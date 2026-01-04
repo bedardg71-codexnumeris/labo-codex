@@ -1,23 +1,23 @@
 # SESSION ACTIVE
 
-**Date** : 3 janvier 2026
+**Date** : 4 janvier 2026
 **Debut** : Continuation session precedente
-**Objectif initial** : Stabilisation apres refonte Construction
+**Objectif initial** : Harmonisation Primo ↔ Formulaires Trimestre
 
 ---
 
 ## ETAT MENTAL
 
 **Ou j'en suis** :
-Verification post-refonte + corrections bugs orphelins
-- 2 bugs de navigation corriges (references a l'ancienne section)
-- Audit CSS parties 10-16 : DEJA IMPLEMENTEES (confirmation)
-- Code stabilise pour tests manuels
+Harmonisation des noms de champs entre Primo et les formulaires Trimestre
+- Correction : Primo utilisait `niveauMinimum`/`noteBase`, formulaires utilisent `seuilReussite`/`noteBaseReussite`
+- Fichiers corriges : primo-questions.js, pratiques-bibliotheque.js, wizard-pratique-v2.js, pratiques-materiel.js, pratique-pan-standards.js
+- Fallbacks maintenus pour compatibilite avec anciennes donnees
 
 **Prochain pas prevu** :
-1. Tester manuellement la refonte Construction
-2. Tester le tutoriel interactif avec nouvelle navigation
-3. Dette technique (suppression cours, checkbox jetons)
+1. Tests manuels : verifier que Primo → formulaires fonctionne
+2. Tests manuels : verifier que les gabarits enseignants fonctionnent
+3. Preparer version finale pour H2026 (5 janvier)
 
 ---
 
@@ -369,4 +369,4 @@ Mais dans Trimestre, le systeme de jetons semble obligatoire (pas de checkbox gl
 
 ---
 
-**Derniere mise a jour** : 3 jan 2026
+**Derniere mise a jour** : 4 jan 2026

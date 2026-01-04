@@ -192,6 +192,354 @@ const MODELES_PRATIQUES_PREDEFINIS = {
                 ]
             }
         }
+    },
+
+    // ============================================================================
+    // PRATIQUE PERSONNALISÉE : Bruno V. (Chimie organique)
+    // Standards avec critères par standard, meilleurs résultats (N=1)
+    // ============================================================================
+    'STD-Bruno-Chimie': {
+        id: 'STD-Bruno-Chimie',
+        nom: 'STD Chimie organique (Bruno V.)',
+        description: 'Standards avec critères par standard, meilleurs résultats. Reprises illimitées au bureau.',
+        type: 'pan-standards',
+        auteur: 'Bruno V.',
+        discipline: 'Chimie',
+        estGabarit: true,
+        pratiques: ['STD'],
+        configuration: {
+            varianteCalcul: 'par-objectifs',
+            echelleId: 'ECHELLE_BRUNO_CHIMIE',
+            portfolio: {
+                methodeSelection: 'meilleurs',
+                nombreARetenir: 1,  // Meilleur résultat par standard
+                minimumCompletion: 1,
+                nombreTotal: 12,    // 12 occasions formelles
+                decouplerPR: true   // Critères par standard, pas par éval
+            },
+            parObjectifs: {
+                modeCalcul: 'comptage',
+                objectifs: [
+                    { id: 1, nom: 'Nomenclature organique', essentiel: true, ponderation: 0 },
+                    { id: 2, nom: 'Réactions acidobasiques', essentiel: true, ponderation: 0 },
+                    { id: 3, nom: 'Additions sur alcènes', essentiel: true, ponderation: 0 },
+                    { id: 4, nom: 'Substitutions nucléophiles', essentiel: true, ponderation: 0 },
+                    { id: 5, nom: 'Éliminations', essentiel: true, ponderation: 0 },
+                    { id: 6, nom: 'Synthèses multi-étapes', essentiel: true, ponderation: 0 }
+                ],
+                comptage: {
+                    seuilMaitrise: 75,              // Niveau "Acquis"
+                    plafondSiEssentielNonMaitrise: 55,
+                    grilleConversion: { 0: 0, 1: 50, 2: 55, 3: 60, 4: 70, 5: 80, 6: 100 }
+                }
+            }
+        },
+        seuils: {
+            vaBien: 75,
+            difficulte: 60,
+            grandeDifficulte: 55
+        }
+    },
+
+    // ============================================================================
+    // PRATIQUE PERSONNALISÉE : Xavier C.-T. (Informatique)
+    // 6 objectifs, tous niveau 3+ requis, calcul conditionnel
+    // ============================================================================
+    'STD-Xavier-Info': {
+        id: 'STD-Xavier-Info',
+        nom: 'STD Interfaces et BD (Xavier C.-T.)',
+        description: '6 objectifs requis niveau 3+. Base 80% + bonus 3.33% par niveau 4. Hybride STD/SPE.',
+        type: 'pan-standards',
+        auteur: 'Xavier C.-T.',
+        discipline: 'Informatique',
+        estGabarit: true,
+        pratiques: ['STD'],
+        configuration: {
+            varianteCalcul: 'par-objectifs',
+            echelleId: 'ECHELLE_XAVIER_INFO',
+            portfolio: {
+                methodeSelection: 'meilleurs',
+                nombreARetenir: 1,
+                minimumCompletion: 1,
+                nombreTotal: 3,     // 3 évaluations (projet, examen pratique, examens théoriques)
+                decouplerPR: true
+            },
+            parObjectifs: {
+                modeCalcul: 'seuils-critiques',
+                objectifs: [
+                    { id: 1, nom: 'Modélisation de données', essentiel: true, ponderation: 0 },
+                    { id: 2, nom: 'Procédures stockées et déclencheurs', essentiel: true, ponderation: 0 },
+                    { id: 3, nom: 'Sécurité et sauvegardes', essentiel: true, ponderation: 0 },
+                    { id: 4, nom: 'Programmation DB First', essentiel: true, ponderation: 0 },
+                    { id: 5, nom: 'Conception d\'interfaces', essentiel: true, ponderation: 0 },
+                    { id: 6, nom: 'Programmation LINQ', essentiel: true, ponderation: 0 }
+                ],
+                // ✅ CORRECTION (4 jan 2026) : Harmoniser avec les noms des formulaires Trimestre
+                seuilsCritiques: {
+                    seuilReussite: 3,               // Tous doivent être niveau 3+
+                    noteBaseReussite: 80,           // 80% si tous niveau 3+
+                    bonusParNiveau4: 3.33,          // +3.33% par objectif niveau 4
+                    notes1Objectif2: 55,            // 1 objectif niveau 2 → 55%
+                    notes2Objectifs2ou1Obj1: 50,    // 2 obj niveau 2 OU 1 obj niveau 1 → 50%
+                    notesAutresCas: 40              // Plafond autres cas
+                }
+            }
+        },
+        seuils: {
+            vaBien: 80,
+            difficulte: 55,
+            grandeDifficulte: 50
+        }
+    },
+
+    // ============================================================================
+    // PRATIQUES SOMMATIVES TRADITIONNELLES
+    // ============================================================================
+
+    // ============================================================================
+    // PRATIQUE PERSONNALISÉE : Étienne L. (Administration)
+    // Sommative traditionnelle - Comptabilité et numérique
+    // ============================================================================
+    'SOM-Etienne-Admin': {
+        id: 'SOM-Etienne-Admin',
+        nom: 'SOM Comptabilité (Étienne L.)',
+        description: 'Sommative traditionnelle. Examens écrits et travaux pratiques. Moyenne pondérée.',
+        type: 'sommative',
+        auteur: 'Étienne L.',
+        discipline: 'Administration',
+        etablissement: 'Cégep de l\'Abitibi-Témiscamingue',
+        estGabarit: true,
+        pratiques: ['SOM'],
+        configuration: {
+            methodeCalcul: 'moyenne-ponderee',
+            evaluations: [
+                { id: 1, nom: 'Examen 1', type: 'examen', ponderation: 30 },
+                { id: 2, nom: 'Examen 2', type: 'examen', ponderation: 30 },
+                { id: 3, nom: 'Travaux pratiques', type: 'tp', ponderation: 40 }
+            ],
+            criteres: {
+                type: 'variables',
+                description: 'Exactitude des réponses, démarche, transfert de connaissance'
+            }
+        },
+        seuils: {
+            vaBien: 80,
+            difficulte: 70,
+            grandeDifficulte: 60
+        }
+    },
+
+    // ============================================================================
+    // PRATIQUE PERSONNALISÉE : Olivier L. (Géographie)
+    // Sommative traditionnelle - Introduction en géographie
+    // ============================================================================
+    'SOM-Olivier-Geo': {
+        id: 'SOM-Olivier-Geo',
+        nom: 'SOM Géographie (Olivier L.)',
+        description: 'Sommative traditionnelle. Examens 55%, travaux pratiques 45%. Quiz formatifs non notés.',
+        type: 'sommative',
+        auteur: 'Olivier L.',
+        discipline: 'Géographie',
+        etablissement: 'Collège Montmorency',
+        estGabarit: true,
+        pratiques: ['SOM'],
+        configuration: {
+            methodeCalcul: 'moyenne-ponderee',
+            evaluations: [
+                { id: 1, nom: 'Examens écrits', type: 'examen', ponderation: 55 },
+                { id: 2, nom: 'Travaux pratiques', type: 'tp', ponderation: 45 }
+            ],
+            criteres: {
+                type: 'variables',
+                examens: 'Connaissances, liens entre connaissances',
+                travaux: 'Méthodologie, normes, structure'
+            }
+        },
+        seuils: {
+            vaBien: 70,
+            difficulte: 65,
+            grandeDifficulte: 55
+        }
+    },
+
+    // ============================================================================
+    // PRATIQUE PERSONNALISÉE : Hélène C. (Philosophie)
+    // Sommative hybride avec portfolio formatif
+    // ============================================================================
+    'SOM-Helene-Philo': {
+        id: 'SOM-Helene-Philo',
+        nom: 'SOM Philo + Portfolio (Hélène C.)',
+        description: 'Hybride sommative/PAN. Portfolio 30% avec progression évaluée, erreurs non pénalisées.',
+        type: 'sommative',
+        auteur: 'Hélène C.',
+        discipline: 'Philosophie',
+        etablissement: 'Cégep Gérald-Godin',
+        estGabarit: true,
+        pratiques: ['SOM'],
+        configuration: {
+            methodeCalcul: 'moyenne-ponderee',
+            evaluations: [
+                { id: 1, nom: 'Rédaction 1', type: 'redaction', ponderation: 15 },
+                { id: 2, nom: 'Rédaction 2', type: 'redaction', ponderation: 20 },
+                { id: 3, nom: 'Dissertation/Analyse', type: 'dissertation', ponderation: 35 },
+                { id: 4, nom: 'Portfolio', type: 'portfolio', ponderation: 30 }
+            ],
+            criteres: {
+                type: 'fixes',
+                liste: [
+                    'Exploitation adéquate du genre',
+                    'Qualité de la problématisation',
+                    'Qualité de l\'argumentation',
+                    'Définition et utilisation des concepts'
+                ]
+            },
+            particularites: {
+                portfolioFormatif: true,
+                erreursNonPenalisees: true,
+                progressionEvaluee: true
+            }
+        },
+        seuils: {
+            vaBien: 70,
+            difficulte: 60,
+            grandeDifficulte: 50
+        }
+    },
+
+    // ============================================================================
+    // PRATIQUE PERSONNALISÉE : Marie-Hélène L. (Littérature)
+    // Sommative avec critères fixes et double verrou
+    // ============================================================================
+    'SOM-MarieHelene-Litt': {
+        id: 'SOM-MarieHelene-Litt',
+        nom: 'SOM Littérature (Marie-Hélène L.)',
+        description: 'Sommative avec analyse finale 50% (double verrou). Portfolio 20%. Critères fixes.',
+        type: 'sommative',
+        auteur: 'Marie-Hélène L.',
+        discipline: 'Littérature',
+        etablissement: 'Cégep de Valleyfield',
+        estGabarit: true,
+        pratiques: ['SOM'],
+        configuration: {
+            methodeCalcul: 'moyenne-ponderee',
+            evaluations: [
+                { id: 1, nom: 'Analyse partielle', type: 'analyse', ponderation: 15 },
+                { id: 2, nom: 'Portfolio', type: 'portfolio', ponderation: 20 },
+                { id: 3, nom: 'Travail équipe', type: 'atelier', ponderation: 15 },
+                { id: 4, nom: 'Analyse finale', type: 'analyse', ponderation: 50, doubleVerrou: true }
+            ],
+            criteres: {
+                type: 'fixes',
+                liste: [
+                    'Pertinence',
+                    'Justesse',
+                    'Clarté',
+                    'Qualité de la langue',
+                    'Respect de la structure',
+                    'Cohérence textuelle'
+                ]
+            },
+            particularites: {
+                doubleVerrou: true,
+                portfolioNombreTravaux: '5-7'
+            }
+        },
+        seuils: {
+            vaBien: 75,
+            difficulte: 65,
+            grandeDifficulte: 55
+        }
+    },
+
+    // ============================================================================
+    // PRATIQUE PERSONNALISÉE : Isabelle M. (Biologie)
+    // PAN-Standards avec jugement global (holistique)
+    // ============================================================================
+    'STD-Isabelle-Bio': {
+        id: 'STD-Isabelle-Bio',
+        nom: 'STD Anatomie (Isabelle M.)',
+        description: 'PAN-Standards avec jugement global. 11 évaluations. Progression qualitative sans calcul strict.',
+        type: 'pan-standards',
+        auteur: 'Isabelle M.',
+        discipline: 'Biologie',
+        etablissement: 'Cégep',
+        estGabarit: true,
+        pratiques: ['STD'],
+        configuration: {
+            varianteCalcul: 'par-objectifs',
+            echelleId: 'ECHELLE_ISABELLE_BIO',
+            portfolio: {
+                methodeSelection: 'tous',
+                nombreTotal: 11,
+                decouplerPR: true
+            },
+            parObjectifs: {
+                modeCalcul: 'holistique',
+                description: 'Jugement professionnel global basé sur la progression',
+                objectifs: [
+                    { id: 1, nom: 'Compétence anatomie', essentiel: true, ponderation: 0 }
+                ],
+                holistique: {
+                    baseSurProgression: true,
+                    criteresProjets: true,
+                    criteresExamens: false,
+                    jugementProfessionnel: true
+                }
+            }
+        },
+        seuils: {
+            vaBien: null,
+            difficulte: null,
+            grandeDifficulte: null,
+            type: 'qualitatif'
+        },
+        avertissement: 'Cette pratique nécessite un jugement professionnel final. Les indicateurs sont un soutien, pas un calcul automatique.'
+    },
+
+    // ============================================================================
+    // PRATIQUE PERSONNALISÉE : Jordan R. (Philosophie)
+    // Sommative avec mécanisme de remplacement
+    // ============================================================================
+    'SOM-Jordan-Philo': {
+        id: 'SOM-Jordan-Philo',
+        nom: 'SOM Philo + Remplacement (Jordan R.)',
+        description: 'Sommative avec remplacement progressif. Note finale peut remplacer mi-session si supérieure.',
+        type: 'sommative',
+        auteur: 'Jordan R.',
+        discipline: 'Philosophie',
+        etablissement: 'Cégep',
+        estGabarit: true,
+        pratiques: ['SOM'],
+        configuration: {
+            methodeCalcul: 'remplacement-progression',
+            evaluations: [
+                { id: 1, nom: 'Examen mi-session', type: 'examen', ponderation: 10, paire: 'examen' },
+                { id: 2, nom: 'Examen final', type: 'examen', ponderation: 20, paire: 'examen', remplace: 1 },
+                { id: 3, nom: 'Texte mi-session', type: 'texte', ponderation: 20, paire: 'texte' },
+                { id: 4, nom: 'Texte final', type: 'texte', ponderation: 40, paire: 'texte', remplace: 3 }
+            ],
+            remplacement: {
+                description: 'Si note finale > note mi-session, elle la remplace',
+                paires: [
+                    { initial: 1, final: 2, poidsInitial: 10, poidsFinal: 20 },
+                    { initial: 3, final: 4, poidsInitial: 20, poidsFinal: 40 }
+                ],
+                regle: 'max'
+            },
+            criteres: {
+                type: 'variables',
+                examens: 'Exactitude (réponses courtes)',
+                textes: 'Argumentation, conceptualisation, problématisation'
+            },
+            autresPoints: {
+                description: 'Notes de lecture, activités classe, textes réflexifs (points de complétion)'
+            }
+        },
+        seuils: {
+            vaBien: 80,
+            difficulte: 60,
+            grandeDifficulte: 50
+        }
     }
 };
 

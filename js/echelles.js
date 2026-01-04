@@ -436,6 +436,222 @@ async function assurerEchelleGenerique() {
     console.log('   ✅ Échelle générique ajoutée à la bibliothèque');
 }
 
+/**
+ * Assure la présence des échelles personnalisées des enseignants
+ * Ces échelles sont identifiées par auteur pour un export futur personnalisé
+ * ✅ AJOUT (3 janvier 2026)
+ */
+async function assurerEchellesPersonnalisees() {
+    const echelles = await db.get('echellesTemplates') || [];
+    let nbAjoutees = 0;
+
+    // ============================================================================
+    // ÉCHELLE BRUNO V. (Chimie organique)
+    // Standards avec comptage, seuil maîtrise 75%
+    // ============================================================================
+    if (!echelles.some(e => e.id === 'ECHELLE_BRUNO_CHIMIE')) {
+        console.log('📊 Ajout échelle Bruno V. (Chimie)...');
+        echelles.push({
+            id: 'ECHELLE_BRUNO_CHIMIE',
+            nom: 'Échelle Chimie organique (Bruno V.)',
+            description: 'Échelle 4 niveaux pour standards. Seuil maîtrise: 75%.',
+            auteur: 'Bruno V.',
+            discipline: 'Chimie',
+            niveaux: [
+                { code: 'I', nom: 'Insuffisant', min: 0, max: 54, valeur: 40, couleur: '#dc3545' },
+                { code: 'D', nom: 'En développement', min: 55, max: 74, valeur: 65, couleur: '#fd7e14' },
+                { code: 'M', nom: 'Maîtrisé', min: 75, max: 89, valeur: 82, couleur: '#28a745' },
+                { code: 'E', nom: 'Étendu', min: 90, max: 100, valeur: 95, couleur: '#007bff' }
+            ],
+            verrouille: false,
+            dansBibliotheque: true,
+            dateCreation: new Date().toISOString()
+        });
+        nbAjoutees++;
+    }
+
+    // ============================================================================
+    // ÉCHELLE XAVIER C.-T. (Informatique)
+    // STD+SPE hybride, 4 niveaux numériques (1-4), seuil niveau 3
+    // ============================================================================
+    if (!echelles.some(e => e.id === 'ECHELLE_XAVIER_INFO')) {
+        console.log('📊 Ajout échelle Xavier C.-T. (Informatique)...');
+        echelles.push({
+            id: 'ECHELLE_XAVIER_INFO',
+            nom: 'Échelle Interfaces/BD (Xavier C.-T.)',
+            description: 'Échelle 4 niveaux numériques. Niveau 3 = seuil passage, niveau 4 = bonus.',
+            auteur: 'Xavier C.-T.',
+            discipline: 'Informatique',
+            niveaux: [
+                { code: '1', nom: 'Non atteint', min: 0, max: 49, valeur: 40, couleur: '#dc3545' },
+                { code: '2', nom: 'En développement', min: 50, max: 64, valeur: 55, couleur: '#fd7e14' },
+                { code: '3', nom: 'Maîtrisé', min: 65, max: 84, valeur: 80, couleur: '#28a745' },
+                { code: '4', nom: 'Excellence', min: 85, max: 100, valeur: 95, couleur: '#007bff' }
+            ],
+            verrouille: false,
+            dansBibliotheque: true,
+            dateCreation: new Date().toISOString()
+        });
+        nbAjoutees++;
+    }
+
+    // ============================================================================
+    // ÉCHELLE ISABELLE M. (Biologie)
+    // PAN-Standards holistique, 4 niveaux IDME qualitatifs
+    // ============================================================================
+    if (!echelles.some(e => e.id === 'ECHELLE_ISABELLE_BIO')) {
+        console.log('📊 Ajout échelle Isabelle M. (Biologie)...');
+        echelles.push({
+            id: 'ECHELLE_ISABELLE_BIO',
+            nom: 'Échelle Anatomie (Isabelle M.)',
+            description: 'Échelle IDME qualitative pour jugement global. Pas de seuils chiffrés stricts.',
+            auteur: 'Isabelle M.',
+            discipline: 'Biologie',
+            niveaux: [
+                { code: 'I', nom: 'Insuffisant', min: 0, max: 49, valeur: 40, couleur: '#dc3545' },
+                { code: 'D', nom: 'En développement', min: 50, max: 64, valeur: 57, couleur: '#fd7e14' },
+                { code: 'M', nom: 'Maîtrisé', min: 65, max: 84, valeur: 75, couleur: '#28a745' },
+                { code: 'E', nom: 'Étendu', min: 85, max: 100, valeur: 92, couleur: '#007bff' }
+            ],
+            verrouille: false,
+            dansBibliotheque: true,
+            dateCreation: new Date().toISOString(),
+            avertissement: 'Échelle pour jugement professionnel - les seuils sont indicatifs'
+        });
+        nbAjoutees++;
+    }
+
+    // ============================================================================
+    // ÉCHELLE HÉLÈNE C. (Philosophie)
+    // Sommative avec portfolio, échelle pourcentages standard
+    // ============================================================================
+    if (!echelles.some(e => e.id === 'ECHELLE_HELENE_PHILO')) {
+        console.log('📊 Ajout échelle Hélène C. (Philosophie)...');
+        echelles.push({
+            id: 'ECHELLE_HELENE_PHILO',
+            nom: 'Échelle Philosophie (Hélène C.)',
+            description: 'Échelle 4 niveaux pour cours de philosophie. Seuils: 70/60/50.',
+            auteur: 'Hélène C.',
+            discipline: 'Philosophie',
+            niveaux: [
+                { code: 'I', nom: 'Insuffisant', min: 0, max: 49, valeur: 35, couleur: '#dc3545' },
+                { code: 'D', nom: 'En développement', min: 50, max: 59, valeur: 55, couleur: '#fd7e14' },
+                { code: 'M', nom: 'Maîtrisé', min: 60, max: 79, valeur: 70, couleur: '#28a745' },
+                { code: 'E', nom: 'Étendu', min: 80, max: 100, valeur: 90, couleur: '#007bff' }
+            ],
+            verrouille: false,
+            dansBibliotheque: true,
+            dateCreation: new Date().toISOString()
+        });
+        nbAjoutees++;
+    }
+
+    // ============================================================================
+    // ÉCHELLE MARIE-HÉLÈNE L. (Littérature)
+    // Sommative avec critères fixes, échelle pourcentages
+    // ============================================================================
+    if (!echelles.some(e => e.id === 'ECHELLE_MARIEHELENE_LITT')) {
+        console.log('📊 Ajout échelle Marie-Hélène L. (Littérature)...');
+        echelles.push({
+            id: 'ECHELLE_MARIEHELENE_LITT',
+            nom: 'Échelle Littérature (Marie-Hélène L.)',
+            description: 'Échelle 4 niveaux pour cours de littérature. Seuils: 75/65/55.',
+            auteur: 'Marie-Hélène L.',
+            discipline: 'Littérature',
+            niveaux: [
+                { code: 'I', nom: 'Insuffisant', min: 0, max: 54, valeur: 40, couleur: '#dc3545' },
+                { code: 'D', nom: 'En développement', min: 55, max: 64, valeur: 60, couleur: '#fd7e14' },
+                { code: 'M', nom: 'Maîtrisé', min: 65, max: 84, valeur: 75, couleur: '#28a745' },
+                { code: 'E', nom: 'Étendu', min: 85, max: 100, valeur: 92, couleur: '#007bff' }
+            ],
+            verrouille: false,
+            dansBibliotheque: true,
+            dateCreation: new Date().toISOString()
+        });
+        nbAjoutees++;
+    }
+
+    // ============================================================================
+    // ÉCHELLE ÉTIENNE L. (Administration)
+    // Sommative traditionnelle, échelle pourcentages
+    // ============================================================================
+    if (!echelles.some(e => e.id === 'ECHELLE_ETIENNE_ADMIN')) {
+        console.log('📊 Ajout échelle Étienne L. (Administration)...');
+        echelles.push({
+            id: 'ECHELLE_ETIENNE_ADMIN',
+            nom: 'Échelle Comptabilité (Étienne L.)',
+            description: 'Échelle 4 niveaux pour cours d\'administration. Seuils: 80/70/60.',
+            auteur: 'Étienne L.',
+            discipline: 'Administration',
+            niveaux: [
+                { code: 'I', nom: 'Insuffisant', min: 0, max: 59, valeur: 45, couleur: '#dc3545' },
+                { code: 'D', nom: 'En développement', min: 60, max: 69, valeur: 65, couleur: '#fd7e14' },
+                { code: 'M', nom: 'Maîtrisé', min: 70, max: 89, valeur: 80, couleur: '#28a745' },
+                { code: 'E', nom: 'Étendu', min: 90, max: 100, valeur: 95, couleur: '#007bff' }
+            ],
+            verrouille: false,
+            dansBibliotheque: true,
+            dateCreation: new Date().toISOString()
+        });
+        nbAjoutees++;
+    }
+
+    // ============================================================================
+    // ÉCHELLE OLIVIER L. (Géographie)
+    // Sommative traditionnelle, échelle pourcentages
+    // ============================================================================
+    if (!echelles.some(e => e.id === 'ECHELLE_OLIVIER_GEO')) {
+        console.log('📊 Ajout échelle Olivier L. (Géographie)...');
+        echelles.push({
+            id: 'ECHELLE_OLIVIER_GEO',
+            nom: 'Échelle Géographie (Olivier L.)',
+            description: 'Échelle 4 niveaux pour cours de géographie. Seuils: 70/65/55.',
+            auteur: 'Olivier L.',
+            discipline: 'Géographie',
+            niveaux: [
+                { code: 'I', nom: 'Insuffisant', min: 0, max: 54, valeur: 40, couleur: '#dc3545' },
+                { code: 'D', nom: 'En développement', min: 55, max: 64, valeur: 60, couleur: '#fd7e14' },
+                { code: 'M', nom: 'Maîtrisé', min: 65, max: 79, valeur: 72, couleur: '#28a745' },
+                { code: 'E', nom: 'Étendu', min: 80, max: 100, valeur: 90, couleur: '#007bff' }
+            ],
+            verrouille: false,
+            dansBibliotheque: true,
+            dateCreation: new Date().toISOString()
+        });
+        nbAjoutees++;
+    }
+
+    // ============================================================================
+    // ÉCHELLE JORDAN R. (Philosophie)
+    // Sommative avec remplacement, échelle pourcentages
+    // ============================================================================
+    if (!echelles.some(e => e.id === 'ECHELLE_JORDAN_PHILO')) {
+        console.log('📊 Ajout échelle Jordan R. (Philosophie)...');
+        echelles.push({
+            id: 'ECHELLE_JORDAN_PHILO',
+            nom: 'Échelle Philosophie 101 (Jordan R.)',
+            description: 'Échelle 4 niveaux pour cours de philosophie. Seuils: 80/60/50.',
+            auteur: 'Jordan R.',
+            discipline: 'Philosophie',
+            niveaux: [
+                { code: 'I', nom: 'Insuffisant', min: 0, max: 49, valeur: 35, couleur: '#dc3545' },
+                { code: 'D', nom: 'En développement', min: 50, max: 59, valeur: 55, couleur: '#fd7e14' },
+                { code: 'M', nom: 'Maîtrisé', min: 60, max: 79, valeur: 70, couleur: '#28a745' },
+                { code: 'E', nom: 'Étendu', min: 80, max: 100, valeur: 90, couleur: '#007bff' }
+            ],
+            verrouille: false,
+            dansBibliotheque: true,
+            dateCreation: new Date().toISOString()
+        });
+        nbAjoutees++;
+    }
+
+    if (nbAjoutees > 0) {
+        await db.set('echellesTemplates', echelles);
+        console.log(`   ✅ ${nbAjoutees} échelle(s) personnalisée(s) ajoutée(s)`);
+    }
+}
+
 async function initialiserModuleEchelles() {
     console.log('📈 Initialisation du module Échelles de performance');
 
@@ -444,6 +660,9 @@ async function initialiserModuleEchelles() {
 
     // ✅ AJOUT (3 janvier 2026) : Assurer présence de l'échelle générique
     await assurerEchelleGenerique();
+
+    // ✅ AJOUT (3 janvier 2026) : Assurer présence des échelles personnalisées (Bruno, Xavier)
+    await assurerEchellesPersonnalisees();
 
     // Afficher la sidebar avec la liste des échelles (Beta 80.5+)
     if (typeof afficherListeEchelles === 'function') {

@@ -1437,9 +1437,9 @@ class PratiquePANStandards {
      * Tous les objectifs doivent atteindre niveau 3+, bonus pour niveau 4
      */
     _calculerModeSeuilsCritiques(da, objectifs, configSeuils) {
-        // Paramètres configurés via wizard Primo (Beta 95)
-        const niveauMinimum = configSeuils.niveauMinimum || configSeuils.seuilReussite || 3;
-        const noteBase = (configSeuils.noteBase || configSeuils.noteBaseReussite || 80) / 100;
+        // ✅ CORRECTION (4 jan 2026) : Prioriser les noms des formulaires, garder fallback pour compatibilité
+        const niveauMinimum = configSeuils.seuilReussite || configSeuils.niveauMinimum || 3;
+        const noteBase = (configSeuils.noteBaseReussite || configSeuils.noteBase || 80) / 100;
         const bonusNiveau4 = (configSeuils.bonusNiveau4 || 3.33) / 100;
 
         const niveauxParObjectif = this._calculerNiveauxParObjectif(da, objectifs);

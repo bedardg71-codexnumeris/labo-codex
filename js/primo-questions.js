@@ -605,8 +605,9 @@ const QUESTIONS_PRIMO = [
         texte: 'Quel est le niveau minimum que **tous** les objectifs doivent atteindre ?',
         type: 'number',
         placeholder: '3',
+        // ✅ CORRECTION (4 jan 2026) : Harmoniser avec les noms des formulaires Trimestre
         champsCibles: [
-            { cle: 'modalitesEvaluation', champ: 'parObjectifs.seuilsCritiques.niveauMinimum' }
+            { cle: 'modalitesEvaluation', champ: 'parObjectifs.seuilsCritiques.seuilReussite' }
         ],
         validation: {
             requis: true,
@@ -626,8 +627,9 @@ const QUESTIONS_PRIMO = [
         texte: 'Quelle est la note de base (%) quand **tous** les objectifs atteignent le niveau minimum ?',
         type: 'number',
         placeholder: '80',
+        // ✅ CORRECTION (4 jan 2026) : Harmoniser avec les noms des formulaires Trimestre
         champsCibles: [
-            { cle: 'modalitesEvaluation', champ: 'parObjectifs.seuilsCritiques.noteBase' }
+            { cle: 'modalitesEvaluation', champ: 'parObjectifs.seuilsCritiques.noteBaseReussite' }
         ],
         validation: {
             requis: true,
