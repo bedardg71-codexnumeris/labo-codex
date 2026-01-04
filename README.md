@@ -10,7 +10,7 @@
 
 ## 📖 À propos
 
-**Monitorage Pédagogique** est une application web autonome (100% client-side) conçue pour faciliter le suivi formative des apprentissages au niveau collégial. Elle implémente une approche de monitorage pédagogique inspirée de la taxonomie SOLO et du modèle de Réponse à l'intervention (RàI).
+**Monitorage Pédagogique** est une application web autonome (100% client-side) conçue pour faciliter le suivi formative des apprentissages au niveau collégial. Elle implémente une approche de suivi de l'apprentissage inspirée de la taxonomie SOLO et du modèle de Réponse à l'intervention (RàI).
 
 ### Caractéristiques principales
 

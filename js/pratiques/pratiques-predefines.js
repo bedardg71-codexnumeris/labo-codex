@@ -350,12 +350,12 @@ const PRATIQUE_PAN_SPECIFICATIONS = {
 };
 
 // ============================================================================
-// PRATIQUE 4 : PAN-Maîtrise configurable (Grégoire Bédard)
+// PRATIQUE 4 : PAN-Standards configurable (Grégoire Bédard)
 // ============================================================================
 
 const PRATIQUE_PAN_MAITRISE = {
     id: 'pan-maitrise-json',
-    nom: 'PAN-Maîtrise (IDME + SRPNF)',
+    nom: 'PAN-Standards (IDME + SRPNF)',
     auteur: 'Grégoire Bédard',
     etablissement: 'Cégep Drummond',
     description: 'Échelle IDME 4 niveaux, critères SRPNF, sélection des N meilleurs artefacts',

@@ -23,8 +23,8 @@
  * @returns {string} Nom complet lisible par l'utilisateur
  *
  * @example
- * // PAN-Maîtrise
- * obtenirNom() => "PAN-Maîtrise"
+ * // PAN-Standards
+ * obtenirNom() => "PAN-Standards"
  *
  * // Sommative
  * obtenirNom() => "Sommative traditionnelle"
@@ -36,7 +36,7 @@
  * @returns {string} Identifiant unique (kebab-case)
  *
  * @example
- * // PAN-Maîtrise
+ * // PAN-Standards
  * obtenirId() => "pan-maitrise"
  *
  * // Sommative
@@ -51,8 +51,8 @@
  * @returns {string} Description détaillée (1-3 phrases)
  *
  * @example
- * // PAN-Maîtrise
- * obtenirDescription() => "Pratique PAN-Maîtrise basée sur les N meilleurs artefacts..."
+ * // PAN-Standards
+ * obtenirDescription() => "Pratique PAN-Standards basée sur les N meilleurs artefacts..."
  *
  * // Sommative
  * obtenirDescription() => "Pratique sommative traditionnelle avec moyenne pondérée..."
@@ -66,14 +66,14 @@
  * calculerPerformance(da) - Calcule l'indice P (Performance)
  *
  * Cette méthode est SPÉCIFIQUE à chaque pratique :
- * - PAN-Maîtrise : Moyenne des N meilleurs artefacts
+ * - PAN-Standards : Moyenne des N meilleurs artefacts
  * - Sommative : Moyenne pondérée de TOUTES les évaluations
  *
  * @param {string} da - Numéro de dossier d'admission (7 chiffres)
  * @returns {number} Indice P entre 0 et 1 (ex: 0.78 pour 78%)
  *
  * @example
- * // PAN-Maîtrise (3 meilleurs artefacts: 85%, 80%, 75%)
+ * // PAN-Standards (3 meilleurs artefacts: 85%, 80%, 75%)
  * calculerPerformance("1234567") => 0.80
  *
  * // Sommative (toutes évaluations pondérées)
@@ -91,7 +91,7 @@
  *
  * Cette méthode peut être UNIVERSELLE ou SPÉCIFIQUE :
  * - Par défaut : Nombre remis / Total attendu (toutes productions)
- * - PAN-Maîtrise : Peut se limiter aux artefacts portfolio
+ * - PAN-Standards : Peut se limiter aux artefacts portfolio
  * - Sommative : Inclut toutes les productions
  *
  * @param {string} da - Numéro de dossier d'admission (7 chiffres)
@@ -118,14 +118,14 @@
  * detecterDefis(da) - Détecte les défis spécifiques de l'étudiant
  *
  * Cette méthode est SPÉCIFIQUE à chaque pratique :
- * - PAN-Maîtrise : Défis SRPNF (Structure, Rigueur, Plausibilité, Nuance, Français)
+ * - PAN-Standards : Défis SRPNF (Structure, Rigueur, Plausibilité, Nuance, Français)
  * - Sommative : Défis génériques (notes faibles, tendance baisse, irrégularité)
  *
  * @param {string} da - Numéro de dossier d'admission (7 chiffres)
  * @returns {Object} Défis identifiés
  *
  * @example
- * // PAN-Maîtrise (défis SRPNF)
+ * // PAN-Standards (défis SRPNF)
  * detecterDefis("1234567") => {
  *   type: 'srpnf',
  *   defis: [
@@ -193,14 +193,14 @@
  * genererCibleIntervention(da) - Génère une cible d'intervention RàI personnalisée
  *
  * Cette méthode est SPÉCIFIQUE à chaque pratique :
- * - PAN-Maîtrise : Cible un critère SRPNF faible
+ * - PAN-Standards : Cible un critère SRPNF faible
  * - Sommative : Cible une production faible à refaire
  *
  * @param {string} da - Numéro de dossier d'admission (7 chiffres)
  * @returns {Object} Cible d'intervention
  *
  * @example
- * // PAN-Maîtrise (cible SRPNF)
+ * // PAN-Standards (cible SRPNF)
  * genererCibleIntervention("1234567") => {
  *   type: 'critere-srpnf',
  *   critere: 'Nuance',
@@ -250,7 +250,7 @@
  *   afficherSommatif: boolean,    // Afficher calculs sommatifs
  *   afficherAlternatif: boolean,  // Afficher calculs alternatifs
  *
- *   // Configuration PAN-Maîtrise
+ *   // Configuration PAN-Standards
  *   configPAN: {
  *     nombreCours: 3 | 7 | 12,      // Nombre de cours dans le programme
  *     nombreARetenir: number         // N meilleurs artefacts (ex: 3)
@@ -281,7 +281,7 @@
  *           evaluations: [...]
  *         }
  *       },
- *       PAN: {  // PAN-Maîtrise
+ *       PAN: {  // PAN-Standards
  *         C: 0.75,
  *         P: 0.80,
  *         details: {

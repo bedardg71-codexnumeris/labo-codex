@@ -5,7 +5,7 @@
  * d'évaluation configurables (JSON).
  *
  * S'intègre avec pratique-registre.js existant pour supporter
- * à la fois les pratiques codées en dur (PAN-Maîtrise, Sommative)
+ * à la fois les pratiques codées en dur (PAN-Standards, Sommative)
  * et les pratiques configurables JSON.
  *
  * VERSION : 1.0

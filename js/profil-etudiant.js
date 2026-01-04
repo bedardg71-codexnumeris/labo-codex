@@ -75,7 +75,7 @@ function obtenirTermeProduction(context = 'singulier', majuscule = false) {
         partitif: "d'artefact"
     };
 
-    // PAN-Maîtrise : terme "artefact" (portfolio d'apprentissage)
+    // PAN-Standards : terme "artefact" (portfolio d'apprentissage)
     if (pratique === 'pan-maitrise') {
         // Configuration personnalisée possible dans le futur
         const termePerso = config.termeProduction || 'artefact';
@@ -188,7 +188,7 @@ function obtenirPratiqueActuelle() {
         // Reconnaît: pan-maitrise, pan-maitrise-json, etc.
         return new PratiquePANMaitrise();
     } else {
-        // Par défaut, utiliser PAN-Maîtrise
+        // Par défaut, utiliser PAN-Standards
         return new PratiquePANMaitrise();
     }
 }
@@ -6109,7 +6109,7 @@ function genererDiagnosticCriteres(da) {
 }
 
 /**
- * Génère le diagnostic SRPNF (PAN-Maîtrise)
+ * Génère le diagnostic SRPNF (PAN-Standards)
  */
 function genererDiagnosticSRPNF(da, defisInfo) {
     // Recalculer moyennes pour l'affichage détaillé (compatibilité)
@@ -7883,7 +7883,7 @@ function supprimerEvaluationDepuisProfil(evaluationId) {
 }
 
 /**
- * Calcule les détails de la note finale de session pour un étudiant (pratique PAN-Maîtrise)
+ * Calcule les détails de la note finale de session pour un étudiant (pratique PAN-Standards)
  * Retourne les informations nécessaires pour afficher la construction de la note
  *
  * @param {string} da - Numéro DA de l'étudiant
@@ -7893,7 +7893,7 @@ function calculerDetailsNoteFinale(da) {
     const modalites = db.getSync('modalitesEvaluation', {});
     const pratique = modalites.pratique || 'pan-maitrise';
 
-    // Pour l'instant, on gère seulement PAN-Maîtrise (accepter toutes les variantes qui contiennent "pan")
+    // Pour l'instant, on gère seulement PAN-Standards (accepter toutes les variantes qui contiennent "pan")
     const pratiqueLower = pratique.toLowerCase();
     if (!pratiqueLower.includes('pan') && pratiqueLower !== 'alternative') {
         return null;
@@ -8096,7 +8096,7 @@ function calculerDetailsNoteFinale(da) {
     };
 
     return {
-        pratique: 'PAN-Maîtrise',
+        pratique: 'PAN-Standards',
         portfolio: {
             nombreARetenir: nombreARetenir,
             nombreEvalues: evaluationsArtefacts.length,

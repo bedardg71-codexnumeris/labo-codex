@@ -151,7 +151,7 @@ function initialiserModulePratiques() {
     // Charger les modalités sauvegardées
     chargerModalites();
 
-    // Afficher les cartes PAN (Portfolio + Jetons) si PAN-Maîtrise est active
+    // Afficher les cartes PAN (Portfolio + Jetons) si PAN-Standards est active
     afficherCartesExtras();
 
     // Charger les valeurs du portfolio et jetons depuis localStorage
@@ -330,7 +330,7 @@ function getPratiqueParDefaut() {
 function definirPratiqueParDefaut(pratiqueId) {
     db.setSync('pratiqueParDefaut', pratiqueId);
 
-    const nomPratique = pratiqueId === 'sommative' ? 'Sommative traditionnelle' : 'PAN-Maîtrise';
+    const nomPratique = pratiqueId === 'sommative' ? 'Sommative traditionnelle' : 'PAN-Standards';
     console.log(`[definirPratiqueParDefaut] Pratique par défaut définie : ${nomPratique}`);
 
     // Afficher notification
@@ -366,7 +366,7 @@ function mettreAJourUIPratiqueDefaut() {
 
     if (btnPanMaitrise && btnSommative) {
         if (pratiqueDefaut === 'pan-maitrise') {
-            // PAN-Maîtrise est sélectionnée - classe btn-principal
+            // PAN-Standards est sélectionnée - classe btn-principal
             btnPanMaitrise.className = 'btn btn-principal';
             btnSommative.className = 'btn';
         } else {
@@ -379,7 +379,7 @@ function mettreAJourUIPratiqueDefaut() {
     // Mettre à jour le texte de l'indicateur
     const nomPratiqueSpan = document.getElementById('nomPratiqueDefaut');
     if (nomPratiqueSpan) {
-        const nomPratique = pratiqueDefaut === 'sommative' ? 'Sommative traditionnelle' : 'PAN-Maîtrise';
+        const nomPratique = pratiqueDefaut === 'sommative' ? 'Sommative traditionnelle' : 'PAN-Standards';
         nomPratiqueSpan.textContent = nomPratique;
     }
 }
@@ -2254,7 +2254,7 @@ function afficherSectionsSelonConfig(config) {
 async function desactiverPratique(id) {
     const pratiqueDefaut = getPratiqueParDefaut();
 
-    if (!confirm(`Désactiver cette pratique ?\n\nLa pratique par défaut (${pratiqueDefaut === 'pan-maitrise' ? 'PAN-Maîtrise' : 'Sommative'}) sera activée à la place.`)) {
+    if (!confirm(`Désactiver cette pratique ?\n\nLa pratique par défaut (${pratiqueDefaut === 'pan-maitrise' ? 'PAN-Standards' : 'Sommative'}) sera activée à la place.`)) {
         return;
     }
 
@@ -2289,7 +2289,7 @@ async function editerPratiqueActive() {
     // Vérifier si c'est une pratique codée (canevas de base)
     const pratiquesCodees = ['pan-standards', 'sommative', 'pan-specifications', 'pan-maitrise', 'specifications'];
     if (pratiquesCodees.includes(pratiqueActiveId)) {
-        alert('❌ Impossible de modifier un canevas de base\n\nLes canevas de base (PAN-Maîtrise, Sommative, PAN-Spécifications) ne peuvent pas être modifiés.\n\nVous pouvez créer une nouvelle pratique basée sur ces canevas.');
+        alert('❌ Impossible de modifier un canevas de base\n\nLes canevas de base (PAN-Standards, Sommative, PAN-Spécifications) ne peuvent pas être modifiés.\n\nVous pouvez créer une nouvelle pratique basée sur ces canevas.');
         return;
     }
 
@@ -4317,7 +4317,7 @@ async function ouvrirModalBibliothequePratiques() {
     const canevasDeBase = [
         {
             id: 'pan-maitrise',
-            nom: 'PAN-Maîtrise',
+            nom: 'PAN-Standards',
             description: 'Pratique alternative basée sur les N meilleurs artefacts de portfolio avec évaluation formative selon l\'échelle IDME et la grille de critères configurée',
             type: 'canevas'
         },

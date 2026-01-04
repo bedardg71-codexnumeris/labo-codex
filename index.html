@@ -3284,7 +3284,7 @@
                 <!-- Sous-section: Aperçu -->
                 <div id="tableau-bord-apercu" class="sous-section">
                     <h2>Vue d'ensemble</h2>
-                    <p class="text-muted">Monitorage pédagogique et priorisation des interventions</p>
+                    <p class="text-muted">Suivi de l'apprentissage et priorisation des interventions</p>
 
                     <!-- ========== MÉTRIQUES GLOBALES DU GROUPE ========== -->
                     <div class="carte">
@@ -3303,7 +3303,7 @@
                             <br><br>
                             <strong>Complétion (C)</strong> : Proportion de travaux remis parmi les travaux <strong>effectivement réalisés jusqu'à maintenant</strong>. Un artefact devient «réalisé» dès qu'une première évaluation existe pour celui-ci.
                             <br><br>
-                            <strong>Performance (P)</strong> : Calculé selon la pratique de notation en vigueur (Sommative : moyenne pondérée provisoire de toutes les évaluations, ou PAN-Maîtrise : moyenne des N meilleurs artefacts selon l'échelle IDME).
+                            <strong>Performance (P)</strong> : Calculé selon la pratique de notation en vigueur (Sommative : moyenne pondérée provisoire de toutes les évaluations, ou PAN-Standards : moyenne des N meilleurs artefacts selon l'échelle IDME).
                             <br><br>
                             <strong>Engagement (E)</strong> : Racine cubique du produit des trois indices, E = ∛(A × C × P). La racine cubique normalise le résultat pour préserver l'échelle d'origine : un étudiant à 70% sur les trois indices aura un engagement de 70% (au lieu de 34% avec une multiplication directe). Cette transformation compense la décroissance multiplicative tout en pénalisant les déséquilibres importants.
                             <br><br>
@@ -4648,7 +4648,7 @@
                     <!-- Carte Note (pas de Conseil pour Échelle) -->
                     <div id="note-echelle" class="carte-info-toggle carte-info-note" style="display: none;">
                         <strong>Note :</strong> L'échelle de performance définit les niveaux de maîtrise utilisés pour évaluer les critères.
-                        L'échelle IDME (Insuffisant, en Développement, Maîtrisé, Étendu) basée sur la taxonomie SOLO est utilisée dans la pratique PAN-Maîtrise.
+                        L'échelle IDME (Insuffisant, en Développement, Maîtrisé, Étendu) basée sur la taxonomie SOLO est utilisée dans la pratique PAN-Standards.
                         Chaque niveau correspond à un seuil de performance : Insuffisant (&lt; 64%), Développement (65-74%), Maîtrisé (75-84%),
                         Étendu (≥ 85%). Cette échelle peut être personnalisée selon les besoins pédagogiques et permet un suivi longitudinal
                         de la progression des étudiants. Tu peux créer tes propres échelles de notation adaptées à ta pratique.
@@ -4987,7 +4987,7 @@
                                             <label for="mat-pratique-nom" style="font-weight: 600; display: block; margin-bottom: 6px;">
                                                 Nom de la configuration
                                             </label>
-                                            <input type="text" id="mat-pratique-nom" class="controle-form" placeholder="Ex: PAN-Maîtrise Littérature" onchange="mettreAJourNomPratiqueMat()">
+                                            <input type="text" id="mat-pratique-nom" class="controle-form" placeholder="Ex: PAN-Standards Littérature" onchange="mettreAJourNomPratiqueMat()">
                                         </div>
                                         <div class="groupe-form">
                                             <label for="mat-pratique-type" style="font-weight: 600; display: block; margin-bottom: 6px;">
@@ -6215,7 +6215,6 @@
                                 <select id="pratiqueIdCours" class="champ-texte">
                                     <option value="sommative">Sommative (moyenne pondérée)</option>
                                     <option value="pan-standards" selected>PAN-Standards (par niveaux de maîtrise)</option>
-                                    <option value="pan-maitrise">PAN-Maîtrise (N meilleurs artefacts)</option>
                                     <option value="pan-objectifs">PAN-Objectifs (par objectifs)</option>
                                 </select>
                                 <div style="margin-top: 10px;">
@@ -6697,14 +6696,14 @@
                     <div id="note-pratiques" class="carte-info-toggle carte-info-note" style="display: none;">
                         <strong>Note :</strong> Les pratiques de notation définissent comment les performances des étudiants sont
                         évaluées et calculées. Tu peux utiliser une pratique sommative traditionnelle (moyenne pondérée) ou
-                        une pratique alternative comme le PAN-Maîtrise (N meilleurs artefacts). Chaque pratique peut avoir ses
+                        une pratique alternative comme le PAN-Standards (N meilleurs artefacts). Chaque pratique peut avoir ses
                         propres options d'affichage, configuration de portfolio et système de jetons.
                     </div>
 
                     <!-- Carte Conseil pratique -->
                     <div id="conseil-pratiques" class="carte-info-toggle carte-info-conseil" style="display: none;">
                         <strong>Conseil pratique :</strong> Commencez par choisir une des pratiques prédéfinies dans la bibliothèque
-                        (Sommative, PAN-Maîtrise, PAN par contrat). Tu pourras ensuite la personnaliser selon tes besoins en ajustant
+                        (Sommative, PAN-Standards, PAN par contrat). Tu pourras ensuite la personnaliser selon tes besoins en ajustant
                         les options d'affichage, le portfolio et les jetons. Crée ta propre pratique uniquement si aucune des pratiques
                         prédéfinies ne correspond à tes besoins.
                     </div>
@@ -9680,7 +9679,7 @@ Exemple :
                      SOUS-SECTION 1: INTRODUCTION
                      =================================== -->
                 <div id="aide-introduction" class="sous-section">
-                    <h2>Introduction au système de monitorage</h2>
+                    <h2>Introduction au système de suivi</h2>
                     <p class="text-muted">« L'objectif est de faire mentir les prédictions de risque par nos interventions proactives ! »</p>
 
                     <!-- Carte: Présentation de l'application -->
@@ -9720,7 +9719,7 @@ Exemple :
                                 <li><strong>Portraits individuels</strong> : Profil détaillé de chaque étudiant avec forces, défis et recommandations</li>
                                 <li><strong>Captures hebdomadaires</strong> : Vue longitudinale de la progression (snapshots)</li>
                                 <li><strong>Rétroactions personnalisées</strong> : Assemblage automatique de commentaires selon tes cartouches</li>
-                                <li><strong>Pratiques de notation</strong> : Support PAN-Maîtrise, Sommative et autres pratiques</li>
+                                <li><strong>Pratiques de notation</strong> : Support PAN-Standards, Sommative et autres pratiques</li>
                             </ul>
 
                             <div class="alerte alerte-succes">
@@ -9730,11 +9729,11 @@ Exemple :
                         </div>
                     </div>
 
-                    <!-- Carte: Qu'est-ce que le monitorage -->
+                    <!-- Carte: Qu'est-ce que le suivi de l'apprentissage -->
                     <div class="carte accordeon" id="accordeon-aide-monitorage">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
                             <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Qu'est-ce que le monitorage pédagogique ?
+                                <span class="accordeon-chevron">▼</span> Qu'est-ce que le suivi de l'apprentissage ?
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
@@ -9757,8 +9756,8 @@ Exemple :
                             </ul>
 
                             <div class="alerte alerte-information">
-                                <p><strong>📝 Exemple : Pratique PAN-Maîtrise</strong></p>
-                                <p>La pratique PAN-Maîtrise développée par Grégoire utilise :</p>
+                                <p><strong>📝 Exemple : Pratique PAN-Standards</strong></p>
+                                <p>La pratique PAN-Standards développée par Grégoire utilise :</p>
                                 <ul class="mt-5">
                                     <li><strong>Critères SRPNF</strong> : Structure, Rigueur, Plausibilité, Nuance, Français</li>
                                     <li><strong>Échelle IDME</strong> : Basée sur la taxonomie SOLO (Insuffisant, Développement, Maîtrisé, Étendu)</li>
@@ -9796,7 +9795,7 @@ Exemple :
                                 <p><strong>Qualité des productions</strong> - Mesure la maîtrise</p>
                                 <p class="text-muted" style="font-size: 0.9rem"><em>Module source : portfolio.js</em></p>
                                 <p>Évalue la qualité des travaux selon tes critères et ton échelle de notation.</p>
-                                <p class="text-muted" style="margin-top: 10px; font-size: 0.9rem"><em>Le calcul dépend de ta pratique : en PAN-Maîtrise, P = moyenne des N meilleurs artefacts (IDME). En Sommative, P = moyenne pondérée de toutes les évaluations (0-100%).</em></p>
+                                <p class="text-muted" style="margin-top: 10px; font-size: 0.9rem"><em>Le calcul dépend de ta pratique : en PAN-Standards, P = moyenne des N meilleurs artefacts (IDME). En Sommative, P = moyenne pondérée de toutes les évaluations (0-100%).</em></p>
                             </div>
 
                             <div style="text-align: center; margin-top: 15px;">
@@ -9810,7 +9809,7 @@ Exemple :
                     <div class="carte accordeon" id="accordeon-aide-srpnf">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
                             <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Exemple de grille : SRPNF (pratique PAN-Maîtrise)
+                                <span class="accordeon-chevron">▼</span> Exemple de grille : SRPNF (pratique PAN-Standards)
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
@@ -9864,7 +9863,7 @@ Exemple :
                     <div class="carte accordeon" id="accordeon-aide-idme">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
                             <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Exemple d'échelle : IDME (pratique PAN-Maîtrise)
+                                <span class="accordeon-chevron">▼</span> Exemple d'échelle : IDME (pratique PAN-Standards)
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
@@ -9909,7 +9908,7 @@ Exemple :
 
                             <div class="alerte alerte-info">
                                 <p><strong>📌 Autres échelles possibles</strong></p>
-                                <p>L'échelle IDME est utilisée en pratique PAN-Maîtrise pour évaluer la profondeur de compréhension. D'autres pratiques utilisent des <strong>moyennes pondérées traditionnelles (0-100%)</strong> ou des échelles personnalisées. Configurez ton échelle dans <strong>Construction de la note → Niveaux de performance</strong>.</p>
+                                <p>L'échelle IDME est utilisée en pratique PAN-Standards pour évaluer la profondeur de compréhension. D'autres pratiques utilisent des <strong>moyennes pondérées traditionnelles (0-100%)</strong> ou des échelles personnalisées. Configurez ton échelle dans <strong>Construction de la note → Niveaux de performance</strong>.</p>
                             </div>
 
                             <div style="text-align: center; margin: 15px 0;">
@@ -10024,7 +10023,7 @@ Exemple :
                      =================================== -->
                 <div id="aide-configuration" class="sous-section">
                     <h2>Configuration initiale (1ʳᵉ utilisation)</h2>
-                    <p class="text-muted">Guide pas-à-pas pour configurer ton système de monitorage</p>
+                    <p class="text-muted">Guide pas-à-pas pour configurer ton système de suivi</p>
 
                     <!-- Carte: Vue d'ensemble -->
                     <div class="carte accordeon" id="accordeon-aide-etapes-config">
@@ -10040,7 +10039,7 @@ Exemple :
                                 <li><strong>Trimestre</strong> : Dates et calendrier complet (SOURCE)</li>
                                 <li><strong>Groupe</strong> : Liste des étudiants</li>
                                 <li><strong>Horaire</strong> : Séances hebdomadaires ✅</li>
-                                <li><strong>Pratique de notation</strong> : Choisir ton approche (PAN-Maîtrise, Sommative, etc.)</li>
+                                <li><strong>Pratique de notation</strong> : Choisir ton approche (PAN-Standards, Sommative, etc.)</li>
                             </ol>
 
                             <div class="alerte alerte-succes">
@@ -10057,7 +10056,7 @@ Exemple :
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                            <p><strong>Primo</strong> est un assistant conversationnel qui te guide pas-à-pas dans la configuration de ton système de monitorage.</p>
+                            <p><strong>Primo</strong> est un assistant conversationnel qui te guide pas-à-pas dans la configuration de ton système de suivi.</p>
 
                             <div style="text-align: center; margin: 15px 0;">
                                 <img src="img/aide/Primo.png" alt="Interface de Primo" style="max-width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
@@ -10314,7 +10313,7 @@ Exemple :
                             <p>Le système supporte différentes pratiques pédagogiques. Choisissez celle qui correspond à ton approche :</p>
 
                             <div class="alerte alerte-information">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">📝 PAN-Maîtrise (Évaluation par compétences)</h4>
+                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">📝 PAN-Standards (Évaluation par compétences)</h4>
                                 <p><strong>Principes :</strong> Sélection des N meilleurs artefacts, échelle IDME, système de jetons</p>
                                 <p><strong>Paramètres à définir :</strong></p>
                                 <ul class="mt-5">
@@ -11817,7 +11816,7 @@ Exemple :
                             <p><strong>Fonction :</strong> Affiche une carte dans le profil étudiant (section Accompagnement) avec les forces et défis identifiés selon les 4 niveaux IDME (Insuffisant, Développement, Maîtrisé, Étendu) basés sur la taxonomie SOLO de Biggs & Collis.</p>
                             <p><strong>Utilisation recommandée :</strong></p>
                             <ul style="margin-top: 5px;">
-                                <li><strong>✅ Activer si :</strong> Ta pratique s'appuie sur la taxonomie SOLO et l'échelle IDME (ex: PAN-Maîtrise)</li>
+                                <li><strong>✅ Activer si :</strong> Ta pratique s'appuie sur la taxonomie SOLO et l'échelle IDME (ex: PAN-Standards)</li>
                                 <li><strong>❌ Désactiver si :</strong> Tu utilises une échelle chiffrée traditionnelle (0-100%) sans référence à la taxonomie SOLO</li>
                             </ul>
                         </div>
@@ -11835,7 +11834,7 @@ Exemple :
                             </ul>
                         </div>
 
-                            <p class="text-muted" style="margin-top: 15px; font-size: 0.9rem;"><em><strong>Note :</strong> Ces options ont été développées dans le cadre de la pratique PAN-Maîtrise de Grégoire Bédard mais peuvent être adaptées à d'autres pratiques pédagogiques. Elles ne sont pas obligatoires pour utiliser le système de monitorage A-C-P.</em></p>
+                            <p class="text-muted" style="margin-top: 15px; font-size: 0.9rem;"><em><strong>Note :</strong> Ces options ont été développées dans le cadre de la pratique PAN-Standards de Grégoire Bédard mais peuvent être adaptées à d'autres pratiques pédagogiques. Elles ne sont pas obligatoires pour utiliser le système de suivi A-C-P.</em></p>
                         </div>
                     </div>
 
@@ -12536,7 +12535,7 @@ Exemple :
                         <div class="accordeon-contenu">
 
                         <div class="my-20">
-                            <h4 class="titre-bleu-mb8">Questions sur le monitorage</h4>
+                            <h4 class="titre-bleu-mb8">Questions sur le suivi</h4>
 
                             <details class="carte-grise-info">
                                 <summary class="titre-cliquable">Quelle est la différence entre Assiduité (A), Complétion (C) et Performance (P) ?</summary>
@@ -12544,7 +12543,7 @@ Exemple :
                                     <ul>
                                         <li><strong>Assiduité (A) :</strong> Mesure la présence physique et cognitive en classe. Un étudiant assidu est engagé dans son apprentissage.</li>
                                         <li><strong>Complétion (C) :</strong> Mesure la remise des travaux demandés. Un taux élevé indique une bonne mobilisation.</li>
-                                        <li><strong>Performance (P) :</strong> Mesure la qualité des productions selon tes critères d'évaluation (ex: SRPNF dans la pratique PAN-Maîtrise). Reflète le niveau de maîtrise.</li>
+                                        <li><strong>Performance (P) :</strong> Mesure la qualité des productions selon tes critères d'évaluation (ex: SRPNF dans la pratique PAN-Standards). Reflète le niveau de maîtrise.</li>
                                     </ul>
                                     <p class="mt-10"><strong>Exemple concret :</strong> Un étudiant peut avoir A=95% (toujours présent), C=80% (remet la plupart des travaux) et P=65% (qualité variable). L'indice R combinera ces trois dimensions pour prédire le risque.</p>
                                 </div>
@@ -12779,7 +12778,7 @@ Exemple :
 
                             <dl class="ml-10">
                                 <dt class="titre-section-aide">Échelle IDME</dt>
-                                <dd class="ml-20-mb-10">Échelle de performance à 4 niveaux : <strong>I</strong>nsuffisant (&lt; 64%), <strong>D</strong>éveloppement (65-74%), <strong>M</strong>aîtrisé (75-84%), <strong>E</strong>tendu (≥ 85%). Basée sur la taxonomie SOLO de Biggs & Collis. Utilisée dans la pratique PAN-Maîtrise pour interpréter les scores des critères d'évaluation. <em>(Optionnel - voir Réglages → Pratique de notation)</em></dd>
+                                <dd class="ml-20-mb-10">Échelle de performance à 4 niveaux : <strong>I</strong>nsuffisant (&lt; 64%), <strong>D</strong>éveloppement (65-74%), <strong>M</strong>aîtrisé (75-84%), <strong>E</strong>tendu (≥ 85%). Basée sur la taxonomie SOLO de Biggs & Collis. Utilisée dans la pratique PAN-Standards pour interpréter les scores des critères d'évaluation. <em>(Optionnel - voir Réglages → Pratique de notation)</em></dd>
                             </dl>
 
                             <h4 class="titre-section-principal">G</h4>
@@ -12828,7 +12827,7 @@ Exemple :
                                 <dt class="titre-section-aide">Mode provisoire / final (Portfolio)</dt>
                                 <dd class="ml-20-mb-10"><strong>Provisoire :</strong> Tous les artefacts complétés sont considérés, même si &lt; nombre total attendu. <strong>Final :</strong> Ne calcule la note que si le nombre minimum d'artefacts complétés est atteint, sinon retourne 0. Permet de gérer les portfolios en cours de session.</dd>
 
-                                <dt class="titre-section-aide">Monitorage pédagogique</dt>
+                                <dt class="titre-section-aide">Suivi de l'apprentissage</dt>
                                 <dd class="ml-20-mb-10">Approche systémique de suivi des apprentissages combinant observation continue (présences), évaluation formative (artefacts) et intervention différenciée (RàI). Objectif : identifier précocement les étudiants à risque pour intervenir avant l'échec.</dd>
                             </dl>
 
@@ -13198,7 +13197,7 @@ Exemple :
                         <p class="text-muted">5-16 novembre 2025</p>
 
                         <ul class="modal-liste">
-                            <li><strong>Système de pratiques modulaire</strong> : Support de plusieurs pratiques de notation (Sommative, PAN-Maîtrise).</li>
+                            <li><strong>Système de pratiques modulaire</strong> : Support de plusieurs pratiques de notation (Sommative, PAN-Standards).</li>
                             <li><strong>Engagement (E)</strong> : Remplacement du concept de « Risque d'échec » par une perspective positive.</li>
                             <li><strong>Jetons personnalisés</strong> : Délai, reprise, aide, bonus avec compteurs visuels.</li>
                             <li><strong>Barres de distribution</strong> : Visualisation par nuages de points avec gradients.</li>
@@ -13218,7 +13217,7 @@ Exemple :
 
                         <h4 class="titre-bleu-mb8 mt-15">Phase 0 : Prototypes initiaux (10-20 sept)</h4>
                         <ul class="modal-liste">
-                            <li><strong>10 sept 2025</strong> : Première version archivée (214 KB) — Titre : « Système de Monitorage - 601-101-MQ »</li>
+                            <li><strong>10 sept 2025</strong> : Première version archivée (214 KB) — Titre : « Système de suivi - 601-101-MQ »</li>
                             <li><strong>18-19 sept</strong> : Itérations rapides, optimisations (214-228 KB)</li>
                             <li><strong>20-22 sept</strong> : Prototype minimal (27 KB) puis index2 stable (74 KB)</li>
                         </ul>

@@ -443,7 +443,7 @@ function calculerCorrelationPearson(x, y) {
 
 /**
  * Génère le contenu de la carte explicative sur le calcul des indices A-C-P
- * Affiche les détails selon la pratique active (PAN-Maîtrise ou Sommative)
+ * Affiche les détails selon la pratique active (PAN-Standards ou Sommative)
  *
  * RETOUR:
  * - HTML formaté expliquant comment A, C et P sont calculés
@@ -457,7 +457,7 @@ function genererExplicationCalculIndices() {
     // Récupérer les paramètres de configuration
     const nbArtefacts = config.nombreArtefacts || 7;
 
-    let html = '<strong>Méthodes de calcul des indices (pratique active : ' + (isPAN ? 'PAN-Maîtrise' : 'Sommative') + ')</strong><br><br>';
+    let html = '<strong>Méthodes de calcul des indices (pratique active : ' + (isPAN ? 'PAN-Standards' : 'Sommative') + ')</strong><br><br>';
 
     // A - Assiduité (TOUJOURS DYNAMIQUE - comportement cumulatif)
     html += '<strong class="u-texte-bleu">A (Assiduité)</strong> : ';
@@ -484,7 +484,7 @@ function genererExplicationCalculIndices() {
     html += '<strong>Calculé selon la pratique de notation en vigueur</strong>. ';
 
     if (isPAN) {
-        html += '<br>→ <strong>PAN-Maîtrise</strong> : Moyenne des <strong>' + nbArtefacts + ' meilleurs artefacts</strong> selon l\'échelle IDME. ';
+        html += '<br>→ <strong>PAN-Standards</strong> : Moyenne des <strong>' + nbArtefacts + ' meilleurs artefacts</strong> selon l\'échelle IDME. ';
         html += '<br><em class="etud-texte-gris-petit">&nbsp;&nbsp;&nbsp;Les niveaux IDME (Insuffisant, Développement, Maîtrisé, Étendu) sont convertis en pourcentages.</em>';
         html += '<br><em class="etud-texte-gris-petit">&nbsp;&nbsp;&nbsp;Seuls les ' + nbArtefacts + ' meilleurs artefacts comptent dans le calcul de P</em>';
     } else {
@@ -496,7 +496,7 @@ function genererExplicationCalculIndices() {
     html += '<br><br>';
     html += '<strong class="u-texte-bleu">Résumé</strong> : ';
     html += '<strong>A et C</strong> mesurent le <strong>comportement cumulatif observable</strong> (contexte d\'apprentissage favorable ou non). ';
-    html += '<strong>P</strong> mesure la <strong>qualité de l\'apprentissage</strong> selon la pratique pédagogique choisie (Sommative, PAN-Maîtrise, ou autre).';
+    html += '<strong>P</strong> mesure la <strong>qualité de l\'apprentissage</strong> selon la pratique pédagogique choisie (Sommative, PAN-Standards, ou autre).';
 
     html += '<br><br>';
     html += '<em class="etud-texte-gris-moyen">💡 La pratique de notation et ses paramètres peuvent être modifiés dans <strong>Réglages › Pratique de notation</strong></em>';

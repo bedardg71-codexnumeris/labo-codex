@@ -455,7 +455,7 @@ function terminerTutoriel() {
     setTimeout(() => {
         afficherNotificationSucces(
             'Tutoriel terminé ! 🎓',
-            'Tu es maintenant prêt à explorer l\'application. Bon monitorage !'
+            'Tu es maintenant prêt à explorer l\'application. Bon suivi !'
         );
     }, 400);
 }
