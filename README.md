@@ -257,9 +257,9 @@ Labo Codex : le laboratoire de codexnumeris.org
 ## 🔗 Liens utiles
 
 - **Repository GitHub** : [https://github.com/bedardg71-codexnumeris/Monitorage_v6](https://github.com/bedardg71-codexnumeris/Monitorage_v6)
-- **Site Codex Numeris** : [https://codexnumeris.org](https://codexnumeris.org)
+- **Blog Codex Numeris** : [https://codexnumeris.org](https://codexnumeris.org) (blogue de l'auteur)
 - **Articles Pédagogie collégiale** : [https://aqpc.qc.ca/revue](https://aqpc.qc.ca/revue)
-- **Guide de monitorage** : Disponible sur le site Codex Numeris
+- **Guide de suivi** : Disponible sur le blogue Codex Numeris
 
 ---
 

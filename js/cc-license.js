@@ -860,7 +860,7 @@ COMMENT UTILISER CETTE CONFIGURATION
 -------------------------------------------
 
 1. Téléchargez le fichier PRATIQUE-COMPLETE-xxx.json
-2. Dans Codex Numeris, allez dans Paramètres > Import/Export
+2. Dans l'application, allez dans Paramètres > Import/Export
 3. Cliquez sur "Importer une configuration complète"
 4. Sélectionnez le fichier téléchargé
 5. L'application importera automatiquement toutes les ressources
@@ -904,7 +904,7 @@ Plus d'informations : https://creativecommons.org/licenses/by-nc-sa/4.0/
 
 -------------------------------------------
 
-Exporté le ${metadata.date_export} avec Codex Numeris ${metadata.application_version}
+Exporté le ${metadata.date_export} - Version ${metadata.application_version}
 ${metadata.email_auteur ? `Contact : ${metadata.email_auteur}` : ''}
 ${metadata.site_auteur ? `Site : ${metadata.site_auteur}` : ''}
 `;
