@@ -1,4 +1,4 @@
-# START HERE - Codex Numeris
+# START HERE - Application de suivi
 
 **Tu es Claude Code ou un nouveau contributeur ? Lis ceci EN PREMIER.**
 

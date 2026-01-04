@@ -1,4 +1,4 @@
-# Architecture mentale de Codex Numeris
+# Architecture mentale de l'application
 
 **Version** : 2.0 (post-reorganisation)
 **Date** : 1er janvier 2026
@@ -8,7 +8,7 @@
 
 ## Vision philosophique
 
-Codex Numeris est un **systeme de suivi de l'apprentissage** qui permet de :
+Cette application est un **systeme de suivi de l'apprentissage** qui permet de :
 1. Detecter precocement les etudiants a risque
 2. Intervenir de facon ciblee selon le modele RaI
 3. Suivre l'efficacite des interventions
