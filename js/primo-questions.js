@@ -1273,7 +1273,7 @@ const QUESTIONS_PRIMO = [
     // ========================================================================
     {
         id: 'etudiants-methode',
-        texte: '**Ajout des étudiants**\n\nConsulte le système de gestion des apprentissages de ton établissement pour récupérer la liste de tes élèves.\n\nLe format attendu est : **DA, Groupe, Nom, Prénom, Programme** (séparés par virgules ou tabulations).\n\nSi tu préfères utiliser une liste fictive, tu trouveras un fichier **etudiants-demo.csv** dans le dossier **materiel-demo/**.',
+        texte: '**Ajout des étudiants**\n\nConsulte le système de gestion des apprentissages de ton établissement pour récupérer la liste de tes élèves.\n\nLe format attendu est : **DA, Groupe, Nom, Prénom, Programme** (séparés par virgules ou tabulations).\n\n<button onclick="copierListeEtudiantsFictifs()" class="btn btn-secondaire" style="margin-top: 10px;">📋 Copier une liste fictive (10 étudiants)</button>\n\n<small>Tu pourras coller cette liste à l\'étape suivante pour tester l\'application.</small>',
         type: 'instruction',
         champsCibles: [],
         validation: { requis: false }
@@ -1692,10 +1692,41 @@ function obtenirOptions(questionId) {
     return question.options;
 }
 
+/**
+ * Copie une liste d'étudiants fictifs dans le presse-papier
+ * Utilisé par le bouton dans la question 'etudiants-methode'
+ */
+function copierListeEtudiantsFictifs() {
+    const listeFictive = `DA,Groupe,Nom,Prénom,Programme
+1234579,00001,Boucher,Charles,506.A0
+1234582,00001,Cissé,Fatou,410.B0
+1234585,00001,Côté,Florence,200.B1
+1234588,00001,Diallo,Olivier,300.M1
+1234591,00001,Dubé,Samuel,410.D0
+1234594,00001,Fortin,Nathan,410.D0
+1234597,00001,Gagnon,Léa,506.A0
+1234600,00001,Lavoie,Emma,200.B1
+1234603,00001,Nguyen,Minh,300.M1
+1234606,00001,Roy,Thomas,410.B0`;
+
+    navigator.clipboard.writeText(listeFictive).then(() => {
+        // Afficher confirmation
+        if (typeof showToast === 'function') {
+            showToast('Liste copiée ! Tu peux la coller à l\'étape suivante.', 'success');
+        } else {
+            alert('Liste copiée dans le presse-papier !');
+        }
+    }).catch(err => {
+        console.error('Erreur copie presse-papier:', err);
+        alert('Impossible de copier. Voici la liste à copier manuellement :\n\n' + listeFictive);
+    });
+}
+
 // ============================================================================
 // EXPORTS
 // ============================================================================
 
+window.copierListeEtudiantsFictifs = copierListeEtudiantsFictifs;
 window.obtenirQuestion = obtenirQuestion;
 window.obtenirToutesLesQuestions = obtenirToutesLesQuestions;
 window.obtenirQuestionsActives = obtenirQuestionsActives;
