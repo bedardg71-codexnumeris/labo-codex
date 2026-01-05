@@ -644,9 +644,7 @@ function genererFormulaireSeance(index, seance) {
                 </div>
                 <div class="groupe-form">
                     <label style="font-size: 0.85rem; font-weight: 500;">Heure début</label>
-                    <select class="controle-form" id="debut_${index}" required>
-                        ${genererOptionsHeureDebut()}
-                    </select>
+                    <input type="time" class="controle-form" id="debut_${index}" required>
                 </div>
                 <div class="groupe-form">
                     <label style="font-size: 0.85rem; font-weight: 500;">Durée</label>
@@ -982,9 +980,8 @@ function genererCarteSeanceEdition(seance, index) {
         </div>
         <div class="groupe-form">
             <label>Heure début</label>
-            <select class="controle-form controle-form-compact" id="edit-debut-${index}">
-                ${genererOptionsHeureDebut()}
-            </select>
+            <input type="time" class="controle-form controle-form-compact" id="edit-debut-${index}"
+                   value="${echapperHtml(seance.debut || '')}">
         </div>
         <div class="groupe-form">
             <label>Durée</label>

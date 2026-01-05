@@ -1,23 +1,52 @@
-# SESSION ACTIVE
+# SESSION ACTIVE - BETA 95.1
 
-**Date** : 4 janvier 2026
-**Debut** : Continuation session precedente
-**Objectif initial** : Harmonisation Primo ↔ Formulaires Trimestre
+**Date** : 5 janvier 2026
+**Debut** : Retours de Bruno V. (premier testeur)
+**Objectif** : Corriger les bugs signales et implementer les souhaits
+
+---
+
+## RETOURS DE BRUNO (5 janvier 2026)
+
+**Testeur** : Bruno V. (Chimie organique, Cegep Andre-Laurendeau)
+**Fichiers fournis** :
+- `Retours des testeurs/bruno/bruno 5 janvier 2026.txt`
+- `Retours des testeurs/bruno/PRATIQUE-COMPLETE-Bruno V.-2026-01-05.json`
+- `Retours des testeurs/bruno/image.png` (capture erreur)
+
+### Bugs signales et corriges
+
+| # | Bug | Cause | Correction | Fichier |
+|---|-----|-------|------------|---------|
+| 1 | Erreur application pratique au cours | `obtenirConfigurationPratiqueParId()` ne cherchait pas dans `pratiquesConfigurables` | Ajout recherche dans les 3 sources | `pratiques-bibliotheque.js:663-677` |
+| 2 | Grilles de criteres disparaissent | `dupliquerGrille()` n'ajoutait pas `dansBibliotheque: true` | Ajout du flag + refresh sidebar | `grilles.js:903-928` |
+| 3 | Jour de semaine non reporte depuis Primo | Casse differente : Primo="lundi", Horaire="Lundi" | Harmonisation majuscules | `primo-questions.js`, `pack-demarrage.js` |
+
+### Souhaits implementes
+
+| # | Souhait | Correction | Fichiers |
+|---|---------|------------|----------|
+| 1 | Application automatique pratique depuis Primo MODULE 4 | Bug #1 corrigeait le problème ; message confirmation amélioré | `primo-modal.js:1318-1333` |
+| 2 | Permettre heures non piles (8h55, 9h45...) | Changé `type: 'select'` → `type: 'time'` dans Primo et Trimestre | `primo-questions.js`, `horaire.js:645-648, 981-985` |
 
 ---
 
 ## ETAT MENTAL
 
 **Ou j'en suis** :
-Harmonisation des noms de champs entre Primo et les formulaires Trimestre
-- Correction : Primo utilisait `niveauMinimum`/`noteBase`, formulaires utilisent `seuilReussite`/`noteBaseReussite`
-- Fichiers corriges : primo-questions.js, pratiques-bibliotheque.js, wizard-pratique-v2.js, pratiques-materiel.js, pratique-pan-standards.js
-- Fallbacks maintenus pour compatibilite avec anciennes donnees
+Beta 96 - TOUS les bugs corriges et souhaits implementes
 
-**Prochain pas prevu** :
-1. Tests manuels : verifier que Primo → formulaires fonctionne
-2. Tests manuels : verifier que les gabarits enseignants fonctionnent
-3. Preparer version finale pour H2026 (5 janvier)
+**Prochain pas** :
+1. Tester avec export de Bruno pour valider les corrections
+2. Commit des modifications Beta 96
+
+---
+
+## HISTORIQUE BETA 95 (archive)
+
+**Date** : 4 janvier 2026
+**Objectif** : Harmonisation Primo ↔ Formulaires Trimestre
+**Archive** : `Archives/Beta-95-2026-01-04/`
 
 ---
 
@@ -369,4 +398,4 @@ Mais dans Trimestre, le systeme de jetons semble obligatoire (pas de checkbox gl
 
 ---
 
-**Derniere mise a jour** : 4 jan 2026
+**Derniere mise a jour** : 5 jan 2026
