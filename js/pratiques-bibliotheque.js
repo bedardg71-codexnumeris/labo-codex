@@ -661,13 +661,19 @@ async function obtenirDisciplinesDisponiblesPratiques() {
  * @returns {Promise<Object|null>} La configuration ou null
  */
 async function obtenirConfigurationPratiqueParId(configId) {
-    // Vérifier d'abord les gabarits prédéfinis
+    // 1. Vérifier d'abord les gabarits prédéfinis
     if (MODELES_PRATIQUES_PREDEFINIS[configId]) {
         return { ...MODELES_PRATIQUES_PREDEFINIS[configId] };
     }
 
+    // 2. Vérifier la bibliothèque partagée
     const bibliotheque = await db.get(CLE_BIBLIOTHEQUE_PRATIQUES) || [];
-    return bibliotheque.find(p => p.id === configId) || null;
+    const dansBibliotheque = bibliotheque.find(p => p.id === configId);
+    if (dansBibliotheque) return dansBibliotheque;
+
+    // 3. Vérifier les pratiques configurables de l'utilisateur (Beta 96 - Bug Bruno)
+    const configurables = await db.get('pratiquesConfigurables') || [];
+    return configurables.find(p => p.id === configId) || null;
 }
 
 /**

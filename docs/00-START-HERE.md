@@ -41,7 +41,7 @@ Avant de commencer, identifie ce sur quoi tu travailles :
 
 ## Etat actuel du projet
 
-**Version** : Beta 95 (stabilisation H2026)
+**Version** : Beta 95.1 (stabilisation H2026)
 **Objectif** : Tests reseau janvier-mai 2026
 **Priorite** : **Stabilite > Nouvelles fonctionnalites**
 

@@ -1,0 +1,269 @@
+/* ===============================
+   BIBLIOTHÈQUE DE CARTOUCHES DE RÉTROACTION
+   ✅ REFACTORING (2 janvier 2026)
+
+   Bibliothèque partagée de cartouches de rétroaction.
+   - Indépendante du trimestre (clé non-namespacée)
+   - Stockage dans IndexedDB/localStorage
+   - Import/export avec collègues
+   - Plus de données hardcodées
+
+   Clé de stockage: 'bibliothequeCartouches' (sans namespace)
+   =============================== */
+
+/**
+ * Clé de stockage pour la bibliothèque (NON namespacée = partagée entre trimestres)
+ */
+const CLE_BIBLIOTHEQUE_CARTOUCHES = 'bibliothequeCartouches';
+
+/**
+ * Obtenir toutes les cartouches de la bibliothèque
+ * @returns {Promise<Array>} Tableau de toutes les cartouches disponibles
+ */
+async function obtenirToutesLesCartouchesBibliotheque() {
+    const bibliotheque = await db.get(CLE_BIBLIOTHEQUE_CARTOUCHES) || [];
+    return bibliotheque;
+}
+
+/**
+ * Version synchrone pour compatibilité
+ * @returns {Array} Tableau de toutes les cartouches disponibles
+ */
+function obtenirToutesLesCartouchesBibliothequeSync() {
+    const bibliotheque = db.getSync(CLE_BIBLIOTHEQUE_CARTOUCHES) || [];
+    return bibliotheque;
+}
+
+/**
+ * Obtenir les cartouches d'une discipline spécifique
+ * @param {string} discipline - Nom de la discipline
+ * @returns {Array} Tableau des cartouches de cette discipline
+ */
+function obtenirCartouchesParDiscipline(discipline) {
+    const bibliotheque = db.getSync(CLE_BIBLIOTHEQUE_CARTOUCHES) || [];
+    if (!discipline || discipline === 'toutes') {
+        return bibliotheque;
+    }
+    return bibliotheque.filter(c =>
+        c.discipline && c.discipline.toLowerCase() === discipline.toLowerCase()
+    );
+}
+
+/**
+ * Obtenir la liste des disciplines disponibles dans la bibliothèque
+ * @returns {Array} Tableau des noms de disciplines uniques
+ */
+function obtenirDisciplinesDisponiblesCartouches() {
+    const bibliotheque = db.getSync(CLE_BIBLIOTHEQUE_CARTOUCHES) || [];
+    const disciplines = new Set();
+
+    bibliotheque.forEach(cartouche => {
+        if (cartouche.discipline) {
+            disciplines.add(cartouche.discipline);
+        }
+    });
+
+    return Array.from(disciplines).sort();
+}
+
+/**
+ * Ajouter une cartouche à la bibliothèque partagée
+ * @param {Object} cartouche - La cartouche à ajouter
+ * @returns {Promise<boolean>} true si ajoutée, false si déjà existante
+ */
+async function ajouterCartoucheALaBibliotheque(cartouche) {
+    let bibliotheque = await db.get(CLE_BIBLIOTHEQUE_CARTOUCHES) || [];
+
+    const existe = bibliotheque.some(c => c.id === cartouche.id);
+    if (existe) {
+        console.log('[Bibliothèque Cartouches] Cartouche déjà présente:', cartouche.id);
+        return false;
+    }
+
+    const cartoucheBiblio = {
+        ...cartouche,
+        dansBibliotheque: true,
+        dateAjoutBiblio: new Date().toISOString(),
+        auteur: cartouche.auteur || 'Inconnu'
+    };
+
+    bibliotheque.push(cartoucheBiblio);
+    await db.set(CLE_BIBLIOTHEQUE_CARTOUCHES, bibliotheque);
+
+    console.log('[Bibliothèque Cartouches] Cartouche ajoutée:', cartouche.nom);
+    return true;
+}
+
+/**
+ * Retirer une cartouche de la bibliothèque
+ * @param {string} cartoucheId - ID de la cartouche à retirer
+ * @returns {Promise<boolean>} true si retirée, false si non trouvée
+ */
+async function retirerCartoucheDeLaBibliotheque(cartoucheId) {
+    let bibliotheque = await db.get(CLE_BIBLIOTHEQUE_CARTOUCHES) || [];
+
+    const indexAvant = bibliotheque.length;
+    bibliotheque = bibliotheque.filter(c => c.id !== cartoucheId);
+
+    if (bibliotheque.length === indexAvant) {
+        return false;
+    }
+
+    await db.set(CLE_BIBLIOTHEQUE_CARTOUCHES, bibliotheque);
+    console.log('[Bibliothèque Cartouches] Cartouche retirée:', cartoucheId);
+    return true;
+}
+
+/**
+ * Importer des cartouches dans la bibliothèque
+ * @param {Array} cartouches - Tableau de cartouches à importer
+ * @returns {Promise<{ajoutees: number, existantes: number}>}
+ */
+async function importerCartouchesDansBibliotheque(cartouches) {
+    let ajoutees = 0;
+    let existantes = 0;
+
+    for (const cartouche of cartouches) {
+        const resultat = await ajouterCartoucheALaBibliotheque(cartouche);
+        if (resultat) {
+            ajoutees++;
+        } else {
+            existantes++;
+        }
+    }
+
+    console.log(`[Bibliothèque Cartouches] Import: ${ajoutees} ajoutées, ${existantes} déjà existantes`);
+    return { ajoutees, existantes };
+}
+
+/**
+ * Exporter toute la bibliothèque de cartouches
+ * @returns {Promise<Object>} Objet JSON exportable
+ */
+async function exporterBibliothequeCartouches() {
+    const bibliotheque = await db.get(CLE_BIBLIOTHEQUE_CARTOUCHES) || [];
+
+    return {
+        version: '1.0',
+        type: 'cartouches',
+        dateExport: new Date().toISOString(),
+        nombreCartouches: bibliotheque.length,
+        cartouches: bibliotheque
+    };
+}
+
+/**
+ * Migrer les cartouches d'un trimestre vers la bibliothèque partagée
+ * @param {string} cleSource - Clé source (ex: 'a2025_cartouches')
+ * @returns {Promise<{ajoutees: number, existantes: number}>}
+ */
+async function migrerCartouchesVersBibliotheque(cleSource) {
+    const dataRaw = localStorage.getItem(cleSource);
+    if (!dataRaw) {
+        console.log('[Bibliothèque Cartouches] Aucune donnée trouvée pour:', cleSource);
+        return { ajoutees: 0, existantes: 0 };
+    }
+
+    const cartouches = JSON.parse(dataRaw);
+    if (!Array.isArray(cartouches)) {
+        return { ajoutees: 0, existantes: 0 };
+    }
+
+    console.log(`[Bibliothèque Cartouches] Migration de ${cartouches.length} cartouches depuis ${cleSource}`);
+    return await importerCartouchesDansBibliotheque(cartouches);
+}
+
+/**
+ * Lister tous les trimestres qui ont des cartouches
+ * @returns {Array<{cle: string, code: string, nom: string, nombre: number}>}
+ */
+function listerTrimestresAvecCartouches() {
+    const trimestres = [];
+    const trimestreActuel = window.trimestreActif || '';
+
+    for (let i = 0; i < localStorage.length; i++) {
+        const cle = localStorage.key(i);
+        if (cle && cle.endsWith('_cartouches')) {
+            try {
+                const data = JSON.parse(localStorage.getItem(cle));
+                if (Array.isArray(data) && data.length > 0) {
+                    const codeTrimestre = cle.replace('_cartouches', '');
+
+                    if (codeTrimestre !== trimestreActuel) {
+                        const nomTrimestre = formaterNomTrimestreCartouches(codeTrimestre);
+                        trimestres.push({
+                            cle: cle,
+                            code: codeTrimestre,
+                            nom: nomTrimestre,
+                            nombre: data.length
+                        });
+                    }
+                }
+            } catch (e) {
+                // Ignorer
+            }
+        }
+    }
+
+    trimestres.sort((a, b) => b.code.localeCompare(a.code));
+    return trimestres;
+}
+
+/**
+ * Formater un code trimestre pour affichage
+ */
+function formaterNomTrimestreCartouches(code) {
+    if (!code) return 'Inconnu';
+    const saison = code.charAt(0).toLowerCase();
+    const annee = code.substring(1);
+    const saisons = { 'a': 'Automne', 'h': 'Hiver', 'e': 'Été' };
+    return `${saisons[saison] || saison.toUpperCase()} ${annee}`;
+}
+
+/**
+ * Obtenir les cartouches d'un trimestre spécifique
+ * @param {string} cleOuCode - Clé complète ou code trimestre
+ * @returns {Array}
+ */
+function obtenirCartouchesTrimestre(cleOuCode) {
+    const cle = cleOuCode.includes('_') ? cleOuCode : `${cleOuCode}_cartouches`;
+    try {
+        const data = localStorage.getItem(cle);
+        if (data) {
+            return JSON.parse(data);
+        }
+    } catch (e) {
+        console.error('[Bibliothèque Cartouches] Erreur lecture trimestre:', e);
+    }
+    return [];
+}
+
+/**
+ * Obtenir le nombre de cartouches dans la bibliothèque
+ * @returns {number}
+ */
+function getNombreCartouchesBibliotheque() {
+    const bibliotheque = db.getSync(CLE_BIBLIOTHEQUE_CARTOUCHES) || [];
+    return bibliotheque.length;
+}
+
+// ===========================
+// EXPORTS GLOBAUX
+// ===========================
+window.obtenirToutesLesCartouchesBibliotheque = obtenirToutesLesCartouchesBibliotheque;
+window.obtenirToutesLesCartouchesBibliothequeSync = obtenirToutesLesCartouchesBibliothequeSync;
+window.obtenirCartouchesParDiscipline = obtenirCartouchesParDiscipline;
+window.obtenirDisciplinesDisponiblesCartouches = obtenirDisciplinesDisponiblesCartouches;
+window.ajouterCartoucheALaBibliotheque = ajouterCartoucheALaBibliotheque;
+window.retirerCartoucheDeLaBibliotheque = retirerCartoucheDeLaBibliotheque;
+window.importerCartouchesDansBibliotheque = importerCartouchesDansBibliotheque;
+window.exporterBibliothequeCartouches = exporterBibliothequeCartouches;
+window.migrerCartouchesVersBibliotheque = migrerCartouchesVersBibliotheque;
+window.listerTrimestresAvecCartouches = listerTrimestresAvecCartouches;
+window.formaterNomTrimestreCartouches = formaterNomTrimestreCartouches;
+window.obtenirCartouchesTrimestre = obtenirCartouchesTrimestre;
+window.getNombreCartouchesBibliotheque = getNombreCartouchesBibliotheque;
+window.CLE_BIBLIOTHEQUE_CARTOUCHES = CLE_BIBLIOTHEQUE_CARTOUCHES;
+
+// Rétrocompatibilité: CARTOUCHES_BIBLIOTHEQUE vide (plus de hardcodé)
+window.CARTOUCHES_BIBLIOTHEQUE = {};

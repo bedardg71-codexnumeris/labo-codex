@@ -909,7 +909,8 @@ async function dupliquerGrille(grilleId) {
         })),
         dateCreation: new Date().toISOString(),
         dateModification: new Date().toISOString(),
-        baseSur: grilleOriginale.nom
+        baseSur: grilleOriginale.nom,
+        dansBibliotheque: true  // ✅ AJOUT (Beta 96 - Bug Bruno) - Grille dupliquée dans bibliothèque
     };
 
     // Sauvegarder
@@ -920,6 +921,8 @@ async function dupliquerGrille(grilleId) {
     grilleTemplateActuelle = nouvelleGrille;
     await chargerListeGrillesTemplates();
     await afficherToutesLesGrillesCriteres();
+    // ✅ AJOUT (Beta 96) : Rafraîchir la sidebar
+    await afficherListeGrilles();
     const select = document.getElementById('selectGrilleTemplate');
     if (select) select.value = nouvelleGrille.id;
     await chargerGrilleTemplate();

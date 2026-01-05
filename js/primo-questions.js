@@ -1040,11 +1040,11 @@ const QUESTIONS_PRIMO = [
         texte: 'Séance 1 - Quel jour de la semaine ?',
         type: 'select',
         options: [
-            { value: 'lundi', label: 'Lundi' },
-            { value: 'mardi', label: 'Mardi' },
-            { value: 'mercredi', label: 'Mercredi' },
-            { value: 'jeudi', label: 'Jeudi' },
-            { value: 'vendredi', label: 'Vendredi' }
+            { value: 'Lundi', label: 'Lundi' },
+            { value: 'Mardi', label: 'Mardi' },
+            { value: 'Mercredi', label: 'Mercredi' },
+            { value: 'Jeudi', label: 'Jeudi' },
+            { value: 'Vendredi', label: 'Vendredi' }
         ],
         champsCibles: [
             { cle: 'horaireHebdomadaire', champ: 'jour1' }
@@ -1057,20 +1057,8 @@ const QUESTIONS_PRIMO = [
     {
         id: 'horaire-heure1-debut',
         texte: 'Séance 1 - À quelle heure commence-t-elle ?',
-        type: 'select',
-        options: [
-            { value: '08:00', label: '08:00' },
-            { value: '09:00', label: '09:00' },
-            { value: '10:00', label: '10:00' },
-            { value: '11:00', label: '11:00' },
-            { value: '12:00', label: '12:00' },
-            { value: '13:00', label: '13:00' },
-            { value: '14:00', label: '14:00' },
-            { value: '15:00', label: '15:00' },
-            { value: '16:00', label: '16:00' },
-            { value: '17:00', label: '17:00' },
-            { value: '18:00', label: '18:00' }
-        ],
+        type: 'time',  // ✅ MODIF (Beta 96 - Souhait Bruno) : Permettre heures non piles
+        placeholder: '08:00',
         champsCibles: [
             { cle: 'horaireHebdomadaire', champ: 'heure1Debut' }
         ],
@@ -1082,20 +1070,8 @@ const QUESTIONS_PRIMO = [
     {
         id: 'horaire-heure1-fin',
         texte: 'Séance 1 - À quelle heure finit-elle ?',
-        type: 'select',
-        options: [
-            { value: '09:00', label: '09:00' },
-            { value: '10:00', label: '10:00' },
-            { value: '11:00', label: '11:00' },
-            { value: '12:00', label: '12:00' },
-            { value: '13:00', label: '13:00' },
-            { value: '14:00', label: '14:00' },
-            { value: '15:00', label: '15:00' },
-            { value: '16:00', label: '16:00' },
-            { value: '17:00', label: '17:00' },
-            { value: '18:00', label: '18:00' },
-            { value: '19:00', label: '19:00' }
-        ],
+        type: 'time',  // ✅ MODIF (Beta 96 - Souhait Bruno) : Permettre heures non piles
+        placeholder: '12:00',
         champsCibles: [
             { cle: 'horaireHebdomadaire', champ: 'heure1Fin' }
         ],
@@ -1111,11 +1087,11 @@ const QUESTIONS_PRIMO = [
         texte: 'Séance 2 - Quel jour ?',
         type: 'select',
         options: [
-            { value: 'lundi', label: 'Lundi' },
-            { value: 'mardi', label: 'Mardi' },
-            { value: 'mercredi', label: 'Mercredi' },
-            { value: 'jeudi', label: 'Jeudi' },
-            { value: 'vendredi', label: 'Vendredi' }
+            { value: 'Lundi', label: 'Lundi' },
+            { value: 'Mardi', label: 'Mardi' },
+            { value: 'Mercredi', label: 'Mercredi' },
+            { value: 'Jeudi', label: 'Jeudi' },
+            { value: 'Vendredi', label: 'Vendredi' }
         ],
         champsCibles: [
             { cle: 'horaireHebdomadaire', champ: 'jour2' }
@@ -1132,20 +1108,8 @@ const QUESTIONS_PRIMO = [
     {
         id: 'horaire-heure2-debut',
         texte: 'Séance 2 - À quelle heure commence-t-elle ?',
-        type: 'select',
-        options: [
-            { value: '08:00', label: '08:00' },
-            { value: '09:00', label: '09:00' },
-            { value: '10:00', label: '10:00' },
-            { value: '11:00', label: '11:00' },
-            { value: '12:00', label: '12:00' },
-            { value: '13:00', label: '13:00' },
-            { value: '14:00', label: '14:00' },
-            { value: '15:00', label: '15:00' },
-            { value: '16:00', label: '16:00' },
-            { value: '17:00', label: '17:00' },
-            { value: '18:00', label: '18:00' }
-        ],
+        type: 'time',  // ✅ MODIF (Beta 96 - Souhait Bruno) : Permettre heures non piles
+        placeholder: '13:00',
         champsCibles: [
             { cle: 'horaireHebdomadaire', champ: 'heure2Debut' }
         ],
@@ -1161,20 +1125,8 @@ const QUESTIONS_PRIMO = [
     {
         id: 'horaire-heure2-fin',
         texte: 'Séance 2 - À quelle heure finit-elle ?',
-        type: 'select',
-        options: [
-            { value: '09:00', label: '09:00' },
-            { value: '10:00', label: '10:00' },
-            { value: '11:00', label: '11:00' },
-            { value: '12:00', label: '12:00' },
-            { value: '13:00', label: '13:00' },
-            { value: '14:00', label: '14:00' },
-            { value: '15:00', label: '15:00' },
-            { value: '16:00', label: '16:00' },
-            { value: '17:00', label: '17:00' },
-            { value: '18:00', label: '18:00' },
-            { value: '19:00', label: '19:00' }
-        ],
+        type: 'time',  // ✅ MODIF (Beta 96 - Souhait Bruno) : Permettre heures non piles
+        placeholder: '16:00',
         champsCibles: [
             { cle: 'horaireHebdomadaire', champ: 'heure2Fin' }
         ],
@@ -1194,11 +1146,11 @@ const QUESTIONS_PRIMO = [
         texte: 'Séance 3 - Quel jour ?',
         type: 'select',
         options: [
-            { value: 'lundi', label: 'Lundi' },
-            { value: 'mardi', label: 'Mardi' },
-            { value: 'mercredi', label: 'Mercredi' },
-            { value: 'jeudi', label: 'Jeudi' },
-            { value: 'vendredi', label: 'Vendredi' }
+            { value: 'Lundi', label: 'Lundi' },
+            { value: 'Mardi', label: 'Mardi' },
+            { value: 'Mercredi', label: 'Mercredi' },
+            { value: 'Jeudi', label: 'Jeudi' },
+            { value: 'Vendredi', label: 'Vendredi' }
         ],
         champsCibles: [
             { cle: 'horaireHebdomadaire', champ: 'jour3' }
@@ -1214,20 +1166,8 @@ const QUESTIONS_PRIMO = [
     {
         id: 'horaire-heure3-debut',
         texte: 'Séance 3 - À quelle heure commence-t-elle ?',
-        type: 'select',
-        options: [
-            { value: '08:00', label: '08:00' },
-            { value: '09:00', label: '09:00' },
-            { value: '10:00', label: '10:00' },
-            { value: '11:00', label: '11:00' },
-            { value: '12:00', label: '12:00' },
-            { value: '13:00', label: '13:00' },
-            { value: '14:00', label: '14:00' },
-            { value: '15:00', label: '15:00' },
-            { value: '16:00', label: '16:00' },
-            { value: '17:00', label: '17:00' },
-            { value: '18:00', label: '18:00' }
-        ],
+        type: 'time',  // ✅ MODIF (Beta 96 - Souhait Bruno) : Permettre heures non piles
+        placeholder: '14:00',
         champsCibles: [
             { cle: 'horaireHebdomadaire', champ: 'heure3Debut' }
         ],
@@ -1242,20 +1182,8 @@ const QUESTIONS_PRIMO = [
     {
         id: 'horaire-heure3-fin',
         texte: 'Séance 3 - À quelle heure finit-elle ?',
-        type: 'select',
-        options: [
-            { value: '09:00', label: '09:00' },
-            { value: '10:00', label: '10:00' },
-            { value: '11:00', label: '11:00' },
-            { value: '12:00', label: '12:00' },
-            { value: '13:00', label: '13:00' },
-            { value: '14:00', label: '14:00' },
-            { value: '15:00', label: '15:00' },
-            { value: '16:00', label: '16:00' },
-            { value: '17:00', label: '17:00' },
-            { value: '18:00', label: '18:00' },
-            { value: '19:00', label: '19:00' }
-        ],
+        type: 'time',  // ✅ MODIF (Beta 96 - Souhait Bruno) : Permettre heures non piles
+        placeholder: '17:00',
         champsCibles: [
             { cle: 'horaireHebdomadaire', champ: 'heure3Fin' }
         ],

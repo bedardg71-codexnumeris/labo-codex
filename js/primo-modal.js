@@ -1317,10 +1317,18 @@ async function terminerConfiguration() {
 
         // Afficher notification de succès
         if (typeof afficherNotificationSucces === 'function') {
-            const messageType = estParcoursCourt ? 'Configuration de base' : 'Séquence d\'évaluation';
+            // ✅ AJOUT (Beta 96) : Message plus explicite selon le parcours
+            let messageType, messageDetails;
+            if (estParcoursCourt) {
+                messageType = 'Configuration de base';
+                messageDetails = 'Tu peux maintenant choisir une autre activité.';
+            } else {
+                messageType = 'Pratique de notation configurée';
+                messageDetails = 'Les paramètres ont été appliqués au cours actif.';
+            }
             afficherNotificationSucces(
                 `${messageType} terminée ! ✅`,
-                'Tu peux maintenant choisir une autre activité.'
+                messageDetails
             );
         }
 

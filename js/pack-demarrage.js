@@ -50,7 +50,7 @@ const PACK_DEMARRAGE = {
   // ===== HORAIRE HEBDOMADAIRE (mardi 8h-12h) =====
   // Format tableau de séances (attendu par horaire.js)
   "horaireHebdo": [
-    { "jour": "mardi", "debut": "08:00", "fin": "12:00", "duree": 4 }
+    { "jour": "Mardi", "debut": "08:00", "fin": "12:00", "duree": 4 }
   ],
 
   // ===== NOTE: calendrierComplet et seancesCompletes sont GÉNÉRÉS par l'app =====

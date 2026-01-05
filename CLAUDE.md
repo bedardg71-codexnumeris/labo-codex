@@ -18,7 +18,7 @@ Ce document te guidera vers :
 
 ## Etat actuel
 
-- **Version** : Beta 95
+- **Version** : Beta 95.1
 - **Objectif** : Stabilisation pour H2026 (5 janvier 2026)
 - **Session en cours** : Voir `SESSION.md`
 
@@ -71,4 +71,4 @@ Gregoire a la memoire contextuelle reelle du projet.
 
 ---
 
-**Derniere mise a jour** : 4 janvier 2026
+**Derniere mise a jour** : 5 janvier 2026
