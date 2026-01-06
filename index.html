@@ -6,7 +6,7 @@
     <title>Système de suivi Beta 95.1 - Hiver 2026</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=2026010602">
+    <link rel="stylesheet" href="styles.css?v=2026010603">
 
     <style>
         /* Les styles embarqués restent ici */
@@ -3183,8 +3183,8 @@
 
                 <!-- Encadré testeurs (compact, en haut) -->
                 <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: 4px; padding: 8px 12px; margin-bottom: 1rem; font-size: 0.85rem;">
-                    <strong style="color: var(--bleu-principal);">Dernière correction :</strong>
-                    Sauvegarde des nouvelles grilles (merci Bruno)
+                    <strong style="color: var(--bleu-principal);">Dernières corrections :</strong>
+                    Finalisation Primo (merci Olivier) · Sauvegarde grilles (merci Bruno)
                     <a href="#" onclick="fermerModalNouveautes(); allerVersNotesDeVersion(); return false;" style="color: var(--bleu-principal); margin-left: 8px;">Détails →</a>
                 </div>
 
@@ -13097,9 +13097,10 @@ Exemple :
 
                         <h4 class="titre-bleu-mb8 mt-15">Corrections de bugs</h4>
                         <ul class="modal-liste">
+                            <li><strong>Finalisation Primo</strong> : L'interface se met à jour correctement après le parcours de configuration (merci Olivier).</li>
+                            <li><strong>Sauvegarde des nouvelles grilles</strong> : Les grilles créées s'ajoutent maintenant correctement à la bibliothèque (merci Bruno).</li>
                             <li><strong>Application des pratiques</strong> : Les pratiques créées via Primo s'appliquent correctement au cours.</li>
                             <li><strong>Persistance des ressources</strong> : Les grilles, échelles, cartouches et productions restent visibles après sauvegarde.</li>
-                            <li><strong>Sauvegarde des nouvelles grilles</strong> : Les grilles créées s'ajoutent maintenant correctement à la bibliothèque (merci Bruno).</li>
                             <li><strong>Heures non piles</strong> : Entrée d'heures comme 8h55 dans Primo au lieu des heures rondes.</li>
                         </ul>
                         </div><!-- fin accordeon-contenu beta951 -->
@@ -13448,7 +13449,7 @@ Exemple :
 
     <!-- PRIMO - Système conversationnel de configuration (Beta 92) -->
     <script src="js/primo-questions.js?v=2026010402"></script>
-    <script src="js/primo-modal.js?v=2026010213"></script>
+    <script src="js/primo-modal.js?v=2026010603"></script> <!-- Bug Olivier: reload après parcours court -->
     <script src="js/primo-accueil.js?v=2025112809"></script>
     <script src="js/primo-validation-champs.js?v=2025112727"></script>
     <script src="js/primo-tooltips.js?v=2025120901"></script>
@@ -13482,7 +13483,7 @@ Exemple :
 
         // === CONFIGURATION (à mettre à jour à chaque déploiement) ===
         const VERSION_MAJEURE = '95.1';      // Changer pour 95.2, 96, etc.
-        const BUILD_ID = '0106-1530';        // Format: MMJJ-HHMM (ex: 0106-1530 = 6 jan 15h30)
+        const BUILD_ID = '0106-1615';        // Format: MMJJ-HHMM (ex: 0106-1615 = 6 jan 16h15)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';

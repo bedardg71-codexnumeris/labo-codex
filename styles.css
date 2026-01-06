@@ -522,7 +522,7 @@ h1, h2, h3, h4 {
 /* Numéro de build dans l'entête */
 .build-numero {
     font-size: 0.75rem;
-    color: var(--gris-moyen);
+    color: inherit;
     font-weight: normal;
     margin-left: 4px;
 }
