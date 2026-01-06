@@ -386,6 +386,7 @@ function detecterFormatConfig(config) {
 
 /**
  * Affiche le modal de prévisualisation pour un export localStorage brut
+ * Propose deux modes : import complet OU fusion avec bibliothèques
  * @param {Object} config - Données brutes localStorage
  * @param {string} nomFichier - Nom du fichier importé
  */
@@ -400,26 +401,19 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
     });
     const tailleKo = (tailleTotale / 1024).toFixed(1);
 
-    // Catégoriser les clés
-    const categories = {
-        cours: cles.filter(c => c.includes('infoCours') || c.includes('Cours')),
-        calendrier: cles.filter(c => c.includes('calendrier') || c.includes('seances') || c.includes('horaire')),
-        evaluations: cles.filter(c => c.includes('evaluation') || c.includes('production') || c.includes('grille') || c.includes('echelle')),
-        etudiants: cles.filter(c => c.includes('tudiant') || c.includes('groupe') || c.includes('presence')),
-        pratiques: cles.filter(c => c.includes('pratique') || c.includes('modalite')),
-        preferences: cles.filter(c => c.includes('preference') || c.includes('accordeon') || c.includes('etat'))
-    };
+    // Analyser les ressources disponibles pour les bibliothèques
+    const ressourcesBiblio = analyserRessourcesBibliotheques(config);
 
     const modalHTML = `
         <div id="modalPreviewConfigComplete" style="display: flex; position: fixed; top: 0; left: 0;
              width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000;
              align-items: center; justify-content: center;">
-            <div style="background: white; border-radius: 8px; padding: 30px; max-width: 600px;
-                 width: 90%; max-height: 80vh; overflow-y: auto;">
+            <div style="background: white; border-radius: 8px; padding: 30px; max-width: 650px;
+                 width: 90%; max-height: 85vh; overflow-y: auto;">
 
                 <h2 style="margin-top: 0; color: var(--bleu-moyen); border-bottom: 2px solid var(--bleu-pale);
                      padding-bottom: 10px;">
-                    📁 Import de données brutes
+                    📁 Import de données
                 </h2>
 
                 <!-- Badge format -->
@@ -427,56 +421,79 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                      padding: 10px 15px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
                     <span style="font-size: 1.5rem;">📦</span>
                     <div>
-                        <strong style="color: var(--bleu-moyen);">Format détecté : Export localStorage</strong>
+                        <strong style="color: var(--bleu-moyen);">Format : Export localStorage</strong>
                         <p style="margin: 5px 0 0 0; font-size: 0.85rem; color: var(--gris-fonce);">
-                            Ce fichier contient une sauvegarde complète des données de l'application.
+                            ${nomFichier} · ${nbCles} clés · ~${tailleKo} Ko
                         </p>
                     </div>
                 </div>
 
-                <!-- Infos fichier -->
-                <div style="background: var(--bleu-tres-pale); border-left: 4px solid var(--bleu-moyen);
-                     padding: 15px; margin-bottom: 20px; border-radius: 4px;">
-                    <p style="margin: 0 0 8px 0;"><strong>📄 Fichier :</strong> ${nomFichier}</p>
-                    <p style="margin: 0 0 8px 0;"><strong>📊 Contenu :</strong> ${nbCles} clé(s) de données</p>
-                    <p style="margin: 0;"><strong>💾 Taille :</strong> ~${tailleKo} Ko</p>
-                </div>
-
-                <!-- Aperçu des catégories -->
-                <div style="background: white; border: 1px solid var(--bleu-pale); padding: 15px;
-                     margin-bottom: 20px; border-radius: 4px;">
-                    <h3 style="margin-top: 0; font-size: 1rem; color: var(--bleu-moyen);">📋 Données incluses</h3>
-                    <ul style="list-style: none; padding-left: 0; margin: 10px 0; font-size: 0.9rem;">
-                        ${categories.cours.length > 0 ? `<li style="padding: 4px 0;">✓ Configuration cours (${categories.cours.length})</li>` : ''}
-                        ${categories.calendrier.length > 0 ? `<li style="padding: 4px 0;">✓ Calendrier et séances (${categories.calendrier.length})</li>` : ''}
-                        ${categories.evaluations.length > 0 ? `<li style="padding: 4px 0;">✓ Évaluations et grilles (${categories.evaluations.length})</li>` : ''}
-                        ${categories.etudiants.length > 0 ? `<li style="padding: 4px 0;">✓ Étudiants et présences (${categories.etudiants.length})</li>` : ''}
-                        ${categories.pratiques.length > 0 ? `<li style="padding: 4px 0;">✓ Pratiques de notation (${categories.pratiques.length})</li>` : ''}
-                        ${categories.preferences.length > 0 ? `<li style="padding: 4px 0;">✓ Préférences utilisateur (${categories.preferences.length})</li>` : ''}
-                    </ul>
-                </div>
-
-                <!-- Avertissement -->
-                <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px;
-                     margin-bottom: 20px; border-radius: 4px;">
-                    <p style="margin: 0; font-size: 0.9rem; color: #856404;">
-                        <strong>⚠️ Attention :</strong> Cette action va importer TOUTES les données du fichier.
-                        Les clés existantes seront écrasées. Exporte tes données actuelles d'abord si nécessaire !
+                <!-- OPTION 1: Fusionner avec bibliothèques (recommandé) -->
+                <div style="background: #d4edda; border: 2px solid #28a745; border-radius: 8px;
+                     padding: 20px; margin-bottom: 15px;">
+                    <h3 style="margin: 0 0 10px 0; color: #155724; font-size: 1.1rem;">
+                        📚 Option 1 : Fusionner avec mes bibliothèques
+                        <span style="background: #28a745; color: white; font-size: 0.7rem; padding: 2px 8px;
+                               border-radius: 10px; margin-left: 8px; vertical-align: middle;">Recommandé</span>
+                    </h3>
+                    <p style="margin: 0 0 12px 0; font-size: 0.9rem; color: #155724;">
+                        Ajoute uniquement les ressources pédagogiques à tes bibliothèques existantes.
+                        <strong>Tes données actuelles sont préservées.</strong>
                     </p>
+
+                    <!-- Ressources détectées -->
+                    <div style="background: white; border-radius: 4px; padding: 12px; margin-bottom: 12px;">
+                        <p style="margin: 0 0 8px 0; font-size: 0.85rem; color: #666;"><strong>Ressources détectées :</strong></p>
+                        <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.9rem;">
+                            ${ressourcesBiblio.pratiques > 0 ? `<li style="padding: 3px 0;">✓ ${ressourcesBiblio.pratiques} pratique(s) de notation</li>` : ''}
+                            ${ressourcesBiblio.grilles > 0 ? `<li style="padding: 3px 0;">✓ ${ressourcesBiblio.grilles} grille(s) de critères</li>` : ''}
+                            ${ressourcesBiblio.echelles > 0 ? `<li style="padding: 3px 0;">✓ ${ressourcesBiblio.echelles} échelle(s) de performance</li>` : ''}
+                            ${ressourcesBiblio.productions > 0 ? `<li style="padding: 3px 0;">✓ ${ressourcesBiblio.productions} production(s)</li>` : ''}
+                            ${ressourcesBiblio.total === 0 ? `<li style="padding: 3px 0; color: #666;">Aucune ressource de bibliothèque détectée</li>` : ''}
+                        </ul>
+                    </div>
+
+                    <button onclick="executerImportVersBibliotheques()"
+                            style="padding: 12px 24px; background: #28a745; color: white;
+                                   border: none; border-radius: 4px; cursor: pointer; font-size: 1rem;
+                                   font-weight: 500; width: 100%;"
+                            ${ressourcesBiblio.total === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                        Fusionner avec mes bibliothèques
+                    </button>
                 </div>
 
-                <!-- Boutons -->
-                <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                    <button onclick="fermerModalPreviewConfigComplete()"
-                            style="padding: 10px 20px; background: var(--gris-clair); color: var(--gris-fonce);
-                                   border: none; border-radius: 4px; cursor: pointer; font-size: 0.95rem;">
-                        Annuler
-                    </button>
+                <!-- OPTION 2: Import complet -->
+                <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px;
+                     padding: 20px; margin-bottom: 20px;">
+                    <h3 style="margin: 0 0 10px 0; color: #495057; font-size: 1.1rem;">
+                        🔄 Option 2 : Import complet (écrasement)
+                    </h3>
+                    <p style="margin: 0 0 12px 0; font-size: 0.9rem; color: #6c757d;">
+                        Remplace TOUTES tes données par celles du fichier.
+                        Utile pour restaurer une sauvegarde complète.
+                    </p>
+
+                    <div style="background: #fff3cd; border-left: 3px solid #ffc107; padding: 10px;
+                         margin-bottom: 12px; border-radius: 0 4px 4px 0;">
+                        <p style="margin: 0; font-size: 0.85rem; color: #856404;">
+                            ⚠️ Les données existantes seront écrasées !
+                        </p>
+                    </div>
+
                     <button onclick="executerImportConfigComplete()"
-                            style="padding: 10px 20px; background: var(--bleu-moyen); color: white;
-                                   border: none; border-radius: 4px; cursor: pointer; font-size: 0.95rem;
-                                   font-weight: 500;">
-                        Importer ces données
+                            style="padding: 10px 20px; background: #6c757d; color: white;
+                                   border: none; border-radius: 4px; cursor: pointer; font-size: 0.95rem;">
+                        Importer tout (écrasement)
+                    </button>
+                </div>
+
+                <!-- Bouton Annuler -->
+                <div style="text-align: right;">
+                    <button onclick="fermerModalPreviewConfigComplete()"
+                            style="padding: 10px 20px; background: white; color: var(--gris-fonce);
+                                   border: 1px solid var(--gris-clair); border-radius: 4px;
+                                   cursor: pointer; font-size: 0.95rem;">
+                        Annuler
                     </button>
                 </div>
             </div>
@@ -486,6 +503,54 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
     const modalContainer = document.createElement('div');
     modalContainer.innerHTML = modalHTML;
     document.body.appendChild(modalContainer);
+}
+
+/**
+ * Analyse les ressources d'un export localStorage pour les bibliothèques
+ * @param {Object} config - Données brutes localStorage
+ * @returns {Object} Comptage des ressources par type
+ */
+function analyserRessourcesBibliotheques(config) {
+    const result = { pratiques: 0, grilles: 0, echelles: 0, productions: 0, total: 0 };
+
+    // Parser les valeurs si elles sont des strings JSON
+    const parseValeur = (val) => {
+        if (typeof val === 'string') {
+            try { return JSON.parse(val); } catch (e) { return val; }
+        }
+        return val;
+    };
+
+    // Pratiques configurables
+    if (config.pratiquesConfigurables) {
+        const pratiques = parseValeur(config.pratiquesConfigurables);
+        if (Array.isArray(pratiques)) result.pratiques = pratiques.length;
+    }
+
+    // Grilles (plusieurs sources possibles)
+    if (config.bibliothequeGrilles) {
+        const grilles = parseValeur(config.bibliothequeGrilles);
+        if (Array.isArray(grilles)) result.grilles += grilles.length;
+    }
+    if (config.grillesTemplates) {
+        const grilles = parseValeur(config.grillesTemplates);
+        if (Array.isArray(grilles)) result.grilles += grilles.length;
+    }
+
+    // Échelles
+    if (config.echellesTemplates) {
+        const echelles = parseValeur(config.echellesTemplates);
+        if (Array.isArray(echelles)) result.echelles = echelles.length;
+    }
+
+    // Productions (plusieurs sources possibles)
+    if (config.bibliothequeProductions) {
+        const prods = parseValeur(config.bibliothequeProductions);
+        if (Array.isArray(prods)) result.productions += prods.length;
+    }
+
+    result.total = result.pratiques + result.grilles + result.echelles + result.productions;
+    return result;
 }
 
 /**
@@ -849,6 +914,196 @@ async function executerImportLocalStorageBrut(config) {
     }
 }
 
+/**
+ * 🆕 BETA 95.1 : Import fusionné vers les bibliothèques
+ * Extrait uniquement les ressources (pratiques, grilles, échelles, productions)
+ * et les ajoute aux bibliothèques existantes SANS écraser les données du cours
+ */
+async function executerImportVersBibliotheques() {
+    if (!configCompleteEnAttente) {
+        alert('Aucune configuration en attente d\'importation.');
+        return;
+    }
+
+    const config = configCompleteEnAttente;
+
+    // Retirer la propriété interne _format
+    const donnees = { ...config };
+    delete donnees._format;
+
+    // Helper pour parser les valeurs JSON
+    const parseValeur = (val) => {
+        if (typeof val === 'string') {
+            try { return JSON.parse(val); } catch (e) { return val; }
+        }
+        return val;
+    };
+
+    try {
+        let compteurs = { pratiques: 0, grilles: 0, echelles: 0, productions: 0 };
+
+        // 1. PRATIQUES CONFIGURABLES
+        if (donnees.pratiquesConfigurables) {
+            const pratiquesImport = parseValeur(donnees.pratiquesConfigurables);
+            if (Array.isArray(pratiquesImport) && pratiquesImport.length > 0) {
+                const pratiquesExistantes = db.getSync('pratiquesConfigurables', []);
+                const idsPratiquesExistants = new Set(pratiquesExistantes.map(p => p.id));
+
+                const pratiquesNouvelles = pratiquesImport.filter(p => {
+                    // Éviter les doublons par ID ou par nom
+                    if (idsPratiquesExistants.has(p.id)) return false;
+                    if (pratiquesExistantes.some(pe => pe.nom === p.nom)) return false;
+                    return true;
+                }).map(p => ({
+                    ...p,
+                    id: 'PRATIQUE_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                    dateImport: new Date().toISOString()
+                }));
+
+                if (pratiquesNouvelles.length > 0) {
+                    const pratiquesFusionnees = [...pratiquesExistantes, ...pratiquesNouvelles];
+                    db.setSync('pratiquesConfigurables', pratiquesFusionnees);
+                    compteurs.pratiques = pratiquesNouvelles.length;
+                    console.log(`✅ ${pratiquesNouvelles.length} pratique(s) ajoutée(s)`);
+                }
+            }
+        }
+
+        // 2. GRILLES (depuis grillesTemplates et bibliothequeGrilles)
+        const grillesExistantes = db.getSync('grillesTemplates', []);
+        const idsGrillesExistants = new Set(grillesExistantes.map(g => g.id));
+        let grillesNouvelles = [];
+
+        // Depuis grillesTemplates
+        if (donnees.grillesTemplates) {
+            const grillesImport = parseValeur(donnees.grillesTemplates);
+            if (Array.isArray(grillesImport)) {
+                grillesImport.forEach(g => {
+                    if (!idsGrillesExistants.has(g.id) &&
+                        !grillesExistantes.some(ge => ge.nom === g.nom)) {
+                        grillesNouvelles.push({
+                            ...g,
+                            id: 'GRILLE_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                            dateImport: new Date().toISOString()
+                        });
+                    }
+                });
+            }
+        }
+
+        // Depuis bibliothequeGrilles (autre clé possible)
+        if (donnees.bibliothequeGrilles) {
+            const grillesImport = parseValeur(donnees.bibliothequeGrilles);
+            if (Array.isArray(grillesImport)) {
+                grillesImport.forEach(g => {
+                    if (!idsGrillesExistants.has(g.id) &&
+                        !grillesExistantes.some(ge => ge.nom === g.nom) &&
+                        !grillesNouvelles.some(gn => gn.nom === g.nom)) {
+                        grillesNouvelles.push({
+                            ...g,
+                            id: 'GRILLE_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                            dateImport: new Date().toISOString()
+                        });
+                    }
+                });
+            }
+        }
+
+        if (grillesNouvelles.length > 0) {
+            const grillesFusionnees = [...grillesExistantes, ...grillesNouvelles];
+            db.setSync('grillesTemplates', grillesFusionnees);
+            compteurs.grilles = grillesNouvelles.length;
+            console.log(`✅ ${grillesNouvelles.length} grille(s) ajoutée(s)`);
+        }
+
+        // 3. ÉCHELLES
+        if (donnees.echellesTemplates) {
+            const echellesImport = parseValeur(donnees.echellesTemplates);
+            if (Array.isArray(echellesImport) && echellesImport.length > 0) {
+                const echellesExistantes = db.getSync('echellesTemplates', []);
+                const idsEchellesExistants = new Set(echellesExistantes.map(e => e.id));
+
+                const echellesNouvelles = echellesImport.filter(e => {
+                    if (idsEchellesExistants.has(e.id)) return false;
+                    if (echellesExistantes.some(ee => ee.nom === e.nom)) return false;
+                    return true;
+                }).map(e => ({
+                    ...e,
+                    id: 'ECH_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                    dateImport: new Date().toISOString()
+                }));
+
+                if (echellesNouvelles.length > 0) {
+                    const echellesFusionnees = [...echellesExistantes, ...echellesNouvelles];
+                    db.setSync('echellesTemplates', echellesFusionnees);
+                    compteurs.echelles = echellesNouvelles.length;
+                    console.log(`✅ ${echellesNouvelles.length} échelle(s) ajoutée(s)`);
+                }
+            }
+        }
+
+        // 4. PRODUCTIONS (depuis bibliothequeProductions)
+        if (donnees.bibliothequeProductions) {
+            const prodsImport = parseValeur(donnees.bibliothequeProductions);
+            if (Array.isArray(prodsImport) && prodsImport.length > 0) {
+                const cleProductions = (typeof window.cle === 'function') ? window.cle('productions') : 'productions';
+                const prodsExistantes = db.getSync(cleProductions, []);
+                const idsProdsExistants = new Set(prodsExistantes.map(p => p.id));
+
+                const prodsNouvelles = prodsImport.filter(p => {
+                    if (idsProdsExistants.has(p.id)) return false;
+                    if (prodsExistantes.some(pe => pe.nom === p.nom)) return false;
+                    return true;
+                }).map(p => ({
+                    ...p,
+                    id: 'PROD_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                    dateImport: new Date().toISOString()
+                }));
+
+                if (prodsNouvelles.length > 0) {
+                    const prodsFusionnees = [...prodsExistantes, ...prodsNouvelles];
+                    db.setSync(cleProductions, prodsFusionnees);
+                    compteurs.productions = prodsNouvelles.length;
+                    console.log(`✅ ${prodsNouvelles.length} production(s) ajoutée(s)`);
+                }
+            }
+        }
+
+        // Fermer le modal
+        fermerModalPreviewConfigComplete();
+
+        // Message de résumé
+        const total = compteurs.pratiques + compteurs.grilles + compteurs.echelles + compteurs.productions;
+
+        if (total === 0) {
+            alert('Aucune nouvelle ressource à ajouter.\n\nToutes les ressources du fichier existent déjà dans vos bibliothèques.');
+        } else {
+            let details = [];
+            if (compteurs.pratiques > 0) details.push(`${compteurs.pratiques} pratique(s)`);
+            if (compteurs.grilles > 0) details.push(`${compteurs.grilles} grille(s)`);
+            if (compteurs.echelles > 0) details.push(`${compteurs.echelles} échelle(s)`);
+            if (compteurs.productions > 0) details.push(`${compteurs.productions} production(s)`);
+
+            const message = `Fusion réussie !\n\n${details.join(', ')} ajoutée(s) à vos bibliothèques.\n\nVos données existantes ont été préservées.`;
+
+            if (typeof afficherNotificationSucces === 'function') {
+                afficherNotificationSucces(message);
+            }
+            alert(message);
+
+            if (confirm('Recharger la page pour voir les nouvelles ressources ?')) {
+                location.reload();
+            }
+        }
+
+        console.log('📊 Résumé import fusionné:', compteurs);
+
+    } catch (erreur) {
+        console.error('Erreur lors de l\'import vers bibliothèques:', erreur);
+        alert('Erreur lors de la fusion.\n\n' + erreur.message);
+    }
+}
+
 /* ===============================
    EXPORT CONFIGURATION COMPLÈTE (Beta 91)
    =============================== */
@@ -988,3 +1243,4 @@ window.reinitialiserDonnees = reinitialiserDonnees;
 // window.importerConfigComplete = importerConfigComplete; // ❌ Fonction n'existe plus
 window.executerImportConfigComplete = executerImportConfigComplete;
 window.exporterConfigurationComplete = exporterConfigurationComplete;
+window.executerImportVersBibliotheques = executerImportVersBibliotheques; // 🆕 BETA 95.1
