@@ -1421,46 +1421,67 @@ async function executerImportVersBibliotheques() {
         }
 
         // 2. GRILLES (depuis grillesTemplates et bibliothequeGrilles)
-        const grillesExistantes = db.getSync('grillesTemplates', []);
+        // ✅ MODIFIÉ (6 jan 2026) : Gestion des doublons avec modal
+        let grillesExistantes = db.getSync('grillesTemplates', []);
         const idsGrillesExistants = new Set(grillesExistantes.map(g => g.id));
         let grillesNouvelles = [];
 
-        // Depuis grillesTemplates
+        // Collecter toutes les grilles à importer
+        let toutesGrillesImport = [];
         if (donnees.grillesTemplates) {
             const grillesImport = parseValeur(donnees.grillesTemplates);
             if (Array.isArray(grillesImport)) {
-                grillesImport.forEach(g => {
-                    if (!idsGrillesExistants.has(g.id) &&
-                        !grillesExistantes.some(ge => ge.nom === g.nom)) {
-                        grillesNouvelles.push({
-                            ...g,
-                            id: 'GRILLE_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
-                            dateImport: new Date().toISOString()
-                        });
-                    }
-                });
+                toutesGrillesImport = toutesGrillesImport.concat(grillesImport);
             }
         }
-
-        // Depuis bibliothequeGrilles (autre clé possible)
         if (donnees.bibliothequeGrilles) {
             const grillesImport = parseValeur(donnees.bibliothequeGrilles);
             if (Array.isArray(grillesImport)) {
-                grillesImport.forEach(g => {
-                    if (!idsGrillesExistants.has(g.id) &&
-                        !grillesExistantes.some(ge => ge.nom === g.nom) &&
-                        !grillesNouvelles.some(gn => gn.nom === g.nom)) {
-                        grillesNouvelles.push({
-                            ...g,
-                            id: 'GRILLE_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
-                            dateImport: new Date().toISOString()
-                        });
-                    }
-                });
+                toutesGrillesImport = toutesGrillesImport.concat(grillesImport);
             }
         }
 
-        if (grillesNouvelles.length > 0) {
+        // Traiter chaque grille avec gestion des doublons
+        for (const g of toutesGrillesImport) {
+            // Vérifier si déjà dans la liste des nouvelles
+            if (grillesNouvelles.some(gn => gn.nom === g.nom)) continue;
+
+            // Vérifier doublon par ID ou nom
+            const existeParId = idsGrillesExistants.has(g.id);
+            const existeParNom = grillesExistantes.some(ge => ge.nom === g.nom);
+
+            if (!existeParId && !existeParNom) {
+                // Pas de doublon - ajouter directement
+                grillesNouvelles.push({
+                    ...g,
+                    id: 'GRILLE_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                    dateImport: new Date().toISOString()
+                });
+            } else if (existeParNom && typeof afficherModalDoublon === 'function') {
+                // Doublon détecté - demander à l'utilisateur
+                const resultat = await afficherModalDoublon('grille', g.nom, { estImport: true });
+
+                if (resultat && resultat.action === 'renommer') {
+                    grillesNouvelles.push({
+                        ...g,
+                        nom: resultat.nouveauNom,
+                        id: 'GRILLE_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                        dateImport: new Date().toISOString()
+                    });
+                } else if (resultat && resultat.action === 'ecraser') {
+                    // Supprimer l'existante et ajouter la nouvelle
+                    grillesExistantes = grillesExistantes.filter(ge => ge.nom !== g.nom);
+                    grillesNouvelles.push({
+                        ...g,
+                        id: 'GRILLE_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                        dateImport: new Date().toISOString()
+                    });
+                }
+                // Si ignorer ou annuler, on ne fait rien
+            }
+        }
+
+        if (grillesNouvelles.length > 0 || grillesExistantes.length !== db.getSync('grillesTemplates', []).length) {
             const grillesFusionnees = [...grillesExistantes, ...grillesNouvelles];
             db.setSync('grillesTemplates', grillesFusionnees);
             compteurs.grilles = grillesNouvelles.length;
@@ -1468,23 +1489,46 @@ async function executerImportVersBibliotheques() {
         }
 
         // 3. ÉCHELLES
+        // ✅ MODIFIÉ (6 jan 2026) : Gestion des doublons avec modal
         if (donnees.echellesTemplates) {
             const echellesImport = parseValeur(donnees.echellesTemplates);
             if (Array.isArray(echellesImport) && echellesImport.length > 0) {
-                const echellesExistantes = db.getSync('echellesTemplates', []);
+                let echellesExistantes = db.getSync('echellesTemplates', []);
                 const idsEchellesExistants = new Set(echellesExistantes.map(e => e.id));
+                let echellesNouvelles = [];
 
-                const echellesNouvelles = echellesImport.filter(e => {
-                    if (idsEchellesExistants.has(e.id)) return false;
-                    if (echellesExistantes.some(ee => ee.nom === e.nom)) return false;
-                    return true;
-                }).map(e => ({
-                    ...e,
-                    id: 'ECH_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
-                    dateImport: new Date().toISOString()
-                }));
+                for (const e of echellesImport) {
+                    const existeParId = idsEchellesExistants.has(e.id);
+                    const existeParNom = echellesExistantes.some(ee => ee.nom === e.nom);
 
-                if (echellesNouvelles.length > 0) {
+                    if (!existeParId && !existeParNom && !echellesNouvelles.some(en => en.nom === e.nom)) {
+                        echellesNouvelles.push({
+                            ...e,
+                            id: 'ECH_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                            dateImport: new Date().toISOString()
+                        });
+                    } else if (existeParNom && typeof afficherModalDoublon === 'function') {
+                        const resultat = await afficherModalDoublon('echelle', e.nom, { estImport: true });
+
+                        if (resultat && resultat.action === 'renommer') {
+                            echellesNouvelles.push({
+                                ...e,
+                                nom: resultat.nouveauNom,
+                                id: 'ECH_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                                dateImport: new Date().toISOString()
+                            });
+                        } else if (resultat && resultat.action === 'ecraser') {
+                            echellesExistantes = echellesExistantes.filter(ee => ee.nom !== e.nom);
+                            echellesNouvelles.push({
+                                ...e,
+                                id: 'ECH_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                                dateImport: new Date().toISOString()
+                            });
+                        }
+                    }
+                }
+
+                if (echellesNouvelles.length > 0 || echellesExistantes.length !== db.getSync('echellesTemplates', []).length) {
                     const echellesFusionnees = [...echellesExistantes, ...echellesNouvelles];
                     db.setSync('echellesTemplates', echellesFusionnees);
                     compteurs.echelles = echellesNouvelles.length;
@@ -1507,24 +1551,51 @@ async function executerImportVersBibliotheques() {
                 cleProdsVersBibl = 'productions';
             }
         }
+        // ✅ MODIFIÉ (6 jan 2026) : Gestion des doublons avec modal
         if (cleProdsVersBibl) {
             const prodsImport = parseValeur(donnees[cleProdsVersBibl]);
             if (Array.isArray(prodsImport) && prodsImport.length > 0) {
                 const cleProductions = (typeof window.cle === 'function') ? window.cle('productions') : 'productions';
-                const prodsExistantes = db.getSync(cleProductions, []);
+                let prodsExistantes = db.getSync(cleProductions, []);
                 const idsProdsExistants = new Set(prodsExistantes.map(p => p.id));
+                let prodsNouvelles = [];
 
-                const prodsNouvelles = prodsImport.filter(p => {
-                    if (idsProdsExistants.has(p.id)) return false;
-                    if (prodsExistantes.some(pe => pe.nom === p.nom)) return false;
-                    return true;
-                }).map(p => ({
-                    ...p,
-                    id: 'PROD_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
-                    dateImport: new Date().toISOString()
-                }));
+                // Productions utilisent 'titre' comme nom
+                const getNomProd = (p) => p.titre || p.nom || '';
 
-                if (prodsNouvelles.length > 0) {
+                for (const p of prodsImport) {
+                    const nomProd = getNomProd(p);
+                    const existeParId = idsProdsExistants.has(p.id);
+                    const existeParNom = prodsExistantes.some(pe => getNomProd(pe) === nomProd);
+
+                    if (!existeParId && !existeParNom && !prodsNouvelles.some(pn => getNomProd(pn) === nomProd)) {
+                        prodsNouvelles.push({
+                            ...p,
+                            id: 'PROD_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                            dateImport: new Date().toISOString()
+                        });
+                    } else if (existeParNom && typeof afficherModalDoublon === 'function') {
+                        const resultat = await afficherModalDoublon('production', nomProd, { estImport: true });
+
+                        if (resultat && resultat.action === 'renommer') {
+                            prodsNouvelles.push({
+                                ...p,
+                                titre: resultat.nouveauNom,
+                                id: 'PROD_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                                dateImport: new Date().toISOString()
+                            });
+                        } else if (resultat && resultat.action === 'ecraser') {
+                            prodsExistantes = prodsExistantes.filter(pe => getNomProd(pe) !== nomProd);
+                            prodsNouvelles.push({
+                                ...p,
+                                id: 'PROD_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                                dateImport: new Date().toISOString()
+                            });
+                        }
+                    }
+                }
+
+                if (prodsNouvelles.length > 0 || prodsExistantes.length !== db.getSync(cleProductions, []).length) {
                     const prodsFusionnees = [...prodsExistantes, ...prodsNouvelles];
                     db.setSync(cleProductions, prodsFusionnees);
                     compteurs.productions = prodsNouvelles.length;

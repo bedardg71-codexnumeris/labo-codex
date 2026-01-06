@@ -372,6 +372,35 @@ async function sauvegarderProduction() {
 
     let evaluations = await db.get('productions') || [];
 
+    // ✅ AJOUT (6 jan 2026) : Vérification des doublons
+    const idActuel = productionEnEdition || null;
+    const productionActuelle = idActuel ? evaluations.find(e => e.id === idActuel) : null;
+    const isCreation = !productionEnEdition;
+    const isNameChange = productionActuelle && productionActuelle.titre !== titre;
+
+    if ((isCreation || isNameChange) && typeof verifierEtGererDoublon === 'function') {
+        const resultat = await verifierEtGererDoublon('production', titre, evaluations.map(e => ({ ...e, nom: e.titre })), idActuel);
+
+        if (resultat === null) {
+            // Utilisateur a annulé
+            return;
+        }
+
+        if (resultat && resultat.action === 'renommer') {
+            document.getElementById('productionTitre').value = resultat.nouveauNom;
+            // Mettre à jour la variable locale
+            arguments[0] = resultat.nouveauNom; // Ne fonctionne pas, utiliser variable
+        }
+
+        if (resultat && resultat.action === 'ecraser') {
+            // Supprimer la production existante avec le même titre
+            evaluations = evaluations.filter(e => e.titre !== titre);
+        }
+    }
+
+    // Re-lire le titre en cas de renommage
+    const titreFinal = document.getElementById('productionTitre').value.trim();
+
     // ✅ CORRECTION CRITIQUE (Beta 95 - 27 déc 2025) : Ajouter coursId
     const coursId = typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null;
     if (!coursId) {
@@ -385,7 +414,7 @@ async function sauvegarderProduction() {
 
     // Préparer l'objet de base
     let productionData = {
-        titre,
+        titre: titreFinal,  // ✅ Utilise titreFinal en cas de renommage
         description,
         type,
         ponderation,

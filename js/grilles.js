@@ -591,7 +591,7 @@ function afficherChampFormule() {
  * 6. Affiche notification si pas silencieux
  */
 async function sauvegarderGrilleTemplate(silencieux = false) {
-    const nomGrille = document.getElementById('nomGrilleTemplate')?.value?.trim();
+    let nomGrille = document.getElementById('nomGrilleTemplate')?.value?.trim();
 
     if (!nomGrille) {
         if (!silencieux) {
@@ -601,6 +601,30 @@ async function sauvegarderGrilleTemplate(silencieux = false) {
     }
 
     let grilles = await db.get('grillesTemplates') || [];
+
+    // ✅ AJOUT (6 jan 2026) : Vérification des doublons
+    const idActuel = grilleTemplateActuelle?.id || null;
+    const isCreation = !grilleTemplateActuelle;
+    const isNameChange = grilleTemplateActuelle && grilleTemplateActuelle.nom !== nomGrille;
+
+    if ((isCreation || isNameChange) && typeof verifierEtGererDoublon === 'function') {
+        const resultat = await verifierEtGererDoublon('grille', nomGrille, grilles, idActuel);
+
+        if (resultat === null) {
+            // Utilisateur a annulé
+            return;
+        }
+
+        if (resultat && resultat.action === 'renommer') {
+            nomGrille = resultat.nouveauNom;
+            document.getElementById('nomGrilleTemplate').value = nomGrille;
+        }
+
+        if (resultat && resultat.action === 'ecraser') {
+            // Supprimer la grille existante avec le même nom
+            grilles = grilles.filter(g => g.nom !== nomGrille);
+        }
+    }
 
     // Lire les pratiques compatibles sélectionnées
     const pratiquesCompatibles = typeof GabaritsUtils !== 'undefined'

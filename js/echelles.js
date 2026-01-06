@@ -3680,12 +3680,38 @@ async function supprimerEchelleActive() {
  * Sauvegarde complète de l'échelle en cours d'édition
  */
 async function sauvegarderEchelleComplete() {
-    const nom = document.getElementById('nomEchelleTemplate').value.trim();
+    let nom = document.getElementById('nomEchelleTemplate').value.trim();
 
     // Vérifier le nom
     if (!nom) {
         alert('Veuillez entrer un nom pour l\'échelle');
         return;
+    }
+
+    // ✅ AJOUT (6 jan 2026) : Vérification des doublons
+    let echelles = await db.get('echellesTemplates') || [];
+    const idActuel = echelleTemplateActuelle?.id || null;
+    const isCreation = !echelleTemplateActuelle;
+    const isNameChange = echelleTemplateActuelle && echelleTemplateActuelle.nom !== nom;
+
+    if ((isCreation || isNameChange) && typeof verifierEtGererDoublon === 'function') {
+        const resultat = await verifierEtGererDoublon('echelle', nom, echelles, idActuel);
+
+        if (resultat === null) {
+            // Utilisateur a annulé
+            return;
+        }
+
+        if (resultat && resultat.action === 'renommer') {
+            nom = resultat.nouveauNom;
+            document.getElementById('nomEchelleTemplate').value = nom;
+        }
+
+        if (resultat && resultat.action === 'ecraser') {
+            // Supprimer l'échelle existante avec le même nom
+            echelles = echelles.filter(e => e.nom !== nom);
+            await db.set('echellesTemplates', echelles);
+        }
     }
 
     // Cas 1: Création d'une nouvelle échelle (echelleTemplateActuelle est null)
@@ -3712,8 +3738,7 @@ async function sauvegarderEchelleComplete() {
             dateCreation: new Date().toISOString()
         };
 
-        // Sauvegarder dans la base
-        let echelles = await db.get('echellesTemplates') || [];
+        // Sauvegarder dans la base (utilise echelles déjà chargé)
         echelles.push(nouvelleEchelle);
         await db.set('echellesTemplates', echelles);
 
