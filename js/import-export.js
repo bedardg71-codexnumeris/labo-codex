@@ -150,34 +150,34 @@ function fermerModalImport() {
 function previsualiserImport(event) {
     const fichier = event.target.files[0];
     if (!fichier) return;
-    
+
+    const nomFichier = fichier.name;
+
     const lecteur = new FileReader();
     lecteur.onload = function(e) {
         try {
             const donnees = JSON.parse(e.target.result);
-            donneesImportEnAttente = donnees;
-            
-            const nbCles = Object.keys(donnees).length;
-            let tailleTotale = 0;
-            Object.values(donnees).forEach(v => {
-                tailleTotale += v.length * 2;
-            });
-            const tailleKo = (tailleTotale / 1024).toFixed(2);
-            
-            const apercu = document.getElementById('apercu-import');
-            apercu.innerHTML = `
-                <strong>Fichier valide</strong><br>
-                <span style="color: var(--bleu-leger); font-size: 0.9rem;">
-                    ${nbCles} clé(s) · ${tailleKo} Ko
-                </span>
-            `;
-            apercu.style.display = 'block';
-            
-            document.getElementById('btnExecuterImport').disabled = false;
-            document.getElementById('btnExecuterImport').style.opacity = '1';
-            
+
+            // 🆕 BETA 95.1 : Fermer l'ancien modal et ouvrir le nouveau avec analyse
+            fermerModalImport();
+
+            // Stocker les données pour l'import
+            configCompleteEnAttente = donnees;
+
+            // Détecter le format et afficher le modal approprié
+            const format = detecterFormatConfig(donnees);
+
+            if (format === 'configuration-complete') {
+                // Format Beta 91+ avec métadonnées
+                afficherModalPreviewConfigComplete(donnees);
+            } else {
+                // Format localStorage brut → nouveau modal avec checkboxes
+                configCompleteEnAttente._format = 'localStorage-brut';
+                afficherModalPreviewLocalStorageBrut(donnees, nomFichier);
+            }
+
         } catch (err) {
-            alert('Fichier JSON invalide');
+            alert('Fichier JSON invalide.\n\nVérifiez que le fichier est bien un export Monitorage.');
             console.error('Erreur de parsing JSON:', err);
         }
     };
