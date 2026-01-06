@@ -3403,21 +3403,20 @@ async function supprimerGrilleActive() {
 
 /**
  * Sauvegarde complète de la grille (nom + critères)
+ * ✅ CORRIGÉ (6 jan 2026 - Bug Bruno) : Utiliser sauvegarderGrilleTemplate directement
  */
 async function sauvegarderGrilleComplete() {
-    // Sauvegarder le nom si modifié (crée grilleTemplateActuelle si nouvelle)
-    sauvegarderNomGrille();
+    // ✅ CORRIGÉ : Appeler sauvegarderGrilleTemplate avec await
+    // sauvegarderNomGrille() ne fonctionne que pour les grilles existantes
+    await sauvegarderGrilleTemplate(false);
 
-    // 🆕 BETA 95.1 : Récupérer l'ID APRÈS la sauvegarde (pour nouvelles grilles)
+    // Récupérer l'ID APRÈS la sauvegarde (pour nouvelles grilles)
     const idSauvegarde = grilleTemplateActuelle?.id;
-
-    // Message de confirmation
-    alert('Grille sauvegardée avec succès');
 
     // Recharger la liste pour refléter les changements
     await afficherListeGrilles();
 
-    // 🆕 BETA 95.1 : Réouvrir la grille en mode édition pour qu'elle reste visible
+    // Réouvrir la grille en mode édition pour qu'elle reste visible
     if (idSauvegarde && typeof chargerGrillePourModif === 'function') {
         setTimeout(() => {
             chargerGrillePourModif(idSauvegarde);
