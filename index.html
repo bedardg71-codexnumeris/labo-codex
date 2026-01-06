@@ -3181,6 +3181,13 @@
                 <!-- Titre principal -->
                 <h2 class="modal-titre">Bienvenue dans la Beta 95.1</h2>
 
+                <!-- Encadré testeurs (compact, en haut) -->
+                <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: 4px; padding: 8px 12px; margin-bottom: 1rem; font-size: 0.85rem;">
+                    <strong style="color: var(--bleu-principal);">Dernière correction :</strong>
+                    Sauvegarde des nouvelles grilles (merci Bruno)
+                    <a href="#" onclick="fermerModalNouveautes(); allerVersNotesDeVersion(); return false;" style="color: var(--bleu-principal); margin-left: 8px;">Détails →</a>
+                </div>
+
                 <!-- Nouveautés Beta 95.1 -->
                 <div class="modal-section">
                     <h3>Nouveautés de la Beta 95.1 (5-6 janvier 2026)</h3>
@@ -3259,20 +3266,6 @@
 
                     <p style="margin-top: 1rem;"><strong>Chaque retour compte</strong><br>
                     Tu n'es pas juste un·e testeur·euse, tu es co-développeur·euse. Tes retours orientent directement les prochaines versions et profitent à toute la communauté. Merci !</p>
-                </div>
-
-                <!-- Encadré testeurs -->
-                <div class="modal-section" style="background: var(--fond-clair); border-radius: var(--radius-standard); padding: 1rem; margin-top: 1.5rem;">
-                    <h4 style="margin: 0 0 0.5rem 0; color: var(--bleu-principal);">Pour les testeurs</h4>
-                    <p style="margin: 0 0 0.5rem 0; font-size: 0.9rem;">Dernières corrections :</p>
-                    <ul class="modal-liste" style="font-size: 0.85rem; margin-bottom: 0.5rem;">
-                        <li><strong>Sauvegarde des grilles</strong> : Les nouvelles grilles s'ajoutent correctement à la bibliothèque</li>
-                    </ul>
-                    <p style="margin: 0; font-size: 0.85rem;">
-                        <a href="#" onclick="fermerModalNouveautes(); allerVersNotesDeVersion(); return false;" style="color: var(--bleu-principal);">
-                            Voir toutes les notes de version →
-                        </a>
-                    </p>
                 </div>
 
                 <!-- Aide -->
