@@ -6,7 +6,7 @@
     <title>Système de suivi Beta 95.1 - Hiver 2026</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=2026010601">
+    <link rel="stylesheet" href="styles.css?v=2026010602">
 
     <style>
         /* Les styles embarqués restent ici */
@@ -3098,7 +3098,7 @@
                     <div class="titre-section">
                         <h1>Système de suivi des apprentissages et de construction de la note</h1>
                         <p class="meta">
-                            Beta 95.1 - 6 janvier 2026
+                            Beta 95.1 <span id="build-numero" class="build-numero"></span>
                             <span class="pastille-nouveautes" onclick="afficherModalNouveautes()" title="Voir les nouveautés">✉️🔴</span>
                             <button class="btn-backup-warning" onclick="window.backupReminder.afficherModal()" title="Protégez tes données">⚠️</button>
                         </p>
@@ -3259,6 +3259,20 @@
 
                     <p style="margin-top: 1rem;"><strong>Chaque retour compte</strong><br>
                     Tu n'es pas juste un·e testeur·euse, tu es co-développeur·euse. Tes retours orientent directement les prochaines versions et profitent à toute la communauté. Merci !</p>
+                </div>
+
+                <!-- Encadré testeurs -->
+                <div class="modal-section" style="background: var(--fond-clair); border-radius: var(--radius-standard); padding: 1rem; margin-top: 1.5rem;">
+                    <h4 style="margin: 0 0 0.5rem 0; color: var(--bleu-principal);">Pour les testeurs</h4>
+                    <p style="margin: 0 0 0.5rem 0; font-size: 0.9rem;">Dernières corrections :</p>
+                    <ul class="modal-liste" style="font-size: 0.85rem; margin-bottom: 0.5rem;">
+                        <li><strong>Sauvegarde des grilles</strong> : Les nouvelles grilles s'ajoutent correctement à la bibliothèque</li>
+                    </ul>
+                    <p style="margin: 0; font-size: 0.85rem;">
+                        <a href="#" onclick="fermerModalNouveautes(); allerVersNotesDeVersion(); return false;" style="color: var(--bleu-principal);">
+                            Voir toutes les notes de version →
+                        </a>
+                    </p>
                 </div>
 
                 <!-- Aide -->
@@ -13475,7 +13489,7 @@ Exemple :
 
         // === CONFIGURATION (à mettre à jour à chaque déploiement) ===
         const VERSION_MAJEURE = '95.1';      // Changer pour 95.2, 96, etc.
-        const BUILD_DATE = '2026-01-06';     // Date du dernier déploiement (YYYY-MM-DD)
+        const BUILD_ID = '0106-1530';        // Format: MMJJ-HHMM (ex: 0106-1530 = 6 jan 15h30)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
@@ -13489,7 +13503,7 @@ Exemple :
             const buildVu = localStorage.getItem(CLE_BUILD_VU);
 
             const nouvelleVersionMajeure = versionVue !== VERSION_MAJEURE;
-            const nouveauBuild = buildVu !== BUILD_DATE;
+            const nouveauBuild = buildVu !== BUILD_ID;
 
             return {
                 nouvelleVersionMajeure,
@@ -13526,12 +13540,15 @@ Exemple :
                 }
                 // Marquer version ET build comme vus
                 localStorage.setItem(CLE_VERSION_VUE, VERSION_MAJEURE);
-                localStorage.setItem(CLE_BUILD_VU, BUILD_DATE);
+                localStorage.setItem(CLE_BUILD_VU, BUILD_ID);
             } else {
-                // Juste un nouveau build → naviguer vers Aide > Notes de version
-                allerVersNotesDeVersion();
+                // Juste un nouveau build → ouvrir aussi le modal (avec section testeurs)
+                const modal = document.getElementById('modalNouveautes');
+                if (modal) {
+                    modal.classList.add('actif');
+                }
                 // Marquer le build comme vu
-                localStorage.setItem(CLE_BUILD_VU, BUILD_DATE);
+                localStorage.setItem(CLE_BUILD_VU, BUILD_ID);
             }
 
             mettreAJourPastille();
@@ -13578,6 +13595,16 @@ Exemple :
             }
         }
 
+        /**
+         * Affiche le numéro de build dans l'entête
+         */
+        function afficherBuildNumero() {
+            const span = document.getElementById('build-numero');
+            if (span) {
+                span.textContent = `(b.${BUILD_ID})`;
+            }
+        }
+
         // Initialisation au chargement
         document.addEventListener('DOMContentLoaded', function() {
             // Fermer le modal si on clique sur l'overlay
@@ -13590,6 +13617,9 @@ Exemple :
                 });
             }
 
+            // Afficher le numéro de build dans l'entête
+            afficherBuildNumero();
+
             // Mettre à jour l'affichage de la pastille
             mettreAJourPastille();
         });
@@ -13598,7 +13628,7 @@ Exemple :
         window.afficherModalNouveautes = afficherModalNouveautes;
         window.fermerModalNouveautes = fermerModalNouveautes;
         window.allerVersNotesDeVersion = allerVersNotesDeVersion;
-        window.BUILD_DATE = BUILD_DATE;
+        window.BUILD_ID = BUILD_ID;
         window.VERSION_MAJEURE = VERSION_MAJEURE;
     </script>
 

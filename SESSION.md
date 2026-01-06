@@ -66,19 +66,24 @@ Beta 95.1 - Système de notification automatique implementé
 | Type | Déclencheur | Action au clic |
 |------|-------------|----------------|
 | Version majeure (95.2, 96...) | `VERSION_MAJEURE` différente | Modal Bienvenue |
-| Correction de bug | `BUILD_DATE` différente | Navigation vers Aide > Notes de version |
+| Correction de bug | `BUILD_ID` différent | Modal Bienvenue (avec encadré testeurs) |
 
 **Configuration** (index.html, script inline) :
 ```javascript
 const VERSION_MAJEURE = '95.1';      // Changer pour 95.2, 96, etc.
-const BUILD_DATE = '2026-01-06';     // Date du dernier déploiement (YYYY-MM-DD)
+const BUILD_ID = '0106-1530';        // Format: MMJJ-HHMM (ex: 0106-1530 = 6 jan 15h30)
 ```
+
+**Affichage entête** : `Beta 95.1 (b.0106-1530)`
 
 **Clés localStorage** :
 - `monitorage-version-vue` : dernière version majeure consultée
-- `monitorage-build-vu` : dernière date de build consultée
+- `monitorage-build-vu` : dernier build consulté
 
-**À chaque déploiement avec corrections** : mettre à jour `BUILD_DATE` dans index.html
+**À chaque déploiement avec corrections** :
+1. Mettre à jour `BUILD_ID` dans index.html
+2. Ajouter la correction dans l'encadré "Pour les testeurs" du modal Bienvenue
+3. Ajouter la correction dans Aide > Notes de version
 
 ---
 

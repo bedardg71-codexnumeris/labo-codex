@@ -519,6 +519,14 @@ h1, h2, h3, h4 {
     gap: 8px;
 }
 
+/* Numéro de build dans l'entête */
+.build-numero {
+    font-size: 0.75rem;
+    color: var(--gris-moyen);
+    font-weight: normal;
+    margin-left: 4px;
+}
+
 /* Pastille de notification nouveautés (emoji) */
 .pastille-nouveautes {
     display: inline-block;
