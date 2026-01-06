@@ -3194,10 +3194,15 @@
                         <li><strong>Rétrocompatibilité</strong> : Tes données existantes sont automatiquement migrées</li>
                     </ul>
 
+                    <h4 style="margin-top: 1rem;">Heures non piles (souhait Bruno)</h4>
+                    <p>Tu peux maintenant entrer des heures de début et de fin comme 8h55 dans Primo, au lieu d'être limité aux heures rondes.</p>
+
                     <h4 style="margin-top: 1rem;">Corrections de bugs</h4>
                     <ul class="modal-liste">
+                        <li><strong>Application des pratiques</strong> : Les pratiques créées via Primo s'appliquent maintenant correctement au cours</li>
+                        <li><strong>Persistance après sauvegarde</strong> : Les grilles, échelles, cartouches et productions restent visibles après sauvegarde</li>
+                        <li><strong>Calendrier et jours de cours</strong> : Primo synchronise correctement les jours de séances avec le calendrier</li>
                         <li>Correction de l'affichage des colonnes lors du premier chargement</li>
-                        <li>Amélioration de la gestion des groupes dans l'horaire</li>
                     </ul>
                 </div>
 
@@ -13442,7 +13447,7 @@ Exemple :
             if (modal) {
                 modal.classList.add('actif');
                 // Marquer comme vu dans localStorage
-                localStorage.setItem('nouveautes-beta-95.1-vue', 'true');
+                localStorage.setItem('nouveautes-beta-95.1b-vue', 'true');
                 // Changer l'emoji en version "lu"
                 const pastille = document.querySelector('.pastille-nouveautes');
                 if (pastille) {
@@ -13473,7 +13478,7 @@ Exemple :
             }
 
             // Afficher l'emoji "lu" si les nouveautés ont déjà été vues
-            const nouveautesVues = localStorage.getItem('nouveautes-beta-95.1-vue');
+            const nouveautesVues = localStorage.getItem('nouveautes-beta-95.1b-vue');
             const pastille = document.querySelector('.pastille-nouveautes');
             if (nouveautesVues === 'true' && pastille) {
                 pastille.textContent = '✉️';
