@@ -3409,9 +3409,11 @@ async function supprimerGrilleActive() {
     }
 
     const grilles = await db.get('grillesTemplates') || [];
-    const index = grilles.findIndex(g => g.id === grilleTemplateActuelle);
+    // ✅ CORRIGÉ (6 jan 2026) : grilleTemplateActuelle est un objet, pas un ID
+    const index = grilles.findIndex(g => g.id === grilleTemplateActuelle.id);
 
     if (index !== -1) {
+        const nomGrille = grilleTemplateActuelle.nom || 'Grille';
         grilles.splice(index, 1);
         await db.set('grillesTemplates', grilles);
 
@@ -3421,7 +3423,10 @@ async function supprimerGrilleActive() {
         // Recharger la liste
         await afficherListeGrilles();
 
-        alert('Grille supprimée avec succès');
+        // ✅ Notification au lieu d'alert
+        if (typeof afficherNotificationSucces === 'function') {
+            afficherNotificationSucces(`Grille "${nomGrille}" supprimée`);
+        }
     }
 }
 
