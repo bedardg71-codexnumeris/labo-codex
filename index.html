@@ -3201,8 +3201,8 @@
                     <ul class="modal-liste">
                         <li><strong>Application des pratiques</strong> : Les pratiques créées via Primo s'appliquent maintenant correctement au cours</li>
                         <li><strong>Persistance après sauvegarde</strong> : Les grilles, échelles, cartouches et productions restent visibles après sauvegarde</li>
+                        <li><strong>Sauvegarde des nouvelles grilles</strong> : Les grilles créées s'ajoutent correctement à la bibliothèque</li>
                         <li><strong>Calendrier et jours de cours</strong> : Primo synchronise correctement les jours de séances avec le calendrier</li>
-                        <li>Correction de l'affichage des colonnes lors du premier chargement</li>
                     </ul>
                 </div>
 
@@ -13092,6 +13092,7 @@ Exemple :
                         <ul class="modal-liste">
                             <li><strong>Application des pratiques</strong> : Les pratiques créées via Primo s'appliquent correctement au cours.</li>
                             <li><strong>Persistance des ressources</strong> : Les grilles, échelles, cartouches et productions restent visibles après sauvegarde.</li>
+                            <li><strong>Sauvegarde des nouvelles grilles</strong> : Les grilles créées s'ajoutent maintenant correctement à la bibliothèque (merci Bruno).</li>
                             <li><strong>Heures non piles</strong> : Entrée d'heures comme 8h55 dans Primo au lieu des heures rondes.</li>
                         </ul>
                         </div><!-- fin accordeon-contenu beta951 -->
@@ -13460,22 +13461,110 @@ Exemple :
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
     <script src="js/main.js?v=2025123009"></script>
 
-    <!-- Script de gestion du modal des nouveautés -->
+    <!-- Script de gestion des notifications de mises à jour -->
     <script>
         /**
-         * Affiche le modal des nouveautés
+         * SYSTÈME DE NOTIFICATION À DEUX NIVEAUX
+         *
+         * 1. VERSION_MAJEURE : Nouvelle version (95.2, 96...) → Modal Bienvenue
+         * 2. BUILD_DATE : Corrections de bugs → Lien vers Aide > Notes de version
+         *
+         * La pastille 🔴 apparaît si l'un ou l'autre est nouveau.
+         * Le clic adapte son comportement selon ce qui est nouveau.
+         */
+
+        // === CONFIGURATION (à mettre à jour à chaque déploiement) ===
+        const VERSION_MAJEURE = '95.1';      // Changer pour 95.2, 96, etc.
+        const BUILD_DATE = '2026-01-06';     // Date du dernier déploiement (YYYY-MM-DD)
+
+        // === CLÉS LOCALSTORAGE ===
+        const CLE_VERSION_VUE = 'monitorage-version-vue';
+        const CLE_BUILD_VU = 'monitorage-build-vu';
+
+        /**
+         * Vérifie s'il y a des nouveautés non vues
+         */
+        function verifierNouveautes() {
+            const versionVue = localStorage.getItem(CLE_VERSION_VUE);
+            const buildVu = localStorage.getItem(CLE_BUILD_VU);
+
+            const nouvelleVersionMajeure = versionVue !== VERSION_MAJEURE;
+            const nouveauBuild = buildVu !== BUILD_DATE;
+
+            return {
+                nouvelleVersionMajeure,
+                nouveauBuild,
+                aDesNouveautes: nouvelleVersionMajeure || nouveauBuild
+            };
+        }
+
+        /**
+         * Met à jour l'affichage de la pastille selon l'état
+         */
+        function mettreAJourPastille() {
+            const pastille = document.querySelector('.pastille-nouveautes');
+            if (!pastille) return;
+
+            const { aDesNouveautes } = verifierNouveautes();
+            pastille.textContent = aDesNouveautes ? '✉️🔴' : '✉️';
+            pastille.title = aDesNouveautes ? 'Nouveautés disponibles' : 'Notes de version';
+        }
+
+        /**
+         * Gère le clic sur la pastille
+         * - Nouvelle version majeure → Modal Bienvenue
+         * - Nouveau build seulement → Aide > Notes de version
          */
         function afficherModalNouveautes() {
-            const modal = document.getElementById('modalNouveautes');
-            if (modal) {
-                modal.classList.add('actif');
-                // Marquer comme vu dans localStorage
-                localStorage.setItem('nouveautes-beta-95.1c-vue', 'true');
-                // Changer l'emoji en version "lu"
-                const pastille = document.querySelector('.pastille-nouveautes');
-                if (pastille) {
-                    pastille.textContent = '✉️';
+            const { nouvelleVersionMajeure } = verifierNouveautes();
+
+            if (nouvelleVersionMajeure) {
+                // Nouvelle version majeure → ouvrir le modal Bienvenue
+                const modal = document.getElementById('modalNouveautes');
+                if (modal) {
+                    modal.classList.add('actif');
                 }
+                // Marquer version ET build comme vus
+                localStorage.setItem(CLE_VERSION_VUE, VERSION_MAJEURE);
+                localStorage.setItem(CLE_BUILD_VU, BUILD_DATE);
+            } else {
+                // Juste un nouveau build → naviguer vers Aide > Notes de version
+                allerVersNotesDeVersion();
+                // Marquer le build comme vu
+                localStorage.setItem(CLE_BUILD_VU, BUILD_DATE);
+            }
+
+            mettreAJourPastille();
+        }
+
+        /**
+         * Navigue vers la section Aide > Notes de version
+         */
+        function allerVersNotesDeVersion() {
+            // Utiliser les fonctions de navigation existantes
+            if (typeof afficherSection === 'function') {
+                afficherSection('aide');
+                // Petit délai pour laisser la section se charger
+                setTimeout(() => {
+                    if (typeof afficherSousSection === 'function') {
+                        afficherSousSection('aide-versions');
+                        // Mettre à jour le bouton actif dans la sous-navigation
+                        const conteneurSousNav = document.getElementById('sous-navigation');
+                        if (conteneurSousNav) {
+                            conteneurSousNav.querySelectorAll('button').forEach(b => b.classList.remove('actif'));
+                            const btnVersions = conteneurSousNav.querySelector('[data-sous-onglet="aide-versions"]');
+                            if (btnVersions) btnVersions.classList.add('actif');
+                        }
+                    }
+                    // Ouvrir l'accordéon de la version actuelle
+                    const accordeon = document.getElementById('accordeon-aide-beta951');
+                    if (accordeon) {
+                        const contenu = accordeon.querySelector('.accordeon-contenu');
+                        const chevron = accordeon.querySelector('.accordeon-chevron');
+                        if (contenu) contenu.style.display = 'block';
+                        if (chevron) chevron.textContent = '▼';
+                    }
+                }, 100);
             }
         }
 
@@ -13489,8 +13578,9 @@ Exemple :
             }
         }
 
-        // Fermer le modal si on clique sur l'overlay
+        // Initialisation au chargement
         document.addEventListener('DOMContentLoaded', function() {
+            // Fermer le modal si on clique sur l'overlay
             const modal = document.getElementById('modalNouveautes');
             if (modal) {
                 modal.addEventListener('click', function(e) {
@@ -13500,17 +13590,16 @@ Exemple :
                 });
             }
 
-            // Afficher l'emoji "lu" si les nouveautés ont déjà été vues
-            const nouveautesVues = localStorage.getItem('nouveautes-beta-95.1c-vue');
-            const pastille = document.querySelector('.pastille-nouveautes');
-            if (nouveautesVues === 'true' && pastille) {
-                pastille.textContent = '✉️';
-            }
+            // Mettre à jour l'affichage de la pastille
+            mettreAJourPastille();
         });
 
         // Export des fonctions pour usage global
         window.afficherModalNouveautes = afficherModalNouveautes;
         window.fermerModalNouveautes = fermerModalNouveautes;
+        window.allerVersNotesDeVersion = allerVersNotesDeVersion;
+        window.BUILD_DATE = BUILD_DATE;
+        window.VERSION_MAJEURE = VERSION_MAJEURE;
     </script>
 
     <!-- Script de débogage additionnel (optionnel) -->
