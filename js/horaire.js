@@ -1590,6 +1590,40 @@ window.calculerHeureFinPeriodes = calculerHeureFinPeriodes;
 window.genererOptionsNombrePeriodes = genererOptionsNombrePeriodes;
 window.formaterDuree = formaterDuree;
 
+/**
+ * 🆕 BETA 95.1 : Handler UI pour modifier la durée de période
+ * Appelé depuis le select #v2-dureePeriode dans index.html
+ */
+function modifierDureePeriodeV2(minutes) {
+    definirDureePeriode(parseInt(minutes));
+    console.log(`[Horaire] Durée de période modifiée via UI: ${minutes} minutes`);
+
+    // Afficher confirmation visuelle
+    const select = document.getElementById('v2-dureePeriode');
+    if (select) {
+        select.style.transition = 'background-color 0.3s';
+        select.style.backgroundColor = '#d4edda';
+        setTimeout(() => {
+            select.style.backgroundColor = '';
+        }, 1000);
+    }
+}
+window.modifierDureePeriodeV2 = modifierDureePeriodeV2;
+
+/**
+ * 🆕 BETA 95.1 : Charger la durée de période sauvegardée dans l'UI
+ * Appelé lors de l'initialisation de la page Trimestre
+ */
+function chargerDureePeriodeUI() {
+    const select = document.getElementById('v2-dureePeriode');
+    if (select) {
+        const dureeSauvegardee = obtenirDureePeriode();
+        select.value = dureeSauvegardee.toString();
+        console.log(`[Horaire] Durée de période chargée: ${dureeSauvegardee} minutes`);
+    }
+}
+window.chargerDureePeriodeUI = chargerDureePeriodeUI;
+
 // Fonctions appelées depuis le HTML (onclick, onchange)
 window.afficherFormulaireSeancesDynamique = afficherFormulaireSeancesDynamique;
 window.ajouterFormulaireSeance = ajouterFormulaireSeance;
