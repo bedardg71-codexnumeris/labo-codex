@@ -2620,6 +2620,57 @@ textarea {
     line-height: 1.6;
 }
 
+/* ===============================
+   MODAL DOUBLON (Beta 95.1)
+   =============================== */
+
+#modalConflitDoublon .modal-contenu {
+    max-width: 520px;
+}
+
+/* ===============================
+   PANNEAU METADONNEES (Beta 95.1)
+   =============================== */
+
+.panneau-metadata {
+    background: var(--bleu-tres-pale);
+    border: 1px solid var(--bleu-pale);
+    border-radius: var(--radius-moyen);
+    padding: 12px 16px;
+    margin-top: 15px;
+    font-size: 0.9rem;
+}
+
+.panneau-metadata .meta-titre {
+    font-weight: 600;
+    color: var(--bleu-principal);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.panneau-metadata .meta-ligne {
+    display: flex;
+    gap: 8px;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.panneau-metadata .meta-ligne:last-child {
+    border-bottom: none;
+}
+
+.panneau-metadata .meta-label {
+    font-weight: 500;
+    color: var(--gris-moyen);
+    min-width: 100px;
+}
+
+.panneau-metadata .meta-valeur {
+    color: var(--gris-fonce);
+}
+
 /* Modal Backup Reminder */
 .modal-backup-overlay {
     position: fixed;

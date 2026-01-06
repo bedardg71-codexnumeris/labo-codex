@@ -672,13 +672,41 @@ async function sauvegarderCommentaire(key) {
  */
 async function sauvegarderCartouche() {
     if (!cartoucheActuel) return;
-    
-    const nom = document.getElementById('nomCartouche').value.trim();
+
+    let nom = document.getElementById('nomCartouche').value.trim();
     if (!nom) {
         alert('Veuillez donner un nom à la cartouche');
         return;
     }
-    
+
+    const grilleId = cartoucheActuel.grilleId;
+    let cartouches = await db.get(`cartouches_${grilleId}`) || [];
+
+    // ✅ AJOUT (6 jan 2026) : Vérification des doublons
+    const idActuel = cartoucheActuel?.id || null;
+    const cartoucheOriginale = idActuel ? cartouches.find(c => c.id === idActuel) : null;
+    const isCreation = !cartoucheOriginale;
+    const isNameChange = cartoucheOriginale && cartoucheOriginale.nom !== nom;
+
+    if ((isCreation || isNameChange) && typeof verifierEtGererDoublon === 'function') {
+        const resultat = await verifierEtGererDoublon('cartouche', nom, cartouches, idActuel);
+
+        if (resultat === null) {
+            // Utilisateur a annulé
+            return;
+        }
+
+        if (resultat && resultat.action === 'renommer') {
+            nom = resultat.nouveauNom;
+            document.getElementById('nomCartouche').value = nom;
+        }
+
+        if (resultat && resultat.action === 'ecraser') {
+            // Supprimer la cartouche existante avec le même nom
+            cartouches = cartouches.filter(c => c.nom !== nom);
+        }
+    }
+
     // Lire les pratiques compatibles sélectionnées
     const pratiquesCompatibles = typeof GabaritsUtils !== 'undefined'
         ? GabaritsUtils.lirePratiquesSelectionnees('cartouche')
@@ -688,9 +716,6 @@ async function sauvegarderCartouche() {
     cartoucheActuel.nom = nom;
     cartoucheActuel.contexte = document.getElementById('contexteCartouche').value.trim();
     cartoucheActuel.pratiquesCompatibles = pratiquesCompatibles;
-    
-    const grilleId = cartoucheActuel.grilleId;
-    let cartouches = await db.get(`cartouches_${grilleId}`) || [];
     
     // Vérifier si la cartouche existe déjà
     const index = cartouches.findIndex(c => c.id === cartoucheActuel.id);
