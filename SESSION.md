@@ -57,6 +57,20 @@ Beta 95.1 - Système de notification automatique implementé
 
 ---
 
+## RETOURS D'OLIVIER (6 janvier 2026)
+
+**Testeur** : Olivier L. (Géographie, Cegep)
+**Fichier** : `Retours des testeurs/olivier/olivier 6 janvier 2026 a.txt`
+
+### Bugs signalés et corrigés
+
+| # | Bug | Cause | Correction | Fichier |
+|---|-----|-------|------------|---------|
+| 1 | Primo finalization : interface pas mise à jour | Parcours court ne faisait pas `location.reload()` | Ajout reload après parcours court | `primo-modal.js` |
+| 2 | Format horaire pas dynamique | Dropdown statique, non lié au nombre de périodes | Créé `mettreAJourFormatHoraire()` dynamique | `trimestre-v2.js` |
+
+---
+
 ## SYSTÈME DE NOTIFICATION (6 janvier 2026) ✅ FAIT
 
 **Objectif** : Notifier les testeurs des mises à jour sans les spammer par courriel.
@@ -70,20 +84,46 @@ Beta 95.1 - Système de notification automatique implementé
 
 **Configuration** (index.html, script inline) :
 ```javascript
-const VERSION_MAJEURE = '95.1';      // Changer pour 95.2, 96, etc.
-const BUILD_ID = '0106-1530';        // Format: MMJJ-HHMM (ex: 0106-1530 = 6 jan 15h30)
+const VERSION_MAJEURE = '95.1';
+const BUILD_ID = '0106-0939';  // Auto-updated by Claude before each commit (Toronto time)
 ```
 
-**Affichage entête** : `Beta 95.1 (b.0106-1530)`
+**Affichage entête** : `Beta 95.1 (b.0106-0939)`
 
 **Clés localStorage** :
 - `monitorage-version-vue` : dernière version majeure consultée
 - `monitorage-build-vu` : dernier build consulté
 
+**Workflow automatisé** :
+- Claude met à jour `BUILD_ID` automatiquement avant chaque commit (heure Toronto)
+- L'utilisateur dit simplement "commit et push"
+- Plus de mise à jour manuelle requise
+
 **À chaque déploiement avec corrections** :
-1. Mettre à jour `BUILD_ID` dans index.html
+1. ~~Mettre à jour `BUILD_ID` dans index.html~~ (automatique)
 2. Ajouter la correction dans l'encadré "Pour les testeurs" du modal Bienvenue
 3. Ajouter la correction dans Aide > Notes de version
+
+---
+
+## MODAL BIENVENUE RESTRUCTURÉ (6 janvier 2026) ✅ FAIT
+
+**Structure actuelle** :
+1. **Encadré testeurs** (en haut) - fond bleu pâle, bordure gauche bleue
+   - Liste à puces des corrections récentes (dernières 48h)
+   - Format : `**Correction** : Description (merci NomTesteur)`
+   - Lien vers Notes de version complètes
+
+2. **Section Nouveautés Beta 95** - pour tous les utilisateurs
+   - Résumé simplifié des nouvelles fonctionnalités
+   - Pas de détails techniques
+
+**Exemple encadré testeurs** :
+```html
+<li><strong>Périodes au lieu d'heures</strong> : Format horaire dynamique (merci Olivier)</li>
+<li><strong>Finalisation Primo</strong> : L'interface se met à jour (merci Olivier)</li>
+<li><strong>Sauvegarde des grilles</strong> : Ajout à la bibliothèque (merci Bruno)</li>
+```
 
 ---
 
@@ -366,15 +406,18 @@ Mais dans Trimestre, le systeme de jetons semble obligatoire (pas de checkbox gl
 
 ## OU REPRENDRE (si session s'arrete maintenant)
 
-**Etat actuel** (3 jan 2026) :
-- Refonte "Construction de la note" : TERMINEE
-- References orphelines : CORRIGEES (2 bugs)
-- Audit CSS parties 10-16 : CONFIRME DEJA FAIT
-- Code pret pour tests manuels
+**Etat actuel** (6 jan 2026) :
+- Bugs Bruno (5-6 jan) : TOUS CORRIGÉS
+- Bugs Olivier (6 jan) : TOUS CORRIGÉS
+- Système notification : BUILD_ID automatique (Toronto)
+- Modal Bienvenue : Restructuré avec encadré testeurs
+- Périodes : Formulaire cours utilise "périodes" au lieu de "heures"
+
+**Tous les bugs signalés sont corrigés !**
 
 **Action immediate au retour** :
-1. Tester manuellement la refonte Construction (creation pratique, 4 modes)
-2. Tester le tutoriel interactif (nouvelle navigation)
+1. Attendre nouveaux retours des testeurs (Bruno, Olivier)
+2. Plan "Périodes" phases 3-6 si demandé (saisie présences, calculs assiduité)
 3. Dette technique si temps disponible
 
 ---
@@ -458,6 +501,20 @@ Mais dans Trimestre, le systeme de jetons semble obligatoire (pas de checkbox gl
 
 ---
 
+## COMMITS 6 JANVIER 2026
+
+| Hash | Description |
+|------|-------------|
+| `5b9c78b` | fix: Correction sauvegarde nouvelles grilles (Bug Bruno) |
+| `10b2fac` | feat: Système de notification automatique pour les testeurs |
+| `39e377c` | feat: Build ID avec heure + encadré testeurs dans modal |
+| `9634877` | ui: Encadré testeurs compact en haut du modal |
+| `7e0de38` | fix: Finalisation Primo recharge la page (Bug Olivier) |
+| `6ba9a95` | feat: Périodes au lieu d'heures + modal restructuré |
+| `ea157b6` | fix: BUILD_ID automatique (Toronto) + merci testeurs |
+
+---
+
 ## PLAN POUR LE 3 JANVIER 2026 (mis a jour)
 
 ### Priorite 1 : Tester la refonte Construction
@@ -505,4 +562,4 @@ Mais dans Trimestre, le systeme de jetons semble obligatoire (pas de checkbox gl
 
 ---
 
-**Derniere mise a jour** : 5 jan 2026
+**Derniere mise a jour** : 6 jan 2026
