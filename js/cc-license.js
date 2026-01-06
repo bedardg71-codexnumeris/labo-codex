@@ -20,6 +20,62 @@ const CC_LICENSE_DEFAULTS = {
 };
 
 // ============================================
+// 🆕 BETA 96: PROFIL AUTEUR DEPUIS GROUPE-COURS
+// ============================================
+
+/**
+ * Obtient le profil auteur de l'enseignant du groupe-cours actif (synchrone)
+ * Utilisé pour pré-remplir les métadonnées CC lors des exports
+ *
+ * @returns {Object|null} - Profil auteur ou null si non disponible
+ */
+function obtenirProfilAuteurActifSync() {
+    try {
+        // Vérifier que db est disponible
+        if (typeof db === 'undefined' || !db.getSync) {
+            return null;
+        }
+
+        // Obtenir le trimestre actif
+        const trimestreActif = window.trimestreActif || db.getSync('trimestreActif', null);
+        if (!trimestreActif) {
+            return null;
+        }
+
+        // Obtenir les groupe-cours du trimestre
+        const cleGC = `${trimestreActif}_groupesCours`;
+        const groupesCours = db.getSync(cleGC, []);
+
+        // Trouver le groupe-cours actif
+        const groupeActif = groupesCours.find(gc => gc.actif);
+        if (!groupeActif || !groupeActif.enseignantId) {
+            return null;
+        }
+
+        // Obtenir l'enseignant
+        const enseignants = db.getSync('enseignants', []);
+        const enseignant = enseignants.find(e => e.id === groupeActif.enseignantId);
+        if (!enseignant) {
+            return null;
+        }
+
+        // Convertir en profil auteur (format CC)
+        return {
+            auteur_original: `${enseignant.prenom || ''} ${enseignant.nom || ''}`.trim() || CC_LICENSE_DEFAULTS.auteur_original,
+            email_auteur: enseignant.courriel || '',
+            institution: enseignant.institution || '',
+            site_auteur: enseignant.siteWeb || '',
+            niveau: enseignant.niveau || '',
+            attribution: `Créé par ${enseignant.prenom || ''} ${enseignant.nom || ''}`.trim()
+        };
+
+    } catch (err) {
+        console.warn('[CC License] Erreur obtention profil auteur:', err);
+        return null;
+    }
+}
+
+// ============================================
 // AJOUT DE MÉTADONNÉES CC
 // ============================================
 
@@ -34,21 +90,36 @@ const CC_LICENSE_DEFAULTS = {
 function ajouterMetadonnéesCC(contenu, type, nom, metaEnrichies = {}) {
     const date_actuelle = new Date().toISOString().split('T')[0];
 
-    // 🆕 BETA 92: Utiliser les métadonnées enrichies du modal (avec checkboxes)
-    // Si metaEnrichies contient auteur/courriel/siteWeb, les utiliser; sinon, fallback sur infoCours
+    // 🆕 BETA 96: Utiliser le profil auteur de l'enseignant du groupe-cours actif
+    // Priorité: metaEnrichies > profilAuteur (enseignant) > infoCours > défauts
+    const profilAuteur = obtenirProfilAuteurActifSync();
     const infoCours = JSON.parse(localStorage.getItem('infoCours') || '{}');
 
     const auteur_utilisateur = metaEnrichies.auteur ||
+                               profilAuteur?.auteur_original ||
                                infoCours.enseignant ||
                                CC_LICENSE_DEFAULTS.auteur_original;
 
     const email_utilisateur = metaEnrichies.courriel ||
+                             profilAuteur?.email_auteur ||
                              infoCours.courriel ||
                              CC_LICENSE_DEFAULTS.email_auteur;
 
     const site_utilisateur = metaEnrichies.siteWeb ||
+                            profilAuteur?.site_auteur ||
                             infoCours.siteWeb ||
                             CC_LICENSE_DEFAULTS.site_auteur;
+
+    // 🆕 BETA 96: Institution et niveau depuis profil auteur
+    const institution_utilisateur = metaEnrichies.institution ||
+                                    profilAuteur?.institution ||
+                                    infoCours.institution ||
+                                    "";
+
+    const niveau_utilisateur = metaEnrichies.niveau ||
+                               profilAuteur?.niveau ||
+                               infoCours.niveau ||
+                               "";
 
     // Déterminer l'auteur original (si c'est du matériel importé, préserver l'auteur)
     const auteur_original = contenu.metadata_cc?.auteur_original ||
@@ -71,11 +142,11 @@ function ajouterMetadonnéesCC(contenu, type, nom, metaEnrichies = {}) {
             date_modification: date_actuelle,
             version: contenu.metadata?.version || "1.0",
             contributeurs: contenu.metadata_cc?.contributeurs || contenu.metadata?.contributeurs || [],
-            attribution: `Créé par ${auteur_original} pour l'application Monitorage Pédagogique`,
-            // 🆕 BETA 92: Métadonnées enrichies avec discipline, niveau et institution
+            attribution: profilAuteur?.attribution || `Créé par ${auteur_original} pour l'application Monitorage Pédagogique`,
+            // 🆕 BETA 96: Métadonnées enrichies depuis profil auteur (enseignant)
             discipline: metaEnrichies.discipline || contenu.metadata?.discipline || [],
-            niveau: metaEnrichies.niveau || contenu.metadata?.niveau || "",
-            institution: metaEnrichies.institution || contenu.metadata?.institution || "",
+            niveau: niveau_utilisateur || contenu.metadata?.niveau || "",
+            institution: institution_utilisateur || contenu.metadata?.institution || "",
             description_courte: metaEnrichies.description_courte || contenu.metadata?.description_courte || ""
         },
         contenu: contenu
@@ -1043,9 +1114,6 @@ function genererPanneauMetadonnees(ressource, typeRessource) {
         <div class="panneau-metadata" data-type="${typeRessource}" data-id="${ressource.id || ''}">
             <div class="panneau-metadata-header">
                 <span class="panneau-metadata-titre">Métadonnées</span>
-                <button type="button" class="btn-edit-metadata" onclick="afficherModalEditionMetadonnees('${typeRessource}', '${ressource.id || ''}')" title="Modifier les métadonnées">
-                    ✏️
-                </button>
             </div>
             ${lignesHTML}
         </div>

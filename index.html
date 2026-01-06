@@ -3179,29 +3179,36 @@
                 <button onclick="fermerModalNouveautes()" class="modal-fermer">✕</button>
 
                 <!-- Titre principal -->
-                <h2 class="modal-titre">Bienvenue dans la Beta 95.1</h2>
+                <h2 class="modal-titre">Bienvenue dans la Beta 96</h2>
 
                 <!-- Encadré testeurs (liste à puces) -->
                 <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: 4px; padding: 12px 16px; margin-bottom: 1.5rem;">
-                    <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Pour les testeurs (dernières 48h) :</strong>
+                    <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Nouveautés Beta 96 — Architecture modulaire :</strong>
                     <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
-                        <li><strong>Périodes au lieu d'heures</strong> : Format horaire dynamique selon le nombre de périodes (merci Olivier)</li>
-                        <li><strong>Finalisation Primo</strong> : L'interface se met à jour après la configuration (merci Olivier)</li>
-                        <li><strong>Sauvegarde des grilles</strong> : Les nouvelles grilles s'ajoutent à la bibliothèque (merci Bruno)</li>
-                        <li><strong>Heures non piles</strong> : Entrée d'heures comme 8h55 dans Primo (merci Bruno)</li>
-                        <li><strong>Import/Export amélioré</strong> : Import sélectif, protection des données (merci Bruno, Grégoire)</li>
+                        <li><strong>Toggles séparés</strong> : Cours, Enseignant·e, Horaire et Groupe-cours sont maintenant des entités indépendantes</li>
+                        <li><strong>Profil auteur</strong> : Tes informations enseignant·e servent de source unique pour les métadonnées CC</li>
+                        <li><strong>Assemblage flexible</strong> : Crée des groupe-cours en combinant cours + enseignant·e + horaire + pratique</li>
+                        <li><strong>Réutilisation</strong> : Un même cours peut être associé à plusieurs groupes avec des horaires différents</li>
+                        <li><strong>Migration automatique</strong> : Tes données existantes sont converties vers la nouvelle architecture</li>
                     </ul>
                     <p style="margin: 8px 0 0 0; font-size: 0.85rem;">
                         <a href="#" onclick="fermerModalNouveautes(); allerVersNotesDeVersion(); return false;" style="color: var(--bleu-principal);">Voir toutes les notes de version →</a>
                     </p>
                 </div>
 
-                <!-- Nouveautés Beta 95 (pour utilisateurs novices) -->
+                <!-- Nouveautés Beta 96 -->
                 <div class="modal-section">
-                    <h3>Nouveautés de la Beta 95</h3>
+                    <h3>Nouveautés de la Beta 96</h3>
+                    <p>Cette version <strong>sépare les entités</strong> pour une meilleure réutilisation : un cours (601-101-MQ) peut maintenant être enseigné par différents enseignant·es, avec des horaires différents, sans dupliquer les informations.</p>
+                    <p style="margin-top: 0.8rem;">Le <strong>profil auteur</strong> de l'enseignant·e devient la source unique pour les métadonnées Creative Commons de toutes tes ressources partagées.</p>
+                    <p style="margin-top: 0.8rem;">L'<strong>assemblage groupe-cours</strong> te permet de combiner les entités via des menus déroulants, simplifiant la gestion de plusieurs groupes.</p>
+                </div>
+
+                <!-- Rappel Beta 95 -->
+                <div class="modal-section">
+                    <h3>Rappel : Beta 95</h3>
                     <p>Cette version te permet de gérer <strong>plusieurs trimestres et plusieurs cours</strong> simultanément. Tes trimestres terminés sont automatiquement archivés pour protéger tes données.</p>
                     <p style="margin-top: 0.8rem;">La section <strong>Construction de la note</strong> propose une bibliothèque de pratiques prédéfinies (sommative, standards, spécifications) avec des configurations adaptées à différentes disciplines.</p>
-                    <p style="margin-top: 0.8rem;">Le système <strong>d'import/export</strong> facilite le partage de ressources pédagogiques entre collègues tout en protégeant la confidentialité des données étudiantes.</p>
                 </div>
 
                 <hr style="border: none; border-top: 1px solid var(--gris-clair); margin: 1.5rem 0;">
@@ -3235,7 +3242,7 @@
 
                     <p>Depuis la brève présentation de l'application aux membres de la communauté PAN en novembre, j'ai corrigé vraiment beaucoup de choses. Mais j'ai très peu de retours sur l'utilisation réelle : est-ce que les pratiques de notation fonctionnent pour toi ? Les fonctionnalités de suivi répondent-elles à tes besoins ?</p>
 
-                    <p style="margin-top: 1rem;">Je ne peux pas deviner ta façon d'enseigner ni celle des autres collègues. Je ne connais ni tes contraintes particulières ni les frictions que tu peux rencontrer. J'estime la Beta 95.1 assez stable pour un usage quotidien. C'est le moment idéal pour me dire ce qui fonctionne, ce qui coince, ce qui manque.</p>
+                    <p style="margin-top: 1rem;">Je ne peux pas deviner ta façon d'enseigner ni celle des autres collègues. Je ne connais ni tes contraintes particulières ni les frictions que tu peux rencontrer. J'estime la Beta 96 assez stable pour un usage quotidien. C'est le moment idéal pour me dire ce qui fonctionne, ce qui coince, ce qui manque.</p>
                     <p style="margin-top: 1rem;">L'objectif, en bout de ligne, c'est d'avoir un outil qui ressemble à nos pratiques et qui supporte les enseignant·es qui veulent renouveler leur pédagogie et leur pratique de notation. Mais un tel projet ne peut être réalisé par un seul individu. Il doit mobiliser notre intelligence collective.</p>
 
                     <p style="margin-top: 1rem;">Utilise le formulaire dans <strong>AIDE → Signaler un bug</strong>, ou partage-moi simplement :</p>
@@ -8879,6 +8886,257 @@
                         </div>
                     </div><!-- FIN accordéon Cours -->
 
+                    <!-- ========== ACCORDÉON: ENSEIGNANT·E (Beta 96 - Profil Auteur) ========== -->
+                    <div class="carte accordeon" id="accordeon-enseignant" style="margin-top: 20px;">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu" style="margin: 0;">
+                                <span class="accordeon-chevron">▶</span> Enseignant·e
+                            </h3>
+                            <div class="btn-groupe" style="gap: 8px;" onclick="event.stopPropagation();">
+                                <button class="btn btn-confirmer btn-sm" onclick="afficherFormEnseignantV2()">
+                                    + Nouvel enseignant·e
+                                </button>
+                            </div>
+                        </div>
+                        <div class="accordeon-contenu" style="display: none;">
+                            <div class="alerte alerte-information" style="margin-bottom: 15px;">
+                                <strong>Profil auteur</strong> : Ces informations servent de métadonnées pour toutes vos ressources partagées (grilles, productions, etc.).
+                            </div>
+
+                            <!-- Sélection de l'enseignant -->
+                            <div class="d-flex-gap-10-center" style="margin-bottom: 15px;">
+                                <label style="font-weight: 500;">Enseignant·e :</label>
+                                <select id="v2-selectEnseignant" class="controle-form" style="max-width: 400px;" onchange="changerEnseignantSelectionneV2(this.value)">
+                                    <option value="">Sélectionner un enseignant·e</option>
+                                </select>
+                                <button class="btn btn-modifier btn-sm" onclick="modifierEnseignantSelectionneV2()" id="v2-btnModifierEnseignant" style="display: none;">
+                                    Modifier
+                                </button>
+                            </div>
+
+                            <!-- Aperçu de l'enseignant sélectionné -->
+                            <div id="v2-apercuEnseignant" class="carte-bleu-pale-p15">
+                                <p class="text-muted">Sélectionnez un enseignant·e pour voir ses détails.</p>
+                            </div>
+
+                            <!-- FORMULAIRE ENSEIGNANT (caché par défaut) -->
+                            <div id="v2-formulaireEnseignant" style="display: none; padding: 20px; background: var(--bleu-pale); border: 1px solid var(--bleu-leger); border-radius: 8px; margin-top: 15px;">
+                                <h4 id="v2-titreFormEnseignant" class="titre-bleu-mb-20">
+                                    Nouvel enseignant·e
+                                </h4>
+
+                                <div class="grille-3col-form" style="margin-bottom: 15px;">
+                                    <div class="groupe-form">
+                                        <label>Prénom <span style="color: var(--rouge-erreur);">*</span></label>
+                                        <input type="text" id="v2-ens-prenom" class="controle-form controle-form-compact" placeholder="Ex: Marie">
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label>Nom <span style="color: var(--rouge-erreur);">*</span></label>
+                                        <input type="text" id="v2-ens-nom" class="controle-form controle-form-compact" placeholder="Ex: Tremblay">
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label>Courriel <span style="color: var(--rouge-erreur);">*</span></label>
+                                        <input type="email" id="v2-ens-courriel" class="controle-form controle-form-compact" placeholder="Ex: marie.tremblay@cegep.qc.ca">
+                                    </div>
+                                </div>
+
+                                <div class="grille-3col-form" style="margin-bottom: 15px;">
+                                    <div class="groupe-form">
+                                        <label>Institution <span style="color: var(--rouge-erreur);">*</span></label>
+                                        <input type="text" id="v2-ens-institution" class="controle-form controle-form-compact" placeholder="Ex: Cégep de Drummondville">
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label>Département</label>
+                                        <input type="text" id="v2-ens-departement" class="controle-form controle-form-compact" placeholder="Ex: Lettres">
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label>Niveau d'enseignement</label>
+                                        <select id="v2-ens-niveau" class="controle-form controle-form-compact">
+                                            <option value="Collégial">Collégial</option>
+                                            <option value="Secondaire">Secondaire</option>
+                                            <option value="Universitaire">Universitaire</option>
+                                            <option value="Formation continue">Formation continue</option>
+                                            <option value="Autre">Autre</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="groupe-form" style="margin-bottom: 20px;">
+                                    <label>Site web personnel <span style="color: var(--gris-leger); font-weight: normal;">(optionnel)</span></label>
+                                    <input type="url" id="v2-ens-siteWeb" class="controle-form controle-form-compact" placeholder="Ex: https://monsite.com">
+                                </div>
+
+                                <!-- Boutons d'action -->
+                                <div class="btn-groupe btn-groupe-droite" style="margin-top: 25px; padding-top: 20px; border-top: 2px solid var(--bleu-leger);">
+                                    <button class="btn btn-annuler" onclick="annulerFormEnseignantV2()">
+                                        Annuler
+                                    </button>
+                                    <button class="btn btn-confirmer" onclick="sauvegarderEnseignantV2()">
+                                        <span id="v2-btnTexteEnseignant">Ajouter</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div><!-- FIN accordéon Enseignant·e -->
+
+                    <!-- ========== ACCORDÉON: HORAIRE (Beta 96) ========== -->
+                    <div class="carte accordeon" id="accordeon-horaire" style="margin-top: 20px;">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu" style="margin: 0;">
+                                <span class="accordeon-chevron">▶</span> Horaire
+                            </h3>
+                            <div class="btn-groupe" style="gap: 8px;" onclick="event.stopPropagation();">
+                                <button class="btn btn-confirmer btn-sm" onclick="afficherFormHoraireV2()">
+                                    + Nouvel horaire
+                                </button>
+                            </div>
+                        </div>
+                        <div class="accordeon-contenu" style="display: none;">
+                            <!-- Sélection de l'horaire -->
+                            <div class="d-flex-gap-10-center" style="margin-bottom: 15px;">
+                                <label style="font-weight: 500;">Horaire :</label>
+                                <select id="v2-selectHoraire" class="controle-form" style="max-width: 400px;" onchange="changerHoraireSelectionneV2(this.value)">
+                                    <option value="">Sélectionner un horaire</option>
+                                </select>
+                                <button class="btn btn-modifier btn-sm" onclick="modifierHoraireSelectionneV2()" id="v2-btnModifierHoraire" style="display: none;">
+                                    Modifier
+                                </button>
+                            </div>
+
+                            <!-- Aperçu de l'horaire sélectionné -->
+                            <div id="v2-apercuHoraire" class="carte-bleu-pale-p15">
+                                <p class="text-muted">Sélectionnez un horaire pour voir ses détails.</p>
+                            </div>
+
+                            <!-- FORMULAIRE HORAIRE (caché par défaut) -->
+                            <div id="v2-formulaireHoraire" style="display: none; padding: 20px; background: var(--bleu-pale); border: 1px solid var(--bleu-leger); border-radius: 8px; margin-top: 15px;">
+                                <h4 id="v2-titreFormHoraire" class="titre-bleu-mb-20">
+                                    Nouvel horaire
+                                </h4>
+
+                                <div class="grille-3col-form" style="margin-bottom: 15px;">
+                                    <div class="groupe-form">
+                                        <label>Nom de l'horaire</label>
+                                        <input type="text" id="v2-hor-nom" class="controle-form controle-form-compact" placeholder="Ex: Lun-Mer 10h">
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label>Format horaire</label>
+                                        <select id="v2-hor-format" class="controle-form controle-form-compact" onchange="mettreAJourFormatHoraireV2()">
+                                            <option value="2x2">2x2 - 2 séances de 2 périodes</option>
+                                            <option value="1x4">1x4 - 1 séance de 4 périodes</option>
+                                            <option value="1x3">1x3 - 1 séance de 3 périodes</option>
+                                            <option value="2x1.5">2x1.5 - 2 séances de 1.5 périodes</option>
+                                            <option value="1x2">1x2 - 1 séance de 2 périodes</option>
+                                            <option value="2x1">2x1 - 2 séances de 1 période</option>
+                                            <option value="autre">Autre format</option>
+                                        </select>
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label>Local <span style="color: var(--gris-leger); font-weight: normal;">(optionnel)</span></label>
+                                        <input type="text" id="v2-hor-local" class="controle-form controle-form-compact" placeholder="Ex: A-123">
+                                    </div>
+                                </div>
+
+                                <!-- Séances hebdomadaires -->
+                                <h5 class="sous-titre-section" style="margin-top: 20px;">Séances hebdomadaires</h5>
+                                <div id="v2-hor-seances" style="margin-bottom: 15px;">
+                                    <!-- Séances générées dynamiquement -->
+                                </div>
+                                <button class="btn btn-secondaire btn-sm" onclick="ajouterSeanceV2()">
+                                    + Ajouter une séance
+                                </button>
+
+                                <!-- Boutons d'action -->
+                                <div class="btn-groupe btn-groupe-droite" style="margin-top: 25px; padding-top: 20px; border-top: 2px solid var(--bleu-leger);">
+                                    <button class="btn btn-annuler" onclick="annulerFormHoraireV2()">
+                                        Annuler
+                                    </button>
+                                    <button class="btn btn-confirmer" onclick="sauvegarderHoraireV2()">
+                                        <span id="v2-btnTexteHoraire">Ajouter</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div><!-- FIN accordéon Horaire -->
+
+                    <!-- ========== ACCORDÉON: GROUPE-COURS (Beta 96 - Assemblage) ========== -->
+                    <div class="carte accordeon" id="accordeon-groupe-cours" style="margin-top: 20px;">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu" style="margin: 0;">
+                                <span class="accordeon-chevron">▶</span> Groupe-cours
+                            </h3>
+                            <div class="btn-groupe" style="gap: 8px;" onclick="event.stopPropagation();">
+                                <button class="btn btn-confirmer btn-sm" onclick="afficherFormGroupeCoursV2()">
+                                    + Nouveau groupe-cours
+                                </button>
+                            </div>
+                        </div>
+                        <div class="accordeon-contenu" style="display: none;">
+                            <div class="alerte alerte-information" style="margin-bottom: 15px;">
+                                Un <strong>groupe-cours</strong> combine : un cours + un enseignant·e + un numéro de groupe + un horaire + une pratique de notation.
+                            </div>
+
+                            <!-- Liste des groupe-cours existants -->
+                            <div id="v2-listeGroupeCours" style="margin-bottom: 20px;">
+                                <p class="text-muted">Aucun groupe-cours configuré pour ce trimestre.</p>
+                            </div>
+
+                            <!-- FORMULAIRE GROUPE-COURS (caché par défaut) -->
+                            <div id="v2-formulaireGroupeCours" style="display: none; padding: 20px; background: var(--bleu-pale); border: 1px solid var(--bleu-leger); border-radius: 8px;">
+                                <h4 class="titre-bleu-mb-20">Créer un groupe-cours</h4>
+
+                                <div class="grille-2col" style="gap: 15px; margin-bottom: 15px;">
+                                    <div class="groupe-form">
+                                        <label>Cours <span style="color: var(--rouge-erreur);">*</span></label>
+                                        <select id="v2-gc-cours" class="controle-form controle-form-compact">
+                                            <option value="">-- Sélectionner un cours --</option>
+                                        </select>
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label>Enseignant·e <span style="color: var(--rouge-erreur);">*</span></label>
+                                        <select id="v2-gc-enseignant" class="controle-form controle-form-compact">
+                                            <option value="">-- Sélectionner un enseignant·e --</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="grille-3col-form" style="margin-bottom: 15px;">
+                                    <div class="groupe-form">
+                                        <label>Numéro de groupe <span style="color: var(--rouge-erreur);">*</span></label>
+                                        <input type="text" id="v2-gc-groupe" class="controle-form controle-form-compact" placeholder="Ex: 00001" maxlength="5">
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label>Horaire</label>
+                                        <select id="v2-gc-horaire" class="controle-form controle-form-compact">
+                                            <option value="">-- Sélectionner un horaire --</option>
+                                        </select>
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label>Pratique de notation</label>
+                                        <select id="v2-gc-pratique" class="controle-form controle-form-compact">
+                                            <option value="">-- Sélectionner une pratique --</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Aperçu de l'assemblage -->
+                                <div id="v2-gc-apercu" class="carte-bleu-pale-p15" style="margin-bottom: 15px;">
+                                    <strong>Aperçu :</strong> <span id="v2-gc-apercu-texte" class="text-muted">Complétez les champs pour voir l'aperçu</span>
+                                </div>
+
+                                <!-- Boutons d'action -->
+                                <div class="btn-groupe btn-groupe-droite" style="margin-top: 15px; padding-top: 15px; border-top: 2px solid var(--bleu-leger);">
+                                    <button class="btn btn-annuler" onclick="annulerFormGroupeCoursV2()">
+                                        Annuler
+                                    </button>
+                                    <button class="btn btn-confirmer" onclick="sauvegarderGroupeCoursV2()">
+                                        Créer le groupe-cours
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div><!-- FIN accordéon Groupe-cours -->
+
                     <!-- ========== ACCORDÉON: GROUPES ========== -->
                     <!-- ========== ACCORDÉON: GROUPE D'ÉTUDIANTS (HTML Legacy intégré) ========== -->
                     <div class="carte accordeon" id="accordeon-groupe" style="margin-top: 20px;">
@@ -13063,6 +13321,57 @@ Exemple :
                     <h2>Notes de version</h2>
                     <p class="text-muted">Historique des changements majeurs</p>
 
+                    <!-- Beta 96 -->
+                    <div class="carte accordeon" id="accordeon-aide-beta96">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Beta 96 — Architecture modulaire groupe-cours
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                        <p class="text-muted">6 janvier 2026</p>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Séparation des entités</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Toggle Cours</strong> : Informations générales uniquement (code, nom, compétence).</li>
+                            <li><strong>Toggle Enseignant·e</strong> : Profil auteur séparé (prénom, nom, courriel, institution, niveau).</li>
+                            <li><strong>Toggle Horaire</strong> : Séances hebdomadaires configurables (jours, heures, local).</li>
+                            <li><strong>Toggle Groupe-cours</strong> : Assemblage via dropdowns (cours + enseignant + horaire + pratique).</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Profil auteur pour métadonnées CC</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Source unique</strong> : L'enseignant·e du groupe-cours actif alimente automatiquement les métadonnées Creative Commons.</li>
+                            <li><strong>Plus d'édition manuelle</strong> : Les informations auteur sont centralisées dans le toggle Enseignant·e.</li>
+                            <li><strong>Niveau d'enseignement</strong> : Nouveau champ (Secondaire, Collégial, Universitaire, etc.).</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Réutilisation et flexibilité</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Cours réutilisables</strong> : Un même cours peut être associé à plusieurs groupes.</li>
+                            <li><strong>Horaires indépendants</strong> : Créez des configurations d'horaire réutilisables (ex: "Lun-Mer 10h").</li>
+                            <li><strong>Enseignants partagés</strong> : Le même profil enseignant peut gérer plusieurs groupe-cours.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Migration automatique</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Extraction des enseignants</strong> : Les informations enseignant sont extraites de listeCours vers la nouvelle entité.</li>
+                            <li><strong>Extraction des horaires</strong> : Les séances hebdomadaires sont converties vers l'entité Horaire.</li>
+                            <li><strong>Création des groupe-cours</strong> : Les associations sont recréées automatiquement.</li>
+                            <li><strong>Rétrocompatibilité</strong> : listeCours reste lisible pour les modules legacy.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Fichiers créés</h4>
+                        <ul class="modal-liste">
+                            <li><code>js/entites/cours-entite.js</code> : CRUD cours (infos générales)</li>
+                            <li><code>js/entites/enseignants.js</code> : CRUD enseignants (profil auteur)</li>
+                            <li><code>js/entites/horaires.js</code> : CRUD horaires (séances)</li>
+                            <li><code>js/entites/groupe-cours.js</code> : Assemblage et synchronisation</li>
+                            <li><code>js/entites-ui.js</code> : Interface des nouveaux toggles</li>
+                        </ul>
+                        </div><!-- fin accordeon-contenu beta96 -->
+                    </div>
+
                     <!-- Beta 95.1 -->
                     <div class="carte accordeon" id="accordeon-aide-beta951">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
@@ -13368,6 +13677,14 @@ Exemple :
     <script src="js/trimestres.js?v=2025123102"></script> <!-- Beta 95 : Gestion multi-trimestres -->
     <script src="js/trimestre.js?v=2025123109"></script>
     <script src="js/trimestre-v2.js?v=2026010604"></script> <!-- Périodes au lieu d'heures + dropdown dynamique -->
+
+    <!-- ENTITÉS Beta 96 - Architecture modulaire groupe-cours -->
+    <script src="js/entites/cours-entite.js?v=2026010601"></script>
+    <script src="js/entites/enseignants.js?v=2026010601"></script>
+    <script src="js/entites/horaires.js?v=2026010601"></script>
+    <script src="js/entites/groupe-cours.js?v=2026010601"></script>
+    <script src="js/entites-ui.js?v=2026010601"></script>
+
     <script src="js/pratique-notation-v2.js?v=2026010226"></script> <!-- Beta 95 : dropdown productions + terminologie "production" -->
     <script src="js/gabarits-utils.js?v=2026010202"></script> <!-- Beta 95 : Module utilitaire gabarits + filtres pratique -->
     <script src="js/spe-specifications.js?v=2026010206"></script> <!-- Beta 95 : Module PAN-Spécifications + gabarits François -->
@@ -13478,8 +13795,8 @@ Exemple :
          */
 
         // === CONFIGURATION ===
-        const VERSION_MAJEURE = '95.1';
-        const BUILD_ID = '0106-1203';  // Auto-updated by Claude before each commit (Toronto time)
+        const VERSION_MAJEURE = '96';
+        const BUILD_ID = '0106-1258';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';

@@ -18,8 +18,8 @@ Ce document te guidera vers :
 
 ## Etat actuel
 
-- **Version** : Beta 95.1
-- **Objectif** : Stabilisation pour H2026 (5 janvier 2026)
+- **Version** : Beta 96
+- **Objectif** : Architecture modulaire groupe-cours (6 janvier 2026)
 - **Session en cours** : Voir `SESSION.md`
 
 ---
@@ -71,4 +71,4 @@ Gregoire a la memoire contextuelle reelle du projet.
 
 ---
 
-**Derniere mise a jour** : 5 janvier 2026
+**Derniere mise a jour** : 6 janvier 2026
