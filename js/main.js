@@ -91,6 +91,11 @@ document.addEventListener('DOMContentLoaded', function () {
     window.addEventListener('db-ready', async function(event) {
         console.log('🔄 [Main] Données synchronisées, rechargement...');
 
+        // 🆕 BETA 95.1 (5 jan 2026): Vérifier si migration legacy nécessaire
+        if (typeof verifierEtProposerMigrationLegacy === 'function') {
+            verifierEtProposerMigrationLegacy();
+        }
+
         // ✅ NOUVEAU (30 déc 2025): Recalculer les indices C et P si demandé (après chargement démo)
         recalculerIndicesSiDemande();
 

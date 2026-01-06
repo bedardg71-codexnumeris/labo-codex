@@ -478,6 +478,373 @@ function executerMigrationsBeta951() {
     return resultats;
 }
 
+/* ===============================
+   ASSISTANT DE MIGRATION LEGACY
+   Date: 5 janvier 2026
+
+   Objectif:
+   Détecter automatiquement les données legacy (pré-Beta 93.5)
+   et proposer une migration guidée vers le format moderne
+   =============================== */
+
+/**
+ * Détecte si les données stockées sont au format legacy (ancien)
+ *
+ * Critères de détection:
+ * - Présence de clés non namespacées (groupeEtudiants, presences, productions)
+ * - Absence de système de trimestres
+ * - Flag de migration non présent
+ *
+ * @returns {Object} { isLegacy, details }
+ */
+function detecterDonneesLegacy() {
+    // Déjà migré ?
+    if (db.getSync('migrationLegacyEffectuee', false)) {
+        return { isLegacy: false, details: 'Migration déjà effectuée' };
+    }
+
+    // Vérifier la présence du système de trimestres
+    const trimestres = db.getSync('trimestres', []);
+    const listeCours = db.getSync('listeCours', []);
+
+    // Clés legacy typiques (non namespacées)
+    const clesLegacy = [
+        'groupeEtudiants',
+        'presences',
+        'productions',
+        'seancesHoraire',
+        'horaireHebdo',
+        'modalitesEvaluation',
+        'infoCours'
+    ];
+
+    // Compter les clés legacy présentes avec des données
+    let clesLegacyPresentes = [];
+    clesLegacy.forEach(cle => {
+        const valeur = db.getSync(cle, null);
+        if (valeur !== null) {
+            // Vérifier que ce n'est pas vide
+            if (Array.isArray(valeur) && valeur.length > 0) {
+                clesLegacyPresentes.push(cle);
+            } else if (typeof valeur === 'object' && Object.keys(valeur).length > 0) {
+                clesLegacyPresentes.push(cle);
+            } else if (typeof valeur === 'string' && valeur.length > 0) {
+                clesLegacyPresentes.push(cle);
+            }
+        }
+    });
+
+    // Conditions pour être considéré legacy:
+    // 1. Pas de trimestres OU pas de cours
+    // 2. Au moins 2 clés legacy avec des données
+    const pasDeSystemeTrimestres = trimestres.length === 0 || listeCours.length === 0;
+    const aDonneesLegacy = clesLegacyPresentes.length >= 2;
+
+    if (pasDeSystemeTrimestres && aDonneesLegacy) {
+        return {
+            isLegacy: true,
+            details: {
+                clesDetectees: clesLegacyPresentes,
+                nbCles: clesLegacyPresentes.length,
+                trimestres: trimestres.length,
+                cours: listeCours.length
+            }
+        };
+    }
+
+    return { isLegacy: false, details: 'Format moderne détecté' };
+}
+
+/**
+ * Affiche le modal d'assistant de migration legacy
+ *
+ * @param {Object} detailsLegacy - Détails des données legacy détectées
+ */
+function afficherModalMigrationLegacy(detailsLegacy) {
+    const nbCles = detailsLegacy.nbCles || 0;
+
+    const modalHTML = `
+        <div id="modalMigrationLegacy" style="display: flex; position: fixed; top: 0; left: 0;
+             width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10001;
+             align-items: center; justify-content: center;">
+            <div style="background: white; border-radius: 12px; padding: 30px; max-width: 580px;
+                 width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+
+                <!-- Icône et titre -->
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div style="font-size: 3rem; margin-bottom: 10px;">🔄</div>
+                    <h2 style="margin: 0; color: var(--bleu-moyen); font-size: 1.4rem;">
+                        Mise à jour de vos données
+                    </h2>
+                </div>
+
+                <!-- Contexte : pourquoi cette migration -->
+                <div style="background: #f0f7ff; border-radius: 8px; padding: 18px; margin-bottom: 18px;">
+                    <p style="margin: 0; font-size: 0.95rem; line-height: 1.6; color: #333;">
+                        L'application Monitorage a beaucoup évolué récemment pour mieux répondre aux
+                        besoins des enseignants. Pour profiter de toutes les nouvelles fonctionnalités,
+                        vos données doivent être réorganisées une seule fois.
+                    </p>
+                </div>
+
+                <!-- Ce qui change -->
+                <div style="background: #e7f3ff; border-radius: 8px; padding: 18px; margin-bottom: 18px;">
+                    <p style="margin: 0 0 10px 0; font-size: 0.95rem;">
+                        <strong>Ce qui change :</strong>
+                    </p>
+                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
+                        <li>Gestion de plusieurs <strong>trimestres</strong> (archivage automatique)</li>
+                        <li>Support de plusieurs <strong>cours-groupes</strong> par trimestre</li>
+                        <li>Comptage en <strong>périodes</strong> (configurable)</li>
+                    </ul>
+                </div>
+
+                <!-- Ce qui va se passer -->
+                <div style="background: #f8f9fa; border-left: 4px solid var(--bleu-moyen);
+                     padding: 15px; margin-bottom: 18px; border-radius: 0 8px 8px 0;">
+                    <p style="margin: 0 0 8px 0; font-size: 0.95rem;">
+                        <strong>📋 ${nbCles} ensemble(s) de données détecté(s)</strong>
+                    </p>
+                    <p style="margin: 0; font-size: 0.9rem; color: #555;">
+                        La migration va créer un trimestre à partir de vos données actuelles.
+                        <strong>Aucune donnée ne sera perdue.</strong>
+                    </p>
+                </div>
+
+                <!-- Rassurant -->
+                <div style="background: #d4edda; border-radius: 8px; padding: 12px; margin-bottom: 18px;">
+                    <p style="margin: 0; font-size: 0.85rem; color: #155724;">
+                        ✅ <strong>Rassurez-vous :</strong> Cette opération est automatique et ne prendra
+                        que quelques secondes. C'est une opération ponctuelle qui ne devrait pas se reproduire.
+                    </p>
+                </div>
+
+                <!-- Avertissement export -->
+                <div style="background: #fff3cd; border-radius: 8px; padding: 12px; margin-bottom: 22px;">
+                    <p style="margin: 0; font-size: 0.85rem; color: #856404;">
+                        💡 <strong>Conseil :</strong> Si vous préférez, exportez d'abord vos données
+                        (Réglages → Export localStorage) avant de continuer.
+                    </p>
+                </div>
+
+                <!-- Boutons -->
+                <div style="display: flex; gap: 12px; justify-content: center;">
+                    <button onclick="reporterMigrationLegacy()"
+                            style="padding: 12px 24px; background: white; color: var(--gris-fonce);
+                                   border: 1px solid var(--gris-clair); border-radius: 6px;
+                                   cursor: pointer; font-size: 0.95rem;">
+                        Plus tard
+                    </button>
+                    <button onclick="executerMigrationLegacy()"
+                            style="padding: 12px 28px; background: var(--bleu-moyen); color: white;
+                                   border: none; border-radius: 6px; cursor: pointer;
+                                   font-size: 1rem; font-weight: 500;">
+                        Migrer mes données
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    const container = document.createElement('div');
+    container.id = 'containerMigrationLegacy';
+    container.innerHTML = modalHTML;
+    document.body.appendChild(container);
+}
+
+/**
+ * Ferme le modal de migration legacy
+ */
+function fermerModalMigrationLegacy() {
+    const container = document.getElementById('containerMigrationLegacy');
+    if (container) {
+        container.remove();
+    }
+}
+
+/**
+ * Reporter la migration (l'utilisateur choisit "Plus tard")
+ * On ne redemande pas pendant cette session
+ */
+function reporterMigrationLegacy() {
+    fermerModalMigrationLegacy();
+    // Flag de session pour ne pas redemander
+    window._migrationLegacyReportee = true;
+    console.log('⏸️ Migration legacy reportée par l\'utilisateur');
+}
+
+/**
+ * Exécute la migration complète des données legacy vers le format moderne
+ *
+ * Étapes:
+ * 1. Créer un trimestre par défaut
+ * 2. Créer un cours par défaut
+ * 3. Copier les données vers les clés namespacées
+ * 4. Exécuter les migrations progressives
+ * 5. Marquer comme migré
+ */
+async function executerMigrationLegacy() {
+    console.log('🚀 [Migration Legacy] Démarrage...');
+
+    try {
+        // 1. CRÉER LE TRIMESTRE
+        const maintenant = new Date();
+        const mois = maintenant.getMonth(); // 0-11
+        const annee = maintenant.getFullYear();
+
+        // Déterminer la session (H: jan-mai, A: août-déc)
+        let session, sessionLettre;
+        if (mois >= 0 && mois <= 4) {
+            session = 'Hiver';
+            sessionLettre = 'h';
+        } else if (mois >= 7 && mois <= 11) {
+            session = 'Automne';
+            sessionLettre = 'a';
+        } else {
+            session = 'Été';
+            sessionLettre = 'e';
+        }
+
+        const trimestreId = sessionLettre + annee; // ex: "h2026"
+
+        const nouveauTrimestre = {
+            id: trimestreId,
+            nom: `${session} ${annee}`,
+            session: session,
+            annee: annee,
+            actif: true,
+            dateCreation: maintenant.toISOString()
+        };
+
+        // Sauvegarder le trimestre
+        db.setSync('trimestres', [nouveauTrimestre]);
+        db.setSync('trimestreActif', trimestreId);
+        console.log(`   ✅ Trimestre créé: ${nouveauTrimestre.nom} (${trimestreId})`);
+
+        // 2. CRÉER UN COURS PAR DÉFAUT
+        // Essayer de récupérer infoCours legacy pour les infos
+        const infoCours = db.getSync('infoCours', {});
+        const sigle = infoCours.sigle || '000-000-XX';
+        const titre = infoCours.titre || 'Mon cours';
+        const groupe = infoCours.groupe || '01';
+
+        const coursId = `${sigle.toLowerCase().replace(/\s/g, '-')}-${sessionLettre}${annee}-${groupe}`;
+
+        const nouveauCours = {
+            id: coursId,
+            sigle: sigle,
+            titre: titre,
+            groupe: groupe,
+            session: session.charAt(0).toUpperCase(), // 'H', 'A', 'E'
+            annee: annee,
+            trimestreId: trimestreId,
+            actif: true,
+            dateCreation: maintenant.toISOString()
+        };
+
+        db.setSync('listeCours', [nouveauCours]);
+        console.log(`   ✅ Cours créé: ${sigle} gr.${groupe} (${coursId})`);
+
+        // 3. COPIER LES DONNÉES VERS LES CLÉS NAMESPACÉES
+        // Préfixe pour ce trimestre
+        const prefixe = trimestreId + '_';
+
+        // Fonction helper pour copier une clé
+        const copierVersNamespace = (cleSource, cleDestSuffix) => {
+            const valeur = db.getSync(cleSource, null);
+            if (valeur !== null) {
+                const cleNamespacee = prefixe + cleDestSuffix;
+                db.setSync(cleNamespacee, valeur);
+                console.log(`   📦 ${cleSource} → ${cleNamespacee}`);
+                return true;
+            }
+            return false;
+        };
+
+        // Copier les données principales
+        copierVersNamespace('groupeEtudiants', 'groupeEtudiants');
+        copierVersNamespace('presences', 'presences');
+        copierVersNamespace('productions', 'productions');
+        copierVersNamespace('horaireHebdo', 'horaireHebdo');
+        copierVersNamespace('seancesHoraire', 'seancesHoraire');
+        copierVersNamespace('evaluations', 'evaluations');
+        copierVersNamespace('notesEtudiants', 'notesEtudiants');
+
+        // Copier aussi vers la clé spécifique au cours (horaire)
+        const horaireGlobal = db.getSync('seancesHoraire', null) || db.getSync('horaireHebdo', null);
+        if (horaireGlobal) {
+            db.setSync(`seancesHoraire_${coursId}`, horaireGlobal);
+            console.log(`   📦 Horaire → seancesHoraire_${coursId}`);
+        }
+
+        // 4. EXÉCUTER LES MIGRATIONS PROGRESSIVES
+        console.log('   🔄 Exécution des migrations progressives...');
+
+        // Activer la fonction cle() pour les migrations
+        if (typeof window.cle !== 'function') {
+            window.cle = (nomCle) => prefixe + nomCle;
+        }
+
+        // Beta 93.5 : Ajouter coursId
+        migrerEtudiantsVersCoursId();
+        migrerProductionsVersCoursId();
+        migrerPresencesVersCoursId();
+        migrerCoursVersTrimestreId();
+
+        // Beta 95 : Horaires multi-cours
+        migrerHoraireVersMultiCours();
+
+        // Beta 95.1 : Périodes
+        migrerSeancesVersPeriodes();
+        migrerPresencesVersPeriodes();
+
+        // 5. MARQUER COMME MIGRÉ
+        db.setSync('migrationLegacyEffectuee', true);
+        db.setSync('migrationLegacyDate', maintenant.toISOString());
+        db.setSync('migrationLegacyVersion', 'Beta 95.1');
+
+        console.log('✅ [Migration Legacy] Terminée avec succès !');
+
+        // Fermer le modal
+        fermerModalMigrationLegacy();
+
+        // Notification et rechargement
+        alert(`Migration réussie !\n\nVos données ont été organisées pour le trimestre "${nouveauTrimestre.nom}".\n\nL'application va se recharger.`);
+
+        location.reload();
+
+    } catch (erreur) {
+        console.error('❌ [Migration Legacy] Erreur:', erreur);
+        alert('Erreur lors de la migration.\n\n' + erreur.message + '\n\nVos données n\'ont pas été modifiées.');
+    }
+}
+
+/**
+ * Vérifie au démarrage si une migration legacy est nécessaire
+ * et propose le modal si oui
+ *
+ * Appelé depuis main.js après le chargement de db.js
+ */
+function verifierEtProposerMigrationLegacy() {
+    // Ne pas vérifier si déjà reporté cette session
+    if (window._migrationLegacyReportee) {
+        return;
+    }
+
+    const detection = detecterDonneesLegacy();
+
+    if (detection.isLegacy) {
+        console.log('🔍 [Migration] Données legacy détectées:', detection.details);
+
+        // Petit délai pour laisser l'interface se charger
+        setTimeout(() => {
+            afficherModalMigrationLegacy(detection.details);
+        }, 500);
+    } else {
+        console.log('✅ [Migration] Données au format moderne');
+    }
+}
+
 // Export des fonctions
 if (typeof window !== 'undefined') {
     window.executerMigrationsBeta935 = executerMigrationsBeta935;
@@ -492,4 +859,11 @@ if (typeof window !== 'undefined') {
     window.executerMigrationsBeta951 = executerMigrationsBeta951;
     window.migrerSeancesVersPeriodes = migrerSeancesVersPeriodes;
     window.migrerPresencesVersPeriodes = migrerPresencesVersPeriodes;
+    // 🆕 Beta 95.1 - Assistant migration legacy
+    window.detecterDonneesLegacy = detecterDonneesLegacy;
+    window.afficherModalMigrationLegacy = afficherModalMigrationLegacy;
+    window.fermerModalMigrationLegacy = fermerModalMigrationLegacy;
+    window.reporterMigrationLegacy = reporterMigrationLegacy;
+    window.executerMigrationLegacy = executerMigrationLegacy;
+    window.verifierEtProposerMigrationLegacy = verifierEtProposerMigrationLegacy;
 }
