@@ -408,82 +408,86 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
         <div id="modalPreviewConfigComplete" style="display: flex; position: fixed; top: 0; left: 0;
              width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000;
              align-items: center; justify-content: center;">
-            <div style="background: white; border-radius: 8px; padding: 30px; max-width: 650px;
+            <div style="background: white; border-radius: 10px; padding: 30px; max-width: 620px;
                  width: 90%; max-height: 85vh; overflow-y: auto;">
 
                 <h2 style="margin-top: 0; color: var(--bleu-moyen); border-bottom: 2px solid var(--bleu-pale);
                      padding-bottom: 10px;">
-                    📁 Import de données
+                    Fichier analysé
                 </h2>
 
-                <!-- Badge format -->
-                <div style="background: #e7f3ff; border: 1px solid var(--bleu-moyen); border-radius: 4px;
-                     padding: 10px 15px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-                    <span style="font-size: 1.5rem;">📦</span>
-                    <div>
-                        <strong style="color: var(--bleu-moyen);">Format : Export localStorage</strong>
-                        <p style="margin: 5px 0 0 0; font-size: 0.85rem; color: var(--gris-fonce);">
-                            ${nomFichier} · ${nbCles} clés · ~${tailleKo} Ko
-                        </p>
+                <!-- Type détecté -->
+                <div style="background: #fff8e6; border: 1px solid #f0c36d; border-radius: 8px;
+                     padding: 15px; margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 2rem;">💾</span>
+                        <div>
+                            <strong style="color: #8a6d3b; font-size: 1.1rem;">Sauvegarde personnelle</strong>
+                            <p style="margin: 4px 0 0 0; font-size: 0.9rem; color: #666;">
+                                Ce fichier contient une sauvegarde complète de données Monitorage.
+                            </p>
+                            <p style="margin: 4px 0 0 0; font-size: 0.8rem; color: #999;">
+                                ${nomFichier} · ${nbCles} éléments · ~${tailleKo} Ko
+                            </p>
+                        </div>
                     </div>
                 </div>
 
-                <!-- OPTION 1: Fusionner avec bibliothèques (recommandé) -->
+                <!-- Question : que veux-tu faire ? -->
+                <p style="font-size: 1rem; color: #333; margin-bottom: 15px; font-weight: 500;">
+                    Que souhaites-tu faire avec ce fichier ?
+                </p>
+
+                <!-- OPTION 1: Récupérer les ressources (recommandé si collègue) -->
                 <div style="background: #d4edda; border: 2px solid #28a745; border-radius: 8px;
-                     padding: 20px; margin-bottom: 15px;">
-                    <h3 style="margin: 0 0 10px 0; color: #155724; font-size: 1.1rem;">
-                        📚 Option 1 : Fusionner avec mes bibliothèques
-                        <span style="background: #28a745; color: white; font-size: 0.7rem; padding: 2px 8px;
-                               border-radius: 10px; margin-left: 8px; vertical-align: middle;">Recommandé</span>
+                     padding: 18px; margin-bottom: 12px; ${ressourcesBiblio.total === 0 ? 'opacity: 0.5;' : ''}">
+                    <h3 style="margin: 0 0 8px 0; color: #155724; font-size: 1rem;">
+                        📚 Récupérer les ressources pédagogiques
+                        ${ressourcesBiblio.total > 0 ? '<span style="background: #28a745; color: white; font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; margin-left: 8px;">Recommandé</span>' : ''}
                     </h3>
-                    <p style="margin: 0 0 12px 0; font-size: 0.9rem; color: #155724;">
-                        Ajoute uniquement les ressources pédagogiques à tes bibliothèques existantes.
+                    <p style="margin: 0 0 10px 0; font-size: 0.9rem; color: #155724;">
+                        Ajoute les grilles, échelles et pratiques à tes bibliothèques.
                         <strong>Tes données actuelles sont préservées.</strong>
                     </p>
 
-                    <!-- Ressources détectées -->
-                    <div style="background: white; border-radius: 4px; padding: 12px; margin-bottom: 12px;">
-                        <p style="margin: 0 0 8px 0; font-size: 0.85rem; color: #666;"><strong>Ressources détectées :</strong></p>
-                        <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.9rem;">
-                            ${ressourcesBiblio.pratiques > 0 ? `<li style="padding: 3px 0;">✓ ${ressourcesBiblio.pratiques} pratique(s) de notation</li>` : ''}
-                            ${ressourcesBiblio.grilles > 0 ? `<li style="padding: 3px 0;">✓ ${ressourcesBiblio.grilles} grille(s) de critères</li>` : ''}
-                            ${ressourcesBiblio.echelles > 0 ? `<li style="padding: 3px 0;">✓ ${ressourcesBiblio.echelles} échelle(s) de performance</li>` : ''}
-                            ${ressourcesBiblio.productions > 0 ? `<li style="padding: 3px 0;">✓ ${ressourcesBiblio.productions} production(s)</li>` : ''}
-                            ${ressourcesBiblio.total === 0 ? `<li style="padding: 3px 0; color: #666;">Aucune ressource de bibliothèque détectée</li>` : ''}
-                        </ul>
+                    ${ressourcesBiblio.total > 0 ? `
+                    <div style="background: white; border-radius: 4px; padding: 10px; margin-bottom: 10px; font-size: 0.85rem;">
+                        ${ressourcesBiblio.pratiques > 0 ? `✓ ${ressourcesBiblio.pratiques} pratique(s) · ` : ''}
+                        ${ressourcesBiblio.grilles > 0 ? `✓ ${ressourcesBiblio.grilles} grille(s) · ` : ''}
+                        ${ressourcesBiblio.echelles > 0 ? `✓ ${ressourcesBiblio.echelles} échelle(s) · ` : ''}
+                        ${ressourcesBiblio.productions > 0 ? `✓ ${ressourcesBiblio.productions} production(s)` : ''}
                     </div>
+                    ` : '<p style="font-size: 0.85rem; color: #666; margin-bottom: 10px;">Aucune ressource de bibliothèque détectée dans ce fichier.</p>'}
 
                     <button onclick="executerImportVersBibliotheques()"
-                            style="padding: 12px 24px; background: #28a745; color: white;
-                                   border: none; border-radius: 4px; cursor: pointer; font-size: 1rem;
-                                   font-weight: 500; width: 100%;"
-                            ${ressourcesBiblio.total === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
-                        Fusionner avec mes bibliothèques
+                            style="padding: 10px 20px; background: #28a745; color: white;
+                                   border: none; border-radius: 4px; cursor: pointer; font-size: 0.95rem;"
+                            ${ressourcesBiblio.total === 0 ? 'disabled' : ''}>
+                        Ajouter à mes bibliothèques
                     </button>
                 </div>
 
-                <!-- OPTION 2: Import complet -->
+                <!-- OPTION 2: Restaurer (sa propre sauvegarde) -->
                 <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px;
-                     padding: 20px; margin-bottom: 20px;">
-                    <h3 style="margin: 0 0 10px 0; color: #495057; font-size: 1.1rem;">
-                        🔄 Option 2 : Import complet (écrasement)
+                     padding: 18px; margin-bottom: 20px;">
+                    <h3 style="margin: 0 0 8px 0; color: #495057; font-size: 1rem;">
+                        🔄 Restaurer cette sauvegarde
                     </h3>
-                    <p style="margin: 0 0 12px 0; font-size: 0.9rem; color: #6c757d;">
-                        Remplace TOUTES tes données par celles du fichier.
-                        Utile pour restaurer une sauvegarde complète.
+                    <p style="margin: 0 0 10px 0; font-size: 0.9rem; color: #6c757d;">
+                        C'est ta propre sauvegarde ? Restaure toutes tes données.
                     </p>
 
-                    <div style="background: #fff3cd; border-left: 3px solid #ffc107; padding: 10px;
-                         margin-bottom: 12px; border-radius: 0 4px 4px 0;">
-                        <p style="margin: 0; font-size: 0.85rem; color: #856404;">
-                            ⚠️ Les données existantes seront écrasées !
+                    <div style="background: #fff3cd; border-left: 3px solid #ffc107; padding: 8px 12px;
+                         margin-bottom: 10px; border-radius: 0 4px 4px 0;">
+                        <p style="margin: 0; font-size: 0.8rem; color: #856404;">
+                            ⚠️ Tes données actuelles seront remplacées
                         </p>
                     </div>
 
                     <button onclick="executerImportConfigComplete()"
                             style="padding: 10px 20px; background: #6c757d; color: white;
                                    border: none; border-radius: 4px; cursor: pointer; font-size: 0.95rem;">
-                        Importer tout (écrasement)
+                        Restaurer mes données
                     </button>
                 </div>
 
@@ -570,81 +574,85 @@ function afficherModalPreviewConfigComplete(config) {
             return total + (contenu.cartouches[grilleId] ? contenu.cartouches[grilleId].length : 0);
           }, 0)
         : 0;
+    const totalRessources = nbEchelles + nbGrilles + nbProductions + nbCartouches;
 
     // Créer le modal
     const modalHTML = `
         <div id="modalPreviewConfigComplete" style="display: flex; position: fixed; top: 0; left: 0;
              width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000;
              align-items: center; justify-content: center;">
-            <div style="background: white; border-radius: 8px; padding: 30px; max-width: 600px;
-                 width: 90%; max-height: 80vh; overflow-y: auto;">
+            <div style="background: white; border-radius: 10px; padding: 30px; max-width: 600px;
+                 width: 90%; max-height: 85vh; overflow-y: auto;">
 
                 <h2 style="margin-top: 0; color: var(--bleu-moyen); border-bottom: 2px solid var(--bleu-pale);
                      padding-bottom: 10px;">
-                    Aperçu de la configuration
+                    Fichier analysé
                 </h2>
 
-                <!-- Métadonnées -->
-                <div style="background: var(--bleu-tres-pale); border-left: 4px solid var(--bleu-moyen);
-                     padding: 15px; margin-bottom: 20px; border-radius: 4px;">
-                    <h3 style="margin-top: 0; font-size: 1.1rem;">📋 ${meta.nom}</h3>
-                    <p style="margin: 5px 0;"><strong>Auteur :</strong> ${meta.auteur}</p>
-                    ${meta.discipline && meta.discipline.length > 0
-                        ? `<p style="margin: 5px 0;"><strong>Discipline :</strong> ${meta.discipline.join(', ')}</p>`
-                        : ''}
-                    ${meta.niveau ? `<p style="margin: 5px 0;"><strong>Niveau :</strong> ${meta.niveau}</p>` : ''}
-                    ${meta.description
-                        ? `<p style="margin: 10px 0 5px 0; font-style: italic; color: var(--gris-fonce);">${meta.description}</p>`
-                        : ''}
-                    <p style="margin: 10px 0 0 0; font-size: 0.85rem; color: var(--gris-moyen);">
-                        Version ${meta.version} • Exportée le ${meta.date_export}
+                <!-- Type détecté -->
+                <div style="background: #e8f5e9; border: 1px solid #81c784; border-radius: 8px;
+                     padding: 15px; margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 2rem;">📚</span>
+                        <div>
+                            <strong style="color: #2e7d32; font-size: 1.1rem;">Configuration pédagogique partagée</strong>
+                            <p style="margin: 4px 0 0 0; font-size: 0.9rem; color: #666;">
+                                Ce fichier contient des ressources pédagogiques prêtes à utiliser.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Infos auteur -->
+                <div style="background: var(--bleu-tres-pale); border-radius: 8px;
+                     padding: 15px; margin-bottom: 20px;">
+                    <h3 style="margin: 0 0 8px 0; font-size: 1.05rem; color: var(--bleu-moyen);">
+                        ${meta.nom}
+                    </h3>
+                    <p style="margin: 0; font-size: 0.9rem; color: #555;">
+                        Par <strong>${meta.auteur}</strong>
+                        ${meta.discipline && meta.discipline.length > 0 ? ` · ${meta.discipline.join(', ')}` : ''}
+                        ${meta.niveau ? ` · ${meta.niveau}` : ''}
                     </p>
+                    ${meta.description
+                        ? `<p style="margin: 10px 0 0 0; font-size: 0.9rem; font-style: italic; color: #666;">${meta.description}</p>`
+                        : ''}
                 </div>
 
                 <!-- Contenu -->
-                <div style="background: white; border: 1px solid var(--bleu-pale); padding: 15px;
-                     margin-bottom: 20px; border-radius: 4px;">
-                    <h3 style="margin-top: 0; font-size: 1rem; color: var(--bleu-moyen);">📦 Contenu de la configuration</h3>
-                    <ul style="list-style: none; padding-left: 0; margin: 10px 0;">
-                        <li style="padding: 5px 0; border-bottom: 1px solid var(--bleu-tres-pale);">
-                            ✓ ${nbEchelles} échelle(s) de performance
-                        </li>
-                        <li style="padding: 5px 0; border-bottom: 1px solid var(--bleu-tres-pale);">
-                            ✓ ${nbGrilles} grille(s) de critères
-                        </li>
-                        <li style="padding: 5px 0; border-bottom: 1px solid var(--bleu-tres-pale);">
-                            ✓ ${nbProductions} production(s) pédagogique(s)
-                        </li>
-                        <li style="padding: 5px 0; border-bottom: 1px solid var(--bleu-tres-pale);">
-                            ✓ ${nbCartouches} cartouche(s) de rétroaction
-                        </li>
-                        <li style="padding: 5px 0;">
-                            ✓ Paramètres du cours (jetons, reprises, etc.)
-                        </li>
-                    </ul>
+                <div style="background: #f8f9fa; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+                    <p style="margin: 0 0 10px 0; font-size: 0.95rem; font-weight: 500;">
+                        Ressources incluses (${totalRessources}) :
+                    </p>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.9rem;">
+                        ${nbEchelles > 0 ? `<span style="background: white; padding: 4px 10px; border-radius: 4px; border: 1px solid #ddd;">✓ ${nbEchelles} échelle(s)</span>` : ''}
+                        ${nbGrilles > 0 ? `<span style="background: white; padding: 4px 10px; border-radius: 4px; border: 1px solid #ddd;">✓ ${nbGrilles} grille(s)</span>` : ''}
+                        ${nbProductions > 0 ? `<span style="background: white; padding: 4px 10px; border-radius: 4px; border: 1px solid #ddd;">✓ ${nbProductions} production(s)</span>` : ''}
+                        ${nbCartouches > 0 ? `<span style="background: white; padding: 4px 10px; border-radius: 4px; border: 1px solid #ddd;">✓ ${nbCartouches} cartouche(s)</span>` : ''}
+                    </div>
                 </div>
 
-                <!-- Avertissement -->
-                <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px;
-                     margin-bottom: 20px; border-radius: 4px;">
-                    <p style="margin: 0; font-size: 0.9rem; color: #856404;">
-                        <strong>⚠️ Attention :</strong> Cette action va importer toutes les ressources de cette configuration.
-                        Les ressources existantes avec les mêmes identifiants seront écrasées.
+                <!-- Info CC -->
+                <div style="background: #e3f2fd; border-radius: 8px; padding: 12px; margin-bottom: 20px;">
+                    <p style="margin: 0; font-size: 0.85rem; color: #1565c0;">
+                        📄 Licence <strong>CC BY-NC-SA 4.0</strong> — Tu peux utiliser et adapter ces ressources
+                        en citant l'auteur.
                     </p>
                 </div>
 
                 <!-- Boutons -->
                 <div style="display: flex; gap: 10px; justify-content: flex-end;">
                     <button onclick="fermerModalPreviewConfigComplete()"
-                            style="padding: 10px 20px; background: var(--gris-clair); color: var(--gris-fonce);
-                                   border: none; border-radius: 4px; cursor: pointer; font-size: 0.95rem;">
+                            style="padding: 10px 20px; background: white; color: var(--gris-fonce);
+                                   border: 1px solid var(--gris-clair); border-radius: 4px;
+                                   cursor: pointer; font-size: 0.95rem;">
                         Annuler
                     </button>
                     <button onclick="executerImportConfigComplete()"
-                            style="padding: 10px 20px; background: var(--bleu-moyen); color: white;
+                            style="padding: 10px 20px; background: #28a745; color: white;
                                    border: none; border-radius: 4px; cursor: pointer; font-size: 0.95rem;
                                    font-weight: 500;">
-                        Importer cette configuration
+                        Ajouter à mes bibliothèques
                     </button>
                 </div>
             </div>

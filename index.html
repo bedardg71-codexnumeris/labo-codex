@@ -9488,78 +9488,68 @@ Exemple :
                     </p>
 
                     <!-- ========================================
-                         CARTE : SAUVEGARDE ET RESTAURATION
+                         CARTE : EXPORTER
                          ======================================== -->
                     <div class="carte">
-                        <h3 class="carte-titre-bleu">Sauvegarde et restauration</h3>
+                        <h3 class="carte-titre-bleu">Exporter</h3>
                         <p class="text-muted" style="margin-bottom: 20px;">
-                            Exporte tes données pour les sauvegarder, importe pour les restaurer.
+                            Deux types d'exports selon tes besoins.
                         </p>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                            <!-- Export -->
+                            <!-- Export sauvegarde -->
                             <div class="carte-bleu-pale-p15">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">Exporter les données</h4>
-                                <p style="font-size: 0.9rem; margin-bottom: 15px;">
-                                    Sauvegarde tes données dans un fichier JSON.
+                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">
+                                    Sauvegarde complète
+                                </h4>
+                                <p style="font-size: 0.9rem; margin-bottom: 15px; color: #555;">
+                                    Toutes tes données : cours, étudiants, présences, évaluations, etc.
+                                    <br><em style="color: #888;">Pour restaurer sur cet appareil ou un autre.</em>
                                 </p>
                                 <button class="btn btn-principal" onclick="ouvrirModalExport()">
-                                    Ouvrir l'exportation
+                                    Exporter mes données
                                 </button>
                             </div>
 
-                            <!-- Import -->
+                            <!-- Export config pédagogique -->
                             <div class="carte-bleu-pale-p15">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">Importer des données</h4>
-                                <p style="font-size: 0.9rem; margin-bottom: 15px;">
-                                    Restaure des données depuis un fichier JSON.
+                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">
+                                    Configuration pédagogique
+                                </h4>
+                                <p style="font-size: 0.9rem; margin-bottom: 15px; color: #555;">
+                                    Uniquement les outils : grilles, échelles, productions, cartouches.
+                                    <br><em style="color: #888;">Pour partager avec des collègues (CC BY-NC-SA).</em>
                                 </p>
-                                <button class="btn btn-principal" onclick="ouvrirModalImport()">
-                                    Ouvrir l'importation
+                                <button class="btn btn-principal" onclick="exporterConfigurationComplete()">
+                                    Exporter ma config
                                 </button>
                             </div>
-                        </div>
-
-                        <div class="badge-alerte" style="margin-top: 20px;">
-                            <strong>Important :</strong> L'import écrasera les données existantes pour les clés importées. Exporte d'abord si nécessaire.
                         </div>
                     </div>
 
                     <!-- ========================================
-                         CARTE : CONFIGURATION PÉDAGOGIQUE
+                         CARTE : IMPORTER
                          ======================================== -->
                     <div class="carte">
-                        <h3 class="carte-titre-bleu">Configuration pédagogique complète</h3>
+                        <h3 class="carte-titre-bleu">Importer</h3>
                         <p class="text-muted" style="margin-bottom: 20px;">
-                            Package complet avec échelles, grilles, productions, cartouches et paramètres.
+                            Importe n'importe quel fichier Monitorage. Le type sera détecté automatiquement.
                         </p>
 
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                            <!-- Export config -->
-                            <div class="carte-bleu-pale-p15">
-                                <h4 style="color: var(--bleu-moyen); margin-bottom: 10px;">Exporter ma configuration</h4>
-                                <p style="font-size: 0.9rem; margin-bottom: 15px;">
-                                    Génère un package partageable avec métadonnées CC BY-NC-SA 4.0.
-                                </p>
-                                <button class="btn btn-principal" onclick="exporterConfigurationComplete()">
-                                    Exporter la configuration
-                                </button>
-                            </div>
-
-                            <!-- Import config -->
-                            <div class="carte-bleu-pale-p15">
-                                <h4 style="color: var(--bleu-moyen); margin-bottom: 10px;">Importer une configuration</h4>
-                                <p style="font-size: 0.9rem; margin-bottom: 15px;">
-                                    Importe une configuration pédagogique partagée.
-                                </p>
-                                <button class="btn btn-principal" onclick="ouvrirImportConfigComplete()">
-                                    Importer une configuration
-                                </button>
-                            </div>
+                        <div class="carte-bleu-pale-p15" style="max-width: 400px;">
+                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">
+                                Importer un fichier
+                            </h4>
+                            <p style="font-size: 0.9rem; margin-bottom: 15px; color: #555;">
+                                Sauvegarde personnelle ou configuration d'un collègue — l'application s'adapte.
+                            </p>
+                            <button class="btn btn-principal" onclick="ouvrirModalImport()">
+                                Choisir un fichier...
+                            </button>
                         </div>
 
                         <p class="text-muted" style="margin-top: 15px; font-size: 0.85rem;">
-                            Idéal pour partager une pratique pédagogique avec des collègues ou conserver une configuration de cours.
+                            Après analyse du fichier, tu pourras choisir entre restaurer ou fusionner avec tes bibliothèques.
                         </p>
                     </div>
 
