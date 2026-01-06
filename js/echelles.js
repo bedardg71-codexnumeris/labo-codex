@@ -3717,9 +3717,13 @@ async function sauvegarderEchelleComplete() {
     // Recharger la liste pour refléter les changements
     await afficherListeEchelles();
 
-    // Retourner à l'accueil
-    document.getElementById('conteneurEditionEchelle').style.display = 'none';
-    document.getElementById('accueilEchelles').style.display = 'block';
+    // 🆕 BETA 95.1 : Réouvrir l'échelle en mode édition pour qu'elle reste visible
+    const idSauvegarde = echelleTemplateActuelle?.id;
+    if (idSauvegarde && typeof chargerEchellePourModif === 'function') {
+        setTimeout(() => {
+            chargerEchellePourModif(idSauvegarde);
+        }, 100);
+    }
 }
 
 // Export global
