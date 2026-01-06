@@ -390,6 +390,9 @@ function detecterFormatConfig(config) {
  * @param {Object} config - Données brutes localStorage
  * @param {string} nomFichier - Nom du fichier importé
  */
+// Variable globale pour stocker l'analyse en cours
+let analyseImportEnCours = null;
+
 function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
     const cles = Object.keys(config);
     const nbCles = cles.length;
@@ -401,103 +404,134 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
     });
     const tailleKo = (tailleTotale / 1024).toFixed(1);
 
-    // Analyser les ressources disponibles pour les bibliothèques
-    const ressourcesBiblio = analyserRessourcesBibliotheques(config);
+    // Analyser les ressources en détail
+    const analyse = analyserRessourcesDetaillees(config);
+    analyseImportEnCours = analyse;
+
+    // Générer les lignes de ressources avec checkboxes
+    const genererLigneRessource = (id, label, count, items, emoji) => {
+        if (count === 0) return '';
+        const details = items.slice(0, 3).map(i => i.nom).join(', ') + (items.length > 3 ? '...' : '');
+        return `
+            <label style="display: flex; align-items: flex-start; gap: 10px; padding: 10px;
+                   background: white; border-radius: 6px; margin-bottom: 8px; cursor: pointer;
+                   border: 1px solid #e0e0e0; transition: all 0.2s;"
+                   onmouseover="this.style.borderColor='#28a745'" onmouseout="this.style.borderColor='#e0e0e0'">
+                <input type="checkbox" id="import-${id}" checked
+                       style="margin-top: 3px; transform: scale(1.2); accent-color: #28a745;">
+                <div style="flex: 1;">
+                    <strong style="font-size: 0.95rem;">${emoji} ${label}</strong>
+                    <span style="color: #28a745; font-size: 0.85rem; margin-left: 8px;">(${count})</span>
+                    <p style="margin: 4px 0 0 0; font-size: 0.8rem; color: #666;">${details}</p>
+                </div>
+            </label>
+        `;
+    };
+
+    // Générer les lignes de données avec checkboxes
+    const genererLigneDonnee = (id, label, info, emoji) => {
+        if (!info) return '';
+        return `
+            <label style="display: flex; align-items: center; gap: 10px; padding: 10px;
+                   background: white; border-radius: 6px; margin-bottom: 8px; cursor: pointer;
+                   border: 1px solid #e0e0e0; transition: all 0.2s;"
+                   onmouseover="this.style.borderColor='#6c757d'" onmouseout="this.style.borderColor='#e0e0e0'">
+                <input type="checkbox" id="import-${id}"
+                       style="transform: scale(1.2); accent-color: #6c757d;">
+                <div style="flex: 1;">
+                    <strong style="font-size: 0.95rem;">${emoji} ${label}</strong>
+                    <span style="color: #666; font-size: 0.85rem; margin-left: 8px;">${info}</span>
+                </div>
+            </label>
+        `;
+    };
 
     const modalHTML = `
         <div id="modalPreviewConfigComplete" style="display: flex; position: fixed; top: 0; left: 0;
              width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000;
              align-items: center; justify-content: center;">
-            <div style="background: white; border-radius: 10px; padding: 30px; max-width: 620px;
-                 width: 90%; max-height: 85vh; overflow-y: auto;">
+            <div style="background: white; border-radius: 10px; padding: 30px; max-width: 650px;
+                 width: 90%; max-height: 90vh; overflow-y: auto;">
 
                 <h2 style="margin-top: 0; color: var(--bleu-moyen); border-bottom: 2px solid var(--bleu-pale);
                      padding-bottom: 10px;">
-                    Fichier analysé
+                    Contenu du fichier
                 </h2>
 
-                <!-- Type détecté -->
-                <div style="background: #fff8e6; border: 1px solid #f0c36d; border-radius: 8px;
-                     padding: 15px; margin-bottom: 20px;">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <span style="font-size: 2rem;">💾</span>
-                        <div>
-                            <strong style="color: #8a6d3b; font-size: 1.1rem;">Sauvegarde personnelle</strong>
-                            <p style="margin: 4px 0 0 0; font-size: 0.9rem; color: #666;">
-                                Ce fichier contient une sauvegarde complète de données Monitorage.
-                            </p>
-                            <p style="margin: 4px 0 0 0; font-size: 0.8rem; color: #999;">
-                                ${nomFichier} · ${nbCles} éléments · ~${tailleKo} Ko
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Question : que veux-tu faire ? -->
-                <p style="font-size: 1rem; color: #333; margin-bottom: 15px; font-weight: 500;">
-                    Que souhaites-tu faire avec ce fichier ?
-                </p>
-
-                <!-- OPTION 1: Récupérer les ressources (recommandé si collègue) -->
-                <div style="background: #d4edda; border: 2px solid #28a745; border-radius: 8px;
-                     padding: 18px; margin-bottom: 12px; ${ressourcesBiblio.total === 0 ? 'opacity: 0.5;' : ''}">
-                    <h3 style="margin: 0 0 8px 0; color: #155724; font-size: 1rem;">
-                        📚 Récupérer les ressources pédagogiques
-                        ${ressourcesBiblio.total > 0 ? '<span style="background: #28a745; color: white; font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; margin-left: 8px;">Recommandé</span>' : ''}
-                    </h3>
-                    <p style="margin: 0 0 10px 0; font-size: 0.9rem; color: #155724;">
-                        Ajoute les grilles, échelles et pratiques à tes bibliothèques.
-                        <strong>Tes données actuelles sont préservées.</strong>
-                    </p>
-
-                    ${ressourcesBiblio.total > 0 ? `
-                    <div style="background: white; border-radius: 4px; padding: 10px; margin-bottom: 10px; font-size: 0.85rem;">
-                        ${ressourcesBiblio.pratiques > 0 ? `✓ ${ressourcesBiblio.pratiques} pratique(s) · ` : ''}
-                        ${ressourcesBiblio.grilles > 0 ? `✓ ${ressourcesBiblio.grilles} grille(s) · ` : ''}
-                        ${ressourcesBiblio.echelles > 0 ? `✓ ${ressourcesBiblio.echelles} échelle(s) · ` : ''}
-                        ${ressourcesBiblio.productions > 0 ? `✓ ${ressourcesBiblio.productions} production(s)` : ''}
-                    </div>
-                    ` : '<p style="font-size: 0.85rem; color: #666; margin-bottom: 10px;">Aucune ressource de bibliothèque détectée dans ce fichier.</p>'}
-
-                    <button onclick="executerImportVersBibliotheques()"
-                            style="padding: 10px 20px; background: #28a745; color: white;
-                                   border: none; border-radius: 4px; cursor: pointer; font-size: 0.95rem;"
-                            ${ressourcesBiblio.total === 0 ? 'disabled' : ''}>
-                        Ajouter à mes bibliothèques
-                    </button>
-                </div>
-
-                <!-- OPTION 2: Restaurer (sa propre sauvegarde) -->
-                <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px;
-                     padding: 18px; margin-bottom: 20px;">
-                    <h3 style="margin: 0 0 8px 0; color: #495057; font-size: 1rem;">
-                        🔄 Restaurer cette sauvegarde
-                    </h3>
-                    <p style="margin: 0 0 10px 0; font-size: 0.9rem; color: #6c757d;">
-                        C'est ta propre sauvegarde ? Restaure toutes tes données.
-                    </p>
-
-                    <div style="background: #fff3cd; border-left: 3px solid #ffc107; padding: 8px 12px;
-                         margin-bottom: 10px; border-radius: 0 4px 4px 0;">
-                        <p style="margin: 0; font-size: 0.8rem; color: #856404;">
-                            ⚠️ Tes données actuelles seront remplacées
+                <!-- Info fichier -->
+                <div style="background: #f8f9fa; border-radius: 8px; padding: 12px; margin-bottom: 20px;
+                     display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.5rem;">📁</span>
+                    <div>
+                        <strong style="font-size: 0.95rem;">${nomFichier}</strong>
+                        <p style="margin: 2px 0 0 0; font-size: 0.8rem; color: #666;">
+                            ${nbCles} éléments · ~${tailleKo} Ko
                         </p>
                     </div>
-
-                    <button onclick="executerImportConfigComplete()"
-                            style="padding: 10px 20px; background: #6c757d; color: white;
-                                   border: none; border-radius: 4px; cursor: pointer; font-size: 0.95rem;">
-                        Restaurer mes données
-                    </button>
                 </div>
 
-                <!-- Bouton Annuler -->
-                <div style="text-align: right;">
+                <!-- Instruction -->
+                <p style="font-size: 0.95rem; color: #333; margin-bottom: 15px;">
+                    <strong>Coche ce que tu veux importer :</strong>
+                </p>
+
+                <!-- SECTION: Ressources pédagogiques -->
+                ${analyse.totalRessources > 0 ? `
+                <div style="margin-bottom: 20px;">
+                    <h3 style="font-size: 0.9rem; color: #28a745; margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
+                        <span style="background: #d4edda; padding: 4px 8px; border-radius: 4px;">📚 Ressources pédagogiques</span>
+                        <span style="font-size: 0.8rem; color: #666; font-weight: normal;">→ ajoutées à tes bibliothèques</span>
+                    </h3>
+                    <div style="background: #f0fff4; border-radius: 8px; padding: 12px;">
+                        ${genererLigneRessource('pratiques', 'Pratiques de notation', analyse.ressources.pratiques.count, analyse.ressources.pratiques.items, '⚙️')}
+                        ${genererLigneRessource('grilles', 'Grilles de critères', analyse.ressources.grilles.count, analyse.ressources.grilles.items, '📋')}
+                        ${genererLigneRessource('echelles', 'Échelles de performance', analyse.ressources.echelles.count, analyse.ressources.echelles.items, '📊')}
+                        ${genererLigneRessource('productions', 'Productions', analyse.ressources.productions.count, analyse.ressources.productions.items, '📝')}
+                        ${analyse.ressources.cartouches.count > 0 ? genererLigneRessource('cartouches', 'Cartouches de rétroaction', analyse.ressources.cartouches.count, analyse.ressources.cartouches.items.map(c => ({nom: c.count + ' pour grille ' + c.grilleId.substring(0,8)})), '💬') : ''}
+                    </div>
+                </div>
+                ` : ''}
+
+                <!-- SECTION: Données du cours -->
+                ${analyse.totalDonnees > 0 ? `
+                <div style="margin-bottom: 20px;">
+                    <h3 style="font-size: 0.9rem; color: #6c757d; margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
+                        <span style="background: #e9ecef; padding: 4px 8px; border-radius: 4px;">📦 Données du cours</span>
+                        <span style="font-size: 0.8rem; color: #999; font-weight: normal;">→ partage ou restauration</span>
+                    </h3>
+                    <div style="background: #f8f9fa; border-radius: 8px; padding: 12px;">
+                        ${analyse.donnees.etudiants.count > 0 ? genererLigneDonnee('etudiants', 'Étudiants', analyse.donnees.etudiants.count + ' étudiant(s)', '👥') : ''}
+                        ${analyse.donnees.presences.count > 0 ? genererLigneDonnee('presences', 'Présences', analyse.donnees.presences.count + ' date(s)', '📅') : ''}
+                        ${analyse.donnees.evaluations.count > 0 ? genererLigneDonnee('evaluations', 'Évaluations/Notes', analyse.donnees.evaluations.cles.length + ' ensemble(s)', '📈') : ''}
+                        ${analyse.donnees.configuration.present ? genererLigneDonnee('configuration', 'Configuration du cours', analyse.donnees.configuration.cles.join(', '), '⚙️') : ''}
+                    </div>
+                    <p style="font-size: 0.75rem; color: #999; margin: 8px 0 0 12px;">
+                        ⚠️ Remplacera les données existantes du même type
+                    </p>
+                </div>
+                ` : ''}
+
+                ${analyse.totalRessources === 0 && analyse.totalDonnees === 0 ? `
+                <div style="background: #fff3cd; border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 20px;">
+                    <p style="margin: 0; color: #856404;">Aucune ressource reconnue dans ce fichier.</p>
+                </div>
+                ` : ''}
+
+                <!-- Boutons -->
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;
+                     padding-top: 15px; border-top: 1px solid #eee;">
                     <button onclick="fermerModalPreviewConfigComplete()"
                             style="padding: 10px 20px; background: white; color: var(--gris-fonce);
                                    border: 1px solid var(--gris-clair); border-radius: 4px;
                                    cursor: pointer; font-size: 0.95rem;">
                         Annuler
+                    </button>
+                    <button onclick="executerImportSelectif()"
+                            style="padding: 10px 24px; background: #28a745; color: white;
+                                   border: none; border-radius: 4px; cursor: pointer; font-size: 0.95rem;
+                                   font-weight: 500;"
+                            ${analyse.totalRessources === 0 && analyse.totalDonnees === 0 ? 'disabled style="opacity:0.5"' : ''}>
+                        Importer la sélection
                     </button>
                 </div>
             </div>
@@ -510,12 +544,31 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
 }
 
 /**
- * Analyse les ressources d'un export localStorage pour les bibliothèques
+ * Analyse détaillée complète d'un export localStorage
+ * Retourne les détails pour ressources pédagogiques ET données du cours
  * @param {Object} config - Données brutes localStorage
- * @returns {Object} Comptage des ressources par type
+ * @returns {Object} Détails des ressources et données par type
  */
-function analyserRessourcesBibliotheques(config) {
-    const result = { pratiques: 0, grilles: 0, echelles: 0, productions: 0, total: 0 };
+function analyserRessourcesDetaillees(config) {
+    const result = {
+        // Ressources pédagogiques (bibliothèques)
+        ressources: {
+            pratiques: { items: [], count: 0, cle: 'pratiquesConfigurables' },
+            grilles: { items: [], count: 0, cles: ['grillesTemplates', 'bibliothequeGrilles'] },
+            echelles: { items: [], count: 0, cle: 'echellesTemplates' },
+            productions: { items: [], count: 0, cle: 'bibliothequeProductions' },
+            cartouches: { items: [], count: 0, cles: [] }
+        },
+        // Données du cours (troubleshooting)
+        donnees: {
+            etudiants: { count: 0, cles: [] },
+            presences: { count: 0, cles: [] },
+            evaluations: { count: 0, cles: [] },
+            configuration: { present: false, cles: [] }
+        },
+        totalRessources: 0,
+        totalDonnees: 0
+    };
 
     // Parser les valeurs si elles sont des strings JSON
     const parseValeur = (val) => {
@@ -525,36 +578,153 @@ function analyserRessourcesBibliotheques(config) {
         return val;
     };
 
+    // ========== RESSOURCES PÉDAGOGIQUES ==========
+
     // Pratiques configurables
     if (config.pratiquesConfigurables) {
         const pratiques = parseValeur(config.pratiquesConfigurables);
-        if (Array.isArray(pratiques)) result.pratiques = pratiques.length;
+        if (Array.isArray(pratiques)) {
+            result.ressources.pratiques.items = pratiques.map(p => ({
+                id: p.id,
+                nom: p.nom || 'Sans nom',
+                description: p.description || ''
+            }));
+            result.ressources.pratiques.count = pratiques.length;
+        }
     }
 
     // Grilles (plusieurs sources possibles)
+    let allGrilles = [];
     if (config.bibliothequeGrilles) {
         const grilles = parseValeur(config.bibliothequeGrilles);
-        if (Array.isArray(grilles)) result.grilles += grilles.length;
+        if (Array.isArray(grilles)) allGrilles = allGrilles.concat(grilles);
     }
     if (config.grillesTemplates) {
         const grilles = parseValeur(config.grillesTemplates);
-        if (Array.isArray(grilles)) result.grilles += grilles.length;
+        if (Array.isArray(grilles)) allGrilles = allGrilles.concat(grilles);
     }
+    result.ressources.grilles.items = allGrilles.map(g => ({
+        id: g.id,
+        nom: g.nom || 'Sans nom',
+        criteres: g.criteres ? g.criteres.length : 0
+    }));
+    result.ressources.grilles.count = allGrilles.length;
 
     // Échelles
     if (config.echellesTemplates) {
         const echelles = parseValeur(config.echellesTemplates);
-        if (Array.isArray(echelles)) result.echelles = echelles.length;
+        if (Array.isArray(echelles)) {
+            result.ressources.echelles.items = echelles.map(e => ({
+                id: e.id,
+                nom: e.nom || 'Sans nom',
+                niveaux: e.niveaux ? e.niveaux.length : 0
+            }));
+            result.ressources.echelles.count = echelles.length;
+        }
     }
 
-    // Productions (plusieurs sources possibles)
+    // Productions
     if (config.bibliothequeProductions) {
         const prods = parseValeur(config.bibliothequeProductions);
-        if (Array.isArray(prods)) result.productions += prods.length;
+        if (Array.isArray(prods)) {
+            result.ressources.productions.items = prods.map(p => ({
+                id: p.id,
+                nom: p.nom || 'Sans nom',
+                type: p.type || ''
+            }));
+            result.ressources.productions.count = prods.length;
+        }
     }
 
-    result.total = result.pratiques + result.grilles + result.echelles + result.productions;
+    // Cartouches (chercher toutes les clés cartouches_*)
+    Object.keys(config).forEach(cle => {
+        if (cle.startsWith('cartouches_')) {
+            const cartouches = parseValeur(config[cle]);
+            if (Array.isArray(cartouches) && cartouches.length > 0) {
+                result.ressources.cartouches.cles.push(cle);
+                result.ressources.cartouches.items.push({
+                    grilleId: cle.replace('cartouches_', ''),
+                    count: cartouches.length
+                });
+                result.ressources.cartouches.count += cartouches.length;
+            }
+        }
+    });
+
+    // ========== DONNÉES DU COURS ==========
+
+    // Étudiants (clés: groupeEtudiants, *_groupeEtudiants)
+    Object.keys(config).forEach(cle => {
+        if (cle === 'groupeEtudiants' || cle.endsWith('_groupeEtudiants')) {
+            const etudiants = parseValeur(config[cle]);
+            if (Array.isArray(etudiants) && etudiants.length > 0) {
+                result.donnees.etudiants.cles.push(cle);
+                result.donnees.etudiants.count += etudiants.length;
+            }
+        }
+    });
+
+    // Présences (clés: presences, *_presences)
+    Object.keys(config).forEach(cle => {
+        if (cle === 'presences' || cle.endsWith('_presences')) {
+            const presences = parseValeur(config[cle]);
+            if (presences && typeof presences === 'object') {
+                const nbDates = Object.keys(presences).length;
+                if (nbDates > 0) {
+                    result.donnees.presences.cles.push(cle);
+                    result.donnees.presences.count += nbDates;
+                }
+            }
+        }
+    });
+
+    // Évaluations/Notes (clés: evaluations, notesEtudiants, *_evaluations, *_notesEtudiants)
+    Object.keys(config).forEach(cle => {
+        if (cle === 'evaluations' || cle.endsWith('_evaluations') ||
+            cle === 'notesEtudiants' || cle.endsWith('_notesEtudiants')) {
+            const data = parseValeur(config[cle]);
+            if (data && (Array.isArray(data) ? data.length > 0 : Object.keys(data).length > 0)) {
+                result.donnees.evaluations.cles.push(cle);
+                result.donnees.evaluations.count++;
+            }
+        }
+    });
+
+    // Configuration (modalitesEvaluation, infoCours, listeCours, trimestres)
+    ['modalitesEvaluation', 'infoCours', 'listeCours', 'trimestres'].forEach(cle => {
+        if (config[cle]) {
+            result.donnees.configuration.cles.push(cle);
+            result.donnees.configuration.present = true;
+        }
+    });
+
+    // Totaux
+    result.totalRessources = result.ressources.pratiques.count +
+                             result.ressources.grilles.count +
+                             result.ressources.echelles.count +
+                             result.ressources.productions.count +
+                             result.ressources.cartouches.count;
+
+    result.totalDonnees = result.donnees.etudiants.count +
+                          result.donnees.presences.count +
+                          (result.donnees.evaluations.count > 0 ? 1 : 0) +
+                          (result.donnees.configuration.present ? 1 : 0);
+
     return result;
+}
+
+/**
+ * Version simplifiée pour rétrocompatibilité (retourne juste les comptes)
+ */
+function analyserRessourcesBibliotheques(config) {
+    const details = analyserRessourcesDetaillees(config);
+    return {
+        pratiques: details.pratiques.count,
+        grilles: details.grilles.count,
+        echelles: details.echelles.count,
+        productions: details.productions.count,
+        total: details.total
+    };
 }
 
 /**
@@ -1112,6 +1282,246 @@ async function executerImportVersBibliotheques() {
     }
 }
 
+/**
+ * 🆕 BETA 95.1 : Import sélectif basé sur les checkboxes
+ * Importe uniquement les catégories cochées par l'utilisateur
+ */
+async function executerImportSelectif() {
+    if (!configCompleteEnAttente) {
+        alert('Aucune configuration en attente d\'importation.');
+        return;
+    }
+
+    const config = configCompleteEnAttente;
+
+    // Retirer la propriété interne _format
+    const donnees = { ...config };
+    delete donnees._format;
+
+    // Helper pour parser les valeurs JSON
+    const parseValeur = (val) => {
+        if (typeof val === 'string') {
+            try { return JSON.parse(val); } catch (e) { return val; }
+        }
+        return val;
+    };
+
+    // Lire les checkboxes cochées
+    const isChecked = (id) => {
+        const cb = document.getElementById(`import-${id}`);
+        return cb && cb.checked;
+    };
+
+    try {
+        let compteurs = { ressources: 0, donnees: 0 };
+        let details = [];
+
+        // ========== RESSOURCES PÉDAGOGIQUES (fusion) ==========
+
+        // Pratiques
+        if (isChecked('pratiques') && donnees.pratiquesConfigurables) {
+            const pratiquesImport = parseValeur(donnees.pratiquesConfigurables);
+            if (Array.isArray(pratiquesImport) && pratiquesImport.length > 0) {
+                const pratiquesExistantes = db.getSync('pratiquesConfigurables', []);
+                const pratiquesNouvelles = pratiquesImport.filter(p =>
+                    !pratiquesExistantes.some(pe => pe.nom === p.nom)
+                ).map(p => ({
+                    ...p,
+                    id: 'PRATIQUE_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                    dateImport: new Date().toISOString()
+                }));
+                if (pratiquesNouvelles.length > 0) {
+                    db.setSync('pratiquesConfigurables', [...pratiquesExistantes, ...pratiquesNouvelles]);
+                    compteurs.ressources += pratiquesNouvelles.length;
+                    details.push(`${pratiquesNouvelles.length} pratique(s)`);
+                }
+            }
+        }
+
+        // Grilles
+        if (isChecked('grilles')) {
+            const grillesExistantes = db.getSync('grillesTemplates', []);
+            let grillesNouvelles = [];
+
+            ['grillesTemplates', 'bibliothequeGrilles'].forEach(cle => {
+                if (donnees[cle]) {
+                    const grillesImport = parseValeur(donnees[cle]);
+                    if (Array.isArray(grillesImport)) {
+                        grillesImport.forEach(g => {
+                            if (!grillesExistantes.some(ge => ge.nom === g.nom) &&
+                                !grillesNouvelles.some(gn => gn.nom === g.nom)) {
+                                grillesNouvelles.push({
+                                    ...g,
+                                    id: 'GRILLE_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                                    dateImport: new Date().toISOString()
+                                });
+                            }
+                        });
+                    }
+                }
+            });
+
+            if (grillesNouvelles.length > 0) {
+                db.setSync('grillesTemplates', [...grillesExistantes, ...grillesNouvelles]);
+                compteurs.ressources += grillesNouvelles.length;
+                details.push(`${grillesNouvelles.length} grille(s)`);
+            }
+        }
+
+        // Échelles
+        if (isChecked('echelles') && donnees.echellesTemplates) {
+            const echellesImport = parseValeur(donnees.echellesTemplates);
+            if (Array.isArray(echellesImport) && echellesImport.length > 0) {
+                const echellesExistantes = db.getSync('echellesTemplates', []);
+                const echellesNouvelles = echellesImport.filter(e =>
+                    !echellesExistantes.some(ee => ee.nom === e.nom)
+                ).map(e => ({
+                    ...e,
+                    id: 'ECH_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                    dateImport: new Date().toISOString()
+                }));
+                if (echellesNouvelles.length > 0) {
+                    db.setSync('echellesTemplates', [...echellesExistantes, ...echellesNouvelles]);
+                    compteurs.ressources += echellesNouvelles.length;
+                    details.push(`${echellesNouvelles.length} échelle(s)`);
+                }
+            }
+        }
+
+        // Productions
+        if (isChecked('productions') && donnees.bibliothequeProductions) {
+            const prodsImport = parseValeur(donnees.bibliothequeProductions);
+            if (Array.isArray(prodsImport) && prodsImport.length > 0) {
+                const cleProductions = (typeof window.cle === 'function') ? window.cle('productions') : 'productions';
+                const prodsExistantes = db.getSync(cleProductions, []);
+                const prodsNouvelles = prodsImport.filter(p =>
+                    !prodsExistantes.some(pe => pe.nom === p.nom)
+                ).map(p => ({
+                    ...p,
+                    id: 'PROD_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                    dateImport: new Date().toISOString()
+                }));
+                if (prodsNouvelles.length > 0) {
+                    db.setSync(cleProductions, [...prodsExistantes, ...prodsNouvelles]);
+                    compteurs.ressources += prodsNouvelles.length;
+                    details.push(`${prodsNouvelles.length} production(s)`);
+                }
+            }
+        }
+
+        // Cartouches
+        if (isChecked('cartouches')) {
+            let nbCartouches = 0;
+            Object.keys(donnees).forEach(cle => {
+                if (cle.startsWith('cartouches_')) {
+                    const cartouches = parseValeur(donnees[cle]);
+                    if (Array.isArray(cartouches) && cartouches.length > 0) {
+                        const cartouchesExistantes = db.getSync(cle, []);
+                        const cartouchesFusionnees = [...cartouchesExistantes, ...cartouches];
+                        db.setSync(cle, cartouchesFusionnees);
+                        nbCartouches += cartouches.length;
+                    }
+                }
+            });
+            if (nbCartouches > 0) {
+                compteurs.ressources += nbCartouches;
+                details.push(`${nbCartouches} cartouche(s)`);
+            }
+        }
+
+        // ========== DONNÉES DU COURS (écrasement) ==========
+
+        // Étudiants
+        if (isChecked('etudiants')) {
+            let nbEtudiants = 0;
+            Object.keys(donnees).forEach(cle => {
+                if (cle === 'groupeEtudiants' || cle.endsWith('_groupeEtudiants')) {
+                    const etudiants = parseValeur(donnees[cle]);
+                    if (Array.isArray(etudiants)) {
+                        db.setSync(cle, etudiants);
+                        nbEtudiants += etudiants.length;
+                    }
+                }
+            });
+            if (nbEtudiants > 0) {
+                compteurs.donnees++;
+                details.push(`${nbEtudiants} étudiant(s)`);
+            }
+        }
+
+        // Présences
+        if (isChecked('presences')) {
+            let nbDates = 0;
+            Object.keys(donnees).forEach(cle => {
+                if (cle === 'presences' || cle.endsWith('_presences')) {
+                    const presences = parseValeur(donnees[cle]);
+                    if (presences && typeof presences === 'object') {
+                        db.setSync(cle, presences);
+                        nbDates += Object.keys(presences).length;
+                    }
+                }
+            });
+            if (nbDates > 0) {
+                compteurs.donnees++;
+                details.push(`${nbDates} date(s) de présences`);
+            }
+        }
+
+        // Évaluations
+        if (isChecked('evaluations')) {
+            Object.keys(donnees).forEach(cle => {
+                if (cle === 'evaluations' || cle.endsWith('_evaluations') ||
+                    cle === 'notesEtudiants' || cle.endsWith('_notesEtudiants')) {
+                    const data = parseValeur(donnees[cle]);
+                    if (data) {
+                        db.setSync(cle, data);
+                    }
+                }
+            });
+            compteurs.donnees++;
+            details.push('Évaluations/Notes');
+        }
+
+        // Configuration
+        if (isChecked('configuration')) {
+            ['modalitesEvaluation', 'infoCours', 'listeCours', 'trimestres'].forEach(cle => {
+                if (donnees[cle]) {
+                    db.setSync(cle, parseValeur(donnees[cle]));
+                }
+            });
+            compteurs.donnees++;
+            details.push('Configuration du cours');
+        }
+
+        // Fermer le modal
+        fermerModalPreviewConfigComplete();
+
+        // Message de résumé
+        const total = compteurs.ressources + compteurs.donnees;
+
+        if (total === 0) {
+            alert('Aucun élément sélectionné ou aucune nouvelle donnée à importer.');
+        } else {
+            const message = `Import réussi !\n\n${details.join('\n')}\n\nTotal : ${total} élément(s) importé(s).`;
+
+            if (typeof afficherNotificationSucces === 'function') {
+                afficherNotificationSucces(message);
+            }
+            alert(message);
+
+            if (confirm('Recharger la page pour voir les changements ?')) {
+                location.reload();
+            }
+        }
+
+        console.log('📊 Import sélectif terminé:', { compteurs, details });
+
+    } catch (erreur) {
+        console.error('Erreur lors de l\'import sélectif:', erreur);
+        alert('Erreur lors de l\'import.\n\n' + erreur.message);
+    }
+}
+
 /* ===============================
    EXPORT CONFIGURATION COMPLÈTE (Beta 91)
    =============================== */
@@ -1252,3 +1662,4 @@ window.reinitialiserDonnees = reinitialiserDonnees;
 window.executerImportConfigComplete = executerImportConfigComplete;
 window.exporterConfigurationComplete = exporterConfigurationComplete;
 window.executerImportVersBibliotheques = executerImportVersBibliotheques; // 🆕 BETA 95.1
+window.executerImportSelectif = executerImportSelectif; // 🆕 BETA 95.1
