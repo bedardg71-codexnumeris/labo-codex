@@ -232,6 +232,118 @@ function calculerHeureFin(debut, duree) {
 }
 
 /* ===============================
+   🆕 BETA 95.1 : GESTION DES PÉRIODES
+   =============================== */
+
+/**
+ * Obtient la durée d'une période en minutes
+ * Source unique : modalitesEvaluation.dureePeriodeMinutes
+ * @returns {number} Durée en minutes (défaut: 55)
+ */
+function obtenirDureePeriode() {
+    const modalites = db.getSync(cle('modalitesEvaluation'), {});
+    return modalites.dureePeriodeMinutes || 55; // Défaut: 55 minutes
+}
+
+/**
+ * Définit la durée d'une période en minutes
+ * @param {number} minutes - Durée en minutes (50, 55, 60...)
+ */
+function definirDureePeriode(minutes) {
+    const modalites = db.getSync(cle('modalitesEvaluation'), {});
+    modalites.dureePeriodeMinutes = parseInt(minutes) || 55;
+    db.setSync(cle('modalitesEvaluation'), modalites);
+    console.log(`[Horaire] Durée de période définie: ${minutes} minutes`);
+}
+
+/**
+ * Convertit un nombre de périodes en heures décimales
+ * @param {number} nombrePeriodes - Nombre de périodes
+ * @param {number} [dureePeriodeMinutes] - Durée d'une période (optionnel, utilise config si omis)
+ * @returns {number} Heures décimales (ex: 2.75)
+ */
+function periodesVersHeures(nombrePeriodes, dureePeriodeMinutes = null) {
+    const duree = dureePeriodeMinutes || obtenirDureePeriode();
+    return (nombrePeriodes * duree) / 60;
+}
+
+/**
+ * Convertit des heures décimales en nombre de périodes (arrondi)
+ * @param {number} heures - Heures décimales
+ * @param {number} [dureePeriodeMinutes] - Durée d'une période (optionnel)
+ * @returns {number} Nombre de périodes (arrondi au plus proche)
+ */
+function heuresVersPeriodes(heures, dureePeriodeMinutes = null) {
+    const duree = dureePeriodeMinutes || obtenirDureePeriode();
+    const minutesTotales = heures * 60;
+    return Math.round(minutesTotales / duree);
+}
+
+/**
+ * Convertit un nombre de périodes en minutes
+ * @param {number} nombrePeriodes - Nombre de périodes
+ * @param {number} [dureePeriodeMinutes] - Durée d'une période (optionnel)
+ * @returns {number} Durée en minutes
+ */
+function periodesVersMinutes(nombrePeriodes, dureePeriodeMinutes = null) {
+    const duree = dureePeriodeMinutes || obtenirDureePeriode();
+    return nombrePeriodes * duree;
+}
+
+/**
+ * Calcule l'heure de fin à partir d'une heure de début et d'un nombre de périodes
+ * @param {string} debut - Heure de début "HH:MM"
+ * @param {number} nombrePeriodes - Nombre de périodes
+ * @param {number} [dureePeriodeMinutes] - Durée d'une période (optionnel)
+ * @returns {string} Heure de fin "HH:MM"
+ */
+function calculerHeureFinPeriodes(debut, nombrePeriodes, dureePeriodeMinutes = null) {
+    if (!debut || !nombrePeriodes) return '';
+    const dureeHeures = periodesVersHeures(nombrePeriodes, dureePeriodeMinutes);
+    return calculerHeureFin(debut, dureeHeures);
+}
+
+/**
+ * Génère les options pour le select du nombre de périodes
+ * De 1 à 8 périodes
+ * @returns {string} HTML des options
+ */
+function genererOptionsNombrePeriodes() {
+    let options = '<option value="">Choisir...</option>';
+    for (let p = 1; p <= 8; p++) {
+        const dureeMinutes = periodesVersMinutes(p);
+        const heures = Math.floor(dureeMinutes / 60);
+        const minutes = dureeMinutes % 60;
+        const affichageTemps = minutes > 0 ? `${heures}h${String(minutes).padStart(2, '0')}` : `${heures}h`;
+        options += `<option value="${p}">${p} période${p > 1 ? 's' : ''} (${affichageTemps})</option>`;
+    }
+    return options;
+}
+
+/**
+ * Formate une durée en affichage lisible selon la préférence
+ * @param {number} nombrePeriodes - Nombre de périodes
+ * @param {string} [mode='periodes'] - 'periodes', 'heures', 'les-deux'
+ * @returns {string} Affichage formaté
+ */
+function formaterDuree(nombrePeriodes, mode = 'periodes') {
+    const dureePeriode = obtenirDureePeriode();
+    const heures = periodesVersHeures(nombrePeriodes, dureePeriode);
+    const heuresInt = Math.floor(heures);
+    const minutes = Math.round((heures - heuresInt) * 60);
+    const heuresStr = minutes > 0 ? `${heuresInt}h${String(minutes).padStart(2, '0')}` : `${heuresInt}h`;
+
+    switch (mode) {
+        case 'heures':
+            return heuresStr;
+        case 'les-deux':
+            return `${nombrePeriodes} pér. (${heuresStr})`;
+        default: // 'periodes'
+            return `${nombrePeriodes} période${nombrePeriodes > 1 ? 's' : ''}`;
+    }
+}
+
+/* ===============================
    MIGRATION DES DONNÉES
    =============================== */
 
@@ -591,7 +703,7 @@ function afficherFormulaireSeancesDynamique() {
             groupe: '',
             jour: '',
             debut: '',
-            duree: '',
+            nombrePeriodes: '',
             local: ''
         }];
     }
@@ -647,9 +759,9 @@ function genererFormulaireSeance(index, seance) {
                     <input type="time" class="controle-form" id="debut_${index}" required>
                 </div>
                 <div class="groupe-form">
-                    <label style="font-size: 0.85rem; font-weight: 500;">Durée</label>
-                    <select class="controle-form" id="duree_${index}" required>
-                        ${genererOptionsDuree()}
+                    <label style="font-size: 0.85rem; font-weight: 500;">Périodes</label>
+                    <select class="controle-form" id="periodes_${index}" required>
+                        ${genererOptionsNombrePeriodes()}
                     </select>
                 </div>
                 <div class="groupe-form">
@@ -698,17 +810,22 @@ function rafraichirFormulairesSeances() {
         const groupeSelect = document.getElementById(`groupe_${index}`);
         const jourSelect = document.getElementById(`jour_${index}`);
         const debutSelect = document.getElementById(`debut_${index}`);
-        const dureeSelect = document.getElementById(`duree_${index}`);
+        const periodesSelect = document.getElementById(`periodes_${index}`);
         const localInput = document.getElementById(`local_${index}`);
 
         if (groupeSelect && seance.groupe) groupeSelect.value = seance.groupe;
         if (jourSelect && seance.jour) jourSelect.value = seance.jour;
         if (debutSelect && seance.debut) debutSelect.value = seance.debut;
 
-        // Convertir la durée en string avec le bon format pour correspondre aux options
-        if (dureeSelect && seance.duree) {
-            const dureeStr = typeof seance.duree === 'number' ? seance.duree.toFixed(1) : seance.duree;
-            dureeSelect.value = dureeStr;
+        // 🆕 BETA 95.1 : Lire nombrePeriodes, avec fallback sur conversion depuis duree
+        if (periodesSelect) {
+            if (seance.nombrePeriodes) {
+                periodesSelect.value = seance.nombrePeriodes;
+            } else if (seance.duree) {
+                // Rétrocompatibilité : convertir heures → périodes
+                const periodes = heuresVersPeriodes(seance.duree);
+                periodesSelect.value = periodes;
+            }
         }
 
         if (localInput && seance.local) localInput.value = seance.local;
@@ -733,7 +850,7 @@ function ajouterFormulaireSeance() {
         groupe: '',
         jour: '',
         debut: '',
-        duree: '',
+        nombrePeriodes: '',
         local: ''
     });
 
@@ -803,14 +920,15 @@ function annulerAjoutSeance() {
  * 5. Rafraîchit l'affichage
  * 6. Masque le formulaire
  *
- * NOUVELLE STRUCTURE DONNÉES:
+ * NOUVELLE STRUCTURE DONNÉES (Beta 95.1):
  * Séance = {
  *   id: timestamp,
  *   lettre: 'A' | 'B' | 'C' | 'D' | 'E' | 'F',
  *   groupe: string,
  *   jour: string,
  *   debut: string (HH:MM),
- *   duree: number (en heures, ex: 2.0, 1.5),
+ *   nombrePeriodes: number (ex: 3, 4),
+ *   duree: number (calculé, heures décimales pour rétrocompat),
  *   local: string,
  *   verrouille: boolean
  * }
@@ -823,7 +941,7 @@ function confirmerSeances() {
         const groupeSelect = document.getElementById(`groupe_${i}`);
         const jourSelect = document.getElementById(`jour_${i}`);
         const debutSelect = document.getElementById(`debut_${i}`);
-        const dureeSelect = document.getElementById(`duree_${i}`);
+        const periodesSelect = document.getElementById(`periodes_${i}`);
         const localInput = document.getElementById(`local_${i}`);
 
         // Validation
@@ -842,10 +960,14 @@ function confirmerSeances() {
             return;
         }
 
-        if (!dureeSelect || !dureeSelect.value) {
-            alert(`Séance ${seancesEnCours[i].lettre}: Veuillez sélectionner une durée`);
+        if (!periodesSelect || !periodesSelect.value) {
+            alert(`Séance ${seancesEnCours[i].lettre}: Veuillez sélectionner le nombre de périodes`);
             return;
         }
+
+        // 🆕 BETA 95.1 : Stocker nombrePeriodes + duree calculée pour rétrocompat
+        const nombrePeriodes = parseInt(periodesSelect.value);
+        const dureeHeures = periodesVersHeures(nombrePeriodes);
 
         // Créer l'objet séance
         const seance = {
@@ -854,7 +976,8 @@ function confirmerSeances() {
             groupe: groupeSelect.value,
             jour: jourSelect.value,
             debut: debutSelect.value,
-            duree: parseFloat(dureeSelect.value),
+            nombrePeriodes: nombrePeriodes,
+            duree: dureeHeures, // Rétrocompatibilité
             local: localInput ? localInput.value : ''
         };
 
@@ -922,10 +1045,13 @@ function genererCarteSeance(seance, index) {
     // Afficher la lettre (nouveau format) ou le nom (ancien format)
     const nomSeance = seance.lettre || seance.nom || '?';
 
-    // Formater la durée pour affichage
-    const dureeAffichage = seance.duree
-        ? ` (${seance.duree % 1 === 0 ? seance.duree + 'h' : seance.duree.toString().replace('.', 'h')})`
-        : '';
+    // 🆕 BETA 95.1 : Afficher périodes si disponible, sinon durée
+    let dureeAffichage = '';
+    if (seance.nombrePeriodes) {
+        dureeAffichage = ` (${seance.nombrePeriodes} pér.)`;
+    } else if (seance.duree) {
+        dureeAffichage = ` (${seance.duree % 1 === 0 ? seance.duree + 'h' : seance.duree.toString().replace('.', 'h')})`;
+    }
 
     return `
 <div class="item-carte" id="carte-seance-${index}">
@@ -984,9 +1110,9 @@ function genererCarteSeanceEdition(seance, index) {
                    value="${echapperHtml(seance.debut || '')}">
         </div>
         <div class="groupe-form">
-            <label>Durée</label>
-            <select class="controle-form controle-form-compact" id="edit-duree-${index}">
-                ${genererOptionsDuree()}
+            <label>Périodes</label>
+            <select class="controle-form controle-form-compact" id="edit-periodes-${index}">
+                ${genererOptionsNombrePeriodes()}
             </select>
         </div>
         <div class="groupe-form">
@@ -997,6 +1123,7 @@ function genererCarteSeanceEdition(seance, index) {
     </div>
     <input type="hidden" id="edit-lettre-${index}" value="${seance.lettre || ''}">
     <input type="hidden" id="edit-groupe-${index}" value="${seance.groupe || ''}">
+    <input type="hidden" id="edit-nombrePeriodes-${index}" value="${seance.nombrePeriodes || ''}">
 </div>
 `;
 }
@@ -1028,15 +1155,21 @@ function modifierSeanceEnPlace(index) {
 
         // Sélectionner les valeurs après insertion dans le DOM
         const debutSelect = document.getElementById(`edit-debut-${index}`);
-        const dureeSelect = document.getElementById(`edit-duree-${index}`);
+        const periodesSelect = document.getElementById(`edit-periodes-${index}`);
 
         if (debutSelect && seance.debut) {
             debutSelect.value = seance.debut;
         }
 
-        if (dureeSelect && seance.duree) {
-            const dureeStr = typeof seance.duree === 'number' ? seance.duree.toFixed(1) : seance.duree;
-            dureeSelect.value = dureeStr;
+        // 🆕 BETA 95.1 : Remplir périodes avec fallback depuis duree
+        if (periodesSelect) {
+            if (seance.nombrePeriodes) {
+                periodesSelect.value = seance.nombrePeriodes;
+            } else if (seance.duree) {
+                // Rétrocompatibilité : convertir heures → périodes
+                const periodes = heuresVersPeriodes(seance.duree);
+                periodesSelect.value = periodes;
+            }
         }
     }
 }
@@ -1058,17 +1191,17 @@ function annulerEditionSeanceEnPlace() {
 function sauvegarderEditionSeanceEnPlace(index) {
     const jour = document.getElementById(`edit-jour-${index}`)?.value;
     const debut = document.getElementById(`edit-debut-${index}`)?.value;
-    const duree = document.getElementById(`edit-duree-${index}`)?.value;
+    const periodes = document.getElementById(`edit-periodes-${index}`)?.value;
     const local = document.getElementById(`edit-local-${index}`)?.value;
     const lettre = document.getElementById(`edit-lettre-${index}`)?.value;
     const groupe = document.getElementById(`edit-groupe-${index}`)?.value;
 
-    if (!jour || !debut || !duree) {
+    if (!jour || !debut || !periodes) {
         alert('Veuillez remplir tous les champs obligatoires');
         return;
     }
 
-    // 🆕 BETA 95 : Lire et sauvegarder dans la clé du cours actif
+    // 🆕 BETA 95.1 : Lire et sauvegarder dans la clé du cours actif
     const cleCours = cleHoraire(null);
     const seances = obtenirSeancesHoraire(null);
 
@@ -1077,13 +1210,18 @@ function sauvegarderEditionSeanceEnPlace(index) {
         return;
     }
 
+    // 🆕 BETA 95.1 : Stocker nombrePeriodes + duree calculée
+    const nombrePeriodes = parseInt(periodes);
+    const dureeHeures = periodesVersHeures(nombrePeriodes);
+
     // Mettre à jour la séance
     seances[index] = {
         lettre: lettre || seances[index].lettre,
         groupe: groupe || seances[index].groupe || '',
         jour: jour,
         debut: debut,
-        duree: parseFloat(duree),
+        nombrePeriodes: nombrePeriodes,
+        duree: dureeHeures, // Rétrocompatibilité
         local: local || ''
     };
 
@@ -1208,7 +1346,7 @@ function annulerFormAjoutSeance() {
     // Réinitialiser les champs
     document.getElementById('jourSeance').value = '';
     document.getElementById('debutSeance').value = '';
-    document.getElementById('dureeSeance').value = '';
+    document.getElementById('periodesSeance').value = '';  // 🆕 BETA 95.1
     document.getElementById('localSeance').value = '';
 
     // Cacher le formulaire et réafficher le bouton
@@ -1224,16 +1362,17 @@ function annulerFormAjoutSeance() {
 /**
  * Confirme l'ajout d'une nouvelle séance
  * Valide les champs, ajoute la séance à localStorage et régénère tout
+ * 🆕 BETA 95.1 : Utilise les périodes au lieu des heures
  */
 function confirmerAjoutSeance() {
     const jour = document.getElementById('jourSeance')?.value;
     const debut = document.getElementById('debutSeance')?.value;
-    const duree = document.getElementById('dureeSeance')?.value;
+    const periodes = document.getElementById('periodesSeance')?.value;  // 🆕 BETA 95.1
     const local = document.getElementById('localSeance')?.value;
 
     // Validation
-    if (!jour || !debut || !duree) {
-        alert('Veuillez remplir tous les champs obligatoires (jour, heure début, durée)');
+    if (!jour || !debut || !periodes) {
+        alert('Veuillez remplir tous les champs obligatoires (jour, heure début, périodes)');
         return;
     }
 
@@ -1247,15 +1386,19 @@ function confirmerAjoutSeance() {
         return;
     }
 
+    // 🆕 BETA 95.1 : Convertir périodes en heures pour rétrocompatibilité
+    const nombrePeriodes = parseInt(periodes);
+    const dureeHeures = periodesVersHeures(nombrePeriodes);
+
     // ✅ VALIDATION: Vérifier si une séance identique existe déjà
     const seanceExistante = seances.find(s =>
         s.jour === jour &&
         s.debut === debut &&
-        s.duree === parseFloat(duree)
+        (s.nombrePeriodes === nombrePeriodes || s.duree === dureeHeures)
     );
 
     if (seanceExistante) {
-        alert(`Une séance identique existe déjà (${seanceExistante.lettre} : ${jour} ${debut}, ${duree}h).\nUtilisez le bouton "Supprimer" pour retirer les doublons.`);
+        alert(`Une séance identique existe déjà (${seanceExistante.lettre} : ${jour} ${debut}, ${nombrePeriodes} périodes).\nUtilisez le bouton "Supprimer" pour retirer les doublons.`);
         return;
     }
 
@@ -1269,7 +1412,8 @@ function confirmerAjoutSeance() {
         groupe: '', // Vide par défaut, peut être configuré plus tard
         jour: jour,
         debut: debut,
-        duree: parseFloat(duree),
+        nombrePeriodes: nombrePeriodes,  // 🆕 BETA 95.1
+        duree: dureeHeures,              // Rétrocompatibilité
         local: local || ''
     };
 
@@ -1435,6 +1579,16 @@ window.obtenirSeancesHoraire = obtenirSeancesHoraire;
 
 // Fonctions utilitaires
 window.calculerHeureFin = calculerHeureFin;
+
+// 🆕 BETA 95.1 : Gestion des périodes
+window.obtenirDureePeriode = obtenirDureePeriode;
+window.definirDureePeriode = definirDureePeriode;
+window.periodesVersHeures = periodesVersHeures;
+window.heuresVersPeriodes = heuresVersPeriodes;
+window.periodesVersMinutes = periodesVersMinutes;
+window.calculerHeureFinPeriodes = calculerHeureFinPeriodes;
+window.genererOptionsNombrePeriodes = genererOptionsNombrePeriodes;
+window.formaterDuree = formaterDuree;
 
 // Fonctions appelées depuis le HTML (onclick, onchange)
 window.afficherFormulaireSeancesDynamique = afficherFormulaireSeancesDynamique;

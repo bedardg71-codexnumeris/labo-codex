@@ -322,6 +322,162 @@ function executerMigrationsBeta95() {
     return resultats;
 }
 
+/* ===============================
+   MIGRATIONS BETA 95.1 : PÉRIODES AU LIEU DES HEURES
+   Date: 5 janvier 2026
+
+   Objectif:
+   Migrer les données existantes vers le système de périodes
+   - Séances: duree → nombrePeriodes
+   - Présences: heures → periodesPresentes
+   =============================== */
+
+/**
+ * Migration 6: Ajouter nombrePeriodes aux séances existantes
+ *
+ * Contexte:
+ * Beta 95.1 introduit le comptage en périodes au lieu des heures.
+ * Cette migration ajoute nombrePeriodes aux séances qui n'ont que duree.
+ *
+ * @returns {Object} { nbSeancesMigrees, nbCoursMigres }
+ */
+function migrerSeancesVersPeriodes() {
+    console.log('🔄 [Migration Beta 95.1] Migration séances vers périodes...');
+
+    const listeCours = db.getSync('listeCours', []);
+    if (listeCours.length === 0) {
+        console.log('   ⚠️ Aucun cours, pas de migration nécessaire');
+        return { nbSeancesMigrees: 0, nbCoursMigres: 0 };
+    }
+
+    // Obtenir la durée de période (défaut: 55 min)
+    const modalites = db.getSync('modalitesEvaluation', {});
+    const dureePeriode = modalites.dureePeriodeMinutes || 55;
+
+    let nbSeancesMigrees = 0;
+    let nbCoursMigres = 0;
+
+    listeCours.forEach(cours => {
+        // Migrer l'horaire du cours
+        const cleHoraireCours = `seancesHoraire_${cours.id}`;
+        const seancesHoraire = db.getSync(cleHoraireCours, []);
+        let modified = false;
+
+        seancesHoraire.forEach(seance => {
+            if (seance.duree !== undefined && seance.nombrePeriodes === undefined) {
+                // Convertir la durée en périodes
+                seance.nombrePeriodes = Math.round((seance.duree * 60) / dureePeriode);
+                nbSeancesMigrees++;
+                modified = true;
+            }
+        });
+
+        if (modified) {
+            db.setSync(cleHoraireCours, seancesHoraire);
+            nbCoursMigres++;
+        }
+
+        // Migrer aussi les séances complètes
+        const cleSeancesCompletes = `seancesCompletes_${cours.id}`;
+        const seancesCompletes = db.getSync(cleSeancesCompletes, {});
+
+        Object.keys(seancesCompletes).forEach(date => {
+            const seancesDuJour = seancesCompletes[date];
+            if (Array.isArray(seancesDuJour)) {
+                seancesDuJour.forEach(seance => {
+                    if (seance.duree !== undefined && seance.nombrePeriodes === undefined) {
+                        seance.nombrePeriodes = Math.round((seance.duree * 60) / dureePeriode);
+                        nbSeancesMigrees++;
+                    }
+                });
+            }
+        });
+
+        if (Object.keys(seancesCompletes).length > 0) {
+            db.setSync(cleSeancesCompletes, seancesCompletes);
+        }
+    });
+
+    if (nbSeancesMigrees > 0) {
+        console.log(`   ✅ ${nbSeancesMigrees} séance(s) migrée(s) (${nbCoursMigres} cours)`);
+    }
+
+    return { nbSeancesMigrees, nbCoursMigres };
+}
+
+/**
+ * Migration 7: Ajouter periodesPresentes aux présences existantes
+ *
+ * Contexte:
+ * Beta 95.1 stocke les présences en périodes.
+ * Cette migration ajoute periodesPresentes aux présences qui n'ont que heures.
+ *
+ * @returns {number} Nombre de présences migrées
+ */
+function migrerPresencesVersPeriodes() {
+    console.log('🔄 [Migration Beta 95.1] Migration présences vers périodes...');
+
+    // Obtenir la durée de période (défaut: 55 min)
+    const modalites = db.getSync('modalitesEvaluation', {});
+    const dureePeriode = modalites.dureePeriodeMinutes || 55;
+
+    // Lire les présences (utiliser clé namespacée si disponible)
+    const clePresences = (typeof cle === 'function') ? cle('presences') : 'presences';
+    const presences = db.getSync(clePresences, []);
+
+    if (!Array.isArray(presences) || presences.length === 0) {
+        console.log('   ⚠️ Aucune présence, pas de migration nécessaire');
+        return 0;
+    }
+
+    let nbMigrees = 0;
+
+    presences.forEach(presence => {
+        if (presence.heures !== undefined && presence.periodesPresentes === undefined) {
+            // Convertir les heures en périodes
+            presence.periodesPresentes = Math.round((presence.heures * 60) / dureePeriode);
+            nbMigrees++;
+        }
+    });
+
+    if (nbMigrees > 0) {
+        db.setSync(clePresences, presences);
+        console.log(`   ✅ ${nbMigrees} présence(s) migrée(s)`);
+    }
+
+    return nbMigrees;
+}
+
+/**
+ * Exécuter toutes les migrations Beta 95.1
+ *
+ * Appelé au chargement de l'application dans js/main.js
+ *
+ * @returns {Object} Résultats des migrations
+ */
+function executerMigrationsBeta951() {
+    console.log('🔄 [Migration] Démarrage migrations Beta 95.1...');
+
+    const resultats = {
+        seances: migrerSeancesVersPeriodes(),
+        presences: migrerPresencesVersPeriodes()
+    };
+
+    const totalSeances = resultats.seances.nbSeancesMigrees || 0;
+    const totalPresences = resultats.presences || 0;
+    const total = totalSeances + totalPresences;
+
+    if (total > 0) {
+        console.log(`✅ [Migration] Beta 95.1 terminée:`);
+        console.log(`   - Séances: ${totalSeances}`);
+        console.log(`   - Présences: ${totalPresences}`);
+    } else {
+        console.log('✅ [Migration] Aucune migration Beta 95.1 nécessaire (déjà à jour)');
+    }
+
+    return resultats;
+}
+
 // Export des fonctions
 if (typeof window !== 'undefined') {
     window.executerMigrationsBeta935 = executerMigrationsBeta935;
@@ -332,4 +488,8 @@ if (typeof window !== 'undefined') {
     // 🆕 Beta 95
     window.executerMigrationsBeta95 = executerMigrationsBeta95;
     window.migrerHoraireVersMultiCours = migrerHoraireVersMultiCours;
+    // 🆕 Beta 95.1
+    window.executerMigrationsBeta951 = executerMigrationsBeta951;
+    window.migrerSeancesVersPeriodes = migrerSeancesVersPeriodes;
+    window.migrerPresencesVersPeriodes = migrerPresencesVersPeriodes;
 }

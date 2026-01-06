@@ -2114,9 +2114,16 @@ function chargerSeancesV2() {
         </div>`;
     }
 
+    // 🆕 BETA 95.1 : Calculer le total en périodes
+    const totalPeriodes = horaire.reduce((sum, s) => {
+        if (s.nombrePeriodes) return sum + s.nombrePeriodes;
+        if (s.duree) return sum + Math.round((parseFloat(s.duree) * 60) / 55);
+        return sum + 2; // Défaut 2 périodes
+    }, 0);
+
     html += `
         <div style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
-            <span class="text-muted"><strong>${horaire.length}</strong> séance(s) • <strong>${totalHeures}h</strong>/semaine</span>
+            <span class="text-muted"><strong>${horaire.length}</strong> séance(s) • <strong>${totalPeriodes}</strong> pér./semaine</span>
         </div>
         <div style="display: grid; gap: 8px;">
     `;
@@ -2124,13 +2131,14 @@ function chargerSeancesV2() {
     horaire.forEach((s, index) => {
         const jourNom = s.jour || joursInverse[s.jourNum] || '?';
         const heureDebut = s.heureDebut || s.debut || '?';
-        const duree = parseFloat(s.duree) || 2;
+        // 🆕 BETA 95.1 : Afficher en périodes
+        const periodes = s.nombrePeriodes || (s.duree ? Math.round((parseFloat(s.duree) * 60) / 55) : 2);
         const local = s.local || '';
 
         html += `
             <div class="item-carte-compact" style="display: flex; align-items: center; padding: 10px 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
                 <span style="width: 90px; font-weight: 600; color: var(--bleu-principal);">${jourNom}</span>
-                <span style="flex: 1;">${heureDebut} (${duree}h)</span>
+                <span style="flex: 1;">${heureDebut} (${periodes} pér.)</span>
                 <span class="text-muted" style="width: 80px;">${local}</span>
                 <div style="display: flex; gap: 5px;">
                     <button class="btn btn-modifier btn-sm" onclick="modifierSeanceV2(${index})" title="Modifier">Modifier</button>
@@ -2165,7 +2173,7 @@ function afficherFormSeanceV2() {
         // Réinitialiser les champs
         setValue('v2-jourSeance', '');
         setValue('v2-debutSeance', '');
-        setValue('v2-dureeSeance', '2.0');
+        setValue('v2-periodesSeance', '2');
         setValue('v2-localSeance', '');
 
         formulaire.scrollIntoView({ behavior: 'smooth' });
@@ -2201,7 +2209,10 @@ function modifierSeanceV2(index) {
         // Remplir les champs
         setValue('v2-jourSeance', seance.jour || '');
         setValue('v2-debutSeance', seance.heureDebut || seance.debut || '');
-        setValue('v2-dureeSeance', seance.duree || '2.0');
+        // 🆕 BETA 95.1 : Utiliser nombrePeriodes si disponible, sinon convertir depuis duree
+        const periodesValue = seance.nombrePeriodes
+            || (seance.duree ? Math.round((parseFloat(seance.duree) * 60) / 55) : 2);
+        setValue('v2-periodesSeance', String(periodesValue));
         setValue('v2-localSeance', seance.local || '');
 
         formulaire.scrollIntoView({ behavior: 'smooth' });
@@ -2219,11 +2230,12 @@ function annulerFormSeanceV2() {
 
 /**
  * Confirme l'ajout ou la modification d'une séance
+ * 🆕 BETA 95.1 : Utilise les périodes au lieu des heures
  */
 function confirmerSeanceV2() {
     const jour = document.getElementById('v2-jourSeance')?.value;
     const debut = document.getElementById('v2-debutSeance')?.value;
-    const duree = document.getElementById('v2-dureeSeance')?.value;
+    const periodes = document.getElementById('v2-periodesSeance')?.value;
     const local = document.getElementById('v2-localSeance')?.value?.trim() || '';
 
     // Validation
@@ -2235,23 +2247,29 @@ function confirmerSeanceV2() {
         alert('Veuillez sélectionner une heure de début.');
         return;
     }
-    if (!duree) {
-        alert('Veuillez sélectionner une durée.');
+    if (!periodes) {
+        alert('Veuillez sélectionner le nombre de périodes.');
         return;
     }
 
+    // 🆕 BETA 95.1 : Convertir périodes en heures pour rétrocompatibilité
+    const nombrePeriodes = parseInt(periodes);
+    const dureeHeures = typeof periodesVersHeures === 'function'
+        ? periodesVersHeures(nombrePeriodes)
+        : (nombrePeriodes * 55) / 60; // Fallback: 55 min par période
+
     // Calculer l'heure de fin
     const [heures, minutes] = debut.split(':').map(Number);
-    const dureeFloat = parseFloat(duree);
-    const finHeures = heures + Math.floor(dureeFloat);
-    const finMinutes = minutes + (dureeFloat % 1) * 60;
-    const heureFin = `${String(finHeures + Math.floor(finMinutes / 60)).padStart(2, '0')}:${String(finMinutes % 60).padStart(2, '0')}`;
+    const finHeures = heures + Math.floor(dureeHeures);
+    const finMinutes = minutes + (dureeHeures % 1) * 60;
+    const heureFin = `${String(finHeures + Math.floor(finMinutes / 60)).padStart(2, '0')}:${String(Math.round(finMinutes % 60)).padStart(2, '0')}`;
 
     const seance = {
         jour: jour,
         heureDebut: debut,
         heureFin: heureFin,
-        duree: duree,
+        nombrePeriodes: nombrePeriodes,  // 🆕 BETA 95.1
+        duree: dureeHeures,              // Rétrocompatibilité
         local: local
     };
 
