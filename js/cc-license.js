@@ -926,6 +926,360 @@ ${metadata.site_auteur ? `Site : ${metadata.site_auteur}` : ''}
 }
 
 // ============================================
+// PANNEAU MÉTADONNÉES EN LECTURE SEULE (Beta 95.1)
+// ============================================
+
+/**
+ * Génère le HTML du panneau métadonnées en lecture seule
+ * @param {Object} ressource - La ressource avec ses métadonnées
+ * @param {string} typeRessource - Type de ressource (grille, echelle, production, cartouche)
+ * @returns {string} - HTML du panneau
+ */
+function genererPanneauMetadonnees(ressource, typeRessource) {
+    if (!ressource) return '';
+
+    // Récupérer les métadonnées (plusieurs formats possibles)
+    const meta = ressource.metadata_cc || ressource.metadata || {};
+
+    // Formatage de la date
+    const formatDate = (dateStr) => {
+        if (!dateStr) return 'Non spécifié';
+        try {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('fr-CA', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        } catch {
+            return dateStr;
+        }
+    };
+
+    // Déterminer l'auteur
+    const auteur = meta.auteur_original || meta.auteur || ressource.auteur || 'Non spécifié';
+    const institution = meta.institution || ressource.institution || '';
+    const dateCreation = meta.date_creation || ressource.dateCreation || ressource.dateAjout || '';
+    const dateModif = meta.date_modification || ressource.dateModification || '';
+    const description = meta.description_courte || meta.description || ressource.description || '';
+    const discipline = Array.isArray(meta.discipline) ? meta.discipline.join(', ') : (meta.discipline || '');
+    const licence = meta.licence || 'CC BY-NC-SA 4.0';
+
+    // Construire les lignes du panneau
+    let lignesHTML = '';
+
+    // Auteur (toujours affiché)
+    lignesHTML += `
+        <div class="meta-ligne">
+            <span class="meta-label">Auteur</span>
+            <span class="meta-valeur">${echapperHtmlCC(auteur)}</span>
+        </div>
+    `;
+
+    // Institution (si présente)
+    if (institution) {
+        lignesHTML += `
+            <div class="meta-ligne">
+                <span class="meta-label">Institution</span>
+                <span class="meta-valeur">${echapperHtmlCC(institution)}</span>
+            </div>
+        `;
+    }
+
+    // Discipline (si présente)
+    if (discipline) {
+        lignesHTML += `
+            <div class="meta-ligne">
+                <span class="meta-label">Discipline</span>
+                <span class="meta-valeur">${echapperHtmlCC(discipline)}</span>
+            </div>
+        `;
+    }
+
+    // Date de création
+    if (dateCreation) {
+        lignesHTML += `
+            <div class="meta-ligne">
+                <span class="meta-label">Créé le</span>
+                <span class="meta-valeur">${formatDate(dateCreation)}</span>
+            </div>
+        `;
+    }
+
+    // Date de modification (si différente de création)
+    if (dateModif && dateModif !== dateCreation) {
+        lignesHTML += `
+            <div class="meta-ligne">
+                <span class="meta-label">Modifié le</span>
+                <span class="meta-valeur">${formatDate(dateModif)}</span>
+            </div>
+        `;
+    }
+
+    // Description (si présente)
+    if (description) {
+        lignesHTML += `
+            <div class="meta-ligne meta-description">
+                <span class="meta-label">Description</span>
+                <span class="meta-valeur">${echapperHtmlCC(description)}</span>
+            </div>
+        `;
+    }
+
+    // Licence (toujours affichée)
+    lignesHTML += `
+        <div class="meta-ligne meta-licence">
+            <span class="meta-label">Licence</span>
+            <span class="meta-valeur">
+                <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank"
+                   style="color: var(--bleu-moyen); text-decoration: none;">
+                    ${echapperHtmlCC(licence)}
+                </a>
+            </span>
+        </div>
+    `;
+
+    return `
+        <div class="panneau-metadata" data-type="${typeRessource}" data-id="${ressource.id || ''}">
+            <div class="panneau-metadata-header">
+                <span class="panneau-metadata-titre">Métadonnées</span>
+                <button type="button" class="btn-edit-metadata" onclick="afficherModalEditionMetadonnees('${typeRessource}', '${ressource.id || ''}')" title="Modifier les métadonnées">
+                    ✏️
+                </button>
+            </div>
+            ${lignesHTML}
+        </div>
+    `;
+}
+
+/**
+ * Fonction utilitaire pour échapper le HTML (locale à cc-license.js)
+ */
+function echapperHtmlCC(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+// ============================================
+// MODAL ÉDITION DES MÉTADONNÉES (Beta 95.1)
+// ============================================
+
+/**
+ * Affiche le modal d'édition des métadonnées
+ * @param {string} typeRessource - Type de ressource
+ * @param {string} ressourceId - ID de la ressource
+ */
+async function afficherModalEditionMetadonnees(typeRessource, ressourceId) {
+    // Récupérer la ressource selon son type
+    let ressource = null;
+    let cleStockage = '';
+
+    switch(typeRessource) {
+        case 'grille':
+            const grilles = await db.get('grillesTemplates') || [];
+            ressource = grilles.find(g => g.id === ressourceId);
+            cleStockage = 'grillesTemplates';
+            break;
+        case 'echelle':
+            const echelles = await db.get('echellesTemplates') || [];
+            ressource = echelles.find(e => e.id === ressourceId);
+            cleStockage = 'echellesTemplates';
+            break;
+        case 'production':
+            const productions = await db.get('productions') || [];
+            ressource = productions.find(p => p.id === ressourceId);
+            cleStockage = 'productions';
+            break;
+        case 'cartouche':
+            // Les cartouches sont stockés par grille, on doit chercher dans toutes
+            const grillesTemplates = await db.get('grillesTemplates') || [];
+            for (const grille of grillesTemplates) {
+                const cartouches = await db.get(`cartouches_${grille.id}`) || [];
+                ressource = cartouches.find(c => c.id === ressourceId);
+                if (ressource) {
+                    cleStockage = `cartouches_${grille.id}`;
+                    break;
+                }
+            }
+            break;
+    }
+
+    if (!ressource) {
+        alert('Ressource non trouvée');
+        return;
+    }
+
+    // Créer ou récupérer le modal
+    let modal = document.getElementById('modalEditionMetadonnees');
+    if (!modal) {
+        modal = creerModalEditionMetadonnees();
+        document.body.appendChild(modal);
+    }
+
+    // Récupérer les métadonnées actuelles
+    const meta = ressource.metadata_cc || ressource.metadata || {};
+
+    // Pré-remplir les champs
+    document.getElementById('editMetaAuteur').value = meta.auteur_original || meta.auteur || ressource.auteur || '';
+    document.getElementById('editMetaInstitution').value = meta.institution || ressource.institution || '';
+    document.getElementById('editMetaDiscipline').value = Array.isArray(meta.discipline) ? meta.discipline.join(', ') : (meta.discipline || '');
+    document.getElementById('editMetaDescription').value = meta.description_courte || meta.description || ressource.description || '';
+
+    // Stocker le contexte pour la sauvegarde
+    modal.dataset.type = typeRessource;
+    modal.dataset.id = ressourceId;
+    modal.dataset.cle = cleStockage;
+
+    // Afficher le nom de la ressource
+    const nomRessource = ressource.nom || ressource.titre || 'Ressource';
+    document.getElementById('editMetaTitre').textContent = `Métadonnées : ${nomRessource}`;
+
+    // Afficher le modal
+    modal.style.display = 'flex';
+}
+
+/**
+ * Crée le HTML du modal d'édition des métadonnées
+ * @returns {HTMLElement}
+ */
+function creerModalEditionMetadonnees() {
+    const modal = document.createElement('div');
+    modal.id = 'modalEditionMetadonnees';
+    modal.className = 'modal';
+    modal.style.cssText = 'display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center;';
+
+    modal.innerHTML = `
+        <div class="modal-content" style="background: white; padding: 30px; border-radius: var(--radius-grand); max-width: 550px; width: 90%; box-shadow: var(--shadow-fort);">
+            <h2 id="editMetaTitre" style="margin-top: 0; color: var(--bleu-fonce); font-size: 1.2rem;">
+                Métadonnées
+            </h2>
+
+            <p style="color: var(--gris-moyen); font-size: 0.9rem; margin-bottom: 20px;">
+                Ces informations sont affichées dans la bibliothèque et incluses lors de l'export.
+            </p>
+
+            <div class="groupe-form" style="margin-bottom: 15px;">
+                <label for="editMetaAuteur" style="font-weight: 600; margin-bottom: 5px; display: block;">Auteur</label>
+                <input type="text" id="editMetaAuteur" class="controle-form" placeholder="Prénom Nom">
+            </div>
+
+            <div class="groupe-form" style="margin-bottom: 15px;">
+                <label for="editMetaInstitution" style="font-weight: 600; margin-bottom: 5px; display: block;">Institution</label>
+                <input type="text" id="editMetaInstitution" class="controle-form" placeholder="Ex: Cégep de Drummondville">
+            </div>
+
+            <div class="groupe-form" style="margin-bottom: 15px;">
+                <label for="editMetaDiscipline" style="font-weight: 600; margin-bottom: 5px; display: block;">Discipline(s)</label>
+                <input type="text" id="editMetaDiscipline" class="controle-form" placeholder="Ex: Littérature, Philosophie">
+                <small style="color: var(--gris-moyen);">Séparez plusieurs disciplines par des virgules</small>
+            </div>
+
+            <div class="groupe-form" style="margin-bottom: 20px;">
+                <label for="editMetaDescription" style="font-weight: 600; margin-bottom: 5px; display: block;">Description</label>
+                <textarea id="editMetaDescription" class="controle-form" rows="3" placeholder="Brève description de cette ressource..." style="resize: vertical;"></textarea>
+            </div>
+
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" class="btn btn-annuler" onclick="fermerModalEditionMetadonnees()">
+                    Annuler
+                </button>
+                <button type="button" class="btn btn-confirmer" onclick="sauvegarderMetadonnees()">
+                    Sauvegarder
+                </button>
+            </div>
+        </div>
+    `;
+
+    return modal;
+}
+
+/**
+ * Ferme le modal d'édition des métadonnées
+ */
+function fermerModalEditionMetadonnees() {
+    const modal = document.getElementById('modalEditionMetadonnees');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+/**
+ * Sauvegarde les métadonnées modifiées
+ */
+async function sauvegarderMetadonnees() {
+    const modal = document.getElementById('modalEditionMetadonnees');
+    if (!modal) return;
+
+    const typeRessource = modal.dataset.type;
+    const ressourceId = modal.dataset.id;
+    const cleStockage = modal.dataset.cle;
+
+    // Récupérer les valeurs du formulaire
+    const auteur = document.getElementById('editMetaAuteur').value.trim();
+    const institution = document.getElementById('editMetaInstitution').value.trim();
+    const disciplineStr = document.getElementById('editMetaDiscipline').value.trim();
+    const description = document.getElementById('editMetaDescription').value.trim();
+
+    // Parser les disciplines
+    const disciplines = disciplineStr ? disciplineStr.split(',').map(d => d.trim()).filter(d => d) : [];
+
+    // Mettre à jour la ressource
+    let liste = await db.get(cleStockage) || [];
+    const index = liste.findIndex(r => r.id === ressourceId);
+
+    if (index === -1) {
+        alert('Ressource non trouvée');
+        return;
+    }
+
+    // Initialiser metadata si nécessaire
+    if (!liste[index].metadata_cc && !liste[index].metadata) {
+        liste[index].metadata = {};
+    }
+
+    // Utiliser metadata_cc si existant, sinon metadata
+    const metaKey = liste[index].metadata_cc ? 'metadata_cc' : 'metadata';
+    if (!liste[index][metaKey]) {
+        liste[index][metaKey] = {};
+    }
+
+    // Mettre à jour les champs
+    liste[index][metaKey].auteur_original = auteur;
+    liste[index][metaKey].institution = institution;
+    liste[index][metaKey].discipline = disciplines;
+    liste[index][metaKey].description_courte = description;
+    liste[index][metaKey].date_modification = new Date().toISOString().split('T')[0];
+
+    // Aussi mettre à jour au niveau ressource pour compatibilité
+    if (auteur) liste[index].auteur = auteur;
+    if (institution) liste[index].institution = institution;
+    if (description) liste[index].description = description;
+
+    // Sauvegarder
+    await db.set(cleStockage, liste);
+
+    // Fermer le modal
+    fermerModalEditionMetadonnees();
+
+    // Rafraîchir l'affichage du panneau métadonnées
+    const panneau = document.querySelector(`.panneau-metadata[data-id="${ressourceId}"]`);
+    if (panneau) {
+        const nouveauPanneau = genererPanneauMetadonnees(liste[index], typeRessource);
+        panneau.outerHTML = nouveauPanneau;
+    }
+
+    // Notification
+    if (typeof afficherNotificationSucces === 'function') {
+        afficherNotificationSucces('Métadonnées mises à jour');
+    }
+}
+
+// ============================================
 // EXPORTS
 // ============================================
 
@@ -940,3 +1294,9 @@ window.genererBadgeCCPermanent = genererBadgeCCPermanent;
 window.demanderMetadonneesEnrichies = demanderMetadonneesEnrichies;
 window.demanderMetadonneesConfigComplete = demanderMetadonneesConfigComplete;
 window.genererFichierLISEZMOI = genererFichierLISEZMOI;
+
+// Beta 95.1 : Panneau métadonnées et édition
+window.genererPanneauMetadonnees = genererPanneauMetadonnees;
+window.afficherModalEditionMetadonnees = afficherModalEditionMetadonnees;
+window.fermerModalEditionMetadonnees = fermerModalEditionMetadonnees;
+window.sauvegarderMetadonnees = sauvegarderMetadonnees;

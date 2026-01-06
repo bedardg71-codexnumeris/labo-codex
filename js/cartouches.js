@@ -1461,6 +1461,12 @@ async function chargerCartouchePourModif(cartoucheId, grilleId) {
         // Générer la checklist pour l'import partiel
         genererChecklistCriteresImport();
 
+        // ✅ AJOUT (6 jan 2026) : Afficher le panneau métadonnées
+        const panneauMeta = document.getElementById('panneauMetadonneesCartouche');
+        if (panneauMeta && typeof genererPanneauMetadonnees === 'function') {
+            panneauMeta.innerHTML = genererPanneauMetadonnees(cartouche, 'cartouche');
+        }
+
         console.log('✅ Cartouche chargée avec succès');
 
         // Si verrouillée, afficher l'alerte de verrouillage
@@ -2876,6 +2882,10 @@ async function creerNouvelleCartouche() {
     // Réinitialiser les champs
     document.getElementById('nomCartouche').value = '';
     document.getElementById('contexteCartouche').value = '';
+
+    // ✅ AJOUT (6 jan 2026) : Vider le panneau métadonnées (mode création)
+    const panneauMeta = document.getElementById('panneauMetadonneesCartouche');
+    if (panneauMeta) panneauMeta.innerHTML = '';
 
     // Peupler et activer les dropdowns grille ET échelle
     await populerDropdownsCartouche('', '', false);

@@ -2836,6 +2836,10 @@ async function creerNouvelleEchelle() {
     // Réinitialiser le formulaire
     document.getElementById('nomEchelleTemplate').value = '';
 
+    // ✅ AJOUT (6 jan 2026) : Vider le panneau métadonnées (mode création)
+    const panneauMeta = document.getElementById('panneauMetadonneesEchelle');
+    if (panneauMeta) panneauMeta.innerHTML = '';
+
     // Initialiser avec 4 niveaux vides par défaut (structure typique)
     window._niveauxNouvelleEchelle = [
         { code: '', nom: '', min: 90, max: 100, valeurCalcul: 95, couleur: '#27ae60' },
@@ -3135,6 +3139,12 @@ async function chargerEchellePourModif(id) {
     if (containerPratiques && typeof GabaritsUtils !== 'undefined') {
         const pratiquesActuelles = echelle.pratiquesCompatibles || [];
         containerPratiques.innerHTML = GabaritsUtils.genererCheckboxesPratiques('echelle', pratiquesActuelles);
+    }
+
+    // ✅ AJOUT (6 jan 2026) : Afficher le panneau métadonnées
+    const panneauMeta = document.getElementById('panneauMetadonneesEchelle');
+    if (panneauMeta && typeof genererPanneauMetadonnees === 'function') {
+        panneauMeta.innerHTML = genererPanneauMetadonnees(echelle, 'echelle');
     }
 
     // Afficher les niveaux
