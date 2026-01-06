@@ -1,6 +1,6 @@
 # SESSION ACTIVE - BETA 95.1
 
-**Date** : 5 janvier 2026
+**Date** : 6 janvier 2026
 **Debut** : Retours de Bruno V. (premier testeur)
 **Objectif** : Corriger les bugs signales et implementer les souhaits
 
@@ -34,11 +34,51 @@
 ## ETAT MENTAL
 
 **Ou j'en suis** :
-Beta 96 - TOUS les bugs corriges et souhaits implementes
+Beta 95.1 - Système de notification automatique implementé
 
 **Prochain pas** :
-1. Tester avec export de Bruno pour valider les corrections
-2. Commit des modifications Beta 96
+1. Attendre retour Bruno sur correction bug grilles
+2. Planifier Import/Export v2 (voir docs/PLAN-IMPORT-EXPORT.md)
+
+---
+
+## RETOURS DE BRUNO (6 janvier 2026)
+
+**Fichier** : `Retours des testeurs/bruno/Bruno 6 janvier 2026 a.txt`
+
+| # | Point | Statut | Correction |
+|---|-------|--------|------------|
+| 1 | Application pratique au cours | ✅ OK | (deja corrige) |
+| 2 | Grille non sauvegardée en bibliothèque | ✅ Corrigé | `sauvegarderGrilleComplete()` appelait la mauvaise fonction |
+
+**Cause du bug #2** : `sauvegarderGrilleComplete()` appelait `sauvegarderNomGrille()` qui ne fonctionne que pour les grilles existantes (vérifie `grilleTemplateActuelle` qui est null pour une nouvelle grille).
+
+**Correction** : Remplacé par appel direct à `await sauvegarderGrilleTemplate(false)` dans `grilles.js:3408-3411`
+
+---
+
+## SYSTÈME DE NOTIFICATION (6 janvier 2026) ✅ FAIT
+
+**Objectif** : Notifier les testeurs des mises à jour sans les spammer par courriel.
+
+**Mécanisme à deux niveaux** :
+
+| Type | Déclencheur | Action au clic |
+|------|-------------|----------------|
+| Version majeure (95.2, 96...) | `VERSION_MAJEURE` différente | Modal Bienvenue |
+| Correction de bug | `BUILD_DATE` différente | Navigation vers Aide > Notes de version |
+
+**Configuration** (index.html, script inline) :
+```javascript
+const VERSION_MAJEURE = '95.1';      // Changer pour 95.2, 96, etc.
+const BUILD_DATE = '2026-01-06';     // Date du dernier déploiement (YYYY-MM-DD)
+```
+
+**Clés localStorage** :
+- `monitorage-version-vue` : dernière version majeure consultée
+- `monitorage-build-vu` : dernière date de build consultée
+
+**À chaque déploiement avec corrections** : mettre à jour `BUILD_DATE` dans index.html
 
 ---
 
