@@ -136,6 +136,12 @@
             detailsTechniques.checked = preferences.afficherDetailsTechniques === true;
         }
 
+        // 🆕 BETA 95.1 : Unité d'affichage de l'assiduité (périodes/heures)
+        const uniteAffichage = document.getElementById('v2-pref-unite-affichage');
+        if (uniteAffichage) {
+            uniteAffichage.value = preferences.uniteAffichageAssiduite || 'periodes';
+        }
+
         // Grille de référence
         const grilleReference = document.getElementById('v2-pref-grille-reference');
         if (grilleReference && modalites.grilleReferenceDepistage) {
@@ -258,6 +264,8 @@
         preferences.afficherGraphiques = document.getElementById('v2-pref-graphiques')?.checked !== false;
         preferences.afficherSeuilsVisuels = document.getElementById('v2-pref-seuils-visuels')?.checked !== false;
         preferences.afficherDetailsTechniques = document.getElementById('v2-pref-details-techniques')?.checked === true;
+        // 🆕 BETA 95.1 : Unité d'affichage de l'assiduité
+        preferences.uniteAffichageAssiduite = document.getElementById('v2-pref-unite-affichage')?.value || 'periodes';
 
         db.setSync('preferencesAffichage', preferences);
 
@@ -401,6 +409,74 @@
     }
 
     // =========================================================================
+    // 🆕 BETA 95.1 : FORMATAGE DE L'ASSIDUITÉ SELON PRÉFÉRENCE
+    // =========================================================================
+
+    /**
+     * Obtient la préférence d'unité d'affichage
+     * @returns {string} - 'periodes' | 'heures' | 'les-deux'
+     */
+    function obtenirUniteAffichageAssiduite() {
+        try {
+            const preferences = db.getSync('preferencesAffichage') || {};
+            return preferences.uniteAffichageAssiduite || 'periodes';
+        } catch (e) {
+            return 'periodes';
+        }
+    }
+
+    /**
+     * Formate l'assiduité selon la préférence d'affichage
+     * @param {Object} assiduite - Objet avec heuresPresentes, heuresOffertes, periodesPresentes, periodesOffertes
+     * @param {string} modeForce - Mode forcé (optionnel) : 'periodes' | 'heures' | 'les-deux'
+     * @returns {string} - Texte formaté
+     */
+    function formaterAssiduiteAvecUnite(assiduite, modeForce = null) {
+        const mode = modeForce || obtenirUniteAffichageAssiduite();
+
+        const heuresP = assiduite.heuresPresentes || 0;
+        const heuresO = assiduite.heuresOffertes || 0;
+        const periodesP = assiduite.periodesPresentes || 0;
+        const periodesO = assiduite.periodesOffertes || 0;
+
+        switch (mode) {
+            case 'heures':
+                return `${heuresP.toFixed(1)}h / ${heuresO.toFixed(1)}h`;
+
+            case 'les-deux':
+                return `${periodesP} / ${periodesO} pér. (${heuresP.toFixed(1)}h / ${heuresO.toFixed(1)}h)`;
+
+            case 'periodes':
+            default:
+                return `${periodesP} / ${periodesO} périodes`;
+        }
+    }
+
+    /**
+     * Formate un total de présence selon la préférence d'affichage
+     * @param {number} heures - Heures totales
+     * @param {string} modeForce - Mode forcé (optionnel)
+     * @returns {string} - Texte formaté
+     */
+    function formaterTotalPresence(heures, modeForce = null) {
+        const mode = modeForce || obtenirUniteAffichageAssiduite();
+        const dureePeriode = typeof window.obtenirDureePeriode === 'function' ? window.obtenirDureePeriode() : 55;
+        const periodes = Math.round((heures * 60) / dureePeriode);
+
+        switch (mode) {
+            case 'heures':
+                return `${heures.toFixed(1)}h`;
+
+            case 'les-deux':
+                return `${periodes} pér. (${heures.toFixed(1)}h)`;
+
+            case 'periodes':
+            default:
+                return `${periodes} période${periodes > 1 ? 's' : ''}`;
+        }
+    }
+
+    // =========================================================================
     // EXPORTS GLOBAUX
     // =========================================================================
 
@@ -411,6 +487,10 @@
     window.restaurerSeuilsDetectionDefautV2 = restaurerSeuilsDetectionDefautV2;
     window.sauvegarderToutesPreferencesV2 = sauvegarderToutesPreferencesV2;
     window.mettreAJourAffichageSeuilV2 = mettreAJourAffichageSeuilV2;
+    // 🆕 BETA 95.1 : Fonctions de formatage selon l'unité
+    window.obtenirUniteAffichageAssiduite = obtenirUniteAffichageAssiduite;
+    window.formaterAssiduiteAvecUnite = formaterAssiduiteAvecUnite;
+    window.formaterTotalPresence = formaterTotalPresence;
 
     // =========================================================================
     // INITIALISATION AU CHARGEMENT

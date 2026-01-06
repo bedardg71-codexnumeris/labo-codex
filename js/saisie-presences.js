@@ -1,13 +1,17 @@
 /* ===============================
    MODULE: SAISIE DES PRÉSENCES
    Version refondée complète avec toutes les fonctionnalités
-   
+
    ⚠️ ARCHITECTURE ⚠️
    Ce module LIT les données depuis :
    - trimestre.js : obtenirCalendrierComplet()
    - horaire.js : obtenirSeancesJour(dateStr)
-   
+
    Il ne doit JAMAIS recalculer les dates ou séances.
+
+   🆕 BETA 95.1 : Comptage en périodes
+   - Les présences sont saisies en nombre de périodes (0, 1, 2, ...)
+   - Les heures sont calculées automatiquement pour rétrocompatibilité
    =============================== */
 
 /* ===============================
@@ -85,6 +89,8 @@ function calculerAssiduiteSommative(da) {
             indice: 1,
             heuresPresentes: 0,
             heuresOffertes: 0,
+            periodesPresentes: 0,
+            periodesOffertes: 0,
             nombreSeances: 0
         };
     }
@@ -160,6 +166,8 @@ function calculerAssiduiteSommative(da) {
             indice: 1,
             heuresPresentes: 0,
             heuresOffertes: 0,
+            periodesPresentes: 0,
+            periodesOffertes: 0,
             nombreSeances: 0
         };
     }
@@ -168,11 +176,18 @@ function calculerAssiduiteSommative(da) {
 
     console.log(`   Sommatif ${da}: ${totalHeuresPresentes}h / ${totalHeuresDonnees}h = ${(indice * 100).toFixed(1)}%`);
 
+    // 🆕 BETA 95.1 : Calculer les équivalents en périodes pour l'affichage
+    const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : 55;
+    const periodesPresentes = Math.round((totalHeuresPresentes * 60) / dureePeriode);
+    const periodesOffertes = Math.round((totalHeuresDonnees * 60) / dureePeriode);
+
     // Retourner un objet avec tous les détails (Single Source of Truth)
     return {
         indice: Math.min(indice, 1),
         heuresPresentes: totalHeuresPresentes,
         heuresOffertes: totalHeuresDonnees,
+        periodesPresentes: periodesPresentes,  // 🆕 BETA 95.1
+        periodesOffertes: periodesOffertes,    // 🆕 BETA 95.1
         nombreSeances: seancesNonFacultatives.size
     };
 }
@@ -277,6 +292,8 @@ function calculerAssiduiteJusquADate(da, dateLimite) {
             indice: 1,
             heuresPresentes: 0,
             heuresOffertes: 0,
+            periodesPresentes: 0,
+            periodesOffertes: 0,
             nombreSeances: 0
         };
     }
@@ -329,16 +346,25 @@ function calculerAssiduiteJusquADate(da, dateLimite) {
             indice: 1,
             heuresPresentes: 0,
             heuresOffertes: 0,
+            periodesPresentes: 0,
+            periodesOffertes: 0,
             nombreSeances: 0
         };
     }
 
     const indice = totalHeuresPresentes / totalHeuresDonnees;
 
+    // 🆕 BETA 95.1 : Calculer les équivalents en périodes
+    const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : 55;
+    const periodesPresentes = Math.round((totalHeuresPresentes * 60) / dureePeriode);
+    const periodesOffertes = Math.round((totalHeuresDonnees * 60) / dureePeriode);
+
     return {
         indice: Math.min(indice, 1),
         heuresPresentes: totalHeuresPresentes,
         heuresOffertes: totalHeuresDonnees,
+        periodesPresentes: periodesPresentes,
+        periodesOffertes: periodesOffertes,
         nombreSeances: seancesNonFacultatives.size
     };
 }
@@ -784,6 +810,70 @@ function obtenirDureeMaxSeance() {
     return 2;
 }
 
+/**
+ * 🆕 BETA 95.1 : Obtient le nombre de périodes d'une séance pour une date
+ * Utilise les séances complètes si disponibles, sinon fallback sur 2 périodes
+ */
+function obtenirNombrePeriodesSeance(dateStr) {
+    let seancesCompletes;
+
+    if (typeof obtenirSeancesCompletes === 'function') {
+        seancesCompletes = obtenirSeancesCompletes();
+    } else {
+        const cleCours = typeof cleSeancesCompletes === 'function' ? cleSeancesCompletes() : cle('seancesCompletes');
+        seancesCompletes = db.getSync(cleCours, {});
+    }
+
+    const seancesDuJour = seancesCompletes[dateStr];
+
+    if (seancesDuJour && seancesDuJour.length > 0) {
+        // Prendre le nombre de périodes de la première séance du jour
+        const seance = seancesDuJour[0];
+        if (seance.nombrePeriodes) {
+            return seance.nombrePeriodes;
+        }
+        // Rétrocompatibilité : convertir la durée en périodes
+        if (seance.duree) {
+            const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : 55;
+            return Math.round((seance.duree * 60) / dureePeriode);
+        }
+    }
+
+    // Fallback : 2 périodes par défaut
+    return 2;
+}
+
+/**
+ * 🆕 BETA 95.1 : Génère les options du select de périodes présentes
+ * @param {number} nombrePeriodesMax - Nombre maximum de périodes pour cette séance
+ * @param {number} valeurSelectionnee - Valeur actuellement sélectionnée
+ */
+function genererOptionsPeriodesPresentes(nombrePeriodesMax, valeurSelectionnee = null) {
+    let options = '';
+    const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : 55;
+
+    for (let p = 0; p <= nombrePeriodesMax; p++) {
+        const selected = (valeurSelectionnee !== null && p === valeurSelectionnee) ? 'selected' : '';
+        const dureeMinutes = p * dureePeriode;
+        const heures = Math.floor(dureeMinutes / 60);
+        const minutes = dureeMinutes % 60;
+        let affichage;
+
+        if (p === 0) {
+            affichage = 'Absent';
+        } else if (p === nombrePeriodesMax) {
+            affichage = `${p} pér. (complet)`;
+        } else {
+            const tempsStr = minutes > 0 ? `${heures}h${String(minutes).padStart(2, '0')}` : `${heures}h`;
+            affichage = `${p} pér. (${tempsStr})`;
+        }
+
+        options += `<option value="${p}" ${selected}>${affichage}</option>`;
+    }
+
+    return options;
+}
+
 /* ===============================
    🔍 VALIDATION ET VÉRIFICATION
    =============================== */
@@ -1106,6 +1196,9 @@ function chargerTableauPresences(dateStr, estVerrouille) {
     }
 
     const dureeSeance = obtenirHeuresSeance(dateStr);
+    // 🆕 BETA 95.1 : Obtenir le nombre de périodes de la séance
+    const nombrePeriodesSeance = obtenirNombrePeriodesSeance(dateStr);
+    const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : 55;
 
     tbody.innerHTML = '';
 
@@ -1114,7 +1207,22 @@ function chargerTableauPresences(dateStr, estVerrouille) {
             p.date === dateStr && p.da === etudiant.da
         );
 
-        const heuresPresence = presenceExistante ? (presenceExistante.heures || 0) : dureeSeance;
+        // 🆕 BETA 95.1 : Utiliser periodesPresentes si disponible, sinon calculer depuis heures
+        let periodesPresence;
+        if (presenceExistante) {
+            if (presenceExistante.periodesPresentes !== undefined) {
+                periodesPresence = presenceExistante.periodesPresentes;
+            } else if (presenceExistante.heures !== undefined) {
+                // Rétrocompatibilité : convertir les heures en périodes
+                periodesPresence = Math.round((presenceExistante.heures * 60) / dureePeriode);
+            } else {
+                periodesPresence = nombrePeriodesSeance; // Présent par défaut
+            }
+        } else {
+            periodesPresence = nombrePeriodesSeance; // Présent par défaut si nouvelle saisie
+        }
+
+        const heuresPresence = (periodesPresence * dureePeriode) / 60;
         const notes = presenceExistante ? (presenceExistante.notes || '') : '';
         const estFacultatif = presenceExistante ? (presenceExistante.facultatif === true) : false;
 
@@ -1127,18 +1235,14 @@ function chargerTableauPresences(dateStr, estVerrouille) {
 
         const tr = document.createElement('tr');
 
-        // Créer l'input des heures avec les bonnes classes CSS
-        const inputHeuresHTML = `
-            <input type="number"
-                   class="controle-form input-heures ${obtenirClasseSaisie(heuresPresence, dureeSeance, estFacultatif)}"
-                   id="heures_${etudiant.da}"
-                   value="${heuresPresence}"
-                   min="0"
-                   max="${dureeSeance}"
-                   step="0.5"
-                   ${estVerrouille ? 'disabled' : ''}
-                   onchange="mettreAJourLigne('${etudiant.da}', '${dateStr}')"
-                   oninput="appliquerCodeCouleurSaisie(this, ${dureeSeance})">`;
+        // 🆕 BETA 95.1 : Select de périodes au lieu d'input heures
+        const selectPeriodesHTML = `
+            <select class="controle-form select-periodes ${obtenirClasseSaisiePeriodes(periodesPresence, nombrePeriodesSeance, estFacultatif)}"
+                    id="periodes_${etudiant.da}"
+                    ${estVerrouille ? 'disabled' : ''}
+                    onchange="mettreAJourLignePeriodes('${etudiant.da}', '${dateStr}', ${nombrePeriodesSeance})">
+                ${genererOptionsPeriodesPresentes(nombrePeriodesSeance, periodesPresence)}
+            </select>`;
 
         // Calculer le total incluant la séance actuelle
         const totalHeuresAvecSeanceActuelle = heuresHistorique + parseFloat(heuresPresence);
@@ -1148,7 +1252,7 @@ function chargerTableauPresences(dateStr, estVerrouille) {
             <td>${echapperHtml(etudiant.da)}</td>
             <td>${echapperHtml(etudiant.prenom)}</td>
             <td>${echapperHtml(etudiant.nom)}</td>
-            <td class="u-w-80">${inputHeuresHTML}</td>
+            <td class="u-w-100">${selectPeriodesHTML}</td>
             <td>
                 <input type="text"
                        class="controle-form input-notes"
@@ -1176,20 +1280,20 @@ function chargerTableauPresences(dateStr, estVerrouille) {
     // Mettre à jour le titre de la colonne Présence avec bouton
     const colonnePresenceTitre = document.getElementById('colonneHeuresTitre');
     if (colonnePresenceTitre) {
-        // Toujours afficher 2h peu importe la durée réelle
+        // 🆕 BETA 95.1 : Afficher en périodes
         colonnePresenceTitre.innerHTML = `
             Présence
             <div class="mt-8-flex-col-gap4">
                 <button class="btn btn-principal btn-tres-compact"
                         onclick="tousPresents()"
                         ${estVerrouille ? 'disabled' : ''}
-                        title="Mettre tous présents">
-                    Tous 2h
+                        title="Mettre tous présents (${nombrePeriodesSeance} périodes)">
+                    Tous ${nombrePeriodesSeance} pér.
                 </button>
                 <button class="btn btn-annuler btn-tres-compact"
                         onclick="reinitialiserSaisie()"
                         ${estVerrouille ? 'disabled' : ''}
-                        title="Réinitialiser">
+                        title="Réinitialiser (tous absents)">
                     ↻
                 </button>
             </div>
@@ -1225,6 +1329,77 @@ function obtenirClasseSaisie(heures, dureeMax, estFacultatif = false) {
         return 'saisie-present';
     }
     return 'saisie-vide';
+}
+
+/**
+ * 🆕 BETA 95.1 : Obtient la classe CSS pour la saisie en périodes
+ */
+function obtenirClasseSaisiePeriodes(periodes, periodesMax, estFacultatif = false) {
+    const valeur = parseInt(periodes) || 0;
+
+    if (valeur === 0) {
+        return estFacultatif ? 'saisie-absence-motivee' : 'saisie-absence';
+    } else if (valeur < periodesMax) {
+        return 'saisie-retard';
+    } else if (valeur >= periodesMax) {
+        return 'saisie-present';
+    }
+    return 'saisie-vide';
+}
+
+/**
+ * 🆕 BETA 95.1 : Applique le code couleur à un select de périodes
+ */
+function appliquerCodeCouleurPeriodes(selectPeriodes, periodesMax) {
+    if (!selectPeriodes) return;
+
+    const valeur = parseInt(selectPeriodes.value) || 0;
+
+    // Retirer toutes les classes
+    selectPeriodes.classList.remove('saisie-absence', 'saisie-absence-motivee', 'saisie-retard', 'saisie-present', 'saisie-vide');
+
+    // Appliquer la bonne classe
+    if (valeur === 0) {
+        selectPeriodes.classList.add('saisie-absence');
+    } else if (valeur < periodesMax) {
+        selectPeriodes.classList.add('saisie-retard');
+    } else {
+        selectPeriodes.classList.add('saisie-present');
+    }
+}
+
+/**
+ * 🆕 BETA 95.1 : Met à jour les statistiques d'une ligne (version périodes)
+ */
+function mettreAJourLignePeriodes(da, dateStr, nombrePeriodesMax) {
+    const selectPeriodes = document.getElementById(`periodes_${da}`);
+    const spanTaux = document.getElementById(`taux_${da}`);
+    const spanHeuresHisto = document.getElementById(`heuresHisto_${da}`);
+
+    if (!selectPeriodes || !spanTaux) return;
+
+    const periodesSeance = parseInt(selectPeriodes.value) || 0;
+    const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : 55;
+    const heuresSeance = (periodesSeance * dureePeriode) / 60;
+
+    // Appliquer le code couleur
+    appliquerCodeCouleurPeriodes(selectPeriodes, nombrePeriodesMax);
+
+    // Mettre à jour le total des heures (historique + séance actuelle)
+    if (spanHeuresHisto) {
+        const heuresHistorique = calculerTotalHeuresPresence(da, dateStr);
+        const totalHeuresAvecSeanceActuelle = heuresHistorique + heuresSeance;
+        spanHeuresHisto.textContent = totalHeuresAvecSeanceActuelle.toFixed(1) + 'h';
+    }
+
+    // Mettre à jour le taux
+    const tauxAssiduiteActuel = calculerTauxAssiduite(da, dateStr, heuresSeance);
+
+    spanTaux.textContent = tauxAssiduiteActuel + '%';
+    spanTaux.style.fontWeight = '500';
+
+    // Mettre à jour le compteur présents/absents
+    mettreAJourCompteurPresences();
 }
 
 /**
@@ -1336,19 +1511,26 @@ function enregistrerPresences() {
     // ✅ CORRECTION CRITIQUE (Beta 95 - 27 déc 2025) : Ajouter coursId
     const coursId = typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null;
 
+    // 🆕 BETA 95.1 : Utiliser les périodes au lieu des heures
+    const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : 55;
+
     etudiantsATraiter.forEach(etudiant => {
-        const inputHeures = document.getElementById(`heures_${etudiant.da}`);
+        // 🆕 BETA 95.1 : Chercher le select de périodes au lieu de l'input heures
+        const selectPeriodes = document.getElementById(`periodes_${etudiant.da}`);
         const inputNotes = document.getElementById(`notes_${etudiant.da}`);
 
-        if (inputHeures) {
-            const heures = parseFloat(inputHeures.value) || 0;
+        if (selectPeriodes) {
+            const periodesPresentes = parseInt(selectPeriodes.value) || 0;
+            // Calculer les heures pour rétrocompatibilité
+            const heures = (periodesPresentes * dureePeriode) / 60;
             const notes = inputNotes ? inputNotes.value.trim() : '';
 
             // Créer l'objet de présence
             const presenceObj = {
                 date: dateStr,
                 da: etudiant.da,
-                heures: heures,
+                periodesPresentes: periodesPresentes,  // 🆕 BETA 95.1
+                heures: heures,  // Rétrocompatibilité
                 notes: notes,
                 coursId: coursId  // ✅ Lier la présence au cours actif
             };
@@ -1481,16 +1663,17 @@ function obtenirClasseTaux(taux) {
    =============================== */
 
 /**
- * Met tous les étudiants présents (heures complètes)
- * IMPORTANT : Préserve les absences motivées RàI (0h avec facultatif=true)
+ * Met tous les étudiants présents (périodes complètes)
+ * IMPORTANT : Préserve les absences motivées RàI (0 période avec facultatif=true)
+ * 🆕 BETA 95.1 : Utilise les périodes au lieu des heures
  */
 function tousPresents() {
     const dateInput = document.getElementById('date-cours');
     if (!dateInput || !dateInput.value) return;
 
     const dateStr = dateInput.value;
-    const dureeSeance = obtenirHeuresSeance(dateStr);
-    const inputs = document.querySelectorAll('.input-heures');
+    const nombrePeriodesSeance = obtenirNombrePeriodesSeance(dateStr);
+    const selects = document.querySelectorAll('.select-periodes');
 
     // Obtenir les présences existantes pour cette date
     const presences = obtenirDonneesSelonMode('presences') || [];
@@ -1498,58 +1681,60 @@ function tousPresents() {
     let nbMisPresents = 0;
     let nbAbsencesMotiveesPreservees = 0;
 
-    inputs.forEach(input => {
-        if (!input.disabled) {
-            const da = input.id.replace('heures_', '');
+    selects.forEach(select => {
+        if (!select.disabled) {
+            const da = select.id.replace('periodes_', '');
 
             // Vérifier si cet étudiant a une absence motivée RàI
             const presenceExistante = presences.find(p => p.date === dateStr && p.da === da);
             const estAbsenceMotivee = presenceExistante &&
                                       presenceExistante.facultatif === true &&
-                                      presenceExistante.heures === 0;
+                                      (presenceExistante.periodesPresentes === 0 || presenceExistante.heures === 0);
 
             if (estAbsenceMotivee) {
                 // Ne pas toucher aux absences motivées RàI
-                console.log(`   ⚪ ${da}: Absence motivée RàI préservée (0h)`);
+                console.log(`   ⚪ ${da}: Absence motivée RàI préservée (0 période)`);
                 nbAbsencesMotiveesPreservees++;
             } else {
-                // Mettre présent
-                input.value = dureeSeance;
+                // Mettre présent (toutes les périodes)
+                select.value = nombrePeriodesSeance;
 
                 // Appliquer le code couleur
-                appliquerCodeCouleurSaisie(input, dureeSeance);
+                appliquerCodeCouleurPeriodes(select, nombrePeriodesSeance);
 
                 // Mettre à jour les stats
-                mettreAJourLigne(da, dateStr);
+                mettreAJourLignePeriodes(da, dateStr, nombrePeriodesSeance);
 
                 nbMisPresents++;
             }
         }
     });
 
-    console.log(`✅ ${nbMisPresents} étudiant(s) mis présents (${dureeSeance}h)`);
+    console.log(`✅ ${nbMisPresents} étudiant(s) mis présents (${nombrePeriodesSeance} périodes)`);
     if (nbAbsencesMotiveesPreservees > 0) {
         console.log(`   ⚪ ${nbAbsencesMotiveesPreservees} absence(s) motivée(s) RàI préservée(s)`);
     }
 }
 
 /**
- * Réinitialise la saisie (met toutes les heures à 0)
+ * Réinitialise la saisie (met toutes les périodes à 0 = absent)
+ * 🆕 BETA 95.1 : Utilise les périodes au lieu des heures
  */
 function reinitialiserSaisie() {
     const dateInput = document.getElementById('date-cours');
     if (!dateInput || !dateInput.value) return;
 
-    const dureeSeance = obtenirHeuresSeance(dateInput.value);
+    const dateStr = dateInput.value;
+    const nombrePeriodesSeance = obtenirNombrePeriodesSeance(dateStr);
 
     // Pas de confirmation pour être plus rapide
-    document.querySelectorAll('.input-heures').forEach(input => {
-        if (!input.disabled) {
-            input.value = 0;
-            appliquerCodeCouleurSaisie(input, dureeSeance);
+    document.querySelectorAll('.select-periodes').forEach(select => {
+        if (!select.disabled) {
+            select.value = 0;
+            appliquerCodeCouleurPeriodes(select, nombrePeriodesSeance);
 
-            const da = input.id.replace('heures_', '');
-            mettreAJourLigne(da, dateInput.value);
+            const da = select.id.replace('periodes_', '');
+            mettreAJourLignePeriodes(da, dateStr, nombrePeriodesSeance);
         }
     });
 
@@ -1851,6 +2036,7 @@ function filtrerTableauPresences() {
 
 /**
  * Met à jour le compteur de présents/absents en temps réel
+ * 🆕 BETA 95.1 : Utilise les selects de périodes au lieu des inputs d'heures
  */
 function mettreAJourCompteurPresences() {
     const tbody = document.getElementById('tbody-saisie-presences');
@@ -1870,13 +2056,13 @@ function mettreAJourCompteurPresences() {
 
         nbTotal++;
 
-        // Récupérer le champ heures (4ème cellule, index 3)
-        const celluleHeures = ligne.cells[3];
-        const inputHeures = celluleHeures?.querySelector('input[type="number"]');
+        // 🆕 BETA 95.1 : Récupérer le select de périodes (4ème cellule, index 3)
+        const cellulePeriodes = ligne.cells[3];
+        const selectPeriodes = cellulePeriodes?.querySelector('select.select-periodes');
 
-        if (inputHeures) {
-            const heures = parseFloat(inputHeures.value) || 0;
-            if (heures > 0) {
+        if (selectPeriodes) {
+            const periodes = parseInt(selectPeriodes.value) || 0;
+            if (periodes > 0) {
                 nbPresents++;
             } else {
                 nbAbsents++;
@@ -1908,6 +2094,11 @@ window.ouvrirSaisiePresence = ouvrirSaisiePresence;
 window.mettreAJourLigne = mettreAJourLigne;
 window.appliquerCodeCouleurSaisie = appliquerCodeCouleurSaisie;
 window.filtrerTableauPresences = filtrerTableauPresences;
+// 🆕 BETA 95.1 : Exports pour le comptage en périodes
+window.mettreAJourLignePeriodes = mettreAJourLignePeriodes;
+window.appliquerCodeCouleurPeriodes = appliquerCodeCouleurPeriodes;
+window.obtenirNombrePeriodesSeance = obtenirNombrePeriodesSeance;
+window.genererOptionsPeriodesPresentes = genererOptionsPeriodesPresentes;
 
 /* ===============================
    🔄 RECHARGEMENT AUTOMATIQUE

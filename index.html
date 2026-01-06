@@ -3181,11 +3181,33 @@
                 <!-- Titre principal -->
                 <h2 class="modal-titre">Bienvenue dans la Beta 95.1</h2>
 
-                <!-- Nouveautés -->
+                <!-- Nouveautés Beta 95.1 -->
                 <div class="modal-section">
-                    <h3>Nouveautés de cette version</h3>
+                    <h3>Nouveautés de la Beta 95.1 (5 janvier 2026)</h3>
+
+                    <h4>Comptage en périodes</h4>
+                    <p>Suite à la demande de Bruno, l'application permet maintenant de compter les présences en <strong>périodes</strong> au lieu des heures. Puisque la durée d'une période varie selon les cégeps (50, 55 ou 60 minutes), tu peux configurer cette durée dans les réglages.</p>
+                    <ul class="modal-liste">
+                        <li><strong>Séances</strong> : Définies en nombre de périodes (1, 2, 3...)</li>
+                        <li><strong>Présences</strong> : Saisies avec un menu déroulant (0 à N périodes)</li>
+                        <li><strong>Affichage</strong> : Configurable (périodes, heures, ou les deux) dans Réglages → Préférences</li>
+                        <li><strong>Rétrocompatibilité</strong> : Tes données existantes sont automatiquement migrées</li>
+                    </ul>
+
+                    <h4 style="margin-top: 1rem;">Corrections de bugs</h4>
+                    <ul class="modal-liste">
+                        <li>Correction de l'affichage des colonnes lors du premier chargement</li>
+                        <li>Amélioration de la gestion des groupes dans l'horaire</li>
+                    </ul>
+                </div>
+
+                <hr style="border: none; border-top: 1px solid var(--gris-clair); margin: 1.5rem 0;">
+
+                <!-- Rappel Beta 95 -->
+                <div class="modal-section">
+                    <h3>Rappel : Nouveautés de la Beta 95</h3>
                     <p>Cette version te permet de gérer plusieurs trimestres et plusieurs cours simultanément. Tes trimestres terminés sont automatiquement archivés pour protéger tes données, et tu peux suivre l'évolution de tes étudiants dans le temps grâce à des graphiques et des captures hebdomadaires.</p>
-                    <p style="margin-top: 0.8rem;">La section <strong>Construction de la note</strong> a été entièrement repensée pour mieux t'accompagner dans ta pratique de notation. Tu y trouveras une bibliothèque de pratiques prédéfinies (sommative, standards, spécifications) avec des configurations adaptées à différentes disciplines. Des gabarits personnalisés ont été créés pour chaque enseignant·e participant·e, basés sur les informations de la cartographie.</p>
+                    <p style="margin-top: 0.8rem;">La section <strong>Construction de la note</strong> a été entièrement repensée pour mieux t'accompagner dans ta pratique de notation. Tu y trouveras une bibliothèque de pratiques prédéfinies (sommative, standards, spécifications) avec des configurations adaptées à différentes disciplines.</p>
                 </div>
 
                 <hr style="border: none; border-top: 1px solid var(--gris-clair); margin: 1.5rem 0;">
@@ -6340,15 +6362,17 @@
                                     </select>
                                 </div>
                                 <div class="groupe-form">
-                                    <label>Durée</label>
-                                    <select class="controle-form controle-form-compact" id="dureeSeance">
+                                    <label>Périodes</label>
+                                    <select class="controle-form controle-form-compact" id="periodesSeance">
                                         <option value="">Choisir...</option>
-                                        <option value="1.0">1h</option>
-                                        <option value="2.0">2h</option>
-                                        <option value="3.0">3h</option>
-                                        <option value="4.0">4h</option>
-                                        <option value="5.0">5h</option>
-                                        <option value="6.0">6h</option>
+                                        <option value="1">1 période</option>
+                                        <option value="2">2 périodes</option>
+                                        <option value="3">3 périodes</option>
+                                        <option value="4">4 périodes</option>
+                                        <option value="5">5 périodes</option>
+                                        <option value="6">6 périodes</option>
+                                        <option value="7">7 périodes</option>
+                                        <option value="8">8 périodes</option>
                                     </select>
                                 </div>
                                 <div class="groupe-form">
@@ -9069,15 +9093,17 @@ Exemple :
                                         </select>
                                     </div>
                                     <div class="groupe-form">
-                                        <label>Durée</label>
-                                        <select class="controle-form controle-form-compact" id="v2-dureeSeance">
+                                        <label>Périodes</label>
+                                        <select class="controle-form controle-form-compact" id="v2-periodesSeance">
                                             <option value="">Choisir...</option>
-                                            <option value="1.0">1h</option>
-                                            <option value="2.0" selected>2h</option>
-                                            <option value="3.0">3h</option>
-                                            <option value="4.0">4h</option>
-                                            <option value="5.0">5h</option>
-                                            <option value="6.0">6h</option>
+                                            <option value="1">1 période</option>
+                                            <option value="2" selected>2 périodes</option>
+                                            <option value="3">3 périodes</option>
+                                            <option value="4">4 périodes</option>
+                                            <option value="5">5 périodes</option>
+                                            <option value="6">6 périodes</option>
+                                            <option value="7">7 périodes</option>
+                                            <option value="8">8 périodes</option>
                                         </select>
                                     </div>
                                     <div class="groupe-form">
@@ -9217,6 +9243,21 @@ Exemple :
                             </label>
                             <small style="display: block; color: var(--gris-moyen); margin-top: 5px; margin-left: 28px; font-size: 0.85rem;">
                                 Afficher les formules de calcul et données brutes
+                            </small>
+                        </div>
+
+                        <!-- 🆕 BETA 95.1 : Unité d'affichage de l'assiduité -->
+                        <div class="groupe-form" style="margin-bottom: 15px;">
+                            <label for="v2-pref-unite-affichage" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                Unité d'affichage de l'assiduité
+                            </label>
+                            <select id="v2-pref-unite-affichage" class="controle-form" onchange="sauvegarderPreferencesV2()" style="max-width: 250px;">
+                                <option value="periodes">Périodes (ex: 12/14 périodes)</option>
+                                <option value="heures">Heures (ex: 11.0h/12.8h)</option>
+                                <option value="les-deux">Les deux (périodes et heures)</option>
+                            </select>
+                            <small style="display: block; color: var(--gris-moyen); margin-top: 5px; font-size: 0.85rem;">
+                                Choisir comment afficher les totaux de présence et d'assiduité
                             </small>
                         </div>
 
@@ -13401,7 +13442,7 @@ Exemple :
             if (modal) {
                 modal.classList.add('actif');
                 // Marquer comme vu dans localStorage
-                localStorage.setItem('nouveautes-beta-95-vue', 'true');
+                localStorage.setItem('nouveautes-beta-95.1-vue', 'true');
                 // Changer l'emoji en version "lu"
                 const pastille = document.querySelector('.pastille-nouveautes');
                 if (pastille) {
@@ -13432,7 +13473,7 @@ Exemple :
             }
 
             // Afficher l'emoji "lu" si les nouveautés ont déjà été vues
-            const nouveautesVues = localStorage.getItem('nouveautes-beta-95-vue');
+            const nouveautesVues = localStorage.getItem('nouveautes-beta-95.1-vue');
             const pastille = document.querySelector('.pastille-nouveautes');
             if (nouveautesVues === 'true' && pastille) {
                 pastille.textContent = '✉️';

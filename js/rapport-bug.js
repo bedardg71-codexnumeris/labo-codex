@@ -1,6 +1,6 @@
 /* ===============================
    MODULE: RAPPORT DE BUG POUR TESTEURS
-   Beta 94 - 16 décembre 2025
+   Beta 95.1 - 5 janvier 2026
 
    Permet aux testeurs d'envoyer facilement des rapports de bug
    avec les informations techniques nécessaires au débogage.
@@ -97,7 +97,7 @@ function obtenirInfosSysteme() {
  */
 function obtenirEtatApplication() {
     const etat = {
-        version: 'Beta 94',
+        version: 'Beta 95.1',
         dateHeure: new Date().toLocaleString('fr-CA'),
         sectionActive: typeof sectionActive !== 'undefined' ? sectionActive : 'inconnue',
         sousSectionActive: typeof sousSectionActive !== 'undefined' ? sousSectionActive : 'inconnue'
@@ -417,7 +417,7 @@ function envoyerRapportParCourriel() {
     const rapport = genererRapportBug(description);
 
     // Construire le mailto
-    const sujet = encodeURIComponent(`[Bug Monitorage Beta 94] ${description.substring(0, 50) || 'Rapport de bug'}...`);
+    const sujet = encodeURIComponent(`[Bug Monitorage Beta 95.1] ${description.substring(0, 50) || 'Rapport de bug'}...`);
     const corps = encodeURIComponent(rapport + '\n\n--- JOIGNEZ VOS CAPTURES D\'ÉCRAN À CE COURRIEL ---');
 
     // Ouvrir le client courriel
