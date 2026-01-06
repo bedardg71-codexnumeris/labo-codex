@@ -1596,6 +1596,7 @@ function afficherNotificationSucces(message) {
  */
 async function exporterCartouches() {
     const cartouches = {};
+    let nbExclues = 0;
 
     // Parcourir toutes les clés localStorage
     const allKeys = Object.keys(localStorage);
@@ -1603,12 +1604,26 @@ async function exporterCartouches() {
         const key = allKeys[i];
         if (key && key.startsWith('cartouches_')) {
             const grilleId = key.replace('cartouches_', '');
-            cartouches[grilleId] = await db.get(key) || [];
+            const toutesCartouches = await db.get(key) || [];
+
+            // ✅ MODIFIÉ (6 jan 2026) : Utiliser détection heuristique pour filtrer démo + importées
+            const cartouchesFiltrees = typeof filtrerRessourcesNonDemo === 'function'
+                ? filtrerRessourcesNonDemo(toutesCartouches, 'cartouche')
+                : toutesCartouches.filter(c => !c.estDemo && !c.auteurOriginal);
+            nbExclues += toutesCartouches.length - cartouchesFiltrees.length;
+
+            if (cartouchesFiltrees.length > 0) {
+                cartouches[grilleId] = cartouchesFiltrees;
+            }
         }
     }
 
     if (Object.keys(cartouches).length === 0) {
-        alert('Aucune cartouche à exporter.');
+        if (nbExclues > 0) {
+            alert(`Aucune cartouche personnelle à exporter.\n\n${nbExclues} cartouche(s) exclue(s) car elles proviennent du matériel démo ou d'imports de collègues.`);
+        } else {
+            alert('Aucune cartouche à exporter.');
+        }
         return;
     }
 
@@ -1618,10 +1633,16 @@ async function exporterCartouches() {
         nbCartouches += arr.length;
     });
 
+    // Informer si des cartouches ont été exclues
+    let infoExclusion = '';
+    if (nbExclues > 0) {
+        infoExclusion = ` (${nbExclues} exclue(s) : démo/importées)`;
+    }
+
     // NOUVEAU (Beta 91): Demander métadonnées enrichies
     const metaEnrichies = await demanderMetadonneesEnrichies(
         'Cartouches de rétroaction',
-        `${nbCartouches} cartouche(s) pour ${Object.keys(cartouches).length} grille(s)`
+        `${nbCartouches} cartouche(s) pour ${Object.keys(cartouches).length} grille(s)${infoExclusion}`
     );
 
     if (!metaEnrichies) {
@@ -3206,6 +3227,7 @@ async function afficherBibliothequeCartouches() {
             const nomCartouche = cartouche.nom || 'Sans titre';
             const grilleNom = cartouche.grilleNom || 'Grille inconnue';
             const nbCommentaires = Object.keys(cartouche.commentaires || {}).length;
+            const auteurOriginal = cartouche.auteurOriginal || '';
 
             html += `
                 <div style="
@@ -3221,7 +3243,7 @@ async function afficherBibliothequeCartouches() {
                                 ${nomCartouche}
                             </div>
                             <div style="color: #7f8c8d; font-size: 0.9em;">
-                                ${nbCommentaires} commentaire(s) • ${grilleNom}
+                                ${nbCommentaires} commentaire(s) • ${grilleNom}${auteurOriginal ? ' • ' + auteurOriginal : ''}
                             </div>
                         </div>
                         <div style="display: flex; gap: 8px; margin-left: 10px;">

@@ -87,12 +87,29 @@ function ajouterMetadonnéesCC(contenu, type, nom, metaEnrichies = {}) {
  * @param {string} type - Type de contenu
  * @param {string} nom - Nom du contenu
  * @param {string} version - Version
+ * @param {string} [auteur] - Auteur (optionnel, sinon récupéré depuis infoCours)
  * @returns {string} - Nom de fichier formaté
  */
-function genererNomFichierCC(type, nom, version) {
+function genererNomFichierCC(type, nom, version, auteur) {
     const nomNettoye = nom.replace(/[^a-z0-9]/gi, '-').toLowerCase();
     const date = new Date().toISOString().split('T')[0];
-    return `${type}-${nomNettoye}-CC-BY-SA-v${version}-${date}.json`;
+
+    // Récupérer l'auteur depuis infoCours si non fourni
+    let auteurNettoye = '';
+    if (!auteur && typeof db !== 'undefined') {
+        const infoCours = db.getSync ? db.getSync('infoCours', {}) : {};
+        auteur = infoCours?.enseignant || '';
+    }
+    if (auteur && typeof auteur === 'string') {
+        auteurNettoye = auteur.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+    }
+
+    // Format: type-nom-auteur-date.json (sans CC-BY-SA pour simplifier)
+    const parties = [type, nomNettoye];
+    if (auteurNettoye) parties.push(auteurNettoye);
+    parties.push(date);
+
+    return parties.join('-') + '.json';
 }
 
 // ============================================
@@ -241,16 +258,14 @@ function verifierLicenceCC(donnees) {
 }
 
 /**
- * Affiche une alerte si le matériel n'a pas de licence CC
+ * Log discret si le matériel n'a pas de licence CC
+ * (Remplace l'ancienne alerte bloquante qui était trop intrusive)
  * @param {Object} donnees - Données importées
  */
 function avertirSansLicence(donnees) {
     if (!verifierLicenceCC(donnees)) {
-        alert(
-            "⚠️ Ce matériel n'a pas de licence Creative Commons.\n\n" +
-            "Il pourrait être protégé par le droit d'auteur traditionnel.\n" +
-            "Assurez-vous d'avoir les droits nécessaires avant de l'utiliser."
-        );
+        // Simple log console au lieu d'une alerte bloquante
+        console.log('ℹ️ Matériel importé sans métadonnées CC (usage normal)');
     }
 }
 

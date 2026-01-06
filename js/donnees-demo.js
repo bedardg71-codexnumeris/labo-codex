@@ -155,6 +155,8 @@ async function fusionnerDonneesDemo(packDemo) {
         for (const prod of productionsDemo) {
             const existe = productions.some(p => p.id === prod.id);
             if (!existe) {
+                // ✅ AJOUTÉ (6 jan 2026) : Marquer comme démo pour filtrage export
+                prod.estDemo = true;
                 productions.push(prod);
             }
         }
@@ -188,6 +190,8 @@ async function fusionnerDonneesDemo(packDemo) {
         for (const grille of grillesDemo) {
             const existe = grilles.some(g => g.id === grille.id);
             if (!existe) {
+                // ✅ AJOUTÉ (6 jan 2026) : Marquer comme démo pour filtrage export
+                grille.estDemo = true;
                 grilles.push(grille);
             }
         }
@@ -204,6 +208,8 @@ async function fusionnerDonneesDemo(packDemo) {
         for (const echelle of echellesDemo) {
             const existe = echelles.some(e => e.id === echelle.id);
             if (!existe) {
+                // ✅ AJOUTÉ (6 jan 2026) : Marquer comme démo pour filtrage export
+                echelle.estDemo = true;
                 echelles.push(echelle);
             }
         }
@@ -246,6 +252,8 @@ async function fusionnerDonneesDemo(packDemo) {
             for (const cartouche of cartouchesDemo) {
                 const existe = cartouches.some(c => c.id === cartouche.id);
                 if (!existe) {
+                    // ✅ AJOUTÉ (6 jan 2026) : Marquer comme démo pour filtrage export
+                    cartouche.estDemo = true;
                     cartouches.push(cartouche);
                 }
             }

@@ -1569,17 +1569,33 @@ async function initialiserModuleGrilles() {
  * }
  */
 async function exporterGrilles() {
-    const grilles = await db.get('grillesTemplates') || [];
+    const toutesGrilles = await db.get('grillesTemplates') || [];
+
+    // ✅ MODIFIÉ (6 jan 2026) : Utiliser détection heuristique pour filtrer démo + importées
+    const grilles = typeof filtrerRessourcesNonDemo === 'function'
+        ? filtrerRessourcesNonDemo(toutesGrilles, 'grille')
+        : toutesGrilles.filter(g => !g.estDemo && !g.auteurOriginal);
+    const nbExclues = toutesGrilles.length - grilles.length;
 
     if (grilles.length === 0) {
-        alert('Aucune grille à exporter.');
+        if (nbExclues > 0) {
+            alert(`Aucune grille personnelle à exporter.\n\n${nbExclues} grille(s) exclue(s) car elles proviennent du matériel démo ou d'imports de collègues.`);
+        } else {
+            alert('Aucune grille à exporter.');
+        }
         return;
+    }
+
+    // Informer si des grilles ont été exclues
+    let infoExclusion = '';
+    if (nbExclues > 0) {
+        infoExclusion = ` (${nbExclues} exclue(s) : démo/importées)`;
     }
 
     // NOUVEAU (Beta 91): Demander métadonnées enrichies
     const metaEnrichies = await demanderMetadonneesEnrichies(
         'Grilles de critères',
-        `${grilles.length} grille(s)`
+        `${grilles.length} grille(s)${infoExclusion}`
     );
 
     if (!metaEnrichies) {
@@ -2122,6 +2138,7 @@ async function afficherBibliothequeGrilles() {
             const nomGrille = grille.nom || 'Sans titre';
             const nbCriteres = grille.criteres?.length || 0;
             const discipline = grille.discipline || '';
+            const auteurOriginal = grille.auteurOriginal || '';
 
             html += `
                 <div style="
@@ -2138,7 +2155,7 @@ async function afficherBibliothequeGrilles() {
                                 ${nomGrille}
                             </div>
                             <div style="color: #7f8c8d; font-size: 0.9em;">
-                                ${nbCriteres} critère(s)${discipline ? ' • ' + discipline : ''}
+                                ${nbCriteres} critère(s)${discipline ? ' • ' + discipline : ''}${auteurOriginal ? ' • ' + auteurOriginal : ''}
                             </div>
                         </div>
                         <div style="display: flex; gap: 8px; margin-left: 10px;">

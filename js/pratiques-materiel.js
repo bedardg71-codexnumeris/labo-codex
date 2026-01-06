@@ -1534,11 +1534,27 @@ async function partagerPratiqueMateriel(pratiqueId) {
  * Exporte toutes les pratiques de l'utilisateur
  */
 async function exporterPratiquesUtilisateur() {
-    const configurations = await db.get(CLE_PRATIQUES_CONFIGURATIONS) || [];
+    const toutesConfigurations = await db.get(CLE_PRATIQUES_CONFIGURATIONS) || [];
+
+    // ✅ AJOUTÉ (6 jan 2026) : Filtrer pour n'exporter que le matériel de l'utilisateur
+    // Exclure : matériel démo (estDemo) et matériel importé de collègues (auteurOriginal)
+    const configurations = toutesConfigurations.filter(c => !c.estDemo && !c.auteurOriginal);
+    const nbExclues = toutesConfigurations.length - configurations.length;
 
     if (configurations.length === 0) {
-        alert('Aucune pratique à exporter.');
+        if (nbExclues > 0) {
+            alert(`Aucune pratique personnelle à exporter.\n\n${nbExclues} pratique(s) exclue(s) car elles proviennent d'imports de collègues.`);
+        } else {
+            alert('Aucune pratique à exporter.');
+        }
         return;
+    }
+
+    // Informer si des pratiques ont été exclues
+    let infoExclusion = '';
+    if (nbExclues > 0) {
+        infoExclusion = ` (${nbExclues} exclue(s))`;
+        console.log(`📦 Export pratiques: ${nbExclues} pratique(s) exclue(s) (importées)`);
     }
 
     const exportData = {

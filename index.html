@@ -3183,15 +3183,15 @@
 
                 <!-- Nouveautés Beta 95.1 -->
                 <div class="modal-section">
-                    <h3>Nouveautés de la Beta 95.1 (5 janvier 2026)</h3>
+                    <h3>Nouveautés de la Beta 95.1 (5-6 janvier 2026)</h3>
 
-                    <h4>Comptage en périodes</h4>
-                    <p>Suite à la demande de Bruno, l'application permet maintenant de compter les présences en <strong>périodes</strong> au lieu des heures. Puisque la durée d'une période varie selon les cégeps (50, 55 ou 60 minutes), tu peux configurer cette durée dans les réglages.</p>
+                    <h4>Import/Export amélioré</h4>
+                    <p>Le système d'import/export a été repensé pour faciliter le partage de ressources pédagogiques entre collègues tout en protégeant la confidentialité des données étudiantes.</p>
                     <ul class="modal-liste">
-                        <li><strong>Séances</strong> : Définies en nombre de périodes (1, 2, 3...)</li>
-                        <li><strong>Présences</strong> : Saisies avec un menu déroulant (0 à N périodes)</li>
-                        <li><strong>Affichage</strong> : Configurable (périodes, heures, ou les deux) dans Réglages → Préférences</li>
-                        <li><strong>Rétrocompatibilité</strong> : Tes données existantes sont automatiquement migrées</li>
+                        <li><strong>Import sélectif</strong> : Choisis exactement quelles ressources importer avec une checkbox par élément</li>
+                        <li><strong>Protection des données</strong> : Les données nominatives (étudiants, présences, notes) sont protégées et ne peuvent pas être partagées</li>
+                        <li><strong>Filtrage intelligent</strong> : Les données de démonstration et le matériel importé d'autres collègues sont automatiquement exclus de tes exports</li>
+                        <li><strong>Détection de l'auteur</strong> : L'application identifie si un fichier provient de toi ou d'un collègue</li>
                     </ul>
 
                     <h4 style="margin-top: 1rem;">Heures non piles (souhait Bruno)</h4>
@@ -13064,6 +13064,40 @@ Exemple :
                     <h2>Notes de version</h2>
                     <p class="text-muted">Historique des changements majeurs</p>
 
+                    <!-- Beta 95.1 -->
+                    <div class="carte accordeon" id="accordeon-aide-beta951">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Beta 95.1 — Import/Export amélioré
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                        <p class="text-muted">5-6 janvier 2026</p>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Partage de ressources pédagogiques</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Import sélectif</strong> : Checkbox individuelle par élément (grille, échelle, production, pratique).</li>
+                            <li><strong>Toggle par catégorie</strong> : Sélection/désélection rapide de tous les éléments d'une catégorie.</li>
+                            <li><strong>Affichage de l'auteur</strong> : Les ressources importées affichent leur auteur original.</li>
+                            <li><strong>Détection automatique</strong> : L'application identifie si un fichier provient de toi ou d'un collègue.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Protection des données confidentielles</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Données étudiantes protégées</strong> : Les noms, présences et notes sont grisés et non importables.</li>
+                            <li><strong>Message explicite</strong> : « Partage impossible – Les données nominatives sont confidentielles ».</li>
+                            <li><strong>Filtrage intelligent à l'export</strong> : Les données démo et le matériel importé d'autres collègues sont automatiquement exclus.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Corrections de bugs</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Application des pratiques</strong> : Les pratiques créées via Primo s'appliquent correctement au cours.</li>
+                            <li><strong>Persistance des ressources</strong> : Les grilles, échelles, cartouches et productions restent visibles après sauvegarde.</li>
+                            <li><strong>Heures non piles</strong> : Entrée d'heures comme 8h55 dans Primo au lieu des heures rondes.</li>
+                        </ul>
+                        </div><!-- fin accordeon-contenu beta951 -->
+                    </div>
+
                     <!-- Beta 95 -->
                     <div class="carte accordeon" id="accordeon-aide-beta95">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
@@ -13437,7 +13471,7 @@ Exemple :
             if (modal) {
                 modal.classList.add('actif');
                 // Marquer comme vu dans localStorage
-                localStorage.setItem('nouveautes-beta-95.1b-vue', 'true');
+                localStorage.setItem('nouveautes-beta-95.1c-vue', 'true');
                 // Changer l'emoji en version "lu"
                 const pastille = document.querySelector('.pastille-nouveautes');
                 if (pastille) {
@@ -13468,7 +13502,7 @@ Exemple :
             }
 
             // Afficher l'emoji "lu" si les nouveautés ont déjà été vues
-            const nouveautesVues = localStorage.getItem('nouveautes-beta-95.1b-vue');
+            const nouveautesVues = localStorage.getItem('nouveautes-beta-95.1c-vue');
             const pastille = document.querySelector('.pastille-nouveautes');
             if (nouveautesVues === 'true' && pastille) {
                 pastille.textContent = '✉️';

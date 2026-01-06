@@ -1851,17 +1851,33 @@ function afficherNotificationSucces(message) {
  * }
  */
 async function exporterEchelles() {
-    const echelles = await db.get('echellesTemplates') ||  [];
+    const toutesEchelles = await db.get('echellesTemplates') || [];
+
+    // ✅ MODIFIÉ (6 jan 2026) : Utiliser détection heuristique pour filtrer démo + importées
+    const echelles = typeof filtrerRessourcesNonDemo === 'function'
+        ? filtrerRessourcesNonDemo(toutesEchelles, 'echelle')
+        : toutesEchelles.filter(e => !e.estDemo && !e.auteurOriginal);
+    const nbExclues = toutesEchelles.length - echelles.length;
 
     if (echelles.length === 0) {
-        alert('Aucune échelle à exporter.');
+        if (nbExclues > 0) {
+            alert(`Aucune échelle personnelle à exporter.\n\n${nbExclues} échelle(s) exclue(s) car elles proviennent du matériel démo ou d'imports de collègues.`);
+        } else {
+            alert('Aucune échelle à exporter.');
+        }
         return;
+    }
+
+    // Informer si des échelles ont été exclues
+    let infoExclusion = '';
+    if (nbExclues > 0) {
+        infoExclusion = ` (${nbExclues} exclue(s) : démo/importées)`;
     }
 
     // NOUVEAU (Beta 91): Demander métadonnées enrichies
     const metaEnrichies = await demanderMetadonneesEnrichies(
         'Échelles de performance',
-        `${echelles.length} échelle(s)`
+        `${echelles.length} échelle(s)${infoExclusion}`
     );
 
     if (!metaEnrichies) {
@@ -2393,6 +2409,7 @@ async function afficherBibliothequeEchelles() {
             const nomEchelle = echelle.nom || 'Sans titre';
             const nbNiveaux = echelle.niveaux?.length || 0;
             const discipline = echelle.discipline || '';
+            const auteurOriginal = echelle.auteurOriginal || '';
 
             html += `
                 <div style="
@@ -2409,7 +2426,7 @@ async function afficherBibliothequeEchelles() {
                                 ${nomEchelle}
                             </div>
                             <div style="color: #7f8c8d; font-size: 0.9em;">
-                                ${nbNiveaux} niveau(x)${discipline ? ' • ' + discipline : ''}
+                                ${nbNiveaux} niveau(x)${discipline ? ' • ' + discipline : ''}${auteurOriginal ? ' • ' + auteurOriginal : ''}
                             </div>
                         </div>
                         <div style="display: flex; gap: 8px; margin-left: 10px;">

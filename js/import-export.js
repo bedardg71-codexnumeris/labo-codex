@@ -42,6 +42,79 @@ function initialiserModuleImportExport() {
 }
 
 /* ===============================
+   DÉTECTION HEURISTIQUE DES DONNÉES DÉMO
+   (6 jan 2026) - Pour filtrer à l'export
+   =============================== */
+
+/**
+ * Détecte si une ressource est du matériel démo basé sur des patterns connus
+ * @param {Object} ressource - La ressource à vérifier
+ * @param {string} type - Type de ressource ('grille', 'echelle', 'production', 'cartouche', 'pratique', 'etudiant')
+ * @returns {boolean} - True si c'est du matériel démo
+ */
+function estRessourceDemo(ressource, type) {
+    if (!ressource) return false;
+
+    // Si explicitement marqué comme démo
+    if (ressource.estDemo || ressource.isDemo) return true;
+
+    // Si importé d'un collègue
+    if (ressource.auteurOriginal) return true;
+
+    const nom = (ressource.nom || '').toLowerCase();
+
+    // Patterns communs pour les données démo
+    const patternsDemo = [
+        'démo', 'demo', '(exemple)', 'exemple',
+        'primo primavera', // Auteur des données démo
+        '[spe] gabarit' // Gabarits SPE
+    ];
+
+    // Vérifier les patterns dans le nom
+    if (patternsDemo.some(pattern => nom.includes(pattern))) {
+        return true;
+    }
+
+    // Détection spécifique par type
+    switch (type) {
+        case 'etudiant':
+            // Étudiants démo : groupe 9999 ou DA commençant par 9999
+            if (ressource.groupe === '9999' || ressource.groupe === 9999) return true;
+            if (ressource.da && ressource.da.toString().startsWith('9999')) return true;
+            if (ressource.coursId && ressource.coursId.includes('9999')) return true;
+            break;
+
+        case 'grille':
+            // Grilles avec noms spécifiques démo
+            if (nom.includes('grille générique') || nom.includes('grille démo')) return true;
+            break;
+
+        case 'echelle':
+            // Échelles avec noms spécifiques démo
+            if (nom.includes('échelle générique') || nom.includes('echelle générique')) return true;
+            break;
+
+        case 'cours':
+            // Cours démo : groupe 9999
+            if (ressource.groupe === '9999' || ressource.groupe === 9999) return true;
+            break;
+    }
+
+    return false;
+}
+
+/**
+ * Filtre un tableau pour exclure les ressources démo
+ * @param {Array} ressources - Tableau de ressources
+ * @param {string} type - Type de ressource
+ * @returns {Array} - Ressources filtrées (sans démo ni importées)
+ */
+function filtrerRessourcesNonDemo(ressources, type) {
+    if (!Array.isArray(ressources)) return [];
+    return ressources.filter(r => !estRessourceDemo(r, type));
+}
+
+/* ===============================
    EXPORT DES DONNÉES
    =============================== */
 
@@ -92,17 +165,67 @@ function executerExport() {
     document.querySelectorAll('.cle-export:checked').forEach(cb => {
         clesSelectionnees.push(cb.value);
     });
-    
+
     if (clesSelectionnees.length === 0) {
         alert('Aucune clé sélectionnée');
         return;
     }
-    
+
     const donnees = {};
+    let nbDemoExclus = 0;
+
     clesSelectionnees.forEach(cle => {
         // KEPT: localStorage.getItem() pour obtenir la string JSON brute (export)
-        donnees[cle] = localStorage.getItem(cle);
+        let valeur = localStorage.getItem(cle);
+
+        // ✅ AJOUTÉ (6 jan 2026) : Filtrer les données démo avant export
+        if (valeur) {
+            try {
+                let parsed = JSON.parse(valeur);
+
+                // Filtrer les étudiants démo (groupe 9999)
+                if (cle.includes('groupeEtudiants') && Array.isArray(parsed)) {
+                    const avant = parsed.length;
+                    parsed = parsed.filter(e => !estRessourceDemo(e, 'etudiant'));
+                    nbDemoExclus += avant - parsed.length;
+                    valeur = JSON.stringify(parsed);
+                }
+
+                // Filtrer les cours démo (groupe 9999)
+                if (cle === 'listeCours' && Array.isArray(parsed)) {
+                    const avant = parsed.length;
+                    parsed = parsed.filter(c => !estRessourceDemo(c, 'cours'));
+                    nbDemoExclus += avant - parsed.length;
+                    valeur = JSON.stringify(parsed);
+                }
+
+                // Filtrer les grilles démo
+                if (cle === 'grillesTemplates' && Array.isArray(parsed)) {
+                    const avant = parsed.length;
+                    parsed = filtrerRessourcesNonDemo(parsed, 'grille');
+                    nbDemoExclus += avant - parsed.length;
+                    valeur = JSON.stringify(parsed);
+                }
+
+                // Filtrer les échelles démo
+                if (cle === 'echellesTemplates' && Array.isArray(parsed)) {
+                    const avant = parsed.length;
+                    parsed = filtrerRessourcesNonDemo(parsed, 'echelle');
+                    nbDemoExclus += avant - parsed.length;
+                    valeur = JSON.stringify(parsed);
+                }
+
+            } catch (e) {
+                // Si le parsing échoue, garder la valeur brute
+            }
+        }
+
+        donnees[cle] = valeur;
     });
+
+    if (nbDemoExclus > 0) {
+        console.log(`📦 Export: ${nbDemoExclus} élément(s) démo exclu(s)`);
+    }
 
     const json = JSON.stringify(donnees, null, 2);
     const blob = new Blob([json], { type: 'application/json' });
@@ -111,7 +234,15 @@ function executerExport() {
     const a = document.createElement('a');
     a.href = url;
     const dateStr = new Date().toISOString().slice(0, 10);
-    a.download = `export-monitorage-${dateStr}.json`;
+
+    // Inclure le nom de l'utilisateur dans le fichier
+    const infoCours = db.getSync ? db.getSync('infoCours', {}) : {};
+    const auteur = infoCours?.enseignant || '';
+    const auteurNettoye = auteur ? auteur.replace(/[^a-z0-9]/gi, '-').toLowerCase() : '';
+    const nomFichier = auteurNettoye
+        ? `sauvegarde-${auteurNettoye}-${dateStr}.json`
+        : `sauvegarde-monitorage-${dateStr}.json`;
+    a.download = nomFichier;
     a.click();
     URL.revokeObjectURL(url);
     
@@ -155,9 +286,18 @@ function previsualiserImport(event) {
 
     const lecteur = new FileReader();
     lecteur.onload = function(e) {
+        // Étape 1 : Parser le JSON
+        let donnees;
         try {
-            const donnees = JSON.parse(e.target.result);
+            donnees = JSON.parse(e.target.result);
+        } catch (err) {
+            alert('Fichier JSON invalide.\n\nVérifiez que le fichier est bien un export Monitorage.');
+            console.error('Erreur de parsing JSON:', err);
+            return;
+        }
 
+        // Étape 2 : Traiter les données (erreurs séparées)
+        try {
             // 🆕 BETA 95.1 : Fermer l'ancien modal et ouvrir le nouveau avec analyse
             fermerModalImport();
 
@@ -175,10 +315,9 @@ function previsualiserImport(event) {
                 configCompleteEnAttente._format = 'localStorage-brut';
                 afficherModalPreviewLocalStorageBrut(donnees, nomFichier);
             }
-
         } catch (err) {
-            alert('Fichier JSON invalide.\n\nVérifiez que le fichier est bien un export Monitorage.');
-            console.error('Erreur de parsing JSON:', err);
+            alert('Erreur lors de l\'analyse du fichier.\n\nDétails dans la console (F12).');
+            console.error('Erreur analyse import:', err);
         }
     };
     lecteur.readAsText(fichier);
@@ -393,6 +532,21 @@ function detecterFormatConfig(config) {
 // Variable globale pour stocker l'analyse en cours
 let analyseImportEnCours = null;
 
+/**
+ * Toggle toutes les checkboxes d'une catégorie
+ * @param {string} category - ID de la catégorie (grilles, echelles, etc.)
+ * @param {boolean} checked - État à appliquer
+ */
+function toggleCategoryItems(category, checked) {
+    const items = document.querySelectorAll(`.import-item-${category}`);
+    items.forEach(cb => {
+        cb.checked = checked;
+    });
+}
+
+// Exposer globalement
+window.toggleCategoryItems = toggleCategoryItems;
+
 function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
     const cles = Object.keys(config);
     const nbCles = cles.length;
@@ -408,28 +562,106 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
     const analyse = analyserRessourcesDetaillees(config);
     analyseImportEnCours = analyse;
 
-    // Générer les lignes de ressources avec checkboxes
-    const genererLigneRessource = (id, label, count, items, emoji) => {
+    // ✅ CORRIGÉ (6 jan 2026) : Lire le nom enseignant dans tous les formats possibles
+    const extraireNomEnseignant = (infoCours) => {
+        if (!infoCours) return '';
+        // Format 1: prenomEnseignant + nomEnseignant (champs séparés)
+        if (infoCours.prenomEnseignant || infoCours.nomEnseignant) {
+            return `${infoCours.prenomEnseignant || ''} ${infoCours.nomEnseignant || ''}`.trim().toLowerCase();
+        }
+        // Format 2: enseignant comme chaîne
+        if (typeof infoCours.enseignant === 'string') {
+            return infoCours.enseignant.toLowerCase().trim();
+        }
+        // Format 3: enseignant.prenom + enseignant.nom (objet)
+        if (infoCours.enseignant?.prenom || infoCours.enseignant?.nom) {
+            return `${infoCours.enseignant.prenom || ''} ${infoCours.enseignant.nom || ''}`.trim().toLowerCase();
+        }
+        return '';
+    };
+
+    // Détecter si l'import vient d'un collègue ou de soi-même
+    const infoCoursActuel = db.getSync('infoCours', {}) || {};
+    const utilisateurActuel = extraireNomEnseignant(infoCoursActuel);
+
+    // Chercher l'auteur dans le fichier importé
+    let auteurImport = '';
+    if (config.infoCours) {
+        try {
+            const infoCoursImport = typeof config.infoCours === 'string'
+                ? JSON.parse(config.infoCours)
+                : config.infoCours;
+            auteurImport = extraireNomEnseignant(infoCoursImport);
+        } catch (e) { /* ignore */ }
+    }
+
+    // Déterminer si c'est un collègue (auteurs différents ET non vides)
+    const estCollègue = auteurImport && utilisateurActuel && auteurImport !== utilisateurActuel;
+
+    // Cas où on ne peut pas déterminer la source (nom manquant)
+    const sourceInconnue = !utilisateurActuel || !auteurImport;
+    const sourceLabel = estCollègue
+        ? `Configuration de ${auteurImport.split(' ')[0] || 'collègue'}`
+        : sourceInconnue
+            ? 'Source inconnue'
+            : 'Sauvegarde personnelle';
+
+    // Stocker pour utilisation dans executerImportSelectif
+    analyseImportEnCours.estCollègue = estCollègue;
+    analyseImportEnCours.auteurImport = auteurImport;
+    analyseImportEnCours.sourceInconnue = sourceInconnue;
+
+    // ✅ MODIFIÉ (6 jan 2026) : Checkbox individuelle par élément
+    const genererLigneRessource = (id, label, count, items) => {
         if (count === 0) return '';
-        const details = items.slice(0, 3).map(i => i.nom).join(', ') + (items.length > 3 ? '...' : '');
+
+        // Générer les checkboxes individuelles pour chaque item
+        const itemsHTML = items.map((item, index) => {
+            const itemId = item.id || `${id}_${index}`;
+            const nomAffiche = item.nom || 'Sans nom';
+            // Ajouter l'auteur original si présent
+            const auteurInfo = item.auteurOriginal ? ` <span style="color: #999; font-size: 0.75rem;">(${item.auteurOriginal})</span>` : '';
+
+            return `
+                <label style="display: flex; align-items: center; gap: 8px; padding: 6px 10px;
+                       background: #fafafa; border-radius: 4px; margin: 4px 0; cursor: pointer;
+                       border: 1px solid #eee; transition: all 0.15s;"
+                       onmouseover="this.style.borderColor='#28a745'; this.style.background='#f0fff4';"
+                       onmouseout="this.style.borderColor='#eee'; this.style.background='#fafafa';">
+                    <input type="checkbox" class="import-item import-item-${id}" data-category="${id}" data-item-id="${itemId}"
+                           style="transform: scale(1.1); accent-color: #28a745;">
+                    <span style="font-size: 0.85rem;">${nomAffiche}${auteurInfo}</span>
+                </label>
+            `;
+        }).join('');
+
         return `
-            <label style="display: flex; align-items: flex-start; gap: 10px; padding: 10px;
-                   background: white; border-radius: 6px; margin-bottom: 8px; cursor: pointer;
-                   border: 1px solid #e0e0e0; transition: all 0.2s;"
-                   onmouseover="this.style.borderColor='#28a745'" onmouseout="this.style.borderColor='#e0e0e0'">
-                <input type="checkbox" id="import-${id}" checked
-                       style="margin-top: 3px; transform: scale(1.2); accent-color: #28a745;">
-                <div style="flex: 1;">
-                    <strong style="font-size: 0.95rem;">${emoji} ${label}</strong>
-                    <span style="color: #28a745; font-size: 0.85rem; margin-left: 8px;">(${count})</span>
-                    <p style="margin: 4px 0 0 0; font-size: 0.8rem; color: #666;">${details}</p>
+            <div style="background: white; border-radius: 6px; margin-bottom: 12px;
+                   border: 1px solid #e0e0e0; overflow: hidden;">
+                <!-- En-tête de catégorie avec checkbox "tout sélectionner" -->
+                <label style="display: flex; align-items: center; gap: 10px; padding: 12px;
+                       background: #f8f9fa; cursor: pointer; border-bottom: 1px solid #e0e0e0;"
+                       onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">
+                    <input type="checkbox" id="import-${id}" class="import-category-toggle"
+                           data-category="${id}"
+                           onchange="toggleCategoryItems('${id}', this.checked)"
+                           style="transform: scale(1.2); accent-color: #28a745;">
+                    <div style="flex: 1;">
+                        <strong style="font-size: 0.95rem;">${label}</strong>
+                        <span style="color: #28a745; font-size: 0.85rem; margin-left: 8px;">(${count})</span>
+                        <span style="color: #999; font-size: 0.75rem; margin-left: 8px;">tout cocher/décocher</span>
+                    </div>
+                </label>
+                <!-- Liste des items individuels -->
+                <div style="padding: 8px 12px; max-height: 200px; overflow-y: auto;">
+                    ${itemsHTML}
                 </div>
-            </label>
+            </div>
         `;
     };
 
     // Générer les lignes de données avec checkboxes
-    const genererLigneDonnee = (id, label, info, emoji) => {
+    const genererLigneDonnee = (id, label, info) => {
         if (!info) return '';
         return `
             <label style="display: flex; align-items: center; gap: 10px; padding: 10px;
@@ -439,7 +671,7 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                 <input type="checkbox" id="import-${id}"
                        style="transform: scale(1.2); accent-color: #6c757d;">
                 <div style="flex: 1;">
-                    <strong style="font-size: 0.95rem;">${emoji} ${label}</strong>
+                    <strong style="font-size: 0.95rem;">${label}</strong>
                     <span style="color: #666; font-size: 0.85rem; margin-left: 8px;">${info}</span>
                 </div>
             </label>
@@ -458,17 +690,29 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                     Contenu du fichier
                 </h2>
 
-                <!-- Info fichier -->
-                <div style="background: #f8f9fa; border-radius: 8px; padding: 12px; margin-bottom: 20px;
-                     display: flex; align-items: center; gap: 10px;">
-                    <span style="font-size: 1.5rem;">📁</span>
-                    <div>
+                <!-- Info fichier + source -->
+                <div style="background: #f8f9fa; border-radius: 8px; padding: 12px; margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
                         <strong style="font-size: 0.95rem;">${nomFichier}</strong>
-                        <p style="margin: 2px 0 0 0; font-size: 0.8rem; color: #666;">
-                            ${nbCles} éléments · ~${tailleKo} Ko
-                        </p>
+                        <span style="background: ${estCollègue ? '#fff3cd' : sourceInconnue ? '#e9ecef' : '#d4edda'}; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">
+                            ${sourceLabel}
+                        </span>
                     </div>
+                    <p style="margin: 4px 0 0 0; font-size: 0.8rem; color: #666;">
+                        ${nbCles} éléments · ~${tailleKo} Ko
+                    </p>
                 </div>
+
+                ${sourceInconnue ? `
+                <div style="background: #e9ecef; border-radius: 8px; padding: 12px; margin-bottom: 15px; border-left: 4px solid #6c757d;">
+                    <p style="margin: 0; font-size: 0.85rem; color: #495057;">
+                        <strong>Auteur non identifié</strong><br>
+                        ${!utilisateurActuel
+                            ? 'Configure ton nom dans Réglages > Trimestre > Cours pour identifier tes fichiers.'
+                            : 'Le fichier importé ne contient pas d\'information sur son auteur.'}
+                    </p>
+                </div>
+                ` : ''}
 
                 <!-- Instruction -->
                 <p style="font-size: 0.95rem; color: #333; margin-bottom: 15px;">
@@ -479,15 +723,15 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                 ${analyse.totalRessources > 0 ? `
                 <div style="margin-bottom: 20px;">
                     <h3 style="font-size: 0.9rem; color: #28a745; margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
-                        <span style="background: #d4edda; padding: 4px 8px; border-radius: 4px;">📚 Ressources pédagogiques</span>
-                        <span style="font-size: 0.8rem; color: #666; font-weight: normal;">→ ajoutées à tes bibliothèques</span>
+                        <span style="background: #d4edda; padding: 4px 8px; border-radius: 4px;">Ressources pédagogiques</span>
+                        <span style="font-size: 0.8rem; color: #666; font-weight: normal;">Ajoutées à tes bibliothèques</span>
                     </h3>
                     <div style="background: #f0fff4; border-radius: 8px; padding: 12px;">
-                        ${genererLigneRessource('pratiques', 'Pratiques de notation', analyse.ressources.pratiques.count, analyse.ressources.pratiques.items, '⚙️')}
-                        ${genererLigneRessource('grilles', 'Grilles de critères', analyse.ressources.grilles.count, analyse.ressources.grilles.items, '📋')}
-                        ${genererLigneRessource('echelles', 'Échelles de performance', analyse.ressources.echelles.count, analyse.ressources.echelles.items, '📊')}
-                        ${genererLigneRessource('productions', 'Productions', analyse.ressources.productions.count, analyse.ressources.productions.items, '📝')}
-                        ${analyse.ressources.cartouches.count > 0 ? genererLigneRessource('cartouches', 'Cartouches de rétroaction', analyse.ressources.cartouches.count, analyse.ressources.cartouches.items.map(c => ({nom: c.count + ' pour grille ' + c.grilleId.substring(0,8)})), '💬') : ''}
+                        ${genererLigneRessource('pratiques', 'Pratiques de notation', analyse.ressources.pratiques.count, analyse.ressources.pratiques.items)}
+                        ${genererLigneRessource('grilles', 'Grilles de critères', analyse.ressources.grilles.count, analyse.ressources.grilles.items)}
+                        ${genererLigneRessource('echelles', 'Échelles de performance', analyse.ressources.echelles.count, analyse.ressources.echelles.items)}
+                        ${genererLigneRessource('productions', 'Productions', analyse.ressources.productions.count, analyse.ressources.productions.items)}
+                        ${analyse.ressources.cartouches.count > 0 ? genererLigneRessource('cartouches', 'Cartouches de rétroaction', analyse.ressources.cartouches.count, analyse.ressources.cartouches.items.map(c => ({nom: c.count + ' pour grille ' + c.grilleId.substring(0,8)}))) : ''}
                     </div>
                 </div>
                 ` : ''}
@@ -496,18 +740,33 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                 ${analyse.totalDonnees > 0 ? `
                 <div style="margin-bottom: 20px;">
                     <h3 style="font-size: 0.9rem; color: #6c757d; margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
-                        <span style="background: #e9ecef; padding: 4px 8px; border-radius: 4px;">📦 Données du cours</span>
-                        <span style="font-size: 0.8rem; color: #999; font-weight: normal;">→ partage ou restauration</span>
+                        <span style="background: #e9ecef; padding: 4px 8px; border-radius: 4px;">Données du cours</span>
+                        <span style="font-size: 0.8rem; color: #999; font-weight: normal;">Protégées</span>
                     </h3>
-                    <div style="background: #f8f9fa; border-radius: 8px; padding: 12px;">
-                        ${analyse.donnees.etudiants.count > 0 ? genererLigneDonnee('etudiants', 'Étudiants', analyse.donnees.etudiants.count + ' étudiant(s)', '👥') : ''}
-                        ${analyse.donnees.presences.count > 0 ? genererLigneDonnee('presences', 'Présences', analyse.donnees.presences.count + ' date(s)', '📅') : ''}
-                        ${analyse.donnees.evaluations.count > 0 ? genererLigneDonnee('evaluations', 'Évaluations/Notes', analyse.donnees.evaluations.cles.length + ' ensemble(s)', '📈') : ''}
-                        ${analyse.donnees.configuration.present ? genererLigneDonnee('configuration', 'Configuration du cours', analyse.donnees.configuration.cles.join(', '), '⚙️') : ''}
+
+                    <!-- ✅ MODIFIÉ (6 jan 2026) : Données étudiantes toujours grisées avec message confidentialité -->
+                    ${(analyse.donnees.etudiants.count > 0 || analyse.donnees.presences.count > 0 || analyse.donnees.evaluations.count > 0) ? `
+                    <div style="background: #f0f0f0; border-radius: 8px; padding: 15px; margin-bottom: 10px; opacity: 0.7;">
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
+                            ${analyse.donnees.etudiants.count > 0 ? `<span style="background: #e0e0e0; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; color: #666;">Étudiants (${analyse.donnees.etudiants.count})</span>` : ''}
+                            ${analyse.donnees.presences.count > 0 ? `<span style="background: #e0e0e0; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; color: #666;">Présences (${analyse.donnees.presences.count} dates)</span>` : ''}
+                            ${analyse.donnees.evaluations.count > 0 ? `<span style="background: #e0e0e0; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; color: #666;">Notes (${analyse.donnees.evaluations.cles.length} ensemble(s))</span>` : ''}
+                        </div>
+                        <p style="margin: 0; font-size: 0.85rem; color: #666;">
+                            <strong>Partage impossible</strong> – Les données nominatives des étudiants sont confidentielles et ne peuvent pas être importées.
+                        </p>
                     </div>
-                    <p style="font-size: 0.75rem; color: #999; margin: 8px 0 0 12px;">
-                        ⚠️ Remplacera les données existantes du même type
+                    ` : ''}
+
+                    <!-- Configuration du cours (importable sauf si collègue) -->
+                    ${analyse.donnees.configuration.present && !estCollègue ? `
+                    <div style="background: #f8f9fa; border-radius: 8px; padding: 12px;">
+                        ${genererLigneDonnee('configuration', 'Configuration du cours', analyse.donnees.configuration.cles.join(', '))}
+                    </div>
+                    <p style="font-size: 0.75rem; color: #dc3545; margin: 8px 0 0 12px;">
+                        Attention : cette option remplacera ta configuration actuelle
                     </p>
+                    ` : ''}
                 </div>
                 ` : ''}
 
@@ -623,9 +882,23 @@ function analyserRessourcesDetaillees(config) {
         }
     }
 
-    // Productions
+    // Productions (chercher dans bibliothequeProductions OU productions)
+    // Vérifier le contenu, pas juste l'existence de la clé
+    let cleProdsAnalyse = null;
     if (config.bibliothequeProductions) {
-        const prods = parseValeur(config.bibliothequeProductions);
+        const prodsTest = parseValeur(config.bibliothequeProductions);
+        if (Array.isArray(prodsTest) && prodsTest.length > 0) {
+            cleProdsAnalyse = 'bibliothequeProductions';
+        }
+    }
+    if (!cleProdsAnalyse && config.productions) {
+        const prodsTest = parseValeur(config.productions);
+        if (Array.isArray(prodsTest) && prodsTest.length > 0) {
+            cleProdsAnalyse = 'productions';
+        }
+    }
+    if (cleProdsAnalyse) {
+        const prods = parseValeur(config[cleProdsAnalyse]);
         if (Array.isArray(prods)) {
             result.ressources.productions.items = prods.map(p => ({
                 id: p.id,
@@ -1220,9 +1493,22 @@ async function executerImportVersBibliotheques() {
             }
         }
 
-        // 4. PRODUCTIONS (depuis bibliothequeProductions)
+        // 4. PRODUCTIONS (depuis bibliothequeProductions OU productions)
+        let cleProdsVersBibl = null;
         if (donnees.bibliothequeProductions) {
-            const prodsImport = parseValeur(donnees.bibliothequeProductions);
+            const prodsTest = parseValeur(donnees.bibliothequeProductions);
+            if (Array.isArray(prodsTest) && prodsTest.length > 0) {
+                cleProdsVersBibl = 'bibliothequeProductions';
+            }
+        }
+        if (!cleProdsVersBibl && donnees.productions) {
+            const prodsTest = parseValeur(donnees.productions);
+            if (Array.isArray(prodsTest) && prodsTest.length > 0) {
+                cleProdsVersBibl = 'productions';
+            }
+        }
+        if (cleProdsVersBibl) {
+            const prodsImport = parseValeur(donnees[cleProdsVersBibl]);
             if (Array.isArray(prodsImport) && prodsImport.length > 0) {
                 const cleProductions = (typeof window.cle === 'function') ? window.cle('productions') : 'productions';
                 const prodsExistantes = db.getSync(cleProductions, []);
@@ -1284,7 +1570,8 @@ async function executerImportVersBibliotheques() {
 
 /**
  * 🆕 BETA 95.1 : Import sélectif basé sur les checkboxes
- * Importe uniquement les catégories cochées par l'utilisateur
+ * ✅ MODIFIÉ (6 jan 2026) : Support des checkboxes individuelles par élément
+ * Importe uniquement les éléments cochés par l'utilisateur
  */
 async function executerImportSelectif() {
     if (!configCompleteEnAttente) {
@@ -1306,7 +1593,18 @@ async function executerImportSelectif() {
         return val;
     };
 
-    // Lire les checkboxes cochées
+    // ✅ NOUVEAU : Récupérer les IDs des items cochés individuellement par catégorie
+    const getCheckedItemIds = (category) => {
+        const checkboxes = document.querySelectorAll(`.import-item-${category}:checked`);
+        return Array.from(checkboxes).map(cb => cb.dataset.itemId);
+    };
+
+    // Vérifier si au moins un item est coché dans une catégorie (checkboxes individuelles)
+    const hasCheckedItems = (category) => {
+        return document.querySelectorAll(`.import-item-${category}:checked`).length > 0;
+    };
+
+    // Pour les données du cours (étudiants, présences, etc.) - ancien comportement
     const isChecked = (id) => {
         const cb = document.getElementById(`import-${id}`);
         return cb && cb.checked;
@@ -1316,20 +1614,28 @@ async function executerImportSelectif() {
         let compteurs = { ressources: 0, donnees: 0 };
         let details = [];
 
-        // ========== RESSOURCES PÉDAGOGIQUES (fusion) ==========
+        // Auteur source pour marquage des imports
+        const auteurSource = analyseImportEnCours?.auteurImport || '';
 
-        // Pratiques
-        if (isChecked('pratiques') && donnees.pratiquesConfigurables) {
+        // ========== RESSOURCES PÉDAGOGIQUES (fusion avec sélection individuelle) ==========
+
+        // Pratiques - ✅ MODIFIÉ pour import sélectif individuel
+        if (hasCheckedItems('pratiques') && donnees.pratiquesConfigurables) {
             const pratiquesImport = parseValeur(donnees.pratiquesConfigurables);
+            const selectedIds = getCheckedItemIds('pratiques');
+
             if (Array.isArray(pratiquesImport) && pratiquesImport.length > 0) {
                 const pratiquesExistantes = db.getSync('pratiquesConfigurables', []);
-                const pratiquesNouvelles = pratiquesImport.filter(p =>
-                    !pratiquesExistantes.some(pe => pe.nom === p.nom)
-                ).map(p => ({
-                    ...p,
-                    id: 'PRATIQUE_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
-                    dateImport: new Date().toISOString()
-                }));
+                // Filtrer par les items sélectionnés ET non existants
+                const pratiquesNouvelles = pratiquesImport
+                    .filter(p => selectedIds.includes(p.id) || selectedIds.includes(p.nom))
+                    .filter(p => !pratiquesExistantes.some(pe => pe.nom === p.nom))
+                    .map(p => ({
+                        ...p,
+                        id: 'PRATIQUE_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                        dateImport: new Date().toISOString(),
+                        auteurOriginal: auteurSource || p.auteurOriginal || ''
+                    }));
                 if (pratiquesNouvelles.length > 0) {
                     db.setSync('pratiquesConfigurables', [...pratiquesExistantes, ...pratiquesNouvelles]);
                     compteurs.ressources += pratiquesNouvelles.length;
@@ -1338,9 +1644,10 @@ async function executerImportSelectif() {
             }
         }
 
-        // Grilles
-        if (isChecked('grilles')) {
+        // Grilles - ✅ MODIFIÉ pour import sélectif individuel
+        if (hasCheckedItems('grilles')) {
             const grillesExistantes = db.getSync('grillesTemplates', []);
+            const selectedIds = getCheckedItemIds('grilles');
             let grillesNouvelles = [];
 
             ['grillesTemplates', 'bibliothequeGrilles'].forEach(cle => {
@@ -1348,12 +1655,16 @@ async function executerImportSelectif() {
                     const grillesImport = parseValeur(donnees[cle]);
                     if (Array.isArray(grillesImport)) {
                         grillesImport.forEach(g => {
-                            if (!grillesExistantes.some(ge => ge.nom === g.nom) &&
+                            // Vérifier si cet item est sélectionné
+                            const estSelectionne = selectedIds.includes(g.id) || selectedIds.includes(g.nom);
+                            if (estSelectionne &&
+                                !grillesExistantes.some(ge => ge.nom === g.nom) &&
                                 !grillesNouvelles.some(gn => gn.nom === g.nom)) {
                                 grillesNouvelles.push({
                                     ...g,
                                     id: 'GRILLE_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
-                                    dateImport: new Date().toISOString()
+                                    dateImport: new Date().toISOString(),
+                                    auteurOriginal: auteurSource || g.auteurOriginal || ''
                                 });
                             }
                         });
@@ -1368,18 +1679,22 @@ async function executerImportSelectif() {
             }
         }
 
-        // Échelles
-        if (isChecked('echelles') && donnees.echellesTemplates) {
+        // Échelles - ✅ MODIFIÉ pour import sélectif individuel
+        if (hasCheckedItems('echelles') && donnees.echellesTemplates) {
             const echellesImport = parseValeur(donnees.echellesTemplates);
+            const selectedIds = getCheckedItemIds('echelles');
+
             if (Array.isArray(echellesImport) && echellesImport.length > 0) {
                 const echellesExistantes = db.getSync('echellesTemplates', []);
-                const echellesNouvelles = echellesImport.filter(e =>
-                    !echellesExistantes.some(ee => ee.nom === e.nom)
-                ).map(e => ({
-                    ...e,
-                    id: 'ECH_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
-                    dateImport: new Date().toISOString()
-                }));
+                const echellesNouvelles = echellesImport
+                    .filter(e => selectedIds.includes(e.id) || selectedIds.includes(e.nom))
+                    .filter(e => !echellesExistantes.some(ee => ee.nom === e.nom))
+                    .map(e => ({
+                        ...e,
+                        id: 'ECH_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                        dateImport: new Date().toISOString(),
+                        auteurOriginal: auteurSource || e.auteurOriginal || ''
+                    }));
                 if (echellesNouvelles.length > 0) {
                     db.setSync('echellesTemplates', [...echellesExistantes, ...echellesNouvelles]);
                     compteurs.ressources += echellesNouvelles.length;
@@ -1388,19 +1703,35 @@ async function executerImportSelectif() {
             }
         }
 
-        // Productions
-        if (isChecked('productions') && donnees.bibliothequeProductions) {
-            const prodsImport = parseValeur(donnees.bibliothequeProductions);
+        // Productions - ✅ MODIFIÉ pour import sélectif individuel
+        let cleProdsSource = null;
+        if (donnees.bibliothequeProductions) {
+            const prodsTest = parseValeur(donnees.bibliothequeProductions);
+            if (Array.isArray(prodsTest) && prodsTest.length > 0) {
+                cleProdsSource = 'bibliothequeProductions';
+            }
+        }
+        if (!cleProdsSource && donnees.productions) {
+            const prodsTest = parseValeur(donnees.productions);
+            if (Array.isArray(prodsTest) && prodsTest.length > 0) {
+                cleProdsSource = 'productions';
+            }
+        }
+        if (hasCheckedItems('productions') && cleProdsSource) {
+            const prodsImport = parseValeur(donnees[cleProdsSource]);
+            const selectedIds = getCheckedItemIds('productions');
             if (Array.isArray(prodsImport) && prodsImport.length > 0) {
                 const cleProductions = (typeof window.cle === 'function') ? window.cle('productions') : 'productions';
                 const prodsExistantes = db.getSync(cleProductions, []);
-                const prodsNouvelles = prodsImport.filter(p =>
-                    !prodsExistantes.some(pe => pe.nom === p.nom)
-                ).map(p => ({
-                    ...p,
-                    id: 'PROD_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
-                    dateImport: new Date().toISOString()
-                }));
+                const prodsNouvelles = prodsImport
+                    .filter(p => selectedIds.includes(p.id) || selectedIds.includes(p.nom))
+                    .filter(p => !prodsExistantes.some(pe => pe.nom === p.nom))
+                    .map(p => ({
+                        ...p,
+                        id: 'PROD_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                        dateImport: new Date().toISOString(),
+                        auteurOriginal: auteurSource || p.auteurOriginal || ''
+                    }));
                 if (prodsNouvelles.length > 0) {
                     db.setSync(cleProductions, [...prodsExistantes, ...prodsNouvelles]);
                     compteurs.ressources += prodsNouvelles.length;
@@ -1409,17 +1740,28 @@ async function executerImportSelectif() {
             }
         }
 
-        // Cartouches
-        if (isChecked('cartouches')) {
+        // Cartouches - ✅ MODIFIÉ pour import sélectif individuel
+        if (hasCheckedItems('cartouches')) {
+            const selectedIds = getCheckedItemIds('cartouches');
             let nbCartouches = 0;
             Object.keys(donnees).forEach(cle => {
                 if (cle.startsWith('cartouches_')) {
                     const cartouches = parseValeur(donnees[cle]);
                     if (Array.isArray(cartouches) && cartouches.length > 0) {
                         const cartouchesExistantes = db.getSync(cle, []);
-                        const cartouchesFusionnees = [...cartouchesExistantes, ...cartouches];
-                        db.setSync(cle, cartouchesFusionnees);
-                        nbCartouches += cartouches.length;
+                        // Filtrer par sélection et ajouter auteurOriginal
+                        const cartouchesSelectionnees = cartouches
+                            .filter(c => selectedIds.includes(c.id) || selectedIds.includes(c.nom))
+                            .map(c => ({
+                                ...c,
+                                dateImport: new Date().toISOString(),
+                                auteurOriginal: auteurSource || c.auteurOriginal || ''
+                            }));
+                        if (cartouchesSelectionnees.length > 0) {
+                            const cartouchesFusionnees = [...cartouchesExistantes, ...cartouchesSelectionnees];
+                            db.setSync(cle, cartouchesFusionnees);
+                            nbCartouches += cartouchesSelectionnees.length;
+                        }
                     }
                 }
             });
@@ -1430,9 +1772,11 @@ async function executerImportSelectif() {
         }
 
         // ========== DONNÉES DU COURS (écrasement) ==========
+        // Sécurité : bloquer l'import de données personnelles si c'est d'un collègue
+        const bloquerDonneesPerso = analyseImportEnCours && analyseImportEnCours.estCollègue;
 
         // Étudiants
-        if (isChecked('etudiants')) {
+        if (isChecked('etudiants') && !bloquerDonneesPerso) {
             let nbEtudiants = 0;
             Object.keys(donnees).forEach(cle => {
                 if (cle === 'groupeEtudiants' || cle.endsWith('_groupeEtudiants')) {
@@ -1450,7 +1794,7 @@ async function executerImportSelectif() {
         }
 
         // Présences
-        if (isChecked('presences')) {
+        if (isChecked('presences') && !bloquerDonneesPerso) {
             let nbDates = 0;
             Object.keys(donnees).forEach(cle => {
                 if (cle === 'presences' || cle.endsWith('_presences')) {
@@ -1468,7 +1812,7 @@ async function executerImportSelectif() {
         }
 
         // Évaluations
-        if (isChecked('evaluations')) {
+        if (isChecked('evaluations') && !bloquerDonneesPerso) {
             Object.keys(donnees).forEach(cle => {
                 if (cle === 'evaluations' || cle.endsWith('_evaluations') ||
                     cle === 'notesEtudiants' || cle.endsWith('_notesEtudiants')) {
@@ -1493,6 +1837,15 @@ async function executerImportSelectif() {
             details.push('Configuration du cours');
         }
 
+        // ✅ CORRIGÉ (6 jan 2026) : Vérifier les checkboxes AVANT de fermer le modal
+        // Pour les ressources, vérifier les checkboxes individuelles; pour les données, l'ancienne méthode
+        const quelqueChoseCoche =
+            hasCheckedItems('pratiques') || hasCheckedItems('grilles') ||
+            hasCheckedItems('echelles') || hasCheckedItems('productions') ||
+            hasCheckedItems('cartouches') ||
+            isChecked('etudiants') || isChecked('presences') ||
+            isChecked('evaluations') || isChecked('configuration');
+
         // Fermer le modal
         fermerModalPreviewConfigComplete();
 
@@ -1500,7 +1853,11 @@ async function executerImportSelectif() {
         const total = compteurs.ressources + compteurs.donnees;
 
         if (total === 0) {
-            alert('Aucun élément sélectionné ou aucune nouvelle donnée à importer.');
+            if (!quelqueChoseCoche) {
+                alert('Coche au moins un élément à importer.');
+            } else {
+                alert('Aucune nouvelle donnée à importer.\n\nLes éléments sélectionnés existent déjà (même nom).');
+            }
         } else {
             const message = `Import réussi !\n\n${details.join('\n')}\n\nTotal : ${total} élément(s) importé(s).`;
 
@@ -1537,18 +1894,32 @@ async function executerImportSelectif() {
  */
 async function exporterConfigurationComplete() {
     // 1. Rassembler toutes les ressources
-    const echelles = db.getSync('echellesTemplates', []);
-    const grilles = db.getSync('grillesTemplates', []);
-    const productions = db.getSync('productions', []);
+    const toutesEchelles = db.getSync('echellesTemplates', []);
+    const toutesGrilles = db.getSync('grillesTemplates', []);
+    const toutesProductions = db.getSync('productions', []);
 
-    // Cartouches (stockage par grille)
+    // ✅ MODIFIÉ (6 jan 2026) : Utiliser détection heuristique pour filtrer démo + importées
+    const echelles = filtrerRessourcesNonDemo(toutesEchelles, 'echelle');
+    const grilles = filtrerRessourcesNonDemo(toutesGrilles, 'grille');
+    const productions = filtrerRessourcesNonDemo(toutesProductions, 'production');
+
+    let nbExclues = (toutesEchelles.length - echelles.length) +
+                    (toutesGrilles.length - grilles.length) +
+                    (toutesProductions.length - productions.length);
+
+    // Cartouches (stockage par grille) - aussi filtrées avec heuristique
     const cartouches = {};
     const allKeys = Object.keys(localStorage);
     for (let i = 0; i < allKeys.length; i++) {
         const key = allKeys[i];
         if (key && key.startsWith('cartouches_')) {
             const grilleId = key.replace('cartouches_', '');
-            cartouches[grilleId] = db.getSync(key, []);
+            const toutesCartouches = db.getSync(key, []);
+            const cartouchesFiltrees = filtrerRessourcesNonDemo(toutesCartouches, 'cartouche');
+            nbExclues += toutesCartouches.length - cartouchesFiltrees.length;
+            if (cartouchesFiltrees.length > 0) {
+                cartouches[grilleId] = cartouchesFiltrees;
+            }
         }
     }
 
@@ -1563,10 +1934,21 @@ async function exporterConfigurationComplete() {
     };
 
     // Vérifier qu'il y a du contenu à exporter
-    const nbRessources = echelles.length + grilles.length + productions.length + Object.keys(cartouches).length;
+    const nbCartouches = Object.values(cartouches).reduce((total, arr) => total + arr.length, 0);
+    const nbRessources = echelles.length + grilles.length + productions.length + nbCartouches;
+
     if (nbRessources === 0) {
-        alert('Aucune ressource à exporter.\n\nCréez d\'abord des grilles, échelles ou productions.');
+        if (nbExclues > 0) {
+            alert(`Aucune ressource personnelle à exporter.\n\n${nbExclues} ressource(s) exclue(s) car elles proviennent du matériel démo ou d'imports de collègues.`);
+        } else {
+            alert('Aucune ressource à exporter.\n\nCréez d\'abord des grilles, échelles ou productions.');
+        }
         return;
+    }
+
+    // Informer si des ressources ont été exclues
+    if (nbExclues > 0) {
+        console.log(`📦 Export: ${nbExclues} ressource(s) exclue(s) (démo/importées)`);
     }
 
     // 2. Demander les métadonnées enrichies (modal spécial pour config complète)
