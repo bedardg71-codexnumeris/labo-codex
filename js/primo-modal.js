@@ -1271,6 +1271,13 @@ function creerSeancesHoraire() {
         const cleSauvegarde = coursId ? `seancesHoraire_${coursId}` : 'seancesHoraire';
         db.setSync(cleSauvegarde, seances);
         console.log(`[Primo] ${seances.length} séance(s) créée(s) dans ${cleSauvegarde}:`, seances);
+
+        // 🆕 BETA 95.1 (Bug Bruno) : Aussi sauvegarder dans horaireHebdo namespacé
+        // pour que genererCalendrierComplet() puisse déterminer les jours avec cours
+        if (typeof cle === 'function') {
+            db.setSync(cle('horaireHebdo'), seances);
+            console.log(`[Primo] Séances aussi copiées dans ${cle('horaireHebdo')}`);
+        }
     }
 }
 

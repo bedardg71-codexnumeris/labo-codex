@@ -3388,11 +3388,11 @@ async function supprimerGrilleActive() {
  * Sauvegarde complète de la grille (nom + critères)
  */
 async function sauvegarderGrilleComplete() {
-    // 🆕 BETA 95.1 : Garder l'ID pour réafficher après sauvegarde
-    const idSauvegarde = grilleTemplateActuelle?.id;
-
-    // Sauvegarder le nom si modifié
+    // Sauvegarder le nom si modifié (crée grilleTemplateActuelle si nouvelle)
     sauvegarderNomGrille();
+
+    // 🆕 BETA 95.1 : Récupérer l'ID APRÈS la sauvegarde (pour nouvelles grilles)
+    const idSauvegarde = grilleTemplateActuelle?.id;
 
     // Message de confirmation
     alert('Grille sauvegardée avec succès');
