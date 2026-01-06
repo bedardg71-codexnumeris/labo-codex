@@ -3387,7 +3387,10 @@ async function supprimerGrilleActive() {
 /**
  * Sauvegarde complète de la grille (nom + critères)
  */
-function sauvegarderGrilleComplete() {
+async function sauvegarderGrilleComplete() {
+    // 🆕 BETA 95.1 : Garder l'ID pour réafficher après sauvegarde
+    const idSauvegarde = grilleTemplateActuelle?.id;
+
     // Sauvegarder le nom si modifié
     sauvegarderNomGrille();
 
@@ -3395,7 +3398,14 @@ function sauvegarderGrilleComplete() {
     alert('Grille sauvegardée avec succès');
 
     // Recharger la liste pour refléter les changements
-    afficherListeGrilles();
+    await afficherListeGrilles();
+
+    // 🆕 BETA 95.1 : Réouvrir la grille en mode édition pour qu'elle reste visible
+    if (idSauvegarde && typeof chargerGrillePourModif === 'function') {
+        setTimeout(() => {
+            chargerGrillePourModif(idSauvegarde);
+        }, 100);
+    }
 }
 
 // Export global

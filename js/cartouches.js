@@ -2424,11 +2424,22 @@ function annulerFormCartouche() {
  * Sauvegarde complète de la cartouche en cours d'édition
  */
 async function sauvegarderCartoucheComplete() {
+    // 🆕 BETA 95.1 : Garder les IDs pour réafficher après sauvegarde
+    const idSauvegarde = window.cartoucheActuel?.id;
+    const grilleIdSauvegarde = window.cartoucheActuel?.grilleId;
+
     // Sauvegarder avec la fonction existante
     await sauvegarderCartouche();
 
-    // Message de confirmation (déjà géré par sauvegarderCartouche)
-    console.log('Cartouche sauvegardée avec succès');
+    // Message de confirmation
+    alert('Cartouche sauvegardée avec succès');
+
+    // 🆕 BETA 95.1 : Réouvrir la cartouche en mode édition pour qu'elle reste visible
+    if (idSauvegarde && grilleIdSauvegarde && typeof chargerCartouchePourModif === 'function') {
+        setTimeout(() => {
+            chargerCartouchePourModif(idSauvegarde, grilleIdSauvegarde);
+        }, 100);
+    }
 }
 
 /* ===============================

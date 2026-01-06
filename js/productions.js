@@ -436,6 +436,9 @@ async function sauvegarderProduction() {
     await db.set('productions', evaluations);
     console.log('✅ Sauvegarde terminée');
 
+    // 🆕 BETA 95.1 : Garder l'ID pour réafficher après sauvegarde
+    const idSauvegarde = productionEnEdition || productionData.id;
+
     annulerFormProduction();
     await afficherTableauProductions();
     await afficherToutesLesProductionsParType();
@@ -443,8 +446,8 @@ async function sauvegarderProduction() {
 
     // Afficher la notification de succès si la fonction existe
     if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces(productionEnEdition ? 
-            'Production modifiée avec succès !' : 
+        afficherNotificationSucces(productionEnEdition ?
+            'Production modifiée avec succès !' :
             'Production ajoutée avec succès !');
     }
 
@@ -464,6 +467,13 @@ async function sauvegarderProduction() {
     }
 
     productionEnEdition = null;
+
+    // 🆕 BETA 95.1 : Réouvrir la production en mode édition pour qu'elle reste visible
+    if (idSauvegarde && typeof modifierProduction === 'function') {
+        setTimeout(() => {
+            modifierProduction(idSauvegarde);
+        }, 100);
+    }
 }
 
 /* ===============================
