@@ -314,6 +314,10 @@ function ouvrirImportConfigComplete() {
 
 /**
  * Prévisualise une configuration complète avant import
+ * Supporte deux formats :
+ * - Nouveau format (Beta 91+) : { metadata: { type: 'configuration-complete' }, contenu: {...} }
+ * - Ancien format (localStorage brut) : { modalitesEvaluation: ..., bibliothequeGrilles: ..., ... }
+ *
  * @param {Event} event - Événement de sélection de fichier
  */
 function previsualiserConfigComplete(event) {
@@ -325,22 +329,28 @@ function previsualiserConfigComplete(event) {
         try {
             const config = JSON.parse(e.target.result);
 
-            // Validation: vérifier que c'est bien une configuration complète
-            if (!config.metadata || config.metadata.type !== 'configuration-complete') {
-                alert('Fichier invalide. Ce n\'est pas une configuration complète exportée par Monitorage.');
-                return;
+            // 🆕 BETA 95.1 : Détecter le format du fichier
+            const formatDetecte = detecterFormatConfig(config);
+
+            if (formatDetecte === 'configuration-complete') {
+                // Nouveau format (Beta 91+)
+                if (!config.contenu) {
+                    alert('Fichier invalide. La structure de la configuration est incorrecte.');
+                    return;
+                }
+                configCompleteEnAttente = config;
+                configCompleteEnAttente._format = 'configuration-complete';
+                afficherModalPreviewConfigComplete(config);
+
+            } else if (formatDetecte === 'localStorage-brut') {
+                // Ancien format (export localStorage brut)
+                configCompleteEnAttente = config;
+                configCompleteEnAttente._format = 'localStorage-brut';
+                afficherModalPreviewLocalStorageBrut(config, fichier.name);
+
+            } else {
+                alert('Fichier non reconnu.\n\nFormats acceptés :\n• Configuration complète (Beta 91+)\n• Export localStorage brut');
             }
-
-            if (!config.contenu) {
-                alert('Fichier invalide. La structure de la configuration est incorrecte.');
-                return;
-            }
-
-            // Stocker la configuration en attente
-            configCompleteEnAttente = config;
-
-            // Afficher le modal de prévisualisation
-            afficherModalPreviewConfigComplete(config);
 
         } catch (err) {
             alert('Erreur lors de la lecture du fichier JSON.\n\n' + err.message);
@@ -348,6 +358,134 @@ function previsualiserConfigComplete(event) {
         }
     };
     lecteur.readAsText(fichier);
+}
+
+/**
+ * Détecte le format d'un fichier de configuration
+ * @param {Object} config - Objet JSON parsé
+ * @returns {string} 'configuration-complete' | 'localStorage-brut' | 'inconnu'
+ */
+function detecterFormatConfig(config) {
+    // Format nouveau (Beta 91+)
+    if (config.metadata && config.metadata.type === 'configuration-complete') {
+        return 'configuration-complete';
+    }
+
+    // Format localStorage brut : contient des clés typiques de l'application
+    const clesBrut = ['modalitesEvaluation', 'infoCours', 'bibliothequeGrilles', 'echellesTemplates',
+                      'grillesTemplates', 'productionsCours', 'pratiquesConfigurables', 'cadreCalendrier'];
+    const clesPresentes = Object.keys(config);
+    const nbClesReconnues = clesBrut.filter(cle => clesPresentes.includes(cle)).length;
+
+    if (nbClesReconnues >= 2 || clesPresentes.some(c => c.includes('_') && c.includes('2026'))) {
+        return 'localStorage-brut';
+    }
+
+    return 'inconnu';
+}
+
+/**
+ * Affiche le modal de prévisualisation pour un export localStorage brut
+ * @param {Object} config - Données brutes localStorage
+ * @param {string} nomFichier - Nom du fichier importé
+ */
+function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
+    const cles = Object.keys(config);
+    const nbCles = cles.length;
+
+    // Calculer la taille approximative
+    let tailleTotale = 0;
+    Object.values(config).forEach(v => {
+        tailleTotale += (typeof v === 'string' ? v.length : JSON.stringify(v).length) * 2;
+    });
+    const tailleKo = (tailleTotale / 1024).toFixed(1);
+
+    // Catégoriser les clés
+    const categories = {
+        cours: cles.filter(c => c.includes('infoCours') || c.includes('Cours')),
+        calendrier: cles.filter(c => c.includes('calendrier') || c.includes('seances') || c.includes('horaire')),
+        evaluations: cles.filter(c => c.includes('evaluation') || c.includes('production') || c.includes('grille') || c.includes('echelle')),
+        etudiants: cles.filter(c => c.includes('tudiant') || c.includes('groupe') || c.includes('presence')),
+        pratiques: cles.filter(c => c.includes('pratique') || c.includes('modalite')),
+        preferences: cles.filter(c => c.includes('preference') || c.includes('accordeon') || c.includes('etat'))
+    };
+
+    const modalHTML = `
+        <div id="modalPreviewConfigComplete" style="display: flex; position: fixed; top: 0; left: 0;
+             width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000;
+             align-items: center; justify-content: center;">
+            <div style="background: white; border-radius: 8px; padding: 30px; max-width: 600px;
+                 width: 90%; max-height: 80vh; overflow-y: auto;">
+
+                <h2 style="margin-top: 0; color: var(--bleu-moyen); border-bottom: 2px solid var(--bleu-pale);
+                     padding-bottom: 10px;">
+                    📁 Import de données brutes
+                </h2>
+
+                <!-- Badge format -->
+                <div style="background: #e7f3ff; border: 1px solid var(--bleu-moyen); border-radius: 4px;
+                     padding: 10px 15px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.5rem;">📦</span>
+                    <div>
+                        <strong style="color: var(--bleu-moyen);">Format détecté : Export localStorage</strong>
+                        <p style="margin: 5px 0 0 0; font-size: 0.85rem; color: var(--gris-fonce);">
+                            Ce fichier contient une sauvegarde complète des données de l'application.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Infos fichier -->
+                <div style="background: var(--bleu-tres-pale); border-left: 4px solid var(--bleu-moyen);
+                     padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+                    <p style="margin: 0 0 8px 0;"><strong>📄 Fichier :</strong> ${nomFichier}</p>
+                    <p style="margin: 0 0 8px 0;"><strong>📊 Contenu :</strong> ${nbCles} clé(s) de données</p>
+                    <p style="margin: 0;"><strong>💾 Taille :</strong> ~${tailleKo} Ko</p>
+                </div>
+
+                <!-- Aperçu des catégories -->
+                <div style="background: white; border: 1px solid var(--bleu-pale); padding: 15px;
+                     margin-bottom: 20px; border-radius: 4px;">
+                    <h3 style="margin-top: 0; font-size: 1rem; color: var(--bleu-moyen);">📋 Données incluses</h3>
+                    <ul style="list-style: none; padding-left: 0; margin: 10px 0; font-size: 0.9rem;">
+                        ${categories.cours.length > 0 ? `<li style="padding: 4px 0;">✓ Configuration cours (${categories.cours.length})</li>` : ''}
+                        ${categories.calendrier.length > 0 ? `<li style="padding: 4px 0;">✓ Calendrier et séances (${categories.calendrier.length})</li>` : ''}
+                        ${categories.evaluations.length > 0 ? `<li style="padding: 4px 0;">✓ Évaluations et grilles (${categories.evaluations.length})</li>` : ''}
+                        ${categories.etudiants.length > 0 ? `<li style="padding: 4px 0;">✓ Étudiants et présences (${categories.etudiants.length})</li>` : ''}
+                        ${categories.pratiques.length > 0 ? `<li style="padding: 4px 0;">✓ Pratiques de notation (${categories.pratiques.length})</li>` : ''}
+                        ${categories.preferences.length > 0 ? `<li style="padding: 4px 0;">✓ Préférences utilisateur (${categories.preferences.length})</li>` : ''}
+                    </ul>
+                </div>
+
+                <!-- Avertissement -->
+                <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px;
+                     margin-bottom: 20px; border-radius: 4px;">
+                    <p style="margin: 0; font-size: 0.9rem; color: #856404;">
+                        <strong>⚠️ Attention :</strong> Cette action va importer TOUTES les données du fichier.
+                        Les clés existantes seront écrasées. Exporte tes données actuelles d'abord si nécessaire !
+                    </p>
+                </div>
+
+                <!-- Boutons -->
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button onclick="fermerModalPreviewConfigComplete()"
+                            style="padding: 10px 20px; background: var(--gris-clair); color: var(--gris-fonce);
+                                   border: none; border-radius: 4px; cursor: pointer; font-size: 0.95rem;">
+                        Annuler
+                    </button>
+                    <button onclick="executerImportConfigComplete()"
+                            style="padding: 10px 20px; background: var(--bleu-moyen); color: white;
+                                   border: none; border-radius: 4px; cursor: pointer; font-size: 0.95rem;
+                                   font-weight: 500;">
+                        Importer ces données
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    const modalContainer = document.createElement('div');
+    modalContainer.innerHTML = modalHTML;
+    document.body.appendChild(modalContainer);
 }
 
 /**
@@ -467,14 +605,23 @@ function fermerModalPreviewConfigComplete() {
 
 /**
  * Exécute l'import de la configuration complète avec gestion des conflits d'ID
+ * Supporte deux formats : configuration-complete (Beta 91+) et localStorage-brut
  */
-function executerImportConfigComplete() {
+async function executerImportConfigComplete() {
     if (!configCompleteEnAttente) {
         alert('Aucune configuration en attente d\'importation.');
         return;
     }
 
     const config = configCompleteEnAttente;
+
+    // 🆕 BETA 95.1 : Gérer les deux formats
+    if (config._format === 'localStorage-brut') {
+        await executerImportLocalStorageBrut(config);
+        return;
+    }
+
+    // Format configuration-complete (Beta 91+)
     const contenu = config.contenu;
 
     try {
@@ -650,6 +797,55 @@ function executerImportConfigComplete() {
     } catch (erreur) {
         console.error('Erreur lors de l\'import de la configuration:', erreur);
         alert('Erreur lors de l\'import de la configuration.\n\n' + erreur.message);
+    }
+}
+
+/**
+ * 🆕 BETA 95.1 : Exécute l'import d'un export localStorage brut
+ * Réutilise la logique de executerImport() mais via le modal unifié
+ * @param {Object} config - Données brutes localStorage
+ */
+async function executerImportLocalStorageBrut(config) {
+    // Retirer la propriété interne _format avant import
+    const donnees = { ...config };
+    delete donnees._format;
+
+    try {
+        const cles = Object.keys(donnees);
+        let nbCles = 0;
+
+        for (const cle of cles) {
+            let valeur = donnees[cle];
+
+            // Parser les strings JSON (backups de l'ancienne version localStorage)
+            if (typeof valeur === 'string') {
+                try {
+                    valeur = JSON.parse(valeur);
+                } catch (e) {
+                    // Garder comme string si ce n'est pas du JSON valide
+                }
+            }
+
+            // Utiliser db.set (async/IndexedDB)
+            await db.set(cle, valeur);
+            nbCles++;
+        }
+
+        // Fermer le modal
+        fermerModalPreviewConfigComplete();
+
+        console.log(`✅ Import localStorage brut: ${nbCles} clé(s) importée(s)`);
+
+        // Notification et rechargement
+        alert(`Import réussi !\n\n${nbCles} clé(s) de données importée(s).`);
+
+        if (confirm('Recharger la page pour appliquer les changements ?')) {
+            location.reload();
+        }
+
+    } catch (erreur) {
+        console.error('Erreur lors de l\'import localStorage brut:', erreur);
+        alert('Erreur lors de l\'import.\n\n' + erreur.message);
     }
 }
 
