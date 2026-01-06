@@ -1328,7 +1328,7 @@ async function terminerConfiguration() {
             let messageType, messageDetails;
             if (estParcoursCourt) {
                 messageType = 'Configuration de base';
-                messageDetails = 'Tu peux maintenant choisir une autre activité.';
+                messageDetails = 'L\'application va se recharger pour appliquer les changements.';
             } else {
                 messageType = 'Pratique de notation configurée';
                 messageDetails = 'Les paramètres ont été appliqués au cours actif.';
@@ -1342,12 +1342,20 @@ async function terminerConfiguration() {
         // Fermer le modal
         fermerModalConversationnel();
 
-        // Attendre un peu puis rouvrir le menu d'accueil
-        setTimeout(() => {
-            if (typeof afficherModalAccueil === 'function') {
-                afficherModalAccueil();
-            }
-        }, 1000);
+        // ✅ CORRECTION (6 jan 2026 - Bug Olivier) : Recharger la page pour le parcours court aussi
+        // Sinon l'interface ne reflète pas les nouvelles données (cours, étudiants, etc.)
+        if (estParcoursCourt) {
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
+        } else {
+            // Parcours évaluer : retour au menu d'accueil (pas besoin de reload)
+            setTimeout(() => {
+                if (typeof afficherModalAccueil === 'function') {
+                    afficherModalAccueil();
+                }
+            }, 1000);
+        }
 
     } else {
         // PARCOURS COMPLET : Configuration complète avec import matériel
