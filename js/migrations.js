@@ -845,6 +845,383 @@ function verifierEtProposerMigrationLegacy() {
     }
 }
 
+/* ===============================
+   MIGRATIONS BETA 96 : ENTITÉS MODULAIRES
+   Date: 6 janvier 2026
+
+   Objectif:
+   Migrer de l'architecture monolithique vers les entités modulaires:
+   - listeCours → cours (infos générales)
+   - listeCours → enseignants (profil auteur)
+   - listeCours → horaires (séances)
+   - listeCours + références → groupesCours (assemblage)
+   =============================== */
+
+/**
+ * Migration 8: Extraire les enseignants de listeCours vers l'entité Enseignants
+ *
+ * @returns {Object} { nbEnseignantsExtraits, mapAncienNouvel }
+ */
+async function migrerVersEntiteEnseignants() {
+    console.log('🔄 [Migration Beta 96] Extraction des enseignants...');
+
+    const listeCours = db.getSync('listeCours', []);
+    const enseignantsExistants = db.getSync('enseignants', []);
+
+    if (enseignantsExistants.length > 0) {
+        console.log('   ⚠️ Des enseignants existent déjà, migration non nécessaire');
+        return { nbEnseignantsExtraits: 0, mapAncienNouvel: {} };
+    }
+
+    // Map pour éviter les doublons: clé = prenom_nom_courriel
+    const enseignantsMap = new Map();
+
+    listeCours.forEach(cours => {
+        // Extraire les infos enseignant des différentes propriétés possibles
+        const prenom = cours.prenomEnseignant || cours.auteur_prenom || '';
+        const nom = cours.nomEnseignant || cours.auteur_nom || '';
+        const courriel = cours.courriel || cours.courrielEnseignant || cours.email_auteur || '';
+        const institution = cours.institution || cours.institutionEnseignant || '';
+        const departement = cours.departement || cours.departementEnseignant || '';
+        const discipline = cours.discipline || '';
+
+        // Ignorer si pas de nom
+        if (!prenom && !nom) return;
+
+        const cle = `${prenom.toLowerCase()}_${nom.toLowerCase()}_${courriel.toLowerCase()}`;
+
+        if (!enseignantsMap.has(cle)) {
+            const id = 'ENS_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+            enseignantsMap.set(cle, {
+                id: id,
+                prenom: prenom,
+                nom: nom,
+                courriel: courriel,
+                institution: institution,
+                departement: departement || discipline,
+                siteWeb: cours.siteWeb || cours.site_auteur || '',
+                niveau: cours.niveau || 'Collégial',
+                dateCreation: new Date().toISOString(),
+                dateModification: new Date().toISOString(),
+                // Garder référence aux anciens cours pour le mapping
+                _anciensCoursIds: [cours.id]
+            });
+        } else {
+            // Ajouter ce cours à la liste des cours de cet enseignant
+            const ens = enseignantsMap.get(cle);
+            if (!ens._anciensCoursIds.includes(cours.id)) {
+                ens._anciensCoursIds.push(cours.id);
+            }
+        }
+    });
+
+    // Créer le mapping ancien coursId → nouvel enseignantId
+    const mapAncienNouvel = {};
+    enseignantsMap.forEach(ens => {
+        ens._anciensCoursIds.forEach(coursId => {
+            mapAncienNouvel[coursId] = ens.id;
+        });
+        // Supprimer la propriété temporaire
+        delete ens._anciensCoursIds;
+    });
+
+    // Sauvegarder les enseignants
+    const enseignantsArray = Array.from(enseignantsMap.values());
+    if (enseignantsArray.length > 0) {
+        db.setSync('enseignants', enseignantsArray);
+        console.log(`   ✅ ${enseignantsArray.length} enseignant(s) extrait(s)`);
+    }
+
+    return {
+        nbEnseignantsExtraits: enseignantsArray.length,
+        mapAncienNouvel: mapAncienNouvel
+    };
+}
+
+/**
+ * Migration 9: Extraire les infos cours vers l'entité Cours
+ *
+ * @returns {Object} { nbCoursExtraits, mapAncienNouvel }
+ */
+async function migrerVersEntiteCours() {
+    console.log('🔄 [Migration Beta 96] Extraction des cours (infos générales)...');
+
+    const listeCours = db.getSync('listeCours', []);
+    const coursExistants = db.getSync('cours', []);
+
+    if (coursExistants.length > 0) {
+        console.log('   ⚠️ Des cours existent déjà, migration non nécessaire');
+        return { nbCoursExtraits: 0, mapAncienNouvel: {} };
+    }
+
+    // Map pour éviter les doublons: clé = codeCours
+    const coursMap = new Map();
+
+    listeCours.forEach(ancienCours => {
+        const codeCours = ancienCours.sigle || ancienCours.codeCours || ancienCours.code || '';
+
+        if (!codeCours) return;
+
+        // Si ce code cours existe déjà, ne pas dupliquer
+        if (!coursMap.has(codeCours)) {
+            const id = 'COURS_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+            coursMap.set(codeCours, {
+                id: id,
+                codeCours: codeCours,
+                nomCours: ancienCours.titre || ancienCours.nomCours || '',
+                discipline: ancienCours.discipline || '',
+                numeroCompetence: ancienCours.numeroCompetence || ancienCours.competenceId || '',
+                competence: ancienCours.competence || ancienCours.competenceNom || '',
+                elementsCompetence: ancienCours.elementsCompetence || '',
+                dateCreation: new Date().toISOString(),
+                dateModification: new Date().toISOString(),
+                _anciensCoursIds: [ancienCours.id]
+            });
+        } else {
+            // Ajouter ce cours à la liste
+            const cours = coursMap.get(codeCours);
+            if (!cours._anciensCoursIds.includes(ancienCours.id)) {
+                cours._anciensCoursIds.push(ancienCours.id);
+            }
+        }
+    });
+
+    // Créer le mapping ancien coursId → nouveau coursId
+    const mapAncienNouvel = {};
+    coursMap.forEach(cours => {
+        cours._anciensCoursIds.forEach(ancienId => {
+            mapAncienNouvel[ancienId] = cours.id;
+        });
+        delete cours._anciensCoursIds;
+    });
+
+    // Sauvegarder les cours
+    const coursArray = Array.from(coursMap.values());
+    if (coursArray.length > 0) {
+        db.setSync('cours', coursArray);
+        console.log(`   ✅ ${coursArray.length} cours extrait(s)`);
+    }
+
+    return {
+        nbCoursExtraits: coursArray.length,
+        mapAncienNouvel: mapAncienNouvel
+    };
+}
+
+/**
+ * Migration 10: Extraire les horaires vers l'entité Horaires
+ *
+ * @returns {Object} { nbHorairesExtraits, mapAncienNouvel }
+ */
+async function migrerVersEntiteHoraires() {
+    console.log('🔄 [Migration Beta 96] Extraction des horaires...');
+
+    const listeCours = db.getSync('listeCours', []);
+    const horairesExistants = db.getSync('horaires', []);
+
+    if (horairesExistants.length > 0) {
+        console.log('   ⚠️ Des horaires existent déjà, migration non nécessaire');
+        return { nbHorairesExtraits: 0, mapAncienNouvel: {} };
+    }
+
+    const horairesArray = [];
+    const mapAncienNouvel = {};
+
+    listeCours.forEach(cours => {
+        // Essayer de récupérer l'horaire spécifique au cours
+        const cleHoraire = `seancesHoraire_${cours.id}`;
+        let seancesHoraire = db.getSync(cleHoraire, null);
+
+        // Si pas d'horaire spécifique, utiliser l'horaire global namespacé
+        if (!seancesHoraire && cours.trimestreId) {
+            seancesHoraire = db.getSync(`${cours.trimestreId}_seancesHoraire`, null);
+        }
+
+        // Si pas encore, essayer l'horaire global
+        if (!seancesHoraire) {
+            seancesHoraire = db.getSync('seancesHoraire', null);
+        }
+
+        // Convertir les séances vers le format de l'entité Horaire
+        let seances = [];
+        if (seancesHoraire && Array.isArray(seancesHoraire)) {
+            seances = seancesHoraire.map(s => ({
+                jour: s.jour || 'lundi',
+                heureDebut: s.heureDebut || '10:00',
+                heureFin: s.heureFin || '12:00'
+            }));
+        }
+
+        // Créer l'horaire si on a des séances
+        if (seances.length > 0 || cours.periodesParSemaine || cours.formatHoraire) {
+            const id = 'HOR_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+
+            // Générer un nom basé sur les séances
+            let nom = '';
+            if (seances.length > 0) {
+                const joursAbrev = seances.map(s => {
+                    const joursMap = {
+                        'lundi': 'Lun', 'mardi': 'Mar', 'mercredi': 'Mer',
+                        'jeudi': 'Jeu', 'vendredi': 'Ven', 'samedi': 'Sam', 'dimanche': 'Dim'
+                    };
+                    return joursMap[s.jour] || s.jour;
+                });
+                const premiereHeure = seances[0]?.heureDebut?.split(':')[0] || '';
+                nom = `${joursAbrev.join('-')} ${premiereHeure}h`;
+            } else {
+                nom = `Horaire ${cours.sigle || cours.groupe || ''}`;
+            }
+
+            const horaire = {
+                id: id,
+                nom: nom,
+                periodesParSemaine: cours.periodesParSemaine || 4,
+                formatHoraire: cours.formatHoraire || '2x2',
+                local: cours.local || '',
+                seances: seances,
+                dateCreation: new Date().toISOString(),
+                dateModification: new Date().toISOString()
+            };
+
+            horairesArray.push(horaire);
+            mapAncienNouvel[cours.id] = id;
+        }
+    });
+
+    // Sauvegarder les horaires
+    if (horairesArray.length > 0) {
+        db.setSync('horaires', horairesArray);
+        console.log(`   ✅ ${horairesArray.length} horaire(s) extrait(s)`);
+    }
+
+    return {
+        nbHorairesExtraits: horairesArray.length,
+        mapAncienNouvel: mapAncienNouvel
+    };
+}
+
+/**
+ * Migration 11: Créer les groupe-cours à partir des mappings
+ *
+ * @param {Object} mapEnseignants - Mapping coursId → enseignantId
+ * @param {Object} mapCours - Mapping coursId → nouveauCoursId
+ * @param {Object} mapHoraires - Mapping coursId → horaireId
+ * @returns {Object} { nbGroupeCoursCreés }
+ */
+async function migrerVersGroupeCours(mapEnseignants, mapCours, mapHoraires) {
+    console.log('🔄 [Migration Beta 96] Création des groupe-cours...');
+
+    const listeCours = db.getSync('listeCours', []);
+    const trimestres = db.getSync('trimestres', []);
+
+    let nbTotal = 0;
+
+    // Traiter chaque trimestre
+    for (const trimestre of trimestres) {
+        const coursTrimmestre = listeCours.filter(c => c.trimestreId === trimestre.id);
+        const cleGC = `${trimestre.id}_groupesCours`;
+        const groupesCoursExistants = db.getSync(cleGC, []);
+
+        if (groupesCoursExistants.length > 0) {
+            console.log(`   ⚠️ ${trimestre.id}: groupe-cours existants, ignoré`);
+            continue;
+        }
+
+        const groupesCours = [];
+
+        coursTrimmestre.forEach(ancienCours => {
+            const gcId = 'GC_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+
+            const groupeCours = {
+                id: gcId,
+                trimestreId: trimestre.id,
+                coursId: mapCours[ancienCours.id] || null,
+                enseignantId: mapEnseignants[ancienCours.id] || null,
+                horaireId: mapHoraires[ancienCours.id] || null,
+                pratiqueId: ancienCours.pratiqueId || null,
+                groupe: ancienCours.groupe || '00001',
+                actif: ancienCours.actif || false,
+                dateCreation: new Date().toISOString(),
+                dateModification: new Date().toISOString(),
+                // Garder référence à l'ancien cours pour rétrocompatibilité
+                _ancienCoursId: ancienCours.id
+            };
+
+            groupesCours.push(groupeCours);
+            nbTotal++;
+        });
+
+        if (groupesCours.length > 0) {
+            db.setSync(cleGC, groupesCours);
+            console.log(`   ✅ ${trimestre.id}: ${groupesCours.length} groupe-cours créé(s)`);
+        }
+    }
+
+    return { nbGroupeCoursCreés: nbTotal };
+}
+
+/**
+ * Exécuter toutes les migrations Beta 96
+ *
+ * @returns {Object} Résultats des migrations
+ */
+async function executerMigrationsBeta96() {
+    console.log('🔄 [Migration] Démarrage migrations Beta 96 (entités modulaires)...');
+
+    // Vérifier si déjà migré
+    if (db.getSync('migrationBeta96Effectuee', false)) {
+        console.log('✅ [Migration] Beta 96 déjà effectuée');
+        return { deja_effectuee: true };
+    }
+
+    try {
+        // 1. Extraire les enseignants
+        const resultEnseignants = await migrerVersEntiteEnseignants();
+
+        // 2. Extraire les cours
+        const resultCours = await migrerVersEntiteCours();
+
+        // 3. Extraire les horaires
+        const resultHoraires = await migrerVersEntiteHoraires();
+
+        // 4. Créer les groupe-cours
+        const resultGC = await migrerVersGroupeCours(
+            resultEnseignants.mapAncienNouvel,
+            resultCours.mapAncienNouvel,
+            resultHoraires.mapAncienNouvel
+        );
+
+        // Marquer comme migré
+        db.setSync('migrationBeta96Effectuee', true);
+        db.setSync('migrationBeta96Date', new Date().toISOString());
+
+        const resultats = {
+            enseignants: resultEnseignants.nbEnseignantsExtraits,
+            cours: resultCours.nbCoursExtraits,
+            horaires: resultHoraires.nbHorairesExtraits,
+            groupesCours: resultGC.nbGroupeCoursCreés
+        };
+
+        const total = Object.values(resultats).reduce((a, b) => a + b, 0);
+
+        if (total > 0) {
+            console.log(`✅ [Migration] Beta 96 terminée:`);
+            console.log(`   - Enseignants: ${resultats.enseignants}`);
+            console.log(`   - Cours: ${resultats.cours}`);
+            console.log(`   - Horaires: ${resultats.horaires}`);
+            console.log(`   - Groupe-cours: ${resultats.groupesCours}`);
+        } else {
+            console.log('✅ [Migration] Aucune migration Beta 96 nécessaire (données vides ou déjà migrées)');
+        }
+
+        return resultats;
+
+    } catch (err) {
+        console.error('❌ [Migration] Erreur Beta 96:', err);
+        return { erreur: err.message };
+    }
+}
+
 // Export des fonctions
 if (typeof window !== 'undefined') {
     window.executerMigrationsBeta935 = executerMigrationsBeta935;
@@ -866,4 +1243,10 @@ if (typeof window !== 'undefined') {
     window.reporterMigrationLegacy = reporterMigrationLegacy;
     window.executerMigrationLegacy = executerMigrationLegacy;
     window.verifierEtProposerMigrationLegacy = verifierEtProposerMigrationLegacy;
+    // 🆕 Beta 96 - Entités modulaires
+    window.executerMigrationsBeta96 = executerMigrationsBeta96;
+    window.migrerVersEntiteEnseignants = migrerVersEntiteEnseignants;
+    window.migrerVersEntiteCours = migrerVersEntiteCours;
+    window.migrerVersEntiteHoraires = migrerVersEntiteHoraires;
+    window.migrerVersGroupeCours = migrerVersGroupeCours;
 }
