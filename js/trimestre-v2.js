@@ -1274,8 +1274,8 @@ function afficherDetailsCoursV2(cours) {
         }
     }
 
-    // Normaliser les heures (heuresParSemaine ou heuresHebdo)
-    const heures = cours.heuresParSemaine || cours.heuresHebdo || '—';
+    // ✅ MODIFIÉ (6 jan 2026) : Périodes au lieu d'heures
+    const periodes = cours.periodesParSemaine || cours.heuresParSemaine || cours.heuresHebdo || '—';
 
     // Normaliser le sigle (sigle, codeCours ou numero)
     const sigle = cours.sigle || cours.codeCours || cours.numero || '—';
@@ -1312,7 +1312,7 @@ function afficherDetailsCoursV2(cours) {
             </div>
             <div>
                 <label class="text-muted" style="font-size: 0.85rem;">Format horaire</label>
-                <div>${cours.formatHoraire || '—'} (${heures}h/sem)</div>
+                <div>${cours.formatHoraire || '—'} (${periodes} pér./sem)</div>
             </div>
         </div>
     `;
@@ -1475,7 +1475,10 @@ function remplirFormCoursV2(cours) {
     // Session et horaire
     setValue('v2-session', cours.session || 'H');
     setValue('v2-annee', cours.annee || new Date().getFullYear());
-    setValue('v2-heuresParSemaine', cours.heuresParSemaine || cours.heuresHebdo || 4);
+    // ✅ MODIFIÉ (6 jan 2026) : Périodes au lieu d'heures
+    const periodes = cours.periodesParSemaine || cours.heuresParSemaine || cours.heuresHebdo || 4;
+    setValue('v2-periodesParSemaine', periodes);
+    mettreAJourFormatHoraire(); // Générer les options dynamiquement
     setValue('v2-formatHoraire', cours.formatHoraire || '2x2');
     // Groupe géré via le groupe-cours (Beta 95)
 
@@ -1495,7 +1498,9 @@ function reinitialiserFormCoursV2() {
     champs.forEach(id => setValue(id, ''));
 
     setValue('v2-session', 'H');
-    setValue('v2-heuresParSemaine', 4);
+    // ✅ MODIFIÉ (6 jan 2026) : Périodes au lieu d'heures
+    setValue('v2-periodesParSemaine', 4);
+    mettreAJourFormatHoraire();
     setValue('v2-formatHoraire', '2x2');
     // ✅ AJOUT (2 jan 2026) : Pratique par défaut
     setValue('v2-pratiqueIdCours', 'pan-standards');
@@ -1627,7 +1632,8 @@ function sauvegarderCoursV2() {
         },
         session: session,
         annee: annee,
-        heuresParSemaine: parseInt(document.getElementById('v2-heuresParSemaine')?.value) || 4,
+        // ✅ MODIFIÉ (6 jan 2026) : Périodes au lieu d'heures
+        periodesParSemaine: parseInt(document.getElementById('v2-periodesParSemaine')?.value) || 4,
         formatHoraire: document.getElementById('v2-formatHoraire')?.value || '2x2',
         groupe: groupe,
         actif: true,
@@ -2391,10 +2397,88 @@ function basculerDonneesDemoV2(activer) {
 }
 
 /* ===============================
+   FORMAT HORAIRE DYNAMIQUE (6 jan 2026)
+   Génère les options selon le nombre de périodes
+   =============================== */
+
+/**
+ * Met à jour le dropdown Format horaire selon le nombre de périodes/semaine
+ * Génère toutes les combinaisons possibles (diviseurs)
+ */
+function mettreAJourFormatHoraire() {
+    const select = document.getElementById('v2-formatHoraire');
+    const info = document.getElementById('v2-formatHoraire-info');
+    const inputPeriodes = document.getElementById('v2-periodesParSemaine');
+
+    if (!select || !inputPeriodes) return;
+
+    const totalPeriodes = parseInt(inputPeriodes.value) || 4;
+    const valeurActuelle = select.value;
+
+    // Trouver tous les diviseurs du nombre de périodes
+    const diviseurs = [];
+    for (let i = 1; i <= totalPeriodes; i++) {
+        if (totalPeriodes % i === 0) {
+            diviseurs.push(i);
+        }
+    }
+
+    // Générer les options
+    let html = '';
+    diviseurs.forEach(nbSeances => {
+        const periodesParSeance = totalPeriodes / nbSeances;
+        const value = `${nbSeances}x${periodesParSeance}`;
+        const label = nbSeances === 1
+            ? `1 séance de ${periodesParSeance} période${periodesParSeance > 1 ? 's' : ''}`
+            : `${nbSeances} séances de ${periodesParSeance} période${periodesParSeance > 1 ? 's' : ''}`;
+        html += `<option value="${value}">${label}</option>`;
+    });
+
+    select.innerHTML = html;
+
+    // Restaurer la valeur si elle existe toujours
+    if ([...select.options].some(opt => opt.value === valeurActuelle)) {
+        select.value = valeurActuelle;
+    }
+
+    // Afficher la durée en heures/minutes
+    mettreAJourInfoDuree();
+}
+
+/**
+ * Affiche la durée totale en heures/minutes sous le dropdown
+ */
+function mettreAJourInfoDuree() {
+    const info = document.getElementById('v2-formatHoraire-info');
+    const inputPeriodes = document.getElementById('v2-periodesParSemaine');
+
+    if (!info || !inputPeriodes) return;
+
+    const totalPeriodes = parseInt(inputPeriodes.value) || 4;
+
+    // Récupérer la durée d'une période (depuis horaire.js ou valeur par défaut)
+    const dureePeriode = typeof obtenirDureePeriode === 'function'
+        ? obtenirDureePeriode()
+        : 55;
+
+    const totalMinutes = totalPeriodes * dureePeriode;
+    const heures = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+
+    let texte = `= ${heures}h`;
+    if (minutes > 0) texte += `${minutes.toString().padStart(2, '0')}`;
+    texte += ` (${totalPeriodes} × ${dureePeriode} min)`;
+
+    info.textContent = texte;
+}
+
+/* ===============================
    EXPORTS WINDOW
    =============================== */
 
 // Exposer les fonctions au scope global
+window.mettreAJourFormatHoraire = mettreAJourFormatHoraire;
+window.mettreAJourInfoDuree = mettreAJourInfoDuree;
 window.initialiserTrimestreV2 = initialiserTrimestreV2;
 window.chargerCadreCalendrierV2 = chargerCadreCalendrierV2;
 window.sauvegarderCadreCalendrierV2 = sauvegarderCadreCalendrierV2;
