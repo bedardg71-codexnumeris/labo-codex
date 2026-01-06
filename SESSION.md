@@ -42,6 +42,69 @@ Beta 96 - TOUS les bugs corriges et souhaits implementes
 
 ---
 
+## AMELIORATIONS FUTURES (backlog)
+
+### Import de configurations (Beta 95.1)
+
+**Etat actuel** : Option 3 implementee - seules les ressources pedagogiques (grilles, echelles, pratiques) sont importables depuis un collegue. Les donnees du cours (etudiants, presences, notes) sont bloquees pour eviter l'ecrasement.
+
+**Ameliorations envisagees** :
+- [ ] Mode "consultation" : importer les donnees d'un collegue dans un namespace separe (comme les donnees demo)
+- [ ] Anonymisation automatique : remplacer les noms d'etudiants par des pseudonymes
+- [ ] Trimestre virtuel "Import de [collegue]" pour explorer sans risque
+- [ ] Fusion selective : permettre de copier des elements specifiques vers ses propres donnees
+
+### Simplification boutons Import/Export (6 jan 2026)
+
+**Probleme** : Trop de boutons dans les interfaces (productions, grilles, etc.) - confus pour l'utilisateur.
+
+**Exemple Productions** : 5 boutons visibles (Exporter, Retirer, Ajouter a la bibliotheque, Exporter toutes, Importer)
+
+**Ameliorations envisagees** :
+- [ ] Regrouper les actions dans un menu deroulant ou une modale unique
+- [ ] Harmoniser les boutons entre les differentes sections (grilles, echelles, productions, cartouches)
+- [ ] Reduire la redondance : un seul point d'entree pour import/export par section
+
+### Import selectif par element (6 jan 2026) ✅ FAIT
+
+**Probleme** : Actuellement on importe par categorie complete (toutes les grilles, toutes les echelles, etc.)
+
+**Solution implementee** (6 jan 2026) :
+- [x] Checkbox par element individuel avec toggle par categorie
+- [x] Donnees etudiantes (noms, presences, notes) grisees avec message de confidentialite
+- [x] Detection heuristique des donnees demo a l'export
+
+### Heures non piles dans Trimestre (6 jan 2026)
+
+**Probleme** : Dans Trimestre > Horaire, les heures sont en format select avec heures piles seulement.
+
+**Amelioration envisagee** :
+- [ ] Ajuster les selecteurs d'heures pour permettre des heures non piles (8h55, 9h45, etc.)
+- [ ] Harmoniser avec le comportement de Primo qui utilise deja `type: 'time'`
+
+### Comptage en periodes au lieu des heures (6 jan 2026)
+
+**Probleme** : L'assiduite est comptee en heures, mais Bruno (et d'autres cegeps) comptent en periodes de 55 minutes.
+
+**Plan detaille** : Voir `/Users/kuekatsheu/.claude/plans/sleepy-scribbling-boole.md`
+
+**Ameliorations envisagees** :
+- [ ] Configurer la duree d'une periode (50/55/60 min) dans Reglages > Trimestre
+- [ ] Saisir les presences en nombre de periodes (0, 1, 2, 3...)
+- [ ] Calculer l'assiduite en periodes ou heures selon preference
+- [ ] Migration retrocompatible des donnees existantes
+
+### Anonymisation et cryptage des donnees etudiantes (6 jan 2026)
+
+**Probleme** : Les donnees etudiantes sont confidentielles et ne peuvent pas etre partagees.
+
+**Ameliorations envisagees** :
+- [ ] Anonymisation automatique : remplacer les noms par des pseudonymes pour partage
+- [ ] Cryptage optionnel des exports pour securiser les sauvegardes
+- [ ] Mode "consultation" : importer dans un namespace separe sans affecter ses propres donnees
+
+---
+
 ## HISTORIQUE BETA 95 (archive)
 
 **Date** : 4 janvier 2026

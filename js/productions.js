@@ -2041,17 +2041,33 @@ function fermerModalBibliothequeProductions() {
  * }
  */
 async function exporterProductions() {
-    const productions = await db.get('productions') || [];
+    const toutesProductions = await db.get('productions') || [];
+
+    // ✅ MODIFIÉ (6 jan 2026) : Utiliser détection heuristique pour filtrer démo + importées
+    const productions = typeof filtrerRessourcesNonDemo === 'function'
+        ? filtrerRessourcesNonDemo(toutesProductions, 'production')
+        : toutesProductions.filter(p => !p.estDemo && !p.auteurOriginal);
+    const nbExclues = toutesProductions.length - productions.length;
 
     if (productions.length === 0) {
-        alert('Aucune production à exporter.');
+        if (nbExclues > 0) {
+            alert(`Aucune production personnelle à exporter.\n\n${nbExclues} production(s) exclue(s) car elles proviennent du matériel démo ou d'imports de collègues.`);
+        } else {
+            alert('Aucune production à exporter.');
+        }
         return;
+    }
+
+    // Informer si des productions ont été exclues
+    let infoExclusion = '';
+    if (nbExclues > 0) {
+        infoExclusion = ` (${nbExclues} exclue(s) : démo/importées)`;
     }
 
     // NOUVEAU (Beta 91): Demander métadonnées enrichies
     const metaEnrichies = await demanderMetadonneesEnrichies(
         'Productions pédagogiques',
-        `${productions.length} production(s)`
+        `${productions.length} production(s)${infoExclusion}`
     );
 
     if (!metaEnrichies) {
