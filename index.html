@@ -8417,41 +8417,12 @@
                         </div>
                     </div>
 
-                    <!-- ========== GUIDE : CONFIGURATION GROUPE-COURS ========== -->
-                    <div class="carte" id="guide-groupe-cours">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
-                            <h3 class="carte-titre-bleu" style="margin: 0;">Configuration d'un groupe-cours</h3>
-                            <button class="btn btn-secondaire btn-sm" onclick="demarrerConfigComplete()" title="Lancer l'assistant guidé">
-                                😎 Assistant Primo
-                            </button>
-                        </div>
-
-                        <div class="alerte alerte-information" style="margin-bottom: 15px;">
-                            Un <strong>groupe-cours</strong> associe : un cours + un numéro de groupe + un horaire + une pratique de notation.
-                        </div>
-
-                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px;">
-                            <div class="carte-metrique" id="guide-etape-1">
-                                <span class="label">1. Cours</span>
-                                <span class="valeur" id="status-cours" style="font-size: 1.2rem;">○</span>
-                            </div>
-                            <div class="carte-metrique" id="guide-etape-2">
-                                <span class="label">2. Groupe</span>
-                                <span class="valeur" id="status-groupe" style="font-size: 1.2rem;">○</span>
-                            </div>
-                            <div class="carte-metrique" id="guide-etape-3">
-                                <span class="label">3. Horaire</span>
-                                <span class="valeur" id="status-horaire" style="font-size: 1.2rem;">○</span>
-                            </div>
-                            <div class="carte-metrique" id="guide-etape-4">
-                                <span class="label">4. Étudiants</span>
-                                <span class="valeur" id="status-etudiants" style="font-size: 1.2rem;">○</span>
-                            </div>
-                        </div>
-
-                        <p class="text-muted" style="margin: 0; font-size: 0.9rem;">
-                            <strong>Mode expert :</strong> Utilise les sections ci-dessous et les bibliothèques pour configurer rapidement.
-                        </p>
+                    <!-- ========== CONSIGNE GROUPE-COURS ========== -->
+                    <div class="alerte alerte-information" style="margin-bottom: 20px;">
+                        <strong>Pour constituer un groupe-cours</strong>, associe : un cours + un enseignant·e + un numéro de groupe + un horaire + une pratique de notation.
+                        <span style="margin-left: 10px;">
+                            Besoin d'aide ? <button class="btn btn-secondaire btn-sm" onclick="demarrerConfigComplete()" style="margin-left: 5px;">😎 Assistant Primo</button>
+                        </span>
                     </div>
 
                     <!-- ========== GESTION DES TRIMESTRES ========== -->
@@ -8463,72 +8434,13 @@
                         </div>
                         <div class="accordeon-contenu">
                             <p class="texte-intro">
-                                Gère tes trimestres : archivez les sessions terminées pour les conserver en lecture seule,
-                                ou exportez les données pour analyse pédagogique.
+                                Archive les sessions terminées pour les conserver en lecture seule.
+                                <a href="#" onclick="allerVersAide('aide-archivage'); return false;" style="color: var(--bleu-principal);">En savoir plus sur l'archivage →</a>
                             </p>
 
                             <!-- Liste des trimestres (générée par JS) -->
                             <div id="listeTrimestreGestion">
                                 <!-- Généré dynamiquement par afficherListeTrimestreGestion() -->
-                            </div>
-
-                            <!-- Explication de l'archivage -->
-                            <details class="details-aide">
-                                <summary>Qu'est-ce que l'archivage ?</summary>
-                                <div class="details-contenu">
-                                    <p>
-                                        <strong>L'archivage protège tes données</strong> en passant le trimestre en mode lecture seule.
-                                        Aucune modification n'est possible tant qu'il n'est pas désarchivé.
-                                    </p>
-                                    <ul>
-                                        <li><strong>Format</strong> : Les données restent dans ton navigateur (localStorage/IndexedDB), au même format qu'avant.</li>
-                                        <li><strong>Sécurité</strong> : Rien n'est envoyé sur Internet. Vos données restent 100% locales sur ton appareil.</li>
-                                        <li><strong>Réversible</strong> : Tu peux désarchiver à tout moment pour reprendre les modifications.</li>
-                                    </ul>
-                                    <p>
-                                        <strong>Faut-il archiver ?</strong> C'est recommandé à la fin d'une session pour éviter toute modification accidentelle.
-                                        Pensez aussi à <em>exporter</em> tes données régulièrement comme sauvegarde externe.
-                                    </p>
-                                </div>
-                            </details>
-
-                            <!-- Section Export pour la recherche -->
-                            <div class="section-export-recherche">
-                                <h4>Export anonymisé pour la recherche</h4>
-                                <p class="texte-intro">
-                                    Exporte tes données dans un format anonymisé, idéal pour l'analyse pédagogique,
-                                    la publication scientifique ou le partage avec des collègues.
-                                </p>
-
-                                <!-- Trimestre ciblé par l'export (généré dynamiquement) -->
-                                <div id="export-trimestre-info" class="export-trimestre-cible">
-                                    <!-- Généré par JS: afficherTrimestreCibleExport() -->
-                                </div>
-
-                                <div class="export-info-grid">
-                                    <div class="alerte alerte-information">
-                                        <strong>Contenu de l'export</strong>
-                                        <ul>
-                                            <li><strong>Observations</strong> : Présences, évaluations par critère, remises</li>
-                                            <li><strong>Contexte</strong> : Grille SOLO, calendrier, artefacts</li>
-                                            <li><strong>Calculs</strong> : Snapshots A-C-P, indices finaux</li>
-                                        </ul>
-                                    </div>
-                                    <div class="alerte alerte-attention">
-                                        <strong>Anonymisation réversible</strong>
-                                        <ul>
-                                            <li>Les DA sont transformés via hash cryptographique</li>
-                                            <li>Toi seul peux retrouver les correspondances</li>
-                                            <li>Conservez la clé secrète en lieu sûr</li>
-                                        </ul>
-                                    </div>
-                                </div>
-
-                                <div class="export-actions">
-                                    <button onclick="lancerExportRecherche()" class="btn btn-principal">
-                                        Générer l'export anonymisé
-                                    </button>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -8541,6 +8453,33 @@
                             </h3>
                         </div>
                         <div class="accordeon-contenu" style="display: none;">
+
+                        <!-- Identification du trimestre -->
+                        <div style="background: var(--vert-tres-pale, #e8f5e9); padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid var(--vert-succes, #4caf50);">
+                            <h5 class="sous-titre-section" style="margin-top: 0; margin-bottom: 12px;">Identification du trimestre</h5>
+                            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 15px; align-items: end;">
+                                <div class="groupe-form">
+                                    <label style="font-size: 0.8rem; font-weight: 500;">Nom du trimestre <span class="text-danger">*</span></label>
+                                    <input type="text" class="controle-form" id="v2-nomTrimestre" placeholder="Ex: Hiver 2026" onchange="sauvegarderIdentificationTrimestreV2()">
+                                </div>
+                                <div class="groupe-form">
+                                    <label style="font-size: 0.8rem; font-weight: 500;">Session <span class="text-danger">*</span></label>
+                                    <select class="controle-form" id="v2-sessionTrimestre" onchange="sauvegarderIdentificationTrimestreV2()">
+                                        <option value="">— Choisir —</option>
+                                        <option value="automne">Automne</option>
+                                        <option value="hiver">Hiver</option>
+                                        <option value="ete">Été</option>
+                                    </select>
+                                </div>
+                                <div class="groupe-form">
+                                    <label style="font-size: 0.8rem; font-weight: 500;">Année <span class="text-danger">*</span></label>
+                                    <input type="number" class="controle-form" id="v2-anneeTrimestre" min="2020" max="2050" placeholder="2026" onchange="sauvegarderIdentificationTrimestreV2()">
+                                </div>
+                            </div>
+                            <p class="texte-aide" style="margin-top: 10px; margin-bottom: 0; font-size: 0.8rem;">
+                                Ces informations identifient votre trimestre de travail et préfixent vos données.
+                            </p>
+                        </div>
 
                         <!-- Grille 2 colonnes : Bornes et Semaines spéciales -->
                         <div class="grille-2col">
@@ -8725,7 +8664,7 @@
                                     <span id="v2-nombreJoursCours">0</span> jours de cours
                                     <span id="v2-statsCongesReprises"></span>
                                 </p>
-                                <button class="btn btn-confirmer btn-tres-compact" onclick="sauvegarderCadreCalendrierV2()">Sauvegarder le cadre</button>
+                                <button class="btn btn-confirmer btn-tres-compact" onclick="sauvegarderCadreCalendrierV2()">Sauvegarder le trimestre</button>
                             </div>
                         </div>
                         </div>
@@ -8992,6 +8931,19 @@
                             </div>
                         </div>
                         <div class="accordeon-contenu" style="display: none;">
+                            <!-- Configuration durée de période -->
+                            <div class="alerte alerte-information" style="margin-bottom: 15px; display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                                <label style="font-weight: 600; white-space: nowrap; margin: 0;">Durée d'une période :</label>
+                                <select id="v2-dureePeriode" class="controle-form" style="width: auto; min-width: 150px;" onchange="modifierDureePeriodeV2(this.value)">
+                                    <option value="50">50 minutes</option>
+                                    <option value="55" selected>55 minutes</option>
+                                    <option value="60">60 minutes</option>
+                                    <option value="75">75 minutes</option>
+                                    <option value="90">90 minutes</option>
+                                </select>
+                                <span class="text-muted" style="font-size: 0.85rem;">Cette durée s'applique à toutes les séances.</span>
+                            </div>
+
                             <!-- Sélection de l'horaire -->
                             <div class="d-flex-gap-10-center" style="margin-bottom: 15px;">
                                 <label style="font-weight: 500;">Horaire :</label>
@@ -9006,6 +8958,11 @@
                             <!-- Aperçu de l'horaire sélectionné -->
                             <div id="v2-apercuHoraire" class="carte-bleu-pale-p15">
                                 <p class="text-muted">Sélectionnez un horaire pour voir ses détails.</p>
+                            </div>
+
+                            <!-- Liste des séances du cours (ajoutée Beta 96) -->
+                            <div id="v2-seancesContainer" class="mb-20" style="margin-top: 15px;">
+                                <!-- Contenu généré par chargerSeancesV2() -->
                             </div>
 
                             <!-- FORMULAIRE HORAIRE (caché par défaut) -->
@@ -9059,85 +9016,6 @@
                         </div>
                     </div><!-- FIN accordéon Horaire -->
 
-                    <!-- ========== ACCORDÉON: GROUPE-COURS (Beta 96 - Assemblage) ========== -->
-                    <div class="carte accordeon" id="accordeon-groupe-cours" style="margin-top: 20px;">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
-                            <h3 class="carte-titre-bleu" style="margin: 0;">
-                                <span class="accordeon-chevron">▶</span> Groupe-cours
-                            </h3>
-                            <div class="btn-groupe" style="gap: 8px;" onclick="event.stopPropagation();">
-                                <button class="btn btn-confirmer btn-sm" onclick="afficherFormGroupeCoursV2()">
-                                    + Nouveau groupe-cours
-                                </button>
-                            </div>
-                        </div>
-                        <div class="accordeon-contenu" style="display: none;">
-                            <div class="alerte alerte-information" style="margin-bottom: 15px;">
-                                Un <strong>groupe-cours</strong> combine : un cours + un enseignant·e + un numéro de groupe + un horaire + une pratique de notation.
-                            </div>
-
-                            <!-- Liste des groupe-cours existants -->
-                            <div id="v2-listeGroupeCours" style="margin-bottom: 20px;">
-                                <p class="text-muted">Aucun groupe-cours configuré pour ce trimestre.</p>
-                            </div>
-
-                            <!-- FORMULAIRE GROUPE-COURS (caché par défaut) -->
-                            <div id="v2-formulaireGroupeCours" style="display: none; padding: 20px; background: var(--bleu-pale); border: 1px solid var(--bleu-leger); border-radius: 8px;">
-                                <h4 class="titre-bleu-mb-20">Créer un groupe-cours</h4>
-
-                                <div class="grille-2col" style="gap: 15px; margin-bottom: 15px;">
-                                    <div class="groupe-form">
-                                        <label>Cours <span style="color: var(--rouge-erreur);">*</span></label>
-                                        <select id="v2-gc-cours" class="controle-form controle-form-compact">
-                                            <option value="">-- Sélectionner un cours --</option>
-                                        </select>
-                                    </div>
-                                    <div class="groupe-form">
-                                        <label>Enseignant·e <span style="color: var(--rouge-erreur);">*</span></label>
-                                        <select id="v2-gc-enseignant" class="controle-form controle-form-compact">
-                                            <option value="">-- Sélectionner un enseignant·e --</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="grille-3col-form" style="margin-bottom: 15px;">
-                                    <div class="groupe-form">
-                                        <label>Numéro de groupe <span style="color: var(--rouge-erreur);">*</span></label>
-                                        <input type="text" id="v2-gc-groupe" class="controle-form controle-form-compact" placeholder="Ex: 00001" maxlength="5">
-                                    </div>
-                                    <div class="groupe-form">
-                                        <label>Horaire</label>
-                                        <select id="v2-gc-horaire" class="controle-form controle-form-compact">
-                                            <option value="">-- Sélectionner un horaire --</option>
-                                        </select>
-                                    </div>
-                                    <div class="groupe-form">
-                                        <label>Pratique de notation</label>
-                                        <select id="v2-gc-pratique" class="controle-form controle-form-compact">
-                                            <option value="">-- Sélectionner une pratique --</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <!-- Aperçu de l'assemblage -->
-                                <div id="v2-gc-apercu" class="carte-bleu-pale-p15" style="margin-bottom: 15px;">
-                                    <strong>Aperçu :</strong> <span id="v2-gc-apercu-texte" class="text-muted">Complétez les champs pour voir l'aperçu</span>
-                                </div>
-
-                                <!-- Boutons d'action -->
-                                <div class="btn-groupe btn-groupe-droite" style="margin-top: 15px; padding-top: 15px; border-top: 2px solid var(--bleu-leger);">
-                                    <button class="btn btn-annuler" onclick="annulerFormGroupeCoursV2()">
-                                        Annuler
-                                    </button>
-                                    <button class="btn btn-confirmer" onclick="sauvegarderGroupeCoursV2()">
-                                        Créer le groupe-cours
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div><!-- FIN accordéon Groupe-cours -->
-
-                    <!-- ========== ACCORDÉON: GROUPES ========== -->
                     <!-- ========== ACCORDÉON: GROUPE D'ÉTUDIANTS (HTML Legacy intégré) ========== -->
                     <div class="carte accordeon" id="accordeon-groupe" style="margin-top: 20px;">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
@@ -9297,90 +9175,83 @@ Exemple :
                         </div>
                     </div><!-- FIN accordéon Groupe d'étudiants -->
 
-                    <!-- ========== ACCORDÉON: HORAIRE ========== -->
-                    <div class="carte accordeon" id="accordeon-horaire" style="margin-top: 20px;">
+                    <!-- ========== ACCORDÉON: GROUPE-COURS (Beta 96 - Assemblage) ========== -->
+                    <div class="carte accordeon" id="accordeon-groupe-cours" style="margin-top: 20px;">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
                             <h3 class="carte-titre-bleu" style="margin: 0;">
-                                <span class="accordeon-chevron">▶</span> Horaire
+                                <span class="accordeon-chevron">▶</span> Groupe-cours
                             </h3>
-                            <button class="btn btn-confirmer btn-sm" onclick="event.stopPropagation(); afficherFormSeanceV2()">
-                                + Ajouter une séance
-                            </button>
+                            <div class="btn-groupe" style="gap: 8px;" onclick="event.stopPropagation();">
+                                <button class="btn btn-confirmer btn-sm" onclick="afficherFormGroupeCoursV2()">
+                                    + Nouveau groupe-cours
+                                </button>
+                            </div>
                         </div>
                         <div class="accordeon-contenu" style="display: none;">
-                            <p class="text-muted" style="margin-bottom: 15px; font-size: 0.9rem;">
-                                Configurez les séances de cours de la semaine en fonction de la durée des périodes en vigueur dans votre cégep.
-                            </p>
-
-                            <!-- 🆕 BETA 95.1 : Configuration durée d'une période -->
-                            <div class="alerte alerte-information" style="margin-bottom: 15px; display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
-                                <label style="font-weight: 600; white-space: nowrap; margin: 0;">Durée d'une période :</label>
-                                <select id="v2-dureePeriode" class="controle-form" style="width: auto; min-width: 150px;" onchange="modifierDureePeriodeV2(this.value)">
-                                    <option value="50">50 minutes</option>
-                                    <option value="55" selected>55 minutes</option>
-                                    <option value="60">60 minutes</option>
-                                    <option value="75">75 minutes</option>
-                                    <option value="90">90 minutes</option>
-                                </select>
-                                <span class="text-muted" style="font-size: 0.85rem;">Cette durée s'applique à toutes les séances du cours.</span>
+                            <div class="alerte alerte-information" style="margin-bottom: 15px;">
+                                Un <strong>groupe-cours</strong> combine : un cours + un enseignant·e + un numéro de groupe + un horaire + une pratique de notation.
                             </div>
 
-                            <!-- Liste des séances existantes -->
-                            <div id="v2-seancesContainer" class="mb-20">
-                                <p class="text-muted text-italic">Aucune séance configurée.</p>
+                            <!-- Liste des groupe-cours existants -->
+                            <div id="v2-listeGroupeCours" style="margin-bottom: 20px;">
+                                <p class="text-muted">Aucun groupe-cours configuré pour ce trimestre.</p>
                             </div>
 
-                            <!-- FORMULAIRE D'AJOUT SÉANCE (caché par défaut) -->
-                            <div id="v2-formAjoutSeance" class="item-carte" style="display: none; padding: 15px; background: var(--vert-pale); border: 1px solid var(--vert-confirmer); border-radius: 8px; margin-top: 15px;">
-                                <div class="item-carte-header" style="margin-bottom: 15px;">
-                                    <strong id="v2-titreFormSeance" class="item-carte-titre titre-vert">
-                                        Nouvelle séance
-                                    </strong>
-                                </div>
-                                <div class="grille-4col-form">
+                            <!-- FORMULAIRE GROUPE-COURS (caché par défaut) -->
+                            <div id="v2-formulaireGroupeCours" style="display: none; padding: 20px; background: var(--bleu-pale); border: 1px solid var(--bleu-leger); border-radius: 8px;">
+                                <h4 class="titre-bleu-mb-20">Créer un groupe-cours</h4>
+
+                                <div class="grille-2col" style="gap: 15px; margin-bottom: 15px;">
                                     <div class="groupe-form">
-                                        <label>Jour</label>
-                                        <select class="controle-form controle-form-compact" id="v2-jourSeance">
-                                            <option value="">Choisir...</option>
-                                            <option value="Lundi">Lundi</option>
-                                            <option value="Mardi">Mardi</option>
-                                            <option value="Mercredi">Mercredi</option>
-                                            <option value="Jeudi">Jeudi</option>
-                                            <option value="Vendredi">Vendredi</option>
+                                        <label>Cours <span style="color: var(--rouge-erreur);">*</span></label>
+                                        <select id="v2-gc-cours" class="controle-form controle-form-compact">
+                                            <option value="">-- Sélectionner un cours --</option>
                                         </select>
                                     </div>
                                     <div class="groupe-form">
-                                        <label>Heure début</label>
-                                        <!-- 🆕 BETA 95.1 : Input time pour heures non piles (8h55, 9h45...) -->
-                                        <input type="time" class="controle-form controle-form-compact" id="v2-debutSeance" value="08:00">
+                                        <label>Enseignant·e <span style="color: var(--rouge-erreur);">*</span></label>
+                                        <select id="v2-gc-enseignant" class="controle-form controle-form-compact">
+                                            <option value="">-- Sélectionner un enseignant·e --</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="grille-3col-form" style="margin-bottom: 15px;">
+                                    <div class="groupe-form">
+                                        <label>Numéro de groupe <span style="color: var(--rouge-erreur);">*</span></label>
+                                        <input type="text" id="v2-gc-groupe" class="controle-form controle-form-compact" placeholder="Ex: 00001" maxlength="5">
                                     </div>
                                     <div class="groupe-form">
-                                        <label>Périodes</label>
-                                        <select class="controle-form controle-form-compact" id="v2-periodesSeance">
-                                            <option value="">Choisir...</option>
-                                            <option value="1">1 période</option>
-                                            <option value="2" selected>2 périodes</option>
-                                            <option value="3">3 périodes</option>
-                                            <option value="4">4 périodes</option>
-                                            <option value="5">5 périodes</option>
-                                            <option value="6">6 périodes</option>
-                                            <option value="7">7 périodes</option>
-                                            <option value="8">8 périodes</option>
+                                        <label>Horaire</label>
+                                        <select id="v2-gc-horaire" class="controle-form controle-form-compact">
+                                            <option value="">-- Sélectionner un horaire --</option>
                                         </select>
                                     </div>
                                     <div class="groupe-form">
-                                        <label>Local</label>
-                                        <input type="text" class="controle-form controle-form-compact" id="v2-localSeance" placeholder="Ex: 1709">
+                                        <label>Pratique de notation</label>
+                                        <select id="v2-gc-pratique" class="controle-form controle-form-compact">
+                                            <option value="">-- Sélectionner une pratique --</option>
+                                        </select>
                                     </div>
                                 </div>
-                                <div class="btn-groupe btn-groupe-droite" style="margin-top: 15px;">
-                                    <button class="btn btn-annuler btn-sm" onclick="annulerFormSeanceV2()">Annuler</button>
-                                    <button id="v2-btnConfirmerSeance" class="btn btn-confirmer btn-sm" onclick="confirmerSeanceV2()">Ajouter</button>
-                                </div>
-                            </div><!-- FIN formulaire ajout séance -->
 
+                                <!-- Aperçu de l'assemblage -->
+                                <div id="v2-gc-apercu" class="carte-bleu-pale-p15" style="margin-bottom: 15px;">
+                                    <strong>Aperçu :</strong> <span id="v2-gc-apercu-texte" class="text-muted">Complétez les champs pour voir l'aperçu</span>
+                                </div>
+
+                                <!-- Boutons d'action -->
+                                <div class="btn-groupe btn-groupe-droite" style="margin-top: 15px; padding-top: 15px; border-top: 2px solid var(--bleu-leger);">
+                                    <button class="btn btn-annuler" onclick="annulerFormGroupeCoursV2()">
+                                        Annuler
+                                    </button>
+                                    <button class="btn btn-confirmer" onclick="sauvegarderGroupeCoursV2()">
+                                        Créer le groupe-cours
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                    </div><!-- FIN accordéon Horaire -->
+                    </div><!-- FIN accordéon Groupe-cours -->
 
                     <!-- ========== ACCORDÉON: DONNÉES DE DÉMONSTRATION ========== -->
                     <div class="carte accordeon" id="accordeon-donnees-demo" style="margin-top: 20px;">
@@ -9871,6 +9742,44 @@ Exemple :
                                         Efface toutes les captures
                                     </p>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ========================================
+                         CARTE : EXPORT ANONYMISÉ POUR LA RECHERCHE
+                         ======================================== -->
+                    <div class="carte accordeon ferme" id="accordeon-export-recherche">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu" style="margin: 0;">Export anonymisé pour la recherche</h3>
+                            <span class="accordeon-chevron">▼</span>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p class="text-muted" style="margin: 15px 0;">
+                                Génère un export anonymisé des données d'apprentissage pour la recherche en éducation.
+                            </p>
+
+                            <div class="alerte alerte-information">
+                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Qu'est-ce qui est exporté ?</h4>
+                                <ul class="lh-2">
+                                    <li>Indices A-C-P-E anonymisés</li>
+                                    <li>Données de progression longitudinales</li>
+                                    <li>Statistiques agrégées du groupe</li>
+                                    <li>Métadonnées du cours (code, discipline)</li>
+                                </ul>
+                                <p class="mt-10"><strong>Aucune donnée nominative n'est incluse.</strong></p>
+                            </div>
+
+                            <div class="alerte alerte-succes">
+                                <h4 style="color: #2e7d32; margin-bottom: 10px">Format et utilisation</h4>
+                                <p>L'export génère un fichier JSON structuré, compatible avec les outils d'analyse de données (R, Python, Excel).</p>
+                                <p class="mt-10">Les identifiants sont remplacés par des codes anonymes générés aléatoirement.</p>
+                            </div>
+
+                            <div style="margin-top: 20px; text-align: center;">
+                                <button class="btn btn-principal" onclick="exporterFormatRecherche()">
+                                    Générer l'export anonymisé
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -10847,6 +10756,50 @@ Exemple :
                                 <li class="py-8">[ ] Grille de critères créée et définie comme référence</li>
                             </ul>
                             <p class="titre-mt15-fw-bold-bleu">→ Tu es prêt à commencer le suivi hebdomadaire !</p>
+                        </div>
+                    </div>
+
+                    <!-- Carte: Qu'est-ce que l'archivage -->
+                    <div class="carte accordeon" id="accordeon-aide-archivage">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Qu'est-ce que l'archivage d'un trimestre ?
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p>L'archivage permet de <strong>préserver un trimestre terminé</strong> tout en libérant l'espace pour un nouveau trimestre de travail.</p>
+
+                            <div class="alerte alerte-information">
+                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Que se passe-t-il lors de l'archivage ?</h4>
+                                <ul class="lh-2">
+                                    <li>Le trimestre passe en <strong>mode lecture seule</strong> (aucune modification possible)</li>
+                                    <li>Les statistiques finales sont calculées et sauvegardées</li>
+                                    <li>Un <strong>snapshot des ressources</strong> (productions, grilles, échelles, pratiques) est créé</li>
+                                    <li>Le trimestre reste accessible pour consultation dans la liste</li>
+                                </ul>
+                            </div>
+
+                            <div class="alerte alerte-succes">
+                                <h4 style="color: #2e7d32; margin-bottom: 10px">Quand archiver ?</h4>
+                                <p>Archive un trimestre lorsque :</p>
+                                <ul class="mt-5">
+                                    <li>Les notes finales ont été remises</li>
+                                    <li>Tu ne prévois plus de modifications aux données</li>
+                                    <li>Tu souhaites commencer un nouveau trimestre</li>
+                                </ul>
+                            </div>
+
+                            <div class="alerte alerte-attention">
+                                <h4 style="color: #e65100; margin-bottom: 10px">Important</h4>
+                                <p>L'archivage est <strong>réversible</strong>. Tu peux désarchiver un trimestre si nécessaire, ce qui le remet en mode édition.</p>
+                            </div>
+
+                            <p><strong>Comment archiver :</strong></p>
+                            <ol class="lh-relaxed">
+                                <li>Va dans <strong>Trimestre → Gestion des trimestres</strong></li>
+                                <li>Clique sur <strong>Archiver</strong> à côté du trimestre souhaité</li>
+                                <li>Confirme l'action dans la fenêtre de dialogue</li>
+                            </ol>
                         </div>
                     </div>
                 </div>

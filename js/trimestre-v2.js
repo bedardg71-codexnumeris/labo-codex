@@ -18,6 +18,9 @@
 function initialiserTrimestreV2() {
     console.log('[Trimestre V2] Initialisation...');
 
+    // Charger l'identification du trimestre (nom, session, année)
+    chargerIdentificationTrimestreV2();
+
     // Charger le cadre calendrier dans les nouveaux champs
     chargerCadreCalendrierV2();
 
@@ -54,6 +57,114 @@ function initialiserTrimestreV2() {
     mettreAJourGuideGroupeCours();
 
     console.log('[Trimestre V2] Initialisation terminée');
+}
+
+/* ===============================
+   IDENTIFICATION DU TRIMESTRE
+   =============================== */
+
+/**
+ * Charge l'identification du trimestre actif dans les champs v2-
+ */
+function chargerIdentificationTrimestreV2() {
+    const trimestre = typeof obtenirTrimestreActif === 'function' ? obtenirTrimestreActif() : null;
+
+    const elemNom = document.getElementById('v2-nomTrimestre');
+    const elemSession = document.getElementById('v2-sessionTrimestre');
+    const elemAnnee = document.getElementById('v2-anneeTrimestre');
+
+    if (trimestre) {
+        if (elemNom) elemNom.value = trimestre.nom || '';
+        if (elemSession) {
+            // Convertir session : H → hiver, A → automne, E → ete
+            const sessionMap = { 'H': 'hiver', 'A': 'automne', 'E': 'ete' };
+            elemSession.value = sessionMap[trimestre.session] || '';
+        }
+        if (elemAnnee) elemAnnee.value = trimestre.annee || '';
+    } else {
+        // Pas de trimestre actif, vider les champs
+        if (elemNom) elemNom.value = '';
+        if (elemSession) elemSession.value = '';
+        if (elemAnnee) elemAnnee.value = '';
+    }
+}
+
+/**
+ * Sauvegarde l'identification du trimestre depuis les champs v2-
+ * Crée un nouveau trimestre si nécessaire ou met à jour l'existant
+ */
+function sauvegarderIdentificationTrimestreV2() {
+    const nom = document.getElementById('v2-nomTrimestre')?.value?.trim() || '';
+    const session = document.getElementById('v2-sessionTrimestre')?.value || '';
+    const annee = document.getElementById('v2-anneeTrimestre')?.value || '';
+
+    // Validation minimale
+    if (!session || !annee) {
+        console.log('[Trimestre V2] Identification incomplète, sauvegarde ignorée');
+        return;
+    }
+
+    // Convertir session : hiver → H, automne → A, ete → E
+    const sessionMap = { 'hiver': 'H', 'automne': 'A', 'ete': 'E' };
+    const sessionCode = sessionMap[session] || 'H';
+    const id = `${sessionCode.toLowerCase()}${annee}`;
+
+    // Générer le nom si vide
+    const nomTrimestre = nom || `${session.charAt(0).toUpperCase() + session.slice(1)} ${annee}`;
+
+    // Récupérer les trimestres existants
+    const trimestres = db.getSync('trimestres', []);
+    const index = trimestres.findIndex(t => t.actif === true);
+
+    if (index >= 0) {
+        // Mettre à jour le trimestre actif
+        const ancienId = trimestres[index].id;
+        trimestres[index].id = id;
+        trimestres[index].nom = nomTrimestre;
+        trimestres[index].session = sessionCode;
+        trimestres[index].annee = parseInt(annee);
+
+        db.setSync('trimestres', trimestres);
+
+        // Mettre à jour window.trimestreActif
+        window.trimestreActif = id;
+
+        // Si l'ID a changé, il faudrait migrer les données (complexe, pour l'instant on log)
+        if (ancienId !== id) {
+            console.log(`[Trimestre V2] ID changé de ${ancienId} à ${id} - migration manuelle requise`);
+        }
+
+        console.log(`[Trimestre V2] Trimestre mis à jour: ${nomTrimestre} (${id})`);
+    } else {
+        // Créer un nouveau trimestre
+        const nouveauTrimestre = {
+            id: id,
+            nom: nomTrimestre,
+            session: sessionCode,
+            annee: parseInt(annee),
+            dateCreation: new Date().toISOString().split('T')[0],
+            actif: true
+        };
+
+        // Désactiver les autres trimestres
+        trimestres.forEach(t => t.actif = false);
+        trimestres.push(nouveauTrimestre);
+
+        db.setSync('trimestres', trimestres);
+        window.trimestreActif = id;
+
+        console.log(`[Trimestre V2] Nouveau trimestre créé: ${nomTrimestre} (${id})`);
+    }
+
+    // Rafraîchir la liste dans Gestion des trimestres si la fonction existe
+    if (typeof afficherListeTrimestreGestion === 'function') {
+        afficherListeTrimestreGestion();
+    }
+
+    // Rafraîchir le dropdown trimestre
+    if (typeof populerDropdownTrimestreV2 === 'function') {
+        populerDropdownTrimestreV2();
+    }
 }
 
 /* ===============================
@@ -1734,6 +1845,10 @@ function chargerListeEtudiantsV2() {
     if (etudiants.length === 0) {
         conteneur.innerHTML = '<p class="text-muted text-italic">Aucun étudiant dans ce groupe. Utilisez le formulaire ou l\'import ci-dessus.</p>';
         if (actionsEtudiants) actionsEtudiants.style.display = 'none';
+        // 🆕 BETA 96: Appeler aussi la fonction legacy même sans étudiants
+        if (typeof afficherListeEtudiants === 'function') {
+            try { afficherListeEtudiants(); } catch (e) { /* ignore */ }
+        }
         return;
     }
 
@@ -1783,6 +1898,15 @@ function chargerListeEtudiantsV2() {
 
     html += '</tbody></table>';
     conteneur.innerHTML = html;
+
+    // 🆕 BETA 96: Appeler aussi la fonction legacy pour populer accordeon-groupe
+    if (typeof afficherListeEtudiants === 'function') {
+        try {
+            afficherListeEtudiants();
+        } catch (e) {
+            console.log('[Trimestre V2] afficherListeEtudiants legacy non disponible ou erreur:', e.message);
+        }
+    }
 }
 
 /**
@@ -2582,6 +2706,41 @@ function mettreAJourGuideGroupeCours() {
     statusEtudiants.style.color = etudiantsOk ? 'var(--vert-succes)' : 'var(--gris-moyen)';
 
     console.log('[Guide] État:', { coursOk, groupeOk, horaireOk, etudiantsOk });
+}
+
+/* ===============================
+   NAVIGATION VERS AIDE
+   =============================== */
+
+/**
+ * Navigue vers la section AIDE et ouvre un accordéon spécifique
+ * @param {string} idAccordeon - ID de l'accordéon à ouvrir (ex: 'aide-archivage')
+ */
+function allerVersAide(idAccordeon) {
+    // 1. Naviguer vers la section AIDE
+    if (typeof afficherSection === 'function') {
+        afficherSection('aide');
+    }
+
+    // 2. Attendre un court délai pour que la section soit visible
+    setTimeout(() => {
+        const accordeon = document.getElementById('accordeon-' + idAccordeon);
+        if (accordeon) {
+            // 3. Ouvrir l'accordéon s'il est fermé
+            const contenu = accordeon.querySelector('.accordeon-contenu');
+            const chevron = accordeon.querySelector('.accordeon-chevron');
+            if (contenu && contenu.style.display === 'none') {
+                contenu.style.display = 'block';
+                if (chevron) chevron.textContent = '▼';
+                accordeon.classList.add('ouvert');
+            }
+
+            // 4. Scroller vers l'accordéon
+            accordeon.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+            console.warn('[Trimestre V2] Accordéon non trouvé:', idAccordeon);
+        }
+    }, 100);
 }
 
 /* ===============================
