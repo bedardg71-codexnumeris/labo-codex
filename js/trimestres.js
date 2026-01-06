@@ -227,10 +227,15 @@
         // Calculer les statistiques finales
         const stats = calculerStatistiquesFinales(id);
 
+        // 🆕 BETA 96: Créer des snapshots des ressources
+        const snapshotResult = creerSnapshotRessources(id);
+        console.log(`[Trimestres] Snapshot ressources créé: ${snapshotResult.success ? 'OK' : 'Erreur'}`);
+
         // Marquer comme archivé
         trimestre.archive = true;
         trimestre.dateFin = new Date().toISOString().split('T')[0];
         trimestre.statistiquesFinales = stats;
+        trimestre.snapshotRessources = snapshotResult.success ? snapshotResult.cleSnapshot : null;
 
         db.setSync('trimestres', trimestres);
 
@@ -243,8 +248,69 @@
             success: true,
             trimestre: trimestre,
             statistiques: stats,
+            snapshotRessources: snapshotResult,
             exportGenere: exportResult.success
         };
+    }
+
+    /**
+     * Crée un snapshot (copie) des ressources pédagogiques pour un trimestre
+     * 🆕 BETA 96
+     *
+     * @param {string} trimestreId - ID du trimestre
+     * @returns {Object} Résultat avec cleSnapshot si succès
+     */
+    function creerSnapshotRessources(trimestreId) {
+        try {
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            const cleSnapshot = `snapshot_${trimestreId}_${timestamp}`;
+
+            // Ressources à sauvegarder
+            const ressources = {
+                // Productions du trimestre
+                productions: db.getSync(`${trimestreId}_productions`) || db.getSync('productions', []),
+                // Grilles d'évaluation
+                grilles: db.getSync('grilles', []),
+                // Échelles de notation
+                echelles: db.getSync('echelles', []),
+                // Pratiques de notation
+                pratiques: db.getSync('pratiquesNotation', []),
+                // Cartouches d'évaluation
+                cartouches: db.getSync('cartouchesEvaluation', []),
+                // Métadonnées
+                _meta: {
+                    trimestreId: trimestreId,
+                    dateCreation: new Date().toISOString(),
+                    version: 'Beta 96'
+                }
+            };
+
+            // Sauvegarder le snapshot
+            db.setSync(cleSnapshot, ressources);
+
+            console.log(`[Trimestres] Snapshot créé: ${cleSnapshot}`, {
+                productions: ressources.productions.length,
+                grilles: ressources.grilles.length,
+                echelles: ressources.echelles.length,
+                pratiques: ressources.pratiques.length,
+                cartouches: ressources.cartouches.length
+            });
+
+            return {
+                success: true,
+                cleSnapshot: cleSnapshot,
+                resume: {
+                    productions: ressources.productions.length,
+                    grilles: ressources.grilles.length,
+                    echelles: ressources.echelles.length,
+                    pratiques: ressources.pratiques.length,
+                    cartouches: ressources.cartouches.length
+                }
+            };
+        } catch (error) {
+            console.error('[Trimestres] Erreur création snapshot:', error);
+            return { success: false, error: error.message };
+        }
     }
 
     /**
