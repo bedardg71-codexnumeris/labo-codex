@@ -74,25 +74,24 @@ Beta 96 - TOUS les bugs corriges et souhaits implementes
 - [x] Donnees etudiantes (noms, presences, notes) grisees avec message de confidentialite
 - [x] Detection heuristique des donnees demo a l'export
 
-### Heures non piles dans Trimestre (6 jan 2026)
+### Heures non piles dans Trimestre (6 jan 2026) ✅ FAIT
 
 **Probleme** : Dans Trimestre > Horaire, les heures sont en format select avec heures piles seulement.
 
-**Amelioration envisagee** :
-- [ ] Ajuster les selecteurs d'heures pour permettre des heures non piles (8h55, 9h45, etc.)
-- [ ] Harmoniser avec le comportement de Primo qui utilise deja `type: 'time'`
+**Solution implementee** (6 jan 2026) :
+- [x] Changé le select en input type="time" pour permettre 8h55, 9h45, etc.
+- [x] Harmonisé avec Primo qui utilise déjà `type: 'time'`
 
-### Comptage en periodes au lieu des heures (6 jan 2026)
+### Comptage en periodes au lieu des heures (6 jan 2026) ✅ FAIT
 
 **Probleme** : L'assiduite est comptee en heures, mais Bruno (et d'autres cegeps) comptent en periodes de 55 minutes.
 
-**Plan detaille** : Voir `/Users/kuekatsheu/.claude/plans/sleepy-scribbling-boole.md`
-
-**Ameliorations envisagees** :
-- [ ] Configurer la duree d'une periode (50/55/60 min) dans Reglages > Trimestre
-- [ ] Saisir les presences en nombre de periodes (0, 1, 2, 3...)
-- [ ] Calculer l'assiduite en periodes ou heures selon preference
-- [ ] Migration retrocompatible des donnees existantes
+**Solution implementee** (6 jan 2026) :
+- [x] Config duree periode (50/55/60/75/90 min) dans Reglages > Trimestre > Horaire
+- [x] Seances stockees en `nombrePeriodes` au lieu de `duree`
+- [x] Saisie presences avec select de periodes (0 a X)
+- [x] Preference affichage (periodes/heures/les-deux) dans Preferences
+- [x] Migration auto des donnees existantes (migrations 6 et 7)
 
 ### Anonymisation et cryptage des donnees etudiantes (6 jan 2026)
 

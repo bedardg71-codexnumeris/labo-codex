@@ -31,6 +31,11 @@ function initialiserTrimestreV2() {
     // Charger les séances dans l'accordéon Horaire
     chargerSeancesV2();
 
+    // 🆕 BETA 95.1 : Charger la durée de période sauvegardée
+    if (typeof chargerDureePeriodeUI === 'function') {
+        chargerDureePeriodeUI();
+    }
+
     // Charger la liste des étudiants dans l'accordéon Groupes
     chargerListeEtudiantsV2();
 
