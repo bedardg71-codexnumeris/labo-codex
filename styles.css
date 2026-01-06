@@ -2671,6 +2671,46 @@ textarea {
     color: var(--gris-fonce);
 }
 
+.panneau-metadata-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--bleu-pale);
+}
+
+.panneau-metadata-titre {
+    font-weight: 600;
+    color: var(--bleu-principal);
+    font-size: 0.95rem;
+}
+
+.btn-edit-metadata {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: var(--radius-petit);
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}
+
+.btn-edit-metadata:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.panneau-metadata .meta-description .meta-valeur {
+    font-style: italic;
+    color: var(--gris-moyen);
+}
+
+.panneau-metadata .meta-licence {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--bleu-pale);
+}
+
 /* Modal Backup Reminder */
 .modal-backup-overlay {
     position: fixed;

@@ -2729,6 +2729,16 @@ async function chargerProductionPourModif(id) {
     // Appeler afficherFormProduction pour charger les données
     await afficherFormProduction(id);
 
+    // ✅ AJOUT (6 jan 2026) : Afficher le panneau métadonnées
+    const panneauMeta = document.getElementById('panneauMetadonneesProduction');
+    if (panneauMeta && typeof genererPanneauMetadonnees === 'function') {
+        const productions = await db.get('productions') || [];
+        const production = productions.find(p => p.id === id);
+        if (production) {
+            panneauMeta.innerHTML = genererPanneauMetadonnees(production, 'production');
+        }
+    }
+
     // Highlighter l'item actif
     document.querySelectorAll('.sidebar-item').forEach(item => {
         item.classList.remove('active');
@@ -2773,6 +2783,10 @@ function creerNouvelleProduction() {
     document.getElementById('productionGrille').value = '';
     document.getElementById('productionObjectif').value = '';
     document.getElementById('productionTache').value = '';
+
+    // ✅ AJOUT (6 jan 2026) : Vider le panneau métadonnées (mode création)
+    const panneauMeta = document.getElementById('panneauMetadonneesProduction');
+    if (panneauMeta) panneauMeta.innerHTML = '';
 
     // Réinitialiser les champs portfolio et les notes explicatives
     const champsPortfolio = document.getElementById('champsPortfolio');

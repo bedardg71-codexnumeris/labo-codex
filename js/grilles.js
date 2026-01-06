@@ -2533,6 +2533,10 @@ function creerNouvelleGrille() {
     // Réinitialiser le formulaire
     document.getElementById('nomGrilleTemplate').value = '';
 
+    // ✅ AJOUT (6 jan 2026) : Vider le panneau métadonnées (mode création)
+    const panneauMeta = document.getElementById('panneauMetadonneesGrille');
+    if (panneauMeta) panneauMeta.innerHTML = '';
+
     // Initialiser tempCriteres avec un premier critère vide
     window.tempCriteres = [{
         id: 'TEMP_CR' + Date.now(),
@@ -2790,6 +2794,12 @@ async function chargerGrillePourModif(id) {
     if (containerPratiques && typeof GabaritsUtils !== 'undefined') {
         const pratiquesActuelles = grille.pratiquesCompatibles || [];
         containerPratiques.innerHTML = GabaritsUtils.genererCheckboxesPratiques('grille', pratiquesActuelles);
+    }
+
+    // ✅ AJOUT (6 jan 2026) : Afficher le panneau métadonnées
+    const panneauMeta = document.getElementById('panneauMetadonneesGrille');
+    if (panneauMeta && typeof genererPanneauMetadonnees === 'function') {
+        panneauMeta.innerHTML = genererPanneauMetadonnees(grille, 'grille');
     }
 
     // Afficher les critères
