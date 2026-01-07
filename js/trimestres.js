@@ -281,7 +281,7 @@
                 _meta: {
                     trimestreId: trimestreId,
                     dateCreation: new Date().toISOString(),
-                    version: 'Beta 96'
+                    version: 'Beta 95.2'
                 }
             };
 

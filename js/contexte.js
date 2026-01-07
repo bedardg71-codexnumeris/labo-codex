@@ -22,6 +22,7 @@ function echapperHtml(texte) {
 /**
  * Met à jour l'affichage des informations contextuelles dans l'en-tête principal
  * ✅ BETA 95 : Dropdown de sélection de cours pour multi-cours
+ * ✅ BETA 95.2 : Support groupe-cours entities + fallback legacy
  */
 function mettreAJourContexteEntete() {
     const conteneur = document.getElementById('info-contextuelles-centre');
@@ -33,23 +34,66 @@ function mettreAJourContexteEntete() {
         const trimestreActif = trimestres.find(t => t.actif);
         const trimestreActifId = trimestreActif ? trimestreActif.id : null;
 
-        // Obtenir les cours du trimestre actif
-        const listeCours = db.getSync('listeCours', []);
-        const coursTrimestreActif = trimestreActifId
-            ? listeCours.filter(c => c.trimestreId === trimestreActifId)
-            : listeCours;
+        // 🆕 BETA 95.2 : Essayer d'abord les groupe-cours entities
+        let groupesCours = [];
+        let coursActif = null;
+        let utilisationGroupeCours = false;
 
-        // Obtenir le cours actif (depuis infoCours ou le premier cours actif)
-        const infoCours = db.getSync('infoCours', null);
-        let coursActif = infoCours || coursTrimestreActif.find(c => c.actif) || coursTrimestreActif[0] || null;
+        if (trimestreActifId) {
+            const cleGC = `${trimestreActifId.toLowerCase()}_groupesCours`;
+            groupesCours = db.getSync(cleGC, []);
 
-        // Vérifier que le cours actif est bien dans le trimestre actif
-        if (coursActif && trimestreActifId && coursActif.trimestreId !== trimestreActifId) {
-            coursActif = coursTrimestreActif[0] || null;
+            if (groupesCours.length > 0) {
+                utilisationGroupeCours = true;
+                console.log('[Contexte] Mode Beta 95.2 : groupe-cours trouvés:', groupesCours.length);
+
+                // Hydrater les groupe-cours avec les entités
+                const cours = db.getSync('cours', []);
+                const enseignants = db.getSync('enseignants', []);
+
+                groupesCours = groupesCours.map(gc => {
+                    const coursInfo = cours.find(c => c.id === gc.coursId) || {};
+                    const enseignant = enseignants.find(e => e.id === gc.enseignantId) || {};
+                    return {
+                        ...gc,
+                        sigle: coursInfo.codeCours || '',
+                        nomCours: coursInfo.nomCours || '',
+                        prenom: enseignant.prenom || '',
+                        nom: enseignant.nom || '',
+                        pratiqueId: gc.pratiqueId
+                    };
+                });
+
+                // Trouver le groupe-cours actif
+                const gcActif = db.getSync('groupeCoursActif', null);
+                coursActif = gcActif ? groupesCours.find(gc => gc.id === gcActif.id) : groupesCours.find(gc => gc.actif) || groupesCours[0];
+            }
         }
 
-        console.log('[Contexte] Cours trimestre actif:', coursTrimestreActif.length);
-        console.log('[Contexte] Cours actif:', coursActif);
+        // Fallback : utiliser listeCours (format legacy)
+        if (!utilisationGroupeCours) {
+            const listeCours = db.getSync('listeCours', []);
+            const coursTrimestreActif = trimestreActifId
+                ? listeCours.filter(c => c.trimestreId === trimestreActifId)
+                : listeCours;
+
+            groupesCours = coursTrimestreActif.map(c => ({
+                id: c.id,
+                sigle: c.sigle || c.codeCours || '',
+                nomCours: c.titre || c.nomCours || '',
+                groupe: c.groupe || '',
+                pratiqueId: c.pratiqueId,
+                actif: c.actif
+            }));
+
+            // Obtenir le cours actif (depuis infoCours ou le premier cours actif)
+            const infoCours = db.getSync('infoCours', null);
+            coursActif = infoCours ? groupesCours.find(gc => gc.id === infoCours.id) : groupesCours.find(gc => gc.actif) || groupesCours[0];
+
+            console.log('[Contexte] Mode legacy : cours trouvés:', groupesCours.length);
+        }
+
+        console.log('[Contexte] Groupe-cours/Cours actif:', coursActif);
 
         // Obtenir la pratique du cours actif
         let pratiqueName = '';
@@ -73,16 +117,16 @@ function mettreAJourContexteEntete() {
         const infoJour = calendrier[dateStr];
 
         // ========================================
-        // LIGNE 1 : Dropdown cours + Pratique
+        // LIGNE 1 : Dropdown groupe-cours + Pratique
         // ========================================
         let htmlLigne1 = '';
 
-        // Générer le dropdown de cours si plusieurs cours disponibles
-        if (coursTrimestreActif.length > 1) {
+        // Générer le dropdown si plusieurs groupe-cours/cours disponibles
+        if (groupesCours.length > 1) {
             // Trier par sigle de cours, puis par groupe
-            const coursTries = coursTrimestreActif.slice().sort(function(a, b) {
-                const sigleA = (a.sigle || a.codeCours || '').toLowerCase();
-                const sigleB = (b.sigle || b.codeCours || '').toLowerCase();
+            const coursTries = groupesCours.slice().sort(function(a, b) {
+                const sigleA = (a.sigle || '').toLowerCase();
+                const sigleB = (b.sigle || '').toLowerCase();
                 if (sigleA !== sigleB) {
                     return sigleA.localeCompare(sigleB);
                 }
@@ -92,21 +136,25 @@ function mettreAJourContexteEntete() {
                 return groupeA.localeCompare(groupeB);
             });
 
-            htmlLigne1 += '<select id="dropdown-cours-entete" onchange="changerCoursDepuisEntete(this.value)" class="dropdown-cours-entete">';
+            htmlLigne1 += `<select id="dropdown-cours-entete" onchange="changerCoursDepuisEntete(this.value, ${utilisationGroupeCours})" class="dropdown-cours-entete">`;
             coursTries.forEach(c => {
                 const selected = coursActif && c.id === coursActif.id ? ' selected' : '';
-                const sigle = c.sigle || c.codeCours || 'Sans code';
-                const titre = c.titre || c.nomCours || '';
+                const sigle = c.sigle || 'Sans code';
                 const groupe = c.groupe || '';
                 const label = groupe ? `${sigle} (${groupe})` : sigle;
                 htmlLigne1 += `<option value="${c.id}"${selected}>${echapperHtml(label)}</option>`;
             });
             htmlLigne1 += '</select>';
         } else if (coursActif) {
-            // Un seul cours : afficher en texte simple
-            const sigle = coursActif.sigle || coursActif.codeCours || '';
-            const titre = coursActif.titre || coursActif.nomCours || '';
-            htmlLigne1 += `<span class="info-contexte-item">${echapperHtml(titre || sigle)}</span>`;
+            // Un seul groupe-cours : afficher en texte simple
+            const sigle = coursActif.sigle || '';
+            const nomCours = coursActif.nomCours || '';
+            const groupe = coursActif.groupe || '';
+            const label = groupe ? `${sigle} (${groupe})` : (nomCours || sigle);
+            htmlLigne1 += `<span class="info-contexte-item">${echapperHtml(label)}</span>`;
+        } else {
+            // Aucun groupe-cours : inviter à en créer un
+            htmlLigne1 += '<span class="info-contexte-item" style="opacity: 0.7;">Aucun groupe-cours configuré</span>';
         }
 
         // Ajouter la pratique
@@ -177,31 +225,98 @@ function mettreAJourContexteEntete() {
 /**
  * Change le cours actif depuis le dropdown de l'en-tête
  * ✅ BETA 95 : Nouveau pour supporter multi-cours
+ * ✅ BETA 95.2 : Support groupe-cours entities
  *
- * @param {string} coursId - ID du cours à activer
+ * @param {string} id - ID du groupe-cours ou cours à activer
+ * @param {boolean} [estGroupeCours=false] - true si c'est un groupe-cours Beta 95.2
  */
-function changerCoursDepuisEntete(coursId) {
-    if (!coursId) return;
+function changerCoursDepuisEntete(id, estGroupeCours) {
+    if (!id) return;
 
-    console.log('[Contexte] Changement de cours vers:', coursId);
+    console.log('[Contexte] Changement vers:', id, estGroupeCours ? '(groupe-cours)' : '(legacy)');
 
-    // Récupérer le cours sélectionné
-    const listeCours = db.getSync('listeCours', []);
-    const coursSelectionne = listeCours.find(c => c.id === coursId);
+    if (estGroupeCours) {
+        // 🆕 BETA 95.2 : Mode groupe-cours
+        const trimestres = db.getSync('trimestres', []);
+        const trimestreActif = trimestres.find(t => t.actif);
+        if (!trimestreActif) {
+            console.warn('[Contexte] Aucun trimestre actif');
+            return;
+        }
 
-    if (!coursSelectionne) {
-        console.warn('[Contexte] Cours non trouvé:', coursId);
-        return;
+        const cleGC = `${trimestreActif.id.toLowerCase()}_groupesCours`;
+        const groupesCours = db.getSync(cleGC, []);
+        const gcSelectionne = groupesCours.find(gc => gc.id === id);
+
+        if (!gcSelectionne) {
+            console.warn('[Contexte] Groupe-cours non trouvé:', id);
+            return;
+        }
+
+        // Mettre à jour le flag actif
+        groupesCours.forEach(gc => gc.actif = (gc.id === id));
+        db.setSync(cleGC, groupesCours);
+
+        // Mettre à jour groupeCoursActif
+        db.setSync('groupeCoursActif', {
+            id: gcSelectionne.id,
+            trimestreId: gcSelectionne.trimestreId,
+            coursId: gcSelectionne.coursId,
+            enseignantId: gcSelectionne.enseignantId,
+            horaireId: gcSelectionne.horaireId,
+            groupe: gcSelectionne.groupe
+        });
+
+        // Synchroniser vers infoCours pour compatibilité
+        if (typeof GroupeCoursEntite !== 'undefined' && typeof GroupeCoursEntite.synchroniserInfoCours === 'function') {
+            GroupeCoursEntite.synchroniserInfoCours(id).then(() => {
+                console.log('[Contexte] infoCours synchronisé depuis groupe-cours');
+            }).catch(e => {
+                console.warn('[Contexte] Erreur sync infoCours:', e);
+            });
+        } else {
+            // Fallback : construire infoCours manuellement
+            const cours = db.getSync('cours', []);
+            const enseignants = db.getSync('enseignants', []);
+            const coursInfo = cours.find(c => c.id === gcSelectionne.coursId) || {};
+            const enseignant = enseignants.find(e => e.id === gcSelectionne.enseignantId) || {};
+
+            const infoCours = {
+                id: gcSelectionne.id,
+                trimestreId: gcSelectionne.trimestreId || trimestreActif.id,
+                sigle: coursInfo.codeCours || '',
+                codeCours: coursInfo.codeCours || '',
+                titre: coursInfo.nomCours || '',
+                nomCours: coursInfo.nomCours || '',
+                groupe: gcSelectionne.groupe || '00001',
+                prenomEnseignant: enseignant.prenom || '',
+                nomEnseignant: enseignant.nom || '',
+                pratiqueId: gcSelectionne.pratiqueId
+            };
+            db.setSync('infoCours', infoCours);
+        }
+
+        console.log('[Contexte] Groupe-cours activé:', gcSelectionne.id);
+
+    } else {
+        // Mode legacy (listeCours)
+        const listeCours = db.getSync('listeCours', []);
+        const coursSelectionne = listeCours.find(c => c.id === id);
+
+        if (!coursSelectionne) {
+            console.warn('[Contexte] Cours non trouvé:', id);
+            return;
+        }
+
+        // Mettre à jour infoCours
+        db.setSync('infoCours', coursSelectionne);
+
+        // Mettre à jour le flag actif dans listeCours
+        listeCours.forEach(c => c.actif = (c.id === id));
+        db.setSync('listeCours', listeCours);
+
+        console.log('[Contexte] Cours activé:', coursSelectionne.sigle || coursSelectionne.codeCours);
     }
-
-    // Mettre à jour infoCours
-    db.setSync('infoCours', coursSelectionne);
-
-    // Mettre à jour le flag actif dans listeCours
-    listeCours.forEach(c => c.actif = (c.id === coursId));
-    db.setSync('listeCours', listeCours);
-
-    console.log('[Contexte] Cours activé:', coursSelectionne.sigle || coursSelectionne.codeCours);
 
     // Mettre à jour l'en-tête (pratique peut changer)
     mettreAJourContexteEntete();
@@ -213,9 +328,20 @@ function changerCoursDepuisEntete(coursId) {
 /**
  * Rafraîchit les vues après changement de cours
  * ✅ BETA 95 : Nouveau
+ * ✅ BETA 95.2 : Rafraîchit aussi la liste groupe-cours
  */
 function rafraichirVuesApresCours() {
     console.log('[Contexte] Rafraîchissement des vues après changement de cours...');
+
+    // 🆕 BETA 95.2 : Rafraîchir la liste des groupe-cours dans l'UI
+    if (typeof chargerListeGroupeCoursV2 === 'function') {
+        try {
+            chargerListeGroupeCoursV2();
+            console.log('   ✅ Liste groupe-cours rafraîchie');
+        } catch (e) {
+            console.warn('   ⚠️ Erreur rafraîchissement liste groupe-cours:', e);
+        }
+    }
 
     // Rafraîchir le tableau de bord aperçu
     if (typeof afficherTableauBordApercu === 'function') {

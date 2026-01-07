@@ -31,8 +31,17 @@ function initialiserTrimestreV2() {
     // Charger la liste des cours dans le dropdown
     chargerDropdownCoursV2();
 
+    // Charger le profil enseignant (Beta 95.2)
+    chargerProfilEnseignantV2();
+
     // Charger les séances dans l'accordéon Horaire
     chargerSeancesV2();
+
+    // Charger les horaires (Beta 95.2)
+    chargerHorairesV2();
+
+    // Charger les groupe-cours (Beta 95.2)
+    chargerGroupeCoursV2();
 
     // 🆕 BETA 95.1 : Charger la durée de période sauvegardée
     if (typeof chargerDureePeriodeUI === 'function') {
@@ -45,8 +54,9 @@ function initialiserTrimestreV2() {
     // Charger l'état de la checkbox données démo
     chargerEtatDonneesDemoV2();
 
-    // Populer le dropdown trimestre (pour l'instant, un seul trimestre)
+    // Populer le dropdown trimestre et afficher le formulaire
     populerDropdownTrimestreV2();
+    afficherFormulaireTrimestreActif();
 
     // Restaurer l'état des accordéons (ouvert/fermé) depuis localStorage
     if (typeof restaurerEtatAccordeons === 'function') {
@@ -1007,6 +1017,77 @@ function confirmerDesarchivage(id) {
     }
 }
 
+/* ===============================
+   GESTION DES TRIMESTRES - NOUVEAU LAYOUT (Beta 95.2)
+   Pattern : Bibliothèque + Formulaire
+   =============================== */
+
+/**
+ * Rafraîchit l'affichage du formulaire trimestre actif
+ * Le formulaire utilise les mêmes champs que l'ancien "Cadre régulier"
+ * donc les fonctions existantes (chargerIdentificationTrimestreV2, etc.) s'appliquent
+ * 🆕 BETA 95.2
+ */
+function afficherFormulaireTrimestreActif() {
+    // Les champs du formulaire sont déjà remplis par les fonctions existantes :
+    // - chargerIdentificationTrimestreV2()
+    // - chargerCadreCalendrierV2()
+    // - chargerEvenementsPrevusV2()
+    // - chargerEvenementsImprevusV2()
+    // - afficherStatistiquesTrimestreV2()
+
+    // Cette fonction est appelée pour s'assurer que tout est à jour
+    console.log('[Trimestre V2] Formulaire trimestre actif rafraîchi');
+}
+
+/**
+ * Ouvre la bibliothèque des trimestres (modal ou panel)
+ * 🆕 BETA 95.2
+ */
+function ouvrirBibliothequeTrimestreV2() {
+    // Pour l'instant, afficher une alerte informative
+    // À terme : ouvrir un modal avec la liste complète des trimestres
+    const trimestres = typeof obtenirTrimestres === 'function' ? obtenirTrimestres() : [];
+
+    if (trimestres.length === 0) {
+        alert('Aucun trimestre dans la bibliothèque.\n\nCliquez sur "+ Nouveau trimestre" pour en créer un.');
+        return;
+    }
+
+    // Liste simple pour l'instant
+    let message = 'Trimestres disponibles :\n\n';
+    trimestres.forEach(t => {
+        const etat = t.archive ? '📦 Archivé' : (t.actif ? '✅ Actif' : '');
+        message += `• ${t.nom} ${etat}\n`;
+    });
+    message += '\nUtilisez le dropdown "Trimestre actif" pour changer de trimestre.';
+
+    alert(message);
+}
+
+/**
+ * Archive le trimestre actuellement actif
+ * 🆕 BETA 95.2
+ */
+function archiverTrimestreActif() {
+    const trimestreActif = typeof obtenirTrimestreActif === 'function' ? obtenirTrimestreActif() : null;
+
+    if (!trimestreActif) {
+        alert('Aucun trimestre actif à archiver.');
+        return;
+    }
+
+    confirmerArchivage(trimestreActif.id);
+}
+
+/**
+ * Supprime le trimestre actuellement actif (non implémenté)
+ * 🆕 BETA 95.2
+ */
+function supprimerTrimestreActif() {
+    alert('La suppression de trimestre n\'est pas encore disponible.\n\nUtilisez l\'archivage pour conserver les données en lecture seule.');
+}
+
 /**
  * Change le trimestre actif et recharge l'interface
  * Délègue à la fonction de trimestres.js
@@ -1024,12 +1105,17 @@ function changerTrimestreActifV2(valeur) {
             chargerEvenementsImprevusV2();
             afficherStatistiquesTrimestreV2();
 
-            // Rafraîchir le dropdown trimestre et la liste de gestion
+            // Rafraîchir le dropdown trimestre et le formulaire
             populerDropdownTrimestreV2();
-            afficherListeTrimestreGestion();
+            afficherFormulaireTrimestreActif();
 
             // Rafraîchir le dropdown des cours (filtré par trimestre)
             chargerDropdownCoursV2();
+
+            // 🆕 BETA 95.2 : Rafraîchir le dropdown groupe-cours actif
+            if (typeof peuplerDropdownGroupeCoursActif === 'function') {
+                peuplerDropdownGroupeCoursActif();
+            }
 
             // 🆕 BETA 95 FIX : Rafraîchir toutes les vues après changement de cours
             // (la liste d'étudiants, le tableau de bord, etc.)
@@ -1163,12 +1249,11 @@ function chargerDropdownCoursV2() {
     };
 
     // Helper: obtenir le texte d'affichage d'un cours
-    // ✅ CORRECTION (30 déc 2025): Inclure le groupe pour distinguer les cours démo
+    // 🆕 BETA 95.2 : Le groupe ne fait plus partie du cours (entité indépendante)
     const obtenirTexteCours = (c) => {
         const sigle = c.sigle || c.codeCours || c.numero || '';
         const titre = c.titre || c.nomCours || '';
-        const groupe = c.groupe ? ` (gr. ${c.groupe})` : '';
-        const texte = `${sigle} ${titre}${groupe}`.trim();
+        const texte = `${sigle} ${titre}`.trim();
         return texte || `Cours ${c.id || 'sans identifiant'}`;
     };
 
@@ -1278,33 +1363,44 @@ function chargerDropdownCoursV2() {
  * Change le cours sélectionné
  */
 function changerCoursSelectionneV2(coursId) {
-    const apercuCours = document.getElementById('v2-apercuCours');
-    const btnModifier = document.getElementById('v2-btnModifierCours');
-    const btnDupliquer = document.getElementById('v2-btnDupliquerCours');
-    const formulaire = document.getElementById('v2-formulaireCours');
+    const etatVide = document.getElementById('cours-etat-vide');
+    const formulaire = document.getElementById('cours-formulaire-edition');
     const listeGroupes = document.getElementById('v2-listeGroupes');
 
-    // Masquer le formulaire si affiché
-    if (formulaire) formulaire.style.display = 'none';
-    if (apercuCours) apercuCours.style.display = 'block';
-
     if (!coursId) {
-        if (apercuCours) apercuCours.innerHTML = '<p class="text-muted">Sélectionnez un cours pour voir ses détails.</p>';
+        // Afficher l'état vide
+        if (etatVide) etatVide.style.display = 'flex';
+        if (formulaire) formulaire.style.display = 'none';
         if (listeGroupes) listeGroupes.innerHTML = '<p class="text-muted">Sélectionnez un cours pour voir ses groupes.</p>';
-        if (btnModifier) btnModifier.style.display = 'none';
-        if (btnDupliquer) btnDupliquer.style.display = 'none';
+        coursEnEditionV2 = null;
         return;
     }
 
     // Charger les détails du cours
-    const cours = db.getSync('listeCours', []);
-    const coursSelectionne = cours.find(c => c.id === coursId) || db.getSync('infoCours', null);
+    const cours = db.getSync('cours', []);  // 🆕 BETA 95.2 : nouvelle clé
+    let coursSelectionne = cours.find(c => c.id === coursId);
+
+    // Fallback sur l'ancienne clé si non trouvé
+    if (!coursSelectionne) {
+        const listeCours = db.getSync('listeCours', []);
+        coursSelectionne = listeCours.find(c => c.id === coursId);
+    }
 
     if (coursSelectionne) {
-        afficherDetailsCoursV2(coursSelectionne);
+        // Afficher le formulaire en mode édition
+        coursEnEditionV2 = coursId;
+        if (etatVide) etatVide.style.display = 'none';
+        if (formulaire) formulaire.style.display = 'block';
+
+        // Mettre à jour le titre
+        const titre = document.getElementById('v2-titreFormCours');
+        const btnTexte = document.getElementById('v2-btnTexteCours');
+        if (titre) titre.textContent = 'Modifier le cours';
+        if (btnTexte) btnTexte.textContent = 'Enregistrer';
+
+        // Remplir le formulaire
+        remplirFormCoursV2(coursSelectionne);
         chargerGroupesCoursV2(coursId);
-        if (btnModifier) btnModifier.style.display = '';
-        if (btnDupliquer) btnDupliquer.style.display = '';
     }
 }
 
@@ -1349,7 +1445,8 @@ function viderAffichageCoursV2() {
 
 /**
  * Affiche les détails d'un cours (aperçu)
- * Gère différents formats de données (Beta 95)
+ * 🆕 BETA 95.2 : Simplifié - affiche uniquement les informations du cours
+ * (Enseignant, Horaire, Session sont dans leurs sections respectives)
  */
 function afficherDetailsCoursV2(cours) {
     const conteneur = document.getElementById('v2-apercuCours');
@@ -1357,75 +1454,47 @@ function afficherDetailsCoursV2(cours) {
 
     console.log('[Trimestre V2] Affichage détails cours:', cours);
 
-    // Normaliser l'enseignant (plusieurs formats possibles)
-    let nomEnseignant = '—';
-    if (cours.prenomEnseignant || cours.nomEnseignant) {
-        // Format: champs séparés prenomEnseignant/nomEnseignant
-        nomEnseignant = `${cours.prenomEnseignant || ''} ${cours.nomEnseignant || ''}`.trim() || '—';
-    } else if (typeof cours.enseignant === 'string') {
-        // Format: string simple
-        nomEnseignant = cours.enseignant || '—';
-    } else if (cours.enseignant && typeof cours.enseignant === 'object') {
-        // Format: objet {prenom, nom}
-        nomEnseignant = `${cours.enseignant.prenom || ''} ${cours.enseignant.nom || ''}`.trim() || '—';
-    }
-
-    // Normaliser la session (peut être "H2026" ou séparé "H" + "2026")
-    let sessionAffichage = '—';
-    if (cours.session) {
-        // Si session contient déjà l'année (ex: "H2026", "A2025")
-        if (/^[AH]\d{4}$/i.test(cours.session)) {
-            const s = cours.session.charAt(0).toUpperCase();
-            const a = cours.session.substring(1);
-            sessionAffichage = (s === 'H' ? 'Hiver' : 'Automne') + ' ' + a;
-        } else {
-            // Session et année séparées
-            const sessionNom = cours.session === 'H' ? 'Hiver' : (cours.session === 'A' ? 'Automne' : cours.session);
-            sessionAffichage = `${sessionNom} ${cours.annee || ''}`.trim();
-        }
-    }
-
-    // ✅ MODIFIÉ (6 jan 2026) : Périodes au lieu d'heures
-    const periodes = cours.periodesParSemaine || cours.heuresParSemaine || cours.heuresHebdo || '—';
-
     // Normaliser le sigle (sigle, codeCours ou numero)
     const sigle = cours.sigle || cours.codeCours || cours.numero || '—';
 
-    // Construire l'identifiant trimestre (ex: A2025, H2026)
-    let trimestreId = '';
-    if (cours.session && cours.annee) {
-        trimestreId = `${cours.session.charAt(0).toUpperCase()}${cours.annee}`;
-    } else if (cours.trimestreId) {
-        trimestreId = cours.trimestreId.toUpperCase();
-    }
+    // Normaliser le nom du cours
+    const nomCours = cours.titre || cours.nomCours || '—';
 
-    // Construire l'identifiant groupe-cours complet (ex: A2025-601-101-MQ-00001)
-    const groupeFormate = cours.groupe ? String(cours.groupe).padStart(5, '0') : '00001';
-    const groupeCours = (trimestreId && sigle !== '—') ? `${trimestreId}-${sigle}-${groupeFormate}` : '—';
+    // Discipline
+    const discipline = cours.discipline || '—';
+
+    // Compétence
+    const competence = cours.competence || '—';
+    const numeroCompetence = cours.numeroCompetence || '';
+
+    // Éléments de compétence (afficher seulement si présents)
+    const elementsCompetence = cours.elementsCompetence || '';
 
     conteneur.innerHTML = `
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
             <div>
-                <label class="text-muted" style="font-size: 0.85rem;">Groupe-cours</label>
-                <div style="font-weight: 600; font-size: 1.1rem; color: var(--bleu-principal);">${groupeCours}</div>
+                <label class="text-muted" style="font-size: 0.85rem;">Code du cours</label>
+                <div style="font-weight: 600; font-size: 1.1rem; color: var(--bleu-principal);">${sigle}</div>
             </div>
             <div>
-                <label class="text-muted" style="font-size: 0.85rem;">Titre</label>
-                <div style="font-weight: 600;">${cours.titre || cours.nomCours || '—'}</div>
+                <label class="text-muted" style="font-size: 0.85rem;">Nom du cours</label>
+                <div style="font-weight: 600;">${nomCours}</div>
             </div>
             <div>
-                <label class="text-muted" style="font-size: 0.85rem;">Session</label>
-                <div>${sessionAffichage}</div>
+                <label class="text-muted" style="font-size: 0.85rem;">Discipline</label>
+                <div>${discipline}</div>
             </div>
             <div>
-                <label class="text-muted" style="font-size: 0.85rem;">Enseignant·e</label>
-                <div>${nomEnseignant}</div>
-            </div>
-            <div>
-                <label class="text-muted" style="font-size: 0.85rem;">Format horaire</label>
-                <div>${cours.formatHoraire || '—'} (${periodes} pér./sem)</div>
+                <label class="text-muted" style="font-size: 0.85rem;">Compétence${numeroCompetence ? ` (${numeroCompetence})` : ''}</label>
+                <div>${competence}</div>
             </div>
         </div>
+        ${elementsCompetence ? `
+        <div style="margin-top: 15px;">
+            <label class="text-muted" style="font-size: 0.85rem;">Éléments de compétence</label>
+            <div style="font-size: 0.9rem; white-space: pre-line;">${elementsCompetence}</div>
+        </div>
+        ` : ''}
     `;
 }
 
@@ -1436,31 +1505,35 @@ let coursEnEditionV2 = null;
  * Affiche le formulaire pour créer un nouveau cours
  */
 async function afficherFormCoursV2() {
+    await nouveauCoursV2();
+}
+
+/**
+ * Crée un nouveau cours (affiche le formulaire vide)
+ * 🆕 BETA 95.2
+ */
+async function nouveauCoursV2() {
     coursEnEditionV2 = null;
 
-    const formulaire = document.getElementById('v2-formulaireCours');
-    const apercu = document.getElementById('v2-apercuCours');
+    const etatVide = document.getElementById('cours-etat-vide');
+    const formulaire = document.getElementById('cours-formulaire-edition');
     const titre = document.getElementById('v2-titreFormCours');
     const btnTexte = document.getElementById('v2-btnTexteCours');
+    const selectCours = document.getElementById('v2-selectCours');
 
-    if (formulaire) {
-        formulaire.style.display = 'block';
-        if (apercu) apercu.style.display = 'none';
-        if (titre) titre.textContent = 'Nouvelle configuration de cours';
-        if (btnTexte) btnTexte.textContent = 'Ajouter';
+    // Désélectionner dans le dropdown
+    if (selectCours) selectCours.value = '';
 
-        // Réinitialiser tous les champs
-        reinitialiserFormCoursV2();
+    // Afficher le formulaire
+    if (etatVide) etatVide.style.display = 'none';
+    if (formulaire) formulaire.style.display = 'block';
+    if (titre) titre.textContent = 'Nouveau cours';
+    if (btnTexte) btnTexte.textContent = 'Enregistrer';
 
-        // ✅ AJOUT (2 jan 2026) : Charger le dropdown des pratiques
-        await chargerDropdownPratiquesCours();
+    // Réinitialiser tous les champs
+    reinitialiserFormCoursV2();
 
-        // Mettre l'année courante par défaut
-        const anneeInput = document.getElementById('v2-annee');
-        if (anneeInput) anneeInput.value = new Date().getFullYear();
-
-        formulaire.scrollIntoView({ behavior: 'smooth' });
-    }
+    console.log('[Trimestre V2] Formulaire nouveau cours affiché');
 }
 
 /**
@@ -1680,13 +1753,19 @@ function setValue(id, value) {
 function annulerFormCoursV2() {
     coursEnEditionV2 = null;
 
-    const formulaire = document.getElementById('v2-formulaireCours');
-    const apercu = document.getElementById('v2-apercuCours');
+    const etatVide = document.getElementById('cours-etat-vide');
+    const formulaire = document.getElementById('cours-formulaire-edition');
+    const selectCours = document.getElementById('v2-selectCours');
 
+    // Afficher l'état vide
+    if (etatVide) etatVide.style.display = 'flex';
     if (formulaire) formulaire.style.display = 'none';
-    if (apercu) apercu.style.display = 'block';
+
+    // Désélectionner dans le dropdown
+    if (selectCours) selectCours.value = '';
 
     reinitialiserFormCoursV2();
+    console.log('[Trimestre V2] Formulaire cours annulé');
 }
 
 /**
@@ -1815,44 +1894,43 @@ let donneesImportEnAttenteV2 = [];
 function chargerListeEtudiantsV2() {
     const conteneur = document.getElementById('v2-listeEtudiants');
     const nbTotal = document.getElementById('v2-nbEtudiantsTotal');
-    const groupeCoursElem = document.getElementById('v2-groupeCours');
     const actionsEtudiants = document.getElementById('v2-actionsEtudiants');
 
     if (!conteneur) return;
 
-    // ✅ CORRECTION (31 déc 2025): Utiliser namespace cle() pour lire les données du trimestre actif
+    // Utiliser namespace cle() pour lire les données du trimestre actif
     const cleEtudiants = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
-    const etudiants = db.getSync(cleEtudiants, []);
-    const coursActif = db.getSync('infoCours', null);
+    const tousLesEtudiants = db.getSync(cleEtudiants, []);
 
-    // Construire l'identifiant trimestre (ex: A2025, H2026)
-    let trimestreId = '';
-    if (coursActif?.session && coursActif?.annee) {
-        trimestreId = `${coursActif.session.charAt(0).toUpperCase()}${coursActif.annee}`;
-    } else if (coursActif?.trimestreId) {
-        trimestreId = coursActif.trimestreId.toUpperCase();
-    }
+    // Mettre à jour le dropdown des groupes (avec tous les étudiants)
+    populerDropdownGroupesV2(tousLesEtudiants);
 
-    // Construire l'identifiant groupe-cours complet (ex: A2025-601-101-MQ-00001)
-    const codeCours = coursActif?.sigle || coursActif?.codeCours || '';
-    const numeroGroupe = coursActif?.groupe ? String(coursActif.groupe).padStart(5, '0') : '00001';
-    const groupeCours = (trimestreId && codeCours) ? `${trimestreId}-${codeCours}-${numeroGroupe}` : '—';
+    // Filtrer par groupe si sélectionné
+    const groupeFiltre = getGroupeSelectionneV2();
+    const etudiants = groupeFiltre
+        ? tousLesEtudiants.filter(e => String(e.groupe).padStart(5, '0') === groupeFiltre)
+        : tousLesEtudiants;
 
-    // Mettre à jour les compteurs
-    if (nbTotal) nbTotal.textContent = etudiants.length;
-    if (groupeCoursElem) groupeCoursElem.textContent = groupeCours;
+    // Mettre à jour le compteur dans l'en-tête (total, pas filtré)
+    if (nbTotal) nbTotal.textContent = tousLesEtudiants.length;
+
+    // Mettre à jour la carte résumé (avec les étudiants filtrés)
+    mettreAJourResumeEtudiantsV2(etudiants);
 
     if (etudiants.length === 0) {
-        conteneur.innerHTML = '<p class="text-muted text-italic">Aucun étudiant dans ce groupe. Utilisez le formulaire ou l\'import ci-dessus.</p>';
-        if (actionsEtudiants) actionsEtudiants.style.display = 'none';
-        // 🆕 BETA 96: Appeler aussi la fonction legacy même sans étudiants
+        const message = groupeFiltre
+            ? `Aucun étudiant dans le groupe ${groupeFiltre}.`
+            : 'Aucun étudiant. Utilisez l\'import à gauche ou le formulaire ci-dessous.';
+        conteneur.innerHTML = `<p class="etat-vide-liste">${message}</p>`;
+        if (actionsEtudiants) actionsEtudiants.style.display = tousLesEtudiants.length > 0 ? 'flex' : 'none';
+        // Appeler aussi la fonction legacy même sans étudiants
         if (typeof afficherListeEtudiants === 'function') {
             try { afficherListeEtudiants(); } catch (e) { /* ignore */ }
         }
         return;
     }
 
-    if (actionsEtudiants) actionsEtudiants.style.display = 'block';
+    if (actionsEtudiants) actionsEtudiants.style.display = 'flex';
 
     // Trier par nom
     etudiants.sort((a, b) => {
@@ -1862,16 +1940,15 @@ function chargerListeEtudiantsV2() {
     });
 
     let html = `
-        <table class="tableau-blanc" style="width: 100%; font-size: 0.9rem;">
-            <thead class="thead-bleu-moyen">
+        <table>
+            <thead>
                 <tr>
-                    <th style="text-align: left; padding: 8px;">DA</th>
-                    <th style="text-align: center; padding: 8px;">Groupe</th>
-                    <th style="text-align: left; padding: 8px;">Nom</th>
-                    <th style="text-align: left; padding: 8px;">Prénom</th>
-                    <th style="text-align: left; padding: 8px;">Programme</th>
-                    <th style="text-align: center; padding: 8px;">SA</th>
-                    <th style="text-align: center; padding: 8px; width: 100px;">Actions</th>
+                    <th>DA</th>
+                    <th>Grp</th>
+                    <th>Nom</th>
+                    <th>Prénom</th>
+                    <th>SA</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -1883,14 +1960,14 @@ function chargerListeEtudiantsV2() {
         const groupe = e.groupe ? String(e.groupe).padStart(5, '0') : '—';
         html += `
             <tr>
-                <td style="padding: 6px 8px;">${e.da || '—'}</td>
-                <td style="padding: 6px 8px; text-align: center;">${groupe}</td>
-                <td style="padding: 6px 8px;">${e.nom || '—'}</td>
-                <td style="padding: 6px 8px;">${e.prenom || '—'}</td>
-                <td style="padding: 6px 8px;">${e.programme || '—'}</td>
-                <td style="padding: 6px 8px; text-align: center;">${sa}</td>
-                <td style="padding: 6px 8px; text-align: center;">
-                    <button class="btn btn-annuler btn-sm" onclick="supprimerEtudiantV2(${index})" title="Supprimer" style="padding: 3px 8px;">✕</button>
+                <td>${e.da || '—'}</td>
+                <td style="text-align: center;">${groupe}</td>
+                <td>${e.nom || '—'}</td>
+                <td>${e.prenom || '—'}</td>
+                <td style="text-align: center;">${sa}</td>
+                <td style="text-align: center; white-space: nowrap;">
+                    <button class="btn-icon" onclick="editerEtudiantV2(${index})" title="Modifier">✏️</button>
+                    <button class="btn-icon btn-icon-danger" onclick="supprimerEtudiantV2(${index})" title="Supprimer">✕</button>
                 </td>
             </tr>
         `;
@@ -1899,7 +1976,7 @@ function chargerListeEtudiantsV2() {
     html += '</tbody></table>';
     conteneur.innerHTML = html;
 
-    // 🆕 BETA 96: Appeler aussi la fonction legacy pour populer accordeon-groupe
+    // Appeler aussi la fonction legacy pour populer accordeon-groupe
     if (typeof afficherListeEtudiants === 'function') {
         try {
             afficherListeEtudiants();
@@ -1910,16 +1987,112 @@ function chargerListeEtudiantsV2() {
 }
 
 /**
+ * Met à jour la carte résumé des étudiants (Beta 95.2)
+ * @param {Array} etudiants - Liste des étudiants
+ */
+function mettreAJourResumeEtudiantsV2(etudiants) {
+    const elemNbTotal = document.getElementById('v2-resumeNbTotal');
+    const elemGroupes = document.getElementById('v2-resumeGroupes');
+    const elemSA = document.getElementById('v2-resumeSA');
+    const elemNbSA = document.getElementById('v2-resumeNbSA');
+
+    // Nombre total
+    if (elemNbTotal) elemNbTotal.textContent = etudiants.length;
+
+    // Répartition par groupe
+    if (elemGroupes) {
+        const groupesMap = {};
+        etudiants.forEach(e => {
+            const grp = e.groupe ? String(e.groupe).padStart(5, '0') : 'Sans groupe';
+            groupesMap[grp] = (groupesMap[grp] || 0) + 1;
+        });
+
+        const groupesTries = Object.entries(groupesMap).sort((a, b) => a[0].localeCompare(b[0]));
+
+        if (groupesTries.length === 0) {
+            elemGroupes.innerHTML = '';
+        } else if (groupesTries.length === 1) {
+            elemGroupes.innerHTML = `<div class="resume-details-ligne"><span>Groupe ${groupesTries[0][0]}</span></div>`;
+        } else {
+            let html = '';
+            groupesTries.forEach(([grp, nb]) => {
+                html += `<div class="resume-details-ligne"><span>Grp ${grp}</span><span>${nb}</span></div>`;
+            });
+            elemGroupes.innerHTML = html;
+        }
+    }
+
+    // Services adaptés (SA)
+    const nbSA = etudiants.filter(e => e.sa === 'Oui' || e.sa === true).length;
+    if (elemSA) {
+        elemSA.style.display = nbSA > 0 ? 'block' : 'none';
+    }
+    if (elemNbSA) {
+        elemNbSA.textContent = nbSA;
+    }
+}
+
+/**
+ * Peuple le dropdown de sélection des groupes
+ * @param {Array} etudiants - Liste complète des étudiants
+ */
+function populerDropdownGroupesV2(etudiants) {
+    const select = document.getElementById('v2-selectGroupe');
+    if (!select) return;
+
+    const valeurActuelle = select.value;
+
+    // Extraire les groupes uniques
+    const groupesSet = new Set();
+    etudiants.forEach(e => {
+        if (e.groupe) {
+            groupesSet.add(String(e.groupe).padStart(5, '0'));
+        }
+    });
+
+    const groupesTries = Array.from(groupesSet).sort();
+
+    // Reconstruire les options
+    let html = '<option value="">Tous les groupes</option>';
+    groupesTries.forEach(grp => {
+        html += `<option value="${grp}">${grp}</option>`;
+    });
+    select.innerHTML = html;
+
+    // Restaurer la sélection si elle existe encore
+    if (valeurActuelle && groupesSet.has(valeurActuelle)) {
+        select.value = valeurActuelle;
+    }
+}
+
+/**
+ * Filtre la liste des étudiants par groupe sélectionné
+ */
+function filtrerParGroupeV2() {
+    chargerListeEtudiantsV2();
+}
+
+/**
+ * Retourne le groupe actuellement sélectionné dans le dropdown
+ */
+function getGroupeSelectionneV2() {
+    return document.getElementById('v2-selectGroupe')?.value || '';
+}
+
+/**
  * Charge les groupes d'un cours (ancien comportement, maintenant charge la liste)
  */
 function chargerGroupesCoursV2(coursId) {
     chargerListeEtudiantsV2();
 }
 
+// Variable pour tracker l'index en cours d'édition (-1 = mode ajout)
+let etudiantEnEditionIndex = -1;
+
 /**
- * Ajoute un étudiant manuellement
+ * Soumet le formulaire étudiant (ajout ou modification)
  */
-function ajouterEtudiantV2() {
+function soumettreEtudiantV2() {
     const da = document.getElementById('v2-etudiantDA')?.value?.trim();
     const nom = document.getElementById('v2-etudiantNom')?.value?.trim();
     const prenom = document.getElementById('v2-etudiantPrenom')?.value?.trim();
@@ -1928,15 +2101,14 @@ function ajouterEtudiantV2() {
     const groupeInput = document.getElementById('v2-etudiantGroupe')?.value?.trim();
 
     if (!nom || !prenom) {
-        alert('Le nom et le prénom sont obligatoires.');
+        afficherNotificationErreur('Le nom et le prénom sont obligatoires.');
         return;
     }
 
     const coursActif = db.getSync('infoCours', null);
-    // Priorité au champ groupe saisi, sinon groupe du cours actif
     const groupe = groupeInput || coursActif?.groupe || '00001';
 
-    const nouvelEtudiant = {
+    const etudiant = {
         da: da || `DA${Date.now()}`,
         nom: nom,
         prenom: prenom,
@@ -1946,26 +2118,162 @@ function ajouterEtudiantV2() {
         coursId: coursActif?.id || ''
     };
 
-    // ✅ CORRECTION (31 déc 2025): Utiliser namespace
     const cleEtud = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
     let etudiants = db.getSync(cleEtud, []);
-    etudiants.push(nouvelEtudiant);
-    db.setSync(cleEtud, etudiants);
 
-    // Vider les champs
-    setValue('v2-etudiantDA', '');
-    setValue('v2-etudiantNom', '');
-    setValue('v2-etudiantPrenom', '');
-    setValue('v2-etudiantGroupe', '');
-    setValue('v2-etudiantProgramme', '');
-    setValue('v2-etudiantSA', '');
-
-    // Recharger la liste
-    chargerListeEtudiantsV2();
-
-    if (typeof afficherNotificationSucces === 'function') {
+    if (etudiantEnEditionIndex >= 0) {
+        // Mode édition : mettre à jour l'étudiant existant
+        etudiants[etudiantEnEditionIndex] = etudiant;
+        db.setSync(cleEtud, etudiants);
+        afficherNotificationSucces(`${prenom} ${nom} modifié`);
+    } else {
+        // Mode ajout : ajouter un nouvel étudiant
+        etudiants.push(etudiant);
+        db.setSync(cleEtud, etudiants);
         afficherNotificationSucces(`${prenom} ${nom} ajouté`);
     }
+
+    // Réinitialiser le formulaire et le mode
+    reinitialiserFormEtudiantV2();
+    chargerListeEtudiantsV2();
+}
+
+/**
+ * Passe en mode édition pour un étudiant
+ */
+function editerEtudiantV2(index) {
+    const cleEtud = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
+    const etudiants = db.getSync(cleEtud, []);
+    const etudiant = etudiants[index];
+
+    if (!etudiant) return;
+
+    // Stocker l'index en édition
+    etudiantEnEditionIndex = index;
+
+    // Remplir le formulaire
+    document.getElementById('v2-etudiantDA').value = etudiant.da || '';
+    document.getElementById('v2-etudiantNom').value = etudiant.nom || '';
+    document.getElementById('v2-etudiantPrenom').value = etudiant.prenom || '';
+    document.getElementById('v2-etudiantGroupe').value = etudiant.groupe || '';
+    document.getElementById('v2-etudiantProgramme').value = etudiant.programme || '';
+    document.getElementById('v2-etudiantSA').value = etudiant.sa || '';
+
+    // Changer l'apparence du formulaire
+    const titre = document.getElementById('v2-formEtudiantTitre');
+    const btnSoumettre = document.getElementById('v2-btnSoumettreEtudiant');
+    const btnAnnuler = document.getElementById('v2-btnAnnulerEdition');
+    const formContainer = document.getElementById('v2-formEtudiant');
+
+    if (titre) titre.textContent = 'Modifier l\'étudiant';
+    if (btnSoumettre) btnSoumettre.textContent = 'Enregistrer les modifications';
+    if (btnAnnuler) btnAnnuler.style.display = 'inline-block';
+    if (formContainer) formContainer.classList.add('mode-edition');
+
+    // Scroller vers le formulaire
+    formContainer?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+/**
+ * Annule l'édition et revient au mode ajout
+ */
+function annulerEditionEtudiantV2() {
+    reinitialiserFormEtudiantV2();
+}
+
+/**
+ * Réinitialise le formulaire en mode ajout
+ */
+function reinitialiserFormEtudiantV2() {
+    etudiantEnEditionIndex = -1;
+
+    // Vider les champs
+    document.getElementById('v2-etudiantDA').value = '';
+    document.getElementById('v2-etudiantNom').value = '';
+    document.getElementById('v2-etudiantPrenom').value = '';
+    document.getElementById('v2-etudiantGroupe').value = '';
+    document.getElementById('v2-etudiantProgramme').value = '';
+    document.getElementById('v2-etudiantSA').value = '';
+
+    // Remettre l'apparence normale
+    const titre = document.getElementById('v2-formEtudiantTitre');
+    const btnSoumettre = document.getElementById('v2-btnSoumettreEtudiant');
+    const btnAnnuler = document.getElementById('v2-btnAnnulerEdition');
+    const formContainer = document.getElementById('v2-formEtudiant');
+
+    if (titre) titre.textContent = 'Ajouter un étudiant';
+    if (btnSoumettre) btnSoumettre.textContent = 'Ajouter l\'étudiant';
+    if (btnAnnuler) btnAnnuler.style.display = 'none';
+    if (formContainer) formContainer.classList.remove('mode-edition');
+}
+
+/**
+ * Ajoute un étudiant (alias pour compatibilité)
+ */
+function ajouterEtudiantV2() {
+    soumettreEtudiantV2();
+}
+
+/**
+ * Crée un nouveau groupe (calcule le prochain numéro disponible)
+ */
+function creerNouveauGroupeV2() {
+    const cleEtud = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
+    const etudiants = db.getSync(cleEtud, []);
+
+    // Trouver tous les numéros de groupe existants
+    const groupesExistants = new Set();
+    etudiants.forEach(e => {
+        if (e.groupe) {
+            const num = parseInt(e.groupe, 10);
+            if (!isNaN(num)) groupesExistants.add(num);
+        }
+    });
+
+    // Calculer le prochain numéro disponible
+    let prochainNumero = 1;
+    while (groupesExistants.has(prochainNumero)) {
+        prochainNumero++;
+    }
+
+    const nouveauGroupe = String(prochainNumero).padStart(5, '0');
+
+    // Demander confirmation ou personnalisation
+    const groupeSaisi = prompt(`Numéro du nouveau groupe :`, nouveauGroupe);
+    if (!groupeSaisi) return; // Annulé
+
+    const groupeFinal = String(groupeSaisi).padStart(5, '0');
+
+    // Réinitialiser le formulaire et pré-remplir le groupe
+    reinitialiserFormEtudiantV2();
+    document.getElementById('v2-etudiantGroupe').value = groupeFinal;
+
+    // Ajouter l'option au dropdown si elle n'existe pas et la sélectionner
+    const select = document.getElementById('v2-selectGroupe');
+    if (select) {
+        // Vérifier si l'option existe déjà
+        let optionExiste = false;
+        for (let opt of select.options) {
+            if (opt.value === groupeFinal) {
+                optionExiste = true;
+                break;
+            }
+        }
+        if (!optionExiste) {
+            const newOption = document.createElement('option');
+            newOption.value = groupeFinal;
+            newOption.textContent = groupeFinal;
+            select.appendChild(newOption);
+        }
+        select.value = groupeFinal;
+        // Rafraîchir l'affichage pour montrer le groupe vide
+        chargerListeEtudiantsV2();
+    }
+
+    // Focus sur le premier champ
+    document.getElementById('v2-etudiantDA')?.focus();
+
+    afficherNotificationSucces(`Groupe ${groupeFinal} prêt. Ajoutez des étudiants.`);
 }
 
 /**
@@ -2162,6 +2470,71 @@ function reinitialiserEtudiantsV2() {
 
     // Mettre à jour le guide groupe-cours
     mettreAJourGuideGroupeCours();
+}
+
+/**
+ * Vide la liste des étudiants (alias de reinitialiser)
+ * 🆕 BETA 95.2 : Fonction ajoutée pour l'accordéon groupe d'étudiants
+ */
+function viderListeEtudiantsV2() {
+    reinitialiserEtudiantsV2();
+}
+
+/**
+ * Sauvegarde le groupe d'étudiants et ouvre l'accordéon Horaire
+ * 🆕 BETA 95.2 : Workflow groupe → horaire
+ */
+function sauvegarderGroupeEtudiantsV2() {
+    const cleEtud = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
+    const etudiants = db.getSync(cleEtud, []);
+
+    if (etudiants.length === 0) {
+        alert('Aucun étudiant dans le groupe. Importez d\'abord une liste.');
+        return;
+    }
+
+    // Récupérer le numéro de groupe
+    const coursActif = db.getSync('infoCours', {});
+    const numeroGroupe = coursActif?.groupe || '00001';
+
+    // S'assurer que tous les étudiants ont le bon numéro de groupe
+    let modifie = false;
+    etudiants.forEach(e => {
+        if (!e.groupe || e.groupe === '' || e.groupe === '—') {
+            e.groupe = numeroGroupe;
+            modifie = true;
+        }
+    });
+
+    if (modifie) {
+        db.setSync(cleEtud, etudiants);
+    }
+
+    // Notification de succès
+    if (typeof afficherNotificationSucces === 'function') {
+        afficherNotificationSucces(`Groupe ${numeroGroupe} sauvegardé (${etudiants.length} étudiants)`);
+    }
+
+    // 🆕 BETA 95.2 : Rafraîchir le dropdown groupe-cours pour inclure ce groupe
+    if (typeof peuplerDropdownGroupeCours === 'function') {
+        peuplerDropdownGroupeCours();
+    }
+
+    // Mettre à jour le guide groupe-cours
+    mettreAJourGuideGroupeCours();
+
+    // Ouvrir l'accordéon Horaire pour continuer le workflow
+    const accordeonHoraire = document.getElementById('accordeon-horaire');
+    if (accordeonHoraire) {
+        const contenu = accordeonHoraire.querySelector('.accordeon-contenu');
+        const chevron = accordeonHoraire.querySelector('.accordeon-chevron');
+        if (contenu && contenu.style.display === 'none') {
+            contenu.style.display = 'block';
+            if (chevron) chevron.textContent = '▼';
+        }
+        // Scroll vers l'accordéon Horaire
+        accordeonHoraire.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 }
 
 /**
@@ -2489,6 +2862,857 @@ function chargerHoraireGroupeActifV2(numeroGroupe) {
 }
 
 /* ===============================
+   GESTION DES HORAIRES (Beta 95.2)
+   =============================== */
+
+// Variable pour tracker l'horaire en édition
+let horaireEnEditionId = null;
+
+/**
+ * Charge et affiche les horaires dans le dropdown
+ */
+function chargerHorairesV2() {
+    populerDropdownHorairesV2();
+    mettreAJourCarteResumeHoraireV2();
+}
+
+/**
+ * Peuple le dropdown des horaires
+ */
+function populerDropdownHorairesV2() {
+    const select = document.getElementById('v2-selectHoraire');
+    if (!select) return;
+
+    const cleHoraires = typeof cle === 'function' ? cle('horaires') : 'horaires';
+    const horaires = db.getSync(cleHoraires, []);
+    const valeurActuelle = select.value;
+
+    let html = '<option value="">Sélectionner...</option>';
+    horaires.forEach(h => {
+        html += `<option value="${h.id}">${h.nom || 'Sans nom'}</option>`;
+    });
+    select.innerHTML = html;
+
+    // Restaurer la sélection
+    if (valeurActuelle) {
+        select.value = valeurActuelle;
+    }
+}
+
+/**
+ * Appelé quand on change l'horaire sélectionné dans le dropdown
+ */
+function changerHoraireSelectionneV2(horaireId) {
+    if (!horaireId) {
+        // Aucun horaire sélectionné - afficher état vide
+        mettreAJourCarteResumeHoraireV2(null);
+        afficherEtatVideHoraireV2();
+        return;
+    }
+
+    const cleHoraires = typeof cle === 'function' ? cle('horaires') : 'horaires';
+    const horaires = db.getSync(cleHoraires, []);
+    const horaire = horaires.find(h => h.id === horaireId);
+
+    if (horaire) {
+        mettreAJourCarteResumeHoraireV2(horaire);
+        editerHoraireV2(horaire);
+    }
+}
+
+/**
+ * Met à jour la carte résumé de l'horaire
+ */
+function mettreAJourCarteResumeHoraireV2(horaire) {
+    const carte = document.getElementById('v2-carteResumeHoraire');
+    if (!carte) return;
+
+    if (!horaire) {
+        carte.innerHTML = '<p class="etat-vide-resume">Aucun horaire sélectionné</p>';
+        return;
+    }
+
+    const nbSeances = horaire.seances?.length || 0;
+    const periodesParSeance = horaire.periodesParSeance || 2;
+    const totalPeriodes = nbSeances * periodesParSeance;
+    const local = horaire.local || '—';
+
+    let seancesHtml = '';
+    if (horaire.seances && horaire.seances.length > 0) {
+        seancesHtml = '<ul>';
+        horaire.seances.forEach(s => {
+            const heureFin = s.heureFin || calculerHeureFin(s.heureDebut, periodesParSeance);
+            seancesHtml += `<li>${s.jour} ${s.heureDebut} - ${heureFin}</li>`;
+        });
+        seancesHtml += '</ul>';
+    }
+
+    carte.innerHTML = `
+        <div class="resume-horaire-nom">${horaire.nom || 'Sans nom'}</div>
+        <div class="resume-horaire-details">
+            <div>Local : ${local}</div>
+            <div>Format : ${nbSeances}×${periodesParSeance}</div>
+            <div>${totalPeriodes} périodes/semaine</div>
+        </div>
+        ${seancesHtml ? `<div class="resume-horaire-seances">${seancesHtml}</div>` : ''}
+    `;
+}
+
+/**
+ * Affiche l'état vide du formulaire
+ */
+function afficherEtatVideHoraireV2() {
+    const etatVide = document.getElementById('v2-horaireEtatVide');
+    const formulaire = document.getElementById('v2-formulaireHoraire');
+
+    if (etatVide) etatVide.style.display = 'block';
+    if (formulaire) formulaire.style.display = 'none';
+    horaireEnEditionId = null;
+}
+
+/**
+ * Peuple le dropdown des groupes associés dans le formulaire horaire
+ */
+function populerDropdownGroupesHoraireV2() {
+    const select = document.getElementById('v2-hor-groupeAssocie');
+    if (!select) return;
+
+    const cleEtud = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
+    const etudiants = db.getSync(cleEtud, []);
+
+    // Extraire les groupes uniques
+    const groupesSet = new Set();
+    etudiants.forEach(e => {
+        if (e.groupe) {
+            groupesSet.add(String(e.groupe).padStart(5, '0'));
+        }
+    });
+
+    const groupesTries = Array.from(groupesSet).sort();
+    let html = '<option value="">— Sélectionner un groupe —</option>';
+    groupesTries.forEach(grp => {
+        const nbEtudiants = etudiants.filter(e => String(e.groupe).padStart(5, '0') === grp).length;
+        html += `<option value="${grp}">${grp} (${nbEtudiants} étud.)</option>`;
+    });
+    select.innerHTML = html;
+}
+
+/**
+ * Affiche le formulaire pour un nouvel horaire
+ */
+function nouveauHoraireV2() {
+    horaireEnEditionId = null;
+
+    // Populer le dropdown des groupes
+    populerDropdownGroupesHoraireV2();
+
+    // Vider les champs
+    document.getElementById('v2-hor-groupeAssocie').value = '';
+    document.getElementById('v2-hor-nom').value = '';
+    document.getElementById('v2-hor-local').value = '';
+    document.getElementById('v2-hor-nbSeances').value = '2';
+    document.getElementById('v2-hor-periodesParSeance').value = '2';
+
+    // Mettre à jour le titre
+    const titre = document.getElementById('v2-titreFormHoraire');
+    const btnTexte = document.getElementById('v2-btnTexteHoraire');
+    if (titre) titre.textContent = 'Nouvel horaire';
+    if (btnTexte) btnTexte.textContent = 'Ajouter';
+
+    // Générer les champs de séances
+    mettreAJourSeancesHoraireV2();
+
+    // Afficher le formulaire
+    const etatVide = document.getElementById('v2-horaireEtatVide');
+    const formulaire = document.getElementById('v2-formulaireHoraire');
+    if (etatVide) etatVide.style.display = 'none';
+    if (formulaire) formulaire.style.display = 'block';
+
+    // Désélectionner dans le dropdown
+    const select = document.getElementById('v2-selectHoraire');
+    if (select) select.value = '';
+    mettreAJourCarteResumeHoraireV2(null);
+}
+
+/**
+ * Charge un horaire existant dans le formulaire pour édition
+ */
+function editerHoraireV2(horaire) {
+    horaireEnEditionId = horaire.id;
+
+    // Populer le dropdown des groupes
+    populerDropdownGroupesHoraireV2();
+
+    // Remplir les champs
+    const selectGroupe = document.getElementById('v2-hor-groupeAssocie');
+    if (selectGroupe) selectGroupe.value = horaire.groupeAssocie || '';
+    document.getElementById('v2-hor-nom').value = horaire.nom || '';
+    document.getElementById('v2-hor-local').value = horaire.local || '';
+    document.getElementById('v2-hor-nbSeances').value = String(horaire.seances?.length || 2);
+    document.getElementById('v2-hor-periodesParSeance').value = String(horaire.periodesParSeance || 2);
+
+    // Mettre à jour le titre
+    const titre = document.getElementById('v2-titreFormHoraire');
+    const btnTexte = document.getElementById('v2-btnTexteHoraire');
+    if (titre) titre.textContent = 'Modifier l\'horaire';
+    if (btnTexte) btnTexte.textContent = 'Enregistrer';
+
+    // Générer les champs de séances puis les remplir
+    mettreAJourSeancesHoraireV2();
+
+    // Remplir les séances existantes
+    if (horaire.seances) {
+        horaire.seances.forEach((s, i) => {
+            const selectJour = document.getElementById(`v2-hor-seance-${i}-jour`);
+            const inputDebut = document.getElementById(`v2-hor-seance-${i}-debut`);
+            const inputFin = document.getElementById(`v2-hor-seance-${i}-fin`);
+
+            if (selectJour) selectJour.value = s.jour || 'Lundi';
+            if (inputDebut) inputDebut.value = s.heureDebut || '08:00';
+            if (inputFin) inputFin.value = s.heureFin || '10:00';
+        });
+    }
+
+    // Afficher le formulaire
+    const etatVide = document.getElementById('v2-horaireEtatVide');
+    const formulaire = document.getElementById('v2-formulaireHoraire');
+    if (etatVide) etatVide.style.display = 'none';
+    if (formulaire) formulaire.style.display = 'block';
+}
+
+/**
+ * Annule le formulaire horaire
+ */
+function annulerFormHoraireV2() {
+    afficherEtatVideHoraireV2();
+
+    // Désélectionner dans le dropdown
+    const select = document.getElementById('v2-selectHoraire');
+    if (select) select.value = '';
+    mettreAJourCarteResumeHoraireV2(null);
+}
+
+/**
+ * Sauvegarde l'horaire (ajout ou modification)
+ */
+function sauvegarderHoraireV2() {
+    const groupeAssocie = document.getElementById('v2-hor-groupeAssocie')?.value;
+    const nom = document.getElementById('v2-hor-nom')?.value?.trim();
+    const local = document.getElementById('v2-hor-local')?.value?.trim();
+    const nbSeances = parseInt(document.getElementById('v2-hor-nbSeances')?.value) || 2;
+    const periodesParSeance = parseInt(document.getElementById('v2-hor-periodesParSeance')?.value) || 2;
+
+    if (!groupeAssocie) {
+        afficherNotificationErreur('Veuillez sélectionner un groupe associé');
+        return;
+    }
+
+    if (!nom) {
+        afficherNotificationErreur('Le nom de l\'horaire est requis');
+        return;
+    }
+
+    // Collecter les séances
+    const seances = [];
+    for (let i = 0; i < nbSeances; i++) {
+        const jour = document.getElementById(`v2-hor-seance-${i}-jour`)?.value || 'Lundi';
+        const heureDebut = document.getElementById(`v2-hor-seance-${i}-debut`)?.value || '08:00';
+        const heureFin = document.getElementById(`v2-hor-seance-${i}-fin`)?.value || '10:00';
+        seances.push({ jour, heureDebut, heureFin });
+    }
+
+    const cleHoraires = typeof cle === 'function' ? cle('horaires') : 'horaires';
+    let horaires = db.getSync(cleHoraires, []);
+
+    if (horaireEnEditionId) {
+        // Modification
+        const index = horaires.findIndex(h => h.id === horaireEnEditionId);
+        if (index >= 0) {
+            horaires[index] = {
+                ...horaires[index],
+                groupeAssocie,
+                nom,
+                local,
+                periodesParSeance,
+                seances
+            };
+        }
+        afficherNotificationSucces(`Horaire "${nom}" modifié`);
+    } else {
+        // Ajout
+        const nouvelHoraire = {
+            id: 'HOR_' + Date.now(),
+            groupeAssocie,
+            nom,
+            local,
+            periodesParSeance,
+            seances
+        };
+        horaires.push(nouvelHoraire);
+        horaireEnEditionId = nouvelHoraire.id;
+        afficherNotificationSucces(`Horaire "${nom}" créé`);
+    }
+
+    db.setSync(cleHoraires, horaires);
+
+    // Rafraîchir l'interface
+    populerDropdownHorairesV2();
+    const select = document.getElementById('v2-selectHoraire');
+    if (select) select.value = horaireEnEditionId;
+
+    const horaire = horaires.find(h => h.id === horaireEnEditionId);
+    mettreAJourCarteResumeHoraireV2(horaire);
+
+    // Mettre à jour le guide groupe-cours
+    mettreAJourGuideGroupeCours();
+}
+
+/**
+ * Met à jour les champs de séances selon le nombre sélectionné
+ */
+function mettreAJourSeancesHoraireV2() {
+    const conteneur = document.getElementById('v2-hor-seances');
+    const nbSeances = parseInt(document.getElementById('v2-hor-nbSeances')?.value) || 2;
+    const periodesParSeance = parseInt(document.getElementById('v2-hor-periodesParSeance')?.value) || 2;
+
+    // Mettre à jour le résumé du format
+    const totalPeriodes = nbSeances * periodesParSeance;
+    const resumeElem = document.getElementById('v2-hor-formatResume');
+    if (resumeElem) {
+        resumeElem.textContent = `${nbSeances} séance(s) × ${periodesParSeance} période(s) = ${totalPeriodes} périodes/semaine`;
+    }
+
+    if (!conteneur) return;
+
+    const jours = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
+    let html = '';
+
+    for (let i = 0; i < nbSeances; i++) {
+        const jourDefaut = jours[i % jours.length];
+        html += `
+            <div class="seance-horaire-ligne">
+                <label>Séance ${i + 1}</label>
+                <select id="v2-hor-seance-${i}-jour" class="controle-form">
+                    ${jours.map(j => `<option value="${j}" ${j === jourDefaut ? 'selected' : ''}>${j}</option>`).join('')}
+                </select>
+                <input type="time" id="v2-hor-seance-${i}-debut" class="controle-form" value="08:00">
+                <span>à</span>
+                <input type="time" id="v2-hor-seance-${i}-fin" class="controle-form" value="10:00">
+            </div>
+        `;
+    }
+
+    conteneur.innerHTML = html;
+}
+
+/**
+ * Calcule l'heure de fin à partir de l'heure de début et du nombre de périodes
+ */
+function calculerHeureFin(heureDebut, nbPeriodes) {
+    if (!heureDebut) return '';
+    const dureePeriode = parseInt(document.getElementById('v2-dureePeriode')?.value) || 55;
+    const [h, m] = heureDebut.split(':').map(Number);
+    const totalMinutes = h * 60 + m + (nbPeriodes * dureePeriode);
+    const heures = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return `${String(heures).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+}
+
+// Exports globaux pour les fonctions horaire
+window.nouveauHoraireV2 = nouveauHoraireV2;
+window.changerHoraireSelectionneV2 = changerHoraireSelectionneV2;
+window.annulerFormHoraireV2 = annulerFormHoraireV2;
+window.sauvegarderHoraireV2 = sauvegarderHoraireV2;
+window.mettreAJourSeancesHoraireV2 = mettreAJourSeancesHoraireV2;
+window.chargerHorairesV2 = chargerHorairesV2;
+
+/* ===============================
+   GESTION DES GROUPE-COURS (Beta 95.2)
+   Assemblage final des entités
+   =============================== */
+
+// Variable pour tracker le groupe-cours en édition
+let groupeCoursEnEditionId = null;
+
+/**
+ * Charge et initialise l'accordéon Groupe-cours
+ */
+function chargerGroupeCoursV2() {
+    populerDropdownGroupeCoursV2();
+    populerDropdownsAssemblageV2();
+    afficherEnseignantGroupeCoursV2();
+    mettreAJourCarteResumeGroupeCoursV2(null);
+
+    // Synchroniser le dropdown dans l'en-tête de l'application
+    if (typeof peuplerDropdownGroupeCoursActif === 'function') {
+        peuplerDropdownGroupeCoursActif();
+    }
+}
+
+/**
+ * Peuple le dropdown des groupe-cours existants
+ */
+function populerDropdownGroupeCoursV2() {
+    const select = document.getElementById('v2-selectGroupeCours');
+    if (!select) return;
+
+    const cleGC = typeof cle === 'function' ? cle('groupesCours') : 'groupesCours';
+    const groupesCours = db.getSync(cleGC, []);
+    const valeurActuelle = select.value;
+
+    let html = '<option value="">Sélectionner...</option>';
+    groupesCours.forEach(gc => {
+        html += `<option value="${gc.id}">${gc.nom || gc.id}</option>`;
+    });
+    select.innerHTML = html;
+
+    if (valeurActuelle) {
+        select.value = valeurActuelle;
+    }
+}
+
+/**
+ * Peuple les dropdowns du formulaire d'assemblage
+ */
+function populerDropdownsAssemblageV2() {
+    // Dropdown Cours
+    const selectCours = document.getElementById('v2-gc-cours');
+    if (selectCours) {
+        const cours = db.getSync('listeCours', []) || db.getSync('cours', []);
+        let html = '<option value="">— Sélectionner —</option>';
+        cours.forEach(c => {
+            const code = c.sigle || c.codeCours || c.code || '';
+            const nom = c.nomCours || c.nom || '';
+            const label = code ? `${code} - ${nom}` : nom;
+            html += `<option value="${c.id || code}">${label}</option>`;
+        });
+        selectCours.innerHTML = html;
+    }
+
+    // Dropdown Groupes d'étudiants
+    const selectGroupe = document.getElementById('v2-gc-groupe');
+    if (selectGroupe) {
+        const cleEtud = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
+        const etudiants = db.getSync(cleEtud, []);
+
+        // Extraire les groupes uniques
+        const groupesSet = new Set();
+        etudiants.forEach(e => {
+            if (e.groupe) {
+                groupesSet.add(String(e.groupe).padStart(5, '0'));
+            }
+        });
+
+        const groupesTries = Array.from(groupesSet).sort();
+        let html = '<option value="">— Sélectionner —</option>';
+        groupesTries.forEach(grp => {
+            const nbEtudiants = etudiants.filter(e => String(e.groupe).padStart(5, '0') === grp).length;
+            html += `<option value="${grp}">${grp} (${nbEtudiants} étud.)</option>`;
+        });
+        selectGroupe.innerHTML = html;
+    }
+
+    // Note: L'horaire n'est plus un dropdown mais un affichage en lecture seule
+    // Il est mis à jour automatiquement via mettreAJourNomGroupeCoursV2()
+    // quand on sélectionne un groupe (l'horaire est associé au groupe)
+}
+
+/**
+ * Affiche le nom de l'enseignant (profil unique)
+ */
+function afficherEnseignantGroupeCoursV2() {
+    const elem = document.getElementById('v2-gc-enseignantNom');
+    if (!elem) return;
+
+    const profil = db.getSync('profilEnseignant', {});
+    if (profil.prenom && profil.nom) {
+        elem.textContent = `${profil.prenom} ${profil.nom}`;
+    } else {
+        elem.textContent = '(Non configuré)';
+    }
+}
+
+/**
+ * Génère le nom du groupe-cours à partir des sélections
+ * Format: H2026-601-101-MQ-00001 (Mer-PM / Ven-AM)
+ */
+function genererNomGroupeCoursV2() {
+    // Trimestre actif
+    const trimestre = typeof obtenirTrimestreActif === 'function' ? obtenirTrimestreActif() : null;
+    let trimestreId = '';
+    if (trimestre) {
+        const sessionLettre = { 'hiver': 'H', 'automne': 'A', 'ete': 'E' }[trimestre.session] || trimestre.session?.charAt(0)?.toUpperCase() || '';
+        trimestreId = `${sessionLettre}${trimestre.annee}`;
+    }
+
+    // Cours sélectionné
+    const coursId = document.getElementById('v2-gc-cours')?.value;
+    let codeCours = '';
+    if (coursId) {
+        const cours = db.getSync('listeCours', []) || db.getSync('cours', []);
+        const coursObj = cours.find(c => (c.id || c.sigle || c.codeCours) === coursId);
+        codeCours = coursObj?.sigle || coursObj?.codeCours || coursObj?.code || '';
+    }
+
+    // Groupe d'étudiants
+    const groupeNum = document.getElementById('v2-gc-groupe')?.value || '';
+
+    // Horaire sélectionné
+    const horaireId = document.getElementById('v2-gc-horaire')?.value;
+    let horaireResume = '';
+    if (horaireId) {
+        const cleHoraires = typeof cle === 'function' ? cle('horaires') : 'horaires';
+        const horaires = db.getSync(cleHoraires, []);
+        const horaire = horaires.find(h => h.id === horaireId);
+
+        if (horaire?.seances && horaire.seances.length > 0) {
+            const seancesAbregees = horaire.seances.map(s => {
+                const jourAbrege = abrevierJour(s.jour);
+                const periode = obtenirPeriodeJournee(s.heureDebut);
+                return `${jourAbrege}-${periode}`;
+            });
+            horaireResume = seancesAbregees.join(' / ');
+        }
+    }
+
+    // Assembler le nom
+    let nom = '';
+    if (trimestreId) nom += trimestreId;
+    if (codeCours) nom += (nom ? '-' : '') + codeCours;
+    if (groupeNum) nom += (nom ? '-' : '') + groupeNum;
+    if (horaireResume) nom += ` (${horaireResume})`;
+
+    return nom || '—';
+}
+
+/**
+ * Abrège le nom du jour
+ */
+function abrevierJour(jour) {
+    const abreviations = {
+        'Lundi': 'Lun', 'Mardi': 'Mar', 'Mercredi': 'Mer',
+        'Jeudi': 'Jeu', 'Vendredi': 'Ven', 'Samedi': 'Sam', 'Dimanche': 'Dim'
+    };
+    return abreviations[jour] || jour?.substring(0, 3) || '';
+}
+
+/**
+ * Détermine AM ou PM selon l'heure
+ */
+function obtenirPeriodeJournee(heure) {
+    if (!heure) return '';
+    const [h] = heure.split(':').map(Number);
+    return h < 12 ? 'AM' : 'PM';
+}
+
+/**
+ * Met à jour l'aperçu du nom généré et l'horaire associé
+ */
+function mettreAJourNomGroupeCoursV2() {
+    // Chercher l'horaire associé au groupe sélectionné
+    const groupeNum = document.getElementById('v2-gc-groupe')?.value;
+    const horaireHidden = document.getElementById('v2-gc-horaire');
+    const horaireNomSpan = document.getElementById('v2-gc-horaireNom');
+    const horaireContainer = document.getElementById('v2-gc-horaireInfo');
+
+    if (groupeNum) {
+        const cleHoraires = typeof cle === 'function' ? cle('horaires') : 'horaires';
+        const horaires = db.getSync(cleHoraires, []);
+        const horaireAssocie = horaires.find(h => h.groupeAssocie === groupeNum);
+
+        if (horaireAssocie) {
+            // Horaire trouvé
+            if (horaireHidden) horaireHidden.value = horaireAssocie.id;
+            if (horaireNomSpan) horaireNomSpan.textContent = horaireAssocie.nom || 'Sans nom';
+            if (horaireContainer) horaireContainer.classList.remove('sans-horaire');
+        } else {
+            // Aucun horaire pour ce groupe
+            if (horaireHidden) horaireHidden.value = '';
+            if (horaireNomSpan) horaireNomSpan.textContent = 'Aucun horaire pour ce groupe';
+            if (horaireContainer) horaireContainer.classList.add('sans-horaire');
+        }
+    } else {
+        // Aucun groupe sélectionné
+        if (horaireHidden) horaireHidden.value = '';
+        if (horaireNomSpan) horaireNomSpan.textContent = '— Sélectionnez un groupe —';
+        if (horaireContainer) horaireContainer.classList.remove('sans-horaire');
+    }
+
+    // Mettre à jour le nom généré
+    const elem = document.getElementById('v2-nomGroupeCoursGenere');
+    if (elem) {
+        elem.textContent = genererNomGroupeCoursV2();
+    }
+}
+
+/**
+ * Appelé quand on change le groupe-cours sélectionné
+ */
+function changerGroupeCoursSelectionneV2(gcId) {
+    if (!gcId) {
+        mettreAJourCarteResumeGroupeCoursV2(null);
+        afficherEtatVideGroupeCoursV2();
+        return;
+    }
+
+    const cleGC = typeof cle === 'function' ? cle('groupesCours') : 'groupesCours';
+    const groupesCours = db.getSync(cleGC, []);
+    const gc = groupesCours.find(g => g.id === gcId);
+
+    if (gc) {
+        mettreAJourCarteResumeGroupeCoursV2(gc);
+        editerGroupeCoursV2(gc);
+    }
+}
+
+/**
+ * Met à jour la carte résumé du groupe-cours
+ */
+function mettreAJourCarteResumeGroupeCoursV2(gc) {
+    const carte = document.getElementById('v2-carteResumeGroupeCours');
+    if (!carte) return;
+
+    if (!gc) {
+        carte.innerHTML = '<p class="etat-vide-resume">Aucun groupe-cours sélectionné</p>';
+        return;
+    }
+
+    // Récupérer les infos liées
+    const cours = db.getSync('listeCours', []) || db.getSync('cours', []);
+    const coursObj = cours.find(c => (c.id || c.sigle || c.codeCours) === gc.coursId);
+    const coursNom = coursObj ? (coursObj.sigle || coursObj.codeCours || '') + ' - ' + (coursObj.nomCours || coursObj.nom || '') : '—';
+
+    const cleHoraires = typeof cle === 'function' ? cle('horaires') : 'horaires';
+    const horaires = db.getSync(cleHoraires, []);
+    const horaireObj = horaires.find(h => h.id === gc.horaireId);
+    const horaireNom = horaireObj?.nom || '—';
+
+    const profil = db.getSync('profilEnseignant', {});
+    const enseignantNom = (profil.prenom && profil.nom) ? `${profil.prenom} ${profil.nom}` : '—';
+
+    carte.innerHTML = `
+        <div class="resume-gc-nom">${gc.nom || gc.id}</div>
+        <div class="resume-gc-details">
+            <div><span class="label-gc">Cours</span><span>${coursNom}</span></div>
+            <div><span class="label-gc">Groupe</span><span>${gc.groupeNum || '—'}</span></div>
+            <div><span class="label-gc">Horaire</span><span>${horaireNom}</span></div>
+            <div><span class="label-gc">Enseig.</span><span>${enseignantNom}</span></div>
+        </div>
+    `;
+}
+
+/**
+ * Affiche l'état vide du formulaire
+ */
+function afficherEtatVideGroupeCoursV2() {
+    const etatVide = document.getElementById('v2-groupeCoursEtatVide');
+    const formulaire = document.getElementById('v2-formulaireGroupeCours');
+
+    if (etatVide) etatVide.style.display = 'block';
+    if (formulaire) formulaire.style.display = 'none';
+    groupeCoursEnEditionId = null;
+}
+
+/**
+ * Affiche le trimestre actif dans le formulaire groupe-cours
+ */
+function afficherTrimestreGroupeCoursV2() {
+    const elem = document.getElementById('v2-gc-trimestreNom');
+    if (!elem) return;
+
+    const trimestre = typeof obtenirTrimestreActif === 'function' ? obtenirTrimestreActif() : null;
+
+    if (trimestre) {
+        const sessionNom = {
+            'hiver': 'Hiver',
+            'automne': 'Automne',
+            'ete': 'Été'
+        }[trimestre.session] || trimestre.session || '';
+
+        elem.textContent = `${sessionNom} ${trimestre.annee}`;
+    } else {
+        elem.textContent = '(Aucun trimestre actif)';
+    }
+}
+
+/**
+ * Affiche le formulaire pour un nouveau groupe-cours
+ */
+function nouveauGroupeCoursV2() {
+    groupeCoursEnEditionId = null;
+
+    // Afficher le trimestre actif
+    afficherTrimestreGroupeCoursV2();
+
+    // Rafraîchir les dropdowns
+    populerDropdownsAssemblageV2();
+    afficherEnseignantGroupeCoursV2();
+
+    // Réinitialiser les sélections
+    const selectCours = document.getElementById('v2-gc-cours');
+    const selectGroupe = document.getElementById('v2-gc-groupe');
+    const horaireHidden = document.getElementById('v2-gc-horaire');
+    const horaireNom = document.getElementById('v2-gc-horaireNom');
+
+    if (selectCours) selectCours.value = '';
+    if (selectGroupe) selectGroupe.value = '';
+    if (horaireHidden) horaireHidden.value = '';
+    if (horaireNom) horaireNom.textContent = '— Sélectionnez un groupe —';
+
+    // Mettre à jour le titre et bouton
+    const titre = document.getElementById('v2-titreFormGroupeCours');
+    const btnTexte = document.getElementById('v2-btnTexteGroupeCours');
+    if (titre) titre.textContent = 'Nouveau groupe-cours';
+    if (btnTexte) btnTexte.textContent = 'Créer';
+
+    // Mettre à jour l'aperçu du nom
+    mettreAJourNomGroupeCoursV2();
+
+    // Afficher le formulaire
+    const etatVide = document.getElementById('v2-groupeCoursEtatVide');
+    const formulaire = document.getElementById('v2-formulaireGroupeCours');
+    if (etatVide) etatVide.style.display = 'none';
+    if (formulaire) formulaire.style.display = 'block';
+
+    // Désélectionner dans le dropdown principal
+    const select = document.getElementById('v2-selectGroupeCours');
+    if (select) select.value = '';
+    mettreAJourCarteResumeGroupeCoursV2(null);
+}
+
+/**
+ * Charge un groupe-cours dans le formulaire pour édition
+ */
+function editerGroupeCoursV2(gc) {
+    groupeCoursEnEditionId = gc.id;
+
+    // Afficher le trimestre actif
+    afficherTrimestreGroupeCoursV2();
+
+    // Rafraîchir les dropdowns
+    populerDropdownsAssemblageV2();
+    afficherEnseignantGroupeCoursV2();
+
+    // Remplir les sélections
+    const selectCours = document.getElementById('v2-gc-cours');
+    const selectGroupe = document.getElementById('v2-gc-groupe');
+
+    if (selectCours) selectCours.value = gc.coursId || '';
+    if (selectGroupe) selectGroupe.value = gc.groupeNum || '';
+
+    // Mettre à jour le titre et bouton
+    const titre = document.getElementById('v2-titreFormGroupeCours');
+    const btnTexte = document.getElementById('v2-btnTexteGroupeCours');
+    if (titre) titre.textContent = 'Modifier le groupe-cours';
+    if (btnTexte) btnTexte.textContent = 'Enregistrer';
+
+    // Mettre à jour l'aperçu du nom (inclut l'horaire associé au groupe)
+    mettreAJourNomGroupeCoursV2();
+
+    // Afficher le formulaire
+    const etatVide = document.getElementById('v2-groupeCoursEtatVide');
+    const formulaire = document.getElementById('v2-formulaireGroupeCours');
+    if (etatVide) etatVide.style.display = 'none';
+    if (formulaire) formulaire.style.display = 'block';
+}
+
+/**
+ * Annule le formulaire groupe-cours
+ */
+function annulerFormGroupeCoursV2() {
+    afficherEtatVideGroupeCoursV2();
+
+    const select = document.getElementById('v2-selectGroupeCours');
+    if (select) select.value = '';
+    mettreAJourCarteResumeGroupeCoursV2(null);
+}
+
+/**
+ * Sauvegarde le groupe-cours (ajout ou modification)
+ */
+function sauvegarderGroupeCoursV2() {
+    const coursId = document.getElementById('v2-gc-cours')?.value;
+    const groupeNum = document.getElementById('v2-gc-groupe')?.value;
+    const horaireId = document.getElementById('v2-gc-horaire')?.value;
+
+    // Validation
+    if (!coursId) {
+        afficherNotificationErreur('Veuillez sélectionner un cours');
+        return;
+    }
+    if (!groupeNum) {
+        afficherNotificationErreur('Veuillez sélectionner un groupe d\'étudiants');
+        return;
+    }
+    if (!horaireId) {
+        afficherNotificationErreur('Aucun horaire n\'est associé à ce groupe. Configurez d\'abord un horaire dans l\'accordéon Horaire.');
+        return;
+    }
+
+    // Générer le nom
+    const nom = genererNomGroupeCoursV2();
+
+    const cleGC = typeof cle === 'function' ? cle('groupesCours') : 'groupesCours';
+    let groupesCours = db.getSync(cleGC, []);
+
+    if (groupeCoursEnEditionId) {
+        // Modification
+        const index = groupesCours.findIndex(g => g.id === groupeCoursEnEditionId);
+        if (index >= 0) {
+            groupesCours[index] = {
+                ...groupesCours[index],
+                nom,
+                coursId,
+                groupeNum,
+                horaireId,
+                dateModification: new Date().toISOString()
+            };
+        }
+        afficherNotificationSucces('Groupe-cours modifié');
+    } else {
+        // Ajout
+        const nouveauGC = {
+            id: 'GC_' + Date.now(),
+            nom,
+            coursId,
+            groupeNum,
+            horaireId,
+            dateCreation: new Date().toISOString(),
+            actif: true
+        };
+        groupesCours.push(nouveauGC);
+        groupeCoursEnEditionId = nouveauGC.id;
+        afficherNotificationSucces('Groupe-cours créé');
+    }
+
+    db.setSync(cleGC, groupesCours);
+
+    // Rafraîchir l'interface
+    populerDropdownGroupeCoursV2();
+    const select = document.getElementById('v2-selectGroupeCours');
+    if (select) select.value = groupeCoursEnEditionId;
+
+    const gc = groupesCours.find(g => g.id === groupeCoursEnEditionId);
+    mettreAJourCarteResumeGroupeCoursV2(gc);
+
+    // Mettre à jour le dropdown dans l'en-tête de l'application
+    if (typeof peuplerDropdownGroupeCoursActif === 'function') {
+        peuplerDropdownGroupeCoursActif();
+    }
+
+    // Mettre à jour le guide groupe-cours
+    mettreAJourGuideGroupeCours();
+}
+
+// Exports globaux pour les fonctions groupe-cours
+window.chargerGroupeCoursV2 = chargerGroupeCoursV2;
+window.nouveauGroupeCoursV2 = nouveauGroupeCoursV2;
+window.changerGroupeCoursSelectionneV2 = changerGroupeCoursSelectionneV2;
+window.annulerFormGroupeCoursV2 = annulerFormGroupeCoursV2;
+window.sauvegarderGroupeCoursV2 = sauvegarderGroupeCoursV2;
+window.mettreAJourNomGroupeCoursV2 = mettreAJourNomGroupeCoursV2;
+
+/* ===============================
    DONNÉES DE DÉMONSTRATION
    =============================== */
 
@@ -2625,11 +3849,16 @@ window.ouvrirModalNouveauTrimestre = ouvrirModalNouveauTrimestre;
 window.afficherListeTrimestreGestion = afficherListeTrimestreGestion;
 window.confirmerArchivage = confirmerArchivage;
 window.confirmerDesarchivage = confirmerDesarchivage;
+window.afficherFormulaireTrimestreActif = afficherFormulaireTrimestreActif;
+window.ouvrirBibliothequeTrimestreV2 = ouvrirBibliothequeTrimestreV2;
+window.archiverTrimestreActif = archiverTrimestreActif;
+window.supprimerTrimestreActif = supprimerTrimestreActif;
 window.chargerDropdownCoursV2 = chargerDropdownCoursV2;
 window.changerCoursSelectionneV2 = changerCoursSelectionneV2;
 window.viderAffichageCoursV2 = viderAffichageCoursV2;
 window.afficherDetailsCoursV2 = afficherDetailsCoursV2;
 window.afficherFormCoursV2 = afficherFormCoursV2;
+window.nouveauCoursV2 = nouveauCoursV2;
 window.modifierCoursSelectionneV2 = modifierCoursSelectionneV2;
 window.dupliquerCoursSelectionneV2 = dupliquerCoursSelectionneV2;
 window.annulerFormCoursV2 = annulerFormCoursV2;
@@ -2643,6 +3872,11 @@ window.ouvrirModalNouveauGroupe = ouvrirModalNouveauGroupe;
 window.chargerListeEtudiantsV2 = chargerListeEtudiantsV2;
 window.ajouterEtudiantV2 = ajouterEtudiantV2;
 window.supprimerEtudiantV2 = supprimerEtudiantV2;
+window.editerEtudiantV2 = editerEtudiantV2;
+window.soumettreEtudiantV2 = soumettreEtudiantV2;
+window.annulerEditionEtudiantV2 = annulerEditionEtudiantV2;
+window.creerNouveauGroupeV2 = creerNouveauGroupeV2;
+window.filtrerParGroupeV2 = filtrerParGroupeV2;
 window.importerFichierEtudiantsV2 = importerFichierEtudiantsV2;
 window.previsualiserDonneesV2 = previsualiserDonneesV2;
 window.confirmerImportV2 = confirmerImportV2;
@@ -2742,6 +3976,116 @@ function allerVersAide(idAccordeon) {
         }
     }, 100);
 }
+
+/* ===============================
+   PROFIL ENSEIGNANT (Beta 95.2)
+   =============================== */
+
+/**
+ * Charge le profil enseignant depuis le stockage
+ * et remplit le formulaire + la carte résumé
+ */
+function chargerProfilEnseignantV2() {
+    const profil = db.getSync('profilEnseignant') || {};
+
+    // Remplir le formulaire
+    const setValue = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.value = val || '';
+    };
+
+    setValue('v2-ens-prenom', profil.prenom);
+    setValue('v2-ens-nom', profil.nom);
+    setValue('v2-ens-courriel', profil.courriel);
+    setValue('v2-ens-institution', profil.institution);
+    setValue('v2-ens-departement', profil.departement);
+    setValue('v2-ens-discipline', profil.discipline);
+    setValue('v2-ens-siteWeb', profil.siteWeb);
+
+    // Mettre à jour la carte
+    mettreAJourCarteEnseignant();
+}
+
+/**
+ * Met à jour la carte résumé de l'enseignant
+ * Appelée à chaque modification des champs du formulaire
+ */
+function mettreAJourCarteEnseignant() {
+    const prenom = document.getElementById('v2-ens-prenom')?.value?.trim() || '';
+    const nom = document.getElementById('v2-ens-nom')?.value?.trim() || '';
+    const courriel = document.getElementById('v2-ens-courriel')?.value?.trim() || '';
+    const institution = document.getElementById('v2-ens-institution')?.value?.trim() || '';
+
+    // Mettre à jour les éléments de la carte
+    const elemNom = document.getElementById('enseignant-resume-nom');
+    const elemCourriel = document.getElementById('enseignant-resume-courriel');
+    const elemInstitution = document.getElementById('enseignant-resume-institution');
+
+    if (elemNom) {
+        elemNom.textContent = (prenom && nom) ? `${prenom} ${nom}` : '—';
+    }
+    if (elemCourriel) {
+        elemCourriel.textContent = courriel || '';
+    }
+    if (elemInstitution) {
+        elemInstitution.textContent = institution || '';
+    }
+}
+
+/**
+ * Sauvegarde le profil enseignant
+ */
+async function sauvegarderEnseignantV2() {
+    const prenom = document.getElementById('v2-ens-prenom')?.value?.trim() || '';
+    const nom = document.getElementById('v2-ens-nom')?.value?.trim() || '';
+    const courriel = document.getElementById('v2-ens-courriel')?.value?.trim() || '';
+    const institution = document.getElementById('v2-ens-institution')?.value?.trim() || '';
+
+    // Validation
+    if (!prenom || !nom) {
+        afficherNotificationErreur('Le prénom et le nom sont requis');
+        return;
+    }
+    if (!courriel) {
+        afficherNotificationErreur('Le courriel est requis');
+        return;
+    }
+    if (!institution) {
+        afficherNotificationErreur('L\'institution est requise');
+        return;
+    }
+
+    const profil = {
+        prenom: prenom,
+        nom: nom,
+        courriel: courriel,
+        institution: institution,
+        departement: document.getElementById('v2-ens-departement')?.value?.trim() || '',
+        discipline: document.getElementById('v2-ens-discipline')?.value?.trim() || '',
+        siteWeb: document.getElementById('v2-ens-siteWeb')?.value?.trim() || ''
+    };
+
+    await db.set('profilEnseignant', profil);
+
+    // Mettre à jour le guide groupe-cours
+    mettreAJourGuideGroupeCours();
+
+    afficherNotificationSucces('Profil enseignant enregistré');
+}
+
+/**
+ * Annule les modifications et recharge le profil depuis le stockage
+ */
+function annulerFormEnseignantV2() {
+    chargerProfilEnseignantV2();
+    afficherNotificationSucces('Modifications annulées');
+}
+
+// Exports globaux
+window.mettreAJourCarteEnseignant = mettreAJourCarteEnseignant;
+window.sauvegarderEnseignantV2 = sauvegarderEnseignantV2;
+window.annulerFormEnseignantV2 = annulerFormEnseignantV2;
+window.chargerProfilEnseignantV2 = chargerProfilEnseignantV2;
 
 /* ===============================
    INITIALISATION AUTOMATIQUE

@@ -1,6 +1,6 @@
 /* ===============================
    ENTITÉ : ENSEIGNANT·E (Profil Auteur)
-   Beta 96 - Refactoring Trimestre
+   Beta 95.2 - Refactoring Trimestre
 
    Structure de données pour les enseignants.
    Sert de source unique pour les métadonnées CC.
