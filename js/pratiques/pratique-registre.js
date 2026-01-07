@@ -129,7 +129,7 @@ function obtenirIdPratiqueActive() {
 
         // Fallback automatique pour migrations
         // Beta 89 → Beta 90 : 'alternative' → 'pan-standards'
-        // Beta 95 → Beta 96 : 'pan-maitrise' → 'pan-standards'
+        // Beta 95 → Beta 95.2 : 'pan-maitrise' → 'pan-standards'
         if (idPratique === 'alternative' || idPratique === 'pan-maitrise') {
             console.warn(`⚠️ Pratique "${idPratique}" détectée, migration automatique vers "pan-standards"`);
             idPratique = 'pan-standards';

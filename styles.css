@@ -828,6 +828,68 @@ h1, h2, h3, h4 {
 }
 
 /* ===============================
+   BANDEAU GROUPE-COURS ACTIF (Beta 95.2)
+   =============================== */
+
+.bandeau-groupe-cours {
+    background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%);
+    padding: 10px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.bandeau-groupe-cours-contenu {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.bandeau-groupe-cours label {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.dropdown-groupe-cours-header {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    color: white;
+    font-size: 0.9rem;
+    padding: 6px 28px 6px 12px;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='white' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    min-width: 200px;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.dropdown-groupe-cours-header:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.dropdown-groupe-cours-header:focus {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+}
+
+.dropdown-groupe-cours-header option {
+    background: var(--bleu-principal);
+    color: white;
+    padding: 10px;
+}
+
+/* ===============================
    NAVIGATION PRINCIPALE - GLASSMORPHISME
    =============================== */
 
@@ -6272,6 +6334,627 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     margin-bottom: 10px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+}
+
+/* ===============================================
+   DISPOSITION BIBLIOTHÈQUE + FORMULAIRE (Beta 95.2)
+   Pattern uniforme pour les accordéons Trimestre
+   =============================================== */
+
+/**
+ * Layout 2 colonnes : Panneau bibliothèque (gauche) + Formulaire (droite)
+ * Utilisé dans : Gestion des trimestres, Cours, Enseignant·e, Horaire, Groupe-cours
+ */
+.disposition-bibliotheque-formulaire {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+/* Panneau gauche : Bibliothèque + Sélection */
+.panneau-bibliotheque {
+    background: var(--bleu-pale);
+    padding: 15px;
+    border-radius: var(--radius-grand);
+    box-shadow: var(--shadow-normal);
+}
+
+.btn-bibliotheque {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 600;
+}
+
+.libelle-selection {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--bleu-principal);
+    margin-bottom: 6px;
+}
+
+/* Panneau droite : Formulaire d'édition */
+.panneau-formulaire {
+    background: white;
+    padding: 20px;
+    border-radius: var(--radius-grand);
+    border: 1px solid var(--gris-bordure);
+    min-height: 200px;
+}
+
+/* État vide (aucune sélection) */
+.etat-vide-formulaire {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 150px;
+    color: var(--gris-texte-pale);
+    text-align: center;
+}
+
+.etat-vide-formulaire p {
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+/* Titre du formulaire */
+.titre-formulaire {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--bleu-principal);
+    margin: 0 0 20px 0;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--bleu-pale);
+}
+
+/* Grille formulaire 2 colonnes */
+.grille-form-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+/* Actions du formulaire */
+.actions-formulaire {
+    display: flex;
+    gap: 10px;
+    padding-top: 15px;
+    border-top: 1px solid var(--gris-bordure);
+}
+
+/* Badge statut */
+.badge-actif {
+    background: var(--vert-succes);
+    color: white;
+    padding: 4px 12px;
+    border-radius: var(--radius-pill);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.badge-archive {
+    background: var(--gris-texte-pale);
+    color: white;
+    padding: 4px 12px;
+    border-radius: var(--radius-pill);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* Carte profil (panneau gauche enseignant) */
+.profil-nom {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--bleu-principal);
+    margin: 0 0 8px 0;
+}
+
+.profil-detail {
+    font-size: 0.85rem;
+    color: var(--gris-texte);
+    margin: 0 0 4px 0;
+}
+
+.profil-detail:empty {
+    display: none;
+}
+
+/* Responsive : empiler sur mobile */
+@media (max-width: 768px) {
+    .disposition-bibliotheque-formulaire {
+        grid-template-columns: 1fr;
+    }
+
+    .panneau-bibliotheque {
+        order: 1;
+    }
+
+    .panneau-formulaire {
+        order: 2;
+    }
+}
+
+/* --- Groupe d'étudiants (Beta 95.2) --- */
+
+.disposition-etudiants {
+    align-items: stretch;
+}
+
+.carte-resume-etudiants {
+    background: var(--bleu-pale);
+    border-radius: var(--radius-standard);
+    padding: 15px;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.resume-stat-principal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.resume-nombre {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--bleu-principal);
+    line-height: 1;
+}
+
+.resume-label {
+    font-size: 0.85rem;
+    color: var(--gris-texte);
+}
+
+.resume-details {
+    font-size: 0.8rem;
+    color: var(--gris-texte);
+    border-top: 1px solid var(--bleu-leger);
+    padding-top: 10px;
+    margin-top: 5px;
+}
+
+.resume-details-ligne {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 0;
+}
+
+.resume-sa {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--bleu-leger);
+    font-size: 0.85rem;
+}
+
+.badge-sa {
+    background: var(--orange-clair);
+    color: var(--orange-fonce);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.section-import {
+    background: var(--bleu-pale);
+    border-radius: var(--radius-standard);
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.section-import .sous-titre-section {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.label-compact {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-bottom: 5px;
+    color: var(--gris-texte);
+}
+
+.separateur-ou {
+    text-align: center;
+    color: var(--gris-texte-pale);
+    font-size: 0.8rem;
+    margin: 12px 0;
+    position: relative;
+}
+
+.separateur-ou::before,
+.separateur-ou::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 35%;
+    height: 1px;
+    background: var(--bleu-leger);
+}
+
+.separateur-ou::before {
+    left: 0;
+}
+
+.separateur-ou::after {
+    right: 0;
+}
+
+.input-fichier-compact {
+    padding: 6px !important;
+    font-size: 0.85rem;
+}
+
+.zone-preview {
+    background: white;
+    border: 1px solid var(--bleu-leger);
+    border-radius: var(--radius-standard);
+    padding: 15px;
+    margin-top: 15px;
+}
+
+.section-actions-liste {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid var(--bleu-leger);
+}
+
+.btn-block {
+    width: 100%;
+}
+
+/* Panneau liste étudiants */
+.panneau-liste-etudiants {
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+}
+
+.conteneur-liste-etudiants {
+    flex: 1;
+    max-height: 350px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+    border: 1px solid var(--bleu-leger);
+    border-radius: var(--radius-standard);
+    background: white;
+}
+
+.conteneur-liste-etudiants table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.conteneur-liste-etudiants th {
+    position: sticky;
+    top: 0;
+    background: var(--bleu-pale);
+    padding: 8px 10px;
+    text-align: left;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--bleu-fonce);
+    border-bottom: 2px solid var(--bleu-leger);
+}
+
+.conteneur-liste-etudiants td {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    border-bottom: 1px solid var(--gris-clair);
+}
+
+.conteneur-liste-etudiants tr:hover {
+    background: var(--bleu-tres-pale);
+}
+
+.etat-vide-liste {
+    padding: 30px;
+    text-align: center;
+    color: var(--gris-texte-pale);
+    font-style: italic;
+}
+
+.formulaire-ajout-etudiant {
+    background: var(--bleu-pale);
+    border-radius: var(--radius-standard);
+    padding: 15px;
+    margin-top: auto;
+}
+
+.grille-ajout-etudiant {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+@media (max-width: 768px) {
+    .grille-ajout-etudiant {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Boutons icône pour tableau */
+.btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 6px;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.btn-icon:hover {
+    background-color: var(--bleu-pale);
+}
+
+.btn-icon-danger {
+    color: var(--orange-fonce);
+}
+
+.btn-icon-danger:hover {
+    background-color: var(--orange-clair);
+}
+
+/* Mode édition du formulaire */
+.formulaire-ajout-etudiant.mode-edition {
+    background: var(--jaune-clair, #fff9e6);
+    border: 2px solid var(--jaune-moyen, #ffc107);
+}
+
+/* --- Horaire (Beta 95.2) --- */
+
+.carte-resume-horaire {
+    background: var(--bleu-pale);
+    border-radius: var(--radius-standard);
+    padding: 15px;
+    margin-bottom: 15px;
+    min-height: 120px;
+}
+
+.carte-resume-horaire .etat-vide-resume {
+    color: var(--gris-texte-pale);
+    font-style: italic;
+    text-align: center;
+    padding: 20px 0;
+}
+
+.resume-horaire-nom {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--bleu-principal);
+    margin-bottom: 10px;
+}
+
+.resume-horaire-details {
+    font-size: 0.85rem;
+    color: var(--gris-texte);
+    margin-bottom: 10px;
+}
+
+.resume-horaire-details div {
+    padding: 2px 0;
+}
+
+.resume-horaire-seances {
+    border-top: 1px solid var(--bleu-leger);
+    padding-top: 10px;
+    margin-top: 10px;
+}
+
+.resume-horaire-seances ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.resume-horaire-seances li {
+    font-size: 0.85rem;
+    padding: 3px 0;
+    color: var(--gris-texte);
+}
+
+.resume-horaire-seances li::before {
+    content: '•';
+    color: var(--bleu-principal);
+    margin-right: 8px;
+}
+
+.section-config-periode {
+    background: var(--gris-clair);
+    border-radius: var(--radius-standard);
+    padding: 12px;
+    margin-top: 15px;
+}
+
+.resume-format-horaire {
+    background: var(--bleu-pale);
+    border-radius: var(--radius-standard);
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+}
+
+.liste-seances-horaire {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.seance-horaire-ligne {
+    display: grid;
+    grid-template-columns: auto 1fr 80px auto 80px;
+    gap: 10px;
+    align-items: center;
+    padding: 10px;
+    background: white;
+    border: 1px solid var(--bleu-leger);
+    border-radius: var(--radius-standard);
+}
+
+.seance-horaire-ligne label {
+    font-weight: 600;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.seance-horaire-ligne select,
+.seance-horaire-ligne input[type="time"] {
+    padding: 6px 8px;
+    font-size: 0.85rem;
+}
+
+@media (max-width: 600px) {
+    .seance-horaire-ligne {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .seance-horaire-ligne label {
+        grid-column: 1 / -1;
+    }
+}
+
+/* --- Groupe-cours (Beta 95.2) --- */
+
+.carte-resume-groupe-cours {
+    background: var(--bleu-pale);
+    border-radius: var(--radius-standard);
+    padding: 15px;
+    margin-bottom: 15px;
+    min-height: 100px;
+}
+
+.carte-resume-groupe-cours .etat-vide-resume {
+    color: var(--gris-texte-pale);
+    font-style: italic;
+    text-align: center;
+    padding: 15px 0;
+}
+
+.resume-gc-nom {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--bleu-principal);
+    margin-bottom: 12px;
+    line-height: 1.3;
+    word-break: break-word;
+}
+
+.resume-gc-details {
+    font-size: 0.85rem;
+    color: var(--gris-texte);
+}
+
+.resume-gc-details div {
+    padding: 3px 0;
+    display: flex;
+    gap: 8px;
+}
+
+.resume-gc-details .label-gc {
+    color: var(--gris-texte-pale);
+    min-width: 70px;
+}
+
+.apercu-nom-groupe-cours {
+    background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%);
+    color: white;
+    border-radius: var(--radius-standard);
+    padding: 15px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.apercu-nom-groupe-cours .label-apercu {
+    display: block;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.8;
+    margin-bottom: 5px;
+}
+
+.apercu-nom-groupe-cours .nom-genere {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 700;
+    word-break: break-word;
+}
+
+.info-enseignant-groupe-cours {
+    background: var(--gris-clair);
+    border-radius: var(--radius-standard);
+    padding: 12px 15px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+}
+
+.info-enseignant-groupe-cours .label-info {
+    color: var(--gris-texte-pale);
+    margin-right: 8px;
+}
+
+.info-enseignant-groupe-cours span:last-child {
+    font-weight: 600;
+    color: var(--bleu-principal);
+}
+
+/* Trimestre actif dans groupe-cours */
+.info-trimestre-groupe-cours {
+    background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%);
+    color: white;
+    border-radius: var(--radius-standard);
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+}
+
+.info-trimestre-groupe-cours .label-info {
+    opacity: 0.8;
+    margin-right: 8px;
+}
+
+.info-trimestre-groupe-cours #v2-gc-trimestreNom {
+    font-weight: 600;
+}
+
+/* Horaire en lecture seule dans groupe-cours */
+.info-horaire-groupe-cours {
+    background: var(--bleu-tres-pale);
+    border: 1px dashed var(--bleu-principal);
+    border-radius: var(--radius-standard);
+    padding: 12px 15px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+}
+
+.info-horaire-groupe-cours .label-info {
+    color: var(--gris-texte-pale);
+    margin-right: 8px;
+}
+
+.info-horaire-groupe-cours #v2-gc-horaireNom {
+    font-weight: 600;
+    color: var(--bleu-fonce);
+}
+
+.info-horaire-groupe-cours.sans-horaire #v2-gc-horaireNom {
+    color: var(--orange-accent);
+    font-style: italic;
+    font-weight: 400;
 }
 
 /* ======================================

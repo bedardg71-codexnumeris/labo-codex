@@ -1,6 +1,6 @@
 /* ===============================
    ENTITÉ : COURS (Informations générales)
-   Beta 96 - Refactoring Trimestre
+   Beta 95.2 - Refactoring Trimestre
 
    Structure de données pour les cours (sans enseignant, ni horaire).
    Les cours sont des entités réutilisables dans les groupe-cours.

@@ -70,13 +70,14 @@ function cleSeancesCompletes(coursId) {
 
 /**
  * Obtient les séances horaire d'un cours spécifique
- * 🆕 BETA 95 : Support multi-cours avec cascade de fallbacks
+ * 🆕 BETA 95.2 : Support entités horaires + groupe-cours actif
  *
  * Ordre de recherche :
  * 1. seancesHoraire_{coursId} (nouvelle clé par cours)
- * 2. {trimestre}_horaireHebdo (clé V2 namespacée)
- * 3. {trimestre}_seancesHoraire (clé legacy namespacée)
- * 4. seancesHoraire (clé legacy non namespacée)
+ * 2. Entité Horaire via groupe-cours actif (Beta 95.2)
+ * 3. {trimestre}_horaireHebdo (clé V2 namespacée)
+ * 4. {trimestre}_seancesHoraire (clé legacy namespacée)
+ * 5. seancesHoraire (clé legacy non namespacée)
  *
  * @param {string|null} coursId - ID du cours (null = cours actif)
  * @returns {Array} - Séances horaire du cours
@@ -89,7 +90,22 @@ function obtenirSeancesHoraire(coursId) {
         return seances;
     }
 
-    // 2. Fallback sur horaireHebdo (format V2)
+    // 2. 🆕 BETA 95.2 : Essayer via groupe-cours actif → entité Horaire
+    try {
+        const groupeCoursActif = db.getSync('groupeCoursActif', null);
+        if (groupeCoursActif && groupeCoursActif.horaireId) {
+            // Lire l'horaire depuis l'entité
+            const horaires = db.getSync('horaires', []);
+            const horaire = horaires.find(h => h.id === groupeCoursActif.horaireId);
+            if (horaire && horaire.seances && horaire.seances.length > 0) {
+                return horaire.seances;
+            }
+        }
+    } catch (e) {
+        console.warn('[Horaire] Fallback entités échoué:', e);
+    }
+
+    // 3. Fallback sur horaireHebdo (format V2)
     if (typeof cle === 'function') {
         seances = db.getSync(cle('horaireHebdo'), null);
         if (seances && seances.length > 0) {
@@ -97,7 +113,7 @@ function obtenirSeancesHoraire(coursId) {
         }
     }
 
-    // 3. Fallback sur seancesHoraire namespacé par trimestre
+    // 4. Fallback sur seancesHoraire namespacé par trimestre
     if (typeof cle === 'function') {
         seances = db.getSync(cle('seancesHoraire'), null);
         if (seances && seances.length > 0) {
@@ -105,7 +121,7 @@ function obtenirSeancesHoraire(coursId) {
         }
     }
 
-    // 4. Fallback sur clé legacy non namespacée
+    // 5. Fallback sur clé legacy non namespacée
     seances = db.getSync('seancesHoraire', []);
     return seances || [];
 }

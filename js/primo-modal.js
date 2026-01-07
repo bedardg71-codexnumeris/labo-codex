@@ -1324,7 +1324,7 @@ async function terminerConfiguration() {
 
         // Afficher notification de succès
         if (typeof afficherNotificationSucces === 'function') {
-            // ✅ AJOUT (Beta 96) : Message plus explicite selon le parcours
+            // ✅ AJOUT (Beta 95.2) : Message plus explicite selon le parcours
             let messageType, messageDetails;
             if (estParcoursCourt) {
                 messageType = 'Configuration de base';

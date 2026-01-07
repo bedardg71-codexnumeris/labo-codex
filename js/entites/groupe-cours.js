@@ -1,6 +1,6 @@
 /* ===============================
    ENTITÉ : GROUPE-COURS (Assemblage)
-   Beta 96 - Refactoring Trimestre
+   Beta 95.2 - Refactoring Trimestre
 
    Assemblage des entités Cours, Enseignant, Horaire et Pratique
    en un groupe-cours pour un trimestre donné.
@@ -410,6 +410,7 @@ async function obtenirTousLesGroupesCours() {
 /**
  * Met à jour infoCours à partir du groupe-cours actif
  * Utile pour la rétrocompatibilité pendant la transition
+ * 🆕 BETA 95.2 : Synchronise aussi les séances horaire et groupeCoursActif
  * @param {string} trimestreId - ID du trimestre
  */
 async function synchroniserInfoCours(trimestreId) {
@@ -444,6 +445,30 @@ async function synchroniserInfoCours(trimestreId) {
     };
 
     await db.set('infoCours', infoCours);
+
+    // 🆕 BETA 95.2 : Stocker groupeCoursActif pour obtenirSeancesHoraire()
+    await db.set('groupeCoursActif', {
+        id: gcComplet.id,
+        trimestreId: gcComplet.trimestreId,
+        coursId: gcComplet.coursId,
+        enseignantId: gcComplet.enseignantId,
+        horaireId: gcComplet.horaireId,
+        groupe: gcComplet.groupe
+    });
+
+    // 🆕 BETA 95.2 : Synchroniser les séances horaire pour rétrocompatibilité
+    // Les modules saisie-presences.js et calendrier-vue.js lisent seancesHoraire
+    if (gcComplet.horaire?.seances && gcComplet.horaire.seances.length > 0) {
+        // Clé namespacée par trimestre
+        const cleSeances = typeof cle === 'function' ? cle('seancesHoraire') : `${trimestreId}_seancesHoraire`;
+        await db.set(cleSeances, gcComplet.horaire.seances);
+
+        // Également la clé legacy non namespacée (pour certains modules)
+        await db.set('seancesHoraire', gcComplet.horaire.seances);
+
+        console.log('[GroupeCours] Séances horaire synchronisées:', gcComplet.horaire.seances.length, 'séances');
+    }
+
     console.log('[GroupeCours] infoCours synchronisé pour rétrocompatibilité');
 }
 

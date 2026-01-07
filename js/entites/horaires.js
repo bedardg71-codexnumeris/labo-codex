@@ -1,6 +1,6 @@
 /* ===============================
    ENTITÉ : HORAIRE
-   Beta 96 - Refactoring Trimestre
+   Beta 95.2 - Refactoring Trimestre
 
    Structure de données pour les horaires hebdomadaires.
    Les horaires sont des entités réutilisables dans les groupe-cours.

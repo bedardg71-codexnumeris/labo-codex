@@ -1,6 +1,6 @@
 /* ===============================
    ENTITÉS UI - Interface utilisateur
-   Beta 96 - Refactoring Trimestre
+   Beta 95.2 - Refactoring Trimestre
 
    Gestion de l'interface pour les entités :
    - Cours (simplifié)
@@ -33,8 +33,144 @@ async function initialiserEntitesUI() {
     await peuplerDropdownEnseignants();
     await peuplerDropdownHoraires();
     await peuplerDropdownGroupeCours();
+    await peuplerDropdownGroupeCoursActif();
 
     console.log('[Entités UI] Initialisé');
+}
+
+// ============================================
+// GROUPE-COURS ACTIF - DROPDOWN GLOBAL
+// ============================================
+
+/**
+ * Peuple le dropdown "Groupe-cours actif" dans l'entête
+ * 🆕 BETA 95.2
+ */
+async function peuplerDropdownGroupeCoursActif() {
+    const selectHeader = document.getElementById('selectGroupeCoursHeader');
+
+    if (!selectHeader) return;
+
+    // Obtenir le trimestre actif
+    const trimestres = db.getSync('trimestres', []);
+    const trimestreActif = trimestres.find(t => t.actif);
+
+    if (!trimestreActif) {
+        selectHeader.innerHTML = '<option value="">-- Sélectionnez un trimestre --</option>';
+        return;
+    }
+
+    // Obtenir les groupe-cours du trimestre
+    const cleGC = `${trimestreActif.id.toLowerCase()}_groupesCours`;
+    const groupesCours = db.getSync(cleGC, []);
+
+    let options = '<option value="">-- Sélectionner un groupe-cours --</option>';
+
+    if (groupesCours.length > 0) {
+        // Hydrater les groupe-cours pour l'affichage
+        const cours = db.getSync('cours', []);
+        const enseignants = db.getSync('enseignants', []);
+        const horaires = db.getSync('horaires', []);
+
+        // Trouver le groupe-cours actif
+        const gcActif = db.getSync('groupeCoursActif', null);
+
+        groupesCours.forEach(gc => {
+            const coursInfo = cours.find(c => c.id === gc.coursId) || {};
+            const ens = enseignants.find(e => e.id === gc.enseignantId) || {};
+            const hor = horaires.find(h => h.id === gc.horaireId) || {};
+
+            const sigle = coursInfo.codeCours || '???';
+            const groupe = gc.groupe || '?';
+            const nomEns = ens.prenom ? `${ens.prenom} ${(ens.nom || '').charAt(0)}.` : '';
+            const nomHor = hor.nom || '';
+
+            let label = `${sigle} gr.${groupe}`;
+            if (nomEns) label += ` - ${nomEns}`;
+            if (nomHor) label += ` - ${nomHor}`;
+
+            const selected = gcActif && gc.id === gcActif.id ? ' selected' : '';
+            options += `<option value="${gc.id}"${selected}>${label}</option>`;
+        });
+    }
+
+    // Mettre à jour le dropdown header
+    selectHeader.innerHTML = options;
+
+    console.log('[Entités UI] Dropdown groupe-cours actif peuplé:', groupesCours.length, 'options');
+}
+
+/**
+ * Change le groupe-cours actif depuis le header
+ * 🆕 BETA 95.2
+ */
+async function changerGroupeCoursDepuisHeader(groupeCoursId) {
+    await changerGroupeCoursActifV2(groupeCoursId);
+}
+
+/**
+ * Change le groupe-cours actif depuis le dropdown
+ * 🆕 BETA 95.2
+ */
+async function changerGroupeCoursActifV2(groupeCoursId) {
+    if (!groupeCoursId) {
+        // Désélectionner le groupe-cours actif
+        db.setSync('groupeCoursActif', null);
+        console.log('[Entités UI] Groupe-cours désélectionné');
+        return;
+    }
+
+    console.log('[Entités UI] Changement groupe-cours actif vers:', groupeCoursId);
+
+    // Obtenir le trimestre actif
+    const trimestres = db.getSync('trimestres', []);
+    const trimestreActif = trimestres.find(t => t.actif);
+    if (!trimestreActif) return;
+
+    // Obtenir le groupe-cours
+    const cleGC = `${trimestreActif.id.toLowerCase()}_groupesCours`;
+    const groupesCours = db.getSync(cleGC, []);
+    const gc = groupesCours.find(g => g.id === groupeCoursId);
+
+    if (!gc) {
+        console.warn('[Entités UI] Groupe-cours non trouvé:', groupeCoursId);
+        return;
+    }
+
+    // Mettre à jour le flag actif
+    groupesCours.forEach(g => g.actif = (g.id === groupeCoursId));
+    db.setSync(cleGC, groupesCours);
+
+    // Stocker groupeCoursActif
+    db.setSync('groupeCoursActif', {
+        id: gc.id,
+        trimestreId: gc.trimestreId || trimestreActif.id,
+        coursId: gc.coursId,
+        enseignantId: gc.enseignantId,
+        horaireId: gc.horaireId,
+        groupe: gc.groupe
+    });
+
+    // Synchroniser vers infoCours pour compatibilité
+    if (typeof GroupeCoursEntite !== 'undefined' && typeof GroupeCoursEntite.synchroniserInfoCours === 'function') {
+        await GroupeCoursEntite.synchroniserInfoCours(groupeCoursId);
+    }
+
+    // Synchroniser le dropdown header
+    const selectHeader = document.getElementById('selectGroupeCoursHeader');
+    if (selectHeader) selectHeader.value = groupeCoursId || '';
+
+    // Rafraîchir l'en-tête contextuel
+    if (typeof mettreAJourContexteEntete === 'function') {
+        mettreAJourContexteEntete();
+    }
+
+    // Notification
+    if (typeof afficherNotificationSucces === 'function') {
+        afficherNotificationSucces('Groupe-cours activé');
+    }
+
+    console.log('[Entités UI] Groupe-cours activé:', gc.id);
 }
 
 // Initialisation au chargement du DOM
@@ -98,7 +234,7 @@ function changerEnseignantSelectionneV2(enseignantId) {
                 <div><strong>Courriel :</strong> ${ens.courriel || '-'}</div>
                 <div><strong>Institution :</strong> ${ens.institution || '-'}</div>
                 <div><strong>Département :</strong> ${ens.departement || '-'}</div>
-                <div><strong>Niveau :</strong> ${ens.niveau || '-'}</div>
+                <div><strong>Discipline :</strong> ${ens.discipline || '-'}</div>
                 <div><strong>Site web :</strong> ${ens.siteWeb ? `<a href="${ens.siteWeb}" target="_blank">${ens.siteWeb}</a>` : '-'}</div>
             </div>
         `;
@@ -121,7 +257,7 @@ function afficherFormEnseignantV2() {
     document.getElementById('v2-ens-courriel').value = '';
     document.getElementById('v2-ens-institution').value = '';
     document.getElementById('v2-ens-departement').value = '';
-    document.getElementById('v2-ens-niveau').value = 'Collégial';
+    document.getElementById('v2-ens-discipline').value = '';
     document.getElementById('v2-ens-siteWeb').value = '';
 
     // Mettre à jour le titre et le bouton
@@ -158,7 +294,7 @@ async function modifierEnseignantSelectionneV2() {
     document.getElementById('v2-ens-courriel').value = ens.courriel || '';
     document.getElementById('v2-ens-institution').value = ens.institution || '';
     document.getElementById('v2-ens-departement').value = ens.departement || '';
-    document.getElementById('v2-ens-niveau').value = ens.niveau || 'Collégial';
+    document.getElementById('v2-ens-discipline').value = ens.discipline || '';
     document.getElementById('v2-ens-siteWeb').value = ens.siteWeb || '';
 
     // Mettre à jour le titre et le bouton
@@ -189,7 +325,7 @@ async function sauvegarderEnseignantV2() {
         courriel: document.getElementById('v2-ens-courriel').value.trim(),
         institution: document.getElementById('v2-ens-institution').value.trim(),
         departement: document.getElementById('v2-ens-departement').value.trim(),
-        niveau: document.getElementById('v2-ens-niveau').value,
+        discipline: document.getElementById('v2-ens-discipline').value.trim(),
         siteWeb: document.getElementById('v2-ens-siteWeb').value.trim()
     };
 
@@ -308,19 +444,16 @@ function afficherFormHoraireV2() {
 
     // Réinitialiser le formulaire
     document.getElementById('v2-hor-nom').value = '';
-    document.getElementById('v2-hor-format').value = '2x2';
     document.getElementById('v2-hor-local').value = '';
+    document.getElementById('v2-hor-nbSeances').value = '2';
+    document.getElementById('v2-hor-periodesParSeance').value = '2';
 
     // Mettre à jour le titre et le bouton
     document.getElementById('v2-titreFormHoraire').textContent = 'Nouvel horaire';
     document.getElementById('v2-btnTexteHoraire').textContent = 'Ajouter';
 
-    // Afficher 2 séances par défaut pour format 2x2
-    seancesTemp = [
-        { jour: 'lundi', heureDebut: '10:00', heureFin: '12:00' },
-        { jour: 'mercredi', heureDebut: '10:00', heureFin: '12:00' }
-    ];
-    afficherSeancesV2();
+    // Générer les séances selon le format par défaut (2 séances)
+    mettreAJourSeancesHoraireV2();
 
     // Afficher le formulaire
     document.getElementById('v2-formulaireHoraire').style.display = 'block';
@@ -349,11 +482,17 @@ async function modifierHoraireSelectionneV2() {
 
     // Remplir le formulaire
     document.getElementById('v2-hor-nom').value = hor.nom || '';
-    document.getElementById('v2-hor-format').value = hor.formatHoraire || '2x2';
     document.getElementById('v2-hor-local').value = hor.local || '';
 
-    // Afficher les séances
+    // Remplir les champs de format (déduire depuis l'ancien format ou les séances)
+    const nbSeances = hor.nbSeances || hor.seances?.length || 2;
+    const periodesParSeance = hor.periodesParSeance || 2;
+    document.getElementById('v2-hor-nbSeances').value = String(nbSeances);
+    document.getElementById('v2-hor-periodesParSeance').value = String(periodesParSeance);
+
+    // Afficher les séances et mettre à jour le résumé
     afficherSeancesV2();
+    mettreAJourResumeFormatV2();
 
     // Mettre à jour le titre et le bouton
     document.getElementById('v2-titreFormHoraire').textContent = 'Modifier l\'horaire';
@@ -366,13 +505,14 @@ async function modifierHoraireSelectionneV2() {
 
 /**
  * Affiche les séances dans le formulaire
+ * 🆕 BETA 95.2 : Sans bouton supprimer (nombre fixé par dropdown)
  */
 function afficherSeancesV2() {
     const container = document.getElementById('v2-hor-seances');
     if (!container) return;
 
     if (seancesTemp.length === 0) {
-        container.innerHTML = '<p class="text-muted">Aucune séance. Cliquez sur "+ Ajouter une séance".</p>';
+        container.innerHTML = '<p class="text-muted">Sélectionnez le nombre de séances ci-dessus.</p>';
         return;
     }
 
@@ -382,23 +522,15 @@ function afficherSeancesV2() {
 
     container.innerHTML = seancesTemp.map((s, i) => `
         <div class="seance-item" style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px; padding: 10px; background: var(--bleu-tres-pale); border-radius: 5px;">
+            <span style="font-weight: 500; min-width: 70px;">Séance ${i + 1}</span>
             <select class="controle-form controle-form-compact" style="width: 140px;" onchange="modifierSeanceV2(${i}, 'jour', this.value)">
                 ${joursOptions.replace(`value="${s.jour}"`, `value="${s.jour}" selected`)}
             </select>
             <input type="time" class="controle-form controle-form-compact" style="width: 100px;" value="${s.heureDebut || '10:00'}" onchange="modifierSeanceV2(${i}, 'heureDebut', this.value)">
             <span>à</span>
             <input type="time" class="controle-form controle-form-compact" style="width: 100px;" value="${s.heureFin || '12:00'}" onchange="modifierSeanceV2(${i}, 'heureFin', this.value)">
-            <button class="btn btn-annuler btn-sm" onclick="supprimerSeanceV2(${i})" title="Supprimer cette séance">✕</button>
         </div>
     `).join('');
-}
-
-/**
- * Ajoute une séance
- */
-function ajouterSeanceV2() {
-    seancesTemp.push({ jour: 'lundi', heureDebut: '10:00', heureFin: '12:00' });
-    afficherSeancesV2();
 }
 
 /**
@@ -411,26 +543,45 @@ function modifierSeanceV2(index, prop, valeur) {
 }
 
 /**
- * Supprime une séance
+ * Met à jour les séances selon le nombre sélectionné
+ * 🆕 BETA 95.2 : Nouvelle logique basée sur nb séances + périodes/séance
  */
-function supprimerSeanceV2(index) {
-    seancesTemp.splice(index, 1);
+function mettreAJourSeancesHoraireV2() {
+    const nbSeances = parseInt(document.getElementById('v2-hor-nbSeances').value) || 2;
+    const periodesParSeance = parseInt(document.getElementById('v2-hor-periodesParSeance').value) || 2;
+
+    // Jours par défaut pour les séances
+    const joursDefaut = ['lundi', 'mercredi', 'vendredi', 'mardi', 'jeudi'];
+
+    // Ajuster le nombre de séances
+    while (seancesTemp.length < nbSeances) {
+        const jourIndex = seancesTemp.length % joursDefaut.length;
+        seancesTemp.push({
+            jour: joursDefaut[jourIndex],
+            heureDebut: '10:00',
+            heureFin: '12:00'
+        });
+    }
+    while (seancesTemp.length > nbSeances) {
+        seancesTemp.pop();
+    }
+
+    // Mettre à jour l'affichage
     afficherSeancesV2();
+    mettreAJourResumeFormatV2();
 }
 
 /**
- * Met à jour le format horaire (ajuste le nombre de séances suggérées)
+ * Met à jour le résumé du format horaire
  */
-function mettreAJourFormatHoraireV2() {
-    const format = document.getElementById('v2-hor-format').value;
-    const formatInfo = HorairesEntite.FORMATS.find(f => f.id === format);
+function mettreAJourResumeFormatV2() {
+    const nbSeances = parseInt(document.getElementById('v2-hor-nbSeances').value) || 2;
+    const periodesParSeance = parseInt(document.getElementById('v2-hor-periodesParSeance').value) || 2;
+    const totalPeriodes = nbSeances * periodesParSeance;
 
-    // Si on a moins de séances que le format suggère, ajouter
-    if (formatInfo && formatInfo.seances > seancesTemp.length) {
-        while (seancesTemp.length < formatInfo.seances) {
-            seancesTemp.push({ jour: 'lundi', heureDebut: '10:00', heureFin: '12:00' });
-        }
-        afficherSeancesV2();
+    const resumeElem = document.getElementById('v2-hor-formatResume');
+    if (resumeElem) {
+        resumeElem.textContent = `${nbSeances} séance${nbSeances > 1 ? 's' : ''} × ${periodesParSeance} période${periodesParSeance > 1 ? 's' : ''} = ${totalPeriodes} périodes/semaine`;
     }
 }
 
@@ -446,11 +597,17 @@ function annulerFormHoraireV2() {
 
 /**
  * Sauvegarde l'horaire (création ou modification)
+ * 🆕 BETA 95.2 : Utilise nbSeances et periodesParSeance
  */
 async function sauvegarderHoraireV2() {
+    const nbSeances = parseInt(document.getElementById('v2-hor-nbSeances').value) || 2;
+    const periodesParSeance = parseInt(document.getElementById('v2-hor-periodesParSeance').value) || 2;
+
     const donnees = {
         nom: document.getElementById('v2-hor-nom').value.trim(),
-        formatHoraire: document.getElementById('v2-hor-format').value,
+        nbSeances: nbSeances,
+        periodesParSeance: periodesParSeance,
+        formatHoraire: `${nbSeances}x${periodesParSeance}`,  // Format calculé pour compatibilité
         local: document.getElementById('v2-hor-local').value.trim(),
         seances: seancesTemp
     };
@@ -501,16 +658,31 @@ async function sauvegarderHoraireV2() {
 
 /**
  * Peuple les dropdowns du formulaire groupe-cours
+ * 🆕 BETA 95.2 : Inclut les cours legacy et les pratiques de bibliothèque
  */
 async function peuplerDropdownGroupeCours() {
-    // Dropdown Cours
+    // Dropdown Cours - Inclure aussi les cours legacy (listeCours)
     const selectCours = document.getElementById('v2-gc-cours');
     if (selectCours) {
-        const cours = await CoursEntite.obtenirTous();
         let options = '<option value="">-- Sélectionner un cours --</option>';
-        cours.forEach(c => {
+
+        // 1. Nouveaux cours (entité)
+        const coursEntites = await CoursEntite.obtenirTous();
+        coursEntites.forEach(c => {
             options += `<option value="${c.id}">${CoursEntite.genererLibelle(c)}</option>`;
         });
+
+        // 2. Cours legacy (listeCours) - pour rétrocompatibilité
+        const coursLegacy = db.getSync('listeCours', []);
+        coursLegacy.forEach(c => {
+            // Ne pas dupliquer si déjà présent comme entité
+            const dejaPresent = coursEntites.some(ce => ce.codeCours === c.sigle);
+            if (!dejaPresent) {
+                const libelle = c.sigle ? `${c.sigle} - ${c.nomCours || 'Sans nom'}` : (c.nomCours || 'Cours sans sigle');
+                options += `<option value="legacy_${c.id || c.sigle}">${libelle} (legacy)</option>`;
+            }
+        });
+
         selectCours.innerHTML = options;
     }
 
@@ -536,15 +708,73 @@ async function peuplerDropdownGroupeCours() {
         selectHor.innerHTML = options;
     }
 
-    // Dropdown Pratique de notation
+    // 🆕 BETA 95.2 : Dropdown Groupe d'étudiants
+    const selectGroupe = document.getElementById('v2-gc-groupe');
+    if (selectGroupe) {
+        let options = '<option value="">-- Sélectionner un groupe --</option>';
+
+        // Lire les étudiants depuis groupeEtudiants (clé namespacée)
+        const cleGroupeEtudiants = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
+        const listeEtudiants = db.getSync(cleGroupeEtudiants, []);
+
+        // Extraire les groupes uniques depuis les étudiants
+        const groupesUniques = new Map();
+        listeEtudiants.forEach(e => {
+            const groupe = e.groupe || e.numeroGroupe || '00001';
+            if (!groupesUniques.has(groupe)) {
+                groupesUniques.set(groupe, 0);
+            }
+            groupesUniques.set(groupe, groupesUniques.get(groupe) + 1);
+        });
+
+        // Trier les groupes par numéro
+        const groupesTries = Array.from(groupesUniques.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+
+        if (groupesTries.length > 0) {
+            groupesTries.forEach(([numero, count]) => {
+                const label = `Groupe ${numero} (${count} étudiants)`;
+                options += `<option value="${numero}">${label}</option>`;
+            });
+        }
+
+        selectGroupe.innerHTML = options;
+        console.log('[Entités UI] Groupes d\'étudiants trouvés:', groupesTries.length, 'depuis clé:', cleGroupeEtudiants);
+    }
+
+    // Dropdown Pratique de notation - Utiliser la bibliothèque de pratiques
     const selectPratique = document.getElementById('v2-gc-pratique');
     if (selectPratique) {
-        // Utiliser les pratiques existantes du système
-        const pratiques = window.pratiquesDisponibles || [];
         let options = '<option value="">-- Sélectionner une pratique --</option>';
-        pratiques.forEach(p => {
-            options += `<option value="${p.id}">${p.nom || p.id}</option>`;
-        });
+
+        // 1. Essayer d'utiliser la bibliothèque de pratiques (async)
+        if (typeof obtenirToutesLesPratiquesBibliotheque === 'function') {
+            try {
+                const pratiques = await obtenirToutesLesPratiquesBibliotheque();
+                pratiques.forEach(p => {
+                    const nom = p.nom || p.typePratique || p.id;
+                    options += `<option value="${p.id}">${nom}</option>`;
+                });
+            } catch (e) {
+                console.warn('[Entités UI] Erreur bibliothèque pratiques:', e);
+            }
+        }
+
+        // 2. Fallback: lire pratiquesNotation du localStorage
+        if (options === '<option value="">-- Sélectionner une pratique --</option>') {
+            const pratiquesLocal = db.getSync('pratiquesNotation', []);
+            pratiquesLocal.forEach(p => {
+                const nom = p.nom || p.typePratique || p.id;
+                options += `<option value="${p.id}">${nom}</option>`;
+            });
+        }
+
+        // 3. Si toujours vide, ajouter des options par défaut
+        if (options === '<option value="">-- Sélectionner une pratique --</option>') {
+            options += '<option value="sommative_standard">Sommative standard</option>';
+            options += '<option value="formative">Formative</option>';
+            options += '<option value="auto_evaluation">Auto-évaluation</option>';
+        }
+
         selectPratique.innerHTML = options;
     }
 
@@ -618,14 +848,13 @@ function afficherFormGroupeCoursV2() {
         toggleAccordeonV2(accordeon.querySelector('.accordeon-header'));
     }
 
-    // Écouter les changements pour l'aperçu
-    ['v2-gc-cours', 'v2-gc-enseignant', 'v2-gc-groupe', 'v2-gc-horaire'].forEach(id => {
+    // Écouter les changements pour l'aperçu (tous sont des selects maintenant)
+    ['v2-gc-cours', 'v2-gc-enseignant', 'v2-gc-groupe', 'v2-gc-horaire', 'v2-gc-pratique'].forEach(id => {
         const el = document.getElementById(id);
         if (el) {
             el.addEventListener('change', mettreAJourApercuGroupeCours);
         }
     });
-    document.getElementById('v2-gc-groupe').addEventListener('input', mettreAJourApercuGroupeCours);
 }
 
 /**
@@ -707,6 +936,9 @@ async function sauvegarderGroupeCoursV2() {
 
         // Rafraîchir la liste
         await afficherListeGroupeCoursV2();
+
+        // 🆕 BETA 95.2 : Rafraîchir le dropdown groupe-cours actif
+        await peuplerDropdownGroupeCoursActif();
 
         // Fermer le formulaire
         annulerFormGroupeCoursV2();
@@ -794,7 +1026,38 @@ window.EntitesUI = {
     // Groupe-cours
     peuplerDropdownGroupeCours,
     afficherListeGroupeCours: afficherListeGroupeCoursV2,
-    afficherFormGroupeCours: afficherFormGroupeCoursV2
+    afficherFormGroupeCours: afficherFormGroupeCoursV2,
+
+    // 🆕 BETA 95.2 : Groupe-cours actif
+    peuplerDropdownGroupeCoursActif,
+    changerGroupeCoursActif: changerGroupeCoursActifV2
 };
+
+// Exposer globalement pour les handlers HTML
+window.peuplerDropdownGroupeCoursActif = peuplerDropdownGroupeCoursActif;
+window.changerGroupeCoursActifV2 = changerGroupeCoursActifV2;
+window.changerGroupeCoursDepuisHeader = changerGroupeCoursDepuisHeader;
+
+// Enseignant - fonctions pour les onclick HTML
+window.afficherFormEnseignantV2 = afficherFormEnseignantV2;
+window.changerEnseignantSelectionneV2 = changerEnseignantSelectionneV2;
+window.modifierEnseignantSelectionneV2 = modifierEnseignantSelectionneV2;
+window.annulerFormEnseignantV2 = annulerFormEnseignantV2;
+window.sauvegarderEnseignantV2 = sauvegarderEnseignantV2;
+
+// Horaire - fonctions pour les onclick HTML
+window.afficherFormHoraireV2 = afficherFormHoraireV2;
+window.changerHoraireSelectionneV2 = changerHoraireSelectionneV2;
+window.modifierHoraireSelectionneV2 = modifierHoraireSelectionneV2;
+window.annulerFormHoraireV2 = annulerFormHoraireV2;
+window.sauvegarderHoraireV2 = sauvegarderHoraireV2;
+
+// Groupe-cours - fonctions pour les onclick HTML
+window.afficherFormGroupeCoursV2 = afficherFormGroupeCoursV2;
+window.annulerFormGroupeCoursV2 = annulerFormGroupeCoursV2;
+window.sauvegarderGroupeCoursV2 = sauvegarderGroupeCoursV2;
+window.activerGroupeCoursV2 = activerGroupeCoursV2;
+window.supprimerGroupeCoursV2 = supprimerGroupeCoursV2;
+window.mettreAJourApercuGroupeCours = mettreAJourApercuGroupeCours;
 
 console.log('[Entités UI] Module chargé');

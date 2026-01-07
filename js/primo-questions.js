@@ -1057,7 +1057,7 @@ const QUESTIONS_PRIMO = [
     {
         id: 'horaire-heure1-debut',
         texte: 'Séance 1 - À quelle heure commence-t-elle ?',
-        type: 'time',  // ✅ MODIF (Beta 96 - Souhait Bruno) : Permettre heures non piles
+        type: 'time',  // ✅ MODIF (Beta 95.2 - Souhait Bruno) : Permettre heures non piles
         placeholder: '08:00',
         champsCibles: [
             { cle: 'horaireHebdomadaire', champ: 'heure1Debut' }
@@ -1070,7 +1070,7 @@ const QUESTIONS_PRIMO = [
     {
         id: 'horaire-heure1-fin',
         texte: 'Séance 1 - À quelle heure finit-elle ?',
-        type: 'time',  // ✅ MODIF (Beta 96 - Souhait Bruno) : Permettre heures non piles
+        type: 'time',  // ✅ MODIF (Beta 95.2 - Souhait Bruno) : Permettre heures non piles
         placeholder: '12:00',
         champsCibles: [
             { cle: 'horaireHebdomadaire', champ: 'heure1Fin' }
@@ -1108,7 +1108,7 @@ const QUESTIONS_PRIMO = [
     {
         id: 'horaire-heure2-debut',
         texte: 'Séance 2 - À quelle heure commence-t-elle ?',
-        type: 'time',  // ✅ MODIF (Beta 96 - Souhait Bruno) : Permettre heures non piles
+        type: 'time',  // ✅ MODIF (Beta 95.2 - Souhait Bruno) : Permettre heures non piles
         placeholder: '13:00',
         champsCibles: [
             { cle: 'horaireHebdomadaire', champ: 'heure2Debut' }
@@ -1125,7 +1125,7 @@ const QUESTIONS_PRIMO = [
     {
         id: 'horaire-heure2-fin',
         texte: 'Séance 2 - À quelle heure finit-elle ?',
-        type: 'time',  // ✅ MODIF (Beta 96 - Souhait Bruno) : Permettre heures non piles
+        type: 'time',  // ✅ MODIF (Beta 95.2 - Souhait Bruno) : Permettre heures non piles
         placeholder: '16:00',
         champsCibles: [
             { cle: 'horaireHebdomadaire', champ: 'heure2Fin' }
@@ -1166,7 +1166,7 @@ const QUESTIONS_PRIMO = [
     {
         id: 'horaire-heure3-debut',
         texte: 'Séance 3 - À quelle heure commence-t-elle ?',
-        type: 'time',  // ✅ MODIF (Beta 96 - Souhait Bruno) : Permettre heures non piles
+        type: 'time',  // ✅ MODIF (Beta 95.2 - Souhait Bruno) : Permettre heures non piles
         placeholder: '14:00',
         champsCibles: [
             { cle: 'horaireHebdomadaire', champ: 'heure3Debut' }
@@ -1182,7 +1182,7 @@ const QUESTIONS_PRIMO = [
     {
         id: 'horaire-heure3-fin',
         texte: 'Séance 3 - À quelle heure finit-elle ?',
-        type: 'time',  // ✅ MODIF (Beta 96 - Souhait Bruno) : Permettre heures non piles
+        type: 'time',  // ✅ MODIF (Beta 95.2 - Souhait Bruno) : Permettre heures non piles
         placeholder: '17:00',
         champsCibles: [
             { cle: 'horaireHebdomadaire', champ: 'heure3Fin' }

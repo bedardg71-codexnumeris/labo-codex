@@ -6,7 +6,7 @@
     <title>Système de suivi Beta 95.1 - Hiver 2026</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=2026010603">
+    <link rel="stylesheet" href="styles.css?v=2026010607">
 
     <style>
         /* Les styles embarqués restent ici */
@@ -3179,11 +3179,11 @@
                 <button onclick="fermerModalNouveautes()" class="modal-fermer">✕</button>
 
                 <!-- Titre principal -->
-                <h2 class="modal-titre">Bienvenue dans la Beta 96</h2>
+                <h2 class="modal-titre">Bienvenue dans la Beta 95.2</h2>
 
                 <!-- Encadré testeurs (liste à puces) -->
                 <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: 4px; padding: 12px 16px; margin-bottom: 1.5rem;">
-                    <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Nouveautés Beta 96 — Architecture modulaire :</strong>
+                    <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Nouveautés Beta 95.2 — Architecture modulaire :</strong>
                     <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
                         <li><strong>Toggles séparés</strong> : Cours, Enseignant·e, Horaire et Groupe-cours sont maintenant des entités indépendantes</li>
                         <li><strong>Profil auteur</strong> : Tes informations enseignant·e servent de source unique pour les métadonnées CC</li>
@@ -3196,9 +3196,9 @@
                     </p>
                 </div>
 
-                <!-- Nouveautés Beta 96 -->
+                <!-- Nouveautés Beta 95.2 -->
                 <div class="modal-section">
-                    <h3>Nouveautés de la Beta 96</h3>
+                    <h3>Nouveautés de la Beta 95.2</h3>
                     <p>Cette version <strong>sépare les entités</strong> pour une meilleure réutilisation : un cours (601-101-MQ) peut maintenant être enseigné par différents enseignant·es, avec des horaires différents, sans dupliquer les informations.</p>
                     <p style="margin-top: 0.8rem;">Le <strong>profil auteur</strong> de l'enseignant·e devient la source unique pour les métadonnées Creative Commons de toutes tes ressources partagées.</p>
                     <p style="margin-top: 0.8rem;">L'<strong>assemblage groupe-cours</strong> te permet de combiner les entités via des menus déroulants, simplifiant la gestion de plusieurs groupes.</p>
@@ -3242,7 +3242,7 @@
 
                     <p>Depuis la brève présentation de l'application aux membres de la communauté PAN en novembre, j'ai corrigé vraiment beaucoup de choses. Mais j'ai très peu de retours sur l'utilisation réelle : est-ce que les pratiques de notation fonctionnent pour toi ? Les fonctionnalités de suivi répondent-elles à tes besoins ?</p>
 
-                    <p style="margin-top: 1rem;">Je ne peux pas deviner ta façon d'enseigner ni celle des autres collègues. Je ne connais ni tes contraintes particulières ni les frictions que tu peux rencontrer. J'estime la Beta 96 assez stable pour un usage quotidien. C'est le moment idéal pour me dire ce qui fonctionne, ce qui coince, ce qui manque.</p>
+                    <p style="margin-top: 1rem;">Je ne peux pas deviner ta façon d'enseigner ni celle des autres collègues. Je ne connais ni tes contraintes particulières ni les frictions que tu peux rencontrer. J'estime la Beta 95.2 assez stable pour un usage quotidien. C'est le moment idéal pour me dire ce qui fonctionne, ce qui coince, ce qui manque.</p>
                     <p style="margin-top: 1rem;">L'objectif, en bout de ligne, c'est d'avoir un outil qui ressemble à nos pratiques et qui supporte les enseignant·es qui veulent renouveler leur pédagogie et leur pratique de notation. Mais un tel projet ne peut être réalisé par un seul individu. Il doit mobiliser notre intelligence collective.</p>
 
                     <p style="margin-top: 1rem;">Utilise le formulaire dans <strong>AIDE → Signaler un bug</strong>, ou partage-moi simplement :</p>
@@ -3268,6 +3268,16 @@
                         Fermer
                     </button>
                 </div>
+            </div>
+        </div>
+
+        <!-- SÉLECTEUR GROUPE-COURS ACTIF (Beta 95.2) -->
+        <div id="bandeau-groupe-cours" class="bandeau-groupe-cours">
+            <div class="bandeau-groupe-cours-contenu">
+                <label>Groupe-cours actif :</label>
+                <select id="selectGroupeCoursHeader" class="dropdown-groupe-cours-header" onchange="changerGroupeCoursDepuisHeader(this.value)">
+                    <option value="">-- Aucun groupe-cours --</option>
+                </select>
             </div>
         </div>
 
@@ -8393,27 +8403,273 @@
                 <!-- fin sous-section import-export (legacy) -->
 
                 <!-- ===================================
-                     NOUVEAUX ONGLETS BETA 95
+                     NOUVEAUX ONGLETS BETA 95.2
                      =================================== -->
 
-                <!-- Onglet 1: Trimestre (Beta 95) -->
+                <!-- Onglet 1: Trimestre (Beta 95.2 - EN RECONSTRUCTION) -->
                 <div id="reglages-trimestre" class="sous-section">
                     <h2>Trimestre</h2>
+
+                    <!-- AVERTISSEMENT RECONSTRUCTION -->
+                    <div class="alerte alerte-attention" style="margin-bottom: 20px;">
+                        <strong>🚧 Section en reconstruction</strong><br>
+                        Cette section est en cours de refactorisation vers une architecture modulaire (groupe-cours).
+                        Certaines fonctionnalités peuvent être incomplètes ou instables.
+                    </div>
+
                     <p class="text-muted">
                         Configuration du cadre temporel et organisationnel du trimestre actif.
                     </p>
 
-                    <!-- ========== DROPDOWN SÉLECTION TRIMESTRE ========== -->
-                    <div class="carte" style="margin-bottom: 20px;">
-                        <div class="d-flex-gap-10-center">
-                            <label style="font-weight: 600; white-space: nowrap;">Trimestre actif :</label>
-                            <select id="selectTrimestreActif" class="controle-form" style="max-width: 300px;" onchange="changerTrimestreActifV2(this.value)">
-                                <!-- Options générées dynamiquement par JS -->
-                                <option value="">Chargement...</option>
-                            </select>
-                            <button class="btn btn-secondaire btn-sm" onclick="ouvrirModalNouveauTrimestre()" title="Créer un nouveau trimestre">
-                                + Nouveau
-                            </button>
+                    <!-- ========== GESTION DES TRIMESTRES ========== -->
+                    <div class="carte accordeon" id="accordeon-gestion-trimestres">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▶</span> Gestion des trimestres
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <!-- Layout Bibliothèque + Formulaire -->
+                            <div class="disposition-bibliotheque-formulaire">
+
+                                <!-- GAUCHE : Bibliothèque + Sélection -->
+                                <div class="panneau-bibliotheque">
+                                    <button class="btn btn-secondaire btn-bibliotheque" onclick="ouvrirBibliothequeTrimestreV2()">
+                                        📚 Bibliothèque
+                                    </button>
+
+                                    <div class="groupe-form" style="margin-top: 15px;">
+                                        <label class="libelle-selection">Trimestre actif :</label>
+                                        <select id="selectTrimestreActif" class="controle-form" onchange="changerTrimestreActifV2(this.value)">
+                                            <option value="">Chargement...</option>
+                                        </select>
+                                    </div>
+
+                                    <button class="btn btn-principal btn-sm" style="margin-top: 15px; width: 100%;" onclick="ouvrirModalNouveauTrimestre()">
+                                        + Nouveau trimestre
+                                    </button>
+                                </div>
+
+                                <!-- DROITE : Formulaire complet du trimestre -->
+                                <div class="panneau-formulaire" style="padding: 15px;">
+
+                                    <!-- Identification du trimestre -->
+                                    <div style="background: var(--vert-tres-pale, #e8f5e9); padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid var(--vert-succes, #4caf50);">
+                                        <h5 class="sous-titre-section" style="margin-top: 0; margin-bottom: 12px;">Identification du trimestre</h5>
+                                        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 15px; align-items: end;">
+                                            <div class="groupe-form">
+                                                <label style="font-size: 0.8rem; font-weight: 500;">Nom du trimestre <span class="text-danger">*</span></label>
+                                                <input type="text" class="controle-form" id="v2-nomTrimestre" placeholder="Ex: Hiver 2026" onchange="sauvegarderIdentificationTrimestreV2()">
+                                            </div>
+                                            <div class="groupe-form">
+                                                <label style="font-size: 0.8rem; font-weight: 500;">Session <span class="text-danger">*</span></label>
+                                                <select class="controle-form" id="v2-sessionTrimestre" onchange="sauvegarderIdentificationTrimestreV2()">
+                                                    <option value="">— Choisir —</option>
+                                                    <option value="automne">Automne</option>
+                                                    <option value="hiver">Hiver</option>
+                                                    <option value="ete">Été</option>
+                                                </select>
+                                            </div>
+                                            <div class="groupe-form">
+                                                <label style="font-size: 0.8rem; font-weight: 500;">Année <span class="text-danger">*</span></label>
+                                                <input type="number" class="controle-form" id="v2-anneeTrimestre" min="2020" max="2050" placeholder="2026" onchange="sauvegarderIdentificationTrimestreV2()">
+                                            </div>
+                                        </div>
+                                        <p class="texte-aide" style="margin-top: 10px; margin-bottom: 0; font-size: 0.8rem;">
+                                            Ces informations identifient votre trimestre de travail et préfixent vos données.
+                                        </p>
+                                    </div>
+
+                                    <!-- Grille 2 colonnes : Bornes et Semaines spéciales -->
+                                    <div class="grille-2col">
+
+                                        <!-- COLONNE GAUCHE: Bornes du trimestre -->
+                                        <div style="background: var(--bleu-tres-pale); padding: 12px; border-radius: 8px; position: relative;">
+                                            <button onclick="reinitialiserBornesTrimestreV2()" style="position: absolute; top: 8px; right: 8px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--orange-accent); padding: 0; line-height: 1;" title="Réinitialiser les bornes">✕</button>
+                                            <h5 class="sous-titre-section" style="margin-top: 0;">Bornes du trimestre</h5>
+                                            <div class="grille-2col-gap15">
+                                                <div class="groupe-form">
+                                                    <label style="font-size: 0.8rem; font-weight: 500;">Début du trimestre :</label>
+                                                    <input type="date" class="controle-form controle-form-compact" id="v2-debutTrimestre"
+                                                        onchange="sauvegarderCadreCalendrierV2()">
+                                                </div>
+                                                <div class="groupe-form">
+                                                    <label style="font-size: 0.8rem; font-weight: 500;">Fin des cours réguliers :</label>
+                                                    <input type="date" class="controle-form controle-form-compact" id="v2-finCours"
+                                                        onchange="sauvegarderCadreCalendrierV2()">
+                                                </div>
+                                                <div class="groupe-form">
+                                                    <label style="font-size: 0.8rem; font-weight: 500;">Fin du trimestre :</label>
+                                                    <input type="date" class="controle-form controle-form-compact" id="v2-finTrimestre"
+                                                        onchange="sauvegarderCadreCalendrierV2()">
+                                                </div>
+                                                <div class="groupe-form">
+                                                    <label style="font-size: 0.8rem; font-weight: 500;">Remise des notes :</label>
+                                                    <input type="date" class="controle-form controle-form-compact" id="v2-remiseNotes"
+                                                        onchange="sauvegarderCadreCalendrierV2()">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- COLONNE DROITE: Semaines spéciales -->
+                                        <div style="background: var(--bleu-tres-pale); padding: 12px; border-radius: 8px; position: relative;">
+                                            <button onclick="reinitialiserSemainesSpecialesV2()" style="position: absolute; top: 8px; right: 8px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--orange-accent); padding: 0; line-height: 1;" title="Réinitialiser les semaines spéciales">✕</button>
+                                            <h5 class="sous-titre-section" style="margin-top: 0;">Semaines spéciales</h5>
+                                            <div class="grille-2col-gap15">
+                                                <!-- Semaine de planification -->
+                                                <div>
+                                                    <label style="font-size: 0.8rem; font-weight: 500;">Semaine de planification</label>
+                                                    <div class="d-flex-gap-10-center">
+                                                        <div class="groupe-form flex-1">
+                                                            <label style="font-size: 0.75rem;">Du :</label>
+                                                            <input type="date" class="controle-form controle-form-compact" id="v2-semainePlanificationDebut"
+                                                                onchange="sauvegarderCadreCalendrierV2()">
+                                                        </div>
+                                                        <span style="padding-top: 15px; font-size: 0.8rem;">au</span>
+                                                        <div class="groupe-form flex-1">
+                                                            <label style="font-size: 0.75rem;">&nbsp;</label>
+                                                            <input type="date" class="controle-form controle-form-compact" id="v2-semainePlanificationFin"
+                                                                onchange="sauvegarderCadreCalendrierV2()">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!-- Semaine d'examens -->
+                                                <div>
+                                                    <label style="font-size: 0.8rem; font-weight: 500;">Semaine d'examens</label>
+                                                    <div class="d-flex-gap-10-center">
+                                                        <div class="groupe-form flex-1">
+                                                            <label style="font-size: 0.75rem;">Du :</label>
+                                                            <input type="date" class="controle-form controle-form-compact" id="v2-semaineExamensDebut"
+                                                                onchange="sauvegarderCadreCalendrierV2()">
+                                                        </div>
+                                                        <span style="padding-top: 15px; font-size: 0.8rem;">au</span>
+                                                        <div class="groupe-form flex-1">
+                                                            <label style="font-size: 0.75rem;">&nbsp;</label>
+                                                            <input type="date" class="controle-form controle-form-compact" id="v2-semaineExamensFin"
+                                                                onchange="sauvegarderCadreCalendrierV2()">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Congés et événements -->
+                                    <div class="grille-2col" style="margin-top: 15px;">
+
+                                        <!-- COLONNE GAUCHE: Congés prévus -->
+                                        <div style="background: var(--bleu-tres-pale); padding: 12px; border-radius: 8px;">
+                                            <h5 class="sous-titre-section" style="margin-top: 0; font-size: 0.85rem;">Congés fériés et activités institutionnelles</h5>
+                                            <div id="v2-congesPrevusContainer" style="margin-bottom: 10px; max-height: 150px; overflow-y: auto;">
+                                                <!-- Liste des événements prévus générée dynamiquement -->
+                                            </div>
+
+                                            <!-- Formulaire ajout événement prévu (caché par défaut) -->
+                                            <div id="v2-formEvenementPrevu" style="display: none; background: white; padding: 10px; border-radius: 6px; margin-bottom: 10px; position: relative;">
+                                                <button onclick="annulerFormEvenementPrevuV2()" style="position: absolute; top: 5px; right: 5px; background: none; border: none; font-size: 1rem; cursor: pointer; color: var(--rouge-danger); padding: 0; line-height: 1;" title="Annuler">✕</button>
+                                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                                                    <div class="groupe-form">
+                                                        <label style="font-size: 0.75rem; font-weight: 500;">Date <span class="text-danger">*</span></label>
+                                                        <input type="date" id="v2-dateEvenementPrevu" class="controle-form controle-form-compact">
+                                                    </div>
+                                                    <div class="groupe-form">
+                                                        <label style="font-size: 0.75rem; font-weight: 500;">Description <span class="text-danger">*</span></label>
+                                                        <input type="text" id="v2-descriptionPrevu" class="controle-form controle-form-compact" placeholder="Ex: Fête du travail">
+                                                    </div>
+                                                </div>
+                                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                                                    <div class="groupe-form">
+                                                        <label style="font-size: 0.75rem; font-weight: 500;">Horaire de reprise</label>
+                                                        <select id="v2-horaireReprisePrevu" class="controle-form controle-form-compact">
+                                                            <option value="">— Aucune —</option>
+                                                            <option value="Lundi">Lundi</option>
+                                                            <option value="Mardi">Mardi</option>
+                                                            <option value="Mercredi">Mercredi</option>
+                                                            <option value="Jeudi">Jeudi</option>
+                                                            <option value="Vendredi">Vendredi</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="groupe-form">
+                                                        <label style="font-size: 0.75rem; font-weight: 500;">Date de reprise</label>
+                                                        <input type="date" id="v2-dateReprisePrevu" class="controle-form controle-form-compact">
+                                                    </div>
+                                                </div>
+                                                <div style="text-align: right;">
+                                                    <button id="v2-btnConfirmerPrevu" class="btn btn-confirmer btn-tres-compact" onclick="confirmerEvenementPrevuV2()">Ajouter</button>
+                                                </div>
+                                            </div>
+
+                                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem;">
+                                                <span class="text-muted"><span id="v2-nombreEvenementsPrevus">0</span> déclarés</span>
+                                                <button class="btn btn-confirmer btn-tres-compact" onclick="afficherFormEvenementV2('prevu')">+ Ajouter</button>
+                                            </div>
+                                        </div>
+
+                                        <!-- COLONNE DROITE: Événements imprévus -->
+                                        <div style="background: var(--bleu-tres-pale); padding: 12px; border-radius: 8px;">
+                                            <h5 class="sous-titre-section" style="margin-top: 0; font-size: 0.85rem;">Événements imprévus</h5>
+                                            <div id="v2-congesImprevusContainer" style="margin-bottom: 10px; max-height: 150px; overflow-y: auto;">
+                                                <!-- Liste des événements imprévus générée dynamiquement -->
+                                            </div>
+
+                                            <!-- Formulaire ajout événement imprévu (caché par défaut) -->
+                                            <div id="v2-formEvenementImprevu" style="display: none; background: white; padding: 10px; border-radius: 6px; margin-bottom: 10px; position: relative;">
+                                                <button onclick="annulerFormEvenementImprevuV2()" style="position: absolute; top: 5px; right: 5px; background: none; border: none; font-size: 1rem; cursor: pointer; color: var(--rouge-danger); padding: 0; line-height: 1;" title="Annuler">✕</button>
+                                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                                                    <div class="groupe-form">
+                                                        <label style="font-size: 0.75rem; font-weight: 500;">Date <span class="text-danger">*</span></label>
+                                                        <input type="date" id="v2-dateEvenementImprevu" class="controle-form controle-form-compact">
+                                                    </div>
+                                                    <div class="groupe-form">
+                                                        <label style="font-size: 0.75rem; font-weight: 500;">Description <span class="text-danger">*</span></label>
+                                                        <input type="text" id="v2-descriptionImprevu" class="controle-form controle-form-compact" placeholder="Ex: Tempête">
+                                                    </div>
+                                                </div>
+                                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                                                    <div class="groupe-form">
+                                                        <label style="font-size: 0.75rem; font-weight: 500;">Horaire de reprise</label>
+                                                        <select id="v2-horaireRepriseImprevu" class="controle-form controle-form-compact">
+                                                            <option value="">— Aucune —</option>
+                                                            <option value="Lundi">Lundi</option>
+                                                            <option value="Mardi">Mardi</option>
+                                                            <option value="Mercredi">Mercredi</option>
+                                                            <option value="Jeudi">Jeudi</option>
+                                                            <option value="Vendredi">Vendredi</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="groupe-form">
+                                                        <label style="font-size: 0.75rem; font-weight: 500;">Date de reprise</label>
+                                                        <input type="date" id="v2-dateRepriseImprevu" class="controle-form controle-form-compact">
+                                                    </div>
+                                                </div>
+                                                <div style="text-align: right;">
+                                                    <button id="v2-btnConfirmerImprevu" class="btn btn-confirmer btn-tres-compact" onclick="confirmerEvenementImprevuV2()">Ajouter</button>
+                                                </div>
+                                            </div>
+
+                                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem;">
+                                                <span class="text-muted"><span id="v2-nombreEvenementsImprevus">0</span> déclarés</span>
+                                                <button class="btn btn-confirmer btn-tres-compact" onclick="afficherFormEvenementV2('imprevu')">+ Ajouter</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Statistiques calculées -->
+                                    <div class="info-box" style="margin-top: 15px;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <p style="margin: 0;">
+                                                <strong>Trimestre :</strong>
+                                                <span id="v2-nombreSemaines">0</span> semaines •
+                                                <span id="v2-nombreJoursCours">0</span> jours de cours
+                                                <span id="v2-statsCongesReprises"></span>
+                                            </p>
+                                            <button class="btn btn-confirmer btn-tres-compact" onclick="sauvegarderCadreCalendrierV2()">Sauvegarder le trimestre</button>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
                         </div>
                     </div>
 
@@ -8425,831 +8681,562 @@
                         </span>
                     </div>
 
-                    <!-- ========== GESTION DES TRIMESTRES ========== -->
-                    <div class="carte accordeon" id="accordeon-gestion-trimestres">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
-                            <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▶</span> Gestion des trimestres
-                            </h3>
-                        </div>
-                        <div class="accordeon-contenu">
-                            <p class="texte-intro">
-                                Archive les sessions terminées pour les conserver en lecture seule.
-                                <a href="#" onclick="allerVersAide('aide-archivage'); return false;" style="color: var(--bleu-principal);">En savoir plus sur l'archivage →</a>
-                            </p>
-
-                            <!-- Liste des trimestres (générée par JS) -->
-                            <div id="listeTrimestreGestion">
-                                <!-- Généré dynamiquement par afficherListeTrimestreGestion() -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ========== ACCORDÉON: CADRE RÉGULIER ========== -->
-                    <div class="carte accordeon" id="accordeon-cadre-regulier">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
-                            <h3 class="carte-titre-bleu" style="margin: 0;">
-                                <span class="accordeon-chevron">▶</span> Cadre régulier
-                            </h3>
-                        </div>
-                        <div class="accordeon-contenu" style="display: none;">
-
-                        <!-- Identification du trimestre -->
-                        <div style="background: var(--vert-tres-pale, #e8f5e9); padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid var(--vert-succes, #4caf50);">
-                            <h5 class="sous-titre-section" style="margin-top: 0; margin-bottom: 12px;">Identification du trimestre</h5>
-                            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 15px; align-items: end;">
-                                <div class="groupe-form">
-                                    <label style="font-size: 0.8rem; font-weight: 500;">Nom du trimestre <span class="text-danger">*</span></label>
-                                    <input type="text" class="controle-form" id="v2-nomTrimestre" placeholder="Ex: Hiver 2026" onchange="sauvegarderIdentificationTrimestreV2()">
-                                </div>
-                                <div class="groupe-form">
-                                    <label style="font-size: 0.8rem; font-weight: 500;">Session <span class="text-danger">*</span></label>
-                                    <select class="controle-form" id="v2-sessionTrimestre" onchange="sauvegarderIdentificationTrimestreV2()">
-                                        <option value="">— Choisir —</option>
-                                        <option value="automne">Automne</option>
-                                        <option value="hiver">Hiver</option>
-                                        <option value="ete">Été</option>
-                                    </select>
-                                </div>
-                                <div class="groupe-form">
-                                    <label style="font-size: 0.8rem; font-weight: 500;">Année <span class="text-danger">*</span></label>
-                                    <input type="number" class="controle-form" id="v2-anneeTrimestre" min="2020" max="2050" placeholder="2026" onchange="sauvegarderIdentificationTrimestreV2()">
-                                </div>
-                            </div>
-                            <p class="texte-aide" style="margin-top: 10px; margin-bottom: 0; font-size: 0.8rem;">
-                                Ces informations identifient votre trimestre de travail et préfixent vos données.
-                            </p>
-                        </div>
-
-                        <!-- Grille 2 colonnes : Bornes et Semaines spéciales -->
-                        <div class="grille-2col">
-
-                            <!-- COLONNE GAUCHE: Bornes du trimestre -->
-                            <div style="background: var(--bleu-tres-pale); padding: 12px; border-radius: 8px; position: relative;">
-                                <button onclick="reinitialiserBornesTrimestreV2()" style="position: absolute; top: 8px; right: 8px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--orange-accent); padding: 0; line-height: 1;" title="Réinitialiser les bornes">✕</button>
-                                <h5 class="sous-titre-section" style="margin-top: 0;">Bornes du trimestre</h5>
-                                <div class="grille-2col-gap15">
-                                    <div class="groupe-form">
-                                        <label style="font-size: 0.8rem; font-weight: 500;">Début du trimestre :</label>
-                                        <input type="date" class="controle-form controle-form-compact" id="v2-debutTrimestre"
-                                            onchange="sauvegarderCadreCalendrierV2()">
-                                    </div>
-                                    <div class="groupe-form">
-                                        <label style="font-size: 0.8rem; font-weight: 500;">Fin des cours réguliers :</label>
-                                        <input type="date" class="controle-form controle-form-compact" id="v2-finCours"
-                                            onchange="sauvegarderCadreCalendrierV2()">
-                                    </div>
-                                    <div class="groupe-form">
-                                        <label style="font-size: 0.8rem; font-weight: 500;">Fin du trimestre :</label>
-                                        <input type="date" class="controle-form controle-form-compact" id="v2-finTrimestre"
-                                            onchange="sauvegarderCadreCalendrierV2()">
-                                    </div>
-                                    <div class="groupe-form">
-                                        <label style="font-size: 0.8rem; font-weight: 500;">Remise des notes :</label>
-                                        <input type="date" class="controle-form controle-form-compact" id="v2-remiseNotes"
-                                            onchange="sauvegarderCadreCalendrierV2()">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- COLONNE DROITE: Semaines spéciales -->
-                            <div style="background: var(--bleu-tres-pale); padding: 12px; border-radius: 8px; position: relative;">
-                                <button onclick="reinitialiserSemainesSpecialesV2()" style="position: absolute; top: 8px; right: 8px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--orange-accent); padding: 0; line-height: 1;" title="Réinitialiser les semaines spéciales">✕</button>
-                                <h5 class="sous-titre-section" style="margin-top: 0;">Semaines spéciales</h5>
-                                <div class="grille-2col-gap15">
-                                    <!-- Semaine de planification -->
-                                    <div>
-                                        <label style="font-size: 0.8rem; font-weight: 500;">Semaine de planification</label>
-                                        <div class="d-flex-gap-10-center">
-                                            <div class="groupe-form flex-1">
-                                                <label style="font-size: 0.75rem;">Du :</label>
-                                                <input type="date" class="controle-form controle-form-compact" id="v2-semainePlanificationDebut"
-                                                    onchange="sauvegarderCadreCalendrierV2()">
-                                            </div>
-                                            <span style="padding-top: 15px; font-size: 0.8rem;">au</span>
-                                            <div class="groupe-form flex-1">
-                                                <label style="font-size: 0.75rem;">&nbsp;</label>
-                                                <input type="date" class="controle-form controle-form-compact" id="v2-semainePlanificationFin"
-                                                    onchange="sauvegarderCadreCalendrierV2()">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <!-- Semaine d'examens -->
-                                    <div>
-                                        <label style="font-size: 0.8rem; font-weight: 500;">Semaine d'examens</label>
-                                        <div class="d-flex-gap-10-center">
-                                            <div class="groupe-form flex-1">
-                                                <label style="font-size: 0.75rem;">Du :</label>
-                                                <input type="date" class="controle-form controle-form-compact" id="v2-semaineExamensDebut"
-                                                    onchange="sauvegarderCadreCalendrierV2()">
-                                            </div>
-                                            <span style="padding-top: 15px; font-size: 0.8rem;">au</span>
-                                            <div class="groupe-form flex-1">
-                                                <label style="font-size: 0.75rem;">&nbsp;</label>
-                                                <input type="date" class="controle-form controle-form-compact" id="v2-semaineExamensFin"
-                                                    onchange="sauvegarderCadreCalendrierV2()">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Congés et événements (intégré depuis Aménagements) -->
-                        <div class="grille-2col" style="margin-top: 15px;">
-
-                            <!-- COLONNE GAUCHE: Congés prévus -->
-                            <div style="background: var(--bleu-tres-pale); padding: 12px; border-radius: 8px;">
-                                <h5 class="sous-titre-section" style="margin-top: 0; font-size: 0.85rem;">Congés fériés et activités institutionnelles</h5>
-                                <div id="v2-congesPrevusContainer" style="margin-bottom: 10px; max-height: 150px; overflow-y: auto;">
-                                    <!-- Liste des événements prévus générée dynamiquement -->
-                                </div>
-
-                                <!-- Formulaire ajout événement prévu (caché par défaut) -->
-                                <div id="v2-formEvenementPrevu" style="display: none; background: white; padding: 10px; border-radius: 6px; margin-bottom: 10px; position: relative;">
-                                    <button onclick="annulerFormEvenementPrevuV2()" style="position: absolute; top: 5px; right: 5px; background: none; border: none; font-size: 1rem; cursor: pointer; color: var(--rouge-danger); padding: 0; line-height: 1;" title="Annuler">✕</button>
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
-                                        <div class="groupe-form">
-                                            <label style="font-size: 0.75rem; font-weight: 500;">Date <span class="text-danger">*</span></label>
-                                            <input type="date" id="v2-dateEvenementPrevu" class="controle-form controle-form-compact">
-                                        </div>
-                                        <div class="groupe-form">
-                                            <label style="font-size: 0.75rem; font-weight: 500;">Description <span class="text-danger">*</span></label>
-                                            <input type="text" id="v2-descriptionPrevu" class="controle-form controle-form-compact" placeholder="Ex: Fête du travail">
-                                        </div>
-                                    </div>
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
-                                        <div class="groupe-form">
-                                            <label style="font-size: 0.75rem; font-weight: 500;">Horaire de reprise</label>
-                                            <select id="v2-horaireReprisePrevu" class="controle-form controle-form-compact">
-                                                <option value="">— Aucune —</option>
-                                                <option value="Lundi">Lundi</option>
-                                                <option value="Mardi">Mardi</option>
-                                                <option value="Mercredi">Mercredi</option>
-                                                <option value="Jeudi">Jeudi</option>
-                                                <option value="Vendredi">Vendredi</option>
-                                            </select>
-                                        </div>
-                                        <div class="groupe-form">
-                                            <label style="font-size: 0.75rem; font-weight: 500;">Date de reprise</label>
-                                            <input type="date" id="v2-dateReprisePrevu" class="controle-form controle-form-compact">
-                                        </div>
-                                    </div>
-                                    <div style="text-align: right;">
-                                        <button id="v2-btnConfirmerPrevu" class="btn btn-confirmer btn-tres-compact" onclick="confirmerEvenementPrevuV2()">Ajouter</button>
-                                    </div>
-                                </div>
-
-                                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem;">
-                                    <span class="text-muted"><span id="v2-nombreEvenementsPrevus">0</span> déclarés</span>
-                                    <button class="btn btn-confirmer btn-tres-compact" onclick="afficherFormEvenementV2('prevu')">+ Ajouter</button>
-                                </div>
-                            </div>
-
-                            <!-- COLONNE DROITE: Événements imprévus -->
-                            <div style="background: var(--bleu-tres-pale); padding: 12px; border-radius: 8px;">
-                                <h5 class="sous-titre-section" style="margin-top: 0; font-size: 0.85rem;">Événements imprévus</h5>
-                                <div id="v2-congesImprevusContainer" style="margin-bottom: 10px; max-height: 150px; overflow-y: auto;">
-                                    <!-- Liste des événements imprévus générée dynamiquement -->
-                                </div>
-
-                                <!-- Formulaire ajout événement imprévu (caché par défaut) -->
-                                <div id="v2-formEvenementImprevu" style="display: none; background: white; padding: 10px; border-radius: 6px; margin-bottom: 10px; position: relative;">
-                                    <button onclick="annulerFormEvenementImprevuV2()" style="position: absolute; top: 5px; right: 5px; background: none; border: none; font-size: 1rem; cursor: pointer; color: var(--rouge-danger); padding: 0; line-height: 1;" title="Annuler">✕</button>
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
-                                        <div class="groupe-form">
-                                            <label style="font-size: 0.75rem; font-weight: 500;">Date <span class="text-danger">*</span></label>
-                                            <input type="date" id="v2-dateEvenementImprevu" class="controle-form controle-form-compact">
-                                        </div>
-                                        <div class="groupe-form">
-                                            <label style="font-size: 0.75rem; font-weight: 500;">Description <span class="text-danger">*</span></label>
-                                            <input type="text" id="v2-descriptionImprevu" class="controle-form controle-form-compact" placeholder="Ex: Tempête">
-                                        </div>
-                                    </div>
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
-                                        <div class="groupe-form">
-                                            <label style="font-size: 0.75rem; font-weight: 500;">Horaire de reprise</label>
-                                            <select id="v2-horaireRepriseImprevu" class="controle-form controle-form-compact">
-                                                <option value="">— Aucune —</option>
-                                                <option value="Lundi">Lundi</option>
-                                                <option value="Mardi">Mardi</option>
-                                                <option value="Mercredi">Mercredi</option>
-                                                <option value="Jeudi">Jeudi</option>
-                                                <option value="Vendredi">Vendredi</option>
-                                            </select>
-                                        </div>
-                                        <div class="groupe-form">
-                                            <label style="font-size: 0.75rem; font-weight: 500;">Date de reprise</label>
-                                            <input type="date" id="v2-dateRepriseImprevu" class="controle-form controle-form-compact">
-                                        </div>
-                                    </div>
-                                    <div style="text-align: right;">
-                                        <button id="v2-btnConfirmerImprevu" class="btn btn-confirmer btn-tres-compact" onclick="confirmerEvenementImprevuV2()">Ajouter</button>
-                                    </div>
-                                </div>
-
-                                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem;">
-                                    <span class="text-muted"><span id="v2-nombreEvenementsImprevus">0</span> déclarés</span>
-                                    <button class="btn btn-confirmer btn-tres-compact" onclick="afficherFormEvenementV2('imprevu')">+ Ajouter</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Statistiques calculées -->
-                        <div class="info-box" style="margin-top: 15px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <p style="margin: 0;">
-                                    <strong>Trimestre :</strong>
-                                    <span id="v2-nombreSemaines">0</span> semaines •
-                                    <span id="v2-nombreJoursCours">0</span> jours de cours
-                                    <span id="v2-statsCongesReprises"></span>
-                                </p>
-                                <button class="btn btn-confirmer btn-tres-compact" onclick="sauvegarderCadreCalendrierV2()">Sauvegarder le trimestre</button>
-                            </div>
-                        </div>
-                        </div>
-                    </div><!-- FIN accordéon Cadre régulier -->
-
                     <!-- ========== ACCORDÉON: COURS ========== -->
                     <div class="carte accordeon" id="accordeon-cours" style="margin-top: 20px;">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
                             <h3 class="carte-titre-bleu" style="margin: 0;">
                                 <span class="accordeon-chevron">▶</span> Cours
                             </h3>
-                            <div class="btn-groupe" style="gap: 8px;" onclick="event.stopPropagation();">
-                                <button class="btn btn-principal btn-sm" onclick="ouvrirModalBibliothequeCours()" title="Consulter la bibliothèque de cours">
-                                    Bibliothèque
-                                </button>
-                                <button class="btn btn-confirmer btn-sm" onclick="afficherFormCoursV2()">
-                                    + Nouveau cours
-                                </button>
-                            </div>
                         </div>
                         <div class="accordeon-contenu" style="display: none;">
-                            <!-- Sélection du cours actif -->
-                            <div class="d-flex-gap-10-center" style="margin-bottom: 15px;">
-                                <label style="font-weight: 500;">Cours sélectionné :</label>
-                                <select id="v2-selectCours" class="controle-form" style="max-width: 400px;" onchange="changerCoursSelectionneV2(this.value)">
-                                    <option value="">Aucun cours</option>
-                                </select>
-                                <button class="btn btn-modifier btn-sm" onclick="modifierCoursSelectionneV2()" id="v2-btnModifierCours" style="display: none;">
-                                    Modifier
-                                </button>
-                                <button class="btn btn-ajouter btn-sm" onclick="dupliquerCoursSelectionneV2()" id="v2-btnDupliquerCours" style="display: none;">
-                                    Dupliquer
-                                </button>
-                            </div>
+                            <!-- Layout Bibliothèque + Formulaire -->
+                            <div class="disposition-bibliotheque-formulaire">
 
-                            <!-- Aperçu du cours sélectionné (visible par défaut) -->
-                            <div id="v2-apercuCours" class="carte-bleu-pale-p15">
-                                <p class="text-muted">Sélectionnez un cours pour voir ses détails.</p>
-                            </div>
+                                <!-- GAUCHE : Bibliothèque + Sélection -->
+                                <div class="panneau-bibliotheque">
+                                    <button class="btn btn-secondaire btn-bibliotheque" onclick="ouvrirModalBibliothequeCours()">
+                                        📚 Bibliothèque
+                                    </button>
 
-                            <!-- FORMULAIRE DE COURS (caché par défaut) -->
-                            <div id="v2-formulaireCours" style="display: none; padding: 20px; background: var(--bleu-pale); border: 1px solid var(--bleu-leger); border-radius: 8px; margin-top: 15px;">
-
-                                <h4 id="v2-titreFormCours" class="titre-bleu-mb-20">
-                                    Nouvelle configuration de cours
-                                </h4>
-
-                                <!-- Informations générales -->
-                                <h5 class="sous-titre-section">Informations générales</h5>
-                                <div class="grille-4col-form" style="margin-bottom: 20px;">
-                                    <div class="groupe-form">
-                                        <label>Code du cours</label>
-                                        <input type="text" id="v2-codeCours" class="controle-form controle-form-compact" placeholder="Ex: 601-101-MQ">
-                                    </div>
-                                    <div class="groupe-form">
-                                        <label>Nom du cours</label>
-                                        <input type="text" id="v2-nomCours" class="controle-form controle-form-compact" placeholder="Ex: Écriture et littérature">
-                                    </div>
-                                    <div class="groupe-form">
-                                        <label>N° de la compétence</label>
-                                        <input type="text" id="v2-numeroCompetence" class="controle-form controle-form-compact" placeholder="Ex: 4EF0">
-                                    </div>
-                                    <div class="groupe-form">
-                                        <label>Compétence</label>
-                                        <input type="text" id="v2-competence" class="controle-form controle-form-compact" placeholder="Ex: Analyser des textes littéraires">
-                                    </div>
-                                </div>
-
-                                <div class="groupe-form" style="margin-bottom: 20px;">
-                                    <label>Éléments de compétence</label>
-                                    <textarea id="v2-elementsCompetence" class="controle-form controle-form-compact" rows="3"
-                                        placeholder="• Reconnaître le propos du texte&#10;• Repérer et classer des thèmes et procédés stylistiques"></textarea>
-                                </div>
-
-                                <!-- Enseignant·e -->
-                                <h5 class="sous-titre-section" style="margin-top: 25px;">Enseignant·e</h5>
-                                <div class="grille-3col-form" style="margin-bottom: 15px;">
-                                    <div class="groupe-form">
-                                        <label>Prénom</label>
-                                        <input type="text" id="v2-prenomEnseignant" class="controle-form controle-form-compact" placeholder="Ex: Grégoire">
-                                    </div>
-                                    <div class="groupe-form">
-                                        <label>Nom</label>
-                                        <input type="text" id="v2-nomEnseignant" class="controle-form controle-form-compact" placeholder="Ex: Bédard">
-                                    </div>
-                                    <div class="groupe-form">
-                                        <label>Courriel <span style="color: var(--gris-leger); font-weight: normal;">(optionnel)</span></label>
-                                        <input type="email" id="v2-courrielEnseignant" class="controle-form controle-form-compact" placeholder="Ex: prenom.nom@cegep.qc.ca">
-                                    </div>
-                                </div>
-                                <div class="grille-3col-form" style="margin-bottom: 20px;">
-                                    <div class="groupe-form">
-                                        <label>Discipline <span style="color: var(--rouge-erreur); font-weight: normal;">*</span></label>
-                                        <input type="text" id="v2-disciplineEnseignant" class="controle-form controle-form-compact" required placeholder="Ex: Littérature">
-                                    </div>
-                                    <div class="groupe-form">
-                                        <label>Département</label>
-                                        <input type="text" id="v2-departement" class="controle-form controle-form-compact" placeholder="Ex: Littérature et communication">
-                                    </div>
-                                    <div class="groupe-form">
-                                        <label>Institution <span style="color: var(--gris-leger); font-weight: normal;">(optionnel)</span></label>
-                                        <input type="text" id="v2-institutionEnseignant" class="controle-form controle-form-compact" placeholder="Ex: Cégep de Drummondville">
-                                    </div>
-                                </div>
-
-                                <!-- Session et horaire -->
-                                <h5 class="sous-titre-section" style="margin-top: 25px;">Session et horaire</h5>
-                                <div class="grille-4col-form" style="margin-bottom: 20px;">
-                                    <div class="groupe-form">
-                                        <label>Session</label>
-                                        <select id="v2-session" class="controle-form controle-form-compact">
-                                            <option value="H">Hiver</option>
-                                            <option value="A">Automne</option>
+                                    <div class="groupe-form" style="margin-top: 15px;">
+                                        <label class="libelle-selection">Cours :</label>
+                                        <select id="v2-selectCours" class="controle-form" onchange="changerCoursSelectionneV2(this.value)">
+                                            <option value="">-- Sélectionner --</option>
                                         </select>
                                     </div>
-                                    <div class="groupe-form">
-                                        <label>Année</label>
-                                        <input type="number" id="v2-annee" class="controle-form controle-form-compact" value="2025" min="2020" max="2030">
-                                    </div>
-                                    <div class="groupe-form">
-                                        <label>Périodes/semaine</label>
-                                        <input type="number" id="v2-periodesParSemaine" class="controle-form controle-form-compact" value="4" min="1" max="12" onchange="mettreAJourFormatHoraire()">
-                                    </div>
-                                    <div class="groupe-form">
-                                        <label>Format horaire</label>
-                                        <select id="v2-formatHoraire" class="controle-form controle-form-compact">
-                                            <!-- Généré dynamiquement par mettreAJourFormatHoraire() -->
-                                        </select>
-                                        <small id="v2-formatHoraire-info" class="text-muted" style="display: block; margin-top: 4px;"></small>
-                                    </div>
-                                </div>
 
-                                <!-- Pratique de notation (sélectionnable par cours) -->
-                                <h5 class="sous-titre-section" style="margin-top: 25px;">Pratique de notation</h5>
-                                <div class="groupe-form" style="margin-bottom: 20px;">
-                                    <label for="v2-pratiqueIdCours">
-                                        Pratique de notation pour ce groupe-cours
-                                        <small style="display: block; color: var(--gris-moyen); font-weight: normal; margin-top: 3px;">
-                                            Chaque groupe-cours peut avoir sa propre pratique de notation
-                                        </small>
-                                    </label>
-                                    <select id="v2-pratiqueIdCours" class="controle-form controle-form-compact">
-                                        <option value="">-- Chargement... --</option>
-                                    </select>
-                                </div>
-
-                                <!-- Boutons d'action -->
-                                <div class="btn-groupe btn-groupe-droite" style="margin-top: 25px; padding-top: 20px; border-top: 2px solid var(--bleu-leger);">
-                                    <button class="btn btn-annuler" onclick="annulerFormCoursV2()">
-                                        Annuler
-                                    </button>
-                                    <button class="btn btn-confirmer" onclick="sauvegarderCoursV2()">
-                                        <span id="v2-btnTexteCours">Ajouter</span>
+                                    <button class="btn btn-principal btn-sm" style="margin-top: 15px; width: 100%;" onclick="nouveauCoursV2()">
+                                        + Nouveau cours
                                     </button>
                                 </div>
-                            </div><!-- FIN formulaire cours v2 -->
 
+                                <!-- DROITE : Formulaire d'édition -->
+                                <div class="panneau-formulaire" style="padding: 15px;">
+                                    <div id="v2-formulaireCours">
+                                        <!-- État vide -->
+                                        <div id="cours-etat-vide" class="etat-vide-formulaire">
+                                            <p>Sélectionne un cours pour l'éditer ou crée un nouveau cours.</p>
+                                        </div>
+
+                                        <!-- Formulaire (caché par défaut) -->
+                                        <div id="cours-formulaire-edition" style="display: none;">
+                                            <h4 id="v2-titreFormCours" class="titre-formulaire">
+                                                Nouveau cours
+                                            </h4>
+
+                                            <!-- Informations générales -->
+                                            <div class="grille-form-2col" style="margin-bottom: 15px;">
+                                                <div class="groupe-form">
+                                                    <label>Code du cours</label>
+                                                    <input type="text" id="v2-codeCours" class="controle-form" placeholder="Ex: 601-101-MQ">
+                                                </div>
+                                                <div class="groupe-form">
+                                                    <label>Nom du cours</label>
+                                                    <input type="text" id="v2-nomCours" class="controle-form" placeholder="Ex: Écriture et littérature">
+                                                </div>
+                                            </div>
+
+                                            <div class="grille-form-2col" style="margin-bottom: 15px;">
+                                                <div class="groupe-form">
+                                                    <label>N° de la compétence</label>
+                                                    <input type="text" id="v2-numeroCompetence" class="controle-form" placeholder="Ex: 4EF0">
+                                                </div>
+                                                <div class="groupe-form">
+                                                    <label>Compétence</label>
+                                                    <input type="text" id="v2-competence" class="controle-form" placeholder="Ex: Analyser des textes littéraires">
+                                                </div>
+                                            </div>
+
+                                            <div class="grille-form-2col" style="margin-bottom: 15px;">
+                                                <div class="groupe-form">
+                                                    <label>Discipline</label>
+                                                    <input type="text" id="v2-disciplineCours" class="controle-form" placeholder="Ex: Français, langue d'enseignement">
+                                                </div>
+                                                <div class="groupe-form">
+                                                    <label>Éléments de compétence</label>
+                                                    <textarea id="v2-elementsCompetence" class="controle-form" rows="2"
+                                                        placeholder="• Reconnaître le propos du texte&#10;• Repérer et classer des thèmes"></textarea>
+                                                </div>
+                                            </div>
+
+                                            <!-- Boutons d'action -->
+                                            <div class="actions-formulaire" style="margin-top: 20px;">
+                                                <button class="btn btn-annuler" onclick="annulerFormCoursV2()">
+                                                    Annuler
+                                                </button>
+                                                <button class="btn btn-confirmer" onclick="sauvegarderCoursV2()">
+                                                    <span id="v2-btnTexteCours">Enregistrer</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
                         </div>
                     </div><!-- FIN accordéon Cours -->
 
-                    <!-- ========== ACCORDÉON: ENSEIGNANT·E (Beta 96 - Profil Auteur) ========== -->
+                    <!-- ========== ACCORDÉON: ENSEIGNANT·E (Beta 95.2 - Profil Auteur) ========== -->
                     <div class="carte accordeon" id="accordeon-enseignant" style="margin-top: 20px;">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
                             <h3 class="carte-titre-bleu" style="margin: 0;">
                                 <span class="accordeon-chevron">▶</span> Enseignant·e
                             </h3>
-                            <div class="btn-groupe" style="gap: 8px;" onclick="event.stopPropagation();">
-                                <button class="btn btn-confirmer btn-sm" onclick="afficherFormEnseignantV2()">
-                                    + Nouvel enseignant·e
-                                </button>
-                            </div>
                         </div>
                         <div class="accordeon-contenu" style="display: none;">
-                            <div class="alerte alerte-information" style="margin-bottom: 15px;">
-                                <strong>Profil auteur</strong> : Ces informations servent de métadonnées pour toutes vos ressources partagées (grilles, productions, etc.).
-                            </div>
+                            <!-- Layout Carte profil + Formulaire -->
+                            <div class="disposition-bibliotheque-formulaire">
 
-                            <!-- Sélection de l'enseignant -->
-                            <div class="d-flex-gap-10-center" style="margin-bottom: 15px;">
-                                <label style="font-weight: 500;">Enseignant·e :</label>
-                                <select id="v2-selectEnseignant" class="controle-form" style="max-width: 400px;" onchange="changerEnseignantSelectionneV2(this.value)">
-                                    <option value="">Sélectionner un enseignant·e</option>
-                                </select>
-                                <button class="btn btn-modifier btn-sm" onclick="modifierEnseignantSelectionneV2()" id="v2-btnModifierEnseignant" style="display: none;">
-                                    Modifier
-                                </button>
-                            </div>
-
-                            <!-- Aperçu de l'enseignant sélectionné -->
-                            <div id="v2-apercuEnseignant" class="carte-bleu-pale-p15">
-                                <p class="text-muted">Sélectionnez un enseignant·e pour voir ses détails.</p>
-                            </div>
-
-                            <!-- FORMULAIRE ENSEIGNANT (caché par défaut) -->
-                            <div id="v2-formulaireEnseignant" style="display: none; padding: 20px; background: var(--bleu-pale); border: 1px solid var(--bleu-leger); border-radius: 8px; margin-top: 15px;">
-                                <h4 id="v2-titreFormEnseignant" class="titre-bleu-mb-20">
-                                    Nouvel enseignant·e
-                                </h4>
-
-                                <div class="grille-3col-form" style="margin-bottom: 15px;">
-                                    <div class="groupe-form">
-                                        <label>Prénom <span style="color: var(--rouge-erreur);">*</span></label>
-                                        <input type="text" id="v2-ens-prenom" class="controle-form controle-form-compact" placeholder="Ex: Marie">
+                                <!-- GAUCHE : Carte profil -->
+                                <div class="panneau-bibliotheque">
+                                    <div id="enseignant-carte-resume">
+                                        <p class="profil-nom" id="enseignant-resume-nom">—</p>
+                                        <p class="profil-detail" id="enseignant-resume-courriel"></p>
+                                        <p class="profil-detail" id="enseignant-resume-institution"></p>
                                     </div>
-                                    <div class="groupe-form">
-                                        <label>Nom <span style="color: var(--rouge-erreur);">*</span></label>
-                                        <input type="text" id="v2-ens-nom" class="controle-form controle-form-compact" placeholder="Ex: Tremblay">
+                                    <p class="texte-aide" style="margin-top: 15px; font-size: 0.8rem;">
+                                        Ces informations servent de métadonnées pour vos ressources partagées.
+                                    </p>
+                                </div>
+
+                                <!-- DROITE : Formulaire d'édition (toujours visible) -->
+                                <div class="panneau-formulaire" style="padding: 15px;">
+                                    <h4 class="titre-formulaire">Modifier le profil</h4>
+
+                                    <div class="grille-form-2col" style="margin-bottom: 15px;">
+                                        <div class="groupe-form">
+                                            <label>Prénom <span class="text-danger">*</span></label>
+                                            <input type="text" id="v2-ens-prenom" class="controle-form" placeholder="Ex: Marie" onchange="mettreAJourCarteEnseignant()">
+                                        </div>
+                                        <div class="groupe-form">
+                                            <label>Nom <span class="text-danger">*</span></label>
+                                            <input type="text" id="v2-ens-nom" class="controle-form" placeholder="Ex: Tremblay" onchange="mettreAJourCarteEnseignant()">
+                                        </div>
                                     </div>
-                                    <div class="groupe-form">
-                                        <label>Courriel <span style="color: var(--rouge-erreur);">*</span></label>
-                                        <input type="email" id="v2-ens-courriel" class="controle-form controle-form-compact" placeholder="Ex: marie.tremblay@cegep.qc.ca">
+
+                                    <div class="groupe-form" style="margin-bottom: 15px;">
+                                        <label>Courriel <span class="text-danger">*</span></label>
+                                        <input type="email" id="v2-ens-courriel" class="controle-form" placeholder="Ex: marie.tremblay@cegep.qc.ca" onchange="mettreAJourCarteEnseignant()">
+                                    </div>
+
+                                    <div class="grille-form-2col" style="margin-bottom: 15px;">
+                                        <div class="groupe-form">
+                                            <label>Institution <span class="text-danger">*</span></label>
+                                            <input type="text" id="v2-ens-institution" class="controle-form" placeholder="Ex: Cégep de Drummondville" onchange="mettreAJourCarteEnseignant()">
+                                        </div>
+                                        <div class="groupe-form">
+                                            <label>Département</label>
+                                            <input type="text" id="v2-ens-departement" class="controle-form" placeholder="Ex: Littérature et communication">
+                                        </div>
+                                    </div>
+
+                                    <div class="groupe-form" style="margin-bottom: 15px;">
+                                        <label>Discipline</label>
+                                        <input type="text" id="v2-ens-discipline" class="controle-form" placeholder="Ex: Français, langue d'enseignement">
+                                    </div>
+
+                                    <div class="groupe-form" style="margin-bottom: 15px;">
+                                        <label>Site web personnel <span style="color: var(--gris-texte-pale); font-weight: normal;">(optionnel)</span></label>
+                                        <input type="url" id="v2-ens-siteWeb" class="controle-form" placeholder="Ex: https://monsite.com">
+                                    </div>
+
+                                    <!-- Boutons d'action -->
+                                    <div class="actions-formulaire" style="margin-top: 20px;">
+                                        <button class="btn btn-annuler" onclick="annulerFormEnseignantV2()">
+                                            Annuler
+                                        </button>
+                                        <button class="btn btn-confirmer" onclick="sauvegarderEnseignantV2()">
+                                            Enregistrer
+                                        </button>
                                     </div>
                                 </div>
 
-                                <div class="grille-3col-form" style="margin-bottom: 15px;">
-                                    <div class="groupe-form">
-                                        <label>Institution <span style="color: var(--rouge-erreur);">*</span></label>
-                                        <input type="text" id="v2-ens-institution" class="controle-form controle-form-compact" placeholder="Ex: Cégep de Drummondville">
-                                    </div>
-                                    <div class="groupe-form">
-                                        <label>Département</label>
-                                        <input type="text" id="v2-ens-departement" class="controle-form controle-form-compact" placeholder="Ex: Lettres">
-                                    </div>
-                                    <div class="groupe-form">
-                                        <label>Niveau d'enseignement</label>
-                                        <select id="v2-ens-niveau" class="controle-form controle-form-compact">
-                                            <option value="Collégial">Collégial</option>
-                                            <option value="Secondaire">Secondaire</option>
-                                            <option value="Universitaire">Universitaire</option>
-                                            <option value="Formation continue">Formation continue</option>
-                                            <option value="Autre">Autre</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="groupe-form" style="margin-bottom: 20px;">
-                                    <label>Site web personnel <span style="color: var(--gris-leger); font-weight: normal;">(optionnel)</span></label>
-                                    <input type="url" id="v2-ens-siteWeb" class="controle-form controle-form-compact" placeholder="Ex: https://monsite.com">
-                                </div>
-
-                                <!-- Boutons d'action -->
-                                <div class="btn-groupe btn-groupe-droite" style="margin-top: 25px; padding-top: 20px; border-top: 2px solid var(--bleu-leger);">
-                                    <button class="btn btn-annuler" onclick="annulerFormEnseignantV2()">
-                                        Annuler
-                                    </button>
-                                    <button class="btn btn-confirmer" onclick="sauvegarderEnseignantV2()">
-                                        <span id="v2-btnTexteEnseignant">Ajouter</span>
-                                    </button>
-                                </div>
                             </div>
                         </div>
                     </div><!-- FIN accordéon Enseignant·e -->
 
-                    <!-- ========== ACCORDÉON: HORAIRE (Beta 96) ========== -->
+                    <!-- ========== ACCORDÉON: GROUPE D'ÉTUDIANTS (Beta 95.2) ========== -->
+                    <div class="carte accordeon" id="accordeon-groupe-etudiants" style="margin-top: 20px;">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu" style="margin: 0;">
+                                <span class="accordeon-chevron">▶</span> Groupe d'étudiants
+                            </h3>
+                            <div class="badge-compteur" style="margin-left: auto; margin-right: 10px;">
+                                <span id="v2-nbEtudiantsTotal">0</span> étudiant(s)
+                            </div>
+                        </div>
+                        <div class="accordeon-contenu" style="display: none;">
+
+                            <div class="disposition-bibliotheque-formulaire disposition-etudiants">
+
+                                <!-- GAUCHE : Sélection groupe + Import -->
+                                <div class="panneau-bibliotheque">
+
+                                    <!-- Sélection du groupe -->
+                                    <div class="groupe-form" style="margin-bottom: 15px;">
+                                        <label class="label-compact">Groupe :</label>
+                                        <select id="v2-selectGroupe" class="controle-form" onchange="filtrerParGroupeV2()">
+                                            <option value="">Tous les groupes</option>
+                                            <!-- Options générées dynamiquement -->
+                                        </select>
+                                    </div>
+
+                                    <!-- Carte résumé -->
+                                    <div class="carte-resume-etudiants">
+                                        <div class="resume-stat-principal">
+                                            <span class="resume-nombre" id="v2-resumeNbTotal">0</span>
+                                            <span class="resume-label">étudiants</span>
+                                        </div>
+                                        <div class="resume-details" id="v2-resumeGroupes">
+                                            <!-- Rempli dynamiquement -->
+                                        </div>
+                                        <div class="resume-sa" id="v2-resumeSA" style="display: none;">
+                                            <span class="badge-sa">SA</span> <span id="v2-resumeNbSA">0</span> étudiant(s)
+                                        </div>
+                                    </div>
+
+                                    <!-- Import -->
+                                    <div class="section-import">
+                                        <h5 class="sous-titre-section">Importer</h5>
+                                        <p class="texte-aide" style="font-size: 0.8rem; margin-bottom: 10px;">
+                                            Format : DA, Groupe, Nom, Prénom, Programme, (vide), SA
+                                        </p>
+
+                                        <label class="label-compact">Coller les données :</label>
+                                        <textarea id="v2-donneesCollees" class="controle-form" rows="4"
+                                            placeholder="Depuis Excel ou Omnivox..."></textarea>
+                                        <button class="btn btn-secondaire btn-sm btn-block" style="margin-top: 8px;" onclick="previsualiserDonneesV2()">
+                                            Prévisualiser
+                                        </button>
+
+                                        <div class="separateur-ou">ou</div>
+
+                                        <label class="label-compact">Fichier CSV/TSV :</label>
+                                        <input type="file" id="v2-fichierCsvEntree" class="controle-form input-fichier-compact" accept=".csv,.tsv,.txt"
+                                            onchange="importerFichierEtudiantsV2(event)">
+                                    </div>
+
+                                    <!-- Zone de prévisualisation -->
+                                    <div id="v2-previewZone" class="zone-preview" style="display: none;">
+                                        <h6 style="margin-bottom: 10px;">Prévisualisation</h6>
+                                        <div id="v2-previewTable" style="max-height: 150px; overflow-y: auto;"></div>
+                                        <div class="btn-groupe" style="margin-top: 10px;">
+                                            <button class="btn btn-annuler btn-sm" onclick="annulerImportV2()">Annuler</button>
+                                            <button class="btn btn-confirmer btn-sm" onclick="confirmerImportV2()">Confirmer</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Actions sur la liste -->
+                                    <div class="section-actions-liste" id="v2-actionsEtudiants" style="display: none;">
+                                        <button class="btn btn-secondaire btn-sm btn-block" onclick="exporterEtudiantsV2()">
+                                            Exporter CSV
+                                        </button>
+                                        <button class="btn btn-annuler btn-sm btn-block" onclick="viderListeEtudiantsV2()">
+                                            Vider la liste
+                                        </button>
+                                    </div>
+
+                                    <!-- Bouton nouveau groupe (en bas) -->
+                                    <button class="btn btn-principal btn-sm btn-block" style="margin-top: 15px;" onclick="creerNouveauGroupeV2()">
+                                        + Nouveau groupe
+                                    </button>
+
+                                </div>
+
+                                <!-- DROITE : Liste + Ajout manuel -->
+                                <div class="panneau-formulaire panneau-liste-etudiants">
+
+                                    <!-- Liste des étudiants (tableau scrollable) -->
+                                    <div class="conteneur-liste-etudiants" id="v2-listeEtudiants">
+                                        <p class="etat-vide-liste">Aucun étudiant. Utilisez l'import à gauche ou le formulaire ci-dessous.</p>
+                                    </div>
+
+                                    <!-- Formulaire d'ajout/édition (toujours visible) -->
+                                    <div class="formulaire-ajout-etudiant" id="v2-formEtudiant">
+                                        <h5 class="sous-titre-section" style="margin-bottom: 10px;" id="v2-formEtudiantTitre">Ajouter un étudiant</h5>
+                                        <div class="grille-ajout-etudiant">
+                                            <div class="groupe-form">
+                                                <label>DA</label>
+                                                <input type="text" id="v2-etudiantDA" class="controle-form controle-form-compact" placeholder="1234567">
+                                            </div>
+                                            <div class="groupe-form">
+                                                <label>Nom <span class="text-danger">*</span></label>
+                                                <input type="text" id="v2-etudiantNom" class="controle-form controle-form-compact" placeholder="Tremblay">
+                                            </div>
+                                            <div class="groupe-form">
+                                                <label>Prénom <span class="text-danger">*</span></label>
+                                                <input type="text" id="v2-etudiantPrenom" class="controle-form controle-form-compact" placeholder="Marie">
+                                            </div>
+                                            <div class="groupe-form">
+                                                <label>Groupe</label>
+                                                <input type="text" id="v2-etudiantGroupe" class="controle-form controle-form-compact" placeholder="00001">
+                                            </div>
+                                            <div class="groupe-form">
+                                                <label>Programme</label>
+                                                <input type="text" id="v2-etudiantProgramme" class="controle-form controle-form-compact" placeholder="500.AF">
+                                            </div>
+                                            <div class="groupe-form">
+                                                <label>SA</label>
+                                                <select id="v2-etudiantSA" class="controle-form controle-form-compact">
+                                                    <option value="">Non</option>
+                                                    <option value="Oui">Oui</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div style="margin-top: 10px; display: flex; gap: 10px;">
+                                            <button class="btn btn-confirmer btn-sm" id="v2-btnSoumettreEtudiant" onclick="soumettreEtudiantV2()">
+                                                Ajouter l'étudiant
+                                            </button>
+                                            <button class="btn btn-annuler btn-sm" id="v2-btnAnnulerEdition" style="display: none;" onclick="annulerEditionEtudiantV2()">
+                                                Annuler
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div><!-- FIN disposition-bibliotheque-formulaire -->
+
+                        </div>
+                    </div><!-- FIN accordéon Groupe d'étudiants -->
+
+                    <!-- ========== ACCORDÉON: HORAIRE (Beta 95.2) ========== -->
                     <div class="carte accordeon" id="accordeon-horaire" style="margin-top: 20px;">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
                             <h3 class="carte-titre-bleu" style="margin: 0;">
                                 <span class="accordeon-chevron">▶</span> Horaire
                             </h3>
-                            <div class="btn-groupe" style="gap: 8px;" onclick="event.stopPropagation();">
-                                <button class="btn btn-confirmer btn-sm" onclick="afficherFormHoraireV2()">
-                                    + Nouvel horaire
-                                </button>
-                            </div>
                         </div>
                         <div class="accordeon-contenu" style="display: none;">
-                            <!-- Configuration durée de période -->
-                            <div class="alerte alerte-information" style="margin-bottom: 15px; display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
-                                <label style="font-weight: 600; white-space: nowrap; margin: 0;">Durée d'une période :</label>
-                                <select id="v2-dureePeriode" class="controle-form" style="width: auto; min-width: 150px;" onchange="modifierDureePeriodeV2(this.value)">
-                                    <option value="50">50 minutes</option>
-                                    <option value="55" selected>55 minutes</option>
-                                    <option value="60">60 minutes</option>
-                                    <option value="75">75 minutes</option>
-                                    <option value="90">90 minutes</option>
-                                </select>
-                                <span class="text-muted" style="font-size: 0.85rem;">Cette durée s'applique à toutes les séances.</span>
-                            </div>
 
-                            <!-- Sélection de l'horaire -->
-                            <div class="d-flex-gap-10-center" style="margin-bottom: 15px;">
-                                <label style="font-weight: 500;">Horaire :</label>
-                                <select id="v2-selectHoraire" class="controle-form" style="max-width: 400px;" onchange="changerHoraireSelectionneV2(this.value)">
-                                    <option value="">Sélectionner un horaire</option>
-                                </select>
-                                <button class="btn btn-modifier btn-sm" onclick="modifierHoraireSelectionneV2()" id="v2-btnModifierHoraire" style="display: none;">
-                                    Modifier
-                                </button>
-                            </div>
+                            <div class="disposition-bibliotheque-formulaire">
 
-                            <!-- Aperçu de l'horaire sélectionné -->
-                            <div id="v2-apercuHoraire" class="carte-bleu-pale-p15">
-                                <p class="text-muted">Sélectionnez un horaire pour voir ses détails.</p>
-                            </div>
+                                <!-- GAUCHE : Sélection + Résumé -->
+                                <div class="panneau-bibliotheque">
 
-                            <!-- Liste des séances du cours (ajoutée Beta 96) -->
-                            <div id="v2-seancesContainer" class="mb-20" style="margin-top: 15px;">
-                                <!-- Contenu généré par chargerSeancesV2() -->
-                            </div>
-
-                            <!-- FORMULAIRE HORAIRE (caché par défaut) -->
-                            <div id="v2-formulaireHoraire" style="display: none; padding: 20px; background: var(--bleu-pale); border: 1px solid var(--bleu-leger); border-radius: 8px; margin-top: 15px;">
-                                <h4 id="v2-titreFormHoraire" class="titre-bleu-mb-20">
-                                    Nouvel horaire
-                                </h4>
-
-                                <div class="grille-3col-form" style="margin-bottom: 15px;">
-                                    <div class="groupe-form">
-                                        <label>Nom de l'horaire</label>
-                                        <input type="text" id="v2-hor-nom" class="controle-form controle-form-compact" placeholder="Ex: Lun-Mer 10h">
-                                    </div>
-                                    <div class="groupe-form">
-                                        <label>Format horaire</label>
-                                        <select id="v2-hor-format" class="controle-form controle-form-compact" onchange="mettreAJourFormatHoraireV2()">
-                                            <option value="2x2">2x2 - 2 séances de 2 périodes</option>
-                                            <option value="1x4">1x4 - 1 séance de 4 périodes</option>
-                                            <option value="1x3">1x3 - 1 séance de 3 périodes</option>
-                                            <option value="2x1.5">2x1.5 - 2 séances de 1.5 périodes</option>
-                                            <option value="1x2">1x2 - 1 séance de 2 périodes</option>
-                                            <option value="2x1">2x1 - 2 séances de 1 période</option>
-                                            <option value="autre">Autre format</option>
+                                    <!-- Sélection de l'horaire -->
+                                    <div class="groupe-form" style="margin-bottom: 15px;">
+                                        <label class="label-compact">Horaire :</label>
+                                        <select id="v2-selectHoraire" class="controle-form" onchange="changerHoraireSelectionneV2(this.value)">
+                                            <option value="">Sélectionner...</option>
                                         </select>
                                     </div>
-                                    <div class="groupe-form">
-                                        <label>Local <span style="color: var(--gris-leger); font-weight: normal;">(optionnel)</span></label>
-                                        <input type="text" id="v2-hor-local" class="controle-form controle-form-compact" placeholder="Ex: A-123">
+
+                                    <!-- Carte résumé de l'horaire sélectionné -->
+                                    <div class="carte-resume-horaire" id="v2-carteResumeHoraire">
+                                        <p class="etat-vide-resume">Aucun horaire sélectionné</p>
                                     </div>
+
+                                    <!-- Configuration durée de période -->
+                                    <div class="section-config-periode">
+                                        <label class="label-compact">Durée d'une période :</label>
+                                        <select id="v2-dureePeriode" class="controle-form" onchange="modifierDureePeriodeV2(this.value)">
+                                            <option value="50">50 minutes</option>
+                                            <option value="55" selected>55 minutes</option>
+                                            <option value="60">60 minutes</option>
+                                            <option value="75">75 minutes</option>
+                                            <option value="90">90 minutes</option>
+                                        </select>
+                                        <p class="texte-aide" style="margin-top: 5px; font-size: 0.75rem;">S'applique à tous les horaires.</p>
+                                    </div>
+
+                                    <!-- Bouton nouvel horaire (en bas) -->
+                                    <button class="btn btn-principal btn-sm btn-block" style="margin-top: 15px;" onclick="nouveauHoraireV2()">
+                                        + Nouvel horaire
+                                    </button>
+
                                 </div>
 
-                                <!-- Séances hebdomadaires -->
-                                <h5 class="sous-titre-section" style="margin-top: 20px;">Séances hebdomadaires</h5>
-                                <div id="v2-hor-seances" style="margin-bottom: 15px;">
-                                    <!-- Séances générées dynamiquement -->
-                                </div>
-                                <button class="btn btn-secondaire btn-sm" onclick="ajouterSeanceV2()">
-                                    + Ajouter une séance
-                                </button>
+                                <!-- DROITE : Formulaire -->
+                                <div class="panneau-formulaire" id="v2-panneauFormHoraire">
 
-                                <!-- Boutons d'action -->
-                                <div class="btn-groupe btn-groupe-droite" style="margin-top: 25px; padding-top: 20px; border-top: 2px solid var(--bleu-leger);">
-                                    <button class="btn btn-annuler" onclick="annulerFormHoraireV2()">
-                                        Annuler
-                                    </button>
-                                    <button class="btn btn-confirmer" onclick="sauvegarderHoraireV2()">
-                                        <span id="v2-btnTexteHoraire">Ajouter</span>
-                                    </button>
+                                    <!-- État vide -->
+                                    <div id="v2-horaireEtatVide" class="etat-vide-formulaire">
+                                        <p>Sélectionnez un horaire à modifier ou créez-en un nouveau.</p>
+                                    </div>
+
+                                    <!-- Formulaire (caché par défaut) -->
+                                    <div id="v2-formulaireHoraire" style="display: none; padding: 15px;">
+                                        <h4 id="v2-titreFormHoraire" class="titre-formulaire">Nouvel horaire</h4>
+
+                                        <!-- Groupe associé (obligatoire) -->
+                                        <div class="groupe-form" style="margin-bottom: 15px;">
+                                            <label>Groupe associé <span class="text-danger">*</span></label>
+                                            <select id="v2-hor-groupeAssocie" class="controle-form">
+                                                <option value="">— Sélectionner un groupe —</option>
+                                            </select>
+                                            <p class="texte-aide" style="margin-top: 5px; font-size: 0.75rem;">L'horaire sera lié à ce groupe d'étudiants.</p>
+                                        </div>
+
+                                        <div class="grille-form-2col" style="margin-bottom: 15px;">
+                                            <div class="groupe-form">
+                                                <label>Nom de l'horaire <span class="text-danger">*</span></label>
+                                                <input type="text" id="v2-hor-nom" class="controle-form" placeholder="Ex: Lun-Mer 10h">
+                                            </div>
+                                            <div class="groupe-form">
+                                                <label>Local</label>
+                                                <input type="text" id="v2-hor-local" class="controle-form" placeholder="Ex: A-123">
+                                            </div>
+                                        </div>
+
+                                        <div class="grille-form-2col" style="margin-bottom: 15px;">
+                                            <div class="groupe-form">
+                                                <label>Séances par semaine</label>
+                                                <select id="v2-hor-nbSeances" class="controle-form" onchange="mettreAJourSeancesHoraireV2()">
+                                                    <option value="1">1 séance</option>
+                                                    <option value="2" selected>2 séances</option>
+                                                    <option value="3">3 séances</option>
+                                                    <option value="4">4 séances</option>
+                                                    <option value="5">5 séances</option>
+                                                </select>
+                                            </div>
+                                            <div class="groupe-form">
+                                                <label>Périodes par séance</label>
+                                                <select id="v2-hor-periodesParSeance" class="controle-form" onchange="mettreAJourSeancesHoraireV2()">
+                                                    <option value="1">1 période</option>
+                                                    <option value="2" selected>2 périodes</option>
+                                                    <option value="3">3 périodes</option>
+                                                    <option value="4">4 périodes</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <!-- Résumé du format -->
+                                        <div class="resume-format-horaire">
+                                            <strong>Format :</strong> <span id="v2-hor-formatResume">2 séances × 2 périodes = 4 périodes/semaine</span>
+                                        </div>
+
+                                        <!-- Séances hebdomadaires -->
+                                        <h5 class="sous-titre-section" style="margin-top: 20px;">Séances hebdomadaires</h5>
+                                        <div id="v2-hor-seances" class="liste-seances-horaire">
+                                            <!-- Séances générées dynamiquement -->
+                                        </div>
+
+                                        <!-- Boutons d'action -->
+                                        <div class="actions-formulaire" style="margin-top: 20px;">
+                                            <button class="btn btn-annuler" onclick="annulerFormHoraireV2()">
+                                                Annuler
+                                            </button>
+                                            <button class="btn btn-confirmer" onclick="sauvegarderHoraireV2()">
+                                                <span id="v2-btnTexteHoraire">Enregistrer</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
                                 </div>
-                            </div>
+
+                            </div><!-- FIN disposition-bibliotheque-formulaire -->
+
                         </div>
                     </div><!-- FIN accordéon Horaire -->
 
-                    <!-- ========== ACCORDÉON: GROUPE D'ÉTUDIANTS (HTML Legacy intégré) ========== -->
-                    <div class="carte accordeon" id="accordeon-groupe" style="margin-top: 20px;">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
-                            <h3 class="carte-titre-bleu" style="margin: 0;">
-                                <span class="accordeon-chevron">▶</span> Groupe d'étudiants
-                            </h3>
-                        </div>
-                        <div class="accordeon-contenu" style="display: none;">
-
-                            <!-- VUE D'ENSEMBLE (Legacy) -->
-                            <div class="grille-cartes-metriques mb-20">
-                                <div class="carte-metrique-bleue">
-                                    <div class="carte-metrique-contenu">
-                                        <span class="carte-metrique-label">Étudiant·es au total</span>
-                                        <strong id="nbEtudiantsTotal" class="carte-metrique-valeur">0</strong>
-                                    </div>
-                                </div>
-                                <div class="carte-metrique-bleue">
-                                    <div class="carte-metrique-contenu">
-                                        <span class="carte-metrique-label">Groupes</span>
-                                        <strong id="nbGroupes" class="carte-metrique-valeur">0</strong>
-                                    </div>
-                                </div>
-                                <div class="carte-metrique-bleue">
-                                    <div id="detailGroupes" class="carte-metrique-contenu">
-                                        <em>Aucun groupe configuré</em>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- FILTRAGE PAR GROUPE (Legacy) -->
-                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                                <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
-                                    <label style="font-weight: 500; color: var(--bleu-principal);">Filtrer par groupe :</label>
-                                    <select id="filtreGroupe" onchange="filtrerParGroupe()" class="controle-form" style="flex: 1; min-width: 200px; max-width: 300px;">
-                                        <option value="">Tous les groupes</option>
-                                    </select>
-                                    <button onclick="resetFiltreGroupe()" class="btn btn-annuler btn-sm">Réinitialiser</button>
-                                </div>
-                            </div>
-
-                            <!-- FORMULAIRE D'AJOUT MANUEL (Legacy) -->
-                            <details class="mb-20">
-                                <summary style="cursor: pointer; font-weight: 600; color: var(--bleu-principal); padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px; user-select: none;">
-                                    + Ajouter un·e étudiant·e manuellement
-                                </summary>
-                                <div style="padding: 15px; background: var(--bleu-tres-pale); border-radius: 0 0 6px 6px; margin-top: -5px;">
-                                    <div class="formulaire-ajout-grid">
-                                        <div>
-                                            <label class="label-form-reglages">DA</label>
-                                            <input type="text" id="etudiantDA" class="controle-form" placeholder="1234567">
-                                        </div>
-                                        <div>
-                                            <label class="label-form-reglages">Groupe</label>
-                                            <input type="text" id="etudiantGroupe" class="controle-form" placeholder="1">
-                                        </div>
-                                        <div>
-                                            <label class="label-form-reglages">Nom <span class="text-danger">*</span></label>
-                                            <input type="text" id="etudiantNom" class="controle-form" required placeholder="Nom">
-                                        </div>
-                                        <div>
-                                            <label class="label-form-reglages">Prénom <span class="text-danger">*</span></label>
-                                            <input type="text" id="etudiantPrenom" class="controle-form" required placeholder="Prénom">
-                                        </div>
-                                        <div>
-                                            <label class="label-form-reglages">Programme</label>
-                                            <input type="text" id="etudiantProgramme" class="controle-form" placeholder="200.B1">
-                                        </div>
-                                        <div>
-                                            <label class="label-form-reglages">SA</label>
-                                            <select id="etudiantSA" class="controle-form">
-                                                <option value="">---</option>
-                                                <option value="Oui">✓</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label class="label-form-reglages">CAF</label>
-                                            <select id="etudiantCAF" class="controle-form">
-                                                <option value="">---</option>
-                                                <option value="Oui">✓</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <button onclick="addStudent()" class="btn btn-principal">Ajouter</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </details>
-
-                            <!-- ZONE D'IMPORT (Legacy) -->
-                            <details class="mb-20">
-                                <summary style="cursor: pointer; font-weight: 600; color: var(--bleu-principal); padding: 12px; background: var(--gris-tres-pale); border-radius: 6px; user-select: none;">
-                                    Importer des étudiants (CSV/TSV ou copier-coller)
-                                </summary>
-                                <div style="padding: 15px; background: var(--gris-tres-pale); border-radius: 0 0 6px 6px; margin-top: -5px;">
-                                    <div style="margin-bottom: 15px;">
-                                        <label style="font-weight: 500; display: block; margin-bottom: 8px;">Option 1 : Importer un fichier CSV/TSV</label>
-                                        <input type="file" id="fichierCsvEntree" accept=".csv,.tsv,.txt" onchange="handleFileImport(event)" class="controle-form">
-                                        <small style="color: var(--gris-moyen); display: block; margin-top: 5px;">Format attendu : DA, Groupe, Nom, Prénom, Programme, Nom du programme, SA</small>
-                                    </div>
-                                    <div>
-                                        <label style="font-weight: 500; display: block; margin-bottom: 8px;">Option 2 : Copier-coller des données</label>
-                                        <textarea id="donneesCollees" class="controle-form" placeholder="Collez tes données ici (colonnes séparées par des tabulations ou virgules)
-Exemple :
-1234567	1	Tremblay	Marie	582.A1	Oui
-1234568	1	Gagnon	Pierre	582.A1		Oui" rows="6" style="font-family: monospace;"></textarea>
-                                        <button onclick="previewPastedData()" class="btn btn-principal btn-sm" style="margin-top: 10px;">Prévisualiser les données</button>
-                                    </div>
-                                </div>
-                            </details>
-
-                            <!-- ZONE DE PRÉVISUALISATION (Legacy) -->
-                            <div id="previewZone" style="display: none; margin-bottom: 20px; background: var(--alerte-fond-attention); padding: 15px; border-radius: 8px; border: 2px solid #ffc107;">
-                                <h4 style="margin: 0 0 10px 0; color: #856404;">Prévisualisation de l'import</h4>
-                                <p style="color: var(--alerte-texte-attention); margin-bottom: 15px;">Vérifiez les données avant de les importer définitivement.</p>
-                                <div id="previewTable" style="overflow-x: auto; max-height: 300px; border: 1px solid var(--bordure-claire); border-radius: 4px; background: white;"></div>
-                                <div style="margin-top: 15px; display: flex; gap: 10px;">
-                                    <button onclick="confirmImport()" class="btn btn-confirmer">Confirmer l'import</button>
-                                    <button onclick="cancelImport()" class="btn btn-annuler">Annuler</button>
-                                </div>
-                            </div>
-
-                            <!-- LISTE DES ÉTUDIANTS (Legacy) -->
-                            <div id="students-list-container" style="display: none; margin-bottom: 20px;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                                    <h4 style="color: var(--bleu-principal); margin: 0;">Liste des étudiants <span id="compteurFiltres"></span></h4>
-                                    <div style="display: flex; gap: 10px;">
-                                        <button onclick="exportStudentsData()" class="btn btn-principal btn-sm">Exporter (CSV)</button>
-                                        <button onclick="resetStudentsData()" class="btn btn-annuler btn-sm">Réinitialiser</button>
-                                    </div>
-                                </div>
-                                <div style="overflow-x: auto; border: 1px solid var(--bordure-claire); border-radius: 6px;">
-                                    <table id="students-table" class="tableau-blanc" style="width: 100%;">
-                                        <thead class="thead-bleu-moyen">
-                                            <tr>
-                                                <th style="text-align: left; width: 100px;">DA</th>
-                                                <th style="text-align: center; width: 80px;">Groupe</th>
-                                                <th style="text-align: left;">Nom</th>
-                                                <th style="text-align: left;">Prénom</th>
-                                                <th style="text-align: left; width: 100px;">Programme</th>
-                                                <th style="text-align: center; width: 60px;">SA</th>
-                                                <th style="text-align: center; width: 60px;">CAF</th>
-                                                <th style="text-align: center; width: 200px;">Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="students-tbody"></tbody>
-                                    </table>
-                                </div>
-                            </div>
-
-                            <!-- MESSAGE SI AUCUN ÉTUDIANT (Legacy) -->
-                            <div id="no-students-msg" style="display: block; text-align: center; padding: 40px; background: var(--gris-tres-pale); border-radius: 8px; color: var(--gris-moyen);">
-                                <p style="font-size: 1.1rem; margin-bottom: 10px;">📭 Aucun·e étudiant·e dans le groupe</p>
-                                <p style="font-size: 0.9rem;">Utilisez le formulaire ci-dessus ou l'import pour ajouter des étudiant·es</p>
-                            </div>
-
-                        </div>
-                    </div><!-- FIN accordéon Groupe d'étudiants -->
-
-                    <!-- ========== ACCORDÉON: GROUPE-COURS (Beta 96 - Assemblage) ========== -->
+                    <!-- ========== ACCORDÉON: GROUPE-COURS (Beta 95.2 - Assemblage) ========== -->
                     <div class="carte accordeon" id="accordeon-groupe-cours" style="margin-top: 20px;">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
                             <h3 class="carte-titre-bleu" style="margin: 0;">
                                 <span class="accordeon-chevron">▶</span> Groupe-cours
                             </h3>
-                            <div class="btn-groupe" style="gap: 8px;" onclick="event.stopPropagation();">
-                                <button class="btn btn-confirmer btn-sm" onclick="afficherFormGroupeCoursV2()">
-                                    + Nouveau groupe-cours
-                                </button>
-                            </div>
                         </div>
                         <div class="accordeon-contenu" style="display: none;">
-                            <div class="alerte alerte-information" style="margin-bottom: 15px;">
-                                Un <strong>groupe-cours</strong> combine : un cours + un enseignant·e + un numéro de groupe + un horaire + une pratique de notation.
-                            </div>
 
-                            <!-- Liste des groupe-cours existants -->
-                            <div id="v2-listeGroupeCours" style="margin-bottom: 20px;">
-                                <p class="text-muted">Aucun groupe-cours configuré pour ce trimestre.</p>
-                            </div>
+                            <div class="disposition-bibliotheque-formulaire">
 
-                            <!-- FORMULAIRE GROUPE-COURS (caché par défaut) -->
-                            <div id="v2-formulaireGroupeCours" style="display: none; padding: 20px; background: var(--bleu-pale); border: 1px solid var(--bleu-leger); border-radius: 8px;">
-                                <h4 class="titre-bleu-mb-20">Créer un groupe-cours</h4>
+                                <!-- GAUCHE : Sélection + Résumé -->
+                                <div class="panneau-bibliotheque">
 
-                                <div class="grille-2col" style="gap: 15px; margin-bottom: 15px;">
-                                    <div class="groupe-form">
-                                        <label>Cours <span style="color: var(--rouge-erreur);">*</span></label>
-                                        <select id="v2-gc-cours" class="controle-form controle-form-compact">
-                                            <option value="">-- Sélectionner un cours --</option>
+                                    <!-- Sélection du groupe-cours -->
+                                    <div class="groupe-form" style="margin-bottom: 15px;">
+                                        <label class="label-compact">Groupe-cours :</label>
+                                        <select id="v2-selectGroupeCours" class="controle-form" onchange="changerGroupeCoursSelectionneV2(this.value)">
+                                            <option value="">Sélectionner...</option>
                                         </select>
                                     </div>
-                                    <div class="groupe-form">
-                                        <label>Enseignant·e <span style="color: var(--rouge-erreur);">*</span></label>
-                                        <select id="v2-gc-enseignant" class="controle-form controle-form-compact">
-                                            <option value="">-- Sélectionner un enseignant·e --</option>
-                                        </select>
-                                    </div>
-                                </div>
 
-                                <div class="grille-3col-form" style="margin-bottom: 15px;">
-                                    <div class="groupe-form">
-                                        <label>Numéro de groupe <span style="color: var(--rouge-erreur);">*</span></label>
-                                        <input type="text" id="v2-gc-groupe" class="controle-form controle-form-compact" placeholder="Ex: 00001" maxlength="5">
+                                    <!-- Carte résumé du groupe-cours sélectionné -->
+                                    <div class="carte-resume-groupe-cours" id="v2-carteResumeGroupeCours">
+                                        <p class="etat-vide-resume">Aucun groupe-cours sélectionné</p>
                                     </div>
-                                    <div class="groupe-form">
-                                        <label>Horaire</label>
-                                        <select id="v2-gc-horaire" class="controle-form controle-form-compact">
-                                            <option value="">-- Sélectionner un horaire --</option>
-                                        </select>
-                                    </div>
-                                    <div class="groupe-form">
-                                        <label>Pratique de notation</label>
-                                        <select id="v2-gc-pratique" class="controle-form controle-form-compact">
-                                            <option value="">-- Sélectionner une pratique --</option>
-                                        </select>
-                                    </div>
-                                </div>
 
-                                <!-- Aperçu de l'assemblage -->
-                                <div id="v2-gc-apercu" class="carte-bleu-pale-p15" style="margin-bottom: 15px;">
-                                    <strong>Aperçu :</strong> <span id="v2-gc-apercu-texte" class="text-muted">Complétez les champs pour voir l'aperçu</span>
-                                </div>
+                                    <!-- Info -->
+                                    <p class="texte-aide" style="margin-top: 15px; font-size: 0.8rem;">
+                                        Le groupe-cours actif apparaît dans l'en-tête de l'application.
+                                    </p>
 
-                                <!-- Boutons d'action -->
-                                <div class="btn-groupe btn-groupe-droite" style="margin-top: 15px; padding-top: 15px; border-top: 2px solid var(--bleu-leger);">
-                                    <button class="btn btn-annuler" onclick="annulerFormGroupeCoursV2()">
-                                        Annuler
+                                    <!-- Bouton nouveau groupe-cours (en bas) -->
+                                    <button class="btn btn-principal btn-sm btn-block" style="margin-top: 15px;" onclick="nouveauGroupeCoursV2()">
+                                        + Nouveau groupe-cours
                                     </button>
-                                    <button class="btn btn-confirmer" onclick="sauvegarderGroupeCoursV2()">
-                                        Créer le groupe-cours
-                                    </button>
+
                                 </div>
-                            </div>
+
+                                <!-- DROITE : Formulaire d'assemblage -->
+                                <div class="panneau-formulaire" id="v2-panneauFormGroupeCours">
+
+                                    <!-- État vide -->
+                                    <div id="v2-groupeCoursEtatVide" class="etat-vide-formulaire">
+                                        <p>Sélectionnez un groupe-cours ou créez-en un nouveau pour assembler vos éléments.</p>
+                                    </div>
+
+                                    <!-- Formulaire (caché par défaut) -->
+                                    <div id="v2-formulaireGroupeCours" style="display: none; padding: 15px;">
+                                        <h4 id="v2-titreFormGroupeCours" class="titre-formulaire">Nouveau groupe-cours</h4>
+
+                                        <!-- Trimestre actif (lecture seule) -->
+                                        <div class="info-trimestre-groupe-cours" id="v2-gc-trimestreInfo">
+                                            <span class="label-info">Trimestre :</span>
+                                            <span id="v2-gc-trimestreNom">—</span>
+                                        </div>
+
+                                        <!-- Nom généré dynamiquement -->
+                                        <div class="apercu-nom-groupe-cours" id="v2-apercuNomGroupeCours">
+                                            <span class="label-apercu">Nom :</span>
+                                            <span class="nom-genere" id="v2-nomGroupeCoursGenere">—</span>
+                                        </div>
+
+                                        <!-- Assemblage des éléments -->
+                                        <div class="grille-form-2col" style="margin-bottom: 15px;">
+                                            <div class="groupe-form">
+                                                <label>Cours <span class="text-danger">*</span></label>
+                                                <select id="v2-gc-cours" class="controle-form" onchange="mettreAJourNomGroupeCoursV2()">
+                                                    <option value="">— Sélectionner —</option>
+                                                </select>
+                                            </div>
+                                            <div class="groupe-form">
+                                                <label>Groupe d'étudiants <span class="text-danger">*</span></label>
+                                                <select id="v2-gc-groupe" class="controle-form" onchange="mettreAJourNomGroupeCoursV2()">
+                                                    <option value="">— Sélectionner —</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <!-- Horaire (lecture seule - lié au groupe) -->
+                                        <div class="info-horaire-groupe-cours" id="v2-gc-horaireInfo">
+                                            <span class="label-info">Horaire :</span>
+                                            <span id="v2-gc-horaireNom">— Sélectionnez un groupe —</span>
+                                            <input type="hidden" id="v2-gc-horaire" value="">
+                                        </div>
+
+                                        <!-- Enseignant (affiché mais pas modifiable - profil unique) -->
+                                        <div class="info-enseignant-groupe-cours" id="v2-gc-enseignantInfo">
+                                            <span class="label-info">Enseignant·e :</span>
+                                            <span id="v2-gc-enseignantNom">—</span>
+                                        </div>
+
+                                        <!-- Boutons d'action -->
+                                        <div class="actions-formulaire" style="margin-top: 20px;">
+                                            <button class="btn btn-annuler" onclick="annulerFormGroupeCoursV2()">
+                                                Annuler
+                                            </button>
+                                            <button class="btn btn-confirmer" id="v2-btnSauvegarderGroupeCours" onclick="sauvegarderGroupeCoursV2()">
+                                                <span id="v2-btnTexteGroupeCours">Créer</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div><!-- FIN disposition-bibliotheque-formulaire -->
+
                         </div>
                     </div><!-- FIN accordéon Groupe-cours -->
 
@@ -13274,11 +13261,11 @@ Exemple :
                     <h2>Notes de version</h2>
                     <p class="text-muted">Historique des changements majeurs</p>
 
-                    <!-- Beta 96 -->
+                    <!-- Beta 95.2 -->
                     <div class="carte accordeon" id="accordeon-aide-beta96">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
                             <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Beta 96 — Architecture modulaire groupe-cours
+                                <span class="accordeon-chevron">▼</span> Beta 95.2 — Architecture modulaire groupe-cours
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
@@ -13629,14 +13616,14 @@ Exemple :
     <!-- PRIORITÉ 2: Données de base -->
     <script src="js/trimestres.js?v=2025123102"></script> <!-- Beta 95 : Gestion multi-trimestres -->
     <script src="js/trimestre.js?v=2025123109"></script>
-    <script src="js/trimestre-v2.js?v=2026010604"></script> <!-- Périodes au lieu d'heures + dropdown dynamique -->
+    <script src="js/trimestre-v2.js?v=2026010607"></script> <!-- Beta 95.2 : rafraîchit dropdown groupe-cours actif -->
 
-    <!-- ENTITÉS Beta 96 - Architecture modulaire groupe-cours -->
+    <!-- ENTITÉS Beta 95.2 - Architecture modulaire groupe-cours -->
     <script src="js/entites/cours-entite.js?v=2026010601"></script>
     <script src="js/entites/enseignants.js?v=2026010601"></script>
     <script src="js/entites/horaires.js?v=2026010601"></script>
     <script src="js/entites/groupe-cours.js?v=2026010601"></script>
-    <script src="js/entites-ui.js?v=2026010601"></script>
+    <script src="js/entites-ui.js?v=2026010606"></script> <!-- Beta 95.2 : dropdown groupe-cours header -->
 
     <script src="js/pratique-notation-v2.js?v=2026010226"></script> <!-- Beta 95 : dropdown productions + terminologie "production" -->
     <script src="js/gabarits-utils.js?v=2026010202"></script> <!-- Beta 95 : Module utilitaire gabarits + filtres pratique -->
@@ -13655,7 +13642,7 @@ Exemple :
     <script src="js/cartouches-bibliotheque.js?v=2026010220"></script> <!-- refactoring: plus de hardcodé -->
     <script src="js/cartouches.js?v=2026010601"></script>
     <script src="js/cours.js?v=2025121601"></script>
-    <script src="js/contexte.js?v=2025122401"></script>
+    <script src="js/contexte.js?v=2026010601"></script> <!-- Beta 95.2 : Support groupe-cours -->
 
     <!-- PRIORITÉ 3: Configuration et calcul des indices (AVANT affichage) -->
     <script src="js/interpretation-config.js?v=2025111501"></script>

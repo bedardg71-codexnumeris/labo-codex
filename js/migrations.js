@@ -846,7 +846,7 @@ function verifierEtProposerMigrationLegacy() {
 }
 
 /* ===============================
-   MIGRATIONS BETA 96 : ENTITÉS MODULAIRES
+   MIGRATIONS BETA 95.2 : ENTITÉS MODULAIRES
    Date: 6 janvier 2026
 
    Objectif:
@@ -863,7 +863,7 @@ function verifierEtProposerMigrationLegacy() {
  * @returns {Object} { nbEnseignantsExtraits, mapAncienNouvel }
  */
 async function migrerVersEntiteEnseignants() {
-    console.log('🔄 [Migration Beta 96] Extraction des enseignants...');
+    console.log('🔄 [Migration Beta 95.2] Extraction des enseignants...');
 
     const listeCours = db.getSync('listeCours', []);
     const enseignantsExistants = db.getSync('enseignants', []);
@@ -944,7 +944,7 @@ async function migrerVersEntiteEnseignants() {
  * @returns {Object} { nbCoursExtraits, mapAncienNouvel }
  */
 async function migrerVersEntiteCours() {
-    console.log('🔄 [Migration Beta 96] Extraction des cours (infos générales)...');
+    console.log('🔄 [Migration Beta 95.2] Extraction des cours (infos générales)...');
 
     const listeCours = db.getSync('listeCours', []);
     const coursExistants = db.getSync('cours', []);
@@ -1014,7 +1014,7 @@ async function migrerVersEntiteCours() {
  * @returns {Object} { nbHorairesExtraits, mapAncienNouvel }
  */
 async function migrerVersEntiteHoraires() {
-    console.log('🔄 [Migration Beta 96] Extraction des horaires...');
+    console.log('🔄 [Migration Beta 95.2] Extraction des horaires...');
 
     const listeCours = db.getSync('listeCours', []);
     const horairesExistants = db.getSync('horaires', []);
@@ -1109,7 +1109,7 @@ async function migrerVersEntiteHoraires() {
  * @returns {Object} { nbGroupeCoursCreés }
  */
 async function migrerVersGroupeCours(mapEnseignants, mapCours, mapHoraires) {
-    console.log('🔄 [Migration Beta 96] Création des groupe-cours...');
+    console.log('🔄 [Migration Beta 95.2] Création des groupe-cours...');
 
     const listeCours = db.getSync('listeCours', []);
     const trimestres = db.getSync('trimestres', []);
@@ -1161,16 +1161,16 @@ async function migrerVersGroupeCours(mapEnseignants, mapCours, mapHoraires) {
 }
 
 /**
- * Exécuter toutes les migrations Beta 96
+ * Exécuter toutes les migrations Beta 95.2
  *
  * @returns {Object} Résultats des migrations
  */
 async function executerMigrationsBeta96() {
-    console.log('🔄 [Migration] Démarrage migrations Beta 96 (entités modulaires)...');
+    console.log('🔄 [Migration] Démarrage migrations Beta 95.2 (entités modulaires)...');
 
     // Vérifier si déjà migré
     if (db.getSync('migrationBeta96Effectuee', false)) {
-        console.log('✅ [Migration] Beta 96 déjà effectuée');
+        console.log('✅ [Migration] Beta 95.2 déjà effectuée');
         return { deja_effectuee: true };
     }
 
@@ -1205,19 +1205,19 @@ async function executerMigrationsBeta96() {
         const total = Object.values(resultats).reduce((a, b) => a + b, 0);
 
         if (total > 0) {
-            console.log(`✅ [Migration] Beta 96 terminée:`);
+            console.log(`✅ [Migration] Beta 95.2 terminée:`);
             console.log(`   - Enseignants: ${resultats.enseignants}`);
             console.log(`   - Cours: ${resultats.cours}`);
             console.log(`   - Horaires: ${resultats.horaires}`);
             console.log(`   - Groupe-cours: ${resultats.groupesCours}`);
         } else {
-            console.log('✅ [Migration] Aucune migration Beta 96 nécessaire (données vides ou déjà migrées)');
+            console.log('✅ [Migration] Aucune migration Beta 95.2 nécessaire (données vides ou déjà migrées)');
         }
 
         return resultats;
 
     } catch (err) {
-        console.error('❌ [Migration] Erreur Beta 96:', err);
+        console.error('❌ [Migration] Erreur Beta 95.2:', err);
         return { erreur: err.message };
     }
 }
@@ -1243,7 +1243,7 @@ if (typeof window !== 'undefined') {
     window.reporterMigrationLegacy = reporterMigrationLegacy;
     window.executerMigrationLegacy = executerMigrationLegacy;
     window.verifierEtProposerMigrationLegacy = verifierEtProposerMigrationLegacy;
-    // 🆕 Beta 96 - Entités modulaires
+    // 🆕 Beta 95.2 - Entités modulaires
     window.executerMigrationsBeta96 = executerMigrationsBeta96;
     window.migrerVersEntiteEnseignants = migrerVersEntiteEnseignants;
     window.migrerVersEntiteCours = migrerVersEntiteCours;

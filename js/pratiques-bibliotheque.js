@@ -671,7 +671,7 @@ async function obtenirConfigurationPratiqueParId(configId) {
     const dansBibliotheque = bibliotheque.find(p => p.id === configId);
     if (dansBibliotheque) return dansBibliotheque;
 
-    // 3. Vérifier les pratiques configurables de l'utilisateur (Beta 96 - Bug Bruno)
+    // 3. Vérifier les pratiques configurables de l'utilisateur (Beta 95.2 - Bug Bruno)
     const configurables = await db.get('pratiquesConfigurables') || [];
     return configurables.find(p => p.id === configId) || null;
 }

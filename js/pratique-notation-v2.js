@@ -485,7 +485,7 @@
 
     /**
      * Affiche la configuration correspondant au type de pratique
-     * Taxonomie Beta 96 : Sommative, PAN-Standards, PAN-Spécifications, PAN-Dénotation
+     * Taxonomie Beta 95.2 : Sommative, PAN-Standards, PAN-Spécifications, PAN-Dénotation
      */
     function afficherConfigurationType(type) {
         // Masquer toutes les configurations

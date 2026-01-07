@@ -20,7 +20,7 @@ const CC_LICENSE_DEFAULTS = {
 };
 
 // ============================================
-// 🆕 BETA 96: PROFIL AUTEUR DEPUIS GROUPE-COURS
+// 🆕 BETA 95.2: PROFIL AUTEUR DEPUIS GROUPE-COURS
 // ============================================
 
 /**
@@ -90,7 +90,7 @@ function obtenirProfilAuteurActifSync() {
 function ajouterMetadonnéesCC(contenu, type, nom, metaEnrichies = {}) {
     const date_actuelle = new Date().toISOString().split('T')[0];
 
-    // 🆕 BETA 96: Utiliser le profil auteur de l'enseignant du groupe-cours actif
+    // 🆕 BETA 95.2: Utiliser le profil auteur de l'enseignant du groupe-cours actif
     // Priorité: metaEnrichies > profilAuteur (enseignant) > infoCours > défauts
     const profilAuteur = obtenirProfilAuteurActifSync();
     const infoCours = JSON.parse(localStorage.getItem('infoCours') || '{}');
@@ -110,7 +110,7 @@ function ajouterMetadonnéesCC(contenu, type, nom, metaEnrichies = {}) {
                             infoCours.siteWeb ||
                             CC_LICENSE_DEFAULTS.site_auteur;
 
-    // 🆕 BETA 96: Institution et niveau depuis profil auteur
+    // 🆕 BETA 95.2: Institution et niveau depuis profil auteur
     const institution_utilisateur = metaEnrichies.institution ||
                                     profilAuteur?.institution ||
                                     infoCours.institution ||
@@ -143,7 +143,7 @@ function ajouterMetadonnéesCC(contenu, type, nom, metaEnrichies = {}) {
             version: contenu.metadata?.version || "1.0",
             contributeurs: contenu.metadata_cc?.contributeurs || contenu.metadata?.contributeurs || [],
             attribution: profilAuteur?.attribution || `Créé par ${auteur_original} pour l'application Monitorage Pédagogique`,
-            // 🆕 BETA 96: Métadonnées enrichies depuis profil auteur (enseignant)
+            // 🆕 BETA 95.2: Métadonnées enrichies depuis profil auteur (enseignant)
             discipline: metaEnrichies.discipline || contenu.metadata?.discipline || [],
             niveau: niveau_utilisateur || contenu.metadata?.niveau || "",
             institution: institution_utilisateur || contenu.metadata?.institution || "",

@@ -39,9 +39,24 @@ Avant de commencer, identifie ce sur quoi tu travailles :
 
 ---
 
+## Pattern architectural principal
+
+L'application utilise le pattern **"Bibliotheque + Assemblage"** :
+
+- **Bibliotheque** : Entites reutilisables (NON namespacees, partagees)
+- **Assemblage** : Combinaison d'entites pour un contexte specifique
+
+Ce pattern est utilise dans :
+1. **Construction de la note** : Pratiques → Configuration active
+2. **Gestion du Trimestre** : Cours/Enseignants/Horaires → Groupe-cours
+
+**Documentation complete** : `architecture/pattern-bibliotheque-assemblage.md`
+
+---
+
 ## Etat actuel du projet
 
-**Version** : Beta 95.1 (stabilisation H2026)
+**Version** : Beta 95.2 (architecture modulaire groupe-cours)
 **Objectif** : Tests reseau janvier-mai 2026
 **Priorite** : **Stabilite > Nouvelles fonctionnalites**
 
@@ -103,4 +118,4 @@ Gregoire a la memoire contextuelle reelle du projet.
 
 ---
 
-**Derniere mise a jour** : 1er janvier 2026
+**Derniere mise a jour** : 6 janvier 2026
