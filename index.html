@@ -3194,24 +3194,27 @@
                 <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: 4px; padding: 12px 16px; margin-bottom: 1.5rem;">
                     <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Pour les testeurs (dernières 48h) :</strong>
                     <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
-                        <li><strong>Lien horaire ↔ groupe</strong> : Chaque horaire est maintenant associé à un groupe d'étudiants</li>
-                        <li><strong>Nom dynamique</strong> : Le groupe-cours génère son nom automatiquement (ex: H2026-601-101-MQ-00001)</li>
-                        <li><strong>Trimestre actif visible</strong> : Le trimestre s'affiche dans le formulaire groupe-cours</li>
-                        <li><strong>Dropdown header</strong> : Les groupe-cours apparaissent dans l'entête pour sélection rapide</li>
-                        <li><strong>Interface unifiée</strong> : Pattern bibliothèque-formulaire pour tous les accordéons</li>
+                        <li><strong>Périodes au lieu d'heures</strong> : Format horaire dynamique selon le nombre de périodes (merci Olivier)</li>
+                        <li><strong>Finalisation Primo</strong> : L'interface se met à jour après la configuration (merci Olivier)</li>
+                        <li><strong>Sauvegarde des grilles</strong> : Les nouvelles grilles s'ajoutent à la bibliothèque (merci Bruno)</li>
+                        <li><strong>Heures non piles</strong> : Entrée d'heures comme 8h55 dans Primo (merci Bruno)</li>
+                        <li><strong>Import/Export amélioré</strong> : Import sélectif, protection des données (merci Bruno, Grégoire)</li>
                     </ul>
                     <p style="margin: 8px 0 0 0; font-size: 0.85rem;">
-                        Merci Bruno, Olivier et les autres testeurs pour vos retours précieux !
-                        <a href="#" onclick="fermerModalNouveautes(); allerVersNotesDeVersion(); return false;" style="color: var(--bleu-principal); margin-left: 8px;">Voir toutes les notes de version →</a>
+                        <a href="#" onclick="fermerModalNouveautes(); allerVersNotesDeVersion(); return false;" style="color: var(--bleu-principal);">Voir toutes les notes de version →</a>
                     </p>
                 </div>
 
-                <!-- Nouveautés Beta 95.2 -->
-                <div class="modal-section">
-                    <h3>Nouveautés de la Beta 95.2</h3>
-                    <p>Cette version <strong>sépare les entités</strong> pour une meilleure réutilisation : un cours (601-101-MQ) peut maintenant être enseigné par différents enseignant·es, avec des horaires différents, sans dupliquer les informations.</p>
-                    <p style="margin-top: 0.8rem;">Le <strong>profil auteur</strong> de l'enseignant·e devient la source unique pour les métadonnées Creative Commons de toutes tes ressources partagées.</p>
-                    <p style="margin-top: 0.8rem;">L'<strong>assemblage groupe-cours</strong> te permet de combiner les entités via des menus déroulants, simplifiant la gestion de plusieurs groupes.</p>
+                <!-- Nouveautés Beta 95.2 — Architecture modulaire -->
+                <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: 4px; padding: 12px 16px; margin-bottom: 1.5rem;">
+                    <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Nouveautés Beta 95.2 — Architecture modulaire :</strong>
+                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
+                        <li><strong>Toggles séparés</strong> : Cours, Enseignant·e, Horaire et Groupe-cours sont maintenant des entités indépendantes</li>
+                        <li><strong>Profil auteur</strong> : Tes informations enseignant·e servent de source unique pour les métadonnées CC</li>
+                        <li><strong>Assemblage flexible</strong> : Crée des groupe-cours en combinant cours + enseignant·e + horaire + pratique</li>
+                        <li><strong>Réutilisation</strong> : Un même cours peut être associé à plusieurs groupes avec des horaires différents</li>
+                        <li><strong>Migration automatique</strong> : Tes données existantes sont converties vers la nouvelle architecture</li>
+                    </ul>
                 </div>
 
                 <!-- Rappel Beta 95 -->
