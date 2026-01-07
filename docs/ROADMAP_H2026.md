@@ -102,6 +102,7 @@
 
 | Focus | Livrable |
 |-------|----------|
+| Architecture modulaire styles.css | CSS organise par modules |
 | Correction bugs prioritaires | Application stable |
 | Migration A2025 finalisee (si necessaire) | Donnees propres |
 
@@ -150,6 +151,28 @@
 
 ## Backlog Beta 95 (janvier)
 
+### 7 janvier - Finaliser Trimestre modulaire
+
+- [ ] Fonctions completes (CRUD toutes entites)
+- [ ] Boutons fonctionnels (sauvegarder, supprimer, dupliquer)
+- [ ] Interface terminee (tous les toggles)
+- [ ] Connexion avec vue calendaire
+- [ ] Connexion avec saisie des presences
+
+### 8 janvier - Bibliotheques et Import/Export
+
+- [ ] Valider import/export Productions
+- [ ] Valider import/export Grilles
+- [ ] Valider import/export Echelles
+- [ ] Valider import/export Cartouches
+- [ ] Valider import/export Pratiques
+
+### Plus tard (Beta 95.x)
+
+- [ ] Compatibilite donnees A2025 avec nouveaux formats
+- [ ] Verification donnees demo encore fonctionnelles
+- [ ] Auditer module evaluation (meme pattern assemblage?)
+
 ### Architecture modulaire - Verification coherence
 
 **Contexte** : L'architecture groupe-cours (Beta 95.2) utilise un pattern d'assemblage :
@@ -157,11 +180,6 @@
 
 **Verification requise** : Le module d'evaluation utilise-t-il le MEME pattern ?
 - Production + Eleve + Grille + Echelle + Cartouche + Jetons → **Evaluation** (bibliotheque)
-
-**Taches** :
-- [ ] Auditer le module d'evaluation pour confirmer le pattern
-- [ ] Documenter les divergences si elles existent
-- [ ] Harmoniser si necessaire AVANT les premieres evaluations
 
 **Echeance** : Avant les premieres evaluations du trimestre (mi-janvier)
 

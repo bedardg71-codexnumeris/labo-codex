@@ -64,6 +64,13 @@ Utiliser `window.cle('nomCle')` pour obtenir la cle namespacee.
 
 ---
 
+## Priorite absolue : Retours testeurs
+
+**Quand un testeur signale un bug ou un besoin, on interrompt le plan en cours.**
+Les retours utilisateurs passent AVANT le backlog prevu.
+
+---
+
 ## En cas de doute
 
 **Pose la question plutot que de supposer.**
