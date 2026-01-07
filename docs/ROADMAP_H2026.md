@@ -62,36 +62,67 @@
 > **Contexte** : 1 developpeur, pas de liberation, temps partiel.
 > **Strategie** : Stabilite et usage personnel > nouvelles fonctionnalites.
 
-### Janvier-Fevrier : Usage reel H2026
+### Feuille de route des versions
 
-**Objectif** : Utiliser l'application avec ses propres groupes H2026
+| Mois | Version | Objectif principal |
+|------|---------|-------------------|
+| Janvier | **Beta 95** | Stabilisation + architecture modulaire |
+| Fevrier | Beta 96 | Corrections usage reel |
+| Mars | Beta 97 | Ameliorations UX |
+| Avril | Beta 98 | Polish et stabilite |
+| Mai | Beta 99 | Documentation + preparation |
+| Juin | **Version 1.0** | Colloque AQPC |
+
+---
+
+### Janvier : Beta 95 - Stabilisation
+
+**Objectif** : Architecture modulaire operationnelle AVANT les premieres evaluations
 
 | Focus | Livrable |
 |-------|----------|
+| Architecture modulaire groupe-cours | Toggles separes (Cours, Enseignant, Horaire, Groupe-cours) |
+| Verification coherence evaluations | Pattern assemblage identique partout |
 | Configurer H2026 (cours, groupes, etudiants) | Donnees reelles importees |
 | Corriger bugs decouverts en usage | Beta 95.x stable |
-| Documenter problemes rencontres | Liste bugs priorisee |
+
+**Point critique** : Le module d'evaluation suit le MEME pattern d'assemblage :
+- Production + Eleve + Grille + Echelle + Cartouche + Jetons → **Evaluation** (bibliotheque)
+- Verifier que l'architecture est coherente dans tous les modules
 
 **Criteres de succes** :
+- [ ] Architecture modulaire validee dans Trimestre
+- [ ] Pattern identique confirme dans module Evaluations
 - [ ] 1+ groupe suivi avec l'application
 - [ ] Bugs bloquants corriges au fil de l'eau
-- [ ] Application utilisable au quotidien
 
-### Mars-Avril : Stabilisation
+### Fevrier : Beta 96
 
-**Objectif** : Corriger les bugs identifies en usage reel
+**Objectif** : Corrections basees sur usage reel janvier
 
 | Focus | Livrable |
 |-------|----------|
-| Correction bugs prioritaires | Beta 96 |
+| Correction bugs prioritaires | Application stable |
 | Migration A2025 finalisee (si necessaire) | Donnees propres |
+
+### Mars : Beta 97
+
+**Objectif** : Ameliorations UX basees sur retours
+
+| Focus | Livrable |
+|-------|----------|
 | Ameliorations UX mineures | Interface polie |
+| Frictions identifiees resolues | Usage fluide |
+
+### Avril : Beta 98
+
+**Objectif** : Stabilite pour fin de session
 
 **Criteres de succes** :
 - [ ] 0 bugs critiques
 - [ ] Application fiable pour fin de session
 
-### Mai : Documentation minimale
+### Mai : Beta 99 - Documentation
 
 **Objectif** : Documentation suffisante pour presentation
 
@@ -105,7 +136,7 @@
 - [ ] Nouvel utilisateur peut demarrer seul
 - [ ] FAQ couvre questions frequentes
 
-### Juin : Colloque AQPC
+### Juin : Version 1.0 - Colloque AQPC
 
 **Date** : 3-5 juin 2026 (Drummondville)
 
@@ -114,6 +145,25 @@
 - [ ] Version stable telecharger
 - [ ] Lien documentation en ligne
 - [ ] Contact pour questions (pas support formel)
+
+---
+
+## Backlog Beta 95 (janvier)
+
+### Architecture modulaire - Verification coherence
+
+**Contexte** : L'architecture groupe-cours (Beta 95.2) utilise un pattern d'assemblage :
+- Cours + Enseignant + Horaire + Pratique → **Groupe-cours** (bibliotheque)
+
+**Verification requise** : Le module d'evaluation utilise-t-il le MEME pattern ?
+- Production + Eleve + Grille + Echelle + Cartouche + Jetons → **Evaluation** (bibliotheque)
+
+**Taches** :
+- [ ] Auditer le module d'evaluation pour confirmer le pattern
+- [ ] Documenter les divergences si elles existent
+- [ ] Harmoniser si necessaire AVANT les premieres evaluations
+
+**Echeance** : Avant les premieres evaluations du trimestre (mi-janvier)
 
 ---
 
@@ -128,6 +178,10 @@
 2. **Migration A2025 si necessaire**
    - Resoudre etat hybride namespace
    - Valider integrite donnees
+
+3. **Verification architecture modulaire** (NOUVEAU)
+   - Confirmer pattern identique Trimestre ↔ Evaluations
+   - Harmoniser avant usage reel
 
 ### P2 - Importantes (si temps disponible)
 
@@ -217,5 +271,5 @@
 
 ---
 
-**Derniere mise a jour** : 1er janvier 2026
-**Prochaine revue** : 1er mars 2026 (mi-session)
+**Derniere mise a jour** : 6 janvier 2026
+**Prochaine revue** : 1er fevrier 2026 (fin janvier)
