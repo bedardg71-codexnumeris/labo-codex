@@ -3181,18 +3181,28 @@
                 <!-- Titre principal -->
                 <h2 class="modal-titre">Bienvenue dans la Beta 95.2</h2>
 
+                <!-- Avertissement section en reconstruction -->
+                <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%); border-left: 3px solid #ffc107; border-radius: 4px; padding: 12px 16px; margin-bottom: 1rem;">
+                    <strong style="color: #856404;">🚧 Section Trimestre en reconstruction</strong>
+                    <p style="margin: 8px 0 0 0; font-size: 0.9rem; color: #856404;">
+                        L'onglet Réglages → Trimestre est en cours de refactorisation vers une architecture modulaire.
+                        Certaines fonctionnalités peuvent être incomplètes ou instables.
+                    </p>
+                </div>
+
                 <!-- Encadré testeurs (liste à puces) -->
                 <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: 4px; padding: 12px 16px; margin-bottom: 1.5rem;">
-                    <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Nouveautés Beta 95.2 — Architecture modulaire :</strong>
+                    <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Pour les testeurs (dernières 48h) :</strong>
                     <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
-                        <li><strong>Toggles séparés</strong> : Cours, Enseignant·e, Horaire et Groupe-cours sont maintenant des entités indépendantes</li>
-                        <li><strong>Profil auteur</strong> : Tes informations enseignant·e servent de source unique pour les métadonnées CC</li>
-                        <li><strong>Assemblage flexible</strong> : Crée des groupe-cours en combinant cours + enseignant·e + horaire + pratique</li>
-                        <li><strong>Réutilisation</strong> : Un même cours peut être associé à plusieurs groupes avec des horaires différents</li>
-                        <li><strong>Migration automatique</strong> : Tes données existantes sont converties vers la nouvelle architecture</li>
+                        <li><strong>Lien horaire ↔ groupe</strong> : Chaque horaire est maintenant associé à un groupe d'étudiants</li>
+                        <li><strong>Nom dynamique</strong> : Le groupe-cours génère son nom automatiquement (ex: H2026-601-101-MQ-00001)</li>
+                        <li><strong>Trimestre actif visible</strong> : Le trimestre s'affiche dans le formulaire groupe-cours</li>
+                        <li><strong>Dropdown header</strong> : Les groupe-cours apparaissent dans l'entête pour sélection rapide</li>
+                        <li><strong>Interface unifiée</strong> : Pattern bibliothèque-formulaire pour tous les accordéons</li>
                     </ul>
                     <p style="margin: 8px 0 0 0; font-size: 0.85rem;">
-                        <a href="#" onclick="fermerModalNouveautes(); allerVersNotesDeVersion(); return false;" style="color: var(--bleu-principal);">Voir toutes les notes de version →</a>
+                        Merci Bruno, Olivier et les autres testeurs pour vos retours précieux !
+                        <a href="#" onclick="fermerModalNouveautes(); allerVersNotesDeVersion(); return false;" style="color: var(--bleu-principal); margin-left: 8px;">Voir toutes les notes de version →</a>
                     </p>
                 </div>
 
@@ -13735,8 +13745,8 @@
          */
 
         // === CONFIGURATION ===
-        const VERSION_MAJEURE = '96';
-        const BUILD_ID = '0106-1258';  // Auto-updated by Claude before each commit (Toronto time)
+        const VERSION_MAJEURE = '95.2';
+        const BUILD_ID = '0106-1830';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
