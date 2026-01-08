@@ -69,6 +69,7 @@ async function peuplerDropdownGroupeCoursActif() {
     if (groupesCours.length > 0) {
         // Hydrater les groupe-cours pour l'affichage
         const cours = db.getSync('cours', []);
+        const listeCours = db.getSync('listeCours', []);  // Beta 95.2: aussi chercher dans listeCours (Primo)
         const enseignants = db.getSync('enseignants', []);
         const horaires = db.getSync('horaires', []);
 
@@ -76,11 +77,17 @@ async function peuplerDropdownGroupeCoursActif() {
         const gcActif = db.getSync('groupeCoursActif', null);
 
         groupesCours.forEach(gc => {
-            const coursInfo = cours.find(c => c.id === gc.coursId) || {};
+            // Beta 95.2: Chercher dans cours (nouveau) ou listeCours (Primo legacy)
+            let coursInfo = cours.find(c => c.id === gc.coursId);
+            if (!coursInfo) {
+                coursInfo = listeCours.find(c => c.id === gc.coursId || c.sigle === gc.coursId);
+            }
+            coursInfo = coursInfo || {};
+
             const ens = enseignants.find(e => e.id === gc.enseignantId) || {};
             const hor = horaires.find(h => h.id === gc.horaireId) || {};
 
-            const sigle = coursInfo.codeCours || '???';
+            const sigle = coursInfo.codeCours || coursInfo.code || coursInfo.sigle || '???';
             const groupe = gc.groupe || '?';
             const nomEns = ens.prenom ? `${ens.prenom} ${(ens.nom || '').charAt(0)}.` : '';
             const nomHor = hor.nom || '';
