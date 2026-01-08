@@ -1894,6 +1894,7 @@ function sauvegarderCoursV2() {
         nomCours: nomCours,
         numeroCompetence: document.getElementById('v2-numeroCompetence')?.value?.trim() || '',
         competence: document.getElementById('v2-competence')?.value?.trim() || '',
+        discipline: discipline,  // Beta 95.2: Discipline du cours (top-level)
         elementsCompetence: document.getElementById('v2-elementsCompetence')?.value?.trim() || '',
         enseignant: {
             prenom: document.getElementById('v2-prenomEnseignant')?.value?.trim() || '',
