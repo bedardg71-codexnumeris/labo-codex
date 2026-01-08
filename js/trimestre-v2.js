@@ -366,9 +366,15 @@ function afficherStatistiquesTrimestreV2() {
         console.error('[Trimestre V2] Erreur lecture calendrier:', e);
     }
 
+    // Éléments originaux (masqués pour compatibilité)
     const elemSemaines = document.getElementById('v2-nombreSemaines');
     const elemJours = document.getElementById('v2-nombreJoursCours');
     const elemCongesReprises = document.getElementById('v2-statsCongesReprises');
+
+    // Éléments sidebar (Beta 95.2)
+    const elemSemainesSidebar = document.getElementById('v2-nombreSemainesSidebar');
+    const elemJoursSidebar = document.getElementById('v2-nombreJoursCoursSidebar');
+    const elemCongesReprisesSidebar = document.getElementById('v2-statsCongesReprisesSidebar');
 
     console.log('[Trimestre V2] Calendrier lu:', calendrier ? Object.keys(calendrier).length + ' jours' : 'null');
 
@@ -378,6 +384,9 @@ function afficherStatistiquesTrimestreV2() {
         if (elemSemaines) elemSemaines.textContent = '0';
         if (elemJours) elemJours.textContent = '0';
         if (elemCongesReprises) elemCongesReprises.textContent = '';
+        if (elemSemainesSidebar) elemSemainesSidebar.textContent = '0';
+        if (elemJoursSidebar) elemJoursSidebar.textContent = '0';
+        if (elemCongesReprisesSidebar) elemCongesReprisesSidebar.textContent = '';
         return;
     }
 
@@ -403,26 +412,31 @@ function afficherStatistiquesTrimestreV2() {
 
     console.log(`[Trimestre V2] Stats: ${semaines} semaines, ${joursCours} jours, ${conges} congés, ${reprises} reprises`);
 
+    // Remplir éléments originaux (masqués)
     if (elemSemaines) elemSemaines.textContent = semaines;
     if (elemJours) elemJours.textContent = joursCours;
 
+    // Remplir éléments sidebar (Beta 95.2)
+    if (elemSemainesSidebar) elemSemainesSidebar.textContent = semaines;
+    if (elemJoursSidebar) elemJoursSidebar.textContent = joursCours;
+
     // Générer le texte contextuel pour congés/reprises
-    if (elemCongesReprises) {
-        let texte = '';
-        if (conges === 0 && reprises === 0) {
-            texte = '(aucun congé)';
-        } else if (reprises > 0 && conges > 0) {
-            // Ex: "(incluant 2 reprises pour 2 congés)"
-            const congeText = conges === 1 ? 'congé' : 'congés';
-            const repriseText = reprises === 1 ? 'reprise' : 'reprises';
-            texte = `(incluant ${reprises} ${repriseText} pour ${conges} ${congeText})`;
-        } else if (conges > 0 && reprises === 0) {
-            texte = `(${conges} congé${conges > 1 ? 's' : ''} non repris)`;
-        } else if (reprises > 0 && conges === 0) {
-            texte = `(${reprises} reprise${reprises > 1 ? 's' : ''})`;
-        }
-        elemCongesReprises.textContent = texte;
+    let texte = '';
+    if (conges === 0 && reprises === 0) {
+        texte = '(aucun congé)';
+    } else if (reprises > 0 && conges > 0) {
+        // Ex: "(incluant 2 reprises pour 2 congés)"
+        const congeText = conges === 1 ? 'congé' : 'congés';
+        const repriseText = reprises === 1 ? 'reprise' : 'reprises';
+        texte = `(incluant ${reprises} ${repriseText} pour ${conges} ${congeText})`;
+    } else if (conges > 0 && reprises === 0) {
+        texte = `(${conges} congé${conges > 1 ? 's' : ''} non repris)`;
+    } else if (reprises > 0 && conges === 0) {
+        texte = `(${reprises} reprise${reprises > 1 ? 's' : ''})`;
     }
+
+    if (elemCongesReprises) elemCongesReprises.textContent = texte;
+    if (elemCongesReprisesSidebar) elemCongesReprisesSidebar.textContent = texte;
 }
 
 /* ===============================

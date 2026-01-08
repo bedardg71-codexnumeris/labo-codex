@@ -8455,6 +8455,14 @@
                                     <button class="btn btn-principal btn-sm" style="margin-top: 15px; width: 100%;" onclick="ouvrirModalNouveauTrimestre()">
                                         + Nouveau trimestre
                                     </button>
+
+                                    <!-- Aperçu du trimestre (Beta 95.2) -->
+                                    <div class="apercu-trimestre-sidebar" id="v2-apercuTrimestreSidebar" style="margin-top: 20px; padding: 12px; background: var(--fond-clair, #f8f9fa); border-radius: 8px; font-size: 0.85rem;">
+                                        <strong>Trimestre :</strong><br>
+                                        <span id="v2-nombreSemainesSidebar">0</span> semaines •
+                                        <span id="v2-nombreJoursCoursSidebar">0</span> jours de cours
+                                        <span id="v2-statsCongesReprisesSidebar" style="display: block; margin-top: 4px; color: #666;"></span>
+                                    </div>
                                 </div>
 
                                 <!-- DROITE : Formulaire complet du trimestre -->
@@ -8662,17 +8670,13 @@
                                     </div>
 
                                     <!-- Statistiques calculées -->
-                                    <div class="info-box" style="margin-top: 15px;">
-                                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                                            <p style="margin: 0;">
-                                                <strong>Trimestre :</strong>
-                                                <span id="v2-nombreSemaines">0</span> semaines •
-                                                <span id="v2-nombreJoursCours">0</span> jours de cours
-                                                <span id="v2-statsCongesReprises"></span>
-                                            </p>
-                                            <button class="btn btn-confirmer btn-tres-compact" onclick="sauvegarderCadreCalendrierV2()">Sauvegarder le trimestre</button>
-                                        </div>
+                                    <div class="info-box" style="margin-top: 15px; text-align: right;">
+                                        <button class="btn btn-confirmer btn-tres-compact" onclick="sauvegarderCadreCalendrierV2()">Sauvegarder le trimestre</button>
                                     </div>
+                                    <!-- Anciens spans masqués pour compatibilité -->
+                                    <span id="v2-nombreSemaines" style="display:none;">0</span>
+                                    <span id="v2-nombreJoursCours" style="display:none;">0</span>
+                                    <span id="v2-statsCongesReprises" style="display:none;"></span>
 
                                 </div>
 
@@ -13779,7 +13783,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '95.2';
-        const BUILD_ID = '0108-1534';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0108-1546';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
