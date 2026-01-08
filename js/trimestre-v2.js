@@ -1349,7 +1349,6 @@ function chargerDropdownCoursV2() {
             if (coursASelectionner && c.id === coursASelectionner.id) {
                 option.selected = true;
                 coursSelectionne = true;
-                afficherDetailsCoursV2(c);
             }
             select.appendChild(option);
         });
@@ -1357,8 +1356,13 @@ function chargerDropdownCoursV2() {
         // Si aucun cours sélectionné mais qu'il y en a, sélectionner le premier
         if (!coursSelectionne && coursAfficher.length > 0) {
             select.options[1].selected = true;
-            afficherDetailsCoursV2(coursAfficher[0]);
-            coursSelectionne = true; // Un cours est maintenant sélectionné
+            coursASelectionner = coursAfficher[0];
+            coursSelectionne = true;
+        }
+
+        // Afficher le formulaire avec le cours sélectionné (Beta 95.2)
+        if (coursSelectionne && coursASelectionner) {
+            changerCoursSelectionneV2(coursASelectionner.id);
         }
 
         // Afficher les boutons Modifier et Dupliquer si un cours est sélectionné
