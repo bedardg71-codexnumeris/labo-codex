@@ -9498,11 +9498,12 @@
                                     <div id="v2-groupeCoursEtatVide" class="etat-vide-formulaire">
                                         <div style="text-align: center; padding: 20px;">
                                             <p style="font-size: 1.1rem; margin-bottom: 10px;"><strong>Assemblez un groupe-cours</strong></p>
-                                            <p style="color: #666; margin-bottom: 15px;">Cliquez sur « + Nouveau groupe-cours » pour associer un cours, un groupe d'étudiants et un horaire.</p>
+                                            <p style="color: #666; margin-bottom: 15px;">Cliquez sur « + Nouveau groupe-cours » pour sélectionner les 4 éléments à assembler.</p>
                                             <ol style="text-align: left; display: inline-block; color: #555; font-size: 0.9rem; margin: 0; padding-left: 20px;">
-                                                <li>Sélectionnez le <strong>cours</strong> à enseigner</li>
-                                                <li>Choisissez le <strong>numéro de groupe</strong> d'étudiants</li>
-                                                <li>L'<strong>horaire</strong> et l'<strong>enseignant</strong> se lient automatiquement</li>
+                                                <li>Le <strong>cours</strong> à enseigner</li>
+                                                <li>Le <strong>numéro de groupe</strong> d'étudiants</li>
+                                                <li>L'<strong>horaire</strong> des séances</li>
+                                                <li>L'<strong>enseignant·e</strong> responsable</li>
                                             </ol>
                                         </div>
                                     </div>
@@ -9540,17 +9541,20 @@
                                             </div>
                                         </div>
 
-                                        <!-- Horaire (lecture seule - lié au groupe) -->
-                                        <div class="info-horaire-groupe-cours" id="v2-gc-horaireInfo">
-                                            <span class="label-info">Horaire :</span>
-                                            <span id="v2-gc-horaireNom">— Sélectionnez un groupe —</span>
-                                            <input type="hidden" id="v2-gc-horaire" value="">
-                                        </div>
-
-                                        <!-- Enseignant (affiché mais pas modifiable - profil unique) -->
-                                        <div class="info-enseignant-groupe-cours" id="v2-gc-enseignantInfo">
-                                            <span class="label-info">Enseignant·e :</span>
-                                            <span id="v2-gc-enseignantNom">—</span>
+                                        <!-- Horaire et Enseignant (Beta 95.2: maintenant sélectionnables) -->
+                                        <div class="grille-form-2col" style="margin-bottom: 15px;">
+                                            <div class="groupe-form">
+                                                <label>3. Horaire <span class="text-danger">*</span></label>
+                                                <select id="v2-gc-horaire" class="controle-form" onchange="mettreAJourNomGroupeCoursV2()">
+                                                    <option value="">— Choisir un horaire —</option>
+                                                </select>
+                                            </div>
+                                            <div class="groupe-form">
+                                                <label>4. Enseignant·e <span class="text-danger">*</span></label>
+                                                <select id="v2-gc-enseignant" class="controle-form" onchange="mettreAJourNomGroupeCoursV2()">
+                                                    <option value="">— Choisir un enseignant —</option>
+                                                </select>
+                                            </div>
                                         </div>
 
                                         <!-- Boutons d'action -->
@@ -14084,7 +14088,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '95.2';
-        const BUILD_ID = '0108-1729';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0108-1738';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';

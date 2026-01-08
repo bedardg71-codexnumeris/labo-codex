@@ -3438,16 +3438,16 @@ function chargerGroupeCoursV2() {
 function ouvrirAideGroupeCours() {
     alert(
         "Comment créer un groupe-cours ?\n\n" +
-        "Un groupe-cours associe plusieurs éléments pour créer une instance d'enseignement :\n\n" +
+        "Un groupe-cours associe 4 éléments pour créer une instance d'enseignement :\n\n" +
         "1. COURS : Le cours que vous enseignez (ex: 601-101-MQ)\n" +
         "   → Créez-le d'abord dans la section « Cours »\n\n" +
         "2. GROUPE D'ÉTUDIANTS : Le numéro de groupe (ex: 00001)\n" +
         "   → Importez vos étudiants dans la section « Groupe d'étudiants »\n\n" +
         "3. HORAIRE : Les jours et heures de cours\n" +
-        "   → Configurez-le dans la section « Horaire »\n\n" +
-        "4. ENSEIGNANT·E : Votre profil (automatique)\n" +
+        "   → Créez-le dans la section « Horaire »\n\n" +
+        "4. ENSEIGNANT·E : Le responsable du cours\n" +
         "   → Configuré dans la section « Enseignant·e »\n\n" +
-        "Une fois ces éléments créés, cliquez sur « + Nouveau groupe-cours » pour les assembler."
+        "Cliquez sur « + Nouveau groupe-cours » puis sélectionnez chaque élément dans les 4 menus déroulants."
     );
 }
 window.ouvrirAideGroupeCours = ouvrirAideGroupeCours;
@@ -3519,9 +3519,41 @@ function populerDropdownsAssemblageV2() {
         selectGroupe.innerHTML = html;
     }
 
-    // Note: L'horaire n'est plus un dropdown mais un affichage en lecture seule
-    // Il est mis à jour automatiquement via mettreAJourNomGroupeCoursV2()
-    // quand on sélectionne un groupe (l'horaire est associé au groupe)
+    // Beta 95.2: Dropdown Horaires
+    const selectHoraire = document.getElementById('v2-gc-horaire');
+    if (selectHoraire) {
+        const cleHoraires = typeof cle === 'function' ? cle('horaires') : 'horaires';
+        const horaires = db.getSync(cleHoraires, []);
+        let html = '<option value="">— Choisir un horaire —</option>';
+        horaires.forEach(h => {
+            const nom = h.nom || h.id || 'Sans nom';
+            html += `<option value="${h.id}">${nom}</option>`;
+        });
+        selectHoraire.innerHTML = html;
+    }
+
+    // Beta 95.2: Dropdown Enseignants
+    const selectEnseignant = document.getElementById('v2-gc-enseignant');
+    if (selectEnseignant) {
+        const enseignants = db.getSync('enseignants', []);
+        // Aussi inclure le profil unique s'il existe
+        const profil = db.getSync('profilEnseignant', null);
+
+        let html = '<option value="">— Choisir un enseignant —</option>';
+
+        // Ajouter le profil principal en premier s'il existe
+        if (profil && profil.prenom && profil.nom) {
+            const nomComplet = `${profil.prenom} ${profil.nom}`;
+            html += `<option value="profil">${nomComplet} (profil principal)</option>`;
+        }
+
+        // Ajouter les autres enseignants
+        enseignants.forEach(e => {
+            const nomComplet = `${e.prenom || ''} ${e.nom || ''}`.trim() || e.id;
+            html += `<option value="${e.id}">${nomComplet}</option>`;
+        });
+        selectEnseignant.innerHTML = html;
+    }
 }
 
 /**
@@ -3701,14 +3733,26 @@ function mettreAJourCarteResumeGroupeCoursV2(gc) {
     const horaireObj = horaires.find(h => h.id === gc.horaireId);
     const horaireNom = horaireObj?.nom || '—';
 
-    const profil = db.getSync('profilEnseignant', {});
-    const enseignantNom = (profil.prenom && profil.nom) ? `${profil.prenom} ${profil.nom}` : '—';
+    // Beta 95.2: Récupérer l'enseignant selon enseignantId
+    let enseignantNom = '—';
+    if (gc.enseignantId === 'profil') {
+        const profil = db.getSync('profilEnseignant', {});
+        enseignantNom = (profil.prenom && profil.nom) ? `${profil.prenom} ${profil.nom}` : '—';
+    } else if (gc.enseignantId) {
+        const enseignants = db.getSync('enseignants', []);
+        const ensObj = enseignants.find(e => e.id === gc.enseignantId);
+        enseignantNom = ensObj ? `${ensObj.prenom || ''} ${ensObj.nom || ''}`.trim() : '—';
+    } else {
+        // Fallback sur le profil unique si pas d'enseignantId
+        const profil = db.getSync('profilEnseignant', {});
+        enseignantNom = (profil.prenom && profil.nom) ? `${profil.prenom} ${profil.nom}` : '—';
+    }
 
     carte.innerHTML = `
         <div class="resume-gc-nom">${gc.nom || gc.id}</div>
         <div class="resume-gc-details">
             <div><span class="label-gc">Cours</span><span>${coursNom}</span></div>
-            <div><span class="label-gc">Groupe</span><span>${gc.groupeNum || '—'}</span></div>
+            <div><span class="label-gc">Groupe</span><span>${gc.groupeNum || gc.groupe || '—'}</span></div>
             <div><span class="label-gc">Horaire</span><span>${horaireNom}</span></div>
             <div><span class="label-gc">Enseig.</span><span>${enseignantNom}</span></div>
         </div>
@@ -3805,14 +3849,17 @@ function editerGroupeCoursV2(gc) {
 
     // Rafraîchir les dropdowns
     populerDropdownsAssemblageV2();
-    afficherEnseignantGroupeCoursV2();
 
-    // Remplir les sélections
+    // Remplir les 4 sélections (Beta 95.2)
     const selectCours = document.getElementById('v2-gc-cours');
     const selectGroupe = document.getElementById('v2-gc-groupe');
+    const selectHoraire = document.getElementById('v2-gc-horaire');
+    const selectEnseignant = document.getElementById('v2-gc-enseignant');
 
     if (selectCours) selectCours.value = gc.coursId || '';
-    if (selectGroupe) selectGroupe.value = gc.groupeNum || '';
+    if (selectGroupe) selectGroupe.value = gc.groupeNum || gc.groupe || '';
+    if (selectHoraire) selectHoraire.value = gc.horaireId || '';
+    if (selectEnseignant) selectEnseignant.value = gc.enseignantId || '';
 
     // Mettre à jour le titre et bouton
     const titre = document.getElementById('v2-titreFormGroupeCours');
@@ -3820,7 +3867,7 @@ function editerGroupeCoursV2(gc) {
     if (titre) titre.textContent = 'Modifier le groupe-cours';
     if (btnTexte) btnTexte.textContent = 'Enregistrer';
 
-    // Mettre à jour l'aperçu du nom (inclut l'horaire associé au groupe)
+    // Mettre à jour l'aperçu du nom
     mettreAJourNomGroupeCoursV2();
 
     // Afficher le formulaire
@@ -3848,6 +3895,7 @@ function sauvegarderGroupeCoursV2() {
     const coursId = document.getElementById('v2-gc-cours')?.value;
     const groupeNum = document.getElementById('v2-gc-groupe')?.value;
     const horaireId = document.getElementById('v2-gc-horaire')?.value;
+    const enseignantId = document.getElementById('v2-gc-enseignant')?.value;  // Beta 95.2
 
     // Validation
     if (!coursId) {
@@ -3859,7 +3907,11 @@ function sauvegarderGroupeCoursV2() {
         return;
     }
     if (!horaireId) {
-        afficherNotificationErreur('Aucun horaire n\'est associé à ce groupe. Configurez d\'abord un horaire dans l\'accordéon Horaire.');
+        afficherNotificationErreur('Veuillez sélectionner un horaire');
+        return;
+    }
+    if (!enseignantId) {
+        afficherNotificationErreur('Veuillez sélectionner un enseignant');
         return;
     }
 
@@ -3879,6 +3931,7 @@ function sauvegarderGroupeCoursV2() {
                 coursId,
                 groupeNum,
                 horaireId,
+                enseignantId,  // Beta 95.2
                 dateModification: new Date().toISOString()
             };
         }
@@ -3891,6 +3944,7 @@ function sauvegarderGroupeCoursV2() {
             coursId,
             groupeNum,
             horaireId,
+            enseignantId,  // Beta 95.2
             dateCreation: new Date().toISOString(),
             actif: true
         };
