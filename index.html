@@ -8945,8 +8945,19 @@
                             <!-- Layout Carte profil + Formulaire -->
                             <div class="disposition-bibliotheque-formulaire">
 
-                                <!-- GAUCHE : Carte profil -->
+                                <!-- GAUCHE : Sélection + Carte profil -->
                                 <div class="panneau-bibliotheque">
+                                    <!-- Dropdown sélection profil (Beta 95.2) -->
+                                    <div class="groupe-form" style="margin-bottom: 15px;">
+                                        <label style="font-weight: 600;">Profil enseignant</label>
+                                        <select id="v2-selectEnseignant" class="controle-form" onchange="chargerEnseignantSelectionneV2()">
+                                            <option value="">— Sélectionner —</option>
+                                        </select>
+                                    </div>
+                                    <button class="btn btn-secondaire" onclick="nouveauProfilEnseignantV2()" style="width: 100%; margin-bottom: 15px;">
+                                        + Nouveau profil
+                                    </button>
+
                                     <div id="enseignant-carte-resume">
                                         <p class="profil-nom" id="enseignant-resume-nom">—</p>
                                         <p class="profil-detail" id="enseignant-resume-courriel"></p>
@@ -8959,7 +8970,7 @@
 
                                 <!-- DROITE : Formulaire d'édition (toujours visible) -->
                                 <div class="panneau-formulaire" style="padding: 15px;">
-                                    <h4 class="titre-formulaire">Modifier le profil</h4>
+                                    <h4 class="titre-formulaire" id="v2-titreFormEnseignant">Modifier le profil</h4>
 
                                     <div class="grille-form-2col" style="margin-bottom: 15px;">
                                         <div class="groupe-form">
@@ -9141,13 +9152,18 @@
                                     </div>
 
                                     <!-- Boutons d'action -->
-                                    <div class="actions-formulaire" style="margin-top: 20px;">
-                                        <button class="btn btn-annuler" onclick="annulerFormEnseignantV2()">
-                                            Annuler
+                                    <div class="actions-formulaire" style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
+                                        <button class="btn btn-supprimer" onclick="supprimerProfilEnseignantV2()" title="Supprimer ce profil">
+                                            🗑️ Supprimer
                                         </button>
-                                        <button class="btn btn-confirmer" onclick="sauvegarderEnseignantV2()">
-                                            Enregistrer
-                                        </button>
+                                        <div>
+                                            <button class="btn btn-annuler" onclick="annulerFormEnseignantV2()">
+                                                Annuler
+                                            </button>
+                                            <button class="btn btn-confirmer" onclick="sauvegarderEnseignantV2()">
+                                                Enregistrer
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -9512,48 +9528,57 @@
                                     <div id="v2-formulaireGroupeCours" style="display: none; padding: 15px;">
                                         <h4 id="v2-titreFormGroupeCours" class="titre-formulaire">Nouveau groupe-cours</h4>
 
-                                        <!-- Trimestre actif (lecture seule) -->
-                                        <div class="info-trimestre-groupe-cours" id="v2-gc-trimestreInfo">
-                                            <span class="label-info">Trimestre :</span>
-                                            <span id="v2-gc-trimestreNom">—</span>
-                                        </div>
-
                                         <!-- Nom généré dynamiquement -->
                                         <div class="apercu-nom-groupe-cours" id="v2-apercuNomGroupeCours">
                                             <span class="label-apercu">NOM GÉNÉRÉ :</span>
                                             <span class="nom-genere" id="v2-nomGroupeCoursGenere">—</span>
                                         </div>
 
-                                        <!-- Assemblage des éléments -->
-                                        <p style="font-size: 0.85rem; color: #666; margin-bottom: 10px;">Étape 1 : Sélectionnez les éléments à assembler</p>
+                                        <!-- Assemblage des 5 éléments (Beta 95.2) -->
+                                        <p style="font-size: 0.85rem; color: #666; margin-bottom: 10px;">Assemblez les 5 éléments pour créer un groupe-cours</p>
+
+                                        <!-- Ligne 1: Trimestre + Cours -->
                                         <div class="grille-form-2col" style="margin-bottom: 15px;">
                                             <div class="groupe-form">
-                                                <label>1. Cours à enseigner <span class="text-danger">*</span></label>
+                                                <label>1. Trimestre <span class="text-danger">*</span></label>
+                                                <select id="v2-gc-trimestre" class="controle-form" onchange="mettreAJourNomGroupeCoursV2()">
+                                                    <option value="">— Choisir un trimestre —</option>
+                                                </select>
+                                            </div>
+                                            <div class="groupe-form">
+                                                <label>2. Cours à enseigner <span class="text-danger">*</span></label>
                                                 <select id="v2-gc-cours" class="controle-form" onchange="mettreAJourNomGroupeCoursV2()">
                                                     <option value="">— Choisir un cours —</option>
                                                 </select>
                                             </div>
+                                        </div>
+
+                                        <!-- Ligne 2: Groupe + Horaire -->
+                                        <div class="grille-form-2col" style="margin-bottom: 15px;">
                                             <div class="groupe-form">
-                                                <label>2. Numéro de groupe <span class="text-danger">*</span></label>
+                                                <label>3. Numéro de groupe <span class="text-danger">*</span></label>
                                                 <select id="v2-gc-groupe" class="controle-form" onchange="mettreAJourNomGroupeCoursV2()">
                                                     <option value="">— Choisir un groupe —</option>
                                                 </select>
                                             </div>
-                                        </div>
-
-                                        <!-- Horaire et Enseignant (Beta 95.2: maintenant sélectionnables) -->
-                                        <div class="grille-form-2col" style="margin-bottom: 15px;">
                                             <div class="groupe-form">
-                                                <label>3. Horaire <span class="text-danger">*</span></label>
+                                                <label>4. Horaire <span class="text-danger">*</span></label>
                                                 <select id="v2-gc-horaire" class="controle-form" onchange="mettreAJourNomGroupeCoursV2()">
                                                     <option value="">— Choisir un horaire —</option>
                                                 </select>
                                             </div>
+                                        </div>
+
+                                        <!-- Ligne 3: Enseignant (seul) -->
+                                        <div class="grille-form-2col" style="margin-bottom: 15px;">
                                             <div class="groupe-form">
-                                                <label>4. Enseignant·e <span class="text-danger">*</span></label>
+                                                <label>5. Enseignant·e <span class="text-danger">*</span></label>
                                                 <select id="v2-gc-enseignant" class="controle-form" onchange="mettreAJourNomGroupeCoursV2()">
                                                     <option value="">— Choisir un enseignant —</option>
                                                 </select>
+                                            </div>
+                                            <div class="groupe-form">
+                                                <!-- Espace réservé pour équilibre visuel -->
                                             </div>
                                         </div>
 
