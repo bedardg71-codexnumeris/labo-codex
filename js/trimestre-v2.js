@@ -1725,6 +1725,7 @@ function remplirFormCoursV2(cours) {
     setValue('v2-nomCours', cours.titre || cours.nomCours || '');
     setValue('v2-numeroCompetence', cours.numeroCompetence || '');
     setValue('v2-competence', cours.competence || '');
+    setValue('v2-disciplineCours', cours.discipline || '');  // Beta 95.2: Discipline du cours
     setValue('v2-elementsCompetence', cours.elementsCompetence || '');
 
     // Enseignant - gère deux formats:
@@ -1757,9 +1758,9 @@ function remplirFormCoursV2(cours) {
  */
 function reinitialiserFormCoursV2() {
     const champs = [
-        'v2-codeCours', 'v2-nomCours', 'v2-numeroCompetence', 'v2-competence', 'v2-elementsCompetence',
-        'v2-prenomEnseignant', 'v2-nomEnseignant', 'v2-courrielEnseignant', 'v2-disciplineEnseignant',
-        'v2-departement', 'v2-institutionEnseignant'
+        'v2-codeCours', 'v2-nomCours', 'v2-numeroCompetence', 'v2-competence', 'v2-disciplineCours',
+        'v2-elementsCompetence', 'v2-prenomEnseignant', 'v2-nomEnseignant', 'v2-courrielEnseignant',
+        'v2-disciplineEnseignant', 'v2-departement', 'v2-institutionEnseignant'
     ];
     champs.forEach(id => setValue(id, ''));
 
