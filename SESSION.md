@@ -33,6 +33,9 @@
 - **Correction bug Primo** : Groupe-cours maintenant cree automatiquement (dropdown fonctionnel)
 - **5 dropdowns groupe-cours** : Trimestre + Cours + Groupe + Horaire + Enseignant
 - **Multi-profils enseignants** : Dropdown selection, creation, suppression de profils
+- **Alignement SST Primo/Trimestre** : Memes sources de donnees (listeCours, enseignants)
+- **Fix discipline cours** : Sauvegarde et affichage correct par cours
+- **Fix affichage cours** : Formulaire s'affiche quand cours selectionne dans dropdown
 
 ---
 
@@ -140,6 +143,9 @@
 - **5 dropdowns groupe-cours** : Trimestre, Cours, Groupe, Horaire, Enseignant selectionnables
 - **Multi-profils enseignants** : Liste unifiee `enseignants` avec dropdown, boutons nouveau/supprimer
 - Migration automatique profilEnseignant → enseignants au chargement
+- **Alignement SST Primo/Trimestre** : obtenirCoursExistants() utilise listeCours + filtrage trimestre
+- **Fix discipline cours** : sauvegarderCoursV2() + remplirFormCoursV2() corrigés
+- **Fix affichage cours** : chargerDropdownCoursV2() appelle changerCoursSelectionneV2()
 
 ### 6-7 janvier 2026
 - Corrections bugs testeurs (Bruno, Olivier)
@@ -170,4 +176,4 @@
 
 ---
 
-**Derniere mise a jour** : 8 janvier 2026, 16:45 (Toronto)
+**Derniere mise a jour** : 8 janvier 2026, 18:30 (Toronto)
