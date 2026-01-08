@@ -82,25 +82,41 @@ function obtenirEnseignantExistant() {
 }
 
 /**
- * Récupère les cours existants
- * @returns {Array} Liste des cours
+ * Récupère les cours existants (aligné sur Trimestre - Beta 95.2)
+ * Utilise listeCours global et filtre par trimestre actif (SST)
+ * @returns {Array} Liste des cours du trimestre actif
  */
 function obtenirCoursExistants() {
-    // Vérifier dans la liste des cours (Beta 95.2)
-    const cleNS = (typeof cle === 'function') ? cle('cours') : 'cours';
-    const cours = (typeof db !== 'undefined' && db.getSync)
-        ? db.getSync(cleNS, [])
-        : JSON.parse(localStorage.getItem(cleNS) || '[]');
+    // Lire depuis listeCours global (même source que Trimestre)
+    const tousCours = (typeof db !== 'undefined' && db.getSync)
+        ? db.getSync('listeCours', [])
+        : JSON.parse(localStorage.getItem('listeCours') || '[]');
 
-    if (cours.length > 0) return cours;
+    // Obtenir le trimestre actif
+    const trimestreActifId = (typeof obtenirTrimestreId === 'function')
+        ? obtenirTrimestreId()
+        : ((typeof db !== 'undefined' && db.getSync) ? db.getSync('trimestreActif', '') : '');
 
-    // Fallback sur listeCours (legacy)
-    const cleLegacy = (typeof cle === 'function') ? cle('listeCours') : 'listeCours';
-    const listeCours = (typeof db !== 'undefined' && db.getSync)
-        ? db.getSync(cleLegacy, [])
-        : JSON.parse(localStorage.getItem(cleLegacy) || '[]');
+    if (!trimestreActifId) return tousCours;
 
-    return listeCours;
+    // Filtrer par trimestre (même logique que Trimestre)
+    const deriverTrimestreId = (cours) => {
+        if (!cours) return null;
+        if (cours.trimestreId) return cours.trimestreId;
+        if (cours.session && cours.annee) {
+            const s = cours.session.length === 1 ? cours.session.toLowerCase() : cours.session.charAt(0).toLowerCase();
+            return s + cours.annee;
+        }
+        if (cours.session && /^[AHE]\d{4}$/i.test(cours.session)) {
+            return cours.session.toLowerCase();
+        }
+        return null;
+    };
+
+    return tousCours.filter(c => {
+        const trimestreDerive = deriverTrimestreId(c);
+        return trimestreDerive === trimestreActifId || trimestreDerive === null;
+    });
 }
 
 const QUESTIONS_PRIMO = [
