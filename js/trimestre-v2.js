@@ -218,12 +218,16 @@ function chargerCadreCalendrierV2() {
         return;
     }
 
-    // Vérifier si le calendrier existe, sinon le générer
+    // Vérifier si le calendrier existe et correspond aux bornes actuelles
     const calendrier = db.getSync(cle('calendrierComplet'), null);
-    if (!calendrier && cadre.dateDebut && cadre.finCours && cadre.finTrimestre) {
+    const doitRegenerer = !calendrier ||
+        (calendrier && cadre.dateDebut && !calendrier[cadre.dateDebut]) ||
+        (calendrier && cadre.finTrimestre && !calendrier[cadre.finTrimestre]);
+
+    if (doitRegenerer && cadre.dateDebut && cadre.finCours && cadre.finTrimestre) {
         if (typeof genererCalendrierComplet === 'function') {
             genererCalendrierComplet();
-            console.log('[Trimestre V2] Calendrier généré à l\'initialisation');
+            console.log('[Trimestre V2] Calendrier généré/régénéré (bornes mises à jour)');
         }
     }
 
