@@ -1042,20 +1042,23 @@ window.changerGroupeCoursDepuisHeader = changerGroupeCoursDepuisHeader;
 window.afficherFormEnseignantV2 = afficherFormEnseignantV2;
 window.changerEnseignantSelectionneV2 = changerEnseignantSelectionneV2;
 window.modifierEnseignantSelectionneV2 = modifierEnseignantSelectionneV2;
-window.annulerFormEnseignantV2 = annulerFormEnseignantV2;
-window.sauvegarderEnseignantV2 = sauvegarderEnseignantV2;
+// DÉSACTIVÉ (6 jan 2026) - Utilisez versions de trimestre-v2.js
+// window.annulerFormEnseignantV2 = annulerFormEnseignantV2;
+// window.sauvegarderEnseignantV2 = sauvegarderEnseignantV2;
 
 // Horaire - fonctions pour les onclick HTML
 window.afficherFormHoraireV2 = afficherFormHoraireV2;
-window.changerHoraireSelectionneV2 = changerHoraireSelectionneV2;
+// DÉSACTIVÉ (6 jan 2026) - Utilisez versions de trimestre-v2.js (avec groupeAssocie)
+// window.changerHoraireSelectionneV2 = changerHoraireSelectionneV2;
 window.modifierHoraireSelectionneV2 = modifierHoraireSelectionneV2;
-window.annulerFormHoraireV2 = annulerFormHoraireV2;
-window.sauvegarderHoraireV2 = sauvegarderHoraireV2;
+// window.annulerFormHoraireV2 = annulerFormHoraireV2;
+// window.sauvegarderHoraireV2 = sauvegarderHoraireV2;
 
 // Groupe-cours - fonctions pour les onclick HTML
 window.afficherFormGroupeCoursV2 = afficherFormGroupeCoursV2;
-window.annulerFormGroupeCoursV2 = annulerFormGroupeCoursV2;
-window.sauvegarderGroupeCoursV2 = sauvegarderGroupeCoursV2;
+// DÉSACTIVÉ (6 jan 2026) - Utilisez versions de trimestre-v2.js
+// window.annulerFormGroupeCoursV2 = annulerFormGroupeCoursV2;
+// window.sauvegarderGroupeCoursV2 = sauvegarderGroupeCoursV2;
 window.activerGroupeCoursV2 = activerGroupeCoursV2;
 window.supprimerGroupeCoursV2 = supprimerGroupeCoursV2;
 window.mettreAJourApercuGroupeCours = mettreAJourApercuGroupeCours;
