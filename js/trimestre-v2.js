@@ -1366,12 +1366,14 @@ function changerCoursSelectionneV2(coursId) {
     const etatVide = document.getElementById('cours-etat-vide');
     const formulaire = document.getElementById('cours-formulaire-edition');
     const listeGroupes = document.getElementById('v2-listeGroupes');
+    const btnSupprimer = document.getElementById('v2-btnSupprimerCours');
 
     if (!coursId) {
         // Afficher l'état vide
         if (etatVide) etatVide.style.display = 'flex';
         if (formulaire) formulaire.style.display = 'none';
         if (listeGroupes) listeGroupes.innerHTML = '<p class="text-muted">Sélectionnez un cours pour voir ses groupes.</p>';
+        if (btnSupprimer) btnSupprimer.style.display = 'none';
         coursEnEditionV2 = null;
         return;
     }
@@ -1391,6 +1393,7 @@ function changerCoursSelectionneV2(coursId) {
         coursEnEditionV2 = coursId;
         if (etatVide) etatVide.style.display = 'none';
         if (formulaire) formulaire.style.display = 'block';
+        if (btnSupprimer) btnSupprimer.style.display = 'block';
 
         // Mettre à jour le titre
         const titre = document.getElementById('v2-titreFormCours');
@@ -1401,6 +1404,64 @@ function changerCoursSelectionneV2(coursId) {
         // Remplir le formulaire
         remplirFormCoursV2(coursSelectionne);
         chargerGroupesCoursV2(coursId);
+    }
+}
+
+/**
+ * Supprime le cours actuellement sélectionné
+ * Beta 95.2 (8 jan 2026)
+ */
+function supprimerCoursV2() {
+    if (!coursEnEditionV2) {
+        console.warn('[Trimestre V2] Aucun cours sélectionné pour suppression');
+        return;
+    }
+
+    // Chercher le cours dans les deux clés possibles
+    let cours = db.getSync('cours', []);
+    let coursObj = cours.find(c => c.id === coursEnEditionV2);
+    let cleCours = 'cours';
+
+    if (!coursObj) {
+        cours = db.getSync('listeCours', []);
+        coursObj = cours.find(c => c.id === coursEnEditionV2);
+        cleCours = 'listeCours';
+    }
+
+    if (!coursObj) {
+        console.warn('[Trimestre V2] Cours non trouvé:', coursEnEditionV2);
+        return;
+    }
+
+    // Confirmation
+    const nomCours = coursObj.sigle || coursObj.codeCours || coursObj.code || coursObj.id;
+    const titreCours = coursObj.nomCours || coursObj.nom || coursObj.titre || '';
+    if (!confirm(`Supprimer le cours "${nomCours} - ${titreCours}" ?\n\nCette action est irréversible.`)) {
+        return;
+    }
+
+    // Supprimer de la liste
+    const coursFiltres = cours.filter(c => c.id !== coursEnEditionV2);
+    db.setSync(cleCours, coursFiltres);
+
+    console.log('[Trimestre V2] Cours supprimé:', coursEnEditionV2);
+
+    // Réinitialiser l'interface
+    coursEnEditionV2 = null;
+    chargerDropdownCoursV2();
+
+    // Masquer le bouton supprimer et afficher l'état vide
+    const btnSupprimer = document.getElementById('v2-btnSupprimerCours');
+    if (btnSupprimer) btnSupprimer.style.display = 'none';
+
+    const etatVide = document.getElementById('cours-etat-vide');
+    const formulaire = document.getElementById('cours-formulaire-edition');
+    if (etatVide) etatVide.style.display = 'flex';
+    if (formulaire) formulaire.style.display = 'none';
+
+    // Notification
+    if (typeof afficherNotificationSucces === 'function') {
+        afficherNotificationSucces('Cours supprimé', `${nomCours} - ${titreCours}`);
     }
 }
 
@@ -2870,10 +2931,29 @@ let horaireEnEditionId = null;
 
 /**
  * Charge et affiche les horaires dans le dropdown
+ * Beta 95.2 : Restaure le dernier horaire sélectionné
  */
 function chargerHorairesV2() {
     populerDropdownHorairesV2();
-    mettreAJourCarteResumeHoraireV2();
+
+    // ✅ CORRIGÉ (8 janvier 2026) : Restaurer le dernier horaire sélectionné
+    const horaireIdSauvegarde = db.getSync('horaireSelectionne', null);
+    if (horaireIdSauvegarde) {
+        const cleHoraires = typeof cle === 'function' ? cle('horaires') : 'horaires';
+        const horaires = db.getSync(cleHoraires, []);
+        const horaire = horaires.find(h => h.id === horaireIdSauvegarde);
+
+        if (horaire) {
+            const select = document.getElementById('v2-selectHoraire');
+            if (select) select.value = horaire.id;
+            mettreAJourCarteResumeHoraireV2(horaire);
+            editerHoraireV2(horaire);
+        } else {
+            mettreAJourCarteResumeHoraireV2(null);
+        }
+    } else {
+        mettreAJourCarteResumeHoraireV2(null);
+    }
 }
 
 /**
@@ -2905,6 +2985,7 @@ function populerDropdownHorairesV2() {
 function changerHoraireSelectionneV2(horaireId) {
     if (!horaireId) {
         // Aucun horaire sélectionné - afficher état vide
+        db.setSync('horaireSelectionne', null);
         mettreAJourCarteResumeHoraireV2(null);
         afficherEtatVideHoraireV2();
         return;
@@ -2915,6 +2996,8 @@ function changerHoraireSelectionneV2(horaireId) {
     const horaire = horaires.find(h => h.id === horaireId);
 
     if (horaire) {
+        // Sauvegarder la sélection pour persistance (Beta 95.2)
+        db.setSync('horaireSelectionne', horaireId);
         mettreAJourCarteResumeHoraireV2(horaire);
         editerHoraireV2(horaire);
     }
@@ -2964,9 +3047,12 @@ function mettreAJourCarteResumeHoraireV2(horaire) {
 function afficherEtatVideHoraireV2() {
     const etatVide = document.getElementById('v2-horaireEtatVide');
     const formulaire = document.getElementById('v2-formulaireHoraire');
+    const carteResume = document.getElementById('v2-carteResumeHoraire');
 
     if (etatVide) etatVide.style.display = 'block';
     if (formulaire) formulaire.style.display = 'none';
+    // Afficher la carte résumé seulement en état vide (Beta 95.2)
+    if (carteResume) carteResume.style.display = 'block';
     horaireEnEditionId = null;
 }
 
@@ -3019,19 +3105,24 @@ function nouveauHoraireV2() {
     if (titre) titre.textContent = 'Nouvel horaire';
     if (btnTexte) btnTexte.textContent = 'Ajouter';
 
+    // Masquer le bouton supprimer (mode création)
+    const btnSupprimer = document.getElementById('v2-btnSupprimerHoraire');
+    if (btnSupprimer) btnSupprimer.style.display = 'none';
+
     // Générer les champs de séances
     mettreAJourSeancesHoraireV2();
 
-    // Afficher le formulaire
+    // Afficher le formulaire, masquer carte résumé (évite redondance - Beta 95.2)
     const etatVide = document.getElementById('v2-horaireEtatVide');
     const formulaire = document.getElementById('v2-formulaireHoraire');
+    const carteResume = document.getElementById('v2-carteResumeHoraire');
     if (etatVide) etatVide.style.display = 'none';
     if (formulaire) formulaire.style.display = 'block';
+    if (carteResume) carteResume.style.display = 'none';
 
     // Désélectionner dans le dropdown
     const select = document.getElementById('v2-selectHoraire');
     if (select) select.value = '';
-    mettreAJourCarteResumeHoraireV2(null);
 }
 
 /**
@@ -3057,6 +3148,10 @@ function editerHoraireV2(horaire) {
     if (titre) titre.textContent = 'Modifier l\'horaire';
     if (btnTexte) btnTexte.textContent = 'Enregistrer';
 
+    // Afficher le bouton supprimer (mode édition)
+    const btnSupprimer = document.getElementById('v2-btnSupprimerHoraire');
+    if (btnSupprimer) btnSupprimer.style.display = 'inline-block';
+
     // Générer les champs de séances puis les remplir
     mettreAJourSeancesHoraireV2();
 
@@ -3073,11 +3168,13 @@ function editerHoraireV2(horaire) {
         });
     }
 
-    // Afficher le formulaire
+    // Afficher le formulaire, masquer carte résumé (évite redondance - Beta 95.2)
     const etatVide = document.getElementById('v2-horaireEtatVide');
     const formulaire = document.getElementById('v2-formulaireHoraire');
+    const carteResume = document.getElementById('v2-carteResumeHoraire');
     if (etatVide) etatVide.style.display = 'none';
     if (formulaire) formulaire.style.display = 'block';
+    if (carteResume) carteResume.style.display = 'none';
 }
 
 /**
@@ -3168,6 +3265,51 @@ function sauvegarderHoraireV2() {
 }
 
 /**
+ * Supprime l'horaire en cours d'édition
+ * Beta 95.2 - Les horaires changent à chaque trimestre, pas de banque nécessaire
+ */
+function supprimerHoraireV2() {
+    if (!horaireEnEditionId) {
+        afficherNotificationErreur('Aucun horaire sélectionné');
+        return;
+    }
+
+    const cleHoraires = typeof cle === 'function' ? cle('horaires') : 'horaires';
+    let horaires = db.getSync(cleHoraires, []);
+    const horaire = horaires.find(h => h.id === horaireEnEditionId);
+
+    if (!horaire) {
+        afficherNotificationErreur('Horaire introuvable');
+        return;
+    }
+
+    // Confirmation
+    const nomHoraire = horaire.nom || 'cet horaire';
+    if (!confirm(`Supprimer l'horaire "${nomHoraire}" ?\n\nCette action est irréversible.`)) {
+        return;
+    }
+
+    // Supprimer de la liste
+    horaires = horaires.filter(h => h.id !== horaireEnEditionId);
+    db.setSync(cleHoraires, horaires);
+
+    // Effacer la sélection sauvegardée
+    db.setSync('horaireSelectionne', null);
+
+    // Réinitialiser l'interface
+    horaireEnEditionId = null;
+    afficherEtatVideHoraireV2();
+    populerDropdownHorairesV2();
+    mettreAJourCarteResumeHoraireV2(null);
+
+    // Mettre à jour le guide groupe-cours
+    mettreAJourGuideGroupeCours();
+
+    afficherNotificationSucces(`Horaire "${nomHoraire}" supprimé`);
+}
+window.supprimerHoraireV2 = supprimerHoraireV2;
+
+/**
  * Met à jour les champs de séances selon le nombre sélectionné
  */
 function mettreAJourSeancesHoraireV2() {
@@ -3241,7 +3383,27 @@ function chargerGroupeCoursV2() {
     populerDropdownGroupeCoursV2();
     populerDropdownsAssemblageV2();
     afficherEnseignantGroupeCoursV2();
-    mettreAJourCarteResumeGroupeCoursV2(null);
+
+    // ✅ CORRIGÉ (8 janvier 2026) : Restaurer depuis groupeCoursActif au lieu d'afficher vide
+    const gcActif = db.getSync('groupeCoursActif', null);
+    if (gcActif && gcActif.id) {
+        // Trouver le groupe-cours dans la liste pour avoir les données à jour
+        const cleGC = typeof cle === 'function' ? cle('groupesCours') : 'groupesCours';
+        const groupesCours = db.getSync(cleGC, []);
+        const gc = groupesCours.find(g => g.id === gcActif.id);
+
+        if (gc) {
+            // Restaurer la sélection et afficher les détails
+            const select = document.getElementById('v2-selectGroupeCours');
+            if (select) select.value = gc.id;
+            mettreAJourCarteResumeGroupeCoursV2(gc);
+            editerGroupeCoursV2(gc);
+        } else {
+            mettreAJourCarteResumeGroupeCoursV2(null);
+        }
+    } else {
+        mettreAJourCarteResumeGroupeCoursV2(null);
+    }
 
     // Synchroniser le dropdown dans l'en-tête de l'application
     if (typeof peuplerDropdownGroupeCoursActif === 'function') {
@@ -3258,6 +3420,8 @@ function populerDropdownGroupeCoursV2() {
 
     const cleGC = typeof cle === 'function' ? cle('groupesCours') : 'groupesCours';
     const groupesCours = db.getSync(cleGC, []);
+
+    // Sauvegarder la valeur actuelle pour la restaurer après repopulation
     const valeurActuelle = select.value;
 
     let html = '<option value="">Sélectionner...</option>';
@@ -3266,9 +3430,11 @@ function populerDropdownGroupeCoursV2() {
     });
     select.innerHTML = html;
 
+    // Restaurer la sélection si elle existait
     if (valeurActuelle) {
         select.value = valeurActuelle;
     }
+    // Note: La restauration depuis groupeCoursActif est gérée par chargerGroupeCoursV2()
 }
 
 /**
@@ -3449,9 +3615,12 @@ function mettreAJourNomGroupeCoursV2() {
  * Appelé quand on change le groupe-cours sélectionné
  */
 function changerGroupeCoursSelectionneV2(gcId) {
+    const btnSupprimer = document.getElementById('v2-btnSupprimerGroupeCours');
+
     if (!gcId) {
         mettreAJourCarteResumeGroupeCoursV2(null);
         afficherEtatVideGroupeCoursV2();
+        if (btnSupprimer) btnSupprimer.style.display = 'none';
         return;
     }
 
@@ -3462,6 +3631,8 @@ function changerGroupeCoursSelectionneV2(gcId) {
     if (gc) {
         mettreAJourCarteResumeGroupeCoursV2(gc);
         editerGroupeCoursV2(gc);
+        // Afficher le bouton supprimer quand un groupe-cours est sélectionné
+        if (btnSupprimer) btnSupprimer.style.display = 'block';
     }
 }
 
@@ -3704,6 +3875,64 @@ function sauvegarderGroupeCoursV2() {
     mettreAJourGuideGroupeCours();
 }
 
+/**
+ * Supprime le groupe-cours actuellement sélectionné
+ * Beta 95.2 (8 jan 2026)
+ */
+function supprimerGroupeCoursV2() {
+    if (!groupeCoursEnEditionId) {
+        console.warn('[Trimestre V2] Aucun groupe-cours sélectionné pour suppression');
+        return;
+    }
+
+    const cleGC = typeof cle === 'function' ? cle('groupesCours') : 'groupesCours';
+    const groupesCours = db.getSync(cleGC, []);
+    const gc = groupesCours.find(g => g.id === groupeCoursEnEditionId);
+
+    if (!gc) {
+        console.warn('[Trimestre V2] Groupe-cours non trouvé:', groupeCoursEnEditionId);
+        return;
+    }
+
+    // Confirmation
+    const nomGC = gc.nom || gc.id;
+    if (!confirm(`Supprimer le groupe-cours "${nomGC}" ?\n\nCette action est irréversible.`)) {
+        return;
+    }
+
+    // Supprimer de la liste
+    const groupesCoursFiltre = groupesCours.filter(g => g.id !== groupeCoursEnEditionId);
+    db.setSync(cleGC, groupesCoursFiltre);
+
+    // Si c'était le groupe-cours actif, le désactiver
+    const gcActifId = db.getSync('groupeCoursActif', null);
+    if (gcActifId === groupeCoursEnEditionId) {
+        db.setSync('groupeCoursActif', null);
+    }
+
+    console.log('[Trimestre V2] Groupe-cours supprimé:', groupeCoursEnEditionId);
+
+    // Réinitialiser l'interface
+    groupeCoursEnEditionId = null;
+    chargerGroupeCoursV2();
+    afficherEtatVideGroupeCoursV2();
+    mettreAJourCarteResumeGroupeCoursV2(null);
+
+    // Masquer le bouton supprimer
+    const btnSupprimer = document.getElementById('v2-btnSupprimerGroupeCours');
+    if (btnSupprimer) btnSupprimer.style.display = 'none';
+
+    // Rafraîchir le dropdown header
+    if (typeof peuplerDropdownGroupeCoursActif === 'function') {
+        peuplerDropdownGroupeCoursActif();
+    }
+
+    // Notification
+    if (typeof afficherNotificationSucces === 'function') {
+        afficherNotificationSucces('Groupe-cours supprimé', nomGC);
+    }
+}
+
 // Exports globaux pour les fonctions groupe-cours
 window.chargerGroupeCoursV2 = chargerGroupeCoursV2;
 window.nouveauGroupeCoursV2 = nouveauGroupeCoursV2;
@@ -3711,6 +3940,7 @@ window.changerGroupeCoursSelectionneV2 = changerGroupeCoursSelectionneV2;
 window.annulerFormGroupeCoursV2 = annulerFormGroupeCoursV2;
 window.sauvegarderGroupeCoursV2 = sauvegarderGroupeCoursV2;
 window.mettreAJourNomGroupeCoursV2 = mettreAJourNomGroupeCoursV2;
+window.supprimerGroupeCoursV2 = supprimerGroupeCoursV2;
 
 /* ===============================
    DONNÉES DE DÉMONSTRATION
@@ -3859,6 +4089,7 @@ window.viderAffichageCoursV2 = viderAffichageCoursV2;
 window.afficherDetailsCoursV2 = afficherDetailsCoursV2;
 window.afficherFormCoursV2 = afficherFormCoursV2;
 window.nouveauCoursV2 = nouveauCoursV2;
+window.supprimerCoursV2 = supprimerCoursV2;
 window.modifierCoursSelectionneV2 = modifierCoursSelectionneV2;
 window.dupliquerCoursSelectionneV2 = dupliquerCoursSelectionneV2;
 window.annulerFormCoursV2 = annulerFormCoursV2;
@@ -4195,8 +4426,10 @@ async function changerGroupeCoursActifV2(groupeCoursId) {
         groupe: gc.groupe || gc.groupeNum
     });
 
-    if (typeof GroupeCoursEntite !== 'undefined' && typeof GroupeCoursEntite.synchroniserInfoCours === 'function') {
-        await GroupeCoursEntite.synchroniserInfoCours(groupeCoursId);
+    // ✅ CORRIGÉ (8 janvier 2026) : Passer trimestreId, pas groupeCoursId
+    const trimestreIdSync = gc.trimestreId || (trimestreActif ? trimestreActif.id : null);
+    if (trimestreIdSync && typeof GroupeCoursEntite !== 'undefined' && typeof GroupeCoursEntite.synchroniserInfoCours === 'function') {
+        await GroupeCoursEntite.synchroniserInfoCours(trimestreIdSync);
     }
 
     const selectHeader = document.getElementById('selectGroupeCoursHeader');
@@ -4208,6 +4441,11 @@ async function changerGroupeCoursActifV2(groupeCoursId) {
 
     if (typeof afficherNotificationSucces === 'function') {
         afficherNotificationSucces('Groupe-cours activé');
+    }
+
+    // 🆕 BETA 95.2 : Rafraîchir le calendrier si visible
+    if (typeof afficherCalendrierScolaire === 'function') {
+        afficherCalendrierScolaire();
     }
 
     console.log('[Trimestre V2] Groupe-cours activé:', gc.id);
@@ -4458,28 +4696,12 @@ async function activerGroupeCoursV2(groupeCoursId) {
 }
 
 /**
- * Supprime un groupe-cours
+ * Supprime un groupe-cours (ancienne version - redirige vers la nouvelle)
+ * @deprecated Utiliser supprimerGroupeCoursV2() sans paramètre
  */
-async function supprimerGroupeCoursV2(groupeCoursId) {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce groupe-cours ?')) return;
-
-    const trimestreActif = window.trimestreActif || obtenirTrimestreActif()?.id;
-    if (!trimestreActif) return;
-
-    try {
-        if (typeof GroupeCoursEntite !== 'undefined') {
-            await GroupeCoursEntite.supprimer(trimestreActif, groupeCoursId);
-        }
-
-        rafraichirListeGroupeCoursV2();
-        await peuplerDropdownGroupeCoursActif();
-
-        console.log('[Trimestre V2] Groupe-cours supprimé:', groupeCoursId);
-
-    } catch (err) {
-        console.error('[Trimestre V2] Erreur suppression groupe-cours:', err);
-        alert('Erreur lors de la suppression');
-    }
+async function _supprimerGroupeCoursV2_legacy(groupeCoursId) {
+    // Redirige vers la nouvelle fonction qui utilise groupeCoursEnEditionId
+    supprimerGroupeCoursV2();
 }
 
 /**
@@ -4517,7 +4739,25 @@ async function mettreAJourApercuGroupeCours() {
     apercuSpan.style.fontWeight = '500';
 }
 
+/**
+ * Accès rapide au calendrier depuis le bandeau groupe-cours
+ * 🆕 BETA 95.2
+ */
+function accederCalendrierRapide() {
+    // Naviguer vers la section Présences
+    if (typeof afficherSection === 'function') {
+        afficherSection('presences');
+    }
+    // Puis vers la sous-section Calendrier (avec délai pour laisser le DOM se mettre à jour)
+    setTimeout(() => {
+        if (typeof afficherSousSection === 'function') {
+            afficherSousSection('presences-calendrier');
+        }
+    }, 100);
+}
+
 // Exports des fonctions migrées
+window.accederCalendrierRapide = accederCalendrierRapide;
 window.peuplerDropdownGroupeCoursActif = peuplerDropdownGroupeCoursActif;
 window.changerGroupeCoursDepuisHeader = changerGroupeCoursDepuisHeader;
 window.changerGroupeCoursActifV2 = changerGroupeCoursActifV2;

@@ -1159,7 +1159,8 @@ function chargerTableauPresences(dateStr, estVerrouille) {
     const groupeFiltre = selectGroupe ? selectGroupe.value : '';
 
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
-    const presences = db.getSync('presences', []);
+    // ✅ CORRIGÉ (8 janvier 2026) : Utiliser obtenirDonneesSelonMode pour filtrer par coursId
+    const presences = obtenirDonneesSelonMode('presences') || [];
 
     let etudiantsFiltres = etudiants;
 
@@ -1487,6 +1488,9 @@ function enregistrerPresences() {
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
     let presences = db.getSync('presences', []);
 
+    // ✅ CORRIGÉ (8 janvier 2026) : Obtenir coursId en premier pour filtrer correctement
+    const coursId = typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null;
+
     // Filtrer les étudiants si un groupe est sélectionné
     let etudiantsATraiter = etudiants;
     if (groupeFiltre) {
@@ -1494,22 +1498,25 @@ function enregistrerPresences() {
     }
 
     // IMPORTANT : Sauvegarder les flags facultatifs AVANT de supprimer les anciennes présences
+    // ✅ CORRIGÉ (8 janvier 2026) : Vérifier aussi coursId pour ne pas mélanger les cours
     const flagsFacultatifs = {};
     presences.forEach(p => {
-        if (p.date === dateStr && p.facultatif === true) {
+        const matchCoursId = !coursId || !p.coursId || p.coursId === coursId;
+        if (p.date === dateStr && p.facultatif === true && matchCoursId) {
             flagsFacultatifs[p.da] = true;
         }
     });
 
     // Supprimer les anciennes présences pour cette date et ces étudiants
+    // ✅ CORRIGÉ (8 janvier 2026) : Protéger les présences des autres cours
     presences = presences.filter(p => {
         if (p.date !== dateStr) return true;
+        // Préserver les présences d'autres cours (coursId différent)
+        if (coursId && p.coursId && p.coursId !== coursId) return true;
         return !etudiantsATraiter.some(e => e.da === p.da);
     });
 
     // Ajouter les nouvelles présences
-    // ✅ CORRECTION CRITIQUE (Beta 95 - 27 déc 2025) : Ajouter coursId
-    const coursId = typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null;
 
     // 🆕 BETA 95.1 : Utiliser les périodes au lieu des heures
     const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : 55;
