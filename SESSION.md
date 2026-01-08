@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 95.2
 
 **Date** : 8 janvier 2026
-**Version** : Beta 95.2 (build 0108-0731)
+**Version** : Beta 95.2 (build 0108-1240)
 **Statut** : Application fonctionnelle pour H2026
 
 ---
@@ -28,6 +28,7 @@
 - Correction persistance groupe-cours (db.setSync)
 - Correction persistance description export
 - Correction imports 5 modules : sauvegarde dans bibliotheque* (workflow consultation avant ajout)
+- Correction persistance groupe-cours au rechargement (cle() vs namespace hardcode)
 
 ---
 
@@ -57,7 +58,7 @@
 ## BACKLOG BETA 95.x
 
 ### Prioritaire
-- [ ] Valider import/export (Productions, Grilles, Echelles, Cartouches, Pratiques)
+- [x] Valider import/export (Productions, Grilles, Echelles, Cartouches, Pratiques)
 - [ ] Connexion calendrier avec groupe-cours
 - [ ] Saisie des presences avec groupe-cours actif
 
@@ -84,7 +85,7 @@
 
 | Fichier | Modification |
 |---------|--------------|
-| `js/trimestre-v2.js` | Consolidation entites-ui.js (+400 lignes) |
+| `js/trimestre-v2.js` | Consolidation entites-ui.js, fix init db-ready |
 | `styles.css` | Nouvelles classes .bloc-section (+160 lignes) |
 | `index.html` | Message bienvenue, BUILD_ID, classes CSS |
 | `DESIGN_SYSTEM.html` | Mise a jour v7, variables CSS |
@@ -150,4 +151,4 @@
 
 ---
 
-**Derniere mise a jour** : 8 janvier 2026, 09:50 (Toronto)
+**Derniere mise a jour** : 8 janvier 2026, 12:40 (Toronto)

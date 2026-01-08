@@ -169,9 +169,16 @@
 
 ### Plus tard (Beta 95.x)
 
-- [ ] Compatibilite donnees A2025 avec nouveaux formats
-- [ ] Verification donnees demo encore fonctionnelles
 - [ ] Auditer module evaluation (meme pattern assemblage?)
+- [ ] Revoir le design de la page Trimestre (harmonisation complete)
+- [ ] Assurer compatibilite page Trimestre avec wizard Primo (configuration rapide)
+- [ ] Creer un protocole de mise a jour des beta (checklist, versioning, communication)
+
+### Compatibilite et donnees (Beta 95.x)
+
+- [ ] Assurer compatibilite donnees A2025 avec modifications au code (cartouche modulaire, trimestre, etc.)
+- [ ] Tester l'application avec les donnees A2025 (validation complete)
+- [ ] Assurer la fonctionnalite des donnees demo (groupe 9999)
 
 ### Architecture modulaire - Verification coherence
 

@@ -10268,3 +10268,164 @@ body[data-mode="simulation"] table tr:hover {
     color: #666;
     margin-bottom: 15px;
 }
+
+/* ===============================
+   SECTION TRIMESTRE - Harmonisation Beta 95.2
+   Ajouté: 8 janvier 2026
+   =============================== */
+
+/* Bloc de section avec fond coloré (remplace les styles inline) */
+.bloc-section {
+    padding: 15px;
+    border-radius: var(--radius-grand);
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.bloc-section--bleu {
+    background: var(--bleu-tres-pale);
+}
+
+.bloc-section--vert {
+    background: var(--vert-tres-pale, #e8f5e9);
+    border-left: 4px solid var(--vert-succes, #4caf50);
+}
+
+.bloc-section--compact {
+    padding: 12px;
+}
+
+/* Bouton de réinitialisation dans les blocs */
+.btn-reset-bloc {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--orange-accent);
+    padding: 0;
+    line-height: 1;
+    transition: transform 0.2s ease;
+}
+
+.btn-reset-bloc:hover {
+    transform: scale(1.2);
+}
+
+/* Formulaire interne (popup dans les blocs) */
+.formulaire-interne {
+    background: white;
+    padding: 10px;
+    border-radius: var(--radius-moyen);
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.formulaire-interne .btn-fermer {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: none;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    color: var(--rouge-erreur);
+    padding: 0;
+    line-height: 1;
+}
+
+/* Conteneur scrollable pour listes d'événements */
+.liste-evenements {
+    margin-bottom: 10px;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+/* Pied de section avec compteur et bouton */
+.section-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+}
+
+/* Grille 2 colonnes avec espacement 15px */
+.grille-2col-gap15 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+/* Grille 3 colonnes pour identification trimestre */
+.grille-identification {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 15px;
+    align-items: end;
+}
+
+/* Labels de formulaire harmonisés */
+.label-compact {
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.label-tres-compact {
+    font-size: 0.75rem;
+}
+
+/* Info box harmonisée */
+.info-box {
+    background: var(--bleu-tres-pale);
+    border-radius: var(--radius-grand);
+    padding: 15px;
+    margin-top: 15px;
+}
+
+/* Aperçu de groupe-cours */
+.apercu-groupe-cours {
+    background: var(--bleu-tres-pale);
+    border: 1px solid var(--bleu-pale);
+    border-radius: var(--radius-grand);
+    padding: 15px;
+}
+
+.apercu-groupe-cours h5 {
+    margin: 0 0 10px 0;
+    color: var(--bleu-principal);
+    font-size: 0.9rem;
+}
+
+.apercu-groupe-cours p {
+    margin: 5px 0;
+    font-size: 0.85rem;
+    color: var(--gris-fonce);
+}
+
+/* Résumé horaire */
+.resume-horaire {
+    background: var(--bleu-tres-pale);
+    padding: 12px;
+    border-radius: var(--radius-grand);
+    margin-top: 15px;
+}
+
+.resume-horaire h5 {
+    margin: 0 0 8px 0;
+    font-size: 0.85rem;
+    color: var(--bleu-principal);
+}
+
+.resume-horaire-ligne {
+    display: flex;
+    gap: 10px;
+    font-size: 0.8rem;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.resume-horaire-ligne:last-child {
+    border-bottom: none;
+}
