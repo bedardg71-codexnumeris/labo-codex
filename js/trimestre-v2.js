@@ -3432,6 +3432,27 @@ function chargerGroupeCoursV2() {
 }
 
 /**
+ * Affiche l'aide pour la création d'un groupe-cours
+ * Beta 95.2 (8 jan 2026)
+ */
+function ouvrirAideGroupeCours() {
+    alert(
+        "Comment créer un groupe-cours ?\n\n" +
+        "Un groupe-cours associe plusieurs éléments pour créer une instance d'enseignement :\n\n" +
+        "1. COURS : Le cours que vous enseignez (ex: 601-101-MQ)\n" +
+        "   → Créez-le d'abord dans la section « Cours »\n\n" +
+        "2. GROUPE D'ÉTUDIANTS : Le numéro de groupe (ex: 00001)\n" +
+        "   → Importez vos étudiants dans la section « Groupe d'étudiants »\n\n" +
+        "3. HORAIRE : Les jours et heures de cours\n" +
+        "   → Configurez-le dans la section « Horaire »\n\n" +
+        "4. ENSEIGNANT·E : Votre profil (automatique)\n" +
+        "   → Configuré dans la section « Enseignant·e »\n\n" +
+        "Une fois ces éléments créés, cliquez sur « + Nouveau groupe-cours » pour les assembler."
+    );
+}
+window.ouvrirAideGroupeCours = ouvrirAideGroupeCours;
+
+/**
  * Peuple le dropdown des groupe-cours existants
  */
 function populerDropdownGroupeCoursV2() {
@@ -3444,7 +3465,7 @@ function populerDropdownGroupeCoursV2() {
     // Sauvegarder la valeur actuelle pour la restaurer après repopulation
     const valeurActuelle = select.value;
 
-    let html = '<option value="">Sélectionner...</option>';
+    let html = '<option value="">— Choisir pour modifier —</option>';
     groupesCours.forEach(gc => {
         html += `<option value="${gc.id}">${gc.nom || gc.id}</option>`;
     });
@@ -3465,10 +3486,10 @@ function populerDropdownsAssemblageV2() {
     const selectCours = document.getElementById('v2-gc-cours');
     if (selectCours) {
         const cours = db.getSync('listeCours', []) || db.getSync('cours', []);
-        let html = '<option value="">— Sélectionner —</option>';
+        let html = '<option value="">— Choisir un cours —</option>';
         cours.forEach(c => {
             const code = c.sigle || c.codeCours || c.code || '';
-            const nom = c.nomCours || c.nom || '';
+            const nom = c.nomCours || c.nom || c.titre || '';
             const label = code ? `${code} - ${nom}` : nom;
             html += `<option value="${c.id || code}">${label}</option>`;
         });
@@ -3490,7 +3511,7 @@ function populerDropdownsAssemblageV2() {
         });
 
         const groupesTries = Array.from(groupesSet).sort();
-        let html = '<option value="">— Sélectionner —</option>';
+        let html = '<option value="">— Choisir un groupe —</option>';
         groupesTries.forEach(grp => {
             const nbEtudiants = etudiants.filter(e => String(e.groupe).padStart(5, '0') === grp).length;
             html += `<option value="${grp}">${grp} (${nbEtudiants} étud.)</option>`;

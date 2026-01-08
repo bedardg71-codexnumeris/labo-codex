@@ -9443,6 +9443,14 @@
                         </div>
                         <div class="accordeon-contenu" style="display: none;">
 
+                            <!-- Bandeau explicatif -->
+                            <div class="bandeau-info" style="background: var(--bleu-clair, #e8f4fc); border-left: 4px solid var(--bleu-primaire, #1a5a96); padding: 12px 15px; margin-bottom: 20px; border-radius: 4px;">
+                                <p style="margin: 0; font-size: 0.9rem; color: var(--texte-fonce, #333);">
+                                    <strong>Pour constituer un groupe-cours</strong>, associe : un cours + un enseignant·e + un numéro de groupe + un horaire + une pratique de notation.
+                                    <a href="#" onclick="ouvrirAideGroupeCours(); return false;" style="margin-left: 8px; color: var(--bleu-primaire, #1a5a96);">Besoin d'aide ?</a>
+                                </p>
+                            </div>
+
                             <div class="disposition-bibliotheque-formulaire">
 
                                 <!-- GAUCHE : Sélection + Résumé -->
@@ -9450,9 +9458,9 @@
 
                                     <!-- Sélection du groupe-cours -->
                                     <div class="groupe-form" style="margin-bottom: 15px;">
-                                        <label class="label-compact">Groupe-cours :</label>
+                                        <label class="label-compact">Groupe-cours existants :</label>
                                         <select id="v2-selectGroupeCours" class="controle-form" onchange="changerGroupeCoursSelectionneV2(this.value)">
-                                            <option value="">Sélectionner...</option>
+                                            <option value="">— Choisir pour modifier —</option>
                                         </select>
                                     </div>
 
@@ -9488,7 +9496,15 @@
 
                                     <!-- État vide -->
                                     <div id="v2-groupeCoursEtatVide" class="etat-vide-formulaire">
-                                        <p>Sélectionnez un groupe-cours ou créez-en un nouveau pour assembler vos éléments.</p>
+                                        <div style="text-align: center; padding: 20px;">
+                                            <p style="font-size: 1.1rem; margin-bottom: 10px;"><strong>Assemblez un groupe-cours</strong></p>
+                                            <p style="color: #666; margin-bottom: 15px;">Cliquez sur « + Nouveau groupe-cours » pour associer un cours, un groupe d'étudiants et un horaire.</p>
+                                            <ol style="text-align: left; display: inline-block; color: #555; font-size: 0.9rem; margin: 0; padding-left: 20px;">
+                                                <li>Sélectionnez le <strong>cours</strong> à enseigner</li>
+                                                <li>Choisissez le <strong>numéro de groupe</strong> d'étudiants</li>
+                                                <li>L'<strong>horaire</strong> et l'<strong>enseignant</strong> se lient automatiquement</li>
+                                            </ol>
+                                        </div>
                                     </div>
 
                                     <!-- Formulaire (caché par défaut) -->
@@ -9503,22 +9519,23 @@
 
                                         <!-- Nom généré dynamiquement -->
                                         <div class="apercu-nom-groupe-cours" id="v2-apercuNomGroupeCours">
-                                            <span class="label-apercu">Nom :</span>
+                                            <span class="label-apercu">NOM GÉNÉRÉ :</span>
                                             <span class="nom-genere" id="v2-nomGroupeCoursGenere">—</span>
                                         </div>
 
                                         <!-- Assemblage des éléments -->
+                                        <p style="font-size: 0.85rem; color: #666; margin-bottom: 10px;">Étape 1 : Sélectionnez les éléments à assembler</p>
                                         <div class="grille-form-2col" style="margin-bottom: 15px;">
                                             <div class="groupe-form">
-                                                <label>Cours <span class="text-danger">*</span></label>
+                                                <label>1. Cours à enseigner <span class="text-danger">*</span></label>
                                                 <select id="v2-gc-cours" class="controle-form" onchange="mettreAJourNomGroupeCoursV2()">
-                                                    <option value="">— Sélectionner —</option>
+                                                    <option value="">— Choisir un cours —</option>
                                                 </select>
                                             </div>
                                             <div class="groupe-form">
-                                                <label>Groupe d'étudiants <span class="text-danger">*</span></label>
+                                                <label>2. Numéro de groupe <span class="text-danger">*</span></label>
                                                 <select id="v2-gc-groupe" class="controle-form" onchange="mettreAJourNomGroupeCoursV2()">
-                                                    <option value="">— Sélectionner —</option>
+                                                    <option value="">— Choisir un groupe —</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -14067,7 +14084,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '95.2';
-        const BUILD_ID = '0108-1707';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0108-1729';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
