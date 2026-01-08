@@ -288,7 +288,7 @@ function changerCoursDepuisEntete(id, estGroupeCours) {
                 codeCours: coursInfo.codeCours || '',
                 titre: coursInfo.nomCours || '',
                 nomCours: coursInfo.nomCours || '',
-                groupe: gcSelectionne.groupe || '00001',
+                groupe: gcSelectionne.groupeNum || gcSelectionne.groupe || '00001',
                 prenomEnseignant: enseignant.prenom || '',
                 nomEnseignant: enseignant.nom || '',
                 pratiqueId: gcSelectionne.pratiqueId
