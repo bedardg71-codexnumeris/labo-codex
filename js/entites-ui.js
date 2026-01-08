@@ -395,6 +395,8 @@ async function peuplerDropdownHoraires() {
 
 /**
  * Change l'horaire sélectionné
+ * NOTE: Cette fonction est un doublon de celle dans trimestre-v2.js
+ * Elle est conservée pour compatibilité mais devrait utiliser la version de trimestre-v2.js
  */
 function changerHoraireSelectionneV2(horaireId) {
     const btnModifier = document.getElementById('v2-btnModifierHoraire');
@@ -409,9 +411,15 @@ function changerHoraireSelectionneV2(horaireId) {
     // Afficher le bouton modifier
     if (btnModifier) btnModifier.style.display = '';
 
+    // Guard: Si l'élément aperçu n'existe pas, ne pas continuer
+    if (!apercu) {
+        console.log('[Entités UI] v2-apercuHoraire non trouvé, utilisation interface trimestre-v2.js');
+        return;
+    }
+
     // Afficher l'aperçu
     HorairesEntite.obtenirParId(horaireId).then(hor => {
-        if (!hor) return;
+        if (!hor || !apercu) return;
 
         const seancesHTML = (hor.seances || []).map(s => HorairesEntite.formaterSeance(s)).join('<br>');
 
@@ -639,12 +647,22 @@ async function sauvegarderHoraireV2() {
         // Rafraîchir les dropdowns
         await peuplerDropdownHoraires();
 
-        // Sélectionner le nouvel/modifié horaire
-        document.getElementById('v2-selectHoraire').value = horaireEnEdition;
-        changerHoraireSelectionneV2(horaireEnEdition);
+        // Sélectionner le nouvel/modifié horaire (avec guard)
+        const selectHoraire = document.getElementById('v2-selectHoraire');
+        if (selectHoraire) {
+            selectHoraire.value = horaireEnEdition;
+            changerHoraireSelectionneV2(horaireEnEdition);
+        }
 
-        // Fermer le formulaire
-        annulerFormHoraireV2();
+        // Fermer le formulaire (avec guard)
+        const formulaire = document.getElementById('v2-formulaireHoraire');
+        if (formulaire) {
+            formulaire.style.display = 'none';
+        }
+        const apercuStyle = document.getElementById('v2-apercuHoraire');
+        if (apercuStyle) {
+            apercuStyle.style.display = 'block';
+        }
 
     } catch (err) {
         console.error('[Entités UI] Erreur sauvegarde horaire:', err);
