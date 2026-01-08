@@ -4110,7 +4110,8 @@ async function peuplerDropdownGroupeCoursActif() {
         return;
     }
 
-    const cleGC = `${trimestreActif.id.toLowerCase()}_groupesCours`;
+    // Utiliser cle() pour cohérence avec sauvegarderGroupeCoursV2
+    const cleGC = typeof cle === 'function' ? cle('groupesCours') : 'groupesCours';
     const groupesCours = db.getSync(cleGC, []);
 
     let options = '<option value="">-- Sélectionner un groupe-cours --</option>';
@@ -4171,7 +4172,9 @@ async function changerGroupeCoursActifV2(groupeCoursId) {
     const trimestreActif = trimestres.find(t => t.actif);
     if (!trimestreActif) return;
 
-    const cleGC = `${trimestreActif.id.toLowerCase()}_groupesCours`;
+    // ✅ CORRIGÉ (8 janvier 2026) : Utiliser cle() pour cohérence avec les autres fonctions
+    // Avant : hardcodé avec namespace qui ne correspondait pas aux données sauvegardées
+    const cleGC = typeof cle === 'function' ? cle('groupesCours') : 'groupesCours';
     const groupesCours = db.getSync(cleGC, []);
     const gc = groupesCours.find(g => g.id === groupeCoursId);
 
@@ -4536,13 +4539,14 @@ window.mettreAJourApercuGroupeCours = mettreAJourApercuGroupeCours;
 
 // Initialiser quand le DOM est prêt et que db est disponible
 document.addEventListener('DOMContentLoaded', function() {
-    // Attendre que db soit prêt
-    if (typeof db !== 'undefined' && db.getSync) {
+    // ✅ CORRIGÉ (8 janvier 2026) : Attendre window.dbReady (synchronisation IndexedDB → localStorage terminée)
+    // Avant, on vérifiait db.getSync qui existe AVANT la fin de la synchronisation
+    if (window.dbReady) {
         initialiserTrimestreV2();
     } else {
-        // Attendre l'événement db-ready
-        document.addEventListener('db-ready', function() {
+        // Attendre l'événement db-ready (déclenché après syncToLocalStorageCache)
+        window.addEventListener('db-ready', function() {
             initialiserTrimestreV2();
-        });
+        }, { once: true });
     }
 });

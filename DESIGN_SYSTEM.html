@@ -3,9 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Design System - Monitorage v6 | Palette Nuit Élégante</title>
+    <title>Design System - Monitorage v7 | Palette Nuit Élégante</title>
     <link rel="stylesheet" href="styles.css">
     <style>
+        /* ===============================
+           DESIGN SYSTEM v7 - Harmonisé
+           Dernière mise à jour: 8 janvier 2026
+           Référence complète: Design system - Modules/AUDIT_V5.md
+           =============================== */
+
+        /* VARIABLES DE RÉFÉRENCE (specs harmonisées) */
+        :root {
+            /* Border-radius - 4 niveaux */
+            --ds-radius-petit: 5px;      /* Badges Tétris */
+            --ds-radius-moyen: 6px;      /* Boutons, inputs, alertes */
+            --ds-radius-grand: 12px;     /* Conteneurs, cartes, modaux */
+            --ds-radius-pill: 20px;      /* Pills uniformes */
+
+            /* Box-shadow - 5 niveaux */
+            --ds-shadow-subtil: 0 1px 4px rgba(3, 46, 92, 0.1);
+            --ds-shadow-normal: 0 2px 8px rgba(3, 46, 92, 0.15);
+            --ds-shadow-prononce: 0 4px 12px rgba(3, 46, 92, 0.25);
+            --ds-shadow-fort: 0 8px 24px rgba(3, 46, 92, 0.3);
+            --ds-shadow-inset: inset 0 1px 3px rgba(3, 46, 92, 0.08);
+        }
+
         /* Styles spécifiques pour le guide */
         body {
             margin: 0;
@@ -43,7 +65,7 @@
         .guide-nav {
             background: #f0f8ff;
             border: 2px solid #065dbb;
-            border-radius: 8px;
+            border-radius: var(--ds-radius-grand);
             padding: 20px;
             margin-bottom: 40px;
         }
@@ -101,10 +123,10 @@
         .guide-component {
             background: white;
             border: 1px solid #e8f2fd;
-            border-radius: 8px;
+            border-radius: var(--ds-radius-grand);
             padding: 30px;
             margin-bottom: 30px;
-            box-shadow: 0 2px 8px rgba(3, 46, 92, 0.05);
+            box-shadow: var(--ds-shadow-normal);
         }
 
         .guide-component-title {
@@ -389,8 +411,8 @@
 
 <!-- EN-TÊTE -->
 <div class="guide-header">
-    <h1>🎨 Design System Monitorage v6</h1>
-    <p>Palette Nuit Élégante • Guide de référence complet</p>
+    <h1>🎨 Design System Monitorage v7</h1>
+    <p>Palette Nuit Élégante • Guide de référence complet • 8 janvier 2026</p>
 
     <!-- NAVIGATION RAPIDE INTÉGRÉE -->
     <div class="guide-nav" style="position: static; margin: 20px 0 0 0; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2);">
