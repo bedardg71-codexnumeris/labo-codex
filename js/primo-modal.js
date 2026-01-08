@@ -1717,16 +1717,22 @@ function creerGroupeCoursDepuisPrimo(reponses) {
         return;
     }
 
+    // Générer le nom du groupe-cours (aligné sur Trimestre)
+    const groupeNum = reponses['numero-groupe'] || '00001';
+    const codeCours = infoCours.sigle || infoCours.codeCours || infoCours.code || '';
+    const nomGC = genererNomGroupeCoursPrimo(trimestreId, codeCours, groupeNum, horaireId);
+
     const nouveauGC = {
         id: 'GC_' + Date.now(),
+        nom: nomGC,                    // Aligné sur Trimestre
         trimestreId: trimestreId,
         coursId: coursId,
-        enseignantId: enseignantId,
+        groupeNum: groupeNum,          // Aligné sur Trimestre (était "groupe")
         horaireId: horaireId,
-        pratiqueId: pratiqueId,
-        groupe: reponses['numero-groupe'] || '00001',
-        actif: true,
-        dateCreation: new Date().toISOString().split('T')[0]
+        enseignantId: enseignantId,
+        pratiqueId: pratiqueId,        // Bonus Primo
+        dateCreation: new Date().toISOString(),
+        actif: true
     };
 
     groupesCours.push(nouveauGC);
@@ -1800,6 +1806,56 @@ function creerHoraireDansBanquePrimo(reponses, coursId) {
 
     console.log('[Primo] Horaire créé:', nouvelHoraire.id);
     return nouvelHoraire.id;
+}
+
+/**
+ * Génère le nom du groupe-cours (aligné sur Trimestre)
+ * Format: H2026-601-101-MQ-00001 (Lun-AM / Mer-PM)
+ */
+function genererNomGroupeCoursPrimo(trimestreId, codeCours, groupeNum, horaireId) {
+    // Formater le trimestre (ex: "h2026" → "H2026")
+    let trimestreNom = '';
+    if (trimestreId) {
+        const trimestres = db.getSync('trimestres', []);
+        const trimestre = trimestres.find(t => t.id === trimestreId);
+        if (trimestre) {
+            const sessionLettre = { 'hiver': 'H', 'automne': 'A', 'ete': 'E' }[trimestre.session] ||
+                                  trimestre.session?.charAt(0)?.toUpperCase() || '';
+            trimestreNom = `${sessionLettre}${trimestre.annee}`;
+        } else {
+            // Fallback: extraire de l'ID (ex: "h2026" → "H2026")
+            trimestreNom = trimestreId.charAt(0).toUpperCase() + trimestreId.slice(1);
+        }
+    }
+
+    // Résumé horaire
+    let horaireResume = '';
+    if (horaireId) {
+        const cleHoraires = (typeof cle === 'function') ? cle('horaires') : 'horaires';
+        const horaires = db.getSync(cleHoraires, []);
+        const horaire = horaires.find(h => h.id === horaireId);
+
+        if (horaire?.seances && horaire.seances.length > 0) {
+            const abrevJour = { 'Lundi': 'Lun', 'Mardi': 'Mar', 'Mercredi': 'Mer',
+                               'Jeudi': 'Jeu', 'Vendredi': 'Ven', 'Samedi': 'Sam', 'Dimanche': 'Dim' };
+            const seancesAbregees = horaire.seances.map(s => {
+                const jourAbrege = abrevJour[s.jour] || s.jour?.substring(0, 3) || '';
+                const heure = parseInt(s.heureDebut?.split(':')[0] || '12');
+                const periode = heure < 12 ? 'AM' : 'PM';
+                return `${jourAbrege}-${periode}`;
+            });
+            horaireResume = seancesAbregees.join(' / ');
+        }
+    }
+
+    // Assembler le nom
+    let nom = '';
+    if (trimestreNom) nom += trimestreNom;
+    if (codeCours) nom += (nom ? '-' : '') + codeCours;
+    if (groupeNum) nom += (nom ? '-' : '') + groupeNum;
+    if (horaireResume) nom += ` (${horaireResume})`;
+
+    return nom || 'Groupe-cours';
 }
 
 // ============================================================================

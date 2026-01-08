@@ -88,7 +88,7 @@ async function peuplerDropdownGroupeCoursActif() {
             const hor = horaires.find(h => h.id === gc.horaireId) || {};
 
             const sigle = coursInfo.codeCours || coursInfo.code || coursInfo.sigle || '???';
-            const groupe = gc.groupe || '?';
+            const groupe = gc.groupeNum || gc.groupe || '?';  // Beta 95.2: groupeNum prioritaire
             const nomEns = ens.prenom ? `${ens.prenom} ${(ens.nom || '').charAt(0)}.` : '';
             const nomHor = hor.nom || '';
 
