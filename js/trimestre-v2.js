@@ -3530,7 +3530,8 @@ function genererNomGroupeCoursV2() {
     let codeCours = '';
     if (coursId) {
         const cours = db.getSync('listeCours', []) || db.getSync('cours', []);
-        const coursObj = cours.find(c => (c.id || c.sigle || c.codeCours) === coursId);
+        // Beta 95.2: Chercher par id, sigle, codeCours OU code (Primo utilise 'code')
+        const coursObj = cours.find(c => c.id === coursId || c.sigle === coursId || c.codeCours === coursId || c.code === coursId);
         codeCours = coursObj?.sigle || coursObj?.codeCours || coursObj?.code || '';
     }
 
@@ -3664,8 +3665,9 @@ function mettreAJourCarteResumeGroupeCoursV2(gc) {
 
     // Récupérer les infos liées
     const cours = db.getSync('listeCours', []) || db.getSync('cours', []);
-    const coursObj = cours.find(c => (c.id || c.sigle || c.codeCours) === gc.coursId);
-    const coursNom = coursObj ? (coursObj.sigle || coursObj.codeCours || '') + ' - ' + (coursObj.nomCours || coursObj.nom || '') : '—';
+    // Beta 95.2: Chercher par id, sigle, codeCours OU code (Primo utilise 'code')
+    const coursObj = cours.find(c => c.id === gc.coursId || c.sigle === gc.coursId || c.codeCours === gc.coursId || c.code === gc.coursId);
+    const coursNom = coursObj ? (coursObj.sigle || coursObj.codeCours || coursObj.code || '') + ' - ' + (coursObj.nomCours || coursObj.nom || coursObj.titre || '') : '—';
 
     const cleHoraires = typeof cle === 'function' ? cle('horaires') : 'horaires';
     const horaires = db.getSync(cleHoraires, []);
