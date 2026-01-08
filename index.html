@@ -3192,12 +3192,14 @@
 
                 <!-- Encadré testeurs (liste à puces) -->
                 <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: 4px; padding: 12px 16px; margin-bottom: 1.5rem;">
-                    <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Corrections récentes (8 janvier) :</strong>
+                    <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Corrections récentes (6-8 janvier) :</strong>
                     <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
                         <li><strong>Section Trimestre stabilisée</strong> : Tous les accordéons fonctionnent (Cours, Enseignant·e, Horaire, Groupe-cours)</li>
                         <li><strong>Sélecteur groupe-cours</strong> : Le dropdown dans l'en-tête affiche correctement tes groupe-cours</li>
-                        <li><strong>Design harmonisé</strong> : Interface uniformisée selon le Design System v7</li>
-                        <li><strong>Consolidation du code</strong> : Un seul module pour la section Trimestre (stabilité accrue)</li>
+                        <li><strong>Périodes au lieu d'heures</strong> : Format horaire dynamique (merci Olivier)</li>
+                        <li><strong>Finalisation Primo</strong> : L'interface se met à jour après configuration (merci Olivier)</li>
+                        <li><strong>Sauvegarde des grilles</strong> : Les nouvelles grilles s'ajoutent correctement (merci Bruno)</li>
+                        <li><strong>Import/Export amélioré</strong> : Import sélectif avec protection des données (merci Bruno)</li>
                     </ul>
                     <p style="margin: 8px 0 0 0; font-size: 0.85rem;">
                         <a href="#" onclick="fermerModalNouveautes(); allerVersNotesDeVersion(); return false;" style="color: var(--bleu-principal);">Voir toutes les notes de version →</a>
@@ -8418,16 +8420,9 @@
                      NOUVEAUX ONGLETS BETA 95.2
                      =================================== -->
 
-                <!-- Onglet 1: Trimestre (Beta 95.2 - EN RECONSTRUCTION) -->
+                <!-- Onglet 1: Trimestre (Beta 95.2) -->
                 <div id="reglages-trimestre" class="sous-section">
                     <h2>Trimestre</h2>
-
-                    <!-- AVERTISSEMENT RECONSTRUCTION -->
-                    <div class="alerte alerte-attention" style="margin-bottom: 20px;">
-                        <strong>🚧 Section en reconstruction</strong><br>
-                        Cette section est en cours de refactorisation vers une architecture modulaire (groupe-cours).
-                        Certaines fonctionnalités peuvent être incomplètes ou instables.
-                    </div>
 
                     <p class="text-muted">
                         Configuration du cadre temporel et organisationnel du trimestre actif.
@@ -8719,6 +8714,11 @@
 
                                     <button class="btn btn-principal btn-sm" style="margin-top: 15px; width: 100%;" onclick="nouveauCoursV2()">
                                         + Nouveau cours
+                                    </button>
+
+                                    <!-- Bouton supprimer cours (Beta 95.2) -->
+                                    <button id="v2-btnSupprimerCours" class="btn btn-danger btn-sm" style="margin-top: 8px; width: 100%; display: none;" onclick="supprimerCoursV2()">
+                                        Supprimer ce cours
                                     </button>
                                 </div>
 
@@ -9132,6 +9132,10 @@
                                             <button class="btn btn-confirmer" onclick="sauvegarderHoraireV2()">
                                                 <span id="v2-btnTexteHoraire">Enregistrer</span>
                                             </button>
+                                            <!-- Bouton supprimer (visible seulement en mode édition) -->
+                                            <button id="v2-btnSupprimerHoraire" class="btn btn-danger" onclick="supprimerHoraireV2()" style="display: none; margin-left: auto;">
+                                                Supprimer
+                                            </button>
                                         </div>
                                     </div>
 
@@ -9177,6 +9181,16 @@
                                     <!-- Bouton nouveau groupe-cours (en bas) -->
                                     <button class="btn btn-principal btn-sm btn-block" style="margin-top: 15px;" onclick="nouveauGroupeCoursV2()">
                                         + Nouveau groupe-cours
+                                    </button>
+
+                                    <!-- Bouton supprimer groupe-cours (Beta 95.2) -->
+                                    <button id="v2-btnSupprimerGroupeCours" class="btn btn-danger btn-sm btn-block" style="margin-top: 8px; display: none;" onclick="supprimerGroupeCoursV2()">
+                                        Supprimer ce groupe-cours
+                                    </button>
+
+                                    <!-- Bouton accès rapide calendrier (Beta 95.2) -->
+                                    <button class="btn btn-secondaire btn-sm btn-block" style="margin-top: 8px;" onclick="accederCalendrierRapide()">
+                                        Voir le calendrier
                                     </button>
 
                                 </div>
@@ -13281,7 +13295,26 @@
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                        <p class="text-muted">6 janvier 2026</p>
+                        <p class="text-muted">6-8 janvier 2026</p>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Corrections récentes (8 janvier)</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Section Trimestre stabilisée</strong> : Tous les accordéons fonctionnent (Cours, Enseignant·e, Horaire, Groupe-cours).</li>
+                            <li><strong>Sélecteur groupe-cours</strong> : Le dropdown dans l'en-tête affiche correctement tes groupe-cours.</li>
+                            <li><strong>Persistance au rechargement</strong> : Le groupe-cours et l'horaire sélectionnés sont restaurés après rechargement de page.</li>
+                            <li><strong>Bouton suppression horaire</strong> : Les horaires peuvent être supprimés (changent chaque trimestre).</li>
+                            <li><strong>Présences par groupe-cours</strong> : Les présences sont maintenant correctement filtrées par groupe-cours actif.</li>
+                            <li><strong>Design harmonisé</strong> : Interface uniformisée selon le Design System v7.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Retours testeurs (6 janvier)</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Périodes au lieu d'heures</strong> : Format horaire dynamique selon le nombre de périodes (merci Olivier).</li>
+                            <li><strong>Finalisation Primo</strong> : L'interface se met à jour après la configuration (merci Olivier).</li>
+                            <li><strong>Sauvegarde des grilles</strong> : Les nouvelles grilles s'ajoutent correctement à la bibliothèque (merci Bruno).</li>
+                            <li><strong>Heures non piles</strong> : Entrée d'heures comme 8h55 dans Primo (merci Bruno).</li>
+                            <li><strong>Import/Export amélioré</strong> : Import sélectif avec protection des données (merci Bruno).</li>
+                        </ul>
 
                         <h4 class="titre-bleu-mb8 mt-15">Séparation des entités</h4>
                         <ul class="modal-liste">
@@ -13627,7 +13660,7 @@
     <!-- PRIORITÉ 2: Données de base -->
     <script src="js/trimestres.js?v=2025123102"></script> <!-- Beta 95 : Gestion multi-trimestres -->
     <script src="js/trimestre.js?v=2025123109"></script>
-    <script src="js/trimestre-v2.js?v=2026010812"></script> <!-- Beta 95.2 : fix persistance groupe-cours -->
+    <script src="js/trimestre-v2.js?v=2026010816"></script> <!-- Beta 95.2 : persistance + suppression horaires -->
 
     <!-- ENTITÉS Beta 95.2 - Architecture modulaire groupe-cours -->
     <script src="js/entites/cours-entite.js?v=2026010601"></script>
@@ -13685,7 +13718,7 @@
     <script src="js/objectifs.js?v=2025120124"></script>
 
     <script src="js/portfolio.js?v=2025122901"></script>
-    <script src="js/saisie-presences.js?v=2025122901"></script>
+    <script src="js/saisie-presences.js?v=2026010801"></script>
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
     <script src="js/tableau-bord-apercu.js?v=2025122801"></script>
@@ -13711,7 +13744,7 @@
     <script src="js/evaluation.js?v=2025123103"></script>
 
     <!-- PRIMO - Système conversationnel de configuration (Beta 92) -->
-    <script src="js/primo-questions.js?v=2026010402"></script>
+    <script src="js/primo-questions.js?v=2026010801"></script>
     <script src="js/primo-modal.js?v=2026010603"></script> <!-- Bug Olivier: reload après parcours court -->
     <script src="js/primo-accueil.js?v=2025112809"></script>
     <script src="js/primo-validation-champs.js?v=2025112727"></script>
@@ -13746,7 +13779,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '95.2';
-        const BUILD_ID = '0108-1240';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0108-1534';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';

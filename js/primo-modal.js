@@ -1287,6 +1287,8 @@ function creerSeancesHoraire() {
 async function terminerConfiguration() {
     console.log('[Primo] Configuration terminée !');
     console.log('[Primo] Réponses collectées:', reponsesPrimo);
+    console.log('[Primo] DEBUG code-cours:', reponsesPrimo['code-cours']);
+    console.log('[Primo] DEBUG titre-cours:', reponsesPrimo['titre-cours']);
 
     // Vérifier si c'est un parcours modulaire (retour au menu)
     const questionsActives = obtenirQuestionsActives(reponsesPrimo);
@@ -1305,6 +1307,10 @@ async function terminerConfiguration() {
     // Créer le tableau de séances à partir de horaireHebdomadaire
     // Utilise maintenant seancesHoraire_{coursId} (namespacé)
     creerSeancesHoraire();
+
+    // ✅ NOUVEAU (Beta 95.2 - 8 jan 2026) : Créer le groupe-cours
+    // pour qu'il apparaisse dans le dropdown et lie toutes les entités
+    creerGroupeCoursDepuisPrimo(reponsesPrimo);
 
     // Générer le calendrier complet à partir des données du trimestre
     if (typeof genererCalendrierComplet === 'function') {
@@ -1672,6 +1678,128 @@ function creerTrimestreSiAbsent(trimestreId, session, annee) {
         db.setSync('trimestres', trimestres);
         console.log('[Primo] Trimestre créé:', trimestreId);
     }
+}
+
+/**
+ * Crée le groupe-cours à partir des données Primo
+ * Beta 95.2 (8 jan 2026) : Lie cours + enseignant + horaire + pratique
+ * Corrige le bug où le cours créé avec Primo n'apparaissait pas dans le dropdown
+ */
+function creerGroupeCoursDepuisPrimo(reponses) {
+    // Récupérer les données créées par creerCoursInitial()
+    const infoCours = db.getSync('infoCours', {});
+    const coursId = infoCours.id || '';
+    const trimestreId = infoCours.trimestreId || '';
+
+    if (!coursId) {
+        console.warn('[Primo] Pas de coursId, groupe-cours non créé');
+        return;
+    }
+
+    // Créer ou récupérer l'enseignant
+    const enseignantId = creerOuRecupererEnseignantPrimo(reponses);
+
+    // Créer l'horaire dans la banque
+    const horaireId = creerHoraireDansBanquePrimo(reponses, coursId);
+
+    // Récupérer la pratique
+    const pratiqueId = reponses['pratique-notation'] || 'pan-maitrise';
+
+    // Créer le groupe-cours
+    const cleGC = (typeof cle === 'function') ? cle('groupesCours') : 'groupesCours';
+    const groupesCours = db.getSync(cleGC, []);
+
+    // Vérifier si un groupe-cours existe déjà pour ce cours
+    const existant = groupesCours.find(gc => gc.coursId === coursId);
+    if (existant) {
+        console.log('[Primo] Groupe-cours existant pour ce cours:', existant.id);
+        db.setSync('groupeCoursActif', existant.id);
+        return;
+    }
+
+    const nouveauGC = {
+        id: 'GC_' + Date.now(),
+        trimestreId: trimestreId,
+        coursId: coursId,
+        enseignantId: enseignantId,
+        horaireId: horaireId,
+        pratiqueId: pratiqueId,
+        groupe: reponses['numero-groupe'] || '00001',
+        actif: true,
+        dateCreation: new Date().toISOString().split('T')[0]
+    };
+
+    groupesCours.push(nouveauGC);
+    db.setSync(cleGC, groupesCours);
+
+    // Marquer comme actif
+    db.setSync('groupeCoursActif', nouveauGC.id);
+
+    console.log('[Primo] Groupe-cours créé:', nouveauGC);
+}
+
+/**
+ * Crée ou récupère un enseignant existant
+ * Beta 95.2 : Utilisé par creerGroupeCoursDepuisPrimo()
+ */
+function creerOuRecupererEnseignantPrimo(reponses) {
+    const enseignants = db.getSync('enseignants', []);
+    const nom = reponses['nom-utilisateur'] || '';
+    const courriel = reponses['courriel-utilisateur'] || '';
+
+    // Chercher enseignant existant par courriel
+    if (courriel) {
+        const existant = enseignants.find(e => e.courriel === courriel);
+        if (existant) return existant.id;
+    }
+
+    // Créer nouvel enseignant
+    const partiesNom = nom.split(' ');
+    const nouvelEnseignant = {
+        id: 'ENS_' + Date.now(),
+        prenom: partiesNom[0] || '',
+        nom: partiesNom.slice(1).join(' ') || nom,
+        courriel: courriel,
+        institution: '',
+        departement: '',
+        discipline: ''
+    };
+
+    enseignants.push(nouvelEnseignant);
+    db.setSync('enseignants', enseignants);
+
+    console.log('[Primo] Enseignant créé:', nouvelEnseignant.id);
+    return nouvelEnseignant.id;
+}
+
+/**
+ * Crée l'horaire dans la banque namespacée
+ * Beta 95.2 : Utilisé par creerGroupeCoursDepuisPrimo()
+ */
+function creerHoraireDansBanquePrimo(reponses, coursId) {
+    const cleHoraires = (typeof cle === 'function') ? cle('horaires') : 'horaires';
+    const horaires = db.getSync(cleHoraires, []);
+
+    const horaireHebdo = reponses['horaireHebdomadaire'] || [];
+
+    // Ne pas créer si pas d'horaire
+    if (!horaireHebdo || horaireHebdo.length === 0) {
+        console.log('[Primo] Pas d\'horaire hebdomadaire, horaire non créé');
+        return null;
+    }
+
+    const nouvelHoraire = {
+        id: 'HOR_' + Date.now(),
+        coursId: coursId,
+        seances: horaireHebdo,
+        dateCreation: new Date().toISOString().split('T')[0]
+    };
+
+    horaires.push(nouvelHoraire);
+    db.setSync(cleHoraires, horaires);
+
+    console.log('[Primo] Horaire créé:', nouvelHoraire.id);
+    return nouvelHoraire.id;
 }
 
 // ============================================================================

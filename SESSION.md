@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 95.2
 
 **Date** : 8 janvier 2026
-**Version** : Beta 95.2 (build 0108-1240)
+**Version** : Beta 95.2 (build 0108-1432)
 **Statut** : Application fonctionnelle pour H2026
 
 ---
@@ -23,12 +23,14 @@
 
 ### Derniere tache completee (8 janvier)
 - Import/export valide pour 5 modules (Productions, Grilles, Echelles, Cartouches, Pratiques)
-- Correction z-index modaux import (apparaissent au-dessus des biblio)
-- Correction lecture profilEnseignant pour metadonnees CC
-- Correction persistance groupe-cours (db.setSync)
-- Correction persistance description export
-- Correction imports 5 modules : sauvegarde dans bibliotheque* (workflow consultation avant ajout)
-- Correction persistance groupe-cours au rechargement (cle() vs namespace hardcode)
+- Correction persistance groupe-cours au rechargement (restauration complete)
+- Correction persistance horaire selectionne (nouvelle cle horaireSelectionne)
+- Bouton suppression horaire (pas de banque necessaire, change chaque trimestre)
+- Simplification UI horaire (carte resume masquee quand formulaire visible)
+- Bouton "Voir le calendrier" dans sidebar groupe-cours
+- Connexion calendrier/presences avec groupe-cours actif (filtrage par coursId)
+- **Primo dynamique** : Detection config existante (enseignant, cours, trimestre)
+- **Correction bug Primo** : Groupe-cours maintenant cree automatiquement (dropdown fonctionnel)
 
 ---
 
@@ -41,7 +43,7 @@
 - [x] Cartouches (export + import CC)
 - [x] Pratiques (export + import CC)
 
-**Prochaine etape** : Connexion calendrier/presences avec groupe-cours
+**Prochaine etape** : Optimiser utilisation de l'espace (limiter scrolling vertical)
 
 ---
 
@@ -59,10 +61,15 @@
 
 ### Prioritaire
 - [x] Valider import/export (Productions, Grilles, Echelles, Cartouches, Pratiques)
-- [ ] Connexion calendrier avec groupe-cours
-- [ ] Saisie des presences avec groupe-cours actif
+- [x] Connexion calendrier avec groupe-cours
+- [x] Saisie des presences avec groupe-cours actif
 
 ### Plus tard
+- [ ] **Bug trimestre par defaut** : Au rechargement, tombe sur A2025 au lieu de H2026 (investigation)
+- [ ] **Incoherence profil enseignant** : Primo affiche "Gregoire" vs Trimestre affiche "Greg Bedard" (sources differentes)
+- [ ] **Bouton supprimer groupe-cours** : Ajouter modal bibliotheque pour gerer/supprimer les groupes-cours
+- [ ] **Affichage dropdown groupe-cours** : Afficher nom lisible au lieu de GC_timestamp quand donnees incompletes
+- [ ] Optimiser utilisation de l'espace (limiter scrolling vertical)
 - [ ] Revoir design page Trimestre (harmonisation complete)
 - [ ] Compatibilite page Trimestre avec wizard Primo
 - [ ] Creer protocole de mise a jour des beta
@@ -86,6 +93,9 @@
 | Fichier | Modification |
 |---------|--------------|
 | `js/trimestre-v2.js` | Consolidation entites-ui.js, fix init db-ready |
+| `js/saisie-presences.js` | Filtrage presences par coursId |
+| `js/primo-modal.js` | Correction bug groupe-cours (creerGroupeCoursDepuisPrimo) |
+| `js/primo-questions.js` | Primo dynamique (detection config existante) |
 | `styles.css` | Nouvelles classes .bloc-section (+160 lignes) |
 | `index.html` | Message bienvenue, BUILD_ID, classes CSS |
 | `DESIGN_SYSTEM.html` | Mise a jour v7, variables CSS |
@@ -119,8 +129,12 @@
 - Consolidation entites-ui.js → trimestre-v2.js
 - Correction dropdown groupe-cours (namespacing)
 - Harmonisation design section Trimestre
-- Message de bienvenue mis a jour (statut vert)
-- Notes de version BETA_95_CHANGELOG.md creees
+- Persistance groupe-cours et horaire au rechargement
+- Bouton suppression horaire + simplification UI
+- Bouton "Voir le calendrier" dans sidebar groupe-cours
+- Connexion presences avec groupe-cours (filtrage par coursId dans saisie-presences.js)
+- Primo dynamique : detection config existante (enseignant, cours, trimestre)
+- Correction bug Primo : creerGroupeCoursDepuisPrimo() pour que le dropdown fonctionne
 
 ### 6-7 janvier 2026
 - Corrections bugs testeurs (Bruno, Olivier)
@@ -151,4 +165,4 @@
 
 ---
 
-**Derniere mise a jour** : 8 janvier 2026, 12:40 (Toronto)
+**Derniere mise a jour** : 8 janvier 2026, 14:32 (Toronto)

@@ -2416,6 +2416,15 @@ textarea {
     background: var(--bleu-clair);
 }
 
+.btn-danger {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+    background: #c82333;
+}
+
 .btn-ajouter {
     background: var(--btn-ajouter);
     color: white;

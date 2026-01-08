@@ -47,13 +47,111 @@
  * }
  */
 
+// ============================================================================
+// FONCTIONS UTILITAIRES POUR DÉTECTION DE CONFIG EXISTANTE
+// ============================================================================
+
+/**
+ * Récupère les informations enseignant existantes
+ * @returns {Object|null} Infos enseignant ou null si non configuré
+ */
+function obtenirEnseignantExistant() {
+    // Vérifier d'abord dans la liste des enseignants (Beta 95.2)
+    const enseignants = (typeof db !== 'undefined' && db.getSync)
+        ? db.getSync('enseignants', [])
+        : JSON.parse(localStorage.getItem('enseignants') || '[]');
+
+    if (enseignants.length > 0) {
+        return enseignants[0]; // Premier enseignant
+    }
+
+    // Fallback sur infoCours
+    const infoCours = (typeof db !== 'undefined' && db.getSync)
+        ? db.getSync('infoCours', {})
+        : JSON.parse(localStorage.getItem('infoCours') || '{}');
+
+    if (infoCours.enseignant) {
+        return {
+            prenom: infoCours.enseignant,
+            courriel: infoCours.courriel || '',
+            siteWeb: infoCours.siteWeb || ''
+        };
+    }
+
+    return null;
+}
+
+/**
+ * Récupère les cours existants
+ * @returns {Array} Liste des cours
+ */
+function obtenirCoursExistants() {
+    // Vérifier dans la liste des cours (Beta 95.2)
+    const cleNS = (typeof cle === 'function') ? cle('cours') : 'cours';
+    const cours = (typeof db !== 'undefined' && db.getSync)
+        ? db.getSync(cleNS, [])
+        : JSON.parse(localStorage.getItem(cleNS) || '[]');
+
+    if (cours.length > 0) return cours;
+
+    // Fallback sur listeCours (legacy)
+    const cleLegacy = (typeof cle === 'function') ? cle('listeCours') : 'listeCours';
+    const listeCours = (typeof db !== 'undefined' && db.getSync)
+        ? db.getSync(cleLegacy, [])
+        : JSON.parse(localStorage.getItem(cleLegacy) || '[]');
+
+    return listeCours;
+}
+
 const QUESTIONS_PRIMO = [
     // ========================================================================
-    // ÉTAPE 1 : UTILISATEUR ET COURS (6 questions essentielles)
+    // ÉTAPE 1 : UTILISATEUR (avec détection config existante)
     // ========================================================================
+
+    // ✅ NOUVEAU (8 janvier 2026) : Détection profil enseignant existant
+    {
+        id: 'enseignant-config-existante',
+        texte: function() {
+            const ens = obtenirEnseignantExistant();
+            if (!ens) return '';
+
+            const nom = ens.prenom || ens.nom || 'Enseignant';
+            const courriel = ens.courriel ? `\n• Courriel : **${ens.courriel}**` : '';
+
+            return `Salut ! Je vois que tu as déjà un profil configuré :\n\n` +
+                   `• Nom : **${nom}**${courriel}\n\n` +
+                   `Veux-tu utiliser ce profil pour ce groupe-cours ?`;
+        },
+        type: 'radio',
+        options: [
+            {
+                value: 'oui',
+                label: 'Oui, c\'est moi !',
+                description: 'Utiliser le profil existant'
+            },
+            {
+                value: 'non',
+                label: 'Non, créer un nouveau profil',
+                description: 'Entrer de nouvelles informations'
+            }
+        ],
+        champsCibles: [],
+        validation: { requis: true },
+        sautSi: function() {
+            const ens = obtenirEnseignantExistant();
+            return !ens || !ens.prenom;
+        }
+    },
+
     {
         id: 'nom-utilisateur',
-        texte: 'Salut, je suis Primo ! Je vais t\'assister dans la configuration des paramètres de l\'application.\n\nToi, quel est ton nom ?',
+        texte: function(reponses) {
+            // Message d'accueil seulement si pas de profil existant
+            if (!reponses['enseignant-config-existante']) {
+                return 'Salut, je suis Primo ! Je vais t\'assister dans la configuration des paramètres de l\'application.\n\nToi, quel est ton nom ?';
+            }
+            return 'Quel est ton nom ?';
+        },
         type: 'text',
         placeholder: 'Ton prénom',
         champsCibles: [
@@ -62,6 +160,9 @@ const QUESTIONS_PRIMO = [
         validation: {
             requis: true,
             minLength: 2
+        },
+        sautSi: function(reponses) {
+            return reponses['enseignant-config-existante'] === 'oui';
         }
     },
 
@@ -78,7 +179,10 @@ const QUESTIONS_PRIMO = [
             pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
             messageErreur: 'Format de courriel invalide'
         },
-        aide: 'Optionnel. Sera inclus dans les métadonnées lors du partage de matériel pédagogique.'
+        aide: 'Optionnel. Sera inclus dans les métadonnées lors du partage de matériel pédagogique.',
+        sautSi: function(reponses) {
+            return reponses['enseignant-config-existante'] === 'oui';
+        }
     },
 
     {
@@ -94,7 +198,87 @@ const QUESTIONS_PRIMO = [
             pattern: /^https?:\/\/.+/,
             messageErreur: 'Le lien doit commencer par http:// ou https://'
         },
-        aide: 'Optionnel. Permet aux collègues de te contacter ou d\'explorer tes ressources.'
+        aide: 'Optionnel. Permet aux collègues de te contacter ou d\'explorer tes ressources.',
+        sautSi: function(reponses) {
+            return reponses['enseignant-config-existante'] === 'oui';
+        }
+    },
+
+    // ========================================================================
+    // ÉTAPE 2 : COURS (avec détection cours existants)
+    // ========================================================================
+
+    // ✅ NOUVEAU (8 janvier 2026) : Détection cours existants
+    {
+        id: 'cours-config-existante',
+        texte: function() {
+            const cours = obtenirCoursExistants();
+            if (!cours || cours.length === 0) return '';
+
+            // Lister les cours existants (max 3)
+            const listeCours = cours.slice(0, 3).map(c => {
+                const code = c.code || c.sigle || '?';
+                const titre = c.titre || c.nom || 'Sans titre';
+                return `• **${code}** - ${titre}`;
+            }).join('\n');
+
+            const etPlus = cours.length > 3 ? `\n• ... et ${cours.length - 3} autre(s)` : '';
+
+            return `Tu as déjà ${cours.length} cours configuré${cours.length > 1 ? 's' : ''} :\n\n` +
+                   `${listeCours}${etPlus}\n\n` +
+                   `Veux-tu utiliser un de ces cours ou en créer un nouveau ?`;
+        },
+        type: 'radio',
+        options: [
+            {
+                value: 'existant',
+                label: 'Utiliser un cours existant',
+                description: 'Choisir parmi mes cours'
+            },
+            {
+                value: 'nouveau',
+                label: 'Créer un nouveau cours',
+                description: 'Entrer les informations d\'un nouveau cours'
+            }
+        ],
+        champsCibles: [],
+        validation: { requis: true },
+        sautSi: function() {
+            const cours = obtenirCoursExistants();
+            return !cours || cours.length === 0;
+        }
+    },
+
+    // Sélection du cours existant
+    {
+        id: 'cours-existant-selection',
+        texte: 'Quel cours veux-tu utiliser ?',
+        type: 'select',
+        options: function() {
+            const cours = obtenirCoursExistants();
+            return cours.map(c => ({
+                value: c.id || c.code || c.sigle,
+                label: `${c.code || c.sigle || '?'} - ${c.titre || c.nom || 'Sans titre'}`
+            }));
+        },
+        champsCibles: [],
+        validation: { requis: true },
+        sautSi: function(reponses) {
+            return reponses['cours-config-existante'] !== 'existant';
+        },
+        // Action après sélection : copier les infos du cours sélectionné
+        // ✅ CORRECTION (8 jan 2026) : Copier vers les clés que creerCoursInitial() attend
+        actionApres: function(valeur, reponses) {
+            const cours = obtenirCoursExistants();
+            const coursChoisi = cours.find(c => (c.id || c.code || c.sigle) === valeur);
+            if (coursChoisi) {
+                // Copier vers les mêmes clés que les questions manuelles
+                reponses['titre-cours'] = coursChoisi.titre || coursChoisi.nom || '';
+                reponses['code-cours'] = coursChoisi.code || coursChoisi.sigle || '';
+                reponses['numero-groupe'] = coursChoisi.groupe || '00001';
+                console.log('[Primo] Cours existant sélectionné:', reponses['code-cours']);
+            }
+        }
     },
 
     {
@@ -108,6 +292,9 @@ const QUESTIONS_PRIMO = [
         validation: {
             requis: true,
             minLength: 3
+        },
+        sautSi: function(reponses) {
+            return reponses['cours-config-existante'] === 'existant';
         }
     },
 
@@ -124,7 +311,10 @@ const QUESTIONS_PRIMO = [
             pattern: /^\d{3}-\d{3}(-[A-Z]{2})?$/,
             messageErreur: 'Format attendu : 601-101 ou 601-101-MQ'
         },
-        aide: 'Le code officiel du cours tel qu\'il apparaît dans ton horaire (ex: 601-101-MQ).'
+        aide: 'Le code officiel du cours tel qu\'il apparaît dans ton horaire (ex: 601-101-MQ).',
+        sautSi: function(reponses) {
+            return reponses['cours-config-existante'] === 'existant';
+        }
     },
 
     {
@@ -973,8 +1163,64 @@ const QUESTIONS_PRIMO = [
     },
 
     // ========================================================================
-    // ÉTAPE 3 : BORNES DU TRIMESTRE (2 questions essentielles)
+    // ÉTAPE 3 : BORNES DU TRIMESTRE (2-3 questions selon config existante)
     // ========================================================================
+
+    // ✅ NOUVEAU (8 janvier 2026) : Détection config trimestre existante
+    {
+        id: 'trimestre-config-existante',
+        texte: function() {
+            // Récupérer les infos du trimestre actif
+            const cadre = (typeof db !== 'undefined' && db.getSync)
+                ? db.getSync('cadreCalendrier', {})
+                : JSON.parse(localStorage.getItem('cadreCalendrier') || '{}');
+            const trimestreActif = (typeof db !== 'undefined' && db.getSync)
+                ? db.getSync('trimestreActif', null)
+                : JSON.parse(localStorage.getItem('trimestreActif') || 'null');
+
+            const nomTrimestre = trimestreActif?.nom || 'Le trimestre actif';
+            const dateDebut = cadre.dateDebut || '';
+            const dateFin = cadre.finCours || cadre.finTrimestre || '';
+
+            // Formater les dates pour affichage
+            const formatDate = (d) => {
+                if (!d) return '?';
+                const date = new Date(d + 'T12:00:00');
+                return date.toLocaleDateString('fr-CA', { day: 'numeric', month: 'long' });
+            };
+
+            return `**${nomTrimestre}** est déjà configuré :\n\n` +
+                   `• Début : **${formatDate(dateDebut)}**\n` +
+                   `• Fin : **${formatDate(dateFin)}**\n\n` +
+                   `Veux-tu utiliser ces dates pour ce groupe-cours ?`;
+        },
+        type: 'radio',
+        options: [
+            {
+                value: 'oui',
+                label: 'Oui, utiliser ces dates',
+                description: 'Les dates du trimestre sont déjà bonnes'
+            },
+            {
+                value: 'non',
+                label: 'Non, modifier les dates',
+                description: 'Je veux entrer de nouvelles dates'
+            }
+        ],
+        champsCibles: [],
+        validation: {
+            requis: true
+        },
+        // N'afficher que si le trimestre a déjà des dates configurées
+        sautSi: function() {
+            const cadre = (typeof db !== 'undefined' && db.getSync)
+                ? db.getSync('cadreCalendrier', {})
+                : JSON.parse(localStorage.getItem('cadreCalendrier') || '{}');
+            // Sauter si PAS de dates configurées
+            return !cadre.dateDebut || !cadre.finCours;
+        }
+    },
+
     {
         id: 'trimestre-debut',
         texte: 'Quelle est la date de début du trimestre ?',
@@ -984,6 +1230,10 @@ const QUESTIONS_PRIMO = [
         ],
         validation: {
             requis: true
+        },
+        // ✅ NOUVEAU (8 janvier 2026) : Sauter si l'utilisateur veut réutiliser la config existante
+        sautSi: function(reponses) {
+            return reponses['trimestre-config-existante'] === 'oui';
         }
     },
 
@@ -999,6 +1249,10 @@ const QUESTIONS_PRIMO = [
         validation: {
             requis: true,
             apres: 'trimestre-debut'
+        },
+        // ✅ NOUVEAU (8 janvier 2026) : Sauter si l'utilisateur veut réutiliser la config existante
+        sautSi: function(reponses) {
+            return reponses['trimestre-config-existante'] === 'oui';
         }
     },
 
