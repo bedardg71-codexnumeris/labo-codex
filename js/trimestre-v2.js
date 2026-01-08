@@ -1477,6 +1477,9 @@ function supprimerCoursV2() {
     if (typeof afficherNotificationSucces === 'function') {
         afficherNotificationSucces('Cours supprimé', `${nomCours} - ${titreCours}`);
     }
+
+    // Beta 95.2: Rafraîchir le dropdown Cours dans la section Groupe-cours
+    populerDropdownsAssemblageV2();
 }
 
 /**
@@ -1944,6 +1947,9 @@ function sauvegarderCoursV2() {
         selectCours.value = cours.id;
         changerCoursSelectionneV2(cours.id);
     }
+
+    // Beta 95.2: Rafraîchir le dropdown Cours dans la section Groupe-cours
+    populerDropdownsAssemblageV2();
 
     // Mettre à jour le guide groupe-cours
     mettreAJourGuideGroupeCours();
