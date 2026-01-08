@@ -3479,9 +3479,24 @@ function populerDropdownGroupeCoursV2() {
 }
 
 /**
- * Peuple les dropdowns du formulaire d'assemblage
+ * Peuple les dropdowns du formulaire d'assemblage (5 éléments Beta 95.2)
  */
 function populerDropdownsAssemblageV2() {
+    // Beta 95.2: Dropdown Trimestres
+    const selectTrimestre = document.getElementById('v2-gc-trimestre');
+    if (selectTrimestre) {
+        const trimestres = db.getSync('trimestres', []);
+        const trimestreActif = db.getSync('trimestreActif', '');
+
+        let html = '<option value="">— Choisir un trimestre —</option>';
+        trimestres.forEach(t => {
+            const nom = t.nom || t.id || 'Sans nom';
+            const selected = (t.id === trimestreActif) ? ' selected' : '';
+            html += `<option value="${t.id}"${selected}>${nom}</option>`;
+        });
+        selectTrimestre.innerHTML = html;
+    }
+
     // Dropdown Cours
     const selectCours = document.getElementById('v2-gc-cours');
     if (selectCours) {
@@ -3532,22 +3547,12 @@ function populerDropdownsAssemblageV2() {
         selectHoraire.innerHTML = html;
     }
 
-    // Beta 95.2: Dropdown Enseignants
+    // Beta 95.2: Dropdown Enseignants (maintenant depuis liste unifiée)
     const selectEnseignant = document.getElementById('v2-gc-enseignant');
     if (selectEnseignant) {
         const enseignants = db.getSync('enseignants', []);
-        // Aussi inclure le profil unique s'il existe
-        const profil = db.getSync('profilEnseignant', null);
 
         let html = '<option value="">— Choisir un enseignant —</option>';
-
-        // Ajouter le profil principal en premier s'il existe
-        if (profil && profil.prenom && profil.nom) {
-            const nomComplet = `${profil.prenom} ${profil.nom}`;
-            html += `<option value="profil">${nomComplet} (profil principal)</option>`;
-        }
-
-        // Ajouter les autres enseignants
         enseignants.forEach(e => {
             const nomComplet = `${e.prenom || ''} ${e.nom || ''}`.trim() || e.id;
             html += `<option value="${e.id}">${nomComplet}</option>`;
@@ -3576,12 +3581,16 @@ function afficherEnseignantGroupeCoursV2() {
  * Format: H2026-601-101-MQ-00001 (Mer-PM / Ven-AM)
  */
 function genererNomGroupeCoursV2() {
-    // Trimestre actif
-    const trimestre = typeof obtenirTrimestreActif === 'function' ? obtenirTrimestreActif() : null;
-    let trimestreId = '';
+    // Beta 95.2: Trimestre sélectionné dans le dropdown (ou actif par défaut)
+    const trimestreSelectionne = document.getElementById('v2-gc-trimestre')?.value;
+    const trimestres = db.getSync('trimestres', []);
+    const trimestre = trimestres.find(t => t.id === trimestreSelectionne)
+        || (typeof obtenirTrimestreActif === 'function' ? obtenirTrimestreActif() : null);
+
+    let trimestreNom = '';
     if (trimestre) {
         const sessionLettre = { 'hiver': 'H', 'automne': 'A', 'ete': 'E' }[trimestre.session] || trimestre.session?.charAt(0)?.toUpperCase() || '';
-        trimestreId = `${sessionLettre}${trimestre.annee}`;
+        trimestreNom = `${sessionLettre}${trimestre.annee}`;
     }
 
     // Cours sélectionné
@@ -3617,7 +3626,7 @@ function genererNomGroupeCoursV2() {
 
     // Assembler le nom
     let nom = '';
-    if (trimestreId) nom += trimestreId;
+    if (trimestreNom) nom += trimestreNom;
     if (codeCours) nom += (nom ? '-' : '') + codeCours;
     if (groupeNum) nom += (nom ? '-' : '') + groupeNum;
     if (horaireResume) nom += ` (${horaireResume})`;
@@ -3844,18 +3853,20 @@ function nouveauGroupeCoursV2() {
 function editerGroupeCoursV2(gc) {
     groupeCoursEnEditionId = gc.id;
 
-    // Afficher le trimestre actif
-    afficherTrimestreGroupeCoursV2();
-
     // Rafraîchir les dropdowns
     populerDropdownsAssemblageV2();
 
-    // Remplir les 4 sélections (Beta 95.2)
+    // Remplir les 5 sélections (Beta 95.2)
+    const selectTrimestre = document.getElementById('v2-gc-trimestre');
     const selectCours = document.getElementById('v2-gc-cours');
     const selectGroupe = document.getElementById('v2-gc-groupe');
     const selectHoraire = document.getElementById('v2-gc-horaire');
     const selectEnseignant = document.getElementById('v2-gc-enseignant');
 
+    // Trimestre: utiliser celui du groupe-cours ou le trimestre actif par défaut
+    if (selectTrimestre) {
+        selectTrimestre.value = gc.trimestreId || db.getSync('trimestreActif', '') || '';
+    }
     if (selectCours) selectCours.value = gc.coursId || '';
     if (selectGroupe) selectGroupe.value = gc.groupeNum || gc.groupe || '';
     if (selectHoraire) selectHoraire.value = gc.horaireId || '';
@@ -3892,12 +3903,17 @@ function annulerFormGroupeCoursV2() {
  * Sauvegarde le groupe-cours (ajout ou modification)
  */
 function sauvegarderGroupeCoursV2() {
+    const trimestreId = document.getElementById('v2-gc-trimestre')?.value;  // Beta 95.2
     const coursId = document.getElementById('v2-gc-cours')?.value;
     const groupeNum = document.getElementById('v2-gc-groupe')?.value;
     const horaireId = document.getElementById('v2-gc-horaire')?.value;
-    const enseignantId = document.getElementById('v2-gc-enseignant')?.value;  // Beta 95.2
+    const enseignantId = document.getElementById('v2-gc-enseignant')?.value;
 
-    // Validation
+    // Validation (5 éléments requis)
+    if (!trimestreId) {
+        afficherNotificationErreur('Veuillez sélectionner un trimestre');
+        return;
+    }
     if (!coursId) {
         afficherNotificationErreur('Veuillez sélectionner un cours');
         return;
@@ -3928,10 +3944,11 @@ function sauvegarderGroupeCoursV2() {
             groupesCours[index] = {
                 ...groupesCours[index],
                 nom,
+                trimestreId,  // Beta 95.2
                 coursId,
                 groupeNum,
                 horaireId,
-                enseignantId,  // Beta 95.2
+                enseignantId,
                 dateModification: new Date().toISOString()
             };
         }
@@ -3941,10 +3958,11 @@ function sauvegarderGroupeCoursV2() {
         const nouveauGC = {
             id: 'GC_' + Date.now(),
             nom,
+            trimestreId,  // Beta 95.2
             coursId,
             groupeNum,
             horaireId,
-            enseignantId,  // Beta 95.2
+            enseignantId,
             dateCreation: new Date().toISOString(),
             actif: true
         };
@@ -4310,28 +4328,46 @@ function allerVersAide(idAccordeon) {
    =============================== */
 
 /**
- * Charge le profil enseignant depuis le stockage
- * et remplit le formulaire + la carte résumé
+ * Charge les profils enseignants au démarrage (Beta 95.2)
+ * Migration: si profilEnseignant existe mais pas dans enseignants, l'ajouter
  */
 function chargerProfilEnseignantV2() {
-    const profil = db.getSync('profilEnseignant') || {};
+    // Migration: copier profilEnseignant vers enseignants si nécessaire
+    const profilAncien = db.getSync('profilEnseignant', null);
+    let enseignants = db.getSync('enseignants', []);
 
-    // Remplir le formulaire
-    const setValue = (id, val) => {
-        const el = document.getElementById(id);
-        if (el) el.value = val || '';
-    };
+    if (profilAncien && profilAncien.prenom && profilAncien.nom) {
+        // Vérifier si ce profil existe déjà dans la liste (par courriel)
+        const existe = enseignants.some(e => e.courriel === profilAncien.courriel);
+        if (!existe) {
+            const nouveauProfil = {
+                id: 'ENS_' + Date.now(),
+                ...profilAncien,
+                dateCreation: new Date().toISOString()
+            };
+            enseignants.push(nouveauProfil);
+            db.setSync('enseignants', enseignants);
+            // Optionnel: nettoyer l'ancien profil
+            // db.setSync('profilEnseignant', null);
+        }
+    }
 
-    setValue('v2-ens-prenom', profil.prenom);
-    setValue('v2-ens-nom', profil.nom);
-    setValue('v2-ens-courriel', profil.courriel);
-    setValue('v2-ens-institution', profil.institution);
-    setValue('v2-ens-departement', profil.departement);
-    setValue('v2-ens-discipline', profil.discipline);
-    setValue('v2-ens-siteWeb', profil.siteWeb);
+    // Peupler le dropdown
+    populerDropdownEnseignantsV2();
 
-    // Mettre à jour la carte
-    mettreAJourCarteEnseignant();
+    // Sélectionner le premier enseignant s'il y en a
+    if (enseignants.length > 0) {
+        const select = document.getElementById('v2-selectEnseignant');
+        if (select && !select.value) {
+            select.value = enseignants[0].id;
+            chargerEnseignantSelectionneV2();
+        }
+    } else {
+        // Aucun enseignant - préparer pour nouveau
+        const titre = document.getElementById('v2-titreFormEnseignant');
+        if (titre) titre.textContent = 'Nouveau profil';
+        mettreAJourCarteEnseignant();
+    }
 }
 
 /**
@@ -4360,8 +4396,109 @@ function mettreAJourCarteEnseignant() {
     }
 }
 
+// Variable pour suivre l'enseignant en édition (Beta 95.2)
+let enseignantEnEditionId = null;
+
 /**
- * Sauvegarde le profil enseignant
+ * Peuple le dropdown de sélection des enseignants (Beta 95.2)
+ */
+function populerDropdownEnseignantsV2() {
+    const select = document.getElementById('v2-selectEnseignant');
+    if (!select) return;
+
+    const enseignants = db.getSync('enseignants', []);
+
+    let html = '<option value="">— Sélectionner —</option>';
+    enseignants.forEach(e => {
+        const nomComplet = `${e.prenom || ''} ${e.nom || ''}`.trim() || 'Sans nom';
+        const selected = (e.id === enseignantEnEditionId) ? ' selected' : '';
+        html += `<option value="${e.id}"${selected}>${nomComplet}</option>`;
+    });
+
+    select.innerHTML = html;
+}
+
+/**
+ * Charge l'enseignant sélectionné dans le formulaire (Beta 95.2)
+ */
+function chargerEnseignantSelectionneV2() {
+    const select = document.getElementById('v2-selectEnseignant');
+    const enseignantId = select?.value;
+
+    if (!enseignantId) {
+        // Aucune sélection - vider le formulaire
+        viderFormulaireEnseignantV2();
+        enseignantEnEditionId = null;
+        return;
+    }
+
+    const enseignants = db.getSync('enseignants', []);
+    const enseignant = enseignants.find(e => e.id === enseignantId);
+
+    if (!enseignant) {
+        viderFormulaireEnseignantV2();
+        enseignantEnEditionId = null;
+        return;
+    }
+
+    enseignantEnEditionId = enseignantId;
+
+    // Remplir le formulaire
+    const setValue = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.value = val || '';
+    };
+
+    setValue('v2-ens-prenom', enseignant.prenom);
+    setValue('v2-ens-nom', enseignant.nom);
+    setValue('v2-ens-courriel', enseignant.courriel);
+    setValue('v2-ens-institution', enseignant.institution);
+    setValue('v2-ens-departement', enseignant.departement);
+    setValue('v2-ens-discipline', enseignant.discipline);
+    setValue('v2-ens-siteWeb', enseignant.siteWeb);
+
+    // Mettre à jour le titre et la carte
+    const titre = document.getElementById('v2-titreFormEnseignant');
+    if (titre) titre.textContent = 'Modifier le profil';
+
+    mettreAJourCarteEnseignant();
+}
+
+/**
+ * Prépare le formulaire pour un nouveau profil (Beta 95.2)
+ */
+function nouveauProfilEnseignantV2() {
+    enseignantEnEditionId = null;
+
+    // Désélectionner dans le dropdown
+    const select = document.getElementById('v2-selectEnseignant');
+    if (select) select.value = '';
+
+    // Vider le formulaire
+    viderFormulaireEnseignantV2();
+
+    // Mettre à jour le titre
+    const titre = document.getElementById('v2-titreFormEnseignant');
+    if (titre) titre.textContent = 'Nouveau profil';
+
+    // Focus sur le premier champ
+    document.getElementById('v2-ens-prenom')?.focus();
+}
+
+/**
+ * Vide le formulaire enseignant
+ */
+function viderFormulaireEnseignantV2() {
+    const champs = ['v2-ens-prenom', 'v2-ens-nom', 'v2-ens-courriel', 'v2-ens-institution', 'v2-ens-departement', 'v2-ens-discipline', 'v2-ens-siteWeb'];
+    champs.forEach(id => {
+        const elem = document.getElementById(id);
+        if (elem) elem.value = '';
+    });
+    mettreAJourCarteEnseignant();
+}
+
+/**
+ * Sauvegarde le profil enseignant (Beta 95.2 - multi-profils)
  */
 async function sauvegarderEnseignantV2() {
     const prenom = document.getElementById('v2-ens-prenom')?.value?.trim() || '';
@@ -4393,20 +4530,92 @@ async function sauvegarderEnseignantV2() {
         siteWeb: document.getElementById('v2-ens-siteWeb')?.value?.trim() || ''
     };
 
-    await db.set('profilEnseignant', profil);
+    let enseignants = db.getSync('enseignants', []);
 
-    // Mettre à jour le guide groupe-cours
-    mettreAJourGuideGroupeCours();
+    if (enseignantEnEditionId) {
+        // Modification d'un profil existant
+        const index = enseignants.findIndex(e => e.id === enseignantEnEditionId);
+        if (index >= 0) {
+            enseignants[index] = { ...enseignants[index], ...profil };
+        }
+        afficherNotificationSucces('Profil enseignant modifié');
+    } else {
+        // Nouveau profil
+        const nouveauProfil = {
+            id: 'ENS_' + Date.now(),
+            ...profil,
+            dateCreation: new Date().toISOString()
+        };
+        enseignants.push(nouveauProfil);
+        enseignantEnEditionId = nouveauProfil.id;
+        afficherNotificationSucces('Profil enseignant créé');
+    }
 
-    afficherNotificationSucces('Profil enseignant enregistré');
+    db.setSync('enseignants', enseignants);
+
+    // Rafraîchir les dropdowns
+    populerDropdownEnseignantsV2();
+    populerDropdownsAssemblageV2();
+
+    // Mettre à jour le titre
+    const titre = document.getElementById('v2-titreFormEnseignant');
+    if (titre) titre.textContent = 'Modifier le profil';
 }
 
 /**
  * Annule les modifications et recharge le profil depuis le stockage
  */
 function annulerFormEnseignantV2() {
-    chargerProfilEnseignantV2();
+    if (enseignantEnEditionId) {
+        chargerEnseignantSelectionneV2();
+    } else {
+        viderFormulaireEnseignantV2();
+    }
     afficherNotificationSucces('Modifications annulées');
+}
+
+/**
+ * Supprime le profil enseignant sélectionné (Beta 95.2)
+ */
+async function supprimerProfilEnseignantV2() {
+    if (!enseignantEnEditionId) {
+        afficherNotificationErreur('Aucun profil sélectionné');
+        return;
+    }
+
+    const enseignants = db.getSync('enseignants', []);
+    const enseignant = enseignants.find(e => e.id === enseignantEnEditionId);
+
+    if (!enseignant) {
+        afficherNotificationErreur('Profil non trouvé');
+        return;
+    }
+
+    // Confirmation
+    const nomComplet = `${enseignant.prenom || ''} ${enseignant.nom || ''}`.trim();
+    const confirme = confirm(`Voulez-vous vraiment supprimer le profil de ${nomComplet} ?\n\nCette action est irréversible.`);
+
+    if (!confirme) {
+        return;
+    }
+
+    // Supprimer de la liste
+    const nouvellesListe = enseignants.filter(e => e.id !== enseignantEnEditionId);
+    db.setSync('enseignants', nouvellesListe);
+
+    // Réinitialiser
+    enseignantEnEditionId = null;
+    viderFormulaireEnseignantV2();
+
+    // Rafraîchir les dropdowns
+    populerDropdownEnseignantsV2();
+    populerDropdownsAssemblageV2();
+
+    // Mettre à jour le titre
+    const titre = document.getElementById('v2-titreFormEnseignant');
+    if (titre) titre.textContent = 'Nouveau profil';
+
+    afficherNotificationSucces('Profil enseignant supprimé');
 }
 
 // Exports globaux
@@ -4414,6 +4623,10 @@ window.mettreAJourCarteEnseignant = mettreAJourCarteEnseignant;
 window.sauvegarderEnseignantV2 = sauvegarderEnseignantV2;
 window.annulerFormEnseignantV2 = annulerFormEnseignantV2;
 window.chargerProfilEnseignantV2 = chargerProfilEnseignantV2;
+window.supprimerProfilEnseignantV2 = supprimerProfilEnseignantV2;
+window.populerDropdownEnseignantsV2 = populerDropdownEnseignantsV2;
+window.chargerEnseignantSelectionneV2 = chargerEnseignantSelectionneV2;
+window.nouveauProfilEnseignantV2 = nouveauProfilEnseignantV2;
 
 /* ===============================
    FONCTIONS MIGRÉES DE entites-ui.js

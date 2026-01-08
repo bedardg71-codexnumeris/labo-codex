@@ -31,6 +31,8 @@
 - Connexion calendrier/presences avec groupe-cours actif (filtrage par coursId)
 - **Primo dynamique** : Detection config existante (enseignant, cours, trimestre)
 - **Correction bug Primo** : Groupe-cours maintenant cree automatiquement (dropdown fonctionnel)
+- **5 dropdowns groupe-cours** : Trimestre + Cours + Groupe + Horaire + Enseignant
+- **Multi-profils enseignants** : Dropdown selection, creation, suppression de profils
 
 ---
 
@@ -66,7 +68,7 @@
 
 ### Plus tard
 - [ ] **Bug trimestre par defaut** : Au rechargement, tombe sur A2025 au lieu de H2026 (investigation)
-- [ ] **Incoherence profil enseignant** : Primo affiche "Gregoire" vs Trimestre affiche "Greg Bedard" (sources differentes)
+- [x] **Incoherence profil enseignant** : Resolu - liste unifiee `enseignants` (migration auto de profilEnseignant)
 - [ ] **Bouton supprimer groupe-cours** : Ajouter modal bibliotheque pour gerer/supprimer les groupes-cours
 - [ ] **Affichage dropdown groupe-cours** : Afficher nom lisible au lieu de GC_timestamp quand donnees incompletes
 - [ ] Optimiser utilisation de l'espace (limiter scrolling vertical)
@@ -135,6 +137,9 @@
 - Connexion presences avec groupe-cours (filtrage par coursId dans saisie-presences.js)
 - Primo dynamique : detection config existante (enseignant, cours, trimestre)
 - Correction bug Primo : creerGroupeCoursDepuisPrimo() pour que le dropdown fonctionne
+- **5 dropdowns groupe-cours** : Trimestre, Cours, Groupe, Horaire, Enseignant selectionnables
+- **Multi-profils enseignants** : Liste unifiee `enseignants` avec dropdown, boutons nouveau/supprimer
+- Migration automatique profilEnseignant → enseignants au chargement
 
 ### 6-7 janvier 2026
 - Corrections bugs testeurs (Bruno, Olivier)
@@ -165,4 +170,4 @@
 
 ---
 
-**Derniere mise a jour** : 8 janvier 2026, 14:32 (Toronto)
+**Derniere mise a jour** : 8 janvier 2026, 16:45 (Toronto)
