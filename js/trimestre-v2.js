@@ -4088,6 +4088,449 @@ window.annulerFormEnseignantV2 = annulerFormEnseignantV2;
 window.chargerProfilEnseignantV2 = chargerProfilEnseignantV2;
 
 /* ===============================
+   FONCTIONS MIGRÉES DE entites-ui.js
+   (8 janvier 2026 - consolidation)
+   =============================== */
+
+// Variables d'état pour entités
+let enseignantEnEditionUI = null;
+
+/**
+ * Peuple le dropdown "Groupe-cours actif" dans l'entête
+ */
+async function peuplerDropdownGroupeCoursActif() {
+    const selectHeader = document.getElementById('selectGroupeCoursHeader');
+    if (!selectHeader) return;
+
+    const trimestres = db.getSync('trimestres', []);
+    const trimestreActif = trimestres.find(t => t.actif);
+
+    if (!trimestreActif) {
+        selectHeader.innerHTML = '<option value="">-- Sélectionnez un trimestre --</option>';
+        return;
+    }
+
+    const cleGC = `${trimestreActif.id.toLowerCase()}_groupesCours`;
+    const groupesCours = db.getSync(cleGC, []);
+
+    let options = '<option value="">-- Sélectionner un groupe-cours --</option>';
+
+    if (groupesCours.length > 0) {
+        const cours = db.getSync('cours', []);
+        const listeCours = db.getSync('listeCours', []);
+        const enseignants = db.getSync('enseignants', []);
+        const cleHoraires = typeof cle === 'function' ? cle('horaires') : 'horaires';
+        const horaires = db.getSync(cleHoraires, []);
+        const gcActif = db.getSync('groupeCoursActif', null);
+
+        groupesCours.forEach(gc => {
+            // Chercher dans cours (nouveau) ou listeCours (legacy)
+            let coursInfo = cours.find(c => c.id === gc.coursId);
+            if (!coursInfo) {
+                coursInfo = listeCours.find(c => c.id === gc.coursId || c.sigle === gc.coursId);
+            }
+            const ens = enseignants.find(e => e.id === gc.enseignantId) || {};
+            const hor = horaires.find(h => h.id === gc.horaireId) || {};
+
+            const sigle = coursInfo?.codeCours || coursInfo?.sigle || '???';
+            const groupe = gc.groupe || gc.groupeNum || '?';
+            const nomEns = ens.prenom ? `${ens.prenom} ${(ens.nom || '').charAt(0)}.` : '';
+            const nomHor = hor.nom || '';
+
+            let label = `${sigle} gr.${groupe}`;
+            if (nomEns) label += ` - ${nomEns}`;
+            if (nomHor) label += ` - ${nomHor}`;
+
+            const selected = gcActif && gc.id === gcActif.id ? ' selected' : '';
+            options += `<option value="${gc.id}"${selected}>${label}</option>`;
+        });
+    }
+
+    selectHeader.innerHTML = options;
+    console.log('[Trimestre V2] Dropdown groupe-cours actif peuplé:', groupesCours.length, 'options');
+}
+
+/**
+ * Change le groupe-cours actif depuis le header
+ */
+async function changerGroupeCoursDepuisHeader(groupeCoursId) {
+    await changerGroupeCoursActifV2(groupeCoursId);
+}
+
+/**
+ * Change le groupe-cours actif
+ */
+async function changerGroupeCoursActifV2(groupeCoursId) {
+    if (!groupeCoursId) {
+        db.setSync('groupeCoursActif', null);
+        console.log('[Trimestre V2] Groupe-cours désélectionné');
+        return;
+    }
+
+    const trimestres = db.getSync('trimestres', []);
+    const trimestreActif = trimestres.find(t => t.actif);
+    if (!trimestreActif) return;
+
+    const cleGC = `${trimestreActif.id.toLowerCase()}_groupesCours`;
+    const groupesCours = db.getSync(cleGC, []);
+    const gc = groupesCours.find(g => g.id === groupeCoursId);
+
+    if (!gc) {
+        console.warn('[Trimestre V2] Groupe-cours non trouvé:', groupeCoursId);
+        return;
+    }
+
+    groupesCours.forEach(g => g.actif = (g.id === groupeCoursId));
+    db.setSync(cleGC, groupesCours);
+
+    db.setSync('groupeCoursActif', {
+        id: gc.id,
+        trimestreId: gc.trimestreId || trimestreActif.id,
+        coursId: gc.coursId,
+        enseignantId: gc.enseignantId,
+        horaireId: gc.horaireId,
+        groupe: gc.groupe || gc.groupeNum
+    });
+
+    if (typeof GroupeCoursEntite !== 'undefined' && typeof GroupeCoursEntite.synchroniserInfoCours === 'function') {
+        await GroupeCoursEntite.synchroniserInfoCours(groupeCoursId);
+    }
+
+    const selectHeader = document.getElementById('selectGroupeCoursHeader');
+    if (selectHeader) selectHeader.value = groupeCoursId || '';
+
+    if (typeof mettreAJourContexteEntete === 'function') {
+        mettreAJourContexteEntete();
+    }
+
+    if (typeof afficherNotificationSucces === 'function') {
+        afficherNotificationSucces('Groupe-cours activé');
+    }
+
+    console.log('[Trimestre V2] Groupe-cours activé:', gc.id);
+}
+
+/**
+ * Peuple le dropdown des enseignants
+ */
+async function peuplerDropdownEnseignants() {
+    const select = document.getElementById('v2-selectEnseignant');
+    const selectGC = document.getElementById('v2-gc-enseignant');
+    if (!select) return;
+
+    let enseignants = [];
+    if (typeof EnseignantsEntite !== 'undefined') {
+        enseignants = await EnseignantsEntite.obtenirTous();
+    }
+
+    let options = '<option value="">Sélectionner un enseignant·e</option>';
+    enseignants.forEach(ens => {
+        const libelle = typeof EnseignantsEntite !== 'undefined'
+            ? EnseignantsEntite.genererLibelle(ens)
+            : `${ens.prenom} ${ens.nom}`;
+        options += `<option value="${ens.id}">${libelle}</option>`;
+    });
+
+    select.innerHTML = options;
+    if (selectGC) {
+        selectGC.innerHTML = options.replace('Sélectionner', '-- Sélectionner');
+    }
+}
+
+/**
+ * Change l'enseignant sélectionné (affiche aperçu)
+ */
+function changerEnseignantSelectionneV2(enseignantId) {
+    const btnModifier = document.getElementById('v2-btnModifierEnseignant');
+    const apercu = document.getElementById('v2-apercuEnseignant');
+
+    if (!enseignantId) {
+        if (btnModifier) btnModifier.style.display = 'none';
+        if (apercu) apercu.innerHTML = '<p class="text-muted">Sélectionnez un enseignant·e pour voir ses détails.</p>';
+        return;
+    }
+
+    if (btnModifier) btnModifier.style.display = '';
+
+    if (typeof EnseignantsEntite !== 'undefined') {
+        EnseignantsEntite.obtenirParId(enseignantId).then(ens => {
+            if (!ens || !apercu) return;
+            apercu.innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                    <div><strong>Nom :</strong> ${ens.prenom} ${ens.nom}</div>
+                    <div><strong>Courriel :</strong> ${ens.courriel || '-'}</div>
+                    <div><strong>Institution :</strong> ${ens.institution || '-'}</div>
+                    <div><strong>Département :</strong> ${ens.departement || '-'}</div>
+                    <div><strong>Discipline :</strong> ${ens.discipline || '-'}</div>
+                    <div><strong>Site web :</strong> ${ens.siteWeb ? `<a href="${ens.siteWeb}" target="_blank">${ens.siteWeb}</a>` : '-'}</div>
+                </div>
+            `;
+        });
+    }
+}
+
+/**
+ * Affiche le formulaire d'ajout d'enseignant
+ */
+function afficherFormEnseignantV2() {
+    enseignantEnEditionUI = null;
+
+    const fields = ['v2-ens-prenom', 'v2-ens-nom', 'v2-ens-courriel', 'v2-ens-institution', 'v2-ens-departement', 'v2-ens-discipline', 'v2-ens-siteWeb'];
+    fields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+
+    const titre = document.getElementById('v2-titreFormEnseignant');
+    const btnTexte = document.getElementById('v2-btnTexteEnseignant');
+    if (titre) titre.textContent = 'Nouvel enseignant·e';
+    if (btnTexte) btnTexte.textContent = 'Ajouter';
+
+    const form = document.getElementById('v2-formulaireEnseignant');
+    const apercu = document.getElementById('v2-apercuEnseignant');
+    if (form) form.style.display = 'block';
+    if (apercu) apercu.style.display = 'none';
+}
+
+/**
+ * Modifie l'enseignant sélectionné
+ */
+async function modifierEnseignantSelectionneV2() {
+    const enseignantId = document.getElementById('v2-selectEnseignant')?.value;
+    if (!enseignantId || typeof EnseignantsEntite === 'undefined') return;
+
+    const ens = await EnseignantsEntite.obtenirParId(enseignantId);
+    if (!ens) return;
+
+    enseignantEnEditionUI = enseignantId;
+
+    const mapping = {
+        'v2-ens-prenom': ens.prenom,
+        'v2-ens-nom': ens.nom,
+        'v2-ens-courriel': ens.courriel,
+        'v2-ens-institution': ens.institution,
+        'v2-ens-departement': ens.departement,
+        'v2-ens-discipline': ens.discipline,
+        'v2-ens-siteWeb': ens.siteWeb
+    };
+    Object.entries(mapping).forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (el) el.value = val || '';
+    });
+
+    const titre = document.getElementById('v2-titreFormEnseignant');
+    const btnTexte = document.getElementById('v2-btnTexteEnseignant');
+    if (titre) titre.textContent = 'Modifier l\'enseignant·e';
+    if (btnTexte) btnTexte.textContent = 'Enregistrer';
+
+    const form = document.getElementById('v2-formulaireEnseignant');
+    const apercu = document.getElementById('v2-apercuEnseignant');
+    if (form) form.style.display = 'block';
+    if (apercu) apercu.style.display = 'none';
+}
+
+/**
+ * Affiche le formulaire d'ajout d'horaire (version UI)
+ */
+function afficherFormHoraireV2() {
+    horaireEnEditionId = null;
+    seancesTempV2 = [];
+
+    const fields = { 'v2-hor-nom': '', 'v2-hor-local': '', 'v2-hor-nbSeances': '2', 'v2-hor-periodesParSeance': '2' };
+    Object.entries(fields).forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (el) el.value = val;
+    });
+
+    const titre = document.getElementById('v2-titreFormHoraire');
+    const btnTexte = document.getElementById('v2-btnTexteHoraire');
+    if (titre) titre.textContent = 'Nouvel horaire';
+    if (btnTexte) btnTexte.textContent = 'Ajouter';
+
+    // Peupler dropdown groupe associé
+    populerDropdownGroupesHoraireV2();
+
+    mettreAJourSeancesHoraireV2();
+
+    const form = document.getElementById('v2-formulaireHoraire');
+    if (form) form.style.display = 'block';
+}
+
+/**
+ * Modifie l'horaire sélectionné
+ */
+async function modifierHoraireSelectionneV2() {
+    const horaireId = document.getElementById('v2-selectHoraire')?.value;
+    if (!horaireId || typeof HorairesEntite === 'undefined') return;
+
+    const hor = await HorairesEntite.obtenirParId(horaireId);
+    if (!hor) return;
+
+    horaireEnEditionId = horaireId;
+    seancesTempV2 = [...(hor.seances || [])];
+
+    document.getElementById('v2-hor-nom').value = hor.nom || '';
+    document.getElementById('v2-hor-local').value = hor.local || '';
+    document.getElementById('v2-hor-nbSeances').value = String(hor.nbSeances || hor.seances?.length || 2);
+    document.getElementById('v2-hor-periodesParSeance').value = String(hor.periodesParSeance || 2);
+
+    // Groupe associé
+    const selectGroupe = document.getElementById('v2-hor-groupeAssocie');
+    if (selectGroupe) {
+        populerDropdownGroupesHoraireV2();
+        selectGroupe.value = hor.groupeAssocie || '';
+    }
+
+    afficherSeancesHoraireV2();
+    mettreAJourResumeFormatHoraireV2();
+
+    const titre = document.getElementById('v2-titreFormHoraire');
+    const btnTexte = document.getElementById('v2-btnTexteHoraire');
+    if (titre) titre.textContent = 'Modifier l\'horaire';
+    if (btnTexte) btnTexte.textContent = 'Enregistrer';
+
+    const form = document.getElementById('v2-formulaireHoraire');
+    if (form) form.style.display = 'block';
+}
+
+/**
+ * Met à jour le résumé du format horaire
+ */
+function mettreAJourResumeFormatHoraireV2() {
+    const nbSeances = parseInt(document.getElementById('v2-hor-nbSeances')?.value) || 2;
+    const periodesParSeance = parseInt(document.getElementById('v2-hor-periodesParSeance')?.value) || 2;
+    const totalPeriodes = nbSeances * periodesParSeance;
+
+    const resumeElem = document.getElementById('v2-hor-formatResume');
+    if (resumeElem) {
+        resumeElem.textContent = `${nbSeances} séance${nbSeances > 1 ? 's' : ''} × ${periodesParSeance} période${periodesParSeance > 1 ? 's' : ''} = ${totalPeriodes} périodes/semaine`;
+    }
+}
+
+/**
+ * Affiche le formulaire de création de groupe-cours
+ */
+function afficherFormGroupeCoursV2() {
+    const fields = ['v2-gc-cours', 'v2-gc-groupe'];
+    fields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+
+    const titre = document.getElementById('v2-titreFormGroupeCours');
+    if (titre) titre.textContent = 'Nouveau groupe-cours';
+
+    afficherTrimestreGroupeCoursV2();
+
+    const form = document.getElementById('v2-formulaireGroupeCours');
+    if (form) form.style.display = 'block';
+}
+
+/**
+ * Active un groupe-cours
+ */
+async function activerGroupeCoursV2(groupeCoursId) {
+    const trimestreActif = window.trimestreActif || obtenirTrimestreActif()?.id;
+    if (!trimestreActif) return;
+
+    try {
+        if (typeof GroupeCoursEntite !== 'undefined') {
+            await GroupeCoursEntite.activer(trimestreActif, groupeCoursId);
+            await GroupeCoursEntite.synchroniserInfoCours(trimestreActif);
+        }
+
+        rafraichirListeGroupeCoursV2();
+        await peuplerDropdownGroupeCoursActif();
+
+        if (typeof chargerCoursSelectV2 === 'function') {
+            chargerCoursSelectV2();
+        }
+
+        console.log('[Trimestre V2] Groupe-cours activé:', groupeCoursId);
+
+    } catch (err) {
+        console.error('[Trimestre V2] Erreur activation groupe-cours:', err);
+        alert('Erreur lors de l\'activation');
+    }
+}
+
+/**
+ * Supprime un groupe-cours
+ */
+async function supprimerGroupeCoursV2(groupeCoursId) {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce groupe-cours ?')) return;
+
+    const trimestreActif = window.trimestreActif || obtenirTrimestreActif()?.id;
+    if (!trimestreActif) return;
+
+    try {
+        if (typeof GroupeCoursEntite !== 'undefined') {
+            await GroupeCoursEntite.supprimer(trimestreActif, groupeCoursId);
+        }
+
+        rafraichirListeGroupeCoursV2();
+        await peuplerDropdownGroupeCoursActif();
+
+        console.log('[Trimestre V2] Groupe-cours supprimé:', groupeCoursId);
+
+    } catch (err) {
+        console.error('[Trimestre V2] Erreur suppression groupe-cours:', err);
+        alert('Erreur lors de la suppression');
+    }
+}
+
+/**
+ * Met à jour l'aperçu du groupe-cours
+ */
+async function mettreAJourApercuGroupeCours() {
+    const coursId = document.getElementById('v2-gc-cours')?.value;
+    const groupe = document.getElementById('v2-gc-groupe')?.value;
+    const apercuSpan = document.getElementById('v2-gc-apercu-texte');
+
+    if (!apercuSpan) return;
+
+    if (!coursId || !groupe) {
+        apercuSpan.textContent = 'Complétez les champs obligatoires pour voir l\'aperçu';
+        apercuSpan.className = 'text-muted';
+        return;
+    }
+
+    // Récupérer infos cours
+    let cours = null;
+    if (typeof CoursEntite !== 'undefined') {
+        cours = await CoursEntite.obtenirParId(coursId);
+    }
+    if (!cours) {
+        const listeCours = db.getSync('listeCours', []);
+        cours = listeCours.find(c => c.id === coursId || c.sigle === coursId);
+    }
+
+    const sigle = cours?.codeCours || cours?.sigle || '???';
+    const apercu = `${sigle} gr.${groupe}`;
+
+    apercuSpan.textContent = apercu;
+    apercuSpan.className = '';
+    apercuSpan.style.color = 'var(--bleu-principal)';
+    apercuSpan.style.fontWeight = '500';
+}
+
+// Exports des fonctions migrées
+window.peuplerDropdownGroupeCoursActif = peuplerDropdownGroupeCoursActif;
+window.changerGroupeCoursDepuisHeader = changerGroupeCoursDepuisHeader;
+window.changerGroupeCoursActifV2 = changerGroupeCoursActifV2;
+window.peuplerDropdownEnseignants = peuplerDropdownEnseignants;
+window.changerEnseignantSelectionneV2 = changerEnseignantSelectionneV2;
+window.afficherFormEnseignantV2 = afficherFormEnseignantV2;
+window.modifierEnseignantSelectionneV2 = modifierEnseignantSelectionneV2;
+window.afficherFormHoraireV2 = afficherFormHoraireV2;
+window.modifierHoraireSelectionneV2 = modifierHoraireSelectionneV2;
+window.mettreAJourResumeFormatHoraireV2 = mettreAJourResumeFormatHoraireV2;
+window.afficherFormGroupeCoursV2 = afficherFormGroupeCoursV2;
+window.activerGroupeCoursV2 = activerGroupeCoursV2;
+window.supprimerGroupeCoursV2 = supprimerGroupeCoursV2;
+window.mettreAJourApercuGroupeCours = mettreAJourApercuGroupeCours;
+
+/* ===============================
    INITIALISATION AUTOMATIQUE
    =============================== */
 
