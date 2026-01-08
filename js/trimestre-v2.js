@@ -1850,7 +1850,7 @@ function sauvegarderCoursV2() {
     // Récupérer les valeurs
     const codeCours = document.getElementById('v2-codeCours')?.value?.trim();
     const nomCours = document.getElementById('v2-nomCours')?.value?.trim();
-    const discipline = document.getElementById('v2-disciplineEnseignant')?.value?.trim();
+    const discipline = document.getElementById('v2-disciplineCours')?.value?.trim();
 
     // Validation
     if (!codeCours) {
