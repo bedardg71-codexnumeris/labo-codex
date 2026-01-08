@@ -1532,18 +1532,20 @@ async function partagerPratiqueMateriel(pratiqueId) {
 
 /**
  * Exporte toutes les pratiques de l'utilisateur
+ * MODIFIÉ (8 jan 2026) : Support métadonnées CC comme les autres modules
  */
 async function exporterPratiquesUtilisateur() {
     const toutesConfigurations = await db.get(CLE_PRATIQUES_CONFIGURATIONS) || [];
 
-    // ✅ AJOUTÉ (6 jan 2026) : Filtrer pour n'exporter que le matériel de l'utilisateur
-    // Exclure : matériel démo (estDemo) et matériel importé de collègues (auteurOriginal)
-    const configurations = toutesConfigurations.filter(c => !c.estDemo && !c.auteurOriginal);
+    // ✅ MODIFIÉ (8 jan 2026) : Utiliser détection heuristique pour filtrer démo + importées
+    const configurations = typeof filtrerRessourcesNonDemo === 'function'
+        ? filtrerRessourcesNonDemo(toutesConfigurations, 'pratique')
+        : toutesConfigurations.filter(c => !c.estDemo && !c.auteurOriginal);
     const nbExclues = toutesConfigurations.length - configurations.length;
 
     if (configurations.length === 0) {
         if (nbExclues > 0) {
-            alert(`Aucune pratique personnelle à exporter.\n\n${nbExclues} pratique(s) exclue(s) car elles proviennent d'imports de collègues.`);
+            alert(`Aucune pratique personnelle à exporter.\n\n${nbExclues} pratique(s) exclue(s) car elles proviennent du matériel démo ou d'imports de collègues.`);
         } else {
             alert('Aucune pratique à exporter.');
         }
@@ -1553,89 +1555,178 @@ async function exporterPratiquesUtilisateur() {
     // Informer si des pratiques ont été exclues
     let infoExclusion = '';
     if (nbExclues > 0) {
-        infoExclusion = ` (${nbExclues} exclue(s))`;
-        console.log(`📦 Export pratiques: ${nbExclues} pratique(s) exclue(s) (importées)`);
+        infoExclusion = ` (${nbExclues} exclue(s) : démo/importées)`;
+        console.log(`📦 Export pratiques: ${nbExclues} pratique(s) exclue(s) (démo/importées)`);
     }
 
-    const exportData = {
-        version: '1.0',
-        type: 'configurations-pratiques',
-        dateExport: new Date().toISOString(),
-        nombreConfigurations: configurations.length,
-        configurations: configurations
-    };
+    // ✅ AJOUTÉ (8 jan 2026) : Demander métadonnées enrichies CC
+    const metaEnrichies = await demanderMetadonneesEnrichies(
+        'Pratiques de notation',
+        `${configurations.length} pratique(s)${infoExclusion}`
+    );
 
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    if (!metaEnrichies) {
+        console.log('Export annulé par l\'utilisateur');
+        return;
+    }
+
+    // Emballer avec métadonnées CC enrichies
+    const donnees = ajouterMetadonnéesCC(
+        { pratiques: configurations },
+        'pratiques',
+        'Pratiques de notation',
+        metaEnrichies
+    );
+
+    // Générer nom de fichier avec watermark CC
+    const nomFichier = genererNomFichierCC(
+        'pratiques',
+        'Pratiques-notation',
+        donnees.metadata.version
+    );
+
+    const blob = new Blob([JSON.stringify(donnees, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `mes-pratiques-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = nomFichier;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
+    console.log('✅ Pratiques exportées avec licence CC BY-NC-SA 4.0');
     if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces('Toutes les pratiques exportées');
+        afficherNotificationSucces(`${configurations.length} pratique(s) exportée(s) avec succès`);
     }
 }
 
 /**
  * Importer des pratiques depuis un fichier JSON
+ * MODIFIÉ (8 jan 2026) : Support métadonnées CC comme les autres modules
  * @param {Event} event - Événement du changement de fichier
  */
 async function importerPratiquesUtilisateur(event) {
     const file = event.target.files[0];
     if (!file) return;
 
-    try {
-        const content = await file.text();
-        const data = JSON.parse(content);
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const donnees = JSON.parse(e.target.result);
 
-        // Vérifier le format
-        if (!data.configurations || !Array.isArray(data.configurations)) {
-            alert('Format de fichier invalide. Le fichier doit contenir un tableau de configurations.');
-            return;
-        }
+            // Stocker temporairement dans une variable globale
+            window._pratiquesImportEnAttente = donnees;
 
-        const configurations = await db.get(CLE_PRATIQUES_CONFIGURATIONS) || [];
-        let nbImportees = 0;
-        let nbIgnorees = 0;
+            // Vérifier licence CC et afficher badge
+            const estCC = typeof verifierLicenceCC === 'function' && verifierLicenceCC(donnees);
 
-        for (const config of data.configurations) {
-            // Vérifier si la pratique existe déjà (par ID)
-            const existe = configurations.some(c => c.id === config.id);
-            if (existe) {
-                nbIgnorees++;
-                continue;
+            let message = estCC && typeof genererBadgeCC === 'function' ?
+                '<div style="margin-bottom: 15px;">' + genererBadgeCC(donnees.metadata) + '</div>' :
+                '';
+
+            message += '<p><strong>Voulez-vous importer ces pratiques de notation ?</strong></p>';
+
+            // Créer modal avec badge CC
+            const modal = document.createElement('div');
+            modal.innerHTML = `
+                <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10001; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; padding: 20px; border-radius: 8px; max-width: 600px; max-height: 80vh; overflow-y: auto;">
+                        ${message}
+                        <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: flex-end;">
+                            <button class="btn" onclick="this.closest('div[style*=fixed]').parentElement.remove(); delete window._pratiquesImportEnAttente;">Annuler</button>
+                            <button class="btn btn-confirmer" onclick="window.confirmerImportPratiques(window._pratiquesImportEnAttente); this.closest('div[style*=fixed]').parentElement.remove(); delete window._pratiquesImportEnAttente;">Importer</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            // Avertir si pas de licence CC
+            if (!estCC && typeof avertirSansLicence === 'function') {
+                avertirSansLicence(donnees);
             }
 
+        } catch (error) {
+            console.error('Erreur lors de l\'import:', error);
+            alert('❌ Erreur lors de la lecture du fichier.\n' + error.message);
+        }
+    };
+    reader.readAsText(file);
+
+    // Réinitialiser l'input pour permettre le même fichier
+    event.target.value = '';
+}
+
+/**
+ * Confirme l'import et fusionne les pratiques
+ * AJOUTÉ (8 jan 2026) : Fonction helper appelée depuis le modal de confirmation
+ */
+window.confirmerImportPratiques = async function(donnees) {
+    try {
+        let pratiquesImportees;
+
+        // Extraire le contenu (supporter ancien format et nouveau format CC)
+        if (donnees.contenu && donnees.contenu.pratiques) {
+            // Nouveau format CC: { metadata, contenu: { pratiques: [...] } }
+            pratiquesImportees = donnees.contenu.pratiques;
+        } else if (donnees.configurations) {
+            // Ancien format: { configurations: [...] }
+            pratiquesImportees = donnees.configurations;
+        } else {
+            throw new Error('Format invalide: pratiques ou configurations non trouvées');
+        }
+
+        if (!Array.isArray(pratiquesImportees)) {
+            throw new Error('Format invalide: les pratiques doivent être un tableau');
+        }
+
+        // ✅ CORRIGÉ (8 janvier 2026) : Ajouter UNIQUEMENT dans bibliothequePratiques
+        // L'utilisateur consulte puis choisit lesquelles ajouter à sa barre latérale
+        const CLE_BIBLIOTHEQUE = window.CLE_BIBLIOTHEQUE_PRATIQUES || 'bibliothequePratiques';
+        let bibliotheque = await db.get(CLE_BIBLIOTHEQUE) || [];
+
+        let nbAjoutees = 0;
+        let nbMisesAJour = 0;
+
+        for (const config of pratiquesImportees) {
             // Ajouter avec un nouvel ID si nécessaire
             if (!config.id) {
                 config.id = 'PRAT_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
             }
-            config.dansBibliotheque = true;
 
-            configurations.push(config);
-            nbImportees++;
+            const indexBiblio = bibliotheque.findIndex(c => c.id === config.id);
+            if (indexBiblio >= 0) {
+                bibliotheque[indexBiblio] = { ...config, dateAjoutBiblio: bibliotheque[indexBiblio].dateAjoutBiblio };
+                nbMisesAJour++;
+            } else {
+                bibliotheque.push({ ...config, dateAjoutBiblio: new Date().toISOString() });
+                nbAjoutees++;
+            }
         }
 
-        await db.set(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+        // Sauvegarder uniquement la bibliothèque
+        await db.set(CLE_BIBLIOTHEQUE, bibliotheque);
 
-        // Rafraîchir l'affichage
-        await afficherListePratiquesMateriel();
-        await afficherBibliothequePratiques();
-
-        if (typeof afficherNotificationSucces === 'function') {
-            afficherNotificationSucces(`Import réussi : ${nbImportees} pratique(s) importée(s)${nbIgnorees > 0 ? `, ${nbIgnorees} ignorée(s) (déjà existantes)` : ''}`);
+        // Rafraîchir le modal de bibliothèque s'il est ouvert
+        if (document.getElementById('modalBibliothequePratiques')) {
+            if (typeof afficherBibliothequePratiques === 'function') {
+                await afficherBibliothequePratiques();
+            }
         }
+
+        let message = `✅ Import réussi !\n\n`;
+        if (nbAjoutees > 0) message += `${nbAjoutees} nouvelle(s) pratique(s) ajoutée(s).\n`;
+        if (nbMisesAJour > 0) message += `${nbMisesAJour} pratique(s) mise(s) à jour.\n`;
+        message += `\nConsultez "Pratiques disponibles" pour les ajouter à votre barre latérale.`;
+        alert(message);
+        console.log('✅ Pratiques importées:', nbAjoutees + nbMisesAJour);
 
     } catch (error) {
-        console.error('Erreur import pratiques:', error);
-        alert('Erreur lors de l\'import : ' + error.message);
+        console.error('Erreur lors de l\'import:', error);
+        alert('❌ Erreur lors de l\'import.\n' + error.message);
     }
-
-    // Réinitialiser l'input
-    event.target.value = '';
-}
+};
 
 /* ===============================
    SYSTÈME DE JETONS

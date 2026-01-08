@@ -2381,18 +2381,21 @@ function importerProductions(event) {
             message += '<p><strong>Voulez-vous importer ces productions ?</strong></p>';
 
             // Créer modal avec badge CC
+            // z-index: 10001 pour passer au-dessus des modaux de bibliothèque (10000)
             const modal = document.createElement('div');
             modal.innerHTML = `
-                <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;">
+                <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10001; display: flex; align-items: center; justify-content: center;">
                     <div style="background: white; padding: 20px; border-radius: 8px; max-width: 600px; max-height: 80vh; overflow-y: auto;">
                         ${message}
                         <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: flex-end;">
                             <button class="btn" onclick="this.closest('div[style*=fixed]').parentElement.remove()">Annuler</button>
-                            <button class="btn btn-confirmer" onclick="window.confirmerImportProductions(${JSON.stringify(donnees).replace(/"/g, '&quot;')}); this.closest('div[style*=fixed]').parentElement.remove()">Importer</button>
+                            <button class="btn btn-confirmer" onclick="this.closest('div[style*=fixed]').parentElement.remove(); window.confirmerImportProductions(window._productionsImportEnAttente); delete window._productionsImportEnAttente;">Importer</button>
                         </div>
                     </div>
                 </div>
             `;
+            // Stocker les données pour éviter problèmes de sérialisation
+            window._productionsImportEnAttente = donnees;
             document.body.appendChild(modal);
 
             // Avertir si pas de licence CC
@@ -2473,37 +2476,41 @@ window.confirmerImportProductions = async function(donnees) {
             console.log(`⚠️ Import avec ${nbGrillesManquantes} dépendance(s) manquante(s):`, grillesManquantes);
         }
 
-        // Charger productions existantes
-        const productionsExistantes = await db.get('productions') || [];
+        // ✅ CORRIGÉ (8 janvier 2026) : Ajouter UNIQUEMENT dans bibliothequeProductions
+        // L'utilisateur consulte puis choisit lesquelles ajouter à sa barre latérale
+        const CLE_BIBLIOTHEQUE = window.CLE_BIBLIOTHEQUE_PRODUCTIONS || 'bibliothequeProductions';
+        let bibliotheque = await db.get(CLE_BIBLIOTHEQUE) || [];
 
-        // Fusionner (remplacer si même ID, sinon ajouter)
+        let nbAjoutees = 0;
+        let nbMisesAJour = 0;
+
+        // Fusionner dans la bibliothèque partagée uniquement
         productionsImportees.forEach(prod => {
-            // ✅ AJOUT (8 décembre 2025) : Productions importées vont dans la bibliothèque, pas dans la sidebar automatiquement
-            if (prod.dansBibliotheque === undefined) {
-                prod.dansBibliotheque = false;
-            }
-
-            const index = productionsExistantes.findIndex(p => p.id === prod.id);
-            if (index >= 0) {
-                productionsExistantes[index] = prod;
+            const indexBiblio = bibliotheque.findIndex(p => p.id === prod.id);
+            if (indexBiblio >= 0) {
+                bibliotheque[indexBiblio] = { ...prod, dateAjoutBiblio: bibliotheque[indexBiblio].dateAjoutBiblio };
+                nbMisesAJour++;
             } else {
-                productionsExistantes.push(prod);
+                bibliotheque.push({ ...prod, dateAjoutBiblio: new Date().toISOString() });
+                nbAjoutees++;
             }
         });
 
-        // Sauvegarder
-        await db.set('productions', productionsExistantes);
+        // Sauvegarder uniquement la bibliothèque
+        await db.set(CLE_BIBLIOTHEQUE, bibliotheque);
 
-        // ✅ MODIFICATION (8 décembre 2025) : Rafraîchir sidebar et tableau
-        if (typeof afficherListeProductions === 'function') {
-            await afficherListeProductions();
-        }
-        if (typeof afficherTableauProductions === 'function') {
-            await afficherTableauProductions();
+        // Rafraîchir le modal de bibliothèque s'il est ouvert
+        if (document.getElementById('modalBibliothequeProductions')) {
+            if (typeof afficherBibliothequeProductions === 'function') {
+                await afficherBibliothequeProductions();
+            }
         }
 
-        // Message informatif sur la bibliothèque
-        alert(`Import réussi !\n\n${productionsImportees.length} production(s) importée(s) dans la bibliothèque.\n\nUtilisez "Consulter la bibliothèque" pour les ajouter à la barre latérale.`);
+        let message = `✅ Import réussi !\n\n`;
+        if (nbAjoutees > 0) message += `${nbAjoutees} nouvelle(s) production(s) ajoutée(s).\n`;
+        if (nbMisesAJour > 0) message += `${nbMisesAJour} production(s) mise(s) à jour.\n`;
+        message += `\nConsultez "Productions disponibles" pour les ajouter à votre barre latérale.`;
+        alert(message);
         console.log('✅ Productions importées:', productionsImportees.length);
 
     } catch (error) {

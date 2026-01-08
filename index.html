@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Système de suivi Beta 95.1 - Hiver 2026</title>
+    <title>Système de suivi Beta 95.2 - Hiver 2026</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=2026010607">
+    <link rel="stylesheet" href="styles.css?v=2026010808">
 
     <style>
         /* Les styles embarqués restent ici */
@@ -3098,7 +3098,7 @@
                     <div class="titre-section">
                         <h1>Système de suivi des apprentissages et de construction de la note</h1>
                         <p class="meta">
-                            Beta 95.1 <span id="build-numero" class="build-numero"></span>
+                            Beta 95.2 <span id="build-numero" class="build-numero"></span>
                             <span class="pastille-nouveautes" onclick="afficherModalNouveautes()" title="Voir les nouveautés">✉️🔴</span>
                             <button class="btn-backup-warning" onclick="window.backupReminder.afficherModal()" title="Protégez tes données">⚠️</button>
                         </p>
@@ -3181,24 +3181,23 @@
                 <!-- Titre principal -->
                 <h2 class="modal-titre">Bienvenue dans la Beta 95.2</h2>
 
-                <!-- Avertissement section en reconstruction -->
-                <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%); border-left: 3px solid #ffc107; border-radius: 4px; padding: 12px 16px; margin-bottom: 1rem;">
-                    <strong style="color: #856404;">🚧 Section Trimestre en reconstruction</strong>
-                    <p style="margin: 8px 0 0 0; font-size: 0.9rem; color: #856404;">
-                        L'onglet Réglages → Trimestre est en cours de refactorisation vers une architecture modulaire.
-                        Certaines fonctionnalités peuvent être incomplètes ou instables.
+                <!-- Statut application -->
+                <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); border-left: 3px solid #28a745; border-radius: 4px; padding: 12px 16px; margin-bottom: 1rem;">
+                    <strong style="color: #155724;">✅ Application fonctionnelle pour H2026</strong>
+                    <p style="margin: 8px 0 0 0; font-size: 0.9rem; color: #155724;">
+                        La section Trimestre est opérationnelle. Tu peux configurer ton trimestre, tes cours,
+                        tes groupes d'étudiants et commencer à travailler avec tes groupe-cours.
                     </p>
                 </div>
 
                 <!-- Encadré testeurs (liste à puces) -->
                 <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: 4px; padding: 12px 16px; margin-bottom: 1.5rem;">
-                    <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Pour les testeurs (dernières 48h) :</strong>
+                    <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Corrections récentes (8 janvier) :</strong>
                     <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
-                        <li><strong>Périodes au lieu d'heures</strong> : Format horaire dynamique selon le nombre de périodes (merci Olivier)</li>
-                        <li><strong>Finalisation Primo</strong> : L'interface se met à jour après la configuration (merci Olivier)</li>
-                        <li><strong>Sauvegarde des grilles</strong> : Les nouvelles grilles s'ajoutent à la bibliothèque (merci Bruno)</li>
-                        <li><strong>Heures non piles</strong> : Entrée d'heures comme 8h55 dans Primo (merci Bruno)</li>
-                        <li><strong>Import/Export amélioré</strong> : Import sélectif, protection des données (merci Bruno, Grégoire)</li>
+                        <li><strong>Section Trimestre stabilisée</strong> : Tous les accordéons fonctionnent (Cours, Enseignant·e, Horaire, Groupe-cours)</li>
+                        <li><strong>Sélecteur groupe-cours</strong> : Le dropdown dans l'en-tête affiche correctement tes groupe-cours</li>
+                        <li><strong>Design harmonisé</strong> : Interface uniformisée selon le Design System v7</li>
+                        <li><strong>Consolidation du code</strong> : Un seul module pour la section Trimestre (stabilité accrue)</li>
                     </ul>
                     <p style="margin: 8px 0 0 0; font-size: 0.85rem;">
                         <a href="#" onclick="fermerModalNouveautes(); allerVersNotesDeVersion(); return false;" style="color: var(--bleu-principal);">Voir toutes les notes de version →</a>
@@ -8467,9 +8466,9 @@
                                 <div class="panneau-formulaire" style="padding: 15px;">
 
                                     <!-- Identification du trimestre -->
-                                    <div style="background: var(--vert-tres-pale, #e8f5e9); padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid var(--vert-succes, #4caf50);">
+                                    <div class="bloc-section bloc-section--vert">
                                         <h5 class="sous-titre-section" style="margin-top: 0; margin-bottom: 12px;">Identification du trimestre</h5>
-                                        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 15px; align-items: end;">
+                                        <div class="grille-identification">
                                             <div class="groupe-form">
                                                 <label style="font-size: 0.8rem; font-weight: 500;">Nom du trimestre <span class="text-danger">*</span></label>
                                                 <input type="text" class="controle-form" id="v2-nomTrimestre" placeholder="Ex: Hiver 2026" onchange="sauvegarderIdentificationTrimestreV2()">
@@ -8497,8 +8496,8 @@
                                     <div class="grille-2col">
 
                                         <!-- COLONNE GAUCHE: Bornes du trimestre -->
-                                        <div style="background: var(--bleu-tres-pale); padding: 12px; border-radius: 8px; position: relative;">
-                                            <button onclick="reinitialiserBornesTrimestreV2()" style="position: absolute; top: 8px; right: 8px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--orange-accent); padding: 0; line-height: 1;" title="Réinitialiser les bornes">✕</button>
+                                        <div class="bloc-section bloc-section--bleu bloc-section--compact">
+                                            <button onclick="reinitialiserBornesTrimestreV2()" class="btn-reset-bloc" title="Réinitialiser les bornes">✕</button>
                                             <h5 class="sous-titre-section" style="margin-top: 0;">Bornes du trimestre</h5>
                                             <div class="grille-2col-gap15">
                                                 <div class="groupe-form">
@@ -8525,8 +8524,8 @@
                                         </div>
 
                                         <!-- COLONNE DROITE: Semaines spéciales -->
-                                        <div style="background: var(--bleu-tres-pale); padding: 12px; border-radius: 8px; position: relative;">
-                                            <button onclick="reinitialiserSemainesSpecialesV2()" style="position: absolute; top: 8px; right: 8px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--orange-accent); padding: 0; line-height: 1;" title="Réinitialiser les semaines spéciales">✕</button>
+                                        <div class="bloc-section bloc-section--bleu bloc-section--compact">
+                                            <button onclick="reinitialiserSemainesSpecialesV2()" class="btn-reset-bloc" title="Réinitialiser les semaines spéciales">✕</button>
                                             <h5 class="sous-titre-section" style="margin-top: 0;">Semaines spéciales</h5>
                                             <div class="grille-2col-gap15">
                                                 <!-- Semaine de planification -->
@@ -8571,15 +8570,15 @@
                                     <div class="grille-2col" style="margin-top: 15px;">
 
                                         <!-- COLONNE GAUCHE: Congés prévus -->
-                                        <div style="background: var(--bleu-tres-pale); padding: 12px; border-radius: 8px;">
+                                        <div class="bloc-section bloc-section--bleu bloc-section--compact" style="margin-bottom: 0;">
                                             <h5 class="sous-titre-section" style="margin-top: 0; font-size: 0.85rem;">Congés fériés et activités institutionnelles</h5>
                                             <div id="v2-congesPrevusContainer" style="margin-bottom: 10px; max-height: 150px; overflow-y: auto;">
                                                 <!-- Liste des événements prévus générée dynamiquement -->
                                             </div>
 
                                             <!-- Formulaire ajout événement prévu (caché par défaut) -->
-                                            <div id="v2-formEvenementPrevu" style="display: none; background: white; padding: 10px; border-radius: 6px; margin-bottom: 10px; position: relative;">
-                                                <button onclick="annulerFormEvenementPrevuV2()" style="position: absolute; top: 5px; right: 5px; background: none; border: none; font-size: 1rem; cursor: pointer; color: var(--rouge-danger); padding: 0; line-height: 1;" title="Annuler">✕</button>
+                                            <div id="v2-formEvenementPrevu" class="formulaire-interne" style="display: none;">
+                                                <button onclick="annulerFormEvenementPrevuV2()" class="btn-fermer" title="Annuler">✕</button>
                                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
                                                     <div class="groupe-form">
                                                         <label style="font-size: 0.75rem; font-weight: 500;">Date <span class="text-danger">*</span></label>
@@ -8619,15 +8618,15 @@
                                         </div>
 
                                         <!-- COLONNE DROITE: Événements imprévus -->
-                                        <div style="background: var(--bleu-tres-pale); padding: 12px; border-radius: 8px;">
+                                        <div class="bloc-section bloc-section--bleu bloc-section--compact" style="margin-bottom: 0;">
                                             <h5 class="sous-titre-section" style="margin-top: 0; font-size: 0.85rem;">Événements imprévus</h5>
                                             <div id="v2-congesImprevusContainer" style="margin-bottom: 10px; max-height: 150px; overflow-y: auto;">
                                                 <!-- Liste des événements imprévus générée dynamiquement -->
                                             </div>
 
                                             <!-- Formulaire ajout événement imprévu (caché par défaut) -->
-                                            <div id="v2-formEvenementImprevu" style="display: none; background: white; padding: 10px; border-radius: 6px; margin-bottom: 10px; position: relative;">
-                                                <button onclick="annulerFormEvenementImprevuV2()" style="position: absolute; top: 5px; right: 5px; background: none; border: none; font-size: 1rem; cursor: pointer; color: var(--rouge-danger); padding: 0; line-height: 1;" title="Annuler">✕</button>
+                                            <div id="v2-formEvenementImprevu" class="formulaire-interne" style="display: none;">
+                                                <button onclick="annulerFormEvenementImprevuV2()" class="btn-fermer" title="Annuler">✕</button>
                                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
                                                     <div class="groupe-form">
                                                         <label style="font-size: 0.75rem; font-weight: 500;">Date <span class="text-danger">*</span></label>
@@ -13628,7 +13627,7 @@
     <!-- PRIORITÉ 2: Données de base -->
     <script src="js/trimestres.js?v=2025123102"></script> <!-- Beta 95 : Gestion multi-trimestres -->
     <script src="js/trimestre.js?v=2025123109"></script>
-    <script src="js/trimestre-v2.js?v=2026010803"></script> <!-- Beta 95.2 : rafraîchit dropdown groupe-cours actif -->
+    <script src="js/trimestre-v2.js?v=2026010808"></script> <!-- Beta 95.2 : section Trimestre stabilisée -->
 
     <!-- ENTITÉS Beta 95.2 - Architecture modulaire groupe-cours -->
     <script src="js/entites/cours-entite.js?v=2026010601"></script>
@@ -13747,7 +13746,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '95.2';
-        const BUILD_ID = '0106-1830';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0108-1124';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
@@ -14350,79 +14349,8 @@
         // ========================================
         // IMPORT DES PRODUCTIONS
         // ========================================
-        function importerProductions(event) {
-            const fichier = event.target.files[0];
-            if (!fichier) return;
-
-            const lecteur = new FileReader();
-            lecteur.onload = function(e) {
-                try {
-                    const productionsImportees = JSON.parse(e.target.result);
-
-                    // Validation structure
-                    if (!Array.isArray(productionsImportees)) {
-                        alert('Format invalide : le fichier doit contenir un tableau de productions.');
-                        return;
-                    }
-
-                    // Validation contenu
-                    for (let prod of productionsImportees) {
-                        if (!prod.id || !prod.titre || !prod.type) {
-                            alert('Format invalide : chaque production doit avoir au minimum un id, un titre et un type.');
-                            return;
-                        }
-                    }
-
-                    // Charger les productions existantes (clé: productions)
-                    let productions = JSON.parse(localStorage.getItem('productions') || '[]');
-
-                    // Fusionner (remplacer si ID existe, ajouter sinon)
-                    let nbAjoutees = 0;
-                    let nbMisesAJour = 0;
-
-                    productionsImportees.forEach(prodImportee => {
-                        const index = productions.findIndex(p => p.id === prodImportee.id);
-                        if (index >= 0) {
-                            productions[index] = prodImportee;
-                            nbMisesAJour++;
-                        } else {
-                            productions.push(prodImportee);
-                            nbAjoutees++;
-                        }
-                    });
-
-                    // Sauvegarder (clé: productions)
-                    localStorage.setItem('productions', JSON.stringify(productions));
-
-                    // Recalculer si module disponible
-                    if (typeof afficherTableauProductions === 'function') {
-                        afficherTableauProductions();
-                    }
-
-                    // Notification
-                    let message = `Import réussi :\n• ${nbAjoutees} production(s) ajoutée(s)\n• ${nbMisesAJour} production(s) mise(s) à jour`;
-
-                    if (typeof afficherNotificationSucces === 'function') {
-                        afficherNotificationSucces(message.replace(/\n/g, ' '));
-                    } else {
-                        alert(message);
-                    }
-
-                    // Réinitialiser le champ fichier
-                    event.target.value = '';
-
-                    // Recharger la page pour appliquer les changements
-                    if (confirm('Import terminé ! Recharger la page pour voir les productions importées ?')) {
-                        location.reload();
-                    }
-
-                } catch (err) {
-                    console.error('Erreur import productions:', err);
-                    alert('Fichier JSON invalide ou format incorrect.');
-                }
-            };
-            lecteur.readAsText(fichier);
-        }
+        // OBSOLÈTE (8 jan 2026) : Cette fonction a été déplacée vers productions.js (supporte nouveau format CC)
+        // La fonction importerProductions() est maintenant chargée depuis productions.js
     </script>
 
     <!-- Script pour afficher les informations contextuelles dans la navigation -->

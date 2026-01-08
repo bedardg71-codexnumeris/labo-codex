@@ -2205,33 +2205,38 @@ window.confirmerImportEchelles = async function(donnees) {
             throw new Error('Format invalide: échelles doit être un tableau');
         }
 
-        // Charger échelles existantes
-        const echellesExistantes = await db.get('echellesTemplates') ||  [];
+        // ✅ CORRIGÉ (8 janvier 2026) : Ajouter UNIQUEMENT dans bibliothequeEchelles
+        // L'utilisateur consulte puis choisit lesquelles ajouter à sa barre latérale
+        const CLE_BIBLIOTHEQUE = window.CLE_BIBLIOTHEQUE_ECHELLES || 'bibliothequeEchelles';
+        let bibliotheque = await db.get(CLE_BIBLIOTHEQUE) || [];
 
-        // Fusionner (remplacer si même ID, sinon ajouter)
+        // Fusionner dans la bibliothèque partagée uniquement
+        let nbAjoutees = 0;
+        let nbMisesAJour = 0;
         echellesImportees.forEach(echelle => {
-            // ✅ AJOUT (8 décembre 2025) : Les échelles importées ne sont pas automatiquement dans la bibliothèque
-            // L'utilisateur doit utiliser "Gérer la bibliothèque" pour les ajouter à la barre latérale
-            echelle.dansBibliotheque = false;
-
-            const index = echellesExistantes.findIndex(e => e.id === echelle.id);
-            if (index >= 0) {
-                echellesExistantes[index] = echelle;
+            const indexBiblio = bibliotheque.findIndex(e => e.id === echelle.id);
+            if (indexBiblio >= 0) {
+                bibliotheque[indexBiblio] = { ...echelle, dateAjoutBiblio: bibliotheque[indexBiblio].dateAjoutBiblio };
+                nbMisesAJour++;
             } else {
-                echellesExistantes.push(echelle);
+                bibliotheque.push({ ...echelle, dateAjoutBiblio: new Date().toISOString() });
+                nbAjoutees++;
             }
         });
 
-        // Sauvegarder
-        await db.set('echellesTemplates',  echellesExistantes);
+        // Sauvegarder uniquement la bibliothèque
+        await db.set(CLE_BIBLIOTHEQUE, bibliotheque);
 
-        // Rafraîchir l'affichage
-        if (typeof afficherToutesLesEchellesNiveaux === 'function') {
-            await afficherToutesLesEchellesNiveaux();
+        // Rafraîchir le modal de bibliothèque s'il est ouvert
+        if (document.getElementById('modalBibliothequeEchelles')) {
+            await afficherBibliothequeEchelles();
         }
 
-        // ✅ AJOUT (8 décembre 2025) : Mention de la bibliothèque dans le message de succès
-        alert(`✅ Import réussi !\n\n${echellesImportees.length} échelle(s) importée(s).\n\nUtilisez "Consulter la bibliothèque" pour les ajouter à la barre latérale.`);
+        let message = `✅ Import réussi !\n\n`;
+        if (nbAjoutees > 0) message += `${nbAjoutees} nouvelle(s) échelle(s) ajoutée(s).\n`;
+        if (nbMisesAJour > 0) message += `${nbMisesAJour} échelle(s) mise(s) à jour.\n`;
+        message += `\nConsultez "Échelles disponibles" pour les ajouter à votre barre latérale.`;
+        alert(message);
         console.log('✅ Échelles importées:', echellesImportees.length);
 
     } catch (error) {

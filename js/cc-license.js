@@ -396,20 +396,25 @@ function demanderMetadonneesEnrichies(typeContenu, nomContenu) {
             document.body.appendChild(modal);
         }
 
-        // 🆕 BETA 92: Lire les informations de l'utilisateur depuis infoCours ET listeCours
+        // 🆕 BETA 95.2: Priorité au profilEnseignant (section Trimestre)
+        // Fallback vers infoCours et listeCours pour rétrocompatibilité
+        // Note: db.getSync lit depuis localStorage (cache) qui est synchronisé avec IndexedDB
+        const profilEnseignant = (typeof db !== 'undefined' && db.getSync)
+            ? db.getSync('profilEnseignant', null)
+            : JSON.parse(localStorage.getItem('profilEnseignant') || 'null');
         const infoCours = JSON.parse(localStorage.getItem('infoCours') || '{}');
         const listeCours = JSON.parse(localStorage.getItem('listeCours') || '[]');
         const coursActif = listeCours.find(c => c.actif) || listeCours[0] || {};
 
-        // Construire le nom complet (prioriser listeCours puis infoCours)
-        const prenom = coursActif.prenomEnseignant || infoCours.prenomEnseignant || infoCours.enseignant || '';
-        const nom = coursActif.nomEnseignant || infoCours.nomEnseignant || '';
+        // Construire le nom complet (priorité: profilEnseignant > listeCours > infoCours)
+        const prenom = profilEnseignant?.prenom || coursActif.prenomEnseignant || infoCours.prenomEnseignant || infoCours.enseignant || '';
+        const nom = profilEnseignant?.nom || coursActif.nomEnseignant || infoCours.nomEnseignant || '';
         const nomComplet = [prenom, nom].filter(Boolean).join(' ');
 
-        const courriel = coursActif.courriel || infoCours.courriel || '';
-        const siteWeb = coursActif.siteWeb || infoCours.siteWeb || '';
-        const discipline = coursActif.discipline || infoCours.discipline || '';
-        const institution = coursActif.institution || infoCours.institution || '';
+        const courriel = profilEnseignant?.courriel || coursActif.courriel || infoCours.courriel || '';
+        const siteWeb = profilEnseignant?.siteWeb || coursActif.siteWeb || infoCours.siteWeb || '';
+        const discipline = profilEnseignant?.discipline || coursActif.discipline || infoCours.discipline || '';
+        const institution = profilEnseignant?.institution || coursActif.institution || infoCours.institution || '';
 
         console.log('[CC Export] Pré-remplissage:', { nomComplet, courriel, siteWeb, discipline, institution });
 
@@ -424,8 +429,11 @@ function demanderMetadonneesEnrichies(typeContenu, nomContenu) {
         document.getElementById('metaDisciplines').value = discipline;
         document.getElementById('metaInstitution').value = institution;
         document.getElementById('metaNiveau').value = 'Collégial';
-        document.getElementById('metaDescription').value = '';
-        document.getElementById('metaDescriptionCompteur').textContent = '0/200';
+
+        // Pré-remplir avec la dernière description utilisée
+        const derniereDescription = localStorage.getItem('cc-derniere-description') || '';
+        document.getElementById('metaDescription').value = derniereDescription;
+        document.getElementById('metaDescriptionCompteur').textContent = `${derniereDescription.length}/200`;
 
         // 🆕 Réinitialiser les checkboxes (intelligentes : cochées si valeur présente)
         document.getElementById('checkPartagerNom').checked = true;
@@ -489,6 +497,9 @@ function demanderMetadonneesEnrichies(typeContenu, nomContenu) {
                 return;
             }
 
+            // Sauvegarder la description pour le prochain export
+            localStorage.setItem('cc-derniere-description', description);
+
             // 🆕 Construire les métadonnées selon les checkboxes
             const disciplines = document.getElementById('checkPartagerDiscipline').checked
                 ? document.getElementById('metaDisciplines').value.split(',').map(d => d.trim()).filter(d => d.length > 0)
@@ -546,7 +557,8 @@ function creerModalMetadonneesEnrichies() {
     const modal = document.createElement('div');
     modal.id = 'modalMetadonneesEnrichies';
     modal.className = 'modal';
-    modal.style.cssText = 'display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center;';
+    // z-index: 10001 pour passer au-dessus des modaux de bibliothèque (10000)
+    modal.style.cssText = 'display: none; position: fixed; z-index: 10001; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center;';
 
     modal.innerHTML = `
         <div class="modal-content" style="background: white; padding: 30px; border-radius: 8px; max-width: 700px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
@@ -1219,7 +1231,8 @@ function creerModalEditionMetadonnees() {
     const modal = document.createElement('div');
     modal.id = 'modalEditionMetadonnees';
     modal.className = 'modal';
-    modal.style.cssText = 'display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center;';
+    // z-index: 10001 pour passer au-dessus des modaux de bibliothèque (10000)
+    modal.style.cssText = 'display: none; position: fixed; z-index: 10001; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center;';
 
     modal.innerHTML = `
         <div class="modal-content" style="background: white; padding: 30px; border-radius: var(--radius-grand); max-width: 550px; width: 90%; box-shadow: var(--shadow-fort);">
