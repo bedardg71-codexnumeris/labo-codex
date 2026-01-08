@@ -1757,9 +1757,10 @@ async function importerCartouches(event) {
             message += '<p><strong>Voulez-vous importer ces cartouches ?</strong></p>';
 
             // Créer modal avec badge CC
+            // z-index: 10001 pour passer au-dessus des modaux de bibliothèque (10000)
             const modal = document.createElement('div');
             modal.innerHTML = `
-                <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;">
+                <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10001; display: flex; align-items: center; justify-content: center;">
                     <div style="background: white; padding: 20px; border-radius: 8px; max-width: 600px; max-height: 80vh; overflow-y: auto;">
                         ${message}
                         <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: flex-end;">
@@ -1864,15 +1865,18 @@ window.confirmerImportCartouches = async function(donnees) {
             console.log(`⚠️ Import avec ${nbGrillesManquantes} dépendance(s) manquante(s):`, grillesManquantes);
         }
 
-        let compteur = 0;
+        // ✅ CORRIGÉ (8 janvier 2026) : Ajouter UNIQUEMENT dans bibliothequeCartouches
+        // L'utilisateur consulte puis choisit lesquelles ajouter à sa sélection
+        const CLE_BIBLIOTHEQUE = window.CLE_BIBLIOTHEQUE_CARTOUCHES || 'bibliothequeCartouches';
+        let bibliotheque = await db.get(CLE_BIBLIOTHEQUE) || [];
 
-        // Importer chaque grille de cartouches
-        // ✅ CORRECTION: Utiliser for...of au lieu de forEach pour supporter await
+        let nbAjoutees = 0;
+        let nbMisesAJour = 0;
+
+        // Aplatir les cartouches de toutes les grilles pour la bibliothèque
         for (const grilleId of Object.keys(cartouchesData)) {
             const cartouchesImportees = cartouchesData[grilleId];
-            const cartouchesExistantes = await db.get(`cartouches_${grilleId}`) || [];
 
-            // Fusionner : remplacer si même ID, sinon ajouter
             cartouchesImportees.forEach(importee => {
                 // Préserver metadata_cc pour batch export aussi
                 if (metadata && metadata.licence && !importee.metadata_cc) {
@@ -1884,34 +1888,36 @@ window.confirmerImportCartouches = async function(donnees) {
                     };
                 }
 
-                // ✅ AJOUT (8 décembre 2025) : Les cartouches importées ne sont pas automatiquement dans la bibliothèque
-                importee.dansBibliotheque = false;
+                // S'assurer que la cartouche a sa grilleId
+                importee.grilleId = importee.grilleId || grilleId;
 
-                const index = cartouchesExistantes.findIndex(c => c.id === importee.id);
-                if (index !== -1) {
-                    cartouchesExistantes[index] = importee;
+                const indexBiblio = bibliotheque.findIndex(c => c.id === importee.id);
+                if (indexBiblio >= 0) {
+                    bibliotheque[indexBiblio] = { ...importee, dateAjoutBiblio: bibliotheque[indexBiblio].dateAjoutBiblio };
+                    nbMisesAJour++;
                 } else {
-                    cartouchesExistantes.push(importee);
+                    bibliotheque.push({ ...importee, dateAjoutBiblio: new Date().toISOString() });
+                    nbAjoutees++;
                 }
-                compteur++;
             });
-
-            await db.set(`cartouches_${grilleId}`, cartouchesExistantes);
         }
 
-        // Rafraîchir l'interface si on est dans la section
-        const selectGrille = document.getElementById('selectGrilleRetroaction');
-        if (selectGrille && selectGrille.value) {
-            await chargerCartouchesRetroaction();
+        // Sauvegarder uniquement la bibliothèque
+        await db.set(CLE_BIBLIOTHEQUE, bibliotheque);
+
+        // Rafraîchir le modal de bibliothèque s'il est ouvert
+        if (document.getElementById('modalBibliothequeCartouches')) {
+            if (typeof afficherBibliothequeCartouches === 'function') {
+                await afficherBibliothequeCartouches();
+            }
         }
 
-        // ✅ AJOUT (8 décembre 2025) : Rafraîchir la banque après import
-        if (typeof afficherBanqueCartouches === 'function') {
-            await afficherBanqueCartouches();
-        }
-
-        afficherNotificationSucces(`✅ Import réussi ! ${compteur} cartouche(s) importée(s). Utilisez "Consulter la bibliothèque" pour les ajouter à votre sélection.`);
-        console.log('✅ Cartouches importées:', compteur);
+        let message = `✅ Import réussi !\n\n`;
+        if (nbAjoutees > 0) message += `${nbAjoutees} nouvelle(s) cartouche(s) ajoutée(s).\n`;
+        if (nbMisesAJour > 0) message += `${nbMisesAJour} cartouche(s) mise(s) à jour.\n`;
+        message += `\nConsultez "Cartouches disponibles" pour les ajouter à votre sélection.`;
+        afficherNotificationSucces(message);
+        console.log('✅ Cartouches importées:', nbAjoutees + nbMisesAJour);
 
     } catch (error) {
         console.error('Erreur lors de l\'import:', error);

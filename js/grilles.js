@@ -1945,15 +1945,15 @@ window.confirmerImportGrilles = async function(donnees) {
             throw new Error('Format invalide: grilles doit être un tableau');
         }
 
-        // Charger grilles existantes
-        const grillesExistantes = await db.get('grillesTemplates') || [];
+        // ✅ CORRIGÉ (8 janvier 2026) : Ajouter UNIQUEMENT dans bibliothequeGrilles
+        // L'utilisateur consulte puis choisit lesquelles ajouter à sa barre latérale
+        const CLE_BIBLIOTHEQUE = window.CLE_BIBLIOTHEQUE_GRILLES || 'bibliothequeGrilles';
+        let bibliotheque = await db.get(CLE_BIBLIOTHEQUE) || [];
 
-        // Fusionner (remplacer si même ID, sinon ajouter)
+        // Fusionner dans la bibliothèque partagée uniquement
+        let nbAjoutees = 0;
+        let nbMisesAJour = 0;
         grillesImportees.forEach(grille => {
-            // ✅ AJOUT (8 décembre 2025) : Les grilles importées ne sont pas automatiquement dans la bibliothèque
-            // L'utilisateur doit utiliser "Gérer la bibliothèque" pour les ajouter à la barre latérale
-            grille.dansBibliotheque = false;
-
             // Préserver les métadonnées CC dans la grille importée
             if (metadata && metadata.licence) {
                 grille.metadata_cc = {
@@ -1964,24 +1964,29 @@ window.confirmerImportGrilles = async function(donnees) {
                 };
             }
 
-            const index = grillesExistantes.findIndex(g => g.id === grille.id);
-            if (index >= 0) {
-                grillesExistantes[index] = grille;
+            const indexBiblio = bibliotheque.findIndex(g => g.id === grille.id);
+            if (indexBiblio >= 0) {
+                bibliotheque[indexBiblio] = { ...grille, dateAjoutBiblio: bibliotheque[indexBiblio].dateAjoutBiblio };
+                nbMisesAJour++;
             } else {
-                grillesExistantes.push(grille);
+                bibliotheque.push({ ...grille, dateAjoutBiblio: new Date().toISOString() });
+                nbAjoutees++;
             }
         });
 
-        // Sauvegarder
-        await db.set('grillesTemplates', grillesExistantes);
+        // Sauvegarder uniquement la bibliothèque
+        await db.set(CLE_BIBLIOTHEQUE, bibliotheque);
 
-        // Rafraîchir l'affichage
-        if (typeof afficherToutesLesGrillesCriteres === 'function') {
-            await afficherToutesLesGrillesCriteres();
+        // Rafraîchir le modal de bibliothèque s'il est ouvert
+        if (document.getElementById('modalBibliothequeGrilles')) {
+            await afficherBibliothequeGrilles();
         }
 
-        // ✅ AJOUT (8 décembre 2025) : Mention de la bibliothèque dans le message de succès
-        alert(`✅ Import réussi !\n\n${grillesImportees.length} grille(s) importée(s).\n\nUtilisez "Consulter la bibliothèque" pour les ajouter à la barre latérale.`);
+        let message = `✅ Import réussi !\n\n`;
+        if (nbAjoutees > 0) message += `${nbAjoutees} nouvelle(s) grille(s) ajoutée(s).\n`;
+        if (nbMisesAJour > 0) message += `${nbMisesAJour} grille(s) mise(s) à jour.\n`;
+        message += `\nConsultez "Grilles disponibles" pour les ajouter à votre barre latérale.`;
+        alert(message);
         console.log('✅ Grilles importées:', grillesImportees.length);
 
     } catch (error) {

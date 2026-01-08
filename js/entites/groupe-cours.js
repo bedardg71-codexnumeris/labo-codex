@@ -447,7 +447,8 @@ async function synchroniserInfoCours(trimestreId) {
     await db.set('infoCours', infoCours);
 
     // 🆕 BETA 95.2 : Stocker groupeCoursActif pour obtenirSeancesHoraire()
-    await db.set('groupeCoursActif', {
+    // ✅ CORRIGÉ (8 jan 2026) : Utiliser setSync pour persistance localStorage
+    db.setSync('groupeCoursActif', {
         id: gcComplet.id,
         trimestreId: gcComplet.trimestreId,
         coursId: gcComplet.coursId,
