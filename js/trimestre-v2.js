@@ -1114,6 +1114,7 @@ function changerTrimestreActifV2(valeur) {
         const success = window.changerTrimestreActif(valeur);
         if (success) {
             // Recharger l'interface complète
+            chargerIdentificationTrimestreV2();  // 🆕 FIX: Recharger nom, session, année
             chargerCadreCalendrierV2();
             chargerEvenementsPrevusV2();
             chargerEvenementsImprevusV2();
