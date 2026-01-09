@@ -3190,15 +3190,26 @@
                     </p>
                 </div>
 
+                <!-- Encadré pour testeurs qui n'ont pas encore accédé à l'app -->
+                <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%); border-left: 3px solid #ffc107; border-radius: 4px; padding: 12px 16px; margin-bottom: 1rem;">
+                    <strong style="color: #856404; display: block; margin-bottom: 8px;">Tu n'as pas encore testé l'application en ligne ?</strong>
+                    <p style="margin: 0 0 8px 0; font-size: 0.9rem; color: #856404;">
+                        L'application est accessible à : <a href="https://bedardg71-codexnumeris.github.io/Monitorage_v6/" target="_blank" style="color: #856404; font-weight: bold;">bedardg71-codexnumeris.github.io/Monitorage_v6/</a>
+                    </p>
+                    <p style="margin: 0; font-size: 0.85rem; color: #856404;">
+                        Tes données restent sur ton appareil (localStorage). Active le <strong>Mode Assisté</strong> et laisse <strong>Primo</strong> te guider pour ta première configuration !
+                    </p>
+                </div>
+
                 <!-- Encadré testeurs (liste à puces) -->
                 <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: 4px; padding: 12px 16px; margin-bottom: 1.5rem;">
-                    <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Nouveautés (8 janvier) :</strong>
+                    <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Nouveautés (9 janvier) :</strong>
                     <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
-                        <li><strong>5 dropdowns groupe-cours</strong> : Trimestre + Cours + Groupe + Horaire + Enseignant pour un assemblage complet</li>
-                        <li><strong>Multi-profils enseignants</strong> : Crée, sélectionne et supprime plusieurs profils enseignants</li>
-                        <li><strong>Alignement Primo/Trimestre</strong> : Les deux modules utilisent exactement les mêmes sources de données (SST)</li>
-                        <li><strong>Fix discipline cours</strong> : Le champ discipline est maintenant sauvegardé et affiché correctement</li>
-                        <li><strong>Section Trimestre stabilisée</strong> : Tous les accordéons fonctionnent (Cours, Enseignant·e, Horaire, Groupe-cours)</li>
+                        <li><strong>Modal bibliothèque groupe-cours</strong> : Bouton 📚 pour voir, activer ou supprimer tes groupes-cours</li>
+                        <li><strong>Synthèses intelligentes</strong> : Chaque accordéon affiche un résumé calculé (nb étudiants, heures/sem, etc.)</li>
+                        <li><strong>Import depuis trimestre précédent</strong> : Réutilise tes échelles, grilles et productions d'un trimestre à l'autre</li>
+                        <li><strong>Audit module évaluation</strong> : 3 problèmes critiques corrigés (namespacing, groupe-cours, validations)</li>
+                        <li><strong>Section AIDE mise à jour</strong> : Documentation complète du workflow Beta 95</li>
                     </ul>
                     <p style="margin: 8px 0 0 0; font-size: 0.85rem;">
                         <a href="#" onclick="fermerModalNouveautes(); allerVersNotesDeVersion(); return false;" style="color: var(--bleu-principal);">Voir toutes les notes de version →</a>
@@ -3255,7 +3266,7 @@
 
                     <p>Depuis la brève présentation de l'application aux membres de la communauté PAN en novembre, j'ai corrigé vraiment beaucoup de choses. Mais j'ai très peu de retours sur l'utilisation réelle : est-ce que les pratiques de notation fonctionnent pour toi ? Les fonctionnalités de suivi répondent-elles à tes besoins ?</p>
 
-                    <p style="margin-top: 1rem;">Je ne peux pas deviner ta façon d'enseigner ni celle des autres collègues. Je ne connais ni tes contraintes particulières ni les frictions que tu peux rencontrer. J'estime la Beta 95.2 assez stable pour un usage quotidien. C'est le moment idéal pour me dire ce qui fonctionne, ce qui coince, ce qui manque.</p>
+                    <p style="margin-top: 1rem;">Je ne peux pas deviner ta façon d'enseigner ni celle des autres collègues. Je ne connais ni tes contraintes particulières ni les frictions que tu peux rencontrer. J'estime la Beta 95.3 assez stable pour un usage quotidien. C'est le moment idéal pour me dire ce qui fonctionne, ce qui coince, ce qui manque.</p>
                     <p style="margin-top: 1rem;">L'objectif, en bout de ligne, c'est d'avoir un outil qui ressemble à nos pratiques et qui supporte les enseignant·es qui veulent renouveler leur pédagogie et leur pratique de notation. Mais un tel projet ne peut être réalisé par un seul individu. Il doit mobiliser notre intelligence collective.</p>
 
                     <p style="margin-top: 1rem;">Utilise le formulaire dans <strong>AIDE → Signaler un bug</strong>, ou partage-moi simplement :</p>
