@@ -351,12 +351,22 @@ async function validerDonneesGroupeCours(donnees) {
  * @returns {string}
  */
 function genererLibelleGroupeCours(gc, cours, enseignant, horaire) {
-    const codeCours = cours?.codeCours || '???';
-    const groupe = gc?.groupe || '???';
+    const codeCours = cours?.codeCours || cours?.code || cours?.sigle || null;
+    const groupe = gc?.groupe || gc?.groupeNum || '00001';
     const nomEns = enseignant ? `${enseignant.prenom?.[0] || ''}. ${enseignant.nom || ''}` : '';
     const nomHor = horaire?.nom || '';
 
-    return `${codeCours} gr.${groupe}${nomEns ? ` - ${nomEns}` : ''}${nomHor ? ` - ${nomHor}` : ''}`;
+    // 🆕 FIX (9 jan 2026) : Libellé lisible même sans cours
+    let label;
+    if (codeCours) {
+        label = `${codeCours} gr.${groupe}`;
+    } else {
+        label = `Groupe ${groupe}`;
+    }
+    if (nomEns) label += ` - ${nomEns}`;
+    if (nomHor) label += ` (${nomHor})`;
+
+    return label;
 }
 
 /**
@@ -366,9 +376,10 @@ function genererLibelleGroupeCours(gc, cours, enseignant, horaire) {
  * @returns {string}
  */
 function genererLibelleCourtGroupeCours(gc, cours) {
-    const codeCours = cours?.codeCours || '???';
-    const groupe = gc?.groupe || '???';
-    return `${codeCours} gr.${groupe}`;
+    const codeCours = cours?.codeCours || cours?.code || cours?.sigle || null;
+    const groupe = gc?.groupe || gc?.groupeNum || '00001';
+    // 🆕 FIX (9 jan 2026) : Libellé lisible même sans cours
+    return codeCours ? `${codeCours} gr.${groupe}` : `Groupe ${groupe}`;
 }
 
 /**

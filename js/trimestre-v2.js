@@ -4799,14 +4799,15 @@ async function peuplerDropdownGroupeCoursActif() {
             const ens = enseignants.find(e => e.id === gc.enseignantId) || {};
             const hor = horaires.find(h => h.id === gc.horaireId) || {};
 
-            const sigle = coursInfo?.codeCours || coursInfo?.code || coursInfo?.sigle || '???';
-            const groupe = gc.groupe || gc.groupeNum || '?';
+            const sigle = coursInfo?.codeCours || coursInfo?.code || coursInfo?.sigle || null;
+            const groupe = gc.groupe || gc.groupeNum || '00001';
             const nomEns = ens.prenom ? `${ens.prenom} ${(ens.nom || '').charAt(0)}.` : '';
             const nomHor = hor.nom || '';
 
-            let label = `${sigle} gr.${groupe}`;
+            // 🆕 FIX (9 jan 2026) : Libellé lisible même sans cours
+            let label = sigle ? `${sigle} gr.${groupe}` : `Groupe ${groupe}`;
             if (nomEns) label += ` - ${nomEns}`;
-            if (nomHor) label += ` - ${nomHor}`;
+            if (nomHor) label += ` (${nomHor})`;
 
             const selected = gcActif && gc.id === gcActif.id ? ' selected' : '';
             options += `<option value="${gc.id}"${selected}>${label}</option>`;
@@ -5165,8 +5166,9 @@ async function mettreAJourApercuGroupeCours() {
         cours = listeCours.find(c => c.id === coursId || c.sigle === coursId);
     }
 
-    const sigle = cours?.codeCours || cours?.sigle || '???';
-    const apercu = `${sigle} gr.${groupe}`;
+    // 🆕 FIX (9 jan 2026) : Libellé lisible même sans cours
+    const sigle = cours?.codeCours || cours?.sigle || null;
+    const apercu = sigle ? `${sigle} gr.${groupe}` : `Groupe ${groupe}`;
 
     apercuSpan.textContent = apercu;
     apercuSpan.className = '';
