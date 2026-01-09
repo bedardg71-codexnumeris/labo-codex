@@ -40,7 +40,7 @@ function obtenirConfigJetons() {
 function compterJetonsUtilises(da, type) {
     // IMPORTANT: Utiliser directement localStorage pour éviter le conflit avec obtenirDonneesSelonMode
     // qui peut retourner les données de simulation au lieu des données réelles
-    const evaluations = db.getSync('evaluationsSauvegardees', []);
+    const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
 
     if (type === 'delai') {
         return evaluations.filter(e =>
@@ -102,7 +102,7 @@ function appliquerJetonDelai(evaluationId) {
     console.log('⭐ Application jeton de délai:', evaluationId);
 
     // IMPORTANT: Utiliser directement localStorage pour éviter le conflit avec les modes
-    const evaluations = db.getSync('evaluationsSauvegardees', []);
+    const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
     const evaluation = evaluations.find(e => e.id === evaluationId);
 
     if (!evaluation) {
@@ -139,7 +139,7 @@ function appliquerJetonDelai(evaluationId) {
     evaluation.dureeDelaiJours = dureeDelai; // Stocker la durée appliquée
 
     // Sauvegarder directement dans localStorage
-    db.setSync('evaluationsSauvegardees', evaluations);
+    db.setSync(cle('evaluationsSauvegardees'), evaluations);
     console.log('✅ Évaluations sauvegardées avec jeton de délai');
 
     console.log('✅ Jeton de délai appliqué');
@@ -179,7 +179,7 @@ function retirerJetonDelai(evaluationId) {
     console.log('🗑️ Retrait jeton de délai:', evaluationId);
 
     // IMPORTANT: Utiliser directement localStorage pour éviter le conflit avec les modes
-    const evaluations = db.getSync('evaluationsSauvegardees', []);
+    const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
     const evaluation = evaluations.find(e => e.id === evaluationId);
 
     if (!evaluation) {
@@ -194,7 +194,7 @@ function retirerJetonDelai(evaluationId) {
     delete evaluation.dureeDelaiJours;
 
     // Sauvegarder directement dans localStorage
-    db.setSync('evaluationsSauvegardees', evaluations);
+    db.setSync(cle('evaluationsSauvegardees'), evaluations);
     console.log('✅ Évaluations sauvegardées après retrait jeton de délai');
 
     console.log('✅ Jeton de délai retiré');
@@ -241,7 +241,7 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale = null) 
     console.log('⭐ Application jeton de reprise:', evaluationOriginaleId);
 
     // IMPORTANT: Utiliser directement localStorage pour éviter le conflit avec les modes
-    const evaluations = db.getSync('evaluationsSauvegardees', []);
+    const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
     const indexOriginal = evaluations.findIndex(e => e.id === evaluationOriginaleId);
 
     if (indexOriginal === -1) {
@@ -330,7 +330,7 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale = null) 
     evaluations.push(nouvelleEvaluation);
 
     // Sauvegarder directement dans localStorage
-    db.setSync('evaluationsSauvegardees', evaluations);
+    db.setSync(cle('evaluationsSauvegardees'), evaluations);
     console.log('✅ Évaluations sauvegardées avec jeton de reprise');
     console.log('✅ Jeton de reprise appliqué, nouvelle évaluation:', nouvelleEvaluation.id);
 
@@ -359,7 +359,7 @@ function retirerJetonReprise(evaluationId) {
     console.log('🗑️ Retrait jeton de reprise:', evaluationId);
 
     // IMPORTANT: Utiliser directement localStorage pour éviter le conflit avec les modes
-    const evaluations = db.getSync('evaluationsSauvegardees', []);
+    const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
     const indexReprise = evaluations.findIndex(e => e.id === evaluationId);
 
     if (indexReprise === -1) {
@@ -434,7 +434,7 @@ function retirerJetonReprise(evaluationId) {
     }
 
     // Sauvegarder directement dans localStorage
-    db.setSync('evaluationsSauvegardees', evaluations);
+    db.setSync(cle('evaluationsSauvegardees'), evaluations);
     console.log('✅ Évaluations sauvegardées après retrait jeton de reprise');
 
     // Recalculer les indices
@@ -651,7 +651,7 @@ function appliquerJetonRepriseCiblee(evaluationOriginaleId, critereId = null, ar
     console.log('⭐ Application jeton de reprise ciblée:', evaluationOriginaleId, 'critère:', critereId);
 
     // IMPORTANT: Utiliser directement db.getSync pour éviter conflit avec les modes
-    const evaluations = db.getSync('evaluationsSauvegardees', []);
+    const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
     const indexOriginal = evaluations.findIndex(e => e.id === evaluationOriginaleId);
 
     if (indexOriginal === -1) {
@@ -726,7 +726,7 @@ function appliquerJetonRepriseCiblee(evaluationOriginaleId, critereId = null, ar
     evaluations.push(nouvelleEvaluation);
 
     // Sauvegarder directement dans localStorage
-    db.setSync('evaluationsSauvegardees', evaluations);
+    db.setSync(cle('evaluationsSauvegardees'), evaluations);
     console.log('✅ Évaluations sauvegardées avec jeton de reprise ciblée');
     console.log('✅ Jeton de reprise ciblée appliqué, nouvelle évaluation:', nouvelleEvaluation.id);
 
@@ -749,7 +749,7 @@ function appliquerJetonRepriseCiblee(evaluationOriginaleId, critereId = null, ar
  * (Bug corrigé : les nouvelles évaluations héritaient de remplaceeParId de l'originale)
  */
 function nettoyerEvaluationsRepriseCiblee() {
-    const evaluations = db.getSync('evaluationsSauvegardees', []);
+    const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
     let nbNettoyees = 0;
 
     evaluations.forEach(evaluation => {
@@ -765,7 +765,7 @@ function nettoyerEvaluationsRepriseCiblee() {
     });
 
     if (nbNettoyees > 0) {
-        db.setSync('evaluationsSauvegardees', evaluations);
+        db.setSync(cle('evaluationsSauvegardees'), evaluations);
         console.log(`✅ ${nbNettoyees} évaluation(s) de reprise ciblée nettoyée(s)`);
 
         // Rafraîchir la liste

@@ -1822,7 +1822,7 @@ function sauvegarderEvaluation() {
     }
 
     // Sauvegarder
-    let evaluations = db.getSync('evaluationsSauvegardees', []);
+    let evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
     evaluations.push(evaluation);
 
     // Protection : bloquer en mode anonymisation ou quota dépassé
@@ -3282,7 +3282,7 @@ function mettreAJourStatistiquesEvaluations() {
     const etudiantsEvalues = etudiants.filter(e => e.evaluations.length > 0).length;
 
     // 🎯 Calculer le total d'artefacts DONNÉS (même logique que portfolio.js)
-    const evaluations = db.getSync('evaluationsSauvegardees', []);
+    const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
     const productions = db.getSync('productions', []);
 
     // Identifier les artefacts-portfolio
@@ -3552,7 +3552,7 @@ function verifierEtChargerEvaluationExistante() {
     }
 
     // Chercher une évaluation existante
-    const evaluations = db.getSync('evaluationsSauvegardees', []);
+    const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
     const evaluationExistante = evaluations.find(e =>
         e.etudiantDA === etudiantDA &&
         e.productionId === productionId &&
@@ -3835,7 +3835,7 @@ function mettreAJourIndicateurProgression() {
     const totalEtudiants = etudiantsActifs.length;
 
     // Compter les évaluations déjà réalisées pour cette production
-    const evaluations = db.getSync('evaluationsSauvegardees', []);
+    const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
     const evaluationsProduction = evaluations.filter(e => e.productionId === productionId);
 
     // Compter les étudiants uniques évalués (au cas où il y aurait plusieurs évaluations par étudiant)
@@ -4054,7 +4054,7 @@ function lancerReparationEvaluations() {
 function reparer_evaluations_criteres_manquants() {
     console.log('Début de la réparation des évaluations...');
 
-    const evaluations = db.getSync('evaluationsSauvegardees', []);
+    const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
     const grilles = db.getSync('grillesTemplates', []);
 
     let nbEvaluationsReparees = 0;
@@ -4121,7 +4121,7 @@ function reparer_evaluations_criteres_manquants() {
 
     // Sauvegarder les modifications
     if (nbEvaluationsReparees > 0) {
-        db.setSync('evaluationsSauvegardees', evaluations);
+        db.setSync(cle('evaluationsSauvegardees'), evaluations);
         console.log(`\n${nbEvaluationsReparees} évaluation(s) sauvegardée(s)`);
     }
 
@@ -4751,7 +4751,7 @@ function sauvegarderEvaluationModifiee() {
  * NOTE: Fonction renommée pour éviter conflit avec verrouillerEvaluation de productions.js
  */
 function verrouillerEvaluationIndividuelle(evaluationId) {
-    let evaluations = db.getSync('evaluationsSauvegardees', []);
+    let evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
     const index = evaluations.findIndex(e => e.id === evaluationId);
 
     if (index === -1) {
@@ -4781,7 +4781,7 @@ function verrouillerEvaluationIndividuelle(evaluationId) {
  * NOTE: Fonction renommée pour cohérence avec verrouillerEvaluationIndividuelle
  */
 function deverrouillerEvaluationIndividuelle(evaluationId) {
-    let evaluations = db.getSync('evaluationsSauvegardees', []);
+    let evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
     const index = evaluations.findIndex(e => e.id === evaluationId);
 
     if (index === -1) {
@@ -4860,7 +4860,7 @@ function afficherIndicateurModeModification(evaluation) {
  * @param {string} evaluationId - ID de l'évaluation à supprimer
  */
 function supprimerEvaluation(evaluationId) {
-    let evaluations = db.getSync('evaluationsSauvegardees', []);
+    let evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
     const evaluation = evaluations.find(e => e.id === evaluationId);
 
     if (!evaluation) {
@@ -4994,7 +4994,7 @@ function chargerFiltresBanqueEvaluations() {
  * Filtre et affiche les évaluations selon les critères sélectionnés
  */
 function filtrerBanqueEvaluations() {
-    const evaluations = db.getSync('evaluationsSauvegardees', []);
+    const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
 
     // Récupérer les filtres dropdown
     const filtreGroupe = document.getElementById('filtreBanqueGroupe')?.value || '';
@@ -5303,7 +5303,7 @@ function retirerJeton(evaluationId, typeJeton) {
         return; // Annulation
     }
 
-    let evaluations = db.getSync('evaluationsSauvegardees', []);
+    let evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
     const index = evaluations.findIndex(e => e.id === evaluationId);
 
     if (index === -1) {
@@ -5351,7 +5351,7 @@ function supprimerEvaluationBanque(evaluationId) {
         return;
     }
 
-    let evaluations = db.getSync('evaluationsSauvegardees', []);
+    let evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
     const evaluation = evaluations.find(e => e.id === evaluationId);
 
     if (!evaluation) {
@@ -5389,7 +5389,7 @@ function supprimerEvaluationBanque(evaluationId) {
  * @param {boolean} verrouiller - true pour verrouiller, false pour déverrouiller
  */
 function verrouillerToutesEvaluations(verrouiller) {
-    let evaluations = db.getSync('evaluationsSauvegardees', []);
+    let evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
 
     if (evaluations.length === 0) {
         afficherNotificationErreur('Aucune évaluation', 'Aucune évaluation à modifier');
@@ -5797,7 +5797,7 @@ function appliquerJetonPersonnalise(jetonId) {
     });
 
     // Sauvegarder
-    db.setSync('evaluationsSauvegardees', evaluations);
+    db.setSync(cle('evaluationsSauvegardees'), evaluations);
 
     // Rafraîchir l'affichage
     afficherBadgesJetons();
@@ -5822,7 +5822,7 @@ function confirmerSuppressionEvaluationSidebar() {
 
     // Si la suppression réussit, réinitialiser le formulaire
     setTimeout(() => {
-        const evaluations = db.getSync('evaluationsSauvegardees', []);
+        const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
         const evalExiste = evaluations.find(e => e.id === evaluationId);
 
         if (!evalExiste) {

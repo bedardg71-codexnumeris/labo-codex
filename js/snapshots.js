@@ -405,7 +405,8 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null) 
             try {
                 console.log('⚡ Chargement évaluations depuis IndexedDB...');
                 // ✅ CORRECTION (7 déc 2025): Utiliser 'evaluationsSauvegardees' (clé correcte)
-                evaluationsCache = await db.get('evaluationsSauvegardees');
+                // 🆕 FIX (9 jan 2026): Namespacing par trimestre via cle()
+                evaluationsCache = await db.get(cle('evaluationsSauvegardees'));
                 console.log(`✓ ${evaluationsCache ? evaluationsCache.length : 0} évaluations chargées depuis IndexedDB`);
             } catch (e) {
                 console.warn('Impossible de charger depuis IndexedDB:', e.message);
@@ -729,7 +730,8 @@ async function reconstruireSnapshotsHistoriques() {
         // ⚡ Charger les évaluations depuis IndexedDB (évite QuotaExceededError)
         console.log('⚡ Chargement évaluations depuis IndexedDB...');
         // ✅ CORRECTION (7 déc 2025): Utiliser 'evaluationsSauvegardees' (clé correcte)
-        const evaluationsCache = await db.get('evaluationsSauvegardees');
+        // 🆕 FIX (9 jan 2026): Namespacing par trimestre via cle()
+        const evaluationsCache = await db.get(cle('evaluationsSauvegardees'));
         console.log(`✓ ${evaluationsCache ? evaluationsCache.length : 0} évaluations chargées`);
 
         // ✨ CORRECTION (7 déc 2025): Utiliser seancesCompletes au lieu du calendrier brut
