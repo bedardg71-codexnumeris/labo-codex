@@ -23,22 +23,25 @@
 - Variables CSS adoptees massivement (box-shadow 43%, border-radius 95%)
 
 ### Derniere tache completee (9 janvier)
+- **Compatibilite A2025** : Verifiee et nettoyee
+  - Donnees namespacees OK (30 etudiants, 305 evals, 941 presences)
+  - Donnees legacy orphelines supprimees (presences, portfoliosEleves)
+  - Flag migration mis a jour
+- **Donnees demo (groupe 9999)** : Bug fusion corrige
+  - Cause: Cache non synchronise avant appel cle()
+  - Fix: Ajout `db.syncToLocalStorageCache()` apres activation trimestre demo
 - **Protocole mise a jour beta** : Documentation + script automatisation
-  - `docs/operations/PROTOCOLE_MISE_A_JOUR_BETA.md`
-  - `scripts/update-version.sh` (build/minor/major/status)
 - **Alignement Trimestre/Primo** : Dropdown pratique dans groupe-cours
 - **Audit Design System v7 COMPLET** : 16 parties verifiees
-- **Syntheses intelligentes sidebars** : Cours, Groupe etudiants, Groupe-cours
-- Migration massive variables CSS (box-shadow 43%, border-radius 95%)
 
 ---
 
 ## PROCHAINE TACHE
 
 **Choisir parmi le backlog** :
-- [ ] Compatibilite donnees A2025
-- [ ] Donnees demo (groupe 9999)
 - [ ] Auditer module evaluation
+- [ ] Bouton supprimer groupe-cours
+- [ ] Affichage dropdown groupe-cours (nom lisible)
 
 ---
 
@@ -80,9 +83,9 @@
 - [x] **Audit design global** : 16 parties verifiees, toutes conformes
 
 ### Compatibilite et donnees
-- [ ] Assurer compatibilite donnees A2025 avec modifications au code
-- [ ] Tester l'application avec les donnees A2025
-- [ ] Assurer la fonctionnalite des donnees demo (groupe 9999)
+- [x] Assurer compatibilite donnees A2025 avec modifications au code
+- [x] Tester l'application avec les donnees A2025
+- [x] Assurer la fonctionnalite des donnees demo (groupe 9999)
 
 ---
 
@@ -90,6 +93,7 @@
 
 | Fichier | Modification |
 |---------|--------------|
+| `js/donnees-demo.js` | Fix fusion demo - syncToLocalStorageCache() avant cle() |
 | `styles.css` | Audit complet + corrections parties 15-16, syntheses sidebars, import droite |
 | `index.html` | Syntheses sidebars, reorganisation import etudiants |
 | `js/trimestre-v2.js` | Fonctions syntheses (cours, top programmes, score completude) |
@@ -119,11 +123,12 @@
 ## HISTORIQUE RECENT
 
 ### 9 janvier 2026
+- **Compatibilite A2025** : Verifiee, donnees legacy nettoyees
+- **Donnees demo (groupe 9999)** : Bug fusion corrige (sync cache avant cle())
 - **Protocole mise a jour beta** : Documentation + script automatisation
 - **Alignement Trimestre/Primo** : Dropdown pratique dans formulaire groupe-cours
 - **Audit Design System v7 COMPLET** : 16 parties verifiees, toutes conformes
 - Syntheses intelligentes sidebars (cours, groupe etudiants, groupe-cours)
-- Reorganisation Import etudiants (panneau droit, grille 2 colonnes)
 - Migration massive variables CSS (box-shadow 43%, border-radius 95%)
 
 ### 8 janvier 2026
@@ -172,4 +177,4 @@
 
 ---
 
-**Derniere mise a jour** : 9 janvier 2026, 13:04 (Toronto)
+**Derniere mise a jour** : 9 janvier 2026, 13:43 (Toronto)
