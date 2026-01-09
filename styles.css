@@ -4698,9 +4698,9 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 .portfolio-barre-progression {
-    background: #ddd;
+    background: var(--gris-leger);
     height: 10px;
-    border-radius: 5px;
+    border-radius: var(--radius-moyen);
     overflow: hidden;
 }
 
@@ -9397,10 +9397,10 @@ label:has(+ textarea:disabled) {
 
 /* En-tête du popup */
 .primo-popup-header {
-    background: linear-gradient(135deg, #1a5266, #2d7a8c);
+    background: linear-gradient(135deg, var(--bleu-fonce), var(--bleu-principal));
     color: white;
     padding: 15px 20px;
-    border-radius: 12px 12px 0 0;
+    border-radius: var(--radius-grand) var(--radius-grand) 0 0;
     font-size: 1.1rem;
     font-weight: 600;
     display: flex;
