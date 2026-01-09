@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 95.3
 
 **Date** : 9 janvier 2026
-**Version** : Beta 95.3 (build 0109-0951)
+**Version** : Beta 95.3 (build 0109-1304)
 **Statut** : Application fonctionnelle pour H2026
 
 ---
@@ -23,12 +23,12 @@
 - Variables CSS adoptees massivement (box-shadow 43%, border-radius 95%)
 
 ### Derniere tache completee (9 janvier)
-- **Alignement Trimestre/Primo** : Dropdown pratique ajoute au formulaire groupe-cours
-  - Trimestre et Primo creent maintenant des groupe-cours identiques
-  - Score de completude 5/5 possible dans les deux cas
-- **Audit Design System v7 COMPLET** : 16 parties verifiees, toutes conformes
+- **Protocole mise a jour beta** : Documentation + script automatisation
+  - `docs/operations/PROTOCOLE_MISE_A_JOUR_BETA.md`
+  - `scripts/update-version.sh` (build/minor/major/status)
+- **Alignement Trimestre/Primo** : Dropdown pratique dans groupe-cours
+- **Audit Design System v7 COMPLET** : 16 parties verifiees
 - **Syntheses intelligentes sidebars** : Cours, Groupe etudiants, Groupe-cours
-- **Reorganisation Import etudiants** : Section deplacee dans panneau droit
 - Migration massive variables CSS (box-shadow 43%, border-radius 95%)
 
 ---
@@ -38,7 +38,6 @@
 **Choisir parmi le backlog** :
 - [ ] Compatibilite donnees A2025
 - [ ] Donnees demo (groupe 9999)
-- [ ] Creer protocole de mise a jour des beta
 - [ ] Auditer module evaluation
 
 ---
@@ -70,7 +69,7 @@
 - [x] Optimiser utilisation de l'espace (limiter scrolling vertical)
 - [x] Revoir design page Trimestre (harmonisation complete)
 - [x] Compatibilite page Trimestre avec wizard Primo (dropdown pratique ajoute)
-- [ ] Creer protocole de mise a jour des beta
+- [x] Creer protocole de mise a jour des beta (docs/operations/ + scripts/)
 - [ ] Auditer module evaluation (meme pattern assemblage?)
 - [ ] Filtres par discipline/cours avec listes controlees (dropdowns standardises)
 - [ ] Import par trimestre filtrable par cours
@@ -120,13 +119,12 @@
 ## HISTORIQUE RECENT
 
 ### 9 janvier 2026
+- **Protocole mise a jour beta** : Documentation + script automatisation
 - **Alignement Trimestre/Primo** : Dropdown pratique dans formulaire groupe-cours
 - **Audit Design System v7 COMPLET** : 16 parties verifiees, toutes conformes
-- Corrections parties 15-16 (barre progression, primo popup header)
 - Syntheses intelligentes sidebars (cours, groupe etudiants, groupe-cours)
 - Reorganisation Import etudiants (panneau droit, grille 2 colonnes)
 - Migration massive variables CSS (box-shadow 43%, border-radius 95%)
-- Archivage Beta 95.2 dans Archives/Beta-95-2/
 
 ### 8 janvier 2026
 - Consolidation entites-ui.js → trimestre-v2.js
@@ -174,4 +172,4 @@
 
 ---
 
-**Derniere mise a jour** : 9 janvier 2026, 09:51 (Toronto)
+**Derniere mise a jour** : 9 janvier 2026, 13:04 (Toronto)
