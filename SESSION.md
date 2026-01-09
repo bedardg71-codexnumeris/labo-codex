@@ -1,7 +1,7 @@
-# SESSION ACTIVE - BETA 95.2
+# SESSION ACTIVE - BETA 95.3
 
-**Date** : 8 janvier 2026
-**Version** : Beta 95.2 (build 0108-1432)
+**Date** : 9 janvier 2026
+**Version** : Beta 95.3 (build 0109-1100)
 **Statut** : Application fonctionnelle pour H2026
 
 ---
@@ -20,35 +20,27 @@
 - Dropdown groupe-cours dans l'en-tete
 - Design harmonise (Design System v7)
 - Message de bienvenue et notes de version a jour
+- Variables CSS adoptees massivement (box-shadow 43%, border-radius 95%)
 
-### Derniere tache completee (8 janvier)
-- Import/export valide pour 5 modules (Productions, Grilles, Echelles, Cartouches, Pratiques)
-- Correction persistance groupe-cours au rechargement (restauration complete)
-- Correction persistance horaire selectionne (nouvelle cle horaireSelectionne)
-- Bouton suppression horaire (pas de banque necessaire, change chaque trimestre)
-- Simplification UI horaire (carte resume masquee quand formulaire visible)
-- Bouton "Voir le calendrier" dans sidebar groupe-cours
-- Connexion calendrier/presences avec groupe-cours actif (filtrage par coursId)
-- **Primo dynamique** : Detection config existante (enseignant, cours, trimestre)
-- **Correction bug Primo** : Groupe-cours maintenant cree automatiquement (dropdown fonctionnel)
-- **5 dropdowns groupe-cours** : Trimestre + Cours + Groupe + Horaire + Enseignant
-- **Multi-profils enseignants** : Dropdown selection, creation, suppression de profils
-- **Alignement SST Primo/Trimestre** : Memes sources de donnees (listeCours, enseignants)
-- **Fix discipline cours** : Sauvegarde et affichage correct par cours
-- **Fix affichage cours** : Formulaire s'affiche quand cours selectionne dans dropdown
+### Derniere tache completee (9 janvier)
+- **Migration Design System v7** : Variables CSS appliquees
+  - Box-shadow: 30 variables (43%) vs 40 hardcodes restants
+  - Border-radius: 214 variables (95%) vs 11 hardcodes restants
+- **Partie 1 audit terminee** : 4 pratiques de notation (SOM/STD/SPE/DEN)
+- **Partie 5 audit terminee** : Box-shadow migres vers variables
+- **Partie 6 audit terminee** : Border-radius migres vers variables
+- Archivage Beta 95.2 dans Archives/Beta-95-2/
 
 ---
 
 ## PROCHAINE TACHE
 
-**Backlog 8 janvier** : Valider import/export
-- [x] Productions (export + import CC)
-- [x] Grilles (export + import CC)
-- [x] Echelles (export + import CC)
-- [x] Cartouches (export + import CC)
-- [x] Pratiques (export + import CC)
-
-**Prochaine etape** : Optimiser utilisation de l'espace (limiter scrolling vertical)
+**Prochaine etape** : Continuer audit design (Parties 2-4, 7-16)
+- [ ] Partie 2 : Badges Tetris (7 familles)
+- [ ] Partie 3 : Badges materiel pedagogique
+- [ ] Partie 4 : Gradients
+- [ ] Partie 7 : Sidebars / Bibliotheques
+- [ ] Parties 8-16 : Boutons, Variables, Modals, Alertes, etc.
 
 ---
 
@@ -56,6 +48,7 @@
 
 | Decision | Date | Raison |
 |----------|------|--------|
+| Migration massive variables CSS | 9 jan | Maintenabilite + coherence |
 | Modularisation code reportee a Beta 96 | 8 jan | Priorite = stabilite pour H2026 |
 | Garder tout dans trimestre-v2.js | 8 jan | Structure donnees deja modulaire |
 | Design System v7 | 8 jan | Harmonisation border-radius 12px/6px |
@@ -68,6 +61,7 @@
 - [x] Valider import/export (Productions, Grilles, Echelles, Cartouches, Pratiques)
 - [x] Connexion calendrier avec groupe-cours
 - [x] Saisie des presences avec groupe-cours actif
+- [x] Migration variables CSS (box-shadow, border-radius)
 
 ### Plus tard
 - [x] **Bug trimestre par defaut** : Resolu - detection et correction auto si plusieurs trimestres actifs
@@ -85,7 +79,7 @@
 - [ ] UX modal Echelles : bouton Export avec sidebar, bouton Import avec section disponibles
 - [ ] Harmoniser largeur modaux bibliotheque (Cartouches plus etroit que Echelles)
 - [ ] Revoir nommage fichiers export : nom personnalise OU nomenclature standard (type-cours-discipline-date)
-- [ ] **Audit design global** : Terminer l'audit du design system sur toutes les pages
+- [ ] **Audit design global** : Continuer parties 2-16 de l'audit V5
 
 ### Compatibilite et donnees
 - [ ] Assurer compatibilite donnees A2025 avec modifications au code
@@ -94,19 +88,14 @@
 
 ---
 
-## FICHIERS CLES MODIFIES (8 janvier)
+## FICHIERS CLES MODIFIES (9 janvier)
 
 | Fichier | Modification |
 |---------|--------------|
-| `js/trimestre-v2.js` | Consolidation entites-ui.js, fix init db-ready |
-| `js/saisie-presences.js` | Filtrage presences par coursId |
-| `js/primo-modal.js` | Correction bug groupe-cours (creerGroupeCoursDepuisPrimo) |
-| `js/primo-questions.js` | Primo dynamique (detection config existante) |
-| `styles.css` | Nouvelles classes .bloc-section (+160 lignes) |
-| `index.html` | Message bienvenue, BUILD_ID, classes CSS |
-| `DESIGN_SYSTEM.html` | Mise a jour v7, variables CSS |
-| `Documentation/Changelogs/BETA_95_CHANGELOG.md` | NOUVEAU |
-| `docs/ROADMAP_H2026.md` | Backlog mis a jour |
+| `styles.css` | Migration massive box-shadow et border-radius vers variables |
+| `index.html` | Mise a jour version 95.3, BUILD_ID 0109-1100 |
+| `SESSION.md` | Mise a jour Beta 95.3 |
+| `Archives/Beta-95-2/` | Archivage Beta 95.2 |
 
 ---
 
@@ -118,8 +107,8 @@
 - **Priorite testeurs** : Les retours utilisateurs passent AVANT le backlog
 
 ### Design System v7
-- Conteneurs : `border-radius: 12px` ou `var(--radius-grand)`
-- Petits elements : `border-radius: 6px` ou `var(--radius-moyen)`
+- Conteneurs : `border-radius: var(--radius-grand)` (12px)
+- Petits elements : `border-radius: var(--radius-moyen)` (6px)
 - Box-shadow : 5 niveaux (subtil, normal, prononce, fort, inset)
 
 ### Zones protegees
@@ -130,6 +119,15 @@
 ---
 
 ## HISTORIQUE RECENT
+
+### 9 janvier 2026
+- **Beta 95.3** : Migration massive variables CSS
+- Archivage Beta 95.2 dans Archives/Beta-95-2/
+- Box-shadow: 30 variables (43% adoption)
+- Border-radius: 214 variables (95% adoption)
+- Partie 1 audit: 4 pratiques (SOM/STD/SPE/DEN) - deja complete
+- Partie 5 audit: Box-shadow migres
+- Partie 6 audit: Border-radius migres
 
 ### 8 janvier 2026
 - Consolidation entites-ui.js → trimestre-v2.js
@@ -145,7 +143,7 @@
 - **Multi-profils enseignants** : Liste unifiee `enseignants` avec dropdown, boutons nouveau/supprimer
 - Migration automatique profilEnseignant → enseignants au chargement
 - **Alignement SST Primo/Trimestre** : obtenirCoursExistants() utilise listeCours + filtrage trimestre
-- **Fix discipline cours** : sauvegarderCoursV2() + remplirFormCoursV2() corrigés
+- **Fix discipline cours** : sauvegarderCoursV2() + remplirFormCoursV2() corriges
 - **Fix affichage cours** : chargerDropdownCoursV2() appelle changerCoursSelectionneV2()
 
 ### 6-7 janvier 2026
@@ -177,4 +175,4 @@
 
 ---
 
-**Derniere mise a jour** : 8 janvier 2026, 18:30 (Toronto)
+**Derniere mise a jour** : 9 janvier 2026, 11:00 (Toronto)
