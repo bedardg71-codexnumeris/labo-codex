@@ -292,10 +292,28 @@ async function dechargerDonneesDemo() {
             // Désactiver le trimestre demo
             trimestres[indexDemo].actif = false;
 
-            // Réactiver le premier trimestre non-demo (ex: a2025)
+            // 🆕 FIX (9 jan 2026): Réactiver le trimestre approprié selon la date actuelle
+            // (pas toujours le premier, qui pourrait être A2025 au lieu de H2026)
             const autresTrimestres = trimestres.filter(t => t.id !== 'demo');
             if (autresTrimestres.length > 0) {
-                const trimestreAReactiver = autresTrimestres[0];
+                const maintenant = new Date();
+                const moisActuel = maintenant.getMonth() + 1;
+                const anneeActuelle = maintenant.getFullYear();
+                const sessionAttendue = (moisActuel >= 1 && moisActuel <= 6) ? 'H' : 'A';
+                const idAttendu = `${sessionAttendue.toLowerCase()}${anneeActuelle}`;
+
+                // Chercher le trimestre correspondant à la date actuelle
+                let trimestreAReactiver = autresTrimestres.find(t => t.id === idAttendu);
+
+                // Si pas trouvé, prendre le plus récent
+                if (!trimestreAReactiver) {
+                    const tries = autresTrimestres.sort((a, b) => {
+                        if (b.annee !== a.annee) return b.annee - a.annee;
+                        return (b.session === 'H' ? 1 : 0) - (a.session === 'H' ? 1 : 0);
+                    });
+                    trimestreAReactiver = tries[0];
+                }
+
                 const indexAReactiver = trimestres.findIndex(t => t.id === trimestreAReactiver.id);
                 if (indexAReactiver >= 0) {
                     trimestres[indexAReactiver].actif = true;

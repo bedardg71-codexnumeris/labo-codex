@@ -68,7 +68,58 @@
      */
     function obtenirTrimestreActif() {
         const trimestres = obtenirTrimestres();
-        return trimestres.find(t => t.actif === true) || null;
+        const actifs = trimestres.filter(t => t.actif === true);
+
+        // 🆕 FIX (9 jan 2026): Si plusieurs trimestres sont actifs, corriger
+        if (actifs.length > 1) {
+            console.warn(`[Trimestres] ⚠️ ${actifs.length} trimestres actifs détectés, correction...`);
+            corrigerTrimestresMultiplesActifs(trimestres);
+            // Relire après correction
+            return trimestres.find(t => t.actif === true) || null;
+        }
+
+        return actifs[0] || null;
+    }
+
+    /**
+     * Corrige les données quand plusieurs trimestres ont actif=true
+     * Garde le trimestre le plus approprié selon la date actuelle
+     * 🆕 FIX (9 jan 2026)
+     */
+    function corrigerTrimestresMultiplesActifs(trimestres) {
+        const maintenant = new Date();
+        const moisActuel = maintenant.getMonth() + 1; // 1-12
+        const anneeActuelle = maintenant.getFullYear();
+
+        // Déterminer quel trimestre devrait être actif
+        // Hiver (H) = janvier-juin, Automne (A) = août-décembre
+        const sessionAttendue = (moisActuel >= 1 && moisActuel <= 6) ? 'H' : 'A';
+        const idAttendu = `${sessionAttendue.toLowerCase()}${anneeActuelle}`;
+
+        console.log(`[Trimestres] Trimestre attendu selon la date: ${idAttendu}`);
+
+        // Chercher ce trimestre
+        let trimestreAGarder = trimestres.find(t => t.id === idAttendu);
+
+        // Si pas trouvé, prendre le plus récent (par année puis session H > A)
+        if (!trimestreAGarder) {
+            const tries = trimestres
+                .filter(t => t.id !== 'demo')
+                .sort((a, b) => {
+                    // Trier par année décroissante, puis H avant A
+                    if (b.annee !== a.annee) return b.annee - a.annee;
+                    return (b.session === 'H' ? 1 : 0) - (a.session === 'H' ? 1 : 0);
+                });
+            trimestreAGarder = tries[0];
+        }
+
+        if (trimestreAGarder) {
+            // Désactiver tous, activer le bon
+            trimestres.forEach(t => t.actif = false);
+            trimestreAGarder.actif = true;
+            db.setSync('trimestres', trimestres);
+            console.log(`[Trimestres] ✅ Trimestre actif corrigé: ${trimestreAGarder.nom} (${trimestreAGarder.id})`);
+        }
     }
 
     /**
