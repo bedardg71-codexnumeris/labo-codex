@@ -3641,6 +3641,19 @@ function populerDropdownsAssemblageV2() {
         });
         selectEnseignant.innerHTML = html;
     }
+
+    // Beta 95.3: Dropdown Pratiques de notation (alignement Primo)
+    const selectPratique = document.getElementById('v2-gc-pratique');
+    if (selectPratique) {
+        const pratiques = db.getSync('pratiquesNotation', []);
+
+        let html = '<option value="">— Optionnel —</option>';
+        pratiques.forEach(p => {
+            const nom = p.nom || p.id || 'Sans nom';
+            html += `<option value="${p.id}">${nom}</option>`;
+        });
+        selectPratique.innerHTML = html;
+    }
 }
 
 /**
@@ -3917,11 +3930,13 @@ function nouveauGroupeCoursV2() {
     const selectGroupe = document.getElementById('v2-gc-groupe');
     const horaireHidden = document.getElementById('v2-gc-horaire');
     const horaireNom = document.getElementById('v2-gc-horaireNom');
+    const selectPratique = document.getElementById('v2-gc-pratique');  // Beta 95.3
 
     if (selectCours) selectCours.value = '';
     if (selectGroupe) selectGroupe.value = '';
     if (horaireHidden) horaireHidden.value = '';
     if (horaireNom) horaireNom.textContent = '— Sélectionnez un groupe —';
+    if (selectPratique) selectPratique.value = '';  // Beta 95.3
 
     // Mettre à jour le titre et bouton
     const titre = document.getElementById('v2-titreFormGroupeCours');
@@ -3957,12 +3972,13 @@ function editerGroupeCoursV2(gc) {
     // Rafraîchir les dropdowns
     populerDropdownsAssemblageV2();
 
-    // Remplir les 5 sélections (Beta 95.2)
+    // Remplir les 6 sélections (Beta 95.3: +pratique)
     const selectTrimestre = document.getElementById('v2-gc-trimestre');
     const selectCours = document.getElementById('v2-gc-cours');
     const selectGroupe = document.getElementById('v2-gc-groupe');
     const selectHoraire = document.getElementById('v2-gc-horaire');
     const selectEnseignant = document.getElementById('v2-gc-enseignant');
+    const selectPratique = document.getElementById('v2-gc-pratique');  // Beta 95.3
 
     // Trimestre: utiliser celui du groupe-cours ou le trimestre actif par défaut
     if (selectTrimestre) {
@@ -3972,6 +3988,7 @@ function editerGroupeCoursV2(gc) {
     if (selectGroupe) selectGroupe.value = gc.groupeNum || gc.groupe || '';
     if (selectHoraire) selectHoraire.value = gc.horaireId || '';
     if (selectEnseignant) selectEnseignant.value = gc.enseignantId || '';
+    if (selectPratique) selectPratique.value = gc.pratiqueId || '';  // Beta 95.3
 
     // Mettre à jour le titre et bouton
     const titre = document.getElementById('v2-titreFormGroupeCours');
@@ -4013,6 +4030,7 @@ function sauvegarderGroupeCoursV2() {
     const groupeNum = document.getElementById('v2-gc-groupe')?.value;
     const horaireId = document.getElementById('v2-gc-horaire')?.value;
     const enseignantId = document.getElementById('v2-gc-enseignant')?.value;
+    const pratiqueId = document.getElementById('v2-gc-pratique')?.value || null;  // Beta 95.3
 
     // Validation (5 éléments requis)
     if (!trimestreId) {
@@ -4054,6 +4072,7 @@ function sauvegarderGroupeCoursV2() {
                 groupeNum,
                 horaireId,
                 enseignantId,
+                pratiqueId,   // Beta 95.3
                 dateModification: new Date().toISOString()
             };
         }
@@ -4068,6 +4087,7 @@ function sauvegarderGroupeCoursV2() {
             groupeNum,
             horaireId,
             enseignantId,
+            pratiqueId,   // Beta 95.3
             dateCreation: new Date().toISOString(),
             actif: true
         };
