@@ -362,12 +362,29 @@ function parseAndPreview(content) {
             if (!line.trim()) return;
 
             // Split avec le séparateur détecté
-            let parts = line.split(separator).map(p => p.trim());
+            let parts = line.split(separator).map(p => {
+                // Nettoyer format Excel ="valeur" (préserve zéros en tête)
+                let val = p.trim();
+                if (val.startsWith('="') && val.endsWith('"')) {
+                    val = val.slice(2, -1);
+                } else if (val.startsWith('"') && val.endsWith('"')) {
+                    val = val.slice(1, -1);
+                }
+                return val.trim();
+            });
 
             // TOLÉRANCE : Si moins de 4 colonnes, essayer d'autres séparateurs
             if (parts.length < 4) {
                 for (const altSep of ['\t', ';', ',']) {
-                    const altParts = line.split(altSep).map(p => p.trim());
+                    const altParts = line.split(altSep).map(p => {
+                        let val = p.trim();
+                        if (val.startsWith('="') && val.endsWith('"')) {
+                            val = val.slice(2, -1);
+                        } else if (val.startsWith('"') && val.endsWith('"')) {
+                            val = val.slice(1, -1);
+                        }
+                        return val.trim();
+                    });
                     if (altParts.length >= 4) {
                         parts = altParts;
                         break;
