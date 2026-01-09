@@ -1550,11 +1550,15 @@ async function afficherBibliothequeProductions() {
                         Importer depuis un autre trimestre
                     </h4>
                     <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                        <select id="selectTrimestreImport" class="controle-form" style="flex: 1; min-width: 200px;">
+                        <select id="selectTrimestreImport" class="controle-form" style="flex: 1; min-width: 200px;" onchange="mettreAJourFiltreCoursTrimestreProductions()">
                             <option value="">-- Choisir un trimestre --</option>
                             ${trimestresDisponibles.map(t =>
                                 `<option value="${t.cle}">${t.nom} (${t.nombre} production${t.nombre > 1 ? 's' : ''})</option>`
                             ).join('')}
+                        </select>
+                        <!-- 🆕 Beta 95.3 : Filtre par cours -->
+                        <select id="selectCoursImportProductions" class="controle-form" style="flex: 1; min-width: 150px; display: none;">
+                            <option value="">Tous les cours</option>
                         </select>
                         <button onclick="afficherProductionsTrimestreModal()" class="btn btn-secondaire btn-compact">
                             Voir les productions
@@ -1773,10 +1777,59 @@ async function ajouterMesProductionsALaBibliotheque() {
 }
 
 /**
+ * 🆕 Beta 95.3 : Mettre à jour le dropdown filtre cours quand un trimestre est sélectionné
+ */
+function mettreAJourFiltreCoursTrimestreProductions() {
+    const selectTrimestre = document.getElementById('selectTrimestreImport');
+    const selectCours = document.getElementById('selectCoursImportProductions');
+    const preview = document.getElementById('previewProductionsTrimestre');
+
+    if (!selectTrimestre || !selectCours) return;
+
+    const cleSelectionnee = selectTrimestre.value;
+
+    // Réinitialiser et masquer si aucun trimestre sélectionné
+    if (!cleSelectionnee) {
+        selectCours.innerHTML = '<option value="">Tous les cours</option>';
+        selectCours.style.display = 'none';
+        if (preview) preview.style.display = 'none';
+        return;
+    }
+
+    // Récupérer les productions du trimestre
+    const productions = obtenirProductionsTrimestre(cleSelectionnee);
+
+    // Extraire les cours uniques
+    const coursMap = new Map();
+    productions.forEach(prod => {
+        if (prod.coursId) {
+            // Essayer de récupérer le nom du cours
+            const nomCours = prod.sigleCours || prod.coursNom || prod.coursId;
+            coursMap.set(prod.coursId, nomCours);
+        }
+    });
+
+    // Peupler le dropdown cours
+    let optionsHTML = '<option value="">Tous les cours</option>';
+    coursMap.forEach((nom, id) => {
+        optionsHTML += `<option value="${id}">${nom}</option>`;
+    });
+    selectCours.innerHTML = optionsHTML;
+
+    // Afficher le dropdown seulement s'il y a des cours
+    selectCours.style.display = coursMap.size > 0 ? 'inline-block' : 'none';
+
+    // Masquer le preview
+    if (preview) preview.style.display = 'none';
+}
+
+/**
  * Affiche un aperçu des productions d'un trimestre dans la modal
+ * 🆕 Beta 95.3 : Avec support du filtre par cours
  */
 function afficherProductionsTrimestreModal() {
     const select = document.getElementById('selectTrimestreImport');
+    const selectCours = document.getElementById('selectCoursImportProductions');
     const preview = document.getElementById('previewProductionsTrimestre');
 
     if (!select || !preview) return;
@@ -1787,7 +1840,13 @@ function afficherProductionsTrimestreModal() {
         return;
     }
 
-    const productions = obtenirProductionsTrimestre(cleSelectionnee);
+    let productions = obtenirProductionsTrimestre(cleSelectionnee);
+
+    // 🆕 Beta 95.3 : Filtrer par cours si sélectionné
+    const coursFiltre = selectCours?.value || '';
+    if (coursFiltre) {
+        productions = productions.filter(p => p.coursId === coursFiltre);
+    }
 
     if (productions.length === 0) {
         preview.innerHTML = '<p style="color: #999; font-style: italic;">Aucune production trouvée.</p>';
@@ -1797,12 +1856,13 @@ function afficherProductionsTrimestreModal() {
 
     let html = '<div style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; padding: 10px;">';
     productions.forEach(prod => {
+        const coursLabel = prod.sigleCours || prod.coursNom || '';
         html += `
             <div style="padding: 8px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
                 <div>
                     <strong>${prod.titre || 'Sans titre'}</strong>
                     ${prod.description ? ` - ${prod.description}` : ''}
-                    <br><small style="color: #666;">Type: ${prod.type || 'N/A'} • Pondération: ${prod.ponderation || 0}%</small>
+                    <br><small style="color: #666;">Type: ${prod.type || 'N/A'} • Pondération: ${prod.ponderation || 0}%${coursLabel ? ' • ' + coursLabel : ''}</small>
                 </div>
                 <button onclick="importerUneProductionTrimestre('${cleSelectionnee}', '${prod.id}')" class="btn btn-confirmer btn-tres-compact">
                     Importer
@@ -1818,9 +1878,12 @@ function afficherProductionsTrimestreModal() {
 
 /**
  * Importe toutes les productions d'un trimestre dans la bibliothèque
+ * 🆕 Beta 95.3 : Avec support du filtre par cours
  */
 async function importerToutTrimestreModal() {
     const select = document.getElementById('selectTrimestreImport');
+    const selectCours = document.getElementById('selectCoursImportProductions');
+
     if (!select || !select.value) {
         alert('Veuillez d\'abord sélectionner un trimestre.');
         return;
@@ -1830,15 +1893,22 @@ async function importerToutTrimestreModal() {
     const codeTrimestre = cleSelectionnee.replace('_productions', '');
     const nomTrimestre = formaterNomTrimestre(codeTrimestre);
 
-    const productions = obtenirProductionsTrimestre(cleSelectionnee);
+    let productions = obtenirProductionsTrimestre(cleSelectionnee);
+
+    // 🆕 Beta 95.3 : Filtrer par cours si sélectionné
+    const coursFiltre = selectCours?.value || '';
+    if (coursFiltre) {
+        productions = productions.filter(p => p.coursId === coursFiltre);
+    }
 
     if (productions.length === 0) {
-        alert('Aucune production à importer dans ce trimestre.');
+        alert('Aucune production à importer' + (coursFiltre ? ' pour ce cours.' : ' dans ce trimestre.'));
         return;
     }
 
+    const coursLabel = coursFiltre ? ` du cours sélectionné` : '';
     const confirmation = confirm(
-        `Voulez-vous importer les ${productions.length} production(s) de ${nomTrimestre} dans la bibliothèque partagée ?`
+        `Voulez-vous importer les ${productions.length} production(s)${coursLabel} de ${nomTrimestre} dans la bibliothèque partagée ?`
     );
 
     if (!confirmation) return;
@@ -2569,6 +2639,7 @@ window.ajouterMesProductionsALaBibliotheque = ajouterMesProductionsALaBibliotheq
 window.afficherProductionsTrimestreModal = afficherProductionsTrimestreModal;
 window.importerToutTrimestreModal = importerToutTrimestreModal;
 window.importerUneProductionTrimestre = importerUneProductionTrimestre;
+window.mettreAJourFiltreCoursTrimestreProductions = mettreAJourFiltreCoursTrimestreProductions; // 🆕 Beta 95.3
 
 /* ===============================
    📌 NOTES D'UTILISATION

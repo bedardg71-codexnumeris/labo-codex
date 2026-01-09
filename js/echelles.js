@@ -2458,7 +2458,7 @@ async function afficherBibliothequeEchelles() {
                     </div>
 
                     <!-- Boutons Import/Export après la Section 1 -->
-                    <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px;">
+                    <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
                         <button onclick="exporterEchelles()" class="btn btn-secondaire">
                             Exporter toutes mes échelles
                         </button>
@@ -2468,7 +2468,41 @@ async function afficherBibliothequeEchelles() {
                         <input type="file" id="fichier-import-echelles-modal" accept=".json" style="display: none;" onchange="importerEchelles(event)">
                     </div>
                 </div>
+    `;
 
+    // 🆕 Beta 95.3 : Section "Importer depuis un autre trimestre"
+    const trimestresDisponibles = typeof listerTrimestresAvecEchelles === 'function'
+        ? listerTrimestresAvecEchelles()
+        : [];
+
+    if (trimestresDisponibles.length > 0) {
+        html += `
+                <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 6px; border: 1px solid #e0e0e0;">
+                    <h4 style="color: var(--bleu-principal); font-size: 1rem; margin: 0 0 10px 0;">
+                        Importer depuis un autre trimestre
+                    </h4>
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <select id="selectTrimestreImportEchelles" class="controle-form" style="flex: 1; min-width: 200px;">
+                            <option value="">-- Choisir un trimestre --</option>
+                            ${trimestresDisponibles.map(t =>
+                                `<option value="${t.cle}">${t.nom} (${t.nombre} échelle${t.nombre > 1 ? 's' : ''})</option>`
+                            ).join('')}
+                        </select>
+                        <button onclick="afficherEchellesTrimestreModal()" class="btn btn-secondaire btn-compact">
+                            Voir les échelles
+                        </button>
+                        <button onclick="importerToutEchellesTrimestreModal()" class="btn btn-principal btn-compact">
+                            Tout importer
+                        </button>
+                    </div>
+                    <div id="previewEchellesTrimestre" style="margin-top: 10px; display: none;">
+                        <!-- Preview des échelles du trimestre sélectionné -->
+                    </div>
+                </div>
+        `;
+    }
+
+    html += `
                 <!-- Section 2 : Échelles disponibles -->
                 <h3 style="color: #3498db; font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
                     Échelles disponibles à ajouter à la barre latérale
@@ -2821,6 +2855,130 @@ function fermerModalBibliothequeEchelles() {
     const modal = document.getElementById('modalBibliothequeEchelles');
     if (modal) {
         modal.remove();
+    }
+}
+
+/**
+ * 🆕 Beta 95.3 : Afficher la prévisualisation des échelles d'un trimestre
+ */
+function afficherEchellesTrimestreModal() {
+    const select = document.getElementById('selectTrimestreImportEchelles');
+    const preview = document.getElementById('previewEchellesTrimestre');
+
+    if (!select || !preview) return;
+
+    const cleSelectionnee = select.value;
+    if (!cleSelectionnee) {
+        preview.style.display = 'none';
+        return;
+    }
+
+    const echelles = typeof obtenirEchellesTrimestre === 'function'
+        ? obtenirEchellesTrimestre(cleSelectionnee)
+        : [];
+
+    if (echelles.length === 0) {
+        preview.innerHTML = '<p style="color: #999; font-style: italic;">Aucune échelle trouvée.</p>';
+        preview.style.display = 'block';
+        return;
+    }
+
+    let html = '<div style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; padding: 10px;">';
+    echelles.forEach(echelle => {
+        const nbNiveaux = echelle.niveaux?.length || 0;
+        html += `
+            <div style="padding: 8px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <strong>${echelle.nom || 'Sans titre'}</strong>
+                    ${echelle.discipline ? ` - ${echelle.discipline}` : ''}
+                    <br><small style="color: #666;">${nbNiveaux} niveau(x)${echelle.auteurOriginal ? ' • ' + echelle.auteurOriginal : ''}</small>
+                </div>
+                <button onclick="importerUneEchelleTrimestre('${cleSelectionnee}', '${echelle.id}')" class="btn btn-confirmer btn-tres-compact">
+                    Importer
+                </button>
+            </div>
+        `;
+    });
+    html += '</div>';
+
+    preview.innerHTML = html;
+    preview.style.display = 'block';
+}
+
+/**
+ * 🆕 Beta 95.3 : Importer toutes les échelles d'un trimestre
+ */
+async function importerToutEchellesTrimestreModal() {
+    const select = document.getElementById('selectTrimestreImportEchelles');
+    if (!select || !select.value) {
+        alert('Veuillez d\'abord sélectionner un trimestre.');
+        return;
+    }
+
+    const cleSelectionnee = select.value;
+    const codeTrimestre = cleSelectionnee.replace('_echelles', '');
+    const nomTrimestre = typeof formaterNomTrimestreEchelles === 'function'
+        ? formaterNomTrimestreEchelles(codeTrimestre)
+        : codeTrimestre;
+
+    const echelles = typeof obtenirEchellesTrimestre === 'function'
+        ? obtenirEchellesTrimestre(cleSelectionnee)
+        : [];
+
+    if (echelles.length === 0) {
+        alert('Aucune échelle à importer dans ce trimestre.');
+        return;
+    }
+
+    const confirmation = confirm(
+        `Voulez-vous importer les ${echelles.length} échelle(s) de ${nomTrimestre} dans la bibliothèque partagée ?`
+    );
+
+    if (!confirmation) return;
+
+    // Importer chaque échelle
+    let ajoutees = 0;
+    let existantes = 0;
+
+    for (const echelle of echelles) {
+        const resultat = await ajouterEchelleALaBibliotheque(echelle);
+        if (resultat) {
+            ajoutees++;
+        } else {
+            existantes++;
+        }
+    }
+
+    // Rafraîchir l'affichage
+    fermerModalBibliothequeEchelles();
+    await afficherBibliothequeEchelles();
+
+    alert(`✅ Import terminé !\n\n${ajoutees} échelle(s) ajoutée(s).\n${existantes} déjà présente(s).`);
+}
+
+/**
+ * 🆕 Beta 95.3 : Importer une seule échelle d'un trimestre
+ */
+async function importerUneEchelleTrimestre(cleTrimestre, echelleId) {
+    const echelles = typeof obtenirEchellesTrimestre === 'function'
+        ? obtenirEchellesTrimestre(cleTrimestre)
+        : [];
+    const echelle = echelles.find(e => e.id === echelleId);
+
+    if (!echelle) {
+        alert('Échelle introuvable.');
+        return;
+    }
+
+    const resultat = await ajouterEchelleALaBibliotheque(echelle);
+
+    if (resultat) {
+        // Rafraîchir l'affichage
+        fermerModalBibliothequeEchelles();
+        await afficherBibliothequeEchelles();
+        alert(`✅ "${echelle.nom || 'Échelle'}" ajoutée à la bibliothèque !`);
+    } else {
+        alert('Cette échelle est déjà dans la bibliothèque.');
     }
 }
 
@@ -3817,3 +3975,8 @@ window.ajouterEchellesABibliotheque = ajouterEchellesABibliotheque;
 window.filtrerEchellesParDiscipline = filtrerEchellesParDiscipline;
 window.filtrerEchellesBibliotheque = filtrerEchellesBibliotheque;
 window.fermerModalBibliothequeEchelles = fermerModalBibliothequeEchelles;
+
+// 🆕 Beta 95.3 : Exports fonctions import depuis trimestre
+window.afficherEchellesTrimestreModal = afficherEchellesTrimestreModal;
+window.importerToutEchellesTrimestreModal = importerToutEchellesTrimestreModal;
+window.importerUneEchelleTrimestre = importerUneEchelleTrimestre;
