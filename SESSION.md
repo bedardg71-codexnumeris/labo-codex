@@ -23,6 +23,12 @@
 - Variables CSS adoptees massivement (box-shadow 43%, border-radius 95%)
 
 ### Derniere tache completee (9 janvier)
+- **Section AIDE mise a jour** : Documentation Beta 95.3
+  - Carte "Etapes de configuration" : Workflow Beta 95 unifie
+  - Carte "Primo" : Integration Section Trimestre + detection config existante
+  - Carte "Partage et communs" : Import trimestre precedent + nommage exports
+  - Carte "Section Trimestre" : 6 accordeons + syntheses intelligentes
+  - Carte "Groupe-cours" : 5 composantes + bibliotheque
 - **Audit module evaluation** : 3/3 problemes critiques resolus
   - `docs/modules/AUDIT_EVALUATION.md` : 16 548 lignes analysees
   - Fix #1: Namespacing `evaluationsSauvegardees` (34 occurrences, 7 fichiers)
@@ -104,6 +110,7 @@
 | `js/snapshots.js` | Namespacing evaluationsSauvegardees via cle() |
 | `js/donnees-demo.js` | Fix fusion demo - syncToLocalStorageCache() avant cle() |
 | `docs/modules/AUDIT_EVALUATION.md` | Documentation audit module evaluation |
+| `index.html` | Section AIDE mise a jour (Beta 95.3 workflow + import trimestre) |
 
 ---
 
@@ -129,6 +136,7 @@
 ## HISTORIQUE RECENT
 
 ### 9 janvier 2026
+- **Section AIDE mise a jour** : Documentation Beta 95.3 (workflow, Primo, import trimestre)
 - **Modal bibliotheque groupe-cours** : Vue liste, Activer, Supprimer, bouton 📚
 - **Syntheses intelligentes sidebars** : 5 fonctions (Cours, Enseignant, Groupe, Horaire, Groupe-cours)
 - **Libelle dropdown groupe-cours** : "Groupe 00001" au lieu de "??? gr.00001" (5 endroits)
@@ -192,4 +200,4 @@
 
 ---
 
-**Derniere mise a jour** : 9 janvier 2026, 15:43 (Toronto)
+**Derniere mise a jour** : 9 janvier 2026, 15:50 (Toronto)

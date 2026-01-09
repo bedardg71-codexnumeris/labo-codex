@@ -10547,8 +10547,20 @@
                                 <li><strong>Grilles d'évaluation</strong> : Critères et pondérations</li>
                                 <li><strong>Échelles de performance</strong> : Niveaux et descriptions</li>
                                 <li><strong>Cartouches de rétroaction</strong> : Commentaires prédéfinis par critère</li>
+                                <li><strong>Productions</strong> : Définitions d'artefacts avec échéances</li>
                                 <li><strong>Configurations de pratiques</strong> : Paramètres complets</li>
                             </ul>
+
+                            <div class="alerte alerte-information">
+                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Import depuis un trimestre précédent (Beta 95.3)</h4>
+                                <p>Réutilisez votre matériel d'un trimestre à l'autre sans tout recréer :</p>
+                                <ul class="mt-5">
+                                    <li><strong>Échelles</strong> : Section "Importer depuis un autre trimestre" dans la bibliothèque</li>
+                                    <li><strong>Grilles</strong> : Dropdown de sélection du trimestre source</li>
+                                    <li><strong>Productions</strong> : Filtre par cours pour importer sélectivement</li>
+                                </ul>
+                                <p class="mt-10 text-muted" style="font-size: 0.9rem"><em>L'import crée des copies indépendantes - les originaux ne sont pas affectés.</em></p>
+                            </div>
 
                             <div style="text-align: center; margin: 15px 0;">
                                 <img src="img/aide/Bibliothèques - partage.png" alt="Interface de partage des bibliothèques" style="max-width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
@@ -10564,6 +10576,12 @@
                             <div class="alerte alerte-succes">
                                 <p><strong>Protection des données</strong></p>
                                 <p>Les exports de matériel pédagogique ne contiennent <strong>jamais</strong> de données confidentielles (noms d'étudiants, notes, présences). Seul le matériel réutilisable est partagé.</p>
+                            </div>
+
+                            <div class="alerte alerte-info">
+                                <p><strong>Nommage des fichiers export (Beta 95.3)</strong></p>
+                                <p>Les fichiers exportés suivent un format standardisé : <code>type-nom-cours-discipline-date.json</code></p>
+                                <p class="mt-5 text-muted" style="font-size: 0.9rem">Ex: <em>echelle-IDME-601101-litterature-2026-01-09.json</em></p>
                             </div>
                         </div>
                     </div>
@@ -10584,17 +10602,28 @@
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                            <p>Suivez ces étapes dans l'ordre pour configurer correctement le système :</p>
-                            <ol class="lh-relaxed">
-                                <li><strong>Cours</strong> : Informations de base (code, titre, pondération)</li>
-                                <li><strong>Trimestre</strong> : Dates et calendrier complet (SOURCE)</li>
-                                <li><strong>Groupe</strong> : Liste des étudiants</li>
-                                <li><strong>Horaire</strong> : Séances hebdomadaires ✅</li>
-                                <li><strong>Pratique de notation</strong> : Choisir ton approche (PAN-Standards, Sommative, etc.)</li>
-                            </ol>
+                            <p>La configuration se fait principalement dans <strong>Réglages → Trimestre</strong> qui centralise toutes les étapes :</p>
+
+                            <div class="carte-gradient-bleu">
+                                <p class="titre-11-bold-bleu-mb15">Workflow Beta 95 (recommandé) :</p>
+                                <ol class="lh-2">
+                                    <li><strong>Trimestre</strong> : Définir les dates (génère le calendrier)</li>
+                                    <li><strong>Cours</strong> : Créer ou sélectionner le cours</li>
+                                    <li><strong>Enseignant</strong> : Créer votre profil</li>
+                                    <li><strong>Groupe</strong> : Importer la liste d'étudiants (CSV/TXT)</li>
+                                    <li><strong>Horaire</strong> : Définir les séances hebdomadaires</li>
+                                    <li><strong>Groupe-cours</strong> : Assembler les 5 éléments + pratique de notation</li>
+                                </ol>
+                            </div>
+
+                            <p><strong>Deux méthodes possibles :</strong></p>
+                            <ul>
+                                <li><strong>Méthode manuelle</strong> : Section Trimestre avec 6 accordéons (configuration détaillée)</li>
+                                <li><strong>Méthode assistée</strong> : Primo guide conversationnellement (plus rapide)</li>
+                            </ul>
 
                             <div class="alerte alerte-succes">
-                                <strong>💡 Astuce :</strong> L'assistant Primo peut te guider dans ces étapes de manière conversationnelle. Voir la carte suivante.
+                                <strong>💡 Astuce :</strong> L'assistant Primo peut te guider dans ces étapes de manière conversationnelle. Voir la carte suivante pour les détails.
                             </div>
                         </div>
                     </div>
@@ -10630,11 +10659,13 @@
                                 <p>Questions conversationnelles pour configurer :</p>
                                 <ul class="mt-5">
                                     <li>Informations du cours (code, titre, groupe)</li>
-                                    <li>Dates du trimestre</li>
+                                    <li>Dates du trimestre (détecte si déjà configuré)</li>
+                                    <li>Profil enseignant (détecte si existant)</li>
                                     <li>Horaire hebdomadaire</li>
-                                    <li>Import de la liste d'étudiants</li>
+                                    <li>Import de la liste d'étudiants (CSV/TXT)</li>
+                                    <li>Pratique de notation (dropdown pour sélectionner)</li>
                                 </ul>
-                                <p class="text-muted mt-10" style="font-size: 0.9rem"><em>À la fin, ton cours est prêt avec calendrier, séances et étudiants.</em></p>
+                                <p class="text-muted mt-10" style="font-size: 0.9rem"><em>À la fin, ton groupe-cours est créé et apparaît dans le dropdown de l'en-tête. Les données sont éditables dans Section Trimestre.</em></p>
                             </div>
 
                             <div class="alerte alerte-information">
@@ -10669,7 +10700,7 @@
                             </ul>
 
                             <div class="alerte alerte-attention">
-                                <strong>Navigation libre :</strong> Tu peux quitter Primo à tout moment pour naviguer librement dans l'application. Les données saisies via Primo sont sauvegardées normalement et accessibles depuis les sections Réglages.
+                                <strong>Navigation libre :</strong> Tu peux quitter Primo à tout moment pour naviguer librement dans l'application. Les données saisies via Primo sont sauvegardées normalement et modifiables depuis <strong>Réglages → Trimestre</strong> (les 6 accordéons).
                             </div>
 
                             <div class="alerte alerte-succes">
@@ -10703,37 +10734,54 @@
                         </div>
                     </div>
 
-                    <!-- Carte: 2. Trimestre -->
+                    <!-- Carte: 2. Section Trimestre (Beta 95) -->
                     <div class="carte accordeon" id="accordeon-aide-trimestre">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
                             <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> 2. Définir le trimestre - MODULE SOURCE
+                                <span class="accordeon-chevron">▼</span> 2. Section Trimestre - Configuration centralisée (Beta 95)
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
                             <p><strong>Navigation :</strong> Réglages → Trimestre</p>
-                            <p class="text-succes-bold">Ce module GÉNÈRE le calendrierComplet (source unique)</p>
+                            <p class="text-succes-bold">Centre de configuration complet avec 6 accordéons</p>
 
-                            <p><strong>Informations à saisir :</strong></p>
-                            <ul>
-                                <li><strong>Date de début</strong> : Premier jour de cours</li>
-                                <li><strong>Date de fin</strong> : Dernier jour de cours</li>
-                                <li><strong>Jours fériés</strong> : Congés prévus</li>
-                                <li><strong>Congés imprévus</strong> : À ajouter en cours de trimestre</li>
-                                <li><strong>Reprises</strong> : Si nécessaire</li>
-                            </ul>
+                            <div class="carte-gradient-bleu">
+                                <p class="titre-11-bold-bleu-mb15">Les 6 accordéons de configuration :</p>
+                                <ol class="lh-2">
+                                    <li><strong>Gestion des trimestres</strong> : Dates début/fin, congés, aperçu statistiques</li>
+                                    <li><strong>Gestion des cours</strong> : Code, titre, discipline, compétence</li>
+                                    <li><strong>Profil enseignant</strong> : Multi-profils avec dropdown (Beta 95.3)</li>
+                                    <li><strong>Groupe d'étudiants</strong> : Import CSV/TXT, gestion SA/CAF</li>
+                                    <li><strong>Horaire hebdomadaire</strong> : Séances avec jour, heures, local</li>
+                                    <li><strong>Assemblage groupe-cours</strong> : Combine les 5 éléments ci-dessus</li>
+                                </ol>
+                            </div>
 
-                            <p><strong>Génération automatique :</strong></p>
-                            <ul>
-                                <li>Calendrier complet sur 124 jours</li>
-                                <li>Calcul automatique des semaines (5 jours cours = 1 semaine)</li>
-                                <li>Gestion des congés et reprises</li>
-                            </ul>
+                            <div class="alerte alerte-information">
+                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Synthèses intelligentes (Beta 95.3)</h4>
+                                <p>Chaque accordéon affiche une <strong>synthèse calculée</strong> dans sa barre latérale :</p>
+                                <ul class="mt-5">
+                                    <li><strong>Trimestre</strong> : "Hiver 2026 • 15 sem., 31 jours cours, 10 congés"</li>
+                                    <li><strong>Cours</strong> : Code + discipline + compétence</li>
+                                    <li><strong>Enseignant</strong> : Nom + courriel + institution</li>
+                                    <li><strong>Groupe</strong> : Nombre étudiants + SA + top programmes</li>
+                                    <li><strong>Horaire</strong> : Séances/semaine + heures totales + jours</li>
+                                    <li><strong>Groupe-cours</strong> : Score de complétude (ex: "4/5 éléments")</li>
+                                </ul>
+                            </div>
+
+                            <p><strong>Workflow recommandé :</strong></p>
+                            <ol>
+                                <li>Configurer le <strong>trimestre</strong> (dates, génère le calendrier)</li>
+                                <li>Créer le <strong>cours</strong> (ou sélectionner existant)</li>
+                                <li>Définir le <strong>profil enseignant</strong></li>
+                                <li>Importer le <strong>groupe d'étudiants</strong></li>
+                                <li>Créer l'<strong>horaire</strong> hebdomadaire</li>
+                                <li>Assembler le tout dans un <strong>groupe-cours</strong></li>
+                            </ol>
 
                             <div class="alerte alerte-succes">
-                                <strong>API disponibles :</strong><br>
-                                <code>obtenirCalendrierComplet()</code> - Récupère le calendrier<br>
-                                <code>obtenirInfosJour(date)</code> - Détails d'une journée
+                                <strong>💡 Astuce :</strong> Une fois le groupe-cours créé, il apparaît dans le dropdown de l'en-tête. Vous pouvez basculer rapidement entre plusieurs groupes-cours.
                             </div>
                         </div>
                     </div>
@@ -10796,6 +10844,56 @@
 
                             <div class="alerte alerte-succes">
                                 <strong>💡 Astuce pédagogique :</strong> Utilisez le groupe demo pour te familiariser avec les fonctionnalités avant de saisir tes vraies données. C'est aussi utile pour expérimenter des configurations (seuils, pratiques de notation) sans risquer d'affecter tes données réelles.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Carte: 2c. Concept Groupe-cours (Beta 95) -->
+                    <div class="carte accordeon" id="accordeon-aide-groupe-cours">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> 2c. Le concept Groupe-cours (Beta 95)
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p>Un <strong>groupe-cours</strong> est l'assemblage de 5 éléments qui définissent complètement un contexte d'enseignement :</p>
+
+                            <div class="carte-gradient-bleu">
+                                <p class="titre-11-bold-bleu-mb15">Les 5 composantes d'un groupe-cours :</p>
+                                <ol class="lh-2">
+                                    <li><strong>Cours</strong> : Le cours enseigné (601-101, etc.)</li>
+                                    <li><strong>Enseignant</strong> : Le profil enseignant associé</li>
+                                    <li><strong>Groupe étudiants</strong> : La liste des étudiants</li>
+                                    <li><strong>Horaire</strong> : Les séances hebdomadaires</li>
+                                    <li><strong>Pratique de notation</strong> : PAN-Standards, Sommative, etc.</li>
+                                </ol>
+                            </div>
+
+                            <p><strong>Pourquoi le groupe-cours ?</strong></p>
+                            <ul>
+                                <li><strong>Contexte complet</strong> : Toutes les données sont liées (présences, évaluations, rétroactions)</li>
+                                <li><strong>Multi-cours</strong> : Un enseignant peut avoir plusieurs groupes-cours actifs</li>
+                                <li><strong>Basculement rapide</strong> : Dropdown dans l'en-tête pour changer de contexte</li>
+                                <li><strong>Namespacing</strong> : Données isolées par trimestre (h2026_, a2025_, etc.)</li>
+                            </ul>
+
+                            <div class="alerte alerte-information">
+                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Bibliothèque groupe-cours (Beta 95.3)</h4>
+                                <p>Le bouton <strong>📚 Bibliothèque</strong> dans l'accordéon Groupe-cours ouvre une modal avec :</p>
+                                <ul class="mt-5">
+                                    <li>Liste de tous vos groupes-cours du trimestre</li>
+                                    <li>Bouton <strong>Activer</strong> pour basculer rapidement</li>
+                                    <li>Bouton <strong>Supprimer</strong> avec confirmation</li>
+                                    <li>Indicateur visuel du groupe-cours actif</li>
+                                </ul>
+                            </div>
+
+                            <div class="alerte alerte-succes">
+                                <strong>💡 Workflow typique :</strong><br>
+                                1. Créez vos composantes dans les accordéons<br>
+                                2. Assemblez dans "Groupe-cours" avec les 5 dropdowns<br>
+                                3. Cliquez "Créer groupe-cours"<br>
+                                4. Le groupe apparaît dans l'en-tête et la bibliothèque
                             </div>
                         </div>
                     </div>
