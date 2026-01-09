@@ -1983,8 +1983,11 @@ async function exporterEchelleActive() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    const nomFichier = (echelle.nom || 'echelle').replace(/[^a-z0-9]/gi, '-').toLowerCase();
-    a.download = `echelle-${nomFichier}-CC-BY-SA-${new Date().toISOString().split('T')[0]}.json`;
+    // 🆕 Beta 95.3 : Nommage standardisé
+    const nomFichier = typeof genererNomFichierExport === 'function'
+        ? genererNomFichierExport('echelle', { nom: echelle.nom, discipline: echelle.discipline, inclureLicence: true })
+        : `echelle-${(echelle.nom || 'echelle').replace(/[^a-z0-9]/gi, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = nomFichier;
     a.click();
     URL.revokeObjectURL(url);
 
@@ -3901,12 +3904,17 @@ async function sauvegarderEchelleComplete() {
             ? GabaritsUtils.lirePratiquesSelectionnees('echelle')
             : [];
 
+        // 🆕 Beta 95.3 : Capturer discipline depuis infoCours
+        const infoCours = typeof db !== 'undefined' && db.getSync ? db.getSync('infoCours', {}) : {};
+        const discipline = infoCours?.discipline || '';
+
         // Créer la nouvelle échelle
         const nouvelleEchelle = {
             id: 'echelle_' + Date.now(),
             nom: nom,
             niveaux: niveaux,
             pratiquesCompatibles: pratiquesCompatibles,
+            discipline: discipline, // 🆕 Beta 95.3
             dansBibliotheque: true,
             dateCreation: new Date().toISOString()
         };

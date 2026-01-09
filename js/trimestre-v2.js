@@ -4374,7 +4374,7 @@ function ouvrirModalBibliothequeGroupeCours() {
                 background: white;
                 border-radius: 12px;
                 width: 90%;
-                max-width: 700px;
+                max-width: 800px;
                 max-height: 85vh;
                 overflow-y: auto;
                 padding: 30px;

@@ -1361,11 +1361,55 @@ async function sauvegarderMetadonnees() {
 }
 
 // ============================================
+// 🆕 Beta 95.3 : NOMMAGE STANDARDISÉ EXPORTS
+// ============================================
+
+/**
+ * Génère un nom de fichier export standardisé
+ * Format: type-cours-discipline-date.json
+ *
+ * @param {string} type - Type de ressource (echelle, grille, production, etc.)
+ * @param {Object} options - Options de nommage
+ * @param {string} [options.nom] - Nom de l'élément
+ * @param {string} [options.cours] - Code du cours
+ * @param {string} [options.discipline] - Discipline
+ * @param {boolean} [options.inclureLicence] - Ajouter CC-BY-SA au nom
+ * @returns {string} Nom de fichier formaté
+ */
+function genererNomFichierExport(type, options = {}) {
+    const nettoyer = (str) => (str || '').replace(/[^a-z0-9àâäéèêëïîôùûüç]/gi, '-').replace(/-+/g, '-').toLowerCase();
+    const date = new Date().toISOString().split('T')[0];
+
+    // Récupérer infos du cours actif si non fournies
+    let cours = options.cours;
+    let discipline = options.discipline;
+
+    if ((!cours || !discipline) && typeof db !== 'undefined') {
+        const infoCours = db.getSync ? db.getSync('infoCours', {}) : {};
+        if (!cours) cours = infoCours?.sigle || infoCours?.codeCours || '';
+        if (!discipline) discipline = infoCours?.discipline || '';
+    }
+
+    // Construire le nom
+    const parties = [type];
+
+    if (options.nom) parties.push(nettoyer(options.nom));
+    if (cours) parties.push(nettoyer(cours));
+    if (discipline) parties.push(nettoyer(discipline));
+    if (options.inclureLicence) parties.push('CC-BY-SA');
+
+    parties.push(date);
+
+    return parties.join('-') + '.json';
+}
+
+// ============================================
 // EXPORTS
 // ============================================
 
 window.ajouterMetadonnéesCC = ajouterMetadonnéesCC;
 window.genererNomFichierCC = genererNomFichierCC;
+window.genererNomFichierExport = genererNomFichierExport; // 🆕 Beta 95.3
 window.genererBadgeCC = genererBadgeCC;
 window.enregistrerModificationCC = enregistrerModificationCC;
 window.demanderAttributionModification = demanderAttributionModification;

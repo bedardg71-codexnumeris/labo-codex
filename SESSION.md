@@ -36,10 +36,9 @@
 
 ## PROCHAINE TACHE
 
-**Choisir parmi le backlog** :
-- [ ] Harmoniser largeur modaux bibliotheque (Cartouches plus etroit que Echelles)
-- [ ] Revoir nommage fichiers export : nom personnalise OU nomenclature standard
-- [ ] Verifier lecture champs discipline/pratique dans filtres bibliotheque Echelles
+**Backlog vide - Choisir une nouvelle direction** :
+- Beta 95.x stable et fonctionnelle
+- Prochaine etape : Beta 96 (modularisation) ou nouvelles fonctionnalites
 
 ---
 
@@ -77,9 +76,9 @@
 - [x] **Filtres par discipline/cours** : Deja implementes dans Grilles, Echelles, Productions
 - [x] **Import par trimestre filtrable par cours** : Section + filtre cours + preview (Productions)
 - [x] **UX modal Echelles** : Section "Importer depuis un autre trimestre" ajoutee
-- [ ] Verifier lecture champs discipline/pratique dans filtres bibliotheque Echelles
-- [ ] Harmoniser largeur modaux bibliotheque (Cartouches plus etroit que Echelles)
-- [ ] Revoir nommage fichiers export : nom personnalise OU nomenclature standard (type-cours-discipline-date)
+- [x] **Filtres discipline Echelles/Grilles** : Capture auto discipline depuis infoCours
+- [x] **Harmoniser largeur modaux** : Tous a 800px (cours 900→800, groupe-cours 700→800)
+- [x] **Nommage fichiers export** : Fonction genererNomFichierExport() standardisee
 - [x] **Audit design global** : 16 parties verifiees, toutes conformes
 
 ### Compatibilite et donnees
@@ -93,8 +92,12 @@
 
 | Fichier | Modification |
 |---------|--------------|
-| `js/echelles.js` | Section "Importer depuis un autre trimestre" + 3 fonctions |
-| `js/productions.js` | Filtre par cours dans import trimestre |
+| `js/cc-license.js` | Fonction genererNomFichierExport() standardisee |
+| `js/echelles.js` | Import trimestre + discipline auto + nommage export |
+| `js/grilles.js` | Discipline auto + nommage export |
+| `js/productions.js` | Filtre cours import + nommage export |
+| `js/cours.js` | Modal 800px (etait 900px) |
+| `js/trimestre-v2.js` | Modal groupe-cours 800px (etait 700px) |
 | `js/evaluation.js` | Namespacing evaluationsSauvegardees via cle() |
 | `js/evaluation-jetons.js` | Namespacing evaluationsSauvegardees via cle() |
 | `js/portfolio.js` | Namespacing evaluationsSauvegardees via cle() |
@@ -131,6 +134,9 @@
 - **Libelle dropdown groupe-cours** : "Groupe 00001" au lieu de "??? gr.00001" (5 endroits)
 - **UX modal Echelles** : Section "Importer depuis un autre trimestre" (3 fonctions)
 - **Import Productions filtrable par cours** : Dropdown filtre cours + preview
+- **Harmonisation modaux** : Tous a 800px (cours, groupe-cours)
+- **Nommage exports** : genererNomFichierExport() type-nom-cours-discipline-date
+- **Filtres discipline** : Auto-capture depuis infoCours (echelles, grilles)
 - **Audit module evaluation** : 16 548 lignes, 3 problemes critiques identifies et resolus
 - **Fix #1 namespacing evaluationsSauvegardees** : 34 occurrences, 7 fichiers
 - **Fix #2 integration groupe-cours** : groupeCoursId ajoute aux evaluations + logs
@@ -186,4 +192,4 @@
 
 ---
 
-**Derniere mise a jour** : 9 janvier 2026, 15:24 (Toronto)
+**Derniere mise a jour** : 9 janvier 2026, 15:43 (Toronto)
