@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 95.3
 
 **Date** : 9 janvier 2026
-**Version** : Beta 95.3 (build 0109-0747)
+**Version** : Beta 95.3 (build 0109-0927)
 **Statut** : Application fonctionnelle pour H2026
 
 ---
@@ -23,33 +23,28 @@
 - Variables CSS adoptees massivement (box-shadow 43%, border-radius 95%)
 
 ### Derniere tache completee (9 janvier)
-- **Migration Design System v7** : Variables CSS appliquees
-  - Box-shadow: 30 variables (43%) vs 40 hardcodes restants
-  - Border-radius: 214 variables (95%) vs 11 hardcodes restants
-- **Partie 1 audit terminee** : 4 pratiques de notation (SOM/STD/SPE/DEN)
-- **Partie 5 audit terminee** : Box-shadow migres vers variables
-- **Partie 6 audit terminee** : Border-radius migres vers variables
-- Archivage Beta 95.2 dans Archives/Beta-95-2/
-- **Uniformisation page Trimestre** : ~150 lignes CSS ajoutees
-  - Couleurs encadres → bleu pale uniforme (var(--bleu-pale))
-  - Suppression arrondis bordures gauches
-  - Tailles de police uniformisees (labels 0.8rem, sous-labels 0.7rem)
-  - Boutons uniformises (padding, couleurs, espacement)
+- **Audit Design System v7 COMPLET** : 16 parties verifiees, toutes conformes
+  - Parties 1-11 : Conformes (pratiques, badges, gradients, shadows, radius, sidebars, boutons, variables, modals, alertes)
+  - Parties 12-14 : Conformes (navigation, formulaires, tableaux)
+  - Parties 15-16 : Corrigees (barre progression, primo popup header)
 - **Syntheses intelligentes sidebars** : Informations calculees dans chaque accordeon
   - Cours : nom, code, discipline, competence
   - Groupe etudiants : top 3 programmes les plus frequents
   - Groupe-cours : score de completude (X/5 configures)
+- **Reorganisation Import etudiants** : Section deplacee dans panneau droit (grille 2 colonnes)
+- Migration massive variables CSS (box-shadow 43%, border-radius 95%)
+- Uniformisation page Trimestre (~150 lignes CSS)
 
 ---
 
 ## PROCHAINE TACHE
 
-**Prochaine etape** : Continuer audit design (Parties 2-4, 7-16)
-- [ ] Partie 2 : Badges Tetris (7 familles)
-- [ ] Partie 3 : Badges materiel pedagogique
-- [ ] Partie 4 : Gradients
-- [ ] Partie 7 : Sidebars / Bibliotheques
-- [ ] Parties 8-16 : Boutons, Variables, Modals, Alertes, etc.
+**Audit Design System v7 termine** - Choisir parmi le backlog :
+- [ ] Bouton supprimer groupe-cours (modal bibliotheque)
+- [ ] Affichage dropdown groupe-cours (nom lisible)
+- [ ] Compatibilite page Trimestre avec wizard Primo
+- [ ] Compatibilite donnees A2025
+- [ ] Donnees demo (groupe 9999)
 
 ---
 
@@ -88,7 +83,7 @@
 - [ ] UX modal Echelles : bouton Export avec sidebar, bouton Import avec section disponibles
 - [ ] Harmoniser largeur modaux bibliotheque (Cartouches plus etroit que Echelles)
 - [ ] Revoir nommage fichiers export : nom personnalise OU nomenclature standard (type-cours-discipline-date)
-- [ ] **Audit design global** : Continuer parties 2-16 de l'audit V5
+- [x] **Audit design global** : 16 parties verifiees, toutes conformes
 
 ### Compatibilite et donnees
 - [ ] Assurer compatibilite donnees A2025 avec modifications au code
@@ -101,10 +96,10 @@
 
 | Fichier | Modification |
 |---------|--------------|
-| `styles.css` | Migration massive box-shadow et border-radius vers variables |
-| `index.html` | Mise a jour version 95.3, BUILD_ID 0109-1100 |
+| `styles.css` | Audit complet + corrections parties 15-16, syntheses sidebars, import droite |
+| `index.html` | Syntheses sidebars, reorganisation import etudiants |
+| `js/trimestre-v2.js` | Fonctions syntheses (cours, top programmes, score completude) |
 | `SESSION.md` | Mise a jour Beta 95.3 |
-| `Archives/Beta-95-2/` | Archivage Beta 95.2 |
 
 ---
 
@@ -130,14 +125,13 @@
 ## HISTORIQUE RECENT
 
 ### 9 janvier 2026
-- **Beta 95.3** : Migration massive variables CSS
+- **Audit Design System v7 COMPLET** : 16 parties verifiees, toutes conformes
+- Corrections parties 15-16 (barre progression, primo popup header)
+- Syntheses intelligentes sidebars (cours, groupe etudiants, groupe-cours)
+- Reorganisation Import etudiants (panneau droit, grille 2 colonnes)
+- Migration massive variables CSS (box-shadow 43%, border-radius 95%)
+- Uniformisation page Trimestre (~150 lignes CSS)
 - Archivage Beta 95.2 dans Archives/Beta-95-2/
-- Box-shadow: 30 variables (43% adoption)
-- Border-radius: 214 variables (95% adoption)
-- Partie 1 audit: 4 pratiques (SOM/STD/SPE/DEN) - deja complete
-- Partie 5 audit: Box-shadow migres
-- Partie 6 audit: Border-radius migres
-- **Uniformisation page Trimestre** : encadres, polices, boutons harmonises
 
 ### 8 janvier 2026
 - Consolidation entites-ui.js → trimestre-v2.js
@@ -185,4 +179,4 @@
 
 ---
 
-**Derniere mise a jour** : 9 janvier 2026, 07:47 (Toronto)
+**Derniere mise a jour** : 9 janvier 2026, 09:27 (Toronto)
