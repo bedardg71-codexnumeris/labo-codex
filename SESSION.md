@@ -37,9 +37,9 @@
 ## PROCHAINE TACHE
 
 **Choisir parmi le backlog** :
-- [ ] Bouton supprimer groupe-cours (existe deja, modal bibliotheque optionnelle)
-- [ ] Syntheses intelligentes dans les sidebars (plan existant)
+- [ ] Bouton supprimer groupe-cours (modal bibliotheque optionnelle)
 - [ ] Filtres par discipline/cours avec listes controlees
+- [ ] UX modal Echelles : bouton Export avec sidebar
 
 ---
 
@@ -72,6 +72,7 @@
 - [x] Compatibilite page Trimestre avec wizard Primo (dropdown pratique ajoute)
 - [x] Creer protocole de mise a jour des beta (docs/operations/ + scripts/)
 - [x] Auditer module evaluation (3/3 problemes critiques resolus)
+- [x] Syntheses intelligentes dans sidebars (5 fonctions Beta 95.3)
 - [ ] Filtres par discipline/cours avec listes controlees (dropdowns standardises)
 - [ ] Import par trimestre filtrable par cours
 - [ ] Verifier lecture champs discipline/pratique dans filtres bibliotheque Echelles
@@ -122,6 +123,7 @@
 ## HISTORIQUE RECENT
 
 ### 9 janvier 2026
+- **Syntheses intelligentes sidebars** : 5 fonctions (Cours, Enseignant, Groupe, Horaire, Groupe-cours)
 - **Libelle dropdown groupe-cours** : "Groupe 00001" au lieu de "??? gr.00001" (5 endroits)
 - **Audit module evaluation** : 16 548 lignes, 3 problemes critiques identifies et resolus
 - **Fix #1 namespacing evaluationsSauvegardees** : 34 occurrences, 7 fichiers
@@ -178,4 +180,4 @@
 
 ---
 
-**Derniere mise a jour** : 9 janvier 2026, 14:25 (Toronto)
+**Derniere mise a jour** : 9 janvier 2026, 14:32 (Toronto)
