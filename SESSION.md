@@ -23,25 +23,23 @@
 - Variables CSS adoptees massivement (box-shadow 43%, border-radius 95%)
 
 ### Derniere tache completee (9 janvier)
-- **Audit module evaluation** : Documentation complete + fix critique
+- **Audit module evaluation** : 3/3 problemes critiques resolus
   - `docs/modules/AUDIT_EVALUATION.md` : 16 548 lignes analysees
-  - 3 problemes critiques identifies, 1 corrige
-  - Fix: Namespacing `evaluationsSauvegardees` (34 occurrences, 7 fichiers)
-- **Compatibilite A2025** : Verifiee et nettoyee
-  - Donnees legacy orphelines supprimees
+  - Fix #1: Namespacing `evaluationsSauvegardees` (34 occurrences, 7 fichiers)
+  - Fix #2: Integration groupe-cours (`groupeCoursId` + logs)
+  - Fix #3: Validations references (etudiant/production/grille)
+- **Compatibilite A2025** : Verifiee, donnees legacy nettoyees
 - **Donnees demo (groupe 9999)** : Bug fusion corrige
 - **Protocole mise a jour beta** : Documentation + script automatisation
-- **Audit Design System v7 COMPLET** : 16 parties verifiees
 
 ---
 
 ## PROCHAINE TACHE
 
 **Choisir parmi le backlog** :
-- [ ] Integrer groupe-cours dans module evaluation (probleme critique #2)
-- [ ] Ajouter validations references (probleme critique #3)
 - [ ] Bouton supprimer groupe-cours
 - [ ] Affichage dropdown groupe-cours (nom lisible)
+- [ ] Syntheses intelligentes dans les sidebars (plan existant)
 
 ---
 
@@ -73,7 +71,7 @@
 - [x] Revoir design page Trimestre (harmonisation complete)
 - [x] Compatibilite page Trimestre avec wizard Primo (dropdown pratique ajoute)
 - [x] Creer protocole de mise a jour des beta (docs/operations/ + scripts/)
-- [x] Auditer module evaluation (audit complet + fix namespacing)
+- [x] Auditer module evaluation (3/3 problemes critiques resolus)
 - [ ] Filtres par discipline/cours avec listes controlees (dropdowns standardises)
 - [ ] Import par trimestre filtrable par cours
 - [ ] Verifier lecture champs discipline/pratique dans filtres bibliotheque Echelles
@@ -124,8 +122,10 @@
 ## HISTORIQUE RECENT
 
 ### 9 janvier 2026
-- **Audit module evaluation** : 16 548 lignes, 3 problemes critiques identifies
-- **Fix namespacing evaluationsSauvegardees** : 34 occurrences, 7 fichiers
+- **Audit module evaluation** : 16 548 lignes, 3 problemes critiques identifies et resolus
+- **Fix #1 namespacing evaluationsSauvegardees** : 34 occurrences, 7 fichiers
+- **Fix #2 integration groupe-cours** : groupeCoursId ajoute aux evaluations + logs
+- **Fix #3 validations references** : Verification etudiant/production/grille avant sauvegarde
 - **Compatibilite A2025** : Verifiee, donnees legacy nettoyees
 - **Donnees demo (groupe 9999)** : Bug fusion corrige (sync cache avant cle())
 - **Protocole mise a jour beta** : Documentation + script automatisation
@@ -177,4 +177,4 @@
 
 ---
 
-**Derniere mise a jour** : 9 janvier 2026, 14:04 (Toronto)
+**Derniere mise a jour** : 9 janvier 2026, 14:16 (Toronto)
