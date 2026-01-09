@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 95.3
 
 **Date** : 9 janvier 2026
-**Version** : Beta 95.3 (build 0109-0927)
+**Version** : Beta 95.3 (build 0109-0951)
 **Statut** : Application fonctionnelle pour H2026
 
 ---
@@ -23,28 +23,23 @@
 - Variables CSS adoptees massivement (box-shadow 43%, border-radius 95%)
 
 ### Derniere tache completee (9 janvier)
+- **Alignement Trimestre/Primo** : Dropdown pratique ajoute au formulaire groupe-cours
+  - Trimestre et Primo creent maintenant des groupe-cours identiques
+  - Score de completude 5/5 possible dans les deux cas
 - **Audit Design System v7 COMPLET** : 16 parties verifiees, toutes conformes
-  - Parties 1-11 : Conformes (pratiques, badges, gradients, shadows, radius, sidebars, boutons, variables, modals, alertes)
-  - Parties 12-14 : Conformes (navigation, formulaires, tableaux)
-  - Parties 15-16 : Corrigees (barre progression, primo popup header)
-- **Syntheses intelligentes sidebars** : Informations calculees dans chaque accordeon
-  - Cours : nom, code, discipline, competence
-  - Groupe etudiants : top 3 programmes les plus frequents
-  - Groupe-cours : score de completude (X/5 configures)
-- **Reorganisation Import etudiants** : Section deplacee dans panneau droit (grille 2 colonnes)
+- **Syntheses intelligentes sidebars** : Cours, Groupe etudiants, Groupe-cours
+- **Reorganisation Import etudiants** : Section deplacee dans panneau droit
 - Migration massive variables CSS (box-shadow 43%, border-radius 95%)
-- Uniformisation page Trimestre (~150 lignes CSS)
 
 ---
 
 ## PROCHAINE TACHE
 
-**Audit Design System v7 termine** - Choisir parmi le backlog :
-- [ ] Bouton supprimer groupe-cours (modal bibliotheque)
-- [ ] Affichage dropdown groupe-cours (nom lisible)
-- [ ] Compatibilite page Trimestre avec wizard Primo
+**Choisir parmi le backlog** :
 - [ ] Compatibilite donnees A2025
 - [ ] Donnees demo (groupe 9999)
+- [ ] Creer protocole de mise a jour des beta
+- [ ] Auditer module evaluation
 
 ---
 
@@ -74,7 +69,7 @@
 - [ ] **Affichage dropdown groupe-cours** : Afficher nom lisible au lieu de GC_timestamp quand donnees incompletes
 - [x] Optimiser utilisation de l'espace (limiter scrolling vertical)
 - [x] Revoir design page Trimestre (harmonisation complete)
-- [ ] Compatibilite page Trimestre avec wizard Primo
+- [x] Compatibilite page Trimestre avec wizard Primo (dropdown pratique ajoute)
 - [ ] Creer protocole de mise a jour des beta
 - [ ] Auditer module evaluation (meme pattern assemblage?)
 - [ ] Filtres par discipline/cours avec listes controlees (dropdowns standardises)
@@ -125,12 +120,12 @@
 ## HISTORIQUE RECENT
 
 ### 9 janvier 2026
+- **Alignement Trimestre/Primo** : Dropdown pratique dans formulaire groupe-cours
 - **Audit Design System v7 COMPLET** : 16 parties verifiees, toutes conformes
 - Corrections parties 15-16 (barre progression, primo popup header)
 - Syntheses intelligentes sidebars (cours, groupe etudiants, groupe-cours)
 - Reorganisation Import etudiants (panneau droit, grille 2 colonnes)
 - Migration massive variables CSS (box-shadow 43%, border-radius 95%)
-- Uniformisation page Trimestre (~150 lignes CSS)
 - Archivage Beta 95.2 dans Archives/Beta-95-2/
 
 ### 8 janvier 2026
@@ -179,4 +174,4 @@
 
 ---
 
-**Derniere mise a jour** : 9 janvier 2026, 09:27 (Toronto)
+**Derniere mise a jour** : 9 janvier 2026, 09:51 (Toronto)
