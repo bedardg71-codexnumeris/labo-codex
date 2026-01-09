@@ -1404,6 +1404,7 @@ function changerCoursSelectionneV2(coursId) {
         if (formulaire) formulaire.style.display = 'none';
         if (listeGroupes) listeGroupes.innerHTML = '<p class="text-muted">Sélectionnez un cours pour voir ses groupes.</p>';
         if (btnSupprimer) btnSupprimer.style.display = 'none';
+        afficherSyntheseCours(null);  // Beta 95.3 : vider la synthèse
         coursEnEditionV2 = null;
         return;
     }
@@ -1433,6 +1434,7 @@ function changerCoursSelectionneV2(coursId) {
 
         // Remplir le formulaire
         remplirFormCoursV2(coursSelectionne);
+        afficherSyntheseCours(coursSelectionne);  // Beta 95.3 : synthèse sidebar
         chargerGroupesCoursV2(coursId);
     }
 }
@@ -1771,6 +1773,32 @@ function remplirFormCoursV2(cours) {
 
     // ✅ AJOUT (2 jan 2026) : Pratique de notation
     setValue('v2-pratiqueIdCours', cours.pratiqueId || 'pan-standards');
+}
+
+/**
+ * Affiche la synthèse du cours dans la sidebar (Beta 95.3)
+ * Synthèse concise: nom, discipline, compétence
+ */
+function afficherSyntheseCours(cours) {
+    const sidebar = document.getElementById('v2-apercuCoursSidebar');
+    if (!sidebar) return;
+
+    if (!cours) {
+        sidebar.innerHTML = '<p class="etat-vide-resume">Aucun cours sélectionné</p>';
+        return;
+    }
+
+    const code = cours.sigle || cours.codeCours || cours.code || '';
+    const nom = cours.titre || cours.nomCours || cours.nom || '';
+    const discipline = cours.discipline || '—';
+    const competence = cours.numeroCompetence || cours.competence || '—';
+
+    sidebar.innerHTML = `
+        <div class="apercu-titre">${nom}</div>
+        <div class="apercu-code">${code}</div>
+        <div class="apercu-detail">Discipline : ${discipline}</div>
+        <div class="apercu-detail">Compétence : ${competence}</div>
+    `;
 }
 
 /**
@@ -2136,6 +2164,34 @@ function mettreAJourResumeEtudiantsV2(etudiants) {
     }
     if (elemNbSA) {
         elemNbSA.textContent = nbSA;
+    }
+
+    // Beta 95.3 : Top programmes (2-3 plus fréquents)
+    const elemTopProgrammes = document.getElementById('v2-topProgrammes');
+    if (elemTopProgrammes) {
+        const programmesMap = {};
+        etudiants.forEach(e => {
+            const prog = e.programme ? String(e.programme).trim() : '';
+            if (prog) {
+                programmesMap[prog] = (programmesMap[prog] || 0) + 1;
+            }
+        });
+
+        // Trier par fréquence décroissante, garder top 3
+        const topProgrammes = Object.entries(programmesMap)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 3);
+
+        if (topProgrammes.length === 0) {
+            elemTopProgrammes.style.display = 'none';
+        } else {
+            elemTopProgrammes.style.display = 'block';
+            let html = '<div class="label-top">Programmes :</div>';
+            topProgrammes.forEach(([prog, nb]) => {
+                html += `<div class="programme-item"><span>${prog}</span><span>${nb}</span></div>`;
+            });
+            elemTopProgrammes.innerHTML = html;
+        }
     }
 }
 
@@ -3783,6 +3839,18 @@ function mettreAJourCarteResumeGroupeCoursV2(gc) {
         enseignantNom = (profil.prenom && profil.nom) ? `${profil.prenom} ${profil.nom}` : '—';
     }
 
+    // Beta 95.3 : Score de complétude (5 éléments)
+    let score = 0;
+    if (gc.coursId && coursObj) score++;
+    if (gc.groupeNum || gc.groupe) score++;
+    if (gc.horaireId && horaireObj) score++;
+    if (gc.enseignantId) score++;
+    if (gc.pratiqueId) score++;
+
+    const estComplet = score === 5;
+    const classeCompletude = estComplet ? 'complet' : 'incomplet';
+    const texteCompletude = estComplet ? 'Complet' : `${score}/5 configurés`;
+
     carte.innerHTML = `
         <div class="resume-gc-nom">${gc.nom || gc.id}</div>
         <div class="resume-gc-details">
@@ -3790,6 +3858,9 @@ function mettreAJourCarteResumeGroupeCoursV2(gc) {
             <div><span class="label-gc">Groupe</span><span>${gc.groupeNum || gc.groupe || '—'}</span></div>
             <div><span class="label-gc">Horaire</span><span>${horaireNom}</span></div>
             <div><span class="label-gc">Enseig.</span><span>${enseignantNom}</span></div>
+        </div>
+        <div class="score-completude ${classeCompletude}">
+            <span class="score-valeur">${texteCompletude}</span>
         </div>
     `;
 }
