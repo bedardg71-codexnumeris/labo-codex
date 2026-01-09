@@ -6564,6 +6564,30 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     margin-bottom: 10px;
 }
 
+/* Section Import à droite (Beta 95.3) */
+.section-import-droite {
+    background: var(--bleu-pale);
+    border-radius: var(--radius-grand);
+    padding: 15px;
+    margin-top: 20px;
+}
+
+.grille-import-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.import-option {
+    display: flex;
+    flex-direction: column;
+}
+
+.import-option .btn {
+    margin-top: 8px;
+    align-self: flex-start;
+}
+
 .label-compact {
     display: block;
     font-size: 0.85rem;
@@ -10544,6 +10568,77 @@ body[data-mode="simulation"] table tr:hover {
     font-size: 0.8rem;
     background: var(--bleu-pale);
     border-radius: var(--radius-grand);
+}
+
+/* ========== SYNTHÈSES SIDEBAR (Beta 95.3) ========== */
+#reglages-trimestre .apercu-sidebar {
+    padding: 10px;
+    margin-top: 12px;
+    font-size: 0.8rem;
+    background: var(--bleu-pale);
+    border-radius: var(--radius-grand);
+}
+
+#reglages-trimestre .apercu-titre {
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-bottom: 2px;
+    color: var(--texte-fonce);
+}
+
+#reglages-trimestre .apercu-code {
+    font-size: 0.75rem;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+#reglages-trimestre .apercu-detail {
+    font-size: 0.75rem;
+    color: #555;
+    line-height: 1.4;
+}
+
+/* Score de complétude groupe-cours */
+#reglages-trimestre .score-completude {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(0,0,0,0.1);
+    font-size: 0.75rem;
+}
+
+#reglages-trimestre .score-completude .score-valeur {
+    font-weight: 600;
+}
+
+#reglages-trimestre .score-completude.complet .score-valeur {
+    color: var(--vert-fonce);
+}
+
+#reglages-trimestre .score-completude.incomplet .score-valeur {
+    color: #d97706;
+}
+
+/* Top programmes groupe étudiants */
+#reglages-trimestre .top-programmes {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(0,0,0,0.1);
+    font-size: 0.75rem;
+}
+
+#reglages-trimestre .top-programmes .label-top {
+    font-weight: 500;
+    color: #666;
+    margin-bottom: 4px;
+}
+
+#reglages-trimestre .top-programmes .programme-item {
+    display: flex;
+    justify-content: space-between;
+    color: #555;
 }
 
 /* Compacter les états vides */

@@ -35,6 +35,10 @@
   - Suppression arrondis bordures gauches
   - Tailles de police uniformisees (labels 0.8rem, sous-labels 0.7rem)
   - Boutons uniformises (padding, couleurs, espacement)
+- **Syntheses intelligentes sidebars** : Informations calculees dans chaque accordeon
+  - Cours : nom, code, discipline, competence
+  - Groupe etudiants : top 3 programmes les plus frequents
+  - Groupe-cours : score de completude (X/5 configures)
 
 ---
 

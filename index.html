@@ -8710,6 +8710,11 @@
                                     <button class="btn btn-principal btn-sm btn-block" onclick="nouveauCoursV2()">
                                         + Nouveau cours
                                     </button>
+
+                                    <!-- Aperçu du cours sélectionné (Beta 95.3) -->
+                                    <div class="apercu-sidebar" id="v2-apercuCoursSidebar">
+                                        <p class="etat-vide-resume">Aucun cours sélectionné</p>
+                                    </div>
                                 </div>
 
                                 <!-- DROITE : Formulaire d'édition -->
@@ -9200,41 +9205,14 @@
                                         <div class="resume-sa" id="v2-resumeSA" style="display: none;">
                                             <span class="badge-sa">SA</span> <span id="v2-resumeNbSA">0</span> étudiant(s)
                                         </div>
-                                    </div>
-
-                                    <!-- Import -->
-                                    <div class="section-import">
-                                        <h5 class="sous-titre-section">Importer</h5>
-                                        <p class="texte-aide" style="font-size: 0.8rem; margin-bottom: 10px;">
-                                            Format : DA, Groupe, Nom, Prénom, Programme, (vide), SA
-                                        </p>
-
-                                        <label class="label-compact">Coller les données :</label>
-                                        <textarea id="v2-donneesCollees" class="controle-form" rows="4"
-                                            placeholder="Depuis Excel ou Omnivox..."></textarea>
-                                        <button class="btn btn-secondaire btn-sm btn-block" onclick="previsualiserDonneesV2()">
-                                            Prévisualiser
-                                        </button>
-
-                                        <div class="separateur-ou">ou</div>
-
-                                        <label class="label-compact">Fichier CSV/TSV :</label>
-                                        <input type="file" id="v2-fichierCsvEntree" class="controle-form input-fichier-compact" accept=".csv,.tsv,.txt"
-                                            onchange="importerFichierEtudiantsV2(event)">
-                                    </div>
-
-                                    <!-- Zone de prévisualisation -->
-                                    <div id="v2-previewZone" class="zone-preview" style="display: none;">
-                                        <h6 style="margin-bottom: 10px;">Prévisualisation</h6>
-                                        <div id="v2-previewTable" style="max-height: 150px; overflow-y: auto;"></div>
-                                        <div class="btn-groupe" style="margin-top: 10px;">
-                                            <button class="btn btn-annuler btn-sm" onclick="annulerImportV2()">Annuler</button>
-                                            <button class="btn btn-confirmer btn-sm" onclick="confirmerImportV2()">Confirmer</button>
+                                        <!-- Top programmes (Beta 95.3) -->
+                                        <div class="top-programmes" id="v2-topProgrammes" style="display: none;">
+                                            <!-- Rempli dynamiquement -->
                                         </div>
                                     </div>
 
                                     <!-- Actions sur la liste -->
-                                    <div class="section-actions-liste" id="v2-actionsEtudiants" style="display: none;">
+                                    <div class="section-actions-liste" id="v2-actionsEtudiants" style="display: none; margin-top: 15px;">
                                         <button class="btn btn-secondaire btn-sm btn-block" onclick="exporterEtudiantsV2()">
                                             Exporter CSV
                                         </button>
@@ -9242,11 +9220,6 @@
                                             Vider la liste
                                         </button>
                                     </div>
-
-                                    <!-- Bouton nouveau groupe -->
-                                    <button class="btn btn-principal btn-sm btn-block" onclick="creerNouveauGroupeV2()">
-                                        + Nouveau groupe
-                                    </button>
 
                                 </div>
 
@@ -9297,6 +9270,43 @@
                                             <button class="btn btn-annuler btn-sm" id="v2-btnAnnulerEdition" style="display: none;" onclick="annulerEditionEtudiantV2()">
                                                 Annuler
                                             </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Section Import (Beta 95.3 : déplacée à droite) -->
+                                    <div class="section-import-droite">
+                                        <h5 class="sous-titre-section" style="margin-bottom: 10px;">Importer des étudiants</h5>
+
+                                        <div class="grille-import-2col">
+                                            <!-- Colonne 1 : Coller -->
+                                            <div class="import-option">
+                                                <label class="label-compact">Coller les données :</label>
+                                                <textarea id="v2-donneesCollees" class="controle-form" rows="3"
+                                                    placeholder="Depuis Excel ou Omnivox..."></textarea>
+                                                <button class="btn btn-secondaire btn-sm" onclick="previsualiserDonneesV2()">
+                                                    Prévisualiser
+                                                </button>
+                                            </div>
+
+                                            <!-- Colonne 2 : Fichier -->
+                                            <div class="import-option">
+                                                <label class="label-compact">Fichier CSV/TSV :</label>
+                                                <input type="file" id="v2-fichierCsvEntree" class="controle-form input-fichier-compact" accept=".csv,.tsv,.txt"
+                                                    onchange="importerFichierEtudiantsV2(event)">
+                                                <p class="texte-aide" style="font-size: 0.75rem; margin-top: 8px;">
+                                                    Format : DA, Groupe, Nom, Prénom, Programme, (vide), SA
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Zone de prévisualisation -->
+                                        <div id="v2-previewZone" class="zone-preview" style="display: none; margin-top: 15px;">
+                                            <h6 style="margin-bottom: 10px;">Prévisualisation</h6>
+                                            <div id="v2-previewTable" style="max-height: 150px; overflow-y: auto;"></div>
+                                            <div class="btn-groupe" style="margin-top: 10px;">
+                                                <button class="btn btn-annuler btn-sm" onclick="annulerImportV2()">Annuler</button>
+                                                <button class="btn btn-confirmer btn-sm" onclick="confirmerImportV2()">Confirmer</button>
+                                            </div>
                                         </div>
                                     </div>
 
