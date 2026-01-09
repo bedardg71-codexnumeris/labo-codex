@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 95.3
 
 **Date** : 9 janvier 2026
-**Version** : Beta 95.3 (build 0109-1304)
+**Version** : Beta 95.3 (build 0109-1604)
 **Statut** : Application fonctionnelle pour H2026
 
 ---
