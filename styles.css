@@ -6782,7 +6782,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 .section-config-periode {
-    background: var(--gris-clair);
+    background: var(--bleu-pale);
     border-radius: var(--radius-standard);
     padding: 12px;
     margin-top: 15px;
@@ -10634,14 +10634,20 @@ body[data-mode="simulation"] table tr:hover {
     margin-bottom: 10px;
 }
 
-/* Boutons dans les actions formulaire - alignement à droite */
+/* Boutons dans les actions formulaire - Supprimer à gauche, Annuler/Enregistrer à droite */
 #reglages-trimestre .actions-formulaire {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: center;
     gap: 8px;
     margin-top: 12px;
     padding-top: 12px;
     border-top: 1px solid var(--gris-tres-clair);
+}
+
+/* Quand pas de bouton Supprimer, aligner à droite */
+#reglages-trimestre .actions-formulaire > div:only-child {
+    margin-left: auto;
 }
 
 /* Boutons de réinitialisation dans les blocs */

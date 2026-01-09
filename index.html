@@ -8451,7 +8451,7 @@
                                         </select>
                                     </div>
 
-                                    <button class="btn btn-principal btn-sm" style="margin-top: 15px; width: 100%;" onclick="ouvrirModalNouveauTrimestre()">
+                                    <button class="btn btn-principal btn-sm btn-block" onclick="ouvrirModalNouveauTrimestre()">
                                         + Nouveau trimestre
                                     </button>
 
@@ -8465,7 +8465,7 @@
                                 </div>
 
                                 <!-- DROITE : Formulaire complet du trimestre -->
-                                <div class="panneau-formulaire" style="padding: 15px;">
+                                <div class="panneau-formulaire">
 
                                     <!-- Identification du trimestre -->
                                     <div class="bloc-section bloc-section--vert">
@@ -8683,14 +8683,6 @@
                         </div>
                     </div>
 
-                    <!-- ========== CONSIGNE GROUPE-COURS ========== -->
-                    <div class="alerte alerte-information" style="margin-bottom: 20px;">
-                        <strong>Pour constituer un groupe-cours</strong>, associe : un cours + un enseignant·e + un numéro de groupe + un horaire + une pratique de notation.
-                        <span style="margin-left: 10px;">
-                            Besoin d'aide ? <button class="btn btn-secondaire btn-sm" onclick="demarrerConfigComplete()" style="margin-left: 5px;">😎 Assistant Primo</button>
-                        </span>
-                    </div>
-
                     <!-- ========== ACCORDÉON: COURS ========== -->
                     <div class="carte accordeon" id="accordeon-cours">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
@@ -8715,18 +8707,13 @@
                                         </select>
                                     </div>
 
-                                    <button class="btn btn-principal btn-sm" style="margin-top: 15px; width: 100%;" onclick="nouveauCoursV2()">
+                                    <button class="btn btn-principal btn-sm btn-block" onclick="nouveauCoursV2()">
                                         + Nouveau cours
-                                    </button>
-
-                                    <!-- Bouton supprimer cours (Beta 95.2) -->
-                                    <button id="v2-btnSupprimerCours" class="btn btn-danger btn-sm" style="margin-top: 8px; width: 100%; display: none;" onclick="supprimerCoursV2()">
-                                        Supprimer ce cours
                                     </button>
                                 </div>
 
                                 <!-- DROITE : Formulaire d'édition -->
-                                <div class="panneau-formulaire" style="padding: 15px;">
+                                <div class="panneau-formulaire">
                                     <div id="v2-formulaireCours">
                                         <!-- État vide -->
                                         <div id="cours-etat-vide" class="etat-vide-formulaire">
@@ -8917,13 +8904,18 @@
                                             </div>
 
                                             <!-- Boutons d'action -->
-                                            <div class="actions-formulaire" style="margin-top: 20px;">
-                                                <button class="btn btn-annuler" onclick="annulerFormCoursV2()">
-                                                    Annuler
+                                            <div class="actions-formulaire">
+                                                <button id="v2-btnSupprimerCours" class="btn btn-supprimer" onclick="supprimerCoursV2()" style="display: none;">
+                                                    Supprimer
                                                 </button>
-                                                <button class="btn btn-confirmer" onclick="sauvegarderCoursV2()">
-                                                    <span id="v2-btnTexteCours">Enregistrer</span>
-                                                </button>
+                                                <div>
+                                                    <button class="btn btn-annuler" onclick="annulerFormCoursV2()">
+                                                        Annuler
+                                                    </button>
+                                                    <button class="btn btn-confirmer" onclick="sauvegarderCoursV2()">
+                                                        <span id="v2-btnTexteCours">Enregistrer</span>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -8953,7 +8945,7 @@
                                             <option value="">— Sélectionner —</option>
                                         </select>
                                     </div>
-                                    <button class="btn btn-secondaire" onclick="nouveauProfilEnseignantV2()" style="width: 100%; margin-bottom: 15px;">
+                                    <button class="btn btn-secondaire btn-block" onclick="nouveauProfilEnseignantV2()">
                                         + Nouveau profil
                                     </button>
 
@@ -8968,7 +8960,7 @@
                                 </div>
 
                                 <!-- DROITE : Formulaire d'édition (toujours visible) -->
-                                <div class="panneau-formulaire" style="padding: 15px;">
+                                <div class="panneau-formulaire">
                                     <h4 class="titre-formulaire" id="v2-titreFormEnseignant">Modifier le profil</h4>
 
                                     <div class="grille-form-2col" style="margin-bottom: 15px;">
@@ -9151,9 +9143,9 @@
                                     </div>
 
                                     <!-- Boutons d'action -->
-                                    <div class="actions-formulaire" style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
-                                        <button class="btn btn-supprimer" onclick="supprimerProfilEnseignantV2()" title="Supprimer ce profil">
-                                            🗑️ Supprimer
+                                    <div class="actions-formulaire">
+                                        <button class="btn btn-supprimer" onclick="supprimerProfilEnseignantV2()">
+                                            Supprimer
                                         </button>
                                         <div>
                                             <button class="btn btn-annuler" onclick="annulerFormEnseignantV2()">
@@ -9220,7 +9212,7 @@
                                         <label class="label-compact">Coller les données :</label>
                                         <textarea id="v2-donneesCollees" class="controle-form" rows="4"
                                             placeholder="Depuis Excel ou Omnivox..."></textarea>
-                                        <button class="btn btn-secondaire btn-sm btn-block" style="margin-top: 8px;" onclick="previsualiserDonneesV2()">
+                                        <button class="btn btn-secondaire btn-sm btn-block" onclick="previsualiserDonneesV2()">
                                             Prévisualiser
                                         </button>
 
@@ -9251,8 +9243,8 @@
                                         </button>
                                     </div>
 
-                                    <!-- Bouton nouveau groupe (en bas) -->
-                                    <button class="btn btn-principal btn-sm btn-block" style="margin-top: 15px;" onclick="creerNouveauGroupeV2()">
+                                    <!-- Bouton nouveau groupe -->
+                                    <button class="btn btn-principal btn-sm btn-block" onclick="creerNouveauGroupeV2()">
                                         + Nouveau groupe
                                     </button>
 
@@ -9355,8 +9347,8 @@
                                         <p class="texte-aide" style="margin-top: 5px; font-size: 0.75rem;">S'applique à tous les horaires.</p>
                                     </div>
 
-                                    <!-- Bouton nouvel horaire (en bas) -->
-                                    <button class="btn btn-principal btn-sm btn-block" style="margin-top: 15px;" onclick="nouveauHoraireV2()">
+                                    <!-- Bouton nouvel horaire -->
+                                    <button class="btn btn-principal btn-sm btn-block" onclick="nouveauHoraireV2()">
                                         + Nouvel horaire
                                     </button>
 
@@ -9428,17 +9420,18 @@
                                         </div>
 
                                         <!-- Boutons d'action -->
-                                        <div class="actions-formulaire" style="margin-top: 20px;">
-                                            <button class="btn btn-annuler" onclick="annulerFormHoraireV2()">
-                                                Annuler
-                                            </button>
-                                            <button class="btn btn-confirmer" onclick="sauvegarderHoraireV2()">
-                                                <span id="v2-btnTexteHoraire">Enregistrer</span>
-                                            </button>
-                                            <!-- Bouton supprimer (visible seulement en mode édition) -->
-                                            <button id="v2-btnSupprimerHoraire" class="btn btn-danger" onclick="supprimerHoraireV2()" style="display: none; margin-left: auto;">
+                                        <div class="actions-formulaire">
+                                            <button id="v2-btnSupprimerHoraire" class="btn btn-supprimer" onclick="supprimerHoraireV2()" style="display: none;">
                                                 Supprimer
                                             </button>
+                                            <div>
+                                                <button class="btn btn-annuler" onclick="annulerFormHoraireV2()">
+                                                    Annuler
+                                                </button>
+                                                <button class="btn btn-confirmer" onclick="sauvegarderHoraireV2()">
+                                                    <span id="v2-btnTexteHoraire">Enregistrer</span>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -9458,13 +9451,10 @@
                         </div>
                         <div class="accordeon-contenu" style="display: none;">
 
-                            <!-- Bandeau explicatif -->
-                            <div class="bandeau-info" style="background: var(--bleu-clair, #e8f4fc); border-left: 4px solid var(--bleu-primaire, #1a5a96); padding: 12px 15px; margin-bottom: 20px; border-radius: 4px;">
-                                <p style="margin: 0; font-size: 0.9rem; color: var(--texte-fonce, #333);">
-                                    <strong>Pour constituer un groupe-cours</strong>, associe : un cours + un enseignant·e + un numéro de groupe + un horaire + une pratique de notation.
-                                    <a href="#" onclick="ouvrirAideGroupeCours(); return false;" style="margin-left: 8px; color: var(--bleu-primaire, #1a5a96);">Besoin d'aide ?</a>
-                                </p>
-                            </div>
+                            <!-- Consigne groupe-cours -->
+                            <p class="texte-aide">
+                                <strong>Pour constituer un groupe-cours</strong>, associe : un cours + un enseignant·e + un numéro de groupe + un horaire + une pratique de notation.
+                            </p>
 
                             <div class="disposition-bibliotheque-formulaire">
 
@@ -9489,19 +9479,9 @@
                                         Le groupe-cours actif apparaît dans l'en-tête de l'application.
                                     </p>
 
-                                    <!-- Bouton nouveau groupe-cours (en bas) -->
-                                    <button class="btn btn-principal btn-sm btn-block" style="margin-top: 15px;" onclick="nouveauGroupeCoursV2()">
+                                    <!-- Bouton nouveau groupe-cours -->
+                                    <button class="btn btn-principal btn-sm btn-block" onclick="nouveauGroupeCoursV2()">
                                         + Nouveau groupe-cours
-                                    </button>
-
-                                    <!-- Bouton supprimer groupe-cours (Beta 95.2) -->
-                                    <button id="v2-btnSupprimerGroupeCours" class="btn btn-danger btn-sm btn-block" style="margin-top: 8px; display: none;" onclick="supprimerGroupeCoursV2()">
-                                        Supprimer ce groupe-cours
-                                    </button>
-
-                                    <!-- Bouton accès rapide calendrier (Beta 95.2) -->
-                                    <button class="btn btn-secondaire btn-sm btn-block" style="margin-top: 8px;" onclick="accederCalendrierRapide()">
-                                        Voir le calendrier
                                     </button>
 
                                 </div>
@@ -9582,13 +9562,18 @@
                                         </div>
 
                                         <!-- Boutons d'action -->
-                                        <div class="actions-formulaire" style="margin-top: 20px;">
-                                            <button class="btn btn-annuler" onclick="annulerFormGroupeCoursV2()">
-                                                Annuler
+                                        <div class="actions-formulaire">
+                                            <button id="v2-btnSupprimerGroupeCours" class="btn btn-supprimer" onclick="supprimerGroupeCoursV2()" style="display: none;">
+                                                Supprimer
                                             </button>
-                                            <button class="btn btn-confirmer" id="v2-btnSauvegarderGroupeCours" onclick="sauvegarderGroupeCoursV2()">
-                                                <span id="v2-btnTexteGroupeCours">Créer</span>
-                                            </button>
+                                            <div>
+                                                <button class="btn btn-annuler" onclick="annulerFormGroupeCoursV2()">
+                                                    Annuler
+                                                </button>
+                                                <button class="btn btn-confirmer" id="v2-btnSauvegarderGroupeCours" onclick="sauvegarderGroupeCoursV2()">
+                                                    <span id="v2-btnTexteGroupeCours">Créer</span>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -14121,7 +14106,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '95.2';
-        const BUILD_ID = '0109-0747';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0109-0807';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
