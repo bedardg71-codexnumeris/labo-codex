@@ -10708,38 +10708,40 @@ body[data-mode="simulation"] table tr:hover {
     margin-top: 0;
 }
 
-/* Boutons de suppression */
+/* Boutons - Utilisation des variables Design System */
 #reglages-trimestre .btn-supprimer,
 #reglages-trimestre .btn-danger {
-    background: transparent;
-    color: var(--rouge-danger);
-    border: 1px solid var(--rouge-danger);
-    font-size: 0.75rem;
-    padding: 5px 10px;
+    background: var(--btn-supprimer);
+    color: white;
+    border: none;
+    font-size: 0.8rem;
+    padding: 8px 14px;
+    border-radius: var(--radius-moyen);
 }
 
 #reglages-trimestre .btn-supprimer:hover,
 #reglages-trimestre .btn-danger:hover {
-    background: var(--rouge-danger);
-    color: white;
+    background: var(--btn-supprimer-hover);
 }
 
-/* Boutons annuler/confirmer uniformes */
 #reglages-trimestre .btn-annuler {
-    background: transparent;
-    color: var(--gris-moyen);
-    border: 1px solid var(--gris-clair);
+    background: var(--btn-annuler);
+    color: white;
+    border: none;
+}
+
+#reglages-trimestre .btn-annuler:hover {
+    background: var(--btn-annuler-hover);
 }
 
 #reglages-trimestre .btn-confirmer {
-    background: var(--bleu-principal);
+    background: var(--btn-confirmer);
     color: white;
-    border: 1px solid var(--bleu-principal);
+    border: none;
 }
 
 #reglages-trimestre .btn-confirmer:hover {
-    background: var(--bleu-moyen);
-    border-color: var(--bleu-moyen);
+    background: var(--btn-confirmer-hover);
 }
 
 /* Espacement uniforme entre boutons côte à côte */
