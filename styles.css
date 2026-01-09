@@ -10438,3 +10438,128 @@ body[data-mode="simulation"] table tr:hover {
 .resume-horaire-ligne:last-child {
     border-bottom: none;
 }
+
+/* ===============================
+   OPTIMISATION ESPACE - PAGE TRIMESTRE
+   Beta 95.3 - 9 janvier 2026
+   =============================== */
+
+/* Réduire l'espacement entre accordéons */
+#reglages-trimestre .carte.accordeon {
+    margin-top: 12px !important;
+}
+
+#reglages-trimestre .carte.accordeon:first-of-type {
+    margin-top: 0 !important;
+}
+
+/* Compacter le contenu des accordéons */
+#reglages-trimestre .accordeon-contenu {
+    padding: 12px 0 0 0;
+}
+
+/* Compacter la disposition bibliothèque/formulaire */
+#reglages-trimestre .disposition-bibliotheque-formulaire {
+    gap: 12px;
+}
+
+/* Compacter le panneau formulaire */
+#reglages-trimestre .panneau-formulaire {
+    padding: 12px;
+    min-height: auto;
+}
+
+/* Compacter les blocs section */
+#reglages-trimestre .bloc-section {
+    padding: 10px 12px;
+    margin-bottom: 10px;
+}
+
+#reglages-trimestre .bloc-section--compact {
+    padding: 8px 10px;
+}
+
+/* Compacter les sous-titres */
+#reglages-trimestre .sous-titre-section {
+    font-size: 0.85rem;
+    margin-bottom: 8px !important;
+}
+
+/* Compacter les groupes de formulaire */
+#reglages-trimestre .groupe-form {
+    margin-bottom: 8px;
+}
+
+#reglages-trimestre .groupe-form label {
+    font-size: 0.75rem;
+    margin-bottom: 3px;
+}
+
+/* Compacter les inputs */
+#reglages-trimestre .controle-form {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+}
+
+#reglages-trimestre .controle-form-compact {
+    padding: 5px 8px;
+    font-size: 0.8rem;
+}
+
+/* Compacter les grilles */
+#reglages-trimestre .grille-2col {
+    gap: 10px;
+}
+
+#reglages-trimestre .grille-2col-gap15 {
+    gap: 8px;
+}
+
+#reglages-trimestre .grille-form-2col {
+    gap: 10px;
+    margin-bottom: 10px !important;
+}
+
+/* Compacter les textes d'aide */
+#reglages-trimestre .texte-aide {
+    font-size: 0.75rem;
+    margin-top: 6px;
+}
+
+/* Compacter le panneau bibliothèque */
+#reglages-trimestre .panneau-bibliotheque {
+    padding: 10px;
+}
+
+#reglages-trimestre .panneau-bibliotheque .btn {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+}
+
+/* Compacter l'aperçu sidebar */
+#reglages-trimestre .apercu-trimestre-sidebar {
+    padding: 8px !important;
+    margin-top: 12px !important;
+    font-size: 0.8rem !important;
+}
+
+/* Compacter les états vides */
+#reglages-trimestre .etat-vide-formulaire {
+    padding: 15px;
+}
+
+/* Compacter les actions formulaire */
+#reglages-trimestre .actions-formulaire {
+    margin-top: 12px;
+    padding-top: 10px;
+}
+
+/* Réduire hauteur du titre h2 */
+#reglages-trimestre > h2 {
+    margin-bottom: 8px;
+}
+
+#reglages-trimestre > p.text-muted {
+    margin-bottom: 12px;
+    font-size: 0.85rem;
+}
