@@ -23,15 +23,14 @@
 - Variables CSS adoptees massivement (box-shadow 43%, border-radius 95%)
 
 ### Derniere tache completee (9 janvier)
+- **Audit module evaluation** : Documentation complete + fix critique
+  - `docs/modules/AUDIT_EVALUATION.md` : 16 548 lignes analysees
+  - 3 problemes critiques identifies, 1 corrige
+  - Fix: Namespacing `evaluationsSauvegardees` (34 occurrences, 7 fichiers)
 - **Compatibilite A2025** : Verifiee et nettoyee
-  - Donnees namespacees OK (30 etudiants, 305 evals, 941 presences)
-  - Donnees legacy orphelines supprimees (presences, portfoliosEleves)
-  - Flag migration mis a jour
+  - Donnees legacy orphelines supprimees
 - **Donnees demo (groupe 9999)** : Bug fusion corrige
-  - Cause: Cache non synchronise avant appel cle()
-  - Fix: Ajout `db.syncToLocalStorageCache()` apres activation trimestre demo
 - **Protocole mise a jour beta** : Documentation + script automatisation
-- **Alignement Trimestre/Primo** : Dropdown pratique dans groupe-cours
 - **Audit Design System v7 COMPLET** : 16 parties verifiees
 
 ---
@@ -39,7 +38,8 @@
 ## PROCHAINE TACHE
 
 **Choisir parmi le backlog** :
-- [ ] Auditer module evaluation
+- [ ] Integrer groupe-cours dans module evaluation (probleme critique #2)
+- [ ] Ajouter validations references (probleme critique #3)
 - [ ] Bouton supprimer groupe-cours
 - [ ] Affichage dropdown groupe-cours (nom lisible)
 
@@ -73,7 +73,7 @@
 - [x] Revoir design page Trimestre (harmonisation complete)
 - [x] Compatibilite page Trimestre avec wizard Primo (dropdown pratique ajoute)
 - [x] Creer protocole de mise a jour des beta (docs/operations/ + scripts/)
-- [ ] Auditer module evaluation (meme pattern assemblage?)
+- [x] Auditer module evaluation (audit complet + fix namespacing)
 - [ ] Filtres par discipline/cours avec listes controlees (dropdowns standardises)
 - [ ] Import par trimestre filtrable par cours
 - [ ] Verifier lecture champs discipline/pratique dans filtres bibliotheque Echelles
@@ -93,11 +93,12 @@
 
 | Fichier | Modification |
 |---------|--------------|
+| `js/evaluation.js` | Namespacing evaluationsSauvegardees via cle() |
+| `js/evaluation-jetons.js` | Namespacing evaluationsSauvegardees via cle() |
+| `js/portfolio.js` | Namespacing evaluationsSauvegardees via cle() |
+| `js/snapshots.js` | Namespacing evaluationsSauvegardees via cle() |
 | `js/donnees-demo.js` | Fix fusion demo - syncToLocalStorageCache() avant cle() |
-| `styles.css` | Audit complet + corrections parties 15-16, syntheses sidebars, import droite |
-| `index.html` | Syntheses sidebars, reorganisation import etudiants |
-| `js/trimestre-v2.js` | Fonctions syntheses (cours, top programmes, score completude) |
-| `SESSION.md` | Mise a jour Beta 95.3 |
+| `docs/modules/AUDIT_EVALUATION.md` | Documentation audit module evaluation |
 
 ---
 
@@ -123,13 +124,12 @@
 ## HISTORIQUE RECENT
 
 ### 9 janvier 2026
+- **Audit module evaluation** : 16 548 lignes, 3 problemes critiques identifies
+- **Fix namespacing evaluationsSauvegardees** : 34 occurrences, 7 fichiers
 - **Compatibilite A2025** : Verifiee, donnees legacy nettoyees
 - **Donnees demo (groupe 9999)** : Bug fusion corrige (sync cache avant cle())
 - **Protocole mise a jour beta** : Documentation + script automatisation
-- **Alignement Trimestre/Primo** : Dropdown pratique dans formulaire groupe-cours
 - **Audit Design System v7 COMPLET** : 16 parties verifiees, toutes conformes
-- Syntheses intelligentes sidebars (cours, groupe etudiants, groupe-cours)
-- Migration massive variables CSS (box-shadow 43%, border-radius 95%)
 
 ### 8 janvier 2026
 - Consolidation entites-ui.js → trimestre-v2.js
@@ -177,4 +177,4 @@
 
 ---
 
-**Derniere mise a jour** : 9 janvier 2026, 13:43 (Toronto)
+**Derniere mise a jour** : 9 janvier 2026, 14:04 (Toronto)
