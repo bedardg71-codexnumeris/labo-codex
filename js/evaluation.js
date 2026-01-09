@@ -111,6 +111,10 @@ function initialiserModuleEvaluation() {
  * - 'groupeEtudiants' : Array des étudiants
  */
 function chargerListeEtudiantsEval() {
+    // 🆕 FIX (9 jan 2026) : Log groupe-cours actif pour debug
+    const groupeCoursActif = db.getSync('groupeCoursActif', null);
+    console.log('📚 [Évaluation] Groupe-cours actif:', groupeCoursActif?.id || 'AUCUN', '| Groupe:', groupeCoursActif?.groupe || 'N/A');
+
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
     const select = document.getElementById('selectEtudiantEval');
 
@@ -123,7 +127,7 @@ function chargerListeEtudiantsEval() {
     const modeAnonymisation = modeDepuisDb === 'anonymisation' ||
                               (typeof estModeeLectureSeule === 'function' && estModeeLectureSeule());
 
-    console.log('🔍 [chargerListeEtudiantsEval] Mode:', modeDepuisDb, 'Anonymisation:', modeAnonymisation);
+    console.log('🔍 [chargerListeEtudiantsEval] Mode:', modeDepuisDb, '| Étudiants:', etudiants.length);
 
     // NOUVEAU (Beta 84): Trier par nom de famille (ordre alphabétique)
     etudiants.sort((a, b) => {
@@ -1745,6 +1749,23 @@ function sauvegarderEvaluation() {
     const grilles = db.getSync('grillesTemplates', []);
     const grille = grilles.find(g => g.id === grilleId);
 
+    // 🆕 FIX (9 jan 2026) : Validation des références avant sauvegarde
+    if (!etudiant) {
+        afficherNotificationErreur('Étudiant introuvable', `L'étudiant ${etudiantDA} n'existe pas dans le groupe actif.`);
+        console.error('[Évaluation] ❌ Référence invalide: etudiantDA', etudiantDA);
+        return;
+    }
+    if (!production) {
+        afficherNotificationErreur('Production introuvable', `La production sélectionnée n'existe plus.`);
+        console.error('[Évaluation] ❌ Référence invalide: productionId', productionId);
+        return;
+    }
+    if (!grille) {
+        afficherNotificationErreur('Grille introuvable', `La grille de critères sélectionnée n'existe plus.`);
+        console.error('[Évaluation] ❌ Référence invalide: grilleId', grilleId);
+        return;
+    }
+
     // Collecter les évaluations des critères
     const criteres = [];
     if (grille && grille.criteres) {
@@ -1765,7 +1786,9 @@ function sauvegarderEvaluation() {
 
     // Créer l'objet évaluation avec horodatage
     // ✅ CORRECTION CRITIQUE (Beta 95 - 27 déc 2025) : Ajouter coursId
+    // 🆕 FIX (9 jan 2026) : Ajouter groupeCoursId pour traçabilité complète
     const coursId = typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null;
+    const groupeCoursActif = db.getSync('groupeCoursActif', null);
     const maintenant = new Date();
     const evaluation = {
         id: 'EVAL_' + Date.now(),
@@ -1773,6 +1796,7 @@ function sauvegarderEvaluation() {
         etudiantNom: etudiant ? `${etudiant.prenom} ${etudiant.nom}` : '',
         groupe: etudiant ? etudiant.groupe : '',
         coursId: coursId,  // ✅ Lier l'évaluation au cours actif
+        groupeCoursId: groupeCoursActif?.id || null,  // 🆕 Traçabilité groupe-cours
         productionId: productionId,
         productionNom: production ? (production.titre || production.nom) : '',
         grilleId: grilleId,
@@ -4642,6 +4666,23 @@ function sauvegarderEvaluationModifiee() {
 
     const grilles = db.getSync('grillesTemplates', []);
     const grille = grilles.find(g => g.id === grilleId);
+
+    // 🆕 FIX (9 jan 2026) : Validation des références avant sauvegarde
+    if (!etudiant) {
+        afficherNotificationErreur('Étudiant introuvable', `L'étudiant ${etudiantDA} n'existe pas dans le groupe actif.`);
+        console.error('[Évaluation] ❌ Référence invalide: etudiantDA', etudiantDA);
+        return;
+    }
+    if (!production) {
+        afficherNotificationErreur('Production introuvable', `La production sélectionnée n'existe plus.`);
+        console.error('[Évaluation] ❌ Référence invalide: productionId', productionId);
+        return;
+    }
+    if (!grille) {
+        afficherNotificationErreur('Grille introuvable', `La grille de critères sélectionnée n'existe plus.`);
+        console.error('[Évaluation] ❌ Référence invalide: grilleId', grilleId);
+        return;
+    }
 
     // Collecter les évaluations des critères
     const criteres = [];
