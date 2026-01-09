@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 95.3
 
 **Date** : 9 janvier 2026
-**Version** : Beta 95.3 (build 0109-1100)
+**Version** : Beta 95.3 (build 0109-0747)
 **Statut** : Application fonctionnelle pour H2026
 
 ---
@@ -30,6 +30,11 @@
 - **Partie 5 audit terminee** : Box-shadow migres vers variables
 - **Partie 6 audit terminee** : Border-radius migres vers variables
 - Archivage Beta 95.2 dans Archives/Beta-95-2/
+- **Uniformisation page Trimestre** : ~150 lignes CSS ajoutees
+  - Couleurs encadres → bleu pale uniforme (var(--bleu-pale))
+  - Suppression arrondis bordures gauches
+  - Tailles de police uniformisees (labels 0.8rem, sous-labels 0.7rem)
+  - Boutons uniformises (padding, couleurs, espacement)
 
 ---
 
@@ -68,8 +73,8 @@
 - [x] **Incoherence profil enseignant** : Resolu - liste unifiee `enseignants` (migration auto de profilEnseignant)
 - [ ] **Bouton supprimer groupe-cours** : Ajouter modal bibliotheque pour gerer/supprimer les groupes-cours
 - [ ] **Affichage dropdown groupe-cours** : Afficher nom lisible au lieu de GC_timestamp quand donnees incompletes
-- [ ] Optimiser utilisation de l'espace (limiter scrolling vertical)
-- [ ] Revoir design page Trimestre (harmonisation complete)
+- [x] Optimiser utilisation de l'espace (limiter scrolling vertical)
+- [x] Revoir design page Trimestre (harmonisation complete)
 - [ ] Compatibilite page Trimestre avec wizard Primo
 - [ ] Creer protocole de mise a jour des beta
 - [ ] Auditer module evaluation (meme pattern assemblage?)
@@ -128,6 +133,7 @@
 - Partie 1 audit: 4 pratiques (SOM/STD/SPE/DEN) - deja complete
 - Partie 5 audit: Box-shadow migres
 - Partie 6 audit: Border-radius migres
+- **Uniformisation page Trimestre** : encadres, polices, boutons harmonises
 
 ### 8 janvier 2026
 - Consolidation entites-ui.js → trimestre-v2.js
@@ -175,4 +181,4 @@
 
 ---
 
-**Derniere mise a jour** : 9 janvier 2026, 11:00 (Toronto)
+**Derniere mise a jour** : 9 janvier 2026, 07:47 (Toronto)
