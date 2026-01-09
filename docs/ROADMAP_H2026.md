@@ -6,9 +6,9 @@
 
 ---
 
-## Etat actuel (1er janvier 2026)
+## Etat actuel (9 janvier 2026)
 
-### Accompli (novembre-decembre 2025)
+### Accompli (novembre 2025 - janvier 2026)
 
 | Date | Jalon | Statut |
 |------|-------|--------|
@@ -18,6 +18,8 @@
 | 3 dec | Systeme 100% universel (Beta 93) | ✅ |
 | 10-12 dec | Snapshots hebdomadaires (Beta 94) | ✅ |
 | 24-27 dec | Multi-trimestres + namespacing (Beta 95) | ✅ |
+| 6-7 jan 2026 | Architecture modulaire Trimestre (Beta 95.2) | ✅ |
+| 8-9 jan | Audit evaluation + UX modaux (Beta 95.3) | ✅ |
 
 ### Resultats du sondage (6 cartographies analysees)
 
@@ -54,6 +56,10 @@
 - [x] Import/export avec Creative Commons
 - [x] Primo Assistant (onboarding)
 - [x] Groupe demo 9999
+- [x] Architecture modulaire groupe-cours (6 accordeons)
+- [x] Syntheses intelligentes sidebars
+- [x] Import depuis trimestre precedent
+- [x] Design System v7 (variables CSS)
 
 ---
 
@@ -64,37 +70,37 @@
 
 ### Feuille de route des versions
 
-| Mois | Version | Objectif principal |
-|------|---------|-------------------|
-| Janvier | **Beta 95** | Stabilisation + architecture modulaire |
-| Fevrier | Beta 96 | Corrections usage reel |
-| Mars | Beta 97 | Ameliorations UX |
-| Avril | Beta 98 | Polish et stabilite |
-| Mai | Beta 99 | Documentation + preparation |
-| Juin | **Version 1.0** | Colloque AQPC |
+| Mois | Version | Objectif principal | Statut |
+|------|---------|-------------------|--------|
+| Janvier | **Beta 95** | Stabilisation + architecture modulaire | ✅ Complet |
+| Fevrier | Beta 96 | Corrections usage reel + CSS modulaire | En attente |
+| Mars | Beta 97 | Ameliorations UX | En attente |
+| Avril | Beta 98 | Polish et stabilite | En attente |
+| Mai | Beta 99 | Documentation + preparation | En attente |
+| Juin | **Version 1.0** | Colloque AQPC | En attente |
 
 ---
 
-### Janvier : Beta 95 - Stabilisation
+### Janvier : Beta 95 - Stabilisation ✅ COMPLÉTÉ
 
 **Objectif** : Architecture modulaire operationnelle AVANT les premieres evaluations
 
-| Focus | Livrable |
-|-------|----------|
-| Architecture modulaire groupe-cours | Toggles separes (Cours, Enseignant, Horaire, Groupe-cours) |
-| Verification coherence evaluations | Pattern assemblage identique partout |
-| Configurer H2026 (cours, groupes, etudiants) | Donnees reelles importees |
-| Corriger bugs decouverts en usage | Beta 95.x stable |
+| Focus | Livrable | Statut |
+|-------|----------|--------|
+| Architecture modulaire groupe-cours | 6 accordeons (Cours, Enseignant, Groupe, Horaire, Groupe-cours, Trimestre) | ✅ |
+| Verification coherence evaluations | Audit complet + 3 fixes critiques | ✅ |
+| Configurer H2026 (cours, groupes, etudiants) | Donnees reelles importees | ✅ |
+| Corriger bugs decouverts en usage | Beta 95.3 stable | ✅ |
 
-**Point critique** : Le module d'evaluation suit le MEME pattern d'assemblage :
+**Point critique resolu** : Le module d'evaluation suit le MEME pattern d'assemblage :
 - Production + Eleve + Grille + Echelle + Cartouche + Jetons → **Evaluation** (bibliotheque)
-- Verifier que l'architecture est coherente dans tous les modules
+- Audit complet effectue le 9 janvier (16 548 lignes, 3 problemes resolus)
 
 **Criteres de succes** :
-- [ ] Architecture modulaire validee dans Trimestre
-- [ ] Pattern identique confirme dans module Evaluations
-- [ ] 1+ groupe suivi avec l'application
-- [ ] Bugs bloquants corriges au fil de l'eau
+- [x] Architecture modulaire validee dans Trimestre (6 accordeons, groupe-cours)
+- [x] Pattern identique confirme dans module Evaluations (audit 9 janvier)
+- [ ] 1+ groupe suivi avec l'application (en cours H2026)
+- [x] Bugs bloquants corriges au fil de l'eau (Bruno + Olivier, 6 janvier)
 
 ### Fevrier : Beta 96
 
@@ -149,46 +155,55 @@
 
 ---
 
-## Backlog Beta 95 (janvier)
+## Backlog Beta 95 (janvier) - COMPLÉTÉ
 
-### 7 janvier - Finaliser Trimestre modulaire
+### 7 janvier - Finaliser Trimestre modulaire ✅
 
-- [ ] Fonctions completes (CRUD toutes entites)
-- [ ] Boutons fonctionnels (sauvegarder, supprimer, dupliquer)
-- [ ] Interface terminee (tous les toggles)
-- [ ] Connexion avec vue calendaire
-- [ ] Connexion avec saisie des presences
+- [x] Fonctions completes (CRUD toutes entites)
+- [x] Boutons fonctionnels (sauvegarder, supprimer, dupliquer)
+- [x] Interface terminee (tous les toggles → 6 accordeons)
+- [x] Connexion avec vue calendaire
+- [x] Connexion avec saisie des presences
 
-### 8 janvier - Bibliotheques et Import/Export
+### 8 janvier - Bibliotheques et Import/Export ✅
 
-- [ ] Valider import/export Productions
-- [ ] Valider import/export Grilles
-- [ ] Valider import/export Echelles
-- [ ] Valider import/export Cartouches
-- [ ] Valider import/export Pratiques
+- [x] Valider import/export Productions
+- [x] Valider import/export Grilles
+- [x] Valider import/export Echelles
+- [x] Valider import/export Cartouches
+- [x] Valider import/export Pratiques
 
-### Plus tard (Beta 95.x)
+### 9 janvier - Beta 95.3 ✅
 
-- [ ] Auditer module evaluation (meme pattern assemblage?)
-- [ ] Revoir le design de la page Trimestre (harmonisation complete)
-- [ ] Assurer compatibilite page Trimestre avec wizard Primo (configuration rapide)
-- [ ] Creer un protocole de mise a jour des beta (checklist, versioning, communication)
+- [x] Auditer module evaluation (3/3 problemes critiques resolus)
+- [x] Revoir le design de la page Trimestre (Design System v7)
+- [x] Assurer compatibilite page Trimestre avec wizard Primo (detection config existante)
+- [x] Creer un protocole de mise a jour des beta (docs/operations/ + scripts/)
+- [x] Modal bibliotheque groupe-cours (vue liste, Activer, Supprimer)
+- [x] Syntheses intelligentes dans sidebars (5 fonctions)
+- [x] Import depuis trimestre precedent (Echelles, Grilles, Productions)
+- [x] Nommage fichiers export standardise (genererNomFichierExport)
+- [x] Section AIDE mise a jour (workflow Beta 95.3)
 
-### Compatibilite et donnees (Beta 95.x)
+### Compatibilite et donnees (Beta 95.x) ✅
 
-- [ ] Assurer compatibilite donnees A2025 avec modifications au code (cartouche modulaire, trimestre, etc.)
-- [ ] Tester l'application avec les donnees A2025 (validation complete)
-- [ ] Assurer la fonctionnalite des donnees demo (groupe 9999)
+- [x] Assurer compatibilite donnees A2025 avec modifications au code
+- [x] Tester l'application avec les donnees A2025 (validation complete)
+- [x] Assurer la fonctionnalite des donnees demo (groupe 9999)
 
-### Architecture modulaire - Verification coherence
+### Architecture modulaire - Verification coherence ✅
 
 **Contexte** : L'architecture groupe-cours (Beta 95.2) utilise un pattern d'assemblage :
-- Cours + Enseignant + Horaire + Pratique → **Groupe-cours** (bibliotheque)
+- Cours + Enseignant + Horaire + Groupe + Pratique → **Groupe-cours** (bibliotheque)
 
-**Verification requise** : Le module d'evaluation utilise-t-il le MEME pattern ?
+**Verification effectuee** (9 janvier 2026) : Audit complet du module evaluation
 - Production + Eleve + Grille + Echelle + Cartouche + Jetons → **Evaluation** (bibliotheque)
+- 16 548 lignes analysees, 3 problemes critiques identifies et resolus
+- Namespacing evaluationsSauvegardees via cle() (34 occurrences, 7 fichiers)
+- Integration groupeCoursId dans toutes les evaluations
+- Validations references (etudiant/production/grille) avant sauvegarde
 
-**Echeance** : Avant les premieres evaluations du trimestre (mi-janvier)
+**Resultat** : Pattern d'assemblage coherent entre Trimestre et Evaluations
 
 ---
 
@@ -296,5 +311,5 @@
 
 ---
 
-**Derniere mise a jour** : 6 janvier 2026
-**Prochaine revue** : 1er fevrier 2026 (fin janvier)
+**Derniere mise a jour** : 9 janvier 2026
+**Prochaine revue** : 1er fevrier 2026 (debut Beta 96)
