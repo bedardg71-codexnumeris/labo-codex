@@ -96,7 +96,7 @@ function chargerPortfolioEleveDetail(da) {
         const artefactsPortfolio = productions.filter(p => p.type === 'artefact-portfolio');
 
         // Récupérer les évaluations de cet élève
-        const evaluations = db.getSync('evaluationsSauvegardees', []);
+        const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
         const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da);
 
         // Récupérer les sélections de portfolio

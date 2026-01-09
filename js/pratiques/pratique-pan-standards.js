@@ -733,7 +733,7 @@ class PratiquePANStandards {
         if (typeof obtenirDonneesSelonMode === 'function') {
             return obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
         }
-        return db.getSync('evaluationsSauvegardees', []);
+        return db.getSync(cle('evaluationsSauvegardees'), []);
     }
 
     /**

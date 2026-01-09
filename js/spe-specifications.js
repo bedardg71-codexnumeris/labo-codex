@@ -364,7 +364,8 @@
         const forfaits = specifications.forfaits || [];
 
         // Récupérer les évaluations de l'étudiant
-        const evaluations = await db.get('evaluationsSauvegardees') || [];
+        // 🆕 FIX (9 jan 2026): Namespacing par trimestre via cle()
+        const evaluations = await db.get(cle('evaluationsSauvegardees')) || [];
         const evalsEtudiant = evaluations.filter(e =>
             e.etudiantDA === etudiantDA &&
             e.statutRemise === 'remis'
