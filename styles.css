@@ -10292,12 +10292,13 @@ body[data-mode="simulation"] table tr:hover {
 }
 
 .bloc-section--bleu {
-    background: var(--bleu-tres-pale);
+    background: var(--bleu-pale);
 }
 
+/* Beta 95.3 : Uniformisation - plus de bordure verte */
 .bloc-section--vert {
-    background: var(--vert-tres-pale, #e8f5e9);
-    border-left: 4px solid var(--vert-succes, #4caf50);
+    background: var(--bleu-pale);
+    /* Bordure gauche supprimée pour cohérence */
 }
 
 .bloc-section--compact {
@@ -10538,9 +10539,11 @@ body[data-mode="simulation"] table tr:hover {
 
 /* Compacter l'aperçu sidebar */
 #reglages-trimestre .apercu-trimestre-sidebar {
-    padding: 8px !important;
-    margin-top: 12px !important;
-    font-size: 0.8rem !important;
+    padding: 10px;
+    margin-top: 12px;
+    font-size: 0.8rem;
+    background: var(--bleu-pale);
+    border-radius: var(--radius-grand);
 }
 
 /* Compacter les états vides */
@@ -10562,4 +10565,189 @@ body[data-mode="simulation"] table tr:hover {
 #reglages-trimestre > p.text-muted {
     margin-bottom: 12px;
     font-size: 0.85rem;
+}
+
+/* ===============================
+   UNIFORMISATION VISUELLE - PAGE TRIMESTRE
+   Beta 95.3 - 9 janvier 2026
+   =============================== */
+
+/* --- Suppression arrondis bordures gauches --- */
+/* Les éléments avec bordure gauche doivent avoir coins carrés à gauche */
+#reglages-trimestre [style*="border-left"],
+#reglages-trimestre .alerte,
+#reglages-trimestre .modal-info,
+#reglages-trimestre .carte-info-toggle {
+    border-radius: 0 var(--radius-moyen) var(--radius-moyen) 0 !important;
+}
+
+/* --- Uniformisation tailles de police labels --- */
+/* Tous les labels de formulaire : 0.8rem uniforme */
+#reglages-trimestre .groupe-form label,
+#reglages-trimestre .panneau-formulaire label,
+#reglages-trimestre label[style*="font-size"] {
+    font-size: 0.8rem !important;
+    font-weight: 500 !important;
+    color: var(--gris-fonce);
+    margin-bottom: 4px;
+}
+
+/* Sous-labels (Du:/Au:) : 0.7rem */
+#reglages-trimestre .d-flex-gap-10-center label {
+    font-size: 0.7rem !important;
+}
+
+/* --- Uniformisation sous-titres sections --- */
+#reglages-trimestre .sous-titre-section {
+    font-size: 0.9rem !important;
+    font-weight: 600;
+    color: var(--bleu-principal);
+    margin: 0 0 10px 0 !important;
+}
+
+/* --- Uniformisation textes d'aide --- */
+#reglages-trimestre .texte-aide,
+#reglages-trimestre p[style*="font-size: 0.8rem"] {
+    font-size: 0.75rem !important;
+    color: var(--gris-moyen);
+}
+
+/* --- Uniformisation boutons --- */
+/* Boutons primaires/secondaires dans la page */
+#reglages-trimestre .btn {
+    font-size: 0.8rem;
+    padding: 8px 14px;
+    border-radius: var(--radius-moyen);
+    transition: all 0.2s ease;
+}
+
+/* Boutons compacts */
+#reglages-trimestre .btn-tres-compact,
+#reglages-trimestre .btn-compact {
+    padding: 5px 10px;
+    font-size: 0.75rem;
+}
+
+/* Boutons bibliothèque */
+#reglages-trimestre .btn-bibliotheque {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+/* Boutons dans les actions formulaire - alignement à droite */
+#reglages-trimestre .actions-formulaire {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--gris-tres-clair);
+}
+
+/* Boutons de réinitialisation dans les blocs */
+#reglages-trimestre .btn-reset-bloc {
+    font-size: 1rem;
+    opacity: 0.6;
+}
+
+#reglages-trimestre .btn-reset-bloc:hover {
+    opacity: 1;
+}
+
+/* --- Uniformisation encadrés --- */
+/* Tous les blocs-section en bleu pâle uniforme */
+#reglages-trimestre .bloc-section {
+    background: var(--bleu-pale) !important;
+    border: none !important;
+    border-radius: var(--radius-grand);
+}
+
+/* Formulaires internes */
+#reglages-trimestre .formulaire-interne {
+    background: var(--bleu-tres-pale);
+    border-radius: var(--radius-moyen);
+    padding: 10px;
+    margin-top: 8px;
+    position: relative;
+}
+
+/* --- Uniformisation selects et inputs --- */
+#reglages-trimestre .controle-form,
+#reglages-trimestre select,
+#reglages-trimestre input[type="text"],
+#reglages-trimestre input[type="number"],
+#reglages-trimestre input[type="date"] {
+    font-size: 0.85rem;
+    padding: 6px 10px;
+    border: 1px solid var(--gris-clair);
+    border-radius: var(--radius-moyen);
+}
+
+#reglages-trimestre .controle-form:focus,
+#reglages-trimestre select:focus,
+#reglages-trimestre input:focus {
+    border-color: var(--bleu-principal);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.15);
+}
+
+/* Boutons pleine largeur */
+#reglages-trimestre .btn-block,
+#reglages-trimestre .btn.btn-sm[style*="width: 100%"] {
+    width: 100%;
+    margin-top: 8px;
+}
+
+#reglages-trimestre .btn-block:first-of-type {
+    margin-top: 0;
+}
+
+/* Boutons de suppression */
+#reglages-trimestre .btn-supprimer,
+#reglages-trimestre .btn-danger {
+    background: transparent;
+    color: var(--rouge-danger);
+    border: 1px solid var(--rouge-danger);
+    font-size: 0.75rem;
+    padding: 5px 10px;
+}
+
+#reglages-trimestre .btn-supprimer:hover,
+#reglages-trimestre .btn-danger:hover {
+    background: var(--rouge-danger);
+    color: white;
+}
+
+/* Boutons annuler/confirmer uniformes */
+#reglages-trimestre .btn-annuler {
+    background: transparent;
+    color: var(--gris-moyen);
+    border: 1px solid var(--gris-clair);
+}
+
+#reglages-trimestre .btn-confirmer {
+    background: var(--bleu-principal);
+    color: white;
+    border: 1px solid var(--bleu-principal);
+}
+
+#reglages-trimestre .btn-confirmer:hover {
+    background: var(--bleu-moyen);
+    border-color: var(--bleu-moyen);
+}
+
+/* Espacement uniforme entre boutons côte à côte */
+#reglages-trimestre .btn-groupe,
+#reglages-trimestre .actions-formulaire div {
+    display: flex;
+    gap: 8px;
+}
+
+/* Badges compteurs dans les en-têtes accordéon */
+#reglages-trimestre .badge-compteur {
+    font-size: 0.75rem;
+    padding: 3px 8px;
+    background: var(--bleu-tres-pale);
+    border-radius: var(--radius-pill);
+    color: var(--bleu-moyen);
 }
