@@ -23,6 +23,15 @@
 - Variables CSS adoptees massivement (box-shadow 43%, border-radius 95%)
 
 ### Derniere tache completee (9 janvier)
+- **BUG CRITIQUE CORRIGE** : Perte de donnees etudiants
+  - Cause : `obtenirDonneesSelonMode()` filtrait par coursId, puis `sauvegarderDonneesSelonMode()` ecrasait TOUT
+  - Fix : Utilisation de `db.getSync()` direct dans groupe.js (confirmerImport, supprimerEtudiant)
+  - Fichier modifie : `js/groupe.js` (2 fonctions corrigees)
+- **Bouton "Supprimer ce groupe"** : Nouvelle fonctionnalite
+  - Permet de supprimer tous les etudiants d'un groupe en un clic
+  - Bouton visible uniquement quand un groupe est selectionne
+  - Confirmation requise avant suppression
+- **Support format Excel** : `="valeur"` maintenant reconnu lors de l'import
 - **Section AIDE mise a jour** : Documentation Beta 95.3
   - Carte "Etapes de configuration" : Workflow Beta 95 unifie
   - Carte "Primo" : Integration Section Trimestre + detection config existante
@@ -98,19 +107,20 @@
 
 | Fichier | Modification |
 |---------|--------------|
+| `js/groupe.js` | **FIX CRITIQUE** : Perte donnees etudiants + format Excel ="valeur" |
+| `js/trimestre-v2.js` | Bouton supprimer groupe + reset dropdown + format Excel |
+| `index.html` | Bouton "Supprimer ce groupe" + Section AIDE |
 | `js/cc-license.js` | Fonction genererNomFichierExport() standardisee |
 | `js/echelles.js` | Import trimestre + discipline auto + nommage export |
 | `js/grilles.js` | Discipline auto + nommage export |
 | `js/productions.js` | Filtre cours import + nommage export |
 | `js/cours.js` | Modal 800px (etait 900px) |
-| `js/trimestre-v2.js` | Modal groupe-cours 800px (etait 700px) |
 | `js/evaluation.js` | Namespacing evaluationsSauvegardees via cle() |
 | `js/evaluation-jetons.js` | Namespacing evaluationsSauvegardees via cle() |
 | `js/portfolio.js` | Namespacing evaluationsSauvegardees via cle() |
 | `js/snapshots.js` | Namespacing evaluationsSauvegardees via cle() |
 | `js/donnees-demo.js` | Fix fusion demo - syncToLocalStorageCache() avant cle() |
 | `docs/modules/AUDIT_EVALUATION.md` | Documentation audit module evaluation |
-| `index.html` | Section AIDE mise a jour (Beta 95.3 workflow + import trimestre) |
 
 ---
 
@@ -136,6 +146,11 @@
 ## HISTORIQUE RECENT
 
 ### 9 janvier 2026
+- **BUG CRITIQUE CORRIGE** : Perte donnees etudiants lors import/suppression
+  - Cause : obtenirDonneesSelonMode() filtrait par coursId puis sauvegarderDonneesSelonMode() ecrasait TOUT
+  - Fix : db.getSync() direct dans groupe.js (confirmerImport, supprimerEtudiant)
+- **Bouton "Supprimer ce groupe"** : Permet de supprimer un groupe entier avec confirmation
+- **Support format Excel** : `="valeur"` reconnu lors de l'import etudiants
 - **Section AIDE mise a jour** : Documentation Beta 95.3 (workflow, Primo, import trimestre)
 - **Modal bibliotheque groupe-cours** : Vue liste, Activer, Supprimer, bouton 📚
 - **Syntheses intelligentes sidebars** : 5 fonctions (Cours, Enseignant, Groupe, Horaire, Groupe-cours)
