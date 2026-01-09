@@ -37,9 +37,9 @@
 ## PROCHAINE TACHE
 
 **Choisir parmi le backlog** :
-- [ ] Bouton supprimer groupe-cours (modal bibliotheque optionnelle)
 - [ ] Filtres par discipline/cours avec listes controlees
 - [ ] UX modal Echelles : bouton Export avec sidebar
+- [ ] Import par trimestre filtrable par cours
 
 ---
 
@@ -66,6 +66,7 @@
 - [x] **Bug trimestre par defaut** : Resolu - detection et correction auto si plusieurs trimestres actifs
 - [x] **Incoherence profil enseignant** : Resolu - liste unifiee `enseignants` (migration auto de profilEnseignant)
 - [x] **Bouton supprimer groupe-cours** : Deja implementé (bouton dans formulaire + liste)
+- [x] **Modal bibliotheque groupe-cours** : Vue liste avec Activer/Supprimer (Beta 95.3)
 - [x] **Affichage dropdown groupe-cours** : "Groupe 00001" au lieu de "??? gr.00001"
 - [x] Optimiser utilisation de l'espace (limiter scrolling vertical)
 - [x] Revoir design page Trimestre (harmonisation complete)
@@ -123,6 +124,7 @@
 ## HISTORIQUE RECENT
 
 ### 9 janvier 2026
+- **Modal bibliotheque groupe-cours** : Vue liste, Activer, Supprimer, bouton 📚
 - **Syntheses intelligentes sidebars** : 5 fonctions (Cours, Enseignant, Groupe, Horaire, Groupe-cours)
 - **Libelle dropdown groupe-cours** : "Groupe 00001" au lieu de "??? gr.00001" (5 endroits)
 - **Audit module evaluation** : 16 548 lignes, 3 problemes critiques identifies et resolus
@@ -180,4 +182,4 @@
 
 ---
 
-**Derniere mise a jour** : 9 janvier 2026, 14:32 (Toronto)
+**Derniere mise a jour** : 9 janvier 2026, 14:40 (Toronto)
