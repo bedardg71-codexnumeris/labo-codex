@@ -3647,7 +3647,7 @@ function populerDropdownsAssemblageV2() {
     if (selectPratique) {
         const pratiques = db.getSync('pratiquesNotation', []);
 
-        let html = '<option value="">— Optionnel —</option>';
+        let html = '<option value="">— À compléter quand configurée —</option>';
         pratiques.forEach(p => {
             const nom = p.nom || p.id || 'Sans nom';
             html += `<option value="${p.id}">${nom}</option>`;
