@@ -37,9 +37,9 @@
 ## PROCHAINE TACHE
 
 **Choisir parmi le backlog** :
-- [ ] Bouton supprimer groupe-cours
-- [ ] Affichage dropdown groupe-cours (nom lisible)
+- [ ] Bouton supprimer groupe-cours (existe deja, modal bibliotheque optionnelle)
 - [ ] Syntheses intelligentes dans les sidebars (plan existant)
+- [ ] Filtres par discipline/cours avec listes controlees
 
 ---
 
@@ -65,8 +65,8 @@
 ### Plus tard
 - [x] **Bug trimestre par defaut** : Resolu - detection et correction auto si plusieurs trimestres actifs
 - [x] **Incoherence profil enseignant** : Resolu - liste unifiee `enseignants` (migration auto de profilEnseignant)
-- [ ] **Bouton supprimer groupe-cours** : Ajouter modal bibliotheque pour gerer/supprimer les groupes-cours
-- [ ] **Affichage dropdown groupe-cours** : Afficher nom lisible au lieu de GC_timestamp quand donnees incompletes
+- [x] **Bouton supprimer groupe-cours** : Deja implementé (bouton dans formulaire + liste)
+- [x] **Affichage dropdown groupe-cours** : "Groupe 00001" au lieu de "??? gr.00001"
 - [x] Optimiser utilisation de l'espace (limiter scrolling vertical)
 - [x] Revoir design page Trimestre (harmonisation complete)
 - [x] Compatibilite page Trimestre avec wizard Primo (dropdown pratique ajoute)
@@ -122,6 +122,7 @@
 ## HISTORIQUE RECENT
 
 ### 9 janvier 2026
+- **Libelle dropdown groupe-cours** : "Groupe 00001" au lieu de "??? gr.00001" (5 endroits)
 - **Audit module evaluation** : 16 548 lignes, 3 problemes critiques identifies et resolus
 - **Fix #1 namespacing evaluationsSauvegardees** : 34 occurrences, 7 fichiers
 - **Fix #2 integration groupe-cours** : groupeCoursId ajoute aux evaluations + logs
@@ -177,4 +178,4 @@
 
 ---
 
-**Derniere mise a jour** : 9 janvier 2026, 14:16 (Toronto)
+**Derniere mise a jour** : 9 janvier 2026, 14:25 (Toronto)
