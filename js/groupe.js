@@ -498,8 +498,18 @@ function confirmImport() {
     }
 
     try {
-        let students = obtenirDonneesSelonMode('groupeEtudiants');
+        // 🔧 CORRECTION CRITIQUE (9 janvier 2026) : Lire TOUTES les données sans filtrage
+        // obtenirDonneesSelonMode filtre par coursId, ce qui causait la perte des étudiants d'autres cours
+        const cleEtudiants = (typeof cle === 'function') ? cle('groupeEtudiants') : 'groupeEtudiants';
+        let students = db.getSync(cleEtudiants, []);
         const ancienTotal = students.length;
+
+        // Vérifier mode anonymisation
+        const modeActuel = db.getSync('modeApplication', 'normal');
+        if (modeActuel === 'anonymisation') {
+            afficherNotificationErreur('Modification impossible', 'Impossible d\'importer en mode anonymisation');
+            return;
+        }
 
         // Vérifier doublons DA
         const dasExistants = students.map(s => s.da);
@@ -513,10 +523,8 @@ function confirmImport() {
         }
 
         students = students.concat(tempImportData);
-        if (!sauvegarderDonneesSelonMode('groupeEtudiants', students)) {
-            afficherNotificationErreur('Modification impossible', 'Impossible d\'importer en mode anonymisation');
-            return;
-        }
+        db.setSync(cleEtudiants, students);
+        console.log(`✅ [confirmerImport] Sauvegarde dans ${cleEtudiants}: ${students.length} étudiants`);
 
         const details = `Groupe : ${ancienTotal} → ${students.length} étudiant·es (+ ${tempImportData.length})`;
         afficherNotificationSucces('Importation réussie !', details);
@@ -1050,7 +1058,17 @@ function supprimerEtudiant(id) {
         return;
     }
 
-    let students = obtenirDonneesSelonMode('groupeEtudiants');
+    // Vérifier mode anonymisation
+    const modeActuel = db.getSync('modeApplication', 'normal');
+    if (modeActuel === 'anonymisation') {
+        afficherNotificationErreur('Modification impossible', 'Impossible de supprimer en mode anonymisation');
+        return;
+    }
+
+    // 🔧 CORRECTION CRITIQUE (9 janvier 2026) : Lire TOUTES les données sans filtrage
+    // obtenirDonneesSelonMode filtre par coursId, ce qui causait la perte des étudiants d'autres cours
+    const cleEtudiants = (typeof cle === 'function') ? cle('groupeEtudiants') : 'groupeEtudiants';
+    let students = db.getSync(cleEtudiants, []);
     const etudiantASupprimer = students.find(s => (s.id == id || s.da == id));
 
     if (!etudiantASupprimer) {
@@ -1061,10 +1079,8 @@ function supprimerEtudiant(id) {
     if (confirm(`Êtes-vous sûr de vouloir supprimer ${etudiantASupprimer.nom}, ${etudiantASupprimer.prenom} ?`)) {
         try {
             students = students.filter(s => !(s.id == id || s.da == id));
-            if (!sauvegarderDonneesSelonMode('groupeEtudiants', students)) {
-                afficherNotificationErreur('Modification impossible', 'Impossible de supprimer en mode anonymisation');
-                return;
-            }
+            db.setSync(cleEtudiants, students);
+            console.log(`✅ [supprimerEtudiant] Sauvegarde dans ${cleEtudiants}: ${students.length} étudiants restants`);
             afficherListeEtudiants();
 
             console.log(`Étudiant·e supprimé·e: ${etudiantASupprimer.nom}, ${etudiantASupprimer.prenom} (DA: ${etudiantASupprimer.da})`);
