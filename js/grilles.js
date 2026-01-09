@@ -643,11 +643,16 @@ async function sauvegarderGrilleTemplate(silencieux = false) {
         }
     } else {
         // Mode création
+        // 🆕 Beta 95.3 : Capturer discipline depuis infoCours
+        const infoCours = typeof db !== 'undefined' && db.getSync ? db.getSync('infoCours', {}) : {};
+        const discipline = infoCours?.discipline || '';
+
         const nouvelleGrille = {
             id: 'GRILLE' + Date.now(),
             nom: nomGrille,
             criteres: window.tempCriteres || [],
             pratiquesCompatibles: pratiquesCompatibles,
+            discipline: discipline, // 🆕 Beta 95.3
             dateCreation: new Date().toISOString(),
             dateModification: new Date().toISOString(),
             dansBibliotheque: true  // ✅ AJOUT (8 décembre 2025) - Nouvelle grille dans bibliothèque par défaut
@@ -1724,7 +1729,11 @@ async function exporterGrilleActive() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `grille-${grille.nom.replace(/[^a-z0-9]/gi, '-')}-CC-BY-SA-${new Date().toISOString().split('T')[0]}.json`;
+    // 🆕 Beta 95.3 : Nommage standardisé
+    const nomFichier = typeof genererNomFichierExport === 'function'
+        ? genererNomFichierExport('grille', { nom: grille.nom, discipline: grille.discipline, inclureLicence: true })
+        : `grille-${grille.nom.replace(/[^a-z0-9]/gi, '-')}-CC-BY-SA-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = nomFichier;
     a.click();
     URL.revokeObjectURL(url);
 

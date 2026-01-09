@@ -2284,8 +2284,11 @@ async function exporterProductionActive() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    const nomFichier = (production.description || production.titre || 'production').replace(/[^a-z0-9]/gi, '-');
-    a.download = `production-${nomFichier}-CC-BY-SA-${new Date().toISOString().split('T')[0]}.json`;
+    // 🆕 Beta 95.3 : Nommage standardisé
+    const nomExport = typeof genererNomFichierExport === 'function'
+        ? genererNomFichierExport('production', { nom: production.description || production.titre, discipline: production.discipline, inclureLicence: true })
+        : `production-${(production.description || production.titre || 'production').replace(/[^a-z0-9]/gi, '-')}-CC-BY-SA-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = nomExport;
     a.click();
     URL.revokeObjectURL(url);
 
