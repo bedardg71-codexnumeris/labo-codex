@@ -9471,8 +9471,13 @@
                                 <!-- GAUCHE : Sélection + Résumé -->
                                 <div class="panneau-bibliotheque">
 
+                                    <!-- 🆕 Beta 95.3 : Bouton bibliothèque -->
+                                    <button class="btn btn-secondaire btn-bibliotheque" onclick="ouvrirModalBibliothequeGroupeCours()">
+                                        📚 Bibliothèque
+                                    </button>
+
                                     <!-- Sélection du groupe-cours -->
-                                    <div class="groupe-form" style="margin-bottom: 15px;">
+                                    <div class="groupe-form" style="margin-top: 15px; margin-bottom: 15px;">
                                         <label class="label-compact">Groupe-cours existants :</label>
                                         <select id="v2-selectGroupeCours" class="controle-form" onchange="changerGroupeCoursSelectionneV2(this.value)">
                                             <option value="">— Choisir pour modifier —</option>

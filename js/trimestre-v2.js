@@ -4343,6 +4343,219 @@ function supprimerGroupeCoursV2() {
     }
 }
 
+/**
+ * 🆕 Beta 95.3 : Modal bibliothèque groupe-cours
+ * Affiche la liste de tous les groupe-cours avec actions
+ */
+function ouvrirModalBibliothequeGroupeCours() {
+    const cleGC = typeof cle === 'function' ? cle('groupesCours') : 'groupesCours';
+    const groupesCours = db.getSync(cleGC, []);
+    const gcActif = db.getSync('groupeCoursActif', null);
+
+    // Récupérer les entités liées pour l'affichage
+    const cours = db.getSync('cours', []);
+    const listeCours = db.getSync('listeCours', []);
+    const enseignants = db.getSync('enseignants', []);
+
+    let modalHTML = `
+        <div id="modalBibliothequeGroupeCours" style="
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        ">
+            <div style="
+                background: white;
+                border-radius: 12px;
+                width: 90%;
+                max-width: 700px;
+                max-height: 85vh;
+                overflow-y: auto;
+                padding: 30px;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+                position: relative;
+            ">
+                <button onclick="fermerModalBibliothequeGroupeCours()" style="
+                    position: sticky;
+                    top: 0;
+                    right: 0;
+                    float: right;
+                    background: transparent;
+                    border: none;
+                    font-size: 28px;
+                    color: #999;
+                    cursor: pointer;
+                    padding: 0;
+                    width: 30px;
+                    height: 30px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 1;
+                " onmouseover="this.style.color='#333'" onmouseout="this.style.color='#999'">
+                    ×
+                </button>
+                <h2 style="margin-top: 0; color: var(--bleu-principal);">📚 Bibliothèque groupe-cours</h2>
+                <p class="text-muted">Gérez vos groupe-cours du trimestre actif</p>
+    `;
+
+    if (groupesCours.length === 0) {
+        modalHTML += `
+            <div style="text-align: center; padding: 40px; color: #666;">
+                <p style="font-size: 1.1rem;">Aucun groupe-cours configuré</p>
+                <p>Cliquez sur « + Nouveau groupe-cours » dans l'accordéon pour en créer un.</p>
+            </div>
+        `;
+    } else {
+        modalHTML += `<div style="margin-top: 20px;">`;
+
+        groupesCours.forEach(gc => {
+            // Récupérer les infos liées
+            let coursInfo = cours.find(c => c.id === gc.coursId);
+            if (!coursInfo) coursInfo = listeCours.find(c => c.id === gc.coursId);
+            const ens = enseignants.find(e => e.id === gc.enseignantId);
+
+            const codeCours = coursInfo?.codeCours || coursInfo?.sigle || null;
+            const groupe = gc.groupe || gc.groupeNum || '00001';
+            const titre = codeCours ? `${codeCours} — Groupe ${groupe}` : `Groupe ${groupe}`;
+            const nomEns = ens ? `${ens.prenom || ''} ${ens.nom || ''}`.trim() : '—';
+
+            const estActif = gcActif && gc.id === gcActif.id;
+            const badgeActif = estActif ? '<span style="background: var(--vert-principal); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; margin-left: 10px;">Actif</span>' : '';
+
+            modalHTML += `
+                <div style="
+                    border: 1px solid ${estActif ? 'var(--vert-principal)' : '#ddd'};
+                    border-radius: 8px;
+                    padding: 15px;
+                    margin-bottom: 10px;
+                    background: ${estActif ? 'rgba(76, 175, 80, 0.05)' : 'white'};
+                ">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <div style="font-weight: 600; color: var(--bleu-principal);">
+                                ${titre}${badgeActif}
+                            </div>
+                            <div style="font-size: 0.85rem; color: #666; margin-top: 3px;">
+                                ${nomEns}
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            ${!estActif ? `
+                                <button onclick="activerGroupeCoursDepuisBibliotheque('${gc.id}')"
+                                        class="btn btn-confirmer btn-sm"
+                                        title="Activer ce groupe-cours">
+                                    Activer
+                                </button>
+                            ` : ''}
+                            <button onclick="supprimerGroupeCoursDepuisBibliotheque('${gc.id}', '${titre.replace(/'/g, "\\'")}')"
+                                    class="btn btn-supprimer btn-sm"
+                                    title="Supprimer ce groupe-cours">
+                                Supprimer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        modalHTML += `</div>`;
+    }
+
+    modalHTML += `
+            </div>
+        </div>
+    `;
+
+    // Insérer dans le DOM
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    // Fermer avec Escape
+    document.addEventListener('keydown', fermerModalBibliothequeGroupeCoursEscape);
+}
+
+function fermerModalBibliothequeGroupeCoursEscape(e) {
+    if (e.key === 'Escape') {
+        fermerModalBibliothequeGroupeCours();
+    }
+}
+
+function fermerModalBibliothequeGroupeCours() {
+    const modal = document.getElementById('modalBibliothequeGroupeCours');
+    if (modal) modal.remove();
+    document.removeEventListener('keydown', fermerModalBibliothequeGroupeCoursEscape);
+}
+
+function activerGroupeCoursDepuisBibliotheque(gcId) {
+    const cleGC = typeof cle === 'function' ? cle('groupesCours') : 'groupesCours';
+    const groupesCours = db.getSync(cleGC, []);
+
+    // Désactiver tous les autres
+    groupesCours.forEach(gc => gc.actif = (gc.id === gcId));
+    db.setSync(cleGC, groupesCours);
+
+    // Sauvegarder comme groupe-cours actif
+    const gc = groupesCours.find(g => g.id === gcId);
+    if (gc) {
+        db.setSync('groupeCoursActif', gc);
+    }
+
+    // Rafraîchir
+    if (typeof peuplerDropdownGroupeCoursActif === 'function') {
+        peuplerDropdownGroupeCoursActif();
+    }
+    chargerGroupeCoursV2();
+
+    // Rafraîchir la modal
+    fermerModalBibliothequeGroupeCours();
+    ouvrirModalBibliothequeGroupeCours();
+
+    if (typeof afficherNotificationSucces === 'function') {
+        afficherNotificationSucces('Groupe-cours activé');
+    }
+}
+
+function supprimerGroupeCoursDepuisBibliotheque(gcId, nomGC) {
+    if (!confirm(`Supprimer le groupe-cours "${nomGC}" ?\n\nCette action est irréversible.`)) {
+        return;
+    }
+
+    const cleGC = typeof cle === 'function' ? cle('groupesCours') : 'groupesCours';
+    let groupesCours = db.getSync(cleGC, []);
+
+    // Supprimer de la liste
+    groupesCours = groupesCours.filter(gc => gc.id !== gcId);
+    db.setSync(cleGC, groupesCours);
+
+    // Si c'était le groupe-cours actif, désactiver
+    const gcActif = db.getSync('groupeCoursActif', null);
+    if (gcActif && gcActif.id === gcId) {
+        db.setSync('groupeCoursActif', null);
+    }
+
+    // Rafraîchir
+    if (typeof peuplerDropdownGroupeCoursActif === 'function') {
+        peuplerDropdownGroupeCoursActif();
+    }
+    chargerGroupeCoursV2();
+
+    // Rafraîchir la modal
+    fermerModalBibliothequeGroupeCours();
+    if (groupesCours.length > 0) {
+        ouvrirModalBibliothequeGroupeCours();
+    }
+
+    if (typeof afficherNotificationSucces === 'function') {
+        afficherNotificationSucces('Groupe-cours supprimé', nomGC);
+    }
+}
+
 // Exports globaux pour les fonctions groupe-cours
 window.chargerGroupeCoursV2 = chargerGroupeCoursV2;
 window.nouveauGroupeCoursV2 = nouveauGroupeCoursV2;
@@ -4351,6 +4564,10 @@ window.annulerFormGroupeCoursV2 = annulerFormGroupeCoursV2;
 window.sauvegarderGroupeCoursV2 = sauvegarderGroupeCoursV2;
 window.mettreAJourNomGroupeCoursV2 = mettreAJourNomGroupeCoursV2;
 window.supprimerGroupeCoursV2 = supprimerGroupeCoursV2;
+window.ouvrirModalBibliothequeGroupeCours = ouvrirModalBibliothequeGroupeCours; // 🆕 Beta 95.3
+window.fermerModalBibliothequeGroupeCours = fermerModalBibliothequeGroupeCours; // 🆕 Beta 95.3
+window.activerGroupeCoursDepuisBibliotheque = activerGroupeCoursDepuisBibliotheque; // 🆕 Beta 95.3
+window.supprimerGroupeCoursDepuisBibliotheque = supprimerGroupeCoursDepuisBibliotheque; // 🆕 Beta 95.3
 
 /* ===============================
    DONNÉES DE DÉMONSTRATION
