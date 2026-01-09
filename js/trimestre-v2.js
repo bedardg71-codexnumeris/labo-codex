@@ -394,25 +394,32 @@ function afficherStatistiquesTrimestreV2() {
         return;
     }
 
-    // Compter les jours de cours, congés et reprises
+    // Compter les jours de cours, congés, reprises et trouver le max de numeroSemaine
     let joursCours = 0;
     let conges = 0;
     let reprises = 0;
+    let maxSemaine = 0;
 
     Object.values(calendrier).forEach(jour => {
-        if (jour.statut === 'cours') joursCours++;
+        if (jour.statut === 'cours') {
+            joursCours++;
+            if (jour.numeroSemaine && jour.numeroSemaine > maxSemaine) {
+                maxSemaine = jour.numeroSemaine;
+            }
+        }
         if (jour.statut === 'reprise') {
             joursCours++;  // Les reprises comptent comme jours de cours
             reprises++;
+            if (jour.numeroSemaine && jour.numeroSemaine > maxSemaine) {
+                maxSemaine = jour.numeroSemaine;
+            }
         }
         if (jour.statut === 'conge') conges++;
     });
 
-    // Total jours de cours = cours normaux + reprises
-    // Les congés sont déjà exclus (statut différent de 'cours')
-
-    // Calculer les semaines (approximation : 5 jours = 1 semaine)
-    const semaines = Math.ceil(joursCours / 5);
+    // Utiliser le numeroSemaine du calendrier (plus précis que diviser par 5)
+    // Fallback sur division par 5 si pas de numeroSemaine
+    const semaines = maxSemaine > 0 ? maxSemaine : Math.ceil(joursCours / 5);
 
     console.log(`[Trimestre V2] Stats: ${semaines} semaines, ${joursCours} jours, ${conges} congés, ${reprises} reprises`);
 
