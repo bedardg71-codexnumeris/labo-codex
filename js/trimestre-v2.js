@@ -1627,6 +1627,10 @@ async function nouveauCoursV2() {
     // Réinitialiser tous les champs
     reinitialiserFormCoursV2();
 
+    // Masquer le bouton Supprimer (mode création)
+    const btnSupprimer = document.getElementById('v2-btnSupprimerCours');
+    if (btnSupprimer) btnSupprimer.style.display = 'none';
+
     console.log('[Trimestre V2] Formulaire nouveau cours affiché');
 }
 
@@ -1669,6 +1673,10 @@ async function modifierCoursSelectionneV2() {
 
         // Remplir les champs avec les données du cours
         remplirFormCoursV2(coursSelectionne);
+
+        // Afficher le bouton Supprimer (mode édition)
+        const btnSupprimer = document.getElementById('v2-btnSupprimerCours');
+        if (btnSupprimer) btnSupprimer.style.display = '';
 
         formulaire.scrollIntoView({ behavior: 'smooth' });
     }
@@ -3859,6 +3867,10 @@ function nouveauGroupeCoursV2() {
     if (etatVide) etatVide.style.display = 'none';
     if (formulaire) formulaire.style.display = 'block';
 
+    // Masquer le bouton Supprimer (mode création)
+    const btnSupprimer = document.getElementById('v2-btnSupprimerGroupeCours');
+    if (btnSupprimer) btnSupprimer.style.display = 'none';
+
     // Désélectionner dans le dropdown principal
     const select = document.getElementById('v2-selectGroupeCours');
     if (select) select.value = '';
@@ -3904,6 +3916,10 @@ function editerGroupeCoursV2(gc) {
     const formulaire = document.getElementById('v2-formulaireGroupeCours');
     if (etatVide) etatVide.style.display = 'none';
     if (formulaire) formulaire.style.display = 'block';
+
+    // Afficher le bouton Supprimer (mode édition)
+    const btnSupprimer = document.getElementById('v2-btnSupprimerGroupeCours');
+    if (btnSupprimer) btnSupprimer.style.display = '';
 }
 
 /**
