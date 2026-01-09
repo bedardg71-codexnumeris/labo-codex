@@ -37,9 +37,9 @@
 ## PROCHAINE TACHE
 
 **Choisir parmi le backlog** :
-- [ ] Filtres par discipline/cours avec listes controlees
-- [ ] UX modal Echelles : bouton Export avec sidebar
-- [ ] Import par trimestre filtrable par cours
+- [ ] Harmoniser largeur modaux bibliotheque (Cartouches plus etroit que Echelles)
+- [ ] Revoir nommage fichiers export : nom personnalise OU nomenclature standard
+- [ ] Verifier lecture champs discipline/pratique dans filtres bibliotheque Echelles
 
 ---
 
@@ -74,10 +74,10 @@
 - [x] Creer protocole de mise a jour des beta (docs/operations/ + scripts/)
 - [x] Auditer module evaluation (3/3 problemes critiques resolus)
 - [x] Syntheses intelligentes dans sidebars (5 fonctions Beta 95.3)
-- [ ] Filtres par discipline/cours avec listes controlees (dropdowns standardises)
-- [ ] Import par trimestre filtrable par cours
+- [x] **Filtres par discipline/cours** : Deja implementes dans Grilles, Echelles, Productions
+- [x] **Import par trimestre filtrable par cours** : Section + filtre cours + preview (Productions)
+- [x] **UX modal Echelles** : Section "Importer depuis un autre trimestre" ajoutee
 - [ ] Verifier lecture champs discipline/pratique dans filtres bibliotheque Echelles
-- [ ] UX modal Echelles : bouton Export avec sidebar, bouton Import avec section disponibles
 - [ ] Harmoniser largeur modaux bibliotheque (Cartouches plus etroit que Echelles)
 - [ ] Revoir nommage fichiers export : nom personnalise OU nomenclature standard (type-cours-discipline-date)
 - [x] **Audit design global** : 16 parties verifiees, toutes conformes
@@ -93,6 +93,8 @@
 
 | Fichier | Modification |
 |---------|--------------|
+| `js/echelles.js` | Section "Importer depuis un autre trimestre" + 3 fonctions |
+| `js/productions.js` | Filtre par cours dans import trimestre |
 | `js/evaluation.js` | Namespacing evaluationsSauvegardees via cle() |
 | `js/evaluation-jetons.js` | Namespacing evaluationsSauvegardees via cle() |
 | `js/portfolio.js` | Namespacing evaluationsSauvegardees via cle() |
@@ -127,6 +129,8 @@
 - **Modal bibliotheque groupe-cours** : Vue liste, Activer, Supprimer, bouton 📚
 - **Syntheses intelligentes sidebars** : 5 fonctions (Cours, Enseignant, Groupe, Horaire, Groupe-cours)
 - **Libelle dropdown groupe-cours** : "Groupe 00001" au lieu de "??? gr.00001" (5 endroits)
+- **UX modal Echelles** : Section "Importer depuis un autre trimestre" (3 fonctions)
+- **Import Productions filtrable par cours** : Dropdown filtre cours + preview
 - **Audit module evaluation** : 16 548 lignes, 3 problemes critiques identifies et resolus
 - **Fix #1 namespacing evaluationsSauvegardees** : 34 occurrences, 7 fichiers
 - **Fix #2 integration groupe-cours** : groupeCoursId ajoute aux evaluations + logs
@@ -182,4 +186,4 @@
 
 ---
 
-**Derniere mise a jour** : 9 janvier 2026, 14:40 (Toronto)
+**Derniere mise a jour** : 9 janvier 2026, 15:24 (Toronto)
