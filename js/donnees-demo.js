@@ -78,7 +78,10 @@ async function chargerDonneesDemo() {
         }
 
         await db.set('trimestres', trimestres);
-        console.log('   → Trimestre demo activé AVANT fusion');
+        // 🆕 FIX (9 jan 2026): Forcer la sync du cache AVANT fusion
+        // Pour que cle() lise le trimestre 'demo' et retourne 'demo_' prefix
+        await db.syncToLocalStorageCache();
+        console.log('   → Trimestre demo activé AVANT fusion (cache synchronisé)');
 
         // ✅ Activer le cours demo comme cours actif
         // Pour que obtenirDonneesSelonMode() filtre correctement les données
