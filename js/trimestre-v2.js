@@ -1802,6 +1802,176 @@ function afficherSyntheseCours(cours) {
 }
 
 /**
+ * 🆕 Beta 95.3 : Synthèse Enseignant dans sidebar
+ * Affiche : Prénom Nom, Courriel, Institution - Département
+ */
+function afficherSyntheseEnseignant(enseignant) {
+    const elemNom = document.getElementById('enseignant-resume-nom');
+    const elemCourriel = document.getElementById('enseignant-resume-courriel');
+    const elemInstitution = document.getElementById('enseignant-resume-institution');
+
+    if (!elemNom) return;
+
+    if (!enseignant) {
+        if (elemNom) elemNom.textContent = '—';
+        if (elemCourriel) elemCourriel.textContent = '';
+        if (elemInstitution) elemInstitution.textContent = '';
+        return;
+    }
+
+    const nom = `${enseignant.prenom || ''} ${enseignant.nom || ''}`.trim() || '—';
+    const courriel = enseignant.courriel || '';
+    const institution = enseignant.institution || '';
+    const departement = enseignant.departement || '';
+    const instDept = [institution, departement].filter(Boolean).join(' — ');
+
+    if (elemNom) elemNom.textContent = nom;
+    if (elemCourriel) elemCourriel.textContent = courriel;
+    if (elemInstitution) elemInstitution.textContent = instDept;
+}
+
+/**
+ * 🆕 Beta 95.3 : Synthèse Groupe Étudiants dans sidebar
+ * Affiche : X étudiants, Y en SA, Top programmes
+ */
+function afficherSyntheseGroupeEtudiants() {
+    const etudiants = obtenirDonneesSelonMode('groupeEtudiants') || [];
+
+    // Mettre à jour les compteurs existants
+    const elemTotal = document.getElementById('v2-resumeNbTotal');
+    const elemNbTotal = document.getElementById('v2-nbEtudiantsTotal');
+    const elemSA = document.getElementById('v2-resumeNbSA');
+    const conteneurSA = document.getElementById('v2-resumeSA');
+    const elemProgrammes = document.getElementById('v2-topProgrammes');
+
+    const total = etudiants.length;
+    const nbSA = etudiants.filter(e => e.sa === true || e.sa === 'oui' || e.sa === 'Oui' || e.SA === true).length;
+
+    // Compter les programmes
+    const programmes = {};
+    etudiants.forEach(e => {
+        const prog = e.programme || e.programmeEtudes || 'Non spécifié';
+        programmes[prog] = (programmes[prog] || 0) + 1;
+    });
+    const topProgrammes = Object.entries(programmes)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3);
+
+    // Mettre à jour l'affichage
+    if (elemTotal) elemTotal.textContent = total;
+    if (elemNbTotal) elemNbTotal.textContent = total;
+
+    if (conteneurSA) {
+        conteneurSA.style.display = nbSA > 0 ? 'block' : 'none';
+        if (elemSA) elemSA.textContent = nbSA;
+    }
+
+    if (elemProgrammes) {
+        if (topProgrammes.length > 0 && total > 0) {
+            elemProgrammes.style.display = 'block';
+            elemProgrammes.innerHTML = '<strong style="font-size: 0.75rem;">Programmes :</strong><br>' +
+                topProgrammes.map(([prog, nb]) => `<span style="font-size: 0.75rem;">${prog} (${nb})</span>`).join('<br>');
+        } else {
+            elemProgrammes.style.display = 'none';
+        }
+    }
+}
+
+/**
+ * 🆕 Beta 95.3 : Synthèse Horaire dans sidebar
+ * Affiche : X séances/sem, Y heures, Jours
+ */
+function afficherSyntheseHoraire(horaire) {
+    const sidebar = document.getElementById('v2-carteResumeHoraire');
+    if (!sidebar) return;
+
+    if (!horaire || !horaire.seances || horaire.seances.length === 0) {
+        sidebar.innerHTML = '<p class="etat-vide-resume">Aucun horaire sélectionné</p>';
+        return;
+    }
+
+    const seances = horaire.seances || [];
+    const nbSeances = seances.length;
+
+    // Calculer les heures totales
+    let totalMinutes = 0;
+    const joursSet = new Set();
+    const joursNoms = { 'lundi': 'Lun', 'mardi': 'Mar', 'mercredi': 'Mer', 'jeudi': 'Jeu', 'vendredi': 'Ven', 'samedi': 'Sam' };
+
+    seances.forEach(s => {
+        if (s.heureDebut && s.heureFin) {
+            const [h1, m1] = s.heureDebut.split(':').map(Number);
+            const [h2, m2] = s.heureFin.split(':').map(Number);
+            totalMinutes += (h2 * 60 + m2) - (h1 * 60 + m1);
+        }
+        if (s.jour) {
+            joursSet.add(joursNoms[s.jour.toLowerCase()] || s.jour.substring(0, 3));
+        }
+    });
+
+    const heures = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    const heuresStr = minutes > 0 ? `${heures}h${minutes}` : `${heures}h`;
+    const joursStr = Array.from(joursSet).join(', ');
+
+    sidebar.innerHTML = `
+        <div class="apercu-titre">${horaire.nom || 'Horaire'}</div>
+        <div class="apercu-detail">${nbSeances} séance${nbSeances > 1 ? 's' : ''}/sem. • ${heuresStr}</div>
+        <div class="apercu-detail">Jours : ${joursStr || '—'}</div>
+    `;
+}
+
+/**
+ * 🆕 Beta 95.3 : Synthèse Groupe-cours dans sidebar
+ * Affiche : Code cours - Groupe, Enseignant, Séances/étudiants, Pratique
+ */
+function afficherSyntheseGroupeCours(gc) {
+    const sidebar = document.getElementById('v2-carteResumeGroupeCours');
+    if (!sidebar) return;
+
+    if (!gc) {
+        sidebar.innerHTML = '<p class="etat-vide-resume">Aucun groupe-cours sélectionné</p>';
+        return;
+    }
+
+    // Récupérer les entités liées
+    const cours = db.getSync('cours', []);
+    const listeCours = db.getSync('listeCours', []);
+    const enseignants = db.getSync('enseignants', []);
+    const horaires = db.getSync('horaires', []);
+    const pratiques = db.getSync('pratiquesConfigurables', []);
+
+    let coursInfo = cours.find(c => c.id === gc.coursId);
+    if (!coursInfo) coursInfo = listeCours.find(c => c.id === gc.coursId);
+    const ens = enseignants.find(e => e.id === gc.enseignantId);
+    const hor = horaires.find(h => h.id === gc.horaireId);
+    const prat = pratiques.find(p => p.id === gc.pratiqueId);
+
+    // Construire le libellé
+    const codeCours = coursInfo?.codeCours || coursInfo?.sigle || null;
+    const groupe = gc.groupe || gc.groupeNum || '00001';
+    const titre = codeCours ? `${codeCours} — Groupe ${groupe}` : `Groupe ${groupe}`;
+
+    const nomEns = ens ? `${ens.prenom || ''} ${ens.nom || ''}`.trim() : '—';
+    const nbSeances = hor?.seances?.length || 0;
+    const nomPratique = prat?.nom || gc.pratiqueId || '—';
+
+    // Score de complétude
+    const elements = [gc.coursId, gc.enseignantId, gc.horaireId, gc.pratiqueId, gc.groupe];
+    const complets = elements.filter(Boolean).length;
+
+    sidebar.innerHTML = `
+        <div class="apercu-titre">${titre}</div>
+        <div class="apercu-detail">${nomEns}</div>
+        <div class="apercu-detail">${nbSeances} séance${nbSeances !== 1 ? 's' : ''}/sem.</div>
+        <div class="apercu-detail">Pratique : ${nomPratique}</div>
+        <div class="apercu-completude" style="font-size: 0.75rem; color: ${complets === 5 ? 'var(--vert-principal)' : 'var(--orange-principal)'}; margin-top: 5px;">
+            ${complets}/5 éléments configurés
+        </div>
+    `;
+}
+
+/**
  * Réinitialise le formulaire cours
  */
 function reinitialiserFormCoursV2() {
@@ -4335,6 +4505,11 @@ window.dupliquerCoursSelectionneV2 = dupliquerCoursSelectionneV2;
 window.annulerFormCoursV2 = annulerFormCoursV2;
 window.sauvegarderCoursV2 = sauvegarderCoursV2;
 window.chargerDropdownPratiquesCours = chargerDropdownPratiquesCours; // ✅ AJOUT (2 jan 2026)
+window.afficherSyntheseCours = afficherSyntheseCours; // 🆕 Beta 95.3
+window.afficherSyntheseEnseignant = afficherSyntheseEnseignant; // 🆕 Beta 95.3
+window.afficherSyntheseGroupeEtudiants = afficherSyntheseGroupeEtudiants; // 🆕 Beta 95.3
+window.afficherSyntheseHoraire = afficherSyntheseHoraire; // 🆕 Beta 95.3
+window.afficherSyntheseGroupeCours = afficherSyntheseGroupeCours; // 🆕 Beta 95.3
 window.ouvrirModalNouveauCours = ouvrirModalNouveauCours;
 window.chargerGroupesCoursV2 = chargerGroupesCoursV2;
 window.activerGroupeV2 = activerGroupeV2;
@@ -4500,25 +4675,15 @@ function chargerProfilEnseignantV2() {
  * Appelée à chaque modification des champs du formulaire
  */
 function mettreAJourCarteEnseignant() {
-    const prenom = document.getElementById('v2-ens-prenom')?.value?.trim() || '';
-    const nom = document.getElementById('v2-ens-nom')?.value?.trim() || '';
-    const courriel = document.getElementById('v2-ens-courriel')?.value?.trim() || '';
-    const institution = document.getElementById('v2-ens-institution')?.value?.trim() || '';
-
-    // Mettre à jour les éléments de la carte
-    const elemNom = document.getElementById('enseignant-resume-nom');
-    const elemCourriel = document.getElementById('enseignant-resume-courriel');
-    const elemInstitution = document.getElementById('enseignant-resume-institution');
-
-    if (elemNom) {
-        elemNom.textContent = (prenom && nom) ? `${prenom} ${nom}` : '—';
-    }
-    if (elemCourriel) {
-        elemCourriel.textContent = courriel || '';
-    }
-    if (elemInstitution) {
-        elemInstitution.textContent = institution || '';
-    }
+    // 🆕 Beta 95.3 : Utilise afficherSyntheseEnseignant() pour unifier la logique
+    const enseignant = {
+        prenom: document.getElementById('v2-ens-prenom')?.value?.trim() || '',
+        nom: document.getElementById('v2-ens-nom')?.value?.trim() || '',
+        courriel: document.getElementById('v2-ens-courriel')?.value?.trim() || '',
+        institution: document.getElementById('v2-ens-institution')?.value?.trim() || '',
+        departement: document.getElementById('v2-ens-departement')?.value?.trim() || ''
+    };
+    afficherSyntheseEnseignant(enseignant);
 }
 
 // Variable pour suivre l'enseignant en édition (Beta 95.2)
