@@ -85,6 +85,7 @@
 - [ ] UX modal Echelles : bouton Export avec sidebar, bouton Import avec section disponibles
 - [ ] Harmoniser largeur modaux bibliotheque (Cartouches plus etroit que Echelles)
 - [ ] Revoir nommage fichiers export : nom personnalise OU nomenclature standard (type-cours-discipline-date)
+- [ ] **Audit design global** : Terminer l'audit du design system sur toutes les pages
 
 ### Compatibilite et donnees
 - [ ] Assurer compatibilite donnees A2025 avec modifications au code
