@@ -87,14 +87,15 @@ async function peuplerDropdownGroupeCoursActif() {
             const ens = enseignants.find(e => e.id === gc.enseignantId) || {};
             const hor = horaires.find(h => h.id === gc.horaireId) || {};
 
-            const sigle = coursInfo.codeCours || coursInfo.code || coursInfo.sigle || '???';
-            const groupe = gc.groupeNum || gc.groupe || '?';  // Beta 95.2: groupeNum prioritaire
+            const sigle = coursInfo.codeCours || coursInfo.code || coursInfo.sigle || null;
+            const groupe = gc.groupeNum || gc.groupe || '00001';
             const nomEns = ens.prenom ? `${ens.prenom} ${(ens.nom || '').charAt(0)}.` : '';
             const nomHor = hor.nom || '';
 
-            let label = `${sigle} gr.${groupe}`;
+            // 🆕 FIX (9 jan 2026) : Libellé lisible même sans cours
+            let label = sigle ? `${sigle} gr.${groupe}` : `Groupe ${groupe}`;
             if (nomEns) label += ` - ${nomEns}`;
-            if (nomHor) label += ` - ${nomHor}`;
+            if (nomHor) label += ` (${nomHor})`;
 
             const selected = gcActif && gc.id === gcActif.id ? ' selected' : '';
             options += `<option value="${gc.id}"${selected}>${label}</option>`;
@@ -904,7 +905,10 @@ async function mettreAJourApercuGroupeCours() {
         const ens = await EnseignantsEntite.obtenirParId(enseignantId);
         const hor = horaireId ? await HorairesEntite.obtenirParId(horaireId) : null;
 
-        let apercu = `${cours?.codeCours || '???'} gr.${groupe} - ${ens?.prenom || ''} ${ens?.nom?.charAt(0) || ''}.`;
+        // 🆕 FIX (9 jan 2026) : Libellé lisible même sans cours
+        const sigleCours = cours?.codeCours || cours?.code || cours?.sigle || null;
+        let apercu = sigleCours ? `${sigleCours} gr.${groupe}` : `Groupe ${groupe}`;
+        if (ens?.prenom || ens?.nom) apercu += ` - ${ens?.prenom || ''} ${ens?.nom?.charAt(0) || ''}.`;
         if (hor) {
             apercu += ` - ${hor.nom || ''}`;
         }
