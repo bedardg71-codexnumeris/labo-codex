@@ -2665,9 +2665,18 @@ function traiterDonneesImportV2(contenu) {
     donneesImportEnAttenteV2 = [];
 
     lignes.forEach(ligne => {
-        // Détecter le séparateur (tab ou virgule)
-        const separateur = ligne.includes('\t') ? '\t' : ',';
-        const colonnes = ligne.split(separateur).map(c => c.trim());
+        // Détecter le séparateur (tab, point-virgule ou virgule)
+        const separateur = ligne.includes('\t') ? '\t' : (ligne.includes(';') ? ';' : ',');
+        const colonnes = ligne.split(separateur).map(c => {
+            // Nettoyer format Excel ="valeur" (préserve zéros en tête)
+            let val = c.trim();
+            if (val.startsWith('="') && val.endsWith('"')) {
+                val = val.slice(2, -1);
+            } else if (val.startsWith('"') && val.endsWith('"')) {
+                val = val.slice(1, -1);
+            }
+            return val.trim();
+        });
 
         if (colonnes.length >= 4) {
             donneesImportEnAttenteV2.push({
