@@ -2228,6 +2228,9 @@ function chargerListeEtudiantsV2() {
             : 'Aucun étudiant. Utilisez l\'import à gauche ou le formulaire ci-dessous.';
         conteneur.innerHTML = `<p class="etat-vide-liste">${message}</p>`;
         if (actionsEtudiants) actionsEtudiants.style.display = tousLesEtudiants.length > 0 ? 'flex' : 'none';
+        // Masquer le bouton supprimer groupe si pas d'étudiants
+        const btnSupprimerGroupe = document.getElementById('v2-btnSupprimerGroupe');
+        if (btnSupprimerGroupe) btnSupprimerGroupe.style.display = 'none';
         // Appeler aussi la fonction legacy même sans étudiants
         if (typeof afficherListeEtudiants === 'function') {
             try { afficherListeEtudiants(); } catch (e) { /* ignore */ }
@@ -2236,6 +2239,12 @@ function chargerListeEtudiantsV2() {
     }
 
     if (actionsEtudiants) actionsEtudiants.style.display = 'flex';
+
+    // 🆕 Beta 95.3: Afficher/masquer le bouton "Supprimer ce groupe"
+    const btnSupprimerGroupe = document.getElementById('v2-btnSupprimerGroupe');
+    if (btnSupprimerGroupe) {
+        btnSupprimerGroupe.style.display = groupeFiltre ? 'block' : 'none';
+    }
 
     // Trier par nom
     etudiants.sort((a, b) => {
@@ -2751,6 +2760,10 @@ function confirmerImportV2() {
     document.getElementById('v2-donneesCollees').value = '';
     document.getElementById('v2-fichierCsvEntree').value = '';
 
+    // 🆕 Beta 95.3: Reset le filtre à "Tous les groupes" pour voir les nouveaux étudiants
+    const selectGroupe = document.getElementById('v2-selectGroupe');
+    if (selectGroupe) selectGroupe.value = '';
+
     chargerListeEtudiantsV2();
 
     if (typeof afficherNotificationSucces === 'function') {
@@ -2820,6 +2833,55 @@ function reinitialiserEtudiantsV2() {
  */
 function viderListeEtudiantsV2() {
     reinitialiserEtudiantsV2();
+}
+
+/**
+ * Supprime tous les étudiants du groupe sélectionné
+ * 🆕 BETA 95.3 : Permet de supprimer un groupe entier
+ */
+function supprimerGroupeSelectionneV2() {
+    const groupeSelectionne = getGroupeSelectionneV2();
+    if (!groupeSelectionne) {
+        afficherNotificationErreur('Sélectionnez un groupe spécifique à supprimer.');
+        return;
+    }
+
+    const cleEtud = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
+    const tousLesEtudiants = db.getSync(cleEtud, []);
+
+    // Compter les étudiants du groupe
+    const etudiantsDuGroupe = tousLesEtudiants.filter(e =>
+        String(e.groupe).padStart(5, '0') === groupeSelectionne
+    );
+
+    if (etudiantsDuGroupe.length === 0) {
+        afficherNotificationErreur('Aucun étudiant dans ce groupe.');
+        return;
+    }
+
+    if (!confirm(`Supprimer les ${etudiantsDuGroupe.length} étudiant(s) du groupe ${groupeSelectionne} ?`)) {
+        return;
+    }
+
+    // Garder uniquement les étudiants des autres groupes
+    const etudiantsRestants = tousLesEtudiants.filter(e =>
+        String(e.groupe).padStart(5, '0') !== groupeSelectionne
+    );
+
+    db.setSync(cleEtud, etudiantsRestants);
+
+    // Reset le dropdown à "Tous les groupes"
+    const selectGroupe = document.getElementById('v2-selectGroupe');
+    if (selectGroupe) selectGroupe.value = '';
+
+    chargerListeEtudiantsV2();
+
+    if (typeof afficherNotificationSucces === 'function') {
+        afficherNotificationSucces(`Groupe ${groupeSelectionne} supprimé (${etudiantsDuGroupe.length} étudiant(s))`);
+    }
+
+    // Mettre à jour le guide groupe-cours
+    mettreAJourGuideGroupeCours();
 }
 
 /**
@@ -4755,6 +4817,7 @@ window.confirmerImportV2 = confirmerImportV2;
 window.annulerImportV2 = annulerImportV2;
 window.exporterEtudiantsV2 = exporterEtudiantsV2;
 window.reinitialiserEtudiantsV2 = reinitialiserEtudiantsV2;
+window.supprimerGroupeSelectionneV2 = supprimerGroupeSelectionneV2;
 window.chargerHoraireGroupeActifV2 = chargerHoraireGroupeActifV2;
 window.chargerSeancesV2 = chargerSeancesV2;
 window.afficherFormSeanceV2 = afficherFormSeanceV2;
