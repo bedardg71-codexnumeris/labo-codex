@@ -70,7 +70,7 @@
 - [x] Saisie des presences avec groupe-cours actif
 
 ### Plus tard
-- [ ] **Bug trimestre par defaut** : Au rechargement, tombe sur A2025 au lieu de H2026 (investigation)
+- [x] **Bug trimestre par defaut** : Resolu - detection et correction auto si plusieurs trimestres actifs
 - [x] **Incoherence profil enseignant** : Resolu - liste unifiee `enseignants` (migration auto de profilEnseignant)
 - [ ] **Bouton supprimer groupe-cours** : Ajouter modal bibliotheque pour gerer/supprimer les groupes-cours
 - [ ] **Affichage dropdown groupe-cours** : Afficher nom lisible au lieu de GC_timestamp quand donnees incompletes
