@@ -1290,6 +1290,23 @@ function genererPanneauMetadonnees(ressource, typeRessource) {
         `;
     }
 
+    // 🆕 Beta 95.4 : Contributeurs (si présents)
+    const contributeurs = meta.contributeurs || [];
+    if (contributeurs.length > 0) {
+        const listeContributeurs = contributeurs.map(c => {
+            const nom = c.nom || 'Anonyme';
+            const date = c.date ? ` (${formatDate(c.date)})` : '';
+            return `${echapperHtmlCC(nom)}${date}`;
+        }).join(', ');
+
+        lignesHTML += `
+            <div class="meta-ligne">
+                <span class="meta-label">Contributeur${contributeurs.length > 1 ? 's' : ''}</span>
+                <span class="meta-valeur">${listeContributeurs}</span>
+            </div>
+        `;
+    }
+
     // Licence (toujours affichée)
     lignesHTML += `
         <div class="meta-ligne meta-licence">
