@@ -1052,6 +1052,173 @@ function calculerNoteFinaleMultiObjectifs(da, ensembleId) {
 }
 
 /* ===============================
+   🆕 CALCUL AVEC CATÉGORIES SÉLECTION/OBLIGATOIRES
+
+   Support pour le système de catégories (Beta 95.4) :
+   - Sélection : Pool de N meilleures productions retenues
+   - Obligatoires : Productions toujours comptées (0 si manquante)
+
+   DATE : Janvier 2026
+   =============================== */
+
+/**
+ * Calcule la note finale avec catégories Sélection/Obligatoires
+ *
+ * Formule : Note = (Moyenne N meilleures Sélection × %sel) + (Moyenne Obligatoires × %obl)
+ *
+ * @param {string} da - Numéro DA de l'étudiant
+ * @param {object} configCategories - Configuration des catégories depuis pratiquesConfigurables
+ * @returns {object} - { noteFinale, valide, details }
+ *
+ * EXEMPLE DE CONFIGURATION :
+ * configCategories = {
+ *   actif: true,
+ *   selection: { nombreARetenir: 4, ponderation: 65 },
+ *   obligatoires: { ponderation: 35 }
+ * }
+ *
+ * EXEMPLE DE RÉSULTAT :
+ * {
+ *   noteFinale: 78.5,
+ *   valide: true,
+ *   details: {
+ *     selection: { moyenne: 82, retenues: 4, total: 8, ponderation: 65, notes: [88, 85, 80, 75] },
+ *     obligatoires: { moyenne: 72, completees: 2, total: 2, ponderation: 35, notes: [75, 69] }
+ *   }
+ * }
+ */
+function calculerNoteAvecCategories(da, configCategories) {
+    if (!da || !configCategories || !configCategories.actif) {
+        return { noteFinale: null, valide: false, details: null };
+    }
+
+    // 1. Charger les données
+    const productions = obtenirDonneesSelonMode('productions') || [];
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+
+    // 2. Filtrer les évaluations de cet étudiant (non remplacées)
+    const evaluationsEleve = evaluations.filter(e =>
+        e.etudiantDA === da &&
+        e.noteFinale !== null &&
+        e.noteFinale !== undefined &&
+        !e.remplaceeParId
+    );
+
+    // 3. Séparer les productions par catégorie
+    const prodsSelection = productions.filter(p => p.categorie === 'selection');
+    const prodsObligatoires = productions.filter(p => p.categorie === 'obligatoire');
+
+    console.log(`[Catégories] DA ${da}: ${prodsSelection.length} Sélection, ${prodsObligatoires.length} Obligatoires`);
+
+    // 4. Configuration
+    const { nombreARetenir, ponderation: pondSelection } = configCategories.selection || { nombreARetenir: 4, ponderation: 65 };
+    const { ponderation: pondOblig } = configCategories.obligatoires || { ponderation: 35 };
+
+    // 5. SÉLECTION : Récupérer les évaluations et prendre les N meilleures
+    const evalsSelection = [];
+    prodsSelection.forEach(prod => {
+        const eval = evaluationsEleve.find(e => e.productionId === prod.id);
+        if (eval) {
+            evalsSelection.push({
+                productionId: prod.id,
+                titre: prod.titre || prod.description,
+                note: eval.noteFinale
+            });
+        }
+    });
+
+    // Trier par note décroissante et prendre les N meilleures
+    evalsSelection.sort((a, b) => b.note - a.note);
+    const meilleures = evalsSelection.slice(0, nombreARetenir);
+
+    const moyenneSelection = meilleures.length > 0
+        ? meilleures.reduce((sum, e) => sum + e.note, 0) / meilleures.length
+        : 0;
+
+    // 6. OBLIGATOIRES : Toutes comptent (0 si manquante)
+    const notesObligatoires = [];
+    prodsObligatoires.forEach(prod => {
+        const eval = evaluationsEleve.find(e => e.productionId === prod.id);
+        notesObligatoires.push({
+            productionId: prod.id,
+            titre: prod.titre || prod.description,
+            note: eval ? eval.noteFinale : 0,  // 0 si non remise
+            manquante: !eval
+        });
+    });
+
+    const moyenneObligatoires = notesObligatoires.length > 0
+        ? notesObligatoires.reduce((sum, e) => sum + e.note, 0) / notesObligatoires.length
+        : 0;
+
+    // 7. NOTE FINALE PONDÉRÉE
+    const noteFinale = (moyenneSelection * pondSelection / 100) + (moyenneObligatoires * pondOblig / 100);
+
+    // 8. Déterminer si le calcul est valide (au moins une note dans chaque catégorie active)
+    const valide = (prodsSelection.length === 0 || meilleures.length > 0) &&
+                   (prodsObligatoires.length === 0 || notesObligatoires.length > 0);
+
+    const resultat = {
+        noteFinale: parseFloat(noteFinale.toFixed(2)),
+        valide: valide,
+        details: {
+            selection: {
+                moyenne: parseFloat(moyenneSelection.toFixed(2)),
+                retenues: meilleures.length,
+                total: prodsSelection.length,
+                disponibles: evalsSelection.length,
+                ponderation: pondSelection,
+                notes: meilleures.map(e => e.note),
+                productions: meilleures.map(e => ({ id: e.productionId, titre: e.titre, note: e.note }))
+            },
+            obligatoires: {
+                moyenne: parseFloat(moyenneObligatoires.toFixed(2)),
+                completees: notesObligatoires.filter(e => !e.manquante).length,
+                total: prodsObligatoires.length,
+                ponderation: pondOblig,
+                notes: notesObligatoires.map(e => e.note),
+                productions: notesObligatoires.map(e => ({ id: e.productionId, titre: e.titre, note: e.note, manquante: e.manquante }))
+            }
+        }
+    };
+
+    console.log(`[Catégories] DA ${da}: Note finale = ${resultat.noteFinale}% (Sél: ${moyenneSelection.toFixed(1)}×${pondSelection}% + Obl: ${moyenneObligatoires.toFixed(1)}×${pondOblig}%)`);
+
+    return resultat;
+}
+
+/**
+ * Vérifie si une configuration de catégories est active pour la pratique courante
+ *
+ * @returns {object|null} - Configuration des catégories ou null si non active
+ */
+function obtenirConfigCategories() {
+    // Lire depuis pratiquesConfigurables (la config de la pratique active)
+    const pratiquesConfig = db.getSync('pratiquesConfigurables', []);
+    const coursActifId = typeof getCoursActifId === 'function' ? getCoursActifId() : null;
+
+    if (!coursActifId) {
+        return null;
+    }
+
+    // Trouver la pratique associée au cours actif
+    const pratiqueId = typeof getPratiqueCours === 'function' ? getPratiqueCours(coursActifId) : null;
+
+    if (!pratiqueId) {
+        return null;
+    }
+
+    // Chercher la configuration de cette pratique
+    const configPratique = pratiquesConfig.find(p => p.pratiqueId === pratiqueId);
+
+    if (!configPratique || !configPratique.configuration?.categories?.actif) {
+        return null;
+    }
+
+    return configPratique.configuration.categories;
+}
+
+/* ===============================
    EXPORTS GLOBAUX
    =============================== */
 
@@ -1059,4 +1226,8 @@ function calculerNoteFinaleMultiObjectifs(da, ensembleId) {
 window.calculerPerformanceParObjectif = calculerPerformanceParObjectif;
 window.calculerNoteFinaleMultiObjectifs = calculerNoteFinaleMultiObjectifs;
 
-console.log('✅ Module portfolio.js chargé (avec support multi-objectifs)');
+// 🆕 Beta 95.4 : Exporter les fonctions de catégories
+window.calculerNoteAvecCategories = calculerNoteAvecCategories;
+window.obtenirConfigCategories = obtenirConfigCategories;
+
+console.log('✅ Module portfolio.js chargé (avec support multi-objectifs et catégories)');

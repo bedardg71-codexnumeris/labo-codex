@@ -1,7 +1,7 @@
-# SESSION ACTIVE - BETA 95.3
+# SESSION ACTIVE - BETA 95.4
 
 **Date** : 10 janvier 2026
-**Version** : Beta 95.3 (build 0110)
+**Version** : Beta 95.4 (build 0110b)
 **Statut** : Application fonctionnelle pour H2026
 
 ---
@@ -24,7 +24,29 @@
 - Variables CSS adoptees massivement (box-shadow 43%, border-radius 95%)
 
 ### Derniere tache completee (10 janvier)
-- **NOUVELLE FONCTIONNALITE** : Mode "Cours" dans le dropdown de l'en-tete
+- **NOUVELLE FONCTIONNALITE** : Categories Selection/Obligatoires (Beta 95.4)
+  - Permet de distinguer des productions "pool" (N meilleures retenues) vs "toujours comptees"
+  - **Cas d'usage** : 4 meilleures sur 8 artefacts (65%) + 2 certifications obligatoires (35%)
+  - **Phase 1** : Champ `categorie` ajoute aux productions (selection | obligatoire | null)
+  - **Phase 2** : Configuration dans Reglages → Pratique de notation
+    - Checkbox "Activer categories Selection/Obligatoires"
+    - Nombre a retenir pour Selection + ponderations
+    - Validation que la somme = 100%
+  - **Phase 3** : Fonction `calculerNoteAvecCategories()` dans portfolio.js
+    - Integration dans `calculerPerformance()` de pratique-pan-standards.js
+  - **Phase 4** : Assistant de migration pour productions existantes
+    - Modal avec actions rapides "Tout en Selection" / "Tout en Obligatoire"
+  - **Phase 5** : Questions Primo pour configurer les categories
+    - 5 nouvelles questions conditionnelles
+  - **Fichiers modifies** :
+    - `js/productions.js` : Champ categorie + assistant migration
+    - `js/portfolio.js` : calculerNoteAvecCategories() + obtenirConfigCategories()
+    - `js/pratiques-materiel.js` : Section configuration + validation
+    - `js/pratiques/pratique-pan-standards.js` : Integration dans calculerPerformance()
+    - `js/primo-questions.js` : 5 questions categories
+    - `index.html` : Select categorie + section config categories
+
+- **Tache precedente** : Mode "Cours" dans le dropdown de l'en-tete
   - Permet de selectionner un cours entier (tous les groupes fusionnes)
   - Format dropdown : `SIGLE (X groupes)` dans section "Cours (tous groupes)"
   - Etudiants de tous les groupes affiches ensemble

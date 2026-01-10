@@ -1091,6 +1091,124 @@ const QUESTIONS_PRIMO = [
         }
     },
 
+    // ========================================================================
+    // 🆕 CATÉGORIES SÉLECTION/OBLIGATOIRES (Beta 95.4)
+    // Permet de distinguer des productions "pool" vs "toujours comptées"
+    // ========================================================================
+    {
+        id: 'utiliser-categories',
+        texte: 'Veux-tu distinguer des productions **Sélection** (N meilleures retenues) et **Obligatoires** (toujours comptées) ?',
+        type: 'radio',
+        options: [
+            {
+                value: 'oui',
+                label: 'Oui, j\'ai des productions obligatoires',
+                description: 'Ex: évaluation finale toujours comptée, portfolio = N meilleures'
+            },
+            {
+                value: 'non',
+                label: 'Non, toutes mes productions sont dans le même pool',
+                description: 'Toutes les productions sont traitées de la même façon'
+            }
+        ],
+        champsCibles: [
+            { cle: 'modalitesEvaluation', champ: 'utiliserCategories' }
+        ],
+        validation: {
+            requis: true
+        },
+        aide: 'Cette option est utile si tu as des évaluations finales (examen, certification) qui doivent toujours compter, même si le reste du portfolio utilise les N meilleures.',
+        sautSi: function(reponses) {
+            const pratique = reponses['pratique-notation'];
+            const portfolio = reponses['utiliser-portfolio'];
+            const approche = reponses['approche-evaluation'];
+            // Afficher seulement pour PAN-Standards avec portfolio par-artefacts
+            if (pratique !== 'pan-standards') return true;
+            if (approche === 'par-objectifs') return true;
+            if (portfolio !== 'oui') return true;
+            return false;
+        }
+    },
+
+    {
+        id: 'categories-selection-nombre',
+        texte: 'Combien de productions **Sélection** seront retenues pour le calcul ?',
+        type: 'number',
+        placeholder: 'Ex: 4',
+        champsCibles: [
+            { cle: 'modalitesEvaluation', champ: 'categories.selection.nombreARetenir' }
+        ],
+        validation: {
+            requis: true,
+            min: 1,
+            max: 20
+        },
+        aide: 'Les N meilleures productions marquées "Sélection" seront retenues. Ex: 4 meilleures sur 8 artefacts.',
+        sautSi: function(reponses) {
+            return reponses['utiliser-categories'] !== 'oui';
+        }
+    },
+
+    {
+        id: 'categories-selection-ponderation',
+        texte: 'Quel pourcentage de la note finale pour les productions **Sélection** ?',
+        type: 'number',
+        placeholder: '65',
+        champsCibles: [
+            { cle: 'modalitesEvaluation', champ: 'categories.selection.ponderation' }
+        ],
+        validation: {
+            requis: true,
+            min: 0,
+            max: 100
+        },
+        aide: 'Ex: 65% pour le portfolio (Sélection) + 35% pour l\'évaluation finale (Obligatoire) = 100%',
+        sautSi: function(reponses) {
+            return reponses['utiliser-categories'] !== 'oui';
+        }
+    },
+
+    {
+        id: 'categories-obligatoires-ponderation',
+        texte: 'Quel pourcentage pour les productions **Obligatoires** ?',
+        type: 'number',
+        placeholder: '35',
+        champsCibles: [
+            { cle: 'modalitesEvaluation', champ: 'categories.obligatoires.ponderation' }
+        ],
+        validation: {
+            requis: true,
+            min: 0,
+            max: 100
+        },
+        aide: 'Les productions Obligatoires comptent toujours (note = 0 si non remise). Ex: certification finale.',
+        sautSi: function(reponses) {
+            return reponses['utiliser-categories'] !== 'oui';
+        }
+    },
+
+    {
+        id: 'categories-info-validation',
+        texte: function(reponses) {
+            const pondSel = parseInt(reponses['categories-selection-ponderation']) || 0;
+            const pondObl = parseInt(reponses['categories-obligatoires-ponderation']) || 0;
+            const total = pondSel + pondObl;
+
+            if (total === 100) {
+                return `✅ **Configuration validée !**\n\n• Sélection : **${pondSel}%** (${reponses['categories-selection-nombre'] || 4} meilleures retenues)\n• Obligatoires : **${pondObl}%** (toujours comptées)\n\nTotal : **100%**`;
+            } else if (total < 100) {
+                return `⚠️ **Attention** : Le total des pondérations est de **${total}%** (inférieur à 100%).\n\nTu pourras ajuster dans **Réglages → Pratique de notation**.`;
+            } else {
+                return `❌ **Attention** : Le total des pondérations dépasse 100% (**${total}%**).\n\nTu devras ajuster dans **Réglages → Pratique de notation**.`;
+            }
+        },
+        type: 'info',
+        champsCibles: [],
+        sautSi: function(reponses) {
+            return reponses['utiliser-categories'] !== 'oui';
+        }
+    },
+
     // MODE EXPERT : 4 variantes PAN-Standards (traces sélectives) - Seulement pour approche par-artefacts
     {
         id: 'construction-note-expert',

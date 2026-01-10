@@ -242,6 +242,12 @@ async function afficherFormProduction(id) {
             // ✨ NOUVEAU (Beta 94 - 10 déc 2025): Charger date d'échéance
             document.getElementById('productionDateEcheance').value = prod.dateEcheance || '';
 
+            // 🆕 Beta 95.4 : Charger la catégorie (Sélection/Obligatoire)
+            const selectCategorie = document.getElementById('productionCategorie');
+            if (selectCategorie) {
+                selectCategorie.value = prod.categorie || '';
+            }
+
             // Gérer l'affichage des champs spécifiques au type
             gererChangementTypeProduction();
 
@@ -413,6 +419,9 @@ async function sauvegarderProduction() {
         : [];
 
     // Préparer l'objet de base
+    // 🆕 Beta 95.4 : Lire la catégorie (Sélection/Obligatoire)
+    const categorie = document.getElementById('productionCategorie')?.value || null;
+
     let productionData = {
         titre: titreFinal,  // ✅ Utilise titreFinal en cas de renommage
         description,
@@ -425,7 +434,8 @@ async function sauvegarderProduction() {
         pratiquesCompatibles,  // Pratiques de notation compatibles
         verrouille: false,
         dansBibliotheque: true,  // ✅ AJOUT (8 décembre 2025) - Nouvelle production dans bibliothèque par défaut
-        coursId  // ✅ CRITIQUE (Beta 95) : Lier la production au cours actif
+        coursId,  // ✅ CRITIQUE (Beta 95) : Lier la production au cours actif
+        categorie  // 🆕 Beta 95.4 : Catégorie pour calcul de note (selection | obligatoire | null)
     };
 
     // Si c'est un Portfolio, ajouter les données spécifiques
@@ -2593,6 +2603,183 @@ window.confirmerImportProductions = async function(donnees) {
 };
 
 /* ===============================
+   🆕 ASSISTANT DE MIGRATION CATÉGORIES (Beta 95.4)
+
+   Détecte les productions sans catégorie et propose
+   une assignation rapide (Sélection ou Obligatoire)
+   =============================== */
+
+/**
+ * Vérifie si des productions nécessitent une migration de catégorie
+ * et affiche un assistant si nécessaire
+ *
+ * @returns {boolean} - true si des productions sans catégorie existent
+ */
+async function verifierMigrationCategories() {
+    const productions = await db.get('productions') || [];
+
+    // Filtrer les productions sans catégorie (exclure portfolio conteneur et formatifs)
+    const sansCategorie = productions.filter(p =>
+        !p.categorie &&
+        p.type !== 'portfolio' &&
+        !p.type?.endsWith('-formatif')
+    );
+
+    if (sansCategorie.length === 0) {
+        return false;
+    }
+
+    console.log(`[Migration] ${sansCategorie.length} production(s) sans catégorie détectée(s)`);
+    return true;
+}
+
+/**
+ * Affiche l'assistant de migration des catégories
+ * Permet d'assigner rapidement des catégories aux productions existantes
+ */
+async function afficherAssistantMigrationCategories() {
+    const productions = await db.get('productions') || [];
+
+    // Filtrer les productions sans catégorie
+    const sansCategorie = productions.filter(p =>
+        !p.categorie &&
+        p.type !== 'portfolio' &&
+        !p.type?.endsWith('-formatif')
+    );
+
+    if (sansCategorie.length === 0) {
+        alert('✅ Toutes les productions ont déjà une catégorie assignée.');
+        return;
+    }
+
+    // Générer le contenu du modal
+    const lignesHTML = sansCategorie.map((prod, index) => `
+        <tr>
+            <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">
+                ${echapperHtml(prod.titre || 'Sans titre')}
+                ${prod.description ? `<br><small style="color: var(--gris-moyen);">${echapperHtml(prod.description)}</small>` : ''}
+            </td>
+            <td style="text-align: center;">${getTypeLabel(prod.type)}</td>
+            <td style="text-align: center;">
+                <select id="migration-cat-${prod.id}" class="controle-form" style="min-width: 150px;">
+                    <option value="">-- Non définie --</option>
+                    <option value="selection">Sélection</option>
+                    <option value="obligatoire">Obligatoire</option>
+                </select>
+            </td>
+        </tr>
+    `).join('');
+
+    const modalHTML = `
+        <div id="modal-migration-categories" class="modal-overlay" style="display: flex; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999;">
+            <div class="modal-contenu" style="background: white; border-radius: var(--radius-grand); max-width: 700px; width: 95%; max-height: 80vh; overflow: auto; padding: 24px;">
+                <h3 style="margin-top: 0; color: var(--bleu-principal);">🔄 Migration des catégories</h3>
+                <p style="color: var(--gris-fonce); margin-bottom: 20px;">
+                    <strong>${sansCategorie.length}</strong> production(s) n'ont pas encore de catégorie assignée.
+                    Assignez-leur une catégorie pour activer le calcul Sélection/Obligatoires.
+                </p>
+
+                <div style="margin-bottom: 20px; padding: 12px; background: var(--bleu-tres-pale); border-radius: var(--radius-moyen);">
+                    <strong>Actions rapides :</strong>
+                    <button type="button" onclick="assignerToutesMigration('selection')" class="btn-secondaire" style="margin-left: 10px;">
+                        Tout en Sélection
+                    </button>
+                    <button type="button" onclick="assignerToutesMigration('obligatoire')" class="btn-secondaire" style="margin-left: 8px;">
+                        Tout en Obligatoire
+                    </button>
+                </div>
+
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: var(--gris-tres-clair); border-bottom: 2px solid var(--gris-clair);">
+                            <th style="padding: 10px; text-align: left;">Production</th>
+                            <th style="padding: 10px; text-align: center;">Type</th>
+                            <th style="padding: 10px; text-align: center;">Catégorie</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${lignesHTML}
+                    </tbody>
+                </table>
+
+                <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--gris-clair);">
+                    <button type="button" onclick="fermerModalMigration()" class="btn-secondaire">Annuler</button>
+                    <button type="button" onclick="sauvegarderMigrationCategories()" class="btn-primaire">
+                        💾 Sauvegarder
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Insérer le modal dans le DOM
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+/**
+ * Assigne une catégorie à toutes les productions dans le modal de migration
+ * @param {string} categorie - 'selection' ou 'obligatoire'
+ */
+function assignerToutesMigration(categorie) {
+    const selects = document.querySelectorAll('[id^="migration-cat-"]');
+    selects.forEach(select => {
+        select.value = categorie;
+    });
+}
+
+/**
+ * Ferme le modal de migration
+ */
+function fermerModalMigration() {
+    const modal = document.getElementById('modal-migration-categories');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+/**
+ * Sauvegarde les catégories assignées via l'assistant de migration
+ */
+async function sauvegarderMigrationCategories() {
+    const productions = await db.get('productions') || [];
+    let nbMises = 0;
+
+    // Parcourir les selects du modal
+    const selects = document.querySelectorAll('[id^="migration-cat-"]');
+    selects.forEach(select => {
+        const prodId = select.id.replace('migration-cat-', '');
+        const categorie = select.value;
+
+        if (categorie) {
+            const prod = productions.find(p => p.id === prodId);
+            if (prod) {
+                prod.categorie = categorie;
+                nbMises++;
+            }
+        }
+    });
+
+    if (nbMises > 0) {
+        await db.set('productions', productions);
+        console.log(`[Migration] ${nbMises} production(s) mise(s) à jour avec catégorie`);
+
+        // Notification
+        if (typeof afficherNotificationSucces === 'function') {
+            afficherNotificationSucces(`${nbMises} catégorie(s) assignée(s)`, 'Les productions ont été mises à jour.');
+        } else {
+            alert(`✅ ${nbMises} catégorie(s) assignée(s) avec succès !`);
+        }
+
+        // Rafraîchir l'affichage si visible
+        if (typeof afficherTableauProductions === 'function') {
+            afficherTableauProductions();
+        }
+    }
+
+    fermerModalMigration();
+}
+
+/* ===============================
    EXPORT DES FONCTIONS GLOBALES
    =============================== */
 
@@ -2643,6 +2830,13 @@ window.afficherProductionsTrimestreModal = afficherProductionsTrimestreModal;
 window.importerToutTrimestreModal = importerToutTrimestreModal;
 window.importerUneProductionTrimestre = importerUneProductionTrimestre;
 window.mettreAJourFiltreCoursTrimestreProductions = mettreAJourFiltreCoursTrimestreProductions; // 🆕 Beta 95.3
+
+// 🆕 Beta 95.4 : Assistant de migration des catégories
+window.verifierMigrationCategories = verifierMigrationCategories;
+window.afficherAssistantMigrationCategories = afficherAssistantMigrationCategories;
+window.assignerToutesMigration = assignerToutesMigration;
+window.fermerModalMigration = fermerModalMigration;
+window.sauvegarderMigrationCategories = sauvegarderMigrationCategories;
 
 /* ===============================
    📌 NOTES D'UTILISATION

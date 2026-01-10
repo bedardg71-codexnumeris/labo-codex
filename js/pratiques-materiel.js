@@ -675,6 +675,15 @@ function remplirFormulairePratique(pratique) {
             setCheckbox('mat-decoupler-pr', config.portfolio.decouplerPR || false);
         }
 
+        // 🆕 Beta 95.4 : Catégories Sélection/Obligatoires
+        if (config.categories) {
+            setCheckbox('mat-categories-actif', config.categories.actif || false);
+            setValeurChamp('mat-selection-nombre', config.categories.selection?.nombreARetenir || 4);
+            setValeurChamp('mat-selection-ponderation', config.categories.selection?.ponderation || 65);
+            setValeurChamp('mat-obligatoires-ponderation', config.categories.obligatoires?.ponderation || 35);
+            toggleCategoriesMat(); // Afficher/masquer les détails
+        }
+
     } else if (pratique.type === 'pan-specifications') {
         const config = pratique.configuration || {};
 
@@ -962,6 +971,19 @@ async function sauvegarderConfigPratiqueMat() {
                 minimumCompletion: parseInt(getValeurChamp('mat-portfolio-minimum')) || 7,
                 nombreTotal: parseInt(getValeurChamp('mat-portfolio-total')) || 10,
                 decouplerPR: getCheckbox('mat-decoupler-pr')
+            };
+
+            // 🆕 Beta 95.4 : Configuration Catégories Sélection/Obligatoires
+            const categoriesActif = getCheckbox('mat-categories-actif');
+            configurations[index].configuration.categories = {
+                actif: categoriesActif,
+                selection: {
+                    nombreARetenir: parseInt(getValeurChamp('mat-selection-nombre')) || 4,
+                    ponderation: parseInt(getValeurChamp('mat-selection-ponderation')) || 65
+                },
+                obligatoires: {
+                    ponderation: parseInt(getValeurChamp('mat-obligatoires-ponderation')) || 35
+                }
             };
         }
 
@@ -1748,6 +1770,47 @@ function toggleSystemeJetonsMat() {
     }
 }
 
+/**
+ * 🆕 Beta 95.4 : Toggle la visibilité des catégories Sélection/Obligatoires
+ */
+function toggleCategoriesMat() {
+    const checkbox = document.getElementById('mat-categories-actif');
+    const details = document.getElementById('mat-categories-details');
+    const validation = document.getElementById('mat-categories-validation');
+
+    if (details) {
+        details.style.display = checkbox && checkbox.checked ? 'block' : 'none';
+    }
+
+    // Valider que les pondérations = 100%
+    if (checkbox && checkbox.checked) {
+        validerPonderationsCategoriesMat();
+    }
+
+    // Sauvegarder automatiquement
+    sauvegarderConfigPratiqueMat();
+}
+
+/**
+ * 🆕 Beta 95.4 : Valide que les pondérations Sélection + Obligatoires = 100%
+ */
+function validerPonderationsCategoriesMat() {
+    const pondSelection = parseInt(document.getElementById('mat-selection-ponderation')?.value) || 0;
+    const pondOblig = parseInt(document.getElementById('mat-obligatoires-ponderation')?.value) || 0;
+    const total = pondSelection + pondOblig;
+    const validation = document.getElementById('mat-categories-validation');
+
+    if (validation) {
+        if (total === 100) {
+            validation.innerHTML = `<span style="color: var(--vert-principal);">✓ Total : ${total}%</span>`;
+        } else if (total < 100) {
+            validation.innerHTML = `<span style="color: var(--orange-principal);">⚠ Total : ${total}% (il manque ${100 - total}%)</span>`;
+        } else {
+            validation.innerHTML = `<span style="color: var(--rouge-principal);">⚠ Total : ${total}% (dépasse de ${total - 100}%)</span>`;
+        }
+    }
+}
+
 /* ===============================
    PAR-OBJECTIFS (variante STD)
    =============================== */
@@ -2146,6 +2209,8 @@ window.mettreAJourDescriptionPratiqueMat = mettreAJourDescriptionPratiqueMat;
 window.mettreAJourDisciplinePratiqueMat = mettreAJourDisciplinePratiqueMat;
 window.sauvegarderConfigPratiqueMat = sauvegarderConfigPratiqueMat;
 window.toggleSystemeJetonsMat = toggleSystemeJetonsMat;
+window.toggleCategoriesMat = toggleCategoriesMat;  // 🆕 Beta 95.4
+window.validerPonderationsCategoriesMat = validerPonderationsCategoriesMat;  // 🆕 Beta 95.4
 
 // Échelles
 window.chargerDropdownEchellesMat = chargerDropdownEchellesMat;

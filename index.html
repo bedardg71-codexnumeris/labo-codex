@@ -4490,6 +4490,25 @@
                                 </div>
 
                                 <!-- ═══════════════════════════════════════════════════════════
+                                     SECTION 3B : CATÉGORIE POUR CALCUL DE NOTE (Beta 95.4)
+                                     ═══════════════════════════════════════════════════════════ -->
+                                <div id="champCategorie" style="margin-bottom: 20px;">
+                                    <div class="groupe-form">
+                                        <label for="productionCategorie">Catégorie pour le calcul
+                                            <span class="tooltip-aide" title="Sélection : cette production fait partie du pool des N meilleures (ex: artefacts 1-8). Obligatoire : cette production compte toujours dans la note finale (ex: examen final, projet synthèse).">📌</span>
+                                        </label>
+                                        <select id="productionCategorie" class="controle-form" style="max-width: 300px;">
+                                            <option value="">-- Non définie --</option>
+                                            <option value="selection">Sélection (N meilleures retenues)</option>
+                                            <option value="obligatoire">Obligatoire (toujours comptée)</option>
+                                        </select>
+                                        <small style="display: block; margin-top: 6px; color: var(--gris-moyen); font-size: 0.85rem;">
+                                            Laissez vide pour utiliser le comportement par défaut de la pratique de notation.
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <!-- ═══════════════════════════════════════════════════════════
                                      SECTION 4 : OBJECTIFS PÉDAGOGIQUES
                                      Objectif d'apprentissage + Description de la tâche
                                      ═══════════════════════════════════════════════════════════ -->
@@ -5176,6 +5195,48 @@
                                                     </label>
                                                     <input type="number" id="mat-portfolio-total" class="controle-form" min="1" max="50" value="10" onchange="sauvegarderConfigPratiqueMat()">
                                                 </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Config Catégories Sélection/Obligatoires (Beta 95.4) -->
+                                        <div id="mat-config-categories" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--gris-clair);">
+                                            <div style="margin-bottom: 15px;">
+                                                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                                    <input type="checkbox" id="mat-categories-actif" onchange="toggleCategoriesMat()">
+                                                    <span style="font-weight: 600;">Activer les catégories Sélection / Obligatoires</span>
+                                                    <span class="tooltip-aide" title="Permet de distinguer des productions 'Sélection' (N meilleures retenues pour la note) et des productions 'Obligatoires' (toujours comptées, ex: examen final).">📌</span>
+                                                </label>
+                                            </div>
+
+                                            <div id="mat-categories-details" style="display: none;">
+                                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                                                    <!-- Sélection -->
+                                                    <fieldset style="border: 1px solid var(--bleu-clair); border-radius: var(--radius-moyen); padding: 15px;">
+                                                        <legend style="font-weight: 600; color: var(--bleu-principal); padding: 0 8px;">Sélection (N meilleures)</legend>
+                                                        <div class="groupe-form" style="margin-bottom: 12px;">
+                                                            <label for="mat-selection-nombre">Nombre à retenir</label>
+                                                            <input type="number" id="mat-selection-nombre" class="controle-form" min="1" max="20" value="4" onchange="sauvegarderConfigPratiqueMat()">
+                                                        </div>
+                                                        <div class="groupe-form">
+                                                            <label for="mat-selection-ponderation">Pondération (%)</label>
+                                                            <input type="number" id="mat-selection-ponderation" class="controle-form" min="0" max="100" value="65" onchange="validerPonderationsCategoriesMat(); sauvegarderConfigPratiqueMat()">
+                                                        </div>
+                                                    </fieldset>
+
+                                                    <!-- Obligatoires -->
+                                                    <fieldset style="border: 1px solid var(--orange-principal, #e67e22); border-radius: var(--radius-moyen); padding: 15px;">
+                                                        <legend style="font-weight: 600; color: var(--orange-principal, #e67e22); padding: 0 8px;">Obligatoires</legend>
+                                                        <div class="groupe-form">
+                                                            <label for="mat-obligatoires-ponderation">Pondération (%)</label>
+                                                            <input type="number" id="mat-obligatoires-ponderation" class="controle-form" min="0" max="100" value="35" onchange="validerPonderationsCategoriesMat(); sauvegarderConfigPratiqueMat()">
+                                                        </div>
+                                                        <small style="display: block; margin-top: 10px; color: var(--gris-moyen);">
+                                                            Les productions obligatoires comptent toujours.<br>
+                                                            Note = 0 si non remise.
+                                                        </small>
+                                                    </fieldset>
+                                                </div>
+                                                <p id="mat-categories-validation" style="margin-top: 12px; font-size: 0.85rem; color: var(--gris-moyen);"></p>
                                             </div>
                                         </div>
 
