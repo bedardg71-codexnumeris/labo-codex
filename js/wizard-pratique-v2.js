@@ -48,7 +48,10 @@ const ETAPES_WIZARD = {
         ordre: 1,
         champs: [
             { id: 'nom', label: 'Nom de la pratique', type: 'text', required: true, placeholder: 'Ex: PAN-Standards Littérature H2026' },
-            { id: 'auteur', label: 'Auteur (pour la licence CC)', type: 'text', required: true, placeholder: 'Prénom Nom' },
+            { id: 'auteur-row', type: 'row', champs: [
+                { id: 'prenom', label: 'Prénom', type: 'text', required: true, placeholder: 'Prénom' },
+                { id: 'nomAuteur', label: 'Nom', type: 'text', required: true, placeholder: 'Nom' }
+            ]},
             { id: 'etablissement', label: 'Établissement', type: 'text', required: true, placeholder: 'Ex: Cégep de Drummondville' },
             { id: 'discipline', label: 'Discipline', type: 'select-disciplines', required: true },
             { id: 'description', label: 'Description', type: 'textarea', required: false, placeholder: 'Décrivez brièvement votre pratique (optionnel)' },
@@ -830,6 +833,8 @@ function genererChamp(champ) {
             return genererSelectGrille(champ);
         case 'select-disciplines':
             return genererChampSelectDisciplines(champ);
+        case 'row':
+            return genererChampRow(champ);
         case 'info':
             return genererInfo(champ);
         default:
@@ -854,6 +859,31 @@ function genererChampTexte(champ) {
                    name="${champ.id}"
                    placeholder="${champ.placeholder || ''}"
                    ${required}>
+        </div>
+    `;
+}
+
+/**
+ * 🆕 Beta 95.4 : Génère une rangée de champs côte à côte (2 colonnes)
+ */
+function genererChampRow(champ) {
+    const champsHTML = champ.champs.map(sousChamp => {
+        const required = sousChamp.required ? 'required' : '';
+        return `
+            <div class="wizard-v2-champ" style="flex: 1;">
+                <label for="${WIZARD_V2_ID_PREFIX}${sousChamp.id}">${sousChamp.label}${sousChamp.required ? ' *' : ''}</label>
+                <input type="text"
+                       id="${WIZARD_V2_ID_PREFIX}${sousChamp.id}"
+                       name="${sousChamp.id}"
+                       placeholder="${sousChamp.placeholder || ''}"
+                       ${required}>
+            </div>
+        `;
+    }).join('');
+
+    return `
+        <div class="wizard-v2-row" style="display: flex; gap: 15px;">
+            ${champsHTML}
         </div>
     `;
 }
@@ -1385,8 +1415,15 @@ function sauvegarderReponsesEtape(etapeId) {
         champs = etape.getChampsDynamiques(wizardState.reponses);
     }
 
-    champs.forEach(champ => {
-        if (champ.type === 'info') return; // Ignorer les blocs info
+    // Fonction interne pour sauvegarder un champ
+    const sauvegarderChamp = (champ) => {
+        if (champ.type === 'info') return;
+
+        // 🆕 Beta 95.4 : Gérer les rows avec sous-champs
+        if (champ.type === 'row' && champ.champs) {
+            champ.champs.forEach(sousChamp => sauvegarderChamp(sousChamp));
+            return;
+        }
 
         const element = document.getElementById(`${WIZARD_V2_ID_PREFIX}${champ.id}`);
 
@@ -1400,7 +1437,9 @@ function sauvegarderReponsesEtape(etapeId) {
         } else if (element) {
             wizardState.reponses[champ.id] = element.value;
         }
-    });
+    };
+
+    champs.forEach(sauvegarderChamp);
 
     console.log('[WizardV2] Réponses sauvegardées:', wizardState.reponses);
 }
@@ -1419,8 +1458,15 @@ function restaurerValeursEtape(etapeId) {
         champs = etape.getChampsDynamiques(wizardState.reponses);
     }
 
-    champs.forEach(champ => {
+    // Fonction interne pour restaurer un champ
+    const restaurerChamp = (champ) => {
         if (champ.type === 'info') return;
+
+        // 🆕 Beta 95.4 : Gérer les rows avec sous-champs
+        if (champ.type === 'row' && champ.champs) {
+            champ.champs.forEach(sousChamp => restaurerChamp(sousChamp));
+            return;
+        }
 
         const valeur = wizardState.reponses[champ.id];
         if (valeur === undefined) return;
@@ -1435,7 +1481,9 @@ function restaurerValeursEtape(etapeId) {
         } else if (element) {
             element.value = valeur;
         }
-    });
+    };
+
+    champs.forEach(restaurerChamp);
 }
 
 // ============================================================================
@@ -1452,7 +1500,7 @@ function creerPratiqueV2() {
     const pratique = {
         id: wizardState.pratiqueId || `pratique-${Date.now()}`,
         nom: r.nom,
-        auteur: r.auteur || '',
+        auteur: `${r.prenom || ''} ${r.nomAuteur || ''}`.trim(),
         etablissement: r.etablissement || '',
         description: r.description || '',
         discipline: r.discipline || '',
@@ -1600,7 +1648,8 @@ function ouvrirWizardV2(modeEdition = false, pratiqueId = null) {
     if (!modeEdition) {
         const profilEnseignant = obtenirProfilEnseignantActifWizard();
         if (profilEnseignant) {
-            wizardState.reponses.auteur = profilEnseignant.nomComplet || '';
+            wizardState.reponses.prenom = profilEnseignant.prenom || '';
+            wizardState.reponses.nomAuteur = profilEnseignant.nom || '';
             wizardState.reponses.etablissement = profilEnseignant.institution || '';
             wizardState.reponses.discipline = profilEnseignant.discipline || '';
             console.log('[WizardV2] Pré-remplissage avec profil enseignant:', profilEnseignant);
@@ -1624,7 +1673,7 @@ function ouvrirWizardV2(modeEdition = false, pratiqueId = null) {
 
 /**
  * 🆕 Beta 95.4 : Obtient le profil de l'enseignant du groupe-cours actif
- * @returns {Object|null} - { nomComplet, institution, discipline } ou null
+ * @returns {Object|null} - { prenom, nom, institution, discipline } ou null
  */
 function obtenirProfilEnseignantActifWizard() {
     try {
@@ -1640,7 +1689,8 @@ function obtenirProfilEnseignantActifWizard() {
         if (!enseignant) return null;
 
         return {
-            nomComplet: `${enseignant.prenom || ''} ${enseignant.nom || ''}`.trim(),
+            prenom: enseignant.prenom || '',
+            nom: enseignant.nom || '',
             institution: enseignant.institution || '',
             discipline: enseignant.discipline || ''
         };
