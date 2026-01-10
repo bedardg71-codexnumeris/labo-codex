@@ -5544,6 +5544,14 @@ async function changerGroupeCoursActifV2(valeur) {
             afficherCalendrierScolaire();
         }
 
+        // 🆕 BETA 95.3 : Rafraîchir la liste des étudiants si visible
+        // Réinitialiser le filtre groupe local (redondant avec le dropdown entête)
+        const filtreGroupeCours = document.getElementById('filtre-groupe-liste');
+        if (filtreGroupeCours) filtreGroupeCours.value = '';
+        if (typeof afficherListeEtudiantsConsultation === 'function') {
+            afficherListeEtudiantsConsultation();
+        }
+
         console.log('[Trimestre V2] Mode COURS activé:', coursId, '(tous groupes)');
         return;
     }
@@ -5594,6 +5602,14 @@ async function changerGroupeCoursActifV2(valeur) {
     // 🆕 BETA 95.2 : Rafraîchir le calendrier si visible
     if (typeof afficherCalendrierScolaire === 'function') {
         afficherCalendrierScolaire();
+    }
+
+    // 🆕 BETA 95.3 : Rafraîchir la liste des étudiants si visible
+    // Réinitialiser le filtre groupe local (redondant avec le dropdown entête)
+    const filtreGroupeGC = document.getElementById('filtre-groupe-liste');
+    if (filtreGroupeGC) filtreGroupeGC.value = '';
+    if (typeof afficherListeEtudiantsConsultation === 'function') {
+        afficherListeEtudiantsConsultation();
     }
 
     console.log('[Trimestre V2] Groupe-cours activé:', gc.id);
