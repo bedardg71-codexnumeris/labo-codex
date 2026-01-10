@@ -39,6 +39,13 @@
   - **Amelioration** : Option "Cours" visible meme avec 1 seul groupe-cours actif (permet de voir tous les etudiants meme si d'autres groupes sont masques)
   - **Rafraichissement automatique** : Changement de groupe-cours dans l'entete rafraichit la liste des etudiants et reinitialise le filtre Groupe
   - **Suppression dropdown redondant** : L'ancien dropdown cours dans la zone contextuelle est supprime, seul le dropdown "Groupe-cours actif" reste
+- **CORRECTIONS DE BUGS** (10 janvier) :
+  - **Dropdown pratique de notation** : Utilise maintenant la bonne cle `pratiquesConfigurables` (etait `pratiquesNotation`)
+  - **Echelle de performance** : Persiste correctement apres rechargement (ordre de chargement corrige dans pratiques-materiel.js)
+  - **Fichiers modifies** :
+    - `js/trimestre-v2.js` : Cle dropdown pratique corrigee
+    - `js/pratiques-materiel.js` : Dropdown echelles charge AVANT remplissage formulaire
+    - `js/contexte.js` : Suppression dropdown cours redondant
 
 ### Tache precedente (9 janvier)
 - **BUG CRITIQUE CORRIGE** : Perte de donnees etudiants (55 → 29)
