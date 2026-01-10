@@ -23,10 +23,17 @@
 - Variables CSS adoptees massivement (box-shadow 43%, border-radius 95%)
 
 ### Derniere tache completee (9 janvier)
-- **BUG CRITIQUE CORRIGE** : Perte de donnees etudiants
-  - Cause : `obtenirDonneesSelonMode()` filtrait par coursId, puis `sauvegarderDonneesSelonMode()` ecrasait TOUT
-  - Fix : Utilisation de `db.getSync()` direct dans groupe.js (confirmerImport, supprimerEtudiant)
-  - Fichier modifie : `js/groupe.js` (2 fonctions corrigees)
+- **BUG CRITIQUE CORRIGE** : Perte de donnees etudiants (55 → 29)
+  - **Symptome** : Import 29 etudiants OK, import 26 de plus OK (55 total), mais dropdown affiche 29
+  - **Cause racine** : `db.getSync()` lisait depuis localStorage qui contenait des donnees obsoletes
+  - **Solution** : Convertir toutes les fonctions en async avec `await db.get/set` pour lire/ecrire depuis IndexedDB (source de verite)
+  - **Fichiers modifies** :
+    - `js/trimestre-v2.js` : 8 fonctions converties en async
+      - `confirmerImportV2`, `soumettreEtudiantV2`, `supprimerEtudiantV2`
+      - `reinitialiserEtudiantsV2`, `supprimerGroupeSelectionneV2`, `sauvegarderGroupeEtudiantsV2`
+      - `chargerListeEtudiantsV2`, `filtrerParGroupeV2`, `chargerGroupesCoursV2`
+    - `js/modes.js` : Normalisation des groupes pour comparaison ("1" == "00001")
+  - **Suppression appels legacy** : `afficherListeEtudiants()` retire de `chargerListeEtudiantsV2`
 - **Bouton "Supprimer ce groupe"** : Nouvelle fonctionnalite
   - Permet de supprimer tous les etudiants d'un groupe en un clic
   - Bouton visible uniquement quand un groupe est selectionne

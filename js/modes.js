@@ -524,7 +524,10 @@ function obtenirDonneesSelonMode(cle) {
                     // Pour étudiants : vérifier groupe
                     if (cle === 'groupeEtudiants') {
                         const groupeCours = coursActif.groupe || coursActif.groupes?.[0];
-                        return item.groupe === groupeCours;
+                        // ✅ CORRECTION (9 jan 2026) : Normaliser les groupes avant comparaison
+                        // "1" et "00001" doivent être considérés comme égaux
+                        const normaliserGroupe = (g) => String(g || '').padStart(5, '0');
+                        return normaliserGroupe(item.groupe) === normaliserGroupe(groupeCours);
                     }
                     // Pour autres données sans coursId : les inclure (migration progressive)
                     return true;
@@ -861,7 +864,9 @@ function obtenirEtudiantsCoursActif() {
         if (!e.coursId) {
             // Ancien format : vérifier si le groupe correspond au cours actif
             const groupeCours = coursActif.groupe || coursActif.groupes?.[0];
-            return e.groupe === groupeCours;
+            // ✅ CORRECTION (9 jan 2026) : Normaliser les groupes avant comparaison
+            const normaliserGroupe = (g) => String(g || '').padStart(5, '0');
+            return normaliserGroupe(e.groupe) === normaliserGroupe(groupeCours);
         }
         return e.coursId === coursActif.id;
     });

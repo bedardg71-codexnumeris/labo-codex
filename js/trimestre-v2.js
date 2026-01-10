@@ -2195,8 +2195,9 @@ let donneesImportEnAttenteV2 = [];
 
 /**
  * Charge et affiche la liste des étudiants dans l'accordéon v2
+ * ✅ CORRECTION (9 jan 2026): Converti en async pour lire depuis IndexedDB (source de vérité)
  */
-function chargerListeEtudiantsV2() {
+async function chargerListeEtudiantsV2() {
     const conteneur = document.getElementById('v2-listeEtudiants');
     const nbTotal = document.getElementById('v2-nbEtudiantsTotal');
     const actionsEtudiants = document.getElementById('v2-actionsEtudiants');
@@ -2205,7 +2206,12 @@ function chargerListeEtudiantsV2() {
 
     // Utiliser namespace cle() pour lire les données du trimestre actif
     const cleEtudiants = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
-    const tousLesEtudiants = db.getSync(cleEtudiants, []);
+
+    // ✅ CORRECTION (9 jan 2026): Lire depuis IndexedDB pour éviter les données obsolètes de localStorage
+    const tousLesEtudiants = await db.get(cleEtudiants) || [];
+
+    // 🔍 DEBUG (9 jan 2026): Tracer la source des données
+    console.log(`🔍 [chargerListeEtudiantsV2] Clé: ${cleEtudiants}, Nb étudiants: ${tousLesEtudiants.length} (depuis IndexedDB)`);
 
     // Mettre à jour le dropdown des groupes (avec tous les étudiants)
     populerDropdownGroupesV2(tousLesEtudiants);
@@ -2231,10 +2237,6 @@ function chargerListeEtudiantsV2() {
         // Masquer le bouton supprimer groupe si pas d'étudiants
         const btnSupprimerGroupe = document.getElementById('v2-btnSupprimerGroupe');
         if (btnSupprimerGroupe) btnSupprimerGroupe.style.display = 'none';
-        // Appeler aussi la fonction legacy même sans étudiants
-        if (typeof afficherListeEtudiants === 'function') {
-            try { afficherListeEtudiants(); } catch (e) { /* ignore */ }
-        }
         return;
     }
 
@@ -2289,15 +2291,6 @@ function chargerListeEtudiantsV2() {
 
     html += '</tbody></table>';
     conteneur.innerHTML = html;
-
-    // Appeler aussi la fonction legacy pour populer accordeon-groupe
-    if (typeof afficherListeEtudiants === 'function') {
-        try {
-            afficherListeEtudiants();
-        } catch (e) {
-            console.log('[Trimestre V2] afficherListeEtudiants legacy non disponible ou erreur:', e.message);
-        }
-    }
 }
 
 /**
@@ -2409,9 +2402,10 @@ function populerDropdownGroupesV2(etudiants) {
 
 /**
  * Filtre la liste des étudiants par groupe sélectionné
+ * ✅ CORRECTION (9 jan 2026): Async pour supporter chargerListeEtudiantsV2 async
  */
-function filtrerParGroupeV2() {
-    chargerListeEtudiantsV2();
+async function filtrerParGroupeV2() {
+    await chargerListeEtudiantsV2();
 }
 
 /**
@@ -2424,8 +2418,8 @@ function getGroupeSelectionneV2() {
 /**
  * Charge les groupes d'un cours (ancien comportement, maintenant charge la liste)
  */
-function chargerGroupesCoursV2(coursId) {
-    chargerListeEtudiantsV2();
+async function chargerGroupesCoursV2(coursId) {
+    await chargerListeEtudiantsV2();
 }
 
 // Variable pour tracker l'index en cours d'édition (-1 = mode ajout)
@@ -2434,7 +2428,7 @@ let etudiantEnEditionIndex = -1;
 /**
  * Soumet le formulaire étudiant (ajout ou modification)
  */
-function soumettreEtudiantV2() {
+async function soumettreEtudiantV2() {
     const da = document.getElementById('v2-etudiantDA')?.value?.trim();
     const nom = document.getElementById('v2-etudiantNom')?.value?.trim();
     const prenom = document.getElementById('v2-etudiantPrenom')?.value?.trim();
@@ -2461,17 +2455,19 @@ function soumettreEtudiantV2() {
     };
 
     const cleEtud = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
-    let etudiants = db.getSync(cleEtud, []);
+
+    // ✅ CORRECTION (9 jan 2026): Utiliser async pour persistance fiable
+    let etudiants = await db.get(cleEtud) || [];
 
     if (etudiantEnEditionIndex >= 0) {
         // Mode édition : mettre à jour l'étudiant existant
         etudiants[etudiantEnEditionIndex] = etudiant;
-        db.setSync(cleEtud, etudiants);
+        await db.set(cleEtud, etudiants);
         afficherNotificationSucces(`${prenom} ${nom} modifié`);
     } else {
         // Mode ajout : ajouter un nouvel étudiant
         etudiants.push(etudiant);
-        db.setSync(cleEtud, etudiants);
+        await db.set(cleEtud, etudiants);
         afficherNotificationSucces(`${prenom} ${nom} ajouté`);
     }
 
@@ -2621,16 +2617,18 @@ function creerNouveauGroupeV2() {
 /**
  * Supprime un étudiant
  */
-function supprimerEtudiantV2(index) {
+async function supprimerEtudiantV2(index) {
     // ✅ CORRECTION (31 déc 2025): Utiliser namespace
     const cleEtud = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
-    let etudiants = db.getSync(cleEtud, []);
+
+    // ✅ CORRECTION (9 jan 2026): Utiliser async pour persistance fiable
+    let etudiants = await db.get(cleEtud) || [];
     const etudiant = etudiants[index];
 
     if (!confirm(`Supprimer ${etudiant?.prenom || ''} ${etudiant?.nom || ''} ?`)) return;
 
     etudiants.splice(index, 1);
-    db.setSync(cleEtud, etudiants);
+    await db.set(cleEtud, etudiants);
 
     chargerListeEtudiantsV2();
 
@@ -2737,13 +2735,22 @@ function traiterDonneesImportV2(contenu) {
 /**
  * Confirme l'import des données
  */
-function confirmerImportV2() {
-    if (donneesImportEnAttenteV2.length === 0) return;
+async function confirmerImportV2() {
+    console.log('📥 [confirmerImportV2] Début - donneesImportEnAttenteV2:', donneesImportEnAttenteV2.length);
+
+    if (donneesImportEnAttenteV2.length === 0) {
+        console.warn('⚠️ [confirmerImportV2] Aucune donnée en attente !');
+        return;
+    }
 
     const coursActif = db.getSync('infoCours', null);
     // ✅ CORRECTION (31 déc 2025): Utiliser namespace
     const cleEtud = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
-    let etudiants = db.getSync(cleEtud, []);
+    console.log('📥 [confirmerImportV2] Clé:', cleEtud);
+
+    // ✅ CORRECTION (9 jan 2026): Lire depuis IndexedDB pour avoir les données complètes
+    let etudiants = await db.get(cleEtud) || [];
+    console.log('📥 [confirmerImportV2] Étudiants existants:', etudiants.length);
 
     donneesImportEnAttenteV2.forEach(e => {
         etudiants.push({
@@ -2752,7 +2759,14 @@ function confirmerImportV2() {
         });
     });
 
-    db.setSync(cleEtud, etudiants);
+    console.log('📥 [confirmerImportV2] Total après ajout:', etudiants.length);
+
+    // ✅ CORRECTION (9 jan 2026): Utiliser db.set (async) pour écriture fiable
+    await db.set(cleEtud, etudiants);
+
+    // Vérification immédiate
+    const verification = db.getSync(cleEtud, []).length;
+    console.log('📥 [confirmerImportV2] Vérification après save:', verification);
 
     // Nettoyer
     donneesImportEnAttenteV2 = [];
@@ -2810,13 +2824,15 @@ function exporterEtudiantsV2() {
 /**
  * Réinitialise la liste des étudiants
  */
-function reinitialiserEtudiantsV2() {
+async function reinitialiserEtudiantsV2() {
     // ✅ CORRECTION (31 déc 2025): Utiliser namespace
     const cleEtud = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
-    const etudiants = db.getSync(cleEtud, []);
+
+    // ✅ CORRECTION (9 jan 2026): Utiliser async pour persistance fiable
+    const etudiants = await db.get(cleEtud) || [];
     if (!confirm(`Supprimer les ${etudiants.length} étudiant(s) ? Cette action est irréversible.`)) return;
 
-    db.setSync(cleEtud, []);
+    await db.set(cleEtud, []);
     chargerListeEtudiantsV2();
 
     if (typeof afficherNotificationSucces === 'function') {
@@ -2839,7 +2855,7 @@ function viderListeEtudiantsV2() {
  * Supprime tous les étudiants du groupe sélectionné
  * 🆕 BETA 95.3 : Permet de supprimer un groupe entier
  */
-function supprimerGroupeSelectionneV2() {
+async function supprimerGroupeSelectionneV2() {
     const groupeSelectionne = getGroupeSelectionneV2();
     if (!groupeSelectionne) {
         afficherNotificationErreur('Sélectionnez un groupe spécifique à supprimer.');
@@ -2847,7 +2863,9 @@ function supprimerGroupeSelectionneV2() {
     }
 
     const cleEtud = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
-    const tousLesEtudiants = db.getSync(cleEtud, []);
+
+    // ✅ CORRECTION (9 jan 2026): Utiliser async pour persistance fiable
+    const tousLesEtudiants = await db.get(cleEtud) || [];
 
     // Compter les étudiants du groupe
     const etudiantsDuGroupe = tousLesEtudiants.filter(e =>
@@ -2868,7 +2886,7 @@ function supprimerGroupeSelectionneV2() {
         String(e.groupe).padStart(5, '0') !== groupeSelectionne
     );
 
-    db.setSync(cleEtud, etudiantsRestants);
+    await db.set(cleEtud, etudiantsRestants);
 
     // Reset le dropdown à "Tous les groupes"
     const selectGroupe = document.getElementById('v2-selectGroupe');
@@ -2888,9 +2906,11 @@ function supprimerGroupeSelectionneV2() {
  * Sauvegarde le groupe d'étudiants et ouvre l'accordéon Horaire
  * 🆕 BETA 95.2 : Workflow groupe → horaire
  */
-function sauvegarderGroupeEtudiantsV2() {
+async function sauvegarderGroupeEtudiantsV2() {
     const cleEtud = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
-    const etudiants = db.getSync(cleEtud, []);
+
+    // ✅ CORRECTION (9 jan 2026): Utiliser async pour persistance fiable
+    const etudiants = await db.get(cleEtud) || [];
 
     if (etudiants.length === 0) {
         alert('Aucun étudiant dans le groupe. Importez d\'abord une liste.');
@@ -2911,7 +2931,7 @@ function sauvegarderGroupeEtudiantsV2() {
     });
 
     if (modifie) {
-        db.setSync(cleEtud, etudiants);
+        await db.set(cleEtud, etudiants);
     }
 
     // Notification de succès
