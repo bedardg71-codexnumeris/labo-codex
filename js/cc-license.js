@@ -1153,9 +1153,19 @@ function genererPanneauMetadonnees(ressource, typeRessource) {
     // Récupérer les métadonnées (plusieurs formats possibles)
     const meta = ressource.metadata_cc || ressource.metadata || {};
 
+    // 🆕 Beta 95.4 : Titre dynamique selon le type de ressource
+    const titreParType = {
+        'production': 'Métadonnées sur cette production',
+        'grille': 'Métadonnées sur cette grille',
+        'echelle': 'Métadonnées sur cette échelle',
+        'cartouche': 'Métadonnées sur ce cartouche',
+        'pratique': 'Métadonnées sur cette pratique'
+    };
+    const titreMetadonnees = titreParType[typeRessource] || 'Métadonnées';
+
     // Formatage de la date
     const formatDate = (dateStr) => {
-        if (!dateStr) return 'Non spécifié';
+        if (!dateStr) return null;
         try {
             const date = new Date(dateStr);
             return date.toLocaleDateString('fr-CA', {
@@ -1228,11 +1238,12 @@ function genererPanneauMetadonnees(ressource, typeRessource) {
     const description = meta.description_courte || meta.description || ressource.description || '';
     const discipline = Array.isArray(meta.discipline) ? meta.discipline.join(', ') : (meta.discipline || '');
     const licence = meta.licence || 'CC BY-NC-SA 4.0';
+    const contributeurs = meta.contributeurs || [];
 
-    // Construire les lignes du panneau
+    // Construire les lignes du panneau - ORDRE UNIFORME pour tous les types
     let lignesHTML = '';
 
-    // Auteur (toujours affiché)
+    // 1. Auteur (toujours affiché)
     lignesHTML += `
         <div class="meta-ligne">
             <span class="meta-label">Auteur</span>
@@ -1240,58 +1251,27 @@ function genererPanneauMetadonnees(ressource, typeRessource) {
         </div>
     `;
 
-    // Institution (si présente)
-    if (institution) {
-        lignesHTML += `
-            <div class="meta-ligne">
-                <span class="meta-label">Institution</span>
-                <span class="meta-valeur">${echapperHtmlCC(institution)}</span>
-            </div>
-        `;
-    }
+    // 2. Date de création (toujours affichée)
+    const dateCreationFormatee = formatDate(dateCreation);
+    lignesHTML += `
+        <div class="meta-ligne">
+            <span class="meta-label">Créé le</span>
+            <span class="meta-valeur">${dateCreationFormatee || 'Non spécifié'}</span>
+        </div>
+    `;
 
-    // Discipline (si présente)
-    if (discipline) {
-        lignesHTML += `
-            <div class="meta-ligne">
-                <span class="meta-label">Discipline</span>
-                <span class="meta-valeur">${echapperHtmlCC(discipline)}</span>
-            </div>
-        `;
-    }
-
-    // Date de création
-    if (dateCreation) {
-        lignesHTML += `
-            <div class="meta-ligne">
-                <span class="meta-label">Créé le</span>
-                <span class="meta-valeur">${formatDate(dateCreation)}</span>
-            </div>
-        `;
-    }
-
-    // Date de modification (si différente de création)
-    if (dateModif && dateModif !== dateCreation) {
+    // 3. Date de modification (toujours affichée, sauf si identique à création)
+    const dateModifFormatee = formatDate(dateModif);
+    if (dateModifFormatee && dateModifFormatee !== dateCreationFormatee) {
         lignesHTML += `
             <div class="meta-ligne">
                 <span class="meta-label">Modifié le</span>
-                <span class="meta-valeur">${formatDate(dateModif)}</span>
+                <span class="meta-valeur">${dateModifFormatee}</span>
             </div>
         `;
     }
 
-    // Description (si présente)
-    if (description) {
-        lignesHTML += `
-            <div class="meta-ligne meta-description">
-                <span class="meta-label">Description</span>
-                <span class="meta-valeur">${echapperHtmlCC(description)}</span>
-            </div>
-        `;
-    }
-
-    // 🆕 Beta 95.4 : Contributeurs (si présents)
-    const contributeurs = meta.contributeurs || [];
+    // 4. Contributeurs (si présents)
     if (contributeurs.length > 0) {
         const listeContributeurs = contributeurs.map(c => {
             const nom = c.nom || 'Anonyme';
@@ -1307,7 +1287,37 @@ function genererPanneauMetadonnees(ressource, typeRessource) {
         `;
     }
 
-    // Licence (toujours affichée)
+    // 5. Institution (si présente)
+    if (institution) {
+        lignesHTML += `
+            <div class="meta-ligne">
+                <span class="meta-label">Institution</span>
+                <span class="meta-valeur">${echapperHtmlCC(institution)}</span>
+            </div>
+        `;
+    }
+
+    // 6. Discipline (si présente)
+    if (discipline) {
+        lignesHTML += `
+            <div class="meta-ligne">
+                <span class="meta-label">Discipline</span>
+                <span class="meta-valeur">${echapperHtmlCC(discipline)}</span>
+            </div>
+        `;
+    }
+
+    // 7. Description (si présente)
+    if (description) {
+        lignesHTML += `
+            <div class="meta-ligne meta-description">
+                <span class="meta-label">Description</span>
+                <span class="meta-valeur">${echapperHtmlCC(description)}</span>
+            </div>
+        `;
+    }
+
+    // 8. Licence (toujours affichée en dernier)
     lignesHTML += `
         <div class="meta-ligne meta-licence">
             <span class="meta-label">Licence</span>
@@ -1320,10 +1330,21 @@ function genererPanneauMetadonnees(ressource, typeRessource) {
         </div>
     `;
 
+    // Bouton d'édition (si ressource a un ID)
+    const boutonEdition = ressource.id ? `
+        <button type="button" class="btn-edit-metadata"
+                onclick="afficherModalEditionMetadonnees('${typeRessource}', '${ressource.id}')"
+                title="Modifier les métadonnées"
+                style="background: none; border: none; cursor: pointer; padding: 4px; color: var(--gris-moyen); font-size: 0.9rem;">
+            ✏️
+        </button>
+    ` : '';
+
     return `
         <div class="panneau-metadata" data-type="${typeRessource}" data-id="${ressource.id || ''}">
-            <div class="panneau-metadata-header">
-                <span class="panneau-metadata-titre">Métadonnées</span>
+            <div class="panneau-metadata-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <span class="panneau-metadata-titre">${titreMetadonnees}</span>
+                ${boutonEdition}
             </div>
             ${lignesHTML}
         </div>
@@ -1384,6 +1405,12 @@ async function afficherModalEditionMetadonnees(typeRessource, ressourceId) {
                     break;
                 }
             }
+            break;
+        case 'pratique':
+            // 🆕 Beta 95.4 : Support des pratiques
+            const pratiques = await db.get('pratiques_configurations') || [];
+            ressource = pratiques.find(p => p.id === ressourceId);
+            cleStockage = 'pratiques_configurations';
             break;
     }
 
