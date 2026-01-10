@@ -841,6 +841,11 @@ async function sauvegarderNomEchelle() {
         echelleTemplateActuelle.pratiquesCompatibles = pratiquesCompatibles;
         echelleTemplateActuelle.dateModification = new Date().toISOString();
 
+        // 🆕 Beta 95.4 : Ajouter contributeur si l'utilisateur actif n'est pas l'auteur
+        if (typeof ajouterContributeurSiNecessaire === 'function') {
+            echelleTemplateActuelle = ajouterContributeurSiNecessaire(echelleTemplateActuelle);
+        }
+
         // Mettre à jour dans localStorage - SAUVEGARDER TOUTE L'ÉCHELLE (y compris les niveaux)
         let echelles = await db.get('echellesTemplates') ||  [];
         const index = echelles.findIndex(e => e.id === echelleTemplateActuelle.id);
@@ -3920,6 +3925,9 @@ async function sauvegarderEchelleComplete() {
         const infoCours = typeof db !== 'undefined' && db.getSync ? db.getSync('infoCours', {}) : {};
         const discipline = infoCours?.discipline || '';
 
+        // 🆕 Beta 95.4 : Définir l'auteur original
+        const enseignantActif = typeof obtenirNomEnseignantActif === 'function' ? obtenirNomEnseignantActif() : null;
+
         // Créer la nouvelle échelle
         const nouvelleEchelle = {
             id: 'echelle_' + Date.now(),
@@ -3928,7 +3936,12 @@ async function sauvegarderEchelleComplete() {
             pratiquesCompatibles: pratiquesCompatibles,
             discipline: discipline, // 🆕 Beta 95.3
             dansBibliotheque: true,
-            dateCreation: new Date().toISOString()
+            dateCreation: new Date().toISOString(),
+            metadata_cc: enseignantActif ? {
+                auteur_original: enseignantActif,
+                date_creation: new Date().toISOString().split('T')[0],
+                contributeurs: []
+            } : undefined
         };
 
         // Sauvegarder dans la base (utilise echelles déjà chargé)

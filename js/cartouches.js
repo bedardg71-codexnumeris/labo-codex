@@ -721,9 +721,20 @@ async function sauvegarderCartouche() {
     const index = cartouches.findIndex(c => c.id === cartoucheActuel.id);
     if (index >= 0) {
         // Mise à jour
+        // 🆕 Beta 95.4 : Ajouter contributeur si l'utilisateur actif n'est pas l'auteur
+        if (typeof ajouterContributeurSiNecessaire === 'function') {
+            cartoucheActuel = ajouterContributeurSiNecessaire(cartoucheActuel);
+        }
         cartouches[index] = cartoucheActuel;
     } else {
-        // Ajout
+        // Ajout - 🆕 Beta 95.4 : Définir l'auteur original
+        const enseignantActif = typeof obtenirNomEnseignantActif === 'function' ? obtenirNomEnseignantActif() : null;
+        if (enseignantActif) {
+            if (!cartoucheActuel.metadata_cc) cartoucheActuel.metadata_cc = {};
+            cartoucheActuel.metadata_cc.auteur_original = enseignantActif;
+            cartoucheActuel.metadata_cc.date_creation = new Date().toISOString().split('T')[0];
+            cartoucheActuel.metadata_cc.contributeurs = [];
+        }
         cartouches.push(cartoucheActuel);
     }
     

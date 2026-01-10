@@ -637,6 +637,11 @@ async function sauvegarderGrilleTemplate(silencieux = false) {
         grilleTemplateActuelle.pratiquesCompatibles = pratiquesCompatibles;
         grilleTemplateActuelle.dateModification = new Date().toISOString();
 
+        // 🆕 Beta 95.4 : Ajouter contributeur si l'utilisateur actif n'est pas l'auteur
+        if (typeof ajouterContributeurSiNecessaire === 'function') {
+            grilleTemplateActuelle = ajouterContributeurSiNecessaire(grilleTemplateActuelle);
+        }
+
         const index = grilles.findIndex(g => g.id === grilleTemplateActuelle.id);
         if (index !== -1) {
             grilles[index] = grilleTemplateActuelle;
@@ -647,6 +652,9 @@ async function sauvegarderGrilleTemplate(silencieux = false) {
         const infoCours = typeof db !== 'undefined' && db.getSync ? db.getSync('infoCours', {}) : {};
         const discipline = infoCours?.discipline || '';
 
+        // 🆕 Beta 95.4 : Définir l'auteur original
+        const enseignantActif = typeof obtenirNomEnseignantActif === 'function' ? obtenirNomEnseignantActif() : null;
+
         const nouvelleGrille = {
             id: 'GRILLE' + Date.now(),
             nom: nomGrille,
@@ -655,7 +663,12 @@ async function sauvegarderGrilleTemplate(silencieux = false) {
             discipline: discipline, // 🆕 Beta 95.3
             dateCreation: new Date().toISOString(),
             dateModification: new Date().toISOString(),
-            dansBibliotheque: true  // ✅ AJOUT (8 décembre 2025) - Nouvelle grille dans bibliothèque par défaut
+            dansBibliotheque: true,  // ✅ AJOUT (8 décembre 2025) - Nouvelle grille dans bibliothèque par défaut
+            metadata_cc: enseignantActif ? {
+                auteur_original: enseignantActif,
+                date_creation: new Date().toISOString().split('T')[0],
+                contributeurs: []
+            } : undefined
         };
         grilles.push(nouvelleGrille);
         grilleTemplateActuelle = nouvelleGrille;
