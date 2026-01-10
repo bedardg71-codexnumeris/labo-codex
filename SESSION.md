@@ -37,6 +37,7 @@
     - Flag `modeCours: true` dans `groupeCoursActif` et `infoCours._modeCours`
     - Filtrage par coursId sans filtre groupe quand mode cours actif
   - **Amelioration** : Option "Cours" visible meme avec 1 seul groupe-cours actif (permet de voir tous les etudiants meme si d'autres groupes sont masques)
+  - **Rafraichissement automatique** : Changement de groupe-cours dans l'entete rafraichit la liste des etudiants et reinitialise le filtre Groupe
 
 ### Tache precedente (9 janvier)
 - **BUG CRITIQUE CORRIGE** : Perte de donnees etudiants (55 → 29)
