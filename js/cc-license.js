@@ -1330,21 +1330,10 @@ function genererPanneauMetadonnees(ressource, typeRessource) {
         </div>
     `;
 
-    // Bouton d'édition (si ressource a un ID)
-    const boutonEdition = ressource.id ? `
-        <button type="button" class="btn-edit-metadata"
-                onclick="afficherModalEditionMetadonnees('${typeRessource}', '${ressource.id}')"
-                title="Modifier les métadonnées"
-                style="background: none; border: none; cursor: pointer; padding: 4px; color: var(--gris-moyen); font-size: 0.9rem;">
-            ✏️
-        </button>
-    ` : '';
-
     return `
         <div class="panneau-metadata" data-type="${typeRessource}" data-id="${ressource.id || ''}">
-            <div class="panneau-metadata-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="panneau-metadata-header">
                 <span class="panneau-metadata-titre">${titreMetadonnees}</span>
-                ${boutonEdition}
             </div>
             ${lignesHTML}
         </div>
