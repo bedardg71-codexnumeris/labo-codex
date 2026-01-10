@@ -42,10 +42,12 @@
 - **CORRECTIONS DE BUGS** (10 janvier) :
   - **Dropdown pratique de notation** : Utilise maintenant la bonne cle `pratiquesConfigurables` (etait `pratiquesNotation`)
   - **Echelle de performance** : Persiste correctement apres rechargement (ordre de chargement corrige dans pratiques-materiel.js)
+  - **Grilles de criteres** : Modifications persistaient pas apres rechargement (synchronisation grilleTemplateActuelle ajoutee)
   - **Fichiers modifies** :
     - `js/trimestre-v2.js` : Cle dropdown pratique corrigee
     - `js/pratiques-materiel.js` : Dropdown echelles charge AVANT remplissage formulaire
     - `js/contexte.js` : Suppression dropdown cours redondant
+    - `js/grilles.js` : 4 fonctions synchronisent maintenant grilleTemplateActuelle (modifierCritereGrille, deplacerCritereGrilleHaut/Bas, supprimerCritereGrille)
 
 ### Tache precedente (9 janvier)
 - **BUG CRITIQUE CORRIGE** : Perte de donnees etudiants (55 → 29)
@@ -184,6 +186,9 @@
   - Format : `SIGLE (X groupes)`
   - Filtrage par coursId sans filtre groupe
   - Flag `_modeCours` et `groupe: null` pour detecter le mode
+- **FIX Grilles de criteres** : Modifications ne persistaient pas apres rechargement
+  - Cause : grilleTemplateActuelle n'etait pas synchronisee apres modification inline
+  - Solution : Synchroniser grilleTemplateActuelle dans 4 fonctions (modifierCritereGrille, deplacerHaut/Bas, supprimer)
 
 ### 9 janvier 2026
 - **BUG CRITIQUE CORRIGE** : Perte donnees etudiants lors import/suppression
