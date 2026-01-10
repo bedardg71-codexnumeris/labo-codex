@@ -1,0 +1,154 @@
+Disciplines au collégial
+
+Dans cette page :
+Codes 100
+Codes 200
+Codes 300
+Codes 400
+Codes 500
+Codes 600
+Codes 100
+
+
+101 Biologie
+105 Culture scientifique et technologique
+107 Techniques de la santé
+109 Éducation physique
+110 Techniques dentaires
+111 Techniques d’hygiène dentaire
+112 Acupuncture
+120 Techniques de diététique
+130 Électrophysiologie médicale
+140 Technologie d’analyses biomédicales
+141 Techniques d’inhalothérapie
+142 Techniques de radiologie
+144 Techniques de réadaptation
+145 Technologie des sciences naturelles
+147 Milieu naturel
+150 Techniques agricoles
+152 Gestion et exploitation d’entreprise agricole
+153 Techniques horticoles
+154 Technologie des procédés et de la qualité des aliments
+155 Techniques agricoles
+160 Techniques paramédicales
+165 Pharmacie
+171 Techniques de thanatologie
+180 Soins infirmiers
+181 Soins préhospitaliers d’urgence
+190 Technologie forestière
+
+Codes 200
+201 Mathématique
+202 Chimie
+203 Physique
+204 Langage mathématique et informatique
+205 Géologie
+210 Techniques de chimie industrielle
+211 Techniques des matières plastiques
+221 Technologie du bâtiment et des travaux publics
+222 Techniques d’aménagement et d’urbanisme
+223 Énergie
+230 Technologie de la géomatique
+231 Techniques de la pêche
+232 Technologies des pâtes et papiers
+233 Techniques du meuble et d’ébénisterie
+235 Production industrielle
+241 Techniques de la mécanique
+242 Dessin technique
+243 Technologie du génie électrique
+244 Technologie physique
+247 Technologie de systèmes
+248 Techniques maritimes
+251 Technologie et gestion des textiles
+260 Techniques de l’eau, de l’air et de l’assainissement
+262 Environnement
+265 Hygiène industrielle
+270 Technologie du génie métallurgique
+271 Technologie minérale
+272 Techniques d’instruments d’analyse
+280 Aéronautique
+
+Codes 300
+300 Sciences humaines
+305 Sciences humaines (complémentaire)
+310 Techniques auxiliaires de la justice
+311 Sécurité incendie
+320 Géographie
+322 Techniques d’éducation à l’enfance
+330 Histoire
+332 Civilisations anciennes
+340 Philosophie
+345 Humanities
+350 Psychologie
+351 Techniques d’éducation spécialisée
+352 Techniques de gérontologie
+353 Techniques d’accueil
+354 Techniques d’animation
+360 Multidisciplinaire
+365 Transdisciplinaire
+370 Science des religions
+371 Pastorale
+381 Anthropologie
+383 Économique
+384 Techniques de recherche sociale
+385 Science politique
+386 Organisation communautaire
+387 Sociologie
+388 Techniques de travail social
+391 Techniques d’intervention en loisir
+393 Techniques de la documentation
+394 Relations publiques
+
+Codes 400
+401 Administration
+410 Techniques administratives
+411 Archives médicales
+412 Techniques de bureautique
+413 Coopération
+414 Techniques de tourisme
+415 Techniques administratives (2)
+420 Techniques de l’informatique
+430 Techniques de gestion hôtelière et des services alimentaires
+
+Codes 500
+500 Arts
+502 Arts et lettres
+504 Art et esthétique
+506 Danse
+510 Arts plastiques
+511 Arts plastiques
+520 Esthétique et histoire de l’art
+530 Cinéma
+550 Musique
+551 Techniques professionnelles de musique et chanson
+560 Théâtre
+561 Théâtre professionnel
+570 Arts appliqués
+571 Industrie de la mode
+573 Métiers d’art
+574 Dessin animé
+581 Communications graphiques
+582 Techniques d’intégration multimédia
+585 Communication
+589 Techniques des communications
+
+Codes 600
+601 Français (langue et littérature)
+602 Français (langue seconde)
+603 Anglais (langue et littérature)
+604 Anglais (langue seconde)
+607 Espagnol
+608 Italien
+609 Allemand
+610 Russe
+611 Hébreu
+612 Yiddish
+613 Chinois
+614 Langues autochtones
+615 Langues anciennes
+616 Arabe
+617 Langue des signes québécoise
+618 Langue moderne
+619 Langues autochtones (langue seconde)
+620 Sciences de la parole
+
