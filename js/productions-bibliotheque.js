@@ -82,13 +82,20 @@ async function ajouterALaBibliotheque(production) {
         return false;
     }
 
+    // 🆕 Beta 95.4 : Obtenir l'auteur depuis le profil enseignant si non défini
+    let auteur = production.auteur;
+    if (!auteur && typeof obtenirProfilAuteurActifSync === 'function') {
+        const profil = obtenirProfilAuteurActifSync();
+        auteur = profil?.auteur_original || 'Inconnu';
+    }
+    if (!auteur) auteur = 'Inconnu';
+
     // Marquer comme partagée et ajouter métadonnées
     const productionBiblio = {
         ...production,
         dansBibliotheque: true,
         dateAjoutBiblio: new Date().toISOString(),
-        // Conserver l'auteur original ou utiliser celui du cours
-        auteur: production.auteur || 'Inconnu'
+        auteur: auteur
     };
 
     bibliotheque.push(productionBiblio);

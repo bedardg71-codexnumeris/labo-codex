@@ -80,11 +80,14 @@ async function ajouterEchelleALaBibliotheque(echelle) {
         return false;
     }
 
+    // 🆕 Beta 95.4 : Obtenir l'auteur depuis le profil enseignant si non défini
+    const auteur = echelle.auteur || (typeof obtenirProfilAuteurActifSync === 'function' ? obtenirProfilAuteurActifSync()?.auteur_original : null) || 'Inconnu';
+
     const echelleBiblio = {
         ...echelle,
         dansBibliotheque: true,
         dateAjoutBiblio: new Date().toISOString(),
-        auteur: echelle.auteur || 'Inconnu'
+        auteur: auteur
     };
 
     bibliotheque.push(echelleBiblio);

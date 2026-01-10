@@ -690,11 +690,14 @@ async function ajouterPratiqueALaBibliotheque(configuration) {
         return false;
     }
 
+    // 🆕 Beta 95.4 : Obtenir l'auteur depuis le profil enseignant si non défini
+    const auteur = configuration.auteur || (typeof obtenirProfilAuteurActifSync === 'function' ? obtenirProfilAuteurActifSync()?.auteur_original : null) || 'Inconnu';
+
     const configBiblio = {
         ...configuration,
         dansBibliotheque: true,
         dateAjoutBiblio: new Date().toISOString(),
-        auteur: configuration.auteur || 'Inconnu'
+        auteur: auteur
     };
 
     bibliotheque.push(configBiblio);
