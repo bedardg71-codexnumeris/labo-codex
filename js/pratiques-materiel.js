@@ -721,6 +721,12 @@ function remplirFormulairePratique(pratique) {
     }
     setCheckbox('mat-jeton-ciblee-actif', jetons.cibleeActif !== false);
     setValeurChamp('mat-ciblee-plafond', jetons.cibleePlafond || 'D (Développement)');
+
+    // 🆕 Beta 95.4 : Afficher le panneau métadonnées CC
+    const panneauMeta = document.getElementById('panneauMetadonneesPratique');
+    if (panneauMeta && typeof genererPanneauMetadonnees === 'function') {
+        panneauMeta.innerHTML = genererPanneauMetadonnees(pratique, 'pratique');
+    }
 }
 
 /**
