@@ -1820,8 +1820,10 @@ async function chargerProductionsPourCategories() {
     const container = document.getElementById('mat-categories-productions-liste');
     if (!container) return;
 
-    // Charger les productions
-    const productions = await db.get('productions') || [];
+    // Charger les productions du cours actif (via obtenirDonneesSelonMode)
+    const productions = (typeof obtenirDonneesSelonMode === 'function')
+        ? obtenirDonneesSelonMode('productions') || []
+        : await db.get(cle('productionsPedagogiques')) || [];
 
     // Filtrer : exclure portfolio conteneur et formatifs
     const productionsFiltrables = productions.filter(p =>
@@ -1888,12 +1890,14 @@ async function chargerProductionsPourCategories() {
  * 🆕 Beta 95.4 : Assigne une catégorie à une production spécifique
  */
 async function assignerCategorieProductionMat(prodId, categorie) {
-    const productions = await db.get('productions') || [];
+    // Utiliser la clé namespacée pour les productions
+    const cleProductions = (typeof cle === 'function') ? cle('productionsPedagogiques') : 'productions';
+    const productions = await db.get(cleProductions) || [];
     const prod = productions.find(p => p.id === prodId);
 
     if (prod) {
         prod.categorie = categorie || null;
-        await db.set('productions', productions);
+        await db.set(cleProductions, productions);
         console.log(`[Catégories] Production "${prod.titre}" → ${categorie || 'non définie'}`);
 
         // Rafraîchir l'affichage
@@ -1905,7 +1909,9 @@ async function assignerCategorieProductionMat(prodId, categorie) {
  * 🆕 Beta 95.4 : Assigne une catégorie à TOUTES les productions
  */
 async function assignerToutesProductionsMat(categorie) {
-    const productions = await db.get('productions') || [];
+    // Utiliser la clé namespacée pour les productions
+    const cleProductions = (typeof cle === 'function') ? cle('productionsPedagogiques') : 'productions';
+    const productions = await db.get(cleProductions) || [];
     let nbModifiees = 0;
 
     productions.forEach(prod => {
@@ -1916,7 +1922,7 @@ async function assignerToutesProductionsMat(categorie) {
         }
     });
 
-    await db.set('productions', productions);
+    await db.set(cleProductions, productions);
     console.log(`[Catégories] ${nbModifiees} productions → ${categorie}`);
 
     // Rafraîchir l'affichage
