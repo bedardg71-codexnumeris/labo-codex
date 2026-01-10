@@ -1041,6 +1041,7 @@ async function sauvegarderPratiqueMaterielComplet() {
 
 /**
  * Charge le dropdown des échelles
+ * ✅ FIX (10 jan 2026) : N'affiche que les échelles dans la sidebar (dansBibliotheque !== false)
  */
 async function chargerDropdownEchellesMat() {
     const select = document.getElementById('mat-echelle-id');
@@ -1048,7 +1049,9 @@ async function chargerDropdownEchellesMat() {
 
     let echelles = [];
     try {
-        echelles = await db.get('echellesTemplates') || [];
+        const toutesEchelles = await db.get('echellesTemplates') || [];
+        // Filtrer pour n'afficher que les échelles dans la sidebar
+        echelles = toutesEchelles.filter(e => e.dansBibliotheque !== false);
     } catch (e) {
         echelles = [];
     }
