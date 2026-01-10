@@ -513,16 +513,24 @@ function obtenirDonneesSelonMode(cle) {
     // ✅ CORRECTION CRITIQUE (Beta 95 - 27 déc 2025)
     // Filtrer par coursId pour les données liées au cours actif uniquement
     // Ceci corrige le bug de contamination entre cours/trimestres
+    // 🆕 BETA 95.3 (10 jan 2026) : Supporte le mode "cours" (tous groupes fusionnés)
     const clesAvecCoursId = ['groupeEtudiants', 'productions', 'presences', 'evaluationsSauvegardees'];
     if (clesAvecCoursId.includes(cle) && Array.isArray(donnees)) {
         const coursActif = db.getSync('infoCours', null);
         if (coursActif && coursActif.id) {
             const totalAvant = donnees.length;
+            // 🆕 BETA 95.3 : Mode cours = tous les groupes fusionnés
+            const estModeCours = coursActif._modeCours || coursActif.groupe === null;
+
             donnees = donnees.filter(item => {
                 // Compatibilité : ancien format sans coursId
                 if (!item.coursId) {
-                    // Pour étudiants : vérifier groupe
+                    // Pour étudiants : vérifier groupe (sauf en mode cours)
                     if (cle === 'groupeEtudiants') {
+                        // En mode cours, accepter tous les étudiants (pas de filtre groupe)
+                        if (estModeCours) {
+                            return true;
+                        }
                         const groupeCours = coursActif.groupe || coursActif.groupes?.[0];
                         // ✅ CORRECTION (9 jan 2026) : Normaliser les groupes avant comparaison
                         // "1" et "00001" doivent être considérés comme égaux
@@ -535,7 +543,8 @@ function obtenirDonneesSelonMode(cle) {
                 return item.coursId === coursActif.id;
             });
             if (donnees.length !== totalAvant) {
-                console.log(`📋 [coursId] Filtré ${cle}: ${donnees.length}/${totalAvant} pour cours ${coursActif.id}`);
+                const modeLabel = estModeCours ? 'tous groupes' : `groupe ${coursActif.groupe}`;
+                console.log(`📋 [coursId] Filtré ${cle}: ${donnees.length}/${totalAvant} pour cours ${coursActif.id} (${modeLabel})`);
             }
         }
     }
@@ -840,6 +849,7 @@ window.filtrerEtudiantsParMode = filtrerEtudiantsParMode;
 /**
  * Obtient les étudiants du cours actif uniquement
  * Filtre par coursId pour éviter la contamination entre trimestres
+ * 🆕 BETA 95.3 (10 jan 2026) : Supporte le mode "cours" (tous groupes fusionnés)
  *
  * @returns {Array} - Liste des étudiants du cours actif (vide si aucun cours)
  */
@@ -858,20 +868,43 @@ function obtenirEtudiantsCoursActif() {
     // Obtenir tous les étudiants
     const tousEtudiants = obtenirDonneesSelonMode('groupeEtudiants') || [];
 
-    // Filtrer par coursId
+    // 🆕 BETA 95.3 : Mode cours = tous les groupes fusionnés
+    const estModeCours = coursActif._modeCours || coursActif.groupe === null;
+
+    // Filtrer par coursId (et optionnellement par groupe)
     const etudiantsFiltres = tousEtudiants.filter(e => {
         // Compatibilité : si l'étudiant n'a pas de coursId, vérifier le groupe
         if (!e.coursId) {
             // Ancien format : vérifier si le groupe correspond au cours actif
+            // En mode cours, accepter tous les étudiants (pas de filtre groupe)
+            if (estModeCours) {
+                return true; // Inclure tous les étudiants du trimestre
+            }
             const groupeCours = coursActif.groupe || coursActif.groupes?.[0];
             // ✅ CORRECTION (9 jan 2026) : Normaliser les groupes avant comparaison
             const normaliserGroupe = (g) => String(g || '').padStart(5, '0');
             return normaliserGroupe(e.groupe) === normaliserGroupe(groupeCours);
         }
-        return e.coursId === coursActif.id;
+
+        // Nouveau format avec coursId
+        if (e.coursId !== coursActif.id) {
+            return false; // Pas le bon cours
+        }
+
+        // Si mode cours (tous groupes), retourner tous les étudiants du cours
+        if (estModeCours) {
+            return true;
+        }
+
+        // Sinon, filtrer aussi par groupe
+        const groupeCours = coursActif.groupe || coursActif.groupes?.[0];
+        if (!groupeCours) return true; // Pas de groupe spécifié = tous
+        const normaliserGroupe = (g) => String(g || '').padStart(5, '0');
+        return normaliserGroupe(e.groupe) === normaliserGroupe(groupeCours);
     });
 
-    console.log(`[Modes] Étudiants cours actif (${coursActif.id}): ${etudiantsFiltres.length}/${tousEtudiants.length}`);
+    const modeLabel = estModeCours ? 'tous groupes' : `groupe ${coursActif.groupe}`;
+    console.log(`[Modes] Étudiants cours actif (${coursActif.id}, ${modeLabel}): ${etudiantsFiltres.length}/${tousEtudiants.length}`);
 
     // Appliquer le filtrage par mode (exclure groupe 9999 en mode normal)
     return filtrerEtudiantsParMode(etudiantsFiltres);

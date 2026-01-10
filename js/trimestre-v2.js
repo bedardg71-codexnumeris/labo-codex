@@ -3368,6 +3368,7 @@ function changerHoraireSelectionneV2(horaireId) {
 
 /**
  * Met à jour la carte résumé de l'horaire
+ * 🆕 (10 jan 2026) : Affiche local par séance
  */
 function mettreAJourCarteResumeHoraireV2(horaire) {
     const carte = document.getElementById('v2-carteResumeHoraire');
@@ -3381,14 +3382,16 @@ function mettreAJourCarteResumeHoraireV2(horaire) {
     const nbSeances = horaire.seances?.length || 0;
     const periodesParSeance = horaire.periodesParSeance || 2;
     const totalPeriodes = nbSeances * periodesParSeance;
-    const local = horaire.local || '—';
 
     let seancesHtml = '';
     if (horaire.seances && horaire.seances.length > 0) {
         seancesHtml = '<ul>';
         horaire.seances.forEach(s => {
             const heureFin = s.heureFin || calculerHeureFin(s.heureDebut, periodesParSeance);
-            seancesHtml += `<li>${s.jour} ${s.heureDebut} - ${heureFin}</li>`;
+            // Afficher le local par séance (ou fallback vers local global pour anciennes données)
+            const localSeance = s.local || horaire.local || '';
+            const localInfo = localSeance ? ` (${localSeance})` : '';
+            seancesHtml += `<li>${s.jour} ${s.heureDebut} - ${heureFin}${localInfo}</li>`;
         });
         seancesHtml += '</ul>';
     }
@@ -3396,7 +3399,6 @@ function mettreAJourCarteResumeHoraireV2(horaire) {
     carte.innerHTML = `
         <div class="resume-horaire-nom">${horaire.nom || 'Sans nom'}</div>
         <div class="resume-horaire-details">
-            <div>Local : ${local}</div>
             <div>Format : ${nbSeances}×${periodesParSeance}</div>
             <div>${totalPeriodes} périodes/semaine</div>
         </div>
@@ -3490,6 +3492,7 @@ function nouveauHoraireV2() {
 
 /**
  * Charge un horaire existant dans le formulaire pour édition
+ * 🆕 (10 jan 2026) : Local par séance au lieu de global
  */
 function editerHoraireV2(horaire) {
     horaireEnEditionId = horaire.id;
@@ -3501,7 +3504,6 @@ function editerHoraireV2(horaire) {
     const selectGroupe = document.getElementById('v2-hor-groupeAssocie');
     if (selectGroupe) selectGroupe.value = horaire.groupeAssocie || '';
     document.getElementById('v2-hor-nom').value = horaire.nom || '';
-    document.getElementById('v2-hor-local').value = horaire.local || '';
     document.getElementById('v2-hor-nbSeances').value = String(horaire.seances?.length || 2);
     document.getElementById('v2-hor-periodesParSeance').value = String(horaire.periodesParSeance || 2);
 
@@ -3518,16 +3520,22 @@ function editerHoraireV2(horaire) {
     // Générer les champs de séances puis les remplir
     mettreAJourSeancesHoraireV2();
 
-    // Remplir les séances existantes
+    // Remplir les séances existantes (avec local par séance)
     if (horaire.seances) {
+        // Migration : si ancien format avec local global, le copier dans chaque séance
+        const localGlobal = horaire.local || '';
+
         horaire.seances.forEach((s, i) => {
             const selectJour = document.getElementById(`v2-hor-seance-${i}-jour`);
             const inputDebut = document.getElementById(`v2-hor-seance-${i}-debut`);
             const inputFin = document.getElementById(`v2-hor-seance-${i}-fin`);
+            const inputLocal = document.getElementById(`v2-hor-seance-${i}-local`);
 
             if (selectJour) selectJour.value = s.jour || 'Lundi';
             if (inputDebut) inputDebut.value = s.heureDebut || '08:00';
             if (inputFin) inputFin.value = s.heureFin || '10:00';
+            // Local par séance ou fallback vers local global (migration)
+            if (inputLocal) inputLocal.value = s.local || localGlobal;
         });
     }
 
@@ -3554,11 +3562,11 @@ function annulerFormHoraireV2() {
 
 /**
  * Sauvegarde l'horaire (ajout ou modification)
+ * 🆕 (10 jan 2026) : Local par séance au lieu de global
  */
 function sauvegarderHoraireV2() {
     const groupeAssocie = document.getElementById('v2-hor-groupeAssocie')?.value;
     const nom = document.getElementById('v2-hor-nom')?.value?.trim();
-    const local = document.getElementById('v2-hor-local')?.value?.trim();
     const nbSeances = parseInt(document.getElementById('v2-hor-nbSeances')?.value) || 2;
     const periodesParSeance = parseInt(document.getElementById('v2-hor-periodesParSeance')?.value) || 2;
 
@@ -3572,13 +3580,14 @@ function sauvegarderHoraireV2() {
         return;
     }
 
-    // Collecter les séances
+    // Collecter les séances (avec local par séance)
     const seances = [];
     for (let i = 0; i < nbSeances; i++) {
         const jour = document.getElementById(`v2-hor-seance-${i}-jour`)?.value || 'Lundi';
         const heureDebut = document.getElementById(`v2-hor-seance-${i}-debut`)?.value || '08:00';
         const heureFin = document.getElementById(`v2-hor-seance-${i}-fin`)?.value || '10:00';
-        seances.push({ jour, heureDebut, heureFin });
+        const local = document.getElementById(`v2-hor-seance-${i}-local`)?.value?.trim() || '';
+        seances.push({ jour, heureDebut, heureFin, local });
     }
 
     const cleHoraires = typeof cle === 'function' ? cle('horaires') : 'horaires';
@@ -3592,10 +3601,11 @@ function sauvegarderHoraireV2() {
                 ...horaires[index],
                 groupeAssocie,
                 nom,
-                local,
                 periodesParSeance,
                 seances
             };
+            // Supprimer l'ancien champ local global s'il existe (migration)
+            delete horaires[index].local;
         }
         afficherNotificationSucces(`Horaire "${nom}" modifié`);
     } else {
@@ -3604,7 +3614,6 @@ function sauvegarderHoraireV2() {
             id: 'HOR_' + Date.now(),
             groupeAssocie,
             nom,
-            local,
             periodesParSeance,
             seances
         };
@@ -3622,6 +3631,9 @@ function sauvegarderHoraireV2() {
 
     const horaire = horaires.find(h => h.id === horaireEnEditionId);
     mettreAJourCarteResumeHoraireV2(horaire);
+
+    // 🆕 (10 jan 2026) : Rafraîchir le dropdown horaires dans Groupe-cours
+    populerDropdownsAssemblageV2();
 
     // Mettre à jour le guide groupe-cours
     mettreAJourGuideGroupeCours();
@@ -3665,6 +3677,9 @@ function supprimerHoraireV2() {
     populerDropdownHorairesV2();
     mettreAJourCarteResumeHoraireV2(null);
 
+    // 🆕 (10 jan 2026) : Rafraîchir le dropdown horaires dans Groupe-cours
+    populerDropdownsAssemblageV2();
+
     // Mettre à jour le guide groupe-cours
     mettreAJourGuideGroupeCours();
 
@@ -3674,6 +3689,7 @@ window.supprimerHoraireV2 = supprimerHoraireV2;
 
 /**
  * Met à jour les champs de séances selon le nombre sélectionné
+ * 🆕 (10 jan 2026) : Ajout du champ Local par séance
  */
 function mettreAJourSeancesHoraireV2() {
     const conteneur = document.getElementById('v2-hor-seances');
@@ -3703,6 +3719,7 @@ function mettreAJourSeancesHoraireV2() {
                 <input type="time" id="v2-hor-seance-${i}-debut" class="controle-form" value="08:00">
                 <span>à</span>
                 <input type="time" id="v2-hor-seance-${i}-fin" class="controle-form" value="10:00">
+                <input type="text" id="v2-hor-seance-${i}-local" class="controle-form" placeholder="Local" style="width: 80px;">
             </div>
         `;
     }
@@ -4436,7 +4453,8 @@ function supprimerGroupeCoursV2() {
 
 /**
  * 🆕 Beta 95.3 : Modal bibliothèque groupe-cours
- * Affiche la liste de tous les groupe-cours avec actions
+ * 🔄 (10 jan 2026) : Refonte avec sections "Dans le dropdown" / "Masqués"
+ * Affiche la liste de tous les groupe-cours avec gestion de la visibilité
  */
 function ouvrirModalBibliothequeGroupeCours() {
     const cleGC = typeof cle === 'function' ? cle('groupesCours') : 'groupesCours';
@@ -4447,6 +4465,86 @@ function ouvrirModalBibliothequeGroupeCours() {
     const cours = db.getSync('cours', []);
     const listeCours = db.getSync('listeCours', []);
     const enseignants = db.getSync('enseignants', []);
+    const cleHoraires = typeof cle === 'function' ? cle('horaires') : 'horaires';
+    const horaires = db.getSync(cleHoraires, []);
+
+    // Séparer les groupe-cours visibles et masqués
+    const gcVisibles = groupesCours.filter(gc => gc.dansSidebar !== false);
+    const gcMasques = groupesCours.filter(gc => gc.dansSidebar === false);
+
+    // Helper pour générer une carte groupe-cours
+    function genererCarteGC(gc, estMasque) {
+        let coursInfo = cours.find(c => c.id === gc.coursId);
+        if (!coursInfo) coursInfo = listeCours.find(c => c.id === gc.coursId);
+        const ens = enseignants.find(e => e.id === gc.enseignantId);
+        const hor = horaires.find(h => h.id === gc.horaireId);
+
+        const codeCours = coursInfo?.codeCours || coursInfo?.sigle || null;
+        const groupe = gc.groupe || gc.groupeNum || '00001';
+        const titre = codeCours ? `${codeCours} — Groupe ${groupe}` : `Groupe ${groupe}`;
+        const nomEns = ens ? `${ens.prenom || ''} ${ens.nom || ''}`.trim() : '';
+        const nomHor = hor?.nom || '';
+
+        const estActif = gcActif && gc.id === gcActif.id;
+        const badgeActif = estActif ? '<span style="background: var(--vert-principal); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; margin-left: 10px;">Actif</span>' : '';
+
+        const borderColor = estActif ? 'var(--vert-principal)' : (estMasque ? '#ccc' : 'var(--bleu-clair)');
+        const bgColor = estActif ? 'rgba(76, 175, 80, 0.05)' : (estMasque ? '#f9f9f9' : 'var(--bleu-tres-pale)');
+
+        let sousInfo = [];
+        if (nomEns) sousInfo.push(nomEns);
+        if (nomHor) sousInfo.push(nomHor);
+
+        return `
+            <div style="
+                border: 1px solid ${borderColor};
+                border-radius: 8px;
+                padding: 15px;
+                margin-bottom: 10px;
+                background: ${bgColor};
+            ">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <div style="font-weight: 600; color: var(--bleu-principal);">
+                            ${titre}${badgeActif}
+                        </div>
+                        ${sousInfo.length > 0 ? `
+                            <div style="font-size: 0.85rem; color: #666; margin-top: 3px;">
+                                ${sousInfo.join(' • ')}
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        ${estMasque ? `
+                            <button onclick="afficherGroupeCoursDepuisBibliotheque('${gc.id}')"
+                                    class="btn btn-confirmer btn-sm"
+                                    title="Afficher dans le dropdown">
+                                Afficher
+                            </button>
+                        ` : `
+                            ${!estActif ? `
+                                <button onclick="activerGroupeCoursDepuisBibliotheque('${gc.id}')"
+                                        class="btn btn-confirmer btn-sm"
+                                        title="Activer ce groupe-cours">
+                                    Activer
+                                </button>
+                            ` : ''}
+                            <button onclick="masquerGroupeCoursDepuisBibliotheque('${gc.id}')"
+                                    class="btn btn-secondaire btn-sm"
+                                    title="Masquer du dropdown">
+                                Masquer
+                            </button>
+                        `}
+                        <button onclick="supprimerGroupeCoursDepuisBibliotheque('${gc.id}', '${titre.replace(/'/g, "\\'")}')"
+                                class="btn btn-supprimer btn-sm"
+                                title="Supprimer définitivement">
+                                Supprimer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
 
     let modalHTML = `
         <div id="modalBibliothequeGroupeCours" style="
@@ -4493,7 +4591,7 @@ function ouvrirModalBibliothequeGroupeCours() {
                     ×
                 </button>
                 <h2 style="margin-top: 0; color: var(--bleu-principal);">📚 Bibliothèque groupe-cours</h2>
-                <p class="text-muted">Gérez vos groupe-cours du trimestre actif</p>
+                <p class="text-muted">Gérez les groupe-cours affichés dans le dropdown de l'en-tête.</p>
     `;
 
     if (groupesCours.length === 0) {
@@ -4504,59 +4602,39 @@ function ouvrirModalBibliothequeGroupeCours() {
             </div>
         `;
     } else {
-        modalHTML += `<div style="margin-top: 20px;">`;
+        // Section 1 : Groupe-cours dans le dropdown
+        modalHTML += `
+            <h3 style="color: var(--bleu-clair); font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
+                Groupe-cours dans le dropdown
+            </h3>
+            <div style="margin-bottom: 30px;">
+        `;
 
-        groupesCours.forEach(gc => {
-            // Récupérer les infos liées
-            let coursInfo = cours.find(c => c.id === gc.coursId);
-            if (!coursInfo) coursInfo = listeCours.find(c => c.id === gc.coursId);
-            const ens = enseignants.find(e => e.id === gc.enseignantId);
-
-            const codeCours = coursInfo?.codeCours || coursInfo?.sigle || null;
-            const groupe = gc.groupe || gc.groupeNum || '00001';
-            const titre = codeCours ? `${codeCours} — Groupe ${groupe}` : `Groupe ${groupe}`;
-            const nomEns = ens ? `${ens.prenom || ''} ${ens.nom || ''}`.trim() : '—';
-
-            const estActif = gcActif && gc.id === gcActif.id;
-            const badgeActif = estActif ? '<span style="background: var(--vert-principal); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; margin-left: 10px;">Actif</span>' : '';
-
-            modalHTML += `
-                <div style="
-                    border: 1px solid ${estActif ? 'var(--vert-principal)' : '#ddd'};
-                    border-radius: 8px;
-                    padding: 15px;
-                    margin-bottom: 10px;
-                    background: ${estActif ? 'rgba(76, 175, 80, 0.05)' : 'white'};
-                ">
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                        <div style="flex: 1; min-width: 200px;">
-                            <div style="font-weight: 600; color: var(--bleu-principal);">
-                                ${titre}${badgeActif}
-                            </div>
-                            <div style="font-size: 0.85rem; color: #666; margin-top: 3px;">
-                                ${nomEns}
-                            </div>
-                        </div>
-                        <div style="display: flex; gap: 8px;">
-                            ${!estActif ? `
-                                <button onclick="activerGroupeCoursDepuisBibliotheque('${gc.id}')"
-                                        class="btn btn-confirmer btn-sm"
-                                        title="Activer ce groupe-cours">
-                                    Activer
-                                </button>
-                            ` : ''}
-                            <button onclick="supprimerGroupeCoursDepuisBibliotheque('${gc.id}', '${titre.replace(/'/g, "\\'")}')"
-                                    class="btn btn-supprimer btn-sm"
-                                    title="Supprimer ce groupe-cours">
-                                Supprimer
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
+        if (gcVisibles.length === 0) {
+            modalHTML += `<p style="color: #999; font-style: italic;">Aucun groupe-cours visible dans le dropdown</p>`;
+        } else {
+            gcVisibles.forEach(gc => {
+                modalHTML += genererCarteGC(gc, false);
+            });
+        }
 
         modalHTML += `</div>`;
+
+        // Section 2 : Groupe-cours masqués
+        if (gcMasques.length > 0) {
+            modalHTML += `
+                <h3 style="color: #888; font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
+                    Groupe-cours masqués
+                </h3>
+                <div style="margin-bottom: 20px;">
+            `;
+
+            gcMasques.forEach(gc => {
+                modalHTML += genererCarteGC(gc, true);
+            });
+
+            modalHTML += `</div>`;
+        }
     }
 
     modalHTML += `
@@ -4647,6 +4725,70 @@ function supprimerGroupeCoursDepuisBibliotheque(gcId, nomGC) {
     }
 }
 
+/**
+ * 🆕 (10 jan 2026) : Masquer un groupe-cours du dropdown
+ * Le groupe-cours reste dans la base mais n'apparaît plus dans le dropdown
+ */
+function masquerGroupeCoursDepuisBibliotheque(gcId) {
+    const cleGC = typeof cle === 'function' ? cle('groupesCours') : 'groupesCours';
+    const groupesCours = db.getSync(cleGC, []);
+
+    const gc = groupesCours.find(g => g.id === gcId);
+    if (gc) {
+        gc.dansSidebar = false;
+        db.setSync(cleGC, groupesCours);
+
+        // Si c'était le groupe-cours actif, le désactiver
+        const gcActif = db.getSync('groupeCoursActif', null);
+        if (gcActif && gcActif.id === gcId) {
+            db.setSync('groupeCoursActif', null);
+        }
+
+        // Rafraîchir
+        if (typeof peuplerDropdownGroupeCoursActif === 'function') {
+            peuplerDropdownGroupeCoursActif();
+        }
+        chargerGroupeCoursV2();
+
+        // Rafraîchir la modal
+        fermerModalBibliothequeGroupeCours();
+        ouvrirModalBibliothequeGroupeCours();
+
+        if (typeof afficherNotificationSucces === 'function') {
+            afficherNotificationSucces('Groupe-cours masqué');
+        }
+    }
+}
+
+/**
+ * 🆕 (10 jan 2026) : Afficher un groupe-cours dans le dropdown
+ * Rend visible un groupe-cours précédemment masqué
+ */
+function afficherGroupeCoursDepuisBibliotheque(gcId) {
+    const cleGC = typeof cle === 'function' ? cle('groupesCours') : 'groupesCours';
+    const groupesCours = db.getSync(cleGC, []);
+
+    const gc = groupesCours.find(g => g.id === gcId);
+    if (gc) {
+        gc.dansSidebar = true;
+        db.setSync(cleGC, groupesCours);
+
+        // Rafraîchir
+        if (typeof peuplerDropdownGroupeCoursActif === 'function') {
+            peuplerDropdownGroupeCoursActif();
+        }
+        chargerGroupeCoursV2();
+
+        // Rafraîchir la modal
+        fermerModalBibliothequeGroupeCours();
+        ouvrirModalBibliothequeGroupeCours();
+
+        if (typeof afficherNotificationSucces === 'function') {
+            afficherNotificationSucces('Groupe-cours affiché');
+        }
+    }
+}
+
 // Exports globaux pour les fonctions groupe-cours
 window.chargerGroupeCoursV2 = chargerGroupeCoursV2;
 window.nouveauGroupeCoursV2 = nouveauGroupeCoursV2;
@@ -4659,6 +4801,8 @@ window.ouvrirModalBibliothequeGroupeCours = ouvrirModalBibliothequeGroupeCours; 
 window.fermerModalBibliothequeGroupeCours = fermerModalBibliothequeGroupeCours; // 🆕 Beta 95.3
 window.activerGroupeCoursDepuisBibliotheque = activerGroupeCoursDepuisBibliotheque; // 🆕 Beta 95.3
 window.supprimerGroupeCoursDepuisBibliotheque = supprimerGroupeCoursDepuisBibliotheque; // 🆕 Beta 95.3
+window.masquerGroupeCoursDepuisBibliotheque = masquerGroupeCoursDepuisBibliotheque; // 🆕 (10 jan 2026)
+window.afficherGroupeCoursDepuisBibliotheque = afficherGroupeCoursDepuisBibliotheque; // 🆕 (10 jan 2026)
 
 /* ===============================
    DONNÉES DE DÉMONSTRATION
@@ -5237,6 +5381,7 @@ let enseignantEnEditionUI = null;
 
 /**
  * Peuple le dropdown "Groupe-cours actif" dans l'entête
+ * 🆕 BETA 95.3 (10 jan 2026) : Ajoute section "Cours" pour voir tous les groupes fusionnés
  */
 async function peuplerDropdownGroupeCoursActif() {
     const selectHeader = document.getElementById('selectGroupeCoursHeader');
@@ -5252,9 +5397,12 @@ async function peuplerDropdownGroupeCoursActif() {
 
     // Utiliser cle() pour cohérence avec sauvegarderGroupeCoursV2
     const cleGC = typeof cle === 'function' ? cle('groupesCours') : 'groupesCours';
-    const groupesCours = db.getSync(cleGC, []);
+    const tousGroupesCours = db.getSync(cleGC, []);
 
-    let options = '<option value="">-- Sélectionner un groupe-cours --</option>';
+    // 🆕 (10 jan 2026) : Filtrer les groupe-cours masqués (dansSidebar !== false)
+    const groupesCours = tousGroupesCours.filter(gc => gc.dansSidebar !== false);
+
+    let options = '<option value="">-- Sélectionner --</option>';
 
     if (groupesCours.length > 0) {
         const cours = db.getSync('cours', []);
@@ -5264,6 +5412,19 @@ async function peuplerDropdownGroupeCoursActif() {
         const horaires = db.getSync(cleHoraires, []);
         const gcActif = db.getSync('groupeCoursActif', null);
 
+        // 🆕 BETA 95.3 : Grouper les groupe-cours par coursId pour la section "Cours"
+        const coursMap = new Map();
+        groupesCours.forEach(gc => {
+            if (gc.coursId) {
+                if (!coursMap.has(gc.coursId)) {
+                    coursMap.set(gc.coursId, []);
+                }
+                coursMap.get(gc.coursId).push(gc);
+            }
+        });
+
+        // Section Groupe-cours
+        options += '<optgroup label="Groupe-cours">';
         groupesCours.forEach(gc => {
             // Chercher dans cours (nouveau) ou listeCours (legacy)
             let coursInfo = cours.find(c => c.id === gc.coursId);
@@ -5283,13 +5444,32 @@ async function peuplerDropdownGroupeCoursActif() {
             if (nomEns) label += ` - ${nomEns}`;
             if (nomHor) label += ` (${nomHor})`;
 
-            const selected = gcActif && gc.id === gcActif.id ? ' selected' : '';
+            const selected = gcActif && !gcActif.modeCours && gc.id === gcActif.id ? ' selected' : '';
             options += `<option value="${gc.id}"${selected}>${label}</option>`;
         });
+        options += '</optgroup>';
+
+        // 🆕 BETA 95.3 : Section Cours (tous groupes fusionnés)
+        // Afficher pour tous les cours (même avec 1 seul groupe visible, car il peut y avoir des étudiants dans d'autres groupes)
+        if (coursMap.size > 0) {
+            options += '<optgroup label="Cours (tous groupes)">';
+            coursMap.forEach((gcs, coursId) => {
+                let coursInfo = cours.find(c => c.id === coursId);
+                if (!coursInfo) {
+                    coursInfo = listeCours.find(c => c.id === coursId || c.sigle === coursId);
+                }
+                const sigle = coursInfo?.codeCours || coursInfo?.code || coursInfo?.sigle || coursId;
+                const nbGroupes = gcs.length;
+                const label = nbGroupes > 1 ? `${sigle} (${nbGroupes} groupes)` : sigle;
+                const selected = gcActif && gcActif.modeCours && gcActif.coursId === coursId ? ' selected' : '';
+                options += `<option value="cours:${coursId}"${selected}>${label}</option>`;
+            });
+            options += '</optgroup>';
+        }
     }
 
     selectHeader.innerHTML = options;
-    console.log('[Trimestre V2] Dropdown groupe-cours actif peuplé:', groupesCours.length, 'options');
+    console.log('[Trimestre V2] Dropdown groupe-cours actif peuplé:', groupesCours.length, 'groupe-cours');
 }
 
 /**
@@ -5301,10 +5481,12 @@ async function changerGroupeCoursDepuisHeader(groupeCoursId) {
 
 /**
  * Change le groupe-cours actif
+ * 🆕 BETA 95.3 (10 jan 2026) : Supporte le mode "cours" (tous groupes fusionnés)
  */
-async function changerGroupeCoursActifV2(groupeCoursId) {
-    if (!groupeCoursId) {
+async function changerGroupeCoursActifV2(valeur) {
+    if (!valeur) {
         db.setSync('groupeCoursActif', null);
+        await db.set('infoCours', null);
         console.log('[Trimestre V2] Groupe-cours désélectionné');
         return;
     }
@@ -5313,8 +5495,63 @@ async function changerGroupeCoursActifV2(groupeCoursId) {
     const trimestreActif = trimestres.find(t => t.actif);
     if (!trimestreActif) return;
 
+    // 🆕 BETA 95.3 : Détecter si c'est un mode cours (tous groupes)
+    const estModeCours = valeur.startsWith('cours:');
+
+    if (estModeCours) {
+        // Mode COURS : tous les groupes fusionnés
+        const coursId = valeur.replace('cours:', '');
+        const cours = db.getSync('cours', []);
+        const listeCours = db.getSync('listeCours', []);
+
+        let coursInfo = cours.find(c => c.id === coursId);
+        if (!coursInfo) {
+            coursInfo = listeCours.find(c => c.id === coursId || c.sigle === coursId);
+        }
+
+        const sigle = coursInfo?.codeCours || coursInfo?.code || coursInfo?.sigle || coursId;
+
+        db.setSync('groupeCoursActif', {
+            modeCours: true,
+            coursId: coursId,
+            trimestreId: trimestreActif.id,
+            groupe: null,  // null = tous les groupes
+            id: null,
+            enseignantId: null,
+            horaireId: null
+        });
+
+        await db.set('infoCours', {
+            id: coursId,
+            codeCours: sigle,
+            nomCours: coursInfo?.nomCours || '',
+            groupe: null,  // null = tous les groupes
+            _modeCours: true
+        });
+
+        const selectHeader = document.getElementById('selectGroupeCoursHeader');
+        if (selectHeader) selectHeader.value = valeur;
+
+        if (typeof mettreAJourContexteEntete === 'function') {
+            mettreAJourContexteEntete();
+        }
+
+        if (typeof afficherNotificationSucces === 'function') {
+            afficherNotificationSucces('Cours activé (tous groupes)');
+        }
+
+        if (typeof afficherCalendrierScolaire === 'function') {
+            afficherCalendrierScolaire();
+        }
+
+        console.log('[Trimestre V2] Mode COURS activé:', coursId, '(tous groupes)');
+        return;
+    }
+
+    // Mode GROUPE-COURS : un seul groupe
+    const groupeCoursId = valeur;
+
     // ✅ CORRIGÉ (8 janvier 2026) : Utiliser cle() pour cohérence avec les autres fonctions
-    // Avant : hardcodé avec namespace qui ne correspondait pas aux données sauvegardées
     const cleGC = typeof cle === 'function' ? cle('groupesCours') : 'groupesCours';
     const groupesCours = db.getSync(cleGC, []);
     const gc = groupesCours.find(g => g.id === groupeCoursId);
@@ -5328,6 +5565,7 @@ async function changerGroupeCoursActifV2(groupeCoursId) {
     db.setSync(cleGC, groupesCours);
 
     db.setSync('groupeCoursActif', {
+        modeCours: false,
         id: gc.id,
         trimestreId: gc.trimestreId || trimestreActif.id,
         coursId: gc.coursId,
