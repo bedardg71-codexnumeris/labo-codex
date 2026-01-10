@@ -117,45 +117,9 @@ function mettreAJourContexteEntete() {
         const infoJour = calendrier[dateStr];
 
         // ========================================
-        // LIGNE 1 : Dropdown groupe-cours + Pratique
+        // LIGNE 1 : Pratique seulement (le dropdown groupe-cours est dans le bandeau dédié)
         // ========================================
         let htmlLigne1 = '';
-
-        // Générer le dropdown si plusieurs groupe-cours/cours disponibles
-        if (groupesCours.length > 1) {
-            // Trier par sigle de cours, puis par groupe
-            const coursTries = groupesCours.slice().sort(function(a, b) {
-                const sigleA = (a.sigle || '').toLowerCase();
-                const sigleB = (b.sigle || '').toLowerCase();
-                if (sigleA !== sigleB) {
-                    return sigleA.localeCompare(sigleB);
-                }
-                // Même sigle : trier par groupe
-                const groupeA = a.groupe || '';
-                const groupeB = b.groupe || '';
-                return groupeA.localeCompare(groupeB);
-            });
-
-            htmlLigne1 += `<select id="dropdown-cours-entete" onchange="changerCoursDepuisEntete(this.value, ${utilisationGroupeCours})" class="dropdown-cours-entete">`;
-            coursTries.forEach(c => {
-                const selected = coursActif && c.id === coursActif.id ? ' selected' : '';
-                const sigle = c.sigle || 'Sans code';
-                const groupe = c.groupe || '';
-                const label = groupe ? `${sigle} (${groupe})` : sigle;
-                htmlLigne1 += `<option value="${c.id}"${selected}>${echapperHtml(label)}</option>`;
-            });
-            htmlLigne1 += '</select>';
-        } else if (coursActif) {
-            // Un seul groupe-cours : afficher en texte simple
-            const sigle = coursActif.sigle || '';
-            const nomCours = coursActif.nomCours || '';
-            const groupe = coursActif.groupe || '';
-            const label = groupe ? `${sigle} (${groupe})` : (nomCours || sigle);
-            htmlLigne1 += `<span class="info-contexte-item">${echapperHtml(label)}</span>`;
-        } else {
-            // Aucun groupe-cours : inviter à en créer un
-            htmlLigne1 += '<span class="info-contexte-item" style="opacity: 0.7;">Aucun groupe-cours configuré</span>';
-        }
 
         // Ajouter la pratique
         if (pratiqueName) {
