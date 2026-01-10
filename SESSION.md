@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 95.3
 
-**Date** : 9 janvier 2026
-**Version** : Beta 95.3 (build 0109-1604)
+**Date** : 10 janvier 2026
+**Version** : Beta 95.3 (build 0110)
 **Statut** : Application fonctionnelle pour H2026
 
 ---
@@ -18,11 +18,27 @@
 - Section Trimestre operationnelle (tous les accordeons)
 - Creation et selection de groupe-cours
 - Dropdown groupe-cours dans l'en-tete
+- **Dropdown "Cours (tous groupes)"** : Voir tous les groupes fusionnes
 - Design harmonise (Design System v7)
 - Message de bienvenue et notes de version a jour
 - Variables CSS adoptees massivement (box-shadow 43%, border-radius 95%)
 
-### Derniere tache completee (9 janvier)
+### Derniere tache completee (10 janvier)
+- **NOUVELLE FONCTIONNALITE** : Mode "Cours" dans le dropdown de l'en-tete
+  - Permet de selectionner un cours entier (tous les groupes fusionnes)
+  - Format dropdown : `SIGLE (X groupes)` dans section "Cours (tous groupes)"
+  - Etudiants de tous les groupes affiches ensemble
+  - Statistiques agregees pour le cours complet
+  - **Fichiers modifies** :
+    - `js/trimestre-v2.js` : `peuplerDropdownGroupeCoursActif()` + `changerGroupeCoursActifV2()`
+    - `js/modes.js` : `obtenirEtudiantsCoursActif()` + `obtenirDonneesSelonMode()`
+  - **Implementation** :
+    - Valeur dropdown avec prefixe `cours:` pour le mode cours
+    - Flag `modeCours: true` dans `groupeCoursActif` et `infoCours._modeCours`
+    - Filtrage par coursId sans filtre groupe quand mode cours actif
+  - **Amelioration** : Option "Cours" visible meme avec 1 seul groupe-cours actif (permet de voir tous les etudiants meme si d'autres groupes sont masques)
+
+### Tache precedente (9 janvier)
 - **BUG CRITIQUE CORRIGE** : Perte de donnees etudiants (55 → 29)
   - **Symptome** : Import 29 etudiants OK, import 26 de plus OK (55 total), mais dropdown affiche 29
   - **Cause racine** : `db.getSync()` lisait depuis localStorage qui contenait des donnees obsoletes
@@ -68,6 +84,7 @@
 
 | Decision | Date | Raison |
 |----------|------|--------|
+| Mode Cours (tous groupes) dans dropdown | 10 jan | Suivre plusieurs groupes simultanément |
 | Migration massive variables CSS | 9 jan | Maintenabilite + coherence |
 | Modularisation code reportee a Beta 96 | 8 jan | Priorite = stabilite pour H2026 |
 | Garder tout dans trimestre-v2.js | 8 jan | Structure donnees deja modulaire |
@@ -152,6 +169,13 @@
 
 ## HISTORIQUE RECENT
 
+### 10 janvier 2026
+- **Mode "Cours" dans dropdown entete** : Voir tous les groupes fusionnes d'un cours
+  - Section "Cours (tous groupes)" dans le dropdown
+  - Format : `SIGLE (X groupes)`
+  - Filtrage par coursId sans filtre groupe
+  - Flag `_modeCours` et `groupe: null` pour detecter le mode
+
 ### 9 janvier 2026
 - **BUG CRITIQUE CORRIGE** : Perte donnees etudiants lors import/suppression
   - Cause : obtenirDonneesSelonMode() filtrait par coursId puis sauvegarderDonneesSelonMode() ecrasait TOUT
@@ -222,4 +246,4 @@
 
 ---
 
-**Derniere mise a jour** : 9 janvier 2026, 15:50 (Toronto)
+**Derniere mise a jour** : 10 janvier 2026 (Toronto)
