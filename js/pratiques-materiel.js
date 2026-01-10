@@ -614,11 +614,12 @@ async function chargerPratiquePourModif(pratiqueId) {
     if (accueil) accueil.style.display = 'none';
     if (conteneurEdition) conteneurEdition.style.display = 'block';
 
-    // Remplir les champs du formulaire
-    remplirFormulairePratique(pratique);
-
-    // Charger le dropdown des échelles
+    // ✅ FIX (10 jan 2026) : Charger le dropdown des échelles AVANT de remplir le formulaire
+    // Sinon la valeur de l'échelle ne peut pas être appliquée car le dropdown est vide
     await chargerDropdownEchellesMat();
+
+    // Remplir les champs du formulaire (incluant l'échelle)
+    remplirFormulairePratique(pratique);
 
     // Marquer l'item actif dans la sidebar
     document.querySelectorAll('#sidebarListePratiques .sidebar-item').forEach(item => {
