@@ -1040,33 +1040,13 @@ function genererPanneauMetadonnees(ressource, typeRessource) {
     };
 
     // Déterminer l'auteur
-    // ✅ FIX (10 jan 2026) : Lire depuis le profil enseignant si non défini
+    // 🆕 Beta 95.4 : Utiliser obtenirProfilAuteurActifSync() pour le fallback
     let auteur = meta.auteur_original || meta.auteur || ressource.auteur || '';
-    if (!auteur && typeof db !== 'undefined') {
-        // Essayer d'abord l'enseignant du groupe-cours actif
-        const gcActif = db.getSync('groupeCoursActif', null);
-        const enseignants = db.getSync('enseignants', []);
-        if (gcActif && gcActif.enseignantId) {
-            const ens = enseignants.find(e => e.id === gcActif.enseignantId);
-            if (ens && ens.prenom && ens.nom) {
-                auteur = `${ens.prenom} ${ens.nom}`;
-            }
-        }
-        // Sinon, utiliser le premier enseignant ou profilEnseignant legacy
-        if (!auteur && enseignants.length > 0) {
-            const ens = enseignants[0];
-            if (ens.prenom && ens.nom) {
-                auteur = `${ens.prenom} ${ens.nom}`;
-            }
-        }
-        if (!auteur) {
-            const profil = db.getSync('profilEnseignant', {});
-            if (profil.prenom && profil.nom) {
-                auteur = `${profil.prenom} ${profil.nom}`;
-            }
-        }
+    if (!auteur) {
+        // Utiliser le profil auteur de l'enseignant actif
+        const profilAuteur = obtenirProfilAuteurActifSync();
+        auteur = profilAuteur?.auteur_original || 'Non spécifié';
     }
-    if (!auteur) auteur = 'Non spécifié';
     const institution = meta.institution || ressource.institution || '';
     const dateCreation = meta.date_creation || ressource.dateCreation || ressource.dateAjout || '';
     const dateModif = meta.date_modification || ressource.dateModification || '';

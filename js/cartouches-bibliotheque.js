@@ -80,11 +80,14 @@ async function ajouterCartoucheALaBibliotheque(cartouche) {
         return false;
     }
 
+    // 🆕 Beta 95.4 : Obtenir l'auteur depuis le profil enseignant si non défini
+    const auteur = cartouche.auteur || (typeof obtenirProfilAuteurActifSync === 'function' ? obtenirProfilAuteurActifSync()?.auteur_original : null) || 'Inconnu';
+
     const cartoucheBiblio = {
         ...cartouche,
         dansBibliotheque: true,
         dateAjoutBiblio: new Date().toISOString(),
-        auteur: cartouche.auteur || 'Inconnu'
+        auteur: auteur
     };
 
     bibliotheque.push(cartoucheBiblio);

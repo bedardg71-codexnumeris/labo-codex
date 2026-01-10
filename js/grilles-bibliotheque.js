@@ -80,11 +80,14 @@ async function ajouterGrilleALaBibliotheque(grille) {
         return false;
     }
 
+    // 🆕 Beta 95.4 : Obtenir l'auteur depuis le profil enseignant si non défini
+    const auteur = grille.auteur || (typeof obtenirProfilAuteurActifSync === 'function' ? obtenirProfilAuteurActifSync()?.auteur_original : null) || 'Inconnu';
+
     const grilleBiblio = {
         ...grille,
         dansBibliotheque: true,
         dateAjoutBiblio: new Date().toISOString(),
-        auteur: grille.auteur || 'Inconnu'
+        auteur: auteur
     };
 
     bibliotheque.push(grilleBiblio);
