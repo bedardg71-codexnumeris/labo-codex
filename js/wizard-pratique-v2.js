@@ -48,9 +48,9 @@ const ETAPES_WIZARD = {
         ordre: 1,
         champs: [
             { id: 'nom', label: 'Nom de la pratique', type: 'text', required: true, placeholder: 'Ex: PAN-Standards Littérature H2026' },
-            { id: 'auteur', label: 'Auteur (pour la licence CC)', type: 'text', required: true, placeholder: 'Votre nom' },
+            { id: 'auteur', label: 'Auteur (pour la licence CC)', type: 'text', required: true, placeholder: 'Prénom Nom' },
             { id: 'etablissement', label: 'Établissement', type: 'text', required: true, placeholder: 'Ex: Cégep de Drummondville' },
-            { id: 'discipline', label: 'Discipline', type: 'text', required: true, placeholder: 'Ex: Littérature, Chimie, Philosophie' },
+            { id: 'discipline', label: 'Discipline', type: 'select-disciplines', required: true },
             { id: 'description', label: 'Description', type: 'textarea', required: false, placeholder: 'Décrivez brièvement votre pratique (optionnel)' },
             { id: 'infoCC', type: 'info', texte: 'Le partage n\'est pas obligatoire, mais ces informations permettent de protéger votre travail sous licence Creative Commons (CC BY-NC-SA 4.0) et d\'en attribuer la création si vous choisissez de le partager.' }
         ],
@@ -828,6 +828,8 @@ function genererChamp(champ) {
             return genererSelectEchelle(champ);
         case 'select-grille':
             return genererSelectGrille(champ);
+        case 'select-disciplines':
+            return genererChampSelectDisciplines(champ);
         case 'info':
             return genererInfo(champ);
         default:
@@ -924,6 +926,82 @@ function genererChampSelect(champ) {
             <label for="${WIZARD_V2_ID_PREFIX}${champ.id}">${champ.label}</label>
             <select id="${WIZARD_V2_ID_PREFIX}${champ.id}" name="${champ.id}">
                 ${options}
+            </select>
+        </div>
+    `;
+}
+
+/**
+ * Génère un champ select pour les disciplines (dropdown complet)
+ * 🆕 Beta 95.4 : Utilise le même dropdown que le profil enseignant
+ */
+function genererChampSelectDisciplines(champ) {
+    return `
+        <div class="wizard-v2-champ">
+            <label for="${WIZARD_V2_ID_PREFIX}${champ.id}">${champ.label}${champ.required ? ' *' : ''}</label>
+            <select id="${WIZARD_V2_ID_PREFIX}${champ.id}" name="${champ.id}" class="controle-form" ${champ.required ? 'required' : ''}>
+                <option value="">— Sélectionner —</option>
+                <optgroup label="Sciences de la santé et techniques (100)">
+                    <option value="101 Biologie">101 Biologie</option>
+                    <option value="109 Éducation physique">109 Éducation physique</option>
+                    <option value="180 Soins infirmiers">180 Soins infirmiers</option>
+                </optgroup>
+                <optgroup label="Sciences et techniques (200)">
+                    <option value="201 Mathématique">201 Mathématique</option>
+                    <option value="202 Chimie">202 Chimie</option>
+                    <option value="203 Physique">203 Physique</option>
+                </optgroup>
+                <optgroup label="Sciences humaines (300)">
+                    <option value="300 Sciences humaines">300 Sciences humaines</option>
+                    <option value="305 Économique">305 Économique</option>
+                    <option value="320 Géographie">320 Géographie</option>
+                    <option value="330 Histoire">330 Histoire</option>
+                    <option value="332 Civilisations anciennes">332 Civilisations anciennes</option>
+                    <option value="340 Philosophie">340 Philosophie</option>
+                    <option value="345 Humanities">345 Humanities</option>
+                    <option value="350 Psychologie">350 Psychologie</option>
+                    <option value="360 Science politique">360 Science politique</option>
+                    <option value="370 Intervention sociale">370 Intervention sociale</option>
+                    <option value="381 Anthropologie">381 Anthropologie</option>
+                    <option value="383 Études religieuses">383 Études religieuses</option>
+                    <option value="385 Sociologie">385 Sociologie</option>
+                    <option value="387 Sexologie">387 Sexologie</option>
+                </optgroup>
+                <optgroup label="Arts (500)">
+                    <option value="502 Danse">502 Danse</option>
+                    <option value="504 Art et esthétique">504 Art et esthétique</option>
+                    <option value="506 Cinéma">506 Cinéma</option>
+                    <option value="510 Arts plastiques">510 Arts plastiques</option>
+                    <option value="520 Histoire de l'art">520 Histoire de l'art</option>
+                    <option value="530 Musique">530 Musique</option>
+                    <option value="550 Esthétique industrielle">550 Esthétique industrielle</option>
+                    <option value="551 Arts et technologies">551 Arts et technologies</option>
+                    <option value="560 Théâtre">560 Théâtre</option>
+                    <option value="570 Design">570 Design</option>
+                    <option value="581 Création littéraire">581 Création littéraire</option>
+                    <option value="582 Techniques professionnelles de musique et de chanson">582 Techniques professionnelles de musique et de chanson</option>
+                    <option value="589 Communication">589 Communication</option>
+                </optgroup>
+                <optgroup label="Langues et littérature (600)">
+                    <option value="601 Français (langue et littérature)">601 Français (langue et littérature)</option>
+                    <option value="602 Anglais (langue seconde)">602 Anglais (langue seconde)</option>
+                    <option value="603 Anglais (langue et littérature)">603 Anglais (langue et littérature)</option>
+                    <option value="604 Français (langue seconde)">604 Français (langue seconde)</option>
+                    <option value="607 Espagnol">607 Espagnol</option>
+                    <option value="608 Italien">608 Italien</option>
+                    <option value="609 Allemand">609 Allemand</option>
+                    <option value="610 Langues autochtones">610 Langues autochtones</option>
+                    <option value="613 Mandarin">613 Mandarin</option>
+                    <option value="615 Russe">615 Russe</option>
+                    <option value="618 Hébreu">618 Hébreu</option>
+                    <option value="619 Multilingue">619 Multilingue</option>
+                </optgroup>
+                <optgroup label="Informatique et administration (400-420)">
+                    <option value="401 Gestion et administration">401 Gestion et administration</option>
+                    <option value="410 Techniques de comptabilité et de gestion">410 Techniques de comptabilité et de gestion</option>
+                    <option value="412 Techniques de bureautique">412 Techniques de bureautique</option>
+                    <option value="420 Informatique">420 Informatique</option>
+                </optgroup>
             </select>
         </div>
     `;
@@ -1518,6 +1596,17 @@ function ouvrirWizardV2(modeEdition = false, pratiqueId = null) {
     wizardState.modeEdition = modeEdition;
     wizardState.pratiqueId = pratiqueId;
 
+    // 🆕 Beta 95.4 : Pré-remplir avec le profil enseignant du groupe-cours actif
+    if (!modeEdition) {
+        const profilEnseignant = obtenirProfilEnseignantActifWizard();
+        if (profilEnseignant) {
+            wizardState.reponses.auteur = profilEnseignant.nomComplet || '';
+            wizardState.reponses.etablissement = profilEnseignant.institution || '';
+            wizardState.reponses.discipline = profilEnseignant.discipline || '';
+            console.log('[WizardV2] Pré-remplissage avec profil enseignant:', profilEnseignant);
+        }
+    }
+
     // Si édition, charger les données existantes
     if (modeEdition && pratiqueId) {
         chargerPratiqueExistante(pratiqueId);
@@ -1530,6 +1619,34 @@ function ouvrirWizardV2(modeEdition = false, pratiqueId = null) {
         afficherEtapeWizardV2('infos-base');
     } else {
         console.error('[WizardV2] Modal #modalWizardPratiqueV2 non trouvé');
+    }
+}
+
+/**
+ * 🆕 Beta 95.4 : Obtient le profil de l'enseignant du groupe-cours actif
+ * @returns {Object|null} - { nomComplet, institution, discipline } ou null
+ */
+function obtenirProfilEnseignantActifWizard() {
+    try {
+        const trimestreActif = window.trimestreActif || (typeof db !== 'undefined' && db.getSync ? db.getSync('trimestreActif', null) : null);
+        if (!trimestreActif) return null;
+
+        const groupesCours = db.getSync(`${trimestreActif}_groupesCours`, []);
+        const groupeActif = groupesCours.find(gc => gc.actif);
+        if (!groupeActif || !groupeActif.enseignantId) return null;
+
+        const enseignants = db.getSync('enseignants', []);
+        const enseignant = enseignants.find(e => e.id === groupeActif.enseignantId);
+        if (!enseignant) return null;
+
+        return {
+            nomComplet: `${enseignant.prenom || ''} ${enseignant.nom || ''}`.trim(),
+            institution: enseignant.institution || '',
+            discipline: enseignant.discipline || ''
+        };
+    } catch (e) {
+        console.warn('[WizardV2] Erreur obtention profil enseignant:', e);
+        return null;
     }
 }
 
