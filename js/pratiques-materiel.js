@@ -723,31 +723,6 @@ function remplirFormulairePratique(pratique) {
     setValeurChamp('mat-ciblee-plafond', jetons.cibleePlafond || 'D (Développement)');
 
     // 🆕 Beta 95.4 : Afficher le panneau métadonnées CC
-    // Migration automatique : corriger les auteurs erronés des pratiques
-    // (pratiques créées avec le mauvais groupe-cours actif)
-    const enseignantActif = typeof obtenirNomEnseignantActif === 'function' ? obtenirNomEnseignantActif() : null;
-    if (enseignantActif && pratique.auteur && pratique.auteur !== enseignantActif) {
-        // Si l'auteur stocké n'est pas l'enseignant actif, corriger
-        pratique.auteur = enseignantActif;
-        if (pratique.metadata_cc) {
-            pratique.metadata_cc.auteur_original = enseignantActif;
-        }
-        // Sauvegarder la correction
-        db.get('pratiques_configurations').then(pratiques => {
-            if (pratiques) {
-                const idx = pratiques.findIndex(p => p.id === pratique.id);
-                if (idx !== -1) {
-                    pratiques[idx].auteur = enseignantActif;
-                    if (pratiques[idx].metadata_cc) {
-                        pratiques[idx].metadata_cc.auteur_original = enseignantActif;
-                    }
-                    db.set('pratiques_configurations', pratiques);
-                    console.log('[pratiques-materiel] Auteur corrigé:', pratique.nom, '→', enseignantActif);
-                }
-            }
-        });
-    }
-
     const panneauMeta = document.getElementById('panneauMetadonneesPratique');
     if (panneauMeta && typeof genererPanneauMetadonnees === 'function') {
         panneauMeta.innerHTML = genererPanneauMetadonnees(pratique, 'pratique');
