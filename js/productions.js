@@ -3165,11 +3165,14 @@ function mettreAJourMetriquesProduction(production) {
  * NOTE: Renommée pour éviter conflit avec chargerGrillesDisponibles() de pratiques.js
  */
 async function chargerGrillesDisponiblesPourProduction() {
-    const grilles = await db.get('grillesTemplates') || [];
+    // 🆕 Beta 95.4 : Utiliser la clé namespacée pour n'afficher que les grilles du trimestre actif
+    const cleGrilles = (typeof cle === 'function') ? cle('grillesTemplates') : 'grillesTemplates';
+    const grilles = await db.get(cleGrilles) || [];
     const selectStandard = document.getElementById('productionGrille');
     const selectInline = document.getElementById('productionGrilleInline');
 
     console.log('📋 chargerGrillesDisponiblesPourProduction appelée');
+    console.log('   - Clé utilisée:', cleGrilles);
     console.log('   - Nombre de grilles:', grilles.length);
     console.log('   - selectStandard trouvé?', !!selectStandard);
     console.log('   - selectInline trouvé?', !!selectInline);
