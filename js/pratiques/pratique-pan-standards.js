@@ -69,6 +69,21 @@ class PratiquePANStandards {
             return this._calculerPerformanceParObjectifs(da);
         }
 
+        // 🆕 Beta 95.4 : Vérifier si les catégories Sélection/Obligatoires sont actives
+        const configCategories = typeof obtenirConfigCategories === 'function' ? obtenirConfigCategories() : null;
+        if (configCategories && configCategories.actif) {
+            // Utiliser le calcul avec catégories
+            const resultat = typeof calculerNoteAvecCategories === 'function'
+                ? calculerNoteAvecCategories(da, configCategories)
+                : null;
+
+            if (resultat && resultat.valide) {
+                // Convertir en indice 0-1
+                return resultat.noteFinale / 100;
+            }
+            // Si le calcul avec catégories échoue, continuer avec la logique standard
+        }
+
         // Lire configuration
         const config = this._lireConfiguration();
         const portfolioActif = config.portfolioActif;
