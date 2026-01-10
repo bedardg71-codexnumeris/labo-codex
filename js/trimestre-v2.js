@@ -3921,10 +3921,13 @@ function populerDropdownsAssemblageV2() {
     }
 
     // Beta 95.3: Dropdown Pratiques de notation (alignement Primo)
+    // ✅ FIX (10 jan 2026) : N'affiche que les pratiques dans la sidebar (dansBibliotheque !== false)
     const selectPratique = document.getElementById('v2-gc-pratique');
     if (selectPratique) {
         // Les pratiques sont stockées dans 'pratiquesConfigurables' (module pratiques-materiel.js)
-        const pratiques = db.getSync('pratiquesConfigurables', []);
+        const toutesPratiques = db.getSync('pratiquesConfigurables', []);
+        // Filtrer pour n'afficher que les pratiques dans la sidebar
+        const pratiques = toutesPratiques.filter(p => p.dansBibliotheque !== false);
 
         let html = '<option value="">— À compléter quand configurée —</option>';
         pratiques.forEach(p => {
