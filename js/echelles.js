@@ -1312,7 +1312,19 @@ async function modifierNiveau(index, champ, valeur) {
     let niveaux = await db.get('niveauxEchelle') ||  niveauxDefaut;
     niveaux[index][champ] = valeur;
     await db.set('niveauxEchelle',  niveaux);
-    
+
+    // ✅ FIX (10 jan 2026) : Synchroniser avec echelleTemplateActuelle et echellesTemplates
+    if (echelleTemplateActuelle && echelleTemplateActuelle.id) {
+        echelleTemplateActuelle.niveaux = niveaux;
+        let echelles = await db.get('echellesTemplates') || [];
+        const idx = echelles.findIndex(e => e.id === echelleTemplateActuelle.id);
+        if (idx !== -1) {
+            echelles[idx].niveaux = niveaux;
+            echelles[idx].dateModification = new Date().toISOString();
+            await db.set('echellesTemplates', echelles);
+        }
+    }
+
     // Mise à jour immédiate de l'aperçu de couleur sans recharger tout le tableau
     if (champ === 'couleur') {
         const apercuDiv = document.getElementById(`apercu-couleur-${index}`);
@@ -1320,7 +1332,7 @@ async function modifierNiveau(index, champ, valeur) {
             apercuDiv.style.background = valeur;
         }
     }
-    
+
     // Mettre à jour l'aperçu global de l'échelle
     afficherApercuEchelle(niveaux);
 }
