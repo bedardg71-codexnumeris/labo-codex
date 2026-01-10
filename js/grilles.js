@@ -2762,7 +2762,14 @@ async function deplacerCritereGrilleHaut(grilleId, index) {
     if (!grille || !grille.criteres) return;
 
     [grille.criteres[index - 1], grille.criteres[index]] = [grille.criteres[index], grille.criteres[index - 1]];
+    grille.dateModification = new Date().toISOString();
     await db.set('grillesTemplates', grilles);
+
+    // FIX (10 jan 2026) : Synchroniser grilleTemplateActuelle
+    if (grilleTemplateActuelle && grilleTemplateActuelle.id === grilleId) {
+        grilleTemplateActuelle = grille;
+    }
+
     afficherCriteresGrille(grille);
 }
 
@@ -2776,7 +2783,14 @@ async function deplacerCritereGrilleBas(grilleId, index) {
     if (index >= grille.criteres.length - 1) return;
 
     [grille.criteres[index], grille.criteres[index + 1]] = [grille.criteres[index + 1], grille.criteres[index]];
+    grille.dateModification = new Date().toISOString();
     await db.set('grillesTemplates', grilles);
+
+    // FIX (10 jan 2026) : Synchroniser grilleTemplateActuelle
+    if (grilleTemplateActuelle && grilleTemplateActuelle.id === grilleId) {
+        grilleTemplateActuelle = grille;
+    }
+
     afficherCriteresGrille(grille);
 }
 
@@ -3070,9 +3084,15 @@ async function modifierCritereGrille(grilleId, critereIndex, champ, valeur) {
 
     // Mettre à jour le champ
     grille.criteres[critereIndex][champ] = valeur;
+    grille.dateModification = new Date().toISOString();
 
-    // Sauvegarder dans localStorage
+    // Sauvegarder dans IndexedDB
     await db.set('grillesTemplates', grilles);
+
+    // FIX (10 jan 2026) : Synchroniser grilleTemplateActuelle pour éviter l'écrasement
+    if (grilleTemplateActuelle && grilleTemplateActuelle.id === grilleId) {
+        grilleTemplateActuelle = grille;
+    }
 
     // Recalculer et afficher la pondération totale
     if (champ === 'ponderation') {
@@ -3331,9 +3351,15 @@ async function supprimerCritereGrille(grilleId, critereIndex) {
 
     // Supprimer le critère
     grille.criteres.splice(critereIndex, 1);
+    grille.dateModification = new Date().toISOString();
 
-    // Sauvegarder dans localStorage
+    // Sauvegarder dans IndexedDB
     await db.set('grillesTemplates', grilles);
+
+    // FIX (10 jan 2026) : Synchroniser grilleTemplateActuelle
+    if (grilleTemplateActuelle && grilleTemplateActuelle.id === grilleId) {
+        grilleTemplateActuelle = grille;
+    }
 
     // Réafficher la liste des critères (calculera automatiquement le total)
     afficherCriteresGrille(grille);
