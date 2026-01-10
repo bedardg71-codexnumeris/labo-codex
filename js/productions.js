@@ -196,7 +196,10 @@ async function afficherFormProduction(id) {
     console.log('   - selectGrilleInline trouvé?', !!selectGrilleInline);
 
     if (selectGrille || selectGrilleInline) {
-        const grilles = await db.get('grillesTemplates') || [];
+        // 🆕 Beta 95.4 : Utiliser la clé namespacée pour n'afficher que les grilles du trimestre
+        const cleGrilles = (typeof cle === 'function') ? cle('grillesTemplates') : 'grillesTemplates';
+        const grilles = await db.get(cleGrilles) || [];
+        console.log('   - Clé utilisée:', cleGrilles);
         console.log('   - Nombre de grilles:', grilles.length);
         console.log('   - Grilles:', grilles.map(g => ({ id: g.id, nom: g.nom })));
 
@@ -213,8 +216,10 @@ async function afficherFormProduction(id) {
 
     if (id) {
         // Mode modification
-        const evaluations = await db.get('productions') || [];
-        console.log('📦 Nombre de productions:', evaluations.length);
+        // 🆕 Beta 95.4 : Utiliser la clé namespacée pour le trimestre actif
+        const cleProductions = (typeof cle === 'function') ? cle('productionsPedagogiques') : 'productions';
+        const evaluations = await db.get(cleProductions) || [];
+        console.log('📦 Nombre de productions:', evaluations.length, '(clé:', cleProductions, ')');
         console.log('🔑 IDs disponibles:', evaluations.map(e => e.id));
 
         // Debug détaillé de la recherche
@@ -376,7 +381,9 @@ async function sauvegarderProduction() {
         return;
     }
 
-    let evaluations = await db.get('productions') || [];
+    // 🆕 Beta 95.4 : Utiliser la clé namespacée pour le trimestre actif
+    const cleProductions = (typeof cle === 'function') ? cle('productionsPedagogiques') : 'productions';
+    let evaluations = await db.get(cleProductions) || [];
 
     // ✅ AJOUT (6 jan 2026) : Vérification des doublons
     const idActuel = productionEnEdition || null;
@@ -471,8 +478,8 @@ async function sauvegarderProduction() {
         console.log('   - Nouveau ID:', productionData.id);
     }
 
-    console.log('💾 Sauvegarde dans db.set...');
-    await db.set('productions', evaluations);
+    console.log('💾 Sauvegarde dans db.set...', cleProductions);
+    await db.set(cleProductions, evaluations);
     console.log('✅ Sauvegarde terminée');
 
     // 🆕 BETA 95.1 : Garder l'ID pour réafficher après sauvegarde
