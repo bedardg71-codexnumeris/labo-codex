@@ -1179,55 +1179,60 @@ function genererPanneauMetadonnees(ressource, typeRessource) {
     };
 
     // Déterminer l'auteur
-    // 🆕 Beta 95.4 : Utiliser l'enseignant du groupe-cours associé à la production
-    // Ignorer les valeurs 'Inconnu' ou 'Non spécifié' comme non-valides
+    // 🆕 Beta 95.4 : Utiliser l'auteur stocké, ou fallback selon le type
     const valeursIgnorees = ['', 'Inconnu', 'Non spécifié', 'Unknown'];
     let auteur = meta.auteur_original || meta.auteur || ressource.auteur || '';
+
     if (!auteur || valeursIgnorees.includes(auteur)) {
-        // Essayer via le groupe-cours de la production
         let profilAuteur = null;
-        const trimestreActif = window.trimestreActif || (typeof db !== 'undefined' && db.getSync ? db.getSync('trimestreActif', null) : null);
 
-        if (trimestreActif && typeof db !== 'undefined' && db.getSync) {
-            const groupesCours = db.getSync(`${trimestreActif}_groupesCours`, []);
-            let groupeCours = null;
+        // Pour les pratiques (bibliothèque), utiliser directement le profil enseignant
+        // car elles ne sont pas liées à un groupe-cours spécifique
+        if (typeRessource === 'pratique') {
+            profilAuteur = obtenirProfilAuteurActifSync();
+        } else {
+            // Pour les autres types (productions, grilles, etc.), essayer via groupe-cours
+            const trimestreActif = window.trimestreActif || (typeof db !== 'undefined' && db.getSync ? db.getSync('trimestreActif', null) : null);
 
-            // 1. Si la ressource a un groupeCoursId direct, l'utiliser
-            if (ressource.groupeCoursId) {
-                groupeCours = groupesCours.find(gc => gc.id === ressource.groupeCoursId);
-            }
+            if (trimestreActif && typeof db !== 'undefined' && db.getSync) {
+                const groupesCours = db.getSync(`${trimestreActif}_groupesCours`, []);
+                let groupeCours = null;
 
-            // 2. Sinon, si la ressource a un coursId, trouver le groupe-cours correspondant
-            if (!groupeCours && ressource.coursId) {
-                // Préférer le groupe-cours actif avec ce coursId
-                groupeCours = groupesCours.find(gc => gc.coursId === ressource.coursId && gc.actif);
-                // Sinon, prendre n'importe quel groupe-cours avec ce coursId
-                if (!groupeCours) {
-                    groupeCours = groupesCours.find(gc => gc.coursId === ressource.coursId);
+                // 1. Si la ressource a un groupeCoursId direct, l'utiliser
+                if (ressource.groupeCoursId) {
+                    groupeCours = groupesCours.find(gc => gc.id === ressource.groupeCoursId);
                 }
-            }
 
-            // 3. Sinon, prendre le groupe-cours actif
-            if (!groupeCours) {
-                groupeCours = groupesCours.find(gc => gc.actif);
-            }
+                // 2. Sinon, si la ressource a un coursId, trouver le groupe-cours correspondant
+                if (!groupeCours && ressource.coursId) {
+                    groupeCours = groupesCours.find(gc => gc.coursId === ressource.coursId && gc.actif);
+                    if (!groupeCours) {
+                        groupeCours = groupesCours.find(gc => gc.coursId === ressource.coursId);
+                    }
+                }
 
-            // Si on a trouvé un groupe-cours avec enseignantId, chercher l'enseignant
-            if (groupeCours && groupeCours.enseignantId) {
-                const enseignants = db.getSync('enseignants', []);
-                const enseignant = enseignants.find(e => e.id === groupeCours.enseignantId);
-                if (enseignant) {
-                    const nomComplet = `${enseignant.prenom || ''} ${enseignant.nom || ''}`.trim();
-                    if (nomComplet) {
-                        profilAuteur = { auteur_original: nomComplet };
+                // 3. Sinon, prendre le groupe-cours actif
+                if (!groupeCours) {
+                    groupeCours = groupesCours.find(gc => gc.actif);
+                }
+
+                // Si on a trouvé un groupe-cours avec enseignantId, chercher l'enseignant
+                if (groupeCours && groupeCours.enseignantId) {
+                    const enseignants = db.getSync('enseignants', []);
+                    const enseignant = enseignants.find(e => e.id === groupeCours.enseignantId);
+                    if (enseignant) {
+                        const nomComplet = `${enseignant.prenom || ''} ${enseignant.nom || ''}`.trim();
+                        if (nomComplet) {
+                            profilAuteur = { auteur_original: nomComplet };
+                        }
                     }
                 }
             }
-        }
 
-        // Sinon, fallback sur le profil auteur actif global
-        if (!profilAuteur) {
-            profilAuteur = obtenirProfilAuteurActifSync();
+            // Fallback sur le profil auteur actif global
+            if (!profilAuteur) {
+                profilAuteur = obtenirProfilAuteurActifSync();
+            }
         }
 
         auteur = profilAuteur?.auteur_original || 'Non spécifié';
