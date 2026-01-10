@@ -4490,23 +4490,10 @@
                                 </div>
 
                                 <!-- ═══════════════════════════════════════════════════════════
-                                     SECTION 3B : CATÉGORIE POUR CALCUL DE NOTE (Beta 95.4)
+                                     SECTION 3B : CATÉGORIE (Beta 95.4 : déplacé vers Structure des évaluations)
+                                     Les catégories Sélection/Obligatoires sont maintenant configurées
+                                     dans Pratiques → Structure des évaluations avec checkboxes.
                                      ═══════════════════════════════════════════════════════════ -->
-                                <div id="champCategorie" style="margin-bottom: 20px;">
-                                    <div class="groupe-form">
-                                        <label for="productionCategorie">Catégorie pour le calcul
-                                            <span class="tooltip-aide" title="Sélection : cette production fait partie du pool des N meilleures (ex: artefacts 1-8). Obligatoire : cette production compte toujours dans la note finale (ex: examen final, projet synthèse).">📌</span>
-                                        </label>
-                                        <select id="productionCategorie" class="controle-form" style="max-width: 300px;">
-                                            <option value="">-- Non définie --</option>
-                                            <option value="selection">Sélection (N meilleures retenues)</option>
-                                            <option value="obligatoire">Obligatoire (toujours comptée)</option>
-                                        </select>
-                                        <small style="display: block; margin-top: 6px; color: var(--gris-moyen); font-size: 0.85rem;">
-                                            Laissez vide pour utiliser le comportement par défaut de la pratique de notation.
-                                        </small>
-                                    </div>
-                                </div>
 
                                 <!-- ═══════════════════════════════════════════════════════════
                                      SECTION 4 : OBJECTIFS PÉDAGOGIQUES
@@ -5209,58 +5196,69 @@
                                             </div>
 
                                             <div id="mat-categories-details" style="display: none;">
+                                                <!-- Validation total = 100% -->
+                                                <p id="mat-categories-validation" style="margin-bottom: 15px; font-size: 0.9rem;"></p>
+
                                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                                                    <!-- Sélection -->
-                                                    <fieldset style="border: 1px solid var(--bleu-clair); border-radius: var(--radius-moyen); padding: 15px;">
-                                                        <legend style="font-weight: 600; color: var(--bleu-principal); padding: 0 8px;">Sélection (N meilleures)</legend>
-                                                        <div class="groupe-form" style="margin-bottom: 12px;">
-                                                            <label for="mat-selection-nombre">Nombre à retenir</label>
-                                                            <input type="number" id="mat-selection-nombre" class="controle-form" min="1" max="20" value="4" onchange="sauvegarderConfigPratiqueMat()">
-                                                        </div>
-                                                        <div class="groupe-form">
-                                                            <label for="mat-selection-ponderation">Pondération (%)</label>
-                                                            <input type="number" id="mat-selection-ponderation" class="controle-form" min="0" max="100" value="65" onchange="validerPonderationsCategoriesMat(); sauvegarderConfigPratiqueMat()">
-                                                        </div>
-                                                    </fieldset>
 
-                                                    <!-- Obligatoires -->
-                                                    <fieldset style="border: 1px solid var(--orange-principal, #e67e22); border-radius: var(--radius-moyen); padding: 15px;">
-                                                        <legend style="font-weight: 600; color: var(--orange-principal, #e67e22); padding: 0 8px;">Obligatoires</legend>
-                                                        <div class="groupe-form">
-                                                            <label for="mat-obligatoires-ponderation">Pondération (%)</label>
-                                                            <input type="number" id="mat-obligatoires-ponderation" class="controle-form" min="0" max="100" value="35" onchange="validerPonderationsCategoriesMat(); sauvegarderConfigPratiqueMat()">
-                                                        </div>
-                                                        <small style="display: block; margin-top: 10px; color: var(--gris-moyen);">
-                                                            Les productions obligatoires comptent toujours.<br>
-                                                            Note = 0 si non remise.
-                                                        </small>
-                                                    </fieldset>
-                                                </div>
-                                                <p id="mat-categories-validation" style="margin-top: 12px; font-size: 0.85rem; color: var(--gris-moyen);"></p>
-
-                                                <!-- Liste des productions pour assignation rapide -->
-                                                <div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed var(--gris-clair);">
-                                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                                                        <h4 style="margin: 0; font-size: 0.95rem; color: var(--gris-fonce);">
-                                                            📋 Assignation des productions
+                                                    <!-- CARTE SÉLECTION -->
+                                                    <div class="carte-categorie" style="border: 2px solid var(--bleu-clair); border-radius: var(--radius-moyen); padding: 15px;">
+                                                        <h4 style="color: var(--bleu-principal); margin: 0 0 15px 0; font-size: 1rem;">
+                                                            Sélection (N meilleures)
                                                         </h4>
-                                                        <div style="display: flex; gap: 8px;">
-                                                            <button type="button" class="btn-secondaire btn-compact" onclick="assignerToutesProductionsMat('selection')" title="Mettre toutes en Sélection">
-                                                                Tout → Sélection
-                                                            </button>
-                                                            <button type="button" class="btn-secondaire btn-compact" onclick="assignerToutesProductionsMat('obligatoire')" title="Mettre toutes en Obligatoire">
-                                                                Tout → Obligatoire
-                                                            </button>
+
+                                                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                                                            <div class="groupe-form">
+                                                                <label for="mat-selection-nombre">Nombre à retenir</label>
+                                                                <input type="number" id="mat-selection-nombre" class="controle-form"
+                                                                       min="1" max="20" value="4"
+                                                                       onchange="recalculerPonderationsUnitaires(); sauvegarderConfigPratiqueMat()">
+                                                            </div>
+                                                            <div class="groupe-form">
+                                                                <label for="mat-selection-ponderation">Pondération (%)</label>
+                                                                <input type="number" id="mat-selection-ponderation" class="controle-form"
+                                                                       min="0" max="100" value="65"
+                                                                       onchange="validerPonderationsCategoriesMat(); recalculerPonderationsUnitaires(); sauvegarderConfigPratiqueMat()">
+                                                            </div>
+                                                        </div>
+
+                                                        <div id="mat-selection-unitaire" style="font-size: 0.85rem; color: var(--bleu-principal); margin-bottom: 10px; padding: 8px; background: rgba(52, 152, 219, 0.08); border-radius: 4px;">
+                                                            Pondération unitaire : <strong>16.25%</strong> par production retenue
+                                                        </div>
+
+                                                        <div id="mat-selection-liste" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--gris-clair); border-radius: var(--radius-moyen); background: white;">
+                                                            <!-- Checkboxes générées dynamiquement -->
+                                                            <p style="padding: 15px; color: var(--gris-moyen); text-align: center;">Chargement...</p>
                                                         </div>
                                                     </div>
-                                                    <div id="mat-categories-productions-liste" style="max-height: 300px; overflow-y: auto; border: 1px solid var(--gris-clair); border-radius: var(--radius-moyen); background: white;">
-                                                        <!-- Liste générée dynamiquement par chargerProductionsPourCategories() -->
-                                                        <p style="padding: 15px; color: var(--gris-moyen); text-align: center;">Chargement des productions...</p>
+
+                                                    <!-- CARTE OBLIGATOIRES -->
+                                                    <div class="carte-categorie" style="border: 2px solid var(--orange-principal, #e67e22); border-radius: var(--radius-moyen); padding: 15px;">
+                                                        <h4 style="color: var(--orange-principal, #e67e22); margin: 0 0 15px 0; font-size: 1rem;">
+                                                            Obligatoires (toujours comptées)
+                                                        </h4>
+
+                                                        <div class="groupe-form" style="margin-bottom: 15px;">
+                                                            <label for="mat-obligatoires-ponderation">Pondération (%)</label>
+                                                            <input type="number" id="mat-obligatoires-ponderation" class="controle-form"
+                                                                   min="0" max="100" value="35"
+                                                                   onchange="validerPonderationsCategoriesMat(); recalculerPonderationsUnitaires(); sauvegarderConfigPratiqueMat()">
+                                                        </div>
+
+                                                        <div id="mat-obligatoires-unitaire" style="font-size: 0.85rem; color: var(--orange-principal, #e67e22); margin-bottom: 10px; padding: 8px; background: rgba(230, 126, 34, 0.08); border-radius: 4px;">
+                                                            Pondération unitaire : <strong>17.5%</strong> par production
+                                                        </div>
+
+                                                        <p style="font-size: 0.8rem; color: var(--gris-moyen); margin-bottom: 10px;">
+                                                            Note = 0 si production non remise.
+                                                        </p>
+
+                                                        <div id="mat-obligatoires-liste" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--gris-clair); border-radius: var(--radius-moyen); background: white;">
+                                                            <!-- Checkboxes générées dynamiquement -->
+                                                            <p style="padding: 15px; color: var(--gris-moyen); text-align: center;">Chargement...</p>
+                                                        </div>
                                                     </div>
-                                                    <p style="margin-top: 8px; font-size: 0.8rem; color: var(--gris-moyen);">
-                                                        <span style="display: inline-block; width: 12px; height: 12px; background: var(--bleu-clair); border-radius: 2px; margin-right: 4px;"></span> Sélection (N meilleures)
-                                                        <span style="display: inline-block; width: 12px; height: 12px; background: var(--orange-principal, #e67e22); border-radius: 2px; margin-left: 12px; margin-right: 4px;"></span> Obligatoire (toujours comptée)
-                                                    </p>
+
                                                 </div>
                                             </div>
                                         </div>

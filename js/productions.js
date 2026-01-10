@@ -42,9 +42,24 @@
    - Tous les champs du formulaire (productionTitre, productionDescription, etc.)
    
    LocalStorage utilisé:
-   - 'productions' : Array des productions/évaluations
+   - 'productionsPedagogiques' : Array des productions/évaluations (namespacé par trimestre)
    - 'grillesTemplates' : Array des grilles de critères (pour association)
    =============================== */
+
+/**
+ * 🆕 Beta 95.4 : Helper pour obtenir la clé namespacée des productions
+ * Utilise cle() si disponible, sinon fallback sur 'productions'
+ */
+function getCleProductions() {
+    return (typeof cle === 'function') ? cle('productionsPedagogiques') : 'productions';
+}
+
+/**
+ * 🆕 Beta 95.4 : Helper pour obtenir la clé namespacée des grilles
+ */
+function getCleGrilles() {
+    return (typeof cle === 'function') ? cle('grillesTemplates') : 'grillesTemplates';
+}
 
 /* ===============================
    FONCTION: AFFICHER TABLEAU DES PRODUCTIONS
@@ -71,7 +86,7 @@
  * 6. Gère l'affichage spécial pour les portfolios
  */
 async function afficherTableauProductions() {
-    const evaluations = await db.get('productions') || [];
+    const evaluations = await db.get(getCleProductions()) || [];
     const grilles = await db.get('grillesTemplates') || [];
     const container = document.getElementById('tableauEvaluationsContainer');
 
@@ -247,11 +262,8 @@ async function afficherFormProduction(id) {
             // ✨ NOUVEAU (Beta 94 - 10 déc 2025): Charger date d'échéance
             document.getElementById('productionDateEcheance').value = prod.dateEcheance || '';
 
-            // 🆕 Beta 95.4 : Charger la catégorie (Sélection/Obligatoire)
-            const selectCategorie = document.getElementById('productionCategorie');
-            if (selectCategorie) {
-                selectCategorie.value = prod.categorie || '';
-            }
+            // 🆕 Beta 95.4 : Catégorie (Sélection/Obligatoire) déplacée vers Structure des évaluations
+            // La catégorie est maintenant gérée via checkboxes dans Pratiques → Structure des évaluations
 
             // Gérer l'affichage des champs spécifiques au type
             gererChangementTypeProduction();
@@ -359,15 +371,9 @@ async function sauvegarderProduction() {
     // ✨ NOUVEAU (Beta 94 - 10 déc 2025): Date d'échéance
     const dateEcheance = document.getElementById('productionDateEcheance').value || null;
 
-    // Lire la grille depuis le bon select selon le type
-    let grilleId = '';
-    if (type === 'artefact-portfolio') {
-        const grilleInline = document.getElementById('productionGrilleInline');
-        grilleId = grilleInline ? grilleInline.value : '';
-    } else {
-        const grille = document.getElementById('productionGrille');
-        grilleId = grille ? grille.value : '';
-    }
+    // Lire la grille depuis le select (même élément pour tous les types)
+    const grille = document.getElementById('productionGrille');
+    const grilleId = grille ? grille.value : '';
 
     // ✅ NOUVEAU (Beta 94): Validation incluant dateEcheance obligatoire
     if (!titre || !type || (type !== 'artefact-portfolio' && ponderation === 0)) {
@@ -426,8 +432,10 @@ async function sauvegarderProduction() {
         : [];
 
     // Préparer l'objet de base
-    // 🆕 Beta 95.4 : Lire la catégorie (Sélection/Obligatoire)
-    const categorie = document.getElementById('productionCategorie')?.value || null;
+    // 🆕 Beta 95.4 : Catégorie déplacée vers Structure des évaluations
+    // Préserver la catégorie existante si modification, sinon null pour nouvelle production
+    const existingProd = evaluations.find(p => p.id === productionEnEdition);
+    const categorieExistante = existingProd?.categorie || null;
 
     let productionData = {
         titre: titreFinal,  // ✅ Utilise titreFinal en cas de renommage
@@ -442,7 +450,7 @@ async function sauvegarderProduction() {
         verrouille: false,
         dansBibliotheque: true,  // ✅ AJOUT (8 décembre 2025) - Nouvelle production dans bibliothèque par défaut
         coursId,  // ✅ CRITIQUE (Beta 95) : Lier la production au cours actif
-        categorie  // 🆕 Beta 95.4 : Catégorie pour calcul de note (selection | obligatoire | null)
+        categorie: categorieExistante  // 🆕 Beta 95.4 : Préservée, gérée via Structure des évaluations
     };
 
     // Si c'est un Portfolio, ajouter les données spécifiques
@@ -466,6 +474,12 @@ async function sauvegarderProduction() {
                 ...evaluations[index],
                 ...productionData
             };
+
+            // 🆕 Beta 95.4 : Ajouter contributeur si l'utilisateur actif n'est pas l'auteur
+            if (typeof ajouterContributeurSiNecessaire === 'function') {
+                evaluations[index] = ajouterContributeurSiNecessaire(evaluations[index]);
+            }
+
             console.log('   - Après:', JSON.stringify(evaluations[index].regles));
         } else {
             console.error('❌ Index non trouvé pour ID:', productionEnEdition);
@@ -474,6 +488,15 @@ async function sauvegarderProduction() {
         // Ajouter nouvelle production
         console.log('➕ MODE AJOUT - Nouvelle production');
         productionData.id = 'PROD' + Date.now();
+
+        // 🆕 Beta 95.4 : Pour nouvelle production, définir l'auteur original
+        const enseignantActif = typeof obtenirNomEnseignantActif === 'function' ? obtenirNomEnseignantActif() : null;
+        if (enseignantActif) {
+            if (!productionData.metadata_cc) productionData.metadata_cc = {};
+            productionData.metadata_cc.auteur_original = enseignantActif;
+            productionData.metadata_cc.date_creation = new Date().toISOString().split('T')[0];
+        }
+
         evaluations.push(productionData);
         console.log('   - Nouveau ID:', productionData.id);
     }
@@ -601,10 +624,10 @@ async function modifierProduction(id) {
  */
 async function supprimerProduction(id) {
     if (confirm('Êtes-vous sûr de vouloir supprimer cette production ?')) {
-        let evaluations = await db.get('productions') || [];
+        let evaluations = await db.get(getCleProductions()) || [];
         evaluations = evaluations.filter(e => e.id !== id);
 
-        await db.set('productions', evaluations);
+        await db.set(getCleProductions(), evaluations);
         await afficherTableauProductions();
         await afficherToutesLesProductionsParType();
         await mettreAJourPonderationTotale();
@@ -640,7 +663,7 @@ async function supprimerProduction(id) {
 async function verrouillerEvaluation(id) {
     console.log('🔐 verrouillerEvaluation appelée avec ID:', id, 'type:', typeof id);
 
-    let evaluations = await db.get('productions') || [];
+    let evaluations = await db.get(getCleProductions()) || [];
     console.log('📦 Nombre de productions:', evaluations.length);
     console.log('🔑 IDs disponibles:', evaluations.map(e => e.id));
 
@@ -655,7 +678,7 @@ async function verrouillerEvaluation(id) {
 
     if (index !== -1) {
         evaluations[index].verrouille = !evaluations[index].verrouille;
-        await db.set('productions', evaluations);
+        await db.set(getCleProductions(), evaluations);
         await afficherTableauProductions();
         await afficherToutesLesProductionsParType();
 
@@ -700,12 +723,12 @@ async function verrouillerEvaluation(id) {
  * 5. Rafraîchit l'affichage
  */
 async function monterEvaluation(id) {
-    let evaluations = await db.get('productions') || [];
+    let evaluations = await db.get(getCleProductions()) || [];
     const index = evaluations.findIndex(e => e.id === id);
 
     if (index > 0) {
         [evaluations[index - 1], evaluations[index]] = [evaluations[index], evaluations[index - 1]];
-        await db.set('productions', evaluations);
+        await db.set(getCleProductions(), evaluations);
         await afficherTableauProductions();
         await afficherToutesLesProductionsParType();
     }
@@ -733,12 +756,12 @@ async function monterEvaluation(id) {
  * 5. Rafraîchit l'affichage
  */
 async function descendreEvaluation(id) {
-    let evaluations = await db.get('productions') || [];
+    let evaluations = await db.get(getCleProductions()) || [];
     const index = evaluations.findIndex(e => e.id === id);
 
     if (index < evaluations.length - 1) {
         [evaluations[index], evaluations[index + 1]] = [evaluations[index + 1], evaluations[index]];
-        await db.set('productions', evaluations);
+        await db.set(getCleProductions(), evaluations);
         await afficherTableauProductions();
         await afficherToutesLesProductionsParType();
     }
@@ -785,7 +808,7 @@ function gererChangementTypeProduction() {
         'stage': '<strong>Stage :</strong> Expérience pratique dans une entreprise pour découvrir un métier, un secteur ou valider un projet professionnel. Le stage vise l\'apprentissage (découverte/exploration) plutôt que la production. Sa durée varie de quelques heures à quelques semaines et il est suivi par un tuteur.',
         'autre': '<strong>Autre :</strong> Tout autre type de production (participation, activités, etc.).',
         'portfolio': '<strong>Portfolio (conteneur) :</strong> Regroupement d\'artefacts permettant d\'évaluer la progression. Le portfolio inclura automatiquement toutes les productions de type «Artefact». Il n\'est pas comptabilisé dans l\'indice de <strong>Complétion (C)</strong>.',
-        'artefact-portfolio': '<strong>Artefact :</strong> Production ciblée sur une tâche de nature variée et rattachée au portfolio.'
+        'artefact-portfolio': '<strong>Artefact :</strong> Production ciblée sur une tâche de nature variée et rattachée au portfolio.<br><br>Les artefacts n\'ont pas de pondération propre. C\'est le portfolio conteneur qui définit la pondération globale.<br><br><em>Pour paramétrer la valeur des artefacts, allez dans « Structure des évaluations » dans les Pratiques de notation.</em>'
     };
 
     // Éléments Définition (carte dynamique)
@@ -815,7 +838,11 @@ function gererChangementTypeProduction() {
     // Masquer la carte définition par défaut
     if (carteDefinition) carteDefinition.style.display = 'none';
 
-    // Pondération : actif par défaut
+    // Pondération : actif et visible par défaut
+    const groupePonderation = inputPonderation?.closest('.groupe-form');
+    if (groupePonderation) {
+        groupePonderation.style.display = ''; // Réafficher si masqué
+    }
     if (inputPonderation) {
         inputPonderation.disabled = false;
         inputPonderation.style.opacity = '1';
@@ -895,16 +922,12 @@ function gererChangementTypeProduction() {
 
     } else if (type === 'artefact-portfolio') {
         // ARTEFACT DE PORTFOLIO
-        // Griser la pondération + note
-        if (inputPonderation) {
-            inputPonderation.disabled = true;
-            inputPonderation.style.opacity = '0.5';
-            inputPonderation.style.cursor = 'not-allowed';
-            inputPonderation.value = '';
+        // 🆕 Beta 95.4 : Masquer complètement le champ pondération (info dans la carte définition)
+        if (groupePonderation) {
+            groupePonderation.style.display = 'none';
         }
         if (notePonderation) {
-            notePonderation.style.display = 'block';
-            notePonderation.innerHTML = 'Les artefacts n\'ont pas de pondération propre. C\'est le portfolio conteneur qui définit la pondération globale.';
+            notePonderation.style.display = 'none';
         }
 
         // Note explicative pour la grille (champ reste actif)
@@ -959,7 +982,7 @@ function synchroniserGrilles() {
  * 4. Sinon : génère des checkboxes pour chaque artefact
  */
 async function chargerArtefactsDisponibles() {
-    const evaluations = await db.get('productions') || [];
+    const evaluations = await db.get(getCleProductions()) || [];
     const artefacts = evaluations.filter(p => p.type === 'artefact-portfolio');
     const container = document.getElementById('listeArtefactsDisponibles');
 
@@ -1005,7 +1028,7 @@ async function chargerArtefactsDisponibles() {
  *    - Orange si < 100%
  */
 async function mettreAJourPonderationTotale() {
-    const productions = await db.get('productions') || [];
+    const productions = await db.get(getCleProductions()) || [];
 
     // Ignorer les artefacts-portfolio dans le calcul (ils font partie du Portfolio)
     const productionsComptees = productions.filter(p => p.type !== 'artefact-portfolio');
@@ -1141,7 +1164,7 @@ async function afficherToutesLesProductionsParType() {
     const container = document.getElementById('vueProductionsParType');
     if (!container) return;
 
-    const productions = await db.get('productions') || [];
+    const productions = await db.get(getCleProductions()) || [];
     const grilles = await db.get('grillesTemplates') || [];
 
     if (productions.length === 0) {
@@ -1369,7 +1392,7 @@ async function ajouterProductionAuType(type) {
  * qui n'ont pas encore ce flag (migration une seule fois)
  */
 async function migrerProductionsVersBibliotheque() {
-    const productions = await db.get('productions') || [];
+    const productions = await db.get(getCleProductions()) || [];
 
     let nbMigrees = 0;
     productions.forEach(prod => {
@@ -1380,7 +1403,7 @@ async function migrerProductionsVersBibliotheque() {
     });
 
     if (nbMigrees > 0) {
-        await db.set('productions', productions);
+        await db.set(getCleProductions(), productions);
         console.log(`✅ Migration bibliothèque: ${nbMigrees} production(s) ajoutée(s) à la bibliothèque`);
     }
 }
@@ -1436,7 +1459,7 @@ async function afficherBibliothequeProductions() {
     }
 
     // Récupérer les productions existantes de l'utilisateur
-    const productionsUtilisateur = await db.get('productions') || [];
+    const productionsUtilisateur = await db.get(getCleProductions()) || [];
 
     // Séparer productions dans sélection vs retirées
     const productionsDansSelection = productionsUtilisateur.filter(p => p.dansBibliotheque !== false);
@@ -1702,7 +1725,7 @@ async function afficherBibliothequeProductions() {
  */
 async function ajouterProductionIndividuelle(id) {
     try {
-        let productions = await db.get('productions') || [];
+        let productions = await db.get(getCleProductions()) || [];
         let prod = productions.find(p => p.id === id);
 
         // Si pas trouvée dans le cours actuel, chercher dans la bibliothèque partagée
@@ -1728,13 +1751,13 @@ async function ajouterProductionIndividuelle(id) {
 
             // Ajouter aux productions du cours
             productions.push(prod);
-            await db.set('productions', productions);
+            await db.set(getCleProductions(), productions);
 
             console.log('[Productions] Importée depuis bibliothèque:', prod.titre);
         } else {
             // Production déjà dans le cours, juste la marquer comme visible
             prod.dansBibliotheque = true;
-            await db.set('productions', productions);
+            await db.set(getCleProductions(), productions);
         }
 
         // Rafraîchir modal et sidebar
@@ -1756,7 +1779,7 @@ async function ajouterProductionIndividuelle(id) {
 async function ajouterMesProductionsALaBibliotheque() {
     try {
         // Récupérer les productions du cours actuel
-        const productions = await db.get('productions') || [];
+        const productions = await db.get(getCleProductions()) || [];
 
         if (productions.length === 0) {
             alert('Aucune production à ajouter.\n\nCréez d\'abord des productions dans votre cours actuel.');
@@ -1969,7 +1992,7 @@ async function importerUneProductionTrimestre(cleTrimestre, productionId) {
  */
 async function partagerProduction(id) {
     try {
-        const productions = await db.get('productions') || [];
+        const productions = await db.get(getCleProductions()) || [];
         const prod = productions.find(p => p.id === id);
 
         if (!prod) {
@@ -1990,7 +2013,7 @@ async function partagerProduction(id) {
         prod.metadata_cc = metadata;
 
         // Sauvegarder
-        await db.set('productions', productions);
+        await db.set(getCleProductions(), productions);
 
         // Rafraîchir modal et sidebar
         fermerModalBibliothequeProductions();
@@ -2013,7 +2036,7 @@ async function retirerProductionDeBibliotheque(id) {
     }
 
     try {
-        const productions = await db.get('productions') || [];
+        const productions = await db.get(getCleProductions()) || [];
         const production = productions.find(p => p.id === id);
 
         if (!production) {
@@ -2022,7 +2045,7 @@ async function retirerProductionDeBibliotheque(id) {
 
         production.dansBibliotheque = false;
 
-        await db.set('productions', productions);
+        await db.set(getCleProductions(), productions);
 
         console.log('✅ Production retirée de la sélection:', id);
 
@@ -2048,7 +2071,7 @@ async function ajouterProductionsABibliotheque() {
     }
 
     try {
-        const productions = await db.get('productions') || [];
+        const productions = await db.get(getCleProductions()) || [];
         let ajoutees = 0;
 
         checkboxes.forEach(checkbox => {
@@ -2077,7 +2100,7 @@ async function ajouterProductionsABibliotheque() {
             }
         });
 
-        await db.set('productions', productions);
+        await db.set(getCleProductions(), productions);
 
         console.log(`✅ ${ajoutees} production(s) ajoutée(s) à la sélection`);
 
@@ -2157,7 +2180,7 @@ function fermerModalBibliothequeProductions() {
  * }
  */
 async function exporterProductions() {
-    const toutesProductions = await db.get('productions') || [];
+    const toutesProductions = await db.get(getCleProductions()) || [];
 
     // ✅ MODIFIÉ (6 jan 2026) : Utiliser détection heuristique pour filtrer démo + importées
     const productions = typeof filtrerRessourcesNonDemo === 'function'
@@ -2240,7 +2263,7 @@ async function exporterProductionActive() {
         return;
     }
 
-    const productions = await db.get('productions') || [];
+    const productions = await db.get(getCleProductions()) || [];
     const production = productions.find(p => p.id === productionId);
 
     if (!production) {
@@ -2385,7 +2408,7 @@ async function importerDansProductionActive(event) {
             }
 
             // Récupérer les productions
-            const productions = await db.get('productions') || [];
+            const productions = await db.get(getCleProductions()) || [];
             const index = productions.findIndex(p => p.id === productionId);
 
             if (index === -1) {
@@ -2409,7 +2432,7 @@ async function importerDansProductionActive(event) {
             productions[index] = productionMiseAJour;
 
             // Sauvegarder
-            await db.set('productions', productions);
+            await db.set(getCleProductions(), productions);
 
             // Recharger la production dans le formulaire
             await afficherFormProduction(productionId);
@@ -2623,7 +2646,7 @@ window.confirmerImportProductions = async function(donnees) {
  * @returns {boolean} - true si des productions sans catégorie existent
  */
 async function verifierMigrationCategories() {
-    const productions = await db.get('productions') || [];
+    const productions = await db.get(getCleProductions()) || [];
 
     // Filtrer les productions sans catégorie (exclure portfolio conteneur et formatifs)
     const sansCategorie = productions.filter(p =>
@@ -2645,7 +2668,7 @@ async function verifierMigrationCategories() {
  * Permet d'assigner rapidement des catégories aux productions existantes
  */
 async function afficherAssistantMigrationCategories() {
-    const productions = await db.get('productions') || [];
+    const productions = await db.get(getCleProductions()) || [];
 
     // Filtrer les productions sans catégorie
     const sansCategorie = productions.filter(p =>
@@ -2748,7 +2771,7 @@ function fermerModalMigration() {
  * Sauvegarde les catégories assignées via l'assistant de migration
  */
 async function sauvegarderMigrationCategories() {
-    const productions = await db.get('productions') || [];
+    const productions = await db.get(getCleProductions()) || [];
     let nbMises = 0;
 
     // Parcourir les selects du modal
@@ -2767,7 +2790,7 @@ async function sauvegarderMigrationCategories() {
     });
 
     if (nbMises > 0) {
-        await db.set('productions', productions);
+        await db.set(getCleProductions(), productions);
         console.log(`[Migration] ${nbMises} production(s) mise(s) à jour avec catégorie`);
 
         // Notification
@@ -2913,8 +2936,11 @@ window.sauvegarderMigrationCategories = sauvegarderMigrationCategories;
  * 5. Boutons Dupliquer (violet) et Supprimer (rouge)
  */
 async function afficherListeProductions(filtreType = '') {
-    const productions = await db.get('productions') || [];
-    const grilles = await db.get('grillesTemplates') || [];
+    // 🆕 Beta 95.4 : Utiliser la clé namespacée pour le trimestre actif
+    const cleProductions = (typeof cle === 'function') ? cle('productionsPedagogiques') : 'productions';
+    const cleGrilles = (typeof cle === 'function') ? cle('grillesTemplates') : 'grillesTemplates';
+    const productions = await db.get(cleProductions) || [];
+    const grilles = await db.get(cleGrilles) || [];
     const container = document.getElementById('sidebarListeProductions');
 
     console.log('[Productions] Total productions:', productions.length);
@@ -3014,7 +3040,7 @@ async function chargerProductionPourModif(id) {
     // ✅ AJOUT (6 jan 2026) : Afficher le panneau métadonnées
     const panneauMeta = document.getElementById('panneauMetadonneesProduction');
     if (panneauMeta && typeof genererPanneauMetadonnees === 'function') {
-        const productions = await db.get('productions') || [];
+        const productions = await db.get(getCleProductions()) || [];
         const production = productions.find(p => p.id === id);
         if (production) {
             panneauMeta.innerHTML = genererPanneauMetadonnees(production, 'production');
@@ -3209,7 +3235,7 @@ async function chargerGrillesDisponiblesPourProduction() {
  * @param {string} id - ID de la production à dupliquer
  */
 async function dupliquerProduction(id) {
-    const productions = await db.get('productions') || [];
+    const productions = await db.get(getCleProductions()) || [];
     const production = productions.find(p => p.id === id);
 
     if (!production) return;
@@ -3223,7 +3249,7 @@ async function dupliquerProduction(id) {
     };
 
     productions.push(copie);
-    await db.set('productions', productions);
+    await db.set(getCleProductions(), productions);
 
     // Recharger la liste
     await afficherListeProductions();
@@ -3268,10 +3294,10 @@ async function supprimerProductionActive() {
         return;
     }
 
-    let productions = await db.get('productions') || [];
+    let productions = await db.get(getCleProductions()) || [];
     productions = productions.filter(e => e.id !== productionEnEdition);
 
-    await db.set('productions', productions);
+    await db.set(getCleProductions(), productions);
 
     // Fermer le formulaire et retourner à l'accueil
     annulerFormProduction();
@@ -3316,7 +3342,7 @@ window.sauvegarderProduction = async function() {
     // Mettre à jour les métriques
     const id = window.productionEnCoursEdition;
     if (id) {
-        const productions = await db.get('productions') || [];
+        const productions = await db.get(getCleProductions()) || [];
         const production = productions.find(p => p.id === id);
         if (production) {
             // mettreAJourMetriquesProduction(production); // DÉSACTIVÉ (cartes métriques supprimées)
@@ -3357,13 +3383,13 @@ const supprimerProductionOriginale = window.supprimerProduction;
 window.supprimerProduction = async function(id) {
     if (!confirm('Supprimer cette production ?')) return;
 
-    const productions = await db.get('productions') || [];
+    const productions = await db.get(getCleProductions()) || [];
     const index = productions.findIndex(p => p.id === id);
 
     if (index === -1) return;
 
     productions.splice(index, 1);
-    await db.set('productions', productions);
+    await db.set(getCleProductions(), productions);
 
     // Recharger la sidebar
     await afficherListeProductions();

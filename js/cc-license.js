@@ -36,37 +36,59 @@ function obtenirProfilAuteurActifSync() {
             return null;
         }
 
-        // Obtenir le trimestre actif
-        const trimestreActif = window.trimestreActif || db.getSync('trimestreActif', null);
-        if (!trimestreActif) {
-            return null;
-        }
-
-        // Obtenir les groupe-cours du trimestre
-        const cleGC = `${trimestreActif}_groupesCours`;
-        const groupesCours = db.getSync(cleGC, []);
-
-        // Trouver le groupe-cours actif
-        const groupeActif = groupesCours.find(gc => gc.actif);
-        if (!groupeActif || !groupeActif.enseignantId) {
-            return null;
-        }
-
-        // Obtenir l'enseignant
+        // Obtenir la liste des enseignants
         const enseignants = db.getSync('enseignants', []);
-        const enseignant = enseignants.find(e => e.id === groupeActif.enseignantId);
+        if (!enseignants || enseignants.length === 0) {
+            return null;
+        }
+
+        let enseignant = null;
+
+        // 🆕 Beta 95.4 : Stratégie de recherche améliorée (5 niveaux)
+
+        // 1. D'abord essayer via le groupe-cours actif
+        const trimestreActif = window.trimestreActif || db.getSync('trimestreActif', null);
+        if (trimestreActif) {
+            const cleGC = `${trimestreActif}_groupesCours`;
+            const groupesCours = db.getSync(cleGC, []);
+            const groupeActif = groupesCours.find(gc => gc.actif);
+
+            if (groupeActif && groupeActif.enseignantId) {
+                enseignant = enseignants.find(e => e.id === groupeActif.enseignantId);
+            }
+        }
+
+        // 2. Sinon, lire le dropdown du profil enseignant (si visible)
+        if (!enseignant) {
+            const selectEnseignant = document.getElementById('v2-selectEnseignant');
+            if (selectEnseignant && selectEnseignant.value) {
+                enseignant = enseignants.find(e => e.id === selectEnseignant.value);
+            }
+        }
+
+        // 3. Sinon, chercher l'enseignant marqué comme actif
+        if (!enseignant) {
+            enseignant = enseignants.find(e => e.actif);
+        }
+
+        // 4. Sinon, prendre le premier enseignant de la liste
+        if (!enseignant && enseignants.length > 0) {
+            enseignant = enseignants[0];
+        }
+
         if (!enseignant) {
             return null;
         }
 
         // Convertir en profil auteur (format CC)
+        const nomComplet = `${enseignant.prenom || ''} ${enseignant.nom || ''}`.trim();
         return {
-            auteur_original: `${enseignant.prenom || ''} ${enseignant.nom || ''}`.trim() || CC_LICENSE_DEFAULTS.auteur_original,
+            auteur_original: nomComplet || CC_LICENSE_DEFAULTS.auteur_original,
             email_auteur: enseignant.courriel || '',
             institution: enseignant.institution || '',
             site_auteur: enseignant.siteWeb || '',
             niveau: enseignant.niveau || '',
-            attribution: `Créé par ${enseignant.prenom || ''} ${enseignant.nom || ''}`.trim()
+            attribution: nomComplet ? `Créé par ${nomComplet}` : ''
         };
 
     } catch (err) {
@@ -312,6 +334,113 @@ function demanderAttributionModification() {
 
     return { nom, description };
 }
+
+// ============================================
+// 🆕 BETA 95.4 : GESTION AUTOMATIQUE DES CONTRIBUTEURS
+// ============================================
+
+/**
+ * Ajoute l'enseignant actif comme contributeur si nécessaire
+ * Règle : Si l'utilisateur actif n'est pas l'auteur original ET n'est pas déjà contributeur,
+ * on l'ajoute une seule fois comme contributeur.
+ *
+ * @param {Object} document - Le document (production, grille, échelle, cartouche, pratique)
+ * @returns {Object} - Le document avec contributeurs mis à jour si nécessaire
+ */
+function ajouterContributeurSiNecessaire(document) {
+    if (!document) return document;
+
+    // Obtenir le nom de l'enseignant actif
+    const enseignantActif = obtenirNomEnseignantActif();
+    if (!enseignantActif) {
+        return document; // Pas d'enseignant actif, rien à faire
+    }
+
+    // Initialiser metadata si inexistant
+    if (!document.metadata) {
+        document.metadata = {};
+    }
+    if (!document.metadata_cc) {
+        document.metadata_cc = {};
+    }
+
+    // Obtenir l'auteur original (plusieurs sources possibles)
+    const auteurOriginal = document.metadata_cc?.auteur_original ||
+                          document.metadata?.auteur_original ||
+                          document.auteur ||
+                          '';
+
+    // Si l'enseignant actif EST l'auteur original, rien à faire
+    if (auteurOriginal && auteurOriginal.toLowerCase() === enseignantActif.toLowerCase()) {
+        return document;
+    }
+
+    // Initialiser contributeurs si inexistant
+    if (!document.metadata_cc.contributeurs) {
+        document.metadata_cc.contributeurs = [];
+    }
+
+    // Vérifier si l'enseignant est déjà contributeur
+    const dejaContributeur = document.metadata_cc.contributeurs.some(
+        c => c.nom && c.nom.toLowerCase() === enseignantActif.toLowerCase()
+    );
+
+    // Si pas encore contributeur, l'ajouter
+    if (!dejaContributeur) {
+        document.metadata_cc.contributeurs.push({
+            nom: enseignantActif,
+            date: new Date().toISOString().split('T')[0]
+        });
+        console.log(`[CC License] Contributeur ajouté: ${enseignantActif}`);
+    }
+
+    return document;
+}
+
+/**
+ * Obtient le nom complet de l'enseignant actif (via groupe-cours)
+ * @returns {string|null} - Nom complet ou null si non trouvé
+ */
+function obtenirNomEnseignantActif() {
+    try {
+        if (typeof db === 'undefined' || !db.getSync) {
+            return null;
+        }
+
+        const trimestreActif = window.trimestreActif || db.getSync('trimestreActif', null);
+        if (!trimestreActif) {
+            return null;
+        }
+
+        // Chercher le groupe-cours actif
+        const groupesCours = db.getSync(`${trimestreActif}_groupesCours`, []);
+        const groupeActif = groupesCours.find(gc => gc.actif);
+
+        if (!groupeActif || !groupeActif.enseignantId) {
+            return null;
+        }
+
+        // Trouver l'enseignant
+        const enseignants = db.getSync('enseignants', []);
+        const enseignant = enseignants.find(e => e.id === groupeActif.enseignantId);
+
+        if (!enseignant) {
+            return null;
+        }
+
+        // Construire le nom complet
+        const nomComplet = `${enseignant.prenom || ''} ${enseignant.nom || ''}`.trim();
+        return nomComplet || null;
+
+    } catch (err) {
+        console.warn('[CC License] Erreur obtention enseignant actif:', err);
+        return null;
+    }
+}
+
+// Export global
+window.ajouterContributeurSiNecessaire = ajouterContributeurSiNecessaire;
+window.obtenirNomEnseignantActif = obtenirNomEnseignantActif;
 
 // ============================================
 // VALIDATION LICENCE
@@ -1040,11 +1169,57 @@ function genererPanneauMetadonnees(ressource, typeRessource) {
     };
 
     // Déterminer l'auteur
-    // 🆕 Beta 95.4 : Utiliser obtenirProfilAuteurActifSync() pour le fallback
+    // 🆕 Beta 95.4 : Utiliser l'enseignant du groupe-cours associé à la production
+    // Ignorer les valeurs 'Inconnu' ou 'Non spécifié' comme non-valides
+    const valeursIgnorees = ['', 'Inconnu', 'Non spécifié', 'Unknown'];
     let auteur = meta.auteur_original || meta.auteur || ressource.auteur || '';
-    if (!auteur) {
-        // Utiliser le profil auteur de l'enseignant actif
-        const profilAuteur = obtenirProfilAuteurActifSync();
+    if (!auteur || valeursIgnorees.includes(auteur)) {
+        // Essayer via le groupe-cours de la production
+        let profilAuteur = null;
+        const trimestreActif = window.trimestreActif || (typeof db !== 'undefined' && db.getSync ? db.getSync('trimestreActif', null) : null);
+
+        if (trimestreActif && typeof db !== 'undefined' && db.getSync) {
+            const groupesCours = db.getSync(`${trimestreActif}_groupesCours`, []);
+            let groupeCours = null;
+
+            // 1. Si la ressource a un groupeCoursId direct, l'utiliser
+            if (ressource.groupeCoursId) {
+                groupeCours = groupesCours.find(gc => gc.id === ressource.groupeCoursId);
+            }
+
+            // 2. Sinon, si la ressource a un coursId, trouver le groupe-cours correspondant
+            if (!groupeCours && ressource.coursId) {
+                // Préférer le groupe-cours actif avec ce coursId
+                groupeCours = groupesCours.find(gc => gc.coursId === ressource.coursId && gc.actif);
+                // Sinon, prendre n'importe quel groupe-cours avec ce coursId
+                if (!groupeCours) {
+                    groupeCours = groupesCours.find(gc => gc.coursId === ressource.coursId);
+                }
+            }
+
+            // 3. Sinon, prendre le groupe-cours actif
+            if (!groupeCours) {
+                groupeCours = groupesCours.find(gc => gc.actif);
+            }
+
+            // Si on a trouvé un groupe-cours avec enseignantId, chercher l'enseignant
+            if (groupeCours && groupeCours.enseignantId) {
+                const enseignants = db.getSync('enseignants', []);
+                const enseignant = enseignants.find(e => e.id === groupeCours.enseignantId);
+                if (enseignant) {
+                    const nomComplet = `${enseignant.prenom || ''} ${enseignant.nom || ''}`.trim();
+                    if (nomComplet) {
+                        profilAuteur = { auteur_original: nomComplet };
+                    }
+                }
+            }
+        }
+
+        // Sinon, fallback sur le profil auteur actif global
+        if (!profilAuteur) {
+            profilAuteur = obtenirProfilAuteurActifSync();
+        }
+
         auteur = profilAuteur?.auteur_original || 'Non spécifié';
     }
     const institution = meta.institution || ressource.institution || '';
