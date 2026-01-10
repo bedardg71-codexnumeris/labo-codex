@@ -5237,6 +5237,31 @@
                                                     </fieldset>
                                                 </div>
                                                 <p id="mat-categories-validation" style="margin-top: 12px; font-size: 0.85rem; color: var(--gris-moyen);"></p>
+
+                                                <!-- Liste des productions pour assignation rapide -->
+                                                <div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed var(--gris-clair);">
+                                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                                        <h4 style="margin: 0; font-size: 0.95rem; color: var(--gris-fonce);">
+                                                            📋 Assignation des productions
+                                                        </h4>
+                                                        <div style="display: flex; gap: 8px;">
+                                                            <button type="button" class="btn-secondaire btn-compact" onclick="assignerToutesProductionsMat('selection')" title="Mettre toutes en Sélection">
+                                                                Tout → Sélection
+                                                            </button>
+                                                            <button type="button" class="btn-secondaire btn-compact" onclick="assignerToutesProductionsMat('obligatoire')" title="Mettre toutes en Obligatoire">
+                                                                Tout → Obligatoire
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    <div id="mat-categories-productions-liste" style="max-height: 300px; overflow-y: auto; border: 1px solid var(--gris-clair); border-radius: var(--radius-moyen); background: white;">
+                                                        <!-- Liste générée dynamiquement par chargerProductionsPourCategories() -->
+                                                        <p style="padding: 15px; color: var(--gris-moyen); text-align: center;">Chargement des productions...</p>
+                                                    </div>
+                                                    <p style="margin-top: 8px; font-size: 0.8rem; color: var(--gris-moyen);">
+                                                        <span style="display: inline-block; width: 12px; height: 12px; background: var(--bleu-clair); border-radius: 2px; margin-right: 4px;"></span> Sélection (N meilleures)
+                                                        <span style="display: inline-block; width: 12px; height: 12px; background: var(--orange-principal, #e67e22); border-radius: 2px; margin-left: 12px; margin-right: 4px;"></span> Obligatoire (toujours comptée)
+                                                    </p>
+                                                </div>
                                             </div>
                                         </div>
 

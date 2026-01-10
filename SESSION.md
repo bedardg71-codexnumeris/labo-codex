@@ -38,6 +38,11 @@
     - Modal avec actions rapides "Tout en Selection" / "Tout en Obligatoire"
   - **Phase 5** : Questions Primo pour configurer les categories
     - 5 nouvelles questions conditionnelles
+  - **UX amelioree** : Liste des productions directement dans la config
+    - Assignation rapide par dropdown pour chaque production
+    - Boutons "Tout → Selection" et "Tout → Obligatoire"
+    - Code couleur visuel (bleu = Selection, orange = Obligatoire)
+    - Compteur de productions par categorie
   - **Fichiers modifies** :
     - `js/productions.js` : Champ categorie + assistant migration
     - `js/portfolio.js` : calculerNoteAvecCategories() + obtenirConfigCategories()

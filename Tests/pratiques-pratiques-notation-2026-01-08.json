@@ -1,0 +1,1848 @@
+{
+  "metadata": {
+    "licence": "CC BY-NC-SA 4.0",
+    "licence_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "licence_resume": "Attribution - Pas d'utilisation commerciale - Partage dans les mêmes conditions 4.0 International",
+    "auteur_original": "Greg Bédard",
+    "email_auteur": "gregoire.bedard@cegepdrummond.ca",
+    "site_auteur": "https://codexnumeris.org",
+    "type": "pratiques",
+    "nom": "Pratiques de notation",
+    "date_creation": "2026-01-08",
+    "date_modification": "2026-01-08",
+    "version": "1.0",
+    "contributeurs": [],
+    "attribution": "Créé par Greg Bédard pour l'application Monitorage Pédagogique",
+    "discipline": [
+      "Littérature"
+    ],
+    "niveau": "Collégial",
+    "institution": "Cégep Drummond",
+    "description_courte": "Approche ELLAC + SOLO · PAN-STD"
+  },
+  "contenu": {
+    "pratiques": [
+      {
+        "id": "pan-standards-bruno",
+        "nom": "PAN-Littérature (GB)",
+        "auteur": "Bruno V.",
+        "description": "Système à 5 niveaux avec reprises multiples, niveau non rétrogradable",
+        "config": {
+          "id": "pan-standards-bruno",
+          "nom": "PAN-Standards (5 niveaux)",
+          "auteur": "Bruno V.",
+          "etablissement": "Cégep Laurendeau",
+          "description": "Système à 5 niveaux avec reprises multiples, niveau non rétrogradable",
+          "discipline": "Chimie",
+          "version": "1.0",
+          "date_creation": "2025-11-26",
+          "echelle": {
+            "type": "niveaux",
+            "echelle_id": "ECH1759264511178",
+            "echelle_nom": "IDME et niv 0",
+            "niveaux": [
+              {
+                "code": "0",
+                "label": "Aucun",
+                "description": "",
+                "valeur_numerique": 1,
+                "valeur_pourcentage": 0,
+                "couleur": "#831100",
+                "ordre": 1
+              },
+              {
+                "code": "I",
+                "label": "Incomplet ou insuffisant",
+                "description": "Préstructurel, unistructurel",
+                "valeur_numerique": 2,
+                "valeur_pourcentage": "40",
+                "couleur": "#e67e22",
+                "ordre": 2
+              },
+              {
+                "code": "D",
+                "label": "En Développement",
+                "description": "Multistructurel",
+                "valeur_numerique": 3,
+                "valeur_pourcentage": "65",
+                "couleur": "#f1c40f",
+                "ordre": 3
+              },
+              {
+                "code": "M",
+                "label": "Maîtrisé",
+                "description": "Relationnel acquis",
+                "valeur_numerique": 4,
+                "valeur_pourcentage": "75",
+                "couleur": "#27ae60",
+                "ordre": 4
+              },
+              {
+                "code": "E",
+                "label": "Étendu",
+                "description": "Abstrait étendu",
+                "valeur_numerique": 5,
+                "valeur_pourcentage": "100",
+                "couleur": "#3498db",
+                "ordre": 5
+              }
+            ]
+          },
+          "structure_evaluations": {
+            "type": "standards",
+            "nombre_standards": 10,
+            "standards_terminaux": [],
+            "ponderation": "egale"
+          },
+          "calcul_note": {
+            "methode": "conversion_niveaux",
+            "description": "Conversion des niveaux en pourcentages",
+            "table_conversion": [],
+            "conditions_speciales": []
+          },
+          "systeme_reprises": {
+            "type": "illimitees",
+            "reprises_bureau": true,
+            "niveau_retrogradable": false
+          },
+          "gestion_criteres": {
+            "type": "grille",
+            "grille_id": "GRILLE1759243306842",
+            "description": "Grille de critères sélectionnée depuis le matériel pédagogique"
+          },
+          "seuils": {
+            "type": "pourcentage",
+            "va_bien": 85,
+            "difficulte": 80,
+            "grande_difficulte": 70,
+            "source": "reglages",
+            "description": "Seuils configurés dans Réglages → Pratique de notation"
+          },
+          "interface": {
+            "afficher_notes_chiffrees": true,
+            "afficher_rang": false,
+            "afficher_moyenne_groupe": false,
+            "terminologie": {
+              "evaluation": "Standard",
+              "critere": "Critère",
+              "note_finale": "Note finale",
+              "reprise": "Reprise"
+            }
+          },
+          "affichage": {
+            "modeComparatif": false
+          },
+          "portfolio": {
+            "actif": true,
+            "nombreARetenir": 5,
+            "minimumCompletion": 7,
+            "nombreTotal": 10,
+            "methodeSelection": "meilleurs",
+            "decouplerPR": false
+          },
+          "jetons": {
+            "actif": true,
+            "delai": {
+              "nombre": 2,
+              "dureeJours": 7
+            },
+            "reprise": {
+              "nombre": 2,
+              "maxParProduction": 1,
+              "archiverOriginale": true
+            },
+            "nombreParEleve": 4,
+            "typesPersonnalises": []
+          }
+        },
+        "etablissement": "Cégep Laurendeau",
+        "dansBibliotheque": true,
+        "type": "pan-standards",
+        "pratiques": [
+          "STD"
+        ],
+        "configuration": {
+          "varianteCalcul": "n-meilleurs",
+          "portfolio": {
+            "methodeSelection": "meilleurs",
+            "nombreARetenir": 4,
+            "minimumCompletion": 3,
+            "nombreTotal": 9,
+            "decouplerPR": false
+          },
+          "echelleId": ""
+        },
+        "discipline": "Littérature",
+        "jetons": {
+          "actif": true,
+          "nombre": 2,
+          "delaiActif": true,
+          "delaiDuree": 2,
+          "repriseActif": true,
+          "repriseOriginale": "archiver",
+          "cibleeActif": true,
+          "cibleePlafond": "D (Développement)"
+        }
+      },
+      {
+        "id": "sommative-classique-mhl",
+        "nom": "Sommative traditionnelle",
+        "auteur": "Marie-Hélène L.",
+        "description": "Moyenne pondérée traditionnelle avec critères fixes",
+        "config": {
+          "id": "sommative-classique-mhl",
+          "nom": "Sommative traditionnelle",
+          "auteur": "Marie-Hélène L.",
+          "description": "Moyenne pondérée classique avec critères fixes",
+          "discipline": "Littérature",
+          "version": "1.0",
+          "date_creation": "2025-11-25",
+          "echelle": {
+            "type": "pourcentage",
+            "min": 0,
+            "max": 100,
+            "precision": 0.5
+          },
+          "structure_evaluations": {
+            "type": "evaluations_discretes",
+            "evaluations": [
+              {
+                "nom": "Analyse partielle",
+                "poids": 15,
+                "type": "dissertation",
+                "obligatoire": true
+              },
+              {
+                "nom": "Portfolio",
+                "poids": 20,
+                "type": "portfolio",
+                "nombre_travaux_min": 5,
+                "nombre_travaux_max": 7
+              },
+              {
+                "nom": "Travail équipe",
+                "poids": 15,
+                "type": "travail_equipe"
+              },
+              {
+                "nom": "Analyse finale",
+                "poids": 50,
+                "type": "dissertation",
+                "double_verrou": true,
+                "seuil_reussite": 60
+              }
+            ]
+          },
+          "calcul_note": {
+            "methode": "moyenne_ponderee",
+            "formule": "somme(note_i × poids_i) / 100",
+            "conditions_speciales": [
+              {
+                "type": "double_verrou",
+                "description": "Analyse finale doit être réussie (≥60%) pour passer",
+                "condition": {
+                  "evaluation": "Analyse finale",
+                  "comparateur": "<",
+                  "seuil": 60
+                },
+                "consequence": {
+                  "action": "echec",
+                  "note_max": 55
+                }
+              }
+            ]
+          },
+          "systeme_reprises": {
+            "type": "aucune"
+          },
+          "gestion_criteres": {
+            "type": "fixes",
+            "criteres_fixes": [
+              "Pertinence, justesse, clarté",
+              "Qualité de la langue",
+              "Respect de la structure",
+              "Cohérence textuelle"
+            ]
+          },
+          "seuils": {
+            "type": "pourcentage",
+            "va_bien": 75,
+            "difficulte": 65,
+            "grande_difficulte": 55
+          },
+          "interface": {
+            "afficher_notes_chiffrees": true,
+            "afficher_rang": false,
+            "afficher_moyenne_groupe": true,
+            "terminologie": {
+              "evaluation": "Évaluation",
+              "critere": "Critère",
+              "note_finale": "Note finale",
+              "reprise": "Reprise"
+            }
+          },
+          "affichage": {
+            "modeComparatif": false
+          },
+          "portfolio": {
+            "actif": true,
+            "nombreARetenir": 5,
+            "minimumCompletion": 7,
+            "nombreTotal": 10,
+            "methodeSelection": "meilleurs",
+            "decouplerPR": false
+          },
+          "jetons": {
+            "actif": true,
+            "delai": {
+              "nombre": 2,
+              "dureeJours": 7
+            },
+            "reprise": {
+              "nombre": 2,
+              "maxParProduction": 1,
+              "archiverOriginale": true
+            },
+            "nombreParEleve": 4,
+            "typesPersonnalises": []
+          }
+        },
+        "etablissement": "Cégep Valleyfield",
+        "dansBibliotheque": true,
+        "type": "sommative",
+        "pratiques": [
+          "SOM"
+        ],
+        "configuration": {
+          "echelleId": ""
+        },
+        "discipline": "",
+        "jetons": {
+          "actif": false,
+          "nombre": 4,
+          "delaiActif": true,
+          "delaiDuree": 7,
+          "repriseActif": true,
+          "repriseOriginale": "archiver",
+          "cibleeActif": true,
+          "cibleePlafond": "D (Développement)"
+        }
+      },
+      {
+        "id": "pan-specifications-fah",
+        "nom": "PAN-Spécifications (notes fixes)",
+        "auteur": "François A.-H.",
+        "description": "Notes fixes (50, 60, 80, 100%) selon critères atteints",
+        "config": {
+          "id": "pan-specifications-fah",
+          "nom": "PAN-Spécifications (notes fixes)",
+          "auteur": "François A.-H.",
+          "description": "Notes fixes (50, 60, 80, 100%) selon critères atteints",
+          "discipline": "Chimie",
+          "version": "1.0",
+          "date_creation": "2025-11-25",
+          "echelle": {
+            "type": "notes_fixes",
+            "notes_possibles": [
+              50,
+              60,
+              80,
+              100
+            ]
+          },
+          "structure_evaluations": {
+            "type": "specifications",
+            "specifications": [
+              {
+                "nom": "Tests (2)",
+                "description": "Réussir au moins 1 des 2 tests",
+                "requis_pour": [
+                  60,
+                  80,
+                  100
+                ]
+              },
+              {
+                "nom": "Prise de position 1",
+                "description": "Prise de position acceptable",
+                "requis_pour": [
+                  60,
+                  80,
+                  100
+                ]
+              },
+              {
+                "nom": "Présentation découverte",
+                "description": "Présentation acceptable",
+                "requis_pour": [
+                  60,
+                  80,
+                  100
+                ]
+              },
+              {
+                "nom": "Tests (2)",
+                "description": "Réussir les 2 tests",
+                "requis_pour": [
+                  80,
+                  100
+                ]
+              },
+              {
+                "nom": "Bilan portfolio",
+                "description": "Bilan acceptable lors entrevue finale",
+                "requis_pour": [
+                  80,
+                  100
+                ]
+              },
+              {
+                "nom": "Prise de position 2",
+                "description": "Deuxième prise de position acceptable",
+                "requis_pour": [
+                  100
+                ]
+              },
+              {
+                "nom": "Bilan portfolio supérieur",
+                "description": "Critères supérieurs lors entrevue",
+                "requis_pour": [
+                  100
+                ]
+              }
+            ]
+          },
+          "calcul_note": {
+            "methode": "specifications",
+            "description": "Vérifier quelles spécifications sont remplies, déterminer la note la plus élevée accessible"
+          },
+          "systeme_reprises": {
+            "type": "illimitees",
+            "reprises_bureau": true,
+            "niveau_retrogradable": false
+          },
+          "gestion_criteres": {
+            "type": "par_evaluation",
+            "criteres_variables_description": "Tests : exactitude. Prises de position : clarté + fiabilité sources."
+          },
+          "seuils": {
+            "type": "pourcentage",
+            "va_bien": 60,
+            "difficulte": 50,
+            "grande_difficulte": 50
+          },
+          "interface": {
+            "afficher_notes_chiffrees": true,
+            "afficher_rang": false,
+            "afficher_moyenne_groupe": false,
+            "terminologie": {
+              "evaluation": "Spécification",
+              "critere": "Critère",
+              "note_finale": "Note finale",
+              "reprise": "Reprise"
+            }
+          },
+          "affichage": {
+            "modeComparatif": false
+          },
+          "portfolio": {
+            "actif": true,
+            "nombreARetenir": 5,
+            "minimumCompletion": 7,
+            "nombreTotal": 10,
+            "methodeSelection": "meilleurs",
+            "decouplerPR": false
+          },
+          "jetons": {
+            "actif": true,
+            "delai": {
+              "nombre": 2,
+              "dureeJours": 7
+            },
+            "reprise": {
+              "nombre": 2,
+              "maxParProduction": 1,
+              "archiverOriginale": true
+            },
+            "nombreParEleve": 4,
+            "typesPersonnalises": []
+          }
+        },
+        "etablissement": "Cégep Laurendeau",
+        "dansBibliotheque": false
+      },
+      {
+        "id": "pratique-1764086503305",
+        "nom": "PAN-Littérature 101",
+        "auteur": "Grégoire Bédard",
+        "description": "PAN test A2025",
+        "config": {
+          "id": "pratique-1764086503305",
+          "nom": "PAN-Littérature 101",
+          "auteur": "Grégoire Bédard",
+          "etablissement": "Cégep Drummond",
+          "description": "PAN test A2025",
+          "discipline": "Littérature",
+          "version": "1.0",
+          "date_creation": "2025-11-26",
+          "echelle": {
+            "type": "niveaux",
+            "echelle_id": "ECH1759264511178",
+            "echelle_nom": "IDME et niv 0",
+            "niveaux": [
+              {
+                "code": "0",
+                "label": "Aucun",
+                "description": "",
+                "valeur_numerique": 1,
+                "valeur_pourcentage": 0,
+                "couleur": "#831100",
+                "ordre": 1
+              },
+              {
+                "code": "I",
+                "label": "Incomplet ou insuffisant",
+                "description": "Préstructurel, unistructurel",
+                "valeur_numerique": 2,
+                "valeur_pourcentage": "40",
+                "couleur": "#e67e22",
+                "ordre": 2
+              },
+              {
+                "code": "D",
+                "label": "En Développement",
+                "description": "Multistructurel",
+                "valeur_numerique": 3,
+                "valeur_pourcentage": "65",
+                "couleur": "#f1c40f",
+                "ordre": 3
+              },
+              {
+                "code": "M",
+                "label": "Maîtrisé",
+                "description": "Relationnel acquis",
+                "valeur_numerique": 4,
+                "valeur_pourcentage": "75",
+                "couleur": "#27ae60",
+                "ordre": 4
+              },
+              {
+                "code": "E",
+                "label": "Étendu",
+                "description": "Abstrait étendu",
+                "valeur_numerique": 5,
+                "valeur_pourcentage": "100",
+                "couleur": "#3498db",
+                "ordre": 5
+              }
+            ]
+          },
+          "structure_evaluations": {
+            "type": "portfolio",
+            "description": "Artefacts de portfolio",
+            "selection": "n_meilleurs",
+            "n_artefacts": 4
+          },
+          "calcul_note": {
+            "methode": "conversion_niveaux",
+            "description": "Conversion des niveaux en pourcentages",
+            "table_conversion": [],
+            "conditions_speciales": []
+          },
+          "systeme_reprises": {
+            "type": "limitees",
+            "reprises_bureau": false,
+            "niveau_retrogradable": false,
+            "systeme_jetons_actif": true
+          },
+          "gestion_criteres": {
+            "type": "grille",
+            "grille_id": "GRILLE1759243306842",
+            "description": "Grille de critères sélectionnée depuis le matériel pédagogique"
+          },
+          "seuils": {
+            "type": "pourcentage",
+            "va_bien": 85,
+            "difficulte": 80,
+            "grande_difficulte": 70,
+            "source": "reglages",
+            "description": "Seuils configurés dans Réglages → Pratique de notation"
+          },
+          "interface": {
+            "afficher_notes_chiffrees": true,
+            "afficher_rang": false,
+            "afficher_moyenne_groupe": false,
+            "terminologie": {
+              "evaluation": "Évaluation",
+              "critere": "Critère",
+              "note_finale": "Note finale",
+              "reprise": "Reprise"
+            }
+          },
+          "affichage": {
+            "modeComparatif": false
+          },
+          "portfolio": {
+            "actif": true,
+            "nombreARetenir": 5,
+            "minimumCompletion": 7,
+            "nombreTotal": 10,
+            "methodeSelection": "meilleurs",
+            "decouplerPR": false
+          },
+          "jetons": {
+            "actif": true,
+            "delai": {
+              "nombre": 2,
+              "dureeJours": 7
+            },
+            "reprise": {
+              "nombre": 2,
+              "maxParProduction": 1,
+              "archiverOriginale": true
+            },
+            "nombreParEleve": 4,
+            "typesPersonnalises": []
+          }
+        },
+        "etablissement": "Cégep Drummond",
+        "dansBibliotheque": false
+      },
+      {
+        "id": "pan-maitrise-json",
+        "nom": "PAN-Maîtrise (IDME + SRPNF)",
+        "auteur": "Grégoire Bédard",
+        "etablissement": "Cégep Drummond",
+        "description": "Échelle IDME 4 niveaux, critères SRPNF, sélection des N meilleurs artefacts",
+        "discipline": "Littérature",
+        "version": "1.0",
+        "date_creation": "2025-11-26",
+        "config": {
+          "id": "pan-maitrise-json",
+          "nom": "PAN-Maîtrise (IDME + SRPNF)",
+          "auteur": "Grégoire Bédard",
+          "etablissement": "Cégep Drummond",
+          "description": "Échelle IDME 4 niveaux, critères SRPNF, sélection des N meilleurs artefacts",
+          "discipline": "Littérature",
+          "version": "1.0",
+          "date_creation": "2025-11-26",
+          "echelle": {
+            "type": "niveaux",
+            "niveaux": [
+              {
+                "code": "I",
+                "label": "Insuffisant",
+                "description": "Compréhension superficielle ou incompréhension",
+                "valeur_numerique": 1,
+                "valeur_pourcentage": 50,
+                "couleur": "#FF6B6B",
+                "ordre": 1
+              },
+              {
+                "code": "D",
+                "label": "En développement",
+                "description": "Points pertinents sans liens entre eux",
+                "valeur_numerique": 2,
+                "valeur_pourcentage": 70,
+                "couleur": "#FFD93D",
+                "ordre": 2
+              },
+              {
+                "code": "M",
+                "label": "Maîtrisé",
+                "description": "Compréhension globale avec liens établis",
+                "valeur_numerique": 3,
+                "valeur_pourcentage": 80,
+                "couleur": "#6BCF7F",
+                "ordre": 3
+              },
+              {
+                "code": "E",
+                "label": "Étendu",
+                "description": "Transfert à d'autres contextes",
+                "valeur_numerique": 4,
+                "valeur_pourcentage": 92.5,
+                "couleur": "#4D96FF",
+                "ordre": 4
+              }
+            ]
+          },
+          "structure_evaluations": {
+            "type": "portfolio",
+            "description": "Artefacts de portfolio évalués selon critères SRPNF",
+            "selection": "n_meilleurs",
+            "n_artefacts_options": [
+              3,
+              7,
+              12
+            ],
+            "n_artefacts_defaut": 7
+          },
+          "calcul_note": {
+            "methode": "conversion_niveaux",
+            "description": "Moyenne des N meilleurs artefacts convertis en pourcentage",
+            "table_conversion": [
+              {
+                "niveau_code": "I",
+                "note_pct": 50
+              },
+              {
+                "niveau_code": "D",
+                "note_pct": 70
+              },
+              {
+                "niveau_code": "M",
+                "note_pct": 80
+              },
+              {
+                "niveau_code": "E",
+                "note_pct": 92.5
+              }
+            ],
+            "conditions_speciales": []
+          },
+          "systeme_reprises": {
+            "type": "occasions_ponctuelles",
+            "description": "Reprises possibles lors de séances dédiées",
+            "niveau_retrogradable": true
+          },
+          "gestion_criteres": {
+            "type": "fixes",
+            "criteres_fixes": [
+              "Structure",
+              "Rigueur",
+              "Plausibilité",
+              "Nuance",
+              "Français"
+            ],
+            "description": "Critères SRPNF appliqués à chaque artefact"
+          },
+          "seuils": {
+            "type": "pourcentage",
+            "va_bien": 85,
+            "difficulte": 80,
+            "grande_difficulte": 70,
+            "description": "Seuils basés sur l'échelle IDME"
+          },
+          "interface": {
+            "afficher_notes_chiffrees": true,
+            "afficher_rang": false,
+            "afficher_moyenne_groupe": true,
+            "terminologie": {
+              "evaluation": "Artefact",
+              "critere": "Critère",
+              "note_finale": "Note finale",
+              "reprise": "Reprise"
+            }
+          },
+          "affichage": {
+            "modeComparatif": false
+          },
+          "portfolio": {
+            "actif": true,
+            "nombreARetenir": 4,
+            "minimumCompletion": 7,
+            "nombreTotal": 9,
+            "methodeSelection": "meilleurs",
+            "decouplerPR": false
+          },
+          "jetons": {
+            "actif": true,
+            "nombreParEleve": 2,
+            "delai": {
+              "actif": true,
+              "nombre": 2,
+              "dureeJours": 2
+            },
+            "reprise": {
+              "actif": true,
+              "nombre": 2,
+              "maxParProduction": 1,
+              "archiverOriginale": true
+            },
+            "repriseCiblee": {
+              "actif": true,
+              "plafondNote": "M",
+              "archiverOriginale": true
+            },
+            "typesPersonnalises": []
+          }
+        },
+        "dansBibliotheque": false
+      },
+      {
+        "id": "pan-objectifs-ponderes-michel",
+        "nom": "PAN-Objectifs pondérés (Michel B.)",
+        "auteur": "Michel B.",
+        "etablissement": "Cégep (Mathématiques)",
+        "description": "13 objectifs évalués en mode PAN avec pondérations variables selon importance",
+        "discipline": "Mathématiques - Calcul différentiel",
+        "version": "1.0",
+        "date_creation": "2025-11-26",
+        "config": {
+          "id": "pan-objectifs-ponderes-michel",
+          "nom": "PAN-Objectifs pondérés (Michel B.)",
+          "auteur": "Michel B.",
+          "etablissement": "Cégep (Mathématiques)",
+          "description": "13 objectifs évalués en mode PAN avec pondérations variables selon importance",
+          "discipline": "Mathématiques - Calcul différentiel",
+          "version": "1.0",
+          "date_creation": "2025-11-26",
+          "echelle": {
+            "type": "niveaux",
+            "niveaux": [
+              {
+                "code": "I",
+                "label": "Insuffisant",
+                "description": "Compréhension insuffisante de l'objectif",
+                "valeur_numerique": 1,
+                "valeur_pourcentage": 50,
+                "couleur": "#FF6B6B",
+                "ordre": 1
+              },
+              {
+                "code": "D",
+                "label": "Développement",
+                "description": "Développement en cours, maîtrise partielle",
+                "valeur_numerique": 2,
+                "valeur_pourcentage": 70,
+                "couleur": "#FFD93D",
+                "ordre": 2
+              },
+              {
+                "code": "M",
+                "label": "Maîtrisé",
+                "description": "Maîtrise satisfaisante de l'objectif",
+                "valeur_numerique": 3,
+                "valeur_pourcentage": 80,
+                "couleur": "#6BCF7F",
+                "ordre": 3
+              },
+              {
+                "code": "E",
+                "label": "Étendu",
+                "description": "Maîtrise approfondie avec transfert",
+                "valeur_numerique": 4,
+                "valeur_pourcentage": 92.5,
+                "couleur": "#4D96FF",
+                "ordre": 4
+              }
+            ]
+          },
+          "structure_evaluations": {
+            "type": "objectifs-multiples",
+            "description": "Système multi-objectifs avec pondérations variables",
+            "objectifs": [
+              {
+                "id": "obj1",
+                "nom": "Limites et continuité",
+                "poids": 8,
+                "type": "fondamental"
+              },
+              {
+                "id": "obj2",
+                "nom": "Dérivées simples",
+                "poids": 8,
+                "type": "fondamental"
+              },
+              {
+                "id": "obj3",
+                "nom": "Dérivées composées",
+                "poids": 10,
+                "type": "integrateur"
+              },
+              {
+                "id": "obj4",
+                "nom": "Applications des dérivées",
+                "poids": 12,
+                "type": "integrateur"
+              },
+              {
+                "id": "obj5",
+                "nom": "Optimisation",
+                "poids": 15,
+                "type": "integrateur"
+              },
+              {
+                "id": "obj6",
+                "nom": "Analyse graphique",
+                "poids": 7,
+                "type": "fondamental"
+              },
+              {
+                "id": "obj7",
+                "nom": "Théorèmes fondamentaux",
+                "poids": 10,
+                "type": "integrateur"
+              },
+              {
+                "id": "obj8",
+                "nom": "Intégration",
+                "poids": 12,
+                "type": "integrateur"
+              },
+              {
+                "id": "obj9",
+                "nom": "Applications des intégrales",
+                "poids": 8,
+                "type": "fondamental"
+              },
+              {
+                "id": "obj10",
+                "nom": "Séries",
+                "poids": 5,
+                "type": "fondamental"
+              },
+              {
+                "id": "obj11",
+                "nom": "Modélisation mathématique",
+                "poids": 5,
+                "type": "fondamental"
+              },
+              {
+                "id": "obj12",
+                "nom": "Communication mathématique",
+                "poids": 5,
+                "type": "transversal"
+              },
+              {
+                "id": "obj13",
+                "nom": "Rigueur démonstrative",
+                "poids": 5,
+                "type": "transversal"
+              }
+            ],
+            "poids_total": 100
+          },
+          "calcul_note": {
+            "methode": "pan-par-objectif",
+            "description": "Mode PAN appliqué à chaque objectif, puis combinaison pondérée",
+            "nombre_artefacts_par_objectif": 3,
+            "mode_selection": "N_meilleurs",
+            "mode_combinaison": "moyenne_ponderee_objectifs",
+            "normalisation": "poids_total_100",
+            "formule": "Note_finale = Σ (Note_objectif_i × Poids_i) / 100"
+          },
+          "systeme_reprises": {
+            "type": "par-objectif",
+            "description": "Reprises possibles pour chaque objectif individuellement",
+            "limite": "illimitees",
+            "niveau_retrogradable": false
+          },
+          "gestion_criteres": {
+            "type": "par_objectif",
+            "description": "Chaque objectif a ses propres critères définis dans grilles"
+          },
+          "seuils": {
+            "type": "pourcentage",
+            "va_bien": 80,
+            "difficulte": 70,
+            "grande_difficulte": 60
+          },
+          "interface": {
+            "afficher_notes_chiffrees": true,
+            "afficher_rang": false,
+            "afficher_moyenne_groupe": true,
+            "terminologie": {
+              "evaluation": "Objectif",
+              "critere": "Critère",
+              "note_finale": "Note finale",
+              "reprise": "Reprise"
+            }
+          },
+          "affichage": {
+            "modeComparatif": false
+          },
+          "portfolio": {
+            "actif": true,
+            "nombreARetenir": 5,
+            "minimumCompletion": 7,
+            "nombreTotal": 10,
+            "methodeSelection": "meilleurs",
+            "decouplerPR": false
+          },
+          "jetons": {
+            "actif": true,
+            "delai": {
+              "nombre": 2,
+              "dureeJours": 7
+            },
+            "reprise": {
+              "nombre": 2,
+              "maxParProduction": 1,
+              "archiverOriginale": true
+            },
+            "nombreParEleve": 4,
+            "typesPersonnalises": []
+          }
+        },
+        "dansBibliotheque": false
+      },
+      {
+        "id": "sommative-remplacement-jordan",
+        "nom": "Sommative avec remplacement (Jordan R.)",
+        "auteur": "Jordan R.",
+        "etablissement": "Cégep (Philosophie)",
+        "description": "Évaluation finale peut remplacer mi-session si note supérieure. Valorise la progression.",
+        "discipline": "Philosophie 101",
+        "version": "1.0",
+        "date_creation": "2025-11-26",
+        "config": {
+          "id": "sommative-remplacement-jordan",
+          "nom": "Sommative avec remplacement (Jordan R.)",
+          "auteur": "Jordan R.",
+          "etablissement": "Cégep (Philosophie)",
+          "description": "Évaluation finale peut remplacer mi-session si note supérieure. Valorise la progression.",
+          "discipline": "Philosophie 101",
+          "version": "1.0",
+          "date_creation": "2025-11-26",
+          "echelle": {
+            "type": "pourcentage",
+            "min": 0,
+            "max": 100,
+            "precision": 0.5
+          },
+          "structure_evaluations": {
+            "type": "sommative-progressive",
+            "description": "Paires d'évaluations avec remplacement automatique",
+            "paires_remplacement": [
+              {
+                "id": "paire_examens",
+                "nom": "Examens",
+                "evaluation_initiale": {
+                  "nom": "Examen mi-session",
+                  "id": "examen-mi-session",
+                  "poids": 10,
+                  "type": "examen"
+                },
+                "evaluation_finale": {
+                  "nom": "Examen final",
+                  "id": "examen-final",
+                  "poids": 20,
+                  "type": "examen"
+                },
+                "regle_remplacement": "max",
+                "description_regle": "Si note finale > note mi-session, alors finale remplace mi-session"
+              },
+              {
+                "id": "paire_textes",
+                "nom": "Textes argumentatifs",
+                "evaluation_initiale": {
+                  "nom": "Texte mi-session",
+                  "id": "texte-mi-session",
+                  "poids": 20,
+                  "type": "dissertation"
+                },
+                "evaluation_finale": {
+                  "nom": "Texte final",
+                  "id": "texte-final",
+                  "poids": 40,
+                  "type": "dissertation"
+                },
+                "regle_remplacement": "max"
+              }
+            ],
+            "autres_evaluations": [
+              {
+                "nom": "Activités en classe",
+                "id": "activites-classe",
+                "poids": 10,
+                "type": "completion"
+              }
+            ]
+          },
+          "calcul_note": {
+            "methode": "remplacement-progression",
+            "description": "Comparaison paire par paire avec remplacement conditionnel",
+            "formule": "Pour chaque paire: utiliser max(note_initiale, note_finale) × poids correspondant"
+          },
+          "systeme_reprises": {
+            "type": "automatique-progressif",
+            "description": "Le mécanisme de remplacement constitue un système de reprise automatique",
+            "niveau_retrogradable": false
+          },
+          "gestion_criteres": {
+            "type": "par_evaluation",
+            "criteres_variables_description": "Examens : précision. Textes : argumentation/conceptualisation."
+          },
+          "seuils": {
+            "type": "pourcentage",
+            "va_bien": 80,
+            "difficulte": 60,
+            "grande_difficulte": 50
+          },
+          "interface": {
+            "afficher_notes_chiffrees": true,
+            "afficher_rang": false,
+            "afficher_moyenne_groupe": true,
+            "terminologie": {
+              "evaluation": "Évaluation",
+              "critere": "Critère",
+              "note_finale": "Note finale",
+              "reprise": "Reprise"
+            }
+          },
+          "affichage": {
+            "modeComparatif": false
+          },
+          "portfolio": {
+            "actif": true,
+            "nombreARetenir": 5,
+            "minimumCompletion": 7,
+            "nombreTotal": 10,
+            "methodeSelection": "meilleurs",
+            "decouplerPR": false
+          },
+          "jetons": {
+            "actif": true,
+            "delai": {
+              "nombre": 2,
+              "dureeJours": 7
+            },
+            "reprise": {
+              "nombre": 2,
+              "maxParProduction": 1,
+              "archiverOriginale": true
+            },
+            "nombreParEleve": 4,
+            "typesPersonnalises": []
+          }
+        },
+        "dansBibliotheque": false
+      },
+      {
+        "id": "pan-jugement-global-isabelle",
+        "nom": "PAN-Jugement global (Isabelle M.)",
+        "auteur": "Isabelle M.",
+        "etablissement": "Cégep (Biologie)",
+        "description": "Calcul mode statistique comme suggestion. Jugement professionnel de l'enseignante requis.",
+        "discipline": "Biologie - Anatomie et physiologie 3",
+        "version": "1.0",
+        "date_creation": "2025-11-26",
+        "config": {
+          "id": "pan-jugement-global-isabelle",
+          "nom": "PAN-Jugement global (Isabelle M.)",
+          "auteur": "Isabelle M.",
+          "etablissement": "Cégep (Biologie)",
+          "description": "Calcul mode statistique comme suggestion. Jugement professionnel de l'enseignante requis.",
+          "discipline": "Biologie - Anatomie et physiologie 3",
+          "version": "1.0",
+          "date_creation": "2025-11-26",
+          "echelle": {
+            "type": "niveaux",
+            "niveaux": [
+              {
+                "code": "I",
+                "label": "Insuffisant",
+                "description": "Compréhension insuffisante ou incompréhension majeure",
+                "valeur_numerique": 1,
+                "valeur_pourcentage": 50,
+                "couleur": "#FF6B6B",
+                "ordre": 1
+              },
+              {
+                "code": "D",
+                "label": "Développement",
+                "description": "En développement, maîtrise partielle avec lacunes",
+                "valeur_numerique": 2,
+                "valeur_pourcentage": 70,
+                "couleur": "#FFD93D",
+                "ordre": 2
+              },
+              {
+                "code": "M",
+                "label": "Maîtrisé",
+                "description": "Maîtrise satisfaisante des concepts et techniques",
+                "valeur_numerique": 3,
+                "valeur_pourcentage": 80,
+                "couleur": "#6BCF7F",
+                "ordre": 3
+              },
+              {
+                "code": "E",
+                "label": "Étendu",
+                "description": "Maîtrise approfondie avec capacité de transfert",
+                "valeur_numerique": 4,
+                "valeur_pourcentage": 92.5,
+                "couleur": "#4D96FF",
+                "ordre": 4
+              }
+            ]
+          },
+          "structure_evaluations": {
+            "type": "portfolio-integral",
+            "description": "Tous les artefacts sont considérés (pas de sélection N meilleurs)",
+            "nombre_total_evaluations": 11,
+            "types_evaluations": [
+              {
+                "type": "examens-ecrits",
+                "description": "Évaluation holistique de la compréhension"
+              },
+              {
+                "type": "projets-posters",
+                "description": "Précision anatomique et clarté"
+              }
+            ]
+          },
+          "calcul_note": {
+            "methode": "mode-statistique-avec-jugement",
+            "description": "Le mode (niveau le plus fréquent) est calculé comme SUGGESTION",
+            "fenetre_recente": 4,
+            "fenetre_description": "Les 4 derniers artefacts prioritaires pour niveau actuel",
+            "regles_mode": {
+              "si_egalite": "niveau_superieur",
+              "poids_progression": "favorise_niveaux_recents"
+            },
+            "avertissement_important": "⚠️ Ce système calcule une SUGGESTION. L'enseignante DOIT exercer son jugement professionnel pour la décision finale."
+          },
+          "systeme_reprises": {
+            "type": "aucune-formelle",
+            "description": "Pas de système de reprises formelles. Approche par jugement global.",
+            "niveau_retrogradable": false
+          },
+          "gestion_criteres": {
+            "type": "par_evaluation",
+            "criteres_variables_description": "Projets ont critères. Examens : évaluation holistique."
+          },
+          "seuils": {
+            "type": "contextuel",
+            "note": "Pas de seuils chiffrés rigides - jugement contextuel",
+            "description": "Isabelle n'utilise PAS de seuils chiffrés rigides. Le jugement est contextuel et qualitatif."
+          },
+          "interface": {
+            "afficher_notes_chiffrees": true,
+            "afficher_rang": false,
+            "afficher_moyenne_groupe": false,
+            "terminologie": {
+              "evaluation": "Évaluation",
+              "critere": "Critère",
+              "note_finale": "Note finale",
+              "reprise": "Reprise"
+            }
+          },
+          "affichage": {
+            "modeComparatif": false
+          },
+          "portfolio": {
+            "actif": true,
+            "nombreARetenir": 5,
+            "minimumCompletion": 7,
+            "nombreTotal": 10,
+            "methodeSelection": "meilleurs",
+            "decouplerPR": false
+          },
+          "jetons": {
+            "actif": true,
+            "delai": {
+              "nombre": 2,
+              "dureeJours": 7
+            },
+            "reprise": {
+              "nombre": 2,
+              "maxParProduction": 1,
+              "archiverOriginale": true
+            },
+            "nombreParEleve": 4,
+            "typesPersonnalises": []
+          }
+        },
+        "dansBibliotheque": false
+      },
+      {
+        "id": "pratique-1766777139556",
+        "nom": "pratique",
+        "auteur": "nom",
+        "etablissement": "cegep",
+        "description": "description",
+        "discipline": "discipline litt",
+        "type": "pan-standards",
+        "dateCreation": "2025-12-26T19:25:39.556Z",
+        "configuration": {
+          "approcheEvaluation": "par-artefacts",
+          "echelleId": "ECH1759264511178",
+          "grilleId": "GRILLE1759243306842",
+          "portfolio": {
+            "utiliser": true,
+            "nbArtefactsSoumis": 9,
+            "nbArtefactsRetenus": 4,
+            "reprisesPermises": "illimite",
+            "minAvantCalculFormatif": 3
+          }
+        },
+        "dansBibliotheque": false
+      },
+      {
+        "id": "SPE-francois",
+        "nom": "Modèle Chimie (FAH)",
+        "description": "Notation par contrats",
+        "type": "pan-specifications",
+        "auteur": "François A.-H.",
+        "discipline": "Chimie",
+        "estGabarit": true,
+        "pratiques": [
+          "SPE"
+        ],
+        "configuration": {
+          "seuilAcceptable": 75,
+          "typesTravaux": [
+            {
+              "id": 1,
+              "nom": "Prise de position",
+              "description": "Travail écrit argumentatif"
+            },
+            {
+              "id": 2,
+              "nom": "Test",
+              "description": "Évaluation des connaissances"
+            },
+            {
+              "id": 3,
+              "nom": "Portfolio",
+              "description": "Dossier d'apprentissage"
+            },
+            {
+              "id": 4,
+              "nom": "Oral",
+              "description": "Présentation orale"
+            }
+          ],
+          "forfaits": [
+            {
+              "id": 1,
+              "lettre": "A",
+              "note": 90,
+              "travaux": {
+                "1": 3,
+                "2": 2,
+                "3": 1,
+                "4": 1
+              }
+            },
+            {
+              "id": 2,
+              "lettre": "B",
+              "note": 80,
+              "travaux": {
+                "1": 2,
+                "2": 2,
+                "3": 1,
+                "4": 1
+              }
+            },
+            {
+              "id": 3,
+              "lettre": "C",
+              "note": 60,
+              "travaux": {
+                "1": 1,
+                "2": 2,
+                "3": 0,
+                "4": 0
+              }
+            }
+          ],
+          "echelleId": ""
+        },
+        "dansBibliotheque": true,
+        "dateAjout": "2026-01-03T00:12:00.043Z",
+        "etablissement": "Cégep Laurendeau"
+      },
+      {
+        "id": "SPE-litterature",
+        "nom": "Modèle littérature",
+        "description": "Adapté aux cours de français et littérature",
+        "type": "pan-specifications",
+        "auteur": "Codex Numeris",
+        "discipline": "Français",
+        "estGabarit": true,
+        "pratiques": [
+          "SPE"
+        ],
+        "configuration": {
+          "seuilAcceptable": 75,
+          "typesTravaux": [
+            {
+              "id": 1,
+              "nom": "Analyse littéraire",
+              "description": "Analyse d'un texte ou d'une œuvre"
+            },
+            {
+              "id": 2,
+              "nom": "Dissertation",
+              "description": "Texte argumentatif structuré"
+            },
+            {
+              "id": 3,
+              "nom": "Portfolio de lecture",
+              "description": "Traces de lecture et réflexions"
+            }
+          ],
+          "forfaits": [
+            {
+              "id": 1,
+              "lettre": "A",
+              "note": 100,
+              "travaux": {
+                "1": 2,
+                "2": 1,
+                "3": 1
+              }
+            },
+            {
+              "id": 2,
+              "lettre": "B",
+              "note": 80,
+              "travaux": {
+                "1": 2,
+                "2": 1,
+                "3": 0
+              }
+            },
+            {
+              "id": 3,
+              "lettre": "C",
+              "note": 60,
+              "travaux": {
+                "1": 1,
+                "2": 1,
+                "3": 0
+              }
+            }
+          ]
+        },
+        "dansBibliotheque": false,
+        "dateAjout": "2026-01-03T00:15:22.444Z"
+      },
+      {
+        "id": "STD-par-objectifs-pondere",
+        "nom": "Par objectifs (Pondéré)",
+        "description": "Moyenne pondérée des objectifs",
+        "type": "pan-standards",
+        "auteur": "Michel B.",
+        "discipline": "Mathématiques",
+        "estGabarit": true,
+        "pratiques": [
+          "STD"
+        ],
+        "configuration": {
+          "varianteCalcul": "par-objectifs",
+          "portfolio": {
+            "methodeSelection": "meilleurs",
+            "nombreARetenir": 5,
+            "minimumCompletion": 5,
+            "nombreTotal": 10,
+            "decouplerPR": false
+          },
+          "parObjectifs": {
+            "modeCalcul": "moyenne-ponderee",
+            "objectifs": [
+              {
+                "id": 1,
+                "nom": "Objectif principal",
+                "essentiel": true,
+                "ponderation": 50
+              },
+              {
+                "id": 2,
+                "nom": "Objectif secondaire",
+                "essentiel": false,
+                "ponderation": 30
+              },
+              {
+                "id": 3,
+                "nom": "Objectif complémentaire",
+                "essentiel": false,
+                "ponderation": 20
+              }
+            ]
+          },
+          "echelleId": ""
+        },
+        "dansBibliotheque": true,
+        "dateAjout": "2026-01-03T01:52:31.765Z",
+        "jetons": {
+          "actif": false,
+          "nombre": 4,
+          "delaiActif": true,
+          "delaiDuree": 7,
+          "repriseActif": true,
+          "repriseOriginale": "archiver",
+          "cibleeActif": true,
+          "cibleePlafond": "D (Développement)"
+        }
+      },
+      {
+        "id": "STD-par-objectifs-comptage",
+        "nom": "Par objectifs (Comptage)",
+        "description": "Comptage d'objectifs essentiels et complémentaires",
+        "type": "pan-standards",
+        "auteur": "Bruno V.",
+        "discipline": "Chimie",
+        "estGabarit": true,
+        "pratiques": [
+          "STD"
+        ],
+        "configuration": {
+          "varianteCalcul": "par-objectifs",
+          "portfolio": {
+            "methodeSelection": "meilleurs",
+            "nombreARetenir": 5,
+            "minimumCompletion": 5,
+            "nombreTotal": 10,
+            "decouplerPR": true
+          },
+          "parObjectifs": {
+            "modeCalcul": "comptage",
+            "objectifs": [
+              {
+                "id": 1,
+                "nom": "Objectif 1",
+                "essentiel": true,
+                "ponderation": 0
+              },
+              {
+                "id": 2,
+                "nom": "Objectif 2",
+                "essentiel": true,
+                "ponderation": 0
+              },
+              {
+                "id": 3,
+                "nom": "Objectif 3",
+                "essentiel": false,
+                "ponderation": 0
+              }
+            ],
+            "comptage": {
+              "seuilMaitrise": 75,
+              "plafondEssentiel": 55,
+              "grilleConversion": {
+                "0": 0,
+                "1": 33,
+                "2": 67,
+                "3": 100
+              }
+            }
+          },
+          "echelleId": ""
+        },
+        "dansBibliotheque": true,
+        "dateAjout": "2026-01-03T01:56:10.518Z",
+        "etablissement": "Cégep Laurendeau",
+        "jetons": {
+          "actif": false,
+          "nombre": 4,
+          "delaiActif": true,
+          "delaiDuree": 7,
+          "repriseActif": true,
+          "repriseOriginale": "archiver",
+          "cibleeActif": true,
+          "cibleePlafond": "D (Développement)"
+        }
+      },
+      {
+        "id": "STD-Xavier-Info",
+        "nom": "STD Interfaces et BD (Xavier C.-T.)",
+        "description": "6 objectifs requis niveau 3+. Base 80% + bonus 3.33% par niveau 4. Hybride STD/SPE.",
+        "type": "pan-standards",
+        "auteur": "Xavier C.-T.",
+        "discipline": "Informatique",
+        "estGabarit": true,
+        "pratiques": [
+          "STD"
+        ],
+        "configuration": {
+          "varianteCalcul": "par-objectifs",
+          "echelleId": "ECHELLE_XAVIER_INFO",
+          "portfolio": {
+            "methodeSelection": "meilleurs",
+            "nombreARetenir": 1,
+            "minimumCompletion": 1,
+            "nombreTotal": 3,
+            "decouplerPR": true
+          },
+          "parObjectifs": {
+            "modeCalcul": "seuils-critiques",
+            "objectifs": [
+              {
+                "id": 1,
+                "nom": "Modélisation de données",
+                "essentiel": true,
+                "ponderation": 0
+              },
+              {
+                "id": 2,
+                "nom": "Procédures stockées et déclencheurs",
+                "essentiel": true,
+                "ponderation": 0
+              },
+              {
+                "id": 3,
+                "nom": "Sécurité et sauvegardes",
+                "essentiel": true,
+                "ponderation": 0
+              },
+              {
+                "id": 4,
+                "nom": "Programmation DB First",
+                "essentiel": true,
+                "ponderation": 0
+              },
+              {
+                "id": 5,
+                "nom": "Conception d'interfaces",
+                "essentiel": true,
+                "ponderation": 0
+              },
+              {
+                "id": 6,
+                "nom": "Programmation LINQ",
+                "essentiel": true,
+                "ponderation": 0
+              }
+            ],
+            "seuilsCritiques": {
+              "niveauMinimum": 3,
+              "noteBase": 80,
+              "bonusParNiveau4": 3.33,
+              "notes1Objectif2": 55,
+              "notes2Objectifs2ou1Obj1": 50,
+              "notesAutresCas": 40
+            }
+          }
+        },
+        "seuils": {
+          "vaBien": 80,
+          "difficulte": 55,
+          "grandeDifficulte": 50
+        },
+        "dansBibliotheque": true,
+        "dateAjout": "2026-01-04T13:47:39.302Z"
+      },
+      {
+        "id": "STD-Bruno-Chimie",
+        "nom": "STD Chimie organique (BV)",
+        "description": "Standards avec critères par standard, meilleurs résultats. Reprises illimitées au bureau.",
+        "type": "pan-standards",
+        "auteur": "Bruno V.",
+        "discipline": "Chimie",
+        "estGabarit": true,
+        "pratiques": [
+          "STD"
+        ],
+        "configuration": {
+          "varianteCalcul": "par-objectifs",
+          "echelleId": "",
+          "portfolio": {
+            "methodeSelection": "meilleurs",
+            "nombreARetenir": 1,
+            "minimumCompletion": 1,
+            "nombreTotal": 12,
+            "decouplerPR": true
+          },
+          "parObjectifs": {
+            "modeCalcul": "comptage",
+            "objectifs": [
+              {
+                "id": 1,
+                "nom": "Nomenclature organique",
+                "essentiel": true,
+                "ponderation": 0
+              },
+              {
+                "id": 2,
+                "nom": "Réactions acidobasiques",
+                "essentiel": true,
+                "ponderation": 0
+              },
+              {
+                "id": 3,
+                "nom": "Additions sur alcènes",
+                "essentiel": true,
+                "ponderation": 0
+              },
+              {
+                "id": 4,
+                "nom": "Substitutions nucléophiles",
+                "essentiel": true,
+                "ponderation": 0
+              },
+              {
+                "id": 5,
+                "nom": "Éliminations",
+                "essentiel": true,
+                "ponderation": 0
+              },
+              {
+                "id": 6,
+                "nom": "Synthèses multi-étapes",
+                "essentiel": true,
+                "ponderation": 0
+              }
+            ],
+            "comptage": {
+              "seuilMaitrise": 75,
+              "plafondEssentiel": 55,
+              "grilleConversion": {
+                "0": 0,
+                "1": 50,
+                "2": 55,
+                "3": 60,
+                "4": 70,
+                "5": 80,
+                "6": 100
+              }
+            }
+          }
+        },
+        "seuils": {
+          "vaBien": 75,
+          "difficulte": 60,
+          "grandeDifficulte": 55
+        },
+        "dansBibliotheque": true,
+        "dateAjout": "2026-01-04T13:47:46.314Z",
+        "jetons": {
+          "actif": false,
+          "nombre": 4,
+          "delaiActif": true,
+          "delaiDuree": 7,
+          "repriseActif": true,
+          "repriseOriginale": "archiver",
+          "cibleeActif": true,
+          "cibleePlafond": "D (Développement)"
+        }
+      },
+      {
+        "id": "PRATIQUE_1767675558207_434",
+        "nom": "STD Projet de fin d'études en sciences",
+        "auteur": "Bruno V.",
+        "etablissement": "Cégep André-Laurendeau",
+        "description": "Notation basée sur les standards avec 5 standards de poids différents, évalués à l'aide d'une échelle à 4 niveaux. Créée spécifiquement pour un cours de projet de fin d'études en sciences de la nature.",
+        "discipline": "Sciences",
+        "type": "pan-standards",
+        "dateCreation": "2026-01-05T19:10:12.475Z",
+        "configuration": {
+          "approcheEvaluation": "par-objectifs",
+          "echelleId": "",
+          "grilleId": null,
+          "objectifs": {
+            "modeCalcul": "moyenne-ponderee"
+          },
+          "varianteCalcul": "par-objectifs",
+          "portfolio": {
+            "methodeSelection": "meilleurs",
+            "nombreARetenir": 5,
+            "minimumCompletion": 7,
+            "nombreTotal": 10,
+            "decouplerPR": false
+          },
+          "parObjectifs": {
+            "objectifs": [
+              {
+                "id": "obj_1767640341689",
+                "nom": "Concevoir et planifier le projet",
+                "type": "complementaire",
+                "ponderation": 10
+              },
+              {
+                "id": "obj_1767640557903",
+                "nom": "Développer une expertise sur le sujet du projet",
+                "type": "complementaire",
+                "ponderation": 25
+              },
+              {
+                "id": "obj_1767640568595",
+                "nom": "Réaliser les aspects expérimentaux du projet",
+                "type": "complementaire",
+                "ponderation": 20
+              },
+              {
+                "id": "obj_1767640573137",
+                "nom": "Analyser les résultats pour tirer des conclusions et réaliser une autoévaluation de son cheminement",
+                "type": "complementaire",
+                "ponderation": 30
+              },
+              {
+                "id": "obj_1767640597863",
+                "nom": "Présenter le projet",
+                "type": "complementaire",
+                "ponderation": 15
+              }
+            ],
+            "modeCalcul": "moyenne-ponderee",
+            "comptage": {
+              "seuilMaitrise": 75,
+              "plafondEssentiel": 55,
+              "grilleConversion": []
+            }
+          }
+        },
+        "pratiques": [
+          "STD"
+        ],
+        "jetons": {
+          "actif": false,
+          "nombre": 4,
+          "delaiActif": true,
+          "delaiDuree": 7,
+          "repriseActif": true,
+          "repriseOriginale": "archiver",
+          "cibleeActif": true,
+          "cibleePlafond": "D (Développement)"
+        },
+        "dateImport": "2026-01-06T04:59:18.207Z"
+      },
+      {
+        "id": "PRATIQUE_1767675558207_486",
+        "nom": "STD Anatomie (Isabelle M.)",
+        "description": "PAN-Standards avec jugement global. 11 évaluations. Progression qualitative sans calcul strict.",
+        "type": "pan-standards",
+        "auteur": "Isabelle M.",
+        "discipline": "Biologie",
+        "etablissement": "Cégep",
+        "estGabarit": true,
+        "pratiques": [
+          "STD"
+        ],
+        "configuration": {
+          "varianteCalcul": "par-objectifs",
+          "echelleId": "ECHELLE_ISABELLE_BIO",
+          "portfolio": {
+            "methodeSelection": "tous",
+            "nombreTotal": 11,
+            "decouplerPR": true
+          },
+          "parObjectifs": {
+            "modeCalcul": "holistique",
+            "description": "Jugement professionnel global basé sur la progression",
+            "objectifs": [
+              {
+                "id": 1,
+                "nom": "Compétence anatomie",
+                "essentiel": true,
+                "ponderation": 0
+              }
+            ],
+            "holistique": {
+              "baseSurProgression": true,
+              "criteresProjets": true,
+              "criteresExamens": false,
+              "jugementProfessionnel": true
+            }
+          }
+        },
+        "seuils": {
+          "vaBien": null,
+          "difficulte": null,
+          "grandeDifficulte": null,
+          "type": "qualitatif"
+        },
+        "avertissement": "Cette pratique nécessite un jugement professionnel final. Les indicateurs sont un soutien, pas un calcul automatique.",
+        "dansBibliotheque": false,
+        "dateAjout": "2026-01-05T20:00:50.137Z",
+        "dateImport": "2026-01-06T04:59:18.207Z"
+      }
+    ]
+  }
+}

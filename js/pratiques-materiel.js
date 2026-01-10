@@ -1785,6 +1785,8 @@ function toggleCategoriesMat() {
     // Valider que les pondérations = 100%
     if (checkbox && checkbox.checked) {
         validerPonderationsCategoriesMat();
+        // Charger la liste des productions pour assignation
+        chargerProductionsPourCategories();
     }
 
     // Sauvegarder automatiquement
@@ -1808,6 +1810,121 @@ function validerPonderationsCategoriesMat() {
         } else {
             validation.innerHTML = `<span style="color: var(--rouge-principal);">⚠ Total : ${total}% (dépasse de ${total - 100}%)</span>`;
         }
+    }
+}
+
+/**
+ * 🆕 Beta 95.4 : Charge et affiche la liste des productions pour assignation des catégories
+ */
+async function chargerProductionsPourCategories() {
+    const container = document.getElementById('mat-categories-productions-liste');
+    if (!container) return;
+
+    // Charger les productions
+    const productions = await db.get('productions') || [];
+
+    // Filtrer : exclure portfolio conteneur et formatifs
+    const productionsFiltrables = productions.filter(p =>
+        p.type !== 'portfolio' &&
+        !p.type?.endsWith('-formatif')
+    );
+
+    if (productionsFiltrables.length === 0) {
+        container.innerHTML = `
+            <p style="padding: 20px; color: var(--gris-moyen); text-align: center;">
+                Aucune production disponible.<br>
+                <small>Crée d'abord des productions dans Matériel → Productions.</small>
+            </p>
+        `;
+        return;
+    }
+
+    // Compter par catégorie
+    const nbSelection = productionsFiltrables.filter(p => p.categorie === 'selection').length;
+    const nbObligatoire = productionsFiltrables.filter(p => p.categorie === 'obligatoire').length;
+    const nbSansCategorie = productionsFiltrables.filter(p => !p.categorie).length;
+
+    // Générer le HTML
+    let html = `
+        <div style="padding: 8px 12px; background: var(--gris-tres-clair); border-bottom: 1px solid var(--gris-clair); font-size: 0.8rem; color: var(--gris-fonce);">
+            <strong>${productionsFiltrables.length}</strong> productions :
+            <span style="color: var(--bleu-principal);">${nbSelection} Sélection</span> |
+            <span style="color: var(--orange-principal, #e67e22);">${nbObligatoire} Obligatoire</span>
+            ${nbSansCategorie > 0 ? `| <span style="color: var(--gris-moyen);">${nbSansCategorie} non assignée(s)</span>` : ''}
+        </div>
+    `;
+
+    html += '<div style="padding: 0;">';
+    productionsFiltrables.forEach((prod, index) => {
+        const bgColor = prod.categorie === 'selection' ? 'rgba(52, 152, 219, 0.08)'
+                      : prod.categorie === 'obligatoire' ? 'rgba(230, 126, 34, 0.08)'
+                      : 'transparent';
+        const borderLeft = prod.categorie === 'selection' ? '3px solid var(--bleu-clair)'
+                         : prod.categorie === 'obligatoire' ? '3px solid var(--orange-principal, #e67e22)'
+                         : '3px solid transparent';
+
+        html += `
+            <div style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-bottom: 1px solid var(--gris-tres-clair); background: ${bgColor}; border-left: ${borderLeft};">
+                <div style="flex: 1; min-width: 0;">
+                    <div style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        ${echapperHtml(prod.titre || 'Sans titre')}
+                    </div>
+                    ${prod.description ? `<div style="font-size: 0.8rem; color: var(--gris-moyen); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${echapperHtml(prod.description)}</div>` : ''}
+                </div>
+                <select onchange="assignerCategorieProductionMat('${prod.id}', this.value)" class="controle-form" style="width: 140px; padding: 4px 8px; font-size: 0.85rem;">
+                    <option value="" ${!prod.categorie ? 'selected' : ''}>-- Non définie --</option>
+                    <option value="selection" ${prod.categorie === 'selection' ? 'selected' : ''}>Sélection</option>
+                    <option value="obligatoire" ${prod.categorie === 'obligatoire' ? 'selected' : ''}>Obligatoire</option>
+                </select>
+            </div>
+        `;
+    });
+    html += '</div>';
+
+    container.innerHTML = html;
+}
+
+/**
+ * 🆕 Beta 95.4 : Assigne une catégorie à une production spécifique
+ */
+async function assignerCategorieProductionMat(prodId, categorie) {
+    const productions = await db.get('productions') || [];
+    const prod = productions.find(p => p.id === prodId);
+
+    if (prod) {
+        prod.categorie = categorie || null;
+        await db.set('productions', productions);
+        console.log(`[Catégories] Production "${prod.titre}" → ${categorie || 'non définie'}`);
+
+        // Rafraîchir l'affichage
+        chargerProductionsPourCategories();
+    }
+}
+
+/**
+ * 🆕 Beta 95.4 : Assigne une catégorie à TOUTES les productions
+ */
+async function assignerToutesProductionsMat(categorie) {
+    const productions = await db.get('productions') || [];
+    let nbModifiees = 0;
+
+    productions.forEach(prod => {
+        // Exclure portfolio conteneur et formatifs
+        if (prod.type !== 'portfolio' && !prod.type?.endsWith('-formatif')) {
+            prod.categorie = categorie;
+            nbModifiees++;
+        }
+    });
+
+    await db.set('productions', productions);
+    console.log(`[Catégories] ${nbModifiees} productions → ${categorie}`);
+
+    // Rafraîchir l'affichage
+    chargerProductionsPourCategories();
+
+    // Notification
+    if (typeof afficherNotificationSucces === 'function') {
+        afficherNotificationSucces(`${nbModifiees} productions assignées`, `Catégorie : ${categorie === 'selection' ? 'Sélection' : 'Obligatoire'}`);
     }
 }
 
@@ -2210,6 +2327,9 @@ window.mettreAJourDisciplinePratiqueMat = mettreAJourDisciplinePratiqueMat;
 window.sauvegarderConfigPratiqueMat = sauvegarderConfigPratiqueMat;
 window.toggleSystemeJetonsMat = toggleSystemeJetonsMat;
 window.toggleCategoriesMat = toggleCategoriesMat;  // 🆕 Beta 95.4
+window.chargerProductionsPourCategories = chargerProductionsPourCategories;  // 🆕 Beta 95.4
+window.assignerCategorieProductionMat = assignerCategorieProductionMat;  // 🆕 Beta 95.4
+window.assignerToutesProductionsMat = assignerToutesProductionsMat;  // 🆕 Beta 95.4
 window.validerPonderationsCategoriesMat = validerPonderationsCategoriesMat;  // 🆕 Beta 95.4
 
 // Échelles

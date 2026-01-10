@@ -1,0 +1,292 @@
+Programmes d'études techniques (en date du 3 avril 2025)
+
+
+
+Administration, commerce et informatique
+
+384.A0 - Techniques de recherche et de gestion de données (PDF 719 Ko)
+
+410.B0 - Techniques de comptabilité et de gestion (PDF 2,31 Mo)
+
+410.D0 - Gestion de commerces (PDF 2,25 Mo)
+
+410.F0 - Techniques de services financiers et d'assurances (PDF 1,31 Mo)
+
+410.G0 - Techniques d'administration et de gestion (PDF 1,42 Mo)
+
+412.A0 - Techniques de bureautique (PDF 467 Ko)
+
+420.B0 - Techniques de l'informatique (PDF 1,21 Mo)
+
+
+Agriculture et pêches
+
+145.D0 - Techniques de santé animale (PDF 758 Ko)
+
+152.B0 - Gestion et technologies d’entreprise agricole (PDF 610 Ko)
+
+153.A0 - Technologie des productions animales (PDF 109 Ko)
+
+153.C0 - Paysage et commercialisation en horticulture ornementale (PDF 87 Ko)
+
+153.D0 - Technologie du génie agromécanique (PDF 846 Ko)
+
+153.F0 - Technologie de la production horticole agroenvironnementale (PDF 1,24 Mo)
+
+155.A0 - Techniques équines (PDF 134 Ko)
+
+231.A0 - Techniques d'aquaculture (PDF 905 Ko)
+
+231.B0 - Technologies bioalimentaires aquatiques (PDF 0,90 Mo)
+
+Alimentation et tourisme
+
+154.A0 - Technologie des procédés et de la qualité des aliments (PDF 0,99 Mo)
+
+414.A0 - Techniques de tourisme (PDF 226 Ko)
+
+414.B0 - Techniques du tourisme d'aventure (PDF 435 Ko)
+
+430.A0 - Techniques de gestion hôtelière (PDF 0,94 Mo)
+
+430.B0 - Gestion d'un établissement de restauration (PDF 0,97 Mo)
+
+
+Arts
+
+551.A0 - Techniques professionnelles de musique et chanson (PDF 1,53 Mo) 
+
+551.B0 - Technologies sonores (PDF 1,29 Mo) 
+
+561.B0 - Danse - Interprétation (PDF 558 Ko) 
+
+561.C0 - Interprétation théâtrale (PDF 483 Ko) 
+
+561.D0 - Arts du cirque (PDF 0,97 Mo) 
+
+561.F0 - Production scénique (PDF 1,04 Mo) 
+
+570.C0 - Techniques de design industriel (PDF 733 Ko) 
+
+570.D0 - Techniques de design de présentation (PDF 755 Ko) 
+
+570.E0 - Techniques de design d'intérieur (PDF 1,24 Mo) 
+
+570.F0 - Photographie (PDF 859 Ko) 
+
+573.A0 - Techniques de métiers d'art (PDF 1,62 Mo) 
+
+
+Bois et matériaux connexes
+
+233.B0 - Techniques du meuble et d'ébénisterie (PDF 1,36 Mo)
+
+
+Chimie et biologie
+
+210.A0 - Techniques de laboratoire (PDF 381 Ko)
+
+210.D0 - Techniques de procédés industriels (PDF 1,32 Mo)
+
+260.A0 - Technologie de l'eau (PDF 1,31 Mo)
+
+260.B0 - Environnement, hygiène et sécurité au travail (PDF 2,48 Mo)
+
+
+Bâtiment et travaux publics
+
+221.A0 - Technologie de l'architecture (PDF 920 Ko) 
+
+221.B0 - Technologie du génie civil (PDF 1,39 Mo) 
+
+221.C0 - Technologie de la mécanique du bâtiment (PDF 0,95 Mo) 
+
+221.D0 - Technologie de l'estimation et de l'évaluation en bâtiment (PDF 1,06 Mo) 
+
+230.B0 - Technologie de la géomatique (PDF 0,91 Mo)
+
+311.A0 - Techniques de sécurité incendie (PDF 1,27 Mo) 
+
+
+Environnement et aménagement du territoire
+
+145.B0 - Techniques d'aménagement cynégétique et halieutique (PDF 0,97 Mo) 
+
+145.C0 - Techniques de bioécologie (PDF 903 Ko) 
+
+147.A0 - Techniques du milieu naturel (PDF 1,14 Mo) 
+
+222.A0 - Techniques d'aménagement et d'urbanisme (PDF 402 Ko) 
+
+
+Électrotechnique
+
+243.D0 - Technologie du génie électrique - Automatisation et contrôle (PDF 899 Ko) 
+
+243.F0 - Technologie du génie électrique - Réseaux et télécommunications (PDF 845 Ko) 
+
+243.G0 - Technologie du génie électrique - Électronique programmable (PDF 875 Ko) 
+
+243.H0 - Technologie de l'électronique - Audiovisuel (PDF 1,01 Mo) 
+
+244.A0 - Technologie du génie physique (PDF 1,17 Mo) 
+
+280.D0 - Techniques d'avionique (PDF 834 Ko) 
+
+
+Entretien d'équipement motorisé
+
+248.D0 - Techniques de génie mécanique de marine (PDF 1,27 Mo) 
+
+280.C0 - Techniques de maintenance d'aéronefs (PDF 1,77 Mo) 
+
+
+Fabrication mécanique
+
+235.B0 - Technologie du génie industriel (PDF 1,17 Mo)
+
+235.C0 - Technologie de la production pharmaceutique (PDF 1,30 Mo) 
+
+241.A0 - Techniques de génie mécanique (PDF 1,54 Mo) 
+
+241.A0 - Techniques de génie mécanique - Addenda (PDF 145 Ko) 
+
+241.B0 - Techniques de génie du plastique (PDF 757 Ko) 
+
+241.C0 - Technologie du génie des matériaux composites (PDF 1,07 Mo) 
+
+248.A0 - Technologie de l'architecture navale (PDF 1,16 Mo) 
+
+280.B0 - Techniques de génie aérospatial (PDF 1,24 Mo) 
+
+
+Foresterie et papier
+
+190.A0 - Technologie de la transformation des produits forestiers (PDF 101 Ko) 
+
+190.B0 - Technologie forestière (PDF 94 Ko)
+
+
+Communications et documentation
+
+393.B0 - Techniques de la documentation (PDF 0,99 Mo) 
+
+570.B0 - Techniques de muséologie (PDF 104 Ko) 
+
+570.G0 - Graphisme (PDF 1,29 Mo) 
+
+574.A0 - Illustration et dessin animé (PDF 1,38 Mo) 
+
+574.C0 - Production 3D et de synthèse d'images (PDF 0,94 Mo)
+
+581.C0 - Gestion de projet en communications graphiques (PDF 1,06 Mo) 
+
+581.D0 - Infographie en prémédia (PDF 1,31 Mo) 
+
+582.A1 - Techniques d'intégration multimédia (PDF 3,20 Mo) 
+
+589.B0 - Techniques de communication dans les médias (PDF 1,83 Mo) 
+
+589.C0 - Techniques cinématographiques et télévisuelles (PDF 1,10 Mo) 
+
+
+Mécanique d'entretien
+
+241.D0 - Technologie de maintenance industrielle (PDF 1,25 Mo)
+
+
+Mines et travaux de chantier
+
+271.A0 - Technologie minérale (PDF 1,73 Mo) 
+
+
+Métallurgie
+
+270.A0 - Technologie du génie métallurgique (PDF 1,88 Mo) 
+
+
+Transport
+
+248.B0 - Navigation (PDF 1,25 Mo)
+
+280.F0 - Techniques de pilotage d'aéronefs (PDF 1,33 Mo)
+
+410.A1 - Gestion des opérations et de la chaîne logistique (PDF 787 Ko) 
+
+
+Cuir, textile et habillement
+
+571.A0 - Design de mode (PDF 135 Ko) 
+
+571.B0 - Gestion de la production du vêtement (PDF 442 Ko) 
+
+571.C0 - Commercialisation de la mode (nouvelle version) (PDF 1,18 Mo) 
+
+
+Santé
+
+110.A0 - Techniques de prothèses dentaires (PDF 1,03 Mo)
+
+110.B0 - Techniques de denturologie (PDF 115 Ko)
+
+111.B0 - Techniques d'hygiène dentaire (PDF 1,13 Mo)
+
+112.A0 - Acupuncture (PDF 2,23 Mo)
+
+120.A0 - Techniques de diététique (PDF 1,01 Mo) 
+
+120.A0 - Techniques de diététique - Addenda (PDF 236 Ko)
+
+140.A0 - Techniques d'électrophysiologie médicale (PDF 118 Ko)
+
+140.C0 - Technologie d'analyses biomédicales (PDF 905 Ko)
+
+141.A0 - Techniques d'inhalothérapie (PDF 84 Ko)
+
+142.D0 - Technologie de radio-oncologie (PDF 1,38 Mo)
+
+142.F0 - Technologie de médecine nucléaire (PDF 737 Ko)
+
+142.G0 - Technologie de l’échographie médicale (PDF 690 Ko)
+
+142.H0 - Technologie de radiodiagnostic (PDF 1,33 Mo)
+
+144.A1 - Techniques de physiothérapie (PDF 798 Ko)
+
+144.F0 - Orthèses, prothèses et soins orthopédiques (PDF 0,93 Mo)
+
+160.A0 - Optique et lunetterie (PDF 369 Ko)
+
+160.B0 - Audioprothèse (PDF 90 Ko)
+
+165.A0 - Techniques de pharmacie (PDF 917 Ko)
+
+171.A0 - Techniques de thanatologie (PDF 1,00 Mo)
+
+180.A0 - Soins infirmiers (PDF 1,20 Mo)
+
+180.B0 - Soins infirmiers (PDF 1,21 Mo)
+
+181.A1 - Soins préhospitaliers d'urgence (PDF 1,38 Mo)
+
+411.A0 - Archives médicales (PDF 505 Ko)
+
+
+Services sociaux, éducatifs et juridiques
+
+310.A0 - Techniques policières (PDF 0,94 Mo) 
+
+310.A0 - Techniques policières (PDF 1,40 Mo) (version 2024)
+
+310.B1 - Techniques d’intervention en criminologie (PDF 799 Ko) 
+
+310.C0 - Techniques juridiques (PDF 0,93 Mo) 
+
+322.A1 - Techniques d'éducation à l'enfance (PDF 1,12 Mo)
+
+351.A1 - Techniques d'éducation spécialisée (PDF 1,08 Mo) 
+
+388.A1 - Techniques de travail social (PDF 0,98 Mo)  
+
+391.A0 - Techniques de gestion et d’intervention en loisir (PDF 1,23 Mo) 
+
