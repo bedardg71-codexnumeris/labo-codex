@@ -2983,12 +2983,28 @@ async function afficherListeProductions(filtreType = '') {
     }
 
     const html = productionsFiltrees.map(prod => {
+        const titre = prod.titre || prod.description || 'Sans titre';
         const typeLabel = getTypeLabel(prod.type);
+
+        // 🆕 Beta 95.4 : Badges uniformisés avec grilles/échelles
+        // Générer badges pratiques compatibles (utilise gabarits-utils.js)
+        const badgesPratiques = typeof GabaritsUtils !== 'undefined'
+            ? GabaritsUtils.genererBadgesPratiques(prod)
+            : '';
+
+        // Badge de pondération (sauf pour portfolio conteneur et artefacts)
+        const ponderationBadge = (prod.type !== 'portfolio' && prod.type !== 'artefact-portfolio' && prod.ponderation)
+            ? `<span class="badge-caracteristique">${prod.ponderation}%</span>`
+            : '';
 
         return `
             <div class="sidebar-item" data-id="${prod.id}" onclick="chargerProductionPourModif('${prod.id}')">
-                <div class="sidebar-item-titre">${echapperHtml(prod.description || 'Sans titre')}</div>
-                <div class="sidebar-item-badge">${typeLabel}</div>
+                <div class="sidebar-item-titre">${echapperHtml(titre)}</div>
+                <div class="sidebar-item-badges">
+                    ${badgesPratiques}
+                    <span class="badge-caracteristique">${typeLabel}</span>
+                    ${ponderationBadge}
+                </div>
             </div>
         `;
     }).join('');
