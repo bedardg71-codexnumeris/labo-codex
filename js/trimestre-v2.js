@@ -3923,7 +3923,8 @@ function populerDropdownsAssemblageV2() {
     // Beta 95.3: Dropdown Pratiques de notation (alignement Primo)
     const selectPratique = document.getElementById('v2-gc-pratique');
     if (selectPratique) {
-        const pratiques = db.getSync('pratiquesNotation', []);
+        // Les pratiques sont stockées dans 'pratiquesConfigurables' (module pratiques-materiel.js)
+        const pratiques = db.getSync('pratiquesConfigurables', []);
 
         let html = '<option value="">— À compléter quand configurée —</option>';
         pratiques.forEach(p => {
