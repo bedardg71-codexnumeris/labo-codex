@@ -871,6 +871,14 @@ function obtenirEtudiantsCoursActif() {
     // 🆕 BETA 95.3 : Mode cours = tous les groupes fusionnés
     const estModeCours = coursActif._modeCours || coursActif.groupe === null;
 
+    // DEBUG (11 jan 2026)
+    console.log('[Modes] DEBUG infoCours:', {
+        id: coursActif.id,
+        groupe: coursActif.groupe,
+        _modeCours: coursActif._modeCours,
+        estModeCours
+    });
+
     // Filtrer par coursId (et optionnellement par groupe)
     const etudiantsFiltres = tousEtudiants.filter(e => {
         // Compatibilité : si l'étudiant n'a pas de coursId, vérifier le groupe
@@ -905,6 +913,10 @@ function obtenirEtudiantsCoursActif() {
 
     const modeLabel = estModeCours ? 'tous groupes' : `groupe ${coursActif.groupe}`;
     console.log(`[Modes] Étudiants cours actif (${coursActif.id}, ${modeLabel}): ${etudiantsFiltres.length}/${tousEtudiants.length}`);
+
+    // DEBUG (11 jan 2026) : Afficher les groupes distincts des étudiants
+    const groupesDistincts = [...new Set(tousEtudiants.map(e => e.groupe))];
+    console.log('[Modes] DEBUG groupes étudiants:', groupesDistincts);
 
     // Appliquer le filtrage par mode (exclure groupe 9999 en mode normal)
     return filtrerEtudiantsParMode(etudiantsFiltres);

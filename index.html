@@ -3370,6 +3370,7 @@
                     <div class="carte">
                         <h3 class="carte-titre-bleu carte-titre-avec-toggle">
                             <span>Indicateurs globaux du groupe</span>
+                            <span id="badge-nb-etudiants-indicateurs" class="badge-compteur-header" style="margin-left: auto; margin-right: 10px; font-size: 0.75rem; padding: 3px 10px; background: rgba(255,255,255,0.2); border-radius: 20px; color: white; font-weight: normal;"></span>
                             <span class="emoji-container">
                                 <span class="primo-aide" data-target="note-indicateurs">😎</span>
                             </span>
@@ -3428,10 +3429,10 @@
                     </div>
 
                     <div class="carte">
-                        <h3 class="carte-titre-bleu">Étudiant·es inscrit·es
-                            <span id="compteur-tableau-bord-liste"
-                                style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem; font-weight: normal;">
-                                (0 étudiant·e)
+                        <h3 class="carte-titre-bleu" style="display: flex; align-items: center; justify-content: space-between;">
+                            <span>Étudiant·es inscrit·es</span>
+                            <span id="compteur-tableau-bord-liste" class="badge-compteur-header"
+                                style="font-size: 0.75rem; padding: 3px 10px; background: rgba(255,255,255,0.2); border-radius: 20px; color: white; font-weight: normal;">
                             </span>
                         </h3>
 
@@ -14219,7 +14220,7 @@
     <!-- PRIORITÉ 1: Fondations -->
     <script src="js/config.js?v=2026010203"></script>
     <script src="js/navigation.js?v=2026010211"></script>
-    <script src="js/modes.js?v=2025123004"></script>
+    <script src="js/modes.js?v=2026011107"></script>
 
     <!-- ✅ Pack de démarrage AVANT donnees-demo (expose PACK_DEMARRAGE) -->
     <script src="js/pack-demarrage.js?v=2025123110"></script>
@@ -14228,7 +14229,7 @@
     <!-- PRIORITÉ 2: Données de base -->
     <script src="js/trimestres.js?v=2025123102"></script> <!-- Beta 95 : Gestion multi-trimestres -->
     <script src="js/trimestre.js?v=2025123109"></script>
-    <script src="js/trimestre-v2.js?v=2026010816"></script> <!-- Beta 95.2 : persistance + suppression horaires -->
+    <script src="js/trimestre-v2.js?v=2026011110"></script> <!-- Beta 95.4 : fix badge nb personnes -->
 
     <!-- ENTITÉS Beta 95.2 - Architecture modulaire groupe-cours -->
     <script src="js/entites/cours-entite.js?v=2026010601"></script>
@@ -14243,7 +14244,7 @@
     <script src="js/pratiques-materiel.js?v=2026010601"></script> <!-- Beta 95 : retirerPratiqueDeBibliothequeMateriel -->
     <script src="js/preferences-v2.js?v=2026010210"></script> <!-- Beta 95 : + Découpler P/R dans dépistage -->
     <script src="js/donnees-v2.js?v=2025121801"></script> <!-- Beta 95 : Onglet Données restructuré -->
-    <script src="js/etudiants.js?v=2025122902"></script>
+    <script src="js/etudiants.js?v=2026011107"></script>
     <script src="js/productions-bibliotheque.js?v=2026010218"></script> <!-- + import depuis trimestres -->
     <script src="js/productions.js?v=2026010601"></script> <!-- + import depuis bibliothèque corrigé -->
     <script src="js/grilles-bibliotheque.js?v=2026010220"></script> <!-- refactoring: plus de hardcodé -->

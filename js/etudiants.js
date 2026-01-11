@@ -889,9 +889,18 @@ function afficherListeEtudiantsConsultation() {
     // NOUVEAU: Mettre à jour les statistiques
     mettreAJourStatistiques(etudiantsFiltres);
 
-    // Mettre à jour le compteur
+    // Mettre à jour les badges nombre de personnes
+    const nbEtudiants = etudiantsFiltres.length;
+    const labelEtudiants = nbEtudiants + ' personne' + (nbEtudiants > 1 ? 's' : '');
+
     if (compteur) {
-        compteur.textContent = '(' + etudiantsFiltres.length + ' étudiant' + (etudiantsFiltres.length > 1 ? '·es' : '·e') + ')';
+        compteur.textContent = labelEtudiants;
+    }
+
+    // Badge dans "Indicateurs globaux du groupe"
+    const badgeIndicateurs = document.getElementById('badge-nb-etudiants-indicateurs');
+    if (badgeIndicateurs) {
+        badgeIndicateurs.textContent = labelEtudiants;
     }
 
     // Si aucun étudiant
