@@ -112,74 +112,10 @@ async function peuplerDropdownGroupeCoursActif() {
  * Change le groupe-cours actif depuis le header
  * 🆕 BETA 95.2
  */
-async function changerGroupeCoursDepuisHeader(groupeCoursId) {
-    await changerGroupeCoursActifV2(groupeCoursId);
-}
-
-/**
- * Change le groupe-cours actif depuis le dropdown
- * 🆕 BETA 95.2
- */
-async function changerGroupeCoursActifV2(groupeCoursId) {
-    if (!groupeCoursId) {
-        // Désélectionner le groupe-cours actif
-        db.setSync('groupeCoursActif', null);
-        console.log('[Entités UI] Groupe-cours désélectionné');
-        return;
-    }
-
-    console.log('[Entités UI] Changement groupe-cours actif vers:', groupeCoursId);
-
-    // Obtenir le trimestre actif
-    const trimestres = db.getSync('trimestres', []);
-    const trimestreActif = trimestres.find(t => t.actif);
-    if (!trimestreActif) return;
-
-    // Obtenir le groupe-cours
-    const cleGC = `${trimestreActif.id.toLowerCase()}_groupesCours`;
-    const groupesCours = db.getSync(cleGC, []);
-    const gc = groupesCours.find(g => g.id === groupeCoursId);
-
-    if (!gc) {
-        console.warn('[Entités UI] Groupe-cours non trouvé:', groupeCoursId);
-        return;
-    }
-
-    // Mettre à jour le flag actif
-    groupesCours.forEach(g => g.actif = (g.id === groupeCoursId));
-    db.setSync(cleGC, groupesCours);
-
-    // Stocker groupeCoursActif
-    db.setSync('groupeCoursActif', {
-        id: gc.id,
-        trimestreId: gc.trimestreId || trimestreActif.id,
-        coursId: gc.coursId,
-        enseignantId: gc.enseignantId,
-        horaireId: gc.horaireId,
-        groupe: gc.groupe
-    });
-
-    // Synchroniser vers infoCours pour compatibilité
-    if (typeof GroupeCoursEntite !== 'undefined' && typeof GroupeCoursEntite.synchroniserInfoCours === 'function') {
-        await GroupeCoursEntite.synchroniserInfoCours(groupeCoursId);
-    }
-
-    // Synchroniser le dropdown header
-    const selectHeader = document.getElementById('selectGroupeCoursHeader');
-    if (selectHeader) selectHeader.value = groupeCoursId || '';
-
-    // Rafraîchir l'en-tête contextuel
-    if (typeof mettreAJourContexteEntete === 'function') {
-        mettreAJourContexteEntete();
-    }
-
-    // Notification
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces('Groupe-cours activé');
-    }
-
-    console.log('[Entités UI] Groupe-cours activé:', gc.id);
-}
+// ✅ CORRIGÉ (11 jan 2026) : Suppression de la duplication
+// Ces fonctions sont maintenant définies dans trimestre-v2.js
+// qui gère correctement le mode "cours:" (tous groupes fusionnés)
+// Voir changerGroupeCoursDepuisHeader et changerGroupeCoursActifV2 dans trimestre-v2.js
 
 // Initialisation au chargement du DOM
 document.addEventListener('DOMContentLoaded', () => {

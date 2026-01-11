@@ -5488,6 +5488,9 @@ async function changerGroupeCoursDepuisHeader(groupeCoursId) {
  * 🆕 BETA 95.3 (10 jan 2026) : Supporte le mode "cours" (tous groupes fusionnés)
  */
 async function changerGroupeCoursActifV2(valeur) {
+    // DEBUG (11 jan 2026)
+    console.log('[Trimestre V2] changerGroupeCoursActifV2 appelée avec:', valeur);
+
     if (!valeur) {
         db.setSync('groupeCoursActif', null);
         await db.set('infoCours', null);
@@ -5525,7 +5528,8 @@ async function changerGroupeCoursActifV2(valeur) {
             horaireId: null
         });
 
-        await db.set('infoCours', {
+        // ✅ CORRIGÉ (11 jan 2026) : Utiliser setSync pour éviter problèmes localStorage saturé
+        db.setSync('infoCours', {
             id: coursId,
             codeCours: sigle,
             nomCours: coursInfo?.nomCours || '',
@@ -5574,7 +5578,8 @@ async function changerGroupeCoursActifV2(valeur) {
     }
 
     groupesCours.forEach(g => g.actif = (g.id === groupeCoursId));
-    db.setSync(cleGC, groupesCours);
+    // ✅ CORRIGÉ (11 jan 2026) : Utiliser db.set pour synchroniser IndexedDB avant synchroniserInfoCours
+    await db.set(cleGC, groupesCours);
 
     db.setSync('groupeCoursActif', {
         modeCours: false,
@@ -5586,11 +5591,27 @@ async function changerGroupeCoursActifV2(valeur) {
         groupe: gc.groupe || gc.groupeNum
     });
 
-    // ✅ CORRIGÉ (8 janvier 2026) : Passer trimestreId, pas groupeCoursId
-    const trimestreIdSync = gc.trimestreId || (trimestreActif ? trimestreActif.id : null);
-    if (trimestreIdSync && typeof GroupeCoursEntite !== 'undefined' && typeof GroupeCoursEntite.synchroniserInfoCours === 'function') {
-        await GroupeCoursEntite.synchroniserInfoCours(trimestreIdSync);
+    // ✅ CORRIGÉ (11 jan 2026) : Mettre à jour infoCours directement (évite problèmes timing IndexedDB)
+    const cours = db.getSync('cours', []);
+    const listeCours = db.getSync('listeCours', []);
+    let coursInfo = cours.find(c => c.id === gc.coursId);
+    if (!coursInfo) {
+        coursInfo = listeCours.find(c => c.id === gc.coursId || c.sigle === gc.coursId);
     }
+    const sigleGC = coursInfo?.codeCours || coursInfo?.code || coursInfo?.sigle || '';
+
+    // ✅ Utiliser setSync car infoCours doit être lu de manière synchrone par obtenirEtudiantsCoursActif
+    db.setSync('infoCours', {
+        id: gc.coursId,  // ID du cours (pour compatibilité avec e.coursId des étudiants)
+        codeCours: sigleGC,
+        nomCours: coursInfo?.nomCours || '',
+        groupe: gc.groupe || gc.groupeNum,
+        _modeCours: false,
+        _source: 'groupe-cours',
+        _groupeCoursId: gc.id  // ID du groupe-cours
+    });
+
+    console.log('[Trimestre V2] infoCours mis à jour pour groupe:', gc.groupe || gc.groupeNum);
 
     const selectHeader = document.getElementById('selectGroupeCoursHeader');
     if (selectHeader) selectHeader.value = groupeCoursId || '';

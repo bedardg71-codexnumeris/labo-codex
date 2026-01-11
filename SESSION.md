@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 95.4
 
-**Date** : 10 janvier 2026
-**Version** : Beta 95.4 (build 0110b)
+**Date** : 11 janvier 2026
+**Version** : Beta 95.4 (build 0111a)
 **Statut** : Application fonctionnelle pour H2026
 
 ---
@@ -22,8 +22,24 @@
 - Design harmonise (Design System v7)
 - Message de bienvenue et notes de version a jour
 - Variables CSS adoptees massivement (box-shadow 43%, border-radius 95%)
+- **Badge nb personnes** : S'ajuste au groupe-cours selectionne
 
-### Derniere tache completee (10 janvier)
+### Derniere tache completee (11 janvier)
+- **BADGE NB PERSONNES** : Ajout et correction du filtrage par groupe-cours
+  - **Ajout badge** : "Indicateurs globaux du groupe" affiche maintenant le nombre de personnes
+  - **Terminologie** : "etudiant(s)" remplace par "personnes"
+  - **Correction filtrage** : Le badge s'ajuste correctement quand on change de groupe-cours
+  - **Probleme resolu** : `infoCours.id` utilisait l'ID groupe-cours au lieu de l'ID cours
+  - **Probleme resolu** : `db.set` async n'ecrivait pas dans localStorage sature → utilisation `db.setSync`
+  - **Suppression duplication** : `changerGroupeCoursActifV2` n'existe plus que dans trimestre-v2.js
+  - **Fichiers modifies** :
+    - `js/trimestre-v2.js` : Mise a jour directe de `infoCours` avec `db.setSync` + correction `id: gc.coursId`
+    - `js/etudiants.js` : Badge dans header "Indicateurs globaux" + terminologie "personnes"
+    - `js/modes.js` : Logs DEBUG pour diagnostic (a retirer plus tard)
+    - `js/entites-ui.js` : Suppression fonctions dupliquees
+    - `index.html` : Ajout span badge + mise a jour versions scripts
+
+### Tache precedente (10 janvier)
 - **REDESIGN UX** : Categories Selection/Obligatoires (Beta 95.4)
   - **Separation design/notation** : Champ categorie retire du formulaire Production
   - **Nouveau design** : Deux cartes cote a cote dans Structure des evaluations
@@ -114,10 +130,10 @@
 ## BACKLOG BETA 95.x (A FAIRE)
 
 ### Prioritaire
-- [ ] **Separation modal Bienvenue** : Deux modals distincts
+- [x] **Separation modal Bienvenue** : Deux modals distincts (FAIT)
   - ✉️ News (nouveautes par version : 95.4, 95.3, 95.2, 95.1)
   - 😎 Introduction (guide demarrage, Primo, Mode Assiste)
-  - Recuperer contenu "Docu Pour les testeurs.txt" pour Beta 95.1
+  - Contenu Beta 95.1 integre depuis "Docu Pour les testeurs.txt"
 - [ ] **Systeme modals info 😎 (Mode Assiste)** : Aide contextuelle
   - Boutons 😎 a differents endroits de l'interface
   - Explique fonctionnalites, concepts, astuces

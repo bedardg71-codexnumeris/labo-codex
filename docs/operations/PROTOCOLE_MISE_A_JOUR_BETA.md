@@ -1,8 +1,25 @@
 # Protocole de mise a jour des Beta
 
-**Version** : 1.0
-**Date** : 9 janvier 2026
+**Version** : 1.1
+**Date** : 10 janvier 2026
 **Auteur** : Gregoire Bedard / Claude Code
+
+---
+
+## REGLE IMPORTANTE : Numerotation manuelle
+
+**La numerotation des versions n'est JAMAIS automatique.**
+
+Au debut de chaque session de travail, Claude doit demander :
+
+> "Souhaites-tu incrementer le numero de version pour cette session ?"
+> - Oui → Passer a 95.X+1 (ou build suivant)
+> - Non → Rester sur la version actuelle
+
+**Raisons** :
+- Plusieurs sessions peuvent concerner la meme version
+- Un petit correctif ne merite pas toujours un nouveau numero
+- L'utilisateur garde le controle sur le versioning
 
 ---
 
@@ -249,5 +266,6 @@ Voir fichier separe : `scripts/update-version.sh`
 
 | Version | Date | Changement |
 |---------|------|------------|
+| 1.1 | 10 jan 2026 | Ajout regle numerotation manuelle (demander a l'utilisateur) |
 | 1.0 | 9 jan 2026 | Creation initiale |
 
