@@ -24,32 +24,27 @@
 - Variables CSS adoptees massivement (box-shadow 43%, border-radius 95%)
 
 ### Derniere tache completee (10 janvier)
-- **NOUVELLE FONCTIONNALITE** : Categories Selection/Obligatoires (Beta 95.4)
+- **REDESIGN UX** : Categories Selection/Obligatoires (Beta 95.4)
+  - **Separation design/notation** : Champ categorie retire du formulaire Production
+  - **Nouveau design** : Deux cartes cote a cote dans Structure des evaluations
+    - Carte "Selection (N meilleures)" : nombre a retenir + ponderation + checkboxes
+    - Carte "Obligatoires (toujours comptees)" : ponderation + checkboxes
+  - **Calcul automatique** : Ponderation unitaire affichee en temps reel
+    - Selection : 65% / 4 = 16.25% par production retenue
+    - Obligatoires : 35% / 2 = 17.5% par production
+  - **Checkboxes exclusives** : Une production ne peut etre que dans UNE categorie
+    - Cocher dans Selection → grise dans Obligatoires
+    - Indication visuelle quand deja assignee ailleurs
+  - **Fichiers modifies** :
+    - `index.html` : Nouveau HTML cartes avec checkboxes + retrait champ categorie
+    - `js/pratiques-materiel.js` : Nouvelles fonctions checkboxes + calcul unitaire
+    - `js/productions.js` : Preserve categorie existante (plus de lecture du champ retire)
+
+- **Tache precedente** : Categories Selection/Obligatoires (implementation initiale)
   - Permet de distinguer des productions "pool" (N meilleures retenues) vs "toujours comptees"
   - **Cas d'usage** : 4 meilleures sur 8 artefacts (65%) + 2 certifications obligatoires (35%)
-  - **Phase 1** : Champ `categorie` ajoute aux productions (selection | obligatoire | null)
-  - **Phase 2** : Configuration dans Reglages → Pratique de notation
-    - Checkbox "Activer categories Selection/Obligatoires"
-    - Nombre a retenir pour Selection + ponderations
-    - Validation que la somme = 100%
-  - **Phase 3** : Fonction `calculerNoteAvecCategories()` dans portfolio.js
-    - Integration dans `calculerPerformance()` de pratique-pan-standards.js
-  - **Phase 4** : Assistant de migration pour productions existantes
-    - Modal avec actions rapides "Tout en Selection" / "Tout en Obligatoire"
-  - **Phase 5** : Questions Primo pour configurer les categories
-    - 5 nouvelles questions conditionnelles
-  - **UX amelioree** : Liste des productions directement dans la config
-    - Assignation rapide par dropdown pour chaque production
-    - Boutons "Tout → Selection" et "Tout → Obligatoire"
-    - Code couleur visuel (bleu = Selection, orange = Obligatoire)
-    - Compteur de productions par categorie
-  - **Fichiers modifies** :
-    - `js/productions.js` : Champ categorie + assistant migration
-    - `js/portfolio.js` : calculerNoteAvecCategories() + obtenirConfigCategories()
-    - `js/pratiques-materiel.js` : Section configuration + validation
-    - `js/pratiques/pratique-pan-standards.js` : Integration dans calculerPerformance()
-    - `js/primo-questions.js` : 5 questions categories
-    - `index.html` : Select categorie + section config categories
+  - Fonction `calculerNoteAvecCategories()` dans portfolio.js
+  - Questions Primo pour configurer les categories
 
 - **Tache precedente** : Mode "Cours" dans le dropdown de l'en-tete
   - Permet de selectionner un cours entier (tous les groupes fusionnes)
@@ -112,9 +107,28 @@
 
 ## PROCHAINE TACHE
 
-**Backlog vide - Choisir une nouvelle direction** :
-- Beta 95.x stable et fonctionnelle
-- Prochaine etape : Beta 96 (modularisation) ou nouvelles fonctionnalites
+**Choisir une tache dans le backlog Beta 95.x**
+
+---
+
+## BACKLOG BETA 95.x (A FAIRE)
+
+### Prioritaire
+- [ ] **Separation modal Bienvenue** : Deux modals distincts
+  - ✉️ News (nouveautes par version : 95.4, 95.3, 95.2, 95.1)
+  - 😎 Introduction (guide demarrage, Primo, Mode Assiste)
+  - Recuperer contenu "Docu Pour les testeurs.txt" pour Beta 95.1
+- [ ] **Systeme modals info 😎 (Mode Assiste)** : Aide contextuelle
+  - Boutons 😎 a differents endroits de l'interface
+  - Explique fonctionnalites, concepts, astuces
+  - Visible uniquement en Mode Assiste
+- [ ] **Badge nb etudiants (uniformisation)** : Afficher badge "X etudiant(s)" dans :
+  - En-tete "Indicateurs globaux du groupe" (Vue d'ensemble)
+  - En-tete "Etudiant·es inscrit·es" (Liste des etudiant·es)
+- [ ] **Optimisation page Trimestre** : Performance et UX
+- [ ] **Tests export/import metadata CC** : Verifier que les metadonnees CC sont correctement exportees et reimportees
+- [ ] **Modularisation design_system.html** : Suite et fin de la separation en modules
+- [ ] **Test securite donnees sensibles** : Audit des donnees stockees (localStorage, IndexedDB)
 
 ---
 
@@ -130,9 +144,9 @@
 
 ---
 
-## BACKLOG BETA 95.x
+## BACKLOG BETA 95.x (COMPLETE)
 
-### Prioritaire
+### Prioritaire (fait)
 - [x] Valider import/export (Productions, Grilles, Echelles, Cartouches, Pratiques)
 - [x] Connexion calendrier avec groupe-cours
 - [x] Saisie des presences avec groupe-cours actif
