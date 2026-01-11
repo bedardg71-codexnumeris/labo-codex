@@ -3099,7 +3099,8 @@
                         <h1>Système de suivi des apprentissages et de construction de la note</h1>
                         <p class="meta">
                             Beta 95.4 <span id="build-numero" class="build-numero"></span>
-                            <span class="pastille-nouveautes" onclick="afficherModalNouveautes()" title="Voir les nouveautés">✉️🔴</span>
+                            <span class="pastille-nouveautes" onclick="afficherModalNouveautes()" title="Nouveautés">✉️</span>
+                            <span class="pastille-intro" onclick="afficherModalIntro()" title="Découvrir l'application">😎</span>
                             <button class="btn-backup-warning" onclick="window.backupReminder.afficherModal()" title="Protégez tes données">⚠️</button>
                         </p>
                     </div>
@@ -3172,6 +3173,7 @@
         </div>
 
         <!-- MODAL NOUVEAUTÉS BETA -->
+        <!-- ========== MODAL NEWS (✉️) ========== -->
         <div id="modalNouveautes" class="modal-overlay">
             <div class="modal-contenu modal-compact">
 
@@ -3179,7 +3181,76 @@
                 <button onclick="fermerModalNouveautes()" class="modal-fermer">✕</button>
 
                 <!-- Titre principal -->
-                <h2 class="modal-titre">Bienvenue dans la Beta 95.4</h2>
+                <h2 class="modal-titre">✉️ Nouveautés</h2>
+
+                <!-- Encadré Nouveautés Beta 95.4 -->
+                <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: 4px; padding: 12px 16px; margin-bottom: 1rem;">
+                    <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Beta 95.4 (10 janvier) :</strong>
+                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
+                        <li><strong>Catégories Sélection/Obligatoires</strong> : Nouveau design avec deux cartes et checkboxes pour classer tes productions (N meilleures vs toujours comptées)</li>
+                        <li><strong>Métadonnées uniformisées</strong> : Panneau cohérent pour tous les éléments avec titre dynamique</li>
+                        <li><strong>Traçabilité contributeurs CC</strong> : Les contributeurs sont automatiquement ajoutés lors des modifications</li>
+                        <li><strong>Wizard Primo amélioré</strong> : Champs Prénom/Nom séparés, pré-remplissage auto, dropdown disciplines</li>
+                    </ul>
+                </div>
+
+                <!-- Beta 95.3 -->
+                <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: 4px; padding: 12px 16px; margin-bottom: 1rem;">
+                    <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Beta 95.3 (9 janvier) :</strong>
+                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
+                        <li><strong>Modal bibliothèque groupe-cours</strong> : Bouton 📚 pour voir, activer ou supprimer tes groupes-cours</li>
+                        <li><strong>Synthèses intelligentes</strong> : Chaque accordéon affiche un résumé calculé (nb étudiants, heures/sem, etc.)</li>
+                        <li><strong>Import depuis trimestre précédent</strong> : Réutilise tes échelles, grilles et productions</li>
+                        <li><strong>Audit module évaluation</strong> : 3 problèmes critiques corrigés</li>
+                    </ul>
+                </div>
+
+                <!-- Beta 95.2 -->
+                <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: 4px; padding: 12px 16px; margin-bottom: 1rem;">
+                    <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Beta 95.2 (6-8 janvier) — Architecture modulaire :</strong>
+                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
+                        <li><strong>Toggles séparés</strong> : Cours, Enseignant·e, Horaire et Groupe-cours sont des entités indépendantes</li>
+                        <li><strong>Profil auteur</strong> : Source unique pour les métadonnées CC</li>
+                        <li><strong>Assemblage flexible</strong> : Combine cours + enseignant·e + horaire + pratique</li>
+                        <li><strong>Migration automatique</strong> : Tes données existantes sont converties</li>
+                    </ul>
+                </div>
+
+                <!-- Beta 95.1 -->
+                <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%); border-left: 3px solid #ffc107; border-radius: 4px; padding: 12px 16px; margin-bottom: 1rem;">
+                    <strong style="color: #856404; display: block; margin-bottom: 8px;">Beta 95.1 (1-5 janvier) — Corrections testeurs :</strong>
+                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6; color: #856404;">
+                        <li><strong>Périodes au lieu d'heures</strong> : Format horaire dynamique selon le nombre de périodes (merci Olivier)</li>
+                        <li><strong>Finalisation Primo</strong> : L'interface se met à jour après la configuration (merci Olivier)</li>
+                        <li><strong>Sauvegarde des grilles</strong> : Les nouvelles grilles s'ajoutent à la bibliothèque (merci Bruno)</li>
+                        <li><strong>Heures non piles</strong> : Entrée d'heures comme 8h55 dans Primo (merci Bruno)</li>
+                        <li><strong>Import/Export amélioré</strong> : Import sélectif, protection des données (merci Bruno, Grégoire)</li>
+                    </ul>
+                </div>
+
+                <!-- Lien vers notes de version complètes -->
+                <p style="text-align: center; margin: 1rem 0;">
+                    <a href="#" onclick="fermerModalNouveautes(); allerVersNotesDeVersion(); return false;" style="color: var(--bleu-principal);">Voir toutes les notes de version →</a>
+                </p>
+
+                <!-- Bouton fermer en bas -->
+                <div class="modal-actions-centre">
+                    <button onclick="fermerModalNouveautes()" class="btn btn-principal">
+                        Fermer
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== MODAL INTRODUCTION (😎) ========== -->
+        <div id="modalIntro" class="modal-overlay">
+            <div class="modal-contenu modal-compact">
+
+                <!-- Bouton fermer -->
+                <button onclick="fermerModalIntro()" class="modal-fermer">✕</button>
+
+                <!-- Titre principal -->
+                <h2 class="modal-titre">😎 Découvrir l'application</h2>
 
                 <!-- Statut application -->
                 <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); border-left: 3px solid #28a745; border-radius: 4px; padding: 12px 16px; margin-bottom: 1rem;">
@@ -3189,52 +3260,6 @@
                         tes groupes d'étudiants et commencer à travailler avec tes groupe-cours.
                     </p>
                 </div>
-
-                <!-- Encadré Nouveautés Beta 95.4 -->
-                <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: 4px; padding: 12px 16px; margin-bottom: 1.5rem;">
-                    <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Nouveautés Beta 95.4 (10 janvier) :</strong>
-                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
-                        <li><strong>Catégories Sélection/Obligatoires</strong> : Nouveau design avec deux cartes et checkboxes pour classer tes productions (N meilleures vs toujours comptées)</li>
-                        <li><strong>Métadonnées uniformisées</strong> : Panneau cohérent pour tous les éléments (Productions, Grilles, Échelles, Cartouches, Pratiques) avec titre dynamique</li>
-                        <li><strong>Traçabilité contributeurs CC</strong> : Les contributeurs sont automatiquement ajoutés lors des modifications</li>
-                        <li><strong>Wizard Primo amélioré</strong> : Champs Prénom/Nom séparés, pré-remplissage auto depuis le profil enseignant, dropdown disciplines</li>
-                        <li><strong>Corrections de bugs</strong> : Persistance grilles et échelles après modification, dropdown grilles filtré par trimestre</li>
-                    </ul>
-                    <p style="margin: 8px 0 0 0; font-size: 0.85rem;">
-                        <a href="#" onclick="fermerModalNouveautes(); allerVersNotesDeVersion(); return false;" style="color: var(--bleu-principal);">Voir toutes les notes de version →</a>
-                    </p>
-                </div>
-
-                <!-- Encadré testeurs (rappel Beta 95.3) -->
-                <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%); border-left: 3px solid #ffc107; border-radius: 4px; padding: 12px 16px; margin-bottom: 1rem;">
-                    <strong style="color: #856404; display: block; margin-bottom: 8px;">Rappel Beta 95.3 :</strong>
-                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6; color: #856404;">
-                        <li><strong>Modal bibliothèque groupe-cours</strong> : Bouton 📚 pour voir, activer ou supprimer tes groupes-cours</li>
-                        <li><strong>Synthèses intelligentes</strong> : Chaque accordéon affiche un résumé calculé (nb étudiants, heures/sem, etc.)</li>
-                        <li><strong>Import depuis trimestre précédent</strong> : Réutilise tes échelles, grilles et productions d'un trimestre à l'autre</li>
-                    </ul>
-                </div>
-
-                <!-- Nouveautés Beta 95.2 — Architecture modulaire -->
-                <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: 4px; padding: 12px 16px; margin-bottom: 1.5rem;">
-                    <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Nouveautés Beta 95.2 — Architecture modulaire :</strong>
-                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
-                        <li><strong>Toggles séparés</strong> : Cours, Enseignant·e, Horaire et Groupe-cours sont maintenant des entités indépendantes</li>
-                        <li><strong>Profil auteur</strong> : Tes informations enseignant·e servent de source unique pour les métadonnées CC</li>
-                        <li><strong>Assemblage flexible</strong> : Crée des groupe-cours en combinant cours + enseignant·e + horaire + pratique</li>
-                        <li><strong>Réutilisation</strong> : Un même cours peut être associé à plusieurs groupes avec des horaires différents</li>
-                        <li><strong>Migration automatique</strong> : Tes données existantes sont converties vers la nouvelle architecture</li>
-                    </ul>
-                </div>
-
-                <!-- Rappel Beta 95 -->
-                <div class="modal-section">
-                    <h3>Rappel : Beta 95</h3>
-                    <p>Cette version te permet de gérer <strong>plusieurs trimestres et plusieurs cours</strong> simultanément. Tes trimestres terminés sont automatiquement archivés pour protéger tes données.</p>
-                    <p style="margin-top: 0.8rem;">La section <strong>Construction de la note</strong> propose une bibliothèque de pratiques prédéfinies (sommative, standards, spécifications) avec des configurations adaptées à différentes disciplines.</p>
-                </div>
-
-                <hr style="border: none; border-top: 1px solid var(--gris-clair); margin: 1.5rem 0;">
 
                 <!-- Par où commencer -->
                 <div class="modal-section">
@@ -3265,8 +3290,7 @@
 
                     <p>Depuis la brève présentation de l'application aux membres de la communauté PAN en novembre, j'ai corrigé vraiment beaucoup de choses. Mais j'ai très peu de retours sur l'utilisation réelle : est-ce que les pratiques de notation fonctionnent pour toi ? Les fonctionnalités de suivi répondent-elles à tes besoins ?</p>
 
-                    <p style="margin-top: 1rem;">Je ne peux pas deviner ta façon d'enseigner ni celle des autres collègues. Je ne connais ni tes contraintes particulières ni les frictions que tu peux rencontrer. J'estime la Beta 95.4 assez stable pour un usage quotidien. C'est le moment idéal pour me dire ce qui fonctionne, ce qui coince, ce qui manque.</p>
-                    <p style="margin-top: 1rem;">L'objectif, en bout de ligne, c'est d'avoir un outil qui ressemble à nos pratiques et qui supporte les enseignant·es qui veulent renouveler leur pédagogie et leur pratique de notation. Mais un tel projet ne peut être réalisé par un seul individu. Il doit mobiliser notre intelligence collective.</p>
+                    <p style="margin-top: 1rem;">Je ne peux pas deviner ta façon d'enseigner ni celle des autres collègues. Je ne connais ni tes contraintes particulières ni les frictions que tu peux rencontrer. C'est le moment idéal pour me dire ce qui fonctionne, ce qui coince, ce qui manque.</p>
 
                     <p style="margin-top: 1rem;">Utilise le formulaire dans <strong>AIDE → Signaler un bug</strong>, ou partage-moi simplement :</p>
                     <ul class="modal-liste">
@@ -3287,7 +3311,7 @@
 
                 <!-- Bouton fermer en bas -->
                 <div class="modal-actions-centre">
-                    <button onclick="fermerModalNouveautes()" class="btn btn-principal">
+                    <button onclick="fermerModalIntro()" class="btn btn-principal">
                         Fermer
                     </button>
                 </div>
@@ -14430,6 +14454,26 @@
         }
 
         /**
+         * Affiche le modal Introduction (😎)
+         */
+        function afficherModalIntro() {
+            const modal = document.getElementById('modalIntro');
+            if (modal) {
+                modal.classList.add('actif');
+            }
+        }
+
+        /**
+         * Ferme le modal Introduction
+         */
+        function fermerModalIntro() {
+            const modal = document.getElementById('modalIntro');
+            if (modal) {
+                modal.classList.remove('actif');
+            }
+        }
+
+        /**
          * Affiche le numéro de build dans l'entête
          */
         function afficherBuildNumero() {
@@ -14441,12 +14485,22 @@
 
         // Initialisation au chargement
         document.addEventListener('DOMContentLoaded', function() {
-            // Fermer le modal si on clique sur l'overlay
-            const modal = document.getElementById('modalNouveautes');
-            if (modal) {
-                modal.addEventListener('click', function(e) {
-                    if (e.target === modal) {
+            // Fermer le modal News si on clique sur l'overlay
+            const modalNews = document.getElementById('modalNouveautes');
+            if (modalNews) {
+                modalNews.addEventListener('click', function(e) {
+                    if (e.target === modalNews) {
                         fermerModalNouveautes();
+                    }
+                });
+            }
+
+            // Fermer le modal Intro si on clique sur l'overlay
+            const modalIntro = document.getElementById('modalIntro');
+            if (modalIntro) {
+                modalIntro.addEventListener('click', function(e) {
+                    if (e.target === modalIntro) {
+                        fermerModalIntro();
                     }
                 });
             }
@@ -14461,6 +14515,8 @@
         // Export des fonctions pour usage global
         window.afficherModalNouveautes = afficherModalNouveautes;
         window.fermerModalNouveautes = fermerModalNouveautes;
+        window.afficherModalIntro = afficherModalIntro;
+        window.fermerModalIntro = fermerModalIntro;
         window.allerVersNotesDeVersion = allerVersNotesDeVersion;
         window.BUILD_ID = BUILD_ID;
         window.VERSION_MAJEURE = VERSION_MAJEURE;
