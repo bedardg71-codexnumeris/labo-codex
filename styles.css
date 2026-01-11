@@ -541,6 +541,21 @@ h1, h2, h3, h4 {
     transform: scale(1.2);
 }
 
+/* Pastille Introduction (😎) */
+.pastille-intro {
+    display: inline-block;
+    cursor: pointer;
+    transition: transform 0.2s;
+    pointer-events: auto;
+    font-size: 0.85rem;
+    line-height: 1;
+    margin-left: 4px;
+}
+
+.pastille-intro:hover {
+    transform: scale(1.2);
+}
+
 /* Bouton warning backup (rappel sauvegarde) */
 .btn-backup-warning {
     background: none;
