@@ -675,13 +675,30 @@ function calculerIndicesEtudiant(da) {
     // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
     const indicesA = obtenirDonneesSelonMode('indicesAssiduite') || {};
 
-    // Récupérer les indices C et P depuis portfolio.js (Single Source of Truth)
-    const indicesCP = obtenirDonneesSelonMode('indicesCP') || {};
-    const indicesCPEtudiant = indicesCP[da]?.actuel || null;
+    // 🆕 BETA 95.5 : Utiliser obtenirIndicesCP() pour rétrocompatibilité
+    // Gère automatiquement ancien format (SOM/PAN) et nouveau format (pratique unique)
+    const indicesCPEtudiant = typeof obtenirIndicesCP === 'function'
+        ? obtenirIndicesCP(da)
+        : null;
 
-    // 🔀 LECTURE DEPUIS LES DEUX BRANCHES
-    const indicesSOM = indicesCPEtudiant?.SOM || null;
-    const indicesPAN = indicesCPEtudiant?.PAN || null;
+    // 🆕 BETA 95.5 : Détecter le format des données
+    // Ancien format : { SOM: {C, P, E}, PAN: {C, P, E} }
+    // Nouveau format : { pratique, C, P, E }
+    const estNouveauFormat = indicesCPEtudiant && !indicesCPEtudiant.SOM && indicesCPEtudiant.C !== undefined;
+
+    let indicesSOM = null;
+    let indicesPAN = null;
+
+    if (estNouveauFormat) {
+        // 🆕 BETA 95.5 : Nouveau format - pratique unique
+        // Utiliser les mêmes valeurs pour SOM et PAN (la pratique active)
+        indicesSOM = { C: indicesCPEtudiant.C, P: indicesCPEtudiant.P, E: indicesCPEtudiant.E };
+        indicesPAN = { C: indicesCPEtudiant.C, P: indicesCPEtudiant.P, E: indicesCPEtudiant.E };
+    } else if (indicesCPEtudiant) {
+        // Ancien format - branches SOM/PAN
+        indicesSOM = indicesCPEtudiant.SOM || null;
+        indicesPAN = indicesCPEtudiant.PAN || null;
+    }
 
     // Structure complète avec sommatif ET alternatif
     // IMPORTANT: indicesA contient maintenant des objets { indice, heuresPresentes, heuresOffertes, nombreSeances }
@@ -693,14 +710,12 @@ function calculerIndicesEtudiant(da) {
             assiduite: (typeof assiduiteSommatif === 'object') ? assiduiteSommatif.indice : (assiduiteSommatif || 0),
             completion: indicesSOM ? indicesSOM.C / 100 : 0,
             performance: indicesSOM ? indicesSOM.P / 100 : 0,
-            // ✅ NOUVEAU (7 déc 2025): Lire E depuis indicesCP (SST) au lieu de recalculer
             engagement: indicesSOM && indicesSOM.E !== undefined ? indicesSOM.E : 0
         },
         alternatif: {
             assiduite: (typeof assiduiteAlternatif === 'object') ? assiduiteAlternatif.indice : (assiduiteAlternatif || 0),
             completion: indicesPAN ? indicesPAN.C / 100 : 0,
             performance: indicesPAN ? indicesPAN.P / 100 : 0,
-            // ✅ NOUVEAU (7 déc 2025): Lire E depuis indicesCP (SST) au lieu de recalculer
             engagement: indicesPAN && indicesPAN.E !== undefined ? indicesPAN.E : 0
         }
     };

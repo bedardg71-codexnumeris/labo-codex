@@ -947,9 +947,54 @@ function etudiantDansCoursActif(etudiant) {
     return etudiant.groupe === groupeCours;
 }
 
+/**
+ * 🆕 BETA 95.5 : Obtient la pratique de notation active du groupe-cours
+ * Retourne l'ID de la pratique (ex: "sommative", "pan-standards")
+ *
+ * @returns {string|null} - ID de la pratique active ou null si non définie
+ */
+function obtenirPratiqueActiveGroupeCours() {
+    // 1. Essayer depuis groupeCoursActif (source principale)
+    const gcActif = db.getSync('groupeCoursActif', null);
+    if (gcActif && gcActif.pratiqueId) {
+        console.log('[Modes] Pratique active depuis groupeCoursActif:', gcActif.pratiqueId);
+        return gcActif.pratiqueId;
+    }
+
+    // 2. Essayer depuis infoCours (rétrocompatibilité)
+    const infoCours = db.getSync('infoCours', null);
+    if (infoCours && infoCours.pratiqueId) {
+        console.log('[Modes] Pratique active depuis infoCours:', infoCours.pratiqueId);
+        return infoCours.pratiqueId;
+    }
+
+    // 3. Essayer depuis le groupe-cours complet dans groupesCours
+    if (gcActif && gcActif.id) {
+        const cleGC = typeof cle === 'function' ? cle('groupesCours') : 'groupesCours';
+        const groupesCours = db.getSync(cleGC, []);
+        const gc = groupesCours.find(g => g.id === gcActif.id);
+        if (gc && gc.pratiqueId) {
+            console.log('[Modes] Pratique active depuis groupesCours:', gc.pratiqueId);
+            return gc.pratiqueId;
+        }
+    }
+
+    // 4. Fallback : lire depuis modalitesEvaluation (ancienne méthode)
+    const modalites = db.getSync('modalitesEvaluation', {});
+    if (modalites.pratiqueNotation) {
+        console.log('[Modes] Pratique active depuis modalitesEvaluation:', modalites.pratiqueNotation);
+        return modalites.pratiqueNotation;
+    }
+
+    // 5. Défaut : sommative
+    console.warn('[Modes] Aucune pratique définie, utilisation par défaut: sommative');
+    return 'sommative';
+}
+
 // Exporter les nouvelles fonctions
 window.obtenirEtudiantsCoursActif = obtenirEtudiantsCoursActif;
 window.etudiantDansCoursActif = etudiantDansCoursActif;
+window.obtenirPratiqueActiveGroupeCours = obtenirPratiqueActiveGroupeCours;
 
 // ============================================
 // INITIALISATION AUTOMATIQUE

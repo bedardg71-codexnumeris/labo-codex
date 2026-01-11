@@ -1,7 +1,7 @@
-# SESSION ACTIVE - BETA 95.4
+# SESSION ACTIVE - BETA 95.5
 
 **Date** : 11 janvier 2026
-**Version** : Beta 95.4 (build 0111a)
+**Version** : Beta 95.5 (build 0111b)
 **Statut** : Application fonctionnelle pour H2026
 
 ---
@@ -25,6 +25,35 @@
 - **Badge nb personnes** : S'ajuste au groupe-cours selectionne
 
 ### Derniere tache completee (11 janvier)
+- **COMPATIBILITE DONNEES A2025 (Beta 95.5)** : Correction affichage indices
+  - **Probleme** : Badge "0 personne" et barres vides pour trimestres anterieurs
+  - **Cause 1** : `infoCours` non initialise quand changement de trimestre
+  - **Cause 2** : `tableau-bord-apercu.js` lisait directement `.SOM/.PAN` (ancien format)
+  - **Corrections** :
+    - Auto-selection du premier groupe-cours quand changement trimestre
+    - Detection format ancien (SOM/PAN) vs nouveau (pratique unique)
+    - Retrocompatibilite complete pour les deux formats
+  - **Fichiers modifies** :
+    - `js/trimestre-v2.js` : Auto-selection groupe-cours dans `peuplerDropdownGroupeCoursActif()`
+    - `js/tableau-bord-apercu.js` : Detection format dans `calculerIndicesEtudiant()`
+
+- **OPTIMISATION INDICES C/P (Beta 95.5)** : Migration IndexedDB + pratique unique
+  - **Probleme resolu** : Saturation localStorage avec calcul DUAL SOM/PAN
+  - **Solution** :
+    - Stockage principal dans IndexedDB (pas de limite de taille)
+    - Calcul d'une seule pratique (pratique active du groupe-cours)
+    - Structure simplifiee : `{ date, pratique, C, P, E, details }`
+  - **Nouvelles fonctions** :
+    - `obtenirPratiqueActiveGroupeCours()` dans modes.js
+    - `obtenirIndicesCPAsync(da)` pour lecture async
+    - `calculerEtStockerIndicesCP()` maintenant async
+  - **Retrocompatibilite** : `obtenirIndicesCP(da, 'SOM')` fonctionne toujours
+  - **Bug corrige** : db.js memoryCache pour donnees > localStorage
+  - **Fichiers modifies** :
+    - `js/portfolio.js` : Refonte calcul + nouvelles fonctions lecture
+    - `js/modes.js` : obtenirPratiqueActiveGroupeCours()
+    - `js/db.js` : Fix memoryCache pour QuotaExceededError
+
 - **BADGE NB PERSONNES** : Ajout et correction du filtrage par groupe-cours
   - **Ajout badge** : "Indicateurs globaux du groupe" affiche maintenant le nombre de personnes
   - **Terminologie** : "etudiant(s)" remplace par "personnes"
@@ -129,7 +158,7 @@
 
 ## BACKLOG BETA 95.x (A FAIRE)
 
-### Prioritaire
+### Prioritaire (H2026)
 - [x] **Separation modal Bienvenue** : Deux modals distincts (FAIT)
   - ✉️ News (nouveautes par version : 95.4, 95.3, 95.2, 95.1)
   - 😎 Introduction (guide demarrage, Primo, Mode Assiste)
@@ -145,6 +174,22 @@
 - [ ] **Tests export/import metadata CC** : Verifier que les metadonnees CC sont correctement exportees et reimportees
 - [ ] **Modularisation design_system.html** : Suite et fin de la separation en modules
 - [ ] **Test securite donnees sensibles** : Audit des donnees stockees (localStorage, IndexedDB)
+
+### Archivage trimestre (post-H2026)
+- [ ] **Snapshot complet lors archivage** : Figer TOUTES les dependances d'un trimestre
+  - Productions (`trimestre_productions`)
+  - Grilles de criteres (`trimestre_grilles`)
+  - Echelles de performance (`trimestre_echelles`)
+  - Cartouches (`trimestre_cartouches`)
+  - Pratique de notation (`trimestre_pratiques`)
+  - **Objectif** : Garantir consultation des anciens trimestres meme si config evolue
+- [ ] **Compatibilite donnees A2025** : Corriger les references cassees
+  - Probleme : Evaluations A2025 referencent grilles/echelles supprimees
+  - Cause : Productions/grilles/echelles modifiees pour H2026
+  - Impact : Notes non calculees pour A2025
+  - Solution : Reconstruire les metadonnees ou accepter perte partielle
+- [ ] **Message groupe-cours manquant** : Quand aucun groupe-cours pour un trimestre
+- [ ] **Pratique de notation fallback** : Utiliser defaut si pratique configuree n'existe plus
 
 ---
 
@@ -317,4 +362,4 @@
 
 ---
 
-**Derniere mise a jour** : 10 janvier 2026 (Toronto)
+**Derniere mise a jour** : 11 janvier 2026 (Toronto)
