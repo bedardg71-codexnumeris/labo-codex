@@ -546,87 +546,44 @@ function convertirNiveauEnPourcentage(niveau, echelleId = null) {
 /* ===============================
    🔄 CALCUL ET STOCKAGE DES INDICES C et P
 
-   SOURCE UNIQUE (Single Source of Truth):
-   - Calcule l'indice C (Complétion) pour tous les étudiants
-   - Calcule l'indice P (Performance) pour tous les étudiants
-   - Stocke dans db.setSync('indicesCP') avec historique
-   - À appeler après chaque évaluation ou modification de sélection
+   🆕 BETA 95.5 : Refonte complète
+   - Async pour stockage IndexedDB (plus de limite localStorage)
+   - Calcule UNIQUEMENT la pratique active du groupe-cours
+   - Structure simplifiée (plus de branches SOM/PAN)
 
-   SUPPORT UNIVERSEL SOM ET PAN :
-   - Détecte automatiquement le mode via obtenirModePratique()
-   - Filtre les productions via comptesDansDepistage()
-   - Calcule P avec logique bifurquée (PAN vs SOM)
+   NOUVELLE STRUCTURE :
+   indicesCP[da] = {
+     historique: [{ date, pratique, C, P, E, details }, ...],
+     actuel: { date, pratique, C, P, E, details }
+   }
    =============================== */
 
 /**
- * Calcule et stocke les indices C (Complétion) et P (Performance) pour tous les étudiants
- * Maintient un historique pour analyse longitudinale
+ * 🆕 BETA 95.5 : Calcule et stocke les indices C et P (async + pratique active)
  *
- * 🔀 CALCUL DUAL (SOM ET PAN SIMULTANÉMENT) :
- * - Calcule TOUJOURS les deux pratiques en parallèle
- * - Stocke les résultats dans une structure à deux branches
- * - Permet la comparaison expérimentale des deux approches
- *
- * PRATIQUE SOM (Sommative traditionnelle) :
- * - C_som : (évaluations sommatives remises) / (sommatives données) × 100
- * - P_som : Moyenne pondérée provisoire
- *
- * PRATIQUE PAN (Alternative - Portfolio) :
- * - C_pan : (artefacts remis) / (artefacts donnés) × 100
- * - P_pan : Moyenne des N meilleurs artefacts
- *
- * @returns {Object} - Structure complète avec indices SOM et PAN pour chaque étudiant
+ * @returns {Promise<Object>} - Structure avec indices pour chaque étudiant
  */
-function calculerEtStockerIndicesCP() {
-    // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
+async function calculerEtStockerIndicesCP() {
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
     const productions = obtenirDonneesSelonMode('productions');
 
-    // Récupérer l'historique existant ou initialiser
-    const indicesCP = obtenirDonneesSelonMode('indicesCP');
+    // 🆕 BETA 95.5 : Récupérer depuis IndexedDB (async)
+    const cleIndices = (typeof cle === 'function') ? cle('indicesCP') : 'indicesCP';
+    let indicesCP = await db.get(cleIndices, {});
 
-    // ✅ VÉRIFIER CONFIGURATION AFFICHAGE (mode comparatif ou non)
-    const modalites = db.getSync('modalitesEvaluation', {});
-    const affichage = modalites.affichageTableauBord || {};
-    const calculerSOM = affichage.afficherSommatif === true;
-    const calculerPAN = affichage.afficherAlternatif === true;
+    // 🆕 BETA 95.5 : Obtenir la pratique active du groupe-cours
+    const pratiqueId = typeof obtenirPratiqueActiveGroupeCours === 'function'
+        ? obtenirPratiqueActiveGroupeCours()
+        : 'sommative';
 
-    // ⚠️ Log de débogage pour voir ce qui est lu
-    console.log('[calculerEtStockerIndicesCP] Configuration lue:', {
-        affichage,
-        calculerSOM,
-        calculerPAN
-    });
+    console.log(`🔄 [Beta 95.5] Calcul indices C/P pour pratique active: ${pratiqueId}`);
 
-    // Log approprié selon le mode
-    if (calculerSOM && calculerPAN) {
-        console.log('🔄 Calcul DUAL des indices C et P (SOM + PAN) - Mode comparatif actif');
-    } else if (calculerSOM) {
-        console.log('🔄 Calcul des indices C et P (SOM uniquement)');
-    } else if (calculerPAN) {
-        console.log('🔄 Calcul des indices C et P (PAN uniquement)');
-    } else {
-        console.warn('⚠️ Aucune pratique à calculer');
+    // Obtenir la pratique depuis le registre
+    const pratique = obtenirPratiqueParId(pratiqueId);
+    if (!pratique) {
+        console.error(`❌ Pratique "${pratiqueId}" non disponible dans le registre`);
         return indicesCP;
     }
-
-    // 🎯 OBTENIR LES PRATIQUES DEPUIS LE REGISTRE (seulement si nécessaire)
-    const pratiqueSommative = calculerSOM ? obtenirPratiqueParId('sommative') : null;
-    const pratiquePAN = calculerPAN ? obtenirPratiqueParId('pan-standards') : null;
-
-    if ((calculerSOM && !pratiqueSommative) || (calculerPAN && !pratiquePAN)) {
-        console.error('❌ Pratiques requises non disponibles dans le registre');
-        console.error('   Sommative:', calculerSOM ? !!pratiqueSommative : 'non requise');
-        console.error('   PAN-Standards:', calculerPAN ? !!pratiquePAN : 'non requise');
-        return indicesCP;
-    }
-
-    // Préparer compteurs pour les logs
-    const productionsSOM = productions.filter(p => comptesDansDepistage(p, 'SOM'));
-    const nbProductionsSOMDonnees = productionsSOM.length;
-
-    const productionsPAN = productions.filter(p => comptesDansDepistage(p, 'PAN'));
-    const nbArtefactsPANDonnes = productionsPAN.length;
 
     // Filtrer les étudiants actifs
     const etudiantsActifs = etudiants.filter(e =>
@@ -634,136 +591,57 @@ function calculerEtStockerIndicesCP() {
     );
 
     const dateCalcul = new Date().toISOString();
+    const modalites = db.getSync('modalitesEvaluation', {});
+
+    // 🆕 BETA 95.5 : Lire A depuis indicesAssiduite (une seule fois, hors boucle)
+    const cleAssiduite = (typeof cle === 'function') ? cle('indicesAssiduite') : 'indicesAssiduite';
+    const indicesAssiduite = db.getSync(cleAssiduite, {});
 
     // Calculer pour chaque étudiant
     etudiantsActifs.forEach(etudiant => {
         const da = etudiant.da;
 
-        // Lire la configuration des modalités d'évaluation (nécessaire pour multi-objectifs et découplage)
-        const modalites = db.getSync('modalitesEvaluation', {});
-
         // ========================================
-        // CALCUL PRATIQUE SOM (via registre) - Si activé
+        // 🆕 BETA 95.5 : CALCUL PRATIQUE ACTIVE UNIQUEMENT
         // ========================================
 
-        let C_som = 0, P_som = 0;
-        if (calculerSOM) {
-            const C_som_decimal = pratiqueSommative.calculerCompletion(da);
-            const P_som_decimal = pratiqueSommative.calculerPerformance(da);
+        // Calculer C et P via la pratique active du groupe-cours
+        const C_decimal = pratique.calculerCompletion(da);
+        const P_decimal = pratique.calculerPerformance(da);
 
-            // Convertir 0-1 → 0-100
-            C_som = C_som_decimal !== null ? Math.round(C_som_decimal * 100) : 0;
-            P_som = P_som_decimal !== null ? Math.round(P_som_decimal * 100) : 0;
-        }
-
-        // ========================================
-        // CALCUL PRATIQUE PAN (via registre) - Si activé
-        // ========================================
-
-        let C_pan = 0, P_pan = 0, P_pan_decimal = null;
-        let performancesObjectifs = null;
-        let noteFinaleMultiObjectifs = null;
-        let ensembleObjectifsId = null; // ✅ CORRECTION (9 déc 2025) : Déclarer en dehors du if
-
-        if (calculerPAN) {
-            const C_pan_decimal = pratiquePAN.calculerCompletion(da);
-            P_pan_decimal = pratiquePAN.calculerPerformance(da);
-
-            // 🎯 DÉTECTION PRATIQUE MULTI-OBJECTIFS
-            // Si un ensemble d'objectifs est configuré, utiliser le calcul par pratique multi-objectifs
-            ensembleObjectifsId = modalites.configPAN?.ensembleObjectifsId || null;
-
-            if (ensembleObjectifsId && typeof calculerNoteFinaleMultiObjectifs === 'function') {
-                console.log(`[Multi-Objectifs] Calcul pour DA ${da} avec ensemble ${ensembleObjectifsId}`);
-                noteFinaleMultiObjectifs = calculerNoteFinaleMultiObjectifs(da, ensembleObjectifsId);
-                performancesObjectifs = calculerPerformanceParObjectif(da, ensembleObjectifsId);
-
-                if (noteFinaleMultiObjectifs && noteFinaleMultiObjectifs.noteFinale !== null) {
-                    // Utiliser la note de la pratique multi-objectifs au lieu de P_pan global
-                    P_pan_decimal = noteFinaleMultiObjectifs.noteFinale / 100;
-                    console.log(`[Multi-Objectifs] Note finale DA ${da}: ${noteFinaleMultiObjectifs.noteFinale.toFixed(1)}%`);
-                }
-            }
-
-            // Convertir 0-1 → 0-100
-            C_pan = C_pan_decimal !== null ? Math.round(C_pan_decimal * 100) : 0;
-            P_pan = P_pan_decimal !== null ? Math.round(P_pan_decimal * 100) : 0;
-        }
-
-        // ========================================
-        // CALCUL P_RECENT POUR LE RISQUE (si découplage activé)
-        // ========================================
-
-        // Utiliser la configuration PAN pour affichage explicite et découplage (modalites déjà déclaré au début du forEach)
-        const configPortfolio = modalites.configPAN?.portfolio || {};
-        const decouplerPR = configPortfolio.decouplerPR || false;
-
-        // Calculer P_recent si découplage activé ET que la pratique supporte cette méthode ET que PAN est calculé
-        let P_recent = null;
-        if (calculerPAN && decouplerPR && pratiquePAN && typeof pratiquePAN.calculerPerformanceRecente === 'function') {
-            const P_recent_decimal = pratiquePAN.calculerPerformanceRecente(da);
-            P_recent = P_recent_decimal !== null ? Math.round(P_recent_decimal * 100) : null;
-        }
+        // Convertir 0-1 → 0-100
+        const C = C_decimal !== null ? Math.round(C_decimal * 100) : 0;
+        const P = P_decimal !== null ? Math.round(P_decimal * 100) : 0;
 
         // ========================================
         // CALCUL ENGAGEMENT (E) - PRINCIPE SST
         // ========================================
-        // ✅ NOUVEAU (7 déc 2025): Calculer E ici pour respecter Single Source of Truth
-        // E est maintenant stocké dans indicesCP au lieu d'être recalculé partout
+        // E = (A × C × P)^(1/3) - Racine cubique
 
-        // Lire A depuis indicesAssiduite (calculé par saisie-presences.js)
-        const indicesAssiduite = db.getSync((typeof cle === 'function') ? cle('indicesAssiduite') : 'indicesAssiduite', {});
+        // Extraire l'indice A pour cet étudiant
         const assiduiteSommatif = indicesAssiduite.sommatif?.[da];
-
-        // Extraire l'indice A (gérer ancien format nombre et nouveau format objet)
         let A = 0;
         if (typeof assiduiteSommatif === 'object' && assiduiteSommatif.indice !== undefined) {
-            A = assiduiteSommatif.indice; // Déjà en proportion 0-1
+            A = assiduiteSommatif.indice; // Proportion 0-1
         } else if (typeof assiduiteSommatif === 'number') {
-            A = assiduiteSommatif; // Ancien format, déjà en proportion 0-1
+            A = assiduiteSommatif; // Ancien format, proportion 0-1
         }
 
-        // Calculer E pour SOM: E = (A × C × P)^(1/3)
-        const E_brut_som = A * (C_som / 100) * (P_som / 100);
-        const E_som = Math.pow(E_brut_som, 1/3); // Racine cubique
-
-        // Calculer E pour PAN: E = (A × C × P)^(1/3)
-        const E_brut_pan = A * (C_pan / 100) * (P_pan / 100);
-        const E_pan = Math.pow(E_brut_pan, 1/3); // Racine cubique
+        const E_brut = A * (C / 100) * (P / 100);
+        const E = Math.pow(E_brut, 1/3); // Racine cubique
 
         // ========================================
-        // STRUCTURE À DEUX BRANCHES
+        // 🆕 BETA 95.5 : NOUVELLE STRUCTURE SIMPLIFIÉE
         // ========================================
 
         const entreeActuelle = {
             date: dateCalcul,
-            SOM: {
-                C: C_som,
-                P: P_som,
-                E: parseFloat(E_som.toFixed(3)), // ✅ NOUVEAU (7 déc 2025): Engagement stocké ici (SST)
-                details: {
-                    calculViaPratique: true,
-                    pratique: 'sommative'
-                }
-            },
-            PAN: {
-                C: C_pan,
-                P: P_pan,
-                E: parseFloat(E_pan.toFixed(3)), // ✅ NOUVEAU (7 déc 2025): Engagement stocké ici (SST)
-                details: {
-                    calculViaPratique: true,
-                    pratique: 'pan-maitrise',
-                    portfolioActif: configPortfolio.actif !== false,
-                    methodeSelection: configPortfolio.methodeSelection || 'meilleurs',
-                    nombreARetenir: configPortfolio.nombreARetenir || 5,
-                    decouplerPR: decouplerPR,
-                    P_recent: P_recent,  // Performance récente pour le calcul de R (si découplage activé)
-                    // 🎯 Données multi-objectifs (si pratique active)
-                    pratiqueMultiObjectifs: !!ensembleObjectifsId,
-                    ensembleObjectifsId: ensembleObjectifsId || null,
-                    performancesObjectifs: performancesObjectifs || null,
-                    noteFinaleMultiObjectifs: noteFinaleMultiObjectifs || null
-                }
+            pratique: pratiqueId,
+            C: C,
+            P: P,
+            E: parseFloat(E.toFixed(3)),
+            details: {
+                calculViaPratique: true
             }
         };
 
@@ -778,12 +656,10 @@ function calculerEtStockerIndicesCP() {
         // Ajouter à l'historique (seulement si différent du dernier)
         const dernierHistorique = indicesCP[da].historique[indicesCP[da].historique.length - 1];
         const aDiffere = !dernierHistorique ||
-            dernierHistorique.SOM?.C !== C_som ||
-            dernierHistorique.SOM?.P !== P_som ||
-            dernierHistorique.SOM?.E !== parseFloat(E_som.toFixed(3)) ||  // ✅ NOUVEAU (7 déc 2025)
-            dernierHistorique.PAN?.C !== C_pan ||
-            dernierHistorique.PAN?.P !== P_pan ||
-            dernierHistorique.PAN?.E !== parseFloat(E_pan.toFixed(3));  // ✅ NOUVEAU (7 déc 2025)
+            dernierHistorique.pratique !== pratiqueId ||
+            dernierHistorique.C !== C ||
+            dernierHistorique.P !== P ||
+            dernierHistorique.E !== parseFloat(E.toFixed(3));
 
         if (aDiffere) {
             indicesCP[da].historique.push(entreeActuelle);
@@ -796,29 +672,39 @@ function calculerEtStockerIndicesCP() {
     // Ajouter la date de calcul globale
     indicesCP.dateCalcul = dateCalcul;
 
-    // Sauvegarder
-    // IMPORTANT : Utiliser sauvegarderDonneesSelonMode pour respecter le mode actuel
-    sauvegarderDonneesSelonMode('indicesCP', indicesCP);
+    // 🆕 BETA 95.5 : Sauvegarder dans IndexedDB (async, pas de limite de taille)
+    await db.set(cleIndices, indicesCP);
 
-    console.log('✅ Indices C et P sauvegardés (SOM + PAN)');
-    console.log('   Étudiants:', etudiantsActifs.length);
-    console.log('   Productions SOM données:', nbProductionsSOMDonnees);
-    console.log('   Artefacts PAN donnés:', nbArtefactsPANDonnes);
+    console.log(`✅ [Beta 95.5] Indices C/P sauvegardés (pratique: ${pratiqueId})`);
+    console.log(`   Étudiants: ${etudiantsActifs.length}`);
 
     return indicesCP;
 }
 
 /**
- * Récupère les indices C et P actuels pour un étudiant
+ * 🆕 BETA 95.5 : Récupère les indices C et P depuis IndexedDB (async)
  *
  * @param {string} da - Numéro DA de l'étudiant
- * @param {string} pratique - (Optionnel) 'SOM' ou 'PAN' pour une pratique spécifique
- * @returns {Object} - Structure complète ou pratique spécifique, ou null
+ * @returns {Promise<Object>} - { date, pratique, C, P, E, details } ou null
+ */
+async function obtenirIndicesCPAsync(da) {
+    const cleIndices = (typeof cle === 'function') ? cle('indicesCP') : 'indicesCP';
+    const indicesCP = await db.get(cleIndices, {});
+    return indicesCP[da]?.actuel || null;
+}
+
+/**
+ * 🆕 BETA 95.5 : Récupère les indices C et P actuels pour un étudiant (synchrone)
  *
- * EXEMPLES :
- * obtenirIndicesCP('1234567')        → { date, SOM: {...}, PAN: {...} }
- * obtenirIndicesCP('1234567', 'SOM') → { C: 67, P: 72, details: {...} }
- * obtenirIndicesCP('1234567', 'PAN') → { C: 87, P: 85, details: {...} }
+ * NOUVELLE STRUCTURE (Beta 95.5) :
+ * { date, pratique, C, P, E, details }
+ *
+ * RÉTROCOMPATIBILITÉ : Si paramètre 'pratique' fourni (ancienne API),
+ * retourne { C, P, E, details } directement.
+ *
+ * @param {string} da - Numéro DA de l'étudiant
+ * @param {string} pratique - (Déprécié) Ignoré en Beta 95.5
+ * @returns {Object} - Structure actuelle ou null
  */
 function obtenirIndicesCP(da, pratique = null) {
     // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
@@ -827,40 +713,47 @@ function obtenirIndicesCP(da, pratique = null) {
 
     if (!actuel) return null;
 
-    // Si une pratique spécifique est demandée
-    if (pratique === 'SOM') return actuel.SOM || null;
-    if (pratique === 'PAN') return actuel.PAN || null;
+    // 🆕 BETA 95.5 : Nouvelle structure directe (plus de branches SOM/PAN)
+    // Rétrocompatibilité : si pratique demandée, retourner le format attendu
+    if (pratique === 'SOM' || pratique === 'PAN') {
+        // Retourner la structure actuelle (équivalent à l'ancienne branche)
+        return {
+            C: actuel.C || 0,
+            P: actuel.P || 0,
+            E: actuel.E || 0,
+            details: actuel.details || {}
+        };
+    }
 
     // Sinon retourner la structure complète
     return actuel;
 }
 
 /**
- * Récupère l'historique complet des indices C et P pour un étudiant
+ * 🆕 BETA 95.5 : Récupère l'historique des indices C et P pour un étudiant
  *
  * @param {string} da - Numéro DA de l'étudiant
- * @param {string} pratique - (Optionnel) 'SOM' ou 'PAN' pour une pratique spécifique
- * @returns {Array} - Historique complet ou filtré par pratique
- *
- * EXEMPLES :
- * obtenirHistoriqueIndicesCP('1234567')        → [{ date, SOM: {...}, PAN: {...} }, ...]
- * obtenirHistoriqueIndicesCP('1234567', 'SOM') → [{ date, C: 67, P: 72 }, ...]
- * obtenirHistoriqueIndicesCP('1234567', 'PAN') → [{ date, C: 87, P: 85 }, ...]
+ * @param {string} pratique - (Déprécié) Ignoré en Beta 95.5
+ * @returns {Array} - [{ date, pratique, C, P, E, details }, ...]
  */
 function obtenirHistoriqueIndicesCP(da, pratique = null) {
     // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
     const indicesCP = obtenirDonneesSelonMode('indicesCP') || {};
     const historique = indicesCP[da]?.historique || [];
 
-    if (!pratique) return historique;
+    // 🆕 BETA 95.5 : Retourner l'historique directement (plus de filtrage SOM/PAN)
+    // Rétrocompatibilité : si pratique demandée, adapter le format
+    if (pratique === 'SOM' || pratique === 'PAN') {
+        return historique.map(entree => ({
+            date: entree.date,
+            C: entree.C || 0,
+            P: entree.P || 0,
+            E: entree.E || 0,
+            details: entree.details || {}
+        }));
+    }
 
-    // Transformer l'historique pour n'inclure que la pratique demandée
-    return historique.map(entree => ({
-        date: entree.date,
-        C: entree[pratique]?.C || 0,
-        P: entree[pratique]?.P || 0,
-        details: entree[pratique]?.details || {}
-    }));
+    return historique;
 }
 
 /* ===============================
@@ -1230,4 +1123,10 @@ window.calculerNoteFinaleMultiObjectifs = calculerNoteFinaleMultiObjectifs;
 window.calculerNoteAvecCategories = calculerNoteAvecCategories;
 window.obtenirConfigCategories = obtenirConfigCategories;
 
-console.log('✅ Module portfolio.js chargé (avec support multi-objectifs et catégories)');
+// 🆕 Beta 95.5 : Exporter les fonctions d'indices C/P
+window.calculerEtStockerIndicesCP = calculerEtStockerIndicesCP;
+window.obtenirIndicesCP = obtenirIndicesCP;
+window.obtenirIndicesCPAsync = obtenirIndicesCPAsync;
+window.obtenirHistoriqueIndicesCP = obtenirHistoriqueIndicesCP;
+
+console.log('✅ Module portfolio.js chargé (Beta 95.5 - indices C/P optimisés)');

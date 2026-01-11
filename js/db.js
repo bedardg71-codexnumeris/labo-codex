@@ -240,9 +240,11 @@
                     this._setLocalStorage(key, value);
                 } catch (e) {
                     // Si QuotaExceededError (données trop grandes pour localStorage),
-                    // continuer sans cache localStorage (IndexedDB suffit)
+                    // utiliser memoryCache pour que getSync() puisse y accéder
                     if (e.name === 'QuotaExceededError' || e.code === 22) {
-                        console.warn(`[DB] ⚠️ Clé "${key}" trop grande pour localStorage (${this._estimateSize(value)} bytes), stockée uniquement dans IndexedDB`);
+                        console.warn(`[DB] ⚠️ Clé "${key}" trop grande pour localStorage, utilisation memoryCache`);
+                        // 🆕 Beta 95.5 : Stocker dans memoryCache pour accès synchrone
+                        this.memoryCache.set(key, value);
                         // Supprimer du cache localStorage si elle y était
                         try { localStorage.removeItem(key); } catch (ex) { /* ignore */ }
                     } else {

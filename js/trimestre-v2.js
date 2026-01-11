@@ -5474,6 +5474,22 @@ async function peuplerDropdownGroupeCoursActif() {
 
     selectHeader.innerHTML = options;
     console.log('[Trimestre V2] Dropdown groupe-cours actif peuplé:', groupesCours.length, 'groupe-cours');
+
+    // 🆕 BETA 95.5 : Auto-sélection si aucun groupe-cours actif
+    // Vérifie si le groupe-cours actuellement actif appartient au trimestre actif
+    const gcActif = db.getSync('groupeCoursActif', null);
+    const gcActifValide = gcActif && groupesCours.some(gc => gc.id === gcActif.id);
+
+    if (!gcActifValide && groupesCours.length > 0) {
+        // Sélectionner le premier groupe-cours du trimestre
+        const premierGC = groupesCours[0];
+        console.log('[Trimestre V2] Auto-sélection du premier groupe-cours:', premierGC.id);
+        await changerGroupeCoursActifV2(premierGC.id);
+        selectHeader.value = premierGC.id;
+    } else if (gcActifValide) {
+        // S'assurer que le dropdown reflète la sélection actuelle
+        selectHeader.value = gcActif.modeCours ? `cours:${gcActif.coursId}` : gcActif.id;
+    }
 }
 
 /**
