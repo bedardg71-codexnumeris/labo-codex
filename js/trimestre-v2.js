@@ -3457,12 +3457,17 @@ function nouveauHoraireV2() {
     // Populer le dropdown des groupes
     populerDropdownGroupesHoraireV2();
 
-    // Vider les champs
-    document.getElementById('v2-hor-groupeAssocie').value = '';
-    document.getElementById('v2-hor-nom').value = '';
-    document.getElementById('v2-hor-local').value = '';
-    document.getElementById('v2-hor-nbSeances').value = '2';
-    document.getElementById('v2-hor-periodesParSeance').value = '2';
+    // Vider les champs (avec vérifications null pour robustesse)
+    const champGroupe = document.getElementById('v2-hor-groupeAssocie');
+    const champNom = document.getElementById('v2-hor-nom');
+    const champNbSeances = document.getElementById('v2-hor-nbSeances');
+    const champPeriodes = document.getElementById('v2-hor-periodesParSeance');
+
+    if (champGroupe) champGroupe.value = '';
+    if (champNom) champNom.value = '';
+    // Note: v2-hor-local supprimé (Beta 95.5) - le local est maintenant par séance
+    if (champNbSeances) champNbSeances.value = '2';
+    if (champPeriodes) champPeriodes.value = '2';
 
     // Mettre à jour le titre
     const titre = document.getElementById('v2-titreFormHoraire');
