@@ -292,18 +292,34 @@ function addStudent() {
    =============================== */
 
 /**
- * Gère l'import depuis un fichier
+ * ✅ AMÉLIORATION (Beta 95.5) : Support multi-encodage pour fichiers Omnivox
+ * Tente UTF-8, puis Windows-1252 si caractères corrompus détectés
  */
 function handleFileImport(event) {
     const file = event.target.files[0];
     if (!file) return;
 
+    // Essayer d'abord UTF-8
     const reader = new FileReader();
     reader.onload = function (e) {
-        const content = e.target.result;
-        parseAndPreview(content);
+        let content = e.target.result;
+
+        // Détecter si l'encodage est corrompu (caractères de remplacement ou séquences invalides)
+        const hasEncodingIssues = /�|Ã©|Ã¨|Ã |Ãª|Ã®|Ã´|Ã¹|Ã§/.test(content);
+
+        if (hasEncodingIssues) {
+            console.log('⚠️ Encodage UTF-8 invalide détecté, tentative avec Windows-1252...');
+            // Relire avec Windows-1252 (encodage Omnivox/Excel français)
+            const readerLatin = new FileReader();
+            readerLatin.onload = function (e2) {
+                parseAndPreview(e2.target.result);
+            };
+            readerLatin.readAsText(file, 'windows-1252');
+        } else {
+            parseAndPreview(content);
+        }
     };
-    reader.readAsText(file);
+    reader.readAsText(file, 'UTF-8');
 }
 
 /**
@@ -321,6 +337,7 @@ function previewPastedData() {
 /**
  * Parse et affiche la prévisualisation
  * VERSION TOLÉRANTE : Accepte presque tous les formats
+ * ✅ AMÉLIORATION (Beta 95.5) : Détection intelligente des en-têtes de colonnes
  */
 function parseAndPreview(content) {
     try {
@@ -355,10 +372,71 @@ function parseAndPreview(content) {
         const separator = detecterSeparateur(lines[0]);
         console.log(`✓ Séparateur détecté: "${separator === '\t' ? 'TAB' : separator}"`);
 
+        // ✅ NOUVEAU (Beta 95.5) : Détection intelligente des en-têtes
+        // Mapping des noms de colonnes possibles vers nos champs internes
+        const mappingColonnes = {
+            da: ['da', 'code permanent', 'code_permanent', 'codepermanent', 'no', 'numero', 'numéro', 'id'],
+            groupe: ['groupe', 'group', 'gr', 'section', 'classe'],
+            nom: ['nom', 'name', 'nom de famille', 'nom_famille', 'last name', 'lastname', 'family name'],
+            prenom: ['prenom', 'prénom', 'firstname', 'first name', 'given name', 'prenom'],
+            programme: ['programme', 'program', 'prog', 'code programme', 'code_programme'],
+            sa: ['sa', 'services adaptés', 'services adaptes', 'services_adaptes', 'adaptation', 'accommodations', ' sa'],
+            caf: ['caf', 'cote', 'côte', 'cote r', 'score']
+        };
+
+        // Fonction pour normaliser un texte (pour comparaison)
+        const normaliser = (texte) => {
+            return texte.toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Retirer accents
+                .trim();
+        };
+
+        // Fonction pour trouver l'index d'une colonne par son nom
+        const trouverIndexColonne = (headers, champRecherche) => {
+            const variantes = mappingColonnes[champRecherche] || [champRecherche];
+            for (let i = 0; i < headers.length; i++) {
+                const headerNorm = normaliser(headers[i]);
+                for (const variante of variantes) {
+                    if (headerNorm === normaliser(variante) || headerNorm.includes(normaliser(variante))) {
+                        return i;
+                    }
+                }
+            }
+            return -1;
+        };
+
+        // Analyser la première ligne pour voir si c'est un en-tête
+        const premiereLigneParts = lines[0].split(separator).map(p => p.trim().replace(/^"|"$/g, ''));
+        const estEnTete = premiereLigneParts.some(p => {
+            const pNorm = normaliser(p);
+            // Vérifier si au moins un champ ressemble à un en-tête connu
+            return Object.values(mappingColonnes).flat().some(v => pNorm.includes(normaliser(v)));
+        });
+
+        let colonneMapping = null;
+        let lignesATraiter = lines;
+
+        if (estEnTete) {
+            console.log('✓ En-têtes de colonnes détectés, mapping intelligent activé');
+            colonneMapping = {
+                da: trouverIndexColonne(premiereLigneParts, 'da'),
+                groupe: trouverIndexColonne(premiereLigneParts, 'groupe'),
+                nom: trouverIndexColonne(premiereLigneParts, 'nom'),
+                prenom: trouverIndexColonne(premiereLigneParts, 'prenom'),
+                programme: trouverIndexColonne(premiereLigneParts, 'programme'),
+                sa: trouverIndexColonne(premiereLigneParts, 'sa'),
+                caf: trouverIndexColonne(premiereLigneParts, 'caf')
+            };
+            console.log('  Mapping colonnes:', colonneMapping);
+            lignesATraiter = lines.slice(1); // Ignorer la ligne d'en-tête
+        } else {
+            console.log('✓ Pas d\'en-têtes détectés, utilisation de l\'ordre par défaut');
+        }
+
         tempImportData = [];
         let ligneSautees = 0;
 
-        lines.forEach((line, index) => {
+        lignesATraiter.forEach((line, index) => {
             if (!line.trim()) return;
 
             // Split avec le séparateur détecté
@@ -397,17 +475,35 @@ function parseAndPreview(content) {
                 // ✅ CORRECTION CRITIQUE (Beta 95 - 27 déc 2025) : Ajouter coursId
                 const coursId = typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null;
 
-                const student = {
-                    id: Date.now() + index + Math.random(),
-                    da: parts[0] || `AUTO-${Date.now() + index}`,
-                    groupe: parts[1] || '1',
-                    nom: parts[2] || parts[0] || '', // Si pas de DA, premier champ = nom
-                    prenom: parts[3] || parts[1] || '', // Si pas de groupe, deuxième champ = prénom
-                    programme: parts[4] || '---',
-                    sa: parts[5] || '',
-                    caf: parts[6] || '',
-                    coursId: coursId  // ✅ Lier l'étudiant au cours actif
-                };
+                let student;
+
+                if (colonneMapping) {
+                    // ✅ Mode intelligent avec mapping de colonnes
+                    student = {
+                        id: Date.now() + index + Math.random(),
+                        da: colonneMapping.da >= 0 ? (parts[colonneMapping.da] || '') : '',
+                        groupe: colonneMapping.groupe >= 0 ? (parts[colonneMapping.groupe] || '1') : '1',
+                        nom: colonneMapping.nom >= 0 ? (parts[colonneMapping.nom] || '') : '',
+                        prenom: colonneMapping.prenom >= 0 ? (parts[colonneMapping.prenom] || '') : '',
+                        programme: colonneMapping.programme >= 0 ? (parts[colonneMapping.programme] || '---') : '---',
+                        sa: colonneMapping.sa >= 0 ? (parts[colonneMapping.sa] || '') : '',
+                        caf: colonneMapping.caf >= 0 ? (parts[colonneMapping.caf] || '') : '',
+                        coursId: coursId
+                    };
+                } else {
+                    // Mode classique par position fixe
+                    student = {
+                        id: Date.now() + index + Math.random(),
+                        da: parts[0] || `AUTO-${Date.now() + index}`,
+                        groupe: parts[1] || '1',
+                        nom: parts[2] || parts[0] || '', // Si pas de DA, premier champ = nom
+                        prenom: parts[3] || parts[1] || '', // Si pas de groupe, deuxième champ = prénom
+                        programme: parts[4] || '---',
+                        sa: parts[5] || '',
+                        caf: parts[6] || '',
+                        coursId: coursId
+                    };
+                }
 
                 // Nettoyer le DA (retirer espaces, lettres parasites)
                 student.da = student.da.replace(/[^0-9]/g, '');

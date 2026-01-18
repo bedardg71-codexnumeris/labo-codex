@@ -236,8 +236,10 @@ function executerExport() {
     const dateStr = new Date().toISOString().slice(0, 10);
 
     // Inclure le nom de l'utilisateur dans le fichier
+    // ✅ CORRECTION (Beta 95.5) : Vérifier que auteur est une chaîne
     const infoCours = db.getSync ? db.getSync('infoCours', {}) : {};
-    const auteur = infoCours?.enseignant || '';
+    const auteurBrut = infoCours?.enseignant;
+    const auteur = (typeof auteurBrut === 'string') ? auteurBrut : '';
     const auteurNettoye = auteur ? auteur.replace(/[^a-z0-9]/gi, '-').toLowerCase() : '';
     const nomFichier = auteurNettoye
         ? `sauvegarde-${auteurNettoye}-${dateStr}.json`

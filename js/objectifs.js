@@ -67,6 +67,13 @@ function sauvegarderEnsemblesObjectifs(ensembles) {
  */
 function afficherListeEnsemblesObjectifs() {
     const liste = document.getElementById('listeEnsemblesObjectifs');
+
+    // ✅ CORRECTION (Beta 95.5) : Vérification null avant accès
+    if (!liste) {
+        // Élément non présent dans le DOM (section non active)
+        return;
+    }
+
     const ensembles = chargerEnsemblesObjectifs();
 
     if (ensembles.length === 0) {
