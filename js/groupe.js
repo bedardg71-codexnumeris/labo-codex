@@ -293,6 +293,7 @@ function addStudent() {
 
 /**
  * ✅ AMÉLIORATION (Beta 95.5) : Support multi-encodage pour fichiers Omnivox
+ * ✅ CORRECTION (18 jan) : Détection améliorée des problèmes d'encodage
  * Tente UTF-8, puis Windows-1252 si caractères corrompus détectés
  */
 function handleFileImport(event) {
@@ -304,11 +305,25 @@ function handleFileImport(event) {
     reader.onload = function (e) {
         let content = e.target.result;
 
-        // Détecter si l'encodage est corrompu (caractères de remplacement ou séquences invalides)
-        const hasEncodingIssues = /�|Ã©|Ã¨|Ã |Ãª|Ã®|Ã´|Ã¹|Ã§/.test(content);
+        // Détecter si l'encodage est corrompu :
+        // - U+FFFD (�) : caractère de remplacement Unicode
+        // - Séquences mojibake courantes (UTF-8 mal interprété)
+        // - Absence d'accents français là où on en attendrait (heuristique)
+        const hasReplacementChar = content.includes('\uFFFD');
+        const hasMojibake = /Ã©|Ã¨|Ã |Ãª|Ã®|Ã´|Ã¹|Ã§|Ã‰|Ãˆ|Ã€|Ãœ|Ã"|Ã¢|Ã¯/.test(content);
+
+        // Heuristique : si on voit "etudiant" sans accent dans un contexte français, c'est suspect
+        const looksLikeFrench = /groupe|etudiant|prenom|eleve|programme/i.test(content);
+        const missingExpectedAccents = looksLikeFrench && !/[éèêëàâäùûüîïôöç]/i.test(content);
+
+        const hasEncodingIssues = hasReplacementChar || hasMojibake || missingExpectedAccents;
 
         if (hasEncodingIssues) {
             console.log('⚠️ Encodage UTF-8 invalide détecté, tentative avec Windows-1252...');
+            console.log('  - Caractère remplacement:', hasReplacementChar);
+            console.log('  - Mojibake:', hasMojibake);
+            console.log('  - Accents manquants:', missingExpectedAccents);
+
             // Relire avec Windows-1252 (encodage Omnivox/Excel français)
             const readerLatin = new FileReader();
             readerLatin.onload = function (e2) {
@@ -374,14 +389,15 @@ function parseAndPreview(content) {
 
         // ✅ NOUVEAU (Beta 95.5) : Détection intelligente des en-têtes
         // Mapping des noms de colonnes possibles vers nos champs internes
+        // ✅ CORRECTION (18 jan) : Ajout headers Omnivox ("No de DA", "Nom de l'étudiant", etc.)
         const mappingColonnes = {
-            da: ['da', 'code permanent', 'code_permanent', 'codepermanent', 'no', 'numero', 'numéro', 'id'],
+            da: ['da', 'no de da', 'code permanent', 'code_permanent', 'codepermanent', 'no', 'numero', 'numéro', 'id'],
             groupe: ['groupe', 'group', 'gr', 'section', 'classe'],
-            nom: ['nom', 'name', 'nom de famille', 'nom_famille', 'last name', 'lastname', 'family name'],
-            prenom: ['prenom', 'prénom', 'firstname', 'first name', 'given name', 'prenom'],
-            programme: ['programme', 'program', 'prog', 'code programme', 'code_programme'],
+            nom: ['nom', 'nom de l\'etudiant', 'nom de l\'élève', 'name', 'nom de famille', 'nom_famille', 'last name', 'lastname', 'family name'],
+            prenom: ['prenom', 'prénom', 'prenom de l\'etudiant', 'prénom de l\'étudiant', 'prenom de l\'élève', 'prénom de l\'élève', 'firstname', 'first name', 'given name'],
+            programme: ['programme', 'program', 'prog', 'prog.', 'code programme', 'code_programme'],
             sa: ['sa', 'services adaptés', 'services adaptes', 'services_adaptes', 'adaptation', 'accommodations', ' sa'],
-            caf: ['caf', 'cote', 'côte', 'cote r', 'score']
+            caf: ['caf', 'centre d\'aide', 'centre aide', 'aide francais', 'aide français', 'cote', 'côte', 'cote r', 'score']
         };
 
         // Fonction pour normaliser un texte (pour comparaison)
