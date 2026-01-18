@@ -25,6 +25,12 @@
 - **Badge nb personnes** : S'ajuste au groupe-cours selectionne
 
 ### Derniere tache completee (11 janvier)
+- **SEPARATION MODAL BIENVENUE (Beta 95.4)** : Deux modals distincts
+  - ✉️ Modal News : Nouveautes par version (95.4, 95.3, 95.2, 95.1)
+  - 😎 Modal Introduction : Guide de demarrage (Primo, Mode Assiste)
+  - Deux boutons dans l'entete (a cote de ⚠️ backup)
+  - Contenu Beta 95.1 integre depuis "Docu Pour les testeurs.txt"
+
 - **COMPATIBILITE DONNEES A2025 (Beta 95.5)** : Correction affichage indices
   - **Probleme** : Badge "0 personne" et barres vides pour trimestres anterieurs
   - **Cause 1** : `infoCours` non initialise quand changement de trimestre
@@ -175,6 +181,13 @@
 - [ ] **Modularisation design_system.html** : Suite et fin de la separation en modules
 - [ ] **Test securite donnees sensibles** : Audit des donnees stockees (localStorage, IndexedDB)
 
+### Ameliorations rapport de bug (post-testeurs)
+- [ ] **Stack trace complet** : Ajouter trace detaillee au lieu de juste fichier:ligne
+- [ ] **Historique actions recentes** : Capturer les 5-10 dernieres actions (clics, navigation) avant l'erreur
+- [ ] **Contexte de donnees** : Inclure infos pertinentes selon la section (ex: type de fichier importe, cles localStorage actives)
+- [ ] **Capture d'ecran integree** : Bouton pour capturer et joindre automatiquement une capture
+- [ ] **Etat stockage** : Inclure cles localStorage/IndexedDB pertinentes pour la section active
+
 ### Archivage trimestre (post-H2026)
 - [ ] **Snapshot complet lors archivage** : Figer TOUTES les dependances d'un trimestre
   - Productions (`trimestre_productions`)
@@ -281,6 +294,12 @@
 ---
 
 ## HISTORIQUE RECENT
+
+### 11 janvier 2026
+- **Separation modal Bienvenue** : Deux modals distincts ✉️ News / 😎 Introduction
+- **Optimisation indices C/P** : Migration IndexedDB + calcul pratique unique
+- **Compatibilite A2025** : Detection format ancien/nouveau + auto-selection groupe-cours
+- **Fix db.js** : memoryCache pour QuotaExceededError
 
 ### 10 janvier 2026
 - **Mode "Cours" dans dropdown entete** : Voir tous les groupes fusionnes d'un cours
