@@ -4,6 +4,13 @@
 
    Permet aux testeurs d'envoyer facilement des rapports de bug
    avec les informations techniques nécessaires au débogage.
+
+   ✅ AMÉLIORATIONS (18 jan 2026) :
+   - Stack trace complet pour les erreurs
+   - Historique des 10 dernières actions (clics, navigation)
+   - Contexte de données selon la section active
+   - Capture d'écran intégrée
+   - État stockage pertinent
    =============================== */
 
 // ===============================
@@ -24,22 +31,44 @@ const VERSION_APP = 'Beta 95.5';
 const dernieresErreurs = [];
 const MAX_ERREURS = 20;
 
-// Intercepter console.error pour capturer les erreurs
+// Intercepter console.error pour capturer les erreurs avec stack trace complet
 const originalConsoleError = console.error;
 console.error = function(...args) {
     // Appeler l'original
     originalConsoleError.apply(console, args);
 
-    // Stocker l'erreur
+    // Stocker l'erreur avec stack trace complet
     const timestamp = new Date().toLocaleTimeString('fr-CA');
-    const message = args.map(arg => {
-        if (arg instanceof Error) {
-            return `${arg.message} (${arg.stack?.split('\n')[1]?.trim() || 'no stack'})`;
-        }
-        return String(arg);
-    }).join(' ');
+    let message = '';
+    let stackTrace = '';
 
-    dernieresErreurs.push({ timestamp, message });
+    args.forEach(arg => {
+        if (arg instanceof Error) {
+            message += arg.message + ' ';
+            // ✅ Stack trace complet
+            if (arg.stack) {
+                stackTrace = arg.stack;
+            }
+        } else {
+            message += String(arg) + ' ';
+        }
+    });
+
+    // Si pas de stack trace, en générer un
+    if (!stackTrace) {
+        try {
+            throw new Error('Stack trace');
+        } catch (e) {
+            // Retirer les 2 premières lignes (Error et cette fonction)
+            stackTrace = e.stack?.split('\n').slice(3).join('\n') || '';
+        }
+    }
+
+    dernieresErreurs.push({
+        timestamp,
+        message: message.trim(),
+        stack: stackTrace
+    });
 
     // Garder seulement les dernières erreurs
     if (dernieresErreurs.length > MAX_ERREURS) {
@@ -47,17 +76,82 @@ console.error = function(...args) {
     }
 };
 
-// Capturer aussi les erreurs non gérées
+// Capturer aussi les erreurs non gérées avec stack trace
 window.addEventListener('error', (event) => {
     const timestamp = new Date().toLocaleTimeString('fr-CA');
     dernieresErreurs.push({
         timestamp,
-        message: `[UNCAUGHT] ${event.message} at ${event.filename}:${event.lineno}`
+        message: `[UNCAUGHT] ${event.message}`,
+        stack: event.error?.stack || `at ${event.filename}:${event.lineno}:${event.colno}`
     });
     if (dernieresErreurs.length > MAX_ERREURS) {
         dernieresErreurs.shift();
     }
 });
+
+// Capturer les rejets de promesses non gérés
+window.addEventListener('unhandledrejection', (event) => {
+    const timestamp = new Date().toLocaleTimeString('fr-CA');
+    const reason = event.reason;
+    dernieresErreurs.push({
+        timestamp,
+        message: `[PROMISE REJECTED] ${reason?.message || reason}`,
+        stack: reason?.stack || 'No stack trace'
+    });
+    if (dernieresErreurs.length > MAX_ERREURS) {
+        dernieresErreurs.shift();
+    }
+});
+
+// ===============================
+// HISTORIQUE DES ACTIONS
+// ===============================
+
+const dernieresActions = [];
+const MAX_ACTIONS = 10;
+
+/**
+ * Enregistre une action utilisateur
+ */
+function enregistrerAction(type, details) {
+    const timestamp = new Date().toLocaleTimeString('fr-CA');
+    dernieresActions.push({ timestamp, type, details });
+    if (dernieresActions.length > MAX_ACTIONS) {
+        dernieresActions.shift();
+    }
+}
+
+// Intercepter les clics
+document.addEventListener('click', (event) => {
+    const target = event.target;
+    let description = '';
+
+    // Identifier l'élément cliqué
+    if (target.id) {
+        description = `#${target.id}`;
+    } else if (target.className && typeof target.className === 'string') {
+        description = `.${target.className.split(' ')[0]}`;
+    } else {
+        description = target.tagName.toLowerCase();
+    }
+
+    // Ajouter le texte si disponible
+    const texte = target.textContent?.substring(0, 30).trim();
+    if (texte && texte.length > 0) {
+        description += ` "${texte}${texte.length >= 30 ? '...' : ''}"`;
+    }
+
+    enregistrerAction('clic', description);
+}, true);
+
+// Intercepter les changements de navigation (si la fonction existe)
+const originalAfficherSection = window.afficherSection;
+if (typeof originalAfficherSection === 'function') {
+    window.afficherSection = function(section, sousSection) {
+        enregistrerAction('navigation', `${section} > ${sousSection || 'défaut'}`);
+        return originalAfficherSection.apply(this, arguments);
+    };
+}
 
 // ===============================
 // COLLECTE D'INFORMATIONS
@@ -125,12 +219,11 @@ function obtenirEtatApplication() {
     }
 
     // Nombre d'étudiants
-    // ✅ NAMESPACING (Beta 95.5)
     try {
         const etudiants = (typeof obtenirDonneesSelonMode === 'function')
             ? obtenirDonneesSelonMode('groupeEtudiants')
             : db.getSync('groupeEtudiants', []);
-        etat.nbEtudiants = etudiants.length;
+        etat.nbEtudiants = Array.isArray(etudiants) ? etudiants.length : 0;
     } catch (e) {
         etat.nbEtudiants = 'erreur';
     }
@@ -138,8 +231,8 @@ function obtenirEtatApplication() {
     // Nombre de cours
     try {
         const cours = db.getSync('listeCours', []);
-        etat.nbCours = cours.length;
-        const coursActif = cours.find(c => c.actif);
+        etat.nbCours = Array.isArray(cours) ? cours.length : 0;
+        const coursActif = Array.isArray(cours) ? cours.find(c => c.actif) : null;
         etat.coursActif = coursActif ? `${coursActif.codeCours} (${coursActif.session}${coursActif.annee})` : 'aucun';
     } catch (e) {
         etat.nbCours = 'erreur';
@@ -148,7 +241,7 @@ function obtenirEtatApplication() {
     // Nombre de productions
     try {
         const productions = db.getSync('productions', []);
-        etat.nbProductions = productions.length;
+        etat.nbProductions = Array.isArray(productions) ? productions.length : 0;
     } catch (e) {
         etat.nbProductions = 'erreur';
     }
@@ -164,11 +257,116 @@ function obtenirEtatApplication() {
 }
 
 /**
+ * ✅ NOUVEAU : Obtient le contexte spécifique à la section active
+ */
+function obtenirContexteSection() {
+    const section = typeof sectionActive !== 'undefined' ? sectionActive : '';
+    const sousSection = typeof sousSectionActive !== 'undefined' ? sousSectionActive : '';
+    const contexte = {};
+
+    try {
+        // Contexte selon la section
+        switch (section) {
+            case 'reglages':
+                if (sousSection === 'trimestre' || sousSection === 'reglages-trimestre') {
+                    contexte.trimestreActif = db.getSync('trimestreActif', 'non défini');
+                    contexte.infoCours = db.getSync('infoCours', {});
+                }
+                if (sousSection === 'groupe' || sousSection === 'reglages-groupe') {
+                    contexte.dernierImport = sessionStorage.getItem('dernierImportType') || 'aucun';
+                }
+                if (sousSection === 'donnees' || sousSection === 'reglages-donnees') {
+                    contexte.infoCours = db.getSync('infoCours', {});
+                    // Vérifier le type de infoCours.enseignant
+                    const info = db.getSync('infoCours', {});
+                    contexte.typeEnseignant = typeof info?.enseignant;
+                }
+                break;
+
+            case 'evaluations':
+                contexte.nbEvaluations = (db.getSync('evaluationsSauvegardees', []) || []).length;
+                contexte.pratiqueActive = db.getSync('modalitesEvaluation', {})?.pratique || 'non définie';
+                break;
+
+            case 'presences':
+                contexte.nbPresences = (db.getSync('presences', []) || []).length;
+                contexte.horaireActif = db.getSync('horaireActif', 'non défini');
+                break;
+
+            case 'construction':
+                if (sousSection === 'productions') {
+                    contexte.nbProductions = (db.getSync('productions', []) || []).length;
+                }
+                if (sousSection === 'grille-criteres') {
+                    contexte.nbGrilles = (db.getSync('grillesCriteres', []) || []).length;
+                }
+                if (sousSection === 'echelle-performance') {
+                    contexte.nbEchelles = (db.getSync('echellesPerformance', []) || []).length;
+                }
+                break;
+        }
+    } catch (e) {
+        contexte.erreur = e.message;
+    }
+
+    return contexte;
+}
+
+/**
+ * ✅ NOUVEAU : Obtient l'état des clés localStorage pertinentes
+ */
+function obtenirEtatStockage() {
+    const clesImportantes = [
+        'trimestreActif',
+        'coursActifId',
+        'groupeActifId',
+        'modeApplication',
+        'pratiqueParDefaut'
+    ];
+
+    const etat = {};
+    clesImportantes.forEach(cle => {
+        try {
+            const valeur = localStorage.getItem(cle);
+            if (valeur !== null) {
+                // Tronquer si trop long
+                etat[cle] = valeur.length > 50 ? valeur.substring(0, 50) + '...' : valeur;
+            }
+        } catch (e) {
+            etat[cle] = 'erreur lecture';
+        }
+    });
+
+    // Ajouter les clés namespacées si trimestre actif
+    try {
+        const trimestre = localStorage.getItem('trimestreActif');
+        if (trimestre) {
+            const cleNamespace = `${trimestre}_groupeEtudiants`;
+            const valeur = localStorage.getItem(cleNamespace);
+            if (valeur) {
+                try {
+                    const parsed = JSON.parse(valeur);
+                    etat[cleNamespace] = `${Array.isArray(parsed) ? parsed.length : '?'} étudiants`;
+                } catch {
+                    etat[cleNamespace] = 'présent (non parseable)';
+                }
+            }
+        }
+    } catch (e) {
+        // Ignorer
+    }
+
+    return etat;
+}
+
+/**
  * Génère le rapport de bug en texte lisible
  */
 function genererRapportBug(descriptionUtilisateur = '') {
     const infosSysteme = obtenirInfosSysteme();
     const etatApp = obtenirEtatApplication();
+    const contexteSection = obtenirContexteSection();
+    const etatStockage = obtenirEtatStockage();
 
     let rapport = `=== RAPPORT DE BUG ===\n`;
     rapport += `Date: ${etatApp.dateHeure}\n`;
@@ -188,10 +386,48 @@ function genererRapportBug(descriptionUtilisateur = '') {
     rapport += `Nb productions: ${etatApp.nbProductions}\n`;
     rapport += `Mode: ${etatApp.modeDemo}\n\n`;
 
+    // ✅ NOUVEAU : Contexte section
+    if (Object.keys(contexteSection).length > 0) {
+        rapport += `--- CONTEXTE SECTION ---\n`;
+        for (const [cle, valeur] of Object.entries(contexteSection)) {
+            const valeurAffichee = typeof valeur === 'object' ? JSON.stringify(valeur) : valeur;
+            rapport += `${cle}: ${valeurAffichee}\n`;
+        }
+        rapport += `\n`;
+    }
+
+    // ✅ NOUVEAU : État stockage
+    if (Object.keys(etatStockage).length > 0) {
+        rapport += `--- ÉTAT STOCKAGE ---\n`;
+        for (const [cle, valeur] of Object.entries(etatStockage)) {
+            rapport += `${cle}: ${valeur}\n`;
+        }
+        rapport += `\n`;
+    }
+
+    // ✅ NOUVEAU : Historique des actions
+    if (dernieresActions.length > 0) {
+        rapport += `--- DERNIÈRES ACTIONS (${dernieresActions.length}) ---\n`;
+        dernieresActions.forEach(action => {
+            rapport += `[${action.timestamp}] ${action.type}: ${action.details}\n`;
+        });
+        rapport += `\n`;
+    }
+
+    // Erreurs avec stack trace
     if (dernieresErreurs.length > 0) {
         rapport += `--- ERREURS CONSOLE (${dernieresErreurs.length}) ---\n`;
         dernieresErreurs.forEach(err => {
             rapport += `[${err.timestamp}] ${err.message}\n`;
+            // ✅ Stack trace complet (limité à 5 lignes)
+            if (err.stack) {
+                const stackLines = err.stack.split('\n').slice(0, 5);
+                stackLines.forEach(line => {
+                    if (line.trim()) {
+                        rapport += `    ${line.trim()}\n`;
+                    }
+                });
+            }
         });
         rapport += `\n`;
     } else {
@@ -207,6 +443,67 @@ function genererRapportBug(descriptionUtilisateur = '') {
     rapport += `=== FIN DU RAPPORT ===`;
 
     return rapport;
+}
+
+// ===============================
+// CAPTURE D'ÉCRAN
+// ===============================
+
+/**
+ * ✅ NOUVEAU : Capture une capture d'écran de la page
+ * Utilise html2canvas si disponible, sinon indique comment faire manuellement
+ */
+async function capturerEcran() {
+    // Vérifier si html2canvas est disponible
+    if (typeof html2canvas === 'function') {
+        try {
+            const canvas = await html2canvas(document.body, {
+                scale: 0.5, // Réduire la taille
+                logging: false,
+                useCORS: true
+            });
+            return canvas.toDataURL('image/png');
+        } catch (e) {
+            console.error('Erreur capture écran:', e);
+            return null;
+        }
+    }
+    return null;
+}
+
+/**
+ * ✅ NOUVEAU : Télécharge la capture d'écran
+ */
+async function telechargerCaptureEcran() {
+    const btn = event.target;
+    const texteOriginal = btn.textContent;
+    btn.textContent = 'Capture en cours...';
+    btn.disabled = true;
+
+    try {
+        const dataUrl = await capturerEcran();
+        if (dataUrl) {
+            const link = document.createElement('a');
+            link.download = `capture-bug-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.png`;
+            link.href = dataUrl;
+            link.click();
+            btn.textContent = 'Téléchargé !';
+            btn.style.background = 'var(--vert-positif)';
+        } else {
+            // Pas de html2canvas, expliquer comment faire manuellement
+            alert('Capture automatique non disponible.\n\nUtilisez :\n- Mac: Cmd + Shift + 4\n- Windows: Win + Shift + S\n- iPad: Power + Volume haut');
+            btn.textContent = texteOriginal;
+        }
+    } catch (e) {
+        alert('Erreur lors de la capture. Utilisez la méthode manuelle.');
+        btn.textContent = texteOriginal;
+    }
+
+    btn.disabled = false;
+    setTimeout(() => {
+        btn.textContent = texteOriginal;
+        btn.style.background = '';
+    }, 2000);
 }
 
 // ===============================
@@ -326,40 +623,41 @@ function ouvrirModalRapportBug() {
                             background: #f5f5f5;
                             padding: 15px;
                             border-radius: 8px;
-                            font-size: 0.8rem;
+                            font-size: 0.75rem;
                             overflow-x: auto;
                             white-space: pre-wrap;
                             word-wrap: break-word;
-                            max-height: 250px;
+                            max-height: 300px;
                             overflow-y: auto;
                             border: 1px solid var(--gris-clair);
                             margin: 0;
-                        ">${echapperHtml(rapportInitial)}</pre>
+                        ">${typeof echapperHtml === 'function' ? echapperHtml(rapportInitial) : rapportInitial}</pre>
                     </div>
 
                     <!-- Boutons d'action -->
-                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                        <button onclick="copierRapportBug()" class="btn btn-principal" style="flex: 1; min-width: 150px;">
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 15px;">
+                        <button onclick="copierRapportBug()" class="btn btn-principal" style="flex: 1; min-width: 120px;">
                             Copier le rapport
                         </button>
-                        <button onclick="envoyerRapportParCourriel()" class="btn btn-secondaire" style="flex: 1; min-width: 150px;">
+                        <button onclick="telechargerCaptureEcran()" class="btn btn-secondaire" style="flex: 1; min-width: 120px;">
+                            📸 Capture écran
+                        </button>
+                        <button onclick="envoyerRapportParCourriel()" class="btn btn-secondaire" style="flex: 1; min-width: 120px;">
                             Envoyer par courriel
                         </button>
                     </div>
 
                     <!-- Note captures d'écran -->
                     <div style="
-                        margin-top: 20px;
-                        padding: 15px;
+                        padding: 12px;
                         background: var(--bleu-tres-pale);
                         border-radius: 8px;
-                        font-size: 0.9rem;
+                        font-size: 0.85rem;
                     ">
-                        <strong>Captures d'écran :</strong><br>
-                        Sur Mac : <code style="background: #e0e0e0; padding: 2px 6px; border-radius: 4px;">Cmd + Shift + 4</code><br>
-                        Sur Windows : <code style="background: #e0e0e0; padding: 2px 6px; border-radius: 4px;">Win + Shift + S</code><br>
-                        Sur iPad : <code style="background: #e0e0e0; padding: 2px 6px; border-radius: 4px;">Bouton Power + Volume haut</code><br>
-                        <span style="color: var(--gris-moyen);">Joignez vos captures au courriel pour aider au débogage.</span>
+                        <strong>Captures d'écran manuelles :</strong>
+                        Mac: <code style="background: #e0e0e0; padding: 2px 6px; border-radius: 4px;">Cmd+Shift+4</code> |
+                        Windows: <code style="background: #e0e0e0; padding: 2px 6px; border-radius: 4px;">Win+Shift+S</code> |
+                        iPad: <code style="background: #e0e0e0; padding: 2px 6px; border-radius: 4px;">Power+Vol.haut</code>
                     </div>
                 </div>
             </div>
@@ -443,5 +741,7 @@ window.fermerModalRapportBug = fermerModalRapportBug;
 window.mettreAJourRapport = mettreAJourRapport;
 window.copierRapportBug = copierRapportBug;
 window.envoyerRapportParCourriel = envoyerRapportParCourriel;
+window.telechargerCaptureEcran = telechargerCaptureEcran;
+window.enregistrerAction = enregistrerAction; // Pour usage externe si nécessaire
 
-console.log('Module rapport-bug.js chargé');
+console.log('Module rapport-bug.js chargé (version améliorée)');
