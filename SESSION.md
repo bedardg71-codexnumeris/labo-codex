@@ -181,12 +181,12 @@
 - [ ] **Modularisation design_system.html** : Suite et fin de la separation en modules
 - [ ] **Test securite donnees sensibles** : Audit des donnees stockees (localStorage, IndexedDB)
 
-### Ameliorations rapport de bug (post-testeurs)
-- [ ] **Stack trace complet** : Ajouter trace detaillee au lieu de juste fichier:ligne
-- [ ] **Historique actions recentes** : Capturer les 5-10 dernieres actions (clics, navigation) avant l'erreur
-- [ ] **Contexte de donnees** : Inclure infos pertinentes selon la section (ex: type de fichier importe, cles localStorage actives)
-- [ ] **Capture d'ecran integree** : Bouton pour capturer et joindre automatiquement une capture
-- [ ] **Etat stockage** : Inclure cles localStorage/IndexedDB pertinentes pour la section active
+### Ameliorations rapport de bug (post-testeurs) — FAIT 18 jan 2026
+- [x] **Stack trace complet** : Ajouter trace detaillee au lieu de juste fichier:ligne
+- [x] **Historique actions recentes** : Capturer les 5-10 dernieres actions (clics, navigation) avant l'erreur
+- [x] **Contexte de donnees** : Inclure infos pertinentes selon la section (ex: type de fichier importe, cles localStorage actives)
+- [x] **Capture d'ecran integree** : Bouton pour capturer et joindre automatiquement une capture
+- [x] **Etat stockage** : Inclure cles localStorage/IndexedDB pertinentes pour la section active
 
 ### Archivage trimestre (post-H2026)
 - [ ] **Snapshot complet lors archivage** : Figer TOUTES les dependances d'un trimestre
