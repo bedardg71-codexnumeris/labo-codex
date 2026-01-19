@@ -809,6 +809,10 @@ function genererSectionMobilisationEngagement(da) {
         : 0;
     const interpA = interpreterAssiduite(parseFloat(tauxA));
 
+    // 🆕 BETA 95.6 : Détecter si aucune donnée n'est saisie pour cet étudiant
+    // Permet d'afficher "En attente de données" au lieu de messages trompeurs
+    const aucuneDonneeAssiduite = detailsA.heuresOffertes === 0;
+
     // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
     const productions = obtenirDonneesSelonMode('productions') || [];
     const portfolio = productions.find(p => p.type === 'portfolio');
@@ -963,6 +967,13 @@ function genererSectionMobilisationEngagement(da) {
     // artefactsRemis déjà déclaré à la ligne 710
     const artefactsNonRemis = artefacts.filter(a => !a.remis);
 
+    // 🆕 BETA 95.6 : Détecter si aucune donnée de complétion/performance
+    const aucuneDonneeCompletion = nbTotal === 0;
+    const aucuneDonneePerformance = nbRetenus === 0;
+
+    // Détection globale "aucune donnée" pour section Engagement
+    const aucuneDonnee = aucuneDonneeAssiduite && aucuneDonneeCompletion;
+
     // Comptabiliser les jetons utilisés et récupérer les informations des artefacts
     const evaluationsAvecJetonReprise = evaluationsEleve.filter(e => e.repriseDeId);
     const evaluationsAvecJetonDelai = evaluationsEleve.filter(e => e.jetonDelaiApplique && !e.remplaceeParId);
@@ -1032,7 +1043,7 @@ function genererSectionMobilisationEngagement(da) {
             <div class="profil-carte">
                 <div class="u-flex-between-mb15">
                     <h3 class="profil-section-titre-seul">Assiduité</h3>
-                    ${genererValeursComparatives(indicesSOM.A, indicesPAN.A, modeComparatif)}
+                    ${genererValeursComparatives(indicesSOM.A, indicesPAN.A, modeComparatif, aucuneDonneeAssiduite)}
                 </div>
 
                 <!-- Statistiques -->
@@ -1072,8 +1083,8 @@ function genererSectionMobilisationEngagement(da) {
                         }).join('')}
                     </div>
                 ` : `
-                    <div class="profil-message-tous-remis">
-                        Assiduité parfaite !
+                    <div class="${aucuneDonneeAssiduite ? 'profil-message-vide' : 'profil-message-tous-remis'}">
+                        ${aucuneDonneeAssiduite ? 'En attente de données' : 'Assiduité parfaite !'}
                     </div>
                 `}
 
@@ -1129,7 +1140,7 @@ function genererSectionMobilisationEngagement(da) {
             <div class="profil-carte">
                 <div class="u-flex-between-mb15">
                     <h3 class="profil-section-titre-seul">Complétion</h3>
-                    ${genererValeursComparatives(indicesSOM.C, indicesPAN.C, modeComparatif)}
+                    ${genererValeursComparatives(indicesSOM.C, indicesPAN.C, modeComparatif, aucuneDonneeCompletion)}
                 </div>
 
                 <!-- Statistiques -->
@@ -1197,8 +1208,8 @@ function genererSectionMobilisationEngagement(da) {
                             `).join('')}
                     </div>
                 ` : `
-                    <div class="profil-message-tous-remis">
-                        Tous les artefacts remis !
+                    <div class="${aucuneDonneeCompletion ? 'profil-message-vide' : 'profil-message-tous-remis'}">
+                        ${aucuneDonneeCompletion ? 'En attente de données' : 'Tous les artefacts remis !'}
                     </div>
                 `}
             </div>
@@ -1207,7 +1218,7 @@ function genererSectionMobilisationEngagement(da) {
             <div class="profil-carte">
                 <div class="u-flex-between-mb15">
                     <h3 class="profil-section-titre-seul">Performance</h3>
-                    ${genererValeursComparatives(indicesSOM.P, indicesPAN.P, modeComparatif)}
+                    ${genererValeursComparatives(indicesSOM.P, indicesPAN.P, modeComparatif, aucuneDonneePerformance)}
                 </div>
 
                 <!-- Statistiques -->
@@ -1421,6 +1432,21 @@ function genererSectionMobilisationEngagement(da) {
 
         <!-- ÉCHELLE D'ENGAGEMENT (basée sur E = racine cubique de A × C × P) -->
         ${(() => {
+            // 🆕 BETA 95.6 : Si aucune donnée, afficher un message approprié
+            if (aucuneDonnee) {
+                return `
+                    <div class="profil-carte u-mt-10">
+                        <div class="u-flex-between-mb15">
+                            <h3 class="profil-section-titre-seul">Niveau d'engagement</h3>
+                            <span style="color: #94a3b8; font-weight: 600;">—</span>
+                        </div>
+                        <div class="profil-message-vide">
+                            En attente de données
+                        </div>
+                    </div>
+                `;
+            }
+
             // Recalculer E avec racine cubique
             const P_reel = moyenneP / 100;
             const E_brut_reel = A * C * P_reel;
@@ -1605,12 +1631,56 @@ function genererSectionAccompagnement(da) {
     const etudiant = etudiants.find(e => e.da === da);
     const nomComplet = etudiant ? `${etudiant.prenom} ${etudiant.nom}` : `DA ${da}`;
 
+    // Récupérer les données pour le suivi (conservé pour forces/défis)
+    const indices = calculerTousLesIndices(da);
+
+    // 🆕 BETA 95.6 : Détecter si aucune donnée n'est saisie pour cet étudiant
+    const aucuneDonnee = indices.A === 0 && indices.C === 0 && indices.P === 0;
+
+    if (aucuneDonnee) {
+        // Retourner un HTML simplifié pour l'état "en attente de données"
+        return `
+            <!-- Détails de la section (masqué par défaut) -->
+            <div id="details-calculs-accompagnement-${da}" class="carte-info-toggle carte-info-note u-hide">
+                <strong>À propos de cette section</strong>
+                <br><br>
+                <strong>Objectif :</strong> Cette section centralise les indicateurs de suivi et l'historique complet des interventions RàI (Réponse à l'Intervention). Elle permet d'orienter les décisions d'accompagnement pédagogique et de documenter les observations spécifiques.
+            </div>
+
+            <div class="profil-grid-3col">
+                <!-- Carte 1 : Modèle de la Réponse à l'intervention (RàI) -->
+                <div class="profil-carte">
+                    <h2 class="profil-section-titre-sous">Modèle de la Réponse à l'intervention (RàI)</h2>
+                    <div class="profil-message-vide" style="margin: 20px 0;">
+                        En attente de données
+                    </div>
+                    <p class="profil-texte-petit-gris">Les indicateurs RàI seront disponibles après la saisie des premières données.</p>
+                </div>
+
+                <!-- Carte 2 : Contexte d'apprentissage -->
+                <div class="profil-carte">
+                    <h2 class="profil-section-titre-sous">Contexte d'apprentissage</h2>
+                    <div class="profil-message-vide" style="margin: 20px 0;">
+                        En attente de données
+                    </div>
+                    <p class="profil-texte-petit-gris">Le contexte sera analysé après la saisie des premières données.</p>
+                </div>
+
+                <!-- Carte 3 : Observation SOLO -->
+                <div class="profil-carte">
+                    <h2 class="profil-section-titre-sous">Observation de la structure des résultats d'apprentissage</h2>
+                    <div class="profil-message-vide" style="margin: 20px 0;">
+                        En attente de données
+                    </div>
+                    <p class="profil-texte-petit-gris">L'analyse SOLO sera disponible après les premières évaluations.</p>
+                </div>
+            </div>
+        `;
+    }
+
     // 🆕 NOUVEAU : Utiliser les fonctions séparées pour RàI pédagogique et contexte
     const niveauRai = determinerNiveauRaiPedagogique(da);
     const alerteContexte = determinerAlerteContextuelle(da);
-
-    // Récupérer les données pour le suivi (conservé pour forces/défis)
-    const indices = calculerTousLesIndices(da);
     const indices3Derniers = calculerIndicesNDerniersArtefacts(da, true); // true = dépistage (3 artefacts)
     const cibleInfo = determinerCibleIntervention(da); // Conservé pour compatibilité (sera retiré plus tard)
     const progression = calculerProgressionEleve(da);
@@ -3264,7 +3334,12 @@ function genererHistoriqueInterventionsProfil(da) {
  * @param {boolean} modeComparatif - Mode comparatif actif
  * @returns {string} HTML des valeurs colorées
  */
-function genererValeursComparatives(valeurSOM, valeurPAN, modeComparatif) {
+function genererValeursComparatives(valeurSOM, valeurPAN, modeComparatif, afficherTiret = false) {
+    // 🆕 BETA 95.6 : Afficher tiret si aucune donnée
+    if (afficherTiret) {
+        return `<span style="color: #94a3b8; font-weight: 600;">—</span>`;
+    }
+
     if (!modeComparatif) {
         // Mode normal: afficher seulement la valeur de la pratique active
         const config = db.getSync('modalitesEvaluation', {});
