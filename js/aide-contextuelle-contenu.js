@@ -8,9 +8,44 @@
  * - conseil : encadré vert avec conseil pratique
  * - exemple : encadré bleu avec exemple
  * - alerte : encadré orange avec avertissement (niveau: 'attention' | 'important')
+ *
+ * Note : Tutoiement systématique (cohérence avec Primo)
  */
 
 const AIDE_CONTEXTUELLE = {
+
+    // =========================================================================
+    // CONSTRUCTION - RÉFLEXION SUR LES OBJECTIFS (NOUVEAU)
+    // =========================================================================
+
+    'construction-objectifs-reflexion': {
+        titre: "Réfléchir à tes objectifs d'apprentissage",
+        sections: [
+            {
+                type: 'texte',
+                contenu: "Avant de créer tes grilles et échelles, plusieurs enseignants trouvent utile de prendre un moment pour clarifier leurs objectifs d'apprentissage. Cette réflexion peut t'aider à construire un matériel d'évaluation cohérent avec ce que tu enseignes réellement."
+            },
+            {
+                type: 'liste',
+                titre: "Questions de réflexion (optionnelles)",
+                items: [
+                    "Quels sont les éléments de compétence visés dans ton devis ministériel ?",
+                    "Qu'est-ce que tu veux que tes étudiants soient capables de FAIRE à la fin du cours ?",
+                    "Comment sauras-tu qu'un étudiant a atteint cet objectif ? Qu'observeras-tu concrètement dans son travail ?"
+                ]
+            },
+            {
+                type: 'conseil',
+                contenu: "Certains enseignants aiment écrire leurs réflexions sur papier avant d'entrer dans l'application. D'autres préfèrent créer leurs grilles directement et ajuster en cours de route. Les deux approches fonctionnent. Fais ce qui te convient le mieux."
+            },
+            {
+                type: 'exemple',
+                titre: "Passer du devis à des critères observables",
+                contenu: "Si ton devis indique « Repérer et classer des thèmes », tu pourrais te demander : « Comment je sais qu'un étudiant repère bien les thèmes ? » Tes réponses deviennent tes critères : identification des thèmes, précision du vocabulaire, organisation du classement, etc."
+            }
+        ],
+        voirAussi: ['construction-grilles', 'construction-echelles', 'construction-apercu']
+    },
 
     // =========================================================================
     // CONSTRUCTION - APERÇU
@@ -21,7 +56,7 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: "Cette page présente un résumé de tout le matériel pédagogique configuré pour votre cours : productions, grilles de critères, échelles de performance et pratiques de notation."
+                contenu: "Cette page présente un résumé de tout le matériel pédagogique configuré pour ton cours : productions, grilles de critères, échelles de performance et pratiques de notation."
             },
             {
                 type: 'liste',
@@ -29,16 +64,21 @@ const AIDE_CONTEXTUELLE = {
                 items: [
                     "Productions : travaux à évaluer (examens, devoirs, projets)",
                     "Grilles : critères d'évaluation pour chaque production",
-                    "Échelles : niveaux de performance (IDME, pourcentages, etc.)",
+                    "Échelles : niveaux de performance (pourcentages, lettres, etc.)",
                     "Pratiques : méthode de calcul de la note finale"
                 ]
             },
             {
                 type: 'conseil',
-                contenu: "Configurez votre matériel dans cet ordre : 1) Pratique de notation, 2) Échelles, 3) Grilles, 4) Productions. Cette séquence assure une configuration cohérente."
+                contenu: "Configure ton matériel dans cet ordre : 1) Échelles de performance, 2) Pratiques de notation, 3) Grilles de critères, 4) Productions. Chaque élément dépend du précédent. Note : les réglages de base (trimestre, horaire, groupes) doivent être complétés au préalable."
+            },
+            {
+                type: 'alerte',
+                niveau: 'important',
+                contenu: "Prendre le temps de réfléchir à tes objectifs d'apprentissage avant de configurer ton matériel peut t'aider à créer des grilles plus cohérentes. Clique sur le bouton 😎 « Réfléchir à tes objectifs » si tu veux des pistes de réflexion."
             }
         ],
-        voirAussi: ['construction-productions', 'construction-grilles', 'construction-pratiques']
+        voirAussi: ['construction-objectifs-reflexion', 'construction-productions', 'construction-grilles', 'construction-pratiques']
     },
 
     // =========================================================================
@@ -50,17 +90,17 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: "Cette interface permet d'évaluer le travail d'un·e étudiant·e sur une production. L'évaluation génère automatiquement une rétroaction personnalisée basée sur vos critères."
+                contenu: "Cette interface permet d'évaluer le travail d'un·e étudiant·e sur une production. L'évaluation génère automatiquement une rétroaction personnalisée basée sur tes critères."
             },
             {
                 type: 'liste',
                 titre: "Étapes recommandées",
                 items: [
-                    "Sélectionner l'étudiant·e dans la liste déroulante",
-                    "Choisir la production à évaluer",
-                    "Évaluer chaque critère de la grille en cliquant sur le niveau atteint",
-                    "Vérifier et ajuster la rétroaction générée si nécessaire",
-                    "Cliquer sur « Sauvegarder l'évaluation »"
+                    "Sélectionne l'étudiant·e dans la liste déroulante",
+                    "Choisis la production à évaluer",
+                    "Évalue chaque critère de la grille en cliquant sur le niveau atteint",
+                    "Vérifie et ajuste la rétroaction générée si nécessaire",
+                    "Clique sur « Sauvegarder l'évaluation »"
                 ]
             },
             {
@@ -70,7 +110,7 @@ const AIDE_CONTEXTUELLE = {
             {
                 type: 'exemple',
                 titre: "Raccourci clavier",
-                contenu: "Utilisez les touches 1-2-3-4-5 pour évaluer rapidement chaque critère sans utiliser la souris."
+                contenu: "Utilise les touches 1-2-3-4-5 pour évaluer rapidement chaque critère sans utiliser la souris."
             }
         ],
         voirAussi: ['construction-grilles', 'construction-echelles']
@@ -97,11 +137,11 @@ const AIDE_CONTEXTUELLE = {
             {
                 type: 'alerte',
                 niveau: 'attention',
-                contenu: "La somme des pondérations de toutes les productions devrait totaliser 100%. Vérifiez le total affiché en bas de la liste."
+                contenu: "La somme des pondérations de toutes les productions devrait totaliser 100%. Vérifie le total affiché en bas de la liste."
             },
             {
                 type: 'conseil',
-                contenu: "Créez vos productions au début du trimestre pour avoir une vue d'ensemble de votre plan d'évaluation."
+                contenu: "Crée tes productions au début du trimestre pour avoir une vue d'ensemble de ton plan d'évaluation."
             }
         ],
         voirAussi: ['construction-grilles', 'construction-pratiques']
@@ -131,7 +171,7 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'conseil',
-                contenu: "Commencez avec 3-4 rubriques maximum. Une grille trop détaillée devient difficile à utiliser en contexte réel de correction."
+                contenu: "Commence avec 3-4 rubriques maximum. Une grille trop détaillée devient difficile à utiliser en contexte réel de correction."
             }
         ],
         voirAussi: ['construction-echelles', 'evaluations-proceder']
@@ -142,26 +182,30 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: "Les échelles définissent les niveaux de performance utilisés dans vos grilles. Elles permettent de traduire une appréciation qualitative en valeur numérique."
+                contenu: "Les échelles définissent les niveaux de performance utilisés dans tes grilles. Elles permettent de traduire une appréciation qualitative en valeur numérique."
             },
             {
                 type: 'liste',
                 titre: "Échelles prédéfinies disponibles",
                 items: [
-                    "IDME (4 niveaux) : Insuffisant, En développement, Maîtrisé, Exemplaire",
+                    "4 niveaux : Insuffisant, En développement, Maîtrisé, Exemplaire",
                     "Pourcentage (5 niveaux) : 0-20%, 20-40%, 40-60%, 60-80%, 80-100%",
                     "Lettres (5 niveaux) : E, D, C, B, A",
-                    "Personnalisée : créez votre propre échelle"
+                    "Personnalisée : crée ta propre échelle"
                 ]
             },
             {
                 type: 'alerte',
                 niveau: 'important',
-                contenu: "Modifier une échelle déjà utilisée dans des évaluations peut affecter les notes existantes. Créez plutôt une nouvelle échelle si nécessaire."
+                contenu: "Modifier une échelle déjà utilisée dans des évaluations peut affecter les notes existantes. Crée plutôt une nouvelle échelle si nécessaire."
             },
             {
                 type: 'conseil',
-                contenu: "L'échelle IDME est recommandée pour débuter : ses 4 niveaux facilitent les décisions d'évaluation."
+                contenu: "Une échelle à 4 niveaux (par exemple : insuffisant, en développement, maîtrisé, exemplaire) peut faciliter tes premières évaluations en te donnant des repères clairs sans trop de nuances difficiles à distinguer."
+            },
+            {
+                type: 'texte',
+                contenu: "Note optionnelle : Certains enseignants s'inspirent de cadres de recherche en sciences de l'éducation pour structurer leurs échelles de performance. La taxonomie SOLO (Structure of Observed Learning Outcomes), par exemple, décrit comment les étudiants progressent du simple au complexe dans leur apprentissage. Si ce genre d'approche théorique t'intéresse, tu peux l'explorer, mais ce n'est pas nécessaire pour utiliser l'application efficacement."
             }
         ],
         voirAussi: ['construction-grilles', 'construction-pratiques']
@@ -202,7 +246,7 @@ const AIDE_CONTEXTUELLE = {
             {
                 type: 'alerte',
                 niveau: 'attention',
-                contenu: "Changer de pratique en cours de trimestre recalcule toutes les notes. Informez vos étudiants de la méthode choisie dès le début."
+                contenu: "Changer de pratique en cours de trimestre recalcule toutes les notes. Informe tes étudiants de la méthode choisie dès le début."
             }
         ],
         voirAussi: ['construction-productions', 'construction-echelles']
@@ -217,7 +261,7 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: "Le tableau de bord offre une vue d'ensemble de la progression de votre groupe. Les indices A-C-P-E permettent d'identifier rapidement les étudiants nécessitant un suivi particulier."
+                contenu: "Le tableau de bord offre une vue d'ensemble de la progression de ton groupe. Les indices A-C-P-E permettent d'identifier rapidement les étudiants nécessitant un suivi particulier."
             },
             {
                 type: 'liste',
@@ -236,7 +280,7 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'conseil',
-                contenu: "Consultez ce tableau chaque semaine pour détecter les situations à risque avant qu'elles ne s'aggravent."
+                contenu: "Consulte ce tableau chaque semaine pour détecter les situations à risque avant qu'elles ne s'aggravent."
             }
         ],
         voirAussi: ['tableau-bord-rai', 'presences-saisie']
@@ -265,7 +309,7 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'conseil',
-                contenu: "Documentez vos interventions dans l'onglet dédié. Cela permet de suivre leur efficacité et d'ajuster votre approche."
+                contenu: "Documente tes interventions dans l'onglet dédié. Cela permet de suivre leur efficacité et d'ajuster ton approche."
             }
         ],
         voirAussi: ['tableau-bord-apercu', 'tableau-bord-liste']
@@ -290,12 +334,12 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'conseil',
-                contenu: "Prenez les présences au début du cours plutôt qu'à la fin. Utilisez le bouton « Tous présents » puis ajustez les exceptions."
+                contenu: "Prends les présences au début du cours plutôt qu'à la fin. Utilise le bouton « Tous présents » puis ajuste les exceptions."
             },
             {
                 type: 'alerte',
                 niveau: 'attention',
-                contenu: "Les présences sont liées à la date du cours. Vérifiez que la bonne date est sélectionnée avant de saisir."
+                contenu: "Les présences sont liées à la date du cours. Vérifie que la bonne date est sélectionnée avant de saisir."
             }
         ],
         voirAussi: ['tableau-bord-apercu', 'presences-calendrier']
@@ -306,7 +350,7 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: "Les réglages du trimestre définissent le cadre de votre cours : dates, groupes, horaires. Ces paramètres influencent plusieurs fonctionnalités de l'application."
+                contenu: "Les réglages du trimestre définissent le cadre de ton cours : dates, groupes, horaires. Ces paramètres influencent plusieurs fonctionnalités de l'application."
             },
             {
                 type: 'liste',
@@ -321,11 +365,11 @@ const AIDE_CONTEXTUELLE = {
             {
                 type: 'alerte',
                 niveau: 'important',
-                contenu: "Modifier les dates après avoir saisi des données peut créer des incohérences. Configurez ces paramètres en début de trimestre."
+                contenu: "Modifier les dates après avoir saisi des données peut créer des incohérences. Configure ces paramètres en début de trimestre."
             },
             {
                 type: 'conseil',
-                contenu: "Utilisez la fonction d'import pour récupérer la liste de vos étudiants depuis un fichier CSV exporté de Clara ou Omnivox."
+                contenu: "Utilise la fonction d'import pour récupérer la liste de tes étudiants depuis un fichier CSV exporté de Clara ou Omnivox."
             }
         ],
         voirAussi: ['construction-pratiques', 'presences-saisie']
@@ -340,21 +384,21 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: "Cette vue présente tous vos étudiants avec leurs indicateurs clés. Vous pouvez trier et filtrer pour identifier rapidement ceux nécessitant un suivi."
+                contenu: "Cette vue présente tous tes étudiants avec leurs indicateurs clés. Tu peux trier et filtrer pour identifier rapidement ceux nécessitant un suivi."
             },
             {
                 type: 'liste',
                 titre: "Actions disponibles",
                 items: [
-                    "Cliquer sur un nom pour voir le profil détaillé",
-                    "Trier par colonne (note, assiduité, etc.)",
-                    "Filtrer par groupe",
-                    "Exporter la liste au format CSV"
+                    "Clique sur un nom pour voir le profil détaillé",
+                    "Trie par colonne (note, assiduité, etc.)",
+                    "Filtre par groupe",
+                    "Exporte la liste au format CSV"
                 ]
             },
             {
                 type: 'conseil',
-                contenu: "Triez par l'indice le plus problématique pour créer votre liste de suivi prioritaire."
+                contenu: "Trie par l'indice le plus problématique pour créer ta liste de suivi prioritaire."
             }
         ],
         voirAussi: ['tableau-bord-apercu', 'tableau-bord-rai']
@@ -371,15 +415,15 @@ const AIDE_CONTEXTUELLE = {
                 type: 'liste',
                 titre: "Navigation dans le calendrier",
                 items: [
-                    "Cliquer sur une date pour saisir/modifier les présences",
+                    "Clique sur une date pour saisir/modifier les présences",
                     "Les dates en gras ont des présences enregistrées",
-                    "Utilisez les flèches pour naviguer entre les mois",
+                    "Utilise les flèches pour naviguer entre les mois",
                     "La date du jour est encadrée"
                 ]
             },
             {
                 type: 'conseil',
-                contenu: "Repérez les patterns : un étudiant souvent absent le lundi peut avoir un conflit d'horaire à signaler."
+                contenu: "Repère les patterns : un étudiant souvent absent le lundi peut avoir un conflit d'horaire à signaler."
             }
         ],
         voirAussi: ['presences-saisie', 'tableau-bord-apercu']
@@ -390,7 +434,7 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: "Cette section liste toutes les évaluations effectuées. Vous pouvez consulter, modifier ou supprimer une évaluation existante."
+                contenu: "Cette section liste toutes les évaluations effectuées. Tu peux consulter, modifier ou supprimer une évaluation existante."
             },
             {
                 type: 'liste',
@@ -405,11 +449,11 @@ const AIDE_CONTEXTUELLE = {
             {
                 type: 'exemple',
                 titre: "Cas d'usage",
-                contenu: "Filtrez par production « Examen intra » + statut « Complété » pour réviser toutes vos corrections avant de publier les notes."
+                contenu: "Filtre par production « Examen intra » + statut « Complété » pour réviser toutes tes corrections avant de publier les notes."
             },
             {
                 type: 'conseil',
-                contenu: "Exportez les résultats filtrés en CSV pour les importer dans votre système de notes officiel."
+                contenu: "Exporte les résultats filtrés en CSV pour les importer dans ton système de notes officiel."
             }
         ],
         voirAussi: ['evaluations-proceder', 'construction-productions']
