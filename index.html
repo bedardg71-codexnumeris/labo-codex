@@ -287,7 +287,7 @@
             color: white;
             border: 1px solid rgba(255, 255, 255, 0.5);
             padding: 4px 12px;
-            border-radius: 4px;
+            border-radius: var(--radius-moyen);
             font-size: 0.8rem;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -336,7 +336,7 @@
             align-items: center;
             padding: 12px 15px;
             background: var(--bleu-tres-pale);
-            border-radius: 8px;
+            border-radius: var(--radius-grand);
             border-left: 4px solid var(--bleu-principal);
             margin-bottom: 10px;
         }
@@ -440,7 +440,7 @@
         .export-trimestre-cible {
             background: var(--bleu-tres-pale);
             padding: 12px 15px;
-            border-radius: 8px;
+            border-radius: var(--radius-grand);
             margin-bottom: 15px;
             display: flex;
             align-items: center;
@@ -475,7 +475,7 @@
             text-align: center;
             padding: 15px 10px;
             background: var(--bleu-tres-pale);
-            border-radius: 8px;
+            border-radius: var(--radius-grand);
         }
 
         .statistique-valeur {
@@ -503,7 +503,7 @@
         .details-aide {
             margin-top: 20px;
             border: 1px solid var(--gris-clair);
-            border-radius: 8px;
+            border-radius: var(--radius-grand);
             background: var(--blanc);
         }
 
@@ -636,7 +636,7 @@
         .carte {
             background: white;
             border: 1px solid var(--bleu-pale);
-            border-radius: 8px;
+            border-radius: var(--radius-grand);
             padding: var(--espacement-moyen);
             margin-bottom: var(--espacement-moyen);
             box-shadow: 0 2px 8px rgba(3, 46, 92, 0.05);
@@ -662,7 +662,7 @@
             width: 100%;
             padding: 8px;
             border: 1px solid var(--bordure-claire);
-            border-radius: 4px;
+            border-radius: var(--radius-moyen);
             font-size: 0.95rem;
             transition: border-color 0.2s;
         }
@@ -760,7 +760,7 @@
             background: var(--vert-succes);
             color: white;
             padding: 15px 20px;
-            border-radius: 8px;
+            border-radius: var(--radius-grand);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             z-index: 9999;
             animation: slideIn 0.3s ease;
@@ -779,7 +779,7 @@
         .debug-zone {
             background: var(--gris-tres-pale);
             border: 2px dashed #6c757d;
-            border-radius: 8px;
+            border-radius: var(--radius-grand);
             padding: 15px;
             margin-top: 20px;
             font-family: 'Courier New', monospace;
@@ -855,35 +855,35 @@
         .carte-metrique-bleue {
             background: var(--bleu-tres-pale);
             padding: 15px;
-            border-radius: 8px;
+            border-radius: var(--radius-grand);
             border: 2px solid var(--bleu-principal);
         }
 
         .carte-metrique-verte {
             background: var(--alerte-fond-succes);
             padding: 15px;
-            border-radius: 8px;
+            border-radius: var(--radius-grand);
             border: 2px solid var(--btn-confirmer);
         }
 
         .carte-metrique-jaune {
             background: var(--alerte-fond-attention);
             padding: 15px;
-            border-radius: 8px;
+            border-radius: var(--radius-grand);
             border: 2px solid var(--risque-eleve);
         }
 
         .carte-metrique-orange {
             background: var(--alerte-fond-attention);
             padding: 15px;
-            border-radius: 8px;
+            border-radius: var(--radius-grand);
             border: 2px solid var(--risque-tres-eleve);
         }
 
         .carte-metrique-rouge {
             background: var(--alerte-fond-erreur);
             padding: 15px;
-            border-radius: 8px;
+            border-radius: var(--radius-grand);
             border: 2px solid var(--risque-critique);
         }
 
@@ -934,7 +934,7 @@
             margin-top: 8px;
             background: white;
             height: 8px;
-            border-radius: 4px;
+            border-radius: var(--radius-moyen);
             overflow: hidden;
         }
 
@@ -963,7 +963,7 @@
         .carte-metrique-violette {
             background: var(--alerte-fond-information);
             padding: 15px;
-            border-radius: 8px;
+            border-radius: var(--radius-grand);
             border: 2px solid var(--btn-modifier);
         }
 
@@ -971,7 +971,7 @@
         .carte-metrique-jaune-pale {
             background: var(--alerte-fond-attention);
             padding: 15px;
-            border-radius: 8px;
+            border-radius: var(--radius-grand);
             border: 2px solid var(--risque-modere);
         }
 
@@ -979,7 +979,7 @@
         .carte-metrique-rouge-attention {
             background: var(--alerte-fond-attention);
             padding: 15px;
-            border-radius: 8px;
+            border-radius: var(--radius-grand);
             border: 2px solid var(--btn-annuler);
         }
 
@@ -1052,7 +1052,7 @@
             display: none;
             padding: 10px;
             background: var(--bleu-pale);
-            border-radius: 4px;
+            border-radius: var(--radius-moyen);
             color: var(--bleu-principal);
             font-size: 0.85rem;
             margin-bottom: 15px;
@@ -1062,7 +1062,7 @@
         .note-explicative-config {
             background: var(--bleu-tres-pale);
             padding: 10px;
-            border-radius: 4px;
+            border-radius: var(--radius-moyen);
             font-size: 0.9rem;
             margin-top: 15px;
         }
@@ -1219,7 +1219,7 @@
             padding: 15px;
             background: var(--bleu-tres-pale);
             border-left: 4px solid var(--bleu-moyen);
-            border-radius: 4px;
+            border-radius: var(--radius-moyen);
         }
 
         .separateur-section {
@@ -1242,7 +1242,7 @@
         .carte-bleu-encadree {
             background: var(--bleu-tres-pale);
             padding: 15px;
-            border-radius: 8px;
+            border-radius: var(--radius-grand);
             border: 2px solid var(--bleu-principal);
         }
 
@@ -1251,7 +1251,7 @@
             padding: 15px;
             background: var(--gris-tres-pale);
             border-left: 4px solid var(--bleu-moyen);
-            border-radius: 4px;
+            border-radius: var(--radius-moyen);
         }
 
         .titre-section-haut {
@@ -1405,7 +1405,7 @@
             padding: 15px;
             background: var(--alerte-fond-attention);
             border-left: 4px solid #ffc107;
-            border-radius: 4px;
+            border-radius: var(--radius-moyen);
         }
 
         /* Cartes */
@@ -1603,14 +1603,14 @@
             padding: 15px;
             background: var(--alerte-fond-erreur);
             border-left: 4px solid #dc3545;
-            border-radius: 4px;
+            border-radius: var(--radius-moyen);
         }
         .alerte-warning-or {
             margin: 20px 0;
             padding: 15px;
             background: var(--alerte-fond-attention);
             border-left: 4px solid #ffd700;
-            border-radius: 4px;
+            border-radius: var(--radius-moyen);
         }
 
         /* Backgrounds */
@@ -1767,7 +1767,7 @@
             gap: 6px;
             padding: 4px 10px;
             background: #fef2f2;
-            border-radius: 4px;
+            border-radius: var(--radius-moyen);
             cursor: pointer;
             user-select: none;
         }
@@ -1777,7 +1777,7 @@
             gap: 6px;
             padding: 4px 10px;
             background: #fee2e2;
-            border-radius: 4px;
+            border-radius: var(--radius-moyen);
             cursor: pointer;
             user-select: none;
         }
@@ -1915,7 +1915,7 @@
         .carte-gradient-bleu {
             background: linear-gradient(90deg, var(--bleu-pale) 0%, var(--bleu-tres-pale) 100%);
             padding: 20px;
-            border-radius: 8px;
+            border-radius: var(--radius-grand);
             margin-top: 15px;
         }
         .carte-bleu-pale-p15 {
@@ -1932,7 +1932,7 @@
         .carte-bleu-fonce {
             padding: 15px;
             background: var(--bleu-pale);
-            border-radius: 8px;
+            border-radius: var(--radius-grand);
         }
         .carte-info-bleu-clair {
             padding: 15px;
@@ -1957,14 +1957,14 @@
         .overflow-x-border {
             overflow-x: auto;
             border: 1px solid var(--bordure-claire);
-            border-radius: 4px;
+            border-radius: var(--radius-moyen);
         }
         .overflow-xy-600 {
             max-height: 600px;
             overflow-x: auto;
             overflow-y: auto;
             border: 1px solid var(--bordure-claire);
-            border-radius: 4px;
+            border-radius: var(--radius-moyen);
         }
         .overflow-y-500 {
             max-height: 500px;
@@ -2003,7 +2003,7 @@
         .w-80-select {
             width: 80px;
             padding: 6px 10px;
-            border-radius: 4px;
+            border-radius: var(--radius-moyen);
             border: 1px solid var(--bordure-moyenne);
             font-size: 0.95rem;
             margin-right: 10px;
@@ -2018,7 +2018,7 @@
             padding: 12px 40px 12px 15px;
             font-size: 1rem;
             border: 2px solid var(--bleu-moyen);
-            border-radius: 8px;
+            border-radius: var(--radius-grand);
             outline: none;
             transition: all 0.3s;
         }
@@ -2083,63 +2083,63 @@
             padding: 15px;
             background: #e8f5e9;
             border-left: 4px solid #4caf50;
-            border-radius: 4px;
+            border-radius: var(--radius-moyen);
         }
         .alerte-success-dark {
             margin: 15px 0;
             padding: 15px;
             background: #d4edda;
             border-left: 4px solid #28a745;
-            border-radius: 4px;
+            border-radius: var(--radius-moyen);
         }
         .alerte-success-bleu-pale {
             margin: 15px 0;
             padding: 15px;
             background: var(--bleu-tres-pale);
             border-left: 4px solid #28a745;
-            border-radius: 4px;
+            border-radius: var(--radius-moyen);
         }
         .alerte-info-cyan {
             margin: 15px 0;
             padding: 15px;
             background: #d1ecf1;
             border-left: 4px solid #17a2b8;
-            border-radius: 4px;
+            border-radius: var(--radius-moyen);
         }
         .alerte-info-bleu-ciel {
             margin: 15px 0;
             padding: 15px;
             background: #e1f5fe;
             border-left: 4px solid #03a9f4;
-            border-radius: 4px;
+            border-radius: var(--radius-moyen);
         }
         .alerte-warning-orange-clair {
             margin: 15px 0;
             padding: 15px;
             background: #fff3e0;
             border-left: 4px solid #ff9800;
-            border-radius: 4px;
+            border-radius: var(--radius-moyen);
         }
         .alerte-warning-orange-fonce {
             margin: 15px 0;
             padding: 15px;
             background: var(--alerte-fond-attention);
             border-left: 4px solid #ff6f00;
-            border-radius: 4px;
+            border-radius: var(--radius-moyen);
         }
         .alerte-purple {
             margin: 15px 0;
             padding: 15px;
             background: #f3e5f5;
             border-left: 4px solid #9c27b0;
-            border-radius: 4px;
+            border-radius: var(--radius-moyen);
         }
         .alerte-info-grise-my20 {
             margin: 20px 0;
             padding: 15px;
             background: var(--gris-tres-pale);
             border-left: 4px solid var(--bleu-moyen);
-            border-radius: 4px;
+            border-radius: var(--radius-moyen);
         }
 
         /* Cartes encadrées variées */
@@ -2183,7 +2183,7 @@
             background: #721c24;
             color: white;
             border-left: 4px solid #8B0000;
-            border-radius: 4px;
+            border-radius: var(--radius-moyen);
         }
 
         /* Marges variées */
@@ -2329,14 +2329,14 @@
             margin-bottom: 25px;
             padding: 15px;
             background: #f1f8e9;
-            border-radius: 8px;
+            border-radius: var(--radius-grand);
             border-left: 4px solid #8bc34a;
         }
         .carte-mb25-bleu-clair {
             margin-bottom: 25px;
             padding: 15px;
             background: #e3f2fd;
-            border-radius: 8px;
+            border-radius: var(--radius-grand);
             border-left: 4px solid #2196F3;
         }
         .carte-mb20-orange {
@@ -2350,7 +2350,7 @@
             margin-bottom: 20px;
             padding: 15px;
             background: var(--gris-tres-clair);
-            border-radius: 8px;
+            border-radius: var(--radius-grand);
         }
         .carte-mb15-grise {
             margin-bottom: 15px;
@@ -2594,7 +2594,7 @@
         .carte-bleu-tres-pale-mt10 {
             background: var(--bleu-tres-pale);
             padding: 20px;
-            border-radius: 8px;
+            border-radius: var(--radius-grand);
             margin-top: 10px;
         }
         .carte-bleu-pale-mt10 {
@@ -2606,7 +2606,7 @@
         .carte-grise-mb20 {
             background: var(--gris-tres-pale);
             padding: 15px;
-            border-radius: 8px;
+            border-radius: var(--radius-grand);
             margin-bottom: 20px;
         }
         .carte-grise-my15 {
@@ -2618,7 +2618,7 @@
         .carte-grise-mt20 {
             background: var(--gris-tres-pale);
             padding: 20px;
-            border-radius: 8px;
+            border-radius: var(--radius-grand);
             margin-top: 10px;
         }
         .carte-orange-my15 {
@@ -2661,7 +2661,7 @@
         .carte-code-light-sm {
             background: var(--gris-tres-pale);
             padding: 10px;
-            border-radius: 4px;
+            border-radius: var(--radius-moyen);
             margin-top: 10px;
             font-family: monospace;
             font-size: 0.85em;
@@ -2712,7 +2712,7 @@
         .bg-bleu-tres-pale-p15-mb20 {
             background: var(--bleu-tres-pale);
             padding: 15px;
-            border-radius: 8px;
+            border-radius: var(--radius-grand);
             margin-bottom: 20px;
         }
         .bg-f0f8ff { background: var(--bleu-tres-pale); }
@@ -2809,7 +2809,7 @@
             gap: 6px;
             padding: 4px 10px;
             background: #fef3c7;
-            border-radius: 4px;
+            border-radius: var(--radius-moyen);
             cursor: pointer;
             user-select: none;
         }
@@ -2818,7 +2818,7 @@
         .carte-gradient-success-danger {
             background: linear-gradient(90deg, #d4edda 0%, #f8d7da 100%);
             padding: 20px;
-            border-radius: 8px;
+            border-radius: var(--radius-grand);
             margin-top: 15px;
         }
         .carte-gradient-bleu-mt15 {
@@ -2855,7 +2855,7 @@
             padding: 12px 15px;
             background: var(--alerte-fond-attention);
             border-left: 4px solid #ffc107;
-            border-radius: 4px;
+            border-radius: var(--radius-moyen);
         }
         .hidden-mb20-success {
             display: none;
@@ -2872,7 +2872,7 @@
             color: #d32f2f;
             background: #ffebee;
             padding: 8px;
-            border-radius: 4px;
+            border-radius: var(--radius-moyen);
             margin-top: 8px;
         }
 
@@ -3010,7 +3010,7 @@
         .badge-jeton {
             display: inline-block;
             padding: 2px 4px;
-            border-radius: 4px;
+            border-radius: var(--radius-moyen);
             font-size: 0.75rem;
             font-weight: 600;
             margin-left: 8px;
@@ -3043,7 +3043,7 @@
         .badge-statut {
             display: inline-block;
             padding: 2px 4px;
-            border-radius: 4px;
+            border-radius: var(--radius-moyen);
             font-size: 0.75rem;
             font-weight: 600;
         }
@@ -3184,7 +3184,7 @@
                 <h2 class="modal-titre">✉️ Nouveautés</h2>
 
                 <!-- Beta 95.6 - Corrections affichage données -->
-                <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%); border-left: 3px solid #ffc107; border-radius: 4px; padding: 12px 16px; margin-bottom: 1rem;">
+                <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%); border-left: 3px solid #ffc107; border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
                     <strong style="color: #856404; display: block; margin-bottom: 8px;">Beta 95.6 (19 janvier) — Corrections affichage :</strong>
                     <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6; color: #856404;">
                         <li><strong>Tiret "—" au lieu de "0%"</strong> : La liste des étudiants affiche maintenant un tiret quand aucune donnée n'est saisie (évite les interprétations erronées)</li>
@@ -3196,7 +3196,7 @@
                 </div>
 
                 <!-- Encadré Nouveautés Beta 95.5 -->
-                <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: 4px; padding: 12px 16px; margin-bottom: 1rem;">
+                <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
                     <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Beta 95.5 (10 janvier) :</strong>
                     <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
                         <li><strong>Catégories Sélection/Obligatoires</strong> : Nouveau design avec deux cartes et checkboxes pour classer tes productions (N meilleures vs toujours comptées)</li>
@@ -3207,7 +3207,7 @@
                 </div>
 
                 <!-- Beta 95.5 - Corrections testeurs -->
-                <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%); border-left: 3px solid #ffc107; border-radius: 4px; padding: 12px 16px; margin-bottom: 1rem;">
+                <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%); border-left: 3px solid #ffc107; border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
                     <strong style="color: #856404; display: block; margin-bottom: 8px;">Beta 95.5 (18 janvier) — Corrections testeurs :</strong>
                     <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6; color: #856404;">
                         <li><strong>Création d'horaire</strong> : Le bouton fonctionne à nouveau (merci Jordan)</li>
@@ -3219,7 +3219,7 @@
                 </div>
 
                 <!-- Beta 95.3 -->
-                <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: 4px; padding: 12px 16px; margin-bottom: 1rem;">
+                <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
                     <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Beta 95.3 (9 janvier) :</strong>
                     <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
                         <li><strong>Modal bibliothèque groupe-cours</strong> : Bouton 📚 pour voir, activer ou supprimer tes groupes-cours</li>
@@ -3230,7 +3230,7 @@
                 </div>
 
                 <!-- Beta 95.2 -->
-                <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: 4px; padding: 12px 16px; margin-bottom: 1rem;">
+                <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
                     <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Beta 95.2 (6-8 janvier) — Architecture modulaire :</strong>
                     <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
                         <li><strong>Toggles séparés</strong> : Cours, Enseignant·e, Horaire et Groupe-cours sont des entités indépendantes</li>
@@ -3241,7 +3241,7 @@
                 </div>
 
                 <!-- Beta 95.1 -->
-                <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%); border-left: 3px solid #ffc107; border-radius: 4px; padding: 12px 16px; margin-bottom: 1rem;">
+                <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%); border-left: 3px solid #ffc107; border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
                     <strong style="color: #856404; display: block; margin-bottom: 8px;">Beta 95.1 (1-5 janvier) — Corrections testeurs :</strong>
                     <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6; color: #856404;">
                         <li><strong>Périodes au lieu d'heures</strong> : Format horaire dynamique selon le nombre de périodes (merci Olivier)</li>
@@ -3277,7 +3277,7 @@
                 <h2 class="modal-titre">😎 Découvrir l'application</h2>
 
                 <!-- Statut application -->
-                <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); border-left: 3px solid #28a745; border-radius: 4px; padding: 12px 16px; margin-bottom: 1rem;">
+                <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); border-left: 3px solid #28a745; border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
                     <strong style="color: #155724;">✅ Application fonctionnelle pour H2026</strong>
                     <p style="margin: 8px 0 0 0; font-size: 0.9rem; color: #155724;">
                         La section Trimestre est opérationnelle. Tu peux configurer ton trimestre, tes cours,
@@ -3387,7 +3387,12 @@
 
                 <!-- Sous-section: Aperçu -->
                 <div id="tableau-bord-apercu" class="sous-section">
-                    <h2>Vue d'ensemble</h2>
+                    <h2 class="titre-avec-emoji-toggles">
+                        <span>Vue d'ensemble</span>
+                        <span class="titre-emoji-container">
+                            <button class="btn-aide-contextuelle" data-aide="tableau-bord-apercu" aria-label="Aide contextuelle">😎</button>
+                        </span>
+                    </h2>
                     <p class="text-muted">Suivi de l'apprentissage et priorisation des interventions</p>
 
                     <!-- ========== MÉTRIQUES GLOBALES DU GROUPE ========== -->
@@ -3436,8 +3441,12 @@
 
                 <!-- Sous-section: Liste des individus -->
                 <div id="tableau-bord-liste" class="sous-section">
-                    <h2 id="titre-liste-etudiants">Liste des étudiant·es
-                        <span class="primo-aide" data-target="conseil-liste-etudiants">😎</span>
+                    <h2 id="titre-liste-etudiants" class="titre-avec-emoji-toggles">
+                        <span>Liste des étudiant·es</span>
+                        <span class="titre-emoji-container">
+                            <button class="btn-aide-contextuelle" data-aide="tableau-bord-liste" aria-label="Aide contextuelle">😎</button>
+                            <span class="primo-aide" data-target="conseil-liste-etudiants">😎</span>
+                        </span>
                     </h2>
                     <p class="text-muted">Consultation de la liste complète et accès aux portfolios individuels</p>
 
@@ -3565,7 +3574,7 @@
 
                         <!-- MESSAGE SI AUCUN ÉTUDIANT -->
                         <div id="message-aucun-etudiant" style="display: none; text-align: center; padding: 40px; 
-                background: var(--gris-tres-pale); border-radius: 8px; color: var(--gris-moyen);">
+                background: var(--gris-tres-pale); border-radius: var(--radius-grand); color: var(--gris-moyen);">
                             <p class="text-11-mb10">📭 Aucun·e étudiant·e trouvé·e</p>
                             <p class="text-09-mb15">
                                 <span id="message-filtre-actif">
@@ -3594,7 +3603,12 @@
 
                 <!-- Sous-section: Interventions RàI -->
                 <div id="tableau-bord-interventions" class="sous-section">
-                    <h2>Planification et documentation des interventions</h2>
+                    <h2 class="titre-avec-emoji-toggles">
+                        <span>Planification et documentation des interventions</span>
+                        <span class="titre-emoji-container">
+                            <button class="btn-aide-contextuelle" data-aide="tableau-bord-rai" aria-label="Aide contextuelle">😎</button>
+                        </span>
+                    </h2>
                     <p class="text-muted">Gardez une trace des interventions de niveau 2 et 3</p>
 
                     <!-- Conteneur pour la liste des interventions ou le formulaire -->
@@ -3670,6 +3684,12 @@
 
                 <!-- Sous-section: Vue calendaire -->
                 <div id="presences-calendrier" class="sous-section">
+                    <h2 class="titre-avec-emoji-toggles">
+                        <span>Calendrier des présences</span>
+                        <span class="titre-emoji-container">
+                            <button class="btn-aide-contextuelle" data-aide="presences-calendrier" aria-label="Aide contextuelle">😎</button>
+                        </span>
+                    </h2>
                     <div class="carte">
                         <h3 class="carte-titre-bleu">Vue calendaire</h3>
                         <div id="conteneur-calendrier">
@@ -3680,7 +3700,12 @@
 
                 <!-- Sous-section: Saisie -->
                 <div id="presences-saisie" class="sous-section">
-                    <h2>Enregistrement quotidien</h2>
+                    <h2 class="titre-avec-emoji-toggles">
+                        <span>Enregistrement quotidien</span>
+                        <span class="titre-emoji-container">
+                            <button class="btn-aide-contextuelle" data-aide="presences-saisie" aria-label="Aide contextuelle">😎</button>
+                        </span>
+                    </h2>
                     <p class="text-muted">Enregistrer les présences pour une séance</p>
 
                     <!-- Avertissement si format non configuré -->
@@ -3879,7 +3904,12 @@
 
                 <!-- Sous-section: Liste des évaluations -->
                 <div id="evaluations-liste" class="sous-section">
-                <h2>Historique et filtres</h2>
+                    <h2 class="titre-avec-emoji-toggles">
+                        <span>Historique et filtres</span>
+                        <span class="titre-emoji-container">
+                            <button class="btn-aide-contextuelle" data-aide="evaluations-liste" aria-label="Aide contextuelle">😎</button>
+                        </span>
+                    </h2>
                 <p class="description-section">Vue d'ensemble des évaluations et calcul automatique des indices C et P</p>
 
                 <!-- Filtres -->
@@ -3995,7 +4025,12 @@
 
             <!-- Sous-section: Évaluer (formulaire d'évaluation) -->
             <div id="evaluations-individuelles" class="sous-section">
-                <h2>Évaluation des productions et rétroaction différenciée automatique</h2>
+                <h2 class="titre-avec-emoji-toggles">
+                    <span>Évaluation des productions et rétroaction différenciée automatique</span>
+                    <span class="titre-emoji-container">
+                        <button class="btn-aide-contextuelle" data-aide="evaluations-proceder" aria-label="Aide contextuelle">😎</button>
+                    </span>
+                </h2>
                 <p class="text-muted">Évaluation détaillée selon les critères et les échelles de performance</p>
 
                 <!-- Conteneur principal en Layout L modifié -->
@@ -4307,9 +4342,10 @@
 
                 <!-- Sous-section: Aperçu du matériel -->
                 <div id="construction-apercu" class="sous-section">
-                    <h2 class="d-flex-between-center">
+                    <h2 class="titre-avec-emoji-toggles">
                         <span>Vue d'ensemble</span>
-                        <span class="text-12">
+                        <span class="titre-emoji-container">
+                            <button class="btn-aide-contextuelle" data-aide="construction-apercu" aria-label="Aide contextuelle">😎</button>
                             <span class="primo-aide" data-target="note-apercu">😎</span>
                             <span class="primo-aide" data-target="conseil-apercu">😎</span>
                         </span>
@@ -4383,6 +4419,7 @@
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Productions étudiantes</span>
                         <span class="titre-emoji-container">
+                            <button class="btn-aide-contextuelle" data-aide="construction-productions" aria-label="Aide contextuelle">😎</button>
                             <span class="primo-aide" data-target="note-productions">😎</span>
                             <span class="primo-aide" data-target="conseil-productions">😎</span>
                         </span>
@@ -4633,6 +4670,7 @@
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Grilles de critères</span>
                         <span class="titre-emoji-container">
+                            <button class="btn-aide-contextuelle" data-aide="construction-grilles" aria-label="Aide contextuelle">😎</button>
                             <span class="primo-aide" data-target="note-grilles">😎</span>
                             <span class="primo-aide" data-target="conseil-grilles">😎</span>
                         </span>
@@ -4704,7 +4742,7 @@
                                 </div>
 
                                 <!-- Total pondération -->
-                                <div style="margin-bottom: 15px; padding: 10px; background: var(--bleu-tres-pale); border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                                <div style="margin-bottom: 15px; padding: 10px; background: var(--bleu-tres-pale); border-radius: var(--radius-moyen); display: flex; justify-content: space-between; align-items: center;">
                                     <span style="font-weight: 500;">Pondération totale des critères :</span>
                                     <span id="totalPonderationAffichage" style="font-size: 1.2rem; font-weight: 600; color: var(--bleu-fonce);">0%</span>
                                 </div>
@@ -4757,6 +4795,7 @@
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Échelles de performance</span>
                         <span class="titre-emoji-container">
+                            <button class="btn-aide-contextuelle" data-aide="construction-echelles" aria-label="Aide contextuelle">😎</button>
                             <span class="primo-aide" data-target="note-echelle">😎</span>
                         </span>
                     </h2>
@@ -4818,7 +4857,7 @@
 
                                 <!-- Aperçu visuel -->
                                 <div id="apercuEchelleNiveaux" style="display: flex; gap: 10px; flex-wrap: wrap;
-                     align-items: center; padding: 10px; background: white; border-radius: 4px; margin-bottom: 20px;">
+                     align-items: center; padding: 10px; background: white; border-radius: var(--radius-moyen); margin-bottom: 20px;">
                                     <!-- Généré par afficherApercuEchelle() -->
                                 </div>
 
@@ -4993,7 +5032,7 @@
              border-radius: 6px; border: 1px solid var(--vert-leger);">
                             <h5 class="text-vert-leger-mb10">Aperçu de l'échelle</h5>
                             <div id="apercuEchelle" style="display: flex; justify-content: space-between; 
-                 align-items: center; padding: 10px; background: white; border-radius: 4px;">
+                 align-items: center; padding: 10px; background: white; border-radius: var(--radius-moyen);">
                                 <!-- L'aperçu sera généré ici par afficherApercuEchelle() -->
                             </div>
                         </div>
@@ -5030,6 +5069,7 @@
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Pratiques de notation</span>
                         <span class="titre-emoji-container">
+                            <button class="btn-aide-contextuelle" data-aide="construction-pratiques" aria-label="Aide contextuelle">😎</button>
                             <span class="primo-aide" data-target="note-pratiques">😎</span>
                         </span>
                     </h2>
@@ -5140,7 +5180,7 @@
                                                 <option value="autre">Autre (je vais le décrire après)</option>
                                             </select>
                                         </div>
-                                        <div id="mat-variante-description" style="display: none; margin-top: 10px; padding: 10px 12px; background: #f8f9fa; border-radius: 4px; font-size: 0.85rem; color: var(--gris-fonce);"></div>
+                                        <div id="mat-variante-description" style="display: none; margin-top: 10px; padding: 10px 12px; background: #f8f9fa; border-radius: var(--radius-moyen); font-size: 0.85rem; color: var(--gris-fonce);"></div>
                                     </div>
 
                                     <div class="groupe-form" style="margin-top: 15px;">
@@ -5269,7 +5309,7 @@
                                                             </div>
                                                         </div>
 
-                                                        <div id="mat-selection-unitaire" style="font-size: 0.85rem; color: var(--bleu-principal); margin-bottom: 10px; padding: 8px; background: rgba(52, 152, 219, 0.08); border-radius: 4px;">
+                                                        <div id="mat-selection-unitaire" style="font-size: 0.85rem; color: var(--bleu-principal); margin-bottom: 10px; padding: 8px; background: rgba(52, 152, 219, 0.08); border-radius: var(--radius-moyen);">
                                                             Pondération unitaire : <strong>16.25%</strong> par production retenue
                                                         </div>
 
@@ -5292,7 +5332,7 @@
                                                                    onchange="validerPonderationsCategoriesMat(); recalculerPonderationsUnitaires(); sauvegarderConfigPratiqueMat()">
                                                         </div>
 
-                                                        <div id="mat-obligatoires-unitaire" style="font-size: 0.85rem; color: var(--orange-principal, #e67e22); margin-bottom: 10px; padding: 8px; background: rgba(230, 126, 34, 0.08); border-radius: 4px;">
+                                                        <div id="mat-obligatoires-unitaire" style="font-size: 0.85rem; color: var(--orange-principal, #e67e22); margin-bottom: 10px; padding: 8px; background: rgba(230, 126, 34, 0.08); border-radius: var(--radius-moyen);">
                                                             Pondération unitaire : <strong>17.5%</strong> par production
                                                         </div>
 
@@ -5326,7 +5366,7 @@
                                                         <option value="holistique">Holistique (Isabelle M.)</option>
                                                     </select>
                                                 </div>
-                                                <div id="mat-objectifs-mode-description" style="display: none; margin-top: 10px; padding: 10px 12px; background: #f8f9fa; border-radius: 4px; font-size: 0.85rem; color: var(--gris-fonce);">
+                                                <div id="mat-objectifs-mode-description" style="display: none; margin-top: 10px; padding: 10px 12px; background: #f8f9fa; border-radius: var(--radius-moyen); font-size: 0.85rem; color: var(--gris-fonce);">
                                                 </div>
                                             </div>
 
@@ -5784,7 +5824,7 @@
                                         Aperçu d'une rétroaction générée
                                     </h5>
                                     <div id="exempleRetroaction" style="padding: 15px; background: white;
-                 border-radius: 4px; font-size: 0.9rem; line-height: 1.6;">
+                 border-radius: var(--radius-moyen); font-size: 0.9rem; line-height: 1.6;">
                                         <!-- L'aperçu sera généré ici par genererApercuAleatoire() -->
                                     </div>
                                     <button class="btn btn-principal mt-2" onclick="genererApercuAleatoire()">
@@ -6257,7 +6297,7 @@
 
                                 <!-- FORMULAIRE D'AJOUT/MODIFICATION (caché par défaut) -->
                                 <div id="formulaireCours" class="form-cache-mt"
-                                     style="padding: 20px; background: var(--bleu-pale); border: 1px solid var(--bleu-leger); border-radius: 8px; display: none;">
+                                     style="padding: 20px; background: var(--bleu-pale); border: 1px solid var(--bleu-leger); border-radius: var(--radius-grand); display: none;">
 
                             <h4 id="titreFormCours" class="titre-bleu-mb-20">
                                 Nouvelle configuration de cours
@@ -6763,13 +6803,13 @@
 
                         <!-- ZONE DE PRÉVISUALISATION (cachée par défaut) -->
                         <div id="legacy-previewZone" style="display: none; margin-bottom: 20px; background: var(--alerte-fond-attention);
-                                     padding: 15px; border-radius: 8px; border: 2px solid #ffc107;">
+                                     padding: 15px; border-radius: var(--radius-grand); border: 2px solid #ffc107;">
                             <h4 class="mt-0-warning">Prévisualisation de l'import (Legacy)</h4>
                             <p style="color: var(--alerte-texte-attention); margin-bottom: 15px;">
                                 Section Legacy désactivée.
                             </p>
                             <div id="legacy-previewTable" style="overflow-x: auto; max-height: 300px;
-                                          border: 1px solid var(--bordure-claire); border-radius: 4px; background: white;">
+                                          border: 1px solid var(--bordure-claire); border-radius: var(--radius-moyen); background: white;">
                                 <!-- Le tableau sera généré ici -->
                             </div>
                             <div class="d-flex-gap10-mt15">
@@ -6825,7 +6865,7 @@
 
                         <!-- MESSAGE SI AUCUN ÉTUDIANT (Legacy) -->
                         <div id="legacy-no-students-msg" style="display: block; text-align: center; padding: 40px;
-                                         background: var(--gris-tres-pale); border-radius: 8px; color: var(--gris-moyen);">
+                                         background: var(--gris-tres-pale); border-radius: var(--radius-grand); color: var(--gris-moyen);">
                             <p class="text-11-mb10">Section Legacy désactivée
                             </p>
                             <p class="text-09">
@@ -7100,7 +7140,7 @@
                                     </div>
 
                                     <!-- Description dynamique -->
-                                    <div id="descriptionModalite" class="text-muted" style="margin-bottom: 20px; padding: 12px; background: var(--gris-tres-pale); border-radius: 4px; font-size: 0.9rem; line-height: 1.6;">
+                                    <div id="descriptionModalite" class="text-muted" style="margin-bottom: 20px; padding: 12px; background: var(--gris-tres-pale); border-radius: var(--radius-moyen); font-size: 0.9rem; line-height: 1.6;">
                                         Dans ma pratique de notation basée sur la maîtrise de standards, le portfolio contient les N meilleures productions de l'apprenant·e.
                                     </div>
 
@@ -7593,7 +7633,7 @@
                                                 <!-- Configuration BINAIRE (François) -->
                                                 <div id="wizard-spec-config-binaire" style="display: none;">
                                                     <h4 style="margin: 25px 0 15px 0; color: var(--bleu-principal);">Types de travaux</h4>
-                                                    <div style="margin-bottom: 15px; padding: 12px; background: var(--orange-tres-pale); border-left: 4px solid var(--orange-accent); border-radius: 4px;">
+                                                    <div style="margin-bottom: 15px; padding: 12px; background: var(--orange-tres-pale); border-left: 4px solid var(--orange-accent); border-radius: var(--radius-moyen);">
                                                         <p class="text-muted" style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
                                                             Définis les types de travaux avec leurs spécifications. Un travail est <strong>acceptable</strong>
                                                             si TOUTES les spécifications sont respectées (évaluation binaire).
@@ -7604,7 +7644,7 @@
                                                     <button type="button" class="btn btn-tres-compact" onclick="ajouterTypeTravailSpec()">+ Ajouter un type de travail</button>
 
                                                     <h4 style="margin: 25px 0 15px 0; color: var(--bleu-principal);">Table de correspondance (Bundles → Notes)</h4>
-                                                    <div style="margin-bottom: 15px; padding: 12px; background: var(--orange-tres-pale); border-left: 4px solid var(--orange-accent); border-radius: 4px;">
+                                                    <div style="margin-bottom: 15px; padding: 12px; background: var(--orange-tres-pale); border-left: 4px solid var(--orange-accent); border-radius: var(--radius-moyen);">
                                                         <p class="text-muted" style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
                                                             Définis les paliers de notes selon le nombre de travaux acceptables de chaque type.
                                                             Exemple : A (100%) = 2 prises de position + 2 tests + 1 portfolio.
@@ -7618,7 +7658,7 @@
                                                 <!-- Configuration NIVEAUX (Xavier) -->
                                                 <div id="wizard-spec-config-niveaux" style="display: none;">
                                                     <h4 style="margin: 25px 0 15px 0; color: var(--bleu-principal);">Objectifs d'apprentissage</h4>
-                                                    <div style="margin-bottom: 15px; padding: 12px; background: var(--orange-tres-pale); border-left: 4px solid var(--orange-accent); border-radius: 4px;">
+                                                    <div style="margin-bottom: 15px; padding: 12px; background: var(--orange-tres-pale); border-left: 4px solid var(--orange-accent); border-radius: var(--radius-moyen);">
                                                         <p class="text-muted" style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
                                                             Définis tes objectifs d'apprentissage techniques. Chaque objectif sera évalué selon des niveaux
                                                             de performance (ex: 1-Insuffisant, 2-Acceptable, 3-Maîtrisé, 4-Excellence).
@@ -7633,7 +7673,7 @@
                                                     <div id="wizard-spec-objectifs-liste"></div>
 
                                                     <h4 style="margin: 25px 0 15px 0; color: var(--bleu-principal);">Calcul de la note finale</h4>
-                                                    <div style="margin-bottom: 15px; padding: 12px; background: var(--orange-tres-pale); border-left: 4px solid var(--orange-accent); border-radius: 4px;">
+                                                    <div style="margin-bottom: 15px; padding: 12px; background: var(--orange-tres-pale); border-left: 4px solid var(--orange-accent); border-radius: var(--radius-moyen);">
                                                         <p class="text-muted" style="margin: 0 0 10px 0; font-size: 0.85rem; line-height: 1.5;">
                                                             <strong>Logique de Xavier</strong> : La note finale dépend des niveaux atteints pour chaque objectif.
                                                         </p>
@@ -7908,7 +7948,7 @@
                                             </div>
 
                                             <!-- Note explicative -->
-                                            <div style="margin-top: 20px; padding: 12px; background: #f8f9fa; border-radius: 4px;">
+                                            <div style="margin-top: 20px; padding: 12px; background: #f8f9fa; border-radius: var(--radius-moyen);">
                                                 <p style="margin: 0; font-size: 0.85rem; color: var(--gris-fonce); line-height: 1.5;">
                                                     <strong>Important :</strong> Ces seuils sont utilisés pour la détection des patterns et des niveaux RàI.
                                                     Pour que le système fonctionne correctement, garde les mêmes seuils durant toute la session.
@@ -7997,7 +8037,7 @@
 
                             <!-- INFO PAN -->
                             <div id="infoPAN" style="display: none; margin-top: 15px; padding: 10px;
-                 background: white; border-radius: 4px; font-size: 0.85rem; color: var(--gris-moyen);">
+                 background: white; border-radius: var(--radius-moyen); font-size: 0.85rem; color: var(--gris-moyen);">
                             </div>
 
                             <!-- Activation portfolio et jetons -->
@@ -8121,7 +8161,7 @@
                     </div>
 
                     <!-- Option avancée : Découplage P et R -->
-                    <div class="form-group" style="margin-bottom: 20px; padding: 12px; background: var(--alerte-fond-attention); border-left: 3px solid #ffc107; border-radius: 4px;">
+                    <div class="form-group" style="margin-bottom: 20px; padding: 12px; background: var(--alerte-fond-attention); border-left: 3px solid #ffc107; border-radius: var(--radius-moyen);">
                         <label style="cursor: pointer; display: flex; align-items: center;">
                             <input type="checkbox" id="decouplerPR">
                             <strong style="margin-left: 8px;">Découpler Performance (P) et Risque (R)</strong>
@@ -8567,7 +8607,12 @@
 
                 <!-- Onglet 1: Trimestre (Beta 95.2) -->
                 <div id="reglages-trimestre" class="sous-section">
-                    <h2>Trimestre</h2>
+                    <h2 class="titre-avec-emoji-toggles">
+                        <span>Trimestre</span>
+                        <span class="titre-emoji-container">
+                            <button class="btn-aide-contextuelle" data-aide="reglages-trimestre" aria-label="Aide contextuelle">😎</button>
+                        </span>
+                    </h2>
 
                     <p class="text-muted">
                         Configuration du cadre temporel et organisationnel du trimestre actif.
@@ -9760,7 +9805,7 @@
                                 En cas de pépin, décochez la case pour tout réinitialiser.
                             </p>
 
-                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px;">
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: var(--radius-grand);">
                                 <div class="groupe-form" style="margin-bottom: 0;">
                                     <label class="checkbox-container">
                                         <input type="checkbox" id="v2-checkboxDonneesDemo"
@@ -10285,7 +10330,7 @@
                             <span class="accordeon-chevron" style="color: #c62828;">▼</span>
                         </div>
                         <div class="accordeon-contenu">
-                            <div style="padding: 15px; background: #fff3e0; border-radius: 8px; margin-top: 15px;">
+                            <div style="padding: 15px; background: #fff3e0; border-radius: var(--radius-grand); margin-top: 15px;">
                                 <h4 style="color: #e65100; margin-bottom: 10px;">Réinitialisation complète</h4>
                                 <p style="margin-bottom: 15px;">
                                     Efface <strong>toutes</strong> les données et revient à l'état initial.
@@ -10493,7 +10538,7 @@
                             </div>
 
                             <div style="text-align: center; margin-top: 15px;">
-                                <img src="img/aide/Tableau de bord - indicateurs globaux ACPE.png" alt="Tableau de bord - Indicateurs A-C-P-E" style="max-width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                <img src="img/aide/Tableau de bord - indicateurs globaux ACPE.png" alt="Tableau de bord - Indicateurs A-C-P-E" style="max-width: 100%; border-radius: var(--radius-moyen); box-shadow: var(--shadow-normal);">
                                 <p class="text-muted" style="font-size: 0.85rem; margin-top: 8px;">Vue des indicateurs globaux A-C-P-E dans le tableau de bord</p>
                             </div>
                         </div>
@@ -10606,7 +10651,7 @@
                             </div>
 
                             <div style="text-align: center; margin: 15px 0;">
-                                <img src="img/aide/Construction - échelles.png" alt="Interface de configuration des échelles de performance" style="max-width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                <img src="img/aide/Construction - échelles.png" alt="Interface de configuration des échelles de performance" style="max-width: 100%; border-radius: var(--radius-moyen); box-shadow: var(--shadow-normal);">
                                 <p class="text-muted" style="font-size: 0.85rem; margin-top: 8px;">Interface de configuration d'une échelle de performance</p>
                             </div>
                         </div>
@@ -10706,7 +10751,7 @@
                             </div>
 
                             <div style="text-align: center; margin: 15px 0;">
-                                <img src="img/aide/Bibliothèques - partage.png" alt="Interface de partage des bibliothèques" style="max-width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                <img src="img/aide/Bibliothèques - partage.png" alt="Interface de partage des bibliothèques" style="max-width: 100%; border-radius: var(--radius-moyen); box-shadow: var(--shadow-normal);">
                                 <p class="text-muted" style="font-size: 0.85rem; margin-top: 8px;">Interface de partage du matériel pédagogique entre collègues</p>
                             </div>
 
@@ -10782,7 +10827,7 @@
                             <p><strong>Primo</strong> est un assistant conversationnel qui te guide pas-à-pas dans la configuration de ton système de suivi.</p>
 
                             <div style="text-align: center; margin: 15px 0;">
-                                <img src="img/aide/Primo.png" alt="Interface de Primo" style="max-width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                <img src="img/aide/Primo.png" alt="Interface de Primo" style="max-width: 100%; border-radius: var(--radius-moyen); box-shadow: var(--shadow-normal);">
                             </div>
 
                             <div class="carte-gradient-bleu">
@@ -11131,7 +11176,7 @@
                             </div>
 
                             <div style="text-align: center; margin: 15px 0;">
-                                <img src="img/aide/Construction - pratique.png" alt="Configuration d'une pratique de notation" style="max-width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                <img src="img/aide/Construction - pratique.png" alt="Configuration d'une pratique de notation" style="max-width: 100%; border-radius: var(--radius-moyen); box-shadow: var(--shadow-normal);">
                                 <p class="text-muted" style="font-size: 0.85rem; margin-top: 8px;">Interface de configuration d'une pratique de notation</p>
                             </div>
                         </div>
@@ -11167,7 +11212,7 @@
                             </ol>
 
                             <div style="text-align: center; margin: 15px 0;">
-                                <img src="img/aide/Construction - grille de critères.png" alt="Interface de création d'une grille de critères" style="max-width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                <img src="img/aide/Construction - grille de critères.png" alt="Interface de création d'une grille de critères" style="max-width: 100%; border-radius: var(--radius-moyen); box-shadow: var(--shadow-normal);">
                                 <p class="text-muted" style="font-size: 0.85rem; margin-top: 8px;">Interface de création d'une grille de critères avec pondérations</p>
                             </div>
 
@@ -11293,7 +11338,7 @@
                             <ol>
                                 <li>Lors de la correction, noter le code de chaque erreur rencontrée</li>
                                 <li>Dans le formulaire d'évaluation, saisir les codes séparés par des points-virgules :
-                                    <div style="background: #f5f5f5; padding: 10px; border-radius: 4px; margin: 10px 0; font-family: monospace;">
+                                    <div style="background: #f5f5f5; padding: 10px; border-radius: var(--radius-moyen); margin: 10px 0; font-family: monospace;">
                                         3;3;1;4;4;6;1
                                     </div>
                                 </li>
@@ -11443,7 +11488,7 @@
                                     <li>Parfait pour captures d'écran et présentations</li>
                                 </ul>
                                 <div style="text-align: center; margin-top: 12px;">
-                                    <img src="img/aide/Mode anonymisé.png" alt="Mode Anonymisé" style="max-width: 100%; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
+                                    <img src="img/aide/Mode anonymisé.png" alt="Mode Anonymisé" style="max-width: 100%; border-radius: 6px; box-shadow: var(--shadow-normal);">
                                 </div>
                             </div>
                         </div>
@@ -11596,7 +11641,7 @@
                                 <li>Observer les messages dans la console</li>
                             </ol>
                             <p><strong>✅ Messages attendus dans la console :</strong></p>
-                            <pre style="background: #f5f5f5; padding: 10px; border-radius: 4px; font-size: 0.85rem;">✅ Module Interprétation initialisé
+                            <pre style="background: #f5f5f5; padding: 10px; border-radius: var(--radius-moyen); font-size: 0.85rem;">✅ Module Interprétation initialisé
 ✅ 1 grille(s) chargée(s) dans le sélecteur de référence
 ✅ Grille de référence: "Grille SRPNF Littérature" (5 critères)</pre>
                         </div>
@@ -11645,13 +11690,13 @@
                                 🔍 Messages de la console à surveiller :
                             </p>
                             <p><strong>Messages normaux (OK) :</strong></p>
-                            <pre style="background: rgba(255,255,255,0.3); padding: 8px; border-radius: 4px; font-size: 0.8rem;">✅ Module Interprétation initialisé
+                            <pre style="background: rgba(255,255,255,0.3); padding: 8px; border-radius: var(--radius-moyen); font-size: 0.8rem;">✅ Module Interprétation initialisé
 ✅ Grille de référence: "Nom grille" (X critères)
 ✅ Regex dynamique pour X critères: /(CRITÈRE1|CRITÈRE2...)/gi
 ⚠️ Pas de grille de référence (si non configurée - normal au 1er démarrage)</pre>
 
                             <p class="mt-12"><strong>Erreurs interdites (PROBLÈME) :</strong></p>
-                            <pre style="background: rgba(255,0,0,0.1); padding: 8px; border-radius: 4px; font-size: 0.8rem; color: #d32f2f;">❌ TypeError: Cannot read property 'criteres' of null
+                            <pre style="background: rgba(255,0,0,0.1); padding: 8px; border-radius: var(--radius-moyen); font-size: 0.8rem; color: #d32f2f;">❌ TypeError: Cannot read property 'criteres' of null
 ❌ ReferenceError: obtenirGrilleReferenceDepistage is not defined
 ❌ Grille de référence "xxx" introuvable</pre>
                             <p style="margin-top: 8px;"><strong>→ Si tu vois ces erreurs</strong> : Vérifier que la grille existe bien et qu'elle est correctement sélectionnée dans les réglages.</p>
@@ -11727,7 +11772,7 @@
                         </div>
 
                         <div style="text-align: center; margin: 15px 0;">
-                            <img src="img/aide/Présences - saisie.png" alt="Interface de saisie des présences" style="max-width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                            <img src="img/aide/Présences - saisie.png" alt="Interface de saisie des présences" style="max-width: 100%; border-radius: var(--radius-moyen); box-shadow: var(--shadow-normal);">
                             <p class="text-muted" style="font-size: 0.85rem; margin-top: 8px;">Interface de saisie des présences avec les heures par séance</p>
                         </div>
 
@@ -11772,7 +11817,7 @@
                         </div>
 
                         <div style="text-align: center; margin: 15px 0;">
-                            <img src="img/aide/Évaluation - paramètres.png" alt="Paramètres d'évaluation" style="max-width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                            <img src="img/aide/Évaluation - paramètres.png" alt="Paramètres d'évaluation" style="max-width: 100%; border-radius: var(--radius-moyen); box-shadow: var(--shadow-normal);">
                             <p class="text-muted" style="font-size: 0.85rem; margin-top: 8px;">Panneau des paramètres pour évaluer une production</p>
                         </div>
                         </div>
@@ -12260,7 +12305,7 @@
                                 le fichier créditera les trois personnes dans l'ordre chronologique.
                             </p>
 
-                            <p style="margin-top: 15px; padding: 10px; background: #fff3e0; border-left: 4px solid #f57c00; border-radius: 4px;">
+                            <p style="margin-top: 15px; padding: 10px; background: #fff3e0; border-left: 4px solid #f57c00; border-radius: var(--radius-moyen);">
                                 💡 <strong>Conseil :</strong> Même si tu n'as fait que de petites modifications,
                                 entrez ton nom lors de l'export. Cela permet de tracer l'évolution du matériel
                                 et de reconnaître le travail de chacun·e dans la communauté pédagogique.
@@ -12282,7 +12327,7 @@
                         <p>Le système permet de documenter des interventions de Réponse à l'Intervention (RàI) de niveau 2 ou 3 tout en justifiant les absences des étudiants non participants, sans pénaliser leur assiduité.</p>
 
                         <div style="text-align: center; margin: 15px 0;">
-                            <img src="img/aide/Tableau de bord - interventions 1.png" alt="Interface de planification des interventions" style="max-width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                            <img src="img/aide/Tableau de bord - interventions 1.png" alt="Interface de planification des interventions" style="max-width: 100%; border-radius: var(--radius-moyen); box-shadow: var(--shadow-normal);">
                             <p class="text-muted" style="font-size: 0.85rem; margin-top: 8px;">Interface de planification et suivi des interventions RàI</p>
                         </div>
 
@@ -12516,7 +12561,7 @@
                         <p><strong>Action :</strong> Identifier rapidement qui nécessite une intervention.</p>
 
                         <div style="text-align: center; margin: 15px 0;">
-                            <img src="img/aide/Tableau de bord - Liste des individus.png" alt="Liste des individus dans le tableau de bord" style="max-width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                            <img src="img/aide/Tableau de bord - Liste des individus.png" alt="Liste des individus dans le tableau de bord" style="max-width: 100%; border-radius: var(--radius-moyen); box-shadow: var(--shadow-normal);">
                             <p class="text-muted" style="font-size: 0.85rem; margin-top: 8px;">Vue d'ensemble des étudiants avec leurs indices A-C-P-E</p>
                         </div>
 
@@ -12574,7 +12619,7 @@
                         </div>
 
                         <div style="text-align: center; margin: 15px 0;">
-                            <img src="img/aide/Tableau de bord - Liste des individus Profil production 1.png" alt="Profil étudiant - Section productions" style="max-width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                            <img src="img/aide/Tableau de bord - Liste des individus Profil production 1.png" alt="Profil étudiant - Section productions" style="max-width: 100%; border-radius: var(--radius-moyen); box-shadow: var(--shadow-normal);">
                             <p class="text-muted" style="font-size: 0.85rem; margin-top: 8px;">Profil individuel avec l'historique des productions</p>
                         </div>
 
@@ -14342,6 +14387,10 @@
     <script src="js/primo-accueil.js?v=2025112809"></script>
     <script src="js/primo-validation-champs.js?v=2025112727"></script>
     <script src="js/primo-tooltips.js?v=2025120901"></script>
+
+    <!-- AIDE CONTEXTUELLE - Modals d'aide avec boutons 😎 (Beta 95.5) -->
+    <script src="js/aide-contextuelle-contenu.js?v=2026011901"></script>
+    <script src="js/aide-contextuelle.js?v=2026011901"></script>
 
     <!-- GUIDAGE - Système d'assistance contextuelle en mode Assisté (Beta 92) -->
     <script src="js/guidage.js?v=2025112706"></script>
