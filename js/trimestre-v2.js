@@ -5581,6 +5581,11 @@ async function changerGroupeCoursActifV2(valeur) {
             afficherListeEtudiantsConsultation();
         }
 
+        // 🆕 BETA 95.6 : Rafraîchir le tableau de bord aperçu (badges nb étudiants)
+        if (typeof chargerTableauBordApercu === 'function') {
+            chargerTableauBordApercu();
+        }
+
         console.log('[Trimestre V2] Mode COURS activé:', coursId, '(tous groupes)');
         return;
     }
@@ -5656,6 +5661,11 @@ async function changerGroupeCoursActifV2(valeur) {
     if (filtreGroupeGC) filtreGroupeGC.value = '';
     if (typeof afficherListeEtudiantsConsultation === 'function') {
         afficherListeEtudiantsConsultation();
+    }
+
+    // 🆕 BETA 95.6 : Rafraîchir le tableau de bord aperçu (badges nb étudiants)
+    if (typeof chargerTableauBordApercu === 'function') {
+        chargerTableauBordApercu();
     }
 
     console.log('[Trimestre V2] Groupe-cours activé:', gc.id);

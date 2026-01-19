@@ -26,6 +26,11 @@
 - **Vue calendaire** : Affiche correctement l'horaire du groupe-cours actif
 
 ### Derniere tache completee (19 janvier)
+- **BADGE NB ETUDIANTS (Beta 95.6)** : Uniformisation affichage
+  - Badge "X personne(s)" dans "Indicateurs globaux" et "Étudiant·es inscrit·es"
+  - Mise à jour automatique au changement de groupe-cours
+  - **Fichiers modifiés** : `tableau-bord-apercu.js`, `trimestre-v2.js`
+
 - **BUG VUE CALENDAIRE (Beta 95.6)** : Calendrier n'affichait pas les bons jours de cours
   - **Symptome** : Groupe Lun-Jeu affichait des cours le mardi, ne changeait pas selon groupe-cours actif
   - **Causes multiples** :
@@ -187,9 +192,10 @@
   - Boutons 😎 a differents endroits de l'interface
   - Explique fonctionnalites, concepts, astuces
   - Visible uniquement en Mode Assiste
-- [ ] **Badge nb etudiants (uniformisation)** : Afficher badge "X etudiant(s)" dans :
+- [x] **Badge nb etudiants (uniformisation)** : Afficher badge "X etudiant(s)" (FAIT Beta 95.6)
   - En-tete "Indicateurs globaux du groupe" (Vue d'ensemble)
   - En-tete "Etudiant·es inscrit·es" (Liste des etudiant·es)
+  - Mise a jour automatique au changement de groupe-cours
 - [ ] **Optimisation page Trimestre** : Performance et UX
 - [ ] **Tests export/import metadata CC** : Verifier que les metadonnees CC sont correctement exportees et reimportees
 - [ ] **Modularisation design_system.html** : Suite et fin de la separation en modules
@@ -310,6 +316,8 @@
 ## HISTORIQUE RECENT
 
 ### 19 janvier 2026
+- **BADGE NB ETUDIANTS** : Uniformisation dans Vue d'ensemble et Liste
+  - Mise à jour automatique au changement de groupe-cours (tableau-bord-apercu.js, trimestre-v2.js)
 - **BUG VUE CALENDAIRE** : Calendrier n'affichait pas les bons jours selon groupe-cours actif
   - Causes : (1) Comparaison case-sensitive, (2) Ordre priorité dans obtenirSeancesHoraire(), (3) Logique typeFinal
   - Corrections : horaire.js (priorité entité), calendrier-vue.js (logique améliorée), saisie-presences.js, presences-apercu.js
