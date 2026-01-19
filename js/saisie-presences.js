@@ -654,10 +654,11 @@ function obtenirToutesDatesCours() {
     const seancesHoraire = typeof obtenirSeancesHoraire === 'function'
         ? obtenirSeancesHoraire()
         : db.getSync('seancesHoraire', []);
+    // 🆕 BETA 95.6 : Normaliser en minuscules pour éviter problèmes de casse
     const joursAvecSeances = new Set();
     seancesHoraire.forEach(seance => {
         if (seance.jour) {
-            joursAvecSeances.add(seance.jour);
+            joursAvecSeances.add(seance.jour.toLowerCase());
         }
     });
 
@@ -669,7 +670,9 @@ function obtenirToutesDatesCours() {
         const jour = calendrier[date];
         if (jour && jour.statut) {
             // Cours normal : vérifier si c'est un jour de l'horaire
-            if (jour.statut === 'cours' && joursAvecSeances.has(jour.jourSemaine)) {
+            // 🆕 BETA 95.6 : Comparer en minuscules (jourSemaine = "Lundi", seances stockent "Lundi" ou "lundi")
+            const jourSemaineLower = jour.jourSemaine ? jour.jourSemaine.toLowerCase() : '';
+            if (jour.statut === 'cours' && joursAvecSeances.has(jourSemaineLower)) {
                 datesCours.push(date);
             }
             // Reprise : toujours inclure (utilise jourRemplace)

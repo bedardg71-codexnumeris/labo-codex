@@ -169,22 +169,33 @@ function obtenirStatutJour(dateStr, calendrierComplet) {
         'conge': 'conge',
         'reprise': 'reprise',
         'cours': 'cours',
+        'jour-ouvrable': 'jour-ouvrable',
         'semaine-examens': 'examens',
         'semaine-planification': 'planification',
         'hors-cours': 'vide'
     };
-    
+
     const type = mapStatuts[infosJour.statut] || 'cours';
 
-    // 🆕 BETA 95 : Vérifier si c'est un jour de cours avec horaire du cours actif
+    // 🆕 BETA 95.6 : Vérifier si c'est un jour de cours avec horaire du GROUPE-COURS ACTIF
+    // Chaque groupe peut avoir un horaire différent (Lun-Jeu vs Mar-Ven)
     const seances = typeof obtenirSeancesHoraire === 'function'
         ? obtenirSeancesHoraire()
         : db.getSync('seancesHoraire', []);
+    // Comparer en minuscules (seance.jour = "lundi", infosJour.jourSemaine = "Lundi")
+    const jourSemaineLower = infosJour.jourSemaine ? infosJour.jourSemaine.toLowerCase() : '';
     const estCoursReel = seances.some(function(seance) {
-        return seance.jour === infosJour.jourSemaine;
+        return seance.jour && seance.jour.toLowerCase() === jourSemaineLower;
     });
-    
-    const typeFinal = (type === 'cours' && estCoursReel) ? 'cours-reel' : type;
+
+    // 🆕 BETA 95.6 : Logique améliorée
+    // - Si jour potentiel (cours ou jour-ouvrable) ET dans l'horaire du groupe actif → cours-reel
+    // - Si jour potentiel MAIS pas dans l'horaire du groupe actif → jour-ouvrable
+    // - Sinon → type original (weekend, congé, etc.)
+    let typeFinal = type;
+    if (type === 'cours' || type === 'jour-ouvrable') {
+        typeFinal = estCoursReel ? 'cours-reel' : 'jour-ouvrable';
+    }
     
     return {
         type: typeFinal,
@@ -264,7 +275,12 @@ function genererHtmlMois(annee, mois, calendrierComplet) {
         } else if (statut.type === 'cours-reel') {
             classeJour += ' calendrier-jour-cours-reel';
             estCliquable = true;
+        } else if (statut.type === 'jour-ouvrable') {
+            // 🆕 BETA 95.6 : Jour ouvrable mais pas de cours pour CE groupe
+            classeJour += ' calendrier-jour-ouvrable';
+            estCliquable = false; // Pas cliquable car pas de cours à saisir
         } else if (statut.type === 'cours') {
+            // Fallback pour compatibilité
             classeJour += ' calendrier-jour-ouvrable';
             estCliquable = true;
         }
