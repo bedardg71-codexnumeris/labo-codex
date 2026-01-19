@@ -208,7 +208,42 @@ const AIDE_CONTEXTUELLE = {
                 contenu: "Note optionnelle : Certains enseignants s'inspirent de cadres de recherche en sciences de l'éducation pour structurer leurs échelles de performance. La taxonomie SOLO (Structure of Observed Learning Outcomes), par exemple, décrit comment les étudiants progressent du simple au complexe dans leur apprentissage. Si ce genre d'approche théorique t'intéresse, tu peux l'explorer, mais ce n'est pas nécessaire pour utiliser l'application efficacement."
             }
         ],
-        voirAussi: ['construction-grilles', 'construction-pratiques']
+        voirAussi: ['construction-cartouches', 'construction-grilles', 'construction-pratiques']
+    },
+
+    'construction-cartouches': {
+        titre: "Créer des cartouches de rétroaction",
+        sections: [
+            {
+                type: 'texte',
+                contenu: "Les cartouches de rétroaction décrivent concrètement ce qui est atteint ou non pour chaque critère à chaque niveau de performance. C'est grâce aux cartouches que ta grille devient « descriptive » : elles expliquent à l'étudiant exactement ce qui est attendu."
+            },
+            {
+                type: 'liste',
+                titre: "Rôle des cartouches",
+                items: [
+                    "Décrire les manifestations observables de chaque niveau de performance",
+                    "Générer automatiquement une rétroaction personnalisée lors de l'évaluation",
+                    "Assurer la cohérence de ton évaluation d'un étudiant à l'autre",
+                    "Communiquer clairement tes attentes aux étudiants"
+                ]
+            },
+            {
+                type: 'exemple',
+                titre: "Exemple de cartouche pour le critère « Argumentation »",
+                contenu: "Niveau « Maîtrisé » : « Ton argumentation est solide. Tu présentes une thèse claire, appuyée par des arguments pertinents et des exemples bien choisis. La structure logique facilite la compréhension de ton propos. »"
+            },
+            {
+                type: 'conseil',
+                contenu: "Rédige tes cartouches à la deuxième personne (« tu ») pour que la rétroaction s'adresse directement à l'étudiant. Décris ce qui est observé, pas seulement ce qui manque."
+            },
+            {
+                type: 'alerte',
+                niveau: 'attention',
+                contenu: "Une cartouche efficace est spécifique au critère évalué. Évite les formulations génériques comme « Bon travail » ou « Insuffisant » qui n'aident pas l'étudiant à comprendre ce qu'il doit améliorer."
+            }
+        ],
+        voirAussi: ['construction-grilles', 'construction-echelles', 'evaluations-proceder']
     },
 
     'construction-pratiques': {
