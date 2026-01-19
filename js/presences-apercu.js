@@ -189,8 +189,9 @@ function calculerTotalSeances() {
         const seancesHoraire = db.getSync('seancesHoraire', []);
         const aujourdhui = new Date().toISOString().split('T')[0];
 
-        // Obtenir les jours de la semaine où il y a cours (ex: ["Lundi", "Mercredi"])
-        const joursCours = seancesHoraire.map(seance => seance.jour);
+        // 🆕 BETA 95.6 : Normaliser les jours en minuscules pour éviter problèmes de casse
+        // Obtenir les jours de la semaine où il y a cours (ex: ["lundi", "mercredi"])
+        const joursCours = seancesHoraire.map(seance => seance.jour ? seance.jour.toLowerCase() : '');
 
         let totalJoursCours = 0;
 
@@ -204,8 +205,10 @@ function calculerTotalSeances() {
                     ? jour.jourRemplace
                     : jour.jourSemaine;
 
+                // 🆕 BETA 95.6 : Comparer en minuscules
+                const jourAVerifierLower = jourAVerifier ? jourAVerifier.toLowerCase() : '';
                 // Ne compter que si c'est un jour où ce groupe a cours
-                if (joursCours.includes(jourAVerifier)) {
+                if (joursCours.includes(jourAVerifierLower)) {
                     totalJoursCours++;
                 }
             }
@@ -262,8 +265,9 @@ function calculerProchaineSeance() {
         const calendrier = db.getSync(cle('calendrierComplet'), {});
         const seancesHoraire = db.getSync('seancesHoraire', []);
 
-        // Obtenir la liste des jours de la semaine où il y a cours (ex: ["Lundi", "Mercredi"])
-        const joursCours = seancesHoraire.map(seance => seance.jour);
+        // 🆕 BETA 95.6 : Normaliser les jours en minuscules pour éviter problèmes de casse
+        // Obtenir la liste des jours de la semaine où il y a cours (ex: ["lundi", "mercredi"])
+        const joursCours = seancesHoraire.map(seance => seance.jour ? seance.jour.toLowerCase() : '');
 
         // Obtenir la date d'aujourd'hui au format YYYY-MM-DD
         const aujourdhui = new Date();
@@ -281,7 +285,9 @@ function calculerProchaineSeance() {
                 const jourAVerifier = (jour.statut === 'reprise' && jour.jourRemplace)
                     ? jour.jourRemplace
                     : jour.jourSemaine;
-                const estDansHoraire = joursCours.includes(jourAVerifier);
+                // 🆕 BETA 95.6 : Comparer en minuscules
+                const jourAVerifierLower = jourAVerifier ? jourAVerifier.toLowerCase() : '';
+                const estDansHoraire = joursCours.includes(jourAVerifierLower);
 
                 return estDateFuture && estJourCours && estDansHoraire;
             })

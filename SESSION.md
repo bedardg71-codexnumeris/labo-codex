@@ -1,7 +1,7 @@
-# SESSION ACTIVE - BETA 95.5
+# SESSION ACTIVE - BETA 95.6
 
-**Date** : 11 janvier 2026
-**Version** : Beta 95.5 (build 0111b)
+**Date** : 19 janvier 2026
+**Version** : Beta 95.6 (build 0119a)
 **Statut** : Application fonctionnelle pour H2026
 
 ---
@@ -23,8 +23,22 @@
 - Message de bienvenue et notes de version a jour
 - Variables CSS adoptees massivement (box-shadow 43%, border-radius 95%)
 - **Badge nb personnes** : S'ajuste au groupe-cours selectionne
+- **Vue calendaire** : Affiche correctement l'horaire du groupe-cours actif
 
-### Derniere tache completee (11 janvier)
+### Derniere tache completee (19 janvier)
+- **BUG VUE CALENDAIRE (Beta 95.6)** : Calendrier n'affichait pas les bons jours de cours
+  - **Symptome** : Groupe Lun-Jeu affichait des cours le mardi, ne changeait pas selon groupe-cours actif
+  - **Causes multiples** :
+    1. Comparaison case-sensitive `seance.jour` ("lundi") vs `jourSemaine` ("Lundi")
+    2. `obtenirSeancesHoraire()` priorisait clé legacy avant entité horaire du groupe-cours
+    3. Logique `typeFinal` ne distinguait pas cours-reel vs jour-ouvrable
+  - **Corrections** :
+    - `js/horaire.js` : Priorité à l'entité Horaire du groupe-cours actif (ordre de recherche modifié)
+    - `js/calendrier-vue.js` : Normalisation minuscules + logique typeFinal améliorée
+    - `js/saisie-presences.js` : Normalisation minuscules pour filtrage dates
+    - `js/presences-apercu.js` : Normalisation dans `calculerTotalSeances()` et `calculerProchaineSeance()`
+
+### Tache precedente (11 janvier)
 - **SEPARATION MODAL BIENVENUE (Beta 95.4)** : Deux modals distincts
   - ✉️ Modal News : Nouveautes par version (95.4, 95.3, 95.2, 95.1)
   - 😎 Modal Introduction : Guide de demarrage (Primo, Mode Assiste)
@@ -295,6 +309,11 @@
 
 ## HISTORIQUE RECENT
 
+### 19 janvier 2026
+- **BUG VUE CALENDAIRE** : Calendrier n'affichait pas les bons jours selon groupe-cours actif
+  - Causes : (1) Comparaison case-sensitive, (2) Ordre priorité dans obtenirSeancesHoraire(), (3) Logique typeFinal
+  - Corrections : horaire.js (priorité entité), calendrier-vue.js (logique améliorée), saisie-presences.js, presences-apercu.js
+
 ### 11 janvier 2026
 - **Separation modal Bienvenue** : Deux modals distincts ✉️ News / 😎 Introduction
 - **Optimisation indices C/P** : Migration IndexedDB + calcul pratique unique
@@ -381,4 +400,4 @@
 
 ---
 
-**Derniere mise a jour** : 11 janvier 2026 (Toronto)
+**Derniere mise a jour** : 19 janvier 2026
