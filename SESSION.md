@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 95.6
 
 **Date** : 19 janvier 2026
-**Version** : Beta 95.6 (build 0119a)
+**Version** : Beta 95.6 (build 0119-1432)
 **Statut** : Application fonctionnelle pour H2026
 
 ---
@@ -26,6 +26,26 @@
 - **Vue calendaire** : Affiche correctement l'horaire du groupe-cours actif
 
 ### Derniere tache completee (19 janvier)
+- **AIDE CONTEXTUELLE 😎 (Beta 95.6)** : Systeme de boutons d'aide en Mode Assiste
+  - 14 sections d'aide couvrant toutes les zones critiques de l'application
+  - Nouvelle section "Reflexion sur les objectifs d'apprentissage"
+  - Tutoiement systematique (tu/ton/tes) pour ton chaleureux
+  - Ordre de configuration clarifie : Echelles → Pratiques → Grilles → Productions
+  - **Fichiers crees** : `js/aide-contextuelle.js`, `js/aide-contextuelle-contenu.js`
+  - **Fichiers modifies** : `index.html`, `styles.css`
+
+- **MODULARISATION DESIGN SYSTEM (Beta 95.6)** : Separation en modules
+  - 16 modules HTML dans `Design system - Modules/`
+  - Index navigable `design-system-index.html`
+  - Redirection depuis `DESIGN_SYSTEM.html`
+  - Archive du fichier monolithique
+
+- **AUDIT CONFORMITE DS7 (Beta 95.6)** : Corrections styles.css et index.html
+  - Border-radius non conformes corriges (3px→5px, 10px→12px, 15px→20px)
+  - Box-shadow rgba(0,0,0) remplaces par rgba(3,46,92) via variables CSS
+  - Styles inline corriges (border-radius 4px/8px, box-shadow)
+  - Rapport d'audit : `docs/AUDIT_CONFORMITE_DS7.md`
+
 - **BADGE NB ETUDIANTS (Beta 95.6)** : Uniformisation affichage
   - Badge "X personne(s)" dans "Indicateurs globaux" et "Étudiant·es inscrit·es"
   - Mise à jour automatique au changement de groupe-cours
@@ -188,17 +208,20 @@
   - ✉️ News (nouveautes par version : 95.4, 95.3, 95.2, 95.1)
   - 😎 Introduction (guide demarrage, Primo, Mode Assiste)
   - Contenu Beta 95.1 integre depuis "Docu Pour les testeurs.txt"
-- [ ] **Systeme modals info 😎 (Mode Assiste)** : Aide contextuelle
-  - Boutons 😎 a differents endroits de l'interface
-  - Explique fonctionnalites, concepts, astuces
+- [x] **Systeme modals info 😎 (Mode Assiste)** : Aide contextuelle (FAIT Beta 95.6)
+  - 14 sections d'aide couvrant toutes les zones critiques
+  - Tutoiement systematique + ordre configuration clarifie
   - Visible uniquement en Mode Assiste
 - [x] **Badge nb etudiants (uniformisation)** : Afficher badge "X etudiant(s)" (FAIT Beta 95.6)
   - En-tete "Indicateurs globaux du groupe" (Vue d'ensemble)
   - En-tete "Etudiant·es inscrit·es" (Liste des etudiant·es)
   - Mise a jour automatique au changement de groupe-cours
+- [x] **Modularisation design_system.html** : Separation en 16 modules (FAIT Beta 95.6)
+  - Index navigable + redirection + archive monolithique
+- [x] **Audit conformite Design System v7** : Corrections styles.css et index.html (FAIT Beta 95.6)
+  - Border-radius et box-shadow conformes aux specifications
 - [ ] **Optimisation page Trimestre** : Performance et UX
 - [ ] **Tests export/import metadata CC** : Verifier que les metadonnees CC sont correctement exportees et reimportees
-- [ ] **Modularisation design_system.html** : Suite et fin de la separation en modules
 - [ ] **Test securite donnees sensibles** : Audit des donnees stockees (localStorage, IndexedDB)
 
 ### Ameliorations rapport de bug (post-testeurs) — FAIT 18 jan 2026
@@ -316,6 +339,21 @@
 ## HISTORIQUE RECENT
 
 ### 19 janvier 2026
+- **AIDE CONTEXTUELLE 😎** : Systeme complet de boutons d'aide en Mode Assiste
+  - 14 sections : evaluations, construction (grilles, echelles, productions, pratiques), tableau de bord, presences, reglages
+  - Nouvelle section "Reflexion sur les objectifs d'apprentissage" (avant creation grilles)
+  - Tutoiement systematique pour ton chaleureux et accessible
+  - Ordre de configuration clarifie : Echelles → Pratiques → Grilles → Productions
+  - Fichiers : aide-contextuelle.js, aide-contextuelle-contenu.js
+- **MODULARISATION DESIGN SYSTEM** : Separation en 16 modules HTML
+  - Index navigable design-system-index.html
+  - Redirection depuis DESIGN_SYSTEM.html
+  - Archive du fichier monolithique (4000+ lignes)
+- **AUDIT CONFORMITE DS7** : Corrections styles.css et index.html
+  - Border-radius : 3px→5px, 10px→12px, 15px→20px (utilisation variables CSS)
+  - Box-shadow : rgba(0,0,0) → rgba(3,46,92) via variables CSS
+  - Styles inline corriges (border-radius 4px/8px)
+  - Rapport : docs/AUDIT_CONFORMITE_DS7.md
 - **BADGE NB ETUDIANTS** : Uniformisation dans Vue d'ensemble et Liste
   - Mise à jour automatique au changement de groupe-cours (tableau-bord-apercu.js, trimestre-v2.js)
 - **BUG VUE CALENDAIRE** : Calendrier n'affichait pas les bons jours selon groupe-cours actif

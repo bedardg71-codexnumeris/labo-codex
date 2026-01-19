@@ -6,7 +6,7 @@
 
 ---
 
-## Etat actuel (9 janvier 2026)
+## Etat actuel (19 janvier 2026)
 
 ### Accompli (novembre 2025 - janvier 2026)
 
@@ -20,6 +20,8 @@
 | 24-27 dec | Multi-trimestres + namespacing (Beta 95) | ✅ |
 | 6-7 jan 2026 | Architecture modulaire Trimestre (Beta 95.2) | ✅ |
 | 8-9 jan | Audit evaluation + UX modaux (Beta 95.3) | ✅ |
+| 10-11 jan | Categories Selection/Obligatoires (Beta 95.4-95.5) | ✅ |
+| 19 jan | Aide contextuelle 😎 + Design System v7 (Beta 95.6) | ✅ |
 
 ### Resultats du sondage (6 cartographies analysees)
 
@@ -60,6 +62,8 @@
 - [x] Syntheses intelligentes sidebars
 - [x] Import depuis trimestre precedent
 - [x] Design System v7 (variables CSS)
+- [x] Aide contextuelle 😎 en Mode Assiste (14 sections)
+- [x] Modularisation Design System (16 modules HTML)
 
 ---
 
@@ -311,5 +315,5 @@
 
 ---
 
-**Derniere mise a jour** : 9 janvier 2026
+**Derniere mise a jour** : 19 janvier 2026
 **Prochaine revue** : 1er fevrier 2026 (debut Beta 96)
