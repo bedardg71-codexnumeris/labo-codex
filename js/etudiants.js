@@ -1128,29 +1128,47 @@ function afficherListeEtudiantsConsultation() {
         html += '<td>' + prenom + '</td>';
         html += '<td class="etud-text-center">' + (etudiant.sa === 'Oui' ? '✓' : '') + '</td>';
 
+        // 🆕 BETA 95.6 : Détecter si aucune donnée n'est disponible
+        // Si A=0 ET C=0 ET P=0, afficher "-" au lieu de "0%" (évite interprétations erronées)
+        const aucuneDonnee = indices.A === 0 && indices.C === 0 && indices.P === 0;
+        const tiret = '<span class="etud-texte-gris-clair">—</span>';
+
         // Colonnes A-C-P avec couleurs
         const couleurA = obtenirCouleurAssiduite(Math.round(indices.A));
         const couleurC = obtenirCouleurCompletion(Math.round(indices.C));
         const couleurP = obtenirCouleurPerformance(Math.round(indices.P));
 
-        html += '<td class="etud-text-center"><strong style="color: ' + couleurA + ';">' + Math.round(indices.A) + '%</strong></td>';
-        html += '<td class="etud-text-center"><strong style="color: ' + couleurC + ';">' + Math.round(indices.C) + '%</strong></td>';
-        html += '<td class="etud-text-center"><strong style="color: ' + couleurP + ';">' + Math.round(indices.P) + '%</strong></td>';
+        if (aucuneDonnee) {
+            html += '<td class="etud-text-center">' + tiret + '</td>';
+            html += '<td class="etud-text-center">' + tiret + '</td>';
+            html += '<td class="etud-text-center">' + tiret + '</td>';
+            html += '<td class="etud-text-center">' + tiret + '</td>'; // E aussi
+        } else {
+            html += '<td class="etud-text-center"><strong style="color: ' + couleurA + ';">' + Math.round(indices.A) + '%</strong></td>';
+            html += '<td class="etud-text-center"><strong style="color: ' + couleurC + ';">' + Math.round(indices.C) + '%</strong></td>';
+            html += '<td class="etud-text-center"><strong style="color: ' + couleurP + ';">' + Math.round(indices.P) + '%</strong></td>';
 
-        // NOUVEAU: Colonne Engagement E = (A × C × P)^(1/3) en pourcentage
-        const E_brut = (indices.A / 100) * (indices.C / 100) * (indices.P / 100);
-        const E = Math.pow(E_brut, 1/3);
-        const engagementPct = Math.round(E * 100);
-        const couleurE = obtenirCouleurEngagement(engagementPct);
-        html += '<td class="etud-text-center"><strong style="color: ' + couleurE + ';">' + engagementPct + '%</strong></td>';
+            // Colonne Engagement E = (A × C × P)^(1/3) en pourcentage
+            const E_brut = (indices.A / 100) * (indices.C / 100) * (indices.P / 100);
+            const E = Math.pow(E_brut, 1/3);
+            const engagementPct = Math.round(E * 100);
+            const couleurE = obtenirCouleurEngagement(engagementPct);
+            html += '<td class="etud-text-center"><strong style="color: ' + couleurE + ';">' + engagementPct + '%</strong></td>';
+        }
 
         // Colonnes Pattern et RàI (affichées uniquement si RàI activé)
         if (activerRai) {
-            // NOUVEAU: Colonne Pattern avec badge (centré)
-            html += '<td class="etud-text-center"><span class="' + badgePattern.classe + '">' + badgePattern.label + '</span></td>';
+            if (aucuneDonnee) {
+                // 🆕 BETA 95.6 : Afficher "-" si aucune donnée (évite "Blocage critique" / "Niveau 3")
+                html += '<td class="etud-text-center">' + tiret + '</td>';
+                html += '<td class="etud-text-center">' + tiret + '</td>';
+            } else {
+                // Colonne Pattern avec badge (centré)
+                html += '<td class="etud-text-center"><span class="' + badgePattern.classe + '">' + badgePattern.label + '</span></td>';
 
-            // NOUVEAU: Colonne RàI avec badge amélioré
-            html += '<td class="etud-text-center"><span class="' + badgeRai.classe + '">' + badgeRai.label + '</span></td>';
+                // Colonne RàI avec badge amélioré
+                html += '<td class="etud-text-center"><span class="' + badgeRai.classe + '">' + badgeRai.label + '</span></td>';
+            }
         }
 
         // NOUVEAU (Beta 85): Colonne Interventions

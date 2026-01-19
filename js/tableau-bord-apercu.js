@@ -418,6 +418,14 @@ function chargerTableauBordApercu() {
             e.statut !== 'décrochage' && e.statut !== 'abandon'
         );
 
+        // 🆕 BETA 95.6 : Mettre à jour le badge nombre d'étudiants dans "Indicateurs globaux"
+        const nbEtudiants = etudiantsActifs.length;
+        const labelEtudiants = nbEtudiants + ' personne' + (nbEtudiants > 1 ? 's' : '');
+        const badgeIndicateurs = document.getElementById('badge-nb-etudiants-indicateurs');
+        if (badgeIndicateurs) {
+            badgeIndicateurs.textContent = labelEtudiants;
+        }
+
         // Ajouter les indices (structure : {sommatif: {...}, alternatif: {...}})
         const etudiantsAvecIndices = etudiantsActifs.map(etudiant => {
             const indices = calculerIndicesEtudiant(etudiant.da);
@@ -787,57 +795,70 @@ function afficherMetriquesGlobales(etudiants) {
     const afficherSom = affichage.afficherSommatif === true;
     const afficherPan = affichage.afficherAlternatif === true;
 
-    // Préparer les données pour chaque métrique
-    const etudiantsSOM_A = etudiants.map(e => ({
+    // 🆕 BETA 95.6 : Filtrer les étudiants sans données (A=C=P=0)
+    // Évite les interprétations erronées ("blocage critique", "faible engagement")
+    const etudiantsAvecDonneesSOM = etudiants.filter(e =>
+        e.sommatif.assiduite > 0 || e.sommatif.completion > 0 || e.sommatif.performance > 0
+    );
+    const etudiantsAvecDonneesPAN = etudiants.filter(e =>
+        e.alternatif.assiduite > 0 || e.alternatif.completion > 0 || e.alternatif.performance > 0
+    );
+    const nbSansDonneesSOM = etudiants.length - etudiantsAvecDonneesSOM.length;
+    const nbSansDonneesPAN = etudiants.length - etudiantsAvecDonneesPAN.length;
+
+    console.log(`📊 [Métriques] Total: ${etudiants.length}, avec données SOM: ${etudiantsAvecDonneesSOM.length}, avec données PAN: ${etudiantsAvecDonneesPAN.length}`);
+
+    // Préparer les données pour chaque métrique (uniquement étudiants avec données)
+    const etudiantsSOM_A = etudiantsAvecDonneesSOM.map(e => ({
         da: e.da,
         nom: e.nom,
         prenom: e.prenom,
         valeur: e.sommatif.assiduite
     }));
 
-    const etudiantsPAN_A = etudiants.map(e => ({
+    const etudiantsPAN_A = etudiantsAvecDonneesPAN.map(e => ({
         da: e.da,
         nom: e.nom,
         prenom: e.prenom,
         valeur: e.alternatif.assiduite
     }));
 
-    const etudiantsSOM_C = etudiants.map(e => ({
+    const etudiantsSOM_C = etudiantsAvecDonneesSOM.map(e => ({
         da: e.da,
         nom: e.nom,
         prenom: e.prenom,
         valeur: e.sommatif.completion
     }));
 
-    const etudiantsPAN_C = etudiants.map(e => ({
+    const etudiantsPAN_C = etudiantsAvecDonneesPAN.map(e => ({
         da: e.da,
         nom: e.nom,
         prenom: e.prenom,
         valeur: e.alternatif.completion
     }));
 
-    const etudiantsSOM_P = etudiants.map(e => ({
+    const etudiantsSOM_P = etudiantsAvecDonneesSOM.map(e => ({
         da: e.da,
         nom: e.nom,
         prenom: e.prenom,
         valeur: e.sommatif.performance
     }));
 
-    const etudiantsPAN_P = etudiants.map(e => ({
+    const etudiantsPAN_P = etudiantsAvecDonneesPAN.map(e => ({
         da: e.da,
         nom: e.nom,
         prenom: e.prenom,
         valeur: e.alternatif.performance
     }));
 
-    const etudiantsSOM_E = etudiants.map(e => ({
+    const etudiantsSOM_E = etudiantsAvecDonneesSOM.map(e => ({
         da: e.da,
         nom: e.nom,
         prenom: e.prenom,
         valeur: e.sommatif.engagement
     }));
 
-    const etudiantsPAN_E = etudiants.map(e => ({
+    const etudiantsPAN_E = etudiantsAvecDonneesPAN.map(e => ({
         da: e.da,
         nom: e.nom,
         prenom: e.prenom,
@@ -892,14 +913,18 @@ function afficherMetriquesGlobales(etudiants) {
         </div>
     `;
 
+    // 🆕 BETA 95.6 : Déterminer le nombre d'étudiants en attente selon la pratique active
+    const nbSansDonnees = afficherPan ? nbSansDonneesPAN : nbSansDonneesSOM;
+    const nbTotal = etudiants.length;
+
     // Générer les 4 barres de distribution avec interprétations
     const html = `
         <div class="tb-p-20">
             ${legendeUnique}
-            ${genererBarreDistribution('Assiduité (A)', etudiantsSOM_A, etudiantsPAN_A, 'A', afficherSom, afficherPan, r_AP)}
-            ${genererBarreDistribution('Complétion (C)', etudiantsSOM_C, etudiantsPAN_C, 'C', afficherSom, afficherPan, r_CP)}
-            ${genererBarreDistribution('Performance (P)', etudiantsSOM_P, etudiantsPAN_P, 'P', afficherSom, afficherPan, null)}
-            ${genererBarreDistribution('Engagement (E)', etudiantsSOM_E, etudiantsPAN_E, 'E', afficherSom, afficherPan, null, moyenneE)}
+            ${genererBarreDistribution('Assiduité (A)', etudiantsSOM_A, etudiantsPAN_A, 'A', afficherSom, afficherPan, r_AP, null, nbSansDonnees, nbTotal)}
+            ${genererBarreDistribution('Complétion (C)', etudiantsSOM_C, etudiantsPAN_C, 'C', afficherSom, afficherPan, r_CP, null, nbSansDonnees, nbTotal)}
+            ${genererBarreDistribution('Performance (P)', etudiantsSOM_P, etudiantsPAN_P, 'P', afficherSom, afficherPan, null, null, nbSansDonnees, nbTotal)}
+            ${genererBarreDistribution('Engagement (E)', etudiantsSOM_E, etudiantsPAN_E, 'E', afficherSom, afficherPan, null, moyenneE, nbSansDonnees, nbTotal)}
         </div>
     `;
 
@@ -957,8 +982,8 @@ function genererCarteMetrique(label, valeurSom, valeurPan, afficherSom, afficher
  * @param {boolean} afficherPan - Afficher la couche PAN
  * @returns {string} HTML de la barre de distribution
  */
-function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, afficherSom, afficherPan, correlation = null, moyenneEngagement = null) {
-    console.log(`🎯 genererBarreDistribution appelée: type="${type}", afficherSom=${afficherSom}, afficherPan=${afficherPan}, correlation=${correlation}, moyenneEngagement=${moyenneEngagement}`);
+function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, afficherSom, afficherPan, correlation = null, moyenneEngagement = null, nbSansDonnees = 0, nbTotal = 0) {
+    console.log(`🎯 genererBarreDistribution appelée: type="${type}", afficherSom=${afficherSom}, afficherPan=${afficherPan}, correlation=${correlation}, moyenneEngagement=${moyenneEngagement}, nbSansDonnees=${nbSansDonnees}, nbTotal=${nbTotal}`);
     console.log(`   etudiantsSOM.length=${etudiantsSOM?.length || 0}, etudiantsPAN.length=${etudiantsPAN?.length || 0}`);
 
     // Gradient de couleurs selon les seuils d'engagement (4 zones, sans Insuffisant)
@@ -1216,14 +1241,39 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
         });
     }
 
+    // 🆕 BETA 95.6 : Gérer le cas où tous les étudiants sont sans données
+    const nbAvecDonnees = (afficherPan ? etudiantsPAN.length : etudiantsSOM.length) || 0;
+    const tousEnAttente = nbTotal > 0 && nbAvecDonnees === 0;
+    const certainsEnAttente = nbSansDonnees > 0 && nbAvecDonnees > 0;
+
+    // Message quand tous sont en attente
+    let messageAttenteHTML = '';
+    if (tousEnAttente) {
+        messageAttenteHTML = `
+            <div class="tb-texte-description" style="color: #94a3b8; font-style: italic;">
+                En attente de données pour ${nbTotal} étudiant${nbTotal > 1 ? 's' : ''}.
+            </div>
+        `;
+    }
+
+    // Indicateur pour étudiants en attente (si certains seulement)
+    let indicateurAttenteHTML = '';
+    if (certainsEnAttente) {
+        indicateurAttenteHTML = `<span style="color: #94a3b8; font-size: 0.8rem; margin-left: 8px;">(${nbSansDonnees} en attente)</span>`;
+    }
+
+    // Si tous en attente, remplacer l'interprétation par le message d'attente
+    const interpretationFinale = tousEnAttente ? messageAttenteHTML : interpretationHTML;
+    const valeursFinales = tousEnAttente ? '<span style="color: #94a3b8; font-weight: 600;">—</span>' : valeursHTML + indicateurAttenteHTML;
+
     return `
         <div class="distribution-container u-mb-20">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                 <h4 class="tb-titre-simple">${label}</h4>
-                ${valeursHTML}
+                ${valeursFinales}
             </div>
-            ${interpretationHTML}
-            <div class="barre-indicateur" style="position: relative; height: 30px; margin-top: ${interpretationHTML ? '8px' : '0'};">
+            ${interpretationFinale}
+            <div class="barre-indicateur" style="position: relative; height: 30px; margin-top: ${interpretationFinale ? '8px' : '0'};">
                 <div class="barre-indicateur-overlay"></div>
                 ${lignesSOM}
                 ${lignesPAN}
@@ -1242,7 +1292,31 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
  * @param {boolean} afficherPan - Afficher la couche PAN
  * @returns {string} HTML de la barre
  */
-function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan) {
+function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, nbSansDonnees = 0, nbTotal = 0) {
+    // 🆕 BETA 95.6 : Gérer le cas où tous les étudiants sont sans données
+    const nbAvecDonnees = (afficherPan ? etudiantsPAN.length : etudiantsSOM.length) || 0;
+    const tousEnAttente = nbTotal > 0 && nbAvecDonnees === 0;
+
+    if (tousEnAttente) {
+        return `
+            <div class="distribution-container u-mb-15">
+                <h4 class="tb-titre-metrique">Répartition des patterns d'apprentissage</h4>
+                <div class="tb-texte-description" style="color: #94a3b8; font-style: italic;">
+                    En attente de données pour ${nbTotal} étudiant${nbTotal > 1 ? 's' : ''}.
+                </div>
+                <div class="barre-patterns tb-barre-simple" style="opacity: 0.5;">
+                    <div class="barre-patterns-overlay"></div>
+                </div>
+                <div class="distribution-legende tb-barre-distribution">
+                    <span style="position: absolute; left: 12.5%; transform: translateX(-50%); color: #1bbd7e; font-weight: 600; text-align: center;">Progression<br>stable<br><span class="tb-texte-mini" style="color: #94a3b8;">0 (0%)</span></span>
+                    <span style="position: absolute; left: 37.5%; transform: translateX(-50%); color: #11aec5; font-weight: 600; text-align: center;">Défi<br>spécifique<br><span class="tb-texte-mini" style="color: #94a3b8;">0 (0%)</span></span>
+                    <span style="position: absolute; left: 62.5%; transform: translateX(-50%); color: #2994ee; font-weight: 600; text-align: center;">Blocage<br>émergent<br><span class="tb-texte-mini" style="color: #94a3b8;">0 (0%)</span></span>
+                    <span style="position: absolute; left: 87.5%; transform: translateX(-50%); color: #4f74f3; font-weight: 600; text-align: center;">Blocage<br>critique<br><span class="tb-texte-mini" style="color: #94a3b8;">0 (0%)</span></span>
+                </div>
+            </div>
+        `;
+    }
+
     // 4 zones du spectre lumineux avec transitions douces
     // Vert → Cyan → Bleu → Indigo (bon → critique)
     // Gradient maintenant défini dans styles.css (.barre-patterns)
@@ -1451,7 +1525,30 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
  * @param {boolean} afficherPan - Afficher la couche PAN
  * @returns {string} HTML de la barre
  */
-function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan) {
+function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, nbSansDonnees = 0, nbTotal = 0) {
+    // 🆕 BETA 95.6 : Gérer le cas où tous les étudiants sont sans données
+    const nbAvecDonnees = (afficherPan ? etudiantsPAN.length : etudiantsSOM.length) || 0;
+    const tousEnAttente = nbTotal > 0 && nbAvecDonnees === 0;
+
+    if (tousEnAttente) {
+        return `
+            <div class="distribution-container u-mb-15">
+                <h4 class="tb-titre-metrique">Modèle de la Réponse à l'intervention (RàI)</h4>
+                <div class="tb-texte-description" style="color: #94a3b8; font-style: italic;">
+                    En attente de données pour ${nbTotal} étudiant${nbTotal > 1 ? 's' : ''}.
+                </div>
+                <div class="barre-rai tb-barre-simple" style="opacity: 0.5;">
+                    <div class="barre-rai-overlay"></div>
+                </div>
+                <div class="distribution-legende tb-barre-distribution">
+                    <span style="position: absolute; left: 16.5%; transform: translateX(-50%); color: #2196F3; font-weight: 600; text-align: center;">Niveau 1<br>Universel<br><span class="tb-texte-mini" style="color: #94a3b8;">0 (0%)</span></span>
+                    <span style="position: absolute; left: 49.5%; transform: translateX(-50%); color: #9c55d6; font-weight: 600; text-align: center;">Niveau 2<br>Préventif<br><span class="tb-texte-mini" style="color: #94a3b8;">0 (0%)</span></span>
+                    <span style="position: absolute; left: 83%; transform: translateX(-50%); color: #7c3aed; font-weight: 600; text-align: center;">Niveau 3<br>Intensif<br><span class="tb-texte-mini" style="color: #94a3b8;">0 (0%)</span></span>
+                </div>
+            </div>
+        `;
+    }
+
     // 3 zones du spectre lumineux avec transitions douces
     // Bleu → Mauve → Violet (niveau 1 → niveau 3)
     // Gradient maintenant défini dans styles.css (.barre-rai)
@@ -1807,18 +1904,30 @@ function afficherPatternsApprentissage(etudiants) {
     const afficherSom = affichage.afficherSommatif === true;
     const afficherPan = affichage.afficherAlternatif === true;
 
+    // 🆕 BETA 95.6 : Filtrer les étudiants sans données (A=C=P=0)
+    // pour éviter les patterns erronés ("Blocage critique" quand pas de données)
+    const etudiantsAvecDonnees = etudiants.filter(e => {
+        const aSOM = e.sommatif.assiduite > 0 || e.sommatif.completion > 0 || e.sommatif.performance > 0;
+        const aPAN = e.alternatif.assiduite > 0 || e.alternatif.completion > 0 || e.alternatif.performance > 0;
+        return aSOM || aPAN;
+    });
+    const nbSansDonnees = etudiants.length - etudiantsAvecDonnees.length;
+    const nbTotal = etudiants.length;
+
+    console.log(`📊 [Patterns] Total: ${nbTotal}, avec données: ${etudiantsAvecDonnees.length}, sans données: ${nbSansDonnees}`);
+
     // NOUVEAU Beta 90 : Récupérer les pratiques spécifiques
     // IMPORTANT : Utiliser determinerCibleIntervention() pour garantir la cohérence
     // avec le tableau de liste des étudiants. Les patterns doivent être identiques
     // partout car ils sont basés sur la même logique (N derniers artefacts).
 
-    // Préparer les données pour SOM et PAN
+    // Préparer les données pour SOM et PAN (uniquement étudiants avec données)
     // Note : determinerCibleIntervention() retourne le pattern basé sur les N derniers artefacts
     // ce qui garantit la cohérence méthodologique nécessaire pour détecter les patterns
     const etudiantsSOM = [];
     const etudiantsPAN = [];
 
-    etudiants.forEach(e => {
+    etudiantsAvecDonnees.forEach(e => {
         if (typeof determinerCibleIntervention === 'function') {
             const cibleInfo = determinerCibleIntervention(e.da);
             const pattern = cibleInfo ? cibleInfo.pattern : null;
@@ -1863,9 +1972,10 @@ function afficherPatternsApprentissage(etudiants) {
     }
 
     // Générer la barre de distribution et l'ajouter à la fin de la carte
+    // 🆕 BETA 95.6 : Passer le nombre d'étudiants sans données pour affichage approprié
     const html = `
         <div class="barre-patterns-container tb-padding-top-espacé">
-            ${genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan)}
+            ${genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, nbSansDonnees, nbTotal)}
         </div>
     `;
 
@@ -1923,6 +2033,18 @@ function afficherNiveauxRaI(etudiants) {
     const afficherSom = affichage.afficherSommatif === true;
     const afficherPan = affichage.afficherAlternatif === true;
 
+    // 🆕 BETA 95.6 : Filtrer les étudiants sans données (A=C=P=0)
+    // pour éviter les niveaux RàI erronés ("Niveau 3" quand pas de données)
+    const etudiantsAvecDonnees = etudiants.filter(e => {
+        const aSOM = e.sommatif.assiduite > 0 || e.sommatif.completion > 0 || e.sommatif.performance > 0;
+        const aPAN = e.alternatif.assiduite > 0 || e.alternatif.completion > 0 || e.alternatif.performance > 0;
+        return aSOM || aPAN;
+    });
+    const nbSansDonnees = etudiants.length - etudiantsAvecDonnees.length;
+    const nbTotal = etudiants.length;
+
+    console.log(`📊 [RàI] Total: ${nbTotal}, avec données: ${etudiantsAvecDonnees.length}, sans données: ${nbSansDonnees}`);
+
     // NOUVEAU Beta 90 : Récupérer les pratiques spécifiques
     const pratiqueSOM = typeof obtenirPratiqueParId === 'function' ? obtenirPratiqueParId('sommative') : null;
     const pratiquePAN = typeof obtenirPratiqueParId === 'function' ? obtenirPratiqueParId('pan-standards') : null;
@@ -1935,8 +2057,9 @@ function afficherNiveauxRaI(etudiants) {
     const etudiantsPAN = [];
 
     // Utiliser la même fonction pour SOM et PAN (niveau RàI pédagogique identique)
+    // 🆕 BETA 95.6 : Uniquement pour les étudiants avec données
     if (typeof determinerNiveauRaiPedagogique === 'function') {
-        etudiants.forEach(e => {
+        etudiantsAvecDonnees.forEach(e => {
             const niveauInfo = determinerNiveauRaiPedagogique(e.da);
             const niveau = niveauInfo ? niveauInfo.niveau : null;
 
@@ -1979,9 +2102,10 @@ function afficherNiveauxRaI(etudiants) {
     }
 
     // Générer la barre de distribution et l'ajouter à la fin de la carte
+    // 🆕 BETA 95.6 : Passer le nombre d'étudiants sans données pour affichage approprié
     const html = `
         <div class="barre-rai-container tb-padding-top">
-            ${genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan)}
+            ${genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, nbSansDonnees, nbTotal)}
         </div>
     `;
 
