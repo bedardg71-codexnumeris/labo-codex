@@ -27,7 +27,8 @@
 
 ### Derniere tache completee (19 janvier)
 - **AIDE CONTEXTUELLE 😎 (Beta 95.6)** : Systeme de boutons d'aide en Mode Assiste
-  - 14 sections d'aide couvrant toutes les zones critiques de l'application
+  - 15 sections d'aide couvrant toutes les zones critiques de l'application
+  - Nouvelle section "Cartouches de rétroaction" (rôle dans les grilles descriptives)
   - Nouvelle section "Reflexion sur les objectifs d'apprentissage"
   - Tutoiement systematique (tu/ton/tes) pour ton chaleureux
   - Ordre de configuration clarifie : Echelles → Pratiques → Grilles → Productions
@@ -209,7 +210,7 @@
   - 😎 Introduction (guide demarrage, Primo, Mode Assiste)
   - Contenu Beta 95.1 integre depuis "Docu Pour les testeurs.txt"
 - [x] **Systeme modals info 😎 (Mode Assiste)** : Aide contextuelle (FAIT Beta 95.6)
-  - 14 sections d'aide couvrant toutes les zones critiques
+  - 15 sections d'aide couvrant toutes les zones critiques
   - Tutoiement systematique + ordre configuration clarifie
   - Visible uniquement en Mode Assiste
 - [x] **Badge nb etudiants (uniformisation)** : Afficher badge "X etudiant(s)" (FAIT Beta 95.6)
@@ -340,7 +341,7 @@
 
 ### 19 janvier 2026
 - **AIDE CONTEXTUELLE 😎** : Systeme complet de boutons d'aide en Mode Assiste
-  - 14 sections : evaluations, construction (grilles, echelles, productions, pratiques), tableau de bord, presences, reglages
+  - 15 sections : evaluations, construction (grilles, echelles, cartouches, productions, pratiques), tableau de bord, presences, reglages
   - Nouvelle section "Reflexion sur les objectifs d'apprentissage" (avant creation grilles)
   - Tutoiement systematique pour ton chaleureux et accessible
   - Ordre de configuration clarifie : Echelles → Pratiques → Grilles → Productions
