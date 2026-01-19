@@ -5586,6 +5586,30 @@ async function changerGroupeCoursActifV2(valeur) {
             chargerTableauBordApercu();
         }
 
+        // 🆕 BETA 95.6 : Rafraîchir le profil étudiant si affiché
+        // Vérifie si la sous-section profil est active et si un DA est mémorisé
+        const sousSectionProfil = document.getElementById('tableau-bord-profil');
+        if (sousSectionProfil && sousSectionProfil.style.display !== 'none' && window.profilActuelDA) {
+            if (typeof afficherProfilComplet === 'function') {
+                // Récupérer la liste des étudiants du nouveau groupe-cours
+                const etudiantsNouveauGC = typeof obtenirEtudiantsCoursActif === 'function'
+                    ? obtenirEtudiantsCoursActif()
+                    : [];
+                // Si l'étudiant actuel n'est pas dans le nouveau groupe, afficher le premier de la liste
+                const etudiantExiste = etudiantsNouveauGC.find(e => e.da === window.profilActuelDA);
+                if (etudiantExiste) {
+                    afficherProfilComplet(window.profilActuelDA);
+                } else if (etudiantsNouveauGC.length > 0) {
+                    // Trier et prendre le premier
+                    etudiantsNouveauGC.sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+                    const premierActif = etudiantsNouveauGC.find(e => e.statut !== 'décrochage' && e.statut !== 'abandon');
+                    if (premierActif) {
+                        afficherProfilComplet(premierActif.da);
+                    }
+                }
+            }
+        }
+
         console.log('[Trimestre V2] Mode COURS activé:', coursId, '(tous groupes)');
         return;
     }
@@ -5666,6 +5690,30 @@ async function changerGroupeCoursActifV2(valeur) {
     // 🆕 BETA 95.6 : Rafraîchir le tableau de bord aperçu (badges nb étudiants)
     if (typeof chargerTableauBordApercu === 'function') {
         chargerTableauBordApercu();
+    }
+
+    // 🆕 BETA 95.6 : Rafraîchir le profil étudiant si affiché
+    // Vérifie si la sous-section profil est active et si un DA est mémorisé
+    const sousSectionProfilGC = document.getElementById('tableau-bord-profil');
+    if (sousSectionProfilGC && sousSectionProfilGC.style.display !== 'none' && window.profilActuelDA) {
+        if (typeof afficherProfilComplet === 'function') {
+            // Récupérer la liste des étudiants du nouveau groupe-cours
+            const etudiantsNouveauGroupe = typeof obtenirEtudiantsCoursActif === 'function'
+                ? obtenirEtudiantsCoursActif()
+                : [];
+            // Si l'étudiant actuel n'est pas dans le nouveau groupe, afficher le premier de la liste
+            const etudiantExisteGC = etudiantsNouveauGroupe.find(e => e.da === window.profilActuelDA);
+            if (etudiantExisteGC) {
+                afficherProfilComplet(window.profilActuelDA);
+            } else if (etudiantsNouveauGroupe.length > 0) {
+                // Trier et prendre le premier
+                etudiantsNouveauGroupe.sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+                const premierActifGC = etudiantsNouveauGroupe.find(e => e.statut !== 'décrochage' && e.statut !== 'abandon');
+                if (premierActifGC) {
+                    afficherProfilComplet(premierActifGC.da);
+                }
+            }
+        }
     }
 
     console.log('[Trimestre V2] Groupe-cours activé:', gc.id);
