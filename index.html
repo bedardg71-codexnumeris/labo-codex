@@ -3187,10 +3187,12 @@
                 <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
                     <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Beta 95.7 (20 janvier) — Améliorations :</strong>
                     <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
-                        <li><strong>Dropdown Note maximale</strong> : Le champ "Note maximale" (reprise ciblée) affiche maintenant les niveaux de votre échelle de performance au lieu d'un champ texte libre</li>
-                        <li><strong>Ordre disciplines corrigé</strong> : Le dropdown des disciplines respecte l'ordre officiel (100→200→300→400→500→600)</li>
-                        <li><strong>Aide bibliothèque</strong> : Message explicatif ajouté dans les modals de bibliothèque pour guider l'édition des pratiques</li>
-                        <li><strong>Valeurs par défaut jetons</strong> : Nombre de jetons par élève (2) et durée du délai (2 jours) ajustés selon l'usage réel</li>
+                        <li><strong>Persistance Wizard → Expert</strong> : Les valeurs configurées dans le wizard (artefacts, échelle) persistent correctement en mode Expert</li>
+                        <li><strong>Artefacts clarifiés</strong> : Le résumé wizard affiche distinctement "Sélection" (N meilleures) et "Obligatoires" (toujours comptées)</li>
+                        <li><strong>Dropdown Note maximale</strong> : Le champ "Note maximale" (reprise ciblée) affiche les niveaux de votre échelle</li>
+                        <li><strong>Ordre disciplines corrigé</strong> : Le dropdown respecte l'ordre officiel (100→200→300→400→500→600)</li>
+                        <li><strong>Aide bibliothèque</strong> : Message explicatif ajouté pour guider l'édition des pratiques</li>
+                        <li><strong>Valeurs par défaut jetons</strong> : 2 jetons/élève, 2 jours de délai (usage réel)</li>
                     </ul>
                 </div>
 
@@ -14595,7 +14597,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '95.6';
-        const BUILD_ID = '0120-0828';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0120-0958';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
