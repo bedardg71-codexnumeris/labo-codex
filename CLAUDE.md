@@ -18,9 +18,10 @@ Ce document te guidera vers :
 
 ## Etat actuel
 
-- **Version** : Beta 95.5
+- **Version** : Beta 95.7
 - **Objectif** : Architecture modulaire groupe-cours + Categories productions
 - **Session en cours** : Voir `SESSION.md`
+- **Backlog** : Voir `BACKLOG.md` (taches a faire)
 
 ---
 
@@ -58,9 +59,10 @@ Utiliser `window.cle('nomCle')` pour obtenir la cle namespacee.
 ## Avant de coder
 
 1. Lire `docs/00-START-HERE.md`
-2. Identifier le module concerne dans `docs/modules/`
-3. Verifier `docs/legacy/` pour les problemes connus
-4. Consulter `SESSION.md` pour le contexte actuel
+2. Consulter `BACKLOG.md` pour les taches en attente
+3. Consulter `SESSION.md` pour le contexte actuel
+4. Identifier le module concerne dans `docs/modules/`
+5. Verifier `docs/legacy/` pour les problemes connus
 
 ---
 
@@ -78,4 +80,4 @@ Gregoire a la memoire contextuelle reelle du projet.
 
 ---
 
-**Derniere mise a jour** : 10 janvier 2026
+**Derniere mise a jour** : 20 janvier 2026
