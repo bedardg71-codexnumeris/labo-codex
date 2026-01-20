@@ -1188,18 +1188,49 @@ const QUESTIONS_PRIMO = [
     },
 
     {
+        id: 'categories-obligatoires-nombre',
+        texte: 'Combien de productions **Obligatoires** prévois-tu ?',
+        type: 'number',
+        placeholder: 'Ex: 2',
+        champsCibles: [
+            { cle: 'modalitesEvaluation', champ: 'categories.obligatoires.nombre' }
+        ],
+        validation: {
+            requis: true,
+            min: 1,
+            max: 10
+        },
+        aide: 'Les productions Obligatoires sont toujours comptées dans la note (ex: examen final, certification). Note = 0 si non remise.',
+        sautSi: function(reponses) {
+            return reponses['utiliser-categories'] !== 'oui';
+        }
+    },
+
+    {
         id: 'categories-info-validation',
         texte: function(reponses) {
             const pondSel = parseInt(reponses['categories-selection-ponderation']) || 0;
             const pondObl = parseInt(reponses['categories-obligatoires-ponderation']) || 0;
-            const total = pondSel + pondObl;
+            const totalPond = pondSel + pondObl;
 
-            if (total === 100) {
-                return `✅ **Configuration validée !**\n\n• Sélection : **${pondSel}%** (${reponses['categories-selection-nombre'] || 4} meilleures retenues)\n• Obligatoires : **${pondObl}%** (toujours comptées)\n\nTotal : **100%**`;
-            } else if (total < 100) {
-                return `⚠️ **Attention** : Le total des pondérations est de **${total}%** (inférieur à 100%).\n\nTu pourras ajuster dans **Réglages → Pratique de notation**.`;
+            const nSel = parseInt(reponses['categories-selection-nombre']) || 4;
+            const nObl = parseInt(reponses['categories-obligatoires-nombre']) || 2;
+            const totalProd = nSel + nObl;
+
+            if (totalPond === 100) {
+                return `✅ **Configuration validée !**\n\n` +
+                    `📊 **Construction de la note**\n` +
+                    `• Sélection : **${nSel} meilleures** retenues → **${pondSel}%**\n` +
+                    `• Obligatoires : **${nObl} production${nObl > 1 ? 's' : ''}** → **${pondObl}%**\n\n` +
+                    `**Total : ${totalProd} productions pour 100%**`;
+            } else if (totalPond < 100) {
+                return `⚠️ **Attention** : Le total des pondérations est de **${totalPond}%** (inférieur à 100%).\n\n` +
+                    `📊 Construction prévue : ${nSel} meilleures + ${nObl} obligatoire${nObl > 1 ? 's' : ''} = **${totalProd} productions**\n\n` +
+                    `Tu pourras ajuster dans **Réglages → Pratique de notation**.`;
             } else {
-                return `❌ **Attention** : Le total des pondérations dépasse 100% (**${total}%**).\n\nTu devras ajuster dans **Réglages → Pratique de notation**.`;
+                return `❌ **Attention** : Le total des pondérations dépasse 100% (**${totalPond}%**).\n\n` +
+                    `📊 Construction prévue : ${nSel} meilleures + ${nObl} obligatoire${nObl > 1 ? 's' : ''} = **${totalProd} productions**\n\n` +
+                    `Tu devras ajuster dans **Réglages → Pratique de notation**.`;
             }
         },
         type: 'info',

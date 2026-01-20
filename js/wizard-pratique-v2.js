@@ -1541,6 +1541,22 @@ async function creerPratiqueV2() {
                 reprisesPermises: r.reprisesPermises || 'illimite',
                 minAvantCalculFormatif: parseInt(r.minAvantCalculFormatif) || 3
             };
+
+            // 🆕 Beta 95.7 : Transférer config catégories Primo → pratique (#3 + #4)
+            const modalites = db.getSync('modalitesEvaluation', {});
+            if (modalites.utiliserCategories === 'oui' || modalites.categories?.actif) {
+                pratique.configuration.categories = {
+                    actif: true,
+                    selection: {
+                        nombreARetenir: parseInt(modalites.categories?.selection?.nombreARetenir) || 4,
+                        ponderation: parseInt(modalites.categories?.selection?.ponderation) || 65
+                    },
+                    obligatoires: {
+                        nombre: parseInt(modalites.categories?.obligatoires?.nombre) || 2,
+                        ponderation: parseInt(modalites.categories?.obligatoires?.ponderation) || 35
+                    }
+                };
+            }
         } else if (r.approcheEvaluation === 'par-objectifs') {
             pratique.configuration.objectifs = {
                 modeCalcul: r.modeCalcul

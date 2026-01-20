@@ -2057,6 +2057,30 @@ async function recalculerPonderationsUnitaires() {
         const infoNb = nbObligatoires > 0 ? ` (${nbObligatoires} cochée${nbObligatoires > 1 ? 's' : ''})` : ' (aucune cochée)';
         divObligatoires.innerHTML = `Pondération unitaire : <strong>${unitaireObligatoires}%</strong> par production${infoNb}`;
     }
+
+    // 🆕 Beta 95.7 : Mise à jour du résumé construction de la note
+    const resumeContenu = document.getElementById('mat-categories-resume-contenu');
+    if (resumeContenu) {
+        const totalProductions = nombreARetenir + nbObligatoires;
+        const totalPond = pondSelection + pondObligatoires;
+
+        let html = `<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">`;
+        html += `<span style="color: var(--bleu-principal);"><strong>${nombreARetenir}</strong> meilleure${nombreARetenir > 1 ? 's' : ''}</span>`;
+        html += `<span style="color: var(--gris-moyen);">+</span>`;
+        html += `<span style="color: var(--orange-principal);"><strong>${nbObligatoires}</strong> obligatoire${nbObligatoires > 1 ? 's' : ''}</span>`;
+        html += `<span style="color: var(--gris-moyen);">=</span>`;
+        html += `<span style="font-weight: 700; font-size: 1.1rem;"><strong>${totalProductions}</strong> production${totalProductions > 1 ? 's' : ''}</span>`;
+        html += `</div>`;
+
+        html += `<div style="margin-top: 8px; font-size: 0.85rem; color: var(--gris-fonce);">`;
+        html += `(${pondSelection}% + ${pondObligatoires}% = ${totalPond}%)`;
+        if (totalPond !== 100) {
+            html += ` <span style="color: var(--orange-principal);">⚠️ ≠ 100%</span>`;
+        }
+        html += `</div>`;
+
+        resumeContenu.innerHTML = html;
+    }
 }
 
 /* ===============================
