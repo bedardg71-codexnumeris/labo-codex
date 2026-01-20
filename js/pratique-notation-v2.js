@@ -229,7 +229,7 @@
 
         const jetonsNombre = document.getElementById('v2-jetons-nombre');
         if (jetonsNombre) {
-            jetonsNombre.value = configJetons.nombreParEleve || 4;
+            jetonsNombre.value = configJetons.nombreParEleve || 2;  // 🆕 Beta 95.7 : défaut 2
         }
 
         const jetonDelaiActif = document.getElementById('v2-jeton-delai-actif');
@@ -239,7 +239,7 @@
 
         const delaiDuree = document.getElementById('v2-delai-duree');
         if (delaiDuree) {
-            delaiDuree.value = configJetons.dureeDelaiJours || 7;
+            delaiDuree.value = configJetons.dureeDelaiJours || 2;  // 🆕 Beta 95.7 : défaut 2 jours
         }
 
         const jetonRepriseActif = document.getElementById('v2-jeton-reprise-actif');
@@ -619,8 +619,8 @@
             modalites = {};
         }
 
-        const nombreParEleve = parseInt(inputNombre?.value) || 4;
-        const dureeDelaiJours = parseInt(inputDelaiDuree?.value) || 7;
+        const nombreParEleve = parseInt(inputNombre?.value) || 2;  // 🆕 Beta 95.7 : défaut 2
+        const dureeDelaiJours = parseInt(inputDelaiDuree?.value) || 2;  // 🆕 Beta 95.7 : défaut 2 jours
 
         console.log('[DEBUG sauvegarderJetonsV2] Valeurs à sauvegarder - nombreParEleve:', nombreParEleve, 'dureeDelaiJours:', dureeDelaiJours);
 

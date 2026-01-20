@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 95.7
 
 **Date** : 20 janvier 2026
-**Version** : Beta 95.7 (build 0120-0830)
+**Version** : Beta 95.7 (build 0120-0753)
 **Statut** : Application fonctionnelle pour H2026
 
 ---
@@ -41,6 +41,11 @@
   - Message ajouté dans les modals bibliothèque (Construction et Réglages)
   - "Pour éditer une pratique, transférez-la d'abord dans la barre latérale..."
   - **Fichiers modifiés** : `js/pratiques-materiel.js`, `js/pratiques.js`
+
+- **VALEURS PAR DEFAUT JETONS (Beta 95.7)** : Ajustement selon usage réel
+  - Nombre de jetons par élève : 4 → **2**
+  - Durée du délai : 7 → **2 jours**
+  - **Fichiers modifiés** : `index.html`, `js/pratiques.js`, `js/pratiques-materiel.js`, `js/pratique-notation-v2.js`, `js/evaluation-jetons.js`, `js/profil-etudiant.js`, `js/pratiques/pratique-pan-specifications.js`
 
 - **BACKLOG P2 ENRICHI** : 20 éléments ajoutés à la roadmap
   - **Fichier modifié** : `docs/ROADMAP_H2026.md`
@@ -401,6 +406,7 @@
   - Fonctions : `peuplerDropdownNoteMaximaleMat()`, `peuplerDropdownPlafondNoteCiblee()`
 - **ORDRE DISCIPLINES DROPDOWN** : Groupe 400 déplacé à la bonne position (après 300)
 - **MESSAGE AIDE BIBLIOTHEQUE** : Guide pour édition des pratiques ajouté aux modals
+- **VALEURS PAR DEFAUT JETONS** : Jetons par élève 4→2, Durée délai 7→2 jours
 - **BACKLOG P2 ENRICHI** : 20 éléments ajoutés à docs/ROADMAP_H2026.md
   - Fiabilité : audit db.get/getSync, outil intégrité données
   - UX : clarifier artefacts, persistance Primo/Expert, dropdowns, gestion bibliothèques

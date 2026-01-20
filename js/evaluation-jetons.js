@@ -24,7 +24,7 @@ function obtenirConfigJetons() {
     // Valeurs par défaut si config PAN n'existe pas
     const jetonsDefaut = {
         actif: true,
-        delai: { nombre: 2, dureeJours: 7 },
+        delai: { nombre: 2, dureeJours: 2 },  // 🆕 Beta 95.7 : défaut 2 jours
         reprise: { nombre: 2, maxParProduction: 1, archiverOriginale: true }
     };
 

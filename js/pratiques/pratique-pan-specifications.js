@@ -64,7 +64,7 @@ class PratiquePanSpecifications {
             // Configuration jetons (délai, reprise)
             jetons: {
                 actif: true,
-                delai: { nombre: 2, dureeJours: 7 },
+                delai: { nombre: 2, dureeJours: 2 },  // 🆕 Beta 95.7 : défaut 2 jours
                 reprise: { nombre: 2, maxParProduction: 1 }
             },
 
