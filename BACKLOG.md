@@ -9,11 +9,6 @@
 
 ### Priorite haute - UX / Interface
 
-- [ ] **#4** Persistance donnees Primo <-> Mode Expert
-  - Artefacts configures dans Primo doivent persister en mode Expert (ex: 6 devient 5)
-  - Seuils et parametres synchronises entre les deux modes
-  - Verifier tous les champs du wizard vs gabarit Expert
-
 - [ ] **#23** Uniformiser boutons modal wizard pratique
   - Actuellement : Annuler (rouge), Precedent (bleu), Creer (gris)
   - Harmoniser avec le Design System v7
@@ -89,6 +84,7 @@
 
 ## Complete (Beta 95.7 - 20 janvier 2026)
 
+- [x] **#4** Persistance donnees Wizard -> Mode Expert (flag enChargementFormulaire)
 - [x] **#5** Valeurs par defaut jetons : 2 jetons/eleve, 2 jours delai
 - [x] **#6** Dropdown note maximale (reprise ciblee) : echelle dynamique
 - [x] **#8** Message aide bibliotheque pratiques

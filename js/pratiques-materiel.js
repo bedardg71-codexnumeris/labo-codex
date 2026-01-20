@@ -23,6 +23,12 @@ const CLE_PRATIQUES_CONFIGURATIONS = 'pratiquesConfigurables';
  */
 let pratiqueEnEditionMateriel = null;
 
+/**
+ * 🆕 FIX #4 (20 jan 2026) : Flag pour bloquer les sauvegardes pendant le remplissage
+ * Évite que les fonctions appelées pendant remplirFormulairePratique() écrasent les valeurs
+ */
+let enChargementFormulaire = false;
+
 /* ===============================
    INITIALISATION DU MODULE
    =============================== */
@@ -650,6 +656,9 @@ async function chargerPratiquePourModif(pratiqueId) {
  * Remplit tous les champs du formulaire avec les données de la pratique
  */
 function remplirFormulairePratique(pratique) {
+    // 🆕 FIX #4 (20 jan 2026) : Bloquer les sauvegardes pendant le remplissage
+    enChargementFormulaire = true;
+
     // En-tête
     const titrePratique = document.getElementById('mat-titre-pratique');
     const badgePratique = document.getElementById('mat-badge-pratique');
@@ -685,8 +694,10 @@ function remplirFormulairePratique(pratique) {
         // Portfolio
         // 🆕 Beta 95.7 : Accepter noms wizard (nbArtefacts*) ET noms legacy (nombreARetenir/nombreTotal) (#4)
         if (config.portfolio) {
+            const valNombre = config.portfolio.nbArtefactsRetenus || config.portfolio.nombreARetenir || 5;
+
             setValeurChamp('mat-portfolio-selection', config.portfolio.methodeSelection || 'meilleurs');
-            setValeurChamp('mat-portfolio-nombre', config.portfolio.nbArtefactsRetenus || config.portfolio.nombreARetenir || 5);
+            setValeurChamp('mat-portfolio-nombre', valNombre);
             setValeurChamp('mat-portfolio-minimum', config.portfolio.minAvantCalculFormatif || config.portfolio.minimumCompletion || 7);
             setValeurChamp('mat-portfolio-total', config.portfolio.nbArtefactsSoumis || config.portfolio.nombreTotal || 10);
             setCheckbox('mat-decoupler-pr', config.portfolio.decouplerPR || false);
@@ -745,6 +756,9 @@ function remplirFormulairePratique(pratique) {
     if (panneauMeta && typeof genererPanneauMetadonnees === 'function') {
         panneauMeta.innerHTML = genererPanneauMetadonnees(pratique, 'pratique');
     }
+
+    // 🆕 FIX #4 (20 jan 2026) : Débloquer les sauvegardes après le remplissage
+    enChargementFormulaire = false;
 }
 
 /**
@@ -963,6 +977,12 @@ async function mettreAJourDisciplinePratiqueMat() {
  */
 async function sauvegarderConfigPratiqueMat() {
     if (!pratiqueEnEditionMateriel) return;
+
+    // 🆕 FIX #4 (20 jan 2026) : Ne pas sauvegarder pendant le remplissage du formulaire
+    if (enChargementFormulaire) {
+        console.log('[pratiques-materiel] ⏸️ Sauvegarde ignorée (chargement en cours)');
+        return;
+    }
 
     // 🆕 FIX v3 (20 jan 2026) : localStorage comme source principale
     let configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
@@ -1183,7 +1203,10 @@ async function afficherPreviewEchelleMat() {
     contenu.innerHTML = html;
     preview.style.display = 'block';
 
-    sauvegarderConfigPratiqueMat();
+    // 🆕 FIX #4 (20 jan 2026) : NE PAS sauvegarder ici !
+    // Cette fonction est appelée pendant remplirFormulairePratique()
+    // Sauvegarder à ce moment écrase les valeurs avec les défauts du formulaire
+    // La sauvegarde se fait via les onchange des champs individuels
 }
 
 /**
