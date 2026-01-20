@@ -9,10 +9,6 @@
 
 ### Priorite haute - UX / Interface
 
-- [ ] **#3** Clarifier nombre total d'artefacts (meilleurs vs obligatoires)
-  - Distinction dans construction de la note
-  - Affichage clair du calcul
-
 - [ ] **#4** Persistance donnees Primo <-> Mode Expert
   - Artefacts configures dans Primo doivent persister en mode Expert
   - Seuils et parametres synchronises entre les deux modes
@@ -73,6 +69,12 @@
 - [ ] **#7-b** Bouton Dupliquer dans bibliotheques
   - Pratiques et autres bibliotheques
 
+### Configuration
+
+- [ ] **#22** Mettre a jour fichier noms_stables.json
+  - Verifier que tous les identifiants critiques sont documentes
+  - Ajouter les nouveaux noms proteges
+
 ---
 
 ## Complete (Beta 95.7 - 20 janvier 2026)
@@ -83,6 +85,7 @@
 - [x] **#9** Document backlog independant (BACKLOG.md)
 - [x] **#19** Ordre disciplines dropdown (100->600, groupe 400 corrige)
 - [x] **#21** Menage fichiers repertoire principal (fusion archive/, reorganisation)
+- [x] **#3** Clarifier nombre total d'artefacts (meilleurs vs obligatoires)
 
 ---
 

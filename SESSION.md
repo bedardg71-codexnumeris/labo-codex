@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 95.7
 
 **Date** : 20 janvier 2026
-**Version** : Beta 95.7 (build 0120-0753)
+**Version** : Beta 95.7 (build 0120-0828)
 **Statut** : Application fonctionnelle pour H2026
 
 ---
@@ -28,6 +28,13 @@
 - **Dropdown note maximale** : Peuplé dynamiquement selon l'échelle de performance
 
 ### Derniere tache completee (20 janvier)
+- **CLARIFIER ARTEFACTS MEILLEURS VS OBLIGATOIRES (#3)** : Workflow amélioré
+  - Primo : Nouvelle question "Combien de productions Obligatoires ?"
+  - Primo : Message validation affiche total (ex: "4 meilleures + 2 obligatoires = 6 productions")
+  - Wizard : Transfert config catégories Primo → pratique.configuration
+  - Expert : Résumé visuel "📊 Construction de la note" avec calcul dynamique
+  - **Fichiers modifiés** : `js/primo-questions.js`, `js/wizard-pratique-v2.js`, `js/pratiques-materiel.js`, `index.html`
+
 - **DROPDOWN NOTE MAXIMALE (Beta 95.7)** : Reprise ciblée avec échelle dynamique
   - Champ texte remplacé par dropdown dans Construction > Pratiques et Réglages
   - Peuplé automatiquement avec les niveaux de l'échelle sélectionnée
