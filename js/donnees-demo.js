@@ -52,22 +52,27 @@ async function chargerDonneesDemo() {
 
         console.log(`   → Contient: ${packDemo.listeCours?.length || 0} cours, ${packDemo.groupeEtudiants?.length || 0} étudiants`);
 
-        // ✅ DÉPLACÉ AVANT FUSION (31 déc 2025) : Activer le trimestre demo d'abord
-        // Pour que cle() retourne le préfixe 'demo_' lors de la fusion des données
-        // obtenirTrimestreActif() cherche dans le tableau trimestres celui avec actif: true
+        // 🆕 FIX (20 jan 2026) : Ne plus changer le trimestre actif automatiquement
+        // Le mode Assisté affiche les boutons 😎 d'aide, pas les données demo
+        // L'utilisateur peut choisir "Démonstration" manuellement s'il veut expérimenter
         const trimestres = await db.get('trimestres') || [];
 
-        // Désactiver tous les trimestres existants
+        // Sauvegarder le trimestre actif actuel AVANT toute modification
+        const trimestreActifAvant = trimestres.find(t => t.actif === true);
+        const idTrimestreActifAvant = trimestreActifAvant?.id || null;
+        console.log(`   → Trimestre actif avant: ${idTrimestreActifAvant || '(aucun)'}`);
+
+        // Désactiver tous les trimestres TEMPORAIREMENT pour la fusion
         trimestres.forEach(t => t.actif = false);
 
-        // Ajouter ou mettre à jour le trimestre demo
+        // Ajouter ou mettre à jour le trimestre demo (actif temporairement pour fusion)
         const indexDemo = trimestres.findIndex(t => t.id === 'demo');
         const trimestreDemo = {
             id: 'demo',
             nom: 'Démonstration',
             session: 'D',
             annee: '2025',
-            actif: true,
+            actif: true,  // Temporairement actif pour que cle() retourne 'demo_'
             isDemo: true
         };
 
@@ -78,22 +83,27 @@ async function chargerDonneesDemo() {
         }
 
         await db.set('trimestres', trimestres);
-        // 🆕 FIX (9 jan 2026): Forcer la sync du cache AVANT fusion
-        // Pour que cle() lise le trimestre 'demo' et retourne 'demo_' prefix
         await db.syncToLocalStorageCache();
-        console.log('   → Trimestre demo activé AVANT fusion (cache synchronisé)');
+        console.log('   → Trimestre demo activé TEMPORAIREMENT pour fusion');
 
-        // ✅ Activer le cours demo comme cours actif
-        // Pour que obtenirDonneesSelonMode() filtre correctement les données
-        const coursDemo = packDemo.listeCours?.[0];
-        if (coursDemo) {
-            await db.set('infoCours', coursDemo);
-            console.log(`   → Cours actif défini: ${coursDemo.sigle} (${coursDemo.id})`);
-        }
-
-        // Fusionner avec les données existantes (APRÈS activation trimestre)
+        // Fusionner avec les données existantes (utilise cle() qui retourne 'demo_')
         console.log('   → Fusion avec données existantes...');
         await fusionnerDonneesDemo(packDemo);
+
+        // 🆕 RESTAURER le trimestre actif original APRÈS la fusion
+        if (idTrimestreActifAvant) {
+            const trimestresApres = await db.get('trimestres') || [];
+            // Désactiver demo, réactiver l'original
+            trimestresApres.forEach(t => {
+                t.actif = (t.id === idTrimestreActifAvant);
+            });
+            await db.set('trimestres', trimestresApres);
+            await db.syncToLocalStorageCache();
+            console.log(`   → Trimestre actif restauré: ${idTrimestreActifAvant}`);
+        } else {
+            // Aucun trimestre actif avant, laisser demo actif (premier lancement)
+            console.log('   → Aucun trimestre précédent, demo reste actif');
+        }
 
         // Marquer comme chargées
         localStorage.setItem('demo-chargees', 'true');
@@ -287,45 +297,10 @@ async function dechargerDonneesDemo() {
         // Supprimer le groupe 9999 de toutes les structures
         await supprimerGroupe9999();
 
-        // ✅ AJOUTÉ (31 déc 2025) : Désactiver le trimestre demo et réactiver un autre
-        const trimestres = await db.get('trimestres') || [];
-        const indexDemo = trimestres.findIndex(t => t.id === 'demo');
-
-        if (indexDemo >= 0) {
-            // Désactiver le trimestre demo
-            trimestres[indexDemo].actif = false;
-
-            // 🆕 FIX (9 jan 2026): Réactiver le trimestre approprié selon la date actuelle
-            // (pas toujours le premier, qui pourrait être A2025 au lieu de H2026)
-            const autresTrimestres = trimestres.filter(t => t.id !== 'demo');
-            if (autresTrimestres.length > 0) {
-                const maintenant = new Date();
-                const moisActuel = maintenant.getMonth() + 1;
-                const anneeActuelle = maintenant.getFullYear();
-                const sessionAttendue = (moisActuel >= 1 && moisActuel <= 6) ? 'H' : 'A';
-                const idAttendu = `${sessionAttendue.toLowerCase()}${anneeActuelle}`;
-
-                // Chercher le trimestre correspondant à la date actuelle
-                let trimestreAReactiver = autresTrimestres.find(t => t.id === idAttendu);
-
-                // Si pas trouvé, prendre le plus récent
-                if (!trimestreAReactiver) {
-                    const tries = autresTrimestres.sort((a, b) => {
-                        if (b.annee !== a.annee) return b.annee - a.annee;
-                        return (b.session === 'H' ? 1 : 0) - (a.session === 'H' ? 1 : 0);
-                    });
-                    trimestreAReactiver = tries[0];
-                }
-
-                const indexAReactiver = trimestres.findIndex(t => t.id === trimestreAReactiver.id);
-                if (indexAReactiver >= 0) {
-                    trimestres[indexAReactiver].actif = true;
-                    console.log(`   → Trimestre ${trimestreAReactiver.id} réactivé`);
-                }
-            }
-
-            await db.set('trimestres', trimestres);
-        }
+        // 🆕 FIX (20 jan 2026) : Ne plus changer le trimestre actif
+        // Le mode Assisté n'affecte plus le trimestre actif, donc pas besoin de le restaurer
+        // Le trimestre "Démonstration" reste disponible dans le dropdown pour l'utilisateur
+        console.log('   → Trimestre actif inchangé (mode Assisté = boutons 😎 seulement)');
 
         // Marquer comme non chargées
         localStorage.removeItem('demo-chargees');
