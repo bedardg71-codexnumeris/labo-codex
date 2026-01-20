@@ -9,10 +9,6 @@
 
 ### Priorite haute - UX / Interface
 
-- [ ] **#14** Audit champs texte -> dropdown
-  - Identifier inputs texte libres qui gagneraient a etre des dropdowns
-  - Ameliorer coherence et eviter erreurs de saisie
-
 - [ ] **#20** Mettre a jour liste programmes d'etudes
   - Document programmes preuniversitaires
   - Document programmes techniques
@@ -62,10 +58,18 @@
   - Documenter verifications manuelles apres chaque build
   - Creer pratique, evaluer, sauvegarder, recharger, etc.
 
-- [ ] **#26** Audit versions Primo (legacy vs v2)
-  - Verifier s'il existe deux versions differentes de Primo
-  - Identifier les conflits potentiels entre wizard legacy et wizard-pratique-v2
-  - Consolider ou deprecier la version obsolete
+- [ ] **#27** Documenter conventions nommage champs
+  - nArtefactsPAN vs nbArtefactsSoumis vs nombreTotal
+  - Creer reference dans docs/ pour coherence future
+
+- [ ] **#28** Ajouter mode edition a Wizard V2
+  - Permettre d'editer une pratique existante via wizard-pratique-v2
+  - Actuellement l'edition utilise le wizard legacy
+
+- [ ] **#29** Retirer wizard legacy (post #28)
+  - Supprimer modalWizardPratique (~600 lignes HTML)
+  - Supprimer fonctions legacy dans pratiques.js
+  - Prerequis : #28 complete
 
 ### Bibliotheques
 
@@ -85,6 +89,8 @@
 
 ## Complete (Beta 95.7 - 20 janvier 2026)
 
+- [x] **#14** Dropdowns discipline : liste complete (~120 disciplines, 6 optgroups)
+- [x] **#26** Audit versions Primo : pas de conflit, 3 recommandations ajoutees (#27-29)
 - [x] **#24** Option hybride construction note portfolio (Primo + Expert)
 - [x] **#23** Uniformiser boutons tous modals (Design System v7)
 - [x] **#4** Persistance donnees Wizard -> Mode Expert (flag enChargementFormulaire)
