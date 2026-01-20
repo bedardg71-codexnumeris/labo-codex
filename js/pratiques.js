@@ -853,6 +853,9 @@ function chargerConfigurationPAN() {
     const jetonsPersonnalises = jetons.typesPersonnalises || [];
     afficherJetonsPersonnalises(jetonsPersonnalises);
 
+    // 🆕 Beta 95.7 : Peupler le dropdown note maximale (reprise ciblée)
+    peuplerDropdownPlafondNoteCiblee();
+
     // Activer/désactiver sections jetons
     toggleConfigJetons();
 
@@ -1508,6 +1511,9 @@ function chargerConfigurationPAN(configPAN) {
             if (checkRepriseCiblee) {
                 checkRepriseCiblee.checked = configPAN.jetons.repriseCiblee.actif !== false;
             }
+
+            // 🆕 Beta 95.7 : Peupler le dropdown AVANT de définir la valeur
+            peuplerDropdownPlafondNoteCiblee();
 
             const selectPlafond = document.getElementById('plafondNoteCiblee');
             if (selectPlafond && configPAN.jetons.repriseCiblee.plafondNote) {
@@ -4204,6 +4210,53 @@ async function traiterImportPratique(event) {
 // - chargerPratiqueSelectionnees()
 // ============================================
 
+/**
+ * 🆕 Beta 95.7 : Peuple le dropdown "Note maximale" (reprise ciblée) dans Réglages
+ * Utilise l'échelle de la pratique active du groupe-cours
+ */
+function peuplerDropdownPlafondNoteCiblee() {
+    const select = document.getElementById('plafondNoteCiblee');
+    if (!select) return;
+
+    // 1. Obtenir l'ID de la pratique active
+    const pratiqueId = typeof obtenirPratiqueActiveGroupeCours === 'function'
+        ? obtenirPratiqueActiveGroupeCours()
+        : null;
+
+    if (!pratiqueId) {
+        select.innerHTML = '<option value="">— Aucune pratique active —</option>';
+        return;
+    }
+
+    // 2. Obtenir la pratique depuis pratiquesConfigurables
+    const pratiques = db.getSync('pratiquesConfigurables', []);
+    const pratique = pratiques.find(p => p.id === pratiqueId);
+
+    if (!pratique || !pratique.configuration?.echelleId) {
+        select.innerHTML = '<option value="">— Échelle non configurée —</option>';
+        return;
+    }
+
+    // 3. Obtenir l'échelle
+    const echelles = db.getSync('echellesTemplates', []);
+    const echelle = echelles.find(e => e.id === pratique.configuration.echelleId);
+
+    if (!echelle || !echelle.niveaux) {
+        select.innerHTML = '<option value="">— Échelle introuvable —</option>';
+        return;
+    }
+
+    // 4. Construire les options
+    let html = '<option value="">— Sélectionner —</option>';
+    echelle.niveaux.forEach(n => {
+        const label = n.code ? `${n.code} (${n.nom})` : n.nom;
+        const value = n.code || n.nom;
+        html += `<option value="${value}">${label}</option>`;
+    });
+
+    select.innerHTML = html;
+}
+
 // ============================================
 // EXPORT DES FONCTIONS GLOBALES
 // ============================================
@@ -4211,6 +4264,7 @@ async function traiterImportPratique(event) {
 window.initialiserModulePratiques = initialiserModulePratiques;
 window.sauvegarderPratiqueNotation = sauvegarderPratiqueNotation;
 window.obtenirConfigurationNotation = obtenirConfigurationNotation;
+window.peuplerDropdownPlafondNoteCiblee = peuplerDropdownPlafondNoteCiblee; // 🆕 Beta 95.7
 
 // NOUVEAU Beta 91 : Association pratique ↔ cours
 window.getPratiqueCours = getPratiqueCours;
@@ -4358,6 +4412,13 @@ async function ouvrirModalBibliothequePratiques() {
 
                 <!-- Corps -->
                 <div style="padding: 20px;">
+
+                    <!-- 🆕 Beta 95.7 : Message aide édition -->
+                    <div style="background: var(--bleu-tres-pale, #e8f4f8); border-left: 3px solid var(--bleu-clair, #5dade2); padding: 10px 15px; margin-bottom: 20px; border-radius: 0 6px 6px 0;">
+                        <p style="margin: 0; font-size: 0.9rem; color: var(--texte-secondaire, #555);">
+                            💡 <strong>Pour éditer une pratique</strong>, transférez-la d'abord dans la barre latérale en cliquant sur « Ajouter », puis allez dans <strong>Construction → Pratiques</strong> et cliquez dessus pour l'ouvrir en mode édition.
+                        </p>
+                    </div>
 
                     <!-- SECTION 0 : Canevas de base (templates) -->
                     <div style="margin-bottom: 30px;">

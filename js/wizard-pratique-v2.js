@@ -997,6 +997,12 @@ function genererChampSelectDisciplines(champ) {
                     <option value="385 Sociologie">385 Sociologie</option>
                     <option value="387 Sexologie">387 Sexologie</option>
                 </optgroup>
+                <optgroup label="Administration (400)">
+                    <option value="401 Gestion et administration">401 Gestion et administration</option>
+                    <option value="410 Techniques de comptabilité et de gestion">410 Techniques de comptabilité et de gestion</option>
+                    <option value="412 Techniques de bureautique">412 Techniques de bureautique</option>
+                    <option value="420 Informatique">420 Informatique</option>
+                </optgroup>
                 <optgroup label="Arts (500)">
                     <option value="502 Danse">502 Danse</option>
                     <option value="504 Art et esthétique">504 Art et esthétique</option>
@@ -1025,12 +1031,6 @@ function genererChampSelectDisciplines(champ) {
                     <option value="615 Russe">615 Russe</option>
                     <option value="618 Hébreu">618 Hébreu</option>
                     <option value="619 Multilingue">619 Multilingue</option>
-                </optgroup>
-                <optgroup label="Informatique et administration (400-420)">
-                    <option value="401 Gestion et administration">401 Gestion et administration</option>
-                    <option value="410 Techniques de comptabilité et de gestion">410 Techniques de comptabilité et de gestion</option>
-                    <option value="412 Techniques de bureautique">412 Techniques de bureautique</option>
-                    <option value="420 Informatique">420 Informatique</option>
                 </optgroup>
             </select>
         </div>

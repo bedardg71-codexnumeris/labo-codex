@@ -5358,7 +5358,7 @@
                                             <label for="mat-echelle-id" style="font-weight: 600; display: block; margin-bottom: 6px;">
                                                 Échelle à utiliser
                                             </label>
-                                            <select id="mat-echelle-id" class="controle-form" onchange="afficherPreviewEchelleMat()">
+                                            <select id="mat-echelle-id" class="controle-form" onchange="afficherPreviewEchelleMat(); peuplerDropdownNoteMaximaleMat()">
                                                 <option value="">-- Sélectionner une échelle --</option>
                                             </select>
                                             <small style="display: block; color: var(--gris-moyen); margin-top: 6px; font-size: 0.85rem;">
@@ -5805,7 +5805,9 @@
                                                         <label for="mat-ciblee-plafond" style="font-weight: 500; font-size: 0.9rem; display: block; margin-bottom: 6px;">
                                                             Note maximale :
                                                         </label>
-                                                        <input type="text" id="mat-ciblee-plafond" class="controle-form" value="D (Développement)" style="width: 100%;">
+                                                        <select id="mat-ciblee-plafond" class="controle-form" style="width: 100%;">
+                                                            <option value="">— Sélectionner l'échelle d'abord —</option>
+                                                        </select>
                                                     </div>
                                                 </div>
                                             </div>
@@ -7524,8 +7526,9 @@
                                             <label for="plafondNoteCiblee" style="font-weight: 500; font-size: 0.9rem; display: block; margin-bottom: 6px;">
                                                 Note maximale du critère ciblé :
                                             </label>
-                                            <input type="text" id="plafondNoteCiblee" class="controle-form"
-                                                   value="D (Développement)" style="width: 100%;">
+                                            <select id="plafondNoteCiblee" class="controle-form" style="width: 100%;">
+                                                <option value="">— Sélectionner l'échelle d'abord —</option>
+                                            </select>
                                         </div>
                                     </div>
 
@@ -14571,7 +14574,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '95.6';
-        const BUILD_ID = '0120-0700';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0120-0830';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
