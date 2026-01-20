@@ -188,6 +188,7 @@ function rafraichirContenuSelonMode() {
         // Identifier quel module doit se rafraîchir
         const mappingModules = {
             'reglages-groupe': 'afficherListeEtudiants',
+            'reglages-trimestre': 'initialiserTrimestreV2',  // 🆕 FIX (20 jan 2026): Rafraîchir section Trimestre
             'etudiants-liste': 'afficherListeEtudiantsConsultation',
             'etudiants-profil': 'afficherProfilEtudiant',
             'evaluations-liste-evaluations': 'chargerListeEvaluationsRefonte',
