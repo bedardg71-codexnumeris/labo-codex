@@ -31,11 +31,11 @@ let pratiqueEnEditionMateriel = null;
  * Point d'entrée appelé par navigation.js quand on navigue vers construction-pratiques-notation
  * Note: Renommé en "Materiel" pour éviter conflit avec pratiques.js
  */
-function initialiserModulePratiquesMateriel() {
+async function initialiserModulePratiquesMateriel() {
     console.log('[pratiques-materiel] Initialisation du module Pratiques (Construction)');
 
     // Afficher la sidebar avec la liste des pratiques
-    afficherListePratiquesMateriel();
+    await afficherListePratiquesMateriel();
 
     // Cacher le formulaire d'édition et montrer l'accueil
     const conteneurEdition = document.getElementById('conteneurEditionPratique');
@@ -56,7 +56,7 @@ function initialiserModulePratiquesMateriel() {
  * Note: Le bouton "Consulter la bibliothèque" est maintenant dans le HTML statique
  * Renommé avec suffixe "Materiel" pour éviter conflit avec pratiques.js
  */
-function afficherListePratiquesMateriel() {
+async function afficherListePratiquesMateriel() {
     console.log('[pratiques-materiel] afficherListePratiquesMateriel() appelé');
 
     const container = document.getElementById('sidebarListePratiques');
@@ -66,9 +66,15 @@ function afficherListePratiquesMateriel() {
     }
     console.log('[pratiques-materiel] Container trouvé:', container);
 
-    // Charger les configurations de l'utilisateur (utiliser getSync comme pratiques.js)
-    const configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
-    console.log('[pratiques-materiel] Configurations chargées (getSync):', configurations.length, configurations);
+    // 🆕 FIX (20 jan 2026) : Utiliser db.get (IndexedDB) pour cohérence avec bibliothèque
+    // Fallback sur db.getSync si l'appel async échoue
+    let configurations = [];
+    try {
+        configurations = await db.get(CLE_PRATIQUES_CONFIGURATIONS) || [];
+    } catch (e) {
+        configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    }
+    console.log('[pratiques-materiel] Configurations chargées:', configurations.length, configurations);
 
     // Filtrer les pratiques dans la bibliothèque (affichées dans la sidebar)
     const pratiquesDansBibliotheque = configurations.filter(p => p.dansBibliotheque !== false);
@@ -175,12 +181,31 @@ function genererBadgeCaracteristiques(pratique) {
  * Utilise les variables CSS définies dans styles.css (03c-barres-gradient)
  */
 function genererBadgeTypePratique(pratique) {
-    if (!pratique || !pratique.pratiques) return '';
+    if (!pratique) return '';
 
-    const type = pratique.pratiques[0]; // Prendre le premier type
-    const typesValides = ['SOM', 'STD', 'SPE', 'DEN'];
+    // 🆕 FIX (20 jan 2026) : Chercher le type dans plusieurs sources possibles
+    let type = null;
 
-    if (!type || !typesValides.includes(type)) return '';
+    // Source 1 : pratique.pratiques[0] (format attendu)
+    if (pratique.pratiques && Array.isArray(pratique.pratiques) && pratique.pratiques[0]) {
+        type = pratique.pratiques[0];
+    }
+    // Source 2 : pratique.type (format alternatif)
+    else if (pratique.type) {
+        // Convertir le type en code badge
+        const typeMapping = {
+            'sommative': 'SOM',
+            'pan-standards': 'STD',
+            'pan-specifications': 'SPE',
+            'pan-maitrise': 'PAN'
+        };
+        type = typeMapping[pratique.type.toLowerCase()] || pratique.type.toUpperCase().substring(0, 3);
+    }
+
+    if (!type) return '';
+
+    const typesValides = ['SOM', 'STD', 'SPE', 'DEN', 'PAN'];
+    if (!typesValides.includes(type)) return '';
 
     // Utilise la classe CSS .badge-type-pratique avec modificateur
     return `<span class="badge-type-pratique badge-type-${type.toLowerCase()}">${type}</span>`;
@@ -530,7 +555,7 @@ async function ajouterPratiqueALaSelection(pratiqueId) {
     }
 
     // Rafraîchir la sidebar et fermer le modal
-    afficherListePratiquesMateriel();
+    await afficherListePratiquesMateriel();
     fermerModalBibliothequePratiques();
 
     if (typeof afficherNotificationSucces === 'function') {
@@ -554,7 +579,7 @@ async function retirerPratiqueDeLaSelection(pratiqueId) {
         db.setSync(CLE_PRATIQUES_CONFIGURATIONS, configurations);
 
         // Rafraîchir la sidebar AVANT de réouvrir le modal
-        afficherListePratiquesMateriel();
+        await afficherListePratiquesMateriel();
 
         // Rafraîchir le modal
         fermerModalBibliothequePratiques();
