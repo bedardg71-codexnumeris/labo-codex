@@ -9,16 +9,7 @@
 
 ### Priorite haute - UX / Interface
 
-- [ ] **#20** Mettre a jour liste programmes d'etudes
-  - Document programmes preuniversitaires
-  - Document programmes techniques
-
 ### Documentation / Aide
-
-- [ ] **#25** Analyse fonctionnalites pour Claude Cowork
-  - Lister les principales fonctionnalites de l'application
-  - Definir les plus-values et cas d'usage
-  - Fournir un apercu synthetique pour presentation externe
 
 - [ ] **#2** Documentation complete
   - Section Aide complete dans l'application
@@ -89,6 +80,8 @@
 
 ## Complete (Beta 95.7 - 20 janvier 2026)
 
+- [x] **#20** Datalist programmes d'etudes (~130 programmes preuniversitaires + techniques)
+- [x] **#25** Analyse fonctionnalites pour Claude Cowork (docs/ANALYSE-FONCTIONNALITES.md)
 - [x] **#14** Dropdowns discipline : liste complete (~120 disciplines, 6 optgroups)
 - [x] **#26** Audit versions Primo : pas de conflit, 3 recommandations ajoutees (#27-29)
 - [x] **#24** Option hybride construction note portfolio (Primo + Expert)
