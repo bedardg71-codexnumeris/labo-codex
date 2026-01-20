@@ -1249,7 +1249,7 @@ function genererSectionMobilisationEngagement(da) {
 
                     // Récupérer le quota global depuis la configuration
                     const config = db.getSync('modalitesEvaluation', {});
-                    const quotaGlobal = config.configPAN?.jetons?.nombreParEleve || 4;
+                    const quotaGlobal = config.configPAN?.jetons?.nombreParEleve || 2;  // 🆕 Beta 95.7 : défaut 2
 
                     // Déterminer si le quota global est atteint
                     const quotaGlobalAtteint = totalJetonsUtilisesTousTypes >= quotaGlobal;

@@ -149,7 +149,7 @@ function genererBadgeCaracteristiques(pratique) {
 
     // 3. Jetons actifs
     if (pratique.jetons?.actif) {
-        const nbJetons = pratique.jetons.nombre || 4;
+        const nbJetons = pratique.jetons.nombre || 2;  // 🆕 Beta 95.7 : défaut 2
         caracteristiques.push(`${nbJetons} jetons`);
     }
 
@@ -724,9 +724,9 @@ function remplirFormulairePratique(pratique) {
     const jetons = pratique.jetons || {};
     setCheckbox('mat-jetons-actif', jetons.actif || false);
     toggleSystemeJetonsMat(); // Afficher/masquer le contenu
-    setValeurChamp('mat-jetons-nombre', jetons.nombre || 4);
+    setValeurChamp('mat-jetons-nombre', jetons.nombre || 2);  // 🆕 Beta 95.7 : défaut 2
     setCheckbox('mat-jeton-delai-actif', jetons.delaiActif !== false);
-    setValeurChamp('mat-delai-duree', jetons.delaiDuree || 7);
+    setValeurChamp('mat-delai-duree', jetons.delaiDuree || 2);  // 🆕 Beta 95.7 : défaut 2 jours
     setCheckbox('mat-jeton-reprise-actif', jetons.repriseActif !== false);
     // Radio pour l'évaluation originale
     const radioArchiver = document.querySelector('input[name="mat-reprise-originale"][value="archiver"]');
@@ -1057,13 +1057,13 @@ async function sauvegarderConfigPratiqueMat() {
     const repriseOriginale = document.querySelector('input[name="mat-reprise-originale"]:checked');
     configurations[index].jetons = {
         actif: getCheckbox('mat-jetons-actif'),
-        nombre: parseInt(getValeurChamp('mat-jetons-nombre')) || 4,
+        nombre: parseInt(getValeurChamp('mat-jetons-nombre')) || 2,  // 🆕 Beta 95.7 : défaut 2
         delaiActif: getCheckbox('mat-jeton-delai-actif'),
-        delaiDuree: parseInt(getValeurChamp('mat-delai-duree')) || 7,
+        delaiDuree: parseInt(getValeurChamp('mat-delai-duree')) || 2,  // 🆕 Beta 95.7 : défaut 2 jours
         repriseActif: getCheckbox('mat-jeton-reprise-actif'),
         repriseOriginale: repriseOriginale ? repriseOriginale.value : 'archiver',
         cibleeActif: getCheckbox('mat-jeton-ciblee-actif'),
-        cibleePlafond: getValeurChamp('mat-ciblee-plafond') || 'D (Développement)'
+        cibleePlafond: getValeurChamp('mat-ciblee-plafond') || ''  // 🆕 Beta 95.7 : pas de défaut
     };
 
     // 🆕 Beta 95.4 : Ajouter contributeur si l'utilisateur actif n'est pas l'auteur

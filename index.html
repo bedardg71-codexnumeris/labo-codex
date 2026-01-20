@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Système de suivi Beta 95.5 - Hiver 2026</title>
+    <title>Système de suivi Beta 95.7 - Hiver 2026</title>
 
     <!-- CSS externe requis pour styles complets -->
     <link rel="stylesheet" href="styles.css?v=2026010808">
@@ -3098,7 +3098,7 @@
                     <div class="titre-section">
                         <h1>Système de suivi des apprentissages et de construction de la note</h1>
                         <p class="meta">
-                            Beta 95.6 <span id="build-numero" class="build-numero"></span>
+                            Beta 95.7 <span id="build-numero" class="build-numero"></span>
                             <span class="pastille-nouveautes" onclick="afficherModalNouveautes()" title="Nouveautés">✉️</span>
                             <span class="pastille-intro" onclick="afficherModalIntro()" title="Découvrir l'application">😎</span>
                             <button class="btn-backup-warning" onclick="window.backupReminder.afficherModal()" title="Protégez tes données">⚠️</button>
@@ -3182,6 +3182,17 @@
 
                 <!-- Titre principal -->
                 <h2 class="modal-titre">✉️ Nouveautés</h2>
+
+                <!-- Beta 95.7 - Améliorations -->
+                <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
+                    <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Beta 95.7 (20 janvier) — Améliorations :</strong>
+                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
+                        <li><strong>Dropdown Note maximale</strong> : Le champ "Note maximale" (reprise ciblée) affiche maintenant les niveaux de votre échelle de performance au lieu d'un champ texte libre</li>
+                        <li><strong>Ordre disciplines corrigé</strong> : Le dropdown des disciplines respecte l'ordre officiel (100→200→300→400→500→600)</li>
+                        <li><strong>Aide bibliothèque</strong> : Message explicatif ajouté dans les modals de bibliothèque pour guider l'édition des pratiques</li>
+                        <li><strong>Valeurs par défaut jetons</strong> : Nombre de jetons par élève (2) et durée du délai (2 jours) ajustés selon l'usage réel</li>
+                    </ul>
+                </div>
 
                 <!-- Beta 95.6 - Améliorations -->
                 <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
@@ -5735,7 +5746,7 @@
                                                 <label for="mat-jetons-nombre" style="font-weight: 600; display: block; margin-bottom: 6px;">
                                                     Nombre de jetons alloués par élève
                                                 </label>
-                                                <input type="number" id="mat-jetons-nombre" class="controle-form" value="4" min="0" max="20" style="max-width: 100px;">
+                                                <input type="number" id="mat-jetons-nombre" class="controle-form" value="2" min="0" max="20" style="max-width: 100px;">
                                             </div>
 
                                             <!-- Types de jetons -->
@@ -5756,7 +5767,7 @@
                                                             Durée du délai :
                                                         </label>
                                                         <div style="display: flex; align-items: center; gap: 8px;">
-                                                            <input type="number" id="mat-delai-duree" class="controle-form" min="1" max="30" value="7" style="width: 70px;">
+                                                            <input type="number" id="mat-delai-duree" class="controle-form" min="1" max="30" value="2" style="width: 70px;">
                                                             <span style="font-size: 0.9rem;">jours</span>
                                                         </div>
                                                     </div>
@@ -14574,7 +14585,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '95.6';
-        const BUILD_ID = '0120-0830';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0120-0753';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';

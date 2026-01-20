@@ -89,9 +89,9 @@ function migrerConfigurationsSpecifiques() {
         if (!p.config.jetons) {
             p.config.jetons = {
                 actif: true,
-                delai: { nombre: 2, dureeJours: 7 },
+                delai: { nombre: 2, dureeJours: 2 },  // 🆕 Beta 95.7 : défaut 2 jours
                 reprise: { nombre: 2, maxParProduction: 1, archiverOriginale: true },
-                nombreParEleve: 4,
+                nombreParEleve: 2,  // 🆕 Beta 95.7 : défaut 2 jetons
                 typesPersonnalises: []
             };
         }
@@ -808,7 +808,7 @@ function chargerConfigurationPAN() {
     // Jetons - valeurs par défaut
     const jetons = configPAN.jetons || {
         actif: true,
-        delai: { nombre: 2, dureeJours: 7 },
+        delai: { nombre: 2, dureeJours: 2 },  // 🆕 Beta 95.7 : défaut 2 jours
         reprise: { nombre: 2, maxParProduction: 1, archiverOriginale: true }
     };
 
@@ -846,7 +846,7 @@ function chargerConfigurationPAN() {
     // Nombre de jetons par élève (NOUVEAU)
     const inputNombreJetonsParEleve = document.getElementById('nombreJetonsParEleve');
     if (inputNombreJetonsParEleve) {
-        inputNombreJetonsParEleve.value = jetons.nombreParEleve || 4;
+        inputNombreJetonsParEleve.value = jetons.nombreParEleve || 2;  // 🆕 Beta 95.7 : défaut 2
     }
 
     // Charger les types de jetons personnalisés (NOUVEAU)
@@ -1061,7 +1061,7 @@ function sauvegarderConfigurationPAN() {
     const nombreJetonsDelai = selectNombreJetonsDelai ? parseInt(selectNombreJetonsDelai.value) : 2;
 
     const selectDureeDelai = document.getElementById('dureeDelai');
-    const dureeDelai = selectDureeDelai ? parseInt(selectDureeDelai.value) : 7;
+    const dureeDelai = selectDureeDelai ? parseInt(selectDureeDelai.value) : 2;  // 🆕 Beta 95.7
 
     const selectNombreJetonsReprise = document.getElementById('nombreJetonsReprise');
     const nombreJetonsReprise = selectNombreJetonsReprise ? parseInt(selectNombreJetonsReprise.value) : 2;
@@ -1084,7 +1084,7 @@ function sauvegarderConfigurationPAN() {
 
     // NOUVEAU: Nombre de jetons par élève
     const inputNombreJetonsParEleve = document.getElementById('nombreJetonsParEleve');
-    const nombreParEleve = inputNombreJetonsParEleve ? parseInt(inputNombreJetonsParEleve.value) : 4;
+    const nombreParEleve = inputNombreJetonsParEleve ? parseInt(inputNombreJetonsParEleve.value) : 2;  // 🆕 Beta 95.7
 
     // NOUVEAU: Récupérer les types personnalisés depuis localStorage temporaire
     const typesPersonnalises = window.jetonsPersonnalisesTemporaire || [];
@@ -3773,9 +3773,9 @@ async function creerPratiqueDepuisWizard() {
             },
             jetons: {
                 actif: true,
-                delai: { nombre: 2, dureeJours: 7 },
+                delai: { nombre: 2, dureeJours: 2 },  // 🆕 Beta 95.7 : défaut 2 jours
                 reprise: { nombre: 2, maxParProduction: 1, archiverOriginale: true },
-                nombreParEleve: 4,
+                nombreParEleve: 2,  // 🆕 Beta 95.7 : défaut 2 jetons
                 typesPersonnalises: []
             }
         };
