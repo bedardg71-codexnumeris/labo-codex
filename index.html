@@ -3187,6 +3187,7 @@
                 <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
                     <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Beta 95.7 (20 janvier) — Améliorations :</strong>
                     <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
+                        <li><strong>Autocomplétion programmes</strong> : Tapez le code (200, 300, 420...) pour voir les programmes officiels</li>
                         <li><strong>Dropdowns discipline complets</strong> : Liste complète (~120 disciplines) pour les 48 cégeps du Québec</li>
                         <li><strong>Option Hybride portfolio</strong> : Nouveau mode "N meilleures + Obligatoires" disponible dans Primo et Mode Expert</li>
                         <li><strong>Persistance Primo → Expert</strong> : Les valeurs configurées (artefacts, construction note, échelle) persistent correctement</li>
@@ -7060,7 +7061,7 @@
                                             Programme
                                         </label>
                                         <input type="text" id="legacy-etudiantProgramme" class="controle-form"
-                                            placeholder="200.B1" class="w-100" disabled>
+                                            placeholder="200.B0" list="liste-programmes-etudes" class="w-100" disabled>
                                     </div>
                                     <div>
                                         <label
@@ -9917,7 +9918,7 @@
                                             </div>
                                             <div class="groupe-form">
                                                 <label>Programme</label>
-                                                <input type="text" id="v2-etudiantProgramme" class="controle-form controle-form-compact" placeholder="500.AF">
+                                                <input type="text" id="v2-etudiantProgramme" class="controle-form controle-form-compact" placeholder="200.B0" list="liste-programmes-etudes">
                                             </div>
                                             <div class="groupe-form">
                                                 <label>SA</label>
@@ -14891,7 +14892,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '95.6';
-        const BUILD_ID = '0120-1105';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0120-1145';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
@@ -15584,6 +15585,142 @@
             </div>
         </div>
     </div>
+
+    <!-- DATALIST PROGRAMMES D'ÉTUDES (#20) -->
+    <datalist id="liste-programmes-etudes">
+        <!-- Programmes préuniversitaires -->
+        <option value="200.B0 - Sciences de la nature">
+        <option value="200.B1 - Sciences de la nature">
+        <option value="200.C0 - Sciences informatiques et mathématiques">
+        <option value="200.C1 - Sciences, informatique et mathématique">
+        <option value="300.A0 - Sciences humaines">
+        <option value="300.A1 - Sciences humaines">
+        <option value="500.A1 - Arts, lettres et communication">
+        <option value="501.A0 - Musique">
+        <option value="506.A0 - Danse">
+        <option value="510.A0 - Arts visuels">
+        <option value="700.A0 - Sciences, lettres et arts">
+        <option value="700.A1 - Sciences, lettres et arts">
+        <option value="700.B0 - Histoire et civilisation">
+        <!-- Programmes techniques - Santé -->
+        <option value="110.A0 - Techniques de prothèses dentaires">
+        <option value="110.B0 - Techniques de denturologie">
+        <option value="111.B0 - Techniques d'hygiène dentaire">
+        <option value="112.A0 - Acupuncture">
+        <option value="120.A0 - Techniques de diététique">
+        <option value="140.A0 - Techniques d'électrophysiologie médicale">
+        <option value="140.C0 - Technologie d'analyses biomédicales">
+        <option value="141.A0 - Techniques d'inhalothérapie">
+        <option value="142.D0 - Technologie de radio-oncologie">
+        <option value="142.F0 - Technologie de médecine nucléaire">
+        <option value="142.G0 - Technologie de l'échographie médicale">
+        <option value="142.H0 - Technologie de radiodiagnostic">
+        <option value="144.A1 - Techniques de physiothérapie">
+        <option value="144.F0 - Orthèses, prothèses et soins orthopédiques">
+        <option value="160.A0 - Optique et lunetterie">
+        <option value="160.B0 - Audioprothèse">
+        <option value="165.A0 - Techniques de pharmacie">
+        <option value="171.A0 - Techniques de thanatologie">
+        <option value="180.A0 - Soins infirmiers">
+        <option value="180.B0 - Soins infirmiers">
+        <option value="181.A1 - Soins préhospitaliers d'urgence">
+        <option value="411.A0 - Archives médicales">
+        <!-- Programmes techniques - Agriculture et environnement -->
+        <option value="145.B0 - Techniques d'aménagement cynégétique et halieutique">
+        <option value="145.C0 - Techniques de bioécologie">
+        <option value="145.D0 - Techniques de santé animale">
+        <option value="147.A0 - Techniques du milieu naturel">
+        <option value="152.B0 - Gestion et technologies d'entreprise agricole">
+        <option value="153.A0 - Technologie des productions animales">
+        <option value="153.C0 - Paysage et commercialisation en horticulture ornementale">
+        <option value="153.D0 - Technologie du génie agromécanique">
+        <option value="153.F0 - Technologie de la production horticole agroenvironnementale">
+        <option value="154.A0 - Technologie des procédés et de la qualité des aliments">
+        <option value="155.A0 - Techniques équines">
+        <option value="190.A0 - Technologie de la transformation des produits forestiers">
+        <option value="190.B0 - Technologie forestière">
+        <option value="231.A0 - Techniques d'aquaculture">
+        <option value="231.B0 - Technologies bioalimentaires aquatiques">
+        <option value="260.A0 - Technologie de l'eau">
+        <option value="260.B0 - Environnement, hygiène et sécurité au travail">
+        <!-- Programmes techniques - Sciences et génie -->
+        <option value="210.A0 - Techniques de laboratoire">
+        <option value="210.D0 - Techniques de procédés industriels">
+        <option value="221.A0 - Technologie de l'architecture">
+        <option value="221.B0 - Technologie du génie civil">
+        <option value="221.C0 - Technologie de la mécanique du bâtiment">
+        <option value="221.D0 - Technologie de l'estimation et de l'évaluation en bâtiment">
+        <option value="222.A0 - Techniques d'aménagement et d'urbanisme">
+        <option value="230.B0 - Technologie de la géomatique">
+        <option value="233.B0 - Techniques du meuble et d'ébénisterie">
+        <option value="235.B0 - Technologie du génie industriel">
+        <option value="235.C0 - Technologie de la production pharmaceutique">
+        <option value="241.A0 - Techniques de génie mécanique">
+        <option value="241.B0 - Techniques de génie du plastique">
+        <option value="241.C0 - Technologie du génie des matériaux composites">
+        <option value="241.D0 - Technologie de maintenance industrielle">
+        <option value="243.D0 - Technologie du génie électrique - Automatisation et contrôle">
+        <option value="243.F0 - Technologie du génie électrique - Réseaux et télécommunications">
+        <option value="243.G0 - Technologie du génie électrique - Électronique programmable">
+        <option value="243.H0 - Technologie de l'électronique - Audiovisuel">
+        <option value="244.A0 - Technologie du génie physique">
+        <option value="248.A0 - Technologie de l'architecture navale">
+        <option value="248.B0 - Navigation">
+        <option value="248.D0 - Techniques de génie mécanique de marine">
+        <option value="270.A0 - Technologie du génie métallurgique">
+        <option value="271.A0 - Technologie minérale">
+        <option value="280.B0 - Techniques de génie aérospatial">
+        <option value="280.C0 - Techniques de maintenance d'aéronefs">
+        <option value="280.D0 - Techniques d'avionique">
+        <option value="280.F0 - Techniques de pilotage d'aéronefs">
+        <!-- Programmes techniques - Services sociaux et juridiques -->
+        <option value="310.A0 - Techniques policières">
+        <option value="310.B1 - Techniques d'intervention en criminologie">
+        <option value="310.C0 - Techniques juridiques">
+        <option value="311.A0 - Techniques de sécurité incendie">
+        <option value="322.A1 - Techniques d'éducation à l'enfance">
+        <option value="351.A1 - Techniques d'éducation spécialisée">
+        <option value="388.A1 - Techniques de travail social">
+        <option value="391.A0 - Techniques de gestion et d'intervention en loisir">
+        <option value="393.B0 - Techniques de la documentation">
+        <!-- Programmes techniques - Administration et commerce -->
+        <option value="384.A0 - Techniques de recherche et de gestion de données">
+        <option value="410.A1 - Gestion des opérations et de la chaîne logistique">
+        <option value="410.B0 - Techniques de comptabilité et de gestion">
+        <option value="410.D0 - Gestion de commerces">
+        <option value="410.F0 - Techniques de services financiers et d'assurances">
+        <option value="410.G0 - Techniques d'administration et de gestion">
+        <option value="412.A0 - Techniques de bureautique">
+        <option value="414.A0 - Techniques de tourisme">
+        <option value="414.B0 - Techniques du tourisme d'aventure">
+        <option value="420.B0 - Techniques de l'informatique">
+        <option value="430.A0 - Techniques de gestion hôtelière">
+        <option value="430.B0 - Gestion d'un établissement de restauration">
+        <!-- Programmes techniques - Arts et communications -->
+        <option value="551.A0 - Techniques professionnelles de musique et chanson">
+        <option value="551.B0 - Technologies sonores">
+        <option value="561.B0 - Danse - Interprétation">
+        <option value="561.C0 - Interprétation théâtrale">
+        <option value="561.D0 - Arts du cirque">
+        <option value="561.F0 - Production scénique">
+        <option value="570.B0 - Techniques de muséologie">
+        <option value="570.C0 - Techniques de design industriel">
+        <option value="570.D0 - Techniques de design de présentation">
+        <option value="570.E0 - Techniques de design d'intérieur">
+        <option value="570.F0 - Photographie">
+        <option value="570.G0 - Graphisme">
+        <option value="571.A0 - Design de mode">
+        <option value="571.B0 - Gestion de la production du vêtement">
+        <option value="571.C0 - Commercialisation de la mode">
+        <option value="573.A0 - Techniques de métiers d'art">
+        <option value="574.A0 - Illustration et dessin animé">
+        <option value="574.C0 - Production 3D et de synthèse d'images">
+        <option value="581.C0 - Gestion de projet en communications graphiques">
+        <option value="581.D0 - Infographie en prémédia">
+        <option value="582.A1 - Techniques d'intégration multimédia">
+        <option value="589.B0 - Techniques de communication dans les médias">
+        <option value="589.C0 - Techniques cinématographiques et télévisuelles">
+    </datalist>
 </body>
 
 </html>
