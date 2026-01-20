@@ -1480,6 +1480,15 @@ async function chargerCartouchePourModif(cartoucheId, grilleId) {
 
         console.log('✅ Cartouche chargée avec succès');
 
+        // Afficher le bouton export PDF (Beta 95.7 - #30)
+        const btnExportPDF = document.getElementById('btnPreparerPDFCartouche');
+        if (btnExportPDF) btnExportPDF.classList.add('visible');
+
+        // Afficher l'apercu PDF (Beta 95.7 - #30)
+        if (typeof window.afficherApercuCartoucheSelectionnee === 'function') {
+            window.afficherApercuCartoucheSelectionnee();
+        }
+
         // Si verrouillée, afficher l'alerte de verrouillage
         const alerteVerrouillage = document.getElementById('alerteVerrouillage');
         const btnDeverrouiller = document.getElementById('btnDeverrouillerCartouche');

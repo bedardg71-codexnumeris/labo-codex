@@ -3187,6 +3187,7 @@
                 <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
                     <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Beta 95.7 (20 janvier) — Améliorations :</strong>
                     <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
+                        <li><strong>Export PDF grilles descriptives</strong> : Génère un PDF de ta grille avec les rétroactions (grille + échelle + cartouche). Options : orientation, taille police, pied de page personnalisable (enseignant, cours, licence CC)</li>
                         <li><strong>Autocomplétion programmes</strong> : Tapez le code (200, 300, 420...) pour voir les programmes officiels</li>
                         <li><strong>Dropdowns discipline complets</strong> : Liste complète (~120 disciplines) pour les 48 cégeps du Québec</li>
                         <li><strong>Option Hybride portfolio</strong> : Nouveau mode "N meilleures + Obligatoires" disponible dans Primo et Mode Expert</li>
@@ -4493,8 +4494,11 @@
                         <!-- ZONE PRINCIPALE (centrale, scroll) -->
                         <div class="zone-principale">
 
-                            <!-- Bouton création en haut à droite -->
-                            <div style="margin-bottom: 20px; text-align: right;">
+                            <!-- Boutons actions en haut à droite -->
+                            <div style="margin-bottom: 20px; text-align: right; display: flex; gap: 10px; justify-content: flex-end;">
+                                <button id="btnExporterProductionsPDF" onclick="exporterProductionsEnPDF()" class="btn btn-secondaire btn-export-pdf" title="Exporter la liste des productions en PDF">
+                                    📄 Exporter PDF
+                                </button>
                                 <button onclick="creerNouvelleProduction()" class="btn btn-principal">
                                     + Nouvelle production
                                 </button>
@@ -4503,6 +4507,16 @@
                             <!-- Message d'accueil initial -->
                             <div class="zone-principale-accueil" id="accueilProductions">
                                 <p>Sélectionnez une production dans la barre latérale ou créez une nouvelle production</p>
+                            </div>
+
+                            <!-- Zone d'aperçu PDF (Beta 95.7 - #30) -->
+                            <div id="zoneApercuProductions" class="zone-apercu-pdf">
+                                <div id="contenuApercuProductions"></div>
+                                <div class="zone-apercu-pdf-actions">
+                                    <button onclick="exporterProductionsEnPDF()" class="btn btn-principal">
+                                        📄 Exporter en PDF
+                                    </button>
+                                </div>
                             </div>
 
                             <!-- Formulaire d'édition -->
@@ -4734,8 +4748,11 @@
                         <!-- ZONE PRINCIPALE (centrale, scroll) -->
                         <div class="zone-principale">
 
-                            <!-- Bouton création en haut à droite -->
-                            <div style="margin-bottom: 20px; text-align: right;">
+                            <!-- Boutons actions en haut à droite -->
+                            <div style="margin-bottom: 20px; text-align: right; display: flex; gap: 10px; justify-content: flex-end;">
+                                <button onclick="afficherFormulairePreparationPDF()" class="btn btn-secondaire" title="Préparer un PDF avec cette grille">
+                                    📄 Préparer le PDF
+                                </button>
                                 <button onclick="creerNouvelleGrille()" class="btn btn-principal">
                                     + Nouvelle grille
                                 </button>
@@ -4744,6 +4761,90 @@
                             <!-- Message d'accueil initial -->
                             <div class="zone-principale-accueil" id="accueilGrilles">
                                 <p>Sélectionnez une grille dans la barre latérale ou créez une nouvelle grille</p>
+                            </div>
+
+                            <!-- Formulaire de préparation PDF (Beta 95.7 - #30) -->
+                            <div id="formulairePreparationPDF" style="display: none;">
+                                <h3 style="margin-bottom: 20px; color: var(--bleu-fonce);">📄 Préparer le PDF</h3>
+                                <p style="color: var(--texte-secondaire); margin-bottom: 20px;">
+                                    Créez un document de référence complet pour une production.
+                                </p>
+
+                                <!-- SECTION 1 : Production (optionnel) -->
+                                <fieldset style="border: 1px solid var(--bordure-legere); border-radius: var(--radius-moyen); padding: 15px; margin-bottom: 20px;">
+                                    <legend style="font-weight: 600; color: var(--bleu-fonce); padding: 0 10px;">1. Production (optionnel)</legend>
+
+                                    <div class="groupe-form" style="margin-bottom: 15px;">
+                                        <label for="prepPDF-production">Sélectionner une production</label>
+                                        <select id="prepPDF-production" class="controle-form" onchange="mettreAJourOptionsPreparationPDF()">
+                                            <option value="">-- Aucune (grille générique) --</option>
+                                        </select>
+                                    </div>
+
+                                    <div id="prepPDF-options-production" style="display: none;">
+                                        <p style="font-size: 0.9rem; margin-bottom: 10px; color: var(--texte-secondaire);">Informations à inclure :</p>
+                                        <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+                                            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                                <input type="checkbox" id="prepPDF-prod-nom" checked>
+                                                <span>Nom de la production</span>
+                                            </label>
+                                            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                                <input type="checkbox" id="prepPDF-prod-objectif" checked>
+                                                <span>Objectif d'apprentissage</span>
+                                            </label>
+                                            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                                <input type="checkbox" id="prepPDF-prod-description" checked>
+                                                <span>Description de la tâche</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </fieldset>
+
+                                <!-- SECTION 2 : Grille et Échelle -->
+                                <fieldset style="border: 1px solid var(--bordure-legere); border-radius: var(--radius-moyen); padding: 15px; margin-bottom: 20px;">
+                                    <legend style="font-weight: 600; color: var(--bleu-fonce); padding: 0 10px;">2. Grille et Échelle <span style="color: #d32f2f;">*</span></legend>
+
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                                        <div class="groupe-form">
+                                            <label for="prepPDF-grille">Grille de critères</label>
+                                            <select id="prepPDF-grille" class="controle-form" onchange="mettreAJourOptionsPreparationPDF()">
+                                                <option value="">-- Sélectionner --</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="groupe-form">
+                                            <label for="prepPDF-echelle">Échelle de performance</label>
+                                            <select id="prepPDF-echelle" class="controle-form" onchange="mettreAJourOptionsPreparationPDF()">
+                                                <option value="">-- Sélectionner --</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </fieldset>
+
+                                <!-- SECTION 3 : Cartouche (optionnel) -->
+                                <fieldset id="prepPDF-section-cartouche" style="border: 1px solid var(--bordure-legere); border-radius: var(--radius-moyen); padding: 15px; margin-bottom: 20px; display: none;">
+                                    <legend style="font-weight: 600; color: var(--bleu-fonce); padding: 0 10px;">3. Rétroaction (optionnel)</legend>
+
+                                    <div class="groupe-form">
+                                        <label for="prepPDF-cartouche">Cartouche de rétroaction</label>
+                                        <select id="prepPDF-cartouche" class="controle-form">
+                                            <option value="">-- Sans rétroaction --</option>
+                                        </select>
+                                        <p style="font-size: 0.85rem; color: var(--texte-secondaire); margin-top: 5px;">
+                                            Ajoute les commentaires prédéfinis pour chaque croisement critère × niveau
+                                        </p>
+                                    </div>
+                                </fieldset>
+
+                                <!-- Boutons -->
+                                <div class="btn-groupe" style="display: flex; justify-content: space-between;">
+                                    <button onclick="fermerFormulairePreparationPDF()" class="btn btn-annuler">
+                                        Annuler
+                                    </button>
+                                    <button id="prepPDF-btn-apercu" onclick="ouvrirApercuPDF()" class="btn btn-confirmer" disabled>
+                                        Voir l'aperçu →
+                                    </button>
+                                </div>
                             </div>
 
                             <!-- Formulaire d'édition de grille -->
@@ -4848,8 +4949,11 @@
                         <!-- ZONE PRINCIPALE (centrale, scroll) -->
                         <div class="zone-principale">
 
-                            <!-- Bouton création en haut à droite -->
-                            <div style="margin-bottom: 20px; text-align: right;">
+                            <!-- Boutons actions en haut à droite -->
+                            <div style="margin-bottom: 20px; text-align: right; display: flex; gap: 10px; justify-content: flex-end;">
+                                <button onclick="afficherFormulairePDFDepuisEchelle()" class="btn btn-secondaire" title="Préparer un PDF avec cette échelle">
+                                    📄 Préparer le PDF
+                                </button>
                                 <button onclick="creerNouvelleEchelle()" class="btn btn-principal">
                                     + Nouvelle échelle
                                 </button>
@@ -4858,6 +4962,16 @@
                             <!-- Message d'accueil initial -->
                             <div class="zone-principale-accueil" id="accueilEchelles">
                                 <p>Sélectionnez une échelle dans la barre latérale ou créez une nouvelle échelle</p>
+                            </div>
+
+                            <!-- Zone d'aperçu PDF (Beta 95.7 - #30) -->
+                            <div id="zoneApercuEchelle" class="zone-apercu-pdf">
+                                <div id="contenuApercuEchelle"></div>
+                                <div class="zone-apercu-pdf-actions">
+                                    <button onclick="exporterEchelleSelectionneeEnPDF()" class="btn btn-principal">
+                                        📄 Exporter en PDF
+                                    </button>
+                                </div>
                             </div>
 
                             <!-- Formulaire d'édition -->
@@ -5910,8 +6024,11 @@
                             <!-- ZONE PRINCIPALE (centrale, scroll) -->
                             <div class="zone-principale">
 
-                                <!-- Bouton création en haut à droite -->
-                                <div style="margin-bottom: 20px; text-align: right;">
+                                <!-- Boutons actions en haut à droite -->
+                                <div style="margin-bottom: 20px; text-align: right; display: flex; gap: 10px; justify-content: flex-end;">
+                                    <button onclick="afficherFormulairePDFDepuisCartouche()" class="btn btn-secondaire" title="Préparer un PDF avec cette cartouche">
+                                        📄 Préparer le PDF
+                                    </button>
                                     <button onclick="creerNouvelleCartouche()" class="btn btn-principal">
                                         + Nouvelle cartouche
                                     </button>
@@ -5920,6 +6037,16 @@
                                 <!-- Message d'accueil initial -->
                                 <div class="zone-principale-accueil" id="messageAccueilCartouche">
                                     <p>Sélectionnez une cartouche dans la barre latérale ou créez une nouvelle cartouche</p>
+                                </div>
+
+                                <!-- Zone d'aperçu PDF (Beta 95.7 - #30) -->
+                                <div id="zoneApercuCartouche" class="zone-apercu-pdf">
+                                    <div id="contenuApercuCartouche"></div>
+                                    <div class="zone-apercu-pdf-actions">
+                                        <button onclick="exporterCartoucheSelectionneeEnPDF()" class="btn btn-principal">
+                                            📄 Exporter en PDF
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <!-- ANCIEN SYSTÈME (Caché, gardé pour compatibilité interne) -->
@@ -14757,6 +14884,10 @@
     <script src="libs/chart.min.js"></script>
     <script src="libs/chartjs-plugin-annotation.min.js"></script>
 
+    <!-- Bibliothèque externe: jsPDF pour export PDF (Beta 95.7 - #30) -->
+    <script src="libs/jspdf.umd.min.js"></script>
+    <script src="libs/jspdf-autotable.min.js"></script>
+
     <!-- PRIORITÉ 1: Fondations -->
     <script src="js/config.js?v=2026010203"></script>
     <script src="js/navigation.js?v=2026010211"></script>
@@ -14793,6 +14924,7 @@
     <script src="js/echelles.js?v=2026010601"></script>
     <script src="js/cartouches-bibliotheque.js?v=2026010220"></script> <!-- refactoring: plus de hardcodé -->
     <script src="js/cartouches.js?v=2026010601"></script>
+    <script src="js/export-pdf.js?v=2026012001"></script> <!-- Beta 95.7 #30 : Export PDF -->
     <script src="js/cours.js?v=2025121601"></script>
     <script src="js/contexte.js?v=2026010601"></script> <!-- Beta 95.2 : Support groupe-cours -->
 
@@ -14892,7 +15024,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '95.6';
-        const BUILD_ID = '0120-1145';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0120-1346';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
@@ -15582,6 +15714,83 @@
                         ✓ Créer la pratique
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================= -->
+    <!-- MODAL APERÇU PDF (Beta 95.7 - #30) -->
+    <!-- Affiche un aperçu fidèle au rendu PDF final -->
+    <!-- ========================================= -->
+    <div id="modalApercuPDF" class="modal-overlay" style="display: none;">
+        <div class="modal-contenu" style="max-width: 95vw; width: auto; padding: 20px;">
+            <button onclick="fermerModalApercuPDF()" class="modal-fermer">✕</button>
+
+            <h2 class="modal-titre">📄 Aperçu du document</h2>
+
+            <!-- Options de mise en page -->
+            <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center; justify-content: center; margin-bottom: 15px; padding: 12px 15px; background: var(--bleu-tres-pale, #f0f8ff); border-radius: var(--radius-moyen);">
+                <!-- Orientation -->
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <label for="apercuPDF-orientation" style="font-size: 0.9rem; font-weight: 500;">Orientation :</label>
+                    <select id="apercuPDF-orientation" class="controle-form" style="width: auto; padding: 5px 10px;" onchange="rafraichirApercuPDF()">
+                        <option value="portrait">Portrait</option>
+                        <option value="paysage">Paysage</option>
+                    </select>
+                </div>
+
+                <!-- Taille police -->
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <label for="apercuPDF-taille-police" style="font-size: 0.9rem; font-weight: 500;">Taille :</label>
+                    <select id="apercuPDF-taille-police" class="controle-form" style="width: auto; padding: 5px 10px;" onchange="rafraichirApercuPDF()">
+                        <option value="petit">Petit</option>
+                        <option value="moyen" selected>Moyen</option>
+                        <option value="grand">Grand</option>
+                    </select>
+                </div>
+
+                <!-- Forcer une page -->
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.9rem;">
+                    <input type="checkbox" id="apercuPDF-forcer-une-page" onchange="rafraichirApercuPDF()">
+                    <span>Forcer sur 1 page</span>
+                </label>
+            </div>
+
+            <!-- Options pied de page -->
+            <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center; justify-content: center; margin-bottom: 15px; padding: 10px 15px; background: var(--gris-tres-clair, #f5f5f5); border-radius: var(--radius-moyen); font-size: 0.85rem;">
+                <span style="font-weight: 500; color: #555;">Pied de page :</span>
+                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                    <input type="checkbox" id="apercuPDF-pied-enseignant" checked onchange="rafraichirApercuPDF()">
+                    <span>Enseignant</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                    <input type="checkbox" id="apercuPDF-pied-cours" checked onchange="rafraichirApercuPDF()">
+                    <span>Cours</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                    <input type="checkbox" id="apercuPDF-pied-licence" checked onchange="rafraichirApercuPDF()">
+                    <span>Licence CC BY-NC-SA</span>
+                </label>
+            </div>
+
+            <!-- Zone de simulation page PDF -->
+            <div id="apercuPDF-zone" class="apercu-pdf-zone" style="background: #525659; padding: 20px; border-radius: var(--radius-moyen); overflow: auto; max-height: 60vh;">
+                <!-- Page simulée -->
+                <div id="apercuPDF-page" class="apercu-pdf-page apercu-pdf-portrait">
+                    <div id="apercuPDF-contenu" class="apercu-pdf-page-contenu">
+                        <!-- Généré par JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Boutons -->
+            <div class="btn-groupe" style="margin-top: 20px; display: flex; justify-content: space-between;">
+                <button onclick="fermerModalApercuPDF()" class="btn btn-secondaire">
+                    ← Modifier les options
+                </button>
+                <button onclick="exporterPDFDepuisApercu()" class="btn btn-confirmer">
+                    📄 Exporter en PDF
+                </button>
             </div>
         </div>
     </div>

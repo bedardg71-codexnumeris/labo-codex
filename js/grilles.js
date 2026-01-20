@@ -167,6 +167,11 @@ async function chargerGrilleTemplate(grilleId) {
             if (conteneurEdition) {
                 conteneurEdition.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
+
+            // Afficher l'apercu PDF (Beta 95.7 - #30)
+            if (typeof window.afficherApercuGrilleSelectionnee === 'function') {
+                window.afficherApercuGrilleSelectionnee();
+            }
         }
     }
 }

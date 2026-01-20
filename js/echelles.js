@@ -806,6 +806,11 @@ async function chargerEchelleTemplate(echelleId) {
             if (formulaire) {
                 formulaire.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
+
+            // Afficher l'apercu PDF (Beta 95.7 - #30)
+            if (typeof window.afficherApercuEchelleSelectionnee === 'function') {
+                window.afficherApercuEchelleSelectionnee();
+            }
         }
     }
 }
