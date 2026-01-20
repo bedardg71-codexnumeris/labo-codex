@@ -9,11 +9,6 @@
 
 ### Priorite haute - UX / Interface
 
-- [ ] **#24** Option hybride construction note portfolio
-  - Actuellement dropdown sans option "N meilleures + Obligatoires"
-  - Soit checkboxes combinables
-  - Soit option "Hybride (configurer en Expert)"
-
 - [ ] **#14** Audit champs texte -> dropdown
   - Identifier inputs texte libres qui gagneraient a etre des dropdowns
   - Ameliorer coherence et eviter erreurs de saisie
@@ -67,6 +62,11 @@
   - Documenter verifications manuelles apres chaque build
   - Creer pratique, evaluer, sauvegarder, recharger, etc.
 
+- [ ] **#26** Audit versions Primo (legacy vs v2)
+  - Verifier s'il existe deux versions differentes de Primo
+  - Identifier les conflits potentiels entre wizard legacy et wizard-pratique-v2
+  - Consolider ou deprecier la version obsolete
+
 ### Bibliotheques
 
 - [ ] **#7-a** Bouton Supprimer dans bibliotheques
@@ -85,7 +85,8 @@
 
 ## Complete (Beta 95.7 - 20 janvier 2026)
 
-- [x] **#23** Uniformiser boutons modal wizard (Design System v7)
+- [x] **#24** Option hybride construction note portfolio (Primo + Expert)
+- [x] **#23** Uniformiser boutons tous modals (Design System v7)
 - [x] **#4** Persistance donnees Wizard -> Mode Expert (flag enChargementFormulaire)
 - [x] **#5** Valeurs par defaut jetons : 2 jetons/eleve, 2 jours delai
 - [x] **#6** Dropdown note maximale (reprise ciblee) : echelle dynamique

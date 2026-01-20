@@ -687,8 +687,24 @@ function remplirFormulairePratique(pratique) {
     if (pratique.type === 'pan-standards') {
         const config = pratique.configuration || {};
 
-        // Variante de calcul
-        setValeurChamp('mat-variante-calcul', config.varianteCalcul || '');
+        // 🆕 #24 : Déterminer le mode de sélection (hybride a priorité)
+        const estHybride = config.portfolio?.hybride || config.categories?.actif || false;
+        let modeSelection = config.portfolio?.methodeSelection || 'meilleurs';
+        if (estHybride) modeSelection = 'hybride';
+
+        // Variante de calcul - 🆕 #24 : Déduire depuis portfolio si non défini
+        let varianteCalcul = config.varianteCalcul || '';
+        if (!varianteCalcul && config.portfolio) {
+            // Mapper methodeSelection vers varianteCalcul
+            if (estHybride) {
+                varianteCalcul = 'hybride';
+            } else if (modeSelection === 'meilleurs' || modeSelection === 'n_meilleurs') {
+                varianteCalcul = 'n-meilleurs';
+            } else if (modeSelection === 'derniers') {
+                varianteCalcul = 'n-recents';
+            }
+        }
+        setValeurChamp('mat-variante-calcul', varianteCalcul);
         changerVariantePANStandardsMat();
 
         // Portfolio
@@ -696,7 +712,8 @@ function remplirFormulairePratique(pratique) {
         if (config.portfolio) {
             const valNombre = config.portfolio.nbArtefactsRetenus || config.portfolio.nombreARetenir || 5;
 
-            setValeurChamp('mat-portfolio-selection', config.portfolio.methodeSelection || 'meilleurs');
+            // 🆕 #24 : Utiliser le mode calculé (avec hybride si applicable)
+            setValeurChamp('mat-portfolio-selection', modeSelection);
             setValeurChamp('mat-portfolio-nombre', valNombre);
             setValeurChamp('mat-portfolio-minimum', config.portfolio.minAvantCalculFormatif || config.portfolio.minimumCompletion || 7);
             setValeurChamp('mat-portfolio-total', config.portfolio.nbArtefactsSoumis || config.portfolio.nombreTotal || 10);
@@ -704,11 +721,13 @@ function remplirFormulairePratique(pratique) {
         }
 
         // 🆕 Beta 95.4 : Catégories Sélection/Obligatoires
-        if (config.categories) {
-            setCheckbox('mat-categories-actif', config.categories.actif || false);
-            setValeurChamp('mat-selection-nombre', config.categories.selection?.nombreARetenir || 4);
-            setValeurChamp('mat-selection-ponderation', config.categories.selection?.ponderation || 65);
-            setValeurChamp('mat-obligatoires-ponderation', config.categories.obligatoires?.ponderation || 35);
+        // 🆕 #24 : Support du flag hybride depuis le wizard
+        const categoriesActif = config.categories?.actif || config.portfolio?.hybride || false;
+        if (config.categories || categoriesActif) {
+            setCheckbox('mat-categories-actif', categoriesActif);
+            setValeurChamp('mat-selection-nombre', config.categories?.selection?.nombreARetenir || 4);
+            setValeurChamp('mat-selection-ponderation', config.categories?.selection?.ponderation || 65);
+            setValeurChamp('mat-obligatoires-ponderation', config.categories?.obligatoires?.ponderation || 35);
             toggleCategoriesMat(); // Afficher/masquer les détails
         }
 
@@ -1922,6 +1941,22 @@ function toggleSystemeJetonsMat() {
 }
 
 /**
+ * 🆕 #24 : Gère le changement du mode de sélection portfolio
+ * Active automatiquement les catégories si "hybride" est sélectionné
+ */
+function onPortfolioSelectionChangeMat() {
+    const select = document.getElementById('mat-portfolio-selection');
+    const checkbox = document.getElementById('mat-categories-actif');
+
+    if (select && select.value === 'hybride' && checkbox && !checkbox.checked) {
+        checkbox.checked = true;
+        toggleCategoriesMat();
+    }
+
+    sauvegarderConfigPratiqueMat();
+}
+
+/**
  * 🆕 Beta 95.4 : Toggle la visibilité des catégories Sélection/Obligatoires
  */
 function toggleCategoriesMat() {
@@ -2506,6 +2541,7 @@ window.mettreAJourDisciplinePratiqueMat = mettreAJourDisciplinePratiqueMat;
 window.sauvegarderConfigPratiqueMat = sauvegarderConfigPratiqueMat;
 window.toggleSystemeJetonsMat = toggleSystemeJetonsMat;
 window.toggleCategoriesMat = toggleCategoriesMat;  // 🆕 Beta 95.4
+window.onPortfolioSelectionChangeMat = onPortfolioSelectionChangeMat;  // 🆕 #24
 window.chargerProductionsPourCategories = chargerProductionsPourCategories;  // 🆕 Beta 95.4
 window.toggleProductionCategorie = toggleProductionCategorie;  // 🆕 Beta 95.4
 window.recalculerPonderationsUnitaires = recalculerPonderationsUnitaires;  // 🆕 Beta 95.4
