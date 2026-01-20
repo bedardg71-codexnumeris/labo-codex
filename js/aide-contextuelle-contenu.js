@@ -444,7 +444,7 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: "Le calendrier offre une vue d'ensemble des séances passées et à venir. Les codes couleur indiquent le taux de présence de chaque séance."
+                contenu: "Le calendrier offre une vue d'ensemble des séances passées et à venir."
             },
             {
                 type: 'liste',

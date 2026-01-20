@@ -1492,11 +1492,20 @@ function restaurerValeursEtape(etapeId) {
 
 /**
  * Crée la pratique à partir des réponses collectées
+ * 🆕 FIX (20 jan 2026) : Async pour attendre la sauvegarde
  */
-function creerPratiqueV2() {
+async function creerPratiqueV2() {
     const r = wizardState.reponses;
 
     // Construire l'objet pratique
+    // 🆕 FIX (20 jan 2026) : Ajouter dansBibliotheque et pratiques pour sidebar
+    const typeMapping = {
+        'sommative': 'SOM',
+        'pan-standards': 'STD',
+        'pan-specifications': 'SPE',
+        'pan-maitrise': 'PAN'
+    };
+
     const pratique = {
         id: wizardState.pratiqueId || `pratique-${Date.now()}`,
         nom: r.nom,
@@ -1505,6 +1514,8 @@ function creerPratiqueV2() {
         description: r.description || '',
         discipline: r.discipline || '',
         type: r.typePratique,
+        pratiques: [typeMapping[r.typePratique] || 'STD'],  // Pour le badge
+        dansBibliotheque: true,  // Pour apparaître dans la sidebar
         dateCreation: new Date().toISOString(),
         configuration: {}
     };
@@ -1581,8 +1592,8 @@ function creerPratiqueV2() {
 
     console.log('[WizardV2] Pratique créée:', pratique);
 
-    // Sauvegarder la pratique
-    sauvegarderPratique(pratique);
+    // Sauvegarder la pratique (attendre pour s'assurer que c'est fait)
+    await sauvegarderPratique(pratique);
 
     // Fermer le wizard
     fermerWizardV2();
@@ -1594,13 +1605,19 @@ function creerPratiqueV2() {
     if (typeof chargerPratiques === 'function') {
         chargerPratiques();
     }
+
+    // 🆕 FIX (20 jan 2026) : Rafraîchir aussi la sidebar de Construction > Pratiques
+    if (typeof afficherListePratiquesMateriel === 'function') {
+        afficherListePratiquesMateriel();
+    }
 }
 
 /**
  * Sauvegarde la pratique dans le stockage
+ * 🆕 FIX (20 jan 2026) : Sauvegarde robuste avec vérification
  * @param {Object} pratique - Objet pratique à sauvegarder
  */
-function sauvegarderPratique(pratique) {
+async function sauvegarderPratique(pratique) {
     // Récupérer les pratiques existantes
     let pratiques = db.getSync('pratiquesConfigurables', []);
 
@@ -1612,8 +1629,26 @@ function sauvegarderPratique(pratique) {
         pratiques.push(pratique);
     }
 
-    // Sauvegarder
-    db.setSync('pratiquesConfigurables', pratiques);
+    // Sauvegarder avec double écriture pour fiabilité
+    try {
+        // 1. Écriture synchrone localStorage (immédiat)
+        db.setSync('pratiquesConfigurables', pratiques);
+
+        // 2. Écriture asynchrone IndexedDB (attendre pour fiabilité)
+        if (db.ready && db.useIndexedDB) {
+            await db.set('pratiquesConfigurables', pratiques);
+        }
+
+        // 3. Vérification
+        const verification = db.getSync('pratiquesConfigurables', []);
+        if (!verification.find(p => p.id === pratique.id)) {
+            console.error('[WizardV2] ⚠️ Vérification échouée - pratique non trouvée après sauvegarde');
+        } else {
+            console.log('[WizardV2] ✅ Pratique sauvegardée et vérifiée:', pratique.id);
+        }
+    } catch (e) {
+        console.error('[WizardV2] ❌ Erreur sauvegarde:', e);
+    }
 
     // Mettre à jour les modalités d'évaluation si c'est la pratique active
     const modalites = db.getSync('modalitesEvaluation', {});

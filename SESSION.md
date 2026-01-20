@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 95.6
 
-**Date** : 19 janvier 2026
-**Version** : Beta 95.6 (build 0119-1432)
+**Date** : 20 janvier 2026
+**Version** : Beta 95.6 (build 0120-0700)
 **Statut** : Application fonctionnelle pour H2026
 
 ---
@@ -24,8 +24,27 @@
 - Variables CSS adoptees massivement (box-shadow 43%, border-radius 95%)
 - **Badge nb personnes** : S'ajuste au groupe-cours selectionne
 - **Vue calendaire** : Affiche correctement l'horaire du groupe-cours actif
+- **Pratiques de notation** : Sauvegarde fiable via wizard et mode expert
 
-### Derniere tache completee (19 janvier)
+### Derniere tache completee (20 janvier)
+- **DROPDOWN DISCIPLINE (Beta 95.6)** : Remplacement du champ texte libre par dropdown
+  - Champ "Discipline" dans l'édition d'une pratique (Construction > Pratiques)
+  - Même dropdown que Primo avec 6 catégories (100-600)
+  - **Fichier modifié** : `index.html`
+
+- **CORRECTION SAUVEGARDE PRATIQUES (Beta 95.6)** : Bug critique corrigé
+  - **Symptôme** : Pratiques créées disparaissaient au rechargement de la page
+  - **Cause** : Désynchronisation IndexedDB ↔ localStorage
+    - Lectures depuis IndexedDB (données anciennes) écrasaient localStorage (données récentes)
+    - Wizard ne définissait pas `dansBibliotheque: true` ni `pratiques: ['STD']`
+  - **Corrections** :
+    - `js/pratiques-materiel.js` : Toutes les lectures utilisent `db.getSync()` (localStorage)
+    - `js/pratiques-materiel.js` : Vérification explicite après sauvegarde
+    - `js/wizard-pratique-v2.js` : Ajout `dansBibliotheque: true` et `pratiques: [type]`
+    - `js/wizard-pratique-v2.js` : Sauvegarde async avec attente IndexedDB
+    - `js/wizard-pratique-v2.js` : Rafraîchissement sidebar après création
+
+### Tache precedente (19 janvier)
 - **AIDE CONTEXTUELLE 😎 (Beta 95.6)** : Systeme de boutons d'aide en Mode Assiste
   - 15 sections d'aide couvrant toutes les zones critiques de l'application
   - Nouvelle section "Cartouches de rétroaction" (rôle dans les grilles descriptives)
