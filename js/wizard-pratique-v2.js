@@ -229,6 +229,21 @@ const ETAPES_WIZARD = {
                 default: 12,
                 required: true
             },
+            // 🆕 #24 : Mode de sélection pour construction de la note
+            {
+                id: 'modeSelectionPortfolio',
+                label: 'Construction de la note',
+                type: 'select',
+                options: [
+                    { value: 'n_meilleurs', label: 'N meilleurs artefacts' },
+                    { value: 'tous', label: 'Tous les artefacts' },
+                    { value: 'derniers', label: 'N derniers artefacts' },
+                    { value: 'hybride', label: 'Hybride (N meilleures + Obligatoires)' }
+                ],
+                default: 'n_meilleurs',
+                required: true,
+                aide: 'Hybride : combine N meilleures productions + productions obligatoires (ex: examen final). Configuration détaillée en Mode Expert.'
+            },
             {
                 id: 'nbArtefactsRetenus',
                 label: 'Nombre d\'artefacts retenus pour la note finale',
@@ -1203,6 +1218,15 @@ function genererRecapitulatif() {
             const nbRetenus = modalites.nArtefactsRetenus || r.nbArtefactsRetenus || '?';
             html += `<p><strong>Artefacts à soumettre :</strong> ${nbSoumis}</p>`;
             html += `<p><strong>Artefacts retenus :</strong> ${nbRetenus}</p>`;
+            // 🆕 #24 : Afficher la construction de la note
+            const modeSelectionLabels = {
+                'n_meilleurs': 'N meilleurs artefacts',
+                'tous': 'Tous les artefacts',
+                'derniers': 'N derniers artefacts',
+                'hybride': 'Hybride (N meilleures + Obligatoires)'
+            };
+            const modeSelection = r.modeSelectionPortfolio || 'n_meilleurs';
+            html += `<p><strong>Construction de la note :</strong> ${modeSelectionLabels[modeSelection] || modeSelection}</p>`;
         } else if (r.approcheEvaluation === 'par-objectifs') {
             const modeLabels = {
                 'comptage': 'Comptage d\'objectifs',
@@ -1531,10 +1555,27 @@ async function creerPratiqueV2() {
             afficherMoyenneGroupe: r.afficherMoyenneGroupe !== false
         };
     } else if (r.typePratique === 'pan-standards') {
+        // 🆕 #24 : Récupérer le mode de sélection pour déterminer varianteCalcul
+        const modeSelection = r.modeSelectionPortfolio || 'n_meilleurs';
+        const estHybride = modeSelection === 'hybride';
+
+        // Mapper le mode de sélection vers varianteCalcul
+        let varianteCalcul = '';
+        if (estHybride) {
+            varianteCalcul = 'hybride';
+        } else if (modeSelection === 'n_meilleurs' || modeSelection === 'meilleurs') {
+            varianteCalcul = 'n-meilleurs';
+        } else if (modeSelection === 'derniers') {
+            varianteCalcul = 'n-recents';
+        } else if (modeSelection === 'tous') {
+            varianteCalcul = 'n-meilleurs'; // Par défaut
+        }
+
         pratique.configuration = {
             approcheEvaluation: r.approcheEvaluation,
             echelleId: r.echelleId || null,
-            grilleId: r.grilleId || null
+            grilleId: r.grilleId || null,
+            varianteCalcul: varianteCalcul  // 🆕 #24 : Sauvegarder pour Mode Expert
         };
 
         if (r.approcheEvaluation === 'par-artefacts') {
@@ -1552,11 +1593,13 @@ async function creerPratiqueV2() {
                 // Noms standardisés (cohérents avec pratiques-materiel.js)
                 nombreTotal: nbSoumis,
                 nombreARetenir: nbRetenus,
-                methodeSelection: 'meilleurs',
+                methodeSelection: estHybride ? 'meilleurs' : (modeSelection === 'n_meilleurs' ? 'meilleurs' : modeSelection),
                 minimumCompletion: minFormatif,
-                reprisesPermises: r.reprisesPermises || 'illimite'
+                reprisesPermises: r.reprisesPermises || 'illimite',
+                hybride: estHybride  // 🆕 #24 : Flag pour activer les catégories
             };
-            if (modalites.utiliserCategories === 'oui' || modalites.categories?.actif) {
+            // 🆕 #24 : Activer catégories automatiquement si hybride
+            if (estHybride || modalites.utiliserCategories === 'oui' || modalites.categories?.actif) {
                 pratique.configuration.categories = {
                     actif: true,
                     selection: {

@@ -3187,12 +3187,13 @@
                 <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
                     <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Beta 95.7 (20 janvier) — Améliorations :</strong>
                     <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
-                        <li><strong>Persistance Wizard → Expert</strong> : Les valeurs configurées dans le wizard (artefacts, échelle) persistent correctement en mode Expert</li>
-                        <li><strong>Artefacts clarifiés</strong> : Le résumé wizard affiche distinctement "Sélection" (N meilleures) et "Obligatoires" (toujours comptées)</li>
-                        <li><strong>Dropdown Note maximale</strong> : Le champ "Note maximale" (reprise ciblée) affiche les niveaux de votre échelle</li>
-                        <li><strong>Ordre disciplines corrigé</strong> : Le dropdown respecte l'ordre officiel (100→200→300→400→500→600)</li>
-                        <li><strong>Aide bibliothèque</strong> : Message explicatif ajouté pour guider l'édition des pratiques</li>
-                        <li><strong>Valeurs par défaut jetons</strong> : 2 jetons/élève, 2 jours de délai (usage réel)</li>
+                        <li><strong>Option Hybride portfolio</strong> : Nouveau mode "N meilleures + Obligatoires" disponible dans Primo et Mode Expert</li>
+                        <li><strong>Persistance Primo → Expert</strong> : Les valeurs configurées (artefacts, construction note, échelle) persistent correctement</li>
+                        <li><strong>Boutons uniformisés</strong> : Tous les modals respectent le Design System v7 (Annuler orange, Confirmer vert)</li>
+                        <li><strong>Synthèse Primo enrichie</strong> : Affiche maintenant la méthode de construction de la note</li>
+                        <li><strong>Dropdown Note maximale</strong> : Le champ affiche les niveaux de votre échelle</li>
+                        <li><strong>Ordre disciplines corrigé</strong> : Respecte l'ordre officiel (100→600)</li>
+                        <li><strong>Valeurs par défaut jetons</strong> : 2 jetons/élève, 2 jours de délai</li>
                     </ul>
                 </div>
 
@@ -5195,6 +5196,7 @@
                                                 <option value="">-- Choisir une méthode --</option>
                                                 <option value="n-meilleurs">Je retiens les N meilleures évaluations</option>
                                                 <option value="n-recents">Je retiens les N évaluations les plus récentes</option>
+                                                <option value="hybride">Hybride (N meilleures + Obligatoires)</option>
                                                 <option value="grille-profils">J'utilise une grille de profils</option>
                                                 <option value="par-objectifs">Par objectifs (4 modes de calcul)</option>
                                                 <option value="autre">Autre (je vais le décrire après)</option>
@@ -5405,10 +5407,11 @@
                                                     <label for="mat-portfolio-selection" style="font-weight: 600; display: block; margin-bottom: 6px;">
                                                         Mode de sélection
                                                     </label>
-                                                    <select id="mat-portfolio-selection" class="controle-form" onchange="sauvegarderConfigPratiqueMat()">
+                                                    <select id="mat-portfolio-selection" class="controle-form" onchange="onPortfolioSelectionChangeMat()">
                                                         <option value="meilleurs">N meilleurs artefacts</option>
                                                         <option value="derniers">N derniers artefacts</option>
                                                         <option value="tous">Tous les artefacts</option>
+                                                        <option value="hybride">Hybride (N meilleures + Obligatoires)</option>
                                                     </select>
                                                 </div>
                                                 <div class="groupe-form">
@@ -7729,11 +7732,16 @@
 
                                                 <div class="groupe-form">
                                                     <label>Mode de sélection</label>
-                                                    <select id="wizard-portfolio-selection" class="controle-form">
+                                                    <select id="wizard-portfolio-selection" class="controle-form" onchange="onWizardPortfolioSelectionChange()">
                                                         <option value="n_meilleurs">N meilleurs artefacts</option>
                                                         <option value="tous">Tous les artefacts</option>
                                                         <option value="derniers">N derniers artefacts</option>
+                                                        <option value="hybride">Hybride (configurer en Expert)</option>
                                                     </select>
+                                                    <div id="wizard-portfolio-hybride-info" style="display: none; margin-top: 10px; padding: 12px; background: var(--orange-tres-pale, #fff7ed); border: 1px solid var(--orange-clair, #fed7aa); border-radius: 6px; font-size: 0.85rem;">
+                                                        <strong>Mode hybride</strong> : Combine N meilleures productions + productions obligatoires (ex: examen final).<br>
+                                                        <span style="color: var(--gris-moyen);">La configuration détaillée se fera en Mode Expert après création.</span>
+                                                    </div>
                                                 </div>
                                                 <div class="groupe-form">
                                                     <label>Nombre d'artefacts à évaluer</label>
@@ -14597,7 +14605,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '95.6';
-        const BUILD_ID = '0120-0958';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0120-1050';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';

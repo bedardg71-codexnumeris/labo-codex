@@ -3068,7 +3068,39 @@ function resetterWizard() {
     document.getElementById('wizard-terme-critere').value = 'Critère';
     document.getElementById('wizard-terme-note').value = 'Note finale';
     document.getElementById('wizard-terme-reprise').value = 'Reprise';
+
+    // 🆕 #24 : Masquer l'info hybride
+    const infoHybride = document.getElementById('wizard-portfolio-hybride-info');
+    if (infoHybride) infoHybride.style.display = 'none';
 }
+
+/**
+ * 🆕 #24 : Gère le changement de sélection du mode portfolio dans le wizard
+ * Affiche/masque le message d'information pour le mode hybride
+ */
+function onWizardPortfolioSelectionChange() {
+    const select = document.getElementById('wizard-portfolio-selection');
+    const infoHybride = document.getElementById('wizard-portfolio-hybride-info');
+    const champNombre = document.getElementById('wizard-portfolio-nombre');
+
+    if (!select || !infoHybride) return;
+
+    const estHybride = select.value === 'hybride';
+    infoHybride.style.display = estHybride ? 'block' : 'none';
+
+    // Désactiver le champ nombre si hybride (sera configuré en Expert)
+    if (champNombre) {
+        champNombre.disabled = estHybride;
+        if (estHybride) {
+            champNombre.style.opacity = '0.5';
+            champNombre.title = 'Configuration détaillée en Mode Expert';
+        } else {
+            champNombre.style.opacity = '1';
+            champNombre.title = '';
+        }
+    }
+}
+window.onWizardPortfolioSelectionChange = onWizardPortfolioSelectionChange;
 
 /**
  * Affiche une étape spécifique du wizard
@@ -3723,6 +3755,9 @@ async function creerPratiqueDepuisWizard() {
         const idPratique = modal && modal.dataset.idPratique;
 
         // Collecter les données de toutes les étapes
+        // 🆕 #24 : Extraire la structure pour accéder au flag hybride
+        const structureEvals = construireStructure();
+
         const pratiqueConfig = {
             // Étape 1: Informations de base
             id: modeEdition ? idPratique : 'pratique-' + Date.now(),
@@ -3738,7 +3773,7 @@ async function creerPratiqueDepuisWizard() {
             echelle: construireEchelle(),
 
             // Étape 3: Structure
-            structure_evaluations: construireStructure(),
+            structure_evaluations: structureEvals,
 
             // Étape 4: Calcul
             calcul_note: construireCalcul(),
@@ -3765,11 +3800,14 @@ async function creerPratiqueDepuisWizard() {
             },
             portfolio: {
                 actif: true,
-                nombreARetenir: 5,
+                nombreARetenir: structureEvals?.n_artefacts || 5,
                 minimumCompletion: 7,
                 nombreTotal: 10,
-                methodeSelection: 'meilleurs',
-                decouplerPR: false
+                methodeSelection: structureEvals?.selection === 'n_meilleurs' ? 'meilleurs' :
+                                  structureEvals?.selection === 'derniers' ? 'derniers' :
+                                  structureEvals?.selection || 'meilleurs',
+                decouplerPR: false,
+                hybride: structureEvals?.hybride || false  // 🆕 #24
             },
             jetons: {
                 actif: true,
@@ -3895,6 +3933,17 @@ function construireStructure() {
     } else if (type === 'portfolio') {
         const selection = document.getElementById('wizard-portfolio-selection').value;
         const nombre = parseInt(document.getElementById('wizard-portfolio-nombre').value) || 7;
+
+        // 🆕 #24 : Mode hybride - activer les catégories par défaut
+        if (selection === 'hybride') {
+            return {
+                type: 'portfolio',
+                description: 'Artefacts de portfolio (hybride)',
+                selection: 'n_meilleurs',
+                n_artefacts: 4,
+                hybride: true  // Flag pour activer les catégories en Expert
+            };
+        }
 
         return {
             type: 'portfolio',
