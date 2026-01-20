@@ -1029,14 +1029,10 @@ function creerModalConfigComplete() {
             </div>
 
             <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                <button id="btnAnnulerConfig"
-                        class="btn"
-                        style="background: var(--gris-pale); color: var(--gris-fonce);">
+                <button id="btnAnnulerConfig" class="btn btn-annuler">
                     Annuler
                 </button>
-                <button id="btnValiderConfig"
-                        class="btn btn-primaire"
-                        style="background: var(--bleu-leger); color: white;">
+                <button id="btnValiderConfig" class="btn btn-confirmer">
                     Exporter la pratique
                 </button>
             </div>

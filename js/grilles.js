@@ -1913,7 +1913,7 @@ function importerGrilles(event) {
                     <div style="background: white; padding: 20px; border-radius: 8px; max-width: 600px; max-height: 80vh; overflow-y: auto;">
                         ${message}
                         <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: flex-end;">
-                            <button class="btn" onclick="this.closest('div[style*=fixed]').parentElement.remove(); delete window._grillesImportEnAttente;">Annuler</button>
+                            <button class="btn btn-annuler" onclick="this.closest('div[style*=fixed]').parentElement.remove(); delete window._grillesImportEnAttente;">Annuler</button>
                             <button class="btn btn-confirmer" onclick="window.confirmerImportGrilles(window._grillesImportEnAttente); this.closest('div[style*=fixed]').parentElement.remove(); delete window._grillesImportEnAttente;">Importer</button>
                         </div>
                     </div>
@@ -3593,7 +3593,7 @@ async function afficherConfigurationCategoriesErreurs(grilleId, critereIndex) {
                 </div>
 
                 <div style="display: flex; gap: 10px; margin-top: 25px; justify-content: flex-end;">
-                    <button class="btn btn-secondaire" onclick="fermerModalCategoriesErreurs()">Annuler</button>
+                    <button class="btn btn-annuler" onclick="fermerModalCategoriesErreurs()">Annuler</button>
                     <button class="btn btn-confirmer" onclick="sauvegarderCategoriesErreurs('${grilleId}', ${critereIndex})">Sauvegarder</button>
                 </div>
             </div>
