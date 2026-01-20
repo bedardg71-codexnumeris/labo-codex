@@ -237,6 +237,77 @@
    - Section Aide complete
    - Guide rapide
 
+3. **Clarifier nombre total d'artefacts**
+   - Distinction meilleurs vs obligatoires dans construction de la note
+   - Affichage clair du calcul
+
+4. **Persistance donnees Primo ↔ Mode Expert**
+   - Artefacts configures dans Primo doivent persister en mode Expert
+   - Seuils et parametres synchronises entre les deux modes
+
+5. **Valeurs par defaut systeme de jetons**
+   - Revoir le nombre de jetons par defaut
+   - Revoir le delai par defaut
+
+6. **Reprise ciblee - dropdown note maximale**
+   - Remplacer le champ texte "note maximale" par le dropdown original
+
+7. **Gestion bibliotheques (pratiques et autres)**
+   - Bouton Supprimer dans la bibliotheque
+   - Bouton Dupliquer dans la bibliotheque
+   - Appliquer aux autres bibliotheques si pertinent
+
+8. **Message aide bibliotheque pratiques**
+   - Indiquer que pour editer une pratique, elle doit etre transferee dans la sidebar
+
+9. **Document backlog independant**
+   - Creer un fichier BACKLOG.md separe de la roadmap
+   - Plus facile a reperer et maintenir pour Claude
+
+10. **Mettre a jour section AIDE**
+    - Contenu a jour avec les fonctionnalites actuelles
+    - Notes de version dans la section AIDE
+
+11. **Message "Nouveautes de la beta" automatise**
+    - Mise a jour automatique apres chaque correctif fonctionnel
+    - Synchronise avec le numero de build
+
+12. **Audit db.get() vs db.getSync()**
+    - Verifier tous les modules pour desynchronisation IndexedDB/localStorage
+    - Meme probleme que pratiques pourrait exister ailleurs
+
+13. **Outil verification integrite donnees**
+    - Comparer IndexedDB et localStorage
+    - Detecter et signaler les incoherences
+
+14. **Audit champs texte → dropdown**
+    - Identifier inputs texte libres qui gagneraient a etre des dropdowns
+    - Ameliorer coherence et eviter erreurs de saisie
+
+15. **Consolidation wizard vs pratiques-materiel**
+    - Code duplique pour creation de pratiques
+    - Factoriser logique commune
+
+16. **Systeme changelog automatise**
+    - Generer notes de version depuis commits ou SESSION.md
+    - Reduire maintenance manuelle
+
+17. **Checklist tests de regression**
+    - Documenter verifications manuelles apres chaque build
+    - Creer pratique, evaluer, sauvegarder, recharger, etc.
+
+18. **Etendre aide contextuelle 😎**
+    - Ajouter aides pour cas d'erreur frequents
+    - Pas seulement les sections, aussi les messages d'erreur
+
+19. **Ordre disciplines dans dropdown**
+    - Les numeros 400 sont actuellement a la fin
+    - Reordonner logiquement (100, 200, 300, 400, 500, 600)
+
+20. **Mettre a jour liste programmes d'etudes**
+    - Document programmes preuniversitaires
+    - Document programmes techniques
+
 ### P3 - Reportees (post-AQPC ou V1.1)
 
 1. **Nouvelles pratiques** (analyse cartographies)
@@ -315,5 +386,5 @@
 
 ---
 
-**Derniere mise a jour** : 19 janvier 2026
+**Derniere mise a jour** : 20 janvier 2026
 **Prochaine revue** : 1er fevrier 2026 (debut Beta 96)
