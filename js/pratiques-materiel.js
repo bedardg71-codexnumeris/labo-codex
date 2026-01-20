@@ -279,9 +279,16 @@ async function afficherBibliothequePratiques() {
                     ×
                 </button>
                 <h2 style="margin-top: 0; color: #2c3e50;">Bibliothèque de pratiques de notation</h2>
-                <p style="color: #7f8c8d; margin-bottom: 20px;">
+                <p style="color: #7f8c8d; margin-bottom: 15px;">
                     Gérez les pratiques affichées dans la barre latérale.
                 </p>
+
+                <!-- 🆕 Beta 95.7 : Message aide édition -->
+                <div style="background: var(--bleu-tres-pale, #e8f4f8); border-left: 3px solid var(--bleu-clair, #5dade2); padding: 10px 15px; margin-bottom: 20px; border-radius: 0 6px 6px 0;">
+                    <p style="margin: 0; font-size: 0.9rem; color: var(--texte-secondaire, #555);">
+                        💡 <strong>Pour éditer une pratique</strong>, transférez-la d'abord dans la barre latérale en cliquant sur « Ajouter », puis cliquez dessus pour l'ouvrir en mode édition.
+                    </p>
+                </div>
 
                 <!-- Section 1 : Pratiques dans votre sélection -->
                 <h3 style="color: var(--bleu-clair); font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
@@ -710,6 +717,7 @@ function remplirFormulairePratique(pratique) {
     if (pratique.configuration?.echelleId) {
         setValeurChamp('mat-echelle-id', pratique.configuration.echelleId);
         afficherPreviewEchelleMat();
+        peuplerDropdownNoteMaximaleMat(); // 🆕 Beta 95.7 : Peupler dropdown note maximale
     }
 
     // Système de jetons
@@ -729,7 +737,7 @@ function remplirFormulairePratique(pratique) {
         radioArchiver.checked = true;
     }
     setCheckbox('mat-jeton-ciblee-actif', jetons.cibleeActif !== false);
-    setValeurChamp('mat-ciblee-plafond', jetons.cibleePlafond || 'D (Développement)');
+    setValeurChamp('mat-ciblee-plafond', jetons.cibleePlafond || ''); // 🆕 Beta 95.7 : Pas de défaut, l'utilisateur doit choisir
 
     // 🆕 Beta 95.4 : Afficher le panneau métadonnées CC
     const panneauMeta = document.getElementById('panneauMetadonneesPratique');
@@ -1175,6 +1183,40 @@ async function afficherPreviewEchelleMat() {
     preview.style.display = 'block';
 
     sauvegarderConfigPratiqueMat();
+}
+
+/**
+ * 🆕 Beta 95.7 : Peuple le dropdown "Note maximale" avec les niveaux de l'échelle sélectionnée
+ * Utilise db.getSync() pour être synchrone (compatible avec remplirFormulairePratique)
+ */
+function peuplerDropdownNoteMaximaleMat() {
+    const select = document.getElementById('mat-ciblee-plafond');
+    if (!select) return;
+
+    const echelleId = getValeurChamp('mat-echelle-id');
+
+    if (!echelleId) {
+        select.innerHTML = '<option value="">— Sélectionner l\'échelle d\'abord —</option>';
+        return;
+    }
+
+    const echelles = db.getSync('echellesTemplates', []);
+    const echelle = echelles.find(e => e.id === echelleId);
+
+    if (!echelle || !echelle.niveaux) {
+        select.innerHTML = '<option value="">— Échelle sans niveaux —</option>';
+        return;
+    }
+
+    // Construire les options avec code et nom
+    let html = '<option value="">— Sélectionner —</option>';
+    echelle.niveaux.forEach(n => {
+        const label = n.code ? `${n.code} (${n.nom})` : n.nom;
+        const value = n.code || n.nom;
+        html += `<option value="${value}">${label}</option>`;
+    });
+
+    select.innerHTML = html;
 }
 
 /* ===============================
@@ -2424,6 +2466,7 @@ window.validerPonderationsCategoriesMat = validerPonderationsCategoriesMat;  // 
 // Échelles
 window.chargerDropdownEchellesMat = chargerDropdownEchellesMat;
 window.afficherPreviewEchelleMat = afficherPreviewEchelleMat;
+window.peuplerDropdownNoteMaximaleMat = peuplerDropdownNoteMaximaleMat;
 
 // PAN-Spécifications : Types de travaux
 window.afficherTypesTravauxMat = afficherTypesTravauxMat;

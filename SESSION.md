@@ -1,7 +1,7 @@
-# SESSION ACTIVE - BETA 95.6
+# SESSION ACTIVE - BETA 95.7
 
 **Date** : 20 janvier 2026
-**Version** : Beta 95.6 (build 0120-0700)
+**Version** : Beta 95.7 (build 0120-0830)
 **Statut** : Application fonctionnelle pour H2026
 
 ---
@@ -25,8 +25,45 @@
 - **Badge nb personnes** : S'ajuste au groupe-cours selectionne
 - **Vue calendaire** : Affiche correctement l'horaire du groupe-cours actif
 - **Pratiques de notation** : Sauvegarde fiable via wizard et mode expert
+- **Dropdown note maximale** : Peuplé dynamiquement selon l'échelle de performance
 
 ### Derniere tache completee (20 janvier)
+- **DROPDOWN NOTE MAXIMALE (Beta 95.7)** : Reprise ciblée avec échelle dynamique
+  - Champ texte remplacé par dropdown dans Construction > Pratiques et Réglages
+  - Peuplé automatiquement avec les niveaux de l'échelle sélectionnée
+  - **Fichiers modifiés** : `index.html`, `js/pratiques-materiel.js`, `js/pratiques.js`
+
+- **ORDRE DISCIPLINES DROPDOWN (Beta 95.7)** : Correction ordre 100→600
+  - Groupe 400 (Administration) était à la fin, maintenant après 300
+  - **Fichier modifié** : `js/wizard-pratique-v2.js`
+
+- **MESSAGE AIDE BIBLIOTHEQUE (Beta 95.7)** : Guide pour édition des pratiques
+  - Message ajouté dans les modals bibliothèque (Construction et Réglages)
+  - "Pour éditer une pratique, transférez-la d'abord dans la barre latérale..."
+  - **Fichiers modifiés** : `js/pratiques-materiel.js`, `js/pratiques.js`
+
+- **BACKLOG P2 ENRICHI** : 20 éléments ajoutés à la roadmap
+  - **Fichier modifié** : `docs/ROADMAP_H2026.md`
+  - **Éléments ajoutés** :
+    - Clarifier nombre total d'artefacts (meilleurs vs obligatoires)
+    - Persistance données Primo ↔ Mode Expert
+    - Valeurs par défaut système de jetons
+    - Reprise ciblée - dropdown note maximale
+    - Gestion bibliothèques (boutons Supprimer/Dupliquer)
+    - Message aide bibliothèque pratiques
+    - Document backlog indépendant (BACKLOG.md)
+    - Mettre à jour section AIDE + Notes de version
+    - Message "Nouveautés de la beta" automatisé
+    - Audit db.get() vs db.getSync()
+    - Outil vérification intégrité données
+    - Audit champs texte → dropdown
+    - Consolidation wizard vs pratiques-materiel
+    - Système changelog automatisé
+    - Checklist tests de régression
+    - Étendre aide contextuelle 😎
+    - Ordre disciplines dans dropdown (100→600)
+    - Mettre à jour liste programmes d'études
+
 - **DROPDOWN DISCIPLINE (Beta 95.6)** : Remplacement du champ texte libre par dropdown
   - Champ "Discipline" dans l'édition d'une pratique (Construction > Pratiques)
   - Même dropdown que Primo avec 6 catégories (100-600)
@@ -358,6 +395,22 @@
 
 ## HISTORIQUE RECENT
 
+### 20 janvier 2026
+- **DROPDOWN NOTE MAXIMALE (Beta 95.7)** : Reprise ciblée avec échelle dynamique
+  - Champ texte → dropdown peuplé selon l'échelle de l'utilisateur
+  - Fonctions : `peuplerDropdownNoteMaximaleMat()`, `peuplerDropdownPlafondNoteCiblee()`
+- **ORDRE DISCIPLINES DROPDOWN** : Groupe 400 déplacé à la bonne position (après 300)
+- **MESSAGE AIDE BIBLIOTHEQUE** : Guide pour édition des pratiques ajouté aux modals
+- **BACKLOG P2 ENRICHI** : 20 éléments ajoutés à docs/ROADMAP_H2026.md
+  - Fiabilité : audit db.get/getSync, outil intégrité données
+  - UX : clarifier artefacts, persistance Primo/Expert, dropdowns, gestion bibliothèques
+  - Maintenance : changelog automatisé, checklist régression, section AIDE
+  - Données : programmes d'études, ordre disciplines
+- **CORRECTION SAUVEGARDE PRATIQUES** : Bug critique corrigé
+  - Pratiques disparaissaient au rechargement (désync IndexedDB/localStorage)
+  - Fix dans pratiques-materiel.js et wizard-pratique-v2.js
+- **DROPDOWN DISCIPLINE** : Champ texte remplacé par dropdown (6 catégories)
+
 ### 19 janvier 2026
 - **AIDE CONTEXTUELLE 😎** : Systeme complet de boutons d'aide en Mode Assiste
   - 15 sections : evaluations, construction (grilles, echelles, cartouches, productions, pratiques), tableau de bord, presences, reglages
@@ -466,4 +519,4 @@
 
 ---
 
-**Derniere mise a jour** : 19 janvier 2026
+**Derniere mise a jour** : 20 janvier 2026
