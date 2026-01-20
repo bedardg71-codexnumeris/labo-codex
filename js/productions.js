@@ -2501,7 +2501,7 @@ function importerProductions(event) {
                     <div style="background: white; padding: 20px; border-radius: 8px; max-width: 600px; max-height: 80vh; overflow-y: auto;">
                         ${message}
                         <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: flex-end;">
-                            <button class="btn" onclick="this.closest('div[style*=fixed]').parentElement.remove()">Annuler</button>
+                            <button class="btn btn-annuler" onclick="this.closest('div[style*=fixed]').parentElement.remove()">Annuler</button>
                             <button class="btn btn-confirmer" onclick="this.closest('div[style*=fixed]').parentElement.remove(); window.confirmerImportProductions(window._productionsImportEnAttente); delete window._productionsImportEnAttente;">Importer</button>
                         </div>
                     </div>
@@ -2733,8 +2733,8 @@ async function afficherAssistantMigrationCategories() {
                 </table>
 
                 <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--gris-clair);">
-                    <button type="button" onclick="fermerModalMigration()" class="btn-secondaire">Annuler</button>
-                    <button type="button" onclick="sauvegarderMigrationCategories()" class="btn-primaire">
+                    <button type="button" onclick="fermerModalMigration()" class="btn btn-annuler">Annuler</button>
+                    <button type="button" onclick="sauvegarderMigrationCategories()" class="btn btn-confirmer">
                         💾 Sauvegarder
                     </button>
                 </div>

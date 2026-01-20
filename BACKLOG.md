@@ -9,10 +9,6 @@
 
 ### Priorite haute - UX / Interface
 
-- [ ] **#23** Uniformiser boutons modal wizard pratique
-  - Actuellement : Annuler (rouge), Precedent (bleu), Creer (gris)
-  - Harmoniser avec le Design System v7
-
 - [ ] **#24** Option hybride construction note portfolio
   - Actuellement dropdown sans option "N meilleures + Obligatoires"
   - Soit checkboxes combinables
@@ -27,6 +23,11 @@
   - Document programmes techniques
 
 ### Documentation / Aide
+
+- [ ] **#25** Analyse fonctionnalites pour Claude Cowork
+  - Lister les principales fonctionnalites de l'application
+  - Definir les plus-values et cas d'usage
+  - Fournir un apercu synthetique pour presentation externe
 
 - [ ] **#2** Documentation complete
   - Section Aide complete dans l'application
@@ -84,6 +85,7 @@
 
 ## Complete (Beta 95.7 - 20 janvier 2026)
 
+- [x] **#23** Uniformiser boutons modal wizard (Design System v7)
 - [x] **#4** Persistance donnees Wizard -> Mode Expert (flag enChargementFormulaire)
 - [x] **#5** Valeurs par defaut jetons : 2 jetons/eleve, 2 jours delai
 - [x] **#6** Dropdown note maximale (reprise ciblee) : echelle dynamique
