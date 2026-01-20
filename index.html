@@ -3187,6 +3187,7 @@
                 <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
                     <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Beta 95.7 (20 janvier) — Améliorations :</strong>
                     <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
+                        <li><strong>Dropdowns discipline complets</strong> : Liste complète (~120 disciplines) pour les 48 cégeps du Québec</li>
                         <li><strong>Option Hybride portfolio</strong> : Nouveau mode "N meilleures + Obligatoires" disponible dans Primo et Mode Expert</li>
                         <li><strong>Persistance Primo → Expert</strong> : Les valeurs configurées (artefacts, construction note, échelle) persistent correctement</li>
                         <li><strong>Boutons uniformisés</strong> : Tous les modals respectent le Design System v7 (Annuler orange, Confirmer vert)</li>
@@ -6541,8 +6542,150 @@
                             <div class="grille-3col-form" style="margin-bottom: 15px;">
                                 <div class="groupe-form">
                                     <label>Discipline <span style="color: var(--rouge-erreur); font-weight: normal;">*</span></label>
-                                    <input type="text" id="disciplineEnseignant" class="controle-form controle-form-compact" required
-                                        placeholder="Ex: Littérature, Philosophie">
+                                    <!-- 🆕 #14 : Converti en dropdown -->
+                                    <select id="disciplineEnseignant" class="controle-form controle-form-compact" required>
+                                        <option value="">— Sélectionner —</option>
+                                        <optgroup label="Sciences de la santé et techniques (100)">
+                                            <option value="101 Biologie">101 Biologie</option>
+                                            <option value="105 Culture scientifique et technologique">105 Culture scientifique et technologique</option>
+                                            <option value="107 Techniques de la santé">107 Techniques de la santé</option>
+                                            <option value="109 Éducation physique">109 Éducation physique</option>
+                                            <option value="110 Techniques dentaires">110 Techniques dentaires</option>
+                                            <option value="111 Techniques d'hygiène dentaire">111 Techniques d'hygiène dentaire</option>
+                                            <option value="112 Acupuncture">112 Acupuncture</option>
+                                            <option value="120 Techniques de diététique">120 Techniques de diététique</option>
+                                            <option value="130 Électrophysiologie médicale">130 Électrophysiologie médicale</option>
+                                            <option value="140 Technologie d'analyses biomédicales">140 Technologie d'analyses biomédicales</option>
+                                            <option value="141 Techniques d'inhalothérapie">141 Techniques d'inhalothérapie</option>
+                                            <option value="142 Techniques de radiologie">142 Techniques de radiologie</option>
+                                            <option value="144 Techniques de réadaptation">144 Techniques de réadaptation</option>
+                                            <option value="145 Technologie des sciences naturelles">145 Technologie des sciences naturelles</option>
+                                            <option value="147 Milieu naturel">147 Milieu naturel</option>
+                                            <option value="150 Techniques agricoles">150 Techniques agricoles</option>
+                                            <option value="152 Gestion et exploitation d'entreprise agricole">152 Gestion et exploitation d'entreprise agricole</option>
+                                            <option value="153 Techniques horticoles">153 Techniques horticoles</option>
+                                            <option value="154 Technologie des procédés et de la qualité des aliments">154 Technologie des procédés et de la qualité des aliments</option>
+                                            <option value="160 Techniques paramédicales">160 Techniques paramédicales</option>
+                                            <option value="165 Pharmacie">165 Pharmacie</option>
+                                            <option value="171 Techniques de thanatologie">171 Techniques de thanatologie</option>
+                                            <option value="180 Soins infirmiers">180 Soins infirmiers</option>
+                                            <option value="181 Soins préhospitaliers d'urgence">181 Soins préhospitaliers d'urgence</option>
+                                            <option value="190 Technologie forestière">190 Technologie forestière</option>
+                                        </optgroup>
+                                        <optgroup label="Sciences et techniques (200)">
+                                            <option value="201 Mathématique">201 Mathématique</option>
+                                            <option value="202 Chimie">202 Chimie</option>
+                                            <option value="203 Physique">203 Physique</option>
+                                            <option value="204 Langage mathématique et informatique">204 Langage mathématique et informatique</option>
+                                            <option value="205 Géologie">205 Géologie</option>
+                                            <option value="210 Techniques de chimie industrielle">210 Techniques de chimie industrielle</option>
+                                            <option value="211 Techniques des matières plastiques">211 Techniques des matières plastiques</option>
+                                            <option value="221 Technologie du bâtiment et des travaux publics">221 Technologie du bâtiment et des travaux publics</option>
+                                            <option value="222 Techniques d'aménagement et d'urbanisme">222 Techniques d'aménagement et d'urbanisme</option>
+                                            <option value="223 Énergie">223 Énergie</option>
+                                            <option value="230 Technologie de la géomatique">230 Technologie de la géomatique</option>
+                                            <option value="231 Techniques de la pêche">231 Techniques de la pêche</option>
+                                            <option value="232 Technologies des pâtes et papiers">232 Technologies des pâtes et papiers</option>
+                                            <option value="233 Techniques du meuble et d'ébénisterie">233 Techniques du meuble et d'ébénisterie</option>
+                                            <option value="235 Production industrielle">235 Production industrielle</option>
+                                            <option value="241 Techniques de la mécanique">241 Techniques de la mécanique</option>
+                                            <option value="242 Dessin technique">242 Dessin technique</option>
+                                            <option value="243 Technologie du génie électrique">243 Technologie du génie électrique</option>
+                                            <option value="244 Technologie physique">244 Technologie physique</option>
+                                            <option value="247 Technologie de systèmes">247 Technologie de systèmes</option>
+                                            <option value="248 Techniques maritimes">248 Techniques maritimes</option>
+                                            <option value="251 Technologie et gestion des textiles">251 Technologie et gestion des textiles</option>
+                                            <option value="260 Techniques de l'eau, de l'air et de l'assainissement">260 Techniques de l'eau, de l'air et de l'assainissement</option>
+                                            <option value="262 Environnement">262 Environnement</option>
+                                            <option value="265 Hygiène industrielle">265 Hygiène industrielle</option>
+                                            <option value="270 Technologie du génie métallurgique">270 Technologie du génie métallurgique</option>
+                                            <option value="271 Technologie minérale">271 Technologie minérale</option>
+                                            <option value="272 Techniques d'instruments d'analyse">272 Techniques d'instruments d'analyse</option>
+                                            <option value="280 Aéronautique">280 Aéronautique</option>
+                                        </optgroup>
+                                        <optgroup label="Sciences humaines (300)">
+                                            <option value="300 Sciences humaines">300 Sciences humaines</option>
+                                            <option value="305 Sciences humaines (complémentaire)">305 Sciences humaines (complémentaire)</option>
+                                            <option value="310 Techniques auxiliaires de la justice">310 Techniques auxiliaires de la justice</option>
+                                            <option value="311 Sécurité incendie">311 Sécurité incendie</option>
+                                            <option value="320 Géographie">320 Géographie</option>
+                                            <option value="322 Techniques d'éducation à l'enfance">322 Techniques d'éducation à l'enfance</option>
+                                            <option value="330 Histoire">330 Histoire</option>
+                                            <option value="332 Civilisations anciennes">332 Civilisations anciennes</option>
+                                            <option value="340 Philosophie">340 Philosophie</option>
+                                            <option value="345 Humanities">345 Humanities</option>
+                                            <option value="350 Psychologie">350 Psychologie</option>
+                                            <option value="351 Techniques d'éducation spécialisée">351 Techniques d'éducation spécialisée</option>
+                                            <option value="352 Techniques de gérontologie">352 Techniques de gérontologie</option>
+                                            <option value="353 Techniques d'accueil">353 Techniques d'accueil</option>
+                                            <option value="354 Techniques d'animation">354 Techniques d'animation</option>
+                                            <option value="360 Multidisciplinaire">360 Multidisciplinaire</option>
+                                            <option value="365 Transdisciplinaire">365 Transdisciplinaire</option>
+                                            <option value="370 Science des religions">370 Science des religions</option>
+                                            <option value="371 Pastorale">371 Pastorale</option>
+                                            <option value="381 Anthropologie">381 Anthropologie</option>
+                                            <option value="383 Économique">383 Économique</option>
+                                            <option value="384 Techniques de recherche sociale">384 Techniques de recherche sociale</option>
+                                            <option value="385 Science politique">385 Science politique</option>
+                                            <option value="386 Organisation communautaire">386 Organisation communautaire</option>
+                                            <option value="387 Sociologie">387 Sociologie</option>
+                                            <option value="388 Techniques de travail social">388 Techniques de travail social</option>
+                                            <option value="391 Techniques d'intervention en loisir">391 Techniques d'intervention en loisir</option>
+                                            <option value="393 Techniques de la documentation">393 Techniques de la documentation</option>
+                                            <option value="394 Relations publiques">394 Relations publiques</option>
+                                        </optgroup>
+                                        <optgroup label="Administration (400)">
+                                            <option value="401 Administration">401 Administration</option>
+                                            <option value="410 Techniques administratives">410 Techniques administratives</option>
+                                            <option value="411 Archives médicales">411 Archives médicales</option>
+                                            <option value="412 Techniques de bureautique">412 Techniques de bureautique</option>
+                                            <option value="413 Coopération">413 Coopération</option>
+                                            <option value="414 Techniques de tourisme">414 Techniques de tourisme</option>
+                                            <option value="420 Techniques de l'informatique">420 Techniques de l'informatique</option>
+                                            <option value="430 Techniques de gestion hôtelière et des services alimentaires">430 Techniques de gestion hôtelière et des services alimentaires</option>
+                                        </optgroup>
+                                        <optgroup label="Arts (500)">
+                                            <option value="500 Arts">500 Arts</option>
+                                            <option value="502 Arts et lettres">502 Arts et lettres</option>
+                                            <option value="504 Art et esthétique">504 Art et esthétique</option>
+                                            <option value="506 Danse">506 Danse</option>
+                                            <option value="510 Arts plastiques">510 Arts plastiques</option>
+                                            <option value="520 Esthétique et histoire de l'art">520 Esthétique et histoire de l'art</option>
+                                            <option value="530 Cinéma">530 Cinéma</option>
+                                            <option value="550 Musique">550 Musique</option>
+                                            <option value="551 Techniques professionnelles de musique et chanson">551 Techniques professionnelles de musique et chanson</option>
+                                            <option value="560 Théâtre">560 Théâtre</option>
+                                            <option value="561 Théâtre professionnel">561 Théâtre professionnel</option>
+                                            <option value="570 Arts appliqués">570 Arts appliqués</option>
+                                            <option value="571 Industrie de la mode">571 Industrie de la mode</option>
+                                            <option value="573 Métiers d'art">573 Métiers d'art</option>
+                                            <option value="574 Dessin animé">574 Dessin animé</option>
+                                            <option value="581 Communications graphiques">581 Communications graphiques</option>
+                                            <option value="582 Techniques d'intégration multimédia">582 Techniques d'intégration multimédia</option>
+                                            <option value="585 Communication">585 Communication</option>
+                                            <option value="589 Techniques des communications">589 Techniques des communications</option>
+                                        </optgroup>
+                                        <optgroup label="Langues (600)">
+                                            <option value="601 Français (langue et littérature)">601 Français (langue et littérature)</option>
+                                            <option value="602 Français (langue seconde)">602 Français (langue seconde)</option>
+                                            <option value="603 Anglais (langue et littérature)">603 Anglais (langue et littérature)</option>
+                                            <option value="604 Anglais (langue seconde)">604 Anglais (langue seconde)</option>
+                                            <option value="607 Espagnol">607 Espagnol</option>
+                                            <option value="608 Italien">608 Italien</option>
+                                            <option value="609 Allemand">609 Allemand</option>
+                                            <option value="610 Russe">610 Russe</option>
+                                            <option value="611 Hébreu">611 Hébreu</option>
+                                            <option value="612 Yiddish">612 Yiddish</option>
+                                            <option value="613 Chinois">613 Chinois</option>
+                                            <option value="614 Langues autochtones">614 Langues autochtones</option>
+                                            <option value="615 Langues anciennes">615 Langues anciennes</option>
+                                            <option value="616 Arabe">616 Arabe</option>
+                                            <option value="617 Langue des signes québécoise">617 Langue des signes québécoise</option>
+                                            <option value="618 Langue moderne">618 Langue moderne</option>
+                                            <option value="619 Langues autochtones (langue seconde)">619 Langues autochtones (langue seconde)</option>
+                                            <option value="620 Sciences de la parole">620 Sciences de la parole</option>
+                                        </optgroup>
+                                    </select>
                                 </div>
                                 <div class="groupe-form">
                                     <label>Département</label>
@@ -7629,7 +7772,150 @@
                                             </div>
                                             <div class="groupe-form">
                                                 <label>Discipline</label>
-                                                <input type="text" id="wizard-discipline" class="controle-form" placeholder="Ex: Chimie, Littérature, Philosophie">
+                                                <!-- 🆕 #14 : Converti en dropdown -->
+                                                <select id="wizard-discipline" class="controle-form">
+                                                    <option value="">— Sélectionner —</option>
+                                                    <optgroup label="Sciences de la santé et techniques (100)">
+                                                        <option value="101 Biologie">101 Biologie</option>
+                                                        <option value="105 Culture scientifique et technologique">105 Culture scientifique et technologique</option>
+                                                        <option value="107 Techniques de la santé">107 Techniques de la santé</option>
+                                                        <option value="109 Éducation physique">109 Éducation physique</option>
+                                                        <option value="110 Techniques dentaires">110 Techniques dentaires</option>
+                                                        <option value="111 Techniques d'hygiène dentaire">111 Techniques d'hygiène dentaire</option>
+                                                        <option value="112 Acupuncture">112 Acupuncture</option>
+                                                        <option value="120 Techniques de diététique">120 Techniques de diététique</option>
+                                                        <option value="130 Électrophysiologie médicale">130 Électrophysiologie médicale</option>
+                                                        <option value="140 Technologie d'analyses biomédicales">140 Technologie d'analyses biomédicales</option>
+                                                        <option value="141 Techniques d'inhalothérapie">141 Techniques d'inhalothérapie</option>
+                                                        <option value="142 Techniques de radiologie">142 Techniques de radiologie</option>
+                                                        <option value="144 Techniques de réadaptation">144 Techniques de réadaptation</option>
+                                                        <option value="145 Technologie des sciences naturelles">145 Technologie des sciences naturelles</option>
+                                                        <option value="147 Milieu naturel">147 Milieu naturel</option>
+                                                        <option value="150 Techniques agricoles">150 Techniques agricoles</option>
+                                                        <option value="152 Gestion et exploitation d'entreprise agricole">152 Gestion et exploitation d'entreprise agricole</option>
+                                                        <option value="153 Techniques horticoles">153 Techniques horticoles</option>
+                                                        <option value="154 Technologie des procédés et de la qualité des aliments">154 Technologie des procédés et de la qualité des aliments</option>
+                                                        <option value="160 Techniques paramédicales">160 Techniques paramédicales</option>
+                                                        <option value="165 Pharmacie">165 Pharmacie</option>
+                                                        <option value="171 Techniques de thanatologie">171 Techniques de thanatologie</option>
+                                                        <option value="180 Soins infirmiers">180 Soins infirmiers</option>
+                                                        <option value="181 Soins préhospitaliers d'urgence">181 Soins préhospitaliers d'urgence</option>
+                                                        <option value="190 Technologie forestière">190 Technologie forestière</option>
+                                                    </optgroup>
+                                                    <optgroup label="Sciences et techniques (200)">
+                                                        <option value="201 Mathématique">201 Mathématique</option>
+                                                        <option value="202 Chimie">202 Chimie</option>
+                                                        <option value="203 Physique">203 Physique</option>
+                                                        <option value="204 Langage mathématique et informatique">204 Langage mathématique et informatique</option>
+                                                        <option value="205 Géologie">205 Géologie</option>
+                                                        <option value="210 Techniques de chimie industrielle">210 Techniques de chimie industrielle</option>
+                                                        <option value="211 Techniques des matières plastiques">211 Techniques des matières plastiques</option>
+                                                        <option value="221 Technologie du bâtiment et des travaux publics">221 Technologie du bâtiment et des travaux publics</option>
+                                                        <option value="222 Techniques d'aménagement et d'urbanisme">222 Techniques d'aménagement et d'urbanisme</option>
+                                                        <option value="223 Énergie">223 Énergie</option>
+                                                        <option value="230 Technologie de la géomatique">230 Technologie de la géomatique</option>
+                                                        <option value="231 Techniques de la pêche">231 Techniques de la pêche</option>
+                                                        <option value="232 Technologies des pâtes et papiers">232 Technologies des pâtes et papiers</option>
+                                                        <option value="233 Techniques du meuble et d'ébénisterie">233 Techniques du meuble et d'ébénisterie</option>
+                                                        <option value="235 Production industrielle">235 Production industrielle</option>
+                                                        <option value="241 Techniques de la mécanique">241 Techniques de la mécanique</option>
+                                                        <option value="242 Dessin technique">242 Dessin technique</option>
+                                                        <option value="243 Technologie du génie électrique">243 Technologie du génie électrique</option>
+                                                        <option value="244 Technologie physique">244 Technologie physique</option>
+                                                        <option value="247 Technologie de systèmes">247 Technologie de systèmes</option>
+                                                        <option value="248 Techniques maritimes">248 Techniques maritimes</option>
+                                                        <option value="251 Technologie et gestion des textiles">251 Technologie et gestion des textiles</option>
+                                                        <option value="260 Techniques de l'eau, de l'air et de l'assainissement">260 Techniques de l'eau, de l'air et de l'assainissement</option>
+                                                        <option value="262 Environnement">262 Environnement</option>
+                                                        <option value="265 Hygiène industrielle">265 Hygiène industrielle</option>
+                                                        <option value="270 Technologie du génie métallurgique">270 Technologie du génie métallurgique</option>
+                                                        <option value="271 Technologie minérale">271 Technologie minérale</option>
+                                                        <option value="272 Techniques d'instruments d'analyse">272 Techniques d'instruments d'analyse</option>
+                                                        <option value="280 Aéronautique">280 Aéronautique</option>
+                                                    </optgroup>
+                                                    <optgroup label="Sciences humaines (300)">
+                                                        <option value="300 Sciences humaines">300 Sciences humaines</option>
+                                                        <option value="305 Sciences humaines (complémentaire)">305 Sciences humaines (complémentaire)</option>
+                                                        <option value="310 Techniques auxiliaires de la justice">310 Techniques auxiliaires de la justice</option>
+                                                        <option value="311 Sécurité incendie">311 Sécurité incendie</option>
+                                                        <option value="320 Géographie">320 Géographie</option>
+                                                        <option value="322 Techniques d'éducation à l'enfance">322 Techniques d'éducation à l'enfance</option>
+                                                        <option value="330 Histoire">330 Histoire</option>
+                                                        <option value="332 Civilisations anciennes">332 Civilisations anciennes</option>
+                                                        <option value="340 Philosophie">340 Philosophie</option>
+                                                        <option value="345 Humanities">345 Humanities</option>
+                                                        <option value="350 Psychologie">350 Psychologie</option>
+                                                        <option value="351 Techniques d'éducation spécialisée">351 Techniques d'éducation spécialisée</option>
+                                                        <option value="352 Techniques de gérontologie">352 Techniques de gérontologie</option>
+                                                        <option value="353 Techniques d'accueil">353 Techniques d'accueil</option>
+                                                        <option value="354 Techniques d'animation">354 Techniques d'animation</option>
+                                                        <option value="360 Multidisciplinaire">360 Multidisciplinaire</option>
+                                                        <option value="365 Transdisciplinaire">365 Transdisciplinaire</option>
+                                                        <option value="370 Science des religions">370 Science des religions</option>
+                                                        <option value="371 Pastorale">371 Pastorale</option>
+                                                        <option value="381 Anthropologie">381 Anthropologie</option>
+                                                        <option value="383 Économique">383 Économique</option>
+                                                        <option value="384 Techniques de recherche sociale">384 Techniques de recherche sociale</option>
+                                                        <option value="385 Science politique">385 Science politique</option>
+                                                        <option value="386 Organisation communautaire">386 Organisation communautaire</option>
+                                                        <option value="387 Sociologie">387 Sociologie</option>
+                                                        <option value="388 Techniques de travail social">388 Techniques de travail social</option>
+                                                        <option value="391 Techniques d'intervention en loisir">391 Techniques d'intervention en loisir</option>
+                                                        <option value="393 Techniques de la documentation">393 Techniques de la documentation</option>
+                                                        <option value="394 Relations publiques">394 Relations publiques</option>
+                                                    </optgroup>
+                                                    <optgroup label="Administration (400)">
+                                                        <option value="401 Administration">401 Administration</option>
+                                                        <option value="410 Techniques administratives">410 Techniques administratives</option>
+                                                        <option value="411 Archives médicales">411 Archives médicales</option>
+                                                        <option value="412 Techniques de bureautique">412 Techniques de bureautique</option>
+                                                        <option value="413 Coopération">413 Coopération</option>
+                                                        <option value="414 Techniques de tourisme">414 Techniques de tourisme</option>
+                                                        <option value="420 Techniques de l'informatique">420 Techniques de l'informatique</option>
+                                                        <option value="430 Techniques de gestion hôtelière et des services alimentaires">430 Techniques de gestion hôtelière et des services alimentaires</option>
+                                                    </optgroup>
+                                                    <optgroup label="Arts (500)">
+                                                        <option value="500 Arts">500 Arts</option>
+                                                        <option value="502 Arts et lettres">502 Arts et lettres</option>
+                                                        <option value="504 Art et esthétique">504 Art et esthétique</option>
+                                                        <option value="506 Danse">506 Danse</option>
+                                                        <option value="510 Arts plastiques">510 Arts plastiques</option>
+                                                        <option value="520 Esthétique et histoire de l'art">520 Esthétique et histoire de l'art</option>
+                                                        <option value="530 Cinéma">530 Cinéma</option>
+                                                        <option value="550 Musique">550 Musique</option>
+                                                        <option value="551 Techniques professionnelles de musique et chanson">551 Techniques professionnelles de musique et chanson</option>
+                                                        <option value="560 Théâtre">560 Théâtre</option>
+                                                        <option value="561 Théâtre professionnel">561 Théâtre professionnel</option>
+                                                        <option value="570 Arts appliqués">570 Arts appliqués</option>
+                                                        <option value="571 Industrie de la mode">571 Industrie de la mode</option>
+                                                        <option value="573 Métiers d'art">573 Métiers d'art</option>
+                                                        <option value="574 Dessin animé">574 Dessin animé</option>
+                                                        <option value="581 Communications graphiques">581 Communications graphiques</option>
+                                                        <option value="582 Techniques d'intégration multimédia">582 Techniques d'intégration multimédia</option>
+                                                        <option value="585 Communication">585 Communication</option>
+                                                        <option value="589 Techniques des communications">589 Techniques des communications</option>
+                                                    </optgroup>
+                                                    <optgroup label="Langues (600)">
+                                                        <option value="601 Français (langue et littérature)">601 Français (langue et littérature)</option>
+                                                        <option value="602 Français (langue seconde)">602 Français (langue seconde)</option>
+                                                        <option value="603 Anglais (langue et littérature)">603 Anglais (langue et littérature)</option>
+                                                        <option value="604 Anglais (langue seconde)">604 Anglais (langue seconde)</option>
+                                                        <option value="607 Espagnol">607 Espagnol</option>
+                                                        <option value="608 Italien">608 Italien</option>
+                                                        <option value="609 Allemand">609 Allemand</option>
+                                                        <option value="610 Russe">610 Russe</option>
+                                                        <option value="611 Hébreu">611 Hébreu</option>
+                                                        <option value="612 Yiddish">612 Yiddish</option>
+                                                        <option value="613 Chinois">613 Chinois</option>
+                                                        <option value="614 Langues autochtones">614 Langues autochtones</option>
+                                                        <option value="615 Langues anciennes">615 Langues anciennes</option>
+                                                        <option value="616 Arabe">616 Arabe</option>
+                                                        <option value="617 Langue des signes québécoise">617 Langue des signes québécoise</option>
+                                                        <option value="618 Langue moderne">618 Langue moderne</option>
+                                                        <option value="619 Langues autochtones (langue seconde)">619 Langues autochtones (langue seconde)</option>
+                                                        <option value="620 Sciences de la parole">620 Sciences de la parole</option>
+                                                    </optgroup>
+                                                </select>
                                             </div>
                                         </div>
 
@@ -14605,7 +14891,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '95.6';
-        const BUILD_ID = '0120-1050';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0120-1105';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
