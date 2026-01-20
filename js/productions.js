@@ -3010,6 +3010,11 @@ async function afficherListeProductions(filtreType = '') {
     }).join('');
 
     container.innerHTML = html;
+
+    // Afficher l'apercu PDF de la liste (Beta 95.7 - #30)
+    if (typeof window.afficherApercuProductionsListe === 'function') {
+        window.afficherApercuProductionsListe();
+    }
 }
 
 /**

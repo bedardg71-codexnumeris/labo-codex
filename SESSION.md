@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 95.7
 
 **Date** : 20 janvier 2026
-**Version** : Beta 95.7 (build 0120-0828)
+**Version** : Beta 95.7 (build 0120-1346)
 **Statut** : Application fonctionnelle pour H2026
 
 ---
@@ -28,6 +28,15 @@
 - **Dropdown note maximale** : Peuplé dynamiquement selon l'échelle de performance
 
 ### Derniere tache completee (20 janvier)
+- **EXPORT PDF GRILLES DESCRIPTIVES (#30)** : Première version fonctionnelle
+  - Formulaire 2 étapes : sélection contenu → aperçu mise en page
+  - Options mise en page : orientation (portrait/paysage), taille police (petit/moyen/grand)
+  - Pied de page personnalisable : enseignant, cours, licence CC BY-NC-SA (checkboxes)
+  - Titre avec activité d'apprentissage (ex: "Artefact 1 - Stratégies de lecture")
+  - Masquage "Page 1/1" si une seule page
+  - **Fichiers créés/modifiés** : `js/export-pdf.js`, `index.html` (modal aperçu PDF)
+  - **Ajustements restants** : voir BACKLOG.md #30
+
 - **CLARIFIER ARTEFACTS MEILLEURS VS OBLIGATOIRES (#3)** : Workflow amélioré
   - Primo : Nouvelle question "Combien de productions Obligatoires ?"
   - Primo : Message validation affiche total (ex: "4 meilleures + 2 obligatoires = 6 productions")
@@ -421,6 +430,11 @@
 ## HISTORIQUE RECENT
 
 ### 20 janvier 2026
+- **EXPORT PDF GRILLES DESCRIPTIVES (#30)** : Première version fonctionnelle
+  - Formulaire 2 étapes : sélection contenu → aperçu mise en page
+  - Options : orientation, taille police, pied de page personnalisable (enseignant, cours, licence CC)
+  - Titre inclut l'activité d'apprentissage (production.description)
+  - Fichiers : export-pdf.js, index.html (modal aperçu)
 - **DROPDOWN NOTE MAXIMALE (Beta 95.7)** : Reprise ciblée avec échelle dynamique
   - Champ texte → dropdown peuplé selon l'échelle de l'utilisateur
   - Fonctions : `peuplerDropdownNoteMaximaleMat()`, `peuplerDropdownPlafondNoteCiblee()`

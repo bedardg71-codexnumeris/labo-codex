@@ -1,0 +1,2338 @@
+/**
+ * export-pdf.js - Module d'export PDF pour Monitorage Pedagogique
+ * Beta 95.7 - Tache #30
+ *
+ * Utilise jsPDF + jspdf-autotable pour generer des PDF des elements pedagogiques
+ * Fonctionne 100% hors ligne
+ */
+
+// =============================================================================
+// CONFIGURATION ET CONSTANTES
+// =============================================================================
+
+const PDF_CONFIG = {
+    // Marges en mm
+    marges: {
+        haut: 15,
+        bas: 15,
+        gauche: 15,
+        droite: 15
+    },
+    // Couleurs (RGB)
+    couleurs: {
+        titreSection: [41, 98, 255],      // Bleu principal
+        textePrincipal: [33, 33, 33],     // Gris fonce
+        texteSecondaire: [117, 117, 117], // Gris moyen
+        bordure: [224, 224, 224],         // Gris clair
+        fondEntete: [245, 247, 250],      // Fond gris tres clair
+        // Niveaux IDME
+        niveauI: [211, 47, 47],           // Rouge
+        niveauD: [245, 124, 0],           // Orange
+        niveauM: [56, 142, 60],           // Vert
+        niveauE: [46, 125, 50]            // Vert fonce
+    },
+    // Polices
+    polices: {
+        titrePrincipal: 18,
+        titreSection: 14,
+        sousTitre: 12,
+        texteNormal: 10,
+        textePetit: 9
+    }
+};
+
+// =============================================================================
+// FONCTIONS UTILITAIRES
+// =============================================================================
+
+/**
+ * Cree une nouvelle instance jsPDF avec configuration standard
+ */
+function creerDocumentPDF(orientation = 'portrait') {
+    const { jsPDF } = window.jspdf;
+    return new jsPDF({
+        orientation: orientation,
+        unit: 'mm',
+        format: 'letter'  // 8.5 x 11 pouces - standard nord-americain
+    });
+}
+
+/**
+ * Ajoute un en-tete de page avec titre et date
+ */
+function ajouterEntetePage(doc, titre) {
+    const largeurPage = doc.internal.pageSize.getWidth();
+
+    // Titre
+    doc.setFontSize(PDF_CONFIG.polices.titrePrincipal);
+    doc.setTextColor(...PDF_CONFIG.couleurs.titreSection);
+    doc.setFont('helvetica', 'bold');
+    doc.text(titre, PDF_CONFIG.marges.gauche, PDF_CONFIG.marges.haut + 5);
+
+    // Date d'export
+    const dateExport = new Date().toLocaleDateString('fr-CA', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+    doc.setFontSize(PDF_CONFIG.polices.textePetit);
+    doc.setTextColor(...PDF_CONFIG.couleurs.texteSecondaire);
+    doc.setFont('helvetica', 'normal');
+    doc.text(dateExport, largeurPage - PDF_CONFIG.marges.droite, PDF_CONFIG.marges.haut + 5, { align: 'right' });
+
+    // Ligne de separation
+    doc.setDrawColor(...PDF_CONFIG.couleurs.bordure);
+    doc.setLineWidth(0.5);
+    doc.line(PDF_CONFIG.marges.gauche, PDF_CONFIG.marges.haut + 10, largeurPage - PDF_CONFIG.marges.droite, PDF_CONFIG.marges.haut + 10);
+
+    return PDF_CONFIG.marges.haut + 18; // Position Y apres l'en-tete
+}
+
+/**
+ * Ajoute un pied de page avec numero de page
+ */
+function ajouterPiedPage(doc, numeroPage, totalPages, optionsPied = {}) {
+    const largeurPage = doc.internal.pageSize.getWidth();
+    const hauteurPage = doc.internal.pageSize.getHeight();
+    const posY = hauteurPage - PDF_CONFIG.marges.bas + 5;
+
+    doc.setFontSize(PDF_CONFIG.polices.textePetit);
+    doc.setTextColor(...PDF_CONFIG.couleurs.texteSecondaire);
+    doc.setFont('helvetica', 'normal');
+
+    // Numero de page centre (seulement si plusieurs pages)
+    if (totalPages > 1) {
+        doc.text(
+            `Page ${numeroPage} / ${totalPages}`,
+            largeurPage / 2,
+            posY,
+            { align: 'center' }
+        );
+    }
+
+    // Gauche : Enseignant et/ou Cours
+    const elementsGauche = [];
+    if (optionsPied.inclureEnseignant && optionsPied.enseignant) {
+        elementsGauche.push(optionsPied.enseignant);
+    }
+    if (optionsPied.inclureCours && optionsPied.cours) {
+        elementsGauche.push(optionsPied.cours);
+    }
+    if (elementsGauche.length > 0) {
+        doc.text(elementsGauche.join(' — '), PDF_CONFIG.marges.gauche, posY);
+    }
+
+    // Droite : Licence CC
+    if (optionsPied.inclureLicence) {
+        doc.text(
+            'CC BY-NC-SA 4.0',
+            largeurPage - PDF_CONFIG.marges.droite,
+            posY,
+            { align: 'right' }
+        );
+    }
+}
+
+/**
+ * Ajoute les pieds de page a toutes les pages du document
+ */
+function finaliserDocument(doc, optionsPied = {}) {
+    const totalPages = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        ajouterPiedPage(doc, i, totalPages, optionsPied);
+    }
+}
+
+/**
+ * Obtient la couleur pour un niveau de performance
+ */
+function getCouleurNiveau(code) {
+    const couleurs = {
+        'I': PDF_CONFIG.couleurs.niveauI,
+        'D': PDF_CONFIG.couleurs.niveauD,
+        'M': PDF_CONFIG.couleurs.niveauM,
+        'E': PDF_CONFIG.couleurs.niveauE
+    };
+    return couleurs[code] || PDF_CONFIG.couleurs.textePrincipal;
+}
+
+/**
+ * Formate une date ISO en format lisible
+ */
+function formaterDate(dateISO) {
+    if (!dateISO) return '—';
+    try {
+        return new Date(dateISO).toLocaleDateString('fr-CA', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    } catch {
+        return dateISO;
+    }
+}
+
+// =============================================================================
+// GENERATION D'APERCUS HTML (Preview avant export)
+// =============================================================================
+
+/**
+ * Genere un apercu HTML d'une grille de criteres
+ */
+function genererApercuGrille(grille) {
+    if (!grille) return '<p class="text-muted">Aucune grille selectionnee</p>';
+
+    let html = `
+        <div class="apercu-pdf">
+            <div class="apercu-pdf-entete">
+                <h3>${escapeHtml(grille.nom || 'Grille sans nom')}</h3>
+                <span class="apercu-pdf-date">Apercu - ${new Date().toLocaleDateString('fr-CA')}</span>
+            </div>
+    `;
+
+    if (grille.description) {
+        html += `<p class="apercu-pdf-description">${escapeHtml(grille.description)}</p>`;
+    }
+
+    if (grille.criteres && grille.criteres.length > 0) {
+        html += `
+            <table class="apercu-pdf-table">
+                <thead>
+                    <tr>
+                        <th style="width: 25%;">Critere</th>
+                        <th style="width: 60%;">Description</th>
+                        <th style="width: 15%; text-align: center;">Pond.</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        grille.criteres.forEach(c => {
+            html += `
+                <tr>
+                    <td><strong>${escapeHtml(c.nom || '—')}</strong></td>
+                    <td>${escapeHtml(c.description || '—')}</td>
+                    <td style="text-align: center;">${c.ponderation ? c.ponderation + '%' : '—'}</td>
+                </tr>
+            `;
+        });
+        html += '</tbody></table>';
+    } else {
+        html += '<p class="text-muted">Aucun critere defini</p>';
+    }
+
+    html += '</div>';
+    return html;
+}
+
+/**
+ * Genere un apercu HTML d'une echelle de performance
+ */
+function genererApercuEchelle(echelle) {
+    if (!echelle) return '<p class="text-muted">Aucune echelle selectionnee</p>';
+
+    let html = `
+        <div class="apercu-pdf">
+            <div class="apercu-pdf-entete">
+                <h3>${escapeHtml(echelle.nom || 'Echelle sans nom')}</h3>
+                <span class="apercu-pdf-date">Apercu - ${new Date().toLocaleDateString('fr-CA')}</span>
+            </div>
+    `;
+
+    if (echelle.config?.seuilReussite) {
+        html += `<p class="apercu-pdf-info">Seuil de reussite : <strong>${echelle.config.seuilReussite}%</strong></p>`;
+    }
+
+    if (echelle.niveaux && echelle.niveaux.length > 0) {
+        html += `
+            <table class="apercu-pdf-table">
+                <thead>
+                    <tr>
+                        <th style="width: 10%; text-align: center;">Code</th>
+                        <th style="width: 25%;">Niveau</th>
+                        <th style="width: 45%;">Description</th>
+                        <th style="width: 20%; text-align: center;">Plage</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        echelle.niveaux.forEach(n => {
+            const couleurClass = `apercu-niveau-${(n.code || '').toUpperCase()}`;
+            html += `
+                <tr>
+                    <td style="text-align: center;" class="${couleurClass}"><strong>${escapeHtml(n.code || '—')}</strong></td>
+                    <td>${escapeHtml(n.nom || '—')}</td>
+                    <td>${escapeHtml(n.description || '—')}</td>
+                    <td style="text-align: center;">${n.min ?? 0}% - ${n.max ?? 100}%</td>
+                </tr>
+            `;
+        });
+        html += '</tbody></table>';
+    } else {
+        html += '<p class="text-muted">Aucun niveau defini</p>';
+    }
+
+    html += '</div>';
+    return html;
+}
+
+/**
+ * Genere un apercu HTML d'une liste de productions
+ */
+function genererApercuProductions(productions) {
+    if (!productions || productions.length === 0) {
+        return '<p class="text-muted">Aucune production a afficher</p>';
+    }
+
+    let html = `
+        <div class="apercu-pdf">
+            <div class="apercu-pdf-entete">
+                <h3>Productions pedagogiques</h3>
+                <span class="apercu-pdf-date">Apercu - ${new Date().toLocaleDateString('fr-CA')}</span>
+            </div>
+            <p class="apercu-pdf-info">${productions.length} production(s)</p>
+            <table class="apercu-pdf-table">
+                <thead>
+                    <tr>
+                        <th style="width: 45%;">Titre</th>
+                        <th style="width: 20%;">Type</th>
+                        <th style="width: 15%; text-align: center;">Pond.</th>
+                        <th style="width: 20%;">Echeance</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    productions.forEach(p => {
+        const dateFormatee = p.dateEcheance ? new Date(p.dateEcheance).toLocaleDateString('fr-CA') : '—';
+        html += `
+            <tr>
+                <td>${escapeHtml(p.titre || '—')}</td>
+                <td>${escapeHtml(p.type || '—')}</td>
+                <td style="text-align: center;">${p.ponderation ? p.ponderation + '%' : '—'}</td>
+                <td>${dateFormatee}</td>
+            </tr>
+        `;
+    });
+
+    html += '</tbody></table></div>';
+    return html;
+}
+
+/**
+ * Genere un apercu HTML d'une cartouche de retroaction
+ */
+function genererApercuCartouche(cartouche) {
+    if (!cartouche) return '<p class="text-muted">Aucune cartouche selectionnee</p>';
+
+    const criteres = cartouche.criteres || [];
+    const niveaux = cartouche.niveaux || [];
+    const commentaires = cartouche.commentaires || {};
+
+    let html = `
+        <div class="apercu-pdf apercu-pdf-paysage">
+            <div class="apercu-pdf-entete">
+                <h3>${escapeHtml(cartouche.nom || 'Cartouche sans nom')}</h3>
+                <span class="apercu-pdf-date">Apercu - ${new Date().toLocaleDateString('fr-CA')}</span>
+            </div>
+    `;
+
+    if (cartouche.contexte) {
+        html += `<p class="apercu-pdf-description">${escapeHtml(cartouche.contexte)}</p>`;
+    }
+
+    if (criteres.length === 0 || niveaux.length === 0) {
+        html += '<p class="text-muted">Cartouche incomplete (criteres ou niveaux manquants)</p>';
+    } else {
+        html += `
+            <table class="apercu-pdf-table apercu-pdf-table-matrice">
+                <thead>
+                    <tr>
+                        <th style="width: 15%;">Critere</th>
+        `;
+        niveaux.forEach(n => {
+            const couleurClass = `apercu-niveau-${(n.code || '').toUpperCase()}`;
+            html += `<th class="${couleurClass}">${escapeHtml(n.code || n.nom || '—')}</th>`;
+        });
+        html += '</tr></thead><tbody>';
+
+        criteres.forEach(c => {
+            html += `<tr><td><strong>${escapeHtml(c.nom || '—')}</strong></td>`;
+            niveaux.forEach(n => {
+                const cle = `${c.id}_${n.code}`;
+                const commentaire = commentaires[cle] || '—';
+                html += `<td class="apercu-cell-commentaire">${escapeHtml(commentaire)}</td>`;
+            });
+            html += '</tr>';
+        });
+
+        html += '</tbody></table>';
+    }
+
+    html += '</div>';
+    return html;
+}
+
+/**
+ * Echappe les caracteres HTML
+ */
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// =============================================================================
+// EXPORT DES PRODUCTIONS
+// =============================================================================
+
+/**
+ * Exporte une liste de productions en PDF
+ */
+async function exporterProductionsPDF(productions, options = {}) {
+    const doc = creerDocumentPDF();
+    let posY = ajouterEntetePage(doc, options.titre || 'Productions pedagogiques');
+
+    const largeurPage = doc.internal.pageSize.getWidth();
+    const largeurContenu = largeurPage - PDF_CONFIG.marges.gauche - PDF_CONFIG.marges.droite;
+
+    // Tableau des productions
+    const donnees = productions.map(p => [
+        p.titre || '—',
+        p.type || '—',
+        p.ponderation ? `${p.ponderation}%` : '—',
+        formaterDate(p.dateEcheance)
+    ]);
+
+    doc.autoTable({
+        startY: posY,
+        head: [['Titre', 'Type', 'Pond.', 'Echeance']],
+        body: donnees,
+        theme: 'grid',
+        headStyles: {
+            fillColor: PDF_CONFIG.couleurs.titreSection,
+            textColor: [255, 255, 255],
+            fontStyle: 'bold',
+            fontSize: PDF_CONFIG.polices.texteNormal
+        },
+        bodyStyles: {
+            fontSize: PDF_CONFIG.polices.textePetit,
+            textColor: PDF_CONFIG.couleurs.textePrincipal
+        },
+        columnStyles: {
+            0: { cellWidth: largeurContenu * 0.45 },
+            1: { cellWidth: largeurContenu * 0.20 },
+            2: { cellWidth: largeurContenu * 0.15, halign: 'center' },
+            3: { cellWidth: largeurContenu * 0.20 }
+        },
+        margin: { left: PDF_CONFIG.marges.gauche, right: PDF_CONFIG.marges.droite }
+    });
+
+    finaliserDocument(doc);
+    doc.save(options.nomFichier || 'productions.pdf');
+}
+
+// =============================================================================
+// EXPORT DES GRILLES DE CRITERES
+// =============================================================================
+
+/**
+ * Exporte une grille de criteres en PDF
+ */
+async function exporterGrillePDF(grille, options = {}) {
+    const doc = creerDocumentPDF();
+    let posY = ajouterEntetePage(doc, grille.nom || 'Grille de criteres');
+
+    const largeurPage = doc.internal.pageSize.getWidth();
+    const largeurContenu = largeurPage - PDF_CONFIG.marges.gauche - PDF_CONFIG.marges.droite;
+
+    // Description de la grille
+    if (grille.description) {
+        doc.setFontSize(PDF_CONFIG.polices.texteNormal);
+        doc.setTextColor(...PDF_CONFIG.couleurs.texteSecondaire);
+        doc.setFont('helvetica', 'italic');
+        const lignes = doc.splitTextToSize(grille.description, largeurContenu);
+        doc.text(lignes, PDF_CONFIG.marges.gauche, posY);
+        posY += lignes.length * 5 + 5;
+    }
+
+    // Tableau des criteres
+    if (grille.criteres && grille.criteres.length > 0) {
+        const donnees = grille.criteres.map(c => [
+            c.nom || '—',
+            c.description || '—',
+            c.ponderation ? `${c.ponderation}%` : '—'
+        ]);
+
+        doc.autoTable({
+            startY: posY,
+            head: [['Critere', 'Description', 'Pond.']],
+            body: donnees,
+            theme: 'grid',
+            headStyles: {
+                fillColor: PDF_CONFIG.couleurs.titreSection,
+                textColor: [255, 255, 255],
+                fontStyle: 'bold',
+                fontSize: PDF_CONFIG.polices.texteNormal
+            },
+            bodyStyles: {
+                fontSize: PDF_CONFIG.polices.textePetit,
+                textColor: PDF_CONFIG.couleurs.textePrincipal
+            },
+            columnStyles: {
+                0: { cellWidth: largeurContenu * 0.25, fontStyle: 'bold' },
+                1: { cellWidth: largeurContenu * 0.60 },
+                2: { cellWidth: largeurContenu * 0.15, halign: 'center' }
+            },
+            margin: { left: PDF_CONFIG.marges.gauche, right: PDF_CONFIG.marges.droite }
+        });
+    }
+
+    finaliserDocument(doc);
+    doc.save(options.nomFichier || `grille-${grille.id || 'export'}.pdf`);
+}
+
+/**
+ * Exporte toutes les grilles en un seul PDF
+ */
+async function exporterToutesGrillesPDF(options = {}) {
+    const grilles = await db.get('grillesTemplates') || [];
+    if (grilles.length === 0) {
+        alert('Aucune grille a exporter.');
+        return;
+    }
+
+    const doc = creerDocumentPDF();
+    let premierePage = true;
+
+    for (const grille of grilles) {
+        if (!premierePage) {
+            doc.addPage();
+        }
+        premierePage = false;
+
+        let posY = ajouterEntetePage(doc, grille.nom || 'Grille de criteres');
+
+        const largeurPage = doc.internal.pageSize.getWidth();
+        const largeurContenu = largeurPage - PDF_CONFIG.marges.gauche - PDF_CONFIG.marges.droite;
+
+        // Description
+        if (grille.description) {
+            doc.setFontSize(PDF_CONFIG.polices.texteNormal);
+            doc.setTextColor(...PDF_CONFIG.couleurs.texteSecondaire);
+            doc.setFont('helvetica', 'italic');
+            const lignes = doc.splitTextToSize(grille.description, largeurContenu);
+            doc.text(lignes, PDF_CONFIG.marges.gauche, posY);
+            posY += lignes.length * 5 + 5;
+        }
+
+        // Tableau des criteres
+        if (grille.criteres && grille.criteres.length > 0) {
+            const donnees = grille.criteres.map(c => [
+                c.nom || '—',
+                c.description || '—',
+                c.ponderation ? `${c.ponderation}%` : '—'
+            ]);
+
+            doc.autoTable({
+                startY: posY,
+                head: [['Critere', 'Description', 'Pond.']],
+                body: donnees,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: PDF_CONFIG.couleurs.titreSection,
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold'
+                },
+                bodyStyles: {
+                    fontSize: PDF_CONFIG.polices.textePetit
+                },
+                columnStyles: {
+                    0: { cellWidth: largeurContenu * 0.25, fontStyle: 'bold' },
+                    1: { cellWidth: largeurContenu * 0.60 },
+                    2: { cellWidth: largeurContenu * 0.15, halign: 'center' }
+                },
+                margin: { left: PDF_CONFIG.marges.gauche, right: PDF_CONFIG.marges.droite }
+            });
+        }
+    }
+
+    finaliserDocument(doc);
+    doc.save(options.nomFichier || 'grilles-criteres.pdf');
+}
+
+// =============================================================================
+// EXPORT DES ECHELLES DE PERFORMANCE
+// =============================================================================
+
+/**
+ * Exporte une echelle de performance en PDF
+ */
+async function exporterEchellePDF(echelle, options = {}) {
+    const doc = creerDocumentPDF();
+    let posY = ajouterEntetePage(doc, echelle.nom || 'Echelle de performance');
+
+    const largeurPage = doc.internal.pageSize.getWidth();
+    const largeurContenu = largeurPage - PDF_CONFIG.marges.gauche - PDF_CONFIG.marges.droite;
+
+    // Seuil de reussite si defini
+    if (echelle.config?.seuilReussite) {
+        doc.setFontSize(PDF_CONFIG.polices.texteNormal);
+        doc.setTextColor(...PDF_CONFIG.couleurs.texteSecondaire);
+        doc.text(`Seuil de reussite : ${echelle.config.seuilReussite}%`, PDF_CONFIG.marges.gauche, posY);
+        posY += 8;
+    }
+
+    // Tableau des niveaux
+    if (echelle.niveaux && echelle.niveaux.length > 0) {
+        const donnees = echelle.niveaux.map(n => [
+            n.code || '—',
+            n.nom || '—',
+            n.description || '—',
+            `${n.min ?? 0}% - ${n.max ?? 100}%`
+        ]);
+
+        doc.autoTable({
+            startY: posY,
+            head: [['Code', 'Niveau', 'Description', 'Plage']],
+            body: donnees,
+            theme: 'grid',
+            headStyles: {
+                fillColor: PDF_CONFIG.couleurs.titreSection,
+                textColor: [255, 255, 255],
+                fontStyle: 'bold',
+                fontSize: PDF_CONFIG.polices.texteNormal
+            },
+            bodyStyles: {
+                fontSize: PDF_CONFIG.polices.textePetit,
+                textColor: PDF_CONFIG.couleurs.textePrincipal
+            },
+            columnStyles: {
+                0: { cellWidth: largeurContenu * 0.10, halign: 'center', fontStyle: 'bold' },
+                1: { cellWidth: largeurContenu * 0.25 },
+                2: { cellWidth: largeurContenu * 0.45 },
+                3: { cellWidth: largeurContenu * 0.20, halign: 'center' }
+            },
+            didParseCell: function(data) {
+                // Colorer le code selon le niveau
+                if (data.section === 'body' && data.column.index === 0) {
+                    const code = data.cell.raw;
+                    const couleur = getCouleurNiveau(code);
+                    data.cell.styles.textColor = couleur;
+                }
+            },
+            margin: { left: PDF_CONFIG.marges.gauche, right: PDF_CONFIG.marges.droite }
+        });
+    }
+
+    finaliserDocument(doc);
+    doc.save(options.nomFichier || `echelle-${echelle.id || 'export'}.pdf`);
+}
+
+/**
+ * Exporte toutes les echelles en un seul PDF
+ */
+async function exporterToutesEchellesPDF(options = {}) {
+    const echelles = await db.get('echellesTemplates') || [];
+    if (echelles.length === 0) {
+        alert('Aucune echelle a exporter.');
+        return;
+    }
+
+    const doc = creerDocumentPDF();
+    let premierePage = true;
+
+    for (const echelle of echelles) {
+        if (!premierePage) {
+            doc.addPage();
+        }
+        premierePage = false;
+
+        let posY = ajouterEntetePage(doc, echelle.nom || 'Echelle de performance');
+
+        const largeurPage = doc.internal.pageSize.getWidth();
+        const largeurContenu = largeurPage - PDF_CONFIG.marges.gauche - PDF_CONFIG.marges.droite;
+
+        // Seuil de reussite
+        if (echelle.config?.seuilReussite) {
+            doc.setFontSize(PDF_CONFIG.polices.texteNormal);
+            doc.setTextColor(...PDF_CONFIG.couleurs.texteSecondaire);
+            doc.text(`Seuil de reussite : ${echelle.config.seuilReussite}%`, PDF_CONFIG.marges.gauche, posY);
+            posY += 8;
+        }
+
+        // Tableau des niveaux
+        if (echelle.niveaux && echelle.niveaux.length > 0) {
+            const donnees = echelle.niveaux.map(n => [
+                n.code || '—',
+                n.nom || '—',
+                n.description || '—',
+                `${n.min ?? 0}% - ${n.max ?? 100}%`
+            ]);
+
+            doc.autoTable({
+                startY: posY,
+                head: [['Code', 'Niveau', 'Description', 'Plage']],
+                body: donnees,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: PDF_CONFIG.couleurs.titreSection,
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold'
+                },
+                bodyStyles: {
+                    fontSize: PDF_CONFIG.polices.textePetit
+                },
+                columnStyles: {
+                    0: { cellWidth: largeurContenu * 0.10, halign: 'center', fontStyle: 'bold' },
+                    1: { cellWidth: largeurContenu * 0.25 },
+                    2: { cellWidth: largeurContenu * 0.45 },
+                    3: { cellWidth: largeurContenu * 0.20, halign: 'center' }
+                },
+                didParseCell: function(data) {
+                    if (data.section === 'body' && data.column.index === 0) {
+                        const code = data.cell.raw;
+                        const couleur = getCouleurNiveau(code);
+                        data.cell.styles.textColor = couleur;
+                    }
+                },
+                margin: { left: PDF_CONFIG.marges.gauche, right: PDF_CONFIG.marges.droite }
+            });
+        }
+    }
+
+    finaliserDocument(doc);
+    doc.save(options.nomFichier || 'echelles-performance.pdf');
+}
+
+// =============================================================================
+// EXPORT DES CARTOUCHES DE RETROACTION
+// =============================================================================
+
+/**
+ * Exporte une cartouche de retroaction en PDF (matrice criteres x niveaux)
+ */
+async function exporterCartouchePDF(cartouche, options = {}) {
+    // Mode paysage pour la matrice
+    const doc = creerDocumentPDF('landscape');
+    let posY = ajouterEntetePage(doc, cartouche.nom || 'Cartouche de retroaction');
+
+    const largeurPage = doc.internal.pageSize.getWidth();
+    const largeurContenu = largeurPage - PDF_CONFIG.marges.gauche - PDF_CONFIG.marges.droite;
+
+    // Contexte
+    if (cartouche.contexte) {
+        doc.setFontSize(PDF_CONFIG.polices.textePetit);
+        doc.setTextColor(...PDF_CONFIG.couleurs.texteSecondaire);
+        doc.setFont('helvetica', 'italic');
+        const lignes = doc.splitTextToSize(cartouche.contexte, largeurContenu);
+        doc.text(lignes, PDF_CONFIG.marges.gauche, posY);
+        posY += lignes.length * 4 + 5;
+    }
+
+    // Construction de la matrice
+    const criteres = cartouche.criteres || [];
+    const niveaux = cartouche.niveaux || [];
+    const commentaires = cartouche.commentaires || {};
+
+    if (criteres.length === 0 || niveaux.length === 0) {
+        doc.setFontSize(PDF_CONFIG.polices.texteNormal);
+        doc.setTextColor(...PDF_CONFIG.couleurs.texteSecondaire);
+        doc.text('Cartouche incomplete (criteres ou niveaux manquants)', PDF_CONFIG.marges.gauche, posY);
+    } else {
+        // En-tetes : Critere + niveaux
+        const entetes = ['Critere', ...niveaux.map(n => n.code || n.nom)];
+
+        // Lignes : un critere par ligne avec ses commentaires
+        const donnees = criteres.map(c => {
+            const ligne = [c.nom || '—'];
+            niveaux.forEach(n => {
+                const cle = `${c.id}_${n.code}`;
+                ligne.push(commentaires[cle] || '—');
+            });
+            return ligne;
+        });
+
+        // Calcul des largeurs de colonnes
+        const largeurCritere = largeurContenu * 0.15;
+        const largeurNiveau = (largeurContenu - largeurCritere) / niveaux.length;
+
+        const colonnesStyles = {
+            0: { cellWidth: largeurCritere, fontStyle: 'bold' }
+        };
+        niveaux.forEach((n, i) => {
+            colonnesStyles[i + 1] = { cellWidth: largeurNiveau };
+        });
+
+        doc.autoTable({
+            startY: posY,
+            head: [entetes],
+            body: donnees,
+            theme: 'grid',
+            headStyles: {
+                fillColor: PDF_CONFIG.couleurs.titreSection,
+                textColor: [255, 255, 255],
+                fontStyle: 'bold',
+                fontSize: PDF_CONFIG.polices.textePetit,
+                halign: 'center'
+            },
+            bodyStyles: {
+                fontSize: 8,
+                textColor: PDF_CONFIG.couleurs.textePrincipal,
+                cellPadding: 2
+            },
+            columnStyles: colonnesStyles,
+            didParseCell: function(data) {
+                // Colorer les en-tetes de niveaux selon IDME
+                if (data.section === 'head' && data.column.index > 0) {
+                    const niveau = niveaux[data.column.index - 1];
+                    if (niveau?.code) {
+                        const couleur = getCouleurNiveau(niveau.code);
+                        // Garder le fond blanc et colorer le texte
+                        data.cell.styles.fillColor = [255, 255, 255];
+                        data.cell.styles.textColor = couleur;
+                    }
+                }
+            },
+            margin: { left: PDF_CONFIG.marges.gauche, right: PDF_CONFIG.marges.droite }
+        });
+    }
+
+    finaliserDocument(doc);
+    doc.save(options.nomFichier || `cartouche-${cartouche.id || 'export'}.pdf`);
+}
+
+// =============================================================================
+// EXPORT COMPLET (REFERENTIEL PEDAGOGIQUE)
+// =============================================================================
+
+/**
+ * Exporte le referentiel pedagogique complet en PDF
+ * Inclut : Productions, Grilles, Echelles, Cartouches
+ */
+async function exporterReferentielCompletPDF(options = {}) {
+    const doc = creerDocumentPDF();
+
+    // Page de couverture
+    const largeurPage = doc.internal.pageSize.getWidth();
+    const hauteurPage = doc.internal.pageSize.getHeight();
+
+    doc.setFontSize(24);
+    doc.setTextColor(...PDF_CONFIG.couleurs.titreSection);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Referentiel Pedagogique', largeurPage / 2, hauteurPage / 3, { align: 'center' });
+
+    doc.setFontSize(14);
+    doc.setTextColor(...PDF_CONFIG.couleurs.texteSecondaire);
+    doc.setFont('helvetica', 'normal');
+    doc.text(options.cours || 'Cours', largeurPage / 2, hauteurPage / 3 + 15, { align: 'center' });
+    doc.text(options.trimestre || 'Trimestre', largeurPage / 2, hauteurPage / 3 + 25, { align: 'center' });
+
+    const dateExport = new Date().toLocaleDateString('fr-CA', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+    doc.text(`Exporte le ${dateExport}`, largeurPage / 2, hauteurPage / 3 + 40, { align: 'center' });
+
+    doc.setFontSize(10);
+    doc.text('Genere par Monitorage Pedagogique', largeurPage / 2, hauteurPage - 30, { align: 'center' });
+
+    // Charger les donnees
+    const productions = await db.get(cle('productionsPedagogiques')) || [];
+    const grilles = await db.get('grillesTemplates') || [];
+    const echelles = await db.get('echellesTemplates') || [];
+
+    // Section Productions
+    if (productions.length > 0) {
+        doc.addPage();
+        let posY = ajouterEntetePage(doc, '1. Productions');
+
+        const largeurContenu = largeurPage - PDF_CONFIG.marges.gauche - PDF_CONFIG.marges.droite;
+        const donnees = productions.map(p => [
+            p.titre || '—',
+            p.type || '—',
+            p.ponderation ? `${p.ponderation}%` : '—',
+            formaterDate(p.dateEcheance)
+        ]);
+
+        doc.autoTable({
+            startY: posY,
+            head: [['Titre', 'Type', 'Pond.', 'Echeance']],
+            body: donnees,
+            theme: 'grid',
+            headStyles: {
+                fillColor: PDF_CONFIG.couleurs.titreSection,
+                textColor: [255, 255, 255],
+                fontStyle: 'bold'
+            },
+            bodyStyles: { fontSize: PDF_CONFIG.polices.textePetit },
+            columnStyles: {
+                0: { cellWidth: largeurContenu * 0.45 },
+                1: { cellWidth: largeurContenu * 0.20 },
+                2: { cellWidth: largeurContenu * 0.15, halign: 'center' },
+                3: { cellWidth: largeurContenu * 0.20 }
+            },
+            margin: { left: PDF_CONFIG.marges.gauche, right: PDF_CONFIG.marges.droite }
+        });
+    }
+
+    // Section Grilles
+    for (const grille of grilles) {
+        doc.addPage();
+        let posY = ajouterEntetePage(doc, `2. Grille : ${grille.nom}`);
+
+        const largeurContenu = largeurPage - PDF_CONFIG.marges.gauche - PDF_CONFIG.marges.droite;
+
+        if (grille.description) {
+            doc.setFontSize(PDF_CONFIG.polices.texteNormal);
+            doc.setTextColor(...PDF_CONFIG.couleurs.texteSecondaire);
+            doc.setFont('helvetica', 'italic');
+            const lignes = doc.splitTextToSize(grille.description, largeurContenu);
+            doc.text(lignes, PDF_CONFIG.marges.gauche, posY);
+            posY += lignes.length * 5 + 5;
+        }
+
+        if (grille.criteres && grille.criteres.length > 0) {
+            const donnees = grille.criteres.map(c => [
+                c.nom || '—',
+                c.description || '—',
+                c.ponderation ? `${c.ponderation}%` : '—'
+            ]);
+
+            doc.autoTable({
+                startY: posY,
+                head: [['Critere', 'Description', 'Pond.']],
+                body: donnees,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: PDF_CONFIG.couleurs.titreSection,
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold'
+                },
+                bodyStyles: { fontSize: PDF_CONFIG.polices.textePetit },
+                columnStyles: {
+                    0: { cellWidth: largeurContenu * 0.25, fontStyle: 'bold' },
+                    1: { cellWidth: largeurContenu * 0.60 },
+                    2: { cellWidth: largeurContenu * 0.15, halign: 'center' }
+                },
+                margin: { left: PDF_CONFIG.marges.gauche, right: PDF_CONFIG.marges.droite }
+            });
+        }
+    }
+
+    // Section Echelles
+    for (const echelle of echelles) {
+        doc.addPage();
+        let posY = ajouterEntetePage(doc, `3. Echelle : ${echelle.nom}`);
+
+        const largeurContenu = largeurPage - PDF_CONFIG.marges.gauche - PDF_CONFIG.marges.droite;
+
+        if (echelle.niveaux && echelle.niveaux.length > 0) {
+            const donnees = echelle.niveaux.map(n => [
+                n.code || '—',
+                n.nom || '—',
+                n.description || '—',
+                `${n.min ?? 0}% - ${n.max ?? 100}%`
+            ]);
+
+            doc.autoTable({
+                startY: posY,
+                head: [['Code', 'Niveau', 'Description', 'Plage']],
+                body: donnees,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: PDF_CONFIG.couleurs.titreSection,
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold'
+                },
+                bodyStyles: { fontSize: PDF_CONFIG.polices.textePetit },
+                columnStyles: {
+                    0: { cellWidth: largeurContenu * 0.10, halign: 'center', fontStyle: 'bold' },
+                    1: { cellWidth: largeurContenu * 0.25 },
+                    2: { cellWidth: largeurContenu * 0.45 },
+                    3: { cellWidth: largeurContenu * 0.20, halign: 'center' }
+                },
+                didParseCell: function(data) {
+                    if (data.section === 'body' && data.column.index === 0) {
+                        const code = data.cell.raw;
+                        const couleur = getCouleurNiveau(code);
+                        data.cell.styles.textColor = couleur;
+                    }
+                },
+                margin: { left: PDF_CONFIG.marges.gauche, right: PDF_CONFIG.marges.droite }
+            });
+        }
+    }
+
+    finaliserDocument(doc);
+    doc.save(options.nomFichier || 'referentiel-pedagogique.pdf');
+}
+
+// =============================================================================
+// EXPOSITION GLOBALE
+// =============================================================================
+
+window.ExportPDF = {
+    // Config
+    config: PDF_CONFIG,
+
+    // Productions
+    exporterProductions: exporterProductionsPDF,
+
+    // Grilles
+    exporterGrille: exporterGrillePDF,
+    exporterToutesGrilles: exporterToutesGrillesPDF,
+
+    // Echelles
+    exporterEchelle: exporterEchellePDF,
+    exporterToutesEchelles: exporterToutesEchellesPDF,
+
+    // Cartouches
+    exporterCartouche: exporterCartouchePDF,
+
+    // Complet
+    exporterReferentiel: exporterReferentielCompletPDF,
+
+    // Apercus HTML
+    apercuGrille: genererApercuGrille,
+    apercuEchelle: genererApercuEchelle,
+    apercuProductions: genererApercuProductions,
+    apercuCartouche: genererApercuCartouche
+};
+
+// =============================================================================
+// FONCTIONS GLOBALES POUR LES BOUTONS HTML
+// =============================================================================
+
+/**
+ * Exporte les productions du trimestre courant en PDF
+ * Appelee depuis le bouton dans la section Productions
+ */
+async function exporterProductionsEnPDF() {
+    try {
+        const productions = await db.get(cle('productionsPedagogiques')) || [];
+        if (productions.length === 0) {
+            alert('Aucune production a exporter.');
+            return;
+        }
+        await exporterProductionsPDF(productions, {
+            titre: 'Productions pedagogiques',
+            nomFichier: 'productions.pdf'
+        });
+    } catch (err) {
+        console.error('[export-pdf] Erreur export productions:', err);
+        alert('Erreur lors de l\'export PDF. Consultez la console.');
+    }
+}
+
+/**
+ * Exporte la cartouche actuellement selectionnee en PDF
+ * Appelee depuis le bouton dans la section Cartouches
+ */
+async function exporterCartoucheSelectionneeEnPDF() {
+    try {
+        // Recuperer la cartouche selectionnee via l'interface
+        const grilleId = document.getElementById('selectGrilleRetroaction')?.value;
+        const cartoucheId = document.getElementById('selectCartouche')?.value;
+
+        if (!grilleId || !cartoucheId) {
+            alert('Veuillez d\'abord selectionner une cartouche.');
+            return;
+        }
+
+        // Charger les cartouches de cette grille
+        let cartouches = await db.get(`cartouches_${grilleId}`) || [];
+        if (!Array.isArray(cartouches)) {
+            cartouches = [cartouches];
+        }
+
+        const cartouche = cartouches.find(c => c.id === cartoucheId);
+        if (!cartouche) {
+            alert('Cartouche introuvable.');
+            return;
+        }
+
+        await exporterCartouchePDF(cartouche, {
+            nomFichier: `cartouche-${cartouche.nom || cartoucheId}.pdf`
+        });
+    } catch (err) {
+        console.error('[export-pdf] Erreur export cartouche:', err);
+        alert('Erreur lors de l\'export PDF. Consultez la console.');
+    }
+}
+
+/**
+ * Exporte la grille actuellement selectionnee en PDF
+ * Utilise la variable globale grilleTemplateActuelle
+ */
+async function exporterGrilleSelectionneeEnPDF() {
+    try {
+        // grilleTemplateActuelle est definie dans config.js
+        if (!grilleTemplateActuelle) {
+            alert('Veuillez d\'abord selectionner une grille.');
+            return;
+        }
+        await exporterGrillePDF(grilleTemplateActuelle, {
+            nomFichier: `grille-${grilleTemplateActuelle.nom || 'export'}.pdf`
+        });
+    } catch (err) {
+        console.error('[export-pdf] Erreur export grille:', err);
+        alert('Erreur lors de l\'export PDF. Consultez la console.');
+    }
+}
+
+/**
+ * Exporte l'echelle actuellement selectionnee en PDF
+ * Utilise la variable globale echelleTemplateActuelle
+ */
+async function exporterEchelleSelectionneeEnPDF() {
+    try {
+        // echelleTemplateActuelle est definie dans echelles.js
+        if (!window.echelleTemplateActuelle) {
+            alert('Veuillez d\'abord selectionner une echelle.');
+            return;
+        }
+        await exporterEchellePDF(window.echelleTemplateActuelle, {
+            nomFichier: `echelle-${window.echelleTemplateActuelle.nom || 'export'}.pdf`
+        });
+    } catch (err) {
+        console.error('[export-pdf] Erreur export echelle:', err);
+        alert('Erreur lors de l\'export PDF. Consultez la console.');
+    }
+}
+
+// =============================================================================
+// FONCTIONS D'APERCU POUR L'INTERFACE
+// =============================================================================
+
+/**
+ * Affiche l'apercu de la grille selectionnee dans la zone dediee
+ */
+function afficherApercuGrilleSelectionnee() {
+    const zoneApercu = document.getElementById('zoneApercuGrille');
+    const contenuApercu = document.getElementById('contenuApercuGrille');
+    const btnExport = document.getElementById('btnPreparerPDFGrille');
+
+    if (!zoneApercu || !contenuApercu) return;
+
+    if (grilleTemplateActuelle) {
+        contenuApercu.innerHTML = genererApercuGrille(grilleTemplateActuelle);
+        zoneApercu.classList.add('visible');
+        if (btnExport) btnExport.classList.add('visible');
+    } else {
+        zoneApercu.classList.remove('visible');
+        if (btnExport) btnExport.classList.remove('visible');
+    }
+}
+
+/**
+ * Affiche l'apercu de l'echelle selectionnee dans la zone dediee
+ */
+function afficherApercuEchelleSelectionnee() {
+    const zoneApercu = document.getElementById('zoneApercuEchelle');
+    const contenuApercu = document.getElementById('contenuApercuEchelle');
+    const btnExport = document.getElementById('btnPreparerPDFEchelle');
+
+    if (!zoneApercu || !contenuApercu) return;
+
+    if (window.echelleTemplateActuelle) {
+        contenuApercu.innerHTML = genererApercuEchelle(window.echelleTemplateActuelle);
+        zoneApercu.classList.add('visible');
+        if (btnExport) btnExport.classList.add('visible');
+    } else {
+        zoneApercu.classList.remove('visible');
+        if (btnExport) btnExport.classList.remove('visible');
+    }
+}
+
+/**
+ * Affiche l'apercu de la liste des productions
+ */
+async function afficherApercuProductionsListe() {
+    const zoneApercu = document.getElementById('zoneApercuProductions');
+    const contenuApercu = document.getElementById('contenuApercuProductions');
+    const btnExport = document.getElementById('btnExporterProductionsPDF');
+
+    if (!zoneApercu || !contenuApercu) return;
+
+    try {
+        const productions = await db.get(cle('productionsPedagogiques')) || [];
+        if (productions.length > 0) {
+            contenuApercu.innerHTML = genererApercuProductions(productions);
+            zoneApercu.classList.add('visible');
+            if (btnExport) btnExport.classList.add('visible');
+        } else {
+            zoneApercu.classList.remove('visible');
+            if (btnExport) btnExport.classList.remove('visible');
+        }
+    } catch (err) {
+        console.error('[export-pdf] Erreur affichage apercu productions:', err);
+    }
+}
+
+/**
+ * Affiche l'apercu de la cartouche selectionnee
+ */
+async function afficherApercuCartoucheSelectionnee() {
+    const zoneApercu = document.getElementById('zoneApercuCartouche');
+    const contenuApercu = document.getElementById('contenuApercuCartouche');
+    const btnExport = document.getElementById('btnPreparerPDFCartouche');
+
+    if (!zoneApercu || !contenuApercu) return;
+
+    try {
+        const grilleId = document.getElementById('selectGrilleRetroaction')?.value;
+        const cartoucheId = document.getElementById('selectCartouche')?.value;
+
+        if (grilleId && cartoucheId) {
+            let cartouches = await db.get(`cartouches_${grilleId}`) || [];
+            if (!Array.isArray(cartouches)) cartouches = [cartouches];
+
+            const cartouche = cartouches.find(c => c.id === cartoucheId);
+            if (cartouche) {
+                contenuApercu.innerHTML = genererApercuCartouche(cartouche);
+                zoneApercu.classList.add('visible');
+                if (btnExport) btnExport.classList.add('visible');
+                return;
+            }
+        }
+
+        zoneApercu.classList.remove('visible');
+        if (btnExport) btnExport.classList.remove('visible');
+    } catch (err) {
+        console.error('[export-pdf] Erreur affichage apercu cartouche:', err);
+    }
+}
+
+/**
+ * Cache tous les apercus PDF
+ */
+function cacherTousLesApercusPDF() {
+    ['zoneApercuGrille', 'zoneApercuEchelle', 'zoneApercuProductions', 'zoneApercuCartouche'].forEach(id => {
+        const zone = document.getElementById(id);
+        if (zone) zone.classList.remove('visible');
+    });
+
+    ['btnPreparerPDFGrille', 'btnPreparerPDFEchelle', 'btnExporterProductionsPDF', 'btnPreparerPDFCartouche'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) btn.classList.remove('visible');
+    });
+}
+
+// =============================================================================
+// MODAL EXPORT PDF COMBINE (Beta 95.7 - #30)
+// =============================================================================
+
+/**
+ * Ouvre le modal d'export PDF avec preselection optionnelle
+ * @param {Object} options - Options de preselection
+ * @param {string} options.grilleId - ID de la grille a preselectionner
+ * @param {string} options.echelleId - ID de l'echelle a preselectionner
+ */
+async function ouvrirModalExportPDF(options = {}) {
+    const modal = document.getElementById('modalExportPDF');
+    if (!modal) return;
+
+    // Charger les options des dropdowns
+    await chargerOptionsExportPDF();
+
+    // Preselectionner si des options sont fournies
+    if (options.grilleId) {
+        const selectGrille = document.getElementById('exportPDF-grille');
+        if (selectGrille) selectGrille.value = options.grilleId;
+    }
+    if (options.echelleId) {
+        const selectEchelle = document.getElementById('exportPDF-echelle');
+        if (selectEchelle) selectEchelle.value = options.echelleId;
+    }
+
+    // Afficher le modal
+    modal.style.display = 'flex';
+
+    // Mettre a jour l'apercu
+    await mettreAJourApercuPDF();
+}
+
+/**
+ * Ferme le modal d'export PDF
+ */
+function fermerModalExportPDF() {
+    const modal = document.getElementById('modalExportPDF');
+    if (modal) modal.style.display = 'none';
+}
+
+/**
+ * Charge les options de tous les dropdowns du modal
+ */
+async function chargerOptionsExportPDF() {
+    const selectProduction = document.getElementById('exportPDF-production');
+    const selectGrille = document.getElementById('exportPDF-grille');
+    const selectEchelle = document.getElementById('exportPDF-echelle');
+
+    // Charger les productions
+    if (selectProduction) {
+        const cleProductions = (typeof cle === 'function') ? cle('productionsPedagogiques') : 'productions';
+        const productions = await db.get(cleProductions) || [];
+        selectProduction.innerHTML = '<option value="">-- Aucune (grille générique) --</option>';
+        productions.forEach(p => {
+            selectProduction.innerHTML += `<option value="${p.id}">${escapeHtml(p.titre || p.description || 'Sans titre')}</option>`;
+        });
+    }
+
+    // Charger les grilles
+    if (selectGrille) {
+        const grilles = await db.get('grillesTemplates') || [];
+        selectGrille.innerHTML = '<option value="">-- Sélectionner --</option>';
+        grilles.forEach(g => {
+            selectGrille.innerHTML += `<option value="${g.id}">${escapeHtml(g.nom || 'Sans nom')}</option>`;
+        });
+    }
+
+    // Charger les echelles
+    if (selectEchelle) {
+        const echelles = await db.get('echellesTemplates') || [];
+        selectEchelle.innerHTML = '<option value="">-- Sélectionner --</option>';
+        echelles.forEach(e => {
+            selectEchelle.innerHTML += `<option value="${e.id}">${escapeHtml(e.nom || 'Sans nom')}</option>`;
+        });
+    }
+}
+
+/**
+ * Met a jour l'apercu PDF quand les selections changent
+ */
+async function mettreAJourApercuPDF() {
+    const productionId = document.getElementById('exportPDF-production')?.value;
+    const grilleId = document.getElementById('exportPDF-grille')?.value;
+    const echelleId = document.getElementById('exportPDF-echelle')?.value;
+    const cartoucheId = document.getElementById('exportPDF-cartouche')?.value;
+    const taillePolice = document.getElementById('exportPDF-taille-police')?.value || 'moyen';
+
+    const zoneApercu = document.getElementById('exportPDF-apercu');
+    const btnExporter = document.getElementById('exportPDF-btn-exporter');
+    const optionsProduction = document.getElementById('exportPDF-options-production');
+    const sectionCartouche = document.getElementById('exportPDF-section-cartouche');
+    const selectCartouche = document.getElementById('exportPDF-cartouche');
+
+    if (!zoneApercu) return;
+
+    // Afficher/masquer options production
+    if (optionsProduction) {
+        optionsProduction.style.display = productionId ? 'block' : 'none';
+    }
+
+    // Charger les cartouches disponibles pour la grille selectionnee
+    if (grilleId && sectionCartouche && selectCartouche) {
+        const cartouches = await db.get(`cartouches_${grilleId}`) || [];
+        if (cartouches.length > 0) {
+            sectionCartouche.style.display = 'block';
+            const currentValue = selectCartouche.value;
+            selectCartouche.innerHTML = '<option value="">-- Sans rétroaction --</option>';
+            cartouches.forEach(c => {
+                selectCartouche.innerHTML += `<option value="${c.id}">${escapeHtml(c.nom || 'Cartouche sans nom')}</option>`;
+            });
+            // Restaurer la selection si possible
+            if (currentValue && cartouches.find(c => c.id === currentValue)) {
+                selectCartouche.value = currentValue;
+            }
+        } else {
+            sectionCartouche.style.display = 'none';
+            selectCartouche.innerHTML = '<option value="">-- Sans rétroaction --</option>';
+        }
+    } else if (sectionCartouche) {
+        sectionCartouche.style.display = 'none';
+    }
+
+    // Si grille et echelle selectionnees, generer l'apercu
+    if (grilleId && echelleId) {
+        // Charger les donnees
+        const grilles = await db.get('grillesTemplates') || [];
+        const echelles = await db.get('echellesTemplates') || [];
+        const grille = grilles.find(g => g.id === grilleId);
+        const echelle = echelles.find(e => e.id === echelleId);
+
+        let production = null;
+        if (productionId) {
+            const cleProductions = (typeof cle === 'function') ? cle('productionsPedagogiques') : 'productions';
+            const productions = await db.get(cleProductions) || [];
+            production = productions.find(p => p.id === productionId);
+        }
+
+        let cartouche = null;
+        if (cartoucheId && grilleId) {
+            const cartouches = await db.get(`cartouches_${grilleId}`) || [];
+            cartouche = cartouches.find(c => c.id === cartoucheId);
+        }
+
+        if (grille && echelle) {
+            // Options d'affichage
+            const options = {
+                production: production,
+                inclureNomProduction: document.getElementById('exportPDF-prod-nom')?.checked,
+                inclureObjectif: document.getElementById('exportPDF-prod-objectif')?.checked,
+                inclureDescription: document.getElementById('exportPDF-prod-description')?.checked,
+                taillePolice: taillePolice
+            };
+
+            zoneApercu.innerHTML = genererApercuCombine(grille, echelle, cartouche, options);
+            if (btnExporter) btnExporter.disabled = false;
+        }
+    } else {
+        zoneApercu.innerHTML = '<p class="text-muted text-center" style="padding: 40px;">Sélectionnez une grille et une échelle pour voir l\'aperçu</p>';
+        if (btnExporter) btnExporter.disabled = true;
+    }
+}
+
+/**
+ * Genere l'apercu HTML combine (grille + echelle + cartouche optionnelle)
+ * Fidele au rendu PDF avec taille de police configurable (sauf titre et retroactions)
+ * @param {Object} grille - Grille de criteres
+ * @param {Object} echelle - Echelle de performance
+ * @param {Object} cartouche - Cartouche de retroaction (optionnel)
+ * @param {Object} options - Options d'affichage
+ */
+function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
+    if (!grille || !echelle) return '<p class="text-muted">Données manquantes</p>';
+
+    // Facteur de taille pour les elements configurables (pas titre, pas retroactions)
+    const facteurTaille = options.taillePolice === 'petit' ? 0.85 :
+                          options.taillePolice === 'grand' ? 1.15 : 1;
+
+    // Detecter si cartouche avec texte long
+    let longueurMoyenne = 0;
+    if (cartouche && cartouche.commentaires) {
+        const textes = Object.values(cartouche.commentaires).filter(t => t && t !== '—');
+        if (textes.length > 0) {
+            longueurMoyenne = textes.reduce((sum, t) => sum + t.length, 0) / textes.length;
+        }
+    }
+    const aCartoucheLongue = cartouche && longueurMoyenne > 50;
+
+    // Taille de base pour les retroactions (auto-ajustee)
+    let tailleRetroaction = 7.5;
+    if (aCartoucheLongue) {
+        if (longueurMoyenne > 400) tailleRetroaction = 6;
+        else if (longueurMoyenne > 250) tailleRetroaction = 6.5;
+        else if (longueurMoyenne > 150) tailleRetroaction = 7;
+    }
+
+    // Styles inline pour les tailles configurables
+    const styleSectionTitre = `font-size: ${12 * facteurTaille}pt; font-weight: bold; color: #2962ff;`;
+    const styleTexteNormal = `font-size: ${9 * facteurTaille}pt;`;
+    const styleTextePetit = `font-size: ${8 * facteurTaille}pt;`;
+    const styleLegende = `font-size: ${7.5 * facteurTaille}pt;`;
+    const styleTableEntete = `font-size: ${8 * facteurTaille}pt;`;
+    const styleTableCritere = `font-size: ${8 * facteurTaille}pt; font-weight: bold;`;
+    // Retroactions : taille auto-ajustee, pas affectee par le facteur utilisateur
+    const styleRetroaction = `font-size: ${tailleRetroaction}pt; line-height: 1.2;`;
+
+    let html = `<div class="apercu-pdf">`;
+
+    // Titre (production avec activité, ou grille) - TAILLE FIXE, non affectee
+    let titre = grille.nom || 'Grille de critères';
+    if (options.production && options.inclureNomProduction) {
+        const nomProd = options.production.titre || 'Production';
+        const activite = options.production.description || '';
+        titre = activite ? `${nomProd} - ${activite}` : nomProd;
+    }
+
+    html += `
+        <div class="apercu-pdf-entete" style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid #2962ff; padding-bottom: 8px; margin-bottom: 12px;">
+            <h3 style="font-size: 16pt; color: #2962ff; margin: 0; font-weight: bold;">${escapeHtml(titre)}</h3>
+            <span style="font-size: 8pt; color: #757575;">${new Date().toLocaleDateString('fr-CA', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+        </div>
+    `;
+
+    // Informations de la production - taille configurable
+    if (options.production) {
+        if (options.inclureObjectif && options.production.objectif) {
+            html += `
+                <div style="margin-bottom: 10px;">
+                    <div style="${styleSectionTitre} margin-bottom: 3px;">Objectif d'apprentissage :</div>
+                    <p style="${styleTexteNormal} margin: 0; color: #333;">${escapeHtml(options.production.objectif)}</p>
+                </div>
+            `;
+        }
+        if (options.inclureDescription && options.production.consignes) {
+            html += `
+                <div style="margin-bottom: 10px;">
+                    <div style="${styleSectionTitre} margin-bottom: 3px;">Description de la tâche :</div>
+                    <p style="${styleTexteNormal} margin: 0; color: #333;">${escapeHtml(options.production.consignes)}</p>
+                </div>
+            `;
+        }
+    }
+
+    // Info echelle - taille configurable
+    html += `
+        <p style="${styleTextePetit} color: #555; font-style: italic; margin: 8px 0;">
+            Échelle : ${escapeHtml(echelle.nom || 'Sans nom')}
+        </p>
+    `;
+
+    // Legende des niveaux sur une ligne - taille configurable
+    if (echelle.niveaux && echelle.niveaux.length > 0) {
+        html += `<div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 12px;">`;
+        echelle.niveaux.forEach(n => {
+            const couleur = n.code === 'I' ? '#d32f2f' :
+                           n.code === 'D' ? '#f57c00' :
+                           n.code === 'M' ? '#388e3c' :
+                           n.code === 'E' ? '#2e7d32' : '#333';
+            html += `
+                <div style="${styleLegende} display: flex; align-items: center; gap: 4px;">
+                    <span style="color: ${couleur}; font-weight: bold;">${escapeHtml(n.code || '?')}</span>
+                    <span style="color: #555;">${escapeHtml(n.nom || '')} (${n.min ?? 0}-${n.max ?? 100}%)</span>
+                </div>
+            `;
+        });
+        html += `</div>`;
+    }
+
+    // Tableau des criteres - largeurs adaptees comme le PDF
+    if (grille.criteres && grille.criteres.length > 0 && echelle.niveaux && echelle.niveaux.length > 0) {
+        const nbNiveaux = echelle.niveaux.length;
+        // Largeurs en % comme dans le PDF
+        const largeurCritere = aCartoucheLongue ? '8%' : '20%';
+        const largeurPond = aCartoucheLongue ? '4%' : '8%';
+        const largeurNiveau = aCartoucheLongue
+            ? `${(88 / nbNiveaux).toFixed(1)}%`
+            : `${((100 - 28) / nbNiveaux).toFixed(1)}%`;
+
+        html += `
+            <table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
+                <thead>
+                    <tr>
+                        <th style="${styleTableEntete} width: ${largeurCritere}; background: #2962ff; color: white; padding: 6px 8px; text-align: left; border: 1px solid #2962ff;">Critère</th>
+                        <th style="${styleTableEntete} width: ${largeurPond}; background: #2962ff; color: white; padding: 6px 8px; text-align: center; border: 1px solid #2962ff;">%</th>
+        `;
+
+        // En-tetes des niveaux avec couleurs
+        echelle.niveaux.forEach(n => {
+            const couleur = n.code === 'I' ? '#d32f2f' :
+                           n.code === 'D' ? '#f57c00' :
+                           n.code === 'M' ? '#388e3c' :
+                           n.code === 'E' ? '#2e7d32' : '#333';
+            html += `<th style="${styleTableEntete} width: ${largeurNiveau}; background: white; color: ${couleur}; padding: 6px 8px; text-align: center; border: 1px solid #ddd; font-weight: bold;">${escapeHtml(n.code || '?')}</th>`;
+        });
+        html += `</tr></thead><tbody>`;
+
+        // Lignes des criteres
+        grille.criteres.forEach((c, idx) => {
+            const bgColor = idx % 2 === 0 ? 'white' : '#fafafa';
+            html += `
+                <tr style="background: ${bgColor};">
+                    <td style="${styleTableCritere} padding: 6px 8px; border: 1px solid #ddd; vertical-align: top;">${escapeHtml(c.nom || '—')}</td>
+                    <td style="${styleTableCritere} padding: 6px 8px; border: 1px solid #ddd; text-align: center; vertical-align: top;">${c.ponderation || '—'}</td>
+            `;
+
+            // Cellules pour chaque niveau - RETROACTIONS avec taille auto
+            echelle.niveaux.forEach(n => {
+                let contenu = '—';
+                if (cartouche && cartouche.commentaires) {
+                    const cle = `${c.id}_${n.code}`;
+                    contenu = cartouche.commentaires[cle] || '—';
+                }
+                html += `<td style="${styleRetroaction} padding: 5px 6px; border: 1px solid #ddd; vertical-align: top; color: #333;">${escapeHtml(contenu)}</td>`;
+            });
+
+            html += `</tr>`;
+        });
+
+        html += `</tbody></table>`;
+    }
+
+    // Pied de page simule avec options
+    const elementsGauche = [];
+    if (options.piedEnseignant !== false && options.nomEnseignant) {
+        elementsGauche.push(options.nomEnseignant);
+    }
+    if (options.piedCours !== false && options.nomCours) {
+        elementsGauche.push(options.nomCours);
+    }
+    const textePiedGauche = elementsGauche.length > 0 ? elementsGauche.join(' — ') : '';
+    const textePiedDroit = options.piedLicence !== false ? 'CC BY-NC-SA 4.0' : '';
+
+    html += `
+        <div style="margin-top: 15px; padding-top: 8px; border-top: 1px solid #eee; display: flex; justify-content: space-between; font-size: 7pt; color: #999;">
+            <span>${escapeHtml(textePiedGauche)}</span>
+            <span>${escapeHtml(textePiedDroit)}</span>
+        </div>
+    `;
+
+    html += `</div>`;
+    return html;
+}
+
+/**
+ * Exporte le PDF combine avec toutes les options du modal
+ */
+async function exporterPDFCombine() {
+    const productionId = document.getElementById('exportPDF-production')?.value;
+    const grilleId = document.getElementById('exportPDF-grille')?.value;
+    const echelleId = document.getElementById('exportPDF-echelle')?.value;
+    const cartoucheId = document.getElementById('exportPDF-cartouche')?.value;
+    const taillePolice = document.getElementById('exportPDF-taille-police')?.value || 'moyen';
+
+    if (!grilleId || !echelleId) {
+        alert('Veuillez sélectionner une grille et une échelle.');
+        return;
+    }
+
+    try {
+        // Charger les donnees
+        const grilles = await db.get('grillesTemplates') || [];
+        const echelles = await db.get('echellesTemplates') || [];
+        const grille = grilles.find(g => g.id === grilleId);
+        const echelle = echelles.find(e => e.id === echelleId);
+
+        if (!grille || !echelle) {
+            alert('Grille ou échelle introuvable.');
+            return;
+        }
+
+        // Production (optionnel)
+        let production = null;
+        if (productionId) {
+            const cleProductions = (typeof cle === 'function') ? cle('productionsPedagogiques') : 'productions';
+            const productions = await db.get(cleProductions) || [];
+            production = productions.find(p => p.id === productionId);
+        }
+
+        // Cartouche (optionnel)
+        let cartouche = null;
+        if (cartoucheId) {
+            const cartouches = await db.get(`cartouches_${grilleId}`) || [];
+            cartouche = cartouches.find(c => c.id === cartoucheId);
+        }
+
+        // Options d'affichage
+        const options = {
+            production: production,
+            inclureNomProduction: document.getElementById('exportPDF-prod-nom')?.checked,
+            inclureObjectif: document.getElementById('exportPDF-prod-objectif')?.checked,
+            inclureDescription: document.getElementById('exportPDF-prod-description')?.checked,
+            taillePolice: taillePolice
+        };
+
+        await genererPDFCombine(grille, echelle, cartouche, options);
+
+    } catch (err) {
+        console.error('[export-pdf] Erreur export PDF combine:', err);
+        alert('Erreur lors de l\'export PDF. Consultez la console.');
+    }
+}
+
+/**
+ * Genere le PDF combine avec jsPDF
+ * @param {Object} grille - Grille de criteres
+ * @param {Object} echelle - Echelle de performance
+ * @param {Object} cartouche - Cartouche de retroaction (optionnel)
+ * @param {Object} options - Options d'affichage
+ */
+async function genererPDFCombine(grille, echelle, cartouche = null, options = {}) {
+    // Ajustement taille police selon option
+    let facteurTaille = options.taillePolice === 'petit' ? 0.85 :
+                        options.taillePolice === 'grand' ? 1.15 : 1;
+
+    // Si forcer sur une page, appliquer une reduction supplementaire
+    if (options.forcerUnePage) {
+        facteurTaille *= 0.70; // Reduction de 30% pour tenir sur une page
+    }
+
+    // Orientation : utilise l'option ou paysage par defaut si cartouche
+    const orientationPDF = options.orientation === 'paysage' ? 'landscape' : 'portrait';
+    const doc = creerDocumentPDF(orientationPDF);
+
+    // Titre : production (avec activité) ou grille
+    let titre = grille.nom || 'Grille de critères';
+    if (options.production && options.inclureNomProduction) {
+        const nomProd = options.production.titre || 'Production';
+        const activite = options.production.description || '';
+        titre = activite ? `${nomProd} - ${activite}` : nomProd;
+    }
+
+    let posY = ajouterEntetePage(doc, titre);
+
+    const largeurPage = doc.internal.pageSize.getWidth();
+    const largeurContenu = largeurPage - PDF_CONFIG.marges.gauche - PDF_CONFIG.marges.droite;
+
+    // Informations de la production
+    if (options.production) {
+        doc.setFont('helvetica', 'normal');
+
+        if (options.inclureObjectif && options.production.objectif) {
+            doc.setFontSize(PDF_CONFIG.polices.texteNormal * facteurTaille);
+            doc.setTextColor(...PDF_CONFIG.couleurs.titreSection);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Objectif d\'apprentissage :', PDF_CONFIG.marges.gauche, posY);
+            posY += 5;
+
+            doc.setTextColor(...PDF_CONFIG.couleurs.textePrincipal);
+            doc.setFont('helvetica', 'normal');
+            const lignesObjectif = doc.splitTextToSize(options.production.objectif, largeurContenu);
+            doc.text(lignesObjectif, PDF_CONFIG.marges.gauche, posY);
+            posY += lignesObjectif.length * 5 + 5;
+        }
+
+        if (options.inclureDescription && options.production.consignes) {
+            const descriptionTache = options.production.consignes;
+            doc.setFontSize(PDF_CONFIG.polices.texteNormal * facteurTaille);
+            doc.setTextColor(...PDF_CONFIG.couleurs.titreSection);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Description de la tâche :', PDF_CONFIG.marges.gauche, posY);
+            posY += 5;
+
+            doc.setTextColor(...PDF_CONFIG.couleurs.textePrincipal);
+            doc.setFont('helvetica', 'normal');
+            const lignesDesc = doc.splitTextToSize(descriptionTache, largeurContenu);
+            doc.text(lignesDesc, PDF_CONFIG.marges.gauche, posY);
+            posY += lignesDesc.length * 5 + 5;
+        }
+    }
+
+    // Info echelle
+    doc.setFontSize(PDF_CONFIG.polices.texteNormal * facteurTaille);
+    doc.setTextColor(...PDF_CONFIG.couleurs.texteSecondaire);
+    doc.setFont('helvetica', 'italic');
+    let infoEchelle = `Échelle : ${echelle.nom || 'Sans nom'}`;
+    if (echelle.config?.seuilReussite) {
+        infoEchelle += ` — Seuil de réussite : ${echelle.config.seuilReussite}%`;
+    }
+    doc.text(infoEchelle, PDF_CONFIG.marges.gauche, posY);
+    posY += 8;
+
+    // Legende des niveaux
+    if (echelle.niveaux && echelle.niveaux.length > 0) {
+        doc.setFontSize(PDF_CONFIG.polices.textePetit * facteurTaille);
+        let legendeX = PDF_CONFIG.marges.gauche;
+        echelle.niveaux.forEach((n, i) => {
+            const couleur = getCouleurNiveau(n.code);
+            doc.setTextColor(...couleur);
+            doc.setFont('helvetica', 'bold');
+            doc.text(`${n.code || '?'}`, legendeX, posY);
+            legendeX += 8;
+            doc.setTextColor(...PDF_CONFIG.couleurs.texteSecondaire);
+            doc.setFont('helvetica', 'normal');
+            const texte = `${n.nom || ''} (${n.min ?? 0}-${n.max ?? 100}%)`;
+            doc.text(texte, legendeX, posY);
+            legendeX += doc.getTextWidth(texte) + 15;
+        });
+        posY += 10;
+    }
+
+    // Tableau des criteres
+    if (grille.criteres && grille.criteres.length > 0 && echelle.niveaux && echelle.niveaux.length > 0) {
+        // En-tetes
+        const entetes = ['Critère', '%', ...echelle.niveaux.map(n => n.code || '?')];
+
+        // Donnees
+        const donnees = grille.criteres.map(c => {
+            const ligne = [c.nom || '—', c.ponderation ? `${c.ponderation}` : '—'];
+            echelle.niveaux.forEach(n => {
+                let contenu = '—';
+                if (cartouche && cartouche.commentaires) {
+                    const cle = `${c.id}_${n.code}`;
+                    contenu = cartouche.commentaires[cle] || '—';
+                }
+                ligne.push(contenu);
+            });
+            return ligne;
+        });
+
+        // Calculer la longueur moyenne du texte pour ajuster la police
+        let longueurMoyenne = 0;
+        let nbTextes = 0;
+        if (cartouche && cartouche.commentaires) {
+            Object.values(cartouche.commentaires).forEach(txt => {
+                if (txt && txt !== '—') {
+                    longueurMoyenne += txt.length;
+                    nbTextes++;
+                }
+            });
+            longueurMoyenne = nbTextes > 0 ? longueurMoyenne / nbTextes : 0;
+        }
+
+        // Calcul largeurs colonnes - optimise pour cartouches avec texte long
+        const nbNiveaux = echelle.niveaux.length;
+        const aCartouche = cartouche && longueurMoyenne > 50;
+
+        // Colonnes fixes reduites au minimum pour maximiser l'espace des niveaux
+        const largeurCritere = aCartouche ? largeurContenu * 0.08 : largeurContenu * 0.25;
+        const largeurPond = aCartouche ? largeurContenu * 0.04 : largeurContenu * 0.08;
+        const largeurNiveau = (largeurContenu - largeurCritere - largeurPond) / nbNiveaux;
+
+        const colonnesStyles = {
+            0: { cellWidth: largeurCritere, fontStyle: 'bold', valign: 'middle' },
+            1: { cellWidth: largeurPond, halign: 'center', valign: 'middle' }
+        };
+        echelle.niveaux.forEach((n, i) => {
+            colonnesStyles[i + 2] = { cellWidth: largeurNiveau, valign: 'top' };
+        });
+
+        // Taille de police adaptative selon longueur du contenu
+        let tailleCorpsBase;
+        if (aCartouche) {
+            // Ajuster selon la longueur moyenne du texte
+            if (longueurMoyenne > 400) {
+                tailleCorpsBase = 6;  // Tres long
+            } else if (longueurMoyenne > 250) {
+                tailleCorpsBase = 6.5;  // Long
+            } else if (longueurMoyenne > 150) {
+                tailleCorpsBase = 7;  // Moyen
+            } else {
+                tailleCorpsBase = 7.5;  // Court
+            }
+        } else {
+            tailleCorpsBase = PDF_CONFIG.polices.textePetit;
+        }
+
+        const tailleEntete = PDF_CONFIG.polices.textePetit * facteurTaille;
+        const tailleCorps = tailleCorpsBase * facteurTaille;
+
+        // Padding adaptatif
+        const cellPadding = options.forcerUnePage ? 1 : (aCartouche ? 1.5 : 3);
+
+        doc.autoTable({
+            startY: posY,
+            head: [entetes],
+            body: donnees,
+            theme: 'grid',
+            tableWidth: largeurContenu,
+            headStyles: {
+                fillColor: PDF_CONFIG.couleurs.titreSection,
+                textColor: [255, 255, 255],
+                fontStyle: 'bold',
+                fontSize: tailleEntete,
+                halign: 'center',
+                cellPadding: options.forcerUnePage ? 1 : 2
+            },
+            bodyStyles: {
+                fontSize: tailleCorps,
+                textColor: PDF_CONFIG.couleurs.textePrincipal,
+                cellPadding: cellPadding,
+                lineHeight: 1.15
+            },
+            columnStyles: colonnesStyles,
+            // Permettre plusieurs pages sauf si forcer une page
+            rowPageBreak: options.forcerUnePage ? 'avoid' : 'auto',
+            didParseCell: function(data) {
+                // Colorer les en-tetes de niveaux
+                if (data.section === 'head' && data.column.index >= 2) {
+                    const niveau = echelle.niveaux[data.column.index - 2];
+                    if (niveau?.code) {
+                        const couleur = getCouleurNiveau(niveau.code);
+                        data.cell.styles.fillColor = [255, 255, 255];
+                        data.cell.styles.textColor = couleur;
+                    }
+                }
+            },
+            margin: { left: PDF_CONFIG.marges.gauche, right: PDF_CONFIG.marges.droite }
+        });
+    }
+
+    // Options de pied de page
+    const optionsPied = {
+        inclureEnseignant: options.piedEnseignant !== false,
+        inclureCours: options.piedCours !== false,
+        inclureLicence: options.piedLicence !== false,
+        enseignant: options.nomEnseignant || '',
+        cours: options.nomCours || ''
+    };
+    finaliserDocument(doc, optionsPied);
+
+    // Nom du fichier selon le contenu
+    let nomFichier = '';
+    if (options.production && options.inclureNomProduction) {
+        const nomProd = (options.production.titre || options.production.description || 'production')
+            .replace(/[^a-zA-Z0-9àâäéèêëïîôùûüç\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .toLowerCase()
+            .substring(0, 30);
+        nomFichier = cartouche ? `${nomProd}-grille-descriptive.pdf` : `${nomProd}-grille.pdf`;
+    } else {
+        nomFichier = cartouche
+            ? `grille-descriptive-${grille.nom || 'export'}.pdf`
+            : `grille-${grille.nom || 'export'}.pdf`;
+    }
+    doc.save(nomFichier);
+}
+
+/**
+ * Ouvre le modal d'export PDF depuis la section Cartouches
+ * Recupere la grille et l'echelle de la cartouche selectionnee
+ */
+async function ouvrirModalExportPDFDepuisCartouche() {
+    const grilleId = document.getElementById('selectGrilleCartouche')?.value ||
+                     document.getElementById('selectGrilleRetroaction')?.value;
+    const echelleId = document.getElementById('selectEchelleCartouche')?.value;
+    const cartoucheId = document.getElementById('selectCartouche')?.value;
+
+    await ouvrirModalExportPDF({ grilleId, echelleId });
+
+    // Preselectionner la cartouche apres le chargement des options
+    setTimeout(async () => {
+        const selectCartouche = document.getElementById('exportPDF-cartouche');
+        if (selectCartouche && cartoucheId) {
+            selectCartouche.value = cartoucheId;
+            await mettreAJourApercuPDF();
+        }
+    }, 100);
+}
+
+// Exposer les fonctions du modal globalement
+window.ouvrirModalExportPDF = ouvrirModalExportPDF;
+window.ouvrirModalExportPDFDepuisCartouche = ouvrirModalExportPDFDepuisCartouche;
+window.fermerModalExportPDF = fermerModalExportPDF;
+window.mettreAJourApercuPDF = mettreAJourApercuPDF;
+window.exporterPDFCombine = exporterPDFCombine;
+
+// Exposer les fonctions globalement pour les onclick HTML
+window.exporterProductionsEnPDF = exporterProductionsEnPDF;
+window.exporterCartoucheSelectionneeEnPDF = exporterCartoucheSelectionneeEnPDF;
+window.exporterGrilleSelectionneeEnPDF = exporterGrilleSelectionneeEnPDF;
+window.exporterEchelleSelectionneeEnPDF = exporterEchelleSelectionneeEnPDF;
+
+// Exposer les fonctions d'apercu
+window.afficherApercuGrilleSelectionnee = afficherApercuGrilleSelectionnee;
+window.afficherApercuEchelleSelectionnee = afficherApercuEchelleSelectionnee;
+window.afficherApercuProductionsListe = afficherApercuProductionsListe;
+window.afficherApercuCartoucheSelectionnee = afficherApercuCartoucheSelectionnee;
+window.cacherTousLesApercusPDF = cacherTousLesApercusPDF;
+
+// =============================================================================
+// WORKFLOW 2 ETAPES : FORMULAIRE INLINE + MODAL APERCU (Beta 95.7 - #30)
+// =============================================================================
+
+/**
+ * Affiche le formulaire de preparation PDF dans la zone principale
+ * Cache les autres contenus (accueil, formulaire grille)
+ * @param {Object} options - Options de preselection
+ * @param {string} options.grilleId - ID de la grille a preselectionner
+ * @param {string} options.echelleId - ID de l'echelle a preselectionner
+ * @param {string} options.cartoucheId - ID de la cartouche a preselectionner
+ */
+async function afficherFormulairePreparationPDF(options = {}) {
+    const formulaire = document.getElementById('formulairePreparationPDF');
+    const accueil = document.getElementById('accueilGrilles');
+    const conteneurEdition = document.getElementById('conteneurEditionGrille');
+
+    if (!formulaire) return;
+
+    // Cacher les autres contenus
+    if (accueil) accueil.style.display = 'none';
+    if (conteneurEdition) conteneurEdition.style.display = 'none';
+
+    // Charger les options des dropdowns
+    await chargerOptionsPreparationPDF();
+
+    // Afficher le formulaire
+    formulaire.style.display = 'block';
+
+    // Preselectionner la grille : priorite aux options, sinon grille courante
+    const grilleId = options.grilleId ||
+        (typeof grilleTemplateActuelle !== 'undefined' && grilleTemplateActuelle?.id);
+    if (grilleId) {
+        const selectGrille = document.getElementById('prepPDF-grille');
+        if (selectGrille) selectGrille.value = grilleId;
+    }
+
+    // Preselectionner l'echelle si fournie ou si disponible globalement
+    const echelleId = options.echelleId ||
+        (typeof echelleTemplateActuelle !== 'undefined' && echelleTemplateActuelle?.id);
+    if (echelleId) {
+        const selectEchelle = document.getElementById('prepPDF-echelle');
+        if (selectEchelle) selectEchelle.value = echelleId;
+    }
+
+    // Mettre a jour les options dependantes (cartouches, etc.)
+    await mettreAJourOptionsPreparationPDF();
+
+    // Preselectionner la cartouche apres le chargement des cartouches
+    if (options.cartoucheId) {
+        const selectCartouche = document.getElementById('prepPDF-cartouche');
+        if (selectCartouche) selectCartouche.value = options.cartoucheId;
+    }
+}
+
+/**
+ * Ferme le formulaire de preparation PDF et retourne a l'accueil
+ */
+function fermerFormulairePreparationPDF() {
+    const formulaire = document.getElementById('formulairePreparationPDF');
+    const accueil = document.getElementById('accueilGrilles');
+
+    if (formulaire) formulaire.style.display = 'none';
+    if (accueil) accueil.style.display = 'block';
+}
+
+/**
+ * Charge les options de tous les dropdowns du formulaire de preparation
+ */
+async function chargerOptionsPreparationPDF() {
+    const selectProduction = document.getElementById('prepPDF-production');
+    const selectGrille = document.getElementById('prepPDF-grille');
+    const selectEchelle = document.getElementById('prepPDF-echelle');
+
+    // Charger les productions
+    if (selectProduction) {
+        const cleProductions = (typeof cle === 'function') ? cle('productionsPedagogiques') : 'productions';
+        const productions = await db.get(cleProductions) || [];
+        selectProduction.innerHTML = '<option value="">-- Aucune (grille générique) --</option>';
+        productions.forEach(p => {
+            selectProduction.innerHTML += `<option value="${p.id}">${escapeHtml(p.titre || p.description || 'Sans titre')}</option>`;
+        });
+    }
+
+    // Charger les grilles
+    if (selectGrille) {
+        const grilles = await db.get('grillesTemplates') || [];
+        selectGrille.innerHTML = '<option value="">-- Sélectionner --</option>';
+        grilles.forEach(g => {
+            selectGrille.innerHTML += `<option value="${g.id}">${escapeHtml(g.nom || 'Sans nom')}</option>`;
+        });
+    }
+
+    // Charger les echelles
+    if (selectEchelle) {
+        const echelles = await db.get('echellesTemplates') || [];
+        selectEchelle.innerHTML = '<option value="">-- Sélectionner --</option>';
+        echelles.forEach(e => {
+            selectEchelle.innerHTML += `<option value="${e.id}">${escapeHtml(e.nom || 'Sans nom')}</option>`;
+        });
+    }
+}
+
+/**
+ * Met a jour les options du formulaire quand les selections changent
+ * - Affiche/masque les options de production
+ * - Charge les cartouches disponibles pour la grille selectionnee
+ * - Active/desactive le bouton apercu
+ */
+async function mettreAJourOptionsPreparationPDF() {
+    const productionId = document.getElementById('prepPDF-production')?.value;
+    const grilleId = document.getElementById('prepPDF-grille')?.value;
+    const echelleId = document.getElementById('prepPDF-echelle')?.value;
+
+    const optionsProduction = document.getElementById('prepPDF-options-production');
+    const sectionCartouche = document.getElementById('prepPDF-section-cartouche');
+    const selectCartouche = document.getElementById('prepPDF-cartouche');
+    const btnApercu = document.getElementById('prepPDF-btn-apercu');
+
+    // Afficher/masquer options production
+    if (optionsProduction) {
+        optionsProduction.style.display = productionId ? 'block' : 'none';
+    }
+
+    // Charger les cartouches disponibles pour la grille selectionnee
+    if (grilleId && sectionCartouche && selectCartouche) {
+        const cartouches = await db.get(`cartouches_${grilleId}`) || [];
+        if (cartouches.length > 0) {
+            sectionCartouche.style.display = 'block';
+            const currentValue = selectCartouche.value;
+            selectCartouche.innerHTML = '<option value="">-- Sans rétroaction --</option>';
+            cartouches.forEach(c => {
+                selectCartouche.innerHTML += `<option value="${c.id}">${escapeHtml(c.nom || 'Cartouche sans nom')}</option>`;
+            });
+            // Restaurer la selection si possible
+            if (currentValue && cartouches.find(c => c.id === currentValue)) {
+                selectCartouche.value = currentValue;
+            }
+        } else {
+            sectionCartouche.style.display = 'none';
+            selectCartouche.innerHTML = '<option value="">-- Sans rétroaction --</option>';
+        }
+    } else if (sectionCartouche) {
+        sectionCartouche.style.display = 'none';
+    }
+
+    // Activer/desactiver bouton apercu
+    if (btnApercu) {
+        btnApercu.disabled = !(grilleId && echelleId);
+    }
+}
+
+/**
+ * Ouvre le modal d'apercu avec le contenu genere
+ * Affiche une simulation de page PDF selon l'orientation choisie
+ */
+// Variable pour stocker les donnees chargees (evite de recharger a chaque rafraichissement)
+let _apercuPDFData = null;
+
+/**
+ * Ouvre le modal d'apercu avec le contenu genere
+ * Affiche une simulation de page PDF selon l'orientation choisie
+ */
+async function ouvrirApercuPDF() {
+    const productionId = document.getElementById('prepPDF-production')?.value;
+    const grilleId = document.getElementById('prepPDF-grille')?.value;
+    const echelleId = document.getElementById('prepPDF-echelle')?.value;
+    const cartoucheId = document.getElementById('prepPDF-cartouche')?.value;
+
+    if (!grilleId || !echelleId) {
+        alert('Veuillez sélectionner une grille et une échelle.');
+        return;
+    }
+
+    const modal = document.getElementById('modalApercuPDF');
+    if (!modal) return;
+
+    try {
+        // Charger les donnees
+        const grilles = await db.get('grillesTemplates') || [];
+        const echelles = await db.get('echellesTemplates') || [];
+        const grille = grilles.find(g => g.id === grilleId);
+        const echelle = echelles.find(e => e.id === echelleId);
+
+        if (!grille || !echelle) {
+            alert('Grille ou échelle introuvable.');
+            return;
+        }
+
+        // Production (optionnel)
+        let production = null;
+        if (productionId) {
+            const cleProductions = (typeof cle === 'function') ? cle('productionsPedagogiques') : 'productions';
+            const productions = await db.get(cleProductions) || [];
+            production = productions.find(p => p.id === productionId);
+        }
+
+        // Cartouche (optionnel)
+        let cartouche = null;
+        if (cartoucheId) {
+            const cartouches = await db.get(`cartouches_${grilleId}`) || [];
+            cartouche = cartouches.find(c => c.id === cartoucheId);
+        }
+
+        // Charger les infos du cours pour le pied de page
+        const infoCours = db.getSync('infoCours', {});
+        // L'enseignant peut être dans un sous-objet ou directement sur infoCours
+        const enseignantObj = infoCours.enseignant || {};
+        const prenomEns = infoCours.prenomEnseignant || enseignantObj.prenom || '';
+        const nomEns = infoCours.nomEnseignant || enseignantObj.nom || '';
+        const nomEnseignant = `${prenomEns} ${nomEns}`.trim();
+        const nomCours = (infoCours.codeCours || infoCours.sigle) && (infoCours.titre || infoCours.nomCours)
+            ? `${infoCours.codeCours || infoCours.sigle} - ${infoCours.titre || infoCours.nomCours}`
+            : (infoCours.titre || infoCours.nomCours || '');
+
+        // Stocker les donnees pour les rafraichissements ulterieurs
+        _apercuPDFData = {
+            grille: grille,
+            echelle: echelle,
+            cartouche: cartouche,
+            production: production,
+            inclureNomProduction: document.getElementById('prepPDF-prod-nom')?.checked,
+            inclureObjectif: document.getElementById('prepPDF-prod-objectif')?.checked,
+            inclureDescription: document.getElementById('prepPDF-prod-description')?.checked,
+            nomEnseignant: nomEnseignant,
+            nomCours: nomCours
+        };
+
+        // Reinitialiser les options du modal aux valeurs par defaut
+        const selectOrientation = document.getElementById('apercuPDF-orientation');
+        const selectTaille = document.getElementById('apercuPDF-taille-police');
+        const checkForcer = document.getElementById('apercuPDF-forcer-une-page');
+
+        // Suggerer paysage si cartouche presente
+        if (selectOrientation) {
+            selectOrientation.value = cartouche ? 'paysage' : 'portrait';
+        }
+        if (selectTaille) selectTaille.value = 'moyen';
+        if (checkForcer) checkForcer.checked = false;
+
+        // Afficher le modal
+        modal.style.display = 'flex';
+
+        // Generer l'apercu initial
+        rafraichirApercuPDF();
+
+    } catch (err) {
+        console.error('[export-pdf] Erreur ouverture apercu:', err);
+        alert('Erreur lors de la génération de l\'aperçu.');
+    }
+}
+
+/**
+ * Rafraichit l'apercu PDF quand les options de mise en page changent
+ */
+function rafraichirApercuPDF() {
+    if (!_apercuPDFData) return;
+
+    const zoneApercu = document.getElementById('apercuPDF-contenu');
+    const pagePDF = document.getElementById('apercuPDF-page');
+
+    if (!zoneApercu || !pagePDF) return;
+
+    // Lire les options de mise en page du modal
+    const orientation = document.getElementById('apercuPDF-orientation')?.value || 'portrait';
+    const taillePolice = document.getElementById('apercuPDF-taille-police')?.value || 'moyen';
+    const forcerUnePage = document.getElementById('apercuPDF-forcer-une-page')?.checked || false;
+
+    // Lire les options de pied de page
+    const piedEnseignant = document.getElementById('apercuPDF-pied-enseignant')?.checked !== false;
+    const piedCours = document.getElementById('apercuPDF-pied-cours')?.checked !== false;
+    const piedLicence = document.getElementById('apercuPDF-pied-licence')?.checked !== false;
+
+    // Options d'affichage combinees
+    const options = {
+        production: _apercuPDFData.production,
+        inclureNomProduction: _apercuPDFData.inclureNomProduction,
+        inclureObjectif: _apercuPDFData.inclureObjectif,
+        inclureDescription: _apercuPDFData.inclureDescription,
+        taillePolice: taillePolice,
+        orientation: orientation,
+        forcerUnePage: forcerUnePage,
+        // Options pied de page
+        piedEnseignant: piedEnseignant,
+        piedCours: piedCours,
+        piedLicence: piedLicence,
+        nomEnseignant: _apercuPDFData.nomEnseignant,
+        nomCours: _apercuPDFData.nomCours
+    };
+
+    // Appliquer les classes d'orientation et taille sur la page simulee
+    pagePDF.className = 'apercu-pdf-page';
+    pagePDF.classList.add(orientation === 'paysage' ? 'apercu-pdf-paysage' : 'apercu-pdf-portrait');
+    pagePDF.classList.add(`apercu-taille-${taillePolice}`);
+    if (forcerUnePage) {
+        pagePDF.classList.add('apercu-forcer-une-page');
+    }
+
+    // Generer l'apercu
+    zoneApercu.innerHTML = genererApercuCombine(
+        _apercuPDFData.grille,
+        _apercuPDFData.echelle,
+        _apercuPDFData.cartouche,
+        options
+    );
+}
+
+/**
+ * Ferme le modal d'apercu et retourne au formulaire
+ */
+function fermerModalApercuPDF() {
+    const modal = document.getElementById('modalApercuPDF');
+    if (modal) modal.style.display = 'none';
+    // Ne pas nettoyer _apercuPDFData ici pour permettre de revenir au modal
+}
+
+/**
+ * Exporte le PDF depuis le modal d'apercu
+ * Utilise les selections du formulaire de preparation
+ */
+async function exporterPDFDepuisApercu() {
+    if (!_apercuPDFData) {
+        alert('Erreur: données non disponibles.');
+        return;
+    }
+
+    // Lire les options de mise en page du modal
+    const orientation = document.getElementById('apercuPDF-orientation')?.value || 'portrait';
+    const taillePolice = document.getElementById('apercuPDF-taille-police')?.value || 'moyen';
+    const forcerUnePage = document.getElementById('apercuPDF-forcer-une-page')?.checked || false;
+
+    // Lire les options de pied de page
+    const piedEnseignant = document.getElementById('apercuPDF-pied-enseignant')?.checked !== false;
+    const piedCours = document.getElementById('apercuPDF-pied-cours')?.checked !== false;
+    const piedLicence = document.getElementById('apercuPDF-pied-licence')?.checked !== false;
+
+    try {
+        // Options d'affichage combinees
+        const options = {
+            production: _apercuPDFData.production,
+            inclureNomProduction: _apercuPDFData.inclureNomProduction,
+            inclureObjectif: _apercuPDFData.inclureObjectif,
+            inclureDescription: _apercuPDFData.inclureDescription,
+            taillePolice: taillePolice,
+            orientation: orientation,
+            forcerUnePage: forcerUnePage,
+            // Options pied de page
+            piedEnseignant: piedEnseignant,
+            piedCours: piedCours,
+            piedLicence: piedLicence,
+            nomEnseignant: _apercuPDFData.nomEnseignant,
+            nomCours: _apercuPDFData.nomCours
+        };
+
+        // Generer le PDF
+        await genererPDFCombine(
+            _apercuPDFData.grille,
+            _apercuPDFData.echelle,
+            _apercuPDFData.cartouche,
+            options
+        );
+
+        // Fermer le modal apres export
+        fermerModalApercuPDF();
+
+        // Fermer le formulaire et retourner a l'accueil
+        fermerFormulairePreparationPDF();
+
+        // Nettoyer les donnees
+        _apercuPDFData = null;
+
+    } catch (err) {
+        console.error('[export-pdf] Erreur export PDF:', err);
+        alert('Erreur lors de l\'export PDF. Consultez la console.');
+    }
+}
+
+/**
+ * Affiche le formulaire PDF depuis la section Echelles
+ * Recupere l'echelle selectionnee et navigue vers Grilles
+ */
+async function afficherFormulairePDFDepuisEchelle() {
+    const echelleId = (typeof echelleTemplateActuelle !== 'undefined' && echelleTemplateActuelle?.id)
+        ? echelleTemplateActuelle.id
+        : null;
+
+    // Naviguer vers la section Grilles pour afficher le formulaire
+    if (typeof naviguerVers === 'function') {
+        naviguerVers('grilles');
+    }
+
+    // Petit delai pour laisser la navigation se faire
+    setTimeout(async () => {
+        await afficherFormulairePreparationPDF({
+            echelleId: echelleId
+        });
+    }, 100);
+}
+
+/**
+ * Affiche le formulaire PDF depuis la section Cartouches
+ * Recupere la grille et la cartouche selectionnees
+ */
+async function afficherFormulairePDFDepuisCartouche() {
+    const grilleId = document.getElementById('selectGrilleCartouche')?.value ||
+                     document.getElementById('selectGrilleRetroaction')?.value;
+    const cartoucheId = document.getElementById('selectCartouche')?.value;
+
+    // Naviguer vers la section Grilles pour afficher le formulaire
+    if (typeof naviguerVers === 'function') {
+        naviguerVers('grilles');
+    }
+
+    // Petit delai pour laisser la navigation se faire
+    setTimeout(async () => {
+        await afficherFormulairePreparationPDF({
+            grilleId: grilleId,
+            cartoucheId: cartoucheId
+        });
+    }, 100);
+}
+
+// Exposer les nouvelles fonctions globalement
+window.afficherFormulairePreparationPDF = afficherFormulairePreparationPDF;
+window.fermerFormulairePreparationPDF = fermerFormulairePreparationPDF;
+window.chargerOptionsPreparationPDF = chargerOptionsPreparationPDF;
+window.mettreAJourOptionsPreparationPDF = mettreAJourOptionsPreparationPDF;
+window.ouvrirApercuPDF = ouvrirApercuPDF;
+window.rafraichirApercuPDF = rafraichirApercuPDF;
+window.fermerModalApercuPDF = fermerModalApercuPDF;
+window.exporterPDFDepuisApercu = exporterPDFDepuisApercu;
+window.afficherFormulairePDFDepuisEchelle = afficherFormulairePDFDepuisEchelle;
+window.afficherFormulairePDFDepuisCartouche = afficherFormulairePDFDepuisCartouche;
+
+console.log('[export-pdf.js] Module charge - jsPDF disponible:', typeof window.jspdf !== 'undefined');
