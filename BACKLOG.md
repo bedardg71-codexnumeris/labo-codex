@@ -10,8 +10,18 @@
 ### Priorite haute - UX / Interface
 
 - [ ] **#4** Persistance donnees Primo <-> Mode Expert
-  - Artefacts configures dans Primo doivent persister en mode Expert
+  - Artefacts configures dans Primo doivent persister en mode Expert (ex: 6 devient 5)
   - Seuils et parametres synchronises entre les deux modes
+  - Verifier tous les champs du wizard vs gabarit Expert
+
+- [ ] **#23** Uniformiser boutons modal wizard pratique
+  - Actuellement : Annuler (rouge), Precedent (bleu), Creer (gris)
+  - Harmoniser avec le Design System v7
+
+- [ ] **#24** Option hybride construction note portfolio
+  - Actuellement dropdown sans option "N meilleures + Obligatoires"
+  - Soit checkboxes combinables
+  - Soit option "Hybride (configurer en Expert)"
 
 - [ ] **#14** Audit champs texte -> dropdown
   - Identifier inputs texte libres qui gagneraient a etre des dropdowns

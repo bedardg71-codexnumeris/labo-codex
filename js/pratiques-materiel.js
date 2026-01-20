@@ -683,11 +683,12 @@ function remplirFormulairePratique(pratique) {
         changerVariantePANStandardsMat();
 
         // Portfolio
+        // 🆕 Beta 95.7 : Accepter noms wizard (nbArtefacts*) ET noms legacy (nombreARetenir/nombreTotal) (#4)
         if (config.portfolio) {
             setValeurChamp('mat-portfolio-selection', config.portfolio.methodeSelection || 'meilleurs');
-            setValeurChamp('mat-portfolio-nombre', config.portfolio.nombreARetenir || 5);
-            setValeurChamp('mat-portfolio-minimum', config.portfolio.minimumCompletion || 7);
-            setValeurChamp('mat-portfolio-total', config.portfolio.nombreTotal || 10);
+            setValeurChamp('mat-portfolio-nombre', config.portfolio.nbArtefactsRetenus || config.portfolio.nombreARetenir || 5);
+            setValeurChamp('mat-portfolio-minimum', config.portfolio.minAvantCalculFormatif || config.portfolio.minimumCompletion || 7);
+            setValeurChamp('mat-portfolio-total', config.portfolio.nbArtefactsSoumis || config.portfolio.nombreTotal || 10);
             setCheckbox('mat-decoupler-pr', config.portfolio.decouplerPR || false);
         }
 

@@ -1197,8 +1197,12 @@ function genererRecapitulatif() {
         html += `<p><strong>Approche :</strong> ${approcheLabels[r.approcheEvaluation] || r.approcheEvaluation}</p>`;
 
         if (r.approcheEvaluation === 'par-artefacts') {
-            html += `<p><strong>Artefacts à soumettre :</strong> ${r.nbArtefactsSoumis}</p>`;
-            html += `<p><strong>Artefacts retenus :</strong> ${r.nbArtefactsRetenus}</p>`;
+            // 🆕 Beta 95.7 : Lire depuis Primo OU wizard (#4)
+            const modalites = db.getSync('modalitesEvaluation', {});
+            const nbSoumis = modalites.nArtefactsPAN || r.nbArtefactsSoumis || '?';
+            const nbRetenus = modalites.nArtefactsRetenus || r.nbArtefactsRetenus || '?';
+            html += `<p><strong>Artefacts à soumettre :</strong> ${nbSoumis}</p>`;
+            html += `<p><strong>Artefacts retenus :</strong> ${nbRetenus}</p>`;
         } else if (r.approcheEvaluation === 'par-objectifs') {
             const modeLabels = {
                 'comptage': 'Comptage d\'objectifs',
@@ -1534,16 +1538,24 @@ async function creerPratiqueV2() {
         };
 
         if (r.approcheEvaluation === 'par-artefacts') {
+            // 🆕 Beta 95.7 : Lire depuis modalitesEvaluation (Primo) OU wizardState (#4)
+            const modalites = db.getSync('modalitesEvaluation', {});
+
+            // Priorité : valeur Primo > valeur wizard > défaut
+            // 🆕 Beta 95.7 : Utiliser noms Primo corrects (#4)
+            const nbSoumis = parseInt(modalites.nArtefactsPAN) || parseInt(r.nbArtefactsSoumis) || 12;
+            const nbRetenus = parseInt(modalites.nArtefactsRetenus) || parseInt(r.nbArtefactsRetenus) || 7;
+            const minFormatif = parseInt(modalites.minimumAvantCalcul) || parseInt(r.minAvantCalculFormatif) || 3;
+
             pratique.configuration.portfolio = {
                 utiliser: r.utiliserPortfolio !== false,
-                nbArtefactsSoumis: parseInt(r.nbArtefactsSoumis) || 12,
-                nbArtefactsRetenus: parseInt(r.nbArtefactsRetenus) || 7,
-                reprisesPermises: r.reprisesPermises || 'illimite',
-                minAvantCalculFormatif: parseInt(r.minAvantCalculFormatif) || 3
+                // Noms standardisés (cohérents avec pratiques-materiel.js)
+                nombreTotal: nbSoumis,
+                nombreARetenir: nbRetenus,
+                methodeSelection: 'meilleurs',
+                minimumCompletion: minFormatif,
+                reprisesPermises: r.reprisesPermises || 'illimite'
             };
-
-            // 🆕 Beta 95.7 : Transférer config catégories Primo → pratique (#3 + #4)
-            const modalites = db.getSync('modalitesEvaluation', {});
             if (modalites.utiliserCategories === 'oui' || modalites.categories?.actif) {
                 pratique.configuration.categories = {
                     actif: true,
