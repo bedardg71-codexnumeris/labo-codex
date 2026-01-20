@@ -47,6 +47,19 @@
   - Durée du délai : 7 → **2 jours**
   - **Fichiers modifiés** : `index.html`, `js/pratiques.js`, `js/pratiques-materiel.js`, `js/pratique-notation-v2.js`, `js/evaluation-jetons.js`, `js/profil-etudiant.js`, `js/pratiques/pratique-pan-specifications.js`
 
+- **MENAGE REPERTOIRE PRINCIPAL (Beta 95.7)** : Réorganisation des fichiers
+  - Fusion `archive/` dans `Archives/` (documentation + scripts obsolètes)
+  - Fichiers temporaires déplacés vers `Archives/`
+  - Documentation utilisateur → `docs/utilisateur/`
+  - Fichiers de référence → `docs/references/`
+  - Logo et images → `img/`
+  - Racine nettoyée : uniquement fichiers essentiels
+
+- **BACKLOG.md CREE** : Fichier dédié pour les tâches à faire
+  - Accès rapide en début de session
+  - Structure : À faire / Complété
+  - Référencé dans CLAUDE.md
+
 - **BACKLOG P2 ENRICHI** : 20 éléments ajoutés à la roadmap
   - **Fichier modifié** : `docs/ROADMAP_H2026.md`
   - **Éléments ajoutés** :
@@ -407,6 +420,7 @@
 - **ORDRE DISCIPLINES DROPDOWN** : Groupe 400 déplacé à la bonne position (après 300)
 - **MESSAGE AIDE BIBLIOTHEQUE** : Guide pour édition des pratiques ajouté aux modals
 - **VALEURS PAR DEFAUT JETONS** : Jetons par élève 4→2, Durée délai 7→2 jours
+- **BACKLOG.md** : Fichier dédié créé pour accès rapide aux tâches
 - **BACKLOG P2 ENRICHI** : 20 éléments ajoutés à docs/ROADMAP_H2026.md
   - Fiabilité : audit db.get/getSync, outil intégrité données
   - UX : clarifier artefacts, persistance Primo/Expert, dropdowns, gestion bibliothèques
