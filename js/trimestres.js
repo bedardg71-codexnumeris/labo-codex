@@ -247,10 +247,81 @@
 
         console.log(`[Trimestres] Trimestre actif changé: ${trimestre.nom} (${id})`);
 
+        // 🆕 FIX (21 jan 2026): Créer groupe-cours demo si nécessaire
+        // Corrige le bug où les données demo n'étaient pas affichables
+        // car le groupe-cours n'existait pas (données chargées avant la correction)
+        if (id === 'demo') {
+            creerGroupeCoursDemoSiNecessaire();
+        }
+
         // Mettre à jour le bandeau d'archivage après changement
         mettreAJourBandeauArchive();
 
         return true;
+    }
+
+    /**
+     * Crée le groupe-cours demo si nécessaire
+     * 🆕 FIX (21 jan 2026) : Appelée quand on change vers le trimestre demo
+     * Corrige le bug où les données demo n'avaient pas de groupe-cours
+     */
+    function creerGroupeCoursDemoSiNecessaire() {
+        console.log('[Trimestres] Vérification groupe-cours demo...');
+
+        // Vérifier si le groupe-cours demo existe
+        const cleGC = cle('groupesCours');
+        let groupesCours = db.getSync(cleGC, []);
+        const gcDemo = groupesCours.find(gc => gc.id === 'GC_DEMO');
+
+        if (gcDemo) {
+            console.log('[Trimestres] Groupe-cours demo existant');
+            return;
+        }
+
+        // Créer l'horaire demo si nécessaire
+        const cleHoraires = cle('horaires');
+        let horaires = db.getSync(cleHoraires, []);
+        if (!horaires.find(h => h.id === 'HOR_DEMO')) {
+            const nouvelHoraire = {
+                id: 'HOR_DEMO',
+                nom: 'Lun-AM / Mer-PM',
+                periodesParSeance: 2,
+                seances: [
+                    { jour: 'lundi', periode: 'AM' },
+                    { jour: 'mercredi', periode: 'PM' }
+                ],
+                isDemo: true,
+                dateCreation: new Date().toISOString()
+            };
+            horaires.push(nouvelHoraire);
+            db.setSync(cleHoraires, horaires);
+            console.log('[Trimestres] Horaire demo créé');
+        }
+
+        // Récupérer le cours demo depuis listeCours
+        const listeCours = db.getSync('listeCours', []);
+        const coursDemo = listeCours.find(c => c.isDemo || c.id?.includes('9999'));
+        const coursId = coursDemo?.id || '601-101-h2026-9999';
+        const groupeNum = coursDemo?.groupe || '9999';
+        const sigle = coursDemo?.sigle || '601-101';
+
+        // Créer le groupe-cours demo
+        const nouveauGC = {
+            id: 'GC_DEMO',
+            nom: `DEMO-${sigle}-MQ-${String(groupeNum).padStart(5, '0')} (Lun-AM / Mer-PM)`,
+            trimestreId: 'demo',
+            coursId: coursId,
+            groupeNum: groupeNum,
+            horaireId: 'HOR_DEMO',
+            enseignantId: 'profil',
+            pratiqueId: null,
+            dateCreation: new Date().toISOString(),
+            actif: true,
+            isDemo: true
+        };
+        groupesCours.push(nouveauGC);
+        db.setSync(cleGC, groupesCours);
+        console.log('[Trimestres] Groupe-cours demo créé:', nouveauGC.nom);
     }
 
     /* ===============================
