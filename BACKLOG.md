@@ -17,8 +17,14 @@
   - [x] Marges reduites (0.5 inch)
   - [x] Fonctions SST : obtenirInfosCoursPDF(), obtenirNomEnseignantPDF()
   - [ ] **Bug a corriger** :
-    - Infos cours/enseignant non affichees dans le PDF
-    - Ajouter logs de debogage pour identifier la source des donnees
+    - Infos cours/enseignant non affichees dans le PDF (seulement "Hiver 2026" visible)
+    - Fonctions corrigees selon SST de trimestre-v2.js mais ne retournent pas les donnees
+    - **Prochaines etapes de debogage** :
+      1. Ajouter `console.log` dans `obtenirInfosCoursPDF()` pour voir `groupeActif.coursId`
+      2. Verifier si `listeCours` ou `cours` contient les donnees attendues
+      3. Ajouter `console.log` dans `obtenirNomEnseignantPDF()` pour voir `groupeActif.enseignantId`
+      4. Verifier si `enseignants` ou `profilEnseignant` contient les donnees
+    - **SST de reference** : `js/trimestre-v2.js` lignes 4117-4140
   - [ ] **Ajustements restants** :
     - Tester sans cartouche (grille seule)
     - Productions : liste des travaux (a venir)
