@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 95.7
 
 **Date** : 21 janvier 2026
-**Version** : Beta 95.7 (build 0121-1005)
+**Version** : Beta 95.7 (build 0121-1540)
 **Statut** : Application fonctionnelle pour H2026
 
 ---
@@ -47,6 +47,13 @@
     - Cause probable : Grille d'évaluation originale (`GRILLE1759243306842 - Global-5 FR-HOLIS`) supprimée/modifiée
     - Les notes individuelles sont conservées mais le calcul agrégé échoue
     - Ce n'est pas un bug de code mais un problème de données
+
+- **MIGRATION HORAIRES/GROUPESCOURS** : Données H2026 manquantes après ajout à CLES_NAMESPACEES
+  - **Symptôme** : Horaires et groupe-cours créés pour H2026 n'apparaissaient pas
+  - **Cause** : Données stockées dans `horaires`/`groupesCours` (sans préfixe) mais lues depuis `h2026_horaires`/`h2026_groupesCours`
+  - **Fix** : Nouvelle fonction `migrerHorairesEtGroupesCours()` dans `initialiserModuleTrimestres()`
+  - Migre automatiquement les données vers le trimestre actif au démarrage
+  - **Fichier modifié** : `js/trimestres.js`
 
 - **EXPORT PDF GRILLES DESCRIPTIVES (#30)** : Améliorations mise en page
   - **Nouvelle disposition** :

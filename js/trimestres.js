@@ -813,6 +813,41 @@
         }
     }
 
+    /**
+     * Migre les horaires et groupesCours vers le trimestre actif
+     * 🆕 FIX (21 jan 2026) : Ces clés ont été ajoutées à CLES_NAMESPACEES
+     * mais les données existantes étaient stockées sans préfixe
+     */
+    function migrerHorairesEtGroupesCours() {
+        const trimestreActif = obtenirTrimestreActif();
+        if (!trimestreActif) return;
+
+        const prefixe = trimestreActif.id + '_';
+        const clesAMigrer = ['horaires', 'groupesCours'];
+        let clesMigrees = 0;
+
+        clesAMigrer.forEach(nomCle => {
+            const donneesAnciennes = db.getSync(nomCle, null);
+
+            // Si des données existent dans l'ancienne clé (sans préfixe)
+            if (donneesAnciennes !== null && Array.isArray(donneesAnciennes) && donneesAnciennes.length > 0) {
+                const cleNouvelle = prefixe + nomCle;
+                const existantes = db.getSync(cleNouvelle, null);
+
+                // Ne migrer que si la clé namespacée n'existe pas ou est vide
+                if (existantes === null || (Array.isArray(existantes) && existantes.length === 0)) {
+                    db.setSync(cleNouvelle, donneesAnciennes);
+                    console.log(`[Trimestres] → ${nomCle} (${donneesAnciennes.length}) COPIÉ vers ${cleNouvelle}`);
+                    clesMigrees++;
+                }
+            }
+        });
+
+        if (clesMigrees > 0) {
+            console.log(`[Trimestres] Migration horaires/groupesCours: ${clesMigrees} clés migrées vers ${prefixe}*`);
+        }
+    }
+
     /* ===============================
        INITIALISATION
        =============================== */
@@ -825,6 +860,9 @@
 
         // Migration ponctuelle des clés vers A2025
         migrerClesVersA2025();
+
+        // 🆕 FIX (21 jan 2026) : Migration horaires et groupesCours vers trimestre actif
+        migrerHorairesEtGroupesCours();
 
         if (resultatMigration.success) {
             const actif = obtenirTrimestreActif();
