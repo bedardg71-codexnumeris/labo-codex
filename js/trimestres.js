@@ -235,7 +235,12 @@
 
         db.setSync('trimestres', trimestres);
 
-        console.log(`[Trimestres] Trimestre actif changé: ${trimestre.nom}`);
+        // 🆕 FIX (21 jan 2026): Mettre à jour window.trimestreActif
+        // Corrige le bug où les données A2025/Démo n'étaient pas accessibles
+        // car les modules lisaient l'ancienne valeur de window.trimestreActif
+        window.trimestreActif = id;
+
+        console.log(`[Trimestres] Trimestre actif changé: ${trimestre.nom} (${id})`);
 
         // Mettre à jour le bandeau d'archivage après changement
         mettreAJourBandeauArchive();
