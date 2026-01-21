@@ -275,6 +275,68 @@ async function fusionnerDonneesDemo(packDemo) {
         }
     }
 
+    // ✅ AJOUTÉ (21 jan 2026) : Créer horaire et groupe-cours pour les données demo
+    // Sans ces entrées, les données ne peuvent pas être affichées dans Trimestre V2
+
+    // 9. Créer un horaire demo (s'il n'existe pas)
+    const cleHoraires = (typeof window.cle === 'function') ? window.cle('horaires') : 'horaires';
+    console.log(`   📦 Clé horaires: ${cleHoraires}`);
+    let horaires = await db.get(cleHoraires) || [];
+    const horaireDemo = horaires.find(h => h.id === 'HOR_DEMO');
+
+    let horaireId = 'HOR_DEMO';
+    if (!horaireDemo) {
+        const nouvelHoraire = {
+            id: 'HOR_DEMO',
+            nom: 'Lun-AM / Mer-PM',
+            periodesParSeance: 2,
+            seances: [
+                { jour: 'lundi', periode: 'AM' },
+                { jour: 'mercredi', periode: 'PM' }
+            ],
+            isDemo: true,
+            dateCreation: new Date().toISOString()
+        };
+        horaires.push(nouvelHoraire);
+        await db.set(cleHoraires, horaires);
+        console.log(`   ➜ Horaire demo créé: ${nouvelHoraire.nom}`);
+    } else {
+        console.log('   ➜ Horaire demo déjà existant');
+    }
+
+    // 10. Créer un groupe-cours demo (s'il n'existe pas)
+    const cleGC = (typeof window.cle === 'function') ? window.cle('groupesCours') : 'groupesCours';
+    console.log(`   📦 Clé groupesCours: ${cleGC}`);
+    let groupesCours = await db.get(cleGC) || [];
+    const gcDemo = groupesCours.find(gc => gc.id === 'GC_DEMO');
+
+    if (!gcDemo) {
+        // Récupérer le premier cours demo pour les infos
+        const premierCoursDemo = packDemo.listeCours?.[0];
+        const coursId = premierCoursDemo?.id || '601-101-h2026-9999';
+        const groupeNum = premierCoursDemo?.groupe || '9999';
+        const sigle = premierCoursDemo?.sigle || '601-101';
+
+        const nouveauGC = {
+            id: 'GC_DEMO',
+            nom: `DEMO-${sigle}-MQ-${groupeNum.toString().padStart(5, '0')} (Lun-AM / Mer-PM)`,
+            trimestreId: 'demo',
+            coursId: coursId,
+            groupeNum: groupeNum,
+            horaireId: horaireId,
+            enseignantId: 'profil',  // Utilise le profil enseignant
+            pratiqueId: null,        // Pas de pratique spécifique
+            dateCreation: new Date().toISOString(),
+            actif: true,
+            isDemo: true
+        };
+        groupesCours.push(nouveauGC);
+        await db.set(cleGC, groupesCours);
+        console.log(`   ➜ Groupe-cours demo créé: ${nouveauGC.nom}`);
+    } else {
+        console.log('   ➜ Groupe-cours demo déjà existant');
+    }
+
     // Synchroniser vers localStorage cache
     await db.syncToLocalStorageCache();
 }

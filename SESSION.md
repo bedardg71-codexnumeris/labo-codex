@@ -28,6 +28,26 @@
 - **Dropdown note maximale** : Peuplé dynamiquement selon l'échelle de performance
 
 ### Derniere tache completee (21 janvier)
+- **BUG CRITIQUE TRIMESTRES A2025/DEMO** : Données inaccessibles après changement de trimestre
+  - **Symptôme** : "0 personne" affiché, aucun étudiant ni résultat visible
+  - **Cause 1** : `changerTrimestreActif()` ne mettait pas à jour `window.trimestreActif`
+    - Fix : Ajout `window.trimestreActif = id;` après `db.setSync` (trimestres.js)
+  - **Cause 2** : `groupesCours` et `horaires` manquants dans `CLES_NAMESPACEES`
+    - `cle('groupesCours')` retournait 'groupesCours' au lieu de 'a2025_groupesCours'
+    - Fix : Ajout des deux clés à `CLES_NAMESPACEES` (trimestres.js)
+  - **Cause 3** : Données demo n'avaient pas de groupe-cours
+    - Fix : `fusionnerDonneesDemo()` crée maintenant automatiquement un horaire et groupe-cours demo
+    - Fichier modifié : `js/donnees-demo.js`
+  - **Cause 4** : Création automatique groupe-cours demo au changement de trimestre
+    - Fix : Nouvelle fonction `creerGroupeCoursDemoSiNecessaire()` appelée dans `changerTrimestreActif()`
+    - Crée `HOR_DEMO` et `GC_DEMO` si manquants quand on passe au trimestre demo
+    - Fichier modifié : `js/trimestres.js`
+  - **Résultat** : A2025 affiche maintenant 30 étudiants avec assiduité (98%)
+  - **Problème résiduel A2025** : Complétion et Performance à 0% dans le tableau de bord agrégé
+    - Cause probable : Grille d'évaluation originale (`GRILLE1759243306842 - Global-5 FR-HOLIS`) supprimée/modifiée
+    - Les notes individuelles sont conservées mais le calcul agrégé échoue
+    - Ce n'est pas un bug de code mais un problème de données
+
 - **EXPORT PDF GRILLES DESCRIPTIVES (#30)** : Améliorations mise en page
   - **Nouvelle disposition** :
     - En-tête droite : Code cours, Nom du cours, Trimestre (empilés verticalement)

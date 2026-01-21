@@ -99,6 +99,16 @@
 
 ---
 
+## Complete (Beta 95.7 - 21 janvier 2026)
+
+- [x] **Bug critique** Trimestres A2025/Demo inaccessibles
+  - `changerTrimestreActif()` ne mettait pas a jour `window.trimestreActif`
+  - `groupesCours` et `horaires` manquants dans `CLES_NAMESPACEES`
+  - Donnees demo sans groupe-cours (maintenant cree automatiquement)
+  - Nouvelle fonction `creerGroupeCoursDemoSiNecessaire()` dans trimestres.js
+  - **Fichiers modifies** : `js/trimestres.js`, `js/donnees-demo.js`
+  - **Resultat** : A2025 affiche 30 etudiants, Demo cree auto groupe-cours
+
 ## Complete (Beta 95.7 - 20 janvier 2026)
 
 - [x] **#20** Datalist programmes d'etudes (~130 programmes preuniversitaires + techniques)
