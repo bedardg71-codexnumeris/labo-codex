@@ -109,6 +109,11 @@
   - **Fichiers modifies** : `js/trimestres.js`, `js/donnees-demo.js`
   - **Resultat** : A2025 affiche 30 etudiants, Demo cree auto groupe-cours
 
+- [x] **Migration horaires/groupesCours** vers trimestre actif
+  - Donnees H2026 stockees sans prefixe mais lues avec prefixe
+  - Nouvelle fonction `migrerHorairesEtGroupesCours()` dans trimestres.js
+  - Migration automatique au demarrage de l'application
+
 ## Complete (Beta 95.7 - 20 janvier 2026)
 
 - [x] **#20** Datalist programmes d'etudes (~130 programmes preuniversitaires + techniques)
