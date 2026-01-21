@@ -35,7 +35,12 @@
         'groupeEtudiants',
         'productions',
         'presences',
-        'evaluationsSauvegardees'
+        'evaluationsSauvegardees',
+        // ✅ FIX (21 jan 2026) : Ajouter groupesCours et horaires pour cohérence
+        // Ces clés étaient utilisées avec namespacing direct (${trimestre}_xxx)
+        // mais cle() ne les reconnaissait pas, causant le bug A2025/Démo
+        'groupesCours',
+        'horaires'
     ];
 
     // Clés globales (partagées entre trimestres)
