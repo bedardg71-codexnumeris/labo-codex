@@ -442,9 +442,16 @@
 ### 21 janvier 2026
 - **BUG CRITIQUE CORRIGÉ** : Données A2025/Démo inaccessibles après changement de trimestre
   - **Symptôme** : Aucun résultat, aucun élève, aucun travail affiché pour trimestres autres que H2026
-  - **Cause** : `changerTrimestreActif()` ne mettait pas à jour `window.trimestreActif`
-  - **Impact** : Les modules lisaient l'ancienne valeur et cherchaient les données avec la mauvaise clé
-  - **Fix** : Ajout `window.trimestreActif = id;` dans `js/trimestres.js:changerTrimestreActif()`
+  - **Causes multiples** :
+    1. `changerTrimestreActif()` ne mettait pas à jour `window.trimestreActif`
+    2. `groupesCours` et `horaires` manquaient dans `CLES_NAMESPACEES`
+  - **Impact** :
+    - Les modules lisaient l'ancienne valeur de `window.trimestreActif`
+    - `cle('groupesCours')` retournait `'groupesCours'` au lieu de `'a2025_groupesCours'`
+  - **Fix** :
+    - Ajout `window.trimestreActif = id;` dans `changerTrimestreActif()`
+    - Ajout `'groupesCours'` et `'horaires'` à `CLES_NAMESPACEES`
+  - **Fichier** : `js/trimestres.js`
 
 - **EXPORT PDF GRILLES DESCRIPTIVES (#30)** : Améliorations mise en page
   - Nouvelle disposition : cours/trimestre en haut à droite, enseignant en bas à gauche
