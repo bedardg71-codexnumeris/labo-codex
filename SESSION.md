@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 95.7
 
-**Date** : 20 janvier 2026
-**Version** : Beta 95.7 (build 0120-1346)
+**Date** : 21 janvier 2026
+**Version** : Beta 95.7 (build 0121)
 **Statut** : Application fonctionnelle pour H2026
 
 ---
@@ -27,15 +27,25 @@
 - **Pratiques de notation** : Sauvegarde fiable via wizard et mode expert
 - **Dropdown note maximale** : Peuplé dynamiquement selon l'échelle de performance
 
-### Derniere tache completee (20 janvier)
-- **EXPORT PDF GRILLES DESCRIPTIVES (#30)** : Première version fonctionnelle
-  - Formulaire 2 étapes : sélection contenu → aperçu mise en page
-  - Options mise en page : orientation (portrait/paysage), taille police (petit/moyen/grand)
-  - Pied de page personnalisable : enseignant, cours, licence CC BY-NC-SA (checkboxes)
-  - Titre avec activité d'apprentissage (ex: "Artefact 1 - Stratégies de lecture")
-  - Masquage "Page 1/1" si une seule page
-  - **Fichiers créés/modifiés** : `js/export-pdf.js`, `index.html` (modal aperçu PDF)
-  - **Ajustements restants** : voir BACKLOG.md #30
+### Derniere tache completee (21 janvier)
+- **EXPORT PDF GRILLES DESCRIPTIVES (#30)** : Améliorations mise en page
+  - **Nouvelle disposition** :
+    - En-tête droite : Code cours, Nom du cours, Trimestre (empilés verticalement)
+    - Pied de page gauche : Nom complet de l'enseignant uniquement
+    - Pied de page droite : Licence CC BY-NC-SA 4.0
+  - **Corrections SST** (Single Source of Truth) :
+    - `obtenirInfosCoursPDF()` : Lecture depuis `listeCours`/`cours` via `coursId` (comme trimestre-v2.js:4117-4120)
+    - `obtenirNomEnseignantPDF()` : Gestion correcte `enseignantId === 'profil'` (comme trimestre-v2.js:4127-4140)
+  - **Options simplifiées** :
+    - Retiré : Option "Cours" du pied de page (maintenant dans l'en-tête)
+    - Retiré : Taille police (fixée à "petit")
+    - Ajouté : Checkbox "Afficher le trimestre"
+  - **Marges réduites** : 0.5 inch au lieu de 1 inch
+  - **Bug en cours** : Les infos cours/enseignant ne s'affichent pas encore dans le PDF
+    - Prochaine étape : Ajouter logs de débogage pour identifier la source des données
+  - **Fichiers modifiés** : `js/export-pdf.js`, `index.html`, `styles.css`
+
+### Tache precedente (20 janvier)
 
 - **CLARIFIER ARTEFACTS MEILLEURS VS OBLIGATOIRES (#3)** : Workflow amélioré
   - Primo : Nouvelle question "Combien de productions Obligatoires ?"
@@ -428,6 +438,14 @@
 ---
 
 ## HISTORIQUE RECENT
+
+### 21 janvier 2026
+- **EXPORT PDF GRILLES DESCRIPTIVES (#30)** : Améliorations mise en page
+  - Nouvelle disposition : cours/trimestre en haut à droite, enseignant en bas à gauche
+  - Fonctions refactorisées selon SST de trimestre-v2.js
+  - Options simplifiées (retrait option Cours du pied de page, taille fixe "petit")
+  - Marges réduites à 0.5 inch
+  - Bug en cours : infos cours/enseignant non affichées (à déboguer)
 
 ### 20 janvier 2026
 - **EXPORT PDF GRILLES DESCRIPTIVES (#30)** : Première version fonctionnelle

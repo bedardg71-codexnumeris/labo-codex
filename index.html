@@ -4797,6 +4797,12 @@
                                                 <span>Description de la tâche</span>
                                             </label>
                                         </div>
+                                        <div style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--bordure-legere);">
+                                            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                                <input type="checkbox" id="prepPDF-desc-criteres">
+                                                <span>Description des critères dans le tableau</span>
+                                            </label>
+                                        </div>
                                     </div>
                                 </fieldset>
 
@@ -15739,20 +15745,10 @@
                     </select>
                 </div>
 
-                <!-- Taille police -->
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <label for="apercuPDF-taille-police" style="font-size: 0.9rem; font-weight: 500;">Taille :</label>
-                    <select id="apercuPDF-taille-police" class="controle-form" style="width: auto; padding: 5px 10px;" onchange="rafraichirApercuPDF()">
-                        <option value="petit">Petit</option>
-                        <option value="moyen" selected>Moyen</option>
-                        <option value="grand">Grand</option>
-                    </select>
-                </div>
-
-                <!-- Forcer une page -->
+                <!-- Afficher le trimestre -->
                 <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.9rem;">
-                    <input type="checkbox" id="apercuPDF-forcer-une-page" onchange="rafraichirApercuPDF()">
-                    <span>Forcer sur 1 page</span>
+                    <input type="checkbox" id="apercuPDF-afficher-trimestre" checked onchange="rafraichirApercuPDF()">
+                    <span>Afficher le trimestre</span>
                 </label>
             </div>
 
@@ -15762,10 +15758,6 @@
                 <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
                     <input type="checkbox" id="apercuPDF-pied-enseignant" checked onchange="rafraichirApercuPDF()">
                     <span>Enseignant</span>
-                </label>
-                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
-                    <input type="checkbox" id="apercuPDF-pied-cours" checked onchange="rafraichirApercuPDF()">
-                    <span>Cours</span>
                 </label>
                 <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
                     <input type="checkbox" id="apercuPDF-pied-licence" checked onchange="rafraichirApercuPDF()">

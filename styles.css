@@ -11330,7 +11330,7 @@ body.mode-assiste .btn-aide-contextuelle,
 
 /* Ajustements taille police dans simulation page */
 .apercu-pdf-page.apercu-taille-petit .apercu-pdf-page-contenu {
-    font-size: 8.5pt;
+    font-size: 7.5pt;
 }
 
 .apercu-pdf-page.apercu-taille-grand .apercu-pdf-page-contenu {
@@ -11339,14 +11339,14 @@ body.mode-assiste .btn-aide-contextuelle,
 
 /* En-tête simulé dans la page */
 .apercu-pdf-page .apercu-pdf-entete {
-    border-bottom: 2px solid #2962ff;
-    padding-bottom: 10px;
-    margin-bottom: 15px;
+    border-bottom: 1.5px solid #032e5c;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
 }
 
 .apercu-pdf-page .apercu-pdf-entete h3 {
-    font-size: 14pt;
-    color: #2962ff;
+    font-size: 13pt;
+    color: #032e5c;
     margin: 0;
 }
 
@@ -11361,15 +11361,15 @@ body.mode-assiste .btn-aide-contextuelle,
 }
 
 .apercu-pdf-page .apercu-pdf-table thead th {
-    background: #2962ff;
+    background: #032e5c;
     color: white;
-    font-size: 9pt;
-    padding: 6px 8px;
+    font-size: 8pt;
+    padding: 4px 5px;
 }
 
 .apercu-pdf-page .apercu-pdf-table tbody td {
-    font-size: 8pt;
-    padding: 5px 8px;
+    font-size: 7pt;
+    padding: 3px 4px;
     vertical-align: top;
 }
 
