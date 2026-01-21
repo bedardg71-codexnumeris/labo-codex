@@ -11,25 +11,26 @@
 // =============================================================================
 
 const PDF_CONFIG = {
-    // Marges en mm
+    // Marges en mm (0,5 pouce = 12,7mm)
     marges: {
-        haut: 15,
-        bas: 15,
-        gauche: 15,
-        droite: 15
+        haut: 13,
+        bas: 13,
+        gauche: 13,
+        droite: 13
     },
-    // Couleurs (RGB)
+    // Couleurs (RGB) - Sobres pour impression N&B
+    // Basées sur le Design System: --bleu-principal (#032e5c), --gris-*
     couleurs: {
-        titreSection: [41, 98, 255],      // Bleu principal
-        textePrincipal: [33, 33, 33],     // Gris fonce
-        texteSecondaire: [117, 117, 117], // Gris moyen
-        bordure: [224, 224, 224],         // Gris clair
-        fondEntete: [245, 247, 250],      // Fond gris tres clair
-        // Niveaux IDME
-        niveauI: [211, 47, 47],           // Rouge
-        niveauD: [245, 124, 0],           // Orange
-        niveauM: [56, 142, 60],           // Vert
-        niveauE: [46, 125, 50]            // Vert fonce
+        titreSection: [3, 46, 92],        // --bleu-principal #032e5c (imprime gris foncé)
+        textePrincipal: [51, 51, 51],     // --gris-fonce #333333
+        texteSecondaire: [102, 102, 102], // --gris-moyen #666666
+        bordure: [204, 204, 204],         // --bordure-moyenne #cccccc
+        fondEntete: [245, 245, 245],      // Gris très clair pour entêtes
+        // Niveaux - tous en gris pour impression N&B
+        niveauI: [51, 51, 51],            // Gris foncé uniforme
+        niveauD: [51, 51, 51],            // Gris foncé uniforme
+        niveauM: [51, 51, 51],            // Gris foncé uniforme
+        niveauE: [51, 51, 51]             // Gris foncé uniforme
     },
     // Polices
     polices: {
@@ -40,6 +41,48 @@ const PDF_CONFIG = {
         textePetit: 9
     }
 };
+
+// =============================================================================
+// PERSISTANCE DES RÉGLAGES
+// =============================================================================
+
+const CLE_REGLAGES_PDF = 'exportPDF_derniersReglages';
+
+/**
+ * Sauvegarde les réglages actuels du formulaire PDF
+ */
+function sauvegarderReglagesPDF() {
+    const reglages = {
+        productionId: document.getElementById('prepPDF-production')?.value || '',
+        grilleId: document.getElementById('prepPDF-grille')?.value || '',
+        echelleId: document.getElementById('prepPDF-echelle')?.value || '',
+        cartoucheId: document.getElementById('prepPDF-cartouche')?.value || '',
+        inclureNomProduction: document.getElementById('prepPDF-prod-nom')?.checked ?? true,
+        inclureObjectif: document.getElementById('prepPDF-prod-objectif')?.checked ?? true,
+        inclureDescription: document.getElementById('prepPDF-prod-description')?.checked ?? true,
+        inclureDescCriteres: document.getElementById('prepPDF-desc-criteres')?.checked ?? false,
+        orientation: document.getElementById('apercuPDF-orientation')?.value || 'portrait',
+        afficherTrimestre: document.getElementById('apercuPDF-afficher-trimestre')?.checked ?? true,
+        piedEnseignant: document.getElementById('apercuPDF-pied-enseignant')?.checked ?? true,
+        piedLicence: document.getElementById('apercuPDF-pied-licence')?.checked ?? true
+        // piedCours retiré - les infos du cours sont maintenant dans l'en-tête
+    };
+    localStorage.setItem(CLE_REGLAGES_PDF, JSON.stringify(reglages));
+}
+
+/**
+ * Restaure les réglages sauvegardés du formulaire PDF
+ */
+function restaurerReglagesPDF() {
+    try {
+        const reglagesStr = localStorage.getItem(CLE_REGLAGES_PDF);
+        if (!reglagesStr) return null;
+        return JSON.parse(reglagesStr);
+    } catch (e) {
+        console.warn('[export-pdf] Erreur restauration réglages:', e);
+        return null;
+    }
+}
 
 // =============================================================================
 // FONCTIONS UTILITAIRES
@@ -58,27 +101,191 @@ function creerDocumentPDF(orientation = 'portrait') {
 }
 
 /**
- * Ajoute un en-tete de page avec titre et date
+ * Obtient le nom du trimestre actif (ex: "Hiver 2026")
+ * Priorité: 1) Champ 'nom' dans trimestres[], 2) Construction depuis l'ID
  */
-function ajouterEntetePage(doc, titre) {
-    const largeurPage = doc.internal.pageSize.getWidth();
+function obtenirNomTrimestre() {
+    try {
+        // Méthode 1: Chercher dans la liste des trimestres
+        if (typeof db !== 'undefined' && db.getSync) {
+            const trimestres = db.getSync('trimestres', []);
+            const trimestreActif = trimestres.find(t => t.actif === true);
+            if (trimestreActif && trimestreActif.nom) {
+                return trimestreActif.nom;
+            }
+        }
 
-    // Titre
+        // Méthode 2: Construire depuis window.trimestreActif (fallback)
+        const saisons = { 'a': 'Automne', 'h': 'Hiver', 'e': 'Été' };
+        const trimestreId = window.trimestreActif || (typeof db !== 'undefined' && db.getSync ? db.getSync('trimestreActif', '') : '');
+        if (!trimestreId || trimestreId.length < 5) return '';
+
+        const sessionLettre = trimestreId.charAt(0).toLowerCase();
+        const annee = trimestreId.substring(1);
+        const saison = saisons[sessionLettre] || '';
+
+        return saison ? `${saison} ${annee}` : '';
+    } catch (err) {
+        console.warn('[export-pdf] Erreur obtention nom trimestre:', err);
+        return '';
+    }
+}
+
+/**
+ * Obtient le nom de l'enseignant actif pour le PDF
+ * Gère les cas: enseignantId normal, 'profil', ou absence
+ */
+function obtenirNomEnseignantPDF() {
+    // SST: Exactement comme trimestre-v2.js:4127-4140
+    try {
+        if (typeof db === 'undefined' || !db.getSync) {
+            return '';
+        }
+
+        const trimestreActif = window.trimestreActif || db.getSync('trimestreActif', '');
+        if (!trimestreActif) {
+            return '';
+        }
+
+        // Chercher le groupe-cours actif
+        const groupesCours = db.getSync(`${trimestreActif}_groupesCours`, []);
+        const groupeActif = groupesCours.find(gc => gc.actif);
+
+        if (!groupeActif) {
+            return '';
+        }
+
+        // SST: Récupérer l'enseignant selon enseignantId (comme trimestre-v2.js:4127-4140)
+        if (groupeActif.enseignantId === 'profil') {
+            // Cas 1: enseignantId === 'profil' → utiliser profilEnseignant
+            const profil = db.getSync('profilEnseignant', {});
+            if (profil.prenom && profil.nom) {
+                return `${profil.prenom} ${profil.nom}`;
+            }
+            return '';
+        } else if (groupeActif.enseignantId) {
+            // Cas 2: enseignantId est un ID valide → chercher dans enseignants
+            const enseignants = db.getSync('enseignants', []);
+            const ensObj = enseignants.find(e => e.id === groupeActif.enseignantId);
+            if (ensObj) {
+                return `${ensObj.prenom || ''} ${ensObj.nom || ''}`.trim();
+            }
+            return '';
+        } else {
+            // Cas 3: pas d'enseignantId → fallback sur profilEnseignant
+            const profil = db.getSync('profilEnseignant', {});
+            if (profil.prenom && profil.nom) {
+                return `${profil.prenom} ${profil.nom}`;
+            }
+            return '';
+        }
+    } catch (err) {
+        console.warn('[export-pdf] Erreur obtention nom enseignant:', err);
+        return '';
+    }
+}
+
+/**
+ * Obtient les infos du cours actif pour le PDF
+ * SST: listeCours/cours référencé par groupeActif.coursId (comme trimestre-v2.js:4117-4120)
+ * @returns {Object} { sigle, titre, sigleTitre }
+ */
+function obtenirInfosCoursPDF() {
+    try {
+        if (typeof db === 'undefined' || !db.getSync) {
+            return { sigle: '', titre: '', sigleTitre: '' };
+        }
+
+        const trimestreActif = window.trimestreActif || db.getSync('trimestreActif', '');
+        if (!trimestreActif) {
+            return { sigle: '', titre: '', sigleTitre: '' };
+        }
+
+        // Chercher le groupe-cours actif
+        const groupesCours = db.getSync(`${trimestreActif}_groupesCours`, []);
+        const groupeActif = groupesCours.find(gc => gc.actif);
+
+        if (!groupeActif) {
+            return { sigle: '', titre: '', sigleTitre: '' };
+        }
+
+        // SST: Récupérer les infos du cours depuis listeCours ou cours (comme trimestre-v2.js)
+        let cours = db.getSync('listeCours', []);
+        if (!cours || cours.length === 0) {
+            cours = db.getSync('cours', []);
+        }
+
+        // Chercher par id, sigle, codeCours ou code (comme trimestre-v2.js:4118-4119)
+        const coursObj = cours.find(c =>
+            c.id === groupeActif.coursId ||
+            c.sigle === groupeActif.coursId ||
+            c.codeCours === groupeActif.coursId ||
+            c.code === groupeActif.coursId
+        );
+
+        if (coursObj) {
+            const sigle = coursObj.sigle || coursObj.codeCours || coursObj.code || '';
+            const titre = coursObj.nomCours || coursObj.nom || coursObj.titre || '';
+            const sigleTitre = sigle && titre ? `${sigle} - ${titre}` : (titre || sigle);
+            return { sigle, titre, sigleTitre };
+        }
+
+        return { sigle: '', titre: '', sigleTitre: '' };
+
+    } catch (err) {
+        console.warn('[export-pdf] Erreur obtention infos cours:', err);
+        return { sigle: '', titre: '', sigleTitre: '' };
+    }
+}
+
+/**
+ * Ajoute un en-tete de page avec titre et infos cours/trimestre
+ * @param {Object} doc - Instance jsPDF
+ * @param {string} titre - Titre du document
+ * @param {Object} options - Options d'affichage
+ * @param {boolean} options.afficherTrimestre - Afficher les infos en haut à droite (défaut: true)
+ */
+function ajouterEntetePage(doc, titre, options = {}) {
+    const largeurPage = doc.internal.pageSize.getWidth();
+    const afficherInfos = options.afficherTrimestre !== false;
+
+    // Titre principal (gauche)
     doc.setFontSize(PDF_CONFIG.polices.titrePrincipal);
     doc.setTextColor(...PDF_CONFIG.couleurs.titreSection);
     doc.setFont('helvetica', 'bold');
     doc.text(titre, PDF_CONFIG.marges.gauche, PDF_CONFIG.marges.haut + 5);
 
-    // Date d'export
-    const dateExport = new Date().toLocaleDateString('fr-CA', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
-    doc.setFontSize(PDF_CONFIG.polices.textePetit);
-    doc.setTextColor(...PDF_CONFIG.couleurs.texteSecondaire);
-    doc.setFont('helvetica', 'normal');
-    doc.text(dateExport, largeurPage - PDF_CONFIG.marges.droite, PDF_CONFIG.marges.haut + 5, { align: 'right' });
+    // Infos à droite : Code cours, Nom cours, Trimestre
+    if (afficherInfos) {
+        const infosCours = obtenirInfosCoursPDF();
+        const trimestre = obtenirNomTrimestre();
+
+        doc.setFontSize(PDF_CONFIG.polices.textePetit);
+        doc.setTextColor(...PDF_CONFIG.couleurs.texteSecondaire);
+        doc.setFont('helvetica', 'normal');
+
+        let posYDroite = PDF_CONFIG.marges.haut + 2;
+        const xDroite = largeurPage - PDF_CONFIG.marges.droite;
+
+        // Sigle du cours (en gras)
+        if (infosCours.sigle) {
+            doc.setFont('helvetica', 'bold');
+            doc.text(infosCours.sigle, xDroite, posYDroite, { align: 'right' });
+            posYDroite += 3.5;
+            doc.setFont('helvetica', 'normal');
+        }
+
+        // Nom du cours
+        if (infosCours.titre) {
+            doc.text(infosCours.titre, xDroite, posYDroite, { align: 'right' });
+            posYDroite += 3.5;
+        }
+
+        // Trimestre
+        if (trimestre) {
+            doc.text(trimestre, xDroite, posYDroite, { align: 'right' });
+        }
+    }
 
     // Ligne de separation
     doc.setDrawColor(...PDF_CONFIG.couleurs.bordure);
@@ -89,7 +296,7 @@ function ajouterEntetePage(doc, titre) {
 }
 
 /**
- * Ajoute un pied de page avec numero de page
+ * Ajoute un pied de page avec enseignant à gauche et licence à droite
  */
 function ajouterPiedPage(doc, numeroPage, totalPages, optionsPied = {}) {
     const largeurPage = doc.internal.pageSize.getWidth();
@@ -110,16 +317,9 @@ function ajouterPiedPage(doc, numeroPage, totalPages, optionsPied = {}) {
         );
     }
 
-    // Gauche : Enseignant et/ou Cours
-    const elementsGauche = [];
+    // Gauche : Nom de l'enseignant uniquement
     if (optionsPied.inclureEnseignant && optionsPied.enseignant) {
-        elementsGauche.push(optionsPied.enseignant);
-    }
-    if (optionsPied.inclureCours && optionsPied.cours) {
-        elementsGauche.push(optionsPied.cours);
-    }
-    if (elementsGauche.length > 0) {
-        doc.text(elementsGauche.join(' — '), PDF_CONFIG.marges.gauche, posY);
+        doc.text(optionsPied.enseignant, PDF_CONFIG.marges.gauche, posY);
     }
 
     // Droite : Licence CC
@@ -1418,17 +1618,26 @@ function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
         else if (longueurMoyenne > 150) tailleRetroaction = 7;
     }
 
-    // Styles inline pour les tailles configurables
-    const styleSectionTitre = `font-size: ${12 * facteurTaille}pt; font-weight: bold; color: #2962ff;`;
-    const styleTexteNormal = `font-size: ${9 * facteurTaille}pt;`;
-    const styleTextePetit = `font-size: ${8 * facteurTaille}pt;`;
-    const styleLegende = `font-size: ${7.5 * facteurTaille}pt;`;
-    const styleTableEntete = `font-size: ${8 * facteurTaille}pt;`;
-    const styleTableCritere = `font-size: ${8 * facteurTaille}pt; font-weight: bold;`;
-    // Retroactions : taille auto-ajustee, pas affectee par le facteur utilisateur
-    const styleRetroaction = `font-size: ${tailleRetroaction}pt; line-height: 1.2;`;
+    // Couleurs sobres pour impression N&B (harmonisées avec PDF_CONFIG)
+    const couleurTitre = '#032e5c';       // --bleu-principal
+    const couleurTexte = '#333333';       // --gris-fonce
+    const couleurSecondaire = '#666666';  // --gris-moyen
+    const couleurBordure = '#cccccc';     // --bordure-moyenne
+    const couleurFondEntete = '#f5f5f5';  // Gris très clair
 
-    let html = `<div class="apercu-pdf">`;
+    // Styles inline pour les tailles - Alignés sur le PDF (taille petit)
+    // Le PDF utilise: titrePrincipal=18, titreSection=14, texteNormal=10, textePetit=9 * 0.85
+    const styleSectionTitre = `font-size: ${10 * facteurTaille}pt; font-weight: bold; color: ${couleurTitre};`;
+    const styleTexteNormal = `font-size: ${8.5 * facteurTaille}pt; line-height: 1.3;`;
+    const styleTextePetit = `font-size: ${7.5 * facteurTaille}pt;`;
+    const styleLegende = `font-size: ${7 * facteurTaille}pt;`;
+    const styleTableEntete = `font-size: ${7.5 * facteurTaille}pt;`;
+    const styleTableCritere = `font-size: ${7.5 * facteurTaille}pt; font-weight: bold;`;
+    // Retroactions : taille auto-ajustee, pas affectee par le facteur utilisateur
+    const styleRetroaction = `font-size: ${tailleRetroaction * 0.9}pt; line-height: 1.15;`;
+
+    // Conteneur principal (le padding est géré par .apercu-pdf-page-contenu dans CSS)
+    let html = `<div class="apercu-pdf" style="min-height: 100%; display: flex; flex-direction: column;">`;
 
     // Titre (production avec activité, ou grille) - TAILLE FIXE, non affectee
     let titre = grille.nom || 'Grille de critères';
@@ -1438,57 +1647,74 @@ function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
         titre = activite ? `${nomProd} - ${activite}` : nomProd;
     }
 
+    // Infos du cours pour l'en-tête (si afficherTrimestre est activé, on affiche tout)
+    const afficherInfosDroite = options.afficherTrimestre !== false;
+    const infosCours = afficherInfosDroite ? obtenirInfosCoursPDF() : { sigle: '', titre: '' };
+    const trimestre = afficherInfosDroite ? obtenirNomTrimestre() : '';
+
+    // Construire les infos à droite (sigle, titre cours, trimestre)
+    let infosEnteteHtml = '';
+    if (afficherInfosDroite && (infosCours.sigle || infosCours.titre || trimestre)) {
+        const lignes = [];
+        if (infosCours.sigle) {
+            lignes.push(`<span style="font-weight: bold;">${escapeHtml(infosCours.sigle)}</span>`);
+        }
+        if (infosCours.titre) {
+            lignes.push(`<span>${escapeHtml(infosCours.titre)}</span>`);
+        }
+        if (trimestre) {
+            lignes.push(`<span>${escapeHtml(trimestre)}</span>`);
+        }
+        infosEnteteHtml = `<div style="text-align: right; font-size: ${7.5 * facteurTaille}pt; color: ${couleurSecondaire}; line-height: 1.4;">${lignes.join('<br>')}</div>`;
+    }
+
+    // Titre principal (15pt comme PDF titrePrincipal * facteur)
     html += `
-        <div class="apercu-pdf-entete" style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid #2962ff; padding-bottom: 8px; margin-bottom: 12px;">
-            <h3 style="font-size: 16pt; color: #2962ff; margin: 0; font-weight: bold;">${escapeHtml(titre)}</h3>
-            <span style="font-size: 8pt; color: #757575;">${new Date().toLocaleDateString('fr-CA', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+        <div class="apercu-pdf-entete" style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1.5px solid ${couleurTitre}; padding-bottom: 6px; margin-bottom: 10px;">
+            <h3 style="font-size: ${15 * facteurTaille}pt; color: ${couleurTitre}; margin: 0; font-weight: bold;">${escapeHtml(titre)}</h3>
+            ${infosEnteteHtml}
         </div>
     `;
 
-    // Informations de la production - taille configurable
-    if (options.production) {
-        if (options.inclureObjectif && options.production.objectif) {
-            html += `
-                <div style="margin-bottom: 10px;">
+    // Informations : Objectif, Description de la tâche, Contexte de la rétroaction
+    // Jusqu'à 3 colonnes selon ce qui est présent
+    if (options.production || (cartouche && cartouche.contexte)) {
+        const aObjectif = options.production && options.inclureObjectif && options.production.objectif;
+        const aDescription = options.production && options.inclureDescription && options.production.tache;
+        const aContexte = cartouche && cartouche.contexte;
+
+        const colonnes = [];
+        if (aObjectif) {
+            colonnes.push(`
+                <div style="flex: 1;">
                     <div style="${styleSectionTitre} margin-bottom: 3px;">Objectif d'apprentissage :</div>
-                    <p style="${styleTexteNormal} margin: 0; color: #333;">${escapeHtml(options.production.objectif)}</p>
+                    <p style="${styleTexteNormal} margin: 0; color: ${couleurTexte};">${escapeHtml(options.production.objectif)}</p>
                 </div>
-            `;
+            `);
         }
-        if (options.inclureDescription && options.production.consignes) {
-            html += `
-                <div style="margin-bottom: 10px;">
+        if (aDescription) {
+            colonnes.push(`
+                <div style="flex: 1;">
                     <div style="${styleSectionTitre} margin-bottom: 3px;">Description de la tâche :</div>
-                    <p style="${styleTexteNormal} margin: 0; color: #333;">${escapeHtml(options.production.consignes)}</p>
+                    <p style="${styleTexteNormal} margin: 0; color: ${couleurTexte};">${escapeHtml(options.production.tache)}</p>
                 </div>
-            `;
+            `);
+        }
+        if (aContexte) {
+            colonnes.push(`
+                <div style="flex: 1;">
+                    <div style="${styleSectionTitre} margin-bottom: 3px;">Contexte de la rétroaction :</div>
+                    <p style="${styleTexteNormal} margin: 0; color: ${couleurTexte};">${escapeHtml(cartouche.contexte)}</p>
+                </div>
+            `);
+        }
+
+        if (colonnes.length > 0) {
+            html += `<div style="display: flex; gap: 12px; margin-bottom: 8px;">${colonnes.join('')}</div>`;
         }
     }
 
-    // Info echelle - taille configurable
-    html += `
-        <p style="${styleTextePetit} color: #555; font-style: italic; margin: 8px 0;">
-            Échelle : ${escapeHtml(echelle.nom || 'Sans nom')}
-        </p>
-    `;
-
-    // Legende des niveaux sur une ligne - taille configurable
-    if (echelle.niveaux && echelle.niveaux.length > 0) {
-        html += `<div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 12px;">`;
-        echelle.niveaux.forEach(n => {
-            const couleur = n.code === 'I' ? '#d32f2f' :
-                           n.code === 'D' ? '#f57c00' :
-                           n.code === 'M' ? '#388e3c' :
-                           n.code === 'E' ? '#2e7d32' : '#333';
-            html += `
-                <div style="${styleLegende} display: flex; align-items: center; gap: 4px;">
-                    <span style="color: ${couleur}; font-weight: bold;">${escapeHtml(n.code || '?')}</span>
-                    <span style="color: #555;">${escapeHtml(n.nom || '')} (${n.min ?? 0}-${n.max ?? 100}%)</span>
-                </div>
-            `;
-        });
-        html += `</div>`;
-    }
+    // Légende supprimée - le nom du niveau est dans l'entête du tableau
 
     // Tableau des criteres - largeurs adaptees comme le PDF
     if (grille.criteres && grille.criteres.length > 0 && echelle.niveaux && echelle.niveaux.length > 0) {
@@ -1501,30 +1727,32 @@ function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
             : `${((100 - 28) / nbNiveaux).toFixed(1)}%`;
 
         html += `
-            <table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
+            <table style="width: 100%; border-collapse: collapse; border: 1px solid ${couleurBordure}; table-layout: fixed;">
                 <thead>
                     <tr>
-                        <th style="${styleTableEntete} width: ${largeurCritere}; background: #2962ff; color: white; padding: 6px 8px; text-align: left; border: 1px solid #2962ff;">Critère</th>
-                        <th style="${styleTableEntete} width: ${largeurPond}; background: #2962ff; color: white; padding: 6px 8px; text-align: center; border: 1px solid #2962ff;">%</th>
+                        <th style="${styleTableEntete} width: ${largeurCritere}; background: ${couleurTitre}; color: white; padding: 4px 5px; text-align: left; border: 1px solid ${couleurTitre};">Critère</th>
+                        <th style="${styleTableEntete} width: ${largeurPond}; background: ${couleurTitre}; color: white; padding: 4px 5px; text-align: center; border: 1px solid ${couleurTitre};">%</th>
         `;
 
-        // En-tetes des niveaux avec couleurs
+        // En-tetes des niveaux - Code + Nom (couleur sobre pour impression N&B)
         echelle.niveaux.forEach(n => {
-            const couleur = n.code === 'I' ? '#d32f2f' :
-                           n.code === 'D' ? '#f57c00' :
-                           n.code === 'M' ? '#388e3c' :
-                           n.code === 'E' ? '#2e7d32' : '#333';
-            html += `<th style="${styleTableEntete} width: ${largeurNiveau}; background: white; color: ${couleur}; padding: 6px 8px; text-align: center; border: 1px solid #ddd; font-weight: bold;">${escapeHtml(n.code || '?')}</th>`;
+            const enteteNiveau = n.nom ? `${n.code || '?'} - ${n.nom}` : (n.code || '?');
+            html += `<th style="${styleTableEntete} width: ${largeurNiveau}; background: ${couleurFondEntete}; color: ${couleurTexte}; padding: 4px 5px; text-align: center; border: 1px solid ${couleurBordure}; font-weight: bold;">${escapeHtml(enteteNiveau)}</th>`;
         });
         html += `</tr></thead><tbody>`;
 
         // Lignes des criteres
         grille.criteres.forEach((c, idx) => {
             const bgColor = idx % 2 === 0 ? 'white' : '#fafafa';
+            // Contenu de la colonne critère : nom + description optionnelle
+            let contenuCritere = escapeHtml(c.nom || '—');
+            if (options.inclureDescCriteres && c.description) {
+                contenuCritere += `<br><span style="font-weight: normal; font-size: 0.85em; color: ${couleurSecondaire};">${escapeHtml(c.description)}</span>`;
+            }
             html += `
                 <tr style="background: ${bgColor};">
-                    <td style="${styleTableCritere} padding: 6px 8px; border: 1px solid #ddd; vertical-align: top;">${escapeHtml(c.nom || '—')}</td>
-                    <td style="${styleTableCritere} padding: 6px 8px; border: 1px solid #ddd; text-align: center; vertical-align: top;">${c.ponderation || '—'}</td>
+                    <td style="${styleTableCritere} padding: 4px 5px; border: 1px solid #ddd; vertical-align: top;">${contenuCritere}</td>
+                    <td style="${styleTableCritere} padding: 4px 5px; border: 1px solid #ddd; text-align: center; vertical-align: top;">${c.ponderation || '—'}</td>
             `;
 
             // Cellules pour chaque niveau - RETROACTIONS avec taille auto
@@ -1534,7 +1762,7 @@ function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
                     const cle = `${c.id}_${n.code}`;
                     contenu = cartouche.commentaires[cle] || '—';
                 }
-                html += `<td style="${styleRetroaction} padding: 5px 6px; border: 1px solid #ddd; vertical-align: top; color: #333;">${escapeHtml(contenu)}</td>`;
+                html += `<td style="${styleRetroaction} padding: 3px 4px; border: 1px solid #ddd; vertical-align: top; color: ${couleurTexte};">${escapeHtml(contenu)}</td>`;
             });
 
             html += `</tr>`;
@@ -1543,23 +1771,21 @@ function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
         html += `</tbody></table>`;
     }
 
-    // Pied de page simule avec options
-    const elementsGauche = [];
-    if (options.piedEnseignant !== false && options.nomEnseignant) {
-        elementsGauche.push(options.nomEnseignant);
-    }
-    if (options.piedCours !== false && options.nomCours) {
-        elementsGauche.push(options.nomCours);
-    }
-    const textePiedGauche = elementsGauche.length > 0 ? elementsGauche.join(' — ') : '';
+    // Pied de page simule avec options - seulement si contenu a afficher
+    // Gauche: uniquement le nom de l'enseignant (cours maintenant dans l'en-tête)
+    const textePiedGauche = (options.piedEnseignant !== false && options.nomEnseignant)
+        ? options.nomEnseignant : '';
     const textePiedDroit = options.piedLicence !== false ? 'CC BY-NC-SA 4.0' : '';
 
-    html += `
-        <div style="margin-top: 15px; padding-top: 8px; border-top: 1px solid #eee; display: flex; justify-content: space-between; font-size: 7pt; color: #999;">
-            <span>${escapeHtml(textePiedGauche)}</span>
-            <span>${escapeHtml(textePiedDroit)}</span>
-        </div>
-    `;
+    // Pied de page (margin-top: auto pour coller en bas si espace)
+    if (textePiedGauche || textePiedDroit) {
+        html += `
+            <div style="margin-top: auto; padding-top: 10px; border-top: 1px solid ${couleurBordure}; display: flex; justify-content: space-between; font-size: ${7 * facteurTaille}pt; color: ${couleurSecondaire};">
+                <span>${escapeHtml(textePiedGauche)}</span>
+                <span>${escapeHtml(textePiedDroit)}</span>
+            </div>
+        `;
+    }
 
     html += `</div>`;
     return html;
@@ -1632,14 +1858,8 @@ async function exporterPDFCombine() {
  * @param {Object} options - Options d'affichage
  */
 async function genererPDFCombine(grille, echelle, cartouche = null, options = {}) {
-    // Ajustement taille police selon option
-    let facteurTaille = options.taillePolice === 'petit' ? 0.85 :
-                        options.taillePolice === 'grand' ? 1.15 : 1;
-
-    // Si forcer sur une page, appliquer une reduction supplementaire
-    if (options.forcerUnePage) {
-        facteurTaille *= 0.70; // Reduction de 30% pour tenir sur une page
-    }
+    // Taille fixe: petit (facteur 0.85)
+    const facteurTaille = 0.85;
 
     // Orientation : utilise l'option ou paysage par defaut si cartouche
     const orientationPDF = options.orientation === 'paysage' ? 'landscape' : 'portrait';
@@ -1653,83 +1873,71 @@ async function genererPDFCombine(grille, echelle, cartouche = null, options = {}
         titre = activite ? `${nomProd} - ${activite}` : nomProd;
     }
 
-    let posY = ajouterEntetePage(doc, titre);
+    let posY = ajouterEntetePage(doc, titre, { afficherTrimestre: options.afficherTrimestre });
 
     const largeurPage = doc.internal.pageSize.getWidth();
     const largeurContenu = largeurPage - PDF_CONFIG.marges.gauche - PDF_CONFIG.marges.droite;
 
-    // Informations de la production
-    if (options.production) {
+    // Informations : Objectif, Description, Contexte (jusqu'à 3 colonnes)
+    const colonnesInfo = [];
+    if (options.production && options.inclureObjectif && options.production.objectif) {
+        colonnesInfo.push({ titre: 'Objectif d\'apprentissage :', texte: options.production.objectif });
+    }
+    if (options.production && options.inclureDescription && options.production.tache) {
+        colonnesInfo.push({ titre: 'Description de la tâche :', texte: options.production.tache });
+    }
+    if (cartouche && cartouche.contexte) {
+        colonnesInfo.push({ titre: 'Contexte de la rétroaction :', texte: cartouche.contexte });
+    }
+
+    if (colonnesInfo.length > 0) {
         doc.setFont('helvetica', 'normal');
+        const espaceEntreCol = 8; // mm
+        const nbCols = colonnesInfo.length;
+        const largeurColonne = (largeurContenu - (espaceEntreCol * (nbCols - 1))) / nbCols;
+        const posYDepart = posY;
+        let maxPosY = posY;
 
-        if (options.inclureObjectif && options.production.objectif) {
+        colonnesInfo.forEach((col, index) => {
+            const colX = PDF_CONFIG.marges.gauche + index * (largeurColonne + espaceEntreCol);
+            let colPosY = posYDepart;
+
+            // Titre
             doc.setFontSize(PDF_CONFIG.polices.texteNormal * facteurTaille);
             doc.setTextColor(...PDF_CONFIG.couleurs.titreSection);
             doc.setFont('helvetica', 'bold');
-            doc.text('Objectif d\'apprentissage :', PDF_CONFIG.marges.gauche, posY);
-            posY += 5;
+            doc.text(col.titre, colX, colPosY);
+            colPosY += 5;
 
+            // Texte
             doc.setTextColor(...PDF_CONFIG.couleurs.textePrincipal);
             doc.setFont('helvetica', 'normal');
-            const lignesObjectif = doc.splitTextToSize(options.production.objectif, largeurContenu);
-            doc.text(lignesObjectif, PDF_CONFIG.marges.gauche, posY);
-            posY += lignesObjectif.length * 5 + 5;
-        }
+            const lignes = doc.splitTextToSize(col.texte, largeurColonne);
+            doc.text(lignes, colX, colPosY);
+            colPosY += lignes.length * 5;
 
-        if (options.inclureDescription && options.production.consignes) {
-            const descriptionTache = options.production.consignes;
-            doc.setFontSize(PDF_CONFIG.polices.texteNormal * facteurTaille);
-            doc.setTextColor(...PDF_CONFIG.couleurs.titreSection);
-            doc.setFont('helvetica', 'bold');
-            doc.text('Description de la tâche :', PDF_CONFIG.marges.gauche, posY);
-            posY += 5;
-
-            doc.setTextColor(...PDF_CONFIG.couleurs.textePrincipal);
-            doc.setFont('helvetica', 'normal');
-            const lignesDesc = doc.splitTextToSize(descriptionTache, largeurContenu);
-            doc.text(lignesDesc, PDF_CONFIG.marges.gauche, posY);
-            posY += lignesDesc.length * 5 + 5;
-        }
-    }
-
-    // Info echelle
-    doc.setFontSize(PDF_CONFIG.polices.texteNormal * facteurTaille);
-    doc.setTextColor(...PDF_CONFIG.couleurs.texteSecondaire);
-    doc.setFont('helvetica', 'italic');
-    let infoEchelle = `Échelle : ${echelle.nom || 'Sans nom'}`;
-    if (echelle.config?.seuilReussite) {
-        infoEchelle += ` — Seuil de réussite : ${echelle.config.seuilReussite}%`;
-    }
-    doc.text(infoEchelle, PDF_CONFIG.marges.gauche, posY);
-    posY += 8;
-
-    // Legende des niveaux
-    if (echelle.niveaux && echelle.niveaux.length > 0) {
-        doc.setFontSize(PDF_CONFIG.polices.textePetit * facteurTaille);
-        let legendeX = PDF_CONFIG.marges.gauche;
-        echelle.niveaux.forEach((n, i) => {
-            const couleur = getCouleurNiveau(n.code);
-            doc.setTextColor(...couleur);
-            doc.setFont('helvetica', 'bold');
-            doc.text(`${n.code || '?'}`, legendeX, posY);
-            legendeX += 8;
-            doc.setTextColor(...PDF_CONFIG.couleurs.texteSecondaire);
-            doc.setFont('helvetica', 'normal');
-            const texte = `${n.nom || ''} (${n.min ?? 0}-${n.max ?? 100}%)`;
-            doc.text(texte, legendeX, posY);
-            legendeX += doc.getTextWidth(texte) + 15;
+            maxPosY = Math.max(maxPosY, colPosY);
         });
-        posY += 10;
+
+        posY = maxPosY + 5;
     }
+
+    // Légende supprimée - le nom du niveau est dans l'entête du tableau
 
     // Tableau des criteres
     if (grille.criteres && grille.criteres.length > 0 && echelle.niveaux && echelle.niveaux.length > 0) {
-        // En-tetes
-        const entetes = ['Critère', '%', ...echelle.niveaux.map(n => n.code || '?')];
+        // En-tetes avec Code + Nom niveau
+        const entetes = ['Critère', '%', ...echelle.niveaux.map(n => {
+            return n.nom ? `${n.code || '?'} - ${n.nom}` : (n.code || '?');
+        })];
 
-        // Donnees
+        // Donnees - inclure description du critère si option cochée
         const donnees = grille.criteres.map(c => {
-            const ligne = [c.nom || '—', c.ponderation ? `${c.ponderation}` : '—'];
+            let nomCritere = c.nom || '—';
+            if (options.inclureDescCriteres && c.description) {
+                nomCritere += '\n' + c.description;
+            }
+            const ligne = [nomCritere, c.ponderation ? `${c.ponderation}` : '—'];
             echelle.niveaux.forEach(n => {
                 let contenu = '—';
                 if (cartouche && cartouche.commentaires) {
@@ -1791,8 +1999,8 @@ async function genererPDFCombine(grille, echelle, cartouche = null, options = {}
         const tailleEntete = PDF_CONFIG.polices.textePetit * facteurTaille;
         const tailleCorps = tailleCorpsBase * facteurTaille;
 
-        // Padding adaptatif
-        const cellPadding = options.forcerUnePage ? 1 : (aCartouche ? 1.5 : 3);
+        // Padding adaptatif selon présence de cartouche
+        const cellPadding = aCartouche ? 1.5 : 3;
 
         doc.autoTable({
             startY: posY,
@@ -1806,7 +2014,7 @@ async function genererPDFCombine(grille, echelle, cartouche = null, options = {}
                 fontStyle: 'bold',
                 fontSize: tailleEntete,
                 halign: 'center',
-                cellPadding: options.forcerUnePage ? 1 : 2
+                cellPadding: 2
             },
             bodyStyles: {
                 fontSize: tailleCorps,
@@ -1815,8 +2023,8 @@ async function genererPDFCombine(grille, echelle, cartouche = null, options = {}
                 lineHeight: 1.15
             },
             columnStyles: colonnesStyles,
-            // Permettre plusieurs pages sauf si forcer une page
-            rowPageBreak: options.forcerUnePage ? 'avoid' : 'auto',
+            // Permettre plusieurs pages
+            rowPageBreak: 'auto',
             didParseCell: function(data) {
                 // Colorer les en-tetes de niveaux
                 if (data.section === 'head' && data.column.index >= 2) {
@@ -1930,29 +2138,53 @@ async function afficherFormulairePreparationPDF(options = {}) {
     // Afficher le formulaire
     formulaire.style.display = 'block';
 
-    // Preselectionner la grille : priorite aux options, sinon grille courante
+    // Restaurer les derniers réglages sauvegardés
+    const reglages = restaurerReglagesPDF();
+
+    // Preselectionner la grille : priorite aux options, sinon réglages, sinon grille courante
     const grilleId = options.grilleId ||
+        reglages?.grilleId ||
         (typeof grilleTemplateActuelle !== 'undefined' && grilleTemplateActuelle?.id);
     if (grilleId) {
         const selectGrille = document.getElementById('prepPDF-grille');
         if (selectGrille) selectGrille.value = grilleId;
     }
 
-    // Preselectionner l'echelle si fournie ou si disponible globalement
+    // Preselectionner l'echelle : priorite aux options, sinon réglages, sinon globale
     const echelleId = options.echelleId ||
+        reglages?.echelleId ||
         (typeof echelleTemplateActuelle !== 'undefined' && echelleTemplateActuelle?.id);
     if (echelleId) {
         const selectEchelle = document.getElementById('prepPDF-echelle');
         if (selectEchelle) selectEchelle.value = echelleId;
     }
 
+    // Preselectionner la production depuis les réglages
+    if (reglages?.productionId) {
+        const selectProduction = document.getElementById('prepPDF-production');
+        if (selectProduction) selectProduction.value = reglages.productionId;
+    }
+
+    // Restaurer les checkboxes
+    if (reglages) {
+        const checkNom = document.getElementById('prepPDF-prod-nom');
+        const checkObjectif = document.getElementById('prepPDF-prod-objectif');
+        const checkDescription = document.getElementById('prepPDF-prod-description');
+        const checkDescCriteres = document.getElementById('prepPDF-desc-criteres');
+        if (checkNom) checkNom.checked = reglages.inclureNomProduction ?? true;
+        if (checkObjectif) checkObjectif.checked = reglages.inclureObjectif ?? true;
+        if (checkDescription) checkDescription.checked = reglages.inclureDescription ?? true;
+        if (checkDescCriteres) checkDescCriteres.checked = reglages.inclureDescCriteres ?? false;
+    }
+
     // Mettre a jour les options dependantes (cartouches, etc.)
     await mettreAJourOptionsPreparationPDF();
 
-    // Preselectionner la cartouche apres le chargement des cartouches
-    if (options.cartoucheId) {
+    // Preselectionner la cartouche : priorite aux options, sinon réglages
+    const cartoucheId = options.cartoucheId || reglages?.cartoucheId;
+    if (cartoucheId) {
         const selectCartouche = document.getElementById('prepPDF-cartouche');
-        if (selectCartouche) selectCartouche.value = options.cartoucheId;
+        if (selectCartouche) selectCartouche.value = cartoucheId;
     }
 }
 
@@ -1969,34 +2201,38 @@ function fermerFormulairePreparationPDF() {
 
 /**
  * Charge les options de tous les dropdowns du formulaire de preparation
+ * Filtre pour n'afficher que les elements dans la sidebar (dansBibliotheque !== false)
  */
 async function chargerOptionsPreparationPDF() {
     const selectProduction = document.getElementById('prepPDF-production');
     const selectGrille = document.getElementById('prepPDF-grille');
     const selectEchelle = document.getElementById('prepPDF-echelle');
 
-    // Charger les productions
+    // Charger les productions (filtrées par dansBibliotheque)
     if (selectProduction) {
         const cleProductions = (typeof cle === 'function') ? cle('productionsPedagogiques') : 'productions';
-        const productions = await db.get(cleProductions) || [];
+        const toutesProductions = await db.get(cleProductions) || [];
+        const productions = toutesProductions.filter(p => p.dansBibliotheque !== false);
         selectProduction.innerHTML = '<option value="">-- Aucune (grille générique) --</option>';
         productions.forEach(p => {
             selectProduction.innerHTML += `<option value="${p.id}">${escapeHtml(p.titre || p.description || 'Sans titre')}</option>`;
         });
     }
 
-    // Charger les grilles
+    // Charger les grilles (filtrées par dansBibliotheque)
     if (selectGrille) {
-        const grilles = await db.get('grillesTemplates') || [];
+        const toutesGrilles = await db.get('grillesTemplates') || [];
+        const grilles = toutesGrilles.filter(g => g.dansBibliotheque !== false);
         selectGrille.innerHTML = '<option value="">-- Sélectionner --</option>';
         grilles.forEach(g => {
             selectGrille.innerHTML += `<option value="${g.id}">${escapeHtml(g.nom || 'Sans nom')}</option>`;
         });
     }
 
-    // Charger les echelles
+    // Charger les echelles (filtrées par dansBibliotheque)
     if (selectEchelle) {
-        const echelles = await db.get('echellesTemplates') || [];
+        const toutesEchelles = await db.get('echellesTemplates') || [];
+        const echelles = toutesEchelles.filter(e => e.dansBibliotheque !== false);
         selectEchelle.innerHTML = '<option value="">-- Sélectionner --</option>';
         echelles.forEach(e => {
             selectEchelle.innerHTML += `<option value="${e.id}">${escapeHtml(e.nom || 'Sans nom')}</option>`;
@@ -2105,16 +2341,11 @@ async function ouvrirApercuPDF() {
             cartouche = cartouches.find(c => c.id === cartoucheId);
         }
 
-        // Charger les infos du cours pour le pied de page
-        const infoCours = db.getSync('infoCours', {});
-        // L'enseignant peut être dans un sous-objet ou directement sur infoCours
-        const enseignantObj = infoCours.enseignant || {};
-        const prenomEns = infoCours.prenomEnseignant || enseignantObj.prenom || '';
-        const nomEns = infoCours.nomEnseignant || enseignantObj.nom || '';
-        const nomEnseignant = `${prenomEns} ${nomEns}`.trim();
-        const nomCours = (infoCours.codeCours || infoCours.sigle) && (infoCours.titre || infoCours.nomCours)
-            ? `${infoCours.codeCours || infoCours.sigle} - ${infoCours.titre || infoCours.nomCours}`
-            : (infoCours.titre || infoCours.nomCours || '');
+        // Charger les infos pour le pied de page et l'en-tête
+        // SST: Utiliser les fonctions centralisées qui suivent la SST de trimestre-v2.js
+        const nomEnseignant = obtenirNomEnseignantPDF();
+        const infosCours = obtenirInfosCoursPDF();
+        const nomCours = infosCours.sigleTitre;
 
         // Stocker les donnees pour les rafraichissements ulterieurs
         _apercuPDFData = {
@@ -2125,21 +2356,30 @@ async function ouvrirApercuPDF() {
             inclureNomProduction: document.getElementById('prepPDF-prod-nom')?.checked,
             inclureObjectif: document.getElementById('prepPDF-prod-objectif')?.checked,
             inclureDescription: document.getElementById('prepPDF-prod-description')?.checked,
+            inclureDescCriteres: document.getElementById('prepPDF-desc-criteres')?.checked,
             nomEnseignant: nomEnseignant,
             nomCours: nomCours
         };
 
-        // Reinitialiser les options du modal aux valeurs par defaut
+        // Restaurer les options du modal depuis les réglages sauvegardés
+        const reglages = restaurerReglagesPDF();
         const selectOrientation = document.getElementById('apercuPDF-orientation');
-        const selectTaille = document.getElementById('apercuPDF-taille-police');
-        const checkForcer = document.getElementById('apercuPDF-forcer-une-page');
+        const checkPiedEnseignant = document.getElementById('apercuPDF-pied-enseignant');
+        const checkPiedLicence = document.getElementById('apercuPDF-pied-licence');
+        const checkAfficherTrimestre = document.getElementById('apercuPDF-afficher-trimestre');
 
-        // Suggerer paysage si cartouche presente
+        // Orientation : réglages sauvegardés, ou paysage si cartouche
         if (selectOrientation) {
-            selectOrientation.value = cartouche ? 'paysage' : 'portrait';
+            selectOrientation.value = reglages?.orientation || (cartouche ? 'paysage' : 'portrait');
         }
-        if (selectTaille) selectTaille.value = 'moyen';
-        if (checkForcer) checkForcer.checked = false;
+
+        // Restaurer les options de pied de page (piedCours retiré - cours maintenant dans l'en-tête)
+        if (checkPiedEnseignant) checkPiedEnseignant.checked = reglages?.piedEnseignant ?? true;
+        if (checkPiedLicence) checkPiedLicence.checked = reglages?.piedLicence ?? true;
+        if (checkAfficherTrimestre) checkAfficherTrimestre.checked = reglages?.afficherTrimestre ?? true;
+
+        // Sauvegarder les réglages actuels
+        sauvegarderReglagesPDF();
 
         // Afficher le modal
         modal.style.display = 'flex';
@@ -2166,38 +2406,33 @@ function rafraichirApercuPDF() {
 
     // Lire les options de mise en page du modal
     const orientation = document.getElementById('apercuPDF-orientation')?.value || 'portrait';
-    const taillePolice = document.getElementById('apercuPDF-taille-police')?.value || 'moyen';
-    const forcerUnePage = document.getElementById('apercuPDF-forcer-une-page')?.checked || false;
+    const afficherTrimestre = document.getElementById('apercuPDF-afficher-trimestre')?.checked !== false;
 
-    // Lire les options de pied de page
+    // Lire les options de pied de page (piedCours retiré - cours maintenant dans l'en-tête)
     const piedEnseignant = document.getElementById('apercuPDF-pied-enseignant')?.checked !== false;
-    const piedCours = document.getElementById('apercuPDF-pied-cours')?.checked !== false;
     const piedLicence = document.getElementById('apercuPDF-pied-licence')?.checked !== false;
 
-    // Options d'affichage combinees
+    // Options d'affichage combinees (taille fixe: petit)
     const options = {
         production: _apercuPDFData.production,
         inclureNomProduction: _apercuPDFData.inclureNomProduction,
         inclureObjectif: _apercuPDFData.inclureObjectif,
         inclureDescription: _apercuPDFData.inclureDescription,
-        taillePolice: taillePolice,
+        inclureDescCriteres: _apercuPDFData.inclureDescCriteres,
+        taillePolice: 'petit',
         orientation: orientation,
-        forcerUnePage: forcerUnePage,
+        afficherTrimestre: afficherTrimestre,
         // Options pied de page
         piedEnseignant: piedEnseignant,
-        piedCours: piedCours,
         piedLicence: piedLicence,
         nomEnseignant: _apercuPDFData.nomEnseignant,
         nomCours: _apercuPDFData.nomCours
     };
 
-    // Appliquer les classes d'orientation et taille sur la page simulee
+    // Appliquer les classes d'orientation sur la page simulee
     pagePDF.className = 'apercu-pdf-page';
     pagePDF.classList.add(orientation === 'paysage' ? 'apercu-pdf-paysage' : 'apercu-pdf-portrait');
-    pagePDF.classList.add(`apercu-taille-${taillePolice}`);
-    if (forcerUnePage) {
-        pagePDF.classList.add('apercu-forcer-une-page');
-    }
+    pagePDF.classList.add('apercu-taille-petit');
 
     // Generer l'apercu
     zoneApercu.innerHTML = genererApercuCombine(
@@ -2229,27 +2464,25 @@ async function exporterPDFDepuisApercu() {
 
     // Lire les options de mise en page du modal
     const orientation = document.getElementById('apercuPDF-orientation')?.value || 'portrait';
-    const taillePolice = document.getElementById('apercuPDF-taille-police')?.value || 'moyen';
-    const forcerUnePage = document.getElementById('apercuPDF-forcer-une-page')?.checked || false;
+    const afficherTrimestre = document.getElementById('apercuPDF-afficher-trimestre')?.checked !== false;
 
-    // Lire les options de pied de page
+    // Lire les options de pied de page (piedCours retiré - cours maintenant dans l'en-tête)
     const piedEnseignant = document.getElementById('apercuPDF-pied-enseignant')?.checked !== false;
-    const piedCours = document.getElementById('apercuPDF-pied-cours')?.checked !== false;
     const piedLicence = document.getElementById('apercuPDF-pied-licence')?.checked !== false;
 
     try {
-        // Options d'affichage combinees
+        // Options d'affichage combinees (taille fixe: petit)
         const options = {
             production: _apercuPDFData.production,
             inclureNomProduction: _apercuPDFData.inclureNomProduction,
             inclureObjectif: _apercuPDFData.inclureObjectif,
             inclureDescription: _apercuPDFData.inclureDescription,
-            taillePolice: taillePolice,
+            inclureDescCriteres: _apercuPDFData.inclureDescCriteres,
+            taillePolice: 'petit',
             orientation: orientation,
-            forcerUnePage: forcerUnePage,
+            afficherTrimestre: afficherTrimestre,
             // Options pied de page
             piedEnseignant: piedEnseignant,
-            piedCours: piedCours,
             piedLicence: piedLicence,
             nomEnseignant: _apercuPDFData.nomEnseignant,
             nomCours: _apercuPDFData.nomCours

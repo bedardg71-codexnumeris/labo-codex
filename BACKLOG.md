@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 20 janvier 2026
+> **Derniere mise a jour** : 21 janvier 2026
 
 ---
 
@@ -12,14 +12,14 @@
 - [ ] **#30** Export PDF des elements pedagogiques (EN COURS)
   - [x] Grilles descriptives (grille + echelle + cartouche) avec jsPDF
   - [x] Formulaire preparation 2 etapes (selection contenu → apercu mise en page)
-  - [x] Options : orientation, taille police, pied de page personnalisable
-  - [x] Pied de page : enseignant, cours, licence CC (checkboxes)
-  - [x] Titre avec activite d'apprentissage (ex: "Artefact 1 - Strategies de lecture")
+  - [x] Nouvelle disposition : cours/trimestre en haut a droite, enseignant en bas a gauche
+  - [x] Options simplifiees : orientation, checkbox trimestre, pied de page (enseignant, licence CC)
+  - [x] Marges reduites (0.5 inch)
+  - [x] Fonctions SST : obtenirInfosCoursPDF(), obtenirNomEnseignantPDF()
+  - [ ] **Bug a corriger** :
+    - Infos cours/enseignant non affichees dans le PDF
+    - Ajouter logs de debogage pour identifier la source des donnees
   - [ ] **Ajustements restants** :
-    - Description de la tache manquante dans le PDF (checkbox cochee mais pas affichee)
-    - Mettre objectif et description cote a cote pour economiser espace vertical
-    - Apercu ne reflete pas le pied de page (visible dans PDF seulement)
-    - Option "Forcer sur 1 page" a revoir (problemes de proportions)
     - Tester sans cartouche (grille seule)
     - Productions : liste des travaux (a venir)
     - Echelles seules (a venir)
