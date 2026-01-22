@@ -603,14 +603,16 @@ function mettreAJourTitreListeEtudiants() {
  * Met à jour les en-têtes des colonnes A, C et E avec les statistiques calculées
  * @param {number|null} r_AP - Corrélation entre Assiduité et Performance
  * @param {number|null} r_CP - Corrélation entre Complétion et Performance
+ * @param {number|null} moyenneA - Moyenne de l'assiduité du groupe (0-100)
  * @param {number|null} moyenneE - Moyenne de l'engagement du groupe (0-100)
  *
  * AFFICHAGE DANS L'EN-TÊTE:
- * - A et C : Corrélations r=0.XX avec couleur selon force
+ * - A : Moyenne du groupe (%) 🆕 BETA 95.7
+ * - C : Corrélation r=0.XX avec couleur selon force
  * - E : Moyenne du groupe (%)
  * - Si données manquantes: affiche "—"
  */
-function mettreAJourEntetesAvecCorrelations(r_AP, r_CP, moyenneE) {
+function mettreAJourEntetesAvecCorrelations(r_AP, r_CP, moyenneA, moyenneE) {
     // Chercher les en-têtes dans le HTML
     const enteteLigneA = document.querySelector('th[onclick*="assiduite"]');
     const enteteLigneC = document.querySelector('th[onclick*="completion"]');
@@ -641,11 +643,11 @@ function mettreAJourEntetesAvecCorrelations(r_AP, r_CP, moyenneE) {
         return `<span style="color: white; font-size: 0.75rem; font-weight: 600;">moy=${Math.round(valeur)}%</span>`;
     }
 
-    // Mettre à jour l'en-tête A (assiduité)
-    const htmlA = `A<br><span class="text-xs-normal">(assiduité)</span><br>${formaterCorrelation(r_AP)}<span id="tri-assiduite" class="ml-4">↕</span>`;
+    // 🆕 BETA 95.7 : Mettre à jour l'en-tête A (assiduité) avec la MOYENNE
+    const htmlA = `A<br><span class="text-xs-normal">(assiduité)</span><br>${formaterMoyenne(moyenneA)}<span id="tri-assiduite" class="ml-4">↕</span>`;
     enteteLigneA.innerHTML = htmlA;
 
-    // Mettre à jour l'en-tête C (complétion)
+    // Mettre à jour l'en-tête C (complétion) avec corrélation
     const htmlC = `C<br><span class="text-xs-normal">(complétion)</span><br>${formaterCorrelation(r_CP)}<span id="tri-completion" class="ml-4">↕</span>`;
     enteteLigneC.innerHTML = htmlC;
 
@@ -655,7 +657,7 @@ function mettreAJourEntetesAvecCorrelations(r_AP, r_CP, moyenneE) {
         enteteLigneE.innerHTML = htmlE;
     }
 
-    console.log(`📊 Statistiques affichées: A↔P r=${r_AP !== null ? r_AP.toFixed(3) : 'N/A'}, C↔P r=${r_CP !== null ? r_CP.toFixed(3) : 'N/A'}, E moy=${moyenneE !== null ? moyenneE.toFixed(1) : 'N/A'}%`);
+    console.log(`📊 Statistiques affichées: A moy=${moyenneA !== null ? moyenneA.toFixed(1) : 'N/A'}%, C↔P r=${r_CP !== null ? r_CP.toFixed(3) : 'N/A'}, E moy=${moyenneE !== null ? moyenneE.toFixed(1) : 'N/A'}%`);
 }
 
 /**
@@ -989,6 +991,20 @@ function afficherListeEtudiantsConsultation() {
         };
     });
 
+    // 🆕 BETA 95.7 (22 jan): Calculer la moyenne A sur les étudiants avec PRÉSENCES SAISIES
+    // (inclut les 0% = absents, exclut ceux sans aucune présence saisie)
+    let presencesGlobal = obtenirDonneesSelonMode('presences') || [];
+    if (!Array.isArray(presencesGlobal)) presencesGlobal = [];
+
+    const valeursA_avecPresences = [];
+    etudiants.forEach((etudiant, index) => {
+        const aDesPresences = presencesGlobal.some(p => p.da === etudiant.da);
+        if (aDesPresences) {
+            valeursA_avecPresences.push(valeursA_tous[index]);
+        }
+    });
+    const moyenneA = valeursA_avecPresences.length > 0 ? valeursA_avecPresences.reduce((sum, val) => sum + val, 0) / valeursA_avecPresences.length : null;
+
     // 🆕 BETA 91: Calculer la moyenne de l'engagement E sur TOUS les étudiants (cohérence avec corrélations)
     const valeursE_tous = tousIndices.map(indices => {
         const A = indices.A / 100;
@@ -1000,8 +1016,8 @@ function afficherListeEtudiantsConsultation() {
     });
     const moyenneE = valeursE_tous.length > 0 ? valeursE_tous.reduce((sum, val) => sum + val, 0) / valeursE_tous.length : null;
 
-    // Mettre à jour les en-têtes avec les corrélations et la moyenne de E
-    mettreAJourEntetesAvecCorrelations(r_AP, r_CP, moyenneE);
+    // Mettre à jour les en-têtes avec les moyennes
+    mettreAJourEntetesAvecCorrelations(r_AP, r_CP, moyenneA, moyenneE);
 
     // 🆕 BETA 91: Mettre à jour la carte explicative sur le calcul des indices
     mettreAJourExplicationCalculIndices();
@@ -1137,16 +1153,22 @@ function afficherListeEtudiantsConsultation() {
         const tiret = '<span class="etud-texte-gris-clair">—</span>';
 
         // Détection individuelle des données manquantes
-        const aPresences = indices.A > 0;  // A > 0 = présences saisies
-        const aEvaluations = indices.C > 0 || indices.P > 0;  // Au moins une évaluation
+        // Pour A : vérifier si des présences ont été SAISIES (même si absent = 0%)
+        let presences = obtenirDonneesSelonMode('presences') || [];
+        if (!Array.isArray(presences)) presences = [];
+        const presencesEtudiant = presences.filter(p => p.da === etudiant.da);
+        const aPresencesSaisies = presencesEtudiant.length > 0;  // Présences saisies (même si absent)
+
+        // Pour C et P : au moins une évaluation
+        const aEvaluations = indices.C > 0 || indices.P > 0;
 
         // Colonnes A-C-P avec couleurs
         const couleurA = obtenirCouleurAssiduite(Math.round(indices.A));
         const couleurC = obtenirCouleurCompletion(Math.round(indices.C));
         const couleurP = obtenirCouleurPerformance(Math.round(indices.P));
 
-        // Colonne A : afficher si présences, sinon tiret
-        if (aPresences) {
+        // Colonne A : afficher si présences SAISIES (même si 0%), sinon tiret
+        if (aPresencesSaisies) {
             html += '<td class="etud-text-center"><strong style="color: ' + couleurA + ';">' + Math.round(indices.A) + '%</strong></td>';
         } else {
             html += '<td class="etud-text-center">' + tiret + '</td>';
@@ -1161,8 +1183,8 @@ function afficherListeEtudiantsConsultation() {
             html += '<td class="etud-text-center">' + tiret + '</td>';
         }
 
-        // Colonne E : afficher seulement si A ET (C ou P) sont disponibles
-        if (aPresences && aEvaluations) {
+        // Colonne E : afficher seulement si présences saisies ET évaluations
+        if (aPresencesSaisies && aEvaluations) {
             // Colonne Engagement E = (A × C × P)^(1/3) en pourcentage
             const E_brut = (indices.A / 100) * (indices.C / 100) * (indices.P / 100);
             const E = Math.pow(E_brut, 1/3);
@@ -1177,7 +1199,7 @@ function afficherListeEtudiantsConsultation() {
         // Colonnes Pattern et RàI (affichées uniquement si RàI activé)
         // 🆕 BETA 95.7 : Même logique que E - besoin de présences ET évaluations
         if (activerRai) {
-            if (aPresences && aEvaluations) {
+            if (aPresencesSaisies && aEvaluations) {
                 // Colonne Pattern avec badge (centré)
                 html += '<td class="etud-text-center"><span class="' + badgePattern.classe + '">' + badgePattern.label + '</span></td>';
 

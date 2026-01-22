@@ -3188,9 +3188,11 @@
                     <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Beta 95.7 (22 janvier) :</strong>
                     <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
                         <li><strong>Saisie présences améliorée</strong> : Input numérique remplace le dropdown (permet fractions: 1.5, 2.5...), affichage X/Y pér.</li>
+                        <li><strong>Calcul assiduité corrigé</strong> : Formule en périodes (2/2 = 100%, pas 92%). Étudiants absents affichent 0% (pas tiret)</li>
+                        <li><strong>Moyenne A du groupe</strong> : Affichée dans l'entête de la liste des étudiants et sur la barre Assiduité du tableau de bord</li>
+                        <li><strong>Points individuels</strong> : La barre Assiduité du tableau de bord affiche maintenant les 28 points (distribution visible)</li>
                         <li><strong>Calendrier synchronisé</strong> : L'horaire du trimestre actif est maintenant correctement reconnu par le calendrier</li>
                         <li><strong>Affichage nom pratique</strong> : L'entête affiche le nom de la pratique au lieu de son ID technique</li>
-                        <li><strong>Corrections techniques</strong> : Namespacing présences corrigé, protection Array.isArray ajoutée</li>
                     </ul>
                 </div>
 
@@ -5553,7 +5555,7 @@
                                             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 15px;">
                                                 <div class="groupe-form">
                                                     <label for="mat-portfolio-minimum" style="font-weight: 600; display: block; margin-bottom: 6px;">
-                                                        Seuil pour note formative
+                                                        Nb minimal d'évaluations pour P et E
                                                     </label>
                                                     <input type="number" id="mat-portfolio-minimum" class="controle-form" min="1" max="20" value="7" onchange="sauvegarderConfigPratiqueMat()">
                                                 </div>
@@ -15037,7 +15039,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '95.7';
-        const BUILD_ID = '0122-1324';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0122-1450';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
