@@ -506,7 +506,33 @@ function initialiserModuleSaisiePresences() {
     chargerGroupesPresences();
     verifierConfigurationFormatHoraire();
 
+    // 🆕 BETA 95.7 (22 jan) : Restaurer les paramètres persistés
     const dateInput = document.getElementById('date-cours');
+    const selectGroupe = document.getElementById('selectGroupePresences');
+    const selectTri = document.getElementById('selectTriPresences');
+
+    const dateSauvegardee = db.getSync('presences_date', '');
+    const groupeSauvegarde = db.getSync('presences_groupe', '');
+    const triSauvegarde = db.getSync('presences_tri', 'nom');
+
+    // Restaurer la date (seulement si valide et pas dans le futur)
+    if (dateInput && dateSauvegardee) {
+        const aujourdhui = new Date().toISOString().split('T')[0];
+        if (dateSauvegardee <= aujourdhui) {
+            dateInput.value = dateSauvegardee;
+        }
+    }
+
+    // Restaurer le groupe
+    if (selectGroupe && groupeSauvegarde) {
+        selectGroupe.value = groupeSauvegarde;
+    }
+
+    // Restaurer le tri
+    if (selectTri && triSauvegarde) {
+        selectTri.value = triSauvegarde;
+    }
+
     if (dateInput && dateInput.value) {
         initialiserSaisiePresences();
         calculerEtSauvegarderIndicesAssiduite();
@@ -993,9 +1019,24 @@ function verifierConfigurationFormatHoraire() {
 
 /**
  * Initialise la saisie des présences pour la date sélectionnée
+ * 🆕 BETA 95.7 (22 jan) : Persistance des paramètres (date, groupe, tri)
  */
 function initialiserSaisiePresences() {
     const dateInput = document.getElementById('date-cours');
+    const selectGroupe = document.getElementById('selectGroupePresences');
+    const selectTri = document.getElementById('selectTriPresences');
+
+    // 🆕 Sauvegarder les paramètres actuels pour persistance
+    if (dateInput && dateInput.value) {
+        db.setSync('presences_date', dateInput.value);
+    }
+    if (selectGroupe) {
+        db.setSync('presences_groupe', selectGroupe.value);
+    }
+    if (selectTri) {
+        db.setSync('presences_tri', selectTri.value);
+    }
+
     if (!dateInput || !dateInput.value) {
         const tbody = document.getElementById('tbody-saisie-presences');
         if (tbody) {
@@ -1239,15 +1280,15 @@ function chargerTableauPresences(dateStr, estVerrouille) {
             periodesPresence = nombrePeriodesSeance; // Présent par défaut si nouvelle saisie
         }
 
-        const heuresPresence = (periodesPresence * dureePeriode) / 60;
         const notes = presenceExistante ? (presenceExistante.notes || '') : '';
         const estFacultatif = presenceExistante ? (presenceExistante.facultatif === true) : false;
 
+        // 🆕 CORRIGÉ (22 jan 2026) : Passer periodesPresence directement (pas heuresPresence)
         const heuresHistorique = calculerTotalHeuresPresence(etudiant.da, dateStr);
         const tauxAssiduiteActuel = calculerTauxAssiduite(
             etudiant.da,
             dateStr,
-            parseFloat(heuresPresence) || 0
+            periodesPresence
         );
 
         const tr = document.createElement('tr');
@@ -1266,8 +1307,9 @@ function chargerTableauPresences(dateStr, estVerrouille) {
                    onchange="mettreAJourLignePeriodes('${etudiant.da}', '${dateStr}', ${nombrePeriodesSeance})"
             >/<span class="max-periodes">${nombrePeriodesSeance}</span>`;
 
-        // Calculer le total incluant la séance actuelle
-        const totalHeuresAvecSeanceActuelle = heuresHistorique + parseFloat(heuresPresence);
+        // 🆕 CORRIGÉ (22 jan 2026) : Calculer le total en périodes
+        const heuresPresence = (periodesPresence * dureePeriode) / 60;
+        const totalHeuresAvecSeanceActuelle = heuresHistorique + heuresPresence;
 
         // Structure : DA | Prénom | Nom | Présence | Notes | Total heures | Assiduité
         tr.innerHTML = `
@@ -1409,22 +1451,21 @@ function mettreAJourLignePeriodes(da, dateStr, nombrePeriodesMax) {
     if (periodesSeance > nombrePeriodesMax) periodesSeance = nombrePeriodesMax;
     inputPeriodes.value = periodesSeance;
 
-    const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : 55;
-    const heuresSeance = (periodesSeance * dureePeriode) / 60;
-
     // Appliquer le code couleur
     appliquerCodeCouleurPeriodes(inputPeriodes, nombrePeriodesMax);
 
-    // 🆕 BETA 95.7 : Afficher en périodes au lieu d'heures
+    // 🆕 BETA 95.7 : Afficher total en périodes
     if (spanHeuresHisto) {
+        const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : 55;
         const heuresHistorique = calculerTotalHeuresPresence(da, dateStr);
+        const heuresSeance = (periodesSeance * dureePeriode) / 60;
         const totalHeuresAvecSeanceActuelle = heuresHistorique + heuresSeance;
         const totalPeriodes = Math.round((totalHeuresAvecSeanceActuelle * 60) / dureePeriode);
         spanHeuresHisto.textContent = totalPeriodes + ' pér.';
     }
 
-    // Mettre à jour le taux
-    const tauxAssiduiteActuel = calculerTauxAssiduite(da, dateStr, heuresSeance);
+    // 🆕 CORRIGÉ (22 jan 2026) : Passer les périodes directement
+    const tauxAssiduiteActuel = calculerTauxAssiduite(da, dateStr, periodesSeance);
 
     spanTaux.textContent = tauxAssiduiteActuel + '%';
     spanTaux.style.fontWeight = '500';
@@ -1653,40 +1694,53 @@ function calculerTotalHeuresPresence(da, dateActuelle) {
 
 /**
  * Calcule le taux d'assiduité d'un étudiant
+ * 🆕 CORRIGÉ (22 jan 2026) : Calcul en temps réel avec périodes (inclut séance actuelle)
  */
-function calculerTauxAssiduite(da, dateActuelle, heuresSeanceActuelle) {
-    // Utiliser les indices sauvegardés qui tiennent compte des séances facultatives
-    // Utiliser cle() pour namespacing par trimestre
-    const cleIndices = (typeof cle === 'function') ? cle('indicesAssiduite') : 'indicesAssiduite';
-    const indices = db.getSync(cleIndices, {});
+function calculerTauxAssiduite(da, dateActuelle, periodesSeanceActuelle) {
+    // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
+    let presences = obtenirDonneesSelonMode('presences') || [];
+    if (!Array.isArray(presences)) presences = [];
 
-    if (indices.sommatif && indices.sommatif[da] !== undefined) {
-        // Retourner l'indice sommatif sauvegardé (déjà calculé avec logique facultative)
-        // IMPORTANT: indices.sommatif[da] est maintenant un objet {indice, heuresPresentes, heuresOffertes, nombreSeances}
-        const assiduiteSommatif = indices.sommatif[da];
-        const indice = (typeof assiduiteSommatif === 'object') ? assiduiteSommatif.indice : assiduiteSommatif;
-        const taux = indice * 100;
-        return Math.min(Math.round(taux), 100);
+    // Filtrer les présences de cet étudiant AVANT la date actuelle (séances NON facultatives)
+    const presencesHistorique = presences.filter(p =>
+        p.da === da &&
+        p.facultatif !== true &&
+        p.date < dateActuelle &&
+        (p.periodesPresentes !== null && p.periodesPresentes !== undefined ||
+         p.heures !== null && p.heures !== undefined)
+    );
+
+    // Calculer les périodes historiques
+    let periodesOffertesHisto = 0;
+    let periodesPresentesHisto = 0;
+    const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : 55;
+
+    presencesHistorique.forEach(p => {
+        const nombrePeriodesSeance = typeof obtenirNombrePeriodesSeance === 'function'
+            ? obtenirNombrePeriodesSeance(p.date)
+            : 2;
+        periodesOffertesHisto += nombrePeriodesSeance;
+
+        if (p.periodesPresentes !== undefined && p.periodesPresentes !== null) {
+            periodesPresentesHisto += p.periodesPresentes;
+        } else if (p.heures !== undefined && p.heures !== null) {
+            periodesPresentesHisto += (p.heures * 60) / dureePeriode;
+        }
+    });
+
+    // Ajouter la séance actuelle
+    const nombrePeriodesSeanceActuelle = typeof obtenirNombrePeriodesSeance === 'function'
+        ? obtenirNombrePeriodesSeance(dateActuelle)
+        : 2;
+
+    const periodesOffertesTotal = periodesOffertesHisto + nombrePeriodesSeanceActuelle;
+    const periodesPresentesTotal = periodesPresentesHisto + periodesSeanceActuelle;
+
+    if (periodesOffertesTotal === 0) {
+        return 100; // Pas encore de cours
     }
 
-    // Fallback : ancienne logique si les indices ne sont pas disponibles
-    const nombreSeances = calculerNombreSeances(dateActuelle);
-
-    if (nombreSeances === 0) {
-        return 100; // Pas encore de cours, donc 100%
-    }
-
-    const dureeSeance = obtenirDureeMaxSeance();
-    const heuresTheoriques = nombreSeances * dureeSeance;
-
-    if (heuresTheoriques === 0) {
-        return 100;
-    }
-
-    const heuresHistorique = calculerTotalHeuresPresence(da, dateActuelle);
-    const heuresReelles = heuresHistorique + heuresSeanceActuelle;
-
-    const taux = (heuresReelles / heuresTheoriques) * 100;
+    const taux = (periodesPresentesTotal / periodesOffertesTotal) * 100;
     return Math.min(Math.round(taux), 100);
 }
 
