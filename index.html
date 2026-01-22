@@ -3185,18 +3185,18 @@
 
                 <!-- Beta 95.7 - Améliorations -->
                 <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
-                    <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Beta 95.7 (20 janvier) — Améliorations :</strong>
+                    <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Beta 95.7 (22 janvier) — Améliorations :</strong>
                     <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
                         <li><strong>Export PDF grilles descriptives</strong> : Génère un PDF de ta grille avec les rétroactions (grille + échelle + cartouche). Options : orientation, taille police, pied de page personnalisable (enseignant, cours, licence CC)</li>
+                        <li><strong>Saisie présences améliorée</strong> : Input numérique remplace le dropdown (permet fractions: 1.5, 2.5...), affichage X/Y pér.</li>
+                        <li><strong>Calendrier synchronisé</strong> : L'horaire du trimestre actif est maintenant correctement reconnu par le calendrier</li>
+                        <li><strong>Affichage nom pratique</strong> : L'entête affiche le nom de la pratique au lieu de son ID technique</li>
                         <li><strong>Autocomplétion programmes</strong> : Tapez le code (200, 300, 420...) pour voir les programmes officiels</li>
                         <li><strong>Dropdowns discipline complets</strong> : Liste complète (~120 disciplines) pour les 48 cégeps du Québec</li>
                         <li><strong>Option Hybride portfolio</strong> : Nouveau mode "N meilleures + Obligatoires" disponible dans Primo et Mode Expert</li>
                         <li><strong>Persistance Primo → Expert</strong> : Les valeurs configurées (artefacts, construction note, échelle) persistent correctement</li>
                         <li><strong>Boutons uniformisés</strong> : Tous les modals respectent le Design System v7 (Annuler orange, Confirmer vert)</li>
-                        <li><strong>Synthèse Primo enrichie</strong> : Affiche maintenant la méthode de construction de la note</li>
-                        <li><strong>Dropdown Note maximale</strong> : Le champ affiche les niveaux de votre échelle</li>
-                        <li><strong>Ordre disciplines corrigé</strong> : Respecte l'ordre officiel (100→600)</li>
-                        <li><strong>Valeurs par défaut jetons</strong> : 2 jetons/élève, 2 jours de délai</li>
+                        <li><strong>Corrections techniques</strong> : Namespacing présences corrigé, protection Array.isArray ajoutée</li>
                     </ul>
                 </div>
 
@@ -3843,7 +3843,7 @@
                                             </div>
                                         </th>
                                         <th class="w-200">Notes</th>
-                                        <th class="w-100px">Total heures</th>
+                                        <th class="w-80px">Total pér.</th>
                                         <th class="w-100px">Assiduité</th>
                                     </tr>
                                 </thead>
@@ -15030,7 +15030,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '95.7';
-        const BUILD_ID = '0122-0700';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0122-0733';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';

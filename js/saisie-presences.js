@@ -1252,14 +1252,19 @@ function chargerTableauPresences(dateStr, estVerrouille) {
 
         const tr = document.createElement('tr');
 
-        // 🆕 BETA 95.1 : Select de périodes au lieu d'input heures
-        const selectPeriodesHTML = `
-            <select class="controle-form select-periodes ${obtenirClasseSaisiePeriodes(periodesPresence, nombrePeriodesSeance, estFacultatif)}"
-                    id="periodes_${etudiant.da}"
-                    ${estVerrouille ? 'disabled' : ''}
-                    onchange="mettreAJourLignePeriodes('${etudiant.da}', '${dateStr}', ${nombrePeriodesSeance})">
-                ${genererOptionsPeriodesPresentes(nombrePeriodesSeance, periodesPresence)}
-            </select>`;
+        // 🆕 BETA 95.7 : Input numérique pour périodes (permet fractions comme 1.5)
+        const inputPeriodesHTML = `
+            <input type="number"
+                   class="controle-form input-periodes ${obtenirClasseSaisiePeriodes(periodesPresence, nombrePeriodesSeance, estFacultatif)}"
+                   id="periodes_${etudiant.da}"
+                   value="${periodesPresence}"
+                   min="0"
+                   max="${nombrePeriodesSeance}"
+                   step="0.5"
+                   style="width: 70px; text-align: center;"
+                   ${estVerrouille ? 'disabled' : ''}
+                   onchange="mettreAJourLignePeriodes('${etudiant.da}', '${dateStr}', ${nombrePeriodesSeance})"
+            >/<span class="max-periodes">${nombrePeriodesSeance}</span>`;
 
         // Calculer le total incluant la séance actuelle
         const totalHeuresAvecSeanceActuelle = heuresHistorique + parseFloat(heuresPresence);
@@ -1269,7 +1274,7 @@ function chargerTableauPresences(dateStr, estVerrouille) {
             <td>${echapperHtml(etudiant.da)}</td>
             <td>${echapperHtml(etudiant.prenom)}</td>
             <td>${echapperHtml(etudiant.nom)}</td>
-            <td class="u-w-100">${selectPeriodesHTML}</td>
+            <td style="white-space: nowrap;">${inputPeriodesHTML}</td>
             <td>
                 <input type="text"
                        class="controle-form input-notes"
@@ -1278,7 +1283,7 @@ function chargerTableauPresences(dateStr, estVerrouille) {
                        placeholder="Notes..."
                        ${estVerrouille ? 'disabled' : ''}>
             </td>
-            <td><span id="heuresHisto_${etudiant.da}">${totalHeuresAvecSeanceActuelle.toFixed(1)}h</span></td>
+            <td><span id="heuresHisto_${etudiant.da}">${Math.round((totalHeuresAvecSeanceActuelle * 60) / dureePeriode)} pér.</span></td>
             <td>
                 <span id="taux_${etudiant.da}" class="u-texte-medium">
                     ${tauxAssiduiteActuel}%
@@ -1365,23 +1370,24 @@ function obtenirClasseSaisiePeriodes(periodes, periodesMax, estFacultatif = fals
 }
 
 /**
- * 🆕 BETA 95.1 : Applique le code couleur à un select de périodes
+ * 🆕 BETA 95.7 : Applique le code couleur à un input de périodes
  */
-function appliquerCodeCouleurPeriodes(selectPeriodes, periodesMax) {
-    if (!selectPeriodes) return;
+function appliquerCodeCouleurPeriodes(inputPeriodes, periodesMax) {
+    if (!inputPeriodes) return;
 
-    const valeur = parseInt(selectPeriodes.value) || 0;
+    // parseFloat pour supporter les fractions
+    const valeur = parseFloat(inputPeriodes.value) || 0;
 
     // Retirer toutes les classes
-    selectPeriodes.classList.remove('saisie-absence', 'saisie-absence-motivee', 'saisie-retard', 'saisie-present', 'saisie-vide');
+    inputPeriodes.classList.remove('saisie-absence', 'saisie-absence-motivee', 'saisie-retard', 'saisie-present', 'saisie-vide');
 
     // Appliquer la bonne classe
     if (valeur === 0) {
-        selectPeriodes.classList.add('saisie-absence');
+        inputPeriodes.classList.add('saisie-absence');
     } else if (valeur < periodesMax) {
-        selectPeriodes.classList.add('saisie-retard');
+        inputPeriodes.classList.add('saisie-retard');
     } else {
-        selectPeriodes.classList.add('saisie-present');
+        inputPeriodes.classList.add('saisie-present');
     }
 }
 
@@ -1389,24 +1395,32 @@ function appliquerCodeCouleurPeriodes(selectPeriodes, periodesMax) {
  * 🆕 BETA 95.1 : Met à jour les statistiques d'une ligne (version périodes)
  */
 function mettreAJourLignePeriodes(da, dateStr, nombrePeriodesMax) {
-    const selectPeriodes = document.getElementById(`periodes_${da}`);
+    const inputPeriodes = document.getElementById(`periodes_${da}`);
     const spanTaux = document.getElementById(`taux_${da}`);
     const spanHeuresHisto = document.getElementById(`heuresHisto_${da}`);
 
-    if (!selectPeriodes || !spanTaux) return;
+    if (!inputPeriodes || !spanTaux) return;
 
-    const periodesSeance = parseInt(selectPeriodes.value) || 0;
+    // 🆕 BETA 95.7 : parseFloat pour supporter les fractions (1.5, etc.)
+    let periodesSeance = parseFloat(inputPeriodes.value) || 0;
+
+    // Limiter aux bornes valides
+    if (periodesSeance < 0) periodesSeance = 0;
+    if (periodesSeance > nombrePeriodesMax) periodesSeance = nombrePeriodesMax;
+    inputPeriodes.value = periodesSeance;
+
     const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : 55;
     const heuresSeance = (periodesSeance * dureePeriode) / 60;
 
     // Appliquer le code couleur
-    appliquerCodeCouleurPeriodes(selectPeriodes, nombrePeriodesMax);
+    appliquerCodeCouleurPeriodes(inputPeriodes, nombrePeriodesMax);
 
-    // Mettre à jour le total des heures (historique + séance actuelle)
+    // 🆕 BETA 95.7 : Afficher en périodes au lieu d'heures
     if (spanHeuresHisto) {
         const heuresHistorique = calculerTotalHeuresPresence(da, dateStr);
         const totalHeuresAvecSeanceActuelle = heuresHistorique + heuresSeance;
-        spanHeuresHisto.textContent = totalHeuresAvecSeanceActuelle.toFixed(1) + 'h';
+        const totalPeriodes = Math.round((totalHeuresAvecSeanceActuelle * 60) / dureePeriode);
+        spanHeuresHisto.textContent = totalPeriodes + ' pér.';
     }
 
     // Mettre à jour le taux
@@ -1542,12 +1556,13 @@ function enregistrerPresences() {
     const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : 55;
 
     etudiantsATraiter.forEach(etudiant => {
-        // 🆕 BETA 95.1 : Chercher le select de périodes au lieu de l'input heures
-        const selectPeriodes = document.getElementById(`periodes_${etudiant.da}`);
+        // 🆕 BETA 95.7 : Chercher l'input de périodes
+        const inputPeriodes = document.getElementById(`periodes_${etudiant.da}`);
         const inputNotes = document.getElementById(`notes_${etudiant.da}`);
 
-        if (selectPeriodes) {
-            const periodesPresentes = parseInt(selectPeriodes.value) || 0;
+        if (inputPeriodes) {
+            // parseFloat pour supporter les fractions (1.5, etc.)
+            const periodesPresentes = parseFloat(inputPeriodes.value) || 0;
             // Calculer les heures pour rétrocompatibilité
             const heures = (periodesPresentes * dureePeriode) / 60;
             const notes = inputNotes ? inputNotes.value.trim() : '';
@@ -1702,7 +1717,8 @@ function tousPresents() {
 
     const dateStr = dateInput.value;
     const nombrePeriodesSeance = obtenirNombrePeriodesSeance(dateStr);
-    const selects = document.querySelectorAll('.select-periodes');
+    // 🆕 BETA 95.7 : Utiliser .input-periodes au lieu de .select-periodes
+    const inputs = document.querySelectorAll('.input-periodes');
 
     // Obtenir les présences existantes pour cette date
     // ✅ CORRIGÉ (22 janvier 2026) : S'assurer que presences est un tableau
@@ -1712,9 +1728,9 @@ function tousPresents() {
     let nbMisPresents = 0;
     let nbAbsencesMotiveesPreservees = 0;
 
-    selects.forEach(select => {
-        if (!select.disabled) {
-            const da = select.id.replace('periodes_', '');
+    inputs.forEach(input => {
+        if (!input.disabled) {
+            const da = input.id.replace('periodes_', '');
 
             // Vérifier si cet étudiant a une absence motivée RàI
             const presenceExistante = presences.find(p => p.date === dateStr && p.da === da);
@@ -1728,10 +1744,10 @@ function tousPresents() {
                 nbAbsencesMotiveesPreservees++;
             } else {
                 // Mettre présent (toutes les périodes)
-                select.value = nombrePeriodesSeance;
+                input.value = nombrePeriodesSeance;
 
                 // Appliquer le code couleur
-                appliquerCodeCouleurPeriodes(select, nombrePeriodesSeance);
+                appliquerCodeCouleurPeriodes(input, nombrePeriodesSeance);
 
                 // Mettre à jour les stats
                 mettreAJourLignePeriodes(da, dateStr, nombrePeriodesSeance);
@@ -1759,12 +1775,13 @@ function reinitialiserSaisie() {
     const nombrePeriodesSeance = obtenirNombrePeriodesSeance(dateStr);
 
     // Pas de confirmation pour être plus rapide
-    document.querySelectorAll('.select-periodes').forEach(select => {
-        if (!select.disabled) {
-            select.value = 0;
-            appliquerCodeCouleurPeriodes(select, nombrePeriodesSeance);
+    // 🆕 BETA 95.7 : Utiliser .input-periodes au lieu de .select-periodes
+    document.querySelectorAll('.input-periodes').forEach(input => {
+        if (!input.disabled) {
+            input.value = 0;
+            appliquerCodeCouleurPeriodes(input, nombrePeriodesSeance);
 
-            const da = select.id.replace('periodes_', '');
+            const da = input.id.replace('periodes_', '');
             mettreAJourLignePeriodes(da, dateStr, nombrePeriodesSeance);
         }
     });
@@ -2091,12 +2108,12 @@ function mettreAJourCompteurPresences() {
 
         nbTotal++;
 
-        // 🆕 BETA 95.1 : Récupérer le select de périodes (4ème cellule, index 3)
+        // 🆕 BETA 95.7 : Récupérer l'input de périodes (4ème cellule, index 3)
         const cellulePeriodes = ligne.cells[3];
-        const selectPeriodes = cellulePeriodes?.querySelector('select.select-periodes');
+        const inputPeriodes = cellulePeriodes?.querySelector('input.input-periodes');
 
-        if (selectPeriodes) {
-            const periodes = parseInt(selectPeriodes.value) || 0;
+        if (inputPeriodes) {
+            const periodes = parseFloat(inputPeriodes.value) || 0;
             if (periodes > 0) {
                 nbPresents++;
             } else {
