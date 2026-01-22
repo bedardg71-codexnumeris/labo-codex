@@ -3629,6 +3629,32 @@ function sauvegarderHoraireV2() {
 
     db.setSync(cleHoraires, horaires);
 
+    // 🆕 FIX (22 jan 2026) : Synchroniser horaireHebdo pour que le calendrier reconnaisse les jours de cours
+    // Fusionner les séances de TOUS les horaires pour couvrir tous les groupes-cours
+    const toutesSeances = [];
+    const joursDejaVus = new Set();
+    horaires.forEach(h => {
+        if (h.seances && Array.isArray(h.seances)) {
+            h.seances.forEach(s => {
+                // Éviter les doublons de jours (un seul horaire par jour suffit pour le calendrier)
+                const jourNormalise = s.jour.toLowerCase();
+                if (!joursDejaVus.has(jourNormalise)) {
+                    joursDejaVus.add(jourNormalise);
+                    toutesSeances.push(s);
+                }
+            });
+        }
+    });
+    const cleHoraireHebdo = typeof cle === 'function' ? cle('horaireHebdo') : 'horaireHebdo';
+    db.setSync(cleHoraireHebdo, toutesSeances);
+    console.log(`📅 horaireHebdo synchronisé avec ${toutesSeances.length} jour(s):`, toutesSeances.map(s => s.jour).join(', '));
+
+    // Regénérer le calendrier avec les nouveaux jours de cours
+    if (typeof genererCalendrierComplet === 'function') {
+        genererCalendrierComplet();
+        console.log('📅 Calendrier regénéré');
+    }
+
     // Rafraîchir l'interface
     populerDropdownHorairesV2();
     const select = document.getElementById('v2-selectHoraire');
@@ -3672,6 +3698,26 @@ function supprimerHoraireV2() {
     // Supprimer de la liste
     horaires = horaires.filter(h => h.id !== horaireEnEditionId);
     db.setSync(cleHoraires, horaires);
+
+    // 🆕 FIX (22 jan 2026) : Resynchroniser horaireHebdo après suppression
+    const toutesSeances = [];
+    const joursDejaVus = new Set();
+    horaires.forEach(h => {
+        if (h.seances && Array.isArray(h.seances)) {
+            h.seances.forEach(s => {
+                const jourNormalise = s.jour.toLowerCase();
+                if (!joursDejaVus.has(jourNormalise)) {
+                    joursDejaVus.add(jourNormalise);
+                    toutesSeances.push(s);
+                }
+            });
+        }
+    });
+    const cleHoraireHebdo = typeof cle === 'function' ? cle('horaireHebdo') : 'horaireHebdo';
+    db.setSync(cleHoraireHebdo, toutesSeances);
+    if (typeof genererCalendrierComplet === 'function') {
+        genererCalendrierComplet();
+    }
 
     // Effacer la sélection sauvegardée
     db.setSync('horaireSelectionne', null);

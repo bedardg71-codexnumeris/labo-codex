@@ -78,7 +78,9 @@ function calculerEtSauvegarderIndicesAssiduite() {
  */
 function calculerAssiduiteSommative(da) {
     // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
-    const presences = obtenirDonneesSelonMode('presences') || [];
+    // ✅ CORRIGÉ (22 janvier 2026) : S'assurer que presences est un tableau
+    let presences = obtenirDonneesSelonMode('presences') || [];
+    if (!Array.isArray(presences)) presences = [];
 
     // Obtenir toutes les DATES où des présences ont été saisies
     const datesSaisies = [...new Set(presences.map(p => p.date))].sort();
@@ -209,7 +211,9 @@ function calculerAssiduiteSommative(da) {
  * @returns {Object} - { indice, heuresPresentes, heuresOffertes }
  */
 function calculerAssiduiteSeance(da, dateSeance) {
-    const presences = obtenirDonneesSelonMode('presences') || [];
+    // ✅ CORRIGÉ (22 janvier 2026) : S'assurer que presences est un tableau
+    let presences = obtenirDonneesSelonMode('presences') || [];
+    if (!Array.isArray(presences)) presences = [];
 
     // Trouver la présence pour cette séance spécifique
     const presenceSeance = presences.find(p => p.da === da && p.date === dateSeance);
@@ -281,7 +285,9 @@ function calculerAssiduiteSeance(da, dateSeance) {
 }
 
 function calculerAssiduiteJusquADate(da, dateLimite) {
-    const presences = obtenirDonneesSelonMode('presences') || [];
+    // ✅ CORRIGÉ (22 janvier 2026) : S'assurer que presences est un tableau
+    let presences = obtenirDonneesSelonMode('presences') || [];
+    if (!Array.isArray(presences)) presences = [];
 
     // Filtrer seulement les présences JUSQU'À la date limite
     const presencesFiltrees = presences.filter(p => p.date <= dateLimite);
@@ -385,7 +391,9 @@ function calculerAssiduiteJusquADate(da, dateLimite) {
  */
 function calculerAssiduiteAlternative(da) {
     // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
-    const presences = obtenirDonneesSelonMode('presences') || [];
+    // ✅ CORRIGÉ (22 janvier 2026) : S'assurer que presences est un tableau
+    let presences = obtenirDonneesSelonMode('presences') || [];
+    if (!Array.isArray(presences)) presences = [];
 
     // Obtenir le nombre de séances depuis les réglages
     const config = db.getSync('modalitesEvaluation', {});
@@ -1163,7 +1171,12 @@ function chargerTableauPresences(dateStr, estVerrouille) {
 
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
     // ✅ CORRIGÉ (8 janvier 2026) : Utiliser obtenirDonneesSelonMode pour filtrer par coursId
-    const presences = obtenirDonneesSelonMode('presences') || [];
+    // ✅ CORRIGÉ (22 janvier 2026) : S'assurer que presences est un tableau
+    let presences = obtenirDonneesSelonMode('presences') || [];
+    if (!Array.isArray(presences)) {
+        console.warn('⚠️ [chargerTableauPresences] presences n\'est pas un tableau, conversion en []');
+        presences = [];
+    }
 
     let etudiantsFiltres = etudiants;
 
@@ -1489,7 +1502,11 @@ function enregistrerPresences() {
     const groupeFiltre = selectGroupe ? selectGroupe.value : '';
 
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
-    let presences = db.getSync('presences', []);
+    // ✅ CORRIGÉ (22 janvier 2026) : Utiliser la clé namespacée pour le trimestre actif
+    const clePresences = (typeof cle === 'function') ? cle('presences') : 'presences';
+    let presences = db.getSync(clePresences, []);
+    // ✅ CORRIGÉ (22 janvier 2026) : S'assurer que presences est un tableau
+    if (!Array.isArray(presences)) presences = [];
 
     // ✅ CORRIGÉ (8 janvier 2026) : Obtenir coursId en premier pour filtrer correctement
     const coursId = typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null;
@@ -1610,7 +1627,9 @@ function enregistrerPresences() {
  */
 function calculerTotalHeuresPresence(da, dateActuelle) {
     // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
-    const presences = obtenirDonneesSelonMode('presences') || [];
+    // ✅ CORRIGÉ (22 janvier 2026) : S'assurer que presences est un tableau
+    let presences = obtenirDonneesSelonMode('presences') || [];
+    if (!Array.isArray(presences)) presences = [];
 
     return presences
         .filter(p => p.da === da && (dateActuelle === null || p.date < dateActuelle))
@@ -1686,7 +1705,9 @@ function tousPresents() {
     const selects = document.querySelectorAll('.select-periodes');
 
     // Obtenir les présences existantes pour cette date
-    const presences = obtenirDonneesSelonMode('presences') || [];
+    // ✅ CORRIGÉ (22 janvier 2026) : S'assurer que presences est un tableau
+    let presences = obtenirDonneesSelonMode('presences') || [];
+    if (!Array.isArray(presences)) presences = [];
 
     let nbMisPresents = 0;
     let nbAbsencesMotiveesPreservees = 0;
@@ -1970,7 +1991,11 @@ function ouvrirSaisiePresence(date) {
  * Obtient la dernière date de saisie (pour statistiques)
  */
 function obtenirDerniereDataSaisie(da = null) {
-    const presences = db.getSync('presences', []);
+    // ✅ CORRIGÉ (22 janvier 2026) : Utiliser la clé namespacée pour le trimestre actif
+    const clePresences = (typeof cle === 'function') ? cle('presences') : 'presences';
+    let presences = db.getSync(clePresences, []);
+    // ✅ CORRIGÉ (22 janvier 2026) : S'assurer que presences est un tableau
+    if (!Array.isArray(presences)) presences = [];
 
     if (presences.length === 0) {
         return null;

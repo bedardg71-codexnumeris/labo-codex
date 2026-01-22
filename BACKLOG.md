@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 21 janvier 2026
+> **Derniere mise a jour** : 22 janvier 2026
 
 ---
 
@@ -98,6 +98,15 @@
   - Ajouter les nouveaux noms proteges
 
 ---
+
+## Complete (Beta 95.7 - 22 janvier 2026)
+
+- [x] **Bug namespacing presences** Saisie presences ne fonctionnait pas
+  - `db.getSync('presences', [])` utilisait la cle sans prefixe trimestre
+  - Corrige dans : `saisie-presences.js`, `interventions.js`, `rapport-bug.js`
+  - Ajoute protection `Array.isArray()` dans `presences-apercu.js`
+  - **Fichiers modifies** : 4 fichiers JS
+  - **Resultat** : Saisie presences fonctionne avec namespacing correct
 
 ## Complete (Beta 95.7 - 21 janvier 2026)
 

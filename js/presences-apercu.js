@@ -140,6 +140,12 @@ function calculerHeuresOffertes() {
 function calculerHeuresManquees(presences, etudiants) {
     let heuresManquees = 0;
 
+    // ✅ CORRIGÉ (22 janvier 2026) : Vérifier que presences est un tableau
+    if (!Array.isArray(presences)) {
+        console.warn('⚠️ [calculerHeuresManquees] presences n\'est pas un tableau:', typeof presences);
+        return 0;
+    }
+
     presences.forEach(p => {
         if (p.statut === 'absent' || p.statut === 'retard') {
             heuresManquees += p.heuresManquees || 0;
@@ -158,6 +164,12 @@ function calculerSeancesCompletees(presences) {
     const datesUniques = new Set();
     const aujourdhui = new Date().toISOString().split('T')[0];
     const calendrier = db.getSync(cle('calendrierComplet'), {});
+
+    // ✅ CORRIGÉ (22 janvier 2026) : Vérifier que presences est un tableau
+    if (!Array.isArray(presences)) {
+        console.warn('⚠️ [calculerSeancesCompletees] presences n\'est pas un tableau:', typeof presences);
+        return 0;
+    }
 
     presences.forEach(p => {
         if (p.date) {
@@ -229,6 +241,12 @@ function calculerTotalSeances() {
 function calculerAbsencesNonJustifiees(presences) {
     let absencesNonJustifiees = 0;
 
+    // ✅ CORRIGÉ (22 janvier 2026) : Vérifier que presences est un tableau
+    if (!Array.isArray(presences)) {
+        console.warn('⚠️ [calculerAbsencesNonJustifiees] presences n\'est pas un tableau:', typeof presences);
+        return 0;
+    }
+
     presences.forEach(p => {
         if (p.statut === 'absent' && (!p.justifie || p.justifie === false) && (!p.facultatif || p.facultatif === false)) {
             absencesNonJustifiees++;
@@ -246,6 +264,12 @@ function calculerAbsencesNonJustifiees(presences) {
  */
 function calculerAbsencesMotivees(presences) {
     let absencesMotivees = 0;
+
+    // ✅ CORRIGÉ (22 janvier 2026) : Vérifier que presences est un tableau
+    if (!Array.isArray(presences)) {
+        console.warn('⚠️ [calculerAbsencesMotivees] presences n\'est pas un tableau:', typeof presences);
+        return 0;
+    }
 
     presences.forEach(p => {
         if (p.statut === 'absent' && p.facultatif === true) {

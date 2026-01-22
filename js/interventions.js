@@ -1411,7 +1411,9 @@ function transfererPresencesVersModule(interventionId) {
     console.log('   Total étudiants du groupe:', etudiants.length);
 
     // Obtenir les présences existantes
-    let presences = db.getSync('presences', []);
+    // ✅ CORRIGÉ (22 janvier 2026) : Utiliser la clé namespacée pour le trimestre actif
+    const clePresences = (typeof cle === 'function') ? cle('presences') : 'presences';
+    let presences = db.getSync(clePresences, []);
 
     // Supprimer les entrées existantes pour cette date (pour éviter les doublons)
     presences = presences.filter(p => p.date !== intervention.date);

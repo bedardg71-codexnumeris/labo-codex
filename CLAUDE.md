@@ -80,4 +80,4 @@ Gregoire a la memoire contextuelle reelle du projet.
 
 ---
 
-**Derniere mise a jour** : 20 janvier 2026
+**Derniere mise a jour** : 22 janvier 2026
