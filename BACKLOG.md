@@ -124,6 +124,7 @@
 - [x] **Affichage nom pratique** dans l'entete
   - L'entete affichait l'ID (pratique-xxx) au lieu du nom
   - Recherche dans `pratiquesConfigurables` si l'ID n'est pas dans les pratiques codees
+  - Chargement async via `db.get()` si `db.getSync()` retourne tableau vide (timing IndexedDB)
   - **Fichier modifie** : `js/contexte.js`
 
 ## Complete (Beta 95.7 - 21 janvier 2026)
