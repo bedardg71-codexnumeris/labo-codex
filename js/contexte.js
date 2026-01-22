@@ -105,7 +105,15 @@ function mettreAJourContexteEntete() {
                 'pan-denotation': 'PAN-Dénotation',
                 'sommative': 'Sommative'
             };
-            pratiqueName = pratiquesCodées[coursActif.pratiqueId] || coursActif.pratiqueId;
+            // D'abord vérifier les pratiques codées
+            if (pratiquesCodées[coursActif.pratiqueId]) {
+                pratiqueName = pratiquesCodées[coursActif.pratiqueId];
+            } else {
+                // Sinon chercher dans les pratiques configurables pour obtenir le nom
+                const pratiquesConfigurables = db.getSync('pratiquesConfigurables', []);
+                const pratiqueTrouvee = pratiquesConfigurables.find(p => p.id === coursActif.pratiqueId);
+                pratiqueName = pratiqueTrouvee ? pratiqueTrouvee.nom : coursActif.pratiqueId;
+            }
         }
 
         // Obtenir la date actuelle

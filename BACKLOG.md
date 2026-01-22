@@ -108,6 +108,24 @@
   - **Fichiers modifies** : 4 fichiers JS
   - **Resultat** : Saisie presences fonctionne avec namespacing correct
 
+- [x] **Synchronisation horaireHebdo** avec horaires du trimestre
+  - Le calendrier ne reconnaissait pas les jours de cours du nouveau trimestre
+  - `horaireHebdo` n'etait pas mis a jour lors de la sauvegarde d'un horaire
+  - Ajout synchronisation automatique dans `sauvegarderHoraireV2()` et `supprimerHoraireV2()`
+  - **Fichier modifie** : `js/trimestre-v2.js`
+  - **Resultat** : Le calendrier reconnait correctement les jours de cours
+
+- [x] **UX Saisie presences** Input numerique au lieu de dropdown
+  - Remplacement du dropdown par un champ numerique (permet fractions: 1.5, etc.)
+  - Affichage format `X/Y` (ex: `2/2` pour presence complete)
+  - Colonne "Total heures" devient "Total per." (periodes)
+  - **Fichiers modifies** : `js/saisie-presences.js`, `index.html`
+
+- [x] **Affichage nom pratique** dans l'entete
+  - L'entete affichait l'ID (pratique-xxx) au lieu du nom
+  - Recherche dans `pratiquesConfigurables` si l'ID n'est pas dans les pratiques codees
+  - **Fichier modifie** : `js/contexte.js`
+
 ## Complete (Beta 95.7 - 21 janvier 2026)
 
 - [x] **Bug critique** Trimestres A2025/Demo inaccessibles
