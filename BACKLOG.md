@@ -101,6 +101,24 @@
 
 ## Complete (Beta 95.7 - 22 janvier 2026)
 
+- [x] **Calcul assiduite en periodes** (correction majeure)
+  - Formule corrigee : `periodesPresentes / periodesOffertes` (au lieu de heures)
+  - Resultat : 2/2 periodes = 100% (avant: 92% a cause de la conversion heures)
+  - Etudiants absents affichent 0% (au lieu du tiret) si presences saisies
+  - **Fichiers modifies** : `js/saisie-presences.js`, `js/etudiants.js`
+
+- [x] **Moyenne A du groupe** affichee partout
+  - Entete liste etudiants : `moy=93%` sous la colonne A
+  - Barre Assiduite du tableau de bord : moyenne + 28 points individuels
+  - Calcul inclut les 0% (absents) pour moyenne correcte
+  - **Fichiers modifies** : `js/etudiants.js`, `js/tableau-bord-apercu.js`
+
+- [x] **Points individuels** sur barre Assiduite
+  - Distribution visible : 26 points a droite (100%), 2 points a gauche (0%)
+  - Mode PAN active par defaut si aucun mode configure
+  - Filtrage specifique pour A : inclut tous les etudiants avec presences saisies
+  - **Fichier modifie** : `js/tableau-bord-apercu.js`
+
 - [x] **Bug namespacing presences** Saisie presences ne fonctionnait pas
   - `db.getSync('presences', [])` utilisait la cle sans prefixe trimestre
   - Corrige dans : `saisie-presences.js`, `interventions.js`, `rapport-bug.js`

@@ -713,18 +713,30 @@ function calculerIndicesEtudiant(da) {
     const assiduiteSommatif = indicesA.sommatif?.[da];
     const assiduiteAlternatif = indicesA.alternatif?.[da];
 
+    // 🆕 BETA 95.7 (22 jan) : Extraire le nombre de séances et d'évaluations pour déterminer "en attente"
+    const nombreSeancesSOM = (typeof assiduiteSommatif === 'object') ? (assiduiteSommatif.nombreSeances || 0) : 0;
+    const nombreSeancesPAN = (typeof assiduiteAlternatif === 'object') ? (assiduiteAlternatif.nombreSeances || 0) : 0;
+
+    // Nombre d'évaluations depuis les détails de indicesCP
+    const nombreEvalsSOM = indicesSOM?.details?.nbArtefactsRemis || indicesSOM?.details?.nbProductionsRemises || 0;
+    const nombreEvalsPAN = indicesPAN?.details?.nbArtefactsRemis || indicesPAN?.details?.nbProductionsRemises || 0;
+
     const indices = {
         sommatif: {
             assiduite: (typeof assiduiteSommatif === 'object') ? assiduiteSommatif.indice : (assiduiteSommatif || 0),
             completion: indicesSOM ? indicesSOM.C / 100 : 0,
             performance: indicesSOM ? indicesSOM.P / 100 : 0,
-            engagement: indicesSOM && indicesSOM.E !== undefined ? indicesSOM.E : 0
+            engagement: indicesSOM && indicesSOM.E !== undefined ? indicesSOM.E : 0,
+            nombreSeances: nombreSeancesSOM,
+            nombreEvaluations: nombreEvalsSOM
         },
         alternatif: {
             assiduite: (typeof assiduiteAlternatif === 'object') ? assiduiteAlternatif.indice : (assiduiteAlternatif || 0),
             completion: indicesPAN ? indicesPAN.C / 100 : 0,
             performance: indicesPAN ? indicesPAN.P / 100 : 0,
-            engagement: indicesPAN && indicesPAN.E !== undefined ? indicesPAN.E : 0
+            engagement: indicesPAN && indicesPAN.E !== undefined ? indicesPAN.E : 0,
+            nombreSeances: nombreSeancesPAN,
+            nombreEvaluations: nombreEvalsPAN
         }
     };
 
@@ -792,35 +804,168 @@ function determinerNiveauEngagement(engagement) {
 function afficherMetriquesGlobales(etudiants) {
     const config = db.getSync('modalitesEvaluation', {});
     const affichage = config.affichageTableauBord || {};
-    const afficherSom = affichage.afficherSommatif === true;
-    const afficherPan = affichage.afficherAlternatif === true;
 
-    // 🆕 BETA 95.6 : Filtrer les étudiants sans données (A=C=P=0)
-    // Évite les interprétations erronées ("blocage critique", "faible engagement")
+    // 🆕 BETA 95.7: Valeurs par défaut si aucun mode n'est configuré
+    // Par défaut, afficher PAN (pratique alternative/standards)
+    let afficherSom = affichage.afficherSommatif === true;
+    let afficherPan = affichage.afficherAlternatif === true;
+
+    // Si aucun mode n'est configuré, activer PAN par défaut
+    if (!afficherSom && !afficherPan) {
+        afficherPan = true;
+    }
+
+    // 🆕 BETA 95.7 (22 jan) : Calculer "en attente" au niveau du GROUPE
+    // Compter les données disponibles pour le groupe entier :
+    // - Séances = dates distinctes où des présences ont été saisies
+    // - Évaluations = productions distinctes évaluées
+
+    // Compter le nombre de séances du groupe (dates distinctes avec présences)
+    let presences = obtenirDonneesSelonMode('presences') || [];
+    if (!Array.isArray(presences)) presences = [];
+    const datesSeances = [...new Set(presences.filter(p => !p.facultatif).map(p => p.date))];
+    const nbSeancesGroupe = datesSeances.length;
+
+    // Compter le nombre d'évaluations du groupe (productions distinctes évaluées)
+    let evaluations = obtenirDonneesSelonMode('evaluations') || [];
+    if (!Array.isArray(evaluations)) evaluations = [];
+    const productionsDistinctes = [...new Set(evaluations.map(e => e.productionId || e.artefactId))];
+    const nbEvaluationsGroupe = productionsDistinctes.length;
+
+    // Seuils minimaux par indice
+    // - A : 1 séance suffit
+    // - C : 1 évaluation suffit
+    // - P et E : configurable via "Nb minimal d'évaluations pour calculer P et E" (minimumCompletion)
+    const seuilA = 1;
+    const seuilC = 1;
+
+    // Lire le seuil P depuis la configuration de la pratique active
+    // Ordre de priorité : pratique active > modalitesEvaluation > défaut (3)
+    let seuilP = 3; // Défaut
+    let seuilTrouve = false;
+    const groupesCours = obtenirDonneesSelonMode('groupesCours') || [];
+    const groupeActif = groupesCours.find(gc => gc.actif);
+
+    console.log(`📊 [Seuil P] Groupe actif:`, groupeActif?.pratiqueId || 'aucun');
+
+    // 1. Chercher dans la configuration de la pratique active
+    if (groupeActif && groupeActif.pratiqueId) {
+        // 1a. Chercher dans pratiquesConfigurables
+        const pratiquesConfig = db.getSync('pratiquesConfigurables', []);
+        let pratiqueActive = pratiquesConfig.find(p => p.id === groupeActif.pratiqueId);
+
+        // 1b. Si pas trouvée, chercher dans la bibliothèque partagée
+        if (!pratiqueActive) {
+            const bibliotheque = db.getSync('bibliotheque-pratiques', []);
+            pratiqueActive = bibliotheque.find(p => p.id === groupeActif.pratiqueId);
+            if (pratiqueActive) {
+                console.log(`📊 [Seuil P] Pratique trouvée dans bibliothèque`);
+            }
+        }
+
+        if (pratiqueActive) {
+            // Chercher minimumCompletion dans différents chemins possibles
+            const minComp = pratiqueActive.configuration?.portfolio?.minimumCompletion
+                || pratiqueActive.portfolio?.minimumCompletion
+                || pratiqueActive.regles?.minimumCompletion;
+
+            if (minComp !== undefined) {
+                seuilP = minComp;
+                seuilTrouve = true;
+                console.log(`📊 [Seuil P] ✅ Trouvé dans pratique: ${seuilP}`);
+            } else {
+                console.log(`📊 [Seuil P] Pratique trouvée mais pas de minimumCompletion:`, pratiqueActive);
+            }
+        } else {
+            console.log(`📊 [Seuil P] Pratique non trouvée: ${groupeActif.pratiqueId}`);
+        }
+    }
+
+    // 2. Sinon, chercher dans modalitesEvaluation (ancienne config ou fallback)
+    if (!seuilTrouve) {
+        const configPortfolio = config.configPAN?.portfolio || config.portfolio || {};
+        console.log(`📊 [Seuil P] Fallback modalitesEvaluation:`, configPortfolio);
+        if (configPortfolio.minimumCompletion !== undefined) {
+            seuilP = configPortfolio.minimumCompletion;
+            seuilTrouve = true;
+            console.log(`📊 [Seuil P] ✅ Trouvé dans modalitesEvaluation: ${seuilP}`);
+        }
+    }
+
+    console.log(`📊 [Seuil P] Final: ${seuilP} (trouvé: ${seuilTrouve})`);
+
+    // Calculer ce qui manque (0 si le seuil est atteint)
+    const seancesManquantesA = Math.max(0, seuilA - nbSeancesGroupe);
+    const evalsManquantesC = Math.max(0, seuilC - nbEvaluationsGroupe);
+    const evalsManquantesP = Math.max(0, seuilP - nbEvaluationsGroupe);
+
+    // Pour E : besoin des deux (séances ET évaluations pour P)
+    const seancesManquantesE = seancesManquantesA;
+    const evalsManquantesE = evalsManquantesP;
+
+    // Générer les textes explicites "en attente"
+    const texteAttenteA = seancesManquantesA > 0
+        ? `${seancesManquantesA} séance${seancesManquantesA > 1 ? 's' : ''} en attente` : '';
+    const texteAttenteC = evalsManquantesC > 0
+        ? `${evalsManquantesC} évaluation${evalsManquantesC > 1 ? 's' : ''} en attente` : '';
+    const texteAttenteP = evalsManquantesP > 0
+        ? `${evalsManquantesP} évaluation${evalsManquantesP > 1 ? 's' : ''} en attente` : '';
+
+    // Pour E : combiner les deux manques si nécessaire
+    let texteAttenteE = '';
+    if (seancesManquantesE > 0 && evalsManquantesE > 0) {
+        texteAttenteE = `${seancesManquantesE} séance${seancesManquantesE > 1 ? 's' : ''} + ${evalsManquantesE} éval. en attente`;
+    } else if (seancesManquantesE > 0) {
+        texteAttenteE = `${seancesManquantesE} séance${seancesManquantesE > 1 ? 's' : ''} en attente`;
+    } else if (evalsManquantesE > 0) {
+        texteAttenteE = `${evalsManquantesE} évaluation${evalsManquantesE > 1 ? 's' : ''} en attente`;
+    }
+
+    console.log(`📊 [Métriques] Groupe: ${nbSeancesGroupe} séances, ${nbEvaluationsGroupe} évaluations (seuil P: ${seuilP})`);
+    console.log(`📊 [En attente] A: "${texteAttenteA}", C: "${texteAttenteC}", P: "${texteAttenteP}", E: "${texteAttenteE}"`);
+
+    // Debug: Vérifier les indices A des étudiants
+    const indicesADebug = obtenirDonneesSelonMode('indicesAssiduite') || {};
+    console.log(`📊 [Indices A] Structure:`, indicesADebug);
+    console.log(`📊 [Indices A] Nb étudiants sommatif:`, Object.keys(indicesADebug.sommatif || {}).length);
+    console.log(`📊 [Indices A] Nb étudiants alternatif:`, Object.keys(indicesADebug.alternatif || {}).length);
+    if (Object.keys(indicesADebug.alternatif || {}).length > 0) {
+        const premierDA = Object.keys(indicesADebug.alternatif)[0];
+        console.log(`📊 [Indices A] Exemple (${premierDA}):`, indicesADebug.alternatif[premierDA]);
+    }
+
+    // 🆕 BETA 95.7 (22 jan): Filtrage spécifique pour A (présences saisies, même si A=0%)
+    // Pour A: inclure TOUS les étudiants avec nombreSeances > 0 (y compris les absents à 0%)
+    const etudiantsAvecPresencesSOM = etudiants.filter(e => e.sommatif && e.sommatif.nombreSeances > 0);
+    const etudiantsAvecPresencesPAN = etudiants.filter(e => e.alternatif && e.alternatif.nombreSeances > 0);
+
+    // Pour C, P, E: garder l'ancienne logique (A>0 OR C>0 OR P>0)
     const etudiantsAvecDonneesSOM = etudiants.filter(e =>
         e.sommatif.assiduite > 0 || e.sommatif.completion > 0 || e.sommatif.performance > 0
     );
     const etudiantsAvecDonneesPAN = etudiants.filter(e =>
         e.alternatif.assiduite > 0 || e.alternatif.completion > 0 || e.alternatif.performance > 0
     );
-    const nbSansDonneesSOM = etudiants.length - etudiantsAvecDonneesSOM.length;
-    const nbSansDonneesPAN = etudiants.length - etudiantsAvecDonneesPAN.length;
 
-    console.log(`📊 [Métriques] Total: ${etudiants.length}, avec données SOM: ${etudiantsAvecDonneesSOM.length}, avec données PAN: ${etudiantsAvecDonneesPAN.length}`);
+    console.log(`📊 [Données] Étudiants avec présences (nombreSeances>0) SOM: ${etudiantsAvecPresencesSOM.length}, PAN: ${etudiantsAvecPresencesPAN.length}`);
+    console.log(`📊 [Données] Étudiants avec données (A>0 ou C>0 ou P>0) SOM: ${etudiantsAvecDonneesSOM.length}, PAN: ${etudiantsAvecDonneesPAN.length}`);
 
-    // Préparer les données pour chaque métrique (uniquement étudiants avec données)
-    const etudiantsSOM_A = etudiantsAvecDonneesSOM.map(e => ({
+    // 🆕 BETA 95.7: Préparer les données A avec TOUS les étudiants ayant des présences (y compris 0%)
+    // IMPORTANT: Pour A (assiduité), toujours utiliser le calcul SOMMATIF (fait observable)
+    // car A est indépendant de la pratique de notation (SOM ou PAN)
+    const etudiantsSOM_A = etudiantsAvecPresencesSOM.map(e => ({
         da: e.da,
         nom: e.nom,
         prenom: e.prenom,
         valeur: e.sommatif.assiduite
     }));
 
-    const etudiantsPAN_A = etudiantsAvecDonneesPAN.map(e => ({
+    // Pour PAN, utiliser aussi le calcul sommatif pour A (cohérence avec liste étudiants)
+    const etudiantsPAN_A = etudiantsAvecPresencesPAN.map(e => ({
         da: e.da,
         nom: e.nom,
         prenom: e.prenom,
-        valeur: e.alternatif.assiduite
+        valeur: e.sommatif.assiduite  // Utiliser sommatif, pas alternatif
     }));
 
     const etudiantsSOM_C = etudiantsAvecDonneesSOM.map(e => ({
@@ -913,18 +1058,17 @@ function afficherMetriquesGlobales(etudiants) {
         </div>
     `;
 
-    // 🆕 BETA 95.6 : Déterminer le nombre d'étudiants en attente selon la pratique active
-    const nbSansDonnees = afficherPan ? nbSansDonneesPAN : nbSansDonneesSOM;
+    // 🆕 BETA 95.7 (22 jan) : Passer le texte explicite "en attente" à chaque barre
     const nbTotal = etudiants.length;
 
     // Générer les 4 barres de distribution avec interprétations
     const html = `
         <div class="tb-p-20">
             ${legendeUnique}
-            ${genererBarreDistribution('Assiduité (A)', etudiantsSOM_A, etudiantsPAN_A, 'A', afficherSom, afficherPan, r_AP, null, nbSansDonnees, nbTotal)}
-            ${genererBarreDistribution('Complétion (C)', etudiantsSOM_C, etudiantsPAN_C, 'C', afficherSom, afficherPan, r_CP, null, nbSansDonnees, nbTotal)}
-            ${genererBarreDistribution('Performance (P)', etudiantsSOM_P, etudiantsPAN_P, 'P', afficherSom, afficherPan, null, null, nbSansDonnees, nbTotal)}
-            ${genererBarreDistribution('Engagement (E)', etudiantsSOM_E, etudiantsPAN_E, 'E', afficherSom, afficherPan, null, moyenneE, nbSansDonnees, nbTotal)}
+            ${genererBarreDistribution('Assiduité (A)', etudiantsSOM_A, etudiantsPAN_A, 'A', afficherSom, afficherPan, r_AP, null, texteAttenteA, nbTotal)}
+            ${genererBarreDistribution('Complétion (C)', etudiantsSOM_C, etudiantsPAN_C, 'C', afficherSom, afficherPan, r_CP, null, texteAttenteC, nbTotal)}
+            ${genererBarreDistribution('Performance (P)', etudiantsSOM_P, etudiantsPAN_P, 'P', afficherSom, afficherPan, null, null, texteAttenteP, nbTotal)}
+            ${genererBarreDistribution('Engagement (E)', etudiantsSOM_E, etudiantsPAN_E, 'E', afficherSom, afficherPan, null, moyenneE, texteAttenteE, nbTotal)}
         </div>
     `;
 
@@ -982,8 +1126,8 @@ function genererCarteMetrique(label, valeurSom, valeurPan, afficherSom, afficher
  * @param {boolean} afficherPan - Afficher la couche PAN
  * @returns {string} HTML de la barre de distribution
  */
-function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, afficherSom, afficherPan, correlation = null, moyenneEngagement = null, nbSansDonnees = 0, nbTotal = 0) {
-    console.log(`🎯 genererBarreDistribution appelée: type="${type}", afficherSom=${afficherSom}, afficherPan=${afficherPan}, correlation=${correlation}, moyenneEngagement=${moyenneEngagement}, nbSansDonnees=${nbSansDonnees}, nbTotal=${nbTotal}`);
+function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, afficherSom, afficherPan, correlation = null, moyenneEngagement = null, texteAttente = '', nbTotal = 0) {
+    console.log(`🎯 genererBarreDistribution appelée: type="${type}", afficherSom=${afficherSom}, afficherPan=${afficherPan}, correlation=${correlation}, moyenneEngagement=${moyenneEngagement}, texteAttente="${texteAttente}", nbTotal=${nbTotal}`);
     console.log(`   etudiantsSOM.length=${etudiantsSOM?.length || 0}, etudiantsPAN.length=${etudiantsPAN?.length || 0}`);
 
     // Gradient de couleurs selon les seuils d'engagement (4 zones, sans Insuffisant)
@@ -1241,25 +1385,25 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
         });
     }
 
-    // 🆕 BETA 95.6 : Gérer le cas où tous les étudiants sont sans données
+    // 🆕 BETA 95.7 : Gérer le cas où des données sont en attente
     const nbAvecDonnees = (afficherPan ? etudiantsPAN.length : etudiantsSOM.length) || 0;
-    const tousEnAttente = nbTotal > 0 && nbAvecDonnees === 0;
-    const certainsEnAttente = nbSansDonnees > 0 && nbAvecDonnees > 0;
+    const tousEnAttente = nbTotal > 0 && nbAvecDonnees === 0 && texteAttente;
+    const donneesEnAttente = texteAttente && texteAttente.length > 0;
 
     // Message quand tous sont en attente
     let messageAttenteHTML = '';
     if (tousEnAttente) {
         messageAttenteHTML = `
             <div class="tb-texte-description" style="color: #94a3b8; font-style: italic;">
-                En attente de données pour ${nbTotal} étudiant${nbTotal > 1 ? 's' : ''}.
+                ${texteAttente}
             </div>
         `;
     }
 
-    // Indicateur pour étudiants en attente (si certains seulement)
+    // Indicateur "en attente" explicite (si données présentes mais seuil non atteint)
     let indicateurAttenteHTML = '';
-    if (certainsEnAttente) {
-        indicateurAttenteHTML = `<span style="color: #94a3b8; font-size: 0.8rem; margin-left: 8px;">(${nbSansDonnees} en attente)</span>`;
+    if (donneesEnAttente && !tousEnAttente) {
+        indicateurAttenteHTML = `<span style="color: #94a3b8; font-size: 0.8rem; margin-left: 8px;">(${texteAttente})</span>`;
     }
 
     // Si tous en attente, remplacer l'interprétation par le message d'attente
