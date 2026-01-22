@@ -199,51 +199,56 @@ function chargerOptionsFiltres() {
 
 /**
  * Calcule le taux d'assiduité global d'un étudiant (jusqu'à aujourd'hui)
+ * 🆕 CORRIGÉ (22 jan 2026) : Calcul en PÉRIODES au lieu d'heures
  * @param {string} da - Numéro de DA de l'étudiant
  * @returns {number} - Taux d'assiduité en pourcentage (0-100)
  */
-// ✅ NOUVEAU CODE
 function calculerAssiduitéGlobale(da) {
-    // Vérifier que la fonction nécessaire existe
-    if (typeof calculerTotalHeuresPresence !== 'function') {
-        console.warn('⚠️ Fonction calculerTotalHeuresPresence non disponible');
-        return 0;
-    }
-
-    if (typeof obtenirDureeMaxSeance !== 'function') {
-        console.warn('⚠️ Fonction obtenirDureeMaxSeance non disponible');
-        return 0;
-    }
-
-    // Compter le nombre de séances RÉELLEMENT SAISIES pour cet élève
     // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
-    // IMPORTANT : Exclure les séances facultatives (interventions RàI) du décompte
-    const presences = obtenirDonneesSelonMode('presences') || [];
-    const datesSaisies = new Set();
-    presences.forEach(p => {
-        if (p.da === da && p.heures !== null && p.heures !== undefined) {
-            // Ne compter que les séances NON facultatives
-            if (p.facultatif !== true) {
-                datesSaisies.add(p.date);
-            }
+    let presences = obtenirDonneesSelonMode('presences') || [];
+    if (!Array.isArray(presences)) presences = [];
+
+    // Filtrer les présences de cet étudiant (séances NON facultatives seulement)
+    const presencesEtudiant = presences.filter(p =>
+        p.da === da &&
+        p.facultatif !== true &&
+        (p.periodesPresentes !== null && p.periodesPresentes !== undefined ||
+         p.heures !== null && p.heures !== undefined)
+    );
+
+    if (presencesEtudiant.length === 0) {
+        return 0;
+    }
+
+    // 🆕 BETA 95.7 : Calculer en périodes
+    let periodesOffertes = 0;
+    let periodesPresentes = 0;
+
+    presencesEtudiant.forEach(p => {
+        // Obtenir le nombre de périodes de cette séance
+        const nombrePeriodesSeance = typeof obtenirNombrePeriodesSeance === 'function'
+            ? obtenirNombrePeriodesSeance(p.date)
+            : 2; // Fallback : 2 périodes par défaut
+
+        periodesOffertes += nombrePeriodesSeance;
+
+        // Utiliser periodesPresentes si disponible, sinon convertir depuis heures
+        if (p.periodesPresentes !== undefined && p.periodesPresentes !== null) {
+            periodesPresentes += p.periodesPresentes;
+        } else if (p.heures !== undefined && p.heures !== null) {
+            // Rétrocompatibilité : convertir heures en périodes
+            const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : 55;
+            periodesPresentes += (p.heures * 60) / dureePeriode;
         }
     });
 
-    const nombreSeances = datesSaisies.size;
-    if (nombreSeances === 0) {
+    if (periodesOffertes === 0) {
         return 0;
     }
 
-    // Calculer la durée d'une séance
-    const dureeSeance = obtenirDureeMaxSeance();
-    const heuresOffertes = nombreSeances * dureeSeance;
-
-    // Calculer les heures réelles de présence
-    const heuresReelles = calculerTotalHeuresPresence(da, null);
-
-    // Calculer le taux
-    const taux = (heuresReelles / heuresOffertes) * 100;
-    return Math.round(taux);
+    // Calculer le taux (plafonné à 100%)
+    const taux = (periodesPresentes / periodesOffertes) * 100;
+    return Math.min(100, Math.round(taux));
 }
 
 /**
@@ -1128,46 +1133,60 @@ function afficherListeEtudiantsConsultation() {
         html += '<td>' + prenom + '</td>';
         html += '<td class="etud-text-center">' + (etudiant.sa === 'Oui' ? '✓' : '') + '</td>';
 
-        // 🆕 BETA 95.6 : Détecter si aucune donnée n'est disponible
-        // Si A=0 ET C=0 ET P=0, afficher "-" au lieu de "0%" (évite interprétations erronées)
-        const aucuneDonnee = indices.A === 0 && indices.C === 0 && indices.P === 0;
+        // 🆕 BETA 95.7 (22 jan) : Détecter données manquantes INDIVIDUELLEMENT
         const tiret = '<span class="etud-texte-gris-clair">—</span>';
+
+        // Détection individuelle des données manquantes
+        const aPresences = indices.A > 0;  // A > 0 = présences saisies
+        const aEvaluations = indices.C > 0 || indices.P > 0;  // Au moins une évaluation
 
         // Colonnes A-C-P avec couleurs
         const couleurA = obtenirCouleurAssiduite(Math.round(indices.A));
         const couleurC = obtenirCouleurCompletion(Math.round(indices.C));
         const couleurP = obtenirCouleurPerformance(Math.round(indices.P));
 
-        if (aucuneDonnee) {
-            html += '<td class="etud-text-center">' + tiret + '</td>';
-            html += '<td class="etud-text-center">' + tiret + '</td>';
-            html += '<td class="etud-text-center">' + tiret + '</td>';
-            html += '<td class="etud-text-center">' + tiret + '</td>'; // E aussi
-        } else {
+        // Colonne A : afficher si présences, sinon tiret
+        if (aPresences) {
             html += '<td class="etud-text-center"><strong style="color: ' + couleurA + ';">' + Math.round(indices.A) + '%</strong></td>';
+        } else {
+            html += '<td class="etud-text-center">' + tiret + '</td>';
+        }
+
+        // Colonnes C et P : afficher si évaluations, sinon tiret
+        if (aEvaluations) {
             html += '<td class="etud-text-center"><strong style="color: ' + couleurC + ';">' + Math.round(indices.C) + '%</strong></td>';
             html += '<td class="etud-text-center"><strong style="color: ' + couleurP + ';">' + Math.round(indices.P) + '%</strong></td>';
+        } else {
+            html += '<td class="etud-text-center">' + tiret + '</td>';
+            html += '<td class="etud-text-center">' + tiret + '</td>';
+        }
 
+        // Colonne E : afficher seulement si A ET (C ou P) sont disponibles
+        if (aPresences && aEvaluations) {
             // Colonne Engagement E = (A × C × P)^(1/3) en pourcentage
             const E_brut = (indices.A / 100) * (indices.C / 100) * (indices.P / 100);
             const E = Math.pow(E_brut, 1/3);
             const engagementPct = Math.round(E * 100);
             const couleurE = obtenirCouleurEngagement(engagementPct);
             html += '<td class="etud-text-center"><strong style="color: ' + couleurE + ';">' + engagementPct + '%</strong></td>';
+        } else {
+            // Pas assez de données pour calculer E
+            html += '<td class="etud-text-center">' + tiret + '</td>';
         }
 
         // Colonnes Pattern et RàI (affichées uniquement si RàI activé)
+        // 🆕 BETA 95.7 : Même logique que E - besoin de présences ET évaluations
         if (activerRai) {
-            if (aucuneDonnee) {
-                // 🆕 BETA 95.6 : Afficher "-" si aucune donnée (évite "Blocage critique" / "Niveau 3")
-                html += '<td class="etud-text-center">' + tiret + '</td>';
-                html += '<td class="etud-text-center">' + tiret + '</td>';
-            } else {
+            if (aPresences && aEvaluations) {
                 // Colonne Pattern avec badge (centré)
                 html += '<td class="etud-text-center"><span class="' + badgePattern.classe + '">' + badgePattern.label + '</span></td>';
 
                 // Colonne RàI avec badge amélioré
                 html += '<td class="etud-text-center"><span class="' + badgeRai.classe + '">' + badgeRai.label + '</span></td>';
+            } else {
+                // Afficher "-" si données insuffisantes (évite "Blocage critique" / "Niveau 3")
+                html += '<td class="etud-text-center">' + tiret + '</td>';
+                html += '<td class="etud-text-center">' + tiret + '</td>';
             }
         }
 
