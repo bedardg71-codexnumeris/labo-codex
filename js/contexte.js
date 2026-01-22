@@ -110,9 +110,32 @@ function mettreAJourContexteEntete() {
                 pratiqueName = pratiquesCodées[coursActif.pratiqueId];
             } else {
                 // Sinon chercher dans les pratiques configurables pour obtenir le nom
+                // 🆕 FIX (22 jan 2026) : Utiliser db.get() async car getSync peut retourner [] si pas encore synchronisé
                 const pratiquesConfigurables = db.getSync('pratiquesConfigurables', []);
                 const pratiqueTrouvee = pratiquesConfigurables.find(p => p.id === coursActif.pratiqueId);
-                pratiqueName = pratiqueTrouvee ? pratiqueTrouvee.nom : coursActif.pratiqueId;
+
+                if (pratiqueTrouvee) {
+                    pratiqueName = pratiqueTrouvee.nom;
+                } else {
+                    // Fallback : afficher l'ID pour l'instant, puis charger async et mettre à jour
+                    pratiqueName = coursActif.pratiqueId;
+
+                    // Charger async depuis IndexedDB et mettre à jour si trouvé
+                    const pratiqueIdCapture = coursActif.pratiqueId;
+                    db.get('pratiquesConfigurables').then(pratiques => {
+                        if (pratiques && Array.isArray(pratiques)) {
+                            const pratique = pratiques.find(p => p.id === pratiqueIdCapture);
+                            if (pratique && pratique.nom) {
+                                // Mettre à jour l'affichage via l'ID spécifique
+                                const spanPratique = document.getElementById('contexte-pratique-nom');
+                                if (spanPratique) {
+                                    spanPratique.textContent = `Pratique : ${pratique.nom}`;
+                                    console.log('[Contexte] Nom pratique mis à jour async:', pratique.nom);
+                                }
+                            }
+                        }
+                    });
+                }
             }
         }
 
@@ -134,7 +157,7 @@ function mettreAJourContexteEntete() {
             if (htmlLigne1) {
                 htmlLigne1 += '<span class="separateur-contexte">•</span>';
             }
-            htmlLigne1 += `<span class="info-contexte-item">Pratique : ${echapperHtml(pratiqueName)}</span>`;
+            htmlLigne1 += `<span class="info-contexte-item" id="contexte-pratique-nom">Pratique : ${echapperHtml(pratiqueName)}</span>`;
         }
 
         // ========================================
