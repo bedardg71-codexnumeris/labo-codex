@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 23 janvier 2026
+> **Derniere mise a jour** : 23 janvier 2026 (11h50)
 
 ---
 
@@ -47,6 +47,25 @@
 - [ ] **#18** Etendre aide contextuelle 😎
   - Ajouter aides pour cas d'erreur frequents
   - Pas seulement les sections, aussi les messages d'erreur
+
+### Planification pedagogique
+
+- [ ] **#34** Module Planification de l'enseignement explicite (PLANIFICATION REQUISE)
+  - **Concept** : Planifier les lecons et le calendrier du trimestre selon le modele de l'enseignement explicite
+  - **Primo comme wizard** : Guide de planification des lecons (objectifs, modelisation, pratique guidee, pratique autonome)
+  - **Integration calendrier** : Repartition des lecons sur les semaines du trimestre
+  - **Liens avec le module actuel** :
+    - Productions = evaluations planifiees
+    - Objectifs d'apprentissage = cibles des lecons
+    - Sequences d'enseignement = progression logique
+  - **A explorer** :
+    - Structure d'une lecon type (ouverture, modelisation, pratique, cloture)
+    - Banque d'activites d'apprentissage
+    - Estimation du temps par activite
+    - Vue Gantt ou calendrier des lecons
+    - Export du plan de cours
+  - **Prerequis** : Documentation complete de la logique pedagogique avant codage
+  - **Reference** : Modele de l'enseignement explicite (Gauthier, Bissonnette, Richard)
 
 ### Mode simplifie
 
