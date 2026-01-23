@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 23 janvier 2026 (11h50)
+> **Derniere mise a jour** : 23 janvier 2026 (12h05)
 
 ---
 
@@ -52,20 +52,30 @@
 
 - [ ] **#34** Module Planification de l'enseignement explicite (PLANIFICATION REQUISE)
   - **Concept** : Planifier les lecons et le calendrier du trimestre selon le modele de l'enseignement explicite
+  - **Public cible** : Enseignants novices qui decouvrent l'enseignement explicite
+  - **Concepteur** : Gregoire (5-6 ans de pratique, formation TELUQ en enseignement efficace)
   - **Primo comme wizard** : Guide de planification des lecons (objectifs, modelisation, pratique guidee, pratique autonome)
   - **Integration calendrier** : Repartition des lecons sur les semaines du trimestre
+  - **Les 5 phases d'une lecon** :
+    1. Ouverture (objectif, prerequis)
+    2. Modelage ("je fais" - enseignant verbalise sa pensee)
+    3. Pratique guidee ("nous faisons" - avec aide)
+    4. Pratique autonome ("vous faites" - sans aide)
+    5. Cloture (synthese, annonce suite)
   - **Liens avec le module actuel** :
     - Productions = evaluations planifiees
     - Objectifs d'apprentissage = cibles des lecons
+    - Calendrier = visualisation des lecons sur les seances
     - Sequences d'enseignement = progression logique
-  - **A explorer** :
-    - Structure d'une lecon type (ouverture, modelisation, pratique, cloture)
-    - Banque d'activites d'apprentissage
-    - Estimation du temps par activite
-    - Vue Gantt ou calendrier des lecons
-    - Export du plan de cours
+  - **Questions a explorer** :
+    - Quand tu as commence, qu'est-ce qui t'a le plus manque ?
+    - Quelles erreurs font les novices ? (modelage trop long, pratique autonome trop tot, etc.)
+    - L'outil doit-il "enseigner" la methode ou juste aider a planifier ?
+    - Niveau de detail : sequence ou lecon individuelle ?
+    - Wizard Primo (questions guidees) ou formulaire structure ?
+  - **Fichier de specs** : `docs/enseignement explicite/SPEC-MODULE-PLANIFICATION.md`
+  - **Reference PDF** : `docs/enseignement explicite/livret-enseignement_explicite_2024-01-03.pdf` (Academie de Paris)
   - **Prerequis** : Documentation complete de la logique pedagogique avant codage
-  - **Reference** : Modele de l'enseignement explicite (Gauthier, Bissonnette, Richard)
 
 ### Mode simplifie
 
