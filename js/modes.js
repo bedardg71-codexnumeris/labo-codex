@@ -663,6 +663,7 @@ function anonymiserDonnees(cle, donnees) {
                 daAffichage: afficherDAReel ? etudiant.da : 'ANONYME', // Pour affichage seulement
                 nom: mapping[etudiant.da]?.nom || '',
                 prenom: mapping[etudiant.da]?.prenom || etudiant.prenom,
+                groupeReel: etudiant.groupe, // 🆕 Garder le groupe réel pour le filtrage par cours
                 groupe: etudiant.groupe ? `AN.${etudiant.groupe}` : etudiant.groupe,
                 ordreAffichage: mapping[etudiant.da]?.ordreAffichage ?? 999 // Pour tri aléatoire
             }));
@@ -884,6 +885,9 @@ function obtenirEtudiantsCoursActif() {
 
     // Filtrer par coursId (et optionnellement par groupe)
     const etudiantsFiltres = tousEtudiants.filter(e => {
+        // 🆕 CORRECTION (23 jan 2026) : Utiliser groupeReel si disponible (mode anonymisation)
+        const groupeEtudiant = e.groupeReel || e.groupe;
+
         // Compatibilité : si l'étudiant n'a pas de coursId, vérifier le groupe
         if (!e.coursId) {
             // Ancien format : vérifier si le groupe correspond au cours actif
@@ -894,7 +898,7 @@ function obtenirEtudiantsCoursActif() {
             const groupeCours = coursActif.groupe || coursActif.groupes?.[0];
             // ✅ CORRECTION (9 jan 2026) : Normaliser les groupes avant comparaison
             const normaliserGroupe = (g) => String(g || '').padStart(5, '0');
-            return normaliserGroupe(e.groupe) === normaliserGroupe(groupeCours);
+            return normaliserGroupe(groupeEtudiant) === normaliserGroupe(groupeCours);
         }
 
         // Nouveau format avec coursId
@@ -911,7 +915,7 @@ function obtenirEtudiantsCoursActif() {
         const groupeCours = coursActif.groupe || coursActif.groupes?.[0];
         if (!groupeCours) return true; // Pas de groupe spécifié = tous
         const normaliserGroupe = (g) => String(g || '').padStart(5, '0');
-        return normaliserGroupe(e.groupe) === normaliserGroupe(groupeCours);
+        return normaliserGroupe(groupeEtudiant) === normaliserGroupe(groupeCours);
     });
 
     const modeLabel = estModeCours ? 'tous groupes' : `groupe ${coursActif.groupe}`;
@@ -946,8 +950,10 @@ function etudiantDansCoursActif(etudiant) {
     }
 
     // Compatibilité ancien format : vérifier groupe
+    // 🆕 CORRECTION (23 jan 2026) : Utiliser groupeReel si disponible (mode anonymisation)
+    const groupeEtudiant = etudiant.groupeReel || etudiant.groupe;
     const groupeCours = coursActif.groupe || coursActif.groupes?.[0];
-    return etudiant.groupe === groupeCours;
+    return groupeEtudiant === groupeCours;
 }
 
 /**
