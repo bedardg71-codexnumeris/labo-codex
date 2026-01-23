@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 95.7
 
 **Date** : 23 janvier 2026
-**Version** : Beta 95.7 (build 0123-1600)
+**Version** : Beta 95.7 (build 0123-0655)
 **Statut** : Application fonctionnelle pour H2026
 
 ---
