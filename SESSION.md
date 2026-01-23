@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 95.7
 
 **Date** : 23 janvier 2026
-**Version** : Beta 95.7 (build 0123-0655)
+**Version** : Beta 95.7 (build 0123-1430)
 **Statut** : Application fonctionnelle pour H2026
 
 ---
@@ -28,6 +28,19 @@
 - **Dropdown note maximale** : Peuplé dynamiquement selon l'échelle de performance
 
 ### Derniere tache completee (23 janvier)
+- **DIAGNOSTIC ET CORRECTION DONNEES A25** : Trimestre A2025 inutilisable (pas d'etudiants, pas d'indices)
+  - **Symptome** : Groupe-cours 00001 de l'A25 n'affichait aucune donnee malgre 30 etudiants
+  - **Cause 1** : Mismatch coursId - etudiants, evaluations, presences et productions avaient un ancien coursId
+    - Fix : Script console pour corriger coursId dans toutes les entites
+  - **Cause 2** : Pratique non reconnue - `pan-standards-bruno` (pratique utilisateur) non trouvee par `obtenirPratiqueParId()`
+    - Fix : Changement vers `pan-standards` (pratique built-in)
+  - **Cause 3** : Cache indicesCP ancien format causait erreur `historique.length`
+    - Fix : Nettoyage cache et recalcul avec nouveau format
+  - **Cause 4** : Configuration affichage manquante - `affichageTableauBord` non defini
+    - Fix : Ajout `afficherAlternatif: true` dans `modalitesEvaluation`
+  - **Resultat** : A25 affiche maintenant A=98%, C=92%, P=78%, E=89% + patterns + niveaux RaI
+  - **Note** : Corrections via scripts console (pas de changement de code)
+
 - **CORRECTION FILTRAGE PRESENCES PAR GROUPE-COURS** : Les presences etaient melangees entre les groupes
   - **Symptome** : Le groupe 2 affichait les presences du groupe 8 (indice A incorrect)
   - **Cause** : `chargerGroupesPresences()`, `chargerTableauPresences()` et `sauvegarderToutesPresences()` utilisaient `obtenirDonneesSelonMode('groupeEtudiants')` (retourne TOUS les etudiants du trimestre)
@@ -501,6 +514,12 @@
 ## HISTORIQUE RECENT
 
 ### 23 janvier 2026
+- **DIAGNOSTIC DONNEES A25** : Corrections multiples pour rendre le trimestre A2025 fonctionnel
+  - Mismatch coursId corrige pour etudiants (30), evaluations (305), presences (941), productions (11)
+  - Pratique `pan-standards-bruno` → `pan-standards` (built-in)
+  - Cache indicesCP nettoye (ancien format incompatible)
+  - Configuration `affichageTableauBord.afficherAlternatif: true` ajoutee
+  - Resultat : Tableau de bord A25 affiche tous les indicateurs (A, C, P, E, patterns, RaI)
 - **CORRECTION FILTRAGE PRESENCES** : Presences et calcul A maintenant filtres par groupe-cours actif
   - Corrige la contamination croisee entre groupes (ex: groupe 2 affichait les donnees du groupe 8)
   - `chargerGroupesPresences()`, `chargerTableauPresences()`, `sauvegarderToutesPresences()` utilisent maintenant `obtenirEtudiantsCoursActif()`
