@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 95.7
 
 **Date** : 23 janvier 2026
-**Version** : Beta 95.7 (build 0123-1510)
+**Version** : Beta 95.7 (build 0123-1148)
 **Statut** : Application fonctionnelle pour H2026
 
 ---
@@ -28,7 +28,18 @@
 - **Dropdown note maximale** : Peuplé dynamiquement selon l'échelle de performance
 
 ### Derniere tache completee (23 janvier)
-- **CORRECTION BUG ANONYMISATION** : "Eleve introuvable" lors du changement de mode
+- **CORRECTION BUG ANONYMISATION #2** : Liste etudiants vide en mode anonymise
+  - **Symptome** : Passage Normal → Anonymise affichait "0 personne" et "Aucun etudiant trouve"
+  - **Cause** : Le filtrage par groupe dans `obtenirEtudiantsCoursActif()` comparait le groupe anonymise (`AN.00001`) avec le groupe reel (`00001`)
+    - `anonymiserDonnees()` remplacait `e.groupe` par `AN.${e.groupe}` sans preserver le groupe reel
+    - La comparaison `normaliserGroupe(e.groupe) === normaliserGroupe(groupeCours)` echouait systematiquement
+  - **Fix** : Ajout de `groupeReel` dans l'anonymisation + utilisation dans le filtrage
+    - `anonymiserDonnees()` : Ajout `groupeReel: etudiant.groupe` (ligne 667)
+    - `obtenirEtudiantsCoursActif()` : Utilise `e.groupeReel || e.groupe` pour le filtrage (ligne 889)
+    - `etudiantDansCoursActif()` : Meme correction (ligne 955)
+  - **Fichier modifie** : `js/modes.js`
+
+- **CORRECTION BUG ANONYMISATION #1** : "Eleve introuvable" lors du changement de mode
   - **Symptome** : Checkbox Anonymiser ou dropdown mode affichait "Eleve introuvable"
   - **Cause** : Incoherence de filtrage dans `rafraichirContenuSelonMode()` (modes.js)
     - La verification utilisait `filtrerEtudiantsParMode` (sans filtre coursId)
@@ -522,7 +533,10 @@
 ## HISTORIQUE RECENT
 
 ### 23 janvier 2026
-- **BUG ANONYMISATION CORRIGE** : "Eleve introuvable" lors du changement de mode (anonymisation)
+- **BUG ANONYMISATION #2 CORRIGE** : Liste etudiants vide en mode anonymise
+  - Cause : Comparaison groupe anonymise (`AN.00001`) vs groupe reel (`00001`) dans `obtenirEtudiantsCoursActif()`
+  - Fix : Ajout `groupeReel` dans `anonymiserDonnees()` + utilisation dans le filtrage (modes.js)
+- **BUG ANONYMISATION #1 CORRIGE** : "Eleve introuvable" lors du changement de mode (anonymisation)
   - Cause : Incoherence entre `filtrerEtudiantsParMode` et `obtenirEtudiantsCoursActif()`
   - Fix : Utiliser `obtenirEtudiantsCoursActif()` dans `rafraichirContenuSelonMode()` (modes.js)
 - **DIAGNOSTIC DONNEES A25** : Corrections multiples pour rendre le trimestre A2025 fonctionnel
