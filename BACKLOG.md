@@ -50,7 +50,7 @@
 
 ### Mode simplifie
 
-- [ ] **#33** Mode Tableur - Saisie directe des resultats (PLANIFICATION REQUISE)
+- [ ] **#33** Mode Tableur - Saisie directe des resultats (BETA 97 - MARS 2026)
   - **Concept** : Permettre d'utiliser l'application sans creer de productions, grilles, echelles, etc.
   - **Usage** : Entrer directement les resultats des etudiants comme dans un tableur
   - **Objectif** : Suivi de l'apprentissage avec calculs automatiques (moyennes, progression, distribution)
