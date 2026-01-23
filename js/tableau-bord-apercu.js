@@ -389,11 +389,22 @@ function initialiserModuleTableauBordApercu() {
 function chargerTableauBordApercu() {
     console.log('Chargement du tableau de bord - aperçu');
 
+    // 🔄 BETA 95.7: Calculer les indices A avant l'affichage
+    console.log('📊 [TDB] Appel calculerEtSauvegarderIndicesAssiduite, fonction existe:', typeof calculerEtSauvegarderIndicesAssiduite === 'function');
+    if (typeof calculerEtSauvegarderIndicesAssiduite === 'function') {
+        calculerEtSauvegarderIndicesAssiduite();
+    }
+
     // 🔄 Calculer les indices C et P (SOM + PAN) avant l'affichage
     if (typeof calculerEtStockerIndicesCP === 'function') {
         calculerEtStockerIndicesCP();
     } else {
         console.warn('⚠️ calculerEtStockerIndicesCP non disponible - Module portfolio.js non chargé ?');
+    }
+
+    // 🔄 BETA 95.7: Rafraîchir aussi la liste des étudiants pour synchronisation
+    if (typeof afficherListeEtudiantsConsultation === 'function') {
+        afficherListeEtudiantsConsultation();
     }
 
     // 🆕 BETA 91: Calculer et stocker les patterns + RàI pour tout le groupe (si RàI activé)

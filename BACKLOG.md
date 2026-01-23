@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 22 janvier 2026
+> **Derniere mise a jour** : 23 janvier 2026
 
 ---
 
@@ -49,6 +49,25 @@
   - Pas seulement les sections, aussi les messages d'erreur
 
 ### Fiabilite / Maintenance
+
+- [ ] **#32** Refonte architecture groupe Demo (PLANIFICATION REQUISE)
+  - **Concept** : Le groupe Demo n'est plus un trimestre separe, mais un "bac a sable" accessible en mode Assiste
+  - **Principe** : On ne switch pas de trimestre, on switch de MODE
+    - Mode Normal = donnees reelles
+    - Mode Assiste = acces au groupe Demo pour experimenter
+  - **Contenu du groupe Demo** (dataset complet et autonome) :
+    - 5 etudiants anonymises (bases sur A25)
+    - ~8-10 semaines de donnees sur 15
+    - Presences saisies avec patterns varies (assidus, absents, irreguliers)
+    - Evaluations avec differents niveaux de performance
+    - Productions, grilles, echelles, cartouches, pratique - tout inclus
+  - **Adaptation dynamique** : Les donnees Demo s'ajustent au calendrier du trimestre actuel (Hiver/Automne)
+  - **Avantages** :
+    - Plus de confusion trimestre Demo vs trimestres reels
+    - L'utilisateur reste dans son contexte de travail
+    - Experimentation sans risque pour les donnees reelles
+  - **Prerequis** : Documenter la logique complete avant codage
+  - **Remplace** : #31 (Formulaire groupe-cours Demo incomplet - obsolete avec cette refonte)
 
 - [ ] **#12** Audit db.get() vs db.getSync()
   - Verifier tous les modules pour desynchronisation IndexedDB/localStorage

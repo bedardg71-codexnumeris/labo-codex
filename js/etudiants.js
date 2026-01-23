@@ -856,7 +856,10 @@ function masquerColonnesRaiSiDesactive(activerRai) {
 function afficherListeEtudiantsConsultation() {
     console.log('🔵 Affichage de la liste des étudiants...');
 
-    // 🔄 FORCER le recalcul des indices C et P avant affichage
+    // 🔄 FORCER le recalcul des indices A, C et P avant affichage
+    if (typeof calculerEtSauvegarderIndicesAssiduite === 'function') {
+        calculerEtSauvegarderIndicesAssiduite();
+    }
     if (typeof calculerEtStockerIndicesCP === 'function') {
         calculerEtStockerIndicesCP();
     }
@@ -996,13 +999,30 @@ function afficherListeEtudiantsConsultation() {
     let presencesGlobal = obtenirDonneesSelonMode('presences') || [];
     if (!Array.isArray(presencesGlobal)) presencesGlobal = [];
 
+    // 🆕 BETA 95.7 (23 jan): Filtrer les présences par coursId du groupe-cours actif
+    const coursIdActif = typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null;
+    console.log('📊 [Etudiants] coursIdActif:', coursIdActif, '- Total présences:', presencesGlobal.length);
+
+    // Filtrer pour ne garder que les présences du cours actif
+    const presencesCours = coursIdActif
+        ? presencesGlobal.filter(p => p.coursId === coursIdActif)
+        : presencesGlobal;
+    console.log('📊 [Etudiants] Présences pour ce cours:', presencesCours.length);
+
+    // 🆕 DEBUG: Voir les DA dans les présences vs les DA des étudiants
+    const dasPresences = [...new Set(presencesCours.map(p => p.da))];
+    const dasEtudiants = etudiants.slice(0, 5).map(e => e.da); // 5 premiers pour debug
+    console.log('📊 [Etudiants] DA dans présences (exemples):', dasPresences.slice(0, 5));
+    console.log('📊 [Etudiants] DA des étudiants (exemples):', dasEtudiants);
+
     const valeursA_avecPresences = [];
     etudiants.forEach((etudiant, index) => {
-        const aDesPresences = presencesGlobal.some(p => p.da === etudiant.da);
+        const aDesPresences = presencesCours.some(p => p.da === etudiant.da);
         if (aDesPresences) {
             valeursA_avecPresences.push(valeursA_tous[index]);
         }
     });
+    console.log('📊 [Etudiants] Étudiants avec présences:', valeursA_avecPresences.length);
     const moyenneA = valeursA_avecPresences.length > 0 ? valeursA_avecPresences.reduce((sum, val) => sum + val, 0) / valeursA_avecPresences.length : null;
 
     // 🆕 BETA 91: Calculer la moyenne de l'engagement E sur TOUS les étudiants (cohérence avec corrélations)

@@ -31,10 +31,20 @@
  * Appelée après chaque enregistrement de présences
  */
 function calculerEtSauvegarderIndicesAssiduite() {
-    console.log('Calcul des indices d\'assiduité...');
+    console.log('📊 [Assiduité] Calcul des indices d\'assiduité...');
 
     // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    console.log('📊 [Assiduité] Nombre étudiants récupérés:', etudiants?.length || 0);
+
+    // 🆕 DEBUG: Voir les coursId présents dans les présences
+    let presencesDebug = obtenirDonneesSelonMode('presences') || [];
+    if (!Array.isArray(presencesDebug)) presencesDebug = [];
+    const coursIds = [...new Set(presencesDebug.map(p => p.coursId))];
+    const coursIdActif = typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null;
+    console.log('📊 [Assiduité] coursIdActif:', coursIdActif);
+    console.log('📊 [Assiduité] coursId dans présences:', coursIds);
+    console.log('📊 [Assiduité] Total présences:', presencesDebug.length);
 
     // Structure de sortie
     const indices = {
@@ -58,9 +68,9 @@ function calculerEtSauvegarderIndicesAssiduite() {
     // IMPORTANT : Utiliser sauvegarderDonneesSelonMode pour respecter le mode actuel
     sauvegarderDonneesSelonMode('indicesAssiduite', indices);
 
-    console.log('✅ Indices d\'assiduité sauvegardés');
-    console.log('   Sommatif:', Object.keys(indices.sommatif).length, 'étudiants');
-    console.log('   Alternatif:', Object.keys(indices.alternatif).length, 'étudiants');
+    console.log('📊 [Assiduité] ✅ Indices sauvegardés');
+    console.log('📊 [Assiduité] Sommatif:', Object.keys(indices.sommatif).length, 'étudiants');
+    console.log('📊 [Assiduité] Alternatif:', Object.keys(indices.alternatif).length, 'étudiants');
 
     return indices;
 }
@@ -82,8 +92,14 @@ function calculerAssiduiteSommative(da) {
     let presences = obtenirDonneesSelonMode('presences') || [];
     if (!Array.isArray(presences)) presences = [];
 
-    // Obtenir toutes les DATES où des présences ont été saisies (non facultatives)
-    const datesSaisies = [...new Set(presences.filter(p => !p.facultatif).map(p => p.date))].sort();
+    // 🆕 BETA 95.7: Calculer uniquement sur les présences de CET étudiant
+    // Le filtrage par groupe-cours se fait au niveau de l'affichage
+    const presencesEtudiant = presences.filter(p => p.da === da);
+
+    console.log(`📊 [Assiduité Som] ${da}: ${presencesEtudiant.length} présences trouvées`);
+
+    // Obtenir les DATES où CET étudiant a des présences saisies (non facultatives)
+    const datesSaisies = [...new Set(presencesEtudiant.filter(p => !p.facultatif).map(p => p.date))].sort();
 
     if (datesSaisies.length === 0) {
         return {
@@ -95,9 +111,6 @@ function calculerAssiduiteSommative(da) {
             nombreSeances: 0
         };
     }
-
-    // Obtenir les présences de cet étudiant
-    const presencesEtudiant = presences.filter(p => p.da === da);
 
     // 🆕 BETA 95.7 : Calculer directement en PÉRIODES
     let totalPeriodesOffertes = 0;
@@ -127,16 +140,9 @@ function calculerAssiduiteSommative(da) {
                 const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : 55;
                 totalPeriodesPresentes += (presenceDate.heures * 60) / dureePeriode;
             }
-        } else {
-            // L'étudiant n'a pas d'entrée - vérifier si c'est une séance normale
-            const presencesDate = presences.filter(p => p.date === date && !p.facultatif);
-            if (presencesDate.length > 0) {
-                // Séance normale où l'étudiant est absent
-                seancesNonFacultatives.add(date);
-                totalPeriodesOffertes += nombrePeriodesSeance;
-                // totalPeriodesPresentes += 0 (absent)
-            }
         }
+        // Note: Si l'étudiant n'a pas d'entrée pour cette date, c'est qu'il n'y a pas de présence saisie pour lui
+        // On ne compte que les dates où il a une présence saisie (même si 0 périodes = absent)
     });
 
     if (totalPeriodesOffertes === 0) {
@@ -371,15 +377,16 @@ function calculerAssiduiteAlternative(da) {
     let presences = obtenirDonneesSelonMode('presences') || [];
     if (!Array.isArray(presences)) presences = [];
 
+    // 🆕 BETA 95.7: Calculer uniquement sur les présences de CET étudiant
+    const presencesEtudiant = presences.filter(p => p.da === da);
+
     // Obtenir le nombre de séances depuis les réglages
     const config = db.getSync('modalitesEvaluation', {});
     const nombreCours = config.configPAN?.nombreCours || 3; // Par défaut 3 cours
-    const nombreSeances = nombreCours * 2; // 3 cours = 6 séances
+    const nombreSeancesConfig = nombreCours * 2; // 3 cours = 6 séances
 
-    console.log(`   Calcul alternatif : ${nombreCours} derniers cours = ${nombreSeances} séances`);
-
-    // Obtenir toutes les dates où des présences ont été saisies (ordre chronologique)
-    const datesSaisies = [...new Set(presences.map(p => p.date))].sort();
+    // Obtenir toutes les dates où CET étudiant a des présences saisies (ordre chronologique)
+    const datesSaisies = [...new Set(presencesEtudiant.map(p => p.date))].sort();
 
     if (datesSaisies.length === 0) {
         console.log(`   Alternatif ${da}: Aucune saisie, retour 100%`);
@@ -392,13 +399,13 @@ function calculerAssiduiteAlternative(da) {
     }
 
     // Prendre les N dernières dates de saisie
-    const dernieresDates = datesSaisies.slice(-nombreSeances);
+    const dernieresDates = datesSaisies.slice(-nombreSeancesConfig);
 
-    console.log(`   Dernières dates pour ${da}:`, dernieresDates);
+    console.log(`📊 [Assiduité Alt] ${da}: ${dernieresDates.length} dernières dates sur ${datesSaisies.length} saisies`);
 
-    // Obtenir les présences de cet étudiant
-    const presencesEtudiant = presences.filter(p =>
-        p.da === da && dernieresDates.includes(p.date)
+    // Filtrer les présences de cet étudiant sur les dernières dates
+    const presencesDernieresDates = presencesEtudiant.filter(p =>
+        dernieresDates.includes(p.date)
     );
 
     // Calculer en tenant compte des séances facultatives
@@ -407,7 +414,7 @@ function calculerAssiduiteAlternative(da) {
     let seancesComptees = 0; // 🆕 BETA 95.7: Nombre de séances réellement comptées
 
     dernieresDates.forEach(date => {
-        const presenceDate = presencesEtudiant.find(p => p.date === date);
+        const presenceDate = presencesDernieresDates.find(p => p.date === date);
 
         if (presenceDate) {
             const estFacultatif = presenceDate.facultatif === true;
@@ -443,6 +450,7 @@ function calculerAssiduiteAlternative(da) {
         } else {
             // L'étudiant n'a pas d'entrée pour cette date
             // Vérifier si cette date correspond à une séance facultative (intervention RàI)
+            // 🆕 BETA 95.7: Utiliser toutes les présences pour cette vérification
             const presencesDate = presences.filter(p => p.date === date);
             const estSeanceFacultative = presencesDate.length > 0 &&
                                          presencesDate.every(p => p.facultatif === true);
@@ -542,6 +550,7 @@ function initialiserModuleSaisiePresences() {
 
 /**
  * Charge la liste des groupes dans le select
+ * 🆕 BETA 95.7 (23 jan) : Utiliser uniquement les étudiants du groupe-cours ACTIF
  */
 function chargerGroupesPresences() {
     const selectGroupe = document.getElementById('selectGroupePresences');
@@ -550,11 +559,13 @@ function chargerGroupesPresences() {
         return;
     }
 
-    // Obtenir les étudiants selon le mode actif
-    // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
-    const etudiants = obtenirDonneesSelonMode('groupeEtudiants') || [];
+    // 🆕 BETA 95.7 : Utiliser UNIQUEMENT les étudiants du groupe-cours actif
+    // Évite la confusion entre les groupes-cours différents
+    const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
+        ? obtenirEtudiantsCoursActif()
+        : obtenirDonneesSelonMode('groupeEtudiants') || [];
 
-    // Extraire les groupes uniques
+    // Extraire les groupes uniques (sous-groupes à l'intérieur du groupe-cours)
     const groupesSet = new Set();
     etudiants.forEach(e => {
         if (e.groupe && e.groupe.trim() !== '') {
@@ -565,15 +576,22 @@ function chargerGroupesPresences() {
     const groupes = Array.from(groupesSet).sort();
 
     // Remplir le select
-    selectGroupe.innerHTML = '<option value="">Tous les groupes</option>';
-    groupes.forEach(groupe => {
-        const option = document.createElement('option');
-        option.value = groupe;
-        option.textContent = groupe;
-        selectGroupe.appendChild(option);
-    });
+    // 🆕 BETA 95.7 : Si un seul groupe, ne pas afficher le filtre "Tous les groupes"
+    if (groupes.length <= 1) {
+        selectGroupe.innerHTML = '<option value="">Tous</option>';
+        selectGroupe.style.display = 'none'; // Masquer si inutile
+    } else {
+        selectGroupe.innerHTML = '<option value="">Tous les groupes</option>';
+        groupes.forEach(groupe => {
+            const option = document.createElement('option');
+            option.value = groupe;
+            option.textContent = groupe;
+            selectGroupe.appendChild(option);
+        });
+        selectGroupe.style.display = '';
+    }
 
-    console.log(`✅ ${groupes.length} groupes chargés dans le select`);
+    console.log(`✅ ${groupes.length} groupes chargés (groupe-cours actif: ${etudiants.length} étudiants)`);
     calculerEtSauvegarderIndicesAssiduite();
 }
 
@@ -1205,7 +1223,10 @@ function chargerTableauPresences(dateStr, estVerrouille) {
     const selectGroupe = document.getElementById('selectGroupePresences');
     const groupeFiltre = selectGroupe ? selectGroupe.value : '';
 
-    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    // 🆕 BETA 95.7 (23 jan) : Utiliser UNIQUEMENT les étudiants du groupe-cours actif
+    const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
+        ? obtenirEtudiantsCoursActif()
+        : obtenirDonneesSelonMode('groupeEtudiants');
     // ✅ CORRIGÉ (8 janvier 2026) : Utiliser obtenirDonneesSelonMode pour filtrer par coursId
     // ✅ CORRIGÉ (22 janvier 2026) : S'assurer que presences est un tableau
     let presences = obtenirDonneesSelonMode('presences') || [];
@@ -1551,7 +1572,10 @@ function enregistrerPresences() {
     const selectGroupe = document.getElementById('selectGroupePresences');
     const groupeFiltre = selectGroupe ? selectGroupe.value : '';
 
-    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    // 🆕 BETA 95.7 (23 jan) : Utiliser UNIQUEMENT les étudiants du groupe-cours actif
+    const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
+        ? obtenirEtudiantsCoursActif()
+        : obtenirDonneesSelonMode('groupeEtudiants');
     // ✅ CORRIGÉ (22 janvier 2026) : Utiliser la clé namespacée pour le trimestre actif
     const clePresences = (typeof cle === 'function') ? cle('presences') : 'presences';
     let presences = db.getSync(clePresences, []);
@@ -1561,7 +1585,7 @@ function enregistrerPresences() {
     // ✅ CORRIGÉ (8 janvier 2026) : Obtenir coursId en premier pour filtrer correctement
     const coursId = typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null;
 
-    // Filtrer les étudiants si un groupe est sélectionné
+    // Filtrer les étudiants si un sous-groupe est sélectionné (à l'intérieur du groupe-cours)
     let etudiantsATraiter = etudiants;
     if (groupeFiltre) {
         etudiantsATraiter = etudiants.filter(e => e.groupe === groupeFiltre);

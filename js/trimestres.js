@@ -61,10 +61,48 @@
 
     /**
      * Obtient la liste de tous les trimestres
-     * @returns {Array} Liste des trimestres
+     * 🆕 FIX (23 jan 2026): Nettoie automatiquement les doublons
+     * @returns {Array} Liste des trimestres (sans doublons)
      */
     function obtenirTrimestres() {
-        return db.getSync('trimestres', []);
+        let trimestres = db.getSync('trimestres', []);
+
+        // 🆕 FIX (23 jan 2026): Détecter et corriger les doublons
+        const idsVus = new Set();
+        const nomsVus = new Set();
+        let aDesDoublons = false;
+
+        trimestres.forEach(t => {
+            if (idsVus.has(t.id) || (t.nom && nomsVus.has(t.nom))) {
+                aDesDoublons = true;
+            }
+            idsVus.add(t.id);
+            if (t.nom) nomsVus.add(t.nom);
+        });
+
+        if (aDesDoublons) {
+            console.warn('[Trimestres] ⚠️ Doublons détectés, nettoyage...');
+            // Garder le premier de chaque ID (priorité à l'ID)
+            const trimestresUniques = [];
+            const idsGardes = new Set();
+
+            trimestres.forEach(t => {
+                if (!idsGardes.has(t.id)) {
+                    idsGardes.add(t.id);
+                    trimestresUniques.push(t);
+                } else {
+                    console.log(`[Trimestres] Doublon supprimé: ${t.nom} (${t.id})`);
+                }
+            });
+
+            // Sauvegarder la liste nettoyée
+            db.setSync('trimestres', trimestresUniques);
+            console.log(`[Trimestres] Nettoyage terminé: ${trimestres.length} → ${trimestresUniques.length} trimestres`);
+
+            return trimestresUniques;
+        }
+
+        return trimestres;
     }
 
     /**
