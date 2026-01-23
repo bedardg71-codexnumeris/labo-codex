@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 95.7
 
-**Date** : 21 janvier 2026
-**Version** : Beta 95.7 (build 0121-1540)
+**Date** : 23 janvier 2026
+**Version** : Beta 95.7 (build 0123-1600)
 **Statut** : Application fonctionnelle pour H2026
 
 ---
@@ -27,7 +27,41 @@
 - **Pratiques de notation** : Sauvegarde fiable via wizard et mode expert
 - **Dropdown note maximale** : Peuplé dynamiquement selon l'échelle de performance
 
-### Derniere tache completee (21 janvier)
+### Derniere tache completee (23 janvier)
+- **CORRECTION FILTRAGE PRESENCES PAR GROUPE-COURS** : Les presences etaient melangees entre les groupes
+  - **Symptome** : Le groupe 2 affichait les presences du groupe 8 (indice A incorrect)
+  - **Cause** : `chargerGroupesPresences()`, `chargerTableauPresences()` et `sauvegarderToutesPresences()` utilisaient `obtenirDonneesSelonMode('groupeEtudiants')` (retourne TOUS les etudiants du trimestre)
+  - **Fix** : Utilisation de `obtenirEtudiantsCoursActif()` pour ne prendre que les etudiants du groupe-cours actif
+  - **Fichier modifie** : `js/saisie-presences.js`
+
+- **CORRECTION CALCUL MOYENNE A PAR GROUPE-COURS** : Le calcul incluait les presences d'autres groupes
+  - **Symptome** : Groupe 2 affichait la moyenne A du groupe 8
+  - **Cause** : Les presences n'etaient pas filtrees par `coursId` du groupe-cours actif
+  - **Fix** : Ajout filtrage `presencesGlobal.filter(p => p.coursId === coursIdActif)` dans le calcul moyenneA
+  - **Fichier modifie** : `js/etudiants.js`
+
+- **CORRECTION DROPDOWN TRIMESTRE ACTIF** : Le dropdown affichait le mauvais trimestre
+  - **Symptome** : Apres changement vers A2025, le dropdown affichait toujours "Demonstration"
+  - **Cause** : La valeur du select n'etait pas forcee apres population des options
+  - **Fix** : Ajout `select.value = trimestreActif.id` apres population des options
+  - **Fichier modifie** : `js/trimestre-v2.js`
+
+- **CORRECTION DOUBLONS TRIMESTRES** : Deux entrees "Demonstration" dans le dropdown
+  - **Cause** : Doublons dans la liste des trimestres enregistres
+  - **Fix** : Nettoyage automatique des doublons dans `obtenirTrimestres()` (detection par ID et par nom)
+  - **Fichier modifie** : `js/trimestres.js`
+
+- **MASQUAGE TRIMESTRE DEMO EN MODE NORMAL** : Le trimestre Demo n'apparait plus en mode Normal
+  - Le trimestre Demo est maintenant visible uniquement en Mode Assiste
+  - **Fichier modifie** : `js/trimestre-v2.js`
+
+- **AJOUT BACKLOG #32** : Refonte architecture groupe Demo planifiee
+  - Le groupe Demo devient un "bac a sable" accessible en Mode Assiste
+  - Plus de switch de trimestre, mais switch de MODE (Normal/Assiste)
+  - Dataset complet : 5 etudiants, ~8-10 semaines, presences variees, evaluations, productions
+  - Prerequis : Documentation complete avant codage
+
+### Tache precedente (21 janvier)
 - **BUG CRITIQUE TRIMESTRES A2025/DEMO** : Données inaccessibles après changement de trimestre
   - **Symptôme** : "0 personne" affiché, aucun étudiant ni résultat visible
   - **Cause 1** : `changerTrimestreActif()` ne mettait pas à jour `window.trimestreActif`
@@ -466,6 +500,22 @@
 
 ## HISTORIQUE RECENT
 
+### 23 janvier 2026
+- **CORRECTION FILTRAGE PRESENCES** : Presences et calcul A maintenant filtres par groupe-cours actif
+  - Corrige la contamination croisee entre groupes (ex: groupe 2 affichait les donnees du groupe 8)
+  - `chargerGroupesPresences()`, `chargerTableauPresences()`, `sauvegarderToutesPresences()` utilisent maintenant `obtenirEtudiantsCoursActif()`
+  - Calcul moyenneA filtre les presences par `coursId`
+  - **Fichiers** : `js/saisie-presences.js`, `js/etudiants.js`
+- **CORRECTION DROPDOWN TRIMESTRE** : Synchronisation correcte apres changement
+  - Le dropdown affiche maintenant le bon trimestre actif
+  - Nettoyage automatique des doublons dans la liste des trimestres
+  - Trimestre Demo masque en Mode Normal (visible seulement en Mode Assiste)
+  - **Fichiers** : `js/trimestre-v2.js`, `js/trimestres.js`
+- **BACKLOG #32 AJOUTE** : Refonte architecture groupe Demo planifiee
+  - Concept : Demo devient un "bac a sable" accessible en Mode Assiste
+  - Plus de switch de trimestre, mais switch de MODE
+  - Prerequis : Documentation complete avant codage
+
 ### 21 janvier 2026
 - **BUG CRITIQUE CORRIGÉ** : Données A2025/Démo inaccessibles après changement de trimestre
   - **Symptôme** : Aucun résultat, aucun élève, aucun travail affiché pour trimestres autres que H2026
@@ -618,4 +668,4 @@
 
 ---
 
-**Derniere mise a jour** : 20 janvier 2026
+**Derniere mise a jour** : 23 janvier 2026

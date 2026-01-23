@@ -868,8 +868,16 @@ function populerDropdownTrimestreV2() {
     if (!select) return;
 
     // Lire le registre des trimestres (de trimestres.js)
-    const trimestres = typeof obtenirTrimestres === 'function' ? obtenirTrimestres() : [];
+    let trimestres = typeof obtenirTrimestres === 'function' ? obtenirTrimestres() : [];
     const trimestreActif = typeof obtenirTrimestreActif === 'function' ? obtenirTrimestreActif() : null;
+
+    // 🆕 FIX (23 jan 2026): En mode Normal, masquer le trimestre Démonstration
+    const modeActuel = typeof window.modeActuel !== 'undefined' ? window.modeActuel : 'normal';
+    if (modeActuel === 'normal') {
+        trimestres = trimestres.filter(t => t.id !== 'demo');
+    }
+
+    console.log('🔄 [Dropdown Trim] Mode:', modeActuel, '- Trimestre actif:', trimestreActif?.id);
 
     select.innerHTML = '';
 
@@ -887,6 +895,11 @@ function populerDropdownTrimestreV2() {
         option.selected = (trimestreActif && t.id === trimestreActif.id);
         select.appendChild(option);
     });
+
+    // 🆕 FIX (23 jan 2026): Forcer la valeur du select au trimestre actif
+    if (trimestreActif) {
+        select.value = trimestreActif.id;
+    }
 
     console.log('[Trimestre V2] Dropdown peuplé avec', trimestres.length, 'trimestre(s)');
 
@@ -1118,11 +1131,14 @@ function supprimerTrimestreActif() {
  * Délègue à la fonction de trimestres.js
  */
 function changerTrimestreActifV2(valeur) {
-    console.log('[Trimestre V2] Changement trimestre:', valeur);
+    console.log('🔄 [Trimestre V2] Changement trimestre demandé:', valeur);
 
     // Appeler la fonction de trimestres.js
     if (typeof window.changerTrimestreActif === 'function') {
         const success = window.changerTrimestreActif(valeur);
+        console.log('🔄 [Trimestre V2] Résultat changerTrimestreActif:', success);
+        console.log('🔄 [Trimestre V2] window.trimestreActif après changement:', window.trimestreActif);
+
         if (success) {
             // Recharger l'interface complète
             chargerIdentificationTrimestreV2();  // 🆕 FIX: Recharger nom, session, année
@@ -5445,6 +5461,8 @@ async function peuplerDropdownGroupeCoursActif() {
     const trimestres = db.getSync('trimestres', []);
     const trimestreActif = trimestres.find(t => t.actif);
 
+    console.log('🔄 [GC Dropdown] Trimestre actif:', trimestreActif?.id, trimestreActif?.nom);
+
     if (!trimestreActif) {
         selectHeader.innerHTML = '<option value="">-- Sélectionnez un trimestre --</option>';
         return;
@@ -5452,7 +5470,9 @@ async function peuplerDropdownGroupeCoursActif() {
 
     // Utiliser cle() pour cohérence avec sauvegarderGroupeCoursV2
     const cleGC = typeof cle === 'function' ? cle('groupesCours') : 'groupesCours';
+    console.log('🔄 [GC Dropdown] Clé groupesCours:', cleGC);
     const tousGroupesCours = db.getSync(cleGC, []);
+    console.log('🔄 [GC Dropdown] Groupe-cours trouvés:', tousGroupesCours.length);
 
     // 🆕 (10 jan 2026) : Filtrer les groupe-cours masqués (dansSidebar !== false)
     const groupesCours = tousGroupesCours.filter(gc => gc.dansSidebar !== false);
@@ -5531,14 +5551,18 @@ async function peuplerDropdownGroupeCoursActif() {
     const gcActif = db.getSync('groupeCoursActif', null);
     const gcActifValide = gcActif && groupesCours.some(gc => gc.id === gcActif.id);
 
+    console.log('🔄 [GC Dropdown] gcActif:', gcActif?.id, '- trimestreId:', gcActif?.trimestreId);
+    console.log('🔄 [GC Dropdown] gcActifValide:', gcActifValide);
+
     if (!gcActifValide && groupesCours.length > 0) {
         // Sélectionner le premier groupe-cours du trimestre
         const premierGC = groupesCours[0];
-        console.log('[Trimestre V2] Auto-sélection du premier groupe-cours:', premierGC.id);
+        console.log('🔄 [GC Dropdown] Auto-sélection du premier groupe-cours:', premierGC.id);
         await changerGroupeCoursActifV2(premierGC.id);
         selectHeader.value = premierGC.id;
     } else if (gcActifValide) {
         // S'assurer que le dropdown reflète la sélection actuelle
+        console.log('🔄 [GC Dropdown] Groupe-cours actif valide, sélection:', gcActif.modeCours ? `cours:${gcActif.coursId}` : gcActif.id);
         selectHeader.value = gcActif.modeCours ? `cours:${gcActif.coursId}` : gcActif.id;
     }
 }
