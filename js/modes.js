@@ -208,11 +208,13 @@ function rafraichirContenuSelonMode() {
                 const etudiantsAvant = window.etudiantsListeCache || [];
                 const indexAvant = etudiantsAvant.findIndex(e => e.da === window.profilActuelDA);
 
-                // Vérifier si le DA existe dans le nouveau mode
-                const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
-                const etudiantsTries = typeof filtrerEtudiantsParMode === 'function'
-                    ? filtrerEtudiantsParMode(etudiants)
-                    : etudiants.filter(e => e.groupe !== '9999');
+                // 🔧 FIX (23 jan 2026): Utiliser obtenirEtudiantsCoursActif() pour cohérence
+                // avec afficherProfilComplet() qui utilise aussi ce filtre par coursId
+                const etudiantsTries = typeof obtenirEtudiantsCoursActif === 'function'
+                    ? obtenirEtudiantsCoursActif()
+                    : (typeof filtrerEtudiantsParMode === 'function'
+                        ? filtrerEtudiantsParMode(obtenirDonneesSelonMode('groupeEtudiants'))
+                        : obtenirDonneesSelonMode('groupeEtudiants').filter(e => e.groupe !== '9999'));
 
                 const etudiantExiste = etudiantsTries.find(e => e.da === window.profilActuelDA);
 
