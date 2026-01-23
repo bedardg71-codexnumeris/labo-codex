@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 95.7
 
 **Date** : 23 janvier 2026
-**Version** : Beta 95.7 (build 0123-1430)
+**Version** : Beta 95.7 (build 0123-1510)
 **Statut** : Application fonctionnelle pour H2026
 
 ---
@@ -28,6 +28,14 @@
 - **Dropdown note maximale** : Peuplé dynamiquement selon l'échelle de performance
 
 ### Derniere tache completee (23 janvier)
+- **CORRECTION BUG ANONYMISATION** : "Eleve introuvable" lors du changement de mode
+  - **Symptome** : Checkbox Anonymiser ou dropdown mode affichait "Eleve introuvable"
+  - **Cause** : Incoherence de filtrage dans `rafraichirContenuSelonMode()` (modes.js)
+    - La verification utilisait `filtrerEtudiantsParMode` (sans filtre coursId)
+    - Mais `afficherProfilComplet` utilisait `obtenirEtudiantsCoursActif()` (avec filtre coursId)
+  - **Fix** : Utiliser `obtenirEtudiantsCoursActif()` partout pour coherence
+  - **Fichier modifie** : `js/modes.js`
+
 - **DIAGNOSTIC ET CORRECTION DONNEES A25** : Trimestre A2025 inutilisable (pas d'etudiants, pas d'indices)
   - **Symptome** : Groupe-cours 00001 de l'A25 n'affichait aucune donnee malgre 30 etudiants
   - **Cause 1** : Mismatch coursId - etudiants, evaluations, presences et productions avaient un ancien coursId
@@ -514,6 +522,9 @@
 ## HISTORIQUE RECENT
 
 ### 23 janvier 2026
+- **BUG ANONYMISATION CORRIGE** : "Eleve introuvable" lors du changement de mode (anonymisation)
+  - Cause : Incoherence entre `filtrerEtudiantsParMode` et `obtenirEtudiantsCoursActif()`
+  - Fix : Utiliser `obtenirEtudiantsCoursActif()` dans `rafraichirContenuSelonMode()` (modes.js)
 - **DIAGNOSTIC DONNEES A25** : Corrections multiples pour rendre le trimestre A2025 fonctionnel
   - Mismatch coursId corrige pour etudiants (30), evaluations (305), presences (941), productions (11)
   - Pratique `pan-standards-bruno` → `pan-standards` (built-in)
