@@ -48,6 +48,20 @@
   - Ajouter aides pour cas d'erreur frequents
   - Pas seulement les sections, aussi les messages d'erreur
 
+### Mode simplifie
+
+- [ ] **#33** Mode Tableur - Saisie directe des resultats (PLANIFICATION REQUISE)
+  - **Concept** : Permettre d'utiliser l'application sans creer de productions, grilles, echelles, etc.
+  - **Usage** : Entrer directement les resultats des etudiants comme dans un tableur
+  - **Objectif** : Suivi de l'apprentissage avec calculs automatiques (moyennes, progression, distribution)
+  - **Public cible** : Enseignants qui ont deja leur propre systeme d'evaluation ou qui veulent un outil simple
+  - **A explorer** :
+    - Format des notes (sur 100? lettres? echelle personnalisee?)
+    - Nommage libre des evaluations ("Examen 1", "TP2", etc.)
+    - Integration avec le tableau de bord (indices C/P)
+    - Cohabitation avec le mode complet (pratiques de notation)
+  - **Prerequis** : Documenter la logique complete avant codage
+
 ### Fiabilite / Maintenance
 
 - [ ] **#32** Refonte architecture groupe Demo (PLANIFICATION REQUISE)
