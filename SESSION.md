@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 95.7
 
 **Date** : 24 janvier 2026
-**Version** : Beta 95.7 (build 0124-0715)
+**Version** : Beta 95.7 (build 0124-0730)
 **Statut** : Application fonctionnelle pour H2026
 
 ---
@@ -28,6 +28,17 @@
 - **Dropdown note maximale** : Peuplé dynamiquement selon l'échelle de performance
 
 ### Derniere tache completee (24 janvier)
+- **NETTOYAGE DOUBLON GROUPE-COURS** : Groupe 1 de A25 apparaissait dans H26
+  - **Symptome** : Le dropdown groupe-cours en H26 affichait 3 groupes (1, 2, 8) au lieu de 2 (2, 8)
+  - **Cause** : La migration `migrerHorairesEtGroupesCours()` du 21 jan avait copie les donnees globales vers le trimestre actif, incluant le groupe 1 de A25 dans h2026_groupesCours
+  - **Diagnostic** : Script console pour lister les groupes par trimestre
+    - `db.getSync("h2026_groupesCours")` → 3 groupes (00001, 00002, 00008)
+    - `db.getSync("a2025_groupesCours")` → 1 groupe (00001)
+  - **Fix** : Nettoyage manuel via console (suppression du groupe 00001 de h2026_groupesCours)
+    - Script : `db.setSync("h2026_groupesCours", db.getSync("h2026_groupesCours").filter(gc => gc.groupe !== "00001"))`
+  - **Resultat** : H26 affiche maintenant seulement les groupes 2 et 8, A25 conserve son groupe 1
+  - **Note** : Pas de changement de code, correction de donnees uniquement
+
 - **CORRECTION AFFICHAGE TABLEAU DE BORD** : Messages "en attente" contradictoires
   - **Symptome 1** : Trimestre archive A25 affichait les moyennes (92%, 78%, 89%) ET "(X evaluations en attente)" simultanement
   - **Cause** : La condition d'affichage du message "en attente" ne verificait pas si une moyenne existait deja
@@ -549,6 +560,7 @@
 ## HISTORIQUE RECENT
 
 ### 24 janvier 2026
+- **NETTOYAGE DOUBLON GROUPE-COURS** : Groupe 1 de A25 retire de H26 (correction donnees via console)
 - **CORRECTION AFFICHAGE TABLEAU DE BORD** : Messages "en attente" et patterns/RaI incoherents
   - Trimestre archive A25 : Moyennes affichees sans message "en attente" contradictoire
   - H26 sans evaluations : Message "En attente de donnees" au lieu de "100% blocage critique"
