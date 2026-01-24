@@ -1412,8 +1412,12 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
     }
 
     // Indicateur "en attente" explicite (si données présentes mais seuil non atteint)
+    // 🆕 FIX (24 jan 2026): Ne pas afficher "en attente" si une moyenne significative (> 0%) existe
+    // Cas des trimestres archivés où les moyennes sont calculées mais le comptage des évaluations est incorrect
+    // Une moyenne de 0% indique qu'il n'y a pas de données significatives → afficher "en attente"
     let indicateurAttenteHTML = '';
-    if (donneesEnAttente && !tousEnAttente) {
+    const moyenneSignificative = (afficherSom && moyenneSOM > 0) || (afficherPan && moyennePAN > 0);
+    if (donneesEnAttente && !tousEnAttente && !moyenneSignificative) {
         indicateurAttenteHTML = `<span style="color: #94a3b8; font-size: 0.8rem; margin-left: 8px;">(${texteAttente})</span>`;
     }
 
@@ -2059,30 +2063,34 @@ function afficherPatternsApprentissage(etudiants) {
     const afficherSom = affichage.afficherSommatif === true;
     const afficherPan = affichage.afficherAlternatif === true;
 
-    // 🆕 BETA 95.6 : Filtrer les étudiants sans données (A=C=P=0)
-    // pour éviter les patterns erronés ("Blocage critique" quand pas de données)
-    const etudiantsAvecDonnees = etudiants.filter(e => {
-        const aSOM = e.sommatif.assiduite > 0 || e.sommatif.completion > 0 || e.sommatif.performance > 0;
-        const aPAN = e.alternatif.assiduite > 0 || e.alternatif.completion > 0 || e.alternatif.performance > 0;
-        return aSOM || aPAN;
+    // 🆕 FIX (24 jan 2026) : Pour les patterns, seuls C et P comptent (pas A seul)
+    // Un étudiant avec A > 0 mais C = P = 0 ne doit pas générer de pattern "blocage critique"
+    // car les patterns sont basés sur la performance et la complétion, pas l'assiduité seule
+    const etudiantsAvecDonneesCP = etudiants.filter(e => {
+        const cpSOM = e.sommatif.completion > 0 || e.sommatif.performance > 0;
+        const cpPAN = e.alternatif.completion > 0 || e.alternatif.performance > 0;
+        return cpSOM || cpPAN;
     });
-    const nbSansDonnees = etudiants.length - etudiantsAvecDonnees.length;
+    const nbSansDonneesCP = etudiants.length - etudiantsAvecDonneesCP.length;
     const nbTotal = etudiants.length;
 
-    console.log(`📊 [Patterns] Total: ${nbTotal}, avec données: ${etudiantsAvecDonnees.length}, sans données: ${nbSansDonnees}`);
+    // Vérifier si au moins un étudiant a des données C ou P significatives
+    const aucuneDonneeCP = etudiantsAvecDonneesCP.length === 0;
+
+    console.log(`📊 [Patterns] Total: ${nbTotal}, avec données CP: ${etudiantsAvecDonneesCP.length}, sans données CP: ${nbSansDonneesCP}, aucuneDonneeCP: ${aucuneDonneeCP}`);
 
     // NOUVEAU Beta 90 : Récupérer les pratiques spécifiques
     // IMPORTANT : Utiliser determinerCibleIntervention() pour garantir la cohérence
     // avec le tableau de liste des étudiants. Les patterns doivent être identiques
     // partout car ils sont basés sur la même logique (N derniers artefacts).
 
-    // Préparer les données pour SOM et PAN (uniquement étudiants avec données)
+    // Préparer les données pour SOM et PAN (uniquement étudiants avec données CP)
     // Note : determinerCibleIntervention() retourne le pattern basé sur les N derniers artefacts
     // ce qui garantit la cohérence méthodologique nécessaire pour détecter les patterns
     const etudiantsSOM = [];
     const etudiantsPAN = [];
 
-    etudiantsAvecDonnees.forEach(e => {
+    etudiantsAvecDonneesCP.forEach(e => {
         if (typeof determinerCibleIntervention === 'function') {
             const cibleInfo = determinerCibleIntervention(e.da);
             const pattern = cibleInfo ? cibleInfo.pattern : null;
@@ -2127,10 +2135,10 @@ function afficherPatternsApprentissage(etudiants) {
     }
 
     // Générer la barre de distribution et l'ajouter à la fin de la carte
-    // 🆕 BETA 95.6 : Passer le nombre d'étudiants sans données pour affichage approprié
+    // 🆕 FIX (24 jan 2026) : Passer le nombre d'étudiants sans données CP pour affichage approprié
     const html = `
         <div class="barre-patterns-container tb-padding-top-espacé">
-            ${genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, nbSansDonnees, nbTotal)}
+            ${genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, nbSansDonneesCP, nbTotal)}
         </div>
     `;
 
@@ -2188,17 +2196,18 @@ function afficherNiveauxRaI(etudiants) {
     const afficherSom = affichage.afficherSommatif === true;
     const afficherPan = affichage.afficherAlternatif === true;
 
-    // 🆕 BETA 95.6 : Filtrer les étudiants sans données (A=C=P=0)
-    // pour éviter les niveaux RàI erronés ("Niveau 3" quand pas de données)
-    const etudiantsAvecDonnees = etudiants.filter(e => {
-        const aSOM = e.sommatif.assiduite > 0 || e.sommatif.completion > 0 || e.sommatif.performance > 0;
-        const aPAN = e.alternatif.assiduite > 0 || e.alternatif.completion > 0 || e.alternatif.performance > 0;
-        return aSOM || aPAN;
+    // 🆕 FIX (24 jan 2026) : Pour RàI, seuls C et P comptent (pas A seul)
+    // Un étudiant avec A > 0 mais C = P = 0 ne doit pas être classé "Niveau 3"
+    // car les niveaux RàI sont basés sur la performance, pas l'assiduité seule
+    const etudiantsAvecDonneesCP = etudiants.filter(e => {
+        const cpSOM = e.sommatif.completion > 0 || e.sommatif.performance > 0;
+        const cpPAN = e.alternatif.completion > 0 || e.alternatif.performance > 0;
+        return cpSOM || cpPAN;
     });
-    const nbSansDonnees = etudiants.length - etudiantsAvecDonnees.length;
+    const nbSansDonneesCP = etudiants.length - etudiantsAvecDonneesCP.length;
     const nbTotal = etudiants.length;
 
-    console.log(`📊 [RàI] Total: ${nbTotal}, avec données: ${etudiantsAvecDonnees.length}, sans données: ${nbSansDonnees}`);
+    console.log(`📊 [RàI] Total: ${nbTotal}, avec données CP: ${etudiantsAvecDonneesCP.length}, sans données CP: ${nbSansDonneesCP}`);
 
     // NOUVEAU Beta 90 : Récupérer les pratiques spécifiques
     const pratiqueSOM = typeof obtenirPratiqueParId === 'function' ? obtenirPratiqueParId('sommative') : null;
@@ -2212,9 +2221,9 @@ function afficherNiveauxRaI(etudiants) {
     const etudiantsPAN = [];
 
     // Utiliser la même fonction pour SOM et PAN (niveau RàI pédagogique identique)
-    // 🆕 BETA 95.6 : Uniquement pour les étudiants avec données
+    // 🆕 FIX (24 jan 2026) : Uniquement pour les étudiants avec données CP
     if (typeof determinerNiveauRaiPedagogique === 'function') {
-        etudiantsAvecDonnees.forEach(e => {
+        etudiantsAvecDonneesCP.forEach(e => {
             const niveauInfo = determinerNiveauRaiPedagogique(e.da);
             const niveau = niveauInfo ? niveauInfo.niveau : null;
 
@@ -2257,10 +2266,10 @@ function afficherNiveauxRaI(etudiants) {
     }
 
     // Générer la barre de distribution et l'ajouter à la fin de la carte
-    // 🆕 BETA 95.6 : Passer le nombre d'étudiants sans données pour affichage approprié
+    // 🆕 FIX (24 jan 2026) : Passer le nombre d'étudiants sans données CP pour affichage approprié
     const html = `
         <div class="barre-rai-container tb-padding-top">
-            ${genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, nbSansDonnees, nbTotal)}
+            ${genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, nbSansDonneesCP, nbTotal)}
         </div>
     `;
 

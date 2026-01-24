@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 95.7
 
-**Date** : 23 janvier 2026
-**Version** : Beta 95.7 (build 0123-1148)
+**Date** : 24 janvier 2026
+**Version** : Beta 95.7 (build 0124-0715)
 **Statut** : Application fonctionnelle pour H2026
 
 ---
@@ -27,7 +27,23 @@
 - **Pratiques de notation** : Sauvegarde fiable via wizard et mode expert
 - **Dropdown note maximale** : Peuplé dynamiquement selon l'échelle de performance
 
-### Derniere tache completee (23 janvier)
+### Derniere tache completee (24 janvier)
+- **CORRECTION AFFICHAGE TABLEAU DE BORD** : Messages "en attente" contradictoires
+  - **Symptome 1** : Trimestre archive A25 affichait les moyennes (92%, 78%, 89%) ET "(X evaluations en attente)" simultanement
+  - **Cause** : La condition d'affichage du message "en attente" ne verificait pas si une moyenne existait deja
+  - **Fix** : Ajout condition `moyenneSignificative` - le message n'apparait que si la moyenne est 0%
+  - **Symptome 2** : H26 sans evaluations affichait "100% en blocage critique" et "100% Niveau 3 intensif"
+  - **Cause** : Le filtrage incluait les etudiants avec A > 0 mais C = P = 0 pour les patterns/RaI
+  - **Fix** : Filtrage corrige pour ne considerer que les etudiants avec C > 0 OU P > 0
+  - **Fichier modifie** : `js/tableau-bord-apercu.js`
+    - `genererBarreDistribution()` : Condition `moyenneSignificative` (ligne 1418)
+    - `afficherPatternsApprentissage()` : Filtrage `etudiantsAvecDonneesCP` sur C et P uniquement
+    - `afficherNiveauxRaI()` : Meme correction pour les niveaux RaI
+  - **Resultat** :
+    - A25 (archive) : Moyennes affichees sans message "en attente" parasite
+    - H26 (sans evaluations) : Message "En attente de donnees" pour Patterns et RaI
+
+### Tache precedente (23 janvier)
 - **CORRECTION BUG ANONYMISATION #2** : Liste etudiants vide en mode anonymise
   - **Symptome** : Passage Normal → Anonymise affichait "0 personne" et "Aucun etudiant trouve"
   - **Cause** : Le filtrage par groupe dans `obtenirEtudiantsCoursActif()` comparait le groupe anonymise (`AN.00001`) avec le groupe reel (`00001`)
@@ -532,6 +548,13 @@
 
 ## HISTORIQUE RECENT
 
+### 24 janvier 2026
+- **CORRECTION AFFICHAGE TABLEAU DE BORD** : Messages "en attente" et patterns/RaI incoherents
+  - Trimestre archive A25 : Moyennes affichees sans message "en attente" contradictoire
+  - H26 sans evaluations : Message "En attente de donnees" au lieu de "100% blocage critique"
+  - Corrections dans `genererBarreDistribution()`, `afficherPatternsApprentissage()`, `afficherNiveauxRaI()`
+  - Fichier : `js/tableau-bord-apercu.js`
+
 ### 23 janvier 2026
 - **BUG ANONYMISATION #2 CORRIGE** : Liste etudiants vide en mode anonymise
   - Cause : Comparaison groupe anonymise (`AN.00001`) vs groupe reel (`00001`) dans `obtenirEtudiantsCoursActif()`
@@ -712,4 +735,4 @@
 
 ---
 
-**Derniere mise a jour** : 23 janvier 2026
+**Derniere mise a jour** : 24 janvier 2026
