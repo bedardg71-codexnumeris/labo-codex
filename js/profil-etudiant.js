@@ -4279,8 +4279,26 @@ function genererSectionProgression(da) {
     // Créer le HTML avec le canvas
     const html = `
         <div class="profil-zone-moyenne-bleu">
+            <!-- Légende des indices -->
+            <div style="background: white; padding: 12px 20px; border-radius: 6px; margin-bottom: 10px; display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+                <span style="font-weight: 600; color: #333;">Indices :</span>
+                <span style="display: flex; align-items: center; gap: 6px;">
+                    <span style="width: 12px; height: 12px; background: #1976D2; border-radius: 50%;"></span>
+                    <span style="color: #1976D2; font-weight: 500;">Assiduité (A)</span>
+                </span>
+                <span style="display: flex; align-items: center; gap: 6px;">
+                    <span style="width: 12px; height: 12px; background: #FF6B35; border-radius: 50%;"></span>
+                    <span style="color: #FF6B35; font-weight: 500;">Complétion (C)</span>
+                </span>
+                <span style="display: flex; align-items: center; gap: 6px;">
+                    <span style="width: 12px; height: 12px; background: #4CAF50; border-radius: 50%;"></span>
+                    <span style="color: #4CAF50; font-weight: 500;">Performance (P)</span>
+                </span>
+                <span style="color: #888; font-size: 0.85rem; margin-left: auto;">Survolez une courbe pour l'identifier</span>
+            </div>
+
             <!-- Canvas pour le graphique Chart.js -->
-            <div style="background: white; padding: 20px; border-radius: 6px; height: 500px;">
+            <div style="background: white; padding: 20px; border-radius: 6px; height: 450px;">
                 <canvas id="${canvasId}"></canvas>
             </div>
 
@@ -4327,16 +4345,43 @@ function genererSectionPerformance(da) {
 
         if (evaluationsAvecCriteres.length > 0) {
             console.log(`[DEBUG Graphique Critères] Première évaluation critères:`, evaluationsAvecCriteres[0].criteres);
+
+            // Extraire les critères uniques pour la légende
+            const criteresSet = new Set();
+            evaluationsAvecCriteres.forEach(e => {
+                e.criteres.forEach(c => {
+                    if (c.critereNom) criteresSet.add(c.critereNom);
+                });
+            });
+            const criteresUniques = Array.from(criteresSet).sort();
+
+            // Palette de couleurs (même que dans creerGraphiqueCriteres)
+            const COULEURS_CRITERES = [
+                '#E91E63', '#9C27B0', '#3F51B5', '#00BCD4',
+                '#4CAF50', '#FF9800', '#795548', '#607D8B'
+            ];
+
+            // Générer la légende HTML
+            const legendeHTML = criteresUniques.map((critere, index) => {
+                const couleur = COULEURS_CRITERES[index % COULEURS_CRITERES.length];
+                return `<span style="display: flex; align-items: center; gap: 6px;">
+                    <span style="width: 12px; height: 12px; background: ${couleur}; border-radius: 50%;"></span>
+                    <span style="color: ${couleur}; font-weight: 500;">${critere}</span>
+                </span>`;
+            }).join('');
+
             graphiqueCriteres = `
                 <div class="profil-zone-moyenne-bleu" style="margin-bottom: 20px;">
+                    <!-- Légende des critères -->
+                    <div style="background: white; padding: 12px 20px; border-radius: 6px; margin-bottom: 10px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                        <span style="font-weight: 600; color: #333;">Critères :</span>
+                        ${legendeHTML}
+                        <span style="color: #888; font-size: 0.85rem; margin-left: auto;">Survolez une courbe pour l'identifier</span>
+                    </div>
+
                     <!-- Canvas pour le graphique Chart.js -->
                     <div style="background: white; padding: 20px; border-radius: 6px; height: 450px;">
                         <canvas id="${canvasIdCriteres}"></canvas>
-                    </div>
-
-                    <div style="background: white; padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.85rem; color: #666;">
-                        <strong>Conseil :</strong> Cliquez sur un critère dans la légende pour le masquer ou l'afficher.
-                        Survolez les points pour voir les détails.
                     </div>
                 </div>
             `;
