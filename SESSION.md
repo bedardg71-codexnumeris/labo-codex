@@ -1,7 +1,7 @@
-# SESSION ACTIVE - BETA 95.7
+# SESSION ACTIVE - BETA 96
 
 **Date** : 25 janvier 2026
-**Version** : Beta 95.7 (build 0125)
+**Version** : Beta 96 (build 0125)
 **Statut** : Application fonctionnelle pour H2026, A2024 archive
 
 ---
@@ -26,8 +26,23 @@
 - **Vue calendaire** : Affiche correctement l'horaire du groupe-cours actif
 - **Pratiques de notation** : Sauvegarde fiable via wizard et mode expert
 - **Dropdown note maximale** : Peuplé dynamiquement selon l'échelle de performance
+- **Graphique spaghetti** : Visualisation de l'évolution de tous les étudiants (nouveau Beta 96)
 
-### Derniere tache completee (25 janvier)
+### Derniere tache completee (25 janvier - Beta 96)
+- **GRAPHIQUE SPAGHETTI - TABLEAU DE BORD** : Nouvelle visualisation
+  - Affiche l'évolution de tous les étudiants sur un même graphique
+  - Zones IDME colorées en arrière-plan (Insuffisant → Étendu)
+  - Étiquettes de zones à droite du graphique
+  - Dropdown pour sélectionner l'indice (A, C, P)
+  - Carte d'aide 😎 avec explication des zones
+  - Inspiré du graphique "Évolution de la performance littéracique PAN semaines 2 à 15"
+  - **Fichiers modifiés** :
+    - `index.html` : Ajout canvas et contrôles
+    - `js/graphiques-progression.js` : Amélioration fonction `creerGraphiqueGroupeSpaghetti()`, nouveau plugin `pluginEtiquettesZones`
+    - `js/tableau-bord-apercu.js` : Appel au graphique spaghetti
+  - **Prochaine étape** : Courbes de distribution (densité) des indices ACPE
+
+### Tache precedente (25 janvier - Beta 95.7)
 - **IMPORT HISTORIQUE A2024** : Archivage trimestre Automne 2024
   - Import retroactif : 55 etudiants, 2 groupes, 750 evaluations, 1650 presences
   - Echelle IDME documentee (I=40%, D=65%, M=85%, E=100%)

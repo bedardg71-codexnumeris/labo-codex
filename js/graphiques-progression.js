@@ -850,8 +850,52 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
    =============================== */
 
 /**
+ * Instance globale du graphique spaghetti (pour pouvoir le détruire/recréer)
+ */
+let graphiqueSpaghettiInstance = null;
+
+/**
+ * Plugin pour afficher les étiquettes de zones IDME sur le côté droit
+ * Comme dans l'image de référence (Étendu ou enrichi, Réussite, etc.)
+ */
+const pluginEtiquettesZones = {
+    id: 'etiquettesZones',
+    afterDraw(chart) {
+        const ctx = chart.ctx;
+        const chartArea = chart.chartArea;
+        const yScale = chart.scales.y;
+
+        // Configuration des étiquettes de zones
+        const zones = [
+            { yMin: 0.85, yMax: 1.00, label: 'Étendu ou enrichi', color: '#1565C0' },
+            { yMin: 0.65, yMax: 0.75, label: 'Réussite', color: '#2E7D32' },
+            { yMin: 0.00, yMax: 0.40, label: 'Insuffisant ou incomplet', color: '#C62828' }
+        ];
+
+        ctx.save();
+        ctx.font = 'italic 11px Arial';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+
+        zones.forEach(zone => {
+            const yCenter = (zone.yMin + zone.yMax) / 2;
+            const yPixel = yScale.getPixelForValue(yCenter);
+
+            // Vérifier que la position est dans la zone du graphique
+            if (yPixel >= chartArea.top && yPixel <= chartArea.bottom) {
+                ctx.fillStyle = zone.color;
+                ctx.fillText(zone.label, chartArea.right - 5, yPixel);
+            }
+        });
+
+        ctx.restore();
+    }
+};
+
+/**
  * Crée un graphique "spaghetti" avec tous les étudiants
- * Affiche toutes les trajectoires individuelles avec zones colorées
+ * Affiche toutes les trajectoires individuelles avec zones colorées IDME
+ * Inspiré du graphique "Évolution de la performance littéracique PAN semaines 2 à 15"
  *
  * @param {string} canvasId - ID de l'élément canvas
  * @param {string} indice - 'A', 'C', 'P' ou 'E' (quel indice afficher)
@@ -859,23 +903,48 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
  */
 function creerGraphiqueGroupeSpaghetti(canvasId, indice = 'P') {
     try {
+        // Détruire le graphique existant si présent (évite l'erreur "Canvas already in use")
+        const canvas = document.getElementById(canvasId);
+        if (canvas) {
+            const existingChart = Chart.getChart(canvas);
+            if (existingChart) {
+                existingChart.destroy();
+                console.log('🗑️ Graphique spaghetti existant détruit');
+            }
+        }
+
         // Récupérer tous les snapshots hebdomadaires
         const snapshots = obtenirSnapshotsHebdomadaires();
 
         if (snapshots.length === 0) {
-            console.warn('Aucun snapshot hebdomadaire disponible');
+            console.warn('Aucun snapshot hebdomadaire disponible pour le graphique spaghetti');
+            // Afficher un message dans le canvas
+            if (canvas) {
+                const ctx = canvas.getContext('2d');
+                ctx.font = '14px Arial';
+                ctx.fillStyle = '#666';
+                ctx.textAlign = 'center';
+                ctx.fillText('En attente de données...', canvas.width / 2, canvas.height / 2);
+                ctx.font = '12px Arial';
+                ctx.fillText('Les snapshots hebdomadaires seront générés automatiquement.', canvas.width / 2, canvas.height / 2 + 25);
+            }
             return null;
         }
 
         // Trier par semaine
         snapshots.sort((a, b) => a.numSemaine - b.numSemaine);
 
-        // Extraire la liste unique des étudiants
-        const premiereSnap = snapshots[0];
-        const etudiants = premiereSnap.etudiants;
+        // Extraire la liste unique des étudiants (depuis le snapshot le plus récent pour avoir tous)
+        const dernierSnap = snapshots[snapshots.length - 1];
+        const etudiants = dernierSnap.etudiants || [];
 
-        // Préparer les labels (semaines)
-        const labels = snapshots.map(s => `Sem. ${s.numSemaine}`);
+        if (etudiants.length === 0) {
+            console.warn('Aucun étudiant dans les snapshots');
+            return null;
+        }
+
+        // Préparer les labels (semaines) - Format "Semaine X" comme l'image
+        const labels = snapshots.map(s => `Semaine ${s.numSemaine}`);
 
         // Créer un dataset par étudiant
         const datasets = etudiants.map(etudiant => {
@@ -887,27 +956,37 @@ function creerGraphiqueGroupeSpaghetti(canvasId, indice = 'P') {
                 if (!etud) return null;
 
                 // Retourner la valeur de l'indice demandé (en 0-1)
-                if (indice === 'E') {
-                    return etud.E;
-                } else {
-                    return etud[indice] / 100;
-                }
+                const valeur = etud[indice];
+                if (valeur === null || valeur === undefined) return null;
+
+                // Convertir en décimal si nécessaire (les indices A, C, P sont en %)
+                return valeur > 1 ? valeur / 100 : valeur;
             });
 
-            return {
-                label: `${etudiant.nom}`,
-                data: donnees,
-                borderColor: 'rgba(0, 0, 0, 0.6)', // Noir semi-transparent
-                backgroundColor: 'transparent',
-                borderWidth: 1,
-                tension: 0.4,
-                pointRadius: 0, // Pas de points (spaghetti pur)
-                pointHoverRadius: 3
-            };
-        });
+            // Vérifier si l'étudiant a des données valides
+            const aDonnees = donnees.some(v => v !== null);
+            if (!aDonnees) return null;
 
-        // Obtenir le canvas
-        const canvas = document.getElementById(canvasId);
+            return {
+                label: etudiant.nom || `DA ${da}`,
+                data: donnees,
+                borderColor: 'rgba(30, 30, 30, 0.5)', // Noir semi-transparent
+                backgroundColor: 'transparent',
+                borderWidth: 1.5,
+                tension: 0.3, // Courbes légèrement lissées
+                pointRadius: 0, // Pas de points (spaghetti pur)
+                pointHoverRadius: 4,
+                pointHoverBackgroundColor: 'rgba(30, 30, 30, 0.8)',
+                spanGaps: true // Connecter les points même s'il y a des trous
+            };
+        }).filter(d => d !== null); // Filtrer les étudiants sans données
+
+        if (datasets.length === 0) {
+            console.warn('Aucune donnée valide pour le graphique spaghetti');
+            return null;
+        }
+
+        // Obtenir le canvas (déjà récupéré en haut)
         if (!canvas) {
             console.error(`Canvas ${canvasId} introuvable`);
             return null;
@@ -916,15 +995,16 @@ function creerGraphiqueGroupeSpaghetti(canvasId, indice = 'P') {
 
         // Nom de l'indice pour le titre
         const nomsIndices = {
-            'A': 'Assiduité',
-            'C': 'Complétion',
-            'P': 'Performance',
-            'E': 'Engagement'
+            'A': 'l\'Assiduité',
+            'C': 'la Complétion',
+            'P': 'la Performance',
+            'E': 'l\'Engagement'
         };
 
         // Configuration du graphique
         const config = {
             type: 'line',
+            plugins: [pluginEtiquettesZones], // Plugin pour étiquettes de zones
             data: {
                 labels: labels,
                 datasets: datasets
@@ -932,48 +1012,76 @@ function creerGraphiqueGroupeSpaghetti(canvasId, indice = 'P') {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        right: 120 // Espace pour les étiquettes de zones à droite
+                    }
+                },
                 plugins: {
                     title: {
                         display: true,
-                        text: `Évolution de la ${nomsIndices[indice]} - Tous les étudiants`,
-                        font: { size: 16, weight: 'bold' }
+                        text: `Évolution de ${nomsIndices[indice]} - Tous les étudiants`,
+                        font: { size: 16, weight: 'bold' },
+                        padding: { top: 10, bottom: 20 }
                     },
                     legend: {
                         display: false // Trop d'étudiants pour afficher la légende
                     },
                     tooltip: {
+                        enabled: true,
                         mode: 'nearest',
                         intersect: true,
+                        backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                        titleFont: { size: 13, weight: 'bold' },
+                        bodyFont: { size: 12 },
+                        padding: 10,
                         callbacks: {
+                            title: function(tooltipItems) {
+                                return tooltipItems[0]?.label || '';
+                            },
                             label: function(context) {
                                 const nom = context.dataset.label || '';
-                                const value = (context.parsed.y * 100).toFixed(0);
+                                const value = context.parsed.y !== null ? (context.parsed.y * 100).toFixed(0) : '—';
                                 return `${nom}: ${value}%`;
                             }
                         }
                     },
                     annotation: {
-                        annotations: creerAnnotationsZones()
+                        annotations: creerAnnotationsZonesIDME()
                     }
                 },
                 scales: {
                     x: {
                         title: {
+                            display: false // Les labels sont suffisamment explicites
+                        },
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45,
+                            font: { size: 11 }
+                        },
+                        grid: {
                             display: true,
-                            text: 'Semaines'
+                            color: 'rgba(0, 0, 0, 0.05)'
                         }
                     },
                     y: {
                         min: 0,
                         max: 1,
                         title: {
-                            display: true,
-                            text: `${nomsIndices[indice]} (0.00 à 1.00)`
+                            display: false // Simplifié comme l'image
                         },
                         ticks: {
                             callback: function(value) {
-                                return value.toFixed(2);
-                            }
+                                // Format décimal avec 3 chiffres comme l'image (0,000 à 1,000)
+                                return value.toFixed(3).replace('.', ',');
+                            },
+                            stepSize: 0.25,
+                            font: { size: 11 }
+                        },
+                        grid: {
+                            display: true,
+                            color: 'rgba(0, 0, 0, 0.08)'
                         }
                     }
                 },
@@ -986,13 +1094,75 @@ function creerGraphiqueGroupeSpaghetti(canvasId, indice = 'P') {
 
         // Créer le graphique
         const chart = new Chart(ctx, config);
-        console.log(`✅ Graphique spaghetti créé (${indice})`);
+        graphiqueSpaghettiInstance = chart;
+
+        console.log(`✅ Graphique spaghetti créé (${indice}) avec ${datasets.length} étudiants`);
         return chart;
 
     } catch (error) {
         console.error('❌ Erreur création graphique spaghetti:', error);
         return null;
     }
+}
+
+/**
+ * Crée les annotations pour les zones colorées IDME (version améliorée pour spaghetti)
+ * Couleurs plus saturées pour meilleure visibilité avec les lignes noires
+ * @returns {Object} - Configuration des annotations
+ */
+function creerAnnotationsZonesIDME() {
+    return {
+        zoneInsuffisant: {
+            type: 'box',
+            yMin: 0.00,
+            yMax: 0.40,
+            backgroundColor: 'rgba(239, 154, 154, 0.5)',  // Rouge plus visible
+            borderWidth: 0,
+            drawTime: 'beforeDatasetsDraw'
+        },
+        zoneReussite: {
+            type: 'box',
+            yMin: 0.40,
+            yMax: 0.65,
+            backgroundColor: 'rgba(255, 224, 178, 0.5)',  // Orange clair
+            borderWidth: 0,
+            drawTime: 'beforeDatasetsDraw'
+        },
+        zoneDeveloppement: {
+            type: 'box',
+            yMin: 0.65,
+            yMax: 0.75,
+            backgroundColor: 'rgba(255, 245, 157, 0.5)',  // Jaune
+            borderWidth: 0,
+            drawTime: 'beforeDatasetsDraw'
+        },
+        zoneMaitrise: {
+            type: 'box',
+            yMin: 0.75,
+            yMax: 0.85,
+            backgroundColor: 'rgba(200, 230, 201, 0.5)',  // Vert clair
+            borderWidth: 0,
+            drawTime: 'beforeDatasetsDraw'
+        },
+        zoneEtendu: {
+            type: 'box',
+            yMin: 0.85,
+            yMax: 1.00,
+            backgroundColor: 'rgba(144, 202, 249, 0.5)',  // Bleu clair
+            borderWidth: 0,
+            drawTime: 'beforeDatasetsDraw'
+        }
+    };
+}
+
+/**
+ * Rafraîchit le graphique spaghetti avec un nouvel indice
+ * Appelé depuis le dropdown de sélection
+ */
+function rafraichirGraphiqueSpaghetti() {
+    const select = document.getElementById('select-indice-spaghetti');
+    const indice = select ? select.value : 'P';
+    creerGraphiqueGroupeSpaghetti('graphique-groupe-spaghetti', indice);
 }
 
 /* ===============================
@@ -1347,6 +1517,7 @@ function creerGraphiqueCriteres(canvasId, da) {
 window.creerGraphiqueIndividuel = creerGraphiqueIndividuel;
 window.creerGraphiqueGroupeMoyennes = creerGraphiqueGroupeMoyennes;
 window.creerGraphiqueGroupeSpaghetti = creerGraphiqueGroupeSpaghetti;
+window.rafraichirGraphiqueSpaghetti = rafraichirGraphiqueSpaghetti;
 window.creerGraphiqueCriteres = creerGraphiqueCriteres;
 window.detruireGraphique = detruireGraphique;
 

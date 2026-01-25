@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Système de suivi Beta 95.7 - Hiver 2026</title>
+    <title>Système de suivi Beta 96 - Hiver 2026</title>
 
     <!-- CSS externe requis pour styles complets -->
     <link rel="stylesheet" href="styles.css?v=2026010808">
@@ -3098,7 +3098,7 @@
                     <div class="titre-section">
                         <h1>Système de suivi des apprentissages et de construction de la note</h1>
                         <p class="meta">
-                            Beta 95.7 <span id="build-numero" class="build-numero"></span>
+                            Beta 96 <span id="build-numero" class="build-numero"></span>
                             <span class="pastille-nouveautes" onclick="afficherModalNouveautes()" title="Nouveautés">✉️</span>
                             <span class="pastille-intro" onclick="afficherModalIntro()" title="Découvrir l'application">😎</span>
                             <button class="btn-backup-warning" onclick="window.backupReminder.afficherModal()" title="Protégez tes données">⚠️</button>
@@ -3478,6 +3478,52 @@
                         <p class="text-muted" style="margin-top: 1rem; font-size: 0.85rem; font-style: italic;">
                             💡 Les courbes sont légèrement décalées verticalement (+0.5-1.5%) pour éviter la superposition.
                             Les valeurs affichées dans les infobulle sont les valeurs réelles (sans décalage).
+                        </p>
+                    </div>
+
+                    <!-- ========== GRAPHIQUE SPAGHETTI - TOUS LES ÉTUDIANTS ========== -->
+                    <div class="carte" style="margin-top: 2rem;">
+                        <h3 class="carte-titre-bleu carte-titre-avec-toggle">
+                            <span>Évolution individuelle - Tous les étudiants</span>
+                            <span class="emoji-container">
+                                <span class="primo-aide" data-target="note-spaghetti">😎</span>
+                            </span>
+                        </h3>
+
+                        <!-- Carte Note -->
+                        <div id="note-spaghetti" class="carte-info-toggle carte-info-note" style="display: none;">
+                            <strong>Graphique « spaghetti » :</strong> Chaque ligne représente la trajectoire d'un étudiant au fil des semaines.
+                            <br><br>
+                            Ce type de visualisation permet de voir la <strong>dispersion</strong> du groupe : les zones plus denses (lignes superposées) indiquent où se concentre la majorité des étudiants.
+                            <br><br>
+                            Les <strong>zones colorées</strong> en arrière-plan correspondent aux niveaux de l'échelle IDME :
+                            <ul style="margin: 10px 0; padding-left: 20px;">
+                                <li><span style="color: #64B5F6;">Bleu</span> : Étendu ou enrichi (85-100%)</li>
+                                <li><span style="color: #8BC34A;">Vert</span> : Maîtrisé (75-85%)</li>
+                                <li><span style="color: #FFEB3B;">Jaune</span> : En développement (65-75%)</li>
+                                <li><span style="color: #FF9800;">Orange</span> : Réussite (40-65%)</li>
+                                <li><span style="color: #F44336;">Rouge</span> : Insuffisant (0-40%)</li>
+                            </ul>
+                            <em style="color: var(--gris-moyen); font-size: 0.9rem;">💡 Survolez une ligne pour identifier l'étudiant concerné.</em>
+                        </div>
+
+                        <!-- Sélecteur d'indice -->
+                        <div class="carte-grise-mb20" style="display: flex; align-items: center; gap: 15px;">
+                            <label for="select-indice-spaghetti" style="font-weight: 500; margin: 0;">Indice à afficher :</label>
+                            <select id="select-indice-spaghetti" class="controle-form" style="width: auto; min-width: 200px;" onchange="rafraichirGraphiqueSpaghetti()">
+                                <option value="P" selected>Performance (P)</option>
+                                <option value="A">Assiduité (A)</option>
+                                <option value="C">Complétion (C)</option>
+                            </select>
+                        </div>
+
+                        <div style="position: relative; height: 450px; width: 100%;">
+                            <canvas id="graphique-groupe-spaghetti"></canvas>
+                        </div>
+
+                        <p class="text-muted" style="margin-top: 1rem; font-size: 0.85rem; font-style: italic;">
+                            💡 Ce graphique montre l'évolution de chaque étudiant individuellement.
+                            Les zones de forte densité (lignes superposées) révèlent les tendances dominantes du groupe.
                         </p>
                     </div>
 
@@ -15051,8 +15097,8 @@
          */
 
         // === CONFIGURATION ===
-        const VERSION_MAJEURE = '95.7';
-        const BUILD_ID = '0123-1510';  // Auto-updated by Claude before each commit (Toronto time)
+        const VERSION_MAJEURE = '96';
+        const BUILD_ID = '0125-0102';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';

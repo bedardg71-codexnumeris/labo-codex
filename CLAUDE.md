@@ -18,7 +18,7 @@ Ce document te guidera vers :
 
 ## Etat actuel
 
-- **Version** : Beta 95.7
+- **Version** : Beta 96
 - **Objectif** : Architecture modulaire groupe-cours + Categories productions
 - **Session en cours** : Voir `SESSION.md`
 - **Backlog** : Voir `BACKLOG.md` (taches a faire)

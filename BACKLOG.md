@@ -1,13 +1,22 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 25 janvier 2026
+> **Derniere mise a jour** : 25 janvier 2026 (Beta 96)
 
 ---
 
 ## A faire
 
 ### Priorite haute - UX / Interface
+
+- [ ] **#39** Courbes de distribution (densite) des indices ACPE
+  - Objectif : Visualiser la distribution des etudiants selon les indices A, C, P, E
+  - Type : Courbe de densite (style Gauss) avec les 4 indices superposes
+  - Couleurs : A=bleu, C=orange, P=vert, E=violet (coherence avec graphiques existants)
+  - Emplacement : Tableau de bord, section Vue d'ensemble (apres graphique spaghetti)
+  - Fonction a creer : `creerGraphiqueDistributionACPE(canvasId)`
+  - Prerequis : Graphique spaghetti complete (#38) ✓
+  - **Fichiers concernes** : `index.html`, `js/graphiques-progression.js`, `js/tableau-bord-apercu.js`
 
 - [ ] **#30** Export PDF des elements pedagogiques (EN COURS)
   - [x] Grilles descriptives (grille + echelle + cartouche) avec jsPDF
@@ -206,6 +215,20 @@
 - [ ] **#22** Mettre a jour fichier noms_stables.json
   - Verifier que tous les identifiants critiques sont documentes
   - Ajouter les nouveaux noms proteges
+
+---
+
+## Complete (Beta 96 - 25 janvier 2026)
+
+- [x] **#38** Graphique spaghetti - Visualisation evolution tous les etudiants
+  - Affiche l'evolution de tous les etudiants sur un meme graphique
+  - Zones IDME colorees en arriere-plan (Insuffisant → Etendu)
+  - Etiquettes de zones a droite du graphique (plugin Chart.js personnalise)
+  - Dropdown pour selectionner l'indice (A, C, P)
+  - Carte d'aide 😎 avec explication des zones
+  - Inspire du graphique "Evolution de la performance litteracique PAN semaines 2 a 15"
+  - **Fichiers modifies** : `index.html`, `js/graphiques-progression.js`, `js/tableau-bord-apercu.js`
+  - **Prochaine etape** : Courbes de distribution (densite) des indices ACPE
 
 ---
 
