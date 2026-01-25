@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 96
 
 **Date** : 25 janvier 2026
-**Version** : Beta 96 (build 0125-1600)
+**Version** : Beta 96 (build 0125-1630)
 **Statut** : Application fonctionnelle pour H2026, A2024 archive
 
 ---
@@ -29,6 +29,13 @@
 - **Graphique spaghetti** : Visualisation de l'évolution de tous les étudiants (nouveau Beta 96)
 
 ### Derniere tache completee (25 janvier - Beta 96)
+- **FIX #37 : COHÉRENCE INDICE P = NOTE FINALE** : L'indice P reflète maintenant la vraie note
+  - **Problème** : P=50% dans tableau de bord mais Note finale=59% dans profil
+  - **Cause** : `calculerPerformance()` utilisait TOUTES les évaluations, pas la méthode de sélection
+  - **Solution** : `calculerEtStockerIndicesCP()` utilise maintenant `calculerDetailsNoteFinale()`
+  - L'indice P respecte : méthode de sélection, pondérations, règles de conformité
+  - **Fichiers modifiés** : `js/portfolio.js`, `js/profil-etudiant.js`
+
 - **UNIFORMISATION VISUELLE DES POINTS** : Tous les graphiques ont le même style
   - **Points blancs par défaut** : Fond `rgba(255, 255, 255, 0.9)` + contour bleu pâle `rgba(33, 150, 243, 0.5)`
   - **Points noirs au survol/sélection** : Fond `rgba(0, 0, 0, 0.85)` + contour blanc
