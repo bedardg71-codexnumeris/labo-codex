@@ -8744,39 +8744,43 @@ label:has(+ textarea:disabled) {
 }
 
 /* Point représentant un étudiant (scatter plot) */
+/* BETA 96: Uniformisation - blanc par défaut, noir au survol */
 .barre-etudiant {
     position: absolute;
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
     cursor: pointer;
     transition: all 0.2s ease;
     z-index: 10;
     transform: translate(-50%, -50%);
     top: 50%;
-    border: 1px solid white;
+    /* Style uniforme : blanc avec bordure bleue subtile */
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid rgba(33, 150, 243, 0.5);
     box-shadow: var(--shadow-subtil);
     /* Pas d'animation par défaut - seulement au hover */
 }
 
-/* Animation et grossissement au hover */
+/* Animation et grossissement au hover - point devient noir */
 .barre-etudiant:hover {
     z-index: 20;
-    border-width: 2px;
+    background: rgba(0, 0, 0, 0.85);
+    border-color: rgba(255, 255, 255, 0.9);
     box-shadow: var(--shadow-prononce);
     animation: float-subtle 7s ease-in-out infinite;
 }
 
-/* Point pour SOM (orange) */
+/* Point pour SOM - même style uniforme */
 .barre-etudiant-som {
-    background: var(--som-orange);
-    opacity: 1; /* Opacité maximale pour meilleure visibilité */
+    /* Hérité de .barre-etudiant - blanc par défaut */
+    opacity: 1;
 }
 
-/* Point pour PAN (bleu) */
+/* Point pour PAN - même style uniforme */
 .barre-etudiant-std {
-    background: var(--std-bleu);
-    opacity: 1; /* Opacité maximale pour meilleure visibilité */
+    /* Hérité de .barre-etudiant - blanc par défaut */
+    opacity: 1;
 }
 
 /* Conteneur de distribution */
@@ -8971,7 +8975,7 @@ label:has(+ textarea:disabled) {
 
 .barre-indicateur {
     height: 55px; /* 🆕 BETA 96: Augmenté de 40px pour meilleure lisibilité */
-    border-radius: var(--radius-pill);
+    border-radius: var(--radius-grand); /* 🆕 BETA 96: Aligné avec les cartes (12px) */
     position: relative;
     background: linear-gradient(to right,
         #ff8c00 0%,   /* Orange foncé */
@@ -8993,7 +8997,7 @@ label:has(+ textarea:disabled) {
     right: 0;
     bottom: 0;
     background: rgba(15, 30, 58, 0.2);
-    border-radius: var(--radius-pill);
+    border-radius: var(--radius-grand); /* 🆕 BETA 96: Aligné avec les cartes */
     pointer-events: none;
 }
 
@@ -9032,7 +9036,7 @@ label:has(+ textarea:disabled) {
 
 .barre-patterns {
     height: 45px; /* 🆕 BETA 96: Augmenté de 30px pour meilleure lisibilité */
-    border-radius: var(--radius-pill);  /* 20px - pill */
+    border-radius: var(--radius-grand);  /* 🆕 BETA 96: Aligné avec les cartes (12px) */
     position: relative;
     background: linear-gradient(to right,
         #22c55e 0%,   /* Vert */
@@ -9051,7 +9055,7 @@ label:has(+ textarea:disabled) {
     right: 0;
     bottom: 0;
     background: rgba(15, 30, 58, 0.35);
-    border-radius: var(--radius-pill);  /* 20px - pill */
+    border-radius: var(--radius-grand);  /* 🆕 BETA 96: Aligné avec les cartes */
     pointer-events: none;
 }
 
@@ -9059,7 +9063,7 @@ label:has(+ textarea:disabled) {
 
 .barre-rai {
     height: 45px; /* 🆕 BETA 96: Augmenté de 30px pour meilleure lisibilité */
-    border-radius: var(--radius-pill);  /* 20px - pill */
+    border-radius: var(--radius-grand);  /* 🆕 BETA 96: Aligné avec les cartes (12px) */
     position: relative;
     background: linear-gradient(to right,
         #0ea5e9 0%,   /* Bleu ciel */
@@ -9078,7 +9082,7 @@ label:has(+ textarea:disabled) {
     right: 0;
     bottom: 0;
     background: rgba(15, 30, 58, 0.4);
-    border-radius: var(--radius-pill);  /* 20px - pill */
+    border-radius: var(--radius-grand);  /* 🆕 BETA 96: Aligné avec les cartes */
     pointer-events: none;
 }
 
