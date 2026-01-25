@@ -847,6 +847,7 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
 
 /* ===============================
    GRAPHIQUE GROUPE - SPAGHETTI
+   Résultats bruts par artefact (Beta 96)
    =============================== */
 
 /**
@@ -893,17 +894,21 @@ const pluginEtiquettesZones = {
 };
 
 /**
- * Crée un graphique "spaghetti" avec tous les étudiants
- * Affiche toutes les trajectoires individuelles avec zones colorées IDME
- * Inspiré du graphique "Évolution de la performance littéracique PAN semaines 2 à 15"
+ * Crée un graphique "spaghetti" montrant les RÉSULTATS BRUTS par artefact
+ *
+ * IMPORTANT (Beta 96) : Ce graphique montre les notes réelles de chaque évaluation,
+ * PAS l'indice P agrégé. Cela permet de voir :
+ * - La volatilité réelle de l'apprentissage
+ * - Les hauts et les bas (non-linéarité)
+ * - Les patterns de difficulté par artefact
+ * - La résilience des étudiants (rebonds après difficultés)
  *
  * @param {string} canvasId - ID de l'élément canvas
- * @param {string} indice - 'A', 'C', 'P' ou 'E' (quel indice afficher)
  * @returns {Chart|null} - Instance Chart.js ou null si erreur
  */
-function creerGraphiqueGroupeSpaghetti(canvasId, indice = 'P') {
+function creerGraphiqueGroupeSpaghetti(canvasId) {
     try {
-        // Détruire le graphique existant si présent (évite l'erreur "Canvas already in use")
+        // Détruire le graphique existant si présent
         const canvas = document.getElementById(canvasId);
         if (canvas) {
             const existingChart = Chart.getChart(canvas);
@@ -913,98 +918,141 @@ function creerGraphiqueGroupeSpaghetti(canvasId, indice = 'P') {
             }
         }
 
-        // Récupérer tous les snapshots hebdomadaires
-        const snapshots = obtenirSnapshotsHebdomadaires();
+        // Récupérer les productions (artefacts) du cours actif
+        const cleProductions = (typeof cle === 'function') ? cle('productionsPedagogiques') : 'productions';
+        let productions = [];
 
-        if (snapshots.length === 0) {
-            console.warn('Aucun snapshot hebdomadaire disponible pour le graphique spaghetti');
-            // Afficher un message dans le canvas
-            if (canvas) {
-                const ctx = canvas.getContext('2d');
-                ctx.font = '14px Arial';
-                ctx.fillStyle = '#666';
-                ctx.textAlign = 'center';
-                ctx.fillText('En attente de données...', canvas.width / 2, canvas.height / 2);
-                ctx.font = '12px Arial';
-                ctx.fillText('Les snapshots hebdomadaires seront générés automatiquement.', canvas.width / 2, canvas.height / 2 + 25);
-            }
+        if (typeof obtenirDonneesSelonMode === 'function') {
+            productions = obtenirDonneesSelonMode('productionsPedagogiques') || [];
+        } else {
+            productions = db.getSync(cleProductions, []);
+        }
+
+        // Filtrer les productions qui comptent pour le portfolio (pas analyse finale, etc.)
+        // et qui ont été évaluées au moins une fois
+        const productionsPortfolio = productions.filter(p => {
+            // Exclure les productions de type "analyse finale" ou similaire
+            const estAnalyseFinale = p.titre?.toLowerCase().includes('analyse finale') ||
+                                     p.type === 'analyseFinale' ||
+                                     p.categorie === 'analyseFinale';
+            return !estAnalyseFinale;
+        });
+
+        if (productionsPortfolio.length === 0) {
+            console.warn('Aucune production disponible pour le graphique spaghetti');
+            afficherMessageAttente(canvas, 'Aucun artefact défini', 'Créez des productions dans Réglages › Productions');
             return null;
         }
 
-        // Trier par semaine
-        snapshots.sort((a, b) => a.numSemaine - b.numSemaine);
+        // Récupérer les évaluations
+        const cleEvaluations = (typeof cle === 'function') ? cle('evaluationsSauvegardees') : 'evaluationsSauvegardees';
+        let evaluations = [];
 
-        // Extraire la liste unique des étudiants (depuis le snapshot le plus récent pour avoir tous)
-        const dernierSnap = snapshots[snapshots.length - 1];
-        const etudiants = dernierSnap.etudiants || [];
+        if (typeof obtenirDonneesSelonMode === 'function') {
+            evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+        } else {
+            evaluations = db.getSync(cleEvaluations, []);
+        }
+
+        if (evaluations.length === 0) {
+            console.warn('Aucune évaluation disponible pour le graphique spaghetti');
+            afficherMessageAttente(canvas, 'En attente d\'évaluations', 'Les trajectoires apparaîtront après les premières évaluations.');
+            return null;
+        }
+
+        // Récupérer la liste des étudiants
+        let etudiants = [];
+        if (typeof obtenirDonneesSelonMode === 'function') {
+            etudiants = obtenirDonneesSelonMode('groupeEtudiants') || [];
+        } else {
+            const cleEtudiants = (typeof cle === 'function') ? cle('groupeEtudiants') : 'groupeEtudiants';
+            etudiants = db.getSync(cleEtudiants, []);
+        }
 
         if (etudiants.length === 0) {
-            console.warn('Aucun étudiant dans les snapshots');
+            console.warn('Aucun étudiant disponible');
             return null;
         }
 
-        // Préparer les labels (semaines) - Format "Semaine X" comme l'image
-        const labels = snapshots.map(s => `Semaine ${s.numSemaine}`);
+        // Créer un index productionId → position pour le tri
+        const indexProductions = {};
+        productionsPortfolio.forEach((prod, index) => {
+            indexProductions[prod.id] = index;
+        });
+
+        // Préparer les labels (artefacts) - utiliser le numéro ou le titre court
+        const labels = productionsPortfolio.map((prod, index) => {
+            // Extraire un label court (numéro ou premiers mots du titre)
+            const numero = index + 1;
+            const titreMatch = prod.titre?.match(/^(artefact|art\.?|production|prod\.?)\s*n?[°º]?\s*(\d+)/i);
+            if (titreMatch) {
+                return `Art. ${titreMatch[2]}`;
+            }
+            return `Art. ${numero}`;
+        });
 
         // Créer un dataset par étudiant
         const datasets = etudiants.map(etudiant => {
             const da = etudiant.da;
 
-            // Extraire les valeurs de cet étudiant pour chaque semaine
-            const donnees = snapshots.map(snap => {
-                const etud = snap.etudiants.find(e => e.da === da);
-                if (!etud) return null;
+            // Pour chaque production, trouver l'évaluation de cet étudiant
+            const donnees = productionsPortfolio.map(prod => {
+                // Trouver l'évaluation pour cet étudiant et cette production
+                const evaluation = evaluations.find(e =>
+                    e.etudiantDA === da && e.productionId === prod.id
+                );
 
-                // Retourner la valeur de l'indice demandé (en 0-1)
-                const valeur = etud[indice];
-                if (valeur === null || valeur === undefined) return null;
+                if (!evaluation) return null;
 
-                // Convertir en décimal si nécessaire (les indices A, C, P sont en %)
-                return valeur > 1 ? valeur / 100 : valeur;
+                // Utiliser noteFinale (0-100) converti en 0-1
+                const note = evaluation.noteFinale;
+                if (note === null || note === undefined) return null;
+
+                // Convertir en décimal (0-1) pour cohérence avec les zones IDME
+                return note / 100;
             });
 
-            // Vérifier si l'étudiant a des données valides
+            // Vérifier si l'étudiant a au moins une évaluation
             const aDonnees = donnees.some(v => v !== null);
             if (!aDonnees) return null;
 
+            // Obtenir le nom pour l'infobulle
+            const nom = etudiant.prenom && etudiant.nom
+                ? `${etudiant.prenom} ${etudiant.nom.charAt(0)}.`
+                : etudiant.nom || `DA ${da}`;
+
             return {
-                label: etudiant.nom || `DA ${da}`,
+                label: nom,
                 data: donnees,
                 borderColor: 'rgba(30, 30, 30, 0.5)', // Noir semi-transparent
                 backgroundColor: 'transparent',
                 borderWidth: 1.5,
-                tension: 0.3, // Courbes légèrement lissées
-                pointRadius: 0, // Pas de points (spaghetti pur)
-                pointHoverRadius: 4,
-                pointHoverBackgroundColor: 'rgba(30, 30, 30, 0.8)',
-                spanGaps: true // Connecter les points même s'il y a des trous
+                tension: 0.2, // Légère courbe (pas trop lissé pour voir la volatilité)
+                pointRadius: 3, // Points visibles pour chaque artefact
+                pointHoverRadius: 6,
+                pointBackgroundColor: 'rgba(30, 30, 30, 0.6)',
+                pointHoverBackgroundColor: 'rgba(30, 30, 30, 0.9)',
+                spanGaps: false // NE PAS connecter les trous (artefacts non évalués)
             };
-        }).filter(d => d !== null); // Filtrer les étudiants sans données
+        }).filter(d => d !== null);
 
         if (datasets.length === 0) {
             console.warn('Aucune donnée valide pour le graphique spaghetti');
+            afficherMessageAttente(canvas, 'Aucune trajectoire disponible', 'Les évaluations ne correspondent pas aux productions définies.');
             return null;
         }
 
-        // Obtenir le canvas (déjà récupéré en haut)
+        // Obtenir le canvas
         if (!canvas) {
             console.error(`Canvas ${canvasId} introuvable`);
             return null;
         }
         const ctx = canvas.getContext('2d');
 
-        // Nom de l'indice pour le titre
-        const nomsIndices = {
-            'A': 'l\'Assiduité',
-            'C': 'la Complétion',
-            'P': 'la Performance',
-            'E': 'l\'Engagement'
-        };
-
         // Configuration du graphique
         const config = {
             type: 'line',
-            plugins: [pluginEtiquettesZones], // Plugin pour étiquettes de zones
+            plugins: [pluginEtiquettesZones],
             data: {
                 labels: labels,
                 datasets: datasets
@@ -1014,18 +1062,18 @@ function creerGraphiqueGroupeSpaghetti(canvasId, indice = 'P') {
                 maintainAspectRatio: false,
                 layout: {
                     padding: {
-                        right: 120 // Espace pour les étiquettes de zones à droite
+                        right: 120 // Espace pour les étiquettes de zones
                     }
                 },
                 plugins: {
                     title: {
                         display: true,
-                        text: `Évolution de ${nomsIndices[indice]} - Tous les étudiants`,
+                        text: 'Trajectoire d\'apprentissage - Résultats par artefact',
                         font: { size: 16, weight: 'bold' },
                         padding: { top: 10, bottom: 20 }
                     },
                     legend: {
-                        display: false // Trop d'étudiants pour afficher la légende
+                        display: false
                     },
                     tooltip: {
                         enabled: true,
@@ -1037,11 +1085,18 @@ function creerGraphiqueGroupeSpaghetti(canvasId, indice = 'P') {
                         padding: 10,
                         callbacks: {
                             title: function(tooltipItems) {
+                                // Afficher le nom de l'artefact complet
+                                const index = tooltipItems[0]?.dataIndex;
+                                if (index !== undefined && productionsPortfolio[index]) {
+                                    return productionsPortfolio[index].titre || tooltipItems[0]?.label;
+                                }
                                 return tooltipItems[0]?.label || '';
                             },
                             label: function(context) {
                                 const nom = context.dataset.label || '';
-                                const value = context.parsed.y !== null ? (context.parsed.y * 100).toFixed(0) : '—';
+                                const value = context.parsed.y !== null
+                                    ? (context.parsed.y * 100).toFixed(0)
+                                    : '—';
                                 return `${nom}: ${value}%`;
                             }
                         }
@@ -1053,7 +1108,9 @@ function creerGraphiqueGroupeSpaghetti(canvasId, indice = 'P') {
                 scales: {
                     x: {
                         title: {
-                            display: false // Les labels sont suffisamment explicites
+                            display: true,
+                            text: 'Artefacts',
+                            font: { size: 12, weight: 'bold' }
                         },
                         ticks: {
                             maxRotation: 45,
@@ -1069,14 +1126,15 @@ function creerGraphiqueGroupeSpaghetti(canvasId, indice = 'P') {
                         min: 0,
                         max: 1,
                         title: {
-                            display: false // Simplifié comme l'image
+                            display: true,
+                            text: 'Résultat',
+                            font: { size: 12, weight: 'bold' }
                         },
                         ticks: {
                             callback: function(value) {
-                                // Format décimal avec 3 chiffres comme l'image (0,000 à 1,000)
-                                return value.toFixed(3).replace('.', ',');
+                                return value.toFixed(2).replace('.', ',');
                             },
-                            stepSize: 0.25,
+                            stepSize: 0.20,
                             font: { size: 11 }
                         },
                         grid: {
@@ -1096,13 +1154,45 @@ function creerGraphiqueGroupeSpaghetti(canvasId, indice = 'P') {
         const chart = new Chart(ctx, config);
         graphiqueSpaghettiInstance = chart;
 
-        console.log(`✅ Graphique spaghetti créé (${indice}) avec ${datasets.length} étudiants`);
+        console.log(`✅ Graphique spaghetti créé avec ${datasets.length} trajectoires sur ${productionsPortfolio.length} artefacts`);
         return chart;
 
     } catch (error) {
         console.error('❌ Erreur création graphique spaghetti:', error);
         return null;
     }
+}
+
+/**
+ * Affiche un message d'attente dans le canvas
+ * @param {HTMLCanvasElement} canvas - Élément canvas
+ * @param {string} titre - Titre du message
+ * @param {string} details - Détails supplémentaires
+ */
+function afficherMessageAttente(canvas, titre, details) {
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.font = 'bold 14px Arial';
+    ctx.fillStyle = '#666';
+    ctx.textAlign = 'center';
+    ctx.fillText(titre, canvas.width / 2, canvas.height / 2 - 10);
+
+    if (details) {
+        ctx.font = '12px Arial';
+        ctx.fillStyle = '#999';
+        ctx.fillText(details, canvas.width / 2, canvas.height / 2 + 15);
+    }
+}
+
+/**
+ * Rafraîchit le graphique spaghetti
+ * Note: Le paramètre indice n'est plus utilisé (Beta 96 - résultats bruts)
+ */
+function rafraichirGraphiqueSpaghetti() {
+    creerGraphiqueGroupeSpaghetti('graphique-groupe-spaghetti');
 }
 
 /**
@@ -1153,16 +1243,6 @@ function creerAnnotationsZonesIDME() {
             drawTime: 'beforeDatasetsDraw'
         }
     };
-}
-
-/**
- * Rafraîchit le graphique spaghetti avec un nouvel indice
- * Appelé depuis le dropdown de sélection
- */
-function rafraichirGraphiqueSpaghetti() {
-    const select = document.getElementById('select-indice-spaghetti');
-    const indice = select ? select.value : 'P';
-    creerGraphiqueGroupeSpaghetti('graphique-groupe-spaghetti', indice);
 }
 
 /* ===============================

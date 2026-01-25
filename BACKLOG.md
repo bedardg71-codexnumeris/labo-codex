@@ -220,13 +220,14 @@
 
 ## Complete (Beta 96 - 25 janvier 2026)
 
-- [x] **#38** Graphique spaghetti - Visualisation evolution tous les etudiants
-  - Affiche l'evolution de tous les etudiants sur un meme graphique
-  - Zones IDME colorees en arriere-plan (Insuffisant → Etendu)
-  - Etiquettes de zones a droite du graphique (plugin Chart.js personnalise)
-  - Dropdown pour selectionner l'indice (A, C, P)
-  - Carte d'aide 😎 avec explication des zones
-  - Inspire du graphique "Evolution de la performance litteracique PAN semaines 2 a 15"
+- [x] **#38** Graphique spaghetti - Trajectoires d'apprentissage par artefact
+  - Affiche les **resultats bruts par artefact** (pas l'indice P agrege)
+  - Montre la volatilite reelle de l'apprentissage (hauts et bas, non-linearite)
+  - Revele les artefacts difficiles (convergence vers le bas)
+  - Permet de voir la resilience (rebonds apres difficultes)
+  - Zones IDME colorees en arriere-plan avec etiquettes a droite
+  - Carte d'aide 😎 expliquant pourquoi les resultats bruts vs indice P
+  - **Decision pedagogique** : L'indice P (meilleures notes) masque la non-linearite
   - **Fichiers modifies** : `index.html`, `js/graphiques-progression.js`, `js/tableau-bord-apercu.js`
   - **Prochaine etape** : Courbes de distribution (densite) des indices ACPE
 
