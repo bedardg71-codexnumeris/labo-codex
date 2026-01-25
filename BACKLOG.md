@@ -48,6 +48,29 @@
   - Ajouter aides pour cas d'erreur frequents
   - Pas seulement les sections, aussi les messages d'erreur
 
+### Recherche / Analyse longitudinale
+
+- [ ] **#35** Import historique H2024 (trimestre implementation portfolio)
+  - **Contexte** : Premier trimestre du portfolio, pratique sommative uniquement
+  - **Donnees disponibles** : TSV artefacts, etudiants, evaluations
+  - **Caracteristiques** : Pas de PAN, pas de RaI, pas de patterns
+  - **Objectif** : Avoir le baseline complet pour comparaison longitudinale
+  - **Processus** : Meme methode que A2024 (scripts d'import console)
+  - **Livrable** : Trimestre h2024 archive dans l'application
+
+- [ ] **#36** Rapport comparatif inter-trimestres
+  - **Objectif** : Comparer les trimestres pour valider le systeme et analyser la pratique
+  - **Trimestres** : H2024, A2024, A2025, H2026
+  - **Indicateurs** : A, C, P, E, patterns, niveaux RaI (quand disponibles)
+  - **Variables systeme** : +Portfolio (H24), +PAN (A25), +RaI (A25), +Patterns (A25)
+  - **Variables pratique** : Nombre d'artefacts, interventions, abandons
+  - **Questions de recherche** :
+    - Impact du RaI sur les interventions et les resultats ?
+    - Impact de la reduction du nombre d'artefacts sur P ?
+    - Evolution des patterns entre cohortes ?
+  - **Format** : Rapport genere (PDF ou markdown) avec tableaux et graphiques
+  - **Prerequis** : #35 (Import H2024) pour avoir les 4 trimestres
+
 ### Planification pedagogique
 
 - [ ] **#34** Module Planification de l'enseignement explicite (PLANIFICATION REQUISE)
