@@ -3576,16 +3576,16 @@
 
                         <!-- Carte Note -->
                         <div id="note-distribution-acpe" class="carte-info-toggle carte-info-note" style="display: none;">
-                            <strong>Courbes de densité :</strong> Visualise comment les étudiants sont répartis selon chaque indice.
+                            <strong>Courbes de Gauss :</strong> Montre la distribution normale de chaque indice avec la moyenne (μ) et l'écart-type (σ).
                             <br><br>
-                            <strong>Interprétation :</strong>
+                            <strong>Lecture du graphique :</strong>
                             <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
-                                <li><strong>Courbe étroite et haute</strong> = groupe homogène (valeurs similaires)</li>
-                                <li><strong>Courbe large et basse</strong> = grande variabilité dans le groupe</li>
-                                <li><strong>Décalage vers la droite</strong> = bons résultats en moyenne</li>
-                                <li><strong>Plusieurs pics</strong> = sous-groupes distincts</li>
+                                <li><strong>Ligne pleine</strong> = moyenne (μ) de l'indice</li>
+                                <li><strong>Lignes pointillées</strong> = écarts-types (μ±σ), contient ~68% des étudiants</li>
+                                <li><strong>Courbe étroite</strong> = groupe homogène (petit σ)</li>
+                                <li><strong>Courbe large</strong> = grande variabilité (grand σ)</li>
                             </ul>
-                            Les 4 indices sont superposés pour comparer leurs distributions.
+                            <strong>Survolez</strong> une courbe pour voir μ, σ et n (nombre d'étudiants).
                         </div>
 
                         <div style="position: relative; height: 400px; width: 100%;">
@@ -3593,7 +3593,7 @@
                         </div>
 
                         <p class="text-muted" style="margin-top: 1rem; font-size: 0.85rem; font-style: italic;">
-                            💡 Les courbes montrent la densité de probabilité. Plus la courbe est haute à un endroit, plus il y a d'étudiants avec cette valeur.
+                            💡 Chaque courbe montre où se situent les étudiants. La moyenne (μ) est au centre, et ~68% des étudiants sont entre μ-σ et μ+σ.
                         </p>
                     </div>
 
