@@ -1,8 +1,8 @@
 # SESSION ACTIVE - BETA 95.7
 
-**Date** : 24 janvier 2026
-**Version** : Beta 95.7 (build 0124-0730)
-**Statut** : Application fonctionnelle pour H2026
+**Date** : 25 janvier 2026
+**Version** : Beta 95.7 (build 0125)
+**Statut** : Application fonctionnelle pour H2026, A2024 archive
 
 ---
 
@@ -27,7 +27,17 @@
 - **Pratiques de notation** : Sauvegarde fiable via wizard et mode expert
 - **Dropdown note maximale** : Peuplé dynamiquement selon l'échelle de performance
 
-### Derniere tache completee (24 janvier)
+### Derniere tache completee (25 janvier)
+- **IMPORT HISTORIQUE A2024** : Archivage trimestre Automne 2024
+  - Import retroactif : 55 etudiants, 2 groupes, 750 evaluations, 1650 presences
+  - Echelle IDME documentee (I=40%, D=65%, M=85%, E=100%)
+  - Pratique : 6 artefacts recents (60%) + Analyse finale (40%)
+  - Correction tri "recents" par numero de production (pas par date)
+  - Scripts d'import dans `docs/A2024/`
+  - Trimestre archive en lecture seule
+  - **Fichiers modifies** : `js/portfolio.js`, `js/profil-etudiant.js`
+
+### Tache precedente (24 janvier)
 - **NETTOYAGE DOUBLON GROUPE-COURS** : Groupe 1 de A25 apparaissait dans H26
   - **Symptome** : Le dropdown groupe-cours en H26 affichait 3 groupes (1, 2, 8) au lieu de 2 (2, 8)
   - **Cause** : La migration `migrerHorairesEtGroupesCours()` du 21 jan avait copie les donnees globales vers le trimestre actif, incluant le groupe 1 de A25 dans h2026_groupesCours
@@ -559,6 +569,21 @@
 
 ## HISTORIQUE RECENT
 
+### 25 janvier 2026
+- **IMPORT HISTORIQUE A2024** : Archivage complet du trimestre Automne 2024
+  - Import retroactif des donnees historiques (session de developpement initial)
+  - 55 etudiants, 2 groupes, 14 artefacts + 1 analyse finale
+  - 750 evaluations (700 artefacts + 50 analyses finales)
+  - 1650 presences importees
+  - Echelle IDME A2024 creee dans bibliotheque (I=40%, D=65%, M=85%, E=100%)
+  - Pratique de notation : 6 recents (60%) + Analyse finale (40%)
+  - Analyse finale : 5 criteres (Structure 15%, Rigueur 20%, Plausibilite 10%, Nuance 25%, Francais 30%)
+  - Correction tri "recents" : par numero de production (pas par date d'evaluation)
+  - Scripts d'import et diagnostic dans `docs/A2024/`
+  - Documentation complete dans `docs/A2024/README.md`
+  - Trimestre archive en lecture seule
+  - **Fichiers modifies** : `js/portfolio.js`, `js/profil-etudiant.js`
+
 ### 24 janvier 2026
 - **NETTOYAGE DOUBLON GROUPE-COURS** : Groupe 1 de A25 retire de H26 (correction donnees via console)
 - **CORRECTION AFFICHAGE TABLEAU DE BORD** : Messages "en attente" et patterns/RaI incoherents
@@ -747,4 +772,4 @@
 
 ---
 
-**Derniere mise a jour** : 24 janvier 2026
+**Derniere mise a jour** : 25 janvier 2026
