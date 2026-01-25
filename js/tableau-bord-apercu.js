@@ -78,41 +78,69 @@ function calculerCorrelationPearson(x, y) {
 
 /**
  * 🆕 BETA 96: Met à jour les lignes de contexte dans les en-têtes des sections
- * Affiche: Trimestre | Cours | Badge nombre de personnes
+ * Affiche: Trimestre | Cours | Badge nombre de personnes (aligné à droite)
  * @param {number} nbEtudiants - Nombre d'étudiants actifs
  */
 function mettreAJourContextesSections(nbEtudiants) {
-    // Récupérer les infos du contexte actuel
-    const trimestreId = window.trimestreActif || '';
-    const gcActif = db.getSync('groupeCoursActif', null);
-
-    // Formater le nom du trimestre
+    // Récupérer le trimestre actif via la fonction globale
     let nomTrimestre = '';
-    if (trimestreId) {
-        // Format: h2026 ou a2025
-        const session = trimestreId.charAt(0).toLowerCase();
-        const annee = trimestreId.substring(1);
-        const sessionNom = { 'h': 'Hiver', 'a': 'Automne', 'e': 'Été' }[session] || session.toUpperCase();
-        nomTrimestre = `${sessionNom} ${annee}`;
+    if (typeof obtenirTrimestreActif === 'function') {
+        const trimestre = obtenirTrimestreActif();
+        if (trimestre) {
+            const sessionNom = {
+                'hiver': 'Hiver',
+                'automne': 'Automne',
+                'ete': 'Été',
+                'h': 'Hiver',
+                'a': 'Automne',
+                'e': 'Été'
+            }[trimestre.session?.toLowerCase()] || trimestre.session || '';
+            nomTrimestre = `${sessionNom} ${trimestre.annee || ''}`.trim();
+        }
+    }
+    // Fallback sur window.trimestreActif si fonction non disponible
+    if (!nomTrimestre && window.trimestreActif) {
+        const id = window.trimestreActif;
+        const session = id.charAt(0).toLowerCase();
+        const annee = id.substring(1);
+        const sessionNom = { 'h': 'Hiver', 'a': 'Automne', 'e': 'Été' }[session] || '';
+        nomTrimestre = `${sessionNom} ${annee}`.trim();
     }
 
-    // Formater le cours
+    // Récupérer le groupe-cours actif
+    const gcActif = db.getSync('groupeCoursActif', null);
     let nomCours = '';
+
     if (gcActif) {
-        // Priorité: titre personnalisé > cours + groupe
+        // Priorité: titrePersonnalise > sigle du cours + groupe > coursId + groupe
         if (gcActif.titrePersonnalise) {
             nomCours = gcActif.titrePersonnalise;
-        } else if (gcActif.coursId && gcActif.groupe) {
-            nomCours = `${gcActif.coursId} gr. ${gcActif.groupe}`;
-        } else if (gcActif.id) {
-            nomCours = gcActif.id;
+        } else {
+            // Chercher le sigle du cours dans la liste des cours
+            let sigleCours = gcActif.coursId || '';
+
+            // Si coursId ressemble à un ID interne (COURS...), chercher le vrai sigle
+            if (sigleCours.startsWith('COURS') && gcActif.trimestreId) {
+                const cleCours = `${gcActif.trimestreId.toLowerCase()}_cours`;
+                const listeCours = db.getSync(cleCours, []);
+                const coursInfo = listeCours.find(c => c.id === gcActif.coursId);
+                if (coursInfo && coursInfo.sigle) {
+                    sigleCours = coursInfo.sigle;
+                }
+            }
+
+            if (sigleCours && gcActif.groupe) {
+                nomCours = `${sigleCours} gr. ${gcActif.groupe}`;
+            } else if (sigleCours) {
+                nomCours = sigleCours;
+            }
         }
     }
 
     // Formater le badge
     const badgeTexte = nbEtudiants + ' personne' + (nbEtudiants > 1 ? 's' : '');
 
-    // Générer le HTML du contexte
+    // Générer le HTML du contexte (aligné à droite via margin-left: auto)
     const contexteHTML = `
         <span class="contexte-trimestre">${nomTrimestre || '—'}</span>
         <span class="contexte-separateur">|</span>
