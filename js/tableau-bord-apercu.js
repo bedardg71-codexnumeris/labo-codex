@@ -2599,6 +2599,14 @@ function setBarre(id, pourcentage) {
 }
 
 /* ===============================
+   📤 EXPORTS GLOBAUX
+   =============================== */
+
+// Export pour permettre le rafraîchissement depuis d'autres modules
+window.chargerTableauBordApercu = chargerTableauBordApercu;
+window.initialiserModuleTableauBordApercu = initialiserModuleTableauBordApercu;
+
+/* ===============================
    📌 NOTES D'UTILISATION
    =============================== */
 

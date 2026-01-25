@@ -339,9 +339,9 @@ function rafraichirVuesApresCours() {
     }
 
     // Rafraîchir le tableau de bord aperçu
-    if (typeof afficherTableauBordApercu === 'function') {
+    if (typeof chargerTableauBordApercu === 'function') {
         try {
-            afficherTableauBordApercu();
+            chargerTableauBordApercu();
             console.log('   ✅ Tableau de bord rafraîchi');
         } catch (e) {
             console.warn('   ⚠️ Erreur rafraîchissement tableau de bord:', e);
