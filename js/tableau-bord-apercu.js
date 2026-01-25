@@ -77,6 +77,86 @@ function calculerCorrelationPearson(x, y) {
 }
 
 /**
+ * 🆕 BETA 96: Génère un SVG de courbe de Gauss pour superposer sur une barre de progression
+ * La barre affiche 30-100%, donc on mappe les valeurs sur cet intervalle
+ * @param {Array<number>} valeurs - Valeurs des étudiants (0-1 décimal)
+ * @param {number} hauteur - Hauteur du SVG en pixels
+ * @returns {string} - Code SVG de la courbe ou chaîne vide si données insuffisantes
+ */
+function genererSvgGauss(valeurs, hauteur = 55) {
+    if (!valeurs || valeurs.length < 3) {
+        return ''; // Pas assez de données pour une distribution
+    }
+
+    // Calculer moyenne et écart-type
+    const n = valeurs.length;
+    const moyenne = valeurs.reduce((a, b) => a + b, 0) / n;
+    const variance = valeurs.reduce((a, b) => a + Math.pow(b - moyenne, 2), 0) / n;
+    const ecartType = Math.sqrt(variance);
+
+    // Si écart-type trop petit, pas de courbe visible
+    if (ecartType < 0.01) {
+        return '';
+    }
+
+    // Mapper 30-100% sur 0-100% de la barre (comme dans genererBarreDistribution)
+    // position = (valeur - 0.30) / 0.70 * 100
+    const mapperPosition = (val) => Math.max(0, Math.min((val - 0.30) / 0.70 * 100, 100));
+
+    const muPos = mapperPosition(moyenne);
+    const sigma1MoinsPos = mapperPosition(moyenne - ecartType);
+    const sigma1PlusPos = mapperPosition(moyenne + ecartType);
+
+    // Générer les points de la courbe de Gauss
+    // On génère de 0 à 100% de la barre
+    const points = [];
+    const nbPoints = 50;
+
+    for (let i = 0; i <= nbPoints; i++) {
+        const xPct = (i / nbPoints) * 100; // 0-100%
+        // Reconvertir en valeur 0-1 pour calculer y
+        const valeur = 0.30 + (xPct / 100) * 0.70; // 0.30 à 1.0
+
+        // Calculer y selon la formule de Gauss (normalisée)
+        const exposant = -0.5 * Math.pow((valeur - moyenne) / ecartType, 2);
+        const yNorm = Math.exp(exposant);
+
+        // Mapper y sur la hauteur (inversé car SVG y=0 est en haut)
+        const yPx = hauteur - (yNorm * hauteur * 0.85); // 85% de la hauteur max
+
+        points.push(`${xPct},${yPx}`);
+    }
+
+    // Créer le path SVG (courbe + fermeture en bas)
+    const pathD = `M ${points[0]} L ${points.join(' L ')} L 100,${hauteur} L 0,${hauteur} Z`;
+
+    // Statistiques pour affichage
+    const dans1Sigma = valeurs.filter(v => v >= moyenne - ecartType && v <= moyenne + ecartType).length;
+    const pct1Sigma = Math.round((dans1Sigma / n) * 100);
+
+    return `
+        <svg class="barre-gauss-svg" viewBox="0 0 100 ${hauteur}" preserveAspectRatio="none">
+            <defs>
+                <linearGradient id="gaussGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:rgba(255,255,255,0.6)"/>
+                    <stop offset="100%" style="stop-color:rgba(255,255,255,0.1)"/>
+                </linearGradient>
+            </defs>
+            <!-- Courbe de Gauss -->
+            <path d="${pathD}" fill="url(#gaussGradient)" stroke="rgba(255,255,255,0.7)" stroke-width="0.5"/>
+            <!-- Ligne μ (moyenne) -->
+            <line class="ligne-mu" x1="${muPos}" y1="0" x2="${muPos}" y2="${hauteur}" />
+            <!-- Lignes ±σ -->
+            ${sigma1MoinsPos > 0 ? `<line class="ligne-sigma" x1="${sigma1MoinsPos}" y1="0" x2="${sigma1MoinsPos}" y2="${hauteur}" />` : ''}
+            ${sigma1PlusPos < 100 ? `<line class="ligne-sigma" x1="${sigma1PlusPos}" y1="0" x2="${sigma1PlusPos}" y2="${hauteur}" />` : ''}
+        </svg>
+        <div style="position: absolute; bottom: -18px; left: ${muPos}%; transform: translateX(-50%); font-size: 0.7rem; color: #666; white-space: nowrap;">
+            μ=${Math.round(moyenne * 100)}% | ±1σ: ${dans1Sigma}/${n} (${pct1Sigma}%)
+        </div>
+    `;
+}
+
+/**
  * 🆕 BETA 91: Génère un diagnostic basique basé sur la note de passage (60%)
  * Utilisé quand SOLO et RàI sont désactivés
  * @param {Array} etudiants - [{da, valeur: 0-1}, ...] étudiants avec leur performance
@@ -498,12 +578,8 @@ function chargerTableauBordApercu() {
             console.warn('⚠️ creerGraphiqueGroupeSpaghetti non disponible - Module graphiques-progression.js non chargé ?');
         }
 
-        // 🆕 BETA 96: Afficher le graphique de distribution ACPE (courbes de densité)
-        if (typeof creerGraphiqueDistributionACPE === 'function') {
-            creerGraphiqueDistributionACPE('graphique-distribution-acpe');
-        } else {
-            console.warn('⚠️ creerGraphiqueDistributionACPE non disponible - Module graphiques-progression.js non chargé ?');
-        }
+        // 🆕 BETA 96: Distribution ACPE maintenant intégrée dans les barres de progression
+        // (graphique séparé supprimé - mini-courbes Gauss dans chaque barre)
 
         console.log('✅ Tableau de bord chargé (aperçu anonyme)');
 
@@ -1439,6 +1515,17 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
     const interpretationFinale = tousEnAttente ? messageAttenteHTML : interpretationHTML;
     const valeursFinales = tousEnAttente ? '<span style="color: #94a3b8; font-weight: 600;">—</span>' : valeursHTML + indicateurAttenteHTML;
 
+    // 🆕 BETA 96: Générer la courbe de Gauss SVG
+    // Collecter toutes les valeurs pour calculer la distribution
+    const toutesValeurs = [];
+    if (afficherSom && etudiantsSOM.length > 0) {
+        etudiantsSOM.forEach(e => toutesValeurs.push(e.valeur));
+    }
+    if (afficherPan && etudiantsPAN.length > 0) {
+        etudiantsPAN.forEach(e => toutesValeurs.push(e.valeur));
+    }
+    const svgGauss = genererSvgGauss(toutesValeurs, 55);
+
     return `
         <div class="distribution-container u-mb-20">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -1446,8 +1533,9 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                 ${valeursFinales}
             </div>
             ${interpretationFinale}
-            <div class="barre-indicateur" style="position: relative; height: 30px; margin-top: ${interpretationFinale ? '8px' : '0'};">
+            <div class="barre-indicateur" style="position: relative; margin-top: ${interpretationFinale ? '8px' : '0'}; margin-bottom: ${svgGauss ? '22px' : '0'};">
                 <div class="barre-indicateur-overlay"></div>
+                ${svgGauss}
                 ${lignesSOM}
                 ${lignesPAN}
             </div>
