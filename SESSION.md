@@ -29,20 +29,32 @@
 - **Graphique spaghetti** : Visualisation de l'évolution de tous les étudiants (nouveau Beta 96)
 
 ### Derniere tache completee (25 janvier - Beta 96)
+- **UNIFORMISATION DES GRAPHIQUES** : Tous les graphiques adoptent le même look
+  - **Échelle Y dynamique** : S'adapte aux données (min-5% à max+5%) au lieu de 0-100% fixe
+  - **Zones IDME dynamiques** : Utilisent l'échelle utilisateur partout (via `genererZonesDepuisEchelle()`)
+  - **Étiquettes de zones** : Centrées dans le graphique avec couleurs saturées (rouge, orange, vert, bleu)
+  - **Survol interactif** : Courbe survolée mise en évidence, autres atténuées, nom affiché au bout
+  - **Graphiques uniformisés** :
+    - `creerGraphiqueIndividuel` : Progression temporelle A-C-P (profil étudiant)
+    - `creerGraphiqueGroupeMoyennes` : Moyennes A-C-P du groupe (tableau de bord)
+    - `creerGraphiqueGroupeSpaghettiACP` : Trajectoires ACP par étudiant (tableau de bord)
+    - `creerGraphiqueGroupeSpaghetti` : Trajectoires par production (tableau de bord)
+    - `creerGraphiqueCriteres` : Développement des habiletés (profil étudiant)
+  - **Fichiers modifiés** :
+    - `js/graphiques-progression.js` : Ajout plugins, onHover, échelle dynamique
+    - `index.html` : Notes de version Beta 96
+  - **Plugins créés** :
+    - `pluginEtiquettesZones` / `pluginEtiquettesZones100` : Étiquettes centrées
+    - `pluginNomCritereSurvol` : Affiche nom du critère au survol
+
+### Tache precedente (25 janvier - Beta 96)
 - **GRAPHIQUE SPAGHETTI - TRAJECTOIRES D'APPRENTISSAGE** : Nouvelle visualisation
   - Affiche les **résultats bruts par artefact** (pas l'indice P agrégé)
   - Montre la volatilité réelle de l'apprentissage (hauts et bas)
   - Révèle les artefacts difficiles (convergence vers le bas)
   - Permet de voir la résilience (rebonds après difficultés)
   - Zones IDME colorées en arrière-plan avec étiquettes
-  - Carte d'aide 😎 expliquant la différence avec l'indice P
-  - **Décision pédagogique** : L'indice P (meilleures notes) masque la non-linéarité
-    de l'apprentissage. Les résultats bruts par artefact sont plus informatifs.
-  - **Fichiers modifiés** :
-    - `index.html` : Canvas, carte d'aide enrichie
-    - `js/graphiques-progression.js` : Fonction réécrite pour utiliser evaluationsSauvegardees
-    - `js/tableau-bord-apercu.js` : Appel simplifié
-  - **Prochaine étape** : Courbes de distribution (densité) des indices ACPE
+  - Carte d'aide expliquant la différence avec l'indice P
 
 ### Tache precedente (25 janvier - Beta 95.7)
 - **IMPORT HISTORIQUE A2024** : Archivage trimestre Automne 2024

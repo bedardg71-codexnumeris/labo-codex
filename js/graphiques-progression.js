@@ -83,6 +83,112 @@ const ZONES_IDME = [
 ];
 
 /**
+ * Calcule les bornes Y dynamiques pour un meilleur affichage des données
+ * Au lieu de 0-100%, affiche (min - 5%) à (max + 5%) arrondi à 5%
+ * @param {Array} datasets - Les datasets Chart.js avec leurs données
+ * @returns {Object} - { min: number, max: number } en valeurs 0-1
+ */
+function calculerBornesYDynamiques(datasets) {
+    // Collecter toutes les valeurs non-null des datasets
+    let toutesValeurs = [];
+    datasets.forEach(dataset => {
+        if (dataset.data && Array.isArray(dataset.data)) {
+            dataset.data.forEach(val => {
+                if (val !== null && val !== undefined && !isNaN(val)) {
+                    toutesValeurs.push(val);
+                }
+            });
+        }
+    });
+
+    // Si pas de données, retourner l'échelle complète
+    if (toutesValeurs.length === 0) {
+        return { min: 0, max: 1 };
+    }
+
+    // Trouver min et max
+    const minData = Math.min(...toutesValeurs);
+    const maxData = Math.max(...toutesValeurs);
+
+    // Arrondir à 5% (0.05) avec marge de 5%
+    // Min: arrondir vers le bas au 5% inférieur, puis soustraire 5%
+    // Max: arrondir vers le haut au 5% supérieur, puis ajouter 5%
+    const pas = 0.05; // 5%
+
+    let borneMin = Math.floor(minData / pas) * pas - pas;
+    let borneMax = Math.ceil(maxData / pas) * pas + pas;
+
+    // S'assurer de rester dans les limites raisonnables
+    // Min: pas en dessous de 0
+    // Max: permet jusqu'à 1.03 (103%) pour espace visuel au-dessus de 100%
+    borneMin = Math.max(0, borneMin);
+    borneMax = Math.min(1.03, borneMax);
+
+    // Si la plage est trop petite, élargir un peu
+    if (borneMax - borneMin < 0.2) {
+        const centre = (borneMin + borneMax) / 2;
+        borneMin = Math.max(0, centre - 0.15);
+        borneMax = Math.min(1.03, centre + 0.15);
+    }
+
+    console.log(`📊 [Échelle Y dynamique] Données: ${(minData*100).toFixed(0)}%-${(maxData*100).toFixed(0)}% → Affichage: ${(borneMin*100).toFixed(0)}%-${(borneMax*100).toFixed(0)}%`);
+
+    return { min: borneMin, max: borneMax };
+}
+
+/**
+ * Calcule les bornes Y dynamiques pour une échelle 0-100 (pourcentages)
+ * Variante de calculerBornesYDynamiques pour les graphiques en pourcentage
+ * @param {Array} datasets - Les datasets Chart.js avec leurs données
+ * @returns {Object} - { min: number, max: number } en valeurs 0-100
+ */
+function calculerBornesYDynamiques100(datasets) {
+    // Collecter toutes les valeurs non-null des datasets
+    let toutesValeurs = [];
+    datasets.forEach(dataset => {
+        if (dataset.data && Array.isArray(dataset.data)) {
+            dataset.data.forEach(val => {
+                if (val !== null && val !== undefined && !isNaN(val)) {
+                    toutesValeurs.push(val);
+                }
+            });
+        }
+    });
+
+    // Si pas de données, retourner l'échelle complète
+    if (toutesValeurs.length === 0) {
+        return { min: 0, max: 100 };
+    }
+
+    // Trouver min et max
+    const minData = Math.min(...toutesValeurs);
+    const maxData = Math.max(...toutesValeurs);
+
+    // Arrondir à 5% avec marge de 5%
+    const pas = 5; // 5%
+
+    let borneMin = Math.floor(minData / pas) * pas - pas;
+    let borneMax = Math.ceil(maxData / pas) * pas + pas;
+
+    // S'assurer de rester dans les limites raisonnables
+    // Min: pas en dessous de 0
+    // Max: permet jusqu'à 103% pour espace visuel au-dessus de 100%
+    borneMin = Math.max(0, borneMin);
+    borneMax = Math.min(103, borneMax);
+
+    // Si la plage est trop petite, élargir un peu
+    if (borneMax - borneMin < 20) {
+        const centre = (borneMin + borneMax) / 2;
+        borneMin = Math.max(0, centre - 15);
+        borneMax = Math.min(103, centre + 15);
+    }
+
+    console.log(`📊 [Échelle Y dynamique 100] Données: ${minData.toFixed(0)}%-${maxData.toFixed(0)}% → Affichage: ${borneMin.toFixed(0)}%-${borneMax.toFixed(0)}%`);
+
+    return { min: borneMin, max: borneMax };
+}
+
+/**
  * Récupère l'échelle de performance de l'utilisateur (première disponible)
  * @returns {Object|null} - Échelle avec ses niveaux ou null
  */
@@ -401,6 +507,28 @@ const pluginEtiquettesCourbes = {
  * @param {string} da - Numéro DA de l'étudiant
  * @returns {Chart|null} - Instance Chart.js ou null si erreur
  */
+/**
+ * Stockage des instances de graphiques individuels par DA
+ */
+const graphiquesIndividuels = {};
+
+/**
+ * Rafraîchit le graphique individuel en fonction des checkboxes
+ * @param {string} da - Numéro DA de l'étudiant
+ */
+function rafraichirGraphiqueIndividuel(da) {
+    const canvasId = `graphique-progression-${da}`;
+
+    // Détruire l'ancien graphique s'il existe
+    if (graphiquesIndividuels[da]) {
+        graphiquesIndividuels[da].destroy();
+        delete graphiquesIndividuels[da];
+    }
+
+    // Recréer le graphique
+    creerGraphiqueIndividuel(canvasId, da);
+}
+
 function creerGraphiqueIndividuel(canvasId, da) {
     try {
         // Récupérer les snapshots de l'étudiant
@@ -411,58 +539,100 @@ function creerGraphiqueIndividuel(canvasId, da) {
             return null;
         }
 
-        // Préparer les données
-        // ✅ NOUVEAU (Beta 94 - 10 déc 2025) : Snapshots ponctuals A-C-P uniquement (E retiré)
-        // ✅ CORRECTION (Beta 93) : Gérer null pour P (pas encore d'évaluation)
-        // ✨ AMÉLIORATION (Beta 93) : Offset vertical léger pour éviter superposition des courbes
+        // Préparer les données - afficher tous les indices
         const OFFSET_VISUEL = {
-            A: 0.000,   // Baseline (pas de décalage)
-            C: 0.005,   // +0.5% (~2px sur graphique 400px)
-            P: 0.010    // +1.0% (~4px)
+            A: 0.000,
+            C: 0.005,
+            P: 0.010
         };
 
         const labels = snapshots.map(s => `Sem. ${s.numSemaine}`);
-        // ✅ NOUVEAU (Beta 94 - 10 déc 2025) : Utiliser A_cumulatif pour le graphique individuel
-        // A_cumulatif = assiduité depuis le début (cohérent avec C et P cumulatifs)
+
         const donneesA = snapshots.map(s => {
-            const valeur = s.A_cumulatif !== undefined ? s.A_cumulatif : s.A; // Fallback si ancien snapshot
+            const valeur = s.A_cumulatif !== undefined ? s.A_cumulatif : s.A;
             return valeur !== null && valeur !== 0 ? (valeur / 100) + OFFSET_VISUEL.A : null;
         });
-        const donneesC = snapshots.map(s => s.C !== null && s.C !== 0 ? (s.C / 100) + OFFSET_VISUEL.C : null);
-        const donneesP = snapshots.map(s => s.P !== null && s.P !== 0 ? (s.P / 100) + OFFSET_VISUEL.P : null);
 
-        // ✨ NOUVEAU (17 déc 2025) : Récupérer les événements pédagogiques pour marqueurs visuels
-        // Indexés par dateSeance pour éviter les doublons sur les semaines à 2 séances
+        const donneesC = snapshots.map(s =>
+            s.C !== null && s.C !== 0 ? (s.C / 100) + OFFSET_VISUEL.C : null
+        );
+
+        const donneesP = snapshots.map(s =>
+            s.P !== null && s.P !== 0 ? (s.P / 100) + OFFSET_VISUEL.P : null
+        );
+
+        // Récupérer les événements pédagogiques pour marqueurs visuels
         const jetonsParDate = obtenirJetonsParDate(da, snapshots);
         const raiParDate = obtenirRaiParDate(da, snapshots);
 
         // Générer les styles de points personnalisés
-        // - Courbe A : marqueurs RàI (triangle niveau 2, carré niveau 3)
-        // - Courbe P : marqueurs jetons (étoile délai, losange reprise)
         const stylesA = genererStylesPoints(snapshots, raiParDate, 'rai', COULEURS_INDICES.A);
-        const stylesC = genererStylesPoints(snapshots, {}, 'none', COULEURS_INDICES.C); // Pas de marqueurs sur C
+        const stylesC = genererStylesPoints(snapshots, {}, 'none', COULEURS_INDICES.C);
         const stylesP = genererStylesPoints(snapshots, jetonsParDate, 'jeton', COULEURS_INDICES.P);
 
         // Stocker les infos pour les tooltips enrichis
         const infosEvenements = { jetonsParDate, raiParDate, snapshots };
 
-        // Calculer min/max pour ajuster l'échelle Y
-        // ✅ CORRECTION (Beta 93) : Filtrer les valeurs null avant calcul min/max
-        // ✨ AMÉLIORATION (Beta 93) : Échelle fixe 60-100% pour meilleure lisibilité
-        const toutesValeurs = [...donneesA, ...donneesC, ...donneesP].filter(v => v !== null);
-        const valeurMin = Math.min(...toutesValeurs);
-        const valeurMax = Math.max(...toutesValeurs);
+        // Construire les datasets - style noir/fin par défaut (comme spaghetti)
+        const couleursOriginales = {
+            'Assiduité (A)': COULEURS_INDICES.A,
+            'Complétion (C)': COULEURS_INDICES.C,
+            'Performance (P)': COULEURS_INDICES.P
+        };
 
-        // Échelle fixe pour contexte pédagogique (60-105%)
-        // La plupart des étudiants se situent dans cette plage
-        // Max à 105% pour accommoder l'offset visuel (+0.5-1.5%)
-        let yMin = 0.60;  // 60%
-        let yMax = 1.05;  // 105% (permet affichage avec offset)
+        const datasets = [
+            {
+                label: 'Assiduité (A)',
+                data: donneesA,
+                borderColor: 'rgba(50, 50, 50, 0.5)',
+                backgroundColor: 'transparent',
+                borderWidth: 1.5,
+                tension: 0.2,
+                pointRadius: 2,
+                pointHoverRadius: 5,
+                pointBackgroundColor: 'rgba(50, 50, 50, 0.5)',
+                pointHoverBackgroundColor: COULEURS_INDICES.A,
+                hoverBorderWidth: 3,
+                hoverBorderColor: COULEURS_INDICES.A,
+                spanGaps: false
+            },
+            {
+                label: 'Complétion (C)',
+                data: donneesC,
+                borderColor: 'rgba(50, 50, 50, 0.5)',
+                backgroundColor: 'transparent',
+                borderWidth: 1.5,
+                tension: 0.2,
+                pointRadius: 2,
+                pointHoverRadius: 5,
+                pointBackgroundColor: 'rgba(50, 50, 50, 0.5)',
+                pointHoverBackgroundColor: COULEURS_INDICES.C,
+                hoverBorderWidth: 3,
+                hoverBorderColor: COULEURS_INDICES.C,
+                spanGaps: false
+            },
+            {
+                label: 'Performance (P)',
+                data: donneesP,
+                borderColor: 'rgba(50, 50, 50, 0.5)',
+                backgroundColor: 'transparent',
+                borderWidth: 1.5,
+                tension: 0.2,
+                pointRadius: 2,
+                pointHoverRadius: 5,
+                pointBackgroundColor: 'rgba(50, 50, 50, 0.5)',
+                pointHoverBackgroundColor: COULEURS_INDICES.P,
+                hoverBorderWidth: 3,
+                hoverBorderColor: COULEURS_INDICES.P,
+                spanGaps: false
+            }
+        ];
 
-        // Si des valeurs descendent sous 60%, ajuster yMin dynamiquement
-        if (valeurMin < 0.60) {
-            yMin = Math.max(0, Math.floor(valeurMin * 10) / 10); // Arrondir vers le bas (ex: 0.53 → 0.50)
-        }
+        // Variable pour suivre le dataset survolé
+        let dernierDatasetSurvoleIndiv = -1;
+
+        // Calculer les bornes Y dynamiques
+        const bornesY = calculerBornesYDynamiques(datasets);
 
         // Obtenir le canvas
         const canvas = document.getElementById(canvasId);
@@ -475,109 +645,37 @@ function creerGraphiqueIndividuel(canvasId, da) {
         // Configuration du graphique
         const config = {
             type: 'line',
-            plugins: [pluginEtiquettesCourbes], // ✨ Activer le plugin d'étiquettes
+            plugins: [pluginEtiquettesZones], // Utiliser le même plugin que les spaghetti
             data: {
                 labels: labels,
-                datasets: [
-                    {
-                        label: 'Assiduité (A)',
-                        data: donneesA,
-                        borderColor: COULEURS_INDICES.A,
-                        backgroundColor: 'transparent',
-                        borderWidth: EPAISSEUR_LIGNE_STANDARD,
-                        tension: 0.4, // Courbes lisses
-                        // ✨ NOUVEAU (17 déc 2025) : Styles personnalisés pour marqueurs RàI
-                        pointStyle: stylesA.pointStyle,
-                        pointRadius: stylesA.pointRadius,
-                        pointHoverRadius: 9,
-                        pointBackgroundColor: stylesA.pointBackgroundColor,
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2
-                    },
-                    {
-                        label: 'Complétion (C)',
-                        data: donneesC,
-                        borderColor: COULEURS_INDICES.C,
-                        backgroundColor: 'transparent',
-                        borderWidth: EPAISSEUR_LIGNE_STANDARD,
-                        tension: 0.4,
-                        pointStyle: stylesC.pointStyle,
-                        pointRadius: stylesC.pointRadius,
-                        pointHoverRadius: 7,
-                        pointBackgroundColor: stylesC.pointBackgroundColor,
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2,
-                        spanGaps: false
-                    },
-                    {
-                        label: 'Performance (P)',
-                        data: donneesP,
-                        borderColor: COULEURS_INDICES.P,
-                        backgroundColor: 'transparent',
-                        borderWidth: EPAISSEUR_LIGNE_STANDARD,
-                        tension: 0.4,
-                        // ✨ NOUVEAU (17 déc 2025) : Styles personnalisés pour marqueurs jetons
-                        pointStyle: stylesP.pointStyle,
-                        pointRadius: stylesP.pointRadius,
-                        pointHoverRadius: 9,
-                        pointBackgroundColor: stylesP.pointBackgroundColor,
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2,
-                        spanGaps: false
-                    }
-                ]
+                datasets: datasets
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                layout: {
+                    padding: { right: 10 }
+                },
                 plugins: {
                     title: {
                         display: true,
-                        text: ['Évolution des indices A-C-P (par séance)', 'Indices cumulatifs depuis le début du trimestre'],
-                        font: [
-                            { size: 16, weight: 'bold' },
-                            { size: 11, weight: 'normal', style: 'italic' }
-                        ],
-                        color: ['#333', '#777'],
+                        text: 'Progression temporelle - Indices A-C-P',
+                        font: { size: 16, weight: 'bold' },
                         padding: { top: 10, bottom: 20 }
                     },
                     legend: {
-                        display: true,
-                        position: 'bottom',
-                        labels: {
-                            usePointStyle: true,
-                            padding: 15,
-                            font: { size: 12 }
-                        },
-                        onClick: function(e, legendItem, legend) {
-                            // ✨ NOUVELLE FONCTIONNALITÉ (8 déc 2025) : Persistance de la légende
-                            const index = legendItem.datasetIndex;
-                            const chart = legend.chart;
-                            const meta = chart.getDatasetMeta(index);
-
-                            // Toggle visibilité
-                            meta.hidden = meta.hidden === null ? !chart.data.datasets[index].hidden : null;
-
-                            // Sauvegarder l'état (extraire la lettre de l'étiquette)
-                            const match = legendItem.text.match(/\(([A-Z])\)/);
-                            const indice = match ? match[1] : legendItem.text;
-                            etatLegendeGraphiqueACPE[indice] = meta.hidden === null ? true : false;
-
-                            chart.update();
-                        }
+                        display: false // Masquer la légende, on utilise les checkboxes
                     },
                     tooltip: {
                         mode: 'index',
                         intersect: false,
                         callbacks: {
-                            // ✨ NOUVEAU (17 déc 2025) : Afficher la date de la séance dans le titre
                             title: function(tooltipItems) {
                                 if (!tooltipItems.length) return '';
                                 const index = tooltipItems[0].dataIndex;
                                 const snapshot = infosEvenements.snapshots[index];
                                 if (!snapshot) return tooltipItems[0].label;
 
-                                // Formater la date (YYYY-MM-DD → JJ mois AAAA)
                                 const dateSeance = snapshot.dateSeance;
                                 if (dateSeance) {
                                     const date = new Date(dateSeance + 'T12:00:00');
@@ -589,14 +687,10 @@ function creerGraphiqueIndividuel(canvasId, da) {
                             },
                             label: function(context) {
                                 const label = context.dataset.label || '';
-                                // ✨ Soustraire l'offset visuel pour afficher la valeur réelle
-                                const offsets = [0.000, 0.005, 0.010, 0.015]; // A, C, P, E
-                                const offset = offsets[context.datasetIndex] || 0;
-                                const valeurReelle = context.parsed.y - offset;
+                                const valeurReelle = context.parsed.y;
                                 const value = (valeurReelle * 100).toFixed(0);
                                 return `${label}: ${value}%`;
                             },
-                            // ✨ NOUVEAU (17 déc 2025) : Afficher les détails des événements pédagogiques
                             afterBody: function(tooltipItems) {
                                 if (!tooltipItems.length) return [];
 
@@ -607,7 +701,6 @@ function creerGraphiqueIndividuel(canvasId, da) {
                                 const dateSeance = snapshot.dateSeance;
                                 const lignes = [];
 
-                                // Vérifier s'il y a un jeton à cette date
                                 const jeton = infosEvenements.jetonsParDate[dateSeance];
                                 if (jeton) {
                                     const typeLabel = jeton.type === 'jetonDelai' ? '⭐ Jeton délai' : '◆ Jeton reprise';
@@ -615,7 +708,6 @@ function creerGraphiqueIndividuel(canvasId, da) {
                                     lignes.push(`${typeLabel} sur "${jeton.production}"`);
                                 }
 
-                                // Vérifier s'il y a une intervention RàI à cette date
                                 const rai = infosEvenements.raiParDate[dateSeance];
                                 if (rai) {
                                     const niveauLabel = rai.niveau === 3 ? '■ RàI Niveau 3' : '▲ RàI Niveau 2';
@@ -628,34 +720,81 @@ function creerGraphiqueIndividuel(canvasId, da) {
                         }
                     },
                     annotation: {
-                        annotations: creerAnnotationsZones()
+                        annotations: creerAnnotationsZonesIDME()
                     }
                 },
                 scales: {
                     x: {
                         title: {
                             display: true,
-                            text: 'Semaines'
-                        }
-                    },
-                    y: {
-                        min: yMin,
-                        max: yMax,
-                        title: {
-                            display: true,
-                            text: 'Indices (0.60 à 1.05)'  // ✨ Échelle étendue pour offset visuel
+                            text: 'Semaines',
+                            font: { size: 12, weight: 'bold' }
                         },
                         ticks: {
-                            callback: function(value) {
-                                return value.toFixed(2);
-                            }
-                        }
+                            maxRotation: 45,
+                            minRotation: 45,
+                            font: { size: 10 }
+                        },
+                        grid: { display: true, color: 'rgba(0,0,0,0.05)' }
+                    },
+                    y: {
+                        min: bornesY.min,
+                        max: bornesY.max,
+                        title: {
+                            display: true,
+                            text: 'Indice',
+                            font: { size: 12, weight: 'bold' }
+                        },
+                        ticks: {
+                            callback: value => (value * 100).toFixed(0) + '%',
+                            stepSize: 0.05
+                        },
+                        grid: { display: true, color: 'rgba(0,0,0,0.08)' }
                     }
                 },
                 interaction: {
                     mode: 'nearest',
-                    axis: 'x',
+                    axis: 'xy',
                     intersect: false
+                },
+                onHover: function(event, activeElements, chart) {
+                    let datasetIndex = -1;
+
+                    if (activeElements.length > 0) {
+                        datasetIndex = activeElements[0].datasetIndex;
+                    }
+
+                    // Éviter les mises à jour inutiles
+                    if (datasetIndex === dernierDatasetSurvoleIndiv) return;
+                    dernierDatasetSurvoleIndiv = datasetIndex;
+
+                    // Mettre à jour les styles de toutes les courbes
+                    chart.data.datasets.forEach((dataset, idx) => {
+                        const couleurOriginale = couleursOriginales[dataset.label];
+                        const nbPoints = dataset.data.length;
+
+                        if (datasetIndex === -1) {
+                            // Aucun survol - toutes les courbes en noir/gris
+                            dataset.borderColor = 'rgba(50, 50, 50, 0.5)';
+                            dataset.borderWidth = 1.5;
+                            dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(50, 50, 50, 0.5)');
+                            dataset.pointRadius = Array(nbPoints).fill(2);
+                        } else if (idx === datasetIndex) {
+                            // Courbe survolée - colorée et épaisse
+                            dataset.borderColor = couleurOriginale;
+                            dataset.borderWidth = 3;
+                            dataset.pointBackgroundColor = Array(nbPoints).fill(couleurOriginale);
+                            dataset.pointRadius = Array(nbPoints).fill(4);
+                        } else {
+                            // Autres courbes - atténuées
+                            dataset.borderColor = 'rgba(150, 150, 150, 0.3)';
+                            dataset.borderWidth = 1;
+                            dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(150, 150, 150, 0.3)');
+                            dataset.pointRadius = Array(nbPoints).fill(1);
+                        }
+                    });
+
+                    chart.update('none');
                 }
             }
         };
@@ -663,16 +802,8 @@ function creerGraphiqueIndividuel(canvasId, da) {
         // Créer le graphique
         const chart = new Chart(ctx, config);
 
-        // ✨ NOUVELLE FONCTIONNALITÉ (8 déc 2025) : Restaurer l'état de la légende
-        // Permet de comparer le même indice entre plusieurs élèves
-        const indices = ['A', 'C', 'P', 'E'];
-        indices.forEach((indice, index) => {
-            if (etatLegendeGraphiqueACPE[indice] === false) {
-                const meta = chart.getDatasetMeta(index);
-                meta.hidden = true;
-            }
-        });
-        chart.update();
+        // Stocker l'instance pour pouvoir la détruire plus tard
+        graphiquesIndividuels[da] = chart;
 
         console.log(`✅ Graphique individuel créé pour DA ${da}`);
         return chart;
@@ -762,9 +893,30 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
         }
         const ctx = canvas.getContext('2d');
 
+        // Stocker les couleurs originales pour le survol
+        const couleursOriginales = {
+            'Assiduité (A)': COULEURS_INDICES.A,
+            'Complétion (C)': COULEURS_INDICES.C,
+            'Performance (P)': COULEURS_INDICES.P
+        };
+
+        // Variable pour tracker le dernier survol
+        let dernierDatasetSurvoleMoyennes = -1;
+
+        // Préparer les datasets pour calculer les bornes Y
+        const datasetsTemp = [
+            { data: donneesA },
+            { data: donneesC },
+            { data: donneesP }
+        ];
+
+        // Calculer les bornes Y dynamiques
+        const bornesY = calculerBornesYDynamiques(datasetsTemp);
+
         // Configuration du graphique
         const config = {
             type: 'line',
+            plugins: [pluginEtiquettesZones],
             data: {
                 labels: labels,
                 datasets: [
@@ -866,7 +1018,7 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
                         }
                     },
                     annotation: {
-                        annotations: creerAnnotationsZones()
+                        annotations: creerAnnotationsZonesIDME()
                     }
                 },
                 scales: {
@@ -877,23 +1029,60 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
                         }
                     },
                     y: {
-                        min: 0.60,  // ✨ AMÉLIORATION (Beta 93) : Échelle 60-105% pour meilleure lisibilité
-                        max: 1.05,  // 105% pour accommoder l'offset visuel (+0.5-1.5%)
+                        min: bornesY.min,
+                        max: bornesY.max,
                         title: {
                             display: true,
-                            text: 'Indices (0.60 à 1.05)'
+                            text: 'Performance'
                         },
                         ticks: {
                             callback: function(value) {
-                                return value.toFixed(2);
+                                return (value * 100).toFixed(0) + '%';
                             }
                         }
                     }
                 },
                 interaction: {
                     mode: 'nearest',
-                    axis: 'x',
+                    axis: 'xy',
                     intersect: false
+                },
+                onHover: function(event, activeElements, chart) {
+                    let datasetIndex = -1;
+
+                    if (activeElements.length > 0) {
+                        datasetIndex = activeElements[0].datasetIndex;
+                    }
+
+                    if (datasetIndex === dernierDatasetSurvoleMoyennes) return;
+                    dernierDatasetSurvoleMoyennes = datasetIndex;
+
+                    chart.data.datasets.forEach((dataset, idx) => {
+                        const couleurOriginale = couleursOriginales[dataset.label];
+                        const nbPoints = dataset.data.length;
+
+                        if (datasetIndex === -1) {
+                            // Aucun survol : toutes les courbes colorées
+                            dataset.borderColor = couleurOriginale;
+                            dataset.borderWidth = EPAISSEUR_LIGNE_STANDARD;
+                            dataset.pointBackgroundColor = Array(nbPoints).fill(couleurOriginale);
+                            dataset.pointRadius = Array(nbPoints).fill(5);
+                        } else if (idx === datasetIndex) {
+                            // Courbe survolée : mise en évidence
+                            dataset.borderColor = couleurOriginale;
+                            dataset.borderWidth = 3;
+                            dataset.pointBackgroundColor = Array(nbPoints).fill(couleurOriginale);
+                            dataset.pointRadius = Array(nbPoints).fill(6);
+                        } else {
+                            // Autres courbes : atténuées
+                            dataset.borderColor = 'rgba(150, 150, 150, 0.3)';
+                            dataset.borderWidth = 1;
+                            dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(150, 150, 150, 0.3)');
+                            dataset.pointRadius = Array(nbPoints).fill(3);
+                        }
+                    });
+
+                    chart.update('none');
                 }
             }
         };
@@ -1157,6 +1346,9 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
         }
         const ctx = canvas.getContext('2d');
 
+        // Calculer les bornes Y dynamiques
+        const bornesY = calculerBornesYDynamiques(datasets);
+
         // Configuration
         const config = {
             type: 'line',
@@ -1214,12 +1406,12 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
                         }
                     },
                     y: {
-                        min: 0,
-                        max: 1,
+                        min: bornesY.min,
+                        max: bornesY.max,
                         grid: { display: true, color: 'rgba(0,0,0,0.08)' },
                         ticks: {
                             callback: value => (value * 100).toFixed(0) + '%',
-                            stepSize: 0.1
+                            stepSize: 0.05
                         },
                         title: {
                             display: true,
@@ -1327,6 +1519,8 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
 
         // Fonction toggle verrouillage
         function toggleVerrouillageSpaghetti(indexDataset) {
+            const selecteur = document.getElementById('selecteur-etudiant-acp');
+
             if (datasetVerrouilleACP === indexDataset) {
                 datasetVerrouilleACP = -1;
                 console.log('🔓 Courbe ACP déverrouillée');
@@ -1334,6 +1528,8 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
                     dataset.pointHoverRadius = 5;
                     dataset.pointHoverBackgroundColor = 'rgba(50, 50, 50, 0.9)';
                 });
+                // Réinitialiser le dropdown
+                if (selecteur) selecteur.value = '';
             } else {
                 datasetVerrouilleACP = indexDataset;
                 dernierDatasetSurvoleACP = indexDataset;
@@ -1347,6 +1543,8 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
                         dataset.pointHoverBackgroundColor = 'rgba(80, 80, 80, 0.3)';
                     }
                 });
+                // Synchroniser le dropdown avec la courbe verrouillée
+                if (selecteur) selecteur.value = indexDataset;
             }
             chart.update('none');
         }
@@ -1511,22 +1709,205 @@ const pluginEtiquettesZones = {
         // Obtenir les zones depuis l'échelle utilisateur
         const zonesUtilisateur = genererZonesDepuisEchelle();
 
+        // Couleurs saturées pour chaque niveau (plus foncées que le fond)
+        const couleursSaturees = {
+            'Insuffisant': '#C62828',      // Rouge foncé
+            'Incomplet': '#C62828',        // Rouge foncé
+            'Développement': '#E65100',    // Orange foncé
+            'En développement': '#E65100', // Orange foncé
+            'Maîtrisé': '#2E7D32',         // Vert foncé
+            'Étendu': '#1565C0',           // Bleu foncé
+            'Enrichi': '#1565C0'           // Bleu foncé
+        };
+
         ctx.save();
-        ctx.font = 'italic 11px Arial';
-        ctx.textAlign = 'right';
+        ctx.font = 'bold 12px Arial';
+        ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
+        // Position horizontale centrée dans le graphique
+        const xCenter = (chartArea.left + chartArea.right) / 2;
+
+        // Obtenir les limites Y visibles
+        const yMinVisible = yScale.min;
+        const yMaxVisible = yScale.max;
+
         zonesUtilisateur.forEach(zone => {
-            const yCenter = (zone.yMin + zone.yMax) / 2;
-            const yPixel = yScale.getPixelForValue(yCenter);
+            // Vérifier si la zone est au moins partiellement visible
+            if (zone.yMax <= yMinVisible || zone.yMin >= yMaxVisible) {
+                return; // Zone complètement hors de vue
+            }
+
+            // Calculer le centre visible de la zone (clampé aux limites)
+            const zoneMinVisible = Math.max(zone.yMin, yMinVisible);
+            const zoneMaxVisible = Math.min(zone.yMax, yMaxVisible);
+            const yCenterVisible = (zoneMinVisible + zoneMaxVisible) / 2;
+
+            const yPixel = yScale.getPixelForValue(yCenterVisible);
 
             // Vérifier que la position est dans la zone du graphique
             if (yPixel >= chartArea.top && yPixel <= chartArea.bottom) {
-                // Utiliser une couleur plus foncée pour le texte (extraire de borderColor)
-                ctx.fillStyle = zone.borderColor || '#666666';
-                ctx.fillText(zone.label, chartArea.right - 5, yPixel);
+                // Trouver la couleur saturée correspondante ou utiliser noir par défaut
+                let couleurTexte = '#333333'; // Noir par défaut
+                for (const [mot, couleur] of Object.entries(couleursSaturees)) {
+                    if (zone.label && zone.label.toLowerCase().includes(mot.toLowerCase())) {
+                        couleurTexte = couleur;
+                        break;
+                    }
+                }
+                ctx.fillStyle = couleurTexte;
+                ctx.fillText(zone.label, xCenter, yPixel);
             }
         });
+
+        ctx.restore();
+    }
+};
+
+/**
+ * Plugin pour afficher les étiquettes des zones IDME (version 0-100%)
+ * Variante du plugin pour les graphiques en pourcentage (critères)
+ */
+const pluginEtiquettesZones100 = {
+    id: 'etiquettesZones100',
+    afterDraw(chart) {
+        const ctx = chart.ctx;
+        const chartArea = chart.chartArea;
+        const yScale = chart.scales.y;
+
+        // Zones en échelle 0-100
+        const zones = [
+            { yMin: 0, yMax: 40, label: 'Insuffisant', couleur: '#C62828' },
+            { yMin: 40, yMax: 65, label: 'En Développement', couleur: '#E65100' },
+            { yMin: 65, yMax: 75, label: 'Maîtrisé', couleur: '#2E7D32' },
+            { yMin: 75, yMax: 85, label: 'Maîtrisé', couleur: '#2E7D32' },
+            { yMin: 85, yMax: 103, label: 'Étendu', couleur: '#1565C0' }
+        ];
+
+        // Fusionner les zones adjacentes avec le même label
+        const zonesFusionnees = [];
+        zones.forEach(zone => {
+            const derniere = zonesFusionnees[zonesFusionnees.length - 1];
+            if (derniere && derniere.label === zone.label) {
+                derniere.yMax = zone.yMax;
+            } else {
+                zonesFusionnees.push({ ...zone });
+            }
+        });
+
+        ctx.save();
+        ctx.font = 'bold 12px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        const xCenter = (chartArea.left + chartArea.right) / 2;
+        const yMinVisible = yScale.min;
+        const yMaxVisible = yScale.max;
+
+        zonesFusionnees.forEach(zone => {
+            if (zone.yMax <= yMinVisible || zone.yMin >= yMaxVisible) {
+                return;
+            }
+
+            const zoneMinVisible = Math.max(zone.yMin, yMinVisible);
+            const zoneMaxVisible = Math.min(zone.yMax, yMaxVisible);
+            const yCenterVisible = (zoneMinVisible + zoneMaxVisible) / 2;
+
+            const yPixel = yScale.getPixelForValue(yCenterVisible);
+
+            if (yPixel >= chartArea.top && yPixel <= chartArea.bottom) {
+                ctx.fillStyle = zone.couleur;
+                ctx.fillText(zone.label, xCenter, yPixel);
+            }
+        });
+
+        ctx.restore();
+    }
+};
+
+/**
+ * Variables pour le graphique des critères
+ */
+let dernierDatasetSurvoleCriteresGlobal = -1;
+let zonesCriteres = [];
+
+/**
+ * Plugin pour afficher le nom du critère au bout de la courbe survolée
+ */
+const pluginNomCritereSurvol = {
+    id: 'nomCritereSurvol',
+    afterDraw(chart) {
+        const datasetIndex = dernierDatasetSurvoleCriteresGlobal;
+        if (datasetIndex === -1) {
+            zonesCriteres = [];
+            return;
+        }
+
+        const ctx = chart.ctx;
+        const chartArea = chart.chartArea;
+        const dataset = chart.data.datasets[datasetIndex];
+        if (!dataset) return;
+
+        const meta = chart.getDatasetMeta(datasetIndex);
+        if (!meta || !meta.data || meta.data.length === 0) return;
+
+        // Trouver le dernier point visible
+        let dernierPoint = null;
+        let dernierIndex = -1;
+        for (let i = meta.data.length - 1; i >= 0; i--) {
+            const point = meta.data[i];
+            if (point && dataset.data[i] !== null && dataset.data[i] !== undefined) {
+                dernierPoint = point;
+                dernierIndex = i;
+                break;
+            }
+        }
+
+        if (!dernierPoint) return;
+
+        // Couleur du critère
+        const couleur = dataset.borderColor;
+        const nomCritere = dataset.label;
+
+        ctx.save();
+        ctx.font = 'bold 12px Arial';
+
+        const textWidth = ctx.measureText(nomCritere).width;
+        const marge = 10;
+
+        // Vérifier si le texte peut tenir à droite du point
+        let x, textAlign;
+        if (dernierPoint.x + marge + textWidth <= chartArea.right) {
+            // Assez de place à droite
+            x = dernierPoint.x + marge;
+            textAlign = 'left';
+        } else {
+            // Pas assez de place : afficher à gauche du point
+            x = dernierPoint.x - marge;
+            textAlign = 'right';
+        }
+
+        // Position Y : légèrement au-dessus du point pour éviter le chevauchement
+        let y = dernierPoint.y - 15;
+        // S'assurer que le texte reste dans la zone du graphique
+        if (y < chartArea.top + 10) {
+            y = dernierPoint.y + 15; // Mettre en dessous si trop haut
+        }
+
+        ctx.textAlign = textAlign;
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = couleur;
+        ctx.fillText(nomCritere, x, y);
+
+        // Stocker la zone cliquable
+        const xZone = textAlign === 'left' ? x : x - textWidth;
+        zonesCriteres = [{
+            x: xZone,
+            y: y - 10,
+            width: textWidth,
+            height: 20,
+            datasetIndex: datasetIndex
+        }];
 
         ctx.restore();
     }
@@ -2136,6 +2517,9 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
         }
         const ctx = canvas.getContext('2d');
 
+        // Calculer les bornes Y dynamiques
+        const bornesY = calculerBornesYDynamiques(datasets);
+
         // Configuration du graphique
         const config = {
             type: 'line',
@@ -2268,8 +2652,8 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                         }
                     },
                     y: {
-                        min: 0,
-                        max: 1,
+                        min: bornesY.min,
+                        max: bornesY.max,
                         title: {
                             display: true,
                             text: 'Résultat',
@@ -2279,7 +2663,7 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                             callback: function(value) {
                                 return value.toFixed(2).replace('.', ',');
                             },
-                            stepSize: 0.20,
+                            stepSize: 0.05,
                             font: { size: 11 }
                         },
                         grid: {
@@ -2432,6 +2816,8 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
 
         // Fonction pour appliquer le verrouillage/déverrouillage
         function toggleVerrouillage(indexDataset) {
+            const selecteur = document.getElementById('selecteur-etudiant-spaghetti');
+
             if (datasetVerrouille === indexDataset) {
                 // Déverrouiller
                 datasetVerrouille = -1;
@@ -2441,6 +2827,8 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                     dataset.pointHoverRadius = 5;
                     dataset.pointHoverBackgroundColor = 'rgba(50, 50, 50, 0.9)';
                 });
+                // Réinitialiser le dropdown
+                if (selecteur) selecteur.value = '';
             } else {
                 // Verrouiller
                 datasetVerrouille = indexDataset;
@@ -2456,6 +2844,8 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                         dataset.pointHoverBackgroundColor = 'rgba(80, 80, 80, 0.3)';
                     }
                 });
+                // Synchroniser le dropdown avec la courbe verrouillée
+                if (selecteur) selecteur.value = indexDataset;
             }
             chart.update('none');
         }
@@ -2788,25 +3178,33 @@ function creerGraphiqueCriteres(canvasId, da) {
             '#607D8B'   // Bleu-gris
         ];
 
-        // Créer les datasets (une courbe par critère)
+        // Stocker les couleurs originales pour le survol
+        const couleursOriginales = {};
+
+        // Créer les datasets - toutes les courbes colorées par défaut
         const datasets = donnees.criteresUniques.map((critere, index) => {
             const couleur = COULEURS_CRITERES[index % COULEURS_CRITERES.length];
+            couleursOriginales[critere] = couleur;
 
             return {
                 label: critere,
                 data: donnees.criteres[critere],
                 borderColor: couleur,
-                backgroundColor: couleur + '20', // Transparence 20%
-                borderWidth: 2,
-                tension: 0.3,
-                pointRadius: 5,
-                pointHoverRadius: 7,
+                backgroundColor: 'transparent',
+                borderWidth: 1.5,
+                tension: 0.2,
+                pointRadius: 2,
+                pointHoverRadius: 5,
                 pointBackgroundColor: couleur,
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2,
+                pointHoverBackgroundColor: couleur,
+                hoverBorderWidth: 3,
+                hoverBorderColor: couleur,
                 spanGaps: false
             };
         });
+
+        // Réinitialiser la variable globale pour le plugin
+        dernierDatasetSurvoleCriteresGlobal = -1;
 
         // Obtenir le canvas
         const canvas = document.getElementById(canvasId);
@@ -2816,9 +3214,27 @@ function creerGraphiqueCriteres(canvasId, da) {
         }
         const ctx = canvas.getContext('2d');
 
+        // Calculer les bornes Y dynamiques (échelle 0-100)
+        const bornesY = calculerBornesYDynamiques100(datasets);
+
+        // Générer les zones à partir de l'échelle utilisateur (comme dans le tableau de bord)
+        const zonesUtilisateur = genererZonesDepuisEchelle();
+        const annotationsZones = {};
+        zonesUtilisateur.forEach((zone, index) => {
+            annotationsZones[`zone${index}`] = {
+                type: 'box',
+                yMin: zone.yMin * 100,  // Convertir 0-1 en 0-100
+                yMax: Math.min(zone.yMax * 100, 103),  // Plafonner à 103 pour l'espace visuel
+                backgroundColor: zone.backgroundColor,
+                borderWidth: 0,
+                drawTime: 'beforeDatasetsDraw'
+            };
+        });
+
         // Configuration du graphique
         const config = {
             type: 'line',
+            plugins: [pluginEtiquettesZones100, pluginNomCritereSurvol],
             data: {
                 labels: donnees.labels,
                 datasets: datasets
@@ -2829,37 +3245,17 @@ function creerGraphiqueCriteres(canvasId, da) {
                 plugins: {
                     title: {
                         display: true,
-                        text: 'Évolution des critères au fil des productions',
-                        font: { size: 16, weight: 'bold' }
+                        text: 'Développement des habiletés et compétences',
+                        font: { size: 16, weight: 'bold' },
+                        padding: { top: 10, bottom: 20 }
                     },
                     legend: {
-                        display: true,
-                        position: 'bottom',
-                        labels: {
-                            usePointStyle: true,
-                            padding: 15,
-                            font: { size: 12 }
-                        },
-                        onClick: function(e, legendItem, legend) {
-                            // ✨ NOUVELLE FONCTIONNALITÉ (8 déc 2025) : Persistance de la légende
-                            const index = legendItem.datasetIndex;
-                            const chart = legend.chart;
-                            const meta = chart.getDatasetMeta(index);
-
-                            // Toggle visibilité
-                            meta.hidden = meta.hidden === null ? !chart.data.datasets[index].hidden : null;
-
-                            // Sauvegarder l'état (nom du critère)
-                            const nomCritere = legendItem.text;
-                            etatLegendeGraphiqueCriteres[nomCritere] = meta.hidden === null ? true : false;
-
-                            chart.update();
-                        }
+                        display: false // Masquer la légende, le survol identifie les courbes
                     },
                     tooltip: {
-                        mode: 'point',
+                        mode: 'nearest',
                         intersect: true,
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        backgroundColor: 'rgba(0, 0, 0, 0.85)',
                         padding: 12,
                         titleFont: { size: 14, weight: 'bold' },
                         bodyFont: { size: 13 },
@@ -2867,119 +3263,92 @@ function creerGraphiqueCriteres(canvasId, da) {
                             label: function(context) {
                                 const critere = context.dataset.label;
                                 const valeur = context.parsed.y;
-                                return valeur !== null ? `${critere}: ${valeur.toFixed(1)}%` : `${critere}: —`;
+                                return valeur !== null ? `${critere}: ${valeur.toFixed(0)}%` : `${critere}: —`;
                             }
                         }
                     },
                     annotation: {
-                        annotations: {
-                            // ✨ NOUVEAU (8 déc 2025) : Zones colorées IDME en arrière-plan
-                            zone0: {
-                                type: 'box',
-                                yMin: 0,
-                                yMax: 40,
-                                backgroundColor: 'rgba(244, 67, 54, 0.15)',  // Rouge pâle
-                                borderColor: 'rgba(244, 67, 54, 0.3)',
-                                borderWidth: 0,
-                                drawTime: 'beforeDatasetsDraw'
-                            },
-                            zone1: {
-                                type: 'box',
-                                yMin: 40,
-                                yMax: 65,
-                                backgroundColor: 'rgba(255, 152, 0, 0.15)',  // Orange pâle
-                                borderColor: 'rgba(255, 152, 0, 0.3)',
-                                borderWidth: 0,
-                                drawTime: 'beforeDatasetsDraw'
-                            },
-                            zone2: {
-                                type: 'box',
-                                yMin: 65,
-                                yMax: 75,
-                                backgroundColor: 'rgba(255, 235, 59, 0.15)', // Jaune pâle
-                                borderColor: 'rgba(255, 235, 59, 0.3)',
-                                borderWidth: 0,
-                                drawTime: 'beforeDatasetsDraw'
-                            },
-                            zone3: {
-                                type: 'box',
-                                yMin: 75,
-                                yMax: 85,
-                                backgroundColor: 'rgba(139, 195, 74, 0.15)', // Vert clair pâle
-                                borderColor: 'rgba(139, 195, 74, 0.3)',
-                                borderWidth: 0,
-                                drawTime: 'beforeDatasetsDraw'
-                            },
-                            zone4: {
-                                type: 'box',
-                                yMin: 85,
-                                yMax: 100,
-                                backgroundColor: 'rgba(100, 181, 246, 0.15)', // Bleu clair pâle
-                                borderColor: 'rgba(100, 181, 246, 0.3)',
-                                borderWidth: 0,
-                                drawTime: 'beforeDatasetsDraw'
-                            }
-                        }
+                        annotations: annotationsZones
                     }
                 },
                 scales: {
                     x: {
                         title: {
                             display: true,
-                            text: 'Productions',
-                            font: { size: 13, weight: 'bold' }
+                            text: 'Activités d\'apprentissage',
+                            font: { size: 12, weight: 'bold' }
                         },
                         ticks: {
                             maxRotation: 45,
                             minRotation: 45,
-                            font: { size: 11 }
-                        }
+                            font: { size: 10 }
+                        },
+                        grid: { display: true, color: 'rgba(0,0,0,0.05)' }
                     },
                     y: {
                         title: {
                             display: true,
-                            text: 'Performance (%)',
-                            font: { size: 13, weight: 'bold' }
+                            text: 'Performance',
+                            font: { size: 12, weight: 'bold' }
                         },
-                        min: 0,
-                        max: 100,
+                        min: bornesY.min,
+                        max: bornesY.max,
                         ticks: {
-                            stepSize: 10,
+                            stepSize: 5,
                             callback: function(value) {
                                 return value + '%';
                             }
                         },
-                        grid: {
-                            color: function(context) {
-                                // Lignes de grille aux seuils clés
-                                if (context.tick.value === 40) return 'rgba(255, 0, 0, 0.2)'; // Insuffisant
-                                if (context.tick.value === 65) return 'rgba(255, 152, 0, 0.2)'; // Développement
-                                if (context.tick.value === 75) return 'rgba(76, 175, 80, 0.2)'; // Maîtrisé
-                                return 'rgba(0, 0, 0, 0.1)';
-                            }
-                        }
+                        grid: { display: true, color: 'rgba(0,0,0,0.08)' }
                     }
                 },
                 interaction: {
                     mode: 'nearest',
-                    axis: 'x',
+                    axis: 'xy',
                     intersect: false
+                },
+                onHover: function(event, activeElements, chart) {
+                    let datasetIndex = -1;
+
+                    if (activeElements.length > 0) {
+                        datasetIndex = activeElements[0].datasetIndex;
+                    }
+
+                    if (datasetIndex === dernierDatasetSurvoleCriteresGlobal) return;
+                    dernierDatasetSurvoleCriteresGlobal = datasetIndex;
+
+                    chart.data.datasets.forEach((dataset, idx) => {
+                        const couleurOriginale = couleursOriginales[dataset.label];
+                        const nbPoints = dataset.data.length;
+
+                        if (datasetIndex === -1) {
+                            // Aucun survol : toutes les courbes colorées
+                            dataset.borderColor = couleurOriginale;
+                            dataset.borderWidth = 1.5;
+                            dataset.pointBackgroundColor = Array(nbPoints).fill(couleurOriginale);
+                            dataset.pointRadius = Array(nbPoints).fill(2);
+                        } else if (idx === datasetIndex) {
+                            // Courbe survolée : mise en évidence
+                            dataset.borderColor = couleurOriginale;
+                            dataset.borderWidth = 3;
+                            dataset.pointBackgroundColor = Array(nbPoints).fill(couleurOriginale);
+                            dataset.pointRadius = Array(nbPoints).fill(4);
+                        } else {
+                            // Autres courbes : atténuées
+                            dataset.borderColor = 'rgba(150, 150, 150, 0.3)';
+                            dataset.borderWidth = 1;
+                            dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(150, 150, 150, 0.3)');
+                            dataset.pointRadius = Array(nbPoints).fill(1);
+                        }
+                    });
+
+                    chart.update('none');
                 }
             }
         };
 
         // Créer le graphique
         const chart = new Chart(ctx, config);
-
-        // ✨ NOUVELLE FONCTIONNALITÉ (8 déc 2025) : Restaurer l'état de la légende
-        // Permet de comparer le même critère entre plusieurs élèves
-        donnees.criteresUniques.forEach((critere, index) => {
-            if (etatLegendeGraphiqueCriteres[critere] === false) {
-                const meta = chart.getDatasetMeta(index);
-                meta.hidden = true;
-            }
-        });
-        chart.update();
 
         console.log(`✅ Graphique critères créé avec ${donnees.criteresUniques.length} critères`);
         return chart;
@@ -2996,6 +3365,7 @@ function creerGraphiqueCriteres(canvasId, da) {
 
 // Exporter les fonctions pour utilisation globale
 window.creerGraphiqueIndividuel = creerGraphiqueIndividuel;
+window.rafraichirGraphiqueIndividuel = rafraichirGraphiqueIndividuel;
 window.creerGraphiqueGroupeMoyennes = creerGraphiqueGroupeMoyennes;
 window.creerGraphiqueGroupeSpaghettiACP = creerGraphiqueGroupeSpaghettiACP;
 window.rafraichirGraphiqueSpaghettiACP = rafraichirGraphiqueSpaghettiACP;
