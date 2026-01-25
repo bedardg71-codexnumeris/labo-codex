@@ -92,6 +92,7 @@
   - **Variable confondante** : Profil des etudiants
     - A25 : beaucoup d'eleves en sciences (meilleurs resultats attendus)
     - Documenter le profil (programme d'etudes) par trimestre pour nuancer les conclusions
+    - **Donnees disponibles** : programmes dans l'application et/ou tableurs sources
   - **Format** : Rapport genere (PDF ou markdown) avec tableaux et graphiques
   - **Prerequis** : #35 (Import H2024) pour avoir les 4 trimestres
 
