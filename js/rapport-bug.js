@@ -1,6 +1,6 @@
 /* ===============================
    MODULE: RAPPORT DE BUG POUR TESTEURS
-   Beta 95.7 - 23 janvier 2026
+   Beta 96 - 25 janvier 2026
 
    Permet aux testeurs d'envoyer facilement des rapports de bug
    avec les informations techniques nécessaires au débogage.
@@ -21,7 +21,7 @@
  * Version actuelle de l'application
  * ⚠️ MODIFIER ICI lors de chaque nouvelle release
  */
-const VERSION_APP = 'Beta 95.7';
+const VERSION_APP = 'Beta 96';
 
 // ===============================
 // CAPTURE DES ERREURS CONSOLE
