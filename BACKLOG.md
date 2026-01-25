@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 23 janvier 2026 (12h05)
+> **Derniere mise a jour** : 25 janvier 2026
 
 ---
 
@@ -160,6 +160,17 @@
   - Ajouter les nouveaux noms proteges
 
 ---
+
+## Complete (Beta 95.7 - 25 janvier 2026)
+
+- [x] **Import historique A2024** Archivage trimestre Automne 2024
+  - Import retroactif : 55 etudiants, 2 groupes, 750 evaluations, 1650 presences
+  - Echelle IDME (I=40%, D=65%, M=85%, E=100%) documentee dans bibliotheque
+  - Pratique : 6 artefacts recents (60%) + Analyse finale (40%)
+  - Correction tri "recents" par numero de production (pas par date)
+  - Scripts d'import et diagnostic dans `docs/A2024/`
+  - Trimestre archive en lecture seule
+  - **Fichiers modifies** : `js/portfolio.js`, `js/profil-etudiant.js`
 
 ## Complete (Beta 95.7 - 22 janvier 2026)
 
