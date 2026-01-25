@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 96
 
 **Date** : 25 janvier 2026
-**Version** : Beta 96 (build 0125)
+**Version** : Beta 96 (build 0125-1105)
 **Statut** : Application fonctionnelle pour H2026, A2024 archive
 
 ---
