@@ -3576,24 +3576,24 @@
 
                         <!-- Carte Note -->
                         <div id="note-distribution-acpe" class="carte-info-toggle carte-info-note" style="display: none;">
-                            <strong>Courbes de Gauss :</strong> Montre la distribution normale de chaque indice avec la moyenne (μ) et l'écart-type (σ).
+                            <strong>Distribution réelle :</strong> Combine les courbes de Gauss théoriques avec la position réelle de chaque étudiant.
                             <br><br>
                             <strong>Lecture du graphique :</strong>
                             <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+                                <li><strong>Points colorés</strong> = position réelle de chaque étudiant sur l'axe X</li>
+                                <li><strong>Bandes colorées</strong> = zones ±1σ (foncé) et ±2σ (clair) avec le comptage réel</li>
                                 <li><strong>Ligne pleine</strong> = moyenne (μ) de l'indice</li>
-                                <li><strong>Lignes pointillées</strong> = écarts-types (μ±σ), contient ~68% des étudiants</li>
-                                <li><strong>Courbe étroite</strong> = groupe homogène (petit σ)</li>
-                                <li><strong>Courbe large</strong> = grande variabilité (grand σ)</li>
+                                <li><strong>Lignes pointillées</strong> = écarts-types (±σ)</li>
                             </ul>
-                            <strong>Survolez</strong> une courbe pour voir μ, σ et n (nombre d'étudiants).
+                            <strong>Survolez</strong> un point pour voir sa position relative (en σ) par rapport à la moyenne.
                         </div>
 
-                        <div style="position: relative; height: 400px; width: 100%;">
+                        <div style="position: relative; height: 450px; width: 100%;">
                             <canvas id="graphique-distribution-acpe"></canvas>
                         </div>
 
                         <p class="text-muted" style="margin-top: 1rem; font-size: 0.85rem; font-style: italic;">
-                            💡 Chaque courbe montre où se situent les étudiants. La moyenne (μ) est au centre, et ~68% des étudiants sont entre μ-σ et μ+σ.
+                            💡 Les points montrent où se situent vraiment les étudiants. En haut: "±1σ: X/N (Y%)" = X étudiants sur N dans la zone centrale.
                         </p>
                     </div>
 

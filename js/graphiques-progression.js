@@ -3433,8 +3433,53 @@ function creerDatasetGauss(label, points, couleur) {
 }
 
 /**
+ * Compte le nombre de valeurs dans une plage donnée
+ * @param {Array} valeurs - Tableau de valeurs
+ * @param {number} min - Borne inférieure
+ * @param {number} max - Borne supérieure
+ * @returns {number} - Nombre de valeurs dans la plage
+ */
+function compterValeursEntre(valeurs, min, max) {
+    return valeurs.filter(v => v >= min && v <= max).length;
+}
+
+/**
+ * Crée un dataset de points pour afficher les étudiants sur l'axe X
+ * @param {string} label - Label du dataset
+ * @param {Array} valeurs - Valeurs des étudiants
+ * @param {string} couleur - Couleur hex
+ * @param {number} yPosition - Position Y relative (0-1) dans le graphique
+ * @returns {Object} - Dataset Chart.js
+ */
+function creerDatasetPoints(label, valeurs, couleur, yPosition) {
+    if (!valeurs || valeurs.length === 0) {
+        return { label, data: [], borderColor: couleur };
+    }
+
+    // Créer les points avec une légère variation Y pour éviter superposition totale
+    const points = valeurs.map((v, i) => ({
+        x: v,
+        y: yPosition + (Math.random() - 0.5) * 0.3 // Léger jitter
+    }));
+
+    return {
+        label: label + ' (étudiants)',
+        data: points,
+        borderColor: couleur,
+        backgroundColor: hexVersRgba(couleur, 0.7),
+        pointRadius: 6,
+        pointHoverRadius: 8,
+        pointStyle: 'circle',
+        showLine: false,
+        parsing: { xAxisKey: 'x', yAxisKey: 'y' },
+        order: 0 // Afficher au-dessus des courbes
+    };
+}
+
+/**
  * Crée un graphique de distribution normale (Gauss) des indices ACPE
  * Affiche les courbes avec moyenne (μ) au centre et écarts-types (σ) marqués
+ * Inclut les points individuels des étudiants et le comptage par zone σ
  * @param {string} canvasId - ID du canvas HTML
  * @returns {Chart|null} - Instance Chart.js ou null si erreur
  */
@@ -3518,12 +3563,12 @@ function creerGraphiqueDistributionACPE(canvasId) {
         const statsP = calculerStatistiques(valeursP);
         const statsE = calculerStatistiques(valeursE);
 
-        // Stocker toutes les stats pour le plugin
+        // Stocker toutes les stats et valeurs pour le plugin
         const statistiques = {
-            A: statsA,
-            C: statsC,
-            P: statsP,
-            E: statsE
+            A: { ...statsA, valeurs: valeursA },
+            C: { ...statsC, valeurs: valeursC },
+            P: { ...statsP, valeurs: valeursP },
+            E: { ...statsE, valeurs: valeursE }
         };
 
         console.log(`📊 [Distribution ACPE] Stats: A(μ=${(statsA.moyenne*100).toFixed(1)}%, σ=${(statsA.ecartType*100).toFixed(1)}%), C(μ=${(statsC.moyenne*100).toFixed(1)}%, σ=${(statsC.ecartType*100).toFixed(1)}%)`);
@@ -3534,15 +3579,42 @@ function creerGraphiqueDistributionACPE(canvasId) {
         const courbeP = genererCourbeGauss(statsP.moyenne, statsP.ecartType);
         const courbeE = genererCourbeGauss(statsE.moyenne, statsE.ecartType);
 
-        // Créer les datasets
-        const datasets = [
+        // Trouver la hauteur maximale des courbes pour positionner les points
+        const maxY = Math.max(
+            ...courbeA.map(p => p.y),
+            ...courbeC.map(p => p.y),
+            ...courbeP.map(p => p.y),
+            ...courbeE.map(p => p.y)
+        );
+
+        // Créer les datasets des courbes
+        const datasetsCourbes = [
             creerDatasetGauss('Assiduité (A)', courbeA, COULEURS_INDICES.A),
             creerDatasetGauss('Complétion (C)', courbeC, COULEURS_INDICES.C),
             creerDatasetGauss('Performance (P)', courbeP, COULEURS_INDICES.P),
             creerDatasetGauss('Engagement (E)', courbeE, COULEURS_INDICES.E)
         ].filter(d => d.data && d.data.length > 0);
 
-        if (datasets.length === 0) {
+        // Créer les datasets des points (étudiants individuels)
+        // Positionner les points à différentes hauteurs pour chaque indice
+        const yPositions = {
+            A: maxY * 0.15,
+            C: maxY * 0.35,
+            P: maxY * 0.55,
+            E: maxY * 0.75
+        };
+
+        const datasetsPoints = [
+            creerDatasetPoints('A', valeursA, COULEURS_INDICES.A, yPositions.A),
+            creerDatasetPoints('C', valeursC, COULEURS_INDICES.C, yPositions.C),
+            creerDatasetPoints('P', valeursP, COULEURS_INDICES.P, yPositions.P),
+            creerDatasetPoints('E', valeursE, COULEURS_INDICES.E, yPositions.E)
+        ].filter(d => d.data && d.data.length > 0);
+
+        // Combiner tous les datasets
+        const datasets = [...datasetsCourbes, ...datasetsPoints];
+
+        if (datasetsCourbes.length === 0) {
             console.warn('[Distribution ACPE] Aucune donnée à afficher');
             ctx.font = '14px Arial';
             ctx.fillStyle = '#666';
@@ -3551,13 +3623,13 @@ function creerGraphiqueDistributionACPE(canvasId) {
             return null;
         }
 
-        // Plugin pour afficher les lignes μ et σ
-        const pluginLignesStatistiques = {
-            id: 'lignesStatistiquesACPE',
-            afterDraw(chart) {
+        // Plugin pour afficher les bandes σ, lignes μ et comptages
+        const pluginBandesEtLignes = {
+            id: 'bandesEtLignesACPE',
+            beforeDatasetsDraw(chart) {
+                // Dessiner les bandes σ AVANT les courbes
                 const ctx = chart.ctx;
                 const xScale = chart.scales.x;
-                const yScale = chart.scales.y;
                 const chartArea = chart.chartArea;
 
                 ctx.save();
@@ -3565,6 +3637,53 @@ function creerGraphiqueDistributionACPE(canvasId) {
                 const indices = ['A', 'C', 'P', 'E'];
                 const couleurs = [COULEURS_INDICES.A, COULEURS_INDICES.C, COULEURS_INDICES.P, COULEURS_INDICES.E];
 
+                indices.forEach((indice, i) => {
+                    const stats = statistiques[indice];
+                    if (stats.moyenne === null) return;
+
+                    const mu = stats.moyenne;
+                    const sigma = stats.ecartType;
+                    const couleur = couleurs[i];
+
+                    // Bande μ±1σ (plus foncée)
+                    const x1SigmaMin = Math.max(0, mu - sigma);
+                    const x1SigmaMax = Math.min(1, mu + sigma);
+                    const px1Min = xScale.getPixelForValue(x1SigmaMin);
+                    const px1Max = xScale.getPixelForValue(x1SigmaMax);
+
+                    ctx.fillStyle = hexVersRgba(couleur, 0.15);
+                    ctx.fillRect(px1Min, chartArea.top, px1Max - px1Min, chartArea.bottom - chartArea.top);
+
+                    // Bande μ±2σ (plus claire, uniquement les parties extérieures à ±1σ)
+                    const x2SigmaMin = Math.max(0, mu - 2 * sigma);
+                    const x2SigmaMax = Math.min(1, mu + 2 * sigma);
+
+                    ctx.fillStyle = hexVersRgba(couleur, 0.07);
+                    // Partie gauche (entre -2σ et -1σ)
+                    if (x2SigmaMin < x1SigmaMin) {
+                        const px2Min = xScale.getPixelForValue(x2SigmaMin);
+                        ctx.fillRect(px2Min, chartArea.top, px1Min - px2Min, chartArea.bottom - chartArea.top);
+                    }
+                    // Partie droite (entre +1σ et +2σ)
+                    if (x2SigmaMax > x1SigmaMax) {
+                        const px2Max = xScale.getPixelForValue(x2SigmaMax);
+                        ctx.fillRect(px1Max, chartArea.top, px2Max - px1Max, chartArea.bottom - chartArea.top);
+                    }
+                });
+
+                ctx.restore();
+            },
+            afterDraw(chart) {
+                const ctx = chart.ctx;
+                const xScale = chart.scales.x;
+                const chartArea = chart.chartArea;
+
+                ctx.save();
+
+                const indices = ['A', 'C', 'P', 'E'];
+                const couleurs = [COULEURS_INDICES.A, COULEURS_INDICES.C, COULEURS_INDICES.P, COULEURS_INDICES.E];
+
+                // Dessiner les lignes μ et σ
                 indices.forEach((indice, i) => {
                     const stats = statistiques[indice];
                     if (stats.moyenne === null) return;
@@ -3606,9 +3725,10 @@ function creerGraphiqueDistributionACPE(canvasId) {
                     }
                 });
 
-                // Afficher les légendes μ et σ en haut
                 ctx.setLineDash([]);
-                ctx.font = 'bold 11px Arial';
+
+                // Afficher les légendes μ avec comptage σ en haut
+                ctx.font = 'bold 10px Arial';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'top';
 
@@ -3618,14 +3738,21 @@ function creerGraphiqueDistributionACPE(canvasId) {
                     if (stats.moyenne === null) return;
 
                     const mu = stats.moyenne;
+                    const sigma = stats.ecartType;
+                    const valeurs = stats.valeurs;
+                    const n = valeurs.length;
                     const xMu = xScale.getPixelForValue(mu);
 
-                    // Afficher μ au-dessus de la ligne
+                    // Compter les étudiants dans chaque zone
+                    const dans1Sigma = compterValeursEntre(valeurs, mu - sigma, mu + sigma);
+                    const dans2Sigma = compterValeursEntre(valeurs, mu - 2 * sigma, mu + 2 * sigma);
+
+                    // Afficher μ et comptage au-dessus de la ligne
                     ctx.fillStyle = couleurs[i];
-                    const muLabel = `μ${indice}=${(mu * 100).toFixed(0)}%`;
+                    const muLabel = `μ${indice}=${(mu * 100).toFixed(0)}% | ±1σ: ${dans1Sigma}/${n} (${Math.round(dans1Sigma/n*100)}%)`;
                     ctx.fillText(muLabel, xMu, chartArea.top + offsetY);
 
-                    offsetY += 14; // Décaler pour éviter superposition
+                    offsetY += 13; // Décaler pour éviter superposition
                 });
 
                 ctx.restore();
@@ -3635,7 +3762,7 @@ function creerGraphiqueDistributionACPE(canvasId) {
         // Configuration du graphique
         const config = {
             type: 'line',
-            plugins: [pluginLignesStatistiques],
+            plugins: [pluginBandesEtLignes],
             data: {
                 datasets: datasets
             },
@@ -3643,56 +3770,81 @@ function creerGraphiqueDistributionACPE(canvasId) {
                 responsive: true,
                 maintainAspectRatio: false,
                 layout: {
-                    padding: { top: 60 } // Espace pour les labels μ
+                    padding: { top: 70 } // Espace pour les labels μ avec comptage
                 },
                 plugins: {
                     title: {
                         display: true,
-                        text: 'Distribution normale des indices ACPE',
+                        text: 'Distribution des indices ACPE',
                         font: { size: 16, weight: 'bold' },
-                        padding: { top: 10, bottom: 10 }
+                        padding: { top: 10, bottom: 5 }
                     },
                     subtitle: {
                         display: true,
-                        text: 'Lignes pleines = moyenne (μ) | Lignes pointillées = écart-type (±σ)',
-                        font: { size: 11, style: 'italic' },
+                        text: 'Courbes de Gauss + points = position réelle des étudiants | Bandes colorées = zones ±1σ et ±2σ',
+                        font: { size: 10, style: 'italic' },
                         color: '#666',
-                        padding: { bottom: 15 }
+                        padding: { bottom: 10 }
                     },
                     legend: {
                         display: true,
                         position: 'bottom',
                         labels: {
                             usePointStyle: true,
-                            padding: 15,
-                            font: { size: 12 }
+                            padding: 12,
+                            font: { size: 11 },
+                            // Filtrer pour n'afficher que les courbes, pas les points
+                            filter: function(item) {
+                                return !item.text.includes('(étudiants)');
+                            }
                         }
                     },
                     tooltip: {
                         enabled: true,
                         mode: 'nearest',
-                        intersect: false,
+                        intersect: true,
                         backgroundColor: 'rgba(0, 0, 0, 0.85)',
                         padding: 12,
                         callbacks: {
                             title: function(items) {
                                 if (items.length > 0) {
-                                    return `Valeur: ${(items[0].parsed.x * 100).toFixed(0)}%`;
+                                    const valeur = items[0].parsed.x;
+                                    return `Valeur: ${(valeur * 100).toFixed(1)}%`;
                                 }
                                 return '';
                             },
                             label: function(context) {
-                                const indice = context.dataset.label.match(/\(([ACPE])\)/)?.[1];
+                                const label = context.dataset.label;
+                                // Si c'est un point d'étudiant
+                                if (label.includes('(étudiants)')) {
+                                    const indice = label.charAt(0); // A, C, P ou E
+                                    const stats = statistiques[indice];
+                                    const valeur = context.parsed.x;
+                                    if (stats && stats.moyenne !== null) {
+                                        const ecartMu = ((valeur - stats.moyenne) / stats.ecartType).toFixed(2);
+                                        const position = ecartMu >= 0 ? `+${ecartMu}σ` : `${ecartMu}σ`;
+                                        return [
+                                            `Étudiant - Indice ${indice}`,
+                                            `  Valeur: ${(valeur * 100).toFixed(1)}%`,
+                                            `  Position: ${position} par rapport à μ`
+                                        ];
+                                    }
+                                    return `Indice ${indice}: ${(valeur * 100).toFixed(1)}%`;
+                                }
+                                // Si c'est une courbe de Gauss
+                                const indice = label.match(/\(([ACPE])\)/)?.[1];
                                 const stats = statistiques[indice];
                                 if (stats && stats.moyenne !== null) {
+                                    const dans1Sigma = compterValeursEntre(stats.valeurs, stats.moyenne - stats.ecartType, stats.moyenne + stats.ecartType);
                                     return [
-                                        context.dataset.label,
+                                        label,
                                         `  μ = ${(stats.moyenne * 100).toFixed(1)}%`,
                                         `  σ = ${(stats.ecartType * 100).toFixed(1)}%`,
-                                        `  n = ${stats.n} étudiants`
+                                        `  n = ${stats.n} étudiants`,
+                                        `  Dans ±1σ: ${dans1Sigma} (${Math.round(dans1Sigma/stats.n*100)}%)`
                                     ];
                                 }
-                                return context.dataset.label;
+                                return label;
                             }
                         }
                     }
@@ -3733,8 +3885,8 @@ function creerGraphiqueDistributionACPE(canvasId) {
                 },
                 interaction: {
                     mode: 'nearest',
-                    axis: 'x',
-                    intersect: false
+                    axis: 'xy',
+                    intersect: true
                 }
             }
         };
