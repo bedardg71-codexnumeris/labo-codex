@@ -1079,7 +1079,7 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
         const nomsIndices = {
             'A': 'Assiduité',
             'C': 'Complétion',
-            'P': 'Performance'
+            'P': 'Construction de P'
         };
 
         // Couleurs des indices
@@ -1089,8 +1089,12 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
             'P': '#4CAF50'
         };
 
+        // Décalage visuel aléatoire pour séparer les courbes superposées (±1.5%)
+        const genererOffset = () => (Math.random() - 0.5) * 0.03;
+
         // Créer un dataset par étudiant
         const datasets = etudiants.map(etudiant => {
+            const offsetEtudiant = genererOffset();
             const data = snapshots.map(snapshot => {
                 const etudiantSnapshot = snapshot.etudiants?.find(e => e.da === etudiant.da);
                 if (!etudiantSnapshot) return null;
@@ -1111,6 +1115,11 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
                 // Convertir en 0-1 si en pourcentage (valeurs > 1)
                 if (valeur !== null && valeur !== undefined && valeur > 1) {
                     valeur = valeur / 100;
+                }
+
+                // Appliquer le décalage visuel pour séparer les courbes superposées
+                if (valeur !== null && valeur !== undefined) {
+                    valeur = Math.max(0, Math.min(1, valeur + offsetEtudiant));
                 }
 
                 return valeur;
@@ -1393,6 +1402,18 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
             canvas.style.cursor = surElement ? 'pointer' : 'default';
         });
 
+        // Peupler le dropdown des étudiants
+        const selecteurEtudiant = document.getElementById('selecteur-etudiant-acp');
+        if (selecteurEtudiant) {
+            selecteurEtudiant.innerHTML = '<option value="">-- Sélectionner --</option>';
+            datasets.forEach((dataset, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = dataset.label;
+                selecteurEtudiant.appendChild(option);
+            });
+        }
+
         console.log(`✅ Graphique spaghetti ACP créé (${indice}) avec ${datasets.length} étudiants`);
         return chart;
 
@@ -1409,6 +1430,61 @@ function rafraichirGraphiqueSpaghettiACP() {
     const selecteur = document.getElementById('selecteur-indice-acp');
     const indice = selecteur ? selecteur.value : 'A';
     creerGraphiqueGroupeSpaghettiACP('graphique-groupe-moyennes', indice);
+}
+
+/**
+ * Sélectionne un étudiant dans le graphique ACP via le dropdown
+ */
+function selectionnerEtudiantACP() {
+    const selecteur = document.getElementById('selecteur-etudiant-acp');
+    if (!selecteur || !graphiqueSpaghettiACPInstance) return;
+
+    const indexStr = selecteur.value;
+    if (indexStr === '') {
+        // Désélectionner - déverrouiller si verrouillé
+        if (datasetVerrouilleACP >= 0) {
+            datasetVerrouilleACP = -1;
+            dernierDatasetSurvoleACP = -1;
+            graphiqueSpaghettiACPInstance.data.datasets.forEach(dataset => {
+                const nbPoints = dataset.data.length;
+                dataset.borderColor = 'rgba(50, 50, 50, 0.4)';
+                dataset.borderWidth = 1.5;
+                dataset.pointRadius = Array(nbPoints).fill(2);
+                dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(50, 50, 50, 0.5)');
+                dataset.pointHoverRadius = 5;
+                dataset.pointHoverBackgroundColor = 'rgba(50, 50, 50, 0.9)';
+            });
+            graphiqueSpaghettiACPInstance.update('none');
+        }
+        return;
+    }
+
+    const index = parseInt(indexStr);
+    // Simuler un verrouillage sur cet étudiant
+    datasetVerrouilleACP = index;
+    dernierDatasetSurvoleACP = index;
+
+    const chart = graphiqueSpaghettiACPInstance;
+    chart.data.datasets.forEach((dataset, idx) => {
+        const nbPoints = dataset.data.length;
+        if (idx === index) {
+            dataset.borderColor = '#E91E63';
+            dataset.borderWidth = 3;
+            dataset.pointRadius = Array(nbPoints).fill(4);
+            dataset.pointBackgroundColor = Array(nbPoints).fill('#E91E63');
+            dataset.pointHoverRadius = 5;
+            dataset.pointHoverBackgroundColor = '#E91E63';
+        } else {
+            dataset.borderColor = 'rgba(80, 80, 80, 0.35)';
+            dataset.borderWidth = 1;
+            dataset.pointRadius = Array(nbPoints).fill(1);
+            dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(80, 80, 80, 0.3)');
+            dataset.pointHoverRadius = 1;
+            dataset.pointHoverBackgroundColor = 'rgba(80, 80, 80, 0.3)';
+        }
+    });
+    chart.update('none');
+    console.log(`🔒 Étudiant sélectionné (dropdown): ${chart.data.datasets[index]?.label}`);
 }
 
 /* ===============================
@@ -2438,6 +2514,18 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
             canvas.style.cursor = surElement ? 'pointer' : 'default';
         });
 
+        // Peupler le dropdown des étudiants
+        const selecteurEtudiant = document.getElementById('selecteur-etudiant-spaghetti');
+        if (selecteurEtudiant) {
+            selecteurEtudiant.innerHTML = '<option value="">-- Sélectionner --</option>';
+            datasets.forEach((dataset, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = dataset.label;
+                selecteurEtudiant.appendChild(option);
+            });
+        }
+
         console.log(`✅ Graphique spaghetti créé avec ${datasets.length} trajectoires sur ${productionsArtefacts.length} artefacts`);
         return chart;
 
@@ -2445,6 +2533,62 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
         console.error('❌ Erreur création graphique spaghetti:', error);
         return null;
     }
+}
+
+/**
+ * Sélectionne un étudiant dans le graphique spaghetti productions via le dropdown
+ */
+function selectionnerEtudiantSpaghetti() {
+    const selecteur = document.getElementById('selecteur-etudiant-spaghetti');
+    if (!selecteur || !graphiqueSpaghettiInstance) return;
+
+    const indexStr = selecteur.value;
+    if (indexStr === '') {
+        // Désélectionner - déverrouiller si verrouillé
+        if (datasetVerrouille >= 0) {
+            datasetVerrouille = -1;
+            dernierDatasetSurvole = -1;
+            dernierPointSurvole = -1;
+            graphiqueSpaghettiInstance.data.datasets.forEach(dataset => {
+                const nbPoints = dataset.data.length;
+                dataset.borderColor = 'rgba(50, 50, 50, 0.4)';
+                dataset.borderWidth = 1.5;
+                dataset.pointRadius = Array(nbPoints).fill(2);
+                dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(50, 50, 50, 0.5)');
+                dataset.pointHoverRadius = 5;
+                dataset.pointHoverBackgroundColor = 'rgba(50, 50, 50, 0.9)';
+            });
+            graphiqueSpaghettiInstance.update('none');
+        }
+        return;
+    }
+
+    const index = parseInt(indexStr);
+    // Simuler un verrouillage sur cet étudiant
+    datasetVerrouille = index;
+    dernierDatasetSurvole = index;
+
+    const chart = graphiqueSpaghettiInstance;
+    chart.data.datasets.forEach((dataset, idx) => {
+        const nbPoints = dataset.data.length;
+        if (idx === index) {
+            dataset.borderColor = '#E91E63';
+            dataset.borderWidth = 3;
+            dataset.pointRadius = Array(nbPoints).fill(4);
+            dataset.pointBackgroundColor = Array(nbPoints).fill('#E91E63');
+            dataset.pointHoverRadius = 5;
+            dataset.pointHoverBackgroundColor = '#E91E63';
+        } else {
+            dataset.borderColor = 'rgba(80, 80, 80, 0.35)';
+            dataset.borderWidth = 1;
+            dataset.pointRadius = Array(nbPoints).fill(1);
+            dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(80, 80, 80, 0.3)');
+            dataset.pointHoverRadius = 1;
+            dataset.pointHoverBackgroundColor = 'rgba(80, 80, 80, 0.3)';
+        }
+    });
+    chart.update('none');
+    console.log(`🔒 Étudiant sélectionné (dropdown): ${chart.data.datasets[index]?.label}`);
 }
 
 /**
@@ -2855,8 +2999,10 @@ window.creerGraphiqueIndividuel = creerGraphiqueIndividuel;
 window.creerGraphiqueGroupeMoyennes = creerGraphiqueGroupeMoyennes;
 window.creerGraphiqueGroupeSpaghettiACP = creerGraphiqueGroupeSpaghettiACP;
 window.rafraichirGraphiqueSpaghettiACP = rafraichirGraphiqueSpaghettiACP;
+window.selectionnerEtudiantACP = selectionnerEtudiantACP;
 window.creerGraphiqueGroupeSpaghetti = creerGraphiqueGroupeSpaghetti;
 window.rafraichirGraphiqueSpaghetti = rafraichirGraphiqueSpaghetti;
+window.selectionnerEtudiantSpaghetti = selectionnerEtudiantSpaghetti;
 window.creerGraphiqueCriteres = creerGraphiqueCriteres;
 window.detruireGraphique = detruireGraphique;
 
