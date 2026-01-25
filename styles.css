@@ -8947,7 +8947,7 @@ label:has(+ textarea:disabled) {
 /* === INDICATEURS A-C-P-E (Overlay 20%) === */
 
 .barre-indicateur {
-    height: 40px;
+    height: 55px; /* 🆕 BETA 96: Augmenté de 40px pour meilleure lisibilité */
     border-radius: var(--radius-pill);
     position: relative;
     background: linear-gradient(to right,
@@ -8960,6 +8960,7 @@ label:has(+ textarea:disabled) {
         #0ea5e9 100%  /* Bleu ciel */
     );
     box-shadow: var(--shadow-subtil);
+    overflow: hidden; /* 🆕 BETA 96: Pour contenir la courbe de Gauss */
 }
 
 .barre-indicateur-overlay {
@@ -8973,10 +8974,41 @@ label:has(+ textarea:disabled) {
     pointer-events: none;
 }
 
+/* 🆕 BETA 96: Mini-courbe de Gauss superposée sur la barre */
+.barre-gauss-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.barre-gauss-svg path {
+    fill: rgba(255, 255, 255, 0.4);
+    stroke: rgba(255, 255, 255, 0.8);
+    stroke-width: 1.5;
+}
+
+/* Ligne verticale pour la moyenne μ */
+.barre-gauss-svg .ligne-mu {
+    stroke: rgba(255, 255, 255, 0.9);
+    stroke-width: 2;
+    stroke-dasharray: none;
+}
+
+/* Lignes verticales pour ±σ */
+.barre-gauss-svg .ligne-sigma {
+    stroke: rgba(255, 255, 255, 0.6);
+    stroke-width: 1;
+    stroke-dasharray: 4 3;
+}
+
 /* === PATTERNS D'APPRENTISSAGE (Overlay 35%) === */
 
 .barre-patterns {
-    height: 30px;
+    height: 45px; /* 🆕 BETA 96: Augmenté de 30px pour meilleure lisibilité */
     border-radius: var(--radius-pill);  /* 20px - pill */
     position: relative;
     background: linear-gradient(to right,
@@ -9003,7 +9035,7 @@ label:has(+ textarea:disabled) {
 /* === MODÈLE RàI (Overlay 40%) === */
 
 .barre-rai {
-    height: 30px;
+    height: 45px; /* 🆕 BETA 96: Augmenté de 30px pour meilleure lisibilité */
     border-radius: var(--radius-pill);  /* 20px - pill */
     position: relative;
     background: linear-gradient(to right,

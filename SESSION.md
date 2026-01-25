@@ -29,16 +29,14 @@
 - **Graphique spaghetti** : Visualisation de l'évolution de tous les étudiants (nouveau Beta 96)
 
 ### Derniere tache completee (25 janvier - Beta 96)
-- **GRAPHIQUE DISTRIBUTION ACPE** : Courbes de Gauss avec distribution réelle
-  - Visualise la répartition des indices A, C, P, E parmi les étudiants
-  - **Courbes de Gauss** basées sur μ (moyenne) et σ (écart-type) calculés
-  - **Points individuels** : Chaque étudiant est affiché comme un point sur l'axe X
-  - **Bandes colorées σ** : Zones ±1σ (foncées) et ±2σ (claires) avec comptage réel
-  - **Comptage en temps réel** : Affiche "±1σ: X/N (Y%)" pour chaque indice
-  - **Tooltips enrichis** : Position de l'étudiant en σ par rapport à μ
-  - Interprétation : courbe étroite = groupe homogène, courbe large = grande variabilité
-  - **Fonction créée** : `creerGraphiqueDistributionACPE(canvasId)`
-  - **Fichiers modifiés** : `index.html`, `js/graphiques-progression.js`, `js/tableau-bord-apercu.js`
+- **MINI-COURBES DE GAUSS INTÉGRÉES** : Distribution directement dans les barres
+  - **Suppression** du graphique séparé "Distribution des indices ACPE" (trop chargé)
+  - **Mini-courbe de Gauss SVG** superposée sur chaque barre ACPE
+  - **Ligne μ** (moyenne) pleine + **lignes ±σ** pointillées
+  - **Statistiques** sous chaque barre : μ=XX% | ±1σ: X/N (Y%)
+  - **Barres agrandies** : 55px (ACPE), 45px (Patterns, RàI) pour meilleure lisibilité
+  - Points étudiants conservés avec jitter pour éviter superposition
+  - **Fichiers modifiés** : `index.html`, `js/tableau-bord-apercu.js`, `styles.css`
 
 ### Tache precedente (25 janvier - Beta 96)
 - **UNIFORMISATION DES GRAPHIQUES** : Tous les graphiques adoptent le même look
