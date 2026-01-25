@@ -604,12 +604,28 @@ async function calculerEtStockerIndicesCP() {
         const da = etudiant.da;
 
         // ========================================
-        // 🆕 BETA 95.5 : CALCUL PRATIQUE ACTIVE UNIQUEMENT
+        // 🆕 BETA 96 : CALCUL P = NOTE FINALE DE SESSION
         // ========================================
+        // FIX #37 : L'indice P doit refléter la vraie note finale de session
+        // qui prend en compte la méthode de sélection, les pondérations, etc.
 
-        // Calculer C et P via la pratique active du groupe-cours
+        // Calculer C via la pratique active
         const C_decimal = pratique.calculerCompletion(da);
-        const P_decimal = pratique.calculerPerformance(da);
+
+        // Calculer P via calculerDetailsNoteFinale (si disponible)
+        // pour garantir la cohérence avec la note affichée dans le profil
+        let P_decimal = null;
+        if (typeof calculerDetailsNoteFinale === 'function') {
+            const detailsNote = calculerDetailsNoteFinale(da);
+            if (detailsNote && detailsNote.noteFinale !== null) {
+                P_decimal = detailsNote.noteFinale / 100; // Convertir % → 0-1
+            }
+        }
+
+        // Fallback : utiliser la pratique si calculerDetailsNoteFinale n'est pas disponible
+        if (P_decimal === null) {
+            P_decimal = pratique.calculerPerformance(da);
+        }
 
         // Convertir 0-1 → 0-100
         const C = C_decimal !== null ? Math.round(C_decimal * 100) : 0;
