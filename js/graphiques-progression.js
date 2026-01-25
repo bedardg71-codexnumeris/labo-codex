@@ -894,9 +894,10 @@ const pluginEtiquettesZones = {
 };
 
 /**
- * Variable pour suivre le dernier dataset survolé (évite les mises à jour inutiles)
+ * Variables pour suivre le dernier survol (évite les mises à jour inutiles)
  */
 let dernierDatasetSurvole = -1;
+let dernierPointSurvole = -1;
 
 /**
  * Plugin pour afficher le nom de l'étudiant au bout de la courbe survolée
@@ -1052,8 +1053,8 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
 
         console.log(`📊 [Spaghetti] Productions trouvées: ${productions.length}`);
 
-        // Filtrer les productions : garder uniquement les artefacts évaluables
-        // Exclure : Portfolio (conteneur), Analyse finale, Évaluation terminale
+        // Filtrer les productions : garder les artefacts évaluables + évaluation terminale
+        // Exclure uniquement : Portfolio (conteneur vide), Analyse finale (réflexion non comparable)
         const productionsVues = new Set();
         const productionsArtefacts = productions.filter(p => {
             const titreLower = (p.titre || '').toLowerCase();
@@ -1064,12 +1065,10 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                 return false;
             }
 
-            // Exclure les évaluations terminales / analyses finales
+            // Exclure uniquement "Analyse finale" (réflexion métacognitive, pas comparable aux artefacts)
+            // MAIS garder "Évaluation terminale" car c'est une rédaction comparable
             if (titreLower.includes('analyse finale') ||
-                titreLower.includes('évaluation terminale') ||
-                titreLower.includes('evaluation terminale') ||
                 p.type === 'analyseFinale' ||
-                p.type === 'evaluationTerminale' ||
                 p.categorie === 'analyseFinale') {
                 return false;
             }
@@ -1083,7 +1082,7 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
             return true;
         });
 
-        console.log(`📊 [Spaghetti] Productions artefacts (sans conteneurs/terminales): ${productionsArtefacts.length}`);
+        console.log(`📊 [Spaghetti] Productions artefacts: ${productionsArtefacts.length}`);
 
         if (productionsArtefacts.length === 0) {
             console.warn('Aucune production disponible pour le graphique spaghetti');
@@ -1180,6 +1179,40 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
             // Si pas de description, utiliser le titre
             return prod.titre || `Production ${index + 1}`;
         });
+
+        // Créer un mapping activité → indices des productions (pour surbrillance des mêmes activités)
+        // Normaliser les noms pour regrouper les variantes (ex: "Stratégies de lecture" apparaît 2 fois)
+        const activitesMap = {};
+        labels.forEach((label, index) => {
+            // Normaliser : minuscules, sans accents, sans espaces multiples
+            const normalise = label.toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Enlever accents
+                .replace(/\s+/g, ' ').trim();
+            if (!activitesMap[normalise]) {
+                activitesMap[normalise] = [];
+            }
+            activitesMap[normalise].push(index);
+        });
+
+        // Index inverse : pour chaque position, quels autres indices ont la même activité
+        const memesActivites = {};
+        labels.forEach((label, index) => {
+            const normalise = label.toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .replace(/\s+/g, ' ').trim();
+            // Tous les indices de cette activité SAUF l'index courant
+            memesActivites[index] = activitesMap[normalise].filter(i => i !== index);
+        });
+
+        // Fonction pour convertir une note (0-1) en code IDME
+        const noteVersIDME = (note) => {
+            if (note === null || note === undefined) return '—';
+            if (note >= 0.85) return 'E'; // Étendu
+            if (note >= 0.75) return 'M'; // Maîtrisé
+            if (note >= 0.65) return 'D'; // Développement
+            if (note >= 0.40) return 'D'; // Développement (seuil de réussite)
+            return 'I'; // Insuffisant
+        };
 
         // Créer un dataset par étudiant
         const datasets = etudiants.map(etudiant => {
@@ -1301,10 +1334,8 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                                 const dataIndex = item.dataIndex;
                                 const production = productionsArtefacts[dataIndex];
                                 // Titre : activité d'apprentissage (description) ou titre
-                                const activite = production?.description || production?.titre || `Production ${dataIndex + 1}`;
-                                // Ajouter le nom de l'étudiant
-                                const nomEtudiant = item.dataset?.label || '';
-                                return nomEtudiant ? `${nomEtudiant} - ${activite}` : activite;
+                                // Note: le nom de l'élève est déjà affiché à droite de la courbe
+                                return production?.description || production?.titre || `Production ${dataIndex + 1}`;
                             },
                             label: function(context) {
                                 const lignes = [];
@@ -1317,11 +1348,13 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                                     ? evaluationsIndex[da]?.[production.id]
                                     : null;
 
-                                // Note
-                                const value = context.parsed.y !== null
-                                    ? (context.parsed.y * 100).toFixed(0)
+                                // Note avec code IDME : "M (75%)"
+                                const noteDecimale = context.parsed.y;
+                                const notePourcent = noteDecimale !== null
+                                    ? (noteDecimale * 100).toFixed(0)
                                     : '—';
-                                lignes.push(`Note: ${value}%`);
+                                const codeIDME = noteVersIDME(noteDecimale);
+                                lignes.push(`${codeIDME} (${notePourcent}%)`);
 
                                 if (evaluation) {
                                     // Vérifier jeton utilisé
@@ -1401,9 +1434,73 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                     axis: 'xy',
                     intersect: false // Permet de détecter le survol près de la ligne
                 },
-                // Gestion du survol pour mise en évidence
+                // Gestion du survol pour mise en évidence + mêmes activités
                 onHover: function(event, activeElements, chart) {
-                    gererSurvolSpaghetti(event, activeElements, chart);
+                    if (!chart || !chart.data || !chart.data.datasets) return;
+
+                    let datasetIndex = -1;
+                    let dataIndex = -1;
+
+                    // Détecter quel point est survolé
+                    if (activeElements && activeElements.length > 0) {
+                        datasetIndex = activeElements[0].datasetIndex;
+                        dataIndex = activeElements[0].index;
+                    }
+
+                    // Si pas de changement, ne rien faire
+                    if (datasetIndex === dernierDatasetSurvole && dataIndex === dernierPointSurvole) return;
+
+                    dernierDatasetSurvole = datasetIndex;
+                    dernierPointSurvole = dataIndex;
+
+                    // Indices des autres points avec la même activité
+                    const indicesMemesActivites = dataIndex >= 0 ? (memesActivites[dataIndex] || []) : [];
+
+                    // Appliquer les styles selon le survol
+                    chart.data.datasets.forEach((dataset, idx) => {
+                        const nbPoints = dataset.data.length;
+
+                        if (datasetIndex === -1) {
+                            // Aucun survol - style par défaut
+                            dataset.borderColor = 'rgba(50, 50, 50, 0.4)';
+                            dataset.borderWidth = 1.5;
+                            dataset.pointRadius = Array(nbPoints).fill(2);
+                            dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(50, 50, 50, 0.5)');
+                        } else if (idx === datasetIndex) {
+                            // Courbe survolée - mise en évidence
+                            dataset.borderColor = '#2196F3';
+                            dataset.borderWidth = 3;
+
+                            // Créer des tableaux pour les styles de points
+                            const rayons = Array(nbPoints).fill(4);
+                            const couleurs = Array(nbPoints).fill('#2196F3');
+
+                            // Mettre en évidence le point survolé (plus gros)
+                            if (dataIndex >= 0 && dataIndex < nbPoints) {
+                                rayons[dataIndex] = 8;
+                                couleurs[dataIndex] = '#1565C0'; // Bleu foncé pour le point survolé
+                            }
+
+                            // Mettre en évidence les mêmes activités (orange)
+                            indicesMemesActivites.forEach(i => {
+                                if (i >= 0 && i < nbPoints && dataset.data[i] !== null) {
+                                    rayons[i] = 7;
+                                    couleurs[i] = '#FF9800'; // Orange pour mêmes activités
+                                }
+                            });
+
+                            dataset.pointRadius = rayons;
+                            dataset.pointBackgroundColor = couleurs;
+                        } else {
+                            // Autres courbes - atténuées
+                            dataset.borderColor = 'rgba(80, 80, 80, 0.35)';
+                            dataset.borderWidth = 1;
+                            dataset.pointRadius = Array(nbPoints).fill(1);
+                            dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(80, 80, 80, 0.3)');
+                        }
+                    });
+
+                    chart.update('none');
                 }
             }
         };
@@ -1414,7 +1511,18 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
 
         // Ajouter un listener pour réinitialiser au mouseout du canvas
         canvas.addEventListener('mouseleave', function() {
-            reinitialiserStylesSpaghetti(chart);
+            dernierDatasetSurvole = -1;
+            dernierPointSurvole = -1;
+
+            // Réinitialiser tous les datasets au style par défaut
+            chart.data.datasets.forEach(dataset => {
+                const nbPoints = dataset.data.length;
+                dataset.borderColor = 'rgba(50, 50, 50, 0.4)';
+                dataset.borderWidth = 1.5;
+                dataset.pointRadius = Array(nbPoints).fill(2);
+                dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(50, 50, 50, 0.5)');
+            });
+            chart.update('none');
         });
 
         console.log(`✅ Graphique spaghetti créé avec ${datasets.length} trajectoires sur ${productionsArtefacts.length} artefacts`);
