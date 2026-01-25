@@ -894,6 +894,127 @@ const pluginEtiquettesZones = {
 };
 
 /**
+ * Variable pour suivre le dernier dataset survolé (évite les mises à jour inutiles)
+ */
+let dernierDatasetSurvole = -1;
+
+/**
+ * Plugin pour afficher le nom de l'étudiant au bout de la courbe survolée
+ */
+const pluginNomEtudiantSurvol = {
+    id: 'nomEtudiantSurvol',
+    afterDraw(chart) {
+        if (dernierDatasetSurvole === -1) return;
+
+        const ctx = chart.ctx;
+        const dataset = chart.data.datasets[dernierDatasetSurvole];
+        if (!dataset) return;
+
+        const meta = chart.getDatasetMeta(dernierDatasetSurvole);
+        if (!meta || !meta.data || meta.data.length === 0) return;
+
+        // Trouver le dernier point visible (non-null) de la courbe
+        let dernierPoint = null;
+        for (let i = meta.data.length - 1; i >= 0; i--) {
+            const point = meta.data[i];
+            if (point && dataset.data[i] !== null) {
+                dernierPoint = point;
+                break;
+            }
+        }
+
+        if (!dernierPoint) return;
+
+        // Dessiner le nom de l'étudiant à droite du dernier point
+        const nom = dataset.label || '';
+        const x = dernierPoint.x + 10;
+        const y = dernierPoint.y;
+
+        ctx.save();
+        ctx.font = 'bold 12px Arial';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+
+        // Fond blanc semi-transparent pour lisibilité
+        const textWidth = ctx.measureText(nom).width;
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.fillRect(x - 3, y - 9, textWidth + 6, 18);
+
+        // Texte bleu
+        ctx.fillStyle = '#1976D2';
+        ctx.fillText(nom, x, y);
+        ctx.restore();
+    }
+};
+
+/**
+ * Gère le survol du graphique spaghetti - met en évidence la courbe survolée
+ * @param {Event} event - Événement de survol
+ * @param {Array} activeElements - Éléments actifs (points survolés)
+ * @param {Chart} chart - Instance du graphique
+ */
+function gererSurvolSpaghetti(event, activeElements, chart) {
+    if (!chart || !chart.data || !chart.data.datasets) return;
+
+    let datasetIndex = -1;
+
+    // Détecter quel dataset est survolé
+    if (activeElements && activeElements.length > 0) {
+        datasetIndex = activeElements[0].datasetIndex;
+    }
+
+    // Si pas de changement, ne rien faire
+    if (datasetIndex === dernierDatasetSurvole) return;
+
+    dernierDatasetSurvole = datasetIndex;
+
+    // Appliquer les styles selon le survol
+    chart.data.datasets.forEach((dataset, index) => {
+        if (datasetIndex === -1) {
+            // Aucun survol - style par défaut
+            dataset.borderColor = 'rgba(50, 50, 50, 0.4)';
+            dataset.borderWidth = 1.5;
+            dataset.pointRadius = 2;
+            dataset.pointBackgroundColor = 'rgba(50, 50, 50, 0.5)';
+        } else if (index === datasetIndex) {
+            // Courbe survolée - mise en évidence
+            dataset.borderColor = '#2196F3';
+            dataset.borderWidth = 3;
+            dataset.pointRadius = 4;
+            dataset.pointBackgroundColor = '#2196F3';
+        } else {
+            // Autres courbes - atténuées mais visibles
+            dataset.borderColor = 'rgba(80, 80, 80, 0.35)';
+            dataset.borderWidth = 1;
+            dataset.pointRadius = 1;
+            dataset.pointBackgroundColor = 'rgba(80, 80, 80, 0.3)';
+        }
+    });
+
+    chart.update('none'); // Update sans animation pour fluidité
+}
+
+/**
+ * Réinitialise les styles du graphique spaghetti (au mouseout)
+ * @param {Chart} chart - Instance du graphique
+ */
+function reinitialiserStylesSpaghetti(chart) {
+    if (!chart || !chart.data || !chart.data.datasets) return;
+
+    dernierDatasetSurvole = -1;
+
+    // Réinitialiser tous les datasets au style par défaut
+    chart.data.datasets.forEach(dataset => {
+        dataset.borderColor = 'rgba(50, 50, 50, 0.4)';
+        dataset.borderWidth = 1.5;
+        dataset.pointRadius = 2;
+        dataset.pointBackgroundColor = 'rgba(50, 50, 50, 0.5)';
+    });
+
+    chart.update('none');
+}
+
+/**
  * Crée un graphique "spaghetti" montrant les RÉSULTATS BRUTS par artefact
  *
  * IMPORTANT (Beta 96) : Ce graphique montre les notes réelles de chaque évaluation,
@@ -919,17 +1040,19 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
         }
 
         // Récupérer les productions (artefacts) du cours actif
-        const cleProductions = (typeof cle === 'function') ? cle('productionsPedagogiques') : 'productions';
+        // IMPORTANT: Utiliser 'productions' comme clé (pas 'productionsPedagogiques')
         let productions = [];
 
         if (typeof obtenirDonneesSelonMode === 'function') {
-            productions = obtenirDonneesSelonMode('productionsPedagogiques') || [];
+            productions = obtenirDonneesSelonMode('productions') || [];
         } else {
+            const cleProductions = (typeof cle === 'function') ? cle('productions') : 'productions';
             productions = db.getSync(cleProductions, []);
         }
 
+        console.log(`📊 [Spaghetti] Productions trouvées: ${productions.length}`);
+
         // Filtrer les productions qui comptent pour le portfolio (pas analyse finale, etc.)
-        // et qui ont été évaluées au moins une fois
         const productionsPortfolio = productions.filter(p => {
             // Exclure les productions de type "analyse finale" ou similaire
             const estAnalyseFinale = p.titre?.toLowerCase().includes('analyse finale') ||
@@ -938,6 +1061,8 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
             return !estAnalyseFinale;
         });
 
+        console.log(`📊 [Spaghetti] Productions portfolio (sans analyse finale): ${productionsPortfolio.length}`);
+
         if (productionsPortfolio.length === 0) {
             console.warn('Aucune production disponible pour le graphique spaghetti');
             afficherMessageAttente(canvas, 'Aucun artefact défini', 'Créez des productions dans Réglages › Productions');
@@ -945,14 +1070,36 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
         }
 
         // Récupérer les évaluations
-        const cleEvaluations = (typeof cle === 'function') ? cle('evaluationsSauvegardees') : 'evaluationsSauvegardees';
-        let evaluations = [];
+        let evaluationsBrutes = [];
 
         if (typeof obtenirDonneesSelonMode === 'function') {
-            evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+            evaluationsBrutes = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
         } else {
-            evaluations = db.getSync(cleEvaluations, []);
+            const cleEvaluations = (typeof cle === 'function') ? cle('evaluationsSauvegardees') : 'evaluationsSauvegardees';
+            evaluationsBrutes = db.getSync(cleEvaluations, []);
         }
+
+        // IMPORTANT: Filtrer les doublons - garder seulement la plus récente par étudiant/production
+        // Cela évite d'afficher plusieurs points pour le même artefact
+        const evaluationsMap = new Map();
+        evaluationsBrutes.forEach(evalItem => {
+            const cle = `${evalItem.etudiantDA}_${evalItem.productionId}`;
+            const existante = evaluationsMap.get(cle);
+
+            // Garder l'évaluation la plus récente (ou la première si pas de date)
+            if (!existante) {
+                evaluationsMap.set(cle, evalItem);
+            } else {
+                const dateExistante = existante.dateEvaluation || existante.date || '';
+                const dateNouvelle = evalItem.dateEvaluation || evalItem.date || '';
+                if (dateNouvelle > dateExistante) {
+                    evaluationsMap.set(cle, evalItem);
+                }
+            }
+        });
+
+        const evaluations = Array.from(evaluationsMap.values());
+        console.log(`📊 [Spaghetti] Évaluations: ${evaluationsBrutes.length} brutes → ${evaluations.length} après dédoublonnage`);
 
         if (evaluations.length === 0) {
             console.warn('Aucune évaluation disponible pour le graphique spaghetti');
@@ -969,10 +1116,22 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
             etudiants = db.getSync(cleEtudiants, []);
         }
 
+        console.log(`📊 [Spaghetti] Étudiants trouvés: ${etudiants.length}`);
+
         if (etudiants.length === 0) {
             console.warn('Aucun étudiant disponible');
+            afficherMessageAttente(canvas, 'Aucun étudiant', 'Ajoutez des étudiants dans Réglages › Groupe');
             return null;
         }
+
+        // Diagnostic: Vérifier la correspondance entre évaluations et productions
+        const prodIds = new Set(productionsPortfolio.map(p => p.id));
+        const evalProdIds = [...new Set(evaluations.map(e => e.productionId))];
+        const correspondances = evalProdIds.filter(id => prodIds.has(id));
+
+        console.log(`📊 [Spaghetti] IDs productions: ${[...prodIds].slice(0, 3).join(', ')}...`);
+        console.log(`📊 [Spaghetti] IDs dans évaluations: ${evalProdIds.slice(0, 3).join(', ')}...`);
+        console.log(`📊 [Spaghetti] Correspondances: ${correspondances.length}/${evalProdIds.length}`);
 
         // Créer un index productionId → position pour le tri
         const indexProductions = {};
@@ -1002,7 +1161,15 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                     e.etudiantDA === da && e.productionId === prod.id
                 );
 
+                // Pas d'évaluation → trou dans la trajectoire
                 if (!evaluation) return null;
+
+                // IMPORTANT: Vérifier si le travail a été REMIS
+                // Si statutRemise existe et n'est pas 'remis' → trou (pas de point)
+                // Cela distingue "travail non-remis" de "travail remis avec 0%"
+                if (evaluation.statutRemise && evaluation.statutRemise !== 'remis') {
+                    return null; // Trou pour travail non-remis
+                }
 
                 // Utiliser noteFinale (0-100) converti en 0-1
                 const note = evaluation.noteFinale;
@@ -1023,16 +1190,21 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
 
             return {
                 label: nom,
+                da: da, // Stocker le DA pour identification
                 data: donnees,
-                borderColor: 'rgba(30, 30, 30, 0.5)', // Noir semi-transparent
+                // Style par défaut (sera modifié au survol)
+                borderColor: 'rgba(50, 50, 50, 0.4)',
                 backgroundColor: 'transparent',
                 borderWidth: 1.5,
-                tension: 0.2, // Légère courbe (pas trop lissé pour voir la volatilité)
-                pointRadius: 3, // Points visibles pour chaque artefact
-                pointHoverRadius: 6,
-                pointBackgroundColor: 'rgba(30, 30, 30, 0.6)',
-                pointHoverBackgroundColor: 'rgba(30, 30, 30, 0.9)',
-                spanGaps: false // NE PAS connecter les trous (artefacts non évalués)
+                tension: 0.2,
+                pointRadius: 2,
+                pointHoverRadius: 5,
+                pointBackgroundColor: 'rgba(50, 50, 50, 0.5)',
+                pointHoverBackgroundColor: 'rgba(50, 50, 50, 0.9)',
+                spanGaps: false, // NE PAS connecter les trous (travaux non-remis)
+                // Propriétés pour le survol
+                hoverBorderWidth: 3,
+                hoverBorderColor: '#2196F3' // Bleu vif au survol
             };
         }).filter(d => d !== null);
 
@@ -1052,7 +1224,7 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
         // Configuration du graphique
         const config = {
             type: 'line',
-            plugins: [pluginEtiquettesZones],
+            plugins: [pluginEtiquettesZones, pluginNomEtudiantSurvol],
             data: {
                 labels: labels,
                 datasets: datasets
@@ -1078,26 +1250,27 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                     tooltip: {
                         enabled: true,
                         mode: 'nearest',
-                        intersect: true,
-                        backgroundColor: 'rgba(0, 0, 0, 0.85)',
-                        titleFont: { size: 13, weight: 'bold' },
-                        bodyFont: { size: 12 },
-                        padding: 10,
+                        intersect: true, // Seulement au survol exact d'un point
+                        backgroundColor: 'rgba(0, 0, 0, 0.75)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        titleFont: { size: 11 },
+                        bodyFont: { size: 12, weight: 'bold' },
+                        padding: 8,
+                        cornerRadius: 4,
+                        displayColors: false,
+                        // Afficher seulement la note (le nom est affiché au bout de la courbe)
                         callbacks: {
                             title: function(tooltipItems) {
-                                // Afficher le nom de l'artefact complet
-                                const index = tooltipItems[0]?.dataIndex;
-                                if (index !== undefined && productionsPortfolio[index]) {
-                                    return productionsPortfolio[index].titre || tooltipItems[0]?.label;
-                                }
-                                return tooltipItems[0]?.label || '';
+                                const dataIndex = tooltipItems[0]?.dataIndex;
+                                // Titre court : numéro de l'artefact
+                                return productionsPortfolio[dataIndex]?.titre || `Art. ${dataIndex + 1}`;
                             },
                             label: function(context) {
-                                const nom = context.dataset.label || '';
                                 const value = context.parsed.y !== null
                                     ? (context.parsed.y * 100).toFixed(0)
                                     : '—';
-                                return `${nom}: ${value}%`;
+                                return `${value}%`;
                             }
                         }
                     },
@@ -1145,7 +1318,12 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                 },
                 interaction: {
                     mode: 'nearest',
-                    intersect: true
+                    axis: 'xy',
+                    intersect: false // Permet de détecter le survol près de la ligne
+                },
+                // Gestion du survol pour mise en évidence
+                onHover: function(event, activeElements, chart) {
+                    gererSurvolSpaghetti(event, activeElements, chart);
                 }
             }
         };
@@ -1153,6 +1331,11 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
         // Créer le graphique
         const chart = new Chart(ctx, config);
         graphiqueSpaghettiInstance = chart;
+
+        // Ajouter un listener pour réinitialiser au mouseout du canvas
+        canvas.addEventListener('mouseleave', function() {
+            reinitialiserStylesSpaghetti(chart);
+        });
 
         console.log(`✅ Graphique spaghetti créé avec ${datasets.length} trajectoires sur ${productionsPortfolio.length} artefacts`);
         return chart;
