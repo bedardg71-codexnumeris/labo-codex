@@ -9,14 +9,14 @@
 
 ### Priorite haute - UX / Interface
 
-- [ ] **#39** Courbes de distribution (densite) des indices ACPE
+- [x] **#39** Courbes de distribution (densite) des indices ACPE ✅ FAIT (25 jan 2026)
   - Objectif : Visualiser la distribution des etudiants selon les indices A, C, P, E
   - Type : Courbe de densite (style Gauss) avec les 4 indices superposes
   - Couleurs : A=bleu, C=orange, P=vert, E=violet (coherence avec graphiques existants)
   - Emplacement : Tableau de bord, section Vue d'ensemble (apres graphique spaghetti)
-  - Fonction a creer : `creerGraphiqueDistributionACPE(canvasId)`
-  - Prerequis : Graphique spaghetti complete (#38) ✓
-  - **Fichiers concernes** : `index.html`, `js/graphiques-progression.js`, `js/tableau-bord-apercu.js`
+  - Fonction creee : `creerGraphiqueDistributionACPE(canvasId)`
+  - Algorithme : KDE (Kernel Density Estimation) avec regle de Silverman
+  - **Fichiers modifies** : `index.html`, `js/graphiques-progression.js`, `js/tableau-bord-apercu.js`
 
 - [ ] **#30** Export PDF des elements pedagogiques (EN COURS)
   - [x] Grilles descriptives (grille + echelle + cartouche) avec jsPDF
