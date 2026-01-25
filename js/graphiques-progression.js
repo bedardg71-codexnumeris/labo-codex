@@ -1784,64 +1784,88 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
             chart.update('none');
         });
 
+        // Fonction pour appliquer le verrouillage/déverrouillage
+        function toggleVerrouillage(indexDataset) {
+            if (datasetVerrouille === indexDataset) {
+                // Déverrouiller
+                datasetVerrouille = -1;
+                console.log('🔓 Courbe déverrouillée');
+                // Rétablir les propriétés de survol normales pour tous
+                chart.data.datasets.forEach(dataset => {
+                    dataset.pointHoverRadius = 5;
+                    dataset.pointHoverBackgroundColor = 'rgba(50, 50, 50, 0.9)';
+                });
+            } else {
+                // Verrouiller
+                datasetVerrouille = indexDataset;
+                dernierDatasetSurvole = indexDataset;
+                console.log(`🔒 Courbe verrouillée: ${chart.data.datasets[indexDataset]?.label}`);
+                // Désactiver le survol des autres courbes
+                chart.data.datasets.forEach((dataset, idx) => {
+                    if (idx === indexDataset) {
+                        dataset.pointHoverRadius = 5;
+                        dataset.pointHoverBackgroundColor = '#E91E63';
+                    } else {
+                        dataset.pointHoverRadius = 1;
+                        dataset.pointHoverBackgroundColor = 'rgba(80, 80, 80, 0.3)';
+                    }
+                });
+            }
+            chart.update('none');
+        }
+
         // Gestionnaire de clic pour verrouiller/déverrouiller une courbe
         canvas.addEventListener('click', function(event) {
             const rect = canvas.getBoundingClientRect();
             const clickX = event.clientX - rect.left;
             const clickY = event.clientY - rect.top;
 
-            // Vérifier si le clic est sur un nom d'étudiant
+            // 1. Vérifier si le clic est sur un nom d'étudiant
             for (const zone of zonesNomsEtudiants) {
                 if (clickX >= zone.x && clickX <= zone.x + zone.width &&
                     clickY >= zone.y && clickY <= zone.y + zone.height) {
-
-                    // Clic sur un nom - toggle verrouillage
-                    if (datasetVerrouille === zone.datasetIndex) {
-                        // Déverrouiller
-                        datasetVerrouille = -1;
-                        console.log('🔓 Courbe déverrouillée');
-                        // Rétablir les propriétés de survol normales pour tous
-                        chart.data.datasets.forEach(dataset => {
-                            dataset.pointHoverRadius = 5;
-                            dataset.pointHoverBackgroundColor = 'rgba(50, 50, 50, 0.9)';
-                        });
-                    } else {
-                        // Verrouiller
-                        datasetVerrouille = zone.datasetIndex;
-                        dernierDatasetSurvole = zone.datasetIndex;
-                        console.log(`🔒 Courbe verrouillée: ${chart.data.datasets[zone.datasetIndex]?.label}`);
-                        // Désactiver le survol des autres courbes
-                        chart.data.datasets.forEach((dataset, idx) => {
-                            if (idx === zone.datasetIndex) {
-                                dataset.pointHoverRadius = 5;
-                                dataset.pointHoverBackgroundColor = '#E91E63';
-                            } else {
-                                dataset.pointHoverRadius = 1;
-                                dataset.pointHoverBackgroundColor = 'rgba(80, 80, 80, 0.3)';
-                            }
-                        });
-                    }
-                    chart.update('none');
+                    toggleVerrouillage(zone.datasetIndex);
                     return;
                 }
             }
+
+            // 2. Vérifier si le clic est sur un point de la courbe
+            const elements = chart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, false);
+            if (elements.length > 0) {
+                const clickedDatasetIndex = elements[0].datasetIndex;
+                toggleVerrouillage(clickedDatasetIndex);
+                return;
+            }
+
+            // 3. Si clic ailleurs et une courbe est verrouillée, déverrouiller
+            if (datasetVerrouille >= 0) {
+                toggleVerrouillage(datasetVerrouille);
+            }
         });
 
-        // Changer le curseur au survol des noms
+        // Changer le curseur au survol des noms ou des points
         canvas.addEventListener('mousemove', function(event) {
             const rect = canvas.getBoundingClientRect();
             const mouseX = event.clientX - rect.left;
             const mouseY = event.clientY - rect.top;
 
-            let surNom = false;
+            // Vérifier si sur un nom
+            let surElement = false;
             for (const zone of zonesNomsEtudiants) {
                 if (mouseX >= zone.x && mouseX <= zone.x + zone.width &&
                     mouseY >= zone.y && mouseY <= zone.y + zone.height) {
-                    surNom = true;
+                    surElement = true;
                     break;
                 }
             }
-            canvas.style.cursor = surNom ? 'pointer' : 'default';
+
+            // Vérifier si sur un point de courbe
+            if (!surElement) {
+                const elements = chart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, false);
+                surElement = elements.length > 0;
+            }
+
+            canvas.style.cursor = surElement ? 'pointer' : 'default';
         });
 
         console.log(`✅ Graphique spaghetti créé avec ${datasets.length} trajectoires sur ${productionsArtefacts.length} artefacts`);
