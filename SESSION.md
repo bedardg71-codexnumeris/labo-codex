@@ -29,14 +29,20 @@
 - **Graphique spaghetti** : Visualisation de l'évolution de tous les étudiants (nouveau Beta 96)
 
 ### Derniere tache completee (25 janvier - Beta 96)
-- **MINI-COURBES DE GAUSS INTÉGRÉES** : Distribution directement dans les barres
-  - **Suppression** du graphique séparé "Distribution des indices ACPE" (trop chargé)
-  - **Mini-courbe de Gauss SVG** superposée sur chaque barre ACPE
-  - **Ligne μ** (moyenne) pleine + **lignes ±σ** pointillées
-  - **Statistiques** sous chaque barre : μ=XX% | ±1σ: X/N (Y%)
-  - **Barres agrandies** : 55px (ACPE), 45px (Patterns, RàI) pour meilleure lisibilité
-  - Points étudiants conservés avec jitter pour éviter superposition
-  - **Fichiers modifiés** : `index.html`, `js/tableau-bord-apercu.js`, `styles.css`
+- **RÉORGANISATION DU TABLEAU DE BORD** : 4 sections distinctes
+  1. **Indicateurs ACPE du groupe** : Barres A, C, P, E avec mini-courbes Gauss
+  2. **Indicateurs d'apprentissage** : Patterns + RàI (nouvelle section séparée)
+  3. **Évolution temporelle** : Graphique spaghetti ACP
+  4. **Trajectoire d'apprentissage** : Graphique spaghetti par production
+  - Chaque section a son propre ID pour injection JS ciblée
+  - Notes d'aide mises à jour pour chaque section
+  - **Fichiers modifiés** : `index.html`, `js/tableau-bord-apercu.js`
+
+- **MINI-COURBES DE GAUSS INTÉGRÉES** (tâche précédente)
+  - Mini-courbe de Gauss SVG superposée sur chaque barre ACPE
+  - Ligne μ pleine + lignes ±σ pointillées
+  - Statistiques sous chaque barre : μ=XX% | ±1σ: X/N (Y%)
+  - Barres agrandies : 55px (ACPE), 45px (Patterns, RàI)
 
 ### Tache precedente (25 janvier - Beta 96)
 - **UNIFORMISATION DES GRAPHIQUES** : Tous les graphiques adoptent le même look
