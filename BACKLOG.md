@@ -89,6 +89,9 @@
     - Chaine causale : RaI → niveaux/patterns visibles → interventions precoces → moins de decrochages → meilleures moyennes
     - A valider : comparer taux de decrochage et moyennes finales A24 (sans RaI) vs A25+ (avec RaI)
     - Potentiel : communication AQPC si resultats concluants
+  - **Variable confondante** : Profil des etudiants
+    - A25 : beaucoup d'eleves en sciences (meilleurs resultats attendus)
+    - Documenter le profil (programme d'etudes) par trimestre pour nuancer les conclusions
   - **Format** : Rapport genere (PDF ou markdown) avec tableaux et graphiques
   - **Prerequis** : #35 (Import H2024) pour avoir les 4 trimestres
 
