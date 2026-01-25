@@ -8058,15 +8058,23 @@ function calculerDetailsNoteFinale(da) {
     // Sélectionner les N meilleurs selon la méthode
     let artefactsRetenus = [...evaluationsArtefacts];
 
+    // Helper: obtenir le numéro de production pour une évaluation
+    const getNumeroProduction = (eval) => {
+        const prod = productions.find(p => p.id === eval.productionId);
+        return prod?.numero || parseInt(eval.productionId.match(/(\d+)$/)?.[1]) || 0;
+    };
+
     if (methodeSelection === 'meilleurs') {
         artefactsRetenus.sort((a, b) => b.noteFinale - a.noteFinale);
     } else if (methodeSelection === 'recents') {
-        artefactsRetenus.sort((a, b) => new Date(b.dateEvaluation) - new Date(a.dateEvaluation));
+        // CORRECTION (24 jan 2026): Trier par numéro de production décroissant
+        artefactsRetenus.sort((a, b) => getNumeroProduction(b) - getNumeroProduction(a));
     } else if (methodeSelection === 'recents-meilleurs') {
         const nombreMeilleurs = Math.max(1, Math.ceil(artefactsRetenus.length * 0.5));
         artefactsRetenus.sort((a, b) => b.noteFinale - a.noteFinale);
         artefactsRetenus = artefactsRetenus.slice(0, nombreMeilleurs);
-        artefactsRetenus.sort((a, b) => new Date(b.dateEvaluation) - new Date(a.dateEvaluation));
+        // CORRECTION (24 jan 2026): Trier par numéro de production décroissant
+        artefactsRetenus.sort((a, b) => getNumeroProduction(b) - getNumeroProduction(a));
     }
 
     // Limiter au nombre à retenir
