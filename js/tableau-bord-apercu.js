@@ -491,12 +491,9 @@ function chargerTableauBordApercu() {
             console.warn('⚠️ creerGraphiqueGroupeMoyennes non disponible - Module graphiques-progression.js non chargé ?');
         }
 
-        // 🆕 BETA 95.8: Afficher le graphique spaghetti (tous les étudiants)
+        // 🆕 BETA 96: Afficher le graphique spaghetti (trajectoires par artefact)
         if (typeof creerGraphiqueGroupeSpaghetti === 'function') {
-            // Récupérer l'indice sélectionné (par défaut Performance)
-            const selectIndice = document.getElementById('select-indice-spaghetti');
-            const indice = selectIndice ? selectIndice.value : 'P';
-            creerGraphiqueGroupeSpaghetti('graphique-groupe-spaghetti', indice);
+            creerGraphiqueGroupeSpaghetti('graphique-groupe-spaghetti');
         } else {
             console.warn('⚠️ creerGraphiqueGroupeSpaghetti non disponible - Module graphiques-progression.js non chargé ?');
         }

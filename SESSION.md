@@ -29,17 +29,19 @@
 - **Graphique spaghetti** : Visualisation de l'évolution de tous les étudiants (nouveau Beta 96)
 
 ### Derniere tache completee (25 janvier - Beta 96)
-- **GRAPHIQUE SPAGHETTI - TABLEAU DE BORD** : Nouvelle visualisation
-  - Affiche l'évolution de tous les étudiants sur un même graphique
-  - Zones IDME colorées en arrière-plan (Insuffisant → Étendu)
-  - Étiquettes de zones à droite du graphique
-  - Dropdown pour sélectionner l'indice (A, C, P)
-  - Carte d'aide 😎 avec explication des zones
-  - Inspiré du graphique "Évolution de la performance littéracique PAN semaines 2 à 15"
+- **GRAPHIQUE SPAGHETTI - TRAJECTOIRES D'APPRENTISSAGE** : Nouvelle visualisation
+  - Affiche les **résultats bruts par artefact** (pas l'indice P agrégé)
+  - Montre la volatilité réelle de l'apprentissage (hauts et bas)
+  - Révèle les artefacts difficiles (convergence vers le bas)
+  - Permet de voir la résilience (rebonds après difficultés)
+  - Zones IDME colorées en arrière-plan avec étiquettes
+  - Carte d'aide 😎 expliquant la différence avec l'indice P
+  - **Décision pédagogique** : L'indice P (meilleures notes) masque la non-linéarité
+    de l'apprentissage. Les résultats bruts par artefact sont plus informatifs.
   - **Fichiers modifiés** :
-    - `index.html` : Ajout canvas et contrôles
-    - `js/graphiques-progression.js` : Amélioration fonction `creerGraphiqueGroupeSpaghetti()`, nouveau plugin `pluginEtiquettesZones`
-    - `js/tableau-bord-apercu.js` : Appel au graphique spaghetti
+    - `index.html` : Canvas, carte d'aide enrichie
+    - `js/graphiques-progression.js` : Fonction réécrite pour utiliser evaluationsSauvegardees
+    - `js/tableau-bord-apercu.js` : Appel simplifié
   - **Prochaine étape** : Courbes de distribution (densité) des indices ACPE
 
 ### Tache precedente (25 janvier - Beta 95.7)
