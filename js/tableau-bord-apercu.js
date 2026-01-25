@@ -498,6 +498,13 @@ function chargerTableauBordApercu() {
             console.warn('⚠️ creerGraphiqueGroupeSpaghetti non disponible - Module graphiques-progression.js non chargé ?');
         }
 
+        // 🆕 BETA 96: Afficher le graphique de distribution ACPE (courbes de densité)
+        if (typeof creerGraphiqueDistributionACPE === 'function') {
+            creerGraphiqueDistributionACPE('graphique-distribution-acpe');
+        } else {
+            console.warn('⚠️ creerGraphiqueDistributionACPE non disponible - Module graphiques-progression.js non chargé ?');
+        }
+
         console.log('✅ Tableau de bord chargé (aperçu anonyme)');
 
         // 🆕 BETA 91: Initialiser les événements toggle après génération du HTML

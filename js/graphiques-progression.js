@@ -3360,6 +3360,324 @@ function creerGraphiqueCriteres(canvasId, da) {
 }
 
 /* ===============================
+   GRAPHIQUE DISTRIBUTION ACPE (Beta 96)
+   Courbes de densité (style Gauss) pour les indices A, C, P, E
+   =============================== */
+
+/**
+ * Estimation de densité par noyau (KDE) avec noyau gaussien
+ * Crée une courbe lisse à partir de points discrets
+ * @param {Array} valeurs - Tableau de valeurs numériques (0-1)
+ * @returns {Array} - Points {x, y} pour tracer la courbe
+ */
+function calculerKDE(valeurs) {
+    if (!valeurs || valeurs.length < 2) return [];
+
+    const n = valeurs.length;
+
+    // Calculer moyenne et écart-type
+    const mean = valeurs.reduce((a, b) => a + b, 0) / n;
+    const variance = valeurs.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / n;
+    const std = Math.sqrt(variance);
+
+    // Si écart-type nul (toutes valeurs identiques), utiliser une valeur minimale
+    const stdEffectif = std > 0 ? std : 0.05;
+
+    // Bande passante (règle de Silverman)
+    const h = 1.06 * stdEffectif * Math.pow(n, -0.2);
+
+    // Générer les points de la courbe (0 à 1 par pas de 0.01)
+    const points = [];
+    for (let x = 0; x <= 1.001; x += 0.01) {
+        let y = 0;
+        valeurs.forEach(xi => {
+            // Noyau gaussien
+            y += Math.exp(-0.5 * Math.pow((x - xi) / h, 2));
+        });
+        // Normaliser
+        y = y / (n * h * Math.sqrt(2 * Math.PI));
+        points.push({ x: parseFloat(x.toFixed(2)), y: y });
+    }
+
+    return points;
+}
+
+/**
+ * Crée un dataset Chart.js pour une courbe de densité
+ * @param {string} label - Nom de la courbe
+ * @param {Array} points - Points {x, y} de la courbe
+ * @param {string} couleur - Couleur hex de la courbe
+ * @returns {Object} - Dataset Chart.js
+ */
+function creerDatasetDensite(label, points, couleur) {
+    if (!points || points.length === 0) {
+        return { label, data: [], borderColor: couleur };
+    }
+
+    return {
+        label: label,
+        data: points,
+        borderColor: couleur,
+        backgroundColor: hexVersRgba(couleur, 0.15),
+        borderWidth: 2.5,
+        tension: 0.4,
+        fill: true,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        pointHoverBackgroundColor: couleur,
+        parsing: {
+            xAxisKey: 'x',
+            yAxisKey: 'y'
+        }
+    };
+}
+
+/**
+ * Crée un graphique de distribution (densité) des indices ACPE
+ * Utilise l'estimation de densité par noyau (KDE) pour des courbes lisses
+ * @param {string} canvasId - ID du canvas HTML
+ * @returns {Chart|null} - Instance Chart.js ou null si erreur
+ */
+function creerGraphiqueDistributionACPE(canvasId) {
+    try {
+        console.log('📊 [Distribution ACPE] Création du graphique...');
+
+        // Détruire le graphique existant si présent
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) {
+            console.error(`Canvas ${canvasId} introuvable`);
+            return null;
+        }
+
+        const existingChart = Chart.getChart(canvas);
+        if (existingChart) {
+            existingChart.destroy();
+        }
+
+        const ctx = canvas.getContext('2d');
+
+        // Récupérer les étudiants actifs
+        const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
+            ? obtenirEtudiantsCoursActif()
+            : (typeof obtenirDonneesSelonMode === 'function'
+                ? obtenirDonneesSelonMode('groupeEtudiants')
+                : []) || [];
+
+        const etudiantsActifs = etudiants.filter(e =>
+            e.statut !== 'décrochage' && e.statut !== 'abandon'
+        );
+
+        if (etudiantsActifs.length === 0) {
+            console.warn('[Distribution ACPE] Aucun étudiant actif');
+            return null;
+        }
+
+        // Collecter les valeurs ACPE pour chaque étudiant
+        const indicesAssiduite = typeof obtenirDonneesSelonMode === 'function'
+            ? obtenirDonneesSelonMode('indicesAssiduite') || {}
+            : {};
+
+        const valeursA = [];
+        const valeursC = [];
+        const valeursP = [];
+        const valeursE = [];
+
+        etudiantsActifs.forEach(e => {
+            // Indice A (Assiduité)
+            const assiduiteSom = indicesAssiduite.sommatif?.[e.da];
+            const A = typeof assiduiteSom === 'object'
+                ? assiduiteSom.indice
+                : (typeof assiduiteSom === 'number' ? assiduiteSom : null);
+
+            if (A !== null && A > 0) {
+                valeursA.push(A);
+            }
+
+            // Indices C, P, E
+            if (typeof obtenirIndicesCP === 'function') {
+                const indicesCP = obtenirIndicesCP(e.da);
+                if (indicesCP) {
+                    if (indicesCP.C !== undefined && indicesCP.C > 0) {
+                        valeursC.push(indicesCP.C / 100); // Convertir en 0-1
+                    }
+                    if (indicesCP.P !== undefined && indicesCP.P > 0) {
+                        valeursP.push(indicesCP.P / 100);
+                    }
+                    if (indicesCP.E !== undefined && indicesCP.E > 0) {
+                        valeursE.push(indicesCP.E); // Déjà en 0-1
+                    }
+                }
+            }
+        });
+
+        console.log(`📊 [Distribution ACPE] Valeurs collectées: A=${valeursA.length}, C=${valeursC.length}, P=${valeursP.length}, E=${valeursE.length}`);
+
+        // Calculer les courbes de densité KDE
+        const courbeA = calculerKDE(valeursA);
+        const courbeC = calculerKDE(valeursC);
+        const courbeP = calculerKDE(valeursP);
+        const courbeE = calculerKDE(valeursE);
+
+        // Créer les datasets
+        const datasets = [
+            creerDatasetDensite('Assiduité (A)', courbeA, COULEURS_INDICES.A),
+            creerDatasetDensite('Complétion (C)', courbeC, COULEURS_INDICES.C),
+            creerDatasetDensite('Performance (P)', courbeP, COULEURS_INDICES.P),
+            creerDatasetDensite('Engagement (E)', courbeE, COULEURS_INDICES.E)
+        ].filter(d => d.data && d.data.length > 0);
+
+        if (datasets.length === 0) {
+            console.warn('[Distribution ACPE] Aucune donnée à afficher');
+            // Afficher un message dans le canvas
+            ctx.font = '14px Arial';
+            ctx.fillStyle = '#666';
+            ctx.textAlign = 'center';
+            ctx.fillText('Données insuffisantes pour afficher la distribution', canvas.width / 2, canvas.height / 2);
+            return null;
+        }
+
+        // Calculer les moyennes pour le plugin
+        const moyennes = {
+            A: valeursA.length > 0 ? valeursA.reduce((a,b) => a+b, 0) / valeursA.length : null,
+            C: valeursC.length > 0 ? valeursC.reduce((a,b) => a+b, 0) / valeursC.length : null,
+            P: valeursP.length > 0 ? valeursP.reduce((a,b) => a+b, 0) / valeursP.length : null,
+            E: valeursE.length > 0 ? valeursE.reduce((a,b) => a+b, 0) / valeursE.length : null
+        };
+
+        // Plugin pour afficher les lignes de moyenne
+        const pluginLignesMoyennes = {
+            id: 'lignesMoyennesACPE',
+            afterDraw(chart) {
+                const ctx = chart.ctx;
+                const xScale = chart.scales.x;
+                const chartArea = chart.chartArea;
+
+                ctx.save();
+                ctx.setLineDash([5, 5]);
+                ctx.lineWidth = 1;
+
+                const indices = ['A', 'C', 'P', 'E'];
+                const couleurs = [COULEURS_INDICES.A, COULEURS_INDICES.C, COULEURS_INDICES.P, COULEURS_INDICES.E];
+
+                indices.forEach((indice, i) => {
+                    const moyenne = moyennes[indice];
+                    if (moyenne !== null) {
+                        const xPixel = xScale.getPixelForValue(moyenne);
+
+                        ctx.strokeStyle = couleurs[i];
+                        ctx.beginPath();
+                        ctx.moveTo(xPixel, chartArea.top);
+                        ctx.lineTo(xPixel, chartArea.bottom);
+                        ctx.stroke();
+                    }
+                });
+
+                ctx.restore();
+            }
+        };
+
+        // Configuration du graphique
+        const config = {
+            type: 'line',
+            plugins: [pluginLignesMoyennes],
+            data: {
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Distribution des indices ACPE',
+                        font: { size: 16, weight: 'bold' },
+                        padding: { top: 10, bottom: 20 }
+                    },
+                    legend: {
+                        display: true,
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 15,
+                            font: { size: 12 }
+                        }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                        padding: 12,
+                        callbacks: {
+                            title: function(items) {
+                                if (items.length > 0) {
+                                    return `Valeur: ${(items[0].parsed.x * 100).toFixed(0)}%`;
+                                }
+                                return '';
+                            },
+                            label: function(context) {
+                                return `${context.dataset.label}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'linear',
+                        min: 0,
+                        max: 1,
+                        title: {
+                            display: true,
+                            text: 'Valeur de l\'indice',
+                            font: { size: 12, weight: 'bold' }
+                        },
+                        ticks: {
+                            stepSize: 0.1,
+                            callback: function(value) {
+                                return (value * 100).toFixed(0) + '%';
+                            }
+                        },
+                        grid: {
+                            display: true,
+                            color: 'rgba(0,0,0,0.05)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Densité',
+                            font: { size: 12, weight: 'bold' }
+                        },
+                        beginAtZero: true,
+                        ticks: {
+                            display: false // Cacher les valeurs de densité (peu significatives pour l'utilisateur)
+                        },
+                        grid: {
+                            display: true,
+                            color: 'rgba(0,0,0,0.05)'
+                        }
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
+                }
+            }
+        };
+
+        // Créer le graphique
+        const chart = new Chart(ctx, config);
+
+        console.log('✅ Graphique distribution ACPE créé');
+        return chart;
+
+    } catch (error) {
+        console.error('[creerGraphiqueDistributionACPE] Erreur:', error);
+        return null;
+    }
+}
+
+/* ===============================
    EXPORTS
    =============================== */
 
@@ -3374,6 +3692,7 @@ window.creerGraphiqueGroupeSpaghetti = creerGraphiqueGroupeSpaghetti;
 window.rafraichirGraphiqueSpaghetti = rafraichirGraphiqueSpaghetti;
 window.selectionnerEtudiantSpaghetti = selectionnerEtudiantSpaghetti;
 window.creerGraphiqueCriteres = creerGraphiqueCriteres;
+window.creerGraphiqueDistributionACPE = creerGraphiqueDistributionACPE;
 window.detruireGraphique = detruireGraphique;
 
 console.log('📊 Module graphiques-progression.js chargé');
