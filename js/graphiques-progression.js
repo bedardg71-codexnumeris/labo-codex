@@ -1095,15 +1095,14 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
                 const etudiantSnapshot = snapshot.etudiants?.find(e => e.da === etudiant.da);
                 if (!etudiantSnapshot) return null;
 
-                // Récupérer la valeur selon l'indice
-                // Utiliser A_cumulatif pour A (plus lisse), sinon A ponctuel
-                let valeur = null;
-                if (indice === 'A') {
-                    valeur = etudiantSnapshot.A_cumulatif ?? etudiantSnapshot.A;
-                } else if (indice === 'C') {
-                    valeur = etudiantSnapshot.C;
-                } else if (indice === 'P') {
-                    valeur = etudiantSnapshot.P;
+                // Récupérer la valeur selon l'indice (A, C, P sont tous présents)
+                let valeur = etudiantSnapshot[indice];
+
+                // Fallback si la propriété directe n'existe pas
+                if (valeur === undefined) {
+                    if (indice === 'A') valeur = etudiantSnapshot.A_cumulatif;
+                    else if (indice === 'C') valeur = etudiantSnapshot.completion;
+                    else if (indice === 'P') valeur = etudiantSnapshot.performance;
                 }
 
                 // Convertir en 0-1 si en pourcentage (valeurs > 1)
