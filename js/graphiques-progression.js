@@ -900,18 +900,34 @@ let dernierDatasetSurvole = -1;
 let dernierPointSurvole = -1;
 
 /**
- * Plugin pour afficher le nom de l'étudiant au bout de la courbe survolée
+ * Variable pour le verrouillage d'une courbe (clic sur le nom)
+ * -1 = pas de verrouillage, sinon index du dataset verrouillé
+ */
+let datasetVerrouille = -1;
+
+/**
+ * Stockage des zones cliquables des noms d'étudiants
+ */
+let zonesNomsEtudiants = [];
+
+/**
+ * Plugin pour afficher le nom de l'étudiant au bout de la courbe survolée/verrouillée
  */
 const pluginNomEtudiantSurvol = {
     id: 'nomEtudiantSurvol',
     afterDraw(chart) {
-        if (dernierDatasetSurvole === -1) return;
+        // Afficher le nom pour le dataset actif (survolé ou verrouillé)
+        const datasetIndexActif = datasetVerrouille >= 0 ? datasetVerrouille : dernierDatasetSurvole;
+        if (datasetIndexActif === -1) {
+            zonesNomsEtudiants = [];
+            return;
+        }
 
         const ctx = chart.ctx;
-        const dataset = chart.data.datasets[dernierDatasetSurvole];
+        const dataset = chart.data.datasets[datasetIndexActif];
         if (!dataset) return;
 
-        const meta = chart.getDatasetMeta(dernierDatasetSurvole);
+        const meta = chart.getDatasetMeta(datasetIndexActif);
         if (!meta || !meta.data || meta.data.length === 0) return;
 
         // Trouver le dernier point visible (non-null) de la courbe
@@ -927,7 +943,9 @@ const pluginNomEtudiantSurvol = {
         if (!dernierPoint) return;
 
         // Dessiner le nom de l'étudiant à droite du dernier point
+        const estVerrouille = datasetVerrouille >= 0;
         const nom = dataset.label || '';
+        const texteAffiche = estVerrouille ? `🔒 ${nom}` : nom;
         const x = dernierPoint.x + 10;
         const y = dernierPoint.y;
 
@@ -937,14 +955,35 @@ const pluginNomEtudiantSurvol = {
         ctx.textBaseline = 'middle';
 
         // Fond blanc semi-transparent pour lisibilité
-        const textWidth = ctx.measureText(nom).width;
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-        ctx.fillRect(x - 3, y - 9, textWidth + 6, 18);
+        const textWidth = ctx.measureText(texteAffiche).width;
+        const rectX = x - 3;
+        const rectY = y - 10;
+        const rectW = textWidth + 10;
+        const rectH = 20;
 
-        // Texte bleu
-        ctx.fillStyle = '#1976D2';
-        ctx.fillText(nom, x, y);
+        ctx.fillStyle = estVerrouille ? 'rgba(233, 30, 99, 0.15)' : 'rgba(255, 255, 255, 0.9)';
+        ctx.fillRect(rectX, rectY, rectW, rectH);
+
+        // Bordure si verrouillé
+        if (estVerrouille) {
+            ctx.strokeStyle = '#E91E63';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(rectX, rectY, rectW, rectH);
+        }
+
+        // Texte
+        ctx.fillStyle = estVerrouille ? '#C2185B' : '#1976D2';
+        ctx.fillText(texteAffiche, x, y);
         ctx.restore();
+
+        // Stocker la zone cliquable pour ce nom
+        zonesNomsEtudiants = [{
+            datasetIndex: datasetIndexActif,
+            x: rectX,
+            y: rectY,
+            width: rectW,
+            height: rectH
+        }];
     }
 };
 
@@ -1181,12 +1220,15 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
         });
 
         // Créer un mapping activité → indices des productions (pour surbrillance des mêmes activités)
-        // Normaliser les noms pour regrouper les variantes (ex: "Carte mentale" et "Carte mentale (2)")
+        // Normaliser les noms pour regrouper les variantes
+        // Ex: "Carte mentale" et "Carte mentale (2)" → même activité
+        // Ex: "Formuler 10 HOC" et "Formuler 5 HOC" → même activité
         const normaliserActivite = (label) => {
             return label.toLowerCase()
                 .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Enlever accents
                 .replace(/\s*\(\d+\)\s*$/, '') // Enlever suffixes (2), (3), etc.
                 .replace(/\s*\d+\s*$/, '') // Enlever numéros en fin
+                .replace(/\s+\d+\s+/g, ' ') // Enlever numéros au milieu (ex: "Formuler 10 HOC" → "Formuler HOC")
                 .replace(/\s+/g, ' ').trim();
         };
 
@@ -1199,12 +1241,12 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
             activitesMap[normalise].push(index);
         });
 
-        // Index inverse : pour chaque position, quels autres indices ont la même activité
+        // Index inverse : pour chaque position, TOUS les indices de la même activité (y compris le courant)
         const memesActivites = {};
         labels.forEach((label, index) => {
             const normalise = normaliserActivite(label);
-            // Tous les indices de cette activité SAUF l'index courant
-            memesActivites[index] = activitesMap[normalise].filter(i => i !== index);
+            // TOUS les indices de cette activité (y compris l'index courant pour mise en relief complète)
+            memesActivites[index] = activitesMap[normalise];
         });
 
         // Debug: afficher les activités regroupées
@@ -1448,7 +1490,7 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                     axis: 'xy',
                     intersect: false // Permet de détecter le survol près de la ligne
                 },
-                // Gestion du survol pour mise en évidence + mêmes activités
+                // Gestion du survol pour mise en évidence + mêmes activités + verrouillage
                 onHover: function(event, activeElements, chart) {
                     if (!chart || !chart.data || !chart.data.datasets) return;
 
@@ -1461,47 +1503,55 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                         dataIndex = activeElements[0].index;
                     }
 
-                    // Si pas de changement, ne rien faire
-                    if (datasetIndex === dernierDatasetSurvole && dataIndex === dernierPointSurvole) return;
+                    // Si une courbe est verrouillée, forcer le datasetIndex
+                    const datasetActif = datasetVerrouille >= 0 ? datasetVerrouille : datasetIndex;
 
-                    dernierDatasetSurvole = datasetIndex;
+                    // Si pas de changement, ne rien faire
+                    if (datasetActif === dernierDatasetSurvole && dataIndex === dernierPointSurvole) return;
+
+                    dernierDatasetSurvole = datasetActif;
                     dernierPointSurvole = dataIndex;
 
-                    // Indices des autres points avec la même activité
+                    // TOUS les indices de la même activité (y compris le point survolé)
                     const indicesMemesActivites = dataIndex >= 0 ? (memesActivites[dataIndex] || []) : [];
 
                     // Appliquer les styles selon le survol
                     chart.data.datasets.forEach((dataset, idx) => {
                         const nbPoints = dataset.data.length;
 
-                        if (datasetIndex === -1) {
+                        if (datasetActif === -1) {
                             // Aucun survol - style par défaut
                             dataset.borderColor = 'rgba(50, 50, 50, 0.4)';
                             dataset.borderWidth = 1.5;
                             dataset.pointRadius = Array(nbPoints).fill(2);
                             dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(50, 50, 50, 0.5)');
-                        } else if (idx === datasetIndex) {
-                            // Courbe survolée - mise en évidence
-                            dataset.borderColor = '#2196F3';
+                        } else if (idx === datasetActif) {
+                            // Courbe active (survolée ou verrouillée) - mise en évidence
+                            dataset.borderColor = datasetVerrouille >= 0 ? '#E91E63' : '#2196F3'; // Rose si verrouillé, bleu sinon
                             dataset.borderWidth = 3;
 
                             // Créer des tableaux pour les styles de points
                             const rayons = Array(nbPoints).fill(4);
-                            const couleurs = Array(nbPoints).fill('#2196F3');
+                            const couleurs = Array(nbPoints).fill(datasetVerrouille >= 0 ? '#E91E63' : '#2196F3');
 
-                            // Mettre en évidence le point survolé (plus gros)
-                            if (dataIndex >= 0 && dataIndex < nbPoints) {
-                                rayons[dataIndex] = 8;
-                                couleurs[dataIndex] = '#1565C0'; // Bleu foncé pour le point survolé
+                            // Mettre en évidence TOUS les points de même activité (orange)
+                            if (indicesMemesActivites.length > 1) {
+                                indicesMemesActivites.forEach(i => {
+                                    if (i >= 0 && i < nbPoints && dataset.data[i] !== null) {
+                                        rayons[i] = 7;
+                                        couleurs[i] = '#FF9800'; // Orange pour mêmes activités
+                                    }
+                                });
                             }
 
-                            // Mettre en évidence les mêmes activités (orange)
-                            indicesMemesActivites.forEach(i => {
-                                if (i >= 0 && i < nbPoints && dataset.data[i] !== null) {
-                                    rayons[i] = 7;
-                                    couleurs[i] = '#FF9800'; // Orange pour mêmes activités
+                            // Le point directement survolé est plus gros
+                            if (dataIndex >= 0 && dataIndex < nbPoints && dataset.data[dataIndex] !== null) {
+                                rayons[dataIndex] = 9;
+                                // Garder orange si même activité, sinon bleu foncé
+                                if (indicesMemesActivites.length <= 1) {
+                                    couleurs[dataIndex] = datasetVerrouille >= 0 ? '#AD1457' : '#1565C0';
                                 }
-                            });
+                            }
 
                             dataset.pointRadius = rayons;
                             dataset.pointBackgroundColor = couleurs;
@@ -1524,19 +1574,85 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
         graphiqueSpaghettiInstance = chart;
 
         // Ajouter un listener pour réinitialiser au mouseout du canvas
+        // Sauf si une courbe est verrouillée
         canvas.addEventListener('mouseleave', function() {
-            dernierDatasetSurvole = -1;
-            dernierPointSurvole = -1;
-
-            // Réinitialiser tous les datasets au style par défaut
-            chart.data.datasets.forEach(dataset => {
-                const nbPoints = dataset.data.length;
-                dataset.borderColor = 'rgba(50, 50, 50, 0.4)';
-                dataset.borderWidth = 1.5;
-                dataset.pointRadius = Array(nbPoints).fill(2);
-                dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(50, 50, 50, 0.5)');
-            });
+            // Si verrouillé, garder la courbe active affichée
+            if (datasetVerrouille >= 0) {
+                dernierDatasetSurvole = datasetVerrouille;
+                dernierPointSurvole = -1;
+                // Mettre à jour pour montrer la courbe verrouillée sans point survolé
+                chart.data.datasets.forEach((dataset, idx) => {
+                    const nbPoints = dataset.data.length;
+                    if (idx === datasetVerrouille) {
+                        dataset.borderColor = '#E91E63';
+                        dataset.borderWidth = 3;
+                        dataset.pointRadius = Array(nbPoints).fill(4);
+                        dataset.pointBackgroundColor = Array(nbPoints).fill('#E91E63');
+                    } else {
+                        dataset.borderColor = 'rgba(80, 80, 80, 0.35)';
+                        dataset.borderWidth = 1;
+                        dataset.pointRadius = Array(nbPoints).fill(1);
+                        dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(80, 80, 80, 0.3)');
+                    }
+                });
+            } else {
+                // Pas de verrouillage - réinitialiser tout
+                dernierDatasetSurvole = -1;
+                dernierPointSurvole = -1;
+                chart.data.datasets.forEach(dataset => {
+                    const nbPoints = dataset.data.length;
+                    dataset.borderColor = 'rgba(50, 50, 50, 0.4)';
+                    dataset.borderWidth = 1.5;
+                    dataset.pointRadius = Array(nbPoints).fill(2);
+                    dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(50, 50, 50, 0.5)');
+                });
+            }
             chart.update('none');
+        });
+
+        // Gestionnaire de clic pour verrouiller/déverrouiller une courbe
+        canvas.addEventListener('click', function(event) {
+            const rect = canvas.getBoundingClientRect();
+            const clickX = event.clientX - rect.left;
+            const clickY = event.clientY - rect.top;
+
+            // Vérifier si le clic est sur un nom d'étudiant
+            for (const zone of zonesNomsEtudiants) {
+                if (clickX >= zone.x && clickX <= zone.x + zone.width &&
+                    clickY >= zone.y && clickY <= zone.y + zone.height) {
+
+                    // Clic sur un nom - toggle verrouillage
+                    if (datasetVerrouille === zone.datasetIndex) {
+                        // Déverrouiller
+                        datasetVerrouille = -1;
+                        console.log('🔓 Courbe déverrouillée');
+                    } else {
+                        // Verrouiller
+                        datasetVerrouille = zone.datasetIndex;
+                        dernierDatasetSurvole = zone.datasetIndex;
+                        console.log(`🔒 Courbe verrouillée: ${chart.data.datasets[zone.datasetIndex]?.label}`);
+                    }
+                    chart.update('none');
+                    return;
+                }
+            }
+        });
+
+        // Changer le curseur au survol des noms
+        canvas.addEventListener('mousemove', function(event) {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = event.clientX - rect.left;
+            const mouseY = event.clientY - rect.top;
+
+            let surNom = false;
+            for (const zone of zonesNomsEtudiants) {
+                if (mouseX >= zone.x && mouseX <= zone.x + zone.width &&
+                    mouseY >= zone.y && mouseY <= zone.y + zone.height) {
+                    surNom = true;
+                    break;
+                }
+            }
+            canvas.style.cursor = surNom ? 'pointer' : 'default';
         });
 
         console.log(`✅ Graphique spaghetti créé avec ${datasets.length} trajectoires sur ${productionsArtefacts.length} artefacts`);
