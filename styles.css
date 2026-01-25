@@ -1270,6 +1270,29 @@ h1, h2, h3, h4 {
     font-weight: 600;
 }
 
+/* 🆕 BETA 96: Ligne de contexte sous le titre (Trimestre | Cours | Badge) */
+.carte-contexte-ligne {
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.carte-contexte-ligne .contexte-trimestre,
+.carte-contexte-ligne .contexte-cours {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.carte-contexte-ligne .contexte-separateur {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.carte-contexte-ligne .contexte-badge {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+}
+
 .carte ul,
 .carte ol {
     padding-left: 30px;
