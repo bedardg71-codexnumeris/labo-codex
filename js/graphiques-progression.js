@@ -1204,15 +1204,39 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
         }
 
         // Récupérer les productions (artefacts) du cours actif
-        // IMPORTANT: Utiliser 'productions' comme clé (pas 'productionsPedagogiques')
+        // IMPORTANT: Utiliser 'productions' pour les IDs (correspondance avec évaluations)
+        // mais enrichir les descriptions depuis 'productionsPedagogiques' (formulaire)
         let productions = [];
 
         if (typeof obtenirDonneesSelonMode === 'function') {
-            productions = obtenirDonneesSelonMode('productionsPedagogiques') || [];
+            productions = obtenirDonneesSelonMode('productions') || [];
         } else {
-            const cleProductions = (typeof cle === 'function') ? cle('productionsPedagogiques') : 'productionsPedagogiques';
+            const cleProductions = (typeof cle === 'function') ? cle('productions') : 'productions';
             productions = db.getSync(cleProductions, []);
         }
+
+        // Récupérer aussi productionsPedagogiques pour les descriptions mises à jour
+        let productionsPedago = [];
+        if (typeof obtenirDonneesSelonMode === 'function') {
+            productionsPedago = obtenirDonneesSelonMode('productionsPedagogiques') || [];
+        } else {
+            const clePedago = (typeof cle === 'function') ? cle('productionsPedagogiques') : 'productionsPedagogiques';
+            productionsPedago = db.getSync(clePedago, []);
+        }
+
+        // Créer un mapping titre → description depuis productionsPedagogiques
+        const descriptionsParTitre = {};
+        productionsPedago.forEach(p => {
+            if (p.titre && p.description) {
+                descriptionsParTitre[p.titre] = p.description;
+            }
+        });
+
+        // Enrichir les productions avec les descriptions mises à jour
+        productions = productions.map(p => ({
+            ...p,
+            description: descriptionsParTitre[p.titre] || p.description
+        }));
 
         console.log(`📊 [Spaghetti] Productions trouvées: ${productions.length}`);
 
