@@ -1118,7 +1118,7 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
             if (data.every(v => v === null || v === undefined)) return null;
 
             return {
-                label: nomAffiche,
+                label: etudiant.nomAffiche,
                 data: data,
                 da: etudiant.da,
                 borderColor: 'rgba(50, 50, 50, 0.4)',
