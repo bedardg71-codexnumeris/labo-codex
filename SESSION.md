@@ -29,10 +29,13 @@
 - **Graphique spaghetti** : Visualisation de l'évolution de tous les étudiants (nouveau Beta 96)
 
 ### Derniere tache completee (25 janvier - Beta 96)
-- **GRAPHIQUE DISTRIBUTION ACPE** : Courbes de densité (style Gauss)
+- **GRAPHIQUE DISTRIBUTION ACPE** : Courbes de Gauss avec distribution réelle
   - Visualise la répartition des indices A, C, P, E parmi les étudiants
-  - Utilise l'algorithme KDE (Kernel Density Estimation) pour courbes lisses
-  - Lignes verticales pointillées aux moyennes de chaque indice
+  - **Courbes de Gauss** basées sur μ (moyenne) et σ (écart-type) calculés
+  - **Points individuels** : Chaque étudiant est affiché comme un point sur l'axe X
+  - **Bandes colorées σ** : Zones ±1σ (foncées) et ±2σ (claires) avec comptage réel
+  - **Comptage en temps réel** : Affiche "±1σ: X/N (Y%)" pour chaque indice
+  - **Tooltips enrichis** : Position de l'étudiant en σ par rapport à μ
   - Interprétation : courbe étroite = groupe homogène, courbe large = grande variabilité
   - **Fonction créée** : `creerGraphiqueDistributionACPE(canvasId)`
   - **Fichiers modifiés** : `index.html`, `js/graphiques-progression.js`, `js/tableau-bord-apercu.js`
