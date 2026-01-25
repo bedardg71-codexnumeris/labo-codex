@@ -1052,15 +1052,27 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
 
         console.log(`📊 [Spaghetti] Productions trouvées: ${productions.length}`);
 
-        // Filtrer les productions qui comptent pour le portfolio (pas analyse finale, etc.)
-        // ET dédupliquer par ID (évite les doublons comme "Art. 1" affiché deux fois)
+        // Filtrer les productions : garder uniquement les artefacts évaluables
+        // Exclure : Portfolio (conteneur), Analyse finale, Évaluation terminale
         const productionsVues = new Set();
-        const productionsPortfolio = productions.filter(p => {
-            // Exclure les productions de type "analyse finale" ou similaire
-            const estAnalyseFinale = p.titre?.toLowerCase().includes('analyse finale') ||
-                                     p.type === 'analyseFinale' ||
-                                     p.categorie === 'analyseFinale';
-            if (estAnalyseFinale) return false;
+        const productionsArtefacts = productions.filter(p => {
+            const titreLower = (p.titre || '').toLowerCase();
+
+            // Exclure le Portfolio (c'est un conteneur, pas une production évaluable)
+            if (titreLower === 'portfolio' || titreLower.startsWith('portfolio ') ||
+                p.type === 'portfolio' || p.categorie === 'portfolio') {
+                return false;
+            }
+
+            // Exclure les évaluations terminales / analyses finales
+            if (titreLower.includes('analyse finale') ||
+                titreLower.includes('évaluation terminale') ||
+                titreLower.includes('evaluation terminale') ||
+                p.type === 'analyseFinale' ||
+                p.type === 'evaluationTerminale' ||
+                p.categorie === 'analyseFinale') {
+                return false;
+            }
 
             // Dédupliquer par ID
             if (productionsVues.has(p.id)) {
@@ -1071,9 +1083,9 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
             return true;
         });
 
-        console.log(`📊 [Spaghetti] Productions portfolio (sans analyse finale, sans doublons): ${productionsPortfolio.length}`);
+        console.log(`📊 [Spaghetti] Productions artefacts (sans conteneurs/terminales): ${productionsArtefacts.length}`);
 
-        if (productionsPortfolio.length === 0) {
+        if (productionsArtefacts.length === 0) {
             console.warn('Aucune production disponible pour le graphique spaghetti');
             afficherMessageAttente(canvas, 'Aucun artefact défini', 'Créez des productions dans Réglages › Productions');
             return null;
@@ -1144,7 +1156,7 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
         }
 
         // Diagnostic: Vérifier la correspondance entre évaluations et productions
-        const prodIds = new Set(productionsPortfolio.map(p => p.id));
+        const prodIds = new Set(productionsArtefacts.map(p => p.id));
         const evalProdIds = [...new Set(evaluations.map(e => e.productionId))];
         const correspondances = evalProdIds.filter(id => prodIds.has(id));
 
@@ -1154,22 +1166,19 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
 
         // Créer un index productionId → position pour le tri
         const indexProductions = {};
-        productionsPortfolio.forEach((prod, index) => {
+        productionsArtefacts.forEach((prod, index) => {
             indexProductions[prod.id] = index;
         });
 
-        // Préparer les labels (artefacts) - utiliser l'activité d'apprentissage
-        // Ex: "Artefact 1 - Portrait de lecteur" → "Portrait de lecteur"
-        const labels = productionsPortfolio.map((prod, index) => {
-            const titre = prod.titre || '';
-            // Chercher le pattern "Artefact X - Activité" ou "Art. X - Activité"
-            const titreSplit = titre.split(/\s*[-–—:]\s*/);
-            if (titreSplit.length >= 2) {
-                // Prendre la partie après le tiret (l'activité d'apprentissage)
-                return titreSplit.slice(1).join(' - ').trim();
+        // Préparer les labels - utiliser le champ "description" qui contient l'activité d'apprentissage
+        // Ex: titre="Artefact 1", description="Portrait de lecteur" → "Portrait de lecteur"
+        const labels = productionsArtefacts.map((prod, index) => {
+            // Priorité : description (activité) > titre > fallback
+            if (prod.description && prod.description.trim()) {
+                return prod.description.trim();
             }
-            // Si pas de tiret, utiliser le titre complet ou un fallback
-            return titre || `Production ${index + 1}`;
+            // Si pas de description, utiliser le titre
+            return prod.titre || `Production ${index + 1}`;
         });
 
         // Créer un dataset par étudiant
@@ -1177,7 +1186,7 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
             const da = etudiant.da;
 
             // Pour chaque production, trouver l'évaluation de cet étudiant
-            const donnees = productionsPortfolio.map(prod => {
+            const donnees = productionsArtefacts.map(prod => {
                 // Trouver l'évaluation pour cet étudiant et cette production
                 const evaluation = evaluations.find(e =>
                     e.etudiantDA === da && e.productionId === prod.id
@@ -1271,28 +1280,37 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                     },
                     tooltip: {
                         enabled: true,
-                        mode: 'nearest',
-                        intersect: true, // Seulement au survol exact d'un point
+                        mode: 'point', // Un seul point exact (évite les doublons)
+                        intersect: true,
                         backgroundColor: 'rgba(0, 0, 0, 0.85)',
                         titleColor: '#fff',
                         bodyColor: '#fff',
-                        titleFont: { size: 11 },
-                        bodyFont: { size: 12 },
+                        titleFont: { size: 12, weight: 'bold' },
+                        bodyFont: { size: 11 },
                         padding: 10,
                         cornerRadius: 6,
                         displayColors: false,
-                        // Afficher note + statuts (jeton, irrecevable, non-remis)
+                        // Filtrer pour ne garder qu'un seul élément (évite doublons)
+                        filter: function(tooltipItem, index) {
+                            return index === 0; // Garder seulement le premier
+                        },
                         callbacks: {
                             title: function(tooltipItems) {
-                                const dataIndex = tooltipItems[0]?.dataIndex;
-                                // Titre : nom complet de la production
-                                return productionsPortfolio[dataIndex]?.titre || `Production ${dataIndex + 1}`;
+                                if (!tooltipItems || tooltipItems.length === 0) return '';
+                                const item = tooltipItems[0];
+                                const dataIndex = item.dataIndex;
+                                const production = productionsArtefacts[dataIndex];
+                                // Titre : activité d'apprentissage (description) ou titre
+                                const activite = production?.description || production?.titre || `Production ${dataIndex + 1}`;
+                                // Ajouter le nom de l'étudiant
+                                const nomEtudiant = item.dataset?.label || '';
+                                return nomEtudiant ? `${nomEtudiant} - ${activite}` : activite;
                             },
                             label: function(context) {
                                 const lignes = [];
                                 const da = context.dataset.da;
                                 const dataIndex = context.dataIndex;
-                                const production = productionsPortfolio[dataIndex];
+                                const production = productionsArtefacts[dataIndex];
 
                                 // Récupérer l'évaluation complète depuis l'index
                                 const evaluation = production && da
@@ -1399,7 +1417,7 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
             reinitialiserStylesSpaghetti(chart);
         });
 
-        console.log(`✅ Graphique spaghetti créé avec ${datasets.length} trajectoires sur ${productionsPortfolio.length} artefacts`);
+        console.log(`✅ Graphique spaghetti créé avec ${datasets.length} trajectoires sur ${productionsArtefacts.length} artefacts`);
         return chart;
 
     } catch (error) {
