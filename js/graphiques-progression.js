@@ -1181,13 +1181,18 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
         });
 
         // Créer un mapping activité → indices des productions (pour surbrillance des mêmes activités)
-        // Normaliser les noms pour regrouper les variantes (ex: "Stratégies de lecture" apparaît 2 fois)
+        // Normaliser les noms pour regrouper les variantes (ex: "Carte mentale" et "Carte mentale (2)")
+        const normaliserActivite = (label) => {
+            return label.toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Enlever accents
+                .replace(/\s*\(\d+\)\s*$/, '') // Enlever suffixes (2), (3), etc.
+                .replace(/\s*\d+\s*$/, '') // Enlever numéros en fin
+                .replace(/\s+/g, ' ').trim();
+        };
+
         const activitesMap = {};
         labels.forEach((label, index) => {
-            // Normaliser : minuscules, sans accents, sans espaces multiples
-            const normalise = label.toLowerCase()
-                .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Enlever accents
-                .replace(/\s+/g, ' ').trim();
+            const normalise = normaliserActivite(label);
             if (!activitesMap[normalise]) {
                 activitesMap[normalise] = [];
             }
@@ -1197,12 +1202,13 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
         // Index inverse : pour chaque position, quels autres indices ont la même activité
         const memesActivites = {};
         labels.forEach((label, index) => {
-            const normalise = label.toLowerCase()
-                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-                .replace(/\s+/g, ' ').trim();
+            const normalise = normaliserActivite(label);
             // Tous les indices de cette activité SAUF l'index courant
             memesActivites[index] = activitesMap[normalise].filter(i => i !== index);
         });
+
+        // Debug: afficher les activités regroupées
+        console.log('📊 [Spaghetti] Activités regroupées:', Object.entries(activitesMap).filter(([k, v]) => v.length > 1));
 
         // Fonction pour convertir une note (0-1) en code IDME
         const noteVersIDME = (note) => {
@@ -1348,42 +1354,50 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                                     ? evaluationsIndex[da]?.[production.id]
                                     : null;
 
-                                // Note avec code IDME : "M (75%)"
+                                // Construire une ligne compacte : "M (75%) - Jeton - Plagiat"
                                 const noteDecimale = context.parsed.y;
                                 const notePourcent = noteDecimale !== null
                                     ? (noteDecimale * 100).toFixed(0)
                                     : '—';
                                 const codeIDME = noteVersIDME(noteDecimale);
-                                lignes.push(`${codeIDME} (${notePourcent}%)`);
+
+                                // Collecter les statuts
+                                const statuts = [];
 
                                 if (evaluation) {
-                                    // Vérifier jeton utilisé
+                                    // Jeton utilisé
                                     const jetonUtilise = evaluation.repriseDeId ||
                                                         evaluation.jetonReprise ||
                                                         evaluation.jetonDelai ||
                                                         evaluation.avecJeton;
                                     if (jetonUtilise) {
-                                        lignes.push('🎟️ Jeton utilisé');
+                                        statuts.push('Jeton');
                                     }
 
-                                    // Vérifier intégrité académique (plagiat, IA)
+                                    // Intégrité académique
                                     const statutIntegrite = evaluation.statutIntegrite;
                                     if (statutIntegrite === 'plagiat') {
-                                        lignes.push('⚠️ Irrecevable (plagiat)');
+                                        statuts.push('Plagiat');
                                     } else if (statutIntegrite === 'ia') {
-                                        lignes.push('⚠️ Irrecevable (IA)');
+                                        statuts.push('IA');
                                     }
 
-                                    // Vérifier statut de remise
+                                    // Statut de remise
                                     const statutRemise = evaluation.statutRemise;
                                     if (statutRemise === 'non-remis') {
-                                        lignes.push('📭 Non remis');
+                                        statuts.push('Non remis');
                                     } else if (statutRemise === 'retard') {
-                                        lignes.push('⏰ Remis en retard');
+                                        statuts.push('Retard');
                                     }
                                 }
 
-                                return lignes;
+                                // Formater sur une ligne : "M (75%)" ou "M (75%) - Jeton - Plagiat"
+                                let ligne = `${codeIDME} (${notePourcent}%)`;
+                                if (statuts.length > 0) {
+                                    ligne += ' - ' + statuts.join(' - ');
+                                }
+
+                                return ligne;
                             }
                         }
                     },
