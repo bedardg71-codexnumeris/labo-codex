@@ -1053,10 +1053,16 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
             if (snapshot.etudiants) {
                 snapshot.etudiants.forEach(etudiant => {
                     if (!etudiantsMap.has(etudiant.da)) {
+                        // Le nom est au format "Prénom Nom" dans les snapshots
+                        const nomComplet = etudiant.nom || etudiant.da;
+                        const parties = nomComplet.split(' ');
+                        const prenom = parties[0] || '';
+                        const nomFamille = parties.slice(1).join(' ') || '';
+
                         etudiantsMap.set(etudiant.da, {
                             da: etudiant.da,
-                            nom: etudiant.nom || etudiant.da,
-                            prenom: etudiant.prenom || ''
+                            nomComplet: nomComplet,
+                            nomAffiche: nomFamille ? `${prenom} ${nomFamille.charAt(0)}.` : prenom
                         });
                     }
                 });
@@ -1090,17 +1096,18 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
                 if (!etudiantSnapshot) return null;
 
                 // Récupérer la valeur selon l'indice
+                // Utiliser A_cumulatif pour A (plus lisse), sinon A ponctuel
                 let valeur = null;
                 if (indice === 'A') {
-                    valeur = etudiantSnapshot.A ?? etudiantSnapshot.assiduite;
+                    valeur = etudiantSnapshot.A_cumulatif ?? etudiantSnapshot.A;
                 } else if (indice === 'C') {
-                    valeur = etudiantSnapshot.C ?? etudiantSnapshot.completion;
+                    valeur = etudiantSnapshot.C;
                 } else if (indice === 'P') {
-                    valeur = etudiantSnapshot.P ?? etudiantSnapshot.performance;
+                    valeur = etudiantSnapshot.P;
                 }
 
-                // Convertir en 0-1 si en pourcentage
-                if (valeur !== null && valeur > 1) {
+                // Convertir en 0-1 si en pourcentage (valeurs > 1)
+                if (valeur !== null && valeur !== undefined && valeur > 1) {
                     valeur = valeur / 100;
                 }
 
@@ -1108,14 +1115,10 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
             });
 
             // Vérifier qu'il y a au moins une valeur non-null
-            if (data.every(v => v === null)) return null;
-
-            const nomComplet = etudiant.prenom
-                ? `${etudiant.prenom} ${etudiant.nom.charAt(0)}.`
-                : etudiant.nom;
+            if (data.every(v => v === null || v === undefined)) return null;
 
             return {
-                label: nomComplet,
+                label: nomAffiche,
                 data: data,
                 da: etudiant.da,
                 borderColor: 'rgba(50, 50, 50, 0.4)',
