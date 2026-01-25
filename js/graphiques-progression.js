@@ -82,6 +82,82 @@ const ZONES_IDME = [
     }
 ];
 
+/**
+ * Récupère l'échelle de performance de l'utilisateur (première disponible)
+ * @returns {Object|null} - Échelle avec ses niveaux ou null
+ */
+function obtenirEchelleUtilisateur() {
+    try {
+        const echelles = db.getSync('echellesTemplates', []);
+        if (echelles && echelles.length > 0) {
+            // Prendre la première échelle (ou celle par défaut si définie)
+            return echelles.find(e => e.parDefaut) || echelles[0];
+        }
+    } catch (e) {
+        console.warn('[Graphiques] Erreur lecture échelles:', e);
+    }
+    return null;
+}
+
+/**
+ * Convertit une couleur hex en rgba
+ * @param {string} hex - Couleur hex (#RRGGBB ou #RGB)
+ * @param {number} alpha - Opacité (0-1)
+ * @returns {string} - Couleur rgba
+ */
+function hexVersRgba(hex, alpha = 0.5) {
+    if (!hex) return `rgba(128, 128, 128, ${alpha})`;
+
+    // Gérer les variables CSS
+    if (hex.startsWith('var(')) {
+        // Couleurs par défaut pour les variables connues
+        const variablesDefaut = {
+            'var(--risque-critique)': '#dc3545',
+            'var(--risque-modere)': '#fd7e14',
+            'var(--risque-minimal)': '#28a745',
+            'var(--risque-nul)': '#007bff'
+        };
+        hex = variablesDefaut[hex] || '#888888';
+    }
+
+    // Nettoyer le hex
+    hex = hex.replace('#', '');
+    if (hex.length === 3) {
+        hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+    }
+
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+/**
+ * Génère les zones colorées à partir de l'échelle utilisateur
+ * @returns {Array} - Tableau de zones pour les annotations
+ */
+function genererZonesDepuisEchelle() {
+    const echelle = obtenirEchelleUtilisateur();
+
+    if (!echelle || !echelle.niveaux || echelle.niveaux.length === 0) {
+        // Fallback: retourner ZONES_IDME par défaut
+        return ZONES_IDME;
+    }
+
+    // Trier les niveaux par min croissant
+    const niveauxTries = [...echelle.niveaux].sort((a, b) => a.min - b.min);
+
+    return niveauxTries.map(niveau => ({
+        yMin: niveau.min / 100,
+        yMax: (niveau.max + 1) / 100, // +1 pour inclure le max
+        backgroundColor: hexVersRgba(niveau.couleur, 0.35),
+        borderColor: hexVersRgba(niveau.couleur, 0.5),
+        label: niveau.nom,
+        code: niveau.code
+    }));
+}
+
 /* ===============================
    ✨ NOUVEAU (17 déc 2025) : MARQUEURS JETONS ET RÀI
    Détecte les événements pédagogiques pour affichage sur le graphique
@@ -856,8 +932,8 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
 let graphiqueSpaghettiInstance = null;
 
 /**
- * Plugin pour afficher les étiquettes de zones IDME sur le côté droit
- * Comme dans l'image de référence (Étendu ou enrichi, Réussite, etc.)
+ * Plugin pour afficher les étiquettes de zones sur le côté droit
+ * Utilise l'échelle de performance de l'utilisateur
  */
 const pluginEtiquettesZones = {
     id: 'etiquettesZones',
@@ -866,25 +942,22 @@ const pluginEtiquettesZones = {
         const chartArea = chart.chartArea;
         const yScale = chart.scales.y;
 
-        // Configuration des étiquettes de zones
-        const zones = [
-            { yMin: 0.85, yMax: 1.00, label: 'Étendu ou enrichi', color: '#1565C0' },
-            { yMin: 0.65, yMax: 0.75, label: 'Réussite', color: '#2E7D32' },
-            { yMin: 0.00, yMax: 0.40, label: 'Insuffisant ou incomplet', color: '#C62828' }
-        ];
+        // Obtenir les zones depuis l'échelle utilisateur
+        const zonesUtilisateur = genererZonesDepuisEchelle();
 
         ctx.save();
         ctx.font = 'italic 11px Arial';
         ctx.textAlign = 'right';
         ctx.textBaseline = 'middle';
 
-        zones.forEach(zone => {
+        zonesUtilisateur.forEach(zone => {
             const yCenter = (zone.yMin + zone.yMax) / 2;
             const yPixel = yScale.getPixelForValue(yCenter);
 
             // Vérifier que la position est dans la zone du graphique
             if (yPixel >= chartArea.top && yPixel <= chartArea.bottom) {
-                ctx.fillStyle = zone.color;
+                // Utiliser une couleur plus foncée pour le texte (extraire de borderColor)
+                ctx.fillStyle = zone.borderColor || '#666666';
                 ctx.fillText(zone.label, chartArea.right - 5, yPixel);
             }
         });
@@ -1400,14 +1473,21 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
         // Debug: afficher les activités regroupées
         console.log('📊 [Spaghetti] Activités regroupées:', Object.entries(activitesMap).filter(([k, v]) => v.length > 1));
 
-        // Fonction pour convertir une note (0-1) en code IDME
+        // Fonction pour convertir une note (0-1) en code selon l'échelle utilisateur
+        const zonesEchelle = genererZonesDepuisEchelle();
         const noteVersIDME = (note) => {
             if (note === null || note === undefined) return '—';
-            if (note >= 0.85) return 'E'; // Étendu
-            if (note >= 0.75) return 'M'; // Maîtrisé
-            if (note >= 0.65) return 'D'; // Développement
-            if (note >= 0.40) return 'D'; // Développement (seuil de réussite)
-            return 'I'; // Insuffisant
+            const notePourcent = note * 100;
+            // Parcourir les zones du plus haut au plus bas
+            const zonesTries = [...zonesEchelle].sort((a, b) => b.yMin - a.yMin);
+            for (const zone of zonesTries) {
+                if (notePourcent >= zone.yMin * 100) {
+                    return zone.code || zone.label.charAt(0).toUpperCase();
+                }
+            }
+            // Fallback: première zone (la plus basse)
+            const zoneBasse = zonesEchelle[0];
+            return zoneBasse?.code || 'I';
         };
 
         // Stocker les données pour les plugins (tooltips multiples)
@@ -1910,53 +1990,26 @@ function rafraichirGraphiqueSpaghetti() {
 }
 
 /**
- * Crée les annotations pour les zones colorées IDME (version améliorée pour spaghetti)
- * Couleurs plus saturées pour meilleure visibilité avec les lignes noires
+ * Crée les annotations pour les zones colorées (version dynamique)
+ * Utilise l'échelle de performance de l'utilisateur
  * @returns {Object} - Configuration des annotations
  */
 function creerAnnotationsZonesIDME() {
-    return {
-        zoneInsuffisant: {
+    const zones = genererZonesDepuisEchelle();
+    const annotations = {};
+
+    zones.forEach((zone, index) => {
+        annotations[`zone${index}_${zone.code || index}`] = {
             type: 'box',
-            yMin: 0.00,
-            yMax: 0.40,
-            backgroundColor: 'rgba(239, 154, 154, 0.5)',  // Rouge plus visible
+            yMin: zone.yMin,
+            yMax: zone.yMax,
+            backgroundColor: zone.backgroundColor,
             borderWidth: 0,
             drawTime: 'beforeDatasetsDraw'
-        },
-        zoneReussite: {
-            type: 'box',
-            yMin: 0.40,
-            yMax: 0.65,
-            backgroundColor: 'rgba(255, 224, 178, 0.5)',  // Orange clair
-            borderWidth: 0,
-            drawTime: 'beforeDatasetsDraw'
-        },
-        zoneDeveloppement: {
-            type: 'box',
-            yMin: 0.65,
-            yMax: 0.75,
-            backgroundColor: 'rgba(255, 245, 157, 0.5)',  // Jaune
-            borderWidth: 0,
-            drawTime: 'beforeDatasetsDraw'
-        },
-        zoneMaitrise: {
-            type: 'box',
-            yMin: 0.75,
-            yMax: 0.85,
-            backgroundColor: 'rgba(200, 230, 201, 0.5)',  // Vert clair
-            borderWidth: 0,
-            drawTime: 'beforeDatasetsDraw'
-        },
-        zoneEtendu: {
-            type: 'box',
-            yMin: 0.85,
-            yMax: 1.00,
-            backgroundColor: 'rgba(144, 202, 249, 0.5)',  // Bleu clair
-            borderWidth: 0,
-            drawTime: 'beforeDatasetsDraw'
-        }
-    };
+        };
+    });
+
+    return annotations;
 }
 
 /* ===============================
