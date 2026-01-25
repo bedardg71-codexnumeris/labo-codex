@@ -77,6 +77,69 @@ function calculerCorrelationPearson(x, y) {
 }
 
 /**
+ * 🆕 BETA 96: Met à jour les lignes de contexte dans les en-têtes des sections
+ * Affiche: Trimestre | Cours | Badge nombre de personnes
+ * @param {number} nbEtudiants - Nombre d'étudiants actifs
+ */
+function mettreAJourContextesSections(nbEtudiants) {
+    // Récupérer les infos du contexte actuel
+    const trimestreId = window.trimestreActif || '';
+    const gcActif = db.getSync('groupeCoursActif', null);
+
+    // Formater le nom du trimestre
+    let nomTrimestre = '';
+    if (trimestreId) {
+        // Format: h2026 ou a2025
+        const session = trimestreId.charAt(0).toLowerCase();
+        const annee = trimestreId.substring(1);
+        const sessionNom = { 'h': 'Hiver', 'a': 'Automne', 'e': 'Été' }[session] || session.toUpperCase();
+        nomTrimestre = `${sessionNom} ${annee}`;
+    }
+
+    // Formater le cours
+    let nomCours = '';
+    if (gcActif) {
+        // Priorité: titre personnalisé > cours + groupe
+        if (gcActif.titrePersonnalise) {
+            nomCours = gcActif.titrePersonnalise;
+        } else if (gcActif.coursId && gcActif.groupe) {
+            nomCours = `${gcActif.coursId} gr. ${gcActif.groupe}`;
+        } else if (gcActif.id) {
+            nomCours = gcActif.id;
+        }
+    }
+
+    // Formater le badge
+    const badgeTexte = nbEtudiants + ' personne' + (nbEtudiants > 1 ? 's' : '');
+
+    // Générer le HTML du contexte
+    const contexteHTML = `
+        <span class="contexte-trimestre">${nomTrimestre || '—'}</span>
+        <span class="contexte-separateur">|</span>
+        <span class="contexte-cours">${nomCours || '—'}</span>
+        <span class="contexte-separateur">|</span>
+        <span class="contexte-badge">${badgeTexte}</span>
+    `;
+
+    // Mettre à jour les 4 sections
+    const idsContexte = [
+        'contexte-indicateurs-acpe',
+        'contexte-indicateurs-apprentissage',
+        'contexte-evolution-temporelle',
+        'contexte-trajectoire-apprentissage'
+    ];
+
+    idsContexte.forEach(id => {
+        const elem = document.getElementById(id);
+        if (elem) {
+            elem.innerHTML = contexteHTML;
+        }
+    });
+
+    console.log(`📊 [Contexte] Mis à jour: ${nomTrimestre} | ${nomCours} | ${badgeTexte}`);
+}
+
+/**
  * 🆕 BETA 96: Génère un SVG de courbe de Gauss pour superposer sur une barre de progression
  * La barre affiche 30-100%, donc on mappe les valeurs sur cet intervalle
  * @param {Array<number>} valeurs - Valeurs des étudiants (0-1 décimal)
@@ -509,13 +572,9 @@ function chargerTableauBordApercu() {
             e.statut !== 'décrochage' && e.statut !== 'abandon'
         );
 
-        // 🆕 BETA 95.6 : Mettre à jour le badge nombre d'étudiants dans "Indicateurs ACPE"
+        // 🆕 BETA 96 : Mettre à jour les lignes de contexte dans les 4 sections
         const nbEtudiants = etudiantsActifs.length;
-        const labelEtudiants = nbEtudiants + ' personne' + (nbEtudiants > 1 ? 's' : '');
-        const badgeIndicateurs = document.getElementById('badge-nb-etudiants-indicateurs');
-        if (badgeIndicateurs) {
-            badgeIndicateurs.textContent = labelEtudiants;
-        }
+        mettreAJourContextesSections(nbEtudiants);
 
         // Ajouter les indices (structure : {sommatif: {...}, alternatif: {...}})
         const etudiantsAvecIndices = etudiantsActifs.map(etudiant => {

@@ -3456,12 +3456,17 @@
 
                     <!-- ========== SECTION 1: INDICATEURS ACPE DU GROUPE ========== -->
                     <div class="carte" id="carte-indicateurs-acpe">
-                        <h3 class="carte-titre-bleu carte-titre-avec-toggle">
-                            <span>Indicateurs ACPE du groupe</span>
-                            <span id="badge-nb-etudiants-indicateurs" class="badge-compteur-header" style="margin-left: auto; margin-right: 10px; font-size: 0.75rem; padding: 3px 10px; background: rgba(255,255,255,0.2); border-radius: 20px; color: white; font-weight: normal;"></span>
-                            <span class="emoji-container">
-                                <span class="primo-aide" data-target="note-indicateurs">😎</span>
-                            </span>
+                        <h3 class="carte-titre-bleu carte-titre-avec-toggle" style="flex-wrap: wrap;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; width: 100%;">
+                                <span>Indicateurs ACPE du groupe</span>
+                                <span style="margin-left: auto;"></span>
+                                <span class="emoji-container">
+                                    <span class="primo-aide" data-target="note-indicateurs">😎</span>
+                                </span>
+                            </div>
+                            <div id="contexte-indicateurs-acpe" class="carte-contexte-ligne" style="width: 100%; font-size: 0.8rem; font-weight: normal; opacity: 0.9; margin-top: 6px; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                                <!-- Trimestre | Cours | Badge - rempli dynamiquement par JS -->
+                            </div>
                         </h3>
 
                         <!-- Carte Note -->
@@ -3485,11 +3490,17 @@
 
                     <!-- ========== SECTION 2: INDICATEURS D'APPRENTISSAGE ========== -->
                     <div class="carte" id="carte-indicateurs-apprentissage" style="margin-top: 2rem;">
-                        <h3 class="carte-titre-bleu carte-titre-avec-toggle">
-                            <span>Indicateurs d'apprentissage</span>
-                            <span class="emoji-container">
-                                <span class="primo-aide" data-target="note-apprentissage">😎</span>
-                            </span>
+                        <h3 class="carte-titre-bleu carte-titre-avec-toggle" style="flex-wrap: wrap;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; width: 100%;">
+                                <span>Indicateurs d'apprentissage</span>
+                                <span style="margin-left: auto;"></span>
+                                <span class="emoji-container">
+                                    <span class="primo-aide" data-target="note-apprentissage">😎</span>
+                                </span>
+                            </div>
+                            <div id="contexte-indicateurs-apprentissage" class="carte-contexte-ligne" style="width: 100%; font-size: 0.8rem; font-weight: normal; opacity: 0.9; margin-top: 4px; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                                <!-- Trimestre | Cours | Badge - rempli par JS -->
+                            </div>
                         </h3>
 
                         <!-- Carte Note -->
@@ -3517,23 +3528,28 @@
 
                     <!-- ========== SECTION 3: ÉVOLUTION TEMPORELLE ========== -->
                     <div class="carte" id="carte-evolution-temporelle" style="margin-top: 2rem;">
-                        <h3 class="carte-titre-bleu" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-                            <span>Évolution temporelle</span>
-                            <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
-                                <div style="display: flex; gap: 0.5rem; align-items: center;">
-                                    <label style="font-size: 0.9rem; font-weight: normal; color: var(--gris-fonce);">Indice :</label>
-                                    <select id="selecteur-indice-acp" onchange="rafraichirGraphiqueSpaghettiACP()" style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid var(--gris-moyen); font-size: 0.9rem;">
-                                        <option value="A" selected>Assiduité (A)</option>
-                                        <option value="C">Complétion (C)</option>
-                                        <option value="P">Construction de P</option>
-                                    </select>
+                        <h3 class="carte-titre-bleu" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; width: 100%;">
+                                <span>Évolution temporelle</span>
+                                <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                        <label style="font-size: 0.9rem; font-weight: normal; color: var(--gris-fonce);">Indice :</label>
+                                        <select id="selecteur-indice-acp" onchange="rafraichirGraphiqueSpaghettiACP()" style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid var(--gris-moyen); font-size: 0.9rem;">
+                                            <option value="A" selected>Assiduité (A)</option>
+                                            <option value="C">Complétion (C)</option>
+                                            <option value="P">Construction de P</option>
+                                        </select>
+                                    </div>
+                                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                        <label style="font-size: 0.9rem; font-weight: normal; color: var(--gris-fonce);">Élève :</label>
+                                        <select id="selecteur-etudiant-acp" onchange="selectionnerEtudiantACP()" style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid var(--gris-moyen); font-size: 0.9rem;">
+                                            <option value="">-- Sélectionner --</option>
+                                        </select>
+                                    </div>
                                 </div>
-                                <div style="display: flex; gap: 0.5rem; align-items: center;">
-                                    <label style="font-size: 0.9rem; font-weight: normal; color: var(--gris-fonce);">Élève :</label>
-                                    <select id="selecteur-etudiant-acp" onchange="selectionnerEtudiantACP()" style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid var(--gris-moyen); font-size: 0.9rem;">
-                                        <option value="">-- Sélectionner --</option>
-                                    </select>
-                                </div>
+                            </div>
+                            <div id="contexte-evolution-temporelle" class="carte-contexte-ligne" style="font-size: 0.8rem; font-weight: normal; opacity: 0.9; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                                <!-- Trimestre | Cours | Badge - rempli par JS -->
                             </div>
                         </h3>
 
@@ -3548,18 +3564,23 @@
 
                     <!-- ========== SECTION 4: TRAJECTOIRE D'APPRENTISSAGE ========== -->
                     <div class="carte" id="carte-trajectoire-apprentissage" style="margin-top: 2rem;">
-                        <h3 class="carte-titre-bleu" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-                            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                <span>Trajectoire d'apprentissage</span>
-                                <span class="emoji-container">
-                                    <span class="primo-aide" data-target="note-spaghetti">😎</span>
-                                </span>
+                        <h3 class="carte-titre-bleu" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; width: 100%;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span>Trajectoire d'apprentissage</span>
+                                    <span class="emoji-container">
+                                        <span class="primo-aide" data-target="note-spaghetti">😎</span>
+                                    </span>
+                                </div>
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <label style="font-size: 0.9rem; font-weight: normal; color: var(--gris-fonce);">Élève :</label>
+                                    <select id="selecteur-etudiant-spaghetti" onchange="selectionnerEtudiantSpaghetti()" style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid var(--gris-moyen); font-size: 0.9rem;">
+                                        <option value="">-- Sélectionner --</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div style="display: flex; gap: 0.5rem; align-items: center;">
-                                <label style="font-size: 0.9rem; font-weight: normal; color: var(--gris-fonce);">Élève :</label>
-                                <select id="selecteur-etudiant-spaghetti" onchange="selectionnerEtudiantSpaghetti()" style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid var(--gris-moyen); font-size: 0.9rem;">
-                                    <option value="">-- Sélectionner --</option>
-                                </select>
+                            <div id="contexte-trajectoire-apprentissage" class="carte-contexte-ligne" style="font-size: 0.8rem; font-weight: normal; opacity: 0.9; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                                <!-- Trimestre | Cours | Badge - rempli par JS -->
                             </div>
                         </h3>
 
