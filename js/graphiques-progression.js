@@ -3361,55 +3361,56 @@ function creerGraphiqueCriteres(canvasId, da) {
 
 /* ===============================
    GRAPHIQUE DISTRIBUTION ACPE (Beta 96)
-   Courbes de densité (style Gauss) pour les indices A, C, P, E
+   Courbes de Gauss avec moyenne et écarts-types
    =============================== */
 
 /**
- * Estimation de densité par noyau (KDE) avec noyau gaussien
- * Crée une courbe lisse à partir de points discrets
- * @param {Array} valeurs - Tableau de valeurs numériques (0-1)
- * @returns {Array} - Points {x, y} pour tracer la courbe
+ * Calcule les statistiques (moyenne et écart-type) d'un tableau de valeurs
+ * @param {Array} valeurs - Tableau de valeurs numériques
+ * @returns {Object} - { moyenne, ecartType, n }
  */
-function calculerKDE(valeurs) {
-    if (!valeurs || valeurs.length < 2) return [];
+function calculerStatistiques(valeurs) {
+    if (!valeurs || valeurs.length < 2) {
+        return { moyenne: null, ecartType: null, n: 0 };
+    }
 
     const n = valeurs.length;
+    const moyenne = valeurs.reduce((a, b) => a + b, 0) / n;
+    const variance = valeurs.reduce((a, b) => a + Math.pow(b - moyenne, 2), 0) / n;
+    const ecartType = Math.sqrt(variance);
 
-    // Calculer moyenne et écart-type
-    const mean = valeurs.reduce((a, b) => a + b, 0) / n;
-    const variance = valeurs.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / n;
-    const std = Math.sqrt(variance);
+    return { moyenne, ecartType: ecartType > 0 ? ecartType : 0.01, n };
+}
 
-    // Si écart-type nul (toutes valeurs identiques), utiliser une valeur minimale
-    const stdEffectif = std > 0 ? std : 0.05;
+/**
+ * Génère les points d'une courbe de Gauss (distribution normale)
+ * @param {number} moyenne - Moyenne (μ)
+ * @param {number} ecartType - Écart-type (σ)
+ * @returns {Array} - Points {x, y} pour tracer la courbe
+ */
+function genererCourbeGauss(moyenne, ecartType) {
+    if (moyenne === null || ecartType === null) return [];
 
-    // Bande passante (règle de Silverman)
-    const h = 1.06 * stdEffectif * Math.pow(n, -0.2);
-
-    // Générer les points de la courbe (0 à 1 par pas de 0.01)
     const points = [];
-    for (let x = 0; x <= 1.001; x += 0.01) {
-        let y = 0;
-        valeurs.forEach(xi => {
-            // Noyau gaussien
-            y += Math.exp(-0.5 * Math.pow((x - xi) / h, 2));
-        });
-        // Normaliser
-        y = y / (n * h * Math.sqrt(2 * Math.PI));
-        points.push({ x: parseFloat(x.toFixed(2)), y: y });
+    // Générer de 0 à 1 (ou étendre si nécessaire)
+    for (let x = 0; x <= 1.001; x += 0.005) {
+        // Formule de la distribution normale
+        const y = (1 / (ecartType * Math.sqrt(2 * Math.PI))) *
+                  Math.exp(-0.5 * Math.pow((x - moyenne) / ecartType, 2));
+        points.push({ x: parseFloat(x.toFixed(3)), y: y });
     }
 
     return points;
 }
 
 /**
- * Crée un dataset Chart.js pour une courbe de densité
+ * Crée un dataset Chart.js pour une courbe de Gauss
  * @param {string} label - Nom de la courbe
  * @param {Array} points - Points {x, y} de la courbe
  * @param {string} couleur - Couleur hex de la courbe
  * @returns {Object} - Dataset Chart.js
  */
-function creerDatasetDensite(label, points, couleur) {
+function creerDatasetGauss(label, points, couleur) {
     if (!points || points.length === 0) {
         return { label, data: [], borderColor: couleur };
     }
@@ -3418,13 +3419,12 @@ function creerDatasetDensite(label, points, couleur) {
         label: label,
         data: points,
         borderColor: couleur,
-        backgroundColor: hexVersRgba(couleur, 0.15),
+        backgroundColor: hexVersRgba(couleur, 0.1),
         borderWidth: 2.5,
         tension: 0.4,
         fill: true,
         pointRadius: 0,
-        pointHoverRadius: 4,
-        pointHoverBackgroundColor: couleur,
+        pointHoverRadius: 0,
         parsing: {
             xAxisKey: 'x',
             yAxisKey: 'y'
@@ -3433,8 +3433,8 @@ function creerDatasetDensite(label, points, couleur) {
 }
 
 /**
- * Crée un graphique de distribution (densité) des indices ACPE
- * Utilise l'estimation de densité par noyau (KDE) pour des courbes lisses
+ * Crée un graphique de distribution normale (Gauss) des indices ACPE
+ * Affiche les courbes avec moyenne (μ) au centre et écarts-types (σ) marqués
  * @param {string} canvasId - ID du canvas HTML
  * @returns {Chart|null} - Instance Chart.js ou null si erreur
  */
@@ -3498,13 +3498,13 @@ function creerGraphiqueDistributionACPE(canvasId) {
                 const indicesCP = obtenirIndicesCP(e.da);
                 if (indicesCP) {
                     if (indicesCP.C !== undefined && indicesCP.C > 0) {
-                        valeursC.push(indicesCP.C / 100); // Convertir en 0-1
+                        valeursC.push(indicesCP.C / 100);
                     }
                     if (indicesCP.P !== undefined && indicesCP.P > 0) {
                         valeursP.push(indicesCP.P / 100);
                     }
                     if (indicesCP.E !== undefined && indicesCP.E > 0) {
-                        valeursE.push(indicesCP.E); // Déjà en 0-1
+                        valeursE.push(indicesCP.E);
                     }
                 }
             }
@@ -3512,23 +3512,38 @@ function creerGraphiqueDistributionACPE(canvasId) {
 
         console.log(`📊 [Distribution ACPE] Valeurs collectées: A=${valeursA.length}, C=${valeursC.length}, P=${valeursP.length}, E=${valeursE.length}`);
 
-        // Calculer les courbes de densité KDE
-        const courbeA = calculerKDE(valeursA);
-        const courbeC = calculerKDE(valeursC);
-        const courbeP = calculerKDE(valeursP);
-        const courbeE = calculerKDE(valeursE);
+        // Calculer les statistiques pour chaque indice
+        const statsA = calculerStatistiques(valeursA);
+        const statsC = calculerStatistiques(valeursC);
+        const statsP = calculerStatistiques(valeursP);
+        const statsE = calculerStatistiques(valeursE);
+
+        // Stocker toutes les stats pour le plugin
+        const statistiques = {
+            A: statsA,
+            C: statsC,
+            P: statsP,
+            E: statsE
+        };
+
+        console.log(`📊 [Distribution ACPE] Stats: A(μ=${(statsA.moyenne*100).toFixed(1)}%, σ=${(statsA.ecartType*100).toFixed(1)}%), C(μ=${(statsC.moyenne*100).toFixed(1)}%, σ=${(statsC.ecartType*100).toFixed(1)}%)`);
+
+        // Générer les courbes de Gauss
+        const courbeA = genererCourbeGauss(statsA.moyenne, statsA.ecartType);
+        const courbeC = genererCourbeGauss(statsC.moyenne, statsC.ecartType);
+        const courbeP = genererCourbeGauss(statsP.moyenne, statsP.ecartType);
+        const courbeE = genererCourbeGauss(statsE.moyenne, statsE.ecartType);
 
         // Créer les datasets
         const datasets = [
-            creerDatasetDensite('Assiduité (A)', courbeA, COULEURS_INDICES.A),
-            creerDatasetDensite('Complétion (C)', courbeC, COULEURS_INDICES.C),
-            creerDatasetDensite('Performance (P)', courbeP, COULEURS_INDICES.P),
-            creerDatasetDensite('Engagement (E)', courbeE, COULEURS_INDICES.E)
+            creerDatasetGauss('Assiduité (A)', courbeA, COULEURS_INDICES.A),
+            creerDatasetGauss('Complétion (C)', courbeC, COULEURS_INDICES.C),
+            creerDatasetGauss('Performance (P)', courbeP, COULEURS_INDICES.P),
+            creerDatasetGauss('Engagement (E)', courbeE, COULEURS_INDICES.E)
         ].filter(d => d.data && d.data.length > 0);
 
         if (datasets.length === 0) {
             console.warn('[Distribution ACPE] Aucune donnée à afficher');
-            // Afficher un message dans le canvas
             ctx.font = '14px Arial';
             ctx.fillStyle = '#666';
             ctx.textAlign = 'center';
@@ -3536,40 +3551,81 @@ function creerGraphiqueDistributionACPE(canvasId) {
             return null;
         }
 
-        // Calculer les moyennes pour le plugin
-        const moyennes = {
-            A: valeursA.length > 0 ? valeursA.reduce((a,b) => a+b, 0) / valeursA.length : null,
-            C: valeursC.length > 0 ? valeursC.reduce((a,b) => a+b, 0) / valeursC.length : null,
-            P: valeursP.length > 0 ? valeursP.reduce((a,b) => a+b, 0) / valeursP.length : null,
-            E: valeursE.length > 0 ? valeursE.reduce((a,b) => a+b, 0) / valeursE.length : null
-        };
-
-        // Plugin pour afficher les lignes de moyenne
-        const pluginLignesMoyennes = {
-            id: 'lignesMoyennesACPE',
+        // Plugin pour afficher les lignes μ et σ
+        const pluginLignesStatistiques = {
+            id: 'lignesStatistiquesACPE',
             afterDraw(chart) {
                 const ctx = chart.ctx;
                 const xScale = chart.scales.x;
+                const yScale = chart.scales.y;
                 const chartArea = chart.chartArea;
 
                 ctx.save();
-                ctx.setLineDash([5, 5]);
-                ctx.lineWidth = 1;
 
                 const indices = ['A', 'C', 'P', 'E'];
                 const couleurs = [COULEURS_INDICES.A, COULEURS_INDICES.C, COULEURS_INDICES.P, COULEURS_INDICES.E];
 
                 indices.forEach((indice, i) => {
-                    const moyenne = moyennes[indice];
-                    if (moyenne !== null) {
-                        const xPixel = xScale.getPixelForValue(moyenne);
+                    const stats = statistiques[indice];
+                    if (stats.moyenne === null) return;
 
-                        ctx.strokeStyle = couleurs[i];
+                    const mu = stats.moyenne;
+                    const sigma = stats.ecartType;
+                    const couleur = couleurs[i];
+
+                    // Ligne μ (moyenne) - trait plein
+                    const xMu = xScale.getPixelForValue(mu);
+                    ctx.strokeStyle = couleur;
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([]);
+                    ctx.beginPath();
+                    ctx.moveTo(xMu, chartArea.top);
+                    ctx.lineTo(xMu, chartArea.bottom);
+                    ctx.stroke();
+
+                    // Lignes σ (écarts-types) - traits pointillés
+                    ctx.lineWidth = 1;
+                    ctx.setLineDash([4, 4]);
+
+                    // μ - σ
+                    if (mu - sigma >= 0) {
+                        const xSigmaMoins = xScale.getPixelForValue(mu - sigma);
                         ctx.beginPath();
-                        ctx.moveTo(xPixel, chartArea.top);
-                        ctx.lineTo(xPixel, chartArea.bottom);
+                        ctx.moveTo(xSigmaMoins, chartArea.top);
+                        ctx.lineTo(xSigmaMoins, chartArea.bottom);
                         ctx.stroke();
                     }
+
+                    // μ + σ
+                    if (mu + sigma <= 1) {
+                        const xSigmaPlus = xScale.getPixelForValue(mu + sigma);
+                        ctx.beginPath();
+                        ctx.moveTo(xSigmaPlus, chartArea.top);
+                        ctx.lineTo(xSigmaPlus, chartArea.bottom);
+                        ctx.stroke();
+                    }
+                });
+
+                // Afficher les légendes μ et σ en haut
+                ctx.setLineDash([]);
+                ctx.font = 'bold 11px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+
+                let offsetY = 5;
+                indices.forEach((indice, i) => {
+                    const stats = statistiques[indice];
+                    if (stats.moyenne === null) return;
+
+                    const mu = stats.moyenne;
+                    const xMu = xScale.getPixelForValue(mu);
+
+                    // Afficher μ au-dessus de la ligne
+                    ctx.fillStyle = couleurs[i];
+                    const muLabel = `μ${indice}=${(mu * 100).toFixed(0)}%`;
+                    ctx.fillText(muLabel, xMu, chartArea.top + offsetY);
+
+                    offsetY += 14; // Décaler pour éviter superposition
                 });
 
                 ctx.restore();
@@ -3579,19 +3635,29 @@ function creerGraphiqueDistributionACPE(canvasId) {
         // Configuration du graphique
         const config = {
             type: 'line',
-            plugins: [pluginLignesMoyennes],
+            plugins: [pluginLignesStatistiques],
             data: {
                 datasets: datasets
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                layout: {
+                    padding: { top: 60 } // Espace pour les labels μ
+                },
                 plugins: {
                     title: {
                         display: true,
-                        text: 'Distribution des indices ACPE',
+                        text: 'Distribution normale des indices ACPE',
                         font: { size: 16, weight: 'bold' },
-                        padding: { top: 10, bottom: 20 }
+                        padding: { top: 10, bottom: 10 }
+                    },
+                    subtitle: {
+                        display: true,
+                        text: 'Lignes pleines = moyenne (μ) | Lignes pointillées = écart-type (±σ)',
+                        font: { size: 11, style: 'italic' },
+                        color: '#666',
+                        padding: { bottom: 15 }
                     },
                     legend: {
                         display: true,
@@ -3603,7 +3669,8 @@ function creerGraphiqueDistributionACPE(canvasId) {
                         }
                     },
                     tooltip: {
-                        mode: 'index',
+                        enabled: true,
+                        mode: 'nearest',
                         intersect: false,
                         backgroundColor: 'rgba(0, 0, 0, 0.85)',
                         padding: 12,
@@ -3615,7 +3682,17 @@ function creerGraphiqueDistributionACPE(canvasId) {
                                 return '';
                             },
                             label: function(context) {
-                                return `${context.dataset.label}`;
+                                const indice = context.dataset.label.match(/\(([ACPE])\)/)?.[1];
+                                const stats = statistiques[indice];
+                                if (stats && stats.moyenne !== null) {
+                                    return [
+                                        context.dataset.label,
+                                        `  μ = ${(stats.moyenne * 100).toFixed(1)}%`,
+                                        `  σ = ${(stats.ecartType * 100).toFixed(1)}%`,
+                                        `  n = ${stats.n} étudiants`
+                                    ];
+                                }
+                                return context.dataset.label;
                             }
                         }
                     }
@@ -3643,17 +3720,14 @@ function creerGraphiqueDistributionACPE(canvasId) {
                     },
                     y: {
                         title: {
-                            display: true,
-                            text: 'Densité',
-                            font: { size: 12, weight: 'bold' }
+                            display: false
                         },
                         beginAtZero: true,
                         ticks: {
-                            display: false // Cacher les valeurs de densité (peu significatives pour l'utilisateur)
+                            display: false
                         },
                         grid: {
-                            display: true,
-                            color: 'rgba(0,0,0,0.05)'
+                            display: false
                         }
                     }
                 },
