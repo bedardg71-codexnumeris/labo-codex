@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 96
 
 **Date** : 25 janvier 2026
-**Version** : Beta 96 (build 0125-1105)
+**Version** : Beta 96 (build 0125-1600)
 **Statut** : Application fonctionnelle pour H2026, A2024 archive
 
 ---
@@ -29,7 +29,22 @@
 - **Graphique spaghetti** : Visualisation de l'évolution de tous les étudiants (nouveau Beta 96)
 
 ### Derniere tache completee (25 janvier - Beta 96)
-- **RÉORGANISATION DU TABLEAU DE BORD** : 4 sections distinctes
+- **UNIFORMISATION VISUELLE DES POINTS** : Tous les graphiques ont le même style
+  - **Points blancs par défaut** : Fond `rgba(255, 255, 255, 0.9)` + contour bleu pâle `rgba(33, 150, 243, 0.5)`
+  - **Points noirs au survol/sélection** : Fond `rgba(0, 0, 0, 0.85)` + contour blanc
+  - **Taille uniformisée** : 10px pour les barres ACEP (CSS), pointRadius: 5 pour Chart.js
+  - **Barres ACEP** : `.barre-etudiant` CSS modifié pour style uniforme
+  - **Graphiques Chart.js** : Tous les `pointBackgroundColor` et `pointBorderColor` uniformisés
+  - **Fichiers modifiés** : `styles.css`, `js/graphiques-progression.js`
+
+- **CORRECTION CLIC SUR NOMS ÉTUDIANTS** : Le verrouillage fonctionne maintenant partout
+  - **Problème** : Cliquer sur le nom d'un étudiant/indice ne déclenchait pas le verrouillage
+  - **Cause** : Coordonnées du clic en espace CSS vs zones cliquables en espace canvas
+  - **Fix** : Application du ratio de scale (`canvas.width / rect.width`) dans les gestionnaires de clic
+  - **Graphiques corrigés** : Évolution temporelle, Progression temporelle, Développement des habiletés
+  - **Fichier modifié** : `js/graphiques-progression.js`
+
+- **RÉORGANISATION DU TABLEAU DE BORD** : 4 sections distinctes (tâche précédente)
   1. **Indicateurs ACPE du groupe** : Barres A, C, P, E avec mini-courbes Gauss
   2. **Indicateurs d'apprentissage** : Patterns + RàI (nouvelle section séparée)
   3. **Évolution temporelle** : Graphique spaghetti ACP
@@ -817,4 +832,4 @@
 
 ---
 
-**Derniere mise a jour** : 25 janvier 2026
+**Derniere mise a jour** : 25 janvier 2026 (16h00)

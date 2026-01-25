@@ -107,33 +107,19 @@ function mettreAJourContextesSections(nbEtudiants) {
         nomTrimestre = `${sessionNom} ${annee}`.trim();
     }
 
-    // Récupérer le groupe-cours actif
-    const gcActif = db.getSync('groupeCoursActif', null);
+    // Récupérer le cours actif depuis infoCours (source fiable avec sigle/codeCours)
+    const infoCours = db.getSync('infoCours', null);
     let nomCours = '';
 
-    if (gcActif) {
-        // Priorité: titrePersonnalise > sigle du cours + groupe > coursId + groupe
-        if (gcActif.titrePersonnalise) {
-            nomCours = gcActif.titrePersonnalise;
-        } else {
-            // Chercher le sigle du cours dans la liste des cours
-            let sigleCours = gcActif.coursId || '';
+    if (infoCours) {
+        // infoCours contient directement sigle/codeCours et groupe
+        const sigle = infoCours.sigle || infoCours.codeCours || '';
+        const groupe = infoCours.groupe || '';
 
-            // Si coursId ressemble à un ID interne (COURS...), chercher le vrai sigle
-            if (sigleCours.startsWith('COURS') && gcActif.trimestreId) {
-                const cleCours = `${gcActif.trimestreId.toLowerCase()}_cours`;
-                const listeCours = db.getSync(cleCours, []);
-                const coursInfo = listeCours.find(c => c.id === gcActif.coursId);
-                if (coursInfo && coursInfo.sigle) {
-                    sigleCours = coursInfo.sigle;
-                }
-            }
-
-            if (sigleCours && gcActif.groupe) {
-                nomCours = `${sigleCours} gr. ${gcActif.groupe}`;
-            } else if (sigleCours) {
-                nomCours = sigleCours;
-            }
+        if (sigle && groupe) {
+            nomCours = `${sigle} gr. ${groupe}`;
+        } else if (sigle) {
+            nomCours = sigle;
         }
     }
 
@@ -1248,8 +1234,8 @@ function afficherMetriquesGlobales(etudiants) {
             ${legendeUnique}
             ${genererBarreDistribution('Assiduité (A)', etudiantsSOM_A, etudiantsPAN_A, 'A', afficherSom, afficherPan, r_AP, null, texteAttenteA, nbTotal)}
             ${genererBarreDistribution('Complétion (C)', etudiantsSOM_C, etudiantsPAN_C, 'C', afficherSom, afficherPan, r_CP, null, texteAttenteC, nbTotal)}
-            ${genererBarreDistribution('Performance (P)', etudiantsSOM_P, etudiantsPAN_P, 'P', afficherSom, afficherPan, null, null, texteAttenteP, nbTotal)}
             ${genererBarreDistribution('Engagement (E)', etudiantsSOM_E, etudiantsPAN_E, 'E', afficherSom, afficherPan, null, moyenneE, texteAttenteE, nbTotal)}
+            ${genererBarreDistribution('Performance (P)', etudiantsSOM_P, etudiantsPAN_P, 'P', afficherSom, afficherPan, null, null, texteAttenteP, nbTotal)}
         </div>
     `;
 
@@ -1451,24 +1437,40 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
         `;
     }
 
-    // Générer l'affichage dual des valeurs moyennes
-    let valeursHTML = '';
-    if (moyenneSOM !== null && moyennePAN !== null) {
-        // Mode comparatif : afficher les deux valeurs
-        valeursHTML = `
-            <span style="display: flex; gap: 8px; align-items: center; font-size: 0.9rem; font-weight: 600; margin-left: 10px;">
-                <span style="color: var(--som-orange);">${moyenneSOM}%</span>
-                <span style="color: #999;">|</span>
-                <span style="color: var(--std-bleu);">${moyennePAN}%</span>
-            </span>
-        `;
-    } else if (moyenneSOM !== null) {
-        // Mode SOM uniquement
-        valeursHTML = `<span class="tb-texte-moyen-orange">${moyenneSOM}%</span>`;
-    } else if (moyennePAN !== null) {
-        // Mode PAN uniquement
-        valeursHTML = `<span class="tb-texte-moyen-bleu-std">${moyennePAN}%</span>`;
+    // 🆕 BETA 96: Fonction pour interpoler la couleur du gradient selon la position
+    // Gradient: orange (0%) → jaune (25%) → vert (50%) → bleu (75%+)
+    function obtenirCouleurGradient(positionPourcent) {
+        // Stops du gradient (position en % de la barre → couleur)
+        const stops = [
+            { pos: 0, r: 255, g: 152, b: 0 },    // #ff9800 orange
+            { pos: 25, r: 255, g: 193, b: 7 },   // #ffc107 jaune
+            { pos: 50, r: 40, g: 167, b: 69 },   // #28a745 vert
+            { pos: 75, r: 33, g: 150, b: 243 },  // #2196F3 bleu
+            { pos: 100, r: 33, g: 150, b: 243 }  // #2196F3 bleu (plateau)
+        ];
+
+        // Trouver les deux stops entre lesquels interpoler
+        let stopInf = stops[0];
+        let stopSup = stops[stops.length - 1];
+        for (let i = 0; i < stops.length - 1; i++) {
+            if (positionPourcent >= stops[i].pos && positionPourcent <= stops[i + 1].pos) {
+                stopInf = stops[i];
+                stopSup = stops[i + 1];
+                break;
+            }
+        }
+
+        // Interpolation linéaire
+        const range = stopSup.pos - stopInf.pos;
+        const t = range > 0 ? (positionPourcent - stopInf.pos) / range : 0;
+        const r = Math.round(stopInf.r + t * (stopSup.r - stopInf.r));
+        const g = Math.round(stopInf.g + t * (stopSup.g - stopInf.g));
+        const b = Math.round(stopInf.b + t * (stopSup.b - stopInf.b));
+
+        return `rgb(${r}, ${g}, ${b})`;
     }
+
+    // Note: valeursHTML sera généré plus tard avec la couleur dynamique
 
     // Générer les points pour SOM avec jitter aléatoire
     let lignesSOM = '';
@@ -1593,7 +1595,6 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
 
     // Si tous en attente, remplacer l'interprétation par le message d'attente
     const interpretationFinale = tousEnAttente ? messageAttenteHTML : interpretationHTML;
-    const valeursFinales = tousEnAttente ? '<span style="color: #94a3b8; font-weight: 600;">—</span>' : valeursHTML + indicateurAttenteHTML;
 
     // 🆕 BETA 96: Générer la courbe de Gauss SVG
     // Collecter toutes les valeurs pour calculer la distribution
@@ -1606,19 +1607,38 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
     }
     const svgGauss = genererSvgGauss(toutesValeurs, 55);
 
+    // 🆕 BETA 96: Calculer la position et la couleur de la moyenne
+    // Mapper la moyenne de 30-100% vers 0-100% de la barre
+    let positionMoyenne = 50; // Par défaut au centre
+    const moyenneAffichee = afficherPan && moyennePAN !== null ? moyennePAN : moyenneSOM;
+    if (moyenneAffichee !== null && !tousEnAttente) {
+        // Convertir pourcentage en décimal puis mapper sur la barre
+        const moyenneDecimal = moyenneAffichee / 100;
+        positionMoyenne = Math.max(0, Math.min((moyenneDecimal - 0.30) / 0.70 * 100, 100));
+    }
+
+    // Obtenir la couleur dynamique correspondant à la position dans le gradient
+    const couleurMoyenne = obtenirCouleurGradient(positionMoyenne);
+
+    // HTML de la moyenne positionnée au-dessus de la barre avec couleur dynamique
+    let moyennePositionneeHTML = '';
+    if (!tousEnAttente && moyenneAffichee !== null) {
+        moyennePositionneeHTML = `<div style="position: absolute; top: -20px; left: ${positionMoyenne}%; transform: translateX(-50%); z-index: 10; font-size: 0.9rem; font-weight: 700; color: ${couleurMoyenne};">${moyenneAffichee}%</div>`;
+    }
+
     return `
         <div class="distribution-container u-mb-20">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <h4 class="tb-titre-simple">${label}</h4>
-                ${valeursFinales}
+            <h4 class="tb-titre-simple" style="margin-bottom: 4px;">${label}</h4>
+            <div style="position: relative; margin-top: 20px; margin-bottom: ${interpretationFinale ? '8px' : '0'};">
+                ${moyennePositionneeHTML}
+                <div class="barre-indicateur">
+                    <div class="barre-indicateur-overlay"></div>
+                    ${svgGauss}
+                    ${lignesSOM}
+                    ${lignesPAN}
+                </div>
             </div>
             ${interpretationFinale}
-            <div class="barre-indicateur" style="position: relative; margin-top: ${interpretationFinale ? '8px' : '0'}; margin-bottom: ${svgGauss ? '22px' : '0'};">
-                <div class="barre-indicateur-overlay"></div>
-                ${svgGauss}
-                ${lignesSOM}
-                ${lignesPAN}
-            </div>
         </div>
     `;
 }
@@ -1839,8 +1859,7 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
 
     return `
         <div class="distribution-container u-mb-15">
-            <h4 class="tb-titre-metrique">Répartition des patterns d'apprentissage</h4>
-            ${interpretation ? `<div class="interpretation-barre">${interpretation}</div>` : ''}
+            <h4 class="tb-titre-metrique" style="margin-bottom: 4px;">Répartition des patterns d'apprentissage</h4>
             <div class="barre-patterns tb-barre-simple">
                 <div class="barre-patterns-overlay"></div>
                 ${lignesSOM}
@@ -1852,6 +1871,7 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
                 <span style="position: absolute; left: 62.5%; transform: translateX(-50%); color: #2994ee; font-weight: 600; text-align: center;">${labelEmergent}</span>
                 <span style="position: absolute; left: 87.5%; transform: translateX(-50%); color: #4f74f3; font-weight: 600; text-align: center;">${labelCritique}</span>
             </div>
+            ${interpretation ? `<div class="interpretation-barre" style="margin-top: 8px;">${interpretation}</div>` : ''}
         </div>
     `;
 }
@@ -2049,8 +2069,7 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, n
 
     return `
         <div class="distribution-container u-mb-15">
-            <h4 class="tb-titre-metrique">Modèle de la Réponse à l'intervention (RàI)</h4>
-            ${interpretation ? `<div class="interpretation-barre">${interpretation}</div>` : ''}
+            <h4 class="tb-titre-metrique" style="margin-bottom: 4px;">Modèle de la Réponse à l'intervention (RàI)</h4>
             <div class="barre-rai tb-barre-simple">
                 <div class="barre-rai-overlay"></div>
                 ${lignesSOM}
@@ -2061,6 +2080,7 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, n
                 <span style="position: absolute; left: 49.5%; transform: translateX(-50%); color: #6366f1; font-weight: 600; text-align: center;">${labelNiveau2}</span>
                 <span style="position: absolute; left: 83%; transform: translateX(-50%); color: #7c3aed; font-weight: 600; text-align: center;">${labelNiveau3}</span>
             </div>
+            ${interpretation ? `<div class="interpretation-barre" style="margin-top: 8px;">${interpretation}</div>` : ''}
         </div>
     `;
 }
