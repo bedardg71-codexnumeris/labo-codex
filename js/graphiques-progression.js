@@ -1053,15 +1053,25 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
         console.log(`📊 [Spaghetti] Productions trouvées: ${productions.length}`);
 
         // Filtrer les productions qui comptent pour le portfolio (pas analyse finale, etc.)
+        // ET dédupliquer par ID (évite les doublons comme "Art. 1" affiché deux fois)
+        const productionsVues = new Set();
         const productionsPortfolio = productions.filter(p => {
             // Exclure les productions de type "analyse finale" ou similaire
             const estAnalyseFinale = p.titre?.toLowerCase().includes('analyse finale') ||
                                      p.type === 'analyseFinale' ||
                                      p.categorie === 'analyseFinale';
-            return !estAnalyseFinale;
+            if (estAnalyseFinale) return false;
+
+            // Dédupliquer par ID
+            if (productionsVues.has(p.id)) {
+                console.warn(`📊 [Spaghetti] Production dupliquée ignorée: ${p.id}`);
+                return false;
+            }
+            productionsVues.add(p.id);
+            return true;
         });
 
-        console.log(`📊 [Spaghetti] Productions portfolio (sans analyse finale): ${productionsPortfolio.length}`);
+        console.log(`📊 [Spaghetti] Productions portfolio (sans analyse finale, sans doublons): ${productionsPortfolio.length}`);
 
         if (productionsPortfolio.length === 0) {
             console.warn('Aucune production disponible pour le graphique spaghetti');
@@ -1101,6 +1111,15 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
         const evaluations = Array.from(evaluationsMap.values());
         console.log(`📊 [Spaghetti] Évaluations: ${evaluationsBrutes.length} brutes → ${evaluations.length} après dédoublonnage`);
 
+        // Créer un index rapide pour le tooltip : [da][productionId] → évaluation
+        const evaluationsIndex = {};
+        evaluations.forEach(evalItem => {
+            if (!evaluationsIndex[evalItem.etudiantDA]) {
+                evaluationsIndex[evalItem.etudiantDA] = {};
+            }
+            evaluationsIndex[evalItem.etudiantDA][evalItem.productionId] = evalItem;
+        });
+
         if (evaluations.length === 0) {
             console.warn('Aucune évaluation disponible pour le graphique spaghetti');
             afficherMessageAttente(canvas, 'En attente d\'évaluations', 'Les trajectoires apparaîtront après les premières évaluations.');
@@ -1139,15 +1158,18 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
             indexProductions[prod.id] = index;
         });
 
-        // Préparer les labels (artefacts) - utiliser le numéro ou le titre court
+        // Préparer les labels (artefacts) - utiliser l'activité d'apprentissage
+        // Ex: "Artefact 1 - Portrait de lecteur" → "Portrait de lecteur"
         const labels = productionsPortfolio.map((prod, index) => {
-            // Extraire un label court (numéro ou premiers mots du titre)
-            const numero = index + 1;
-            const titreMatch = prod.titre?.match(/^(artefact|art\.?|production|prod\.?)\s*n?[°º]?\s*(\d+)/i);
-            if (titreMatch) {
-                return `Art. ${titreMatch[2]}`;
+            const titre = prod.titre || '';
+            // Chercher le pattern "Artefact X - Activité" ou "Art. X - Activité"
+            const titreSplit = titre.split(/\s*[-–—:]\s*/);
+            if (titreSplit.length >= 2) {
+                // Prendre la partie après le tiret (l'activité d'apprentissage)
+                return titreSplit.slice(1).join(' - ').trim();
             }
-            return `Art. ${numero}`;
+            // Si pas de tiret, utiliser le titre complet ou un fallback
+            return titre || `Production ${index + 1}`;
         });
 
         // Créer un dataset par étudiant
@@ -1240,7 +1262,7 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                 plugins: {
                     title: {
                         display: true,
-                        text: 'Trajectoire d\'apprentissage - Résultats par artefact',
+                        text: 'Trajectoire d\'apprentissage - Résultats par activité',
                         font: { size: 16, weight: 'bold' },
                         padding: { top: 10, bottom: 20 }
                     },
@@ -1251,26 +1273,66 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                         enabled: true,
                         mode: 'nearest',
                         intersect: true, // Seulement au survol exact d'un point
-                        backgroundColor: 'rgba(0, 0, 0, 0.75)',
+                        backgroundColor: 'rgba(0, 0, 0, 0.85)',
                         titleColor: '#fff',
                         bodyColor: '#fff',
                         titleFont: { size: 11 },
-                        bodyFont: { size: 12, weight: 'bold' },
-                        padding: 8,
-                        cornerRadius: 4,
+                        bodyFont: { size: 12 },
+                        padding: 10,
+                        cornerRadius: 6,
                         displayColors: false,
-                        // Afficher seulement la note (le nom est affiché au bout de la courbe)
+                        // Afficher note + statuts (jeton, irrecevable, non-remis)
                         callbacks: {
                             title: function(tooltipItems) {
                                 const dataIndex = tooltipItems[0]?.dataIndex;
-                                // Titre court : numéro de l'artefact
-                                return productionsPortfolio[dataIndex]?.titre || `Art. ${dataIndex + 1}`;
+                                // Titre : nom complet de la production
+                                return productionsPortfolio[dataIndex]?.titre || `Production ${dataIndex + 1}`;
                             },
                             label: function(context) {
+                                const lignes = [];
+                                const da = context.dataset.da;
+                                const dataIndex = context.dataIndex;
+                                const production = productionsPortfolio[dataIndex];
+
+                                // Récupérer l'évaluation complète depuis l'index
+                                const evaluation = production && da
+                                    ? evaluationsIndex[da]?.[production.id]
+                                    : null;
+
+                                // Note
                                 const value = context.parsed.y !== null
                                     ? (context.parsed.y * 100).toFixed(0)
                                     : '—';
-                                return `${value}%`;
+                                lignes.push(`Note: ${value}%`);
+
+                                if (evaluation) {
+                                    // Vérifier jeton utilisé
+                                    const jetonUtilise = evaluation.repriseDeId ||
+                                                        evaluation.jetonReprise ||
+                                                        evaluation.jetonDelai ||
+                                                        evaluation.avecJeton;
+                                    if (jetonUtilise) {
+                                        lignes.push('🎟️ Jeton utilisé');
+                                    }
+
+                                    // Vérifier intégrité académique (plagiat, IA)
+                                    const statutIntegrite = evaluation.statutIntegrite;
+                                    if (statutIntegrite === 'plagiat') {
+                                        lignes.push('⚠️ Irrecevable (plagiat)');
+                                    } else if (statutIntegrite === 'ia') {
+                                        lignes.push('⚠️ Irrecevable (IA)');
+                                    }
+
+                                    // Vérifier statut de remise
+                                    const statutRemise = evaluation.statutRemise;
+                                    if (statutRemise === 'non-remis') {
+                                        lignes.push('📭 Non remis');
+                                    } else if (statutRemise === 'retard') {
+                                        lignes.push('⏰ Remis en retard');
+                                    }
+                                }
+
+                                return lignes;
                             }
                         }
                     },
@@ -1282,7 +1344,7 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                     x: {
                         title: {
                             display: true,
-                            text: 'Artefacts',
+                            text: 'Activités d\'apprentissage',
                             font: { size: 12, weight: 'bold' }
                         },
                         ticks: {
