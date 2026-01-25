@@ -922,6 +922,491 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
 }
 
 /* ===============================
+   GRAPHIQUE GROUPE - SPAGHETTI ACP
+   Évolution temporelle par étudiant (Beta 96)
+   =============================== */
+
+/**
+ * Instance globale du graphique spaghetti ACP
+ */
+let graphiqueSpaghettiACPInstance = null;
+
+/**
+ * Variables de suivi pour le graphique spaghetti ACP
+ */
+let dernierDatasetSurvoleACP = -1;
+let datasetVerrouilleACP = -1;
+let zonesNomsEtudiantsACP = [];
+
+/**
+ * Plugin pour afficher le nom de l'étudiant au bout de la courbe (version ACP)
+ */
+const pluginNomEtudiantSurvolACP = {
+    id: 'nomEtudiantSurvolACP',
+    afterDraw(chart) {
+        const datasetIndexActif = datasetVerrouilleACP >= 0 ? datasetVerrouilleACP : dernierDatasetSurvoleACP;
+        if (datasetIndexActif === -1) {
+            zonesNomsEtudiantsACP = [];
+            return;
+        }
+
+        const ctx = chart.ctx;
+        const dataset = chart.data.datasets[datasetIndexActif];
+        if (!dataset) return;
+
+        const meta = chart.getDatasetMeta(datasetIndexActif);
+        if (!meta || !meta.data || meta.data.length === 0) return;
+
+        // Trouver le dernier point visible
+        let dernierPoint = null;
+        for (let i = meta.data.length - 1; i >= 0; i--) {
+            const point = meta.data[i];
+            if (point && dataset.data[i] !== null) {
+                dernierPoint = point;
+                break;
+            }
+        }
+
+        if (!dernierPoint) return;
+
+        const estVerrouille = datasetVerrouilleACP >= 0;
+        const nom = dataset.label || '';
+        const texteAffiche = estVerrouille ? `🔒 ${nom}` : nom;
+        const x = dernierPoint.x + 10;
+        const y = dernierPoint.y;
+
+        ctx.save();
+        ctx.font = 'bold 12px Arial';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+
+        const textWidth = ctx.measureText(texteAffiche).width;
+        const rectX = x - 3;
+        const rectY = y - 10;
+        const rectW = textWidth + 10;
+        const rectH = 20;
+
+        ctx.fillStyle = estVerrouille ? 'rgba(233, 30, 99, 0.15)' : 'rgba(255, 255, 255, 0.9)';
+        ctx.fillRect(rectX, rectY, rectW, rectH);
+
+        if (estVerrouille) {
+            ctx.strokeStyle = '#E91E63';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(rectX, rectY, rectW, rectH);
+        }
+
+        ctx.fillStyle = estVerrouille ? '#C2185B' : '#1976D2';
+        ctx.fillText(texteAffiche, x, y);
+        ctx.restore();
+
+        zonesNomsEtudiantsACP = [{
+            datasetIndex: datasetIndexActif,
+            x: rectX,
+            y: rectY,
+            width: rectW,
+            height: rectH
+        }];
+    }
+};
+
+/**
+ * Crée un graphique spaghetti pour l'évolution temporelle d'un indice ACP
+ * Montre les courbes individuelles de tous les étudiants par semaine
+ *
+ * @param {string} canvasId - ID de l'élément canvas
+ * @param {string} indice - L'indice à afficher ('A', 'C' ou 'P')
+ * @returns {Chart|null} - Instance Chart.js ou null si erreur
+ */
+function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
+    try {
+        // Détruire le graphique existant
+        const canvas = document.getElementById(canvasId);
+        if (canvas) {
+            const existingChart = Chart.getChart(canvas);
+            if (existingChart) {
+                existingChart.destroy();
+            }
+        }
+
+        // Réinitialiser les variables de suivi
+        dernierDatasetSurvoleACP = -1;
+        datasetVerrouilleACP = -1;
+        zonesNomsEtudiantsACP = [];
+
+        // Récupérer les snapshots hebdomadaires
+        const snapshots = obtenirSnapshotsHebdomadaires();
+        if (snapshots.length === 0) {
+            console.warn('Aucun snapshot hebdomadaire disponible');
+            afficherMessageAttente(canvas, 'Aucune donnée disponible', 'Capturez des snapshots hebdomadaires.');
+            return null;
+        }
+
+        // Trier par semaine
+        snapshots.sort((a, b) => a.numSemaine - b.numSemaine);
+
+        // Labels (semaines)
+        const labels = snapshots.map(s => `Sem. ${s.numSemaine}`);
+
+        // Collecter tous les étudiants uniques
+        const etudiantsMap = new Map();
+        snapshots.forEach(snapshot => {
+            if (snapshot.etudiants) {
+                snapshot.etudiants.forEach(etudiant => {
+                    if (!etudiantsMap.has(etudiant.da)) {
+                        etudiantsMap.set(etudiant.da, {
+                            da: etudiant.da,
+                            nom: etudiant.nom || etudiant.da,
+                            prenom: etudiant.prenom || ''
+                        });
+                    }
+                });
+            }
+        });
+
+        const etudiants = Array.from(etudiantsMap.values());
+        if (etudiants.length === 0) {
+            afficherMessageAttente(canvas, 'Aucun étudiant', 'Les snapshots ne contiennent pas de données étudiants.');
+            return null;
+        }
+
+        // Noms des indices
+        const nomsIndices = {
+            'A': 'Assiduité',
+            'C': 'Complétion',
+            'P': 'Performance'
+        };
+
+        // Couleurs des indices
+        const couleursIndices = {
+            'A': '#1976D2',
+            'C': '#FF6B35',
+            'P': '#4CAF50'
+        };
+
+        // Créer un dataset par étudiant
+        const datasets = etudiants.map(etudiant => {
+            const data = snapshots.map(snapshot => {
+                const etudiantSnapshot = snapshot.etudiants?.find(e => e.da === etudiant.da);
+                if (!etudiantSnapshot) return null;
+
+                // Récupérer la valeur selon l'indice
+                let valeur = null;
+                if (indice === 'A') {
+                    valeur = etudiantSnapshot.A ?? etudiantSnapshot.assiduite;
+                } else if (indice === 'C') {
+                    valeur = etudiantSnapshot.C ?? etudiantSnapshot.completion;
+                } else if (indice === 'P') {
+                    valeur = etudiantSnapshot.P ?? etudiantSnapshot.performance;
+                }
+
+                // Convertir en 0-1 si en pourcentage
+                if (valeur !== null && valeur > 1) {
+                    valeur = valeur / 100;
+                }
+
+                return valeur;
+            });
+
+            // Vérifier qu'il y a au moins une valeur non-null
+            if (data.every(v => v === null)) return null;
+
+            const nomComplet = etudiant.prenom
+                ? `${etudiant.prenom} ${etudiant.nom.charAt(0)}.`
+                : etudiant.nom;
+
+            return {
+                label: nomComplet,
+                data: data,
+                da: etudiant.da,
+                borderColor: 'rgba(50, 50, 50, 0.4)',
+                backgroundColor: 'transparent',
+                borderWidth: 1.5,
+                tension: 0.2,
+                pointRadius: 2,
+                pointHoverRadius: 5,
+                pointBackgroundColor: 'rgba(50, 50, 50, 0.5)',
+                pointHoverBackgroundColor: 'rgba(50, 50, 50, 0.9)',
+                spanGaps: false,
+                hoverBorderWidth: 3,
+                hoverBorderColor: couleursIndices[indice]
+            };
+        }).filter(d => d !== null);
+
+        if (datasets.length === 0) {
+            afficherMessageAttente(canvas, 'Aucune donnée', 'Pas de données pour cet indice.');
+            return null;
+        }
+
+        if (!canvas) {
+            console.error(`Canvas ${canvasId} introuvable`);
+            return null;
+        }
+        const ctx = canvas.getContext('2d');
+
+        // Configuration
+        const config = {
+            type: 'line',
+            plugins: [pluginEtiquettesZones, pluginNomEtudiantSurvolACP],
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                    padding: { right: 120 }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: `Évolution temporelle - ${nomsIndices[indice]} (${indice})`,
+                        font: { size: 16, weight: 'bold' },
+                        padding: { top: 10, bottom: 20 }
+                    },
+                    legend: { display: false },
+                    tooltip: {
+                        enabled: true,
+                        mode: 'nearest',
+                        intersect: true,
+                        filter: function(tooltipItem) {
+                            const datasetActif = datasetVerrouilleACP >= 0 ? datasetVerrouilleACP : dernierDatasetSurvoleACP;
+                            return tooltipItem.datasetIndex === datasetActif;
+                        },
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                if (tooltipItems.length === 0) return '';
+                                return tooltipItems[0].label;
+                            },
+                            label: function(context) {
+                                const valeur = context.parsed.y;
+                                if (valeur === null) return '';
+                                const pourcent = (valeur * 100).toFixed(0);
+                                return `${pourcent}%`;
+                            }
+                        }
+                    },
+                    annotation: {
+                        annotations: creerAnnotationsZonesIDME()
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: true, color: 'rgba(0,0,0,0.05)' },
+                        ticks: {
+                            font: { size: 10 },
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    },
+                    y: {
+                        min: 0,
+                        max: 1,
+                        grid: { display: true, color: 'rgba(0,0,0,0.08)' },
+                        ticks: {
+                            callback: value => (value * 100).toFixed(0) + '%',
+                            stepSize: 0.1
+                        },
+                        title: {
+                            display: true,
+                            text: nomsIndices[indice],
+                            font: { size: 12, weight: 'bold' }
+                        }
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'xy',
+                    intersect: false
+                },
+                onHover: function(event, activeElements, chart) {
+                    let datasetIndex = -1;
+                    let dataIndex = -1;
+
+                    if (activeElements.length > 0) {
+                        datasetIndex = activeElements[0].datasetIndex;
+                        dataIndex = activeElements[0].index;
+                    }
+
+                    const datasetActif = datasetVerrouilleACP >= 0 ? datasetVerrouilleACP : datasetIndex;
+
+                    if (datasetActif === dernierDatasetSurvoleACP && dataIndex === -1) return;
+
+                    dernierDatasetSurvoleACP = datasetActif;
+
+                    chart.data.datasets.forEach((dataset, idx) => {
+                        const nbPoints = dataset.data.length;
+
+                        if (datasetActif === -1) {
+                            dataset.borderColor = 'rgba(50, 50, 50, 0.4)';
+                            dataset.borderWidth = 1.5;
+                            dataset.pointRadius = Array(nbPoints).fill(2);
+                            dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(50, 50, 50, 0.5)');
+                        } else if (idx === datasetActif) {
+                            dataset.borderColor = datasetVerrouilleACP >= 0 ? '#E91E63' : couleursIndices[indice];
+                            dataset.borderWidth = 3;
+                            dataset.pointRadius = Array(nbPoints).fill(4);
+                            dataset.pointBackgroundColor = Array(nbPoints).fill(datasetVerrouilleACP >= 0 ? '#E91E63' : couleursIndices[indice]);
+
+                            if (dataIndex >= 0 && dataIndex < nbPoints && dataset.data[dataIndex] !== null) {
+                                dataset.pointRadius[dataIndex] = 8;
+                            }
+                        } else {
+                            dataset.borderColor = 'rgba(80, 80, 80, 0.35)';
+                            dataset.borderWidth = 1;
+                            dataset.pointRadius = Array(nbPoints).fill(1);
+                            dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(80, 80, 80, 0.3)');
+                            if (datasetVerrouilleACP >= 0) {
+                                dataset.pointHoverRadius = 1;
+                                dataset.pointHoverBackgroundColor = 'rgba(80, 80, 80, 0.3)';
+                            } else {
+                                dataset.pointHoverRadius = 5;
+                                dataset.pointHoverBackgroundColor = 'rgba(50, 50, 50, 0.9)';
+                            }
+                        }
+                    });
+
+                    chart.update('none');
+                }
+            }
+        };
+
+        const chart = new Chart(ctx, config);
+        graphiqueSpaghettiACPInstance = chart;
+
+        // Gestionnaire mouseleave
+        canvas.addEventListener('mouseleave', function() {
+            if (datasetVerrouilleACP >= 0) {
+                dernierDatasetSurvoleACP = datasetVerrouilleACP;
+                chart.data.datasets.forEach((dataset, idx) => {
+                    const nbPoints = dataset.data.length;
+                    if (idx === datasetVerrouilleACP) {
+                        dataset.borderColor = '#E91E63';
+                        dataset.borderWidth = 3;
+                        dataset.pointRadius = Array(nbPoints).fill(4);
+                        dataset.pointBackgroundColor = Array(nbPoints).fill('#E91E63');
+                        dataset.pointHoverRadius = 5;
+                        dataset.pointHoverBackgroundColor = '#E91E63';
+                    } else {
+                        dataset.borderColor = 'rgba(80, 80, 80, 0.35)';
+                        dataset.borderWidth = 1;
+                        dataset.pointRadius = Array(nbPoints).fill(1);
+                        dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(80, 80, 80, 0.3)');
+                        dataset.pointHoverRadius = 1;
+                        dataset.pointHoverBackgroundColor = 'rgba(80, 80, 80, 0.3)';
+                    }
+                });
+            } else {
+                dernierDatasetSurvoleACP = -1;
+                chart.data.datasets.forEach(dataset => {
+                    const nbPoints = dataset.data.length;
+                    dataset.borderColor = 'rgba(50, 50, 50, 0.4)';
+                    dataset.borderWidth = 1.5;
+                    dataset.pointRadius = Array(nbPoints).fill(2);
+                    dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(50, 50, 50, 0.5)');
+                    dataset.pointHoverRadius = 5;
+                    dataset.pointHoverBackgroundColor = 'rgba(50, 50, 50, 0.9)';
+                });
+            }
+            chart.update('none');
+        });
+
+        // Fonction toggle verrouillage
+        function toggleVerrouillageSpaghetti(indexDataset) {
+            if (datasetVerrouilleACP === indexDataset) {
+                datasetVerrouilleACP = -1;
+                console.log('🔓 Courbe ACP déverrouillée');
+                chart.data.datasets.forEach(dataset => {
+                    dataset.pointHoverRadius = 5;
+                    dataset.pointHoverBackgroundColor = 'rgba(50, 50, 50, 0.9)';
+                });
+            } else {
+                datasetVerrouilleACP = indexDataset;
+                dernierDatasetSurvoleACP = indexDataset;
+                console.log(`🔒 Courbe ACP verrouillée: ${chart.data.datasets[indexDataset]?.label}`);
+                chart.data.datasets.forEach((dataset, idx) => {
+                    if (idx === indexDataset) {
+                        dataset.pointHoverRadius = 5;
+                        dataset.pointHoverBackgroundColor = '#E91E63';
+                    } else {
+                        dataset.pointHoverRadius = 1;
+                        dataset.pointHoverBackgroundColor = 'rgba(80, 80, 80, 0.3)';
+                    }
+                });
+            }
+            chart.update('none');
+        }
+
+        // Gestionnaire de clic
+        canvas.addEventListener('click', function(event) {
+            const rect = canvas.getBoundingClientRect();
+            const clickX = event.clientX - rect.left;
+            const clickY = event.clientY - rect.top;
+
+            // Vérifier clic sur nom
+            for (const zone of zonesNomsEtudiantsACP) {
+                if (clickX >= zone.x && clickX <= zone.x + zone.width &&
+                    clickY >= zone.y && clickY <= zone.y + zone.height) {
+                    toggleVerrouillageSpaghetti(zone.datasetIndex);
+                    return;
+                }
+            }
+
+            // Vérifier clic sur point
+            const elements = chart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, false);
+            if (elements.length > 0) {
+                toggleVerrouillageSpaghetti(elements[0].datasetIndex);
+                return;
+            }
+
+            // Clic ailleurs - déverrouiller
+            if (datasetVerrouilleACP >= 0) {
+                toggleVerrouillageSpaghetti(datasetVerrouilleACP);
+            }
+        });
+
+        // Curseur pointer
+        canvas.addEventListener('mousemove', function(event) {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = event.clientX - rect.left;
+            const mouseY = event.clientY - rect.top;
+
+            let surElement = false;
+            for (const zone of zonesNomsEtudiantsACP) {
+                if (mouseX >= zone.x && mouseX <= zone.x + zone.width &&
+                    mouseY >= zone.y && mouseY <= zone.y + zone.height) {
+                    surElement = true;
+                    break;
+                }
+            }
+
+            if (!surElement) {
+                const elements = chart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, false);
+                surElement = elements.length > 0;
+            }
+
+            canvas.style.cursor = surElement ? 'pointer' : 'default';
+        });
+
+        console.log(`✅ Graphique spaghetti ACP créé (${indice}) avec ${datasets.length} étudiants`);
+        return chart;
+
+    } catch (error) {
+        console.error('❌ Erreur création graphique spaghetti ACP:', error);
+        return null;
+    }
+}
+
+/**
+ * Rafraîchit le graphique spaghetti ACP avec l'indice sélectionné
+ */
+function rafraichirGraphiqueSpaghettiACP() {
+    const selecteur = document.getElementById('selecteur-indice-acp');
+    const indice = selecteur ? selecteur.value : 'A';
+    creerGraphiqueGroupeSpaghettiACP('graphique-groupe-moyennes', indice);
+}
+
+/* ===============================
    GRAPHIQUE GROUPE - SPAGHETTI
    Résultats bruts par artefact (Beta 96)
    =============================== */
@@ -2363,6 +2848,8 @@ function creerGraphiqueCriteres(canvasId, da) {
 // Exporter les fonctions pour utilisation globale
 window.creerGraphiqueIndividuel = creerGraphiqueIndividuel;
 window.creerGraphiqueGroupeMoyennes = creerGraphiqueGroupeMoyennes;
+window.creerGraphiqueGroupeSpaghettiACP = creerGraphiqueGroupeSpaghettiACP;
+window.rafraichirGraphiqueSpaghettiACP = rafraichirGraphiqueSpaghettiACP;
 window.creerGraphiqueGroupeSpaghetti = creerGraphiqueGroupeSpaghetti;
 window.rafraichirGraphiqueSpaghetti = rafraichirGraphiqueSpaghetti;
 window.creerGraphiqueCriteres = creerGraphiqueCriteres;

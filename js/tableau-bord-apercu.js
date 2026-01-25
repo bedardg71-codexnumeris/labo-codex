@@ -484,11 +484,11 @@ function chargerTableauBordApercu() {
             afficherNiveauxRaI(etudiantsAvecIndices);
         }
 
-        // 🆕 BETA 93: Afficher le graphique d'évolution temporelle (moyennes groupe)
-        if (typeof creerGraphiqueGroupeMoyennes === 'function') {
-            creerGraphiqueGroupeMoyennes('graphique-groupe-moyennes');
+        // 🆕 BETA 96: Afficher le graphique spaghetti ACP (évolution temporelle par étudiant)
+        if (typeof creerGraphiqueGroupeSpaghettiACP === 'function') {
+            creerGraphiqueGroupeSpaghettiACP('graphique-groupe-moyennes', 'A');
         } else {
-            console.warn('⚠️ creerGraphiqueGroupeMoyennes non disponible - Module graphiques-progression.js non chargé ?');
+            console.warn('⚠️ creerGraphiqueGroupeSpaghettiACP non disponible - Module graphiques-progression.js non chargé ?');
         }
 
         // 🆕 BETA 96: Afficher le graphique spaghetti (trajectoires par artefact)
