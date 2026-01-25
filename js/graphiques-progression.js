@@ -1473,16 +1473,26 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
             if (snapshot.etudiants) {
                 snapshot.etudiants.forEach(etudiant => {
                     if (!etudiantsMap.has(etudiant.da)) {
-                        // Le nom est au format "Prénom Nom" dans les snapshots
-                        const nomComplet = etudiant.nom || etudiant.da;
-                        const parties = nomComplet.split(' ');
-                        const prenom = parties[0] || '';
-                        const nomFamille = parties.slice(1).join(' ') || '';
+                        // 🆕 BETA 96 (FIX): Vérifier le mode anonymisation
+                        const nomAnonyme = typeof anonymiserNom === 'function' ? anonymiserNom(etudiant.da) : null;
+
+                        let nomAffiche;
+                        if (nomAnonyme) {
+                            // Mode anonymisation actif : utiliser le nom anonymisé
+                            nomAffiche = nomAnonyme;
+                        } else {
+                            // Mode normal : utiliser le nom formaté "Prénom N."
+                            const nomComplet = etudiant.nom || etudiant.da;
+                            const parties = nomComplet.split(' ');
+                            const prenom = parties[0] || '';
+                            const nomFamille = parties.slice(1).join(' ') || '';
+                            nomAffiche = nomFamille ? `${prenom} ${nomFamille.charAt(0)}.` : prenom;
+                        }
 
                         etudiantsMap.set(etudiant.da, {
                             da: etudiant.da,
-                            nomComplet: nomComplet,
-                            nomAffiche: nomFamille ? `${prenom} ${nomFamille.charAt(0)}.` : prenom
+                            nomComplet: etudiant.nom || etudiant.da,
+                            nomAffiche: nomAffiche
                         });
                     }
                 });
@@ -1830,15 +1840,14 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
         }
 
         // Gestionnaire de clic
+        // NOTE: Chart.js utilise des coordonnées CSS en interne, pas des pixels canvas
+        // Les zones du plugin sont donc en CSS, on utilise les coordonnées CSS du clic
         canvas.addEventListener('click', function(event) {
             const rect = canvas.getBoundingClientRect();
-            // Appliquer le ratio de scale pour correspondre aux coordonnées du canvas
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            const clickX = (event.clientX - rect.left) * scaleX;
-            const clickY = (event.clientY - rect.top) * scaleY;
+            const clickX = event.clientX - rect.left;
+            const clickY = event.clientY - rect.top;
 
-            // Vérifier clic sur nom
+            // Vérifier clic sur nom (coordonnées CSS)
             for (const zone of zonesNomsEtudiantsACP) {
                 if (clickX >= zone.x && clickX <= zone.x + zone.width &&
                     clickY >= zone.y && clickY <= zone.y + zone.height) {
@@ -1863,11 +1872,8 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
         // Curseur pointer
         canvas.addEventListener('mousemove', function(event) {
             const rect = canvas.getBoundingClientRect();
-            // Appliquer le ratio de scale pour correspondre aux coordonnées du canvas
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            const mouseX = (event.clientX - rect.left) * scaleX;
-            const mouseY = (event.clientY - rect.top) * scaleY;
+            const mouseX = event.clientX - rect.left;
+            const mouseY = event.clientY - rect.top;
 
             let surElement = false;
             for (const zone of zonesNomsEtudiantsACP) {
@@ -2803,10 +2809,14 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
             const aDonnees = donnees.some(v => v !== null);
             if (!aDonnees) return null;
 
-            // Obtenir le nom pour l'infobulle
-            const nom = etudiant.prenom && etudiant.nom
-                ? `${etudiant.prenom} ${etudiant.nom.charAt(0)}.`
-                : etudiant.nom || `DA ${da}`;
+            // 🆕 BETA 96 (FIX): Obtenir le nom en respectant le mode anonymisation
+            // Si anonymiserNom retourne une valeur, on est en mode anonymisation
+            const nomAnonyme = typeof anonymiserNom === 'function' ? anonymiserNom(da) : null;
+            const nom = nomAnonyme
+                ? nomAnonyme
+                : (etudiant.prenom && etudiant.nom
+                    ? `${etudiant.prenom} ${etudiant.nom.charAt(0)}.`
+                    : etudiant.nom || `DA ${da}`);
 
             return {
                 label: nom,

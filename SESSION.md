@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 96
 
 **Date** : 25 janvier 2026
-**Version** : Beta 96 (build 0125-1630)
+**Version** : Beta 96 (build 0125-1710)
 **Statut** : Application fonctionnelle pour H2026, A2024 archive
 
 ---
@@ -49,6 +49,12 @@
   - **Cause** : Coordonnées du clic en espace CSS vs zones cliquables en espace canvas
   - **Fix** : Application du ratio de scale (`canvas.width / rect.width`) dans les gestionnaires de clic
   - **Graphiques corrigés** : Évolution temporelle, Progression temporelle, Développement des habiletés
+  - **Fichier modifié** : `js/graphiques-progression.js`
+
+- **CORRECTION ANONYMISATION ARCHIVES** : Les noms sont anonymisés partout
+  - **Problème** : Noms réels affichés dans graphiques "Évolution temporelle" malgré mode anonymisation
+  - **Cause** : Les labels étaient construits directement depuis snapshot sans vérifier l'anonymisation
+  - **Fix** : Ajout vérification `anonymiserNom(da)` dans `creerGraphiqueGroupeSpaghettiACP` et `creerGraphiqueGroupeSpaghetti`
   - **Fichier modifié** : `js/graphiques-progression.js`
 
 - **RÉORGANISATION DU TABLEAU DE BORD** : 4 sections distinctes (tâche précédente)
