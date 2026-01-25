@@ -1026,8 +1026,12 @@ const pluginTooltipsMultiples = {
 
         const da = dataset.da;
 
-        // Dessiner un tooltip pour chaque point de même activité
+        // Dessiner un tooltip pour chaque AUTRE point de même activité (pas le survolé)
+        // Le point survolé a déjà le tooltip natif de Chart.js
         indicesMemeActivite.forEach(pointIndex => {
+            // Exclure le point directement survolé (déjà géré par tooltip natif)
+            if (pointIndex === dernierPointSurvole) return;
+
             const point = meta.data[pointIndex];
             const valeur = dataset.data[pointIndex];
             if (!point || valeur === null) return;
