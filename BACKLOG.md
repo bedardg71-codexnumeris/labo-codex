@@ -85,6 +85,10 @@
     - Impact du RaI sur les interventions et les resultats ?
     - Impact de la reduction du nombre d'artefacts sur P ?
     - Evolution des patterns entre cohortes ?
+  - **Hypothese principale** : L'introduction de la RaI (A25) a rendu l'enseignant plus proactif
+    - Chaine causale : RaI → niveaux/patterns visibles → interventions precoces → moins de decrochages → meilleures moyennes
+    - A valider : comparer taux de decrochage et moyennes finales A24 (sans RaI) vs A25+ (avec RaI)
+    - Potentiel : communication AQPC si resultats concluants
   - **Format** : Rapport genere (PDF ou markdown) avec tableaux et graphiques
   - **Prerequis** : #35 (Import H2024) pour avoir les 4 trimestres
 
