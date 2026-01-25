@@ -509,7 +509,7 @@ function chargerTableauBordApercu() {
             e.statut !== 'décrochage' && e.statut !== 'abandon'
         );
 
-        // 🆕 BETA 95.6 : Mettre à jour le badge nombre d'étudiants dans "Indicateurs globaux"
+        // 🆕 BETA 95.6 : Mettre à jour le badge nombre d'étudiants dans "Indicateurs ACPE"
         const nbEtudiants = etudiantsActifs.length;
         const labelEtudiants = nbEtudiants + ' personne' + (nbEtudiants > 1 ? 's' : '');
         const badgeIndicateurs = document.getElementById('badge-nb-etudiants-indicateurs');
@@ -1124,15 +1124,8 @@ function afficherMetriquesGlobales(etudiants) {
     // Calculer la moyenne de E pour le groupe
     const moyenneE = valeursE.length > 0 ? valeursE.reduce((sum, val) => sum + val, 0) / valeursE.length : null;
 
-    // Trouver la carte des indicateurs globaux
-    const cartes = document.querySelectorAll('#tableau-bord-apercu .carte');
-    let carteIndicateurs = null;
-    cartes.forEach(carte => {
-        const h3 = carte.querySelector('h3 span');
-        if (h3 && h3.textContent.includes("Indicateurs globaux")) {
-            carteIndicateurs = carte;
-        }
-    });
+    // 🆕 BETA 96: Utiliser l'ID de la carte au lieu de chercher par texte
+    const carteIndicateurs = document.getElementById('carte-indicateurs-acpe');
 
     if (!carteIndicateurs) return;
 
@@ -2215,36 +2208,31 @@ function afficherPatternsApprentissage(etudiants) {
         }
     });
 
-    // Trouver la carte "Indicateurs globaux du groupe"
-    const cartes = document.querySelectorAll('#tableau-bord-apercu .carte');
-    let carteIndicateurs = null;
-    cartes.forEach(carte => {
-        const h3 = carte.querySelector('h3 span');
-        if (h3 && h3.textContent.toLowerCase().includes("indicateurs globaux")) {
-            carteIndicateurs = carte;
-        }
-    });
+    // 🆕 BETA 96: Injecter dans la nouvelle section "Indicateurs d'apprentissage"
+    const conteneur = document.getElementById('conteneur-indicateurs-apprentissage');
 
-    if (!carteIndicateurs) {
-        console.warn('⚠️ [Patterns] Carte Indicateurs globaux non trouvée dans le DOM');
+    if (!conteneur) {
+        console.warn('⚠️ [Patterns] Conteneur indicateurs apprentissage non trouvé dans le DOM');
         return;
     }
 
     // Vérifier si la barre Patterns existe déjà pour éviter les doublons
-    const barreExistante = carteIndicateurs.querySelector('.barre-patterns-container');
+    const barreExistante = conteneur.querySelector('.barre-patterns-container');
     if (barreExistante) {
         barreExistante.remove();
     }
 
-    // Générer la barre de distribution et l'ajouter à la fin de la carte
+    // Générer la barre de distribution et l'ajouter au conteneur
     // 🆕 FIX (24 jan 2026) : Passer le nombre d'étudiants sans données CP pour affichage approprié
+    // Note: Patterns doit être AVANT RàI dans l'ordre d'affichage
     const html = `
-        <div class="barre-patterns-container tb-padding-top-espacé">
+        <div class="barre-patterns-container">
             ${genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, nbSansDonneesCP, nbTotal)}
         </div>
     `;
 
-    carteIndicateurs.insertAdjacentHTML('beforeend', html);
+    // Insérer au début du conteneur (avant RàI)
+    conteneur.insertAdjacentHTML('afterbegin', html);
 }
 
 /**
@@ -2346,36 +2334,29 @@ function afficherNiveauxRaI(etudiants) {
         console.warn('⚠️ [RàI] Fonction determinerNiveauRaiPedagogique non disponible');
     }
 
-    // Trouver la carte "Indicateurs globaux du groupe"
-    const cartes = document.querySelectorAll('#tableau-bord-apercu .carte');
-    let carteIndicateurs = null;
-    cartes.forEach(carte => {
-        const h3 = carte.querySelector('h3 span');
-        if (h3 && h3.textContent.toLowerCase().includes("indicateurs globaux")) {
-            carteIndicateurs = carte;
-        }
-    });
+    // 🆕 BETA 96: Injecter dans la nouvelle section "Indicateurs d'apprentissage"
+    const conteneur = document.getElementById('conteneur-indicateurs-apprentissage');
 
-    if (!carteIndicateurs) {
-        console.warn('⚠️ [RàI] Carte Indicateurs globaux non trouvée dans le DOM');
+    if (!conteneur) {
+        console.warn('⚠️ [RàI] Conteneur indicateurs apprentissage non trouvé dans le DOM');
         return;
     }
 
     // Vérifier si la barre RàI existe déjà pour éviter les doublons
-    const barreExistante = carteIndicateurs.querySelector('.barre-rai-container');
+    const barreExistante = conteneur.querySelector('.barre-rai-container');
     if (barreExistante) {
         barreExistante.remove();
     }
 
-    // Générer la barre de distribution et l'ajouter à la fin de la carte
+    // Générer la barre de distribution et l'ajouter au conteneur
     // 🆕 FIX (24 jan 2026) : Passer le nombre d'étudiants sans données CP pour affichage approprié
     const html = `
-        <div class="barre-rai-container tb-padding-top">
+        <div class="barre-rai-container">
             ${genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, nbSansDonneesCP, nbTotal)}
         </div>
     `;
 
-    carteIndicateurs.insertAdjacentHTML('beforeend', html);
+    conteneur.insertAdjacentHTML('beforeend', html);
 }
 
 /**

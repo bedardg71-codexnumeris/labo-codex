@@ -3454,10 +3454,10 @@
                     </h2>
                     <p class="text-muted">Suivi de l'apprentissage et priorisation des interventions</p>
 
-                    <!-- ========== MÉTRIQUES GLOBALES DU GROUPE ========== -->
-                    <div class="carte">
+                    <!-- ========== SECTION 1: INDICATEURS ACPE DU GROUPE ========== -->
+                    <div class="carte" id="carte-indicateurs-acpe">
                         <h3 class="carte-titre-bleu carte-titre-avec-toggle">
-                            <span>Indicateurs globaux du groupe</span>
+                            <span>Indicateurs ACPE du groupe</span>
                             <span id="badge-nb-etudiants-indicateurs" class="badge-compteur-header" style="margin-left: auto; margin-right: 10px; font-size: 0.75rem; padding: 3px 10px; background: rgba(255,255,255,0.2); border-radius: 20px; color: white; font-weight: normal;"></span>
                             <span class="emoji-container">
                                 <span class="primo-aide" data-target="note-indicateurs">😎</span>
@@ -3466,7 +3466,7 @@
 
                         <!-- Carte Note -->
                         <div id="note-indicateurs" class="carte-info-toggle carte-info-note" style="display: none;">
-                            <strong>Note :</strong> Les indices A-C-P mesurent l'engagement des étudiants dans l'apprentissage.
+                            <strong>Note :</strong> Les indices A-C-P-E mesurent l'engagement des étudiants dans l'apprentissage.
                             <br><br>
                             <strong>Assiduité (A)</strong> : Proportion des heures de présence parmi les heures de cours <strong>effectivement données jusqu'à maintenant</strong>. Calculé uniquement sur les séances passées, pas sur le total prévu pour la session.
                             <br><br>
@@ -3476,17 +3476,49 @@
                             <br><br>
                             <strong>Engagement (E)</strong> : Racine cubique du produit des trois indices, E = ∛(A × C × P). La racine cubique normalise le résultat pour préserver l'échelle d'origine : un étudiant à 70% sur les trois indices aura un engagement de 70% (au lieu de 34% avec une multiplication directe). Cette transformation compense la décroissance multiplicative tout en pénalisant les déséquilibres importants.
                             <br><br>
-                            <em style="color: var(--gris-moyen); font-size: 0.9rem;">💡 Les corrélations affichées (r) mesurent la force de la relation linéaire entre deux indices. L'interprétation suit les conventions de Cohen (1988) : |r| < 0.3 = très faible, 0.3-0.5 = faible, 0.5-0.7 = modérée, 0.7-0.9 = forte, ≥ 0.9 = très forte.</em>
+                            <em style="color: var(--gris-moyen); font-size: 0.9rem;">💡 Les mini-courbes de Gauss montrent la distribution du groupe. La ligne blanche = moyenne (μ), les pointillés = ±1 écart-type (σ).</em>
                         </div>
 
-                        <!-- Le contenu des indicateurs globaux est généré dynamiquement par tableau-bord-apercu.js -->
-                        <!-- Barres de distribution avec nuages de points pour A, C, P, E -->
+                        <!-- Le contenu des indicateurs ACPE est généré dynamiquement par tableau-bord-apercu.js -->
+                        <!-- Barres de distribution avec nuages de points et courbes de Gauss pour A, C, P, E -->
                     </div>
 
-                    <!-- ========== GRAPHIQUE ÉVOLUTION TEMPORELLE - SPAGHETTI ACP ========== -->
-                    <div class="carte" style="margin-top: 2rem;">
+                    <!-- ========== SECTION 2: INDICATEURS D'APPRENTISSAGE ========== -->
+                    <div class="carte" id="carte-indicateurs-apprentissage" style="margin-top: 2rem;">
+                        <h3 class="carte-titre-bleu carte-titre-avec-toggle">
+                            <span>Indicateurs d'apprentissage</span>
+                            <span class="emoji-container">
+                                <span class="primo-aide" data-target="note-apprentissage">😎</span>
+                            </span>
+                        </h3>
+
+                        <!-- Carte Note -->
+                        <div id="note-apprentissage" class="carte-info-toggle carte-info-note" style="display: none;">
+                            <strong>Patterns d'apprentissage :</strong> Analyse de la trajectoire de chaque étudiant sur les dernières productions.
+                            <ul style="margin: 10px 0; padding-left: 20px;">
+                                <li><strong>Progression stable</strong> : Amélioration régulière ou maintien d'un bon niveau</li>
+                                <li><strong>Défi spécifique</strong> : Difficulté ponctuelle sur un type de tâche</li>
+                                <li><strong>Blocage émergent</strong> : Début de difficulté nécessitant vigilance</li>
+                                <li><strong>Blocage critique</strong> : Difficulté persistante nécessitant intervention</li>
+                            </ul>
+                            <strong>Modèle RàI (Réponse à l'intervention) :</strong> Classification selon l'intensité du soutien nécessaire.
+                            <ul style="margin: 10px 0; padding-left: 20px;">
+                                <li><strong>Niveau 1 - Universel</strong> : Enseignement régulier suffit</li>
+                                <li><strong>Niveau 2 - Préventif</strong> : Interventions ciblées en petit groupe</li>
+                                <li><strong>Niveau 3 - Intensif</strong> : Accompagnement individualisé requis</li>
+                            </ul>
+                        </div>
+
+                        <!-- Le contenu (Patterns + RàI) est généré dynamiquement par tableau-bord-apercu.js -->
+                        <div id="conteneur-indicateurs-apprentissage">
+                            <!-- Barres Patterns et RàI injectées ici -->
+                        </div>
+                    </div>
+
+                    <!-- ========== SECTION 3: ÉVOLUTION TEMPORELLE ========== -->
+                    <div class="carte" id="carte-evolution-temporelle" style="margin-top: 2rem;">
                         <h3 class="carte-titre-bleu" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-                            <span>Évolution temporelle - Tous les étudiants</span>
+                            <span>Évolution temporelle</span>
                             <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
                                 <div style="display: flex; gap: 0.5rem; align-items: center;">
                                     <label style="font-size: 0.9rem; font-weight: normal; color: var(--gris-fonce);">Indice :</label>
@@ -3514,11 +3546,11 @@
                         </p>
                     </div>
 
-                    <!-- ========== GRAPHIQUE SPAGHETTI - TRAJECTOIRES D'APPRENTISSAGE ========== -->
-                    <div class="carte" style="margin-top: 2rem;">
+                    <!-- ========== SECTION 4: TRAJECTOIRE D'APPRENTISSAGE ========== -->
+                    <div class="carte" id="carte-trajectoire-apprentissage" style="margin-top: 2rem;">
                         <h3 class="carte-titre-bleu" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                             <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                <span>Trajectoire d'apprentissage - Tous les étudiants</span>
+                                <span>Trajectoire d'apprentissage</span>
                                 <span class="emoji-container">
                                     <span class="primo-aide" data-target="note-spaghetti">😎</span>
                                 </span>
