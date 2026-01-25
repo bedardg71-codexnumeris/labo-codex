@@ -3445,21 +3445,21 @@ function compterValeursEntre(valeurs, min, max) {
 
 /**
  * Crée un dataset de points pour afficher les étudiants sur l'axe X
- * @param {string} label - Label du dataset
+ * Les points sont positionnés à y=0 (sur l'axe X) avec un léger jitter horizontal
+ * @param {string} label - Label du dataset (A, C, P ou E)
  * @param {Array} valeurs - Valeurs des étudiants
  * @param {string} couleur - Couleur hex
- * @param {number} yPosition - Position Y relative (0-1) dans le graphique
  * @returns {Object} - Dataset Chart.js
  */
-function creerDatasetPoints(label, valeurs, couleur, yPosition) {
+function creerDatasetPoints(label, valeurs, couleur) {
     if (!valeurs || valeurs.length === 0) {
         return { label, data: [], borderColor: couleur };
     }
 
-    // Créer les points avec une légère variation Y pour éviter superposition totale
+    // Créer les points sur l'axe X (y=0) avec léger jitter horizontal pour éviter superposition
     const points = valeurs.map((v, i) => ({
-        x: v,
-        y: yPosition + (Math.random() - 0.5) * 0.3 // Léger jitter
+        x: v + (Math.random() - 0.5) * 0.01, // Léger jitter horizontal
+        y: 0 // Sur l'axe X
     }));
 
     return {
@@ -3579,14 +3579,6 @@ function creerGraphiqueDistributionACPE(canvasId) {
         const courbeP = genererCourbeGauss(statsP.moyenne, statsP.ecartType);
         const courbeE = genererCourbeGauss(statsE.moyenne, statsE.ecartType);
 
-        // Trouver la hauteur maximale des courbes pour positionner les points
-        const maxY = Math.max(
-            ...courbeA.map(p => p.y),
-            ...courbeC.map(p => p.y),
-            ...courbeP.map(p => p.y),
-            ...courbeE.map(p => p.y)
-        );
-
         // Créer les datasets des courbes
         const datasetsCourbes = [
             creerDatasetGauss('Assiduité (A)', courbeA, COULEURS_INDICES.A),
@@ -3595,24 +3587,24 @@ function creerGraphiqueDistributionACPE(canvasId) {
             creerDatasetGauss('Engagement (E)', courbeE, COULEURS_INDICES.E)
         ].filter(d => d.data && d.data.length > 0);
 
-        // Créer les datasets des points (étudiants individuels)
-        // Positionner les points à différentes hauteurs pour chaque indice
-        const yPositions = {
-            A: maxY * 0.15,
-            C: maxY * 0.35,
-            P: maxY * 0.55,
-            E: maxY * 0.75
-        };
-
+        // Créer les datasets des points (étudiants individuels sur l'axe X)
         const datasetsPoints = [
-            creerDatasetPoints('A', valeursA, COULEURS_INDICES.A, yPositions.A),
-            creerDatasetPoints('C', valeursC, COULEURS_INDICES.C, yPositions.C),
-            creerDatasetPoints('P', valeursP, COULEURS_INDICES.P, yPositions.P),
-            creerDatasetPoints('E', valeursE, COULEURS_INDICES.E, yPositions.E)
+            creerDatasetPoints('A', valeursA, COULEURS_INDICES.A),
+            creerDatasetPoints('C', valeursC, COULEURS_INDICES.C),
+            creerDatasetPoints('P', valeursP, COULEURS_INDICES.P),
+            creerDatasetPoints('E', valeursE, COULEURS_INDICES.E)
         ].filter(d => d.data && d.data.length > 0);
 
-        // Combiner tous les datasets
-        const datasets = [...datasetsCourbes, ...datasetsPoints];
+        // Combiner : courbes d'abord, puis points (alterner pour lier visibilité)
+        // Format: [courbeA, pointsA, courbeC, pointsC, ...]
+        const datasets = [];
+        const indicesLabels = ['A', 'C', 'P', 'E'];
+        indicesLabels.forEach(indice => {
+            const courbe = datasetsCourbes.find(d => d.label.includes(`(${indice})`));
+            const points = datasetsPoints.find(d => d.label.startsWith(indice));
+            if (courbe) datasets.push(courbe);
+            if (points) datasets.push(points);
+        });
 
         if (datasetsCourbes.length === 0) {
             console.warn('[Distribution ACPE] Aucune donnée à afficher');
@@ -3797,6 +3789,33 @@ function creerGraphiqueDistributionACPE(canvasId) {
                             filter: function(item) {
                                 return !item.text.includes('(étudiants)');
                             }
+                        },
+                        // Clic sur légende : masquer/afficher courbe ET ses points associés
+                        onClick: function(e, legendItem, legend) {
+                            const chart = legend.chart;
+                            const index = legendItem.datasetIndex;
+                            const dataset = chart.data.datasets[index];
+
+                            // Extraire l'indice (A, C, P ou E)
+                            const indiceMatch = dataset.label.match(/\(([ACPE])\)/);
+                            if (!indiceMatch) return;
+                            const indice = indiceMatch[1];
+
+                            // Trouver le dataset des points associé
+                            const pointsIndex = chart.data.datasets.findIndex(
+                                d => d.label === `${indice} (étudiants)`
+                            );
+
+                            // Toggle visibilité de la courbe
+                            const isHidden = chart.isDatasetVisible(index);
+                            chart.setDatasetVisibility(index, !isHidden);
+
+                            // Toggle visibilité des points associés
+                            if (pointsIndex !== -1) {
+                                chart.setDatasetVisibility(pointsIndex, !isHidden);
+                            }
+
+                            chart.update();
                         }
                     },
                     tooltip: {
