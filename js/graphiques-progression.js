@@ -906,6 +906,17 @@ let dernierPointSurvole = -1;
 let datasetVerrouille = -1;
 
 /**
+ * Données partagées pour les tooltips multiples (initialisées dans creerGraphiqueGroupeSpaghetti)
+ */
+let donneesSpaghettiGlobales = {
+    memesActivites: {},
+    labels: [],
+    evaluationsIndex: {},
+    productionsArtefacts: [],
+    noteVersIDME: null
+};
+
+/**
  * Stockage des zones cliquables des noms d'étudiants
  */
 let zonesNomsEtudiants = [];
@@ -984,6 +995,115 @@ const pluginNomEtudiantSurvol = {
             width: rectW,
             height: rectH
         }];
+    }
+};
+
+/**
+ * Plugin pour afficher les tooltips de toutes les activités similaires
+ * Permet de comparer les résultats sur une même activité pratiquée plusieurs fois
+ */
+const pluginTooltipsMultiples = {
+    id: 'tooltipsMultiples',
+    afterDraw(chart) {
+        // Vérifier qu'on a un point survolé et les données nécessaires
+        if (dernierPointSurvole === -1) return;
+        const datasetActif = datasetVerrouille >= 0 ? datasetVerrouille : dernierDatasetSurvole;
+        if (datasetActif === -1) return;
+
+        const { memesActivites, labels, evaluationsIndex, productionsArtefacts, noteVersIDME } = donneesSpaghettiGlobales;
+        if (!memesActivites || !labels || !noteVersIDME) return;
+
+        // Obtenir tous les indices de même activité
+        const indicesMemeActivite = memesActivites[dernierPointSurvole] || [];
+        if (indicesMemeActivite.length <= 1) return; // Pas d'autres activités similaires
+
+        const ctx = chart.ctx;
+        const dataset = chart.data.datasets[datasetActif];
+        if (!dataset) return;
+
+        const meta = chart.getDatasetMeta(datasetActif);
+        if (!meta || !meta.data) return;
+
+        const da = dataset.da;
+
+        // Dessiner un tooltip pour chaque point de même activité
+        indicesMemeActivite.forEach(pointIndex => {
+            const point = meta.data[pointIndex];
+            const valeur = dataset.data[pointIndex];
+            if (!point || valeur === null) return;
+
+            // Obtenir les infos de l'évaluation
+            const production = productionsArtefacts[pointIndex];
+            const evaluation = production && da ? evaluationsIndex[da]?.[production.id] : null;
+
+            // Construire le texte du tooltip
+            const label = labels[pointIndex] || `Point ${pointIndex + 1}`;
+            const codeIDME = noteVersIDME(valeur);
+            const pourcent = (valeur * 100).toFixed(0);
+
+            // Collecter les statuts
+            const statuts = [];
+            if (evaluation) {
+                if (evaluation.repriseDeId || evaluation.jetonReprise || evaluation.jetonDelai || evaluation.avecJeton) {
+                    statuts.push('Jeton');
+                }
+                if (evaluation.statutIntegrite === 'plagiat') statuts.push('Plagiat');
+                else if (evaluation.statutIntegrite === 'ia') statuts.push('IA');
+                if (evaluation.statutRemise === 'non-remis') statuts.push('Non remis');
+                else if (evaluation.statutRemise === 'retard') statuts.push('Retard');
+            }
+
+            let ligne2 = `${codeIDME} (${pourcent}%)`;
+            if (statuts.length > 0) ligne2 += ' - ' + statuts.join(' - ');
+
+            // Position du tooltip (au-dessus ou en-dessous du point selon l'espace)
+            const x = point.x;
+            const y = point.y;
+            const estEnHaut = y > chart.chartArea.top + 60;
+
+            ctx.save();
+            ctx.font = '11px Arial';
+
+            // Mesurer les textes
+            const largeurLabel = ctx.measureText(label).width;
+            const largeurLigne2 = ctx.measureText(ligne2).width;
+            const largeurMax = Math.max(largeurLabel, largeurLigne2);
+
+            const padding = 6;
+            const hauteur = 36;
+            const rectX = x - largeurMax / 2 - padding;
+            const rectY = estEnHaut ? y - hauteur - 12 : y + 12;
+            const rectW = largeurMax + padding * 2;
+
+            // Fond du tooltip
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+            ctx.beginPath();
+            ctx.roundRect(rectX, rectY, rectW, hauteur, 4);
+            ctx.fill();
+
+            // Flèche vers le point
+            ctx.beginPath();
+            if (estEnHaut) {
+                ctx.moveTo(x - 6, rectY + hauteur);
+                ctx.lineTo(x, rectY + hauteur + 6);
+                ctx.lineTo(x + 6, rectY + hauteur);
+            } else {
+                ctx.moveTo(x - 6, rectY);
+                ctx.lineTo(x, rectY - 6);
+                ctx.lineTo(x + 6, rectY);
+            }
+            ctx.fill();
+
+            // Texte
+            ctx.fillStyle = '#fff';
+            ctx.textAlign = 'center';
+            ctx.font = 'bold 11px Arial';
+            ctx.fillText(label, x, rectY + 14);
+            ctx.font = '11px Arial';
+            ctx.fillText(ligne2, x, rectY + 28);
+
+            ctx.restore();
+        });
     }
 };
 
@@ -1262,6 +1382,15 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
             return 'I'; // Insuffisant
         };
 
+        // Stocker les données pour les plugins (tooltips multiples)
+        donneesSpaghettiGlobales = {
+            memesActivites,
+            labels,
+            evaluationsIndex,
+            productionsArtefacts,
+            noteVersIDME
+        };
+
         // Créer un dataset par étudiant
         const datasets = etudiants.map(etudiant => {
             const da = etudiant.da;
@@ -1336,7 +1465,7 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
         // Configuration du graphique
         const config = {
             type: 'line',
-            plugins: [pluginEtiquettesZones, pluginNomEtudiantSurvol],
+            plugins: [pluginEtiquettesZones, pluginNomEtudiantSurvol, pluginTooltipsMultiples],
             data: {
                 labels: labels,
                 datasets: datasets
