@@ -44,10 +44,11 @@ function selectionnerArtefactsSelonModalite(artefactsRemisAvecNote, nombreAReten
                 .slice(0, nombreARetenir);
 
         case 'recents':
-            // MODALITÉ 2: N récents artefacts (date décroissante)
+            // MODALITÉ 2: N récents artefacts (numéro décroissant)
             // Représentatif du niveau terminal/actuel
+            // CORRECTION (24 jan 2026): Trier par numéro de production, pas par date
             return artefactsRemisAvecNote
-                .sort((a, b) => new Date(b.dateRemise) - new Date(a.dateRemise))
+                .sort((a, b) => (b.numero || 0) - (a.numero || 0))
                 .slice(0, nombreARetenir);
 
         case 'recents-meilleurs':
@@ -123,6 +124,7 @@ function chargerPortfolioEleveDetail(da) {
                 id: art.id,
                 titre: art.titre,
                 description: art.description || '',
+                numero: art.numero || parseInt(art.id.match(/\d+/)?.[0]) || 0, // AJOUT (24 jan 2026)
                 remis: !!evaluation,
                 note: evaluation?.noteFinale || null,
                 niveau: evaluation?.niveauFinal || null,
