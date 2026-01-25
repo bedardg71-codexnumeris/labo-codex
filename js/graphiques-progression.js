@@ -1718,6 +1718,15 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                             dataset.borderWidth = 1;
                             dataset.pointRadius = Array(nbPoints).fill(1);
                             dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(80, 80, 80, 0.3)');
+                            // Quand une courbe est verrouillée, désactiver le survol des autres courbes
+                            if (datasetVerrouille >= 0) {
+                                dataset.pointHoverRadius = 1;
+                                dataset.pointHoverBackgroundColor = 'rgba(80, 80, 80, 0.3)';
+                            } else {
+                                // Rétablir les propriétés de survol normales
+                                dataset.pointHoverRadius = 5;
+                                dataset.pointHoverBackgroundColor = 'rgba(50, 50, 50, 0.9)';
+                            }
                         }
                     });
 
@@ -1745,11 +1754,16 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                         dataset.borderWidth = 3;
                         dataset.pointRadius = Array(nbPoints).fill(4);
                         dataset.pointBackgroundColor = Array(nbPoints).fill('#E91E63');
+                        dataset.pointHoverRadius = 5;
+                        dataset.pointHoverBackgroundColor = '#E91E63';
                     } else {
                         dataset.borderColor = 'rgba(80, 80, 80, 0.35)';
                         dataset.borderWidth = 1;
                         dataset.pointRadius = Array(nbPoints).fill(1);
                         dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(80, 80, 80, 0.3)');
+                        // Désactiver le survol des autres courbes quand verrouillé
+                        dataset.pointHoverRadius = 1;
+                        dataset.pointHoverBackgroundColor = 'rgba(80, 80, 80, 0.3)';
                     }
                 });
             } else {
@@ -1762,6 +1776,9 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                     dataset.borderWidth = 1.5;
                     dataset.pointRadius = Array(nbPoints).fill(2);
                     dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(50, 50, 50, 0.5)');
+                    // Rétablir les propriétés de survol normales
+                    dataset.pointHoverRadius = 5;
+                    dataset.pointHoverBackgroundColor = 'rgba(50, 50, 50, 0.9)';
                 });
             }
             chart.update('none');
@@ -1783,11 +1800,26 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                         // Déverrouiller
                         datasetVerrouille = -1;
                         console.log('🔓 Courbe déverrouillée');
+                        // Rétablir les propriétés de survol normales pour tous
+                        chart.data.datasets.forEach(dataset => {
+                            dataset.pointHoverRadius = 5;
+                            dataset.pointHoverBackgroundColor = 'rgba(50, 50, 50, 0.9)';
+                        });
                     } else {
                         // Verrouiller
                         datasetVerrouille = zone.datasetIndex;
                         dernierDatasetSurvole = zone.datasetIndex;
                         console.log(`🔒 Courbe verrouillée: ${chart.data.datasets[zone.datasetIndex]?.label}`);
+                        // Désactiver le survol des autres courbes
+                        chart.data.datasets.forEach((dataset, idx) => {
+                            if (idx === zone.datasetIndex) {
+                                dataset.pointHoverRadius = 5;
+                                dataset.pointHoverBackgroundColor = '#E91E63';
+                            } else {
+                                dataset.pointHoverRadius = 1;
+                                dataset.pointHoverBackgroundColor = 'rgba(80, 80, 80, 0.3)';
+                            }
+                        });
                     }
                     chart.update('none');
                     return;
