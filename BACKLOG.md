@@ -18,26 +18,21 @@
   - Algorithme : KDE (Kernel Density Estimation) avec regle de Silverman
   - **Fichiers modifies** : `index.html`, `js/graphiques-progression.js`, `js/tableau-bord-apercu.js`
 
-- [ ] **#30** Export PDF des elements pedagogiques (EN COURS)
+- [x] **#30** Export PDF des elements pedagogiques ✅ CORRIGÉ (25 jan 2026)
   - [x] Grilles descriptives (grille + echelle + cartouche) avec jsPDF
   - [x] Formulaire preparation 2 etapes (selection contenu → apercu mise en page)
   - [x] Nouvelle disposition : cours/trimestre en haut a droite, enseignant en bas a gauche
   - [x] Options simplifiees : orientation, checkbox trimestre, pied de page (enseignant, licence CC)
   - [x] Marges reduites (0.5 inch)
   - [x] Fonctions SST : obtenirInfosCoursPDF(), obtenirNomEnseignantPDF()
-  - [ ] **Bug a corriger** :
-    - Infos cours/enseignant non affichees dans le PDF (seulement "Hiver 2026" visible)
-    - Fonctions corrigees selon SST de trimestre-v2.js mais ne retournent pas les donnees
-    - **Prochaines etapes de debogage** :
-      1. Ajouter `console.log` dans `obtenirInfosCoursPDF()` pour voir `groupeActif.coursId`
-      2. Verifier si `listeCours` ou `cours` contient les donnees attendues
-      3. Ajouter `console.log` dans `obtenirNomEnseignantPDF()` pour voir `groupeActif.enseignantId`
-      4. Verifier si `enseignants` ou `profilEnseignant` contient les donnees
-    - **SST de reference** : `js/trimestre-v2.js` lignes 4117-4140
-  - [ ] **Ajustements restants** :
-    - Tester sans cartouche (grille seule)
-    - Productions : liste des travaux (a venir)
-    - Echelles seules (a venir)
+  - [x] **Bug corrigé** : Infos cours/enseignant maintenant affichées
+    - **Cause** : `window.trimestreActif` vide, pas de fallback
+    - **Fix** : Utilisation de `obtenirTrimestreActif()` + fallbacks multiples
+    - En-tête : code cours, nom cours, trimestre
+    - Pied de page : nom enseignant, licence CC BY-NC-SA
+  - [ ] **Ajustements futurs (optionnel)** :
+    - Productions : liste des travaux
+    - Echelles seules
 
 ### Bugs critiques
 

@@ -136,58 +136,70 @@ function obtenirNomTrimestre() {
  * Gère les cas: enseignantId normal, 'profil', ou absence
  */
 function obtenirNomEnseignantPDF() {
-    // SST: Exactement comme trimestre-v2.js:4127-4140
+    // 🆕 BETA 96 FIX #30: Utiliser obtenirTrimestreActif() + fallback sur profilEnseignant
     try {
         if (typeof db === 'undefined' || !db.getSync) {
             return '';
         }
 
-        const trimestreActif = window.trimestreActif || db.getSync('trimestreActif', '');
+        // 1. Obtenir le trimestre actif via la fonction officielle
+        let trimestreActif = '';
+        if (typeof obtenirTrimestreActif === 'function') {
+            const trimestre = obtenirTrimestreActif();
+            trimestreActif = trimestre?.id || '';
+        }
         if (!trimestreActif) {
-            return '';
+            trimestreActif = window.trimestreActif || db.getSync('trimestreActif', '');
         }
 
-        // Chercher le groupe-cours actif
-        const groupesCours = db.getSync(`${trimestreActif}_groupesCours`, []);
-        const groupeActif = groupesCours.find(gc => gc.actif);
-
-        if (!groupeActif) {
-            return '';
+        // 2. Chercher le groupe-cours actif (si trimestre disponible)
+        let groupeActif = null;
+        if (trimestreActif) {
+            const groupesCours = db.getSync(`${trimestreActif}_groupesCours`, []);
+            groupeActif = groupesCours.find(gc => gc.actif);
         }
 
-        // SST: Récupérer l'enseignant selon enseignantId (comme trimestre-v2.js:4127-4140)
-        if (groupeActif.enseignantId === 'profil') {
-            // Cas 1: enseignantId === 'profil' → utiliser profilEnseignant
-            const profil = db.getSync('profilEnseignant', {});
-            if (profil.prenom && profil.nom) {
-                return `${profil.prenom} ${profil.nom}`;
+        // 3. Si groupe actif trouvé avec enseignantId, l'utiliser
+        if (groupeActif && groupeActif.enseignantId) {
+            if (groupeActif.enseignantId === 'profil') {
+                // Cas 1: enseignantId === 'profil' → utiliser profilEnseignant
+                const profil = db.getSync('profilEnseignant', {});
+                if (profil.prenom && profil.nom) {
+                    return `${profil.prenom} ${profil.nom}`;
+                }
+            } else {
+                // Cas 2: enseignantId est un ID valide → chercher dans enseignants
+                const enseignants = db.getSync('enseignants', []);
+                const ensObj = enseignants.find(e => e.id === groupeActif.enseignantId);
+                if (ensObj) {
+                    return `${ensObj.prenom || ''} ${ensObj.nom || ''}`.trim();
+                }
             }
-            return '';
-        } else if (groupeActif.enseignantId) {
-            // Cas 2: enseignantId est un ID valide → chercher dans enseignants
-            const enseignants = db.getSync('enseignants', []);
-            const ensObj = enseignants.find(e => e.id === groupeActif.enseignantId);
-            if (ensObj) {
-                return `${ensObj.prenom || ''} ${ensObj.nom || ''}`.trim();
-            }
-            return '';
-        } else {
-            // Cas 3: pas d'enseignantId → fallback sur profilEnseignant
-            const profil = db.getSync('profilEnseignant', {});
-            if (profil.prenom && profil.nom) {
-                return `${profil.prenom} ${profil.nom}`;
-            }
-            return '';
         }
+
+        // 4. FALLBACK: Toujours essayer profilEnseignant si rien trouvé
+        const profil = db.getSync('profilEnseignant', {});
+        if (profil.prenom && profil.nom) {
+            return `${profil.prenom} ${profil.nom}`;
+        }
+
+        return '';
     } catch (err) {
         console.warn('[export-pdf] Erreur obtention nom enseignant:', err);
+        // Dernier recours: essayer profilEnseignant
+        try {
+            const profil = db.getSync('profilEnseignant', {});
+            if (profil.prenom && profil.nom) {
+                return `${profil.prenom} ${profil.nom}`;
+            }
+        } catch (e) { /* ignore */ }
         return '';
     }
 }
 
 /**
  * Obtient les infos du cours actif pour le PDF
- * SST: listeCours/cours référencé par groupeActif.coursId (comme trimestre-v2.js:4117-4120)
+ * 🆕 BETA 96 FIX #30: Utiliser obtenirTrimestreActif() + fallback sur coursActif/infoCours
  * @returns {Object} { sigle, titre, sigleTitre }
  */
 function obtenirInfosCoursPDF() {
@@ -196,38 +208,76 @@ function obtenirInfosCoursPDF() {
             return { sigle: '', titre: '', sigleTitre: '' };
         }
 
-        const trimestreActif = window.trimestreActif || db.getSync('trimestreActif', '');
+        // 1. Obtenir le trimestre actif via la fonction officielle
+        let trimestreActif = '';
+        if (typeof obtenirTrimestreActif === 'function') {
+            const trimestre = obtenirTrimestreActif();
+            trimestreActif = trimestre?.id || '';
+        }
         if (!trimestreActif) {
-            return { sigle: '', titre: '', sigleTitre: '' };
+            trimestreActif = window.trimestreActif || db.getSync('trimestreActif', '');
         }
 
-        // Chercher le groupe-cours actif
-        const groupesCours = db.getSync(`${trimestreActif}_groupesCours`, []);
-        const groupeActif = groupesCours.find(gc => gc.actif);
-
-        if (!groupeActif) {
-            return { sigle: '', titre: '', sigleTitre: '' };
+        // 2. Chercher le groupe-cours actif (si trimestre disponible)
+        let groupeActif = null;
+        if (trimestreActif) {
+            const groupesCours = db.getSync(`${trimestreActif}_groupesCours`, []);
+            groupeActif = groupesCours.find(gc => gc.actif);
         }
 
-        // SST: Récupérer les infos du cours depuis listeCours ou cours (comme trimestre-v2.js)
+        // 3. Récupérer la liste des cours
         let cours = db.getSync('listeCours', []);
         if (!cours || cours.length === 0) {
             cours = db.getSync('cours', []);
         }
 
-        // Chercher par id, sigle, codeCours ou code (comme trimestre-v2.js:4118-4119)
-        const coursObj = cours.find(c =>
-            c.id === groupeActif.coursId ||
-            c.sigle === groupeActif.coursId ||
-            c.codeCours === groupeActif.coursId ||
-            c.code === groupeActif.coursId
-        );
+        // 4. Si groupe actif avec coursId, chercher le cours correspondant
+        if (groupeActif && groupeActif.coursId && cours.length > 0) {
+            const coursObj = cours.find(c =>
+                c.id === groupeActif.coursId ||
+                c.sigle === groupeActif.coursId ||
+                c.codeCours === groupeActif.coursId ||
+                c.code === groupeActif.coursId
+            );
 
-        if (coursObj) {
-            const sigle = coursObj.sigle || coursObj.codeCours || coursObj.code || '';
-            const titre = coursObj.nomCours || coursObj.nom || coursObj.titre || '';
-            const sigleTitre = sigle && titre ? `${sigle} - ${titre}` : (titre || sigle);
-            return { sigle, titre, sigleTitre };
+            if (coursObj) {
+                const sigle = coursObj.sigle || coursObj.codeCours || coursObj.code || '';
+                const titre = coursObj.nomCours || coursObj.nom || coursObj.titre || '';
+                const sigleTitre = sigle && titre ? `${sigle} - ${titre}` : (titre || sigle);
+                return { sigle, titre, sigleTitre };
+            }
+        }
+
+        // 5. FALLBACK 1: Essayer coursActif ou infoCours (anciens formats)
+        const coursActif = db.getSync('coursActif', null);
+        if (coursActif) {
+            const sigle = coursActif.sigle || coursActif.codeCours || coursActif.code || '';
+            const titre = coursActif.nomCours || coursActif.nom || coursActif.titre || '';
+            if (sigle || titre) {
+                const sigleTitre = sigle && titre ? `${sigle} - ${titre}` : (titre || sigle);
+                return { sigle, titre, sigleTitre };
+            }
+        }
+
+        const infoCours = db.getSync('infoCours', null);
+        if (infoCours) {
+            const sigle = infoCours.sigle || infoCours.codeCours || infoCours.code || '';
+            const titre = infoCours.nomCours || infoCours.nom || infoCours.titre || '';
+            if (sigle || titre) {
+                const sigleTitre = sigle && titre ? `${sigle} - ${titre}` : (titre || sigle);
+                return { sigle, titre, sigleTitre };
+            }
+        }
+
+        // 6. FALLBACK 2: Si un seul cours dans listeCours et pas d'autre info, l'utiliser
+        if (cours.length === 1) {
+            const coursUnique = cours[0];
+            const sigle = coursUnique.sigle || coursUnique.codeCours || coursUnique.code || '';
+            const titre = coursUnique.nomCours || coursUnique.nom || coursUnique.titre || '';
+            if (sigle || titre) {
+                const sigleTitre = sigle && titre ? `${sigle} - ${titre}` : (titre || sigle);
+                return { sigle, titre, sigleTitre };
+            }
         }
 
         return { sigle: '', titre: '', sigleTitre: '' };
@@ -2342,7 +2392,7 @@ async function ouvrirApercuPDF() {
         }
 
         // Charger les infos pour le pied de page et l'en-tête
-        // SST: Utiliser les fonctions centralisées qui suivent la SST de trimestre-v2.js
+        // 🆕 BETA 96 FIX #30: Fonctions améliorées avec fallbacks
         const nomEnseignant = obtenirNomEnseignantPDF();
         const infosCours = obtenirInfosCoursPDF();
         const nomCours = infosCours.sigleTitre;

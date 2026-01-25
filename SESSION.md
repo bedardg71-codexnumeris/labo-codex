@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 96
 
 **Date** : 25 janvier 2026
-**Version** : Beta 96 (build 0125-1710)
+**Version** : Beta 96 (build 0125-1755)
 **Statut** : Application fonctionnelle pour H2026, A2024 archive
 
 ---
@@ -29,6 +29,17 @@
 - **Graphique spaghetti** : Visualisation de l'évolution de tous les étudiants (nouveau Beta 96)
 
 ### Derniere tache completee (25 janvier - Beta 96)
+- **FIX #30 : EXPORT PDF - INFOS COURS/ENSEIGNANT** : Le PDF affiche maintenant les infos complètes
+  - **Problème** : Infos cours et enseignant non affichées dans le PDF (seulement trimestre visible)
+  - **Cause** : `window.trimestreActif` était vide, et pas de fallback sur `profilEnseignant`
+  - **Solution** : Fonctions `obtenirInfosCoursPDF()` et `obtenirNomEnseignantPDF()` améliorées
+    - Utilisation de `obtenirTrimestreActif()` au lieu de juste `window.trimestreActif`
+    - Fallbacks multiples : `coursActif`, `infoCours`, cours unique dans `listeCours`
+    - Fallback final sur `profilEnseignant` même si groupe-cours non trouvé
+  - **Résultat** : En-tête affiche "601-101-MQ / Écriture et littérature / Hiver 2026"
+  - **Résultat** : Pied de page affiche "Grégoire Bédard" et "CC BY-NC-SA 4.0"
+  - **Fichier modifié** : `js/export-pdf.js`
+
 - **FIX #37 : COHÉRENCE INDICE P = NOTE FINALE** : L'indice P reflète maintenant la vraie note
   - **Problème** : P=50% dans tableau de bord mais Note finale=59% dans profil
   - **Cause** : `calculerPerformance()` utilisait TOUTES les évaluations, pas la méthode de sélection
