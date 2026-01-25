@@ -111,7 +111,7 @@ function obtenirJetonsParDate(da, snapshots) {
     try {
         // ✨ CORRECTION (17 déc 2025) : Utiliser obtenirDonneesSelonMode pour compatibilité IndexedDB
         const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-        const productions = obtenirDonneesSelonMode('productions') || [];
+        const productions = obtenirDonneesSelonMode('productionsPedagogiques') || [];
 
         // Filtrer les évaluations de cet étudiant avec jetons
         const evalsAvecJetons = evaluations.filter(e =>
@@ -1208,9 +1208,9 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
         let productions = [];
 
         if (typeof obtenirDonneesSelonMode === 'function') {
-            productions = obtenirDonneesSelonMode('productions') || [];
+            productions = obtenirDonneesSelonMode('productionsPedagogiques') || [];
         } else {
-            const cleProductions = (typeof cle === 'function') ? cle('productions') : 'productions';
+            const cleProductions = (typeof cle === 'function') ? cle('productionsPedagogiques') : 'productionsPedagogiques';
             productions = db.getSync(cleProductions, []);
         }
 
@@ -1927,7 +1927,7 @@ function obtenirDonneesCriteres(da) {
         });
 
         // Récupérer les productions pour les noms
-        const productions = obtenirDonneesSelonMode('productions') || [];
+        const productions = obtenirDonneesSelonMode('productionsPedagogiques') || [];
 
         // Extraire les critères uniques depuis toutes les évaluations
         const criteresSet = new Set();
