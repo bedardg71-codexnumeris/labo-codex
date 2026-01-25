@@ -30,6 +30,23 @@
     - Productions : liste des travaux (a venir)
     - Echelles seules (a venir)
 
+### Bugs critiques
+
+- [ ] **#37** Incoherence indice P vs Note finale (tableau de bord)
+  - **Symptome** : Vincent affiche P=50% dans le tableau de bord mais Note finale=59% dans son profil
+  - **Cause** : L'indice P est calcule avec TOUTES les evaluations (14 artefacts + analyse)
+    alors que la Note finale utilise la methode "6 recents (60%) + analyse (40%)"
+  - **Impact** : Les points sur la barre Performance ne correspondent pas aux notes reelles
+  - **Fichiers concernes** :
+    - `js/pratiques/pratique-sommative.js` : `calculerPerformance()` (ligne 56-99)
+    - `js/portfolio.js` : `calculerEtStockerIndicesCP()` (ligne 568)
+    - `js/profil-etudiant.js` : `calculerDetailsNoteFinale()` (calcul note finale)
+  - **Solution proposee** : L'indice P doit utiliser la meme logique que la note finale
+    - Respecter la methode de selection (meilleurs, recents, recents-meilleurs)
+    - Respecter les ponderations portfolio/analyse finale
+    - `pratique.calculerPerformance(da)` doit deleguer au calcul de note finale
+  - **Priorite** : Haute (validation systeme)
+
 ### Documentation / Aide
 
 - [ ] **#2** Documentation complete
