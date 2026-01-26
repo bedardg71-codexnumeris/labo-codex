@@ -51,13 +51,15 @@
 
 ### Documentation / Aide
 
-- [ ] **#2** Documentation complete
-  - Section Aide complete dans l'application
-  - Guide rapide (10-15 pages PDF)
+- [ ] **#2** Guide PDF pour utilisateurs (10-15 pages)
+  - Version imprimable du contenu de la section Aide
+  - Workflow de configuration pas-à-pas
+  - Captures d'écran annotées
 
-- [ ] **#10** Mettre a jour section AIDE
-  - Contenu a jour avec les fonctionnalites actuelles
-  - Notes de version dans la section AIDE
+- [x] **#10** Mettre a jour section AIDE ✅ FAIT (26 jan 2026)
+  - Notes de version Beta 96 ajoutées
+  - Notes de version Beta 95.3-95.7 consolidées
+  - Section Introduction et Configuration à jour
 
 - [ ] **#11** Message "Nouveautes de la beta" automatise
   - Mise a jour automatique apres chaque correctif fonctionnel

@@ -14676,8 +14676,103 @@
                     <h2>Notes de version</h2>
                     <p class="text-muted">Historique des changements majeurs</p>
 
+                    <!-- Beta 96 -->
+                    <div class="carte accordeon ouvert" id="accordeon-aide-beta96">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Beta 96 — Visualisations avancées et stabilisation
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu" style="display: block;">
+                        <p class="text-muted">25-26 janvier 2026</p>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Nouveaux graphiques (Tableau de bord)</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Graphique spaghetti ACP</strong> : Trajectoires d'évolution de tous les étudiants (indices A, C, P par semaine).</li>
+                            <li><strong>Graphique spaghetti par production</strong> : Résultats bruts par artefact montrant la volatilité réelle de l'apprentissage.</li>
+                            <li><strong>Courbes de distribution ACPE</strong> : Densité de probabilité (KDE) pour visualiser la répartition du groupe.</li>
+                            <li><strong>Mini-courbes de Gauss</strong> : Superposées sur chaque barre ACPE avec μ et ±σ.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Réorganisation du tableau de bord</h4>
+                        <ul class="modal-liste">
+                            <li><strong>4 sections distinctes</strong> : Indicateurs ACPE, Indicateurs d'apprentissage (Patterns + RàI), Évolution temporelle, Trajectoire d'apprentissage.</li>
+                            <li><strong>Uniformisation visuelle</strong> : Tous les graphiques adoptent le même style (échelle Y dynamique, zones IDME, survol interactif).</li>
+                            <li><strong>Points uniformisés</strong> : Style blanc par défaut, noir au survol/sélection pour tous les graphiques.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Corrections importantes</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Export PDF (#30)</strong> : Affiche maintenant les infos cours et enseignant (fallbacks multiples vers profilEnseignant).</li>
+                            <li><strong>Indice P = Note finale (#37)</strong> : L'indice P reflète maintenant la vraie note de session (méthode de sélection, pondérations, conformité).</li>
+                            <li><strong>Aperçu des présences</strong> : Taux d'assiduité aligné sur le tableau de bord (sommatif uniquement, filtrage groupe actif).</li>
+                            <li><strong>Anonymisation archives</strong> : Les noms sont correctement anonymisés dans les graphiques spaghetti.</li>
+                            <li><strong>Clic sur noms étudiants</strong> : Le verrouillage fonctionne dans tous les graphiques (ratio scale CSS/canvas).</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Import historique A2024</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Archivage complet</strong> : 55 étudiants, 2 groupes, 14 artefacts, 750 évaluations, 1650 présences.</li>
+                            <li><strong>Échelle IDME documentée</strong> : I=40%, D=65%, M=85%, E=100%.</li>
+                            <li><strong>Pratique configurée</strong> : 6 artefacts récents (60%) + Analyse finale (40%).</li>
+                            <li><strong>Trimestre en lecture seule</strong> : Données historiques protégées.</li>
+                        </ul>
+                        </div><!-- fin accordeon-contenu beta96 -->
+                    </div>
+
+                    <!-- Beta 95.3-95.7 -->
+                    <div class="carte accordeon" id="accordeon-aide-beta957">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Beta 95.3-95.7 — Stabilisation et UX
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                        <p class="text-muted">9-24 janvier 2026</p>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Aide contextuelle 😎 (Beta 95.6)</h4>
+                        <ul class="modal-liste">
+                            <li><strong>15 sections d'aide</strong> : Boutons 😎 dans toutes les zones critiques (Mode Assisté uniquement).</li>
+                            <li><strong>Tutoiement systématique</strong> : Ton chaleureux et accessible.</li>
+                            <li><strong>Ordre de configuration clarifié</strong> : Échelles → Pratiques → Grilles → Productions.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Calcul d'assiduité corrigé (Beta 95.7)</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Formule en périodes</strong> : periodesPresentes / periodesOffertes (au lieu d'heures).</li>
+                            <li><strong>Moyenne A du groupe</strong> : Affichée dans l'en-tête et sur la barre Assiduité.</li>
+                            <li><strong>Points individuels</strong> : Distribution visible sur la barre (26 points à 100%, 2 à 0%).</li>
+                            <li><strong>Saisie numérique</strong> : Input numérique au lieu de dropdown (permet 1.5 périodes).</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Corrections multi-trimestres (Beta 95.3-95.5)</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Compatibilité A2025</strong> : Détection format ancien (SOM/PAN) vs nouveau (pratique unique).</li>
+                            <li><strong>Bug anonymisation corrigé</strong> : Liste étudiants vide en mode anonymisé (groupeReel préservé).</li>
+                            <li><strong>Filtrage présences</strong> : Présences correctement filtrées par groupe-cours actif.</li>
+                            <li><strong>Namespacing complet</strong> : groupesCours et horaires ajoutés à CLES_NAMESPACEES.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">UX améliorée (Beta 95.4-95.6)</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Séparation modal Bienvenue</strong> : ✉️ News (nouveautés) + 😎 Introduction (guide démarrage).</li>
+                            <li><strong>Catégories Selection/Obligatoires</strong> : Deux cartes avec checkboxes exclusives.</li>
+                            <li><strong>Badge nb étudiants</strong> : Uniformisé dans Vue d'ensemble et Liste.</li>
+                            <li><strong>Vue calendaire corrigée</strong> : Affiche les bons jours selon groupe-cours actif.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Maintenance (Beta 95.3)</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Audit module évaluation</strong> : 3 problèmes critiques résolus (namespacing, groupe-cours, validations).</li>
+                            <li><strong>Import depuis trimestre</strong> : Échelles, grilles, productions réutilisables.</li>
+                            <li><strong>Nommage exports standardisé</strong> : type-nom-cours-discipline-date.json.</li>
+                            <li><strong>Design System v7</strong> : Audit conformité border-radius et box-shadow.</li>
+                        </ul>
+                        </div><!-- fin accordeon-contenu beta957 -->
+                    </div>
+
                     <!-- Beta 95.2 -->
-                    <div class="carte accordeon" id="accordeon-aide-beta96">
+                    <div class="carte accordeon" id="accordeon-aide-beta952">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Beta 95.2 — Architecture modulaire groupe-cours
