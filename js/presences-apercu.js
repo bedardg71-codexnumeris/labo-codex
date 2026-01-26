@@ -19,9 +19,11 @@ function chargerApercuPresences() {
     console.log('🔄 Chargement de l\'aperçu des présences...');
 
     try {
-        // Récupérer les étudiants actifs
-        // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
-        const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+        // 🆕 BETA 96 FIX: Utiliser obtenirEtudiantsCoursActif() pour filtrer par groupe-cours actif
+        // (comme le fait le tableau de bord)
+        const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
+            ? obtenirEtudiantsCoursActif()
+            : obtenirDonneesSelonMode('groupeEtudiants');
         const etudiantsActifs = etudiants.filter(e =>
             e.statut !== 'décrochage' && e.statut !== 'abandon'
         );
@@ -35,11 +37,9 @@ function chargerApercuPresences() {
         // Calculer les statistiques
         calculerStatistiquesPresences(etudiantsActifs, indicesAssiduite, presences);
 
-        // Charger les informations du cours (nb cours, groupes, élèves)
-        // depuis le module statistiques.js
-        if (typeof chargerInfosCours === 'function') {
-            chargerInfosCours();
-        }
+        // 🆕 BETA 96 FIX: Afficher le nombre d'élèves du groupe actif (pas tous les étudiants)
+        const nbEleves = etudiantsActifs.length;
+        setStatText('stat-nb-eleves', nbEleves || '0');
 
         console.log('✅ Aperçu des présences chargé');
     } catch (error) {
@@ -62,32 +62,25 @@ function calculerStatistiquesPresences(etudiants, indicesAssiduite, presences) {
         return;
     }
 
-    // Déterminer la pratique active
-    const config = db.getSync('modalitesEvaluation', {});
-    const affichage = config.affichageTableauBord || {};
-    const afficherSom = affichage.afficherSommatif !== false;
-    const afficherPan = affichage.afficherAlternatif !== false;
-    const modeComparatif = afficherSom && afficherPan;
-
     // TAUX D'ASSIDUITÉ MOYEN DU GROUPE
-    // En mode comparatif, afficher la moyenne des deux pratiques
-    // Sinon, afficher la pratique active
+    // 🆕 BETA 96 FIX: Toujours utiliser l'indice SOMMATIF pour l'assiduité
+    // (même comportement que tableau de bord - pas de moyenne des deux pratiques)
+    // Le sommatif est la mesure cumulative officielle depuis le début du trimestre
     let totalTaux = 0;
     let nbAvecDonnees = 0;
 
-    etudiants.forEach(e => {
-        let tauxEtudiant = 0;
-
-        if (modeComparatif) {
-            // Moyenne des deux pratiques
-            const tauxSOM = indicesAssiduite.sommatif?.[e.da] || 0;
-            const tauxPAN = indicesAssiduite.alternatif?.[e.da] || 0;
-            tauxEtudiant = (tauxSOM + tauxPAN) / 2;
-        } else if (afficherSom) {
-            tauxEtudiant = indicesAssiduite.sommatif?.[e.da] || 0;
-        } else if (afficherPan) {
-            tauxEtudiant = indicesAssiduite.alternatif?.[e.da] || 0;
+    // 🆕 BETA 96 FIX: Extraire .indice si l'indice est un objet (comme le fait tableau-bord-apercu.js)
+    const extraireIndice = (val) => {
+        if (typeof val === 'object' && val !== null) {
+            return val.indice || 0;
         }
+        return val || 0;
+    };
+
+    etudiants.forEach(e => {
+        // 🆕 BETA 96 FIX: Utiliser sommatif uniquement (pas de moyenne SOM/PAN)
+        // L'alternatif utilise une fenêtre glissante qui n'est pas pertinente pour l'aperçu global
+        const tauxEtudiant = extraireIndice(indicesAssiduite.sommatif?.[e.da]);
 
         if (tauxEtudiant > 0) {
             nbAvecDonnees++;
@@ -96,7 +89,9 @@ function calculerStatistiquesPresences(etudiants, indicesAssiduite, presences) {
         totalTaux += tauxEtudiant;
     });
 
-    const tauxMoyen = nbAvecDonnees > 0 ? Math.round((totalTaux / nbTotal) * 100) : 0;
+    // 🆕 BETA 96 FIX: Diviser par nbAvecDonnees (comme tableau de bord), pas nbTotal
+    // Sinon les étudiants sans données diluent la moyenne
+    const tauxMoyen = nbAvecDonnees > 0 ? Math.round((totalTaux / nbAvecDonnees) * 100) : 0;
     setStatText('pa-taux-moyen', `${tauxMoyen}%`);
 
     // SÉANCES DONNÉES (format X / Total)
@@ -192,14 +187,17 @@ function calculerSeancesCompletees(presences) {
 }
 
 /**
- * Calcule le nombre total de séances prévues (jusqu'à aujourd'hui inclusivement)
- * @returns {number} Total de séances
+ * Calcule le nombre total de séances prévues pour le trimestre complet
+ * 🆕 BETA 96 FIX: Compte TOUTES les séances du trimestre (pas seulement jusqu'à aujourd'hui)
+ * @returns {number} Total de séances du trimestre
  */
 function calculerTotalSeances() {
     try {
         const calendrier = db.getSync(cle('calendrierComplet'), {});
-        const seancesHoraire = db.getSync('seancesHoraire', []);
-        const aujourdhui = new Date().toISOString().split('T')[0];
+        // 🆕 BETA 96 FIX: Utiliser obtenirSeancesHoraire() pour le bon namespace
+        const seancesHoraire = typeof obtenirSeancesHoraire === 'function'
+            ? obtenirSeancesHoraire()
+            : db.getSync('seancesHoraire', []);
 
         // 🆕 BETA 95.6 : Normaliser les jours en minuscules pour éviter problèmes de casse
         // Obtenir les jours de la semaine où il y a cours (ex: ["lundi", "mercredi"])
@@ -207,10 +205,10 @@ function calculerTotalSeances() {
 
         let totalJoursCours = 0;
 
-        // Compter les jours de cours et reprises jusqu'à aujourd'hui
-        // en filtrant uniquement les jours où ce groupe a cours
+        // 🆕 BETA 96 FIX: Compter TOUTES les séances du trimestre (pas de filtre date)
+        // pour afficher la progression X / Total
         Object.entries(calendrier).forEach(([date, jour]) => {
-            if ((jour.statut === 'cours' || jour.statut === 'reprise') && date <= aujourdhui) {
+            if (jour.statut === 'cours' || jour.statut === 'reprise') {
                 // Pour les reprises, vérifier le jour remplacé (ex: cours du lundi → vendredi)
                 // Pour les cours normaux, vérifier le jour de la semaine
                 const jourAVerifier = (jour.statut === 'reprise' && jour.jourRemplace)
@@ -287,7 +285,10 @@ function calculerAbsencesMotivees(presences) {
 function calculerProchaineSeance() {
     try {
         const calendrier = db.getSync(cle('calendrierComplet'), {});
-        const seancesHoraire = db.getSync('seancesHoraire', []);
+        // 🆕 BETA 96 FIX: Utiliser obtenirSeancesHoraire() pour le bon namespace
+        const seancesHoraire = typeof obtenirSeancesHoraire === 'function'
+            ? obtenirSeancesHoraire()
+            : db.getSync('seancesHoraire', []);
 
         // 🆕 BETA 95.6 : Normaliser les jours en minuscules pour éviter problèmes de casse
         // Obtenir la liste des jours de la semaine où il y a cours (ex: ["lundi", "mercredi"])

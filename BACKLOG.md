@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 25 janvier 2026 (Beta 96)
+> **Derniere mise a jour** : 26 janvier 2026 (Beta 96)
 
 ---
 
