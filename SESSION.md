@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 96
 
-**Date** : 25 janvier 2026
-**Version** : Beta 96 (build 0125-1755)
+**Date** : 26 janvier 2026
+**Version** : Beta 96 (build 0126-1330)
 **Statut** : Application fonctionnelle pour H2026, A2024 archive
 
 ---
@@ -28,7 +28,26 @@
 - **Dropdown note maximale** : Peuplé dynamiquement selon l'échelle de performance
 - **Graphique spaghetti** : Visualisation de l'évolution de tous les étudiants (nouveau Beta 96)
 
-### Derniere tache completee (25 janvier - Beta 96)
+### Derniere tache completee (26 janvier - Beta 96)
+- **FIX APERÇU DES PRÉSENCES** : Alignement calculs sur tableau de bord
+  - **Problème** : Élèves=53 (au lieu de 25), Taux=90% (au lieu de 98%), Séances=1/2 (au lieu de 1/30)
+  - **Causes multiples** :
+    1. Étudiants non filtrés par groupe-cours actif → utilisait tous les étudiants du trimestre
+    2. Taux faisait la moyenne SOM/PAN → si sommatif=98% et alternatif=82%, moyenne=90%
+    3. Indices lus comme valeurs directes → mais format réel est `{indice: 0.98, nombreSeances: 1}`
+    4. Séances comptées jusqu'à aujourd'hui → au lieu du total trimestre
+    5. `seancesHoraire` lu sans namespace → clé globale au lieu de trimestre actif
+  - **Corrections** :
+    - Utilisation de `obtenirEtudiantsCoursActif()` pour filtrer par groupe
+    - Taux utilise **sommatif uniquement** (pas de moyenne avec alternatif)
+    - Extraction `.indice` des objets indices
+    - Division par `nbAvecDonnees` (pas nbTotal) pour éviter dilution
+    - Comptage de TOUTES les séances du trimestre
+    - Utilisation de `obtenirSeancesHoraire()` pour le bon namespace
+  - **Résultat** : Élèves=25, Taux=98%, Séances=1/30
+  - **Fichiers modifiés** : `js/presences-apercu.js`
+
+### Tache precedente (25 janvier - Beta 96)
 - **FIX #30 : EXPORT PDF - INFOS COURS/ENSEIGNANT** : Le PDF affiche maintenant les infos complètes
   - **Problème** : Infos cours et enseignant non affichées dans le PDF (seulement trimestre visible)
   - **Cause** : `window.trimestreActif` était vide, et pas de fallback sur `profilEnseignant`
@@ -856,4 +875,4 @@
 
 ---
 
-**Derniere mise a jour** : 25 janvier 2026 (16h00)
+**Derniere mise a jour** : 26 janvier 2026 (13h30)
