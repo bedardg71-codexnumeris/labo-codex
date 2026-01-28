@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 96.1
 
 **Date** : 28 janvier 2026
-**Version** : Beta 96.1 (build 0128-1155)
+**Version** : Beta 96.1 (build 0128-1530)
 **Statut** : Application fonctionnelle pour H2026, A2024 archive
 
 ---
@@ -31,6 +31,15 @@
 - **Anonymisation groupes** : Numéros de groupe remplacés par lettres en mode anonymisation
 
 ### Derniere tache completee (28 janvier - Beta 96.1)
+- **ANIMATION 3D DES POINTS (Tableau de bord)**
+  - Les points blancs dans les barres graduées oscillent avec un effet de rotation 3D
+  - Tous les points partent du centre de la barre (ligne horizontale)
+  - Chaque point a une amplitude aléatoire (5-22px) et un délai aléatoire (0-3s)
+  - Durée inversement proportionnelle à l'amplitude (grandes amplitudes = plus rapide)
+  - Effet de profondeur via z-index (premier plan en montant, arrière-plan en descendant)
+  - **Option désactivable** : Préférences > Expérience visuelle > Animation des points
+  - Fichiers modifiés : `styles.css`, `js/tableau-bord-apercu.js`, `js/preferences-v2.js`, `index.html`
+
 - **MODAL CONFIDENTIEL (Profil étudiant)**
   - Nouveau bouton 🔒 Confidentiel dans la section Accompagnement
   - Formulaire pour saisir : ÉPGC, cours antérieur, services adaptés, défis particuliers, notes

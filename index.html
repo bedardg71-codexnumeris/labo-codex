@@ -3193,6 +3193,7 @@
                 <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
                     <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Beta 96.1 (28 janvier) :</strong>
                     <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
+                        <li><strong>Animation 3D des points (Tableau de bord)</strong> : Les points blancs dans les barres oscillent avec un effet de rotation 3D (désactivable dans Préférences > Expérience visuelle)</li>
                         <li><strong>Modal Confidentiel (Profil étudiant)</strong> : Nouveau bouton 🔒 dans la section Accompagnement pour saisir des informations sensibles (ÉPGC, cours antérieur, services adaptés, défis particuliers, notes personnelles)</li>
                         <li><strong>Corrélations significatives uniquement</strong> : Les messages de corrélation A↔P et C↔P ne s'affichent que si r ≥ 0.5 (modérée ou plus)</li>
                         <li><strong>Anonymisation des groupes</strong> : En mode Anonymisation, les numéros de groupe sont remplacés par des lettres (00001 → Gr. A)</li>
@@ -10725,6 +10726,25 @@
                         </div>
                     </div>
 
+                    <!-- Carte : Expérience visuelle -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">Expérience visuelle</h3>
+                        <p class="text-muted" style="margin-bottom: 15px; font-size: 0.9rem;">
+                            Options d'animation et d'effets visuels.
+                        </p>
+
+                        <!-- Animation des points -->
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label style="cursor: pointer; display: flex; align-items: center;">
+                                <input type="checkbox" id="v2-pref-animation-points" checked onchange="sauvegarderPreferencesV2()">
+                                <strong style="margin-left: 8px;">Animation des points (tableau de bord)</strong>
+                            </label>
+                            <small style="display: block; color: var(--gris-moyen); margin-top: 5px; margin-left: 28px; font-size: 0.85rem;">
+                                Les points dans les barres du tableau de bord oscillent avec un effet 3D
+                            </small>
+                        </div>
+                    </div>
+
                     <!-- Carte : Configuration du dépistage -->
                     <div class="carte">
                         <h3 class="carte-titre-bleu">Configuration du dépistage</h3>
@@ -15303,7 +15323,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '96';
-        const BUILD_ID = '0128-0915';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0128-1530';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';

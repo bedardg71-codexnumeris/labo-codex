@@ -136,6 +136,14 @@
             detailsTechniques.checked = preferences.afficherDetailsTechniques === true;
         }
 
+        // 🆕 BETA 96.1 : Animation des points du tableau de bord
+        const animationPoints = document.getElementById('v2-pref-animation-points');
+        if (animationPoints) {
+            animationPoints.checked = preferences.animationPoints !== false;
+        }
+        // Appliquer immédiatement l'état de l'animation
+        appliquerAnimationPoints(preferences.animationPoints !== false);
+
         // 🆕 BETA 95.1 : Unité d'affichage de l'assiduité (périodes/heures)
         const uniteAffichage = document.getElementById('v2-pref-unite-affichage');
         if (uniteAffichage) {
@@ -266,6 +274,9 @@
         preferences.afficherDetailsTechniques = document.getElementById('v2-pref-details-techniques')?.checked === true;
         // 🆕 BETA 95.1 : Unité d'affichage de l'assiduité
         preferences.uniteAffichageAssiduite = document.getElementById('v2-pref-unite-affichage')?.value || 'periodes';
+        // 🆕 BETA 96.1 : Animation des points
+        preferences.animationPoints = document.getElementById('v2-pref-animation-points')?.checked !== false;
+        appliquerAnimationPoints(preferences.animationPoints);
 
         db.setSync('preferencesAffichage', preferences);
 
@@ -477,6 +488,23 @@
     }
 
     // =========================================================================
+    // 🆕 BETA 96.1 : ANIMATION DES POINTS DU TABLEAU DE BORD
+    // =========================================================================
+
+    /**
+     * Active ou désactive l'animation des points dans les barres du tableau de bord
+     * @param {boolean} activer - true pour activer, false pour désactiver
+     */
+    function appliquerAnimationPoints(activer) {
+        if (activer) {
+            document.body.classList.remove('animation-points-desactivee');
+        } else {
+            document.body.classList.add('animation-points-desactivee');
+        }
+        console.log('[preferences-v2] Animation des points:', activer ? 'activée' : 'désactivée');
+    }
+
+    // =========================================================================
     // EXPORTS GLOBAUX
     // =========================================================================
 
@@ -491,6 +519,8 @@
     window.obtenirUniteAffichageAssiduite = obtenirUniteAffichageAssiduite;
     window.formaterAssiduiteAvecUnite = formaterAssiduiteAvecUnite;
     window.formaterTotalPresence = formaterTotalPresence;
+    // 🆕 BETA 96.1 : Animation des points
+    window.appliquerAnimationPoints = appliquerAnimationPoints;
 
     // =========================================================================
     // INITIALISATION AU CHARGEMENT
