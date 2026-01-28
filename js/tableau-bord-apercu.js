@@ -1493,7 +1493,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                 // Mapper 30-100% sur 0-100% de la barre
                 const position = Math.max(0, Math.min((e.valeur - 0.30) / 0.70 * 100, 100));
                 // Jitter pour dilater les agglomérations : ±1.5% horizontal, ±12px vertical
-                const jitterH = (Math.random() - 0.5) * 3.0; // -1.5% à +1.5%
+                const jitterH = (Math.random() - 0.5) * 6.0; // ±3% pour ACPE
                 const jitterV = (Math.random() - 0.5) * 24; // -12px à +12px
                 // Contraindre la position finale pour ne pas dépasser les bords
                 const positionFinale = Math.max(0, Math.min(position + jitterH, 100));
@@ -1512,10 +1512,10 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                     nomAffiche = `${e.nom}, ${e.prenom}`;
                 }
                 const animDelay = (Math.random() * 3).toFixed(2); // Délai aléatoire 0-3s
-                const amplitude = (5 + Math.random() * 17).toFixed(1); // Amplitude aléatoire 5-22px
-                const animDuration = (5 - amplitude * 0.15).toFixed(2); // Durée inversement proportionnelle à l'amplitude
-                lignesSOM += `<div class="barre-etudiant barre-etudiant-som"
-                    style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; animation-duration: ${animDuration}s; --amp: ${amplitude}px;"
+                const amplitude = (5 + Math.random() * 12).toFixed(1); // Amplitude aléatoire 5-17px
+                const offsetX = ((Math.random() - 0.5) * 6).toFixed(1); // Décalage X aléatoire -3 à +3px
+                                lignesSOM += `<div class="barre-etudiant barre-etudiant-som"
+                    style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px;"
                     data-da="${e.da}"
                     data-nom="${echapperHtml(nomAffiche)}"
                     data-valeur="${Math.round(e.valeur * 100)}%"
@@ -1544,7 +1544,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                 // Mapper 30-100% sur 0-100% de la barre
                 const position = Math.max(0, Math.min((e.valeur - 0.30) / 0.70 * 100, 100));
                 // Jitter pour dilater les agglomérations : ±1.5% horizontal, ±12px vertical
-                const jitterH = (Math.random() - 0.5) * 3.0; // -1.5% à +1.5%
+                const jitterH = (Math.random() - 0.5) * 6.0; // ±3% pour ACPE
                 const jitterV = (Math.random() - 0.5) * 24; // -12px à +12px
                 // Contraindre la position finale pour ne pas dépasser les bords
                 const positionFinale = Math.max(0, Math.min(position + jitterH, 100));
@@ -1563,10 +1563,10 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                     nomAffiche = `${e.nom}, ${e.prenom}`;
                 }
                 const animDelay = (Math.random() * 3).toFixed(2); // Délai aléatoire 0-3s
-                const amplitude = (5 + Math.random() * 17).toFixed(1); // Amplitude aléatoire 5-22px
-                const animDuration = (5 - amplitude * 0.15).toFixed(2); // Durée inversement proportionnelle à l'amplitude
-                lignesPAN += `<div class="barre-etudiant barre-etudiant-std"
-                    style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; animation-duration: ${animDuration}s; --amp: ${amplitude}px;"
+                const amplitude = (5 + Math.random() * 12).toFixed(1); // Amplitude aléatoire 5-17px
+                const offsetX = ((Math.random() - 0.5) * 6).toFixed(1); // Décalage X aléatoire -3 à +3px
+                                lignesPAN += `<div class="barre-etudiant barre-etudiant-std"
+                    style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px;"
                     data-da="${e.da}"
                     data-nom="${echapperHtml(nomAffiche)}"
                     data-valeur="${Math.round(e.valeur * 100)}%"
@@ -1712,7 +1712,7 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
 
             const position = positionPattern[pattern] || 50;
             const decalageH = -2; // SOM à gauche
-            const jitterH = (Math.random() - 0.5) * 3.0; // ±1.5% pour dilater agglomérations
+            const jitterH = (Math.random() - 0.5) * 20.0; // ±10% pour Patterns/RàI
             const jitterV = (Math.random() - 0.5) * 24; // ±12px pour dilater agglomérations
             // Contraindre la position finale pour ne pas dépasser les bords
             const positionFinale = Math.max(0, Math.min(position + decalageH + jitterH, 100));
@@ -1731,10 +1731,10 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
                 nomAffiche = `${e.nom}, ${e.prenom}`;
             }
             const animDelay = (Math.random() * 3).toFixed(2); // Délai aléatoire 0-3s
-            const amplitude = (5 + Math.random() * 17).toFixed(1); // Amplitude aléatoire 5-22px
-            const animDuration = (5 - amplitude * 0.15).toFixed(2); // Durée inversement proportionnelle à l'amplitude
-            lignesSOM += `<div class="barre-etudiant barre-etudiant-som"
-                style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; animation-duration: ${animDuration}s; --amp: ${amplitude}px;"
+            const amplitude = (5 + Math.random() * 12).toFixed(1); // Amplitude aléatoire 5-17px
+                const offsetX = ((Math.random() - 0.5) * 6).toFixed(1); // Décalage X aléatoire -3 à +3px
+                        lignesSOM += `<div class="barre-etudiant barre-etudiant-som"
+                style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px;"
                 data-da="${e.da}"
                 data-nom="${echapperHtml(nomAffiche)}"
                 data-pattern="${pattern}"
@@ -1752,7 +1752,7 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
 
             const position = positionPattern[pattern] || 50;
             const decalageH = 2; // PAN à droite
-            const jitterH = (Math.random() - 0.5) * 3.0; // ±1.5% pour dilater agglomérations
+            const jitterH = (Math.random() - 0.5) * 20.0; // ±10% pour Patterns/RàI
             const jitterV = (Math.random() - 0.5) * 24; // ±12px pour dilater agglomérations
             // Contraindre la position finale pour ne pas dépasser les bords
             const positionFinale = Math.max(0, Math.min(position + decalageH + jitterH, 100));
@@ -1771,10 +1771,10 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
                 nomAffiche = `${e.nom}, ${e.prenom}`;
             }
             const animDelay = (Math.random() * 3).toFixed(2); // Délai aléatoire 0-3s
-            const amplitude = (5 + Math.random() * 17).toFixed(1); // Amplitude aléatoire 5-22px
-            const animDuration = (5 - amplitude * 0.15).toFixed(2); // Durée inversement proportionnelle à l'amplitude
-            lignesPAN += `<div class="barre-etudiant barre-etudiant-std"
-                style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; animation-duration: ${animDuration}s; --amp: ${amplitude}px;"
+            const amplitude = (5 + Math.random() * 12).toFixed(1); // Amplitude aléatoire 5-17px
+                const offsetX = ((Math.random() - 0.5) * 6).toFixed(1); // Décalage X aléatoire -3 à +3px
+                        lignesPAN += `<div class="barre-etudiant barre-etudiant-std"
+                style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px;"
                 data-da="${e.da}"
                 data-nom="${echapperHtml(nomAffiche)}"
                 data-pattern="${pattern}"
@@ -1948,7 +1948,7 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, n
 
             const position = positionNiveau[niveau] || 50;
             const decalageH = -2; // SOM à gauche
-            const jitterH = (Math.random() - 0.5) * 3.0; // ±1.5% pour dilater agglomérations
+            const jitterH = (Math.random() - 0.5) * 20.0; // ±10% pour Patterns/RàI
             const jitterV = (Math.random() - 0.5) * 24; // ±12px pour dilater agglomérations
             // Contraindre la position finale pour ne pas dépasser les bords
             const positionFinale = Math.max(0, Math.min(position + decalageH + jitterH, 100));
@@ -1967,10 +1967,10 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, n
                 nomAffiche = `${e.nom}, ${e.prenom}`;
             }
             const animDelay = (Math.random() * 3).toFixed(2); // Délai aléatoire 0-3s
-            const amplitude = (5 + Math.random() * 17).toFixed(1); // Amplitude aléatoire 5-22px
-            const animDuration = (5 - amplitude * 0.15).toFixed(2); // Durée inversement proportionnelle à l'amplitude
-            lignesSOM += `<div class="barre-etudiant barre-etudiant-som"
-                style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; animation-duration: ${animDuration}s; --amp: ${amplitude}px;"
+            const amplitude = (5 + Math.random() * 12).toFixed(1); // Amplitude aléatoire 5-17px
+                const offsetX = ((Math.random() - 0.5) * 6).toFixed(1); // Décalage X aléatoire -3 à +3px
+                        lignesSOM += `<div class="barre-etudiant barre-etudiant-som"
+                style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px;"
                 data-da="${e.da}"
                 data-nom="${echapperHtml(nomAffiche)}"
                 data-niveau="${niveau}"
@@ -1988,7 +1988,7 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, n
 
             const position = positionNiveau[niveau] || 50;
             const decalageH = 2; // PAN à droite
-            const jitterH = (Math.random() - 0.5) * 3.0; // ±1.5% pour dilater agglomérations
+            const jitterH = (Math.random() - 0.5) * 20.0; // ±10% pour Patterns/RàI
             const jitterV = (Math.random() - 0.5) * 24; // ±12px pour dilater agglomérations
             // Contraindre la position finale pour ne pas dépasser les bords
             const positionFinale = Math.max(0, Math.min(position + decalageH + jitterH, 100));
@@ -2007,10 +2007,10 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, n
                 nomAffiche = `${e.nom}, ${e.prenom}`;
             }
             const animDelay = (Math.random() * 3).toFixed(2); // Délai aléatoire 0-3s
-            const amplitude = (5 + Math.random() * 17).toFixed(1); // Amplitude aléatoire 5-22px
-            const animDuration = (5 - amplitude * 0.15).toFixed(2); // Durée inversement proportionnelle à l'amplitude
-            lignesPAN += `<div class="barre-etudiant barre-etudiant-std"
-                style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; animation-duration: ${animDuration}s; --amp: ${amplitude}px;"
+            const amplitude = (5 + Math.random() * 12).toFixed(1); // Amplitude aléatoire 5-17px
+                const offsetX = ((Math.random() - 0.5) * 6).toFixed(1); // Décalage X aléatoire -3 à +3px
+                        lignesPAN += `<div class="barre-etudiant barre-etudiant-std"
+                style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px;"
                 data-da="${e.da}"
                 data-nom="${echapperHtml(nomAffiche)}"
                 data-niveau="${niveau}"
