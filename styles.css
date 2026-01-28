@@ -9096,7 +9096,7 @@ label:has(+ textarea:disabled) {
 /* === PATTERNS D'APPRENTISSAGE (Overlay 35%) === */
 
 .barre-patterns {
-    height: 45px; /* 🆕 BETA 96: Augmenté de 30px pour meilleure lisibilité */
+    height: 55px; /* 🆕 BETA 96.1: Aligné avec barre-indicateur ACPE */
     border-radius: var(--radius-grand);  /* 🆕 BETA 96: Aligné avec les cartes (12px) */
     position: relative;
     background: linear-gradient(to right,
@@ -9123,7 +9123,7 @@ label:has(+ textarea:disabled) {
 /* === MODÈLE RàI (Overlay 40%) === */
 
 .barre-rai {
-    height: 45px; /* 🆕 BETA 96: Augmenté de 30px pour meilleure lisibilité */
+    height: 55px; /* 🆕 BETA 96.1: Aligné avec barre-indicateur ACPE */
     border-radius: var(--radius-grand);  /* 🆕 BETA 96: Aligné avec les cartes (12px) */
     position: relative;
     background: linear-gradient(to right,

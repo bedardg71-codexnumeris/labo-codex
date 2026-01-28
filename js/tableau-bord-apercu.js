@@ -117,7 +117,12 @@ function mettreAJourContextesSections(nbEtudiants) {
         const groupe = infoCours.groupe || '';
 
         if (sigle && groupe) {
-            nomCours = `${sigle} gr. ${groupe}`;
+            // 🆕 BETA 96.1: Anonymiser le groupe en mode anonymisation
+            const modeActif = db.getSync('modeApplication', 'normal');
+            const groupeAffiche = (modeActif === 'anonymisation' && typeof anonymiserGroupe === 'function')
+                ? anonymiserGroupe(groupe)
+                : `gr. ${groupe}`;
+            nomCours = `${sigle} ${groupeAffiche}`;
         } else if (sigle) {
             nomCours = sigle;
         }
@@ -1379,24 +1384,20 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
             }
         }
     }
-    // PRIORITÉ 2: Corrélations A-P et C-P
-    else if (correlation !== null && !isNaN(correlation)) {
+    // PRIORITÉ 2: Corrélations A-P et C-P (seulement si significative r ≥ 0.5)
+    else if (correlation !== null && !isNaN(correlation) && Math.abs(correlation) >= 0.5) {
         // Interprétation des corrélations A-P ou C-P avec force intégrée dans la phrase
         const absR = Math.abs(correlation);
         let forceAdjectif = '';
         let explication = '';
 
-        // Déterminer la force de la corrélation (adjectif)
+        // Déterminer la force de la corrélation (adjectif) - seulement modérée et plus
         if (absR >= 0.9) {
             forceAdjectif = 'très forte';
         } else if (absR >= 0.7) {
             forceAdjectif = 'forte';
-        } else if (absR >= 0.5) {
-            forceAdjectif = 'modérée';
-        } else if (absR >= 0.3) {
-            forceAdjectif = 'faible';
         } else {
-            forceAdjectif = 'très faible';
+            forceAdjectif = 'modérée';
         }
 
         // Explication pédagogique avec force intégrée et corrélation à la fin

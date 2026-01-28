@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 96.1
 
 **Date** : 28 janvier 2026
-**Version** : Beta 96.1 (build 0128-0915)
+**Version** : Beta 96.1 (build 0128-1155)
 **Statut** : Application fonctionnelle pour H2026, A2024 archive
 
 ---
@@ -27,8 +27,35 @@
 - **Pratiques de notation** : Sauvegarde fiable via wizard et mode expert
 - **Dropdown note maximale** : Peuplé dynamiquement selon l'échelle de performance
 - **Graphique spaghetti** : Visualisation de l'évolution de tous les étudiants (nouveau Beta 96)
+- **Modal Confidentiel** : Informations sensibles sur l'étudiant (ÉPGC, services adaptés, etc.)
+- **Anonymisation groupes** : Numéros de groupe remplacés par lettres en mode anonymisation
 
 ### Derniere tache completee (28 janvier - Beta 96.1)
+- **MODAL CONFIDENTIEL (Profil étudiant)**
+  - Nouveau bouton 🔒 Confidentiel dans la section Accompagnement
+  - Formulaire pour saisir : ÉPGC, cours antérieur, services adaptés, défis particuliers, notes
+  - Services adaptés avec dropdowns conditionnels (catégorie → sous-catégorie)
+  - Interface réorganisée en 2 colonnes pour optimiser l'espace
+  - Indicateur vert si l'étudiant a des infos confidentielles
+  - Fichiers modifiés : `index.html`, `js/profil-etudiant.js`
+
+- **AMÉLIORATIONS TABLEAU DE BORD**
+  - **Corrélations significatives** : Messages A↔P et C↔P affichés uniquement si r ≥ 0.5
+  - **Barres uniformisées** : Patterns et RàI alignées sur hauteur ACPE (55px)
+  - **Graphique Trajectoire** : Courbe sélectionnée au premier plan (order: 0)
+  - Fichiers modifiés : `js/tableau-bord-apercu.js`, `js/graphiques-progression.js`, `styles.css`
+
+- **ANONYMISATION DES GROUPES**
+  - Nouvelle fonction `anonymiserGroupe()` : 00001 → Gr. A, 00002 → Gr. B
+  - Appliquée dans l'en-tête du tableau de bord et les tableaux d'étudiants
+  - Mapping persisté dans localStorage (réinitialisé avec mapping anonymisation)
+  - Fichiers modifiés : `js/modes.js`, `js/tableau-bord-apercu.js`
+
+- **CORRECTIONS MINEURES**
+  - "Correction" → "Permission d'écriture" dans bandeau trimestre archivé
+  - "heures" → "périodes" dans section Engagement du profil étudiant
+
+### Tache precedente (28 janvier - Beta 96.1)
 - **REFONTE EXPORT PDF - FORMULAIRE INLINE ET APERÇU AMÉLIORÉ**
   - **Formulaire inline** : Le bouton "Préparer le PDF" affiche le formulaire dans la zone principale (pas de navigation)
     - Production, Grille, Échelle, Cartouche sur 2 lignes compactes

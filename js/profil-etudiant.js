@@ -1016,7 +1016,7 @@ function genererSectionMobilisationEngagement(da) {
         <div id="details-calculs-mobilisation-${da}" class="carte-info-toggle carte-info-note u-hide">
             <strong>Méthodologie de calcul</strong>
             <br><br>
-            <strong>Assiduité (A) :</strong> Indice A = ${indices.A}% — ${detailsA.heuresPresentes}h présentes / ${detailsA.heuresOffertes}h offertes
+            <strong>Assiduité (A) :</strong> Indice A = ${indices.A}% — ${detailsA.heuresPresentes} périodes présentes / ${detailsA.heuresOffertes} périodes offertes
             <br><br>
             <strong>Complétion (C) :</strong> Indice C = ${indices.C}% — ${nbRemis} ${obtenirTermeProduction('pluriel')} remis / ${nbTotal} ${obtenirTermeProduction('pluriel')} totaux
             <br><br>
@@ -1048,7 +1048,7 @@ function genererSectionMobilisationEngagement(da) {
 
                 <!-- Statistiques -->
                 <ul class="profil-liste-simple">
-                    <li><strong>• Heures présentes :</strong> ${detailsA.heuresPresentes}h / ${detailsA.heuresOffertes}h</li>
+                    <li><strong>• Périodes présentes :</strong> ${detailsA.heuresPresentes} / ${detailsA.heuresOffertes}</li>
                 </ul>
 
                 <hr class="profil-separateur">
@@ -1074,8 +1074,8 @@ function genererSectionMobilisationEngagement(da) {
                                     </span>
                                     <span class="badge-absence-heures">
                                         ${estAbsenceComplete
-                                            ? `${abs.heuresManquees}h`
-                                            : `${abs.heuresPresence}h`
+                                            ? `${abs.heuresManquees} pér.`
+                                            : `${abs.heuresPresence} pér.`
                                         }
                                     </span>
                                 </div>
@@ -1846,6 +1846,10 @@ function genererSectionAccompagnement(da) {
                 <p class="profil-texte-detail-compact">
                     <strong>Services adaptés :</strong> ${etudiant.caf === 'Oui' ? '✓ CAF' : ''} ${etudiant.sa === 'Oui' ? '✓ SA' : ''} ${etudiant.caf !== 'Oui' && etudiant.sa !== 'Oui' ? 'Aucun' : ''}
                 </p>
+
+                <button onclick="ouvrirModalConfidentiel('${da}')" class="btn btn-secondaire" style="margin-top: 12px; font-size: 0.85rem;">
+                    🔒 Confidentiel ${aDesInfosConfidentielles(da) ? '<span style="color: var(--vert-principal);">●</span>' : ''}
+                </button>
             </div>
 
             <!-- Carte 3 : Observation de la structure des résultats d'apprentissage (SOLO) - Optionnelle -->
@@ -8376,6 +8380,202 @@ function obtenirPatternEtudiant(da) {
 // 🆕 BETA 91: Exporter les fonctions de patterns de groupe
 window.calculerEtStockerPatternsGroupe = calculerEtStockerPatternsGroupe;
 window.obtenirPatternEtudiant = obtenirPatternEtudiant;
+
+// =============================================================================
+// MODAL INFORMATIONS CONFIDENTIELLES (Beta 96.1)
+// Gestion des informations sensibles sur l'étudiant
+// =============================================================================
+
+// Variable pour stocker le DA de l'étudiant en cours d'édition
+let _confidentielDaActuel = null;
+
+// Sous-catégories pour les services adaptés
+const SOUS_CATEGORIES_SERVICES = {
+    'sensorielle': [
+        'Déficience visuelle',
+        'Déficience auditive',
+        'Paralysie cérébrale',
+        'Spina-bifida',
+        'Dystrophie musculaire'
+    ],
+    'neurologique': [
+        'Trouble du spectre autistique (TSA)',
+        'Syndrome Gilles de la Tourette',
+        'Traumatisme craniocérébral',
+        'Sclérose en plaques',
+        'Dysphasie',
+        'TDA/H',
+        'Fibromyalgie'
+    ],
+    'organique': [
+        'Épilepsie',
+        'Maladie de Crohn',
+        'Cancer',
+        'Diabète'
+    ],
+    'apprentissage': [
+        'Dyslexie',
+        'Dysorthographie',
+        'Dyscalculie'
+    ],
+    'sante-mentale': [
+        'Trouble d\'anxiété généralisée',
+        'Trouble de l\'humeur (bipolarité, dépression)',
+        'Trouble de la personnalité',
+        'Trouble psychotique (schizophrénie)',
+        'Troubles alimentaires'
+    ]
+};
+
+/**
+ * Ouvre le modal des informations confidentielles pour un étudiant
+ * @param {string} da - Numéro de DA de l'étudiant
+ */
+function ouvrirModalConfidentiel(da) {
+    _confidentielDaActuel = da;
+
+    // Récupérer les infos de l'étudiant
+    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    const etudiant = etudiants.find(e => e.da === da);
+    const nomComplet = etudiant ? `${etudiant.prenom} ${etudiant.nom}` : `DA ${da}`;
+
+    // Afficher le nom dans le modal
+    document.getElementById('confidentiel-nom-etudiant').textContent = nomComplet;
+
+    // Charger les données existantes
+    const cleConfidentiel = (typeof cle === 'function') ? cle('confidentielEtudiants') : 'confidentielEtudiants';
+    const donnees = db.getSync(cleConfidentiel, {});
+    const infos = donnees[da] || {};
+
+    // Remplir les champs
+    document.getElementById('confidentiel-epgc').checked = infos.epgc || false;
+    document.getElementById('confidentiel-cours-regulier').checked = infos.coursRegulier || false;
+    document.getElementById('confidentiel-cours-echec').checked = infos.coursEchec || false;
+    document.getElementById('confidentiel-cours-abandon').checked = infos.coursAbandon || false;
+    document.getElementById('confidentiel-cours-decrochage').checked = infos.coursDecrochage || false;
+    document.getElementById('confidentiel-cours-renforcement').checked = infos.coursRenforcement || false;
+
+    document.getElementById('confidentiel-services-adaptes').checked = infos.servicesAdaptes || false;
+    toggleServicesAdaptes(infos.servicesAdaptes || false);
+
+    document.getElementById('confidentiel-categorie').value = infos.categorie || '';
+    mettreAJourSousCategories();
+    document.getElementById('confidentiel-sous-categorie').value = infos.sousCategorie || '';
+
+    document.getElementById('confidentiel-defi-fls').checked = infos.defiFLS || false;
+    document.getElementById('confidentiel-defi-socialisation').checked = infos.defiSocialisation || false;
+    document.getElementById('confidentiel-defi-integration').checked = infos.defiIntegration || false;
+    document.getElementById('confidentiel-defi-organisation-scolaire').checked = infos.defiOrganisationScolaire || false;
+    document.getElementById('confidentiel-defi-organisation-citoyenne').checked = infos.defiOrganisationCitoyenne || false;
+
+    document.getElementById('confidentiel-notes').value = infos.notes || '';
+
+    // Afficher le modal
+    document.getElementById('modalConfidentiel').style.display = 'flex';
+}
+
+/**
+ * Ferme le modal des informations confidentielles
+ */
+function fermerModalConfidentiel() {
+    document.getElementById('modalConfidentiel').style.display = 'none';
+    _confidentielDaActuel = null;
+}
+
+/**
+ * Sauvegarde les informations confidentielles
+ */
+function sauvegarderConfidentiel() {
+    if (!_confidentielDaActuel) return;
+
+    const infos = {
+        epgc: document.getElementById('confidentiel-epgc').checked,
+        coursRegulier: document.getElementById('confidentiel-cours-regulier').checked,
+        coursEchec: document.getElementById('confidentiel-cours-echec').checked,
+        coursAbandon: document.getElementById('confidentiel-cours-abandon').checked,
+        coursDecrochage: document.getElementById('confidentiel-cours-decrochage').checked,
+        coursRenforcement: document.getElementById('confidentiel-cours-renforcement').checked,
+        servicesAdaptes: document.getElementById('confidentiel-services-adaptes').checked,
+        categorie: document.getElementById('confidentiel-categorie').value,
+        sousCategorie: document.getElementById('confidentiel-sous-categorie').value,
+        defiFLS: document.getElementById('confidentiel-defi-fls').checked,
+        defiSocialisation: document.getElementById('confidentiel-defi-socialisation').checked,
+        defiIntegration: document.getElementById('confidentiel-defi-integration').checked,
+        defiOrganisationScolaire: document.getElementById('confidentiel-defi-organisation-scolaire').checked,
+        defiOrganisationCitoyenne: document.getElementById('confidentiel-defi-organisation-citoyenne').checked,
+        notes: document.getElementById('confidentiel-notes').value.trim()
+    };
+
+    // Sauvegarder
+    const cleConfidentiel = (typeof cle === 'function') ? cle('confidentielEtudiants') : 'confidentielEtudiants';
+    const donnees = db.getSync(cleConfidentiel, {});
+    donnees[_confidentielDaActuel] = infos;
+    db.setSync(cleConfidentiel, donnees);
+
+    // Fermer le modal
+    fermerModalConfidentiel();
+
+    // Rafraîchir le profil si nécessaire
+    if (typeof chargerProfilEtudiant === 'function') {
+        chargerProfilEtudiant(_confidentielDaActuel);
+    }
+}
+
+/**
+ * Affiche/masque les détails des services adaptés
+ * @param {boolean} afficher - true pour afficher, false pour masquer
+ */
+function toggleServicesAdaptes(afficher) {
+    const details = document.getElementById('confidentiel-services-details');
+    if (details) {
+        details.style.display = afficher ? 'block' : 'none';
+    }
+}
+
+/**
+ * Met à jour les sous-catégories selon la catégorie sélectionnée
+ */
+function mettreAJourSousCategories() {
+    const categorie = document.getElementById('confidentiel-categorie').value;
+    const selectSousCategorie = document.getElementById('confidentiel-sous-categorie');
+
+    if (!categorie) {
+        selectSousCategorie.innerHTML = '<option value="">-- Sélectionner une catégorie d\'abord --</option>';
+        return;
+    }
+
+    const sousCategories = SOUS_CATEGORIES_SERVICES[categorie] || [];
+    selectSousCategorie.innerHTML = '<option value="">-- Sélectionner --</option>' +
+        sousCategories.map(sc => `<option value="${sc}">${sc}</option>`).join('');
+}
+
+/**
+ * Vérifie si un étudiant a des informations confidentielles enregistrées
+ * @param {string} da - Numéro de DA
+ * @returns {boolean} - true si des infos existent
+ */
+function aDesInfosConfidentielles(da) {
+    const cleConfidentiel = (typeof cle === 'function') ? cle('confidentielEtudiants') : 'confidentielEtudiants';
+    const donnees = db.getSync(cleConfidentiel, {});
+    const infos = donnees[da];
+    if (!infos) return false;
+
+    // Vérifier si au moins une info est renseignée
+    return infos.epgc || infos.servicesAdaptes ||
+           infos.coursRegulier || infos.coursEchec || infos.coursAbandon ||
+           infos.coursDecrochage || infos.coursRenforcement ||
+           infos.defiFLS || infos.defiSocialisation || infos.defiIntegration ||
+           infos.defiOrganisationScolaire || infos.defiOrganisationCitoyenne ||
+           (infos.notes && infos.notes.length > 0);
+}
+
+// 🆕 BETA 96.1: Exporter les fonctions du modal confidentiel
+window.ouvrirModalConfidentiel = ouvrirModalConfidentiel;
+window.fermerModalConfidentiel = fermerModalConfidentiel;
+window.sauvegarderConfidentiel = sauvegarderConfidentiel;
+window.toggleServicesAdaptes = toggleServicesAdaptes;
+window.mettreAJourSousCategories = mettreAJourSousCategories;
+window.aDesInfosConfidentielles = aDesInfosConfidentielles;
 
 // 🆕 BETA 93: Exporter afficherProfilComplet pour accès depuis autres modules
 window.afficherProfilComplet = afficherProfilComplet;

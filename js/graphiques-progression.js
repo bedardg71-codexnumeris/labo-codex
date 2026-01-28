@@ -868,6 +868,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
                             dataset.pointBorderColor = Array(nbPoints).fill('rgba(33, 150, 243, 0.5)');
                             dataset.pointBorderWidth = 2;
                             dataset.pointRadius = Array(nbPoints).fill(5);
+                            dataset.order = 1; // Ordre normal
                         } else if (idx === datasetActif) {
                             // Courbe active (survolée ou verrouillée) - noire avec points colorés
                             dataset.borderColor = datasetVerrouilleIndiv >= 0 ? 'rgba(0, 0, 0, 0.9)' : 'rgba(0, 0, 0, 0.7)';
@@ -876,6 +877,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
                             dataset.pointBorderColor = Array(nbPoints).fill('#FFFFFF');
                             dataset.pointBorderWidth = 2;
                             dataset.pointRadius = Array(nbPoints).fill(6);
+                            dataset.order = 0; // 🆕 BETA 96.1: Premier plan (dessiné en dernier)
                         } else {
                             // Autres courbes - atténuées
                             dataset.borderColor = 'rgba(255, 255, 255, 0.3)';
@@ -884,6 +886,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
                             dataset.pointBorderColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.3)');
                             dataset.pointBorderWidth = 1;
                             dataset.pointRadius = Array(nbPoints).fill(3);
+                            dataset.order = 1; // Arrière-plan
                         }
                     });
 
@@ -909,6 +912,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
                     dataset.pointBorderColor = Array(nbPoints).fill('rgba(33, 150, 243, 0.5)');
                     dataset.pointBorderWidth = 2;
                     dataset.pointRadius = Array(nbPoints).fill(5);
+                    dataset.order = 1; // Ordre normal
                 });
             } else {
                 // Verrouiller
@@ -924,6 +928,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
                         dataset.pointBorderColor = Array(nbPoints).fill('#FFFFFF');
                         dataset.pointBorderWidth = 2;
                         dataset.pointRadius = Array(nbPoints).fill(6);
+                        dataset.order = 0; // 🆕 BETA 96.1: Premier plan
                     } else {
                         dataset.borderColor = 'rgba(255, 255, 255, 0.3)';
                         dataset.borderWidth = 1.5;
@@ -931,6 +936,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
                         dataset.pointBorderColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.3)');
                         dataset.pointBorderWidth = 1;
                         dataset.pointRadius = Array(nbPoints).fill(3);
+                        dataset.order = 1; // Arrière-plan
                     }
                 });
             }

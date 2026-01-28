@@ -631,7 +631,40 @@ function definirOptionAffichageDA(afficherDAReel) {
  */
 function reinitialiserMappingAnonyme() {
     db.removeSync('mapping_anonymisation');
+    db.removeSync('mapping_groupes_anonymes'); // 🆕 BETA 96.1: Aussi réinitialiser le mapping des groupes
     console.log('🔄 Mapping d\'anonymisation réinitialisé');
+}
+
+/**
+ * Anonymise un numéro de groupe en le convertissant en lettre
+ * @param {string} groupe - Numéro de groupe (ex: "00001", "00002")
+ * @returns {string} - Groupe anonymisé avec lettre (ex: "Gr. A", "Gr. B")
+ */
+function anonymiserGroupe(groupe) {
+    if (!groupe) return groupe;
+
+    // Récupérer ou créer le mapping des groupes
+    let mappingGroupes = db.getSync('mapping_groupes_anonymes', null);
+
+    if (!mappingGroupes) {
+        // Créer le mapping en collectant tous les groupes uniques
+        // Utiliser window.cle pour le namespacing par trimestre
+        const cleNamespacee = (typeof window.cle === 'function') ? window.cle('groupeEtudiants') : 'groupeEtudiants';
+        const etudiants = db.getSync(cleNamespacee, []);
+        const groupesUniques = [...new Set(etudiants.map(e => e.groupe).filter(Boolean))].sort();
+
+        mappingGroupes = {};
+        groupesUniques.forEach((g, index) => {
+            // Convertir index en lettre (0 → A, 1 → B, etc.)
+            const lettre = String.fromCharCode(65 + (index % 26));
+            mappingGroupes[g] = `Gr. ${lettre}`;
+        });
+
+        db.setSync('mapping_groupes_anonymes', mappingGroupes);
+        console.log('🎭 Mapping groupes anonymes créé:', mappingGroupes);
+    }
+
+    return mappingGroupes[groupe] || `Gr. ?`;
 }
 
 /**
@@ -664,7 +697,7 @@ function anonymiserDonnees(cle, donnees) {
                 nom: mapping[etudiant.da]?.nom || '',
                 prenom: mapping[etudiant.da]?.prenom || etudiant.prenom,
                 groupeReel: etudiant.groupe, // 🆕 Garder le groupe réel pour le filtrage par cours
-                groupe: etudiant.groupe ? `AN.${etudiant.groupe}` : etudiant.groupe,
+                groupe: etudiant.groupe ? anonymiserGroupe(etudiant.groupe) : etudiant.groupe,
                 ordreAffichage: mapping[etudiant.da]?.ordreAffichage ?? 999 // Pour tri aléatoire
             }));
 
@@ -682,7 +715,7 @@ function anonymiserDonnees(cle, donnees) {
                     etudiantDAReel: evaluation.etudiantDA, // Toujours garder le vrai DA
                     etudiantDAffichage: afficherDAReel ? evaluation.etudiantDA : 'ANONYME',
                     etudiantNom: nomAnonyme,
-                    groupe: evaluation.groupe ? `AN.${evaluation.groupe}` : evaluation.groupe
+                    groupe: evaluation.groupe ? anonymiserGroupe(evaluation.groupe) : evaluation.groupe
                 };
             });
 
@@ -795,6 +828,7 @@ window.estModeGuide = estModeGuide; // Alias compatibilité
 window.obtenirDonneesSelonMode = obtenirDonneesSelonMode;
 window.sauvegarderDonneesSelonMode = sauvegarderDonneesSelonMode;
 window.anonymiserNom = anonymiserNom;
+window.anonymiserGroupe = anonymiserGroupe;
 window.estModeeLectureSeule = estModeeLectureSeule;
 window.obtenirOptionAffichageDA = obtenirOptionAffichageDA;
 window.definirOptionAffichageDA = definirOptionAffichageDA;
