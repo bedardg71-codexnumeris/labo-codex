@@ -44,7 +44,7 @@
     ];
 
     // Clés globales (partagées entre trimestres)
-    // Ces clés ne sont JAMAIS préfixées
+    // Ces clés ne sont JAMAIS préfixées (sauf si archivées)
     const CLES_GLOBALES = [
         'trimestres',
         'grillesTemplates',
@@ -53,6 +53,14 @@
         'modalitesEvaluation',
         'modeApplication',
         'etatsAccordeonsV2'
+    ];
+
+    // ✅ AJOUT (28 janvier 2026) : Templates à copier lors de l'archivage
+    // Ces templates globaux sont copiés vers des clés namespacées pour isoler les archives
+    const CLES_TEMPLATES_ARCHIVES = [
+        'grillesTemplates',
+        'echellesTemplates',
+        'pratiquesConfigurables'
     ];
 
     /* ===============================
@@ -188,13 +196,36 @@
      * pour assurer la rétrocompatibilité avec l'ancien format.
      */
     function cle(nomCle) {
-        // Vérifier si c'est une clé globale (jamais namespacée)
+        // Obtenir l'ID du trimestre actif
+        const trimestreId = obtenirTrimestreId();
+
+        // ✅ AJOUT (28 janvier 2026) : Si trimestre archivé et template global,
+        // utiliser la copie archivée si elle existe
+        if (trimestreId && estTrimestreArchive()) {
+            // Cas 1: Template global (grilles, échelles, pratiques)
+            if (CLES_TEMPLATES_ARCHIVES.includes(nomCle)) {
+                const cleArchivee = `${trimestreId}_${nomCle}`;
+                // Vérifier si la copie archivée existe
+                if (db.getSync(cleArchivee, null) !== null) {
+                    return cleArchivee;
+                }
+                // Fallback vers la clé globale si pas de copie (rétrocompatibilité)
+            }
+
+            // Cas 2: Cartouches (format cartouches_{grilleId})
+            if (nomCle.startsWith('cartouches_')) {
+                const cleArchivee = `${trimestreId}_${nomCle}`;
+                if (db.getSync(cleArchivee, null) !== null) {
+                    return cleArchivee;
+                }
+                // Fallback vers la clé globale
+            }
+        }
+
+        // Vérifier si c'est une clé globale (jamais namespacée sauf archive)
         if (CLES_GLOBALES.includes(nomCle) || nomCle.startsWith('cartouches_')) {
             return nomCle;
         }
-
-        // Obtenir l'ID du trimestre actif
-        const trimestreId = obtenirTrimestreId();
 
         // Si pas de trimestre actif, retourner la clé originale (rétrocompatibilité)
         if (!trimestreId) {
@@ -424,8 +455,64 @@
     }
 
     /**
+     * ✅ AJOUT (28 janvier 2026) : Identifie les templates utilisés par un trimestre
+     * Analyse les productions pour trouver les grilles, échelles et pratiques référencées
+     *
+     * @param {string} trimestreId - ID du trimestre
+     * @returns {Object} IDs des templates utilisés {grilleIds, echelleIds, pratiqueIds}
+     */
+    function identifierTemplatesUtilises(trimestreId) {
+        // Récupérer les productions du trimestre
+        const productions = db.getSync(`${trimestreId}_productions`, [])
+            || db.getSync(`${trimestreId}_productionsPedagogiques`, [])
+            || [];
+
+        // Collecter les IDs des grilles utilisées
+        const grilleIds = new Set();
+        productions.forEach(p => {
+            if (p.grilleId) grilleIds.add(p.grilleId);
+        });
+
+        // Collecter les IDs des échelles utilisées (via les grilles ou directement)
+        const echelleIds = new Set();
+        const grilles = db.getSync('grillesTemplates', []);
+        grilles.forEach(g => {
+            if (grilleIds.has(g.id) && g.echelleId) {
+                echelleIds.add(g.echelleId);
+            }
+        });
+        productions.forEach(p => {
+            if (p.echelleId) echelleIds.add(p.echelleId);
+        });
+
+        // Collecter les IDs des pratiques utilisées
+        const pratiqueIds = new Set();
+        productions.forEach(p => {
+            if (p.pratiqueId) pratiqueIds.add(p.pratiqueId);
+        });
+
+        // Récupérer aussi les modalités d'évaluation du trimestre
+        const modalites = db.getSync(`${trimestreId}_modalitesEvaluation`, null)
+            || db.getSync('modalitesEvaluation', null);
+        if (modalites && modalites.pratiqueId) {
+            pratiqueIds.add(modalites.pratiqueId);
+        }
+
+        console.log(`[Trimestres] Templates utilisés par ${trimestreId}:`, {
+            grilles: grilleIds.size,
+            echelles: echelleIds.size,
+            pratiques: pratiqueIds.size
+        });
+
+        return { grilleIds, echelleIds, pratiqueIds };
+    }
+
+    /**
      * Crée un snapshot (copie) des ressources pédagogiques pour un trimestre
-     * 🆕 BETA 96
+     * 🆕 BETA 96 - Modifié (28 jan 2026) pour copier vers des clés namespacées
+     *
+     * Cette fonction copie les templates UTILISÉS vers des clés namespacées
+     * pour isoler les archives du trimestre actif.
      *
      * @param {string} trimestreId - ID du trimestre
      * @returns {Object} Résultat avec cleSnapshot si succès
@@ -435,46 +522,72 @@
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
             const cleSnapshot = `snapshot_${trimestreId}_${timestamp}`;
 
-            // Ressources à sauvegarder
+            // ✅ AJOUT (28 jan 2026) : Identifier les templates utilisés
+            const { grilleIds, echelleIds, pratiqueIds } = identifierTemplatesUtilises(trimestreId);
+
+            // Récupérer tous les templates globaux
+            const toutesGrilles = db.getSync('grillesTemplates', []);
+            const toutesEchelles = db.getSync('echellesTemplates', []);
+            const toutesPratiques = db.getSync('pratiquesConfigurables', []);
+
+            // Filtrer pour ne garder que les utilisés
+            const grillesUtilisees = toutesGrilles.filter(g => grilleIds.has(g.id));
+            const echellesUtilisees = toutesEchelles.filter(e => echelleIds.has(e.id));
+            const pratiquesUtilisees = toutesPratiques.filter(p => pratiqueIds.has(p.id));
+
+            // ✅ AJOUT (28 jan 2026) : Copier vers des clés namespacées pour l'archivage
+            // Ces copies seront utilisées quand le trimestre est en mode archive
+            db.setSync(`${trimestreId}_grillesTemplates`, grillesUtilisees);
+            db.setSync(`${trimestreId}_echellesTemplates`, echellesUtilisees);
+            db.setSync(`${trimestreId}_pratiquesConfigurables`, pratiquesUtilisees);
+
+            console.log(`[Trimestres] Templates copiés pour archivage ${trimestreId}:`, {
+                grilles: grillesUtilisees.length,
+                echelles: echellesUtilisees.length,
+                pratiques: pratiquesUtilisees.length
+            });
+
+            // ✅ AJOUT (28 jan 2026) : Copier les cartouches des grilles utilisées
+            let nbCartouchesCopies = 0;
+            grilleIds.forEach(grilleId => {
+                const cartouches = db.getSync(`cartouches_${grilleId}`, []);
+                if (cartouches.length > 0) {
+                    db.setSync(`${trimestreId}_cartouches_${grilleId}`, cartouches);
+                    nbCartouchesCopies += cartouches.length;
+                }
+            });
+
+            console.log(`[Trimestres] Cartouches copiés: ${nbCartouchesCopies} pour ${grilleIds.size} grille(s)`);
+
+            // Ressources pour le snapshot (backup complet)
             const ressources = {
-                // Productions du trimestre
                 productions: db.getSync(`${trimestreId}_productions`) || db.getSync('productions', []),
-                // Grilles d'évaluation
-                grilles: db.getSync('grilles', []),
-                // Échelles de notation
-                echelles: db.getSync('echelles', []),
-                // Pratiques de notation
-                pratiques: db.getSync('pratiquesNotation', []),
-                // Cartouches d'évaluation
-                cartouches: db.getSync('cartouchesEvaluation', []),
-                // Métadonnées
+                grilles: grillesUtilisees,
+                echelles: echellesUtilisees,
+                pratiques: pratiquesUtilisees,
+                cartouches: nbCartouchesCopies,
                 _meta: {
                     trimestreId: trimestreId,
                     dateCreation: new Date().toISOString(),
-                    version: 'Beta 95.2'
+                    version: 'Beta 96',
+                    isolationArchive: true
                 }
             };
 
-            // Sauvegarder le snapshot
+            // Sauvegarder le snapshot (backup)
             db.setSync(cleSnapshot, ressources);
 
-            console.log(`[Trimestres] Snapshot créé: ${cleSnapshot}`, {
-                productions: ressources.productions.length,
-                grilles: ressources.grilles.length,
-                echelles: ressources.echelles.length,
-                pratiques: ressources.pratiques.length,
-                cartouches: ressources.cartouches.length
-            });
+            console.log(`[Trimestres] Snapshot créé: ${cleSnapshot}`);
 
             return {
                 success: true,
                 cleSnapshot: cleSnapshot,
                 resume: {
                     productions: ressources.productions.length,
-                    grilles: ressources.grilles.length,
-                    echelles: ressources.echelles.length,
-                    pratiques: ressources.pratiques.length,
-                    cartouches: ressources.cartouches.length
+                    grilles: grillesUtilisees.length,
+                    echelles: echellesUtilisees.length,
+                    pratiques: pratiquesUtilisees.length,
+                    cartouches: nbCartouchesCopies
                 }
             };
         } catch (error) {

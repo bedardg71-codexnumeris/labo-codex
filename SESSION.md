@@ -1,7 +1,7 @@
-# SESSION ACTIVE - BETA 96
+# SESSION ACTIVE - BETA 96.1
 
-**Date** : 26 janvier 2026
-**Version** : Beta 96 (build 0126-1330)
+**Date** : 28 janvier 2026
+**Version** : Beta 96.1 (build 0128-xxxx)
 **Statut** : Application fonctionnelle pour H2026, A2024 archive
 
 ---
@@ -28,7 +28,32 @@
 - **Dropdown note maximale** : Peuplé dynamiquement selon l'échelle de performance
 - **Graphique spaghetti** : Visualisation de l'évolution de tous les étudiants (nouveau Beta 96)
 
-### Derniere tache completee (26 janvier - Beta 96)
+### Derniere tache completee (28 janvier - Beta 96.1)
+- **GESTION BIBLIOTHÈQUES COMPLÈTE** : Boutons Supprimer et Dupliquer
+  - **Bouton Supprimer** : Suppression définitive avec confirmation modale
+    - Vérification des dépendances (ex: impossible de supprimer une grille avec cartouches liées)
+    - Bouton "Retirer" changé de rouge (btn-supprimer) à gris (btn-secondaire)
+    - Implémenté dans 5 bibliothèques : Grilles, Cartouches, Échelles, Pratiques, Productions
+  - **Bouton Dupliquer** : Crée une copie avec nouvel ID et suffixe "(copie)"
+    - Métadonnées CC nettoyées sur la copie
+    - Bouton vert (btn-confirmer)
+    - Implémenté dans les 5 bibliothèques
+  - **Détection doublons (Productions)** : Avertissement si titres en double
+    - Badges de source : Locale (vert), Bibliothèque (bleu), Retirée (orange)
+    - ID court affiché (#abc123) pour distinguer les doublons
+  - **Fichiers modifiés** : `js/grilles.js`, `js/cartouches.js`, `js/echelles.js`, `js/pratiques-materiel.js`, `js/productions.js`
+
+- **ISOLATION DES TEMPLATES ARCHIVÉS** : Protection des trimestres archivés
+  - **Problème résolu** : Supprimer une grille en H2026 affectait les trimestres archivés (A2025)
+  - **Solution** : Copie des templates UTILISÉS lors de l'archivage
+    - Nouvelle constante `CLES_TEMPLATES_ARCHIVES` dans trimestres.js
+    - Nouvelle fonction `identifierTemplatesUtilises()` pour identifier les templates référencés
+    - Modification de `creerSnapshotRessources()` pour copier vers des clés namespacées
+    - Modification de `cle()` pour utiliser les copies archivées en lecture
+  - **Templates copiés** : grillesTemplates, echellesTemplates, pratiquesConfigurables, cartouches_{grilleId}
+  - **Fichier modifié** : `js/trimestres.js`
+
+### Tache precedente (26 janvier - Beta 96)
 - **FIX APERÇU DES PRÉSENCES** : Alignement calculs sur tableau de bord
   - **Problème** : Élèves=53 (au lieu de 25), Taux=90% (au lieu de 98%), Séances=1/2 (au lieu de 1/30)
   - **Causes multiples** :
@@ -875,4 +900,4 @@
 
 ---
 
-**Derniere mise a jour** : 26 janvier 2026 (13h30)
+**Derniere mise a jour** : 28 janvier 2026
