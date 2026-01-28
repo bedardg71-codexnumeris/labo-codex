@@ -2571,9 +2571,12 @@ async function afficherFormulairePDFDepuisEchelle() {
         ? echelleTemplateActuelle.id
         : null;
 
-    // Naviguer vers la section Grilles pour afficher le formulaire
-    if (typeof naviguerVers === 'function') {
-        naviguerVers('grilles');
+    // Naviguer vers la section Construction → Grilles pour afficher le formulaire
+    if (typeof afficherSection === 'function') {
+        afficherSection('construction');
+    }
+    if (typeof afficherSousSection === 'function') {
+        afficherSousSection('construction-grilles');
     }
 
     // Petit delai pour laisser la navigation se faire
@@ -2593,9 +2596,12 @@ async function afficherFormulairePDFDepuisCartouche() {
                      document.getElementById('selectGrilleRetroaction')?.value;
     const cartoucheId = document.getElementById('selectCartouche')?.value;
 
-    // Naviguer vers la section Grilles pour afficher le formulaire
-    if (typeof naviguerVers === 'function') {
-        naviguerVers('grilles');
+    // Naviguer vers la section Construction → Grilles pour afficher le formulaire
+    if (typeof afficherSection === 'function') {
+        afficherSection('construction');
+    }
+    if (typeof afficherSousSection === 'function') {
+        afficherSousSection('construction-grilles');
     }
 
     // Petit delai pour laisser la navigation se faire
@@ -2617,9 +2623,12 @@ async function afficherFormulairePDFDepuisProduction() {
         ? productionEnEdition
         : null;
 
-    // Naviguer vers la section Grilles pour afficher le formulaire
-    if (typeof naviguerVers === 'function') {
-        naviguerVers('grilles');
+    // Naviguer vers la section Construction → Grilles pour afficher le formulaire
+    if (typeof afficherSection === 'function') {
+        afficherSection('construction');
+    }
+    if (typeof afficherSousSection === 'function') {
+        afficherSousSection('construction-grilles');
     }
 
     // Petit délai pour laisser la navigation se faire
