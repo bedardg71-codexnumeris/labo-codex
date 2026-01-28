@@ -15995,6 +15995,103 @@
     </div>
 
     <!-- ========================================= -->
+    <!-- MODAL PRÉPARATION PDF (Beta 96.1) -->
+    <!-- Formulaire de sélection accessible depuis toutes les sections -->
+    <!-- ========================================= -->
+    <div id="modalPreparationPDF" class="modal-overlay" style="display: none;">
+        <div class="modal-contenu" style="max-width: 600px; padding: 25px;">
+            <button onclick="fermerModalPreparationPDF()" class="modal-fermer">✕</button>
+
+            <h2 class="modal-titre">📄 Préparer le PDF</h2>
+            <p style="color: var(--texte-secondaire); margin-bottom: 20px;">
+                Créez un document de référence complet pour une production.
+            </p>
+
+            <!-- SECTION 1 : Production (optionnel) -->
+            <fieldset style="border: 1px solid var(--bordure-legere); border-radius: var(--radius-moyen); padding: 15px; margin-bottom: 20px;">
+                <legend style="font-weight: 600; color: var(--bleu-fonce); padding: 0 10px;">1. Production (optionnel)</legend>
+
+                <div class="groupe-form" style="margin-bottom: 15px;">
+                    <label for="modalPDF-production">Sélectionner une production</label>
+                    <select id="modalPDF-production" class="controle-form" onchange="mettreAJourOptionsModalPDF()">
+                        <option value="">-- Aucune (grille générique) --</option>
+                    </select>
+                </div>
+
+                <div id="modalPDF-options-production" style="display: none;">
+                    <p style="font-size: 0.9rem; margin-bottom: 10px; color: var(--texte-secondaire);">Informations à inclure :</p>
+                    <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                            <input type="checkbox" id="modalPDF-prod-nom" checked>
+                            <span>Nom de la production</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                            <input type="checkbox" id="modalPDF-prod-objectif" checked>
+                            <span>Objectif d'apprentissage</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                            <input type="checkbox" id="modalPDF-prod-description" checked>
+                            <span>Description de la tâche</span>
+                        </label>
+                    </div>
+                    <div style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--bordure-legere);">
+                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                            <input type="checkbox" id="modalPDF-desc-criteres">
+                            <span>Description des critères dans le tableau</span>
+                        </label>
+                    </div>
+                </div>
+            </fieldset>
+
+            <!-- SECTION 2 : Grille et Échelle -->
+            <fieldset style="border: 1px solid var(--bordure-legere); border-radius: var(--radius-moyen); padding: 15px; margin-bottom: 20px;">
+                <legend style="font-weight: 600; color: var(--bleu-fonce); padding: 0 10px;">2. Grille et Échelle <span style="color: #d32f2f;">*</span></legend>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="groupe-form">
+                        <label for="modalPDF-grille">Grille de critères</label>
+                        <select id="modalPDF-grille" class="controle-form" onchange="mettreAJourOptionsModalPDF()">
+                            <option value="">-- Sélectionner --</option>
+                        </select>
+                    </div>
+
+                    <div class="groupe-form">
+                        <label for="modalPDF-echelle">Échelle de performance</label>
+                        <select id="modalPDF-echelle" class="controle-form" onchange="mettreAJourOptionsModalPDF()">
+                            <option value="">-- Sélectionner --</option>
+                        </select>
+                    </div>
+                </div>
+            </fieldset>
+
+            <!-- SECTION 3 : Cartouche (optionnel) -->
+            <fieldset id="modalPDF-section-cartouche" style="border: 1px solid var(--bordure-legere); border-radius: var(--radius-moyen); padding: 15px; margin-bottom: 20px; display: none;">
+                <legend style="font-weight: 600; color: var(--bleu-fonce); padding: 0 10px;">3. Rétroaction (optionnel)</legend>
+
+                <div class="groupe-form">
+                    <label for="modalPDF-cartouche">Cartouche de rétroaction</label>
+                    <select id="modalPDF-cartouche" class="controle-form">
+                        <option value="">-- Sans rétroaction --</option>
+                    </select>
+                    <p style="font-size: 0.85rem; color: var(--texte-secondaire); margin-top: 5px;">
+                        Ajoute les commentaires prédéfinis pour chaque croisement critère × niveau
+                    </p>
+                </div>
+            </fieldset>
+
+            <!-- Boutons -->
+            <div class="btn-groupe" style="display: flex; justify-content: space-between;">
+                <button onclick="fermerModalPreparationPDF()" class="btn btn-annuler">
+                    Annuler
+                </button>
+                <button id="modalPDF-btn-apercu" onclick="ouvrirApercuPDFDepuisModal()" class="btn btn-confirmer" disabled>
+                    Voir l'aperçu →
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================= -->
     <!-- MODAL APERÇU PDF (Beta 95.7 - #30) -->
     <!-- Affiche un aperçu fidèle au rendu PDF final -->
     <!-- ========================================= -->
