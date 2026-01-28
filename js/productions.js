@@ -3200,6 +3200,13 @@ async function chargerProductionPourModif(id) {
     const accueil = document.getElementById('accueilProductions');
     if (accueil) accueil.style.display = 'none';
 
+    // ✅ AJOUT (28 janvier 2026) : Masquer l'aperçu de la liste des productions
+    // L'aperçu ne doit s'afficher que dans la vue d'accueil, pas quand on édite une production
+    const zoneApercu = document.getElementById('zoneApercuProductions');
+    if (zoneApercu) zoneApercu.classList.remove('visible');
+    const btnExport = document.getElementById('btnExporterProductionsPDF');
+    if (btnExport) btnExport.classList.remove('visible');
+
     // Afficher le formulaire
     const formulaire = document.getElementById('formulaireProduction');
     if (formulaire) formulaire.style.display = 'block';
@@ -3248,6 +3255,12 @@ function creerNouvelleProduction() {
     // Masquer le message d'accueil
     const accueil = document.getElementById('accueilProductions');
     if (accueil) accueil.style.display = 'none';
+
+    // ✅ AJOUT (28 janvier 2026) : Masquer l'aperçu de la liste des productions
+    const zoneApercu = document.getElementById('zoneApercuProductions');
+    if (zoneApercu) zoneApercu.classList.remove('visible');
+    const btnExportPDF = document.getElementById('btnExporterProductionsPDF');
+    if (btnExportPDF) btnExportPDF.classList.remove('visible');
 
     // Afficher le formulaire
     const formulaire = document.getElementById('formulaireProduction');
