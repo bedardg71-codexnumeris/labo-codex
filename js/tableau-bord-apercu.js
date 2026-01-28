@@ -1511,8 +1511,11 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                 } else {
                     nomAffiche = `${e.nom}, ${e.prenom}`;
                 }
+                const animDelay = (Math.random() * 3).toFixed(2); // Délai aléatoire 0-3s
+                const amplitude = (5 + Math.random() * 17).toFixed(1); // Amplitude aléatoire 5-22px
+                const animDuration = (5 - amplitude * 0.15).toFixed(2); // Durée inversement proportionnelle à l'amplitude
                 lignesSOM += `<div class="barre-etudiant barre-etudiant-som"
-                    style="left: ${positionFinale}%; top: calc(50% + ${jitterV}px);"
+                    style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; animation-duration: ${animDuration}s; --amp: ${amplitude}px;"
                     data-da="${e.da}"
                     data-nom="${echapperHtml(nomAffiche)}"
                     data-valeur="${Math.round(e.valeur * 100)}%"
@@ -1559,8 +1562,11 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                 } else {
                     nomAffiche = `${e.nom}, ${e.prenom}`;
                 }
+                const animDelay = (Math.random() * 3).toFixed(2); // Délai aléatoire 0-3s
+                const amplitude = (5 + Math.random() * 17).toFixed(1); // Amplitude aléatoire 5-22px
+                const animDuration = (5 - amplitude * 0.15).toFixed(2); // Durée inversement proportionnelle à l'amplitude
                 lignesPAN += `<div class="barre-etudiant barre-etudiant-std"
-                    style="left: ${positionFinale}%; top: calc(50% + ${jitterV}px);"
+                    style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; animation-duration: ${animDuration}s; --amp: ${amplitude}px;"
                     data-da="${e.da}"
                     data-nom="${echapperHtml(nomAffiche)}"
                     data-valeur="${Math.round(e.valeur * 100)}%"
@@ -1724,8 +1730,11 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
             } else {
                 nomAffiche = `${e.nom}, ${e.prenom}`;
             }
+            const animDelay = (Math.random() * 3).toFixed(2); // Délai aléatoire 0-3s
+            const amplitude = (5 + Math.random() * 17).toFixed(1); // Amplitude aléatoire 5-22px
+            const animDuration = (5 - amplitude * 0.15).toFixed(2); // Durée inversement proportionnelle à l'amplitude
             lignesSOM += `<div class="barre-etudiant barre-etudiant-som"
-                style="left: ${positionFinale}%; top: calc(50% + ${jitterV}px);"
+                style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; animation-duration: ${animDuration}s; --amp: ${amplitude}px;"
                 data-da="${e.da}"
                 data-nom="${echapperHtml(nomAffiche)}"
                 data-pattern="${pattern}"
@@ -1761,8 +1770,11 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
             } else {
                 nomAffiche = `${e.nom}, ${e.prenom}`;
             }
+            const animDelay = (Math.random() * 3).toFixed(2); // Délai aléatoire 0-3s
+            const amplitude = (5 + Math.random() * 17).toFixed(1); // Amplitude aléatoire 5-22px
+            const animDuration = (5 - amplitude * 0.15).toFixed(2); // Durée inversement proportionnelle à l'amplitude
             lignesPAN += `<div class="barre-etudiant barre-etudiant-std"
-                style="left: ${positionFinale}%; top: calc(50% + ${jitterV}px);"
+                style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; animation-duration: ${animDuration}s; --amp: ${amplitude}px;"
                 data-da="${e.da}"
                 data-nom="${echapperHtml(nomAffiche)}"
                 data-pattern="${pattern}"
@@ -1954,8 +1966,11 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, n
             } else {
                 nomAffiche = `${e.nom}, ${e.prenom}`;
             }
+            const animDelay = (Math.random() * 3).toFixed(2); // Délai aléatoire 0-3s
+            const amplitude = (5 + Math.random() * 17).toFixed(1); // Amplitude aléatoire 5-22px
+            const animDuration = (5 - amplitude * 0.15).toFixed(2); // Durée inversement proportionnelle à l'amplitude
             lignesSOM += `<div class="barre-etudiant barre-etudiant-som"
-                style="left: ${positionFinale}%; top: calc(50% + ${jitterV}px);"
+                style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; animation-duration: ${animDuration}s; --amp: ${amplitude}px;"
                 data-da="${e.da}"
                 data-nom="${echapperHtml(nomAffiche)}"
                 data-niveau="${niveau}"
@@ -1991,8 +2006,11 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, n
             } else {
                 nomAffiche = `${e.nom}, ${e.prenom}`;
             }
+            const animDelay = (Math.random() * 3).toFixed(2); // Délai aléatoire 0-3s
+            const amplitude = (5 + Math.random() * 17).toFixed(1); // Amplitude aléatoire 5-22px
+            const animDuration = (5 - amplitude * 0.15).toFixed(2); // Durée inversement proportionnelle à l'amplitude
             lignesPAN += `<div class="barre-etudiant barre-etudiant-std"
-                style="left: ${positionFinale}%; top: calc(50% + ${jitterV}px);"
+                style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; animation-duration: ${animDuration}s; --amp: ${amplitude}px;"
                 data-da="${e.da}"
                 data-nom="${echapperHtml(nomAffiche)}"
                 data-niveau="${niveau}"

@@ -8734,6 +8734,7 @@ label:has(+ textarea:disabled) {
     border-radius: var(--radius-moyen);
     overflow: visible;
     opacity: 1; /* Opacité maximale pour fond dégradé visible */
+    perspective: 500px; /* 🆕 BETA 96.1: Perspective pour effet 3D des points */
 }
 
 /* Animation de flottement subtil pour les points (au hover seulement) */
@@ -8752,8 +8753,58 @@ label:has(+ textarea:disabled) {
     }
 }
 
+/* 🆕 BETA 96.1: Animation tourbillon vertical (rotation cylindrique) */
+/* Utilise --amp (amplitude) définie par JS selon la distance au centre */
+@keyframes float-vertical {
+    0% {
+        transform: translate(-50%, -50%) translateY(0px);
+        z-index: 10;
+        animation-timing-function: linear;
+    }
+    12.5% {
+        transform: translate(-50%, -50%) translateY(calc(var(--amp, 10px) * -0.7));
+        z-index: 10;
+        animation-timing-function: linear;
+    }
+    25% {
+        transform: translate(-50%, -50%) translateY(calc(var(--amp, 10px) * -1));
+        z-index: 10;
+        animation-timing-function: linear;
+    }
+    37.5% {
+        transform: translate(-50%, -50%) translateY(calc(var(--amp, 10px) * -0.7));
+        z-index: 10;
+        animation-timing-function: linear;
+    }
+    50% {
+        transform: translate(-50%, -50%) translateY(0px);
+        z-index: 1;
+        animation-timing-function: linear;
+    }
+    62.5% {
+        transform: translate(-50%, -50%) translateY(calc(var(--amp, 10px) * 0.7));
+        z-index: 1;
+        animation-timing-function: linear;
+    }
+    75% {
+        transform: translate(-50%, -50%) translateY(calc(var(--amp, 10px) * 1));
+        z-index: 1;
+        animation-timing-function: linear;
+    }
+    87.5% {
+        transform: translate(-50%, -50%) translateY(calc(var(--amp, 10px) * 0.7));
+        z-index: 1;
+        animation-timing-function: linear;
+    }
+    100% {
+        transform: translate(-50%, -50%) translateY(0px);
+        z-index: 10;
+    }
+}
+
 /* Point représentant un étudiant (scatter plot) */
 /* BETA 96.1: Effet 3D - ombre décentrée simulant lumière latérale gauche→droite */
+/* BETA 96.1: Animation tourbillon 3D permanente */
 .barre-etudiant {
     position: absolute;
     width: 10px;
@@ -8763,6 +8814,7 @@ label:has(+ textarea:disabled) {
     transition: all 0.2s ease;
     z-index: 10;
     transform: translate(-50%, -50%);
+    transform-style: preserve-3d;
     top: 50%;
     /* Style uniforme : blanc avec effet 3D */
     background: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(240, 245, 250, 0.95) 100%);
@@ -8772,12 +8824,17 @@ label:has(+ textarea:disabled) {
     box-shadow:
         /* Ombre externe décentrée vers droite/bas (effet 3D) */
         2px 2px 4px rgba(33, 100, 180, 0.35),
-        /* Contour fin simulé */
-        0 0 0 1.5px rgba(33, 150, 243, 0.4),
         /* Highlight inset en haut-gauche (reflet lumière) */
         inset -1px -1px 2px rgba(0, 50, 100, 0.1),
         inset 1px 1px 2px rgba(255, 255, 255, 0.8);
-    /* Pas d'animation par défaut - seulement au hover */
+    /* 🆕 BETA 96.1: Animation tourbillon vertical */
+    /* Le délai est ajouté dynamiquement via JS pour désynchroniser les points */
+    animation: float-vertical 3s linear infinite;
+}
+
+/* 🆕 BETA 96.1: Désactivation de l'animation via préférences */
+.animation-points-desactivee .barre-etudiant {
+    animation: none;
 }
 
 /* Animation et grossissement au hover - point devient noir avec effet 3D */
@@ -8793,7 +8850,8 @@ label:has(+ textarea:disabled) {
         /* Highlight inset (reflet) */
         inset -1px -1px 3px rgba(0, 0, 0, 0.3),
         inset 1px 1px 3px rgba(80, 80, 80, 0.4);
-    animation: float-subtle 7s ease-in-out infinite;
+    /* 🆕 BETA 96.1: Animation verticale au hover (même animation, grossie) */
+    animation: float-vertical 3s ease-in-out infinite;
 }
 
 /* Point pour SOM - même style uniforme */
@@ -8827,8 +8885,6 @@ label:has(+ textarea:disabled) {
     box-shadow:
         /* Ombre externe décentrée vers droite/bas (effet 3D) */
         2px 2px 4px rgba(33, 100, 180, 0.35),
-        /* Contour fin simulé */
-        0 0 0 1.5px rgba(33, 150, 243, 0.4),
         /* Highlight inset en haut-gauche (reflet lumière) */
         inset -1px -1px 2px rgba(0, 50, 100, 0.1),
         inset 1px 1px 2px rgba(255, 255, 255, 0.8);
@@ -9049,6 +9105,7 @@ label:has(+ textarea:disabled) {
     );
     box-shadow: var(--shadow-subtil);
     overflow: hidden; /* 🆕 BETA 96: Pour contenir la courbe de Gauss */
+    perspective: 500px; /* 🆕 BETA 96.1: Perspective pour effet 3D des points */
 }
 
 .barre-indicateur-overlay {
@@ -9107,6 +9164,7 @@ label:has(+ textarea:disabled) {
         #6366f1 100%  /* Indigo */
     );
     box-shadow: var(--shadow-subtil);
+    perspective: 500px; /* 🆕 BETA 96.1: Perspective pour effet 3D des points */
 }
 
 .barre-patterns-overlay {
@@ -9134,6 +9192,7 @@ label:has(+ textarea:disabled) {
         #6b21a8 100%  /* Mauve foncé */
     );
     box-shadow: var(--shadow-subtil);
+    perspective: 500px; /* 🆕 BETA 96.1: Perspective pour effet 3D des points */
 }
 
 .barre-rai-overlay {
