@@ -3309,6 +3309,12 @@ async function afficherBibliothequeCartouches() {
                         </div>
                         <div style="display: flex; gap: 8px; margin-left: 10px;">
                             <button
+                                onclick="dupliquerCartoucheBibliotheque('${cartouche.id}', '${cartouche.grilleId}')"
+                                class="btn btn-confirmer btn-tres-compact"
+                                title="Créer une copie">
+                                Dupliquer
+                            </button>
+                            <button
                                 onclick="partagerCartouche('${cartouche.id}', '${cartouche.grilleId}')"
                                 class="btn btn-secondaire btn-tres-compact"
                                 title="Exporter en JSON">
@@ -3316,9 +3322,15 @@ async function afficherBibliothequeCartouches() {
                             </button>
                             <button
                                 onclick="retirerCartoucheDeBibliotheque('${cartouche.id}', '${cartouche.grilleId}')"
-                                class="btn btn-supprimer btn-tres-compact"
-                                title="Retirer de votre sélection">
+                                class="btn btn-secondaire btn-tres-compact"
+                                title="Retirer de la barre latérale (données conservées)">
                                 Retirer
+                            </button>
+                            <button
+                                onclick="supprimerCartoucheDefinitivement('${cartouche.id}', '${cartouche.grilleId}')"
+                                class="btn btn-supprimer btn-tres-compact"
+                                title="Supprimer définitivement">
+                                Supprimer
                             </button>
                         </div>
                     </div>
@@ -3519,6 +3531,73 @@ async function retirerCartoucheDeBibliotheque(id, grilleId) {
         await afficherBanqueCartouches();
         await afficherBibliothequeCartouches();
     }
+}
+
+/**
+ * ✅ AJOUT (28 janvier 2026) : Supprimer définitivement une cartouche (hard delete)
+ * @param {string} id - ID de la cartouche à supprimer
+ * @param {string} grilleId - ID de la grille associée
+ */
+async function supprimerCartoucheDefinitivement(id, grilleId) {
+    const cartouches = await db.get(`cartouches_${grilleId}`) || [];
+    const cartouche = cartouches.find(c => c.id === id);
+
+    if (!cartouche) return;
+
+    // Confirmation
+    if (!confirm(`Supprimer définitivement la cartouche «${cartouche.nom}» ?\n\nCette action est irréversible.`)) {
+        return;
+    }
+
+    // Suppression définitive
+    const nouveauxCartouches = cartouches.filter(c => c.id !== id);
+    await db.set(`cartouches_${grilleId}`, nouveauxCartouches);
+
+    // Rafraîchir UI
+    fermerModalBibliothequeCartouches();
+    await afficherBanqueCartouches();
+    await afficherBibliothequeCartouches();
+
+    console.log(`Cartouche "${cartouche.nom}" supprimée définitivement`);
+}
+
+/**
+ * ✅ AJOUT (28 janvier 2026) : Dupliquer une cartouche dans la bibliothèque
+ * @param {string} id - ID de la cartouche à dupliquer
+ * @param {string} grilleId - ID de la grille associée
+ */
+async function dupliquerCartoucheBibliotheque(id, grilleId) {
+    const cartouches = await db.get(`cartouches_${grilleId}`) || [];
+    const cartouche = cartouches.find(c => c.id === id);
+
+    if (!cartouche) {
+        alert('Cartouche introuvable');
+        return;
+    }
+
+    // Créer une copie avec un nouvel ID
+    const nouvelleCartouche = {
+        ...cartouche,
+        id: `cartouche_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        nom: `${cartouche.nom} (copie)`,
+        dansBibliotheque: true,
+        dateCreation: new Date().toISOString()
+    };
+
+    // Supprimer les métadonnées de partage
+    delete nouvelleCartouche.metadata_cc;
+    delete nouvelleCartouche.auteurOriginal;
+
+    // Ajouter à la liste
+    cartouches.push(nouvelleCartouche);
+    await db.set(`cartouches_${grilleId}`, cartouches);
+
+    // Rafraîchir UI
+    fermerModalBibliothequeCartouches();
+    await afficherBanqueCartouches();
+    await afficherBibliothequeCartouches();
+
+    console.log(`Cartouche "${cartouche.nom}" dupliquée → "${nouvelleCartouche.nom}"`);
 }
 
 /**

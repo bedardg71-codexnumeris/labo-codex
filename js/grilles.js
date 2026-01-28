@@ -2216,6 +2216,12 @@ async function afficherBibliothequeGrilles() {
                         </div>
                         <div style="display: flex; gap: 8px; margin-left: 10px;">
                             <button
+                                onclick="dupliquerGrilleBibliotheque('${grille.id}')"
+                                class="btn btn-confirmer btn-tres-compact"
+                                title="Créer une copie">
+                                Dupliquer
+                            </button>
+                            <button
                                 onclick="partagerGrille('${grille.id}')"
                                 class="btn btn-secondaire btn-tres-compact"
                                 title="Exporter en JSON">
@@ -2223,9 +2229,15 @@ async function afficherBibliothequeGrilles() {
                             </button>
                             <button
                                 onclick="retirerGrilleDeBibliotheque('${grille.id}')"
-                                class="btn btn-supprimer btn-tres-compact"
-                                title="Retirer de votre sélection">
+                                class="btn btn-secondaire btn-tres-compact"
+                                title="Retirer de la barre latérale (données conservées)">
                                 Retirer
+                            </button>
+                            <button
+                                onclick="supprimerGrilleDefinitivement('${grille.id}')"
+                                class="btn btn-supprimer btn-tres-compact"
+                                title="Supprimer définitivement">
+                                Supprimer
                             </button>
                         </div>
                     </div>
@@ -2453,6 +2465,78 @@ async function retirerGrilleDeBibliotheque(id) {
     await afficherBibliothequeGrilles();
 
     console.log(`Grille "${grille.nom}" retirée de la barre latérale`);
+}
+
+/**
+ * ✅ AJOUT (28 janvier 2026) : Supprimer définitivement une grille (hard delete)
+ * @param {string} id - ID de la grille à supprimer
+ */
+async function supprimerGrilleDefinitivement(id) {
+    const grilles = await db.get('grillesTemplates') || [];
+    const grille = grilles.find(g => g.id === id);
+
+    if (!grille) return;
+
+    // Vérifier dépendances : cartouches liées à cette grille
+    const cartouches = await db.get(`cartouches_${id}`) || [];
+    if (cartouches.length > 0) {
+        alert(`Impossible de supprimer cette grille.\n\n${cartouches.length} cartouche(s) y sont associée(s).\nSupprimez d'abord les cartouches.`);
+        return;
+    }
+
+    // Confirmation
+    if (!confirm(`Supprimer définitivement la grille «${grille.nom}» ?\n\nCette action est irréversible.`)) {
+        return;
+    }
+
+    // Suppression définitive
+    const nouvellesGrilles = grilles.filter(g => g.id !== id);
+    await db.set('grillesTemplates', nouvellesGrilles);
+
+    // Rafraîchir UI
+    fermerModalBibliothequeGrilles();
+    await afficherListeGrilles();
+    await afficherBibliothequeGrilles();
+
+    console.log(`Grille "${grille.nom}" supprimée définitivement`);
+}
+
+/**
+ * ✅ AJOUT (28 janvier 2026) : Dupliquer une grille dans la bibliothèque
+ * @param {string} id - ID de la grille à dupliquer
+ */
+async function dupliquerGrilleBibliotheque(id) {
+    const grilles = await db.get('grillesTemplates') || [];
+    const grille = grilles.find(g => g.id === id);
+
+    if (!grille) {
+        alert('Grille introuvable');
+        return;
+    }
+
+    // Créer une copie avec un nouvel ID
+    const nouvelleGrille = {
+        ...grille,
+        id: `grille_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        nom: `${grille.nom} (copie)`,
+        dansBibliotheque: true,
+        dateCreation: new Date().toISOString()
+    };
+
+    // Supprimer les métadonnées de partage (c'est une nouvelle grille)
+    delete nouvelleGrille.metadata_cc;
+    delete nouvelleGrille.auteurOriginal;
+
+    // Ajouter à la liste
+    grilles.push(nouvelleGrille);
+    await db.set('grillesTemplates', grilles);
+
+    // Rafraîchir UI
+    fermerModalBibliothequeGrilles();
+    await afficherListeGrilles();
+    await afficherBibliothequeGrilles();
+
+    console.log(`Grille "${grille.nom}" dupliquée → "${nouvelleGrille.nom}"`);
 }
 
 /**

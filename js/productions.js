@@ -61,6 +61,61 @@ function getCleGrilles() {
     return (typeof cle === 'function') ? cle('grillesTemplates') : 'grillesTemplates';
 }
 
+/**
+ * ✅ AJOUT (28 janvier 2026) : Détecter les doublons potentiels dans les productions
+ * Retourne une liste des titres qui apparaissent plus d'une fois
+ * @param {Array} productionsLocales - Productions de l'utilisateur
+ * @param {Array} productionsBibliotheque - Productions de la bibliothèque partagée
+ * @returns {Array} Liste des doublons {titre, count, ids}
+ */
+function detecterDoublonsProductions(productionsLocales, productionsBibliotheque) {
+    const toutesProductions = [...productionsLocales, ...productionsBibliotheque];
+    const parTitre = {};
+
+    toutesProductions.forEach(prod => {
+        const titre = (prod.titre || '').trim().toLowerCase();
+        if (!titre) return;
+
+        if (!parTitre[titre]) {
+            parTitre[titre] = { titre: prod.titre, count: 0, ids: [] };
+        }
+        parTitre[titre].count++;
+        parTitre[titre].ids.push(prod.id);
+    });
+
+    // Retourner uniquement ceux avec count > 1
+    return Object.values(parTitre).filter(d => d.count > 1);
+}
+
+/**
+ * ✅ AJOUT (28 janvier 2026) : Générer un badge de source pour une production
+ * @param {Object} prod - La production
+ * @param {Array} productionsLocales - Productions locales pour vérifier la source
+ * @returns {string} HTML du badge
+ */
+function genererBadgeSourceProduction(prod, productionsLocales) {
+    const estLocale = productionsLocales.some(p => p.id === prod.id);
+    const estRetiree = prod.dansBibliotheque === false;
+
+    if (estRetiree) {
+        return '<span style="background: #ff9800; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em; margin-left: 6px;">Retirée</span>';
+    } else if (estLocale) {
+        return '<span style="background: #4caf50; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em; margin-left: 6px;">Locale</span>';
+    } else {
+        return '<span style="background: #2196f3; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em; margin-left: 6px;">Bibliothèque</span>';
+    }
+}
+
+/**
+ * ✅ AJOUT (28 janvier 2026) : Générer un ID court pour affichage
+ * @param {string} id - L'ID complet
+ * @returns {string} Les 6 derniers caractères
+ */
+function genererIdCourtProduction(id) {
+    if (!id || id.length < 6) return id || '?';
+    return id.slice(-6);
+}
+
 /* ===============================
    FONCTION: AFFICHER TABLEAU DES PRODUCTIONS
    Affiche toutes les productions avec leurs détails
@@ -1516,6 +1571,30 @@ async function afficherBibliothequeProductions() {
                 </p>
     `;
 
+    // ✅ AJOUT (28 jan 2026) : Détecter les doublons potentiels
+    const toutesProductionsBiblio = await obtenirToutesLesProductionsBibliotheque();
+    const doublonsDetectes = detecterDoublonsProductions(productionsUtilisateur, toutesProductionsBiblio);
+
+    if (doublonsDetectes.length > 0) {
+        modalHTML += `
+                <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 15px; margin-bottom: 20px;">
+                    <div style="font-weight: bold; color: #856404; margin-bottom: 8px;">
+                        ⚠️ ${doublonsDetectes.length} doublon(s) potentiel(s) détecté(s)
+                    </div>
+                    <p style="color: #856404; font-size: 0.9em; margin: 0 0 10px 0;">
+                        Des productions avec des noms similaires existent en plusieurs exemplaires.
+                        Vérifiez les <code style="background: #f8f9fa; padding: 2px 4px; border-radius: 3px;">ID</code> pour distinguer les originaux des copies.
+                    </p>
+                    <details style="color: #856404;">
+                        <summary style="cursor: pointer; font-size: 0.9em;">Voir les doublons</summary>
+                        <ul style="margin: 10px 0 0 0; padding-left: 20px; font-size: 0.85em;">
+                            ${doublonsDetectes.map(d => `<li><strong>${d.titre}</strong> : ${d.count} exemplaire(s)</li>`).join('')}
+                        </ul>
+                    </details>
+                </div>
+        `;
+    }
+
     // SECTION 1 : Productions dans ma sélection
     if (productionsDansSelection.length > 0) {
         modalHTML += `
@@ -1526,6 +1605,7 @@ async function afficherBibliothequeProductions() {
 
         productionsDansSelection.forEach(prod => {
             const typeLabel = getTypeLabel(prod.type);
+            const idCourt = genererIdCourtProduction(prod.id);
             modalHTML += `
                 <div style="
                     border: 1px solid var(--bleu-clair);
@@ -1538,6 +1618,7 @@ async function afficherBibliothequeProductions() {
                         <div style="flex: 1;">
                             <div style="font-weight: bold; color: #2c3e50; margin-bottom: 4px;">
                                 ${prod.titre} ${prod.description ? '- ' + prod.description : ''}
+                                <span style="background: #e0e0e0; color: #666; padding: 2px 6px; border-radius: 3px; font-size: 0.7em; margin-left: 6px; font-family: monospace;" title="ID: ${prod.id}">#${idCourt}</span>
                             </div>
                             <div style="color: #7f8c8d; font-size: 0.9em; margin-bottom: 4px;">
                                 Type: ${typeLabel} • Pondération: ${prod.ponderation}%
@@ -1546,6 +1627,12 @@ async function afficherBibliothequeProductions() {
                         </div>
                         <div style="display: flex; gap: 8px; margin-left: 10px;">
                             <button
+                                onclick="dupliquerProductionBibliotheque('${prod.id}')"
+                                class="btn btn-confirmer btn-tres-compact"
+                                title="Créer une copie">
+                                Dupliquer
+                            </button>
+                            <button
                                 onclick="partagerProduction('${prod.id}')"
                                 class="btn btn-secondaire btn-tres-compact"
                                 title="Exporter en JSON">
@@ -1553,9 +1640,15 @@ async function afficherBibliothequeProductions() {
                             </button>
                             <button
                                 onclick="retirerProductionDeBibliotheque('${prod.id}')"
-                                class="btn btn-supprimer btn-tres-compact"
-                                title="Retirer de votre sélection">
+                                class="btn btn-secondaire btn-tres-compact"
+                                title="Retirer de la barre latérale (données conservées)">
                                 Retirer
+                            </button>
+                            <button
+                                onclick="supprimerProductionDefinitivement('${prod.id}')"
+                                class="btn btn-supprimer btn-tres-compact"
+                                title="Supprimer définitivement">
+                                Supprimer
                             </button>
                         </div>
                     </div>
@@ -1674,10 +1767,8 @@ async function afficherBibliothequeProductions() {
 
         parDiscipline[discipline].forEach(prod => {
             const typeLabel = getTypeLabel(prod.type);
-            const estRetiree = productionsRetirees.find(p => p.id === prod.id);
-            const badgeRetiree = estRetiree
-                ? '<span style="background: #ff9800; color: white; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; margin-left: 8px;">Retirée</span>'
-                : '';
+            const badgeSource = genererBadgeSourceProduction(prod, productionsUtilisateur);
+            const idCourt = genererIdCourtProduction(prod.id);
 
             modalHTML += `
                 <div class="production-disponible-item" data-discipline="${prod.discipline || 'Autres'}" style="
@@ -1691,7 +1782,8 @@ async function afficherBibliothequeProductions() {
                         <div style="flex: 1;">
                             <div style="font-weight: bold; color: #2c3e50; margin-bottom: 4px;">
                                 ${prod.titre} ${prod.description ? '- ' + prod.description : ''}
-                                ${badgeRetiree}
+                                <span style="background: #e0e0e0; color: #666; padding: 2px 6px; border-radius: 3px; font-size: 0.7em; margin-left: 6px; font-family: monospace;" title="ID: ${prod.id}">#${idCourt}</span>
+                                ${badgeSource}
                             </div>
                             <div style="color: #7f8c8d; font-size: 0.9em; margin-bottom: 4px;">
                                 Type: ${typeLabel} • Pondération: ${prod.ponderation}%
@@ -2057,6 +2149,71 @@ async function retirerProductionDeBibliotheque(id) {
         console.error('Erreur lors du retrait:', error);
         alert(`❌ Erreur : ${error.message}`);
     }
+}
+
+/**
+ * ✅ AJOUT (28 janvier 2026) : Supprimer définitivement une production (hard delete)
+ * @param {string} id - ID de la production à supprimer
+ */
+async function supprimerProductionDefinitivement(id) {
+    const productions = await db.get(getCleProductions()) || [];
+    const production = productions.find(p => p.id === id);
+
+    if (!production) return;
+
+    // Confirmation
+    if (!confirm(`Supprimer définitivement la production «${production.titre}» ?\n\nCette action est irréversible.`)) {
+        return;
+    }
+
+    // Suppression définitive
+    const nouvellesProductions = productions.filter(p => p.id !== id);
+    await db.set(getCleProductions(), nouvellesProductions);
+
+    // Rafraîchir UI
+    fermerModalBibliothequeProductions();
+    await afficherBibliothequeProductions();
+    await afficherListeProductions();
+
+    console.log(`Production "${production.titre}" supprimée définitivement`);
+}
+
+/**
+ * ✅ AJOUT (28 janvier 2026) : Dupliquer une production dans la bibliothèque
+ * @param {string} id - ID de la production à dupliquer
+ */
+async function dupliquerProductionBibliotheque(id) {
+    const productions = await db.get(getCleProductions()) || [];
+    const production = productions.find(p => p.id === id);
+
+    if (!production) {
+        alert('Production introuvable');
+        return;
+    }
+
+    // Créer une copie avec un nouvel ID
+    const nouvelleProduction = {
+        ...production,
+        id: `prod_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        titre: `${production.titre} (copie)`,
+        dansBibliotheque: true,
+        dateCreation: new Date().toISOString()
+    };
+
+    // Supprimer les métadonnées de partage
+    delete nouvelleProduction.metadata_cc;
+    delete nouvelleProduction.auteurOriginal;
+
+    // Ajouter à la liste
+    productions.push(nouvelleProduction);
+    await db.set(getCleProductions(), productions);
+
+    // Rafraîchir UI
+    fermerModalBibliothequeProductions();
+    await afficherBibliothequeProductions();
+    await afficherListeProductions();
+
+    console.log(`Production "${production.titre}" dupliquée → "${nouvelleProduction.titre}"`);
 }
 
 /**

@@ -2461,6 +2461,12 @@ async function afficherBibliothequeEchelles() {
                         </div>
                         <div style="display: flex; gap: 8px; margin-left: 10px;">
                             <button
+                                onclick="dupliquerEchelleBibliotheque('${echelle.id}')"
+                                class="btn btn-confirmer btn-tres-compact"
+                                title="Créer une copie">
+                                Dupliquer
+                            </button>
+                            <button
                                 onclick="partagerEchelle('${echelle.id}')"
                                 class="btn btn-secondaire btn-tres-compact"
                                 title="Exporter en JSON">
@@ -2468,9 +2474,15 @@ async function afficherBibliothequeEchelles() {
                             </button>
                             <button
                                 onclick="retirerEchelleDeBibliotheque('${echelle.id}')"
-                                class="btn btn-supprimer btn-tres-compact"
-                                title="Retirer de votre sélection">
+                                class="btn btn-secondaire btn-tres-compact"
+                                title="Retirer de la barre latérale (données conservées)">
                                 Retirer
+                            </button>
+                            <button
+                                onclick="supprimerEchelleDefinitivement('${echelle.id}')"
+                                class="btn btn-supprimer btn-tres-compact"
+                                title="Supprimer définitivement">
+                                Supprimer
                             </button>
                         </div>
                     </div>
@@ -2755,6 +2767,73 @@ async function retirerEchelleDeBibliotheque(id) {
     await afficherBibliothequeEchelles();
 
     console.log(`Échelle "${echelle.nom}" retirée de la barre latérale`);
+}
+
+/**
+ * ✅ AJOUT (28 janvier 2026) : Supprimer définitivement une échelle (hard delete)
+ * @param {string} id - ID de l'échelle à supprimer
+ */
+async function supprimerEchelleDefinitivement(id) {
+    const echelles = await db.get('echellesTemplates') || [];
+    const echelle = echelles.find(e => e.id === id);
+
+    if (!echelle) return;
+
+    // Pas de dépendances directes pour les échelles
+
+    // Confirmation
+    if (!confirm(`Supprimer définitivement l'échelle «${echelle.nom}» ?\n\nCette action est irréversible.`)) {
+        return;
+    }
+
+    // Suppression définitive
+    const nouvellesEchelles = echelles.filter(e => e.id !== id);
+    await db.set('echellesTemplates', nouvellesEchelles);
+
+    // Rafraîchir UI
+    fermerModalBibliothequeEchelles();
+    await afficherListeEchelles();
+    await afficherBibliothequeEchelles();
+
+    console.log(`Échelle "${echelle.nom}" supprimée définitivement`);
+}
+
+/**
+ * ✅ AJOUT (28 janvier 2026) : Dupliquer une échelle dans la bibliothèque
+ * @param {string} id - ID de l'échelle à dupliquer
+ */
+async function dupliquerEchelleBibliotheque(id) {
+    const echelles = await db.get('echellesTemplates') || [];
+    const echelle = echelles.find(e => e.id === id);
+
+    if (!echelle) {
+        alert('Échelle introuvable');
+        return;
+    }
+
+    // Créer une copie avec un nouvel ID
+    const nouvelleEchelle = {
+        ...echelle,
+        id: `echelle_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        nom: `${echelle.nom} (copie)`,
+        dansBibliotheque: true,
+        dateCreation: new Date().toISOString()
+    };
+
+    // Supprimer les métadonnées de partage
+    delete nouvelleEchelle.metadata_cc;
+    delete nouvelleEchelle.auteurOriginal;
+
+    // Ajouter à la liste
+    echelles.push(nouvelleEchelle);
+    await db.set('echellesTemplates', echelles);
+
+    // Rafraîchir UI
+    fermerModalBibliothequeEchelles();
+    await afficherListeEchelles();
+    await afficherBibliothequeEchelles();
+
+    console.log(`Échelle "${echelle.nom}" dupliquée → "${nouvelleEchelle.nom}"`);
 }
 
 /**

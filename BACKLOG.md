@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 26 janvier 2026 (Beta 96)
+> **Derniere mise a jour** : 28 janvier 2026 (Beta 96.1)
 
 ---
 
@@ -199,11 +199,16 @@
 
 ### Bibliotheques
 
-- [ ] **#7-a** Bouton Supprimer dans bibliotheques
-  - Pratiques et autres bibliotheques
+- [x] **#7-a** Bouton Supprimer dans bibliotheques ✅ FAIT (28 jan 2026)
+  - Suppression définitive avec confirmation (modal)
+  - Vérification des dépendances (ex: cartouches liées à une grille)
+  - Bouton "Retirer" changé de rouge à gris (action moins grave)
+  - **Fichiers modifiés** : `js/grilles.js`, `js/cartouches.js`, `js/echelles.js`, `js/pratiques-materiel.js`, `js/productions.js`
 
-- [ ] **#7-b** Bouton Dupliquer dans bibliotheques
-  - Pratiques et autres bibliotheques
+- [x] **#7-b** Bouton Dupliquer dans bibliotheques ✅ FAIT (28 jan 2026)
+  - Duplication avec nouvel ID et suffixe "(copie)"
+  - Métadonnées CC nettoyées sur la copie
+  - **Fichiers modifiés** : `js/grilles.js`, `js/cartouches.js`, `js/echelles.js`, `js/pratiques-materiel.js`, `js/productions.js`
 
 ### Configuration
 

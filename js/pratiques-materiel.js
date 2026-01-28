@@ -332,6 +332,12 @@ async function afficherBibliothequePratiques() {
                         </div>
                         <div style="display: flex; gap: 8px; margin-left: 10px;">
                             <button
+                                onclick="dupliquerPratiqueBibliotheque('${pratique.id}')"
+                                class="btn btn-confirmer btn-tres-compact"
+                                title="Créer une copie">
+                                Dupliquer
+                            </button>
+                            <button
                                 onclick="partagerPratiqueMateriel('${pratique.id}')"
                                 class="btn btn-secondaire btn-tres-compact"
                                 title="Exporter en JSON">
@@ -339,9 +345,15 @@ async function afficherBibliothequePratiques() {
                             </button>
                             <button
                                 onclick="retirerPratiqueDeBibliothequeMateriel('${pratique.id}')"
-                                class="btn btn-supprimer btn-tres-compact"
-                                title="Retirer de votre sélection">
+                                class="btn btn-secondaire btn-tres-compact"
+                                title="Retirer de la barre latérale (données conservées)">
                                 Retirer
+                            </button>
+                            <button
+                                onclick="supprimerPratiqueDefinitivement('${pratique.id}')"
+                                class="btn btn-supprimer btn-tres-compact"
+                                title="Supprimer définitivement">
+                                Supprimer
                             </button>
                         </div>
                     </div>
@@ -597,6 +609,72 @@ async function retirerPratiqueDeLaSelection(pratiqueId) {
 // Alias pour compatibilité - renommé avec suffixe Materiel
 async function retirerPratiqueDeBibliothequeMateriel(pratiqueId) {
     await retirerPratiqueDeLaSelection(pratiqueId);
+}
+
+/**
+ * ✅ AJOUT (28 janvier 2026) : Supprimer définitivement une pratique (hard delete)
+ * @param {string} pratiqueId - ID de la pratique à supprimer
+ */
+async function supprimerPratiqueDefinitivement(pratiqueId) {
+    const configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    const pratique = configurations.find(p => p.id === pratiqueId);
+
+    if (!pratique) return;
+
+    // Confirmation
+    if (!confirm(`Supprimer définitivement la pratique «${pratique.nom}» ?\n\nCette action est irréversible.`)) {
+        return;
+    }
+
+    // Suppression définitive
+    const nouvellesConfigurations = configurations.filter(p => p.id !== pratiqueId);
+    db.setSync(CLE_PRATIQUES_CONFIGURATIONS, nouvellesConfigurations);
+
+    // Rafraîchir UI
+    fermerModalBibliothequePratiques();
+    await afficherListePratiques();
+    await afficherBibliothequePratiques();
+
+    console.log(`Pratique "${pratique.nom}" supprimée définitivement`);
+}
+
+/**
+ * ✅ AJOUT (28 janvier 2026) : Dupliquer une pratique dans la bibliothèque
+ * @param {string} pratiqueId - ID de la pratique à dupliquer
+ */
+async function dupliquerPratiqueBibliotheque(pratiqueId) {
+    const configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    const pratique = configurations.find(p => p.id === pratiqueId);
+
+    if (!pratique) {
+        alert('Pratique introuvable');
+        return;
+    }
+
+    // Créer une copie avec un nouvel ID
+    const nouvellePratique = {
+        ...pratique,
+        id: `pratique_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        nom: `${pratique.nom} (copie)`,
+        dansBibliotheque: true,
+        dateCreation: new Date().toISOString()
+    };
+
+    // Supprimer les métadonnées de partage
+    delete nouvellePratique.metadata_cc;
+    delete nouvellePratique.auteurOriginal;
+    delete nouvellePratique.estGabarit; // Ce n'est plus un gabarit
+
+    // Ajouter à la liste
+    configurations.push(nouvellePratique);
+    db.setSync(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+
+    // Rafraîchir UI
+    fermerModalBibliothequePratiques();
+    await afficherListePratiques();
+    await afficherBibliothequePratiques();
+
+    console.log(`Pratique "${pratique.nom}" dupliquée → "${nouvellePratique.nom}"`);
 }
 
 /* ===============================
