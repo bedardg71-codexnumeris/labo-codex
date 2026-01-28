@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 96.1
 
 **Date** : 28 janvier 2026
-**Version** : Beta 96.1 (build 0128-xxxx)
+**Version** : Beta 96.1 (build 0128-0915)
 **Statut** : Application fonctionnelle pour H2026, A2024 archive
 
 ---
@@ -29,6 +29,20 @@
 - **Graphique spaghetti** : Visualisation de l'évolution de tous les étudiants (nouveau Beta 96)
 
 ### Derniere tache completee (28 janvier - Beta 96.1)
+- **REFONTE EXPORT PDF - FORMULAIRE INLINE ET APERÇU AMÉLIORÉ**
+  - **Formulaire inline** : Le bouton "Préparer le PDF" affiche le formulaire dans la zone principale (pas de navigation)
+    - Production, Grille, Échelle, Cartouche sur 2 lignes compactes
+    - Bouton "Annuler" restaure le contenu précédent
+    - Bouton "Voir l'aperçu →" ouvre le modal d'aperçu
+  - **Modal d'aperçu optimisé** : Options compactes sur une seule ligne
+    - **Orientation** : Portrait/Paysage
+    - **Entête** : Code cours ✓ / Nom cours ✓ / Trimestre ✓ (nouvelles options)
+    - **Pied de page** : Enseignant ✓ / Licence CC ✓
+    - **Production** (conditionnel) : Nom ✓ / Objectif ✓ / Tâche ✓ / Desc. critères ☐
+  - **Aperçu dynamique** : Toutes les options mettent à jour l'aperçu en temps réel
+  - **Pied de page visible** : CSS modifié pour afficher le footer même si le contenu dépasse
+  - **Fichiers modifiés** : `index.html`, `styles.css`, `js/export-pdf.js`
+
 - **CORRECTIONS VISUELLES ET UX** (#40-#46)
   - **Boutons d'aide dans bibliothèques** (#40) : Bouton 😎 ajouté aux 5 bibliothèques
     - Contenu d'aide expliquant les badges (Locale/Bibliothèque/Retirée) et les boutons

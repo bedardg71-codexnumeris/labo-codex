@@ -15300,7 +15300,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '96';
-        const BUILD_ID = '0128-0605';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0128-0915';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
@@ -15995,103 +15995,6 @@
     </div>
 
     <!-- ========================================= -->
-    <!-- MODAL PRÉPARATION PDF (Beta 96.1) -->
-    <!-- Formulaire de sélection accessible depuis toutes les sections -->
-    <!-- ========================================= -->
-    <div id="modalPreparationPDF" class="modal-overlay" style="display: none;">
-        <div class="modal-contenu" style="max-width: 600px; padding: 25px;">
-            <button onclick="fermerModalPreparationPDF()" class="modal-fermer">✕</button>
-
-            <h2 class="modal-titre">📄 Préparer le PDF</h2>
-            <p style="color: var(--texte-secondaire); margin-bottom: 20px;">
-                Créez un document de référence complet pour une production.
-            </p>
-
-            <!-- SECTION 1 : Production (optionnel) -->
-            <fieldset style="border: 1px solid var(--bordure-legere); border-radius: var(--radius-moyen); padding: 15px; margin-bottom: 20px;">
-                <legend style="font-weight: 600; color: var(--bleu-fonce); padding: 0 10px;">1. Production (optionnel)</legend>
-
-                <div class="groupe-form" style="margin-bottom: 15px;">
-                    <label for="modalPDF-production">Sélectionner une production</label>
-                    <select id="modalPDF-production" class="controle-form" onchange="mettreAJourOptionsModalPDF()">
-                        <option value="">-- Aucune (grille générique) --</option>
-                    </select>
-                </div>
-
-                <div id="modalPDF-options-production" style="display: none;">
-                    <p style="font-size: 0.9rem; margin-bottom: 10px; color: var(--texte-secondaire);">Informations à inclure :</p>
-                    <div style="display: flex; flex-wrap: wrap; gap: 15px;">
-                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                            <input type="checkbox" id="modalPDF-prod-nom" checked>
-                            <span>Nom de la production</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                            <input type="checkbox" id="modalPDF-prod-objectif" checked>
-                            <span>Objectif d'apprentissage</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                            <input type="checkbox" id="modalPDF-prod-description" checked>
-                            <span>Description de la tâche</span>
-                        </label>
-                    </div>
-                    <div style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--bordure-legere);">
-                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                            <input type="checkbox" id="modalPDF-desc-criteres">
-                            <span>Description des critères dans le tableau</span>
-                        </label>
-                    </div>
-                </div>
-            </fieldset>
-
-            <!-- SECTION 2 : Grille et Échelle -->
-            <fieldset style="border: 1px solid var(--bordure-legere); border-radius: var(--radius-moyen); padding: 15px; margin-bottom: 20px;">
-                <legend style="font-weight: 600; color: var(--bleu-fonce); padding: 0 10px;">2. Grille et Échelle <span style="color: #d32f2f;">*</span></legend>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <div class="groupe-form">
-                        <label for="modalPDF-grille">Grille de critères</label>
-                        <select id="modalPDF-grille" class="controle-form" onchange="mettreAJourOptionsModalPDF()">
-                            <option value="">-- Sélectionner --</option>
-                        </select>
-                    </div>
-
-                    <div class="groupe-form">
-                        <label for="modalPDF-echelle">Échelle de performance</label>
-                        <select id="modalPDF-echelle" class="controle-form" onchange="mettreAJourOptionsModalPDF()">
-                            <option value="">-- Sélectionner --</option>
-                        </select>
-                    </div>
-                </div>
-            </fieldset>
-
-            <!-- SECTION 3 : Cartouche (optionnel) -->
-            <fieldset id="modalPDF-section-cartouche" style="border: 1px solid var(--bordure-legere); border-radius: var(--radius-moyen); padding: 15px; margin-bottom: 20px; display: none;">
-                <legend style="font-weight: 600; color: var(--bleu-fonce); padding: 0 10px;">3. Rétroaction (optionnel)</legend>
-
-                <div class="groupe-form">
-                    <label for="modalPDF-cartouche">Cartouche de rétroaction</label>
-                    <select id="modalPDF-cartouche" class="controle-form">
-                        <option value="">-- Sans rétroaction --</option>
-                    </select>
-                    <p style="font-size: 0.85rem; color: var(--texte-secondaire); margin-top: 5px;">
-                        Ajoute les commentaires prédéfinis pour chaque croisement critère × niveau
-                    </p>
-                </div>
-            </fieldset>
-
-            <!-- Boutons -->
-            <div class="btn-groupe" style="display: flex; justify-content: space-between;">
-                <button onclick="fermerModalPreparationPDF()" class="btn btn-annuler">
-                    Annuler
-                </button>
-                <button id="modalPDF-btn-apercu" onclick="ouvrirApercuPDFDepuisModal()" class="btn btn-confirmer" disabled>
-                    Voir l'aperçu →
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ========================================= -->
     <!-- MODAL APERÇU PDF (Beta 95.7 - #30) -->
     <!-- Affiche un aperçu fidèle au rendu PDF final -->
     <!-- ========================================= -->
@@ -16101,35 +16004,69 @@
 
             <h2 class="modal-titre">📄 Aperçu du document</h2>
 
-            <!-- Options de mise en page -->
-            <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center; justify-content: center; margin-bottom: 15px; padding: 12px 15px; background: var(--bleu-tres-pale, #f0f8ff); border-radius: var(--radius-moyen);">
+            <!-- Options de mise en page sur une ligne -->
+            <div style="display: grid; grid-template-columns: auto 1fr 1fr; gap: 15px; margin-bottom: 12px; padding: 10px 15px; background: var(--gris-tres-clair, #f5f5f5); border-radius: var(--radius-moyen); font-size: 0.85rem; align-items: center;">
                 <!-- Orientation -->
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <label for="apercuPDF-orientation" style="font-size: 0.9rem; font-weight: 500;">Orientation :</label>
-                    <select id="apercuPDF-orientation" class="controle-form" style="width: auto; padding: 5px 10px;" onchange="rafraichirApercuPDF()">
+                    <span style="font-weight: 500; color: #555;">Orientation :</span>
+                    <select id="apercuPDF-orientation" class="controle-form" style="width: auto; padding: 4px 8px; font-size: 0.85rem;" onchange="rafraichirApercuPDF()">
                         <option value="portrait">Portrait</option>
                         <option value="paysage">Paysage</option>
                     </select>
                 </div>
 
-                <!-- Afficher le trimestre -->
-                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.9rem;">
-                    <input type="checkbox" id="apercuPDF-afficher-trimestre" checked onchange="rafraichirApercuPDF()">
-                    <span>Afficher le trimestre</span>
-                </label>
+                <!-- Entête -->
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <span style="font-weight: 500; color: #555;">Entête :</span>
+                    <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                        <input type="checkbox" id="apercuPDF-entete-code" checked onchange="rafraichirApercuPDF()">
+                        <span>Code cours</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                        <input type="checkbox" id="apercuPDF-entete-nom" checked onchange="rafraichirApercuPDF()">
+                        <span>Nom cours</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                        <input type="checkbox" id="apercuPDF-entete-trimestre" checked onchange="rafraichirApercuPDF()">
+                        <span>Trimestre</span>
+                    </label>
+                </div>
+
+                <!-- Pied de page -->
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <span style="font-weight: 500; color: #555;">Pied de page :</span>
+                    <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                        <input type="checkbox" id="apercuPDF-pied-enseignant" checked onchange="rafraichirApercuPDF()">
+                        <span>Enseignant</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                        <input type="checkbox" id="apercuPDF-pied-licence" checked onchange="rafraichirApercuPDF()">
+                        <span>Licence CC</span>
+                    </label>
+                </div>
             </div>
 
-            <!-- Options pied de page -->
-            <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center; justify-content: center; margin-bottom: 15px; padding: 10px 15px; background: var(--gris-tres-clair, #f5f5f5); border-radius: var(--radius-moyen); font-size: 0.85rem;">
-                <span style="font-weight: 500; color: #555;">Pied de page :</span>
-                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
-                    <input type="checkbox" id="apercuPDF-pied-enseignant" checked onchange="rafraichirApercuPDF()">
-                    <span>Enseignant</span>
-                </label>
-                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
-                    <input type="checkbox" id="apercuPDF-pied-licence" checked onchange="rafraichirApercuPDF()">
-                    <span>Licence CC BY-NC-SA</span>
-                </label>
+            <!-- Options de production (affiché uniquement si une production est sélectionnée) -->
+            <div id="apercuPDF-options-production" style="display: none; margin-bottom: 12px; padding: 10px 15px; background: var(--bleu-tres-pale, #f0f8ff); border-radius: var(--radius-moyen); font-size: 0.85rem;">
+                <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                    <span style="font-weight: 500; color: var(--bleu-fonce);">Production :</span>
+                    <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                        <input type="checkbox" id="apercuPDF-prod-nom" checked onchange="rafraichirApercuPDF()">
+                        <span>Nom</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                        <input type="checkbox" id="apercuPDF-prod-objectif" checked onchange="rafraichirApercuPDF()">
+                        <span>Objectif</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                        <input type="checkbox" id="apercuPDF-prod-description" checked onchange="rafraichirApercuPDF()">
+                        <span>Tâche</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                        <input type="checkbox" id="apercuPDF-prod-criteres" onchange="rafraichirApercuPDF()">
+                        <span>Desc. critères</span>
+                    </label>
+                </div>
             </div>
 
             <!-- Zone de simulation page PDF -->

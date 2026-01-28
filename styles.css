@@ -11426,7 +11426,7 @@ body.mode-assiste .btn-aide-contextuelle,
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     margin: 0 auto;
     position: relative;
-    overflow: hidden;
+    /* overflow: visible pour permettre au contenu de s'étendre */
 }
 
 /* Portrait : ratio Letter (8.5 x 11) - echelle 0.7 pour tenir dans le modal */
@@ -11434,7 +11434,7 @@ body.mode-assiste .btn-aide-contextuelle,
     width: 595px;  /* 8.5" * 70 */
     min-height: 770px; /* 11" * 70 */
     max-width: 100%;
-    aspect-ratio: 8.5 / 11;
+    /* aspect-ratio retiré pour permettre au contenu de s'étendre verticalement */
 }
 
 /* Paysage : ratio Letter inversé (11 x 8.5) */
@@ -11442,7 +11442,7 @@ body.mode-assiste .btn-aide-contextuelle,
     width: 770px;  /* 11" * 70 */
     min-height: 595px; /* 8.5" * 70 */
     max-width: 100%;
-    aspect-ratio: 11 / 8.5;
+    /* aspect-ratio retiré pour permettre au contenu de s'étendre verticalement */
 }
 
 /* Contenu de la page avec marges simulées */
