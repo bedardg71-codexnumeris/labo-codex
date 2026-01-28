@@ -464,6 +464,53 @@ const AIDE_CONTEXTUELLE = {
         voirAussi: ['presences-saisie', 'tableau-bord-apercu']
     },
 
+    // =========================================================================
+    // BIBLIOTHÈQUES - AIDE COMMUNE (ajouté 28 janvier 2026)
+    // =========================================================================
+
+    'bibliotheque-fonctionnement': {
+        titre: "Comment fonctionne la bibliothèque",
+        sections: [
+            {
+                type: 'texte',
+                contenu: "La bibliothèque te permet de gérer ton matériel pédagogique : grilles, échelles, cartouches, pratiques et productions. Tu peux ajouter, retirer, dupliquer, exporter ou supprimer des éléments."
+            },
+            {
+                type: 'liste',
+                titre: "Comprendre les badges de source",
+                items: [
+                    "<strong style='color: #4caf50;'>Locale</strong> : élément que tu as créé ou modifié toi-même",
+                    "<strong style='color: #2196f3;'>Bibliothèque</strong> : élément provenant de la bibliothèque partagée (gabarits)",
+                    "<strong style='color: #ff9800;'>Retirée</strong> : élément retiré de la barre latérale mais conservé dans tes données"
+                ]
+            },
+            {
+                type: 'alerte',
+                niveau: 'important',
+                contenu: "<strong>Retirer ≠ Supprimer</strong><br><br><strong>Retirer</strong> : masque l'élément de la barre latérale, mais il reste dans tes données. Tu peux le réajouter plus tard depuis « Disponibles ».<br><br><strong>Supprimer</strong> : efface définitivement l'élément de tes données. Cette action est irréversible."
+            },
+            {
+                type: 'conseil',
+                contenu: "Utilise <strong>Retirer</strong> pour désencombrer ta barre latérale sans perdre tes configurations. Utilise <strong>Supprimer</strong> uniquement pour les éléments dont tu es certain de ne plus avoir besoin."
+            },
+            {
+                type: 'liste',
+                titre: "Les autres boutons",
+                items: [
+                    "<strong>Dupliquer</strong> : crée une copie indépendante avec un nouvel ID, idéal pour créer une variante",
+                    "<strong>Exporter</strong> : télécharge l'élément en fichier JSON pour le partager ou le sauvegarder",
+                    "<strong>Ajouter</strong> : transfère un élément disponible vers ta barre latérale"
+                ]
+            },
+            {
+                type: 'exemple',
+                titre: "Détection des doublons",
+                contenu: "Si tu vois un avertissement jaune « Doublons détectés », cela signifie que plusieurs éléments portent le même nom. Utilise les ID courts (#abc123) pour les distinguer et supprimer les copies inutiles."
+            }
+        ],
+        voirAussi: ['construction-grilles', 'construction-echelles', 'construction-cartouches', 'construction-pratiques']
+    },
+
     'evaluations-liste': {
         titre: "Historique des évaluations",
         sections: [

@@ -29,7 +29,20 @@
 - **Graphique spaghetti** : Visualisation de l'évolution de tous les étudiants (nouveau Beta 96)
 
 ### Derniere tache completee (28 janvier - Beta 96.1)
-- **GESTION BIBLIOTHÈQUES COMPLÈTE** : Boutons Supprimer et Dupliquer
+- **CORRECTIONS VISUELLES ET UX** (#40-#46)
+  - **Boutons d'aide dans bibliothèques** (#40) : Bouton 😎 ajouté aux 5 bibliothèques
+    - Contenu d'aide expliquant les badges (Locale/Bibliothèque/Retirée) et les boutons
+  - **Uniformisation sidebars** (#41) : Style uniforme pour boutons "Consulter la bibliothèque"
+    - Classe `.sidebar-vide` pour messages vides
+  - **Uniformisation bibliothèques** (#42) : Badges, ID courts, détection doublons
+  - **Z-index modal d'aide** : 10002 (au-dessus des bibliothèques à 10000)
+  - **Doublon bouton cartouches** : Supprimé le bouton HTML dupliqué
+  - **Bouton "Préparer le PDF" productions** : Ajouté pour cohérence avec grilles/échelles/cartouches
+  - **Footer PDF corrigé** : Espacement correct, nom enseignant affiché
+  - **Effet 3D bulles tableaux** : Classe `.bulle-niveau-tableau` (même effet que barres graduées)
+  - **Fichiers modifiés** : `index.html`, `styles.css`, `js/export-pdf.js`, `js/profil-etudiant.js`, `js/aide-contextuelle-contenu.js`, et 5 fichiers bibliothèques
+
+- **GESTION BIBLIOTHÈQUES COMPLÈTE** : Boutons Supprimer et Dupliquer (session précédente)
   - **Bouton Supprimer** : Suppression définitive avec confirmation modale
     - Vérification des dépendances (ex: impossible de supprimer une grille avec cartouches liées)
     - Bouton "Retirer" changé de rouge (btn-supprimer) à gris (btn-secondaire)

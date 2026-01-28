@@ -1565,7 +1565,10 @@ async function afficherBibliothequeProductions() {
                 " onmouseover="this.style.color='#333'" onmouseout="this.style.color='#999'">
                     ×
                 </button>
-                <h2 style="margin-top: 0; color: #2c3e50;">Bibliothèque de productions</h2>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                    <h2 style="margin: 0; color: #2c3e50;">Bibliothèque de productions</h2>
+                    <button class="btn-aide-contextuelle" data-aide="bibliotheque-fonctionnement" title="Comment fonctionne la bibliothèque">😎</button>
+                </div>
                 <p style="color: #7f8c8d; margin-bottom: 20px;">
                     Gérez les productions affichées dans la barre latérale.
                 </p>
@@ -3140,8 +3143,9 @@ async function afficherListeProductions(filtreType = '') {
     }
 
     const html = productionsFiltrees.map(prod => {
-        const titre = prod.titre || prod.description || 'Sans titre';
-        const typeLabel = getTypeLabel(prod.type);
+        const titre = prod.titre || 'Sans titre';
+        // ✅ MODIF (28 janvier 2026) : Afficher l'activité d'apprentissage sous le titre
+        const activite = prod.description || '';
 
         // 🆕 Beta 95.4 : Badges uniformisés avec grilles/échelles
         // Générer badges pratiques compatibles (utilise gabarits-utils.js)
@@ -3157,9 +3161,9 @@ async function afficherListeProductions(filtreType = '') {
         return `
             <div class="sidebar-item" data-id="${prod.id}" onclick="chargerProductionPourModif('${prod.id}')">
                 <div class="sidebar-item-titre">${echapperHtml(titre)}</div>
+                ${activite ? `<div class="sidebar-item-activite">${echapperHtml(activite)}</div>` : ''}
                 <div class="sidebar-item-badges">
                     ${badgesPratiques}
-                    <span class="badge-caracteristique">${typeLabel}</span>
                     ${ponderationBadge}
                 </div>
             </div>

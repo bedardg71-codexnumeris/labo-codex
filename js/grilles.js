@@ -60,6 +60,64 @@
 let critereEnEdition = null;
 
 /* ===============================
+   ✅ AJOUT (28 janvier 2026) : DÉTECTION DES DOUBLONS
+   Fonctions pour identifier les grilles avec des noms similaires
+   =============================== */
+
+/**
+ * Détecter les doublons potentiels dans les grilles
+ * @param {Array} grillesLocales - Grilles de l'utilisateur
+ * @param {Array} grillesBibliotheque - Grilles de la bibliothèque partagée
+ * @returns {Array} Liste des doublons {nom, count, ids}
+ */
+function detecterDoublonsGrilles(grillesLocales, grillesBibliotheque) {
+    const toutesGrilles = [...grillesLocales, ...grillesBibliotheque];
+    const parNom = {};
+
+    toutesGrilles.forEach(grille => {
+        const nom = (grille.nom || '').trim().toLowerCase();
+        if (!nom) return;
+
+        if (!parNom[nom]) {
+            parNom[nom] = { nom: grille.nom, count: 0, ids: [] };
+        }
+        parNom[nom].count++;
+        parNom[nom].ids.push(grille.id);
+    });
+
+    return Object.values(parNom).filter(d => d.count > 1);
+}
+
+/**
+ * Générer un badge de source pour une grille
+ * @param {Object} grille - La grille
+ * @param {Array} grillesLocales - Grilles locales pour vérifier la source
+ * @returns {string} HTML du badge
+ */
+function genererBadgeSourceGrille(grille, grillesLocales) {
+    const estLocale = grillesLocales.some(g => g.id === grille.id);
+    const estRetiree = grille.dansBibliotheque === false;
+
+    if (estRetiree) {
+        return '<span style="background: #ff9800; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em; margin-left: 6px;">Retirée</span>';
+    } else if (estLocale) {
+        return '<span style="background: #4caf50; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em; margin-left: 6px;">Locale</span>';
+    } else {
+        return '<span style="background: #2196f3; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em; margin-left: 6px;">Bibliothèque</span>';
+    }
+}
+
+/**
+ * Générer un ID court pour affichage
+ * @param {string} id - L'ID complet
+ * @returns {string} Les 6 derniers caractères
+ */
+function genererIdCourtGrille(id) {
+    if (!id || id.length < 6) return id || '?';
+    return id.slice(-6);
+}
+
+/* ===============================
    FONCTION: CHARGER LISTE GRILLES
    Charge les grilles dans le select
    ⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json
@@ -2127,6 +2185,9 @@ async function afficherBibliothequeGrilles() {
     const grillesDansBibliotheque = grilles.filter(g => g.dansBibliotheque !== false);
     const grillesDisponibles = await obtenirToutesLesGrillesBibliotheque();
 
+    // ✅ AJOUT (28 janvier 2026) : Détecter les doublons
+    const doublonsDetectes = detecterDoublonsGrilles(grillesDansBibliotheque, grillesDisponibles);
+
     // Obtenir les disciplines disponibles
     const disciplines = obtenirDisciplinesDisponiblesGrilles();
 
@@ -2174,11 +2235,36 @@ async function afficherBibliothequeGrilles() {
                 " onmouseover="this.style.color='#333'" onmouseout="this.style.color='#999'">
                     ×
                 </button>
-                <h2 style="margin-top: 0; color: #2c3e50;">Bibliothèque de grilles de critères</h2>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                    <h2 style="margin: 0; color: #2c3e50;">Bibliothèque de grilles de critères</h2>
+                    <button class="btn-aide-contextuelle" data-aide="bibliotheque-fonctionnement" title="Comment fonctionne la bibliothèque">😎</button>
+                </div>
                 <p style="color: #7f8c8d; margin-bottom: 20px;">
                     Gérez les grilles de critères affichées dans la barre latérale.
                 </p>
+    `;
 
+    // ✅ AJOUT (28 janvier 2026) : Afficher avertissement doublons
+    if (doublonsDetectes.length > 0) {
+        html += `
+                <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 15px; margin-bottom: 20px;">
+                    <div style="font-weight: bold; color: #856404; margin-bottom: 8px;">
+                        ⚠️ ${doublonsDetectes.length} doublon(s) potentiel(s) détecté(s)
+                    </div>
+                    <p style="color: #856404; font-size: 0.9em; margin: 0 0 10px 0;">
+                        Des grilles avec des noms similaires existent en plusieurs exemplaires.
+                    </p>
+                    <details style="color: #856404; font-size: 0.85em;">
+                        <summary style="cursor: pointer; font-weight: 500;">Voir les détails</summary>
+                        <ul style="margin: 10px 0 0 0; padding-left: 20px;">
+                            ${doublonsDetectes.map(d => `<li><strong>${d.nom}</strong> : ${d.count} exemplaires (IDs: ${d.ids.map(id => '#' + genererIdCourtGrille(id)).join(', ')})</li>`).join('')}
+                        </ul>
+                    </details>
+                </div>
+        `;
+    }
+
+    html += `
                 <!-- Section 1 : Grilles dans votre sélection -->
                 <h3 style="color: var(--bleu-clair); font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
                     Grilles dans la barre latérale
@@ -2195,6 +2281,10 @@ async function afficherBibliothequeGrilles() {
             const nbCriteres = grille.criteres?.length || 0;
             const discipline = grille.discipline || '';
             const auteurOriginal = grille.auteurOriginal || '';
+            // ✅ AJOUT (28 janvier 2026) : ID court pour identifier les doublons
+            const idCourt = genererIdCourtGrille(grille.id);
+            // ✅ AJOUT (28 janvier 2026) : Badge source
+            const badgeSource = genererBadgeSourceGrille(grille, grillesDansBibliotheque);
 
             html += `
                 <div style="
@@ -2209,6 +2299,8 @@ async function afficherBibliothequeGrilles() {
                             <div style="font-weight: bold; color: #2c3e50; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
                                 ${typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(grille) : ''}
                                 ${nomGrille}
+                                <span style="background: #e0e0e0; color: #666; padding: 2px 6px; border-radius: 3px; font-size: 0.7em; font-family: monospace;" title="ID: ${grille.id}">#${idCourt}</span>
+                                ${badgeSource}
                             </div>
                             <div style="color: #7f8c8d; font-size: 0.9em;">
                                 ${nbCriteres} critère(s)${discipline ? ' • ' + discipline : ''}${auteurOriginal ? ' • ' + auteurOriginal : ''}
@@ -2308,6 +2400,10 @@ async function afficherBibliothequeGrilles() {
             const nbCriteres = grille.criteres?.length || 0;
             const description = grille.description || '';
             const auteur = grille.auteur || '';
+            // ✅ AJOUT (28 janvier 2026) : ID court pour identifier les doublons
+            const idCourt = genererIdCourtGrille(grille.id);
+            // ✅ AJOUT (28 janvier 2026) : Badge source (grilles disponibles = bibliothèque)
+            const badgeSource = genererBadgeSourceGrille(grille, grillesDansBibliotheque);
 
             // Vérifier si déjà dans la bibliothèque
             const dejaPresent = grilles.some(g => g.id === grille.id && g.dansBibliotheque !== false);
@@ -2329,6 +2425,8 @@ async function afficherBibliothequeGrilles() {
                         <div style="font-weight: 500; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
                             ${typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(grille) : ''}
                             ${nomGrille}
+                            <span style="background: #e0e0e0; color: #666; padding: 2px 6px; border-radius: 3px; font-size: 0.7em; font-family: monospace;" title="ID: ${grille.id}">#${idCourt}</span>
+                            ${badgeSource}
                         </div>
                         <div style="font-size: 0.85rem; color: #666; margin-bottom: 4px;">
                             ${nbCriteres} critère(s)${auteur ? ' • ' + auteur : ''}

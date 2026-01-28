@@ -1475,11 +1475,17 @@
             z-index: 0;
         }
 
+        /* BETA 96.1: Bulles avec effet 3D harmonisé avec tableau de bord */
         .bulle {
             position: absolute;
             border-radius: 50%;
             animation: floatUp 30s infinite linear;
-            opacity: 0.35;
+            opacity: 0.5;
+            /* Effet 3D: ombre décentrée simulant lumière gauche→droite */
+            box-shadow:
+                1.5px 1.5px 3px rgba(0, 0, 0, 0.25),
+                inset -0.5px -0.5px 1px rgba(0, 0, 0, 0.1),
+                inset 0.5px 0.5px 1px rgba(255, 255, 255, 0.3);
         }
 
         /* Tailles variées */
@@ -1498,21 +1504,21 @@
             height: 16px;
         }
 
-        /* Couleurs des 4 pratiques (codes 3 lettres) */
+        /* Couleurs des 4 pratiques avec dégradé 3D */
         .bulle.som {
-            background: var(--som-orange);
+            background: linear-gradient(135deg, #ffb74d 0%, var(--som-orange) 100%);
         }
 
         .bulle.std {
-            background: var(--std-bleu);
+            background: linear-gradient(135deg, #64b5f6 0%, var(--std-bleu) 100%);
         }
 
         .bulle.spe {
-            background: var(--spe-vert);
+            background: linear-gradient(135deg, #81c784 0%, var(--spe-vert) 100%);
         }
 
         .bulle.den {
-            background: var(--den-violet);
+            background: linear-gradient(135deg, #ba68c8 0%, var(--den-violet) 100%);
         }
 
         /* Animation organique comme du pollen - mouvement fluide continu avec courbes */
@@ -4644,7 +4650,7 @@
                             <div class="sidebar-nav-buttons" style="margin-bottom: 15px;">
                                 <button onclick="afficherBibliothequeProductions()"
                                         class="btn btn-principal"
-                                        style="width: 100%;"
+                                        style="width: 100%; font-size: 0.9rem;"
                                         title="Consulter la bibliothèque de productions">
                                     Consulter la bibliothèque
                                 </button>
@@ -4663,8 +4669,11 @@
 
                             <!-- Boutons actions en haut à droite -->
                             <div style="margin-bottom: 20px; text-align: right; display: flex; gap: 10px; justify-content: flex-end;">
+                                <button onclick="afficherFormulairePDFDepuisProduction()" class="btn btn-secondaire" title="Préparer un PDF avec une grille de critères">
+                                    📄 Préparer le PDF
+                                </button>
                                 <button id="btnExporterProductionsPDF" onclick="exporterProductionsEnPDF()" class="btn btn-secondaire btn-export-pdf" title="Exporter la liste des productions en PDF">
-                                    📄 Exporter PDF
+                                    📄 Exporter liste PDF
                                 </button>
                                 <button onclick="creerNouvelleProduction()" class="btn btn-principal">
                                     + Nouvelle production
@@ -6187,10 +6196,9 @@
 
                             <!-- SIDEBAR GAUCHE (280px, sticky) -->
                             <div class="sidebar-navigation">
-
-                                <!-- Liste des cartouches -->
+                                <!-- Liste des cartouches (bouton bibliothèque généré par cartouches.js) -->
                                 <div class="sidebar-liste" id="listeCartouchesBanque">
-                                    <p class="banque-vide">Chargement...</p>
+                                    <p class="sidebar-vide">Chargement...</p>
                                 </div>
                             </div>
 
