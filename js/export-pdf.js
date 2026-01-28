@@ -2564,58 +2564,36 @@ async function exporterPDFDepuisApercu() {
 
 /**
  * Affiche le formulaire PDF depuis la section Echelles
- * Recupere l'echelle selectionnee et navigue vers Grilles
+ * BETA 96.1: Ouvre le modal au lieu de naviguer
  */
 async function afficherFormulairePDFDepuisEchelle() {
     const echelleId = (typeof echelleTemplateActuelle !== 'undefined' && echelleTemplateActuelle?.id)
         ? echelleTemplateActuelle.id
         : null;
 
-    // Naviguer vers la section Construction → Grilles pour afficher le formulaire
-    if (typeof afficherSection === 'function') {
-        afficherSection('construction');
-    }
-    if (typeof afficherSousSection === 'function') {
-        afficherSousSection('construction-grille-criteres');
-    }
-
-    // Petit delai pour laisser la navigation se faire
-    setTimeout(async () => {
-        await afficherFormulairePreparationPDF({
-            echelleId: echelleId
-        });
-    }, 100);
+    await ouvrirModalPreparationPDF({
+        echelleId: echelleId
+    });
 }
 
 /**
  * Affiche le formulaire PDF depuis la section Cartouches
- * Recupere la grille et la cartouche selectionnees
+ * BETA 96.1: Ouvre le modal au lieu de naviguer
  */
 async function afficherFormulairePDFDepuisCartouche() {
     const grilleId = document.getElementById('selectGrilleCartouche')?.value ||
                      document.getElementById('selectGrilleRetroaction')?.value;
     const cartoucheId = document.getElementById('selectCartouche')?.value;
 
-    // Naviguer vers la section Construction → Grilles pour afficher le formulaire
-    if (typeof afficherSection === 'function') {
-        afficherSection('construction');
-    }
-    if (typeof afficherSousSection === 'function') {
-        afficherSousSection('construction-grille-criteres');
-    }
-
-    // Petit delai pour laisser la navigation se faire
-    setTimeout(async () => {
-        await afficherFormulairePreparationPDF({
-            grilleId: grilleId,
-            cartoucheId: cartoucheId
-        });
-    }, 100);
+    await ouvrirModalPreparationPDF({
+        grilleId: grilleId,
+        cartoucheId: cartoucheId
+    });
 }
 
 /**
  * BETA 96.1: Affiche le formulaire PDF depuis la section Productions
- * Recupere la production selectionnee et navigue vers Grilles
+ * Ouvre le modal au lieu de naviguer
  */
 async function afficherFormulairePDFDepuisProduction() {
     // Récupérer la production sélectionnée (si disponible)
@@ -2623,20 +2601,188 @@ async function afficherFormulairePDFDepuisProduction() {
         ? productionEnEdition
         : null;
 
-    // Naviguer vers la section Construction → Grilles pour afficher le formulaire
-    if (typeof afficherSection === 'function') {
-        afficherSection('construction');
+    await ouvrirModalPreparationPDF({
+        productionId: productionId
+    });
+}
+
+// =============================================================================
+// MODAL DE PRÉPARATION PDF (Beta 96.1)
+// Modal global accessible depuis toutes les sections
+// =============================================================================
+
+/**
+ * Ouvre le modal de préparation PDF
+ * @param {Object} options - Options de pré-sélection (productionId, grilleId, echelleId, cartoucheId)
+ */
+async function ouvrirModalPreparationPDF(options = {}) {
+    const modal = document.getElementById('modalPreparationPDF');
+    if (!modal) return;
+
+    // Charger les options des dropdowns
+    await chargerOptionsModalPDF();
+
+    // Pré-sélectionner les valeurs si fournies
+    if (options.productionId) {
+        const selectProd = document.getElementById('modalPDF-production');
+        if (selectProd) selectProd.value = options.productionId;
     }
-    if (typeof afficherSousSection === 'function') {
-        afficherSousSection('construction-grille-criteres');
+    if (options.grilleId) {
+        const selectGrille = document.getElementById('modalPDF-grille');
+        if (selectGrille) selectGrille.value = options.grilleId;
+    }
+    if (options.echelleId) {
+        const selectEchelle = document.getElementById('modalPDF-echelle');
+        if (selectEchelle) selectEchelle.value = options.echelleId;
+    }
+    if (options.cartoucheId) {
+        const selectCartouche = document.getElementById('modalPDF-cartouche');
+        if (selectCartouche) selectCartouche.value = options.cartoucheId;
     }
 
-    // Petit délai pour laisser la navigation se faire
-    setTimeout(async () => {
-        await afficherFormulairePreparationPDF({
-            productionId: productionId
-        });
-    }, 100);
+    // Mettre à jour l'affichage des options
+    mettreAJourOptionsModalPDF();
+
+    // Afficher le modal
+    modal.style.display = 'flex';
+}
+
+/**
+ * Ferme le modal de préparation PDF
+ */
+function fermerModalPreparationPDF() {
+    const modal = document.getElementById('modalPreparationPDF');
+    if (modal) modal.style.display = 'none';
+}
+
+/**
+ * Charge les options dans les dropdowns du modal
+ */
+async function chargerOptionsModalPDF() {
+    // Charger les productions
+    const selectProd = document.getElementById('modalPDF-production');
+    if (selectProd) {
+        const cleProductions = (typeof cle === 'function') ? cle('productionsPedagogiques') : 'productions';
+        const productions = await db.get(cleProductions) || [];
+        selectProd.innerHTML = '<option value="">-- Aucune (grille générique) --</option>' +
+            productions.map(p => `<option value="${p.id}">${p.titre}${p.description ? ' - ' + p.description : ''}</option>`).join('');
+    }
+
+    // Charger les grilles
+    const selectGrille = document.getElementById('modalPDF-grille');
+    if (selectGrille) {
+        const grilles = await db.get('grillesTemplates') || [];
+        selectGrille.innerHTML = '<option value="">-- Sélectionner --</option>' +
+            grilles.map(g => `<option value="${g.id}">${g.nom}</option>`).join('');
+    }
+
+    // Charger les échelles
+    const selectEchelle = document.getElementById('modalPDF-echelle');
+    if (selectEchelle) {
+        const echelles = await db.get('echellesTemplates') || [];
+        selectEchelle.innerHTML = '<option value="">-- Sélectionner --</option>' +
+            echelles.map(e => `<option value="${e.id}">${e.nom}</option>`).join('');
+    }
+}
+
+/**
+ * Met à jour l'affichage des options du modal selon les sélections
+ */
+async function mettreAJourOptionsModalPDF() {
+    const productionId = document.getElementById('modalPDF-production')?.value;
+    const grilleId = document.getElementById('modalPDF-grille')?.value;
+    const echelleId = document.getElementById('modalPDF-echelle')?.value;
+
+    // Afficher/masquer les options de production
+    const optionsProd = document.getElementById('modalPDF-options-production');
+    if (optionsProd) {
+        optionsProd.style.display = productionId ? 'block' : 'none';
+    }
+
+    // Charger les cartouches si une grille est sélectionnée
+    const sectionCartouche = document.getElementById('modalPDF-section-cartouche');
+    const selectCartouche = document.getElementById('modalPDF-cartouche');
+    if (grilleId && selectCartouche) {
+        const cartouches = await db.get(`cartouches_${grilleId}`) || [];
+        if (cartouches.length > 0) {
+            selectCartouche.innerHTML = '<option value="">-- Sans rétroaction --</option>' +
+                cartouches.map(c => `<option value="${c.id}">${c.nom || 'Cartouche sans nom'}</option>`).join('');
+            if (sectionCartouche) sectionCartouche.style.display = 'block';
+        } else {
+            if (sectionCartouche) sectionCartouche.style.display = 'none';
+        }
+    } else {
+        if (sectionCartouche) sectionCartouche.style.display = 'none';
+    }
+
+    // Activer/désactiver le bouton aperçu
+    const btnApercu = document.getElementById('modalPDF-btn-apercu');
+    if (btnApercu) {
+        btnApercu.disabled = !(grilleId && echelleId);
+    }
+}
+
+/**
+ * Ouvre l'aperçu PDF depuis le modal de préparation
+ */
+async function ouvrirApercuPDFDepuisModal() {
+    const productionId = document.getElementById('modalPDF-production')?.value;
+    const grilleId = document.getElementById('modalPDF-grille')?.value;
+    const echelleId = document.getElementById('modalPDF-echelle')?.value;
+    const cartoucheId = document.getElementById('modalPDF-cartouche')?.value;
+
+    if (!grilleId || !echelleId) {
+        alert('Veuillez sélectionner une grille et une échelle.');
+        return;
+    }
+
+    // Récupérer les données
+    const grilles = await db.get('grillesTemplates') || [];
+    const echelles = await db.get('echellesTemplates') || [];
+    const grille = grilles.find(g => g.id === grilleId);
+    const echelle = echelles.find(e => e.id === echelleId);
+
+    let production = null;
+    if (productionId) {
+        const cleProductions = (typeof cle === 'function') ? cle('productionsPedagogiques') : 'productions';
+        const productions = await db.get(cleProductions) || [];
+        production = productions.find(p => p.id === productionId);
+    }
+
+    let cartouche = null;
+    if (cartoucheId && grilleId) {
+        const cartouches = await db.get(`cartouches_${grilleId}`) || [];
+        cartouche = cartouches.find(c => c.id === cartoucheId);
+    }
+
+    // Charger les infos pour le pied de page
+    const nomEnseignant = obtenirNomEnseignantPDF();
+    const infosCours = obtenirInfosCoursPDF();
+    const nomCours = infosCours.sigleTitre;
+
+    // Stocker les données pour l'aperçu
+    _apercuPDFData = {
+        grille: grille,
+        echelle: echelle,
+        cartouche: cartouche,
+        production: production,
+        inclureNomProduction: document.getElementById('modalPDF-prod-nom')?.checked,
+        inclureObjectif: document.getElementById('modalPDF-prod-objectif')?.checked,
+        inclureDescription: document.getElementById('modalPDF-prod-description')?.checked,
+        inclureDescCriteres: document.getElementById('modalPDF-desc-criteres')?.checked,
+        nomEnseignant: nomEnseignant,
+        nomCours: nomCours
+    };
+
+    // Fermer le modal de préparation
+    fermerModalPreparationPDF();
+
+    // Ouvrir le modal d'aperçu (réutilise la fonction existante)
+    const modalApercu = document.getElementById('modalApercuPDF');
+    if (modalApercu) {
+        modalApercu.style.display = 'flex';
+        rafraichirApercuPDF();
+    }
 }
 
 // Exposer les nouvelles fonctions globalement
@@ -2651,5 +2797,11 @@ window.exporterPDFDepuisApercu = exporterPDFDepuisApercu;
 window.afficherFormulairePDFDepuisEchelle = afficherFormulairePDFDepuisEchelle;
 window.afficherFormulairePDFDepuisCartouche = afficherFormulairePDFDepuisCartouche;
 window.afficherFormulairePDFDepuisProduction = afficherFormulairePDFDepuisProduction;
+// Modal de préparation PDF (Beta 96.1)
+window.ouvrirModalPreparationPDF = ouvrirModalPreparationPDF;
+window.fermerModalPreparationPDF = fermerModalPreparationPDF;
+window.chargerOptionsModalPDF = chargerOptionsModalPDF;
+window.mettreAJourOptionsModalPDF = mettreAJourOptionsModalPDF;
+window.ouvrirApercuPDFDepuisModal = ouvrirApercuPDFDepuisModal;
 
 console.log('[export-pdf.js] Module charge - jsPDF disponible:', typeof window.jspdf !== 'undefined');
