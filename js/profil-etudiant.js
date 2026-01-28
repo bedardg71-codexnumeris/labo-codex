@@ -4170,17 +4170,8 @@ function genererTableauObjectifs(da, ensembleId, noteFinaleMultiObjectifs) {
                                     ` : `<span style="color: #999;">--</span>`}
                                 </td>
                                 <td style="text-align: center; padding: 12px;">
-                                    <span style="
-                                        display: inline-block;
-                                        width: 32px;
-                                        height: 32px;
-                                        line-height: 32px;
-                                        border-radius: 50%;
-                                        background: ${couleurNiveau};
-                                        color: white;
-                                        font-weight: bold;
-                                        font-size: 1rem;
-                                    ">
+                                    <!-- BETA 96.1: Bulle avec effet 3D -->
+                                    <span class="bulle-niveau-tableau">
                                         ${niveau}
                                     </span>
                                 </td>

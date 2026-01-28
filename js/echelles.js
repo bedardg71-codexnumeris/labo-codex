@@ -152,6 +152,64 @@ const paletteCouleurs = [
 let echelleTemplateActuelle = null;
 
 /* ===============================
+   ✅ AJOUT (28 janvier 2026) : DÉTECTION DES DOUBLONS
+   Fonctions pour identifier les échelles avec des noms similaires
+   =============================== */
+
+/**
+ * Détecter les doublons potentiels dans les échelles
+ * @param {Array} echellesLocales - Échelles de l'utilisateur
+ * @param {Array} echellesBibliotheque - Échelles de la bibliothèque partagée
+ * @returns {Array} Liste des doublons {nom, count, ids}
+ */
+function detecterDoublonsEchelles(echellesLocales, echellesBibliotheque) {
+    const toutesEchelles = [...echellesLocales, ...echellesBibliotheque];
+    const parNom = {};
+
+    toutesEchelles.forEach(echelle => {
+        const nom = (echelle.nom || '').trim().toLowerCase();
+        if (!nom) return;
+
+        if (!parNom[nom]) {
+            parNom[nom] = { nom: echelle.nom, count: 0, ids: [] };
+        }
+        parNom[nom].count++;
+        parNom[nom].ids.push(echelle.id);
+    });
+
+    return Object.values(parNom).filter(d => d.count > 1);
+}
+
+/**
+ * Générer un badge de source pour une échelle
+ * @param {Object} echelle - L'échelle
+ * @param {Array} echellesLocales - Échelles locales pour vérifier la source
+ * @returns {string} HTML du badge
+ */
+function genererBadgeSourceEchelle(echelle, echellesLocales) {
+    const estLocale = echellesLocales.some(e => e.id === echelle.id);
+    const estRetiree = echelle.dansBibliotheque === false;
+
+    if (estRetiree) {
+        return '<span style="background: #ff9800; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em; margin-left: 6px;">Retirée</span>';
+    } else if (estLocale) {
+        return '<span style="background: #4caf50; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em; margin-left: 6px;">Locale</span>';
+    } else {
+        return '<span style="background: #2196f3; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em; margin-left: 6px;">Bibliothèque</span>';
+    }
+}
+
+/**
+ * Générer un ID court pour affichage
+ * @param {string} id - L'ID complet
+ * @returns {string} Les 6 derniers caractères
+ */
+function genererIdCourtEchelle(id) {
+    if (!id || id.length < 6) return id || '?';
+    return id.slice(-6);
+}
+
+/* ===============================
    NOUVELLE VUE HIÉRARCHIQUE
    Affichage toutes les échelles avec leurs niveaux
    =============================== */
@@ -2372,6 +2430,9 @@ async function afficherBibliothequeEchelles() {
     const echellesDansBibliotheque = echelles.filter(e => e.dansBibliotheque !== false);
     const echellesDisponibles = await obtenirToutesLesEchellesBibliotheque();
 
+    // ✅ AJOUT (28 janvier 2026) : Détecter les doublons
+    const doublonsDetectes = detecterDoublonsEchelles(echellesDansBibliotheque, echellesDisponibles);
+
     // Obtenir les disciplines disponibles
     const disciplines = obtenirDisciplinesDisponiblesEchelles();
 
@@ -2419,11 +2480,36 @@ async function afficherBibliothequeEchelles() {
                 " onmouseover="this.style.color='#333'" onmouseout="this.style.color='#999'">
                     ×
                 </button>
-                <h2 style="margin-top: 0; color: #2c3e50;">Bibliothèque d'échelles de performance</h2>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                    <h2 style="margin: 0; color: #2c3e50;">Bibliothèque d'échelles de performance</h2>
+                    <button class="btn-aide-contextuelle" data-aide="bibliotheque-fonctionnement" title="Comment fonctionne la bibliothèque">😎</button>
+                </div>
                 <p style="color: #7f8c8d; margin-bottom: 20px;">
                     Gérez les échelles de performance affichées dans la barre latérale.
                 </p>
+    `;
 
+    // ✅ AJOUT (28 janvier 2026) : Afficher avertissement doublons
+    if (doublonsDetectes.length > 0) {
+        html += `
+                <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 15px; margin-bottom: 20px;">
+                    <div style="font-weight: bold; color: #856404; margin-bottom: 8px;">
+                        ⚠️ ${doublonsDetectes.length} doublon(s) potentiel(s) détecté(s)
+                    </div>
+                    <p style="color: #856404; font-size: 0.9em; margin: 0 0 10px 0;">
+                        Des échelles avec des noms similaires existent en plusieurs exemplaires.
+                    </p>
+                    <details style="color: #856404; font-size: 0.85em;">
+                        <summary style="cursor: pointer; font-weight: 500;">Voir les détails</summary>
+                        <ul style="margin: 10px 0 0 0; padding-left: 20px;">
+                            ${doublonsDetectes.map(d => `<li><strong>${d.nom}</strong> : ${d.count} exemplaires (IDs: ${d.ids.map(id => '#' + genererIdCourtEchelle(id)).join(', ')})</li>`).join('')}
+                        </ul>
+                    </details>
+                </div>
+        `;
+    }
+
+    html += `
                 <!-- Section 1 : Échelles dans votre sélection -->
                 <h3 style="color: var(--bleu-clair); font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
                     Échelles dans la barre latérale
@@ -2440,6 +2526,10 @@ async function afficherBibliothequeEchelles() {
             const nbNiveaux = echelle.niveaux?.length || 0;
             const discipline = echelle.discipline || '';
             const auteurOriginal = echelle.auteurOriginal || '';
+            // ✅ AJOUT (28 janvier 2026) : ID court pour identifier les doublons
+            const idCourt = genererIdCourtEchelle(echelle.id);
+            // ✅ AJOUT (28 janvier 2026) : Badge source
+            const badgeSource = genererBadgeSourceEchelle(echelle, echellesDansBibliotheque);
 
             html += `
                 <div style="
@@ -2454,6 +2544,8 @@ async function afficherBibliothequeEchelles() {
                             <div style="font-weight: bold; color: #2c3e50; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
                                 ${typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(echelle) : ''}
                                 ${nomEchelle}
+                                <span style="background: #e0e0e0; color: #666; padding: 2px 6px; border-radius: 3px; font-size: 0.7em; font-family: monospace;" title="ID: ${echelle.id}">#${idCourt}</span>
+                                ${badgeSource}
                             </div>
                             <div style="color: #7f8c8d; font-size: 0.9em;">
                                 ${nbNiveaux} niveau(x)${discipline ? ' • ' + discipline : ''}${auteurOriginal ? ' • ' + auteurOriginal : ''}
@@ -2608,6 +2700,10 @@ async function afficherBibliothequeEchelles() {
             const nbNiveaux = echelle.niveaux?.length || 0;
             const description = echelle.description || '';
             const auteur = echelle.auteur || '';
+            // ✅ AJOUT (28 janvier 2026) : ID court pour identifier les doublons
+            const idCourt = genererIdCourtEchelle(echelle.id);
+            // ✅ AJOUT (28 janvier 2026) : Badge source (échelles disponibles = bibliothèque)
+            const badgeSource = genererBadgeSourceEchelle(echelle, echellesDansBibliotheque);
 
             // Obtenir les pratiques de l'échelle
             const pratiques = echelle.pratiques || (echelle.gabaritType ? [echelle.gabaritType] : ['all']);
@@ -2651,6 +2747,8 @@ async function afficherBibliothequeEchelles() {
                         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
                             ${badgesPratiques}
                             <span style="font-weight: 500;">${nomEchelle}</span>
+                            <span style="background: #e0e0e0; color: #666; padding: 2px 6px; border-radius: 3px; font-size: 0.7em; font-family: monospace;" title="ID: ${echelle.id}">#${idCourt}</span>
+                            ${badgeSource}
                             ${estGabarit ? '<span style="font-size: 0.7rem; color: #6f42c1; font-weight: 500;">(gabarit)</span>' : ''}
                         </div>
                         <div style="font-size: 0.85rem; color: #666; margin-bottom: 4px;">

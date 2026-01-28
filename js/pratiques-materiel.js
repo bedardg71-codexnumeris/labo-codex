@@ -30,6 +30,64 @@ let pratiqueEnEditionMateriel = null;
 let enChargementFormulaire = false;
 
 /* ===============================
+   ✅ AJOUT (28 janvier 2026) : DÉTECTION DES DOUBLONS
+   Fonctions pour identifier les pratiques avec des noms similaires
+   =============================== */
+
+/**
+ * Détecter les doublons potentiels dans les pratiques
+ * @param {Array} pratiquesLocales - Pratiques de l'utilisateur
+ * @param {Array} pratiquesBibliotheque - Pratiques de la bibliothèque partagée
+ * @returns {Array} Liste des doublons {nom, count, ids}
+ */
+function detecterDoublonsPratiques(pratiquesLocales, pratiquesBibliotheque) {
+    const toutesPratiques = [...pratiquesLocales, ...pratiquesBibliotheque];
+    const parNom = {};
+
+    toutesPratiques.forEach(pratique => {
+        const nom = (pratique.nom || '').trim().toLowerCase();
+        if (!nom) return;
+
+        if (!parNom[nom]) {
+            parNom[nom] = { nom: pratique.nom, count: 0, ids: [] };
+        }
+        parNom[nom].count++;
+        parNom[nom].ids.push(pratique.id);
+    });
+
+    return Object.values(parNom).filter(d => d.count > 1);
+}
+
+/**
+ * Générer un badge de source pour une pratique
+ * @param {Object} pratique - La pratique
+ * @param {Array} pratiquesLocales - Pratiques locales pour vérifier la source
+ * @returns {string} HTML du badge
+ */
+function genererBadgeSourcePratique(pratique, pratiquesLocales) {
+    const estLocale = pratiquesLocales.some(p => p.id === pratique.id);
+    const estRetiree = pratique.dansBibliotheque === false;
+
+    if (estRetiree) {
+        return '<span style="background: #ff9800; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em; margin-left: 6px;">Retirée</span>';
+    } else if (estLocale) {
+        return '<span style="background: #4caf50; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em; margin-left: 6px;">Locale</span>';
+    } else {
+        return '<span style="background: #2196f3; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em; margin-left: 6px;">Bibliothèque</span>';
+    }
+}
+
+/**
+ * Générer un ID court pour affichage
+ * @param {string} id - L'ID complet
+ * @returns {string} Les 6 derniers caractères
+ */
+function genererIdCourtPratique(id) {
+    if (!id || id.length < 6) return id || '?';
+    return id.slice(-6);
+}
+
+/* ===============================
    INITIALISATION DU MODULE
    =============================== */
 
@@ -233,6 +291,9 @@ async function afficherBibliothequePratiques() {
         pratiquesDisponibles = await obtenirToutesLesPratiquesBibliotheque();
     }
 
+    // ✅ AJOUT (28 janvier 2026) : Détecter les doublons
+    const doublonsDetectes = detecterDoublonsPratiques(pratiquesDansBibliotheque, pratiquesDisponibles);
+
     // Obtenir les disciplines disponibles
     let disciplines = [];
     if (typeof obtenirDisciplinesDisponiblesPratiques === 'function') {
@@ -284,11 +345,36 @@ async function afficherBibliothequePratiques() {
                 " onmouseover="this.style.color='#333'" onmouseout="this.style.color='#999'">
                     ×
                 </button>
-                <h2 style="margin-top: 0; color: #2c3e50;">Bibliothèque de pratiques de notation</h2>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                    <h2 style="margin: 0; color: #2c3e50;">Bibliothèque de pratiques de notation</h2>
+                    <button class="btn-aide-contextuelle" data-aide="bibliotheque-fonctionnement" title="Comment fonctionne la bibliothèque">😎</button>
+                </div>
                 <p style="color: #7f8c8d; margin-bottom: 15px;">
                     Gérez les pratiques affichées dans la barre latérale.
                 </p>
+    `;
 
+    // ✅ AJOUT (28 janvier 2026) : Afficher avertissement doublons
+    if (doublonsDetectes.length > 0) {
+        html += `
+                <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 15px; margin-bottom: 20px;">
+                    <div style="font-weight: bold; color: #856404; margin-bottom: 8px;">
+                        ⚠️ ${doublonsDetectes.length} doublon(s) potentiel(s) détecté(s)
+                    </div>
+                    <p style="color: #856404; font-size: 0.9em; margin: 0 0 10px 0;">
+                        Des pratiques avec des noms similaires existent en plusieurs exemplaires.
+                    </p>
+                    <details style="color: #856404; font-size: 0.85em;">
+                        <summary style="cursor: pointer; font-weight: 500;">Voir les détails</summary>
+                        <ul style="margin: 10px 0 0 0; padding-left: 20px;">
+                            ${doublonsDetectes.map(d => `<li><strong>${d.nom}</strong> : ${d.count} exemplaires (IDs: ${d.ids.map(id => '#' + genererIdCourtPratique(id)).join(', ')})</li>`).join('')}
+                        </ul>
+                    </details>
+                </div>
+        `;
+    }
+
+    html += `
                 <!-- 🆕 Beta 95.7 : Message aide édition -->
                 <div style="background: var(--bleu-tres-pale, #e8f4f8); border-left: 3px solid var(--bleu-clair, #5dade2); padding: 10px 15px; margin-bottom: 20px; border-radius: 0 6px 6px 0;">
                     <p style="margin: 0; font-size: 0.9rem; color: var(--texte-secondaire, #555);">
@@ -311,6 +397,9 @@ async function afficherBibliothequePratiques() {
             const badge = genererBadgeTypePratique(pratique);
             const nomPratique = pratique.nom || 'Sans titre';
             const discipline = pratique.discipline || '';
+            const idCourt = genererIdCourtPratique(pratique.id);
+            // ✅ AJOUT (28 janvier 2026) : Badge source
+            const badgeSource = genererBadgeSourcePratique(pratique, pratiquesDansBibliotheque);
 
             html += `
                 <div style="
@@ -325,6 +414,8 @@ async function afficherBibliothequePratiques() {
                             <div style="font-weight: bold; color: #2c3e50; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
                                 ${badge}
                                 ${nomPratique}
+                                <span style="background: #e0e0e0; color: #666; padding: 2px 6px; border-radius: 3px; font-size: 0.7em; font-family: monospace;" title="ID: ${pratique.id}">#${idCourt}</span>
+                                ${badgeSource}
                             </div>
                             <div style="color: #7f8c8d; font-size: 0.9em;">
                                 ${pratique.description || ''}${discipline ? ' • ' + discipline : ''}
@@ -438,6 +529,9 @@ async function afficherBibliothequePratiques() {
             const nomPratique = pratique.nom || 'Sans titre';
             const estGabarit = pratique.estGabarit;
             const discipline = pratique.discipline || '';
+            const idCourt = genererIdCourtPratique(pratique.id);
+            // ✅ AJOUT (28 janvier 2026) : Badge source (pratiques disponibles = bibliothèque)
+            const badgeSource = genererBadgeSourcePratique(pratique, pratiquesDansBibliotheque);
 
             html += `
                 <div class="pratique-dispo-item"
@@ -455,6 +549,8 @@ async function afficherBibliothequePratiques() {
                             <div style="font-weight: bold; color: #2c3e50; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
                                 ${badge}
                                 ${nomPratique}
+                                <span style="background: #e0e0e0; color: #666; padding: 2px 6px; border-radius: 3px; font-size: 0.7em; font-family: monospace;" title="ID: ${pratique.id}">#${idCourt}</span>
+                                ${badgeSource}
                                 ${estGabarit ? '<span style="background: #f39c12; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.7em;">Gabarit</span>' : ''}
                             </div>
                             <div style="color: #7f8c8d; font-size: 0.9em;">

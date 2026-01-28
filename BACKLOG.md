@@ -69,6 +69,47 @@
   - Ajouter aides pour cas d'erreur frequents
   - Pas seulement les sections, aussi les messages d'erreur
 
+- [x] **#43** Apercu avant impression fidele au PDF final ✅ FAIT (28 jan 2026)
+  - Correction des en-têtes de niveaux : fond blanc comme le PDF (au lieu de gris)
+  - Alignement des styles avec le rendu PDF final
+  - **Fichier modifie** : `js/export-pdf.js`
+
+- [x] **#44** Effet 3D sur les bulles du tableau de bord ✅ FAIT (28 jan 2026)
+  - Ombre décentrée simulant lumière latérale gauche→droite
+  - Dégradé de fond pour profondeur
+  - Highlight inset pour reflet
+  - **Fichier modifie** : `styles.css` (classe `.barre-etudiant`)
+
+- [x] **#45** Animation des bulles animees de l'entete ✅ FAIT (28 jan 2026)
+  - Effet 3D harmonisé avec les bulles du tableau de bord
+  - Dégradés de couleur pour chaque pratique (SOM, STD, SPE, DEN)
+  - Ombre décentrée et highlights inset ajoutés
+  - **Fichier modifie** : `index.html` (section styles bulles)
+
+- [x] **#40** Boutons d'aide dans les modals de bibliothèques ✅ FAIT (28 jan 2026)
+  - Ajout du bouton 😎 dans les 5 bibliothèques (grilles, échelles, cartouches, pratiques, productions)
+  - Contenu d'aide expliquant les badges (Locale/Bibliothèque/Retirée) et les boutons
+  - **Fichiers modifiés** : `js/aide-contextuelle-contenu.js`, `js/grilles.js`, `js/echelles.js`, `js/cartouches.js`, `js/pratiques-materiel.js`, `js/productions.js`
+
+- [x] **#41** Uniformiser présentation visuelle des sidebars ✅ FAIT (28 jan 2026)
+  - Style uniforme pour les boutons "Consulter la bibliothèque" (font-size: 0.9rem)
+  - Classe `.sidebar-vide` pour messages vides (remplace `.banque-vide`)
+  - **Fichiers modifiés** : `index.html`, `styles.css`
+
+- [x] **#42** Uniformiser présentation visuelle des bibliothèques ✅ FAIT (28 jan 2026)
+  - Badges de source (Locale/Bibliothèque/Retirée) ajoutés aux 4 bibliothèques
+  - Affichage ID court (#XXXX) pour identifier les éléments
+  - Détection de doublons potentiels avec avertissement
+  - **Fichiers modifiés** : `js/grilles.js`, `js/echelles.js`, `js/cartouches.js`, `js/productions.js`
+
+- [x] **#46** Corrections visuelles Beta 96.1 ✅ FAIT (28 jan 2026)
+  - Z-index modal d'aide : 10002 (au-dessus des bibliothèques à 10000)
+  - Doublon bouton "Consulter la bibliothèque" dans cartouches supprimé
+  - Bouton "Préparer le PDF" ajouté à la section Productions
+  - Footer PDF : espacement corrigé, nom enseignant correctement affiché
+  - Effet 3D appliqué aux bulles de niveau dans les tableaux (classe `.bulle-niveau-tableau`)
+  - **Fichiers modifiés** : `index.html`, `styles.css`, `js/export-pdf.js`, `js/profil-etudiant.js`
+
 ### Recherche / Analyse longitudinale
 
 - [ ] **#35** Import historique H2024 (trimestre implementation portfolio)
@@ -198,6 +239,23 @@
   - Prerequis : #28 complete
 
 ### Bibliotheques
+
+- [x] **#40** Boutons d'aide 😎 dans les modals de bibliotheques ✅ FAIT (28 jan 2026)
+  - Aide contextuelle ajoutée expliquant le fonctionnement des bibliothèques
+  - Distinction claire : Retirer ≠ Supprimer, Locale vs Bibliothèque, doublons
+  - **Fichiers modifies** : `js/aide-contextuelle-contenu.js`, `js/grilles.js`, `js/echelles.js`, `js/cartouches.js`, `js/pratiques-materiel.js`, `js/productions.js`
+
+- [x] **#41** Uniformiser presentation visuelle des sidebars ✅ FAIT (28 jan 2026)
+  - Bouton "Consulter la bibliothèque" ajouté aux cartouches
+  - Style uniforme (font-size: 0.9rem) sur tous les boutons
+  - Classe `.banque-vide` remplacée par `.sidebar-vide` pour cohérence
+  - **Fichiers modifies** : `index.html`, `js/cartouches.js`
+
+- [x] **#42** Uniformiser presentation visuelle des bibliotheques ✅ FAIT (28 jan 2026)
+  - Vérification : ordre des boutons déjà uniforme (Dupliquer → Exporter → Retirer → Supprimer)
+  - Badges source (Locale/Bibliothèque/Retirée) ajoutés aux 4 bibliothèques
+  - IDs courts (#abc123) ajoutés pour identifier les doublons
+  - **Fichiers modifies** : `js/grilles.js`, `js/echelles.js`, `js/cartouches.js`, `js/pratiques-materiel.js`
 
 - [x] **#7-a** Bouton Supprimer dans bibliotheques ✅ FAIT (28 jan 2026)
   - Suppression définitive avec confirmation (modal)

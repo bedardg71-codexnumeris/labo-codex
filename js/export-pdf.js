@@ -1784,10 +1784,11 @@ function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
                         <th style="${styleTableEntete} width: ${largeurPond}; background: ${couleurTitre}; color: white; padding: 4px 5px; text-align: center; border: 1px solid ${couleurTitre};">%</th>
         `;
 
-        // En-tetes des niveaux - Code + Nom (couleur sobre pour impression N&B)
+        // En-tetes des niveaux - Code + Nom (fond blanc comme le PDF, texte coloré)
         echelle.niveaux.forEach(n => {
             const enteteNiveau = n.nom ? `${n.code || '?'} - ${n.nom}` : (n.code || '?');
-            html += `<th style="${styleTableEntete} width: ${largeurNiveau}; background: ${couleurFondEntete}; color: ${couleurTexte}; padding: 4px 5px; text-align: center; border: 1px solid ${couleurBordure}; font-weight: bold;">${escapeHtml(enteteNiveau)}</th>`;
+            // ✅ CORRECTION (28 janvier 2026) : Fond blanc + texte gris foncé comme le PDF
+            html += `<th style="${styleTableEntete} width: ${largeurNiveau}; background: white; color: ${couleurTexte}; padding: 4px 5px; text-align: center; border: 1px solid ${couleurBordure}; font-weight: bold;">${escapeHtml(enteteNiveau)}</th>`;
         });
         html += `</tr></thead><tbody>`;
 
@@ -2606,6 +2607,29 @@ async function afficherFormulairePDFDepuisCartouche() {
     }, 100);
 }
 
+/**
+ * BETA 96.1: Affiche le formulaire PDF depuis la section Productions
+ * Recupere la production selectionnee et navigue vers Grilles
+ */
+async function afficherFormulairePDFDepuisProduction() {
+    // Récupérer la production sélectionnée (si disponible)
+    const productionId = (typeof productionEnEdition !== 'undefined' && productionEnEdition)
+        ? productionEnEdition
+        : null;
+
+    // Naviguer vers la section Grilles pour afficher le formulaire
+    if (typeof naviguerVers === 'function') {
+        naviguerVers('grilles');
+    }
+
+    // Petit délai pour laisser la navigation se faire
+    setTimeout(async () => {
+        await afficherFormulairePreparationPDF({
+            productionId: productionId
+        });
+    }, 100);
+}
+
 // Exposer les nouvelles fonctions globalement
 window.afficherFormulairePreparationPDF = afficherFormulairePreparationPDF;
 window.fermerFormulairePreparationPDF = fermerFormulairePreparationPDF;
@@ -2617,5 +2641,6 @@ window.fermerModalApercuPDF = fermerModalApercuPDF;
 window.exporterPDFDepuisApercu = exporterPDFDepuisApercu;
 window.afficherFormulairePDFDepuisEchelle = afficherFormulairePDFDepuisEchelle;
 window.afficherFormulairePDFDepuisCartouche = afficherFormulairePDFDepuisCartouche;
+window.afficherFormulairePDFDepuisProduction = afficherFormulairePDFDepuisProduction;
 
 console.log('[export-pdf.js] Module charge - jsPDF disponible:', typeof window.jspdf !== 'undefined');
