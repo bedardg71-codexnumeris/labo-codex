@@ -297,7 +297,11 @@ function obtenirInfosCoursPDF() {
  */
 function ajouterEntetePage(doc, titre, options = {}) {
     const largeurPage = doc.internal.pageSize.getWidth();
-    const afficherInfos = options.afficherTrimestre !== false;
+
+    // Options d'entête individuelles (rétrocompatibilité avec afficherTrimestre)
+    const afficherCode = options.enteteCode !== false;
+    const afficherNomCours = options.enteteNom !== false;
+    const afficherTrimestre = options.enteteTrimestre !== false;
 
     // Titre principal (gauche)
     doc.setFontSize(PDF_CONFIG.polices.titrePrincipal);
@@ -305,36 +309,34 @@ function ajouterEntetePage(doc, titre, options = {}) {
     doc.setFont('helvetica', 'bold');
     doc.text(titre, PDF_CONFIG.marges.gauche, PDF_CONFIG.marges.haut + 5);
 
-    // Infos à droite : Code cours, Nom cours, Trimestre
-    if (afficherInfos) {
-        const infosCours = obtenirInfosCoursPDF();
-        const trimestre = obtenirNomTrimestre();
+    // Infos à droite : Code cours, Nom cours, Trimestre (selon options)
+    const infosCours = options.infosCours || obtenirInfosCoursPDF();
+    const trimestre = obtenirNomTrimestre();
 
-        doc.setFontSize(PDF_CONFIG.polices.textePetit);
-        doc.setTextColor(...PDF_CONFIG.couleurs.texteSecondaire);
+    doc.setFontSize(PDF_CONFIG.polices.textePetit);
+    doc.setTextColor(...PDF_CONFIG.couleurs.texteSecondaire);
+    doc.setFont('helvetica', 'normal');
+
+    let posYDroite = PDF_CONFIG.marges.haut + 2;
+    const xDroite = largeurPage - PDF_CONFIG.marges.droite;
+
+    // Sigle du cours (en gras)
+    if (afficherCode && infosCours.sigle) {
+        doc.setFont('helvetica', 'bold');
+        doc.text(infosCours.sigle, xDroite, posYDroite, { align: 'right' });
+        posYDroite += 3.5;
         doc.setFont('helvetica', 'normal');
+    }
 
-        let posYDroite = PDF_CONFIG.marges.haut + 2;
-        const xDroite = largeurPage - PDF_CONFIG.marges.droite;
+    // Nom du cours
+    if (afficherNomCours && infosCours.titre) {
+        doc.text(infosCours.titre, xDroite, posYDroite, { align: 'right' });
+        posYDroite += 3.5;
+    }
 
-        // Sigle du cours (en gras)
-        if (infosCours.sigle) {
-            doc.setFont('helvetica', 'bold');
-            doc.text(infosCours.sigle, xDroite, posYDroite, { align: 'right' });
-            posYDroite += 3.5;
-            doc.setFont('helvetica', 'normal');
-        }
-
-        // Nom du cours
-        if (infosCours.titre) {
-            doc.text(infosCours.titre, xDroite, posYDroite, { align: 'right' });
-            posYDroite += 3.5;
-        }
-
-        // Trimestre
-        if (trimestre) {
-            doc.text(trimestre, xDroite, posYDroite, { align: 'right' });
-        }
+    // Trimestre
+    if (afficherTrimestre && trimestre) {
+        doc.text(trimestre, xDroite, posYDroite, { align: 'right' });
     }
 
     // Ligne de separation
@@ -1697,24 +1699,27 @@ function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
         titre = activite ? `${nomProd} - ${activite}` : nomProd;
     }
 
-    // Infos du cours pour l'en-tête (si afficherTrimestre est activé, on affiche tout)
-    const afficherInfosDroite = options.afficherTrimestre !== false;
-    const infosCours = afficherInfosDroite ? obtenirInfosCoursPDF() : { sigle: '', titre: '' };
-    const trimestre = afficherInfosDroite ? obtenirNomTrimestre() : '';
+    // Infos du cours pour l'en-tête (utilise les nouvelles options individuelles)
+    const afficherCode = options.enteteCode !== false;
+    const afficherNomCours = options.enteteNom !== false;
+    const afficherTrimestre = options.enteteTrimestre !== false;
+
+    const infosCours = options.infosCours || obtenirInfosCoursPDF();
+    const trimestre = obtenirNomTrimestre();
 
     // Construire les infos à droite (sigle, titre cours, trimestre)
     let infosEnteteHtml = '';
-    if (afficherInfosDroite && (infosCours.sigle || infosCours.titre || trimestre)) {
-        const lignes = [];
-        if (infosCours.sigle) {
-            lignes.push(`<span style="font-weight: bold;">${escapeHtml(infosCours.sigle)}</span>`);
-        }
-        if (infosCours.titre) {
-            lignes.push(`<span>${escapeHtml(infosCours.titre)}</span>`);
-        }
-        if (trimestre) {
-            lignes.push(`<span>${escapeHtml(trimestre)}</span>`);
-        }
+    const lignes = [];
+    if (afficherCode && infosCours.sigle) {
+        lignes.push(`<span style="font-weight: bold;">${escapeHtml(infosCours.sigle)}</span>`);
+    }
+    if (afficherNomCours && infosCours.titre) {
+        lignes.push(`<span>${escapeHtml(infosCours.titre)}</span>`);
+    }
+    if (afficherTrimestre && trimestre) {
+        lignes.push(`<span>${escapeHtml(trimestre)}</span>`);
+    }
+    if (lignes.length > 0) {
         infosEnteteHtml = `<div style="text-align: right; font-size: ${7.5 * facteurTaille}pt; color: ${couleurSecondaire}; line-height: 1.4;">${lignes.join('<br>')}</div>`;
     }
 
@@ -1828,10 +1833,10 @@ function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
         ? options.nomEnseignant : '';
     const textePiedDroit = options.piedLicence !== false ? 'CC BY-NC-SA 4.0' : '';
 
-    // Pied de page (margin-top: auto pour coller en bas si espace)
+    // Pied de page (toujours visible à la fin du contenu)
     if (textePiedGauche || textePiedDroit) {
         html += `
-            <div style="margin-top: auto; padding-top: 10px; border-top: 1px solid ${couleurBordure}; display: flex; justify-content: space-between; font-size: ${7 * facteurTaille}pt; color: ${couleurSecondaire};">
+            <div class="apercu-pdf-pied" style="margin-top: 15px; padding-top: 8px; border-top: 1px solid ${couleurBordure}; display: flex; justify-content: space-between; font-size: ${7 * facteurTaille}pt; color: ${couleurSecondaire};">
                 <span>${escapeHtml(textePiedGauche)}</span>
                 <span>${escapeHtml(textePiedDroit)}</span>
             </div>
@@ -1924,7 +1929,12 @@ async function genererPDFCombine(grille, echelle, cartouche = null, options = {}
         titre = activite ? `${nomProd} - ${activite}` : nomProd;
     }
 
-    let posY = ajouterEntetePage(doc, titre, { afficherTrimestre: options.afficherTrimestre });
+    let posY = ajouterEntetePage(doc, titre, {
+        enteteCode: options.enteteCode,
+        enteteNom: options.enteteNom,
+        enteteTrimestre: options.enteteTrimestre,
+        infosCours: options.infosCours
+    });
 
     const largeurPage = doc.internal.pageSize.getWidth();
     const largeurContenu = largeurPage - PDF_CONFIG.marges.gauche - PDF_CONFIG.marges.droite;
@@ -2457,27 +2467,41 @@ function rafraichirApercuPDF() {
 
     // Lire les options de mise en page du modal
     const orientation = document.getElementById('apercuPDF-orientation')?.value || 'portrait';
-    const afficherTrimestre = document.getElementById('apercuPDF-afficher-trimestre')?.checked !== false;
 
-    // Lire les options de pied de page (piedCours retiré - cours maintenant dans l'en-tête)
+    // Lire les options d'entête
+    const enteteCode = document.getElementById('apercuPDF-entete-code')?.checked !== false;
+    const enteteNom = document.getElementById('apercuPDF-entete-nom')?.checked !== false;
+    const enteteTrimestre = document.getElementById('apercuPDF-entete-trimestre')?.checked !== false;
+
+    // Lire les options de pied de page
     const piedEnseignant = document.getElementById('apercuPDF-pied-enseignant')?.checked !== false;
     const piedLicence = document.getElementById('apercuPDF-pied-licence')?.checked !== false;
+
+    // Lire les options de production (depuis le modal)
+    const inclureNomProduction = document.getElementById('apercuPDF-prod-nom')?.checked !== false;
+    const inclureObjectif = document.getElementById('apercuPDF-prod-objectif')?.checked !== false;
+    const inclureDescription = document.getElementById('apercuPDF-prod-description')?.checked !== false;
+    const inclureDescCriteres = document.getElementById('apercuPDF-prod-criteres')?.checked === true;
 
     // Options d'affichage combinees (taille fixe: petit)
     const options = {
         production: _apercuPDFData.production,
-        inclureNomProduction: _apercuPDFData.inclureNomProduction,
-        inclureObjectif: _apercuPDFData.inclureObjectif,
-        inclureDescription: _apercuPDFData.inclureDescription,
-        inclureDescCriteres: _apercuPDFData.inclureDescCriteres,
+        inclureNomProduction: inclureNomProduction,
+        inclureObjectif: inclureObjectif,
+        inclureDescription: inclureDescription,
+        inclureDescCriteres: inclureDescCriteres,
         taillePolice: 'petit',
         orientation: orientation,
-        afficherTrimestre: afficherTrimestre,
+        // Options entête
+        enteteCode: enteteCode,
+        enteteNom: enteteNom,
+        enteteTrimestre: enteteTrimestre,
         // Options pied de page
         piedEnseignant: piedEnseignant,
         piedLicence: piedLicence,
         nomEnseignant: _apercuPDFData.nomEnseignant,
-        nomCours: _apercuPDFData.nomCours
+        nomCours: _apercuPDFData.nomCours,
+        infosCours: _apercuPDFData.infosCours
     };
 
     // Appliquer les classes d'orientation sur la page simulee
@@ -2515,28 +2539,42 @@ async function exporterPDFDepuisApercu() {
 
     // Lire les options de mise en page du modal
     const orientation = document.getElementById('apercuPDF-orientation')?.value || 'portrait';
-    const afficherTrimestre = document.getElementById('apercuPDF-afficher-trimestre')?.checked !== false;
 
-    // Lire les options de pied de page (piedCours retiré - cours maintenant dans l'en-tête)
+    // Lire les options d'entête
+    const enteteCode = document.getElementById('apercuPDF-entete-code')?.checked !== false;
+    const enteteNom = document.getElementById('apercuPDF-entete-nom')?.checked !== false;
+    const enteteTrimestre = document.getElementById('apercuPDF-entete-trimestre')?.checked !== false;
+
+    // Lire les options de pied de page
     const piedEnseignant = document.getElementById('apercuPDF-pied-enseignant')?.checked !== false;
     const piedLicence = document.getElementById('apercuPDF-pied-licence')?.checked !== false;
+
+    // Lire les options de production (depuis le modal)
+    const inclureNomProduction = document.getElementById('apercuPDF-prod-nom')?.checked !== false;
+    const inclureObjectif = document.getElementById('apercuPDF-prod-objectif')?.checked !== false;
+    const inclureDescription = document.getElementById('apercuPDF-prod-description')?.checked !== false;
+    const inclureDescCriteres = document.getElementById('apercuPDF-prod-criteres')?.checked === true;
 
     try {
         // Options d'affichage combinees (taille fixe: petit)
         const options = {
             production: _apercuPDFData.production,
-            inclureNomProduction: _apercuPDFData.inclureNomProduction,
-            inclureObjectif: _apercuPDFData.inclureObjectif,
-            inclureDescription: _apercuPDFData.inclureDescription,
-            inclureDescCriteres: _apercuPDFData.inclureDescCriteres,
+            inclureNomProduction: inclureNomProduction,
+            inclureObjectif: inclureObjectif,
+            inclureDescription: inclureDescription,
+            inclureDescCriteres: inclureDescCriteres,
             taillePolice: 'petit',
             orientation: orientation,
-            afficherTrimestre: afficherTrimestre,
+            // Options entête
+            enteteCode: enteteCode,
+            enteteNom: enteteNom,
+            enteteTrimestre: enteteTrimestre,
             // Options pied de page
             piedEnseignant: piedEnseignant,
             piedLicence: piedLicence,
             nomEnseignant: _apercuPDFData.nomEnseignant,
-            nomCours: _apercuPDFData.nomCours
+            nomCours: _apercuPDFData.nomCours,
+            infosCours: _apercuPDFData.infosCours
         };
 
         // Generer le PDF
@@ -2571,21 +2609,21 @@ async function afficherFormulairePDFDepuisEchelle() {
         ? echelleTemplateActuelle.id
         : null;
 
-    await ouvrirModalPreparationPDF({
+    await afficherFormulairePDFInline({
         echelleId: echelleId
     });
 }
 
 /**
  * Affiche le formulaire PDF depuis la section Cartouches
- * BETA 96.1: Ouvre le modal au lieu de naviguer
+ * BETA 96.1: Affiche le formulaire inline dans la zone principale
  */
 async function afficherFormulairePDFDepuisCartouche() {
     const grilleId = document.getElementById('selectGrilleCartouche')?.value ||
                      document.getElementById('selectGrilleRetroaction')?.value;
     const cartoucheId = document.getElementById('selectCartouche')?.value;
 
-    await ouvrirModalPreparationPDF({
+    await afficherFormulairePDFInline({
         grilleId: grilleId,
         cartoucheId: cartoucheId
     });
@@ -2593,7 +2631,7 @@ async function afficherFormulairePDFDepuisCartouche() {
 
 /**
  * BETA 96.1: Affiche le formulaire PDF depuis la section Productions
- * Ouvre le modal au lieu de naviguer
+ * Affiche le formulaire inline dans la zone principale
  */
 async function afficherFormulairePDFDepuisProduction() {
     // Récupérer la production sélectionnée (si disponible)
@@ -2601,66 +2639,140 @@ async function afficherFormulairePDFDepuisProduction() {
         ? productionEnEdition
         : null;
 
-    await ouvrirModalPreparationPDF({
+    await afficherFormulairePDFInline({
         productionId: productionId
     });
 }
 
 // =============================================================================
-// MODAL DE PRÉPARATION PDF (Beta 96.1)
-// Modal global accessible depuis toutes les sections
+// FORMULAIRE DE PRÉPARATION PDF INLINE (Beta 96.1)
+// Formulaire injecté dans la zone principale de la section actuelle
 // =============================================================================
 
+// Stockage du contenu précédent pour restauration
+let _contenuPrecedentPDF = null;
+let _zonePrincipalePDF = null;
+
 /**
- * Ouvre le modal de préparation PDF
- * @param {Object} options - Options de pré-sélection (productionId, grilleId, echelleId, cartoucheId)
+ * Génère le HTML du formulaire de préparation PDF
+ * Version compacte pour optimiser l'espace vertical
  */
-async function ouvrirModalPreparationPDF(options = {}) {
-    const modal = document.getElementById('modalPreparationPDF');
-    if (!modal) return;
+function genererHTMLFormulairePDF() {
+    return `
+        <div id="formulairePDFInline">
+            <h3 style="margin-bottom: 12px; color: var(--bleu-fonce);">📄 Préparer le PDF</h3>
+
+            <!-- Sélection des éléments sur deux lignes -->
+            <fieldset style="border: 1px solid var(--bordure-legere); border-radius: var(--radius-moyen); padding: 12px 15px; margin-bottom: 15px;">
+                <legend style="font-weight: 600; color: var(--bleu-fonce); padding: 0 8px; font-size: 0.95rem;">Éléments du document</legend>
+
+                <!-- Ligne 1 : Production (optionnel) -->
+                <div class="groupe-form" style="margin-bottom: 12px;">
+                    <label for="inlinePDF-production" style="font-size: 0.85rem; margin-bottom: 4px;">Production (optionnel)</label>
+                    <select id="inlinePDF-production" class="controle-form" onchange="mettreAJourOptionsInlinePDF()">
+                        <option value="">-- Aucune (grille générique) --</option>
+                    </select>
+                </div>
+
+                <!-- Ligne 2 : Grille, Échelle, Cartouche -->
+                <div id="inlinePDF-grid-selects" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: start;">
+                    <div class="groupe-form" style="margin-bottom: 0;">
+                        <label for="inlinePDF-grille" style="font-size: 0.85rem; margin-bottom: 4px;">Grille de critères <span style="color: #d32f2f;">*</span></label>
+                        <select id="inlinePDF-grille" class="controle-form" onchange="mettreAJourOptionsInlinePDF()">
+                            <option value="">-- Sélectionner --</option>
+                        </select>
+                    </div>
+
+                    <div class="groupe-form" style="margin-bottom: 0;">
+                        <label for="inlinePDF-echelle" style="font-size: 0.85rem; margin-bottom: 4px;">Échelle de performance <span style="color: #d32f2f;">*</span></label>
+                        <select id="inlinePDF-echelle" class="controle-form" onchange="mettreAJourOptionsInlinePDF()">
+                            <option value="">-- Sélectionner --</option>
+                        </select>
+                    </div>
+
+                    <div id="inlinePDF-section-cartouche" class="groupe-form" style="margin-bottom: 0; display: none;">
+                        <label for="inlinePDF-cartouche" style="font-size: 0.85rem; margin-bottom: 4px;">Cartouche (optionnel)</label>
+                        <select id="inlinePDF-cartouche" class="controle-form">
+                            <option value="">-- Sans rétroaction --</option>
+                        </select>
+                    </div>
+                </div>
+            </fieldset>
+
+            <!-- Boutons -->
+            <div class="btn-groupe" style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button onclick="fermerFormulairePDFInline()" class="btn btn-annuler">
+                    Annuler
+                </button>
+                <button id="inlinePDF-btn-apercu" onclick="ouvrirApercuPDFDepuisInline()" class="btn btn-confirmer" disabled>
+                    Voir l'aperçu →
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Affiche le formulaire de préparation PDF dans la zone principale actuelle
+ * @param {Object} options - Options de pré-sélection
+ */
+async function afficherFormulairePDFInline(options = {}) {
+    // Trouver la zone principale visible de la section actuelle (classe .active)
+    const zonePrincipale = document.querySelector('.sous-section.active .zone-principale');
+    if (!zonePrincipale) {
+        console.warn('[export-pdf] Zone principale non trouvée');
+        return;
+    }
+
+    // Sauvegarder le contenu actuel
+    _contenuPrecedentPDF = zonePrincipale.innerHTML;
+    _zonePrincipalePDF = zonePrincipale;
+
+    // Injecter le formulaire
+    zonePrincipale.innerHTML = genererHTMLFormulairePDF();
 
     // Charger les options des dropdowns
-    await chargerOptionsModalPDF();
+    await chargerOptionsInlinePDF();
 
     // Pré-sélectionner les valeurs si fournies
     if (options.productionId) {
-        const selectProd = document.getElementById('modalPDF-production');
+        const selectProd = document.getElementById('inlinePDF-production');
         if (selectProd) selectProd.value = options.productionId;
     }
     if (options.grilleId) {
-        const selectGrille = document.getElementById('modalPDF-grille');
+        const selectGrille = document.getElementById('inlinePDF-grille');
         if (selectGrille) selectGrille.value = options.grilleId;
     }
     if (options.echelleId) {
-        const selectEchelle = document.getElementById('modalPDF-echelle');
+        const selectEchelle = document.getElementById('inlinePDF-echelle');
         if (selectEchelle) selectEchelle.value = options.echelleId;
     }
     if (options.cartoucheId) {
-        const selectCartouche = document.getElementById('modalPDF-cartouche');
+        const selectCartouche = document.getElementById('inlinePDF-cartouche');
         if (selectCartouche) selectCartouche.value = options.cartoucheId;
     }
 
     // Mettre à jour l'affichage des options
-    mettreAJourOptionsModalPDF();
-
-    // Afficher le modal
-    modal.style.display = 'flex';
+    await mettreAJourOptionsInlinePDF();
 }
 
 /**
- * Ferme le modal de préparation PDF
+ * Ferme le formulaire et restaure le contenu précédent
  */
-function fermerModalPreparationPDF() {
-    const modal = document.getElementById('modalPreparationPDF');
-    if (modal) modal.style.display = 'none';
+function fermerFormulairePDFInline() {
+    if (_zonePrincipalePDF && _contenuPrecedentPDF !== null) {
+        _zonePrincipalePDF.innerHTML = _contenuPrecedentPDF;
+        _contenuPrecedentPDF = null;
+        _zonePrincipalePDF = null;
+    }
 }
 
 /**
- * Charge les options dans les dropdowns du modal
+ * Charge les options dans les dropdowns du formulaire inline
  */
-async function chargerOptionsModalPDF() {
+async function chargerOptionsInlinePDF() {
     // Charger les productions
-    const selectProd = document.getElementById('modalPDF-production');
+    const selectProd = document.getElementById('inlinePDF-production');
     if (selectProd) {
         const cleProductions = (typeof cle === 'function') ? cle('productionsPedagogiques') : 'productions';
         const productions = await db.get(cleProductions) || [];
@@ -2669,7 +2781,7 @@ async function chargerOptionsModalPDF() {
     }
 
     // Charger les grilles
-    const selectGrille = document.getElementById('modalPDF-grille');
+    const selectGrille = document.getElementById('inlinePDF-grille');
     if (selectGrille) {
         const grilles = await db.get('grillesTemplates') || [];
         selectGrille.innerHTML = '<option value="">-- Sélectionner --</option>' +
@@ -2677,7 +2789,7 @@ async function chargerOptionsModalPDF() {
     }
 
     // Charger les échelles
-    const selectEchelle = document.getElementById('modalPDF-echelle');
+    const selectEchelle = document.getElementById('inlinePDF-echelle');
     if (selectEchelle) {
         const echelles = await db.get('echellesTemplates') || [];
         selectEchelle.innerHTML = '<option value="">-- Sélectionner --</option>' +
@@ -2686,50 +2798,55 @@ async function chargerOptionsModalPDF() {
 }
 
 /**
- * Met à jour l'affichage des options du modal selon les sélections
+ * Met à jour l'affichage des options du formulaire inline selon les sélections
  */
-async function mettreAJourOptionsModalPDF() {
-    const productionId = document.getElementById('modalPDF-production')?.value;
-    const grilleId = document.getElementById('modalPDF-grille')?.value;
-    const echelleId = document.getElementById('modalPDF-echelle')?.value;
+async function mettreAJourOptionsInlinePDF() {
+    const productionId = document.getElementById('inlinePDF-production')?.value;
+    const grilleId = document.getElementById('inlinePDF-grille')?.value;
+    const echelleId = document.getElementById('inlinePDF-echelle')?.value;
 
     // Afficher/masquer les options de production
-    const optionsProd = document.getElementById('modalPDF-options-production');
+    const optionsProd = document.getElementById('inlinePDF-options-production');
     if (optionsProd) {
         optionsProd.style.display = productionId ? 'block' : 'none';
     }
 
     // Charger les cartouches si une grille est sélectionnée
-    const sectionCartouche = document.getElementById('modalPDF-section-cartouche');
-    const selectCartouche = document.getElementById('modalPDF-cartouche');
+    const sectionCartouche = document.getElementById('inlinePDF-section-cartouche');
+    const selectCartouche = document.getElementById('inlinePDF-cartouche');
+    const gridContainer = document.getElementById('inlinePDF-grid-selects');
+
     if (grilleId && selectCartouche) {
         const cartouches = await db.get(`cartouches_${grilleId}`) || [];
         if (cartouches.length > 0) {
             selectCartouche.innerHTML = '<option value="">-- Sans rétroaction --</option>' +
                 cartouches.map(c => `<option value="${c.id}">${c.nom || 'Cartouche sans nom'}</option>`).join('');
             if (sectionCartouche) sectionCartouche.style.display = 'block';
+            if (gridContainer) gridContainer.style.gridTemplateColumns = '1fr 1fr 1fr';
         } else {
             if (sectionCartouche) sectionCartouche.style.display = 'none';
+            if (gridContainer) gridContainer.style.gridTemplateColumns = '1fr 1fr';
         }
     } else {
         if (sectionCartouche) sectionCartouche.style.display = 'none';
+        if (gridContainer) gridContainer.style.gridTemplateColumns = '1fr 1fr';
     }
 
     // Activer/désactiver le bouton aperçu
-    const btnApercu = document.getElementById('modalPDF-btn-apercu');
+    const btnApercu = document.getElementById('inlinePDF-btn-apercu');
     if (btnApercu) {
         btnApercu.disabled = !(grilleId && echelleId);
     }
 }
 
 /**
- * Ouvre l'aperçu PDF depuis le modal de préparation
+ * Ouvre l'aperçu PDF depuis le formulaire inline
  */
-async function ouvrirApercuPDFDepuisModal() {
-    const productionId = document.getElementById('modalPDF-production')?.value;
-    const grilleId = document.getElementById('modalPDF-grille')?.value;
-    const echelleId = document.getElementById('modalPDF-echelle')?.value;
-    const cartoucheId = document.getElementById('modalPDF-cartouche')?.value;
+async function ouvrirApercuPDFDepuisInline() {
+    const productionId = document.getElementById('inlinePDF-production')?.value;
+    const grilleId = document.getElementById('inlinePDF-grille')?.value;
+    const echelleId = document.getElementById('inlinePDF-echelle')?.value;
+    const cartoucheId = document.getElementById('inlinePDF-cartouche')?.value;
 
     if (!grilleId || !echelleId) {
         alert('Veuillez sélectionner une grille et une échelle.');
@@ -2760,24 +2877,27 @@ async function ouvrirApercuPDFDepuisModal() {
     const infosCours = obtenirInfosCoursPDF();
     const nomCours = infosCours.sigleTitre;
 
-    // Stocker les données pour l'aperçu
+    // Stocker les données pour l'aperçu (les options checkboxes sont lues depuis le modal)
     _apercuPDFData = {
         grille: grille,
         echelle: echelle,
         cartouche: cartouche,
         production: production,
-        inclureNomProduction: document.getElementById('modalPDF-prod-nom')?.checked,
-        inclureObjectif: document.getElementById('modalPDF-prod-objectif')?.checked,
-        inclureDescription: document.getElementById('modalPDF-prod-description')?.checked,
-        inclureDescCriteres: document.getElementById('modalPDF-desc-criteres')?.checked,
         nomEnseignant: nomEnseignant,
-        nomCours: nomCours
+        nomCours: nomCours,
+        infosCours: infosCours
     };
 
-    // Fermer le modal de préparation
-    fermerModalPreparationPDF();
+    // Fermer le formulaire inline (restaure le contenu précédent)
+    fermerFormulairePDFInline();
 
-    // Ouvrir le modal d'aperçu (réutilise la fonction existante)
+    // Afficher/masquer les options de production dans le modal
+    const optionsProd = document.getElementById('apercuPDF-options-production');
+    if (optionsProd) {
+        optionsProd.style.display = production ? 'block' : 'none';
+    }
+
+    // Ouvrir le modal d'aperçu
     const modalApercu = document.getElementById('modalApercuPDF');
     if (modalApercu) {
         modalApercu.style.display = 'flex';
@@ -2803,5 +2923,11 @@ window.fermerModalPreparationPDF = fermerModalPreparationPDF;
 window.chargerOptionsModalPDF = chargerOptionsModalPDF;
 window.mettreAJourOptionsModalPDF = mettreAJourOptionsModalPDF;
 window.ouvrirApercuPDFDepuisModal = ouvrirApercuPDFDepuisModal;
+// Formulaire inline de préparation PDF (Beta 96.1)
+window.afficherFormulairePDFInline = afficherFormulairePDFInline;
+window.fermerFormulairePDFInline = fermerFormulairePDFInline;
+window.chargerOptionsInlinePDF = chargerOptionsInlinePDF;
+window.mettreAJourOptionsInlinePDF = mettreAJourOptionsInlinePDF;
+window.ouvrirApercuPDFDepuisInline = ouvrirApercuPDFDepuisInline;
 
 console.log('[export-pdf.js] Module charge - jsPDF disponible:', typeof window.jspdf !== 'undefined');
