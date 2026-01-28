@@ -2576,7 +2576,7 @@ async function afficherFormulairePDFDepuisEchelle() {
         afficherSection('construction');
     }
     if (typeof afficherSousSection === 'function') {
-        afficherSousSection('construction-grilles');
+        afficherSousSection('construction-grille-criteres');
     }
 
     // Petit delai pour laisser la navigation se faire
@@ -2601,7 +2601,7 @@ async function afficherFormulairePDFDepuisCartouche() {
         afficherSection('construction');
     }
     if (typeof afficherSousSection === 'function') {
-        afficherSousSection('construction-grilles');
+        afficherSousSection('construction-grille-criteres');
     }
 
     // Petit delai pour laisser la navigation se faire
@@ -2628,7 +2628,7 @@ async function afficherFormulairePDFDepuisProduction() {
         afficherSection('construction');
     }
     if (typeof afficherSousSection === 'function') {
-        afficherSousSection('construction-grilles');
+        afficherSousSection('construction-grille-criteres');
     }
 
     // Petit délai pour laisser la navigation se faire
