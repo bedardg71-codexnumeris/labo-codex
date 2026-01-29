@@ -1162,16 +1162,26 @@ function afficherMetriquesGlobales(etudiants) {
     const etudiantsAvecPresencesSOM = etudiants.filter(e => e.sommatif && e.sommatif.nombreSeances > 0);
     const etudiantsAvecPresencesPAN = etudiants.filter(e => e.alternatif && e.alternatif.nombreSeances > 0);
 
-    // Pour C, P, E: garder l'ancienne logique (A>0 OR C>0 OR P>0)
+    // 🆕 BETA 96.1: Pour C et P, exiger des évaluations réelles (pas seulement des présences)
+    // Ceci aligne la logique avec profil-etudiant.js (determinerNiveauRaiPedagogique et determinerAlerteContextuelle)
+    const etudiantsAvecEvalsSOM = etudiants.filter(e =>
+        e.sommatif.completion > 0 || e.sommatif.performance > 0
+    );
+    const etudiantsAvecEvalsPAN = etudiants.filter(e =>
+        e.alternatif.completion > 0 || e.alternatif.performance > 0
+    );
+
+    // Pour E: nécessite A ET (C ou P) pour être significatif
     const etudiantsAvecDonneesSOM = etudiants.filter(e =>
-        e.sommatif.assiduite > 0 || e.sommatif.completion > 0 || e.sommatif.performance > 0
+        e.sommatif.nombreSeances > 0 && (e.sommatif.completion > 0 || e.sommatif.performance > 0)
     );
     const etudiantsAvecDonneesPAN = etudiants.filter(e =>
-        e.alternatif.assiduite > 0 || e.alternatif.completion > 0 || e.alternatif.performance > 0
+        e.alternatif.nombreSeances > 0 && (e.alternatif.completion > 0 || e.alternatif.performance > 0)
     );
 
     console.log(`📊 [Données] Étudiants avec présences (nombreSeances>0) SOM: ${etudiantsAvecPresencesSOM.length}, PAN: ${etudiantsAvecPresencesPAN.length}`);
-    console.log(`📊 [Données] Étudiants avec données (A>0 ou C>0 ou P>0) SOM: ${etudiantsAvecDonneesSOM.length}, PAN: ${etudiantsAvecDonneesPAN.length}`);
+    console.log(`📊 [Données] Étudiants avec évaluations (C>0 ou P>0) SOM: ${etudiantsAvecEvalsSOM.length}, PAN: ${etudiantsAvecEvalsPAN.length}`);
+    console.log(`📊 [Données] Étudiants avec données complètes (A+C/P) SOM: ${etudiantsAvecDonneesSOM.length}, PAN: ${etudiantsAvecDonneesPAN.length}`);
 
     // 🆕 BETA 95.7: Préparer les données A avec TOUS les étudiants ayant des présences (y compris 0%)
     // IMPORTANT: Pour A (assiduité), toujours utiliser le calcul SOMMATIF (fait observable)
@@ -1191,28 +1201,29 @@ function afficherMetriquesGlobales(etudiants) {
         valeur: e.sommatif.assiduite  // Utiliser sommatif, pas alternatif
     }));
 
-    const etudiantsSOM_C = etudiantsAvecDonneesSOM.map(e => ({
+    // 🆕 BETA 96.1: Utiliser etudiantsAvecEvals pour C et P (exige des évaluations réelles)
+    const etudiantsSOM_C = etudiantsAvecEvalsSOM.map(e => ({
         da: e.da,
         nom: e.nom,
         prenom: e.prenom,
         valeur: e.sommatif.completion
     }));
 
-    const etudiantsPAN_C = etudiantsAvecDonneesPAN.map(e => ({
+    const etudiantsPAN_C = etudiantsAvecEvalsPAN.map(e => ({
         da: e.da,
         nom: e.nom,
         prenom: e.prenom,
         valeur: e.alternatif.completion
     }));
 
-    const etudiantsSOM_P = etudiantsAvecDonneesSOM.map(e => ({
+    const etudiantsSOM_P = etudiantsAvecEvalsSOM.map(e => ({
         da: e.da,
         nom: e.nom,
         prenom: e.prenom,
         valeur: e.sommatif.performance
     }));
 
-    const etudiantsPAN_P = etudiantsAvecDonneesPAN.map(e => ({
+    const etudiantsPAN_P = etudiantsAvecEvalsPAN.map(e => ({
         da: e.da,
         nom: e.nom,
         prenom: e.prenom,
