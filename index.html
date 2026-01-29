@@ -16174,16 +16174,11 @@
                         </div>
                     </fieldset>
 
-                    <!-- SECTION 2 : Services adaptés -->
+                    <!-- SECTION 2 : Diagnostic et Services adaptés -->
                     <fieldset style="border: 1px solid var(--bordure-legere); border-radius: var(--radius-moyen); padding: 12px; margin: 0;">
-                        <legend style="font-weight: 600; color: var(--bleu-fonce); padding: 0 8px; font-size: 0.9rem;">Services adaptés</legend>
+                        <legend style="font-weight: 600; color: var(--bleu-fonce); padding: 0 8px; font-size: 0.9rem;">Diagnostic</legend>
 
-                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; margin-bottom: 8px; font-size: 0.85rem;">
-                            <input type="checkbox" id="confidentiel-services-adaptes" onchange="toggleServicesAdaptes(this.checked)">
-                            <span><strong>Bénéficie des services adaptés</strong></span>
-                        </label>
-
-                        <div id="confidentiel-services-details" style="display: none; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--bordure-legere);">
+                        <div id="confidentiel-services-details">
                             <div class="groupe-form" style="margin-bottom: 10px;">
                                 <label for="confidentiel-categorie" style="font-size: 0.8rem;">Catégorie</label>
                                 <select id="confidentiel-categorie" class="controle-form" style="font-size: 0.85rem;" onchange="mettreAJourSousCategories()">
@@ -16196,13 +16191,18 @@
                                 </select>
                             </div>
 
-                            <div class="groupe-form" style="margin-bottom: 0;">
+                            <div class="groupe-form" style="margin-bottom: 10px;">
                                 <label for="confidentiel-sous-categorie" style="font-size: 0.8rem;">Sous-catégorie</label>
                                 <select id="confidentiel-sous-categorie" class="controle-form" style="font-size: 0.85rem;">
                                     <option value="">-- Catégorie d'abord --</option>
                                 </select>
                             </div>
                         </div>
+
+                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--bordure-legere);">
+                            <input type="checkbox" id="confidentiel-services-adaptes">
+                            <span><strong>Pris en charge par les Services adaptés</strong></span>
+                        </label>
                     </fieldset>
                 </div>
 

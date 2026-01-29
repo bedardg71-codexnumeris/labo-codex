@@ -8456,7 +8456,6 @@ function ouvrirModalConfidentiel(da) {
     document.getElementById('confidentiel-cours-renforcement').checked = infos.coursRenforcement || false;
 
     document.getElementById('confidentiel-services-adaptes').checked = infos.servicesAdaptes || false;
-    toggleServicesAdaptes(infos.servicesAdaptes || false);
 
     document.getElementById('confidentiel-categorie').value = infos.categorie || '';
     mettreAJourSousCategories();
@@ -8561,7 +8560,7 @@ function aDesInfosConfidentielles(da) {
     if (!infos) return false;
 
     // Vérifier si au moins une info est renseignée
-    return infos.epgc || infos.servicesAdaptes ||
+    return infos.epgc || infos.servicesAdaptes || infos.categorie ||
            infos.coursRegulier || infos.coursEchec || infos.coursAbandon ||
            infos.coursDecrochage || infos.coursRenforcement ||
            infos.defiFLS || infos.defiSocialisation || infos.defiIntegration ||
