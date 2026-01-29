@@ -8757,33 +8757,33 @@ label:has(+ textarea:disabled) {
 /* Utilise --amp (amplitude) définie par JS selon la distance au centre */
 @keyframes float-vertical {
     /* Mouvement vertical avec variation de taille et z-index:
-       - Milieu montant: 110%, z=2 (devant)
-       - Haut: 100%, z=1
-       - Milieu descendant: 90%, z=0 (derrière)
-       - Bas: 100%, z=1 */
+       - Milieu montant: 110%, z=3 (devant)
+       - Haut: 100%, z=2
+       - Milieu descendant: 90%, z=1 (derrière)
+       - Bas: 100%, z=2 */
     0% {
         transform: translate(-50%, -50%) translateY(0px) scale(1.1); /* Milieu, monte */
-        z-index: 2;
+        z-index: 3;
         animation-timing-function: ease-out;
     }
     25% {
         transform: translate(-50%, -50%) translateY(calc(var(--amp, 10px) * -1)) scale(1); /* TOP */
-        z-index: 1;
+        z-index: 2;
         animation-timing-function: ease-in;
     }
     50% {
         transform: translate(-50%, -50%) translateY(0px) scale(0.9); /* Milieu, descend */
-        z-index: 0;
+        z-index: 1;
         animation-timing-function: ease-out;
     }
     75% {
         transform: translate(-50%, -50%) translateY(var(--amp, 10px)) scale(1); /* BOTTOM */
-        z-index: 1;
+        z-index: 2;
         animation-timing-function: ease-in;
     }
     100% {
         transform: translate(-50%, -50%) translateY(0px) scale(1.1); /* Milieu, monte */
-        z-index: 2;
+        z-index: 3;
     }
 }
 
