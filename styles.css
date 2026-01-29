@@ -8807,7 +8807,9 @@ label:has(+ textarea:disabled) {
     top: 50%;
     /* Style uniforme : blanc avec dégradé vers gris (même direction que l'ombre) */
     background: linear-gradient(135deg, #ffffff 0%, #c8d4e0 100%);
-    /* opacity contrôlée par l'animation (1.0 montée, 0.9 descente) */
+    /* Opacité réduite + overlay pour effet 3D via l'ombre */
+    opacity: 0.95;
+    mix-blend-mode: overlay;
     /* Bordure avec dégradé simulé via box-shadow multiple */
     border: none;
     /* Effet 3D: ombre propre décentrée (lumière gauche→droite) + highlight inset */
