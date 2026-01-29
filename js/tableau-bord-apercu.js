@@ -547,20 +547,20 @@ function initialiserModuleTableauBordApercu() {
     document.addEventListener('click', function(e) {
         const point = e.target.closest('.barre-etudiant');
 
+        // Supprimer l'ancienne infobulle
+        const ancienneInfo = document.querySelector('.barre-etudiant-info');
+        if (ancienneInfo) ancienneInfo.remove();
+
         if (point) {
-            // Retirer la sélection précédente et son infobulle
+            // Retirer la sélection précédente
             const ancienSelection = document.querySelector('.barre-etudiant.selected');
             if (ancienSelection && ancienSelection !== point) {
                 ancienSelection.classList.remove('selected');
-                const ancienneInfo = ancienSelection.parentElement.querySelector('.barre-etudiant-info');
-                if (ancienneInfo) ancienneInfo.remove();
             }
 
             // Toggle la sélection sur le point cliqué
             if (point.classList.contains('selected')) {
                 point.classList.remove('selected');
-                const infoExistante = point.parentElement.querySelector('.barre-etudiant-info');
-                if (infoExistante) infoExistante.remove();
             } else {
                 point.classList.add('selected');
 
@@ -571,18 +571,18 @@ function initialiserModuleTableauBordApercu() {
                 info.className = 'barre-etudiant-info';
                 info.innerHTML = `<strong>${nom}</strong>${valeur ? ' : ' + valeur : ''}`;
 
-                // Positionner au-dessus du point
-                info.style.left = point.style.left;
-                info.style.bottom = 'calc(50% + 20px)';
-                point.parentElement.appendChild(info);
+                // Positionner au-dessus du point (position fixe)
+                const rect = point.getBoundingClientRect();
+                info.style.left = (rect.left + rect.width / 2) + 'px';
+                info.style.top = (rect.top - 30) + 'px';
+                info.style.transform = 'translateX(-50%)';
+                document.body.appendChild(info);
             }
         } else {
             // Clic ailleurs : désélectionner tout
             const selection = document.querySelector('.barre-etudiant.selected');
             if (selection) {
                 selection.classList.remove('selected');
-                const infoExistante = selection.parentElement.querySelector('.barre-etudiant-info');
-                if (infoExistante) infoExistante.remove();
             }
         }
     });
