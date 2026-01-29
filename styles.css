@@ -8758,11 +8758,11 @@ label:has(+ textarea:disabled) {
 @keyframes float-vertical {
     /* Mouvement vertical avec variation de taille:
        - Extrémités (haut/bas): 100%
-       - Milieu en montant: 120%
-       - Milieu en descendant: 80%
+       - Milieu en montant: 110%
+       - Milieu en descendant: 90%
        Accélération de la taille au milieu */
     0% {
-        transform: translate(-50%, -50%) translateY(0px) scale(1.2); /* Milieu, monte */
+        transform: translate(-50%, -50%) translateY(0px) scale(1.1); /* Milieu, monte */
         animation-timing-function: ease-out; /* Ralentit vers TOP */
     }
     25% {
@@ -8770,7 +8770,7 @@ label:has(+ textarea:disabled) {
         animation-timing-function: ease-in; /* Accélère vers milieu */
     }
     50% {
-        transform: translate(-50%, -50%) translateY(0px) scale(0.8); /* Milieu, descend */
+        transform: translate(-50%, -50%) translateY(0px) scale(0.9); /* Milieu, descend */
         animation-timing-function: ease-out; /* Ralentit vers BOTTOM */
     }
     75% {
@@ -8778,7 +8778,7 @@ label:has(+ textarea:disabled) {
         animation-timing-function: ease-in; /* Accélère vers milieu */
     }
     100% {
-        transform: translate(-50%, -50%) translateY(0px) scale(1.2); /* Milieu, monte */
+        transform: translate(-50%, -50%) translateY(0px) scale(1.1); /* Milieu, monte */
     }
 }
 
