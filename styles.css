@@ -8756,42 +8756,37 @@ label:has(+ textarea:disabled) {
 /* 🆕 BETA 96.1: Animation tourbillon vertical (rotation cylindrique) */
 /* Utilise --amp (amplitude) définie par JS selon la distance au centre */
 @keyframes float-vertical {
-    /* Mouvement vertical avec variation de taille, luminosité et opacité:
-       - Milieu montant: 100% opacité, blanc, scaleUp (devant, z=15)
-       - Haut: 99.5% opacité, gris très léger, z=12
-       - Milieu descendant: 99% opacité, gris léger, scaleDown (derrière, z=5)
-       - Bas: 99.5% opacité, gris très léger, z=8 */
+    /* Mouvement vertical avec variation de taille et opacité:
+       - Milieu montant: 100% opacité, scaleUp (devant, z=15)
+       - Haut: 99.5% opacité, z=12
+       - Milieu descendant: 99% opacité, scaleDown (derrière, z=5)
+       - Bas: 99.5% opacité, z=8 */
     0% {
         transform: translate(-50%, -50%) translateY(0px) scale(var(--scaleUp, 1.1)); /* Milieu, monte */
-        background: linear-gradient(135deg, #ffffff 0%, #f5f7fa 100%); /* Blanc */
         opacity: 1;
         z-index: 15;
         animation-timing-function: ease-out;
     }
     25% {
         transform: translate(-50%, -50%) translateY(calc(var(--amp, 10px) * -1)) scale(1); /* TOP */
-        background: linear-gradient(135deg, #eaeff3 0%, #e0e6ec 100%); /* Gris très léger */
         opacity: 0.995;
         z-index: 12;
         animation-timing-function: ease-in;
     }
     50% {
         transform: translate(-50%, -50%) translateY(0px) scale(var(--scaleDown, 0.9)); /* Milieu, descend */
-        background: linear-gradient(135deg, #d5dce3 0%, #c8d0d8 100%); /* Gris léger */
         opacity: 0.99;
         z-index: 5;
         animation-timing-function: ease-out;
     }
     75% {
         transform: translate(-50%, -50%) translateY(var(--amp, 10px)) scale(1); /* BOTTOM */
-        background: linear-gradient(135deg, #eaeff3 0%, #e0e6ec 100%); /* Gris très léger */
         opacity: 0.995;
         z-index: 8;
         animation-timing-function: ease-in;
     }
     100% {
         transform: translate(-50%, -50%) translateY(0px) scale(var(--scaleUp, 1.1)); /* Milieu, monte */
-        background: linear-gradient(135deg, #ffffff 0%, #f5f7fa 100%); /* Blanc */
         opacity: 1;
         z-index: 15;
     }
