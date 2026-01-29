@@ -5722,6 +5722,20 @@ function determinerNiveauRaiPedagogique(da) {
     const indices3Derniers = calculerIndicesNDerniersArtefacts(da, true);
     console.log('🔍 [determinerNiveauRaiPedagogique] Indices 3 derniers:', indices3Derniers);
 
+    // 🆕 BETA 96.1: Vérifier si données suffisantes avant interprétation
+    if (indices3Derniers.nbArtefacts === 0) {
+        return {
+            niveau: 0,
+            label: 'En attente',
+            pattern: 'Données insuffisantes',
+            defi: 'Aucun',
+            description: 'Aucune production évaluée. L\'interprétation sera disponible après la première évaluation.',
+            badgeClasse: 'badge-attente',
+            patternBadge: 'badge-attente',
+            donneesSuffisantes: false
+        };
+    }
+
     // Déterminer le pattern basé uniquement sur la performance
     const pattern = identifierPatternActuel(indices3Derniers.performance, diagnostic.principalDefi !== null);
 
@@ -5804,14 +5818,33 @@ function determinerAlerteContextuelle(da) {
     const A = indices.A / 100; // Convertir en décimal 0-1
     const C = indices.C / 100; // Convertir en décimal 0-1
 
+    // 🆕 BETA 96.1: Vérifier si données suffisantes pour C
+    const indices3Derniers = calculerIndicesNDerniersArtefacts(da, true);
+    const cEstCalculable = indices3Derniers.nbArtefacts > 0 || C > 0;
+
     // Interpréter la mobilisation
     const interpMobilisation = interpreterMobilisation(A, C);
 
     console.log('📊 Contexte d\'apprentissage pour DA', da, {
         A: (A * 100).toFixed(1) + '%',
         C: (C * 100).toFixed(1) + '%',
+        cEstCalculable,
         mobilisation: interpMobilisation.niveau
     });
+
+    // 🆕 BETA 96.1: Si C n'est pas calculable, retourner un état "en attente"
+    if (!cEstCalculable) {
+        return {
+            niveau: 'attente',
+            label: 'En attente',
+            description: 'Données insuffisantes pour évaluer le contexte. En attente des premières remises.',
+            badgeClasse: 'badge-attente',
+            A: (A * 100).toFixed(0) + '%',
+            C: 'En attente',
+            recommandation: 'L\'interprétation du contexte d\'apprentissage sera disponible après les premières remises.',
+            donneesSuffisantes: false
+        };
+    }
 
     // LOGIQUE CONTEXTUELLE (basée uniquement sur A et C)
 
