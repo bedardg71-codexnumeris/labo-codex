@@ -8856,23 +8856,22 @@ label:has(+ textarea:disabled) {
 
 /* Infobulle persistante pour point sélectionné */
 .barre-etudiant-info {
-    position: absolute;
+    position: fixed;
     background: rgba(30, 30, 30, 0.95);
     color: white;
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 0.85rem;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
     white-space: nowrap;
-    z-index: 100;
+    z-index: 1000;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     pointer-events: none;
-    transform: translateX(-50%);
 }
 
 .barre-etudiant-info::after {
     content: '';
     position: absolute;
-    bottom: -6px;
+    top: 100%;
     left: 50%;
     transform: translateX(-50%);
     border-width: 6px 6px 0;
