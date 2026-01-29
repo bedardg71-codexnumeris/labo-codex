@@ -804,14 +804,18 @@ function genererSectionMobilisationEngagement(da) {
 
     // Récupérer les données pour les trois sections
     const detailsA = obtenirDetailsAssiduite(da);
-    const tauxA = detailsA.heuresOffertes > 0
-        ? (detailsA.heuresPresentes / detailsA.heuresOffertes * 100).toFixed(1)
+
+    // 🆕 BETA 96.1: Utiliser directement les périodes (plus simple)
+    const periodesPresentes = detailsA.periodesPresentes;
+    const periodesOffertes = detailsA.periodesOffertes;
+
+    const tauxA = periodesOffertes > 0
+        ? (periodesPresentes / periodesOffertes * 100).toFixed(1)
         : 0;
     const interpA = interpreterAssiduite(parseFloat(tauxA));
 
-    // 🆕 BETA 95.6 : Détecter si aucune donnée n'est saisie pour cet étudiant
-    // Permet d'afficher "En attente de données" au lieu de messages trompeurs
-    const aucuneDonneeAssiduite = detailsA.heuresOffertes === 0;
+    // Détecter si aucune donnée n'est saisie pour cet étudiant
+    const aucuneDonneeAssiduite = periodesOffertes === 0;
 
     // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
     const productions = obtenirDonneesSelonMode('productions') || [];
@@ -1016,7 +1020,7 @@ function genererSectionMobilisationEngagement(da) {
         <div id="details-calculs-mobilisation-${da}" class="carte-info-toggle carte-info-note u-hide">
             <strong>Méthodologie de calcul</strong>
             <br><br>
-            <strong>Assiduité (A) :</strong> Indice A = ${indices.A}% — ${detailsA.heuresPresentes} périodes présentes / ${detailsA.heuresOffertes} périodes offertes
+            <strong>Assiduité (A) :</strong> Indice A = ${indices.A}% — ${periodesPresentes} périodes présentes / ${periodesOffertes} périodes offertes
             <br><br>
             <strong>Complétion (C) :</strong> Indice C = ${indices.C}% — ${nbRemis} ${obtenirTermeProduction('pluriel')} remis / ${nbTotal} ${obtenirTermeProduction('pluriel')} totaux
             <br><br>
@@ -1048,7 +1052,7 @@ function genererSectionMobilisationEngagement(da) {
 
                 <!-- Statistiques -->
                 <ul class="profil-liste-simple">
-                    <li><strong>• Périodes présentes :</strong> ${detailsA.heuresPresentes} / ${detailsA.heuresOffertes}</li>
+                    <li><strong>• Périodes présentes :</strong> ${periodesPresentes} / ${periodesOffertes}</li>
                 </ul>
 
                 <hr class="profil-separateur">
@@ -1063,7 +1067,7 @@ function genererSectionMobilisationEngagement(da) {
                             const date = new Date(abs.date + 'T12:00:00');
                             const options = { weekday: 'short', day: 'numeric', month: 'short' };
                             const dateFormatee = date.toLocaleDateString('fr-CA', options);
-                            const estAbsenceComplete = abs.heuresPresence === 0;
+                            const estAbsenceComplete = abs.periodesPresence === 0;
                             const classeBadge = estAbsenceComplete ? 'badge-absence-complete' : 'badge-absence-partielle';
 
                             return `
@@ -1074,8 +1078,8 @@ function genererSectionMobilisationEngagement(da) {
                                     </span>
                                     <span class="badge-absence-heures">
                                         ${estAbsenceComplete
-                                            ? `${abs.heuresManquees} pér.`
-                                            : `${abs.heuresPresence} pér.`
+                                            ? `${abs.periodesManquees} pér.`
+                                            : `${abs.periodesPresence} pér.`
                                         }
                                     </span>
                                 </div>
@@ -2643,16 +2647,16 @@ function obtenirDetailsAssiduite(da) {
     if (!detailsSommatif || typeof detailsSommatif !== 'object') {
         console.warn(`⚠️ Aucune donnée d'assiduité pour ${da}, valeurs par défaut`);
         return {
-            heuresPresentes: 0,
-            heuresOffertes: 0,
+            periodesPresentes: 0,
+            periodesOffertes: 0,
             nombreSeances: 0,
             absences: []
         };
     }
 
-    // Extraire les données du calcul sommatif (source unique de vérité)
-    const heuresPresentes = detailsSommatif.heuresPresentes || 0;
-    const heuresOffertes = detailsSommatif.heuresOffertes || 0;
+    // 🆕 BETA 96.1: Utiliser directement les périodes (plus simple que les heures)
+    const periodesPresentes = Math.round(detailsSommatif.periodesPresentes || 0);
+    const periodesOffertes = Math.round(detailsSommatif.periodesOffertes || 0);
     const nombreSeances = detailsSommatif.nombreSeances || 0;
 
     // Récupérer les présences pour calculer la liste des absences
@@ -2669,11 +2673,11 @@ function obtenirDetailsAssiduite(da) {
         }
     });
 
-    const dureeSeance = obtenirDureeMaxSeance();
-
     // Récupérer les séances configurées
-    // NOTE: seancesHoraire n'est pas mode-aware (configuration globale)
     const seances = db.getSync('seancesHoraire', []);
+
+    // 🆕 BETA 96.1: Tout calculer en PÉRIODES (plus simple et plus précis)
+    const dureePeriodeMin = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : 55;
 
     // Détecter les absences (totales ET partielles)
     const absences = [];
@@ -2683,38 +2687,53 @@ function obtenirDetailsAssiduite(da) {
         const presenceEleve = presences.find(p => p.da === da && p.date === dateCours);
 
         // IMPORTANT : Ignorer les séances facultatives (interventions RàI)
-        // Ces séances ne doivent JAMAIS apparaître comme absences, même si l'étudiant n'y a pas participé
         if (presenceEleve && presenceEleve.facultatif === true) {
-            return; // Passer à la séance suivante
+            return;
         }
 
-        if (!presenceEleve || presenceEleve.heures === null || presenceEleve.heures === undefined) {
-            // Absence totale (aucun enregistrement ou heures null)
+        // Nombre de périodes de la séance
+        const periodesSeance = typeof obtenirNombrePeriodesSeance === 'function'
+            ? obtenirNombrePeriodesSeance(dateCours) : 2;
+
+        // Nombre de périodes de présence de l'étudiant
+        let periodesPresenceEleve = 0;
+        if (presenceEleve) {
+            if (presenceEleve.periodesPresentes !== undefined && presenceEleve.periodesPresentes !== null) {
+                periodesPresenceEleve = presenceEleve.periodesPresentes;
+            } else if (presenceEleve.heures !== undefined && presenceEleve.heures !== null) {
+                // Conversion heures → périodes pour rétrocompatibilité
+                periodesPresenceEleve = Math.round(presenceEleve.heures * 60 / dureePeriodeMin);
+            }
+        }
+
+        // Détecter absence totale ou partielle
+        if (periodesPresenceEleve === 0) {
+            // Absence totale
             const seance = seances.find(s => s.date === dateCours);
             absences.push({
                 date: dateCours,
-                heuresPresence: 0,
-                heuresManquees: dureeSeance,
+                periodesPresence: 0,
+                periodesManquees: periodesSeance,
                 seance: seance
             });
-        } else if (presenceEleve.heures < dureeSeance) {
+        } else if (periodesPresenceEleve < periodesSeance) {
             // Présence partielle (retard/départ anticipé)
             const seance = seances.find(s => s.date === dateCours);
             absences.push({
                 date: dateCours,
-                heuresPresence: presenceEleve.heures,
-                heuresManquees: dureeSeance - presenceEleve.heures,
+                periodesPresence: periodesPresenceEleve,
+                periodesManquees: periodesSeance - periodesPresenceEleve,
                 seance: seance
             });
         }
     });
 
-    // 🆕 MODIFIÉ : Trier par date CROISSANTE (plus ancien en premier)
+    // Trier par date CROISSANTE (plus ancien en premier)
     absences.sort((a, b) => new Date(a.date) - new Date(b.date));
 
     return {
-        heuresPresentes,
-        heuresOffertes,
+        periodesPresentes,
+        periodesOffertes,
         nombreSeances,
         absences
     };
@@ -3646,8 +3665,8 @@ function afficherProfilComplet(da) {
  */
 function genererSectionAssiduite(da) {
     const details = obtenirDetailsAssiduite(da);
-    const taux = details.heuresOffertes > 0 
-        ? (details.heuresPresentes / details.heuresOffertes * 100).toFixed(1)
+    const taux = details.periodesOffertes > 0
+        ? (details.periodesPresentes / details.periodesOffertes * 100).toFixed(1)
         : 0;
 
     return `
@@ -3655,14 +3674,14 @@ function genererSectionAssiduite(da) {
         <div class="profil-grid-auto-200">
             <div class="profil-carte-importante">
                 <div class="carte-metrique-header">
-                    <span class="profil-texte-detail">Heures présentes</span>
-                    <strong class="profil-valeur-grande-bleu">${details.heuresPresentes}h</strong>
+                    <span class="profil-texte-detail">Périodes présentes</span>
+                    <strong class="profil-valeur-grande-bleu">${details.periodesPresentes}</strong>
                 </div>
             </div>
             <div class="profil-carte-importante">
                 <div class="carte-metrique-header">
-                    <span class="profil-texte-detail">Heures offertes</span>
-                    <strong class="profil-valeur-grande-bleu">${details.heuresOffertes}h</strong>
+                    <span class="profil-texte-detail">Périodes offertes</span>
+                    <strong class="profil-valeur-grande-bleu">${details.periodesOffertes}</strong>
                 </div>
             </div>
             <div class="profil-carte-importante">
@@ -7245,10 +7264,10 @@ function genererSectionPerformance(da) {
 /**
  * Génère le HTML de la section assiduité - VERSION CSS NATIVE
  */
-function genererSectionAssiduite(da) {
+function genererSectionAssiduiteLegacy(da) {
     const details = obtenirDetailsAssiduite(da);
-    const taux = details.heuresOffertes > 0
-        ? (details.heuresPresentes / details.heuresOffertes * 100).toFixed(1)
+    const taux = details.periodesOffertes > 0
+        ? (details.periodesPresentes / details.periodesOffertes * 100).toFixed(1)
         : 0;
 
     // Interprétation de l'assiduité
@@ -7272,7 +7291,7 @@ function genererSectionAssiduite(da) {
 
             <!-- Statistiques -->
             <ul class="profil-liste-simple">
-                <li><strong>• Heures présentes :</strong> ${details.heuresPresentes}h / ${details.heuresOffertes}h</li>
+                <li><strong>• Périodes présentes :</strong> ${details.periodesPresentes} / ${details.periodesOffertes}</li>
             </ul>
 
             <hr class="profil-separateur">
@@ -7622,7 +7641,7 @@ function genererRapportAPI(da, options = {}) {
 
     // 2. ASSIDUITÉ
     if (opts.assiduite) {
-        rapport += `Assiduité : ${indices.A}% (${detailsA.heuresPresentes}h / ${detailsA.heuresOffertes}h)\n\n`;
+        rapport += `Assiduité : ${indices.A}% (${detailsA.periodesPresentes} / ${detailsA.periodesOffertes} périodes)\n\n`;
     }
 
     // 3. COMPLÉTION
