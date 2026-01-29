@@ -8756,114 +8756,21 @@ label:has(+ textarea:disabled) {
 /* 🆕 BETA 96.1: Animation tourbillon vertical (rotation cylindrique) */
 /* Utilise --amp (amplitude) définie par JS selon la distance au centre */
 @keyframes float-vertical {
-    /* Cycle 1 : amplitude normale
-       Rotation autour axe horizontal:
-       - Montée (0-12.5%): devant (zUp, opacity 1)
-       - TOP (12.5%): transition vers arrière
-       - Descente (12.5-37.5%): derrière (zDown, opacity 0.9)
-       - BOTTOM (37.5%): transition vers avant
-       - Montée (37.5-50%): devant (zUp, opacity 1) */
+    /* Mouvement vertical simple : centre → haut → centre → bas → centre */
     0% {
-        transform: translate(-50%, -50%) translateX(0px) translateY(0px) scale(1.15);
-        z-index: var(--zUp, 15);
-        opacity: 1;
-        animation-timing-function: linear;
-    }
-    6.25% {
-        transform: translate(-50%, -50%) translateX(calc(var(--offsetX, 0px) * 0.7)) translateY(calc(var(--amp, 10px) * -0.7)) scale(1.08);
-        z-index: var(--zUp, 15);
-        opacity: 1;
-        animation-timing-function: ease-out;
-    }
-    12.5% {
-        transform: translate(-50%, -50%) translateX(var(--offsetX, 0px)) translateY(calc(var(--amp, 10px) * -1)) scale(1);
-        z-index: var(--zDown, 15); /* TOP: transition vers arrière */
-        opacity: 0.9;
-        animation-timing-function: linear;
-    }
-    18.75% {
-        transform: translate(-50%, -50%) translateX(calc(var(--offsetX, 0px) * 0.7)) translateY(calc(var(--amp, 10px) * -0.7)) scale(0.92);
-        z-index: var(--zDown, 15);
-        opacity: 0.9;
-        animation-timing-function: linear;
+        transform: translate(-50%, -50%) translateY(0px);
     }
     25% {
-        transform: translate(-50%, -50%) translateX(0px) translateY(0px) scale(0.85);
-        z-index: var(--zDown, 15);
-        opacity: 0.9;
-        animation-timing-function: linear;
+        transform: translate(-50%, -50%) translateY(calc(var(--amp, 10px) * -1)); /* TOP */
     }
-    31.25% {
-        transform: translate(-50%, -50%) translateX(calc(var(--offsetX, 0px) * -0.7)) translateY(calc(var(--amp, 10px) * 0.7)) scale(0.92);
-        z-index: var(--zDown, 15);
-        opacity: 0.9;
-        animation-timing-function: ease-out;
-    }
-    37.5% {
-        transform: translate(-50%, -50%) translateX(calc(var(--offsetX, 0px) * -1)) translateY(calc(var(--amp, 10px) * 1)) scale(1);
-        z-index: var(--zUp, 15); /* BOTTOM: transition vers avant */
-        opacity: 1;
-        animation-timing-function: linear;
-    }
-    43.75% {
-        transform: translate(-50%, -50%) translateX(calc(var(--offsetX, 0px) * -0.7)) translateY(calc(var(--amp, 10px) * 0.7)) scale(1.08);
-        z-index: var(--zUp, 15);
-        opacity: 1;
-        animation-timing-function: linear;
-    }
-    /* Cycle 2 : amplitude réduite (70%) */
     50% {
-        transform: translate(-50%, -50%) translateX(0px) translateY(0px) scale(1.15);
-        z-index: var(--zUp, 15);
-        opacity: 1;
-        animation-timing-function: linear;
-    }
-    56.25% {
-        transform: translate(-50%, -50%) translateX(calc(var(--offsetX, 0px) * 0.5)) translateY(calc(var(--amp, 10px) * -0.5)) scale(1.08);
-        z-index: var(--zUp, 15);
-        opacity: 1;
-        animation-timing-function: ease-out;
-    }
-    62.5% {
-        transform: translate(-50%, -50%) translateX(calc(var(--offsetX, 0px) * 0.7)) translateY(calc(var(--amp, 10px) * -0.7)) scale(1);
-        z-index: var(--zDown, 15); /* TOP: transition vers arrière */
-        opacity: 0.9;
-        animation-timing-function: linear;
-    }
-    68.75% {
-        transform: translate(-50%, -50%) translateX(calc(var(--offsetX, 0px) * 0.5)) translateY(calc(var(--amp, 10px) * -0.5)) scale(0.92);
-        z-index: var(--zDown, 15);
-        opacity: 0.9;
-        animation-timing-function: linear;
+        transform: translate(-50%, -50%) translateY(0px);
     }
     75% {
-        transform: translate(-50%, -50%) translateX(0px) translateY(0px) scale(0.85);
-        z-index: var(--zDown, 15);
-        opacity: 0.9;
-        animation-timing-function: linear;
-    }
-    81.25% {
-        transform: translate(-50%, -50%) translateX(calc(var(--offsetX, 0px) * -0.5)) translateY(calc(var(--amp, 10px) * 0.5)) scale(0.92);
-        z-index: var(--zDown, 15);
-        opacity: 0.9;
-        animation-timing-function: ease-out;
-    }
-    87.5% {
-        transform: translate(-50%, -50%) translateX(calc(var(--offsetX, 0px) * -0.7)) translateY(calc(var(--amp, 10px) * 0.7)) scale(1);
-        z-index: var(--zUp, 15); /* BOTTOM: transition vers avant */
-        opacity: 1;
-        animation-timing-function: linear;
-    }
-    93.75% {
-        transform: translate(-50%, -50%) translateX(calc(var(--offsetX, 0px) * -0.5)) translateY(calc(var(--amp, 10px) * 0.5)) scale(1.08);
-        z-index: var(--zUp, 15);
-        opacity: 1;
-        animation-timing-function: linear;
+        transform: translate(-50%, -50%) translateY(var(--amp, 10px)); /* BOTTOM */
     }
     100% {
-        transform: translate(-50%, -50%) translateX(0px) translateY(0px) scale(1.15);
-        z-index: var(--zUp, 15);
-        opacity: 1;
+        transform: translate(-50%, -50%) translateY(0px);
     }
 }
 
@@ -8877,7 +8784,7 @@ label:has(+ textarea:disabled) {
     border-radius: 50%;
     cursor: pointer;
     transition: all 0.2s ease;
-    z-index: var(--zUp, 15); /* Contrôlé par l'animation selon la phase */
+    z-index: 10;
     transform: translate(-50%, -50%);
     top: 50%;
     /* Style uniforme : blanc avec dégradé vers gris (même direction que l'ombre) */
@@ -8892,8 +8799,8 @@ label:has(+ textarea:disabled) {
         /* Highlight inset en haut-gauche (reflet lumière) */
         inset -1px -1px 2px rgba(60, 60, 60, 0.1),
         inset 1px 1px 2px rgba(255, 255, 255, 0.8);
-    /* 🆕 BETA 96.1: Animation désactivée temporairement pour rebuild étape par étape */
-    /* animation: float-vertical 12s linear infinite; */
+    /* 🆕 BETA 96.1: Animation verticale simple */
+    animation: float-vertical 6s linear infinite;
 }
 
 /* 🆕 BETA 96.1: Désactivation de l'animation via préférences */
