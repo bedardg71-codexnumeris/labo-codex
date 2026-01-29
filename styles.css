@@ -8756,29 +8756,34 @@ label:has(+ textarea:disabled) {
 /* 🆕 BETA 96.1: Animation tourbillon vertical (rotation cylindrique) */
 /* Utilise --amp (amplitude) définie par JS selon la distance au centre */
 @keyframes float-vertical {
-    /* Mouvement vertical avec variation de taille:
-       - Extrémités (haut/bas): 100%
-       - Milieu en montant: 110%
-       - Milieu en descendant: 90%
-       Accélération de la taille au milieu */
+    /* Mouvement vertical avec variation de taille et z-index:
+       - Milieu montant: 110%, z=2 (devant)
+       - Haut: 100%, z=1
+       - Milieu descendant: 90%, z=0 (derrière)
+       - Bas: 100%, z=1 */
     0% {
         transform: translate(-50%, -50%) translateY(0px) scale(1.1); /* Milieu, monte */
-        animation-timing-function: ease-out; /* Ralentit vers TOP */
+        z-index: 2;
+        animation-timing-function: ease-out;
     }
     25% {
         transform: translate(-50%, -50%) translateY(calc(var(--amp, 10px) * -1)) scale(1); /* TOP */
-        animation-timing-function: ease-in; /* Accélère vers milieu */
+        z-index: 1;
+        animation-timing-function: ease-in;
     }
     50% {
         transform: translate(-50%, -50%) translateY(0px) scale(0.9); /* Milieu, descend */
-        animation-timing-function: ease-out; /* Ralentit vers BOTTOM */
+        z-index: 0;
+        animation-timing-function: ease-out;
     }
     75% {
         transform: translate(-50%, -50%) translateY(var(--amp, 10px)) scale(1); /* BOTTOM */
-        animation-timing-function: ease-in; /* Accélère vers milieu */
+        z-index: 1;
+        animation-timing-function: ease-in;
     }
     100% {
         transform: translate(-50%, -50%) translateY(0px) scale(1.1); /* Milieu, monte */
+        z-index: 2;
     }
 }
 
