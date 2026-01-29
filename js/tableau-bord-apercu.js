@@ -1520,8 +1520,9 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                 const scaleVar = 0.05 + (ampNum - 10) / 15 * 0.10; // 5% à 15% selon amplitude
                 const scaleUp = (1 + scaleVar).toFixed(2);
                 const scaleDown = (1 - scaleVar).toFixed(2);
+                const duration = (8 - (ampNum - 10) * 0.27).toFixed(1); // 8s à 4s selon amplitude
                                 lignesSOM += `<div class="barre-etudiant barre-etudiant-som"
-                    style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px; --zUp: ${zUp}; --zDown: ${zDown}; --scaleUp: ${scaleUp}; --scaleDown: ${scaleDown};"
+                    style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px; --zUp: ${zUp}; --zDown: ${zDown}; --scaleUp: ${scaleUp}; --scaleDown: ${scaleDown}; --duration: ${duration}s;"
                     data-da="${e.da}"
                     data-nom="${echapperHtml(nomAffiche)}"
                     data-valeur="${Math.round(e.valeur * 100)}%"
@@ -1577,8 +1578,9 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                 const scaleVar = 0.05 + (ampNum - 10) / 15 * 0.10; // 5% à 15% selon amplitude
                 const scaleUp = (1 + scaleVar).toFixed(2);
                 const scaleDown = (1 - scaleVar).toFixed(2);
+                const duration = (8 - (ampNum - 10) * 0.27).toFixed(1); // 8s à 4s selon amplitude
                                 lignesPAN += `<div class="barre-etudiant barre-etudiant-std"
-                    style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px; --zUp: ${zUp}; --zDown: ${zDown}; --scaleUp: ${scaleUp}; --scaleDown: ${scaleDown};"
+                    style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px; --zUp: ${zUp}; --zDown: ${zDown}; --scaleUp: ${scaleUp}; --scaleDown: ${scaleDown}; --duration: ${duration}s;"
                     data-da="${e.da}"
                     data-nom="${echapperHtml(nomAffiche)}"
                     data-valeur="${Math.round(e.valeur * 100)}%"
@@ -1751,8 +1753,9 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
                 const scaleVar = 0.05 + (ampNum - 10) / 15 * 0.10; // 5% à 15% selon amplitude
                 const scaleUp = (1 + scaleVar).toFixed(2);
                 const scaleDown = (1 - scaleVar).toFixed(2);
+                const duration = (8 - (ampNum - 10) * 0.27).toFixed(1); // 8s à 4s selon amplitude
                         lignesSOM += `<div class="barre-etudiant barre-etudiant-som"
-                style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px; --zUp: ${zUp}; --zDown: ${zDown}; --scaleUp: ${scaleUp}; --scaleDown: ${scaleDown};"
+                style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px; --zUp: ${zUp}; --zDown: ${zDown}; --scaleUp: ${scaleUp}; --scaleDown: ${scaleDown}; --duration: ${duration}s;"
                 data-da="${e.da}"
                 data-nom="${echapperHtml(nomAffiche)}"
                 data-pattern="${pattern}"
@@ -1797,8 +1800,9 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
                 const scaleVar = 0.05 + (ampNum - 10) / 15 * 0.10; // 5% à 15% selon amplitude
                 const scaleUp = (1 + scaleVar).toFixed(2);
                 const scaleDown = (1 - scaleVar).toFixed(2);
+                const duration = (8 - (ampNum - 10) * 0.27).toFixed(1); // 8s à 4s selon amplitude
                         lignesPAN += `<div class="barre-etudiant barre-etudiant-std"
-                style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px; --zUp: ${zUp}; --zDown: ${zDown}; --scaleUp: ${scaleUp}; --scaleDown: ${scaleDown};"
+                style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px; --zUp: ${zUp}; --zDown: ${zDown}; --scaleUp: ${scaleUp}; --scaleDown: ${scaleDown}; --duration: ${duration}s;"
                 data-da="${e.da}"
                 data-nom="${echapperHtml(nomAffiche)}"
                 data-pattern="${pattern}"
@@ -1999,8 +2003,9 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, n
                 const scaleVar = 0.05 + (ampNum - 10) / 15 * 0.10; // 5% à 15% selon amplitude
                 const scaleUp = (1 + scaleVar).toFixed(2);
                 const scaleDown = (1 - scaleVar).toFixed(2);
+                const duration = (8 - (ampNum - 10) * 0.27).toFixed(1); // 8s à 4s selon amplitude
                         lignesSOM += `<div class="barre-etudiant barre-etudiant-som"
-                style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px; --zUp: ${zUp}; --zDown: ${zDown}; --scaleUp: ${scaleUp}; --scaleDown: ${scaleDown};"
+                style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px; --zUp: ${zUp}; --zDown: ${zDown}; --scaleUp: ${scaleUp}; --scaleDown: ${scaleDown}; --duration: ${duration}s;"
                 data-da="${e.da}"
                 data-nom="${echapperHtml(nomAffiche)}"
                 data-niveau="${niveau}"
@@ -2045,8 +2050,9 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, n
                 const scaleVar = 0.05 + (ampNum - 10) / 15 * 0.10; // 5% à 15% selon amplitude
                 const scaleUp = (1 + scaleVar).toFixed(2);
                 const scaleDown = (1 - scaleVar).toFixed(2);
+                const duration = (8 - (ampNum - 10) * 0.27).toFixed(1); // 8s à 4s selon amplitude
                         lignesPAN += `<div class="barre-etudiant barre-etudiant-std"
-                style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px; --zUp: ${zUp}; --zDown: ${zDown}; --scaleUp: ${scaleUp}; --scaleDown: ${scaleDown};"
+                style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px; --zUp: ${zUp}; --zDown: ${zDown}; --scaleUp: ${scaleUp}; --scaleDown: ${scaleDown}; --duration: ${duration}s;"
                 data-da="${e.da}"
                 data-nom="${echapperHtml(nomAffiche)}"
                 data-niveau="${niveau}"

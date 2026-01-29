@@ -8812,8 +8812,8 @@ label:has(+ textarea:disabled) {
         /* Highlight inset en haut-gauche (reflet lumière) */
         inset -1px -1px 2px rgba(60, 60, 60, 0.1),
         inset 1px 1px 2px rgba(255, 255, 255, 0.8);
-    /* 🆕 BETA 96.1: Animation verticale simple */
-    animation: float-vertical 6s linear infinite;
+    /* 🆕 BETA 96.1: Animation verticale - durée proportionnelle à l'amplitude */
+    animation: float-vertical var(--duration, 6s) linear infinite;
 }
 
 /* 🆕 BETA 96.1: Désactivation de l'animation via préférences */
