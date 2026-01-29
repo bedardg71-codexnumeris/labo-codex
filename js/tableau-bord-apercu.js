@@ -1516,7 +1516,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                 const amplitude = ampNum.toFixed(1);
                 const zUp = Math.round(ampNum + 5);    // Montée: grande amp = devant (10-22)
                 const zDown = Math.round(27 - ampNum); // Descente: grande amp = derrière (22-10)
-                const offsetX = ((Math.random() - 0.5) * 6).toFixed(1); // Décalage X aléatoire -3 à +3px
+                const offsetX = ((Math.random() - 0.5) * 10).toFixed(1); // Décalage X aléatoire -5 à +5px
                 const scaleVar = 0.03 + (ampNum - 8) / 10 * 0.17; // 3% à 20% selon amplitude
                 const scaleUp = (1 + scaleVar).toFixed(2);
                 const scaleDown = (1 - scaleVar).toFixed(2);
@@ -1574,7 +1574,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                 const amplitude = ampNum.toFixed(1);
                 const zUp = Math.round(ampNum + 5);    // Montée: grande amp = devant (10-22)
                 const zDown = Math.round(27 - ampNum); // Descente: grande amp = derrière (22-10)
-                const offsetX = ((Math.random() - 0.5) * 6).toFixed(1); // Décalage X aléatoire -3 à +3px
+                const offsetX = ((Math.random() - 0.5) * 10).toFixed(1); // Décalage X aléatoire -5 à +5px
                 const scaleVar = 0.03 + (ampNum - 8) / 10 * 0.17; // 3% à 20% selon amplitude
                 const scaleUp = (1 + scaleVar).toFixed(2);
                 const scaleDown = (1 - scaleVar).toFixed(2);
@@ -1749,7 +1749,7 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
             const amplitude = ampNum.toFixed(1);
             const zUp = Math.round(ampNum + 5);    // Montée: grande amp = devant (10-22)
             const zDown = Math.round(27 - ampNum); // Descente: grande amp = derrière (22-10)
-                const offsetX = ((Math.random() - 0.5) * 6).toFixed(1); // Décalage X aléatoire -3 à +3px
+                const offsetX = ((Math.random() - 0.5) * 10).toFixed(1); // Décalage X aléatoire -5 à +5px
                 const scaleVar = 0.03 + (ampNum - 8) / 10 * 0.17; // 3% à 20% selon amplitude
                 const scaleUp = (1 + scaleVar).toFixed(2);
                 const scaleDown = (1 - scaleVar).toFixed(2);
@@ -1796,7 +1796,7 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
             const amplitude = ampNum.toFixed(1);
             const zUp = Math.round(ampNum + 5);    // Montée: grande amp = devant (10-22)
             const zDown = Math.round(27 - ampNum); // Descente: grande amp = derrière (22-10)
-                const offsetX = ((Math.random() - 0.5) * 6).toFixed(1); // Décalage X aléatoire -3 à +3px
+                const offsetX = ((Math.random() - 0.5) * 10).toFixed(1); // Décalage X aléatoire -5 à +5px
                 const scaleVar = 0.03 + (ampNum - 8) / 10 * 0.17; // 3% à 20% selon amplitude
                 const scaleUp = (1 + scaleVar).toFixed(2);
                 const scaleDown = (1 - scaleVar).toFixed(2);
@@ -1999,7 +1999,7 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, n
             const amplitude = ampNum.toFixed(1);
             const zUp = Math.round(ampNum + 5);    // Montée: grande amp = devant (10-22)
             const zDown = Math.round(27 - ampNum); // Descente: grande amp = derrière (22-10)
-                const offsetX = ((Math.random() - 0.5) * 6).toFixed(1); // Décalage X aléatoire -3 à +3px
+                const offsetX = ((Math.random() - 0.5) * 10).toFixed(1); // Décalage X aléatoire -5 à +5px
                 const scaleVar = 0.03 + (ampNum - 8) / 10 * 0.17; // 3% à 20% selon amplitude
                 const scaleUp = (1 + scaleVar).toFixed(2);
                 const scaleDown = (1 - scaleVar).toFixed(2);
@@ -2046,7 +2046,7 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, n
             const amplitude = ampNum.toFixed(1);
             const zUp = Math.round(ampNum + 5);    // Montée: grande amp = devant (10-22)
             const zDown = Math.round(27 - ampNum); // Descente: grande amp = derrière (22-10)
-                const offsetX = ((Math.random() - 0.5) * 6).toFixed(1); // Décalage X aléatoire -3 à +3px
+                const offsetX = ((Math.random() - 0.5) * 10).toFixed(1); // Décalage X aléatoire -5 à +5px
                 const scaleVar = 0.03 + (ampNum - 8) / 10 * 0.17; // 3% à 20% selon amplitude
                 const scaleUp = (1 + scaleVar).toFixed(2);
                 const scaleDown = (1 - scaleVar).toFixed(2);
