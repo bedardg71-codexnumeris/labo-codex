@@ -1512,7 +1512,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                     nomAffiche = `${e.nom}, ${e.prenom}`;
                 }
                 const animDelay = (Math.random() * 3).toFixed(2); // Délai aléatoire 0-3s
-                const ampNum = 5 + Math.random() * 12; // Amplitude 5-17px
+                const ampNum = 10 + Math.random() * 15; // Amplitude 10-25px
                 const amplitude = ampNum.toFixed(1);
                 const zUp = Math.round(ampNum + 5);    // Montée: grande amp = devant (10-22)
                 const zDown = Math.round(27 - ampNum); // Descente: grande amp = derrière (22-10)
@@ -1566,7 +1566,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                     nomAffiche = `${e.nom}, ${e.prenom}`;
                 }
                 const animDelay = (Math.random() * 3).toFixed(2); // Délai aléatoire 0-3s
-                const ampNum = 5 + Math.random() * 12; // Amplitude 5-17px
+                const ampNum = 10 + Math.random() * 15; // Amplitude 10-25px
                 const amplitude = ampNum.toFixed(1);
                 const zUp = Math.round(ampNum + 5);    // Montée: grande amp = devant (10-22)
                 const zDown = Math.round(27 - ampNum); // Descente: grande amp = derrière (22-10)
@@ -1737,7 +1737,7 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
                 nomAffiche = `${e.nom}, ${e.prenom}`;
             }
             const animDelay = (Math.random() * 3).toFixed(2); // Délai aléatoire 0-3s
-            const ampNum = 5 + Math.random() * 12; // Amplitude 5-17px
+            const ampNum = 10 + Math.random() * 15; // Amplitude 10-25px
             const amplitude = ampNum.toFixed(1);
             const zUp = Math.round(ampNum + 5);    // Montée: grande amp = devant (10-22)
             const zDown = Math.round(27 - ampNum); // Descente: grande amp = derrière (22-10)
@@ -1780,7 +1780,7 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
                 nomAffiche = `${e.nom}, ${e.prenom}`;
             }
             const animDelay = (Math.random() * 3).toFixed(2); // Délai aléatoire 0-3s
-            const ampNum = 5 + Math.random() * 12; // Amplitude 5-17px
+            const ampNum = 10 + Math.random() * 15; // Amplitude 10-25px
             const amplitude = ampNum.toFixed(1);
             const zUp = Math.round(ampNum + 5);    // Montée: grande amp = devant (10-22)
             const zDown = Math.round(27 - ampNum); // Descente: grande amp = derrière (22-10)
@@ -1979,7 +1979,7 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, n
                 nomAffiche = `${e.nom}, ${e.prenom}`;
             }
             const animDelay = (Math.random() * 3).toFixed(2); // Délai aléatoire 0-3s
-            const ampNum = 5 + Math.random() * 12; // Amplitude 5-17px
+            const ampNum = 10 + Math.random() * 15; // Amplitude 10-25px
             const amplitude = ampNum.toFixed(1);
             const zUp = Math.round(ampNum + 5);    // Montée: grande amp = devant (10-22)
             const zDown = Math.round(27 - ampNum); // Descente: grande amp = derrière (22-10)
@@ -2022,7 +2022,7 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, n
                 nomAffiche = `${e.nom}, ${e.prenom}`;
             }
             const animDelay = (Math.random() * 3).toFixed(2); // Délai aléatoire 0-3s
-            const ampNum = 5 + Math.random() * 12; // Amplitude 5-17px
+            const ampNum = 10 + Math.random() * 15; // Amplitude 10-25px
             const amplitude = ampNum.toFixed(1);
             const zUp = Math.round(ampNum + 5);    // Montée: grande amp = devant (10-22)
             const zDown = Math.round(27 - ampNum); // Descente: grande amp = derrière (22-10)
