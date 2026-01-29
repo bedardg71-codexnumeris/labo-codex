@@ -8756,18 +8756,22 @@ label:has(+ textarea:disabled) {
 /* 🆕 BETA 96.1: Animation tourbillon vertical (rotation cylindrique) */
 /* Utilise --amp (amplitude) définie par JS selon la distance au centre */
 @keyframes float-vertical {
-    /* Mouvement vertical simple : centre → haut → centre → bas → centre */
+    /* Mouvement vertical avec ralentissement aux extrémités (effet pendule) */
     0% {
         transform: translate(-50%, -50%) translateY(0px);
+        animation-timing-function: ease-out; /* Ralentit vers TOP */
     }
     25% {
         transform: translate(-50%, -50%) translateY(calc(var(--amp, 10px) * -1)); /* TOP */
+        animation-timing-function: ease-in; /* Accélère depuis TOP */
     }
     50% {
         transform: translate(-50%, -50%) translateY(0px);
+        animation-timing-function: ease-out; /* Ralentit vers BOTTOM */
     }
     75% {
         transform: translate(-50%, -50%) translateY(var(--amp, 10px)); /* BOTTOM */
+        animation-timing-function: ease-in; /* Accélère depuis BOTTOM */
     }
     100% {
         transform: translate(-50%, -50%) translateY(0px);
