@@ -8760,22 +8760,22 @@ label:has(+ textarea:disabled) {
        - Extrémités (haut/bas): 100%
        - Milieu en montant: 120%
        - Milieu en descendant: 80%
-       Accélération de la taille au milieu */
+       Monte = accélère au milieu, Descend = ralentit au milieu */
     0% {
         transform: translate(-50%, -50%) translateY(0px) scale(1.2); /* Milieu, monte */
-        animation-timing-function: ease-out; /* Ralentit vers TOP */
+        animation-timing-function: ease-in; /* Monte: accélère au milieu */
     }
     25% {
         transform: translate(-50%, -50%) translateY(calc(var(--amp, 10px) * -1)) scale(1); /* TOP */
-        animation-timing-function: ease-in; /* Accélère vers milieu */
+        animation-timing-function: ease-out; /* Descend: ralentit au milieu */
     }
     50% {
         transform: translate(-50%, -50%) translateY(0px) scale(0.8); /* Milieu, descend */
-        animation-timing-function: ease-out; /* Ralentit vers BOTTOM */
+        animation-timing-function: ease-out; /* Descend: ralentit au milieu */
     }
     75% {
         transform: translate(-50%, -50%) translateY(var(--amp, 10px)) scale(1); /* BOTTOM */
-        animation-timing-function: ease-in; /* Accélère vers milieu */
+        animation-timing-function: ease-in; /* Monte: accélère au milieu */
     }
     100% {
         transform: translate(-50%, -50%) translateY(0px) scale(1.2); /* Milieu, monte */
