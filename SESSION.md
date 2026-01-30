@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 96.1
 
 **Date** : 30 janvier 2026
-**Version** : Beta 96.1 (build 0130-1200)
+**Version** : Beta 96.1 (build 0130-1602)
 **Statut** : Application fonctionnelle pour H2026, A2024 archive
 
 ---
@@ -37,10 +37,16 @@
   - **Questions liées au cours** : Chaque cours a ses propres questions (stockage par coursId)
   - **Organisation par catégories** : Créer, modifier, supprimer des catégories thématiques
   - **Gestion CRUD** : Ajouter, modifier, supprimer des questions depuis le modal
+  - **Changement de catégorie** : Dropdown pour déplacer une question vers une autre catégorie
+  - **Filtre par catégorie** : Dropdown dans la carte pour filtrer les questions à tirer
   - **Animation roulette** : Même effet de suspense que le tirage d'étudiants
   - **Mode avec/sans remise** : Option pour répéter ou non les questions
   - **Mise en page** : Deux cartes côte à côte (Questions Flash | Tirage au sort)
   - Fichiers modifiés : `js/boite-outils.js`, `js/navigation.js`, `js/trimestre-v2.js`, `index.html`, `styles.css`
+
+- **NAVIGATION - ICÔNE RÉGLAGES**
+  - Le texte "Réglages" remplacé par l'icône d'engrenage dans la barre de navigation
+  - Tooltip "Réglages" au survol pour l'accessibilité
 
 - **BOÎTE À OUTILS - TIRAGE AU SORT** (précédent)
   - Nouvelle section "Boîte à outils" dans la navigation principale
