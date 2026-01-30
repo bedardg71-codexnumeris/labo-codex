@@ -11721,6 +11721,7 @@ body.mode-assiste .btn-aide-contextuelle,
     cursor: pointer;
     color: var(--bleu-principal, #032e5c);
     transition: all 0.2s ease;
+    z-index: 10;
 }
 
 .btn-params-tirage:hover {
