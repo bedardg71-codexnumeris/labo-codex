@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 96.1
 
-**Date** : 28 janvier 2026
-**Version** : Beta 96.1 (build 0128-1530)
+**Date** : 30 janvier 2026
+**Version** : Beta 96.1 (build 0130-1200)
 **Statut** : Application fonctionnelle pour H2026, A2024 archive
 
 ---
@@ -30,7 +30,19 @@
 - **Modal Confidentiel** : Informations sensibles sur l'étudiant (ÉPGC, services adaptés, etc.)
 - **Anonymisation groupes** : Numéros de groupe remplacés par lettres en mode anonymisation
 
-### Derniere tache completee (28 janvier - Beta 96.1)
+### Derniere tache completee (30 janvier - Beta 96.1)
+- **BOÎTE À OUTILS - TIRAGE AU SORT**
+  - Nouvelle section "Boîte à outils" dans la navigation principale
+  - Premier outil : Tirage au sort d'étudiants pour pratiques de récupération en classe
+  - **Animation roulette** : Effet de suspense avec défilement ralentissant
+  - **Modal paramètres** : Nombre à tirer, mode avec/sans remise, exclusions manuelles
+  - **Persistance** : État conservé lors du changement d'onglet (localStorage)
+  - **Rafraîchissement auto** : Liste mise à jour lors du changement de groupe-cours
+  - Design System v7 respecté (modal, boutons, couleurs)
+  - Fichiers créés : `js/boite-outils.js`
+  - Fichiers modifiés : `js/config.js`, `js/navigation.js`, `js/trimestre-v2.js`, `js/contexte.js`, `index.html`, `styles.css`
+
+### Tache precedente (28 janvier - Beta 96.1)
 - **ANIMATION 3D DES POINTS (Tableau de bord)**
   - Les points blancs dans les barres graduées oscillent avec un effet de rotation 3D
   - Tous les points partent du centre de la barre (ligne horizontale)
@@ -963,4 +975,4 @@
 
 ---
 
-**Derniere mise a jour** : 28 janvier 2026
+**Derniere mise a jour** : 30 janvier 2026
