@@ -786,7 +786,7 @@ function ouvrirModalParamsQuestions() {
                                 <div class="questions-groupe-categorie">
                                     <h4 class="questions-categorie-titre">${cat.nom} (${questionsParCategorie[cat.id]?.length || 0})</h4>
                                     <div class="questions-liste">
-                                        ${(questionsParCategorie[cat.id] || []).map(q => genererHTMLQuestion(q)).join('')}
+                                        ${(questionsParCategorie[cat.id] || []).map(q => genererHTMLQuestionFlash(q)).join('')}
                                     </div>
                                 </div>
                             `).join('')}
@@ -795,7 +795,7 @@ function ouvrirModalParamsQuestions() {
                                 <div class="questions-groupe-categorie">
                                     <h4 class="questions-categorie-titre">Sans catégorie (${questionsSansCategorie.length})</h4>
                                     <div class="questions-liste">
-                                        ${questionsSansCategorie.map(q => genererHTMLQuestion(q)).join('')}
+                                        ${questionsSansCategorie.map(q => genererHTMLQuestionFlash(q)).join('')}
                                     </div>
                                 </div>
                             ` : ''}
@@ -834,8 +834,9 @@ function toggleRemiseQuestions(checked) {
 
 /**
  * Génère le HTML d'une question dans la liste
+ * Note: Nommé genererHTMLQuestionFlash pour éviter collision avec primo-modal.js
  */
-function genererHTMLQuestion(question) {
+function genererHTMLQuestionFlash(question) {
     const estPosee = etatQuestions.dejaPositions.includes(question.id);
     return `
         <div class="question-item ${estPosee && !etatQuestions.avecRemise ? 'question-posee' : ''}">
@@ -893,7 +894,7 @@ function rafraichirListeQuestionsModal() {
                     <div class="questions-groupe-categorie">
                         <h4 class="questions-categorie-titre">${cat.nom} (${questionsCategorie.length})</h4>
                         <div class="questions-liste">
-                            ${questionsCategorie.map(q => genererHTMLQuestion(q)).join('')}
+                            ${questionsCategorie.map(q => genererHTMLQuestionFlash(q)).join('')}
                         </div>
                     </div>
                 `;
@@ -906,7 +907,7 @@ function rafraichirListeQuestionsModal() {
                 <div class="questions-groupe-categorie">
                     <h4 class="questions-categorie-titre">Sans catégorie (${questionsSansCategorie.length})</h4>
                     <div class="questions-liste">
-                        ${questionsSansCategorie.map(q => genererHTMLQuestion(q)).join('')}
+                        ${questionsSansCategorie.map(q => genererHTMLQuestionFlash(q)).join('')}
                     </div>
                 </div>
             `;
