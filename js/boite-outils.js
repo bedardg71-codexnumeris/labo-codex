@@ -485,7 +485,8 @@ let etatQuestions = {
     dejaPositions: [],      // IDs des questions déjà posées (mode sans remise)
     avecRemise: false,      // Mode avec remise
     coursId: null,          // Pour stocker par cours
-    animationEnCours: false
+    animationEnCours: false,
+    categorieFiltre: null   // null = toutes, sinon ID de la catégorie sélectionnée
 };
 
 /**
@@ -556,16 +557,77 @@ function initialiserQuestions() {
     // Restaurer l'état pour ce cours
     restaurerEtatQuestions();
     etatQuestions.coursId = coursActuelId;
+    etatQuestions.categorieFiltre = null; // Reset du filtre à l'init
 
+    // Mettre à jour le dropdown des catégories
+    mettreAJourDropdownCategories();
     mettreAJourCompteurQuestions();
     console.log(`[Questions] Initialisé avec ${etatQuestions.questions.length} questions`);
 }
 
 /**
+ * Met à jour le dropdown des catégories pour le filtre
+ */
+function mettreAJourDropdownCategories() {
+    const select = document.getElementById('questions-filtre-categorie');
+    if (!select) return;
+
+    // Sauvegarder la valeur actuelle
+    const valeurActuelle = select.value;
+
+    // Reconstruire les options
+    let html = '<option value="">Toutes les catégories</option>';
+    etatQuestions.categories.forEach(cat => {
+        const count = etatQuestions.questions.filter(q => q.categorieId === cat.id).length;
+        html += `<option value="${cat.id}">${cat.nom} (${count})</option>`;
+    });
+
+    // Ajouter "Sans catégorie" si des questions n'ont pas de catégorie
+    const sansCat = etatQuestions.questions.filter(q => !q.categorieId).length;
+    if (sansCat > 0) {
+        html += `<option value="__none__">Sans catégorie (${sansCat})</option>`;
+    }
+
+    select.innerHTML = html;
+
+    // Restaurer la valeur si elle existe encore
+    if (valeurActuelle && select.querySelector(`option[value="${valeurActuelle}"]`)) {
+        select.value = valeurActuelle;
+    }
+}
+
+/**
+ * Change le filtre de catégorie
+ */
+function changerFiltreCategorie(valeur) {
+    if (valeur === '') {
+        etatQuestions.categorieFiltre = null; // Toutes les catégories
+    } else if (valeur === '__none__') {
+        etatQuestions.categorieFiltre = ''; // Sans catégorie (categorieId null ou vide)
+    } else {
+        etatQuestions.categorieFiltre = valeur; // Catégorie spécifique
+    }
+
+    mettreAJourCompteurQuestions();
+    console.log(`[Questions] Filtre catégorie: ${etatQuestions.categorieFiltre === null ? 'Toutes' : etatQuestions.categorieFiltre || 'Sans catégorie'}`);
+}
+
+/**
  * Obtient les questions disponibles pour le tirage
+ * Filtre par catégorie si une catégorie est sélectionnée
  */
 function obtenirQuestionsDisponibles() {
     return etatQuestions.questions.filter(q => {
+        // Filtre par catégorie
+        if (etatQuestions.categorieFiltre !== null) {
+            if (etatQuestions.categorieFiltre === '' && q.categorieId) {
+                return false; // Filtre "Sans catégorie" mais la question a une catégorie
+            }
+            if (etatQuestions.categorieFiltre !== '' && q.categorieId !== etatQuestions.categorieFiltre) {
+                return false; // Filtre sur une catégorie spécifique
+            }
+        }
+        // Filtre déjà posées (mode sans remise)
         if (!etatQuestions.avecRemise && etatQuestions.dejaPositions.includes(q.id)) {
             return false;
         }
@@ -663,13 +725,8 @@ function afficherResultatQuestion(question) {
         sauvegarderEtatQuestions();
     }
 
-    // Trouver la catégorie
-    const categorie = etatQuestions.categories.find(c => c.id === question.categorieId);
-    const nomCategorie = categorie ? categorie.nom : 'Sans catégorie';
-
     affichage.innerHTML = `
         <div class="question-resultat">
-            <span class="question-categorie-badge">${nomCategorie}</span>
             <span class="question-texte-final">${question.texte}</span>
         </div>
     `;
@@ -938,6 +995,9 @@ function rafraichirListeQuestionsModal() {
             </span>
         `).join('');
     }
+
+    // Mettre à jour le dropdown de filtre de la carte principale
+    mettreAJourDropdownCategories();
 }
 
 /**
@@ -1114,6 +1174,7 @@ window.ajouterQuestion = ajouterQuestion;
 window.modifierQuestion = modifierQuestion;
 window.supprimerQuestion = supprimerQuestion;
 window.reinitialiserQuestionsPositions = reinitialiserQuestionsPositions;
+window.changerFiltreCategorie = changerFiltreCategorie;
 window.initialiserQuestions = initialiserQuestions;
 
 console.log('[Boîte à outils] Module chargé');
