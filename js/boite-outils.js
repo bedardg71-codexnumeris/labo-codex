@@ -12,43 +12,96 @@
    TIRAGE AU SORT
    =============================== */
 
-// État du tirage
+// État du tirage (persisté dans localStorage)
 let etatTirage = {
     pool: [],              // Étudiants disponibles pour le tirage
     exclus: [],            // DA des étudiants exclus manuellement
     dejaTires: [],         // DA des étudiants déjà tirés (mode sans remise)
     avecRemise: false,     // Mode avec remise
     nombreATirer: 1,       // Nombre d'étudiants à tirer
-    animationEnCours: false
+    animationEnCours: false,
+    coursId: null          // Pour détecter le changement de groupe
 };
+
+/**
+ * Sauvegarde l'état du tirage dans localStorage
+ */
+function sauvegarderEtatTirage() {
+    const etatASauvegarder = {
+        exclus: etatTirage.exclus,
+        dejaTires: etatTirage.dejaTires,
+        avecRemise: etatTirage.avecRemise,
+        nombreATirer: etatTirage.nombreATirer,
+        coursId: etatTirage.coursId
+    };
+    localStorage.setItem('etatTirage', JSON.stringify(etatASauvegarder));
+}
+
+/**
+ * Restaure l'état du tirage depuis localStorage
+ */
+function restaurerEtatTirage() {
+    try {
+        const sauvegarde = localStorage.getItem('etatTirage');
+        if (sauvegarde) {
+            const etat = JSON.parse(sauvegarde);
+            etatTirage.exclus = etat.exclus || [];
+            etatTirage.dejaTires = etat.dejaTires || [];
+            etatTirage.avecRemise = etat.avecRemise || false;
+            etatTirage.nombreATirer = etat.nombreATirer || 1;
+            etatTirage.coursId = etat.coursId || null;
+            return true;
+        }
+    } catch (e) {
+        console.warn('[Tirage] Erreur restauration état:', e);
+    }
+    return false;
+}
 
 /**
  * Initialise le tirage au sort avec les étudiants du groupe actif
  */
 function initialiserTirage() {
-    // Récupérer les étudiants via la clé namespacée
-    const cleEtudiants = (typeof cle === 'function') ? cle('groupeEtudiants') : 'groupeEtudiants';
-    const etudiants = db.getSync(cleEtudiants, []);
+    console.log('[Tirage] Initialisation...');
+
+    // Utiliser la fonction existante qui gère correctement le filtrage
+    let etudiants = [];
+    if (typeof obtenirEtudiantsCoursActif === 'function') {
+        etudiants = obtenirEtudiantsCoursActif();
+        console.log('[Tirage] Étudiants via obtenirEtudiantsCoursActif:', etudiants.length);
+    } else {
+        // Fallback
+        const cleEtudiants = (typeof cle === 'function') ? cle('groupeEtudiants') : 'groupeEtudiants';
+        etudiants = db.getSync(cleEtudiants, []);
+        console.warn('[Tirage] Fallback vers groupeEtudiants complet:', etudiants.length);
+    }
 
     if (!etudiants || etudiants.length === 0) {
         console.warn('[Tirage] Aucun étudiant trouvé');
         etatTirage.pool = [];
         mettreAJourCompteur();
-        afficherMessageTirage('Aucun étudiant dans le groupe', 'vide');
+        afficherMessageTirage('Aucun étudiant dans le groupe actif', 'vide');
         return;
     }
 
-    // Filtrer par cours actif si nécessaire
-    const coursActifId = db.getSync('coursActif', null);
-    let etudiantsFiltres = etudiants;
+    // Obtenir l'ID du cours actif pour la persistance
+    const infoCours = db.getSync('infoCours', null);
+    const coursActuelId = infoCours?.id || null;
 
-    if (coursActifId) {
-        etudiantsFiltres = etudiants.filter(e => e.coursId === coursActifId);
+    // Restaurer l'état précédent
+    const etatRestaure = restaurerEtatTirage();
+
+    // Si le groupe a changé, réinitialiser les tirés et exclus
+    if (etatRestaure && etatTirage.coursId !== coursActuelId) {
+        console.log('[Tirage] Changement de groupe détecté, réinitialisation');
+        etatTirage.dejaTires = [];
+        etatTirage.exclus = [];
     }
+    etatTirage.coursId = coursActuelId;
 
     // Initialiser le pool avec les étudiants actifs
-    etatTirage.pool = etudiantsFiltres
-        .filter(e => e.statut !== 'inactif') // Exclure les inactifs
+    etatTirage.pool = etudiants
+        .filter(e => e.statut !== 'inactif')
         .map(e => ({
             da: e.da,
             nom: e.nom,
@@ -58,9 +111,12 @@ function initialiserTirage() {
     // Trier par nom
     etatTirage.pool.sort((a, b) => a.nom.localeCompare(b.nom));
 
-    // Réinitialiser les tirages précédents
-    etatTirage.dejaTires = [];
+    // Nettoyer les exclus/tirés qui ne sont plus dans le pool
+    const dasPool = new Set(etatTirage.pool.map(e => e.da));
+    etatTirage.exclus = etatTirage.exclus.filter(da => dasPool.has(da));
+    etatTirage.dejaTires = etatTirage.dejaTires.filter(da => dasPool.has(da));
 
+    sauvegarderEtatTirage();
     mettreAJourCompteur();
     console.log(`[Tirage] Initialisé avec ${etatTirage.pool.length} étudiants`);
 }
@@ -181,6 +237,7 @@ function afficherResultat(resultats) {
                 etatTirage.dejaTires.push(e.da);
             }
         });
+        sauvegarderEtatTirage();
     }
 
     // Générer l'affichage
@@ -233,6 +290,8 @@ function afficherMessageTirage(message, type = 'info') {
  * Ouvre le modal des paramètres de tirage
  */
 function ouvrirModalParamsTirage() {
+    console.log('[Tirage] Ouverture modal paramètres');
+
     const disponibles = obtenirEtudiantsDisponibles();
     const total = etatTirage.pool.length;
 
@@ -241,7 +300,7 @@ function ouvrirModalParamsTirage() {
             <div class="modal-contenu">
                 <div class="modal-entete">
                     <h2 id="titre-modal-params">Paramètres du tirage</h2>
-                    <button class="btn-fermer" onclick="fermerModalParamsTirage()" aria-label="Fermer">×</button>
+                    <button class="btn-fermer" onclick="window.fermerModalParamsTirage()" aria-label="Fermer">×</button>
                 </div>
                 <div class="modal-corps">
 
@@ -283,7 +342,7 @@ function ouvrirModalParamsTirage() {
                                         <input type="checkbox"
                                                data-da="${e.da}"
                                                ${!estExclu ? 'checked' : ''}
-                                               onchange="toggleExclusionEtudiant('${e.da}')">
+                                               onchange="window.toggleExclusionEtudiant('${e.da}')">
                                         <span class="tirage-etudiant-nom">${e.nom}, ${e.prenom}</span>
                                         ${estTire && !etatTirage.avecRemise ? '<span class="tirage-badge-tire">tiré</span>' : ''}
                                     </label>
@@ -294,9 +353,9 @@ function ouvrirModalParamsTirage() {
 
                 </div>
                 <div class="modal-pied">
-                    <button class="btn btn-modifier" onclick="reinitialiserTirage()">Réinitialiser</button>
-                    <button class="btn btn-annuler" onclick="fermerModalParamsTirage()">Annuler</button>
-                    <button class="btn btn-principal" onclick="appliquerParamsTirage()">Appliquer</button>
+                    <button class="btn btn-modifier" onclick="window.reinitialiserTirageComplet()">Réinitialiser</button>
+                    <button class="btn btn-annuler" onclick="window.fermerModalParamsTirage()">Annuler</button>
+                    <button class="btn btn-principal" onclick="window.appliquerParamsTirage()">Appliquer</button>
                 </div>
             </div>
         </div>
@@ -331,6 +390,7 @@ function toggleExclusionEtudiant(da) {
     } else {
         etatTirage.exclus.push(da);
     }
+    sauvegarderEtatTirage();
 }
 
 /**
@@ -348,6 +408,7 @@ function appliquerParamsTirage() {
         etatTirage.avecRemise = remiseEl.checked;
     }
 
+    sauvegarderEtatTirage();
     mettreAJourCompteur();
     fermerModalParamsTirage();
 }
@@ -355,9 +416,10 @@ function appliquerParamsTirage() {
 /**
  * Réinitialise le tirage (vide les tirés et exclus)
  */
-function reinitialiserTirage() {
+function reinitialiserTirageComplet() {
     etatTirage.dejaTires = [];
     etatTirage.exclus = [];
+    sauvegarderEtatTirage();
 
     // Rafraîchir le modal si ouvert
     fermerModalParamsTirage();
@@ -370,18 +432,13 @@ function reinitialiserTirage() {
    INITIALISATION
    =============================== */
 
-/**
- * Appelée quand on navigue vers la section Boîte à outils
- */
-function afficherSectionBoiteOutils() {
-    initialiserTirage();
-}
-
-// Exposer les fonctions globalement
+// Exposer les fonctions globalement AVANT tout appel
 window.lancerTirage = lancerTirage;
 window.ouvrirModalParamsTirage = ouvrirModalParamsTirage;
 window.fermerModalParamsTirage = fermerModalParamsTirage;
 window.toggleExclusionEtudiant = toggleExclusionEtudiant;
 window.appliquerParamsTirage = appliquerParamsTirage;
-window.reinitialiserTirage = reinitialiserTirage;
-window.afficherSectionBoiteOutils = afficherSectionBoiteOutils;
+window.reinitialiserTirageComplet = reinitialiserTirageComplet;
+window.initialiserTirage = initialiserTirage;
+
+console.log('[Boîte à outils] Module chargé');
