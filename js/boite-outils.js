@@ -69,7 +69,10 @@ function initialiserTirage() {
     // Sauvegarder l'ancien coursId AVANT toute restauration
     const ancienCoursId = etatTirage.coursId;
 
-    console.log(`[Tirage] Initialisation - cours actuel: ${coursActuelId}, ancien: ${ancienCoursId}`);
+    console.log(`[Tirage] ===== INITIALISATION =====`);
+    console.log(`[Tirage] infoCours:`, infoCours);
+    console.log(`[Tirage] coursActuelId: ${coursActuelId}`);
+    console.log(`[Tirage] ancienCoursId (mémoire): ${ancienCoursId}`);
 
     // Vérifier si la section tirage est visible (DOM existe)
     const container = document.getElementById('tirage-container');
@@ -86,10 +89,12 @@ function initialiserTirage() {
 
     // Détecter le changement de groupe-cours
     const groupeAChange = ancienCoursId !== null && ancienCoursId !== coursActuelId;
+    console.log(`[Tirage] groupeAChange: ${groupeAChange} (ancien=${ancienCoursId}, actuel=${coursActuelId})`);
     if (groupeAChange) {
-        console.log(`[Tirage] Changement de groupe détecté: ${ancienCoursId} → ${coursActuelId}`);
+        console.log(`[Tirage] ⚠️ CHANGEMENT DE GROUPE - Reset tirés/exclus`);
         etatTirage.dejaTires = [];
         etatTirage.exclus = [];
+        reinitialiserAffichage();
     }
     etatTirage.coursId = coursActuelId;
 
@@ -97,7 +102,10 @@ function initialiserTirage() {
     let etudiants = [];
     if (typeof obtenirEtudiantsCoursActif === 'function') {
         etudiants = obtenirEtudiantsCoursActif();
-        console.log('[Tirage] Étudiants via obtenirEtudiantsCoursActif:', etudiants.length);
+        console.log(`[Tirage] Étudiants obtenus: ${etudiants.length}`);
+        if (etudiants.length > 0) {
+            console.log(`[Tirage] Premier étudiant: ${etudiants[0].prenom} ${etudiants[0].nom}`);
+        }
     } else {
         // Fallback
         const cleEtudiants = (typeof cle === 'function') ? cle('groupeEtudiants') : 'groupeEtudiants';
