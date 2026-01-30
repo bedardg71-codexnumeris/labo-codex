@@ -11691,3 +11691,221 @@ body.mode-assiste .btn-aide-contextuelle,
         transform-origin: top center;
     }
 }
+
+
+/* ===============================
+   BOÎTE À OUTILS - TIRAGE AU SORT
+   Beta 96.1
+   =============================== */
+
+/* Container principal */
+.tirage-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    padding: 40px 20px;
+    position: relative;
+}
+
+/* Bouton paramètres (engrenage) */
+.btn-params-tirage {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: white;
+    border: 2px solid var(--bleu-pale, #e8f2fd);
+    border-radius: 8px;
+    padding: 10px;
+    cursor: pointer;
+    color: var(--bleu-principal, #032e5c);
+    transition: all 0.2s ease;
+}
+
+.btn-params-tirage:hover {
+    background: var(--bleu-tres-pale, #f0f8ff);
+    border-color: var(--bleu-principal, #032e5c);
+}
+
+/* Zone de la roulette */
+.tirage-zone-roulette {
+    background: var(--bleu-tres-pale, #f0f8ff);
+    border: 3px solid var(--bleu-pale, #e8f2fd);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 600px;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 30px;
+    overflow: hidden;
+}
+
+/* Zone d affichage des noms */
+.tirage-affichage {
+    text-align: center;
+    padding: 40px;
+    width: 100%;
+}
+
+.tirage-placeholder {
+    color: #999;
+    font-size: 1.1rem;
+    font-style: italic;
+}
+
+/* Animation du nom pendant la roulette */
+.tirage-nom-anime {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--bleu-principal, #032e5c);
+    display: block;
+}
+
+/* Résultat unique (1 nom) */
+.tirage-resultat-unique {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.tirage-resultat-unique .tirage-prenom {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--bleu-principal, #032e5c);
+}
+
+.tirage-resultat-unique .tirage-nom {
+    font-size: 2rem;
+    font-weight: 500;
+    color: var(--bleu-moyen, #065dbb);
+}
+
+/* Résultats multiples */
+.tirage-resultats-multiples {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.tirage-resultat-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(3, 46, 92, 0.1);
+}
+
+.tirage-numero {
+    background: var(--bleu-principal, #032e5c);
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.tirage-nom-complet {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--bleu-principal, #032e5c);
+}
+
+/* Animation de révélation */
+.tirage-revele {
+    animation: reveler 0.5s ease;
+}
+
+@keyframes reveler {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.5;
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Compteur */
+.tirage-compteur {
+    margin-top: 20px;
+    color: #666;
+    font-size: 0.95rem;
+}
+
+#tirage-nb-restants {
+    font-weight: 700;
+    color: var(--bleu-principal, #032e5c);
+}
+
+/* Message vide */
+.tirage-message-vide {
+    color: #999;
+    font-style: italic;
+}
+
+/* Liste des étudiants dans le modal */
+.tirage-liste-etudiants {
+    max-height: 250px;
+    overflow-y: auto;
+    border: 1px solid var(--bleu-pale, #e8f2fd);
+    border-radius: 8px;
+    padding: 10px;
+    background: var(--bleu-tres-pale, #f8fafc);
+}
+
+.tirage-etudiant-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.tirage-etudiant-item:hover {
+    background: white;
+}
+
+.tirage-etudiant-item.exclu {
+    opacity: 0.5;
+}
+
+.tirage-etudiant-item.deja-tire .tirage-etudiant-nom {
+    text-decoration: line-through;
+    color: #999;
+}
+
+.tirage-etudiant-nom {
+    flex: 1;
+    color: var(--bleu-principal, #032e5c);
+}
+
+.tirage-badge-tire {
+    background: var(--bleu-pale, #e8f2fd);
+    color: var(--bleu-moyen, #065dbb);
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+/* Séparateur dans le modal */
+.modal-separateur {
+    border: none;
+    border-top: 1px solid var(--bleu-pale, #e8f2fd);
+    margin: 20px 0;
+}
+

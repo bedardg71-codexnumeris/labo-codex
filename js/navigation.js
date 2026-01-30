@@ -428,6 +428,14 @@ function afficherSousSection(idSousSection) {
                 setTimeout(afficherStatutSnapshots, 100);
             }
             break;
+
+        // 🆕 BETA 96.1 : Boîte à outils
+        case 'boite-outils-tirage':
+            console.log('🔄 Initialisation du tirage au sort...');
+            if (typeof initialiserTirage === 'function') {
+                setTimeout(initialiserTirage, 100);
+            }
+            break;
     }
 
         // Recharger le tableau de bord selon la sous-section
