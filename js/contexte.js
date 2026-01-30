@@ -429,9 +429,9 @@ function rafraichirVuesApresCours() {
     }
 
     // 🆕 BETA 96.1 : Rafraîchir le tirage au sort si actif
-    if (typeof initialiserTirage === 'function') {
+    if (typeof window.initialiserTirage === 'function') {
         try {
-            initialiserTirage();
+            window.initialiserTirage();
             console.log('   ✅ Tirage au sort rafraîchi');
         } catch (e) {
             console.warn('   ⚠️ Erreur rafraîchissement tirage:', e);
