@@ -701,8 +701,12 @@ function afficherMessageQuestion(message, type = 'info') {
 function ouvrirModalParamsQuestions() {
     console.log('[Questions] Ouverture modal gestion');
 
+    // S'assurer que les questions sont restaurées depuis localStorage
+    restaurerEtatQuestions();
+
     const disponibles = obtenirQuestionsDisponibles();
     const total = etatQuestions.questions.length;
+    console.log(`[Questions] Modal: ${total} questions, ${disponibles.length} disponibles`);
 
     // Grouper les questions par catégorie
     const questionsSansCategorie = etatQuestions.questions.filter(q => !q.categorieId);
@@ -723,7 +727,7 @@ function ouvrirModalParamsQuestions() {
                     <!-- Options -->
                     <div class="form-groupe">
                         <label class="form-checkbox-label">
-                            <input type="checkbox" id="param-remise-questions" ${etatQuestions.avecRemise ? 'checked' : ''}>
+                            <input type="checkbox" id="param-remise-questions" ${etatQuestions.avecRemise ? 'checked' : ''} onchange="window.toggleRemiseQuestions(this.checked)">
                             <span>Avec remise (une même question peut être tirée plusieurs fois)</span>
                         </label>
                     </div>
@@ -801,8 +805,7 @@ function ouvrirModalParamsQuestions() {
                 </div>
                 <div class="modal-pied">
                     <button class="btn btn-modifier" onclick="window.reinitialiserQuestionsPositions()">Réinitialiser les tirages</button>
-                    <button class="btn btn-annuler" onclick="window.fermerModalParamsQuestions()">Fermer</button>
-                    <button class="btn btn-principal" onclick="window.appliquerParamsQuestions()">Appliquer</button>
+                    <button class="btn btn-principal" onclick="window.fermerModalParamsQuestions()">Fermer</button>
                 </div>
             </div>
         </div>
@@ -820,16 +823,25 @@ function ouvrirModalParamsQuestions() {
 }
 
 /**
+ * Toggle le mode avec remise et sauvegarde
+ */
+function toggleRemiseQuestions(checked) {
+    etatQuestions.avecRemise = checked;
+    sauvegarderEtatQuestions();
+    mettreAJourCompteurQuestions();
+    console.log('[Questions] Mode avec remise:', checked);
+}
+
+/**
  * Génère le HTML d'une question dans la liste
  */
 function genererHTMLQuestion(question) {
     const estPosee = etatQuestions.dejaPositions.includes(question.id);
     return `
         <div class="question-item ${estPosee && !etatQuestions.avecRemise ? 'question-posee' : ''}">
-            <span class="question-item-texte">${question.texte}</span>
+            <span class="question-item-texte" onclick="window.modifierQuestion('${question.id}')" title="Cliquez pour modifier">${question.texte}</span>
             <div class="question-item-actions">
                 ${estPosee && !etatQuestions.avecRemise ? '<span class="question-badge-posee">posée</span>' : ''}
-                <button class="btn-icon" onclick="window.modifierQuestion('${question.id}')" title="Modifier">✏️</button>
                 <button class="btn-icon" onclick="window.supprimerQuestion('${question.id}')" title="Supprimer">🗑️</button>
             </div>
         </div>
@@ -1016,6 +1028,7 @@ window.lancerTirageQuestion = lancerTirageQuestion;
 window.ouvrirModalParamsQuestions = ouvrirModalParamsQuestions;
 window.fermerModalParamsQuestions = fermerModalParamsQuestions;
 window.appliquerParamsQuestions = appliquerParamsQuestions;
+window.toggleRemiseQuestions = toggleRemiseQuestions;
 window.ajouterCategorie = ajouterCategorie;
 window.supprimerCategorie = supprimerCategorie;
 window.ajouterQuestion = ajouterQuestion;
