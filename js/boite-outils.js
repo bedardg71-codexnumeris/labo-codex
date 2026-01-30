@@ -64,6 +64,30 @@ function restaurerEtatTirage() {
 function initialiserTirage() {
     console.log('[Tirage] Initialisation...');
 
+    // Vérifier si la section tirage est visible (DOM existe)
+    const container = document.getElementById('tirage-container');
+    if (!container) {
+        console.log('[Tirage] Section non active, skip');
+        return;
+    }
+
+    // Obtenir l'ID du cours actif AVANT de restaurer l'état
+    const infoCours = db.getSync('infoCours', null);
+    const coursActuelId = infoCours?.id || null;
+
+    // Restaurer l'état précédent
+    const etatRestaure = restaurerEtatTirage();
+    const ancienCoursId = etatTirage.coursId;
+
+    // Détecter le changement de groupe-cours
+    const groupeAChange = ancienCoursId !== null && ancienCoursId !== coursActuelId;
+    if (groupeAChange) {
+        console.log(`[Tirage] Changement de groupe détecté: ${ancienCoursId} → ${coursActuelId}`);
+        etatTirage.dejaTires = [];
+        etatTirage.exclus = [];
+    }
+    etatTirage.coursId = coursActuelId;
+
     // Utiliser la fonction existante qui gère correctement le filtrage
     let etudiants = [];
     if (typeof obtenirEtudiantsCoursActif === 'function') {
@@ -80,24 +104,10 @@ function initialiserTirage() {
         console.warn('[Tirage] Aucun étudiant trouvé');
         etatTirage.pool = [];
         mettreAJourCompteur();
+        reinitialiserAffichage();
         afficherMessageTirage('Aucun étudiant dans le groupe actif', 'vide');
         return;
     }
-
-    // Obtenir l'ID du cours actif pour la persistance
-    const infoCours = db.getSync('infoCours', null);
-    const coursActuelId = infoCours?.id || null;
-
-    // Restaurer l'état précédent
-    const etatRestaure = restaurerEtatTirage();
-
-    // Si le groupe a changé, réinitialiser les tirés et exclus
-    if (etatRestaure && etatTirage.coursId !== coursActuelId) {
-        console.log('[Tirage] Changement de groupe détecté, réinitialisation');
-        etatTirage.dejaTires = [];
-        etatTirage.exclus = [];
-    }
-    etatTirage.coursId = coursActuelId;
 
     // Initialiser le pool avec les étudiants actifs
     etatTirage.pool = etudiants
@@ -118,7 +128,23 @@ function initialiserTirage() {
 
     sauvegarderEtatTirage();
     mettreAJourCompteur();
+
+    // Réinitialiser l'affichage si le groupe a changé
+    if (groupeAChange) {
+        reinitialiserAffichage();
+    }
+
     console.log(`[Tirage] Initialisé avec ${etatTirage.pool.length} étudiants`);
+}
+
+/**
+ * Réinitialise la zone d'affichage au message par défaut
+ */
+function reinitialiserAffichage() {
+    const affichage = document.getElementById('tirage-affichage');
+    if (affichage) {
+        affichage.innerHTML = '<span class="tirage-placeholder">Cliquez sur "Tirer !" pour commencer</span>';
+    }
 }
 
 /**
