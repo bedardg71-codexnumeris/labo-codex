@@ -944,6 +944,19 @@ h1, h2, h3, h4 {
     box-shadow: var(--shadow-prononce);
 }
 
+/* Bouton icône dans la navigation (Réglages) */
+.navigation-principale button.btn-nav-icone {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.navigation-principale button.btn-nav-icone svg {
+    width: 22px;
+    height: 22px;
+}
+
 /* ===============================
    SOUS-NAVIGATION - GLASSMORPHISME
    =============================== */
@@ -11798,6 +11811,28 @@ body.mode-assiste .btn-aide-contextuelle,
 .outil-compteur span {
     font-weight: 700;
     color: var(--bleu-principal, #032e5c);
+}
+
+/* Filtre par catégorie */
+.questions-filtre {
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+.questions-filtre select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--bleu-pale, #e8f2fd);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: var(--bleu-principal, #032e5c);
+    background: white;
+    cursor: pointer;
+}
+
+.questions-filtre select:focus {
+    outline: none;
+    border-color: var(--bleu-principal, #032e5c);
 }
 
 /* Animation du nom pendant la roulette */
