@@ -5680,6 +5680,11 @@ async function changerGroupeCoursActifV2(valeur) {
             }
         }
 
+        // 🆕 BETA 96.1 : Rafraîchir le tirage au sort si visible
+        if (typeof window.initialiserTirage === 'function') {
+            window.initialiserTirage();
+        }
+
         console.log('[Trimestre V2] Mode COURS activé:', coursId, '(tous groupes)');
         return;
     }
@@ -5784,6 +5789,11 @@ async function changerGroupeCoursActifV2(valeur) {
                 }
             }
         }
+    }
+
+    // 🆕 BETA 96.1 : Rafraîchir le tirage au sort si visible
+    if (typeof window.initialiserTirage === 'function') {
+        window.initialiserTirage();
     }
 
     console.log('[Trimestre V2] Groupe-cours activé:', gc.id);
