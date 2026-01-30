@@ -12287,6 +12287,14 @@ body.mode-assiste .btn-aide-contextuelle,
     color: var(--bleu-principal, #032e5c);
     font-size: 0.9rem;
     line-height: 1.4;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background 0.2s ease;
+}
+
+.question-item-texte:hover {
+    background: var(--bleu-pale, #e8f2fd);
 }
 
 .question-item-actions {
