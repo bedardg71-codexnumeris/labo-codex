@@ -62,22 +62,27 @@ function restaurerEtatTirage() {
  * Initialise le tirage au sort avec les étudiants du groupe actif
  */
 function initialiserTirage() {
-    console.log('[Tirage] Initialisation...');
+    // Obtenir l'ID du cours actif
+    const infoCours = db.getSync('infoCours', null);
+    const coursActuelId = infoCours?.id || null;
+
+    // Sauvegarder l'ancien coursId AVANT toute restauration
+    const ancienCoursId = etatTirage.coursId;
+
+    console.log(`[Tirage] Initialisation - cours actuel: ${coursActuelId}, ancien: ${ancienCoursId}`);
 
     // Vérifier si la section tirage est visible (DOM existe)
     const container = document.getElementById('tirage-container');
     if (!container) {
-        console.log('[Tirage] Section non active, skip');
+        console.log('[Tirage] Section non active, mise à jour état seulement');
+        // Mettre à jour le coursId même si la section n'est pas visible
+        etatTirage.coursId = coursActuelId;
+        sauvegarderEtatTirage();
         return;
     }
 
-    // Obtenir l'ID du cours actif AVANT de restaurer l'état
-    const infoCours = db.getSync('infoCours', null);
-    const coursActuelId = infoCours?.id || null;
-
-    // Restaurer l'état précédent
-    const etatRestaure = restaurerEtatTirage();
-    const ancienCoursId = etatTirage.coursId;
+    // Restaurer l'état précédent (sauf coursId qu'on gère manuellement)
+    restaurerEtatTirage();
 
     // Détecter le changement de groupe-cours
     const groupeAChange = ancienCoursId !== null && ancienCoursId !== coursActuelId;
