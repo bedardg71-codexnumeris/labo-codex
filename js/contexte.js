@@ -429,13 +429,17 @@ function rafraichirVuesApresCours() {
     }
 
     // 🆕 BETA 96.1 : Rafraîchir le tirage au sort si actif
+    console.log('   🎲 Vérification tirage:', typeof window.initialiserTirage);
     if (typeof window.initialiserTirage === 'function') {
         try {
+            console.log('   🎲 Appel initialiserTirage()...');
             window.initialiserTirage();
             console.log('   ✅ Tirage au sort rafraîchi');
         } catch (e) {
             console.warn('   ⚠️ Erreur rafraîchissement tirage:', e);
         }
+    } else {
+        console.log('   ⚠️ initialiserTirage non disponible');
     }
 
     // Notification de succès
