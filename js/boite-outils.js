@@ -66,13 +66,21 @@ function initialiserTirage() {
     const infoCours = db.getSync('infoCours', null);
     const coursActuelId = infoCours?.id || null;
 
-    // Sauvegarder l'ancien coursId AVANT toute restauration
-    const ancienCoursId = etatTirage.coursId;
+    // Lire l'ancien coursId depuis localStorage (pas la mémoire!)
+    let ancienCoursId = null;
+    try {
+        const sauvegarde = localStorage.getItem('etatTirage');
+        if (sauvegarde) {
+            const etat = JSON.parse(sauvegarde);
+            ancienCoursId = etat.coursId || null;
+        }
+    } catch (e) {
+        console.warn('[Tirage] Erreur lecture ancien coursId:', e);
+    }
 
     console.log(`[Tirage] ===== INITIALISATION =====`);
-    console.log(`[Tirage] infoCours:`, infoCours);
     console.log(`[Tirage] coursActuelId: ${coursActuelId}`);
-    console.log(`[Tirage] ancienCoursId (mémoire): ${ancienCoursId}`);
+    console.log(`[Tirage] ancienCoursId (localStorage): ${ancienCoursId}`);
 
     // Vérifier si la section tirage est visible (DOM existe)
     const container = document.getElementById('tirage-container');
