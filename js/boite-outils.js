@@ -242,12 +242,11 @@ function afficherResultat(resultats) {
 
     // Générer l'affichage
     if (resultats.length === 1) {
-        // Un seul résultat - affichage grand
+        // Un seul résultat - affichage grand sur une ligne
         const e = resultats[0];
         affichage.innerHTML = `
             <div class="tirage-resultat-unique">
-                <span class="tirage-prenom">${e.prenom}</span>
-                <span class="tirage-nom">${e.nom}</span>
+                <span class="tirage-nom-complet">${e.prenom} ${e.nom}</span>
             </div>
         `;
     } else {
@@ -300,7 +299,7 @@ function ouvrirModalParamsTirage() {
             <div class="modal-contenu">
                 <div class="modal-entete">
                     <h2 id="titre-modal-params">Paramètres du tirage</h2>
-                    <button class="btn-fermer" onclick="window.fermerModalParamsTirage()" aria-label="Fermer">×</button>
+                    <button class="modal-fermer" onclick="window.fermerModalParamsTirage()" aria-label="Fermer">×</button>
                 </div>
                 <div class="modal-corps">
 

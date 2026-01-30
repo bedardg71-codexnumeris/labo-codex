@@ -11765,23 +11765,17 @@ body.mode-assiste .btn-aide-contextuelle,
     display: block;
 }
 
-/* Résultat unique (1 nom) */
+/* Résultat unique (1 nom) - sur une seule ligne */
 .tirage-resultat-unique {
     display: flex;
-    flex-direction: column;
-    gap: 5px;
+    justify-content: center;
+    align-items: center;
 }
 
-.tirage-resultat-unique .tirage-prenom {
+.tirage-resultat-unique .tirage-nom-complet {
     font-size: 2.5rem;
     font-weight: 700;
     color: var(--bleu-principal, #032e5c);
-}
-
-.tirage-resultat-unique .tirage-nom {
-    font-size: 2rem;
-    font-weight: 500;
-    color: var(--bleu-moyen, #065dbb);
 }
 
 /* Résultats multiples */
