@@ -428,6 +428,16 @@ function rafraichirVuesApresCours() {
         }
     }
 
+    // 🆕 BETA 96.1 : Rafraîchir le tirage au sort si actif
+    if (typeof initialiserTirage === 'function') {
+        try {
+            initialiserTirage();
+            console.log('   ✅ Tirage au sort rafraîchi');
+        } catch (e) {
+            console.warn('   ⚠️ Erreur rafraîchissement tirage:', e);
+        }
+    }
+
     // Notification de succès
     if (typeof afficherNotificationSucces === 'function') {
         afficherNotificationSucces('Cours changé');
