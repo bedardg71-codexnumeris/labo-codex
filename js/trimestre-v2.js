@@ -5680,9 +5680,12 @@ async function changerGroupeCoursActifV2(valeur) {
             }
         }
 
-        // 🆕 BETA 96.1 : Rafraîchir le tirage au sort si visible
+        // 🆕 BETA 96.1 : Rafraîchir la boîte à outils si visible
         if (typeof window.initialiserTirage === 'function') {
             window.initialiserTirage();
+        }
+        if (typeof window.initialiserQuestions === 'function') {
+            window.initialiserQuestions();
         }
 
         console.log('[Trimestre V2] Mode COURS activé:', coursId, '(tous groupes)');
@@ -5791,9 +5794,12 @@ async function changerGroupeCoursActifV2(valeur) {
         }
     }
 
-    // 🆕 BETA 96.1 : Rafraîchir le tirage au sort si visible
+    // 🆕 BETA 96.1 : Rafraîchir la boîte à outils si visible
     if (typeof window.initialiserTirage === 'function') {
         window.initialiserTirage();
+    }
+    if (typeof window.initialiserQuestions === 'function') {
+        window.initialiserQuestions();
     }
 
     console.log('[Trimestre V2] Groupe-cours activé:', gc.id);

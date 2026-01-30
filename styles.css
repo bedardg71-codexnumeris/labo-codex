@@ -11694,67 +11694,110 @@ body.mode-assiste .btn-aide-contextuelle,
 
 
 /* ===============================
-   BOÎTE À OUTILS - TIRAGE AU SORT
+   BOÎTE À OUTILS
    Beta 96.1
    =============================== */
 
-/* Container principal */
-.tirage-container {
+/* Grille pour les deux cartes côte à côte */
+.outils-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+@media (max-width: 1000px) {
+    .outils-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Carte générique pour chaque outil */
+.outil-carte {
+    background: white;
+    border-radius: var(--radius-grand, 12px);
+    box-shadow: var(--shadow-normal, 0 2px 8px rgba(3, 46, 92, 0.1));
+    padding: 25px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    min-height: 60vh;
-    padding: 40px 20px;
-    position: relative;
+    min-height: 400px;
 }
 
-/* Bouton paramètres (engrenage) */
-.btn-params-tirage {
-    position: absolute;
-    top: 20px;
-    right: 20px;
+/* Header de carte avec titre et bouton engrenage */
+.outil-carte-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.outil-carte-titre {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--bleu-principal, #032e5c);
+    margin: 0;
+}
+
+/* Bouton paramètres (engrenage) - générique */
+.btn-params-outil {
     background: white;
     border: 2px solid var(--bleu-pale, #e8f2fd);
     border-radius: 8px;
-    padding: 10px;
+    padding: 8px;
     cursor: pointer;
     color: var(--bleu-principal, #032e5c);
     transition: all 0.2s ease;
-    z-index: 10;
 }
 
-.btn-params-tirage:hover {
+.btn-params-outil:hover {
     background: var(--bleu-tres-pale, #f0f8ff);
     border-color: var(--bleu-principal, #032e5c);
 }
 
-/* Zone de la roulette */
-.tirage-zone-roulette {
+/* Zone d'affichage générique */
+.outil-zone-affichage {
     background: var(--bleu-tres-pale, #f0f8ff);
     border: 3px solid var(--bleu-pale, #e8f2fd);
     border-radius: 16px;
     width: 100%;
-    max-width: 600px;
-    min-height: 200px;
+    min-height: 180px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
+    flex-grow: 1;
     overflow: hidden;
 }
 
-/* Zone d affichage des noms */
-.tirage-affichage {
+/* Zone d'affichage des contenus */
+.tirage-affichage,
+.questions-affichage {
     text-align: center;
-    padding: 40px;
+    padding: 30px;
     width: 100%;
 }
 
-.tirage-placeholder {
+/* Placeholder générique */
+.outil-placeholder {
     color: #999;
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-style: italic;
+}
+
+/* Compteur générique */
+.outil-compteur {
+    margin-top: 15px;
+    font-size: 0.9rem;
+    color: var(--gris-moyen, #6c757d);
+}
+
+.outil-compteur span {
+    font-weight: 700;
+    color: var(--bleu-principal, #032e5c);
 }
 
 /* Animation du nom pendant la roulette */
@@ -11902,5 +11945,376 @@ body.mode-assiste .btn-aide-contextuelle,
     border: none;
     border-top: 1px solid var(--bleu-pale, #e8f2fd);
     margin: 20px 0;
+}
+
+/* ===============================
+   QUESTIONS FLASH
+   Beta 96.1
+   =============================== */
+
+/* Question affichée */
+.question-resultat {
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: var(--bleu-principal, #032e5c);
+    line-height: 1.5;
+    text-align: center;
+}
+
+/* Catégorie de la question */
+.question-categorie {
+    display: inline-block;
+    background: var(--bleu-pale, #e8f2fd);
+    color: var(--bleu-moyen, #065dbb);
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 15px;
+}
+
+/* Animation pendant le tirage */
+.question-anime {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: var(--bleu-principal, #032e5c);
+}
+
+/* Liste des questions dans le modal */
+.questions-liste {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid var(--bleu-pale, #e8f2fd);
+    border-radius: 8px;
+    background: var(--bleu-tres-pale, #f8fafc);
+}
+
+.question-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+    border-bottom: 1px solid var(--bleu-pale, #e8f2fd);
+}
+
+.question-item:last-child {
+    border-bottom: none;
+}
+
+.question-item:hover {
+    background: white;
+}
+
+.question-item.deja-posee {
+    opacity: 0.5;
+}
+
+.question-item.deja-posee .question-texte {
+    text-decoration: line-through;
+}
+
+.question-texte {
+    flex: 1;
+    color: var(--bleu-principal, #032e5c);
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.question-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.question-actions button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.question-actions button:hover {
+    opacity: 1;
+}
+
+/* Formulaire d'ajout de question */
+.question-form-ajout {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.question-form-ajout textarea {
+    flex: 1;
+    min-height: 60px;
+    resize: vertical;
+    border: 1px solid var(--bleu-pale, #e8f2fd);
+    border-radius: 6px;
+    padding: 10px;
+    font-family: inherit;
+    font-size: 0.9rem;
+}
+
+.question-form-ajout textarea:focus {
+    outline: none;
+    border-color: var(--bleu-principal, #032e5c);
+}
+
+/* Filtres par catégorie */
+.questions-categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.questions-categories .badge-categorie {
+    background: var(--bleu-pale, #e8f2fd);
+    color: var(--bleu-moyen, #065dbb);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 2px solid transparent;
+}
+
+.questions-categories .badge-categorie:hover,
+.questions-categories .badge-categorie.actif {
+    background: var(--bleu-principal, #032e5c);
+    color: white;
+}
+
+/* Message vide */
+.questions-vide {
+    text-align: center;
+    padding: 30px;
+    color: #999;
+    font-style: italic;
+}
+
+/* Animation du texte pendant la roulette */
+.question-texte-anime {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: var(--bleu-principal, #032e5c);
+    display: block;
+    padding: 0 20px;
+}
+
+/* Badge catégorie dans le résultat */
+.question-categorie-badge {
+    display: inline-block;
+    background: var(--bleu-pale, #e8f2fd);
+    color: var(--bleu-moyen, #065dbb);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+}
+
+/* Texte final de la question */
+.question-texte-final {
+    display: block;
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: var(--bleu-principal, #032e5c);
+    line-height: 1.5;
+}
+
+/* Animation de révélation question */
+.question-revelee {
+    animation: reveler 0.5s ease;
+}
+
+/* Message question */
+.question-message {
+    color: #666;
+    font-size: 1rem;
+}
+
+.question-message-vide {
+    color: #999;
+    font-style: italic;
+}
+
+/* Modal large pour gestion questions */
+.modal-large {
+    width: 95%;
+    max-width: 700px;
+}
+
+/* Gestion des catégories */
+.questions-categories-gestion {
+    margin-bottom: 10px;
+}
+
+.questions-categories-liste {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.questions-categorie-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bleu-pale, #e8f2fd);
+    color: var(--bleu-moyen, #065dbb);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+}
+
+.questions-categorie-suppr {
+    background: none;
+    border: none;
+    color: var(--rouge, #dc3545);
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+    padding: 0;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.questions-categorie-suppr:hover {
+    opacity: 1;
+}
+
+.questions-ajouter-categorie {
+    display: flex;
+    gap: 10px;
+}
+
+.questions-ajouter-categorie .form-input {
+    flex: 1;
+}
+
+/* Formulaire ajout question */
+.questions-ajouter-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.questions-ajouter-form .form-textarea {
+    width: 100%;
+    min-height: 60px;
+    resize: vertical;
+    border: 1px solid var(--bleu-pale, #e8f2fd);
+    border-radius: 6px;
+    padding: 10px;
+    font-family: inherit;
+    font-size: 0.9rem;
+}
+
+.questions-ajouter-form .form-textarea:focus {
+    outline: none;
+    border-color: var(--bleu-principal, #032e5c);
+}
+
+.questions-ajouter-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.questions-ajouter-actions .form-select {
+    flex: 1;
+}
+
+/* Container de la liste des questions */
+.questions-liste-container {
+    max-height: 350px;
+    overflow-y: auto;
+    border: 1px solid var(--bleu-pale, #e8f2fd);
+    border-radius: 8px;
+    background: var(--bleu-tres-pale, #f8fafc);
+}
+
+/* Groupe de catégorie */
+.questions-groupe-categorie {
+    padding: 10px;
+    border-bottom: 1px solid var(--bleu-pale, #e8f2fd);
+}
+
+.questions-groupe-categorie:last-child {
+    border-bottom: none;
+}
+
+.questions-categorie-titre {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--bleu-moyen, #065dbb);
+    margin: 0 0 10px 0;
+    padding-bottom: 5px;
+    border-bottom: 1px dashed var(--bleu-pale, #e8f2fd);
+}
+
+/* Item question dans la liste */
+.question-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    margin-bottom: 5px;
+    background: white;
+}
+
+.question-item:last-child {
+    margin-bottom: 0;
+}
+
+.question-item:hover {
+    background: var(--bleu-tres-pale, #f8fafc);
+}
+
+.question-item.question-posee {
+    opacity: 0.5;
+}
+
+.question-item.question-posee .question-item-texte {
+    text-decoration: line-through;
+}
+
+.question-item-texte {
+    flex: 1;
+    color: var(--bleu-principal, #032e5c);
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.question-item-actions {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.question-badge-posee {
+    background: var(--bleu-pale, #e8f2fd);
+    color: var(--bleu-moyen, #065dbb);
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+/* Bouton icône */
+.btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    font-size: 0.9rem;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.btn-icon:hover {
+    opacity: 1;
 }
 

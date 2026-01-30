@@ -475,10 +475,534 @@ function reinitialiserTirageComplet() {
 }
 
 /* ===============================
+   QUESTIONS FLASH
+   =============================== */
+
+// État des questions (persisté dans localStorage avec clé par coursId)
+let etatQuestions = {
+    questions: [],          // Liste des questions [{id, texte, categorieId}]
+    categories: [],         // Liste des catégories [{id, nom}]
+    dejaPositions: [],      // IDs des questions déjà posées (mode sans remise)
+    avecRemise: false,      // Mode avec remise
+    coursId: null,          // Pour stocker par cours
+    animationEnCours: false
+};
+
+/**
+ * Obtient la clé de stockage pour les questions du cours actif
+ */
+function obtenirCleQuestions() {
+    const infoCours = db.getSync('infoCours', null);
+    const coursId = infoCours?.id || 'global';
+    return `questionsFlash_${coursId}`;
+}
+
+/**
+ * Sauvegarde l'état des questions dans localStorage
+ */
+function sauvegarderEtatQuestions() {
+    const cle = obtenirCleQuestions();
+    const etatASauvegarder = {
+        questions: etatQuestions.questions,
+        categories: etatQuestions.categories,
+        dejaPositions: etatQuestions.dejaPositions,
+        avecRemise: etatQuestions.avecRemise,
+        coursId: etatQuestions.coursId
+    };
+    localStorage.setItem(cle, JSON.stringify(etatASauvegarder));
+    console.log(`[Questions] Sauvegardé dans ${cle}:`, etatQuestions.questions.length, 'questions');
+}
+
+/**
+ * Restaure l'état des questions depuis localStorage
+ */
+function restaurerEtatQuestions() {
+    const cle = obtenirCleQuestions();
+    try {
+        const sauvegarde = localStorage.getItem(cle);
+        if (sauvegarde) {
+            const etat = JSON.parse(sauvegarde);
+            etatQuestions.questions = etat.questions || [];
+            etatQuestions.categories = etat.categories || [];
+            etatQuestions.dejaPositions = etat.dejaPositions || [];
+            etatQuestions.avecRemise = etat.avecRemise || false;
+            etatQuestions.coursId = etat.coursId || null;
+            console.log(`[Questions] Restauré depuis ${cle}:`, etatQuestions.questions.length, 'questions');
+            return true;
+        }
+    } catch (e) {
+        console.warn('[Questions] Erreur restauration état:', e);
+    }
+    return false;
+}
+
+/**
+ * Initialise les Questions Flash pour le cours actif
+ */
+function initialiserQuestions() {
+    const infoCours = db.getSync('infoCours', null);
+    const coursActuelId = infoCours?.id || null;
+
+    console.log(`[Questions] ===== INITIALISATION =====`);
+    console.log(`[Questions] coursActuelId: ${coursActuelId}`);
+
+    // Vérifier si la section questions est visible
+    const container = document.getElementById('questions-container');
+    if (!container) {
+        console.log('[Questions] Section non active');
+        return;
+    }
+
+    // Restaurer l'état pour ce cours
+    restaurerEtatQuestions();
+    etatQuestions.coursId = coursActuelId;
+
+    mettreAJourCompteurQuestions();
+    console.log(`[Questions] Initialisé avec ${etatQuestions.questions.length} questions`);
+}
+
+/**
+ * Obtient les questions disponibles pour le tirage
+ */
+function obtenirQuestionsDisponibles() {
+    return etatQuestions.questions.filter(q => {
+        if (!etatQuestions.avecRemise && etatQuestions.dejaPositions.includes(q.id)) {
+            return false;
+        }
+        return true;
+    });
+}
+
+/**
+ * Met à jour le compteur de questions disponibles
+ */
+function mettreAJourCompteurQuestions() {
+    const disponibles = obtenirQuestionsDisponibles();
+    const compteurEl = document.getElementById('questions-nb-restantes');
+    if (compteurEl) {
+        compteurEl.textContent = disponibles.length;
+    }
+
+    const btnTirer = document.getElementById('btn-tirer-question');
+    if (btnTirer) {
+        btnTirer.disabled = disponibles.length === 0 || etatQuestions.animationEnCours;
+    }
+}
+
+/**
+ * Lance le tirage d'une question avec animation
+ */
+function lancerTirageQuestion() {
+    if (etatQuestions.animationEnCours) return;
+
+    const disponibles = obtenirQuestionsDisponibles();
+    if (disponibles.length === 0) {
+        afficherMessageQuestion('Aucune question disponible', 'vide');
+        return;
+    }
+
+    etatQuestions.animationEnCours = true;
+    mettreAJourCompteurQuestions();
+
+    // Sélectionner une question au hasard
+    const index = Math.floor(Math.random() * disponibles.length);
+    const questionTiree = disponibles[index];
+
+    // Lancer l'animation
+    animerRouletteQuestion(disponibles, questionTiree);
+}
+
+/**
+ * Animation roulette pour les questions
+ */
+function animerRouletteQuestion(pool, resultat) {
+    const affichage = document.getElementById('questions-affichage');
+    if (!affichage) return;
+
+    const dureeAnimation = 2000;
+    const intervalleDebut = 50;
+    const intervalleFin = 250;
+    const debut = Date.now();
+
+    function afficherQuestionAleatoire() {
+        const elapsed = Date.now() - debut;
+        const progression = elapsed / dureeAnimation;
+
+        if (progression >= 1) {
+            afficherResultatQuestion(resultat);
+            return;
+        }
+
+        // Afficher une question aléatoire
+        const q = pool[Math.floor(Math.random() * pool.length)];
+        const texteAffiche = q.texte.length > 80 ? q.texte.substring(0, 80) + '...' : q.texte;
+        affichage.innerHTML = `<span class="question-texte-anime">${texteAffiche}</span>`;
+
+        // Ralentir progressivement
+        const easeOut = 1 - Math.pow(1 - progression, 3);
+        const intervalle = intervalleDebut + (intervalleFin - intervalleDebut) * easeOut;
+
+        setTimeout(afficherQuestionAleatoire, intervalle);
+    }
+
+    afficherQuestionAleatoire();
+}
+
+/**
+ * Affiche le résultat final du tirage de question
+ */
+function afficherResultatQuestion(question) {
+    const affichage = document.getElementById('questions-affichage');
+    if (!affichage) return;
+
+    // Marquer comme posée (mode sans remise)
+    if (!etatQuestions.avecRemise) {
+        if (!etatQuestions.dejaPositions.includes(question.id)) {
+            etatQuestions.dejaPositions.push(question.id);
+        }
+        sauvegarderEtatQuestions();
+    }
+
+    // Trouver la catégorie
+    const categorie = etatQuestions.categories.find(c => c.id === question.categorieId);
+    const nomCategorie = categorie ? categorie.nom : 'Sans catégorie';
+
+    affichage.innerHTML = `
+        <div class="question-resultat">
+            <span class="question-categorie-badge">${nomCategorie}</span>
+            <span class="question-texte-final">${question.texte}</span>
+        </div>
+    `;
+
+    affichage.classList.add('question-revelee');
+    setTimeout(() => affichage.classList.remove('question-revelee'), 500);
+
+    etatQuestions.animationEnCours = false;
+    mettreAJourCompteurQuestions();
+}
+
+/**
+ * Affiche un message dans la zone de questions
+ */
+function afficherMessageQuestion(message, type = 'info') {
+    const affichage = document.getElementById('questions-affichage');
+    if (!affichage) return;
+
+    affichage.innerHTML = `<span class="question-message question-message-${type}">${message}</span>`;
+}
+
+/* ===============================
+   MODAL GESTION DES QUESTIONS
+   =============================== */
+
+/**
+ * Ouvre le modal de gestion des questions
+ */
+function ouvrirModalParamsQuestions() {
+    console.log('[Questions] Ouverture modal gestion');
+
+    const disponibles = obtenirQuestionsDisponibles();
+    const total = etatQuestions.questions.length;
+
+    // Grouper les questions par catégorie
+    const questionsSansCategorie = etatQuestions.questions.filter(q => !q.categorieId);
+    const questionsParCategorie = {};
+    etatQuestions.categories.forEach(c => {
+        questionsParCategorie[c.id] = etatQuestions.questions.filter(q => q.categorieId === c.id);
+    });
+
+    const modalHTML = `
+        <div id="modal-params-questions" class="modal-overlay actif" role="dialog" aria-modal="true">
+            <div class="modal-contenu modal-large">
+                <div class="modal-entete">
+                    <h2>Gestion des Questions Flash</h2>
+                    <button class="modal-fermer" onclick="window.fermerModalParamsQuestions()" aria-label="Fermer">×</button>
+                </div>
+                <div class="modal-corps">
+
+                    <!-- Options -->
+                    <div class="form-groupe">
+                        <label class="form-checkbox-label">
+                            <input type="checkbox" id="param-remise-questions" ${etatQuestions.avecRemise ? 'checked' : ''}>
+                            <span>Avec remise (une même question peut être tirée plusieurs fois)</span>
+                        </label>
+                    </div>
+
+                    <hr class="modal-separateur">
+
+                    <!-- Gestion des catégories -->
+                    <div class="form-groupe">
+                        <label>Catégories</label>
+                        <div class="questions-categories-gestion">
+                            <div class="questions-categories-liste">
+                                ${etatQuestions.categories.map(c => `
+                                    <span class="questions-categorie-tag">
+                                        ${c.nom}
+                                        <button class="questions-categorie-suppr" onclick="window.supprimerCategorie('${c.id}')" title="Supprimer">×</button>
+                                    </span>
+                                `).join('')}
+                            </div>
+                            <div class="questions-ajouter-categorie">
+                                <input type="text" id="nouvelle-categorie" placeholder="Nouvelle catégorie..." class="form-input">
+                                <button class="btn btn-modifier" onclick="window.ajouterCategorie()">Ajouter</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="modal-separateur">
+
+                    <!-- Ajouter une question -->
+                    <div class="form-groupe">
+                        <label>Ajouter une question</label>
+                        <div class="questions-ajouter-form">
+                            <textarea id="nouvelle-question" placeholder="Tapez votre question..." class="form-textarea" rows="2"></textarea>
+                            <div class="questions-ajouter-actions">
+                                <select id="categorie-nouvelle-question" class="form-select">
+                                    <option value="">Sans catégorie</option>
+                                    ${etatQuestions.categories.map(c => `
+                                        <option value="${c.id}">${c.nom}</option>
+                                    `).join('')}
+                                </select>
+                                <button class="btn btn-principal" onclick="window.ajouterQuestion()">Ajouter</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="modal-separateur">
+
+                    <!-- Liste des questions -->
+                    <div class="form-groupe">
+                        <label>Questions (${disponibles.length}/${total} disponibles)</label>
+                        <div class="questions-liste-container">
+                            ${etatQuestions.categories.length === 0 && etatQuestions.questions.length === 0 ? `
+                                <p class="questions-vide">Aucune question. Ajoutez-en ci-dessus.</p>
+                            ` : ''}
+
+                            ${etatQuestions.categories.map(cat => `
+                                <div class="questions-groupe-categorie">
+                                    <h4 class="questions-categorie-titre">${cat.nom} (${questionsParCategorie[cat.id]?.length || 0})</h4>
+                                    <div class="questions-liste">
+                                        ${(questionsParCategorie[cat.id] || []).map(q => genererHTMLQuestion(q)).join('')}
+                                    </div>
+                                </div>
+                            `).join('')}
+
+                            ${questionsSansCategorie.length > 0 ? `
+                                <div class="questions-groupe-categorie">
+                                    <h4 class="questions-categorie-titre">Sans catégorie (${questionsSansCategorie.length})</h4>
+                                    <div class="questions-liste">
+                                        ${questionsSansCategorie.map(q => genererHTMLQuestion(q)).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-pied">
+                    <button class="btn btn-modifier" onclick="window.reinitialiserQuestionsPositions()">Réinitialiser les tirages</button>
+                    <button class="btn btn-annuler" onclick="window.fermerModalParamsQuestions()">Fermer</button>
+                    <button class="btn btn-principal" onclick="window.appliquerParamsQuestions()">Appliquer</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    // Fermeture par clic sur overlay
+    const modal = document.getElementById('modal-params-questions');
+    modal.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal-overlay')) {
+            fermerModalParamsQuestions();
+        }
+    });
+}
+
+/**
+ * Génère le HTML d'une question dans la liste
+ */
+function genererHTMLQuestion(question) {
+    const estPosee = etatQuestions.dejaPositions.includes(question.id);
+    return `
+        <div class="question-item ${estPosee && !etatQuestions.avecRemise ? 'question-posee' : ''}">
+            <span class="question-item-texte">${question.texte}</span>
+            <div class="question-item-actions">
+                ${estPosee && !etatQuestions.avecRemise ? '<span class="question-badge-posee">posée</span>' : ''}
+                <button class="btn-icon" onclick="window.modifierQuestion('${question.id}')" title="Modifier">✏️</button>
+                <button class="btn-icon" onclick="window.supprimerQuestion('${question.id}')" title="Supprimer">🗑️</button>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Ferme le modal de gestion des questions
+ */
+function fermerModalParamsQuestions() {
+    const modal = document.getElementById('modal-params-questions');
+    if (modal) modal.remove();
+}
+
+/**
+ * Applique les paramètres du modal
+ */
+function appliquerParamsQuestions() {
+    const remiseEl = document.getElementById('param-remise-questions');
+    if (remiseEl) {
+        etatQuestions.avecRemise = remiseEl.checked;
+    }
+
+    sauvegarderEtatQuestions();
+    mettreAJourCompteurQuestions();
+    fermerModalParamsQuestions();
+}
+
+/**
+ * Ajoute une nouvelle catégorie
+ */
+function ajouterCategorie() {
+    const input = document.getElementById('nouvelle-categorie');
+    const nom = input?.value.trim();
+
+    if (!nom) {
+        alert('Veuillez entrer un nom de catégorie.');
+        return;
+    }
+
+    // Vérifier que le nom n'existe pas déjà
+    if (etatQuestions.categories.some(c => c.nom.toLowerCase() === nom.toLowerCase())) {
+        alert('Cette catégorie existe déjà.');
+        return;
+    }
+
+    const nouvelleCategorie = {
+        id: 'cat-' + Date.now(),
+        nom: nom
+    };
+
+    etatQuestions.categories.push(nouvelleCategorie);
+    sauvegarderEtatQuestions();
+
+    // Rafraîchir le modal
+    fermerModalParamsQuestions();
+    ouvrirModalParamsQuestions();
+}
+
+/**
+ * Supprime une catégorie
+ */
+function supprimerCategorie(categorieId) {
+    if (!confirm('Supprimer cette catégorie ? Les questions seront déplacées vers "Sans catégorie".')) {
+        return;
+    }
+
+    // Retirer la catégorie des questions
+    etatQuestions.questions.forEach(q => {
+        if (q.categorieId === categorieId) {
+            q.categorieId = null;
+        }
+    });
+
+    // Supprimer la catégorie
+    etatQuestions.categories = etatQuestions.categories.filter(c => c.id !== categorieId);
+    sauvegarderEtatQuestions();
+
+    // Rafraîchir le modal
+    fermerModalParamsQuestions();
+    ouvrirModalParamsQuestions();
+}
+
+/**
+ * Ajoute une nouvelle question
+ */
+function ajouterQuestion() {
+    const texteEl = document.getElementById('nouvelle-question');
+    const categorieEl = document.getElementById('categorie-nouvelle-question');
+
+    const texte = texteEl?.value.trim();
+    if (!texte) {
+        alert('Veuillez entrer le texte de la question.');
+        return;
+    }
+
+    const nouvelleQuestion = {
+        id: 'q-' + Date.now(),
+        texte: texte,
+        categorieId: categorieEl?.value || null
+    };
+
+    etatQuestions.questions.push(nouvelleQuestion);
+    sauvegarderEtatQuestions();
+
+    // Vider le champ et rafraîchir
+    if (texteEl) texteEl.value = '';
+
+    fermerModalParamsQuestions();
+    ouvrirModalParamsQuestions();
+
+    mettreAJourCompteurQuestions();
+}
+
+/**
+ * Modifie une question existante
+ */
+function modifierQuestion(questionId) {
+    const question = etatQuestions.questions.find(q => q.id === questionId);
+    if (!question) return;
+
+    const nouveauTexte = prompt('Modifier la question:', question.texte);
+    if (nouveauTexte === null) return; // Annulé
+    if (!nouveauTexte.trim()) {
+        alert('Le texte ne peut pas être vide.');
+        return;
+    }
+
+    question.texte = nouveauTexte.trim();
+    sauvegarderEtatQuestions();
+
+    // Rafraîchir le modal
+    fermerModalParamsQuestions();
+    ouvrirModalParamsQuestions();
+}
+
+/**
+ * Supprime une question
+ */
+function supprimerQuestion(questionId) {
+    if (!confirm('Supprimer cette question ?')) return;
+
+    etatQuestions.questions = etatQuestions.questions.filter(q => q.id !== questionId);
+    etatQuestions.dejaPositions = etatQuestions.dejaPositions.filter(id => id !== questionId);
+    sauvegarderEtatQuestions();
+
+    // Rafraîchir le modal
+    fermerModalParamsQuestions();
+    ouvrirModalParamsQuestions();
+
+    mettreAJourCompteurQuestions();
+}
+
+/**
+ * Réinitialise les questions posées
+ */
+function reinitialiserQuestionsPositions() {
+    etatQuestions.dejaPositions = [];
+    sauvegarderEtatQuestions();
+
+    // Rafraîchir le modal
+    fermerModalParamsQuestions();
+    ouvrirModalParamsQuestions();
+
+    mettreAJourCompteurQuestions();
+}
+
+/* ===============================
    INITIALISATION
    =============================== */
 
 // Exposer les fonctions globalement AVANT tout appel
+// Tirage au sort
 window.lancerTirage = lancerTirage;
 window.ouvrirModalParamsTirage = ouvrirModalParamsTirage;
 window.fermerModalParamsTirage = fermerModalParamsTirage;
@@ -486,5 +1010,18 @@ window.toggleExclusionEtudiant = toggleExclusionEtudiant;
 window.appliquerParamsTirage = appliquerParamsTirage;
 window.reinitialiserTirageComplet = reinitialiserTirageComplet;
 window.initialiserTirage = initialiserTirage;
+
+// Questions Flash
+window.lancerTirageQuestion = lancerTirageQuestion;
+window.ouvrirModalParamsQuestions = ouvrirModalParamsQuestions;
+window.fermerModalParamsQuestions = fermerModalParamsQuestions;
+window.appliquerParamsQuestions = appliquerParamsQuestions;
+window.ajouterCategorie = ajouterCategorie;
+window.supprimerCategorie = supprimerCategorie;
+window.ajouterQuestion = ajouterQuestion;
+window.modifierQuestion = modifierQuestion;
+window.supprimerQuestion = supprimerQuestion;
+window.reinitialiserQuestionsPositions = reinitialiserQuestionsPositions;
+window.initialiserQuestions = initialiserQuestions;
 
 console.log('[Boîte à outils] Module chargé');
