@@ -12334,8 +12334,26 @@ body.mode-assiste .btn-aide-contextuelle,
 
 .question-item-actions {
     display: flex;
-    gap: 5px;
+    gap: 8px;
     align-items: center;
+    flex-shrink: 0;
+}
+
+/* Dropdown de catégorie dans la liste des questions */
+.question-categorie-select {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    border: 1px solid var(--bleu-pale, #e8f2fd);
+    border-radius: 4px;
+    background: white;
+    color: var(--bleu-moyen, #065dbb);
+    cursor: pointer;
+    max-width: 120px;
+}
+
+.question-categorie-select:focus {
+    outline: none;
+    border-color: var(--bleu-principal, #032e5c);
 }
 
 .question-badge-posee {
