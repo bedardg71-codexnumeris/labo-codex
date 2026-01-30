@@ -895,15 +895,42 @@ function toggleRemiseQuestions(checked) {
  */
 function genererHTMLQuestionFlash(question) {
     const estPosee = etatQuestions.dejaPositions.includes(question.id);
+
+    // Générer les options de catégorie
+    let optionsCategorie = `<option value="" ${!question.categorieId ? 'selected' : ''}>Sans catégorie</option>`;
+    etatQuestions.categories.forEach(cat => {
+        optionsCategorie += `<option value="${cat.id}" ${question.categorieId === cat.id ? 'selected' : ''}>${cat.nom}</option>`;
+    });
+
     return `
         <div class="question-item ${estPosee && !etatQuestions.avecRemise ? 'question-posee' : ''}">
             <span class="question-item-texte" onclick="window.modifierQuestion('${question.id}')" title="Cliquez pour modifier">${question.texte}</span>
             <div class="question-item-actions">
+                <select class="question-categorie-select" onchange="window.changerCategorieQuestion('${question.id}', this.value)" title="Changer de catégorie">
+                    ${optionsCategorie}
+                </select>
                 ${estPosee && !etatQuestions.avecRemise ? '<span class="question-badge-posee">posée</span>' : ''}
                 <button class="btn-icon" onclick="window.supprimerQuestion('${question.id}')" title="Supprimer">🗑️</button>
             </div>
         </div>
     `;
+}
+
+/**
+ * Change la catégorie d'une question
+ */
+function changerCategorieQuestion(questionId, nouvelleCategorieId) {
+    const question = etatQuestions.questions.find(q => q.id === questionId);
+    if (!question) return;
+
+    question.categorieId = nouvelleCategorieId || null;
+    sauvegarderEtatQuestions();
+
+    // Rafraîchir la liste (la question va changer de groupe)
+    rafraichirListeQuestionsModal();
+    mettreAJourCompteurQuestions();
+
+    console.log(`[Questions] Question ${questionId} déplacée vers:`, nouvelleCategorieId || 'Sans catégorie');
 }
 
 /**
@@ -1173,6 +1200,7 @@ window.supprimerCategorie = supprimerCategorie;
 window.ajouterQuestion = ajouterQuestion;
 window.modifierQuestion = modifierQuestion;
 window.supprimerQuestion = supprimerQuestion;
+window.changerCategorieQuestion = changerCategorieQuestion;
 window.reinitialiserQuestionsPositions = reinitialiserQuestionsPositions;
 window.changerFiltreCategorie = changerFiltreCategorie;
 window.initialiserQuestions = initialiserQuestions;
