@@ -31,7 +31,18 @@
 - **Anonymisation groupes** : Numéros de groupe remplacés par lettres en mode anonymisation
 
 ### Derniere tache completee (30 janvier - Beta 96.1)
-- **BOÎTE À OUTILS - TIRAGE AU SORT**
+- **BOÎTE À OUTILS - QUESTIONS FLASH**
+  - Deuxième outil dans la section Boîte à outils
+  - Tirage aléatoire de questions pour pratiques de récupération en classe
+  - **Questions liées au cours** : Chaque cours a ses propres questions (stockage par coursId)
+  - **Organisation par catégories** : Créer, modifier, supprimer des catégories thématiques
+  - **Gestion CRUD** : Ajouter, modifier, supprimer des questions depuis le modal
+  - **Animation roulette** : Même effet de suspense que le tirage d'étudiants
+  - **Mode avec/sans remise** : Option pour répéter ou non les questions
+  - **Mise en page** : Deux cartes côte à côte (Questions Flash | Tirage au sort)
+  - Fichiers modifiés : `js/boite-outils.js`, `js/navigation.js`, `js/trimestre-v2.js`, `index.html`, `styles.css`
+
+- **BOÎTE À OUTILS - TIRAGE AU SORT** (précédent)
   - Nouvelle section "Boîte à outils" dans la navigation principale
   - Premier outil : Tirage au sort d'étudiants pour pratiques de récupération en classe
   - **Animation roulette** : Effet de suspense avec défilement ralentissant

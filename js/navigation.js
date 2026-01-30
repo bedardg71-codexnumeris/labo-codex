@@ -431,9 +431,12 @@ function afficherSousSection(idSousSection) {
 
         // 🆕 BETA 96.1 : Boîte à outils
         case 'boite-outils-tirage':
-            console.log('🔄 Initialisation du tirage au sort...');
+            console.log('🔄 Initialisation de la boîte à outils...');
             if (typeof initialiserTirage === 'function') {
                 setTimeout(initialiserTirage, 100);
+            }
+            if (typeof initialiserQuestions === 'function') {
+                setTimeout(initialiserQuestions, 100);
             }
             break;
     }
