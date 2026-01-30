@@ -296,7 +296,7 @@ function ouvrirModalParamsTirage() {
     const total = etatTirage.pool.length;
 
     const modalHTML = `
-        <div id="modal-params-tirage" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="titre-modal-params">
+        <div id="modal-params-tirage" class="modal-overlay actif" role="dialog" aria-modal="true" aria-labelledby="titre-modal-params">
             <div class="modal-contenu">
                 <div class="modal-entete">
                     <h2 id="titre-modal-params">Paramètres du tirage</h2>
