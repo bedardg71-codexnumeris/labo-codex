@@ -857,6 +857,89 @@ function fermerModalParamsQuestions() {
 }
 
 /**
+ * Rafraîchit uniquement la liste des questions dans le modal (sans fermer/rouvrir)
+ */
+function rafraichirListeQuestionsModal() {
+    const container = document.querySelector('.questions-liste-container');
+    if (!container) return;
+
+    const disponibles = obtenirQuestionsDisponibles();
+    const total = etatQuestions.questions.length;
+
+    // Grouper les questions par catégorie
+    const questionsSansCategorie = etatQuestions.questions.filter(q => !q.categorieId);
+    const questionsParCategorie = {};
+    etatQuestions.categories.forEach(c => {
+        questionsParCategorie[c.id] = etatQuestions.questions.filter(q => q.categorieId === c.id);
+    });
+
+    // Mettre à jour le label du compteur
+    const labelQuestions = document.querySelector('.form-groupe:has(.questions-liste-container) > label');
+    if (labelQuestions) {
+        labelQuestions.textContent = `Questions (${disponibles.length}/${total} disponibles)`;
+    }
+
+    // Mettre à jour le contenu de la liste
+    let html = '';
+
+    if (etatQuestions.categories.length === 0 && etatQuestions.questions.length === 0) {
+        html = '<p class="questions-vide">Aucune question. Ajoutez-en ci-dessus.</p>';
+    } else {
+        // Questions par catégorie
+        etatQuestions.categories.forEach(cat => {
+            const questionsCategorie = questionsParCategorie[cat.id] || [];
+            if (questionsCategorie.length > 0 || etatQuestions.categories.length > 0) {
+                html += `
+                    <div class="questions-groupe-categorie">
+                        <h4 class="questions-categorie-titre">${cat.nom} (${questionsCategorie.length})</h4>
+                        <div class="questions-liste">
+                            ${questionsCategorie.map(q => genererHTMLQuestion(q)).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+        });
+
+        // Questions sans catégorie
+        if (questionsSansCategorie.length > 0) {
+            html += `
+                <div class="questions-groupe-categorie">
+                    <h4 class="questions-categorie-titre">Sans catégorie (${questionsSansCategorie.length})</h4>
+                    <div class="questions-liste">
+                        ${questionsSansCategorie.map(q => genererHTMLQuestion(q)).join('')}
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    container.innerHTML = html;
+
+    // Aussi mettre à jour le select des catégories
+    const selectCategorie = document.getElementById('categorie-nouvelle-question');
+    if (selectCategorie) {
+        const valeurActuelle = selectCategorie.value;
+        selectCategorie.innerHTML = `
+            <option value="">Sans catégorie</option>
+            ${etatQuestions.categories.map(c => `
+                <option value="${c.id}" ${c.id === valeurActuelle ? 'selected' : ''}>${c.nom}</option>
+            `).join('')}
+        `;
+    }
+
+    // Mettre à jour la liste des catégories (tags)
+    const listeCategories = document.querySelector('.questions-categories-liste');
+    if (listeCategories) {
+        listeCategories.innerHTML = etatQuestions.categories.map(c => `
+            <span class="questions-categorie-tag">
+                ${c.nom}
+                <button class="questions-categorie-suppr" onclick="window.supprimerCategorie('${c.id}')" title="Supprimer">×</button>
+            </span>
+        `).join('');
+    }
+}
+
+/**
  * Applique les paramètres du modal
  */
 function appliquerParamsQuestions() {
@@ -896,9 +979,11 @@ function ajouterCategorie() {
     etatQuestions.categories.push(nouvelleCategorie);
     sauvegarderEtatQuestions();
 
-    // Rafraîchir le modal
-    fermerModalParamsQuestions();
-    ouvrirModalParamsQuestions();
+    // Rafraîchir le modal sans le fermer
+    rafraichirListeQuestionsModal();
+
+    // Vider le champ
+    if (input) input.value = '';
 }
 
 /**
@@ -920,9 +1005,8 @@ function supprimerCategorie(categorieId) {
     etatQuestions.categories = etatQuestions.categories.filter(c => c.id !== categorieId);
     sauvegarderEtatQuestions();
 
-    // Rafraîchir le modal
-    fermerModalParamsQuestions();
-    ouvrirModalParamsQuestions();
+    // Rafraîchir le modal sans le fermer
+    rafraichirListeQuestionsModal();
 }
 
 /**
@@ -947,12 +1031,11 @@ function ajouterQuestion() {
     etatQuestions.questions.push(nouvelleQuestion);
     sauvegarderEtatQuestions();
 
-    // Vider le champ et rafraîchir
+    // Vider le champ
     if (texteEl) texteEl.value = '';
 
-    fermerModalParamsQuestions();
-    ouvrirModalParamsQuestions();
-
+    // Rafraîchir le modal sans le fermer
+    rafraichirListeQuestionsModal();
     mettreAJourCompteurQuestions();
 }
 
@@ -973,9 +1056,8 @@ function modifierQuestion(questionId) {
     question.texte = nouveauTexte.trim();
     sauvegarderEtatQuestions();
 
-    // Rafraîchir le modal
-    fermerModalParamsQuestions();
-    ouvrirModalParamsQuestions();
+    // Rafraîchir le modal sans le fermer
+    rafraichirListeQuestionsModal();
 }
 
 /**
@@ -988,10 +1070,8 @@ function supprimerQuestion(questionId) {
     etatQuestions.dejaPositions = etatQuestions.dejaPositions.filter(id => id !== questionId);
     sauvegarderEtatQuestions();
 
-    // Rafraîchir le modal
-    fermerModalParamsQuestions();
-    ouvrirModalParamsQuestions();
-
+    // Rafraîchir le modal sans le fermer
+    rafraichirListeQuestionsModal();
     mettreAJourCompteurQuestions();
 }
 
@@ -1002,10 +1082,8 @@ function reinitialiserQuestionsPositions() {
     etatQuestions.dejaPositions = [];
     sauvegarderEtatQuestions();
 
-    // Rafraîchir le modal
-    fermerModalParamsQuestions();
-    ouvrirModalParamsQuestions();
-
+    // Rafraîchir le modal sans le fermer
+    rafraichirListeQuestionsModal();
     mettreAJourCompteurQuestions();
 }
 
