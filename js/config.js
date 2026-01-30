@@ -56,6 +56,11 @@ const configurationsOnglets = {
         { id: 'retroactions', label: 'Cartouches de rétroaction' },
         { id: 'pratiques-notation', label: 'Pratiques de notation' }
     ],
+    // 🆕 BETA 96.1 : Boîte à outils pédagogiques
+    // Outils interactifs pour l'animation en classe
+    'boite-outils': [
+        { id: 'tirage', label: 'Tirage au sort' }
+    ],
     // ✨ REFONTE UX (18 déc 2025) : 3 onglets (Pratique de notation migrée vers Construction)
     // Structure : Trimestre, Préférences, Données
     'reglages': [
