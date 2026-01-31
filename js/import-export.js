@@ -489,9 +489,6 @@ function previsualiserConfigComplete(event) {
             // 🆕 BETA 95.1 : Détecter le format du fichier
             const formatDetecte = detecterFormatConfig(config);
 
-            // 🔍 DEBUG #48 : Alerte dès la détection du format
-            alert(`DEBUG #48 - Format détecté: ${formatDetecte}\n\nBuild: 0131-0910`);
-
             if (formatDetecte === 'configuration-complete') {
                 // Nouveau format (Beta 91+)
                 if (!config.contenu) {
@@ -568,6 +565,24 @@ function toggleCategoryItems(category, checked) {
 // Exposer globalement
 window.toggleCategoryItems = toggleCategoryItems;
 
+/**
+ * 🆕 Beta 96.2 : Toggle l'affichage des checkboxes données perso quand l'utilisateur confirme
+ * @param {boolean} checked - État de la checkbox "C'est ma propre sauvegarde"
+ */
+function toggleDonneesPersoImport(checked) {
+    const container = document.getElementById('checkboxesDonneesPerso');
+    if (container) {
+        container.style.display = checked ? 'block' : 'none';
+    }
+    // Stocker dans l'analyse en cours pour utilisation lors de l'import
+    if (analyseImportEnCours) {
+        analyseImportEnCours.confirmeMaSauvegarde = checked;
+    }
+}
+
+// Exposer globalement
+window.toggleDonneesPersoImport = toggleDonneesPersoImport;
+
 function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
     const cles = Object.keys(config);
     const nbCles = cles.length;
@@ -616,16 +631,6 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
         } catch (e) { /* ignore */ }
     }
 
-    // 🔍 DEBUG #48 : Afficher les valeurs pour diagnostic
-    console.log('=== DEBUG IMPORT #48 ===');
-    console.log('infoCoursActuel:', JSON.stringify(infoCoursActuel));
-    console.log('utilisateurActuel:', `"${utilisateurActuel}"`);
-    console.log('auteurImport:', `"${auteurImport}"`);
-    console.log('config.infoCours existe:', !!config.infoCours);
-
-    // 🔍 DEBUG #48 : ALERTE VISIBLE pour iPad
-    alert(`DEBUG #48:\n\nutilisateurActuel: "${utilisateurActuel}"\nauteurImport: "${auteurImport}"\n\nSi les deux sont vides ou différents, l'import sera bloqué.`);
-
     // Déterminer si c'est un collègue (auteurs différents ET non vides)
     const estCollègue = auteurImport && utilisateurActuel && auteurImport !== utilisateurActuel;
 
@@ -635,12 +640,6 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
     // - Si les deux vides → vraiment inconnu (blocage)
     const sourceInconnue = !auteurImport; // Seulement si le FICHIER n'a pas d'auteur
     const restaurationNouvelAppareil = auteurImport && !utilisateurActuel;
-
-    // 🔍 DEBUG #48 : Résultats
-    console.log('estCollègue:', estCollègue);
-    console.log('sourceInconnue:', sourceInconnue);
-    console.log('restaurationNouvelAppareil:', restaurationNouvelAppareil);
-    console.log('=== FIN DEBUG #48 ===');
 
     const sourceLabel = estCollègue
         ? `Configuration de ${auteurImport.split(' ')[0] || 'collègue'}`
@@ -791,17 +790,38 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
 
                     <!-- 🆕 Beta 96.2 : Données personnelles importables SI c'est sa propre sauvegarde ou restauration -->
                     ${(analyse.donnees.etudiants.count > 0 || analyse.donnees.presences.count > 0 || analyse.donnees.evaluations.count > 0) ? `
-                    ${(estCollègue || (sourceInconnue && !restaurationNouvelAppareil)) ? `
-                    <!-- Fichier d'un collègue ou source inconnue : bloquer import données perso -->
-                    <div style="background: #f0f0f0; border-radius: 8px; padding: 15px; margin-bottom: 10px; opacity: 0.7;">
+                    ${estCollègue ? `
+                    <!-- Fichier d'un collègue : bloquer import données perso (pas de bypass possible) -->
+                    <div style="background: #f8d7da; border-radius: 8px; padding: 15px; margin-bottom: 10px; border-left: 4px solid #dc3545;">
                         <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
-                            ${analyse.donnees.etudiants.count > 0 ? `<span style="background: #e0e0e0; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; color: #666;">Étudiants (${analyse.donnees.etudiants.count})</span>` : ''}
-                            ${analyse.donnees.presences.count > 0 ? `<span style="background: #e0e0e0; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; color: #666;">Présences (${analyse.donnees.presences.count} dates)</span>` : ''}
-                            ${analyse.donnees.evaluations.count > 0 ? `<span style="background: #e0e0e0; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; color: #666;">Notes (${analyse.donnees.evaluations.cles.length} ensemble(s))</span>` : ''}
+                            ${analyse.donnees.etudiants.count > 0 ? `<span style="background: #f5c6cb; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; color: #721c24;">Étudiants (${analyse.donnees.etudiants.count})</span>` : ''}
+                            ${analyse.donnees.presences.count > 0 ? `<span style="background: #f5c6cb; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; color: #721c24;">Présences (${analyse.donnees.presences.count} dates)</span>` : ''}
+                            ${analyse.donnees.evaluations.count > 0 ? `<span style="background: #f5c6cb; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; color: #721c24;">Notes (${analyse.donnees.evaluations.cles.length} ensemble(s))</span>` : ''}
                         </div>
-                        <p style="margin: 0; font-size: 0.85rem; color: #666;">
-                            <strong>Partage impossible</strong> – Les données nominatives des étudiants sont confidentielles et ne peuvent pas être importées.
+                        <p style="margin: 0; font-size: 0.85rem; color: #721c24;">
+                            <strong>Partage impossible</strong> – Ces données appartiennent à un collègue et ne peuvent pas être importées.
                         </p>
+                    </div>
+                    ` : (sourceInconnue && !restaurationNouvelAppareil) ? `
+                    <!-- Source inconnue : permettre bypass avec confirmation -->
+                    <div id="sectionDonneesPerso" style="background: #fff3cd; border-radius: 8px; padding: 15px; margin-bottom: 10px; border-left: 4px solid #ffc107;">
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
+                            ${analyse.donnees.etudiants.count > 0 ? `<span style="background: #ffeeba; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; color: #856404;">Étudiants (${analyse.donnees.etudiants.count})</span>` : ''}
+                            ${analyse.donnees.presences.count > 0 ? `<span style="background: #ffeeba; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; color: #856404;">Présences (${analyse.donnees.presences.count} dates)</span>` : ''}
+                            ${analyse.donnees.evaluations.count > 0 ? `<span style="background: #ffeeba; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; color: #856404;">Notes (${analyse.donnees.evaluations.cles.length} ensemble(s))</span>` : ''}
+                        </div>
+                        <p style="margin: 0 0 12px 0; font-size: 0.85rem; color: #856404;">
+                            <strong>Source non identifiée</strong> – Le fichier ne contient pas d'information sur son auteur.
+                        </p>
+                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 10px; background: white; border-radius: 6px; border: 2px solid #ffc107;">
+                            <input type="checkbox" id="confirmMaSauvegarde" onchange="toggleDonneesPersoImport(this.checked)" style="width: 20px; height: 20px;">
+                            <span style="font-size: 0.9rem; color: #333;"><strong>C'est ma propre sauvegarde</strong> – Je confirme que ce fichier m'appartient</span>
+                        </label>
+                        <div id="checkboxesDonneesPerso" style="display: none; margin-top: 12px; padding: 12px; background: #d4edda; border-radius: 6px;">
+                            ${analyse.donnees.etudiants.count > 0 ? genererLigneDonnee('etudiants', 'Étudiants', analyse.donnees.etudiants.count + ' étudiant(s)') : ''}
+                            ${analyse.donnees.presences.count > 0 ? genererLigneDonnee('presences', 'Présences', analyse.donnees.presences.count + ' date(s)') : ''}
+                            ${analyse.donnees.evaluations.count > 0 ? genererLigneDonnee('evaluations', 'Notes', analyse.donnees.evaluations.cles.length + ' ensemble(s)') : ''}
+                        </div>
                     </div>
                     ` : `
                     <!-- Sauvegarde personnelle : permettre import données perso -->
@@ -1959,10 +1979,10 @@ async function executerImportSelectif() {
 
         // ========== DONNÉES DU COURS (écrasement) ==========
         // 🆕 Beta 96.2 : Bloquer import données perso SEULEMENT si collègue ou source vraiment inconnue
-        // Permettre si : sauvegarde personnelle OU restauration sur nouvel appareil (auteur identifié dans fichier)
+        // Permettre si : sauvegarde personnelle OU restauration sur nouvel appareil OU confirmation utilisateur
         const bloquerDonneesPerso = analyseImportEnCours &&
             (analyseImportEnCours.estCollègue ||
-             (analyseImportEnCours.sourceInconnue && !analyseImportEnCours.restaurationNouvelAppareil));
+             (analyseImportEnCours.sourceInconnue && !analyseImportEnCours.restaurationNouvelAppareil && !analyseImportEnCours.confirmeMaSauvegarde));
 
         // Étudiants
         if (isChecked('etudiants') && !bloquerDonneesPerso) {
