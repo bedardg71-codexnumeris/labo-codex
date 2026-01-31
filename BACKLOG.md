@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 31 janvier 2026 (Beta 96.2)
+> **Derniere mise a jour** : 31 janvier 2026 (Beta 96.2 - Build 0131-1500)
 
 ---
 
@@ -68,6 +68,16 @@
   - **Symptôme** : Message en gris pâle, difficile à lire
   - **Correction** : Mettre en ROUGE pour attirer l'attention
   - **Fichier** : `js/import-export.js`
+
+- [x] **#55** Pratique configurable non trouvée dans le registre ✅ CORRIGÉ (31 jan 2026)
+  - **Symptôme** : Erreur `❌ Pratique "pratique-1768910384608" non disponible dans le registre`
+  - **Cause 1** : `obtenirPratiqueParId()` ne cherchait pas dans `pratiquesConfigurables`
+  - **Cause 2** : Les pratiques créées via wizard ont une structure différente (ID/échelle à la racine, pas dans `config`)
+  - **Solution** : Nouvelle fonction `construireConfigComplete()` qui normalise les deux formats
+    - Fusionne les champs racine + config interne
+    - Charge l'échelle par ID depuis `echellesTemplates` si non embarquée
+    - Fallback vers échelle IDME par défaut si référence introuvable
+  - **Fichier modifié** : `js/pratiques/pratique-registre.js`
 
 - [x] **#37** Incoherence indice P vs Note finale (tableau de bord) ✅ CORRIGÉ (25 jan 2026)
   - **Symptome** : Vincent affiche P=50% dans le tableau de bord mais Note finale=59% dans son profil
