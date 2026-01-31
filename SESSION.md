@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 96.1
 
 **Date** : 30 janvier 2026
-**Version** : Beta 96.1 (build 0130-1602)
+**Version** : Beta 96.1 (build 0130-1943)
 **Statut** : Application fonctionnelle pour H2026, A2024 archive
 
 ---
@@ -31,6 +31,20 @@
 - **Anonymisation groupes** : Numéros de groupe remplacés par lettres en mode anonymisation
 
 ### Derniere tache completee (30 janvier - Beta 96.1)
+- **CORRECTION CRITIQUE - IMPORT SAUVEGARDE COMPLÈTE**
+  - Bug signalé par testeur (iPad/Safari) : Import réussi mais données non chargées
+  - **Cause** : Les clés `*_groupesCours`, `*_horaires`, `enseignants` n'étaient pas gérées par l'import sélectif
+  - **Correction** : Ajout du support des entités structurelles Beta 95+ dans `import-export.js`
+    - Analyse des clés `*_groupesCours`, `*_horaires`, `enseignants`
+    - Affichage dans le modal avec section "Structure du trimestre"
+    - Importation effective de ces données
+  - Fichier modifié : `js/import-export.js`
+
+- **CORRECTION - ERREUR CONSOLE ouvrirModalPreparationPDF**
+  - Erreur systématique au chargement : `Can't find variable: ouvrirModalPreparationPDF`
+  - **Cause** : Fonction renommée `ouvrirModalExportPDF` mais window.export pas mis à jour
+  - **Correction** : Mise à jour des exports window dans `js/export-pdf.js`
+
 - **BOÎTE À OUTILS - QUESTIONS FLASH**
   - Deuxième outil dans la section Boîte à outils
   - Tirage aléatoire de questions pour pratiques de récupération en classe

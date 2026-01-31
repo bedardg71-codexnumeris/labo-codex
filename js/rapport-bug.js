@@ -202,6 +202,7 @@ function obtenirInfosSysteme() {
 function obtenirEtatApplication() {
     const etat = {
         version: VERSION_APP,
+        build: window.BUILD_ID || 'inconnu',
         dateHeure: new Date().toLocaleString('fr-CA'),
         sectionActive: typeof sectionActive !== 'undefined' ? sectionActive : 'inconnue',
         sousSectionActive: typeof sousSectionActive !== 'undefined' ? sousSectionActive : 'inconnue'
@@ -383,7 +384,7 @@ function genererRapportBug(descriptionUtilisateur = '', prenomTesteur = '') {
     rapport += `ID: ${idRapport}\n`;
     rapport += `Testeur: ${prenomTesteur.trim() || 'Non spécifié'}\n`;
     rapport += `Date: ${etatApp.dateHeure}\n`;
-    rapport += `Version: ${etatApp.version}\n\n`;
+    rapport += `Version: ${etatApp.version} (Build ${etatApp.build})\n\n`;
 
     rapport += `--- SYSTÈME ---\n`;
     rapport += `Navigateur: ${infosSysteme.navigateur}\n`;

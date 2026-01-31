@@ -2918,11 +2918,8 @@ window.afficherFormulairePDFDepuisEchelle = afficherFormulairePDFDepuisEchelle;
 window.afficherFormulairePDFDepuisCartouche = afficherFormulairePDFDepuisCartouche;
 window.afficherFormulairePDFDepuisProduction = afficherFormulairePDFDepuisProduction;
 // Modal de préparation PDF (Beta 96.1)
-window.ouvrirModalPreparationPDF = ouvrirModalPreparationPDF;
-window.fermerModalPreparationPDF = fermerModalPreparationPDF;
-window.chargerOptionsModalPDF = chargerOptionsModalPDF;
-window.mettreAJourOptionsModalPDF = mettreAJourOptionsModalPDF;
-window.ouvrirApercuPDFDepuisModal = ouvrirApercuPDFDepuisModal;
+window.ouvrirModalExportPDF = ouvrirModalExportPDF;
+window.fermerModalExportPDF = fermerModalExportPDF;
 // Formulaire inline de préparation PDF (Beta 96.1)
 window.afficherFormulairePDFInline = afficherFormulairePDFInline;
 window.fermerFormulairePDFInline = fermerFormulairePDFInline;
