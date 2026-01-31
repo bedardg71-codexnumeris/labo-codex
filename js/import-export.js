@@ -573,6 +573,13 @@ function toggleDonneesPersoImport(checked) {
     const container = document.getElementById('checkboxesDonneesPerso');
     if (container) {
         container.style.display = checked ? 'block' : 'none';
+        // 🆕 FIX (31 jan 2026) : Cocher automatiquement les checkboxes données perso
+        // quand l'utilisateur confirme que c'est sa propre sauvegarde
+        if (checked) {
+            container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                cb.checked = true;
+            });
+        }
     }
     // Stocker dans l'analyse en cours pour utilisation lors de l'import
     if (analyseImportEnCours) {
