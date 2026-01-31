@@ -1535,14 +1535,14 @@ async function executerImportVersBibliotheques() {
                 const pratiquesExistantes = db.getSync('pratiquesConfigurables', []);
                 const idsPratiquesExistants = new Set(pratiquesExistantes.map(p => p.id));
 
+                // 🆕 FIX (31 jan 2026) : Préserver les IDs originaux pour maintenir les références
                 const pratiquesNouvelles = pratiquesImport.filter(p => {
-                    // Éviter les doublons par ID ou par nom
+                    // Éviter les doublons par ID seulement (pas par nom - l'ID est la référence unique)
                     if (idsPratiquesExistants.has(p.id)) return false;
-                    if (pratiquesExistantes.some(pe => pe.nom === p.nom)) return false;
                     return true;
                 }).map(p => ({
                     ...p,
-                    id: 'PRATIQUE_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                    // IMPORTANT: Garder l'ID original pour préserver les références (groupe-cours, etc.)
                     dateImport: new Date().toISOString()
                 }));
 
@@ -1832,13 +1832,14 @@ async function executerImportSelectif() {
 
             if (Array.isArray(pratiquesImport) && pratiquesImport.length > 0) {
                 const pratiquesExistantes = db.getSync('pratiquesConfigurables', []);
-                // Filtrer par les items sélectionnés ET non existants
+                const idsPratiquesExistants = new Set(pratiquesExistantes.map(p => p.id));
+                // 🆕 FIX (31 jan 2026) : Filtrer par ID (pas par nom) pour préserver les références
                 const pratiquesNouvelles = pratiquesImport
                     .filter(p => selectedIds.includes(p.id) || selectedIds.includes(p.nom))
-                    .filter(p => !pratiquesExistantes.some(pe => pe.nom === p.nom))
+                    .filter(p => !idsPratiquesExistants.has(p.id)) // Éviter doublons par ID uniquement
                     .map(p => ({
                         ...p,
-                        id: 'PRATIQUE_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                        // IMPORTANT: Garder l'ID original pour préserver les références
                         dateImport: new Date().toISOString(),
                         auteurOriginal: auteurSource || p.auteurOriginal || ''
                     }));
