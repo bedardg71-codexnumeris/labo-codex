@@ -616,18 +616,26 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
     // Déterminer si c'est un collègue (auteurs différents ET non vides)
     const estCollègue = auteurImport && utilisateurActuel && auteurImport !== utilisateurActuel;
 
-    // Cas où on ne peut pas déterminer la source (nom manquant)
-    const sourceInconnue = !utilisateurActuel || !auteurImport;
+    // 🆕 Beta 96.2 : Logique améliorée pour la source
+    // - Si auteur identifié dans fichier mais pas de profil local → restauration sur nouvel appareil (OK)
+    // - Si profil local mais pas d'auteur dans fichier → fichier ancien ou d'un collègue (blocage)
+    // - Si les deux vides → vraiment inconnu (blocage)
+    const sourceInconnue = !auteurImport; // Seulement si le FICHIER n'a pas d'auteur
+    const restaurationNouvelAppareil = auteurImport && !utilisateurActuel;
+
     const sourceLabel = estCollègue
         ? `Configuration de ${auteurImport.split(' ')[0] || 'collègue'}`
-        : sourceInconnue
-            ? 'Source inconnue'
-            : 'Sauvegarde personnelle';
+        : restaurationNouvelAppareil
+            ? `Restauration de ${auteurImport.split(' ')[0] || 'ta sauvegarde'}`
+            : sourceInconnue
+                ? 'Source inconnue'
+                : 'Sauvegarde personnelle';
 
     // Stocker pour utilisation dans executerImportSelectif
     analyseImportEnCours.estCollègue = estCollègue;
     analyseImportEnCours.auteurImport = auteurImport;
     analyseImportEnCours.sourceInconnue = sourceInconnue;
+    analyseImportEnCours.restaurationNouvelAppareil = restaurationNouvelAppareil;
 
     // ✅ MODIFIÉ (6 jan 2026) : Checkbox individuelle par élément
     const genererLigneRessource = (id, label, count, items) => {
@@ -762,8 +770,10 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                         <span style="font-size: 0.8rem; color: #999; font-weight: normal;">Protégées</span>
                     </h3>
 
-                    <!-- ✅ MODIFIÉ (6 jan 2026) : Données étudiantes toujours grisées avec message confidentialité -->
+                    <!-- 🆕 Beta 96.2 : Données personnelles importables SI c'est sa propre sauvegarde ou restauration -->
                     ${(analyse.donnees.etudiants.count > 0 || analyse.donnees.presences.count > 0 || analyse.donnees.evaluations.count > 0) ? `
+                    ${(estCollègue || (sourceInconnue && !restaurationNouvelAppareil)) ? `
+                    <!-- Fichier d'un collègue ou source inconnue : bloquer import données perso -->
                     <div style="background: #f0f0f0; border-radius: 8px; padding: 15px; margin-bottom: 10px; opacity: 0.7;">
                         <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
                             ${analyse.donnees.etudiants.count > 0 ? `<span style="background: #e0e0e0; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; color: #666;">Étudiants (${analyse.donnees.etudiants.count})</span>` : ''}
@@ -774,6 +784,17 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                             <strong>Partage impossible</strong> – Les données nominatives des étudiants sont confidentielles et ne peuvent pas être importées.
                         </p>
                     </div>
+                    ` : `
+                    <!-- Sauvegarde personnelle : permettre import données perso -->
+                    <div style="background: #d4edda; border-radius: 8px; padding: 12px; margin-bottom: 10px;">
+                        ${analyse.donnees.etudiants.count > 0 ? genererLigneDonnee('etudiants', 'Étudiants', analyse.donnees.etudiants.count + ' étudiant(s)') : ''}
+                        ${analyse.donnees.presences.count > 0 ? genererLigneDonnee('presences', 'Présences', analyse.donnees.presences.count + ' date(s)') : ''}
+                        ${analyse.donnees.evaluations.count > 0 ? genererLigneDonnee('evaluations', 'Notes', analyse.donnees.evaluations.cles.length + ' ensemble(s)') : ''}
+                    </div>
+                    <p style="font-size: 0.75rem; color: #28a745; margin: 8px 0 0 12px;">
+                        ✓ Sauvegarde personnelle détectée – tes données peuvent être restaurées
+                    </p>
+                    `}
                     ` : ''}
 
                     <!-- Configuration du cours (importable sauf si collègue) -->
@@ -1918,8 +1939,11 @@ async function executerImportSelectif() {
         }
 
         // ========== DONNÉES DU COURS (écrasement) ==========
-        // Sécurité : bloquer l'import de données personnelles si c'est d'un collègue
-        const bloquerDonneesPerso = analyseImportEnCours && analyseImportEnCours.estCollègue;
+        // 🆕 Beta 96.2 : Bloquer import données perso SEULEMENT si collègue ou source vraiment inconnue
+        // Permettre si : sauvegarde personnelle OU restauration sur nouvel appareil (auteur identifié dans fichier)
+        const bloquerDonneesPerso = analyseImportEnCours &&
+            (analyseImportEnCours.estCollègue ||
+             (analyseImportEnCours.sourceInconnue && !analyseImportEnCours.restaurationNouvelAppareil));
 
         // Étudiants
         if (isChecked('etudiants') && !bloquerDonneesPerso) {
