@@ -24,6 +24,169 @@
 const VERSION_APP = 'Beta 96';
 
 // ===============================
+// ARCHIVAGE LOCAL DES RAPPORTS
+// ===============================
+
+const CLE_RAPPORTS_ARCHIVES = 'rapportsBugArchives';
+const MAX_RAPPORTS_ARCHIVES = 50;
+
+/**
+ * Archive un rapport de bug localement
+ */
+function archiverRapportBug(rapport, description, prenom) {
+    try {
+        const archives = JSON.parse(localStorage.getItem(CLE_RAPPORTS_ARCHIVES) || '[]');
+
+        const nouveauRapport = {
+            id: Date.now(),
+            date: new Date().toISOString(),
+            prenom: prenom || 'Anonyme',
+            description: description || 'Aucune description',
+            rapport: rapport,
+            envoye: true
+        };
+
+        archives.unshift(nouveauRapport);
+
+        // Garder seulement les derniers rapports
+        if (archives.length > MAX_RAPPORTS_ARCHIVES) {
+            archives.length = MAX_RAPPORTS_ARCHIVES;
+        }
+
+        localStorage.setItem(CLE_RAPPORTS_ARCHIVES, JSON.stringify(archives));
+        console.log('[Rapport Bug] Rapport archivé localement');
+    } catch (e) {
+        console.error('[Rapport Bug] Erreur archivage:', e);
+    }
+}
+
+/**
+ * Récupère les rapports archivés
+ */
+function obtenirRapportsArchives() {
+    try {
+        return JSON.parse(localStorage.getItem(CLE_RAPPORTS_ARCHIVES) || '[]');
+    } catch (e) {
+        return [];
+    }
+}
+
+/**
+ * Supprime un rapport archivé
+ */
+function supprimerRapportArchive(id) {
+    try {
+        let archives = obtenirRapportsArchives();
+        archives = archives.filter(r => r.id !== id);
+        localStorage.setItem(CLE_RAPPORTS_ARCHIVES, JSON.stringify(archives));
+        return true;
+    } catch (e) {
+        console.error('[Rapport Bug] Erreur suppression:', e);
+        return false;
+    }
+}
+
+/**
+ * Supprime tous les rapports archivés
+ */
+function viderRapportsArchives() {
+    localStorage.removeItem(CLE_RAPPORTS_ARCHIVES);
+}
+
+/**
+ * Affiche le modal de gestion des rapports archivés
+ */
+function ouvrirModalRapportsArchives() {
+    const archives = obtenirRapportsArchives();
+
+    const formatDate = (iso) => {
+        const d = new Date(iso);
+        return d.toLocaleDateString('fr-CA') + ' ' + d.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' });
+    };
+
+    const listeHTML = archives.length === 0
+        ? '<p style="text-align: center; color: #666; padding: 30px;">Aucun rapport archivé</p>'
+        : archives.map(r => `
+            <div style="background: #f8f9fa; border-radius: 8px; padding: 12px; margin-bottom: 10px; border-left: 3px solid var(--bleu-principal);">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                    <div>
+                        <strong style="color: var(--bleu-principal);">${r.prenom}</strong>
+                        <span style="color: #666; font-size: 0.85rem; margin-left: 10px;">${formatDate(r.date)}</span>
+                    </div>
+                    <button onclick="supprimerEtRafraichirArchive(${r.id})" style="
+                        background: none; border: none; cursor: pointer; font-size: 1.2rem;
+                        color: #999; padding: 0;" title="Supprimer">×</button>
+                </div>
+                <p style="margin: 0 0 8px 0; font-size: 0.9rem; color: #333;">
+                    ${(r.description || 'Aucune description').substring(0, 100)}${r.description?.length > 100 ? '...' : ''}
+                </p>
+                <button onclick="afficherRapportComplet(${r.id})" class="btn btn-secondaire" style="font-size: 0.8rem; padding: 4px 10px;">
+                    Voir le rapport complet
+                </button>
+            </div>
+        `).join('');
+
+    const modalHTML = `
+        <div id="modalRapportsArchives" style="
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); display: flex; align-items: center;
+            justify-content: center; z-index: 10001;">
+            <div style="background: white; border-radius: 12px; width: 90%; max-width: 600px;
+                 max-height: 80vh; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+                <div style="padding: 20px; border-bottom: 1px solid var(--gris-clair);
+                     display: flex; justify-content: space-between; align-items: center;
+                     background: var(--bleu-tres-pale);">
+                    <h3 style="margin: 0; color: var(--bleu-principal);">
+                        Rapports archivés (${archives.length})
+                    </h3>
+                    <button onclick="fermerModalRapportsArchives()" style="
+                        background: none; border: none; font-size: 1.8rem;
+                        cursor: pointer; color: var(--gris-fonce);">&times;</button>
+                </div>
+                <div id="listeRapportsArchives" style="padding: 20px; max-height: 60vh; overflow-y: auto;">
+                    ${listeHTML}
+                </div>
+                ${archives.length > 0 ? `
+                <div style="padding: 15px; border-top: 1px solid var(--gris-clair); text-align: right;">
+                    <button onclick="if(confirm('Supprimer tous les rapports archivés ?')) { viderRapportsArchives(); rafraichirListeArchives(); }"
+                            class="btn btn-secondaire" style="color: #dc3545;">
+                        Tout supprimer
+                    </button>
+                </div>
+                ` : ''}
+            </div>
+        </div>
+    `;
+
+    const container = document.createElement('div');
+    container.innerHTML = modalHTML;
+    document.body.appendChild(container);
+}
+
+function fermerModalRapportsArchives() {
+    const modal = document.getElementById('modalRapportsArchives');
+    if (modal?.parentElement) modal.parentElement.remove();
+}
+
+function supprimerEtRafraichirArchive(id) {
+    supprimerRapportArchive(id);
+    rafraichirListeArchives();
+}
+
+function rafraichirListeArchives() {
+    fermerModalRapportsArchives();
+    ouvrirModalRapportsArchives();
+}
+
+function afficherRapportComplet(id) {
+    const archives = obtenirRapportsArchives();
+    const rapport = archives.find(r => r.id === id);
+    if (!rapport) return;
+
+    alert(rapport.rapport);
+}
+
+// ===============================
 // CAPTURE DES ERREURS CONSOLE
 // ===============================
 
@@ -489,35 +652,59 @@ async function capturerEcran() {
  * ✅ NOUVEAU : Télécharge la capture d'écran
  */
 async function telechargerCaptureEcran() {
-    const btn = event.target;
-    const texteOriginal = btn.textContent;
-    btn.textContent = 'Capture en cours...';
-    btn.disabled = true;
+    const modal = document.getElementById('modalRapportBug');
+    if (!modal) return;
 
-    try {
-        const dataUrl = await capturerEcran();
-        if (dataUrl) {
-            const link = document.createElement('a');
-            link.download = `capture-bug-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.png`;
-            link.href = dataUrl;
-            link.click();
-            btn.textContent = 'Téléchargé !';
-            btn.style.background = 'var(--vert-positif)';
+    // Cacher le modal temporairement
+    modal.style.display = 'none';
+
+    // Créer un overlay de décompte
+    const overlay = document.createElement('div');
+    overlay.id = 'overlayDecompteCapture';
+    overlay.innerHTML = `
+        <div style="
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); display: flex; flex-direction: column;
+            align-items: center; justify-content: center; z-index: 10002;
+            color: white; font-family: system-ui, sans-serif;">
+            <div id="decompteNumero" style="font-size: 6rem; font-weight: bold; margin-bottom: 20px;">3</div>
+            <div style="font-size: 1.5rem; margin-bottom: 30px;">Prenez votre capture d'écran maintenant !</div>
+            <div style="font-size: 1rem; opacity: 0.8; text-align: center; max-width: 400px;">
+                <strong>Mac:</strong> Cmd + Shift + 4<br>
+                <strong>Windows:</strong> Win + Shift + S<br>
+                <strong>iPad:</strong> Power + Volume haut
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+
+    // Décompte de 3 secondes
+    const decompteEl = document.getElementById('decompteNumero');
+    let compte = 3;
+
+    const intervalle = setInterval(() => {
+        compte--;
+        if (compte > 0) {
+            decompteEl.textContent = compte;
         } else {
-            // Pas de html2canvas, expliquer comment faire manuellement
-            alert('Capture automatique non disponible.\n\nUtilisez :\n- Mac: Cmd + Shift + 4\n- Windows: Win + Shift + S\n- iPad: Power + Volume haut');
-            btn.textContent = texteOriginal;
-        }
-    } catch (e) {
-        alert('Erreur lors de la capture. Utilisez la méthode manuelle.');
-        btn.textContent = texteOriginal;
-    }
+            clearInterval(intervalle);
+            // Retirer l'overlay et réafficher le modal
+            overlay.remove();
+            modal.style.display = 'flex';
 
-    btn.disabled = false;
-    setTimeout(() => {
-        btn.textContent = texteOriginal;
-        btn.style.background = '';
-    }, 2000);
+            // Feedback visuel sur le bouton
+            const btn = document.querySelector('[onclick="telechargerCaptureEcran()"]');
+            if (btn) {
+                const texteOriginal = btn.textContent;
+                btn.textContent = '✓ Temps écoulé';
+                btn.style.background = 'var(--vert-positif)';
+                setTimeout(() => {
+                    btn.textContent = texteOriginal;
+                    btn.style.background = '';
+                }, 2000);
+            }
+        }
+    }, 1000);
 }
 
 // ===============================
@@ -689,11 +876,21 @@ function ouvrirModalRapportBug() {
                         background: var(--bleu-tres-pale);
                         border-radius: 8px;
                         font-size: 0.85rem;
+                        margin-bottom: 15px;
                     ">
                         <strong>Captures d'écran manuelles :</strong>
                         Mac: <code style="background: #e0e0e0; padding: 2px 6px; border-radius: 4px;">Cmd+Shift+4</code> |
                         Windows: <code style="background: #e0e0e0; padding: 2px 6px; border-radius: 4px;">Win+Shift+S</code> |
                         iPad: <code style="background: #e0e0e0; padding: 2px 6px; border-radius: 4px;">Power+Vol.haut</code>
+                    </div>
+
+                    <!-- Lien vers archives -->
+                    <div style="text-align: center;">
+                        <button onclick="ouvrirModalRapportsArchives()" style="
+                            background: none; border: none; color: var(--bleu-principal);
+                            cursor: pointer; font-size: 0.85rem; text-decoration: underline;">
+                            📋 Voir mes rapports archivés
+                        </button>
                     </div>
                 </div>
             </div>
@@ -740,16 +937,21 @@ async function copierRapportBug() {
     try {
         await navigator.clipboard.writeText(rapport);
 
-        // Feedback visuel
-        const btn = event.target;
-        const texteOriginal = btn.textContent;
-        btn.textContent = 'Copié !';
-        btn.style.background = 'var(--vert-positif)';
+        // Archiver le rapport localement
+        archiverRapportBug(rapport, description, prenom);
 
-        setTimeout(() => {
-            btn.textContent = texteOriginal;
-            btn.style.background = '';
-        }, 2000);
+        // Feedback visuel
+        const btn = event?.target;
+        if (btn) {
+            const texteOriginal = btn.textContent;
+            btn.textContent = '✓ Copié !';
+            btn.style.background = 'var(--vert-positif)';
+
+            setTimeout(() => {
+                btn.textContent = texteOriginal;
+                btn.style.background = '';
+            }, 2000);
+        }
     } catch (err) {
         alert('Erreur lors de la copie. Sélectionnez manuellement le texte du rapport.');
     }
@@ -797,6 +999,21 @@ function envoyerRapportParCourriel() {
         const corpsNettoye = nettoyerUTF16(rapport + '\n\n--- JOIGNEZ VOS CAPTURES D\'ÉCRAN À CE COURRIEL ---');
         const corps = encodeURIComponent(corpsNettoye);
 
+        // Archiver le rapport localement
+        archiverRapportBug(rapport, description, prenom);
+
+        // Feedback visuel
+        const btn = event?.target;
+        if (btn) {
+            const texteOriginal = btn.textContent;
+            btn.textContent = '✓ Envoyé !';
+            btn.style.background = 'var(--vert-positif)';
+            setTimeout(() => {
+                btn.textContent = texteOriginal;
+                btn.style.background = '';
+            }, 2000);
+        }
+
         // Ouvrir le client courriel
         window.location.href = `mailto:labo@codexnumeris.org?subject=${sujet}&body=${corps}`;
     } catch (e) {
@@ -815,6 +1032,13 @@ window.mettreAJourRapport = mettreAJourRapport;
 window.copierRapportBug = copierRapportBug;
 window.envoyerRapportParCourriel = envoyerRapportParCourriel;
 window.telechargerCaptureEcran = telechargerCaptureEcran;
-window.enregistrerAction = enregistrerAction; // Pour usage externe si nécessaire
+window.enregistrerAction = enregistrerAction;
+// Gestion des rapports archivés
+window.ouvrirModalRapportsArchives = ouvrirModalRapportsArchives;
+window.fermerModalRapportsArchives = fermerModalRapportsArchives;
+window.supprimerEtRafraichirArchive = supprimerEtRafraichirArchive;
+window.rafraichirListeArchives = rafraichirListeArchives;
+window.afficherRapportComplet = afficherRapportComplet;
+window.viderRapportsArchives = viderRapportsArchives;
 
-console.log('Module rapport-bug.js chargé (version améliorée)');
+console.log('Module rapport-bug.js chargé (version améliorée avec archivage)');
