@@ -651,9 +651,12 @@ async function capturerEcran() {
 /**
  * ✅ NOUVEAU : Télécharge la capture d'écran
  */
-async function telechargerCaptureEcran() {
+async function telechargerCaptureEcran(btn) {
     const modal = document.getElementById('modalRapportBug');
     if (!modal) return;
+
+    // Sauvegarder le texte original du bouton
+    const texteOriginal = btn ? btn.textContent : '📸 Capture écran';
 
     // Cacher le modal temporairement
     modal.style.display = 'none';
@@ -693,14 +696,13 @@ async function telechargerCaptureEcran() {
             modal.style.display = 'flex';
 
             // Feedback visuel sur le bouton
-            const btn = document.querySelector('[onclick="telechargerCaptureEcran()"]');
-            if (btn) {
-                const texteOriginal = btn.textContent;
-                btn.textContent = '✓ Temps écoulé';
-                btn.style.background = 'var(--vert-positif)';
+            const btnCapture = document.getElementById('btnCaptureEcran');
+            if (btnCapture) {
+                btnCapture.textContent = '✓ Temps écoulé';
+                btnCapture.style.background = 'var(--vert-positif)';
                 setTimeout(() => {
-                    btn.textContent = texteOriginal;
-                    btn.style.background = '';
+                    btnCapture.textContent = texteOriginal;
+                    btnCapture.style.background = '';
                 }, 2000);
             }
         }
@@ -859,13 +861,13 @@ function ouvrirModalRapportBug() {
 
                     <!-- Boutons d'action -->
                     <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 15px;">
-                        <button onclick="copierRapportBug()" class="btn btn-principal" style="flex: 1; min-width: 120px;">
+                        <button id="btnCopierRapport" onclick="copierRapportBug(this)" class="btn btn-principal" style="flex: 1; min-width: 120px;">
                             Copier le rapport
                         </button>
-                        <button onclick="telechargerCaptureEcran()" class="btn btn-secondaire" style="flex: 1; min-width: 120px;">
+                        <button id="btnCaptureEcran" onclick="telechargerCaptureEcran(this)" class="btn btn-secondaire" style="flex: 1; min-width: 120px;">
                             📸 Capture écran
                         </button>
-                        <button onclick="envoyerRapportParCourriel()" class="btn btn-secondaire" style="flex: 1; min-width: 120px;">
+                        <button id="btnEnvoyerCourriel" onclick="envoyerRapportParCourriel(this)" class="btn btn-secondaire" style="flex: 1; min-width: 120px;">
                             Envoyer par courriel
                         </button>
                     </div>
@@ -929,7 +931,7 @@ function mettreAJourRapport() {
 /**
  * Copie le rapport dans le presse-papiers
  */
-async function copierRapportBug() {
+async function copierRapportBug(btn) {
     const description = document.getElementById('descriptionBug')?.value || '';
     const prenom = document.getElementById('prenomTesteur')?.value || '';
     const rapport = genererRapportBug(description, prenom);
@@ -941,7 +943,6 @@ async function copierRapportBug() {
         archiverRapportBug(rapport, description, prenom);
 
         // Feedback visuel
-        const btn = event?.target;
         if (btn) {
             const texteOriginal = btn.textContent;
             btn.textContent = '✓ Copié !';
@@ -960,7 +961,7 @@ async function copierRapportBug() {
 /**
  * Ouvre le client courriel avec le rapport pré-rempli
  */
-function envoyerRapportParCourriel() {
+function envoyerRapportParCourriel(btn) {
     const description = document.getElementById('descriptionBug')?.value || '';
     const prenom = document.getElementById('prenomTesteur')?.value || '';
     const rapport = genererRapportBug(description, prenom);
@@ -1003,7 +1004,6 @@ function envoyerRapportParCourriel() {
         archiverRapportBug(rapport, description, prenom);
 
         // Feedback visuel
-        const btn = event?.target;
         if (btn) {
             const texteOriginal = btn.textContent;
             btn.textContent = '✓ Envoyé !';
