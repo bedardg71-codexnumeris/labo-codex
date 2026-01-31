@@ -100,6 +100,87 @@ function enregistrerPratique(id, instance) {
 }
 
 // ============================================================================
+// HELPER : Construction de config complète
+// ============================================================================
+
+/**
+ * Construit une config complète pour PratiqueConfigurable
+ * en fusionnant les champs racine et config interne.
+ *
+ * Certaines pratiques ont les champs (id, nom, echelle...) à la racine,
+ * d'autres dans pratiqueData.config. Cette fonction normalise les deux formats.
+ *
+ * NOUVEAU (Beta 96.2): Charge l'échelle par ID si non embarquée
+ *
+ * @param {Object} pratiqueData - Données de la pratique depuis pratiquesConfigurables
+ * @returns {Object} Config complète prête pour PratiqueConfigurable
+ */
+function construireConfigComplete(pratiqueData) {
+    // Priorité : config interne > racine
+    const config = pratiqueData.config || {};
+
+    // Résoudre l'échelle (embarquée ou par référence ID)
+    let echelle = config.echelle || pratiqueData.echelle;
+    if (!echelle) {
+        // Chercher par ID dans configuration ou config
+        const echelleId = pratiqueData.configuration?.echelleId || config.echelleId;
+        if (echelleId) {
+            const echelles = db.getSync('echellesTemplates', []);
+            const echelleRef = echelles.find(e => e.id === echelleId);
+            if (echelleRef) {
+                echelle = {
+                    type: 'niveaux',
+                    echelle_id: echelleRef.id,
+                    echelle_nom: echelleRef.nom,
+                    niveaux: echelleRef.niveaux
+                };
+            } else {
+                console.warn(`[construireConfigComplete] Échelle "${echelleId}" non trouvée, utilisation échelle par défaut`);
+                // Échelle par défaut pour éviter l'erreur
+                echelle = {
+                    type: 'niveaux',
+                    niveaux: [
+                        { code: 'I', label: 'Insuffisant', valeur_pourcentage: 50, ordre: 1 },
+                        { code: 'D', label: 'Développement', valeur_pourcentage: 65, ordre: 2 },
+                        { code: 'M', label: 'Maîtrisé', valeur_pourcentage: 80, ordre: 3 },
+                        { code: 'E', label: 'Étendu', valeur_pourcentage: 95, ordre: 4 }
+                    ]
+                };
+            }
+        }
+    }
+
+    return {
+        // Champs obligatoires - prendre de config si présent, sinon de racine
+        id: config.id || pratiqueData.id,
+        nom: config.nom || pratiqueData.nom,
+        echelle: echelle,
+        calcul_note: config.calcul_note || pratiqueData.calcul_note || { methode: 'conversion_niveaux' },
+
+        // Champs optionnels
+        description: config.description || pratiqueData.description,
+        auteur: config.auteur || pratiqueData.auteur,
+        etablissement: config.etablissement || pratiqueData.etablissement,
+        discipline: config.discipline || pratiqueData.discipline,
+        version: config.version || pratiqueData.version,
+        date_creation: config.date_creation || pratiqueData.dateCreation,
+
+        // Sections de configuration
+        structure_evaluations: config.structure_evaluations || pratiqueData.structure_evaluations,
+        systeme_reprises: config.systeme_reprises || pratiqueData.systeme_reprises,
+        gestion_criteres: config.gestion_criteres || pratiqueData.gestion_criteres,
+        seuils: config.seuils || pratiqueData.seuils,
+        interface: config.interface || pratiqueData.interface,
+        affichage: config.affichage || pratiqueData.affichage,
+        portfolio: config.portfolio || pratiqueData.portfolio || pratiqueData.configuration?.portfolio,
+        jetons: config.jetons || pratiqueData.jetons,
+
+        // Configuration spécifique (pour pratiques avec approcheEvaluation, etc.)
+        configuration: pratiqueData.configuration
+    };
+}
+
+// ============================================================================
 // DÉTECTION DE LA PRATIQUE ACTIVE
 // ============================================================================
 
@@ -181,16 +262,18 @@ function obtenirPratiqueActive() {
     let instance = pratiquesEnregistrees.get(idActif);
 
     // NOUVEAU (Beta 92): Si non trouvée dans le registre, chercher dans les pratiques configurables
+    // MISE À JOUR (Beta 96.2): Utilise construireConfigComplete pour normaliser les formats
     if (!instance && window.PratiqueManager) {
         console.log(`[Registre] Pratique "${idActif}" non trouvée dans le registre, tentative via PratiqueManager...`);
 
         const pratiquesConfigurables = db.getSync('pratiquesConfigurables', []);
         const pratiqueData = pratiquesConfigurables.find(p => p.id === idActif);
 
-        if (pratiqueData && pratiqueData.config) {
+        if (pratiqueData) {
             // Créer une instance de PratiqueConfigurable
             try {
-                instance = new PratiqueConfigurable(pratiqueData.config);
+                const configComplete = construireConfigComplete(pratiqueData);
+                instance = new PratiqueConfigurable(configComplete);
                 console.log(`✅ Pratique configurable chargée : ${idActif} (${instance.obtenirNom()})`);
             } catch (error) {
                 console.error(`Erreur lors du chargement de la pratique configurable "${idActif}":`, error);
@@ -272,6 +355,9 @@ function pratiqueEstDisponible(id) {
 /**
  * Obtient une pratique spécifique par son ID
  *
+ * NOUVEAU (Beta 96.2): Support pratiques configurables JSON
+ * Si la pratique n'est pas dans le registre, tente de la charger depuis pratiquesConfigurables
+ *
  * @param {string} id - ID de la pratique
  * @returns {Object|null} Instance de la pratique, ou null si non trouvée
  *
@@ -279,7 +365,28 @@ function pratiqueEstDisponible(id) {
  * const pratiquePAN = obtenirPratiqueParId('pan-standards');
  */
 function obtenirPratiqueParId(id) {
-    return pratiquesEnregistrees.get(id) || null;
+    // Chercher dans le registre (pratiques codées en dur)
+    let instance = pratiquesEnregistrees.get(id);
+
+    // Si non trouvée dans le registre, chercher dans les pratiques configurables
+    if (!instance && window.PratiqueManager) {
+        const pratiquesConfigurables = db.getSync('pratiquesConfigurables', []);
+        const pratiqueData = pratiquesConfigurables.find(p => p.id === id);
+
+        if (pratiqueData) {
+            try {
+                // Construire la config complète en fusionnant racine + config
+                // (certaines pratiques ont les champs à la racine, d'autres dans config)
+                const configComplete = construireConfigComplete(pratiqueData);
+                instance = new PratiqueConfigurable(configComplete);
+            } catch (error) {
+                console.error(`Erreur lors du chargement de la pratique configurable "${id}":`, error);
+                return null;
+            }
+        }
+    }
+
+    return instance || null;
 }
 
 // ============================================================================
