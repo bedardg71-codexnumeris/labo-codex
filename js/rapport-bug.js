@@ -271,7 +271,7 @@ window.addEventListener('unhandledrejection', (event) => {
 // ===============================
 
 const dernieresActions = [];
-const MAX_ACTIONS = 10;
+const MAX_ACTIONS = 20;
 
 /**
  * Enregistre une action utilisateur
@@ -864,9 +864,6 @@ function ouvrirModalRapportBug() {
                         <button id="btnCopierRapport" onclick="copierRapportBug(this)" class="btn btn-principal" style="flex: 1; min-width: 120px;">
                             Copier le rapport
                         </button>
-                        <button id="btnCaptureEcran" onclick="telechargerCaptureEcran(this)" class="btn btn-secondaire" style="flex: 1; min-width: 120px;">
-                            📸 Capture écran
-                        </button>
                         <button id="btnEnvoyerCourriel" onclick="envoyerRapportParCourriel(this)" class="btn btn-secondaire" style="flex: 1; min-width: 120px;">
                             Envoyer par courriel
                         </button>
@@ -880,7 +877,7 @@ function ouvrirModalRapportBug() {
                         font-size: 0.85rem;
                         margin-bottom: 15px;
                     ">
-                        <strong>Captures d'écran manuelles :</strong>
+                        <strong>Captures d'écran :</strong>
                         Mac: <code style="background: #e0e0e0; padding: 2px 6px; border-radius: 4px;">Cmd+Shift+4</code> |
                         Windows: <code style="background: #e0e0e0; padding: 2px 6px; border-radius: 4px;">Win+Shift+S</code> |
                         iPad: <code style="background: #e0e0e0; padding: 2px 6px; border-radius: 4px;">Power+Vol.haut</code>
