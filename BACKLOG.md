@@ -36,6 +36,39 @@
 
 ### Bugs critiques
 
+- [ ] **#49** Import CSV Omnivox : colonne SA non reconnue + accents mal gérés (Jordan, 18 jan)
+  - **Symptôme** : Colonne "SA" (services adaptés) pas importée car Omnivox n'ajoute pas l'espace
+  - **Symptôme 2** : Caractères accentués mal représentés (é, î) lors de l'import CSV
+  - **Ligne exemple** : `="1234567";="00008";="Rigby";="Éléonore";="200.B1"; ;`
+  - **Impact** : Données étudiants incomplètes ou corrompues
+  - **Fichier concerné** : `js/import-etudiants.js` ou équivalent
+
+- [ ] **#50** Primo : configuration incomplète après wizard (Bruno & Olivier, 5-6 jan)
+  - **Symptôme Bruno** : Jour de la semaine du cours pas configuré après Primo
+  - **Symptôme Olivier** : Retour page principale sans rien de nouveau après Primo
+  - **Souhait Bruno** : Pratique créée via Primo devrait être appliquée automatiquement
+  - **Impact** : Testeurs doivent reconfigurer manuellement ce que Primo aurait dû faire
+
+- [ ] **#51** Création horaire : permettre heures non piles (Bruno, 5 jan)
+  - **Symptôme** : Cadre-horaire limité aux heures piles (8h00, 9h00...)
+  - **Besoin** : Certains cégeps ont des horaires atypiques (ex: 8h55-9h45)
+  - **Impact** : Impossible de configurer correctement le calendrier pour ces cégeps
+
+- [ ] **#52** Erreurs null dans objectifs.js et trimestre-v2.js (Jordan, 18 jan)
+  - **Erreur 1** : `Cannot set properties of null (setting 'innerHTML')` - objectifs.js:73
+  - **Erreur 2** : `Cannot set properties of null (setting 'value')` - trimestre-v2.js:3463
+  - **Symptôme** : Bouton "Nouvel horaire" ne fonctionne pas
+  - **Impact** : Blocage de la configuration du trimestre
+
+- [ ] **#53** Menu "Format horaire" ne se met pas à jour automatiquement (Olivier, 6 jan)
+  - **Symptôme** : Changer le nombre d'heures/semaine ne met pas à jour le format horaire
+  - **Impact** : Choix incohérent affiché à l'utilisateur
+
+- [ ] **#54** UX : Message "Partage impossible" trop peu visible (Grégoire, 30 jan)
+  - **Symptôme** : Message en gris pâle, difficile à lire
+  - **Correction** : Mettre en ROUGE pour attirer l'attention
+  - **Fichier** : `js/import-export.js`
+
 - [x] **#37** Incoherence indice P vs Note finale (tableau de bord) ✅ CORRIGÉ (25 jan 2026)
   - **Symptome** : Vincent affiche P=50% dans le tableau de bord mais Note finale=59% dans son profil
   - **Cause** : L'indice P était calculé avec TOUTES les évaluations (via `pratique.calculerPerformance()`)
