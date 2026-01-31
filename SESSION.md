@@ -1,7 +1,7 @@
-# SESSION ACTIVE - BETA 96.1
+# SESSION ACTIVE - BETA 96.2
 
 **Date** : 30 janvier 2026
-**Version** : Beta 96.1 (build 0130-1943)
+**Version** : Beta 96.2 (build 0130-2032)
 **Statut** : Application fonctionnelle pour H2026, A2024 archive
 
 ---
@@ -30,8 +30,28 @@
 - **Modal Confidentiel** : Informations sensibles sur l'étudiant (ÉPGC, services adaptés, etc.)
 - **Anonymisation groupes** : Numéros de groupe remplacés par lettres en mode anonymisation
 
-### Derniere tache completee (30 janvier - Beta 96.1)
-- **CORRECTION CRITIQUE - IMPORT SAUVEGARDE COMPLÈTE**
+### Derniere tache completee (30 janvier - Beta 96.2)
+- **CORRECTION CRITIQUE - EXPORT SAUVEGARDE COMPLÈTE (IndexedDB)**
+  - Bug critique : La "Sauvegarde complète" exportait SEULEMENT les données de localStorage
+  - Les données volumineuses (groupes-cours, horaires, etc.) stockées uniquement dans IndexedDB étaient PERDUES
+  - **Correction** :
+    - `ouvrirModalExport()` : Utilise maintenant `db.keys()` pour lister TOUTES les clés
+    - `executerExport()` : Convertie en async, utilise `await db.get(cle)` au lieu de `localStorage.getItem()`
+    - Exports window ajoutés pour les fonctions d'export
+  - Fichier modifié : `js/import-export.js`
+
+- **CORRECTION - UTF-16 Safari (envoyerRapportParCourriel)**
+  - Erreur répétée sur iPad : `URIError: String contained an illegal UTF-16 sequence`
+  - **Cause** : Caractères Unicode invalides dans les rapports de bug
+  - **Correction** : Fonction `nettoyerUTF16()` compatible Safari (sans lookbehind regex)
+  - Fichier modifié : `js/rapport-bug.js`
+
+- **AMÉLIORATION - Archivage local des rapports de bug**
+  - Les rapports sont maintenant sauvegardés localement (max 50)
+  - Fichier modifié : `js/rapport-bug.js`
+
+### Tache precedente (30 janvier - Beta 96.1)
+- **CORRECTION - IMPORT SAUVEGARDE COMPLÈTE (clés manquantes)**
   - Bug signalé par testeur (iPad/Safari) : Import réussi mais données non chargées
   - **Cause** : Les clés `*_groupesCours`, `*_horaires`, `enseignants` n'étaient pas gérées par l'import sélectif
   - **Correction** : Ajout du support des entités structurelles Beta 95+ dans `import-export.js`
