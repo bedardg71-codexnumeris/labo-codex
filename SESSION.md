@@ -1,8 +1,8 @@
 # SESSION ACTIVE - BETA 96.2
 
-**Date** : 30 janvier 2026
-**Version** : Beta 96.2 (build 0130-2032)
-**Statut** : Application fonctionnelle pour H2026, A2024 archive
+**Date** : 31 janvier 2026
+**Version** : Beta 96.2 (build 0131-1510)
+**Statut** : Application fonctionnelle pour H2026, A2024/A2025 archives, synchronisation multi-appareils opérationnelle
 
 ---
 
@@ -30,7 +30,42 @@
 - **Modal Confidentiel** : Informations sensibles sur l'étudiant (ÉPGC, services adaptés, etc.)
 - **Anonymisation groupes** : Numéros de groupe remplacés par lettres en mode anonymisation
 
-### Derniere tache completee (30 janvier - Beta 96.2)
+### Derniere tache completee (31 janvier - Beta 96.2)
+
+- **#48 - SYNCHRONISATION MULTI-APPAREILS (MacBook ↔ iPad)**
+  - **Symptôme** : Import sur nouvel appareil échouait, données non chargées
+  - **Corrections** :
+    - Auto-cochage des cases Étudiants/Présences/Notes quand "C'est ma propre sauvegarde" coché
+    - Préservation des IDs originaux pour pratiques, grilles, échelles, productions
+    - Import des données calendrier (cadreCalendrier, horaireHebdo, etc.)
+  - **Résultat** : 68 éléments importés avec succès (22 pratiques, 14 grilles, 8 échelles, 137 étudiants, 2797 présences, 6 groupe-cours, 9 horaires)
+  - Fichier modifié : `js/import-export.js`
+
+- **#55 - PRATIQUES CONFIGURABLES NON TROUVÉES DANS LE REGISTRE**
+  - **Symptôme** : Erreur `❌ Pratique "pratique-1768910384608" non disponible dans le registre`
+  - **Cause 1** : `obtenirPratiqueParId()` ne cherchait pas dans `pratiquesConfigurables`
+  - **Cause 2** : Pratiques créées via wizard ont structure différente (ID/échelle à la racine, pas dans `config`)
+  - **Solution** : Nouvelle fonction `construireConfigComplete()` qui normalise les deux formats
+    - Fusionne champs racine + config interne
+    - Charge l'échelle par ID depuis `echellesTemplates` si non embarquée
+    - Fallback vers échelle IDME par défaut si référence introuvable
+  - Fichier modifié : `js/pratiques/pratique-registre.js`
+
+- **DÉSACTIVATION MODAL MIGRATION LEGACY**
+  - **Symptôme** : Modal "Mise à jour de vos données" apparaissait après nettoyage des clés obsolètes
+  - **Cause** : Flag `migrationLegacyEffectuee` supprimé par le script de nettoyage
+  - **Solution** : `detecterDonneesLegacy()` vérifie maintenant si des données namespacées existent
+    - Si `h2026_groupeEtudiants` ou `h2026_groupesCours` présents → migration non nécessaire
+    - Marque automatiquement `migrationLegacyEffectuee=true`
+  - Fichier modifié : `js/migrations.js`
+
+- **SCRIPT DE NETTOYAGE DES CLÉS OBSOLÈTES**
+  - Nouveau script `scripts/nettoyage-cles.js` pour usage en console navigateur
+  - 3 étapes : `etape1_identifier()` → `etape2_backup()` → `etape3_supprimer()`
+  - Catégories nettoyées : test/simulation, séances test, globales obsolètes, flags migration, snapshots anciens
+  - 48 clés supprimées (189 → 141 clés)
+
+### Tache precedente (30 janvier - Beta 96.2)
 - **CORRECTION CRITIQUE - EXPORT SAUVEGARDE COMPLÈTE (IndexedDB)**
   - Bug critique : La "Sauvegarde complète" exportait SEULEMENT les données de localStorage
   - Les données volumineuses (groupes-cours, horaires, etc.) stockées uniquement dans IndexedDB étaient PERDUES
@@ -823,6 +858,27 @@
 
 ## HISTORIQUE RECENT
 
+### 31 janvier 2026
+- **#48 SYNCHRONISATION MULTI-APPAREILS** : Export/Import MacBook ↔ iPad fonctionnel
+  - Auto-cochage cases données personnelles quand "C'est ma propre sauvegarde" coché
+  - Préservation IDs originaux (pratiques, grilles, échelles, productions)
+  - Import données calendrier (cadreCalendrier, horaireHebdo, bornesTrimestre)
+  - Test réussi : 146 clés exportées, 68 éléments importés sur iPad
+  - **Fichier** : `js/import-export.js`
+- **#55 PRATIQUES CONFIGURABLES** : Correction chargement depuis registre
+  - Nouvelle fonction `construireConfigComplete()` normalise formats wizard vs legacy
+  - Chargement échelle par ID depuis `echellesTemplates`
+  - Fallback échelle IDME par défaut
+  - **Fichier** : `js/pratiques/pratique-registre.js`
+- **MODAL MIGRATION DÉSACTIVÉ** : Détection automatique données modernes
+  - `detecterDonneesLegacy()` vérifie présence clés namespacées
+  - Marque auto `migrationLegacyEffectuee=true` si données modernes détectées
+  - **Fichier** : `js/migrations.js`
+- **SCRIPT NETTOYAGE** : Nouveau `scripts/nettoyage-cles.js`
+  - 3 étapes interactives pour supprimer clés obsolètes
+  - 48 clés nettoyées (tests, migrations, snapshots anciens)
+- **COMMITS** : 309be1c, 4e75c0e (Build 0131-1510)
+
 ### 25 janvier 2026
 - **IMPORT HISTORIQUE A2024** : Archivage complet du trimestre Automne 2024
   - Import retroactif des donnees historiques (session de developpement initial)
@@ -1026,4 +1082,4 @@
 
 ---
 
-**Derniere mise a jour** : 30 janvier 2026
+**Derniere mise a jour** : 31 janvier 2026
