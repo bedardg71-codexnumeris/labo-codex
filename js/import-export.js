@@ -613,6 +613,13 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
         } catch (e) { /* ignore */ }
     }
 
+    // 🔍 DEBUG #48 : Afficher les valeurs pour diagnostic
+    console.log('=== DEBUG IMPORT #48 ===');
+    console.log('infoCoursActuel:', JSON.stringify(infoCoursActuel));
+    console.log('utilisateurActuel:', `"${utilisateurActuel}"`);
+    console.log('auteurImport:', `"${auteurImport}"`);
+    console.log('config.infoCours existe:', !!config.infoCours);
+
     // Déterminer si c'est un collègue (auteurs différents ET non vides)
     const estCollègue = auteurImport && utilisateurActuel && auteurImport !== utilisateurActuel;
 
@@ -622,6 +629,12 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
     // - Si les deux vides → vraiment inconnu (blocage)
     const sourceInconnue = !auteurImport; // Seulement si le FICHIER n'a pas d'auteur
     const restaurationNouvelAppareil = auteurImport && !utilisateurActuel;
+
+    // 🔍 DEBUG #48 : Résultats
+    console.log('estCollègue:', estCollègue);
+    console.log('sourceInconnue:', sourceInconnue);
+    console.log('restaurationNouvelAppareil:', restaurationNouvelAppareil);
+    console.log('=== FIN DEBUG #48 ===');
 
     const sourceLabel = estCollègue
         ? `Configuration de ${auteurImport.split(' ')[0] || 'collègue'}`
