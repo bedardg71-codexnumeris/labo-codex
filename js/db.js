@@ -153,7 +153,8 @@
         }
 
         /**
-         * Lecture depuis IndexedDB
+         * Lecture depuis IndexedDB avec fallback localStorage
+         * 🆕 Beta 96.2 : Ajout fallback localStorage si clé absente d'IndexedDB
          */
         async _getIndexedDB(key, defaultValue) {
             return new Promise((resolve, reject) => {
@@ -165,13 +166,22 @@
                     if (request.result) {
                         resolve(request.result.value);
                     } else {
-                        resolve(defaultValue);
+                        // 🆕 Fallback vers localStorage si absent d'IndexedDB
+                        const localValue = this._getLocalStorage(key, null);
+                        if (localValue !== null) {
+                            console.log(`[DB] Fallback localStorage pour clé "${key}"`);
+                            // Synchroniser vers IndexedDB pour la prochaine fois
+                            this._setIndexedDB(key, localValue).catch(() => {});
+                        }
+                        resolve(localValue !== null ? localValue : defaultValue);
                     }
                 };
 
                 request.onerror = () => {
                     console.error(`[DB] Erreur lecture IndexedDB clé "${key}":`, request.error);
-                    resolve(defaultValue);
+                    // Fallback localStorage en cas d'erreur aussi
+                    const localValue = this._getLocalStorage(key, defaultValue);
+                    resolve(localValue);
                 };
             });
         }
