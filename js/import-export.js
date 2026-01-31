@@ -598,10 +598,6 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
     const analyse = analyserRessourcesDetaillees(config);
     analyseImportEnCours = analyse;
 
-    // 🔍 DEBUG #48 : Voir ce qui est détecté
-    const clesAvecEtudiants = Object.keys(config).filter(c => c.includes('groupeEtudiants'));
-    alert(`DEBUG #48 (Build 0131-1045):\n\nClés totales: ${Object.keys(config).length}\nClés avec groupeEtudiants: ${clesAvecEtudiants.length}\n${clesAvecEtudiants.join(', ')}\n\nAnalyse:\n- Étudiants: ${analyse.donnees.etudiants.count}\n- Présences: ${analyse.donnees.presences.count}\n- Notes: ${analyse.donnees.evaluations.count}\n- totalDonnees: ${analyse.totalDonnees}`);
-
     // ✅ CORRIGÉ (6 jan 2026) : Lire le nom enseignant dans tous les formats possibles
     const extraireNomEnseignant = (infoCours) => {
         if (!infoCours) return '';
@@ -2098,6 +2094,24 @@ async function executerImportSelectif() {
                     details.push(`${enseignants.length} enseignant(s)`);
                 }
             }
+        }
+
+        // 🆕 FIX (31 jan 2026) : Importer les données calendrier (cadreCalendrier, calendrierComplet, etc.)
+        // Ces clés sont namespacées et essentielles pour le fonctionnement du trimestre
+        const clesCalendrier = ['cadreCalendrier', 'calendrierComplet', 'evenementsPrevus', 'evenementsImprevus', 'seancesCompletes', 'horaireHebdo'];
+        let nbCalendrier = 0;
+        Object.keys(donnees).forEach(cle => {
+            // Importer les clés globales et namespacées
+            if (clesCalendrier.includes(cle) || clesCalendrier.some(c => cle.endsWith('_' + c))) {
+                const data = parseValeur(donnees[cle]);
+                if (data && (Array.isArray(data) ? data.length > 0 : Object.keys(data).length > 0)) {
+                    db.setSync(cle, data);
+                    nbCalendrier++;
+                }
+            }
+        });
+        if (nbCalendrier > 0) {
+            details.push(`${nbCalendrier} config(s) calendrier`);
         }
 
         // ✅ CORRIGÉ (6 jan 2026) : Vérifier les checkboxes AVANT de fermer le modal
