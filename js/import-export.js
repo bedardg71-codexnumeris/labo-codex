@@ -1348,12 +1348,19 @@ async function executerImportConfigComplete() {
             const cleProductions = (typeof window.cle === 'function') ? window.cle('productions') : 'productions';
             const productionsExistantes = db.getSync(cleProductions, []);
 
+            const idsProdsExistants = new Set(productionsExistantes.map(p => p.id));
+
             const productionsAImporter = contenu.productions.map(production => {
                 // Créer une copie de la production
                 const prod = { ...production };
 
-                // Générer un nouvel ID pour éviter les conflits
-                prod.id = 'PROD' + Date.now() + Math.floor(Math.random() * 1000);
+                // Générer un nouvel ID SEULEMENT si conflit d'ID
+                if (idsProdsExistants.has(prod.id)) {
+                    const ancienId = prod.id;
+                    prod.id = 'PROD' + Date.now() + Math.floor(Math.random() * 1000);
+                    console.log(`⚠️ Conflit d'ID production: ${ancienId} → ${prod.id}`);
+                }
+                // Sinon, garder l'ID original pour préserver les références
 
                 // Mettre à jour la référence à la grille si elle a été remappée
                 if (prod.grilleId && remapGrilles[prod.grilleId]) {
@@ -1586,10 +1593,10 @@ async function executerImportVersBibliotheques() {
             const existeParNom = grillesExistantes.some(ge => ge.nom === g.nom);
 
             if (!existeParId && !existeParNom) {
-                // Pas de doublon - ajouter directement
+                // Pas de doublon - ajouter directement avec ID original
                 grillesNouvelles.push({
                     ...g,
-                    id: 'GRILLE_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                    // IMPORTANT: Garder l'ID original pour préserver les références
                     dateImport: new Date().toISOString()
                 });
             } else if (existeParNom && typeof afficherModalDoublon === 'function') {
@@ -1600,7 +1607,8 @@ async function executerImportVersBibliotheques() {
                     grillesNouvelles.push({
                         ...g,
                         nom: resultat.nouveauNom,
-                        id: 'GRILLE_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                        // Garder l'ID original sauf si conflit d'ID
+                        ...(existeParId ? { id: 'GRILLE_' + Date.now() + '_' + Math.floor(Math.random() * 1000) } : {}),
                         dateImport: new Date().toISOString()
                     });
                 } else if (resultat && resultat.action === 'ecraser') {
@@ -1608,7 +1616,8 @@ async function executerImportVersBibliotheques() {
                     grillesExistantes = grillesExistantes.filter(ge => ge.nom !== g.nom);
                     grillesNouvelles.push({
                         ...g,
-                        id: 'GRILLE_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                        // Garder l'ID original sauf si conflit d'ID
+                        ...(existeParId ? { id: 'GRILLE_' + Date.now() + '_' + Math.floor(Math.random() * 1000) } : {}),
                         dateImport: new Date().toISOString()
                     });
                 }
@@ -1639,7 +1648,7 @@ async function executerImportVersBibliotheques() {
                     if (!existeParId && !existeParNom && !echellesNouvelles.some(en => en.nom === e.nom)) {
                         echellesNouvelles.push({
                             ...e,
-                            id: 'ECH_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                            // IMPORTANT: Garder l'ID original pour préserver les références
                             dateImport: new Date().toISOString()
                         });
                     } else if (existeParNom && typeof afficherModalDoublon === 'function') {
@@ -1649,14 +1658,16 @@ async function executerImportVersBibliotheques() {
                             echellesNouvelles.push({
                                 ...e,
                                 nom: resultat.nouveauNom,
-                                id: 'ECH_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                                // Garder l'ID original sauf si conflit d'ID
+                                ...(existeParId ? { id: 'ECH_' + Date.now() + '_' + Math.floor(Math.random() * 1000) } : {}),
                                 dateImport: new Date().toISOString()
                             });
                         } else if (resultat && resultat.action === 'ecraser') {
                             echellesExistantes = echellesExistantes.filter(ee => ee.nom !== e.nom);
                             echellesNouvelles.push({
                                 ...e,
-                                id: 'ECH_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                                // Garder l'ID original sauf si conflit d'ID
+                                ...(existeParId ? { id: 'ECH_' + Date.now() + '_' + Math.floor(Math.random() * 1000) } : {}),
                                 dateImport: new Date().toISOString()
                             });
                         }
@@ -1706,7 +1717,7 @@ async function executerImportVersBibliotheques() {
                     if (!existeParId && !existeParNom && !prodsNouvelles.some(pn => getNomProd(pn) === nomProd)) {
                         prodsNouvelles.push({
                             ...p,
-                            id: 'PROD_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                            // IMPORTANT: Garder l'ID original pour préserver les références
                             dateImport: new Date().toISOString()
                         });
                     } else if (existeParNom && typeof afficherModalDoublon === 'function') {
@@ -1716,14 +1727,16 @@ async function executerImportVersBibliotheques() {
                             prodsNouvelles.push({
                                 ...p,
                                 titre: resultat.nouveauNom,
-                                id: 'PROD_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                                // Garder l'ID original sauf si conflit d'ID
+                                ...(existeParId ? { id: 'PROD_' + Date.now() + '_' + Math.floor(Math.random() * 1000) } : {}),
                                 dateImport: new Date().toISOString()
                             });
                         } else if (resultat && resultat.action === 'ecraser') {
                             prodsExistantes = prodsExistantes.filter(pe => getNomProd(pe) !== nomProd);
                             prodsNouvelles.push({
                                 ...p,
-                                id: 'PROD_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                                // Garder l'ID original sauf si conflit d'ID
+                                ...(existeParId ? { id: 'PROD_' + Date.now() + '_' + Math.floor(Math.random() * 1000) } : {}),
                                 dateImport: new Date().toISOString()
                             });
                         }
@@ -1867,9 +1880,12 @@ async function executerImportSelectif() {
                             if (estSelectionne &&
                                 !grillesExistantes.some(ge => ge.nom === g.nom) &&
                                 !grillesNouvelles.some(gn => gn.nom === g.nom)) {
+                                // Vérifier si l'ID existe déjà
+                                const idExiste = grillesExistantes.some(ge => ge.id === g.id);
                                 grillesNouvelles.push({
                                     ...g,
-                                    id: 'GRILLE_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                                    // Garder l'ID original sauf si conflit d'ID
+                                    ...(idExiste ? { id: 'GRILLE_' + Date.now() + '_' + Math.floor(Math.random() * 1000) } : {}),
                                     dateImport: new Date().toISOString(),
                                     auteurOriginal: auteurSource || g.auteurOriginal || ''
                                 });
@@ -1896,12 +1912,17 @@ async function executerImportSelectif() {
                 const echellesNouvelles = echellesImport
                     .filter(e => selectedIds.includes(e.id) || selectedIds.includes(e.nom))
                     .filter(e => !echellesExistantes.some(ee => ee.nom === e.nom))
-                    .map(e => ({
-                        ...e,
-                        id: 'ECH_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
-                        dateImport: new Date().toISOString(),
-                        auteurOriginal: auteurSource || e.auteurOriginal || ''
-                    }));
+                    .map(e => {
+                        // Vérifier si l'ID existe déjà
+                        const idExiste = echellesExistantes.some(ee => ee.id === e.id);
+                        return {
+                            ...e,
+                            // Garder l'ID original sauf si conflit d'ID
+                            ...(idExiste ? { id: 'ECH_' + Date.now() + '_' + Math.floor(Math.random() * 1000) } : {}),
+                            dateImport: new Date().toISOString(),
+                            auteurOriginal: auteurSource || e.auteurOriginal || ''
+                        };
+                    });
                 if (echellesNouvelles.length > 0) {
                     db.setSync('echellesTemplates', [...echellesExistantes, ...echellesNouvelles]);
                     compteurs.ressources += echellesNouvelles.length;
@@ -1933,12 +1954,17 @@ async function executerImportSelectif() {
                 const prodsNouvelles = prodsImport
                     .filter(p => selectedIds.includes(p.id) || selectedIds.includes(p.nom))
                     .filter(p => !prodsExistantes.some(pe => pe.nom === p.nom))
-                    .map(p => ({
-                        ...p,
-                        id: 'PROD_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
-                        dateImport: new Date().toISOString(),
-                        auteurOriginal: auteurSource || p.auteurOriginal || ''
-                    }));
+                    .map(p => {
+                        // Vérifier si l'ID existe déjà
+                        const idExiste = prodsExistantes.some(pe => pe.id === p.id);
+                        return {
+                            ...p,
+                            // Garder l'ID original sauf si conflit d'ID
+                            ...(idExiste ? { id: 'PROD_' + Date.now() + '_' + Math.floor(Math.random() * 1000) } : {}),
+                            dateImport: new Date().toISOString(),
+                            auteurOriginal: auteurSource || p.auteurOriginal || ''
+                        };
+                    });
                 if (prodsNouvelles.length > 0) {
                     db.setSync(cleProductions, [...prodsExistantes, ...prodsNouvelles]);
                     compteurs.ressources += prodsNouvelles.length;
