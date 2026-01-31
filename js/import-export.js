@@ -118,31 +118,49 @@ function filtrerRessourcesNonDemo(ressources, type) {
    EXPORT DES DONNÉES
    =============================== */
 
-function ouvrirModalExport() {
+async function ouvrirModalExport() {
     const modal = document.getElementById('modalExport');
     const liste = document.getElementById('listeClesExport');
 
-    // Récupérer toutes les clés localStorage (pour export complet)
-    const cles = Object.keys(localStorage);
+    // 🆕 Beta 96.2 : Récupérer toutes les clés depuis IndexedDB (pas seulement localStorage)
+    // Cela inclut les données volumineuses qui ne tiennent pas dans localStorage
+    let cles = [];
+    try {
+        cles = await db.keys();
+        console.log(`[Export] ${cles.length} clés trouvées dans la base de données`);
+    } catch (e) {
+        // Fallback vers localStorage si erreur
+        console.warn('[Export] Erreur lecture IndexedDB, fallback localStorage:', e);
+        cles = Object.keys(localStorage);
+    }
 
-    let html = cles.map(cle => {
-        // KEPT: localStorage.getItem() pour obtenir la string JSON brute (calcul taille)
-        const valeur = localStorage.getItem(cle);
-        const tailleKo = ((cle.length + valeur.length) / 1024).toFixed(2);
-        
-        return `
-            <label style="display: flex; align-items: center; padding: 8px; 
-                   background: var(--bleu-tres-pale); margin-bottom: 5px; 
-                   border-radius: 4px; border: 1px solid var(--bleu-pale); 
+    // Construire la liste des clés avec leurs tailles
+    let html = '';
+    for (const cle of cles) {
+        let tailleKo = '?';
+        try {
+            const valeur = await db.get(cle, null);
+            if (valeur !== null) {
+                const jsonStr = JSON.stringify(valeur);
+                tailleKo = ((cle.length + jsonStr.length) / 1024).toFixed(2);
+            }
+        } catch (e) {
+            // Ignorer les erreurs de lecture
+        }
+
+        html += `
+            <label style="display: flex; align-items: center; padding: 8px;
+                   background: var(--bleu-tres-pale); margin-bottom: 5px;
+                   border-radius: 4px; border: 1px solid var(--bleu-pale);
                    transition: all 0.2s; cursor: pointer;">
-                <input type="checkbox" class="cle-export" value="${cle}" 
+                <input type="checkbox" class="cle-export" value="${cle}"
                        style="margin-right: 10px; transform: scale(1.2);">
                 <span style="flex: 1; font-family: monospace; font-size: 0.9rem;">${cle}</span>
                 <span style="color: var(--bleu-leger); font-size: 0.85rem;">${tailleKo} Ko</span>
             </label>
         `;
-    }).join('');
-    
+    }
+
     liste.innerHTML = html;
     document.getElementById('checkToutesLes').checked = false;
     modal.style.display = 'flex';
@@ -160,7 +178,7 @@ function toggleToutesLesCles() {
     });
 }
 
-function executerExport() {
+async function executerExport() {
     const clesSelectionnees = [];
     document.querySelectorAll('.cle-export:checked').forEach(cb => {
         clesSelectionnees.push(cb.value);
@@ -174,54 +192,52 @@ function executerExport() {
     const donnees = {};
     let nbDemoExclus = 0;
 
-    clesSelectionnees.forEach(cle => {
-        // KEPT: localStorage.getItem() pour obtenir la string JSON brute (export)
-        let valeur = localStorage.getItem(cle);
+    // 🆕 Beta 96.2 : Utiliser db.get() pour lire depuis IndexedDB (pas seulement localStorage)
+    for (const cle of clesSelectionnees) {
+        let valeur = null;
 
-        // ✅ AJOUTÉ (6 jan 2026) : Filtrer les données démo avant export
-        if (valeur) {
-            try {
-                let parsed = JSON.parse(valeur);
-
-                // Filtrer les étudiants démo (groupe 9999)
-                if (cle.includes('groupeEtudiants') && Array.isArray(parsed)) {
-                    const avant = parsed.length;
-                    parsed = parsed.filter(e => !estRessourceDemo(e, 'etudiant'));
-                    nbDemoExclus += avant - parsed.length;
-                    valeur = JSON.stringify(parsed);
-                }
-
-                // Filtrer les cours démo (groupe 9999)
-                if (cle === 'listeCours' && Array.isArray(parsed)) {
-                    const avant = parsed.length;
-                    parsed = parsed.filter(c => !estRessourceDemo(c, 'cours'));
-                    nbDemoExclus += avant - parsed.length;
-                    valeur = JSON.stringify(parsed);
-                }
-
-                // Filtrer les grilles démo
-                if (cle === 'grillesTemplates' && Array.isArray(parsed)) {
-                    const avant = parsed.length;
-                    parsed = filtrerRessourcesNonDemo(parsed, 'grille');
-                    nbDemoExclus += avant - parsed.length;
-                    valeur = JSON.stringify(parsed);
-                }
-
-                // Filtrer les échelles démo
-                if (cle === 'echellesTemplates' && Array.isArray(parsed)) {
-                    const avant = parsed.length;
-                    parsed = filtrerRessourcesNonDemo(parsed, 'echelle');
-                    nbDemoExclus += avant - parsed.length;
-                    valeur = JSON.stringify(parsed);
-                }
-
-            } catch (e) {
-                // Si le parsing échoue, garder la valeur brute
-            }
+        try {
+            // Récupérer la valeur depuis IndexedDB (ou localStorage en fallback)
+            valeur = await db.get(cle, null);
+        } catch (e) {
+            console.warn(`[Export] Erreur lecture clé "${cle}":`, e);
+            continue;
         }
 
-        donnees[cle] = valeur;
-    });
+        // ✅ AJOUTÉ (6 jan 2026) : Filtrer les données démo avant export
+        if (valeur !== null) {
+            // Filtrer les étudiants démo (groupe 9999)
+            if (cle.includes('groupeEtudiants') && Array.isArray(valeur)) {
+                const avant = valeur.length;
+                valeur = valeur.filter(e => !estRessourceDemo(e, 'etudiant'));
+                nbDemoExclus += avant - valeur.length;
+            }
+
+            // Filtrer les cours démo (groupe 9999)
+            if (cle === 'listeCours' && Array.isArray(valeur)) {
+                const avant = valeur.length;
+                valeur = valeur.filter(c => !estRessourceDemo(c, 'cours'));
+                nbDemoExclus += avant - valeur.length;
+            }
+
+            // Filtrer les grilles démo
+            if (cle === 'grillesTemplates' && Array.isArray(valeur)) {
+                const avant = valeur.length;
+                valeur = filtrerRessourcesNonDemo(valeur, 'grille');
+                nbDemoExclus += avant - valeur.length;
+            }
+
+            // Filtrer les échelles démo
+            if (cle === 'echellesTemplates' && Array.isArray(valeur)) {
+                const avant = valeur.length;
+                valeur = filtrerRessourcesNonDemo(valeur, 'echelle');
+                nbDemoExclus += avant - valeur.length;
+            }
+
+            // Stocker la valeur sérialisée en JSON
+            donnees[cle] = JSON.stringify(valeur);
+        }
+    }
 
     if (nbDemoExclus > 0) {
         console.log(`📦 Export: ${nbDemoExclus} élément(s) démo exclu(s)`);
@@ -772,7 +788,7 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                 </div>
                 ` : ''}
 
-                <!-- 🆕 Beta 96.1 : SECTION: Entités structurelles -->
+                <!-- 🆕 Beta 96.2 : SECTION: Entités structurelles -->
                 ${(analyse.entites?.groupesCours?.count > 0 || analyse.entites?.horaires?.count > 0 || analyse.entites?.enseignants?.present) ? `
                 <div style="margin-bottom: 20px;">
                     <h3 style="font-size: 0.9rem; color: #17a2b8; margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
@@ -845,7 +861,7 @@ function analyserRessourcesDetaillees(config) {
             evaluations: { count: 0, cles: [] },
             configuration: { present: false, cles: [] }
         },
-        // 🆕 Beta 96.1 : Entités structurelles (groupe-cours, horaires, enseignants)
+        // 🆕 Beta 96.2 : Entités structurelles (groupe-cours, horaires, enseignants)
         entites: {
             groupesCours: { count: 0, cles: [] },
             horaires: { count: 0, cles: [] },
@@ -997,7 +1013,7 @@ function analyserRessourcesDetaillees(config) {
         }
     });
 
-    // 🆕 Beta 96.1 : Entités structurelles
+    // 🆕 Beta 96.2 : Entités structurelles
 
     // Groupe-cours (clés: *_groupesCours)
     Object.keys(config).forEach(cle => {
@@ -1967,7 +1983,7 @@ async function executerImportSelectif() {
             details.push('Configuration du cours');
         }
 
-        // 🆕 Beta 96.1 : Entités structurelles (groupe-cours, horaires, enseignants)
+        // 🆕 Beta 96.2 : Entités structurelles (groupe-cours, horaires, enseignants)
 
         // Groupe-cours (clés: *_groupesCours)
         if (isChecked('groupesCours')) {
@@ -2226,3 +2242,9 @@ window.executerImportConfigComplete = executerImportConfigComplete;
 window.exporterConfigurationComplete = exporterConfigurationComplete;
 window.executerImportVersBibliotheques = executerImportVersBibliotheques; // 🆕 BETA 95.1
 window.executerImportSelectif = executerImportSelectif; // 🆕 BETA 95.1
+
+// 🆕 Beta 96.2 : Export des fonctions d'export (corrigées pour IndexedDB)
+window.ouvrirModalExport = ouvrirModalExport;
+window.fermerModalExport = fermerModalExport;
+window.toggleToutesLesCles = toggleToutesLesCles;
+window.executerExport = executerExport;

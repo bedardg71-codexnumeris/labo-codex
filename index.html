@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Système de suivi Beta 96.1 - Hiver 2026</title>
+    <title>Système de suivi Beta 96.2 - Hiver 2026</title>
 
     <!-- CSS externe requis pour styles complets -->
     <link rel="stylesheet" href="styles.css?v=2026013001">
@@ -3104,7 +3104,7 @@
                     <div class="titre-section">
                         <h1>Système de suivi des apprentissages et de construction de la note</h1>
                         <p class="meta">
-                            Beta 96.1 <span id="build-numero" class="build-numero"></span>
+                            Beta 96.2 <span id="build-numero" class="build-numero"></span>
                             <span class="pastille-nouveautes" onclick="afficherModalNouveautes()" title="Nouveautés">✉️</span>
                             <span class="pastille-intro" onclick="afficherModalIntro()" title="Découvrir l'application">😎</span>
                             <button class="btn-backup-warning" onclick="window.backupReminder.afficherModal()" title="Protégez tes données">⚠️</button>
@@ -3188,6 +3188,18 @@
 
                 <!-- Titre principal -->
                 <h2 class="modal-titre">✉️ Nouveautés</h2>
+
+                <!-- Beta 96.2 - 30 janvier -->
+                <div style="background: linear-gradient(135deg, #fff3e0 0%, #fff8f0 100%); border-left: 3px solid #ff9800; border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
+                    <strong style="color: #e65100; display: block; margin-bottom: 8px;">Beta 96.2 (30 janvier) - Correction critique Export/Import :</strong>
+                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
+                        <li><strong>🔧 Export complet depuis IndexedDB</strong> : La "Sauvegarde complète" exporte maintenant TOUTES les données, y compris celles stockées uniquement dans IndexedDB (groupes-cours, horaires, données volumineuses)</li>
+                        <li><strong>📥 Import groupe-cours et horaires</strong> : L'import reconnaît maintenant les clés <code>*_groupesCours</code>, <code>*_horaires</code> et <code>enseignants</code></li>
+                        <li><strong>📊 Affichage "Structure du trimestre"</strong> : Nouvelle section dans le modal d'import pour visualiser les groupes-cours et horaires avant importation</li>
+                        <li><strong>🐛 Correction UTF-16 Safari</strong> : Le bouton "Envoyer par courriel" des rapports de bug fonctionne maintenant sur Safari/iPad</li>
+                        <li><strong>📝 Archivage local des rapports</strong> : Les rapports de bug sont sauvegardés localement (max 50)</li>
+                    </ul>
+                </div>
 
                 <!-- Beta 96.1 - 30 janvier -->
                 <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
@@ -15429,7 +15441,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '96';
-        const BUILD_ID = '0130-1959';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0130-2032';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';

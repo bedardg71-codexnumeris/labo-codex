@@ -21,7 +21,7 @@
  * Version actuelle de l'application
  * ⚠️ MODIFIER ICI lors de chaque nouvelle release
  */
-const VERSION_APP = 'Beta 96';
+const VERSION_APP = 'Beta 96.2';
 
 // ===============================
 // ARCHIVAGE LOCAL DES RAPPORTS

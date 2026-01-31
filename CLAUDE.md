@@ -18,7 +18,7 @@ Ce document te guidera vers :
 
 ## Etat actuel
 
-- **Version** : Beta 96.1
+- **Version** : Beta 96.2
 - **Objectif** : Architecture modulaire groupe-cours + Categories productions
 - **Session en cours** : Voir `SESSION.md`
 - **Backlog** : Voir `BACKLOG.md` (taches a faire)
@@ -80,4 +80,4 @@ Gregoire a la memoire contextuelle reelle du projet.
 
 ---
 
-**Derniere mise a jour** : 28 janvier 2026
+**Derniere mise a jour** : 30 janvier 2026
