@@ -363,14 +363,25 @@ function obtenirEtatStockage() {
 
 /**
  * Génère le rapport de bug en texte lisible
+ * @param {string} descriptionUtilisateur - Description du problème
+ * @param {string} prenomTesteur - Prénom du testeur (optionnel)
  */
-function genererRapportBug(descriptionUtilisateur = '') {
+function genererRapportBug(descriptionUtilisateur = '', prenomTesteur = '') {
     const infosSysteme = obtenirInfosSysteme();
     const etatApp = obtenirEtatApplication();
     const contexteSection = obtenirContexteSection();
     const etatStockage = obtenirEtatStockage();
 
+    // Générer l'identifiant du rapport
+    const maintenant = new Date();
+    const dateId = maintenant.toISOString().slice(0, 10); // 2026-01-30
+    const heureId = maintenant.toTimeString().slice(0, 8).replace(/:/g, '-'); // 18-42-23
+    const prenomNormalise = prenomTesteur.trim().toLowerCase().replace(/\s+/g, '-') || 'anonyme';
+    const idRapport = `${prenomNormalise} ${dateId} ${heureId}`;
+
     let rapport = `=== RAPPORT DE BUG ===\n`;
+    rapport += `ID: ${idRapport}\n`;
+    rapport += `Testeur: ${prenomTesteur.trim() || 'Non spécifié'}\n`;
     rapport += `Date: ${etatApp.dateHeure}\n`;
     rapport += `Version: ${etatApp.version}\n\n`;
 
@@ -584,6 +595,28 @@ function ouvrirModalRapportBug() {
                         </ol>
                     </div>
 
+                    <!-- Prénom du testeur -->
+                    <div style="margin-bottom: 20px;">
+                        <label for="prenomTesteur" style="
+                            display: block;
+                            font-weight: 600;
+                            margin-bottom: 8px;
+                            color: var(--bleu-principal);
+                        ">
+                            Votre prénom :
+                        </label>
+                        <input type="text" id="prenomTesteur" placeholder="Ex: Grégoire" style="
+                            width: 100%;
+                            max-width: 250px;
+                            padding: 10px 12px;
+                            border: 1px solid var(--gris-clair);
+                            border-radius: 8px;
+                            font-family: inherit;
+                            font-size: 0.95rem;
+                            box-sizing: border-box;
+                        " oninput="mettreAJourRapport()">
+                    </div>
+
                     <!-- Description du problème -->
                     <div style="margin-bottom: 20px;">
                         <label for="descriptionBug" style="
@@ -687,7 +720,8 @@ function fermerModalRapportBug() {
  */
 function mettreAJourRapport() {
     const description = document.getElementById('descriptionBug')?.value || '';
-    const rapport = genererRapportBug(description);
+    const prenom = document.getElementById('prenomTesteur')?.value || '';
+    const rapport = genererRapportBug(description, prenom);
     const pre = document.getElementById('rapportBugTexte');
     if (pre) {
         pre.textContent = rapport;
@@ -699,7 +733,8 @@ function mettreAJourRapport() {
  */
 async function copierRapportBug() {
     const description = document.getElementById('descriptionBug')?.value || '';
-    const rapport = genererRapportBug(description);
+    const prenom = document.getElementById('prenomTesteur')?.value || '';
+    const rapport = genererRapportBug(description, prenom);
 
     try {
         await navigator.clipboard.writeText(rapport);
@@ -724,7 +759,8 @@ async function copierRapportBug() {
  */
 function envoyerRapportParCourriel() {
     const description = document.getElementById('descriptionBug')?.value || '';
-    const rapport = genererRapportBug(description);
+    const prenom = document.getElementById('prenomTesteur')?.value || '';
+    const rapport = genererRapportBug(description, prenom);
 
     // Construire le mailto
     const sujet = encodeURIComponent(`[Bug Monitorage ${VERSION_APP}] ${description.substring(0, 50) || 'Rapport de bug'}...`);
