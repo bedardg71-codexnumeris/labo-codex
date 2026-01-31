@@ -503,8 +503,24 @@ function detecterDonneesLegacy() {
         return { isLegacy: false, details: 'Migration déjà effectuée' };
     }
 
-    // Vérifier la présence du système de trimestres
+    // Beta 96.2: Détecter si des données namespacées existent (format moderne)
+    // Si oui, marquer automatiquement la migration comme effectuée
     const trimestres = db.getSync('trimestres', []);
+    if (trimestres.length > 0) {
+        // Vérifier si au moins un trimestre a des données namespacées
+        for (const t of trimestres) {
+            const cleTest = `${t.id}_groupeEtudiants`;
+            const cleTest2 = `${t.id}_groupesCours`;
+            if (db.getSync(cleTest, null) !== null || db.getSync(cleTest2, null) !== null) {
+                // Données namespacées détectées → marquer migration effectuée
+                console.log(`✅ [Migration] Données namespacées détectées (${t.id}), migration non nécessaire`);
+                db.setSync('migrationLegacyEffectuee', true);
+                return { isLegacy: false, details: 'Données namespacées détectées' };
+            }
+        }
+    }
+
+    // Vérifier la présence du système de trimestres
     const listeCours = db.getSync('listeCours', []);
 
     // Clés legacy typiques (non namespacées)
