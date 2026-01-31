@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 28 janvier 2026 (Beta 96.1)
+> **Derniere mise a jour** : 30 janvier 2026 (Beta 96.2)
 
 ---
 
@@ -183,6 +183,38 @@
     - Integration avec le tableau de bord (indices C/P)
     - Cohabitation avec le mode complet (pratiques de notation)
   - **Prerequis** : Documenter la logique complete avant codage
+
+### Securite / Protection des donnees
+
+- [ ] **#48** BUG CRITIQUE : Import données personnelles bloqué sur nouvel appareil (À FAIRE EN PRIORITÉ)
+  - **Symptôme** : Le message "Partage impossible" s'affiche même pour sa propre sauvegarde
+  - **Impact** : Impossible de restaurer étudiants, présences et notes sur un nouvel appareil (ex: iPad)
+  - **Contexte** : Sauvegarde faite sur MacBook, import sur iPad
+  - **Fichier JSON** : Contient bien `h2026_groupeEtudiants` avec 148 étudiants (export OK)
+  - **Problème** : La logique de détection `restaurationNouvelAppareil` ne fonctionne pas
+    - Condition actuelle : `auteurImport && !utilisateurActuel`
+    - Sur iPad : soit `auteurImport` est vide, soit `utilisateurActuel` n'est pas vide
+  - **Pistes de debug** :
+    1. Ajouter des `console.log` pour voir les valeurs de `auteurImport`, `utilisateurActuel`, `estCollègue`, `sourceInconnue`, `restaurationNouvelAppareil`
+    2. Vérifier comment `extraireNomEnseignant()` fonctionne
+    3. Vérifier si `infoCours` est défini sur iPad après import config
+  - **Solution temporaire possible** : Ajouter une checkbox "C'est ma propre sauvegarde" pour bypasser la protection
+  - **Fichiers concernés** : `js/import-export.js` (lignes 600-630, 765-790, 1935)
+  - **UX** : Le message "Partage impossible" devrait être en ROUGE, pas en gris pâle
+
+- [ ] **#47** Mot de passe optionnel pour sauvegarde/restauration
+  - **Objectif** : Renforcer la protection des données personnelles lors des transferts
+  - **Fonctionnement** :
+    - Option lors de l'export : "Protéger avec un mot de passe"
+    - Chiffrement des données sensibles (étudiants, présences, notes) avec le mot de passe
+    - Demande du mot de passe lors de l'import pour déverrouiller les données
+  - **Algorithme** : AES-256 via Web Crypto API (natif navigateur)
+  - **UX** : Le mot de passe n'est pas stocké, seulement utilisé pour chiffrer/déchiffrer
+  - **Cas d'usage** :
+    - Transfert entre appareils personnels (MacBook → iPad)
+    - Sauvegarde sur cloud ou clé USB
+    - Protection contre accès non autorisé au fichier JSON
+  - **Prerequis** : Documenter la logique de chiffrement avant codage
 
 ### Fiabilite / Maintenance
 
