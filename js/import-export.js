@@ -772,7 +772,25 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                 </div>
                 ` : ''}
 
-                ${analyse.totalRessources === 0 && analyse.totalDonnees === 0 ? `
+                <!-- 🆕 Beta 96.1 : SECTION: Entités structurelles -->
+                ${(analyse.entites?.groupesCours?.count > 0 || analyse.entites?.horaires?.count > 0 || analyse.entites?.enseignants?.present) ? `
+                <div style="margin-bottom: 20px;">
+                    <h3 style="font-size: 0.9rem; color: #17a2b8; margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
+                        <span style="background: #d1ecf1; padding: 4px 8px; border-radius: 4px;">Structure du trimestre</span>
+                        <span style="font-size: 0.8rem; color: #666; font-weight: normal;">Groupe-cours, horaires, enseignants</span>
+                    </h3>
+                    <div style="background: #e8f4f8; border-radius: 8px; padding: 12px;">
+                        ${analyse.entites.groupesCours.count > 0 ? genererLigneDonnee('groupesCours', 'Groupe-cours', analyse.entites.groupesCours.count + ' groupe(s) - ' + analyse.entites.groupesCours.cles.join(', ')) : ''}
+                        ${analyse.entites.horaires.count > 0 ? genererLigneDonnee('horaires', 'Horaires', analyse.entites.horaires.count + ' horaire(s) - ' + analyse.entites.horaires.cles.join(', ')) : ''}
+                        ${analyse.entites.enseignants.present ? genererLigneDonnee('enseignants', 'Enseignants', analyse.entites.enseignants.count + ' profil(s)') : ''}
+                    </div>
+                    <p style="font-size: 0.75rem; color: #17a2b8; margin: 8px 0 0 12px;">
+                        Ces données sont essentielles pour que l'application fonctionne correctement
+                    </p>
+                </div>
+                ` : ''}
+
+                ${analyse.totalRessources === 0 && analyse.totalDonnees === 0 && !(analyse.entites?.groupesCours?.count > 0) ? `
                 <div style="background: #fff3cd; border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 20px;">
                     <p style="margin: 0; color: #856404;">Aucune ressource reconnue dans ce fichier.</p>
                 </div>
@@ -791,7 +809,7 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                             style="padding: 10px 24px; background: #28a745; color: white;
                                    border: none; border-radius: 4px; cursor: pointer; font-size: 0.95rem;
                                    font-weight: 500;"
-                            ${analyse.totalRessources === 0 && analyse.totalDonnees === 0 ? 'disabled style="opacity:0.5"' : ''}>
+                            ${analyse.totalRessources === 0 && analyse.totalDonnees === 0 && !(analyse.entites?.groupesCours?.count > 0 || analyse.entites?.horaires?.count > 0 || analyse.entites?.enseignants?.present) ? 'disabled style="opacity:0.5"' : ''}>
                         Importer la sélection
                     </button>
                 </div>
@@ -826,6 +844,12 @@ function analyserRessourcesDetaillees(config) {
             presences: { count: 0, cles: [] },
             evaluations: { count: 0, cles: [] },
             configuration: { present: false, cles: [] }
+        },
+        // 🆕 Beta 96.1 : Entités structurelles (groupe-cours, horaires, enseignants)
+        entites: {
+            groupesCours: { count: 0, cles: [] },
+            horaires: { count: 0, cles: [] },
+            enseignants: { count: 0, present: false }
         },
         totalRessources: 0,
         totalDonnees: 0
@@ -972,6 +996,39 @@ function analyserRessourcesDetaillees(config) {
             result.donnees.configuration.present = true;
         }
     });
+
+    // 🆕 Beta 96.1 : Entités structurelles
+
+    // Groupe-cours (clés: *_groupesCours)
+    Object.keys(config).forEach(cle => {
+        if (cle.endsWith('_groupesCours')) {
+            const groupesCours = parseValeur(config[cle]);
+            if (Array.isArray(groupesCours) && groupesCours.length > 0) {
+                result.entites.groupesCours.cles.push(cle);
+                result.entites.groupesCours.count += groupesCours.length;
+            }
+        }
+    });
+
+    // Horaires (clés: *_horaires)
+    Object.keys(config).forEach(cle => {
+        if (cle.endsWith('_horaires')) {
+            const horaires = parseValeur(config[cle]);
+            if (Array.isArray(horaires) && horaires.length > 0) {
+                result.entites.horaires.cles.push(cle);
+                result.entites.horaires.count += horaires.length;
+            }
+        }
+    });
+
+    // Enseignants (clé globale)
+    if (config.enseignants) {
+        const enseignants = parseValeur(config.enseignants);
+        if (Array.isArray(enseignants) && enseignants.length > 0) {
+            result.entites.enseignants.count = enseignants.length;
+            result.entites.enseignants.present = true;
+        }
+    }
 
     // Totaux
     result.totalRessources = result.ressources.pratiques.count +
@@ -1910,6 +1967,56 @@ async function executerImportSelectif() {
             details.push('Configuration du cours');
         }
 
+        // 🆕 Beta 96.1 : Entités structurelles (groupe-cours, horaires, enseignants)
+
+        // Groupe-cours (clés: *_groupesCours)
+        if (isChecked('groupesCours')) {
+            let nbGC = 0;
+            Object.keys(donnees).forEach(cle => {
+                if (cle.endsWith('_groupesCours')) {
+                    const groupesCours = parseValeur(donnees[cle]);
+                    if (Array.isArray(groupesCours) && groupesCours.length > 0) {
+                        db.setSync(cle, groupesCours);
+                        nbGC += groupesCours.length;
+                    }
+                }
+            });
+            if (nbGC > 0) {
+                compteurs.donnees++;
+                details.push(`${nbGC} groupe-cours`);
+            }
+        }
+
+        // Horaires (clés: *_horaires)
+        if (isChecked('horaires')) {
+            let nbHoraires = 0;
+            Object.keys(donnees).forEach(cle => {
+                if (cle.endsWith('_horaires')) {
+                    const horaires = parseValeur(donnees[cle]);
+                    if (Array.isArray(horaires) && horaires.length > 0) {
+                        db.setSync(cle, horaires);
+                        nbHoraires += horaires.length;
+                    }
+                }
+            });
+            if (nbHoraires > 0) {
+                compteurs.donnees++;
+                details.push(`${nbHoraires} horaire(s)`);
+            }
+        }
+
+        // Enseignants (clé globale)
+        if (isChecked('enseignants')) {
+            if (donnees.enseignants) {
+                const enseignants = parseValeur(donnees.enseignants);
+                if (Array.isArray(enseignants) && enseignants.length > 0) {
+                    db.setSync('enseignants', enseignants);
+                    compteurs.donnees++;
+                    details.push(`${enseignants.length} enseignant(s)`);
+                }
+            }
+        }
+
         // ✅ CORRIGÉ (6 jan 2026) : Vérifier les checkboxes AVANT de fermer le modal
         // Pour les ressources, vérifier les checkboxes individuelles; pour les données, l'ancienne méthode
         const quelqueChoseCoche =
@@ -1917,7 +2024,8 @@ async function executerImportSelectif() {
             hasCheckedItems('echelles') || hasCheckedItems('productions') ||
             hasCheckedItems('cartouches') ||
             isChecked('etudiants') || isChecked('presences') ||
-            isChecked('evaluations') || isChecked('configuration');
+            isChecked('evaluations') || isChecked('configuration') ||
+            isChecked('groupesCours') || isChecked('horaires') || isChecked('enseignants');
 
         // Fermer le modal
         fermerModalPreviewConfigComplete();
