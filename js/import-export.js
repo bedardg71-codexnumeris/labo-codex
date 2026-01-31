@@ -620,6 +620,9 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
     console.log('auteurImport:', `"${auteurImport}"`);
     console.log('config.infoCours existe:', !!config.infoCours);
 
+    // 🔍 DEBUG #48 : ALERTE VISIBLE pour iPad
+    alert(`DEBUG #48:\n\nutilisateurActuel: "${utilisateurActuel}"\nauteurImport: "${auteurImport}"\n\nSi les deux sont vides ou différents, l'import sera bloqué.`);
+
     // Déterminer si c'est un collègue (auteurs différents ET non vides)
     const estCollègue = auteurImport && utilisateurActuel && auteurImport !== utilisateurActuel;
 
