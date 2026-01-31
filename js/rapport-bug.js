@@ -763,12 +763,46 @@ function envoyerRapportParCourriel() {
     const prenom = document.getElementById('prenomTesteur')?.value || '';
     const rapport = genererRapportBug(description, prenom);
 
-    // Construire le mailto
-    const sujet = encodeURIComponent(`[Bug Monitorage ${VERSION_APP}] ${description.substring(0, 50) || 'Rapport de bug'}...`);
-    const corps = encodeURIComponent(rapport + '\n\n--- JOIGNEZ VOS CAPTURES D\'ÉCRAN À CE COURRIEL ---');
+    // Nettoyer les caractères UTF-16 invalides (surrogates isolés)
+    // Compatible Safari/iOS (pas de lookbehind)
+    const nettoyerUTF16 = (str) => {
+        let result = '';
+        for (let i = 0; i < str.length; i++) {
+            const code = str.charCodeAt(i);
+            // High surrogate (0xD800-0xDBFF)
+            if (code >= 0xD800 && code <= 0xDBFF) {
+                const nextCode = str.charCodeAt(i + 1);
+                // Vérifie si suivi d'un low surrogate valide
+                if (nextCode >= 0xDC00 && nextCode <= 0xDFFF) {
+                    result += str[i] + str[i + 1];
+                    i++; // Sauter le low surrogate
+                } else {
+                    result += '\uFFFD'; // Surrogate isolé → remplacement
+                }
+            }
+            // Low surrogate isolé (pas précédé d'un high surrogate)
+            else if (code >= 0xDC00 && code <= 0xDFFF) {
+                result += '\uFFFD';
+            }
+            else {
+                result += str[i];
+            }
+        }
+        return result;
+    };
 
-    // Ouvrir le client courriel
-    window.location.href = `mailto:labo@codexnumeris.org?subject=${sujet}&body=${corps}`;
+    try {
+        // Construire le mailto
+        const sujet = encodeURIComponent(`[Bug Monitorage ${VERSION_APP}] ${description.substring(0, 50) || 'Rapport de bug'}...`);
+        const corpsNettoye = nettoyerUTF16(rapport + '\n\n--- JOIGNEZ VOS CAPTURES D\'ÉCRAN À CE COURRIEL ---');
+        const corps = encodeURIComponent(corpsNettoye);
+
+        // Ouvrir le client courriel
+        window.location.href = `mailto:labo@codexnumeris.org?subject=${sujet}&body=${corps}`;
+    } catch (e) {
+        console.error('Erreur lors de l\'envoi par courriel:', e);
+        alert('Erreur lors de la préparation du courriel.\n\nUtilisez le bouton "Copier" pour copier le rapport manuellement.');
+    }
 }
 
 // ===============================
