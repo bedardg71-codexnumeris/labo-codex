@@ -598,6 +598,10 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
     const analyse = analyserRessourcesDetaillees(config);
     analyseImportEnCours = analyse;
 
+    // 🔍 DEBUG #48 : Voir ce qui est détecté
+    const clesAvecEtudiants = Object.keys(config).filter(c => c.includes('groupeEtudiants'));
+    alert(`DEBUG #48 (Build 0131-1045):\n\nClés totales: ${Object.keys(config).length}\nClés avec groupeEtudiants: ${clesAvecEtudiants.length}\n${clesAvecEtudiants.join(', ')}\n\nAnalyse:\n- Étudiants: ${analyse.donnees.etudiants.count}\n- Présences: ${analyse.donnees.presences.count}\n- Notes: ${analyse.donnees.evaluations.count}\n- totalDonnees: ${analyse.totalDonnees}`);
+
     // ✅ CORRIGÉ (6 jan 2026) : Lire le nom enseignant dans tous les formats possibles
     const extraireNomEnseignant = (infoCours) => {
         if (!infoCours) return '';
