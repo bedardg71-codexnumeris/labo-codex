@@ -69,6 +69,11 @@
   - **Correction** : Mettre en ROUGE pour attirer l'attention
   - **Fichier** : `js/import-export.js`
 
+- [ ] **#56** Nommage exports avec horodatage complet (Grégoire, 31 jan)
+  - **Format souhaité** : `sauvegarde-monitorage-YYYY-MM-DD-HH-MM-SS.json`
+  - **Raison** : Éviter confusion entre versions lors de multiples exports
+  - **Fichier** : `js/import-export.js` (fonction d'export)
+
 - [x] **#55** Pratique configurable non trouvée dans le registre ✅ CORRIGÉ (31 jan 2026)
   - **Symptôme** : Erreur `❌ Pratique "pratique-1768910384608" non disponible dans le registre`
   - **Cause 1** : `obtenirPratiqueParId()` ne cherchait pas dans `pratiquesConfigurables`
