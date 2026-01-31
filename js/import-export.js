@@ -489,6 +489,9 @@ function previsualiserConfigComplete(event) {
             // 🆕 BETA 95.1 : Détecter le format du fichier
             const formatDetecte = detecterFormatConfig(config);
 
+            // 🔍 DEBUG #48 : Alerte dès la détection du format
+            alert(`DEBUG #48 - Format détecté: ${formatDetecte}\n\nBuild: 0131-0910`);
+
             if (formatDetecte === 'configuration-complete') {
                 // Nouveau format (Beta 91+)
                 if (!config.contenu) {
