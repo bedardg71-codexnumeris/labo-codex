@@ -125,7 +125,15 @@ document.addEventListener('DOMContentLoaded', function () {
     // ===============================
     console.log('🎨 Génération des bulles d\'apprentissage...');
 
-    function creerUneBulle(couleurs, tailles, durees) {
+    // BETA 96.2: Durées selon taille pour effet parallaxe
+    // Grande = proche = rapide, Petite = loin = lente
+    const dureesParTaille = {
+        grande: [20, 22, 25, 28, 30],      // Rapide (proche de l'observateur)
+        moyenne: [40, 44, 48, 52, 56],     // Normal (distance moyenne)
+        petite: [65, 70, 75, 80, 85]       // Lent (loin de l'observateur)
+    };
+
+    function creerUneBulle(couleurs, tailles) {
         const bulle = document.createElement('div');
 
         // Classes aléatoires
@@ -147,7 +155,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const amplitudeY = 30 + Math.random() * 40; // 30px à 70px
         const driftY = `${directionY * amplitudeY}px`;
 
-        const duree = durees[Math.floor(Math.random() * durees.length)];
+        // BETA 96.2: Durée selon la taille (effet parallaxe)
+        const dureesTaille = dureesParTaille[taille] || dureesParTaille.moyenne;
+        const duree = dureesTaille[Math.floor(Math.random() * dureesTaille.length)];
 
         bulle.style.cssText = `
             left: ${left};
@@ -169,7 +179,12 @@ document.addEventListener('DOMContentLoaded', function () {
             const newDirectionY = Math.random() < 0.7 ? -1 : 1;
             const newAmplitudeY = 30 + Math.random() * 40;
             const newDriftY = `${newDirectionY * newAmplitudeY}px`;
-            const newDuree = durees[Math.floor(Math.random() * durees.length)];
+
+            // BETA 96.2: Durée selon la taille (effet parallaxe)
+            const tailleBulle = this.classList.contains('grande') ? 'grande' :
+                               this.classList.contains('petite') ? 'petite' : 'moyenne';
+            const dureesTaille = dureesParTaille[tailleBulle];
+            const newDuree = dureesTaille[Math.floor(Math.random() * dureesTaille.length)];
 
             // Forcer la réinitialisation de l'animation pour avoir le fade in
             this.style.animation = 'none';
@@ -201,12 +216,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const couleurs = ['som', 'pan-maitrise', 'pan-spec', 'pan-denotation'];
         const tailles = ['petite', 'moyenne', 'grande'];
 
-        // Durées d'animation variées (35s à 60s) - ralenti pour moins de distraction
-        const durees = [35, 38, 40, 42, 45, 48, 50, 52, 55, 58, 60];
+        // BETA 96.2: Durées gérées par dureesParTaille selon la taille (effet parallaxe)
 
         // Générer les bulles - toutes présentes dès le début
         for (let i = 0; i < nbEtudiants; i++) {
-            const bulle = creerUneBulle(couleurs, tailles, durees);
+            const bulle = creerUneBulle(couleurs, tailles);
 
             // Délai négatif pour que les bulles commencent à différents points de leur parcours
             // Si durée = 30s et 30 étudiants, chaque bulle commence à -1s, -2s, -3s...

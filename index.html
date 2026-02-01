@@ -1475,50 +1475,76 @@
             z-index: 0;
         }
 
-        /* BETA 96.1: Bulles avec effet 3D harmonisé avec tableau de bord */
+        /* BETA 96.2: Bulles avec effet 3D identique au tableau de bord (.barre-etudiant)
+           + Effet parallaxe : grandes=rapides (proches), petites=lentes (éloignées)
+           Référence: styles.css lignes 9061-9083 pour .barre-etudiant */
         .bulle {
             position: absolute;
             border-radius: 50%;
             animation: floatUp 30s infinite linear;
-            opacity: 0.5;
-            /* Effet 3D: ombre décentrée simulant lumière gauche→droite */
+            /* Opacité augmentée pour mieux voir l'effet 3D */
+            opacity: 0.7;
+            /* Effet 3D identique à .barre-etudiant : ombre décentrée + highlights */
             box-shadow:
-                1.5px 1.5px 3px rgba(0, 0, 0, 0.25),
-                inset -0.5px -0.5px 1px rgba(0, 0, 0, 0.1),
-                inset 0.5px 0.5px 1px rgba(255, 255, 255, 0.3);
+                /* Ombre externe décentrée vers droite/bas (effet 3D) */
+                3px 3px 6px rgba(60, 60, 60, 0.4),
+                /* Highlight inset en haut-gauche (reflet lumière) */
+                inset -1px -1px 2px rgba(60, 60, 60, 0.1),
+                inset 1px 1px 2px rgba(255, 255, 255, 0.8);
         }
 
-        /* Tailles variées */
+        /* Tailles variées + vitesses pour effet parallaxe
+           Grande = proche = rapide (20-30s)
+           Moyenne = milieu = normal (40-50s)
+           Petite = loin = lente (60-80s) */
         .bulle.petite {
             width: 8px;
             height: 8px;
+            /* Loin = lent, ombre plus petite */
+            box-shadow:
+                1.5px 1.5px 3px rgba(60, 60, 60, 0.3),
+                inset -0.5px -0.5px 1px rgba(60, 60, 60, 0.1),
+                inset 0.5px 0.5px 1px rgba(255, 255, 255, 0.6);
+            opacity: 0.5;
         }
 
         .bulle.moyenne {
             width: 12px;
             height: 12px;
+            /* Distance moyenne */
+            box-shadow:
+                2px 2px 4px rgba(60, 60, 60, 0.35),
+                inset -0.75px -0.75px 1.5px rgba(60, 60, 60, 0.1),
+                inset 0.75px 0.75px 1.5px rgba(255, 255, 255, 0.7);
+            opacity: 0.6;
         }
 
         .bulle.grande {
             width: 16px;
             height: 16px;
+            /* Proche = rapide, ombre plus prononcée */
+            box-shadow:
+                3px 3px 6px rgba(60, 60, 60, 0.4),
+                inset -1px -1px 2px rgba(60, 60, 60, 0.1),
+                inset 1px 1px 2px rgba(255, 255, 255, 0.8);
+            opacity: 0.7;
         }
 
-        /* Couleurs des 4 pratiques avec dégradé 3D */
+        /* Couleurs des 4 pratiques avec dégradé 3D renforcé (clair→foncé comme .barre-etudiant) */
         .bulle.som {
-            background: linear-gradient(135deg, #ffb74d 0%, var(--som-orange) 100%);
+            background: linear-gradient(135deg, #ffe0b2 0%, var(--som-orange) 100%);
         }
 
-        .bulle.std {
-            background: linear-gradient(135deg, #64b5f6 0%, var(--std-bleu) 100%);
+        .bulle.std, .bulle.pan-maitrise {
+            background: linear-gradient(135deg, #bbdefb 0%, var(--std-bleu) 100%);
         }
 
-        .bulle.spe {
-            background: linear-gradient(135deg, #81c784 0%, var(--spe-vert) 100%);
+        .bulle.spe, .bulle.pan-spec {
+            background: linear-gradient(135deg, #c8e6c9 0%, var(--spe-vert) 100%);
         }
 
-        .bulle.den {
-            background: linear-gradient(135deg, #ba68c8 0%, var(--den-violet) 100%);
+        .bulle.den, .bulle.pan-denotation {
+            background: linear-gradient(135deg, #e1bee7 0%, var(--den-violet) 100%);
         }
 
         /* Animation organique comme du pollen - mouvement fluide continu avec courbes */
@@ -15467,7 +15493,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '96';
-        const BUILD_ID = '0201-0855';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0201-0915';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';

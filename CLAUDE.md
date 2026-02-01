@@ -96,4 +96,19 @@ Ce numero s'affiche dans l'en-tete de l'application et sert a identifier les ver
 
 ---
 
+## References visuelles importantes
+
+### Animation bulles en-tete (parallaxe)
+Points colores qui circulent de gauche a droite dans l'en-tete :
+- **CSS** : `index.html` lignes 1465-1560 (`.bulles-container`, `.bulle`, `@keyframes floatUp`)
+- **JS** : `js/main.js` lignes 128-240 (`creerUneBulle()`, `genererBullesApprentissage()`)
+- **Effet parallaxe** : grandes=rapides (proches), petites=lentes (eloignees)
+
+### Points etudiants tableau de bord (3D)
+Points blancs dans les barres graduees de l'apercu :
+- **CSS** : `styles.css` lignes 9058-9120 (`.barre-etudiant`, `@keyframes float-vertical`)
+- **Effet 3D** : gradient + box-shadow avec lumiere gauche→droite
+
+---
+
 **Derniere mise a jour** : 1er février 2026
