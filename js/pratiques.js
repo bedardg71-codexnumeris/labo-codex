@@ -4569,9 +4569,14 @@ async function ouvrirModalBibliothequePratiques() {
                                                     ${auteur ? `<div style="color: #7f8c8d; font-size: 0.9em; margin-bottom: 4px;">${echapperHtml(auteur)}</div>` : ''}
                                                     ${description ? `<div style="color: #95a5a6; font-size: 0.85em;">${echapperHtml(description)}</div>` : ''}
                                                 </div>
-                                                <button onclick="ajouterPratiqueIndividuelle('${p.id}')" class="btn btn-ajouter btn-tres-compact" style="margin-left: 10px;">
-                                                    Ajouter à ma sélection
-                                                </button>
+                                                <div style="display: flex; gap: 5px; margin-left: 10px;">
+                                                    <button onclick="ajouterPratiqueIndividuelle('${p.id}')" class="btn btn-ajouter btn-tres-compact">
+                                                        Ajouter
+                                                    </button>
+                                                    <button onclick="supprimerPratiqueHorsBibliotheque('${p.id}')" class="btn btn-supprimer btn-tres-compact" title="Supprimer définitivement">
+                                                        Supprimer
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     `;
@@ -4683,6 +4688,68 @@ async function ajouterPratiqueIndividuelle(pratiqueId) {
     // Puis rafraîchir le modal
     fermerModalBibliothequePratiques();
     await ouvrirModalBibliothequePratiques();
+}
+
+/**
+ * Supprime définitivement une pratique hors-bibliothèque
+ * 🆕 AJOUT (1er fév 2026) - Feature request Gregoire
+ * Permet de supprimer des pratiques qui ne sont pas dans la sidebar
+ */
+async function supprimerPratiqueHorsBibliotheque(pratiqueId) {
+    const pratiques = db.getSync('pratiquesConfigurables', []);
+    const pratique = pratiques.find(p => p.id === pratiqueId);
+
+    if (!pratique) {
+        alert('Pratique introuvable');
+        return;
+    }
+
+    // Vérifier que la pratique n'est pas active
+    const modalites = db.getSync('modalitesEvaluation', {});
+    if (modalites.pratique === pratiqueId) {
+        alert(`❌ Impossible de supprimer cette pratique\n\nElle est actuellement active.\n\nVous devez d'abord activer une autre pratique.`);
+        return;
+    }
+
+    // Vérifier que la pratique n'est pas utilisée par des cours
+    if (typeof getCoursUtilisantPratique === 'function') {
+        const coursUtilisant = getCoursUtilisantPratique(pratiqueId);
+        if (coursUtilisant.length > 0) {
+            const listeCours = coursUtilisant.map(c => c.sigle).join(', ');
+            alert(`❌ Impossible de supprimer cette pratique\n\nElle est utilisée par ${coursUtilisant.length} cours :\n${listeCours}\n\nVous devez d'abord modifier ces cours.`);
+            return;
+        }
+    }
+
+    const nomAffiche = pratique.nom || pratique.id;
+    if (!confirm(`Supprimer définitivement cette pratique ?\n\n"${nomAffiche}"\n\nCette action est irréversible.`)) {
+        return;
+    }
+
+    try {
+        // Supprimer de pratiquesConfigurables
+        const index = pratiques.findIndex(p => p.id === pratiqueId);
+        if (index !== -1) {
+            pratiques.splice(index, 1);
+            db.setSync('pratiquesConfigurables', pratiques);
+        }
+
+        console.log('✅ Pratique hors-bibliothèque supprimée:', pratiqueId);
+
+        // Rafraîchir le modal
+        fermerModalBibliothequePratiques();
+        await ouvrirModalBibliothequePratiques();
+
+        // Rafraîchir la liste principale si elle existe
+        if (typeof afficherListePratiques === 'function') {
+            await afficherListePratiques();
+        }
+
+        alert(`✅ Pratique supprimée avec succès.`);
+    } catch (error) {
+        console.error('Erreur lors de la suppression:', error);
+        alert(`❌ Erreur : ${error.message}`);
+    }
 }
 
 /**
@@ -4943,6 +5010,7 @@ window.ouvrirModalBibliothequePratiques = ouvrirModalBibliothequePratiques;
 window.fermerModalBibliothequePratiques = fermerModalBibliothequePratiques;
 window.retirerPratiqueDeBibliotheque = retirerPratiqueDeBibliotheque;
 window.ajouterPratiqueIndividuelle = ajouterPratiqueIndividuelle;
+window.supprimerPratiqueHorsBibliotheque = supprimerPratiqueHorsBibliotheque; // 🆕 (1er fév 2026)
 window.partagerPratique = partagerPratique;
 window.exporterPratiqueActive = exporterPratiqueActive;
 

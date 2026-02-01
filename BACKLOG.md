@@ -74,6 +74,46 @@
   - **Raison** : Éviter confusion entre versions lors de multiples exports
   - **Fichier** : `js/import-export.js` (fonction d'export)
 
+- [x] **#57** Erreur console lors suppression grilles (Gregoire, 1er fév) ✅ CORRIGÉ (1er fév 2026)
+  - **Symptôme** : Bouton supprimer grille inactif, grilles impossibles à retirer
+  - **Erreur** : `null is not an object (evaluating 'document.getElementById('optionsImportExportGrilles').style')`
+  - **Cause** : Élément `#optionsImportExportGrilles` supprimé en Beta 92 mais code y référait encore
+  - **Correction** : Suppression des lignes 3614 et 3625 dans `js/grilles.js`
+
+- [x] **#58** Import productions non détectées (Gregoire, 1er fév) ✅ CORRIGÉ (1er fév 2026)
+  - **Symptôme** : "Aucune production n'a été importée" malgré présence dans le fichier
+  - **Cause** : Fonctions d'import/export ne cherchaient que dans `productions` ou `bibliothequeProductions`, pas les clés namespacées `*_productions`
+  - **Correction** : Support des clés namespacées dans 4 fonctions de `js/import-export.js`
+    - `analyserRessourcesDetaillees()`, `executerImportSelectif()`, `executerImportVersBibliotheques()`, `exporterConfigurationComplete()`
+
+- [x] **#59** Horaires non trouvés - aperçu présences vide (Gregoire, 1er fév) ✅ CORRIGÉ (1er fév 2026)
+  - **Symptôme** : Aperçu présences vide, compte de semaines incorrect (horaireActif: non défini)
+  - **Cause** : Clé `horaires` dans `CLES_NAMESPACEES` mais lue depuis `'horaires'` au lieu de `cle('horaires')`
+  - **Correction** : Utilisation de `cle('horaires')` dans 4 fichiers :
+    - `js/horaire.js`, `js/entites-ui.js`, `js/trimestre-v2.js`, `js/migrations.js`
+
+- [x] **#60** Cours A25 sauvegardé comme H2026 (Gregoire, 1er fév) ✅ CORRIGÉ (1er fév 2026)
+  - **Symptôme** : Nouveau cours pour A2025 non visible (créé sous H2026)
+  - **Cause** : `reinitialiserFormCoursV2()` forçait session='H' sans définir l'année
+  - **Correction** : Extraction session/année depuis `obtenirTrimestreActif()` dans `js/trimestre-v2.js`
+
+- [x] **#61** Section Trimestre tronquée sur iPad (Gregoire, 1er fév) ✅ CORRIGÉ (1er fév 2026)
+  - **Symptôme** : Dates et boutons coupés à droite sur iPad Safari
+  - **Cause** : Grilles CSS 2 colonnes fixes sans responsive pour tablettes
+  - **Correction** : Media queries pour `layout-sidebar-2col`, `grille-2col`, section `#reglages-trimestre`
+  - **Fichier modifié** : `styles.css`
+
+- [x] **#62** Erreur "reglages-horaire introuvable" (Tous rapports, 1er fév) ✅ CORRIGÉ (1er fév 2026)
+  - **Symptôme** : Erreur console au démarrage
+  - **Cause** : Sous-section renommée `reglages-horaire-legacy` en Beta 95, références obsolètes
+  - **Correction** : Mise à jour des références vers `reglages-trimestre` dans 4 fichiers
+    - `js/guidage.js`, `js/saisie-presences.js`, `index.html`, `js/primo-validation-champs.js`
+
+- [x] **#63** FR: Supprimer pratiques hors-bibliothèque (Gregoire, 1er fév) ✅ IMPLÉMENTÉ (1er fév 2026)
+  - **Demande** : Pouvoir supprimer des pratiques depuis la section "Disponibles à ajouter"
+  - **Solution** : Bouton "Supprimer" ajouté dans le modal Bibliothèque de pratiques
+  - **Nouvelle fonction** : `supprimerPratiqueHorsBibliotheque()` dans `js/pratiques.js`
+
 - [x] **#55** Pratique configurable non trouvée dans le registre ✅ CORRIGÉ (31 jan 2026)
   - **Symptôme** : Erreur `❌ Pratique "pratique-1768910384608" non disponible dans le registre`
   - **Cause 1** : `obtenirPratiqueParId()` ne cherchait pas dans `pratiquesConfigurables`

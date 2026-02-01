@@ -89,7 +89,9 @@ function obtenirSeancesHoraire(coursId) {
         const groupeCoursActif = db.getSync('groupeCoursActif', null);
         if (groupeCoursActif && groupeCoursActif.horaireId) {
             // Lire l'horaire depuis l'entité
-            const horaires = db.getSync('horaires', []);
+            // 🆕 FIX (1er fév 2026) : Utiliser cle() pour namespacing (horaires est dans CLES_NAMESPACEES)
+            const cleHoraires = (typeof cle === 'function') ? cle('horaires') : 'horaires';
+            const horaires = db.getSync(cleHoraires, []);
             const horaire = horaires.find(h => h.id === groupeCoursActif.horaireId);
             if (horaire && horaire.seances && horaire.seances.length > 0) {
                 console.log('[Horaire] Séances depuis entité horaire:', horaire.nom, horaire.seances.map(s => s.jour));

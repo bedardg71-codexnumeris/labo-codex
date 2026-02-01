@@ -1954,7 +1954,9 @@ function afficherSyntheseGroupeCours(gc) {
     const cours = db.getSync('cours', []);
     const listeCours = db.getSync('listeCours', []);
     const enseignants = db.getSync('enseignants', []);
-    const horaires = db.getSync('horaires', []);
+    // 🆕 FIX (1er fév 2026) : Utiliser cle() pour namespacing (horaires est dans CLES_NAMESPACEES)
+    const cleHoraires = (typeof cle === 'function') ? cle('horaires') : 'horaires';
+    const horaires = db.getSync(cleHoraires, []);
     const pratiques = db.getSync('pratiquesConfigurables', []);
 
     let coursInfo = cours.find(c => c.id === gc.coursId);
@@ -1989,6 +1991,7 @@ function afficherSyntheseGroupeCours(gc) {
 
 /**
  * Réinitialise le formulaire cours
+ * 🆕 FIX (1er fév 2026) : Utilise le trimestre actif pour session et année
  */
 function reinitialiserFormCoursV2() {
     const champs = [
@@ -1998,7 +2001,27 @@ function reinitialiserFormCoursV2() {
     ];
     champs.forEach(id => setValue(id, ''));
 
-    setValue('v2-session', 'H');
+    // 🆕 FIX (1er fév 2026) : Session et année depuis le trimestre actif
+    // Corrige le bug où un cours pour A2025 était sauvegardé comme H2026
+    const trimestreActif = typeof obtenirTrimestreActif === 'function' ? obtenirTrimestreActif() : null;
+    let session = 'H';
+    let annee = new Date().getFullYear();
+
+    if (trimestreActif) {
+        // Extraire session et année depuis l'ID du trimestre (ex: "a2025" → session="A", année=2025)
+        const match = trimestreActif.id.match(/^([ah])(\d{4})$/i);
+        if (match) {
+            session = match[1].toUpperCase();
+            annee = parseInt(match[2]);
+        } else if (trimestreActif.session && trimestreActif.annee) {
+            // Fallback sur les propriétés du trimestre
+            session = trimestreActif.session.charAt(0).toUpperCase();
+            annee = trimestreActif.annee;
+        }
+    }
+
+    setValue('v2-session', session);
+    setValue('v2-annee', annee);
     // ✅ MODIFIÉ (6 jan 2026) : Périodes au lieu d'heures
     setValue('v2-periodesParSemaine', 4);
     mettreAJourFormatHoraire();

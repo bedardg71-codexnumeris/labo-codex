@@ -1017,7 +1017,7 @@ function verifierConfigurationFormatHoraire() {
             <div class="alerte alerte-avertissement">
                 <strong>⚠️ Configuration incomplète</strong><br>
                 L'horaire des cours n'est pas configuré. 
-                <a href="#" onclick="afficherSection('reglages'); afficherSousSection('reglages-horaire'); return false;">
+                <a href="#" onclick="afficherSection('reglages'); afficherSousSection('reglages-trimestre'); return false;">
                     Configurer l'horaire →
                 </a>
             </div>`;

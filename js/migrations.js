@@ -1033,7 +1033,9 @@ async function migrerVersEntiteHoraires() {
     console.log('🔄 [Migration Beta 95.2] Extraction des horaires...');
 
     const listeCours = db.getSync('listeCours', []);
-    const horairesExistants = db.getSync('horaires', []);
+    // 🆕 FIX (1er fév 2026) : Utiliser cle() pour namespacing (horaires est dans CLES_NAMESPACEES)
+    const cleHoraires = (typeof cle === 'function') ? cle('horaires') : 'horaires';
+    const horairesExistants = db.getSync(cleHoraires, []);
 
     if (horairesExistants.length > 0) {
         console.log('   ⚠️ Des horaires existent déjà, migration non nécessaire');

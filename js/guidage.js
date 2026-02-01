@@ -34,9 +34,10 @@ const ETAPES_CONFIGURATION = [
     {
         id: 'horaire',
         section: 'reglages',
-        sousSection: 'reglages-horaire',
+        // 🆕 FIX (1er fév 2026) : reglages-horaire supprimé en Beta 95, intégré dans reglages-trimestre
+        sousSection: 'reglages-trimestre',
         titre: 'Étape 3/5 : Horaire des séances',
-        message: 'Configure l\'horaire hebdomadaire de tes cours.',
+        message: 'Configure l\'horaire hebdomadaire de tes cours dans la section Trimestre.',
         suivante: 'groupe'
     },
     {
