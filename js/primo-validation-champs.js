@@ -30,16 +30,8 @@ const CHAMPS_A_VALIDER = {
         { id: 'date-fin', cle: 'informationsTrimestre', champ: 'dateFin' },
         { id: 'date-maj', cle: 'informationsTrimestre', champ: 'dateMiseAJour' }
     ],
-    'reglages-horaire': [
-        { id: 'jour-cours-1', cle: 'horaireHebdomadaire', champ: 'jour1' },
-        { id: 'heure-debut-1', cle: 'horaireHebdomadaire', champ: 'heure1Debut' },
-        { id: 'heure-fin-1', cle: 'horaireHebdomadaire', champ: 'heure1Fin' },
-        { id: 'local-1', cle: 'horaireHebdomadaire', champ: 'local1' },
-        { id: 'jour-cours-2', cle: 'horaireHebdomadaire', champ: 'jour2' },
-        { id: 'heure-debut-2', cle: 'horaireHebdomadaire', champ: 'heure2Debut' },
-        { id: 'heure-fin-2', cle: 'horaireHebdomadaire', champ: 'heure2Fin' },
-        { id: 'local-2', cle: 'horaireHebdomadaire', champ: 'local2' }
-    ],
+    // NOTE (1er fév 2026) : reglages-horaire supprimé en Beta 95, intégré dans reglages-trimestre
+    // Les champs horaire utilisent maintenant les IDs v2-* dans la section Trimestre
     'reglages-groupe': [
         // Pas d'ID spécifique, validation sur existence de groupeEtudiants
     ],

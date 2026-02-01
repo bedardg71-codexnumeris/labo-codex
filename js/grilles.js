@@ -3611,7 +3611,7 @@ async function supprimerGrilleDepuisSidebar(id) {
         await db.set('grillesTemplates', grilles);
         await afficherListeGrilles();
         document.getElementById('conteneurEditionGrille').style.display = 'none';
-        document.getElementById('optionsImportExportGrilles').style.display = 'none';
+        // Note: optionsImportExportGrilles supprimé en Beta 92
         document.getElementById('accueilGrilles').style.display = 'block';
         alert('Grille supprimée');
     }
@@ -3622,7 +3622,7 @@ async function supprimerGrilleDepuisSidebar(id) {
  */
 function annulerFormGrille() {
     document.getElementById('conteneurEditionGrille').style.display = 'none';
-    document.getElementById('optionsImportExportGrilles').style.display = 'none';
+    // Note: optionsImportExportGrilles supprimé en Beta 92
     document.getElementById('accueilGrilles').style.display = 'block';
 
     // Retirer le highlight

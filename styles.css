@@ -6071,6 +6071,30 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     align-items: start;
 }
 
+/* 🆕 FIX (1er fév 2026) : Responsive pour iPad/tablettes */
+/* Corrige le contenu tronqué à droite sur iPad */
+@media (max-width: 1024px) {
+    .layout-cartouches-2col,
+    .layout-sidebar-2col {
+        grid-template-columns: 220px 1fr;
+        gap: 15px;
+    }
+}
+
+@media (max-width: 850px) {
+    .layout-cartouches-2col,
+    .layout-sidebar-2col {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .sidebar-cartouches,
+    .sidebar-navigation {
+        position: static;
+        max-height: none;
+    }
+}
+
 /* === SIDEBARS (fond bleu pâle, radius 12px) - 03b-cartes-sidebars === */
 .sidebar-cartouches,
 .sidebar-navigation {
@@ -8643,6 +8667,41 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     padding: 15px 20px;
 }
 
+/* 🆕 FIX (1er fév 2026) : Responsive grilles pour iPad/tablettes */
+@media (max-width: 1024px) {
+    .grille-2col {
+        gap: 15px;
+    }
+
+    .grille-3col-form {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .grille-4col-form {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 850px) {
+    .grille-2col {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .grille-2col-gap15 {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .grille-3col-form {
+        grid-template-columns: 1fr;
+    }
+
+    .grille-4col-form {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
 /* Titres de sous-sections */
 .sous-titre-section {
     color: var(--bleu-moyen);
@@ -11093,6 +11152,58 @@ body[data-mode="simulation"] table tr:hover {
     background: var(--bleu-tres-pale);
     border-radius: var(--radius-pill);
     color: var(--bleu-moyen);
+}
+
+/* 🆕 FIX (1er fév 2026) : Responsive iPad pour section Trimestre */
+/* Corrige le contenu tronqué à droite signalé par Gregoire */
+@media (max-width: 1024px) {
+    #reglages-trimestre .zone-principale {
+        overflow-x: auto;
+        min-width: 0;
+    }
+
+    #reglages-trimestre .grille-2col {
+        gap: 12px;
+    }
+
+    #reglages-trimestre .d-flex-gap-10-center {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    /* Réduire padding des blocs section */
+    #reglages-trimestre .bloc-section {
+        padding: 10px;
+    }
+
+    /* Inputs date plus compacts */
+    #reglages-trimestre input[type="date"] {
+        padding: 5px 8px;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 850px) {
+    /* Empiler les colonnes Bornes/Semaines spéciales */
+    #reglages-trimestre .grille-2col {
+        grid-template-columns: 1fr;
+    }
+
+    /* Empiler les dates Du/Au */
+    #reglages-trimestre .d-flex-gap-10-center {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    #reglages-trimestre .d-flex-gap-10-center span {
+        text-align: center;
+        padding: 5px 0 !important;
+    }
+
+    /* Grille identification : empiler sur mobile */
+    #reglages-trimestre .grille-identification {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* =============================================================================

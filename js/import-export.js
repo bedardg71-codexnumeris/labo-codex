@@ -991,31 +991,49 @@ function analyserRessourcesDetaillees(config) {
         }
     }
 
-    // Productions (chercher dans bibliothequeProductions OU productions)
-    // Vérifier le contenu, pas juste l'existence de la clé
-    let cleProdsAnalyse = null;
+    // Productions (chercher dans bibliothequeProductions, productions, ET *_productions namespacées)
+    // 🆕 FIX (1er fév 2026) : Ajout support clés namespacées comme h2026_productions
+    let allProductions = [];
+    let clesProdsAnalyse = [];
+
+    // 1. Clé legacy bibliothequeProductions
     if (config.bibliothequeProductions) {
         const prodsTest = parseValeur(config.bibliothequeProductions);
         if (Array.isArray(prodsTest) && prodsTest.length > 0) {
-            cleProdsAnalyse = 'bibliothequeProductions';
+            clesProdsAnalyse.push('bibliothequeProductions');
+            allProductions = allProductions.concat(prodsTest);
         }
     }
-    if (!cleProdsAnalyse && config.productions) {
-        const prodsTest = parseValeur(config.productions);
-        if (Array.isArray(prodsTest) && prodsTest.length > 0) {
-            cleProdsAnalyse = 'productions';
+
+    // 2. Clé globale ou namespacée productions / *_productions
+    Object.keys(config).forEach(cle => {
+        if (cle === 'productions' || cle.endsWith('_productions')) {
+            const prods = parseValeur(config[cle]);
+            if (Array.isArray(prods) && prods.length > 0) {
+                clesProdsAnalyse.push(cle);
+                allProductions = allProductions.concat(prods);
+            }
         }
-    }
-    if (cleProdsAnalyse) {
-        const prods = parseValeur(config[cleProdsAnalyse]);
-        if (Array.isArray(prods)) {
-            result.ressources.productions.items = prods.map(p => ({
-                id: p.id,
-                nom: p.nom || 'Sans nom',
-                type: p.type || ''
-            }));
-            result.ressources.productions.count = prods.length;
+    });
+
+    // Dédupliquer par ID (au cas où la même production serait dans plusieurs clés)
+    const prodsUniques = [];
+    const idsVus = new Set();
+    allProductions.forEach(p => {
+        if (p.id && !idsVus.has(p.id)) {
+            idsVus.add(p.id);
+            prodsUniques.push(p);
         }
+    });
+
+    if (prodsUniques.length > 0) {
+        result.ressources.productions.items = prodsUniques.map(p => ({
+            id: p.id,
+            nom: p.nom || p.titre || 'Sans nom',
+            type: p.type || ''
+        }));
+        result.ressources.productions.count = prodsUniques.length;
+        result.ressources.productions.cles = clesProdsAnalyse;
     }
 
     // Cartouches (chercher toutes les clés cartouches_*)
@@ -1690,23 +1708,44 @@ async function executerImportVersBibliotheques() {
             }
         }
 
-        // 4. PRODUCTIONS (depuis bibliothequeProductions OU productions)
-        let cleProdsVersBibl = null;
+        // 4. PRODUCTIONS (depuis bibliothequeProductions, productions, ET *_productions)
+        // 🆕 FIX (1er fév 2026) : Support clés namespacées *_productions
+        let clesProdsVersBibl = [];
+        let allProdsVersBibl = [];
+
+        // 1. Clé legacy bibliothequeProductions
         if (donnees.bibliothequeProductions) {
             const prodsTest = parseValeur(donnees.bibliothequeProductions);
             if (Array.isArray(prodsTest) && prodsTest.length > 0) {
-                cleProdsVersBibl = 'bibliothequeProductions';
+                clesProdsVersBibl.push('bibliothequeProductions');
+                allProdsVersBibl = allProdsVersBibl.concat(prodsTest);
             }
         }
-        if (!cleProdsVersBibl && donnees.productions) {
-            const prodsTest = parseValeur(donnees.productions);
-            if (Array.isArray(prodsTest) && prodsTest.length > 0) {
-                cleProdsVersBibl = 'productions';
+
+        // 2. Clés productions et *_productions (namespacées)
+        Object.keys(donnees).forEach(cle => {
+            if (cle === 'productions' || cle.endsWith('_productions')) {
+                const prods = parseValeur(donnees[cle]);
+                if (Array.isArray(prods) && prods.length > 0) {
+                    clesProdsVersBibl.push(cle);
+                    allProdsVersBibl = allProdsVersBibl.concat(prods);
+                }
             }
-        }
+        });
+
+        // Dédupliquer par ID
+        const prodsImportUniques = [];
+        const idsProdsVus = new Set();
+        allProdsVersBibl.forEach(p => {
+            if (p.id && !idsProdsVus.has(p.id)) {
+                idsProdsVus.add(p.id);
+                prodsImportUniques.push(p);
+            }
+        });
+
         // ✅ MODIFIÉ (6 jan 2026) : Gestion des doublons avec modal
-        if (cleProdsVersBibl) {
-            const prodsImport = parseValeur(donnees[cleProdsVersBibl]);
+        if (prodsImportUniques.length > 0) {
+            const prodsImport = prodsImportUniques;
             if (Array.isArray(prodsImport) && prodsImport.length > 0) {
                 const cleProductions = (typeof window.cle === 'function') ? window.cle('productions') : 'productions';
                 let prodsExistantes = db.getSync(cleProductions, []);
@@ -1939,44 +1978,64 @@ async function executerImportSelectif() {
         }
 
         // Productions - ✅ MODIFIÉ pour import sélectif individuel
-        let cleProdsSource = null;
+        // 🆕 FIX (1er fév 2026) : Support clés namespacées *_productions
+        let clesProdsSource = [];
+        let allProdsImport = [];
+
+        // 1. Clé legacy bibliothequeProductions
         if (donnees.bibliothequeProductions) {
             const prodsTest = parseValeur(donnees.bibliothequeProductions);
             if (Array.isArray(prodsTest) && prodsTest.length > 0) {
-                cleProdsSource = 'bibliothequeProductions';
+                clesProdsSource.push('bibliothequeProductions');
+                allProdsImport = allProdsImport.concat(prodsTest);
             }
         }
-        if (!cleProdsSource && donnees.productions) {
-            const prodsTest = parseValeur(donnees.productions);
-            if (Array.isArray(prodsTest) && prodsTest.length > 0) {
-                cleProdsSource = 'productions';
-            }
-        }
-        if (hasCheckedItems('productions') && cleProdsSource) {
-            const prodsImport = parseValeur(donnees[cleProdsSource]);
-            const selectedIds = getCheckedItemIds('productions');
-            if (Array.isArray(prodsImport) && prodsImport.length > 0) {
-                const cleProductions = (typeof window.cle === 'function') ? window.cle('productions') : 'productions';
-                const prodsExistantes = db.getSync(cleProductions, []);
-                const prodsNouvelles = prodsImport
-                    .filter(p => selectedIds.includes(p.id) || selectedIds.includes(p.nom))
-                    .filter(p => !prodsExistantes.some(pe => pe.nom === p.nom))
-                    .map(p => {
-                        // Vérifier si l'ID existe déjà
-                        const idExiste = prodsExistantes.some(pe => pe.id === p.id);
-                        return {
-                            ...p,
-                            // Garder l'ID original sauf si conflit d'ID
-                            ...(idExiste ? { id: 'PROD_' + Date.now() + '_' + Math.floor(Math.random() * 1000) } : {}),
-                            dateImport: new Date().toISOString(),
-                            auteurOriginal: auteurSource || p.auteurOriginal || ''
-                        };
-                    });
-                if (prodsNouvelles.length > 0) {
-                    db.setSync(cleProductions, [...prodsExistantes, ...prodsNouvelles]);
-                    compteurs.ressources += prodsNouvelles.length;
-                    details.push(`${prodsNouvelles.length} production(s)`);
+
+        // 2. Clés productions et *_productions (namespacées)
+        Object.keys(donnees).forEach(cle => {
+            if (cle === 'productions' || cle.endsWith('_productions')) {
+                const prods = parseValeur(donnees[cle]);
+                if (Array.isArray(prods) && prods.length > 0) {
+                    clesProdsSource.push(cle);
+                    allProdsImport = allProdsImport.concat(prods);
                 }
+            }
+        });
+
+        if (hasCheckedItems('productions') && allProdsImport.length > 0) {
+            const selectedIds = getCheckedItemIds('productions');
+            const cleProductions = (typeof window.cle === 'function') ? window.cle('productions') : 'productions';
+            const prodsExistantes = db.getSync(cleProductions, []);
+
+            // Dédupliquer par ID
+            const prodsUniques = [];
+            const idsVus = new Set();
+            allProdsImport.forEach(p => {
+                if (p.id && !idsVus.has(p.id)) {
+                    idsVus.add(p.id);
+                    prodsUniques.push(p);
+                }
+            });
+
+            const prodsNouvelles = prodsUniques
+                .filter(p => selectedIds.includes(p.id) || selectedIds.includes(p.nom) || selectedIds.includes(p.titre))
+                .filter(p => !prodsExistantes.some(pe => (pe.nom && pe.nom === p.nom) || (pe.titre && pe.titre === p.titre)))
+                .map(p => {
+                    // Vérifier si l'ID existe déjà
+                    const idExiste = prodsExistantes.some(pe => pe.id === p.id);
+                    return {
+                        ...p,
+                        // Garder l'ID original sauf si conflit d'ID
+                        ...(idExiste ? { id: 'PROD_' + Date.now() + '_' + Math.floor(Math.random() * 1000) } : {}),
+                        dateImport: new Date().toISOString(),
+                        auteurOriginal: auteurSource || p.auteurOriginal || ''
+                    };
+                });
+            if (prodsNouvelles.length > 0) {
+                db.setSync(cleProductions, [...prodsExistantes, ...prodsNouvelles]);
+                compteurs.ressources += prodsNouvelles.length;
+                details.push(`${prodsNouvelles.length} production(s)`);
+                console.log(`✅ Productions importées depuis: ${clesProdsSource.join(', ')}`);
             }
         }
 
@@ -2208,7 +2267,9 @@ async function exporterConfigurationComplete() {
     // 1. Rassembler toutes les ressources
     const toutesEchelles = db.getSync('echellesTemplates', []);
     const toutesGrilles = db.getSync('grillesTemplates', []);
-    const toutesProductions = db.getSync('productions', []);
+    // 🆕 FIX (1er fév 2026) : Utiliser la clé namespacée pour les productions
+    const cleProductions = (typeof window.cle === 'function') ? window.cle('productions') : 'productions';
+    const toutesProductions = db.getSync(cleProductions, []);
 
     // ✅ MODIFIÉ (6 jan 2026) : Utiliser détection heuristique pour filtrer démo + importées
     const echelles = filtrerRessourcesNonDemo(toutesEchelles, 'echelle');

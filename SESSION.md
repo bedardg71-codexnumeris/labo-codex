@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 96.2
 
-**Date** : 31 janvier 2026
-**Version** : Beta 96.2 (build 0131-1510)
+**Date** : 1er février 2026
+**Version** : Beta 96.2 (build 0201-0756)
 **Statut** : Application fonctionnelle pour H2026, A2024/A2025 archives, synchronisation multi-appareils opérationnelle
 
 ---
@@ -30,7 +30,71 @@
 - **Modal Confidentiel** : Informations sensibles sur l'étudiant (ÉPGC, services adaptés, etc.)
 - **Anonymisation groupes** : Numéros de groupe remplacés par lettres en mode anonymisation
 
-### Derniere tache completee (31 janvier - Beta 96.2)
+### Derniere tache completee (1er février - Beta 96.2)
+
+- **CORRECTION ERREUR SUPPRESSION GRILLES (Bugs Gregoire #5, #6, #7)**
+  - **Symptôme** : Impossible de supprimer certaines grilles de la barre latérale (bouton inactif)
+  - **Erreur console** : `null is not an object (evaluating 'document.getElementById('optionsImportExportGrilles').style')`
+  - **Cause** : L'élément `#optionsImportExportGrilles` a été supprimé en Beta 92, mais le code continuait à y accéder
+  - **Fonctions affectées** :
+    - `supprimerGrilleDepuisSidebar()` (ligne 3614)
+    - `annulerFormGrille()` (ligne 3625)
+  - **Correction** : Suppression des deux lignes qui référençaient l'élément supprimé
+  - **Fichier modifié** : `js/grilles.js`
+
+- **CORRECTION IMPORT PRODUCTIONS NON DÉTECTÉES (Bug Gregoire #3)**
+  - **Symptôme** : "Aucune production n'a été importée" après import de sauvegarde
+  - **Cause** : Les fonctions d'analyse et d'import ne cherchaient que dans les clés globales (`productions`, `bibliothequeProductions`), pas les clés namespacées (`h2026_productions`, etc.)
+  - **Fonctions corrigées** :
+    - `analyserRessourcesDetaillees()` : Recherche maintenant dans `*_productions`
+    - `executerImportSelectif()` : Importe depuis toutes les clés productions
+    - `executerImportVersBibliotheques()` : Même correction
+    - `exporterConfigurationComplete()` : Exporte depuis la clé namespacée
+  - **Fichier modifié** : `js/import-export.js`
+
+- **CORRECTION HORAIRES NON TROUVÉS (Bugs Gregoire #1, #2)**
+  - **Symptôme** : Aperçu présences vide, compte de semaines incorrect (horaireActif: non défini)
+  - **Cause** : La clé `horaires` est dans `CLES_NAMESPACEES` mais était lue sans namespacing dans 4 fichiers
+  - **Fichiers corrigés** :
+    - `js/horaire.js:92` - `obtenirSeancesHoraire()`
+    - `js/entites-ui.js:74`
+    - `js/trimestre-v2.js:1957`
+    - `js/migrations.js:1036`
+  - **Correction** : Utilisation de `cle('horaires')` pour obtenir la clé namespacée
+
+- **CORRECTION COURS A25 NON SAUVEGARDÉ (Bugs Gregoire #9, #10)**
+  - **Symptôme** : Cours créé pour A2025 était sauvegardé comme H2026 malgré permission d'écriture
+  - **Cause** : `reinitialiserFormCoursV2()` forçait session='H' et ne définissait pas l'année
+  - **Impact** : À la sauvegarde, année=2026 (défaut), donc trimestreId='h2026' au lieu de 'a2025'
+  - **Correction** : Extraction session/année depuis le trimestre actif (`obtenirTrimestreActif()`)
+  - **Fichier modifié** : `js/trimestre-v2.js`
+
+- **CORRECTION SECTION TRIMESTRE TRONQUÉE SUR iPad (Bug Gregoire #8)**
+  - **Symptôme** : Contenu coupé à droite (dates, boutons) sur iPad Safari
+  - **Cause** : Layouts CSS sans media queries pour tablettes (grilles 2 colonnes fixes)
+  - **Correction** : Ajout de media queries responsive pour :
+    - `.layout-sidebar-2col` : Sidebar réduite à 220px puis empilée sous 850px
+    - `.grille-2col` / `.grille-2col-gap15` : Empilées verticalement sur tablette
+    - `#reglages-trimestre` : Styles spécifiques pour dates et blocs compacts
+  - **Fichier modifié** : `styles.css`
+
+- **CORRECTION ERREUR `reglages-horaire` INTROUVABLE (Tous les rapports)**
+  - **Symptôme** : Erreur console `❌ Sous-section introuvable: reglages-horaire` au démarrage
+  - **Cause** : La sous-section a été renommée en `reglages-horaire-legacy` et masquée en Beta 95, mais des références pointaient encore vers l'ancien ID
+  - **Fichiers corrigés** :
+    - `js/guidage.js` : Étape "horaire" → pointe maintenant vers `reglages-trimestre`
+    - `js/saisie-presences.js` : Lien "Configurer l'horaire" → `reglages-trimestre`
+    - `index.html` : Lien dans l'aide → `reglages-trimestre`
+    - `js/primo-validation-champs.js` : Configuration `reglages-horaire` supprimée (obsolète)
+
+- **FEATURE REQUEST : SUPPRIMER PRATIQUES HORS-BIBLIOTHÈQUE (FR Gregoire #4)**
+  - **Demande** : Pouvoir supprimer des pratiques qui sont dans "Disponibles à ajouter" mais pas dans "Ma sélection"
+  - **Problème** : Avant, ces pratiques ne pouvaient qu'être ajoutées, pas supprimées
+  - **Solution** : Ajout d'un bouton "Supprimer" dans la section "Disponibles à ajouter" du modal Bibliothèque
+  - **Nouvelle fonction** : `supprimerPratiqueHorsBibliotheque(pratiqueId)`
+  - **Fichier modifié** : `js/pratiques.js`
+
+### Tache precedente (31 janvier - Beta 96.2)
 
 - **#48 - SYNCHRONISATION MULTI-APPAREILS (MacBook ↔ iPad)**
   - **Symptôme** : Import sur nouvel appareil échouait, données non chargées
