@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 96.2
 
 **Date** : 1er février 2026
-**Version** : Beta 96.2 (build 0201-0840)
+**Version** : Beta 96.2 (build 0201-0920)
 **Statut** : Application fonctionnelle pour H2026, A2024/A2025 archives, synchronisation multi-appareils opérationnelle
 
 ---
@@ -143,6 +143,25 @@
     - `styles.css` (styles modal bienvenue)
     - `js/modal-backup-reminder.js` (check bienvenue actif)
     - `index.html` (script + nouveautés)
+
+- **AMÉLIORATION MODAL BIENVENUE - REPÈRES VISUELS**
+  - Ajout d'une section expliquant les 3 icônes de l'en-tête :
+    - ✉️ Nouveautés — Corrections et nouvelles fonctionnalités
+    - 😎 Primo — Guide interactif et navigation générale
+    - ⚠️ Rappel backup — Protection des données
+  - **Fichiers modifiés** : `js/modal-bienvenue.js`, `styles.css`
+
+- **RENOMMAGE "DÉCOUVRIR L'APPLICATION" → "PREMIERS PAS"**
+  - Titre du bouton 😎 et du modal intro mis à jour
+  - **Fichier modifié** : `index.html`
+
+- **AMÉLIORATION ANIMATION BULLES EN-TÊTE**
+  - **Style 3D** : Gradient blanc→gris + box-shadow multicouche (identique aux points du tableau de bord)
+  - **Effet parallaxe** : Grandes bulles rapides (proches), petites lentes (éloignées)
+  - **Vitesses** : grande 30-50s, moyenne 55-75s, petite 80-120s
+  - **Couleur** : Toutes blanches (uniformité avec tableau de bord)
+  - **Référence** : CSS `index.html:1465-1560`, JS `js/main.js:128-240`
+  - **Fichiers modifiés** : `index.html`, `js/main.js`, `CLAUDE.md` (référence ajoutée)
 
 ### Tache precedente (31 janvier - Beta 96.2)
 
