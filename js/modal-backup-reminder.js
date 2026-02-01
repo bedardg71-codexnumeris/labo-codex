@@ -25,6 +25,11 @@
      * @returns {boolean}
      */
     function doitAfficherModal() {
+        // Ne pas afficher si le modal bienvenue est présent (premier lancement)
+        if (document.getElementById('modal-bienvenue')) {
+            return false;
+        }
+
         // Si l'utilisateur a choisi "ne plus rappeler", ne pas afficher
         const nePlusRappeler = localStorage.getItem(CLE_NE_PLUS_RAPPELER);
         if (nePlusRappeler === 'true') {

@@ -84,4 +84,16 @@ Gregoire a la memoire contextuelle reelle du projet.
 
 ---
 
+## Avant chaque commit
+
+**Mettre a jour le BUILD_ID** dans `index.html` (ligne ~15470) :
+```javascript
+const BUILD_ID = 'MMJJ-HHMM';  // Format: mois-jour-heure-minute (Toronto)
+```
+Exemple : `'0201-0840'` = 1er fevrier, 08h40
+
+Ce numero s'affiche dans l'en-tete de l'application et sert a identifier les versions.
+
+---
+
 **Derniere mise a jour** : 1er février 2026

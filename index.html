@@ -3193,6 +3193,7 @@
                 <div style="background: linear-gradient(135deg, #ffebee 0%, #fce4ec 100%); border-left: 3px solid #e91e63; border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
                     <strong style="color: #c2185b; display: block; margin-bottom: 8px;">Beta 96.2 (1er février) - Corrections testeurs :</strong>
                     <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
+                        <li><strong>Modal de bienvenue</strong> : Les nouveaux utilisateurs sont maintenant accueillis avec un choix : configuration guidée ou exploration libre</li>
                         <li><strong>Suppression grilles corrigée</strong> : Le bouton supprimer dans la barre latérale fonctionne à nouveau</li>
                         <li><strong>Import productions corrigé</strong> : Les productions namespacées sont maintenant détectées et importées</li>
                         <li><strong>Horaires par trimestre</strong> : Les horaires sont maintenant isolés par trimestre (aperçu présences fonctionnel)</li>
@@ -15440,6 +15441,9 @@
     <!-- TUTORIEL INTERACTIF - Guide après données démo (Beta 92) -->
     <script src="js/tutoriel-interactif.js?v=2025120102"></script>
 
+    <!-- MODAL BIENVENUE - Accueil premier lancement (Beta 96.2) -->
+    <script src="js/modal-bienvenue.js?v=2026020101"></script>
+
     <!-- RAPPEL BACKUP - Avertissement perte de données (Beta 95) -->
     <script src="js/modal-backup-reminder.js?v=2025122803"></script>
 
@@ -15463,7 +15467,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '96';
-        const BUILD_ID = '0131-1510';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0201-0840';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
