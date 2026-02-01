@@ -3187,15 +3187,29 @@
                 <button onclick="fermerModalNouveautes()" class="modal-fermer">✕</button>
 
                 <!-- Titre principal -->
-                <h2 class="modal-titre">✉️ Nouveautés</h2>
+                <h2 class="modal-titre">Nouveautés</h2>
+
+                <!-- Beta 96.2 - 1er février -->
+                <div style="background: linear-gradient(135deg, #ffebee 0%, #fce4ec 100%); border-left: 3px solid #e91e63; border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
+                    <strong style="color: #c2185b; display: block; margin-bottom: 8px;">Beta 96.2 (1er février) - Corrections testeurs :</strong>
+                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
+                        <li><strong>Suppression grilles corrigée</strong> : Le bouton supprimer dans la barre latérale fonctionne à nouveau</li>
+                        <li><strong>Import productions corrigé</strong> : Les productions namespacées sont maintenant détectées et importées</li>
+                        <li><strong>Horaires par trimestre</strong> : Les horaires sont maintenant isolés par trimestre (aperçu présences fonctionnel)</li>
+                        <li><strong>Cours A2025 corrigé</strong> : Les nouveaux cours sont créés dans le bon trimestre</li>
+                        <li><strong>Section Trimestre responsive</strong> : Affichage correct sur iPad (dates et boutons visibles)</li>
+                        <li><strong>Export horodaté</strong> : Les sauvegardes incluent maintenant l'heure (YYYY-MM-DD-HH-MM-SS)</li>
+                        <li><strong>Supprimer pratiques hors-bibliothèque</strong> : Nouveau bouton pour supprimer les pratiques non utilisées</li>
+                    </ul>
+                </div>
 
                 <!-- Beta 96.2 - 31 janvier (après-midi) -->
                 <div style="background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%); border-left: 3px solid #7c4dff; border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
                     <strong style="color: #512da8; display: block; margin-bottom: 8px;">Beta 96.2 (31 janvier PM) - Correction registre pratiques :</strong>
                     <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
-                        <li><strong>🔧 Pratiques configurables corrigées</strong> : Les pratiques créées via l'assistant (wizard) sont maintenant correctement chargées depuis le registre</li>
-                        <li><strong>📊 Normalisation des formats</strong> : Fusion automatique des champs racine + config interne pour compatibilité totale</li>
-                        <li><strong>🎯 Chargement échelles par ID</strong> : Les pratiques référençant une échelle par ID la chargent maintenant depuis la bibliothèque</li>
+                        <li><strong>Pratiques configurables corrigées</strong> : Les pratiques créées via l'assistant (wizard) sont maintenant correctement chargées depuis le registre</li>
+                        <li><strong>Normalisation des formats</strong> : Fusion automatique des champs racine + config interne pour compatibilité totale</li>
+                        <li><strong>Chargement échelles par ID</strong> : Les pratiques référençant une échelle par ID la chargent maintenant depuis la bibliothèque</li>
                     </ul>
                 </div>
 
@@ -3203,10 +3217,10 @@
                 <div style="background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border-left: 3px solid #4caf50; border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
                     <strong style="color: #2e7d32; display: block; margin-bottom: 8px;">Beta 96.2 (31 janvier AM) - Synchronisation multi-appareils :</strong>
                     <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
-                        <li><strong>✅ Import données personnelles corrigé</strong> : L'import sur un nouvel appareil (iPad, nouveau PC) fonctionne maintenant. Cochez "C'est ma propre sauvegarde" et les cases Étudiants/Présences/Notes se cochent automatiquement.</li>
-                        <li><strong>🔗 Préservation des IDs</strong> : Les pratiques, grilles, échelles et productions conservent leurs IDs originaux lors de l'import (plus de références cassées)</li>
-                        <li><strong>📅 Import données calendrier</strong> : Les bornes du trimestre, horaires et événements sont maintenant importés correctement</li>
-                        <li><strong>🔄 Synchronisation MacBook ↔ iPad</strong> : Export sur un appareil, import sur l'autre - toutes les données sont transférées fidèlement</li>
+                        <li><strong>Import données personnelles corrigé</strong> : L'import sur un nouvel appareil (iPad, nouveau PC) fonctionne maintenant. Cochez "C'est ma propre sauvegarde" et les cases Étudiants/Présences/Notes se cochent automatiquement.</li>
+                        <li><strong>Préservation des IDs</strong> : Les pratiques, grilles, échelles et productions conservent leurs IDs originaux lors de l'import (plus de références cassées)</li>
+                        <li><strong>Import données calendrier</strong> : Les bornes du trimestre, horaires et événements sont maintenant importés correctement</li>
+                        <li><strong>Synchronisation MacBook / iPad</strong> : Export sur un appareil, import sur l'autre - toutes les données sont transférées fidèlement</li>
                     </ul>
                 </div>
 
@@ -3214,25 +3228,25 @@
                 <div style="background: linear-gradient(135deg, #fff3e0 0%, #fff8f0 100%); border-left: 3px solid #ff9800; border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
                     <strong style="color: #e65100; display: block; margin-bottom: 8px;">Beta 96.2 (30 janvier) - Correction critique Export/Import :</strong>
                     <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
-                        <li><strong>🔧 Export complet depuis IndexedDB</strong> : La "Sauvegarde complète" exporte maintenant TOUTES les données, y compris celles stockées uniquement dans IndexedDB (groupes-cours, horaires, données volumineuses)</li>
-                        <li><strong>📥 Import groupe-cours et horaires</strong> : L'import reconnaît maintenant les clés <code>*_groupesCours</code>, <code>*_horaires</code> et <code>enseignants</code></li>
-                        <li><strong>📊 Affichage "Structure du trimestre"</strong> : Nouvelle section dans le modal d'import pour visualiser les groupes-cours et horaires avant importation</li>
-                        <li><strong>🐛 Correction UTF-16 Safari</strong> : Le bouton "Envoyer par courriel" des rapports de bug fonctionne maintenant sur Safari/iPad</li>
-                        <li><strong>📝 Archivage local des rapports</strong> : Les rapports de bug sont sauvegardés localement (max 50)</li>
+                        <li><strong>Export complet depuis IndexedDB</strong> : La "Sauvegarde complète" exporte maintenant TOUTES les données, y compris celles stockées uniquement dans IndexedDB (groupes-cours, horaires, données volumineuses)</li>
+                        <li><strong>Import groupe-cours et horaires</strong> : L'import reconnaît maintenant les clés <code>*_groupesCours</code>, <code>*_horaires</code> et <code>enseignants</code></li>
+                        <li><strong>Affichage "Structure du trimestre"</strong> : Nouvelle section dans le modal d'import pour visualiser les groupes-cours et horaires avant importation</li>
+                        <li><strong>Correction UTF-16 Safari</strong> : Le bouton "Envoyer par courriel" des rapports de bug fonctionne maintenant sur Safari/iPad</li>
+                        <li><strong>Archivage local des rapports</strong> : Les rapports de bug sont sauvegardés localement (max 50)</li>
                     </ul>
                 </div>
 
-                <!-- Beta 96.1 - 30 janvier -->
+                <!-- Beta 96.1 - 28 janvier -->
                 <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
-                    <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Beta 96.1 (30 janvier) :</strong>
+                    <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Beta 96.1 (28 janvier) :</strong>
                     <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
-                        <li><strong>🎲 Boîte à outils - Tirage au sort</strong> : Nouvelle section avec un outil pour tirer des étudiants au hasard (animation roulette, mode avec/sans remise, exclusions manuelles, persistance)</li>
-                        <li><strong>❓ Questions Flash</strong> : Deuxième outil pour tirer des questions au hasard, avec organisation par catégories, filtre par catégorie, et gestion complète (ajout, modification, suppression, changement de catégorie)</li>
-                        <li><strong>⚙️ Icône Réglages</strong> : Le texte "Réglages" remplacé par une icône d'engrenage dans la navigation principale</li>
+                        <li><strong>Boîte à outils - Tirage au sort</strong> : Nouvelle section avec un outil pour tirer des étudiants au hasard (animation roulette, mode avec/sans remise, exclusions manuelles, persistance)</li>
+                        <li><strong>Questions Flash</strong> : Deuxième outil pour tirer des questions au hasard, avec organisation par catégories, filtre par catégorie, et gestion complète (ajout, modification, suppression, changement de catégorie)</li>
+                        <li><strong>Icône Réglages</strong> : Le texte "Réglages" remplacé par une icône d'engrenage dans la navigation principale</li>
                         <li><strong>Animation 3D des points (Tableau de bord)</strong> : Les points blancs dans les barres oscillent avec un effet de rotation 3D (désactivable dans Préférences > Expérience visuelle)</li>
-                        <li><strong>Modal Confidentiel (Profil étudiant)</strong> : Nouveau bouton 🔒 dans la section Accompagnement pour saisir des informations sensibles (ÉPGC, cours antérieur, services adaptés, défis particuliers, notes personnelles)</li>
-                        <li><strong>Corrélations significatives uniquement</strong> : Les messages de corrélation A↔P et C↔P ne s'affichent que si r ≥ 0.5 (modérée ou plus)</li>
-                        <li><strong>Anonymisation des groupes</strong> : En mode Anonymisation, les numéros de groupe sont remplacés par des lettres (00001 → Gr. A)</li>
+                        <li><strong>Modal Confidentiel (Profil étudiant)</strong> : Nouveau bouton dans la section Accompagnement pour saisir des informations sensibles (ÉPGC, cours antérieur, services adaptés, défis particuliers, notes personnelles)</li>
+                        <li><strong>Corrélations significatives uniquement</strong> : Les messages de corrélation A/P et C/P ne s'affichent que si r >= 0.5 (modérée ou plus)</li>
+                        <li><strong>Anonymisation des groupes</strong> : En mode Anonymisation, les numéros de groupe sont remplacés par des lettres (00001 = Gr. A)</li>
                         <li><strong>Graphique Trajectoire amélioré</strong> : La courbe de l'élève sélectionné apparaît au premier plan</li>
                         <li><strong>Bouton Supprimer dans les bibliothèques</strong> : Suppression définitive des éléments avec confirmation et vérification des dépendances</li>
                         <li><strong>Bouton Dupliquer dans les bibliothèques</strong> : Créez rapidement une copie d'un élément existant</li>

@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 31 janvier 2026 (Beta 96.2 - Build 0131-1500)
+> **Derniere mise a jour** : 1er février 2026 (Beta 96.2 - Build 0201-0808)
 
 ---
 
@@ -54,25 +54,22 @@
   - **Besoin** : Certains cégeps ont des horaires atypiques (ex: 8h55-9h45)
   - **Impact** : Impossible de configurer correctement le calendrier pour ces cégeps
 
-- [ ] **#52** Erreurs null dans objectifs.js et trimestre-v2.js (Jordan, 18 jan)
+- [x] **#52** Erreurs null dans objectifs.js et trimestre-v2.js (Jordan, 18 jan) ✅ DÉJÀ CORRIGÉ (Beta 95.5)
   - **Erreur 1** : `Cannot set properties of null (setting 'innerHTML')` - objectifs.js:73
   - **Erreur 2** : `Cannot set properties of null (setting 'value')` - trimestre-v2.js:3463
-  - **Symptôme** : Bouton "Nouvel horaire" ne fonctionne pas
-  - **Impact** : Blocage de la configuration du trimestre
+  - **Correction** : Vérifications `if (!element) return;` ajoutées dans les deux fichiers
 
 - [ ] **#53** Menu "Format horaire" ne se met pas à jour automatiquement (Olivier, 6 jan)
   - **Symptôme** : Changer le nombre d'heures/semaine ne met pas à jour le format horaire
   - **Impact** : Choix incohérent affiché à l'utilisateur
 
-- [ ] **#54** UX : Message "Partage impossible" trop peu visible (Grégoire, 30 jan)
-  - **Symptôme** : Message en gris pâle, difficile à lire
-  - **Correction** : Mettre en ROUGE pour attirer l'attention
-  - **Fichier** : `js/import-export.js`
+- [x] **#54** UX : Message "Partage impossible" trop peu visible (Grégoire, 30 jan) ✅ DÉJÀ CORRIGÉ
+  - **Analyse** : Le message est déjà en rouge (fond #f8d7da, bordure #dc3545, texte #721c24)
+  - **Fichier** : `js/import-export.js` ligne 802-810
 
-- [ ] **#56** Nommage exports avec horodatage complet (Grégoire, 31 jan)
-  - **Format souhaité** : `sauvegarde-monitorage-YYYY-MM-DD-HH-MM-SS.json`
-  - **Raison** : Éviter confusion entre versions lors de multiples exports
-  - **Fichier** : `js/import-export.js` (fonction d'export)
+- [x] **#56** Nommage exports avec horodatage complet (Grégoire, 31 jan) ✅ CORRIGÉ (1er fév 2026)
+  - **Format** : `sauvegarde-monitorage-YYYY-MM-DD-HH-MM-SS.json`
+  - **Correction** : Horodatage complet ajouté dans `js/import-export.js` ligne 252
 
 - [x] **#57** Erreur console lors suppression grilles (Gregoire, 1er fév) ✅ CORRIGÉ (1er fév 2026)
   - **Symptôme** : Bouton supprimer grille inactif, grilles impossibles à retirer
