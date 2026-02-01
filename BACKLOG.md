@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 1er février 2026 (Beta 96.2 - Build 0201-0808)
+> **Derniere mise a jour** : 1er février 2026 (Beta 96.2 - Build 0201-0815)
 
 ---
 
@@ -49,10 +49,10 @@
   - **Souhait Bruno** : Pratique créée via Primo devrait être appliquée automatiquement
   - **Impact** : Testeurs doivent reconfigurer manuellement ce que Primo aurait dû faire
 
-- [ ] **#51** Création horaire : permettre heures non piles (Bruno, 5 jan)
+- [x] **#51** Création horaire : permettre heures non piles (Bruno, 5 jan) ✅ CORRIGÉ (1er fév 2026)
   - **Symptôme** : Cadre-horaire limité aux heures piles (8h00, 9h00...)
-  - **Besoin** : Certains cégeps ont des horaires atypiques (ex: 8h55-9h45)
-  - **Impact** : Impossible de configurer correctement le calendrier pour ces cégeps
+  - **Correction** : Dropdown remplacé par `<input type="time">` avec step 5 min
+  - **Fichier modifié** : `index.html`
 
 - [x] **#52** Erreurs null dans objectifs.js et trimestre-v2.js (Jordan, 18 jan) ✅ DÉJÀ CORRIGÉ (Beta 95.5)
   - **Erreur 1** : `Cannot set properties of null (setting 'innerHTML')` - objectifs.js:73

@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 96.2
 
 **Date** : 1er février 2026
-**Version** : Beta 96.2 (build 0201-0808)
+**Version** : Beta 96.2 (build 0201-0815)
 **Statut** : Application fonctionnelle pour H2026, A2024/A2025 archives, synchronisation multi-appareils opérationnelle
 
 ---
@@ -103,6 +103,11 @@
 - **NETTOYAGE ÉMOJIS DANS LES NOUVEAUTÉS**
   - Retrait de tous les émojis du modal Nouveautés pour un affichage plus sobre
   - Fichier modifié : `index.html`
+
+- **#51 - HORAIRE HEURES NON PILES**
+  - **Demande** : Permettre des heures de début non piles (ex: 8h55 au lieu de 8h00)
+  - **Solution** : Remplacement du dropdown par `<input type="time">` avec step="300" (5 min)
+  - **Fichier modifié** : `index.html` (ligne 7355)
 
 ### Tache precedente (31 janvier - Beta 96.2)
 

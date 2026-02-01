@@ -1,7 +1,7 @@
 # Suivi des bugs testeurs
 
 > **Objectif** : Tracker les bugs rapportés par les testeurs pour éviter le travail en double.
-> **Dernière mise à jour** : 1er février 2026 (Build 0201-0808)
+> **Dernière mise à jour** : 1er février 2026 (Build 0201-0815)
 
 ---
 
@@ -11,7 +11,6 @@
 |---|---------|------|-------------|----------|------------------------|
 | 49 | Jordan | 18 jan | Import CSV Omnivox : colonne SA non reconnue + accents mal gérés | Moyenne | js/trimestre-v2.js |
 | 50 | Bruno, Olivier | 5-6 jan | Primo : configuration incomplète après wizard | Moyenne | js/primo-modal.js |
-| 51 | Bruno | 5 jan | Création horaire : permettre heures non piles (8h55) | Moyenne | js/trimestre-v2.js |
 | 53 | Olivier | 6 jan | Menu "Format horaire" ne se met pas à jour automatiquement | Basse | js/trimestre-v2.js |
 
 ---
@@ -28,6 +27,7 @@
 | 62 | Grégoire | 1er fév | 1er fév | 0201-0756 | Erreur "reglages-horaire introuvable" | Références mises à jour vers reglages-trimestre |
 | 63 | Grégoire | 1er fév | 1er fév | 0201-0756 | FR: Supprimer pratiques hors-bibliothèque | Nouvelle fonction supprimerPratiqueHorsBibliotheque() |
 | 56 | Grégoire | 31 jan | 1er fév | 0201-0808 | Nommage exports sans horodatage complet | Format YYYY-MM-DD-HH-MM-SS (js/import-export.js) |
+| 51 | Bruno | 5 jan | 1er fév | 0201-0815 | Horaire heures non piles (8h55) | Input type="time" remplace dropdown (index.html) |
 | 52 | Jordan | 18 jan | Beta 95.5 | - | Erreurs null objectifs.js et trimestre-v2.js | Vérifications if (!element) ajoutées |
 | 54 | Grégoire | 30 jan | Beta 96.2 | - | Message "Partage impossible" peu visible | Déjà en rouge (fond #f8d7da, bordure #dc3545) |
 | 55 | - | 31 jan | 31 jan | 0131-1510 | Pratique configurable non trouvée dans registre | Nouvelle fonction construireConfigComplete() |

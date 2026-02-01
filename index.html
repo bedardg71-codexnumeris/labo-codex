@@ -7352,22 +7352,8 @@
                                 </div>
                                 <div class="groupe-form">
                                     <label>Heure début</label>
-                                    <select class="controle-form controle-form-compact" id="debutSeance">
-                                        <option value="">Choisir...</option>
-                                        <option value="08:00">8h00</option>
-                                        <option value="09:00">9h00</option>
-                                        <option value="10:00">10h00</option>
-                                        <option value="11:00">11h00</option>
-                                        <option value="12:00">12h00</option>
-                                        <option value="13:00">13h00</option>
-                                        <option value="14:00">14h00</option>
-                                        <option value="15:00">15h00</option>
-                                        <option value="16:00">16h00</option>
-                                        <option value="17:00">17h00</option>
-                                        <option value="18:00">18h00</option>
-                                        <option value="19:00">19h00</option>
-                                        <option value="20:00">20h00</option>
-                                    </select>
+                                    <!-- FIX #51 (1er fév 2026) : Input time pour heures non piles (ex: 8h55) -->
+                                    <input type="time" class="controle-form controle-form-compact" id="debutSeance" value="08:00" step="300">
                                 </div>
                                 <div class="groupe-form">
                                     <label>Périodes</label>
