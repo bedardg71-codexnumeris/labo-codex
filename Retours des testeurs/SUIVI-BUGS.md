@@ -1,7 +1,7 @@
 # Suivi des bugs testeurs
 
 > **Objectif** : Tracker les bugs rapportés par les testeurs pour éviter le travail en double.
-> **Dernière mise à jour** : 1er février 2026 (Build 0201-0825)
+> **Dernière mise à jour** : 1er février 2026 (Build 0201-0830)
 
 ---
 
@@ -9,7 +9,6 @@
 
 | # | Testeur | Date | Description | Priorité | Fichier(s) concerné(s) |
 |---|---------|------|-------------|----------|------------------------|
-| 53 | Olivier | 6 jan | Menu "Format horaire" ne se met pas à jour automatiquement | Basse | js/trimestre-v2.js |
 
 ---
 
@@ -28,6 +27,7 @@
 | 51 | Bruno | 5 jan | 1er fév | 0201-0815 | Horaire heures non piles (8h55) | Input type="time" remplace dropdown (index.html) |
 | 49 | Jordan | 18 jan | 1er fév | 0201-0820 | Import CSV Omnivox (SA + accents) | Encodage Windows-1252 + SA flexible col 5/6 |
 | 50 | Bruno, Olivier | 5-6 jan | 1er fév | 0201-0825 | Primo config incomplète (jour semaine) | creerHoraireDansBanquePrimo lit horaireHebdo namespacé |
+| 53 | Olivier | 6 jan | 1er fév | 0201-0830 | Menu Format horaire ne se met pas à jour | mettreAJourOptionsFormatHoraire() dynamique |
 | 52 | Jordan | 18 jan | Beta 95.5 | - | Erreurs null objectifs.js et trimestre-v2.js | Vérifications if (!element) ajoutées |
 | 54 | Grégoire | 30 jan | Beta 96.2 | - | Message "Partage impossible" peu visible | Déjà en rouge (fond #f8d7da, bordure #dc3545) |
 | 55 | - | 31 jan | 31 jan | 0131-1510 | Pratique configurable non trouvée dans registre | Nouvelle fonction construireConfigComplete() |

@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 96.2
 
 **Date** : 1er février 2026
-**Version** : Beta 96.2 (build 0201-0825)
+**Version** : Beta 96.2 (build 0201-0830)
 **Statut** : Application fonctionnelle pour H2026, A2024/A2025 archives, synchronisation multi-appareils opérationnelle
 
 ---
@@ -123,6 +123,12 @@
   - **Cause** : `creerHoraireDansBanquePrimo()` cherchait `reponses['horaireHebdomadaire']` (vide)
   - **Solution** : Lire les séances depuis `cle('horaireHebdo')` ou `seancesHoraire_{coursId}` (créées par creerSeancesHoraire)
   - **Fichier modifié** : `js/primo-modal.js`
+
+- **#53 - MENU FORMAT HORAIRE NE SE MET PAS À JOUR**
+  - **Symptôme** : Changer le nombre d'heures/semaine ne met pas à jour les options du dropdown Format horaire
+  - **Cause** : Options statiques (1×4h, 2×2h, 4×1h) au lieu de dynamiques
+  - **Solution** : Nouvelle fonction `mettreAJourOptionsFormatHoraire()` qui génère les diviseurs
+  - **Fichiers modifiés** : `index.html` (onchange), `js/trimestre-v2.js` (fonction)
 
 ### Tache precedente (31 janvier - Beta 96.2)
 

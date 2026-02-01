@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 1er février 2026 (Beta 96.2 - Build 0201-0825)
+> **Derniere mise a jour** : 1er février 2026 (Beta 96.2 - Build 0201-0830)
 
 ---
 
@@ -57,9 +57,10 @@
   - **Erreur 2** : `Cannot set properties of null (setting 'value')` - trimestre-v2.js:3463
   - **Correction** : Vérifications `if (!element) return;` ajoutées dans les deux fichiers
 
-- [ ] **#53** Menu "Format horaire" ne se met pas à jour automatiquement (Olivier, 6 jan)
-  - **Symptôme** : Changer le nombre d'heures/semaine ne met pas à jour le format horaire
-  - **Impact** : Choix incohérent affiché à l'utilisateur
+- [x] **#53** Menu "Format horaire" ne se met pas à jour automatiquement (Olivier, 6 jan) ✅ CORRIGÉ (1er fév 2026)
+  - **Symptôme** : Options statiques ne reflétaient pas le nb d'heures choisi
+  - **Correction** : Fonction `mettreAJourOptionsFormatHoraire()` génère les diviseurs dynamiquement
+  - **Fichiers modifiés** : `index.html`, `js/trimestre-v2.js`
 
 - [x] **#54** UX : Message "Partage impossible" trop peu visible (Grégoire, 30 jan) ✅ DÉJÀ CORRIGÉ
   - **Analyse** : Le message est déjà en rouge (fond #f8d7da, bordure #dc3545, texte #721c24)
