@@ -3091,6 +3091,46 @@ textarea {
     border-color: var(--gris-moyen);
 }
 
+.modal-bienvenue-reperes {
+    background: var(--gris-tres-clair);
+    border-radius: var(--radius-moyen);
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.modal-bienvenue-reperes-titre {
+    font-size: 0.9rem;
+    color: var(--gris-moyen);
+    margin: 0 0 0.75rem 0;
+}
+
+.modal-bienvenue-repere {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+}
+
+.modal-bienvenue-repere:not(:last-child) {
+    border-bottom: 1px solid var(--gris-clair);
+}
+
+.repere-icone {
+    font-size: 1.25rem;
+    width: 2rem;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.repere-texte {
+    font-size: 0.9rem;
+    color: var(--gris-fonce);
+}
+
+.repere-texte strong {
+    color: var(--texte-principal);
+}
+
 .modal-bienvenue-footer {
     padding: 1rem 1.5rem;
     background: var(--gris-tres-clair);

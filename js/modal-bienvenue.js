@@ -146,6 +146,22 @@
                         gérer les présences et évaluer les productions en continu.
                     </p>
 
+                    <div class="modal-bienvenue-reperes">
+                        <p class="modal-bienvenue-reperes-titre">Trois icônes dans l'en-tête pour t'accompagner :</p>
+                        <div class="modal-bienvenue-repere">
+                            <span class="repere-icone">✉️</span>
+                            <span class="repere-texte"><strong>Nouveautés</strong> — Corrections et nouvelles fonctionnalités</span>
+                        </div>
+                        <div class="modal-bienvenue-repere">
+                            <span class="repere-icone">😎</span>
+                            <span class="repere-texte"><strong>Primo</strong> — Guide interactif et navigation générale</span>
+                        </div>
+                        <div class="modal-bienvenue-repere">
+                            <span class="repere-icone">⚠️</span>
+                            <span class="repere-texte"><strong>Rappel backup</strong> — Protection de tes données</span>
+                        </div>
+                    </div>
+
                     <p style="margin-top: 1rem;">
                         <strong>Comment veux-tu commencer ?</strong>
                     </p>
