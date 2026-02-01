@@ -128,18 +128,17 @@ document.addEventListener('DOMContentLoaded', function () {
     // BETA 96.2: Durées selon taille pour effet parallaxe
     // Grande = proche = rapide, Petite = loin = lente
     const dureesParTaille = {
-        grande: [20, 22, 25, 28, 30],      // Rapide (proche de l'observateur)
-        moyenne: [40, 44, 48, 52, 56],     // Normal (distance moyenne)
-        petite: [65, 70, 75, 80, 85]       // Lent (loin de l'observateur)
+        grande: [30, 35, 40, 45, 50],      // Rapide (proche de l'observateur)
+        moyenne: [55, 60, 65, 70, 75],     // Normal (distance moyenne)
+        petite: [80, 90, 100, 110, 120]    // Lent (loin de l'observateur)
     };
 
-    function creerUneBulle(couleurs, tailles) {
+    function creerUneBulle(tailles) {
         const bulle = document.createElement('div');
 
-        // Classes aléatoires
-        const couleur = couleurs[Math.floor(Math.random() * couleurs.length)];
+        // Taille aléatoire (toutes les bulles sont blanches maintenant)
         const taille = tailles[Math.floor(Math.random() * tailles.length)];
-        bulle.className = `bulle ${taille} ${couleur}`;
+        bulle.className = `bulle ${taille}`;
 
         // Position de départ randomisée - PARTOUT sur l'écran
         const left = `${Math.random() * 100}%`; // 0% à 100% de la largeur
@@ -212,15 +211,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
         console.log(`   → Création de ${nbEtudiants} bulles (1 par étudiant)`);
 
-        // Couleurs des pratiques
-        const couleurs = ['som', 'pan-maitrise', 'pan-spec', 'pan-denotation'];
+        // BETA 96.2: Toutes les bulles blanches, tailles variées pour effet parallaxe
         const tailles = ['petite', 'moyenne', 'grande'];
-
-        // BETA 96.2: Durées gérées par dureesParTaille selon la taille (effet parallaxe)
 
         // Générer les bulles - toutes présentes dès le début
         for (let i = 0; i < nbEtudiants; i++) {
-            const bulle = creerUneBulle(couleurs, tailles);
+            const bulle = creerUneBulle(tailles);
 
             // Délai négatif pour que les bulles commencent à différents points de leur parcours
             // Si durée = 30s et 30 étudiants, chaque bulle commence à -1s, -2s, -3s...
