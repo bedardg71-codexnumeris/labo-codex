@@ -4888,6 +4888,53 @@ function afficherGroupeCoursDepuisBibliotheque(gcId) {
     }
 }
 
+/**
+ * FIX #53 (1er fév 2026) : Met à jour les options du dropdown Format horaire
+ * en fonction du nombre d'heures/semaine sélectionné
+ */
+function mettreAJourOptionsFormatHoraire() {
+    const inputHeures = document.getElementById('heuresParSemaine');
+    const selectFormat = document.getElementById('formatHoraire');
+
+    if (!inputHeures || !selectFormat) return;
+
+    const heures = parseInt(inputHeures.value) || 4;
+    const valeurActuelle = selectFormat.value;
+
+    // Trouver tous les diviseurs du nombre d'heures
+    const diviseurs = [];
+    for (let i = 1; i <= heures; i++) {
+        if (heures % i === 0) {
+            diviseurs.push(i);
+        }
+    }
+
+    // Générer les options
+    let html = '';
+    diviseurs.forEach(d => {
+        const periodes = d;
+        const heuresParPeriode = heures / d;
+        const value = `${periodes}x${heuresParPeriode}`;
+        const label = periodes === 1
+            ? `1 période de ${heuresParPeriode}h`
+            : `${periodes} périodes de ${heuresParPeriode}h`;
+        const selected = value === valeurActuelle ? ' selected' : '';
+        html += `<option value="${value}"${selected}>${label}</option>`;
+    });
+
+    selectFormat.innerHTML = html;
+
+    // Si la valeur actuelle n'existe plus, sélectionner la première option
+    if (!selectFormat.value) {
+        selectFormat.selectedIndex = 0;
+    }
+
+    console.log(`[Trimestre] Format horaire mis à jour pour ${heures}h:`, diviseurs.map(d => `${d}x${heures/d}`));
+}
+
+// Export pour le HTML
+window.mettreAJourOptionsFormatHoraire = mettreAJourOptionsFormatHoraire;
+
 // Exports globaux pour les fonctions groupe-cours
 window.chargerGroupeCoursV2 = chargerGroupeCoursV2;
 window.nouveauGroupeCoursV2 = nouveauGroupeCoursV2;

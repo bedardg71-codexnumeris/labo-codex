@@ -7218,8 +7218,9 @@
                                 </div>
                                 <div class="groupe-form">
                                     <label>Heures/semaine</label>
+                                    <!-- FIX #53 (1er fév 2026) : Met à jour le format horaire dynamiquement -->
                                     <input type="number" id="heuresParSemaine" class="controle-form controle-form-compact" value="4" min="1"
-                                        max="10">
+                                        max="10" onchange="mettreAJourOptionsFormatHoraire()">
                                 </div>
                                 <div class="groupe-form">
                                     <label>Format horaire</label>
