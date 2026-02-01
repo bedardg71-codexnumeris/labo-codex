@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 1er février 2026 (Beta 96.2 - Build 0201-0820)
+> **Derniere mise a jour** : 1er février 2026 (Beta 96.2 - Build 0201-0825)
 
 ---
 
@@ -41,11 +41,11 @@
   - **Problème 2** : Colonne SA non détectée → Position flexible (col 5 ou 6)
   - **Fichier modifié** : `js/trimestre-v2.js`
 
-- [ ] **#50** Primo : configuration incomplète après wizard (Bruno & Olivier, 5-6 jan)
-  - **Symptôme Bruno** : Jour de la semaine du cours pas configuré après Primo
-  - **Symptôme Olivier** : Retour page principale sans rien de nouveau après Primo
-  - **Souhait Bruno** : Pratique créée via Primo devrait être appliquée automatiquement
-  - **Impact** : Testeurs doivent reconfigurer manuellement ce que Primo aurait dû faire
+- [x] **#50** Primo : configuration incomplète après wizard (Bruno & Olivier, 5-6 jan) ✅ CORRIGÉ (1er fév 2026)
+  - **Symptôme** : Jour de la semaine du cours pas configuré après Primo
+  - **Cause** : `creerHoraireDansBanquePrimo()` lisait `reponses['horaireHebdomadaire']` (toujours vide)
+  - **Correction** : Lecture depuis `cle('horaireHebdo')` (créé par creerSeancesHoraire)
+  - **Fichier modifié** : `js/primo-modal.js`
 
 - [x] **#51** Création horaire : permettre heures non piles (Bruno, 5 jan) ✅ CORRIGÉ (1er fév 2026)
   - **Symptôme** : Cadre-horaire limité aux heures piles (8h00, 9h00...)

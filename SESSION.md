@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 96.2
 
 **Date** : 1er février 2026
-**Version** : Beta 96.2 (build 0201-0820)
+**Version** : Beta 96.2 (build 0201-0825)
 **Statut** : Application fonctionnelle pour H2026, A2024/A2025 archives, synchronisation multi-appareils opérationnelle
 
 ---
@@ -117,6 +117,12 @@
   - **Cause** : Position variable (colonne 5 ou 6 selon format)
   - **Solution** : Chercher SA dans colonnes 5 ET 6, normaliser valeurs (Oui/SA/X → "Oui")
   - **Fichier modifié** : `js/trimestre-v2.js`
+
+- **#50 - PRIMO CONFIGURATION INCOMPLÈTE (JOUR SEMAINE)**
+  - **Symptôme Bruno** : Jour de la semaine du cours pas configuré après Primo
+  - **Cause** : `creerHoraireDansBanquePrimo()` cherchait `reponses['horaireHebdomadaire']` (vide)
+  - **Solution** : Lire les séances depuis `cle('horaireHebdo')` ou `seancesHoraire_{coursId}` (créées par creerSeancesHoraire)
+  - **Fichier modifié** : `js/primo-modal.js`
 
 ### Tache precedente (31 janvier - Beta 96.2)
 
