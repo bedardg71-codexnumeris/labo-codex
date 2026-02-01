@@ -1781,30 +1781,40 @@ function creerOuRecupererEnseignantPrimo(reponses) {
 /**
  * Crée l'horaire dans la banque namespacée
  * Beta 95.2 : Utilisé par creerGroupeCoursDepuisPrimo()
+ * FIX #50 (1er fév 2026) : Lire les séances depuis horaireHebdo namespacé
+ * (créé par creerSeancesHoraire) au lieu de reponses['horaireHebdomadaire']
  */
 function creerHoraireDansBanquePrimo(reponses, coursId) {
     const cleHoraires = (typeof cle === 'function') ? cle('horaires') : 'horaires';
     const horaires = db.getSync(cleHoraires, []);
 
-    const horaireHebdo = reponses['horaireHebdomadaire'] || [];
+    // FIX #50 : Lire les séances depuis horaireHebdo namespacé (créé par creerSeancesHoraire)
+    // ou depuis seancesHoraire_{coursId} en fallback
+    const cleHoraireHebdo = (typeof cle === 'function') ? cle('horaireHebdo') : 'horaireHebdo';
+    let seances = db.getSync(cleHoraireHebdo, []);
 
-    // Ne pas créer si pas d'horaire
-    if (!horaireHebdo || horaireHebdo.length === 0) {
-        console.log('[Primo] Pas d\'horaire hebdomadaire, horaire non créé');
+    // Fallback : essayer seancesHoraire_{coursId}
+    if ((!seances || seances.length === 0) && coursId) {
+        seances = db.getSync(`seancesHoraire_${coursId}`, []);
+    }
+
+    // Ne pas créer si pas de séances
+    if (!seances || seances.length === 0) {
+        console.log('[Primo] Pas de séances trouvées, horaire non créé');
         return null;
     }
 
     const nouvelHoraire = {
         id: 'HOR_' + Date.now(),
         coursId: coursId,
-        seances: horaireHebdo,
+        seances: seances,
         dateCreation: new Date().toISOString().split('T')[0]
     };
 
     horaires.push(nouvelHoraire);
     db.setSync(cleHoraires, horaires);
 
-    console.log('[Primo] Horaire créé:', nouvelHoraire.id);
+    console.log('[Primo] Horaire créé:', nouvelHoraire.id, 'avec', seances.length, 'séance(s)');
     return nouvelHoraire.id;
 }
 
