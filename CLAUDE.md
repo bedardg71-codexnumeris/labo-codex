@@ -71,6 +71,10 @@ Utiliser `window.cle('nomCle')` pour obtenir la cle namespacee.
 **Quand un testeur signale un bug ou un besoin, on interrompt le plan en cours.**
 Les retours utilisateurs passent AVANT le backlog prevu.
 
+**Tracker** : `Retours des testeurs/SUIVI-BUGS.md`
+- Consulter AVANT de corriger un bug (evite le travail en double)
+- Bugs ouverts vs corriges avec date/build
+
 ---
 
 ## En cas de doute
