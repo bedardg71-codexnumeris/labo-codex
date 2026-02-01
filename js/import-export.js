@@ -249,7 +249,9 @@ async function executerExport() {
     
     const a = document.createElement('a');
     a.href = url;
-    const dateStr = new Date().toISOString().slice(0, 10);
+    // 🆕 FIX #56 (1er fév 2026) : Horodatage complet pour éviter confusion entre exports
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}-${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}-${String(now.getSeconds()).padStart(2,'0')}`;
 
     // Inclure le nom de l'utilisateur dans le fichier
     // ✅ CORRECTION (Beta 95.5) : Vérifier que auteur est une chaîne

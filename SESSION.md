@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 96.2
 
 **Date** : 1er février 2026
-**Version** : Beta 96.2 (build 0201-0756)
+**Version** : Beta 96.2 (build 0201-0808)
 **Statut** : Application fonctionnelle pour H2026, A2024/A2025 archives, synchronisation multi-appareils opérationnelle
 
 ---
@@ -93,6 +93,16 @@
   - **Solution** : Ajout d'un bouton "Supprimer" dans la section "Disponibles à ajouter" du modal Bibliothèque
   - **Nouvelle fonction** : `supprimerPratiqueHorsBibliotheque(pratiqueId)`
   - **Fichier modifié** : `js/pratiques.js`
+
+- **#56 - NOMMAGE EXPORTS AVEC HORODATAGE COMPLET**
+  - **Demande** : Inclure l'heure dans le nom des fichiers exportés pour éviter confusion
+  - **Avant** : `sauvegarde-monitorage-2026-02-01.json`
+  - **Après** : `sauvegarde-monitorage-2026-02-01-08-08-30.json`
+  - **Fichier modifié** : `js/import-export.js` (ligne 252)
+
+- **NETTOYAGE ÉMOJIS DANS LES NOUVEAUTÉS**
+  - Retrait de tous les émojis du modal Nouveautés pour un affichage plus sobre
+  - Fichier modifié : `index.html`
 
 ### Tache precedente (31 janvier - Beta 96.2)
 
