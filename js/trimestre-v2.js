@@ -2688,7 +2688,8 @@ function importerFichierEtudiantsV2(event) {
         const contenu = e.target.result;
         traiterDonneesImportV2(contenu);
     };
-    reader.readAsText(fichier);
+    // FIX #49 (1er fév 2026) : Omnivox exporte en Windows-1252, pas UTF-8
+    reader.readAsText(fichier, 'windows-1252');
 }
 
 /**
@@ -2725,13 +2726,17 @@ function traiterDonneesImportV2(contenu) {
         });
 
         if (colonnes.length >= 4) {
+            // FIX #49 (1er fév 2026) : SA peut être en colonne 5 ou 6 selon le format Omnivox
+            const saValue = (colonnes[5]?.trim() || colonnes[6]?.trim() || '').toUpperCase();
+            const sa = (saValue === 'OUI' || saValue === 'SA' || saValue === 'X') ? 'Oui' : '';
+
             donneesImportEnAttenteV2.push({
                 da: colonnes[0] || '',
                 groupe: colonnes[1] || '00001',
                 nom: colonnes[2] || '',
                 prenom: colonnes[3] || '',
                 programme: colonnes[4] || '',
-                sa: colonnes[6] || ''
+                sa: sa
             });
         }
     });

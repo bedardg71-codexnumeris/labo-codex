@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 1er février 2026 (Beta 96.2 - Build 0201-0815)
+> **Derniere mise a jour** : 1er février 2026 (Beta 96.2 - Build 0201-0820)
 
 ---
 
@@ -36,12 +36,10 @@
 
 ### Bugs critiques
 
-- [ ] **#49** Import CSV Omnivox : colonne SA non reconnue + accents mal gérés (Jordan, 18 jan)
-  - **Symptôme** : Colonne "SA" (services adaptés) pas importée car Omnivox n'ajoute pas l'espace
-  - **Symptôme 2** : Caractères accentués mal représentés (é, î) lors de l'import CSV
-  - **Ligne exemple** : `="1234567";="00008";="Rigby";="Éléonore";="200.B1"; ;`
-  - **Impact** : Données étudiants incomplètes ou corrompues
-  - **Fichier concerné** : `js/import-etudiants.js` ou équivalent
+- [x] **#49** Import CSV Omnivox : colonne SA non reconnue + accents mal gérés (Jordan, 18 jan) ✅ CORRIGÉ (1er fév 2026)
+  - **Problème 1** : Accents corrompus → Encodage Windows-1252 au lieu de UTF-8
+  - **Problème 2** : Colonne SA non détectée → Position flexible (col 5 ou 6)
+  - **Fichier modifié** : `js/trimestre-v2.js`
 
 - [ ] **#50** Primo : configuration incomplète après wizard (Bruno & Olivier, 5-6 jan)
   - **Symptôme Bruno** : Jour de la semaine du cours pas configuré après Primo

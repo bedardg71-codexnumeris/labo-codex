@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 96.2
 
 **Date** : 1er février 2026
-**Version** : Beta 96.2 (build 0201-0815)
+**Version** : Beta 96.2 (build 0201-0820)
 **Statut** : Application fonctionnelle pour H2026, A2024/A2025 archives, synchronisation multi-appareils opérationnelle
 
 ---
@@ -108,6 +108,15 @@
   - **Demande** : Permettre des heures de début non piles (ex: 8h55 au lieu de 8h00)
   - **Solution** : Remplacement du dropdown par `<input type="time">` avec step="300" (5 min)
   - **Fichier modifié** : `index.html` (ligne 7355)
+
+- **#49 - IMPORT CSV OMNIVOX (SA + ACCENTS)**
+  - **Problème 1** : Accents mal gérés (é → caractères bizarres)
+  - **Cause** : Omnivox exporte en Windows-1252, pas UTF-8
+  - **Solution** : `reader.readAsText(fichier, 'windows-1252')`
+  - **Problème 2** : Colonne SA non reconnue
+  - **Cause** : Position variable (colonne 5 ou 6 selon format)
+  - **Solution** : Chercher SA dans colonnes 5 ET 6, normaliser valeurs (Oui/SA/X → "Oui")
+  - **Fichier modifié** : `js/trimestre-v2.js`
 
 ### Tache precedente (31 janvier - Beta 96.2)
 
