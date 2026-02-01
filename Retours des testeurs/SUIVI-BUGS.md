@@ -1,7 +1,7 @@
 # Suivi des bugs testeurs
 
 > **Objectif** : Tracker les bugs rapportés par les testeurs pour éviter le travail en double.
-> **Dernière mise à jour** : 1er février 2026 (Build 0201-0830)
+> **Dernière mise à jour** : 1er février 2026 (Build 0201-0840)
 
 ---
 

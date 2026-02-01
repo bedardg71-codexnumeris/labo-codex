@@ -2960,6 +2960,150 @@ textarea {
 }
 
 /* ===============================
+   MODAL BIENVENUE (Premier lancement)
+   =============================== */
+
+.modal-bienvenue-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 10002;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal-bienvenue-overlay.modal-bienvenue-visible {
+    opacity: 1;
+}
+
+.modal-bienvenue-overlay.modal-bienvenue-fermeture {
+    opacity: 0;
+}
+
+.modal-bienvenue-contenu {
+    background: white;
+    border-radius: var(--radius-grand);
+    box-shadow: var(--shadow-fort);
+    max-width: 480px;
+    width: 90%;
+    overflow: hidden;
+    transform: scale(0.95);
+    transition: transform 0.3s ease;
+}
+
+.modal-bienvenue-visible .modal-bienvenue-contenu {
+    transform: scale(1);
+}
+
+.modal-bienvenue-header {
+    background: linear-gradient(135deg, var(--bleu-principal) 0%, #2980b9 100%);
+    color: white;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.modal-bienvenue-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.modal-bienvenue-subtitle {
+    margin: 0.5rem 0 0 0;
+    opacity: 0.9;
+    font-size: 1rem;
+}
+
+.modal-bienvenue-body {
+    padding: 1.5rem;
+    color: var(--gris-fonce);
+    line-height: 1.6;
+}
+
+.modal-bienvenue-body p {
+    margin: 0;
+}
+
+.modal-bienvenue-actions {
+    padding: 0 1.5rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.btn-bienvenue {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border: 2px solid transparent;
+    border-radius: var(--radius-moyen);
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s ease;
+}
+
+.btn-bienvenue-icone {
+    font-size: 1.75rem;
+    flex-shrink: 0;
+}
+
+.btn-bienvenue-texte {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.btn-bienvenue-texte strong {
+    font-size: 1rem;
+    color: inherit;
+}
+
+.btn-bienvenue-texte small {
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+
+.btn-bienvenue-principal {
+    background: linear-gradient(135deg, var(--bleu-principal) 0%, #2980b9 100%);
+    color: white;
+}
+
+.btn-bienvenue-principal:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+}
+
+.btn-bienvenue-secondaire {
+    background: var(--gris-tres-clair);
+    color: var(--gris-fonce);
+    border-color: var(--gris-clair);
+}
+
+.btn-bienvenue-secondaire:hover {
+    background: var(--gris-clair);
+    border-color: var(--gris-moyen);
+}
+
+.modal-bienvenue-footer {
+    padding: 1rem 1.5rem;
+    background: var(--gris-tres-clair);
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--gris-moyen);
+}
+
+.modal-bienvenue-footer p {
+    margin: 0;
+}
+
+/* ===============================
    WIZARD DE CRÉATION (PRATIQUES)
    =============================== */
 

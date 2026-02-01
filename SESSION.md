@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 96.2
 
 **Date** : 1er février 2026
-**Version** : Beta 96.2 (build 0201-0830)
+**Version** : Beta 96.2 (build 0201-0840)
 **Statut** : Application fonctionnelle pour H2026, A2024/A2025 archives, synchronisation multi-appareils opérationnelle
 
 ---
@@ -129,6 +129,20 @@
   - **Cause** : Options statiques (1×4h, 2×2h, 4×1h) au lieu de dynamiques
   - **Solution** : Nouvelle fonction `mettreAJourOptionsFormatHoraire()` qui génère les diviseurs
   - **Fichiers modifiés** : `index.html` (onchange), `js/trimestre-v2.js` (fonction)
+
+- **MODAL DE BIENVENUE POUR NOUVEAUX UTILISATEURS**
+  - **Problème** : Premier lancement sur iPad affiche le modal backup au lieu d'un accueil guidé
+  - **Cause** : Primo ne s'affichait qu'en mode Assisté, mais le mode par défaut est Normal
+  - **Solution** : Nouveau modal de bienvenue qui s'affiche avant tout autre modal
+  - **Choix offerts** :
+    - "Configuration guidée" : Passe en mode Assisté et lance Primo
+    - "Explorer par moi-même" : Ferme le modal avec conseil vers section Trimestre
+  - **Coordination** : Le modal backup ne s'affiche pas si le modal bienvenue est présent
+  - **Fichiers créés/modifiés** :
+    - `js/modal-bienvenue.js` (nouveau)
+    - `styles.css` (styles modal bienvenue)
+    - `js/modal-backup-reminder.js` (check bienvenue actif)
+    - `index.html` (script + nouveautés)
 
 ### Tache precedente (31 janvier - Beta 96.2)
 
