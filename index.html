@@ -1530,21 +1530,9 @@
             opacity: 0.7;
         }
 
-        /* Couleurs des 4 pratiques avec dégradé 3D renforcé (clair→foncé comme .barre-etudiant) */
-        .bulle.som {
-            background: linear-gradient(135deg, #ffe0b2 0%, var(--som-orange) 100%);
-        }
-
-        .bulle.std, .bulle.pan-maitrise {
-            background: linear-gradient(135deg, #bbdefb 0%, var(--std-bleu) 100%);
-        }
-
-        .bulle.spe, .bulle.pan-spec {
-            background: linear-gradient(135deg, #c8e6c9 0%, var(--spe-vert) 100%);
-        }
-
-        .bulle.den, .bulle.pan-denotation {
-            background: linear-gradient(135deg, #e1bee7 0%, var(--den-violet) 100%);
+        /* BETA 96.2: Toutes les bulles blanches (identique à .barre-etudiant du tableau de bord) */
+        .bulle {
+            background: linear-gradient(135deg, #ffffff 0%, #c8d4e0 100%);
         }
 
         /* Animation organique comme du pollen - mouvement fluide continu avec courbes */
@@ -15493,7 +15481,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '96';
-        const BUILD_ID = '0201-0915';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0201-0920';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
