@@ -864,6 +864,9 @@ function ouvrirModalRapportBug() {
                         <button id="btnCopierRapport" onclick="copierRapportBug(this)" class="btn btn-principal" style="flex: 1; min-width: 120px;">
                             Copier le rapport
                         </button>
+                        <button id="btnTelechargerTxt" onclick="telechargerRapportTxt(this)" class="btn btn-secondaire" style="flex: 1; min-width: 120px;">
+                            Enregistrer en TXT
+                        </button>
                         <button id="btnEnvoyerCourriel" onclick="envoyerRapportParCourriel(this)" class="btn btn-secondaire" style="flex: 1; min-width: 120px;">
                             Envoyer par courriel
                         </button>
@@ -956,6 +959,76 @@ async function copierRapportBug(btn) {
 }
 
 /**
+ * Enregistre le rapport en fichier TXT avec choix de l'emplacement
+ * Utilise File System Access API si disponible (Chrome/Edge), sinon fallback
+ */
+async function telechargerRapportTxt(btn) {
+    const description = document.getElementById('descriptionBug')?.value || '';
+    const prenom = document.getElementById('prenomTesteur')?.value || '';
+    const rapport = genererRapportBug(description, prenom);
+
+    // Générer le nom du fichier avec date et prénom
+    const maintenant = new Date();
+    const dateStr = maintenant.toISOString().slice(0, 10); // 2026-02-01
+    const heureStr = maintenant.toTimeString().slice(0, 5).replace(':', 'h'); // 21h45
+    const prenomNormalise = prenom.trim().toLowerCase().replace(/\s+/g, '-') || 'anonyme';
+    const nomFichier = `rapport-bug-${prenomNormalise}-${dateStr}-${heureStr}.txt`;
+
+    let succes = false;
+
+    // Essayer File System Access API (Chrome/Edge) pour choix de l'emplacement
+    if ('showSaveFilePicker' in window) {
+        try {
+            const handle = await window.showSaveFilePicker({
+                suggestedName: nomFichier,
+                types: [{
+                    description: 'Fichier texte',
+                    accept: { 'text/plain': ['.txt'] }
+                }]
+            });
+            const writable = await handle.createWritable();
+            await writable.write(rapport);
+            await writable.close();
+            succes = true;
+        } catch (e) {
+            // L'utilisateur a annulé ou erreur — fallback
+            if (e.name !== 'AbortError') {
+                console.warn('File System Access API non disponible, fallback téléchargement classique');
+            } else {
+                // Annulé par l'utilisateur, ne pas faire de fallback
+                return;
+            }
+        }
+    }
+
+    // Fallback : téléchargement classique (Safari, Firefox, ou si erreur)
+    if (!succes) {
+        const blob = new Blob([rapport], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = nomFichier;
+        a.click();
+        URL.revokeObjectURL(url);
+        succes = true;
+    }
+
+    // Archiver le rapport localement
+    archiverRapportBug(rapport, description, prenom);
+
+    // Feedback visuel
+    if (btn && succes) {
+        const texteOriginal = btn.textContent;
+        btn.textContent = '✓ Enregistré !';
+        btn.style.background = 'var(--vert-positif)';
+        setTimeout(() => {
+            btn.textContent = texteOriginal;
+            btn.style.background = '';
+        }, 2000);
+    }
+}
+
+/**
  * Ouvre le client courriel avec le rapport pré-rempli
  */
 function envoyerRapportParCourriel(btn) {
@@ -1027,6 +1100,7 @@ window.ouvrirModalRapportBug = ouvrirModalRapportBug;
 window.fermerModalRapportBug = fermerModalRapportBug;
 window.mettreAJourRapport = mettreAJourRapport;
 window.copierRapportBug = copierRapportBug;
+window.telechargerRapportTxt = telechargerRapportTxt;
 window.envoyerRapportParCourriel = envoyerRapportParCourriel;
 window.telechargerCaptureEcran = telechargerCaptureEcran;
 window.enregistrerAction = enregistrerAction;
