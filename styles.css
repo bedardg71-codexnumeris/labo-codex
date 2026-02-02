@@ -9019,45 +9019,47 @@ label:has(+ textarea:disabled) {
 /* 🆕 BETA 96.1: Animation tourbillon vertical (rotation cylindrique) */
 /* Utilise --amp (amplitude) définie par JS selon la distance au centre */
 @keyframes float-vertical {
-    /* Mouvement vertical avec variation de taille et opacité:
-       - Milieu montant: 100% opacité, scaleUp (devant, z=15)
-       - Haut: 99.5% opacité, z=12
-       - Milieu descendant: 99% opacité, scaleDown (derrière, z=5)
-       - Bas: 99.5% opacité, z=8 */
+    /* Mouvement vertical avec effet "liquide" : blur seul quand le point passe derrière
+       Simule le passage à travers la barre colorée */
     0% {
-        transform: translate(-50%, -50%) translateY(0px) scale(var(--scaleUp, 1.1)); /* Milieu, monte */
+        transform: translate(-50%, -50%) translateY(0px) scale(var(--scaleUp, 1.1)); /* Milieu, monte - DEVANT */
+        filter: blur(0px);
         opacity: 1;
         z-index: 15;
         animation-timing-function: ease-out;
     }
     25% {
         transform: translate(-50%, -50%) translateY(calc(var(--amp, 10px) * -1)) scale(1); /* TOP */
-        opacity: 0.995;
+        filter: blur(0.3px);
+        opacity: 1;
         z-index: 12;
         animation-timing-function: ease-in;
     }
     50% {
-        transform: translate(-50%, -50%) translateY(0px) scale(var(--scaleDown, 0.9)); /* Milieu, descend */
-        opacity: 0.99;
+        transform: translate(-50%, -50%) translateY(0px) scale(var(--scaleDown, 0.9)); /* Milieu, descend - DERRIÈRE */
+        filter: blur(0.5px);
+        opacity: 0.9;
         z-index: 5;
         animation-timing-function: ease-out;
     }
     75% {
         transform: translate(-50%, -50%) translateY(var(--amp, 10px)) scale(1); /* BOTTOM */
-        opacity: 0.995;
+        filter: blur(0.3px);
+        opacity: 1;
         z-index: 8;
         animation-timing-function: ease-in;
     }
     100% {
-        transform: translate(-50%, -50%) translateY(0px) scale(var(--scaleUp, 1.1)); /* Milieu, monte */
+        transform: translate(-50%, -50%) translateY(0px) scale(var(--scaleUp, 1.1)); /* Milieu, monte - DEVANT */
+        filter: blur(0px);
         opacity: 1;
         z-index: 15;
     }
 }
 
 /* Point représentant un étudiant (scatter plot) */
-/* BETA 96.1: Effet 3D - ombre décentrée simulant lumière latérale gauche→droite */
-/* BETA 96.1: Animation tourbillon 3D permanente */
+/* BETA 96.2: Effet sphère 3D avec highlight décentré */
+/* Animation tourbillon 3D permanente */
 .barre-etudiant {
     position: absolute;
     width: 10px;
@@ -9068,17 +9070,20 @@ label:has(+ textarea:disabled) {
     z-index: 10;
     transform: translate(-50%, -50%);
     top: 50%;
-    /* Style uniforme : blanc avec dégradé vers gris (même direction que l'ombre) */
-    background: linear-gradient(135deg, #ffffff 0%, #c8d4e0 100%);
     border: none;
-    /* Effet 3D: ombre propre décentrée (lumière gauche→droite) + highlight inset */
+    /* Effet sphère : gradient radial avec highlight en haut-gauche */
+    background: radial-gradient(
+        circle at 30% 30%,
+        #ffffff 0%,
+        #f0f4f8 25%,
+        #c8d4e0 60%,
+        #a0b0c0 100%
+    );
+    /* Ombre portée + reflet subtil en bas */
     box-shadow:
-        /* Ombre externe décentrée vers droite/bas (effet 3D) - grise */
-        3px 3px 6px rgba(60, 60, 60, 0.4),
-        /* Highlight inset en haut-gauche (reflet lumière) */
-        inset -1px -1px 2px rgba(60, 60, 60, 0.1),
-        inset 1px 1px 2px rgba(255, 255, 255, 0.8);
-    /* 🆕 BETA 96.1: Animation verticale - durée proportionnelle à l'amplitude */
+        2px 3px 6px rgba(0, 0, 0, 0.4),
+        inset 0 -1px 2px rgba(0, 0, 0, 0.1);
+    /* Animation verticale - durée proportionnelle à l'amplitude */
     animation: float-vertical var(--duration, 6s) linear infinite;
 }
 
@@ -9090,16 +9095,14 @@ label:has(+ textarea:disabled) {
 /* Animation et grossissement au hover - point devient noir avec effet 3D */
 .barre-etudiant:hover {
     z-index: 20;
+    transform: translate(-50%, -50%) scale(1.4); /* 🆕 BETA 96.2: Grossissement au hover */
     background: linear-gradient(135deg, rgba(40, 40, 40, 0.95) 0%, rgba(10, 10, 10, 0.9) 100%);
-    /* Effet 3D inversé pour le point noir */
+    /* 🆕 BETA 96.2: Ombres pour effet verre bombé noir */
     box-shadow:
-        /* Ombre externe plus prononcée */
-        3px 3px 6px rgba(0, 0, 0, 0.5),
-        /* Contour blanc */
+        0 6px 16px rgba(0, 0, 0, 0.35),
+        0 0 20px rgba(255, 255, 255, 0.3),
         0 0 0 2px rgba(255, 255, 255, 0.85),
-        /* Highlight inset (reflet) */
-        inset -1px -1px 3px rgba(0, 0, 0, 0.3),
-        inset 1px 1px 3px rgba(80, 80, 80, 0.4);
+        inset 0 -3px 6px rgba(0, 0, 0, 0.3);
     /* 🆕 BETA 96.1: Animation verticale au hover (même animation, grossie) */
     animation: float-vertical 12s ease-in-out infinite;
 }
@@ -9371,7 +9374,7 @@ label:has(+ textarea:disabled) {
 
 
 /* ===============================
-   BARRES DE PROGRESSION - Beta 90
+   BARRES DE PROGRESSION - Beta 96.2
    Spectres lumineux avec overlays "Nuit Élégante"
    Référence: GUIDE_BARRES_PROGRESSION 14 nov.html
    =============================== */
@@ -9379,8 +9382,8 @@ label:has(+ textarea:disabled) {
 /* === INDICATEURS A-C-P-E (Overlay 20%) === */
 
 .barre-indicateur {
-    height: 55px; /* 🆕 BETA 96: Augmenté de 40px pour meilleure lisibilité */
-    border-radius: var(--radius-grand); /* 🆕 BETA 96: Aligné avec les cartes (12px) */
+    height: 55px;
+    border-radius: var(--radius-grand);
     position: relative;
     background: linear-gradient(to right,
         #ff8c00 0%,   /* Orange foncé */
@@ -9392,8 +9395,8 @@ label:has(+ textarea:disabled) {
         #0ea5e9 100%  /* Bleu ciel */
     );
     box-shadow: var(--shadow-subtil);
-    overflow: hidden; /* 🆕 BETA 96: Pour contenir la courbe de Gauss */
-    perspective: 500px; /* 🆕 BETA 96.1: Perspective pour effet 3D des points */
+    overflow: hidden;
+    perspective: 500px;
 }
 
 .barre-indicateur-overlay {
@@ -9403,9 +9406,9 @@ label:has(+ textarea:disabled) {
     right: 0;
     bottom: 0;
     background: rgba(15, 30, 58, 0.2);
-    border-radius: var(--radius-grand); /* 🆕 BETA 96: Aligné avec les cartes */
+    border-radius: var(--radius-grand);
     pointer-events: none;
-    z-index: 1; /* 🆕 BETA 96.1: Derrière les points animés */
+    z-index: 1;
 }
 
 /* 🆕 BETA 96: Mini-courbe de Gauss superposée sur la barre */
@@ -9442,8 +9445,8 @@ label:has(+ textarea:disabled) {
 /* === PATTERNS D'APPRENTISSAGE (Overlay 35%) === */
 
 .barre-patterns {
-    height: 55px; /* 🆕 BETA 96.1: Aligné avec barre-indicateur ACPE */
-    border-radius: var(--radius-grand);  /* 🆕 BETA 96: Aligné avec les cartes (12px) */
+    height: 55px;
+    border-radius: var(--radius-grand);
     position: relative;
     background: linear-gradient(to right,
         #22c55e 0%,   /* Vert */
@@ -9453,6 +9456,8 @@ label:has(+ textarea:disabled) {
         #6366f1 100%  /* Indigo */
     );
     box-shadow: var(--shadow-subtil);
+    overflow: hidden;
+    perspective: 500px;
 }
 
 .barre-patterns-overlay {
@@ -9462,16 +9467,16 @@ label:has(+ textarea:disabled) {
     right: 0;
     bottom: 0;
     background: rgba(15, 30, 58, 0.35);
-    border-radius: var(--radius-grand);  /* 🆕 BETA 96: Aligné avec les cartes */
+    border-radius: var(--radius-grand);
     pointer-events: none;
-    z-index: 1; /* 🆕 BETA 96.1: Derrière les points animés */
+    z-index: 1;
 }
 
 /* === MODÈLE RàI (Overlay 40%) === */
 
 .barre-rai {
-    height: 55px; /* 🆕 BETA 96.1: Aligné avec barre-indicateur ACPE */
-    border-radius: var(--radius-grand);  /* 🆕 BETA 96: Aligné avec les cartes (12px) */
+    height: 55px;
+    border-radius: var(--radius-grand);
     position: relative;
     background: linear-gradient(to right,
         #0ea5e9 0%,   /* Bleu ciel */
@@ -9481,6 +9486,8 @@ label:has(+ textarea:disabled) {
         #6b21a8 100%  /* Mauve foncé */
     );
     box-shadow: var(--shadow-subtil);
+    overflow: hidden;
+    perspective: 500px;
 }
 
 .barre-rai-overlay {
@@ -9490,9 +9497,9 @@ label:has(+ textarea:disabled) {
     right: 0;
     bottom: 0;
     background: rgba(15, 30, 58, 0.4);
-    border-radius: var(--radius-grand);  /* 🆕 BETA 96: Aligné avec les cartes */
+    border-radius: var(--radius-grand);
     pointer-events: none;
-    z-index: 1; /* 🆕 BETA 96.1: Derrière les points animés */
+    z-index: 1;
 }
 
 /* === DOTS (Points blancs sur les barres) === */
