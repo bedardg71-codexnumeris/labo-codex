@@ -396,7 +396,7 @@ function parseAndPreview(content) {
             nom: ['nom', 'nom de l\'etudiant', 'nom de l\'élève', 'name', 'nom de famille', 'nom_famille', 'last name', 'lastname', 'family name'],
             prenom: ['prenom', 'prénom', 'prenom de l\'etudiant', 'prénom de l\'étudiant', 'prenom de l\'élève', 'prénom de l\'élève', 'firstname', 'first name', 'given name'],
             programme: ['programme', 'program', 'prog', 'prog.', 'code programme', 'code_programme'],
-            sa: ['sa', 'services adaptés', 'services adaptes', 'services_adaptes', 'adaptation', 'accommodations', ' sa'],
+            sa: ['sa', 's.a.', 's.a', 'services adaptés', 'services adaptes', 'services_adaptes', 'service adapté', 'service adapte', 'adaptation', 'accommodations', 'accomodations', 'mesures', 'mesures adaptees', 'mesures adaptées'],
             caf: ['caf', 'centre d\'aide', 'centre aide', 'aide francais', 'aide français', 'cote', 'côte', 'cote r', 'score']
         };
 
@@ -525,8 +525,9 @@ function parseAndPreview(content) {
                 student.da = student.da.replace(/[^0-9]/g, '');
                 if (!student.da) student.da = `AUTO-${Date.now() + index}`;
 
-                // Nettoyer Services adaptés (accepter Oui/O/X/✓)
-                if (student.sa && /^(oui|o|x|✓|1)$/i.test(student.sa.trim())) {
+                // Nettoyer Services adaptés (accepter Oui/O/X/✓/Y/Yes/Vrai/True)
+                // 🆕 FIX (4 fév 2026) : Accepter plus de variantes pour SA
+                if (student.sa && /^(oui|o|x|✓|1|y|yes|vrai|true|v)$/i.test(student.sa.trim())) {
                     student.sa = 'Oui';
                 }
 
