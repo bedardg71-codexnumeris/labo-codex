@@ -12681,3 +12681,85 @@ body.mode-assiste .btn-aide-contextuelle,
     opacity: 1;
 }
 
+
+/* ===============================
+   GESTION DES RESSOURCES (Page Données)
+   Ajouté Beta 96
+   =============================== */
+
+/* Accordéon Maintenance - texte rouge foncé visible */
+#accordeon-maintenance > .accordeon-header h3 {
+    color: #c62828 !important;
+}
+
+#accordeon-maintenance > .accordeon-header .accordeon-chevron {
+    color: #c62828 !important;
+}
+
+/* Section Gestion avancée des ressources */
+#section-gestion-ressources {
+    /* Plus besoin de scroll avec le dropdown */
+}
+
+/* Tableaux de ressources */
+.table-ressources-container {
+    margin-top: 10px;
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: 400px;
+}
+
+.table-ressources {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.table-ressources th,
+.table-ressources td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--bordure-claire);
+}
+
+.table-ressources th {
+    background: var(--bleu-pale);
+    color: var(--bleu-principal);
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.table-ressources tbody tr:hover {
+    background: var(--bleu-tres-pale);
+}
+
+.table-ressources .actions-cell {
+    white-space: nowrap;
+}
+
+.table-ressources .actions-cell .btn {
+    margin-right: 5px;
+}
+
+.table-ressources .actions-cell .btn:last-child {
+    margin-right: 0;
+}
+
+/* ===============================
+   RESPONSIVE - Tableaux ressources
+   =============================== */
+
+@media (max-width: 768px) {
+    .table-ressources th,
+    .table-ressources td {
+        padding: 8px 10px;
+        font-size: 0.85rem;
+    }
+
+    .table-ressources th:nth-child(3),
+    .table-ressources td:nth-child(3),
+    .table-ressources th:nth-child(5),
+    .table-ressources td:nth-child(5) {
+        display: none;
+    }
+}
