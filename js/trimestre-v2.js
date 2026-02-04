@@ -1264,11 +1264,21 @@ function chargerDropdownCoursV2() {
     if (!select) return;
 
     // Récupérer les cours depuis le stockage
-    const tousCours = db.getSync('listeCours', []);
+    // 🆕 FIX (4 fév 2026) : Fusionner listeCours ET cours pour compatibilité Primo
+    const listeCours = db.getSync('listeCours', []);
+    const coursCollection = db.getSync('cours', []);
+    // Fusionner les deux sources en évitant les doublons (par id)
+    const coursMap = new Map();
+    [...listeCours, ...coursCollection].forEach(c => {
+        if (c.id && !coursMap.has(c.id)) {
+            coursMap.set(c.id, c);
+        }
+    });
+    const tousCours = Array.from(coursMap.values());
     const coursActif = db.getSync('infoCours', null);
 
     console.log('[Trimestre V2] Chargement dropdown cours...');
-    console.log('[Trimestre V2] listeCours:', tousCours.length, 'cours');
+    console.log('[Trimestre V2] listeCours:', listeCours.length, '+ cours:', coursCollection.length, '= total:', tousCours.length, 'cours');
     console.log('[Trimestre V2] infoCours:', coursActif);
 
     // Obtenir le trimestre actif
@@ -1292,9 +1302,10 @@ function chargerDropdownCoursV2() {
 
     // Helper: obtenir le texte d'affichage d'un cours
     // 🆕 BETA 95.2 : Le groupe ne fait plus partie du cours (entité indépendante)
+    // 🆕 FIX (4 fév 2026) : Ajouter c.code pour compatibilité Primo
     const obtenirTexteCours = (c) => {
-        const sigle = c.sigle || c.codeCours || c.numero || '';
-        const titre = c.titre || c.nomCours || '';
+        const sigle = c.codeCours || c.sigle || c.code || c.numero || '';
+        const titre = c.nomCours || c.titre || c.nom || '';
         const texte = `${sigle} ${titre}`.trim();
         return texte || `Cours ${c.id || 'sans identifiant'}`;
     };
@@ -1482,7 +1493,8 @@ function supprimerCoursV2() {
     }
 
     // Confirmation
-    const nomCours = coursObj.sigle || coursObj.codeCours || coursObj.code || coursObj.id;
+    // 🆕 FIX (4 fév 2026) : Priorité codeCours
+    const nomCours = coursObj.codeCours || coursObj.sigle || coursObj.code || coursObj.id;
     const titreCours = coursObj.nomCours || coursObj.nom || coursObj.titre || '';
     if (!confirm(`Supprimer le cours "${nomCours} - ${titreCours}" ?\n\nCette action est irréversible.`)) {
         return;
@@ -1566,8 +1578,9 @@ function afficherDetailsCoursV2(cours) {
 
     console.log('[Trimestre V2] Affichage détails cours:', cours);
 
-    // Normaliser le sigle (sigle, codeCours ou numero)
-    const sigle = cours.sigle || cours.codeCours || cours.numero || '—';
+    // Normaliser le sigle (codeCours, sigle, code ou numero)
+    // 🆕 FIX (4 fév 2026) : Priorité codeCours, ajouter code pour Primo
+    const sigle = cours.codeCours || cours.sigle || cours.code || cours.numero || '—';
 
     // Normaliser le nom du cours
     const nomCours = cours.titre || cours.nomCours || '—';
@@ -1748,7 +1761,7 @@ function dupliquerCoursSelectionneV2() {
         formulaire.scrollIntoView({ behavior: 'smooth' });
     }
 
-    console.log('[Trimestre V2] Duplication du cours:', coursSelectionne.sigle || coursSelectionne.codeCours);
+    console.log('[Trimestre V2] Duplication du cours:', coursSelectionne.codeCours || coursSelectionne.sigle || coursSelectionne.code);
 }
 
 /**
@@ -1759,7 +1772,8 @@ function remplirFormCoursV2(cours) {
     console.log('[Trimestre V2] Remplissage formulaire avec:', cours);
 
     // Informations générales du cours
-    setValue('v2-codeCours', cours.sigle || cours.codeCours || '');
+    // 🆕 FIX (4 fév 2026) : Priorité codeCours, ajouter code pour Primo
+    setValue('v2-codeCours', cours.codeCours || cours.sigle || cours.code || '');
     setValue('v2-nomCours', cours.titre || cours.nomCours || '');
     setValue('v2-numeroCompetence', cours.numeroCompetence || '');
     setValue('v2-competence', cours.competence || '');
@@ -1804,8 +1818,9 @@ function afficherSyntheseCours(cours) {
         return;
     }
 
-    const code = cours.sigle || cours.codeCours || cours.code || '';
-    const nom = cours.titre || cours.nomCours || cours.nom || '';
+    // 🆕 FIX (4 fév 2026) : Priorité codeCours
+    const code = cours.codeCours || cours.sigle || cours.code || '';
+    const nom = cours.nomCours || cours.titre || cours.nom || '';
     const discipline = cours.discipline || '—';
     const competence = cours.numeroCompetence || cours.competence || '—';
 
@@ -3054,7 +3069,8 @@ function chargerSeancesV2() {
         if (coursId) {
             const infoCours = db.getSync('infoCours', null);
             if (infoCours) {
-                const sigle = infoCours.sigle || infoCours.codeCours || '';
+                // 🆕 FIX (4 fév 2026) : Priorité codeCours
+                const sigle = infoCours.codeCours || infoCours.sigle || infoCours.code || '';
                 const groupe = infoCours.groupe || '';
                 coursActifInfo = groupe ? `${sigle} (${groupe})` : sigle;
             }
@@ -3953,15 +3969,27 @@ function populerDropdownsAssemblageV2() {
     }
 
     // Dropdown Cours
+    // 🆕 FIX (4 fév 2026) : Fusionner listeCours ET cours pour compatibilité Primo
     const selectCours = document.getElementById('v2-gc-cours');
     if (selectCours) {
-        const cours = db.getSync('listeCours', []) || db.getSync('cours', []);
+        const listeCours = db.getSync('listeCours', []);
+        const coursCollection = db.getSync('cours', []);
+        // Fusionner les deux sources en évitant les doublons (par id)
+        const coursMap = new Map();
+        [...listeCours, ...coursCollection].forEach(c => {
+            if (c.id && !coursMap.has(c.id)) {
+                coursMap.set(c.id, c);
+            }
+        });
+        const cours = Array.from(coursMap.values());
+
         let html = '<option value="">— Choisir un cours —</option>';
         cours.forEach(c => {
-            const code = c.sigle || c.codeCours || c.code || '';
+            const code = c.codeCours || c.sigle || c.code || '';
             const nom = c.nomCours || c.nom || c.titre || '';
-            const label = code ? `${code} - ${nom}` : nom;
-            html += `<option value="${c.id || code}">${label}</option>`;
+            let label = code ? `${code}${nom ? ' - ' + nom : ''}` : nom;
+            if (!label) label = `Cours ${c.id || 'inconnu'}`;
+            html += `<option value="${c.id}">${label}</option>`;
         });
         selectCours.innerHTML = html;
     }
@@ -4066,13 +4094,16 @@ function genererNomGroupeCoursV2() {
     }
 
     // Cours sélectionné
+    // 🆕 FIX (4 fév 2026) : Fusionner listeCours ET cours, priorité codeCours
     const coursId = document.getElementById('v2-gc-cours')?.value;
     let codeCours = '';
     if (coursId) {
-        const cours = db.getSync('listeCours', []) || db.getSync('cours', []);
+        const listeCours = db.getSync('listeCours', []);
+        const coursCollection = db.getSync('cours', []);
+        const cours = [...listeCours, ...coursCollection];
         // Beta 95.2: Chercher par id, sigle, codeCours OU code (Primo utilise 'code')
         const coursObj = cours.find(c => c.id === coursId || c.sigle === coursId || c.codeCours === coursId || c.code === coursId);
-        codeCours = coursObj?.sigle || coursObj?.codeCours || coursObj?.code || '';
+        codeCours = coursObj?.codeCours || coursObj?.sigle || coursObj?.code || '';
     }
 
     // Groupe d'étudiants
@@ -4204,10 +4235,13 @@ function mettreAJourCarteResumeGroupeCoursV2(gc) {
     }
 
     // Récupérer les infos liées
-    const cours = db.getSync('listeCours', []) || db.getSync('cours', []);
+    // 🆕 FIX (4 fév 2026) : Fusionner listeCours ET cours, priorité codeCours
+    const listeCours = db.getSync('listeCours', []);
+    const coursCollection = db.getSync('cours', []);
+    const cours = [...listeCours, ...coursCollection];
     // Beta 95.2: Chercher par id, sigle, codeCours OU code (Primo utilise 'code')
     const coursObj = cours.find(c => c.id === gc.coursId || c.sigle === gc.coursId || c.codeCours === gc.coursId || c.code === gc.coursId);
-    const coursNom = coursObj ? (coursObj.sigle || coursObj.codeCours || coursObj.code || '') + ' - ' + (coursObj.nomCours || coursObj.nom || coursObj.titre || '') : '—';
+    const coursNom = coursObj ? (coursObj.codeCours || coursObj.sigle || coursObj.code || '') + ' - ' + (coursObj.nomCours || coursObj.nom || coursObj.titre || '') : '—';
 
     const cleHoraires = typeof cle === 'function' ? cle('horaires') : 'horaires';
     const horaires = db.getSync(cleHoraires, []);
@@ -6173,17 +6207,22 @@ async function mettreAJourApercuGroupeCours() {
     }
 
     // Récupérer infos cours
+    // 🆕 FIX (4 fév 2026) : Chercher dans toutes les sources, ajouter code pour Primo
     let cours = null;
     if (typeof CoursEntite !== 'undefined') {
         cours = await CoursEntite.obtenirParId(coursId);
     }
     if (!cours) {
         const listeCours = db.getSync('listeCours', []);
-        cours = listeCours.find(c => c.id === coursId || c.sigle === coursId);
+        cours = listeCours.find(c => c.id === coursId || c.sigle === coursId || c.code === coursId);
+    }
+    if (!cours) {
+        const coursCollection = db.getSync('cours', []);
+        cours = coursCollection.find(c => c.id === coursId || c.sigle === coursId || c.code === coursId);
     }
 
     // 🆕 FIX (9 jan 2026) : Libellé lisible même sans cours
-    const sigle = cours?.codeCours || cours?.sigle || null;
+    const sigle = cours?.codeCours || cours?.sigle || cours?.code || null;
     const apercu = sigle ? `${sigle} gr.${groupe}` : `Groupe ${groupe}`;
 
     apercuSpan.textContent = apercu;

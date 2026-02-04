@@ -1032,7 +1032,7 @@ function supprimerCours(id) {
     // ===============================
     // CONFIRMATION DÉTAILLÉE (Beta 93.5)
     // ===============================
-    const message = `Supprimer le cours ${coursASupprimer.sigle || coursASupprimer.codeCours} - ${coursASupprimer.titre || coursASupprimer.nomCours} (Groupe ${coursASupprimer.groupe}) ?\n\n` +
+    const message = `Supprimer le cours ${coursASupprimer.codeCours || coursASupprimer.sigle || coursASupprimer.code} - ${coursASupprimer.nomCours || coursASupprimer.titre} (Groupe ${coursASupprimer.groupe}) ?\n\n` +
         `Cette action supprimera :\n` +
         `• ${nbEtudiants} étudiant(s)\n` +
         `• ${nbProductions} production(s)\n` +

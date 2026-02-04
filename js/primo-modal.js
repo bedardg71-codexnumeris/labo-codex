@@ -1718,8 +1718,9 @@ function creerGroupeCoursDepuisPrimo(reponses) {
     }
 
     // Générer le nom du groupe-cours (aligné sur Trimestre)
+    // 🆕 FIX (4 fév 2026) : Priorité codeCours
     const groupeNum = reponses['numero-groupe'] || '00001';
-    const codeCours = infoCours.sigle || infoCours.codeCours || infoCours.code || '';
+    const codeCours = infoCours.codeCours || infoCours.sigle || infoCours.code || '';
     const nomGC = genererNomGroupeCoursPrimo(trimestreId, codeCours, groupeNum, horaireId);
 
     const nouveauGC = {

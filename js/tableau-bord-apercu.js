@@ -113,7 +113,8 @@ function mettreAJourContextesSections(nbEtudiants) {
 
     if (infoCours) {
         // infoCours contient directement sigle/codeCours et groupe
-        const sigle = infoCours.sigle || infoCours.codeCours || '';
+        // 🆕 FIX (4 fév 2026) : Priorité codeCours, ajouter code pour Primo
+        const sigle = infoCours.codeCours || infoCours.sigle || infoCours.code || '';
         const groupe = infoCours.groupe || '';
 
         if (sigle && groupe) {
