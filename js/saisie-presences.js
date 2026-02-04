@@ -987,15 +987,100 @@ function basculerVerrouillageDate(dateStr) {
 
     const index = datesVerrouillees.indexOf(dateStr);
     if (index > -1) {
+        // Déverrouillage
         datesVerrouillees.splice(index, 1);
         console.log('🔓 Date déverrouillée:', dateStr);
     } else {
+        // 🆕 FIX (3 fév 2026) : Sauvegarder les présences AVANT de verrouiller
+        sauvegarderPresencesSansValidation(dateStr);
         datesVerrouillees.push(dateStr);
         console.log('🔒 Date verrouillée:', dateStr);
     }
 
     db.setSync('datesVerrouillees', datesVerrouillees);
     initialiserSaisiePresences();
+}
+
+/**
+ * 🆕 FIX (3 fév 2026) : Sauvegarde les présences sans validation
+ * Utilisé lors du verrouillage pour ne pas perdre les données saisies
+ */
+function sauvegarderPresencesSansValidation(dateStr) {
+    console.log('💾 Sauvegarde des présences avant verrouillage pour:', dateStr);
+
+    // Obtenir les étudiants du cours actif
+    const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
+        ? obtenirEtudiantsCoursActif()
+        : obtenirDonneesSelonMode('groupeEtudiants');
+
+    if (!etudiants || etudiants.length === 0) {
+        console.warn('⚠️ Aucun étudiant à sauvegarder');
+        return;
+    }
+
+    // Lire TOUTES les présences existantes
+    const clePresences = (typeof cle === 'function') ? cle('presences') : 'presences';
+    let presences = db.getSync(clePresences, []);
+    if (!Array.isArray(presences)) presences = [];
+
+    const coursId = typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null;
+    const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : 55;
+
+    // Filtrer par sous-groupe si sélectionné
+    const selectGroupe = document.getElementById('selectGroupePresences');
+    const groupeFiltre = selectGroupe ? selectGroupe.value : '';
+    let etudiantsATraiter = groupeFiltre
+        ? etudiants.filter(e => e.groupe === groupeFiltre)
+        : etudiants;
+
+    // Préserver les flags facultatifs
+    const flagsFacultatifs = {};
+    presences.forEach(p => {
+        const matchCoursId = !coursId || !p.coursId || p.coursId === coursId;
+        if (p.date === dateStr && p.facultatif === true && matchCoursId) {
+            flagsFacultatifs[p.da] = true;
+        }
+    });
+
+    // Supprimer les anciennes présences pour cette date et ce cours
+    presences = presences.filter(p => {
+        if (p.date !== dateStr) return true;
+        if (coursId && p.coursId && p.coursId !== coursId) return true;
+        return !etudiantsATraiter.some(e => e.da === p.da);
+    });
+
+    // Ajouter les nouvelles présences depuis le formulaire
+    let compteur = 0;
+    etudiantsATraiter.forEach(etudiant => {
+        const inputPeriodes = document.getElementById(`periodes_${etudiant.da}`);
+        const inputNotes = document.getElementById(`notes_${etudiant.da}`);
+
+        if (inputPeriodes) {
+            const periodesPresentes = parseFloat(inputPeriodes.value) || 0;
+            const heures = (periodesPresentes * dureePeriode) / 60;
+            const notes = inputNotes ? inputNotes.value.trim() : '';
+
+            const presenceObj = {
+                date: dateStr,
+                da: etudiant.da,
+                periodesPresentes: periodesPresentes,
+                heures: heures,
+                notes: notes,
+                coursId: coursId
+            };
+
+            if (flagsFacultatifs[etudiant.da] === true) {
+                presenceObj.facultatif = true;
+            }
+
+            presences.push(presenceObj);
+            compteur++;
+        }
+    });
+
+    // Sauvegarder
+    db.setSync(clePresences, presences);
+    console.log(`✅ ${compteur} présences sauvegardées pour ${dateStr}`);
 }
 
 /**
@@ -1061,28 +1146,41 @@ function initialiserSaisiePresences() {
     const validation = validerDateSaisie(dateInput.value);
 
     if (!validation.valide) {
-        let message = '';
+        let messageTableau = '';
+        let messageCompteur = '';
         switch (validation.raison) {
             case 'vide':
-                message = 'Veuillez sélectionner une date';
+                messageTableau = 'Veuillez sélectionner une date';
+                messageCompteur = 'Sélectionnez une date';
                 break;
             case 'pas-cours':
-                message = 'Ce jour n\'est pas un jour de cours';
+                messageTableau = ''; // Message affiché uniquement dans la carte de statistiques
+                messageCompteur = 'Pas de cours pour ce groupe à cette date';
                 break;
             case 'future':
-                message = 'Cette date est dans le futur';
+                messageTableau = 'Cette date est dans le futur';
+                messageCompteur = 'Date future';
                 break;
             case 'hors-calendrier':
-                message = 'Cette date est hors du calendrier scolaire';
+                messageTableau = 'Cette date est hors du calendrier scolaire';
+                messageCompteur = 'Hors calendrier';
                 break;
             default:
-                message = 'Date invalide';
+                messageTableau = 'Date invalide';
+                messageCompteur = 'Date invalide';
         }
 
         const tbody = document.getElementById('tbody-saisie-presences');
         if (tbody) {
-            tbody.innerHTML = `<tr><td colspan="8" class="u-text-center-erreur">${message}</td></tr>`;
+            if (messageTableau) {
+                tbody.innerHTML = `<tr><td colspan="8" class="u-text-center-erreur">${messageTableau}</td></tr>`;
+            } else {
+                tbody.innerHTML = '';
+            }
         }
+
+        // 🆕 FIX (3 fév 2026) : Afficher message explicite dans la carte de statistiques
+        afficherMessageCompteurPresences(messageCompteur);
 
         mettreAJourEnteteDateSeance('');
         return;
@@ -1219,6 +1317,9 @@ function mettreAJourEnteteDateSeance(dateStr) {
  * Charge et affiche le tableau des présences avec toutes les fonctionnalités
  */
 function chargerTableauPresences(dateStr, estVerrouille) {
+    // 🆕 FIX (3 fév 2026) : Restaurer le compteur si un message était affiché
+    restaurerCompteurPresences();
+
     const tbody = document.getElementById('tbody-saisie-presences');
     const selectGroupe = document.getElementById('selectGroupePresences');
     const groupeFiltre = selectGroupe ? selectGroupe.value : '';
@@ -2208,6 +2309,51 @@ function mettreAJourCompteurPresences() {
     if (spanAbsents) spanAbsents.textContent = nbAbsents;
     if (spanTotal) spanTotal.textContent = nbTotal;
     if (spanAssiduiteAujourdhui) spanAssiduiteAujourdhui.textContent = tauxAssiduiteAujourdhui + '%';
+
+    // Restaurer l'affichage normal du compteur (au cas où un message était affiché)
+    const compteur = document.getElementById('compteur-presences');
+    if (compteur) {
+        compteur.style.borderLeftColor = 'var(--bleu-principal)';
+        compteur.style.background = 'var(--bleu-tres-pale)';
+    }
+}
+
+/**
+ * 🆕 FIX (3 fév 2026) : Affiche un message dans la carte de statistiques
+ * Utilisé quand il n'y a pas de cours pour ce groupe à cette date
+ */
+function afficherMessageCompteurPresences(message) {
+    const compteur = document.getElementById('compteur-presences');
+    if (!compteur) return;
+
+    // Changer le style pour indiquer un état spécial
+    compteur.style.borderLeftColor = 'var(--jaune-principal, #f0ad4e)';
+    compteur.style.background = 'var(--jaune-tres-pale, #fff8e1)';
+
+    // Remplacer le contenu par le message
+    compteur.innerHTML = `
+        <span style="color: var(--texte-secondaire); font-style: italic;">
+            ${message}
+        </span>
+    `;
+}
+
+/**
+ * Restaure l'affichage normal de la carte de statistiques
+ */
+function restaurerCompteurPresences() {
+    const compteur = document.getElementById('compteur-presences');
+    if (!compteur) return;
+
+    compteur.style.borderLeftColor = 'var(--bleu-principal)';
+    compteur.style.background = 'var(--bleu-tres-pale)';
+
+    compteur.innerHTML = `
+        <span>Présents : <span id="nb-presents">0</span></span>
+        <span>Absents : <span id="nb-absents">0</span></span>
+        <span>Total : <span id="nb-total">0</span></span>
+        <span>Assiduité aujourd'hui : <span id="assiduite-aujourdhui">0%</span></span>
+    `;
 }
 
 window.tousPresents = tousPresents;

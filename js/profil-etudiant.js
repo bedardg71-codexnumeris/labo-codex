@@ -8521,6 +8521,13 @@ function ouvrirModalConfidentiel(da) {
 
     document.getElementById('confidentiel-notes').value = infos.notes || '';
 
+    // Portrait de lecteur
+    document.getElementById('confidentiel-portrait-structure').value = infos.portraitStructure || '';
+    document.getElementById('confidentiel-portrait-rigueur').value = infos.portraitRigueur || '';
+    document.getElementById('confidentiel-portrait-plausibilite').value = infos.portraitPlausibilite || '';
+    document.getElementById('confidentiel-portrait-nuance').value = infos.portraitNuance || '';
+    document.getElementById('confidentiel-portrait-francais').value = infos.portraitFrancais || '';
+
     // Afficher le modal
     document.getElementById('modalConfidentiel').style.display = 'flex';
 }
@@ -8554,7 +8561,13 @@ function sauvegarderConfidentiel() {
         defiIntegration: document.getElementById('confidentiel-defi-integration').checked,
         defiOrganisationScolaire: document.getElementById('confidentiel-defi-organisation-scolaire').checked,
         defiOrganisationCitoyenne: document.getElementById('confidentiel-defi-organisation-citoyenne').checked,
-        notes: document.getElementById('confidentiel-notes').value.trim()
+        notes: document.getElementById('confidentiel-notes').value.trim(),
+        // Portrait de lecteur
+        portraitStructure: document.getElementById('confidentiel-portrait-structure').value,
+        portraitRigueur: document.getElementById('confidentiel-portrait-rigueur').value,
+        portraitPlausibilite: document.getElementById('confidentiel-portrait-plausibilite').value,
+        portraitNuance: document.getElementById('confidentiel-portrait-nuance').value,
+        portraitFrancais: document.getElementById('confidentiel-portrait-francais').value
     };
 
     // Sauvegarder
@@ -8617,7 +8630,9 @@ function aDesInfosConfidentielles(da) {
            infos.coursDecrochage || infos.coursRenforcement ||
            infos.defiFLS || infos.defiSocialisation || infos.defiIntegration ||
            infos.defiOrganisationScolaire || infos.defiOrganisationCitoyenne ||
-           (infos.notes && infos.notes.length > 0);
+           (infos.notes && infos.notes.length > 0) ||
+           infos.portraitStructure || infos.portraitRigueur || infos.portraitPlausibilite ||
+           infos.portraitNuance || infos.portraitFrancais;
 }
 
 // 🆕 BETA 96.1: Exporter les fonctions du modal confidentiel

@@ -60,10 +60,22 @@ function cleHoraire(coursId) {
  * @returns {string} - Clé de stockage (ex: "seancesCompletes_601-101-h2026-94")
  */
 function cleSeancesCompletes(coursId) {
+    // 🆕 FIX (3 fév 2026) : Utiliser groupeCoursId pour différencier les groupes
+    // Chaque groupe-cours a son propre horaire et donc ses propres dates de séances
+    const groupeCoursActif = db.getSync('groupeCoursActif', null);
+    const groupeCoursId = groupeCoursActif?.id || '';
+
+    if (groupeCoursId) {
+        // Clé unique par groupe-cours
+        return `seancesCompletes_gc_${groupeCoursId}`;
+    }
+
+    // Fallback sur coursId si pas de groupe-cours actif
     const id = coursId || (typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null);
     if (id) {
         return `seancesCompletes_${id}`;
     }
+
     // Fallback sur clé globale namespacée par trimestre
     return typeof cle === 'function' ? cle('seancesCompletes') : 'seancesCompletes';
 }

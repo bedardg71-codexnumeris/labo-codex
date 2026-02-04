@@ -16269,69 +16269,154 @@
     <!-- Informations sensibles sur l'étudiant -->
     <!-- ========================================= -->
     <div id="modalConfidentiel" class="modal-overlay" style="display: none;">
-        <div class="modal-contenu" style="max-width: 800px; padding: 20px;">
+        <div class="modal-contenu" style="max-width: 750px; padding: 16px;">
             <button onclick="fermerModalConfidentiel()" class="modal-fermer">✕</button>
 
-            <h2 class="modal-titre" style="margin-bottom: 8px;">🔒 Informations confidentielles</h2>
-            <p style="color: var(--texte-secondaire); margin-bottom: 12px; font-size: 0.85rem;">
+            <h2 class="modal-titre" style="margin-bottom: 4px; font-size: 1.1rem;">🔒 Informations confidentielles</h2>
+            <p style="color: var(--texte-secondaire); margin-bottom: 10px; font-size: 0.8rem;">
                 Ces informations sont stockées localement et ne sont jamais partagées.
             </p>
 
             <!-- Étudiant concerné -->
-            <div style="background: var(--bleu-tres-pale); padding: 8px 12px; border-radius: var(--radius-moyen); margin-bottom: 15px;">
-                <strong id="confidentiel-nom-etudiant" style="font-size: 0.95rem;">Étudiant</strong>
+            <div style="background: var(--bleu-tres-pale); padding: 6px 10px; border-radius: var(--radius-moyen); margin-bottom: 10px;">
+                <strong id="confidentiel-nom-etudiant" style="font-size: 0.9rem;">Étudiant</strong>
             </div>
 
             <!-- LAYOUT 2 COLONNES -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: start;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: start;">
 
-                <!-- COLONNE GAUCHE -->
-                <div style="display: flex; flex-direction: column; gap: 12px;">
+                <!-- COLONNE GAUCHE : Parcours + Notes + Portrait -->
+                <div style="display: flex; flex-direction: column; gap: 10px;">
 
-                    <!-- SECTION 1 : Parcours -->
-                    <fieldset style="border: 1px solid var(--bordure-legere); border-radius: var(--radius-moyen); padding: 12px; margin: 0;">
-                        <legend style="font-weight: 600; color: var(--bleu-fonce); padding: 0 8px; font-size: 0.9rem;">Parcours</legend>
-
-                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; margin-bottom: 10px; font-size: 0.85rem;">
+                    <!-- Parcours -->
+                    <fieldset style="border: 1px solid var(--bordure-legere); border-radius: var(--radius-moyen); padding: 8px 10px; margin: 0;">
+                        <legend style="font-weight: 600; color: var(--bleu-fonce); padding: 0 6px; font-size: 0.85rem;">Parcours</legend>
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin-bottom: 6px; font-size: 0.8rem;">
                             <input type="checkbox" id="confidentiel-epgc">
-                            <span><strong>ÉPGC</strong> — Première génération au cégep</span>
+                            <span><strong>ÉPGC</strong> — 1re génération cégep</span>
                         </label>
-
                         <div>
-                            <label style="font-size: 0.85rem; font-weight: 500; display: block; margin-bottom: 6px;">Cours antérieur :</label>
-                            <div style="display: flex; flex-direction: column; gap: 4px;">
-                                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.85rem;">
-                                    <input type="checkbox" id="confidentiel-cours-regulier">
-                                    <span>Séquence régulière</span>
+                            <label style="font-size: 0.8rem; font-weight: 500; display: block; margin-bottom: 4px;">Cours antérieur :</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px 8px;">
+                                <label style="display: flex; align-items: center; gap: 4px; cursor: pointer; font-size: 0.8rem;">
+                                    <input type="checkbox" id="confidentiel-cours-regulier"><span>Régulier</span>
                                 </label>
-                                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.85rem;">
-                                    <input type="checkbox" id="confidentiel-cours-echec">
-                                    <span>Échec</span>
+                                <label style="display: flex; align-items: center; gap: 4px; cursor: pointer; font-size: 0.8rem;">
+                                    <input type="checkbox" id="confidentiel-cours-echec"><span>Échec</span>
                                 </label>
-                                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.85rem;">
-                                    <input type="checkbox" id="confidentiel-cours-abandon">
-                                    <span>Abandon</span>
+                                <label style="display: flex; align-items: center; gap: 4px; cursor: pointer; font-size: 0.8rem;">
+                                    <input type="checkbox" id="confidentiel-cours-abandon"><span>Abandon</span>
                                 </label>
-                                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.85rem;">
-                                    <input type="checkbox" id="confidentiel-cours-decrochage">
-                                    <span>Décrochage</span>
+                                <label style="display: flex; align-items: center; gap: 4px; cursor: pointer; font-size: 0.8rem;">
+                                    <input type="checkbox" id="confidentiel-cours-decrochage"><span>Décrochage</span>
                                 </label>
-                                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.85rem;">
-                                    <input type="checkbox" id="confidentiel-cours-renforcement">
-                                    <span>Renforcement</span>
+                                <label style="display: flex; align-items: center; gap: 4px; cursor: pointer; font-size: 0.8rem;">
+                                    <input type="checkbox" id="confidentiel-cours-renforcement"><span>Renforcement</span>
                                 </label>
                             </div>
                         </div>
                     </fieldset>
 
-                    <!-- SECTION 2 : Diagnostic et Services adaptés -->
-                    <fieldset style="border: 1px solid var(--bordure-legere); border-radius: var(--radius-moyen); padding: 12px; margin: 0;">
-                        <legend style="font-weight: 600; color: var(--bleu-fonce); padding: 0 8px; font-size: 0.9rem;">Diagnostic</legend>
+                    <!-- Portrait de lecteur -->
+                    <fieldset style="border: 1px solid var(--bordure-legere); border-radius: var(--radius-moyen); padding: 8px 10px; margin: 0;">
+                        <legend style="font-weight: 600; color: var(--bleu-fonce); padding: 0 6px; font-size: 0.85rem;">Portrait de lecteur</legend>
+                        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px;">
+                            <div style="text-align: center;">
+                                <label style="font-size: 0.7rem; font-weight: 500; display: block; margin-bottom: 2px;">Structure</label>
+                                <select id="confidentiel-portrait-structure" class="controle-form" style="font-size: 0.75rem; padding: 3px 2px;">
+                                    <option value="">—</option>
+                                    <option value="I">I</option>
+                                    <option value="D">D</option>
+                                    <option value="M">M</option>
+                                    <option value="E">E</option>
+                                </select>
+                            </div>
+                            <div style="text-align: center;">
+                                <label style="font-size: 0.7rem; font-weight: 500; display: block; margin-bottom: 2px;">Rigueur</label>
+                                <select id="confidentiel-portrait-rigueur" class="controle-form" style="font-size: 0.75rem; padding: 3px 2px;">
+                                    <option value="">—</option>
+                                    <option value="I">I</option>
+                                    <option value="D">D</option>
+                                    <option value="M">M</option>
+                                    <option value="E">E</option>
+                                </select>
+                            </div>
+                            <div style="text-align: center;">
+                                <label style="font-size: 0.7rem; font-weight: 500; display: block; margin-bottom: 2px;">Plausibilité</label>
+                                <select id="confidentiel-portrait-plausibilite" class="controle-form" style="font-size: 0.75rem; padding: 3px 2px;">
+                                    <option value="">—</option>
+                                    <option value="I">I</option>
+                                    <option value="D">D</option>
+                                    <option value="M">M</option>
+                                    <option value="E">E</option>
+                                </select>
+                            </div>
+                            <div style="text-align: center;">
+                                <label style="font-size: 0.7rem; font-weight: 500; display: block; margin-bottom: 2px;">Nuance</label>
+                                <select id="confidentiel-portrait-nuance" class="controle-form" style="font-size: 0.75rem; padding: 3px 2px;">
+                                    <option value="">—</option>
+                                    <option value="I">I</option>
+                                    <option value="D">D</option>
+                                    <option value="M">M</option>
+                                    <option value="E">E</option>
+                                </select>
+                            </div>
+                            <div style="text-align: center;">
+                                <label style="font-size: 0.7rem; font-weight: 500; display: block; margin-bottom: 2px;">Français</label>
+                                <select id="confidentiel-portrait-francais" class="controle-form" style="font-size: 0.75rem; padding: 3px 2px;">
+                                    <option value="">—</option>
+                                    <option value="I">I</option>
+                                    <option value="D">D</option>
+                                    <option value="M">M</option>
+                                    <option value="E">E</option>
+                                </select>
+                            </div>
+                        </div>
+                    </fieldset>
 
+                    <!-- Notes personnelles -->
+                    <fieldset style="border: 1px solid var(--bordure-legere); border-radius: var(--radius-moyen); padding: 8px 10px; margin: 0;">
+                        <legend style="font-weight: 600; color: var(--bleu-fonce); padding: 0 6px; font-size: 0.85rem;">Notes personnelles</legend>
+                        <textarea id="confidentiel-notes" class="controle-form" rows="3" placeholder="Notes confidentielles..." style="resize: vertical; font-size: 0.8rem;"></textarea>
+                    </fieldset>
+                </div>
+
+                <!-- COLONNE DROITE : Défis + Diagnostic -->
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+
+                    <!-- Défis particuliers -->
+                    <fieldset style="border: 1px solid var(--bordure-legere); border-radius: var(--radius-moyen); padding: 8px 10px; margin: 0;">
+                        <legend style="font-weight: 600; color: var(--bleu-fonce); padding: 0 6px; font-size: 0.85rem;">Défis particuliers</legend>
+                        <div style="display: flex; flex-direction: column; gap: 2px;">
+                            <label style="display: flex; align-items: center; gap: 4px; cursor: pointer; font-size: 0.8rem;">
+                                <input type="checkbox" id="confidentiel-defi-fls"><span>Français langue seconde</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 4px; cursor: pointer; font-size: 0.8rem;">
+                                <input type="checkbox" id="confidentiel-defi-socialisation"><span>Socialisation</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 4px; cursor: pointer; font-size: 0.8rem;">
+                                <input type="checkbox" id="confidentiel-defi-integration"><span>Intégration culturelle</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 4px; cursor: pointer; font-size: 0.8rem;">
+                                <input type="checkbox" id="confidentiel-defi-organisation-scolaire"><span>Organisation scolaire</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 4px; cursor: pointer; font-size: 0.8rem;">
+                                <input type="checkbox" id="confidentiel-defi-organisation-citoyenne"><span>Organisation citoyenne</span>
+                            </label>
+                        </div>
+                    </fieldset>
+
+                    <!-- Diagnostic -->
+                    <fieldset style="border: 1px solid var(--bordure-legere); border-radius: var(--radius-moyen); padding: 8px 10px; margin: 0;">
+                        <legend style="font-weight: 600; color: var(--bleu-fonce); padding: 0 6px; font-size: 0.85rem;">Diagnostic</legend>
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.8rem; margin-bottom: 8px;">
+                            <input type="checkbox" id="confidentiel-services-adaptes">
+                            <span><strong>Services adaptés</strong></span>
+                        </label>
                         <div id="confidentiel-services-details">
-                            <div class="groupe-form" style="margin-bottom: 10px;">
-                                <label for="confidentiel-categorie" style="font-size: 0.8rem;">Catégorie</label>
-                                <select id="confidentiel-categorie" class="controle-form" style="font-size: 0.85rem;" onchange="mettreAJourSousCategories()">
+                            <div class="groupe-form" style="margin-bottom: 6px;">
+                                <label for="confidentiel-categorie" style="font-size: 0.75rem;">Catégorie</label>
+                                <select id="confidentiel-categorie" class="controle-form" style="font-size: 0.8rem;" onchange="mettreAJourSousCategories()">
                                     <option value="">-- Sélectionner --</option>
                                     <option value="sensorielle">Déficience sensorielle/physique/motrice</option>
                                     <option value="neurologique">Trouble neurologique</option>
@@ -16340,69 +16425,24 @@
                                     <option value="sante-mentale">Trouble de santé mentale</option>
                                 </select>
                             </div>
-
-                            <div class="groupe-form" style="margin-bottom: 10px;">
-                                <label for="confidentiel-sous-categorie" style="font-size: 0.8rem;">Sous-catégorie</label>
-                                <select id="confidentiel-sous-categorie" class="controle-form" style="font-size: 0.85rem;">
+                            <div class="groupe-form">
+                                <label for="confidentiel-sous-categorie" style="font-size: 0.75rem;">Sous-catégorie</label>
+                                <select id="confidentiel-sous-categorie" class="controle-form" style="font-size: 0.8rem;">
                                     <option value="">-- Catégorie d'abord --</option>
                                 </select>
                             </div>
                         </div>
-
-                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--bordure-legere);">
-                            <input type="checkbox" id="confidentiel-services-adaptes">
-                            <span><strong>Pris en charge par les Services adaptés</strong></span>
-                        </label>
-                    </fieldset>
-                </div>
-
-                <!-- COLONNE DROITE -->
-                <div style="display: flex; flex-direction: column; gap: 12px;">
-
-                    <!-- SECTION 3 : Défis particuliers -->
-                    <fieldset style="border: 1px solid var(--bordure-legere); border-radius: var(--radius-moyen); padding: 12px; margin: 0;">
-                        <legend style="font-weight: 600; color: var(--bleu-fonce); padding: 0 8px; font-size: 0.9rem;">Défis particuliers</legend>
-
-                        <div style="display: flex; flex-direction: column; gap: 4px;">
-                            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.85rem;">
-                                <input type="checkbox" id="confidentiel-defi-fls">
-                                <span>Français langue seconde</span>
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.85rem;">
-                                <input type="checkbox" id="confidentiel-defi-socialisation">
-                                <span>Socialisation</span>
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.85rem;">
-                                <input type="checkbox" id="confidentiel-defi-integration">
-                                <span>Intégration culturelle</span>
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.85rem;">
-                                <input type="checkbox" id="confidentiel-defi-organisation-scolaire">
-                                <span>Organisation scolaire</span>
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.85rem;">
-                                <input type="checkbox" id="confidentiel-defi-organisation-citoyenne">
-                                <span>Organisation citoyenne</span>
-                            </label>
-                        </div>
-                    </fieldset>
-
-                    <!-- SECTION 4 : Notes personnelles -->
-                    <fieldset style="border: 1px solid var(--bordure-legere); border-radius: var(--radius-moyen); padding: 12px; margin: 0; flex: 1;">
-                        <legend style="font-weight: 600; color: var(--bleu-fonce); padding: 0 8px; font-size: 0.9rem;">Notes personnelles</legend>
-
-                        <textarea id="confidentiel-notes" class="controle-form" rows="5" placeholder="Notes confidentielles sur l'étudiant..." style="resize: vertical; font-size: 0.85rem;"></textarea>
                     </fieldset>
                 </div>
 
             </div>
 
             <!-- Boutons -->
-            <div class="btn-groupe" style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px;">
-                <button onclick="fermerModalConfidentiel()" class="btn btn-annuler">
+            <div class="btn-groupe" style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px;">
+                <button onclick="fermerModalConfidentiel()" class="btn btn-annuler" style="padding: 6px 12px; font-size: 0.85rem;">
                     Annuler
                 </button>
-                <button onclick="sauvegarderConfidentiel()" class="btn btn-confirmer">
+                <button onclick="sauvegarderConfidentiel()" class="btn btn-confirmer" style="padding: 6px 12px; font-size: 0.85rem;">
                     Enregistrer
                 </button>
             </div>
