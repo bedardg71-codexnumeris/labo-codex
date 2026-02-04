@@ -5763,6 +5763,17 @@ async function changerGroupeCoursActifV2(valeur) {
             window.initialiserQuestions();
         }
 
+        // 🆕 FIX (3 fév 2026) : Rafraîchir le module de saisie des présences si visible
+        const sectionSaisiePresencesCours = document.getElementById('presences-saisie');
+        if (sectionSaisiePresencesCours && sectionSaisiePresencesCours.style.display !== 'none') {
+            if (typeof initialiserModuleSaisiePresences === 'function') {
+                initialiserModuleSaisiePresences();
+            }
+            if (typeof mettreAJourBoutonsNavigation === 'function') {
+                mettreAJourBoutonsNavigation();
+            }
+        }
+
         console.log('[Trimestre V2] Mode COURS activé:', coursId, '(tous groupes)');
         return;
     }
@@ -5875,6 +5886,18 @@ async function changerGroupeCoursActifV2(valeur) {
     }
     if (typeof window.initialiserQuestions === 'function') {
         window.initialiserQuestions();
+    }
+
+    // 🆕 FIX (3 fév 2026) : Rafraîchir le module de saisie des présences si visible
+    // Les dates de séances dépendent de l'horaire du groupe-cours actif
+    const sectionSaisiePresences = document.getElementById('presences-saisie');
+    if (sectionSaisiePresences && sectionSaisiePresences.style.display !== 'none') {
+        if (typeof initialiserModuleSaisiePresences === 'function') {
+            initialiserModuleSaisiePresences();
+        }
+        if (typeof mettreAJourBoutonsNavigation === 'function') {
+            mettreAJourBoutonsNavigation();
+        }
     }
 
     console.log('[Trimestre V2] Groupe-cours activé:', gc.id);
