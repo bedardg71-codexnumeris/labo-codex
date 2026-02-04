@@ -2336,8 +2336,8 @@ async function chargerListeEtudiantsV2() {
                 <td>${e.prenom || '—'}</td>
                 <td style="text-align: center;">${sa}</td>
                 <td style="text-align: center; white-space: nowrap;">
-                    <button class="btn-icon" onclick="editerEtudiantV2(${index})" title="Modifier">✏️</button>
-                    <button class="btn-icon btn-icon-danger" onclick="supprimerEtudiantV2(${index})" title="Supprimer">✕</button>
+                    <button class="btn-icon" onclick="editerEtudiantV2('${e.da}')" title="Modifier">✏️</button>
+                    <button class="btn-icon btn-icon-danger" onclick="supprimerEtudiantV2('${e.da}')" title="Supprimer">✕</button>
                 </td>
             </tr>
         `;
@@ -2532,15 +2532,17 @@ async function soumettreEtudiantV2() {
 
 /**
  * Passe en mode édition pour un étudiant
+ * 🆕 FIX (4 fév 2026) : Utiliser DA au lieu de l'index pour éviter décalage avec liste filtrée
  */
-function editerEtudiantV2(index) {
+function editerEtudiantV2(da) {
     const cleEtud = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
     const etudiants = db.getSync(cleEtud, []);
+    const index = etudiants.findIndex(e => e.da === da);
     const etudiant = etudiants[index];
 
-    if (!etudiant) return;
+    if (!etudiant || index === -1) return;
 
-    // Stocker l'index en édition
+    // Stocker l'index en édition (index dans la liste complète)
     etudiantEnEditionIndex = index;
 
     // Remplir le formulaire
@@ -2670,16 +2672,18 @@ function creerNouveauGroupeV2() {
 
 /**
  * Supprime un étudiant
+ * 🆕 FIX (4 fév 2026) : Utiliser DA au lieu de l'index pour éviter décalage avec liste filtrée
  */
-async function supprimerEtudiantV2(index) {
+async function supprimerEtudiantV2(da) {
     // ✅ CORRECTION (31 déc 2025): Utiliser namespace
     const cleEtud = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
 
     // ✅ CORRECTION (9 jan 2026): Utiliser async pour persistance fiable
     let etudiants = await db.get(cleEtud) || [];
+    const index = etudiants.findIndex(e => e.da === da);
     const etudiant = etudiants[index];
 
-    if (!confirm(`Supprimer ${etudiant?.prenom || ''} ${etudiant?.nom || ''} ?`)) return;
+    if (index === -1 || !confirm(`Supprimer ${etudiant?.prenom || ''} ${etudiant?.nom || ''} ?`)) return;
 
     etudiants.splice(index, 1);
     await db.set(cleEtud, etudiants);
