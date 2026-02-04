@@ -1601,7 +1601,7 @@ function genererNomFichierExport(type, options = {}) {
 
     if ((!cours || !discipline) && typeof db !== 'undefined') {
         const infoCours = db.getSync ? db.getSync('infoCours', {}) : {};
-        if (!cours) cours = infoCours?.sigle || infoCours?.codeCours || '';
+        if (!cours) cours = infoCours?.codeCours || infoCours?.sigle || infoCours?.code || '';
         if (!discipline) discipline = infoCours?.discipline || '';
     }
 

@@ -1329,7 +1329,8 @@ function afficherSeancesExistantes() {
     if (titreCoursElement) {
         const infoCours = db.getSync('infoCours', null);
         if (infoCours) {
-            const sigle = infoCours.sigle || infoCours.codeCours || '';
+            // 🆕 FIX (4 fév 2026) : Priorité codeCours, ajouter code pour Primo
+            const sigle = infoCours.codeCours || infoCours.sigle || infoCours.code || '';
             const groupe = infoCours.groupe || '';
             titreCoursElement.textContent = sigle && groupe ? `— ${sigle} (${groupe})` : sigle ? `— ${sigle}` : '';
         } else {

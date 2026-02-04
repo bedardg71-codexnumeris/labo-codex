@@ -77,10 +77,11 @@ function mettreAJourContexteEntete() {
                 ? listeCours.filter(c => c.trimestreId === trimestreActifId)
                 : listeCours;
 
+            // 🆕 FIX (4 fév 2026) : Priorité codeCours, ajouter code pour Primo
             groupesCours = coursTrimestreActif.map(c => ({
                 id: c.id,
-                sigle: c.sigle || c.codeCours || '',
-                nomCours: c.titre || c.nomCours || '',
+                sigle: c.codeCours || c.sigle || c.code || '',
+                nomCours: c.nomCours || c.titre || '',
                 groupe: c.groupe || '',
                 pratiqueId: c.pratiqueId,
                 actif: c.actif
@@ -310,7 +311,7 @@ function changerCoursDepuisEntete(id, estGroupeCours) {
         listeCours.forEach(c => c.actif = (c.id === id));
         db.setSync('listeCours', listeCours);
 
-        console.log('[Contexte] Cours activé:', coursSelectionne.sigle || coursSelectionne.codeCours);
+        console.log('[Contexte] Cours activé:', coursSelectionne.codeCours || coursSelectionne.sigle || coursSelectionne.code);
     }
 
     // Mettre à jour l'en-tête (pratique peut changer)

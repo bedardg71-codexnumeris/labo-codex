@@ -240,8 +240,9 @@ function obtenirInfosCoursPDF() {
                 c.code === groupeActif.coursId
             );
 
+            // 🆕 FIX (4 fév 2026) : Priorité codeCours
             if (coursObj) {
-                const sigle = coursObj.sigle || coursObj.codeCours || coursObj.code || '';
+                const sigle = coursObj.codeCours || coursObj.sigle || coursObj.code || '';
                 const titre = coursObj.nomCours || coursObj.nom || coursObj.titre || '';
                 const sigleTitre = sigle && titre ? `${sigle} - ${titre}` : (titre || sigle);
                 return { sigle, titre, sigleTitre };
@@ -251,7 +252,7 @@ function obtenirInfosCoursPDF() {
         // 5. FALLBACK 1: Essayer coursActif ou infoCours (anciens formats)
         const coursActif = db.getSync('coursActif', null);
         if (coursActif) {
-            const sigle = coursActif.sigle || coursActif.codeCours || coursActif.code || '';
+            const sigle = coursActif.codeCours || coursActif.sigle || coursActif.code || '';
             const titre = coursActif.nomCours || coursActif.nom || coursActif.titre || '';
             if (sigle || titre) {
                 const sigleTitre = sigle && titre ? `${sigle} - ${titre}` : (titre || sigle);
@@ -261,7 +262,7 @@ function obtenirInfosCoursPDF() {
 
         const infoCours = db.getSync('infoCours', null);
         if (infoCours) {
-            const sigle = infoCours.sigle || infoCours.codeCours || infoCours.code || '';
+            const sigle = infoCours.codeCours || infoCours.sigle || infoCours.code || '';
             const titre = infoCours.nomCours || infoCours.nom || infoCours.titre || '';
             if (sigle || titre) {
                 const sigleTitre = sigle && titre ? `${sigle} - ${titre}` : (titre || sigle);
@@ -272,7 +273,7 @@ function obtenirInfosCoursPDF() {
         // 6. FALLBACK 2: Si un seul cours dans listeCours et pas d'autre info, l'utiliser
         if (cours.length === 1) {
             const coursUnique = cours[0];
-            const sigle = coursUnique.sigle || coursUnique.codeCours || coursUnique.code || '';
+            const sigle = coursUnique.codeCours || coursUnique.sigle || coursUnique.code || '';
             const titre = coursUnique.nomCours || coursUnique.nom || coursUnique.titre || '';
             if (sigle || titre) {
                 const sigleTitre = sigle && titre ? `${sigle} - ${titre}` : (titre || sigle);
