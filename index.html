@@ -6101,7 +6101,7 @@
 
                                 <!-- Accordéon : Système de jetons -->
                                 <div class="carte accordeon" id="mat-accordeon-jetons" style="margin-top: 20px;">
-                                    <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                                    <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                                         <h3 style="margin: 0; font-size: 1rem;">Système de jetons</h3>
                                         <span class="accordeon-chevron">▼</span>
                                     </div>
@@ -9549,7 +9549,7 @@
 
                     <!-- ========== GESTION DES TRIMESTRES ========== -->
                     <div class="carte accordeon" id="accordeon-gestion-trimestres">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▶</span> Gestion des trimestres
                             </h3>
@@ -9805,7 +9805,7 @@
 
                     <!-- ========== ACCORDÉON: COURS ========== -->
                     <div class="carte accordeon" id="accordeon-cours">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu" style="margin: 0;">
                                 <span class="accordeon-chevron">▶</span> Cours
                             </h3>
@@ -10052,7 +10052,7 @@
 
                     <!-- ========== ACCORDÉON: ENSEIGNANT·E (Beta 95.2 - Profil Auteur) ========== -->
                     <div class="carte accordeon" id="accordeon-enseignant">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu" style="margin: 0;">
                                 <span class="accordeon-chevron">▶</span> Enseignant·e
                             </h3>
@@ -10289,7 +10289,7 @@
 
                     <!-- ========== ACCORDÉON: GROUPE D'ÉTUDIANTS (Beta 95.2) ========== -->
                     <div class="carte accordeon" id="accordeon-groupe-etudiants">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu" style="margin: 0;">
                                 <span class="accordeon-chevron">▶</span> Groupe d'étudiants
                             </h3>
@@ -10442,7 +10442,7 @@
 
                     <!-- ========== ACCORDÉON: HORAIRE (Beta 95.2) ========== -->
                     <div class="carte accordeon" id="accordeon-horaire">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu" style="margin: 0;">
                                 <span class="accordeon-chevron">▶</span> Horaire
                             </h3>
@@ -10571,7 +10571,7 @@
 
                     <!-- ========== ACCORDÉON: GROUPE-COURS (Beta 95.2 - Assemblage) ========== -->
                     <div class="carte accordeon" id="accordeon-groupe-cours">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu" style="margin: 0;">
                                 <span class="accordeon-chevron">▶</span> Groupe-cours
                             </h3>
@@ -10721,7 +10721,7 @@
 
                     <!-- ========== ACCORDÉON: DONNÉES DE DÉMONSTRATION ========== -->
                     <div class="carte accordeon" id="accordeon-donnees-demo">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu" style="margin: 0;">
                                 <span class="accordeon-chevron">▶</span> Données de démonstration
                             </h3>
@@ -11022,7 +11022,7 @@
 
                     <!-- Accordéon : Seuils d'interprétation -->
                     <div class="carte accordeon" id="v2-accordeon-seuils">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 style="margin: 0; font-size: 1rem; text-decoration: none;">Seuils d'interprétation</h3>
                             <span class="accordeon-chevron">▼</span>
                         </div>
@@ -11097,19 +11097,19 @@
                 <div id="reglages-donnees" class="sous-section">
                     <h2>Données</h2>
                     <p class="text-muted">
-                        Gestion des données : sauvegarde, restauration, snapshots et réinitialisation.
+                        Sauvegarde, restauration, gestion des ressources pédagogiques et maintenance.
                     </p>
 
                     <!-- ========================================
-                         CARTE : EXPORTER
+                         CARTE 1 : SAUVEGARDE ET RESTAURATION
                          ======================================== -->
                     <div class="carte">
-                        <h3 class="carte-titre-bleu">Exporter</h3>
+                        <h3 class="carte-titre-bleu">Sauvegarde et restauration</h3>
                         <p class="text-muted" style="margin-bottom: 20px;">
-                            Deux types d'exports selon tes besoins.
+                            Exporte tes données pour les sauvegarder ou les partager, ou importe un fichier existant.
                         </p>
 
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
                             <!-- Export sauvegarde -->
                             <div class="carte-bleu-pale-p15">
                                 <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">
@@ -11137,131 +11137,102 @@
                                     Exporter ma config
                                 </button>
                             </div>
+
+                            <!-- Importer -->
+                            <div class="carte-bleu-pale-p15">
+                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">
+                                    Importer un fichier
+                                </h4>
+                                <p style="font-size: 0.9rem; margin-bottom: 15px; color: #555;">
+                                    Sauvegarde personnelle ou configuration d'un collègue.
+                                    <br><em style="color: #888;">Le type sera détecté automatiquement.</em>
+                                </p>
+                                <button class="btn btn-principal" onclick="ouvrirModalImport()">
+                                    Choisir un fichier...
+                                </button>
+                            </div>
                         </div>
                     </div>
 
                     <!-- ========================================
-                         CARTE : IMPORTER
+                         CARTE 2 : CAPTURES ET RECHERCHE (Accordéon)
                          ======================================== -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu">Importer</h3>
-                        <p class="text-muted" style="margin-bottom: 20px;">
-                            Importe n'importe quel fichier Monitorage. Le type sera détecté automatiquement.
-                        </p>
-
-                        <div class="carte-bleu-pale-p15" style="max-width: 400px;">
-                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">
-                                Importer un fichier
-                            </h4>
-                            <p style="font-size: 0.9rem; margin-bottom: 15px; color: #555;">
-                                Sauvegarde personnelle ou configuration d'un collègue — l'application s'adapte.
-                            </p>
-                            <button class="btn btn-principal" onclick="ouvrirModalImport()">
-                                Choisir un fichier...
-                            </button>
-                        </div>
-
-                        <p class="text-muted" style="margin-top: 15px; font-size: 0.85rem;">
-                            Après analyse du fichier, tu pourras choisir entre restaurer ou fusionner avec tes bibliothèques.
-                        </p>
-                    </div>
-
-                    <!-- ========================================
-                         CARTE : CAPTURES DE PROGRESSION
-                         ======================================== -->
-                    <div class="carte accordeon ferme" id="accordeon-snapshots">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
-                            <h3 class="carte-titre-bleu" style="margin: 0;">Captures de progression (Snapshots)</h3>
+                    <div class="carte accordeon ferme" id="accordeon-captures-recherche">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
+                            <h3 class="carte-titre-bleu" style="margin: 0;">Captures et recherche</h3>
                             <span class="accordeon-chevron">▼</span>
                         </div>
                         <div class="accordeon-contenu">
-                            <p class="text-muted" style="margin: 15px 0;">
-                                Les captures enregistrent l'état des indices A-C-P-E à des moments clés pour le suivi longitudinal.
-                            </p>
+                            <!-- Sous-section: Snapshots -->
+                            <div style="margin-top: 15px; padding: 15px; background: var(--bleu-tres-pale); border-radius: var(--radius-grand);">
+                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">Captures de progression (Snapshots)</h4>
+                                <p class="text-muted" style="margin-bottom: 15px;">
+                                    Les captures enregistrent l'état des indices A-C-P-E à des moments clés pour le suivi longitudinal.
+                                </p>
 
-                            <!-- Statistiques -->
-                            <div class="grille-cartes-metriques" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 20px;">
-                                <div class="carte-metrique-bleue">
-                                    <div class="carte-metrique-contenu">
-                                        <span class="carte-metrique-label">Captures hebdomadaires</span>
-                                        <strong id="v2-stat-snapshots-hebdo" class="carte-metrique-valeur">—</strong>
+                                <!-- Statistiques -->
+                                <div class="grille-cartes-metriques" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 15px;">
+                                    <div class="carte-metrique-bleue">
+                                        <div class="carte-metrique-contenu">
+                                            <span class="carte-metrique-label">Captures hebdomadaires</span>
+                                            <strong id="v2-stat-snapshots-hebdo" class="carte-metrique-valeur">—</strong>
+                                        </div>
+                                    </div>
+                                    <div class="carte-metrique-bleue">
+                                        <div class="carte-metrique-contenu">
+                                            <span class="carte-metrique-label">Captures interventions</span>
+                                            <strong id="v2-stat-snapshots-interventions" class="carte-metrique-valeur">—</strong>
+                                        </div>
+                                    </div>
+                                    <div class="carte-metrique-bleue">
+                                        <div class="carte-metrique-contenu">
+                                            <span class="carte-metrique-label">Dernière capture</span>
+                                            <strong id="v2-stat-derniere-capture" class="carte-metrique-valeur">—</strong>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="carte-metrique-bleue">
-                                    <div class="carte-metrique-contenu">
-                                        <span class="carte-metrique-label">Captures interventions</span>
-                                        <strong id="v2-stat-snapshots-interventions" class="carte-metrique-valeur">—</strong>
+
+                                <!-- Actions -->
+                                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                                    <div>
+                                        <button class="btn btn-secondaire" onclick="capturerSnapshotManuel()" style="width: 100%;">
+                                            Capturer maintenant
+                                        </button>
+                                        <p class="text-muted" style="font-size: 0.8rem; margin-top: 5px; text-align: center;">
+                                            Capture manuelle immédiate
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-secondaire" onclick="lancerReconstructionRetroactive()" style="width: 100%;">
+                                            Reconstruire l'historique
+                                        </button>
+                                        <p class="text-muted" style="font-size: 0.8rem; margin-top: 5px; text-align: center;">
+                                            Recalcule depuis le début
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-secondaire" onclick="confirmerNettoyageSnapshots()" style="width: 100%; border-color: #ff6f00; color: #ff6f00;">
+                                            Supprimer les captures
+                                        </button>
+                                        <p class="text-muted" style="font-size: 0.8rem; margin-top: 5px; text-align: center;">
+                                            Efface toutes les captures
+                                        </p>
                                     </div>
                                 </div>
-                                <div class="carte-metrique-bleue">
-                                    <div class="carte-metrique-contenu">
-                                        <span class="carte-metrique-label">Dernière capture</span>
-                                        <strong id="v2-stat-derniere-capture" class="carte-metrique-valeur">—</strong>
-                                    </div>
-                                </div>
                             </div>
 
-                            <!-- Actions -->
-                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
-                                <div>
-                                    <button class="btn btn-secondaire" onclick="capturerSnapshotManuel()" style="width: 100%;">
-                                        Capturer maintenant
-                                    </button>
-                                    <p class="text-muted" style="font-size: 0.8rem; margin-top: 5px; text-align: center;">
-                                        Capture manuelle immédiate
-                                    </p>
+                            <!-- Sous-section: Export recherche -->
+                            <div style="margin-top: 20px; padding: 15px; background: var(--bleu-tres-pale); border-radius: var(--radius-grand);">
+                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">Export anonymisé pour la recherche</h4>
+                                <p class="text-muted" style="margin-bottom: 15px;">
+                                    Génère un export anonymisé des données d'apprentissage pour la recherche en éducation.
+                                </p>
+
+                                <div class="alerte alerte-information" style="margin-bottom: 15px;">
+                                    <strong>Données exportées :</strong> Indices A-C-P-E anonymisés, progression longitudinale, statistiques agrégées.
+                                    <br><strong>Aucune donnée nominative n'est incluse.</strong>
                                 </div>
-                                <div>
-                                    <button class="btn btn-secondaire" onclick="lancerReconstructionRetroactive()" style="width: 100%;">
-                                        Reconstruire l'historique
-                                    </button>
-                                    <p class="text-muted" style="font-size: 0.8rem; margin-top: 5px; text-align: center;">
-                                        Recalcule depuis le début
-                                    </p>
-                                </div>
-                                <div>
-                                    <button class="btn btn-secondaire" onclick="confirmerNettoyageSnapshots()" style="width: 100%; border-color: #ff6f00; color: #ff6f00;">
-                                        Supprimer les captures
-                                    </button>
-                                    <p class="text-muted" style="font-size: 0.8rem; margin-top: 5px; text-align: center;">
-                                        Efface toutes les captures
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- ========================================
-                         CARTE : EXPORT ANONYMISÉ POUR LA RECHERCHE
-                         ======================================== -->
-                    <div class="carte accordeon ferme" id="accordeon-export-recherche">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
-                            <h3 class="carte-titre-bleu" style="margin: 0;">Export anonymisé pour la recherche</h3>
-                            <span class="accordeon-chevron">▼</span>
-                        </div>
-                        <div class="accordeon-contenu">
-                            <p class="text-muted" style="margin: 15px 0;">
-                                Génère un export anonymisé des données d'apprentissage pour la recherche en éducation.
-                            </p>
-
-                            <div class="alerte alerte-information">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Qu'est-ce qui est exporté ?</h4>
-                                <ul class="lh-2">
-                                    <li>Indices A-C-P-E anonymisés</li>
-                                    <li>Données de progression longitudinales</li>
-                                    <li>Statistiques agrégées du groupe</li>
-                                    <li>Métadonnées du cours (code, discipline)</li>
-                                </ul>
-                                <p class="mt-10"><strong>Aucune donnée nominative n'est incluse.</strong></p>
-                            </div>
-
-                            <div class="alerte alerte-succes">
-                                <h4 style="color: #2e7d32; margin-bottom: 10px">Format et utilisation</h4>
-                                <p>L'export génère un fichier JSON structuré, compatible avec les outils d'analyse de données (R, Python, Excel).</p>
-                                <p class="mt-10">Les identifiants sont remplacés par des codes anonymes générés aléatoirement.</p>
-                            </div>
-
-                            <div style="margin-top: 20px; text-align: center;">
                                 <button class="btn btn-principal" onclick="exporterFormatRecherche()">
                                     Générer l'export anonymisé
                                 </button>
@@ -11270,14 +11241,15 @@
                     </div>
 
                     <!-- ========================================
-                         CARTE : RÉINITIALISATION
+                         CARTE 4 : MAINTENANCE (Zone danger)
                          ======================================== -->
-                    <div class="carte accordeon ferme" id="accordeon-reinitialisation">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)" style="background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);">
-                            <h3 style="margin: 0; color: #c62828;">Réinitialisation</h3>
+                    <div class="carte accordeon ferme" id="accordeon-maintenance">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();" style="background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);">
+                            <h3 style="margin: 0; color: #c62828;">Maintenance</h3>
                             <span class="accordeon-chevron" style="color: #c62828;">▼</span>
                         </div>
                         <div class="accordeon-contenu">
+                            <!-- Réinitialisation -->
                             <div style="padding: 15px; background: #fff3e0; border-radius: var(--radius-grand); margin-top: 15px;">
                                 <h4 style="color: #e65100; margin-bottom: 10px;">Réinitialisation complète</h4>
                                 <p style="margin-bottom: 15px;">
@@ -11291,37 +11263,94 @@
                                     Triple confirmation requise + mot de passe «EFFACER» pour sécurité
                                 </p>
                             </div>
-                        </div>
-                    </div>
 
-                    <!-- ========================================
-                         CARTE : INFORMATIONS TECHNIQUES
-                         ======================================== -->
-                    <div class="carte accordeon ferme" id="accordeon-infos-techniques">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
-                            <h3 class="carte-titre-bleu" style="margin: 0;">Informations techniques</h3>
-                            <span class="accordeon-chevron">▼</span>
-                        </div>
-                        <div class="accordeon-contenu">
-                            <ul style="margin: 15px 0 0 20px; line-height: 1.8;">
-                                <li><strong>Stockage :</strong> Local dans le navigateur (IndexedDB + localStorage)</li>
-                                <li><strong>Format :</strong> Fichiers JSON lisibles</li>
-                                <li><strong>Compatibilité :</strong> Fonctionne sur tous appareils</li>
-                                <li><strong>Sécurité :</strong> Aucune donnée envoyée sur internet</li>
-                                <li><strong>Capacité :</strong> Plusieurs Go (IndexedDB)</li>
-                            </ul>
-
-                            <div class="carte-info-bleu-clair" style="margin-top: 15px;">
-                                <h4 style="color: var(--bleu-clair); margin-bottom: 10px;">Types de sauvegarde</h4>
-                                <ul style="margin-left: 15px; line-height: 1.6;">
-                                    <li><strong>Backup complet :</strong> Toutes les données (étudiants, notes, présences, etc.)</li>
-                                    <li><strong>Configuration pédagogique :</strong> Ressources réutilisables uniquement</li>
-                                    <li><strong>Export partiel :</strong> Ressources individuelles depuis Construction de la note</li>
+                            <!-- Informations techniques -->
+                            <div style="margin-top: 20px; padding: 15px; background: var(--bleu-tres-pale); border-radius: var(--radius-grand);">
+                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">Informations techniques</h4>
+                                <ul style="margin: 0 0 0 20px; line-height: 1.8;">
+                                    <li><strong>Stockage :</strong> Local dans le navigateur (IndexedDB + localStorage)</li>
+                                    <li><strong>Format :</strong> Fichiers JSON lisibles</li>
+                                    <li><strong>Compatibilité :</strong> Fonctionne sur tous appareils</li>
+                                    <li><strong>Sécurité :</strong> Aucune donnée envoyée sur internet</li>
+                                    <li><strong>Capacité :</strong> Plusieurs Go (IndexedDB)</li>
                                 </ul>
+                            </div>
+
+                            <!-- Gestion avancée des ressources -->
+                            <div id="section-gestion-ressources" style="margin-top: 20px;">
+                                <h4 style="margin-bottom: 10px;">Gestion avancée des ressources</h4>
+                                <p class="text-muted" style="margin-bottom: 15px;">
+                                    Outil de développement pour auditer et nettoyer les ressources pédagogiques accumulées.
+                                </p>
+
+                                <!-- Sélecteur de type de ressource -->
+                                <div style="margin-bottom: 15px;">
+                                    <label for="select-type-ressource" style="font-weight: 600; margin-right: 10px;">Type de ressource :</label>
+                                    <select id="select-type-ressource" class="form-control" style="display: inline-block; width: auto; min-width: 250px;" onchange="afficherTableauRessource(this.value)">
+                                        <option value="">— Sélectionner —</option>
+                                        <option value="pratiques">Pratiques de notation (<span id="count-pratiques">0</span>)</option>
+                                        <option value="grilles">Grilles de critères (<span id="count-grilles">0</span>)</option>
+                                        <option value="cartouches">Cartouches de rétroaction (<span id="count-cartouches">0</span>)</option>
+                                        <option value="echelles">Échelles de performance (<span id="count-echelles">0</span>)</option>
+                                        <option value="productions">Productions (<span id="count-productions">0</span>)</option>
+                                    </select>
+                                </div>
+
+                                <!-- Conteneur unique pour le tableau -->
+                                <div id="table-ressources-container" class="table-ressources-container" style="min-height: 100px;">
+                                    <p class="text-muted text-center" style="padding: 30px;">Sélectionnez un type de ressource ci-dessus pour afficher la liste.</p>
+                                </div>
                             </div>
                         </div>
                     </div>
 
+                </div>
+
+                <!-- ========================================
+                     MODAL : CONFIRMATION SUPPRESSION RESSOURCE
+                     ======================================== -->
+                <div id="modal-suppression-ressource" class="modal-overlay" style="display: none;">
+                    <div class="modal-contenu" style="max-width: 500px;">
+                        <div class="modal-header" style="background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);">
+                            <h3 style="color: #c62828; margin: 0;">Supprimer définitivement</h3>
+                            <button class="modal-fermer" onclick="fermerModalSuppressionRessource()">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <div id="suppression-ressource-info">
+                                <!-- Rempli dynamiquement -->
+                            </div>
+
+                            <!-- Dépendances bloquantes -->
+                            <div id="suppression-dependances-bloquantes" class="alerte alerte-erreur" style="display: none; margin-top: 15px;">
+                                <h4 style="color: #c62828; margin-bottom: 10px;">Suppression impossible</h4>
+                                <ul id="liste-dependances-bloquantes" style="margin: 0 0 0 20px;"></ul>
+                            </div>
+
+                            <!-- Avertissements -->
+                            <div id="suppression-avertissements" class="alerte alerte-attention" style="display: none; margin-top: 15px;">
+                                <h4 style="color: #e65100; margin-bottom: 10px;">Attention</h4>
+                                <ul id="liste-avertissements" style="margin: 0 0 0 20px;"></ul>
+                            </div>
+
+                            <!-- Confirmation par nom -->
+                            <div id="suppression-confirmation" style="display: none; margin-top: 20px;">
+                                <label style="display: block; margin-bottom: 10px; font-weight: bold;">
+                                    Pour confirmer, tape le nom de la ressource :
+                                </label>
+                                <input type="text" id="input-confirmation-nom" class="input-champ" style="width: 100%; margin-bottom: 10px;"
+                                       placeholder="Tape le nom exact ici..." oninput="verifierConfirmationSuppression()">
+                                <p class="text-muted" style="font-size: 0.85rem;">
+                                    Nom attendu : <strong id="nom-ressource-attendu"></strong>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondaire" onclick="fermerModalSuppressionRessource()">Annuler</button>
+                            <button id="btn-confirmer-suppression" class="btn btn-supprimer" disabled onclick="confirmerSuppressionRessource()">
+                                Supprimer définitivement
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
             </section><!-- fin section-reglages -->
@@ -11371,7 +11400,7 @@
 
                     <!-- Carte: Présentation de l'application -->
                     <div class="carte accordeon ouvert" id="accordeon-aide-presentation">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Présentation de l'application
                             </h3>
@@ -11418,7 +11447,7 @@
 
                     <!-- Carte: Qu'est-ce que le suivi de l'apprentissage -->
                     <div class="carte accordeon" id="accordeon-aide-monitorage">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Qu'est-ce que le suivi de l'apprentissage ?
                             </h3>
@@ -11457,7 +11486,7 @@
 
                     <!-- Carte: Concepts clés A-C-P -->
                     <div class="carte accordeon" id="accordeon-aide-acp">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Les trois indices primaires (A-C-P)
                             </h3>
@@ -11494,7 +11523,7 @@
 
                     <!-- Carte: Critères SRPNF -->
                     <div class="carte accordeon" id="accordeon-aide-srpnf">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Exemple de grille : SRPNF (pratique PAN-Standards)
                             </h3>
@@ -11548,7 +11577,7 @@
 
                     <!-- Carte: Échelle IDME -->
                     <div class="carte accordeon" id="accordeon-aide-idme">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Exemple d'échelle : IDME (pratique PAN-Standards)
                             </h3>
@@ -11607,7 +11636,7 @@
 
                     <!-- Carte: Architecture Single Source of Truth -->
                     <div class="carte accordeon" id="accordeon-aide-ssot">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Architecture : Single Source of Truth
                             </h3>
@@ -11633,7 +11662,7 @@
 
                     <!-- Carte: Trois modes d'utilisation -->
                     <div class="carte accordeon" id="accordeon-aide-modes">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Trois modes d'utilisation
                             </h3>
@@ -11671,7 +11700,7 @@
 
                     <!-- Carte: Partage et communs éducatifs -->
                     <div class="carte accordeon" id="accordeon-aide-partage">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Partage et communs éducatifs
                             </h3>
@@ -11732,7 +11761,7 @@
 
                     <!-- Carte: Vue d'ensemble -->
                     <div class="carte accordeon" id="accordeon-aide-etapes-config">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Étapes de configuration
                             </h3>
@@ -11766,7 +11795,7 @@
 
                     <!-- Carte: Assistant Primo -->
                     <div class="carte accordeon" id="accordeon-aide-primo">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Configuration avec l'assistant Primo 😎
                             </h3>
@@ -11847,7 +11876,7 @@
 
                     <!-- Carte: 1. Cours -->
                     <div class="carte accordeon" id="accordeon-aide-cours">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> 1. Configurer le cours
                             </h3>
@@ -11872,7 +11901,7 @@
 
                     <!-- Carte: 2. Section Trimestre (Beta 95) -->
                     <div class="carte accordeon" id="accordeon-aide-trimestre">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> 2. Section Trimestre - Configuration centralisée (Beta 95)
                             </h3>
@@ -11924,7 +11953,7 @@
 
                     <!-- Carte: 2b. Données de démonstration -->
                     <div class="carte accordeon" id="accordeon-aide-demo">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> 2b. Utiliser les données de démonstration (optionnel)
                             </h3>
@@ -11986,7 +12015,7 @@
 
                     <!-- Carte: 2c. Concept Groupe-cours (Beta 95) -->
                     <div class="carte accordeon" id="accordeon-aide-groupe-cours">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> 2c. Le concept Groupe-cours (Beta 95)
                             </h3>
@@ -12036,7 +12065,7 @@
 
                     <!-- Carte: 3. Groupe -->
                     <div class="carte accordeon" id="accordeon-aide-groupe">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> 3. Créer le groupe
                             </h3>
@@ -12063,7 +12092,7 @@
 
                     <!-- Carte: 4. Horaire -->
                     <div class="carte accordeon" id="accordeon-aide-horaire">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> 4. Établir l'horaire - MODULE SOURCE
                             </h3>
@@ -12087,7 +12116,7 @@
 
                     <!-- Carte: 5. Pratique de notation -->
                     <div class="carte accordeon" id="accordeon-aide-pratique">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> 5. Choisir ta pratique de notation
                             </h3>
@@ -12132,7 +12161,7 @@
 
                     <!-- Carte: 5b. Grille de référence pour dépistage -->
                     <div class="carte accordeon" id="accordeon-aide-grille-depistage">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> 5b. Configurer la grille de critères pour le dépistage
                             </h3>
@@ -12201,7 +12230,7 @@
 
                     <!-- Carte: 5c. Sous-critères avec pondération différenciée -->
                     <div class="carte accordeon" id="accordeon-aide-sous-criteres">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> 5c. Sous-critères avec pondération différenciée (Critères algorithmiques)
                             </h3>
@@ -12323,7 +12352,7 @@
 
                     <!-- Carte: Checklist -->
                     <div class="carte accordeon" id="accordeon-aide-checklist">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Checklist de configuration
                             </h3>
@@ -12344,7 +12373,7 @@
 
                     <!-- Carte: Qu'est-ce que l'archivage -->
                     <div class="carte accordeon" id="accordeon-aide-archivage">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Qu'est-ce que l'archivage d'un trimestre ?
                             </h3>
@@ -12396,7 +12425,7 @@
 
                     <!-- Carte: Modes de fonctionnement -->
                     <div class="carte accordeon ouvert" id="accordeon-aide-modes">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Les trois modes de l'application
                             </h3>
@@ -12444,7 +12473,7 @@
 
                     <!-- Carte: Mode Assisté et données démo -->
                     <div class="carte accordeon" id="accordeon-aide-mode-assiste">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Le Mode Assisté : ton terrain d'exploration
                             </h3>
@@ -12483,7 +12512,7 @@
 
                     <!-- Carte: Deux parcours de configuration -->
                     <div class="carte accordeon" id="accordeon-aide-parcours">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Deux parcours selon ton expérience
                             </h3>
@@ -12528,7 +12557,7 @@
 
                     <!-- Carte: Validation configuration grille de référence -->
                     <div class="carte accordeon" id="accordeon-aide-validation-grille">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Valider ta configuration : Tests de la grille de référence
                             </h3>
@@ -12666,7 +12695,7 @@
 
                     <!-- Carte: Vue d'ensemble -->
                     <div class="carte accordeon" id="accordeon-aide-flux-travail">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Flux de travail hebdomadaire
                             </h3>
@@ -12688,7 +12717,7 @@
 
                     <!-- Carte: Saisir les présences -->
                     <div class="carte accordeon border-left-succes" id="accordeon-aide-saisie-presences">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> 1. Saisir les présences - MODULE SOURCE
                             </h3>
@@ -12734,7 +12763,7 @@
 
                     <!-- Carte: Évaluer les productions -->
                     <div class="carte accordeon border-left-succes" id="accordeon-aide-evaluer-productions">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> 2. Évaluer les productions - MODULE SOURCE
                             </h3>
@@ -12773,7 +12802,7 @@
 
                     <!-- Carte: Gérer les jetons -->
                     <div class="carte accordeon" id="accordeon-aide-gerer-jetons">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> 3. Gérer les jetons
                             </h3>
@@ -12807,7 +12836,7 @@
 
                     <!-- Carte: Gestion des travaux irrecevables et non-remis -->
                     <div class="carte accordeon" id="accordeon-aide-irrecevables">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> 4. Gestion des travaux irrecevables et non-remis
                             </h3>
@@ -12949,7 +12978,7 @@
 
                     <!-- Carte: Vérification hebdomadaire -->
                     <div class="carte accordeon" id="accordeon-aide-verification-hebdo">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> 5. Vérification hebdomadaire
                             </h3>
@@ -13006,7 +13035,7 @@
 
                     <!-- Carte: Captures de progression (Snapshots) -->
                     <div class="carte accordeon" id="accordeon-aide-snapshots">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> 6. Captures de progression (Snapshots hebdomadaires)
                             </h3>
@@ -13080,7 +13109,7 @@
 
                     <!-- Carte: Collaboration entre collègues -->
                     <div class="carte accordeon border-left-purple" id="accordeon-aide-collaboration">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> 7. Collaboration entre collègues
                             </h3>
@@ -13264,7 +13293,7 @@
 
                     <!-- Carte: Interventions RàI avec présences facultatives -->
                     <div class="carte accordeon border-left-primary" id="accordeon-aide-rai-absences">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> 8. Interventions RàI avec absences motivées
                             </h3>
@@ -13450,7 +13479,7 @@
 
                     <!-- Carte: Temps estimés -->
                     <div class="carte accordeon bg-bleu-tres-pale" id="accordeon-aide-temps-estimes">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Temps estimés par activité
                             </h3>
@@ -13489,7 +13518,7 @@
 
                     <!-- Carte: Tableau de bord Aperçu -->
                     <div class="carte accordeon border-left-primary" id="accordeon-aide-tableau-bord">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Tableau de bord → Aperçu - LECTEUR
                             </h3>
@@ -13521,7 +13550,7 @@
 
                     <!-- Carte: Profil étudiant -->
                     <div class="carte accordeon border-left-primary" id="accordeon-aide-profil-etudiant">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Profil étudiant (détaillé) - LECTEUR
                             </h3>
@@ -13577,7 +13606,7 @@
 
                     <!-- Carte: Interpréter les seuils -->
                     <div class="carte accordeon" id="accordeon-aide-diagnostics">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Interpréter les diagnostics
                             </h3>
@@ -13626,7 +13655,7 @@
 
                     <!-- Carte: Options configurables RàI et SOLO -->
                     <div class="carte accordeon" id="accordeon-aide-rai-solo">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Options configurables : RàI et SOLO
                             </h3>
@@ -13676,7 +13705,7 @@
 
                     <!-- Carte: Patterns d'apprentissage (optionnel) -->
                     <div class="carte accordeon" id="accordeon-aide-patterns">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Patterns d'apprentissage (optionnel - si activé)
                             </h3>
@@ -13716,7 +13745,7 @@
 
                     <!-- Carte: Guide détaillé du profil étudiant (Phase 2) -->
                     <div class="carte accordeon bg-f0f8ff" id="accordeon-aide-guide-profil">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Guide détaillé : Profil étudiant
                             </h3>
@@ -14073,7 +14102,7 @@
 
                     <!-- Carte: Planifier interventions -->
                     <div class="carte accordeon" id="accordeon-aide-planifier-rai">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Planifier les interventions RàI
                             </h3>
@@ -14147,7 +14176,7 @@
 
                     <!-- Carte: Seuils critiques -->
                     <div class="carte accordeon" id="accordeon-aide-seuils-critiques">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Seuils critiques d'alerte
                             </h3>
@@ -14252,7 +14281,7 @@
 
                     <!-- Carte: Architecture Single Source of Truth -->
                     <div class="carte accordeon" id="accordeon-aide-architecture">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Architecture Single Source of Truth (rappel)
                             </h3>
@@ -14295,7 +14324,7 @@
 
                     <!-- Carte: Résolution de problèmes -->
                     <div class="carte accordeon" id="accordeon-aide-problemes">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Résolution de problèmes courants
                             </h3>
@@ -14337,7 +14366,7 @@
 
                     <!-- Carte: Debug localStorage -->
                     <div class="carte accordeon" id="accordeon-aide-debug">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Debug - Console navigateur
                             </h3>
@@ -14363,7 +14392,7 @@
 
                     <!-- Carte: FAQ (Phase 2) -->
                     <div class="carte accordeon" id="accordeon-aide-faq">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Questions fréquentes (FAQ)
                             </h3>
@@ -14573,7 +14602,7 @@
 
                     <!-- Carte: Glossaire (Phase 2) -->
                     <div class="carte accordeon bg-fff9e6" id="accordeon-aide-glossaire">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Glossaire des termes
                             </h3>
@@ -14741,7 +14770,7 @@
 
                     <!-- Carte: Ressources -->
                     <div class="carte accordeon" id="accordeon-aide-ressources">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Ressources et documentation
                             </h3>
@@ -14811,7 +14840,7 @@
 
                     <!-- Carte: À propos -->
                     <div class="carte accordeon" id="accordeon-aide-apropos">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> À propos de l'application
                             </h3>
@@ -14866,7 +14895,7 @@
 
                     <!-- Beta 96 -->
                     <div class="carte accordeon ouvert" id="accordeon-aide-beta96">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Beta 96 — Visualisations avancées et stabilisation
                             </h3>
@@ -14910,7 +14939,7 @@
 
                     <!-- Beta 95.3-95.7 -->
                     <div class="carte accordeon" id="accordeon-aide-beta957">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Beta 95.3-95.7 — Stabilisation et UX
                             </h3>
@@ -14961,7 +14990,7 @@
 
                     <!-- Beta 95.2 -->
                     <div class="carte accordeon" id="accordeon-aide-beta952">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Beta 95.2 — Architecture modulaire groupe-cours
                             </h3>
@@ -15039,7 +15068,7 @@
 
                     <!-- Beta 95.1 -->
                     <div class="carte accordeon" id="accordeon-aide-beta951">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Beta 95.1 — Import/Export amélioré
                             </h3>
@@ -15075,7 +15104,7 @@
 
                     <!-- Beta 95 -->
                     <div class="carte accordeon" id="accordeon-aide-beta95">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Beta 95 — Stabilisation H2026
                             </h3>
@@ -15159,7 +15188,7 @@
 
                     <!-- Beta 94 -->
                     <div class="carte accordeon" id="accordeon-aide-beta94">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Beta 94 — Snapshots et suivi longitudinal
                             </h3>
@@ -15178,7 +15207,7 @@
 
                     <!-- Beta 93 -->
                     <div class="carte accordeon" id="accordeon-aide-beta93">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Beta 93 — Système universel de critères
                             </h3>
@@ -15196,7 +15225,7 @@
 
                     <!-- Beta 92 -->
                     <div class="carte accordeon" id="accordeon-aide-beta92">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Beta 92 — Primo Assistant
                             </h3>
@@ -15215,7 +15244,7 @@
 
                     <!-- Beta 91 -->
                     <div class="carte accordeon" id="accordeon-aide-beta91">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Beta 91 — IndexedDB et capacité étendue
                             </h3>
@@ -15233,7 +15262,7 @@
 
                     <!-- Beta 90 -->
                     <div class="carte accordeon" id="accordeon-aide-beta90">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Beta 90 — Présentation AQPC
                             </h3>
@@ -15252,7 +15281,7 @@
 
                     <!-- Historique pré-Git -->
                     <div class="carte accordeon" id="accordeon-aide-pregit">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Historique pré-Git (septembre-octobre 2025)
                             </h3>
@@ -15473,7 +15502,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '96';
-        const BUILD_ID = '0204-1130';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0204-1140';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
