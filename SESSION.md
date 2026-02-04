@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 96.2
 
-**Date** : 1er février 2026
-**Version** : Beta 96.2 (build 0201-0920)
+**Date** : 4 février 2026
+**Version** : Beta 96.2 (build 0204-1140)
 **Statut** : Application fonctionnelle pour H2026, A2024/A2025 archives, synchronisation multi-appareils opérationnelle
 
 ---
@@ -30,7 +30,30 @@
 - **Modal Confidentiel** : Informations sensibles sur l'étudiant (ÉPGC, services adaptés, etc.)
 - **Anonymisation groupes** : Numéros de groupe remplacés par lettres en mode anonymisation
 
-### Derniere tache completee (1er février - Beta 96.2)
+### Derniere tache completee (4 février - Beta 96.2)
+
+- **REFONTE GESTION DES RESSOURCES (Réglages > Données > Maintenance)**
+  - **Objectif** : Outil développeur pour auditer et nettoyer les ressources pédagogiques accumulées
+  - **Avant** : 5 accordéons imbriqués avec problèmes de scroll et de chargement
+  - **Après** : Dropdown unique avec compteurs, tableau unifié, interface simplifiée
+  - **Types de ressources gérés** :
+    - Pratiques de notation (source: `pratiquesConfigurables`)
+    - Grilles de critères
+    - Cartouches de rétroaction
+    - Échelles de performance
+    - Productions
+  - **Informations affichées** :
+    - Nom et auteur/description
+    - Type (pour pratiques: SOM/STD/SPE/DEN badges)
+    - Statut: Sidebar (visible) ou Masquée
+    - Usage: cours, évaluations, productions liées
+    - Actions: Voir, Supprimer définitivement
+  - **Fichiers modifiés** :
+    - `index.html` : Section Maintenance avec dropdown et conteneur unique
+    - `js/donnees-v2.js` : Fonctions V2 pour affichage dynamique
+    - `styles.css` : Nettoyage CSS accordéons obsolètes
+
+### Tache precedente (1er février - Beta 96.2)
 
 - **CORRECTION ERREUR SUPPRESSION GRILLES (Bugs Gregoire #5, #6, #7)**
   - **Symptôme** : Impossible de supprimer certaines grilles de la barre latérale (bouton inactif)
