@@ -568,8 +568,9 @@ function afficherFormCours(id = null) {
             if (btnTexte) btnTexte.textContent = 'Sauvegarder';
 
             // Remplir les champs
-            document.getElementById('codeCours').value = c.codeCours || '';
-            document.getElementById('nomCours').value = c.nomCours || '';
+            // 🆕 FIX (4 fév 2026) : Chercher code dans plusieurs champs (Primo utilise 'code')
+            document.getElementById('codeCours').value = c.codeCours || c.sigle || c.code || '';
+            document.getElementById('nomCours').value = c.nomCours || c.titre || c.nom || '';
             document.getElementById('numeroCompetence').value = c.numeroCompetence || '';
             document.getElementById('competence').value = c.competence || '';
             document.getElementById('elementsCompetence').value = c.elementsCompetence || '';
@@ -604,9 +605,10 @@ function afficherFormCours(id = null) {
 
         if (coursActif && cours.length > 0) {
             // Pré-remplir avec le premier cours ou le cours actif
+            // 🆕 FIX (4 fév 2026) : Chercher code dans plusieurs champs (Primo utilise 'code')
             const premierCours = coursActif || cours[0];
-            document.getElementById('codeCours').value = premierCours.codeCours || '';
-            document.getElementById('nomCours').value = premierCours.nomCours || '';
+            document.getElementById('codeCours').value = premierCours.codeCours || premierCours.sigle || premierCours.code || '';
+            document.getElementById('nomCours').value = premierCours.nomCours || premierCours.titre || premierCours.nom || '';
             document.getElementById('numeroCompetence').value = premierCours.numeroCompetence || '';
             document.getElementById('competence').value = premierCours.competence || '';
             document.getElementById('elementsCompetence').value = premierCours.elementsCompetence || '';
