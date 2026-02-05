@@ -15514,7 +15514,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '96';
-        const BUILD_ID = '0204-1140';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0204-1200';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
@@ -16477,6 +16477,14 @@
                 </div>
 
             </div>
+
+            <!-- Notes de présences (trimestre actif) -->
+            <fieldset style="border: 1px solid var(--bordure-legere); border-radius: var(--radius-moyen); padding: 8px 10px; margin-top: 10px;">
+                <legend style="font-weight: 600; color: var(--bleu-fonce); padding: 0 6px; font-size: 0.85rem;">Notes de présences (trimestre actif)</legend>
+                <div id="confidentiel-notes-presences" style="max-height: 150px; overflow-y: auto; font-size: 0.8rem;">
+                    <p class="text-muted" style="margin: 0; font-style: italic;">Chargement...</p>
+                </div>
+            </fieldset>
 
             <!-- Boutons -->
             <div class="btn-groupe" style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px;">
