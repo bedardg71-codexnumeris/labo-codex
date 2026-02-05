@@ -8528,8 +8528,102 @@ function ouvrirModalConfidentiel(da) {
     document.getElementById('confidentiel-portrait-nuance').value = infos.portraitNuance || '';
     document.getElementById('confidentiel-portrait-francais').value = infos.portraitFrancais || '';
 
+    // Charger les notes de présences
+    chargerNotesPresencesConfidentiel(da);
+
     // Afficher le modal
     document.getElementById('modalConfidentiel').style.display = 'flex';
+}
+
+/**
+ * Charge et affiche les notes de présences pour un étudiant (trimestre actif)
+ * @param {string} da - DA de l'étudiant
+ */
+function chargerNotesPresencesConfidentiel(da) {
+    const container = document.getElementById('confidentiel-notes-presences');
+    if (!container) return;
+
+    // Fonction locale d'échappement HTML
+    const escapeHtml = (str) => {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    };
+
+    // Obtenir la clé des présences pour le trimestre actif
+    const clePresences = (typeof cle === 'function') ? cle('presences') : 'presences';
+    const presences = db.getSync(clePresences, []);
+
+    // Filtrer les présences de cet étudiant qui ont des notes
+    const notesEtudiant = presences
+        .filter(p => p.da === da && p.notes && p.notes.trim() !== '')
+        .sort((a, b) => new Date(a.date) - new Date(b.date)); // Ordre chronologique
+
+    if (notesEtudiant.length === 0) {
+        container.innerHTML = '<p class="text-muted" style="margin: 0; font-style: italic;">Aucune note de présence pour ce trimestre.</p>';
+        return;
+    }
+
+    // Générer l'affichage
+    let html = '<div style="display: flex; flex-direction: column; gap: 8px;">';
+
+    notesEtudiant.forEach(p => {
+        const dateObj = new Date(p.date);
+        const dateFormatee = dateObj.toLocaleDateString('fr-CA', {
+            day: 'numeric',
+            month: 'short'
+        });
+
+        html += `
+            <div style="display: flex; gap: 8px; align-items: flex-start;">
+                <span style="min-width: 55px; font-weight: 600; color: var(--bleu-principal); padding-top: 4px;">${dateFormatee}</span>
+                <textarea
+                    class="controle-form note-presence-editable"
+                    data-date="${p.date}"
+                    data-da="${da}"
+                    rows="1"
+                    style="flex: 1; resize: vertical; font-size: 0.8rem; padding: 4px 8px;"
+                >${escapeHtml(p.notes)}</textarea>
+            </div>
+        `;
+    });
+
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+/**
+ * Sauvegarde les notes de présences modifiées dans le modal Confidentiel
+ */
+function sauvegarderNotesPresencesConfidentiel() {
+    const textareas = document.querySelectorAll('#confidentiel-notes-presences .note-presence-editable');
+    if (textareas.length === 0) return;
+
+    const clePresences = (typeof cle === 'function') ? cle('presences') : 'presences';
+    const presences = db.getSync(clePresences, []);
+
+    let modifications = 0;
+
+    textareas.forEach(textarea => {
+        const date = textarea.dataset.date;
+        const da = textarea.dataset.da;
+        const nouvelleNote = textarea.value.trim();
+
+        // Trouver la présence correspondante
+        const presence = presences.find(p => p.da === da && p.date === date);
+        if (presence && presence.notes !== nouvelleNote) {
+            presence.notes = nouvelleNote;
+            modifications++;
+        }
+    });
+
+    if (modifications > 0) {
+        db.setSync(clePresences, presences);
+        console.log(`[Confidentiel] ${modifications} note(s) de présence modifiée(s)`);
+    }
 }
 
 /**
@@ -8570,11 +8664,14 @@ function sauvegarderConfidentiel() {
         portraitFrancais: document.getElementById('confidentiel-portrait-francais').value
     };
 
-    // Sauvegarder
+    // Sauvegarder les infos confidentielles
     const cleConfidentiel = (typeof cle === 'function') ? cle('confidentielEtudiants') : 'confidentielEtudiants';
     const donnees = db.getSync(cleConfidentiel, {});
     donnees[_confidentielDaActuel] = infos;
     db.setSync(cleConfidentiel, donnees);
+
+    // Sauvegarder les notes de présences modifiées
+    sauvegarderNotesPresencesConfidentiel();
 
     // Fermer le modal
     fermerModalConfidentiel();
