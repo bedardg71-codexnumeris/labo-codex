@@ -601,7 +601,7 @@ class PratiquePANObjectifs {
      * @returns {Object} Production ou null
      */
     _lireProduction(productionId) {
-        const productions = db.getSync('productions', []);
+        const productions = db.getSync(cle('productions'), []);
         return productions.find(p => p.id === productionId) || null;
     }
 }

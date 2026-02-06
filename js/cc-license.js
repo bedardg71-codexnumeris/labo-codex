@@ -1380,9 +1380,9 @@ async function afficherModalEditionMetadonnees(typeRessource, ressourceId) {
             cleStockage = 'echellesTemplates';
             break;
         case 'production':
-            const productions = await db.get('productions') || [];
+            const productions = await db.get(cle('productions')) || [];
             ressource = productions.find(p => p.id === ressourceId);
-            cleStockage = 'productions';
+            cleStockage = (typeof cle === 'function') ? cle('productions') : 'productions';
             break;
         case 'cartouche':
             // Les cartouches sont stockés par grille, on doit chercher dans toutes

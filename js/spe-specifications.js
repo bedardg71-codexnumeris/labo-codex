@@ -455,7 +455,7 @@
      * Obtient une production par son ID
      */
     async function obtenirProductionParId(productionId) {
-        const productions = await db.get('productions') || [];
+        const productions = await db.get(cle('productions')) || [];
         return productions.find(p => p.id === productionId);
     }
 

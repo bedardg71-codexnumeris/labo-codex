@@ -366,7 +366,7 @@ async function sauvegarderCritere() {
             }
         } else {
             // Ajouter nouveau critère
-            critere.id = 'CR' + Date.now();
+            critere.id = genererIdUnique('CR_');
             grilleTemplateActuelle.criteres.push(critere);
         }
 
@@ -386,7 +386,7 @@ async function sauvegarderCritere() {
                 window.tempCriteres[index] = { ...window.tempCriteres[index], ...critere };
             }
         } else {
-            critere.id = 'CR' + Date.now();
+            critere.id = genererIdUnique('CR_');
             window.tempCriteres.push(critere);
         }
 

@@ -415,7 +415,7 @@ function obtenirEtatApplication() {
 
     // Nombre de productions
     try {
-        const productions = db.getSync('productions', []);
+        const productions = db.getSync(cle('productions'), []);
         etat.nbProductions = Array.isArray(productions) ? productions.length : 0;
     } catch (e) {
         etat.nbProductions = 'erreur';
@@ -472,7 +472,7 @@ function obtenirContexteSection() {
 
             case 'construction':
                 if (sousSection === 'productions') {
-                    contexte.nbProductions = (db.getSync('productions', []) || []).length;
+                    contexte.nbProductions = (db.getSync(cle('productions'), []) || []).length;
                 }
                 if (sousSection === 'grille-criteres') {
                     contexte.nbGrilles = (db.getSync('grillesCriteres', []) || []).length;

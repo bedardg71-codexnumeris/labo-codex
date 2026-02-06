@@ -9,14 +9,14 @@
 
 ### Priorite CRITIQUE - Namespacing (Audit 5 fév 2026)
 
-- [ ] **#64** interventions.js : écriture presences sans namespace (CORRUPTION DONNÉES)
+- [x] **#64** interventions.js : écriture presences sans namespace (CORRUPTION DONNÉES) ✅ CORRIGÉ (6 fév 2026)
   - **Symptôme** : `db.setSync('presences', presences)` à la ligne 1481 écrit dans la clé nue
   - **Cause** : `transfererPresencesVersModule()` lit via `cle('presences')` mais écrit dans `'presences'`
   - **Risque** : Les présences du trimestre actif sont écrites dans la mauvaise clé, invisibles aux lectures namespacées
   - **Correction** : Utiliser `db.setSync(clePresences, presences)` avec la variable déjà définie à la ligne 1415
   - **Fichier** : `js/interventions.js`
 
-- [ ] **#65** ~20 appels `db.getSync('productions', [])` sans namespace
+- [x] **#65** ~20 appels `db.getSync('productions', [])` sans namespace ✅ CORRIGÉ (6 fév 2026)
   - **Symptôme** : Les productions ne sont pas trouvées en contexte multi-trimestre
   - **Cause** : `productions` est dans `CLES_NAMESPACEES` mais accédé directement sans `cle()`
   - **Fichiers concernés** :
@@ -164,34 +164,34 @@
 
 ### Bugs CRITIQUES (Audit complet 5 fév 2026)
 
-- [ ] **#85** BUG CRITIQUE : Clé productions incohérente — `productionsPedagogiques` vs `productions`
+- [x] **#85** BUG CRITIQUE : Clé productions incohérente — `productionsPedagogiques` vs `productions` ✅ CORRIGÉ (6 fév 2026)
   - **Symptôme** : Les productions créées dans productions.js sont invisibles pour 15+ autres modules
   - **Cause** : `productions.js` écrit via `getCleProductions()` → `cle('productionsPedagogiques')` → clé `'productionsPedagogiques'`. Mais `evaluation.js`, `portfolio.js`, `statistiques.js`, etc. lisent depuis `'productions'` ou `obtenirDonneesSelonMode('productions')` — une clé complètement différente
   - **Fichiers lecteurs (mauvaise clé)** : evaluation.js (9x), portfolio.js, statistiques.js, rapport-bug.js (2x), donnees-v2.js (2x), pratiques.js, pratique-pan-standards.js (3x), pratique-pan-objectifs.js, pratique-sommative.js, cc-license.js, pratique-notation-v2.js
   - **Impact** : Évaluations, portfolio, statistiques ne trouvent aucune production
   - **Correction** : Unifier sur UNE seule clé canonique et mettre à jour tous les lecteurs
 
-- [ ] **#86** BUG CRITIQUE : Suppression demo peut effacer des productions réelles
+- [x] **#86** BUG CRITIQUE : Suppression demo peut effacer des productions réelles ✅ CORRIGÉ (6 fév 2026)
   - **Symptôme** : `supprimerGroupe9999()` filtre par `!p.id?.startsWith('PROD_')` — un préfixe aussi utilisé pour les vraies productions
   - **Fichier** : `js/donnees-demo.js` ligne 430
   - **Impact** : Déchargement du mode démo peut supprimer des productions utilisateur
   - **Correction** : Filtrer uniquement `estDemo: true` ou utiliser un préfixe spécifique `PROD_DEMO_`
 
-- [ ] **#87** BUG CRITIQUE : obtenirHeuresSeance() retourne toujours 2 (code mort)
+- [x] **#87** BUG CRITIQUE : obtenirHeuresSeance() retourne toujours 2 (code mort) ✅ CORRIGÉ (6 fév 2026)
   - **Symptôme** : Assiduité incorrecte pour les cours non-2h (3h, 4h, etc.)
   - **Fichier** : `js/saisie-presences.js` ligne 804
   - **Cause** : La fonction calcule minutieusement totalHeures (lignes 772-801) puis `return 2;` ignore tout
   - **Impact** : Étudiants en cours 4h peuvent afficher 200% ou 50% au lieu de 100%
   - **Correction** : Retourner `totalHeures` au lieu du hardcodé, ou documenter que seules les périodes sont utilisées
 
-- [ ] **#88** BUG CRITIQUE : Format presences incohérent (Array vs Object) entre modules
+- [x] **#88** BUG CRITIQUE : Format presences incohérent (Array vs Object) entre modules ✅ CORRIGÉ (6 fév 2026)
   - **Symptôme** : Migrations silencieusement ignorées, TypeError potentiel
   - **Cause** : `migrations.js:116` et `donnees-demo.js:238` lisent comme Object `{}`, `saisie-presences.js` lit comme Array `[]`
   - **Impact** : `migrerPresencesVersPeriodes()` ne s'exécute jamais si format Object, `Object.keys()` donne des indices numériques sur un Array
   - **Fichiers** : migrations.js, donnees-demo.js, saisie-presences.js, cours.js
   - **Correction** : Normaliser sur un format unique (Array), ajouter détection de format dans les migrations
 
-- [ ] **#89** BUG CRITIQUE : Collisions d'ID avec Date.now() seul
+- [x] **#89** BUG CRITIQUE : Collisions d'ID avec Date.now() seul ✅ CORRIGÉ (6 fév 2026)
   - **Symptôme** : Clics rapides produisent des IDs identiques → données écrasées
   - **Fichiers et lignes** :
     - `evaluation.js:1794` → `'EVAL_' + Date.now()`

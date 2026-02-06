@@ -418,7 +418,7 @@ function migrerConfigurationPortfolio() {
     console.log('[Migration Phase 3] 🔄 Début migration configuration portfolio...');
 
     // Lire productions pour trouver le portfolio
-    const productions = db.getSync('productions', []);
+    const productions = db.getSync(cle('productions'), []);
     const portfolio = productions.find(p => p.type === 'portfolio');
 
     if (!portfolio || !portfolio.regles) {

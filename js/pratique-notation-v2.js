@@ -1323,7 +1323,7 @@
         // 1. Productions du cours actuel
         let productionsCours = [];
         try {
-            productionsCours = await db.get('productions') || [];
+            productionsCours = await db.get(cle('productions')) || [];
         } catch (e) {
             productionsCours = [];
         }
