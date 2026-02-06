@@ -3553,7 +3553,6 @@
                 <button data-onglet="evaluations">Évaluations</button>
                 <button data-onglet="construction">Construction de la note</button>
                 <button data-onglet="boite-outils">Boîte à outils</button>
-                <button data-onglet="travaux">Travaux</button>
                 <button data-onglet="reglages" class="btn-nav-icone" title="Réglages">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="3"></circle>
@@ -4595,6 +4594,29 @@
                 </div><!-- fin carte du layout évaluation -->
 
             </div><!-- fin sous-section evaluations-individuelles -->
+
+                <!-- Sous-section: Travaux (import + visionneuse fusionnés) -->
+                <div id="evaluations-travaux" class="sous-section">
+                    <div class="info-box info-box--attention" style="margin: 0 0 12px 0;">
+                        <strong>Module en cours de développement</strong> — N'hésitez pas à signaler tout bug ou comportement inattendu. Vos retours sont la meilleure façon de construire un outil qui répond à vos besoins.
+                    </div>
+                    <div class="info-box info-box--info" style="margin: 0 0 12px 0;">
+                        <strong>Note sur l'affichage</strong> — La prévisualisation à l'écran est en basse résolution pour la fluidité. L'export PDF est de bien meilleure qualité.
+                    </div>
+                    <div id="evaluations-contenu-import">
+                        <p class="texte-muted">Chargement du module Travaux...</p>
+                    </div>
+                    <div id="evaluations-contenu-visionneuse" class="u-hide">
+                        <p class="texte-muted">Chargement de la visionneuse...</p>
+                    </div>
+                </div>
+
+                <!-- Sous-section: Archivage -->
+                <div id="evaluations-archivage" class="sous-section">
+                    <div id="evaluations-contenu-archivage">
+                        <p class="texte-muted">Chargement de l'archivage...</p>
+                    </div>
+                </div>
 
             <!-- Modal Réparation des évaluations -->
             <div id="modalReparationEvaluations" class="modal-overlay">
@@ -6570,42 +6592,7 @@
 
             </section><!-- fin section-boite-outils -->
 
-            <!-- ===================================
-                 SECTION: TRAVAUX
-                 Import, annotation et archivage des travaux etudiants
-                 Beta 96.3
-                 =================================== -->
-            <section id="section-travaux" class="section">
-
-                <div class="info-box info-box--attention" style="margin: 0 0 12px 0;">
-                    <strong>Module en cours de développement</strong> — N'hésitez pas à signaler tout bug ou comportement inattendu. Vos retours sont la meilleure façon de construire un outil qui répond à vos besoins.
-                </div>
-                <div class="info-box info-box--info" style="margin: 0 0 12px 0;">
-                    <strong>Note sur l'affichage</strong> — La prévisualisation à l'écran est en basse résolution pour la fluidité. L'export PDF est de bien meilleure qualité.
-                </div>
-
-                <!-- Sous-section: Import -->
-                <div id="travaux-import" class="sous-section">
-                    <div id="travaux-contenu-import">
-                        <p class="texte-muted">Chargement du module Travaux...</p>
-                    </div>
-                </div>
-
-                <!-- Sous-section: Visionneuse -->
-                <div id="travaux-visionneuse" class="sous-section">
-                    <div id="travaux-contenu-visionneuse">
-                        <p class="texte-muted">Chargement de la visionneuse...</p>
-                    </div>
-                </div>
-
-                <!-- Sous-section: Archivage -->
-                <div id="travaux-archivage" class="sous-section">
-                    <div id="travaux-contenu-archivage">
-                        <p class="texte-muted">Chargement de l'archivage...</p>
-                    </div>
-                </div>
-
-            </section><!-- fin section-travaux -->
+            <!-- SECTION TRAVAUX : migrée sous Évaluations (sous-onglets evaluations-travaux et evaluations-archivage) -->
 
             <!-- ===================================
                  SECTION: RÉGLAGES

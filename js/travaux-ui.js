@@ -67,7 +67,7 @@
      * Affiche la sous-section Import
      */
     function afficherImport() {
-        const conteneur = document.getElementById('travaux-contenu-import');
+        const conteneur = document.getElementById('evaluations-contenu-import');
         if (!conteneur) return;
 
         const fichiersTravaux = travauxStockage.obtenirFichiersTravaux();
@@ -149,7 +149,7 @@
      * Affiche la sous-section Visionneuse
      */
     function afficherVisionneuse() {
-        const conteneur = document.getElementById('travaux-contenu-visionneuse');
+        const conteneur = document.getElementById('evaluations-contenu-visionneuse');
         if (!conteneur) return;
 
         const fichiersTravaux = travauxStockage.obtenirFichiersTravaux();
@@ -178,6 +178,7 @@
                     <!-- Toolbar -->
                     <div class="travaux-toolbar">
                         <div class="travaux-toolbar-gauche">
+                            <button class="btn btn-petit" onclick="travauxUI.retourImport()" title="Retour a la liste">&#x2190; Retour</button>
                             <span id="travaux-nom-fichier" class="travaux-nom-fichier">Aucun fichier ouvert</span>
                         </div>
                         <div class="travaux-toolbar-centre">
@@ -257,7 +258,7 @@
      * Affiche la sous-section Archivage
      */
     function afficherArchivage() {
-        const conteneur = document.getElementById('travaux-contenu-archivage');
+        const conteneur = document.getElementById('evaluations-contenu-archivage');
         if (!conteneur) return;
 
         const etudiants = obtenirDonneesSelonMode(cle('groupeEtudiants'));
@@ -525,10 +526,12 @@
      * @param {string} fichierId - ID du fichier
      */
     async function ouvrirFichier(fichierId) {
-        // Basculer vers la sous-section visionneuse
-        if (typeof afficherSousSection === 'function') {
-            afficherSousSection('travaux-visionneuse');
-        }
+        // Toggle interne : masquer import, afficher visionneuse
+        const importDiv = document.getElementById('evaluations-contenu-import');
+        const visDiv = document.getElementById('evaluations-contenu-visionneuse');
+        if (importDiv) importDiv.classList.add('u-hide');
+        if (visDiv) visDiv.classList.remove('u-hide');
+        afficherVisionneuse();
 
         // Attendre que la visionneuse soit prete
         setTimeout(async () => {
@@ -774,13 +777,15 @@
         if (!sousSection) return;
 
         switch (sousSection) {
-            case 'travaux-import':
-                afficherImport();
+            case 'evaluations-travaux':
+                const visDiv = document.getElementById('evaluations-contenu-visionneuse');
+                if (visDiv && !visDiv.classList.contains('u-hide')) {
+                    afficherVisionneuse();
+                } else {
+                    afficherImport();
+                }
                 break;
-            case 'travaux-visionneuse':
-                afficherVisionneuse();
-                break;
-            case 'travaux-archivage':
+            case 'evaluations-archivage':
                 afficherArchivage();
                 break;
         }
@@ -805,6 +810,17 @@
         }
     }
 
+    /**
+     * Retour a la vue import depuis la visionneuse
+     */
+    function retourImport() {
+        const importDiv = document.getElementById('evaluations-contenu-import');
+        const visDiv = document.getElementById('evaluations-contenu-visionneuse');
+        if (importDiv) importDiv.classList.remove('u-hide');
+        if (visDiv) visDiv.classList.add('u-hide');
+        afficherImport();
+    }
+
     // Fonction globale pour le callback de rafraichissement
     window.rafraichirImportTravaux = rafraichirImportUI;
 
@@ -824,6 +840,7 @@
         ouvrirFichier: ouvrirFichier,
         filtrerParEtudiant: filtrerParEtudiant,
         toggleSidebar: toggleSidebar,
+        retourImport: retourImport,
         // Archivage
         lancerArchivageEtudiant: lancerArchivageEtudiant,
         lancerArchivageProduction: lancerArchivageProduction,
