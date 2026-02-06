@@ -451,6 +451,207 @@
     }
 
     /* ===============================
+       GESTES ZOOM (Pinch & Molette)
+       =============================== */
+
+    let conteneurGestesZoom = null;
+    let wrapperGestesZoom = null;
+
+    // Etat du geste molette (Mac trackpad / souris Ctrl+molette)
+    let gesteZoomMolette = {
+        actif: false,
+        zoomDepart: 1,
+        viewX: 0,
+        viewY: 0,
+        scrollXDepart: 0,
+        scrollYDepart: 0,
+        timer: null
+    };
+
+    // Etat du pinch tactile (iPad)
+    let pinchState = {
+        actif: false,
+        distanceInitiale: 0,
+        zoomInitial: 1,
+        zoomCible: null,
+        origineFixee: false,
+        centreX: 0,
+        centreY: 0
+    };
+
+    /**
+     * Configure les gestes de zoom sur le conteneur du document
+     * @param {HTMLElement} conteneur - .travaux-canvas-container
+     */
+    function configurerGestesZoom(conteneur) {
+        if (!conteneur) return;
+        conteneurGestesZoom = conteneur;
+        wrapperGestesZoom = conteneur.querySelector('.travaux-canvas-wrapper');
+
+        // Molette / trackpad pinch (Mac)
+        conteneur.addEventListener('wheel', onWheelZoom, { passive: false });
+
+        // Pinch tactile (iPad)
+        conteneur.addEventListener('touchstart', onPinchStart, { passive: false });
+        conteneur.addEventListener('touchmove', onPinchMove, { passive: false });
+        conteneur.addEventListener('touchend', onPinchEnd);
+        conteneur.addEventListener('touchcancel', onPinchEnd);
+
+        // Prevenir le zoom natif Safari (gesturestart/gesturechange)
+        conteneur.addEventListener('gesturestart', onGesturePrevent, { passive: false });
+        conteneur.addEventListener('gesturechange', onGesturePrevent, { passive: false });
+
+        console.log('[Travaux-Visionneuse] Gestes zoom configures');
+    }
+
+    /**
+     * Bloque les gestes natifs Safari pour eviter le zoom navigateur
+     */
+    function onGesturePrevent(e) {
+        if (fichierActuel) e.preventDefault();
+    }
+
+    /**
+     * Zoom via molette/trackpad (Ctrl+molette ou pinch trackpad Mac)
+     */
+    function onWheelZoom(e) {
+        if (!e.ctrlKey && !e.metaKey) return;
+        if (!fichierActuel) return;
+
+        e.preventDefault();
+
+        const facteur = e.deltaY > 0 ? 0.97 : 1.03;
+        const nouveauZoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, zoomActuel * facteur));
+        if (Math.abs(nouveauZoom - zoomActuel) < 0.001) return;
+
+        const rect = conteneurGestesZoom.getBoundingClientRect();
+
+        // Debut du geste : enregistrer l'etat initial
+        if (!gesteZoomMolette.actif) {
+            gesteZoomMolette.actif = true;
+            gesteZoomMolette.zoomDepart = zoomActuel;
+            gesteZoomMolette.scrollXDepart = conteneurGestesZoom.scrollLeft;
+            gesteZoomMolette.scrollYDepart = conteneurGestesZoom.scrollTop;
+        }
+
+        gesteZoomMolette.viewX = e.clientX - rect.left;
+        gesteZoomMolette.viewY = e.clientY - rect.top;
+
+        modeZoom = 'manual';
+        zoomActuel = nouveauZoom;
+        mettreAJourNavigation();
+
+        // Debounce le re-rendu reel
+        if (gesteZoomMolette.timer) clearTimeout(gesteZoomMolette.timer);
+        gesteZoomMolette.timer = setTimeout(async () => {
+            const ratio = zoomActuel / gesteZoomMolette.zoomDepart;
+            const contentX = gesteZoomMolette.scrollXDepart + gesteZoomMolette.viewX;
+            const contentY = gesteZoomMolette.scrollYDepart + gesteZoomMolette.viewY;
+
+            cachePages.clear();
+            await reRendrePageActuelle();
+
+            // Ajuster le scroll pour garder le point sous le curseur
+            conteneurGestesZoom.scrollLeft = contentX * ratio - gesteZoomMolette.viewX;
+            conteneurGestesZoom.scrollTop = contentY * ratio - gesteZoomMolette.viewY;
+
+            gesteZoomMolette.actif = false;
+        }, 100);
+    }
+
+    /**
+     * Distance euclidienne entre deux points de toucher
+     */
+    function distanceTouches(t1, t2) {
+        return Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+    }
+
+    /**
+     * Debut du pinch (deux doigts)
+     */
+    function onPinchStart(e) {
+        if (e.touches.length !== 2 || !fichierActuel) return;
+
+        e.preventDefault();
+        pinchState.actif = true;
+        pinchState.distanceInitiale = distanceTouches(e.touches[0], e.touches[1]);
+        pinchState.zoomInitial = zoomActuel;
+        pinchState.zoomCible = zoomActuel;
+        pinchState.origineFixee = false;
+    }
+
+    /**
+     * Mouvement du pinch - preview CSS transform (rapide, sans re-rendu PDF)
+     */
+    function onPinchMove(e) {
+        if (!pinchState.actif || e.touches.length !== 2) return;
+
+        e.preventDefault();
+
+        const distanceCourante = distanceTouches(e.touches[0], e.touches[1]);
+        const ratio = distanceCourante / pinchState.distanceInitiale;
+        const zoomCible = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, pinchState.zoomInitial * ratio));
+
+        if (wrapperGestesZoom) {
+            // Fixer le centre de zoom une seule fois au debut du pinch
+            if (!pinchState.origineFixee) {
+                const wrapperRect = wrapperGestesZoom.getBoundingClientRect();
+                const cx = ((e.touches[0].clientX + e.touches[1].clientX) / 2) - wrapperRect.left;
+                const cy = ((e.touches[0].clientY + e.touches[1].clientY) / 2) - wrapperRect.top;
+                wrapperGestesZoom.style.transformOrigin = `${cx}px ${cy}px`;
+                pinchState.origineFixee = true;
+
+                const containerRect = conteneurGestesZoom.getBoundingClientRect();
+                pinchState.centreX = ((e.touches[0].clientX + e.touches[1].clientX) / 2) - containerRect.left;
+                pinchState.centreY = ((e.touches[0].clientY + e.touches[1].clientY) / 2) - containerRect.top;
+            }
+
+            const scaleVisuel = zoomCible / zoomActuel;
+            wrapperGestesZoom.style.transform = `scale(${scaleVisuel})`;
+            pinchState.zoomCible = zoomCible;
+        }
+    }
+
+    /**
+     * Fin du pinch - re-rendu a la resolution finale
+     */
+    async function onPinchEnd(e) {
+        if (!pinchState.actif) return;
+        if (e.touches.length > 0) return; // Encore des doigts
+
+        pinchState.actif = false;
+
+        // Retirer le transform CSS de preview
+        if (wrapperGestesZoom) {
+            wrapperGestesZoom.style.transform = '';
+            wrapperGestesZoom.style.transformOrigin = '';
+        }
+
+        const zoomCible = pinchState.zoomCible;
+        if (!zoomCible || Math.abs(zoomCible - zoomActuel) < 0.01) return;
+
+        // Calculer le nouveau scroll centre sur le point de pinch
+        const ancienZoom = zoomActuel;
+        const ratio = zoomCible / ancienZoom;
+        const viewX = pinchState.centreX || (conteneurGestesZoom.clientWidth / 2);
+        const viewY = pinchState.centreY || (conteneurGestesZoom.clientHeight / 2);
+        const contentX = conteneurGestesZoom.scrollLeft + viewX;
+        const contentY = conteneurGestesZoom.scrollTop + viewY;
+
+        modeZoom = 'manual';
+        zoomActuel = zoomCible;
+        cachePages.clear();
+
+        await reRendrePageActuelle();
+
+        // Ajuster le scroll pour garder le centre du pinch stable
+        conteneurGestesZoom.scrollLeft = contentX * ratio - viewX;
+        conteneurGestesZoom.scrollTop = contentY * ratio - viewY;
+
+        pinchState.zoomCible = null;
+    }
+
+    /* ===============================
        FERMETURE
        =============================== */
 
@@ -521,6 +722,7 @@
         zoomAvant: zoomAvant,
         zoomArriere: zoomArriere,
         zoomAjuster: zoomAjuster,
+        configurerGestesZoom: configurerGestesZoom,
         // Accesseurs
         getFichierActuel: getFichierActuel,
         getPageActuelle: getPageActuelle,
