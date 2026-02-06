@@ -192,7 +192,7 @@
                             <button class="btn-icon" onclick="travauxVisionneuse.zoomAjuster()" title="Ajuster a la fenetre">&#x2922;</button>
                             <span class="travaux-separateur"></span>
                             <button id="travaux-btn-annoter" class="btn btn-petit" onclick="travauxAnnotation.basculerAnnotation()">Annoter</button>
-                            <button id="travaux-btn-export-pdf" class="btn btn-petit" onclick="travauxExportPDF.afficherRevisionExport(travauxVisionneuse.getFichierActuel()?.id)" title="Exporter PDF annote" style="display:none">Exporter PDF</button>
+                            <button id="travaux-btn-export-pdf" class="btn btn-petit u-hide" onclick="travauxExportPDF.afficherRevisionExport(travauxVisionneuse.getFichierActuel()?.id)" title="Exporter PDF annote">Exporter PDF</button>
                         </div>
                     </div>
 
@@ -200,7 +200,7 @@
                     <div class="travaux-canvas-container" id="travaux-canvas-container">
                         <div class="travaux-canvas-wrapper" id="travaux-canvas-wrapper">
                             <canvas id="travaux-canvas-document"></canvas>
-                            <canvas id="travaux-canvas-annotation" style="display:none; pointer-events:none;"></canvas>
+                            <canvas id="travaux-canvas-annotation" class="u-hide" style="pointer-events:none;"></canvas>
                         </div>
                         <div id="travaux-placeholder-visionneuse" class="travaux-placeholder">
                             <p>Selectionnez un fichier dans la sidebar pour l'ouvrir</p>
@@ -208,10 +208,10 @@
                     </div>
 
                     <!-- Palette d'outils (masquee par defaut) -->
-                    <div id="travaux-palette-container" style="display:none"></div>
+                    <div id="travaux-palette-container" class="u-hide"></div>
 
                     <!-- Undo/Redo (masques par defaut) -->
-                    <div class="travaux-undo-redo" id="travaux-undo-redo" style="display:none">
+                    <div class="travaux-undo-redo u-hide" id="travaux-undo-redo">
                         <button id="travaux-btn-undo" class="btn-icon" onclick="travauxAnnotation.annuler()" disabled title="Annuler (Ctrl+Z)">&#x21A9;</button>
                         <button id="travaux-btn-redo" class="btn-icon" onclick="travauxAnnotation.retablir()" disabled title="Retablir (Ctrl+Y)">&#x21AA;</button>
                         <button class="btn-icon btn-danger-petit" onclick="travauxAnnotation.effacerPage()" title="Effacer la page">&#x1F5D1;</button>
@@ -539,7 +539,7 @@
 
             // Afficher le bouton export PDF
             const btnExport = document.getElementById('travaux-btn-export-pdf');
-            if (btnExport) btnExport.style.display = '';
+            if (btnExport) btnExport.classList.remove('u-hide');
 
             // Mettre a jour la miniature active
             document.querySelectorAll('.travaux-miniature').forEach(m => {
@@ -725,10 +725,10 @@
                 <div class="travaux-canvas-container">
                     <div class="travaux-canvas-wrapper">
                         <canvas id="travaux-canvas-document"></canvas>
-                        <canvas id="travaux-canvas-annotation" style="display:none; pointer-events:none;"></canvas>
+                        <canvas id="travaux-canvas-annotation" class="u-hide" style="pointer-events:none;"></canvas>
                     </div>
                 </div>
-                <div id="travaux-palette-container" style="display:none"></div>
+                <div id="travaux-palette-container" class="u-hide"></div>
             </div>
         `;
 
