@@ -16,7 +16,7 @@
 
     const ZOOM_MIN = 0.25;
     const ZOOM_MAX = 4.0;
-    const ZOOM_PAS = 0.25;
+    const ZOOM_PAS = 0.1;
     const ZOOM_DEFAUT = 1.0;
     const ZOOM_FIT = 'fit'; // Ajuster a la fenetre
 
@@ -266,6 +266,8 @@
                 scale: zoomEffectif
             }
         }));
+
+        mettreAJourNavigation();
     }
 
     /**
@@ -317,11 +319,10 @@
 
     /**
      * Initialise ou recupere le canvas de rendu
+     * Toujours rafraichir depuis le DOM (le HTML peut etre regenere)
      */
     function initialiserCanvas() {
-        if (!canvasDocument) {
-            canvasDocument = document.getElementById('travaux-canvas-document');
-        }
+        canvasDocument = document.getElementById('travaux-canvas-document');
         if (canvasDocument) {
             ctxDocument = canvasDocument.getContext('2d');
         }
@@ -416,6 +417,7 @@
     async function zoomAvant() {
         modeZoom = 'manual';
         zoomActuel = Math.min(zoomActuel + ZOOM_PAS, ZOOM_MAX);
+        mettreAJourNavigation();
         cachePages.clear();
         await reRendrePageActuelle();
     }
@@ -426,6 +428,7 @@
     async function zoomArriere() {
         modeZoom = 'manual';
         zoomActuel = Math.max(zoomActuel - ZOOM_PAS, ZOOM_MIN);
+        mettreAJourNavigation();
         cachePages.clear();
         await reRendrePageActuelle();
     }
