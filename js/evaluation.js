@@ -2717,9 +2717,9 @@ function chargerListeEvaluationsRefonte() {
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
     // 🎯 LECTURE DEPUIS LA SOURCE UNIQUE : saisie-presences.js génère indicesAssiduiteDetailles
-    const indicesAssiduiteDetailles = db.getSync((typeof cle === 'function') ? cle('indicesAssiduite') : 'indicesAssiduite', {});
+    const indicesAssiduiteDetailles = db.getSync(cle('indicesAssiduite'), {});
     // 🎯 LECTURE DEPUIS LA SOURCE UNIQUE : portfolio.js génère indicesCP
-    const indicesCP = db.getSync((typeof cle === 'function') ? cle('indicesCP') : 'indicesCP', {});
+    const indicesCP = db.getSync(cle('indicesCP'), {});
 
     // Détecter la pratique active
     const config = db.getSync('modalitesEvaluation', {});
@@ -2813,7 +2813,7 @@ function genererBadgeCompletion(etudiant) {
 
     // PRIORITÉ 2 : Fallback - Lire directement depuis localStorage
     if (completion === 0) {
-        const indicesCP = db.getSync((typeof cle === 'function') ? cle('indicesCP') : 'indicesCP', {});
+        const indicesCP = db.getSync(cle('indicesCP'), {});
         const actuel = indicesCP[etudiant.da]?.actuel;
         if (actuel && actuel[pratique] && typeof actuel[pratique].C === 'number') {
             completion = actuel[pratique].C / 100;
@@ -3047,7 +3047,7 @@ function genererDetailsEtudiant(etudiant) {
     const nbRemis = productionsDistinctes.size;
 
     // Lire les indices depuis la source unique (portfolio.js)
-    const indicesCP = db.getSync((typeof cle === 'function') ? cle('indicesCP') : 'indicesCP', {});
+    const indicesCP = db.getSync(cle('indicesCP'), {});
     const indicesCPEtudiant = indicesCP[etudiant.da]?.actuel || null;
 
     // Lire C et P directement depuis actuel (structure plate, plus de branches SOM/PAN)
@@ -3378,11 +3378,12 @@ function obtenirClasseNote(note) {
 }
 
 /**
- * Formate une date ISO en format lisible
+ * Formate une date ISO en format court "2026-02-06" (fr-CA par défaut)
+ * Distinct de formaterDate() canonique qui retourne "6 février 2026"
  */
-function formaterDate(dateISO) {
+function formaterDateISO(dateISO) {
     if (!dateISO) return '—';
-    const date = new Date(dateISO);
+    const date = new Date(dateISO + 'T12:00:00');
     return date.toLocaleDateString('fr-CA');
 }
 

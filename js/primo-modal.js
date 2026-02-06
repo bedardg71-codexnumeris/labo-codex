@@ -1110,7 +1110,7 @@ async function creerProduction() {
 
         // ✅ CORRECTION (Beta 95 - 2 jan 2026) : Utiliser clé namespacée
         // Ajouter la production dans localStorage
-        const cleProductions = (typeof window.cle === 'function') ? window.cle('productions') : 'productions';
+        const cleProductions = cle('productions');
         const productions = db.getSync(cleProductions, []);
         productions.push(nouvelleProduction);
         db.setSync(cleProductions, productions);
@@ -1274,10 +1274,8 @@ function creerSeancesHoraire() {
 
         // 🆕 BETA 95.1 (Bug Bruno) : Aussi sauvegarder dans horaireHebdo namespacé
         // pour que genererCalendrierComplet() puisse déterminer les jours avec cours
-        if (typeof cle === 'function') {
-            db.setSync(cle('horaireHebdo'), seances);
-            console.log(`[Primo] Séances aussi copiées dans ${cle('horaireHebdo')}`);
-        }
+        db.setSync(cle('horaireHebdo'), seances);
+        console.log(`[Primo] Séances aussi copiées dans ${cle('horaireHebdo')}`);
     }
 }
 
@@ -1706,7 +1704,7 @@ function creerGroupeCoursDepuisPrimo(reponses) {
     const pratiqueId = reponses['pratique-notation'] || 'pan-maitrise';
 
     // Créer le groupe-cours
-    const cleGC = (typeof cle === 'function') ? cle('groupesCours') : 'groupesCours';
+    const cleGC = cle('groupesCours');
     const groupesCours = db.getSync(cleGC, []);
 
     // Vérifier si un groupe-cours existe déjà pour ce cours
@@ -1786,12 +1784,12 @@ function creerOuRecupererEnseignantPrimo(reponses) {
  * (créé par creerSeancesHoraire) au lieu de reponses['horaireHebdomadaire']
  */
 function creerHoraireDansBanquePrimo(reponses, coursId) {
-    const cleHoraires = (typeof cle === 'function') ? cle('horaires') : 'horaires';
+    const cleHoraires = cle('horaires');
     const horaires = db.getSync(cleHoraires, []);
 
     // FIX #50 : Lire les séances depuis horaireHebdo namespacé (créé par creerSeancesHoraire)
     // ou depuis seancesHoraire_{coursId} en fallback
-    const cleHoraireHebdo = (typeof cle === 'function') ? cle('horaireHebdo') : 'horaireHebdo';
+    const cleHoraireHebdo = cle('horaireHebdo');
     let seances = db.getSync(cleHoraireHebdo, []);
 
     // Fallback : essayer seancesHoraire_{coursId}
@@ -1842,7 +1840,7 @@ function genererNomGroupeCoursPrimo(trimestreId, codeCours, groupeNum, horaireId
     // Résumé horaire
     let horaireResume = '';
     if (horaireId) {
-        const cleHoraires = (typeof cle === 'function') ? cle('horaires') : 'horaires';
+        const cleHoraires = cle('horaires');
         const horaires = db.getSync(cleHoraires, []);
         const horaire = horaires.find(h => h.id === horaireId);
 

@@ -1966,7 +1966,7 @@ function afficherSyntheseGroupeCours(gc) {
     const listeCours = db.getSync('listeCours', []);
     const enseignants = db.getSync('enseignants', []);
     // 🆕 FIX (1er fév 2026) : Utiliser cle() pour namespacing (horaires est dans CLES_NAMESPACEES)
-    const cleHoraires = (typeof cle === 'function') ? cle('horaires') : 'horaires';
+    const cleHoraires = cle('horaires');
     const horaires = db.getSync(cleHoraires, []);
     const pratiques = db.getSync('pratiquesConfigurables', []);
 
@@ -2255,7 +2255,7 @@ async function chargerListeEtudiantsV2() {
     if (!conteneur) return;
 
     // Utiliser namespace cle() pour lire les données du trimestre actif
-    const cleEtudiants = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
+    const cleEtudiants = cle('groupeEtudiants');
 
     // ✅ CORRECTION (9 jan 2026): Lire depuis IndexedDB pour éviter les données obsolètes de localStorage
     const tousLesEtudiants = await db.get(cleEtudiants) || [];
@@ -2500,7 +2500,7 @@ async function soumettreEtudiantV2() {
         coursId: coursActif?.id || ''
     };
 
-    const cleEtud = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
+    const cleEtud = cle('groupeEtudiants');
 
     // ✅ CORRECTION (9 jan 2026): Utiliser async pour persistance fiable
     let etudiants = await db.get(cleEtud) || [];
@@ -2527,7 +2527,7 @@ async function soumettreEtudiantV2() {
  * 🆕 FIX (4 fév 2026) : Utiliser DA au lieu de l'index pour éviter décalage avec liste filtrée
  */
 function editerEtudiantV2(da) {
-    const cleEtud = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
+    const cleEtud = cle('groupeEtudiants');
     const etudiants = db.getSync(cleEtud, []);
     const index = etudiants.findIndex(e => e.da === da);
     const etudiant = etudiants[index];
@@ -2604,7 +2604,7 @@ function ajouterEtudiantV2() {
  * Crée un nouveau groupe (calcule le prochain numéro disponible)
  */
 function creerNouveauGroupeV2() {
-    const cleEtud = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
+    const cleEtud = cle('groupeEtudiants');
     const etudiants = db.getSync(cleEtud, []);
 
     // Trouver tous les numéros de groupe existants
@@ -2668,7 +2668,7 @@ function creerNouveauGroupeV2() {
  */
 async function supprimerEtudiantV2(da) {
     // ✅ CORRECTION (31 déc 2025): Utiliser namespace
-    const cleEtud = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
+    const cleEtud = cle('groupeEtudiants');
 
     // ✅ CORRECTION (9 jan 2026): Utiliser async pour persistance fiable
     let etudiants = await db.get(cleEtud) || [];
@@ -2800,7 +2800,7 @@ async function confirmerImportV2() {
 
     const coursActif = db.getSync('infoCours', null);
     // ✅ CORRECTION (31 déc 2025): Utiliser namespace
-    const cleEtud = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
+    const cleEtud = cle('groupeEtudiants');
     console.log('📥 [confirmerImportV2] Clé:', cleEtud);
 
     // ✅ CORRECTION (9 jan 2026): Lire depuis IndexedDB pour avoir les données complètes
@@ -2856,7 +2856,7 @@ function annulerImportV2() {
  */
 function exporterEtudiantsV2() {
     // ✅ CORRECTION (31 déc 2025): Utiliser namespace
-    const cleEtud = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
+    const cleEtud = cle('groupeEtudiants');
     const etudiants = db.getSync(cleEtud, []);
     if (etudiants.length === 0) {
         alert('Aucun étudiant à exporter.');
@@ -2881,7 +2881,7 @@ function exporterEtudiantsV2() {
  */
 async function reinitialiserEtudiantsV2() {
     // ✅ CORRECTION (31 déc 2025): Utiliser namespace
-    const cleEtud = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
+    const cleEtud = cle('groupeEtudiants');
 
     // ✅ CORRECTION (9 jan 2026): Utiliser async pour persistance fiable
     const etudiants = await db.get(cleEtud) || [];
@@ -2917,7 +2917,7 @@ async function supprimerGroupeSelectionneV2() {
         return;
     }
 
-    const cleEtud = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
+    const cleEtud = cle('groupeEtudiants');
 
     // ✅ CORRECTION (9 jan 2026): Utiliser async pour persistance fiable
     const tousLesEtudiants = await db.get(cleEtud) || [];
@@ -2962,7 +2962,7 @@ async function supprimerGroupeSelectionneV2() {
  * 🆕 BETA 95.2 : Workflow groupe → horaire
  */
 async function sauvegarderGroupeEtudiantsV2() {
-    const cleEtud = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
+    const cleEtud = cle('groupeEtudiants');
 
     // ✅ CORRECTION (9 jan 2026): Utiliser async pour persistance fiable
     const etudiants = await db.get(cleEtud) || [];
@@ -3358,7 +3358,7 @@ function chargerHorairesV2() {
     // ✅ CORRIGÉ (8 janvier 2026) : Restaurer le dernier horaire sélectionné
     const horaireIdSauvegarde = db.getSync('horaireSelectionne', null);
     if (horaireIdSauvegarde) {
-        const cleHoraires = typeof cle === 'function' ? cle('horaires') : 'horaires';
+        const cleHoraires = cle('horaires');
         const horaires = db.getSync(cleHoraires, []);
         const horaire = horaires.find(h => h.id === horaireIdSauvegarde);
 
@@ -3382,7 +3382,7 @@ function populerDropdownHorairesV2() {
     const select = document.getElementById('v2-selectHoraire');
     if (!select) return;
 
-    const cleHoraires = typeof cle === 'function' ? cle('horaires') : 'horaires';
+    const cleHoraires = cle('horaires');
     const horaires = db.getSync(cleHoraires, []);
     const valeurActuelle = select.value;
 
@@ -3410,7 +3410,7 @@ function changerHoraireSelectionneV2(horaireId) {
         return;
     }
 
-    const cleHoraires = typeof cle === 'function' ? cle('horaires') : 'horaires';
+    const cleHoraires = cle('horaires');
     const horaires = db.getSync(cleHoraires, []);
     const horaire = horaires.find(h => h.id === horaireId);
 
@@ -3484,7 +3484,7 @@ function populerDropdownGroupesHoraireV2() {
     const select = document.getElementById('v2-hor-groupeAssocie');
     if (!select) return;
 
-    const cleEtud = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
+    const cleEtud = cle('groupeEtudiants');
     const etudiants = db.getSync(cleEtud, []);
 
     // Extraire les groupes uniques
@@ -3651,7 +3651,7 @@ function sauvegarderHoraireV2() {
         seances.push({ jour, heureDebut, heureFin, local });
     }
 
-    const cleHoraires = typeof cle === 'function' ? cle('horaires') : 'horaires';
+    const cleHoraires = cle('horaires');
     let horaires = db.getSync(cleHoraires, []);
 
     if (horaireEnEditionId) {
@@ -3701,7 +3701,7 @@ function sauvegarderHoraireV2() {
             });
         }
     });
-    const cleHoraireHebdo = typeof cle === 'function' ? cle('horaireHebdo') : 'horaireHebdo';
+    const cleHoraireHebdo = cle('horaireHebdo');
     db.setSync(cleHoraireHebdo, toutesSeances);
     console.log(`📅 horaireHebdo synchronisé avec ${toutesSeances.length} jour(s):`, toutesSeances.map(s => s.jour).join(', '));
 
@@ -3736,7 +3736,7 @@ function supprimerHoraireV2() {
         return;
     }
 
-    const cleHoraires = typeof cle === 'function' ? cle('horaires') : 'horaires';
+    const cleHoraires = cle('horaires');
     let horaires = db.getSync(cleHoraires, []);
     const horaire = horaires.find(h => h.id === horaireEnEditionId);
 
@@ -3769,7 +3769,7 @@ function supprimerHoraireV2() {
             });
         }
     });
-    const cleHoraireHebdo = typeof cle === 'function' ? cle('horaireHebdo') : 'horaireHebdo';
+    const cleHoraireHebdo = cle('horaireHebdo');
     db.setSync(cleHoraireHebdo, toutesSeances);
     if (typeof genererCalendrierComplet === 'function') {
         genererCalendrierComplet();
@@ -3875,7 +3875,7 @@ function chargerGroupeCoursV2() {
     const gcActif = db.getSync('groupeCoursActif', null);
     if (gcActif && gcActif.id) {
         // Trouver le groupe-cours dans la liste pour avoir les données à jour
-        const cleGC = typeof cle === 'function' ? cle('groupesCours') : 'groupesCours';
+        const cleGC = cle('groupesCours');
         const groupesCours = db.getSync(cleGC, []);
         const gc = groupesCours.find(g => g.id === gcActif.id);
 
@@ -3926,7 +3926,7 @@ function populerDropdownGroupeCoursV2() {
     const select = document.getElementById('v2-selectGroupeCours');
     if (!select) return;
 
-    const cleGC = typeof cle === 'function' ? cle('groupesCours') : 'groupesCours';
+    const cleGC = cle('groupesCours');
     const groupesCours = db.getSync(cleGC, []);
 
     // Sauvegarder la valeur actuelle pour la restaurer après repopulation
@@ -3993,7 +3993,7 @@ function populerDropdownsAssemblageV2() {
     // Dropdown Groupes d'étudiants
     const selectGroupe = document.getElementById('v2-gc-groupe');
     if (selectGroupe) {
-        const cleEtud = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
+        const cleEtud = cle('groupeEtudiants');
         const etudiants = db.getSync(cleEtud, []);
 
         // Extraire les groupes uniques
@@ -4016,7 +4016,7 @@ function populerDropdownsAssemblageV2() {
     // Beta 95.2: Dropdown Horaires
     const selectHoraire = document.getElementById('v2-gc-horaire');
     if (selectHoraire) {
-        const cleHoraires = typeof cle === 'function' ? cle('horaires') : 'horaires';
+        const cleHoraires = cle('horaires');
         const horaires = db.getSync(cleHoraires, []);
         let html = '<option value="">— Choisir un horaire —</option>';
         horaires.forEach(h => {
@@ -4109,7 +4109,7 @@ function genererNomGroupeCoursV2() {
     const horaireId = document.getElementById('v2-gc-horaire')?.value;
     let horaireResume = '';
     if (horaireId) {
-        const cleHoraires = typeof cle === 'function' ? cle('horaires') : 'horaires';
+        const cleHoraires = cle('horaires');
         const horaires = db.getSync(cleHoraires, []);
         const horaire = horaires.find(h => h.id === horaireId);
 
@@ -4164,7 +4164,7 @@ function mettreAJourNomGroupeCoursV2() {
     const horaireContainer = document.getElementById('v2-gc-horaireInfo');
 
     if (groupeNum) {
-        const cleHoraires = typeof cle === 'function' ? cle('horaires') : 'horaires';
+        const cleHoraires = cle('horaires');
         const horaires = db.getSync(cleHoraires, []);
         const horaireAssocie = horaires.find(h => h.groupeAssocie === groupeNum);
 
@@ -4206,7 +4206,7 @@ function changerGroupeCoursSelectionneV2(gcId) {
         return;
     }
 
-    const cleGC = typeof cle === 'function' ? cle('groupesCours') : 'groupesCours';
+    const cleGC = cle('groupesCours');
     const groupesCours = db.getSync(cleGC, []);
     const gc = groupesCours.find(g => g.id === gcId);
 
@@ -4239,7 +4239,7 @@ function mettreAJourCarteResumeGroupeCoursV2(gc) {
     const coursObj = cours.find(c => c.id === gc.coursId || c.sigle === gc.coursId || c.codeCours === gc.coursId || c.code === gc.coursId);
     const coursNom = coursObj ? (coursObj.codeCours || coursObj.sigle || coursObj.code || '') + ' - ' + (coursObj.nomCours || coursObj.nom || coursObj.titre || '') : '—';
 
-    const cleHoraires = typeof cle === 'function' ? cle('horaires') : 'horaires';
+    const cleHoraires = cle('horaires');
     const horaires = db.getSync(cleHoraires, []);
     const horaireObj = horaires.find(h => h.id === gc.horaireId);
     const horaireNom = horaireObj?.nom || '—';
@@ -4464,7 +4464,7 @@ function sauvegarderGroupeCoursV2() {
     // Générer le nom
     const nom = genererNomGroupeCoursV2();
 
-    const cleGC = typeof cle === 'function' ? cle('groupesCours') : 'groupesCours';
+    const cleGC = cle('groupesCours');
     let groupesCours = db.getSync(cleGC, []);
 
     if (groupeCoursEnEditionId) {
@@ -4532,7 +4532,7 @@ function supprimerGroupeCoursV2() {
         return;
     }
 
-    const cleGC = typeof cle === 'function' ? cle('groupesCours') : 'groupesCours';
+    const cleGC = cle('groupesCours');
     const groupesCours = db.getSync(cleGC, []);
     const gc = groupesCours.find(g => g.id === groupeCoursEnEditionId);
 
@@ -4586,7 +4586,7 @@ function supprimerGroupeCoursV2() {
  * Affiche la liste de tous les groupe-cours avec gestion de la visibilité
  */
 function ouvrirModalBibliothequeGroupeCours() {
-    const cleGC = typeof cle === 'function' ? cle('groupesCours') : 'groupesCours';
+    const cleGC = cle('groupesCours');
     const groupesCours = db.getSync(cleGC, []);
     const gcActif = db.getSync('groupeCoursActif', null);
 
@@ -4594,7 +4594,7 @@ function ouvrirModalBibliothequeGroupeCours() {
     const cours = db.getSync('cours', []);
     const listeCours = db.getSync('listeCours', []);
     const enseignants = db.getSync('enseignants', []);
-    const cleHoraires = typeof cle === 'function' ? cle('horaires') : 'horaires';
+    const cleHoraires = cle('horaires');
     const horaires = db.getSync(cleHoraires, []);
 
     // Séparer les groupe-cours visibles et masqués
@@ -4791,7 +4791,7 @@ function fermerModalBibliothequeGroupeCours() {
 }
 
 function activerGroupeCoursDepuisBibliotheque(gcId) {
-    const cleGC = typeof cle === 'function' ? cle('groupesCours') : 'groupesCours';
+    const cleGC = cle('groupesCours');
     const groupesCours = db.getSync(cleGC, []);
 
     // Désactiver tous les autres
@@ -4824,7 +4824,7 @@ function supprimerGroupeCoursDepuisBibliotheque(gcId, nomGC) {
         return;
     }
 
-    const cleGC = typeof cle === 'function' ? cle('groupesCours') : 'groupesCours';
+    const cleGC = cle('groupesCours');
     let groupesCours = db.getSync(cleGC, []);
 
     // Supprimer de la liste
@@ -4859,7 +4859,7 @@ function supprimerGroupeCoursDepuisBibliotheque(gcId, nomGC) {
  * Le groupe-cours reste dans la base mais n'apparaît plus dans le dropdown
  */
 function masquerGroupeCoursDepuisBibliotheque(gcId) {
-    const cleGC = typeof cle === 'function' ? cle('groupesCours') : 'groupesCours';
+    const cleGC = cle('groupesCours');
     const groupesCours = db.getSync(cleGC, []);
 
     const gc = groupesCours.find(g => g.id === gcId);
@@ -4894,7 +4894,7 @@ function masquerGroupeCoursDepuisBibliotheque(gcId) {
  * Rend visible un groupe-cours précédemment masqué
  */
 function afficherGroupeCoursDepuisBibliotheque(gcId) {
-    const cleGC = typeof cle === 'function' ? cle('groupesCours') : 'groupesCours';
+    const cleGC = cle('groupesCours');
     const groupesCours = db.getSync(cleGC, []);
 
     const gc = groupesCours.find(g => g.id === gcId);
@@ -4993,7 +4993,7 @@ function chargerEtatDonneesDemoV2() {
 
     // Vérifier si le groupe 9999 existe
     // ✅ CORRECTION (31 déc 2025): Utiliser namespace + vérifier aussi groupe "demo"
-    const cleEtud = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
+    const cleEtud = cle('groupeEtudiants');
     const etudiants = db.getSync(cleEtud, []);
     const groupeDemoExiste = etudiants.some(e => e.groupe === '9999' || e.groupe === 'demo');
 
@@ -5207,7 +5207,7 @@ function mettreAJourGuideGroupeCours() {
     statusHoraire.style.color = horaireOk ? 'var(--vert-succes)' : 'var(--gris-moyen)';
 
     // 4. Étudiants importés ?
-    const cleEtudiants = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
+    const cleEtudiants = cle('groupeEtudiants');
     const etudiants = db.getSync(cleEtudiants, []);
     const etudiantsFiltres = infoCours ? etudiants.filter(e => e.coursId === infoCours.id) : etudiants;
     const etudiantsOk = etudiantsFiltres.length > 0;
@@ -5574,7 +5574,7 @@ async function peuplerDropdownGroupeCoursActif() {
     }
 
     // Utiliser cle() pour cohérence avec sauvegarderGroupeCoursV2
-    const cleGC = typeof cle === 'function' ? cle('groupesCours') : 'groupesCours';
+    const cleGC = cle('groupesCours');
     console.log('🔄 [GC Dropdown] Clé groupesCours:', cleGC);
     const tousGroupesCours = db.getSync(cleGC, []);
     console.log('🔄 [GC Dropdown] Groupe-cours trouvés:', tousGroupesCours.length);
@@ -5588,7 +5588,7 @@ async function peuplerDropdownGroupeCoursActif() {
         const cours = db.getSync('cours', []);
         const listeCours = db.getSync('listeCours', []);
         const enseignants = db.getSync('enseignants', []);
-        const cleHoraires = typeof cle === 'function' ? cle('horaires') : 'horaires';
+        const cleHoraires = cle('horaires');
         const horaires = db.getSync(cleHoraires, []);
         const gcActif = db.getSync('groupeCoursActif', null);
 
@@ -5812,7 +5812,7 @@ async function changerGroupeCoursActifV2(valeur) {
     const groupeCoursId = valeur;
 
     // ✅ CORRIGÉ (8 janvier 2026) : Utiliser cle() pour cohérence avec les autres fonctions
-    const cleGC = typeof cle === 'function' ? cle('groupesCours') : 'groupesCours';
+    const cleGC = cle('groupesCours');
     const groupesCours = db.getSync(cleGC, []);
     const gc = groupesCours.find(g => g.id === groupeCoursId);
 

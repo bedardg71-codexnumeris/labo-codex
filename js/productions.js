@@ -51,14 +51,14 @@
  * Utilise cle() si disponible, sinon fallback sur 'productions'
  */
 function getCleProductions() {
-    return (typeof cle === 'function') ? cle('productions') : 'productions';
+    return cle('productions');
 }
 
 /**
  * 🆕 Beta 95.4 : Helper pour obtenir la clé namespacée des grilles
  */
 function getCleGrilles() {
-    return (typeof cle === 'function') ? cle('grillesTemplates') : 'grillesTemplates';
+    return cle('grillesTemplates');
 }
 
 /**
@@ -267,7 +267,7 @@ async function afficherFormProduction(id) {
 
     if (selectGrille || selectGrilleInline) {
         // 🆕 Beta 95.4 : Utiliser la clé namespacée pour n'afficher que les grilles du trimestre
-        const cleGrilles = (typeof cle === 'function') ? cle('grillesTemplates') : 'grillesTemplates';
+        const cleGrilles = cle('grillesTemplates');
         const grilles = await db.get(cleGrilles) || [];
         console.log('   - Clé utilisée:', cleGrilles);
         console.log('   - Nombre de grilles:', grilles.length);
@@ -287,7 +287,7 @@ async function afficherFormProduction(id) {
     if (id) {
         // Mode modification
         // 🆕 Beta 95.4 : Utiliser la clé namespacée pour le trimestre actif
-        const cleProductions = (typeof cle === 'function') ? cle('productions') : 'productions';
+        const cleProductions = cle('productions');
         const evaluations = await db.get(cleProductions) || [];
         console.log('📦 Nombre de productions:', evaluations.length, '(clé:', cleProductions, ')');
         console.log('🔑 IDs disponibles:', evaluations.map(e => e.id));
@@ -443,7 +443,7 @@ async function sauvegarderProduction() {
     }
 
     // 🆕 Beta 95.4 : Utiliser la clé namespacée pour le trimestre actif
-    const cleProductions = (typeof cle === 'function') ? cle('productions') : 'productions';
+    const cleProductions = cle('productions');
     let evaluations = await db.get(cleProductions) || [];
 
     // ✅ AJOUT (6 jan 2026) : Vérification des doublons
@@ -3060,8 +3060,8 @@ window.sauvegarderMigrationCategories = sauvegarderMigrationCategories;
  */
 async function afficherListeProductions(filtreType = '') {
     // 🆕 Beta 95.4 : Utiliser la clé namespacée pour le trimestre actif
-    const cleProductions = (typeof cle === 'function') ? cle('productions') : 'productions';
-    const cleGrilles = (typeof cle === 'function') ? cle('grillesTemplates') : 'grillesTemplates';
+    const cleProductions = cle('productions');
+    const cleGrilles = cle('grillesTemplates');
     const productions = await db.get(cleProductions) || [];
     const grilles = await db.get(cleGrilles) || [];
     const container = document.getElementById('sidebarListeProductions');
@@ -3357,7 +3357,7 @@ function mettreAJourMetriquesProduction(production) {
  */
 async function chargerGrillesDisponiblesPourProduction() {
     // 🆕 Beta 95.4 : Utiliser la clé namespacée pour n'afficher que les grilles du trimestre actif
-    const cleGrilles = (typeof cle === 'function') ? cle('grillesTemplates') : 'grillesTemplates';
+    const cleGrilles = cle('grillesTemplates');
     const grilles = await db.get(cleGrilles) || [];
     const selectStandard = document.getElementById('productionGrille');
     const selectInline = document.getElementById('productionGrilleInline');

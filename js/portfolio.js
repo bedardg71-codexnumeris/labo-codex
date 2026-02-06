@@ -570,7 +570,7 @@ async function calculerEtStockerIndicesCP() {
     const productions = obtenirDonneesSelonMode('productions');
 
     // 🆕 BETA 95.5 : Récupérer depuis IndexedDB (async)
-    const cleIndices = (typeof cle === 'function') ? cle('indicesCP') : 'indicesCP';
+    const cleIndices = cle('indicesCP');
     let indicesCP = await db.get(cleIndices, {});
 
     // 🆕 BETA 95.5 : Obtenir la pratique active du groupe-cours
@@ -596,7 +596,7 @@ async function calculerEtStockerIndicesCP() {
     const modalites = db.getSync('modalitesEvaluation', {});
 
     // 🆕 BETA 95.5 : Lire A depuis indicesAssiduite (une seule fois, hors boucle)
-    const cleAssiduite = (typeof cle === 'function') ? cle('indicesAssiduite') : 'indicesAssiduite';
+    const cleAssiduite = cle('indicesAssiduite');
     const indicesAssiduite = db.getSync(cleAssiduite, {});
 
     // Calculer pour chaque étudiant
@@ -706,7 +706,7 @@ async function calculerEtStockerIndicesCP() {
  * @returns {Promise<Object>} - { date, pratique, C, P, E, details } ou null
  */
 async function obtenirIndicesCPAsync(da) {
-    const cleIndices = (typeof cle === 'function') ? cle('indicesCP') : 'indicesCP';
+    const cleIndices = cle('indicesCP');
     const indicesCP = await db.get(cleIndices, {});
     return indicesCP[da]?.actuel || null;
 }

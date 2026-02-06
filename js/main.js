@@ -44,6 +44,31 @@ window.toggleDisplay = function(element, show) {
 };
 
 /* ===============================
+   FONCTIONS GLOBALES: Formatage de dates (Beta 97.1 - #68)
+   3 formats canoniques, tous acceptent ISO string, tous avec TZ fix
+   =============================== */
+/** "6 février 2026" */
+window.formaterDate = function(dateISO) {
+    if (!dateISO) return '—';
+    const date = new Date(dateISO + 'T12:00:00');
+    return date.toLocaleDateString('fr-CA', { year: 'numeric', month: 'long', day: 'numeric' });
+};
+
+/** "6 fév." */
+window.formaterDateCourte = function(dateISO) {
+    if (!dateISO) return '—';
+    const date = new Date(dateISO + 'T12:00:00');
+    return date.toLocaleDateString('fr-CA', { day: 'numeric', month: 'short' });
+};
+
+/** "jeudi 6 février 2026" */
+window.formaterDateComplete = function(dateISO) {
+    if (!dateISO) return '—';
+    const date = new Date(dateISO + 'T12:00:00');
+    return date.toLocaleDateString('fr-CA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+};
+
+/* ===============================
    FONCTION GLOBALE: Badge de pratique de notation
    =============================== */
 /**

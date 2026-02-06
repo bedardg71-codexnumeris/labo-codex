@@ -395,7 +395,7 @@ function calculerTousLesIndices(da, pratique = null) {
     // INDICE A : SINGLE SOURCE OF TRUTH
     // Lire depuis db.getSync('indicesAssiduite') (calculé par saisie-presences.js)
     // ========================================
-    const indicesAssiduite = db.getSync((typeof cle === 'function') ? cle('indicesAssiduite') : 'indicesAssiduite', {});
+    const indicesAssiduite = db.getSync(cle('indicesAssiduite'), {});
     const assiduiteSommatif = indicesAssiduite.sommatif?.[da];
 
     // Extraire l'indice (gérer ancien format nombre et nouveau format objet)
@@ -2640,7 +2640,7 @@ function obtenirDetailsAssiduite(da) {
     // SINGLE SOURCE OF TRUTH
     // Lire depuis db.getSync('indicesAssiduite') calculé par saisie-presences.js
     // ========================================
-    const indices = db.getSync((typeof cle === 'function') ? cle('indicesAssiduite') : 'indicesAssiduite', {});
+    const indices = db.getSync(cle('indicesAssiduite'), {});
     const detailsSommatif = indices.sommatif && indices.sommatif[da];
 
     // Si les données n'existent pas, retourner des valeurs par défaut
@@ -2740,17 +2740,7 @@ function obtenirDetailsAssiduite(da) {
 }
 
 
-/**
- * Formate une date ISO en format lisible
- * @param {string} dateISO - Date au format ISO
- * @returns {string} - Date formatée
- */
-function formaterDate(dateISO) {
-    if (!dateISO) return 'N/A';
-    const date = new Date(dateISO + 'T12:00:00');
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    return date.toLocaleDateString('fr-CA', options);
-}
+// formaterDate() — supprimée, canonique dans main.js (Beta 97.1 #68)
 
 /* ===============================
    AFFICHAGE DU PROFIL COMPLET
@@ -7392,11 +7382,12 @@ function naviguerVersPresenceAvecDate(dateStr) {
 }
 
 /**
- * Formate une date ISO en format court lisible (ex: "Lun 21 oct. 2024")
+ * Formate une date ISO en format compact (ex: "Lun 21 oct. 2024")
+ * Format unique à ce module — distinct de formaterDateCourte() canonique ("6 fév.")
  * @param {string} dateISO - Date au format YYYY-MM-DD
  * @returns {string} - Date formatée
  */
-function formaterDateCourte(dateISO) {
+function formaterDateCompacte(dateISO) {
     if (!dateISO) return 'N/A';
     const date = new Date(dateISO + 'T12:00:00');
     const options = {
@@ -8502,7 +8493,7 @@ function ouvrirModalConfidentiel(da) {
     document.getElementById('confidentiel-nom-etudiant').textContent = nomComplet;
 
     // Charger les données existantes
-    const cleConfidentiel = (typeof cle === 'function') ? cle('confidentielEtudiants') : 'confidentielEtudiants';
+    const cleConfidentiel = cle('confidentielEtudiants');
     const donnees = db.getSync(cleConfidentiel, {});
     const infos = donnees[da] || {};
 
@@ -8561,7 +8552,7 @@ function chargerNotesPresencesConfidentiel(da) {
     };
 
     // Obtenir la clé des présences pour le trimestre actif
-    const clePresences = (typeof cle === 'function') ? cle('presences') : 'presences';
+    const clePresences = cle('presences');
     const presences = db.getSync(clePresences, []);
 
     // Filtrer les présences de cet étudiant qui ont des notes
@@ -8609,7 +8600,7 @@ function sauvegarderNotesPresencesConfidentiel() {
     const textareas = document.querySelectorAll('#confidentiel-notes-presences .note-presence-editable');
     if (textareas.length === 0) return;
 
-    const clePresences = (typeof cle === 'function') ? cle('presences') : 'presences';
+    const clePresences = cle('presences');
     const presences = db.getSync(clePresences, []);
 
     let modifications = 0;
@@ -8672,7 +8663,7 @@ function sauvegarderConfidentiel() {
     };
 
     // Sauvegarder les infos confidentielles
-    const cleConfidentiel = (typeof cle === 'function') ? cle('confidentielEtudiants') : 'confidentielEtudiants';
+    const cleConfidentiel = cle('confidentielEtudiants');
     const donnees = db.getSync(cleConfidentiel, {});
     donnees[_confidentielDaActuel] = infos;
     db.setSync(cleConfidentiel, donnees);
@@ -8723,7 +8714,7 @@ function mettreAJourSousCategories() {
  * @returns {boolean} - true si des infos existent
  */
 function aDesInfosConfidentielles(da) {
-    const cleConfidentiel = (typeof cle === 'function') ? cle('confidentielEtudiants') : 'confidentielEtudiants';
+    const cleConfidentiel = cle('confidentielEtudiants');
     const donnees = db.getSync(cleConfidentiel, {});
     const infos = donnees[da];
     if (!infos) return false;

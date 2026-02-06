@@ -109,16 +109,7 @@ function calculerStatistiquesEvaluations(etudiants, evaluations, productions) {
     setStatText('ea-productions-configurees', productions.length);
 }
 
-/**
- * Formate une date en format court (ex: 25 oct.)
- * @param {Date} date - Date à formater
- * @returns {string} Date formatée
- */
-function formaterDateCourte(date) {
-    const mois = ['jan.', 'fév.', 'mars', 'avr.', 'mai', 'juin',
-                  'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
-    return `${date.getDate()} ${mois[date.getMonth()]}`;
-}
+// formaterDateCourte() — supprimée (jamais appelée), canonique dans main.js (Beta 97.1 #68)
 
 /**
  * Affiche un message si aucune donnée disponible

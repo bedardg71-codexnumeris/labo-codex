@@ -3198,7 +3198,8 @@
                     <ul class="changelog-list">
                         <li><strong>Bulles en-tête</strong> : Nouveau mouvement hélicoïdal — oscillation sinusoïdale autour d'un axe de dérive horizontal (parallaxe conservée)</li>
                         <li><strong>Tableau de bord</strong> : Titres renommés — « État des lieux » (Vue d'ensemble), « Observer » (Indicateurs ACPE), « Intervenir » (Indicateurs d'apprentissage), « Développement du groupe » et « Développement individuel »</li>
-                        <li><strong>Qualité CSS</strong> : 475+ couleurs hex hardcodées remplacées par des variables CSS dans 40+ fichiers JS (#74). 171 styles inline retirés dans index.html (#75) — section changelog, couleurs, utilitaires flex.</li>
+                        <li><strong>Qualité CSS</strong> : 475+ couleurs hex → variables CSS dans 40+ fichiers (#74). 171 styles inline retirés dans index.html (#75). 38 <code>!important</code> retirés sur 75 dans styles.css (#80) — spécificité corrigée à la source.</li>
+                        <li><strong>Qualité JS</strong> : 3 fonctions <code>formaterDate</code> canoniques centralisées dans main.js (#68). 136 patterns défensifs <code>typeof cle</code> nettoyés dans 24 fichiers (#73). Design System synchronisé (#84).</li>
                     </ul>
                 </div>
 
@@ -15670,7 +15671,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97';
-        const BUILD_ID = '0206-1406';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0206-1722';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';

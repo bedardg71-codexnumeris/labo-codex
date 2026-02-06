@@ -125,7 +125,7 @@ async function chargerDonneesDemo() {
  */
 async function fusionnerDonneesDemo(packDemo, prefixe) {
     // Helper pour construire la clé sans dépendre de cle() (évite race condition)
-    const cleDemo = (nom) => prefixe ? prefixe + nom : ((typeof window.cle === 'function') ? window.cle(nom) : nom);
+    const cleDemo = (nom) => prefixe ? prefixe + nom : cle(nom);
     // 1. Fusionner listeCours
     const listeCours = await db.get('listeCours') || [];
     const coursDemo = packDemo.listeCours || [];

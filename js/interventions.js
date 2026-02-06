@@ -481,16 +481,12 @@ function genererBadgeStatut(statut) {
 }
 
 /**
- * Formater une date en format lisible
+ * Alias de formaterDateComplete() pour rétrocompatibilité (exporté via window.*)
  * @param {string} dateStr - Date au format YYYY-MM-DD
- * @returns {string} Date formatée
+ * @returns {string} Date formatée "jeudi 6 février 2026"
  */
 function formaterDateLisible(dateStr) {
-    if (!dateStr) return '';
-
-    const date = new Date(dateStr + 'T00:00:00');
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    return date.toLocaleDateString('fr-CA', options);
+    return formaterDateComplete(dateStr);
 }
 
 /**
@@ -1410,7 +1406,7 @@ function transfererPresencesVersModule(interventionId) {
 
     // Obtenir les présences existantes
     // ✅ CORRIGÉ (22 janvier 2026) : Utiliser la clé namespacée pour le trimestre actif
-    const clePresences = (typeof cle === 'function') ? cle('presences') : 'presences';
+    const clePresences = cle('presences');
     let presences = db.getSync(clePresences, []);
 
     // Supprimer les entrées existantes pour cette date (pour éviter les doublons)

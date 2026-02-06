@@ -2147,7 +2147,7 @@ async function chargerProductionsPourCategories() {
     if (!listeSelection || !listeObligatoires) return;
 
     // Charger les productions avec la bonne clé namespacée
-    const cleProductions = (typeof cle === 'function') ? cle('productions') : 'productions';
+    const cleProductions = cle('productions');
     const productions = await db.get(cleProductions) || [];
     console.log('[Catégories] Productions chargées:', productions.length, 'depuis', cleProductions);
 
@@ -2202,7 +2202,7 @@ function genererCheckboxesCategorie(productions, categorie) {
  * 🆕 Beta 95.4 : Toggle une production dans une catégorie (exclusif)
  */
 async function toggleProductionCategorie(prodId, categorie, checked) {
-    const cleProductions = (typeof cle === 'function') ? cle('productions') : 'productions';
+    const cleProductions = cle('productions');
     const productions = await db.get(cleProductions) || [];
     const prod = productions.find(p => p.id === prodId);
 
@@ -2221,7 +2221,7 @@ async function toggleProductionCategorie(prodId, categorie, checked) {
  */
 async function recalculerPonderationsUnitaires() {
     // Charger les productions avec la bonne clé namespacée
-    const cleProductions = (typeof cle === 'function') ? cle('productions') : 'productions';
+    const cleProductions = cle('productions');
     const productions = await db.get(cleProductions) || [];
 
     // Compter productions par catégorie (hors portfolio et formatifs)

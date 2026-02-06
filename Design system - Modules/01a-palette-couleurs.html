@@ -449,7 +449,7 @@ body {
                 <div class="guide-specs-title">&#x1F4CB; Architecture de conversion automatique</div>
                 <ul>
                     <li><strong>Principe:</strong> Conversion complète blue â†’ sarcelle via redéfinition de variables CSS</li>
-                    <li><strong>Mécanisme:</strong> [data-mode="assisté"] redéfinit toutes les variables --bleu-* vers --sarcelle-*</li>
+                    <li><strong>Mécanisme:</strong> [data-mode="simulation"] redéfinit toutes les variables --bleu-* vers --sarcelle-*</li>
                     <li><strong>Équivalences:</strong> Chaque shade sarcelle équivaut Ã  son shade bleu (même luminosité, saturation ajustée)</li>
                     <li><strong>Navigation:</strong> --nav-normal, --nav-actif, --btn-principal automatiquement convertis</li>
                     <li><strong>Cohérence:</strong> Toute l'interface bascule en sarcelle sans code dupliqué</li>
@@ -507,7 +507,7 @@ body {
 }
 
 /* Conversion complète en mode Assisté (styles.css lignes 166-191) */
-[data-mode="assisté"] {
+[data-mode="simulation"] {
     /* Redéfinition de TOUTES les variables bleu vers sarcelle */
     --bleu-principal: var(--sarcelle-principal);
     --bleu-fonce: var(--sarcelle-fonce);
@@ -1061,7 +1061,7 @@ body[data-mode="normal"] {
 }
 
 /* Fond de page - Mode Assisté */
-body[data-mode="assisté"] {
+body[data-mode="simulation"] {
     background: linear-gradient(135deg, #d4ebe5 0%, #e8f5f2 100%);
 }
 
@@ -1102,8 +1102,8 @@ body[data-mode="anonymisation"] {
 }
 
 /* Sections blanches - Mode Assisté (sarcelle) */
-[data-mode="assisté"] .section,
-[data-mode="assisté"] .carte {
+[data-mode="simulation"] .section,
+[data-mode="simulation"] .carte {
     background: white;
     border-radius: 8px;
     box-shadow: 

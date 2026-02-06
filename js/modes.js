@@ -374,7 +374,7 @@ function genererMappingAnonyme() {
     // Créer un nouveau mapping avec format "Élève X"
     // IMPORTANT : Lire DIRECTEMENT depuis storage pour éviter la récursion avec obtenirDonneesSelonMode
     // ✅ NAMESPACING (Beta 95.5) : Utiliser cle() pour le namespacing par trimestre
-    const cleEtudiants = (typeof cle === 'function') ? cle('groupeEtudiants') : 'groupeEtudiants';
+    const cleEtudiants = cle('groupeEtudiants');
     const etudiants = db.getSync(cleEtudiants, []);
 
     // Filtrer pour exclure le groupe 9999 (simulation)
@@ -445,7 +445,7 @@ function anonymiserTexteRetroaction(texte, daEtudiant) {
 
     // Lire les étudiants DIRECTEMENT (pas via obtenirDonneesSelonMode pour éviter récursion)
     // ✅ NAMESPACING (Beta 95.5) : Utiliser cle() pour le namespacing par trimestre
-    const cleEtudiants = (typeof cle === 'function') ? cle('groupeEtudiants') : 'groupeEtudiants';
+    const cleEtudiants = cle('groupeEtudiants');
     const etudiants = db.getSync(cleEtudiants, []);
     const mapping = genererMappingAnonyme();
 
@@ -509,8 +509,8 @@ function obtenirDonneesSelonMode(cle) {
     const clesSontObjets = ['indicesAssiduiteDetailles', 'indicesCP', 'indicesAssiduite', 'calendrierComplet', 'snapshots'];
     const valeurParDefaut = clesSontObjets.includes(cle) ? {} : [];
 
-    // Utiliser cle() pour le namespacing par trimestre (si disponible)
-    const cleEffective = (typeof window.cle === 'function') ? window.cle(cle) : cle;
+    // Utiliser window.cle() pour le namespacing par trimestre (paramètre cle shadowed)
+    const cleEffective = window.cle(cle);
     let donnees = db.getSync(cleEffective, valeurParDefaut);
 
     // ✅ CORRECTION CRITIQUE (Beta 95 - 27 déc 2025)
@@ -582,8 +582,8 @@ function sauvegarderDonneesSelonMode(cle, donnees) {
     // MODE ASSISTÉ et NORMAL : Sauvegarder dans les mêmes clés réelles
     // Depuis Beta 92, le mode Assisté partage les données avec Normal
     try {
-        // Utiliser cle() pour le namespacing par trimestre (si disponible)
-        const cleEffective = (typeof window.cle === 'function') ? window.cle(cle) : cle;
+        // Utiliser window.cle() pour le namespacing par trimestre (paramètre cle shadowed)
+        const cleEffective = window.cle(cle);
         db.setSync(cleEffective, donnees);
         console.log(`[${mode === MODES.SIMULATION ? 'Assisté' : 'Normal'}] Sauvegarde dans ${cleEffective}`);
         return true;
@@ -648,8 +648,8 @@ function anonymiserGroupe(groupe) {
 
     if (!mappingGroupes) {
         // Créer le mapping en collectant tous les groupes uniques
-        // Utiliser window.cle pour le namespacing par trimestre
-        const cleNamespacee = (typeof window.cle === 'function') ? window.cle('groupeEtudiants') : 'groupeEtudiants';
+        // Utiliser cle() pour le namespacing par trimestre
+        const cleNamespacee = cle('groupeEtudiants');
         const etudiants = db.getSync(cleNamespacee, []);
         const groupesUniques = [...new Set(etudiants.map(e => e.groupe).filter(Boolean))].sort();
 
@@ -1009,7 +1009,7 @@ function obtenirPratiqueActiveGroupeCours() {
 
     // 3. Essayer depuis le groupe-cours complet dans groupesCours
     if (gcActif && gcActif.id) {
-        const cleGC = typeof cle === 'function' ? cle('groupesCours') : 'groupesCours';
+        const cleGC = cle('groupesCours');
         const groupesCours = db.getSync(cleGC, []);
         const gc = groupesCours.find(g => g.id === gcActif.id);
         if (gc && gc.pratiqueId) {

@@ -3841,7 +3841,7 @@ async function verifierUtilisationEchelle(echelleId) {
     let evaluations = await db.get('evaluations');
 
     // Si pas trouvé, essayer avec la clé namespacée
-    if (!evaluations && typeof window.cle === 'function') {
+    if (!evaluations) {
         evaluations = await db.get(window.cle('evaluations'));
     }
 

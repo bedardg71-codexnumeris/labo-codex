@@ -114,7 +114,7 @@ function initialiserTirage() {
         }
     } else {
         // Fallback
-        const cleEtudiants = (typeof cle === 'function') ? cle('groupeEtudiants') : 'groupeEtudiants';
+        const cleEtudiants = cle('groupeEtudiants');
         etudiants = db.getSync(cleEtudiants, []);
         console.warn('[Tirage] Fallback vers groupeEtudiants complet:', etudiants.length);
     }
