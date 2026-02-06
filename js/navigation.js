@@ -440,9 +440,9 @@ function afficherSousSection(idSousSection) {
             }
             break;
 
-        // 🆕 BETA 96.3 : Module Travaux
-        case 'travaux-import':
-            console.log('🔄 Initialisation du module Travaux (Import)...');
+        // Module Travaux (migré sous Évaluations)
+        case 'evaluations-travaux':
+            console.log('🔄 Initialisation du module Travaux...');
             if (typeof initialiserModuleTravaux === 'function') {
                 setTimeout(() => {
                     initialiserModuleTravaux();
@@ -453,19 +453,7 @@ function afficherSousSection(idSousSection) {
             }
             break;
 
-        case 'travaux-visionneuse':
-            console.log('🔄 Initialisation du module Travaux (Visionneuse)...');
-            if (typeof initialiserModuleTravaux === 'function') {
-                setTimeout(() => {
-                    initialiserModuleTravaux();
-                    if (typeof travauxUI !== 'undefined') {
-                        travauxUI.afficherVisionneuse();
-                    }
-                }, 100);
-            }
-            break;
-
-        case 'travaux-archivage':
+        case 'evaluations-archivage':
             console.log('🔄 Initialisation du module Travaux (Archivage)...');
             if (typeof initialiserModuleTravaux === 'function') {
                 setTimeout(() => {

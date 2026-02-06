@@ -44,7 +44,9 @@ const configurationsOnglets = {
     'evaluations': [
         { id: 'apercu', label: 'Aperçu' },
         { id: 'liste', label: 'Liste des évaluations' },
-        { id: 'individuelles', label: 'Procéder à une évaluation' }
+        { id: 'individuelles', label: 'Procéder à une évaluation' },
+        { id: 'travaux', label: 'Travaux' },
+        { id: 'archivage', label: 'Archivage' }
     ],
     // ✨ REFONTE (2 jan 2026) : "Matériel" → "Construction de la note"
     // Ajout "Pratiques de notation", retrait "Ensembles d'objectifs"
@@ -61,12 +63,7 @@ const configurationsOnglets = {
     'boite-outils': [
         { id: 'tirage', label: 'Tirage au sort' }
     ],
-    // 🆕 BETA 96.3 : Module Travaux (import, annotation, archivage)
-    'travaux': [
-        { id: 'import', label: 'Import' },
-        { id: 'visionneuse', label: 'Visionneuse' },
-        { id: 'archivage', label: 'Archivage' }
-    ],
+    // 🆕 BETA 96.3 : Module Travaux (migré sous Évaluations)
     // ✨ REFONTE UX (18 déc 2025) : 3 onglets (Pratique de notation migrée vers Construction)
     // Structure : Trimestre, Préférences, Données
     'reglages': [
