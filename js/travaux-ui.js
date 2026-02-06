@@ -194,8 +194,10 @@
 
                     <!-- Canvas container -->
                     <div class="travaux-canvas-container" id="travaux-canvas-container">
-                        <canvas id="travaux-canvas-document"></canvas>
-                        <canvas id="travaux-canvas-annotation" style="display:none; pointer-events:none;"></canvas>
+                        <div class="travaux-canvas-wrapper" id="travaux-canvas-wrapper">
+                            <canvas id="travaux-canvas-document"></canvas>
+                            <canvas id="travaux-canvas-annotation" style="display:none; pointer-events:none;"></canvas>
+                        </div>
                         <div id="travaux-placeholder-visionneuse" class="travaux-placeholder">
                             <p>Selectionnez un fichier dans la sidebar pour l'ouvrir</p>
                         </div>
@@ -687,8 +689,10 @@
                     <button class="btn-icon" onclick="travauxUI.fermerVueCoteACote()" title="Fermer">&times;</button>
                 </div>
                 <div class="travaux-canvas-container">
-                    <canvas id="travaux-canvas-document"></canvas>
-                    <canvas id="travaux-canvas-annotation" style="display:none; pointer-events:none;"></canvas>
+                    <div class="travaux-canvas-wrapper">
+                        <canvas id="travaux-canvas-document"></canvas>
+                        <canvas id="travaux-canvas-annotation" style="display:none; pointer-events:none;"></canvas>
+                    </div>
                 </div>
                 <div id="travaux-palette-container" style="display:none"></div>
             </div>
