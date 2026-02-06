@@ -327,6 +327,7 @@ function obtenirInfosSysteme() {
     const ua = navigator.userAgent;
     let navigateur = 'Inconnu';
     let os = 'Inconnu';
+    let appareil = '';
 
     // Détecter le navigateur
     if (ua.includes('Safari') && !ua.includes('Chrome')) {
@@ -342,21 +343,31 @@ function obtenirInfosSysteme() {
         navigateur = 'Edge';
     }
 
-    // Détecter l'OS
-    if (ua.includes('Mac OS X')) {
-        const match = ua.match(/Mac OS X (\d+[._]\d+)/);
-        os = `macOS ${match ? match[1].replace('_', '.') : ''}`;
+    // Détecter l'OS et l'appareil
+    // Depuis iPadOS 13, l'iPad se fait passer pour macOS dans le user agent.
+    // On le detecte via maxTouchPoints (iPad=5, Mac=0).
+    const estIPad = (ua.includes('Mac OS X') && navigator.maxTouchPoints > 1) || ua.includes('iPad');
+    const estIPhone = ua.includes('iPhone');
+
+    if (estIPad) {
+        os = 'iPadOS';
+        appareil = 'iPad';
+    } else if (estIPhone) {
+        os = 'iOS';
+        appareil = 'iPhone';
+    } else if (ua.includes('Mac OS X')) {
+        const match = ua.match(/Mac OS X (\d+[._]\d+[._]?\d*)/);
+        os = `macOS ${match ? match[1].replace(/_/g, '.') : ''}`;
+        appareil = 'Mac';
     } else if (ua.includes('Windows')) {
         os = 'Windows';
-    } else if (ua.includes('iPad')) {
-        os = 'iPadOS';
-    } else if (ua.includes('iPhone')) {
-        os = 'iOS';
+        appareil = 'PC';
     } else if (ua.includes('Linux')) {
         os = 'Linux';
+        appareil = 'PC';
     }
 
-    return { navigateur, os };
+    return { navigateur, os, appareil };
 }
 
 /**
@@ -550,8 +561,11 @@ function genererRapportBug(descriptionUtilisateur = '', prenomTesteur = '') {
     rapport += `Version: ${etatApp.version} (Build ${etatApp.build})\n\n`;
 
     rapport += `--- SYSTÈME ---\n`;
+    rapport += `Appareil: ${infosSysteme.appareil || 'Inconnu'}\n`;
     rapport += `Navigateur: ${infosSysteme.navigateur}\n`;
-    rapport += `Système: ${infosSysteme.os}\n\n`;
+    rapport += `Système: ${infosSysteme.os}\n`;
+    rapport += `Écran: ${window.screen.width}x${window.screen.height} (${window.devicePixelRatio || 1}x)\n`;
+    rapport += `Touch: ${navigator.maxTouchPoints || 0} points\n\n`;
 
     rapport += `--- APPLICATION ---\n`;
     rapport += `Section active: ${etatApp.sectionActive} > ${etatApp.sousSectionActive}\n`;
