@@ -3210,6 +3210,18 @@
                     </ul>
                 </div>
 
+                <!-- Beta 97 - Correctifs - 6 février -->
+                <div style="background: linear-gradient(135deg, #fff8e1 0%, #fff3e0 100%); border-left: 3px solid var(--orange-accent); border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
+                    <strong style="color: #e65100; display: block; margin-bottom: 8px;">Beta 97 (6 février) - 35 correctifs :</strong>
+                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
+                        <li><strong>Fiabilité des données</strong> : Correction de 5 bugs critiques (clés de stockage incohérentes, collisions d'ID, calcul d'assiduité, format de présences)</li>
+                        <li><strong>Calculs corrigés</strong> : Taux de complétion, tendances, mode « récents-meilleurs », statistiques d'archive — tous recalculent correctement</li>
+                        <li><strong>Multi-trimestre</strong> : Namespacing renforcé dans ~20 fichiers — les données restent bien isolées par trimestre</li>
+                        <li><strong>Stabilité</strong> : Erreurs silencieuses remplacées par des diagnostics, éléments DOM manquants protégés, race conditions corrigées</li>
+                        <li><strong>Design system</strong> : Couleurs et ombres harmonisées avec la palette « Nuit Élégante »</li>
+                    </ul>
+                </div>
+
                 <!-- Beta 96.2 - 4 février -->
                 <div style="background: linear-gradient(135deg, #e3f2fd 0%, #e8eaf6 100%); border-left: 3px solid #1976d2; border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
                     <strong style="color: #1565c0; display: block; margin-bottom: 8px;">Beta 96.2 (4 février) :</strong>
@@ -15018,6 +15030,14 @@
                             <li><strong>File System Access API (Mac)</strong> : Option pour stocker les fichiers sur votre disque au lieu d'IndexedDB. Recommandé pour les gros volumes.</li>
                             <li><strong>Scroll virtuel</strong> : Les listes de 50+ miniatures utilisent le rendu virtuel pour maintenir la fluidité.</li>
                             <li><strong>Stockage persistant</strong> : Demande automatique de persistance au navigateur pour protéger les données.</li>
+                        </ul>
+                        <h4 class="titre-bleu-mb8 mt-15">35 correctifs (6 février)</h4>
+                        <ul class="modal-liste">
+                            <li><strong>5 bugs critiques</strong> : Clé productions unifiée, suppression demo sécurisée, calcul heures/assiduité corrigé, format présences normalisé, IDs uniques (crypto).</li>
+                            <li><strong>9 bugs haute priorité</strong> : Noms de clés corrigés dans 5 modules, filtrage assiduité par étudiant, taux de complétion, tri « récents-meilleurs » par date, race condition demo, éléments DOM protégés.</li>
+                            <li><strong>10 bugs moyenne priorité</strong> : Catch silencieux remplacés par diagnostics, clé legacy niveauxEchelle migrée, anonymisation crypto, double-stringify export corrigé, filtrage demo à l'export, timing db-ready, statistiques d'archive sur bon trimestre, évaluations remplacées exclues, Math.cbrt pour négatifs, tendance triée par date.</li>
+                            <li><strong>Namespacing renforcé</strong> : ~50 localStorage directs migrés vers db.js, 5 clés ajoutées à CLES_NAMESPACEES, storage listener corrigé, 12 fonctions dupliquées consolidées.</li>
+                            <li><strong>Design system</strong> : ~35 couleurs Material Design → variables CSS, border-radius harmonisés, tokens badges ajoutés, validation primo en classes CSS, box-shadows normalisés, en-tête styles.css mis à jour.</li>
                         </ul>
                         </div><!-- fin accordeon-contenu beta97 -->
                     </div>
