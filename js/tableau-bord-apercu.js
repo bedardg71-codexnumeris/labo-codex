@@ -838,8 +838,8 @@ function initialiserEvenementsToggle() {
             const targetElement = document.getElementById(targetId);
 
             if (targetElement) {
-                const isVisible = targetElement.style.display !== 'none';
-                targetElement.style.display = isVisible ? 'none' : 'block';
+                const isVisible = !targetElement.classList.contains('u-hide');
+                toggleDisplay(targetElement, !isVisible);
 
                 // 🎨 Animation de rotation via classe CSS (transition gérée par styles.css)
                 if (isVisible) {
@@ -2634,13 +2634,13 @@ function afficherActionsRecommandees(etudiants) {
         .slice(0, 5); // Top 5
 
     if (etudiantsAEngagementFaible.length === 0) {
-        container.style.display = 'none';
-        if (messageVide) messageVide.style.display = 'block';
+        container.classList.add('u-hide');
+        if (messageVide) messageVide.classList.remove('u-hide');
         return;
     }
 
-    container.style.display = 'flex';
-    if (messageVide) messageVide.style.display = 'none';
+    container.classList.remove('u-hide');
+    if (messageVide) messageVide.classList.add('u-hide');
 
     container.innerHTML = etudiantsAEngagementFaible.map((e, index) => {
         const indices = afficherSommatif ? e.sommatif : e.alternatif;

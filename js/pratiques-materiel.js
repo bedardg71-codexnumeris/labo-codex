@@ -105,8 +105,8 @@ async function initialiserModulePratiquesMateriel() {
     const conteneurEdition = document.getElementById('conteneurEditionPratique');
     const accueil = document.getElementById('accueilPratiques');
 
-    if (conteneurEdition) conteneurEdition.style.display = 'none';
-    if (accueil) accueil.style.display = 'block';
+    if (conteneurEdition) conteneurEdition.classList.add('u-hide');
+    if (accueil) accueil.classList.remove('u-hide');
 
     console.log('   ✅ Module Pratiques initialisé');
 }
@@ -609,7 +609,7 @@ function filtrerPratiquesBibliotheque() {
         const matchType = !typeFiltre || itemType === typeFiltre;
         const matchDiscipline = !disciplineFiltre || itemDiscipline.toLowerCase() === disciplineFiltre.toLowerCase();
 
-        item.style.display = (matchType && matchDiscipline) ? 'block' : 'none';
+        toggleDisplay(item, matchType && matchDiscipline);
     });
 }
 
@@ -807,8 +807,8 @@ async function chargerPratiquePourModif(pratiqueId) {
     const conteneurEdition = document.getElementById('conteneurEditionPratique');
     const accueil = document.getElementById('accueilPratiques');
 
-    if (accueil) accueil.style.display = 'none';
-    if (conteneurEdition) conteneurEdition.style.display = 'block';
+    if (accueil) accueil.classList.add('u-hide');
+    if (conteneurEdition) conteneurEdition.classList.remove('u-hide');
 
     // ✅ FIX (10 jan 2026) : Charger le dropdown des échelles AVANT de remplir le formulaire
     // Sinon la valeur de l'échelle ne peut pas être appliquée car le dropdown est vide
@@ -996,26 +996,26 @@ function afficherConfigurationTypeMat(type) {
     const sections = ['mat-config-pan-standards', 'mat-config-sommative', 'mat-config-pan-specifications', 'mat-config-defaut'];
     sections.forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.style.display = 'none';
+        if (el) el.classList.add('u-hide');
     });
 
     // Variante PAN-Standards
     const variantePAN = document.getElementById('mat-variante-pan-standards');
-    if (variantePAN) variantePAN.style.display = type === 'pan-standards' ? 'block' : 'none';
+    toggleDisplay(variantePAN, type === 'pan-standards');
 
     // Afficher la section appropriée
     if (type === 'pan-standards') {
         const el = document.getElementById('mat-config-pan-standards');
-        if (el) el.style.display = 'block';
+        if (el) el.classList.remove('u-hide');
     } else if (type === 'sommative') {
         const el = document.getElementById('mat-config-sommative');
-        if (el) el.style.display = 'block';
+        if (el) el.classList.remove('u-hide');
     } else if (type === 'pan-specifications') {
         const el = document.getElementById('mat-config-pan-specifications');
-        if (el) el.style.display = 'block';
+        if (el) el.classList.remove('u-hide');
     } else {
         const el = document.getElementById('mat-config-defaut');
-        if (el) el.style.display = 'block';
+        if (el) el.classList.remove('u-hide');
     }
 }
 
@@ -1085,22 +1085,22 @@ function changerVariantePANStandardsMat() {
     // Afficher la description de la variante
     if (descriptions[variante]) {
         descriptionDiv.textContent = descriptions[variante];
-        descriptionDiv.style.display = 'block';
+        descriptionDiv.classList.remove('u-hide');
     } else {
-        descriptionDiv.style.display = 'none';
+        descriptionDiv.classList.add('u-hide');
     }
 
     // Basculer entre Portfolio et Par-Objectifs
     if (variante === 'par-objectifs') {
-        if (configPortfolio) configPortfolio.style.display = 'none';
+        if (configPortfolio) configPortfolio.classList.add('u-hide');
         if (configParObjectifs) {
-            configParObjectifs.style.display = 'block';
+            configParObjectifs.classList.remove('u-hide');
             // Charger les données (changerModeCalculObjectifsMat est appelé à la fin)
             chargerConfigParObjectifsMat();
         }
     } else {
-        if (configPortfolio) configPortfolio.style.display = 'block';
-        if (configParObjectifs) configParObjectifs.style.display = 'none';
+        if (configPortfolio) configPortfolio.classList.remove('u-hide');
+        if (configParObjectifs) configParObjectifs.classList.add('u-hide');
     }
 
     sauvegarderConfigPratiqueMat();
@@ -1371,7 +1371,7 @@ async function afficherPreviewEchelleMat() {
     if (!preview || !contenu) return;
 
     if (!echelleId) {
-        preview.style.display = 'none';
+        preview.classList.add('u-hide');
         return;
     }
 
@@ -1384,7 +1384,7 @@ async function afficherPreviewEchelleMat() {
 
     const echelle = echelles.find(e => e.id === echelleId);
     if (!echelle || !echelle.niveaux) {
-        preview.style.display = 'none';
+        preview.classList.add('u-hide');
         return;
     }
 
@@ -1394,7 +1394,7 @@ async function afficherPreviewEchelleMat() {
     });
 
     contenu.innerHTML = html;
-    preview.style.display = 'block';
+    preview.classList.remove('u-hide');
 
     // 🆕 FIX #4 (20 jan 2026) : NE PAS sauvegarder ici !
     // Cette fonction est appelée pendant remplirFormulairePratique()
@@ -1820,8 +1820,8 @@ async function supprimerPratiqueMateriel(pratiqueId) {
     const conteneurEdition = document.getElementById('conteneurEditionPratique');
     const accueil = document.getElementById('accueilPratiques');
 
-    if (conteneurEdition) conteneurEdition.style.display = 'none';
-    if (accueil) accueil.style.display = 'block';
+    if (conteneurEdition) conteneurEdition.classList.add('u-hide');
+    if (accueil) accueil.classList.remove('u-hide');
 
     if (typeof afficherNotificationSucces === 'function') {
         afficherNotificationSucces('Pratique supprimée');
@@ -2110,7 +2110,7 @@ function toggleSystemeJetonsMat() {
     const contenu = document.getElementById('mat-contenu-jetons');
 
     if (contenu) {
-        contenu.style.display = checkbox && checkbox.checked ? 'block' : 'none';
+        toggleDisplay(contenu, checkbox && checkbox.checked);
     }
 }
 
@@ -2138,7 +2138,7 @@ function toggleCategoriesMat() {
     const details = document.getElementById('mat-categories-details');
 
     if (details) {
-        details.style.display = checkbox && checkbox.checked ? 'block' : 'none';
+        toggleDisplay(details, checkbox && checkbox.checked);
     }
 
     // Valider que les pondérations = 100%
@@ -2403,9 +2403,9 @@ function changerModeCalculObjectifsMat() {
     const modeInfo = MODES_PAR_OBJECTIFS[mode];
     if (modeInfo && descriptionDiv) {
         descriptionDiv.innerHTML = `<strong>${modeInfo.nom} (${modeInfo.auteur})</strong> : ${modeInfo.description}`;
-        descriptionDiv.style.display = 'block';
+        descriptionDiv.classList.remove('u-hide');
     } else if (descriptionDiv) {
-        descriptionDiv.style.display = 'none';
+        descriptionDiv.classList.add('u-hide');
     }
 
     // Masquer toutes les sections de mode
@@ -2413,13 +2413,13 @@ function changerModeCalculObjectifsMat() {
                       'mat-config-mode-seuils-critiques', 'mat-config-mode-holistique'];
     sections.forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.style.display = 'none';
+        if (el) el.classList.add('u-hide');
     });
 
     // Afficher la section correspondante
     const sectionId = `mat-config-mode-${mode}`;
     const section = document.getElementById(sectionId);
-    if (section) section.style.display = 'block';
+    if (section) section.classList.remove('u-hide');
 
     // Rafraîchir la liste des objectifs (colonnes différentes selon le mode)
     rafraichirListeObjectifsMat();

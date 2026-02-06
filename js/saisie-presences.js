@@ -577,7 +577,7 @@ function chargerGroupesPresences() {
     // 🆕 BETA 95.7 : Si un seul groupe, ne pas afficher le filtre "Tous les groupes"
     if (groupes.length <= 1) {
         selectGroupe.innerHTML = '<option value="">Tous</option>';
-        selectGroupe.style.display = 'none'; // Masquer si inutile
+        selectGroupe.classList.add('u-hide'); // Masquer si inutile
     } else {
         selectGroupe.innerHTML = '<option value="">Tous les groupes</option>';
         groupes.forEach(groupe => {
@@ -586,7 +586,7 @@ function chargerGroupesPresences() {
             option.textContent = groupe;
             selectGroupe.appendChild(option);
         });
-        selectGroupe.style.display = '';
+        selectGroupe.classList.remove('u-hide');
     }
 
     console.log(`✅ ${groupes.length} groupes chargés (groupe-cours actif: ${etudiants.length} étudiants)`);
@@ -1095,7 +1095,7 @@ function verifierConfigurationFormatHoraire() {
         : db.getSync('seancesHoraire', []);
 
     if (!formatHoraire || seancesHoraire.length === 0) {
-        alerteDiv.style.display = 'block';
+        alerteDiv.classList.remove('u-hide');
         alerteDiv.innerHTML = `
             <div class="alerte alerte-avertissement">
                 <strong>⚠️ Configuration incomplète</strong><br>
@@ -1105,7 +1105,7 @@ function verifierConfigurationFormatHoraire() {
                 </a>
             </div>`;
     } else {
-        alerteDiv.style.display = 'none';
+        alerteDiv.classList.add('u-hide');
     }
 }
 
@@ -1210,14 +1210,14 @@ function mettreAJourEnteteDateSeance(dateStr) {
     if (!entete || !texte) return;
 
     if (!dateStr) {
-        entete.style.display = 'none';
+        entete.classList.add('u-hide');
         return;
     }
 
     const infoJour = obtenirInfosJourCalendrier(dateStr);
 
     if (!infoJour) {
-        entete.style.display = 'none';
+        entete.classList.add('u-hide');
         return;
     }
 
@@ -1286,7 +1286,7 @@ function mettreAJourEnteteDateSeance(dateStr) {
             message += ` (${infoJour.motif})`;
         }
         entete.classList.add('etat-erreur');
-        entete.style.display = 'block';
+        entete.classList.remove('u-hide');
         texte.innerHTML = message;
         return;
     }
@@ -1307,7 +1307,7 @@ function mettreAJourEnteteDateSeance(dateStr) {
         message += controleVerrou;
     }
 
-    entete.style.display = 'block';
+    entete.classList.remove('u-hide');
     texte.innerHTML = message;
 }
 
@@ -2234,9 +2234,9 @@ function filtrerTableauPresences() {
         const nom = ligne.cells[2]?.textContent.toLowerCase() || '';
 
         if (terme === '' || da.includes(terme) || prenom.includes(terme) || nom.includes(terme)) {
-            ligne.style.display = '';
+            ligne.classList.remove('u-hide');
         } else {
-            ligne.style.display = 'none';
+            ligne.classList.add('u-hide');
         }
     }
 
@@ -2262,7 +2262,7 @@ function mettreAJourCompteurPresences() {
         if (ligne.cells.length < 4) continue;
 
         // Ignorer les lignes cachées par le filtre de recherche
-        if (ligne.style.display === 'none') continue;
+        if (ligne.classList.contains('u-hide')) continue;
 
         nbTotal++;
 

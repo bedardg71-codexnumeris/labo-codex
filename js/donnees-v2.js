@@ -1260,9 +1260,9 @@
         const listeDependances = document.getElementById('liste-dependances-bloquantes');
         if (dependances.length > 0) {
             listeDependances.innerHTML = dependances.map(d => `<li>${escapeHtml(d)}</li>`).join('');
-            divDependances.style.display = 'block';
+            divDependances.classList.remove('u-hide');
         } else {
-            divDependances.style.display = 'none';
+            divDependances.classList.add('u-hide');
         }
 
         // Avertissements
@@ -1270,9 +1270,9 @@
         const listeAvertissements = document.getElementById('liste-avertissements');
         if (avertissements.length > 0) {
             listeAvertissements.innerHTML = avertissements.map(a => `<li>${escapeHtml(a)}</li>`).join('');
-            divAvertissements.style.display = 'block';
+            divAvertissements.classList.remove('u-hide');
         } else {
-            divAvertissements.style.display = 'none';
+            divAvertissements.classList.add('u-hide');
         }
 
         // Zone de confirmation
@@ -1283,12 +1283,12 @@
 
         if (dependances.length > 0) {
             // Suppression bloquée
-            divConfirmation.style.display = 'none';
+            divConfirmation.classList.add('u-hide');
             btnConfirmer.disabled = true;
             btnConfirmer.textContent = 'Suppression impossible';
         } else {
             // Suppression possible avec confirmation
-            divConfirmation.style.display = 'block';
+            divConfirmation.classList.remove('u-hide');
             inputConfirmation.value = '';
             nomAttendu.textContent = ressource.nom;
             btnConfirmer.disabled = true;
@@ -1296,7 +1296,7 @@
         }
 
         // Afficher la modal
-        modal.style.display = 'flex';
+        modal.classList.remove('u-hide');
     }
 
     /**
@@ -1305,7 +1305,7 @@
     function fermerModalSuppressionRessource() {
         const modal = document.getElementById('modal-suppression-ressource');
         if (modal) {
-            modal.style.display = 'none';
+            modal.classList.add('u-hide');
         }
         ressourceASupprimer = null;
     }

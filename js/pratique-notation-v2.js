@@ -87,7 +87,7 @@
 
         const echelleId = dropdown.value;
         if (!echelleId) {
-            preview.style.display = 'none';
+            preview.classList.add('u-hide');
             return;
         }
 
@@ -101,7 +101,7 @@
 
         const echelle = echelles.find(e => e.id === echelleId);
         if (!echelle || !echelle.niveaux) {
-            preview.style.display = 'none';
+            preview.classList.add('u-hide');
             return;
         }
 
@@ -113,7 +113,7 @@
         html += '</ul>';
 
         contenu.innerHTML = html;
-        preview.style.display = 'block';
+        preview.classList.remove('u-hide');
 
         // Sauvegarder la sélection
         sauvegarderPratiqueBaseV2();
@@ -356,13 +356,13 @@
 
         // Afficher pour PAN-Standards ET PAN-Spécifications
         if (type === 'pan-specifications' || type === 'pan-standards') {
-            conteneur.style.display = 'block';
+            conteneur.classList.remove('u-hide');
             // Charger le dropdown des configurations filtrées par type
             if (typeof chargerDropdownModelesPratiques === 'function') {
                 chargerDropdownModelesPratiques();
             }
         } else {
-            conteneur.style.display = 'none';
+            conteneur.classList.add('u-hide');
         }
     }
 
@@ -390,9 +390,9 @@
             // Ajouter la nouvelle classe
             badge.classList.add(config.classe);
             badge.textContent = config.texte;
-            badge.style.display = 'inline-flex';
+            badge.classList.remove('u-hide');
         } else {
-            badge.style.display = 'none';
+            badge.classList.add('u-hide');
         }
     }
 
@@ -408,14 +408,14 @@
         if (type === 'pan-maitrise') typeNormalise = 'pan-standards';
 
         if (typeNormalise === 'pan-standards') {
-            conteneur.style.display = 'block';
+            conteneur.classList.remove('u-hide');
         } else {
-            conteneur.style.display = 'none';
+            conteneur.classList.add('u-hide');
             // Réinitialiser la sélection si on change de type
             const select = document.getElementById('v2-variante-calcul');
             if (select) select.value = '';
             const desc = document.getElementById('v2-variante-description');
-            if (desc) desc.style.display = 'none';
+            if (desc) desc.classList.add('u-hide');
         }
     }
 
@@ -436,20 +436,20 @@
                 html += `<br><em style="color: var(--gris-moyen);">Ex: ${varianteInfo.exemple}</em>`;
             }
             descEl.innerHTML = html;
-            descEl.style.display = 'block';
+            descEl.classList.remove('u-hide');
         } else {
-            descEl.style.display = 'none';
+            descEl.classList.add('u-hide');
         }
 
         // ✅ NOUVEAU (Beta 95) : Afficher/masquer la configuration par-objectifs
         const configObjectifs = document.getElementById('v2-config-par-objectifs');
         if (configObjectifs) {
             if (variante === 'par-objectifs') {
-                configObjectifs.style.display = 'block';
+                configObjectifs.classList.remove('u-hide');
                 // Charger les données de configuration
                 chargerConfigParObjectifs();
             } else {
-                configObjectifs.style.display = 'none';
+                configObjectifs.classList.add('u-hide');
             }
         }
 
@@ -477,9 +477,9 @@
         if (taxonomie) {
             titreEl.textContent = taxonomie.titre;
             definitionEl.textContent = taxonomie.definition;
-            conteneur.style.display = 'block';
+            conteneur.classList.remove('u-hide');
         } else {
-            conteneur.style.display = 'none';
+            conteneur.classList.add('u-hide');
         }
     }
 
@@ -494,7 +494,7 @@
 
         configs.forEach(id => {
             const el = document.getElementById(id);
-            if (el) el.style.display = 'none';
+            if (el) el.classList.add('u-hide');
         });
 
         // Afficher la configuration correspondante
@@ -518,7 +518,7 @@
         }
 
         const config = document.getElementById(configId);
-        if (config) config.style.display = 'block';
+        if (config) config.classList.remove('u-hide');
 
         // Charger les données spécifiques au type de pratique
         if (type === 'pan-specifications' || type === 'specifications') {
@@ -655,7 +655,7 @@
         }
 
         const actif = checkbox.checked;
-        contenu.style.display = actif ? 'block' : 'none';
+        toggleDisplay(contenu, actif);
 
         // Optionnel : ajouter une classe pour le style
         contenu.classList.toggle('jetons-desactive', !actif);
@@ -789,7 +789,7 @@
         sections.forEach(s => {
             const section = document.getElementById(`v2-config-mode-${s}`);
             if (section) {
-                section.style.display = (s === mode) ? 'block' : 'none';
+                toggleDisplay(section, s === mode);
             }
         });
 
@@ -797,7 +797,7 @@
         const descEl = document.getElementById('v2-objectifs-mode-description');
         if (descEl && MODES_CALCUL_OBJECTIFS[mode]) {
             descEl.textContent = MODES_CALCUL_OBJECTIFS[mode].description;
-            descEl.style.display = 'block';
+            descEl.classList.remove('u-hide');
         }
 
         // Charger les paramètres spécifiques au mode

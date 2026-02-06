@@ -550,8 +550,8 @@ function afficherFormCours(id = null) {
 
     if (!formulaire) return;
 
-    formulaire.style.display = 'block';
-    if (btnAjouter) btnAjouter.style.display = 'none';
+    formulaire.classList.remove('u-hide');
+    if (btnAjouter) btnAjouter.classList.add('u-hide');
 
     // Peupler le sélecteur de trimestre (Beta 93.5)
     peupleSelecteurTrimestre();
@@ -673,8 +673,8 @@ function annulerFormCours() {
     const formulaire = document.getElementById('formulaireCours');
     const btnAjouter = document.getElementById('btnAjouterCours');
     
-    if (formulaire) formulaire.style.display = 'none';
-    if (btnAjouter) btnAjouter.style.display = 'inline-block';
+    if (formulaire) formulaire.classList.add('u-hide');
+    if (btnAjouter) btnAjouter.classList.remove('u-hide');
     
     coursEnEdition = null;
 }

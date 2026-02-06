@@ -571,10 +571,10 @@ function demanderMetadonneesEnrichies(typeContenu, nomContenu) {
         document.getElementById('checkPartagerDiscipline').checked = !!discipline;
         document.getElementById('checkPartagerInstitution').checked = !!institution;
         document.getElementById('checkPartagerNiveau').checked = true;
-        document.getElementById('zoneClarification').style.display = 'none';
+        document.getElementById('zoneClarification').classList.add('u-hide');
 
         // Afficher le modal
-        modal.style.display = 'flex';
+        modal.classList.remove('u-hide');
 
         // 🆕 Gérer la checkbox "Partager mon nom" → afficher/masquer la zone de clarification
         const checkNom = document.getElementById('checkPartagerNom');
@@ -582,15 +582,15 @@ function demanderMetadonneesEnrichies(typeContenu, nomContenu) {
 
         checkNom.onchange = function() {
             if (!this.checked) {
-                zoneClarif.style.display = 'block';
+                zoneClarif.classList.remove('u-hide');
             } else {
-                zoneClarif.style.display = 'none';
+                zoneClarif.classList.add('u-hide');
             }
         };
 
         // Gestionnaire de fermeture
         const fermer = (resultat) => {
-            modal.style.display = 'none';
+            modal.classList.add('u-hide');
             resolve(resultat);
         };
 
@@ -685,9 +685,9 @@ function demanderMetadonneesEnrichies(typeContenu, nomContenu) {
 function creerModalMetadonneesEnrichies() {
     const modal = document.createElement('div');
     modal.id = 'modalMetadonneesEnrichies';
-    modal.className = 'modal';
+    modal.className = 'modal u-hide';
     // z-index: 10001 pour passer au-dessus des modaux de bibliothèque (10000)
-    modal.style.cssText = 'display: none; position: fixed; z-index: 10001; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center;';
+    modal.style.cssText = 'display: flex; position: fixed; z-index: 10001; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center;';
 
     modal.innerHTML = `
         <div class="modal-content" style="background: white; padding: 30px; border-radius: 8px; max-width: 700px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
@@ -853,11 +853,11 @@ function demanderMetadonneesConfigComplete(nbRessources) {
         document.getElementById('configDescriptionCompteur').textContent = '0/500';
 
         // Afficher le modal
-        modal.style.display = 'flex';
+        modal.classList.remove('u-hide');
 
         // Gestionnaire de fermeture
         const fermer = (resultat) => {
-            modal.style.display = 'none';
+            modal.classList.add('u-hide');
             resolve(resultat);
         };
 
@@ -924,8 +924,8 @@ function demanderMetadonneesConfigComplete(nbRessources) {
 function creerModalConfigComplete() {
     const modal = document.createElement('div');
     modal.id = 'modalConfigComplete';
-    modal.className = 'modal';
-    modal.style.cssText = 'display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; overflow-y: auto; padding: 20px 0;';
+    modal.className = 'modal u-hide';
+    modal.style.cssText = 'display: flex; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; overflow-y: auto; padding: 20px 0;';
 
     modal.innerHTML = `
         <div class="modal-content" style="background: white; padding: 30px; border-radius: 8px; max-width: 700px; width: 90%; box-shadow: 0 4px 20px rgba(0,0,0,0.3); margin: auto;">
@@ -1435,7 +1435,7 @@ async function afficherModalEditionMetadonnees(typeRessource, ressourceId) {
     document.getElementById('editMetaTitre').textContent = `Métadonnées : ${nomRessource}`;
 
     // Afficher le modal
-    modal.style.display = 'flex';
+    modal.classList.remove('u-hide');
 }
 
 /**
@@ -1445,9 +1445,9 @@ async function afficherModalEditionMetadonnees(typeRessource, ressourceId) {
 function creerModalEditionMetadonnees() {
     const modal = document.createElement('div');
     modal.id = 'modalEditionMetadonnees';
-    modal.className = 'modal';
+    modal.className = 'modal u-hide';
     // z-index: 10001 pour passer au-dessus des modaux de bibliothèque (10000)
-    modal.style.cssText = 'display: none; position: fixed; z-index: 10001; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center;';
+    modal.style.cssText = 'display: flex; position: fixed; z-index: 10001; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center;';
 
     modal.innerHTML = `
         <div class="modal-content" style="background: white; padding: 30px; border-radius: var(--radius-grand); max-width: 550px; width: 90%; box-shadow: var(--shadow-fort);">
@@ -1500,7 +1500,7 @@ function creerModalEditionMetadonnees() {
 function fermerModalEditionMetadonnees() {
     const modal = document.getElementById('modalEditionMetadonnees');
     if (modal) {
-        modal.style.display = 'none';
+        modal.classList.add('u-hide');
     }
 }
 

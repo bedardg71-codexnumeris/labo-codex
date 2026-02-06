@@ -556,12 +556,12 @@ function changerPratiqueNotation() {
 
     if (pratique === 'pan-maitrise') {
         // Afficher le menu PAN
-        colonnePAN.style.display = 'block';
+        colonnePAN.classList.remove('u-hide');
     } else {
         // Masquer le menu PAN
-        colonnePAN.style.display = 'none';
+        colonnePAN.classList.add('u-hide');
         selectPAN.value = '';
-        infoPAN.style.display = 'none';
+        infoPAN.classList.add('u-hide');
     }
 
     // Sauvegarder dans modalitesEvaluation
@@ -605,7 +605,7 @@ function afficherInfoPAN() {
 
     if (typePAN && descriptions[typePAN]) {
         infoPAN.innerHTML = descriptions[typePAN];
-        infoPAN.style.display = 'block';
+        infoPAN.classList.remove('u-hide');
 
         // Sauvegarder le type de PAN
         let modalites = db.getSync('modalitesEvaluation', {});
@@ -614,7 +614,7 @@ function afficherInfoPAN() {
 
         mettreAJourStatutModalites();
     } else {
-        infoPAN.style.display = 'none';
+        infoPAN.classList.add('u-hide');
     }
 }
 
@@ -639,26 +639,20 @@ function afficherOptionsAffichage() {
 
     if (pratique === 'pan-maitrise' || pratique === 'sommative') {
         // Afficher la section d'affichage au tableau de bord
-        if (sectionAffichageTableauBord) {
-            sectionAffichageTableauBord.style.display = 'block';
-        }
+        toggleDisplay(sectionAffichageTableauBord, true);
 
         // Afficher les checkboxes d'activation pour PAN
         if (pratique === 'pan-maitrise' && activationsExtras) {
-            activationsExtras.style.display = 'block';
+            activationsExtras.classList.remove('u-hide');
             // Initialiser l'affichage des cartes
             afficherCartesExtras();
-        } else if (activationsExtras) {
-            activationsExtras.style.display = 'none';
+        } else {
+            toggleDisplay(activationsExtras, false);
         }
     } else {
         // Masquer tout si aucune pratique sélectionnée
-        if (sectionAffichageTableauBord) {
-            sectionAffichageTableauBord.style.display = 'none';
-        }
-        if (activationsExtras) {
-            activationsExtras.style.display = 'none';
-        }
+        toggleDisplay(sectionAffichageTableauBord, false);
+        toggleDisplay(activationsExtras, false);
     }
 
     sauvegarderOptionsAffichage();
@@ -732,10 +726,10 @@ function afficherConfigurationPAN() {
     if (!configPAN) return;
 
     if (pratique === 'pan-maitrise') {
-        configPAN.style.display = 'block';
+        configPAN.classList.remove('u-hide');
         chargerConfigurationPAN();
     } else {
-        configPAN.style.display = 'none';
+        configPAN.classList.add('u-hide');
     }
 }
 
@@ -747,7 +741,7 @@ function afficherParametresPAN() {
     const configPAN = document.getElementById('configurationPAN');
     if (!configPAN) return;
 
-    configPAN.style.display = 'block';
+    configPAN.classList.remove('u-hide');
     chargerConfigurationPAN();
 
     // Scroller vers la section
@@ -940,7 +934,7 @@ function updateDescriptionModalite() {
 
     // Afficher/cacher le champ "Artefacts à retenir" selon la modalité
     if (groupeNombreElem) {
-        groupeNombreElem.style.display = config.afficherNombre ? 'block' : 'none';
+        toggleDisplay(groupeNombreElem, config.afficherNombre);
     }
 }
 
@@ -1001,7 +995,7 @@ function afficherCartesExtras() {
     }
 
     // Gérer l'apparence de la carte Portfolio
-    cartePortfolio.style.display = 'block';
+    cartePortfolio.classList.remove('u-hide');
     if (checkPortfolio && checkPortfolio.checked) {
         cartePortfolio.style.opacity = '1';
     } else {
@@ -1009,7 +1003,7 @@ function afficherCartesExtras() {
     }
 
     // Gérer l'apparence de la carte Jetons
-    carteJetons.style.display = 'block';
+    carteJetons.classList.remove('u-hide');
     if (checkJetons && checkJetons.checked) {
         carteJetons.style.opacity = '1';
     } else {
@@ -1174,7 +1168,7 @@ function sauvegarderPratiqueNotation() {
     }
 
     // Valider typePAN uniquement si le sélecteur est VISIBLE (ancien système)
-    const selecteurVisible = colonnePAN && colonnePAN.style.display !== 'none';
+    const selecteurVisible = colonnePAN && !colonnePAN.classList.contains('u-hide');
     if (pratique === 'pan-maitrise' && selecteurVisible && !typePAN) {
         alert('Veuillez choisir un type de pratique alternative');
         return;
@@ -1297,11 +1291,9 @@ function chargerModalites() {
         db.setSync('modalitesEvaluation', modalites);
 
         selectPratique.value = '';
-        colonnePAN.style.display = 'none';
+        colonnePAN.classList.add('u-hide');
         selectPAN.value = '';
-        if (optionsAffichage) {
-            optionsAffichage.style.display = 'none';
-        }
+        toggleDisplay(optionsAffichage, false);
         mettreAJourStatutModalites();
         return;
     }
@@ -1311,7 +1303,7 @@ function chargerModalites() {
 
     // Gérer l'affichage du menu PAN
     if (modalites.pratique === 'pan-maitrise') {
-        colonnePAN.style.display = 'block';
+        colonnePAN.classList.remove('u-hide');
 
         // Charger le type de PAN si disponible
         if (modalites.typePAN) {
@@ -1321,7 +1313,7 @@ function chargerModalites() {
             selectPAN.value = '';
         }
     } else {
-        colonnePAN.style.display = 'none';
+        colonnePAN.classList.add('u-hide');
         selectPAN.value = '';
     }
 
@@ -1398,7 +1390,7 @@ function chargerModalites() {
     // Elle sera affichée par le bouton "Modifier les paramètres"
     const configPAN = document.getElementById('configurationPAN');
     if (configPAN && modalites.pratique === 'pan-maitrise') {
-        configPAN.style.display = 'none';
+        configPAN.classList.add('u-hide');
     }
 
     // Mettre à jour le statut
@@ -1954,8 +1946,8 @@ function togglePratique(pratiqueId) {
     if (!details || !carte) return;
 
     // Toggle display
-    const estOuvert = details.style.display !== 'none';
-    details.style.display = estOuvert ? 'none' : 'block';
+    const estOuvert = !details.classList.contains('u-hide');
+    toggleDisplay(details, !estOuvert);
 
     // Mettre à jour l'icône
     const icone = carte.querySelector('.pratique-toggle-icon');
@@ -2074,8 +2066,8 @@ function chargerConfigurationPratique(id) {
     const zoneAccueil = document.getElementById('accueilPratiques');
     const zoneConfiguration = document.getElementById('zoneConfigurationPratique');
 
-    if (zoneAccueil) zoneAccueil.style.display = 'none';
-    if (zoneConfiguration) zoneConfiguration.style.display = 'block';
+    toggleDisplay(zoneAccueil, false);
+    toggleDisplay(zoneConfiguration, true);
 
     // ✅ NOUVEAU : Remplir l'en-tête avec les infos de la pratique
     const nomPratique = document.getElementById('nomPratiqueSelectionnee');
@@ -2166,7 +2158,7 @@ function afficherSectionsSelonConfig(config) {
     // Section Options d'affichage : toujours visible
     const carteOptionsAffichage = document.getElementById('carteOptionsAffichage');
     if (carteOptionsAffichage) {
-        carteOptionsAffichage.style.display = 'block';
+        carteOptionsAffichage.classList.remove('u-hide');
         // Fermer l'accordéon par défaut
         const accordeonOptions = document.getElementById('accordeonOptionsAffichage');
         const iconeOptions = carteOptionsAffichage.querySelector('.accordeon-icone');
@@ -2179,7 +2171,7 @@ function afficherSectionsSelonConfig(config) {
     // Section Évaluation du français : toujours visible
     const carteEvaluationFrancais = document.getElementById('carteEvaluationFrancais');
     if (carteEvaluationFrancais) {
-        carteEvaluationFrancais.style.display = 'block';
+        carteEvaluationFrancais.classList.remove('u-hide');
         // Fermer l'accordéon par défaut
         const accordeonFrancais = document.getElementById('accordeonEvaluationFrancais');
         const iconeFrancais = carteEvaluationFrancais.querySelector('.accordeon-icone');
@@ -2193,7 +2185,7 @@ function afficherSectionsSelonConfig(config) {
     const cartePortfolio = document.getElementById('cartePortfolio');
     if (cartePortfolio) {
         const portfolioActif = config.portfolio && config.portfolio.actif !== false;
-        cartePortfolio.style.display = portfolioActif ? 'block' : 'none';
+        toggleDisplay(cartePortfolio, portfolioActif);
 
         if (portfolioActif) {
             // Fermer l'accordéon par défaut
@@ -2210,7 +2202,7 @@ function afficherSectionsSelonConfig(config) {
     const carteJetons = document.getElementById('carteJetons');
     if (carteJetons) {
         const jetonsActif = config.jetons && config.jetons.actif !== false;
-        carteJetons.style.display = jetonsActif ? 'block' : 'none';
+        toggleDisplay(carteJetons, jetonsActif);
 
         if (jetonsActif) {
             // Fermer l'accordéon par défaut
@@ -2373,7 +2365,7 @@ function ouvrirWizardPratique(modeEdition = false, idPratique = null) {
     // Afficher/masquer le bouton Supprimer selon le mode
     const btnSupprimer = document.getElementById('wizard-btn-supprimer');
     if (btnSupprimer) {
-        btnSupprimer.style.display = modeEdition ? 'inline-block' : 'none';
+        toggleDisplay(btnSupprimer, modeEdition);
     }
 
     // Réinitialiser si mode création
@@ -2382,7 +2374,7 @@ function ouvrirWizardPratique(modeEdition = false, idPratique = null) {
     }
 
     // Afficher le modal
-    modal.style.display = 'flex';
+    modal.classList.add('actif');
     wizardEtapeActuelle = 1;
     afficherEtapeWizard(1);
 
@@ -2744,7 +2736,7 @@ function creerNouvellePratique() {
 function fermerWizardPratique() {
     const modal = document.getElementById('modalWizardPratique');
     if (modal) {
-        modal.style.display = 'none';
+        modal.classList.remove('actif');
     }
 
     // Réinitialiser
@@ -2803,7 +2795,7 @@ function afficherPreviewGrilleWizard() {
     const grilleId = select.value;
 
     if (!grilleId) {
-        preview.style.display = 'none';
+        preview.classList.add('u-hide');
         return;
     }
 
@@ -2833,7 +2825,7 @@ function afficherPreviewGrilleWizard() {
                 </div>
             </div>
         `;
-        preview.style.display = 'block';
+        preview.classList.remove('u-hide');
         return;
     }
 
@@ -2842,7 +2834,7 @@ function afficherPreviewGrilleWizard() {
     const grille = grilles.find(g => g.id === grilleId);
 
     if (!grille || !grille.criteres) {
-        preview.style.display = 'none';
+        preview.classList.add('u-hide');
         return;
     }
 
@@ -2861,7 +2853,7 @@ function afficherPreviewGrilleWizard() {
     html += '</div>';
 
     contenu.innerHTML = html;
-    preview.style.display = 'block';
+    preview.classList.remove('u-hide');
 }
 
 /**
@@ -2910,7 +2902,7 @@ function afficherPreviewEchelleWizard() {
     const echelleId = select.value;
 
     if (!echelleId) {
-        preview.style.display = 'none';
+        preview.classList.add('u-hide');
         return;
     }
 
@@ -2948,7 +2940,7 @@ function afficherPreviewEchelleWizard() {
                 </div>
             </div>
         `;
-        preview.style.display = 'block';
+        preview.classList.remove('u-hide');
         return;
     }
 
@@ -2957,7 +2949,7 @@ function afficherPreviewEchelleWizard() {
     const echelle = echelles.find(e => e.id === echelleId);
 
     if (!echelle || !echelle.niveaux) {
-        preview.style.display = 'none';
+        preview.classList.add('u-hide');
         return;
     }
 
@@ -2999,7 +2991,7 @@ function afficherPreviewEchelleWizard() {
     html += '</div>';
 
     contenu.innerHTML = html;
-    preview.style.display = 'block';
+    preview.classList.remove('u-hide');
 }
 
 /**
@@ -3050,7 +3042,7 @@ function resetterWizard() {
 
     // 🆕 #24 : Masquer l'info hybride
     const infoHybride = document.getElementById('wizard-portfolio-hybride-info');
-    if (infoHybride) infoHybride.style.display = 'none';
+    toggleDisplay(infoHybride, false);
 }
 
 /**
@@ -3065,7 +3057,7 @@ function onWizardPortfolioSelectionChange() {
     if (!select || !infoHybride) return;
 
     const estHybride = select.value === 'hybride';
-    infoHybride.style.display = estHybride ? 'block' : 'none';
+    toggleDisplay(infoHybride, estHybride);
 
     // Désactiver le champ nombre si hybride (sera configuré en Expert)
     if (champNombre) {
@@ -3087,12 +3079,12 @@ window.onWizardPortfolioSelectionChange = onWizardPortfolioSelectionChange;
 function afficherEtapeWizard(numeroEtape) {
     // Cacher toutes les étapes
     const steps = document.querySelectorAll('.wizard-step');
-    steps.forEach(step => step.style.display = 'none');
+    steps.forEach(step => step.classList.add('u-hide'));
 
     // Afficher l'étape demandée
     const currentStep = document.querySelector(`.wizard-step[data-step="${numeroEtape}"]`);
     if (currentStep) {
-        currentStep.style.display = 'block';
+        currentStep.classList.remove('u-hide');
     }
 
     // Mettre à jour l'indicateur
@@ -3131,17 +3123,17 @@ function afficherEtapeWizard(numeroEtape) {
     const btnCreer = document.getElementById('wizard-btn-creer');
 
     if (numeroEtape === 1) {
-        btnPrecedent.style.display = 'none';
-        btnSuivant.style.display = 'inline-block';
-        btnCreer.style.display = 'none';
+        toggleDisplay(btnPrecedent, false);
+        toggleDisplay(btnSuivant, true);
+        toggleDisplay(btnCreer, false);
     } else if (numeroEtape === wizardNbEtapes) {
-        btnPrecedent.style.display = 'inline-block';
-        btnSuivant.style.display = 'none';
-        btnCreer.style.display = 'inline-block';
+        toggleDisplay(btnPrecedent, true);
+        toggleDisplay(btnSuivant, false);
+        toggleDisplay(btnCreer, true);
     } else {
-        btnPrecedent.style.display = 'inline-block';
-        btnSuivant.style.display = 'inline-block';
-        btnCreer.style.display = 'none';
+        toggleDisplay(btnPrecedent, true);
+        toggleDisplay(btnSuivant, true);
+        toggleDisplay(btnCreer, false);
     }
 }
 
@@ -3240,21 +3232,21 @@ function afficherConfigEchelle() {
     const type = document.getElementById('wizard-echelle-type').value;
 
     // Cacher toutes les configs
-    document.getElementById('wizard-config-niveaux').style.display = 'none';
-    document.getElementById('wizard-config-pourcentage').style.display = 'none';
-    document.getElementById('wizard-config-notes-fixes').style.display = 'none';
+    document.getElementById('wizard-config-niveaux').classList.add('u-hide');
+    document.getElementById('wizard-config-pourcentage').classList.add('u-hide');
+    document.getElementById('wizard-config-notes-fixes').classList.add('u-hide');
 
     // Afficher la config appropriée
     if (type === 'niveaux') {
-        document.getElementById('wizard-config-niveaux').style.display = 'block';
+        document.getElementById('wizard-config-niveaux').classList.remove('u-hide');
         // Initialiser avec 4 niveaux IDME par défaut
         if (document.getElementById('wizard-niveaux-liste').children.length === 0) {
             initialiserNiveauxIDME();
         }
     } else if (type === 'pourcentage') {
-        document.getElementById('wizard-config-pourcentage').style.display = 'block';
+        document.getElementById('wizard-config-pourcentage').classList.remove('u-hide');
     } else if (type === 'notes_fixes') {
-        document.getElementById('wizard-config-notes-fixes').style.display = 'block';
+        document.getElementById('wizard-config-notes-fixes').classList.remove('u-hide');
     }
 }
 
@@ -3325,21 +3317,21 @@ function afficherConfigStructure() {
     const type = document.getElementById('wizard-structure-type').value;
 
     // Cacher toutes les configs
-    document.getElementById('wizard-config-standards').style.display = 'none';
-    document.getElementById('wizard-config-portfolio').style.display = 'none';
-    document.getElementById('wizard-config-evaluations').style.display = 'none';
-    document.getElementById('wizard-config-specifications').style.display = 'none';
+    document.getElementById('wizard-config-standards').classList.add('u-hide');
+    document.getElementById('wizard-config-portfolio').classList.add('u-hide');
+    document.getElementById('wizard-config-evaluations').classList.add('u-hide');
+    document.getElementById('wizard-config-specifications').classList.add('u-hide');
     document.getElementById('wizard-config-multi-objectifs').classList.add('hidden');
 
     // Afficher la config appropriée
     if (type === 'standards') {
-        document.getElementById('wizard-config-standards').style.display = 'block';
+        document.getElementById('wizard-config-standards').classList.remove('u-hide');
     } else if (type === 'portfolio') {
-        document.getElementById('wizard-config-portfolio').style.display = 'block';
+        document.getElementById('wizard-config-portfolio').classList.remove('u-hide');
     } else if (type === 'evaluations_discretes') {
-        document.getElementById('wizard-config-evaluations').style.display = 'block';
+        document.getElementById('wizard-config-evaluations').classList.remove('u-hide');
     } else if (type === 'specifications') {
-        document.getElementById('wizard-config-specifications').style.display = 'block';
+        document.getElementById('wizard-config-specifications').classList.remove('u-hide');
     } else if (type === 'multi_objectifs') {
         document.getElementById('wizard-config-multi-objectifs').classList.remove('hidden');
         // Peupler le dropdown avec les ensembles disponibles
@@ -3536,11 +3528,11 @@ function afficherConfigCalcul() {
     const infoTexte = document.getElementById('wizard-info-calcul-texte');
 
     if (!methode) {
-        infoDiv.style.display = 'none';
+        infoDiv.classList.add('u-hide');
         return;
     }
 
-    infoDiv.style.display = 'block';
+    infoDiv.classList.remove('u-hide');
 
     if (methode === 'conversion_niveaux') {
         infoTexte.textContent = 'Chaque niveau sera converti en pourcentage selon la table de conversion définie dans l\'échelle (étape 2).';
@@ -3560,14 +3552,14 @@ function afficherConfigReprises() {
     const infoDiv = document.getElementById('wizard-info-reprises');
 
     if (type === 'aucune') {
-        configDiv.style.display = 'none';
-        infoDiv.style.display = 'none';
+        toggleDisplay(configDiv, false);
+        toggleDisplay(infoDiv, false);
     } else if (type === 'illimitees' || type === 'occasions_ponctuelles' || type === 'limitees') {
-        configDiv.style.display = 'block';
-        infoDiv.style.display = type === 'occasions_ponctuelles' ? 'block' : 'none';
+        toggleDisplay(configDiv, true);
+        toggleDisplay(infoDiv, type === 'occasions_ponctuelles');
     } else {
-        configDiv.style.display = 'none';
-        infoDiv.style.display = 'none';
+        toggleDisplay(configDiv, false);
+        toggleDisplay(infoDiv, false);
     }
 }
 
@@ -3676,9 +3668,9 @@ function toggleResumeJetonsWizard() {
         }
 
         contenu.innerHTML = html;
-        resume.style.display = 'block';
+        resume.classList.remove('u-hide');
     } else {
-        resume.style.display = 'none';
+        resume.classList.add('u-hide');
     }
 }
 
@@ -3692,16 +3684,16 @@ function afficherConfigCriteres() {
     const infoTexte = document.getElementById('wizard-info-criteres-texte');
 
     // Cacher toutes les configs
-    configFixesDiv.style.display = 'none';
-    infoDiv.style.display = 'none';
+    configFixesDiv.classList.add('u-hide');
+    infoDiv.classList.add('u-hide');
 
     if (type === 'fixes') {
-        configFixesDiv.style.display = 'block';
+        configFixesDiv.classList.remove('u-hide');
     } else if (type === 'par_standard') {
-        infoDiv.style.display = 'block';
+        infoDiv.classList.remove('u-hide');
         infoTexte.textContent = 'Chaque standard pourra avoir ses propres critères spécifiques.';
     } else if (type === 'par_evaluation') {
-        infoDiv.style.display = 'block';
+        infoDiv.classList.remove('u-hide');
         infoTexte.textContent = 'Les critères varient selon le type d\'évaluation.';
     }
 }
@@ -3713,13 +3705,13 @@ function afficherConfigSeuils() {
     const type = document.getElementById('wizard-seuils-type').value;
 
     // Cacher toutes les configs
-    document.getElementById('wizard-config-seuils-pct').style.display = 'none';
-    document.getElementById('wizard-config-seuils-niveau').style.display = 'none';
+    document.getElementById('wizard-config-seuils-pct').classList.add('u-hide');
+    document.getElementById('wizard-config-seuils-niveau').classList.add('u-hide');
 
     if (type === 'pourcentage') {
-        document.getElementById('wizard-config-seuils-pct').style.display = 'block';
+        document.getElementById('wizard-config-seuils-pct').classList.remove('u-hide');
     } else if (type === 'niveau') {
-        document.getElementById('wizard-config-seuils-niveau').style.display = 'block';
+        document.getElementById('wizard-config-seuils-niveau').classList.remove('u-hide');
     }
 }
 
@@ -4835,21 +4827,21 @@ function afficherConfigSpecType() {
     const configNiveaux = document.getElementById('wizard-spec-config-niveaux');
 
     if (typeEval === 'binaire') {
-        configBinaire.style.display = 'block';
-        configNiveaux.style.display = 'none';
+        configBinaire.classList.remove('u-hide');
+        configNiveaux.classList.add('u-hide');
         // Initialiser avec un type de travail et un palier par défaut
         if (document.getElementById('wizard-spec-types-travaux-liste').children.length === 0) {
             ajouterTypeTravailSpec();
             ajouterPalierBundle();
         }
     } else if (typeEval === 'niveaux') {
-        configBinaire.style.display = 'none';
-        configNiveaux.style.display = 'block';
+        configBinaire.classList.add('u-hide');
+        configNiveaux.classList.remove('u-hide');
         // Générer les objectifs par défaut
         genererObjectifsSpec();
     } else {
-        configBinaire.style.display = 'none';
-        configNiveaux.style.display = 'none';
+        configBinaire.classList.add('u-hide');
+        configNiveaux.classList.add('u-hide');
     }
 }
 
@@ -5236,7 +5228,7 @@ function initialiserReglesConformite() {
 
     // Gérer la checkbox
     checkbox.addEventListener('change', function() {
-        details.style.display = this.checked ? 'block' : 'none';
+        toggleDisplay(details, this.checked);
         console.log('[initialiserReglesConformite] Checkbox changée:', this.checked);
         // Peupler les sélecteurs quand on affiche les détails
         if (this.checked) {
@@ -5462,7 +5454,7 @@ function chargerReglesConformiteConfig(regles) {
     }
 
     if (details) {
-        details.style.display = regles.actif ? 'block' : 'none';
+        toggleDisplay(details, regles.actif);
     }
 
     // D'ABORD peupler le sélecteur d'échelles avec les options

@@ -1049,7 +1049,7 @@
         const isArchive = estTrimestreArchive();
 
         if (bandeau) {
-            bandeau.style.display = isArchive ? 'block' : 'none';
+            toggleDisplay(bandeau, isArchive);
             // Restaurer la couleur par défaut
             bandeau.style.background = 'var(--bleu-clair, #065dbb)';
         }
@@ -1083,7 +1083,7 @@
             // Masquer le bandeau-mode car on a déjà le bandeau archive
             const bandeauMode = document.getElementById('bandeau-mode');
             if (bandeauMode) {
-                bandeauMode.style.display = 'none';
+                bandeauMode.classList.add('u-hide');
             }
             console.log('[Trimestres] Mode archivé activé - Lecture seule');
         } else {
@@ -1758,7 +1758,7 @@
             // Masquer le bandeau-mode car on a déjà le bandeau archive
             const bandeauMode = document.getElementById('bandeau-mode');
             if (bandeauMode) {
-                bandeauMode.style.display = 'none';
+                bandeauMode.classList.add('u-hide');
             }
             // Changer la couleur du bandeau archive pour indiquer l'anonymisation
             const bandeauArchive = document.getElementById('bandeau-archive');
@@ -1772,7 +1772,7 @@
             // Masquer le bandeau-mode car on a déjà le bandeau archive
             const bandeauMode = document.getElementById('bandeau-mode');
             if (bandeauMode) {
-                bandeauMode.style.display = 'none';
+                bandeauMode.classList.add('u-hide');
             }
             // Restaurer la couleur du bandeau archive
             const bandeauArchive = document.getElementById('bandeau-archive');

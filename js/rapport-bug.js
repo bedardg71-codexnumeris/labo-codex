@@ -669,7 +669,7 @@ async function telechargerCaptureEcran(btn) {
     const texteOriginal = btn ? btn.textContent : '📸 Capture écran';
 
     // Cacher le modal temporairement
-    modal.style.display = 'none';
+    modal.classList.add('u-hide');
 
     // Créer un overlay de décompte
     const overlay = document.createElement('div');
@@ -703,7 +703,7 @@ async function telechargerCaptureEcran(btn) {
             clearInterval(intervalle);
             // Retirer l'overlay et réafficher le modal
             overlay.remove();
-            modal.style.display = 'flex';
+            modal.classList.remove('u-hide');
 
             // Feedback visuel sur le bouton
             const btnCapture = document.getElementById('btnCaptureEcran');

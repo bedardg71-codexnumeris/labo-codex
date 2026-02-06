@@ -1502,7 +1502,7 @@ async function ouvrirModalExportPDF(options = {}) {
     }
 
     // Afficher le modal
-    modal.style.display = 'flex';
+    modal.classList.remove('u-hide');
 
     // Mettre a jour l'apercu
     await mettreAJourApercuPDF();
@@ -1513,7 +1513,7 @@ async function ouvrirModalExportPDF(options = {}) {
  */
 function fermerModalExportPDF() {
     const modal = document.getElementById('modalExportPDF');
-    if (modal) modal.style.display = 'none';
+    if (modal) modal.classList.add('u-hide');
 }
 
 /**
@@ -1573,14 +1573,14 @@ async function mettreAJourApercuPDF() {
 
     // Afficher/masquer options production
     if (optionsProduction) {
-        optionsProduction.style.display = productionId ? 'block' : 'none';
+        toggleDisplay(optionsProduction, !!productionId);
     }
 
     // Charger les cartouches disponibles pour la grille selectionnee
     if (grilleId && sectionCartouche && selectCartouche) {
         const cartouches = await db.get(`cartouches_${grilleId}`) || [];
         if (cartouches.length > 0) {
-            sectionCartouche.style.display = 'block';
+            sectionCartouche.classList.remove('u-hide');
             const currentValue = selectCartouche.value;
             selectCartouche.innerHTML = '<option value="">-- Sans rétroaction --</option>';
             cartouches.forEach(c => {
@@ -1591,11 +1591,11 @@ async function mettreAJourApercuPDF() {
                 selectCartouche.value = currentValue;
             }
         } else {
-            sectionCartouche.style.display = 'none';
+            sectionCartouche.classList.add('u-hide');
             selectCartouche.innerHTML = '<option value="">-- Sans rétroaction --</option>';
         }
     } else if (sectionCartouche) {
-        sectionCartouche.style.display = 'none';
+        sectionCartouche.classList.add('u-hide');
     }
 
     // Si grille et echelle selectionnees, generer l'apercu
@@ -2191,14 +2191,14 @@ async function afficherFormulairePreparationPDF(options = {}) {
     if (!formulaire) return;
 
     // Cacher les autres contenus
-    if (accueil) accueil.style.display = 'none';
-    if (conteneurEdition) conteneurEdition.style.display = 'none';
+    if (accueil) accueil.classList.add('u-hide');
+    if (conteneurEdition) conteneurEdition.classList.add('u-hide');
 
     // Charger les options des dropdowns
     await chargerOptionsPreparationPDF();
 
     // Afficher le formulaire
-    formulaire.style.display = 'block';
+    formulaire.classList.remove('u-hide');
 
     // Restaurer les derniers réglages sauvegardés
     const reglages = restaurerReglagesPDF();
@@ -2257,8 +2257,8 @@ function fermerFormulairePreparationPDF() {
     const formulaire = document.getElementById('formulairePreparationPDF');
     const accueil = document.getElementById('accueilGrilles');
 
-    if (formulaire) formulaire.style.display = 'none';
-    if (accueil) accueil.style.display = 'block';
+    if (formulaire) formulaire.classList.add('u-hide');
+    if (accueil) accueil.classList.remove('u-hide');
 }
 
 /**
@@ -2320,14 +2320,14 @@ async function mettreAJourOptionsPreparationPDF() {
 
     // Afficher/masquer options production
     if (optionsProduction) {
-        optionsProduction.style.display = productionId ? 'block' : 'none';
+        toggleDisplay(optionsProduction, !!productionId);
     }
 
     // Charger les cartouches disponibles pour la grille selectionnee
     if (grilleId && sectionCartouche && selectCartouche) {
         const cartouches = await db.get(`cartouches_${grilleId}`) || [];
         if (cartouches.length > 0) {
-            sectionCartouche.style.display = 'block';
+            sectionCartouche.classList.remove('u-hide');
             const currentValue = selectCartouche.value;
             selectCartouche.innerHTML = '<option value="">-- Sans rétroaction --</option>';
             cartouches.forEach(c => {
@@ -2338,11 +2338,11 @@ async function mettreAJourOptionsPreparationPDF() {
                 selectCartouche.value = currentValue;
             }
         } else {
-            sectionCartouche.style.display = 'none';
+            sectionCartouche.classList.add('u-hide');
             selectCartouche.innerHTML = '<option value="">-- Sans rétroaction --</option>';
         }
     } else if (sectionCartouche) {
-        sectionCartouche.style.display = 'none';
+        sectionCartouche.classList.add('u-hide');
     }
 
     // Activer/desactiver bouton apercu
@@ -2444,7 +2444,7 @@ async function ouvrirApercuPDF() {
         sauvegarderReglagesPDF();
 
         // Afficher le modal
-        modal.style.display = 'flex';
+        modal.classList.remove('u-hide');
 
         // Generer l'apercu initial
         rafraichirApercuPDF();
@@ -2524,7 +2524,7 @@ function rafraichirApercuPDF() {
  */
 function fermerModalApercuPDF() {
     const modal = document.getElementById('modalApercuPDF');
-    if (modal) modal.style.display = 'none';
+    if (modal) modal.classList.add('u-hide');
     // Ne pas nettoyer _apercuPDFData ici pour permettre de revenir au modal
 }
 
@@ -2809,7 +2809,7 @@ async function mettreAJourOptionsInlinePDF() {
     // Afficher/masquer les options de production
     const optionsProd = document.getElementById('inlinePDF-options-production');
     if (optionsProd) {
-        optionsProd.style.display = productionId ? 'block' : 'none';
+        toggleDisplay(optionsProd, !!productionId);
     }
 
     // Charger les cartouches si une grille est sélectionnée
@@ -2822,14 +2822,14 @@ async function mettreAJourOptionsInlinePDF() {
         if (cartouches.length > 0) {
             selectCartouche.innerHTML = '<option value="">-- Sans rétroaction --</option>' +
                 cartouches.map(c => `<option value="${c.id}">${c.nom || 'Cartouche sans nom'}</option>`).join('');
-            if (sectionCartouche) sectionCartouche.style.display = 'block';
+            if (sectionCartouche) sectionCartouche.classList.remove('u-hide');
             if (gridContainer) gridContainer.style.gridTemplateColumns = '1fr 1fr 1fr';
         } else {
-            if (sectionCartouche) sectionCartouche.style.display = 'none';
+            if (sectionCartouche) sectionCartouche.classList.add('u-hide');
             if (gridContainer) gridContainer.style.gridTemplateColumns = '1fr 1fr';
         }
     } else {
-        if (sectionCartouche) sectionCartouche.style.display = 'none';
+        if (sectionCartouche) sectionCartouche.classList.add('u-hide');
         if (gridContainer) gridContainer.style.gridTemplateColumns = '1fr 1fr';
     }
 
@@ -2895,13 +2895,13 @@ async function ouvrirApercuPDFDepuisInline() {
     // Afficher/masquer les options de production dans le modal
     const optionsProd = document.getElementById('apercuPDF-options-production');
     if (optionsProd) {
-        optionsProd.style.display = production ? 'block' : 'none';
+        toggleDisplay(optionsProd, !!production);
     }
 
     // Ouvrir le modal d'aperçu
     const modalApercu = document.getElementById('modalApercuPDF');
     if (modalApercu) {
-        modalApercu.style.display = 'flex';
+        modalApercu.classList.remove('u-hide');
         rafraichirApercuPDF();
     }
 }

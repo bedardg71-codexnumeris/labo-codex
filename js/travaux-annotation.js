@@ -66,7 +66,7 @@
             desactiverAnnotation();
             // Cacher le canvas quand le fichier est ferme
             if (canvasAnnotation) {
-                canvasAnnotation.style.display = 'none';
+                canvasAnnotation.classList.add('u-hide');
             }
         });
 
@@ -85,7 +85,7 @@
         if (!annotation) {
             // Pas d'annotations - cacher le canvas
             const canvas = document.getElementById('travaux-canvas-annotation');
-            if (canvas) canvas.style.display = 'none';
+            if (canvas) canvas.classList.add('u-hide');
             return;
         }
 
@@ -98,7 +98,7 @@
         fichierId = fichierActuel.id;
 
         dimensionnerCanvasAnnotation(width, height);
-        canvasAnnotation.style.display = 'block';
+        canvasAnnotation.classList.remove('u-hide');
         canvasAnnotation.style.pointerEvents = 'none';
         reRendreAnnotations();
     }
@@ -130,14 +130,14 @@
         attacherEvenements();
         chargerAnnotationsPage();
 
-        canvasAnnotation.style.display = 'block';
+        canvasAnnotation.classList.remove('u-hide');
         canvasAnnotation.style.pointerEvents = 'auto';
 
         // Afficher la palette
         const palette = document.getElementById('travaux-palette-container');
         if (palette) {
             palette.innerHTML = travauxOutils.genererHTMLPalette();
-            palette.style.display = 'block';
+            palette.classList.remove('u-hide');
         }
 
         window.dispatchEvent(new CustomEvent('travaux-annotation-activee'));
@@ -161,7 +161,7 @@
 
         const palette = document.getElementById('travaux-palette-container');
         if (palette) {
-            palette.style.display = 'none';
+            palette.classList.add('u-hide');
         }
 
         pileUndo = [];

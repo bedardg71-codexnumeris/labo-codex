@@ -107,11 +107,11 @@
   - **Pire zone** : Section changelog/notes de version (lignes ~3198-3400+) — chaque entrée répète le même pattern inline
   - **Correction** : Créer des classes CSS `.changelog-entry`, `.changelog-entry--feature`, `.changelog-entry--bugfix`, `.changelog-entry--breaking`
 
-- [ ] **#76** 595 toggling `.style.display` dans 31 fichiers JS
-  - **Symptôme** : Toggle show/hide par manipulation directe du style au lieu de classes CSS
-  - **Constat** : La classe utilitaire `.u-hide { display: none; }` existe déjà dans styles.css (ligne 338)
-  - **Pires fichiers** : pratiques.js (95), trimestre-v2.js (84), cartouches.js (51), evaluation.js (48)
-  - **Correction** : Remplacer par `element.classList.add('u-hide')` / `element.classList.remove('u-hide')`
+- [x] **#76** 595 toggling `.style.display` dans 31 fichiers JS ✅ CORRIGÉ (6 fév 2026)
+  - **Résultat** : 434 → 11 (423 migrés). Les 11 restants sont des `= ''` (nettoyage) ou commentés
+  - **Infrastructure** : `window.toggleDisplay(el, show)` helper, `.u-hide { display: none !important; }`
+  - **Phase 1** : 11 fichiers migrés + classes CSS utilitaires (info-box, badge-source)
+  - **Phase 2** : 22 fichiers migrés (tous les restants), 0 `.style.display` actif pour show/hide
 
 ### Priorite haute - Design / CSS (Audit 5 fév 2026)
 

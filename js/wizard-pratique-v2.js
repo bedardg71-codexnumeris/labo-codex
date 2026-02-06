@@ -1324,16 +1324,16 @@ function mettreAJourBoutons() {
 
     // Bouton Précédent
     if (btnPrecedent) {
-        btnPrecedent.style.display = wizardState.historique.length > 0 ? 'inline-block' : 'none';
+        toggleDisplay(btnPrecedent, wizardState.historique.length > 0);
     }
 
     // Boutons Suivant/Créer
     const estDerniereEtape = wizardState.etapeActuelle === 'recapitulatif';
     if (btnSuivant) {
-        btnSuivant.style.display = estDerniereEtape ? 'none' : 'inline-block';
+        toggleDisplay(btnSuivant, !estDerniereEtape);
     }
     if (btnCreer) {
-        btnCreer.style.display = estDerniereEtape ? 'inline-block' : 'none';
+        toggleDisplay(btnCreer, estDerniereEtape);
     }
 }
 
@@ -1770,7 +1770,7 @@ function ouvrirWizardV2(modeEdition = false, pratiqueId = null) {
     // Afficher le modal
     const modal = document.getElementById('modalWizardPratiqueV2');
     if (modal) {
-        modal.style.display = 'flex';
+        modal.classList.add('actif');
         afficherEtapeWizardV2('infos-base');
     } else {
         console.error('[WizardV2] Modal #modalWizardPratiqueV2 non trouvé');
@@ -1812,7 +1812,7 @@ function obtenirProfilEnseignantActifWizard() {
 function fermerWizardV2() {
     const modal = document.getElementById('modalWizardPratiqueV2');
     if (modal) {
-        modal.style.display = 'none';
+        modal.classList.remove('actif');
     }
 
     // Réinitialiser l'état

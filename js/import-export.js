@@ -163,11 +163,11 @@ async function ouvrirModalExport() {
 
     liste.innerHTML = html;
     document.getElementById('checkToutesLes').checked = false;
-    modal.style.display = 'flex';
+    modal.classList.remove('u-hide');
 }
 
 function fermerModalExport() {
-    document.getElementById('modalExport').style.display = 'none';
+    document.getElementById('modalExport').classList.add('u-hide');
     document.getElementById('checkToutesLes').checked = false;
 }
 
@@ -305,17 +305,17 @@ let donneesImportEnAttente = null;
 function ouvrirModalImport() {
     const modal = document.getElementById('modalImport');
     document.getElementById('fichierImport').value = '';
-    document.getElementById('apercu-import').style.display = 'none';
+    document.getElementById('apercu-import').classList.add('u-hide');
     document.getElementById('btnExecuterImport').disabled = true;
     document.getElementById('btnExecuterImport').style.opacity = '0.5';
     donneesImportEnAttente = null;
-    modal.style.display = 'flex';
+    modal.classList.remove('u-hide');
     
     document.getElementById('fichierImport').onchange = previsualiserImport;
 }
 
 function fermerModalImport() {
-    document.getElementById('modalImport').style.display = 'none';
+    document.getElementById('modalImport').classList.add('u-hide');
     donneesImportEnAttente = null;
 }
 
@@ -595,7 +595,7 @@ window.toggleCategoryItems = toggleCategoryItems;
 function toggleDonneesPersoImport(checked) {
     const container = document.getElementById('checkboxesDonneesPerso');
     if (container) {
-        container.style.display = checked ? 'block' : 'none';
+        toggleDisplay(container, checked);
         // 🆕 FIX (31 jan 2026) : Cocher automatiquement les checkboxes données perso
         // quand l'utilisateur confirme que c'est sa propre sauvegarde
         if (checked) {

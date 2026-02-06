@@ -768,7 +768,7 @@ function gererAffichageBoutonPrimo(mode) {
     // Bouton Assistance Primo (visible en mode Assisté)
     const boutonPrimo = document.getElementById('btn-assistance-primo');
     if (boutonPrimo) {
-        boutonPrimo.style.display = (mode === MODES.SIMULATION) ? 'inline-block' : 'none';
+        toggleDisplay(boutonPrimo, mode === MODES.SIMULATION);
     }
 
     // Boutons Soutenir/Feedback (visibles en mode Normal uniquement)
@@ -776,11 +776,11 @@ function gererAffichageBoutonPrimo(mode) {
     const boutonFeedback = document.getElementById('btn-feedback');
 
     if (boutonSoutenir) {
-        boutonSoutenir.style.display = (mode === MODES.NORMAL) ? 'inline-block' : 'none';
+        toggleDisplay(boutonSoutenir, mode === MODES.NORMAL);
     }
 
     if (boutonFeedback) {
-        boutonFeedback.style.display = (mode === MODES.NORMAL) ? 'inline-block' : 'none';
+        toggleDisplay(boutonFeedback, mode === MODES.NORMAL);
     }
 
     // Section Aide dans la navigation (visible en mode Assisté)
@@ -788,10 +788,10 @@ function gererAffichageBoutonPrimo(mode) {
     if (boutonAide) {
         if (mode === MODES.SIMULATION) {
             // Mode Assisté : section Aide visible
-            boutonAide.style.display = 'inline-block';
+            boutonAide.classList.remove('u-hide');
         } else {
             // Modes Normal et Anonymisé : section Aide masquée
-            boutonAide.style.display = 'none';
+            boutonAide.classList.add('u-hide');
 
             // Si on est sur la section Aide, rediriger vers Tableau de bord
             if (typeof sectionActive !== 'undefined' && sectionActive === 'aide') {

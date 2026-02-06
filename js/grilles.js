@@ -177,8 +177,8 @@ async function chargerGrilleTemplate(grilleId) {
     // Afficher le conteneur d'édition et cacher la vue hiérarchique
     const conteneurEdition = document.getElementById('conteneurEditionGrille');
     const vueHierarchique = document.getElementById('vueGrillesCriteres');
-    if (conteneurEdition) conteneurEdition.style.display = 'block';
-    if (vueHierarchique) vueHierarchique.style.display = 'none';
+    if (conteneurEdition) conteneurEdition.classList.remove('u-hide');
+    if (vueHierarchique) vueHierarchique.classList.add('u-hide');
 
     // Si aucun ID fourni en paramètre, lire depuis le select
     const select = document.getElementById('selectGrilleTemplate');
@@ -191,11 +191,11 @@ async function chargerGrilleTemplate(grilleId) {
 
     if (!selectValue || selectValue === 'new') {
         // Mode création nouvelle grille
-        if (nomContainer) nomContainer.style.display = 'block';
+        if (nomContainer) nomContainer.classList.remove('u-hide');
         if (nomInput) nomInput.value = '';
-        if (criteresContainer) criteresContainer.style.display = 'block';
-        if (aucuneEvalDiv) aucuneEvalDiv.style.display = 'none';
-        if (btnDupliquer) btnDupliquer.style.display = 'none';
+        if (criteresContainer) criteresContainer.classList.remove('u-hide');
+        if (aucuneEvalDiv) aucuneEvalDiv.classList.add('u-hide');
+        if (btnDupliquer) btnDupliquer.classList.add('u-hide');
 
         // Initialiser avec un tableau vide
         grilleTemplateActuelle = null;
@@ -213,11 +213,11 @@ async function chargerGrilleTemplate(grilleId) {
             }
 
             grilleTemplateActuelle = grille;
-            if (nomContainer) nomContainer.style.display = 'block';
+            if (nomContainer) nomContainer.classList.remove('u-hide');
             if (nomInput) nomInput.value = grille.nom;
-            if (criteresContainer) criteresContainer.style.display = 'block';
-            if (aucuneEvalDiv) aucuneEvalDiv.style.display = 'none';
-            if (btnDupliquer) btnDupliquer.style.display = 'inline-block';
+            if (criteresContainer) criteresContainer.classList.remove('u-hide');
+            if (aucuneEvalDiv) aucuneEvalDiv.classList.add('u-hide');
+            if (btnDupliquer) btnDupliquer.classList.remove('u-hide');
 
             afficherListeCriteres(grille.criteres || [], grille.id);
 
@@ -265,8 +265,8 @@ function afficherFormCritere(id = null) {
 
     if (!form || !btnAjouter) return;
 
-    form.style.display = 'block';
-    btnAjouter.style.display = 'none';
+    form.classList.remove('u-hide');
+    btnAjouter.classList.add('u-hide');
 
     if (id) {
         // Mode édition
@@ -453,8 +453,8 @@ function annulerAjoutCritere() {
     const form = document.getElementById('formAjoutCritere');
     const btnAjouter = document.getElementById('btnAjouterCritere');
 
-    if (form) form.style.display = 'none';
-    if (btnAjouter) btnAjouter.style.display = 'inline-block';
+    if (form) form.classList.add('u-hide');
+    if (btnAjouter) btnAjouter.classList.remove('u-hide');
     critereEnEdition = null;
 }
 
@@ -622,11 +622,7 @@ function afficherChampFormule() {
 
     if (!champFormule) return;
 
-    if (type === 'algorithmique') {
-        champFormule.style.display = 'block';
-    } else {
-        champFormule.style.display = 'none';
-    }
+    toggleDisplay(champFormule, type === 'algorithmique');
 }
 
 /* ===============================
@@ -862,7 +858,7 @@ async function afficherGrillesCriteres() {
     }
 
     const modal = document.getElementById('modalGrilles');
-    if (modal) modal.style.display = 'block';
+    if (modal) modal.classList.remove('u-hide');
 }
 
 /* ===============================
@@ -883,7 +879,7 @@ async function afficherGrillesCriteres() {
  */
 function fermerModalGrilles() {
     const modal = document.getElementById('modalGrilles');
-    if (modal) modal.style.display = 'none';
+    if (modal) modal.classList.add('u-hide');
 }
 
 /* ===============================
@@ -1099,7 +1095,7 @@ async function dupliquerGrilleActuelle() {
     afficherListeCriteres(nouvelleGrille.criteres, nouvelleGrille.id);
 
     const btnDupliquer = document.getElementById('btnDupliquerGrille');
-    if (btnDupliquer) btnDupliquer.style.display = 'inline-block';
+    if (btnDupliquer) btnDupliquer.classList.remove('u-hide');
 
     if (typeof afficherNotificationSucces === 'function') {
         afficherNotificationSucces(`Grille "${nouvelleGrille.nom}" créée à partir de "${grilleTemplateActuelle.baseSur}" !`);
@@ -1426,7 +1422,7 @@ function ajouterCritereAGrille(grilleId) {
     // Afficher le formulaire de critère (s'il existe)
     const formCritere = document.getElementById('formAjoutCritere');
     if (formCritere) {
-        formCritere.style.display = 'block';
+        formCritere.classList.remove('u-hide');
         formCritere.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
@@ -1460,12 +1456,12 @@ function retourVueHierarchique() {
     const conteneurEdition = document.getElementById('conteneurEditionGrille');
     const vueHierarchique = document.getElementById('vueGrillesCriteres');
 
-    if (conteneurEdition) conteneurEdition.style.display = 'none';
-    if (vueHierarchique) vueHierarchique.style.display = 'block';
+    if (conteneurEdition) conteneurEdition.classList.add('u-hide');
+    if (vueHierarchique) vueHierarchique.classList.remove('u-hide');
 
     // Réinitialiser le formulaire
     const formCritere = document.getElementById('formAjoutCritere');
-    if (formCritere) formCritere.style.display = 'none';
+    if (formCritere) formCritere.classList.add('u-hide');
 
     const select = document.getElementById('selectGrilleTemplate');
     if (select) select.value = '';
@@ -2702,18 +2698,18 @@ function filtrerGrillesParDiscipline() {
 
     if (!disciplineSelectionnee) {
         // Afficher tout
-        items.forEach(item => item.style.display = 'flex');
-        titresDisciplines.forEach(titre => titre.style.display = 'block');
+        items.forEach(item => toggleDisplay(item, true));
+        titresDisciplines.forEach(titre => toggleDisplay(titre, true));
     } else {
         // Filtrer par discipline
         items.forEach(item => {
             const discipline = item.dataset.discipline;
-            item.style.display = discipline === disciplineSelectionnee ? 'flex' : 'none';
+            toggleDisplay(item, discipline === disciplineSelectionnee);
         });
 
         titresDisciplines.forEach(titre => {
             const disciplineTitre = titre.textContent.trim();
-            titre.style.display = disciplineTitre === disciplineSelectionnee ? 'block' : 'none';
+            toggleDisplay(titre, disciplineTitre === disciplineSelectionnee);
         });
     }
 }
@@ -2729,8 +2725,8 @@ function fermerModalBibliothequeGrilles() {
 }
 
 function creerNouvelleGrille() {
-    document.getElementById('accueilGrilles').style.display = 'none';
-    document.getElementById('conteneurEditionGrille').style.display = 'block';
+    document.getElementById('accueilGrilles').classList.add('u-hide');
+    document.getElementById('conteneurEditionGrille').classList.remove('u-hide');
 
     // Note: Section optionsImportExportGrilles supprimée (Beta 92)
     // Note: Export/Import se font maintenant via la bibliothèque
@@ -2738,8 +2734,8 @@ function creerNouvelleGrille() {
     // Cacher les boutons Dupliquer et Supprimer (mode création)
     const btnDupliquer = document.getElementById('btnDupliquerGrille');
     const btnSupprimer = document.getElementById('btnSupprimerGrille');
-    if (btnDupliquer) btnDupliquer.style.display = 'none';
-    if (btnSupprimer) btnSupprimer.style.display = 'none';
+    if (btnDupliquer) btnDupliquer.classList.add('u-hide');
+    if (btnSupprimer) btnSupprimer.classList.add('u-hide');
 
     // Réinitialiser grilleTemplateActuelle
     grilleTemplateActuelle = null;
@@ -3000,16 +2996,16 @@ async function chargerGrillePourModif(id) {
 
     if (!grille) return;
 
-    document.getElementById('accueilGrilles').style.display = 'none';
-    document.getElementById('conteneurEditionGrille').style.display = 'block';
+    document.getElementById('accueilGrilles').classList.add('u-hide');
+    document.getElementById('conteneurEditionGrille').classList.remove('u-hide');
 
     // Note: Export/Import se font maintenant via la bibliothèque
 
     // Afficher les boutons Dupliquer et Supprimer (mode édition)
     const btnDupliquer = document.getElementById('btnDupliquerGrille');
     const btnSupprimer = document.getElementById('btnSupprimerGrille');
-    if (btnDupliquer) btnDupliquer.style.display = 'inline-block';
-    if (btnSupprimer) btnSupprimer.style.display = 'inline-block';
+    if (btnDupliquer) btnDupliquer.classList.remove('u-hide');
+    if (btnSupprimer) btnSupprimer.classList.remove('u-hide');
 
     // Définir la grille actuelle (objet complet, pas juste l'ID)
     grilleTemplateActuelle = grille;
@@ -3610,9 +3606,9 @@ async function supprimerGrilleDepuisSidebar(id) {
         grilles.splice(index, 1);
         await db.set('grillesTemplates', grilles);
         await afficherListeGrilles();
-        document.getElementById('conteneurEditionGrille').style.display = 'none';
+        document.getElementById('conteneurEditionGrille').classList.add('u-hide');
         // Note: optionsImportExportGrilles supprimé en Beta 92
-        document.getElementById('accueilGrilles').style.display = 'block';
+        document.getElementById('accueilGrilles').classList.remove('u-hide');
         alert('Grille supprimée');
     }
 }
@@ -3621,9 +3617,9 @@ async function supprimerGrilleDepuisSidebar(id) {
  * Annule l'édition de grille et retourne à l'accueil
  */
 function annulerFormGrille() {
-    document.getElementById('conteneurEditionGrille').style.display = 'none';
+    document.getElementById('conteneurEditionGrille').classList.add('u-hide');
     // Note: optionsImportExportGrilles supprimé en Beta 92
-    document.getElementById('accueilGrilles').style.display = 'block';
+    document.getElementById('accueilGrilles').classList.remove('u-hide');
 
     // Retirer le highlight
     document.querySelectorAll('.sidebar-item').forEach(item => {

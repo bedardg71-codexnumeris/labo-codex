@@ -557,7 +557,7 @@ function afficherFormEvenementV2(type) {
             if (titre) titre.textContent = 'Nouvel événement prévu';
             if (btn) btn.textContent = 'Ajouter';
 
-            form.style.display = 'block';
+            form.classList.remove('u-hide');
             // Ne pas faire défiler la page
         }
     } else if (type === 'imprevu') {
@@ -576,7 +576,7 @@ function afficherFormEvenementV2(type) {
             if (titre) titre.textContent = 'Nouvel événement imprévu';
             if (btn) btn.textContent = 'Ajouter';
 
-            form.style.display = 'block';
+            form.classList.remove('u-hide');
             // Ne pas faire défiler la page
         }
     }
@@ -654,7 +654,7 @@ function modifierEvenementV2(id, type) {
             if (titre) titre.textContent = 'Modifier l\'événement';
             if (btn) btn.textContent = 'Sauvegarder';
 
-            form.style.display = 'block';
+            form.classList.remove('u-hide');
             // Ne pas faire défiler la page
         }
     } else {
@@ -672,7 +672,7 @@ function modifierEvenementV2(id, type) {
             if (titre) titre.textContent = 'Modifier l\'événement';
             if (btn) btn.textContent = 'Sauvegarder';
 
-            form.style.display = 'block';
+            form.classList.remove('u-hide');
             // Ne pas faire défiler la page
         }
     }
@@ -748,7 +748,7 @@ function confirmerEvenementPrevuV2() {
 function annulerFormEvenementPrevuV2() {
     evenementPrevuEnEditionV2 = null;
     const form = document.getElementById('v2-formEvenementPrevu');
-    if (form) form.style.display = 'none';
+    if (form) form.classList.add('u-hide');
 }
 
 /**
@@ -821,7 +821,7 @@ function confirmerEvenementImprevuV2() {
 function annulerFormEvenementImprevuV2() {
     evenementImprevuEnEditionV2 = null;
     const form = document.getElementById('v2-formEvenementImprevu');
-    if (form) form.style.display = 'none';
+    if (form) form.classList.add('u-hide');
 }
 
 /**
@@ -1374,8 +1374,8 @@ function chargerDropdownCoursV2() {
         // Cacher les boutons Modifier et Dupliquer
         const btnModifier = document.getElementById('v2-btnModifierCours');
         const btnDupliquer = document.getElementById('v2-btnDupliquerCours');
-        if (btnModifier) btnModifier.style.display = 'none';
-        if (btnDupliquer) btnDupliquer.style.display = 'none';
+        if (btnModifier) btnModifier.classList.add('u-hide');
+        if (btnDupliquer) btnDupliquer.classList.add('u-hide');
     } else {
         let coursSelectionne = false;
 
@@ -1407,12 +1407,8 @@ function chargerDropdownCoursV2() {
         // Afficher les boutons Modifier et Dupliquer si un cours est sélectionné
         const btnModifier = document.getElementById('v2-btnModifierCours');
         const btnDupliquer = document.getElementById('v2-btnDupliquerCours');
-        if (btnModifier) {
-            btnModifier.style.display = coursSelectionne ? '' : 'none';
-        }
-        if (btnDupliquer) {
-            btnDupliquer.style.display = coursSelectionne ? '' : 'none';
-        }
+        toggleDisplay(btnModifier, coursSelectionne);
+        toggleDisplay(btnDupliquer, coursSelectionne);
     }
 }
 
@@ -1427,10 +1423,10 @@ function changerCoursSelectionneV2(coursId) {
 
     if (!coursId) {
         // Afficher l'état vide
-        if (etatVide) etatVide.style.display = 'flex';
-        if (formulaire) formulaire.style.display = 'none';
+        if (etatVide) etatVide.classList.remove('u-hide');
+        if (formulaire) formulaire.classList.add('u-hide');
         if (listeGroupes) listeGroupes.innerHTML = '<p class="text-muted">Sélectionnez un cours pour voir ses groupes.</p>';
-        if (btnSupprimer) btnSupprimer.style.display = 'none';
+        if (btnSupprimer) btnSupprimer.classList.add('u-hide');
         afficherSyntheseCours(null);  // Beta 95.3 : vider la synthèse
         coursEnEditionV2 = null;
         return;
@@ -1449,9 +1445,9 @@ function changerCoursSelectionneV2(coursId) {
     if (coursSelectionne) {
         // Afficher le formulaire en mode édition
         coursEnEditionV2 = coursId;
-        if (etatVide) etatVide.style.display = 'none';
-        if (formulaire) formulaire.style.display = 'block';
-        if (btnSupprimer) btnSupprimer.style.display = 'block';
+        if (etatVide) etatVide.classList.add('u-hide');
+        if (formulaire) formulaire.classList.remove('u-hide');
+        if (btnSupprimer) btnSupprimer.classList.remove('u-hide');
 
         // Mettre à jour le titre
         const titre = document.getElementById('v2-titreFormCours');
@@ -1512,12 +1508,12 @@ function supprimerCoursV2() {
 
     // Masquer le bouton supprimer et afficher l'état vide
     const btnSupprimer = document.getElementById('v2-btnSupprimerCours');
-    if (btnSupprimer) btnSupprimer.style.display = 'none';
+    if (btnSupprimer) btnSupprimer.classList.add('u-hide');
 
     const etatVide = document.getElementById('cours-etat-vide');
     const formulaire = document.getElementById('cours-formulaire-edition');
-    if (etatVide) etatVide.style.display = 'flex';
-    if (formulaire) formulaire.style.display = 'none';
+    if (etatVide) etatVide.classList.remove('u-hide');
+    if (formulaire) formulaire.classList.add('u-hide');
 
     // Notification
     if (typeof afficherNotificationSucces === 'function') {
@@ -1650,8 +1646,8 @@ async function nouveauCoursV2() {
     if (selectCours) selectCours.value = '';
 
     // Afficher le formulaire
-    if (etatVide) etatVide.style.display = 'none';
-    if (formulaire) formulaire.style.display = 'block';
+    if (etatVide) etatVide.classList.add('u-hide');
+    if (formulaire) formulaire.classList.remove('u-hide');
     if (titre) titre.textContent = 'Nouveau cours';
     if (btnTexte) btnTexte.textContent = 'Enregistrer';
 
@@ -1660,7 +1656,7 @@ async function nouveauCoursV2() {
 
     // Masquer le bouton Supprimer (mode création)
     const btnSupprimer = document.getElementById('v2-btnSupprimerCours');
-    if (btnSupprimer) btnSupprimer.style.display = 'none';
+    if (btnSupprimer) btnSupprimer.classList.add('u-hide');
 
     console.log('[Trimestre V2] Formulaire nouveau cours affiché');
 }
@@ -1694,8 +1690,8 @@ async function modifierCoursSelectionneV2() {
     const btnTexte = document.getElementById('v2-btnTexteCours');
 
     if (formulaire) {
-        formulaire.style.display = 'block';
-        if (apercu) apercu.style.display = 'none';
+        formulaire.classList.remove('u-hide');
+        if (apercu) apercu.classList.add('u-hide');
         if (titre) titre.textContent = 'Modifier le cours';
         if (btnTexte) btnTexte.textContent = 'Enregistrer';
 
@@ -1744,8 +1740,8 @@ function dupliquerCoursSelectionneV2() {
     const btnTexte = document.getElementById('v2-btnTexteCours');
 
     if (formulaire) {
-        formulaire.style.display = 'block';
-        if (apercu) apercu.style.display = 'none';
+        formulaire.classList.remove('u-hide');
+        if (apercu) apercu.classList.add('u-hide');
         if (titre) titre.textContent = 'Dupliquer le cours';
         if (btnTexte) btnTexte.textContent = 'Créer la copie';
 
@@ -1893,17 +1889,17 @@ function afficherSyntheseGroupeEtudiants() {
     if (elemNbTotal) elemNbTotal.textContent = total;
 
     if (conteneurSA) {
-        conteneurSA.style.display = nbSA > 0 ? 'block' : 'none';
+        toggleDisplay(conteneurSA, nbSA > 0);
         if (elemSA) elemSA.textContent = nbSA;
     }
 
     if (elemProgrammes) {
         if (topProgrammes.length > 0 && total > 0) {
-            elemProgrammes.style.display = 'block';
+            elemProgrammes.classList.remove('u-hide');
             elemProgrammes.innerHTML = '<strong style="font-size: 0.75rem;">Programmes :</strong><br>' +
                 topProgrammes.map(([prog, nb]) => `<span style="font-size: 0.75rem;">${prog} (${nb})</span>`).join('<br>');
         } else {
-            elemProgrammes.style.display = 'none';
+            elemProgrammes.classList.add('u-hide');
         }
     }
 }
@@ -2113,8 +2109,8 @@ function annulerFormCoursV2() {
     const selectCours = document.getElementById('v2-selectCours');
 
     // Afficher l'état vide
-    if (etatVide) etatVide.style.display = 'flex';
-    if (formulaire) formulaire.style.display = 'none';
+    if (etatVide) etatVide.classList.remove('u-hide');
+    if (formulaire) formulaire.classList.add('u-hide');
 
     // Désélectionner dans le dropdown
     if (selectCours) selectCours.value = '';
@@ -2287,20 +2283,18 @@ async function chargerListeEtudiantsV2() {
             ? `Aucun étudiant dans le groupe ${groupeFiltre}.`
             : 'Aucun étudiant. Utilisez l\'import à gauche ou le formulaire ci-dessous.';
         conteneur.innerHTML = `<p class="etat-vide-liste">${message}</p>`;
-        if (actionsEtudiants) actionsEtudiants.style.display = tousLesEtudiants.length > 0 ? 'flex' : 'none';
+        toggleDisplay(actionsEtudiants, tousLesEtudiants.length > 0);
         // Masquer le bouton supprimer groupe si pas d'étudiants
         const btnSupprimerGroupe = document.getElementById('v2-btnSupprimerGroupe');
-        if (btnSupprimerGroupe) btnSupprimerGroupe.style.display = 'none';
+        if (btnSupprimerGroupe) btnSupprimerGroupe.classList.add('u-hide');
         return;
     }
 
-    if (actionsEtudiants) actionsEtudiants.style.display = 'flex';
+    if (actionsEtudiants) actionsEtudiants.classList.remove('u-hide');
 
     // 🆕 Beta 95.3: Afficher/masquer le bouton "Supprimer ce groupe"
     const btnSupprimerGroupe = document.getElementById('v2-btnSupprimerGroupe');
-    if (btnSupprimerGroupe) {
-        btnSupprimerGroupe.style.display = groupeFiltre ? 'block' : 'none';
-    }
+    toggleDisplay(btnSupprimerGroupe, groupeFiltre);
 
     // Trier par nom
     etudiants.sort((a, b) => {
@@ -2385,9 +2379,7 @@ function mettreAJourResumeEtudiantsV2(etudiants) {
 
     // Services adaptés (SA)
     const nbSA = etudiants.filter(e => e.sa === 'Oui' || e.sa === true).length;
-    if (elemSA) {
-        elemSA.style.display = nbSA > 0 ? 'block' : 'none';
-    }
+    toggleDisplay(elemSA, nbSA > 0);
     if (elemNbSA) {
         elemNbSA.textContent = nbSA;
     }
@@ -2409,9 +2401,9 @@ function mettreAJourResumeEtudiantsV2(etudiants) {
             .slice(0, 3);
 
         if (topProgrammes.length === 0) {
-            elemTopProgrammes.style.display = 'none';
+            elemTopProgrammes.classList.add('u-hide');
         } else {
-            elemTopProgrammes.style.display = 'block';
+            elemTopProgrammes.classList.remove('u-hide');
             let html = '<div class="label-top">Programmes :</div>';
             topProgrammes.forEach(([prog, nb]) => {
                 html += `<div class="programme-item"><span>${prog}</span><span>${nb}</span></div>`;
@@ -2561,7 +2553,7 @@ function editerEtudiantV2(da) {
 
     if (titre) titre.textContent = 'Modifier l\'étudiant';
     if (btnSoumettre) btnSoumettre.textContent = 'Enregistrer les modifications';
-    if (btnAnnuler) btnAnnuler.style.display = 'inline-block';
+    if (btnAnnuler) btnAnnuler.classList.remove('u-hide');
     if (formContainer) formContainer.classList.add('mode-edition');
 
     // Scroller vers le formulaire
@@ -2597,7 +2589,7 @@ function reinitialiserFormEtudiantV2() {
 
     if (titre) titre.textContent = 'Ajouter un étudiant';
     if (btnSoumettre) btnSoumettre.textContent = 'Ajouter l\'étudiant';
-    if (btnAnnuler) btnAnnuler.style.display = 'none';
+    if (btnAnnuler) btnAnnuler.classList.add('u-hide');
     if (formContainer) formContainer.classList.remove('mode-edition');
 }
 
@@ -2791,7 +2783,7 @@ function traiterDonneesImportV2(contenu) {
 
         html += '</tbody></table>';
         previewTable.innerHTML = html;
-        previewZone.style.display = 'block';
+        previewZone.classList.remove('u-hide');
     }
 }
 
@@ -2833,7 +2825,7 @@ async function confirmerImportV2() {
 
     // Nettoyer
     donneesImportEnAttenteV2 = [];
-    document.getElementById('v2-previewZone').style.display = 'none';
+    document.getElementById('v2-previewZone').classList.add('u-hide');
     document.getElementById('v2-donneesCollees').value = '';
     document.getElementById('v2-fichierCsvEntree').value = '';
 
@@ -2856,7 +2848,7 @@ async function confirmerImportV2() {
  */
 function annulerImportV2() {
     donneesImportEnAttenteV2 = [];
-    document.getElementById('v2-previewZone').style.display = 'none';
+    document.getElementById('v2-previewZone').classList.add('u-hide');
 }
 
 /**
@@ -3015,8 +3007,8 @@ async function sauvegarderGroupeEtudiantsV2() {
     if (accordeonHoraire) {
         const contenu = accordeonHoraire.querySelector('.accordeon-contenu');
         const chevron = accordeonHoraire.querySelector('.accordeon-chevron');
-        if (contenu && contenu.style.display === 'none') {
-            contenu.style.display = 'block';
+        if (contenu && contenu.classList.contains('u-hide')) {
+            contenu.classList.remove('u-hide');
             if (chevron) chevron.textContent = '▼';
         }
         // Scroll vers l'accordéon Horaire
@@ -3162,7 +3154,7 @@ function afficherFormSeanceV2() {
     const btnTexte = document.getElementById('v2-btnConfirmerSeance');
 
     if (formulaire) {
-        formulaire.style.display = 'block';
+        formulaire.classList.remove('u-hide');
         if (titre) titre.textContent = 'Nouvelle séance';
         if (btnTexte) btnTexte.textContent = 'Ajouter';
 
@@ -3198,7 +3190,7 @@ function modifierSeanceV2(index) {
     const btnTexte = document.getElementById('v2-btnConfirmerSeance');
 
     if (formulaire) {
-        formulaire.style.display = 'block';
+        formulaire.classList.remove('u-hide');
         if (titre) titre.textContent = 'Modifier la séance';
         if (btnTexte) btnTexte.textContent = 'Enregistrer';
 
@@ -3221,7 +3213,7 @@ function modifierSeanceV2(index) {
 function annulerFormSeanceV2() {
     seanceEnEditionV2 = null;
     const formulaire = document.getElementById('v2-formAjoutSeance');
-    if (formulaire) formulaire.style.display = 'none';
+    if (formulaire) formulaire.classList.add('u-hide');
 }
 
 /**
@@ -3478,10 +3470,10 @@ function afficherEtatVideHoraireV2() {
     const formulaire = document.getElementById('v2-formulaireHoraire');
     const carteResume = document.getElementById('v2-carteResumeHoraire');
 
-    if (etatVide) etatVide.style.display = 'block';
-    if (formulaire) formulaire.style.display = 'none';
+    if (etatVide) etatVide.classList.remove('u-hide');
+    if (formulaire) formulaire.classList.add('u-hide');
     // Afficher la carte résumé seulement en état vide (Beta 95.2)
-    if (carteResume) carteResume.style.display = 'block';
+    if (carteResume) carteResume.classList.remove('u-hide');
     horaireEnEditionId = null;
 }
 
@@ -3541,7 +3533,7 @@ function nouveauHoraireV2() {
 
     // Masquer le bouton supprimer (mode création)
     const btnSupprimer = document.getElementById('v2-btnSupprimerHoraire');
-    if (btnSupprimer) btnSupprimer.style.display = 'none';
+    if (btnSupprimer) btnSupprimer.classList.add('u-hide');
 
     // Générer les champs de séances
     mettreAJourSeancesHoraireV2();
@@ -3550,9 +3542,9 @@ function nouveauHoraireV2() {
     const etatVide = document.getElementById('v2-horaireEtatVide');
     const formulaire = document.getElementById('v2-formulaireHoraire');
     const carteResume = document.getElementById('v2-carteResumeHoraire');
-    if (etatVide) etatVide.style.display = 'none';
-    if (formulaire) formulaire.style.display = 'block';
-    if (carteResume) carteResume.style.display = 'none';
+    if (etatVide) etatVide.classList.add('u-hide');
+    if (formulaire) formulaire.classList.remove('u-hide');
+    if (carteResume) carteResume.classList.add('u-hide');
 
     // Désélectionner dans le dropdown
     const select = document.getElementById('v2-selectHoraire');
@@ -3584,7 +3576,7 @@ function editerHoraireV2(horaire) {
 
     // Afficher le bouton supprimer (mode édition)
     const btnSupprimer = document.getElementById('v2-btnSupprimerHoraire');
-    if (btnSupprimer) btnSupprimer.style.display = 'inline-block';
+    if (btnSupprimer) btnSupprimer.classList.remove('u-hide');
 
     // Générer les champs de séances puis les remplir
     mettreAJourSeancesHoraireV2();
@@ -3612,9 +3604,9 @@ function editerHoraireV2(horaire) {
     const etatVide = document.getElementById('v2-horaireEtatVide');
     const formulaire = document.getElementById('v2-formulaireHoraire');
     const carteResume = document.getElementById('v2-carteResumeHoraire');
-    if (etatVide) etatVide.style.display = 'none';
-    if (formulaire) formulaire.style.display = 'block';
-    if (carteResume) carteResume.style.display = 'none';
+    if (etatVide) etatVide.classList.add('u-hide');
+    if (formulaire) formulaire.classList.remove('u-hide');
+    if (carteResume) carteResume.classList.add('u-hide');
 }
 
 /**
@@ -4210,7 +4202,7 @@ function changerGroupeCoursSelectionneV2(gcId) {
     if (!gcId) {
         mettreAJourCarteResumeGroupeCoursV2(null);
         afficherEtatVideGroupeCoursV2();
-        if (btnSupprimer) btnSupprimer.style.display = 'none';
+        if (btnSupprimer) btnSupprimer.classList.add('u-hide');
         return;
     }
 
@@ -4222,7 +4214,7 @@ function changerGroupeCoursSelectionneV2(gcId) {
         mettreAJourCarteResumeGroupeCoursV2(gc);
         editerGroupeCoursV2(gc);
         // Afficher le bouton supprimer quand un groupe-cours est sélectionné
-        if (btnSupprimer) btnSupprimer.style.display = 'block';
+        if (btnSupprimer) btnSupprimer.classList.remove('u-hide');
     }
 }
 
@@ -4300,8 +4292,8 @@ function afficherEtatVideGroupeCoursV2() {
     const etatVide = document.getElementById('v2-groupeCoursEtatVide');
     const formulaire = document.getElementById('v2-formulaireGroupeCours');
 
-    if (etatVide) etatVide.style.display = 'block';
-    if (formulaire) formulaire.style.display = 'none';
+    if (etatVide) etatVide.classList.remove('u-hide');
+    if (formulaire) formulaire.classList.add('u-hide');
     groupeCoursEnEditionId = null;
 }
 
@@ -4365,12 +4357,12 @@ function nouveauGroupeCoursV2() {
     // Afficher le formulaire
     const etatVide = document.getElementById('v2-groupeCoursEtatVide');
     const formulaire = document.getElementById('v2-formulaireGroupeCours');
-    if (etatVide) etatVide.style.display = 'none';
-    if (formulaire) formulaire.style.display = 'block';
+    if (etatVide) etatVide.classList.add('u-hide');
+    if (formulaire) formulaire.classList.remove('u-hide');
 
     // Masquer le bouton Supprimer (mode création)
     const btnSupprimer = document.getElementById('v2-btnSupprimerGroupeCours');
-    if (btnSupprimer) btnSupprimer.style.display = 'none';
+    if (btnSupprimer) btnSupprimer.classList.add('u-hide');
 
     // Désélectionner dans le dropdown principal
     const select = document.getElementById('v2-selectGroupeCours');
@@ -4417,8 +4409,8 @@ function editerGroupeCoursV2(gc) {
     // Afficher le formulaire
     const etatVide = document.getElementById('v2-groupeCoursEtatVide');
     const formulaire = document.getElementById('v2-formulaireGroupeCours');
-    if (etatVide) etatVide.style.display = 'none';
-    if (formulaire) formulaire.style.display = 'block';
+    if (etatVide) etatVide.classList.add('u-hide');
+    if (formulaire) formulaire.classList.remove('u-hide');
 
     // Afficher le bouton Supprimer (mode édition)
     const btnSupprimer = document.getElementById('v2-btnSupprimerGroupeCours');
@@ -4575,7 +4567,7 @@ function supprimerGroupeCoursV2() {
 
     // Masquer le bouton supprimer
     const btnSupprimer = document.getElementById('v2-btnSupprimerGroupeCours');
-    if (btnSupprimer) btnSupprimer.style.display = 'none';
+    if (btnSupprimer) btnSupprimer.classList.add('u-hide');
 
     // Rafraîchir le dropdown header
     if (typeof peuplerDropdownGroupeCoursActif === 'function') {
@@ -5246,8 +5238,8 @@ function allerVersAide(idAccordeon) {
             // 3. Ouvrir l'accordéon s'il est fermé
             const contenu = accordeon.querySelector('.accordeon-contenu');
             const chevron = accordeon.querySelector('.accordeon-chevron');
-            if (contenu && contenu.style.display === 'none') {
-                contenu.style.display = 'block';
+            if (contenu && contenu.classList.contains('u-hide')) {
+                contenu.classList.remove('u-hide');
                 if (chevron) chevron.textContent = '▼';
                 accordeon.classList.add('ouvert');
             }
@@ -5772,7 +5764,7 @@ async function changerGroupeCoursActifV2(valeur) {
         // 🆕 BETA 95.6 : Rafraîchir le profil étudiant si affiché
         // Vérifie si la sous-section profil est active et si un DA est mémorisé
         const sousSectionProfil = document.getElementById('tableau-bord-profil');
-        if (sousSectionProfil && sousSectionProfil.style.display !== 'none' && window.profilActuelDA) {
+        if (sousSectionProfil && !sousSectionProfil.classList.contains('u-hide') && window.profilActuelDA) {
             if (typeof afficherProfilComplet === 'function') {
                 // Récupérer la liste des étudiants du nouveau groupe-cours
                 const etudiantsNouveauGC = typeof obtenirEtudiantsCoursActif === 'function'
@@ -5803,7 +5795,7 @@ async function changerGroupeCoursActifV2(valeur) {
 
         // 🆕 FIX (3 fév 2026) : Rafraîchir le module de saisie des présences si visible
         const sectionSaisiePresencesCours = document.getElementById('presences-saisie');
-        if (sectionSaisiePresencesCours && sectionSaisiePresencesCours.style.display !== 'none') {
+        if (sectionSaisiePresencesCours && !sectionSaisiePresencesCours.classList.contains('u-hide')) {
             if (typeof initialiserModuleSaisiePresences === 'function') {
                 initialiserModuleSaisiePresences();
             }
@@ -5897,7 +5889,7 @@ async function changerGroupeCoursActifV2(valeur) {
     // 🆕 BETA 95.6 : Rafraîchir le profil étudiant si affiché
     // Vérifie si la sous-section profil est active et si un DA est mémorisé
     const sousSectionProfilGC = document.getElementById('tableau-bord-profil');
-    if (sousSectionProfilGC && sousSectionProfilGC.style.display !== 'none' && window.profilActuelDA) {
+    if (sousSectionProfilGC && !sousSectionProfilGC.classList.contains('u-hide') && window.profilActuelDA) {
         if (typeof afficherProfilComplet === 'function') {
             // Récupérer la liste des étudiants du nouveau groupe-cours
             const etudiantsNouveauGroupe = typeof obtenirEtudiantsCoursActif === 'function'
@@ -5929,7 +5921,7 @@ async function changerGroupeCoursActifV2(valeur) {
     // 🆕 FIX (3 fév 2026) : Rafraîchir le module de saisie des présences si visible
     // Les dates de séances dépendent de l'horaire du groupe-cours actif
     const sectionSaisiePresences = document.getElementById('presences-saisie');
-    if (sectionSaisiePresences && sectionSaisiePresences.style.display !== 'none') {
+    if (sectionSaisiePresences && !sectionSaisiePresences.classList.contains('u-hide')) {
         if (typeof initialiserModuleSaisiePresences === 'function') {
             initialiserModuleSaisiePresences();
         }
@@ -5976,7 +5968,7 @@ function changerEnseignantSelectionneV2(enseignantId) {
     const apercu = document.getElementById('v2-apercuEnseignant');
 
     if (!enseignantId) {
-        if (btnModifier) btnModifier.style.display = 'none';
+        if (btnModifier) btnModifier.classList.add('u-hide');
         if (apercu) apercu.innerHTML = '<p class="text-muted">Sélectionnez un enseignant·e pour voir ses détails.</p>';
         return;
     }
@@ -6019,8 +6011,8 @@ function afficherFormEnseignantV2() {
 
     const form = document.getElementById('v2-formulaireEnseignant');
     const apercu = document.getElementById('v2-apercuEnseignant');
-    if (form) form.style.display = 'block';
-    if (apercu) apercu.style.display = 'none';
+    if (form) form.classList.remove('u-hide');
+    if (apercu) apercu.classList.add('u-hide');
 }
 
 /**
@@ -6056,8 +6048,8 @@ async function modifierEnseignantSelectionneV2() {
 
     const form = document.getElementById('v2-formulaireEnseignant');
     const apercu = document.getElementById('v2-apercuEnseignant');
-    if (form) form.style.display = 'block';
-    if (apercu) apercu.style.display = 'none';
+    if (form) form.classList.remove('u-hide');
+    if (apercu) apercu.classList.add('u-hide');
 }
 
 /**
@@ -6084,7 +6076,7 @@ function afficherFormHoraireV2() {
     mettreAJourSeancesHoraireV2();
 
     const form = document.getElementById('v2-formulaireHoraire');
-    if (form) form.style.display = 'block';
+    if (form) form.classList.remove('u-hide');
 }
 
 /**
@@ -6121,7 +6113,7 @@ async function modifierHoraireSelectionneV2() {
     if (btnTexte) btnTexte.textContent = 'Enregistrer';
 
     const form = document.getElementById('v2-formulaireHoraire');
-    if (form) form.style.display = 'block';
+    if (form) form.classList.remove('u-hide');
 }
 
 /**
@@ -6154,7 +6146,7 @@ function afficherFormGroupeCoursV2() {
     afficherTrimestreGroupeCoursV2();
 
     const form = document.getElementById('v2-formulaireGroupeCours');
-    if (form) form.style.display = 'block';
+    if (form) form.classList.remove('u-hide');
 }
 
 /**

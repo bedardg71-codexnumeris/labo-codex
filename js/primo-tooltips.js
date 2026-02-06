@@ -119,11 +119,7 @@ function gererVisibilitePrimoSelonMode() {
     const icones = document.querySelectorAll('.primo-aide');
 
     icones.forEach(icone => {
-        if (modeAssiste) {
-            icone.style.display = 'inline-block';
-        } else {
-            icone.style.display = 'none';
-        }
+        toggleDisplay(icone, modeAssiste);
     });
 
     console.log(`🎯 [Primo Tooltips] Mode Assisté: ${modeAssiste} - ${icones.length} icônes ${modeAssiste ? 'affichées' : 'masquées'}`);

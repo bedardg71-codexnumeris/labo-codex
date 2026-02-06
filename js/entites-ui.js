@@ -162,13 +162,13 @@ function changerEnseignantSelectionneV2(enseignantId) {
     const apercu = document.getElementById('v2-apercuEnseignant');
 
     if (!enseignantId) {
-        if (btnModifier) btnModifier.style.display = 'none';
+        if (btnModifier) btnModifier.classList.add('u-hide');
         if (apercu) apercu.innerHTML = '<p class="text-muted">Sélectionnez un enseignant·e pour voir ses détails.</p>';
         return;
     }
 
     // Afficher le bouton modifier
-    if (btnModifier) btnModifier.style.display = '';
+    if (btnModifier) btnModifier.classList.remove('u-hide');
 
     // Afficher l'aperçu
     EnseignantsEntite.obtenirParId(enseignantId).then(ens => {
@@ -211,13 +211,13 @@ function afficherFormEnseignantV2() {
     document.getElementById('v2-btnTexteEnseignant').textContent = 'Ajouter';
 
     // Afficher le formulaire
-    document.getElementById('v2-formulaireEnseignant').style.display = 'block';
-    document.getElementById('v2-apercuEnseignant').style.display = 'none';
+    document.getElementById('v2-formulaireEnseignant').classList.remove('u-hide');
+    document.getElementById('v2-apercuEnseignant').classList.add('u-hide');
 
     // Ouvrir l'accordéon si fermé
     const accordeon = document.getElementById('accordeon-enseignant');
     const contenu = accordeon.querySelector('.accordeon-contenu');
-    if (contenu.style.display === 'none') {
+    if (contenu.classList.contains('u-hide')) {
         toggleAccordeonV2(accordeon.querySelector('.accordeon-header'));
     }
 }
@@ -248,8 +248,8 @@ async function modifierEnseignantSelectionneV2() {
     document.getElementById('v2-btnTexteEnseignant').textContent = 'Enregistrer';
 
     // Afficher le formulaire
-    document.getElementById('v2-formulaireEnseignant').style.display = 'block';
-    document.getElementById('v2-apercuEnseignant').style.display = 'none';
+    document.getElementById('v2-formulaireEnseignant').classList.remove('u-hide');
+    document.getElementById('v2-apercuEnseignant').classList.add('u-hide');
 }
 
 /**
@@ -257,8 +257,8 @@ async function modifierEnseignantSelectionneV2() {
  */
 function annulerFormEnseignantV2() {
     enseignantEnEdition = null;
-    document.getElementById('v2-formulaireEnseignant').style.display = 'none';
-    document.getElementById('v2-apercuEnseignant').style.display = 'block';
+    document.getElementById('v2-formulaireEnseignant').classList.add('u-hide');
+    document.getElementById('v2-apercuEnseignant').classList.remove('u-hide');
 }
 
 /**
@@ -349,13 +349,13 @@ function changerHoraireSelectionneV2(horaireId) {
     const apercu = document.getElementById('v2-apercuHoraire');
 
     if (!horaireId) {
-        if (btnModifier) btnModifier.style.display = 'none';
+        if (btnModifier) btnModifier.classList.add('u-hide');
         if (apercu) apercu.innerHTML = '<p class="text-muted">Sélectionnez un horaire pour voir ses détails.</p>';
         return;
     }
 
     // Afficher le bouton modifier
-    if (btnModifier) btnModifier.style.display = '';
+    if (btnModifier) btnModifier.classList.remove('u-hide');
 
     // Guard: Si l'élément aperçu n'existe pas, ne pas continuer
     if (!apercu) {
@@ -410,13 +410,13 @@ function afficherFormHoraireV2() {
     mettreAJourSeancesHoraireV2();
 
     // Afficher le formulaire
-    document.getElementById('v2-formulaireHoraire').style.display = 'block';
-    document.getElementById('v2-apercuHoraire').style.display = 'none';
+    document.getElementById('v2-formulaireHoraire').classList.remove('u-hide');
+    document.getElementById('v2-apercuHoraire').classList.add('u-hide');
 
     // Ouvrir l'accordéon si fermé
     const accordeon = document.getElementById('accordeon-horaire');
     const contenu = accordeon.querySelector('.accordeon-contenu');
-    if (contenu.style.display === 'none') {
+    if (contenu.classList.contains('u-hide')) {
         toggleAccordeonV2(accordeon.querySelector('.accordeon-header'));
     }
 }
@@ -453,8 +453,8 @@ async function modifierHoraireSelectionneV2() {
     document.getElementById('v2-btnTexteHoraire').textContent = 'Enregistrer';
 
     // Afficher le formulaire
-    document.getElementById('v2-formulaireHoraire').style.display = 'block';
-    document.getElementById('v2-apercuHoraire').style.display = 'none';
+    document.getElementById('v2-formulaireHoraire').classList.remove('u-hide');
+    document.getElementById('v2-apercuHoraire').classList.add('u-hide');
 }
 
 /**
@@ -545,8 +545,8 @@ function mettreAJourResumeFormatV2() {
 function annulerFormHoraireV2() {
     horaireEnEdition = null;
     seancesTemp = [];
-    document.getElementById('v2-formulaireHoraire').style.display = 'none';
-    document.getElementById('v2-apercuHoraire').style.display = 'block';
+    document.getElementById('v2-formulaireHoraire').classList.add('u-hide');
+    document.getElementById('v2-apercuHoraire').classList.remove('u-hide');
 }
 
 /**
@@ -603,11 +603,11 @@ async function sauvegarderHoraireV2() {
         // Fermer le formulaire (avec guard)
         const formulaire = document.getElementById('v2-formulaireHoraire');
         if (formulaire) {
-            formulaire.style.display = 'none';
+            formulaire.classList.add('u-hide');
         }
         const apercuStyle = document.getElementById('v2-apercuHoraire');
         if (apercuStyle) {
-            apercuStyle.style.display = 'block';
+            apercuStyle.classList.remove('u-hide');
         }
 
     } catch (err) {
@@ -803,12 +803,12 @@ function afficherFormGroupeCoursV2() {
     document.getElementById('v2-gc-apercu-texte').textContent = 'Complétez les champs pour voir l\'aperçu';
 
     // Afficher le formulaire
-    document.getElementById('v2-formulaireGroupeCours').style.display = 'block';
+    document.getElementById('v2-formulaireGroupeCours').classList.remove('u-hide');
 
     // Ouvrir l'accordéon si fermé
     const accordeon = document.getElementById('accordeon-groupe-cours');
     const contenu = accordeon.querySelector('.accordeon-contenu');
-    if (contenu.style.display === 'none') {
+    if (contenu.classList.contains('u-hide')) {
         toggleAccordeonV2(accordeon.querySelector('.accordeon-header'));
     }
 
@@ -865,7 +865,7 @@ async function mettreAJourApercuGroupeCours() {
  * Annule le formulaire groupe-cours
  */
 function annulerFormGroupeCoursV2() {
-    document.getElementById('v2-formulaireGroupeCours').style.display = 'none';
+    document.getElementById('v2-formulaireGroupeCours').classList.add('u-hide');
 }
 
 /**

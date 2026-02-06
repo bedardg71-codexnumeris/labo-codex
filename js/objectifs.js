@@ -604,8 +604,8 @@ function sauvegarderEnsembleObjectifs() {
     if (nom !== 'Nouvel ensemble d\'objectifs') {
         const btnsDupliquer = document.querySelectorAll('[onclick*="dupliquerEnsembleObjectifs"]');
         const btnsExporter = document.querySelectorAll('.btn-exporter-ensemble');
-        btnsDupliquer.forEach(btn => btn.style.display = 'inline-block');
-        btnsExporter.forEach(btn => btn.style.display = 'inline-block');
+        btnsDupliquer.forEach(btn => btn.classList.remove('u-hide'));
+        btnsExporter.forEach(btn => btn.classList.remove('u-hide'));
     }
 
     alert('✅ Ensemble d\'objectifs sauvegardé !');
