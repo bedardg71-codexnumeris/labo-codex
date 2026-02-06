@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 6 février 2026 (Beta 97 - Build 0206-0920)
+> **Derniere mise a jour** : 6 février 2026 (Beta 97 - Build 0206-0945)
 
 ---
 
@@ -115,45 +115,32 @@
 
 ### Priorite haute - Design / CSS (Audit 5 fév 2026)
 
-- [ ] **#77** Couleurs Material Design hors palette « Nuit Élégante »
-  - **Constat** : Plusieurs fichiers JS utilisent des couleurs Material Design non conformes
-  - **Correspondances à corriger** :
-    | Utilisé | Origine | Devrait être |
-    |---|---|---|
-    | `#1976d2` | Material Blue 700 | `var(--bleu-clair)` (#065dbb) |
-    | `#2196F3` | Material Blue 500 | `var(--bleu-clair)` (#065dbb) |
-    | `#4caf50` | Material Green 500 | `var(--vert-succes)` (#28a745) |
-    | `#ff9800` | Material Orange 500 | `var(--orange-accent)` (#ff6b35) |
-    | `#ffc107` | Material Amber 500 | `var(--btn-annuler)` (#d97706) |
-    | `#9e9e9e` | Material Grey 500 | `var(--gris-clair)` (#999999) |
+- [x] **#77** Couleurs Material Design hors palette « Nuit Élégante » ✅ CORRIGÉ (6 fév 2026)
+  - ~35 couleurs Material Design remplacées par variables CSS dans styles.css
+  - `#1976d2` → `var(--bleu-clair)`, `#2196F3` → `var(--bleu-clair)`, `#4caf50` → `var(--vert-succes)`
+  - `#ff9800` → `var(--orange-accent)`, `#ffc107` → `var(--btn-annuler)`, `#9e9e9e` → `var(--gris-clair)`
+  - ⏳ Restent ~1855 couleurs hardcodées dans les templates JS (#74)
 
-- [ ] **#78** 31 box-shadow hardcodés au lieu de variables CSS
-  - **Constat** : Le design system définit 5 niveaux (`--shadow-subtil`, `--shadow-normal`, `--shadow-prononce`, `--shadow-fort`, `--shadow-inset`)
-  - **État** : 45 occurrences utilisent les variables (correct), 31 sont hardcodées
-  - **Correction** : Remplacer les valeurs hardcodées par les variables correspondantes dans styles.css
+- [x] **#78** box-shadow hardcodés remplacés par variables CSS ✅ PARTIEL (6 fév 2026)
+  - 2 ombres `rgba(3, 46, 92, ...)` remplacées par `var(--shadow-normal)`
+  - ~29 restantes sont des ombres colorées intentionnelles (vert, bleu, orange, violet) non remplaçables
 
-- [ ] **#79** border-radius incohérents (valeur 8px hors design system)
-  - **Constat** : Le design system définit 4 niveaux (5px, 6px, 12px, 20px)
-  - **Problème** : 5+ occurrences de `border-radius: 8px` dans styles.css — valeur inexistante dans le design system
-  - **Action** : Remplacer par `var(--radius-moyen)` (6px) ou `var(--radius-grand)` (12px) selon le contexte
+- [x] **#79** border-radius incohérents (valeur 8px hors design system) ✅ CORRIGÉ (6 fév 2026)
+  - 9 occurrences `border-radius: 8px` remplacées par `var(--radius-moyen)` dans styles.css
 
 - [ ] **#80** 70 déclarations `!important` dans styles.css
   - **Symptôme** : Guerres de spécificité CSS, cascade naturelle brisée
   - **Action** : Auditer chaque occurrence, résoudre les conflits de spécificité à la source
 
-- [ ] **#81** Validation primo avec styles inline au lieu de classes CSS
-  - **Fichier** : `js/primo-validation-champs.js` (lignes 134-203)
-  - **Symptôme** : `.style.border = '2px solid #ff9800'` et `.style.backgroundColor = '#fff3e0'`
-  - **Constat** : Le design system définit déjà `.etat-erreur`, `.etat-valide`, `.etat-verrouille`
-  - **Correction** : Utiliser `element.classList.add('etat-erreur')` au lieu des styles inline
+- [x] **#81** Validation primo avec styles inline au lieu de classes CSS ✅ CORRIGÉ (6 fév 2026)
+  - Classes `.primo-champ-vide` et `.primo-champ-rempli` créées dans styles.css
+  - `primo-validation-champs.js` utilise maintenant `classList.add/remove` au lieu de `.style.*`
 
-- [ ] **#82** Tokens badges Tetris non définis dans styles.css :root
-  - **Constat** : Le design system (02c-badges-tetris.html) définit `--badge-padding`, `--badge-font-size`, `--badge-border-radius`
-  - **Problème** : Ces variables n'existent pas dans le `:root` de styles.css
-  - **Correction** : Ajouter les variables badge dans le `:root` de styles.css
+- [x] **#82** Tokens badges Tetris non définis dans styles.css :root ✅ CORRIGÉ (6 fév 2026)
+  - `--badge-padding`, `--badge-font-size`, `--badge-border-radius` ajoutés dans `:root`
 
-- [ ] **#83** En-tête styles.css indique « Beta 0.60 » (obsolète)
-  - **Correction** : Mettre à jour l'en-tête pour refléter Beta 96.2
+- [x] **#83** En-tête styles.css indique « Beta 0.60 » (obsolète) ✅ CORRIGÉ (6 fév 2026)
+  - Mis à jour vers « Beta 97 / 06-02-2026 »
 
 - [ ] **#84** Documentation design system : mode « assiste » vs « simulation »
   - **Constat** : Le design system référence `[data-mode="assiste"]` mais le code utilise `[data-mode="simulation"]`

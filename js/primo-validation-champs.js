@@ -131,9 +131,8 @@ function verifierChampRempli(cle, champ) {
  * Applique le style "champ vide" (orange)
  */
 function appliquerStyleVide(element) {
-    element.style.border = '2px solid #ff9800';
-    element.style.backgroundColor = '#fff3e0';
-    element.style.boxShadow = '0 0 8px rgba(255, 152, 0, 0.3)';
+    element.classList.remove('primo-champ-rempli');
+    element.classList.add('primo-champ-vide');
 
     // Ajouter tooltip
     if (!element.hasAttribute('data-primo-tooltip')) {
@@ -146,9 +145,8 @@ function appliquerStyleVide(element) {
  * Applique le style "champ rempli" (vert léger)
  */
 function appliquerStyleRempli(element) {
-    element.style.border = '2px solid #4caf50';
-    element.style.backgroundColor = '#f1f8e9';
-    element.style.boxShadow = 'none';
+    element.classList.remove('primo-champ-vide');
+    element.classList.add('primo-champ-rempli');
 
     // Ajouter tooltip
     if (!element.hasAttribute('data-primo-tooltip')) {
@@ -173,16 +171,14 @@ function validerGroupeEtudiants() {
         // Aucun étudiant : mettre en évidence le bouton "Ajouter"
         const btnAjouter = document.querySelector('#reglages-groupe button');
         if (btnAjouter && btnAjouter.textContent.includes('Ajouter')) {
-            btnAjouter.style.border = '2px solid #ff9800';
-            btnAjouter.style.boxShadow = '0 0 8px rgba(255, 152, 0, 0.3)';
+            btnAjouter.classList.add('primo-champ-vide');
             btnAjouter.setAttribute('title', '⚠️ Aucun étudiant - Clique pour ajouter');
         }
     } else {
         // Étudiants présents : retirer le style
         const btnAjouter = document.querySelector('#reglages-groupe button');
         if (btnAjouter) {
-            btnAjouter.style.border = '';
-            btnAjouter.style.boxShadow = '';
+            btnAjouter.classList.remove('primo-champ-vide');
             btnAjouter.removeAttribute('title');
         }
     }
@@ -199,9 +195,7 @@ function retirerValidationVisuelle(sousSectionId) {
     champs.forEach(config => {
         const element = document.getElementById(config.id);
         if (element) {
-            element.style.border = '';
-            element.style.backgroundColor = '';
-            element.style.boxShadow = '';
+            element.classList.remove('primo-champ-vide', 'primo-champ-rempli');
             element.removeAttribute('data-primo-tooltip');
             element.removeAttribute('title');
         }
