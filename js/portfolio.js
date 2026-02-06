@@ -250,7 +250,7 @@ function chargerPortfolioEleveDetail(da) {
                                    value="${art.id}"
                                    ${art.retenu ? 'checked' : ''}
                                    ${!art.remis ? 'disabled' : ''}
-                                   onchange="toggleArtefactPortfolio('${da}', '${portfolio.id}', ${nombreARetenir})">
+                                   onchange="toggleArtefactPortfolio(event, '${da}', '${portfolio.id}', ${nombreARetenir})">
                             <div class="portfolio-artefact-contenu">
                                 <div class="portfolio-artefact-titre ${art.retenu ? 'portfolio-artefact-titre-retenu' : 'portfolio-artefact-titre-normal'}">
                                     ${echapperHtml(art.description || art.titre)}
@@ -319,7 +319,7 @@ function chargerPortfolioEleveDetail(da) {
  * @param {string} portfolioId - ID du portfolio
  * @param {number} nombreARetenir - Nombre max d'artefacts à retenir
  */
-function toggleArtefactPortfolio(da, portfolioId, nombreARetenir) {
+function toggleArtefactPortfolio(event, da, portfolioId, nombreARetenir) {
     try {
         const checkboxes = document.querySelectorAll('input[name="artefactRetenu"]:checked');
         const artefactsRetenus = Array.from(checkboxes).map(cb => cb.value);

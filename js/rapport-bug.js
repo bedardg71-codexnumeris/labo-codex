@@ -475,10 +475,10 @@ function obtenirContexteSection() {
                     contexte.nbProductions = (db.getSync(cle('productions'), []) || []).length;
                 }
                 if (sousSection === 'grille-criteres') {
-                    contexte.nbGrilles = (db.getSync('grillesCriteres', []) || []).length;
+                    contexte.nbGrilles = (db.getSync('grillesTemplates', []) || []).length;
                 }
                 if (sousSection === 'echelle-performance') {
-                    contexte.nbEchelles = (db.getSync('echellesPerformance', []) || []).length;
+                    contexte.nbEchelles = (db.getSync('echellesTemplates', []) || []).length;
                 }
                 break;
         }

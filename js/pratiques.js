@@ -547,7 +547,9 @@ function attacherEvenementsPratiques() {
  * 6. Met à jour le statut
  */
 function changerPratiqueNotation() {
-    const pratique = document.getElementById('pratiqueNotation').value;
+    const elPratique = document.getElementById('pratiqueNotation');
+    if (!elPratique) return;
+    const pratique = elPratique.value;
     const colonnePAN = document.getElementById('colonnePAN');
     const selectPAN = document.getElementById('typePAN');
     const infoPAN = document.getElementById('infoPAN');

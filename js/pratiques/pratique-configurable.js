@@ -114,9 +114,10 @@ class PratiqueConfigurable {
         }
 
         // Charger les évaluations de l'étudiant
-        const evaluations = db.getSync('evaluations', {});
-        const evaluationsEtudiant = Object.values(evaluations).filter(evaluation => {
-            return evaluation.etudiantId === da &&
+        const cleEval = (typeof cle === 'function') ? cle('evaluationsSauvegardees') : 'evaluationsSauvegardees';
+        const evaluations = db.getSync(cleEval, []);
+        const evaluationsEtudiant = (Array.isArray(evaluations) ? evaluations : Object.values(evaluations)).filter(evaluation => {
+            return (evaluation.etudiantDA === da || evaluation.etudiantId === da) &&
                    evaluation.note !== null &&
                    evaluation.note !== undefined &&
                    !evaluation.remplaceeParId;  // Exclure les évaluations remplacées

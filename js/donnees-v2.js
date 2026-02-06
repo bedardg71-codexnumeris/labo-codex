@@ -794,7 +794,7 @@
         try {
             const trimestres = db.getSync('trimestres') || [];
             trimestres.forEach(trim => {
-                const evaluations = db.getSync(`${trim.id}_evaluations`) || [];
+                const evaluations = db.getSync(`${trim.id}_evaluationsSauvegardees`) || [];
                 evaluations.forEach(ev => {
                     if (ev.grilleId && usages[ev.grilleId]) {
                         usages[ev.grilleId].evaluationsCount++;
@@ -821,7 +821,7 @@
         try {
             const trimestres = db.getSync('trimestres') || [];
             trimestres.forEach(trim => {
-                const evaluations = db.getSync(`${trim.id}_evaluations`) || [];
+                const evaluations = db.getSync(`${trim.id}_evaluationsSauvegardees`) || [];
                 evaluations.forEach(ev => {
                     if (ev.cartoucheId && usages[ev.cartoucheId]) {
                         usages[ev.cartoucheId].evaluationsCount++;
@@ -872,7 +872,7 @@
         try {
             const trimestres = db.getSync('trimestres') || [];
             trimestres.forEach(trim => {
-                const evaluations = db.getSync(`${trim.id}_evaluations`) || [];
+                const evaluations = db.getSync(`${trim.id}_evaluationsSauvegardees`) || [];
                 evaluations.forEach(ev => {
                     if (ev.productionId && usages[ev.productionId]) {
                         usages[ev.productionId].evaluationsCount++;
@@ -940,7 +940,7 @@
             const trimestres = db.getSync('trimestres') || [];
             let evalCount = 0;
             trimestres.forEach(trim => {
-                const evaluations = db.getSync(`${trim.id}_evaluations`) || [];
+                const evaluations = db.getSync(`${trim.id}_evaluationsSauvegardees`) || [];
                 evalCount += evaluations.filter(ev => ev.grilleId === grilleId).length;
             });
             if (evalCount > 0) {
@@ -971,7 +971,7 @@
             const trimestres = db.getSync('trimestres') || [];
             let evalCount = 0;
             trimestres.forEach(trim => {
-                const evaluations = db.getSync(`${trim.id}_evaluations`) || [];
+                const evaluations = db.getSync(`${trim.id}_evaluationsSauvegardees`) || [];
                 evalCount += evaluations.filter(ev => ev.cartoucheId === cartoucheId).length;
             });
             if (evalCount > 0) {
@@ -1017,7 +1017,7 @@
             const trimestres = db.getSync('trimestres') || [];
             let evalCount = 0;
             trimestres.forEach(trim => {
-                const evaluations = db.getSync(`${trim.id}_evaluations`) || [];
+                const evaluations = db.getSync(`${trim.id}_evaluationsSauvegardees`) || [];
                 evalCount += evaluations.filter(ev => ev.productionId === productionId).length;
             });
             if (evalCount > 0) {
@@ -1408,7 +1408,7 @@
     async function supprimerGrilleDefinitivement(grilleId) {
         // Supprimer les cartouches associées à cette grille
         try {
-            localStorage.removeItem(`cartouches_${grilleId}`);
+            await db.remove(`cartouches_${grilleId}`);
         } catch (e) {
             // Ignorer
         }

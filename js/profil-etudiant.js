@@ -909,21 +909,21 @@ function genererSectionMobilisationEngagement(da) {
                 break;
 
             case 'recents':
-                // Trier par date (on utilise l'ordre d'évaluation comme proxy de la date)
+                // Trier par date de remise (plus récents en premier)
                 artefactsSelectionnes = [...artefactsRemis]
-                    .reverse() // Les plus récents en premier
+                    .sort((a, b) => new Date(b.dateRemise || b.dateEvaluation || 0) - new Date(a.dateRemise || a.dateEvaluation || 0))
                     .slice(0, nombreARetenir);
                 break;
 
             case 'recents-meilleurs':
                 // 1. Garder les 50% meilleurs
                 const nombreMeilleurs = Math.max(1, Math.ceil(artefactsRemis.length * 0.5));
-                const topMeilleurs = artefactsRemis
+                const topMeilleurs = [...artefactsRemis]
                     .sort((a, b) => (b.note || 0) - (a.note || 0))
                     .slice(0, nombreMeilleurs);
                 // 2. Parmi ceux-ci, prendre les N plus récents
                 artefactsSelectionnes = [...topMeilleurs]
-                    .reverse()
+                    .sort((a, b) => new Date(b.dateRemise || b.dateEvaluation || 0) - new Date(a.dateRemise || a.dateEvaluation || 0))
                     .slice(0, nombreARetenir);
                 break;
 

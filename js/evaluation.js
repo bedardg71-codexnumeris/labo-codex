@@ -2776,7 +2776,8 @@ function chargerListeEvaluationsRefonte() {
         restaurerPreferenceTri();
     } else {
         // Appliquer le tri alphabétique par défaut
-        document.getElementById('tri-evaluations').value = 'nom-asc';
+        const elTri = document.getElementById('tri-evaluations');
+        if (elTri) elTri.value = 'nom-asc';
         trierListeEvaluations();
     }
 }
@@ -3047,18 +3048,13 @@ function genererDetailsEtudiant(etudiant) {
     const indicesCP = db.getSync((typeof cle === 'function') ? cle('indicesCP') : 'indicesCP', {});
     const indicesCPEtudiant = indicesCP[etudiant.da]?.actuel || null;
 
-    // 🔍 DÉTERMINER LA PRATIQUE ACTIVE (SOM ou PAN)
-    const config = db.getSync('modalitesEvaluation', {});
-    const pratique = config.pratique === 'sommative' ? 'SOM' : 'PAN';
-
-    // Lire C et P depuis la branche appropriée
-    const brancheActive = indicesCPEtudiant?.[pratique];
-    const tauxCompletion = brancheActive?.C ?? (nbAttendus > 0 ? Math.round((nbRemis / nbAttendus) * 100) : 0);
+    // Lire C et P directement depuis actuel (structure plate, plus de branches SOM/PAN)
+    const tauxCompletion = indicesCPEtudiant?.C ?? (nbAttendus > 0 ? Math.round((nbRemis / nbAttendus) * 100) : 0);
 
     // Calcul de la performance moyenne avec fallback
     let performanceMoyenne = 0;
-    if (brancheActive && typeof brancheActive.P === 'number' && !isNaN(brancheActive.P)) {
-        performanceMoyenne = Math.round(brancheActive.P);
+    if (indicesCPEtudiant && typeof indicesCPEtudiant.P === 'number' && !isNaN(indicesCPEtudiant.P)) {
+        performanceMoyenne = Math.round(indicesCPEtudiant.P);
     } else if (evaluationsActives.length > 0) {
         // Fallback : calculer la moyenne des notes des évaluations actives
         const sommeNotes = evaluationsActives.reduce((sum, e) => sum + (e.noteFinale || 0), 0);

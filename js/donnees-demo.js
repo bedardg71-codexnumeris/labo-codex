@@ -86,9 +86,9 @@ async function chargerDonneesDemo() {
         await db.syncToLocalStorageCache();
         console.log('   → Trimestre demo activé TEMPORAIREMENT pour fusion');
 
-        // Fusionner avec les données existantes (utilise cle() qui retourne 'demo_')
+        // Fusionner avec les données existantes (préfixe demo_ explicite)
         console.log('   → Fusion avec données existantes...');
-        await fusionnerDonneesDemo(packDemo);
+        await fusionnerDonneesDemo(packDemo, 'demo_');
 
         // 🆕 RESTAURER le trimestre actif original APRÈS la fusion
         if (idTrimestreActifAvant) {
@@ -121,8 +121,11 @@ async function chargerDonneesDemo() {
 /**
  * Fusionne les données demo avec les données existantes
  * @param {Object} packDemo - Données du pack de démonstration
+ * @param {string} prefixe - Préfixe de clé explicite (ex: 'demo_') pour éviter race condition avec cle()
  */
-async function fusionnerDonneesDemo(packDemo) {
+async function fusionnerDonneesDemo(packDemo, prefixe) {
+    // Helper pour construire la clé sans dépendre de cle() (évite race condition)
+    const cleDemo = (nom) => prefixe ? prefixe + nom : ((typeof window.cle === 'function') ? window.cle(nom) : nom);
     // 1. Fusionner listeCours
     const listeCours = await db.get('listeCours') || [];
     const coursDemo = packDemo.listeCours || [];
@@ -141,7 +144,7 @@ async function fusionnerDonneesDemo(packDemo) {
 
     // 2. Fusionner groupeEtudiants
     // ✅ CORRIGÉ (31 déc 2025) : Utiliser cle() pour le namespacing par trimestre
-    const cleEtudiants = (typeof window.cle === 'function') ? window.cle('groupeEtudiants') : 'groupeEtudiants';
+    const cleEtudiants = cleDemo('groupeEtudiants');
     console.log(`   📦 Clé étudiants: ${cleEtudiants}`);
     const groupeEtudiants = await db.get(cleEtudiants) || [];
     const etudiantsDemo = packDemo.groupeEtudiants || [];
@@ -160,7 +163,7 @@ async function fusionnerDonneesDemo(packDemo) {
     // 3. Fusionner productions
     // ✅ CORRIGÉ (31 déc 2025) : Utiliser cle() pour le namespacing par trimestre
     if (packDemo.productions) {
-        const cleProductions = (typeof window.cle === 'function') ? window.cle('productions') : 'productions';
+        const cleProductions = cleDemo('productions');
         console.log(`   📦 Clé productions: ${cleProductions}`);
         const productions = await db.get(cleProductions) || [];
         const productionsDemo = packDemo.productions || [];
@@ -181,7 +184,7 @@ async function fusionnerDonneesDemo(packDemo) {
     // ✅ CORRIGÉ (31 déc 2025) : Utiliser cle() pour le namespacing par trimestre
     const evaluationsDemo = packDemo.evaluationsSauvegardees || packDemo.evaluations || [];
     if (evaluationsDemo.length > 0) {
-        const cleEvaluations = (typeof window.cle === 'function') ? window.cle('evaluationsSauvegardees') : 'evaluationsSauvegardees';
+        const cleEvaluations = cleDemo('evaluationsSauvegardees');
         console.log(`   📦 Clé évaluations: ${cleEvaluations}`);
         const evaluations = await db.get(cleEvaluations) || [];
 
@@ -233,7 +236,7 @@ async function fusionnerDonneesDemo(packDemo) {
     // 7. Fusionner présences (si présentes)
     // ✅ CORRIGÉ (Beta 97) : Format Array cohérent avec saisie-presences.js
     if (packDemo.presences) {
-        const clePresences = (typeof window.cle === 'function') ? window.cle('presences') : 'presences';
+        const clePresences = cleDemo('presences');
         console.log(`   📦 Clé présences: ${clePresences}`);
         let presences = await db.get(clePresences) || [];
         if (!Array.isArray(presences)) presences = [];
@@ -282,7 +285,7 @@ async function fusionnerDonneesDemo(packDemo) {
     // Sans ces entrées, les données ne peuvent pas être affichées dans Trimestre V2
 
     // 9. Créer un horaire demo (s'il n'existe pas)
-    const cleHoraires = (typeof window.cle === 'function') ? window.cle('horaires') : 'horaires';
+    const cleHoraires = cleDemo('horaires');
     console.log(`   📦 Clé horaires: ${cleHoraires}`);
     let horaires = await db.get(cleHoraires) || [];
     const horaireDemo = horaires.find(h => h.id === 'HOR_DEMO');
@@ -308,7 +311,7 @@ async function fusionnerDonneesDemo(packDemo) {
     }
 
     // 10. Créer un groupe-cours demo (s'il n'existe pas)
-    const cleGC = (typeof window.cle === 'function') ? window.cle('groupesCours') : 'groupesCours';
+    const cleGC = cleDemo('groupesCours');
     console.log(`   📦 Clé groupesCours: ${cleGC}`);
     let groupesCours = await db.get(cleGC) || [];
     const gcDemo = groupesCours.find(gc => gc.id === 'GC_DEMO');
@@ -384,11 +387,12 @@ async function dechargerDonneesDemo() {
  * ✅ CORRIGÉ (31 déc 2025) : Utilise cle() pour les clés namespacées
  */
 async function supprimerGroupe9999() {
-    // ✅ Utiliser cle() pour les clés namespacées (le trimestre demo est encore actif)
-    const cleEtudiants = (typeof window.cle === 'function') ? window.cle('groupeEtudiants') : 'groupeEtudiants';
-    const cleProductions = (typeof window.cle === 'function') ? window.cle('productions') : 'productions';
-    const cleEvaluations = (typeof window.cle === 'function') ? window.cle('evaluationsSauvegardees') : 'evaluationsSauvegardees';
-    const clePresences = (typeof window.cle === 'function') ? window.cle('presences') : 'presences';
+    // Utiliser le préfixe demo_ explicitement pour éviter race condition avec cle()
+    const prefixe = 'demo_';
+    const cleEtudiants = prefixe + 'groupeEtudiants';
+    const cleProductions = prefixe + 'productions';
+    const cleEvaluations = prefixe + 'evaluationsSauvegardees';
+    const clePresences = prefixe + 'presences';
 
     console.log(`   📦 Clés à nettoyer: ${cleEtudiants}, ${cleProductions}, ${cleEvaluations}, ${clePresences}`);
 
