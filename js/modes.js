@@ -893,9 +893,7 @@ window.filtrerEtudiantsParMode = filtrerEtudiantsParMode;
  */
 function obtenirEtudiantsCoursActif() {
     // Obtenir le cours actif
-    const coursActif = typeof db !== 'undefined' && db.getSync
-        ? db.getSync('infoCours', null)
-        : JSON.parse(localStorage.getItem('infoCours') || 'null');
+    const coursActif = db.getSync('infoCours', null);
 
     // Si aucun cours actif, retourner tableau vide
     if (!coursActif || !coursActif.id) {
@@ -972,9 +970,7 @@ function obtenirEtudiantsCoursActif() {
 function etudiantDansCoursActif(etudiant) {
     if (!etudiant) return false;
 
-    const coursActif = typeof db !== 'undefined' && db.getSync
-        ? db.getSync('infoCours', null)
-        : JSON.parse(localStorage.getItem('infoCours') || 'null');
+    const coursActif = db.getSync('infoCours', null);
 
     if (!coursActif || !coursActif.id) return false;
 

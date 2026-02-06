@@ -2125,20 +2125,6 @@ function formaterDateFrancais(dateStr) {
 }
 
 /**
- * Échappe les caractères HTML
- */
-function echapperHtml(str) {
-    // Vérifier si la fonction existe dans config.js
-    if (window.echapperHtml && window.echapperHtml !== echapperHtml) {
-        return window.echapperHtml(str);
-    }
-
-    const div = document.createElement('div');
-    div.textContent = str || '';
-    return div.innerHTML;
-}
-
-/**
  * Ouvre la saisie de présence depuis le calendrier
  */
 function ouvrirSaisiePresence(date) {

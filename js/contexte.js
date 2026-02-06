@@ -8,18 +8,6 @@
    =============================== */
 
 /**
- * Échappe les caractères HTML pour éviter les injections
- * @param {string} texte - Texte à échapper
- * @returns {string} Texte échappé
- */
-function echapperHtml(texte) {
-    if (!texte) return '';
-    const div = document.createElement('div');
-    div.textContent = texte;
-    return div.innerHTML;
-}
-
-/**
  * Met à jour l'affichage des informations contextuelles dans l'en-tête principal
  * ✅ BETA 95 : Dropdown de sélection de cours pour multi-cours
  * ✅ BETA 95.2 : Support groupe-cours entities + fallback legacy

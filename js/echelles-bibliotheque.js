@@ -161,13 +161,11 @@ async function exporterBibliothequeEchelles() {
  * @returns {Promise<{ajoutees: number, existantes: number}>}
  */
 async function migrerEchellesVersBibliotheque(cleSource) {
-    const dataRaw = localStorage.getItem(cleSource);
-    if (!dataRaw) {
+    const echelles = db.getSync(cleSource, null);
+    if (!echelles) {
         console.log('[Bibliothèque Échelles] Aucune donnée trouvée pour:', cleSource);
         return { ajoutees: 0, existantes: 0 };
     }
-
-    const echelles = JSON.parse(dataRaw);
     if (!Array.isArray(echelles)) {
         return { ajoutees: 0, existantes: 0 };
     }
@@ -188,7 +186,7 @@ function listerTrimestresAvecEchelles() {
         const cle = localStorage.key(i);
         if (cle && cle.endsWith('_echelles')) {
             try {
-                const data = JSON.parse(localStorage.getItem(cle));
+                const data = db.getSync(cle, null);
                 if (Array.isArray(data) && data.length > 0) {
                     const codeTrimestre = cle.replace('_echelles', '');
 
@@ -231,9 +229,9 @@ function formaterNomTrimestreEchelles(code) {
 function obtenirEchellesTrimestre(cleOuCode) {
     const cle = cleOuCode.includes('_') ? cleOuCode : `${cleOuCode}_echelles`;
     try {
-        const data = localStorage.getItem(cle);
+        const data = db.getSync(cle, null);
         if (data) {
-            return JSON.parse(data);
+            return data;
         }
     } catch (e) {
         console.error('[Bibliothèque Échelles] Erreur lecture trimestre:', e);

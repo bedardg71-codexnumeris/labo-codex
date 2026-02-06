@@ -1413,12 +1413,12 @@ async function basculerDonneesDemo(activer) {
             // Note: seancesCompletes n'est plus dans le pack (généré par l'app)
 
             // 8. Marquer pour recalcul des indices au prochain chargement
-            localStorage.setItem('recalculerIndicesCP', 'true');
+            db.setSync('recalculerIndicesCP', 'true');
             console.log('   ✅ Flag recalculerIndicesCP positionné');
 
             // Marquer comme activé
             await db.set('donneesDemo', true);
-            localStorage.setItem('demo-chargees', 'true'); // ✅ Flag pour test de validation
+            db.setSync('demo-chargees', 'true'); // ✅ Flag pour test de validation
 
             // ✅ CORRECTION (30 déc 2025): Activer le cours démo comme cours actif
             // Sinon après rechargement, l'app ne sait pas quel cours afficher

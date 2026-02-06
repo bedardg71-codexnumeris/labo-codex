@@ -31,13 +31,13 @@
         }
 
         // Si l'utilisateur a choisi "ne plus rappeler", ne pas afficher
-        const nePlusRappeler = localStorage.getItem(CLE_NE_PLUS_RAPPELER);
+        const nePlusRappeler = db.getSync(CLE_NE_PLUS_RAPPELER, null);
         if (nePlusRappeler === 'true') {
             return false;
         }
 
         // Vérifier la date du prochain rappel
-        const prochainRappel = localStorage.getItem(CLE_PROCHAIN_RAPPEL);
+        const prochainRappel = db.getSync(CLE_PROCHAIN_RAPPEL, null);
 
         // Premier lancement : pas de date enregistrée
         if (!prochainRappel) {
@@ -58,16 +58,16 @@
     function definirProchainRappel(jours) {
         const prochainRappel = new Date();
         prochainRappel.setDate(prochainRappel.getDate() + jours);
-        localStorage.setItem(CLE_PROCHAIN_RAPPEL, prochainRappel.toISOString());
-        localStorage.removeItem(CLE_NE_PLUS_RAPPELER);
+        db.setSync(CLE_PROCHAIN_RAPPEL, prochainRappel.toISOString());
+        db.setSync(CLE_NE_PLUS_RAPPELER, null);
     }
 
     /**
      * Désactive définitivement les rappels
      */
     function desactiverRappels() {
-        localStorage.setItem(CLE_NE_PLUS_RAPPELER, 'true');
-        localStorage.removeItem(CLE_PROCHAIN_RAPPEL);
+        db.setSync(CLE_NE_PLUS_RAPPELER, 'true');
+        db.setSync(CLE_PROCHAIN_RAPPEL, null);
     }
 
     /**

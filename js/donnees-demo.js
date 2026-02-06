@@ -16,7 +16,7 @@ async function chargerDonneesDemo() {
         console.log('📦 Chargement des données de démonstration...');
 
         // Vérifier si déjà chargées
-        const demoChargees = localStorage.getItem('demo-chargees');
+        const demoChargees = db.getSync('demo-chargees', null);
         if (demoChargees === 'true') {
             console.log('   ℹ️ Données demo déjà chargées');
             return true;
@@ -106,7 +106,7 @@ async function chargerDonneesDemo() {
         }
 
         // Marquer comme chargées
-        localStorage.setItem('demo-chargees', 'true');
+        db.setSync('demo-chargees', 'true');
 
         console.log('   ✅ Données demo chargées avec succès');
         return true;
@@ -356,7 +356,7 @@ async function dechargerDonneesDemo() {
         console.log('🗑️ Déchargement des données de démonstration...');
 
         // Vérifier si chargées
-        const demoChargees = localStorage.getItem('demo-chargees');
+        const demoChargees = db.getSync('demo-chargees', null);
         if (demoChargees !== 'true') {
             console.log('   ℹ️ Aucune donnée demo à décharger');
             return true;
@@ -371,7 +371,7 @@ async function dechargerDonneesDemo() {
         console.log('   → Trimestre actif inchangé (mode Assisté = boutons 😎 seulement)');
 
         // Marquer comme non chargées
-        localStorage.removeItem('demo-chargees');
+        db.setSync('demo-chargees', null);
 
         console.log('   ✅ Données demo déchargées avec succès');
         return true;
@@ -451,7 +451,7 @@ async function supprimerGroupe9999() {
  * @returns {boolean} True si chargées, false sinon
  */
 function sontDonnesDemoChargees() {
-    return localStorage.getItem('demo-chargees') === 'true';
+    return db.getSync('demo-chargees', null) === 'true';
 }
 
 /**

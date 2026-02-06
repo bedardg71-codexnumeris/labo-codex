@@ -169,14 +169,12 @@ async function exporterBibliotheque() {
  * @returns {Promise<{ajoutees: number, existantes: number}>}
  */
 async function migrerVersBibliotheque(cleSource) {
-    // Lire directement depuis localStorage (clé exacte fournie)
-    const dataRaw = localStorage.getItem(cleSource);
-    if (!dataRaw) {
+    // Lire depuis db.getSync (clé exacte fournie)
+    const productions = db.getSync(cleSource, null);
+    if (!productions) {
         console.log('[Bibliothèque] Aucune donnée trouvée pour:', cleSource);
         return { ajoutees: 0, existantes: 0 };
     }
-
-    const productions = JSON.parse(dataRaw);
     if (!Array.isArray(productions)) {
         console.log('[Bibliothèque] Format invalide pour:', cleSource);
         return { ajoutees: 0, existantes: 0 };
@@ -208,7 +206,7 @@ function listerTrimestresAvecProductions() {
         const cle = localStorage.key(i);
         if (cle && cle.endsWith('_productions')) {
             try {
-                const data = JSON.parse(localStorage.getItem(cle));
+                const data = db.getSync(cle, null);
                 if (Array.isArray(data) && data.length > 0) {
                     // Extraire le code trimestre (ex: "a2025" de "a2025_productions")
                     const codeTrimestre = cle.replace('_productions', '');
@@ -267,9 +265,9 @@ function obtenirProductionsTrimestre(cleOuCode) {
     const cle = cleOuCode.includes('_') ? cleOuCode : `${cleOuCode}_productions`;
 
     try {
-        const data = localStorage.getItem(cle);
+        const data = db.getSync(cle, null);
         if (data) {
-            return JSON.parse(data);
+            return data;
         }
     } catch (e) {
         console.error('[Bibliothèque] Erreur lecture trimestre:', e);

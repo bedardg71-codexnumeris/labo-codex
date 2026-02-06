@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 6 février 2026 (Beta 97 - Build 0206-0850)
+> **Derniere mise a jour** : 6 février 2026 (Beta 97 - Build 0206-0920)
 
 ---
 
@@ -30,14 +30,14 @@
     - `js/pratiques/pratique-pan-objectifs.js` (ligne 604)
   - **Correction** : Remplacer par `obtenirDonneesSelonMode('productions')` ou `db.getSync(cle('productions'), [])`
 
-- [ ] **#66** pratique-pan-specifications.js : `localStorage.getItem()` contourne db.js ET cle()
+- [x] **#66** pratique-pan-specifications.js : `localStorage.getItem()` contourne db.js ET cle() ✅ CORRIGÉ (6 fév 2026)
   - **Symptôme** : Module PAN-Spécifications entièrement cassé en multi-trimestre
   - **Cause** : `_lireEvaluations()` et `_lireProductions()` (lignes 645, 654) lisent directement `localStorage.getItem('evaluations')` et `localStorage.getItem('productions')`
   - **Triple problème** : 1) Contourne db.js, 2) Contourne cle(), 3) Clé 'evaluations' incorrecte (devrait être 'evaluationsSauvegardees')
   - **Correction** : Remplacer par `obtenirDonneesSelonMode('evaluationsSauvegardees')` et `obtenirDonneesSelonMode('productions')`
   - **Fichier** : `js/pratiques/pratique-pan-specifications.js`
 
-- [ ] **#67** spe-specifications.js : `db.getSync('groupeEtudiants')` sans namespace
+- [x] **#67** spe-specifications.js : `db.getSync('groupeEtudiants')` sans namespace ✅ CORRIGÉ (6 fév 2026)
   - **Symptôme** : `genererRecapitulatifClasseSPE()` retourne les étudiants du mauvais trimestre
   - **Cause** : Accès direct sans `cle()` ni `obtenirDonneesSelonMode()` à la ligne 537
   - **Correction** : Remplacer par `obtenirDonneesSelonMode('groupeEtudiants')`
@@ -45,16 +45,13 @@
 
 ### Priorite haute - Namespacing (Audit 5 fév 2026)
 
-- [ ] **#68** Fonctions dupliquées en scope global (collisions silencieuses)
-  - **Symptôme** : La dernière définition chargée écrase les précédentes silencieusement
-  - **Fonctions à dédupliquer** :
-    - `echapperHtml()` : définie dans 5 fichiers (config.js:262, contexte.js:15, evaluation.js:3404, saisie-presences.js:2132, liste-evaluations.js:19)
-    - `afficherNotificationSucces()` : définie dans 11+ fichiers, avec signature différente dans groupe.js (titre, details) vs (message) partout ailleurs
-    - `formaterDate()` : définie dans 3 fichiers (profil-etudiant.js:2748, export-pdf.js:416, evaluation.js:3380)
-    - `formaterDateCourte()` : définie dans 2 fichiers (evaluations-apercu.js:117, profil-etudiant.js:7388)
-  - **Correction** : Garder une seule définition canonique dans config.js (ou créer un utils.js), supprimer les doublons
+- [x] **#68** Fonctions dupliquées en scope global (collisions silencieuses) ✅ PARTIEL (6 fév 2026)
+  - ✅ `echapperHtml()` : 4 doublons supprimés, canonique dans config.js
+  - ✅ `afficherNotificationSucces()` : 8 doublons supprimés, canonique dans evaluation.js (signature étendue à 2 params)
+  - ⏳ `formaterDate()` : 3 versions avec formats différents — à traiter séparément
+  - ⏳ `formaterDateCourte()` : 2 versions avec signatures incompatibles (Date vs ISO string) — à traiter séparément
 
-- [ ] **#69** Clés manquantes dans CLES_NAMESPACEES
+- [x] **#69** Clés manquantes dans CLES_NAMESPACEES ✅ CORRIGÉ (6 fév 2026)
   - **Symptôme** : Données partagées entre trimestres au lieu d'être isolées
   - **Clés candidates** :
     - `portfoliosEleves` (portfolio.js, profil-etudiant.js)
@@ -71,12 +68,12 @@
   - **Correction progressive** : Encapsuler les modules dans des IIFE avec exports sélectifs (comme db.js et trimestres.js le font déjà)
   - **Alternative** : Pattern namespace objet `window.ModuleName = { func1, func2 }`
 
-- [ ] **#71** ~50 appels `localStorage.getItem()` contournant db.js
+- [x] **#71** ~50 appels `localStorage.getItem()` contournant db.js ✅ CORRIGÉ (6 fév 2026)
   - **Fichiers concernés** : cc-license.js, primo-questions.js, modes.js, echelles-bibliotheque.js, grilles-bibliotheque.js, cartouches-bibliotheque.js, productions-bibliotheque.js, boite-outils.js
   - **Risque** : Contourne le memoryCache fallback de db.js (données IndexedDB retournent null) et la correction double-stringify
   - **Correction** : Remplacer par `db.getSync()` pour cohérence
 
-- [ ] **#72** Storage event listener vérifie clé non-namespacée (main.js)
+- [x] **#72** Storage event listener vérifie clé non-namespacée (main.js) ✅ CORRIGÉ (6 fév 2026)
   - **Symptôme** : `window.addEventListener('storage', ...)` vérifie `e.key === 'groupeEtudiants'` (lignes 238-247)
   - **Cause** : Avec namespacing actif, la clé réelle est `h2026_groupeEtudiants`
   - **Effet** : Le listener ne se déclenche jamais, la régénération des bulles ne se fait pas

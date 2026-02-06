@@ -44,7 +44,13 @@
         // 🆕 BETA 96.3 : Module Travaux
         'fichiersTravaux',
         'annotationsTravaux',
-        'archivesBundles'
+        'archivesBundles',
+        // 🆕 FIX #69 (6 fév 2026) : Clés manquantes identifiées par audit
+        'portfoliosEleves',
+        'indicesEvaluation',
+        'indicesPatternsRaI',
+        'horaireSelectionne',
+        'seancesHoraire'
     ];
 
     // Clés globales (partagées entre trimestres)

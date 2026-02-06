@@ -2486,10 +2486,12 @@ function sauvegarderRetroactionFinale(productionNum) {
 /**
  * Affiche une notification de succès
  */
-function afficherNotificationSucces(message) {
+function afficherNotificationSucces(message, details = '') {
     const notification = document.createElement('div');
     notification.className = 'notification-succes';
-    notification.textContent = message;
+    notification.innerHTML = details
+        ? `<div style="font-weight:600;margin-bottom:4px">${echapperHtml(message)}</div><div>${echapperHtml(details)}</div>`
+        : echapperHtml(message);
     document.body.appendChild(notification);
 
     setTimeout(() => {
@@ -3402,16 +3404,6 @@ function obtenirTendance(evaluations) {
     if (derniere > avantDerniere) return '↗ En progression';
     if (derniere < avantDerniere) return '↘ En régression';
     return '→ Stable';
-}
-
-/**
- * Fonction utilitaire pour échapper le HTML
- */
-function echapperHtml(texte) {
-    if (!texte) return '';
-    const div = document.createElement('div');
-    div.textContent = texte;
-    return div.innerHTML;
 }
 
 /* ===============================

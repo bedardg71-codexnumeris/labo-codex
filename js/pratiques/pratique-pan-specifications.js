@@ -638,21 +638,23 @@ class PratiquePanSpecifications {
     }
 
     /**
-     * Lit les évaluations depuis localStorage
+     * Lit les évaluations via obtenirDonneesSelonMode (namespace + mode)
      * @private
      */
     _lireEvaluations() {
-        const data = localStorage.getItem('evaluations');
-        return data ? JSON.parse(data) : [];
+        return (typeof obtenirDonneesSelonMode === 'function')
+            ? obtenirDonneesSelonMode('evaluationsSauvegardees')
+            : db.getSync(cle('evaluationsSauvegardees'), []);
     }
 
     /**
-     * Lit les productions depuis localStorage
+     * Lit les productions via obtenirDonneesSelonMode (namespace + mode)
      * @private
      */
     _lireProductions() {
-        const data = localStorage.getItem('productions');
-        return data ? JSON.parse(data) : [];
+        return (typeof obtenirDonneesSelonMode === 'function')
+            ? obtenirDonneesSelonMode('productions')
+            : db.getSync(cle('productions'), []);
     }
 }
 

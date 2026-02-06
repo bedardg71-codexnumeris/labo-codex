@@ -41,24 +41,6 @@
    🚀 INITIALISATION
    =============================== */
 
-/**
- * Notifications temporaires (en attendant module 14-utilitaires.js)
- */
-function afficherNotificationSucces(titre, details = '') {
-    const notification = document.createElement('div');
-    notification.className = 'notification-succes';
-    notification.innerHTML = `
-        <div style="font-weight: 600; margin-bottom: 5px;">${echapperHtml(titre)}</div>
-        ${details ? `<div class="notification-details">${echapperHtml(details)}</div>` : ''}
-    `;
-    document.body.appendChild(notification);
-    setTimeout(() => {
-        notification.style.opacity = '0';
-        notification.style.transform = 'translateX(400px)';
-        setTimeout(() => notification.remove(), 300);
-    }, 4000);
-}
-
 function afficherNotificationErreur(titre, details = '') {
     const notification = document.createElement('div');
     notification.className = 'notification-succes';

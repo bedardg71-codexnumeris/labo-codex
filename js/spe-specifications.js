@@ -534,7 +534,9 @@
      * Génère le tableau récapitulatif de tous les étudiants en mode SPE
      */
     async function genererRecapitulatifClasseSPE() {
-        const etudiants = db.getSync('groupeEtudiants') || [];
+        const etudiants = (typeof obtenirDonneesSelonMode === 'function')
+            ? obtenirDonneesSelonMode('groupeEtudiants')
+            : db.getSync(cle('groupeEtudiants'), []);
         const modalites = db.getSync('modalitesEvaluation') || {};
         const specifications = modalites.specifications || {};
         const typesTravaux = specifications.typesTravaux || [];

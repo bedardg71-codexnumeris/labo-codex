@@ -35,7 +35,7 @@ const MAX_RAPPORTS_ARCHIVES = 50;
  */
 function archiverRapportBug(rapport, description, prenom) {
     try {
-        const archives = JSON.parse(localStorage.getItem(CLE_RAPPORTS_ARCHIVES) || '[]');
+        const archives = db.getSync(CLE_RAPPORTS_ARCHIVES, []);
 
         const nouveauRapport = {
             id: Date.now(),
@@ -53,7 +53,7 @@ function archiverRapportBug(rapport, description, prenom) {
             archives.length = MAX_RAPPORTS_ARCHIVES;
         }
 
-        localStorage.setItem(CLE_RAPPORTS_ARCHIVES, JSON.stringify(archives));
+        db.setSync(CLE_RAPPORTS_ARCHIVES, archives);
         console.log('[Rapport Bug] Rapport archivé localement');
     } catch (e) {
         console.error('[Rapport Bug] Erreur archivage:', e);
@@ -65,7 +65,7 @@ function archiverRapportBug(rapport, description, prenom) {
  */
 function obtenirRapportsArchives() {
     try {
-        return JSON.parse(localStorage.getItem(CLE_RAPPORTS_ARCHIVES) || '[]');
+        return db.getSync(CLE_RAPPORTS_ARCHIVES, []);
     } catch (e) {
         return [];
     }
@@ -78,7 +78,7 @@ function supprimerRapportArchive(id) {
     try {
         let archives = obtenirRapportsArchives();
         archives = archives.filter(r => r.id !== id);
-        localStorage.setItem(CLE_RAPPORTS_ARCHIVES, JSON.stringify(archives));
+        db.setSync(CLE_RAPPORTS_ARCHIVES, archives);
         return true;
     } catch (e) {
         console.error('[Rapport Bug] Erreur suppression:', e);
@@ -90,7 +90,7 @@ function supprimerRapportArchive(id) {
  * Supprime tous les rapports archivés
  */
 function viderRapportsArchives() {
-    localStorage.removeItem(CLE_RAPPORTS_ARCHIVES);
+    db.setSync(CLE_RAPPORTS_ARCHIVES, []);
 }
 
 /**
@@ -504,10 +504,11 @@ function obtenirEtatStockage() {
     const etat = {};
     clesImportantes.forEach(cle => {
         try {
-            const valeur = localStorage.getItem(cle);
+            const valeur = db.getSync(cle, null);
             if (valeur !== null) {
                 // Tronquer si trop long
-                etat[cle] = valeur.length > 50 ? valeur.substring(0, 50) + '...' : valeur;
+                const valeurStr = typeof valeur === 'string' ? valeur : JSON.stringify(valeur);
+                etat[cle] = valeurStr.length > 50 ? valeurStr.substring(0, 50) + '...' : valeurStr;
             }
         } catch (e) {
             etat[cle] = 'erreur lecture';
@@ -516,17 +517,12 @@ function obtenirEtatStockage() {
 
     // Ajouter les clés namespacées si trimestre actif
     try {
-        const trimestre = localStorage.getItem('trimestreActif');
+        const trimestre = db.getSync('trimestreActif', null);
         if (trimestre) {
             const cleNamespace = `${trimestre}_groupeEtudiants`;
-            const valeur = localStorage.getItem(cleNamespace);
+            const valeur = db.getSync(cleNamespace, null);
             if (valeur) {
-                try {
-                    const parsed = JSON.parse(valeur);
-                    etat[cleNamespace] = `${Array.isArray(parsed) ? parsed.length : '?'} étudiants`;
-                } catch {
-                    etat[cleNamespace] = 'présent (non parseable)';
-                }
+                etat[cleNamespace] = `${Array.isArray(valeur) ? valeur.length : '?'} étudiants`;
             }
         }
     } catch (e) {

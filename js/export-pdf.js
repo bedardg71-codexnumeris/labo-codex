@@ -67,7 +67,7 @@ function sauvegarderReglagesPDF() {
         piedLicence: document.getElementById('apercuPDF-pied-licence')?.checked ?? true
         // piedCours retiré - les infos du cours sont maintenant dans l'en-tête
     };
-    localStorage.setItem(CLE_REGLAGES_PDF, JSON.stringify(reglages));
+    db.setSync(CLE_REGLAGES_PDF, reglages);
 }
 
 /**
@@ -75,9 +75,9 @@ function sauvegarderReglagesPDF() {
  */
 function restaurerReglagesPDF() {
     try {
-        const reglagesStr = localStorage.getItem(CLE_REGLAGES_PDF);
-        if (!reglagesStr) return null;
-        return JSON.parse(reglagesStr);
+        const reglages = db.getSync(CLE_REGLAGES_PDF, null);
+        if (!reglages) return null;
+        return reglages;
     } catch (e) {
         console.warn('[export-pdf] Erreur restauration réglages:', e);
         return null;
