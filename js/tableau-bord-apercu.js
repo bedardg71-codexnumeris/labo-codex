@@ -667,7 +667,7 @@ function chargerTableauBordApercu() {
             // Layout uniforme : titre à gauche, badges à droite
             conteneurTitre.style.cssText = 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;';
             conteneurTitre.innerHTML = `
-                <span>Vue d'ensemble</span>
+                <span>État des lieux</span>
                 ${genererIndicateurPratiqueOuCheckboxes()}
             `;
 

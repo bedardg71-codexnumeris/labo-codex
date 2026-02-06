@@ -3192,6 +3192,16 @@
                 <!-- Titre principal -->
                 <h2 class="modal-titre">Nouveautés</h2>
 
+                <!-- Beta 97.1 - 6 février -->
+                <div class="changelog-entry changelog-entry--bleu">
+                    <strong class="changelog-title">Beta 97.1 (6 février) - Interface :</strong>
+                    <ul class="changelog-list">
+                        <li><strong>Bulles en-tête</strong> : Nouveau mouvement hélicoïdal — oscillation sinusoïdale autour d'un axe de dérive horizontal (parallaxe conservée)</li>
+                        <li><strong>Tableau de bord</strong> : Titres renommés — « État des lieux » (Vue d'ensemble), « Observer » (Indicateurs ACPE), « Intervenir » (Indicateurs d'apprentissage), « Développement du groupe » et « Développement individuel »</li>
+                        <li><strong>Qualité CSS</strong> : 475+ couleurs hex hardcodées remplacées par des variables CSS dans 40+ fichiers JS (#74). 171 styles inline retirés dans index.html (#75) — section changelog, couleurs, utilitaires flex.</li>
+                    </ul>
+                </div>
+
                 <!-- Beta 97 - 6 février -->
                 <div class="changelog-entry changelog-entry--vert">
                     <strong class="changelog-title">Beta 97 (6 février) - Module Travaux :</strong>
@@ -3572,18 +3582,18 @@
                 <!-- Sous-section: Aperçu -->
                 <div id="tableau-bord-apercu" class="sous-section">
                     <h2 class="titre-avec-emoji-toggles">
-                        <span>Vue d'ensemble</span>
+                        <span>État des lieux</span>
                         <span class="titre-emoji-container">
                             <button class="btn-aide-contextuelle" data-aide="tableau-bord-apercu" aria-label="Aide contextuelle">😎</button>
                         </span>
                     </h2>
                     <p class="text-muted">Suivi de l'apprentissage et priorisation des interventions</p>
 
-                    <!-- ========== SECTION 1: INDICATEURS ACPE DU GROUPE ========== -->
+                    <!-- ========== SECTION 1: OBSERVER ========== -->
                     <div class="carte" id="carte-indicateurs-acpe">
                         <h3 class="carte-titre-bleu carte-titre-avec-toggle" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
                             <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                <span>Indicateurs ACPE du groupe</span>
+                                <span>Observer</span>
                                 <span class="emoji-container">
                                     <span class="primo-aide" data-target="note-indicateurs">😎</span>
                                 </span>
@@ -3612,11 +3622,11 @@
                         <!-- Barres de distribution avec nuages de points et courbes de Gauss pour A, C, P, E -->
                     </div>
 
-                    <!-- ========== SECTION 2: INDICATEURS D'APPRENTISSAGE ========== -->
+                    <!-- ========== SECTION 2: INTERVENIR ========== -->
                     <div class="carte" id="carte-indicateurs-apprentissage" style="margin-top: 2rem;">
                         <h3 class="carte-titre-bleu carte-titre-avec-toggle" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
                             <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                <span>Indicateurs d'apprentissage</span>
+                                <span>Intervenir</span>
                                 <span class="emoji-container">
                                     <span class="primo-aide" data-target="note-apprentissage">😎</span>
                                 </span>
@@ -3653,7 +3663,7 @@
                     <div class="carte" id="carte-evolution-temporelle" style="margin-top: 2rem;">
                         <h3 class="carte-titre-bleu" style="display: flex; flex-direction: column; gap: 0.5rem;">
                             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; width: 100%;">
-                                <span>Évolution temporelle</span>
+                                <span>Développement du groupe</span>
                                 <div id="contexte-evolution-temporelle" class="carte-contexte-ligne" style="font-size: 0.8rem; font-weight: normal; opacity: 0.9; display: flex; align-items: center; gap: 0.75rem;">
                                     <!-- Trimestre | Cours | Badge - rempli par JS -->
                                 </div>
@@ -3690,7 +3700,7 @@
                         <h3 class="carte-titre-bleu" style="display: flex; flex-direction: column; gap: 0.5rem;">
                             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; width: 100%;">
                                 <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                    <span>Trajectoire d'apprentissage</span>
+                                    <span>Développement individuel</span>
                                     <span class="emoji-container">
                                         <span class="primo-aide" data-target="note-spaghetti">😎</span>
                                     </span>
@@ -15060,7 +15070,7 @@
 
                         <h4 class="titre-bleu-mb8 mt-15">Réorganisation du tableau de bord</h4>
                         <ul class="modal-liste">
-                            <li><strong>4 sections distinctes</strong> : Indicateurs ACPE, Indicateurs d'apprentissage (Patterns + RàI), Évolution temporelle, Trajectoire d'apprentissage.</li>
+                            <li><strong>4 sections distinctes</strong> : Observer, Intervenir (Patterns + RàI), Développement du groupe, Développement individuel.</li>
                             <li><strong>Uniformisation visuelle</strong> : Tous les graphiques adoptent le même style (échelle Y dynamique, zones IDME, survol interactif).</li>
                             <li><strong>Points uniformisés</strong> : Style blanc par défaut, noir au survol/sélection pour tous les graphiques.</li>
                         </ul>
@@ -15660,7 +15670,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97';
-        const BUILD_ID = '0206-1400';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0206-1406';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
