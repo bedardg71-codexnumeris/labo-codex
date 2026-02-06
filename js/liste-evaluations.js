@@ -104,9 +104,10 @@ function calculerCompletionSommative(da) {
         return 0;
     }
     
-    // Compter les artefacts remis par cet étudiant
-    const evalsEtudiant = evaluations.filter(e => e.etudiantDA === da);
-    const nbRemis = evalsEtudiant.length;
+    // Compter les productions distinctes remises (exclure remplacées)
+    const evalsEtudiant = evaluations.filter(e => e.etudiantDA === da && !e.remplaceeParId);
+    const productionsDistinctes = new Set(evalsEtudiant.map(e => e.productionId));
+    const nbRemis = productionsDistinctes.size;
     
     const indice = nbRemis / totalAttendus;
     

@@ -787,7 +787,7 @@
                 }
             });
         } catch (e) {
-            // Ignorer
+            console.warn('[donnees-v2] Erreur calcul usages:', e.message);
         }
 
         // Parcourir les évaluations de tous les trimestres
@@ -802,7 +802,7 @@
                 });
             });
         } catch (e) {
-            // Ignorer
+            console.warn('[donnees-v2] Erreur calcul usages:', e.message);
         }
 
         return usages;
@@ -829,7 +829,7 @@
                 });
             });
         } catch (e) {
-            // Ignorer
+            console.warn('[donnees-v2] Erreur calcul usages:', e.message);
         }
 
         return usages;
@@ -853,7 +853,7 @@
                 }
             });
         } catch (e) {
-            // Ignorer
+            console.warn('[donnees-v2] Erreur calcul usages:', e.message);
         }
 
         return usages;
@@ -880,7 +880,7 @@
                 });
             });
         } catch (e) {
-            // Ignorer
+            console.warn('[donnees-v2] Erreur calcul usages:', e.message);
         }
 
         return usages;
@@ -911,7 +911,7 @@
                 });
             });
         } catch (e) {
-            // Ignorer
+            console.warn('[donnees-v2] Erreur calcul usages:', e.message);
         }
 
         return { dependances, avertissements };
@@ -932,7 +932,7 @@
                 dependances.push(`Utilisée par ${prodsUtilisant.length} production(s)`);
             }
         } catch (e) {
-            // Ignorer
+            console.warn('[donnees-v2] Erreur calcul usages:', e.message);
         }
 
         // Vérifier les évaluations
@@ -947,7 +947,7 @@
                 dependances.push(`Utilisée par ${evalCount} évaluation(s)`);
             }
         } catch (e) {
-            // Ignorer
+            console.warn('[donnees-v2] Erreur calcul usages:', e.message);
         }
 
         // Avertissement: cartouches associées
@@ -978,7 +978,7 @@
                 avertissements.push(`Utilisée dans ${evalCount} évaluation(s) - les rétroactions associées seront perdues`);
             }
         } catch (e) {
-            // Ignorer
+            console.warn('[donnees-v2] Erreur calcul usages:', e.message);
         }
 
         return { dependances, avertissements };
@@ -999,7 +999,7 @@
                 dependances.push(`Utilisée par ${pratiquesUtilisant.length} pratique(s) de notation`);
             }
         } catch (e) {
-            // Ignorer
+            console.warn('[donnees-v2] Erreur calcul usages:', e.message);
         }
 
         return { dependances, avertissements };
@@ -1024,7 +1024,7 @@
                 dependances.push(`Utilisée par ${evalCount} évaluation(s)`);
             }
         } catch (e) {
-            // Ignorer
+            console.warn('[donnees-v2] Erreur calcul usages:', e.message);
         }
 
         return { dependances, avertissements };
@@ -1395,7 +1395,7 @@
             configurables = configurables.filter(p => p.id !== pratiqueId);
             db.setSync('pratiquesConfigurables', configurables);
         } catch (e) {
-            // Ignorer
+            console.warn('[donnees-v2] Erreur calcul usages:', e.message);
         }
 
         console.log('[donnees-v2] Pratique supprimée:', pratiqueId);
@@ -1410,7 +1410,7 @@
         try {
             await db.remove(`cartouches_${grilleId}`);
         } catch (e) {
-            // Ignorer
+            console.warn('[donnees-v2] Erreur calcul usages:', e.message);
         }
 
         // Retirer de la bibliothèque

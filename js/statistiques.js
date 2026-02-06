@@ -140,10 +140,8 @@ function chargerMaterielConfigure() {
     setStatText('stat-grilles', grilles.length);
     
     // Échelles de performance
-    const echellesConfig = db.getSync('configEchelle', null);
-    const niveauxEchelle = db.getSync('niveauxEchelle', []);
-    const nbEchelles = (echellesConfig || niveauxEchelle.length > 0) ? '1' : '0';
-    setStatText('stat-echelles', nbEchelles);
+    const echellesTemplates = db.getSync('echellesTemplates', []);
+    setStatText('stat-echelles', echellesTemplates.length);
     
     // Cartouches de rétroaction - compter TOUTES les cartouches
     let totalCartouches = 0;

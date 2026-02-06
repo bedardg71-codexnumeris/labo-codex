@@ -421,13 +421,16 @@ async function initialiserNouveauCartouche(grilleId) {
     // Les critères viennent directement de la grille
     const criteres = grille.criteres || [];
     
-    // Récupérer l'échelle de performance globale
-    const niveaux = await db.get('niveauxEchelle') || [
+    // Récupérer l'échelle de performance depuis echellesTemplates
+    const niveauxDefaut = [
         { code: 'I', nom: 'Incomplet', min: 0, max: 64 },
         { code: 'D', nom: 'En Développement', min: 65, max: 74 },
         { code: 'M', nom: 'Maîtrisé', min: 75, max: 84 },
         { code: 'E', nom: 'Étendu', min: 85, max: 100 }
     ];
+    const echelles = await db.get('echellesTemplates', []);
+    const echelleActive = echelles.find(e => !e.estDemo) || echelles[0];
+    const niveaux = echelleActive?.niveaux || niveauxDefaut;
     
     // Créer la structure de cartouche
     cartoucheActuel = {

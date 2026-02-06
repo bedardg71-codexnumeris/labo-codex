@@ -234,8 +234,29 @@ async function executerExport() {
                 nbDemoExclus += avant - valeur.length;
             }
 
-            // Stocker la valeur sérialisée en JSON
-            donnees[cle] = JSON.stringify(valeur);
+            // Filtrer les productions démo
+            if (cle.includes('productions') && Array.isArray(valeur)) {
+                const avant = valeur.length;
+                valeur = valeur.filter(p => !p.estDemo);
+                nbDemoExclus += avant - valeur.length;
+            }
+
+            // Filtrer les évaluations démo
+            if (cle.includes('evaluationsSauvegardees') && Array.isArray(valeur)) {
+                const avant = valeur.length;
+                valeur = valeur.filter(ev => !ev.estDemo);
+                nbDemoExclus += avant - valeur.length;
+            }
+
+            // Filtrer les presences démo
+            if (cle.includes('presences') && Array.isArray(valeur)) {
+                const avant = valeur.length;
+                valeur = valeur.filter(p => !p.estDemo);
+                nbDemoExclus += avant - valeur.length;
+            }
+
+            // Stocker la valeur (stringify final sur ligne 246)
+            donnees[cle] = valeur;
         }
     }
 

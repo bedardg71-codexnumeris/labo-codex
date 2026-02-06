@@ -657,25 +657,23 @@
                 return { nbEtudiants: 0, nbCours: 0, message: 'Aucun cours trouvé' };
             }
 
-            // Statistiques globales
-            // ✅ NAMESPACING (Beta 95.5)
-            const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+            // Statistiques globales - lire directement depuis le trimestre ciblé
+            const etudiants = db.getSync(`${trimestreId}_groupeEtudiants`, []);
             const etudiantsActifs = etudiants.filter(e =>
                 e.statut !== 'abandon' && e.statut !== 'décrochage'
             );
 
-            // Indices d'engagement
-            const indicesCP = db.getSync(cle('indicesCP'), {});
+            // Indices d'engagement - lire depuis le trimestre ciblé
+            const indicesCP = db.getSync(`${trimestreId}_indicesCP`, {});
             let totalEngagement = 0;
             let nbAvecIndices = 0;
 
             etudiantsActifs.forEach(e => {
                 const indices = indicesCP[e.da];
                 if (indices && indices.actuel) {
-                    const pan = indices.actuel.PAN || indices.actuel.SOM || {};
-                    const a = pan.A || 0;
-                    const c = pan.C || 0;
-                    const p = pan.P || 0;
+                    const a = indices.actuel.A || 0;
+                    const c = indices.actuel.C || 0;
+                    const p = indices.actuel.P || 0;
                     const engagement = (a * c * p) / 10000; // Normaliser
                     totalEngagement += engagement;
                     nbAvecIndices++;
@@ -1106,9 +1104,11 @@
      */
     function genererCleAnonymisation() {
         const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        const valeurs = new Uint32Array(32);
+        crypto.getRandomValues(valeurs);
         let cle = '';
         for (let i = 0; i < 32; i++) {
-            cle += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+            cle += caracteres.charAt(valeurs[i] % caracteres.length);
         }
         return cle;
     }
