@@ -91,7 +91,7 @@ function calculerStatistiquesEvaluations(etudiants, evaluations, productions) {
         });
     }
 
-    const tauxCompletion = nbAvecDonnees > 0 ? Math.round(totalC / nbTotal) : 0;
+    const tauxCompletion = nbAvecDonnees > 0 ? Math.round(totalC / nbAvecDonnees) : 0;
     setStatText('ea-taux-completion', `${tauxCompletion}%`);
 
     // PRODUCTIONS RÉALISÉES (compter les productions avec au moins une évaluation complétée)

@@ -246,8 +246,10 @@ function afficherTableauCours() {
     
     if (cours.length === 0) {
         container.innerHTML = '<p class="text-muted" style="font-style: italic;">Aucun cours configuré.</p>';
-        document.getElementById('nombreCours').textContent = '0';
-        document.getElementById('resumeCours').textContent = 'Aucune configuration de cours';
+        const elNb = document.getElementById('nombreCours');
+        const elResume = document.getElementById('resumeCours');
+        if (elNb) elNb.textContent = '0';
+        if (elResume) elResume.textContent = 'Aucune configuration de cours';
         return;
     }
     
@@ -1022,7 +1024,8 @@ function supprimerCours(id) {
 
     const etudiants = db.getSync(cleEtudiants, []);
     const productions = db.getSync(cleProductions, []);
-    const evaluations = db.getSync('evaluationsDetaillees', []);
+    const cleEvaluations = (typeof window.cle === 'function') ? window.cle('evaluationsSauvegardees') : 'evaluationsSauvegardees';
+    const evaluations = db.getSync(cleEvaluations, []);
     const presences = db.getSync(clePresences, []);
 
     const nbEtudiants = etudiants.filter(e => e.coursId === id).length;
@@ -1063,7 +1066,7 @@ function supprimerCours(id) {
 
     // 3. Supprimer les évaluations liées aux productions supprimées
     const nouvellesEvaluations = evaluations.filter(e => !productionsIds.includes(e.productionId));
-    db.setSync('evaluationsDetaillees', nouvellesEvaluations);
+    db.setSync(cleEvaluations, nouvellesEvaluations);
     console.log(`✅ [Suppression] ${nbEvaluations} évaluation(s) supprimée(s)`);
 
     // 4. Supprimer les présences du cours

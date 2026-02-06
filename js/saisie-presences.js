@@ -271,9 +271,9 @@ function calculerAssiduiteJusquADate(da, dateLimite) {
     let presences = obtenirDonneesSelonMode('presences') || [];
     if (!Array.isArray(presences)) presences = [];
 
-    // Filtrer seulement les présences JUSQU'À la date limite
-    const presencesFiltrees = presences.filter(p => p.date <= dateLimite);
-    const datesSaisies = [...new Set(presencesFiltrees.map(p => p.date))].sort();
+    // Filtrer par étudiant ET jusqu'à la date limite
+    const presencesEtudiant = presences.filter(p => p.da === da && p.date <= dateLimite);
+    const datesSaisies = [...new Set(presencesEtudiant.map(p => p.date))].sort();
 
     if (datesSaisies.length === 0) {
         return {
@@ -285,8 +285,6 @@ function calculerAssiduiteJusquADate(da, dateLimite) {
             nombreSeances: 0
         };
     }
-
-    const presencesEtudiant = presencesFiltrees.filter(p => p.da === da);
     let totalHeuresDonnees = 0;
     let totalHeuresPresentes = 0;
     const seancesNonFacultatives = new Set();

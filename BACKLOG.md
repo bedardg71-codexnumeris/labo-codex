@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 6 février 2026 (Beta 96.3 - Build 0206-0525)
+> **Derniere mise a jour** : 6 février 2026 (Beta 97 - Build 0206-0830)
 
 ---
 
@@ -205,27 +205,27 @@
 
 ### Bugs HAUTE priorité (Audit complet 5 fév 2026)
 
-- [ ] **#90** Mauvais noms de clés dans plusieurs modules (retournent toujours vide)
+- [x] **#90** Mauvais noms de clés dans plusieurs modules (retournent toujours vide) ✅ CORRIGÉ (6 fév 2026)
   - **donnees-v2.js** : `${trim.id}_evaluations` au lieu de `${trim.id}_evaluationsSauvegardees` (6 emplacements : lignes 797, 824, 875, 943, 974, 1020) → compteurs d'usages toujours à 0, suppressions non protégées
   - **rapport-bug.js** : `'grillesCriteres'` (ligne 467) et `'echellesPerformance'` (ligne 470) n'existent pas → contexte bug incomplet
   - **cours.js** : `'evaluationsDetaillees'` (ligne 1025) n'existe pas → avertissement de suppression affiche "0 évaluations"
   - **pratique-configurable.js** : `'evaluations'` avec default `{}` (ligne 117) → calculs toujours à 0
   - **Correction** : Remplacer par les bonnes clés (`evaluationsSauvegardees`, `grillesTemplates`, `echellesTemplates`)
 
-- [ ] **#91** calculerAssiduiteJusquADate() ne filtre pas par DA pour les dates
+- [x] **#91** calculerAssiduiteJusquADate() ne filtre pas par DA pour les dates ✅ CORRIGÉ (6 fév 2026)
   - **Fichier** : `js/saisie-presences.js` lignes 269-276
   - **Symptôme** : `datesSaisies` inclut les dates de TOUS les étudiants, pas seulement l'étudiant cible
   - **Impact** : Un étudiant est compté absent pour des dates où seuls d'autres étudiants ont des données
   - **Comparaison** : `calculerAssiduiteSommative()` (lignes 97-102) filtre correctement par DA d'abord
   - **Correction** : Filtrer `presencesFiltrees` par DA avant de construire `datesSaisies`
 
-- [ ] **#92** evaluations-apercu.js divise totalC par nbTotal au lieu de nbAvecDonnees
+- [x] **#92** evaluations-apercu.js divise totalC par nbTotal au lieu de nbAvecDonnees ✅ CORRIGÉ (6 fév 2026)
   - **Fichier** : `js/evaluations-apercu.js` ligne 94
   - **Symptôme** : `Math.round(totalC / nbTotal)` divise par TOUS les étudiants au lieu de ceux avec données
   - **Impact** : Taux de complétion affiché trop bas (ex: 5/25=20% au lieu de 5/5=100%)
   - **Correction** : Remplacer `nbTotal` par `nbAvecDonnees`
 
-- [ ] **#93** Mode « recents-meilleurs » utilise reverse() au lieu de trier par date
+- [x] **#93** Mode « recents-meilleurs » utilise reverse() au lieu de trier par date ✅ CORRIGÉ (6 fév 2026)
   - **Fichier** : `js/profil-etudiant.js` lignes 911-928
   - **Symptôme** : `.reverse()` inverse l'ordre par note, ne trie PAS par date
   - **Impact** : Sélectionne les pires notes du top 50% au lieu des plus récentes → affecte la note finale
@@ -233,30 +233,30 @@
   - **Aussi** : Mode `recents` (ligne 911) a le même problème
   - **Correction** : Remplacer `.reverse()` par `.sort((a, b) => new Date(b.dateRemise) - new Date(a.dateRemise))`
 
-- [ ] **#94** Demo : race condition et nettoyage cible le mauvais trimestre
+- [x] **#94** Demo : race condition et nettoyage cible le mauvais trimestre ✅ CORRIGÉ (6 fév 2026)
   - **donnees-demo.js:58-106** : `chargerDonneesDemo()` change temporairement le trimestre actif (async) → tout module synchrone qui lit `cle()` pendant ce temps voit le mauvais trimestre
   - **donnees-demo.js:383-437** : `supprimerGroupe9999()` utilise `window.cle()` mais le trimestre actif peut ne plus être demo → nettoie les vraies données
   - **Correction** : Passer le préfixe `demo_` explicitement au lieu de changer le trimestre actif
 
-- [ ] **#95** Éléments DOM référencés mais absents de index.html
+- [x] **#95** Éléments DOM référencés mais absents de index.html ✅ CORRIGÉ (6 fév 2026)
   - **pratiques.js:550** : `getElementById('pratiqueNotation').value` sans null check → crash
   - **cours.js:249-250** : `getElementById('nombreCours')` et `getElementById('resumeCours')` n'existent pas → crash
   - **evaluation.js:2774** : `getElementById('tri-evaluations')` n'existe pas → crash
   - **Correction** : Ajouter les éléments dans index.html ou ajouter des null checks
 
-- [ ] **#96** donnees-v2.js : `localStorage.removeItem` au lieu de `db.remove`
+- [x] **#96** donnees-v2.js : `localStorage.removeItem` au lieu de `db.remove` ✅ CORRIGÉ (6 fév 2026)
   - **Fichier** : `js/donnees-v2.js` ligne 1411
   - **Symptôme** : `localStorage.removeItem('cartouches_${grilleId}')` ne supprime que du localStorage, pas d'IndexedDB
   - **Impact** : Les cartouches réapparaissent après rechargement
   - **Correction** : Utiliser `db.remove()` ou `db.removeSync()`
 
-- [ ] **#97** portfolio.js : `event.target.checked` sans paramètre event
+- [x] **#97** portfolio.js : `event.target.checked` sans paramètre event ✅ CORRIGÉ (6 fév 2026)
   - **Fichier** : `js/portfolio.js` ligne 330
   - **Symptôme** : `toggleArtefactPortfolio(da, portfolioId, nombreARetenir)` utilise `event` qui n'est pas un paramètre
   - **Impact** : En mode strict, ReferenceError. Sinon, le checkbox n'est pas décoché quand on dépasse le max
   - **Correction** : Ajouter `event` comme paramètre de la fonction
 
-- [ ] **#98** evaluation.js : lecture structure SOM/PAN obsolète
+- [x] **#98** evaluation.js : lecture structure SOM/PAN obsolète ✅ CORRIGÉ (6 fév 2026)
   - **Fichier** : `js/evaluation.js` lignes 3050-3051
   - **Symptôme** : `indicesCPEtudiant?.[pratique]` cherche des sous-branches SOM/PAN, mais depuis Beta 95.5 la structure est plate
   - **Impact** : Taux de complétion utilise toujours le fallback, jamais la valeur autoritative
