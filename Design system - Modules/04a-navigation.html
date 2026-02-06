@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4a : Navigation - Design System v7</title>
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="guide-common.css">
+</head>
+<body>
+<div class="guide-header">
+<h1>Module 4a : Navigation</h1>
+<p>Principale • Secondaire • Glassmorphism</p>
+<div class="guide-header-nav">
+<a href="03c-barres-gradient.html">← Module 3c : Barres de gradient</a>
+<a href="design-system-index.html">Retour à l'index</a>
+<a href="04b-entete.html">Module 4b : En-tête →</a>
+</div>
+</div>
+<div class="guide-container">
+        <h2 class="guide-section-title">7. Navigation</h2>
+        <p class="guide-section-intro">
+            La navigation utilise un effet glassmorphisme (liquid glass) pour créer une hiérarchie visuelle claire
+            entre la navigation principale et la navigation secondaire. L'effet s'adapte automatiquement aux trois modes.
+        </p>
+
+        <div class="guide-component">
+            <h3 class="guide-component-title">Navigation principale (.navigation-principale)</h3>
+            <p class="guide-component-description">
+                Navigation entre les grandes sections (Observations, Matériel, Réglages, Aide).
+                Effet glassmorphisme prononcé avec blur élevé pour une visibilité maximale.
+            </p>
+
+            <div class="guide-example">
+                <!-- Simulation de l'en-tête bleu foncé -->
+                <div style="background: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%); padding: 20px; border-radius: 8px;">
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button style="padding: 12px 24px;
+                                       background: rgba(255, 255, 255, 0.3);
+                                       backdrop-filter: blur(10px);
+                                       -webkit-backdrop-filter: blur(10px);
+                                       border: 1px solid rgba(255, 255, 255, 0.5);
+                                       border-radius: 8px;
+                                       color: white;
+                                       font-weight: 600;
+                                       font-size: 0.95rem;
+                                       cursor: pointer;
+                                       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);">
+                            Observations (actif)
+                        </button>
+                        <button style="padding: 12px 24px;
+                                       background: rgba(255, 255, 255, 0.15);
+                                       backdrop-filter: blur(10px);
+                                       -webkit-backdrop-filter: blur(10px);
+                                       border: 1px solid rgba(255, 255, 255, 0.2);
+                                       border-radius: 8px;
+                                       color: white;
+                                       font-weight: 600;
+                                       font-size: 0.95rem;
+                                       cursor: pointer;
+                                       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                                       transition: all 0.3s ease;">
+                            Matériel
+                        </button>
+                        <button style="padding: 12px 24px;
+                                       background: rgba(255, 255, 255, 0.15);
+                                       backdrop-filter: blur(10px);
+                                       -webkit-backdrop-filter: blur(10px);
+                                       border: 1px solid rgba(255, 255, 255, 0.2);
+                                       border-radius: 8px;
+                                       color: white;
+                                       font-weight: 600;
+                                       font-size: 0.95rem;
+                                       cursor: pointer;
+                                       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+                            Réglages
+                        </button>
+                        <button style="padding: 12px 24px;
+                                       background: rgba(255, 255, 255, 0.15);
+                                       backdrop-filter: blur(10px);
+                                       -webkit-backdrop-filter: blur(10px);
+                                       border: 1px solid rgba(255, 255, 255, 0.2);
+                                       border-radius: 8px;
+                                       color: white;
+                                       font-weight: 600;
+                                       font-size: 0.95rem;
+                                       cursor: pointer;
+                                       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+                            Aide
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="guide-specs">
+                <div class="guide-specs-title">&#x1F4D0; Spécifications</div>
+                <ul>
+                    <li><strong>Background:</strong> rgba(255, 255, 255, 0.15)</li>
+                    <li><strong>Backdrop-filter:</strong> blur(10px) - Effet verre prononcé</li>
+                    <li><strong>Border:</strong> 1px solid rgba(255, 255, 255, 0.2)</li>
+                    <li><strong>Border-radius:</strong> 8px</li>
+                    <li><strong>Padding:</strong> 12px 24px</li>
+                    <li><strong>Font-weight:</strong> 600 (semi-gras)</li>
+                    <li><strong>Font-size:</strong> 0.95rem</li>
+                    <li><strong>Color:</strong> white</li>
+                    <li><strong>État actif:</strong> background 0.3, border 0.5</li>
+                    <li><strong>Hover:</strong> background 0.25, border 0.4, translateY(-2px)</li>
+                </ul>
+            </div>
+
+            <div class="guide-code-title">Code HTML</div>
+            <div class="guide-code">&lt;div class="navigation-principale"&gt;
+    &lt;button class="actif"&gt;Observations&lt;/button&gt;
+    &lt;button&gt;Matériel&lt;/button&gt;
+    &lt;button&gt;Réglages&lt;/button&gt;
+    &lt;button&gt;Aide&lt;/button&gt;
+&lt;/div&gt;</div>
+
+            <div class="guide-code-title">Code CSS</div>
+            <div class="guide-code">.navigation-principale {
+    background: transparent;  /* Pas de bande de fond */
+    padding: 0 20px 15px 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    border-bottom: 3px solid var(--bleu-fonce);
+}
+
+.navigation-principale button {
+    padding: 12px 24px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.navigation-principale button:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.navigation-principale button.actif {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}</div>
+        </div>
+
+        <div class="guide-component">
+            <h3 class="guide-component-title">Navigation secondaire (.sous-navigation)</h3>
+            <p class="guide-component-description">
+                Navigation entre les sous-sections d'une section principale.
+                Utilise le même dégradé que l'en-tête pour une continuité visuelle parfaite.
+            </p>
+
+            <div class="guide-example">
+                <!-- Simulation de l'en-tête bleu foncé -->
+                <div style="background: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%); padding: 20px; border-radius: 8px;">
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button style="padding: 8px 16px;
+                                       background: rgba(255, 255, 255, 0.25);
+                                       backdrop-filter: blur(5px);
+                                       -webkit-backdrop-filter: blur(5px);
+                                       border: 1px solid rgba(255, 255, 255, 0.4);
+                                       border-radius: 6px;
+                                       color: white;
+                                       font-size: 0.85rem;
+                                       cursor: pointer;
+                                       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);">
+                            Suivi de l'apprentissage (actif)
+                        </button>
+                        <button style="padding: 8px 16px;
+                                       background: rgba(255, 255, 255, 0.1);
+                                       backdrop-filter: blur(5px);
+                                       -webkit-backdrop-filter: blur(5px);
+                                       border: 1px solid rgba(255, 255, 255, 0.2);
+                                       border-radius: 6px;
+                                       color: white;
+                                       font-size: 0.85rem;
+                                       cursor: pointer;
+                                       transition: all 0.3s ease;">
+                            Développement des habiletés
+                        </button>
+                        <button style="padding: 8px 16px;
+                                       background: rgba(255, 255, 255, 0.1);
+                                       backdrop-filter: blur(5px);
+                                       -webkit-backdrop-filter: blur(5px);
+                                       border: 1px solid rgba(255, 255, 255, 0.2);
+                                       border-radius: 6px;
+                                       color: white;
+                                       font-size: 0.85rem;
+                                       cursor: pointer;">
+                            Mobilisation
+                        </button>
+                        <button style="padding: 8px 16px;
+                                       background: rgba(255, 255, 255, 0.1);
+                                       backdrop-filter: blur(5px);
+                                       -webkit-backdrop-filter: blur(5px);
+                                       border: 1px solid rgba(255, 255, 255, 0.2);
+                                       border-radius: 6px;
+                                       color: white;
+                                       font-size: 0.85rem;
+                                       cursor: pointer;">
+                            Accompagnement
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="guide-specs">
+                <div class="guide-specs-title">&#x1F4D0; Spécifications</div>
+                <ul>
+                    <li><strong>Background:</strong> rgba(255, 255, 255, 0.1) - Blanc transparent discret</li>
+                    <li><strong>Backdrop-filter:</strong> blur(5px) - Moins de blur pour discrétion</li>
+                    <li><strong>Border:</strong> 1px solid rgba(255, 255, 255, 0.2)</li>
+                    <li><strong>Border-radius:</strong> 6px</li>
+                    <li><strong>Padding:</strong> 8px 16px - Plus compact</li>
+                    <li><strong>Font-size:</strong> 0.85rem - Plus petit</li>
+                    <li><strong>Color:</strong> white - Texte blanc pour lisibilité maximale</li>
+                    <li><strong>État actif:</strong> background rgba(255, 255, 255, 0.25) - Plus pâle (cohérent avec navigation principale)</li>
+                    <li><strong>Hover:</strong> background rgba(255, 255, 255, 0.18) - Opacité intermédiaire</li>
+                </ul>
+            </div>
+
+            <div class="guide-code-title">Code HTML</div>
+            <div class="guide-code">&lt;div class="sous-navigation"&gt;
+    &lt;button class="actif"&gt;Suivi de l'apprentissage&lt;/button&gt;
+    &lt;button&gt;Développement des habiletés&lt;/button&gt;
+    &lt;button&gt;Mobilisation&lt;/button&gt;
+    &lt;button&gt;Accompagnement&lt;/button&gt;
+&lt;/div&gt;</div>
+
+            <div class="guide-code-title">Code CSS</div>
+            <div class="guide-code">.sous-navigation {
+    background: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%);
+    padding: 12px 20px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sous-navigation button {
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    color: white;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+}
+
+.sous-navigation button:hover {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: white;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.sous-navigation button.actif {
+    background: rgba(255, 255, 255, 0.25);  /* Plus pâle = actif */
+    border-color: rgba(255, 255, 255, 0.4);
+    color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}</div>
+        </div>
+
+        <div class="guide-component">
+            <h3 class="guide-component-title">Hiérarchie visuelle</h3>
+            <p class="guide-component-description">
+                Comparaison côte Ã  côte des deux niveaux de navigation pour illustrer la hiérarchie claire.
+            </p>
+
+            <div class="guide-example">
+                <div style="background: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%); padding: 25px; border-radius: 8px;">
+                    <h4 style="color: white; margin: 0 0 15px 0; font-size: 0.9rem;">Navigation principale (sections)</h4>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 25px;">
+                        <button style="padding: 12px 24px; background: rgba(255, 255, 255, 0.3); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 8px; color: white; font-weight: 600; font-size: 0.95rem; cursor: pointer;">Observations</button>
+                        <button style="padding: 12px 24px; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white; font-weight: 600; font-size: 0.95rem; cursor: pointer;">Matériel</button>
+                    </div>
+
+                    <h4 style="color: white; margin: 0 0 15px 0; font-size: 0.9rem;">Navigation secondaire (sous-sections)</h4>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button style="padding: 8px 16px; background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 6px; color: white; font-size: 0.85rem; cursor: pointer; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);">Suivi (actif)</button>
+                        <button style="padding: 8px 16px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; color: white; font-size: 0.85rem; cursor: pointer;">Habiletés</button>
+                        <button style="padding: 8px 16px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; color: white; font-size: 0.85rem; cursor: pointer;">Mobilisation</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="guide-specs" style="margin-top: 20px;">
+                <div class="guide-specs-title">&#x1F3A8; Différences visuelles</div>
+                <ul>
+                    <li><strong>Approche unifiée:</strong> Les deux niveaux utilisent blanc transparent (cohérence totale)</li>
+                    <li><strong>Background normale:</strong> Principale rgba(255,255,255,0.15) vs Secondaire rgba(255,255,255,0.1)</li>
+                    <li><strong>Background actif:</strong> Principale rgba(255,255,255,0.3) vs Secondaire rgba(255,255,255,0.25)</li>
+                    <li><strong>Logique:</strong> Bouton actif = plus pâle/clair pour TOUS les niveaux</li>
+                    <li><strong>Blur:</strong> Principale (10px) vs Secondaire (5px)</li>
+                    <li><strong>Taille:</strong> Principale (12px/24px, 0.95rem) vs Secondaire (8px/16px, 0.85rem)</li>
+                    <li><strong>Poids:</strong> Principale (600 semi-gras) vs Secondaire (normal)</li>
+                    <li><strong>Espacement:</strong> Principale (gap 10px) vs Secondaire (gap 8px)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="guide-component">
+            <h3 class="guide-component-title">Adaptation aux modes</h3>
+            <p class="guide-component-description">
+                Le dégradé s'adapte automatiquement aux trois modes d'affichage (Normal, Simulation, Anonymisation).
+                En-tête et sous-navigation partagent toujours le même dégradé pour une cohérence visuelle parfaite.
+            </p>
+
+            <div class="guide-specs">
+                <div class="guide-specs-title">&#x1F3A8; Comportement adaptatif</div>
+                <ul>
+                    <li><strong>Mode Normal:</strong> Dégradé linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%) - Bleu principal</li>
+                    <li><strong>Mode Assisté:</strong> Dégradé linear-gradient(135deg, #1a5266 0%, #0d3540 100%) - Sarcelle/vert</li>
+                    <li><strong>Mode Anonymisation:</strong> Dégradé linear-gradient(135deg, #0f1e3a 0%, #071428 100%) - Bleu nuit désaturé</li>
+                    <li><strong>Cohérence totale:</strong> En-tête et sous-navigation utilisent le même dégradé</li>
+                    <li><strong>Effet glassmorphisme:</strong> Boutons avec transparence + blur fonctionnent parfaitement sur le dégradé</li>
+                </ul>
+            </div>
+
+            <div class="guide-code-title">Code CSS (adaptation modes)</div>
+            <div class="guide-code">/* MODE NORMAL - Bleu principal */
+body[data-mode="normal"] .entete {
+    background: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%);
+}
+
+body[data-mode="normal"] .sous-navigation {
+    background: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%);
+}
+
+/* MODE SIMULATION - Sarcelle/vert */
+body[data-mode="assisté"] .entete {
+    background: linear-gradient(135deg, #1a5266 0%, #0d3540 100%);
+}
+
+body[data-mode="assisté"] .sous-navigation {
+    background: linear-gradient(135deg, #1a5266 0%, #0d3540 100%);
+}
+
+/* MODE ANONYMISATION - Bleu nuit désaturé */
+body[data-mode="anonymisation"] .entete {
+    background: linear-gradient(135deg, #0f1e3a 0%, #071428 100%);
+}
+
+body[data-mode="anonymisation"] .sous-navigation {
+    background: linear-gradient(135deg, #0f1e3a 0%, #071428 100%);
+}</div>
+        </div>
+
+        <div class="guide-do-dont">
+            <div class="guide-do">
+                <div class="guide-do-title">âœ… À FAIRE</div>
+                <ul style="margin: 10px 0 0 0; padding-left: 20px;">
+                    <li>Respecter la hiérarchie : principale plus opaque, secondaire plus transparente</li>
+                    <li>Utiliser backdrop-filter pour l'effet verre</li>
+                    <li>Garder les transitions douces (0.3s ease)</li>
+                    <li>Laisser le système adapter les couleurs selon le mode</li>
+                    <li>Maintenir le contraste texte blanc sur fond glassmorphisme</li>
+                </ul>
+            </div>
+            <div class="guide-dont">
+                <div class="guide-dont-title">âŒ À ÉVITER</div>
+                <ul style="margin: 10px 0 0 0; padding-left: 20px;">
+                    <li>Utiliser la même opacité pour principale et secondaire</li>
+                    <li>Définir des couleurs inline qui court-circuiteraient l'adaptation</li>
+                    <li>Retirer le blur (perd l'effet glassmorphisme)</li>
+                    <li>Utiliser des couleurs de texte autres que blanc/blanc transparent</li>
+                    <li>Oublier -webkit-backdrop-filter pour Safari</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 9: FORMULAIRES -->
+    <section id="formulaires" class="guide-section"></div>
+</body>
+</html>

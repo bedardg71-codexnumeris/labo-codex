@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 1b : Typographie - Design System v7</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="guide-common.css">
+</head>
+<body>
+
+<!-- EN-TÊTE -->
+<div class="guide-header">
+    <h1>Module 1b : Typographie</h1>
+    <p>Hiérarchie des titres • Spécifications</p>
+    <div class="guide-header-nav">
+        <a href="01a-palette-couleurs.html">← Module 1a : Palette de couleurs</a>
+        <a href="design-system-index.html">Retour à l'index</a>
+    </div>
+</div>
+
+<div class="guide-container">
+
+    <!-- ===================== -->
+    <!-- TYPOGRAPHIE -->
+    <!-- ===================== -->
+    <section id="typographie" class="guide-section">
+        <h2 class="guide-section-title">Typographie</h2>
+        <p class="guide-section-intro">
+            La typographie utilise la police système pour garantir une lisibilité optimale et des performances maximales.
+        </p>
+
+        <div class="guide-component">
+            <h3 class="guide-component-title">Hiérarchie des titres</h3>
+
+            <div class="guide-example">
+                <h1 style="margin: 0 0 15px 0;">Titre H1 - Titre principal de page</h1>
+                <h2 style="margin: 0 0 15px 0;">Titre H2 - Section majeure</h2>
+                <h3 style="margin: 0 0 15px 0;">Titre H3 - Sous-section</h3>
+                <h4 style="margin: 0 0 15px 0;">Titre H4 - Composant</h4>
+                <p style="margin: 0;">Paragraphe - Texte normal de contenu avec une lecture confortable.</p>
+            </div>
+
+            <div class="guide-specs">
+                <div class="guide-specs-title">📏 Spécifications</div>
+                <ul>
+                    <li><strong>H1:</strong> 2rem (32px) - Titres de pages principales</li>
+                    <li><strong>H2:</strong> 1.5rem (24px) - Titres de sections</li>
+                    <li><strong>H3:</strong> 1.2rem (19px) - Titres de sous-sections</li>
+                    <li><strong>H4:</strong> 1rem (16px) - Titres de composants</li>
+                    <li><strong>Paragraphe:</strong> 0.95rem (15px) - Texte de base</li>
+                    <li><strong>Police:</strong> -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="guide-component">
+            <h3 class="guide-component-title">⚠️ Règle critique : Guillemets français</h3>
+
+            <div class="guide-specs">
+                <div class="guide-specs-title">✅ À FAIRE</div>
+                <ul>
+                    <li><strong>Guillemets français :</strong> Toujours utiliser «...» avec espaces insécables</li>
+                    <li><strong>Format correct :</strong> «&nbsp;texte entre guillemets&nbsp;»</li>
+                    <li><strong>HTML:</strong> <code>&laquo;&amp;nbsp;texte&amp;nbsp;&raquo;</code></li>
+                    <li><strong>Usage:</strong> Citations, titres, expressions à mettre en évidence</li>
+                </ul>
+            </div>
+
+            <div class="guide-specs" style="background: #fef2f2; border-left-color: #ef4444;">
+                <div class="guide-specs-title" style="color: #dc2626;">❌ À ÉVITER</div>
+                <ul>
+                    <li><strong>Guillemets anglais :</strong> "texte" (INCORRECT)</li>
+                    <li><strong>Guillemets simples :</strong> 'texte' (INCORRECT)</li>
+                    <li><strong>Sans espaces :</strong> «texte» (INCORRECT - manque espaces insécables)</li>
+                    <li><strong>Apostrophes droites :</strong> " ' (INCORRECT - utiliser typographiques)</li>
+                </ul>
+            </div>
+
+            <div class="guide-example">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div style="background: #f0fdf4; border: 2px solid #22c55e; padding: 15px; border-radius: 6px;">
+                        <strong style="color: #16a34a;">✅ CORRECT</strong>
+                        <p style="margin: 10px 0 0 0;">Le mode «&nbsp;Assisté&nbsp;» utilise la palette sarcelle.</p>
+                    </div>
+                    <div style="background: #fef2f2; border: 2px solid #ef4444; padding: 15px; border-radius: 6px;">
+                        <strong style="color: #dc2626;">❌ INCORRECT</strong>
+                        <p style="margin: 10px 0 0 0;">Le mode "Assisté" utilise la palette sarcelle.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div>
+
+</body>
+</html>

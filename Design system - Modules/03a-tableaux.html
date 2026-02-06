@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 3a : Tableaux - Design System v7</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="guide-common.css">
+</head>
+<body>
+<div class="guide-header">
+    <h1>Module 3a : Tableaux</h1>
+    <p>Styles • Interactions • États</p>
+    <div class="guide-header-nav">
+        <a href="02c-badges.html">← Module 2c : Badges</a>
+        <a href="design-system-index.html">Retour à l'index</a>
+        <a href="03b-cartes-sidebars.html">Module 3b : Cartes et sidebars →</a>
+    </div>
+</div>
+<div class="guide-container">
+    <!-- ===================== -->
+    <!-- 4. TABLEAUX -->
+    <!-- ===================== -->
+    <section id="tableaux" class="guide-section">
+        <h2 class="guide-section-title">4. Tableaux</h2>
+        <p class="guide-section-intro">
+            Les tableaux affichent des données structurées avec un style cohérent et des interactions fluides.
+        </p>
+
+        <div class="guide-component">
+            <h3 class="guide-component-title">Tableau standard</h3>
+
+            <div class="guide-example">
+                <table class="tableau">
+                    <thead>
+                        <tr>
+                            <th>DA</th>
+                            <th>Nom</th>
+                            <th>Prénom</th>
+                            <th style="text-align: center;">Programme</th>
+                            <th style="text-align: center;">SA</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="cursor: pointer;">
+                            <td>2987654</td>
+                            <td>Tremblay</td>
+                            <td>Sophie</td>
+                            <td style="text-align: center;">310.B1</td>
+                            <td style="text-align: center;">âœ“</td>
+                        </tr>
+                        <tr style="cursor: pointer;">
+                            <td>2876543</td>
+                            <td>Gagnon</td>
+                            <td>Marc</td>
+                            <td style="text-align: center;">200.B1</td>
+                            <td style="text-align: center;"></td>
+                        </tr>
+                        <tr style="cursor: pointer;">
+                            <td>2765432</td>
+                            <td>Lapointe</td>
+                            <td>Julie</td>
+                            <td style="text-align: center;">200.B1</td>
+                            <td style="text-align: center;"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="guide-specs">
+                <div class="guide-specs-title">ðŸ“ Spécifications</div>
+                <ul>
+                    <li><strong>En-tête:</strong> Fond bleu pâle (#e8f2fd), texte bleu principal</li>
+                    <li><strong>Rangées:</strong> Padding 12px 8px pour un bon espacement</li>
+                    <li><strong>Hover:</strong> Fond bleu très pâle (var(--bleu-tres-pale))</li>
+                    <li><strong>Bordures:</strong> Lignes subtiles entre les rangées</li>
+                    <li><strong>Curseur:</strong> Pointer si les rangées sont cliquables</li>
+                </ul>
+            </div>
+
+            <div class="guide-code-title">Code HTML</div>
+            <div class="guide-code">&lt;table class="tableau"&gt;
+    &lt;thead&gt;
+        &lt;tr&gt;
+            &lt;th&gt;DA&lt;/th&gt;
+            &lt;th&gt;Nom&lt;/th&gt;
+            &lt;th&gt;Prénom&lt;/th&gt;
+        &lt;/tr&gt;
+    &lt;/thead&gt;
+    &lt;tbody&gt;
+        &lt;tr style="cursor: pointer;"&gt;
+            &lt;td style="padding: 12px 8px;"&gt;2987654&lt;/td&gt;
+            &lt;td style="padding: 12px 8px;"&gt;Tremblay&lt;/td&gt;
+            &lt;td style="padding: 12px 8px;"&gt;Sophie&lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/tbody&gt;
+&lt;/table&gt;</div>
+        </div>
+    </section>
+
+    <!-- ===================== -->
+    <!-- 5. CARTES ET SIDEBARS -->
+    <!-- ===================== -->
+    <section id="cartes" class="guide-section"></div>
+</body>
+</html>

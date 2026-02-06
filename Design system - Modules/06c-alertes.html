@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 6c : Alertes et messages - Design System v7</title>
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="guide-common.css">
+</head>
+<body>
+<div class="guide-header">
+<h1>Module 6c : Alertes et messages</h1>
+<p>Messages modaux • Notifications • États</p>
+<div class="guide-header-nav">
+<a href="06b-toggles.html">← Module 6b : Toggles</a>
+<a href="design-system-index.html">Retour à l'index</a>
+<a href="07-primo-assistant.html">Module 7 : Primo Assistant →</a>
+</div>
+</div>
+<div class="guide-container">
+        <h2 class="guide-section-title">10. Messages et alertes</h2>
+        <p class="guide-section-intro">
+            Système de messages colorés pour communiquer différents types d'information Ã  l'utilisateur.
+        </p>
+
+        <div class="guide-component">
+            <h3 class="guide-component-title">Types d'alertes</h3>
+            <p class="guide-component-description">
+                Quatre types d'alertes avec des couleurs distinctes selon le contexte.
+            </p>
+
+            <div class="guide-example">
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <div class="alerte alerte-information">
+                        â„¹ï¸ <strong>Information:</strong> Le trimestre a été configuré avec succès (16 semaines, 124 jours de cours).
+                    </div>
+                    <div class="alerte alerte-succes">
+                        âœ“ <strong>Succès:</strong> Les 30 étudiants ont été importés avec succès.
+                    </div>
+                    <div class="alerte alerte-attention">
+                        &#x26A0;&#xFE0F; <strong>Attention:</strong> Certaines évaluations n'ont pas de grille associée.
+                    </div>
+                    <div class="alerte alerte-erreur">
+                        âœ— <strong>Erreur:</strong> Impossible de charger les données. Vérifiez le fichier JSON.
+                    </div>
+                </div>
+            </div>
+
+            <div class="guide-specs">
+                <div class="guide-specs-title">&#x1F3A8; Variables CSS</div>
+                <ul>
+                    <li><strong>Information (bleu):</strong> --alerte-fond-information: #e8f2fd | --alerte-bordure-information: #032e5c | --alerte-texte-information: #032e5c</li>
+                    <li><strong>Succès (sarcelle):</strong> --alerte-fond-succes: #e8f5f2 | --alerte-bordure-succes: #1e5a4a | --alerte-texte-succes: #165040</li>
+                    <li><strong>Attention (orange):</strong> --alerte-fond-attention: #fff8f0 | --alerte-bordure-attention: #ff6b35 | --alerte-texte-attention: #8a4a2a</li>
+                    <li><strong>Erreur (rouge):</strong> --alerte-fond-erreur: #f8e8e8 | --alerte-bordure-erreur: #8a2a2a | --alerte-texte-erreur: #7a1a1a</li>
+                </ul>
+            </div>
+
+            <div class="guide-code-title">Code CSS</div>
+            <div class="guide-code">/* Alertes - Variables */
+:root {
+    /* Information */
+    --alerte-fond-information: #e8f2fd;
+    --alerte-bordure-information: #032e5c;
+    --alerte-texte-information: #032e5c;
+
+    /* Succès */
+    --alerte-fond-succes: #e8f5f2;
+    --alerte-bordure-succes: #1e5a4a;
+    --alerte-texte-succes: #165040;
+
+    /* Attention */
+    --alerte-fond-attention: #fff8f0;
+    --alerte-bordure-attention: #ff6b35;
+    --alerte-texte-attention: #8a4a2a;
+
+    /* Erreur */
+    --alerte-fond-erreur: #f8e8e8;
+    --alerte-bordure-erreur: #8a2a2a;
+    --alerte-texte-erreur: #7a1a1a;
+}
+
+/* Classe de base */
+.alerte {
+    padding: 16px 24px;
+    border-radius: 8px;
+    border-left: 4px solid;
+    margin-bottom: 15px;
+}
+
+/* Types */
+.alerte-information {
+    background: var(--alerte-fond-information);
+    border-color: var(--alerte-bordure-information);
+    color: var(--alerte-texte-information);
+}
+
+.alerte-succes {
+    background: var(--alerte-fond-succes);
+    border-color: var(--alerte-bordure-succes);
+    color: var(--alerte-texte-succes);
+}
+
+.alerte-attention {
+    background: var(--alerte-fond-attention);
+    border-color: var(--alerte-bordure-attention);
+    color: var(--alerte-texte-attention);
+}
+
+.alerte-erreur {
+    background: var(--alerte-fond-erreur);
+    border-color: var(--alerte-bordure-erreur);
+    color: var(--alerte-texte-erreur);
+}</div>
+        </div>
+
+        <div class="guide-do-dont">
+            <div class="guide-do">
+                <div class="guide-do-title">âœ… À FAIRE</div>
+                <ul style="margin: 10px 0 0 0; padding-left: 20px;">
+                    <li>Utiliser Information pour des messages neutres</li>
+                    <li>Utiliser Succès pour confirmer une action réussie</li>
+                    <li>Utiliser Attention pour prévenir l'utilisateur</li>
+                    <li>Utiliser Erreur uniquement pour les erreurs critiques</li>
+                    <li>Ajouter des icônes/emojis pour renforcer le message</li>
+                </ul>
+            </div>
+            <div class="guide-dont">
+                <div class="guide-dont-title">âŒ À ÉVITER</div>
+                <ul style="margin: 10px 0 0 0; padding-left: 20px;">
+                    <li>Empiler trop d'alertes (max 2-3 simultanées)</li>
+                    <li>Utiliser Erreur pour des avertissements mineurs</li>
+                    <li>Omettre le contexte (toujours expliquer pourquoi)</li>
+                    <li>Messages trop techniques (vulgariser pour l'utilisateur)</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 11: BADGES -->
+    <section id="badges" class="guide-section"></div>
+</body>
+</html>
