@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 6d : Utilitaires Beta 97.1 - Design System v7</title>
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="guide-common.css">
+<style>
+    /* Styles specifiques a ce module */
+    .demo-box {
+        padding: 20px;
+        border: 1px solid #e8f2fd;
+        border-radius: 6px;
+        margin: 10px 0;
+        background: white;
+    }
+    .demo-toggle-target {
+        padding: 15px;
+        background: #e8f2fd;
+        border-radius: 6px;
+        text-align: center;
+        color: #032e5c;
+        font-weight: 500;
+    }
+    .demo-row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: flex-start;
+    }
+    .demo-modal-mini {
+        position: relative;
+        width: 100%;
+        height: 200px;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .demo-modal-mini .modal-contenu {
+        position: relative;
+        width: 80%;
+        max-width: 400px;
+    }
+</style>
+</head>
+<body>
+
+<!-- EN-TETE -->
+<div class="guide-header">
+    <h1>Module 6d : Utilitaires Beta 97.1</h1>
+    <p>Show/Hide CSS • toggleDisplay() • Modals .actif • Info-box • Badge-source</p>
+    <div class="guide-header-nav">
+        <a href="06c-alertes.html">&larr; Module 6c : Alertes</a>
+        <a href="design-system-index.html">Retour a l'index</a>
+        <a href="07-primo-assistant.html">Module 7 : Primo &rarr;</a>
+    </div>
+</div>
+
+<div class="guide-container">
+
+    <!-- ============================================================ -->
+    <!-- SECTION 1 : .u-hide -->
+    <!-- ============================================================ -->
+    <div class="guide-section">
+        <h2 class="guide-section-title">1. Classe utilitaire .u-hide</h2>
+        <p class="guide-section-intro">
+            Depuis la Beta 97.1, toute manipulation de visibilite passe par la classe CSS
+            <code>.u-hide</code> au lieu de <code>.style.display</code>. Cette classe est definie
+            dans <code>styles.css</code> ligne 343.
+        </p>
+
+        <div class="guide-component">
+            <h3 class="guide-component-title">Definition CSS</h3>
+            <div class="guide-code">
+                <pre>.u-hide { display: none !important; }</pre>
+            </div>
+
+            <div class="guide-specs">
+                <div class="guide-specs-title">Regles</div>
+                <ul>
+                    <li><code>!important</code> garantit la priorite sur tout style inline residuel</li>
+                    <li>Fonctionne avec tous les types d'affichage (block, flex, inline-block, etc.)</li>
+                    <li>L'element retrouve son <code>display</code> naturel quand la classe est retiree</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="guide-component">
+            <h3 class="guide-component-title">Exemples d'utilisation</h3>
+
+            <div class="guide-do-dont">
+                <div class="guide-do">
+                    <div class="guide-do-title">FAIRE</div>
+                    <div class="guide-code">
+                        <pre>// Cacher un element
+element.classList.add('u-hide');
+
+// Montrer un element
+element.classList.remove('u-hide');
+
+// Verifier la visibilite
+if (!element.classList.contains('u-hide')) {
+    // l'element est visible
+}</pre>
+                    </div>
+                </div>
+                <div class="guide-dont">
+                    <div class="guide-dont-title">NE PAS FAIRE</div>
+                    <div class="guide-code">
+                        <pre>// INTERDIT depuis Beta 97.1
+element.style.display = 'none';
+element.style.display = 'block';
+element.style.display = 'flex';
+
+// INTERDIT — verification fragile
+if (element.style.display !== 'none') {
+    // ne detecte pas .u-hide
+}</pre>
+                    </div>
+                </div>
+            </div>
+
+            <h4>Demo interactive</h4>
+            <div class="demo-box">
+                <button class="btn btn-principal" onclick="document.getElementById('demoTarget').classList.toggle('u-hide')">
+                    Toggle .u-hide
+                </button>
+                <div id="demoTarget" style="margin-top: 10px;">
+                    <div class="demo-toggle-target">
+                        Cet element est visible. Cliquez pour le cacher avec .u-hide
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="guide-component">
+            <h3 class="guide-component-title">Exception : style.display = ''</h3>
+            <p class="guide-component-description">
+                La seule utilisation acceptable de <code>.style.display</code> est le nettoyage
+                d'un style inline residuel herite du code legacy :
+            </p>
+            <div class="guide-code">
+                <pre>// Acceptable — nettoie un style inline legacy
+element.style.display = '';</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 2 : toggleDisplay() -->
+    <!-- ============================================================ -->
+    <div class="guide-section">
+        <h2 class="guide-section-title">2. Helper toggleDisplay(element, show)</h2>
+        <p class="guide-section-intro">
+            Fonction globale definie dans <code>js/main.js</code> (ligne 37).
+            Raccourci null-safe pour ajouter/retirer <code>.u-hide</code>.
+        </p>
+
+        <div class="guide-component">
+            <h3 class="guide-component-title">Signature</h3>
+            <div class="guide-code">
+                <pre>/**
+ * Toggle la visibilite d'un element via la classe CSS .u-hide.
+ * @param {HTMLElement|null} element - L'element a montrer/cacher
+ * @param {boolean} show - true pour montrer, false pour cacher
+ */
+window.toggleDisplay = function(element, show) {
+    if (!element) return;
+    if (show) {
+        element.classList.remove('u-hide');
+    } else {
+        element.classList.add('u-hide');
+    }
+};</pre>
+            </div>
+
+            <div class="guide-specs">
+                <div class="guide-specs-title">Quand utiliser</div>
+                <ul>
+                    <li>Affichage conditionnel : <code>toggleDisplay(el, condition)</code></li>
+                    <li>Remplace les ternaires : <code>el.style.display = cond ? 'block' : 'none'</code></li>
+                    <li>Null-safe : pas besoin de verifier <code>if (el)</code> avant l'appel</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="guide-component">
+            <h3 class="guide-component-title">Exemples</h3>
+            <div class="guide-do-dont">
+                <div class="guide-do">
+                    <div class="guide-do-title">FAIRE</div>
+                    <div class="guide-code">
+                        <pre>// Conditionnel
+toggleDisplay(btnSauver, hasChanges);
+toggleDisplay(msgErreur, !isValid);
+
+// Avec querySelector (null-safe)
+toggleDisplay(
+    document.getElementById('zoneStats'),
+    data.length > 0
+);</pre>
+                    </div>
+                </div>
+                <div class="guide-dont">
+                    <div class="guide-dont-title">NE PAS FAIRE</div>
+                    <div class="guide-code">
+                        <pre>// INTERDIT — ternaire inline
+el.style.display = cond ? 'flex' : 'none';
+
+// INTERDIT — condition manuelle
+if (hasChanges) {
+    btnSauver.style.display = 'block';
+} else {
+    btnSauver.style.display = 'none';
+}</pre>
+                    </div>
+                </div>
+            </div>
+
+            <h4>Demo interactive</h4>
+            <div class="demo-box">
+                <label>
+                    <input type="checkbox" id="demoCheckbox" checked
+                           onchange="toggleDisplay(document.getElementById('demoConditional'), this.checked)">
+                    Afficher la zone conditionnelle
+                </label>
+                <div id="demoConditional" style="margin-top: 10px;">
+                    <div class="demo-toggle-target">
+                        Zone affichee conditionnellement via toggleDisplay()
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 3 : .modal-overlay.actif -->
+    <!-- ============================================================ -->
+    <div class="guide-section">
+        <h2 class="guide-section-title">3. Pattern modal : .modal-overlay.actif</h2>
+        <p class="guide-section-intro">
+            Les modals utilisent la classe <code>.actif</code> sur le <code>.modal-overlay</code>
+            pour s'afficher. Ce pattern est defini dans <code>styles.css</code> lignes 2774-2789.
+        </p>
+
+        <div class="guide-component">
+            <h3 class="guide-component-title">CSS (dans styles.css)</h3>
+            <div class="guide-code">
+                <pre>.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.modal-overlay.actif {
+    display: block;
+}</pre>
+            </div>
+        </div>
+
+        <div class="guide-component">
+            <h3 class="guide-component-title">Utilisation JS</h3>
+            <div class="guide-do-dont">
+                <div class="guide-do">
+                    <div class="guide-do-title">FAIRE</div>
+                    <div class="guide-code">
+                        <pre>// Ouvrir un modal
+overlay.classList.add('actif');
+
+// Fermer un modal
+overlay.classList.remove('actif');</pre>
+                    </div>
+                </div>
+                <div class="guide-dont">
+                    <div class="guide-dont-title">NE PAS FAIRE</div>
+                    <div class="guide-code">
+                        <pre>// INTERDIT
+overlay.style.display = 'block';
+overlay.style.display = 'none';
+
+// INTERDIT — ne pas utiliser .u-hide
+// pour les .modal-overlay
+overlay.classList.remove('u-hide');</pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="guide-specs">
+                <div class="guide-specs-title">Attention</div>
+                <ul>
+                    <li><code>.modal-overlay</code> utilise <code>.actif</code>, PAS <code>.u-hide</code></li>
+                    <li><code>.u-hide</code> est pour les elements normaux, <code>.actif</code> pour les modals</li>
+                    <li>Ne jamais mettre <code>style="display:none"</code> sur un <code>.modal-overlay</code> en HTML</li>
+                </ul>
+            </div>
+
+            <h4>Demo</h4>
+            <div class="demo-box">
+                <button class="btn btn-principal" onclick="document.getElementById('demoModal').classList.add('actif')">
+                    Ouvrir le modal
+                </button>
+                <div id="demoModal" class="modal-overlay" style="position: relative; height: 200px; z-index: auto;">
+                    <div class="modal-contenu" style="position: relative; margin: 30px auto; max-width: 400px;">
+                        <div class="modal-entete">
+                            <h3>Modal de demonstration</h3>
+                            <button class="btn-fermer" onclick="document.getElementById('demoModal').classList.remove('actif')">&times;</button>
+                        </div>
+                        <div class="modal-corps">
+                            <p>Ce modal utilise <code>.classList.add('actif')</code> pour s'afficher.</p>
+                        </div>
+                        <div class="modal-pied">
+                            <button class="btn btn-annuler" onclick="document.getElementById('demoModal').classList.remove('actif')">Fermer</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 4 : .info-box -->
+    <!-- ============================================================ -->
+    <div class="guide-section">
+        <h2 class="guide-section-title">4. Boites d'information .info-box</h2>
+        <p class="guide-section-intro">
+            Classes utilitaires pour les messages contextuels. Definies dans
+            <code>styles.css</code> lignes 2462-2484. Remplacent les anciens styles inline
+            <code>style="background: #fff3cd; border-left: 4px solid..."</code>.
+        </p>
+
+        <div class="guide-component">
+            <h3 class="guide-component-title">Variantes</h3>
+
+            <div class="guide-example">
+                <div class="guide-example-title">Toutes les variantes</div>
+
+                <div class="info-box info-box--attention" style="margin-bottom: 12px;">
+                    <strong>Attention :</strong> Ceci est un avertissement. Classe <code>.info-box--attention</code>
+                </div>
+
+                <div class="info-box info-box--info" style="margin-bottom: 12px;">
+                    <strong>Information :</strong> Ceci est une info. Classe <code>.info-box--info</code>
+                </div>
+
+                <div class="info-box info-box--succes" style="margin-bottom: 12px;">
+                    <strong>Succes :</strong> Operation reussie. Classe <code>.info-box--succes</code>
+                </div>
+
+                <div class="info-box info-box--erreur">
+                    <strong>Erreur :</strong> Quelque chose a echoue. Classe <code>.info-box--erreur</code>
+                </div>
+            </div>
+        </div>
+
+        <div class="guide-component">
+            <h3 class="guide-component-title">Code</h3>
+            <div class="guide-code">
+                <pre>&lt;!-- Avertissement --&gt;
+&lt;div class="info-box info-box--attention"&gt;
+    &lt;strong&gt;Attention :&lt;/strong&gt; Message ici.
+&lt;/div&gt;
+
+&lt;!-- Information --&gt;
+&lt;div class="info-box info-box--info"&gt;...&lt;/div&gt;
+
+&lt;!-- Succes --&gt;
+&lt;div class="info-box info-box--succes"&gt;...&lt;/div&gt;
+
+&lt;!-- Erreur --&gt;
+&lt;div class="info-box info-box--erreur"&gt;...&lt;/div&gt;</pre>
+            </div>
+
+            <div class="guide-code">
+                <div class="guide-code-title">CSS (styles.css)</div>
+                <pre>.info-box {
+    padding: 12px 15px;
+    border-left: 4px solid;
+    border-radius: var(--radius-moyen);
+    margin-bottom: 12px;
+}
+.info-box--attention { background: #fff3cd; border-color: var(--btn-annuler); color: #856404; }
+.info-box--info     { background: var(--bleu-tres-pale); border-color: var(--bleu-moyen); }
+.info-box--succes   { background: #d4edda; border-color: var(--vert-succes); }
+.info-box--erreur   { background: #f8d7da; border-color: var(--rouge-erreur); }</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 5 : .badge-source -->
+    <!-- ============================================================ -->
+    <div class="guide-section">
+        <h2 class="guide-section-title">5. Badges source .badge-source</h2>
+        <p class="guide-section-intro">
+            Indicateurs visuels pour l'origine des productions. Definis dans
+            <code>styles.css</code> lignes 2487-2504. Remplacent les anciens
+            <code>style="background: #4caf50; color: white; padding: 2px 6px;"</code>.
+        </p>
+
+        <div class="guide-component">
+            <h3 class="guide-component-title">Variantes</h3>
+
+            <div class="guide-example">
+                <div class="guide-example-title">Tous les badges</div>
+                <div class="demo-row">
+                    <span class="badge-source badge-source--locale">Locale</span>
+                    <span class="badge-source badge-source--bibliotheque">Bibliotheque</span>
+                    <span class="badge-source badge-source--retiree">Retiree</span>
+                    <span class="badge-source badge-source--id">ID-12345</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="guide-component">
+            <h3 class="guide-component-title">Code</h3>
+            <div class="guide-code">
+                <pre>&lt;span class="badge-source badge-source--locale"&gt;Locale&lt;/span&gt;
+&lt;span class="badge-source badge-source--bibliotheque"&gt;Bibliotheque&lt;/span&gt;
+&lt;span class="badge-source badge-source--retiree"&gt;Retiree&lt;/span&gt;
+&lt;span class="badge-source badge-source--id"&gt;ID-12345&lt;/span&gt;</pre>
+            </div>
+
+            <div class="guide-code">
+                <div class="guide-code-title">CSS (styles.css)</div>
+                <pre>.badge-source {
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.75em;
+    font-weight: 600;
+}
+.badge-source--locale       { background: var(--vert-succes); }
+.badge-source--bibliotheque { background: var(--bleu-clair); }
+.badge-source--retiree      { background: var(--orange-accent); }
+.badge-source--id           { background: #e0e0e0; color: #666; font-family: monospace; }</pre>
+            </div>
+
+            <div class="guide-specs">
+                <div class="guide-specs-title">Contexte d'utilisation</div>
+                <ul>
+                    <li><code>--locale</code> : Production creee directement par l'enseignant</li>
+                    <li><code>--bibliotheque</code> : Production importee depuis une bibliotheque partagee</li>
+                    <li><code>--retiree</code> : Production retiree de la bibliotheque</li>
+                    <li><code>--id</code> : Identifiant technique (debug/admin)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- RESUME -->
+    <!-- ============================================================ -->
+    <div class="guide-section">
+        <h2 class="guide-section-title">Resume des conventions Beta 97.1</h2>
+
+        <div class="guide-component">
+            <h3 class="guide-component-title">Tableau recapitulatif</h3>
+            <table class="guide-table">
+                <thead>
+                    <tr>
+                        <th>Pattern</th>
+                        <th>Utilisation</th>
+                        <th>Fichier source</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>.u-hide</code></td>
+                        <td>Cacher/montrer un element standard</td>
+                        <td><code>styles.css:343</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>toggleDisplay(el, bool)</code></td>
+                        <td>Show/hide conditionnel (null-safe)</td>
+                        <td><code>js/main.js:37</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>.modal-overlay.actif</code></td>
+                        <td>Ouvrir/fermer un modal</td>
+                        <td><code>styles.css:2787</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>.info-box--*</code></td>
+                        <td>Messages contextuels (attention, info, succes, erreur)</td>
+                        <td><code>styles.css:2462</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>.badge-source--*</code></td>
+                        <td>Origine des productions (locale, bibliotheque, retiree, id)</td>
+                        <td><code>styles.css:2487</code></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// toggleDisplay est normalement dans main.js, mais comme ce module
+// est autonome (ouvert directement dans le navigateur), on le redefinit ici.
+if (typeof window.toggleDisplay !== 'function') {
+    window.toggleDisplay = function(element, show) {
+        if (!element) return;
+        if (show) {
+            element.classList.remove('u-hide');
+        } else {
+            element.classList.add('u-hide');
+        }
+    };
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 6a : Règles emojis (CRITIQUE) - Design System v7</title>
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="guide-common.css">
+</head>
+<body>
+<div class="guide-header">
+<h1>Module 6a : Règles emojis (CRITIQUE)</h1>
+<p>Liste autorisée • Interdictions • Usage</p>
+<div class="guide-header-nav">
+<a href="05-patterns-pedagogiques.html">← Module 5 : Patterns pédagogiques</a>
+<a href="design-system-index.html">Retour à l'index</a>
+<a href="06b-toggles.html">Module 6b : Toggles →</a>
+</div>
+</div>
+<div class="guide-container">
+        <h2 class="guide-section-title">6. Composants interactifs</h2>
+        <p class="guide-section-intro">
+            Composants dynamiques pour afficher/masquer du contenu et fournir des informations contextuelles.
+        </p>
+
+        <!-- RÈGLE IMPORTANTE SUR LES EMOJIS -->
+        <div class="guide-component" style="border: 3px solid #dc2626; background: #fef2f2;">
+            <h3 class="guide-component-title" style="color: #dc2626;">&#x26A0;&#xFE0F; RÈGLE CRITIQUE : Usage des emojis</h3>
+
+            <div class="guide-specs" style="background: white; margin-bottom: 20px;">
+                <div class="guide-specs-title" style="color: #dc2626;">ðŸš« Restriction stricte</div>
+                <ul>
+                    <li><strong>Les SEULS emojis autorisés dans l'application :</strong></li>
+                    <li style="margin-left: 20px;"><strong>Toggles d'information :</strong></li>
+                    <li style="margin-left: 40px;">&#x1F4A1; (ampoule) - Toggle pour conseils pratiques</li>
+                    <li style="margin-left: 40px;">ðŸ“ (équerre) - Toggle pour informations techniques</li>
+                    <li style="margin-left: 40px;">ðŸŽ (pomme rouge) - Toggle pour informations pédagogiques</li>
+                    <li style="margin-left: 20px;"><strong>Messages d'alerte :</strong></li>
+                    <li style="margin-left: 40px;">&#x26A0;&#xFE0F; (triangle avertissement) - Alertes dans les modals uniquement</li>
+                    <li><strong>AUCUN autre emoji ne doit être utilisé ailleurs dans l'application</strong></li>
+                </ul>
+            </div>
+
+            <div class="guide-do-dont">
+                <div class="guide-dont">
+                    <div class="guide-dont-title">âŒ INTERDIT</div>
+                    <ul style="margin: 10px 0 0 0; padding-left: 20px;">
+                        <li>Emojis dans les boutons (ðŸ“¤ Exporter, ðŸ“¥ Importer, etc.)</li>
+                        <li>Emojis dans les titres de sections (&#x1F4CF;� Statistiques, etc.)</li>
+                        <li>Emojis dans les en-têtes (ðŸ’¾ Backup, etc.)</li>
+                        <li>Emojis dans les labels ou textes descriptifs</li>
+                        <li>Emojis dans les messages inline (hors modals)</li>
+                        <li>Tout autre emoji non listé dans les autorisés</li>
+                    </ul>
+                </div>
+                <div class="guide-do">
+                    <div class="guide-do-title">âœ… AUTORISÉ</div>
+                    <ul style="margin: 10px 0 0 0; padding-left: 20px;">
+                        <li>&#x1F4A1;ðŸ“ðŸŽ Comme toggles cliquables</li>
+                        <li>&#x1F4A1;ðŸ“ðŸŽ Dans le titre intégré de la carte toggle</li>
+                        <li>&#x26A0;&#xFE0F; Dans les messages d'alerte des modals</li>
+                        <li>Texte simple sans emojis partout ailleurs</li>
+                        <li>Icônes CSS/SVG si nécessaire (non-emoji)</li>
+                        <li>Classes CSS pour symboles visuels</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="guide-specs" style="background: #fffbea; border-left: 4px solid #d97706; margin-top: 20px;">
+                <div class="guide-specs-title" style="color: #d97706;">&#x1F4A1; Justification</div>
+                <ul>
+                    <li><strong>Cohérence visuelle :</strong> Les emojis &#x1F4A1;ðŸ“ðŸŽ deviennent des symboles reconnaissables pour l'information contextuelle</li>
+                    <li><strong>Clarté fonctionnelle :</strong> Chaque emoji a un rôle précis et unique (toggles ou alertes)</li>
+                    <li><strong>Professionnalisme :</strong> Évite la surcharge visuelle et le manque de sérieux</li>
+                    <li><strong>Accessibilité :</strong> Les lecteurs d'écran gèrent mieux le texte simple</li>
+                    <li><strong>Maintenance :</strong> Règle claire et facile Ã  respecter pour tous les développeurs</li>
+                    <li><strong>Exception &#x26A0;&#xFE0F; :</strong> Symbole universel d'avertissement, réservé aux messages critiques dans les modals</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="guide-component">
+            <h3 class="guide-component-title">Toggle avec carte de conseil pratique</h3>
+            <p class="guide-component-description">
+                Toggle cliquable avec emoji sur la ligne de titre, affichant une carte style post-it jaune pour les conseils pratiques.
+            </p>
+
+            <div class="guide-example">
+                <div style="background: #f9f9f9; padding: 20px; border-radius: 8px;">
+                    <span class="emoji-toggle" onclick="toggleCard(this)" style="cursor: pointer; user-select: none; font-size: 1.5rem;">&#x1F4A1;</span>
+                    <div class="carte-info-toggle carte-info-note" style="display: none;">
+                        <div class="carte-info-toggle-titre">
+                            <span class="emoji">&#x1F4A1;</span>
+                            <span class="texte">Conseil pratique :</span>
+                        </div>
+                        <ul>
+                            <li><strong>Cours actif :</strong> Un seul cours peut être actif Ã  la fois. Le cours actif est utilisé comme référence dans toute l'application</li>
+                            <li><strong>Verrouillage :</strong> Verrouillez un cours terminé pour éviter les modifications accidentelles</li>
+                            <li><strong>Duplication :</strong> Dupliquez un cours pour créer rapidement une nouvelle session en modifiant seulement l'année</li>
+                            <li><strong>Code de cours :</strong> Format habituel : XXX-XXX-XX (département-numéro-pondération)</li>
+                            <li><strong>Format horaire :</strong> Définit comment les heures sont réparties dans la semaine (utilisé pour le calendrier)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="guide-specs">
+                <div class="guide-specs-title">ðŸ“ Spécifications</div>
+                <ul>
+                    <li><strong>Toggle:</strong> Emoji cliquable (&#x1F4A1;) seul, en dehors de la carte</li>
+                    <li><strong>Titre:</strong> Intégré dans la carte avec emoji + texte en orange (#d97706)</li>
+                    <li><strong>Carte:</strong> Fond jaune post-it (#fffbea)</li>
+                    <li><strong>Bordure gauche:</strong> 4px solide jaune (#f5c842), droite (pas de coins arrondis Ã  gauche)</li>
+                    <li><strong>Coins:</strong> Arrondis uniquement Ã  droite (6px)</li>
+                    <li><strong>Animation:</strong> Slide-down smooth (0.3s ease)</li>
+                    <li><strong>État initial:</strong> Caché (display: none)</li>
+                </ul>
+            </div>
+
+            <div class="guide-code-title">Code HTML</div>
+            <div class="guide-code">&lt;!-- Emoji toggle en dehors de la carte --&gt;
+&lt;span class="emoji-toggle" onclick="toggleCard(this)"&gt;&#x1F4A1;&lt;/span&gt;
+
+&lt;!-- Carte avec titre intégré --&gt;
+&lt;div class="carte-info-toggle carte-info-note" style="display: none;"&gt;
+    &lt;div class="carte-info-toggle-titre"&gt;
+        &lt;span class="emoji"&gt;&#x1F4A1;&lt;/span&gt;
+        &lt;span class="texte"&gt;Conseil pratique :&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;ul&gt;
+        &lt;li&gt;&lt;strong&gt;Point 1 :&lt;/strong&gt; Description...&lt;/li&gt;
+        &lt;li&gt;&lt;strong&gt;Point 2 :&lt;/strong&gt; Description...&lt;/li&gt;
+    &lt;/ul&gt;
+&lt;/div&gt;</div>
+
+            <div class="guide-code-title">Code JavaScript</div>
+            <div class="guide-code">function toggleCard(emoji) {
+    const card = emoji.nextElementSibling;
+    if (card.style.display === 'none' || !card.style.display) {
+        card.style.display = 'block';
+        card.style.animation = 'slideDown 0.3s ease';
+    } else {
+        card.style.display = 'none';
+    }
+}</div>
+        </div>
+
+        <div class="guide-component">
+            <h3 class="guide-component-title">Toggle avec carte d'information technique</h3>
+            <p class="guide-component-description">
+                Toggle cliquable avec emoji sur la ligne de titre, affichant une carte style spécification verte pour les informations techniques, procédures ou spécifications particulières.
+            </p>
+
+            <div class="guide-example">
+                <div style="background: #f9f9f9; padding: 20px; border-radius: 8px;">
+                    <span class="emoji-toggle" onclick="toggleCard(this)" style="cursor: pointer; user-select: none; font-size: 1.5rem;">ðŸ“</span>
+                    <div class="carte-info-toggle carte-info-conseil" style="display: none;">
+                        <div class="carte-info-toggle-titre">
+                            <span class="emoji">ðŸ“</span>
+                            <span class="texte">Spécifications techniques :</span>
+                        </div>
+                        <ul>
+                            <li><strong>Format des dates :</strong> Le système utilise le format ISO 8601 (YYYY-MM-DD) pour assurer la compatibilité entre navigateurs</li>
+                            <li><strong>Stockage local :</strong> Toutes les données sont sauvegardées dans localStorage du navigateur (5-10 Mo disponibles)</li>
+                            <li><strong>Calcul automatique :</strong> Les indices A-C-P sont recalculés Ã  chaque modification de données pertinentes</li>
+                            <li><strong>Compatibilité :</strong> Testé sur Safari, Chrome, Firefox et Edge (versions récentes)</li>
+                            <li><strong>Backup recommandé :</strong> Exporter régulièrement vos données via Réglages â†’ Import/Export</li>
+                        </ul>
+                    </div>
+                </div>
+            </div></div>
+</body>
+</html>

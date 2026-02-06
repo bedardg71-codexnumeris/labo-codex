@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 6b : Toggles d'information - Design System v7</title>
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="guide-common.css">
+</head>
+<body>
+<div class="guide-header">
+<h1>Module 6b : Toggles d'information</h1>
+<p>Conseils • Spécifications • Pédagogie</p>
+<div class="guide-header-nav">
+<a href="06a-emojis-CRITIQUE.html">← Module 6a : Règles emojis</a>
+<a href="design-system-index.html">Retour à l'index</a>
+<a href="06c-alertes.html">Module 6c : Alertes →</a>
+</div>
+</div>
+<div class="guide-container">
+
+            <div class="guide-specs">
+                <div class="guide-specs-title">ðŸ“ Spécifications</div>
+                <ul>
+                    <li><strong>Toggle:</strong> Emoji cliquable (ðŸ“) seul, en dehors de la carte</li>
+                    <li><strong>Titre:</strong> Intégré dans la carte avec emoji + texte en vert (#16a34a)</li>
+                    <li><strong>Carte:</strong> Fond vert pâle (#f0fdf4)</li>
+                    <li><strong>Bordure gauche:</strong> 4px solide vert (#4ade80), droite (pas de coins arrondis Ã  gauche)</li>
+                    <li><strong>Coins:</strong> Arrondis uniquement Ã  droite (6px)</li>
+                    <li><strong>Animation:</strong> Slide-down smooth (0.3s ease)</li>
+                    <li><strong>État initial:</strong> Caché (display: none)</li>
+                    <li><strong>Usage:</strong> Informations techniques, procédures, spécifications particulières</li>
+                </ul>
+            </div>
+
+            <div class="guide-code-title">Code HTML</div>
+            <div class="guide-code">&lt;!-- Emoji toggle en dehors de la carte --&gt;
+&lt;span class="emoji-toggle" onclick="toggleCard(this)"&gt;ðŸ“&lt;/span&gt;
+
+&lt;!-- Carte avec titre intégré --&gt;
+&lt;div class="carte-info-toggle carte-info-conseil" style="display: none;"&gt;
+    &lt;div class="carte-info-toggle-titre"&gt;
+        &lt;span class="emoji"&gt;ðŸ“&lt;/span&gt;
+        &lt;span class="texte"&gt;Spécifications techniques :&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;ul&gt;
+        &lt;li&gt;&lt;strong&gt;Point 1 :&lt;/strong&gt; Description technique...&lt;/li&gt;
+        &lt;li&gt;&lt;strong&gt;Point 2 :&lt;/strong&gt; Procédure...&lt;/li&gt;
+    &lt;/ul&gt;
+&lt;/div&gt;</div>
+
+            <div class="guide-specs" style="margin-top: 20px;">
+                <div class="guide-specs-title">&#x1F3A8; Différences visuelles entre les trois types</div>
+                <ul>
+                    <li><strong>Carte pratique (&#x1F4A1;):</strong> Fond jaune (#fffbea), bordure jaune (#f5c842), titre orange (#d97706)</li>
+                    <li><strong>Carte technique (ðŸ“):</strong> Fond vert pâle (#f0fdf4), bordure verte (#4ade80), titre vert (#16a34a)</li>
+                    <li><strong>Carte pédagogique (ðŸŽ):</strong> Fond rouge pâle (#fef2f2), bordure rouge (#f87171), titre rouge (#dc2626)</li>
+                    <li><strong>Usage recommandé:</strong> Pratique pour conseils d'utilisation, Technique pour spécifications et procédures, Pédagogique pour concepts et stratégies d'enseignement</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="guide-component">
+            <h3 class="guide-component-title">Toggle avec carte d'information pédagogique</h3>
+            <p class="guide-component-description">
+                Toggle cliquable avec emoji sur la ligne de titre, affichant une carte style pédagogique rouge pour les concepts d'enseignement, stratégies pédagogiques ou principes didactiques.
+            </p>
+
+            <div class="guide-example">
+                <div style="background: #f9f9f9; padding: 20px; border-radius: 8px;">
+                    <span class="emoji-toggle" onclick="toggleCard(this)" style="cursor: pointer; user-select: none; font-size: 1.5rem;">ðŸŽ</span>
+                    <div class="carte-info-toggle carte-info-pedagogique" style="display: none;">
+                        <div class="carte-info-toggle-titre">
+                            <span class="emoji">ðŸŽ</span>
+                            <span class="texte">Principe pédagogique :</span>
+                        </div>
+                        <ul>
+                            <li><strong>Rétroaction formative :</strong> Fournir des commentaires réguliers pour orienter l'apprentissage plutôt que simplement évaluer</li>
+                            <li><strong>Zone proximale de développement :</strong> Proposer des défis légèrement au-dessus du niveau actuel de l'étudiant</li>
+                            <li><strong>Métacognition :</strong> Encourager la réflexion sur ses propres processus d'apprentissage</li>
+                            <li><strong>Apprentissage actif :</strong> Privilégier la manipulation, l'expérimentation et la construction de connaissances</li>
+                            <li><strong>Différenciation :</strong> Adapter les approches selon les besoins et styles d'apprentissage de chaque étudiant</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="guide-specs">
+                <div class="guide-specs-title">ðŸ“ Spécifications</div>
+                <ul>
+                    <li><strong>Toggle:</strong> Emoji cliquable (ðŸŽ) seul, en dehors de la carte</li>
+                    <li><strong>Titre:</strong> Intégré dans la carte avec emoji + texte en rouge (#dc2626)</li>
+                    <li><strong>Carte:</strong> Fond rouge pâle (#fef2f2)</li>
+                    <li><strong>Bordure gauche:</strong> 4px solide rouge (#f87171), droite (pas de coins arrondis Ã  gauche)</li>
+                    <li><strong>Coins:</strong> Arrondis uniquement Ã  droite (6px)</li>
+                    <li><strong>Animation:</strong> Slide-down smooth (0.3s ease)</li>
+                    <li><strong>État initial:</strong> Caché (display: none)</li>
+                    <li><strong>Usage:</strong> Concepts pédagogiques, stratégies d'enseignement, principes didactiques</li>
+                </ul>
+            </div>
+
+            <div class="guide-code-title">Code HTML</div>
+            <div class="guide-code">&lt;!-- Emoji toggle en dehors de la carte --&gt;
+&lt;span class="emoji-toggle" onclick="toggleCard(this)"&gt;ðŸŽ&lt;/span&gt;
+
+&lt;!-- Carte avec titre intégré --&gt;
+&lt;div class="carte-info-toggle carte-info-pedagogique" style="display: none;"&gt;
+    &lt;div class="carte-info-toggle-titre"&gt;
+        &lt;span class="emoji"&gt;ðŸŽ&lt;/span&gt;
+        &lt;span class="texte"&gt;Principe pédagogique :&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;ul&gt;
+        &lt;li&gt;&lt;strong&gt;Concept 1 :&lt;/strong&gt; Explication pédagogique...&lt;/li&gt;
+        &lt;li&gt;&lt;strong&gt;Stratégie 2 :&lt;/strong&gt; Approche didactique...&lt;/li&gt;
+    &lt;/ul&gt;
+&lt;/div&gt;</div>
+        </div>
+    </section>
+
+    <!-- ===================== -->
+    <!-- 7. NAVIGATION -->
+    <!-- ===================== -->
+    <section id="navigation" class="guide-section"></div>
+</body>
+</html>
