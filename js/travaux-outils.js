@@ -15,15 +15,19 @@
        =============================== */
 
     const COULEURS = [
-        { id: 'rouge',  hex: '#FF0000', nom: 'Rouge' },
-        { id: 'bleu',   hex: '#0066FF', nom: 'Bleu' },
-        { id: 'vert',   hex: '#00AA00', nom: 'Vert' },
-        { id: 'orange', hex: '#FF8800', nom: 'Orange' },
-        { id: 'noir',   hex: '#000000', nom: 'Noir' },
-        { id: 'violet', hex: '#8800CC', nom: 'Violet' }
+        { id: 'orange',      hex: '#ff8c00', nom: 'Orange' },
+        { id: 'vert-lime',   hex: '#98d025', nom: 'Vert lime' },
+        { id: 'vert',        hex: '#22c55e', nom: 'Vert' },
+        { id: 'sarcelle',    hex: '#14b8a6', nom: 'Sarcelle' },
+        { id: 'cyan',        hex: '#0ea5e9', nom: 'Cyan' },
+        { id: 'bleu',        hex: '#3b82f6', nom: 'Bleu' },
+        { id: 'indigo',      hex: '#6366f1', nom: 'Indigo' },
+        { id: 'violet',      hex: '#8b5cf6', nom: 'Violet' },
+        { id: 'pourpre',     hex: '#6b21a8', nom: 'Pourpre' },
+        { id: 'noir',        hex: '#000000', nom: 'Noir' }
     ];
 
-    const COULEUR_DEFAUT = '#FF0000'; // Rouge
+    const COULEUR_DEFAUT = '#ff8c00'; // Orange
 
     /* ===============================
        OUTILS
