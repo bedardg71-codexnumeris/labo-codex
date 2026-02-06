@@ -188,7 +188,7 @@
         }
 
         return `
-            <label style="display: block; margin-bottom: 5px; color: #555; font-weight: 500;">
+            <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">
                 Filtrer par pratique de notation :
             </label>
             <select id="${idFiltre}"
@@ -216,9 +216,9 @@
                 <div class="gabarits-section">
                     <h4 style="margin-top: 15px; margin-bottom: 10px; color: #6f42c1; display: flex; align-items: center; gap: 8px;">
                         <span style="font-size: 1.1rem;">Gabarits</span>
-                        <span style="font-size: 0.8rem; color: #999; font-weight: normal;">(formulaires pré-configurés)</span>
+                        <span style="font-size: 0.8rem; color: var(--gris-clair); font-weight: normal;">(formulaires pré-configurés)</span>
                     </h4>
-                    <p style="color: #999; font-style: italic; font-size: 0.9rem;">
+                    <p style="color: var(--gris-clair); font-style: italic; font-size: 0.9rem;">
                         Aucun gabarit disponible pour cette pratique
                     </p>
                 </div>
@@ -229,7 +229,7 @@
             <div class="gabarits-section">
                 <h4 style="margin-top: 15px; margin-bottom: 10px; color: #6f42c1; display: flex; align-items: center; gap: 8px;">
                     <span style="font-size: 1.1rem;">Gabarits</span>
-                    <span style="font-size: 0.8rem; color: #999; font-weight: normal;">(formulaires pré-configurés)</span>
+                    <span style="font-size: 0.8rem; color: var(--gris-clair); font-weight: normal;">(formulaires pré-configurés)</span>
                 </h4>
         `;
 
@@ -255,9 +255,9 @@
                         <div style="flex: 1;">
                             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
                                 ${badges}
-                                <span style="font-weight: 600; color: #2c3e50;">${nom}</span>
+                                <span style="font-weight: 600; color: var(--bleu-principal);">${nom}</span>
                             </div>
-                            ${description ? `<div style="font-size: 0.85rem; color: #666;">${description}</div>` : ''}
+                            ${description ? `<div style="font-size: 0.85rem; color: var(--gris-moyen);">${description}</div>` : ''}
                         </div>
                         <div style="color: #6f42c1; font-size: 1.2rem; margin-left: 10px;">
                             →

@@ -1475,14 +1475,28 @@
             z-index: 0;
         }
 
-        /* BETA 96.2: Bulles avec effet sphère 3D identique aux points du tableau de bord
-           + Effet parallaxe : grandes=rapides (proches), petites=lentes (éloignées)
-           Référence: styles.css .barre-etudiant */
-        .bulle {
+        /* BETA 97.1: Bulles avec mouvement hélicoïdal
+           Structure imbriquée : enveloppe (dérive) + bulle intérieure (spin)
+           La dérive horizontale (floatUp) + l'oscillation verticale (bulle-helice)
+           créent un mouvement hélicoïdal autour de l'axe de dérive.
+           Référence: styles.css .barre-etudiant (animation float-vertical) */
+
+        /* Enveloppe de trajectoire — dérive de gauche à droite */
+        .bulle-trajectoire {
             position: absolute;
-            border-radius: 50%;
             animation: floatUp 30s infinite linear;
-            /* Effet sphère : gradient radial avec highlight en haut-gauche */
+        }
+
+        /* Tailles sur l'enveloppe (dimensionnement + parallaxe) */
+        .bulle-trajectoire.petite { width: 8px; height: 8px; }
+        .bulle-trajectoire.moyenne { width: 12px; height: 12px; }
+        .bulle-trajectoire.grande { width: 16px; height: 16px; }
+
+        /* Bulle intérieure — apparence sphère 3D + spin hélicoïdal */
+        .bulle {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
             background: radial-gradient(
                 circle at 30% 30%,
                 #ffffff 0%,
@@ -1490,43 +1504,46 @@
                 #c8d4e0 60%,
                 #a0b0c0 100%
             );
+            animation: bulle-helice var(--spin-duration, 5s) ease-in-out infinite;
+            animation-delay: var(--spin-delay, 0s);
         }
 
-        /* Tailles variées + vitesses pour effet parallaxe
-           Grande = proche = rapide (20-30s)
-           Moyenne = milieu = normal (40-50s)
-           Petite = loin = lente (60-80s) */
-        .bulle.petite {
-            width: 8px;
-            height: 8px;
-            /* Loin = lent, ombre plus petite, plus transparent */
+        /* Ombres + paramètres spin par taille (parallaxe)
+           Grande = proche = spin rapide + amplitude large
+           Petite = loin = spin lent + amplitude faible */
+        .bulle-trajectoire.petite .bulle {
             box-shadow:
                 1px 1.5px 3px rgba(0, 0, 0, 0.3),
                 inset 0 -0.5px 1px rgba(0, 0, 0, 0.1);
-            opacity: 0.5;
+            --spin-amp: 1.5px;
+            --spin-duration: 7s;
         }
-
-        .bulle.moyenne {
-            width: 12px;
-            height: 12px;
-            /* Distance moyenne */
+        .bulle-trajectoire.moyenne .bulle {
             box-shadow:
                 1.5px 2px 4px rgba(0, 0, 0, 0.35),
                 inset 0 -0.75px 1.5px rgba(0, 0, 0, 0.1);
-            opacity: 0.6;
+            --spin-amp: 2.5px;
+            --spin-duration: 5s;
         }
-
-        .bulle.grande {
-            width: 16px;
-            height: 16px;
-            /* Proche = rapide, ombre plus prononcée */
+        .bulle-trajectoire.grande .bulle {
             box-shadow:
                 2px 3px 6px rgba(0, 0, 0, 0.4),
                 inset 0 -1px 2px rgba(0, 0, 0, 0.1);
-            opacity: 0.7;
+            --spin-amp: 4px;
+            --spin-duration: 3.5s;
         }
 
-        /* Animation organique comme du pollen - mouvement fluide continu avec courbes */
+        /* Spin hélicoïdal : oscillation verticale + pulsation d'échelle + blur
+           Simule la rotation autour de l'axe de dérive (passage devant/derrière) */
+        @keyframes bulle-helice {
+            0%   { transform: translateY(0) scale(1.08); filter: blur(0); }
+            25%  { transform: translateY(calc(var(--spin-amp, 3px) * -1)) scale(1); filter: blur(0.2px); }
+            50%  { transform: translateY(0) scale(0.92); filter: blur(0.35px); }
+            75%  { transform: translateY(var(--spin-amp, 3px)) scale(1); filter: blur(0.2px); }
+            100% { transform: translateY(0) scale(1.08); filter: blur(0); }
+        }
+
+        /* Dérive organique — mouvement fluide continu de gauche à droite */
         @keyframes floatUp {
             0% { transform: translateX(calc(0vw + var(--start-x))) translateY(calc(0vh + var(--start-y))); opacity: 0; }
             5% { transform: translateX(calc(4vw + var(--start-x))) translateY(calc(-2vh + var(--drift-y) * 0.05 + var(--start-y))); opacity: 0.3; }
@@ -3195,9 +3212,9 @@
                 <h2 class="modal-titre">Nouveautés</h2>
 
                 <!-- Beta 97 - 6 février -->
-                <div style="background: linear-gradient(135deg, #e8f5e9 0%, #e3f2fd 100%); border-left: 3px solid #2e7d32; border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
-                    <strong style="color: #1b5e20; display: block; margin-bottom: 8px;">Beta 97 (6 février) - Module Travaux :</strong>
-                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
+                <div class="changelog-entry changelog-entry--vert">
+                    <strong class="changelog-title">Beta 97 (6 février) - Module Travaux :</strong>
+                    <ul class="changelog-list">
                         <li><strong>Nouvel onglet Travaux</strong> : Gestion complète des travaux étudiants directement dans Monitorage (remplace GoodNotes)</li>
                         <li><strong>Import de fichiers</strong> : Glissez vos PDF et images dans la zone de dépôt. Détection automatique du DA étudiant dans le nom du fichier. Association manuelle possible via dropdown.</li>
                         <li><strong>Visionneuse intégrée</strong> : Ouvrez vos PDF et images directement dans l'application. Navigation entre les pages, zoom avant/arrière, ajustement automatique à la fenêtre.</li>
@@ -3211,9 +3228,9 @@
                 </div>
 
                 <!-- Beta 97 - Correctifs - 6 février -->
-                <div style="background: linear-gradient(135deg, #fff8e1 0%, #fff3e0 100%); border-left: 3px solid var(--orange-accent); border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
-                    <strong style="color: #e65100; display: block; margin-bottom: 8px;">Beta 97 (6 février) - 35 correctifs :</strong>
-                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
+                <div class="changelog-entry changelog-entry--orange">
+                    <strong class="changelog-title">Beta 97 (6 février) - 35 correctifs :</strong>
+                    <ul class="changelog-list">
                         <li><strong>Fiabilité des données</strong> : Correction de 5 bugs critiques (clés de stockage incohérentes, collisions d'ID, calcul d'assiduité, format de présences)</li>
                         <li><strong>Calculs corrigés</strong> : Taux de complétion, tendances, mode « récents-meilleurs », statistiques d'archive — tous recalculent correctement</li>
                         <li><strong>Multi-trimestre</strong> : Namespacing renforcé dans ~20 fichiers — les données restent bien isolées par trimestre</li>
@@ -3223,9 +3240,9 @@
                 </div>
 
                 <!-- Beta 96.2 - 4 février -->
-                <div style="background: linear-gradient(135deg, #e3f2fd 0%, #e8eaf6 100%); border-left: 3px solid #1976d2; border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
-                    <strong style="color: #1565c0; display: block; margin-bottom: 8px;">Beta 96.2 (4 février) :</strong>
-                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
+                <div class="changelog-entry changelog-entry--bleu">
+                    <strong class="changelog-title">Beta 96.2 (4 février) :</strong>
+                    <ul class="changelog-list">
                         <li><strong>Notes de présences dans Confidentiel</strong> : Les notes saisies dans la page Présences sont maintenant visibles et éditables dans le modal Confidentiel du profil étudiant (Accompagnement > 🔒 Confidentiel)</li>
                         <li><strong>Nouveau module Gestion des ressources</strong> : Outil dans Réglages > Données > Maintenance pour auditer et nettoyer les ressources accumulées</li>
                         <li><strong>5 types de ressources</strong> : Pratiques de notation, Grilles de critères, Cartouches de rétroaction, Échelles de performance, Productions</li>
@@ -3236,9 +3253,9 @@
                 </div>
 
                 <!-- Beta 96.2 - 1er février -->
-                <div style="background: linear-gradient(135deg, #ffebee 0%, #fce4ec 100%); border-left: 3px solid #e91e63; border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
-                    <strong style="color: #c2185b; display: block; margin-bottom: 8px;">Beta 96.2 (1er février) - Corrections testeurs :</strong>
-                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
+                <div class="changelog-entry changelog-entry--rose">
+                    <strong class="changelog-title">Beta 96.2 (1er février) - Corrections testeurs :</strong>
+                    <ul class="changelog-list">
                         <li><strong>Modal de bienvenue</strong> : Les nouveaux utilisateurs sont accueillis avec un choix : configuration guidée ou exploration libre</li>
                         <li><strong>Animation bulles</strong> : Effet 3D et parallaxe dans l'en-tete (grandes=proches rapides, petites=loin lentes)</li>
                         <li><strong>Suppression grilles corrigée</strong> : Le bouton supprimer dans la barre latérale fonctionne à nouveau</li>
@@ -3252,9 +3269,9 @@
                 </div>
 
                 <!-- Beta 96.2 - 31 janvier (après-midi) -->
-                <div style="background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%); border-left: 3px solid #7c4dff; border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
-                    <strong style="color: #512da8; display: block; margin-bottom: 8px;">Beta 96.2 (31 janvier PM) - Correction registre pratiques :</strong>
-                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
+                <div class="changelog-entry changelog-entry--violet">
+                    <strong class="changelog-title">Beta 96.2 (31 janvier PM) - Correction registre pratiques :</strong>
+                    <ul class="changelog-list">
                         <li><strong>Pratiques configurables corrigées</strong> : Les pratiques créées via l'assistant (wizard) sont maintenant correctement chargées depuis le registre</li>
                         <li><strong>Normalisation des formats</strong> : Fusion automatique des champs racine + config interne pour compatibilité totale</li>
                         <li><strong>Chargement échelles par ID</strong> : Les pratiques référençant une échelle par ID la chargent maintenant depuis la bibliothèque</li>
@@ -3262,9 +3279,9 @@
                 </div>
 
                 <!-- Beta 96.2 - 31 janvier (matin) -->
-                <div style="background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border-left: 3px solid #4caf50; border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
-                    <strong style="color: #2e7d32; display: block; margin-bottom: 8px;">Beta 96.2 (31 janvier AM) - Synchronisation multi-appareils :</strong>
-                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
+                <div class="changelog-entry changelog-entry--vert">
+                    <strong class="changelog-title">Beta 96.2 (31 janvier AM) - Synchronisation multi-appareils :</strong>
+                    <ul class="changelog-list">
                         <li><strong>Import données personnelles corrigé</strong> : L'import sur un nouvel appareil (iPad, nouveau PC) fonctionne maintenant. Cochez "C'est ma propre sauvegarde" et les cases Étudiants/Présences/Notes se cochent automatiquement.</li>
                         <li><strong>Préservation des IDs</strong> : Les pratiques, grilles, échelles et productions conservent leurs IDs originaux lors de l'import (plus de références cassées)</li>
                         <li><strong>Import données calendrier</strong> : Les bornes du trimestre, horaires et événements sont maintenant importés correctement</li>
@@ -3273,9 +3290,9 @@
                 </div>
 
                 <!-- Beta 96.2 - 30 janvier -->
-                <div style="background: linear-gradient(135deg, #fff3e0 0%, #fff8f0 100%); border-left: 3px solid #ff9800; border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
-                    <strong style="color: #e65100; display: block; margin-bottom: 8px;">Beta 96.2 (30 janvier) - Correction critique Export/Import :</strong>
-                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
+                <div class="changelog-entry changelog-entry--orange">
+                    <strong class="changelog-title">Beta 96.2 (30 janvier) - Correction critique Export/Import :</strong>
+                    <ul class="changelog-list">
                         <li><strong>Export complet depuis IndexedDB</strong> : La "Sauvegarde complète" exporte maintenant TOUTES les données, y compris celles stockées uniquement dans IndexedDB (groupes-cours, horaires, données volumineuses)</li>
                         <li><strong>Import groupe-cours et horaires</strong> : L'import reconnaît maintenant les clés <code>*_groupesCours</code>, <code>*_horaires</code> et <code>enseignants</code></li>
                         <li><strong>Affichage "Structure du trimestre"</strong> : Nouvelle section dans le modal d'import pour visualiser les groupes-cours et horaires avant importation</li>
@@ -3285,9 +3302,9 @@
                 </div>
 
                 <!-- Beta 96.1 - 28 janvier -->
-                <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
-                    <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Beta 96.1 (28 janvier) :</strong>
-                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
+                <div class="changelog-entry changelog-entry--bleu">
+                    <strong class="changelog-title">Beta 96.1 (28 janvier) :</strong>
+                    <ul class="changelog-list">
                         <li><strong>Boîte à outils - Tirage au sort</strong> : Nouvelle section avec un outil pour tirer des étudiants au hasard (animation roulette, mode avec/sans remise, exclusions manuelles, persistance)</li>
                         <li><strong>Questions Flash</strong> : Deuxième outil pour tirer des questions au hasard, avec organisation par catégories, filtre par catégorie, et gestion complète (ajout, modification, suppression, changement de catégorie)</li>
                         <li><strong>Icône Réglages</strong> : Le texte "Réglages" remplacé par une icône d'engrenage dans la navigation principale</li>
@@ -3303,9 +3320,9 @@
                 </div>
 
                 <!-- Beta 96 - 25 janvier -->
-                <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
-                    <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Beta 96 (25 janvier) :</strong>
-                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
+                <div class="changelog-entry changelog-entry--bleu">
+                    <strong class="changelog-title">Beta 96 (25 janvier) :</strong>
+                    <ul class="changelog-list">
                         <li><strong>Uniformisation des graphiques</strong> : Tous les graphiques adoptent le même look et comportement cohérent</li>
                         <li><strong>Échelle Y dynamique</strong> : Les graphiques s'adaptent automatiquement aux données (fini l'échelle fixe 0-100%)</li>
                         <li><strong>Zones IDME dynamiques</strong> : Les zones colorées (Insuffisant, Développement, Maîtrisé, Étendu) utilisent votre échelle personnalisée partout</li>
@@ -3318,9 +3335,9 @@
                 </div>
 
                 <!-- Beta 95.7 - 23 janvier -->
-                <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
-                    <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Beta 95.7 (23 janvier) :</strong>
-                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
+                <div class="changelog-entry changelog-entry--bleu">
+                    <strong class="changelog-title">Beta 95.7 (23 janvier) :</strong>
+                    <ul class="changelog-list">
                         <li><strong>Mode Anonymisé corrigé</strong> : La liste des étudiants s'affiche maintenant correctement en mode anonymisation (le filtrage par groupe utilisait le groupe anonymisé "AN.00001" au lieu du groupe réel)</li>
                         <li><strong>Filtrage présences par groupe-cours</strong> : Les présences sont maintenant correctement isolées par groupe-cours (plus de contamination entre groupes)</li>
                         <li><strong>Calcul moyenne A corrigé</strong> : Chaque groupe affiche sa propre moyenne d'assiduité (pas celle d'un autre groupe)</li>
@@ -3331,9 +3348,9 @@
                 </div>
 
                 <!-- Beta 95.7 - 22 janvier -->
-                <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
-                    <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Beta 95.7 (22 janvier) :</strong>
-                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
+                <div class="changelog-entry changelog-entry--bleu">
+                    <strong class="changelog-title">Beta 95.7 (22 janvier) :</strong>
+                    <ul class="changelog-list">
                         <li><strong>Saisie présences améliorée</strong> : Input numérique remplace le dropdown (permet fractions: 1.5, 2.5...), affichage X/Y pér.</li>
                         <li><strong>Calcul assiduité corrigé</strong> : Formule en périodes (2/2 = 100%, pas 92%). Étudiants absents affichent 0% (pas tiret)</li>
                         <li><strong>Moyenne A du groupe</strong> : Affichée dans l'entête de la liste des étudiants et sur la barre Assiduité du tableau de bord</li>
@@ -3344,9 +3361,9 @@
                 </div>
 
                 <!-- Beta 95.7 - 21 janvier -->
-                <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
-                    <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Beta 95.7 (21 janvier) :</strong>
-                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
+                <div class="changelog-entry changelog-entry--bleu">
+                    <strong class="changelog-title">Beta 95.7 (21 janvier) :</strong>
+                    <ul class="changelog-list">
                         <li><strong>Export PDF grilles descriptives</strong> : Génère un PDF de ta grille avec les rétroactions (grille + échelle + cartouche). Options : orientation, taille police, pied de page personnalisable (enseignant, cours, licence CC)</li>
                         <li><strong>Autocomplétion programmes</strong> : Tapez le code (200, 300, 420...) pour voir les programmes officiels</li>
                         <li><strong>Dropdowns discipline complets</strong> : Liste complète (~120 disciplines) pour les 48 cégeps du Québec</li>
@@ -3357,9 +3374,9 @@
                 </div>
 
                 <!-- Beta 95.6 - Améliorations -->
-                <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
-                    <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Beta 95.6 (19 janvier) — Améliorations :</strong>
-                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
+                <div class="changelog-entry changelog-entry--bleu">
+                    <strong class="changelog-title">Beta 95.6 (19 janvier) — Améliorations :</strong>
+                    <ul class="changelog-list">
                         <li><strong>Boutons 😎 d'aide</strong> : En Mode Assisté, des boutons apparaissent pour expliquer chaque section (14 thèmes couverts)</li>
                         <li><strong>Ordre de configuration clarifié</strong> : Échelles → Pratiques → Grilles → Productions (chaque élément dépend du précédent)</li>
                         <li><strong>Design System v7</strong> : Harmonisation des styles (border-radius, box-shadow) selon la charte graphique</li>
@@ -3375,9 +3392,9 @@
                 </div>
 
                 <!-- Encadré Nouveautés Beta 95.5 -->
-                <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
-                    <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Beta 95.5 (10 janvier) :</strong>
-                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
+                <div class="changelog-entry changelog-entry--bleu">
+                    <strong class="changelog-title">Beta 95.5 (10 janvier) :</strong>
+                    <ul class="changelog-list">
                         <li><strong>Catégories Sélection/Obligatoires</strong> : Nouveau design avec deux cartes et checkboxes pour classer tes productions (N meilleures vs toujours comptées)</li>
                         <li><strong>Métadonnées uniformisées</strong> : Panneau cohérent pour tous les éléments avec titre dynamique</li>
                         <li><strong>Traçabilité contributeurs CC</strong> : Les contributeurs sont automatiquement ajoutés lors des modifications</li>
@@ -3386,9 +3403,9 @@
                 </div>
 
                 <!-- Beta 95.5 - Corrections testeurs -->
-                <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%); border-left: 3px solid #ffc107; border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
-                    <strong style="color: #856404; display: block; margin-bottom: 8px;">Beta 95.5 (18 janvier) — Corrections testeurs :</strong>
-                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6; color: #856404;">
+                <div class="changelog-entry changelog-entry--orange">
+                    <strong class="changelog-title">Beta 95.5 (18 janvier) — Corrections testeurs :</strong>
+                    <ul class="changelog-list">
                         <li><strong>Création d'horaire</strong> : Le bouton fonctionne à nouveau (merci Jordan)</li>
                         <li><strong>Export des données</strong> : Le bouton d'export répond correctement (merci Jordan)</li>
                         <li><strong>Import CSV Omnivox</strong> : Détection intelligente des colonnes (SA, Nom, etc.) quelle que soit leur position (merci Jordan)</li>
@@ -3398,9 +3415,9 @@
                 </div>
 
                 <!-- Beta 95.3 -->
-                <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
-                    <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Beta 95.3 (9 janvier) :</strong>
-                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
+                <div class="changelog-entry changelog-entry--bleu">
+                    <strong class="changelog-title">Beta 95.3 (9 janvier) :</strong>
+                    <ul class="changelog-list">
                         <li><strong>Modal bibliothèque groupe-cours</strong> : Bouton 📚 pour voir, activer ou supprimer tes groupes-cours</li>
                         <li><strong>Synthèses intelligentes</strong> : Chaque accordéon affiche un résumé calculé (nb étudiants, heures/sem, etc.)</li>
                         <li><strong>Import depuis trimestre précédent</strong> : Réutilise tes échelles, grilles et productions</li>
@@ -3409,9 +3426,9 @@
                 </div>
 
                 <!-- Beta 95.2 -->
-                <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%); border-left: 3px solid var(--bleu-principal); border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
-                    <strong style="color: var(--bleu-principal); display: block; margin-bottom: 8px;">Beta 95.2 (6-8 janvier) — Architecture modulaire :</strong>
-                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
+                <div class="changelog-entry changelog-entry--bleu">
+                    <strong class="changelog-title">Beta 95.2 (6-8 janvier) — Architecture modulaire :</strong>
+                    <ul class="changelog-list">
                         <li><strong>Toggles séparés</strong> : Cours, Enseignant·e, Horaire et Groupe-cours sont des entités indépendantes</li>
                         <li><strong>Profil auteur</strong> : Source unique pour les métadonnées CC</li>
                         <li><strong>Assemblage flexible</strong> : Combine cours + enseignant·e + horaire + pratique</li>
@@ -3420,9 +3437,9 @@
                 </div>
 
                 <!-- Beta 95.1 -->
-                <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%); border-left: 3px solid #ffc107; border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
-                    <strong style="color: #856404; display: block; margin-bottom: 8px;">Beta 95.1 (1-5 janvier) — Corrections testeurs :</strong>
-                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6; color: #856404;">
+                <div class="changelog-entry changelog-entry--orange">
+                    <strong class="changelog-title">Beta 95.1 (1-5 janvier) — Corrections testeurs :</strong>
+                    <ul class="changelog-list">
                         <li><strong>Périodes au lieu d'heures</strong> : Format horaire dynamique selon le nombre de périodes (merci Olivier)</li>
                         <li><strong>Finalisation Primo</strong> : L'interface se met à jour après la configuration (merci Olivier)</li>
                         <li><strong>Sauvegarde des grilles</strong> : Les nouvelles grilles s'ajoutent à la bibliothèque (merci Bruno)</li>
@@ -3456,7 +3473,7 @@
                 <h2 class="modal-titre">😎 Premiers pas</h2>
 
                 <!-- Statut application -->
-                <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); border-left: 3px solid #28a745; border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
+                <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); border-left: 3px solid var(--vert-succes); border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
                     <strong style="color: #155724;">✅ Application fonctionnelle pour H2026</strong>
                     <p style="margin: 8px 0 0 0; font-size: 0.9rem; color: #155724;">
                         La section Trimestre est opérationnelle. Tu peux configurer ton trimestre, tes cours,
@@ -3471,13 +3488,13 @@
                     <h4>Tu découvres l'application pour la première fois ?</h4>
                     <p>Pas de panique, tu n'as pas besoin de tout comprendre d'un coup. L'application te propose deux façons d'apprendre à ton rythme.</p>
 
-                    <p style="margin-top: 1rem;"><strong>😎 Primo, ton assistant de configuration</strong><br>
+                    <p class="u-mt-16"><strong>😎 Primo, ton assistant de configuration</strong><br>
                     Une fois en mode Assisté (change de mode d'affichage avec le menu en haut à droite : Normal → Assisté), Primo te pose des questions simples sur ta façon d'enseigner et configure l'application pour toi. Pas de jargon technique, juste des choix pédagogiques que tu comprends déjà. Primo te propose aussi une liste fictive de 10 étudiants pour tester ta propre configuration sans utiliser tes vrais groupes.</p>
 
-                    <p style="margin-top: 1rem;"><strong>Le Mode Assisté avec des données de démonstration</strong><br>
+                    <p class="u-mt-16"><strong>Le Mode Assisté avec des données de démonstration</strong><br>
                     Tu veux voir l'application en action avec des résultats concrets ? Le Mode Assisté offre un groupe de démonstration complet : 5 étudiants fictifs avec 4 productions déjà évaluées, 20 évaluations et 8 semaines de présences. Tu peux explorer le tableau de bord, les profils individuels et toutes les fonctions sans aucun risque. Tes vraies données restent complètement protégées et séparées.</p>
 
-                    <p style="margin-top: 1rem;"><strong>La section AIDE est ton alliée</strong><br>
+                    <p class="u-mt-16"><strong>La section AIDE est ton alliée</strong><br>
                     Tu y trouveras un guide d'utilisation hebdomadaire qui te montre exactement quoi faire chaque semaine, des réponses aux questions fréquentes, et des explications sur chaque fonction.</p>
 
                     <h4 style="margin-top: 1.5rem;">Tu utilises déjà l'application ?</h4>
@@ -3493,9 +3510,9 @@
 
                     <p>Depuis la brève présentation de l'application aux membres de la communauté PAN en novembre, j'ai corrigé vraiment beaucoup de choses. Mais j'ai très peu de retours sur l'utilisation réelle : est-ce que les pratiques de notation fonctionnent pour toi ? Les fonctionnalités de suivi répondent-elles à tes besoins ?</p>
 
-                    <p style="margin-top: 1rem;">Je ne peux pas deviner ta façon d'enseigner ni celle des autres collègues. Je ne connais ni tes contraintes particulières ni les frictions que tu peux rencontrer. C'est le moment idéal pour me dire ce qui fonctionne, ce qui coince, ce qui manque.</p>
+                    <p class="u-mt-16">Je ne peux pas deviner ta façon d'enseigner ni celle des autres collègues. Je ne connais ni tes contraintes particulières ni les frictions que tu peux rencontrer. C'est le moment idéal pour me dire ce qui fonctionne, ce qui coince, ce qui manque.</p>
 
-                    <p style="margin-top: 1rem;">Utilise le formulaire dans <strong>AIDE → Signaler un bug</strong>, ou partage-moi simplement :</p>
+                    <p class="u-mt-16">Utilise le formulaire dans <strong>AIDE → Signaler un bug</strong>, ou partage-moi simplement :</p>
                     <ul class="modal-liste">
                         <li>Comment se passe ta pratique de notation avec l'application ?</li>
                         <li>Quelles fonctionnalités te font gagner du temps (ou t'en font perdre) ?</li>
@@ -3503,7 +3520,7 @@
                         <li>Des suggestions d'amélioration, même petites ?</li>
                     </ul>
 
-                    <p style="margin-top: 1rem;"><strong>Chaque retour compte</strong><br>
+                    <p class="u-mt-16"><strong>Chaque retour compte</strong><br>
                     Tu n'es pas juste un·e testeur·euse, tu es co-développeur·euse. Tes retours orientent directement les prochaines versions et profitent à toute la communauté. Merci !</p>
                 </div>
 
@@ -3664,15 +3681,15 @@
                                 <div style="display: flex; gap: 0.5rem; align-items: center;">
                                     <label style="color: rgba(255,255,255,0.8);">Indice :</label>
                                     <select id="selecteur-indice-acp" onchange="rafraichirGraphiqueSpaghettiACP()" style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.3); font-size: 0.85rem; background: rgba(255,255,255,0.15); color: white;">
-                                        <option value="A" selected style="color: #333;">Assiduité (A)</option>
-                                        <option value="C" style="color: #333;">Complétion (C)</option>
-                                        <option value="P" style="color: #333;">Construction de P</option>
+                                        <option value="A" selected style="color: var(--gris-fonce);">Assiduité (A)</option>
+                                        <option value="C" style="color: var(--gris-fonce);">Complétion (C)</option>
+                                        <option value="P" style="color: var(--gris-fonce);">Construction de P</option>
                                     </select>
                                 </div>
                                 <div style="display: flex; gap: 0.5rem; align-items: center;">
                                     <label style="color: rgba(255,255,255,0.8);">Élève :</label>
                                     <select id="selecteur-etudiant-acp" onchange="selectionnerEtudiantACP()" style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.3); font-size: 0.85rem; background: rgba(255,255,255,0.15); color: white;">
-                                        <option value="" style="color: #333;">-- Sélectionner --</option>
+                                        <option value="" style="color: var(--gris-fonce);">-- Sélectionner --</option>
                                     </select>
                                 </div>
                             </div>
@@ -3704,7 +3721,7 @@
                             <div style="display: flex; gap: 0.5rem; align-items: center; font-size: 0.9rem; font-weight: normal;">
                                 <label style="color: rgba(255,255,255,0.8);">Élève :</label>
                                 <select id="selecteur-etudiant-spaghetti" onchange="selectionnerEtudiantSpaghetti()" style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.3); font-size: 0.85rem; background: rgba(255,255,255,0.15); color: white;">
-                                    <option value="" style="color: #333;">-- Sélectionner --</option>
+                                    <option value="" style="color: var(--gris-fonce);">-- Sélectionner --</option>
                                 </select>
                             </div>
                         </h3>
@@ -4535,8 +4552,8 @@
                             </div>
 
                             <!-- RÉTROACTION FINALE (déplacée sous la prévisualisation) -->
-                            <div class="zone-retroaction" style="margin-top: 20px;">
-                                <div class="zone-retroaction-header" style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="zone-retroaction u-mt-20">
+                                <div class="zone-retroaction-header u-flex-between">
                                     <h4>Rétroaction finale</h4>
                                     <button class="btn btn-confirmer btn-compact" onclick="copierRetroaction(1)">
                                         Copier dans le presse-papier
@@ -4756,7 +4773,7 @@
                         <div class="sidebar-navigation">
 
                             <!-- Bouton Consulter bibliothèque -->
-                            <div class="sidebar-nav-buttons" style="margin-bottom: 15px;">
+                            <div class="sidebar-nav-buttons u-mb-15">
                                 <button onclick="afficherBibliothequeProductions()"
                                         class="btn btn-principal"
                                         style="width: 100%; font-size: 0.9rem;"
@@ -4926,7 +4943,7 @@
                                      SECTION 5 : PLANIFICATION
                                      Date d'échéance + note explicative
                                      ═══════════════════════════════════════════════════════════ -->
-                                <div id="sectionPlanification" style="margin-bottom: 20px;">
+                                <div id="sectionPlanification" class="u-mb-20">
                                     <!-- Date d'échéance -->
                                     <div id="champDateEcheance" style="display: grid; grid-template-columns: 250px 1fr; gap: 20px; align-items: start;">
                                         <div class="groupe-form" style="margin: 0;">
@@ -4950,9 +4967,9 @@
                                      ═══════════════════════════════════════════════════════════ -->
                                 <!-- Ancien div champsPortfolio gardé pour compatibilité JS (caché) -->
                                 <div id="champsPortfolio" style="display: none;"></div>
-                                <div class="btn-groupe" style="display: flex; justify-content: space-between; align-items: center;">
+                                <div class="btn-groupe u-flex-between">
                                     <!-- Boutons gauche (actions sur la production) -->
-                                    <div style="display: flex; gap: 10px;">
+                                    <div class="u-flex-gap-10">
                                         <button id="btnDupliquerProduction" class="btn btn-secondaire" onclick="dupliquerProductionActive()" style="display: none;" title="Créer une copie de cette production">
                                             Dupliquer
                                         </button>
@@ -4961,7 +4978,7 @@
                                         </button>
                                     </div>
                                     <!-- Boutons droite (actions principales) -->
-                                    <div style="display: flex; gap: 10px;">
+                                    <div class="u-flex-gap-10">
                                         <button class="btn btn-annuler" onclick="annulerFormProduction()">Annuler</button>
                                         <button class="btn btn-confirmer" onclick="sauvegarderProduction()">
                                             <span id="btnTexteEvaluation">Ajouter</span>
@@ -5059,7 +5076,7 @@
                                 <fieldset style="border: 1px solid var(--bordure-legere); border-radius: var(--radius-moyen); padding: 15px; margin-bottom: 20px;">
                                     <legend style="font-weight: 600; color: var(--bleu-fonce); padding: 0 10px;">1. Production (optionnel)</legend>
 
-                                    <div class="groupe-form" style="margin-bottom: 15px;">
+                                    <div class="groupe-form u-mb-15">
                                         <label for="prepPDF-production">Sélectionner une production</label>
                                         <select id="prepPDF-production" class="controle-form" onchange="mettreAJourOptionsPreparationPDF()">
                                             <option value="">-- Aucune (grille générique) --</option>
@@ -5166,15 +5183,15 @@
                                 <div id="panneauMetadonneesGrille"></div>
 
                                 <!-- Boutons du formulaire -->
-                                <div class="btn-groupe" style="display: flex; justify-content: space-between; align-items: center;">
+                                <div class="btn-groupe u-flex-between">
                                     <!-- Boutons gauche (actions sur la grille) -->
-                                    <div style="display: flex; gap: 10px;">
+                                    <div class="u-flex-gap-10">
                                         <button id="btnDupliquerGrille" class="btn btn-secondaire" onclick="dupliquerGrilleActive()" style="display: none;" title="Créer une copie de cette grille">
                                             Dupliquer
                                         </button>
                                     </div>
                                     <!-- Boutons droite (actions principales) -->
-                                    <div style="display: flex; gap: 10px;">
+                                    <div class="u-flex-gap-10">
                                         <button id="btnSupprimerGrille" class="btn btn-supprimer" onclick="supprimerGrilleActive()" style="display: none;" title="Supprimer cette grille">
                                             Supprimer
                                         </button>
@@ -5293,15 +5310,15 @@
                                 <div id="panneauMetadonneesEchelle"></div>
 
                                 <!-- Boutons du formulaire -->
-                                <div class="btn-groupe" style="display: flex; justify-content: space-between; align-items: center;">
+                                <div class="btn-groupe u-flex-between">
                                     <!-- Boutons gauche (actions sur l'échelle) -->
-                                    <div style="display: flex; gap: 10px;">
+                                    <div class="u-flex-gap-10">
                                         <button id="btnDupliquerEchelle" class="btn btn-secondaire" onclick="dupliquerEchelleActive()" style="display: none;" title="Créer une copie de cette échelle">
                                             Dupliquer
                                         </button>
                                     </div>
                                     <!-- Boutons droite (actions principales) -->
-                                    <div style="display: flex; gap: 10px;">
+                                    <div class="u-flex-gap-10">
                                         <button id="btnSupprimerEchelle" class="btn btn-supprimer" onclick="supprimerEchelleActive()" style="display: none;" title="Supprimer cette échelle">
                                             Supprimer
                                         </button>
@@ -5519,7 +5536,7 @@
                         <!-- SIDEBAR GAUCHE (280px, sticky) -->
                         <div class="sidebar-navigation">
                             <!-- Bouton bibliothèque (toujours visible) -->
-                            <div style="margin-bottom: 15px;">
+                            <div class="u-mb-15">
                                 <button onclick="afficherBibliothequePratiques()" class="btn btn-principal" style="width: 100%; font-size: 0.9rem;">
                                     Consulter la bibliothèque
                                 </button>
@@ -5555,7 +5572,7 @@
                                             <span id="mat-badge-pratique"></span>
                                             <span id="mat-titre-pratique">Nouvelle pratique</span>
                                         </h3>
-                                        <p style="color: #666; margin: 0; font-size: 0.9rem; line-height: 1.4;" id="mat-description-pratique"></p>
+                                        <p style="color: var(--gris-moyen); margin: 0; font-size: 0.9rem; line-height: 1.4;" id="mat-description-pratique"></p>
                                     </div>
                                     <div style="display: flex; gap: 8px;">
                                         <button onclick="dupliquerPratiqueMateriel(pratiqueEnEditionMateriel)" class="btn btn-secondaire">
@@ -5609,17 +5626,17 @@
                                                 <option value="autre">Autre (je vais le décrire après)</option>
                                             </select>
                                         </div>
-                                        <div id="mat-variante-description" style="display: none; margin-top: 10px; padding: 10px 12px; background: #f8f9fa; border-radius: var(--radius-moyen); font-size: 0.85rem; color: var(--gris-fonce);"></div>
+                                        <div id="mat-variante-description" style="display: none; margin-top: 10px; padding: 10px 12px; background: var(--gris-tres-pale); border-radius: var(--radius-moyen); font-size: 0.85rem; color: var(--gris-fonce);"></div>
                                     </div>
 
-                                    <div class="groupe-form" style="margin-top: 15px;">
+                                    <div class="groupe-form u-mt-15">
                                         <label for="mat-pratique-description" style="font-weight: 600; display: block; margin-bottom: 6px;">
                                             Description <span style="font-weight: normal; color: var(--gris-moyen);">(spécificités de cette pratique)</span>
                                         </label>
                                         <textarea id="mat-pratique-description" class="controle-form" rows="2" placeholder="Décrivez les particularités de cette configuration..." onchange="mettreAJourDescriptionPratiqueMat()"></textarea>
                                     </div>
 
-                                    <div class="groupe-form" style="margin-top: 15px;">
+                                    <div class="groupe-form u-mt-15">
                                         <label for="mat-pratique-discipline" style="font-weight: 600; display: block; margin-bottom: 6px;">
                                             Discipline
                                         </label>
@@ -5846,10 +5863,10 @@
 
                                         <!-- Config Catégories Sélection/Obligatoires (Beta 95.5) -->
                                         <div id="mat-config-categories" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--gris-clair);">
-                                            <div style="margin-bottom: 15px;">
+                                            <div class="u-mb-15">
                                                 <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
                                                     <input type="checkbox" id="mat-categories-actif" onchange="toggleCategoriesMat()">
-                                                    <span style="font-weight: 600;">Activer les catégories Sélection / Obligatoires</span>
+                                                    <span class="u-texte-gras">Activer les catégories Sélection / Obligatoires</span>
                                                     <span class="tooltip-aide" title="Permet de distinguer des productions 'Sélection' (N meilleures retenues pour la note) et des productions 'Obligatoires' (toujours comptées, ex: examen final).">📌</span>
                                                 </label>
                                             </div>
@@ -5897,7 +5914,7 @@
                                                             Obligatoires (toujours comptées)
                                                         </h4>
 
-                                                        <div class="groupe-form" style="margin-bottom: 15px;">
+                                                        <div class="groupe-form u-mb-15">
                                                             <label for="mat-obligatoires-ponderation">Pondération (%)</label>
                                                             <input type="number" id="mat-obligatoires-ponderation" class="controle-form"
                                                                    min="0" max="100" value="35"
@@ -5936,7 +5953,7 @@
                                         <div id="mat-config-par-objectifs" style="display: none;">
 
                                             <!-- Sélecteur de mode de calcul -->
-                                            <div style="margin-bottom: 20px;">
+                                            <div class="u-mb-20">
                                                 <div class="groupe-form">
                                                     <label for="mat-objectifs-mode-calcul" style="font-weight: 600; display: block; margin-bottom: 6px;">
                                                         Mode de calcul de la note finale
@@ -5948,12 +5965,12 @@
                                                         <option value="holistique">Holistique (Isabelle M.)</option>
                                                     </select>
                                                 </div>
-                                                <div id="mat-objectifs-mode-description" style="display: none; margin-top: 10px; padding: 10px 12px; background: #f8f9fa; border-radius: var(--radius-moyen); font-size: 0.85rem; color: var(--gris-fonce);">
+                                                <div id="mat-objectifs-mode-description" style="display: none; margin-top: 10px; padding: 10px 12px; background: var(--gris-tres-pale); border-radius: var(--radius-moyen); font-size: 0.85rem; color: var(--gris-fonce);">
                                                 </div>
                                             </div>
 
                                             <!-- Liste des objectifs (partagée entre tous les modes) -->
-                                            <div style="margin-bottom: 20px;">
+                                            <div class="u-mb-20">
                                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                                                     <h4 style="margin: 0; font-size: 1rem;">Liste des objectifs</h4>
                                                     <button type="button" class="btn btn-principal btn-compact" onclick="ajouterObjectifMat()">
@@ -5990,7 +6007,7 @@
                                                     </div>
                                                 </div>
                                                 <!-- Grille de conversion -->
-                                                <div style="margin-bottom: 15px;">
+                                                <div class="u-mb-15">
                                                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                                                         <h4 style="margin: 0; font-size: 1rem;">Grille de conversion</h4>
                                                         <small class="text-muted">Cliquez sur une note pour la modifier</small>
@@ -6003,7 +6020,7 @@
 
                                             <!-- Section Mode Moyenne pondérée (Michel B.) -->
                                             <div id="mat-config-mode-moyenne-ponderee" style="display: none;">
-                                                <div style="margin-bottom: 15px; padding: 12px; background: #e3f2fd; border-left: 3px solid #2196f3; border-radius: 6px;">
+                                                <div style="margin-bottom: 15px; padding: 12px; background: var(--bleu-pale); border-left: 3px solid var(--bleu-clair); border-radius: 6px;">
                                                     <p style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
                                                         <strong>Moyenne pondérée (Michel B.)</strong> : La note finale est la moyenne des niveaux atteints,
                                                         pondérée par l'importance de chaque objectif. Configurez les pondérations dans la liste ci-dessus.
@@ -6096,7 +6113,7 @@
                                         </div>
 
                                         <!-- Seuil d'acceptabilité -->
-                                        <div class="groupe-form" style="margin-bottom: 20px;">
+                                        <div class="groupe-form u-mb-20">
                                             <label for="mat-spec-seuil" style="font-weight: 600; display: block; margin-bottom: 6px;">
                                                 Seuil d'acceptabilité (%)
                                             </label>
@@ -6114,7 +6131,7 @@
                                             <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 15px;">
                                                 Définis les types de productions que les étudiants devront compléter.
                                             </p>
-                                            <div id="mat-spec-types-travaux-liste" style="margin-bottom: 15px;"></div>
+                                            <div id="mat-spec-types-travaux-liste" class="u-mb-15"></div>
                                             <button type="button" class="btn btn-secondaire" onclick="ajouterTypeTravailMat()">
                                                 + Ajouter un type
                                             </button>
@@ -6126,7 +6143,7 @@
                                             <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 15px;">
                                                 Chaque forfait définit un ensemble de productions requises et la note associée.
                                             </p>
-                                            <div id="mat-spec-forfaits-liste" style="margin-bottom: 15px;"></div>
+                                            <div id="mat-spec-forfaits-liste" class="u-mb-15"></div>
                                             <button type="button" class="btn btn-secondaire" onclick="ajouterForfaitMat()">
                                                 + Ajouter un forfait
                                             </button>
@@ -6142,7 +6159,7 @@
                                 </div>
 
                                 <!-- Accordéon : Système de jetons -->
-                                <div class="carte accordeon" id="mat-accordeon-jetons" style="margin-top: 20px;">
+                                <div class="carte accordeon u-mt-20" id="mat-accordeon-jetons">
                                     <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                                         <h3 style="margin: 0; font-size: 1rem;">Système de jetons</h3>
                                         <span class="accordeon-chevron">▼</span>
@@ -6164,7 +6181,7 @@
                                         <div id="mat-contenu-jetons" style="display: none;">
 
                                             <!-- Nombre de jetons -->
-                                            <div class="groupe-form" style="margin-bottom: 20px;">
+                                            <div class="groupe-form u-mb-20">
                                                 <label for="mat-jetons-nombre" style="font-weight: 600; display: block; margin-bottom: 6px;">
                                                     Nombre de jetons alloués par élève
                                                 </label>
@@ -6249,7 +6266,7 @@
                                 </div>
 
                                 <!-- 🆕 Beta 95.5 : Panneau métadonnées CC -->
-                                <div id="panneauMetadonneesPratique" style="margin-top: 20px;"></div>
+                                <div id="panneauMetadonneesPratique" class="u-mt-20"></div>
 
                                 <!-- Actions finales -->
                                 <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
@@ -6436,7 +6453,7 @@
                                 <div class="btn-groupe" style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px;">
                                     <!-- Boutons gauche (actions sur la cartouche) -->
                                     <!-- Note: Export/Import se font maintenant via la bibliothèque -->
-                                    <div style="display: flex; gap: 10px;">
+                                    <div class="u-flex-gap-10">
                                         <button id="btnDupliquerCartouche" class="btn btn-secondaire" onclick="dupliquerCartoucheActive()" style="display: none;" title="Créer une copie de cette cartouche">
                                             Dupliquer
                                         </button>
@@ -6445,7 +6462,7 @@
                                         </button>
                                     </div>
                                     <!-- Boutons droite (actions principales) -->
-                                    <div style="display: flex; gap: 10px;">
+                                    <div class="u-flex-gap-10">
                                         <button class="btn btn-annuler" onclick="annulerFormCartouche()">Annuler</button>
                                         <button class="btn btn-confirmer" onclick="sauvegarderCartoucheComplete()">
                                             Sauvegarder
@@ -6641,7 +6658,7 @@
                     <!-- Carte informations légales -->
                     <div class="carte" style="margin-top: 25px;">
                         <h3 class="carte-titre-bleu">Informations légales et crédits</h3>
-                        <div style="line-height: 1.8; color: #555;">
+                        <div style="line-height: 1.8; color: var(--gris-moyen);">
                             <p><strong>Auteur :</strong> Grégoire Bédard</p>
                             <p><strong>Codé avec :</strong> Claude Code (Anthropic)</p>
                             <p><strong>Licences :</strong></p>
@@ -6909,11 +6926,11 @@
                         </div><!-- FIN grille 2 colonnes -->
 
                         <!-- ✅ NOUVEAU Beta 93.5 : Données de démonstration -->
-                        <div style="margin-top: 30px; padding-top: 25px; border-top: 1px solid #ddd;">
+                        <div style="margin-top: 30px; padding-top: 25px; border-top: 1px solid var(--bordure-claire);">
                             <h5 class="sous-titre-section">
                                 Données de démonstration
                             </h5>
-                            <p class="text-muted texte-desc" style="margin-bottom: 15px;">
+                            <p class="text-muted texte-desc u-mb-15">
                                 Explorez l'application en toute liberté avec des données fictives.
                                 L'application bascule en <strong>mode Assisté</strong> : tu peux tout expérimenter sans risque,
                                 les données demo sont complètement isolées de tes vraies données.
@@ -6977,7 +6994,7 @@
                         <div class="sidebar-navigation">
 
                             <!-- Bouton Consulter bibliothèque -->
-                            <div class="sidebar-nav-buttons" style="margin-bottom: 15px;">
+                            <div class="sidebar-nav-buttons u-mb-15">
                                 <button onclick="ouvrirModalBibliothequeCours()"
                                         class="btn btn-principal"
                                         style="width: 100%;"
@@ -7001,7 +7018,7 @@
                         <div style="flex: 1; min-width: 0;">
 
                             <!-- Bouton nouveau cours en haut -->
-                            <div style="margin-bottom: 20px;">
+                            <div class="u-mb-20">
                                 <button onclick="afficherFormCours()"
                                         id="btnAjouterCours"
                                         class="btn btn-confirmer">
@@ -7030,7 +7047,7 @@
                             <h5 class="sous-titre-section">
                                 Informations générales
                             </h5>
-                            <div class="grille-4col-form" style="margin-bottom: 20px;">
+                            <div class="grille-4col-form u-mb-20">
                                 <div class="groupe-form">
                                     <label>Code du cours</label>
                                     <input type="text" id="codeCours" class="controle-form controle-form-compact"
@@ -7064,7 +7081,7 @@
                                 Enseignant·e
                             </h5>
                             <!-- Ligne 1: Prénom, Nom, Courriel -->
-                            <div class="grille-3col-form" style="margin-bottom: 15px;">
+                            <div class="grille-3col-form u-mb-15">
                                 <div class="groupe-form">
                                     <label>Prénom</label>
                                     <input type="text" id="prenomEnseignant" class="controle-form controle-form-compact"
@@ -7083,7 +7100,7 @@
                             </div>
 
                             <!-- Ligne 2: Discipline, Département, Local -->
-                            <div class="grille-3col-form" style="margin-bottom: 15px;">
+                            <div class="grille-3col-form u-mb-15">
                                 <div class="groupe-form">
                                     <label>Discipline <span style="color: var(--rouge-erreur); font-weight: normal;">*</span></label>
                                     <!-- 🆕 #14 : Converti en dropdown -->
@@ -7243,7 +7260,7 @@
                             </div>
 
                             <!-- Ligne 3: Institution, Site web -->
-                            <div class="grille-3col-form" style="margin-bottom: 20px;">
+                            <div class="grille-3col-form u-mb-20">
                                 <div class="groupe-form">
                                     <label>Institution <span style="color: var(--gris-leger); font-weight: normal;">(optionnel)</span></label>
                                     <input type="text" id="institutionEnseignant" class="controle-form controle-form-compact"
@@ -7263,7 +7280,7 @@
                             <h5 class="sous-titre-section" style="margin-top: 25px;">
                                 Trimestre
                             </h5>
-                            <div class="groupe-form" style="margin-bottom: 20px;">
+                            <div class="groupe-form u-mb-20">
                                 <label>
                                     Trimestre associé
                                     <span style="color: var(--rouge-erreur); font-weight: normal;">*</span>
@@ -7315,7 +7332,7 @@
                             <h5 class="sous-titre-section" style="margin-top: 25px;">
                                 Pratique de notation
                             </h5>
-                            <div class="groupe-form" style="margin-bottom: 20px;">
+                            <div class="groupe-form u-mb-20">
                                 <label for="pratiqueIdCours">
                                     Pratique de notation pour ce groupe-cours
                                     <small style="display: block; color: var(--gris-moyen); font-weight: normal; margin-top: 3px;">
@@ -7392,7 +7409,7 @@
                     <!-- Configuration des séances -->
                     <div class="carte">
                         <h3 class="carte-titre-bleu">Horaire des séances <span id="titreHoraireCours" style="font-weight: normal; font-size: 0.85em; color: var(--texte-secondaire);"></span></h3>
-                        <p class="text-muted" style="margin-bottom: 15px;">
+                        <p class="text-muted u-mb-15">
                             Configure tes séances de cours de la semaine (de 1 à 6 séances). Chaque séance peut avoir une durée différente (de 1h à 6h).
                         </p>
 
@@ -7813,7 +7830,7 @@
                         <div class="sidebar-navigation">
 
                             <!-- Bouton Consulter bibliothèque -->
-                            <div class="sidebar-nav-buttons" style="margin-bottom: 15px;">
+                            <div class="sidebar-nav-buttons u-mb-15">
                                 <button onclick="ouvrirModalBibliothequePratiques()"
                                         class="btn btn-principal"
                                         style="width: 100%;"
@@ -7876,7 +7893,7 @@
 
                                 <div id="accordeonOptionsAffichage" class="accordeon-contenu">
                                 <!-- Option : Mode comparatif -->
-                                <div class="form-group" style="margin-bottom: 15px;">
+                                <div class="form-group u-mb-15">
                                     <label style="cursor: pointer; display: flex; align-items: center;">
                                         <input type="checkbox" id="modeComparatif">
                                         <strong style="margin-left: 8px;">Activer le mode comparatif (expérimental)</strong>
@@ -7887,7 +7904,7 @@
                                 </div>
 
                                 <!-- Option : Analyse SOLO des acquis -->
-                                <div class="form-group" style="margin-bottom: 15px;">
+                                <div class="form-group u-mb-15">
                                     <label style="cursor: pointer; display: flex; align-items: center;">
                                         <input type="checkbox" id="afficherDescriptionsSOLO" checked>
                                         <strong style="margin-left: 8px;">Afficher l'observation de la structure des résultats d'apprentissage (SOLO)</strong>
@@ -7898,7 +7915,7 @@
                                 </div>
 
                                 <!-- Option : Modèle RàI et détection des patterns -->
-                                <div class="form-group" style="margin-bottom: 15px;">
+                                <div class="form-group u-mb-15">
                                     <label style="cursor: pointer; display: flex; align-items: center;">
                                         <input type="checkbox" id="activerRai" checked>
                                         <strong style="margin-left: 8px;">Activer le modèle de la Réponse à l'intervention (RàI) et la détection des patterns</strong>
@@ -8046,7 +8063,7 @@
 
                                     <div id="detailsReglesConformite" style="display: none;">
                                         <!-- Sélecteur d'échelle -->
-                                        <div class="groupe-form" style="margin-bottom: 15px;">
+                                        <div class="groupe-form u-mb-15">
                                             <label for="echelleConformite" style="font-weight: 500; display: block; margin-bottom: 5px;">
                                                 Échelle de référence
                                             </label>
@@ -8237,7 +8254,7 @@
                             </div>
 
                             <!-- Bouton Sauvegarder -->
-                            <div style="margin-top: 20px;">
+                            <div class="u-mt-20">
                                 <button class="btn btn-confirmer" id="btnSauvegarderPratiqueNotation" style="width: 100%;">
                                     Sauvegarder toutes les configurations
                                 </button>
@@ -8784,7 +8801,7 @@
                                                 <p id="wizard-info-calcul-texte" style="margin: 0; color: var(--gris-fonce); font-size: 0.9rem;"></p>
                                             </div>
 
-                                            <div class="groupe-form" style="margin-top: 20px;">
+                                            <div class="groupe-form u-mt-20">
                                                 <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                                                     <input type="checkbox" id="wizard-conditions-speciales">
                                                     Ajouter des conditions spéciales (double verrou, plafonnement, etc.)
@@ -8949,7 +8966,7 @@
                                             </div>
 
                                             <!-- Note explicative -->
-                                            <div style="margin-top: 20px; padding: 12px; background: #f8f9fa; border-radius: var(--radius-moyen);">
+                                            <div style="margin-top: 20px; padding: 12px; background: var(--gris-tres-pale); border-radius: var(--radius-moyen);">
                                                 <p style="margin: 0; font-size: 0.85rem; color: var(--gris-fonce); line-height: 1.5;">
                                                     <strong>Important :</strong> Ces seuils sont utilisés pour la détection des patterns et des niveaux RàI.
                                                     Pour que le système fonctionne correctement, garde les mêmes seuils durant toute la session.
@@ -8997,7 +9014,7 @@
 
                                     <!-- Boutons navigation -->
                                     <div class="footer-border-top" style="display: flex; justify-content: space-between;">
-                                        <div style="display: flex; gap: 10px;">
+                                        <div class="u-flex-gap-10">
                                             <button class="btn btn-compact btn-annuler" onclick="fermerWizardPratique()">
                                                 Annuler
                                             </button>
@@ -9005,7 +9022,7 @@
                                                 🗑️ Supprimer
                                             </button>
                                         </div>
-                                        <div style="display: flex; gap: 10px;">
+                                        <div class="u-flex-gap-10">
                                             <button id="wizard-btn-precedent" class="btn btn-compact" onclick="precedentEtapeWizard()" style="display: none;">
                                                 ← Précédent
                                             </button>
@@ -9076,7 +9093,7 @@
                                 </p>
 
                                 <!-- Option : Mode comparatif -->
-                                <div class="form-group" style="margin-bottom: 15px;">
+                                <div class="form-group u-mb-15">
                                     <label style="cursor: pointer; display: flex; align-items: center;">
                                         <input type="checkbox" id="modeComparatif">
                                         <strong style="margin-left: 8px;">Activer le mode comparatif (expérimental)</strong>
@@ -9087,7 +9104,7 @@
                                 </div>
 
                                 <!-- Option : Analyse SOLO des acquis -->
-                                <div class="form-group" style="margin-bottom: 15px;">
+                                <div class="form-group u-mb-15">
                                     <label style="cursor: pointer; display: flex; align-items: center;">
                                         <input type="checkbox" id="afficherDescriptionsSOLO" checked>
                                         <strong style="margin-left: 8px;">Afficher l'observation de la structure des résultats d'apprentissage (SOLO)</strong>
@@ -9098,7 +9115,7 @@
                                 </div>
 
                                 <!-- Option : Modèle RàI et détection des patterns -->
-                                <div class="form-group" style="margin-bottom: 15px;">
+                                <div class="form-group u-mb-15">
                                     <label style="cursor: pointer; display: flex; align-items: center;">
                                         <input type="checkbox" id="activerRai" checked>
                                         <strong style="margin-left: 8px;">Activer le modèle de la Réponse à l'intervention (RàI) et la détection des patterns</strong>
@@ -9150,7 +9167,7 @@
 
                     <!-- RAPPEL PATTERNS -->
                     <div style="margin-bottom: 20px; padding: 15px; background: var(--alerte-fond-attention); border-left: 4px solid #ffc107;">
-                        <p style="margin: 0 0 8px 0; font-size: 0.9rem; font-weight: 600; color: #333;">
+                        <p style="margin: 0 0 8px 0; font-size: 0.9rem; font-weight: 600; color: var(--gris-fonce);">
                             💡 Rappel : Conditions pour la détection des patterns
                         </p>
                         <p style="margin: 0; font-size: 0.85rem; line-height: 1.5; color: var(--gris-moyen);">
@@ -9227,7 +9244,7 @@
                                     </small>
                                 </div>
 
-                                <div class="carte-bleu-pale" style="margin-top: 15px;">
+                                <div class="carte-bleu-pale u-mt-15">
                                     <p style="margin: 0 0 10px 0; font-size: 0.85rem; color: var(--gris-moyen);">
                                         <strong>Artefacts nécessaires avant détection :</strong>
                                     </p>
@@ -9267,7 +9284,7 @@
                                     </div>
                                 </div>
 
-                                <div class="carte-bleu-pale" style="margin-top: 15px;">
+                                <div class="carte-bleu-pale u-mt-15">
                                     <p class="m-0-text-muted" style="font-size: 0.85rem;">
                                         <strong>Exemple :</strong> Avec un seuil de <span id="exemple-progression">10</span> points,
                                         si un étudiant passe de 70% à 81%, cela sera considéré comme une progression (↗).
@@ -9304,7 +9321,7 @@
                                     </div>
                                 </div>
 
-                                <div class="carte-bleu-pale" style="margin-top: 15px;">
+                                <div class="carte-bleu-pale u-mt-15">
                                     <p class="m-0-text-muted" style="font-size: 0.85rem;">
                                         <strong>Exemple :</strong> Avec un seuil de <span id="exemple-risque">5</span> points,
                                         si le risque passe de 0.40 à 0.46, cela affichera (→). De 0.40 à 0.44, ce sera (—).
@@ -9335,7 +9352,7 @@
                                     </div>
                                 </div>
 
-                                <div class="carte-bleu-pale" style="margin-top: 15px;">
+                                <div class="carte-bleu-pale u-mt-15">
                                     <p class="m-0-text-muted" style="font-size: 0.85rem;">
                                         <strong>Exemple :</strong> Avec un seuil de <span id="exemple-defi">71.25</span>%,
                                         un critère à 70% sera identifié comme défi, mais un critère à 72% ne le sera pas.
@@ -9636,7 +9653,7 @@
                                         📚 Bibliothèque
                                     </button>
 
-                                    <div class="groupe-form" style="margin-top: 15px;">
+                                    <div class="groupe-form u-mt-15">
                                         <label class="libelle-selection">Trimestre actif :</label>
                                         <select id="selectTrimestreActif" class="controle-form" onchange="changerTrimestreActifV2(this.value)">
                                             <option value="">Chargement...</option>
@@ -9652,7 +9669,7 @@
                                         <strong>Trimestre :</strong><br>
                                         <span id="v2-nombreSemainesSidebar">0</span> semaines •
                                         <span id="v2-nombreJoursCoursSidebar">0</span> jours de cours
-                                        <span id="v2-statsCongesReprisesSidebar" style="display: block; margin-top: 4px; color: #666;"></span>
+                                        <span id="v2-statsCongesReprisesSidebar" style="display: block; margin-top: 4px; color: var(--gris-moyen);"></span>
                                     </div>
                                 </div>
 
@@ -9761,7 +9778,7 @@
                                     </div>
 
                                     <!-- Congés et événements -->
-                                    <div class="grille-2col" style="margin-top: 15px;">
+                                    <div class="grille-2col u-mt-15">
 
                                         <!-- COLONNE GAUCHE: Congés prévus -->
                                         <div class="bloc-section bloc-section--bleu bloc-section--compact" style="margin-bottom: 0;">
@@ -9892,7 +9909,7 @@
                                         📚 Bibliothèque
                                     </button>
 
-                                    <div class="groupe-form" style="margin-top: 15px;">
+                                    <div class="groupe-form u-mt-15">
                                         <label class="libelle-selection">Cours :</label>
                                         <select id="v2-selectCours" class="controle-form" onchange="changerCoursSelectionneV2(this.value)">
                                             <option value="">-- Sélectionner --</option>
@@ -9924,7 +9941,7 @@
                                             </h4>
 
                                             <!-- Informations générales -->
-                                            <div class="grille-form-2col" style="margin-bottom: 15px;">
+                                            <div class="grille-form-2col u-mb-15">
                                                 <div class="groupe-form">
                                                     <label>Code du cours</label>
                                                     <input type="text" id="v2-codeCours" class="controle-form" placeholder="Ex: 601-101-MQ">
@@ -9935,7 +9952,7 @@
                                                 </div>
                                             </div>
 
-                                            <div class="grille-form-2col" style="margin-bottom: 15px;">
+                                            <div class="grille-form-2col u-mb-15">
                                                 <div class="groupe-form">
                                                     <label>N° de la compétence</label>
                                                     <input type="text" id="v2-numeroCompetence" class="controle-form" placeholder="Ex: 4EF0">
@@ -9946,7 +9963,7 @@
                                                 </div>
                                             </div>
 
-                                            <div class="grille-form-2col" style="margin-bottom: 15px;">
+                                            <div class="grille-form-2col u-mb-15">
                                                 <div class="groupe-form">
                                                     <label>Discipline</label>
                                                     <select id="v2-disciplineCours" class="controle-form">
@@ -10136,8 +10153,8 @@
                                 <!-- GAUCHE : Sélection + Carte profil -->
                                 <div class="panneau-bibliotheque">
                                     <!-- Dropdown sélection profil (Beta 95.2) -->
-                                    <div class="groupe-form" style="margin-bottom: 15px;">
-                                        <label style="font-weight: 600;">Profil enseignant</label>
+                                    <div class="groupe-form u-mb-15">
+                                        <label class="u-texte-gras">Profil enseignant</label>
                                         <select id="v2-selectEnseignant" class="controle-form" onchange="chargerEnseignantSelectionneV2()">
                                             <option value="">— Sélectionner —</option>
                                         </select>
@@ -10160,7 +10177,7 @@
                                 <div class="panneau-formulaire">
                                     <h4 class="titre-formulaire" id="v2-titreFormEnseignant">Modifier le profil</h4>
 
-                                    <div class="grille-form-2col" style="margin-bottom: 15px;">
+                                    <div class="grille-form-2col u-mb-15">
                                         <div class="groupe-form">
                                             <label>Prénom <span class="text-danger">*</span></label>
                                             <input type="text" id="v2-ens-prenom" class="controle-form" placeholder="Ex: Marie" onchange="mettreAJourCarteEnseignant()">
@@ -10171,12 +10188,12 @@
                                         </div>
                                     </div>
 
-                                    <div class="groupe-form" style="margin-bottom: 15px;">
+                                    <div class="groupe-form u-mb-15">
                                         <label>Courriel <span class="text-danger">*</span></label>
                                         <input type="email" id="v2-ens-courriel" class="controle-form" placeholder="Ex: marie.tremblay@cegep.qc.ca" onchange="mettreAJourCarteEnseignant()">
                                     </div>
 
-                                    <div class="grille-form-2col" style="margin-bottom: 15px;">
+                                    <div class="grille-form-2col u-mb-15">
                                         <div class="groupe-form">
                                             <label>Institution <span class="text-danger">*</span></label>
                                             <input type="text" id="v2-ens-institution" class="controle-form" placeholder="Ex: Cégep de Drummondville" onchange="mettreAJourCarteEnseignant()">
@@ -10187,7 +10204,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="groupe-form" style="margin-bottom: 15px;">
+                                    <div class="groupe-form u-mb-15">
                                         <label>Discipline</label>
                                         <select id="v2-ens-discipline" class="controle-form">
                                             <option value="">— Sélectionner —</option>
@@ -10334,7 +10351,7 @@
                                         </select>
                                     </div>
 
-                                    <div class="groupe-form" style="margin-bottom: 15px;">
+                                    <div class="groupe-form u-mb-15">
                                         <label>Site web personnel <span style="color: var(--gris-texte-pale); font-weight: normal;">(optionnel)</span></label>
                                         <input type="url" id="v2-ens-siteWeb" class="controle-form" placeholder="Ex: https://monsite.com">
                                     </div>
@@ -10377,7 +10394,7 @@
                                 <div class="panneau-bibliotheque">
 
                                     <!-- Sélection du groupe -->
-                                    <div class="groupe-form" style="margin-bottom: 15px;">
+                                    <div class="groupe-form u-mb-15">
                                         <label class="label-compact">Groupe :</label>
                                         <select id="v2-selectGroupe" class="controle-form" onchange="filtrerParGroupeV2()">
                                             <option value="">Tous les groupes</option>
@@ -10527,7 +10544,7 @@
                                 <div class="panneau-bibliotheque">
 
                                     <!-- Sélection de l'horaire -->
-                                    <div class="groupe-form" style="margin-bottom: 15px;">
+                                    <div class="groupe-form u-mb-15">
                                         <label class="label-compact">Horaire :</label>
                                         <select id="v2-selectHoraire" class="controle-form" onchange="changerHoraireSelectionneV2(this.value)">
                                             <option value="">Sélectionner...</option>
@@ -10572,7 +10589,7 @@
                                         <h4 id="v2-titreFormHoraire" class="titre-formulaire">Nouvel horaire</h4>
 
                                         <!-- Groupe associé (obligatoire) -->
-                                        <div class="groupe-form" style="margin-bottom: 15px;">
+                                        <div class="groupe-form u-mb-15">
                                             <label>Groupe associé <span class="text-danger">*</span></label>
                                             <select id="v2-hor-groupeAssocie" class="controle-form">
                                                 <option value="">— Sélectionner un groupe —</option>
@@ -10580,12 +10597,12 @@
                                             <p class="texte-aide" style="margin-top: 5px; font-size: 0.75rem;">L'horaire sera lié à ce groupe d'étudiants.</p>
                                         </div>
 
-                                        <div class="groupe-form" style="margin-bottom: 15px;">
+                                        <div class="groupe-form u-mb-15">
                                             <label>Nom de l'horaire <span class="text-danger">*</span></label>
                                             <input type="text" id="v2-hor-nom" class="controle-form" placeholder="Ex: Lun-Mer 10h">
                                         </div>
 
-                                        <div class="grille-form-2col" style="margin-bottom: 15px;">
+                                        <div class="grille-form-2col u-mb-15">
                                             <div class="groupe-form">
                                                 <label>Séances par semaine</label>
                                                 <select id="v2-hor-nbSeances" class="controle-form" onchange="mettreAJourSeancesHoraireV2()">
@@ -10613,7 +10630,7 @@
                                         </div>
 
                                         <!-- Séances hebdomadaires -->
-                                        <h5 class="sous-titre-section" style="margin-top: 20px;">Séances hebdomadaires</h5>
+                                        <h5 class="sous-titre-section u-mt-20">Séances hebdomadaires</h5>
                                         <div id="v2-hor-seances" class="liste-seances-horaire">
                                             <!-- Séances générées dynamiquement -->
                                         </div>
@@ -10697,8 +10714,8 @@
                                     <div id="v2-groupeCoursEtatVide" class="etat-vide-formulaire">
                                         <div style="text-align: center; padding: 20px;">
                                             <p style="font-size: 1.1rem; margin-bottom: 10px;"><strong>Assemblez un groupe-cours</strong></p>
-                                            <p style="color: #666; margin-bottom: 15px;">Cliquez sur « + Nouveau groupe-cours » pour sélectionner les 4 éléments à assembler.</p>
-                                            <ol style="text-align: left; display: inline-block; color: #555; font-size: 0.9rem; margin: 0; padding-left: 20px;">
+                                            <p style="color: var(--gris-moyen); margin-bottom: 15px;">Cliquez sur « + Nouveau groupe-cours » pour sélectionner les 4 éléments à assembler.</p>
+                                            <ol style="text-align: left; display: inline-block; color: var(--gris-moyen); font-size: 0.9rem; margin: 0; padding-left: 20px;">
                                                 <li>Le <strong>cours</strong> à enseigner</li>
                                                 <li>Le <strong>numéro de groupe</strong> d'étudiants</li>
                                                 <li>L'<strong>horaire</strong> des séances</li>
@@ -10718,10 +10735,10 @@
                                         </div>
 
                                         <!-- Assemblage des 5 éléments (Beta 95.2) -->
-                                        <p style="font-size: 0.85rem; color: #666; margin-bottom: 10px;">Assemblez les 5 éléments pour créer un groupe-cours</p>
+                                        <p style="font-size: 0.85rem; color: var(--gris-moyen); margin-bottom: 10px;">Assemblez les 5 éléments pour créer un groupe-cours</p>
 
                                         <!-- Ligne 1: Trimestre + Cours -->
-                                        <div class="grille-form-2col" style="margin-bottom: 15px;">
+                                        <div class="grille-form-2col u-mb-15">
                                             <div class="groupe-form">
                                                 <label>1. Trimestre <span class="text-danger">*</span></label>
                                                 <select id="v2-gc-trimestre" class="controle-form" onchange="mettreAJourNomGroupeCoursV2()">
@@ -10737,7 +10754,7 @@
                                         </div>
 
                                         <!-- Ligne 2: Groupe + Horaire -->
-                                        <div class="grille-form-2col" style="margin-bottom: 15px;">
+                                        <div class="grille-form-2col u-mb-15">
                                             <div class="groupe-form">
                                                 <label>3. Numéro de groupe <span class="text-danger">*</span></label>
                                                 <select id="v2-gc-groupe" class="controle-form" onchange="mettreAJourNomGroupeCoursV2()">
@@ -10753,7 +10770,7 @@
                                         </div>
 
                                         <!-- Ligne 3: Enseignant + Pratique -->
-                                        <div class="grille-form-2col" style="margin-bottom: 15px;">
+                                        <div class="grille-form-2col u-mb-15">
                                             <div class="groupe-form">
                                                 <label>5. Enseignant·e <span class="text-danger">*</span></label>
                                                 <select id="v2-gc-enseignant" class="controle-form" onchange="mettreAJourNomGroupeCoursV2()">
@@ -10874,7 +10891,7 @@
                         </p>
 
                         <!-- Analyse SOLO -->
-                        <div class="form-group" style="margin-bottom: 15px;">
+                        <div class="form-group u-mb-15">
                             <label style="cursor: pointer; display: flex; align-items: center;">
                                 <input type="checkbox" id="v2-pref-solo" checked onchange="sauvegarderPreferencesV2()">
                                 <strong style="margin-left: 8px;">Observation de la structure des résultats (SOLO)</strong>
@@ -10885,7 +10902,7 @@
                         </div>
 
                         <!-- Snapshots -->
-                        <div class="form-group" style="margin-bottom: 15px;">
+                        <div class="form-group u-mb-15">
                             <label style="cursor: pointer; display: flex; align-items: center;">
                                 <input type="checkbox" id="v2-pref-snapshots" checked onchange="sauvegarderPreferencesV2()">
                                 <strong style="margin-left: 8px;">Snapshots (captures de progression)</strong>
@@ -10896,7 +10913,7 @@
                         </div>
 
                         <!-- Graphiques -->
-                        <div class="form-group" style="margin-bottom: 15px;">
+                        <div class="form-group u-mb-15">
                             <label style="cursor: pointer; display: flex; align-items: center;">
                                 <input type="checkbox" id="v2-pref-graphiques" checked onchange="sauvegarderPreferencesV2()">
                                 <strong style="margin-left: 8px;">Graphiques d'évolution</strong>
@@ -10907,7 +10924,7 @@
                         </div>
 
                         <!-- Détails techniques -->
-                        <div class="form-group" style="margin-bottom: 15px;">
+                        <div class="form-group u-mb-15">
                             <label style="cursor: pointer; display: flex; align-items: center;">
                                 <input type="checkbox" id="v2-pref-details-techniques" onchange="sauvegarderPreferencesV2()">
                                 <strong style="margin-left: 8px;">Détails techniques</strong>
@@ -10918,7 +10935,7 @@
                         </div>
 
                         <!-- 🆕 BETA 95.1 : Unité d'affichage de l'assiduité -->
-                        <div class="groupe-form" style="margin-bottom: 15px;">
+                        <div class="groupe-form u-mb-15">
                             <label for="v2-pref-unite-affichage" style="font-weight: 600; display: block; margin-bottom: 6px;">
                                 Unité d'affichage de l'assiduité
                             </label>
@@ -10952,7 +10969,7 @@
                         </p>
 
                         <!-- Animation des points -->
-                        <div class="form-group" style="margin-bottom: 15px;">
+                        <div class="form-group u-mb-15">
                             <label style="cursor: pointer; display: flex; align-items: center;">
                                 <input type="checkbox" id="v2-pref-animation-points" checked onchange="sauvegarderPreferencesV2()">
                                 <strong style="margin-left: 8px;">Animation des points (tableau de bord)</strong>
@@ -10972,7 +10989,7 @@
                         </p>
 
                         <!-- Détection des patterns -->
-                        <div class="form-group" style="margin-bottom: 20px;">
+                        <div class="form-group u-mb-20">
                             <label style="cursor: pointer; display: flex; align-items: center;">
                                 <input type="checkbox" id="v2-pref-patterns" checked onchange="sauvegarderPreferencesV2()">
                                 <span style="margin-left: 8px; font-weight: 600;">Activer la détection des patterns</span>
@@ -10983,7 +11000,7 @@
                         </div>
 
                         <!-- Grille de référence -->
-                        <div class="groupe-form" style="margin-bottom: 15px;">
+                        <div class="groupe-form u-mb-15">
                             <label for="v2-pref-grille-reference" style="font-weight: 600; display: block; margin-bottom: 6px;">
                                 Grille de critères pour le dépistage
                             </label>
@@ -10997,7 +11014,7 @@
                         </div>
 
                         <!-- Option : Découpler Performance et Risque -->
-                        <div class="groupe-form" style="margin-top: 15px;">
+                        <div class="groupe-form u-mt-15">
                             <label style="cursor: pointer; display: flex; align-items: center;">
                                 <input type="checkbox" id="v2-pref-decoupler-pr" onchange="sauvegarderPreferencesV2()">
                                 <strong style="margin-left: 8px;">Découpler Performance (P) et Risque (R)</strong>
@@ -11010,7 +11027,7 @@
                         </div>
 
                         <!-- Fenêtre d'analyse des patterns -->
-                        <div class="groupe-form" style="margin-top: 15px;">
+                        <div class="groupe-form u-mt-15">
                             <label for="v2-pref-fenetre-patterns" style="font-weight: 600; display: block; margin-bottom: 8px;">
                                 Fenêtre d'analyse des patterns
                             </label>
@@ -11104,7 +11121,7 @@
                             </p>
 
                             <!-- Indicateurs visuels des seuils -->
-                            <div class="form-group" style="margin-bottom: 20px;">
+                            <div class="form-group u-mb-20">
                                 <label style="cursor: pointer; display: flex; align-items: center;">
                                     <input type="checkbox" id="v2-pref-seuils-visuels" checked onchange="sauvegarderPreferencesV2()">
                                     <span style="margin-left: 8px; font-weight: 600;">Indicateurs visuels des seuils</span>
@@ -11140,7 +11157,7 @@
 
                                 <!-- Seuil Bon -->
                                 <div class="groupe-form" style="padding: 12px; background: #e8f5e9; border-radius: 6px; border-left: 4px solid #4caf50;">
-                                    <label for="v2-seuil-bon" style="font-weight: 600; display: block; margin-bottom: 8px; color: #2e7d32;">
+                                    <label for="v2-seuil-bon" style="font-weight: 600; display: block; margin-bottom: 8px; color: var(--vert-succes);">
                                         Bon si supérieur ou égal à
                                     </label>
                                     <div style="display: flex; align-items: center; gap: 8px;">
@@ -11151,14 +11168,14 @@
                             </div>
 
                             <!-- Bouton restaurer seuils d'interprétation -->
-                            <button class="btn btn-secondaire" onclick="restaurerSeuilsInterpretationDefautV2()" style="margin-top: 15px;">
+                            <button class="btn btn-secondaire u-mt-15" onclick="restaurerSeuilsInterpretationDefautV2()">
                                 Restaurer les valeurs par défaut
                             </button>
                         </div>
                     </div>
 
                     <!-- Bouton sauvegarder -->
-                    <div style="margin-top: 20px;">
+                    <div class="u-mt-20">
                         <button class="btn btn-confirmer" onclick="sauvegarderToutesPreferencesV2()" style="width: 100%;">
                             Sauvegarder toutes les préférences
                         </button>
@@ -11177,7 +11194,7 @@
                          ======================================== -->
                     <div class="carte">
                         <h3 class="carte-titre-bleu">Sauvegarde et restauration</h3>
-                        <p class="text-muted" style="margin-bottom: 20px;">
+                        <p class="text-muted u-mb-20">
                             Exporte tes données pour les sauvegarder ou les partager, ou importe un fichier existant.
                         </p>
 
@@ -11187,7 +11204,7 @@
                                 <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">
                                     Sauvegarde complète
                                 </h4>
-                                <p style="font-size: 0.9rem; margin-bottom: 15px; color: #555;">
+                                <p style="font-size: 0.9rem; margin-bottom: 15px; color: var(--gris-moyen);">
                                     Toutes tes données : cours, étudiants, présences, évaluations, etc.
                                     <br><em style="color: #888;">Pour restaurer sur cet appareil ou un autre.</em>
                                 </p>
@@ -11201,7 +11218,7 @@
                                 <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">
                                     Configuration pédagogique
                                 </h4>
-                                <p style="font-size: 0.9rem; margin-bottom: 15px; color: #555;">
+                                <p style="font-size: 0.9rem; margin-bottom: 15px; color: var(--gris-moyen);">
                                     Uniquement les outils : grilles, échelles, productions, cartouches.
                                     <br><em style="color: #888;">Pour partager avec des collègues (CC BY-NC-SA).</em>
                                 </p>
@@ -11215,7 +11232,7 @@
                                 <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">
                                     Importer un fichier
                                 </h4>
-                                <p style="font-size: 0.9rem; margin-bottom: 15px; color: #555;">
+                                <p style="font-size: 0.9rem; margin-bottom: 15px; color: var(--gris-moyen);">
                                     Sauvegarde personnelle ou configuration d'un collègue.
                                     <br><em style="color: #888;">Le type sera détecté automatiquement.</em>
                                 </p>
@@ -11238,7 +11255,7 @@
                             <!-- Sous-section: Snapshots -->
                             <div style="margin-top: 15px; padding: 15px; background: var(--bleu-tres-pale); border-radius: var(--radius-grand);">
                                 <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">Captures de progression (Snapshots)</h4>
-                                <p class="text-muted" style="margin-bottom: 15px;">
+                                <p class="text-muted u-mb-15">
                                     Les captures enregistrent l'état des indices A-C-P-E à des moments clés pour le suivi longitudinal.
                                 </p>
 
@@ -11296,11 +11313,11 @@
                             <!-- Sous-section: Export recherche -->
                             <div style="margin-top: 20px; padding: 15px; background: var(--bleu-tres-pale); border-radius: var(--radius-grand);">
                                 <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">Export anonymisé pour la recherche</h4>
-                                <p class="text-muted" style="margin-bottom: 15px;">
+                                <p class="text-muted u-mb-15">
                                     Génère un export anonymisé des données d'apprentissage pour la recherche en éducation.
                                 </p>
 
-                                <div class="alerte alerte-information" style="margin-bottom: 15px;">
+                                <div class="alerte alerte-information u-mb-15">
                                     <strong>Données exportées :</strong> Indices A-C-P-E anonymisés, progression longitudinale, statistiques agrégées.
                                     <br><strong>Aucune donnée nominative n'est incluse.</strong>
                                 </div>
@@ -11324,7 +11341,7 @@
                             <!-- Réinitialisation -->
                             <div style="padding: 15px; background: #fff3e0; border-radius: var(--radius-grand); margin-top: 15px;">
                                 <h4 style="color: #e65100; margin-bottom: 10px;">Réinitialisation complète</h4>
-                                <p style="margin-bottom: 15px;">
+                                <p class="u-mb-15">
                                     Efface <strong>toutes</strong> les données et revient à l'état initial.
                                     <strong>Cette action est irréversible.</strong>
                                 </p>
@@ -11349,14 +11366,14 @@
                             </div>
 
                             <!-- Gestion avancée des ressources -->
-                            <div id="section-gestion-ressources" style="margin-top: 20px;">
+                            <div id="section-gestion-ressources" class="u-mt-20">
                                 <h4 style="margin-bottom: 10px;">Gestion avancée des ressources</h4>
-                                <p class="text-muted" style="margin-bottom: 15px;">
+                                <p class="text-muted u-mb-15">
                                     Outil de développement pour auditer et nettoyer les ressources pédagogiques accumulées.
                                 </p>
 
                                 <!-- Sélecteur de type de ressource -->
-                                <div style="margin-bottom: 15px;">
+                                <div class="u-mb-15">
                                     <label for="select-type-ressource" style="font-weight: 600; margin-right: 10px;">Type de ressource :</label>
                                     <select id="select-type-ressource" class="form-control" style="display: inline-block; width: auto; min-width: 250px;" onchange="afficherTableauRessource(this.value)">
                                         <option value="">— Sélectionner —</option>
@@ -11489,7 +11506,7 @@
                             </div>
 
                             <div class="alerte alerte-succes">
-                                <h4 style="color: #2e7d32; margin-bottom: 10px">Une architecture pensée pour l'alignement pédagogique</h4>
+                                <h4 style="color: var(--vert-succes); margin-bottom: 10px">Une architecture pensée pour l'alignement pédagogique</h4>
                                 <p>Cette application propose une architecture pensée dès le départ pour accueillir différentes approches pédagogiques. Elle permet de fixer des paramètres qui serviront à construire la note.</p>
                                 <p class="mt-10">Basée sur le principe de <strong>l'alignement pédagogique</strong>, des objectifs d'apprentissage jusqu'à la rétroaction, elle permet de créer, d'organiser et d'aligner :</p>
                                 <ul class="mt-10">
@@ -12464,7 +12481,7 @@
                             </div>
 
                             <div class="alerte alerte-succes">
-                                <h4 style="color: #2e7d32; margin-bottom: 10px">Quand archiver ?</h4>
+                                <h4 style="color: var(--vert-succes); margin-bottom: 10px">Quand archiver ?</h4>
                                 <p>Archive un trimestre lorsque :</p>
                                 <ul class="mt-5">
                                     <li>Les notes finales ont été remises</li>
@@ -13284,19 +13301,19 @@
                             </ol>
                         </div>
 
-                        <div class="alerte alerte-succes" style="margin-top: 20px;">
-                            <h4 style="color: #2e7d32; margin-bottom: 10px;">📜 Licence Creative Commons BY-NC-SA 4.0</h4>
+                        <div class="alerte alerte-succes u-mt-20">
+                            <h4 style="color: var(--vert-succes); margin-bottom: 10px;">📜 Licence Creative Commons BY-NC-SA 4.0</h4>
                             <p><strong>Tout le matériel exporté est automatiquement sous licence CC BY-NC-SA 4.0</strong></p>
 
                             <p style="margin: 10px 0;"><strong>Cette licence permet :</strong></p>
-                            <ul style="margin-bottom: 15px;">
+                            <ul class="u-mb-15">
                                 <li>✅ <strong>Partager</strong> : Copier et redistribuer le matériel</li>
                                 <li>✅ <strong>Adapter</strong> : Modifier et transformer le matériel</li>
                                 <li>✅ <strong>Utiliser</strong> : Pour ton enseignement</li>
                             </ul>
 
                             <p style="margin: 10px 0;"><strong>Avec ces conditions :</strong></p>
-                            <ul style="margin-bottom: 15px;">
+                            <ul class="u-mb-15">
                                 <li>📝 <strong>Attribution (BY)</strong> : Créditer l'auteur original</li>
                                 <li>🚫 <strong>Non-commercial (NC)</strong> : Pas d'usage commercial</li>
                                 <li>🔄 <strong>Partage dans les mêmes conditions (SA)</strong> : Partager sous la même licence</li>
@@ -13337,8 +13354,8 @@
                                 </ul>
                             </div>
 
-                            <div style="background: #e3f2fd; padding: 12px; border-radius: 6px; margin-top: 15px; border-left: 4px solid #1976d2;">
-                                <p style="margin: 0 0 10px 0; font-weight: bold; color: #1565c0;">📋 Règle simple pour les contributeurs</p>
+                            <div style="background: var(--bleu-pale); padding: 12px; border-radius: 6px; margin-top: 15px; border-left: 4px solid var(--bleu-clair);">
+                                <p style="margin: 0 0 10px 0; font-weight: bold; color: var(--bleu-clair);">📋 Règle simple pour les contributeurs</p>
                                 <ul style="margin: 0;">
                                     <li>Si tu es l'<strong>auteur original</strong> → Tu restes l'auteur, rien n'est ajouté</li>
                                     <li>Si tu <strong>n'es pas</strong> l'auteur original → Tu es ajouté comme contributeur (une seule fois, automatiquement)</li>
@@ -13346,7 +13363,7 @@
                                 </ul>
                             </div>
 
-                            <p style="margin-top: 15px; font-style: italic; color: #555;">
+                            <p style="margin-top: 15px; font-style: italic; color: var(--gris-moyen);">
                                 <strong>Exemple :</strong> Grégoire Bédard crée un ensemble d'objectifs et l'exporte.
                                 Marie Tremblay l'importe, l'adapte pour son cours, et l'exporte.
                                 Le fichier crédite Grégoire comme auteur original ET Marie comme contributrice.
@@ -13736,7 +13753,7 @@
 
                         <p><strong>Le système offre deux fonctionnalités optionnelles</strong> que tu peux activer/désactiver selon ta pratique de notation :</p>
 
-                        <div class="alerte alerte-info" style="margin-top: 15px;">
+                        <div class="alerte alerte-info u-mt-15">
                             <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">Option 1 : Détection des patterns et RàI</h4>
                             <p><strong>Activation :</strong> Réglages → Pratique de notation → Cocher «Activer RàI et détection des patterns»</p>
                             <p><strong>Fonction :</strong> Identifie automatiquement 4 patterns d'apprentissage (Stable, Défi spécifique, Blocage émergent, Blocage critique) et recommande des niveaux d'intervention selon le cadre Réponse à l'Intervention (RàI).</p>
@@ -13747,7 +13764,7 @@
                             </ul>
                         </div>
 
-                        <div class="alerte alerte-info" style="margin-top: 15px;">
+                        <div class="alerte alerte-info u-mt-15">
                             <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">Option 2 : Observation de la structure SOLO</h4>
                             <p><strong>Activation :</strong> Réglages → Pratique de notation → Cocher «Afficher l'observation de la structure des résultats d'apprentissage (SOLO)»</p>
                             <p><strong>Fonction :</strong> Affiche une carte dans le profil étudiant (section Accompagnement) avec les forces et défis identifiés selon les 4 niveaux IDME (Insuffisant, Développement, Maîtrisé, Étendu) basés sur la taxonomie SOLO de Biggs & Collis.</p>
@@ -13758,15 +13775,15 @@
                             </ul>
                         </div>
 
-                        <div class="alerte alerte-warning" style="margin-top: 15px;">
-                            <h4 style="color: #856404; margin-bottom: 10px;">⚠️ Distinction importante : Défis vs Défi spécifique</h4>
+                        <div class="alerte alerte-warning u-mt-15">
+                            <h4 style="color: var(--gris-fonce); margin-bottom: 10px;">⚠️ Distinction importante : Défis vs Défi spécifique</h4>
                             <p><strong>Ces deux concepts sont différents</strong> (quand les deux options sont activées) :</p>
                             <ul style="margin-top: 5px;">
                                 <li><strong>Défis (I/D)</strong> : Niveaux IDME <strong>individuels par critère</strong> dans «Observation de la structure SOLO»
-                                    <br><em style="font-size: 0.85rem; color: #856404;">→ Exemple : L'étudiant a un défi D (Développement 65-74%) en Structure mais une force M (Maîtrisé 75-84%) en Français</em>
+                                    <br><em style="font-size: 0.85rem; color: var(--gris-fonce);">→ Exemple : L'étudiant a un défi D (Développement 65-74%) en Structure mais une force M (Maîtrisé 75-84%) en Français</em>
                                 </li>
                                 <li><strong>Défi spécifique</strong> : <strong>Pattern global</strong> dans le tableau de bord (nécessite Performance ≥ 75% avec au moins un défi sur un critère)
-                                    <br><em style="font-size: 0.85rem; color: #856404;">→ Exemple : Performance moyenne 78% mais Structure à 68% = Pattern «Défi spécifique» (bon globalement, faiblesse ciblée)</em>
+                                    <br><em style="font-size: 0.85rem; color: var(--gris-fonce);">→ Exemple : Performance moyenne 78% mais Structure à 68% = Pattern «Défi spécifique» (bon globalement, faiblesse ciblée)</em>
                                 </li>
                             </ul>
                         </div>
@@ -15662,7 +15679,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97';
-        const BUILD_ID = '0206-0825';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0206-1347';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
@@ -16370,7 +16387,7 @@
             <div style="display: grid; grid-template-columns: auto 1fr 1fr; gap: 15px; margin-bottom: 12px; padding: 10px 15px; background: var(--gris-tres-clair, #f5f5f5); border-radius: var(--radius-moyen); font-size: 0.85rem; align-items: center;">
                 <!-- Orientation -->
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="font-weight: 500; color: #555;">Orientation :</span>
+                    <span style="font-weight: 500; color: var(--gris-moyen);">Orientation :</span>
                     <select id="apercuPDF-orientation" class="controle-form" style="width: auto; padding: 4px 8px; font-size: 0.85rem;" onchange="rafraichirApercuPDF()">
                         <option value="portrait">Portrait</option>
                         <option value="paysage">Paysage</option>
@@ -16379,7 +16396,7 @@
 
                 <!-- Entête -->
                 <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                    <span style="font-weight: 500; color: #555;">Entête :</span>
+                    <span style="font-weight: 500; color: var(--gris-moyen);">Entête :</span>
                     <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
                         <input type="checkbox" id="apercuPDF-entete-code" checked onchange="rafraichirApercuPDF()">
                         <span>Code cours</span>
@@ -16396,7 +16413,7 @@
 
                 <!-- Pied de page -->
                 <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                    <span style="font-weight: 500; color: #555;">Pied de page :</span>
+                    <span style="font-weight: 500; color: var(--gris-moyen);">Pied de page :</span>
                     <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
                         <input type="checkbox" id="apercuPDF-pied-enseignant" checked onchange="rafraichirApercuPDF()">
                         <span>Enseignant</span>
@@ -16510,7 +16527,7 @@
                     <fieldset style="border: 1px solid var(--bordure-legere); border-radius: var(--radius-moyen); padding: 8px 10px; margin: 0;">
                         <legend style="font-weight: 600; color: var(--bleu-fonce); padding: 0 6px; font-size: 0.85rem;">Portrait de lecteur</legend>
                         <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px;">
-                            <div style="text-align: center;">
+                            <div class="u-text-center">
                                 <label style="font-size: 0.7rem; font-weight: 500; display: block; margin-bottom: 2px;">Structure</label>
                                 <select id="confidentiel-portrait-structure" class="controle-form" style="font-size: 0.75rem; padding: 3px 2px;">
                                     <option value="">—</option>
@@ -16520,7 +16537,7 @@
                                     <option value="E">E</option>
                                 </select>
                             </div>
-                            <div style="text-align: center;">
+                            <div class="u-text-center">
                                 <label style="font-size: 0.7rem; font-weight: 500; display: block; margin-bottom: 2px;">Rigueur</label>
                                 <select id="confidentiel-portrait-rigueur" class="controle-form" style="font-size: 0.75rem; padding: 3px 2px;">
                                     <option value="">—</option>
@@ -16530,7 +16547,7 @@
                                     <option value="E">E</option>
                                 </select>
                             </div>
-                            <div style="text-align: center;">
+                            <div class="u-text-center">
                                 <label style="font-size: 0.7rem; font-weight: 500; display: block; margin-bottom: 2px;">Plausibilité</label>
                                 <select id="confidentiel-portrait-plausibilite" class="controle-form" style="font-size: 0.75rem; padding: 3px 2px;">
                                     <option value="">—</option>
@@ -16540,7 +16557,7 @@
                                     <option value="E">E</option>
                                 </select>
                             </div>
-                            <div style="text-align: center;">
+                            <div class="u-text-center">
                                 <label style="font-size: 0.7rem; font-weight: 500; display: block; margin-bottom: 2px;">Nuance</label>
                                 <select id="confidentiel-portrait-nuance" class="controle-form" style="font-size: 0.75rem; padding: 3px 2px;">
                                     <option value="">—</option>
@@ -16550,7 +16567,7 @@
                                     <option value="E">E</option>
                                 </select>
                             </div>
-                            <div style="text-align: center;">
+                            <div class="u-text-center">
                                 <label style="font-size: 0.7rem; font-weight: 500; display: block; margin-bottom: 2px;">Français</label>
                                 <select id="confidentiel-portrait-francais" class="controle-form" style="font-size: 0.75rem; padding: 3px 2px;">
                                     <option value="">—</option>

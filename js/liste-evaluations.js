@@ -180,7 +180,7 @@ function initialiserListeEvaluations() {
         const conteneur = document.getElementById('zone-chargement-evaluations');
         if (conteneur) {
             conteneur.innerHTML = `
-                <p style="color: #d32f2f;">
+                <p style="color: var(--rouge-erreur);">
                     <strong>Erreur de chargement</strong><br>
                     ${error.message}<br>
                     <small>Consultez la console pour plus de détails.</small>
@@ -862,7 +862,7 @@ function genererLigneHTML(ligne) {
         affichageNiveau = '<span class="badge-non-remis-wrapper"><span class="badge-jeton-titre">Non remis</span></span>';
     } else if (ligne.statut === 'non-recevable') {
         // Non recevable : afficher 0 ou --
-        affichageNiveau = '<strong style="color: #999;">0</strong>';
+        affichageNiveau = '<strong style="color: var(--gris-clair);">0</strong>';
     } else if ((ligne.statut === 'evalue' || ligne.statut === 'remplacee') && ligne.niveauFinal !== '-') {
         affichageNiveau = `<strong>${ligne.niveauFinal}</strong>`;
     } else {
@@ -873,10 +873,10 @@ function genererLigneHTML(ligne) {
     let affichageNoteChiffree;
     if (ligne.statutRemise === 'non-remis' || ligne.statutRemise === 'retard') {
         // Non remis ou en retard : afficher --
-        affichageNoteChiffree = '<strong style="color: #999;">--</strong>';
+        affichageNoteChiffree = '<strong style="color: var(--gris-clair);">--</strong>';
     } else if (ligne.statut === 'non-recevable') {
         // Non recevable : afficher -- au lieu d'une note
-        affichageNoteChiffree = '<strong style="color: #999;">--</strong>';
+        affichageNoteChiffree = '<strong style="color: var(--gris-clair);">--</strong>';
     } else if ((ligne.statut === 'evalue' || ligne.statut === 'remplacee') && ligne.noteChiffree !== null) {
         affichageNoteChiffree = `<strong>${ligne.noteChiffree}%</strong>`;
     } else {

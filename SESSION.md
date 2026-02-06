@@ -2,7 +2,7 @@
 
 **Date** : 6 février 2026
 **Version** : Beta 97.1 (build 0206-XXXX)
-**Statut** : Refactorisation progressive en cours (Phase 2)
+**Statut** : Refactorisation progressive terminee (Phase 1-2) + Design System modernise (Phase 3)
 
 ---
 
@@ -106,6 +106,97 @@
 - `.style.display !== 'none'` (test) → `!element.classList.contains('u-hide')`
 - `.style.display = ''` → GARDER (nettoyage legacy, pas du show/hide)
 
+### Phase 3 — COMPLETEE (6 fév 2026, session 3)
+
+**Objectif** : Nettoyer et moderniser le Design System pour en faire la reference efficace
+
+**Commits** : `fdf8558` (Phase 2), `1821dfc` (Phase 3)
+
+**Diagnostic initial** (score 2.5/5) :
+- 478 lignes de CSS chrome dupliquees dans 17 fichiers HTML
+- 20 fichiers parasites (audits, previews, archives) sur 38 au total
+- Redefinitions CSS dans `02c-badges-tetris.html` et `03d-modals.html` qui masquent `styles.css`
+- Patterns Beta 97.1 absents du Design System (.u-hide, .info-box, .badge-source, toggleDisplay, .modal-overlay.actif)
+
+**4 etapes executees** :
+
+**Etape 1 — Nettoyage du repertoire** :
+- Cree `Design system - Modules/_archives/`
+- Deplace 17 fichiers parasites :
+  - 8 audits (AUDIT_*.md, AUDIT_*.html)
+  - 3 previews Liquid Glass
+  - 1 doublon (4b - En-tete v3)
+  - 1 comparatif, 1 archive monolithique (204KB)
+  - 2 docs obsoletes, 2 fichiers caches temporaires
+- Resultat : 20 fichiers actifs (17 modules + index + guide-common.css + README)
+
+**Etape 2 — Extraction CSS chrome partage** :
+- Cree `Design system - Modules/guide-common.css` (~230 lignes) contenant :
+  - Reset body
+  - `.guide-header`, `.guide-header h1/p`, `.guide-header-nav`
+  - `.guide-container`, `.guide-section`, `.guide-section-title`, `.guide-section-intro`
+  - `.guide-component`, `.guide-component-title`, `.guide-component-description`
+  - `.guide-example`, `.guide-example-title`
+  - `.guide-code`, `.guide-code-title`
+  - `.guide-specs`, `.guide-specs-title`, `.guide-specs ul/li`
+  - `.guide-do-dont`, `.guide-do`, `.guide-dont`, `.guide-do-title`, `.guide-dont-title`
+  - `.guide-table`, `.guide-table th/td`, `.guide-table tr:nth-child(even)`
+- 18 fichiers HTML modifies : `<link rel="stylesheet" href="guide-common.css">` ajoute, CSS chrome inline supprime
+- 12 modules n'ont plus de `<style>` du tout (100% guide chrome)
+- 6 fichiers gardent un `<style>` avec CSS specifique au module :
+  - `01a` (palette couleurs), `02c` (badges tetris), `03d` (modals demo)
+  - `04b` (box-shadow demo), `design-system-index` (cartes nav), `06d` (utilitaires demo)
+
+**Etape 3 — Suppression des redefinitions CSS** :
+- `03d-modals.html` : Supprime les 75 lignes de `.btn*` redefinitions (tous dans `styles.css` lignes 2574-2698)
+  - Garde les styles `.modal-entete/corps/pied` (pas dans styles.css) et `.modal-overlay` (demo statique)
+- `02c-badges-tetris.html` : Ajoute commentaire d'avertissement (noms partiellement differents de styles.css : `.badge-rai1` vs `.badge-rai-1`)
+
+**Etape 4 — Nouveau module 06d : Utilitaires Beta 97.1** :
+- Cree `Design system - Modules/06d-utilitaires-beta97.html` documentant :
+  1. `.u-hide` — Classe utilitaire show/hide (styles.css:343)
+  2. `toggleDisplay(element, show)` — Helper JS global null-safe (main.js:37)
+  3. `.modal-overlay.actif` — Pattern modal show/hide (styles.css:2774-2789)
+  4. `.info-box` + `--attention`, `--info`, `--succes`, `--erreur` (styles.css:2462-2484)
+  5. `.badge-source` + `--locale`, `--bibliotheque`, `--retiree`, `--id` (styles.css:2487-2504)
+- Chaque section : exemples Do/Don't, code CSS/JS, demos interactives, tableau recapitulatif
+- Mise a jour `design-system-index.html` (carte 06d avec badge NOUVEAU)
+- Mise a jour `README.md` (architecture CSS, module 06d, instructions maintenance)
+
+**Architecture resultante du Design System** :
+```
+Design system - Modules/
+├── guide-common.css           ← CSS chrome partage (NOUVEAU)
+├── design-system-index.html   ← Index avec cartes cliquables
+├── README.md                  ← Documentation structure
+├── 01a-palette-couleurs.html  ← Module 1a
+├── 01b-typographie.html       ← Module 1b
+├── 02a-boutons.html           ← Module 2a
+├── 02b-formulaires.html       ← Module 2b
+├── 02c-badges-tetris.html     ← Module 2c
+├── 03a-tableaux.html          ← Module 3a
+├── 03b-cartes-sidebars.html   ← Module 3b
+├── 03c-barres-gradient.html   ← Module 3c
+├── 03d-modals.html            ← Module 3d
+├── 04a-navigation.html        ← Module 4a
+├── 04b-box-shadow.html        ← Module 4b
+├── 05-patterns-pedagogiques.html ← Module 5
+├── 06a-emojis-CRITIQUE.html   ← Module 6a
+├── 06b-toggles.html           ← Module 6b
+├── 06c-alertes.html           ← Module 6c
+├── 06d-utilitaires-beta97.html ← Module 6d (NOUVEAU)
+├── 07-primo-assistant.html    ← Module 7
+└── _archives/                 ← 17 fichiers historiques
+```
+
+**Pour ajouter un nouveau module** :
+1. Creer le fichier HTML avec `<link rel="stylesheet" href="../styles.css">` et `<link rel="stylesheet" href="guide-common.css">`
+2. Utiliser les classes `.guide-*` de `guide-common.css` pour la structure
+3. CSS specifique dans un `<style>` local si necessaire
+4. Ajouter lien retour vers `design-system-index.html`
+5. Ajouter carte dans `design-system-index.html`
+6. Mettre a jour `README.md`
+
 ---
 
 ## ETAT ACTUEL
@@ -126,10 +217,12 @@
 - **Modal Confidentiel** : Informations sensibles sur l'étudiant (ÉPGC, services adaptés, etc.)
 - **Anonymisation groupes** : Numéros de groupe remplacés par lettres en mode anonymisation
 
-### Derniere tache completee (6 février - Beta 97)
+### Derniere tache completee (6 février - Beta 97.1)
 
 - **35 correctifs de l'audit du 5 février** (#64-#65, #85-#108) — tous corrigés
-- **Refactorisation Phase 1** (Beta 97.1) — voir section ci-dessus
+- **Refactorisation Phase 1** (Beta 97.1) — `.style.display` fondations + 11 fichiers JS migres
+- **Refactorisation Phase 2** (Beta 97.1) — 434 → 11 occurrences dans 22 fichiers JS (`fdf8558`)
+- **Design System Phase 3** (Beta 97.1) — Nettoyage, deduplication CSS, module 06d (`1821dfc`)
 
 ### Tache precedente (6 février - Beta 96.3)
 

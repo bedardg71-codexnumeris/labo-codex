@@ -99,11 +99,11 @@ function genererBadgeSourceGrille(grille, grillesLocales) {
     const estRetiree = grille.dansBibliotheque === false;
 
     if (estRetiree) {
-        return '<span style="background: #ff9800; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em; margin-left: 6px;">Retirée</span>';
+        return '<span class="badge-source badge-source--retiree" style="margin-left: 6px;">Retirée</span>';
     } else if (estLocale) {
-        return '<span style="background: #4caf50; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em; margin-left: 6px;">Locale</span>';
+        return '<span class="badge-source badge-source--locale" style="margin-left: 6px;">Locale</span>';
     } else {
-        return '<span style="background: #2196f3; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em; margin-left: 6px;">Bibliothèque</span>';
+        return '<span class="badge-source badge-source--bibliotheque" style="margin-left: 6px;">Bibliothèque</span>';
     }
 }
 
@@ -577,7 +577,7 @@ function afficherListeCriteres(criteres, grilleId) {
                             Voir la description
                         </summary>
                         <div style="margin-top: 8px; padding: 8px; background: var(--bleu-tres-pale);
-                             border-radius: 4px; font-size: 0.85rem; color: #666;">
+                             border-radius: 4px; font-size: 0.85rem; color: var(--gris-moyen);">
                             ${critere.description}
                         </div>
                     </details>
@@ -836,7 +836,7 @@ async function afficherGrillesCriteres() {
                         </button>
                     </div>
                 </div>
-                <div style="color: #666; font-size: 0.85rem;">
+                <div style="color: var(--gris-moyen); font-size: 0.85rem;">
                     <span class="grille-mr-20">${grille.criteres?.length || 0} critères</span>
                     <span>Pondération totale : ${grille.criteres?.reduce((sum, c) => sum + (parseInt(c.ponderation) || 0), 0) || 0}%</span>
                 </div>
@@ -848,7 +848,7 @@ async function afficherGrillesCriteres() {
                         ${(grille.criteres || []).map(c => `
                             <div style="margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--bleu-tres-pale);">
                                 <strong>${c.nom}</strong> (${c.ponderation}% - ${getTypeCritereLabel(c.type)})
-                                ${c.description ? `<br><small style="color: #666;">${c.description}</small>` : ''}
+                                ${c.description ? `<br><small style="color: var(--gris-moyen);">${c.description}</small>` : ''}
                             </div>
                         `).join('')}
                     </div>
@@ -1303,7 +1303,7 @@ async function afficherToutesLesGrillesCriteres() {
                                 Voir la description
                             </summary>
                             <div style="margin-top: 8px; padding: 8px; background: var(--bleu-tres-pale);
-                                 border-radius: 4px; font-size: 0.85rem; color: #666;">
+                                 border-radius: 4px; font-size: 0.85rem; color: var(--gris-moyen);">
                                 ${echapperHtml(critere.description)}
                             </div>
                         </details>
@@ -1359,14 +1359,14 @@ async function afficherToutesLesGrillesCriteres() {
                     <span>📋 ${echapperHtml(grille.nom)}</span>
                     <span style="font-size: 0.9rem; font-weight: normal; opacity: 0.9;">
                         ${criteres.length} critère${criteres.length > 1 ? 's' : ''} ·
-                        <span style="color: ${total === 100 ? '#4caf50' : total < 100 ? '#ff9800' : '#f44336'};">
+                        <span style="color: ${total === 100 ? 'var(--vert-succes)' : total < 100 ? 'var(--orange-accent)' : 'var(--rouge-erreur)'};">
                             ${total}%
                         </span>
                     </span>
                 </summary>
                 <div style="padding: 15px;">
                     ${criteres.length > 0 ? `
-                        <div style="margin-bottom: 15px;">
+                        <div class="u-mb-15">
                             ${criteres.map(c => genererHtmlCritere(c, grille.id)).join('')}
                         </div>
                         <div style="padding: 10px; background: var(--bleu-tres-pale); border-radius: 4px; margin-bottom: 15px;">
@@ -1379,7 +1379,7 @@ async function afficherToutesLesGrillesCriteres() {
                         </p>
                     `}
 
-                    <div style="display: flex; gap: 10px;">
+                    <div class="u-flex-gap-10">
                         <button class="btn btn-confirmer" onclick="ajouterCritereAGrille('${grille.id}')">
                             + Ajouter un critère à cette grille
                         </button>
@@ -1960,7 +1960,7 @@ function importerGrilles(event) {
             const estCC = verifierLicenceCC(donnees);
 
             let message = estCC ?
-                '<div style="margin-bottom: 15px;">' + genererBadgeCC(donnees.metadata) + '</div>' :
+                '<div class="u-mb-15">' + genererBadgeCC(donnees.metadata) + '</div>' :
                 '';
 
             message += '<p><strong>Voulez-vous importer ces grilles ?</strong></p>';
@@ -1968,12 +1968,12 @@ function importerGrilles(event) {
             // Créer modal avec badge CC
             const modal = document.createElement('div');
             modal.innerHTML = `
-                <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10001; display: flex; align-items: center; justify-content: center;">
-                    <div style="background: white; padding: 20px; border-radius: 8px; max-width: 600px; max-height: 80vh; overflow-y: auto;">
+                <div class="modal-js-overlay" style="z-index: 10001;">
+                    <div class="modal-js-contenu" style="max-width: 600px;">
                         ${message}
-                        <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: flex-end;">
-                            <button class="btn btn-annuler" onclick="this.closest('div[style*=fixed]').parentElement.remove(); delete window._grillesImportEnAttente;">Annuler</button>
-                            <button class="btn btn-confirmer" onclick="window.confirmerImportGrilles(window._grillesImportEnAttente); this.closest('div[style*=fixed]').parentElement.remove(); delete window._grillesImportEnAttente;">Importer</button>
+                        <div class="u-flex-gap-10" style="margin-top: 15px; justify-content: flex-end;">
+                            <button class="btn btn-annuler" onclick="this.closest('.modal-js-overlay').parentElement.remove(); delete window._grillesImportEnAttente;">Annuler</button>
+                            <button class="btn btn-confirmer" onclick="window.confirmerImportGrilles(window._grillesImportEnAttente); this.closest('.modal-js-overlay').parentElement.remove(); delete window._grillesImportEnAttente;">Importer</button>
                         </div>
                     </div>
                 </div>
@@ -2138,7 +2138,7 @@ async function afficherListeGrilles() {
 
     // ✅ AJOUT (8 décembre 2025) : Bouton "Consulter la bibliothèque" en en-tête
     let html = `
-        <div style="margin-bottom: 15px;">
+        <div class="u-mb-15">
             <button onclick="afficherBibliothequeGrilles()" class="btn btn-principal" style="width: 100%; font-size: 0.9rem;">
                 Consulter la bibliothèque
             </button>
@@ -2188,54 +2188,17 @@ async function afficherBibliothequeGrilles() {
     const disciplines = obtenirDisciplinesDisponiblesGrilles();
 
     let html = `
-        <div id="modalBibliothequeGrilles" style="
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-        ">
-            <div style="
-                background: white;
-                border-radius: 8px;
-                padding: 30px;
-                max-width: 800px;
-                max-height: 80vh;
-                overflow-y: auto;
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-                position: relative;
-            ">
+        <div id="modalBibliothequeGrilles" class="modal-js-overlay" style="z-index: 10000;">
+            <div class="modal-js-contenu" style="max-width: 800px;">
                 <!-- Bouton X sticky -->
-                <button onclick="fermerModalBibliothequeGrilles()" style="
-                    position: sticky;
-                    top: 0;
-                    right: 0;
-                    float: right;
-                    background: transparent;
-                    border: none;
-                    font-size: 28px;
-                    color: #999;
-                    cursor: pointer;
-                    padding: 0;
-                    width: 30px;
-                    height: 30px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    z-index: 1;
-                " onmouseover="this.style.color='#333'" onmouseout="this.style.color='#999'">
+                <button onclick="fermerModalBibliothequeGrilles()" class="modal-js-btn-fermer">
                     ×
                 </button>
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
-                    <h2 style="margin: 0; color: #2c3e50;">Bibliothèque de grilles de critères</h2>
+                <div class="u-flex-gap-10 u-align-center" style="margin-bottom: 5px;">
+                    <h2 style="margin: 0; color: var(--gris-fonce);">Bibliothèque de grilles de critères</h2>
                     <button class="btn-aide-contextuelle" data-aide="bibliotheque-fonctionnement" title="Comment fonctionne la bibliothèque">😎</button>
                 </div>
-                <p style="color: #7f8c8d; margin-bottom: 20px;">
+                <p style="color: var(--gris-clair); margin-bottom: 20px;">
                     Gérez les grilles de critères affichées dans la barre latérale.
                 </p>
     `;
@@ -2243,14 +2206,14 @@ async function afficherBibliothequeGrilles() {
     // ✅ AJOUT (28 janvier 2026) : Afficher avertissement doublons
     if (doublonsDetectes.length > 0) {
         html += `
-                <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 15px; margin-bottom: 20px;">
-                    <div style="font-weight: bold; color: #856404; margin-bottom: 8px;">
+                <div class="info-box info-box--attention" style="margin-bottom: 20px;">
+                    <div style="font-weight: bold; margin-bottom: 8px;">
                         ⚠️ ${doublonsDetectes.length} doublon(s) potentiel(s) détecté(s)
                     </div>
-                    <p style="color: #856404; font-size: 0.9em; margin: 0 0 10px 0;">
+                    <p style="font-size: 0.9em; margin: 0 0 10px 0;">
                         Des grilles avec des noms similaires existent en plusieurs exemplaires.
                     </p>
-                    <details style="color: #856404; font-size: 0.85em;">
+                    <details style="font-size: 0.85em;">
                         <summary style="cursor: pointer; font-weight: 500;">Voir les détails</summary>
                         <ul style="margin: 10px 0 0 0; padding-left: 20px;">
                             ${doublonsDetectes.map(d => `<li><strong>${d.nom}</strong> : ${d.count} exemplaires (IDs: ${d.ids.map(id => '#' + genererIdCourtGrille(id)).join(', ')})</li>`).join('')}
@@ -2270,7 +2233,7 @@ async function afficherBibliothequeGrilles() {
     `;
 
     if (grillesDansBibliotheque.length === 0) {
-        html += '<p style="color: #999; font-style: italic;">Aucune grille dans la barre latérale</p>';
+        html += '<p style="color: var(--gris-clair); font-style: italic;">Aucune grille dans la barre latérale</p>';
     } else {
         grillesDansBibliotheque.forEach(grille => {
             const nomGrille = grille.nom || 'Sans titre';
@@ -2292,13 +2255,13 @@ async function afficherBibliothequeGrilles() {
                 ">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                         <div style="flex: 1;">
-                            <div style="font-weight: bold; color: #2c3e50; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                            <div style="font-weight: bold; color: var(--gris-fonce); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
                                 ${typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(grille) : ''}
                                 ${nomGrille}
-                                <span style="background: #e0e0e0; color: #666; padding: 2px 6px; border-radius: 3px; font-size: 0.7em; font-family: monospace;" title="ID: ${grille.id}">#${idCourt}</span>
+                                <span style="background: var(--bordure-claire); color: var(--gris-moyen); padding: 2px 6px; border-radius: 3px; font-size: 0.7em; font-family: monospace;" title="ID: ${grille.id}">#${idCourt}</span>
                                 ${badgeSource}
                             </div>
-                            <div style="color: #7f8c8d; font-size: 0.9em;">
+                            <div style="color: var(--gris-clair); font-size: 0.9em;">
                                 ${nbCriteres} critère(s)${discipline ? ' • ' + discipline : ''}${auteurOriginal ? ' • ' + auteurOriginal : ''}
                             </div>
                         </div>
@@ -2350,13 +2313,13 @@ async function afficherBibliothequeGrilles() {
                 </div>
 
                 <!-- Section 2 : Grilles disponibles -->
-                <h3 style="color: #3498db; font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
+                <h3 style="color: var(--bleu-clair); font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
                     Grilles disponibles à ajouter à la barre latérale
                 </h3>
 
                 <!-- Filtre par discipline -->
-                <div style="margin-bottom: 15px;">
-                    <label style="display: block; margin-bottom: 5px; color: #555; font-weight: 500;">
+                <div class="u-mb-15">
+                    <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">
                         Filtrer par discipline :
                     </label>
                     <select id="filtreDisciplineGrilles"
@@ -2389,7 +2352,7 @@ async function afficherBibliothequeGrilles() {
 
     // Afficher par discipline
     Object.keys(grillesParDiscipline).sort().forEach(discipline => {
-        html += `<h4 style="margin-top: 20px; margin-bottom: 10px; color: #666;">${discipline}</h4>`;
+        html += `<h4 style="margin-top: 20px; margin-bottom: 10px; color: var(--gris-moyen);">${discipline}</h4>`;
 
         grillesParDiscipline[discipline].forEach(grille => {
             const nomGrille = grille.nom || 'Sans titre';
@@ -2408,7 +2371,7 @@ async function afficherBibliothequeGrilles() {
                 <div class="grille-disponible-item" data-discipline="${discipline}" style="
                     padding: 12px;
                     background: white;
-                    border: 1px solid #ddd;
+                    border: 1px solid var(--bordure-claire);
                     border-radius: 6px;
                     margin-bottom: 10px;
                     display: flex;
@@ -2421,13 +2384,13 @@ async function afficherBibliothequeGrilles() {
                         <div style="font-weight: 500; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
                             ${typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(grille) : ''}
                             ${nomGrille}
-                            <span style="background: #e0e0e0; color: #666; padding: 2px 6px; border-radius: 3px; font-size: 0.7em; font-family: monospace;" title="ID: ${grille.id}">#${idCourt}</span>
+                            <span style="background: var(--bordure-claire); color: var(--gris-moyen); padding: 2px 6px; border-radius: 3px; font-size: 0.7em; font-family: monospace;" title="ID: ${grille.id}">#${idCourt}</span>
                             ${badgeSource}
                         </div>
-                        <div style="font-size: 0.85rem; color: #666; margin-bottom: 4px;">
+                        <div style="font-size: 0.85rem; color: var(--gris-moyen); margin-bottom: 4px;">
                             ${nbCriteres} critère(s)${auteur ? ' • ' + auteur : ''}
                         </div>
-                        ${description ? `<div style="font-size: 0.85rem; color: #888;">${description}</div>` : ''}
+                        ${description ? `<div style="font-size: 0.85rem; color: var(--gris-clair);">${description}</div>` : ''}
                         ${dejaPresent ? '<div style="font-size: 0.8rem; color: var(--bleu-clair); font-style: italic; margin-top: 4px;">Déjà dans la barre latérale</div>' : ''}
                     </div>
                     ${!dejaPresent ? `
@@ -2783,12 +2746,12 @@ function afficherCriteresTemp() {
     if (!container) return;
 
     if (!window.tempCriteres || window.tempCriteres.length === 0) {
-        container.innerHTML = '<p style="color: #999; font-style: italic;">Aucun critère défini</p>';
+        container.innerHTML = '<p style="color: var(--gris-clair); font-style: italic;">Aucun critère défini</p>';
         return;
     }
 
     const html = window.tempCriteres.map((critere, index) => `
-        <div class="item-liste" style="position: relative; padding: 15px; background: white; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 10px;">
+        <div class="item-liste" style="position: relative; padding: 15px; background: white; border: 1px solid var(--bordure-claire); border-radius: 6px; margin-bottom: 10px;">
             <button class="btn btn-supprimer btn-tres-compact"
                     onclick="supprimerCritereTemp(${index})"
                     title="Supprimer ce critère"
@@ -2797,7 +2760,7 @@ function afficherCriteresTemp() {
             </button>
             <div style="display: grid; grid-template-columns: 60px 2fr 140px 90px 3fr; gap: 12px; align-items: end;">
                 <div class="groupe-form" style="text-align: center;">
-                    <label style="font-size: 0.85rem; color: #666;">Ordre</label>
+                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Ordre</label>
                     <div style="display: flex; flex-direction: column; gap: 4px;">
                         <button onclick="deplacerCritereTempHaut(${index})"
                                 class="btn btn-compact"
@@ -2814,7 +2777,7 @@ function afficherCriteresTemp() {
                     </div>
                 </div>
                 <div class="groupe-form">
-                    <label style="font-size: 0.85rem; color: #666;">Nom du critère</label>
+                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Nom du critère</label>
                     <input type="text"
                            class="controle-form"
                            value="${critere.nom}"
@@ -2823,7 +2786,7 @@ function afficherCriteresTemp() {
                            style="font-weight: 500;">
                 </div>
                 <div class="groupe-form">
-                    <label style="font-size: 0.85rem; color: #666;">Type
+                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Type
                         <span class="tooltip-aide" title="Holistique : évalue l'ensemble en considérant les interrelations entre les éléments. Analytique : décompose et évalue chaque élément séparément. Algorithmique : calcul automatique basé sur une formule (ex : nombre d'erreurs en français écrit).">📌</span>
                     </label>
                     <select class="controle-form"
@@ -2834,7 +2797,7 @@ function afficherCriteresTemp() {
                     </select>
                 </div>
                 <div class="groupe-form">
-                    <label style="font-size: 0.85rem; color: #666;">Pond. (%)</label>
+                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Pond. (%)</label>
                     <input type="number"
                            class="controle-form"
                            value="${critere.ponderation}"
@@ -2843,7 +2806,7 @@ function afficherCriteresTemp() {
                            onchange="modifierCritereTemp(${index}, 'ponderation', parseInt(this.value)); mettreAJourTotalTemp();">
                 </div>
                 <div class="groupe-form">
-                    <label style="font-size: 0.85rem; color: #666;">Description</label>
+                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Description</label>
                     <input type="text"
                            class="controle-form"
                            value="${critere.description || ''}"
@@ -2852,10 +2815,10 @@ function afficherCriteresTemp() {
                 </div>
             </div>
             ${critere.type === 'algorithmique' ? `
-            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0e0e0;">
+            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--bordure-claire);">
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
                     <div class="groupe-form">
-                        <label style="font-size: 0.85rem; color: #666;">Facteur de normalisation (nombre de mots)</label>
+                        <label style="font-size: 0.85rem; color: var(--gris-moyen);">Facteur de normalisation (nombre de mots)</label>
                         <input type="number"
                                class="controle-form"
                                value="${critere.facteurNormalisation || 500}"
@@ -2865,7 +2828,7 @@ function afficherCriteresTemp() {
                                title="Nombre de mots de référence pour le calcul (défaut: 500)">
                     </div>
                     <div style="grid-column: span 2;">
-                        <p style="font-size: 0.85rem; color: #666; margin: 0; padding-top: 8px;">
+                        <p style="font-size: 0.85rem; color: var(--gris-moyen); margin: 0; padding-top: 8px;">
                             <strong>Formule:</strong> Note = Pondération − (Erreurs ÷ Mots × ${critere.facteurNormalisation || 500})
                         </p>
                     </div>
@@ -3040,12 +3003,12 @@ function afficherCriteresGrille(grille) {
     if (!container) return;
 
     if (!grille.criteres || grille.criteres.length === 0) {
-        container.innerHTML = '<p style="color: #999; font-style: italic;">Aucun critère défini</p>';
+        container.innerHTML = '<p style="color: var(--gris-clair); font-style: italic;">Aucun critère défini</p>';
         return;
     }
 
     const html = grille.criteres.map((critere, index) => `
-        <div class="item-liste" style="position: relative; padding: 15px; background: white; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 10px;">
+        <div class="item-liste" style="position: relative; padding: 15px; background: white; border: 1px solid var(--bordure-claire); border-radius: 6px; margin-bottom: 10px;">
             <button class="btn btn-supprimer btn-tres-compact"
                     onclick="supprimerCritereGrille('${grille.id}', ${index})"
                     title="Supprimer ce critère"
@@ -3054,7 +3017,7 @@ function afficherCriteresGrille(grille) {
             </button>
             <div style="display: grid; grid-template-columns: 60px 2fr 140px 90px 3fr; gap: 12px; align-items: end;">
                 <div class="groupe-form" style="text-align: center;">
-                    <label style="font-size: 0.85rem; color: #666;">Ordre</label>
+                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Ordre</label>
                     <div style="display: flex; flex-direction: column; gap: 4px;">
                         <button onclick="deplacerCritereGrilleHaut('${grille.id}', ${index})"
                                 class="btn btn-compact"
@@ -3071,7 +3034,7 @@ function afficherCriteresGrille(grille) {
                     </div>
                 </div>
                 <div class="groupe-form">
-                    <label style="font-size: 0.85rem; color: #666;">Nom du critère</label>
+                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Nom du critère</label>
                     <input type="text"
                            class="controle-form"
                            value="${critere.nom}"
@@ -3079,7 +3042,7 @@ function afficherCriteresGrille(grille) {
                            style="font-weight: 500;">
                 </div>
                 <div class="groupe-form">
-                    <label style="font-size: 0.85rem; color: #666;">Type
+                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Type
                         <span class="tooltip-aide" title="Holistique : évalue l'ensemble en considérant les interrelations entre les éléments. Analytique : décompose et évalue chaque élément séparément. Algorithmique : calcul automatique basé sur une formule (ex : nombre d'erreurs en français écrit).">📌</span>
                     </label>
                     <select class="controle-form"
@@ -3090,7 +3053,7 @@ function afficherCriteresGrille(grille) {
                     </select>
                 </div>
                 <div class="groupe-form">
-                    <label style="font-size: 0.85rem; color: #666;">Pond. (%)</label>
+                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Pond. (%)</label>
                     <input type="number"
                            class="controle-form"
                            value="${critere.ponderation}"
@@ -3099,7 +3062,7 @@ function afficherCriteresGrille(grille) {
                            onchange="modifierCritereGrille('${grille.id}', ${index}, 'ponderation', parseInt(this.value))">
                 </div>
                 <div class="groupe-form">
-                    <label style="font-size: 0.85rem; color: #666;">Description</label>
+                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Description</label>
                     <input type="text"
                            class="controle-form"
                            value="${critere.description || ''}"
@@ -3107,10 +3070,10 @@ function afficherCriteresGrille(grille) {
                 </div>
             </div>
             ${critere.type === 'algorithmique' ? `
-            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0e0e0;">
+            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--bordure-claire);">
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
                     <div class="groupe-form">
-                        <label style="font-size: 0.85rem; color: #666;">Facteur de normalisation (nombre de mots)</label>
+                        <label style="font-size: 0.85rem; color: var(--gris-moyen);">Facteur de normalisation (nombre de mots)</label>
                         <input type="number"
                                class="controle-form"
                                value="${critere.facteurNormalisation || 500}"
@@ -3120,10 +3083,10 @@ function afficherCriteresGrille(grille) {
                                title="Nombre de mots de référence pour le calcul (défaut: 500)">
                     </div>
                     <div style="grid-column: span 2;">
-                        <p style="font-size: 0.85rem; color: #666; margin: 0; padding-top: 8px;">
+                        <p style="font-size: 0.85rem; color: var(--gris-moyen); margin: 0; padding-top: 8px;">
                             <strong>Formule:</strong> Note = Pondération − (Erreurs ÷ Mots × ${critere.facteurNormalisation || 500})
                         </p>
-                        <p style="font-size: 0.75rem; color: #999; margin: 4px 0 0 0;">
+                        <p style="font-size: 0.75rem; color: var(--gris-clair); margin: 4px 0 0 0;">
                             Lors de l'évaluation, vous saisirez le nombre d'erreurs et le nombre de mots de la rédaction.
                         </p>
                     </div>
@@ -3755,10 +3718,10 @@ async function afficherConfigurationCategoriesErreurs(grilleId, critereIndex) {
 
     // Créer le modal de configuration
     const modalHtml = `
-        <div id="modalCategoriesErreurs" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;">
-            <div style="background: white; border-radius: 8px; max-width: 900px; width: 90%; max-height: 90vh; overflow-y: auto; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+        <div id="modalCategoriesErreurs" class="modal-js-overlay" style="z-index: 9999;">
+            <div class="modal-js-contenu" style="max-width: 900px; width: 90%;">
                 <h3 style="margin-top: 0; color: var(--bleu-principal);">⚙️ Configuration des catégories d'erreurs</h3>
-                <p style="color: #666; font-size: 0.9rem;">Personnalisez les catégories d'erreurs (codes 0-10) et leurs rétroactions associées.</p>
+                <p style="color: var(--gris-moyen); font-size: 0.9rem;">Personnalisez les catégories d'erreurs (codes 0-10) et leurs rétroactions associées.</p>
 
                 <div id="listeCategoriesErreurs" style="margin-top: 20px;">
                     ${critere.categoriesErreurs.map((cat, idx) => `

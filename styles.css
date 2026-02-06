@@ -370,6 +370,46 @@
 .u-opacity-07 { opacity: 0.7; }
 .u-flex-1 { flex: 1; }
 .u-flex-gap-10 { display: flex; gap: 10px; }
+.u-flex-gap-5 { display: flex; gap: 5px; }
+.u-flex-gap-8 { display: flex; gap: 8px; }
+.u-flex-gap-12 { display: flex; gap: 12px; }
+.u-flex-gap-15 { display: flex; gap: 15px; }
+.u-flex-gap-20 { display: flex; gap: 20px; }
+.u-flex-wrap { flex-wrap: wrap; }
+.u-flex-col { flex-direction: column; }
+.u-align-center { align-items: center; }
+
+/* === PADDING ADDITIONNELS === */
+.u-p-8 { padding: 8px; }
+.u-p-10 { padding: 10px; }
+.u-p-12 { padding: 12px; }
+.u-pb-10 { padding-bottom: 10px; }
+
+/* === MARGIN ADDITIONNELS === */
+.u-mb-5 { margin-bottom: 5px; }
+.u-mb-12 { margin-bottom: 12px; }
+.u-mt-5 { margin-top: 5px; }
+.u-ml-5 { margin-left: 5px; }
+
+/* === BACKGROUNDS === */
+.u-bg-blanc { background: white; }
+.u-bg-bleu-pale { background: var(--bleu-pale); }
+.u-bg-bleu-tres-pale { background: var(--bleu-tres-pale); }
+.u-bg-gris-pale { background: #f8f9fa; }
+
+/* === BORDURES === */
+.u-border { border: 1px solid var(--bordure-claire); }
+.u-border-radius { border-radius: var(--radius-moyen); }
+.u-border-radius-grand { border-radius: var(--radius-grand); }
+
+/* === GAPS ADDITIONNELS === */
+.u-gap-4 { gap: 4px; }
+.u-gap-6 { gap: 6px; }
+.u-gap-8 { gap: 8px; }
+
+/* === MARGINS REM === */
+.u-mt-16 { margin-top: 1rem; }
+.u-mb-16 { margin-bottom: 1rem; }
 
 /* ===============================
    RESET ET BASE
@@ -2566,6 +2606,12 @@ textarea {
     font-size: 0.9rem;
     line-height: 1.6;
 }
+.changelog-entry--vert .changelog-title { color: #1b5e20; }
+.changelog-entry--orange .changelog-title { color: #e65100; }
+.changelog-entry--bleu .changelog-title { color: #1565c0; }
+.changelog-entry--rose .changelog-title { color: #c2185b; }
+.changelog-entry--violet .changelog-title { color: #512da8; }
+.changelog-entry--sarcelle .changelog-title { color: #00897b; }
 
 /* ===============================
    BOUTONS (padding unifié 10px 15px)

@@ -1808,8 +1808,8 @@ function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
             }
             html += `
                 <tr style="background: ${bgColor};">
-                    <td style="${styleTableCritere} padding: 4px 5px; border: 1px solid #ddd; vertical-align: top;">${contenuCritere}</td>
-                    <td style="${styleTableCritere} padding: 4px 5px; border: 1px solid #ddd; text-align: center; vertical-align: top;">${c.ponderation || '—'}</td>
+                    <td style="${styleTableCritere} padding: 4px 5px; border: 1px solid var(--bordure-claire); vertical-align: top;">${contenuCritere}</td>
+                    <td style="${styleTableCritere} padding: 4px 5px; border: 1px solid var(--bordure-claire); text-align: center; vertical-align: top;">${c.ponderation || '—'}</td>
             `;
 
             // Cellules pour chaque niveau - RETROACTIONS avec taille auto
@@ -1819,7 +1819,7 @@ function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
                     const cle = `${c.id}_${n.code}`;
                     contenu = cartouche.commentaires[cle] || '—';
                 }
-                html += `<td style="${styleRetroaction} padding: 3px 4px; border: 1px solid #ddd; vertical-align: top; color: ${couleurTexte};">${escapeHtml(contenu)}</td>`;
+                html += `<td style="${styleRetroaction} padding: 3px 4px; border: 1px solid var(--bordure-claire); vertical-align: top; color: ${couleurTexte};">${escapeHtml(contenu)}</td>`;
             });
 
             html += `</tr>`;

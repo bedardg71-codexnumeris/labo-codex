@@ -4638,7 +4638,7 @@ function ouvrirModalBibliothequeGroupeCours() {
                             ${titre}${badgeActif}
                         </div>
                         ${sousInfo.length > 0 ? `
-                            <div style="font-size: 0.85rem; color: #666; margin-top: 3px;">
+                            <div style="font-size: 0.85rem; color: var(--gris-moyen); margin-top: 3px;">
                                 ${sousInfo.join(' • ')}
                             </div>
                         ` : ''}
@@ -4725,7 +4725,7 @@ function ouvrirModalBibliothequeGroupeCours() {
 
     if (groupesCours.length === 0) {
         modalHTML += `
-            <div style="text-align: center; padding: 40px; color: #666;">
+            <div style="text-align: center; padding: 40px; color: var(--gris-moyen);">
                 <p style="font-size: 1.1rem;">Aucun groupe-cours configuré</p>
                 <p>Cliquez sur « + Nouveau groupe-cours » dans l'accordéon pour en créer un.</p>
             </div>
@@ -4740,7 +4740,7 @@ function ouvrirModalBibliothequeGroupeCours() {
         `;
 
         if (gcVisibles.length === 0) {
-            modalHTML += `<p style="color: #999; font-style: italic;">Aucun groupe-cours visible dans le dropdown</p>`;
+            modalHTML += `<p style="color: var(--gris-clair); font-style: italic;">Aucun groupe-cours visible dans le dropdown</p>`;
         } else {
             gcVisibles.forEach(gc => {
                 modalHTML += genererCarteGC(gc, false);

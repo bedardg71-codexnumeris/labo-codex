@@ -1351,7 +1351,7 @@ function genererSectionMobilisationEngagement(da) {
                                     '</span>'
                                 ).join('');
 
-                                return '<div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;">' + badgesHTML + '</div>';
+                                return '<div class="u-flex-gap-8 u-mt-10">' + badgesHTML + '</div>';
                             }
                             return '';
                         })()}
@@ -1419,7 +1419,7 @@ function genererSectionMobilisationEngagement(da) {
                                     <span class="badge-artefact-note" style="background: ${couleurBadge};">
                                         ${art.niveau || '--'}
                                     </span>
-                                    <span style="color: #666; font-size: 0.8rem; font-weight: 500;">
+                                    <span class="u-texte-petit u-texte-gris" style="font-weight: 500;">
                                         (${art.note})
                                     </span>
                                 </div>
@@ -1442,7 +1442,7 @@ function genererSectionMobilisationEngagement(da) {
                     <div class="profil-carte u-mt-10">
                         <div class="u-flex-between-mb15">
                             <h3 class="profil-section-titre-seul">Niveau d'engagement</h3>
-                            <span style="color: #94a3b8; font-weight: 600;">—</span>
+                            <span style="color: var(--gris-clair); font-weight: 600;">—</span>
                         </div>
                         <div class="profil-message-vide">
                             En attente de données
@@ -1487,7 +1487,7 @@ function genererSectionMobilisationEngagement(da) {
                         ${genererValeursComparatives(Math.round(E_SOM * 100), Math.round(E_PAN * 100), modeComparatif)}
                     </div>
 
-                    <div style="margin-bottom: 15px; font-size: 0.9rem; color: #555;">
+                    <div style="margin-bottom: 15px; font-size: 0.9rem; color: var(--gris-fonce);">
                         Formule : E = ∛(A × C × P)
                         <span class="primo-aide" data-target="conseil-formule-engagement-mobilisation" style="margin-left: 5px; display: inline-block !important; cursor: pointer;">😎</span>
                     </div>
@@ -1512,10 +1512,10 @@ function genererSectionMobilisationEngagement(da) {
 
                     <div class="profil-echelle-risque">
                         <div class="profil-echelle-barre" style="background: linear-gradient(to right,
-                                    #ff9800 0%,
-                                    #ffc107 25%,
-                                    #28a745 50%,
-                                    #2196F3 75%);">
+                                    var(--orange-accent) 0%,
+                                    var(--btn-annuler) 25%,
+                                    var(--vert-succes) 50%,
+                                    var(--bleu-clair) 75%);">
                             ${modeComparatif ? `
                                 <!-- Indicateurs duaux: symboles de direction -->
                                 ${directionSOM.symbole ? `<div style="position: absolute; left: ${Math.max(0, Math.min((E_SOM - 0.30) / 0.70 * 100, 100))}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: var(--som-orange);" title="SOM: ${directionSOM.interpretation}">${directionSOM.symbole}</div>` : ''}
@@ -1531,19 +1531,19 @@ function genererSectionMobilisationEngagement(da) {
                         </div>
 
                         <div class="legende-risque-container">
-                            <div class="legende-risque-item" style="left: 12.5%; color: #ff9800;">
+                            <div class="legende-risque-item" style="left: 12.5%; color: var(--orange-accent);">
                                 <span class="legende-risque-niveau">Fragile</span>
                                 <span class="legende-risque-seuil">0.30-0.49</span>
                             </div>
-                            <div class="legende-risque-item" style="left: 37.5%; color: #ffc107;">
+                            <div class="legende-risque-item" style="left: 37.5%; color: var(--btn-annuler);">
                                 <span class="legende-risque-niveau">Modéré</span>
                                 <span class="legende-risque-seuil">0.50-0.64</span>
                             </div>
-                            <div class="legende-risque-item" style="left: 62.5%; color: #28a745;">
+                            <div class="legende-risque-item" style="left: 62.5%; color: var(--vert-succes);">
                                 <span class="legende-risque-niveau">Favorable</span>
                                 <span class="legende-risque-seuil">0.65-0.79</span>
                             </div>
-                            <div class="legende-risque-item" style="left: 87.5%; color: #2196F3;">
+                            <div class="legende-risque-item" style="left: 87.5%; color: var(--bleu-clair);">
                                 <span class="legende-risque-niveau">Très favorable</span>
                                 <span class="legende-risque-seuil">≥ 0.80</span>
                             </div>
@@ -1791,17 +1791,17 @@ function genererSectionAccompagnement(da) {
                             const methodeTexte = methodeSelection === 'meilleurs' ? 'meilleurs' :
                                                methodeSelection === 'recents' ? 'plus récents' :
                                                methodeSelection === 'recents-meilleurs' ? 'meilleurs récents' : 'tous';
-                            noteExplicative = `<span style="font-size: 0.8rem; color: #6c757d; font-weight: normal; display: block; margin-top: 2px;">Calculée sur les ${nombreARetenir} ${methodeTexte} artefacts</span>`;
+                            noteExplicative = `<span class="u-texte-petit u-texte-gris-clair" style="font-weight: normal; display: block; margin-top: 2px;">Calculée sur les ${nombreARetenir} ${methodeTexte} artefacts</span>`;
                         } else {
-                            noteExplicative = `<span style="font-size: 0.8rem; color: #6c757d; font-weight: normal; display: block; margin-top: 2px;">Calculée sur toutes les évaluations</span>`;
+                            noteExplicative = `<span class="u-texte-petit u-texte-gris-clair" style="font-weight: normal; display: block; margin-top: 2px;">Calculée sur toutes les évaluations</span>`;
                         }
 
                         return `${niveau} ${pct.toFixed(0)}%${noteExplicative}`;
                     })()}
                 </p>
 
-                <p class="profil-texte-paragraphe" style="margin-top: 12px;"><strong>Progression par critère :</strong> <span style="font-size: 0.8rem; color: #6c757d; font-weight: normal;">(moyennes sur tous les ${obtenirTermeProduction('pluriel')})</span></p>
-                <ul style="margin-left: 20px; color: #495057; font-size: 0.9rem;">
+                <p class="profil-texte-paragraphe" style="margin-top: 12px;"><strong>Progression par critère :</strong> <span class="u-texte-petit u-texte-gris-clair" style="font-weight: normal;">(moyennes sur tous les ${obtenirTermeProduction('pluriel')})</span></p>
+                <ul style="margin-left: 20px; color: var(--gris-fonce); font-size: 0.9rem;">
                     ${criteres.map(c => {
                         const pct = c.valeur * 100;
                         const niveau = pct >= 85 ? 'E' : pct >= 75 ? 'M' : pct >= 65 ? 'D' : 'I';
@@ -1816,7 +1816,7 @@ function genererSectionAccompagnement(da) {
                 </div>
 
                 <p class="profil-texte-detail">${niveauRai.description}</p>
-                ${niveauRai.defi !== 'Aucun' ? `<p style="font-size: 0.9rem; color: #666; margin-top: 8px;"><strong>Défi principal :</strong> ${niveauRai.defi}</p>` : ''}
+                ${niveauRai.defi !== 'Aucun' ? `<p class="u-texte-09 u-texte-gris" style="margin-top: 8px;"><strong>Défi principal :</strong> ${niveauRai.defi}</p>` : ''}
             </div>
 
             <!-- Carte 2 : Contexte d'apprentissage -->
@@ -1841,7 +1841,7 @@ function genererSectionAccompagnement(da) {
                     ${alerteContexte.description}
                 </p>
 
-                <p style="font-size: 0.9rem; color: #666; line-height: 1.5;">
+                <p class="u-texte-09 u-texte-gris" style="line-height: 1.5;">
                     ${alerteContexte.recommandation}
                 </p>
 
@@ -1987,7 +1987,7 @@ function genererSectionAccompagnement(da) {
         </div>
 
         <!-- Historique compact -->
-        <div style="margin-top: 15px;">
+        <div class="u-mt-15">
             <div class="u-flex-between-mb10">
                 <h4 style="color: var(--bleu-principal); font-size: 0.95rem; margin: 0; font-weight: 600;">
                     HISTORIQUE ${interventions && interventions.length > 0 ? `(${interventions.length} intervention${interventions.length > 1 ? 's' : ''})` : ''}
@@ -2000,7 +2000,7 @@ function genererSectionAccompagnement(da) {
     if (!interventions || interventions.length === 0) {
         html += `
             <div class="carte profil-zone-centre-fond-bleu">
-                <div style="font-size: 0.95rem; color: #666; font-style: italic;">
+                <div class="u-texte-gris" style="font-size: 0.95rem; font-style: italic;">
                     Aucune intervention documentée. Les interventions RàI apparaîtront ici.
                 </div>
             </div>
@@ -2014,7 +2014,7 @@ function genererSectionAccompagnement(da) {
     });
 
     // Conteneur timeline
-    html += `<div class="carte" style="padding: 0; margin-bottom: 20px;">`;
+    html += `<div class="carte u-mb-20" style="padding: 0;">`;
 
     // Afficher chaque intervention en format timeline compact (une seule ligne)
     interventionsTriees.forEach(intervention => {
@@ -2036,15 +2036,15 @@ function genererSectionAccompagnement(da) {
 
         html += `
             <div class="intervention-timeline-item">
-                <div style="flex: 1; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <div class="u-flex-gap-12 u-align-center" style="flex: 1;">
                     <span class="badge-intervention-vert">
                         ${typeIcone} ${badgeTexte}
                     </span>
-                    <span style="color: var(--bleu-principal); font-weight: 600; font-size: 0.9rem;">
+                    <span class="u-texte-bleu" style="font-weight: 600; font-size: 0.9rem;">
                         ${dateFormatee}
                     </span>
                     ${noteIndividuelle ? `
-                        <span style="color: #666; font-size: 0.9rem; flex: 1;">
+                        <span class="u-texte-gris u-texte-09" style="flex: 1;">
                             ${noteIndividuelle}
                         </span>
                     ` : ''}
@@ -2132,16 +2132,16 @@ function genererSectionMobilisation(da) {
             Décomposition de l'indice M
         </h4>
         <div class="profil-carte-simple">
-            <div style="font-family: monospace; font-size: 1.1rem; text-align: center; color: var(--bleu-principal);">
+            <div class="profil-texte-mono-centre-bleu" style="font-size: 1.1rem;">
                 M = (A + C) / 2 = (${indices.A}% + ${indices.C}%) / 2 = ${indices.M}
             </div>
         </div>
 
         <!-- RECOMMANDATIONS SELON LE NIVEAU -->
         ${interpM.niveau === 'Décrochage' ? `
-            <div style="background: #f5f5f5; border-left: 4px solid #9e9e9e; padding: 15px;">
-                <h4 style="color: #616161; margin-bottom: 10px;">⚫ Actions requises</h4>
-                <ul style="margin: 0; padding-left: 20px; color: #616161; line-height: 1.6;">
+            <div style="background: var(--gris-tres-pale); border-left: 4px solid var(--gris-clair); padding: 15px;">
+                <h4 style="color: var(--gris-fonce); margin-bottom: 10px;">⚫ Actions requises</h4>
+                <ul style="margin: 0; padding-left: 20px; color: var(--gris-fonce); line-height: 1.6;">
                     <li>Contact immédiat avec l'aide pédagogique individuelle (API)</li>
                     <li>Tentative de contact direct (téléphone, courriel)</li>
                     <li>Référence aux services d'aide psychosociale si pertinent</li>
@@ -2168,9 +2168,9 @@ function genererSectionMobilisation(da) {
                 </ul>
             </div>
         ` : (A < 0.8 || C < 0.8) ? `
-            <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px;">
-                <h4 style="color: #856404; margin-bottom: 10px;">💡 Recommandations préventives (niveau fragile)</h4>
-                <ul style="margin: 0; padding-left: 20px; color: #856404; line-height: 1.6;">
+            <div class="info-box info-box--attention">
+                <h4 style="color: var(--alerte-texte-attention); margin-bottom: 10px;">💡 Recommandations préventives (niveau fragile)</h4>
+                <ul style="margin: 0; padding-left: 20px; color: var(--alerte-texte-attention); line-height: 1.6;">
                     ${A < 0.8 && C < 0.8 ?
                         '<li><strong>Mobilisation fragile :</strong> Soutien sur les deux composantes (présence ET remise)</li>' :
                       A < 0.8 ?
@@ -2247,11 +2247,11 @@ function genererSectionEngagement(da) {
                     <span class="profil-texte-detail">Engagement (E)</span>
                     <strong class="profil-valeur-grande-bleu">${indices.E}</strong>
                 </div>
-                <div style="margin-top: 8px; font-size: 0.85rem; color: #555;">
+                <div style="margin-top: 8px; font-size: 0.85rem; color: var(--gris-fonce);">
                     E = ∛(A × C × P)
                     <span class="primo-aide" data-target="conseil-formule-engagement-carte" style="margin-left: 5px; display: inline-block !important; cursor: pointer;">😎</span>
                 </div>
-                <div style="margin-top: 8px; padding: 6px 10px; background: #fff9e6; border-left: 3px solid #ffa000; font-size: 0.8rem; color: #555;">
+                <div style="margin-top: 8px; padding: 6px 10px; background: var(--alerte-fond-attention); border-left: 3px solid var(--orange-accent); font-size: 0.8rem; color: var(--gris-fonce);">
                     <strong>💡 Note :</strong> Indice longitudinal (historique complet depuis le début du trimestre)
                 </div>
             </div>
@@ -2281,7 +2281,7 @@ function genererSectionEngagement(da) {
             <div style="font-size: 1.1rem; font-weight: bold; color: ${interpE.couleur}; margin-bottom: 8px;">
                 ${interpE.emoji} ${interpE.niveau}
             </div>
-            <div style="color: #666; line-height: 1.5;">
+            <div style="color: var(--gris-moyen); line-height: 1.5;">
                 ${interpE.niveau === 'Excellent engagement' ?
                     "Cet étudiant démontre un engagement global exemplaire, combinant présence, complétion et performance de haut niveau." :
                   interpE.niveau === 'Bon engagement' ?
@@ -2306,7 +2306,7 @@ function genererSectionEngagement(da) {
             <div class="profil-texte-mono-centre-bleu">
                 E = ∛(${A.toFixed(2)} × ${C.toFixed(2)} × ${P.toFixed(2)}) = ${indices.E}
             </div>
-            <div style="background: #f0f7ff; padding: 12px; border-radius: 4px; font-size: 0.9rem; color: #555; line-height: 1.6;">
+            <div style="background: var(--bleu-tres-pale); padding: 12px; border-radius: 4px; font-size: 0.9rem; color: var(--gris-fonce); line-height: 1.6;">
                 <strong>⚠️ Nature multiplicative :</strong> Si un seul composant est faible, l'engagement global chute drastiquement.
                 ${indices.E < 0.50 ? `<br><strong>Facteur limitant identifié :</strong> ${facteurLimitant.nom} (${facteurLimitant.pourcentage}%)` : ''}
             </div>
@@ -2332,9 +2332,9 @@ function genererSectionEngagement(da) {
 
         <!-- PROCHAIN SEUIL -->
         ${prochainSeuil ? `
-            <div style="background: #e7f3ff; border: 1px solid #2196F3; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
-                <h4 style="color: #1976d2; margin-bottom: 10px;">🎯 Prochain objectif</h4>
-                <div style="color: #1976d2; line-height: 1.6;">
+            <div style="background: var(--bleu-pale); border: 1px solid var(--bleu-clair); padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                <h4 style="color: var(--bleu-clair); margin-bottom: 10px;">🎯 Prochain objectif</h4>
+                <div style="color: var(--bleu-clair); line-height: 1.6;">
                     <strong>Seuil à atteindre :</strong> ${prochainSeuil}<br>
                     <strong>Distance :</strong> ${(distanceSeuil * 100).toFixed(1)} points<br>
                     ${facteurLimitant.valeur < 0.70 ?
@@ -2342,8 +2342,8 @@ function genererSectionEngagement(da) {
                 </div>
             </div>
         ` : `
-            <div style="background: linear-gradient(to right, #2196F322, #2196F311); border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 15px;">
-                <div style="color: #1976d2; font-weight: bold;">
+            <div class="info-box info-box--info" style="margin-bottom: 15px;">
+                <div style="color: var(--bleu-clair); font-weight: bold;">
                     🏆 Seuil maximum atteint ! Maintenir cet excellent engagement.
                 </div>
             </div>
@@ -2425,33 +2425,33 @@ function genererSectionRisque(da) {
 
         <div class="profil-echelle-risque">
             <div class="profil-echelle-barre" style="background: linear-gradient(to right,
-                        #2196F3 0%, #2196F3 20%,
-                        #28a745 20%, #28a745 35%,
-                        #ffc107 35%, #ffc107 50%,
-                        #ff9800 50%, #ff9800 70%,
-                        #dc3545 70%, #dc3545 100%);">
+                        var(--bleu-clair) 0%, var(--bleu-clair) 20%,
+                        var(--vert-succes) 20%, var(--vert-succes) 35%,
+                        var(--btn-annuler) 35%, var(--btn-annuler) 50%,
+                        var(--orange-accent) 50%, var(--orange-accent) 70%,
+                        var(--rouge-erreur) 70%, var(--rouge-erreur) 100%);">
                 <div class="profil-echelle-indicateur-haut" style="left: ${Math.min(indices.R * 100, 100)}%;">▼</div>
                 <div class="profil-echelle-indicateur-bas" style="left: ${Math.min(indices.R * 100, 100)}%;">R = ${indices.R}</div>
             </div>
 
             <div class="legende-risque-container">
-                <div class="legende-risque-item" style="left: 10%; color: #2196F3;">
+                <div class="legende-risque-item" style="left: 10%; color: var(--bleu-clair);">
                     <span class="legende-risque-niveau">Minimal</span>
                     <span class="legende-risque-seuil">0-0.19</span>
                 </div>
-                <div class="legende-risque-item" style="left: 27.5%; color: #28a745;">
+                <div class="legende-risque-item" style="left: 27.5%; color: var(--vert-succes);">
                     <span class="legende-risque-niveau">Faible</span>
                     <span class="legende-risque-seuil">0.20-0.34</span>
                 </div>
-                <div class="legende-risque-item" style="left: 42.5%; color: #ffc107;">
+                <div class="legende-risque-item" style="left: 42.5%; color: var(--btn-annuler);">
                     <span class="legende-risque-niveau">Modéré</span>
                     <span class="legende-risque-seuil">0.35-0.49</span>
                 </div>
-                <div class="legende-risque-item" style="left: 60%; color: #ff9800;">
+                <div class="legende-risque-item" style="left: 60%; color: var(--orange-accent);">
                     <span class="legende-risque-niveau">Élevé</span>
                     <span class="legende-risque-seuil">0.50-0.69</span>
                 </div>
-                <div class="legende-risque-item" style="left: 85%; color: #dc3545;">
+                <div class="legende-risque-item" style="left: 85%; color: var(--rouge-erreur);">
                     <span class="legende-risque-niveau">Critique</span>
                     <span class="legende-risque-seuil">≥ 0.70</span>
                 </div>
@@ -2487,7 +2487,7 @@ function genererSectionRisque(da) {
                 <li>✅ Plus intuitif qu'une moyenne arithmétique qui ne pénaliserait pas assez les lacunes</li>
             </ul>
 
-            <p style="margin-top: 10px; color: #666; font-style: italic;">💡 C'est une moyenne géométrique qui mesure la mobilisation globale tout en respectant l'interdépendance des trois dimensions.</p>
+            <p style="margin-top: 10px; color: var(--gris-moyen); font-style: italic;">💡 C'est une moyenne géométrique qui mesure la mobilisation globale tout en respectant l'interdépendance des trois dimensions.</p>
         </div>
 
         <div class="section-titre u-mt-25">Indicateurs clés</div>
@@ -2788,7 +2788,7 @@ function genererCarteCibleIntervention(da) {
     if (!pratique) {
         console.error('[ProfilEtudiant] Aucune pratique active trouvée');
         return `
-            <div style="background: #fff3cd; padding: 15px; border-left: 4px solid #ffc107;">
+            <div class="info-box info-box--attention">
                 <strong>⚠️ Configuration requise</strong><br>
                 Veuillez configurer une pratique de notation dans Réglages › Pratique de notation.
             </div>
@@ -3347,7 +3347,7 @@ function genererHistoriqueInterventionsProfil(da) {
 
     return `
         <li><strong>Interventions reçues :</strong> ${totalText}${detailText}
-            <span style="display: block; font-size: 0.85rem; color: #666; margin-top: 3px;">
+            <span class="u-texte-mini u-texte-gris" style="display: block; margin-top: 3px;">
                 Dernière : ${derniere.titre} (${dateDerniere})
             </span>
         </li>
@@ -3364,7 +3364,7 @@ function genererHistoriqueInterventionsProfil(da) {
 function genererValeursComparatives(valeurSOM, valeurPAN, modeComparatif, afficherTiret = false) {
     // 🆕 BETA 95.6 : Afficher tiret si aucune donnée
     if (afficherTiret) {
-        return `<span style="color: #94a3b8; font-weight: 600;">—</span>`;
+        return `<span style="color: var(--gris-clair); font-weight: 600;">—</span>`;
     }
 
     if (!modeComparatif) {
@@ -3518,7 +3518,7 @@ function afficherProfilComplet(da) {
             <div class="sidebar-navigation">
                 <!-- Sélecteur d'étudiant -->
                 <div class="sidebar-filtre">
-                    <label style="font-size: 0.85rem; color: #666; margin-bottom: 5px; display: block;">Étudiant·e :</label>
+                    <label class="u-texte-mini u-texte-gris" style="margin-bottom: 5px; display: block;">Étudiant·e :</label>
                     <select id="selecteurEtudiantProfil" class="controle-form" onchange="afficherProfilComplet(this.value)">
                         ${etudiants.map(e => {
                             // ✅ CORRIGÉ (29 déc 2025): Ne pas afficher DA en mode anonymisation
@@ -3715,7 +3715,7 @@ function genererSectionAssiduite(da) {
             <h4 class="profil-titre-bleu-compact">
                 Absences et retards
             </h4>
-            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+            <div class="u-flex-gap-10">
                 ${details.absences.map(abs => {
                     const date = new Date(abs.date + 'T12:00:00');
                     const options = { weekday: 'short', day: 'numeric', month: 'short' };
@@ -3775,8 +3775,8 @@ function genererSectionProductions(da) {
     if (productionsAEvaluer.length === 0) {
         return `
             <div class="profil-zone-grande-bleu">
-                <p style="color: #666; font-size: 1.1rem;">Aucune production configurée</p>
-                <p style="color: #999; margin-top: 10px;">Créez des productions dans la section Matériel → Productions</p>
+                <p class="u-texte-gris" style="font-size: 1.1rem;">Aucune production configurée</p>
+                <p class="u-texte-gris-clair u-mt-10">Créez des productions dans la section Matériel → Productions</p>
             </div>
         `;
     }
@@ -4004,11 +4004,11 @@ function genererSectionProductions(da) {
                             }
 
                             return `
-                            <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <tr style="border-bottom: 1px solid var(--bordure-claire);">
                                 <td class="profil-tableau-cellule-p12">
                                     ${echapperHtml(ligne.production)}
                                 </td>
-                                <td style="padding: 12px; color: #666;">${echapperHtml(ligne.description)}</td>
+                                <td style="padding: 12px; color: var(--gris-moyen);">${echapperHtml(ligne.description)}</td>
                                 <td class="profil-tableau-cellule-p12">
                                     ${badgeJeton}
                                 </td>
@@ -4022,7 +4022,7 @@ function genererSectionProductions(da) {
                                                 : '<span class="badge-non-remis-wrapper"><span class="badge-jeton-titre">Non remis</span></span>'))
                                     }
                                 </td>
-                                <td style="padding: 12px; text-align: center; color: #666;">${ligne.date}</td>
+                                <td style="padding: 12px; text-align: center; color: var(--gris-moyen);">${ligne.date}</td>
                                 <td style="padding: 12px; text-align: center; white-space: nowrap;">
                                     ${(ligne.statutRemise === 'non-remis' || ligne.statutRemise === 'retard')
                                         ? `
@@ -4071,7 +4071,7 @@ function genererTableauObjectifs(da, ensembleId, noteFinaleMultiObjectifs) {
     const ensemble = ensembles.find(e => e.id === ensembleId);
 
     if (!ensemble) {
-        return '<p style="color: #999;">Ensemble d\'objectifs introuvable</p>';
+        return '<p style="color: var(--gris-clair);">Ensemble d\'objectifs introuvable</p>';
     }
 
     const performances = noteFinaleMultiObjectifs.performances || {};
@@ -4093,36 +4093,36 @@ function genererTableauObjectifs(da, ensembleId, noteFinaleMultiObjectifs) {
 
     // Couleurs par type
     const couleurType = {
-        'fondamental': '#2196F3',      // Bleu
-        'integrateur': '#FF9800',      // Orange
-        'transversal': '#9C27B0'       // Violet
+        'fondamental': 'var(--bleu-clair)',      // Bleu
+        'integrateur': 'var(--orange-accent)',      // Orange
+        'transversal': '#9C27B0'       // Violet (pas de variable définie)
     };
 
     return `
         <!-- Note finale pratique multi-objectifs -->
         <div style="background: white; padding: 20px; border-radius: 6px; text-align: center; margin-bottom: 20px;">
-            <div style="font-size: 0.9rem; color: #666; margin-bottom: 5px;">
+            <div class="u-texte-09 u-texte-gris" style="margin-bottom: 5px;">
                 Note finale pondérée (${noteFinaleMultiObjectifs.nbObjectifsEvalues}/${ensemble.objectifs.length} objectifs évalués)
             </div>
             <div style="font-size: 3rem; font-weight: bold; color: ${obtenirCouleurIndice(noteFinale)};">
                 ${noteFinale.toFixed(1)}/100
             </div>
-            <div style="font-size: 0.85rem; color: #999; margin-top: 5px;">
+            <div class="u-texte-mini u-texte-gris-clair" style="margin-top: 5px;">
                 Σ(P_objectif × poids) / 100
             </div>
         </div>
 
         <!-- Résumé forces et défis -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-            <div style="background: #e8f5e9; padding: 15px; border-radius: 6px; border-left: 4px solid #4caf50;">
-                <div style="font-weight: bold; color: #2e7d32; margin-bottom: 5px;">✅ Forces (≥ ${(seuil * 100).toFixed(0)}%)</div>
-                <div style="font-size: 1.5rem; font-weight: bold; color: #2e7d32;">${forces.length}</div>
-                ${forces.length > 0 ? `<div style="font-size: 0.85rem; color: #666; margin-top: 5px;">${forces.map(f => f.nom).join(', ')}</div>` : ''}
+            <div style="background: var(--vert-pale, #e8f5e9); padding: 15px; border-radius: 6px; border-left: 4px solid var(--vert-succes);">
+                <div style="font-weight: bold; color: var(--vert-succes); margin-bottom: 5px;">✅ Forces (≥ ${(seuil * 100).toFixed(0)}%)</div>
+                <div style="font-size: 1.5rem; font-weight: bold; color: var(--vert-succes);">${forces.length}</div>
+                ${forces.length > 0 ? `<div class="u-texte-mini u-texte-gris" style="margin-top: 5px;">${forces.map(f => f.nom).join(', ')}</div>` : ''}
             </div>
-            <div style="background: #fff3e0; padding: 15px; border-radius: 6px; border-left: 4px solid #ff9800;">
-                <div style="font-weight: bold; color: #e65100; margin-bottom: 5px;">⚠️ Défis (< ${(seuil * 100).toFixed(0)}%)</div>
-                <div style="font-size: 1.5rem; font-weight: bold; color: #e65100;">${defis.length}</div>
-                ${defis.length > 0 ? `<div style="font-size: 0.85rem; color: #666; margin-top: 5px;">${defis.map(d => d.nom).join(', ')}</div>` : ''}
+            <div style="background: var(--orange-pale, #fff3e0); padding: 15px; border-radius: 6px; border-left: 4px solid var(--orange-accent);">
+                <div style="font-weight: bold; color: var(--orange-accent); margin-bottom: 5px;">⚠️ Défis (< ${(seuil * 100).toFixed(0)}%)</div>
+                <div style="font-size: 1.5rem; font-weight: bold; color: var(--orange-accent);">${defis.length}</div>
+                ${defis.length > 0 ? `<div class="u-texte-mini u-texte-gris" style="margin-top: 5px;">${defis.map(d => d.nom).join(', ')}</div>` : ''}
             </div>
         </div>
 
@@ -4150,9 +4150,9 @@ function genererTableauObjectifs(da, ensembleId, noteFinaleMultiObjectifs) {
                         const nbArtefacts = perf?.nbArtefacts ?? 0;
 
                         let niveau = '--';
-                        let couleurNiveau = '#999';
+                        let couleurNiveau = 'var(--gris-clair)';
                         let statut = '⏸️';
-                        let couleurStatut = '#999';
+                        let couleurStatut = 'var(--gris-clair)';
                         let labelStatut = 'Non évalué';
 
                         if (P !== null) {
@@ -4163,11 +4163,11 @@ function genererTableauObjectifs(da, ensembleId, noteFinaleMultiObjectifs) {
                             // Déterminer statut
                             if (P >= seuil * 100) {
                                 statut = '✅';
-                                couleurStatut = '#4caf50';
+                                couleurStatut = 'var(--vert-succes)';
                                 labelStatut = 'Force';
                             } else {
                                 statut = '⚠️';
-                                couleurStatut = '#ff9800';
+                                couleurStatut = 'var(--orange-accent)';
                                 labelStatut = 'Défi';
                             }
                         }
@@ -4178,7 +4178,7 @@ function genererTableauObjectifs(da, ensembleId, noteFinaleMultiObjectifs) {
                             <tr style="border-left: 4px solid ${couleurBordure};">
                                 <td style="padding: 12px;">
                                     <div style="font-weight: bold; margin-bottom: 3px;">${echapperHtml(obj.nom)}</div>
-                                    ${nbArtefacts > 0 ? `<div style="font-size: 0.85rem; color: #666;">${nbArtefacts} artefact${nbArtefacts > 1 ? 's' : ''}</div>` : ''}
+                                    ${nbArtefacts > 0 ? `<div class="u-texte-mini u-texte-gris">${nbArtefacts} artefact${nbArtefacts > 1 ? 's' : ''}</div>` : ''}
                                 </td>
                                 <td style="text-align: center; padding: 12px;">
                                     <span style="
@@ -4202,7 +4202,7 @@ function genererTableauObjectifs(da, ensembleId, noteFinaleMultiObjectifs) {
                                         <div style="font-size: 1.3rem; font-weight: bold; color: ${obtenirCouleurIndice(P)};">
                                             ${P.toFixed(1)}%
                                         </div>
-                                    ` : `<span style="color: #999;">--</span>`}
+                                    ` : `<span style="color: var(--gris-clair);">--</span>`}
                                 </td>
                                 <td style="text-align: center; padding: 12px;">
                                     <!-- BETA 96.1: Bulle avec effet 3D -->
@@ -4224,9 +4224,9 @@ function genererTableauObjectifs(da, ensembleId, noteFinaleMultiObjectifs) {
         </div>
 
         <!-- Légende -->
-        <div style="background: white; padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.85rem; color: #666;">
+        <div style="background: white; padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.85rem; color: var(--gris-moyen);">
             <div style="margin-bottom: 10px;"><strong>Légende types :</strong></div>
-            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+            <div class="u-flex-gap-15">
                 <div><span style="color: ${couleurType.fondamental}; font-weight: bold;">●</span> Fondamental : Concepts de base</div>
                 <div><span style="color: ${couleurType.integrateur}; font-weight: bold;">●</span> Intégrateur : Compétences complexes</div>
                 <div><span style="color: ${couleurType.transversal}; font-weight: bold;">●</span> Transversal : Habiletés générales</div>
@@ -4248,10 +4248,10 @@ function genererSectionProgression(da) {
     if (typeof obtenirSnapshotsEtudiant !== 'function') {
         return `
             <div class="profil-zone-moyenne-bleu">
-                <p style="color: #666; font-size: 0.95rem;">
+                <p class="u-texte-gris" style="font-size: 0.95rem;">
                     Le module de captures n'est pas encore initialisé.
                 </p>
-                <p style="color: #999; margin-top: 10px; font-size: 0.85rem;">
+                <p class="u-texte-gris-clair u-mt-10" style="font-size: 0.85rem;">
                     Les graphiques de progression seront disponibles une fois que des données auront été collectées.
                 </p>
             </div>
@@ -4268,10 +4268,10 @@ function genererSectionProgression(da) {
                 <h4 class="profil-section-titre-large" style="margin-bottom: 15px;">
                     📊 Aucune donnée de progression disponible
                 </h4>
-                <p style="color: #666; font-size: 0.95rem; margin-bottom: 10px;">
+                <p class="u-texte-gris u-mb-10" style="font-size: 0.95rem;">
                     Les graphiques de progression afficheront l'évolution temporelle des indices A-C-P-E une fois que des données auront été collectées.
                 </p>
-                <p style="color: #999; font-size: 0.85rem;">
+                <p class="u-texte-gris-clair" style="font-size: 0.85rem;">
                     Les captures sont enregistrées automatiquement chaque semaine et lors d'interventions RàI complétées.
                 </p>
             </div>
@@ -4307,20 +4307,20 @@ function genererSectionProgression(da) {
         <div class="profil-zone-moyenne-bleu">
             <!-- Légende des indices -->
             <div style="background: white; padding: 12px 20px; border-radius: 6px; margin-bottom: 10px; display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
-                <span style="font-weight: 600; color: #333;">Indices :</span>
+                <span style="font-weight: 600; color: var(--gris-fonce);">Indices :</span>
                 <span style="display: flex; align-items: center; gap: 6px;">
-                    <span style="width: 12px; height: 12px; background: #1976D2; border-radius: 50%;"></span>
-                    <span style="color: #1976D2; font-weight: 500;">Assiduité (A)</span>
+                    <span style="width: 12px; height: 12px; background: var(--bleu-clair); border-radius: 50%;"></span>
+                    <span style="color: var(--bleu-clair); font-weight: 500;">Assiduité (A)</span>
                 </span>
                 <span style="display: flex; align-items: center; gap: 6px;">
                     <span style="width: 12px; height: 12px; background: #FF6B35; border-radius: 50%;"></span>
                     <span style="color: #FF6B35; font-weight: 500;">Complétion (C)</span>
                 </span>
                 <span style="display: flex; align-items: center; gap: 6px;">
-                    <span style="width: 12px; height: 12px; background: #4CAF50; border-radius: 50%;"></span>
-                    <span style="color: #4CAF50; font-weight: 500;">Performance (P)</span>
+                    <span style="width: 12px; height: 12px; background: var(--vert-succes); border-radius: 50%;"></span>
+                    <span style="color: var(--vert-succes); font-weight: 500;">Performance (P)</span>
                 </span>
-                <span style="color: #888; font-size: 0.85rem; margin-left: auto;">Survolez une courbe pour l'identifier</span>
+                <span style="color: var(--gris-clair); font-size: 0.85rem; margin-left: auto;">Survolez une courbe pour l'identifier</span>
             </div>
 
             <!-- Canvas pour le graphique Chart.js -->
@@ -4328,7 +4328,7 @@ function genererSectionProgression(da) {
                 <canvas id="${canvasId}"></canvas>
             </div>
 
-            <div style="background: white; padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.85rem; color: #666;">
+            <div style="background: white; padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.85rem; color: var(--gris-moyen);">
                 <strong>Zones colorées :</strong> ${texteZones}
             </div>
         </div>
@@ -4400,9 +4400,9 @@ function genererSectionPerformance(da) {
                 <div class="profil-zone-moyenne-bleu" style="margin-bottom: 20px;">
                     <!-- Légende des critères -->
                     <div style="background: white; padding: 12px 20px; border-radius: 6px; margin-bottom: 10px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
-                        <span style="font-weight: 600; color: #333;">Critères :</span>
+                        <span style="font-weight: 600; color: var(--gris-fonce);">Critères :</span>
                         ${legendeHTML}
-                        <span style="color: #888; font-size: 0.85rem; margin-left: auto;">Survolez une courbe pour l'identifier</span>
+                        <span style="color: var(--gris-clair); font-size: 0.85rem; margin-left: auto;">Survolez une courbe pour l'identifier</span>
                     </div>
 
                     <!-- Canvas pour le graphique Chart.js -->
@@ -4440,8 +4440,8 @@ function genererSectionPerformance(da) {
             return `
                 ${graphiqueCriteres}
                 <div class="profil-zone-moyenne-bleu">
-                    <p style="color: #666;">Pratique multi-objectifs activée avec l'ensemble «${echapperHtml(statusPratiqueMultiObjectifs.ensemble.nom)}»</p>
-                    <p style="color: #999; margin-top: 10px;">Aucune évaluation disponible pour le moment</p>
+                    <p class="u-texte-gris">Pratique multi-objectifs activée avec l'ensemble «${echapperHtml(statusPratiqueMultiObjectifs.ensemble.nom)}»</p>
+                    <p class="u-texte-gris-clair u-mt-10">Aucune évaluation disponible pour le moment</p>
                 </div>
             `;
         }
@@ -4454,7 +4454,7 @@ function genererSectionPerformance(da) {
         return `
             ${graphiqueCriteres}
             <div class="profil-zone-moyenne-bleu">
-                <p style="color: #666;">Aucune évaluation disponible pour le moment</p>
+                <p class="u-texte-gris">Aucune évaluation disponible pour le moment</p>
             </div>
         `;
     }
@@ -4465,7 +4465,7 @@ function genererSectionPerformance(da) {
         ${graphiqueCriteres}
         <div style="padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
             <div style="background: white; padding: 20px; border-radius: 6px; text-align: center; margin-bottom: 20px;">
-                <div style="font-size: 0.9rem; color: #666; margin-bottom: 5px;">
+                <div class="u-texte-09 u-texte-gris" style="margin-bottom: 5px;">
                     Moyenne PAN (${meilleures.length} meilleur${meilleures.length > 1 ? 's' : ''} artefact${meilleures.length > 1 ? 's' : ''})
                 </div>
                 <div style="font-size: 3rem; font-weight: bold; color: ${obtenirCouleurIndice(moyenne)};">
@@ -4500,7 +4500,7 @@ function genererSectionPerformance(da) {
                 </div>
             `).join('')}
 
-            <div style="background: white; padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.9rem; color: #666;">
+            <div style="background: white; padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.9rem; color: var(--gris-moyen);">
                 <strong>Principe PAN :</strong> La note finale est calculée sur la moyenne des 3 meilleurs ${obtenirTermeProduction('pluriel')}
                 plutôt que sur la moyenne de tous les artefacts.
             </div>
@@ -4756,8 +4756,8 @@ function genererSectionCompletion(da) {
             <h4 class="profil-titre-sous-section">
                 GESTION DES JETONS
             </h4>
-            <div style="background: #fff3cd; border: 2px dashed #ffc107; border-radius: 8px; padding: 20px; margin-bottom: 20px; text-align: center;">
-                <div style="font-size: 1.2rem; color: #856404; margin-bottom: 10px;">
+            <div style="background: var(--alerte-fond-attention); border: 2px dashed var(--btn-annuler); border-radius: 8px; padding: 20px; margin-bottom: 20px; text-align: center;">
+                <div style="font-size: 1.2rem; color: var(--alerte-texte-attention); margin-bottom: 10px;">
                     <strong>Jetons disponibles :</strong> 2 / 2
                 </div>
                 <div class="profil-texte-italique-gris">
@@ -4775,8 +4775,8 @@ function genererSectionCompletion(da) {
                 <div class="badges-centres u-mb-20">
                     ${artefactsRemis.map(art => `
                         <div style="flex: 0 0 auto; min-width: 200px; max-width: 250px; padding: 12px;
-                                    background: #d4edda; border-left: 3px solid #28a745;">
-                            <div style="color: #155724; font-weight: 500; margin-bottom: 5px;">
+                                    background: var(--vert-pale, #d4edda); border-left: 3px solid var(--vert-succes);">
+                            <div style="color: var(--alerte-texte-succes); font-weight: 500; margin-bottom: 5px;">
                                 ✅ ${echapperHtml(art.description)}
                                 ${art.jetonReprise ? '<span style="color: #9c27b0; margin-left: 6px;" title="Jeton de reprise appliqué">⭐</span>' : ''}
                                 ${art.jetonDelai ? '<span style="color: #ff6f00; margin-left: 6px;" title="Jeton de délai appliqué">⭐</span>' : ''}
@@ -4801,8 +4801,8 @@ function genererSectionCompletion(da) {
                 <div class="badges-centres u-mb-20">
                     ${artefactsNonRemis.map(art => `
                         <div style="flex: 0 0 auto; min-width: 200px; max-width: 250px; padding: 12px;
-                                    background: #f5f5f5; border-left: 3px solid #ddd; opacity: 0.6;">
-                            <div style="color: #666; font-weight: 500; margin-bottom: 5px;">
+                                    background: var(--gris-tres-pale); border-left: 3px solid var(--bordure-claire); opacity: 0.6;">
+                            <div style="color: var(--gris-moyen); font-weight: 500; margin-bottom: 5px;">
                                 ⏳ ${echapperHtml(art.description)}
                             </div>
                             <div class="text-muted" style="font-size: 0.9rem;">Non remis</div>
@@ -6308,11 +6308,11 @@ function genererDiagnosticSRPNF(da, defisInfo) {
 
     // Fonction helper pour obtenir la couleur selon le score
     const obtenirCouleurScore = (score) => {
-        if (score >= 0.85) return '#2196F3'; // Bleu
-        if (score >= 0.75) return '#28a745'; // Vert
-        if (score >= 0.7125) return '#28a745'; // Vert (force)
-        if (score >= 0.65) return '#ffc107'; // Jaune
-        return '#ff9800'; // Orange
+        if (score >= 0.85) return 'var(--bleu-clair)'; // Bleu
+        if (score >= 0.75) return 'var(--vert-succes)'; // Vert
+        if (score >= 0.7125) return 'var(--vert-succes)'; // Vert (force)
+        if (score >= 0.65) return 'var(--btn-annuler)'; // Jaune
+        return 'var(--orange-accent)'; // Orange
     };
 
     return `
@@ -6339,7 +6339,7 @@ function genererDiagnosticSRPNF(da, defisInfo) {
                     const estDefi = score < 0.7125;
 
                     return `
-                        <div style="font-weight: 500; color: #555;">${nomCritere}</div>
+                        <div style="font-weight: 500; color: var(--gris-fonce);">${nomCritere}</div>
                         <div class="u-text-center">
                             <span style="display: inline-block; min-width: 50px; padding: 4px 10px;
                                          background: ${couleur}22; color: ${couleur};
@@ -6347,7 +6347,7 @@ function genererDiagnosticSRPNF(da, defisInfo) {
                                 ${pourcentage}%
                             </span>
                         </div>
-                        <div style="text-align: right; font-size: 0.85rem; color: ${estForce ? '#28a745' : estDefi ? '#ff9800' : '#666'};">
+                        <div style="text-align: right; font-size: 0.85rem; color: ${estForce ? 'var(--vert-succes)' : estDefi ? 'var(--orange-accent)' : 'var(--gris-moyen)'};">
                             ${estForce ? '✓ Force' : estDefi ? '⚠ Défi' : '—'}
                         </div>
                     `;
@@ -6396,15 +6396,15 @@ function genererDiagnosticSRPNF(da, defisInfo) {
                         </div>
                     </div>
                     ${resultBlocage.partiel ? `
-                        <div style="background: #fff3cd; padding: 8px; margin-bottom: 10px; border-left: 3px solid #ffc107;">
-                            <div style="font-size: 0.85rem; color: #856404;">
+                        <div style="background: var(--alerte-fond-attention); padding: 8px; margin-bottom: 10px; border-left: 3px solid var(--btn-annuler);">
+                            <div style="font-size: 0.85rem; color: var(--alerte-texte-attention);">
                                 ⚠️ <strong>Calcul partiel :</strong> ${resultBlocage.criteresManquants.join(', ')} non évalué(s).
                                 La pondération a été ajustée automatiquement.
                             </div>
                         </div>
                     ` : ''}
                     <div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
-                        <div style="font-size: 0.85rem; color: #666; margin-bottom: 8px;">
+                        <div class="u-texte-mini u-texte-gris" style="margin-bottom: 8px;">
                             <strong>Formule :</strong> ${formuleTexte}
                         </div>
                         <div class="profil-texte-detail-compact">
@@ -6414,7 +6414,7 @@ function genererDiagnosticSRPNF(da, defisInfo) {
                     <div style="font-weight: bold; color: ${interpBlocage.couleur}; margin-bottom: 8px;">
                         ${interpBlocage.niveau}
                     </div>
-                    <div style="color: #555; font-size: 0.9rem; line-height: 1.5;">
+                    <div style="color: var(--gris-fonce); font-size: 0.9rem; line-height: 1.5;">
                         ${interpBlocage.description}
                     </div>
                 </div>
@@ -6426,8 +6426,8 @@ function genererDiagnosticSRPNF(da, defisInfo) {
             // ✅ Extraire dynamiquement les critères depuis la grille de référence
             const grille = obtenirGrilleReferenceDepistage();
             if (!grille || !grille.criteres || grille.criteres.length === 0) {
-                return `<div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin-bottom: 10px;">
-                    <div style="font-weight: bold; color: #856404;">⚠️ Aucune grille de référence configurée</div>
+                return `<div class="info-box info-box--attention" style="margin-bottom: 10px;">
+                    <div style="font-weight: bold; color: var(--alerte-texte-attention);">⚠️ Aucune grille de référence configurée</div>
                 </div>`;
             }
 
@@ -6529,8 +6529,8 @@ function genererDiagnosticSRPNF(da, defisInfo) {
             // Message si aucun critère avec données
             if (criteresDynamiques.length === 0) {
                 html = `
-                    <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin-bottom: 10px;">
-                        <div style="font-weight: bold; color: #856404;">
+                    <div class="info-box info-box--attention" style="margin-bottom: 10px;">
+                        <div style="font-weight: bold; color: var(--alerte-texte-attention);">
                             ⚠️ Aucune donnée disponible pour l'analyse des critères
                         </div>
                     </div>
@@ -6550,12 +6550,11 @@ function genererDiagnosticGenerique(da, defisInfo) {
 
     if (defisInfo.defis.length === 0 && !defisInfo.tendance) {
         return `
-            <div style="background: linear-gradient(to right, #28a74522, #28a74511);
-                        border-left: 4px solid #28a745; padding: 12px; margin-bottom: 10px;">
-                <div style="font-weight: bold; color: #155724;">
+            <div class="info-box info-box--succes" style="margin-bottom: 10px;">
+                <div style="font-weight: bold; color: var(--vert-succes);">
                     ✓ Aucun défi majeur identifié
                 </div>
-                <div style="color: #155724; font-size: 0.9rem; margin-top: 6px;">
+                <div style="color: var(--vert-succes); font-size: 0.9rem; margin-top: 6px;">
                     Performance satisfaisante. Continuer le suivi régulier et encourager la constance.
                 </div>
             </div>
@@ -6650,7 +6649,7 @@ function genererDiagnosticGenerique(da, defisInfo) {
                 <div style="font-weight: bold; color: ${couleurTendance}; margin-bottom: 6px;">
                     ${iconeTendance} ${texteTendance}
                 </div>
-                <div style="font-size: 0.9rem; color: #555;">
+                <div style="font-size: 0.9rem; color: var(--gris-fonce);">
                     Variation : ${tendance.variation > 0 ? '+' : ''}${tendance.variation.toFixed(1)}%
                     (${tendance.moyenneAncienne.toFixed(1)}% → ${tendance.moyenneRecente.toFixed(1)}%)
                 </div>
@@ -6662,7 +6661,7 @@ function genererDiagnosticGenerique(da, defisInfo) {
     if (defisInfo.statistiques) {
         const stats = defisInfo.statistiques;
         html += `
-            <div style="background: white; padding: 12px; border-radius: 6px; border: 1px solid #ddd; margin-bottom: 10px;">
+            <div style="background: white; padding: 12px; border-radius: 6px; border: 1px solid var(--bordure-claire); margin-bottom: 10px;">
                 <div style="font-weight: bold; color: var(--bleu-principal); margin-bottom: 8px;">
                     📊 Statistiques descriptives
                 </div>
@@ -6723,7 +6722,7 @@ function genererSectionPerformance(da) {
                         <canvas id="${canvasIdCriteres}"></canvas>
                     </div>
 
-                    <div style="background: white; padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.85rem; color: #666;">
+                    <div style="background: white; padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.85rem; color: var(--gris-moyen);">
                         <strong>Conseil :</strong> Cliquez sur un critère dans la légende pour le masquer ou l'afficher.
                         Survolez les points pour voir les détails.
                     </div>
@@ -6935,10 +6934,10 @@ function genererSectionPerformance(da) {
 
     // Fonction helper pour couleur du badge
     const obtenirCouleurBadge = (score) => {
-        if (score >= 0.7125) return '#28a745'; // Vert - Force
-        if (score >= 0.60) return '#ffc107'; // Jaune - Défi modéré
-        if (score >= 0.50) return '#ff9800'; // Orange - Défi important
-        return '#dc3545'; // Rouge - Défi critique
+        if (score >= 0.7125) return 'var(--vert-succes)'; // Vert - Force
+        if (score >= 0.60) return 'var(--btn-annuler)'; // Jaune - Défi modéré
+        if (score >= 0.50) return 'var(--orange-accent)'; // Orange - Défi important
+        return 'var(--rouge-erreur)'; // Rouge - Défi critique
     };
 
     return `
@@ -7033,10 +7032,10 @@ function genererSectionPerformance(da) {
 
                     // Couleurs par défaut IDME (si aucune échelle configurée)
                     let niveaux = [
-                        { code: 'I', nom: 'Incomplet', min: 0, max: 64, couleur: '#ff9800' },
-                        { code: 'D', nom: 'Développement', min: 65, max: 74, couleur: '#ffc107' },
-                        { code: 'M', nom: 'Maîtrisé', min: 75, max: 84, couleur: '#28a745' },
-                        { code: 'E', nom: 'Étendu', min: 85, max: 100, couleur: '#2196F3' }
+                        { code: 'I', nom: 'Incomplet', min: 0, max: 64, couleur: 'var(--orange-accent)' },
+                        { code: 'D', nom: 'Développement', min: 65, max: 74, couleur: 'var(--btn-annuler)' },
+                        { code: 'M', nom: 'Maîtrisé', min: 75, max: 84, couleur: 'var(--vert-succes)' },
+                        { code: 'E', nom: 'Étendu', min: 85, max: 100, couleur: 'var(--bleu-clair)' }
                     ];
 
                     // Utiliser les niveaux de l'échelle active si disponible
@@ -7180,7 +7179,7 @@ function genererSectionPerformance(da) {
                             valeursHTML = `
                                 <span style="display: flex; gap: 8px; align-items: center;">
                                     ${pourcentageSOM !== null ? `<span style="color: var(--som-orange); font-weight: 600;">${pourcentageSOM}%</span>` : ''}
-                                    ${pourcentageSOM !== null && pourcentagePAN !== null ? `<span style="color: #999;">|</span>` : ''}
+                                    ${pourcentageSOM !== null && pourcentagePAN !== null ? `<span style="color: var(--gris-clair);">|</span>` : ''}
                                     ${pourcentagePAN !== null ? `<span style="color: var(--std-bleu); font-weight: 600;">${pourcentagePAN}%</span>` : ''}
                                 </span>
                             `;
@@ -7191,7 +7190,7 @@ function genererSectionPerformance(da) {
 
                             pointsHTML = `<div class="critere-point" style="left: ${Math.min(pourcentage, 100)}%;"></div>`;
                             valeursHTML = `${pourcentage}%`;
-                            symbolesHTML = symboleDirection ? `<div style="position: absolute; left: ${Math.min(pourcentage, 100)}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: #333;" title="${direction.interpretation}">${symboleDirection}</div>` : '';
+                            symbolesHTML = symboleDirection ? `<div style="position: absolute; left: ${Math.min(pourcentage, 100)}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: var(--gris-fonce);" title="${direction.interpretation}">${symboleDirection}</div>` : '';
                         }
 
                         return `
@@ -7235,12 +7234,12 @@ function genererSectionPerformance(da) {
 
                         if (!grilleRef) {
                             return `
-                                <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 15px 0; border-radius: 4px;">
+                                <div class="info-box info-box--attention" style="margin: 15px 0;">
                                     <div style="display: flex; gap: 10px; align-items: start;">
                                         <span style="font-size: 1.3rem;">⚙️</span>
                                         <div style="flex: 1;">
-                                            <strong style="color: #856404; display: block; margin-bottom: 5px;">Configuration requise</strong>
-                                            <p style="margin: 0; color: #856404; font-size: 0.9rem; line-height: 1.5;">
+                                            <strong style="color: var(--alerte-texte-attention); display: block; margin-bottom: 5px;">Configuration requise</strong>
+                                            <p style="margin: 0; color: var(--alerte-texte-attention); font-size: 0.9rem; line-height: 1.5;">
                                                 Pour afficher les forces et défis par critère, vous devez configurer une grille de référence dans
                                                 <strong>Réglages → Pratique de notation → Grille de référence pour le dépistage</strong>.
                                             </p>
@@ -7250,12 +7249,12 @@ function genererSectionPerformance(da) {
                             `;
                         } else {
                             return `
-                                <div style="background: #e7f3ff; border-left: 4px solid #2196F3; padding: 15px; margin: 15px 0; border-radius: 4px;">
+                                <div class="info-box info-box--info" style="margin: 15px 0;">
                                     <div style="display: flex; gap: 10px; align-items: start;">
                                         <span style="font-size: 1.3rem;">📝</span>
                                         <div style="flex: 1;">
-                                            <strong style="color: #0c5460; display: block; margin-bottom: 5px;">Aucune donnée disponible</strong>
-                                            <p style="margin: 0; color: #0c5460; font-size: 0.9rem; line-height: 1.5;">
+                                            <strong style="color: var(--alerte-texte-information); display: block; margin-bottom: 5px;">Aucune donnée disponible</strong>
+                                            <p style="margin: 0; color: var(--alerte-texte-information); font-size: 0.9rem; line-height: 1.5;">
                                                 Cet·te étudiant·e n'a pas encore d'évaluations complétées avec des critères correspondant à la grille de référence.
                                             </p>
                                         </div>
@@ -7766,7 +7765,7 @@ function genererSectionRapport(da) {
                     <!-- Colonne gauche : Paramètres -->
                     <div>
                         <!-- Sections à inclure -->
-                        <div style="font-size: 0.85rem; color: #666; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                        <div class="u-texte-mini" style="color: var(--gris-moyen); margin-bottom: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
                             Sections à inclure
                         </div>
                         <div class="grille-checkboxes u-mb-10">
@@ -7907,7 +7906,7 @@ function copierRapport(da) {
             position: fixed;
             top: 20px;
             right: 20px;
-            background: #28a745;
+            background: var(--vert-succes);
             color: white;
             padding: 15px 25px;
             border-radius: 6px;
@@ -8766,8 +8765,8 @@ function genererSectionTravaux(da) {
     if (fichiers.length === 0) {
         return `
             <div class="profil-zone-grande-bleu">
-                <p style="color: #666; font-size: 1.1rem;">Aucun travail soumis</p>
-                <p style="color: #999; margin-top: 10px;">Importez des travaux depuis l'onglet Travaux &gt; Import</p>
+                <p style="color: var(--gris-moyen); font-size: 1.1rem;">Aucun travail soumis</p>
+                <p style="color: var(--gris-clair); margin-top: 10px;">Importez des travaux depuis l'onglet Travaux &gt; Import</p>
             </div>
         `;
     }

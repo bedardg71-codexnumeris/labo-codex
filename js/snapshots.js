@@ -947,7 +947,7 @@ function afficherStatutSnapshots() {
             `;
         } else {
             elemStatus.innerHTML = `
-                <p style="color: #4caf50;">
+                <p style="color: var(--vert-succes);">
                     ✅ Le système de captures est actif. ${nbHebdo} capture(s) hebdomadaire(s) et ${nbInterventions} capture(s) d'intervention(s) enregistrées.
                 </p>
             `;

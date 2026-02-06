@@ -234,14 +234,14 @@ function afficherMessageGuidage() {
                 <div style="font-weight: 600; color: #1a5266; margin-bottom: 8px;">
                     ${etape.titre}
                 </div>
-                <div style="color: #555; font-size: 0.9rem; line-height: 1.4;">
+                <div style="color: var(--gris-moyen); font-size: 0.9rem; line-height: 1.4;">
                     ${etape.message}
                 </div>
             </div>
             <button onclick="masquerMessageGuidage()" style="
                 background: none;
                 border: none;
-                color: #999;
+                color: var(--gris-clair);
                 cursor: pointer;
                 font-size: 1.2rem;
                 padding: 0;

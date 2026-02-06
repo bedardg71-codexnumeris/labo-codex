@@ -233,7 +233,7 @@ function genererSvgGauss(valeurs, hauteur = 55) {
             ${sigma1MoinsPos > 0 ? `<line class="ligne-sigma" x1="${sigma1MoinsPos}" y1="0" x2="${sigma1MoinsPos}" y2="${hauteur}" />` : ''}
             ${sigma1PlusPos < 100 ? `<line class="ligne-sigma" x1="${sigma1PlusPos}" y1="0" x2="${sigma1PlusPos}" y2="${hauteur}" />` : ''}
         </svg>
-        <div style="position: absolute; bottom: -18px; left: ${muPos}%; transform: translateX(-50%); font-size: 0.7rem; color: #666; white-space: nowrap;">
+        <div style="position: absolute; bottom: -18px; left: ${muPos}%; transform: translateX(-50%); font-size: 0.7rem; color: var(--gris-moyen); white-space: nowrap;">
             μ=${Math.round(moyenne * 100)}% | ±1σ: ${dans1Sigma}/${n} (${pct1Sigma}%)
         </div>
     `;
@@ -1279,9 +1279,9 @@ function afficherMetriquesGlobales(etudiants) {
         <div class="distribution-legende-commune tb-barre-rai">
             <div class="tb-flex-center-around">
                 <span style="color: #ff9800; text-align: center; font-weight: 600;">Fragile<br><span class="tb-texte-mini">30-49%</span></span>
-                <span style="color: #ffc107; text-align: center; font-weight: 600;">Modéré<br><span class="tb-texte-mini">50-64%</span></span>
-                <span style="color: #28a745; text-align: center; font-weight: 600;">Favorable<br><span class="tb-texte-mini">65-79%</span></span>
-                <span style="color: #2196F3; text-align: center; font-weight: 600;">Très favorable<br><span class="tb-texte-mini">≥ 80%</span></span>
+                <span style="color: var(--btn-annuler); text-align: center; font-weight: 600;">Modéré<br><span class="tb-texte-mini">50-64%</span></span>
+                <span style="color: var(--vert-succes); text-align: center; font-weight: 600;">Favorable<br><span class="tb-texte-mini">65-79%</span></span>
+                <span style="color: var(--bleu-clair); text-align: center; font-weight: 600;">Très favorable<br><span class="tb-texte-mini">≥ 80%</span></span>
             </div>
         </div>
     `;
@@ -1991,7 +1991,7 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, n
                     <div class="barre-rai-overlay"></div>
                 </div>
                 <div class="distribution-legende tb-barre-distribution">
-                    <span style="position: absolute; left: 16.5%; transform: translateX(-50%); color: #2196F3; font-weight: 600; text-align: center;">Niveau 1<br>Universel<br><span class="tb-texte-mini" style="color: #94a3b8;">0 (0%)</span></span>
+                    <span style="position: absolute; left: 16.5%; transform: translateX(-50%); color: var(--bleu-clair); font-weight: 600; text-align: center;">Niveau 1<br>Universel<br><span class="tb-texte-mini" style="color: #94a3b8;">0 (0%)</span></span>
                     <span style="position: absolute; left: 49.5%; transform: translateX(-50%); color: #9c55d6; font-weight: 600; text-align: center;">Niveau 2<br>Préventif<br><span class="tb-texte-mini" style="color: #94a3b8;">0 (0%)</span></span>
                     <span style="position: absolute; left: 83%; transform: translateX(-50%); color: #7c3aed; font-weight: 600; text-align: center;">Niveau 3<br>Intensif<br><span class="tb-texte-mini" style="color: #94a3b8;">0 (0%)</span></span>
                 </div>
@@ -2181,7 +2181,7 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, n
                 ${lignesPAN}
             </div>
             <div class="distribution-legende tb-barre-distribution">
-                <span style="position: absolute; left: 16.5%; transform: translateX(-50%); color: #2196f3; font-weight: 600; text-align: center;">${labelNiveau1}</span>
+                <span style="position: absolute; left: 16.5%; transform: translateX(-50%); color: var(--bleu-clair); font-weight: 600; text-align: center;">${labelNiveau1}</span>
                 <span style="position: absolute; left: 49.5%; transform: translateX(-50%); color: #6366f1; font-weight: 600; text-align: center;">${labelNiveau2}</span>
                 <span style="position: absolute; left: 83%; transform: translateX(-50%); color: #7c3aed; font-weight: 600; text-align: center;">${labelNiveau3}</span>
             </div>
@@ -2313,8 +2313,8 @@ function afficherListeEtudiantsCritiques(etudiants, afficherSommatif) {
                         border-left: 4px solid var(--risque-critique);">
                 <div>
                     <strong>${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}</strong>
-                    <span style="color: #666; margin-left: 10px;">(${echapperHtml(e.groupe || '—')})</span>
-                    <div style="font-size: 0.85rem; color: #666; margin-top: 4px;">
+                    <span style="color: var(--gris-moyen); margin-left: 10px;">(${echapperHtml(e.groupe || '—')})</span>
+                    <div style="font-size: 0.85rem; color: var(--gris-moyen); margin-top: 4px;">
                         A: ${formatPourcentage(indices.assiduite)} |
                         C: ${formatPourcentage(indices.completion)} |
                         P: ${formatPourcentage(indices.performance)}
@@ -2479,7 +2479,7 @@ function genererCarteRaI(label, description, valeurSomPct, valeurPanPct, valeurS
                     ${valeurs.join('')}
                 </div>
             </div>
-            <div style="font-size: 0.75rem; color: #999; margin-top: 4px;">${texteEtudiants}</div>
+            <div style="font-size: 0.75rem; color: var(--gris-clair); margin-top: 4px;">${texteEtudiants}</div>
         </div>
     `;
 }
@@ -2658,7 +2658,7 @@ function afficherActionsRecommandees(etudiants) {
                             ${index + 1}
                         </span>
                         <strong>${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}</strong>
-                        <span style="color: #666; margin-left: 8px;">(${echapperHtml(e.groupe || '—')})</span>
+                        <span style="color: var(--gris-moyen); margin-left: 8px;">(${echapperHtml(e.groupe || '—')})</span>
                     </div>
                     <span class="badge-engagement engagement-${indices.niveauEngagement.replace(' ', '-')}"
                           class="tb-texte-capitalize">
@@ -2767,7 +2767,7 @@ function afficherDistributionRisques(etudiants) {
             <div style="font-size: 1.5rem; font-weight: bold; color: ${couleurs[niveau]};">
                 ${nombre}
             </div>
-            <div style="font-size: 0.85rem; color: #666; text-transform: capitalize;">
+            <div style="font-size: 0.85rem; color: var(--gris-moyen); text-transform: capitalize;">
                 ${niveau}
             </div>
         </div>

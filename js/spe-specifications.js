@@ -470,15 +470,15 @@
         const resultat = await calculerForfaitEtudiant(etudiantDA);
 
         let html = `
-            <div class="spe-dashboard" style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin: 10px 0;">
+            <div class="spe-dashboard" style="padding: 15px; background: var(--gris-tres-pale); border-radius: 8px; margin: 10px 0;">
                 <h4 style="margin: 0 0 15px 0; color: var(--bleu-principal);">
                     Progression PAN-Spécifications
                 </h4>
 
                 <!-- Forfait atteint -->
                 <div style="
-                    background: ${resultat.forfaitAtteint ? '#d4edda' : '#fff3cd'};
-                    border: 2px solid ${resultat.forfaitAtteint ? '#28a745' : '#ffc107'};
+                    background: ${resultat.forfaitAtteint ? 'var(--alerte-fond-succes, #d4edda)' : 'var(--alerte-fond-attention)'};
+                    border: 2px solid ${resultat.forfaitAtteint ? 'var(--vert-succes)' : 'var(--btn-annuler)'};
                     border-radius: 8px;
                     padding: 15px;
                     text-align: center;
@@ -487,7 +487,7 @@
                     <div style="font-size: 2rem; font-weight: bold;">
                         ${resultat.forfaitLettre}
                     </div>
-                    <div style="font-size: 1.5rem; color: #666;">
+                    <div style="font-size: 1.5rem; color: var(--gris-moyen);">
                         ${resultat.noteFinale}%
                     </div>
                 </div>
@@ -507,10 +507,10 @@
             const nbAcceptables = resultat.detailParType[type.id] || 0;
             html += `
                 <tr>
-                    <td style="padding: 8px; border-bottom: 1px solid #dee2e6;">${type.nom}</td>
-                    <td style="padding: 8px; text-align: center; border-bottom: 1px solid #dee2e6;">
+                    <td style="padding: 8px; border-bottom: 1px solid var(--bordure-claire);">${type.nom}</td>
+                    <td style="padding: 8px; text-align: center; border-bottom: 1px solid var(--bordure-claire);">
                         <span style="
-                            background: ${nbAcceptables > 0 ? '#28a745' : '#6c757d'};
+                            background: ${nbAcceptables > 0 ? 'var(--vert-succes)' : 'var(--gris-moyen)'};
                             color: white;
                             padding: 2px 10px;
                             border-radius: 12px;
@@ -634,8 +634,8 @@
                     align-items: flex-start;
                     gap: 10px;
                     padding: 10px;
-                    background: ${estCoche ? '#d4edda' : '#fff'};
-                    border: 1px solid ${estCoche ? '#28a745' : '#dee2e6'};
+                    background: ${estCoche ? 'var(--alerte-fond-succes, #d4edda)' : '#fff'};
+                    border: 1px solid ${estCoche ? 'var(--vert-succes)' : 'var(--bordure-claire)'};
                     border-radius: 6px;
                     margin-bottom: 8px;
                     transition: all 0.2s;
@@ -684,8 +684,8 @@
         if (checkbox) {
             const container = checkbox.closest('.spe-spec-item');
             if (container) {
-                container.style.background = estCoche ? '#d4edda' : '#fff';
-                container.style.borderColor = estCoche ? '#28a745' : '#dee2e6';
+                container.style.background = estCoche ? 'var(--alerte-fond-succes, #d4edda)' : '#fff';
+                container.style.borderColor = estCoche ? 'var(--vert-succes)' : 'var(--bordure-claire)';
             }
         }
 
@@ -704,13 +704,13 @@
 
         const resultatDiv = document.getElementById('spe-resultat');
         if (resultatDiv) {
-            resultatDiv.style.background = acceptable ? '#d4edda' : '#f8d7da';
-            resultatDiv.style.border = `2px solid ${acceptable ? '#28a745' : '#dc3545'}`;
+            resultatDiv.style.background = acceptable ? 'var(--alerte-fond-succes, #d4edda)' : 'var(--alerte-fond-erreur, #f8d7da)';
+            resultatDiv.style.border = `2px solid ${acceptable ? 'var(--vert-succes)' : 'var(--rouge-erreur)'}`;
             resultatDiv.innerHTML = `
-                <div style="color: ${acceptable ? '#28a745' : '#dc3545'};">
+                <div style="color: ${acceptable ? 'var(--vert-succes)' : 'var(--rouge-erreur)'};">
                     ${acceptable ? '✓ ACCEPTABLE' : '✗ NON ACCEPTABLE'}
                 </div>
-                <div style="font-size: 0.9rem; font-weight: normal; color: #666; margin-top: 5px;">
+                <div style="font-size: 0.9rem; font-weight: normal; color: var(--gris-moyen); margin-top: 5px;">
                     ${coches} / ${total} spécifications respectées
                 </div>
             `;
@@ -772,17 +772,17 @@
                             border: none;
                             font-size: 1.5rem;
                             cursor: pointer;
-                            color: #666;
+                            color: var(--gris-moyen);
                         ">×</button>
                     </div>
 
                     <!-- Explications -->
-                    <div style="background: #e3f2fd; padding: 12px; border-radius: 6px; margin-bottom: 20px;">
+                    <div style="background: var(--bleu-pale); padding: 12px; border-radius: 6px; margin-bottom: 20px;">
                         <p style="margin: 0; font-size: 0.9rem;">
                             <strong>Comment ça marche ?</strong><br>
                             Une grille de spécifications contient les critères que le travail doit respecter.
-                            Si <strong>tous</strong> les critères sont cochés → le travail est <span style="color: #28a745;">Acceptable</span>.
-                            Sinon → <span style="color: #dc3545;">Non acceptable</span> (à réviser).
+                            Si <strong>tous</strong> les critères sont cochés → le travail est <span style="color: var(--vert-succes);">Acceptable</span>.
+                            Sinon → <span style="color: var(--rouge-erreur);">Non acceptable</span> (à réviser).
                         </p>
                     </div>
 

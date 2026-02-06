@@ -113,11 +113,11 @@ function genererBadgeSourceCartouche(cartouche, cartouchesLocales) {
     const estRetiree = cartouche.dansBibliotheque === false;
 
     if (estRetiree) {
-        return '<span style="background: #ff9800; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em; margin-left: 6px;">Retirée</span>';
+        return '<span class="badge-source badge-source--retiree">Retirée</span>';
     } else if (estLocale) {
-        return '<span style="background: #4caf50; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em; margin-left: 6px;">Locale</span>';
+        return '<span class="badge-source badge-source--locale">Locale</span>';
     } else {
-        return '<span style="background: #2196f3; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em; margin-left: 6px;">Bibliothèque</span>';
+        return '<span class="badge-source badge-source--bibliotheque">Bibliothèque</span>';
     }
 }
 
@@ -3289,7 +3289,7 @@ async function afficherBibliothequeCartouches() {
                     background: transparent;
                     border: none;
                     font-size: 28px;
-                    color: #999;
+                    color: var(--gris-clair);
                     cursor: pointer;
                     padding: 0;
                     width: 30px;
@@ -3298,14 +3298,14 @@ async function afficherBibliothequeCartouches() {
                     align-items: center;
                     justify-content: center;
                     z-index: 1;
-                " onmouseover="this.style.color='#333'" onmouseout="this.style.color='#999'">
+                " onmouseover="this.style.color='var(--gris-fonce)'" onmouseout="this.style.color='var(--gris-clair)'">
                     ×
                 </button>
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
-                    <h2 style="margin: 0; color: #2c3e50;">Bibliothèque de cartouches de rétroaction</h2>
+                    <h2 style="margin: 0; color: var(--bleu-principal);">Bibliothèque de cartouches de rétroaction</h2>
                     <button class="btn-aide-contextuelle" data-aide="bibliotheque-fonctionnement" title="Comment fonctionne la bibliothèque">😎</button>
                 </div>
-                <p style="color: #7f8c8d; margin-bottom: 20px;">
+                <p style="color: var(--gris-clair); margin-bottom: 20px;">
                     Gérez les cartouches de rétroaction affichées dans la barre latérale.
                 </p>
     `;
@@ -3313,14 +3313,14 @@ async function afficherBibliothequeCartouches() {
     // ✅ AJOUT (28 janvier 2026) : Afficher avertissement doublons
     if (doublonsDetectes.length > 0) {
         html += `
-                <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 15px; margin-bottom: 20px;">
-                    <div style="font-weight: bold; color: #856404; margin-bottom: 8px;">
+                <div class="info-box info-box--attention" style="margin-bottom: 20px;">
+                    <div style="font-weight: bold; margin-bottom: 8px;">
                         ⚠️ ${doublonsDetectes.length} doublon(s) potentiel(s) détecté(s)
                     </div>
-                    <p style="color: #856404; font-size: 0.9em; margin: 0 0 10px 0;">
+                    <p style="font-size: 0.9em; margin: 0 0 10px 0;">
                         Des cartouches avec des noms similaires existent en plusieurs exemplaires.
                     </p>
-                    <details style="color: #856404; font-size: 0.85em;">
+                    <details style="font-size: 0.85em;">
                         <summary style="cursor: pointer; font-weight: 500;">Voir les détails</summary>
                         <ul style="margin: 10px 0 0 0; padding-left: 20px;">
                             ${doublonsDetectes.map(d => `<li><strong>${d.nom}</strong> : ${d.count} exemplaires (IDs: ${d.ids.map(id => '#' + genererIdCourtCartouche(id)).join(', ')})</li>`).join('')}
@@ -3340,7 +3340,7 @@ async function afficherBibliothequeCartouches() {
     `;
 
     if (cartouchesDansBibliotheque.length === 0) {
-        html += '<p style="color: #999; font-style: italic;">Aucune cartouche dans la barre latérale</p>';
+        html += '<p style="color: var(--gris-clair); font-style: italic;">Aucune cartouche dans la barre latérale</p>';
     } else {
         cartouchesDansBibliotheque.forEach(cartouche => {
             const nomCartouche = cartouche.nom || 'Sans titre';
@@ -3362,12 +3362,12 @@ async function afficherBibliothequeCartouches() {
                 ">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                         <div style="flex: 1;">
-                            <div style="font-weight: bold; color: #2c3e50; margin-bottom: 4px;">
+                            <div style="font-weight: bold; color: var(--bleu-principal); margin-bottom: 4px;">
                                 ${nomCartouche}
-                                <span style="background: #e0e0e0; color: #666; padding: 2px 6px; border-radius: 3px; font-size: 0.7em; margin-left: 6px; font-family: monospace;" title="ID: ${cartouche.id}">#${idCourt}</span>
+                                <span class="badge-source badge-source--id" title="ID: ${cartouche.id}">#${idCourt}</span>
                                 ${badgeSource}
                             </div>
-                            <div style="color: #7f8c8d; font-size: 0.9em;">
+                            <div style="color: var(--gris-clair); font-size: 0.9em;">
                                 ${nbCommentaires} commentaire(s) • ${grilleNom}${auteurOriginal ? ' • ' + auteurOriginal : ''}
                             </div>
                         </div>
@@ -3419,13 +3419,13 @@ async function afficherBibliothequeCartouches() {
                 </div>
 
                 <!-- Section 2 : Cartouches disponibles -->
-                <h3 style="color: #3498db; font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
+                <h3 style="color: var(--bleu-clair); font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
                     Cartouches disponibles à ajouter à la barre latérale
                 </h3>
 
                 <!-- Filtre par grille -->
                 <div style="margin-bottom: 15px;">
-                    <label style="display: block; margin-bottom: 5px; color: #555; font-weight: 500;">
+                    <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">
                         Filtrer par grille :
                     </label>
                     <select id="filtreGrilleCartouches"
@@ -3458,7 +3458,7 @@ async function afficherBibliothequeCartouches() {
 
     // Afficher par grille
     Object.keys(cartouchesParGrille).sort().forEach(grilleNom => {
-        html += `<h4 style="margin-top: 20px; margin-bottom: 10px; color: #666;">${grilleNom}</h4>`;
+        html += `<h4 style="margin-top: 20px; margin-bottom: 10px; color: var(--gris-moyen);">${grilleNom}</h4>`;
 
         cartouchesParGrille[grilleNom].forEach(cartouche => {
             const nomCartouche = cartouche.nom || 'Sans titre';
@@ -3477,7 +3477,7 @@ async function afficherBibliothequeCartouches() {
                 <div class="cartouche-disponible-item" data-grille="${grilleNom}" style="
                     padding: 12px;
                     background: white;
-                    border: 1px solid #ddd;
+                    border: 1px solid var(--bordure-claire);
                     border-radius: 6px;
                     margin-bottom: 10px;
                     display: flex;
@@ -3489,13 +3489,13 @@ async function afficherBibliothequeCartouches() {
                     <div style="flex: 1;">
                         <div style="font-weight: 500; margin-bottom: 4px;">
                             ${nomCartouche}
-                            <span style="background: #e0e0e0; color: #666; padding: 2px 6px; border-radius: 3px; font-size: 0.7em; margin-left: 6px; font-family: monospace;" title="ID: ${cartouche.id}">#${idCourt}</span>
+                            <span class="badge-source badge-source--id" title="ID: ${cartouche.id}">#${idCourt}</span>
                             ${badgeSource}
                         </div>
-                        <div style="font-size: 0.85rem; color: #666; margin-bottom: 4px;">
+                        <div style="font-size: 0.85rem; color: var(--gris-moyen); margin-bottom: 4px;">
                             ${nbCommentaires} commentaire(s)${auteur ? ' • ' + auteur : ''}
                         </div>
-                        ${description ? `<div style="font-size: 0.85rem; color: #888;">${description}</div>` : ''}
+                        ${description ? `<div style="font-size: 0.85rem; color: var(--gris-clair);">${description}</div>` : ''}
                         ${dejaPresent ? '<div style="font-size: 0.8rem; color: var(--bleu-clair); font-style: italic; margin-top: 4px;">Déjà dans la barre latérale</div>' : ''}
                     </div>
                     ${!dejaPresent ? `

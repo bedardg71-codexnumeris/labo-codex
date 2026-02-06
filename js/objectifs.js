@@ -493,13 +493,13 @@ function calculerTotalPoidsEnsemble() {
 
     // Changer la couleur selon la validité
     if (total === 100) {
-        totalSpan.style.color = '#4caf50'; // Vert
+        totalSpan.style.color = 'var(--vert-succes)'; // Vert
         validationP.textContent = '✓ Total valide ! L\'ensemble peut être utilisé.';
-        validationP.style.color = '#4caf50';
+        validationP.style.color = 'var(--vert-succes)';
     } else if (total > 100) {
-        totalSpan.style.color = '#dc3545'; // Rouge
+        totalSpan.style.color = 'var(--rouge-erreur)'; // Rouge
         validationP.textContent = '⚠ Le total dépasse 100% (' + total + '%). Ajustez les pondérations.';
-        validationP.style.color = '#dc3545';
+        validationP.style.color = 'var(--rouge-erreur)';
     } else {
         totalSpan.style.color = '#f0ad4e'; // Orange
         validationP.textContent = 'Le total doit atteindre 100% (actuellement ' + total + '%)';

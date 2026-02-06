@@ -105,19 +105,19 @@ function ouvrirModalRapportsArchives() {
     };
 
     const listeHTML = archives.length === 0
-        ? '<p style="text-align: center; color: #666; padding: 30px;">Aucun rapport archivé</p>'
+        ? '<p style="text-align: center; color: var(--gris-moyen); padding: 30px;">Aucun rapport archivé</p>'
         : archives.map(r => `
-            <div style="background: #f8f9fa; border-radius: 8px; padding: 12px; margin-bottom: 10px; border-left: 3px solid var(--bleu-principal);">
+            <div style="background: var(--gris-tres-pale); border-radius: 8px; padding: 12px; margin-bottom: 10px; border-left: 3px solid var(--bleu-principal);">
                 <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
                     <div>
                         <strong style="color: var(--bleu-principal);">${r.prenom}</strong>
-                        <span style="color: #666; font-size: 0.85rem; margin-left: 10px;">${formatDate(r.date)}</span>
+                        <span style="color: var(--gris-moyen); font-size: 0.85rem; margin-left: 10px;">${formatDate(r.date)}</span>
                     </div>
                     <button onclick="supprimerEtRafraichirArchive(${r.id})" style="
                         background: none; border: none; cursor: pointer; font-size: 1.2rem;
-                        color: #999; padding: 0;" title="Supprimer">×</button>
+                        color: var(--gris-clair); padding: 0;" title="Supprimer">×</button>
                 </div>
-                <p style="margin: 0 0 8px 0; font-size: 0.9rem; color: #333;">
+                <p style="margin: 0 0 8px 0; font-size: 0.9rem; color: var(--gris-fonce);">
                     ${(r.description || 'Aucune description').substring(0, 100)}${r.description?.length > 100 ? '...' : ''}
                 </p>
                 <button onclick="afficherRapportComplet(${r.id})" class="btn btn-secondaire" style="font-size: 0.8rem; padding: 4px 10px;">
@@ -149,7 +149,7 @@ function ouvrirModalRapportsArchives() {
                 ${archives.length > 0 ? `
                 <div style="padding: 15px; border-top: 1px solid var(--gris-clair); text-align: right;">
                     <button onclick="if(confirm('Supprimer tous les rapports archivés ?')) { viderRapportsArchives(); rafraichirListeArchives(); }"
-                            class="btn btn-secondaire" style="color: #dc3545;">
+                            class="btn btn-secondaire" style="color: var(--rouge-erreur);">
                         Tout supprimer
                     </button>
                 </div>
@@ -780,15 +780,12 @@ function ouvrirModalRapportBug() {
                 <!-- Contenu -->
                 <div style="padding: 25px;">
                     <!-- Instructions -->
-                    <div style="
-                        background: #fff8e1;
-                        border-left: 4px solid #ffc107;
-                        padding: 15px;
+                    <div class="info-box info-box--attention" style="
                         margin-bottom: 20px;
                         border-radius: 0 8px 8px 0;
                     ">
-                        <strong style="color: #856404;">Comment signaler un bug :</strong>
-                        <ol style="margin: 10px 0 0 0; padding-left: 20px; color: #856404;">
+                        <strong>Comment signaler un bug :</strong>
+                        <ol style="margin: 10px 0 0 0; padding-left: 20px;">
                             <li>Décrivez le problème ci-dessous</li>
                             <li>Cliquez sur «Copier le rapport»</li>
                             <li>Envoyez-le par courriel avec vos captures d'écran</li>
@@ -855,7 +852,7 @@ function ouvrirModalRapportBug() {
                             Rapport technique (généré automatiquement) :
                         </label>
                         <pre id="rapportBugTexte" style="
-                            background: #f5f5f5;
+                            background: var(--gris-tres-pale);
                             padding: 15px;
                             border-radius: 8px;
                             font-size: 0.75rem;
@@ -891,9 +888,9 @@ function ouvrirModalRapportBug() {
                         margin-bottom: 15px;
                     ">
                         <strong>Captures d'écran :</strong>
-                        Mac: <code style="background: #e0e0e0; padding: 2px 6px; border-radius: 4px;">Cmd+Shift+4</code> |
-                        Windows: <code style="background: #e0e0e0; padding: 2px 6px; border-radius: 4px;">Win+Shift+S</code> |
-                        iPad: <code style="background: #e0e0e0; padding: 2px 6px; border-radius: 4px;">Power+Vol.haut</code>
+                        Mac: <code style="background: var(--bordure-claire); padding: 2px 6px; border-radius: 4px;">Cmd+Shift+4</code> |
+                        Windows: <code style="background: var(--bordure-claire); padding: 2px 6px; border-radius: 4px;">Win+Shift+S</code> |
+                        iPad: <code style="background: var(--bordure-claire); padding: 2px 6px; border-radius: 4px;">Power+Vol.haut</code>
                     </div>
 
                     <!-- Lien vers archives -->
