@@ -1,0 +1,533 @@
+/* ===============================
+   MODULE: TRAVAUX - VISIONNEUSE
+   Rendu PDF (PDF.js) et images, zoom/pan, navigation pages
+
+   DEPENDANCES:
+   - libs/pdf.min.js (PDF.js)
+   - travaux-stockage.js (recupererBlob)
+   =============================== */
+
+(function() {
+    'use strict';
+
+    /* ===============================
+       CONSTANTES
+       =============================== */
+
+    const ZOOM_MIN = 0.25;
+    const ZOOM_MAX = 4.0;
+    const ZOOM_PAS = 0.25;
+    const ZOOM_DEFAUT = 1.0;
+    const ZOOM_FIT = 'fit'; // Ajuster a la fenetre
+
+    /* ===============================
+       ETAT DU MODULE
+       =============================== */
+
+    let fichierActuel = null;       // Metadonnees du fichier ouvert
+    let pdfDocument = null;         // Instance PDF.js
+    let pageActuelle = 1;
+    let nombrePagesTotal = 1;
+    let zoomActuel = ZOOM_DEFAUT;
+    let modeZoom = ZOOM_FIT;        // 'fit' ou valeur numerique
+    let canvasDocument = null;       // Canvas de rendu
+    let ctxDocument = null;
+    let conteneurVisionneuse = null;
+    let enRendu = false;
+
+    // Cache de pre-rendu pour pages adjacentes
+    const cachePages = new Map(); // Map<numPage, {canvas, scale}>
+    const MAX_CACHE_PAGES = 5;
+
+    /* ===============================
+       INITIALISATION PDF.js
+       =============================== */
+
+    /**
+     * Configure PDF.js worker
+     */
+    function configurerPDFjs() {
+        if (typeof pdfjsLib !== 'undefined') {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'libs/pdf.worker.min.js';
+            console.log('[Travaux-Visionneuse] PDF.js configure');
+        } else {
+            console.warn('[Travaux-Visionneuse] PDF.js non disponible');
+        }
+    }
+
+    /* ===============================
+       OUVERTURE FICHIER
+       =============================== */
+
+    /**
+     * Ouvre un fichier dans la visionneuse
+     * @param {string} fichierId - ID du fichier travail
+     * @returns {Promise<boolean>} true si ouvert avec succes
+     */
+    async function ouvrirFichier(fichierId) {
+        const fichier = travauxStockage.obtenirFichierParId(fichierId);
+        if (!fichier) {
+            console.error('[Travaux-Visionneuse] Fichier introuvable:', fichierId);
+            return false;
+        }
+
+        // Recuperer le blob
+        const blob = await travauxStockage.recupererBlob(fichierId);
+        if (!blob) {
+            console.error('[Travaux-Visionneuse] Blob introuvable:', fichierId);
+            return false;
+        }
+
+        fichierActuel = fichier;
+        pageActuelle = 1;
+        modeZoom = ZOOM_FIT;
+
+        if (fichier.typeMIME === 'application/pdf') {
+            await ouvrirPDF(blob);
+        } else if (fichier.typeMIME.startsWith('image/')) {
+            await ouvrirImage(blob);
+        }
+
+        mettreAJourNavigation();
+        return true;
+    }
+
+    /**
+     * Ouvre un PDF dans la visionneuse
+     * @param {Blob} blob - Le blob PDF
+     */
+    async function ouvrirPDF(blob) {
+        if (typeof pdfjsLib === 'undefined') {
+            afficherErreur('PDF.js non disponible');
+            return;
+        }
+
+        const arrayBuffer = await blob.arrayBuffer();
+        pdfDocument = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        nombrePagesTotal = pdfDocument.numPages;
+
+        await rendrePage(1);
+    }
+
+    /**
+     * Ouvre une image dans la visionneuse
+     * @param {Blob} blob - Le blob image
+     */
+    async function ouvrirImage(blob) {
+        pdfDocument = null;
+        nombrePagesTotal = 1;
+
+        return new Promise((resolve) => {
+            const img = new Image();
+            const url = URL.createObjectURL(blob);
+
+            img.onload = () => {
+                URL.revokeObjectURL(url);
+                rendreImage(img);
+                resolve();
+            };
+
+            img.onerror = () => {
+                URL.revokeObjectURL(url);
+                afficherErreur('Erreur chargement image');
+                resolve();
+            };
+
+            img.src = url;
+        });
+    }
+
+    /* ===============================
+       RENDU
+       =============================== */
+
+    /**
+     * Rend une page PDF sur le canvas
+     * @param {number} numPage - Numero de page (1-indexed)
+     */
+    async function rendrePage(numPage) {
+        if (!pdfDocument || enRendu) return;
+        if (numPage < 1 || numPage > nombrePagesTotal) return;
+
+        enRendu = true;
+        pageActuelle = numPage;
+
+        try {
+            const page = await pdfDocument.getPage(numPage);
+            const zoomEffectif = calculerZoomEffectif(page);
+            const viewport = page.getViewport({ scale: zoomEffectif });
+
+            // Verifier le cache
+            const cached = cachePages.get(numPage);
+            initialiserCanvas();
+
+            if (cached && cached.scale === zoomEffectif) {
+                // Utiliser la page pre-rendue
+                canvasDocument.width = cached.canvas.width;
+                canvasDocument.height = cached.canvas.height;
+                ctxDocument.drawImage(cached.canvas, 0, 0);
+            } else {
+                // Rendre la page normalement
+                canvasDocument.width = viewport.width;
+                canvasDocument.height = viewport.height;
+                await page.render({
+                    canvasContext: ctxDocument,
+                    viewport: viewport
+                }).promise;
+            }
+
+            // Notifier pour l'overlay d'annotation
+            window.dispatchEvent(new CustomEvent('travaux-page-rendue', {
+                detail: {
+                    page: numPage,
+                    width: viewport.width,
+                    height: viewport.height,
+                    scale: zoomEffectif
+                }
+            }));
+
+            // Pre-rendre les pages adjacentes en arriere-plan
+            preRendreAdjacentes(numPage, zoomEffectif);
+
+        } catch (e) {
+            console.error('[Travaux-Visionneuse] Erreur rendu page:', e);
+        }
+
+        enRendu = false;
+        mettreAJourNavigation();
+    }
+
+    /**
+     * Pre-rend les pages adjacentes dans des canvas hors-ecran
+     * @param {number} numPage - Page courante
+     * @param {number} scale - Echelle de rendu
+     */
+    async function preRendreAdjacentes(numPage, scale) {
+        if (!pdfDocument) return;
+
+        // Nettoyer le cache si trop grand
+        if (cachePages.size > MAX_CACHE_PAGES) {
+            const pagesToKeep = new Set([numPage, numPage - 1, numPage + 1]);
+            for (const key of cachePages.keys()) {
+                if (!pagesToKeep.has(key)) {
+                    cachePages.delete(key);
+                }
+            }
+        }
+
+        const pagesToRender = [];
+        if (numPage + 1 <= nombrePagesTotal && !cachePages.has(numPage + 1)) {
+            pagesToRender.push(numPage + 1);
+        }
+        if (numPage - 1 >= 1 && !cachePages.has(numPage - 1)) {
+            pagesToRender.push(numPage - 1);
+        }
+
+        for (const num of pagesToRender) {
+            try {
+                const page = await pdfDocument.getPage(num);
+                const viewport = page.getViewport({ scale: scale });
+                const offscreen = document.createElement('canvas');
+                offscreen.width = viewport.width;
+                offscreen.height = viewport.height;
+                const ctx = offscreen.getContext('2d');
+
+                await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+                cachePages.set(num, { canvas: offscreen, scale: scale });
+            } catch (e) {
+                // Silencieux - le pre-rendu n'est pas critique
+            }
+        }
+    }
+
+    /**
+     * Rend une image sur le canvas
+     * @param {HTMLImageElement} img - L'image chargee
+     */
+    function rendreImage(img) {
+        initialiserCanvas();
+
+        const zoomEffectif = calculerZoomImage(img);
+        const w = img.width * zoomEffectif;
+        const h = img.height * zoomEffectif;
+
+        canvasDocument.width = w;
+        canvasDocument.height = h;
+        ctxDocument.drawImage(img, 0, 0, w, h);
+
+        // Stocker l'image pour re-rendu lors du zoom
+        canvasDocument._imageSource = img;
+
+        window.dispatchEvent(new CustomEvent('travaux-page-rendue', {
+            detail: {
+                page: 1,
+                width: w,
+                height: h,
+                scale: zoomEffectif
+            }
+        }));
+    }
+
+    /**
+     * Calcule le zoom effectif pour un PDF
+     * @param {Object} page - Page PDF.js
+     * @returns {number} Scale a appliquer
+     */
+    function calculerZoomEffectif(page) {
+        if (modeZoom !== ZOOM_FIT) {
+            return zoomActuel;
+        }
+
+        const viewport = page.getViewport({ scale: 1.0 });
+        const conteneur = conteneurVisionneuse || document.getElementById('travaux-conteneur-document');
+        if (!conteneur) return 1.0;
+
+        const largeurDispo = conteneur.clientWidth - 40; // marge
+        const hauteurDispo = conteneur.clientHeight - 40;
+
+        const scaleX = largeurDispo / viewport.width;
+        const scaleY = hauteurDispo / viewport.height;
+
+        zoomActuel = Math.min(scaleX, scaleY, 2.0); // cap a 2x
+        return zoomActuel;
+    }
+
+    /**
+     * Calcule le zoom effectif pour une image
+     * @param {HTMLImageElement} img - L'image
+     * @returns {number} Scale a appliquer
+     */
+    function calculerZoomImage(img) {
+        if (modeZoom !== ZOOM_FIT) {
+            return zoomActuel;
+        }
+
+        const conteneur = conteneurVisionneuse || document.getElementById('travaux-conteneur-document');
+        if (!conteneur) return 1.0;
+
+        const largeurDispo = conteneur.clientWidth - 40;
+        const hauteurDispo = conteneur.clientHeight - 40;
+
+        const scaleX = largeurDispo / img.width;
+        const scaleY = hauteurDispo / img.height;
+
+        zoomActuel = Math.min(scaleX, scaleY, 2.0);
+        return zoomActuel;
+    }
+
+    /**
+     * Initialise ou recupere le canvas de rendu
+     */
+    function initialiserCanvas() {
+        if (!canvasDocument) {
+            canvasDocument = document.getElementById('travaux-canvas-document');
+        }
+        if (canvasDocument) {
+            ctxDocument = canvasDocument.getContext('2d');
+        }
+    }
+
+    /**
+     * Affiche un message d'erreur dans la visionneuse
+     * @param {string} message - Le message d'erreur
+     */
+    function afficherErreur(message) {
+        initialiserCanvas();
+        if (!canvasDocument) return;
+
+        canvasDocument.width = 400;
+        canvasDocument.height = 200;
+        ctxDocument.fillStyle = '#f8f9fa';
+        ctxDocument.fillRect(0, 0, 400, 200);
+        ctxDocument.fillStyle = '#dc3545';
+        ctxDocument.font = '16px sans-serif';
+        ctxDocument.textAlign = 'center';
+        ctxDocument.fillText(message, 200, 100);
+    }
+
+    /* ===============================
+       NAVIGATION
+       =============================== */
+
+    /**
+     * Page suivante
+     */
+    async function pageSuivante() {
+        if (pageActuelle < nombrePagesTotal) {
+            await rendrePage(pageActuelle + 1);
+        }
+    }
+
+    /**
+     * Page precedente
+     */
+    async function pagePrecedente() {
+        if (pageActuelle > 1) {
+            await rendrePage(pageActuelle - 1);
+        }
+    }
+
+    /**
+     * Aller a une page specifique
+     * @param {number} num - Numero de page
+     */
+    async function allerAPage(num) {
+        num = parseInt(num, 10);
+        if (num >= 1 && num <= nombrePagesTotal) {
+            await rendrePage(num);
+        }
+    }
+
+    /**
+     * Met a jour l'affichage de la navigation de pages
+     */
+    function mettreAJourNavigation() {
+        const indicateur = document.getElementById('travaux-indicateur-page');
+        if (indicateur) {
+            indicateur.textContent = `${pageActuelle} / ${nombrePagesTotal}`;
+        }
+
+        const btnPrec = document.getElementById('travaux-btn-page-prec');
+        const btnSuiv = document.getElementById('travaux-btn-page-suiv');
+
+        if (btnPrec) btnPrec.disabled = pageActuelle <= 1;
+        if (btnSuiv) btnSuiv.disabled = pageActuelle >= nombrePagesTotal;
+
+        // Nom du fichier
+        const nomFichier = document.getElementById('travaux-nom-fichier');
+        if (nomFichier && fichierActuel) {
+            nomFichier.textContent = fichierActuel.nomFichier;
+        }
+
+        // Zoom
+        const indicateurZoom = document.getElementById('travaux-indicateur-zoom');
+        if (indicateurZoom) {
+            indicateurZoom.textContent = Math.round(zoomActuel * 100) + '%';
+        }
+    }
+
+    /* ===============================
+       ZOOM
+       =============================== */
+
+    /**
+     * Zoom avant
+     */
+    async function zoomAvant() {
+        modeZoom = 'manual';
+        zoomActuel = Math.min(zoomActuel + ZOOM_PAS, ZOOM_MAX);
+        cachePages.clear();
+        await reRendrePageActuelle();
+    }
+
+    /**
+     * Zoom arriere
+     */
+    async function zoomArriere() {
+        modeZoom = 'manual';
+        zoomActuel = Math.max(zoomActuel - ZOOM_PAS, ZOOM_MIN);
+        cachePages.clear();
+        await reRendrePageActuelle();
+    }
+
+    /**
+     * Ajuster a la fenetre
+     */
+    async function zoomAjuster() {
+        modeZoom = ZOOM_FIT;
+        cachePages.clear();
+        await reRendrePageActuelle();
+    }
+
+    /**
+     * Re-rend la page actuelle (apres zoom)
+     */
+    async function reRendrePageActuelle() {
+        if (pdfDocument) {
+            await rendrePage(pageActuelle);
+        } else if (canvasDocument && canvasDocument._imageSource) {
+            rendreImage(canvasDocument._imageSource);
+        }
+    }
+
+    /* ===============================
+       FERMETURE
+       =============================== */
+
+    /**
+     * Ferme le fichier actuel
+     */
+    function fermerFichier() {
+        fichierActuel = null;
+        pdfDocument = null;
+        pageActuelle = 1;
+        nombrePagesTotal = 1;
+        zoomActuel = ZOOM_DEFAUT;
+        modeZoom = ZOOM_FIT;
+        cachePages.clear();
+
+        if (canvasDocument) {
+            canvasDocument.width = 0;
+            canvasDocument.height = 0;
+            canvasDocument._imageSource = null;
+        }
+
+        window.dispatchEvent(new CustomEvent('travaux-fichier-ferme'));
+    }
+
+    /* ===============================
+       ACCESSEURS
+       =============================== */
+
+    function getFichierActuel() { return fichierActuel; }
+    function getPageActuelle() { return pageActuelle; }
+    function getNombrePagesTotal() { return nombrePagesTotal; }
+    function getZoomActuel() { return zoomActuel; }
+    function getCanvas() { return canvasDocument; }
+    function getPdfDocument() { return pdfDocument; }
+
+    /**
+     * Definit le conteneur de la visionneuse
+     * @param {HTMLElement} element - Le conteneur
+     */
+    function setConteneur(element) {
+        conteneurVisionneuse = element;
+    }
+
+    /* ===============================
+       INITIALISATION
+       =============================== */
+
+    function initialiserVisionneuse() {
+        configurerPDFjs();
+        console.log('[Travaux-Visionneuse] Module initialise');
+    }
+
+    /* ===============================
+       EXPORTS GLOBAUX
+       =============================== */
+
+    window.travauxVisionneuse = {
+        initialiser: initialiserVisionneuse,
+        setConteneur: setConteneur,
+        // Ouverture
+        ouvrirFichier: ouvrirFichier,
+        fermerFichier: fermerFichier,
+        // Navigation
+        pageSuivante: pageSuivante,
+        pagePrecedente: pagePrecedente,
+        allerAPage: allerAPage,
+        // Zoom
+        zoomAvant: zoomAvant,
+        zoomArriere: zoomArriere,
+        zoomAjuster: zoomAjuster,
+        // Accesseurs
+        getFichierActuel: getFichierActuel,
+        getPageActuelle: getPageActuelle,
+        getNombrePagesTotal: getNombrePagesTotal,
+        getZoomActuel: getZoomActuel,
+        getCanvas: getCanvas,
+        getPdfDocument: getPdfDocument
+    };
+
+})();

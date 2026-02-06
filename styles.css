@@ -12763,3 +12763,670 @@ body.mode-assiste .btn-aide-contextuelle,
         display: none;
     }
 }
+
+/* ===============================
+   MODULE TRAVAUX - STYLES
+   Beta 96.3 : Import, annotation, archivage
+   =============================== */
+
+/* --- Drop Zone --- */
+.travaux-drop-zone {
+    border: 2px dashed var(--gris-moyen, #ccc);
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background-color 0.2s;
+    margin: 16px 0;
+}
+
+.travaux-drop-zone:hover,
+.travaux-drop-zone.drag-over {
+    border-color: var(--bleu-clair, #065dbb);
+    background-color: rgba(6, 93, 187, 0.05);
+}
+
+.travaux-drop-zone-icone {
+    font-size: 48px;
+    margin-bottom: 12px;
+}
+
+/* --- File d'attente --- */
+.travaux-file-attente {
+    margin: 16px 0;
+}
+
+.travaux-fichier-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--gris-clair, #e5e5e5);
+    border-radius: 8px;
+    margin-bottom: 6px;
+}
+
+.travaux-fichier-item.statut-erreur {
+    border-color: #dc3545;
+    background-color: rgba(220, 53, 69, 0.05);
+}
+
+.travaux-fichier-icone {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.travaux-fichier-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.travaux-fichier-nom {
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.travaux-fichier-details {
+    font-size: 0.85rem;
+    color: var(--gris-fonce, #666);
+}
+
+.travaux-fichier-etudiant {
+    flex-shrink: 0;
+}
+
+.travaux-select-etudiant {
+    max-width: 220px;
+    font-size: 0.85rem;
+}
+
+.btn-supprimer-fichier {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #dc3545;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.btn-supprimer-fichier:hover {
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+/* --- Import actions --- */
+.travaux-import-actions {
+    display: flex;
+    gap: 12px;
+    margin: 16px 0;
+}
+
+.travaux-select-production {
+    margin: 12px 0;
+}
+
+.travaux-select-production label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 500;
+}
+
+.travaux-stats-rapides {
+    display: flex;
+    gap: 16px;
+    font-size: 0.85rem;
+    color: var(--gris-fonce, #666);
+}
+
+/* --- Barre de progression --- */
+.travaux-barre-progression-container {
+    width: 100%;
+    height: 8px;
+    background: var(--gris-clair, #e5e5e5);
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 8px 0;
+}
+
+.travaux-barre-progression {
+    height: 100%;
+    background: var(--bleu-clair, #065dbb);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+/* --- Grille fichiers --- */
+.travaux-grille-fichiers {
+    margin-top: 24px;
+}
+
+.travaux-grille {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.travaux-grille-item {
+    border: 1px solid var(--gris-clair, #e5e5e5);
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.travaux-grille-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.travaux-grille-thumb {
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    overflow: hidden;
+}
+
+.travaux-grille-thumb img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.travaux-grille-icone {
+    font-size: 48px;
+}
+
+.travaux-grille-info {
+    padding: 8px;
+}
+
+.travaux-grille-nom {
+    font-size: 0.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.travaux-grille-etudiant {
+    font-size: 0.75rem;
+    color: var(--gris-fonce, #666);
+}
+
+/* --- Layout Visionneuse --- */
+.travaux-visionneuse-layout {
+    display: flex;
+    height: calc(100vh - 200px);
+    min-height: 500px;
+    gap: 0;
+}
+
+.travaux-sidebar {
+    width: 200px;
+    min-width: 200px;
+    border-right: 1px solid var(--gris-clair, #e5e5e5);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.travaux-sidebar-header {
+    padding: 12px;
+    border-bottom: 1px solid var(--gris-clair, #e5e5e5);
+}
+
+.travaux-sidebar-header h4 {
+    margin: 0 0 8px 0;
+    font-size: 0.9rem;
+}
+
+.travaux-sidebar-header .form-select {
+    font-size: 0.8rem;
+}
+
+.travaux-miniatures {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+}
+
+.travaux-miniature {
+    padding: 8px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.15s;
+}
+
+.travaux-miniature:hover {
+    background-color: rgba(0,0,0,0.04);
+}
+
+.travaux-miniature.actif {
+    background-color: rgba(6, 93, 187, 0.1);
+    border-color: var(--bleu-clair, #065dbb);
+}
+
+.travaux-miniature-thumb {
+    width: 40px;
+    height: 50px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.travaux-miniature-thumb img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.travaux-miniature-nom {
+    font-size: 0.75rem;
+    word-break: break-all;
+    line-height: 1.2;
+}
+
+/* --- Zone document --- */
+.travaux-zone-document {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.travaux-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--gris-clair, #e5e5e5);
+    background: #fafafa;
+    flex-shrink: 0;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.travaux-toolbar-gauche,
+.travaux-toolbar-centre,
+.travaux-toolbar-droite {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.travaux-nom-fichier {
+    font-size: 0.85rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 250px;
+}
+
+.travaux-separateur {
+    width: 1px;
+    height: 20px;
+    background: var(--gris-clair, #e5e5e5);
+}
+
+.btn-icon {
+    background: none;
+    border: 1px solid var(--gris-clair, #e5e5e5);
+    border-radius: 4px;
+    padding: 4px 10px;
+    cursor: pointer;
+    font-size: 14px;
+    min-width: 32px;
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-icon:hover:not(:disabled) {
+    background: rgba(0,0,0,0.05);
+}
+
+.btn-icon:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.btn-petit {
+    padding: 4px 12px;
+    font-size: 0.8rem;
+}
+
+.btn-petit.actif {
+    background: var(--bleu-clair, #065dbb);
+    color: white;
+    border-color: var(--bleu-clair, #065dbb);
+}
+
+.btn-danger-petit {
+    color: #dc3545;
+}
+
+/* --- Canvas container --- */
+.travaux-canvas-container {
+    flex: 1;
+    overflow: auto;
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 16px;
+    background: #e5e5e5;
+}
+
+.travaux-canvas-container canvas {
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    background: white;
+}
+
+#travaux-canvas-annotation {
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.travaux-placeholder {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: var(--gris-fonce, #666);
+}
+
+/* --- Palette d'outils --- */
+.travaux-palette {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 16px;
+    background: #fafafa;
+    border-top: 1px solid var(--gris-clair, #e5e5e5);
+    flex-wrap: wrap;
+}
+
+.travaux-palette-section {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.travaux-palette-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: var(--gris-fonce, #666);
+    letter-spacing: 0.5px;
+    margin-right: 4px;
+}
+
+.travaux-palette-outils {
+    display: flex;
+    gap: 4px;
+}
+
+.travaux-btn-outil {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--gris-clair, #e5e5e5);
+    border-radius: 6px;
+    background: white;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+    min-width: 44px;
+    min-height: 44px;
+}
+
+.travaux-btn-outil:hover {
+    background: rgba(0,0,0,0.05);
+}
+
+.travaux-btn-outil.actif {
+    background: var(--bleu-clair, #065dbb);
+    color: white;
+    border-color: var(--bleu-clair, #065dbb);
+}
+
+.travaux-palette-couleurs {
+    display: flex;
+    gap: 4px;
+}
+
+.travaux-btn-couleur {
+    width: 28px;
+    height: 28px;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.15s;
+    min-width: 44px;
+    min-height: 44px;
+}
+
+.travaux-btn-couleur:hover {
+    transform: scale(1.15);
+}
+
+.travaux-btn-couleur.actif {
+    border-color: #333;
+    box-shadow: 0 0 0 2px white, 0 0 0 4px #333;
+}
+
+.travaux-slider-epaisseur {
+    width: 80px;
+}
+
+/* --- Undo/Redo --- */
+.travaux-undo-redo {
+    display: flex;
+    gap: 6px;
+    padding: 6px 12px;
+    background: #fafafa;
+    border-top: 1px solid var(--gris-clair, #e5e5e5);
+}
+
+/* --- Archivage --- */
+.travaux-archivage-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin: 16px 0;
+}
+
+.travaux-archivage-carte {
+    border: 1px solid var(--gris-clair, #e5e5e5);
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.travaux-archivage-carte h4 {
+    margin: 0 0 8px 0;
+}
+
+.travaux-archivage-checks {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 12px 0;
+    font-size: 0.85rem;
+}
+
+.travaux-archivage-checks label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.travaux-quota-section {
+    margin-top: 24px;
+    padding: 16px;
+    border: 1px solid var(--gris-clair, #e5e5e5);
+    border-radius: 10px;
+}
+
+.travaux-quota-barre-container {
+    width: 100%;
+    height: 12px;
+    background: var(--gris-clair, #e5e5e5);
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 8px 0;
+}
+
+.travaux-quota-barre {
+    height: 100%;
+    background: var(--bleu-clair, #065dbb);
+    border-radius: 6px;
+    transition: width 0.3s;
+}
+
+/* --- Vue cote-a-cote --- */
+.travaux-split-view {
+    display: flex !important;
+    gap: 0;
+}
+
+.travaux-split-panel {
+    flex: 1;
+    min-width: 0;
+    overflow: auto;
+}
+
+#travaux-split-travail {
+    border-right: 2px solid var(--gris-clair, #e5e5e5);
+}
+
+/* --- Import header --- */
+.travaux-import-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.travaux-import-header h3 {
+    margin: 0;
+}
+
+/* --- Responsive tablette --- */
+@media (max-width: 768px) {
+    .travaux-visionneuse-layout {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .travaux-sidebar {
+        width: 100%;
+        min-width: 100%;
+        max-height: 200px;
+        border-right: none;
+        border-bottom: 1px solid var(--gris-clair, #e5e5e5);
+    }
+
+    .travaux-miniatures {
+        display: flex;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 4px;
+    }
+
+    .travaux-miniature {
+        flex-shrink: 0;
+        flex-direction: column;
+        width: 80px;
+    }
+
+    .travaux-zone-document {
+        min-height: 400px;
+    }
+
+    .travaux-toolbar {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .travaux-archivage-options {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* --- FSAPI Config --- */
+.travaux-fsapi-config {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    background: rgba(6, 93, 187, 0.05);
+    border: 1px solid rgba(6, 93, 187, 0.15);
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+.travaux-fsapi-statut.actif {
+    color: #28a745;
+    font-weight: 500;
+}
+
+.travaux-mode-stockage {
+    padding: 2px 8px;
+    background: rgba(6, 93, 187, 0.1);
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+/* --- Nettoyage post-archivage --- */
+.travaux-nettoyage-bandeau {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: rgba(255, 193, 7, 0.1);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    border-radius: 8px;
+    margin-top: 12px;
+}
+
+.travaux-nettoyage-bandeau .btn {
+    white-space: nowrap;
+}
+
+/* --- Virtual Scroll --- */
+.travaux-miniatures-virtuelles {
+    position: relative;
+    overflow-y: auto;
+    will-change: transform;
+}
+
+.travaux-miniatures-viewport {
+    position: relative;
+}
+
+.travaux-miniature-virtuelle {
+    position: absolute;
+    left: 0;
+    right: 0;
+}

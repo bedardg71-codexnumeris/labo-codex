@@ -61,6 +61,12 @@ const configurationsOnglets = {
     'boite-outils': [
         { id: 'tirage', label: 'Tirage au sort' }
     ],
+    // 🆕 BETA 96.3 : Module Travaux (import, annotation, archivage)
+    'travaux': [
+        { id: 'import', label: 'Import' },
+        { id: 'visionneuse', label: 'Visionneuse' },
+        { id: 'archivage', label: 'Archivage' }
+    ],
     // ✨ REFONTE UX (18 déc 2025) : 3 onglets (Pratique de notation migrée vers Construction)
     // Structure : Trimestre, Préférences, Données
     'reglages': [

@@ -439,6 +439,43 @@ function afficherSousSection(idSousSection) {
                 setTimeout(initialiserQuestions, 100);
             }
             break;
+
+        // 🆕 BETA 96.3 : Module Travaux
+        case 'travaux-import':
+            console.log('🔄 Initialisation du module Travaux (Import)...');
+            if (typeof initialiserModuleTravaux === 'function') {
+                setTimeout(() => {
+                    initialiserModuleTravaux();
+                    if (typeof travauxUI !== 'undefined') {
+                        travauxUI.afficherImport();
+                    }
+                }, 100);
+            }
+            break;
+
+        case 'travaux-visionneuse':
+            console.log('🔄 Initialisation du module Travaux (Visionneuse)...');
+            if (typeof initialiserModuleTravaux === 'function') {
+                setTimeout(() => {
+                    initialiserModuleTravaux();
+                    if (typeof travauxUI !== 'undefined') {
+                        travauxUI.afficherVisionneuse();
+                    }
+                }, 100);
+            }
+            break;
+
+        case 'travaux-archivage':
+            console.log('🔄 Initialisation du module Travaux (Archivage)...');
+            if (typeof initialiserModuleTravaux === 'function') {
+                setTimeout(() => {
+                    initialiserModuleTravaux();
+                    if (typeof travauxUI !== 'undefined') {
+                        travauxUI.afficherArchivage();
+                    }
+                }, 100);
+            }
+            break;
     }
 
         // Recharger le tableau de bord selon la sous-section

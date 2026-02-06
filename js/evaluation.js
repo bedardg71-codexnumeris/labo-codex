@@ -411,6 +411,11 @@ function chargerEvaluationsEtudiant() {
     // Afficher le bouton de profil
     if (btnVoirProfil) btnVoirProfil.style.display = 'block';
 
+    // 🆕 BETA 96.3 : Mettre a jour le bouton "Voir le travail"
+    if (typeof mettreAJourBoutonVoirTravail === 'function') {
+        setTimeout(mettreAJourBoutonVoirTravail, 200);
+    }
+
     // ✅ FIX: Préserver les sélections actuelles (production, grille, échelle, cartouche)
     const selectProduction = document.getElementById('selectProduction1');
     const selectGrille = document.getElementById('selectGrille1');
@@ -3958,6 +3963,13 @@ function insererNavigationEvaluationSerie() {
                 title="Voir le profil de l'étudiant·e">
             👤
         </button>
+
+        <button id="btnVoirTravailDepuisEval" class="btn btn-secondaire btn-compact"
+                onclick="ouvrirTravailDepuisEvaluation()"
+                style="margin-left: 6px; display: none; padding: 6px 10px; min-width: auto; font-size: 0.85rem;"
+                title="Voir le travail de l'étudiant·e">
+            📄 Travail
+        </button>
     `;
 
     // Insérer après le select étudiant
@@ -5730,12 +5742,82 @@ function ouvrirProfilDepuisEvaluation() {
     }, 200);
 }
 
+/**
+ * Ouvre le travail de l'etudiant en vue cote-a-cote depuis l'evaluation
+ * 🆕 BETA 96.3 : Integration module Travaux
+ */
+function ouvrirTravailDepuisEvaluation() {
+    const etudiantDA = document.getElementById('selectEtudiantEval')?.value;
+    const productionId = document.getElementById('selectProduction1')?.value;
+
+    if (!etudiantDA) {
+        alert('Veuillez sélectionner un·e étudiant·e');
+        return;
+    }
+
+    if (typeof travauxStockage === 'undefined') {
+        console.warn('[Evaluation] Module Travaux non disponible');
+        return;
+    }
+
+    // Trouver le fichier associe
+    let fichiers = travauxStockage.obtenirFichiersEtudiant(etudiantDA);
+    if (productionId) {
+        fichiers = fichiers.filter(f => f.productionId === productionId);
+    }
+
+    if (fichiers.length === 0) {
+        alert('Aucun travail trouvé pour cet·te étudiant·e');
+        return;
+    }
+
+    // Ouvrir le premier fichier en vue cote-a-cote
+    const fichierId = fichiers[0].id;
+    const conteneurGrille = document.getElementById('listeCriteresGrille1')?.closest('.form-group') || document.getElementById('listeCriteresGrille1');
+
+    if (conteneurGrille && typeof travauxUI !== 'undefined') {
+        travauxUI.ouvrirVueCoteACote(fichierId, conteneurGrille);
+    }
+}
+
+/**
+ * Met a jour la visibilite du bouton "Voir le travail"
+ * Appele quand l'etudiant ou la production change
+ * 🆕 BETA 96.3
+ */
+function mettreAJourBoutonVoirTravail() {
+    const btn = document.getElementById('btnVoirTravailDepuisEval');
+    if (!btn) return;
+
+    if (typeof travauxStockage === 'undefined') {
+        btn.style.display = 'none';
+        return;
+    }
+
+    const etudiantDA = document.getElementById('selectEtudiantEval')?.value;
+    const productionId = document.getElementById('selectProduction1')?.value;
+
+    if (!etudiantDA) {
+        btn.style.display = 'none';
+        return;
+    }
+
+    let fichiers = travauxStockage.obtenirFichiersEtudiant(etudiantDA);
+    if (productionId) {
+        fichiers = fichiers.filter(f => f.productionId === productionId);
+    }
+
+    btn.style.display = fichiers.length > 0 ? 'inline-block' : 'none';
+}
+
 // Exporter les fonctions
 // window.filtrerListeEvaluations = filtrerListeEvaluations; // DÉSACTIVÉ : Géré par liste-evaluations.js
 window.filtrerBanqueEvaluations = filtrerBanqueEvaluations;
 window.ouvrirBanqueAvecRecherche = ouvrirBanqueAvecRecherche;
 window.modifierEvaluationParId = modifierEvaluation; // Export sous un nom différent pour éviter conflit avec liste-evaluations.js
 window.ouvrirProfilDepuisEvaluation = ouvrirProfilDepuisEvaluation;
+window.ouvrirTravailDepuisEvaluation = ouvrirTravailDepuisEvaluation;
+window.mettreAJourBoutonVoirTravail = mettreAJourBoutonVoirTravail;
 window.chargerProductionsDansSelect = chargerProductionsDansSelect; // Pour mise à jour après duplication/modification de productions
 window.rechargerFiltreProduction = rechargerFiltreProduction; // Pour mise à jour du filtre après ajout/modification de productions
 // window.gererCheckboxJetonDelai = gererCheckboxJetonDelai; // FIXME: Fonctions non définies dans ce fichier

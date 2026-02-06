@@ -1,11 +1,321 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 1er février 2026 (Beta 96.2 - Build 0201-0830)
+> **Derniere mise a jour** : 6 février 2026 (Beta 96.3 - Build 0206-0525)
 
 ---
 
 ## A faire
+
+### Priorite CRITIQUE - Namespacing (Audit 5 fév 2026)
+
+- [ ] **#64** interventions.js : écriture presences sans namespace (CORRUPTION DONNÉES)
+  - **Symptôme** : `db.setSync('presences', presences)` à la ligne 1481 écrit dans la clé nue
+  - **Cause** : `transfererPresencesVersModule()` lit via `cle('presences')` mais écrit dans `'presences'`
+  - **Risque** : Les présences du trimestre actif sont écrites dans la mauvaise clé, invisibles aux lectures namespacées
+  - **Correction** : Utiliser `db.setSync(clePresences, presences)` avec la variable déjà définie à la ligne 1415
+  - **Fichier** : `js/interventions.js`
+
+- [ ] **#65** ~20 appels `db.getSync('productions', [])` sans namespace
+  - **Symptôme** : Les productions ne sont pas trouvées en contexte multi-trimestre
+  - **Cause** : `productions` est dans `CLES_NAMESPACEES` mais accédé directement sans `cle()`
+  - **Fichiers concernés** :
+    - `js/evaluation.js` (8 occurrences : lignes 535, 1630, 1746, 2817, 2903, 3126, 3141, 3310)
+    - `js/portfolio.js` (ligne 87)
+    - `js/pratiques.js` (ligne 421)
+    - `js/statistiques.js` (ligne 135)
+    - `js/donnees-v2.js` (lignes 783, 929)
+    - `js/pratiques/pratique-pan-standards.js` (lignes 159, 722, 1546)
+    - `js/pratiques/pratique-sommative.js` (ligne 614)
+    - `js/pratiques/pratique-pan-objectifs.js` (ligne 604)
+  - **Correction** : Remplacer par `obtenirDonneesSelonMode('productions')` ou `db.getSync(cle('productions'), [])`
+
+- [ ] **#66** pratique-pan-specifications.js : `localStorage.getItem()` contourne db.js ET cle()
+  - **Symptôme** : Module PAN-Spécifications entièrement cassé en multi-trimestre
+  - **Cause** : `_lireEvaluations()` et `_lireProductions()` (lignes 645, 654) lisent directement `localStorage.getItem('evaluations')` et `localStorage.getItem('productions')`
+  - **Triple problème** : 1) Contourne db.js, 2) Contourne cle(), 3) Clé 'evaluations' incorrecte (devrait être 'evaluationsSauvegardees')
+  - **Correction** : Remplacer par `obtenirDonneesSelonMode('evaluationsSauvegardees')` et `obtenirDonneesSelonMode('productions')`
+  - **Fichier** : `js/pratiques/pratique-pan-specifications.js`
+
+- [ ] **#67** spe-specifications.js : `db.getSync('groupeEtudiants')` sans namespace
+  - **Symptôme** : `genererRecapitulatifClasseSPE()` retourne les étudiants du mauvais trimestre
+  - **Cause** : Accès direct sans `cle()` ni `obtenirDonneesSelonMode()` à la ligne 537
+  - **Correction** : Remplacer par `obtenirDonneesSelonMode('groupeEtudiants')`
+  - **Fichier** : `js/spe-specifications.js`
+
+### Priorite haute - Namespacing (Audit 5 fév 2026)
+
+- [ ] **#68** Fonctions dupliquées en scope global (collisions silencieuses)
+  - **Symptôme** : La dernière définition chargée écrase les précédentes silencieusement
+  - **Fonctions à dédupliquer** :
+    - `echapperHtml()` : définie dans 5 fichiers (config.js:262, contexte.js:15, evaluation.js:3404, saisie-presences.js:2132, liste-evaluations.js:19)
+    - `afficherNotificationSucces()` : définie dans 11+ fichiers, avec signature différente dans groupe.js (titre, details) vs (message) partout ailleurs
+    - `formaterDate()` : définie dans 3 fichiers (profil-etudiant.js:2748, export-pdf.js:416, evaluation.js:3380)
+    - `formaterDateCourte()` : définie dans 2 fichiers (evaluations-apercu.js:117, profil-etudiant.js:7388)
+  - **Correction** : Garder une seule définition canonique dans config.js (ou créer un utils.js), supprimer les doublons
+
+- [ ] **#69** Clés manquantes dans CLES_NAMESPACEES
+  - **Symptôme** : Données partagées entre trimestres au lieu d'être isolées
+  - **Clés candidates** :
+    - `portfoliosEleves` (portfolio.js, profil-etudiant.js)
+    - `indicesEvaluation` (liste-evaluations.js, evaluation.js)
+    - `indicesPatternsRaI` (profil-etudiant.js, tableau-bord-apercu.js)
+    - `horaireSelectionne` (trimestre-v2.js)
+    - `seancesHoraire` (~12 localisations dans calendrier-vue.js, saisie-presences.js, presences-apercu.js, horaire.js, profil-etudiant.js, migrations.js)
+  - **Action** : Auditer chaque clé et ajouter à `CLES_NAMESPACEES` dans trimestres.js si elle contient des données par trimestre
+
+- [ ] **#70** 1 261 assignations `window.*` — pollution du namespace global
+  - **Symptôme** : Tout est global, risque élevé de collision entre modules
+  - **Pires fichiers** : trimestre-v2.js (127), pratiques.js (75), grilles.js (72), echelles.js (70), productions.js (60), pratiques-materiel.js (60)
+  - **Constat** : Seulement ~16 des ~75 fichiers JS utilisent un IIFE pour encapsuler
+  - **Correction progressive** : Encapsuler les modules dans des IIFE avec exports sélectifs (comme db.js et trimestres.js le font déjà)
+  - **Alternative** : Pattern namespace objet `window.ModuleName = { func1, func2 }`
+
+- [ ] **#71** ~50 appels `localStorage.getItem()` contournant db.js
+  - **Fichiers concernés** : cc-license.js, primo-questions.js, modes.js, echelles-bibliotheque.js, grilles-bibliotheque.js, cartouches-bibliotheque.js, productions-bibliotheque.js, boite-outils.js
+  - **Risque** : Contourne le memoryCache fallback de db.js (données IndexedDB retournent null) et la correction double-stringify
+  - **Correction** : Remplacer par `db.getSync()` pour cohérence
+
+- [ ] **#72** Storage event listener vérifie clé non-namespacée (main.js)
+  - **Symptôme** : `window.addEventListener('storage', ...)` vérifie `e.key === 'groupeEtudiants'` (lignes 238-247)
+  - **Cause** : Avec namespacing actif, la clé réelle est `h2026_groupeEtudiants`
+  - **Effet** : Le listener ne se déclenche jamais, la régénération des bulles ne se fait pas
+  - **Correction** : Vérifier contre `cle('groupeEtudiants')` ou vérifier si la clé contient `groupeEtudiants`
+
+- [ ] **#73** Patterns d'accès namespace incohérents
+  - **Constat** : 3 patterns différents coexistent dans le code
+    1. `db.getSync(cle('cle'), [])` — accès direct
+    2. `obtenirDonneesSelonMode('cle')` — via helper
+    3. `(typeof window.cle === 'function') ? window.cle('cle') : 'cle'` — défensif inline
+  - **Action** : Standardiser sur `obtenirDonneesSelonMode()` pour les lectures, documenter la convention
+  - **Fichiers avec pattern défensif** : donnees-demo.js, cours.js, groupe.js, modes.js, import-export.js
+
+### Priorite CRITIQUE - Design / CSS (Audit 5 fév 2026)
+
+- [ ] **#74** 1 855 styles inline dans les templates JS avec couleurs hardcodées
+  - **Symptôme** : Les couleurs ne changent PAS lors du switch de mode (Normal/Simulation/Anonymisation)
+  - **Cause** : Les fichiers JS génèrent du HTML avec des hex hardcodés (#fff3cd, #2196F3, #28a745, etc.) au lieu de `var(--token)`
+  - **Pires fichiers** : profil-etudiant.js (318), pratiques.js (162), grilles.js (125), import-export.js (97), evaluation.js (87), cc-license.js (103), echelles.js (101)
+  - **Violation** : Principe du design system « Toute l'interface bascule sans code dupliqué »
+  - **Correction** : Créer des classes CSS réutilisables pour les patterns récurrents :
+    - `.info-box-attention` → remplace `background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px;`
+    - `.info-box-info` → remplace `background: #e7f3ff; border: 1px solid #2196F3; ...`
+    - `.info-box-succes` → remplace `background: #d4edda; border-left: 3px solid #28a745; ...`
+    - `.badge-source-locale` → remplace inline #4caf50 badges
+    - `.badge-source-bibliotheque` → remplace inline #2196f3 badges
+    - `.badge-source-retiree` → remplace inline #ff9800 badges
+
+- [ ] **#75** 1 304 attributs style inline dans index.html
+  - **Symptôme** : HTML difficile à maintenir, styles non centralisés
+  - **Pire zone** : Section changelog/notes de version (lignes ~3198-3400+) — chaque entrée répète le même pattern inline
+  - **Correction** : Créer des classes CSS `.changelog-entry`, `.changelog-entry--feature`, `.changelog-entry--bugfix`, `.changelog-entry--breaking`
+
+- [ ] **#76** 595 toggling `.style.display` dans 31 fichiers JS
+  - **Symptôme** : Toggle show/hide par manipulation directe du style au lieu de classes CSS
+  - **Constat** : La classe utilitaire `.u-hide { display: none; }` existe déjà dans styles.css (ligne 338)
+  - **Pires fichiers** : pratiques.js (95), trimestre-v2.js (84), cartouches.js (51), evaluation.js (48)
+  - **Correction** : Remplacer par `element.classList.add('u-hide')` / `element.classList.remove('u-hide')`
+
+### Priorite haute - Design / CSS (Audit 5 fév 2026)
+
+- [ ] **#77** Couleurs Material Design hors palette « Nuit Élégante »
+  - **Constat** : Plusieurs fichiers JS utilisent des couleurs Material Design non conformes
+  - **Correspondances à corriger** :
+    | Utilisé | Origine | Devrait être |
+    |---|---|---|
+    | `#1976d2` | Material Blue 700 | `var(--bleu-clair)` (#065dbb) |
+    | `#2196F3` | Material Blue 500 | `var(--bleu-clair)` (#065dbb) |
+    | `#4caf50` | Material Green 500 | `var(--vert-succes)` (#28a745) |
+    | `#ff9800` | Material Orange 500 | `var(--orange-accent)` (#ff6b35) |
+    | `#ffc107` | Material Amber 500 | `var(--btn-annuler)` (#d97706) |
+    | `#9e9e9e` | Material Grey 500 | `var(--gris-clair)` (#999999) |
+
+- [ ] **#78** 31 box-shadow hardcodés au lieu de variables CSS
+  - **Constat** : Le design system définit 5 niveaux (`--shadow-subtil`, `--shadow-normal`, `--shadow-prononce`, `--shadow-fort`, `--shadow-inset`)
+  - **État** : 45 occurrences utilisent les variables (correct), 31 sont hardcodées
+  - **Correction** : Remplacer les valeurs hardcodées par les variables correspondantes dans styles.css
+
+- [ ] **#79** border-radius incohérents (valeur 8px hors design system)
+  - **Constat** : Le design system définit 4 niveaux (5px, 6px, 12px, 20px)
+  - **Problème** : 5+ occurrences de `border-radius: 8px` dans styles.css — valeur inexistante dans le design system
+  - **Action** : Remplacer par `var(--radius-moyen)` (6px) ou `var(--radius-grand)` (12px) selon le contexte
+
+- [ ] **#80** 70 déclarations `!important` dans styles.css
+  - **Symptôme** : Guerres de spécificité CSS, cascade naturelle brisée
+  - **Action** : Auditer chaque occurrence, résoudre les conflits de spécificité à la source
+
+- [ ] **#81** Validation primo avec styles inline au lieu de classes CSS
+  - **Fichier** : `js/primo-validation-champs.js` (lignes 134-203)
+  - **Symptôme** : `.style.border = '2px solid #ff9800'` et `.style.backgroundColor = '#fff3e0'`
+  - **Constat** : Le design system définit déjà `.etat-erreur`, `.etat-valide`, `.etat-verrouille`
+  - **Correction** : Utiliser `element.classList.add('etat-erreur')` au lieu des styles inline
+
+- [ ] **#82** Tokens badges Tetris non définis dans styles.css :root
+  - **Constat** : Le design system (02c-badges-tetris.html) définit `--badge-padding`, `--badge-font-size`, `--badge-border-radius`
+  - **Problème** : Ces variables n'existent pas dans le `:root` de styles.css
+  - **Correction** : Ajouter les variables badge dans le `:root` de styles.css
+
+- [ ] **#83** En-tête styles.css indique « Beta 0.60 » (obsolète)
+  - **Correction** : Mettre à jour l'en-tête pour refléter Beta 96.2
+
+- [ ] **#84** Documentation design system : mode « assiste » vs « simulation »
+  - **Constat** : Le design system référence `[data-mode="assiste"]` mais le code utilise `[data-mode="simulation"]`
+  - **Correction** : Synchroniser la documentation avec le code (mettre à jour les fichiers dans Design system - Modules/)
+
+### Bugs CRITIQUES (Audit complet 5 fév 2026)
+
+- [ ] **#85** BUG CRITIQUE : Clé productions incohérente — `productionsPedagogiques` vs `productions`
+  - **Symptôme** : Les productions créées dans productions.js sont invisibles pour 15+ autres modules
+  - **Cause** : `productions.js` écrit via `getCleProductions()` → `cle('productionsPedagogiques')` → clé `'productionsPedagogiques'`. Mais `evaluation.js`, `portfolio.js`, `statistiques.js`, etc. lisent depuis `'productions'` ou `obtenirDonneesSelonMode('productions')` — une clé complètement différente
+  - **Fichiers lecteurs (mauvaise clé)** : evaluation.js (9x), portfolio.js, statistiques.js, rapport-bug.js (2x), donnees-v2.js (2x), pratiques.js, pratique-pan-standards.js (3x), pratique-pan-objectifs.js, pratique-sommative.js, cc-license.js, pratique-notation-v2.js
+  - **Impact** : Évaluations, portfolio, statistiques ne trouvent aucune production
+  - **Correction** : Unifier sur UNE seule clé canonique et mettre à jour tous les lecteurs
+
+- [ ] **#86** BUG CRITIQUE : Suppression demo peut effacer des productions réelles
+  - **Symptôme** : `supprimerGroupe9999()` filtre par `!p.id?.startsWith('PROD_')` — un préfixe aussi utilisé pour les vraies productions
+  - **Fichier** : `js/donnees-demo.js` ligne 430
+  - **Impact** : Déchargement du mode démo peut supprimer des productions utilisateur
+  - **Correction** : Filtrer uniquement `estDemo: true` ou utiliser un préfixe spécifique `PROD_DEMO_`
+
+- [ ] **#87** BUG CRITIQUE : obtenirHeuresSeance() retourne toujours 2 (code mort)
+  - **Symptôme** : Assiduité incorrecte pour les cours non-2h (3h, 4h, etc.)
+  - **Fichier** : `js/saisie-presences.js` ligne 804
+  - **Cause** : La fonction calcule minutieusement totalHeures (lignes 772-801) puis `return 2;` ignore tout
+  - **Impact** : Étudiants en cours 4h peuvent afficher 200% ou 50% au lieu de 100%
+  - **Correction** : Retourner `totalHeures` au lieu du hardcodé, ou documenter que seules les périodes sont utilisées
+
+- [ ] **#88** BUG CRITIQUE : Format presences incohérent (Array vs Object) entre modules
+  - **Symptôme** : Migrations silencieusement ignorées, TypeError potentiel
+  - **Cause** : `migrations.js:116` et `donnees-demo.js:238` lisent comme Object `{}`, `saisie-presences.js` lit comme Array `[]`
+  - **Impact** : `migrerPresencesVersPeriodes()` ne s'exécute jamais si format Object, `Object.keys()` donne des indices numériques sur un Array
+  - **Fichiers** : migrations.js, donnees-demo.js, saisie-presences.js, cours.js
+  - **Correction** : Normaliser sur un format unique (Array), ajouter détection de format dans les migrations
+
+- [ ] **#89** BUG CRITIQUE : Collisions d'ID avec Date.now() seul
+  - **Symptôme** : Clics rapides produisent des IDs identiques → données écrasées
+  - **Fichiers et lignes** :
+    - `evaluation.js:1794` → `'EVAL_' + Date.now()`
+    - `grilles.js:369,389` → `'CR' + Date.now()` (dans une boucle!)
+    - `cartouches.js:434` → `'CART' + Date.now()`
+    - `groupe.js:203` → `Date.now()` nu
+    - `productions.js:545` → `'PROD' + Date.now()`
+    - `interventions.js:129` → `` `intervention-${Date.now()}` ``
+  - **Patron correct existant** : `evaluation-jetons.js:299` utilise `Date.now() + '_' + Math.random().toString(36).substr(2,5)`
+  - **Correction** : Créer un utilitaire `generateId(prefix)` et standardiser
+
+### Bugs HAUTE priorité (Audit complet 5 fév 2026)
+
+- [ ] **#90** Mauvais noms de clés dans plusieurs modules (retournent toujours vide)
+  - **donnees-v2.js** : `${trim.id}_evaluations` au lieu de `${trim.id}_evaluationsSauvegardees` (6 emplacements : lignes 797, 824, 875, 943, 974, 1020) → compteurs d'usages toujours à 0, suppressions non protégées
+  - **rapport-bug.js** : `'grillesCriteres'` (ligne 467) et `'echellesPerformance'` (ligne 470) n'existent pas → contexte bug incomplet
+  - **cours.js** : `'evaluationsDetaillees'` (ligne 1025) n'existe pas → avertissement de suppression affiche "0 évaluations"
+  - **pratique-configurable.js** : `'evaluations'` avec default `{}` (ligne 117) → calculs toujours à 0
+  - **Correction** : Remplacer par les bonnes clés (`evaluationsSauvegardees`, `grillesTemplates`, `echellesTemplates`)
+
+- [ ] **#91** calculerAssiduiteJusquADate() ne filtre pas par DA pour les dates
+  - **Fichier** : `js/saisie-presences.js` lignes 269-276
+  - **Symptôme** : `datesSaisies` inclut les dates de TOUS les étudiants, pas seulement l'étudiant cible
+  - **Impact** : Un étudiant est compté absent pour des dates où seuls d'autres étudiants ont des données
+  - **Comparaison** : `calculerAssiduiteSommative()` (lignes 97-102) filtre correctement par DA d'abord
+  - **Correction** : Filtrer `presencesFiltrees` par DA avant de construire `datesSaisies`
+
+- [ ] **#92** evaluations-apercu.js divise totalC par nbTotal au lieu de nbAvecDonnees
+  - **Fichier** : `js/evaluations-apercu.js` ligne 94
+  - **Symptôme** : `Math.round(totalC / nbTotal)` divise par TOUS les étudiants au lieu de ceux avec données
+  - **Impact** : Taux de complétion affiché trop bas (ex: 5/25=20% au lieu de 5/5=100%)
+  - **Correction** : Remplacer `nbTotal` par `nbAvecDonnees`
+
+- [ ] **#93** Mode « recents-meilleurs » utilise reverse() au lieu de trier par date
+  - **Fichier** : `js/profil-etudiant.js` lignes 911-928
+  - **Symptôme** : `.reverse()` inverse l'ordre par note, ne trie PAS par date
+  - **Impact** : Sélectionne les pires notes du top 50% au lieu des plus récentes → affecte la note finale
+  - **Comparaison** : `portfolio.js` ligne 63 trie correctement par `dateRemise`, `pratique-pan-standards.js:138` par `dateEvaluation`
+  - **Aussi** : Mode `recents` (ligne 911) a le même problème
+  - **Correction** : Remplacer `.reverse()` par `.sort((a, b) => new Date(b.dateRemise) - new Date(a.dateRemise))`
+
+- [ ] **#94** Demo : race condition et nettoyage cible le mauvais trimestre
+  - **donnees-demo.js:58-106** : `chargerDonneesDemo()` change temporairement le trimestre actif (async) → tout module synchrone qui lit `cle()` pendant ce temps voit le mauvais trimestre
+  - **donnees-demo.js:383-437** : `supprimerGroupe9999()` utilise `window.cle()` mais le trimestre actif peut ne plus être demo → nettoie les vraies données
+  - **Correction** : Passer le préfixe `demo_` explicitement au lieu de changer le trimestre actif
+
+- [ ] **#95** Éléments DOM référencés mais absents de index.html
+  - **pratiques.js:550** : `getElementById('pratiqueNotation').value` sans null check → crash
+  - **cours.js:249-250** : `getElementById('nombreCours')` et `getElementById('resumeCours')` n'existent pas → crash
+  - **evaluation.js:2774** : `getElementById('tri-evaluations')` n'existe pas → crash
+  - **Correction** : Ajouter les éléments dans index.html ou ajouter des null checks
+
+- [ ] **#96** donnees-v2.js : `localStorage.removeItem` au lieu de `db.remove`
+  - **Fichier** : `js/donnees-v2.js` ligne 1411
+  - **Symptôme** : `localStorage.removeItem('cartouches_${grilleId}')` ne supprime que du localStorage, pas d'IndexedDB
+  - **Impact** : Les cartouches réapparaissent après rechargement
+  - **Correction** : Utiliser `db.remove()` ou `db.removeSync()`
+
+- [ ] **#97** portfolio.js : `event.target.checked` sans paramètre event
+  - **Fichier** : `js/portfolio.js` ligne 330
+  - **Symptôme** : `toggleArtefactPortfolio(da, portfolioId, nombreARetenir)` utilise `event` qui n'est pas un paramètre
+  - **Impact** : En mode strict, ReferenceError. Sinon, le checkbox n'est pas décoché quand on dépasse le max
+  - **Correction** : Ajouter `event` comme paramètre de la fonction
+
+- [ ] **#98** evaluation.js : lecture structure SOM/PAN obsolète
+  - **Fichier** : `js/evaluation.js` lignes 3050-3051
+  - **Symptôme** : `indicesCPEtudiant?.[pratique]` cherche des sous-branches SOM/PAN, mais depuis Beta 95.5 la structure est plate
+  - **Impact** : Taux de complétion utilise toujours le fallback, jamais la valeur autoritative
+  - **Correction** : Lire `indicesCPEtudiant?.C` directement
+
+### Bugs MOYENNE priorité (Audit complet 5 fév 2026)
+
+- [ ] **#99** donnees-v2.js : 11 blocs catch silencieux « // Ignorer »
+  - **Fichier** : `js/donnees-v2.js` (lignes 789, 804, 831, 855, 882, 913, 934, 949, 980, 1001, 1026)
+  - **Impact** : Erreurs de données complètement masquées, diagnostic impossible
+  - **Correction** : Remplacer par `console.warn('[donnees-v2] Erreur calcul usages:', e.message)`
+
+- [ ] **#100** cartouches.js et statistiques.js : clé legacy `niveauxEchelle`
+  - **cartouches.js:425** : `await db.get('niveauxEchelle')` — clé obsolète
+  - **statistiques.js:144** : `db.getSync('niveauxEchelle', [])` — clé obsolète
+  - **Impact** : Utilise le fallback IDME hardcodé au lieu de l'échelle configurée par l'utilisateur
+  - **Correction** : Lire depuis `'echellesTemplates'` et extraire les niveaux de l'échelle active
+
+- [ ] **#101** Math.random() pour clé d'anonymisation (non cryptographique)
+  - **Fichier** : `js/trimestres.js` lignes 1106-1109
+  - **Impact** : Clés prédictibles pour anonymiser les DA (données personnelles)
+  - **Correction** : Utiliser `crypto.getRandomValues()` (Web Crypto API native)
+
+- [ ] **#102** import-export.js : risque double-stringify multi-cycles
+  - **Fichier** : `js/import-export.js` ligne 238
+  - **Cause** : `JSON.stringify(valeur)` sur des données déjà parsées → double stringification
+  - **Impact** : Exports/imports multiples créent des niveaux d'imbrication croissants
+  - **Correction** : `typeof valeur === 'string' ? valeur : JSON.stringify(valeur)`
+
+- [ ] **#103** Export n'exclut pas toutes les données demo
+  - **Fichier** : `js/import-export.js` lignes 207-239
+  - **Impact** : Productions et évaluations demo incluses dans les sauvegardes utilisateur
+  - **Correction** : Ajouter filtrage demo pour `*_productions`, `*_evaluationsSauvegardees`, `cartouches_*`
+
+- [ ] **#104** entites-ui.js : `setTimeout(initialiserEntitesUI, 500)` fragile
+  - **Fichier** : `js/entites-ui.js` ligne 125
+  - **Impact** : Trop lent sur appareils rapides, possiblement insuffisant sur iPad
+  - **Correction** : Utiliser le pattern `db-ready` comme les autres modules
+
+- [ ] **#105** trimestres.js : `calculerStatistiquesFinales` lit le mauvais trimestre
+  - **Fichier** : `js/trimestres.js` lignes 646-695
+  - **Cause** : `obtenirDonneesSelonMode('groupeEtudiants')` lit le trimestre ACTIF, pas celui archivé
+  - **Impact** : Statistiques d'archive calculées avec les données du mauvais trimestre
+  - **Correction** : Lire directement depuis `${trimestreId}_groupeEtudiants`
+
+- [ ] **#106** liste-evaluations.js : complétion inclut évaluations remplacées et hors-type
+  - **Fichier** : `js/liste-evaluations.js` lignes 93-111
+  - **Impact** : Complétion > 100% possible (cappée par Math.min), reprises comptées double
+  - **Correction** : Filtrer `!e.remplaceeParId` et compter les `productionId` distincts
+
+- [ ] **#107** Math.pow(négatif, 1/3) → NaN dans calcul engagement
+  - **Fichiers** : `js/portfolio.js:648-649`, `js/profil-etudiant.js:434-435`
+  - **Impact** : Si indice A, C ou P négatif (données corrompues), tout le calcul E retourne NaN
+  - **Correction** : Utiliser `Math.cbrt(E_brut)` ou `Math.max(0, E_brut)` avant la racine cubique
+
+- [ ] **#108** obtenirTendance() assume que les évaluations sont triées par date
+  - **Fichier** : `js/evaluation.js` lignes 3389-3399
+  - **Impact** : `evaluations[0]` n'est pas forcément la plus récente → tendance potentiellement inversée
+  - **Correction** : Trier par date avant de comparer
 
 ### Priorite haute - UX / Interface
 
@@ -384,6 +694,19 @@
 - [ ] **#22** Mettre a jour fichier noms_stables.json
   - Verifier que tous les identifiants critiques sont documentes
   - Ajouter les nouveaux noms proteges
+
+---
+
+## Complete (Beta 96.3 - 6 février 2026)
+
+- [x] **#109** Module Travaux - Import, Annotation et Archivage (remplace GoodNotes)
+  - Import drag-drop de PDF/images avec detection auto du DA etudiant
+  - Moteur d'annotation Canvas avec support Apple Pencil (pression, rejet paume, undo/redo)
+  - Integration evaluation : vue cote-a-cote travail + grille, section "Travaux soumis" dans profil
+  - Archivage ZIP par etudiant/production/semestre via JSZip
+  - File System Access API (Mac), scroll virtuel (500+ miniatures), pre-rendu pages adjacentes, moniteur quota
+  - **Nouveaux fichiers** : 7 modules JS (`js/travaux-*.js`), 3 libs (`libs/pdf.min.js`, `libs/pdf.worker.min.js`, `libs/jszip.min.js`)
+  - **Fichiers modifies** : `index.html`, `styles.css`, `js/config.js`, `js/navigation.js`, `js/trimestres.js`, `js/evaluation.js`, `js/profil-etudiant.js`
 
 ---
 
