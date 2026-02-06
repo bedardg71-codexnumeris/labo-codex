@@ -3390,9 +3390,14 @@ function formaterDate(dateISO) {
 function obtenirTendance(evaluations) {
     if (evaluations.length < 2) return '—';
 
+    // Trier par date (plus récente en premier)
+    const triees = [...evaluations].sort((a, b) =>
+        new Date(b.dateEvaluation || b.dateRemise || 0) - new Date(a.dateEvaluation || a.dateRemise || 0)
+    );
+
     // Comparer les 2 dernières évaluations
-    const derniere = convertirNoteEnValeur(evaluations[0].niveauFinal);
-    const avantDerniere = convertirNoteEnValeur(evaluations[1].niveauFinal);
+    const derniere = convertirNoteEnValeur(triees[0].niveauFinal);
+    const avantDerniere = convertirNoteEnValeur(triees[1].niveauFinal);
 
     if (derniere > avantDerniere) return '↗ En progression';
     if (derniere < avantDerniere) return '↘ En régression';

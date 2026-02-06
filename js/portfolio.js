@@ -646,7 +646,7 @@ async function calculerEtStockerIndicesCP() {
         }
 
         const E_brut = A * (C / 100) * (P / 100);
-        const E = Math.pow(E_brut, 1/3); // Racine cubique
+        const E = Math.cbrt(E_brut); // Racine cubique (gère les valeurs négatives)
 
         // ========================================
         // 🆕 BETA 95.5 : NOUVELLE STRUCTURE SIMPLIFIÉE

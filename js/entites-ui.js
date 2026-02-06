@@ -119,11 +119,11 @@ async function peuplerDropdownGroupeCoursActif() {
 // qui gère correctement le mode "cours:" (tous groupes fusionnés)
 // Voir changerGroupeCoursDepuisHeader et changerGroupeCoursActifV2 dans trimestre-v2.js
 
-// Initialisation au chargement du DOM
-document.addEventListener('DOMContentLoaded', () => {
-    // Attendre que les modules d'entités soient chargés
-    setTimeout(initialiserEntitesUI, 500);
-});
+// Initialisation quand la DB est prête
+window.addEventListener('db-ready', initialiserEntitesUI, { once: true });
+if (window.dbReady) {
+    window.dispatchEvent(new CustomEvent('db-ready', { detail: { manual: true } }));
+}
 
 // ============================================
 // ENSEIGNANT·E - DROPDOWN

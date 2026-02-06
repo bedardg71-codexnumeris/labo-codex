@@ -432,7 +432,7 @@ function calculerTousLesIndices(da, pratique = null) {
             P = calculerPerformancePAN(da);
             // Fallback E: calculer si pas disponible
             const E_brut = A * C * P;
-            E = Math.pow(E_brut, 1/3);
+            E = Math.cbrt(E_brut);
         }
     } else {
         // Fallback : fonctions anciennes si module portfolio.js pas chargé

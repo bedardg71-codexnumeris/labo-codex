@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 6 février 2026 (Beta 97 - Build 0206-0830)
+> **Derniere mise a jour** : 6 février 2026 (Beta 97 - Build 0206-0850)
 
 ---
 
@@ -264,55 +264,55 @@
 
 ### Bugs MOYENNE priorité (Audit complet 5 fév 2026)
 
-- [ ] **#99** donnees-v2.js : 11 blocs catch silencieux « // Ignorer »
+- [x] **#99** donnees-v2.js : 11 blocs catch silencieux « // Ignorer » ✅ CORRIGÉ (6 fév 2026)
   - **Fichier** : `js/donnees-v2.js` (lignes 789, 804, 831, 855, 882, 913, 934, 949, 980, 1001, 1026)
   - **Impact** : Erreurs de données complètement masquées, diagnostic impossible
   - **Correction** : Remplacer par `console.warn('[donnees-v2] Erreur calcul usages:', e.message)`
 
-- [ ] **#100** cartouches.js et statistiques.js : clé legacy `niveauxEchelle`
+- [x] **#100** cartouches.js et statistiques.js : clé legacy `niveauxEchelle` ✅ CORRIGÉ (6 fév 2026)
   - **cartouches.js:425** : `await db.get('niveauxEchelle')` — clé obsolète
   - **statistiques.js:144** : `db.getSync('niveauxEchelle', [])` — clé obsolète
   - **Impact** : Utilise le fallback IDME hardcodé au lieu de l'échelle configurée par l'utilisateur
   - **Correction** : Lire depuis `'echellesTemplates'` et extraire les niveaux de l'échelle active
 
-- [ ] **#101** Math.random() pour clé d'anonymisation (non cryptographique)
+- [x] **#101** Math.random() pour clé d'anonymisation (non cryptographique) ✅ CORRIGÉ (6 fév 2026)
   - **Fichier** : `js/trimestres.js` lignes 1106-1109
   - **Impact** : Clés prédictibles pour anonymiser les DA (données personnelles)
   - **Correction** : Utiliser `crypto.getRandomValues()` (Web Crypto API native)
 
-- [ ] **#102** import-export.js : risque double-stringify multi-cycles
+- [x] **#102** import-export.js : risque double-stringify multi-cycles ✅ CORRIGÉ (6 fév 2026)
   - **Fichier** : `js/import-export.js` ligne 238
   - **Cause** : `JSON.stringify(valeur)` sur des données déjà parsées → double stringification
   - **Impact** : Exports/imports multiples créent des niveaux d'imbrication croissants
   - **Correction** : `typeof valeur === 'string' ? valeur : JSON.stringify(valeur)`
 
-- [ ] **#103** Export n'exclut pas toutes les données demo
+- [x] **#103** Export n'exclut pas toutes les données demo ✅ CORRIGÉ (6 fév 2026)
   - **Fichier** : `js/import-export.js` lignes 207-239
   - **Impact** : Productions et évaluations demo incluses dans les sauvegardes utilisateur
   - **Correction** : Ajouter filtrage demo pour `*_productions`, `*_evaluationsSauvegardees`, `cartouches_*`
 
-- [ ] **#104** entites-ui.js : `setTimeout(initialiserEntitesUI, 500)` fragile
+- [x] **#104** entites-ui.js : `setTimeout(initialiserEntitesUI, 500)` fragile ✅ CORRIGÉ (6 fév 2026)
   - **Fichier** : `js/entites-ui.js` ligne 125
   - **Impact** : Trop lent sur appareils rapides, possiblement insuffisant sur iPad
   - **Correction** : Utiliser le pattern `db-ready` comme les autres modules
 
-- [ ] **#105** trimestres.js : `calculerStatistiquesFinales` lit le mauvais trimestre
+- [x] **#105** trimestres.js : `calculerStatistiquesFinales` lit le mauvais trimestre ✅ CORRIGÉ (6 fév 2026)
   - **Fichier** : `js/trimestres.js` lignes 646-695
   - **Cause** : `obtenirDonneesSelonMode('groupeEtudiants')` lit le trimestre ACTIF, pas celui archivé
   - **Impact** : Statistiques d'archive calculées avec les données du mauvais trimestre
   - **Correction** : Lire directement depuis `${trimestreId}_groupeEtudiants`
 
-- [ ] **#106** liste-evaluations.js : complétion inclut évaluations remplacées et hors-type
+- [x] **#106** liste-evaluations.js : complétion inclut évaluations remplacées et hors-type ✅ CORRIGÉ (6 fév 2026)
   - **Fichier** : `js/liste-evaluations.js` lignes 93-111
   - **Impact** : Complétion > 100% possible (cappée par Math.min), reprises comptées double
   - **Correction** : Filtrer `!e.remplaceeParId` et compter les `productionId` distincts
 
-- [ ] **#107** Math.pow(négatif, 1/3) → NaN dans calcul engagement
+- [x] **#107** Math.pow(négatif, 1/3) → NaN dans calcul engagement ✅ CORRIGÉ (6 fév 2026)
   - **Fichiers** : `js/portfolio.js:648-649`, `js/profil-etudiant.js:434-435`
   - **Impact** : Si indice A, C ou P négatif (données corrompues), tout le calcul E retourne NaN
   - **Correction** : Utiliser `Math.cbrt(E_brut)` ou `Math.max(0, E_brut)` avant la racine cubique
 
-- [ ] **#108** obtenirTendance() assume que les évaluations sont triées par date
+- [x] **#108** obtenirTendance() assume que les évaluations sont triées par date ✅ CORRIGÉ (6 fév 2026)
   - **Fichier** : `js/evaluation.js` lignes 3389-3399
   - **Impact** : `evaluations[0]` n'est pas forcément la plus récente → tendance potentiellement inversée
   - **Correction** : Trier par date avant de comparer
