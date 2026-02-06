@@ -115,7 +115,7 @@ function ajouterMetadonnéesCC(contenu, type, nom, metaEnrichies = {}) {
     // 🆕 BETA 95.2: Utiliser le profil auteur de l'enseignant du groupe-cours actif
     // Priorité: metaEnrichies > profilAuteur (enseignant) > infoCours > défauts
     const profilAuteur = obtenirProfilAuteurActifSync();
-    const infoCours = JSON.parse(localStorage.getItem('infoCours') || '{}');
+    const infoCours = db.getSync('infoCours', {});
 
     const auteur_utilisateur = metaEnrichies.auteur ||
                                profilAuteur?.auteur_original ||
@@ -530,9 +530,9 @@ function demanderMetadonneesEnrichies(typeContenu, nomContenu) {
         // Note: db.getSync lit depuis localStorage (cache) qui est synchronisé avec IndexedDB
         const profilEnseignant = (typeof db !== 'undefined' && db.getSync)
             ? db.getSync('profilEnseignant', null)
-            : JSON.parse(localStorage.getItem('profilEnseignant') || 'null');
-        const infoCours = JSON.parse(localStorage.getItem('infoCours') || '{}');
-        const listeCours = JSON.parse(localStorage.getItem('listeCours') || '[]');
+            : db.getSync('profilEnseignant', null);
+        const infoCours = db.getSync('infoCours', {});
+        const listeCours = db.getSync('listeCours', []);
         const coursActif = listeCours.find(c => c.actif) || listeCours[0] || {};
 
         // Construire le nom complet (priorité: profilEnseignant > listeCours > infoCours)
@@ -560,7 +560,7 @@ function demanderMetadonneesEnrichies(typeContenu, nomContenu) {
         document.getElementById('metaNiveau').value = 'Collégial';
 
         // Pré-remplir avec la dernière description utilisée
-        const derniereDescription = localStorage.getItem('cc-derniere-description') || '';
+        const derniereDescription = db.getSync('cc-derniere-description', '');
         document.getElementById('metaDescription').value = derniereDescription;
         document.getElementById('metaDescriptionCompteur').textContent = `${derniereDescription.length}/200`;
 
@@ -627,7 +627,7 @@ function demanderMetadonneesEnrichies(typeContenu, nomContenu) {
             }
 
             // Sauvegarder la description pour le prochain export
-            localStorage.setItem('cc-derniere-description', description);
+            db.setSync('cc-derniere-description', description);
 
             // 🆕 Construire les métadonnées selon les checkboxes
             const disciplines = document.getElementById('checkPartagerDiscipline').checked

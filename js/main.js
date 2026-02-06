@@ -80,9 +80,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // FONCTION UTILITAIRE : Recalcul indices C-P
     // ===============================
     function recalculerIndicesSiDemande() {
-        if (localStorage.getItem('recalculerIndicesCP') === 'true') {
+        if (db.getSync('recalculerIndicesCP', null) === 'true') {
             console.log('🔄 [Main] Recalcul des indices C et P demandé...');
-            localStorage.removeItem('recalculerIndicesCP'); // Effacer le flag immédiatement
+            db.setSync('recalculerIndicesCP', null); // Effacer le flag immédiatement
             if (typeof calculerEtStockerIndicesCP === 'function') {
                 try {
                     calculerEtStockerIndicesCP();
@@ -248,7 +248,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Régénérer si la liste d'étudiants change
     window.addEventListener('storage', function(e) {
-        if (e.key === 'groupeEtudiants') {
+        if (e.key && e.key.includes('groupeEtudiants')) {
             console.log('   → Mise à jour du nombre de bulles');
             const container = document.getElementById('bulles-container');
             if (container) {

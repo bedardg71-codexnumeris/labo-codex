@@ -1650,37 +1650,6 @@ async function supprimerCartouche() {
    🔔 NOTIFICATIONS
    =============================== */
 
-/**
- * Affiche une notification de succès
- * 
- * FONCTIONNEMENT:
- * 1. Crée un div avec le message
- * 2. Ajoute au body avec animation
- * 3. Supprime après 3 secondes
- * 
- * PARAMÈTRES:
- * @param {string} message - Message à afficher
- * 
- * UTILISÉ PAR:
- * - Toutes les fonctions de sauvegarde/modification
- * 
- * STYLE:
- * - Position fixe en haut à droite
- * - Fond vert (succès)
- * - Animation slideIn
- * - Disparaît après 3s
- */
-function afficherNotificationSucces(message) {
-    const notification = document.createElement('div');
-    notification.className = 'notification-succes';
-    notification.textContent = message;
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.remove();
-    }, 3000);
-}
-
 /* ===============================
    📤📥 EXPORT / IMPORT JSON
    =============================== */

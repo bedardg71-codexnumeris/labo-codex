@@ -21,7 +21,7 @@
      */
     function estPremierLancement() {
         // Vérifier le flag
-        const dejaVu = localStorage.getItem(CLE_BIENVENUE_VU);
+        const dejaVu = db.getSync(CLE_BIENVENUE_VU, null);
         if (dejaVu === 'true') {
             return false;
         }
@@ -52,10 +52,7 @@
      * Marque le modal comme vu
      */
     function marquerBienvenueVu() {
-        localStorage.setItem(CLE_BIENVENUE_VU, 'true');
-        if (typeof db !== 'undefined' && db.setSync) {
-            db.setSync(CLE_BIENVENUE_VU, true);
-        }
+        db.setSync(CLE_BIENVENUE_VU, 'true');
     }
 
     /**
@@ -76,7 +73,7 @@
             // Fallback direct
             const prochainRappel = new Date();
             prochainRappel.setDate(prochainRappel.getDate() + 14);
-            localStorage.setItem('backupProchainRappel', prochainRappel.toISOString());
+            db.setSync('backupProchainRappel', prochainRappel.toISOString());
         }
     }
 

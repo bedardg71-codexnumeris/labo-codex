@@ -1885,20 +1885,6 @@ function afficherNotificationErreur(message) {
     }
 }
 
-/**
- * Affiche une notification de succès
- */
-function afficherNotificationSucces(message) {
-    if (typeof afficherNotification === 'function') {
-        afficherNotification(message, 'succes');
-    } else if (typeof afficherNotificationSucces === 'function') {
-        // Fallback sur la fonction existante
-        window.afficherNotificationSucces(message);
-    } else {
-        console.log('[WizardV2] Succès:', message);
-    }
-}
-
 // ============================================================================
 // EXPORTS
 // ============================================================================

@@ -1493,43 +1493,6 @@ function transfererPresencesVersModule(interventionId) {
 }
 
 /* ===============================
-   NOTIFICATIONS
-   =============================== */
-
-/**
- * Afficher une notification de succès
- * @param {string} message - Message à afficher
- */
-function afficherNotificationSucces(message) {
-    // Créer l'élément de notification
-    const notification = document.createElement('div');
-    notification.textContent = message;
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: var(--vert-succes);
-        color: white;
-        padding: 16px 24px;
-        border-radius: 6px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        z-index: 10000;
-        font-size: 0.95rem;
-        font-weight: 500;
-        animation: slideInRight 0.3s ease-out;
-    `;
-
-    document.body.appendChild(notification);
-
-    // Retirer après 3 secondes
-    setTimeout(() => {
-        notification.style.opacity = '0';
-        notification.style.transition = 'opacity 0.3s';
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
-}
-
-/* ===============================
    INITIALISATION
    =============================== */
 

@@ -34,7 +34,7 @@ function sauvegarderEtatTirage() {
         nombreATirer: etatTirage.nombreATirer,
         coursId: etatTirage.coursId
     };
-    localStorage.setItem('etatTirage', JSON.stringify(etatASauvegarder));
+    db.setSync('etatTirage', etatASauvegarder);
 }
 
 /**
@@ -42,14 +42,13 @@ function sauvegarderEtatTirage() {
  */
 function restaurerEtatTirage() {
     try {
-        const sauvegarde = localStorage.getItem('etatTirage');
+        const sauvegarde = db.getSync('etatTirage', null);
         if (sauvegarde) {
-            const etat = JSON.parse(sauvegarde);
-            etatTirage.exclus = etat.exclus || [];
-            etatTirage.dejaTires = etat.dejaTires || [];
-            etatTirage.avecRemise = etat.avecRemise || false;
-            etatTirage.nombreATirer = etat.nombreATirer || 1;
-            etatTirage.coursId = etat.coursId || null;
+            etatTirage.exclus = sauvegarde.exclus || [];
+            etatTirage.dejaTires = sauvegarde.dejaTires || [];
+            etatTirage.avecRemise = sauvegarde.avecRemise || false;
+            etatTirage.nombreATirer = sauvegarde.nombreATirer || 1;
+            etatTirage.coursId = sauvegarde.coursId || null;
             return true;
         }
     } catch (e) {
@@ -69,10 +68,9 @@ function initialiserTirage() {
     // Lire l'ancien coursId depuis localStorage (pas la mémoire!)
     let ancienCoursId = null;
     try {
-        const sauvegarde = localStorage.getItem('etatTirage');
+        const sauvegarde = db.getSync('etatTirage', null);
         if (sauvegarde) {
-            const etat = JSON.parse(sauvegarde);
-            ancienCoursId = etat.coursId || null;
+            ancienCoursId = sauvegarde.coursId || null;
         }
     } catch (e) {
         console.warn('[Tirage] Erreur lecture ancien coursId:', e);
@@ -510,7 +508,7 @@ function sauvegarderEtatQuestions() {
         avecRemise: etatQuestions.avecRemise,
         coursId: etatQuestions.coursId
     };
-    localStorage.setItem(cle, JSON.stringify(etatASauvegarder));
+    db.setSync(cle, etatASauvegarder);
     console.log(`[Questions] Sauvegardé dans ${cle}:`, etatQuestions.questions.length, 'questions');
 }
 
@@ -520,14 +518,13 @@ function sauvegarderEtatQuestions() {
 function restaurerEtatQuestions() {
     const cle = obtenirCleQuestions();
     try {
-        const sauvegarde = localStorage.getItem(cle);
+        const sauvegarde = db.getSync(cle, null);
         if (sauvegarde) {
-            const etat = JSON.parse(sauvegarde);
-            etatQuestions.questions = etat.questions || [];
-            etatQuestions.categories = etat.categories || [];
-            etatQuestions.dejaPositions = etat.dejaPositions || [];
-            etatQuestions.avecRemise = etat.avecRemise || false;
-            etatQuestions.coursId = etat.coursId || null;
+            etatQuestions.questions = sauvegarde.questions || [];
+            etatQuestions.categories = sauvegarde.categories || [];
+            etatQuestions.dejaPositions = sauvegarde.dejaPositions || [];
+            etatQuestions.avecRemise = sauvegarde.avecRemise || false;
+            etatQuestions.coursId = sauvegarde.coursId || null;
             console.log(`[Questions] Restauré depuis ${cle}:`, etatQuestions.questions.length, 'questions');
             return true;
         }

@@ -1588,29 +1588,6 @@ function mettreAJourStatutModalites() {
 }
 
 /* ===============================
-   🔔 NOTIFICATIONS
-   =============================== */
-
-/**
- * Affiche une notification de succès
- * 
- * FONCTIONNEMENT:
- * 1. Crée un div avec le message
- * 2. Ajoute au body avec animation
- * 3. Supprime après 3 secondes
- */
-function afficherNotificationSucces(message) {
-    const notification = document.createElement('div');
-    notification.className = 'notification-succes';
-    notification.textContent = message;
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.remove();
-    }, 3000);
-}
-
-/* ===============================
    GESTION DES JETONS PERSONNALISÉS
    =============================== */
 
@@ -5191,7 +5168,7 @@ function sauvegarderEtatAccordeons() {
         }
     });
 
-    localStorage.setItem('etatsAccordeonsV2', JSON.stringify(etats));
+    db.setSync('etatsAccordeonsV2', etats);
 }
 
 /**
@@ -5200,7 +5177,7 @@ function sauvegarderEtatAccordeons() {
 function restaurerEtatAccordeons() {
     let etats = {};
     try {
-        etats = JSON.parse(localStorage.getItem('etatsAccordeonsV2')) || {};
+        etats = db.getSync('etatsAccordeonsV2', {});
     } catch (e) {
         etats = {};
     }

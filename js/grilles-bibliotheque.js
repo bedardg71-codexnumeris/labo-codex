@@ -161,13 +161,11 @@ async function exporterBibliothequeGrilles() {
  * @returns {Promise<{ajoutees: number, existantes: number}>}
  */
 async function migrerGrillesVersBibliotheque(cleSource) {
-    const dataRaw = localStorage.getItem(cleSource);
-    if (!dataRaw) {
+    const grilles = db.getSync(cleSource, null);
+    if (!grilles) {
         console.log('[Bibliothèque Grilles] Aucune donnée trouvée pour:', cleSource);
         return { ajoutees: 0, existantes: 0 };
     }
-
-    const grilles = JSON.parse(dataRaw);
     if (!Array.isArray(grilles)) {
         return { ajoutees: 0, existantes: 0 };
     }
@@ -188,7 +186,7 @@ function listerTrimestresAvecGrilles() {
         const cle = localStorage.key(i);
         if (cle && cle.endsWith('_grilles')) {
             try {
-                const data = JSON.parse(localStorage.getItem(cle));
+                const data = db.getSync(cle, null);
                 if (Array.isArray(data) && data.length > 0) {
                     const codeTrimestre = cle.replace('_grilles', '');
 
@@ -231,9 +229,9 @@ function formaterNomTrimestreGrilles(code) {
 function obtenirGrillesTrimestre(cleOuCode) {
     const cle = cleOuCode.includes('_') ? cleOuCode : `${cleOuCode}_grilles`;
     try {
-        const data = localStorage.getItem(cle);
+        const data = db.getSync(cle, null);
         if (data) {
-            return JSON.parse(data);
+            return data;
         }
     } catch (e) {
         console.error('[Bibliothèque Grilles] Erreur lecture trimestre:', e);

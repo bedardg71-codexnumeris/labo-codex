@@ -11,18 +11,6 @@ console.log('📦 Chargement du module liste-evaluations.js...');
 // FONCTION UTILITAIRE
 // ============================================
 
-/**
- * Échappe les caractères HTML pour éviter les injections XSS
- * @param {string} texte - Texte à échapper
- * @returns {string} - Texte échappé
- */
-function echapperHtml(texte) {
-    if (!texte) return '';
-    const div = document.createElement('div');
-    div.textContent = texte;
-    return div.innerHTML;
-}
-
 // ============================================
 // VARIABLES GLOBALES DE TRI
 // ============================================

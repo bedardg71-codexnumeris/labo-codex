@@ -446,7 +446,7 @@
     function ajouterGabaritsDefautSiManquants(cleStorage, gabaritsDefaut) {
         let bibliotheque = [];
         try {
-            bibliotheque = JSON.parse(localStorage.getItem(cleStorage) || '[]');
+            bibliotheque = db.getSync(cleStorage, []);
         } catch (e) {
             console.warn(`[gabarits-utils] Erreur lecture ${cleStorage}:`, e);
             bibliotheque = [];
@@ -463,7 +463,7 @@
         });
 
         if (modifie) {
-            localStorage.setItem(cleStorage, JSON.stringify(bibliotheque));
+            db.setSync(cleStorage, bibliotheque);
             console.log(`[gabarits-utils] Bibliothèque ${cleStorage} mise à jour`);
         }
     }

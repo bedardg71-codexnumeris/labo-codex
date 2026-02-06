@@ -57,18 +57,14 @@
  */
 function obtenirEnseignantExistant() {
     // Vérifier d'abord dans la liste des enseignants (Beta 95.2)
-    const enseignants = (typeof db !== 'undefined' && db.getSync)
-        ? db.getSync('enseignants', [])
-        : JSON.parse(localStorage.getItem('enseignants') || '[]');
+    const enseignants = db.getSync('enseignants', []);
 
     if (enseignants.length > 0) {
         return enseignants[0]; // Premier enseignant
     }
 
     // Fallback sur infoCours
-    const infoCours = (typeof db !== 'undefined' && db.getSync)
-        ? db.getSync('infoCours', {})
-        : JSON.parse(localStorage.getItem('infoCours') || '{}');
+    const infoCours = db.getSync('infoCours', {});
 
     if (infoCours.enseignant) {
         return {
@@ -88,9 +84,7 @@ function obtenirEnseignantExistant() {
  */
 function obtenirCoursExistants() {
     // Lire depuis listeCours global (même source que Trimestre)
-    const tousCours = (typeof db !== 'undefined' && db.getSync)
-        ? db.getSync('listeCours', [])
-        : JSON.parse(localStorage.getItem('listeCours') || '[]');
+    const tousCours = db.getSync('listeCours', []);
 
     // Obtenir le trimestre actif
     const trimestreActifId = (typeof obtenirTrimestreId === 'function')
@@ -1336,12 +1330,8 @@ const QUESTIONS_PRIMO = [
         id: 'trimestre-config-existante',
         texte: function() {
             // Récupérer les infos du trimestre actif
-            const cadre = (typeof db !== 'undefined' && db.getSync)
-                ? db.getSync('cadreCalendrier', {})
-                : JSON.parse(localStorage.getItem('cadreCalendrier') || '{}');
-            const trimestreActif = (typeof db !== 'undefined' && db.getSync)
-                ? db.getSync('trimestreActif', null)
-                : JSON.parse(localStorage.getItem('trimestreActif') || 'null');
+            const cadre = db.getSync('cadreCalendrier', {});
+            const trimestreActif = db.getSync('trimestreActif', null);
 
             const nomTrimestre = trimestreActif?.nom || 'Le trimestre actif';
             const dateDebut = cadre.dateDebut || '';
@@ -1378,9 +1368,7 @@ const QUESTIONS_PRIMO = [
         },
         // N'afficher que si le trimestre a déjà des dates configurées
         sautSi: function() {
-            const cadre = (typeof db !== 'undefined' && db.getSync)
-                ? db.getSync('cadreCalendrier', {})
-                : JSON.parse(localStorage.getItem('cadreCalendrier') || '{}');
+            const cadre = db.getSync('cadreCalendrier', {});
             // Sauter si PAS de dates configurées
             return !cadre.dateDebut || !cadre.finCours;
         }
