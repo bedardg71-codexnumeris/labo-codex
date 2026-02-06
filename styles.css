@@ -13431,18 +13431,19 @@ body.mode-assiste .btn-aide-contextuelle,
 
 .travaux-palette-couleurs {
     display: flex;
-    gap: 4px;
+    flex-wrap: wrap;
+    gap: 3px;
 }
 
 .travaux-btn-couleur {
-    width: 28px;
-    height: 28px;
+    width: 20px;
+    height: 20px;
     border: 2px solid transparent;
     border-radius: 50%;
     cursor: pointer;
     transition: transform 0.15s;
-    min-width: 44px;
-    min-height: 44px;
+    min-width: 20px;
+    min-height: 20px;
 }
 
 .travaux-btn-couleur:hover {
@@ -13451,7 +13452,7 @@ body.mode-assiste .btn-aide-contextuelle,
 
 .travaux-btn-couleur.actif {
     border-color: #333;
-    box-shadow: 0 0 0 2px white, 0 0 0 4px #333;
+    box-shadow: 0 0 0 1px white, 0 0 0 3px #333;
 }
 
 .travaux-slider-epaisseur {
