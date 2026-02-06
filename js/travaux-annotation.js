@@ -55,15 +55,52 @@
             if (annotationActive) {
                 dimensionnerCanvasAnnotation(e.detail.width, e.detail.height);
                 chargerAnnotationsPage();
+            } else {
+                // Afficher les annotations en lecture seule si elles existent
+                afficherAnnotationsLectureSeule(e.detail.width, e.detail.height);
             }
         });
 
         // Ecouter la fermeture de fichier
         window.addEventListener('travaux-fichier-ferme', () => {
             desactiverAnnotation();
+            // Cacher le canvas quand le fichier est ferme
+            if (canvasAnnotation) {
+                canvasAnnotation.style.display = 'none';
+            }
         });
 
         console.log('[Travaux-Annotation] Module initialise');
+    }
+
+    /**
+     * Affiche les annotations en lecture seule (sans activer le mode edition)
+     * Appele automatiquement quand une page est rendue
+     */
+    function afficherAnnotationsLectureSeule(width, height) {
+        const fichierActuel = travauxVisionneuse.getFichierActuel();
+        if (!fichierActuel) return;
+
+        const annotation = travauxStockage.obtenirAnnotationFichier(fichierActuel.id);
+        if (!annotation) {
+            // Pas d'annotations - cacher le canvas
+            const canvas = document.getElementById('travaux-canvas-annotation');
+            if (canvas) canvas.style.display = 'none';
+            return;
+        }
+
+        // Il y a des annotations - les afficher en lecture seule
+        canvasAnnotation = document.getElementById('travaux-canvas-annotation');
+        if (!canvasAnnotation) return;
+
+        ctxAnnotation = canvasAnnotation.getContext('2d');
+        annotationCourante = annotation;
+        fichierId = fichierActuel.id;
+
+        dimensionnerCanvasAnnotation(width, height);
+        canvasAnnotation.style.display = 'block';
+        canvasAnnotation.style.pointerEvents = 'none';
+        reRendreAnnotations();
     }
 
     /**
@@ -116,9 +153,10 @@
         detacherEvenements();
         annotationActive = false;
 
+        // Garder le canvas visible en lecture seule (annotations restent affichees)
         if (canvasAnnotation) {
-            canvasAnnotation.style.display = 'none';
             canvasAnnotation.style.pointerEvents = 'none';
+            // NE PAS cacher le canvas - les annotations doivent rester visibles
         }
 
         const palette = document.getElementById('travaux-palette-container');
