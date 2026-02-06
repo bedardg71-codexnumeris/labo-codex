@@ -988,7 +988,7 @@ function afficherNotification(message, details = '') {
 function afficherFormEvenement() {
     const form = document.getElementById('formEvenementPrevu');
     if (form) {
-        form.style.display = 'block';
+        form.classList.remove('u-hide');
         // S'assurer qu'on est en mode création (pas édition)
         if (!form.getAttribute('data-edit-id')) {
             document.getElementById('texteFormPrevu').textContent = 'Nouvel événement prévu';
@@ -1000,7 +1000,7 @@ function afficherFormEvenement() {
 function annulerFormEvenement() {
     const form = document.getElementById('formEvenementPrevu');
     if (form) {
-        form.style.display = 'none';
+        form.classList.add('u-hide');
         form.removeAttribute('data-edit-id');
         document.getElementById('dateEvenementPrevu').value = '';
         document.getElementById('descriptionEvenementPrevu').value = '';
@@ -1016,7 +1016,7 @@ function annulerFormEvenement() {
 function afficherFormEvenementImprevu() {
     const form = document.getElementById('formEvenementImprevu');
     if (form) {
-        form.style.display = 'block';
+        form.classList.remove('u-hide');
         // S'assurer qu'on est en mode création (pas édition)
         if (!form.getAttribute('data-edit-id')) {
             document.getElementById('texteFormImprevu').textContent = 'Nouvel événement imprévu';
@@ -1028,7 +1028,7 @@ function afficherFormEvenementImprevu() {
 function annulerFormEvenementImprevu() {
     const form = document.getElementById('formEvenementImprevu');
     if (form) {
-        form.style.display = 'none';
+        form.classList.add('u-hide');
         form.removeAttribute('data-edit-id');
         document.getElementById('dateEvenementImprevu').value = '';
         document.getElementById('descriptionEvenementImprevu').value = '';

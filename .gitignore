@@ -5,6 +5,7 @@
 *.backup.json
 *backups-donnees*/
 *obsolètes*/
+*ignorés*/
 
 # Calendriers institutionnels (fichiers locaux)
 >DE_*.pdf

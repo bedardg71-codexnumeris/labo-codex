@@ -404,12 +404,12 @@ function chargerEvaluationsEtudiant() {
 
     if (!etudiantDA) {
         // Masquer le bouton de profil si aucun étudiant
-        if (btnVoirProfil) btnVoirProfil.style.display = 'none';
+        if (btnVoirProfil) btnVoirProfil.classList.add('u-hide');
         return;
     }
 
     // Afficher le bouton de profil
-    if (btnVoirProfil) btnVoirProfil.style.display = 'block';
+    if (btnVoirProfil) btnVoirProfil.classList.remove('u-hide');
 
     // 🆕 BETA 96.3 : Mettre a jour le bouton "Voir le travail"
     if (typeof mettreAJourBoutonVoirTravail === 'function') {
@@ -1126,7 +1126,7 @@ function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur
 
         // Vérifier si l'élément existe avant d'y accéder
         const retroDiv = document.getElementById(`retroaction_cat_${critereId}`);
-        if (retroDiv) retroDiv.style.display = 'none';
+        if (retroDiv) retroDiv.classList.add('u-hide');
 
         return;
     }
@@ -1255,7 +1255,7 @@ function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur
 
             // Masquer la zone orange (on ne l'utilise plus)
             const retroDiv = document.getElementById(`retroaction_cat_${critereId}`);
-            if (retroDiv) retroDiv.style.display = 'none';
+            if (retroDiv) retroDiv.classList.add('u-hide');
         } else {
             // Pas de rétroaction personnalisée, rétroaction générique
             let retroactionGenerique = `Ta rédaction contient ${totalErreurs} erreur${totalErreurs > 1 ? 's' : ''} de français pour ${mots} mots.`;
@@ -1929,9 +1929,9 @@ function changerStatutIntegrite() {
 
     // Afficher le champ de notes seulement si ce n'est pas "recevable"
     if (statut !== 'recevable') {
-        divNotes.style.display = 'block';
+        divNotes.classList.remove('u-hide');
     } else {
-        divNotes.style.display = 'none';
+        divNotes.classList.add('u-hide');
         notes.value = ''; // Vider les notes si on repasse à recevable
         if (evaluationEnCours) {
             delete evaluationEnCours.notesIntegrite;
@@ -2005,7 +2005,7 @@ function afficherBadgesJetons() {
 
     if (!section || !conteneur || !window.evaluationEnCours?.idModification) {
         console.log('❌ Sortie précoce de afficherBadgesJetons()');
-        if (section) section.style.display = 'none';
+        if (section) section.classList.add('u-hide');
         return;
     }
 
@@ -2024,7 +2024,7 @@ function afficherBadgesJetons() {
     }
 
     if (!evaluation) {
-        section.style.display = 'none';
+        section.classList.add('u-hide');
         return;
     }
 
@@ -2062,10 +2062,10 @@ function afficherBadgesJetons() {
     if (badges.length > 0) {
         console.log('✅ Affichage des badges (' + badges.length + ')');
         conteneur.innerHTML = badges.join('');
-        section.style.display = 'block';
+        section.classList.remove('u-hide');
     } else {
         console.log('⚠️ Aucun badge à afficher');
-        section.style.display = 'none';
+        section.classList.add('u-hide');
     }
 }
 
@@ -2088,10 +2088,10 @@ function afficherGestionJetons(afficher) {
         const evaluation = evaluations.find(e => e.id === window.evaluationEnCours.idModification);
 
         // Masquer complètement la section des badges (on utilise les checkboxes à la place)
-        if (sectionBadges) sectionBadges.style.display = 'none';
+        if (sectionBadges) sectionBadges.classList.add('u-hide');
 
         // Afficher la section des options de jetons
-        if (sectionOptions) sectionOptions.style.display = 'block';
+        if (sectionOptions) sectionOptions.classList.remove('u-hide');
 
         if (evaluation) {
             // Vérifier si l'évaluation a déjà des jetons
@@ -2099,8 +2099,8 @@ function afficherGestionJetons(afficher) {
             const aDejaJetonReprise = evaluation.jetonRepriseApplique || evaluation.repriseDeId || evaluation.id.startsWith('EVAL_REPRISE_');
 
             // Toujours afficher les options
-            if (badgeDelai) badgeDelai.style.display = 'flex';
-            if (badgeReprise) badgeReprise.style.display = 'flex';
+            if (badgeDelai) badgeDelai.classList.remove('u-hide');
+            if (badgeReprise) badgeReprise.classList.remove('u-hide');
 
             // Cocher les checkboxes si les jetons sont déjà appliqués
             if (checkboxDelai) checkboxDelai.checked = aDejaJetonDelai;
@@ -2111,12 +2111,12 @@ function afficherGestionJetons(afficher) {
         afficherJetonsPersonnalisesEvaluation();
     } else if (afficher) {
         // MODE NOUVELLE ÉVALUATION : Afficher les options seulement (pas les badges)
-        if (sectionBadges) sectionBadges.style.display = 'none';
-        if (sectionOptions) sectionOptions.style.display = 'block';
+        if (sectionBadges) sectionBadges.classList.add('u-hide');
+        if (sectionOptions) sectionOptions.classList.remove('u-hide');
 
         // Afficher tous les badges de jetons (aucun n'est encore appliqué)
-        if (badgeDelai) badgeDelai.style.display = 'flex';
-        if (badgeReprise) badgeReprise.style.display = 'flex';
+        if (badgeDelai) badgeDelai.classList.remove('u-hide');
+        if (badgeReprise) badgeReprise.classList.remove('u-hide');
 
         // Décocher les checkboxes
         if (checkboxDelai) checkboxDelai.checked = false;
@@ -2126,8 +2126,8 @@ function afficherGestionJetons(afficher) {
         afficherJetonsPersonnalisesEvaluation();
     } else {
         // MODE MASQUÉ : Tout masquer
-        if (sectionBadges) sectionBadges.style.display = 'none';
-        if (sectionOptions) sectionOptions.style.display = 'none';
+        if (sectionBadges) sectionBadges.classList.add('u-hide');
+        if (sectionOptions) sectionOptions.classList.add('u-hide');
     }
 }
 
@@ -2283,7 +2283,7 @@ function retirerJetonDepuisSidebar(evaluationId, typeJeton) {
             if (succes) {
                 // Réafficher le bouton pour permettre de réappliquer le jeton
                 const bouton = document.getElementById('boutonJetonDelai');
-                if (bouton) bouton.style.display = 'block';
+                if (bouton) bouton.classList.remove('u-hide');
             }
         } else {
             console.error('❌ Fonction retirerJetonDelai non disponible');
@@ -2337,9 +2337,9 @@ function nouvelleEvaluation() {
     const section = document.getElementById('gestionJetonsEvaluation');
     const boutonDelai = document.getElementById('boutonJetonDelai');
     const boutonReprise = document.getElementById('boutonJetonReprise');
-    if (section) section.style.display = 'none';
-    if (boutonDelai) boutonDelai.style.display = 'none';
-    if (boutonReprise) boutonReprise.style.display = 'none';
+    if (section) section.classList.add('u-hide');
+    if (boutonDelai) boutonDelai.classList.add('u-hide');
+    if (boutonReprise) boutonReprise.classList.add('u-hide');
 
     cocherOptionsParDefaut();
 
@@ -2355,11 +2355,11 @@ function nouvelleEvaluation() {
 
     // Masquer l'indicateur de progression
     const indicateur = document.getElementById('indicateurProgressionEval');
-    if (indicateur) indicateur.style.display = 'none';
+    if (indicateur) indicateur.classList.add('u-hide');
 
     // Masquer l'indicateur de modification
     const indicateurModif = document.getElementById('indicateurModeModification');
-    if (indicateurModif) indicateurModif.style.display = 'none';
+    if (indicateurModif) indicateurModif.classList.add('u-hide');
 
     // Masquer le bouton de verrouillage et réactiver le formulaire
     afficherOuMasquerBoutonVerrouillage(false);
@@ -2371,7 +2371,7 @@ function nouvelleEvaluation() {
     // Masquer la ligne Supprimer cette évaluation (seulement pour évaluations existantes)
     const ligneSupprimer = document.getElementById('ligneSupprimerEvaluation');
     if (ligneSupprimer) {
-        ligneSupprimer.style.display = 'none';
+        ligneSupprimer.classList.add('u-hide');
     }
 
     afficherNotificationSucces('Paramètres réinitialisés - Prêt pour une nouvelle série d\'évaluations');
@@ -2858,13 +2858,13 @@ function afficherListeEvaluations(donneesEtudiants) {
 
     if (donneesEtudiants.length === 0) {
         conteneur.innerHTML = '';
-        conteneur.style.display = 'none';
-        messageVide.style.display = 'block';
+        conteneur.classList.add('u-hide');
+        messageVide.classList.remove('u-hide');
         return;
     }
 
-    conteneur.style.display = 'block';
-    messageVide.style.display = 'none';
+    conteneur.classList.remove('u-hide');
+    messageVide.classList.add('u-hide');
 
     // NE PAS TRIER ICI - Le tri est géré par trierListeEvaluations()
     // La fonction affiche les données dans l'ordre reçu
@@ -3096,11 +3096,11 @@ function toggleEtudiantEval(da) {
 
     if (!details) return;
 
-    if (details.style.display === 'none') {
-        details.style.display = 'block';
+    if (details.classList.contains('u-hide')) {
+        details.classList.remove('u-hide');
         if (toggle) toggle.textContent = '▼';
     } else {
-        details.style.display = 'none';
+        details.classList.add('u-hide');
         if (toggle) toggle.textContent = '▶';
     }
 }
@@ -3617,7 +3617,7 @@ function verifierEtChargerEvaluationExistante() {
 
         // Masquer les badges de jetons
         const section = document.getElementById('gestionJetonsEvaluation');
-        if (section) section.style.display = 'none';
+        if (section) section.classList.add('u-hide');
 
         return;
     }
@@ -3845,7 +3845,7 @@ function mettreAJourIndicateurProgression() {
 
     // Si aucune production sélectionnée, masquer l'indicateur
     if (!productionId) {
-        indicateur.style.display = 'none';
+        indicateur.classList.add('u-hide');
         return;
     }
 
@@ -3866,7 +3866,7 @@ function mettreAJourIndicateurProgression() {
 
     // Afficher le compteur
     indicateur.textContent = `${nbEvaluations}/${totalEtudiants} évaluations`;
-    indicateur.style.display = 'inline-block';
+    indicateur.classList.remove('u-hide');
 
     // Changer la couleur selon la progression
     if (nbEvaluations === totalEtudiants) {
@@ -4614,7 +4614,7 @@ function modifierEvaluation(evaluationId) {
             console.log('1️⃣6️⃣ Affichage ligne suppression');
             const ligneSupprimer = document.getElementById('ligneSupprimerEvaluation');
             if (ligneSupprimer) {
-                ligneSupprimer.style.display = 'flex';
+                ligneSupprimer.classList.remove('u-hide');
             }
 
             console.log('✅ Évaluation chargée avec succès');
@@ -4775,7 +4775,7 @@ function sauvegarderEvaluationModifiee() {
 
     // Masquer l'indicateur de modification
     const indicateurModif = document.getElementById('indicateurModeModification');
-    if (indicateurModif) indicateurModif.style.display = 'none';
+    if (indicateurModif) indicateurModif.classList.add('u-hide');
 
     // Masquer le bouton de verrouillage
     afficherOuMasquerBoutonVerrouillage(false);
@@ -4897,7 +4897,7 @@ function afficherIndicateurModeModification(evaluation) {
         </div>
     `;
 
-    indicateur.style.display = 'flex';
+    indicateur.classList.remove('u-hide');
 }
 
 /**
@@ -5253,7 +5253,7 @@ function appliquerJetonDelaiDepuisSidebar() {
         if (succes) {
             // Masquer le bouton et afficher le badge
             const bouton = document.getElementById('boutonJetonDelai');
-            if (bouton) bouton.style.display = 'none';
+            if (bouton) bouton.classList.add('u-hide');
             afficherBadgesJetons();
         }
     } else {
@@ -5287,7 +5287,7 @@ function appliquerJetonRepriseDepuisSidebar() {
 
     // Le bouton va disparaître car la nouvelle évaluation aura déjà le jeton appliqué
     const bouton = document.getElementById('boutonJetonReprise');
-    if (bouton) bouton.style.display = 'none';
+    if (bouton) bouton.classList.add('u-hide');
 }
 
 /**
@@ -5556,10 +5556,10 @@ function afficherOuMasquerBoutonVerrouillage(afficher, estVerrouillee = false) {
     if (!indicateur) return;
 
     if (afficher) {
-        indicateur.style.display = 'flex';
+        indicateur.classList.remove('u-hide');
         mettreAJourBoutonVerrouillage(estVerrouillee);
     } else {
-        indicateur.style.display = 'none';
+        indicateur.classList.add('u-hide');
     }
 }
 
@@ -5653,11 +5653,7 @@ function filtrerListeEvaluations() {
         const da = carte.getAttribute('data-da') || '';
         const nom = carte.textContent.toLowerCase();
 
-        if (terme === '' || da.includes(terme) || nom.includes(terme)) {
-            carte.style.display = '';
-        } else {
-            carte.style.display = 'none';
-        }
+        toggleDisplay(carte, terme === '' || da.includes(terme) || nom.includes(terme));
     }
 }
 
@@ -5783,7 +5779,7 @@ function mettreAJourBoutonVoirTravail() {
     if (!btn) return;
 
     if (typeof travauxStockage === 'undefined') {
-        btn.style.display = 'none';
+        btn.classList.add('u-hide');
         return;
     }
 
@@ -5791,7 +5787,7 @@ function mettreAJourBoutonVoirTravail() {
     const productionId = document.getElementById('selectProduction1')?.value;
 
     if (!etudiantDA) {
-        btn.style.display = 'none';
+        btn.classList.add('u-hide');
         return;
     }
 
@@ -5800,7 +5796,7 @@ function mettreAJourBoutonVoirTravail() {
         fichiers = fichiers.filter(f => f.productionId === productionId);
     }
 
-    btn.style.display = fichiers.length > 0 ? 'inline-block' : 'none';
+    toggleDisplay(btn, fichiers.length > 0);
 }
 
 // Exporter les fonctions
@@ -5838,12 +5834,12 @@ function afficherJetonsPersonnalisesEvaluation() {
 
     if (jetonsPersonnalises.length === 0) {
         conteneur.innerHTML = '';
-        conteneur.style.display = 'none';
+        conteneur.classList.add('u-hide');
         return;
     }
 
     // Afficher le conteneur
-    conteneur.style.display = 'flex';
+    conteneur.classList.remove('u-hide');
 
     // Générer un badge avec checkbox pour chaque jeton personnalisé
     conteneur.innerHTML = jetonsPersonnalises.map(jeton => `

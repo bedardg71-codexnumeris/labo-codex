@@ -175,7 +175,7 @@
             // Montrer/cacher la section "Ignorer" selon le contexte
             const sectionIgnorer = document.getElementById('sectionDoublonIgnorer');
             if (sectionIgnorer) {
-                sectionIgnorer.style.display = options.estImport ? '' : 'none';
+                toggleDisplay(sectionIgnorer, options.estImport);
             }
 
             // Afficher le modal

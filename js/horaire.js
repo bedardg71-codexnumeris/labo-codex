@@ -745,7 +745,7 @@ function afficherFormulaireSeancesDynamique() {
     }
 
     // Afficher le formulaire
-    document.getElementById('formAjoutSeance').style.display = 'block';
+    document.getElementById('formAjoutSeance').classList.remove('u-hide');
 
     // Générer l'affichage
     rafraichirFormulairesSeances();
@@ -931,7 +931,7 @@ function annulerAjoutSeance() {
     const btnConfirmer = document.getElementById('btnConfirmerSeances');
 
     if (formAjout) {
-        formAjout.style.display = 'none';
+        formAjout.classList.add('u-hide');
     }
 
     // Réinitialiser le bouton
@@ -1370,8 +1370,8 @@ function afficherFormAjoutSeance() {
     const btn = document.getElementById('btnAjouterSeance');
 
     if (form && btn) {
-        form.style.display = 'block';
-        btn.style.display = 'none';
+        form.classList.remove('u-hide');
+        btn.classList.add('u-hide');
     }
 }
 
@@ -1391,8 +1391,8 @@ function annulerFormAjoutSeance() {
     const btn = document.getElementById('btnAjouterSeance');
 
     if (form && btn) {
-        form.style.display = 'none';
-        btn.style.display = 'block';
+        form.classList.add('u-hide');
+        btn.classList.remove('u-hide');
     }
 }
 

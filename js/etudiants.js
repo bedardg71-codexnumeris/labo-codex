@@ -841,9 +841,9 @@ function masquerColonnesRaiSiDesactive(activerRai) {
 
     headers.forEach(header => {
         if (activerRai) {
-            header.style.display = '';  // Afficher
+            header.classList.remove('u-hide');  // Afficher
         } else {
-            header.style.display = 'none';  // Masquer
+            header.classList.add('u-hide');  // Masquer
         }
     });
 }
@@ -916,7 +916,7 @@ function afficherListeEtudiantsConsultation() {
     // Si aucun étudiant
     if (etudiantsFiltres.length === 0) {
         if (messageVide) {
-            messageVide.style.display = 'block';
+            messageVide.classList.remove('u-hide');
 
             // Afficher le bon message selon le contexte
             const messageFiltreActif = document.getElementById('message-filtre-actif');
@@ -925,28 +925,28 @@ function afficherListeEtudiantsConsultation() {
 
             if (etudiants.length === 0) {
                 // Vraiment aucun étudiant dans le système
-                if (messageFiltreActif) messageFiltreActif.style.display = 'none';
-                if (messageListeVide) messageListeVide.style.display = 'block';
-                if (btnResetFiltres) btnResetFiltres.style.display = 'none';
+                if (messageFiltreActif) messageFiltreActif.classList.add('u-hide');
+                if (messageListeVide) messageListeVide.classList.remove('u-hide');
+                if (btnResetFiltres) btnResetFiltres.classList.add('u-hide');
             } else {
                 // Des étudiants existent mais sont filtrés
-                if (messageFiltreActif) messageFiltreActif.style.display = 'block';
-                if (messageListeVide) messageListeVide.style.display = 'none';
-                if (btnResetFiltres) btnResetFiltres.style.display = 'inline-block';
+                if (messageFiltreActif) messageFiltreActif.classList.remove('u-hide');
+                if (messageListeVide) messageListeVide.classList.add('u-hide');
+                if (btnResetFiltres) btnResetFiltres.classList.remove('u-hide');
             }
         }
         if (tableContainer) {
-            tableContainer.style.display = 'none';
+            tableContainer.classList.add('u-hide');
         }
         return;
     }
 
     // Afficher le tableau
     if (messageVide) {
-        messageVide.style.display = 'none';
+        messageVide.classList.add('u-hide');
     }
     if (tableContainer) {
-        tableContainer.style.display = 'block';
+        tableContainer.classList.remove('u-hide');
     }
 
     // 🆕 BETA 91: Calculer les corrélations A-P et C-P sur TOUS les étudiants (avant filtrage)

@@ -340,7 +340,7 @@
 .u-w-80 { width: 80px; }
 
 /* === DISPLAY === */
-.u-hide { display: none; }
+.u-hide { display: none !important; }
 .legacy-hidden { display: none !important; } /* Beta 95 : Masque les anciennes sous-sections */
 .u-block { display: block; }
 .u-inline-block { display: inline-block; }
@@ -2452,6 +2452,119 @@ textarea {
     border: 2px solid var(--vert-succes) !important;
     background-color: #f1f8e9 !important;
     box-shadow: none;
+}
+
+/* ===============================
+   CLASSES UTILITAIRES - REFACTORISATION 97.1
+   =============================== */
+
+/* Info boxes — remplace inline style="background: #fff3cd; border-left: 4px solid ..." */
+.info-box {
+    padding: 12px 15px;
+    border-left: 4px solid;
+    border-radius: var(--radius-moyen);
+    margin-bottom: 12px;
+}
+.info-box--attention {
+    background: #fff3cd;
+    border-color: var(--btn-annuler);
+    color: #856404;
+}
+.info-box--info {
+    background: var(--bleu-tres-pale);
+    border-color: var(--bleu-moyen);
+}
+.info-box--succes {
+    background: #d4edda;
+    border-color: var(--vert-succes);
+}
+.info-box--erreur {
+    background: #f8d7da;
+    border-color: var(--rouge-erreur);
+}
+
+/* Badges source — remplace inline style="background: #4caf50; color: white; padding: 2px 6px; ..." */
+.badge-source {
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.75em;
+    font-weight: 600;
+    margin-left: 6px;
+    display: inline-block;
+}
+.badge-source--locale { background: var(--vert-succes); }
+.badge-source--bibliotheque { background: var(--bleu-clair); }
+.badge-source--retiree { background: var(--orange-accent); }
+.badge-source--id {
+    background: #e0e0e0;
+    color: #666;
+    font-family: monospace;
+    font-size: 0.7em;
+}
+
+/* Modals JS — remplace inline style="position: fixed; top: 0; ..." */
+.modal-js-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.modal-js-contenu {
+    background: white;
+    padding: 30px;
+    border-radius: var(--radius-grand);
+    max-width: 700px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-fort);
+}
+
+/* Changelog entries — remplace inline style="background: linear-gradient(...); border-left: 3px solid ..." */
+.changelog-entry {
+    border-left: 3px solid;
+    border-radius: var(--radius-moyen);
+    padding: 12px 16px;
+    margin-bottom: 1rem;
+}
+.changelog-entry--bleu {
+    background: linear-gradient(135deg, #e3f2fd 0%, #e8eaf6 100%);
+    border-color: var(--bleu-moyen);
+}
+.changelog-entry--vert {
+    background: linear-gradient(135deg, #e8f5e9 0%, #e3f2fd 100%);
+    border-color: #2e7d32;
+}
+.changelog-entry--orange {
+    background: linear-gradient(135deg, #fff8e1 0%, #fff3e0 100%);
+    border-color: var(--orange-accent);
+}
+.changelog-entry--rose {
+    background: linear-gradient(135deg, #ffebee 0%, #fce4ec 100%);
+    border-color: #e91e63;
+}
+.changelog-entry--violet {
+    background: linear-gradient(135deg, #f3e5f5 0%, #ede7f6 100%);
+    border-color: #512da8;
+}
+.changelog-entry--sarcelle {
+    background: linear-gradient(135deg, #e0f7fa 0%, #e8f5e9 100%);
+    border-color: #00897b;
+}
+.changelog-title {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 700;
+}
+.changelog-list {
+    margin: 0;
+    padding-left: 20px;
+    font-size: 0.9rem;
+    line-height: 1.6;
 }
 
 /* ===============================

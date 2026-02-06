@@ -332,11 +332,11 @@ async function chargerCartouchesRetroaction() {
     
     if (!grilleId) {
         // Aucune grille sélectionnée
-        document.getElementById('aucuneEvalRetroaction').style.display = 'block';
-        document.getElementById('infoCartouche').style.display = 'none';
-        document.getElementById('matriceRetroaction').style.display = 'none';
-        document.getElementById('apercuRetroaction').style.display = 'none';
-        document.getElementById('listeCartouchesExistants').style.display = 'none';
+        document.getElementById('aucuneEvalRetroaction').classList.remove('u-hide');
+        document.getElementById('infoCartouche').classList.add('u-hide');
+        document.getElementById('matriceRetroaction').classList.add('u-hide');
+        document.getElementById('apercuRetroaction').classList.add('u-hide');
+        document.getElementById('listeCartouchesExistants').classList.add('u-hide');
         return;
     }
     
@@ -353,10 +353,10 @@ async function chargerCartouchesRetroaction() {
         const nomEchappe = echapperHtml(cartouche.nom);
         selectCartouche.innerHTML += `<option value="${cartouche.id}">${nomEchappe}</option>`;
     });
-    
-    document.getElementById('aucuneEvalRetroaction').style.display = 'none';
-    document.getElementById('infoCartouche').style.display = 'block';
-    
+
+    document.getElementById('aucuneEvalRetroaction').classList.add('u-hide');
+    document.getElementById('infoCartouche').classList.remove('u-hide');
+
     // Afficher la liste des cartouches existantes
     // DÉSACTIVÉ pour Beta 80.5+ : remplacé par la sidebar
     // if (cartouches.length > 0) {
@@ -368,7 +368,7 @@ async function chargerCartouchesRetroaction() {
 
     // Toujours masquer l'ancienne liste (Beta 80.5+)
     const listeAncienne = document.getElementById('listeCartouchesExistants');
-    if (listeAncienne) listeAncienne.style.display = 'none';
+    if (listeAncienne) listeAncienne.classList.add('u-hide');
     
     // Initialiser une nouvelle cartouche par défaut
     await initialiserNouveauCartouche(grilleId);
@@ -452,8 +452,8 @@ async function initialiserNouveauCartouche(grilleId) {
     // Afficher la matrice et l'aperçu
     await afficherMatriceRetroaction();
     mettreAJourMetriques();
-    document.getElementById('matriceRetroaction').style.display = 'block';
-    document.getElementById('apercuRetroaction').style.display = 'block';
+    document.getElementById('matriceRetroaction').classList.remove('u-hide');
+    document.getElementById('apercuRetroaction').classList.remove('u-hide');
 }
 
 /**
@@ -531,8 +531,8 @@ async function chargerMatriceRetroaction(cartoucheIdParam = null, grilleIdParam 
         await afficherMatriceRetroaction();
         await calculerPourcentageComplete();
 
-        document.getElementById('matriceRetroaction').style.display = 'block';
-        document.getElementById('apercuRetroaction').style.display = 'block';
+        document.getElementById('matriceRetroaction').classList.remove('u-hide');
+        document.getElementById('apercuRetroaction').classList.remove('u-hide');
 
         console.log('✅ Matrice affichée');
     } else {
@@ -834,8 +834,8 @@ async function sauvegarderCartouche() {
  * - Bouton «Importer des commentaires»
  */
 function afficherImportCommentaires() {
-    document.getElementById('zoneImportCommentaires').style.display = 'block';
-    document.getElementById('matriceRetroaction').style.display = 'none';
+    document.getElementById('zoneImportCommentaires').classList.remove('u-hide');
+    document.getElementById('matriceRetroaction').classList.add('u-hide');
 }
 
 /**
@@ -846,8 +846,8 @@ function afficherImportCommentaires() {
  * - Bouton «Annuler» dans la zone d'import
  */
 function annulerImportCommentaires() {
-    document.getElementById('zoneImportCommentaires').style.display = 'none';
-    document.getElementById('matriceRetroaction').style.display = 'block';
+    document.getElementById('zoneImportCommentaires').classList.add('u-hide');
+    document.getElementById('matriceRetroaction').classList.remove('u-hide');
     document.getElementById('commentairesColles').value = '';
 }
 
@@ -1492,8 +1492,8 @@ async function chargerCartouchePourModif(cartoucheId, grilleId) {
         // Note: Export/Import se font maintenant via la bibliothèque
         const btnDupliquer = document.getElementById('btnDupliquerCartouche');
         const btnSupprimer = document.getElementById('btnSupprimerCartouche');
-        if (btnDupliquer) btnDupliquer.style.display = 'inline-block';
-        if (btnSupprimer) btnSupprimer.style.display = 'inline-block';
+        if (btnDupliquer) btnDupliquer.classList.remove('u-hide');
+        if (btnSupprimer) btnSupprimer.classList.remove('u-hide');
 
         // NOUVELLE INTERFACE (Beta 80.5+): Passer les paramètres directement
         await chargerMatriceRetroaction(cartoucheId, grilleId);
@@ -1505,28 +1505,28 @@ async function chargerCartouchePourModif(cartoucheId, grilleId) {
         const messageAccueil = document.getElementById('messageAccueilCartouche');
         console.log('messageAccueil trouvé:', !!messageAccueil);
         if (messageAccueil) {
-            messageAccueil.style.display = 'none';
+            messageAccueil.classList.add('u-hide');
             console.log('messageAccueil masqué');
         }
 
         const infoCartouche = document.getElementById('infoCartouche');
         console.log('infoCartouche trouvé:', !!infoCartouche);
         if (infoCartouche) {
-            infoCartouche.style.display = 'block';
+            infoCartouche.classList.remove('u-hide');
             console.log('infoCartouche affiché');
         }
 
         const zoneImport = document.getElementById('zoneImportUnifiee');
         console.log('zoneImport trouvé:', !!zoneImport);
         if (zoneImport) {
-            zoneImport.style.display = 'block';
+            zoneImport.classList.remove('u-hide');
             console.log('zoneImport affiché');
         }
 
         const matriceRetroaction = document.getElementById('matriceRetroaction');
         console.log('matriceRetroaction trouvé:', !!matriceRetroaction);
         if (matriceRetroaction) {
-            matriceRetroaction.style.display = 'block';
+            matriceRetroaction.classList.remove('u-hide');
             console.log('matriceRetroaction affiché');
         }
 
@@ -1556,7 +1556,7 @@ async function chargerCartouchePourModif(cartoucheId, grilleId) {
 
         if (cartouche.verrouille) {
             console.log('🔒 Cartouche en lecture seule (verrouillée)');
-            if (alerteVerrouillage) alerteVerrouillage.style.display = 'block';
+            if (alerteVerrouillage) alerteVerrouillage.classList.remove('u-hide');
 
             // Attacher l'événement au bouton
             if (btnDeverrouiller) {
@@ -1567,7 +1567,7 @@ async function chargerCartouchePourModif(cartoucheId, grilleId) {
                 };
             }
         } else {
-            if (alerteVerrouillage) alerteVerrouillage.style.display = 'none';
+            if (alerteVerrouillage) alerteVerrouillage.classList.add('u-hide');
         }
 
         // NE PLUS faire de scroll - la sidebar reste visible
@@ -2265,26 +2265,26 @@ async function ajouterCartoucheAGrille(grilleId) {
     const btnImporter = document.getElementById('btnImporterCartouche');
     const btnImporterTxt = document.getElementById('btnImporterCartoucheTxt');
     const btnSupprimer = document.getElementById('btnSupprimerCartouche');
-    if (btnDupliquer) btnDupliquer.style.display = 'none';
-    if (btnExporter) btnExporter.style.display = 'none';
-    if (btnImporter) btnImporter.style.display = 'none';
-    if (btnImporterTxt) btnImporterTxt.style.display = 'none';
-    if (btnSupprimer) btnSupprimer.style.display = 'none';
+    if (btnDupliquer) btnDupliquer.classList.add('u-hide');
+    if (btnExporter) btnExporter.classList.add('u-hide');
+    if (btnImporter) btnImporter.classList.add('u-hide');
+    if (btnImporterTxt) btnImporterTxt.classList.add('u-hide');
+    if (btnSupprimer) btnSupprimer.classList.add('u-hide');
 
     // Initialiser une nouvelle cartouche pour cette grille
     await initialiserNouveauCartouche(grilleId);
 
     // Afficher les sections nécessaires
-    document.getElementById('aucuneEvalRetroaction').style.display = 'none';
-    document.getElementById('infoCartouche').style.display = 'block';
-    document.getElementById('matriceRetroaction').style.display = 'block';
+    document.getElementById('aucuneEvalRetroaction').classList.add('u-hide');
+    document.getElementById('infoCartouche').classList.remove('u-hide');
+    document.getElementById('matriceRetroaction').classList.remove('u-hide');
 
     // NOUVELLE INTERFACE (Beta 80.2): Masquer accueil, afficher zones
     const messageAccueil = document.getElementById('messageAccueilCartouche');
-    if (messageAccueil) messageAccueil.style.display = 'none';
+    if (messageAccueil) messageAccueil.classList.add('u-hide');
 
     const zoneImport = document.getElementById('zoneImportUnifiee');
-    if (zoneImport) zoneImport.style.display = 'block';
+    if (zoneImport) zoneImport.classList.remove('u-hide');
 
     // Générer checklist pour import partiel
     genererChecklistCriteresImport();
@@ -2504,10 +2504,10 @@ function annulerFormCartouche() {
     const matriceRetroaction = document.getElementById('matriceRetroaction');
     const messageAccueil = document.getElementById('messageAccueilCartouche');
 
-    if (infoCartouche) infoCartouche.style.display = 'none';
-    if (zoneImport) zoneImport.style.display = 'none';
-    if (matriceRetroaction) matriceRetroaction.style.display = 'none';
-    if (messageAccueil) messageAccueil.style.display = 'block';
+    if (infoCartouche) infoCartouche.classList.add('u-hide');
+    if (zoneImport) zoneImport.classList.add('u-hide');
+    if (matriceRetroaction) matriceRetroaction.classList.add('u-hide');
+    if (messageAccueil) messageAccueil.classList.remove('u-hide');
 
     // Réinitialiser les champs
     document.getElementById('nomCartouche').value = '';
@@ -2830,7 +2830,7 @@ async function onChangeSelectionCartouche() {
 
     // Si les deux ne sont pas sélectionnés, masquer la matrice
     if (!grilleId || !echelleId) {
-        if (matriceRetroaction) matriceRetroaction.style.display = 'none';
+        if (matriceRetroaction) matriceRetroaction.classList.add('u-hide');
         return;
     }
 
@@ -2893,8 +2893,8 @@ async function initialiserNouveauCartoucheAvecEchelle(grilleId, echelleId) {
     // Afficher la matrice
     await afficherMatriceRetroaction();
     mettreAJourMetriques();
-    document.getElementById('matriceRetroaction').style.display = 'block';
-    document.getElementById('apercuRetroaction').style.display = 'block';
+    document.getElementById('matriceRetroaction').classList.remove('u-hide');
+    document.getElementById('apercuRetroaction').classList.remove('u-hide');
 }
 
 /**
@@ -2926,14 +2926,14 @@ async function creerNouvelleCartouche() {
     // Masquer les boutons Dupliquer et Supprimer (mode création)
     const btnDupliquer = document.getElementById('btnDupliquerCartouche');
     const btnSupprimer = document.getElementById('btnSupprimerCartouche');
-    if (btnDupliquer) btnDupliquer.style.display = 'none';
-    if (btnSupprimer) btnSupprimer.style.display = 'none';
+    if (btnDupliquer) btnDupliquer.classList.add('u-hide');
+    if (btnSupprimer) btnSupprimer.classList.add('u-hide');
 
     // Afficher le formulaire
     const messageAccueil = document.getElementById('messageAccueilCartouche');
     const infoCartouche = document.getElementById('infoCartouche');
-    if (messageAccueil) messageAccueil.style.display = 'none';
-    if (infoCartouche) infoCartouche.style.display = 'block';
+    if (messageAccueil) messageAccueil.classList.add('u-hide');
+    if (infoCartouche) infoCartouche.classList.remove('u-hide');
 
     // Réinitialiser les champs
     document.getElementById('nomCartouche').value = '';
@@ -2949,8 +2949,8 @@ async function creerNouvelleCartouche() {
     // Masquer la matrice jusqu'à sélection des deux
     const matriceRetroaction = document.getElementById('matriceRetroaction');
     const apercuRetroaction = document.getElementById('apercuRetroaction');
-    if (matriceRetroaction) matriceRetroaction.style.display = 'none';
-    if (apercuRetroaction) apercuRetroaction.style.display = 'none';
+    if (matriceRetroaction) matriceRetroaction.classList.add('u-hide');
+    if (apercuRetroaction) apercuRetroaction.classList.add('u-hide');
 
     // Si une seule grille ET une seule échelle, les sélectionner automatiquement
     if (grilles.length === 1 && echelles.length === 1) {
@@ -3745,11 +3745,7 @@ function filtrerCartouchesParGrille() {
     const items = document.querySelectorAll('.cartouche-disponible-item');
 
     items.forEach(item => {
-        if (filtre === '' || item.dataset.grille === filtre) {
-            item.style.display = 'flex';
-        } else {
-            item.style.display = 'none';
-        }
+        toggleDisplay(item, filtre === '' || item.dataset.grille === filtre);
     });
 }
 

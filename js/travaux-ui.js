@@ -231,13 +231,13 @@
         window.addEventListener('travaux-annotation-activee', () => {
             document.getElementById('travaux-btn-annoter').textContent = 'Terminer';
             document.getElementById('travaux-btn-annoter').classList.add('actif');
-            document.getElementById('travaux-undo-redo').style.display = 'flex';
+            document.getElementById('travaux-undo-redo').classList.remove('u-hide');
         });
 
         window.addEventListener('travaux-annotation-desactivee', () => {
             document.getElementById('travaux-btn-annoter').textContent = 'Annoter';
             document.getElementById('travaux-btn-annoter').classList.remove('actif');
-            document.getElementById('travaux-undo-redo').style.display = 'none';
+            document.getElementById('travaux-undo-redo').classList.add('u-hide');
         });
     }
 
@@ -490,7 +490,7 @@
         }
 
         const progression = document.getElementById('travaux-progression-import');
-        if (progression) progression.style.display = 'block';
+        if (progression) progression.classList.remove('u-hide');
 
         const resultat = await travauxImport.importerTous(productionId, (i, total) => {
             const pourcent = Math.round((i / total) * 100);
@@ -500,7 +500,7 @@
             if (texte) texte.textContent = `${i}/${total} fichier(s) importes...`;
         });
 
-        if (progression) progression.style.display = 'none';
+        if (progression) progression.classList.add('u-hide');
 
         // Rafraichir l'affichage
         afficherImport();
@@ -521,7 +521,7 @@
         // Attendre que la visionneuse soit prete
         setTimeout(async () => {
             const placeholder = document.getElementById('travaux-placeholder-visionneuse');
-            if (placeholder) placeholder.style.display = 'none';
+            if (placeholder) placeholder.classList.add('u-hide');
 
             await travauxVisionneuse.ouvrirFichier(fichierId);
 
@@ -767,7 +767,7 @@
 
         const actions = document.querySelector('.travaux-import-actions');
         if (actions) {
-            actions.style.display = travauxImport.obtenirFileDAttente().length > 0 ? 'flex' : 'none';
+            toggleDisplay(actions, travauxImport.obtenirFileDAttente().length > 0);
             const btn = actions.querySelector('.btn-principal');
             if (btn) {
                 btn.textContent = `Importer ${travauxImport.obtenirFileDAttente().length} fichier(s)`;

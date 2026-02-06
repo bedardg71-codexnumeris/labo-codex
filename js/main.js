@@ -26,6 +26,24 @@ window.genererIdUnique = function(prefix = '') {
 };
 
 /* ===============================
+   FONCTION GLOBALE: Toggle visibilité (Beta 97.1)
+   =============================== */
+/**
+ * Toggle la visibilité d'un élément via la classe CSS .u-hide.
+ * Remplace element.style.display = 'none'/'block'/'flex'/etc.
+ * @param {HTMLElement|null} element - L'élément à montrer/cacher
+ * @param {boolean} show - true pour montrer, false pour cacher
+ */
+window.toggleDisplay = function(element, show) {
+    if (!element) return;
+    if (show) {
+        element.classList.remove('u-hide');
+    } else {
+        element.classList.add('u-hide');
+    }
+};
+
+/* ===============================
    FONCTION GLOBALE: Badge de pratique de notation
    =============================== */
 /**

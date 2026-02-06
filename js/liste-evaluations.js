@@ -447,7 +447,7 @@ function afficherTableauEvaluations(evaluations, productions, etudiants) {
 
     // Masquer le chargement
     if (zoneChargement) {
-        zoneChargement.style.display = 'none';
+        zoneChargement.classList.add('u-hide');
         console.log('✅ Zone de chargement masquée');
     }
 
@@ -472,13 +472,13 @@ function afficherTableauEvaluations(evaluations, productions, etudiants) {
 
     // Afficher les résultats
     if (lignesFiltrees.length === 0) {
-        conteneurTableau.style.display = 'none';
-        if (messageAucunResultat) messageAucunResultat.style.display = 'block';
+        conteneurTableau.classList.add('u-hide');
+        if (messageAucunResultat) messageAucunResultat.classList.remove('u-hide');
         if (compteur) compteur.textContent = '0 évaluation(s)';
         console.log('📭 Aucune évaluation à afficher');
     } else {
-        if (messageAucunResultat) messageAucunResultat.style.display = 'none';
-        conteneurTableau.style.display = 'block';
+        if (messageAucunResultat) messageAucunResultat.classList.add('u-hide');
+        conteneurTableau.classList.remove('u-hide');
 
         // Calculer les statistiques
         // IMPORTANT : Exclure les non-recevables ET les non remis de la moyenne

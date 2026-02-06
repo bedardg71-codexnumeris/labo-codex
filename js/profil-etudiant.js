@@ -4531,7 +4531,7 @@ function toggleDetailIndice(indice, da) {
     }
 
     // Si on clique sur le même indice, fermer
-    if (indiceActif === indice && panneau.style.display === 'block') {
+    if (indiceActif === indice && !panneau.classList.contains('u-hide')) {
         fermerDetailIndice();
         return;
     }
@@ -4617,7 +4617,7 @@ function toggleDetailIndice(indice, da) {
     }
 
     contenu.innerHTML = html;
-    panneau.style.display = 'block';
+    panneau.classList.remove('u-hide');
 
     // Scroll smooth vers le panneau
     setTimeout(() => {
@@ -4632,7 +4632,7 @@ function toggleDetailIndice(indice, da) {
 function fermerDetailIndice() {
     const panneau = document.getElementById('panneau-details-indice');
     if (panneau) {
-        panneau.style.display = 'none';
+        panneau.classList.add('u-hide');
         indiceActif = null;
     }
 
@@ -7432,11 +7432,7 @@ function reattacherEvenementsToggles() {
 
             if (targetElement) {
                 // Toggle la visibilité
-                if (targetElement.style.display === 'none' || targetElement.style.display === '') {
-                    targetElement.style.display = 'block';
-                } else {
-                    targetElement.style.display = 'none';
-                }
+                targetElement.classList.toggle('u-hide');
             }
         });
     });
@@ -7460,8 +7456,8 @@ function reattacherEvenementsToggles() {
 function toggleSection(sectionId) {
     const section = document.getElementById(sectionId);
     if (section) {
-        const isVisible = section.style.display !== 'none';
-        section.style.display = isVisible ? 'none' : 'block';
+        const isVisible = !section.classList.contains('u-hide');
+        section.classList.toggle('u-hide');
 
         // Changer l'icône du titre
         const titre = section.previousElementSibling;
@@ -8544,7 +8540,7 @@ function ouvrirModalConfidentiel(da) {
     chargerNotesPresencesConfidentiel(da);
 
     // Afficher le modal
-    document.getElementById('modalConfidentiel').style.display = 'flex';
+    document.getElementById('modalConfidentiel').classList.remove('u-hide');
 }
 
 /**
@@ -8642,7 +8638,7 @@ function sauvegarderNotesPresencesConfidentiel() {
  * Ferme le modal des informations confidentielles
  */
 function fermerModalConfidentiel() {
-    document.getElementById('modalConfidentiel').style.display = 'none';
+    document.getElementById('modalConfidentiel').classList.add('u-hide');
     _confidentielDaActuel = null;
 }
 
@@ -8701,7 +8697,7 @@ function sauvegarderConfidentiel() {
 function toggleServicesAdaptes(afficher) {
     const details = document.getElementById('confidentiel-services-details');
     if (details) {
-        details.style.display = afficher ? 'block' : 'none';
+        toggleDisplay(details, afficher);
     }
 }
 

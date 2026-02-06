@@ -1,14 +1,110 @@
-# SESSION ACTIVE - BETA 96.3
+# SESSION ACTIVE - BETA 97.1
 
 **Date** : 6 février 2026
-**Version** : Beta 96.3 (build 0206-0525)
-**Statut** : Application fonctionnelle pour H2026, A2024/A2025 archives, synchronisation multi-appareils opérationnelle
+**Version** : Beta 97.1 (build 0206-XXXX)
+**Statut** : Refactorisation progressive en cours (Phase 2)
 
 ---
 
 ## POUR REPRENDRE
 
 > **Lire ce fichier puis demander : "Ou en sommes-nous ?"**
+> La refactorisation est découpée en phases. Chaque phase est documentée ci-dessous.
+
+---
+
+## REFACTORISATION PROGRESSIVE (Beta 97.1)
+
+**Ticket principal** : #76 (595 `.style.display` dans 31 fichiers JS → `classList` + `u-hide`)
+**Tickets connexes** : #74 (classes CSS utilitaires pour inline styles)
+
+### Phase 1 — COMPLETEE (6 fév 2026, session 1)
+
+**Objectif** : Poser les fondations + migrer un premier lot de fichiers moyens
+
+**Infrastructure créée** :
+1. `window.toggleDisplay(element, show)` — helper global dans `js/main.js`
+   - `toggleDisplay(el, true)` → `el.classList.remove('u-hide')`
+   - `toggleDisplay(el, false)` → `el.classList.add('u-hide')`
+   - Gère `null` silencieusement
+2. `.u-hide` renforcé avec `!important` dans `styles.css:340` (garantit priorité sur inline styles)
+3. Nouvelles classes CSS utilitaires dans `styles.css` (~ligne 2457) :
+   - `.info-box` + `--attention`, `--info`, `--succes`, `--erreur` (remplace inline `background: #fff3cd; border-left: 4px solid...`)
+   - `.badge-source` + `--locale`, `--bibliotheque`, `--retiree`, `--id` (remplace inline badges colorés)
+
+**Fichiers JS migrés (Phase 1)** :
+- `js/cc-license.js` (30 changements)
+- `js/echelles.js` (64 changements)
+- `js/entites-ui.js` (46 changements)
+- `js/etudiants.js` (24 changements)
+- `js/export-pdf.js` (46 changements)
+- `js/groupe.js` (18 changements)
+- `js/pratique-notation-v2.js` (42 changements)
+- `js/pratiques-materiel.js` (56 changements)
+- `js/profil-etudiant.js` (22 changements)
+- `js/saisie-presences.js` (22 changements)
+- `js/donnees-v2.js` (16 changements)
+
+**Nettoyage** :
+- Suppression `Archives/Design system - Modules/` (37 fichiers, ~16 000 lignes)
+- Suppression `docs/A2024/` (scripts d'import historique)
+- Suppression retours testeurs anciens (`bruno/`, `gregoire/`, `jordan/`, `olivier/`)
+- Déplacement `DESIGN_SYSTEM.html` et `Design system - Modules/` à la racine
+
+**Non commité** : Tous ces changements sont dans le working tree, pas encore commités.
+
+### Phase 2 — COMPLETEE (6 fév 2026, session 2)
+
+**Objectif** : Migrer TOUS les fichiers JS restants (434 occurrences dans 23 fichiers)
+
+**Résultat** : 434 → 11 (423 occurrences migrées, 11 exceptions légitimes)
+
+| Fichier | Avant | Migrés | Restants | Raison |
+|---------|-------|--------|----------|--------|
+| `pratiques.js` | 97 | 95 | 2 | `= ''` (nettoyage accordéons) |
+| `trimestre-v2.js` | 88 | 83 | 5 | `= ''` (nettoyage inline styles) |
+| `evaluation.js` | 51 | 51 | 0 | — |
+| `cartouches.js` | 51 | 49 | 2 | Code commenté |
+| `productions.js` | 41 | 40 | 1 | `= ''` (reset display) |
+| `grilles.js` | 39 | 39 | 0 | — |
+| `horaire.js` | 6 | 6 | 0 | — |
+| `import-export.js` | 6 | 6 | 0 | — |
+| `tableau-bord-apercu.js` | 6 | 6 | 0 | — |
+| `travaux-ui.js` | 6 | 6 | 0 | — |
+| `travaux-annotation.js` | 6 | 6 | 0 | — |
+| `wizard-pratique-v2.js` | 5 | 5 | 0 | — |
+| `modes.js` | 5 | 5 | 0 | — |
+| `liste-evaluations.js` | 5 | 5 | 0 | — |
+| `trimestres.js` | 4 | 4 | 0 | — |
+| `trimestre.js` | 4 | 4 | 0 | — |
+| `cours.js` | 4 | 4 | 0 | — |
+| `rapport-bug.js` | 2 | 2 | 0 | — |
+| `primo-modal.js` | 2 | 2 | 0 | — |
+| `primo-tooltips.js` | 2 | 2 | 0 | — |
+| `objectifs.js` | 2 | 2 | 0 | — |
+| `modal-doublon.js` | 1 | 1 | 0 | — |
+| `main.js` | 1 | 0 | 1 | Helper toggleDisplay lui-même |
+
+**Fichiers JS migrés (Phase 2)** : 22 fichiers
+**Exceptions restantes** : 8 `= ''` (nettoyage), 2 commentés, 1 helper = **aucune utilisation active de `.style.display` pour show/hide**
+
+**Changements HTML associés** :
+- `#modalExport` et `#modalImport` (index.html) : `style="display:none"` → `class="u-hide"` + `style="display:flex"`
+- `#modalWizardPratiqueV2` (index.html) : Supprimé `style="display:none"` redondant (CSS `.modal-overlay` le gère)
+
+**Patterns de migration utilisés** :
+- `.modal-overlay` → `.actif` (pattern CSS existant)
+- Éléments génériques → `u-hide` (classe utilitaire avec `!important`)
+- Ternaires → `toggleDisplay(element, condition)` (helper global)
+- Vérifications → `element.classList.contains('u-hide')`
+- Reset inline → `style.display = ''` gardé tel quel
+
+**Règles de migration** :
+- `.style.display = 'none'` → `element.classList.add('u-hide')`
+- `.style.display = 'block'|'flex'|'inline-block'` → `element.classList.remove('u-hide')`
+- `.style.display = condition ? 'X' : 'none'` → `toggleDisplay(element, condition)`
+- `.style.display !== 'none'` (test) → `!element.classList.contains('u-hide')`
+- `.style.display = ''` → GARDER (nettoyage legacy, pas du show/hide)
 
 ---
 
@@ -30,7 +126,12 @@
 - **Modal Confidentiel** : Informations sensibles sur l'étudiant (ÉPGC, services adaptés, etc.)
 - **Anonymisation groupes** : Numéros de groupe remplacés par lettres en mode anonymisation
 
-### Derniere tache completee (6 février - Beta 96.3)
+### Derniere tache completee (6 février - Beta 97)
+
+- **35 correctifs de l'audit du 5 février** (#64-#65, #85-#108) — tous corrigés
+- **Refactorisation Phase 1** (Beta 97.1) — voir section ci-dessus
+
+### Tache precedente (6 février - Beta 96.3)
 
 - **MODULE TRAVAUX - Import, Annotation et Archivage** (remplace GoodNotes)
   - **Objectif** : Gestion complete des travaux etudiants directement dans Monitorage

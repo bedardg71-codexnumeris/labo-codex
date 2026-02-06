@@ -254,8 +254,8 @@ async function afficherFormProduction(id) {
     const btnTexte = document.getElementById('btnTexteEvaluation');
 
     // Afficher le formulaire et cacher le bouton d'ajout (si les éléments existent)
-    if (form) form.style.display = 'block';
-    if (btnAjouter) btnAjouter.style.display = 'none';
+    if (form) form.classList.remove('u-hide');
+    if (btnAjouter) btnAjouter.classList.add('u-hide');
 
     // Charger la liste des grilles dans le select (si l'élément existe)
     const selectGrille = document.getElementById('productionGrille');
@@ -621,11 +621,11 @@ async function sauvegarderProduction() {
 function annulerFormProduction() {
     // Cacher le formulaire
     const form = document.getElementById('formulaireProduction');
-    if (form) form.style.display = 'none';
+    if (form) form.classList.add('u-hide');
 
     // Réafficher le bouton d'ajout (si l'élément existe - pas présent dans layout sidebar)
     const btnAjouter = document.getElementById('btnajouterProduction');
-    if (btnAjouter) btnAjouter.style.display = 'inline-block';
+    if (btnAjouter) btnAjouter.classList.remove('u-hide');
 
     // Réinitialiser la variable d'édition
     productionEnEdition = null;
@@ -891,7 +891,7 @@ function gererChangementTypeProduction() {
     // ═══════════════════════════════════════════════════════════
 
     // Masquer la carte définition par défaut
-    if (carteDefinition) carteDefinition.style.display = 'none';
+    if (carteDefinition) carteDefinition.classList.add('u-hide');
 
     // Pondération : actif et visible par défaut
     const groupePonderation = inputPonderation?.closest('.groupe-form');
@@ -904,7 +904,7 @@ function gererChangementTypeProduction() {
         inputPonderation.style.cursor = 'text';
     }
     if (notePonderation) {
-        notePonderation.style.display = 'none';
+        notePonderation.classList.add('u-hide');
         notePonderation.innerHTML = '';
     }
 
@@ -915,7 +915,7 @@ function gererChangementTypeProduction() {
         selectGrille.style.cursor = 'pointer';
     }
     if (noteGrille) {
-        noteGrille.style.display = 'none';
+        noteGrille.classList.add('u-hide');
         noteGrille.innerHTML = '';
     }
 
@@ -925,18 +925,18 @@ function gererChangementTypeProduction() {
         inputDateEcheance.style.opacity = '1';
         inputDateEcheance.style.cursor = 'pointer';
     }
-    if (asterisqueDateEcheance) asterisqueDateEcheance.style.display = 'inline';
+    if (asterisqueDateEcheance) asterisqueDateEcheance.classList.remove('u-hide');
     if (noteExplicativeDateEcheance) {
         noteExplicativeDateEcheance.innerHTML = 'Cette date fixe les indices <strong>C</strong> (Complétion) et <strong>P</strong> (Performance) pour les suivis longitudinaux.';
     }
 
-    if (champsPortfolio) champsPortfolio.style.display = 'none';
+    if (champsPortfolio) champsPortfolio.classList.add('u-hide');
 
     // ═══════════════════════════════════════════════════════════
     // AFFICHER LA DÉFINITION si un type est sélectionné
     // ═══════════════════════════════════════════════════════════
     if (type && definitions[type]) {
-        if (carteDefinition) carteDefinition.style.display = 'block';
+        if (carteDefinition) carteDefinition.classList.remove('u-hide');
         if (texteDefinition) texteDefinition.innerHTML = definitions[type];
     }
 
@@ -947,7 +947,7 @@ function gererChangementTypeProduction() {
         // PORTFOLIO CONTENEUR
         // Note explicative pour la pondération (champ reste actif)
         if (notePonderation) {
-            notePonderation.style.display = 'block';
+            notePonderation.classList.remove('u-hide');
             notePonderation.innerHTML = 'Les règles de calcul du portfolio se configurent dans <strong>Construction de la note → Pratique de notation</strong>.';
         }
 
@@ -959,7 +959,7 @@ function gererChangementTypeProduction() {
             selectGrille.value = '';
         }
         if (noteGrille) {
-            noteGrille.style.display = 'block';
+            noteGrille.classList.remove('u-hide');
             noteGrille.innerHTML = 'Ce n\'est pas le portfolio comme tel qui est évalué, mais les artefacts qui le composent.';
         }
 
@@ -970,7 +970,7 @@ function gererChangementTypeProduction() {
             inputDateEcheance.style.cursor = 'not-allowed';
             inputDateEcheance.value = '';
         }
-        if (asterisqueDateEcheance) asterisqueDateEcheance.style.display = 'none';
+        if (asterisqueDateEcheance) asterisqueDateEcheance.classList.add('u-hide');
         if (noteExplicativeDateEcheance) {
             noteExplicativeDateEcheance.innerHTML = 'Le portfolio conteneur n\'a pas de date d\'échéance. Seuls les <strong>artefacts individuels</strong> ont une date d\'échéance.';
         }
@@ -979,15 +979,15 @@ function gererChangementTypeProduction() {
         // ARTEFACT DE PORTFOLIO
         // 🆕 Beta 95.4 : Masquer complètement le champ pondération (info dans la carte définition)
         if (groupePonderation) {
-            groupePonderation.style.display = 'none';
+            groupePonderation.classList.add('u-hide');
         }
         if (notePonderation) {
-            notePonderation.style.display = 'none';
+            notePonderation.classList.add('u-hide');
         }
 
         // Note explicative pour la grille (champ reste actif)
         if (noteGrille) {
-            noteGrille.style.display = 'block';
+            noteGrille.classList.remove('u-hide');
             noteGrille.innerHTML = 'Chaque artefact peut avoir sa propre grille de critères.';
         }
 
@@ -995,7 +995,7 @@ function gererChangementTypeProduction() {
         // PRODUCTION STANDARD (examen, travail, quiz, laboratoire, présentation, projet, autre)
         // Note explicative pour la pondération
         if (notePonderation) {
-            notePonderation.style.display = 'block';
+            notePonderation.classList.remove('u-hide');
             notePonderation.innerHTML = 'Pour une évaluation formative, utilisez une pondération de 0%.';
         }
     }
@@ -1926,8 +1926,8 @@ function mettreAJourFiltreCoursTrimestreProductions() {
     // Réinitialiser et masquer si aucun trimestre sélectionné
     if (!cleSelectionnee) {
         selectCours.innerHTML = '<option value="">Tous les cours</option>';
-        selectCours.style.display = 'none';
-        if (preview) preview.style.display = 'none';
+        selectCours.classList.add('u-hide');
+        if (preview) preview.classList.add('u-hide');
         return;
     }
 
@@ -1952,10 +1952,10 @@ function mettreAJourFiltreCoursTrimestreProductions() {
     selectCours.innerHTML = optionsHTML;
 
     // Afficher le dropdown seulement s'il y a des cours
-    selectCours.style.display = coursMap.size > 0 ? 'inline-block' : 'none';
+    toggleDisplay(selectCours, coursMap.size > 0);
 
     // Masquer le preview
-    if (preview) preview.style.display = 'none';
+    if (preview) preview.classList.add('u-hide');
 }
 
 /**
@@ -1971,7 +1971,7 @@ function afficherProductionsTrimestreModal() {
 
     const cleSelectionnee = select.value;
     if (!cleSelectionnee) {
-        preview.style.display = 'none';
+        preview.classList.add('u-hide');
         return;
     }
 
@@ -1985,7 +1985,7 @@ function afficherProductionsTrimestreModal() {
 
     if (productions.length === 0) {
         preview.innerHTML = '<p style="color: #999; font-style: italic;">Aucune production trouvée.</p>';
-        preview.style.display = 'block';
+        preview.classList.remove('u-hide');
         return;
     }
 
@@ -2008,7 +2008,7 @@ function afficherProductionsTrimestreModal() {
     html += '</div>';
 
     preview.innerHTML = html;
-    preview.style.display = 'block';
+    preview.classList.remove('u-hide');
 }
 
 /**
@@ -2291,19 +2291,19 @@ function filtrerProductionsParDiscipline() {
 
     if (!disciplineSelectionnee) {
         // Afficher tout
-        items.forEach(item => item.style.display = 'block');
-        titresDisciplines.forEach(titre => titre.style.display = 'block');
+        items.forEach(item => toggleDisplay(item, true));
+        titresDisciplines.forEach(titre => toggleDisplay(titre, true));
     } else {
         // Filtrer par discipline
         items.forEach(item => {
             const discipline = item.dataset.discipline;
-            item.style.display = discipline === disciplineSelectionnee ? 'block' : 'none';
+            toggleDisplay(item, discipline === disciplineSelectionnee);
         });
 
         // Afficher/cacher les titres de discipline selon le filtre
         titresDisciplines.forEach(titre => {
             const disciplineTitre = titre.textContent.trim();
-            titre.style.display = disciplineTitre === disciplineSelectionnee ? 'block' : 'none';
+            toggleDisplay(titre, disciplineTitre === disciplineSelectionnee);
         });
     }
 }
@@ -3202,7 +3202,7 @@ async function chargerProductionPourModif(id) {
 
     // Masquer le message d'accueil
     const accueil = document.getElementById('accueilProductions');
-    if (accueil) accueil.style.display = 'none';
+    if (accueil) accueil.classList.add('u-hide');
 
     // ✅ AJOUT (28 janvier 2026) : Masquer l'aperçu de la liste des productions
     // L'aperçu ne doit s'afficher que dans la vue d'accueil, pas quand on édite une production
@@ -3213,15 +3213,15 @@ async function chargerProductionPourModif(id) {
 
     // Afficher le formulaire
     const formulaire = document.getElementById('formulaireProduction');
-    if (formulaire) formulaire.style.display = 'block';
+    if (formulaire) formulaire.classList.remove('u-hide');
 
     // Note: Section optionsImportExportProductions supprimée (Beta 92)
     // Afficher les boutons Dupliquer et Supprimer (mode édition)
     // Note: Export/Import se font maintenant via la bibliothèque
     const btnDupliquer = document.getElementById('btnDupliquerProduction');
     const btnSupprimer = document.getElementById('btnSupprimerProduction');
-    if (btnDupliquer) btnDupliquer.style.display = 'inline-block';
-    if (btnSupprimer) btnSupprimer.style.display = 'inline-block';
+    if (btnDupliquer) btnDupliquer.classList.remove('u-hide');
+    if (btnSupprimer) btnSupprimer.classList.remove('u-hide');
 
     // Appeler afficherFormProduction pour charger les données
     await afficherFormProduction(id);
@@ -3258,7 +3258,7 @@ async function chargerProductionPourModif(id) {
 function creerNouvelleProduction() {
     // Masquer le message d'accueil
     const accueil = document.getElementById('accueilProductions');
-    if (accueil) accueil.style.display = 'none';
+    if (accueil) accueil.classList.add('u-hide');
 
     // ✅ AJOUT (28 janvier 2026) : Masquer l'aperçu de la liste des productions
     const zoneApercu = document.getElementById('zoneApercuProductions');
@@ -3268,15 +3268,15 @@ function creerNouvelleProduction() {
 
     // Afficher le formulaire
     const formulaire = document.getElementById('formulaireProduction');
-    if (formulaire) formulaire.style.display = 'block';
+    if (formulaire) formulaire.classList.remove('u-hide');
 
     // Note: Section optionsImportExportProductions supprimée (Beta 92)
     // Cacher les boutons Dupliquer et Supprimer (mode création)
     // Note: Export/Import se font maintenant via la bibliothèque
     const btnDupliquer = document.getElementById('btnDupliquerProduction');
     const btnSupprimer = document.getElementById('btnSupprimerProduction');
-    if (btnDupliquer) btnDupliquer.style.display = 'none';
-    if (btnSupprimer) btnSupprimer.style.display = 'none';
+    if (btnDupliquer) btnDupliquer.classList.add('u-hide');
+    if (btnSupprimer) btnSupprimer.classList.add('u-hide');
 
     // Réinitialiser le formulaire
     document.getElementById('productionDescription').value = '';
@@ -3293,7 +3293,7 @@ function creerNouvelleProduction() {
 
     // Réinitialiser les champs portfolio et les notes explicatives
     const champsPortfolio = document.getElementById('champsPortfolio');
-    if (champsPortfolio) champsPortfolio.style.display = 'none';
+    if (champsPortfolio) champsPortfolio.classList.add('u-hide');
 
     // Réinitialiser la date d'échéance
     const inputDateEcheance = document.getElementById('productionDateEcheance');
@@ -3553,14 +3553,14 @@ const annulerFormProductionOriginale = window.annulerFormProduction;
 window.annulerFormProduction = function() {
     // Masquer le formulaire
     const formulaire = document.getElementById('formulaireProduction');
-    if (formulaire) formulaire.style.display = 'none';
+    if (formulaire) formulaire.classList.add('u-hide');
 
     const options = document.getElementById('optionsImportExportProductions');
-    if (options) options.style.display = 'none';
+    if (options) options.classList.add('u-hide');
 
     // Afficher le message d'accueil
     const accueil = document.getElementById('accueilProductions');
-    if (accueil) accueil.style.display = 'block';
+    if (accueil) accueil.classList.remove('u-hide');
 
     // Retirer le highlight
     document.querySelectorAll('.sidebar-item').forEach(item => {

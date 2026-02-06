@@ -1201,11 +1201,11 @@ function afficherErreur(message) {
     const zoneErreur = document.getElementById('primo-erreur');
     if (zoneErreur) {
         zoneErreur.textContent = '⚠️ ' + message;
-        zoneErreur.style.display = 'block';
+        zoneErreur.classList.remove('u-hide');
 
         // Masquer après 5 secondes
         setTimeout(() => {
-            zoneErreur.style.display = 'none';
+            zoneErreur.classList.add('u-hide');
         }, 5000);
     }
 }

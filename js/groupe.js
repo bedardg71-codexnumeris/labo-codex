@@ -580,7 +580,7 @@ function afficherPrevisualisation(data, titre) {
     `;
 
     previewTable.innerHTML = tableHtml;
-    previewZone.style.display = 'block';
+    previewZone.classList.remove('u-hide');
 }
 
 /**
@@ -626,7 +626,7 @@ function confirmImport() {
 
         // Nettoyer
         tempImportData = [];
-        document.getElementById('previewZone').style.display = 'none';
+        document.getElementById('previewZone').classList.add('u-hide');
         document.getElementById('donneesCollees').value = '';
         document.getElementById('fichierCsvEntree').value = '';
 
@@ -644,7 +644,7 @@ function confirmImport() {
  */
 function cancelImport() {
     tempImportData = [];
-    document.getElementById('previewZone').style.display = 'none';
+    document.getElementById('previewZone').classList.add('u-hide');
     document.getElementById('donneesCollees').value = '';
     document.getElementById('fichierCsvEntree').value = '';
 }
@@ -817,9 +817,9 @@ function filtrerParGroupe() {
 
         // Afficher ou masquer
         if (etudiantsFiltres.length === 0) {
-            if (container) container.style.display = 'none';
+            if (container) container.classList.add('u-hide');
             if (noMsg) {
-                noMsg.style.display = 'block';
+                noMsg.classList.remove('u-hide');
                 if (groupeSelectionné) {
                     noMsg.innerHTML = `
                         <p style="font-size: 1.1rem; margin-bottom: 10px;">🔍 Aucun·e étudiant·e dans le groupe ${echapperHtml(groupeSelectionné)}</p>
@@ -841,8 +841,8 @@ function filtrerParGroupe() {
             return;
         }
 
-        if (container) container.style.display = 'block';
-        if (noMsg) noMsg.style.display = 'none';
+        if (container) container.classList.remove('u-hide');
+        if (noMsg) noMsg.classList.add('u-hide');
 
         // Trier alphabétiquement par nom, puis par prénom (sauf en mode anonymisation)
         const modeActif = db.getSync('mode_actuel', 'normal');
@@ -1100,9 +1100,9 @@ function resetStudentsData() {
         // Afficher message vide
         const container = document.getElementById('students-list-container');
         const noMsg = document.getElementById('no-students-msg');
-        if (container) container.style.display = 'none';
+        if (container) container.classList.add('u-hide');
         if (noMsg) {
-            noMsg.style.display = 'block';
+            noMsg.classList.remove('u-hide');
             noMsg.innerHTML = `
                 <p style="font-size: 1.1rem; margin-bottom: 10px;">📭 Aucun·e étudiant·e dans le groupe</p>
                 <p style="font-size: 0.9rem;">
