@@ -37,7 +37,7 @@
         stylo: {
             id: 'stylo',
             nom: 'Stylo',
-            icone: 'M', // sera remplace par SVG dans le HTML
+            icone: '🖊️',
             curseur: 'crosshair',
             epaisseurDefaut: 2,
             epaisseurMin: 1,
@@ -50,7 +50,7 @@
         surligneur: {
             id: 'surligneur',
             nom: 'Surligneur',
-            icone: 'H',
+            icone: '﹏',
             curseur: 'crosshair',
             epaisseurDefaut: 20,
             epaisseurMin: 10,
@@ -64,14 +64,14 @@
         gomme: {
             id: 'gomme',
             nom: 'Gomme',
-            icone: 'E',
+            icone: '🚫',
             curseur: 'pointer',
             mode: 'effacer-trait' // efface le trait entier au contact
         },
         texte: {
             id: 'texte',
             nom: 'Texte',
-            icone: 'T',
+            icone: '💬',
             curseur: 'text',
             tailleDefaut: 14,
             tailleMin: 10,
@@ -80,7 +80,7 @@
         cercle: {
             id: 'cercle',
             nom: 'Cercle',
-            icone: 'O',
+            icone: '⭕️',
             curseur: 'crosshair',
             type: 'forme',
             epaisseurDefaut: 2,
@@ -89,7 +89,7 @@
         fleche: {
             id: 'fleche',
             nom: 'Fleche',
-            icone: '→',
+            icone: '➔',
             curseur: 'crosshair',
             type: 'forme',
             epaisseurDefaut: 2
@@ -97,7 +97,7 @@
         rectangle: {
             id: 'rectangle',
             nom: 'Rectangle',
-            icone: '◻',
+            icone: '🔲',
             curseur: 'crosshair',
             type: 'forme',
             epaisseurDefaut: 2,
@@ -106,7 +106,7 @@
         crochet: {
             id: 'crochet',
             nom: 'Crochet',
-            icone: '✓',
+            icone: '✅',
             curseur: 'crosshair',
             type: 'symbole',
             taille: 30
@@ -114,7 +114,7 @@
         croix: {
             id: 'croix',
             nom: 'Croix',
-            icone: '✕',
+            icone: '❎',
             curseur: 'crosshair',
             type: 'symbole',
             taille: 30
