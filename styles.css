@@ -13133,16 +13133,23 @@ body.mode-assiste .btn-aide-contextuelle,
     background: #e5e5e5;
 }
 
-.travaux-canvas-container canvas {
+.travaux-canvas-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+#travaux-canvas-document {
+    display: block;
     box-shadow: 0 2px 12px rgba(0,0,0,0.15);
     background: white;
 }
 
 #travaux-canvas-annotation {
     position: absolute;
-    top: 16px;
-    left: 50%;
-    transform: translateX(-50%);
+    top: 0;
+    left: 0;
+    background: transparent;
+    box-shadow: none;
 }
 
 .travaux-placeholder {
