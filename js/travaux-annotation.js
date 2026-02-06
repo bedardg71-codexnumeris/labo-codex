@@ -248,6 +248,11 @@
         // Empecher le scroll/zoom sur le canvas
         canvasAnnotation.style.touchAction = 'none';
 
+        // Laisser les gesture events Safari traverser pour le pinch-to-zoom
+        // (preventDefault empeche le zoom natif, l'event bulle vers le conteneur)
+        canvasAnnotation.addEventListener('gesturestart', onGesturePassthrough, { passive: false });
+        canvasAnnotation.addEventListener('gesturechange', onGesturePassthrough, { passive: false });
+
         // Raccourcis clavier
         document.addEventListener('keydown', onKeyDown);
     }
@@ -259,6 +264,8 @@
         canvasAnnotation.removeEventListener('pointermove', onPointerMove);
         canvasAnnotation.removeEventListener('pointerup', onPointerUp);
         canvasAnnotation.removeEventListener('pointercancel', onPointerUp);
+        canvasAnnotation.removeEventListener('gesturestart', onGesturePassthrough);
+        canvasAnnotation.removeEventListener('gesturechange', onGesturePassthrough);
 
         document.removeEventListener('keydown', onKeyDown);
     }
@@ -428,6 +435,15 @@
         }
 
         traitEnCours = null;
+    }
+
+    /**
+     * Laisse passer les gesture events Safari pour le pinch-to-zoom
+     * preventDefault bloque le zoom natif, l'event bulle vers le conteneur
+     */
+    function onGesturePassthrough(e) {
+        e.preventDefault();
+        // L'event bulle naturellement vers le conteneur ou le zoom est gere
     }
 
     /**
