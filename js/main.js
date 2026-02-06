@@ -186,10 +186,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const startX = `${(Math.random() - 0.5) * 60}px`;
         const startY = `${(Math.random() - 0.5) * 60}px`;
 
-        // Dérive verticale avec possibilité de descente (apprentissage non-linéaire)
-        // 70% chance de monter, 30% chance de descendre
-        const directionY = Math.random() < 0.7 ? -1 : 1;
-        const amplitudeY = 30 + Math.random() * 40;
+        // Pente subtile de l'axe hélicoïdal (le spin fournit le mouvement vertical)
+        const directionY = Math.random() < 0.5 ? -1 : 1;
+        const amplitudeY = 5 + Math.random() * 15; // 5-20px sur toute la traversée
         const driftY = `${directionY * amplitudeY}px`;
 
         // BETA 96.2: Durée selon la taille (effet parallaxe)
@@ -214,8 +213,8 @@ document.addEventListener('DOMContentLoaded', function () {
             const newBottom = `${Math.random() * 100}%`;
             const newStartX = `${(Math.random() - 0.5) * 60}px`;
             const newStartY = `${(Math.random() - 0.5) * 60}px`;
-            const newDirectionY = Math.random() < 0.7 ? -1 : 1;
-            const newAmplitudeY = 30 + Math.random() * 40;
+            const newDirectionY = Math.random() < 0.5 ? -1 : 1;
+            const newAmplitudeY = 5 + Math.random() * 15;
             const newDriftY = `${newDirectionY * newAmplitudeY}px`;
 
             const tailleBulle = this.classList.contains('grande') ? 'grande' :
