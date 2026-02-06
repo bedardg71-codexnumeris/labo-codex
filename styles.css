@@ -13149,6 +13149,15 @@ body.mode-assiste .btn-aide-contextuelle,
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    transition: width 0.3s ease, min-width 0.3s ease, opacity 0.2s ease;
+}
+
+.travaux-sidebar.replie {
+    width: 0;
+    min-width: 0;
+    opacity: 0;
+    border-right: none;
+    pointer-events: none;
 }
 
 .travaux-sidebar-header {
@@ -13216,12 +13225,37 @@ body.mode-assiste .btn-aide-contextuelle,
     line-height: 1.2;
 }
 
+/* --- Bouton toggle sidebar (visible quand sidebar repliee) --- */
+.travaux-btn-toggle-sidebar {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    width: 20px;
+    height: 48px;
+    border: 1px solid var(--gris-clair, #e5e5e5);
+    border-left: none;
+    border-radius: 0 6px 6px 0;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 10px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.travaux-btn-toggle-sidebar.visible {
+    display: flex;
+}
+
 /* --- Zone document --- */
 .travaux-zone-document {
     flex: 1;
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    position: relative;
 }
 
 .travaux-toolbar {
@@ -13424,6 +13458,107 @@ body.mode-assiste .btn-aide-contextuelle,
     width: 80px;
 }
 
+/* --- Popup autocollants --- */
+.travaux-popup-autocollants {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    background: white;
+    border: 1px solid var(--gris-clair, #e5e5e5);
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    padding: 12px;
+    z-index: 100;
+    display: none;
+    max-width: 420px;
+}
+
+.travaux-popup-autocollants.visible {
+    display: block;
+}
+
+.travaux-autocollants-qualite,
+.travaux-autocollants-diagnostic {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.travaux-autocollants-qualite {
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--gris-clair, #e5e5e5);
+}
+
+.travaux-autocollant-item {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    width: 64px;
+    padding: 6px;
+    cursor: pointer;
+    border-radius: 6px;
+}
+
+.travaux-autocollant-item:hover {
+    background: rgba(0,0,0,0.05);
+}
+
+.travaux-autocollant-item img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+
+.travaux-autocollant-item span {
+    font-size: 0.6rem;
+    text-align: center;
+    margin-top: 2px;
+    line-height: 1.1;
+}
+
+/* --- Modal revision export --- */
+.travaux-revision-stats {
+    margin: 12px 0;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.travaux-revision-stats p {
+    margin: 4px 0;
+    font-size: 0.85rem;
+}
+
+.travaux-revision-evaluation {
+    margin: 12px 0;
+}
+
+.travaux-revision-evaluation h4 {
+    margin: 0 0 8px 0;
+}
+
+.travaux-revision-criteres {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.travaux-revision-criteres li {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--gris-clair, #e5e5e5);
+    font-size: 0.85rem;
+}
+
+.travaux-revision-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--gris-clair, #e5e5e5);
+}
+
 /* --- Undo/Redo --- */
 .travaux-undo-redo {
     display: flex;
@@ -13529,6 +13664,14 @@ body.mode-assiste .btn-aide-contextuelle,
         max-height: 200px;
         border-right: none;
         border-bottom: 1px solid var(--gris-clair, #e5e5e5);
+        transition: max-height 0.3s ease, opacity 0.2s ease;
+    }
+
+    .travaux-sidebar.replie {
+        width: 100%;
+        min-width: 100%;
+        max-height: 0;
+        border-bottom: none;
     }
 
     .travaux-miniatures {

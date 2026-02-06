@@ -118,6 +118,92 @@
     };
 
     /* ===============================
+       AUTOCOLLANTS (Tampons de retroaction)
+       =============================== */
+
+    const DOSSIER_AUTOCOLLANTS = 'autocollants/';
+
+    const AUTOCOLLANTS = [
+        { id: 'bien',           nom: 'Bien',             fichier: 'qualité 1 bien.png',                    categorie: 'qualite' },
+        { id: 'tres-bien',      nom: 'Très bien',        fichier: 'qualité 2 très bien.png',               categorie: 'qualite' },
+        { id: 'brillant',       nom: 'Brillant',         fichier: 'qualité 3 brillant.png',                categorie: 'qualite' },
+        { id: 'bon-lien',       nom: 'Bon lien',         fichier: 'bon lien logique.png',                  categorie: 'diagnostic' },
+        { id: 'manque-lien',    nom: 'Manque de lien',   fichier: 'manque de lien.png',                    categorie: 'diagnostic' },
+        { id: 'confusion',      nom: 'Confusion',        fichier: 'confusion2.png',                        categorie: 'diagnostic' },
+        { id: 'repetitif',      nom: 'Répétitif',        fichier: 'répétitif.png',                         categorie: 'diagnostic' },
+        { id: 'preuve-absente', nom: 'Preuve absente',   fichier: 'preuve absente.png',                    categorie: 'diagnostic' },
+        { id: 'citation',       nom: 'Citation',         fichier: 'intégration citation.png',              categorie: 'diagnostic' },
+        { id: 'approfondir',    nom: 'Approfondir',      fichier: 'approfondir.png',                       categorie: 'diagnostic' },
+        { id: 'procedes',       nom: 'Procédés',         fichier: 'identifier les outils (procédés).png',  categorie: 'diagnostic' },
+        { id: 'attention',      nom: 'Attention',        fichier: 'attention.png',                         categorie: 'diagnostic' }
+    ];
+
+    let imagesAutocollants = {};   // Cache { id: HTMLImageElement }
+    let autocollantActif = null;   // ID de l'autocollant selectionne (ou null)
+    let paletteAutoVisible = false;
+
+    /**
+     * Precharge les 12 images autocollants
+     */
+    function prechargerAutocollants() {
+        AUTOCOLLANTS.forEach(a => {
+            const img = new Image();
+            img.src = DOSSIER_AUTOCOLLANTS + a.fichier;
+            imagesAutocollants[a.id] = img;
+        });
+    }
+
+    /**
+     * Retourne l'image prechargee d'un autocollant
+     * @param {string} id - ID de l'autocollant
+     * @returns {HTMLImageElement|null}
+     */
+    function getImageAutocollant(id) {
+        return imagesAutocollants[id] || null;
+    }
+
+    /**
+     * Selectionne un autocollant (mode tampon)
+     * @param {string} id - ID de l'autocollant
+     */
+    function setAutocollantActif(id) {
+        autocollantActif = id;
+        outilActif = 'tampon';
+        fermerPaletteAutocollants();
+
+        // Mettre a jour le curseur
+        const canvas = document.getElementById('travaux-canvas-annotation');
+        if (canvas) canvas.style.cursor = 'copy';
+
+        // Mettre a jour l'etat visuel de la palette
+        rafraichirPalette();
+    }
+
+    function getAutocollantActif() {
+        return autocollantActif;
+    }
+
+    /**
+     * Bascule la palette d'autocollants
+     */
+    function togglePaletteAutocollants() {
+        const popup = document.getElementById('travaux-popup-autocollants');
+        if (!popup) return;
+
+        paletteAutoVisible = !paletteAutoVisible;
+        popup.classList.toggle('visible', paletteAutoVisible);
+    }
+
+    function fermerPaletteAutocollants() {
+        paletteAutoVisible = false;
+        const popup = document.getElementById('travaux-popup-autocollants');
+        if (popup) popup.classList.remove('visible');
+    }
+
+    // Precharger au lancement
+    prechargerAutocollants();
+
+    /* ===============================
        ETAT PALETTE
        =============================== */
 
@@ -137,6 +223,8 @@
     function setOutilActif(id) {
         if (OUTILS[id]) {
             outilActif = id;
+            autocollantActif = null; // Desactiver le mode tampon
+            fermerPaletteAutocollants();
             // Restaurer l'epaisseur par defaut de l'outil
             if (OUTILS[id].epaisseurDefaut) {
                 epaisseurActive = OUTILS[id].epaisseurDefaut;
@@ -249,6 +337,29 @@
 
         html += '</div></div>';
 
+        // Tampons (autocollants)
+        html += '<div class="travaux-palette-section" style="position:relative">';
+        html += '<div class="travaux-palette-label">Tampons</div>';
+        const tamponActif = outilActif === 'tampon' ? ' actif' : '';
+        html += `<button class="travaux-btn-outil${tamponActif}" id="travaux-btn-tampons" onclick="travauxOutils.togglePaletteAutocollants()" title="Tampons de retroaction">&#x1F3F7;</button>`;
+        // Popup des autocollants
+        html += '<div class="travaux-popup-autocollants" id="travaux-popup-autocollants">';
+        html += '<div class="travaux-autocollants-qualite">';
+        AUTOCOLLANTS.filter(a => a.categorie === 'qualite').forEach(a => {
+            html += `<div class="travaux-autocollant-item" onclick="travauxOutils.setAutocollantActif('${a.id}')" title="${a.nom}">`;
+            html += `<img src="${DOSSIER_AUTOCOLLANTS}${a.fichier}" alt="${a.nom}">`;
+            html += `<span>${a.nom}</span></div>`;
+        });
+        html += '</div>';
+        html += '<div class="travaux-autocollants-diagnostic">';
+        AUTOCOLLANTS.filter(a => a.categorie === 'diagnostic').forEach(a => {
+            html += `<div class="travaux-autocollant-item" onclick="travauxOutils.setAutocollantActif('${a.id}')" title="${a.nom}">`;
+            html += `<img src="${DOSSIER_AUTOCOLLANTS}${a.fichier}" alt="${a.nom}">`;
+            html += `<span>${a.nom}</span></div>`;
+        });
+        html += '</div></div>';
+        html += '</div>';
+
         // Couleurs
         html += '<div class="travaux-palette-section">';
         html += '<div class="travaux-palette-label">Couleur</div>';
@@ -278,7 +389,11 @@
     function rafraichirPalette() {
         // Outils
         document.querySelectorAll('.travaux-btn-outil').forEach(btn => {
-            btn.classList.toggle('actif', btn.dataset.outil === outilActif);
+            if (btn.id === 'travaux-btn-tampons') {
+                btn.classList.toggle('actif', outilActif === 'tampon');
+            } else {
+                btn.classList.toggle('actif', btn.dataset.outil === outilActif);
+            }
         });
 
         // Couleurs
@@ -289,8 +404,12 @@
         // Curseur du canvas
         const canvas = document.getElementById('travaux-canvas-annotation');
         if (canvas) {
-            const outil = getOutilActif();
-            canvas.style.cursor = outil.curseur || 'crosshair';
+            if (outilActif === 'tampon') {
+                canvas.style.cursor = 'copy';
+            } else {
+                const outil = getOutilActif();
+                canvas.style.cursor = outil.curseur || 'crosshair';
+            }
         }
     }
 
@@ -306,22 +425,27 @@
         // Constantes
         COULEURS: COULEURS,
         OUTILS: OUTILS,
+        AUTOCOLLANTS: AUTOCOLLANTS,
         // Getters
         getOutilActif: getOutilActif,
         getCouleurActive: getCouleurActive,
         getEpaisseurActive: getEpaisseurActive,
         getTailleTexte: getTailleTexte,
+        getImageAutocollant: getImageAutocollant,
+        getAutocollantActif: getAutocollantActif,
         // Setters
         setOutilActif: setOutilActif,
         setCouleurActive: setCouleurActive,
         setEpaisseurActive: setEpaisseurActive,
         setTailleTexte: setTailleTexte,
+        setAutocollantActif: setAutocollantActif,
         // Pression
         courbeDePresson: courbeDePresson,
         calculerEpaisseurPression: calculerEpaisseurPression,
         // UI
         genererHTMLPalette: genererHTMLPalette,
-        rafraichirPalette: rafraichirPalette
+        rafraichirPalette: rafraichirPalette,
+        togglePaletteAutocollants: togglePaletteAutocollants
     };
 
 })();

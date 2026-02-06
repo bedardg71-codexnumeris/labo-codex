@@ -212,8 +212,13 @@
             annotationCourante.pages[page] = {
                 strokes: [],
                 textAnnotations: [],
-                shapes: []
+                shapes: [],
+                stickers: []
             };
+        }
+        // Migration: ajouter stickers si absent (annotations existantes)
+        if (!annotationCourante.pages[page].stickers) {
+            annotationCourante.pages[page].stickers = [];
         }
         return annotationCourante.pages[page];
     }
@@ -288,6 +293,17 @@
         // Coordonnees normalisees (0-1)
         const xNorm = x / canvasAnnotation.width;
         const yNorm = y / canvasAnnotation.height;
+
+        const outilActifId = travauxOutils.getOutilActif().id;
+
+        // Mode tampon : poser un autocollant
+        if (outilActifId === 'tampon' || travauxOutils.getAutocollantActif()) {
+            const autoId = travauxOutils.getAutocollantActif();
+            if (autoId) {
+                poserAutocollant(autoId, xNorm, yNorm);
+            }
+            return;
+        }
 
         const outil = travauxOutils.getOutilActif();
 
@@ -466,6 +482,54 @@
     }
 
     /* ===============================
+       AUTOCOLLANTS (pose sur le canvas)
+       =============================== */
+
+    /**
+     * Pose un autocollant a la position donnee
+     * @param {string} autocollantId - ID de l'autocollant
+     * @param {number} xNorm - X normalise (0-1)
+     * @param {number} yNorm - Y normalise (0-1)
+     */
+    function poserAutocollant(autocollantId, xNorm, yNorm) {
+        const taille = 0.06; // 6% de la largeur du document
+
+        const sticker = {
+            id: 'STK_' + Date.now(),
+            autocollantId: autocollantId,
+            x: xNorm - taille / 2,
+            y: yNorm - taille / 2,
+            width: taille,
+            height: taille
+        };
+
+        const donneesPage = obtenirDonneesPage();
+        donneesPage.stickers.push(sticker);
+        empilerUndo('ajout-autocollant', sticker);
+        reRendreAnnotations();
+        planifierSauvegarde();
+    }
+
+    /**
+     * Dessine un autocollant sur le canvas
+     * @param {Object} sticker - Donnees du sticker
+     */
+    function dessinerAutocollant(sticker) {
+        const img = travauxOutils.getImageAutocollant(sticker.autocollantId);
+        if (!img || !img.complete) return;
+
+        const w = canvasAnnotation.width;
+        const h = canvasAnnotation.height;
+
+        const sx = sticker.x * w;
+        const sy = sticker.y * h;
+        const sw = sticker.width * w;
+        const sh = sticker.height * h;
+
+        ctxAnnotation.drawImage(img, sx, sy, sw, sh);
+    }
+
+    /* ===============================
        GOMME
        =============================== */
 
@@ -506,6 +570,21 @@
                 reRendreAnnotations();
                 planifierSauvegarde();
                 return;
+            }
+        }
+
+        // Chercher un autocollant a effacer (hit-test bounding box)
+        if (donneesPage.stickers) {
+            for (let i = donneesPage.stickers.length - 1; i >= 0; i--) {
+                const stk = donneesPage.stickers[i];
+                if (xNorm >= stk.x && xNorm <= stk.x + stk.width &&
+                    yNorm >= stk.y && yNorm <= stk.y + stk.height) {
+                    const supprime = donneesPage.stickers.splice(i, 1)[0];
+                    empilerUndo('suppression-autocollant', supprime);
+                    reRendreAnnotations();
+                    planifierSauvegarde();
+                    return;
+                }
             }
         }
     }
@@ -602,6 +681,13 @@
         // Dessiner les textes
         for (const texte of donneesPage.textAnnotations) {
             dessinerTexte(texte);
+        }
+
+        // Dessiner les autocollants
+        if (donneesPage.stickers) {
+            for (const sticker of donneesPage.stickers) {
+                dessinerAutocollant(sticker);
+            }
         }
     }
 
@@ -824,11 +910,20 @@
             case 'ajout-texte':
                 donneesPage.textAnnotations = donneesPage.textAnnotations.filter(t => t.id !== action.donnees.id);
                 break;
+            case 'ajout-autocollant':
+                if (donneesPage.stickers) {
+                    donneesPage.stickers = donneesPage.stickers.filter(s => s.id !== action.donnees.id);
+                }
+                break;
             case 'suppression-trait':
                 donneesPage.strokes.push(action.donnees);
                 break;
             case 'suppression-forme':
                 donneesPage.shapes.push(action.donnees);
+                break;
+            case 'suppression-autocollant':
+                if (!donneesPage.stickers) donneesPage.stickers = [];
+                donneesPage.stickers.push(action.donnees);
                 break;
         }
 
@@ -863,11 +958,20 @@
             case 'ajout-texte':
                 donneesPage.textAnnotations.push(action.donnees);
                 break;
+            case 'ajout-autocollant':
+                if (!donneesPage.stickers) donneesPage.stickers = [];
+                donneesPage.stickers.push(action.donnees);
+                break;
             case 'suppression-trait':
                 donneesPage.strokes = donneesPage.strokes.filter(s => s.id !== action.donnees.id);
                 break;
             case 'suppression-forme':
                 donneesPage.shapes = donneesPage.shapes.filter(s => s.id !== action.donnees.id);
+                break;
+            case 'suppression-autocollant':
+                if (donneesPage.stickers) {
+                    donneesPage.stickers = donneesPage.stickers.filter(s => s.id !== action.donnees.id);
+                }
                 break;
         }
 
@@ -924,7 +1028,8 @@
         annotationCourante.pages[page] = {
             strokes: [],
             textAnnotations: [],
-            shapes: []
+            shapes: [],
+            stickers: []
         };
 
         pileUndo = [];
