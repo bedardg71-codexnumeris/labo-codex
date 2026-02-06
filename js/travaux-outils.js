@@ -184,20 +184,87 @@
     }
 
     /**
-     * Bascule la palette d'autocollants
+     * Bascule la palette d'autocollants (popup fixe au-dessus du bouton)
      */
     function togglePaletteAutocollants() {
-        const popup = document.getElementById('travaux-popup-autocollants');
-        if (!popup) return;
+        let popup = document.getElementById('travaux-popup-autocollants');
 
-        paletteAutoVisible = !paletteAutoVisible;
-        popup.classList.toggle('visible', paletteAutoVisible);
+        if (popup) {
+            // Fermer
+            popup.remove();
+            paletteAutoVisible = false;
+            return;
+        }
+
+        // Creer le popup
+        paletteAutoVisible = true;
+        popup = document.createElement('div');
+        popup.id = 'travaux-popup-autocollants';
+        popup.className = 'travaux-popup-autocollants visible';
+
+        // Qualite (rang du haut)
+        let html = '<div class="travaux-autocollants-label">Qualite</div>';
+        html += '<div class="travaux-autocollants-grille">';
+        AUTOCOLLANTS.filter(a => a.categorie === 'qualite').forEach(a => {
+            html += `<div class="travaux-autocollant-item" onclick="travauxOutils.setAutocollantActif('${a.id}')" title="${a.nom}">`;
+            html += `<img src="${DOSSIER_AUTOCOLLANTS}${a.fichier}" alt="${a.nom}">`;
+            html += `<span>${a.nom}</span></div>`;
+        });
+        html += '</div>';
+
+        // Diagnostic (rang du bas)
+        html += '<div class="travaux-autocollants-label">Diagnostic</div>';
+        html += '<div class="travaux-autocollants-grille">';
+        AUTOCOLLANTS.filter(a => a.categorie === 'diagnostic').forEach(a => {
+            html += `<div class="travaux-autocollant-item" onclick="travauxOutils.setAutocollantActif('${a.id}')" title="${a.nom}">`;
+            html += `<img src="${DOSSIER_AUTOCOLLANTS}${a.fichier}" alt="${a.nom}">`;
+            html += `<span>${a.nom}</span></div>`;
+        });
+        html += '</div>';
+
+        popup.innerHTML = html;
+        document.body.appendChild(popup);
+
+        // Positionner au-dessus du bouton Tampons
+        const btn = document.getElementById('travaux-btn-tampons');
+        if (btn) {
+            const rect = btn.getBoundingClientRect();
+            popup.style.left = rect.left + 'px';
+            popup.style.bottom = (window.innerHeight - rect.top + 8) + 'px';
+
+            // Ajuster si depasse a droite
+            const popupRect = popup.getBoundingClientRect();
+            if (popupRect.right > window.innerWidth - 8) {
+                popup.style.left = (window.innerWidth - popupRect.width - 8) + 'px';
+            }
+            // Ajuster si depasse en haut
+            if (popupRect.top < 8) {
+                popup.style.bottom = 'auto';
+                popup.style.top = (rect.bottom + 8) + 'px';
+            }
+        }
+
+        // Fermer au clic exterieur
+        setTimeout(() => {
+            document.addEventListener('pointerdown', fermerPopupSiExterieur, { once: true });
+        }, 0);
+    }
+
+    function fermerPopupSiExterieur(e) {
+        const popup = document.getElementById('travaux-popup-autocollants');
+        if (popup && !popup.contains(e.target) && e.target.id !== 'travaux-btn-tampons') {
+            popup.remove();
+            paletteAutoVisible = false;
+        } else if (popup) {
+            // Re-attacher si clic dans le popup
+            document.addEventListener('pointerdown', fermerPopupSiExterieur, { once: true });
+        }
     }
 
     function fermerPaletteAutocollants() {
         paletteAutoVisible = false;
         const popup = document.getElementById('travaux-popup-autocollants');
-        if (popup) popup.classList.remove('visible');
+        if (popup) popup.remove();
     }
 
     // Precharger au lancement
@@ -338,26 +405,10 @@
         html += '</div></div>';
 
         // Tampons (autocollants)
-        html += '<div class="travaux-palette-section" style="position:relative">';
+        html += '<div class="travaux-palette-section">';
         html += '<div class="travaux-palette-label">Tampons</div>';
         const tamponActif = outilActif === 'tampon' ? ' actif' : '';
         html += `<button class="travaux-btn-outil${tamponActif}" id="travaux-btn-tampons" onclick="travauxOutils.togglePaletteAutocollants()" title="Tampons de retroaction">&#x1F3F7;</button>`;
-        // Popup des autocollants
-        html += '<div class="travaux-popup-autocollants" id="travaux-popup-autocollants">';
-        html += '<div class="travaux-autocollants-qualite">';
-        AUTOCOLLANTS.filter(a => a.categorie === 'qualite').forEach(a => {
-            html += `<div class="travaux-autocollant-item" onclick="travauxOutils.setAutocollantActif('${a.id}')" title="${a.nom}">`;
-            html += `<img src="${DOSSIER_AUTOCOLLANTS}${a.fichier}" alt="${a.nom}">`;
-            html += `<span>${a.nom}</span></div>`;
-        });
-        html += '</div>';
-        html += '<div class="travaux-autocollants-diagnostic">';
-        AUTOCOLLANTS.filter(a => a.categorie === 'diagnostic').forEach(a => {
-            html += `<div class="travaux-autocollant-item" onclick="travauxOutils.setAutocollantActif('${a.id}')" title="${a.nom}">`;
-            html += `<img src="${DOSSIER_AUTOCOLLANTS}${a.fichier}" alt="${a.nom}">`;
-            html += `<span>${a.nom}</span></div>`;
-        });
-        html += '</div></div>';
         html += '</div>';
 
         // Couleurs
