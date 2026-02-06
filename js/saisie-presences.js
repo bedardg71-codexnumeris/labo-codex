@@ -1017,7 +1017,7 @@ function sauvegarderPresencesSansValidation(dateStr) {
     }
 
     // Lire TOUTES les présences existantes
-    const clePresences = (typeof cle === 'function') ? cle('presences') : 'presences';
+    const clePresences = cle('presences');
     let presences = db.getSync(clePresences, []);
     if (!Array.isArray(presences)) presences = [];
 
@@ -1221,7 +1221,7 @@ function mettreAJourEnteteDateSeance(dateStr) {
         return;
     }
 
-    const dateFr = formaterDateFrancais(dateStr);
+    const dateFr = formaterDateComplete(dateStr);
     const heures = obtenirHeuresSeance(dateStr);
     const heuresFormatees = formaterHeuresAffichage(heures);
     const estVerrouille = estDateVerrouillee(dateStr);
@@ -1676,7 +1676,7 @@ function enregistrerPresences() {
         ? obtenirEtudiantsCoursActif()
         : obtenirDonneesSelonMode('groupeEtudiants');
     // ✅ CORRIGÉ (22 janvier 2026) : Utiliser la clé namespacée pour le trimestre actif
-    const clePresences = (typeof cle === 'function') ? cle('presences') : 'presences';
+    const clePresences = cle('presences');
     let presences = db.getSync(clePresences, []);
     // ✅ CORRIGÉ (22 janvier 2026) : S'assurer que presences est un tableau
     if (!Array.isArray(presences)) presences = [];
@@ -2110,19 +2110,7 @@ function mettreAJourBoutonsNavigation() {
    UTILITAIRES
    =============================== */
 
-/**
- * Formate une date en français
- */
-function formaterDateFrancais(dateStr) {
-    const date = new Date(dateStr + 'T12:00:00');
-    const options = {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    };
-    return date.toLocaleDateString('fr-CA', options);
-}
+// formaterDateFrancais() — supprimée, utilise formaterDateComplete() de main.js (Beta 97.1 #68)
 
 /**
  * Ouvre la saisie de présence depuis le calendrier
@@ -2167,7 +2155,7 @@ function ouvrirSaisiePresence(date) {
  */
 function obtenirDerniereDataSaisie(da = null) {
     // ✅ CORRIGÉ (22 janvier 2026) : Utiliser la clé namespacée pour le trimestre actif
-    const clePresences = (typeof cle === 'function') ? cle('presences') : 'presences';
+    const clePresences = cle('presences');
     let presences = db.getSync(clePresences, []);
     // ✅ CORRIGÉ (22 janvier 2026) : S'assurer que presences est un tableau
     if (!Array.isArray(presences)) presences = [];

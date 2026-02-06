@@ -45,11 +45,12 @@
 
 ### Priorite haute - Namespacing (Audit 5 fév 2026)
 
-- [x] **#68** Fonctions dupliquées en scope global (collisions silencieuses) ✅ PARTIEL (6 fév 2026)
+- [x] **#68** Fonctions dupliquées en scope global (collisions silencieuses) ✅ CORRIGÉ (6 fév 2026)
   - ✅ `echapperHtml()` : 4 doublons supprimés, canonique dans config.js
   - ✅ `afficherNotificationSucces()` : 8 doublons supprimés, canonique dans evaluation.js (signature étendue à 2 params)
-  - ⏳ `formaterDate()` : 3 versions avec formats différents — à traiter séparément
-  - ⏳ `formaterDateCourte()` : 2 versions avec signatures incompatibles (Date vs ISO string) — à traiter séparément
+  - ✅ `formaterDate()` : 3 versions consolidées → canonique dans main.js ("6 février 2026")
+  - ✅ `formaterDateCourte()` : 2 versions consolidées → canonique dans main.js ("6 fév.")
+  - ✅ `formaterDateComplete()` : nouvelle canonique dans main.js ("jeudi 6 février 2026"), remplace formaterDateFrancais + formaterDateLisible
 
 - [x] **#69** Clés manquantes dans CLES_NAMESPACEES ✅ CORRIGÉ (6 fév 2026)
   - **Symptôme** : Données partagées entre trimestres au lieu d'être isolées
@@ -79,13 +80,11 @@
   - **Effet** : Le listener ne se déclenche jamais, la régénération des bulles ne se fait pas
   - **Correction** : Vérifier contre `cle('groupeEtudiants')` ou vérifier si la clé contient `groupeEtudiants`
 
-- [ ] **#73** Patterns d'accès namespace incohérents
-  - **Constat** : 3 patterns différents coexistent dans le code
-    1. `db.getSync(cle('cle'), [])` — accès direct
-    2. `obtenirDonneesSelonMode('cle')` — via helper
-    3. `(typeof window.cle === 'function') ? window.cle('cle') : 'cle'` — défensif inline
-  - **Action** : Standardiser sur `obtenirDonneesSelonMode()` pour les lectures, documenter la convention
-  - **Fichiers avec pattern défensif** : donnees-demo.js, cours.js, groupe.js, modes.js, import-export.js
+- [x] **#73** Patterns d'accès namespace incohérents ✅ CORRIGÉ (6 fév 2026)
+  - **Résultat** : 136 patterns défensifs `typeof cle/window.cle` → `cle('X')` dans 24 fichiers, 0 restant
+  - Phase 1 : 19 remplacements (5 fichiers backlog)
+  - Phase 2 : 117 remplacements (19 fichiers supplémentaires incluant trimestre-v2, migrations, productions, etc.)
+  - Guards flow-control `if (typeof cle === 'function')` dépliés dans migrations.js, horaire.js, primo-modal.js, echelles.js
 
 ### Priorite CRITIQUE - Design / CSS (Audit 5 fév 2026)
 
@@ -126,9 +125,13 @@
 - [x] **#79** border-radius incohérents (valeur 8px hors design system) ✅ CORRIGÉ (6 fév 2026)
   - 9 occurrences `border-radius: 8px` remplacées par `var(--radius-moyen)` dans styles.css
 
-- [ ] **#80** 70 déclarations `!important` dans styles.css
-  - **Symptôme** : Guerres de spécificité CSS, cascade naturelle brisée
-  - **Action** : Auditer chaque occurrence, résoudre les conflits de spécificité à la source
+- [x] **#80** 75 déclarations `!important` dans styles.css ✅ CORRIGÉ (6 fév 2026)
+  - **Résultat** : 75 → 37 `!important` (-38, -51%), 37 restants tous justifiés
+  - 8 retirés sans conflit (cursor, padding, color, textarea, note-plafonnée, wizard-toggle)
+  - 17 retirés par spécificité suffisante (carte accordeon, #reglages-trimestre, IDME, maintenance)
+  - 7 retirés par ajustement de sélecteur (summary.summary-materiel, .tableau .td-center-*)
+  - 6 retirés : matrice-tableau textarea (redondants avec base)
+  - 37 conservés : 3 utilitaires, 3 media queries, 26 toggles JS, 5 overrides inline styles
 
 - [x] **#81** Validation primo avec styles inline au lieu de classes CSS ✅ CORRIGÉ (6 fév 2026)
   - Classes `.primo-champ-vide` et `.primo-champ-rempli` créées dans styles.css
@@ -140,9 +143,10 @@
 - [x] **#83** En-tête styles.css indique « Beta 0.60 » (obsolète) ✅ CORRIGÉ (6 fév 2026)
   - Mis à jour vers « Beta 97 / 06-02-2026 »
 
-- [ ] **#84** Documentation design system : mode « assiste » vs « simulation »
-  - **Constat** : Le design system référence `[data-mode="assiste"]` mais le code utilise `[data-mode="simulation"]`
-  - **Correction** : Synchroniser la documentation avec le code (mettre à jour les fichiers dans Design system - Modules/)
+- [x] **#84** Documentation design system : mode « assiste » vs « simulation » ✅ CORRIGÉ (6 fév 2026)
+  - **Résultat** : 7 occurrences `[data-mode="assisté"]` → `[data-mode="simulation"]` dans 3 modules DS
+  - Fichiers corrigés : 01a-palette-couleurs.html (4), 03b-cartes-sidebars.html (1), 04a-navigation.html (2)
+  - Archives (_archives/) laissées telles quelles (documents historiques)
 
 ### Bugs CRITIQUES (Audit complet 5 fév 2026)
 

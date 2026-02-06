@@ -51,7 +51,7 @@ function cleHoraire(coursId) {
         return `seancesHoraire_${id}`;
     }
     // Fallback sur clé globale namespacée par trimestre
-    return typeof cle === 'function' ? cle('seancesHoraire') : 'seancesHoraire';
+    return cle('seancesHoraire');
 }
 
 /**
@@ -77,7 +77,7 @@ function cleSeancesCompletes(coursId) {
     }
 
     // Fallback sur clé globale namespacée par trimestre
-    return typeof cle === 'function' ? cle('seancesCompletes') : 'seancesCompletes';
+    return cle('seancesCompletes');
 }
 
 /**
@@ -102,7 +102,7 @@ function obtenirSeancesHoraire(coursId) {
         if (groupeCoursActif && groupeCoursActif.horaireId) {
             // Lire l'horaire depuis l'entité
             // 🆕 FIX (1er fév 2026) : Utiliser cle() pour namespacing (horaires est dans CLES_NAMESPACEES)
-            const cleHoraires = (typeof cle === 'function') ? cle('horaires') : 'horaires';
+            const cleHoraires = cle('horaires');
             const horaires = db.getSync(cleHoraires, []);
             const horaire = horaires.find(h => h.id === groupeCoursActif.horaireId);
             if (horaire && horaire.seances && horaire.seances.length > 0) {
@@ -123,21 +123,17 @@ function obtenirSeancesHoraire(coursId) {
     }
 
     // 3. Fallback sur horaireHebdo (format V2)
-    if (typeof cle === 'function') {
-        seances = db.getSync(cle('horaireHebdo'), null);
-        if (seances && seances.length > 0) {
-            console.log('[Horaire] Séances depuis horaireHebdo namespacé');
-            return seances;
-        }
+    seances = db.getSync(cle('horaireHebdo'), null);
+    if (seances && seances.length > 0) {
+        console.log('[Horaire] Séances depuis horaireHebdo namespacé');
+        return seances;
     }
 
     // 4. Fallback sur seancesHoraire namespacé par trimestre
-    if (typeof cle === 'function') {
-        seances = db.getSync(cle('seancesHoraire'), null);
-        if (seances && seances.length > 0) {
-            console.log('[Horaire] Séances depuis seancesHoraire namespacé');
-            return seances;
-        }
+    seances = db.getSync(cle('seancesHoraire'), null);
+    if (seances && seances.length > 0) {
+        console.log('[Horaire] Séances depuis seancesHoraire namespacé');
+        return seances;
     }
 
     // 5. Fallback sur clé legacy non namespacée

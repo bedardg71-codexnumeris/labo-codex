@@ -93,7 +93,7 @@ function filtrerEtudiantsParMode(etudiants) {
  * (pour sauvegarder correctement sans perdre les autres cours)
  */
 function obtenirTousLesEtudiants() {
-    const cleEffective = (typeof window.cle === 'function') ? window.cle('groupeEtudiants') : 'groupeEtudiants';
+    const cleEffective = cle('groupeEtudiants');
     return db.getSync(cleEffective, []);
 }
 
@@ -103,7 +103,7 @@ function obtenirTousLesEtudiants() {
  * Préserve les étudiants des autres cours
  */
 function sauvegarderTousLesEtudiants(etudiants) {
-    const cleEffective = (typeof window.cle === 'function') ? window.cle('groupeEtudiants') : 'groupeEtudiants';
+    const cleEffective = cle('groupeEtudiants');
     db.setSync(cleEffective, etudiants);
     console.log(`💾 Sauvegarde ${etudiants.length} étudiants dans ${cleEffective}`);
 }
@@ -595,7 +595,7 @@ function confirmImport() {
     try {
         // 🔧 CORRECTION CRITIQUE (9 janvier 2026) : Lire TOUTES les données sans filtrage
         // obtenirDonneesSelonMode filtre par coursId, ce qui causait la perte des étudiants d'autres cours
-        const cleEtudiants = (typeof cle === 'function') ? cle('groupeEtudiants') : 'groupeEtudiants';
+        const cleEtudiants = cle('groupeEtudiants');
         let students = db.getSync(cleEtudiants, []);
         const ancienTotal = students.length;
 
@@ -1162,7 +1162,7 @@ function supprimerEtudiant(id) {
 
     // 🔧 CORRECTION CRITIQUE (9 janvier 2026) : Lire TOUTES les données sans filtrage
     // obtenirDonneesSelonMode filtre par coursId, ce qui causait la perte des étudiants d'autres cours
-    const cleEtudiants = (typeof cle === 'function') ? cle('groupeEtudiants') : 'groupeEtudiants';
+    const cleEtudiants = cle('groupeEtudiants');
     let students = db.getSync(cleEtudiants, []);
     const etudiantASupprimer = students.find(s => (s.id == id || s.da == id));
 

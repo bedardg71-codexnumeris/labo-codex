@@ -2567,7 +2567,7 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
         if (typeof obtenirDonneesSelonMode === 'function') {
             productions = obtenirDonneesSelonMode('productions') || [];
         } else {
-            const cleProductions = (typeof cle === 'function') ? cle('productions') : 'productions';
+            const cleProductions = cle('productions');
             productions = db.getSync(cleProductions, []);
         }
 
@@ -2576,7 +2576,7 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
         if (typeof obtenirDonneesSelonMode === 'function') {
             productionsPedago = obtenirDonneesSelonMode('productions') || [];
         } else {
-            const clePedago = (typeof cle === 'function') ? cle('productions') : 'productions';
+            const clePedago = cle('productions');
             productionsPedago = db.getSync(clePedago, []);
         }
 
@@ -2639,7 +2639,7 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
         if (typeof obtenirDonneesSelonMode === 'function') {
             evaluationsBrutes = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
         } else {
-            const cleEvaluations = (typeof cle === 'function') ? cle('evaluationsSauvegardees') : 'evaluationsSauvegardees';
+            const cleEvaluations = cle('evaluationsSauvegardees');
             evaluationsBrutes = db.getSync(cleEvaluations, []);
         }
 
@@ -2685,7 +2685,7 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
         if (typeof obtenirDonneesSelonMode === 'function') {
             etudiants = obtenirDonneesSelonMode('groupeEtudiants') || [];
         } else {
-            const cleEtudiants = (typeof cle === 'function') ? cle('groupeEtudiants') : 'groupeEtudiants';
+            const cleEtudiants = cle('groupeEtudiants');
             etudiants = db.getSync(cleEtudiants, []);
         }
 

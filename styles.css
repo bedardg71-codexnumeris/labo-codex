@@ -608,7 +608,7 @@ h1, h2, h3, h4 {
     padding: 0;
     margin-left: 6px;
     font-size: 0.7rem;
-    cursor: pointer !important;
+    cursor: pointer;
     vertical-align: middle;
     transition: transform 0.2s;
     pointer-events: auto;
@@ -1278,10 +1278,10 @@ h1, h2, h3, h4 {
 }
 
 .carte.accordeon .accordeon-header h3 {
-    color: white !important;
-    background: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
+    color: white;
+    background: none;
+    margin: 0;
+    padding: 0;
 }
 
 .carte.accordeon .accordeon-header .btn {
@@ -1319,11 +1319,11 @@ h1, h2, h3, h4 {
 
 /* Titre avec fond bleu dégradé (comme l'en-tête) */
 .carte h3.carte-titre-bleu {
-    background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%) !important;
-    color: white !important;
+    background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%);
+    color: white;
     margin: -20px -20px 15px -20px;
     padding: 15px 20px;
-    border-bottom: none !important;
+    border-bottom: none;
     border-radius: var(--radius-grand) var(--radius-grand) 0 0;
     font-weight: 600;
 }
@@ -1684,7 +1684,7 @@ h1, h2, h3, h4 {
 #conteneur-tableau-evaluations .tableau td:nth-child(7),
 #conteneur-tableau-evaluations .tableau th:nth-child(8),
 #conteneur-tableau-evaluations .tableau td:nth-child(8) {
-    text-align: center !important;
+    text-align: center;
 }
 
 /* Coins arrondis sur l'en-tête */
@@ -2433,8 +2433,8 @@ input[type="number"].controle-form {
 
 /* Style de base pour TOUS les textarea - fix texte invisible */
 textarea {
-    color: #333 !important;
-    background-color: white !important;
+    color: #333;
+    background-color: white;
 }
 
 /* Inputs spéciaux pour saisie de présences */
@@ -4795,7 +4795,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 /* Titre du mois - Texte blanc sur fond bleu */
 .calendrier-titre-mois {
     text-align: center;
-    color: white !important;
+    color: white;
     background: var(--bleu-principal);
     margin: 0 0 15px 0;
     padding: 10px 15px;
@@ -6706,9 +6706,9 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 /* Summary pour sections de matériel pédagogique - style uniformisé */
-.summary-materiel {
-    background: linear-gradient(135deg, var(--bleu-moyen) 0%, var(--bleu-principal) 100%) !important;
-    color: white !important;
+summary.summary-materiel {
+    background: linear-gradient(135deg, var(--bleu-moyen) 0%, var(--bleu-principal) 100%);
+    color: white;
     padding: 12px 15px;
     cursor: pointer;
     font-weight: 600;
@@ -6716,8 +6716,8 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     margin: 0;
 }
 
-.summary-materiel:hover {
-    background: linear-gradient(135deg, var(--bleu-clair) 0%, var(--bleu-moyen) 100%) !important;
+summary.summary-materiel:hover {
+    background: linear-gradient(135deg, var(--bleu-clair) 0%, var(--bleu-moyen) 100%);
 }
 
 .panneau-import,
@@ -7074,7 +7074,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 .input-fichier-compact {
-    padding: 6px !important;
+    padding: 6px;
     font-size: 0.85rem;
 }
 
@@ -8843,8 +8843,8 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     font-size: 0.85rem;
     font-family: inherit;
     resize: vertical;
-    color: #333 !important; /* Force texte sombre - fix texte invisible */
-    background-color: white !important; /* Force fond blanc */
+    color: #333; /* Force texte sombre - fix texte invisible */
+    background-color: white; /* Force fond blanc */
 }
 
 .matrice-tableau textarea:focus {
@@ -8936,7 +8936,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 
 /* Plus d'espacement vertical dans les cellules */
 #corps-tableau-evaluations td {
-    padding: 16px 12px !important;
+    padding: 16px 12px;
 }
 
 /* Effet hover sur les lignes */
@@ -9705,22 +9705,22 @@ label:has(+ textarea:disabled) {
    =============================== */
 
 /* En-têtes des colonnes A, C, P, E, RàI centrés */
-.td-center-clickable,
-.td-center-100-clickable,
-.td-center-70,
-.td-center-40,
-.td-center-80 {
-    text-align: center !important;
+.tableau .td-center-clickable,
+.tableau .td-center-100-clickable,
+.tableau .td-center-70,
+.tableau .td-center-40,
+.tableau .td-center-80 {
+    text-align: center;
 }
 
 /* Colonne Pattern centrée */
-.td-left-140-clickable {
-    text-align: center !important;
+.tableau .td-left-140-clickable {
+    text-align: center;
 }
 
 /* Colonne Actions (Modifier/Supprimer) */
-.td-center-200 {
-    text-align: center !important;
+.tableau .td-center-200 {
+    text-align: center;
     white-space: nowrap;
     min-width: 180px;
 }
@@ -10400,7 +10400,7 @@ body[data-mode="simulation"] table tr:hover {
 
 /* Composante avec plafonnement appliqué */
 .note-finale-composante-plafonnee {
-    border: 2px solid #dc3545 !important;
+    border: 2px solid #dc3545;
     background: #fff5f5;
 }
 
@@ -10589,7 +10589,7 @@ body[data-mode="simulation"] table tr:hover {
 
 /* Toggle switch */
 .wizard-v2-toggle {
-    flex-direction: row !important;
+    flex-direction: row;
     align-items: center;
 }
 
@@ -11137,11 +11137,11 @@ body[data-mode="simulation"] table tr:hover {
 
 /* Réduire l'espacement entre accordéons */
 #reglages-trimestre .carte.accordeon {
-    margin-top: 12px !important;
+    margin-top: 12px;
 }
 
 #reglages-trimestre .carte.accordeon:first-of-type {
-    margin-top: 0 !important;
+    margin-top: 0;
 }
 
 /* Compacter le contenu des accordéons */
@@ -11173,7 +11173,7 @@ body[data-mode="simulation"] table tr:hover {
 /* Compacter les sous-titres */
 #reglages-trimestre .sous-titre-section {
     font-size: 0.85rem;
-    margin-bottom: 8px !important;
+    margin-bottom: 8px;
 }
 
 /* Compacter les groupes de formulaire */
@@ -11208,7 +11208,7 @@ body[data-mode="simulation"] table tr:hover {
 
 #reglages-trimestre .grille-form-2col {
     gap: 10px;
-    margin-bottom: 10px !important;
+    margin-bottom: 10px;
 }
 
 /* Compacter les textes d'aide */
@@ -11360,10 +11360,10 @@ body[data-mode="simulation"] table tr:hover {
 
 /* --- Uniformisation sous-titres sections --- */
 #reglages-trimestre .sous-titre-section {
-    font-size: 0.9rem !important;
+    font-size: 0.9rem;
     font-weight: 600;
     color: var(--bleu-principal);
-    margin: 0 0 10px 0 !important;
+    margin: 0 0 10px 0;
 }
 
 /* --- Uniformisation textes d'aide --- */
@@ -11424,8 +11424,8 @@ body[data-mode="simulation"] table tr:hover {
 /* --- Uniformisation encadrés --- */
 /* Tous les blocs-section en bleu pâle uniforme */
 #reglages-trimestre .bloc-section {
-    background: var(--bleu-pale) !important;
-    border: none !important;
+    background: var(--bleu-pale);
+    border: none;
     border-radius: var(--radius-grand);
 }
 
@@ -11913,25 +11913,25 @@ body.mode-assiste .btn-aide-contextuelle,
 /* Couleurs IDME pour les niveaux */
 .apercu-niveau-I,
 .apercu-niveau-i {
-    color: #d32f2f !important;
+    color: #d32f2f;
     font-weight: bold;
 }
 
 .apercu-niveau-D,
 .apercu-niveau-d {
-    color: #f57c00 !important;
+    color: #f57c00;
     font-weight: bold;
 }
 
 .apercu-niveau-M,
 .apercu-niveau-m {
-    color: #388e3c !important;
+    color: #388e3c;
     font-weight: bold;
 }
 
 .apercu-niveau-E,
 .apercu-niveau-e {
-    color: #2e7d32 !important;
+    color: #2e7d32;
     font-weight: bold;
 }
 
@@ -12865,11 +12865,11 @@ body.mode-assiste .btn-aide-contextuelle,
 
 /* Accordéon Maintenance - texte rouge foncé visible */
 #accordeon-maintenance > .accordeon-header h3 {
-    color: #c62828 !important;
+    color: #c62828;
 }
 
 #accordeon-maintenance > .accordeon-header .accordeon-chevron {
-    color: #c62828 !important;
+    color: #c62828;
 }
 
 /* Section Gestion avancée des ressources */

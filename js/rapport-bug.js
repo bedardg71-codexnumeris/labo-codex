@@ -465,7 +465,7 @@ function obtenirContexteSection() {
 
             case 'presences':
                 // ✅ CORRIGÉ (22 janvier 2026) : Utiliser la clé namespacée
-                const clePresences = (typeof window.cle === 'function') ? window.cle('presences') : 'presences';
+                const clePresences = cle('presences');
                 contexte.nbPresences = (db.getSync(clePresences, []) || []).length;
                 contexte.horaireActif = db.getSync('horaireActif', 'non défini');
                 break;

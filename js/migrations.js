@@ -23,7 +23,7 @@
  */
 function migrerEtudiantsVersCoursId() {
     // ✅ NAMESPACING (Beta 95.5) : Lire depuis cle namespacee si disponible
-    const cleEtudiants = (typeof cle === 'function') ? cle('groupeEtudiants') : 'groupeEtudiants';
+    const cleEtudiants = cle('groupeEtudiants');
     const etudiants = db.getSync(cleEtudiants, []);
     const cours = db.getSync('listeCours', []);
     const coursActif = cours.find(c => c.actif) || cours[0];
@@ -61,7 +61,7 @@ function migrerEtudiantsVersCoursId() {
  */
 function migrerProductionsVersCoursId() {
     // ✅ CORRECTION (Beta 95 - 2 jan 2026) : Utiliser clé namespacée
-    const cleProductions = (typeof cle === 'function') ? cle('productions') : 'productions';
+    const cleProductions = cle('productions');
     const productions = db.getSync(cleProductions, []);
     const cours = db.getSync('listeCours', []);
     const coursActif = cours.find(c => c.actif) || cours[0];
@@ -112,7 +112,7 @@ function migrerProductionsVersCoursId() {
  */
 function migrerPresencesVersCoursId() {
     // ✅ CORRECTION (Beta 95 - 2 jan 2026) : Utiliser clé namespacée
-    const clePresences = (typeof cle === 'function') ? cle('presences') : 'presences';
+    const clePresences = cle('presences');
     const presences = db.getSync(clePresences, []);
     const cours = db.getSync('listeCours', []);
     const coursActif = cours.find(c => c.actif) || cours[0];
@@ -255,12 +255,10 @@ function migrerHoraireVersMultiCours() {
     let horaireGlobal = [];
 
     // Source 1: horaireHebdo namespacé par trimestre
-    if (typeof cle === 'function') {
-        horaireGlobal = db.getSync(cle('horaireHebdo'), []);
-    }
+    horaireGlobal = db.getSync(cle('horaireHebdo'), []);
 
     // Source 2: seancesHoraire namespacé par trimestre
-    if (horaireGlobal.length === 0 && typeof cle === 'function') {
+    if (horaireGlobal.length === 0) {
         horaireGlobal = db.getSync(cle('seancesHoraire'), []);
     }
 
@@ -434,7 +432,7 @@ function migrerPresencesVersPeriodes() {
     const dureePeriode = modalites.dureePeriodeMinutes || 55;
 
     // Lire les présences (utiliser clé namespacée si disponible)
-    const clePresences = (typeof cle === 'function') ? cle('presences') : 'presences';
+    const clePresences = cle('presences');
     const presences = db.getSync(clePresences, []);
 
     if (!Array.isArray(presences) || presences.length === 0) {
@@ -808,11 +806,6 @@ async function executerMigrationLegacy() {
         // 4. EXÉCUTER LES MIGRATIONS PROGRESSIVES
         console.log('   🔄 Exécution des migrations progressives...');
 
-        // Activer la fonction cle() pour les migrations
-        if (typeof window.cle !== 'function') {
-            window.cle = (nomCle) => prefixe + nomCle;
-        }
-
         // Beta 93.5 : Ajouter coursId
         migrerEtudiantsVersCoursId();
         migrerProductionsVersCoursId();
@@ -1046,7 +1039,7 @@ async function migrerVersEntiteHoraires() {
 
     const listeCours = db.getSync('listeCours', []);
     // 🆕 FIX (1er fév 2026) : Utiliser cle() pour namespacing (horaires est dans CLES_NAMESPACEES)
-    const cleHoraires = (typeof cle === 'function') ? cle('horaires') : 'horaires';
+    const cleHoraires = cle('horaires');
     const horairesExistants = db.getSync(cleHoraires, []);
 
     if (horairesExistants.length > 0) {
@@ -1263,11 +1256,9 @@ function migrerCleProductionsPedagogiques() {
     const trimestres = db.getSync('trimestresDisponibles', []);
     const prefixes = trimestres.map(t => t.id + '_');
     // Ajouter aussi le trimestre actif au cas où
-    if (typeof cle === 'function') {
-        const cleActuelle = cle('productionsPedagogiques');
-        if (cleActuelle && !prefixes.some(p => cleActuelle.startsWith(p))) {
-            prefixes.push(cleActuelle.replace('productionsPedagogiques', ''));
-        }
+    const cleActuelle = cle('productionsPedagogiques');
+    if (cleActuelle && !prefixes.some(p => cleActuelle.startsWith(p))) {
+        prefixes.push(cleActuelle.replace('productionsPedagogiques', ''));
     }
 
     for (const prefix of prefixes) {
@@ -1297,7 +1288,7 @@ function migrerCleProductionsPedagogiques() {
     // Aussi vérifier la clé nue (sans préfixe)
     const nue = db.getSync('productionsPedagogiques', null);
     if (nue && Array.isArray(nue) && nue.length > 0) {
-        const cleNouv = (typeof cle === 'function') ? cle('productions') : 'productions';
+        const cleNouv = cle('productions');
         const existantes = db.getSync(cleNouv, []);
         if (!existantes || existantes.length === 0) {
             db.setSync(cleNouv, nue);

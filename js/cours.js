@@ -1018,13 +1018,13 @@ function supprimerCours(id) {
     // ✅ CORRECTION CRITIQUE (Beta 95 - 2 jan 2026)
     // Lire TOUTES les données (pas filtrées) pour suppression correcte
     // ===============================
-    const cleEtudiants = (typeof window.cle === 'function') ? window.cle('groupeEtudiants') : 'groupeEtudiants';
-    const cleProductions = (typeof window.cle === 'function') ? window.cle('productions') : 'productions';
-    const clePresences = (typeof window.cle === 'function') ? window.cle('presences') : 'presences';
+    const cleEtudiants = cle('groupeEtudiants');
+    const cleProductions = cle('productions');
+    const clePresences = cle('presences');
 
     const etudiants = db.getSync(cleEtudiants, []);
     const productions = db.getSync(cleProductions, []);
-    const cleEvaluations = (typeof window.cle === 'function') ? window.cle('evaluationsSauvegardees') : 'evaluationsSauvegardees';
+    const cleEvaluations = cle('evaluationsSauvegardees');
     const evaluations = db.getSync(cleEvaluations, []);
     const presences = db.getSync(clePresences, []);
 

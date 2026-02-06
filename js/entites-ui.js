@@ -72,7 +72,7 @@ async function peuplerDropdownGroupeCoursActif() {
         const listeCours = db.getSync('listeCours', []);  // Beta 95.2: aussi chercher dans listeCours (Primo)
         const enseignants = db.getSync('enseignants', []);
         // 🆕 FIX (1er fév 2026) : Utiliser cle() pour namespacing (horaires est dans CLES_NAMESPACEES)
-        const cleHoraires = (typeof cle === 'function') ? cle('horaires') : 'horaires';
+        const cleHoraires = cle('horaires');
         const horaires = db.getSync(cleHoraires, []);
 
         // Trouver le groupe-cours actif
@@ -678,7 +678,7 @@ async function peuplerDropdownGroupeCours() {
         let options = '<option value="">-- Sélectionner un groupe --</option>';
 
         // Lire les étudiants depuis groupeEtudiants (clé namespacée)
-        const cleGroupeEtudiants = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
+        const cleGroupeEtudiants = cle('groupeEtudiants');
         const listeEtudiants = db.getSync(cleGroupeEtudiants, []);
 
         // Extraire les groupes uniques depuis les étudiants

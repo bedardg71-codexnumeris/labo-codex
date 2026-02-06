@@ -1393,7 +1393,7 @@ async function executerImportConfigComplete() {
         // 3. Importer les productions avec mise à jour des références aux grilles
         // ✅ CORRECTION (Beta 95 - 2 jan 2026) : Utiliser clé namespacée
         if (contenu.productions && contenu.productions.length > 0) {
-            const cleProductions = (typeof window.cle === 'function') ? window.cle('productions') : 'productions';
+            const cleProductions = cle('productions');
             const productionsExistantes = db.getSync(cleProductions, []);
 
             const idsProdsExistants = new Set(productionsExistantes.map(p => p.id));
@@ -1770,7 +1770,7 @@ async function executerImportVersBibliotheques() {
         if (prodsImportUniques.length > 0) {
             const prodsImport = prodsImportUniques;
             if (Array.isArray(prodsImport) && prodsImport.length > 0) {
-                const cleProductions = (typeof window.cle === 'function') ? window.cle('productions') : 'productions';
+                const cleProductions = cle('productions');
                 let prodsExistantes = db.getSync(cleProductions, []);
                 const idsProdsExistants = new Set(prodsExistantes.map(p => p.id));
                 let prodsNouvelles = [];
@@ -2027,7 +2027,7 @@ async function executerImportSelectif() {
 
         if (hasCheckedItems('productions') && allProdsImport.length > 0) {
             const selectedIds = getCheckedItemIds('productions');
-            const cleProductions = (typeof window.cle === 'function') ? window.cle('productions') : 'productions';
+            const cleProductions = cle('productions');
             const prodsExistantes = db.getSync(cleProductions, []);
 
             // Dédupliquer par ID
@@ -2291,7 +2291,7 @@ async function exporterConfigurationComplete() {
     const toutesEchelles = db.getSync('echellesTemplates', []);
     const toutesGrilles = db.getSync('grillesTemplates', []);
     // 🆕 FIX (1er fév 2026) : Utiliser la clé namespacée pour les productions
-    const cleProductions = (typeof window.cle === 'function') ? window.cle('productions') : 'productions';
+    const cleProductions = cle('productions');
     const toutesProductions = db.getSync(cleProductions, []);
 
     // ✅ MODIFIÉ (6 jan 2026) : Utiliser détection heuristique pour filtrer démo + importées

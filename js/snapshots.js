@@ -70,7 +70,7 @@
  * Helper pour obtenir la clé snapshots avec namespacing par trimestre
  */
 function cleSnapshots() {
-    return (typeof cle === 'function') ? cle('snapshots') : 'snapshots';
+    return cle('snapshots');
 }
 
 function initialiserModuleSnapshots() {

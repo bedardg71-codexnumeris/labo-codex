@@ -472,7 +472,7 @@ async function synchroniserInfoCours(trimestreId) {
     // Les modules saisie-presences.js et calendrier-vue.js lisent seancesHoraire
     if (gcComplet.horaire?.seances && gcComplet.horaire.seances.length > 0) {
         // Clé namespacée par trimestre
-        const cleSeances = typeof cle === 'function' ? cle('seancesHoraire') : `${trimestreId}_seancesHoraire`;
+        const cleSeances = cle('seancesHoraire');
         await db.set(cleSeances, gcComplet.horaire.seances);
 
         // Également la clé legacy non namespacée (pour certains modules)
