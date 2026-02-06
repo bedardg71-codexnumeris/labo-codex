@@ -1515,57 +1515,38 @@
             box-shadow:
                 1px 1.5px 3px rgba(0, 0, 0, 0.3),
                 inset 0 -0.5px 1px rgba(0, 0, 0, 0.1);
-            --spin-amp: 1.5px;
-            --spin-duration: 7s;
+            --spin-amp: 5px;
+            --spin-duration: 5.5s;
         }
         .bulle-trajectoire.moyenne .bulle {
             box-shadow:
                 1.5px 2px 4px rgba(0, 0, 0, 0.35),
                 inset 0 -0.75px 1.5px rgba(0, 0, 0, 0.1);
-            --spin-amp: 2.5px;
-            --spin-duration: 5s;
+            --spin-amp: 8px;
+            --spin-duration: 4s;
         }
         .bulle-trajectoire.grande .bulle {
             box-shadow:
                 2px 3px 6px rgba(0, 0, 0, 0.4),
                 inset 0 -1px 2px rgba(0, 0, 0, 0.1);
-            --spin-amp: 4px;
-            --spin-duration: 3.5s;
+            --spin-amp: 12px;
+            --spin-duration: 3s;
         }
 
-        /* Spin hélicoïdal : oscillation verticale + pulsation d'échelle + blur
-           Simule la rotation autour de l'axe de dérive (passage devant/derrière) */
+        /* Oscillation sinusoïdale autour de l'axe de dérive */
         @keyframes bulle-helice {
-            0%   { transform: translateY(0) scale(1.08); filter: blur(0); }
-            25%  { transform: translateY(calc(var(--spin-amp, 3px) * -1)) scale(1); filter: blur(0.2px); }
-            50%  { transform: translateY(0) scale(0.92); filter: blur(0.35px); }
-            75%  { transform: translateY(var(--spin-amp, 3px)) scale(1); filter: blur(0.2px); }
-            100% { transform: translateY(0) scale(1.08); filter: blur(0); }
+            0%   { transform: translateY(calc(var(--spin-amp, 8px) * -1)); }
+            50%  { transform: translateY(var(--spin-amp, 8px)); }
+            100% { transform: translateY(calc(var(--spin-amp, 8px) * -1)); }
         }
 
-        /* Dérive organique — mouvement fluide continu de gauche à droite */
+        /* Dérive rectiligne — axe horizontal avec pente subtile (--drift-y)
+           Le mouvement vertical visible vient uniquement du spin hélicoïdal (bulle-helice) */
         @keyframes floatUp {
-            0% { transform: translateX(calc(0vw + var(--start-x))) translateY(calc(0vh + var(--start-y))); opacity: 0; }
-            5% { transform: translateX(calc(4vw + var(--start-x))) translateY(calc(-2vh + var(--drift-y) * 0.05 + var(--start-y))); opacity: 0.3; }
-            10% { transform: translateX(calc(8vw + var(--start-x))) translateY(calc(-4vh + var(--drift-y) * 0.10 + var(--start-y))); opacity: 0.4; }
-            15% { transform: translateX(calc(12vw + var(--start-x))) translateY(calc(-5vh + var(--drift-y) * 0.15 + var(--start-y))); }
-            20% { transform: translateX(calc(16vw + var(--start-x))) translateY(calc(-4vh + var(--drift-y) * 0.18 + var(--start-y))); }
-            25% { transform: translateX(calc(20vw + var(--start-x))) translateY(calc(-2vh + var(--drift-y) * 0.17 + var(--start-y))); }
-            30% { transform: translateX(calc(24vw + var(--start-x))) translateY(calc(-1vh + var(--drift-y) * 0.12 + var(--start-y))); }
-            35% { transform: translateX(calc(28vw + var(--start-x))) translateY(calc(-3vh + var(--drift-y) * 0.08 + var(--start-y))); }
-            40% { transform: translateX(calc(32vw + var(--start-x))) translateY(calc(-6vh + var(--drift-y) * 0.15 + var(--start-y))); }
-            45% { transform: translateX(calc(36vw + var(--start-x))) translateY(calc(-8vh + var(--drift-y) * 0.25 + var(--start-y))); opacity: 0.4; }
-            50% { transform: translateX(calc(40vw + var(--start-x))) translateY(calc(-9vh + var(--drift-y) * 0.35 + var(--start-y))); }
-            55% { transform: translateX(calc(44vw + var(--start-x))) translateY(calc(-8vh + var(--drift-y) * 0.40 + var(--start-y))); }
-            60% { transform: translateX(calc(48vw + var(--start-x))) translateY(calc(-7vh + var(--drift-y) * 0.42 + var(--start-y))); }
-            65% { transform: translateX(calc(52vw + var(--start-x))) translateY(calc(-10vh + var(--drift-y) * 0.50 + var(--start-y))); }
-            70% { transform: translateX(calc(56vw + var(--start-x))) translateY(calc(-14vh + var(--drift-y) * 0.62 + var(--start-y))); }
-            75% { transform: translateX(calc(60vw + var(--start-x))) translateY(calc(-17vh + var(--drift-y) * 0.75 + var(--start-y))); opacity: 0.4; }
-            80% { transform: translateX(calc(64vw + var(--start-x))) translateY(calc(-15vh + var(--drift-y) * 0.80 + var(--start-y))); }
-            85% { transform: translateX(calc(68vw + var(--start-x))) translateY(calc(-18vh + var(--drift-y) * 0.88 + var(--start-y))); }
-            90% { transform: translateX(calc(72vw + var(--start-x))) translateY(calc(-22vh + var(--drift-y) * 0.95 + var(--start-y))); }
-            95% { transform: translateX(calc(76vw + var(--start-x))) translateY(calc(-24vh + var(--drift-y) * 0.98 + var(--start-y))); opacity: 0.3; }
-            100% { transform: translateX(calc(80vw + var(--start-x))) translateY(calc(-25vh + var(--start-y))); opacity: 0; }
+            0%   { transform: translateX(var(--start-x)) translateY(var(--start-y)); opacity: 0; }
+            5%   { opacity: 0.4; }
+            95%  { opacity: 0.4; }
+            100% { transform: translateX(calc(80vw + var(--start-x))) translateY(calc(var(--drift-y) + var(--start-y))); opacity: 0; }
         }
 
         /* Les positions, délais et durées sont générés dynamiquement par JavaScript
@@ -15679,7 +15660,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97';
-        const BUILD_ID = '0206-1347';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0206-1400';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
