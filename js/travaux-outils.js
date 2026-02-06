@@ -89,7 +89,7 @@
         fleche: {
             id: 'fleche',
             nom: 'Fleche',
-            icone: '->',
+            icone: '→',
             curseur: 'crosshair',
             type: 'forme',
             epaisseurDefaut: 2
@@ -97,7 +97,7 @@
         rectangle: {
             id: 'rectangle',
             nom: 'Rectangle',
-            icone: '[]',
+            icone: '◻',
             curseur: 'crosshair',
             type: 'forme',
             epaisseurDefaut: 2,
@@ -106,7 +106,7 @@
         crochet: {
             id: 'crochet',
             nom: 'Crochet',
-            icone: 'V',
+            icone: '✓',
             curseur: 'crosshair',
             type: 'symbole',
             taille: 30
@@ -114,7 +114,7 @@
         croix: {
             id: 'croix',
             nom: 'Croix',
-            icone: 'X',
+            icone: '✕',
             curseur: 'crosshair',
             type: 'symbole',
             taille: 30
