@@ -3194,6 +3194,22 @@
                 <!-- Titre principal -->
                 <h2 class="modal-titre">Nouveautés</h2>
 
+                <!-- Beta 97 - 6 février -->
+                <div style="background: linear-gradient(135deg, #e8f5e9 0%, #e3f2fd 100%); border-left: 3px solid #2e7d32; border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
+                    <strong style="color: #1b5e20; display: block; margin-bottom: 8px;">Beta 97 (6 février) - Module Travaux :</strong>
+                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
+                        <li><strong>Nouvel onglet Travaux</strong> : Gestion complète des travaux étudiants directement dans Monitorage (remplace GoodNotes)</li>
+                        <li><strong>Import de fichiers</strong> : Glissez vos PDF et images dans la zone de dépôt. Détection automatique du DA étudiant dans le nom du fichier. Association manuelle possible via dropdown.</li>
+                        <li><strong>Visionneuse intégrée</strong> : Ouvrez vos PDF et images directement dans l'application. Navigation entre les pages, zoom avant/arrière, ajustement automatique à la fenêtre.</li>
+                        <li><strong>Annotation au stylet</strong> : Annotez directement sur les travaux avec le stylo, le surligneur, la gomme, des formes (cercle, flèche, rectangle) et des symboles (crochet, croix). Support Apple Pencil avec sensibilité à la pression et rejet de la paume.</li>
+                        <li><strong>Annuler/Rétablir</strong> : Ctrl+Z / Ctrl+Maj+Z pour annuler ou rétablir vos annotations (jusqu'à 50 niveaux). Sauvegarde automatique.</li>
+                        <li><strong>Voir le travail depuis Évaluations</strong> : Bouton « Voir le travail » dans la page d'évaluation pour afficher le document côte à côte avec la grille de critères.</li>
+                        <li><strong>Travaux dans le Profil étudiant</strong> : Nouvelle section « Travaux soumis » avec grille de miniatures et export ZIP par étudiant.</li>
+                        <li><strong>Archivage ZIP</strong> : Exportez les travaux par étudiant, par production ou pour le semestre complet. Inclut les versions annotées.</li>
+                        <li><strong>Stockage sur disque (Mac)</strong> : Option File System Access API pour stocker les fichiers sur votre disque au lieu d'IndexedDB. Recommandé sur Mac pour les gros volumes.</li>
+                    </ul>
+                </div>
+
                 <!-- Beta 96.2 - 4 février -->
                 <div style="background: linear-gradient(135deg, #e3f2fd 0%, #e8eaf6 100%); border-left: 3px solid #1976d2; border-radius: var(--radius-moyen); padding: 12px 16px; margin-bottom: 1rem;">
                     <strong style="color: #1565c0; display: block; margin-bottom: 8px;">Beta 96.2 (4 février) :</strong>
@@ -14937,14 +14953,83 @@
                     <h2>Notes de version</h2>
                     <p class="text-muted">Historique des changements majeurs</p>
 
+                    <!-- Beta 97 -->
+                    <div class="carte accordeon ouvert" id="accordeon-aide-beta97">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Beta 97 — Module Travaux
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu" style="display: block;">
+                        <p class="text-muted">6 février 2026</p>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Nouvel onglet Travaux</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Remplacement de GoodNotes</strong> : Gestion complète des travaux étudiants directement dans Monitorage (import, annotation, archivage).</li>
+                            <li><strong>3 sous-sections</strong> : Import, Visionneuse et Archivage accessibles depuis l'onglet Travaux.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Import de fichiers</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Drag-and-drop</strong> : Glissez vos PDF et images (JPEG, PNG, HEIC, WebP) dans la zone de dépôt.</li>
+                            <li><strong>Détection automatique du DA</strong> : Le numéro d'admission est extrait du nom de fichier (ex: "Audet_9000175_travail.pdf").</li>
+                            <li><strong>Jumelage par nom</strong> : Si le DA n'est pas trouvé, recherche par nom/prénom dans le fichier.</li>
+                            <li><strong>Association manuelle</strong> : Dropdown pour corriger ou associer un étudiant avant l'import.</li>
+                            <li><strong>Compression images</strong> : Les images dépassant 2000px sont automatiquement redimensionnées (JPEG 85%).</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Visionneuse intégrée</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Rendu PDF natif</strong> : Affichage des PDF via PDF.js directement dans l'application.</li>
+                            <li><strong>Navigation multi-pages</strong> : Boutons précédent/suivant et indicateur de page.</li>
+                            <li><strong>Zoom</strong> : Zoom avant/arrière par paliers de 25%, ajustement automatique à la fenêtre.</li>
+                            <li><strong>Sidebar miniatures</strong> : Liste des fichiers avec filtrage par étudiant.</li>
+                            <li><strong>Pré-rendu</strong> : Les pages adjacentes sont pré-rendues en arrière-plan pour une navigation instantanée.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Annotation au stylet</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Outils de dessin</strong> : Stylo (rouge par défaut), surligneur (jaune, semi-transparent), gomme (supprime le trait entier au contact).</li>
+                            <li><strong>Formes et symboles</strong> : Cercle, flèche, rectangle, crochet (correct) et croix (incorrect).</li>
+                            <li><strong>Texte</strong> : Ajoutez des commentaires positionnés sur le document.</li>
+                            <li><strong>6 couleurs</strong> : Rouge, bleu, vert, orange, noir, violet.</li>
+                            <li><strong>Apple Pencil</strong> : Sensibilité à la pression (courbe Hermite), rejet de la paume, événements coalescés pour fluidité maximale.</li>
+                            <li><strong>Annuler/Rétablir</strong> : Ctrl+Z / Ctrl+Maj+Z, jusqu'à 50 niveaux.</li>
+                            <li><strong>Sauvegarde automatique</strong> : Les annotations sont sauvegardées automatiquement après 2 secondes d'inactivité.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Intégration avec les évaluations</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Bouton « Voir le travail »</strong> : Visible dans la page d'évaluation quand un fichier est associé à l'étudiant.</li>
+                            <li><strong>Vue côte à côte</strong> : Le travail s'affiche à gauche, la grille de critères à droite. Annotez tout en évaluant.</li>
+                            <li><strong>Section Profil étudiant</strong> : Nouvelle section « Travaux soumis » avec grille de miniatures et badge d'annotation.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Archivage et export</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Export par étudiant</strong> : Téléchargez un ZIP contenant tous les travaux d'un étudiant (originaux + annotés).</li>
+                            <li><strong>Export par production</strong> : Tous les travaux soumis pour une production donnée.</li>
+                            <li><strong>Export semestre complet</strong> : Archive complète organisée par étudiant.</li>
+                            <li><strong>Moniteur de stockage</strong> : Barre de progression avec alerte à 80% de capacité et suggestion de nettoyage.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Optimisations</h4>
+                        <ul class="modal-liste">
+                            <li><strong>File System Access API (Mac)</strong> : Option pour stocker les fichiers sur votre disque au lieu d'IndexedDB. Recommandé pour les gros volumes.</li>
+                            <li><strong>Scroll virtuel</strong> : Les listes de 50+ miniatures utilisent le rendu virtuel pour maintenir la fluidité.</li>
+                            <li><strong>Stockage persistant</strong> : Demande automatique de persistance au navigateur pour protéger les données.</li>
+                        </ul>
+                        </div><!-- fin accordeon-contenu beta97 -->
+                    </div>
+
                     <!-- Beta 96 -->
-                    <div class="carte accordeon ouvert" id="accordeon-aide-beta96">
+                    <div class="carte accordeon" id="accordeon-aide-beta96">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Beta 96 — Visualisations avancées et stabilisation
                             </h3>
                         </div>
-                        <div class="accordeon-contenu" style="display: block;">
+                        <div class="accordeon-contenu">
                         <p class="text-muted">25-26 janvier 2026</p>
 
                         <h4 class="titre-bleu-mb8 mt-15">Nouveaux graphiques (Tableau de bord)</h4>
@@ -15556,8 +15641,8 @@
          */
 
         // === CONFIGURATION ===
-        const VERSION_MAJEURE = '96';
-        const BUILD_ID = '0206-0606';  // Auto-updated by Claude before each commit (Toronto time)
+        const VERSION_MAJEURE = '97';
+        const BUILD_ID = '0206-0613';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
