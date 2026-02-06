@@ -492,15 +492,23 @@
      * @param {number} yNorm - Y normalise (0-1)
      */
     function poserAutocollant(autocollantId, xNorm, yNorm) {
-        const taille = 0.06; // 6% de la largeur du document
+        const tailleBase = 0.06; // 6% de la largeur du document
+        const img = travauxOutils.getImageAutocollant(autocollantId);
+        const ratio = (img && img.naturalWidth && img.naturalHeight)
+            ? img.naturalHeight / img.naturalWidth
+            : 1;
+        // Convertir la hauteur normalisée en tenant compte du ratio canvas
+        const canvasRatio = canvasAnnotation.width / canvasAnnotation.height;
+        const stickerW = tailleBase;
+        const stickerH = tailleBase * ratio * canvasRatio;
 
         const sticker = {
             id: 'STK_' + Date.now(),
             autocollantId: autocollantId,
-            x: xNorm - taille / 2,
-            y: yNorm - taille / 2,
-            width: taille,
-            height: taille
+            x: xNorm - stickerW / 2,
+            y: yNorm - stickerH / 2,
+            width: stickerW,
+            height: stickerH
         };
 
         const donneesPage = obtenirDonneesPage();
