@@ -220,6 +220,10 @@
         const conteneurDoc = document.getElementById('travaux-conteneur-document');
         travauxVisionneuse.setConteneur(conteneurDoc);
 
+        // Gestes zoom (pinch iPad / trackpad Mac)
+        const canvasContainer = document.getElementById('travaux-canvas-container');
+        travauxVisionneuse.configurerGestesZoom(canvasContainer);
+
         // Initialiser le scroll virtuel si necessaire
         initialiserScrollVirtuel();
 
@@ -701,6 +705,11 @@
         conteneurGrille.classList.add('travaux-split-panel');
 
         travauxVisionneuse.setConteneur(document.getElementById('travaux-split-document-container'));
+
+        // Gestes zoom (pinch iPad / trackpad Mac)
+        const splitCanvasContainer = conteneurTravail.querySelector('.travaux-canvas-container');
+        travauxVisionneuse.configurerGestesZoom(splitCanvasContainer);
+
         await travauxVisionneuse.ouvrirFichier(fichierId);
     }
 
