@@ -231,27 +231,30 @@ async function fusionnerDonneesDemo(packDemo) {
     }
 
     // 7. Fusionner présences (si présentes)
-    // ✅ CORRIGÉ (31 déc 2025) : Utiliser cle() pour le namespacing par trimestre
+    // ✅ CORRIGÉ (Beta 97) : Format Array cohérent avec saisie-presences.js
     if (packDemo.presences) {
         const clePresences = (typeof window.cle === 'function') ? window.cle('presences') : 'presences';
         console.log(`   📦 Clé présences: ${clePresences}`);
-        const presences = await db.get(clePresences) || {};
+        let presences = await db.get(clePresences) || [];
+        if (!Array.isArray(presences)) presences = [];
         const presencesDemo = packDemo.presences || {};
 
-        // Fusionner les présences par date
+        // Convertir format Object {date: {da: data}} → Array [{date, da, ...}]
         for (const [date, presDate] of Object.entries(presencesDemo)) {
-            if (!presences[date]) {
-                presences[date] = {};
-            }
-
             for (const [da, pres] of Object.entries(presDate)) {
-                if (!presences[date][da]) {
-                    presences[date][da] = pres;
+                const existe = presences.some(p => p.date === date && p.da === da);
+                if (!existe) {
+                    presences.push({
+                        date: date,
+                        da: da,
+                        ...pres,
+                        estDemo: true
+                    });
                 }
             }
         }
         await db.set(clePresences, presences);
-        console.log(`   ➜ ${clePresences} fusionnées`);
+        console.log(`   ➜ ${clePresences} fusionnées (${presences.length} entrées)`);
     }
 
     // 8. Fusionner cartouches (clés cartouches_*)
@@ -415,10 +418,15 @@ async function supprimerGroupe9999() {
     console.log(`   ➜ Évaluations demo supprimées de ${cleEvaluations}`);
 
     // 4. Supprimer présences des étudiants demo
-    const presences = await db.get(clePresences) || {};
-    for (const date in presences) {
-        for (const da of dasDemo) {
-            delete presences[date]?.[da];
+    let presences = await db.get(clePresences) || [];
+    if (Array.isArray(presences)) {
+        presences = presences.filter(p => !p.estDemo && !dasDemo.includes(p.da));
+    } else {
+        // Legacy Object format
+        for (const date in presences) {
+            for (const da of dasDemo) {
+                delete presences[date]?.[da];
+            }
         }
     }
     await db.set(clePresences, presences);
@@ -426,9 +434,7 @@ async function supprimerGroupe9999() {
 
     // 5. Supprimer productions demo
     const productions = await db.get(cleProductions) || [];
-    const prodsFiltrees = productions.filter(p =>
-        p.coursId !== 'demo-cours' && !p.id?.startsWith('PROD_')
-    );
+    const prodsFiltrees = productions.filter(p => !p.estDemo);
     await db.set(cleProductions, prodsFiltrees);
     console.log(`   ➜ Productions demo supprimées de ${cleProductions}`);
 

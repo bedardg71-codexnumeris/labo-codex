@@ -1093,7 +1093,7 @@ async function exporterReferentielCompletPDF(options = {}) {
     doc.text('Genere par Monitorage Pedagogique', largeurPage / 2, hauteurPage - 30, { align: 'center' });
 
     // Charger les donnees
-    const productions = await db.get(cle('productionsPedagogiques')) || [];
+    const productions = await db.get(cle('productions')) || [];
     const grilles = await db.get('grillesTemplates') || [];
     const echelles = await db.get('echellesTemplates') || [];
 
@@ -1265,7 +1265,7 @@ window.ExportPDF = {
  */
 async function exporterProductionsEnPDF() {
     try {
-        const productions = await db.get(cle('productionsPedagogiques')) || [];
+        const productions = await db.get(cle('productions')) || [];
         if (productions.length === 0) {
             alert('Aucune production a exporter.');
             return;
@@ -1411,7 +1411,7 @@ async function afficherApercuProductionsListe() {
     if (!zoneApercu || !contenuApercu) return;
 
     try {
-        const productions = await db.get(cle('productionsPedagogiques')) || [];
+        const productions = await db.get(cle('productions')) || [];
         if (productions.length > 0) {
             contenuApercu.innerHTML = genererApercuProductions(productions);
             zoneApercu.classList.add('visible');
@@ -1526,7 +1526,7 @@ async function chargerOptionsExportPDF() {
 
     // Charger les productions
     if (selectProduction) {
-        const cleProductions = (typeof cle === 'function') ? cle('productionsPedagogiques') : 'productions';
+        const cleProductions = (typeof cle === 'function') ? cle('productions') : 'productions';
         const productions = await db.get(cleProductions) || [];
         selectProduction.innerHTML = '<option value="">-- Aucune (grille générique) --</option>';
         productions.forEach(p => {
@@ -1608,7 +1608,7 @@ async function mettreAJourApercuPDF() {
 
         let production = null;
         if (productionId) {
-            const cleProductions = (typeof cle === 'function') ? cle('productionsPedagogiques') : 'productions';
+            const cleProductions = (typeof cle === 'function') ? cle('productions') : 'productions';
             const productions = await db.get(cleProductions) || [];
             production = productions.find(p => p.id === productionId);
         }
@@ -1878,7 +1878,7 @@ async function exporterPDFCombine() {
         // Production (optionnel)
         let production = null;
         if (productionId) {
-            const cleProductions = (typeof cle === 'function') ? cle('productionsPedagogiques') : 'productions';
+            const cleProductions = (typeof cle === 'function') ? cle('productions') : 'productions';
             const productions = await db.get(cleProductions) || [];
             production = productions.find(p => p.id === productionId);
         }
@@ -2272,7 +2272,7 @@ async function chargerOptionsPreparationPDF() {
 
     // Charger les productions (filtrées par dansBibliotheque)
     if (selectProduction) {
-        const cleProductions = (typeof cle === 'function') ? cle('productionsPedagogiques') : 'productions';
+        const cleProductions = (typeof cle === 'function') ? cle('productions') : 'productions';
         const toutesProductions = await db.get(cleProductions) || [];
         const productions = toutesProductions.filter(p => p.dansBibliotheque !== false);
         selectProduction.innerHTML = '<option value="">-- Aucune (grille générique) --</option>';
@@ -2391,7 +2391,7 @@ async function ouvrirApercuPDF() {
         // Production (optionnel)
         let production = null;
         if (productionId) {
-            const cleProductions = (typeof cle === 'function') ? cle('productionsPedagogiques') : 'productions';
+            const cleProductions = (typeof cle === 'function') ? cle('productions') : 'productions';
             const productions = await db.get(cleProductions) || [];
             production = productions.find(p => p.id === productionId);
         }
@@ -2775,7 +2775,7 @@ async function chargerOptionsInlinePDF() {
     // Charger les productions
     const selectProd = document.getElementById('inlinePDF-production');
     if (selectProd) {
-        const cleProductions = (typeof cle === 'function') ? cle('productionsPedagogiques') : 'productions';
+        const cleProductions = (typeof cle === 'function') ? cle('productions') : 'productions';
         const productions = await db.get(cleProductions) || [];
         selectProd.innerHTML = '<option value="">-- Aucune (grille générique) --</option>' +
             productions.map(p => `<option value="${p.id}">${p.titre}${p.description ? ' - ' + p.description : ''}</option>`).join('');
@@ -2862,7 +2862,7 @@ async function ouvrirApercuPDFDepuisInline() {
 
     let production = null;
     if (productionId) {
-        const cleProductions = (typeof cle === 'function') ? cle('productionsPedagogiques') : 'productions';
+        const cleProductions = (typeof cle === 'function') ? cle('productions') : 'productions';
         const productions = await db.get(cleProductions) || [];
         production = productions.find(p => p.id === productionId);
     }

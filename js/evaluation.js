@@ -254,7 +254,7 @@ function chargerProductionsDansSelect() {
     // ✅ CORRIGÉ (31 déc 2025) : Utiliser obtenirDonneesSelonMode pour le namespacing
     const productions = (typeof obtenirDonneesSelonMode === 'function')
         ? obtenirDonneesSelonMode('productions')
-        : db.getSync('productions', []);
+        : db.getSync(cle('productions'), []);
     const select = document.getElementById('selectProduction1');
 
     if (!select) return;
@@ -537,7 +537,7 @@ function chargerProduction(productionNum) {
     evaluationEnCours.productionId = productionId;
 
     // Récupérer les infos de la production
-    const productions = db.getSync('productions', []);
+    const productions = db.getSync(cle('productions'), []);
     const production = productions.find(p => p.id === productionId);
 
     if (production) {
@@ -1632,7 +1632,7 @@ function genererRetroaction(num) {
 
     if (!cartouche) return;
 
-    const productions = db.getSync('productions', []);
+    const productions = db.getSync(cle('productions'), []);
     const production = productions.find(p => p.id === evaluationEnCours.productionId);
 
     let texte = '';
@@ -1748,7 +1748,7 @@ function sauvegarderEvaluation() {
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
     const etudiant = etudiants.find(e => e.da === etudiantDA);
 
-    const productions = db.getSync('productions', []);
+    const productions = db.getSync(cle('productions'), []);
     const production = productions.find(p => p.id === productionId);
 
     const grilles = db.getSync('grillesTemplates', []);
@@ -1796,7 +1796,7 @@ function sauvegarderEvaluation() {
     const groupeCoursActif = db.getSync('groupeCoursActif', null);
     const maintenant = new Date();
     const evaluation = {
-        id: 'EVAL_' + Date.now(),
+        id: genererIdUnique('EVAL_'),
         etudiantDA: etudiantDA,
         etudiantNom: etudiant ? `${etudiant.prenom} ${etudiant.nom}` : '',
         groupe: etudiant ? etudiant.groupe : '',
@@ -2819,7 +2819,7 @@ function genererBadgeCompletion(etudiant) {
 
     // PRIORITÉ 3 : Fallback final - Calculer depuis le nombre d'artefacts
     if (completion === 0 && nbArtefacts > 0) {
-        const productions = db.getSync('productions', []);
+        const productions = db.getSync(cle('productions'), []);
         const productionsAttendues = productions.filter(p => p.type !== 'portfolio').length;
         completion = productionsAttendues > 0 ? nbArtefacts / productionsAttendues : 0;
     }
@@ -2905,7 +2905,7 @@ ${genererBadgeCompletion(etudiant)}
  */
 function genererDetailsEtudiant(etudiant) {
     const evaluations = etudiant.evaluations || [];
-    const productions = db.getSync('productions', []);
+    const productions = db.getSync(cle('productions'), []);
 
     // Créer un tableau avec TOUTES les productions et leur statut
     const tableauComplet = productions.map(production => {
@@ -3128,7 +3128,7 @@ function chargerFiltresEvaluations() {
     // Charger les productions
     const selectProduction = document.getElementById('filtre-production-eval');
     if (selectProduction) {
-        const productions = db.getSync('productions', []);
+        const productions = db.getSync(cle('productions'), []);
         selectProduction.innerHTML = '<option value="">Toutes les productions</option>';
         productions.forEach(prod => {
             selectProduction.innerHTML += `<option value="${prod.id}">${echapperHtml(prod.titre || prod.nom)}</option>`;
@@ -3143,7 +3143,7 @@ function chargerFiltresEvaluations() {
 function rechargerFiltreProduction() {
     const selectProduction = document.getElementById('filtre-production-eval');
     if (selectProduction) {
-        const productions = db.getSync('productions', []);
+        const productions = db.getSync(cle('productions'), []);
         selectProduction.innerHTML = '<option value="">Toutes les productions</option>';
         productions.forEach(prod => {
             selectProduction.innerHTML += `<option value="${prod.id}">${echapperHtml(prod.titre || prod.nom)}</option>`;
@@ -3312,7 +3312,7 @@ function mettreAJourStatistiquesEvaluations() {
 
     // 🎯 Calculer le total d'artefacts DONNÉS (même logique que portfolio.js)
     const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
-    const productions = db.getSync('productions', []);
+    const productions = db.getSync(cle('productions'), []);
 
     // Identifier les artefacts-portfolio
     const artefactsPortfolioIds = new Set(

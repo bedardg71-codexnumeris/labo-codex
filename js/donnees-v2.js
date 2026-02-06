@@ -780,7 +780,7 @@
 
         // Parcourir les productions
         try {
-            const productions = db.getSync('productions') || [];
+            const productions = db.getSync(cle('productions')) || [];
             productions.forEach(prod => {
                 if (prod.grilleId && usages[prod.grilleId]) {
                     usages[prod.grilleId].productionsCount++;
@@ -926,7 +926,7 @@
 
         // Vérifier les productions
         try {
-            const productions = db.getSync('productions') || [];
+            const productions = db.getSync(cle('productions')) || [];
             const prodsUtilisant = productions.filter(p => p.grilleId === grilleId);
             if (prodsUtilisant.length > 0) {
                 dependances.push(`Utilisée par ${prodsUtilisant.length} production(s)`);

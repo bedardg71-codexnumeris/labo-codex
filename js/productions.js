@@ -42,7 +42,7 @@
    - Tous les champs du formulaire (productionTitre, productionDescription, etc.)
    
    LocalStorage utilisé:
-   - 'productionsPedagogiques' : Array des productions/évaluations (namespacé par trimestre)
+   - 'productions' : Array des productions/évaluations (namespacé par trimestre via cle())
    - 'grillesTemplates' : Array des grilles de critères (pour association)
    =============================== */
 
@@ -51,7 +51,7 @@
  * Utilise cle() si disponible, sinon fallback sur 'productions'
  */
 function getCleProductions() {
-    return (typeof cle === 'function') ? cle('productionsPedagogiques') : 'productions';
+    return (typeof cle === 'function') ? cle('productions') : 'productions';
 }
 
 /**
@@ -287,7 +287,7 @@ async function afficherFormProduction(id) {
     if (id) {
         // Mode modification
         // 🆕 Beta 95.4 : Utiliser la clé namespacée pour le trimestre actif
-        const cleProductions = (typeof cle === 'function') ? cle('productionsPedagogiques') : 'productions';
+        const cleProductions = (typeof cle === 'function') ? cle('productions') : 'productions';
         const evaluations = await db.get(cleProductions) || [];
         console.log('📦 Nombre de productions:', evaluations.length, '(clé:', cleProductions, ')');
         console.log('🔑 IDs disponibles:', evaluations.map(e => e.id));
@@ -443,7 +443,7 @@ async function sauvegarderProduction() {
     }
 
     // 🆕 Beta 95.4 : Utiliser la clé namespacée pour le trimestre actif
-    const cleProductions = (typeof cle === 'function') ? cle('productionsPedagogiques') : 'productions';
+    const cleProductions = (typeof cle === 'function') ? cle('productions') : 'productions';
     let evaluations = await db.get(cleProductions) || [];
 
     // ✅ AJOUT (6 jan 2026) : Vérification des doublons
@@ -542,7 +542,7 @@ async function sauvegarderProduction() {
     } else {
         // Ajouter nouvelle production
         console.log('➕ MODE AJOUT - Nouvelle production');
-        productionData.id = 'PROD' + Date.now();
+        productionData.id = genererIdUnique('PROD_');
 
         // 🆕 Beta 95.4 : Pour nouvelle production, définir l'auteur original
         const enseignantActif = typeof obtenirNomEnseignantActif === 'function' ? obtenirNomEnseignantActif() : null;
@@ -3097,7 +3097,7 @@ window.sauvegarderMigrationCategories = sauvegarderMigrationCategories;
  */
 async function afficherListeProductions(filtreType = '') {
     // 🆕 Beta 95.4 : Utiliser la clé namespacée pour le trimestre actif
-    const cleProductions = (typeof cle === 'function') ? cle('productionsPedagogiques') : 'productions';
+    const cleProductions = (typeof cle === 'function') ? cle('productions') : 'productions';
     const cleGrilles = (typeof cle === 'function') ? cle('grillesTemplates') : 'grillesTemplates';
     const productions = await db.get(cleProductions) || [];
     const grilles = await db.get(cleGrilles) || [];

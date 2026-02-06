@@ -1023,13 +1023,15 @@ function supprimerCours(id) {
     const etudiants = db.getSync(cleEtudiants, []);
     const productions = db.getSync(cleProductions, []);
     const evaluations = db.getSync('evaluationsDetaillees', []);
-    const presences = db.getSync(clePresences, {});
+    const presences = db.getSync(clePresences, []);
 
     const nbEtudiants = etudiants.filter(e => e.coursId === id).length;
     const nbProductions = productions.filter(p => p.coursId === id).length;
     const productionsIds = productions.filter(p => p.coursId === id).map(p => p.id);
     const nbEvaluations = evaluations.filter(e => productionsIds.includes(e.productionId)).length;
-    const nbPresences = Object.keys(presences).filter(date => presences[date].coursId === id).length;
+    const nbPresences = Array.isArray(presences)
+        ? presences.filter(p => p.coursId === id).length
+        : Object.keys(presences).filter(date => presences[date].coursId === id).length;
 
     // ===============================
     // CONFIRMATION DÉTAILLÉE (Beta 93.5)
@@ -1065,12 +1067,15 @@ function supprimerCours(id) {
     console.log(`✅ [Suppression] ${nbEvaluations} évaluation(s) supprimée(s)`);
 
     // 4. Supprimer les présences du cours
-    const nouvellesPresences = {};
-    Object.keys(presences).forEach(date => {
-        if (presences[date].coursId !== id) {
-            nouvellesPresences[date] = presences[date];
-        }
-    });
+    const nouvellesPresences = Array.isArray(presences)
+        ? presences.filter(p => p.coursId !== id)
+        : (() => {
+            const obj = {};
+            Object.keys(presences).forEach(date => {
+                if (presences[date].coursId !== id) obj[date] = presences[date];
+            });
+            return obj;
+        })();
     db.setSync(clePresences, nouvellesPresences);
     console.log(`✅ [Suppression] ${nbPresences} date(s) de présences supprimée(s) dans ${clePresences}`);
 

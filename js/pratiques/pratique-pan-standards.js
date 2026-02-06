@@ -156,7 +156,7 @@ class PratiquePANStandards {
         const moyennePortfolio = somme / artefactsRetenus.length;
 
         // ✅ NOUVEAU (Beta 94 - 10 déc 2025): Intégrer évaluation terminale avec pondération
-        const productions = db.getSync('productions', []);
+        const productions = db.getSync(cle('productions'), []);
 
         // Trouver la production portfolio (conteneur)
         const productionPortfolio = productions.find(p => p.type === 'portfolio');
@@ -719,7 +719,7 @@ class PratiquePANStandards {
             methodeSelection = configPAN.portfolio.methodeSelection || 'meilleurs';
         } else {
             // Ancien format (fallback pour rétrocompatibilité)
-            const productions = db.getSync('productions', []);
+            const productions = db.getSync(cle('productions'), []);
             const portfolio = productions.find(p => p.type === 'portfolio');
 
             if (portfolio && portfolio.regles) {
@@ -757,7 +757,7 @@ class PratiquePANStandards {
      */
     _lireArtefactsPortfolio() {
         // ✅ CORRECTION (30 déc 2025): Utiliser obtenirDonneesSelonMode pour respecter coursId
-        // Avant: db.getSync('productions', []) ne filtrait pas par cours actif
+        // Avant: db.getSync(cle('productions'), []) ne filtrait pas par cours actif
         const productions = this._lireProductions();
         return productions
             .filter(p => p.type === 'artefact-portfolio')
@@ -1543,7 +1543,7 @@ class PratiquePANStandards {
      */
     _calculerNiveauxParObjectif(da, objectifs) {
         const evaluations = this._lireEvaluations();
-        const productions = db.getSync('productions', []);
+        const productions = db.getSync(cle('productions'), []);
 
         const evaluationsEleve = evaluations.filter(e =>
             e.etudiantDA === da &&

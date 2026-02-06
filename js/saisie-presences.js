@@ -801,7 +801,7 @@ function obtenirHeuresSeance(dateStr) {
         }
     });
 
-    return 2;  // Simplification : toujours 2h par séance
+    return totalHeures || 2;
 }
 
 /**

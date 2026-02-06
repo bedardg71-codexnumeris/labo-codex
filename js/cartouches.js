@@ -431,7 +431,7 @@ async function initialiserNouveauCartouche(grilleId) {
     
     // Créer la structure de cartouche
     cartoucheActuel = {
-        id: 'CART' + Date.now(),
+        id: genererIdUnique('CART_'),
         nom: '',
         grilleId: grilleId,
         contexte: '',
@@ -1432,7 +1432,7 @@ async function dupliquerCartouche(cartoucheId, grilleId) {
     if (cartoucheOriginal) {
         const nouveauCartouche = {
             ...cartoucheOriginal,
-            id: 'CART' + Date.now(),
+            id: genererIdUnique('CART_'),
             nom: cartoucheOriginal.nom + ' (copie)',
             verrouille: false,
             dansBibliotheque: true,  // ✅ AJOUT (8 décembre 2025) : Copie visible par défaut

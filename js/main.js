@@ -14,6 +14,18 @@
    =============================== */
 
 /* ===============================
+   FONCTION GLOBALE: Génération d'ID uniques
+   =============================== */
+/**
+ * Génère un ID unique avec préfixe, résistant aux collisions même en boucle
+ * @param {string} prefix - Préfixe (ex: 'EVAL_', 'PROD_', 'CR')
+ * @returns {string} - ID unique (ex: 'EVAL_1707123456789_k7x2m')
+ */
+window.genererIdUnique = function(prefix = '') {
+    return prefix + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+};
+
+/* ===============================
    FONCTION GLOBALE: Badge de pratique de notation
    =============================== */
 /**
@@ -516,6 +528,14 @@ document.addEventListener('DOMContentLoaded', function () {
     // Migrer horaires globaux vers horaires par cours
     if (typeof executerMigrationsBeta95 === 'function') {
         executerMigrationsBeta95();
+    }
+
+    // ===============================
+    // 3.6b MIGRATION CLÉ PRODUCTIONS (Beta 97)
+    // ===============================
+    // Copier productionsPedagogiques → productions (clé canonique)
+    if (typeof migrerCleProductionsPedagogiques === 'function') {
+        migrerCleProductionsPedagogiques();
     }
 
     // ===============================

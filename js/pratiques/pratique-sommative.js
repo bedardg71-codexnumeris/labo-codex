@@ -611,7 +611,7 @@ class PratiqueSommative {
      * @private
      */
     _lireProductions() {
-        return db.getSync('productions', []);
+        return db.getSync(cle('productions'), []);
     }
 
     /**

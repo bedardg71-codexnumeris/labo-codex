@@ -84,7 +84,7 @@ function selectionnerArtefactsSelonModalite(artefactsRemisAvecNote, nombreAReten
 function chargerPortfolioEleveDetail(da) {
     try {
         // Récupérer les données
-        const productions = db.getSync('productions', []);
+        const productions = db.getSync(cle('productions'), []);
         const portfolio = productions.find(p => p.type === 'portfolio');
 
         if (!portfolio) {

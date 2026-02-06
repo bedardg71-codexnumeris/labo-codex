@@ -200,7 +200,7 @@ function addStudent() {
         const coursId = typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null;
 
         const student = {
-            id: Date.now(),
+            id: genererIdUnique('ETU_'),
             da: document.getElementById('etudiantDA').value.trim() || `AUTO-${Date.now()}`,
             groupe: document.getElementById('etudiantGroupe').value.trim() || '1',
             nom: nom,
@@ -496,7 +496,7 @@ function parseAndPreview(content) {
                 if (colonneMapping) {
                     // ✅ Mode intelligent avec mapping de colonnes
                     student = {
-                        id: Date.now() + index + Math.random(),
+                        id: genererIdUnique('ETU_'),
                         da: colonneMapping.da >= 0 ? (parts[colonneMapping.da] || '') : '',
                         groupe: colonneMapping.groupe >= 0 ? (parts[colonneMapping.groupe] || '1') : '1',
                         nom: colonneMapping.nom >= 0 ? (parts[colonneMapping.nom] || '') : '',
@@ -509,7 +509,7 @@ function parseAndPreview(content) {
                 } else {
                     // Mode classique par position fixe
                     student = {
-                        id: Date.now() + index + Math.random(),
+                        id: genererIdUnique('ETU_'),
                         da: parts[0] || `AUTO-${Date.now() + index}`,
                         groupe: parts[1] || '1',
                         nom: parts[2] || parts[0] || '', // Si pas de DA, premier champ = nom

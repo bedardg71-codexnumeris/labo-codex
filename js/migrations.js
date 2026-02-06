@@ -113,7 +113,7 @@ function migrerProductionsVersCoursId() {
 function migrerPresencesVersCoursId() {
     // ✅ CORRECTION (Beta 95 - 2 jan 2026) : Utiliser clé namespacée
     const clePresences = (typeof cle === 'function') ? cle('presences') : 'presences';
-    const presences = db.getSync(clePresences, {});
+    const presences = db.getSync(clePresences, []);
     const cours = db.getSync('listeCours', []);
     const coursActif = cours.find(c => c.actif) || cours[0];
 
@@ -123,12 +123,24 @@ function migrerPresencesVersCoursId() {
     }
 
     let nbMigres = 0;
-    Object.keys(presences).forEach(date => {
-        if (!presences[date].coursId) {
-            presences[date].coursId = coursActif.id;
-            nbMigres++;
-        }
-    });
+
+    if (Array.isArray(presences)) {
+        // Format Array (courant depuis Beta 95)
+        presences.forEach(p => {
+            if (!p.coursId) {
+                p.coursId = coursActif.id;
+                nbMigres++;
+            }
+        });
+    } else if (presences && typeof presences === 'object') {
+        // Format Object legacy {date: {coursId, ...}}
+        Object.keys(presences).forEach(date => {
+            if (!presences[date].coursId) {
+                presences[date].coursId = coursActif.id;
+                nbMigres++;
+            }
+        });
+    }
 
     if (nbMigres > 0) {
         db.setSync(clePresences, presences);
@@ -1240,6 +1252,67 @@ async function executerMigrationsBeta96() {
     }
 }
 
+/**
+ * Migration Beta 97 : Unifier clé productions
+ * Copie les données de 'productionsPedagogiques' vers 'productions' (clé canonique)
+ */
+function migrerCleProductionsPedagogiques() {
+    if (db.getSync('migrationCleProductionsFaite', false)) return 0;
+
+    let nbMigres = 0;
+    const trimestres = db.getSync('trimestresDisponibles', []);
+    const prefixes = trimestres.map(t => t.id + '_');
+    // Ajouter aussi le trimestre actif au cas où
+    if (typeof cle === 'function') {
+        const cleActuelle = cle('productionsPedagogiques');
+        if (cleActuelle && !prefixes.some(p => cleActuelle.startsWith(p))) {
+            prefixes.push(cleActuelle.replace('productionsPedagogiques', ''));
+        }
+    }
+
+    for (const prefix of prefixes) {
+        const ancienneCle = prefix + 'productionsPedagogiques';
+        const nouvelleCle = prefix + 'productions';
+        const anciennes = db.getSync(ancienneCle, null);
+        if (anciennes && Array.isArray(anciennes) && anciennes.length > 0) {
+            const existantes = db.getSync(nouvelleCle, []);
+            if (!existantes || existantes.length === 0) {
+                // Copier vers la nouvelle clé
+                db.setSync(nouvelleCle, anciennes);
+                console.log(`✅ [Migration] ${ancienneCle} → ${nouvelleCle} (${anciennes.length} productions)`);
+                nbMigres += anciennes.length;
+            } else {
+                // Fusionner : ajouter celles qui manquent
+                const idsExistants = new Set(existantes.map(p => p.id));
+                const nouvelles = anciennes.filter(p => !idsExistants.has(p.id));
+                if (nouvelles.length > 0) {
+                    db.setSync(nouvelleCle, [...existantes, ...nouvelles]);
+                    console.log(`✅ [Migration] Fusionné ${nouvelles.length} productions de ${ancienneCle} vers ${nouvelleCle}`);
+                    nbMigres += nouvelles.length;
+                }
+            }
+        }
+    }
+
+    // Aussi vérifier la clé nue (sans préfixe)
+    const nue = db.getSync('productionsPedagogiques', null);
+    if (nue && Array.isArray(nue) && nue.length > 0) {
+        const cleNouv = (typeof cle === 'function') ? cle('productions') : 'productions';
+        const existantes = db.getSync(cleNouv, []);
+        if (!existantes || existantes.length === 0) {
+            db.setSync(cleNouv, nue);
+            console.log(`✅ [Migration] productionsPedagogiques (nue) → ${cleNouv} (${nue.length})`);
+            nbMigres += nue.length;
+        }
+    }
+
+    if (nbMigres > 0) {
+        console.log(`🔄 [Migration] Total : ${nbMigres} productions migrées de productionsPedagogiques → productions`);
+    }
+    db.setSync('migrationCleProductionsFaite', true);
+    return nbMigres;
+}
+
 // Export des fonctions
 if (typeof window !== 'undefined') {
     window.executerMigrationsBeta935 = executerMigrationsBeta935;
@@ -1263,6 +1336,8 @@ if (typeof window !== 'undefined') {
     window.verifierEtProposerMigrationLegacy = verifierEtProposerMigrationLegacy;
     // 🆕 Beta 95.2 - Entités modulaires
     window.executerMigrationsBeta96 = executerMigrationsBeta96;
+    // 🆕 Beta 97 - Unification clé productions
+    window.migrerCleProductionsPedagogiques = migrerCleProductionsPedagogiques;
     window.migrerVersEntiteEnseignants = migrerVersEntiteEnseignants;
     window.migrerVersEntiteCours = migrerVersEntiteCours;
     window.migrerVersEntiteHoraires = migrerVersEntiteHoraires;

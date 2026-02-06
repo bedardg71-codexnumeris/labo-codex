@@ -123,10 +123,8 @@ function sauvegarderInterventions(interventions) {
  */
 function creerIntervention(data) {
     const interventions = obtenirInterventions();
-    const now = Date.now();
-
     const nouvelleIntervention = {
-        id: `intervention-${now}`,
+        id: genererIdUnique('intervention-'),
         date: data.date || '',
         heure: data.heure || '',
         duree: data.duree || 2,
@@ -1478,7 +1476,7 @@ function transfererPresencesVersModule(interventionId) {
     console.log('   ───────────────────────────────────');
 
     // Sauvegarder les présences mises à jour
-    db.setSync('presences', presences);
+    db.setSync(clePresences, presences);
     console.log('   💾 Présences sauvegardées dans localStorage');
 
     // Recalculer les indices d'assiduité
