@@ -13460,61 +13460,63 @@ body.mode-assiste .btn-aide-contextuelle,
 
 /* --- Popup autocollants --- */
 .travaux-popup-autocollants {
-    position: absolute;
-    bottom: 100%;
-    left: 0;
+    position: fixed;
     background: white;
     border: 1px solid var(--gris-clair, #e5e5e5);
-    border-radius: 8px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-    padding: 12px;
-    z-index: 100;
-    display: none;
-    max-width: 420px;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+    padding: 12px 14px;
+    z-index: 10000;
 }
 
-.travaux-popup-autocollants.visible {
-    display: block;
+.travaux-autocollants-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    color: var(--gris-fonce, #666);
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    margin-top: 8px;
 }
 
-.travaux-autocollants-qualite,
-.travaux-autocollants-diagnostic {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
+.travaux-autocollants-label:first-child {
+    margin-top: 0;
 }
 
-.travaux-autocollants-qualite {
-    margin-bottom: 8px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--gris-clair, #e5e5e5);
+.travaux-autocollants-grille {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
 }
 
 .travaux-autocollant-item {
-    display: inline-flex;
+    display: flex;
     flex-direction: column;
     align-items: center;
-    width: 64px;
-    padding: 6px;
+    padding: 6px 4px;
     cursor: pointer;
     border-radius: 6px;
+    min-width: 0;
 }
 
 .travaux-autocollant-item:hover {
-    background: rgba(0,0,0,0.05);
+    background: rgba(0,0,0,0.06);
 }
 
 .travaux-autocollant-item img {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     object-fit: contain;
 }
 
 .travaux-autocollant-item span {
-    font-size: 0.6rem;
+    font-size: 0.55rem;
     text-align: center;
     margin-top: 2px;
     line-height: 1.1;
+    max-width: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* --- Modal revision export --- */
