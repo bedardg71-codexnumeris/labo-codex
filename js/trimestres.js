@@ -40,7 +40,11 @@
         // Ces clés étaient utilisées avec namespacing direct (${trimestre}_xxx)
         // mais cle() ne les reconnaissait pas, causant le bug A2025/Démo
         'groupesCours',
-        'horaires'
+        'horaires',
+        // 🆕 BETA 96.3 : Module Travaux
+        'fichiersTravaux',
+        'annotationsTravaux',
+        'archivesBundles'
     ];
 
     // Clés globales (partagées entre trimestres)

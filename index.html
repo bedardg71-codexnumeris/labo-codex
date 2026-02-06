@@ -3512,6 +3512,7 @@
                 <button data-onglet="evaluations">Évaluations</button>
                 <button data-onglet="construction">Construction de la note</button>
                 <button data-onglet="boite-outils">Boîte à outils</button>
+                <button data-onglet="travaux">Travaux</button>
                 <button data-onglet="reglages" class="btn-nav-icone" title="Réglages">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="3"></circle>
@@ -6527,6 +6528,36 @@
                 </div><!-- fin sous-section tirage -->
 
             </section><!-- fin section-boite-outils -->
+
+            <!-- ===================================
+                 SECTION: TRAVAUX
+                 Import, annotation et archivage des travaux etudiants
+                 Beta 96.3
+                 =================================== -->
+            <section id="section-travaux" class="section">
+
+                <!-- Sous-section: Import -->
+                <div id="travaux-import" class="sous-section">
+                    <div id="travaux-contenu-import">
+                        <p class="texte-muted">Chargement du module Travaux...</p>
+                    </div>
+                </div>
+
+                <!-- Sous-section: Visionneuse -->
+                <div id="travaux-visionneuse" class="sous-section">
+                    <div id="travaux-contenu-visionneuse">
+                        <p class="texte-muted">Chargement de la visionneuse...</p>
+                    </div>
+                </div>
+
+                <!-- Sous-section: Archivage -->
+                <div id="travaux-archivage" class="sous-section">
+                    <div id="travaux-contenu-archivage">
+                        <p class="texte-muted">Chargement de l'archivage...</p>
+                    </div>
+                </div>
+
+            </section><!-- fin section-travaux -->
 
             <!-- ===================================
                  SECTION: RÉGLAGES
@@ -15455,6 +15486,17 @@
     <script src="js/evaluations-apercu.js?v=2025111026"></script>
     <script src="js/boite-outils.js?v=2026013005"></script> <!-- Beta 96.1 : Boîte à outils pédagogiques -->
 
+    <!-- BETA 96.3 : Module Travaux (import, annotation, archivage) -->
+    <script src="libs/pdf.min.js?v=4.2.67"></script>
+    <script src="libs/jszip.min.js?v=3.10.1"></script>
+    <script src="js/travaux-stockage.js?v=2026020601"></script>
+    <script src="js/travaux-import.js?v=2026020601"></script>
+    <script src="js/travaux-visionneuse.js?v=2026020601"></script>
+    <script src="js/travaux-outils.js?v=2026020601"></script>
+    <script src="js/travaux-annotation.js?v=2026020601"></script>
+    <script src="js/travaux-archivage.js?v=2026020601"></script>
+    <script src="js/travaux-ui.js?v=2026020601"></script>
+
     <!-- PRIORITÉ 5: Modules fonctionnels -->
     <script src="js/calendrier-vue.js?v=2025120201"></script>
     <script src="js/horaire.js?v=2026010602"></script>
@@ -15515,7 +15557,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '96';
-        const BUILD_ID = '0204-1215';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0206-0525';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';

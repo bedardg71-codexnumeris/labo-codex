@@ -1,7 +1,7 @@
-# SESSION ACTIVE - BETA 96.2
+# SESSION ACTIVE - BETA 96.3
 
-**Date** : 4 février 2026
-**Version** : Beta 96.2 (build 0204-1140)
+**Date** : 6 février 2026
+**Version** : Beta 96.3 (build 0206-0525)
 **Statut** : Application fonctionnelle pour H2026, A2024/A2025 archives, synchronisation multi-appareils opérationnelle
 
 ---
@@ -30,7 +30,32 @@
 - **Modal Confidentiel** : Informations sensibles sur l'étudiant (ÉPGC, services adaptés, etc.)
 - **Anonymisation groupes** : Numéros de groupe remplacés par lettres en mode anonymisation
 
-### Derniere tache completee (4 février - Beta 96.2)
+### Derniere tache completee (6 février - Beta 96.3)
+
+- **MODULE TRAVAUX - Import, Annotation et Archivage** (remplace GoodNotes)
+  - **Objectif** : Gestion complete des travaux etudiants directement dans Monitorage
+  - **5 phases implementees** :
+    1. **Import + Visualisation** : Import drag-drop de PDF/images, detection auto du DA etudiant, miniatures, PDF.js pour rendu PDF
+    2. **Moteur d'annotation** : Canvas overlay, Apple Pencil (Pointer Events, rejet paume, pression), outils (stylo, surligneur, gomme, texte, formes, symboles), undo/redo (50 niveaux), sauvegarde auto (debounce 2s)
+    3. **Integration evaluation** : Bouton "Voir le travail" dans evaluations, vue cote-a-cote (travail + grille), section "Travaux soumis" dans profil etudiant
+    4. **Archivage** : Export ZIP par etudiant/production/semestre via JSZip, aplatissement annotations sur images
+    5. **Optimisation** : File System Access API (Mac Chrome/Edge) pour stockage sur disque, scroll virtuel (500+ miniatures), pre-rendu pages adjacentes, moniteur quota avec nettoyage
+  - **Nouveaux fichiers** (7 modules JS + 3 libs) :
+    - `js/travaux-stockage.js` - Abstraction stockage (IndexedDB + FSAPI)
+    - `js/travaux-import.js` - Import fichiers, drag-drop, jumelage auto DA
+    - `js/travaux-visionneuse.js` - Rendu PDF.js + images, zoom/pan, cache pages
+    - `js/travaux-annotation.js` - Moteur annotation canvas, Apple Pencil
+    - `js/travaux-outils.js` - Definitions outils, palette, pression
+    - `js/travaux-archivage.js` - Generation ZIP/PDF, export portfolio
+    - `js/travaux-ui.js` - Coordinateur UI, scroll virtuel, vue cote-a-cote
+    - `libs/pdf.min.js` + `libs/pdf.worker.min.js` (PDF.js v4.2.67)
+    - `libs/jszip.min.js` (JSZip v3.10.1)
+  - **Fichiers modifies** : `index.html`, `styles.css`, `js/config.js`, `js/navigation.js`, `js/trimestres.js`, `js/evaluation.js`, `js/profil-etudiant.js`
+  - **Navigation** : Nouvel onglet "Travaux" avec 3 sous-sections (Import, Visionneuse, Archivage)
+  - **Donnees** : 3 nouvelles cles namespacees (`fichiersTravaux`, `annotationsTravaux`, `archivesBundles`)
+  - **Stockage** : IndexedDB blobs (iPad) ou fichiers sur disque via FSAPI (Mac), annotations JSON legeres
+
+### Tache precedente (4 février - Beta 96.2)
 
 - **REFONTE GESTION DES RESSOURCES (Réglages > Données > Maintenance)**
   - **Objectif** : Outil développeur pour auditer et nettoyer les ressources pédagogiques accumulées

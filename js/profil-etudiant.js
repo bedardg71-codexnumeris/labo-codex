@@ -3017,6 +3017,10 @@ function changerSectionProfil(section) {
             titre = 'Accompagnement';
             contenu = genererSectionAccompagnement(da);
             break;
+        case 'travaux':
+            titre = 'Travaux soumis';
+            contenu = genererSectionTravaux(da);
+            break;
         default:
             titre = 'Section inconnue';
             contenu = '<p>Section non trouvée</p>';
@@ -3502,6 +3506,9 @@ function afficherProfilComplet(da) {
         // Si RàI désactivé, rediriger vers productions
         titreSection = 'Productions et évaluations';
         contenuSection = genererSectionProductions(da);
+    } else if (sectionAffichee === 'travaux') {
+        titreSection = 'Travaux soumis';
+        contenuSection = genererSectionTravaux(da);
     }
 
     // Générer le HTML avec layout sidebar matériel
@@ -3586,7 +3593,12 @@ function afficherProfilComplet(da) {
                     </div>
                     ` : ''}
 
-                    <!-- 5. Rapport -->
+                    <!-- 5. Travaux soumis (Beta 96.3) -->
+                    <div class="sidebar-item ${sectionAffichee === 'travaux' ? 'active' : ''}" onclick="changerSectionProfil('travaux')">
+                        <div class="sidebar-item-titre">Travaux soumis</div>
+                    </div>
+
+                    <!-- 6. Rapport -->
                     <div class="sidebar-item ${sectionAffichee === 'rapport' ? 'active' : ''}" onclick="changerSectionProfil('rapport')">
                         <div class="sidebar-item-titre">Rapport</div>
                     </div>
@@ -8739,6 +8751,68 @@ window.sauvegarderConfidentiel = sauvegarderConfidentiel;
 window.toggleServicesAdaptes = toggleServicesAdaptes;
 window.mettreAJourSousCategories = mettreAJourSousCategories;
 window.aDesInfosConfidentielles = aDesInfosConfidentielles;
+
+/**
+ * Genere la section "Travaux soumis" pour le profil etudiant
+ * Affiche une grille de miniatures des fichiers importes
+ * 🆕 BETA 96.3 : Module Travaux
+ * @param {string} da - DA de l'etudiant
+ * @returns {string} HTML de la section
+ */
+function genererSectionTravaux(da) {
+    if (typeof travauxStockage === 'undefined') {
+        return '<p class="texte-muted">Module Travaux non disponible</p>';
+    }
+
+    const fichiers = travauxStockage.obtenirFichiersEtudiant(da);
+    const productions = obtenirDonneesSelonMode('productions');
+
+    if (fichiers.length === 0) {
+        return `
+            <div class="profil-zone-grande-bleu">
+                <p style="color: #666; font-size: 1.1rem;">Aucun travail soumis</p>
+                <p style="color: #999; margin-top: 10px;">Importez des travaux depuis l'onglet Travaux &gt; Import</p>
+            </div>
+        `;
+    }
+
+    let html = '<div class="travaux-grille">';
+
+    fichiers.forEach(f => {
+        const thumb = f.thumbnailDataUrl || '';
+        const icone = f.typeMIME === 'application/pdf' ? '&#x1F4C4;' : '&#x1F5BC;';
+        const production = productions.find(p => p.id === f.productionId);
+        const nomProd = production ? echapperHtml(production.titre || production.nom || '') : '';
+        const annotation = travauxStockage.obtenirAnnotationFichier(f.id);
+        const aAnnotations = annotation && Object.keys(annotation.pages || {}).length > 0;
+
+        html += `
+            <div class="travaux-grille-item" onclick="travauxUI.ouvrirFichier('${f.id}')" title="${echapperHtml(f.nomFichier)}">
+                <div class="travaux-grille-thumb">
+                    ${thumb ? `<img src="${thumb}" alt="">` : `<span class="travaux-grille-icone">${icone}</span>`}
+                    ${aAnnotations ? '<span class="travaux-badge-annote" title="Annote">&#x270F;</span>' : ''}
+                </div>
+                <div class="travaux-grille-info">
+                    <div class="travaux-grille-nom">${echapperHtml(f.nomFichier)}</div>
+                    ${nomProd ? `<div class="travaux-grille-etudiant">${nomProd}</div>` : ''}
+                    <div class="travaux-grille-etudiant">${travauxStockage.formaterTaille(f.tailleFichier)}</div>
+                </div>
+            </div>`;
+    });
+
+    html += '</div>';
+
+    // Bouton export
+    html += `
+        <div style="margin-top: 16px;">
+            <button class="btn btn-secondaire" onclick="travauxArchivage.lancerExportEtudiant('${da}', {inclureAnnotes: true})">
+                Telecharger ZIP des travaux
+            </button>
+        </div>
+    `;
+
+    return html;
+}
 
 // 🆕 BETA 93: Exporter afficherProfilComplet pour accès depuis autres modules
 window.afficherProfilComplet = afficherProfilComplet;
