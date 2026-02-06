@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 6 février 2026 (Beta 97 - Build 0206-0945)
+> **Derniere mise a jour** : 6 février 2026 (Beta 97.1 - Build 0206-1315)
 
 ---
 
@@ -89,23 +89,21 @@
 
 ### Priorite CRITIQUE - Design / CSS (Audit 5 fév 2026)
 
-- [ ] **#74** 1 855 styles inline dans les templates JS avec couleurs hardcodées
-  - **Symptôme** : Les couleurs ne changent PAS lors du switch de mode (Normal/Simulation/Anonymisation)
-  - **Cause** : Les fichiers JS génèrent du HTML avec des hex hardcodés (#fff3cd, #2196F3, #28a745, etc.) au lieu de `var(--token)`
-  - **Pires fichiers** : profil-etudiant.js (318), pratiques.js (162), grilles.js (125), import-export.js (97), evaluation.js (87), cc-license.js (103), echelles.js (101)
-  - **Violation** : Principe du design system « Toute l'interface bascule sans code dupliqué »
-  - **Correction** : Créer des classes CSS réutilisables pour les patterns récurrents :
-    - `.info-box-attention` → remplace `background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px;`
-    - `.info-box-info` → remplace `background: #e7f3ff; border: 1px solid #2196F3; ...`
-    - `.info-box-succes` → remplace `background: #d4edda; border-left: 3px solid #28a745; ...`
-    - `.badge-source-locale` → remplace inline #4caf50 badges
-    - `.badge-source-bibliotheque` → remplace inline #2196f3 badges
-    - `.badge-source-retiree` → remplace inline #ff9800 badges
+- [x] **#74** 1 855 styles inline dans les templates JS avec couleurs hardcodées ✅ CORRIGÉ (6 fév 2026)
+  - **Résultat** : 1 855 → 1 776 `style=` (-79 attributs), 0 couleur hex mappée restante dans les inline styles
+  - **Travail effectué** :
+    - 30+ classes utilitaires ajoutées dans styles.css (u-flex-gap-*, u-p-*, u-bg-*, u-border-*)
+    - Patterns info-box, badge-source, modal-js-overlay/contenu appliqués dans tous les fichiers
+    - ~475 couleurs hex hardcodées remplacées par `var(--token)` CSS dans 40+ fichiers JS
+    - Toutes les couleurs mappées (#032e5c, #065dbb, #666, #999, #28a745, #dc3545, #fff3cd, etc.) éliminées
+    - 30 hex restantes sont des couleurs sémantiques spécifiques (palettes RàI, swatches, Primo) hors mapping
+    - Tous les fichiers passent `node --check` (syntaxe valide)
 
-- [ ] **#75** 1 304 attributs style inline dans index.html
-  - **Symptôme** : HTML difficile à maintenir, styles non centralisés
-  - **Pire zone** : Section changelog/notes de version (lignes ~3198-3400+) — chaque entrée répète le même pattern inline
-  - **Correction** : Créer des classes CSS `.changelog-entry`, `.changelog-entry--feature`, `.changelog-entry--bugfix`, `.changelog-entry--breaking`
+- [x] **#75** 1 304 attributs style inline dans index.html ✅ CORRIGÉ (6 fév 2026)
+  - **Résultat** : 1 309 → 1 138 `style=` (-171 attributs supprimés)
+  - **Phase 1** : Section changelog (18 entrées) → classes `.changelog-entry--*`, `.changelog-title`, `.changelog-list`
+  - **Phase 2** : Hex colors → `var(--token)`, single-property → utility classes, flex → `.u-flex-*`
+  - **Non touché** : `style="display: none"` (~150 occurrences, états JS toggle)
 
 - [x] **#76** 595 toggling `.style.display` dans 31 fichiers JS ✅ CORRIGÉ (6 fév 2026)
   - **Résultat** : 434 → 11 (423 migrés). Les 11 restants sont des `= ''` (nettoyage) ou commentés
@@ -119,7 +117,7 @@
   - ~35 couleurs Material Design remplacées par variables CSS dans styles.css
   - `#1976d2` → `var(--bleu-clair)`, `#2196F3` → `var(--bleu-clair)`, `#4caf50` → `var(--vert-succes)`
   - `#ff9800` → `var(--orange-accent)`, `#ffc107` → `var(--btn-annuler)`, `#9e9e9e` → `var(--gris-clair)`
-  - ⏳ Restent ~1855 couleurs hardcodées dans les templates JS (#74)
+  - ✅ #74 terminé — toutes les couleurs hardcodées mappées remplacées par var(--token)
 
 - [x] **#78** box-shadow hardcodés remplacés par variables CSS ✅ PARTIEL (6 fév 2026)
   - 2 ombres `rgba(3, 46, 92, ...)` remplacées par `var(--shadow-normal)`

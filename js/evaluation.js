@@ -356,7 +356,7 @@ function chargerEchellePerformance() {
         const nomEchappe = echellePratique.nom.replace(/[<>&"']/g, c => ({
             '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&#39;'
         }[c]));
-        select.innerHTML += `<option value="${echellePratique.id}" style="background: #e3f2fd; font-weight: 600;">${nomEchappe} (${nbNiveaux} niveaux)</option>`;
+        select.innerHTML += `<option value="${echellePratique.id}" style="background: var(--bleu-pale); font-weight: 600;">${nomEchappe} (${nbNiveaux} niveaux)</option>`;
     }
 
     // Ajouter les échelles personnalisées
@@ -436,7 +436,7 @@ function chargerEvaluationsEtudiant() {
         select.value = '';
         // ✅ Réinitialiser aussi la couleur de fond (enlever les couleurs vert/jaune/etc.)
         select.style.backgroundColor = '';
-        select.style.borderColor = '#ddd';
+        select.style.borderColor = 'var(--bordure-claire)';
         select.style.fontWeight = 'normal';
 
         // ✅ Vider aussi le commentaire de rétroaction du critère
@@ -445,7 +445,7 @@ function chargerEvaluationsEtudiant() {
         if (commDiv) {
             commDiv.textContent = 'Sélectionnez un niveau';
             commDiv.style.fontStyle = 'italic';
-            commDiv.style.color = '#999';
+            commDiv.style.color = 'var(--gris-clair)';
         }
     });
 
@@ -692,27 +692,27 @@ function cartoucheSelectionnee() {
             <div>
     <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px;">
         <strong class="u-texte-09">${echapperHtml(critere.nom)}</strong>
-        <small style="color: #666;">(${ponderation}%)</small>
+        <small style="color: var(--gris-moyen);">(${ponderation}%)</small>
         ${estAlgorithmique ? '<span style="font-size: 0.7rem; color: var(--orange-accent); font-weight: bold; margin-left: 6px;">ALGORITHMIQUE</span>' : ''}
     </div>
     ${critereGrille?.description ?
-                `<small style="display: block; color: #888; font-style: italic; margin-bottom: 10px; line-height: 1.3;">${echapperHtml(critereGrille.description)}</small>` : ''}
+                `<small style="display: block; color: var(--gris-clair); font-style: italic; margin-bottom: 10px; line-height: 1.3;">${echapperHtml(critereGrille.description)}</small>` : ''}
 
     ${estAlgorithmique ? (categorisationActive ? `
         <!-- Interface algorithmique AVEC catégorisation -->
         <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-bottom: 10px;">
             <div class="groupe-form">
-                <label style="font-size: 0.75rem; color: #666;">Codes d'erreurs → séparer par ;</label>
+                <label style="font-size: 0.75rem; color: var(--gris-moyen);">Codes d'erreurs → séparer par ;</label>
                 <input type="text"
                        id="eval_categories_${critere.id}"
                        class="controle-form"
                        placeholder="Ex: 1;4;6;1;4;10"
                        oninput="calculerNoteAlgorithmiqueAvecCategories('${critere.id}', ${ponderation}, ${facteur}, '${critereGrille?.id || ''}')"
                        style="font-size: 0.85rem;">
-                <small style="font-size: 0.7rem; color: #999;">(Voir configuration de la grille)</small>
+                <small style="font-size: 0.7rem; color: var(--gris-clair);">(Voir configuration de la grille)</small>
             </div>
             <div class="groupe-form">
-                <label style="font-size: 0.75rem; color: #666;">Nombre de mots</label>
+                <label style="font-size: 0.75rem; color: var(--gris-moyen);">Nombre de mots</label>
                 <input type="number"
                        id="eval_mots_${critere.id}"
                        class="controle-form"
@@ -722,26 +722,26 @@ function cartoucheSelectionnee() {
                        style="font-size: 0.85rem;">
             </div>
         </div>
-        <div id="resultat_algo_${critere.id}" style="padding: 8px; background: #f0f8ff; border-radius: 4px; font-size: 0.85rem; color: #666; margin-bottom: 8px;">
+        <div id="resultat_algo_${critere.id}" style="padding: 8px; background: var(--bleu-tres-pale); border-radius: 4px; font-size: 0.85rem; color: var(--gris-moyen); margin-bottom: 8px;">
             <span id="total_erreurs_${critere.id}">--</span> erreurs / <span id="mots_formule_${critere.id}">--</span> mots → <span id="note_algo_${critere.id}">--</span>/${ponderation} (<span id="pct_algo_${critere.id}">--</span>%) | Niveau: <span id="niveau_algo_${critere.id}">--</span><br>
             <strong>Catégorie dominante:</strong> <span id="cat_dominante_${critere.id}" style="color: var(--orange-accent);">--</span>
         </div>
         <!-- Menu sélecteur IDME pour modification manuelle (ex: jeton de reprise ciblée) -->
         <div style="margin-top: 8px;">
-            <label style="font-size: 0.75rem; color: #666; margin-bottom: 4px; display: block;">Niveau IDME (modifiable manuellement) :</label>
+            <label style="font-size: 0.75rem; color: var(--gris-moyen); margin-bottom: 4px; display: block;">Niveau IDME (modifiable manuellement) :</label>
             <select id="eval_${critere.id}" class="controle-form"
                     onchange="niveauSelectionne('${critere.id}')"
-                    style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 2px solid #ddd; width: 100%;">
+                    style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 2px solid var(--bordure-claire); width: 100%;">
                 <option value="">-- Utiliser le niveau calculé --</option>
                 ${niveauxDisponibles.map(n => `<option value="${n.code}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
             </select>
-            <small style="font-size: 0.7rem; color: #999; display: block; margin-top: 4px;">Par défaut: utilise le niveau calculé automatiquement. Modifiez uniquement si nécessaire (ex: jeton de reprise ciblée).</small>
+            <small style="font-size: 0.7rem; color: var(--gris-clair); display: block; margin-top: 4px;">Par défaut: utilise le niveau calculé automatiquement. Modifiez uniquement si nécessaire (ex: jeton de reprise ciblée).</small>
         </div>
     ` : `
         <!-- Interface algorithmique SIMPLE (sans catégorisation) -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
             <div class="groupe-form">
-                <label style="font-size: 0.75rem; color: #666;">Nombre d'erreurs</label>
+                <label style="font-size: 0.75rem; color: var(--gris-moyen);">Nombre d'erreurs</label>
                 <input type="number"
                        id="eval_erreurs_${critere.id}"
                        class="controle-form"
@@ -751,7 +751,7 @@ function cartoucheSelectionnee() {
                        style="font-size: 0.85rem;">
             </div>
             <div class="groupe-form">
-                <label style="font-size: 0.75rem; color: #666;">Nombre de mots</label>
+                <label style="font-size: 0.75rem; color: var(--gris-moyen);">Nombre de mots</label>
                 <input type="number"
                        id="eval_mots_${critere.id}"
                        class="controle-form"
@@ -761,31 +761,31 @@ function cartoucheSelectionnee() {
                        style="font-size: 0.85rem;">
             </div>
         </div>
-        <div id="resultat_algo_${critere.id}" style="padding: 8px; background: #f0f8ff; border-radius: 4px; font-size: 0.85rem; color: #666; margin-bottom: 8px;">
+        <div id="resultat_algo_${critere.id}" style="padding: 8px; background: var(--bleu-tres-pale); border-radius: 4px; font-size: 0.85rem; color: var(--gris-moyen); margin-bottom: 8px;">
             <span id="total_erreurs_simple_${critere.id}">--</span> errreurs sur <span id="mots_simple_${critere.id}">--</span> mots → <span id="note_algo_${critere.id}">--</span>/${ponderation} (<span id="pct_algo_${critere.id}">--</span>%) | Niveau: <span id="niveau_algo_${critere.id}">--</span>
         </div>
         <!-- Menu sélecteur IDME pour modification manuelle (ex: jeton de reprise ciblée) -->
         <div style="margin-top: 8px;">
-            <label style="font-size: 0.75rem; color: #666; margin-bottom: 4px; display: block;">Niveau IDME (modifiable manuellement) :</label>
+            <label style="font-size: 0.75rem; color: var(--gris-moyen); margin-bottom: 4px; display: block;">Niveau IDME (modifiable manuellement) :</label>
             <select id="eval_${critere.id}" class="controle-form"
                     onchange="niveauSelectionne('${critere.id}')"
-                    style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 2px solid #ddd; width: 100%;">
+                    style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 2px solid var(--bordure-claire); width: 100%;">
                 <option value="">-- Utiliser le niveau calculé --</option>
                 ${niveauxDisponibles.map(n => `<option value="${n.code}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
             </select>
-            <small style="font-size: 0.7rem; color: #999; display: block; margin-top: 4px;">Par défaut: utilise le niveau calculé automatiquement. Modifiez uniquement si nécessaire (ex: jeton de reprise ciblée).</small>
+            <small style="font-size: 0.7rem; color: var(--gris-clair); display: block; margin-top: 4px;">Par défaut: utilise le niveau calculé automatiquement. Modifiez uniquement si nécessaire (ex: jeton de reprise ciblée).</small>
         </div>
     `) : `
         <!-- Interface standard (holistique/analytique) -->
         <select id="eval_${critere.id}" class="controle-form"
                 onchange="niveauSelectionne('${critere.id}')"
-                style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 2px solid #ddd; width: 100%;">
+                style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 2px solid var(--bordure-claire); width: 100%;">
             <option value="">--</option>
             ${niveauxDisponibles.map(n => `<option value="${n.code}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
         </select>
     `}
 </div>
-            <div id="comm_${critere.id}" style="font-size: 0.85rem; line-height: 1.5; color: #555; font-style: italic; padding: 8px; background: #f8f9fa; border-radius: 4px; min-height: 60px;">
+            <div id="comm_${critere.id}" style="font-size: 0.85rem; line-height: 1.5; color: var(--gris-moyen); font-style: italic; padding: 8px; background: var(--gris-tres-pale); border-radius: 4px; min-height: 60px;">
                 ${estAlgorithmique ? 'Saisissez les erreurs et le nombre de mots' : 'Sélectionnez un niveau'}
             </div>
         </div>
@@ -858,16 +858,16 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
             <div>
                 <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px;">
                     <strong class="u-texte-09">${echapperHtml(critere.nom)}</strong>
-                    <small style="color: #666;">(${ponderation}%)</small>
+                    <small style="color: var(--gris-moyen);">(${ponderation}%)</small>
                     ${estAlgorithmique ? '<span style="font-size: 0.7rem; color: var(--orange-accent); font-weight: bold; margin-left: 6px;">ALGORITHMIQUE</span>' : ''}
                 </div>
-                ${critere.description ? `<small style="display: block; color: #888; font-style: italic; margin-bottom: 10px; line-height: 1.3;">${echapperHtml(critere.description)}</small>` : ''}
+                ${critere.description ? `<small style="display: block; color: var(--gris-clair); font-style: italic; margin-bottom: 10px; line-height: 1.3;">${echapperHtml(critere.description)}</small>` : ''}
 
                 ${estAlgorithmique ? `
                     <!-- Interface algorithmique SIMPLE (mode consultation) -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
                         <div class="groupe-form">
-                            <label style="font-size: 0.75rem; color: #666;">Nombre d'erreurs</label>
+                            <label style="font-size: 0.75rem; color: var(--gris-moyen);">Nombre d'erreurs</label>
                             <input type="number"
                                    id="eval_erreurs_${critere.id}"
                                    class="controle-form"
@@ -877,7 +877,7 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
                                    style="font-size: 0.85rem;">
                         </div>
                         <div class="groupe-form">
-                            <label style="font-size: 0.75rem; color: #666;">Nombre de mots</label>
+                            <label style="font-size: 0.75rem; color: var(--gris-moyen);">Nombre de mots</label>
                             <input type="number"
                                    id="eval_mots_${critere.id}"
                                    class="controle-form"
@@ -887,12 +887,12 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
                                    style="font-size: 0.85rem;">
                         </div>
                     </div>
-                    <div id="resultat_algo_${critere.id}" style="padding: 8px; background: #f0f8ff; border-radius: 4px; font-size: 0.85rem; color: #666; margin-bottom: 8px;">
+                    <div id="resultat_algo_${critere.id}" style="padding: 8px; background: var(--bleu-tres-pale); border-radius: 4px; font-size: 0.85rem; color: var(--gris-moyen); margin-bottom: 8px;">
                         -- erreurs sur -- mots
                     </div>
                     <select id="eval_${critere.id}" class="controle-form"
                             onchange="niveauSelectionne('${critere.id}')"
-                            style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 2px solid #ddd; width: 100%;">
+                            style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 2px solid var(--bordure-claire); width: 100%;">
                         <option value="">--</option>
                         ${niveauxDisponibles.map(n => `<option value="${n.code}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
                     </select>
@@ -900,13 +900,13 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
                     <!-- Interface standard -->
                     <select id="eval_${critere.id}" class="controle-form"
                             onchange="niveauSelectionne('${critere.id}')"
-                            style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 2px solid #ddd; width: 100%;">
+                            style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 2px solid var(--bordure-claire); width: 100%;">
                         <option value="">--</option>
                         ${niveauxDisponibles.map(n => `<option value="${n.code}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
                     </select>
                 `}
             </div>
-            <div id="comm_${critere.id}" style="font-size: 0.85rem; line-height: 1.5; color: #555; font-style: italic; padding: 8px; background: #f8f9fa; border-radius: 4px; min-height: 60px;">
+            <div id="comm_${critere.id}" style="font-size: 0.85rem; line-height: 1.5; color: var(--gris-moyen); font-style: italic; padding: 8px; background: var(--gris-tres-pale); border-radius: 4px; min-height: 60px;">
                 ${estAlgorithmique ? 'Saisissez les erreurs et le nombre de mots' : 'Sélectionnez un niveau'}
             </div>
         </div>
@@ -950,7 +950,7 @@ function niveauSelectionne(critereId) {
         selectElement.style.fontWeight = 'bold';
     } else {
         selectElement.style.backgroundColor = 'transparent';
-        selectElement.style.borderColor = '#ddd';
+        selectElement.style.borderColor = 'var(--bordure-claire)';
         selectElement.style.fontWeight = 'normal';
     }
 
@@ -968,7 +968,7 @@ function niveauSelectionne(critereId) {
             if (commDiv) {
                 commDiv.textContent = commentaire;
                 commDiv.style.fontStyle = commentaire === '[Non défini]' ? 'italic' : 'normal';
-                commDiv.style.color = commentaire === '[Non défini]' ? '#999' : '#555';
+                commDiv.style.color = commentaire === '[Non défini]' ? 'var(--gris-clair)' : 'var(--gris-moyen)';
             }
         }
     }
@@ -1562,8 +1562,8 @@ function calculerNote() {
         }
     } else if (noteContainer) {
         // Réinitialiser si pas de niveau
-        noteContainer.style.background = '#f0f4f8';
-        noteContainer.style.borderLeft = '4px solid #ddd';
+        noteContainer.style.background = 'var(--gris-tres-pale)';
+        noteContainer.style.borderLeft = '4px solid var(--bordure-claire)';
     }
 
     // Sauvegarder dans evaluationEnCours
@@ -2036,7 +2036,7 @@ function afficherBadgesJetons() {
     if (estNouvelleReprise) {
         console.log('✅ Ajout badge jeton de reprise');
         badges.push(`
-            <span class="statut-badge" style="background: #9c27b0; color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px;">
+            <span class="statut-badge" style="background: var(--violet-jeton, #9c27b0); color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px;">
                 <span>⭐ Reprise</span>
                 <button onclick="retirerJetonDepuisSidebar('${evaluation.id}', 'reprise')"
                         style="background: none; border: none; color: white; cursor: pointer; font-size: 1rem; padding: 0; font-weight: bold; line-height: 1;"
@@ -2049,7 +2049,7 @@ function afficherBadgesJetons() {
     const aDejaJetonDelai = evaluation.jetonDelaiApplique || evaluation.delaiAccorde;
     if (aDejaJetonDelai) {
         badges.push(`
-            <span class="statut-badge" style="background: #ff6f00; color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px;">
+            <span class="statut-badge" style="background: var(--orange-accent); color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px;">
                 <span>⭐ Délai</span>
                 <button onclick="retirerJetonDepuisSidebar('${evaluation.id}', 'delai')"
                         style="background: none; border: none; color: white; cursor: pointer; font-size: 1rem; padding: 0; font-weight: bold; line-height: 1;"
@@ -2828,11 +2828,11 @@ function genererBadgeCompletion(etudiant) {
     }
 
     // Déterminer la couleur selon le taux de complétion
-    let couleurFond = '#e8f5e9'; // Vert clair par défaut
+    let couleurFond = 'var(--alerte-fond-succes, #e8f5e9)'; // Vert clair par défaut
     if (completion < 0.5) {
-        couleurFond = '#ffebee'; // Rouge clair
+        couleurFond = 'var(--alerte-fond-erreur, #ffebee)'; // Rouge clair
     } else if (completion < 0.75) {
-        couleurFond = '#fff3e0'; // Orange clair
+        couleurFond = 'var(--alerte-fond-attention)'; // Orange clair
     }
 
     // Affichage unique (les indices C et P n'ont pas de modalité sommatif/alternatif)
@@ -2842,7 +2842,7 @@ function genererBadgeCompletion(etudiant) {
             <span style="font-size: 1.1rem; font-weight: 600; margin-left: 8px;">
                 ${Math.round(completion * 100)}%
             </span>
-            <span style="font-size: 0.75rem; color: #666; margin-left: 5px;">(${nbArtefacts} artefacts)</span>
+            <span style="font-size: 0.75rem; color: var(--gris-moyen); margin-left: 5px;">(${nbArtefacts} artefacts)</span>
         </span>
     `;
 }
@@ -2981,8 +2981,8 @@ function genererDetailsEtudiant(etudiant) {
                                         ${noteAffichage}
                                     </span>
                                     ${estRemplacee ? '<span class="badge-statut eval-ml-6">Remplacée</span>' : ''}
-                                    ${estReprise ? '<span style="color: #9c27b0; font-size: 1.2rem; margin-left: 6px;" title="Jeton de reprise appliqué">⭐</span>' : ''}
-                                    ${item.evaluation.jetonDelaiApplique ? '<span style="color: #ff6f00; font-size: 1.2rem; margin-left: 6px;" title="Jeton de délai appliqué">⭐</span>' : ''}
+                                    ${estReprise ? '<span style="color: var(--violet-jeton, #9c27b0); font-size: 1.2rem; margin-left: 6px;" title="Jeton de reprise appliqué">⭐</span>' : ''}
+                                    ${item.evaluation.jetonDelaiApplique ? '<span style="color: var(--orange-accent); font-size: 1.2rem; margin-left: 6px;" title="Jeton de délai appliqué">⭐</span>' : ''}
                                 </td>
                                 <td>${item.evaluation.dateEvaluation ? new Date(item.evaluation.dateEvaluation).toLocaleDateString('fr-CA') : '—'}</td>
                                 <td>
@@ -3870,7 +3870,7 @@ function mettreAJourIndicateurProgression() {
 
     // Changer la couleur selon la progression
     if (nbEvaluations === totalEtudiants) {
-        indicateur.style.color = '#28a745'; // Vert - Terminé
+        indicateur.style.color = 'var(--vert-succes)'; // Vert - Terminé
     } else if (nbEvaluations > totalEtudiants / 2) {
         indicateur.style.color = 'var(--bleu-principal)'; // Bleu - En cours (meilleur contraste)
     } else {
@@ -4869,7 +4869,7 @@ function afficherIndicateurModeModification(evaluation) {
             padding: 15px 20px;
             margin: 15px 0;
             border-radius: 8px;
-            border-left: 5px solid #e65100;
+            border-left: 5px solid var(--orange-accent);
             box-shadow: 0 2px 8px rgba(0,0,0,0.15);
             font-weight: 500;
             display: flex;
@@ -5112,7 +5112,7 @@ function afficherListeBanqueEvaluations(evaluations) {
     if (!conteneur) return;
 
     if (evaluations.length === 0) {
-        conteneur.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Aucune évaluation trouvée avec ces critères.</p>';
+        conteneur.innerHTML = '<p style="text-align: center; color: var(--gris-clair); padding: 40px;">Aucune évaluation trouvée avec ces critères.</p>';
         return;
     }
 
@@ -5124,40 +5124,40 @@ function afficherListeBanqueEvaluations(evaluations) {
         const estDelai = evaluation.jetonDelaiApplique ? true : false;
 
         return `
-            <div class="carte" style="margin-bottom: 15px; ${estRemplacee ? 'opacity: 0.6; border-left: 3px solid #999;' : ''}">
+            <div class="carte" style="margin-bottom: 15px; ${estRemplacee ? 'opacity: 0.6; border-left: 3px solid var(--gris-clair);' : ''}">
                 <div style="display: flex; justify-content: space-between; align-items: start;">
                     <div class="u-flex-1">
                         <h4 style="margin: 0 0 10px 0;">
                             ${echapperHtml(evaluation.etudiantNom)}
-                            ${evaluation.verrouillee ? '<span style="color: #ff9800; margin-left: 8px;">(Verrouillée)</span>' : ''}
-                            ${estReprise ? '<span style="color: #9c27b0; margin-left: 8px;" title="Jeton de reprise appliqué">(Reprise)</span>' : ''}
-                            ${estDelai ? '<span style="color: #ff6f00; margin-left: 8px;" title="Jeton de délai de remise appliqué">(Délai)</span>' : ''}
-                            ${estRemplacee ? '<span style="color: #999; margin-left: 8px;" title="Évaluation remplacée">(Remplacée)</span>' : ''}
+                            ${evaluation.verrouillee ? '<span style="color: var(--orange-accent); margin-left: 8px;">(Verrouillée)</span>' : ''}
+                            ${estReprise ? '<span style="color: var(--violet-jeton, #9c27b0); margin-left: 8px;" title="Jeton de reprise appliqué">(Reprise)</span>' : ''}
+                            ${estDelai ? '<span style="color: var(--orange-accent); margin-left: 8px;" title="Jeton de délai de remise appliqué">(Délai)</span>' : ''}
+                            ${estRemplacee ? '<span style="color: var(--gris-clair); margin-left: 8px;" title="Évaluation remplacée">(Remplacée)</span>' : ''}
                         </h4>
-                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; color: #666; font-size: 0.9rem;">
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; color: var(--gris-moyen); font-size: 0.9rem;">
                             <div><strong>Production:</strong> ${echapperHtml(evaluation.productionNom)}</div>
                             <div><strong>Grille:</strong> ${echapperHtml(evaluation.grilleNom)}</div>
                             <div><strong>Note:</strong> ${evaluation.niveauFinal} (${Math.round(evaluation.noteFinale)}%)</div>
                             <div><strong>Date:</strong> ${dateEval} à ${heureEval}</div>
                         </div>
                         ${estRemplacee ? `
-                            <div style="margin-top: 10px; padding: 8px; background: #f5f5f5; border-radius: 4px; font-size: 0.85rem; color: #666;">
+                            <div style="margin-top: 10px; padding: 8px; background: var(--gris-tres-pale); border-radius: 4px; font-size: 0.85rem; color: var(--gris-moyen);">
                                 Cette évaluation a été remplacée par un jeton de reprise et ne compte plus dans les indices
                             </div>
                         ` : ''}
                         ${estReprise ? `
-                            <div style="margin-top: 10px; padding: 8px; background: #f3e5f5; border-radius: 4px; font-size: 0.85rem; color: #7b1fa2; display: flex; justify-content: space-between; align-items: center;">
+                            <div style="margin-top: 10px; padding: 8px; background: var(--violet-pale, #f3e5f5); border-radius: 4px; font-size: 0.85rem; color: var(--violet-jeton, #7b1fa2); display: flex; justify-content: space-between; align-items: center;">
                                 <span>⭐ Jeton de reprise appliqué - Remplace l'évaluation précédente</span>
                                 <button onclick="retirerJeton('${evaluation.id}', 'reprise')"
-                                        style="background: none; border: none; color: #7b1fa2; cursor: pointer; font-size: 1.2rem; padding: 0 5px; font-weight: bold;"
+                                        style="background: none; border: none; color: var(--violet-jeton, #7b1fa2); cursor: pointer; font-size: 1.2rem; padding: 0 5px; font-weight: bold;"
                                         title="Retirer le jeton de reprise">×</button>
                             </div>
                         ` : ''}
                         ${estDelai ? `
-                            <div style="margin-top: 10px; padding: 8px; background: #fff3e0; border-radius: 4px; font-size: 0.85rem; color: #e65100; display: flex; justify-content: space-between; align-items: center;">
+                            <div style="margin-top: 10px; padding: 8px; background: var(--alerte-fond-attention); border-radius: 4px; font-size: 0.85rem; color: var(--orange-accent); display: flex; justify-content: space-between; align-items: center;">
                                 <span>⭐ Jeton de délai appliqué - Date limite étendue</span>
                                 <button onclick="retirerJeton('${evaluation.id}', 'delai')"
-                                        style="background: none; border: none; color: #e65100; cursor: pointer; font-size: 1.2rem; padding: 0 5px; font-weight: bold;"
+                                        style="background: none; border: none; color: var(--orange-accent); cursor: pointer; font-size: 1.2rem; padding: 0 5px; font-weight: bold;"
                                         title="Retirer le jeton de délai">×</button>
                             </div>
                         ` : ''}
@@ -5167,7 +5167,7 @@ function afficherListeBanqueEvaluations(evaluations) {
                             Charger
                         </button>
                         <button class="btn btn-special btn-compact" onclick="appliquerJetonRepriseDepuisBanque('${evaluation.id}')"
-                                style="background: #9c27b0; color: white;">
+                                style="background: var(--violet-jeton, #9c27b0); color: white;">
                             Jeton de reprise
                         </button>
                         <span onclick="basculerVerrouillageEvaluation('${evaluation.id}')"
@@ -5538,12 +5538,12 @@ function mettreAJourBoutonVerrouillage(estVerrouillee) {
     if (estVerrouillee) {
         // Verrouillée : cadenas fermé rouge
         iconeVerrou.textContent = '🔒';
-        iconeVerrou.style.color = '#f44336'; // Rouge
+        iconeVerrou.style.color = 'var(--rouge-erreur)'; // Rouge
         iconeVerrou.title = 'Évaluation verrouillée - Cliquez pour déverrouiller';
     } else {
         // Déverrouillée : cadenas ouvert vert
         iconeVerrou.textContent = '🔓';
-        iconeVerrou.style.color = '#4caf50'; // Vert
+        iconeVerrou.style.color = 'var(--vert-succes)'; // Vert
         iconeVerrou.title = 'Évaluation modifiable - Cliquez pour verrouiller';
     }
 }

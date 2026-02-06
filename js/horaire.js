@@ -833,7 +833,7 @@ function rafraichirFormulairesSeances() {
         `;
     } else {
         html += `
-            <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 10px; margin-top: 10px; text-align: center;">
+            <div style="background: var(--alerte-fond-attention); border: 1px solid var(--btn-annuler); border-radius: 6px; padding: 10px; margin-top: 10px; text-align: center;">
                 Maximum de 6 séances atteint
             </div>
         `;
@@ -1610,7 +1610,7 @@ function modifierDureePeriodeV2(minutes) {
     const select = document.getElementById('v2-dureePeriode');
     if (select) {
         select.style.transition = 'background-color 0.3s';
-        select.style.backgroundColor = '#d4edda';
+        select.style.backgroundColor = 'var(--alerte-fond-succes, #d4edda)';
         setTimeout(() => {
             select.style.backgroundColor = '';
         }, 1000);

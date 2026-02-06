@@ -1053,7 +1053,7 @@ function ouvrirIntervention(interventionId) {
                         </div>
                     </div>
 
-                    <hr style="border: none; border-top: 1px solid #ccc; margin: 15px 0;">
+                    <hr style="border: none; border-top: 1px solid var(--bordure-claire); margin: 15px 0;">
 
                     <h4 style="margin: 0 0 10px 0; color: var(--bleu-principal);">Gestion des absences</h4>
                     <p class="text-muted" style="margin: 0 0 15px 0; font-size: 0.9rem;">
@@ -1077,7 +1077,7 @@ function ouvrirIntervention(interventionId) {
                 </div>
             </div>
 
-            <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
+            <hr style="margin: 20px 0; border: none; border-top: 1px solid var(--bordure-claire);">
 
             <div style="display: grid; grid-template-columns: 40fr 60fr; gap: 20px; align-items: start; margin-bottom: 20px;">
                 <!-- Colonne gauche: Aperçu du sous-groupe (40%) -->
@@ -1181,7 +1181,7 @@ function afficherNotesIndividuelles(interventionId, dasSelectionnes) {
         const noteExistante = intervention.notesIndividuelles[da] || '';
 
         html += `
-            <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee;">
+            <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--bordure-claire);">
                 <label style="display: block; font-weight: 600; margin-bottom: 5px; color: var(--bleu-principal);">
                     ${etudiant.prenom} ${etudiant.nom}
                 </label>

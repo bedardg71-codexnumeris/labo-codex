@@ -102,14 +102,14 @@
                 </div>
 
                 <!-- Option 2: Ecraser -->
-                <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107; margin-bottom: 15px;">
+                <div style="background: var(--alerte-fond-attention); padding: 15px; border-radius: 8px; border-left: 4px solid var(--btn-annuler); margin-bottom: 15px;">
                     <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-weight: 600;">
                         <span style="font-size: 1.2rem;">&#128260;</span>
                         Remplacer l'existante
                     </label>
                     <p style="font-size: 0.9rem; color: var(--gris-moyen); margin: 0 0 10px 0;">
                         La ressource existante sera ecrasee par la nouvelle.
-                        <strong style="color: #856404;">Cette action est irreversible.</strong>
+                        <strong style="color: var(--gris-fonce);">Cette action est irreversible.</strong>
                     </p>
                     <button id="btnDoublonEcraser"
                             class="btn btn-supprimer"
@@ -119,7 +119,7 @@
                 </div>
 
                 <!-- Option 3: Ignorer (import seulement) -->
-                <div id="sectionDoublonIgnorer" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                <div id="sectionDoublonIgnorer" style="background: var(--gris-tres-pale); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
                     <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-weight: 600;">
                         <span style="font-size: 1.2rem;">&#9193;&#65039;</span>
                         Ignorer cette ressource

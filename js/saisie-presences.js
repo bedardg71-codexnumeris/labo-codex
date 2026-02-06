@@ -1759,11 +1759,11 @@ function enregistrerPresences() {
         position: fixed;
         top: 20px;
         right: 20px;
-        background: #d4edda;
-        color: #155724;
+        background: var(--alerte-fond-succes, #d4edda);
+        color: var(--alerte-texte-succes);
         padding: 12px 20px;
         border-radius: 6px;
-        border: 1px solid #c3e6cb;
+        border: 1px solid var(--alerte-fond-succes, #c3e6cb);
         z-index: 9999;
         animation: slideIn 0.3s ease;
     `;

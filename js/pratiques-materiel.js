@@ -69,11 +69,11 @@ function genererBadgeSourcePratique(pratique, pratiquesLocales) {
     const estRetiree = pratique.dansBibliotheque === false;
 
     if (estRetiree) {
-        return '<span style="background: #ff9800; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em; margin-left: 6px;">Retirée</span>';
+        return '<span class="badge-source badge-source--retiree" style="margin-left: 6px;">Retirée</span>';
     } else if (estLocale) {
-        return '<span style="background: #4caf50; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em; margin-left: 6px;">Locale</span>';
+        return '<span class="badge-source badge-source--locale" style="margin-left: 6px;">Locale</span>';
     } else {
-        return '<span style="background: #2196f3; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em; margin-left: 6px;">Bibliothèque</span>';
+        return '<span class="badge-source badge-source--bibliotheque" style="margin-left: 6px;">Bibliothèque</span>';
     }
 }
 
@@ -302,54 +302,17 @@ async function afficherBibliothequePratiques() {
 
     // Construire le HTML du modal
     let html = `
-        <div id="modalBibliothequePratiques" style="
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-        ">
-            <div style="
-                background: white;
-                border-radius: 8px;
-                padding: 30px;
-                max-width: 800px;
-                max-height: 80vh;
-                overflow-y: auto;
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-                position: relative;
-            ">
+        <div id="modalBibliothequePratiques" class="modal-js-overlay">
+            <div class="modal-js-contenu" style="max-width: 800px;">
                 <!-- Bouton X sticky -->
-                <button onclick="fermerModalBibliothequePratiques()" style="
-                    position: sticky;
-                    top: 0;
-                    right: 0;
-                    float: right;
-                    background: transparent;
-                    border: none;
-                    font-size: 28px;
-                    color: #999;
-                    cursor: pointer;
-                    padding: 0;
-                    width: 30px;
-                    height: 30px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    z-index: 1;
-                " onmouseover="this.style.color='#333'" onmouseout="this.style.color='#999'">
+                <button onclick="fermerModalBibliothequePratiques()" class="modal-js-fermer">
                     ×
                 </button>
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
-                    <h2 style="margin: 0; color: #2c3e50;">Bibliothèque de pratiques de notation</h2>
+                    <h2 style="margin: 0; color: var(--bleu-principal);">Bibliothèque de pratiques de notation</h2>
                     <button class="btn-aide-contextuelle" data-aide="bibliotheque-fonctionnement" title="Comment fonctionne la bibliothèque">😎</button>
                 </div>
-                <p style="color: #7f8c8d; margin-bottom: 15px;">
+                <p style="color: var(--gris-clair); margin-bottom: 15px;">
                     Gérez les pratiques affichées dans la barre latérale.
                 </p>
     `;
@@ -357,14 +320,14 @@ async function afficherBibliothequePratiques() {
     // ✅ AJOUT (28 janvier 2026) : Afficher avertissement doublons
     if (doublonsDetectes.length > 0) {
         html += `
-                <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 15px; margin-bottom: 20px;">
-                    <div style="font-weight: bold; color: #856404; margin-bottom: 8px;">
+                <div class="info-box info-box--attention" style="margin-bottom: 20px;">
+                    <div style="font-weight: bold; color: var(--gris-fonce); margin-bottom: 8px;">
                         ⚠️ ${doublonsDetectes.length} doublon(s) potentiel(s) détecté(s)
                     </div>
-                    <p style="color: #856404; font-size: 0.9em; margin: 0 0 10px 0;">
+                    <p style="color: var(--gris-fonce); font-size: 0.9em; margin: 0 0 10px 0;">
                         Des pratiques avec des noms similaires existent en plusieurs exemplaires.
                     </p>
-                    <details style="color: #856404; font-size: 0.85em;">
+                    <details style="color: var(--gris-fonce); font-size: 0.85em;">
                         <summary style="cursor: pointer; font-weight: 500;">Voir les détails</summary>
                         <ul style="margin: 10px 0 0 0; padding-left: 20px;">
                             ${doublonsDetectes.map(d => `<li><strong>${d.nom}</strong> : ${d.count} exemplaires (IDs: ${d.ids.map(id => '#' + genererIdCourtPratique(id)).join(', ')})</li>`).join('')}
@@ -391,7 +354,7 @@ async function afficherBibliothequePratiques() {
     `;
 
     if (pratiquesDansBibliotheque.length === 0) {
-        html += '<p style="color: #999; font-style: italic;">Aucune pratique dans la barre latérale</p>';
+        html += '<p style="color: var(--gris-clair); font-style: italic;">Aucune pratique dans la barre latérale</p>';
     } else {
         pratiquesDansBibliotheque.forEach(pratique => {
             const badge = genererBadgeTypePratique(pratique);
@@ -411,13 +374,13 @@ async function afficherBibliothequePratiques() {
                 ">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                         <div style="flex: 1;">
-                            <div style="font-weight: bold; color: #2c3e50; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                            <div style="font-weight: bold; color: var(--bleu-principal); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
                                 ${badge}
                                 ${nomPratique}
-                                <span style="background: #e0e0e0; color: #666; padding: 2px 6px; border-radius: 3px; font-size: 0.7em; font-family: monospace;" title="ID: ${pratique.id}">#${idCourt}</span>
+                                <span class="badge-source badge-source--id" style="font-family: monospace;" title="ID: ${pratique.id}">#${idCourt}</span>
                                 ${badgeSource}
                             </div>
-                            <div style="color: #7f8c8d; font-size: 0.9em;">
+                            <div style="color: var(--gris-clair); font-size: 0.9em;">
                                 ${pratique.description || ''}${discipline ? ' • ' + discipline : ''}
                             </div>
                         </div>
@@ -469,7 +432,7 @@ async function afficherBibliothequePratiques() {
                 </div>
 
                 <!-- Section 2 : Pratiques disponibles -->
-                <h3 style="color: #3498db; font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
+                <h3 style="color: var(--bleu-clair); font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
                     Pratiques disponibles à ajouter à la barre latérale
                 </h3>
 
@@ -477,7 +440,7 @@ async function afficherBibliothequePratiques() {
                 <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 15px;">
                     <!-- Filtre par type -->
                     <div style="flex: 1; min-width: 200px;">
-                        <label style="display: block; margin-bottom: 5px; color: #555; font-weight: 500;">
+                        <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">
                             Filtrer par type :
                         </label>
                         <select id="filtreTypePratiques"
@@ -494,7 +457,7 @@ async function afficherBibliothequePratiques() {
 
                     <!-- Filtre par discipline -->
                     <div style="flex: 1; min-width: 200px;">
-                        <label style="display: block; margin-bottom: 5px; color: #555; font-weight: 500;">
+                        <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">
                             Filtrer par discipline :
                         </label>
                         <select id="filtreDisciplinePratiques"
@@ -522,7 +485,7 @@ async function afficherBibliothequePratiques() {
     const pratiquesAAfficher = pratiquesDisponibles.filter(p => !idsDejaPresents.has(p.id));
 
     if (pratiquesAAfficher.length === 0) {
-        html += '<p style="color: #999; font-style: italic;">Toutes les pratiques sont déjà dans votre sélection</p>';
+        html += '<p style="color: var(--gris-clair); font-style: italic;">Toutes les pratiques sont déjà dans votre sélection</p>';
     } else {
         pratiquesAAfficher.forEach(pratique => {
             const badge = genererBadgeTypePratique(pratique);
@@ -538,22 +501,22 @@ async function afficherBibliothequePratiques() {
                      data-type="${pratique.type || ''}"
                      data-discipline="${discipline}"
                      style="
-                        border: 1px solid #ddd;
+                        border: 1px solid var(--bordure-claire);
                         border-radius: 6px;
                         padding: 15px;
                         margin-bottom: 10px;
-                        background: ${estGabarit ? '#f8f9fa' : 'white'};
+                        background: ${estGabarit ? 'var(--gris-tres-pale)' : 'white'};
                      ">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                         <div style="flex: 1;">
-                            <div style="font-weight: bold; color: #2c3e50; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                            <div style="font-weight: bold; color: var(--bleu-principal); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
                                 ${badge}
                                 ${nomPratique}
-                                <span style="background: #e0e0e0; color: #666; padding: 2px 6px; border-radius: 3px; font-size: 0.7em; font-family: monospace;" title="ID: ${pratique.id}">#${idCourt}</span>
+                                <span class="badge-source badge-source--id" style="font-family: monospace;" title="ID: ${pratique.id}">#${idCourt}</span>
                                 ${badgeSource}
-                                ${estGabarit ? '<span style="background: #f39c12; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.7em;">Gabarit</span>' : ''}
+                                ${estGabarit ? '<span class="badge-source badge-source--retiree">Gabarit</span>' : ''}
                             </div>
-                            <div style="color: #7f8c8d; font-size: 0.9em;">
+                            <div style="color: var(--gris-clair); font-size: 0.9em;">
                                 ${pratique.description || ''}${discipline ? ' • ' + discipline : ''}
                                 ${pratique.auteur ? ' • Par ' + pratique.auteur : ''}
                             </div>
@@ -1448,7 +1411,7 @@ function afficherTypesTravauxMat(typesTravaux) {
     if (!conteneur) return;
 
     if (!typesTravaux || typesTravaux.length === 0) {
-        conteneur.innerHTML = '<p style="color: #999; font-style: italic;">Aucun type de production défini</p>';
+        conteneur.innerHTML = '<p style="color: var(--gris-clair); font-style: italic;">Aucun type de production défini</p>';
         return;
     }
 
@@ -1531,7 +1494,7 @@ function afficherForfaitsMat(forfaits, typesTravaux) {
     if (!conteneur) return;
 
     if (!forfaits || forfaits.length === 0) {
-        conteneur.innerHTML = '<p style="color: #999; font-style: italic;">Aucun forfait défini</p>';
+        conteneur.innerHTML = '<p style="color: var(--gris-clair); font-style: italic;">Aucun forfait défini</p>';
         return;
     }
 
@@ -2000,12 +1963,12 @@ async function importerPratiquesUtilisateur(event) {
             // Créer modal avec badge CC
             const modal = document.createElement('div');
             modal.innerHTML = `
-                <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10001; display: flex; align-items: center; justify-content: center;">
-                    <div style="background: white; padding: 20px; border-radius: 8px; max-width: 600px; max-height: 80vh; overflow-y: auto;">
+                <div class="modal-js-overlay" style="z-index: 10001;">
+                    <div class="modal-js-contenu" style="max-width: 600px; padding: 20px;">
                         ${message}
                         <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: flex-end;">
-                            <button class="btn btn-annuler" onclick="this.closest('div[style*=fixed]').parentElement.remove(); delete window._pratiquesImportEnAttente;">Annuler</button>
-                            <button class="btn btn-confirmer" onclick="window.confirmerImportPratiques(window._pratiquesImportEnAttente); this.closest('div[style*=fixed]').parentElement.remove(); delete window._pratiquesImportEnAttente;">Importer</button>
+                            <button class="btn btn-annuler" onclick="this.closest('.modal-js-overlay').parentElement.remove(); delete window._pratiquesImportEnAttente;">Annuler</button>
+                            <button class="btn btn-confirmer" onclick="window.confirmerImportPratiques(window._pratiquesImportEnAttente); this.closest('.modal-js-overlay').parentElement.remove(); delete window._pratiquesImportEnAttente;">Importer</button>
                         </div>
                     </div>
                 </div>
@@ -2435,7 +2398,7 @@ function afficherListeObjectifsMat(objectifs) {
     if (!conteneur) return;
 
     if (!objectifs || objectifs.length === 0) {
-        conteneur.innerHTML = '<p style="color: #999; font-style: italic;">Aucun objectif défini. Cliquez sur "+ Ajouter un objectif".</p>';
+        conteneur.innerHTML = '<p style="color: var(--gris-clair); font-style: italic;">Aucun objectif défini. Cliquez sur "+ Ajouter un objectif".</p>';
         return;
     }
 
@@ -2485,7 +2448,7 @@ function afficherListeObjectifsMat(objectifs) {
     // Afficher le total des pondérations pour le mode moyenne-ponderee
     if (mode === 'moyenne-ponderee') {
         const total = objectifs.reduce((sum, obj) => sum + (parseInt(obj.ponderation) || 0), 0);
-        const couleur = total === 100 ? '#4caf50' : '#f44336';
+        const couleur = total === 100 ? 'var(--vert-succes)' : 'var(--rouge-erreur)';
         html += `<p style="margin-top: 10px; font-weight: 600; color: ${couleur};">
             Total des pondérations : ${total}% ${total !== 100 ? '(devrait être 100%)' : '✓'}
         </p>`;
@@ -2602,7 +2565,7 @@ function afficherGrilleConversionMat(grille) {
     if (!conteneur) return;
 
     if (!grille || grille.length === 0) {
-        conteneur.innerHTML = '<p style="color: #999; font-style: italic;">Ajoutez des objectifs pour générer la grille de conversion.</p>';
+        conteneur.innerHTML = '<p style="color: var(--gris-clair); font-style: italic;">Ajoutez des objectifs pour générer la grille de conversion.</p>';
         return;
     }
 

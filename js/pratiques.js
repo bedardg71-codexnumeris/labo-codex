@@ -1792,7 +1792,7 @@ async function afficherListePratiques() {
     } catch (error) {
         console.error('Erreur lors de l\'affichage des pratiques:', error);
         container.innerHTML = `
-            <div style="padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+            <div class="info-box info-box--attention">
                 <strong>Erreur</strong> : Impossible de charger les pratiques
             </div>
         `;
@@ -3292,7 +3292,7 @@ function ajouterNiveauWizard(niveauDefaut = null) {
         <input type="text" class="controle-form" placeholder="Label" value="${niveau.label}" data-field="label" style="padding: 6px;">
         <input type="number" class="controle-form" placeholder="%" value="${niveau.pct}" min="0" max="100" step="0.1" data-field="pct" style="padding: 6px;">
         <input type="color" class="controle-form" value="${niveau.couleur}" data-field="couleur" style="padding: 2px; height: 36px;">
-        <button type="button" class="btn btn-tres-compact" onclick="retirerNiveauWizard(this)" style="background: #dc3545; color: white; padding: 6px;">🗑️</button>
+        <button type="button" class="btn btn-tres-compact" onclick="retirerNiveauWizard(this)" style="background: var(--rouge-erreur); color: white; padding: 6px;">🗑️</button>
     `;
 
     liste.appendChild(div);
@@ -3353,7 +3353,7 @@ function ajouterEvaluationWizard() {
     div.innerHTML = `
         <input type="text" class="controle-form" placeholder="Nom de l'évaluation" data-field="nom" style="padding: 6px;">
         <input type="number" class="controle-form" placeholder="Poids %" min="0" max="100" step="1" data-field="poids" style="padding: 6px;">
-        <button type="button" class="btn btn-tres-compact" onclick="retirerEvaluationWizard(this)" style="background: #dc3545; color: white; padding: 6px;">🗑️</button>
+        <button type="button" class="btn btn-tres-compact" onclick="retirerEvaluationWizard(this)" style="background: var(--rouge-erreur); color: white; padding: 6px;">🗑️</button>
     `;
 
     liste.appendChild(div);
@@ -4421,13 +4421,13 @@ async function ouvrirModalBibliothequePratiques() {
     );
 
     const modalHTML = `
-        <div id="modalBibliothequePratiques" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;">
-            <div style="background: white; border-radius: 8px; max-width: 800px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
+        <div id="modalBibliothequePratiques" class="modal-js-overlay" style="z-index: 10000;">
+            <div class="modal-js-contenu" style="max-width: 800px; width: 90%;">
 
                 <!-- En-tête -->
                 <div style="padding: 20px; border-bottom: 1px solid var(--gris-clair); display: flex; justify-content: space-between; align-items: center;">
                     <h2 style="margin: 0; color: var(--bleu-principal);">Bibliothèque de pratiques</h2>
-                    <button onclick="fermerModalBibliothequePratiques()" class="btn-icon" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gris-fonce);">&times;</button>
+                    <button onclick="fermerModalBibliothequePratiques()" class="modal-js-btn-fermer">&times;</button>
                 </div>
 
                 <!-- Corps -->
@@ -4458,15 +4458,15 @@ async function ouvrirModalBibliothequePratiques() {
                                 const auteur = c.auteur ? `Par ${c.auteur}${c.etablissement ? ' (' + c.etablissement + ')' : ''}` : '';
                                 const description = c.description || '';
                                 return `
-                                    <div style="border: 2px solid var(--bleu-principal); border-radius: 6px; padding: 15px; background: #f0f7ff;">
+                                    <div style="border: 2px solid var(--bleu-principal); border-radius: 6px; padding: 15px; background: var(--bleu-tres-pale);">
                                         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                                             <div style="flex: 1;">
                                                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
                                                     <div style="font-weight: bold; color: var(--bleu-principal);">${echapperHtml(nomAffiche)}</div>
                                                     <span style="background: var(--bleu-principal); color: white; font-size: 0.75em; padding: 2px 8px; border-radius: 10px; font-weight: 600;">CANEVAS</span>
                                                 </div>
-                                                ${auteur ? `<div style="color: #7f8c8d; font-size: 0.9em; margin-bottom: 4px;">${echapperHtml(auteur)}</div>` : ''}
-                                                ${description ? `<div style="color: #5a6c7d; font-size: 0.85em;">${echapperHtml(description)}</div>` : ''}
+                                                ${auteur ? `<div style="color: var(--gris-clair); font-size: 0.9em; margin-bottom: 4px;">${echapperHtml(auteur)}</div>` : ''}
+                                                ${description ? `<div style="color: var(--gris-moyen); font-size: 0.85em;">${echapperHtml(description)}</div>` : ''}
                                             </div>
                                             <button onclick="alert('Fonctionnalité à venir : Créer une configuration basée sur ce canevas')" class="btn btn-secondaire btn-tres-compact" style="margin-left: 10px;">
                                                 Utiliser
@@ -4497,9 +4497,9 @@ async function ouvrirModalBibliothequePratiques() {
                                         <div style="border: 1px solid var(--bleu-clair); border-radius: 6px; padding: 15px; background: var(--bleu-tres-pale);">
                                             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                                                 <div style="flex: 1;">
-                                                    <div style="font-weight: bold; color: #2c3e50; margin-bottom: 4px;">${echapperHtml(nomAffiche)}</div>
-                                                    ${auteur ? `<div style="color: #7f8c8d; font-size: 0.9em; margin-bottom: 4px;">${echapperHtml(auteur)}</div>` : ''}
-                                                    ${description ? `<div style="color: #95a5a6; font-size: 0.85em;">${echapperHtml(description)}</div>` : ''}
+                                                    <div style="font-weight: bold; color: var(--gris-fonce); margin-bottom: 4px;">${echapperHtml(nomAffiche)}</div>
+                                                    ${auteur ? `<div style="color: var(--gris-clair); font-size: 0.9em; margin-bottom: 4px;">${echapperHtml(auteur)}</div>` : ''}
+                                                    ${description ? `<div style="color: var(--gris-clair); font-size: 0.85em;">${echapperHtml(description)}</div>` : ''}
                                                 </div>
                                                 <div style="display: flex; gap: 5px; margin-left: 10px;">
                                                     ${estDeLUtilisateur ? `
@@ -4536,9 +4536,9 @@ async function ouvrirModalBibliothequePratiques() {
                                         <div style="border: 1px solid var(--bleu-clair); border-radius: 6px; padding: 15px; background: white;">
                                             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                                                 <div style="flex: 1;">
-                                                    <div style="font-weight: bold; color: #2c3e50; margin-bottom: 4px;">${echapperHtml(nomAffiche)}</div>
-                                                    ${auteur ? `<div style="color: #7f8c8d; font-size: 0.9em; margin-bottom: 4px;">${echapperHtml(auteur)}</div>` : ''}
-                                                    ${description ? `<div style="color: #95a5a6; font-size: 0.85em;">${echapperHtml(description)}</div>` : ''}
+                                                    <div style="font-weight: bold; color: var(--gris-fonce); margin-bottom: 4px;">${echapperHtml(nomAffiche)}</div>
+                                                    ${auteur ? `<div style="color: var(--gris-clair); font-size: 0.9em; margin-bottom: 4px;">${echapperHtml(auteur)}</div>` : ''}
+                                                    ${description ? `<div style="color: var(--gris-clair); font-size: 0.85em;">${echapperHtml(description)}</div>` : ''}
                                                 </div>
                                                 <div style="display: flex; gap: 5px; margin-left: 10px;">
                                                     <button onclick="ajouterPratiqueIndividuelle('${p.id}')" class="btn btn-ajouter btn-tres-compact">
@@ -4555,7 +4555,7 @@ async function ouvrirModalBibliothequePratiques() {
                             }
                         </div>
 
-                        <div style="display: flex; gap: 10px;">
+                        <div class="u-flex-gap-10">
                             <button onclick="importerPratiqueJSON()" class="btn btn-secondaire">
                                 📥 Importer une pratique
                             </button>

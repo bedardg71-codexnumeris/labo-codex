@@ -694,16 +694,16 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
             const itemId = item.id || `${id}_${index}`;
             const nomAffiche = item.nom || 'Sans nom';
             // Ajouter l'auteur original si présent
-            const auteurInfo = item.auteurOriginal ? ` <span style="color: #999; font-size: 0.75rem;">(${item.auteurOriginal})</span>` : '';
+            const auteurInfo = item.auteurOriginal ? ` <span style="color: var(--gris-clair); font-size: 0.75rem;">(${item.auteurOriginal})</span>` : '';
 
             return `
                 <label style="display: flex; align-items: center; gap: 8px; padding: 6px 10px;
-                       background: #fafafa; border-radius: 4px; margin: 4px 0; cursor: pointer;
-                       border: 1px solid #eee; transition: all 0.15s;"
-                       onmouseover="this.style.borderColor='#28a745'; this.style.background='#f0fff4';"
-                       onmouseout="this.style.borderColor='#eee'; this.style.background='#fafafa';">
+                       background: var(--gris-tres-pale); border-radius: 4px; margin: 4px 0; cursor: pointer;
+                       border: 1px solid var(--bordure-claire); transition: all 0.15s;"
+                       onmouseover="this.style.borderColor='var(--vert-succes)'; this.style.background='var(--gris-tres-pale)';"
+                       onmouseout="this.style.borderColor='var(--bordure-claire)'; this.style.background='var(--gris-tres-pale)';">
                     <input type="checkbox" class="import-item import-item-${id}" data-category="${id}" data-item-id="${itemId}"
-                           style="transform: scale(1.1); accent-color: #28a745;">
+                           style="transform: scale(1.1); accent-color: var(--vert-succes);">
                     <span style="font-size: 0.85rem;">${nomAffiche}${auteurInfo}</span>
                 </label>
             `;
@@ -711,19 +711,19 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
 
         return `
             <div style="background: white; border-radius: 6px; margin-bottom: 12px;
-                   border: 1px solid #e0e0e0; overflow: hidden;">
+                   border: 1px solid var(--bordure-claire); overflow: hidden;">
                 <!-- En-tête de catégorie avec checkbox "tout sélectionner" -->
                 <label style="display: flex; align-items: center; gap: 10px; padding: 12px;
-                       background: #f8f9fa; cursor: pointer; border-bottom: 1px solid #e0e0e0;"
-                       onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">
+                       background: var(--gris-tres-pale); cursor: pointer; border-bottom: 1px solid var(--bordure-claire);"
+                       onmouseover="this.style.background='var(--gris-tres-pale)'" onmouseout="this.style.background='var(--gris-tres-pale)'">
                     <input type="checkbox" id="import-${id}" class="import-category-toggle"
                            data-category="${id}"
                            onchange="toggleCategoryItems('${id}', this.checked)"
-                           style="transform: scale(1.2); accent-color: #28a745;">
+                           style="transform: scale(1.2); accent-color: var(--vert-succes);">
                     <div style="flex: 1;">
                         <strong style="font-size: 0.95rem;">${label}</strong>
-                        <span style="color: #28a745; font-size: 0.85rem; margin-left: 8px;">(${count})</span>
-                        <span style="color: #999; font-size: 0.75rem; margin-left: 8px;">tout cocher/décocher</span>
+                        <span style="color: var(--vert-succes); font-size: 0.85rem; margin-left: 8px;">(${count})</span>
+                        <span style="color: var(--gris-clair); font-size: 0.75rem; margin-left: 8px;">tout cocher/décocher</span>
                     </div>
                 </label>
                 <!-- Liste des items individuels -->
@@ -740,13 +740,13 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
         return `
             <label style="display: flex; align-items: center; gap: 10px; padding: 10px;
                    background: white; border-radius: 6px; margin-bottom: 8px; cursor: pointer;
-                   border: 1px solid #e0e0e0; transition: all 0.2s;"
-                   onmouseover="this.style.borderColor='#6c757d'" onmouseout="this.style.borderColor='#e0e0e0'">
+                   border: 1px solid var(--bordure-claire); transition: all 0.2s;"
+                   onmouseover="this.style.borderColor='var(--gris-moyen)'" onmouseout="this.style.borderColor='var(--bordure-claire)'">
                 <input type="checkbox" id="import-${id}"
-                       style="transform: scale(1.2); accent-color: #6c757d;">
+                       style="transform: scale(1.2); accent-color: var(--gris-moyen);">
                 <div style="flex: 1;">
                     <strong style="font-size: 0.95rem;">${label}</strong>
-                    <span style="color: #666; font-size: 0.85rem; margin-left: 8px;">${info}</span>
+                    <span style="color: var(--gris-moyen); font-size: 0.85rem; margin-left: 8px;">${info}</span>
                 </div>
             </label>
         `;
@@ -765,21 +765,21 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                 </h2>
 
                 <!-- Info fichier + source -->
-                <div style="background: #f8f9fa; border-radius: 8px; padding: 12px; margin-bottom: 20px;">
+                <div style="background: var(--gris-tres-pale); border-radius: 8px; padding: 12px; margin-bottom: 20px;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <strong style="font-size: 0.95rem;">${nomFichier}</strong>
-                        <span style="background: ${estCollègue ? '#fff3cd' : sourceInconnue ? '#e9ecef' : '#d4edda'}; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">
+                        <span style="background: ${estCollègue ? 'var(--alerte-fond-attention)' : sourceInconnue ? 'var(--gris-tres-pale)' : 'var(--alerte-fond-succes, #d4edda)'}; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">
                             ${sourceLabel}
                         </span>
                     </div>
-                    <p style="margin: 4px 0 0 0; font-size: 0.8rem; color: #666;">
+                    <p style="margin: 4px 0 0 0; font-size: 0.8rem; color: var(--gris-moyen);">
                         ${nbCles} éléments · ~${tailleKo} Ko
                     </p>
                 </div>
 
                 ${sourceInconnue ? `
-                <div style="background: #e9ecef; border-radius: 8px; padding: 12px; margin-bottom: 15px; border-left: 4px solid #6c757d;">
-                    <p style="margin: 0; font-size: 0.85rem; color: #495057;">
+                <div style="background: var(--gris-tres-pale); border-radius: 8px; padding: 12px; margin-bottom: 15px; border-left: 4px solid var(--gris-moyen);">
+                    <p style="margin: 0; font-size: 0.85rem; color: var(--gris-fonce);">
                         <strong>Auteur non identifié</strong><br>
                         ${!utilisateurActuel
                             ? 'Configure ton nom dans Réglages > Trimestre > Cours pour identifier tes fichiers.'
@@ -789,18 +789,18 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                 ` : ''}
 
                 <!-- Instruction -->
-                <p style="font-size: 0.95rem; color: #333; margin-bottom: 15px;">
+                <p style="font-size: 0.95rem; color: var(--gris-fonce); margin-bottom: 15px;">
                     <strong>Coche ce que tu veux importer :</strong>
                 </p>
 
                 <!-- SECTION: Ressources pédagogiques -->
                 ${analyse.totalRessources > 0 ? `
                 <div style="margin-bottom: 20px;">
-                    <h3 style="font-size: 0.9rem; color: #28a745; margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
-                        <span style="background: #d4edda; padding: 4px 8px; border-radius: 4px;">Ressources pédagogiques</span>
-                        <span style="font-size: 0.8rem; color: #666; font-weight: normal;">Ajoutées à tes bibliothèques</span>
+                    <h3 style="font-size: 0.9rem; color: var(--vert-succes); margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
+                        <span style="background: var(--alerte-fond-succes, #d4edda); padding: 4px 8px; border-radius: 4px;">Ressources pédagogiques</span>
+                        <span style="font-size: 0.8rem; color: var(--gris-moyen); font-weight: normal;">Ajoutées à tes bibliothèques</span>
                     </h3>
-                    <div style="background: #f0fff4; border-radius: 8px; padding: 12px;">
+                    <div style="background: var(--alerte-fond-succes, #f0fff4); border-radius: 8px; padding: 12px;">
                         ${genererLigneRessource('pratiques', 'Pratiques de notation', analyse.ressources.pratiques.count, analyse.ressources.pratiques.items)}
                         ${genererLigneRessource('grilles', 'Grilles de critères', analyse.ressources.grilles.count, analyse.ressources.grilles.items)}
                         ${genererLigneRessource('echelles', 'Échelles de performance', analyse.ressources.echelles.count, analyse.ressources.echelles.items)}
@@ -813,41 +813,41 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                 <!-- SECTION: Données du cours -->
                 ${analyse.totalDonnees > 0 ? `
                 <div style="margin-bottom: 20px;">
-                    <h3 style="font-size: 0.9rem; color: #6c757d; margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
-                        <span style="background: #e9ecef; padding: 4px 8px; border-radius: 4px;">Données du cours</span>
-                        <span style="font-size: 0.8rem; color: #999; font-weight: normal;">Protégées</span>
+                    <h3 style="font-size: 0.9rem; color: var(--gris-moyen); margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
+                        <span style="background: var(--gris-tres-pale); padding: 4px 8px; border-radius: 4px;">Données du cours</span>
+                        <span style="font-size: 0.8rem; color: var(--gris-clair); font-weight: normal;">Protégées</span>
                     </h3>
 
                     <!-- 🆕 Beta 96.2 : Données personnelles importables SI c'est sa propre sauvegarde ou restauration -->
                     ${(analyse.donnees.etudiants.count > 0 || analyse.donnees.presences.count > 0 || analyse.donnees.evaluations.count > 0) ? `
                     ${estCollègue ? `
                     <!-- Fichier d'un collègue : bloquer import données perso (pas de bypass possible) -->
-                    <div style="background: #f8d7da; border-radius: 8px; padding: 15px; margin-bottom: 10px; border-left: 4px solid #dc3545;">
+                    <div style="background: var(--alerte-fond-erreur, #f8d7da); border-radius: 8px; padding: 15px; margin-bottom: 10px; border-left: 4px solid var(--rouge-erreur);">
                         <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
-                            ${analyse.donnees.etudiants.count > 0 ? `<span style="background: #f5c6cb; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; color: #721c24;">Étudiants (${analyse.donnees.etudiants.count})</span>` : ''}
-                            ${analyse.donnees.presences.count > 0 ? `<span style="background: #f5c6cb; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; color: #721c24;">Présences (${analyse.donnees.presences.count} dates)</span>` : ''}
-                            ${analyse.donnees.evaluations.count > 0 ? `<span style="background: #f5c6cb; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; color: #721c24;">Notes (${analyse.donnees.evaluations.cles.length} ensemble(s))</span>` : ''}
+                            ${analyse.donnees.etudiants.count > 0 ? `<span style="background: var(--alerte-fond-erreur, #f5c6cb); padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; color: var(--rouge-erreur);">Étudiants (${analyse.donnees.etudiants.count})</span>` : ''}
+                            ${analyse.donnees.presences.count > 0 ? `<span style="background: var(--alerte-fond-erreur, #f5c6cb); padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; color: var(--rouge-erreur);">Présences (${analyse.donnees.presences.count} dates)</span>` : ''}
+                            ${analyse.donnees.evaluations.count > 0 ? `<span style="background: var(--alerte-fond-erreur, #f5c6cb); padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; color: var(--rouge-erreur);">Notes (${analyse.donnees.evaluations.cles.length} ensemble(s))</span>` : ''}
                         </div>
-                        <p style="margin: 0; font-size: 0.85rem; color: #721c24;">
+                        <p style="margin: 0; font-size: 0.85rem; color: var(--rouge-erreur);">
                             <strong>Partage impossible</strong> – Ces données appartiennent à un collègue et ne peuvent pas être importées.
                         </p>
                     </div>
                     ` : (sourceInconnue && !restaurationNouvelAppareil) ? `
                     <!-- Source inconnue : permettre bypass avec confirmation -->
-                    <div id="sectionDonneesPerso" style="background: #fff3cd; border-radius: 8px; padding: 15px; margin-bottom: 10px; border-left: 4px solid #ffc107;">
+                    <div id="sectionDonneesPerso" style="background: var(--alerte-fond-attention); border-radius: 8px; padding: 15px; margin-bottom: 10px; border-left: 4px solid var(--btn-annuler);">
                         <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
-                            ${analyse.donnees.etudiants.count > 0 ? `<span style="background: #ffeeba; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; color: #856404;">Étudiants (${analyse.donnees.etudiants.count})</span>` : ''}
-                            ${analyse.donnees.presences.count > 0 ? `<span style="background: #ffeeba; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; color: #856404;">Présences (${analyse.donnees.presences.count} dates)</span>` : ''}
-                            ${analyse.donnees.evaluations.count > 0 ? `<span style="background: #ffeeba; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; color: #856404;">Notes (${analyse.donnees.evaluations.cles.length} ensemble(s))</span>` : ''}
+                            ${analyse.donnees.etudiants.count > 0 ? `<span style="background: var(--alerte-fond-attention); padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; color: var(--gris-fonce);">Étudiants (${analyse.donnees.etudiants.count})</span>` : ''}
+                            ${analyse.donnees.presences.count > 0 ? `<span style="background: var(--alerte-fond-attention); padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; color: var(--gris-fonce);">Présences (${analyse.donnees.presences.count} dates)</span>` : ''}
+                            ${analyse.donnees.evaluations.count > 0 ? `<span style="background: var(--alerte-fond-attention); padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; color: var(--gris-fonce);">Notes (${analyse.donnees.evaluations.cles.length} ensemble(s))</span>` : ''}
                         </div>
-                        <p style="margin: 0 0 12px 0; font-size: 0.85rem; color: #856404;">
+                        <p style="margin: 0 0 12px 0; font-size: 0.85rem; color: var(--gris-fonce);">
                             <strong>Source non identifiée</strong> – Le fichier ne contient pas d'information sur son auteur.
                         </p>
-                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 10px; background: white; border-radius: 6px; border: 2px solid #ffc107;">
+                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 10px; background: white; border-radius: 6px; border: 2px solid var(--btn-annuler);">
                             <input type="checkbox" id="confirmMaSauvegarde" onchange="toggleDonneesPersoImport(this.checked)" style="width: 20px; height: 20px;">
-                            <span style="font-size: 0.9rem; color: #333;"><strong>C'est ma propre sauvegarde</strong> – Je confirme que ce fichier m'appartient</span>
+                            <span style="font-size: 0.9rem; color: var(--gris-fonce);"><strong>C'est ma propre sauvegarde</strong> – Je confirme que ce fichier m'appartient</span>
                         </label>
-                        <div id="checkboxesDonneesPerso" style="display: none; margin-top: 12px; padding: 12px; background: #d4edda; border-radius: 6px;">
+                        <div id="checkboxesDonneesPerso" style="display: none; margin-top: 12px; padding: 12px; background: var(--alerte-fond-succes, #d4edda); border-radius: 6px;">
                             ${analyse.donnees.etudiants.count > 0 ? genererLigneDonnee('etudiants', 'Étudiants', analyse.donnees.etudiants.count + ' étudiant(s)') : ''}
                             ${analyse.donnees.presences.count > 0 ? genererLigneDonnee('presences', 'Présences', analyse.donnees.presences.count + ' date(s)') : ''}
                             ${analyse.donnees.evaluations.count > 0 ? genererLigneDonnee('evaluations', 'Notes', analyse.donnees.evaluations.cles.length + ' ensemble(s)') : ''}
@@ -855,12 +855,12 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                     </div>
                     ` : `
                     <!-- Sauvegarde personnelle : permettre import données perso -->
-                    <div style="background: #d4edda; border-radius: 8px; padding: 12px; margin-bottom: 10px;">
+                    <div style="background: var(--alerte-fond-succes, #d4edda); border-radius: 8px; padding: 12px; margin-bottom: 10px;">
                         ${analyse.donnees.etudiants.count > 0 ? genererLigneDonnee('etudiants', 'Étudiants', analyse.donnees.etudiants.count + ' étudiant(s)') : ''}
                         ${analyse.donnees.presences.count > 0 ? genererLigneDonnee('presences', 'Présences', analyse.donnees.presences.count + ' date(s)') : ''}
                         ${analyse.donnees.evaluations.count > 0 ? genererLigneDonnee('evaluations', 'Notes', analyse.donnees.evaluations.cles.length + ' ensemble(s)') : ''}
                     </div>
-                    <p style="font-size: 0.75rem; color: #28a745; margin: 8px 0 0 12px;">
+                    <p style="font-size: 0.75rem; color: var(--vert-succes); margin: 8px 0 0 12px;">
                         ✓ Sauvegarde personnelle détectée – tes données peuvent être restaurées
                     </p>
                     `}
@@ -868,10 +868,10 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
 
                     <!-- Configuration du cours (importable sauf si collègue) -->
                     ${analyse.donnees.configuration.present && !estCollègue ? `
-                    <div style="background: #f8f9fa; border-radius: 8px; padding: 12px;">
+                    <div style="background: var(--gris-tres-pale); border-radius: 8px; padding: 12px;">
                         ${genererLigneDonnee('configuration', 'Configuration du cours', analyse.donnees.configuration.cles.join(', '))}
                     </div>
-                    <p style="font-size: 0.75rem; color: #dc3545; margin: 8px 0 0 12px;">
+                    <p style="font-size: 0.75rem; color: var(--rouge-erreur); margin: 8px 0 0 12px;">
                         Attention : cette option remplacera ta configuration actuelle
                     </p>
                     ` : ''}
@@ -881,30 +881,30 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                 <!-- 🆕 Beta 96.2 : SECTION: Entités structurelles -->
                 ${(analyse.entites?.groupesCours?.count > 0 || analyse.entites?.horaires?.count > 0 || analyse.entites?.enseignants?.present) ? `
                 <div style="margin-bottom: 20px;">
-                    <h3 style="font-size: 0.9rem; color: #17a2b8; margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
-                        <span style="background: #d1ecf1; padding: 4px 8px; border-radius: 4px;">Structure du trimestre</span>
-                        <span style="font-size: 0.8rem; color: #666; font-weight: normal;">Groupe-cours, horaires, enseignants</span>
+                    <h3 style="font-size: 0.9rem; color: var(--bleu-clair); margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
+                        <span style="background: var(--bleu-pale); padding: 4px 8px; border-radius: 4px;">Structure du trimestre</span>
+                        <span style="font-size: 0.8rem; color: var(--gris-moyen); font-weight: normal;">Groupe-cours, horaires, enseignants</span>
                     </h3>
-                    <div style="background: #e8f4f8; border-radius: 8px; padding: 12px;">
+                    <div style="background: var(--bleu-tres-pale); border-radius: 8px; padding: 12px;">
                         ${analyse.entites.groupesCours.count > 0 ? genererLigneDonnee('groupesCours', 'Groupe-cours', analyse.entites.groupesCours.count + ' groupe(s) - ' + analyse.entites.groupesCours.cles.join(', ')) : ''}
                         ${analyse.entites.horaires.count > 0 ? genererLigneDonnee('horaires', 'Horaires', analyse.entites.horaires.count + ' horaire(s) - ' + analyse.entites.horaires.cles.join(', ')) : ''}
                         ${analyse.entites.enseignants.present ? genererLigneDonnee('enseignants', 'Enseignants', analyse.entites.enseignants.count + ' profil(s)') : ''}
                     </div>
-                    <p style="font-size: 0.75rem; color: #17a2b8; margin: 8px 0 0 12px;">
+                    <p style="font-size: 0.75rem; color: var(--bleu-clair); margin: 8px 0 0 12px;">
                         Ces données sont essentielles pour que l'application fonctionne correctement
                     </p>
                 </div>
                 ` : ''}
 
                 ${analyse.totalRessources === 0 && analyse.totalDonnees === 0 && !(analyse.entites?.groupesCours?.count > 0) ? `
-                <div style="background: #fff3cd; border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 20px;">
-                    <p style="margin: 0; color: #856404;">Aucune ressource reconnue dans ce fichier.</p>
+                <div style="background: var(--alerte-fond-attention); border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 20px;">
+                    <p style="margin: 0; color: var(--gris-fonce);">Aucune ressource reconnue dans ce fichier.</p>
                 </div>
                 ` : ''}
 
                 <!-- Boutons -->
                 <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;
-                     padding-top: 15px; border-top: 1px solid #eee;">
+                     padding-top: 15px; border-top: 1px solid var(--bordure-claire);">
                     <button onclick="fermerModalPreviewConfigComplete()"
                             style="padding: 10px 20px; background: white; color: var(--gris-fonce);
                                    border: 1px solid var(--gris-clair); border-radius: 4px;
@@ -912,7 +912,7 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                         Annuler
                     </button>
                     <button onclick="executerImportSelectif()"
-                            style="padding: 10px 24px; background: #28a745; color: white;
+                            style="padding: 10px 24px; background: var(--vert-succes); color: white;
                                    border: none; border-radius: 4px; cursor: pointer; font-size: 0.95rem;
                                    font-weight: 500;"
                             ${analyse.totalRessources === 0 && analyse.totalDonnees === 0 && !(analyse.entites?.groupesCours?.count > 0 || analyse.entites?.horaires?.count > 0 || analyse.entites?.enseignants?.present) ? 'disabled style="opacity:0.5"' : ''}>
@@ -1216,13 +1216,13 @@ function afficherModalPreviewConfigComplete(config) {
                 </h2>
 
                 <!-- Type détecté -->
-                <div style="background: #e8f5e9; border: 1px solid #81c784; border-radius: 8px;
+                <div style="background: var(--alerte-fond-succes, #e8f5e9); border: 1px solid var(--vert-succes); border-radius: 8px;
                      padding: 15px; margin-bottom: 20px;">
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <span style="font-size: 2rem;">📚</span>
                         <div>
-                            <strong style="color: #2e7d32; font-size: 1.1rem;">Configuration pédagogique partagée</strong>
-                            <p style="margin: 4px 0 0 0; font-size: 0.9rem; color: #666;">
+                            <strong style="color: var(--vert-succes); font-size: 1.1rem;">Configuration pédagogique partagée</strong>
+                            <p style="margin: 4px 0 0 0; font-size: 0.9rem; color: var(--gris-moyen);">
                                 Ce fichier contient des ressources pédagogiques prêtes à utiliser.
                             </p>
                         </div>
@@ -1235,32 +1235,32 @@ function afficherModalPreviewConfigComplete(config) {
                     <h3 style="margin: 0 0 8px 0; font-size: 1.05rem; color: var(--bleu-moyen);">
                         ${meta.nom}
                     </h3>
-                    <p style="margin: 0; font-size: 0.9rem; color: #555;">
+                    <p style="margin: 0; font-size: 0.9rem; color: var(--gris-moyen);">
                         Par <strong>${meta.auteur}</strong>
                         ${meta.discipline && meta.discipline.length > 0 ? ` · ${meta.discipline.join(', ')}` : ''}
                         ${meta.niveau ? ` · ${meta.niveau}` : ''}
                     </p>
                     ${meta.description
-                        ? `<p style="margin: 10px 0 0 0; font-size: 0.9rem; font-style: italic; color: #666;">${meta.description}</p>`
+                        ? `<p style="margin: 10px 0 0 0; font-size: 0.9rem; font-style: italic; color: var(--gris-moyen);">${meta.description}</p>`
                         : ''}
                 </div>
 
                 <!-- Contenu -->
-                <div style="background: #f8f9fa; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+                <div style="background: var(--gris-tres-pale); border-radius: 8px; padding: 15px; margin-bottom: 20px;">
                     <p style="margin: 0 0 10px 0; font-size: 0.95rem; font-weight: 500;">
                         Ressources incluses (${totalRessources}) :
                     </p>
                     <div style="display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.9rem;">
-                        ${nbEchelles > 0 ? `<span style="background: white; padding: 4px 10px; border-radius: 4px; border: 1px solid #ddd;">✓ ${nbEchelles} échelle(s)</span>` : ''}
-                        ${nbGrilles > 0 ? `<span style="background: white; padding: 4px 10px; border-radius: 4px; border: 1px solid #ddd;">✓ ${nbGrilles} grille(s)</span>` : ''}
-                        ${nbProductions > 0 ? `<span style="background: white; padding: 4px 10px; border-radius: 4px; border: 1px solid #ddd;">✓ ${nbProductions} production(s)</span>` : ''}
-                        ${nbCartouches > 0 ? `<span style="background: white; padding: 4px 10px; border-radius: 4px; border: 1px solid #ddd;">✓ ${nbCartouches} cartouche(s)</span>` : ''}
+                        ${nbEchelles > 0 ? `<span style="background: white; padding: 4px 10px; border-radius: 4px; border: 1px solid var(--bordure-claire);">✓ ${nbEchelles} échelle(s)</span>` : ''}
+                        ${nbGrilles > 0 ? `<span style="background: white; padding: 4px 10px; border-radius: 4px; border: 1px solid var(--bordure-claire);">✓ ${nbGrilles} grille(s)</span>` : ''}
+                        ${nbProductions > 0 ? `<span style="background: white; padding: 4px 10px; border-radius: 4px; border: 1px solid var(--bordure-claire);">✓ ${nbProductions} production(s)</span>` : ''}
+                        ${nbCartouches > 0 ? `<span style="background: white; padding: 4px 10px; border-radius: 4px; border: 1px solid var(--bordure-claire);">✓ ${nbCartouches} cartouche(s)</span>` : ''}
                     </div>
                 </div>
 
                 <!-- Info CC -->
-                <div style="background: #e3f2fd; border-radius: 8px; padding: 12px; margin-bottom: 20px;">
-                    <p style="margin: 0; font-size: 0.85rem; color: #1565c0;">
+                <div style="background: var(--bleu-pale); border-radius: 8px; padding: 12px; margin-bottom: 20px;">
+                    <p style="margin: 0; font-size: 0.85rem; color: var(--bleu-clair);">
                         📄 Licence <strong>CC BY-NC-SA 4.0</strong> — Tu peux utiliser et adapter ces ressources
                         en citant l'auteur.
                     </p>
@@ -1275,7 +1275,7 @@ function afficherModalPreviewConfigComplete(config) {
                         Annuler
                     </button>
                     <button onclick="executerImportConfigComplete()"
-                            style="padding: 10px 20px; background: #28a745; color: white;
+                            style="padding: 10px 20px; background: var(--vert-succes); color: white;
                                    border: none; border-radius: 4px; cursor: pointer; font-size: 0.95rem;
                                    font-weight: 500;">
                         Ajouter à mes bibliothèques

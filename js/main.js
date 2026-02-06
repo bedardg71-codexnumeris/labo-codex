@@ -164,31 +164,39 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     function creerUneBulle(tailles) {
-        const bulle = document.createElement('div');
-
-        // Taille aléatoire (toutes les bulles sont blanches maintenant)
+        // BETA 97.1: Structure imbriquée pour mouvement hélicoïdal
+        // Enveloppe = dérive horizontale (floatUp)
+        // Bulle intérieure = spin vertical + scale (bulle-helice)
+        const trajectoire = document.createElement('div');
         const taille = tailles[Math.floor(Math.random() * tailles.length)];
-        bulle.className = `bulle ${taille}`;
+        trajectoire.className = `bulle-trajectoire ${taille}`;
+
+        // Bulle intérieure (apparence + spin hélicoïdal)
+        const bulle = document.createElement('div');
+        bulle.className = 'bulle';
+        // Délai négatif = chaque bulle démarre à une phase différente du spin
+        bulle.style.setProperty('--spin-delay', `-${(Math.random() * 7).toFixed(1)}s`);
+        trajectoire.appendChild(bulle);
 
         // Position de départ randomisée - PARTOUT sur l'écran
-        const left = `${Math.random() * 100}%`; // 0% à 100% de la largeur
-        const bottom = `${Math.random() * 100}%`; // 0% à 100% de la hauteur
+        const left = `${Math.random() * 100}%`;
+        const bottom = `${Math.random() * 100}%`;
 
         // Variables CSS pour trajectoire unique
-        const startX = `${(Math.random() - 0.5) * 60}px`; // -30px à +30px
-        const startY = `${(Math.random() - 0.5) * 60}px`; // -30px à +30px
+        const startX = `${(Math.random() - 0.5) * 60}px`;
+        const startY = `${(Math.random() - 0.5) * 60}px`;
 
         // Dérive verticale avec possibilité de descente (apprentissage non-linéaire)
         // 70% chance de monter, 30% chance de descendre
         const directionY = Math.random() < 0.7 ? -1 : 1;
-        const amplitudeY = 30 + Math.random() * 40; // 30px à 70px
+        const amplitudeY = 30 + Math.random() * 40;
         const driftY = `${directionY * amplitudeY}px`;
 
         // BETA 96.2: Durée selon la taille (effet parallaxe)
         const dureesTaille = dureesParTaille[taille] || dureesParTaille.moyenne;
         const duree = dureesTaille[Math.floor(Math.random() * dureesTaille.length)];
 
-        bulle.style.cssText = `
+        trajectoire.style.cssText = `
             left: ${left};
             bottom: ${bottom};
             --start-x: ${startX};
@@ -198,9 +206,10 @@ document.addEventListener('DOMContentLoaded', function () {
             animation-delay: 0s;
         `;
 
-        // Écouter la fin de l'animation pour régénérer la bulle
-        bulle.addEventListener('animationiteration', function() {
-            // Régénérer position et propriétés aléatoires
+        // Régénérer à chaque itération de la dérive (ignorer les événements du spin)
+        trajectoire.addEventListener('animationiteration', function(event) {
+            if (event.animationName !== 'floatUp') return;
+
             const newLeft = `${Math.random() * 100}%`;
             const newBottom = `${Math.random() * 100}%`;
             const newStartX = `${(Math.random() - 0.5) * 60}px`;
@@ -209,7 +218,6 @@ document.addEventListener('DOMContentLoaded', function () {
             const newAmplitudeY = 30 + Math.random() * 40;
             const newDriftY = `${newDirectionY * newAmplitudeY}px`;
 
-            // BETA 96.2: Durée selon la taille (effet parallaxe)
             const tailleBulle = this.classList.contains('grande') ? 'grande' :
                                this.classList.contains('petite') ? 'petite' : 'moyenne';
             const dureesTaille = dureesParTaille[tailleBulle];
@@ -225,9 +233,12 @@ document.addEventListener('DOMContentLoaded', function () {
             this.style.setProperty('--start-y', newStartY);
             this.style.setProperty('--drift-y', newDriftY);
             this.style.animation = `floatUp ${newDuree}s infinite linear`;
+
+            // Désynchroniser le spin pour le prochain cycle
+            this.querySelector('.bulle').style.setProperty('--spin-delay', `-${(Math.random() * 7).toFixed(1)}s`);
         });
 
-        return bulle;
+        return trajectoire;
     }
 
     function genererBullesApprentissage() {

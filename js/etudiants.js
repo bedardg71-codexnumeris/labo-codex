@@ -271,7 +271,7 @@ function obtenirCouleurSelonSeuils(pourcentage) {
     if (valeur >= seuils.excellent) {
         return '#0284c7'; // Bleu (excellent)
     } else if (valeur >= seuils.bon) {
-        return '#16a34a'; // Vert (bon)
+        return 'var(--vert-succes)'; // Vert (bon)
     } else if (valeur >= seuils.acceptable) {
         return '#ca8a04'; // Jaune (acceptable)
     } else {
@@ -677,7 +677,7 @@ function calculerNiveauRaI(da) {
 
         if (niveauInfo.niveau === 1) {
             label = 'RàI 1';
-            couleurFond = '#e8f5e9'; // Vert pâle
+            couleurFond = 'var(--alerte-fond-succes, #e8f5e9)'; // Vert pâle
             couleurTexte = '#2e7d32'; // Vert foncé
         } else if (niveauInfo.niveau === 2) {
             label = 'RàI 2';

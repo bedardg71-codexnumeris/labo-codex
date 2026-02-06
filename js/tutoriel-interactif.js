@@ -209,7 +209,7 @@ function creerBulle(etape, index) {
                 <div style="
                     height: 100%;
                     width: ${((index + 1) / ETAPES_TUTORIEL.length) * 100}%;
-                    background: linear-gradient(135deg, #032e5c, #065dbb);
+                    background: linear-gradient(135deg, var(--bleu-principal), var(--bleu-clair));
                     transition: width 0.3s ease;
                 "></div>
             </div>
@@ -278,7 +278,7 @@ function creerBulle(etape, index) {
                 ${index < ETAPES_TUTORIEL.length - 1 ? `
                     <button onclick="etapeSuivante()" style="
                         padding: 10px 20px;
-                        background: linear-gradient(135deg, #032e5c, #065dbb);
+                        background: linear-gradient(135deg, var(--bleu-principal), var(--bleu-clair));
                         color: white;
                         border: none;
                         border-radius: 6px;
@@ -294,7 +294,7 @@ function creerBulle(etape, index) {
                 ` : `
                     <button onclick="terminerTutoriel()" style="
                         padding: 10px 20px;
-                        background: linear-gradient(135deg, #1e5a4a, #28a745);
+                        background: linear-gradient(135deg, #1e5a4a, var(--vert-succes));
                         color: white;
                         border: none;
                         border-radius: 6px;

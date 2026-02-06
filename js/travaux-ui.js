@@ -601,7 +601,7 @@
         const quota = await travauxStockage.estimerQuota();
         const stats = travauxStockage.statistiquesFichiers();
         const pourcent = Math.round(quota.pourcentage * 100);
-        const couleurBarre = pourcent >= 90 ? '#dc3545' : (pourcent >= 70 ? '#ffc107' : 'var(--bleu-clair, #065dbb)');
+        const couleurBarre = pourcent >= 90 ? 'var(--rouge-erreur)' : (pourcent >= 70 ? 'var(--btn-annuler)' : 'var(--bleu-clair)');
 
         const fsapiDispo = travauxStockage.estFSAPIDisponible();
         const fsapiActif = travauxStockage.estFSAPIActif();

@@ -44,7 +44,7 @@
 function afficherNotificationErreur(titre, details = '') {
     const notification = document.createElement('div');
     notification.className = 'notification-succes';
-    notification.style.background = '#dc3545';
+    notification.style.background = 'var(--rouge-erreur)';
     notification.innerHTML = `
         <div style="font-weight: 600; margin-bottom: 5px;">${echapperHtml(titre)}</div>
         ${details ? `<div class="notification-details">${echapperHtml(details)}</div>` : ''}

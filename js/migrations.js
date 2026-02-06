@@ -607,8 +607,8 @@ function afficherModalMigrationLegacy(detailsLegacy) {
                 </div>
 
                 <!-- Contexte : pourquoi cette migration -->
-                <div style="background: #f0f7ff; border-radius: 8px; padding: 18px; margin-bottom: 18px;">
-                    <p style="margin: 0; font-size: 0.95rem; line-height: 1.6; color: #333;">
+                <div style="background: var(--bleu-tres-pale); border-radius: 8px; padding: 18px; margin-bottom: 18px;">
+                    <p style="margin: 0; font-size: 0.95rem; line-height: 1.6; color: var(--gris-fonce);">
                         L'application Monitorage a beaucoup évolué récemment pour mieux répondre aux
                         besoins des enseignants. Pour profiter de toutes les nouvelles fonctionnalités,
                         vos données doivent être réorganisées une seule fois.
@@ -616,7 +616,7 @@ function afficherModalMigrationLegacy(detailsLegacy) {
                 </div>
 
                 <!-- Ce qui change -->
-                <div style="background: #e7f3ff; border-radius: 8px; padding: 18px; margin-bottom: 18px;">
+                <div style="background: var(--bleu-pale); border-radius: 8px; padding: 18px; margin-bottom: 18px;">
                     <p style="margin: 0 0 10px 0; font-size: 0.95rem;">
                         <strong>Ce qui change :</strong>
                     </p>
@@ -628,28 +628,28 @@ function afficherModalMigrationLegacy(detailsLegacy) {
                 </div>
 
                 <!-- Ce qui va se passer -->
-                <div style="background: #f8f9fa; border-left: 4px solid var(--bleu-moyen);
+                <div style="background: var(--gris-tres-pale); border-left: 4px solid var(--bleu-moyen);
                      padding: 15px; margin-bottom: 18px; border-radius: 0 8px 8px 0;">
                     <p style="margin: 0 0 8px 0; font-size: 0.95rem;">
                         <strong>📋 ${nbCles} ensemble(s) de données détecté(s)</strong>
                     </p>
-                    <p style="margin: 0; font-size: 0.9rem; color: #555;">
+                    <p style="margin: 0; font-size: 0.9rem; color: var(--gris-moyen);">
                         La migration va créer un trimestre à partir de vos données actuelles.
                         <strong>Aucune donnée ne sera perdue.</strong>
                     </p>
                 </div>
 
                 <!-- Rassurant -->
-                <div style="background: #d4edda; border-radius: 8px; padding: 12px; margin-bottom: 18px;">
-                    <p style="margin: 0; font-size: 0.85rem; color: #155724;">
+                <div style="background: var(--alerte-fond-succes, #d4edda); border-radius: 8px; padding: 12px; margin-bottom: 18px;">
+                    <p style="margin: 0; font-size: 0.85rem; color: var(--alerte-texte-succes);">
                         ✅ <strong>Rassurez-vous :</strong> Cette opération est automatique et ne prendra
                         que quelques secondes. C'est une opération ponctuelle qui ne devrait pas se reproduire.
                     </p>
                 </div>
 
                 <!-- Avertissement export -->
-                <div style="background: #fff3cd; border-radius: 8px; padding: 12px; margin-bottom: 22px;">
-                    <p style="margin: 0; font-size: 0.85rem; color: #856404;">
+                <div style="background: var(--alerte-fond-attention); border-radius: 8px; padding: 12px; margin-bottom: 22px;">
+                    <p style="margin: 0; font-size: 0.85rem; color: var(--gris-fonce);">
                         💡 <strong>Conseil :</strong> Si vous préférez, exportez d'abord vos données
                         (Réglages → Export localStorage) avant de continuer.
                     </p>

@@ -1236,7 +1236,7 @@ async function ouvrirModalBibliothequeCours() {
                     background: transparent;
                     border: none;
                     font-size: 28px;
-                    color: #999;
+                    color: var(--gris-clair);
                     cursor: pointer;
                     padding: 0;
                     width: 30px;
@@ -1245,7 +1245,7 @@ async function ouvrirModalBibliothequeCours() {
                     align-items: center;
                     justify-content: center;
                     z-index: 1;
-                " onmouseover="this.style.color='#333'" onmouseout="this.style.color='#999'">
+                " onmouseover="this.style.color='var(--gris-fonce)'" onmouseout="this.style.color='var(--gris-clair)'">
                     ×
                 </button>
                 <h2 style="margin-top: 0; color: var(--bleu-principal);">Bibliothèque de cours</h2>
@@ -1317,7 +1317,7 @@ async function ouvrirModalBibliothequeCours() {
 
     // SECTION 2 : Disponibles à ajouter
     modalHTML += `
-                <h3 style="color: #3498db; font-size: 1.1rem; margin-top: 20px;">
+                <h3 style="color: var(--bleu-clair); font-size: 1.1rem; margin-top: 20px;">
                     Cours disponibles à ajouter
                 </h3>
     `;
@@ -1328,7 +1328,7 @@ async function ouvrirModalBibliothequeCours() {
         coursDisponibles.forEach(cours => {
             modalHTML += `
                 <div style="
-                    border: 1px solid #ddd;
+                    border: 1px solid var(--bordure-claire);
                     border-radius: 6px;
                     padding: 15px;
                     margin-bottom: 10px;
