@@ -172,6 +172,9 @@
 
                 <!-- Zone document + annotation -->
                 <div class="travaux-zone-document" id="travaux-conteneur-document">
+                    <!-- Bouton toggle sidebar (visible quand sidebar repliee) -->
+                    <button class="travaux-btn-toggle-sidebar" id="travaux-btn-toggle-sidebar" onclick="travauxUI.toggleSidebar()" title="Afficher les fichiers">&#x25C0;</button>
+
                     <!-- Toolbar -->
                     <div class="travaux-toolbar">
                         <div class="travaux-toolbar-gauche">
@@ -189,6 +192,7 @@
                             <button class="btn-icon" onclick="travauxVisionneuse.zoomAjuster()" title="Ajuster a la fenetre">&#x2922;</button>
                             <span class="travaux-separateur"></span>
                             <button id="travaux-btn-annoter" class="btn btn-petit" onclick="travauxAnnotation.basculerAnnotation()">Annoter</button>
+                            <button id="travaux-btn-export-pdf" class="btn btn-petit" onclick="travauxExportPDF.afficherRevisionExport(travauxVisionneuse.getFichierActuel()?.id)" title="Exporter PDF annote" style="display:none">Exporter PDF</button>
                         </div>
                     </div>
 
@@ -232,12 +236,20 @@
             document.getElementById('travaux-btn-annoter').textContent = 'Terminer';
             document.getElementById('travaux-btn-annoter').classList.add('actif');
             document.getElementById('travaux-undo-redo').classList.remove('u-hide');
+            // Replier la sidebar pour maximiser l'espace d'annotation
+            document.getElementById('travaux-sidebar')?.classList.add('replie');
+            const btnToggle = document.getElementById('travaux-btn-toggle-sidebar');
+            if (btnToggle) btnToggle.classList.add('visible');
         });
 
         window.addEventListener('travaux-annotation-desactivee', () => {
             document.getElementById('travaux-btn-annoter').textContent = 'Annoter';
             document.getElementById('travaux-btn-annoter').classList.remove('actif');
             document.getElementById('travaux-undo-redo').classList.add('u-hide');
+            // Redeployer la sidebar
+            document.getElementById('travaux-sidebar')?.classList.remove('replie');
+            const btnToggle = document.getElementById('travaux-btn-toggle-sidebar');
+            if (btnToggle) btnToggle.classList.remove('visible');
         });
     }
 
@@ -525,11 +537,29 @@
 
             await travauxVisionneuse.ouvrirFichier(fichierId);
 
+            // Afficher le bouton export PDF
+            const btnExport = document.getElementById('travaux-btn-export-pdf');
+            if (btnExport) btnExport.style.display = '';
+
             // Mettre a jour la miniature active
             document.querySelectorAll('.travaux-miniature').forEach(m => {
                 m.classList.toggle('actif', m.dataset.fichierId === fichierId);
             });
         }, 100);
+    }
+
+    /**
+     * Bascule la sidebar repliee/deployee (pendant le mode annotation)
+     */
+    function toggleSidebar() {
+        const sidebar = document.getElementById('travaux-sidebar');
+        const btnToggle = document.getElementById('travaux-btn-toggle-sidebar');
+        if (!sidebar) return;
+
+        sidebar.classList.toggle('replie');
+        if (btnToggle) {
+            btnToggle.classList.toggle('visible', sidebar.classList.contains('replie'));
+        }
     }
 
     /**
@@ -793,6 +823,7 @@
         lancerImport: lancerImport,
         ouvrirFichier: ouvrirFichier,
         filtrerParEtudiant: filtrerParEtudiant,
+        toggleSidebar: toggleSidebar,
         // Archivage
         lancerArchivageEtudiant: lancerArchivageEtudiant,
         lancerArchivageProduction: lancerArchivageProduction,
