@@ -111,6 +111,9 @@ async function entrerEnDemo() {
         // 2. Activer le flag démo
         db.setSync('demo-actif', 'true');
 
+        // 2b. Forcer un chargement frais (évite les flags stale après crash/refresh)
+        db.setSync('demo-chargees', null);
+
         // 3. Charger les données demo (crée trimestre + merge données)
         const success = await chargerDonneesDemo();
         if (!success) {
@@ -118,6 +121,19 @@ async function entrerEnDemo() {
             db.setSync('demo-actif', null);
             db.removeSync('demo-etat-precedent');
             return;
+        }
+
+        // 3b. Vérifier que les données sont bien chargées
+        const etudiantsVerif = db.getSync('demo_groupeEtudiants', null);
+        if (!etudiantsVerif || !Array.isArray(etudiantsVerif) || etudiantsVerif.length === 0) {
+            console.error('[Demo] ❌ Données demo_groupeEtudiants absentes après chargement!');
+            console.log('[Demo] Tentative IndexedDB → localStorage sync...');
+            await db.syncToLocalStorageCache();
+            // Re-vérifier après sync
+            const etudiantsRetry = db.getSync('demo_groupeEtudiants', []);
+            console.log(`[Demo] Après sync: ${etudiantsRetry.length} étudiants`);
+        } else {
+            console.log(`[Demo] ✅ ${etudiantsVerif.length} étudiants vérifiés dans demo_groupeEtudiants`);
         }
 
         // 4. Activer le trimestre demo

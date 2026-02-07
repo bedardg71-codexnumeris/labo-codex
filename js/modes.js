@@ -493,8 +493,13 @@ function obtenirDonneesSelonMode(cle) {
     const valeurParDefaut = clesSontObjets.includes(cle) ? {} : [];
 
     // Utiliser window.cle() pour le namespacing par trimestre (paramètre cle shadowed)
-    const cleEffective = window.cle(cle);
+    const cleEffective = typeof window.cle === 'function' ? window.cle(cle) : cle;
     let donnees = db.getSync(cleEffective, valeurParDefaut);
+
+    // Diagnostic si aucune donnée trouvée pour une clé namespacée
+    if (cleEffective !== cle && (!donnees || (Array.isArray(donnees) && donnees.length === 0))) {
+        console.warn(`⚠️ [obtenirDonneesSelonMode] Aucune donnée pour "${cleEffective}" (cle brute: "${cle}")`);
+    }
 
     // ✅ CORRECTION CRITIQUE (Beta 95 - 27 déc 2025)
     // Filtrer par coursId pour les données liées au cours actif uniquement
@@ -783,7 +788,14 @@ function estModeGuide() {
  * @returns {boolean} true si la route démo est active
  */
 function estEnModeDemo() {
-    return db.getSync('demo-actif', null) === 'true';
+    // Vérifier le flag explicite
+    if (db.getSync('demo-actif', null) === 'true') return true;
+    // Fallback robuste : vérifier le trimestre actif (couvre les cas de désync)
+    if (typeof obtenirTrimestreActif === 'function') {
+        const t = obtenirTrimestreActif();
+        if (t && t.id === 'demo') return true;
+    }
+    return false;
 }
 
 window.MODES = MODES;
