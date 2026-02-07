@@ -114,17 +114,17 @@ function afficherAccueilRetour(conteneur) {
                 </div>
             </div>
             <div class="accueil-carte" onclick="afficherSection('evaluations'); setTimeout(function(){ afficherSousSection('evaluations-travaux'); }, 100);">
-                <div class="accueil-carte-icone">&#x1F4DD;</div>
-                <div class="accueil-carte-titre">Corriger des travaux</div>
+                <div class="accueil-carte-icone">&#x270F;&#xFE0F;</div>
+                <div class="accueil-carte-titre">Annoter des travaux</div>
                 <div class="accueil-carte-desc">
-                    Annoter et \u00e9valuer les travaux de vos \u00e9tudiants.
+                    Lire, annoter et apposer des autocollants dans les copies.
                 </div>
             </div>
             <div class="accueil-carte" onclick="afficherSection('evaluations'); setTimeout(function(){ afficherSousSection('evaluations-liste'); }, 100);">
-                <div class="accueil-carte-icone">&#x2705;</div>
+                <div class="accueil-carte-icone">&#x2696;&#xFE0F;</div>
                 <div class="accueil-carte-titre">\u00c9valuer une production</div>
                 <div class="accueil-carte-desc">
-                    Proc\u00e9der \u00e0 l\u2019\u00e9valuation crit\u00e9ri\u00e9e d\u2019une production.
+                    Appliquer la grille de crit\u00e8res et construire la r\u00e9troaction.
                 </div>
             </div>
             <div class="accueil-carte" onclick="afficherSection('tableau-bord');">

@@ -593,24 +593,7 @@
 
 ### Fiabilite / Maintenance
 
-- [ ] **#32** Refonte architecture groupe Demo (PLANIFICATION REQUISE)
-  - **Concept** : Le groupe Demo n'est plus un trimestre separe, mais un "bac a sable" accessible en mode Assiste
-  - **Principe** : On ne switch pas de trimestre, on switch de MODE
-    - Mode Normal = donnees reelles
-    - Mode Assiste = acces au groupe Demo pour experimenter
-  - **Contenu du groupe Demo** (dataset complet et autonome) :
-    - 5 etudiants anonymises (bases sur A25)
-    - ~8-10 semaines de donnees sur 15
-    - Presences saisies avec patterns varies (assidus, absents, irreguliers)
-    - Evaluations avec differents niveaux de performance
-    - Productions, grilles, echelles, cartouches, pratique - tout inclus
-  - **Adaptation dynamique** : Les donnees Demo s'ajustent au calendrier du trimestre actuel (Hiver/Automne)
-  - **Avantages** :
-    - Plus de confusion trimestre Demo vs trimestres reels
-    - L'utilisateur reste dans son contexte de travail
-    - Experimentation sans risque pour les donnees reelles
-  - **Prerequis** : Documenter la logique complete avant codage
-  - **Remplace** : #31 (Formulaire groupe-cours Demo incomplet - obsolete avec cette refonte)
+- [x] **#32** Refonte architecture groupe Demo ✅ OBSOLÈTE (6 fév 2026) — Remplacé par Chantiers 1-4 (Beta 97.2) : route démo isolée, pack 20 étudiants anonymisés, page d'accueil, guidage contextuel
 
 - [ ] **#12** Audit db.get() vs db.getSync()
   - Verifier tous les modules pour desynchronisation IndexedDB/localStorage
@@ -685,7 +668,7 @@
 
 ## Complete (Beta 96.3 - 6 février 2026)
 
-- [x] **#109** Module Travaux - Import, Annotation et Archivage (remplace GoodNotes)
+- [x] **#109** Module Travaux - Import, Annotation et Archivage
   - Import drag-drop de PDF/images avec detection auto du DA etudiant
   - Moteur d'annotation Canvas avec support Apple Pencil (pression, rejet paume, undo/redo)
   - Integration evaluation : vue cote-a-cote travail + grille, section "Travaux soumis" dans profil
