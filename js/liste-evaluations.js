@@ -929,10 +929,15 @@ function genererBoutonsActionsEvalue(ligne) {
         ? 'Consulter cette évaluation (lecture seule)'
         : 'Consulter cette évaluation';
 
+    // Bouton "Dossier PDF" si un fichier de travail existe
+    const btnDossier = typeof travauxExportPDF !== 'undefined'
+        ? ` <button class="btn btn-secondaire btn-compact" onclick="travauxExportPDF.exporterDossierComplet('${ligne.da}', '${ligne.productionId}')" title="Exporter le dossier complet (annote + grille + retroaction)">Dossier PDF</button>`
+        : '';
+
     return `
         <button class="btn btn-secondaire btn-compact" onclick="consulterEvaluationDepuisListe('${ligne.evaluationId}')" title="${titreConsulter}">
             Consulter
-        </button>
+        </button>${btnDossier}
     `;
 }
 

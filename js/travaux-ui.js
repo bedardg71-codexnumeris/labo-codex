@@ -226,13 +226,13 @@
                             <button id="travaux-btn-page-suiv" class="btn-icon" onclick="travauxVisionneuse.pageSuivante()" disabled title="Page suivante">&gt;</button>
                         </div>
                         <div class="travaux-toolbar-droite">
-                            <button class="btn-icon" onclick="travauxVisionneuse.zoomArriere()" title="Zoom arriere">-</button>
+                            <button class="btn btn-petit" onclick="travauxVisionneuse.zoomPleineLargeur()" title="Ajuster a la largeur du conteneur">Pleine largeur</button>
+                            <button class="btn btn-petit" onclick="travauxVisionneuse.zoomPleineHauteur()" title="Ajuster a la hauteur du conteneur">Pleine hauteur</button>
                             <span id="travaux-indicateur-zoom">100%</span>
-                            <button class="btn-icon" onclick="travauxVisionneuse.zoomAvant()" title="Zoom avant">+</button>
-                            <button class="btn-icon" onclick="travauxVisionneuse.zoomAjuster()" title="Ajuster a la fenetre">&#x2922;</button>
                             <span class="travaux-separateur"></span>
                             <button id="travaux-btn-annoter" class="btn btn-petit" onclick="travauxAnnotation.basculerAnnotation()">Annoter</button>
                             <button id="travaux-btn-export-pdf" class="btn btn-petit u-hide" onclick="travauxExportPDF.afficherRevisionExport(travauxVisionneuse.getFichierActuel()?.id)" title="Exporter PDF annote">Exporter PDF</button>
+                            <button id="travaux-btn-evaluer" class="btn btn-petit u-hide" onclick="travauxUI.evaluerDepuisAnnotation()" title="Evaluer cette production">Evaluer</button>
                         </div>
                     </div>
 
@@ -571,9 +571,11 @@
 
             await travauxVisionneuse.ouvrirFichier(fichierId);
 
-            // Afficher le bouton export PDF
+            // Afficher les boutons export PDF et evaluer
             const btnExport = document.getElementById('travaux-btn-export-pdf');
             if (btnExport) btnExport.classList.remove('u-hide');
+            const btnEvaluer = document.getElementById('travaux-btn-evaluer');
+            if (btnEvaluer) btnEvaluer.classList.remove('u-hide');
 
             // Mettre a jour la miniature active
             document.querySelectorAll('.travaux-miniature').forEach(m => {
@@ -731,6 +733,38 @@
     }
 
     /* ===============================
+       ANNOTATION → EVALUATION
+       =============================== */
+
+    /**
+     * Navigue vers l'evaluation avec l'etudiant et la production pre-remplis
+     * depuis la visionneuse d'annotation
+     */
+    function evaluerDepuisAnnotation() {
+        const fichier = travauxVisionneuse.getFichierActuel();
+        if (!fichier) {
+            alert('Aucun fichier ouvert.');
+            return;
+        }
+
+        const da = fichier.etudiantDA;
+        const productionId = fichier.productionId;
+
+        if (!da || !productionId) {
+            alert('Ce fichier n\'est pas associe a un etudiant ou une production.');
+            return;
+        }
+
+        // Utiliser la fonction existante de liste-evaluations.js
+        if (typeof evaluerProduction === 'function') {
+            evaluerProduction(da, productionId);
+        } else {
+            console.error('[Travaux-UI] Fonction evaluerProduction non disponible');
+            alert('Erreur: Module d\'evaluation non charge.');
+        }
+    }
+
+    /* ===============================
        VUE COTE A COTE (Integration evaluation)
        =============================== */
 
@@ -884,6 +918,8 @@
         lancerArchivageEtudiant: lancerArchivageEtudiant,
         lancerArchivageProduction: lancerArchivageProduction,
         lancerArchivageSemestre: lancerArchivageSemestre,
+        // Annotation → Evaluation
+        evaluerDepuisAnnotation: evaluerDepuisAnnotation,
         // Vue cote-a-cote
         ouvrirVueCoteACote: ouvrirVueCoteACote,
         fermerVueCoteACote: fermerVueCoteACote,

@@ -214,9 +214,10 @@
 
         // Textes
         if (donneesPage.textAnnotations) {
+            const ratioResolutionTexte = w / travauxOutils.RESOLUTION_REFERENCE;
             for (const texte of donneesPage.textAnnotations) {
                 ctx.save();
-                ctx.font = `${(texte.fontSize || 14) * scale}px sans-serif`;
+                ctx.font = `${(texte.fontSize || 14) * ratioResolutionTexte}px sans-serif`;
                 ctx.fillStyle = texte.color || '#FF0000';
                 ctx.fillText(texte.text, texte.x * w, texte.y * h);
                 ctx.restore();
@@ -241,6 +242,7 @@
         if (!trait.points || trait.points.length < 2) return;
 
         const outil = travauxOutils.OUTILS[trait.tool] || travauxOutils.OUTILS.stylo;
+        const ratioResolution = w / travauxOutils.RESOLUTION_REFERENCE;
 
         ctx.save();
         ctx.globalAlpha = trait.opacity || 1.0;
@@ -254,10 +256,10 @@
 
         for (let i = 1; i < trait.points.length; i++) {
             const p = trait.points[i];
-            const epaisseur = outil.sensiblePression
-                ? travauxOutils.calculerEpaisseurPression(p.pressure) * (trait.lineWidth / outil.epaisseurDefaut) * scale
-                : trait.lineWidth * scale;
-            ctx.lineWidth = epaisseur;
+            const epaisseurLogique = outil.sensiblePression
+                ? travauxOutils.calculerEpaisseurPression(p.pressure) * (trait.lineWidth / outil.epaisseurDefaut)
+                : trait.lineWidth;
+            ctx.lineWidth = epaisseurLogique * ratioResolution;
             ctx.lineTo(p.x * w, p.y * h);
             ctx.stroke();
             ctx.beginPath();
@@ -271,9 +273,11 @@
      * Dessine une forme
      */
     function dessinerForme(ctx, w, h, forme, scale) {
+        const ratioResolution = w / travauxOutils.RESOLUTION_REFERENCE;
+
         ctx.save();
         ctx.strokeStyle = forme.color;
-        ctx.lineWidth = (forme.lineWidth || 2) * scale;
+        ctx.lineWidth = (forme.lineWidth || 2) * ratioResolution;
         ctx.lineCap = 'round';
 
         const x1 = forme.x1 * w, y1 = forme.y1 * h;
@@ -294,7 +298,7 @@
                 break;
             }
             case 'fleche': {
-                const headLen = 15 * scale;
+                const headLen = 15 * ratioResolution;
                 const angle = Math.atan2(y2 - y1, x2 - x1);
                 ctx.beginPath();
                 ctx.moveTo(x1, y1);
@@ -313,7 +317,7 @@
                 const my = (y1 + y2) / 2;
                 const size = Math.min(Math.abs(x2 - x1), Math.abs(y2 - y1)) / 2;
                 ctx.strokeStyle = forme.color || '#00AA00';
-                ctx.lineWidth = 3 * scale;
+                ctx.lineWidth = 3 * ratioResolution;
                 ctx.beginPath();
                 ctx.moveTo(mx - size, my);
                 ctx.lineTo(mx - size * 0.3, my + size * 0.8);
@@ -323,7 +327,7 @@
             }
             case 'croix': {
                 ctx.strokeStyle = forme.color || '#FF0000';
-                ctx.lineWidth = 3 * scale;
+                ctx.lineWidth = 3 * ratioResolution;
                 ctx.beginPath();
                 ctx.moveTo(x1, y1);
                 ctx.lineTo(x2, y2);
@@ -472,6 +476,63 @@
                 doc.text(ligne, marge + 10, y);
                 y += 12;
             }
+        }
+    }
+
+    /* ===============================
+       EXPORT DOSSIER COMPLET
+       (travail annote + grille remplie + retroaction)
+       =============================== */
+
+    /**
+     * Exporte un dossier complet : pages annotees + page de synthese
+     * Peut etre appele depuis la page d'evaluation (sans fichier ouvert dans la visionneuse)
+     * @param {string} da - DA de l'etudiant
+     * @param {string} productionId - ID de la production
+     */
+    async function exporterDossierComplet(da, productionId) {
+        if (!da || !productionId) {
+            alert('Etudiant ou production non specifie.');
+            return;
+        }
+
+        // Trouver le fichier associe
+        const fichiers = travauxStockage.obtenirFichiersTravaux();
+        const fichier = fichiers.find(f => f.etudiantDA === da && f.productionId === productionId);
+
+        if (!fichier) {
+            alert('Aucun fichier trouve pour cet etudiant et cette production.');
+            return;
+        }
+
+        const blob = await travauxStockage.recupererBlob(fichier.id);
+        if (!blob) {
+            alert('Impossible de recuperer le fichier.');
+            return;
+        }
+
+        const annotation = travauxStockage.obtenirAnnotationFichier(fichier.id);
+
+        try {
+            let doc;
+            if (fichier.typeMIME === 'application/pdf') {
+                doc = await exporterDepuisPDF(blob, annotation);
+            } else {
+                doc = await exporterDepuisImage(blob, annotation);
+            }
+
+            // Ajouter la page de synthese (grille + retroaction)
+            ajouterPageSynthese(doc, fichier);
+
+            // Telecharger
+            const etudiant = obtenirDonneesSelonMode(cle('groupeEtudiants')).find(e => e.da === da);
+            const nomEtudiant = etudiant ? `${etudiant.prenom}_${etudiant.nom}` : da;
+            const nomSortie = `dossier_${nomEtudiant}_${productionId}.pdf`;
+            doc.save(nomSortie);
+            console.log('[Travaux-Export] Dossier complet exporte:', nomSortie);
+        } catch (e) {
+            console.error('[Travaux-Export] Erreur export dossier complet:', e);
+            alert('Erreur lors de l\'export du dossier. Voir la console.');
         }
     }
 
@@ -680,6 +741,7 @@
 
     window.travauxExportPDF = {
         exporterPDF: exporterPDF,
+        exporterDossierComplet: exporterDossierComplet,
         afficherRevisionExport: afficherRevisionExport,
         fermerRevision: fermerRevision,
         rendrePDFAvecAnnotations: rendrePDFAvecAnnotations,
