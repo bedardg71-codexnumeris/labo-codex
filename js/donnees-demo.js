@@ -412,9 +412,11 @@ async function fusionnerDonneesDemo(packDemo, prefixe) {
     const etudiantsDemo = packDemo.groupeEtudiants || [];
 
     for (const etudiant of etudiantsDemo) {
-        const existe = groupeEtudiants.some(e => e.da === etudiant.da);
-        if (!existe) {
-            etudiant.isDemo = true;
+        etudiant.isDemo = true;
+        const index = groupeEtudiants.findIndex(e => e.da === etudiant.da);
+        if (index >= 0) {
+            groupeEtudiants[index] = etudiant;
+        } else {
             groupeEtudiants.push(etudiant);
         }
     }
@@ -429,9 +431,11 @@ async function fusionnerDonneesDemo(packDemo, prefixe) {
         const productionsDemo = packDemo.productions || [];
 
         for (const prod of productionsDemo) {
-            const existe = productions.some(p => p.id === prod.id);
-            if (!existe) {
-                prod.estDemo = true;
+            prod.estDemo = true;
+            const index = productions.findIndex(p => p.id === prod.id);
+            if (index >= 0) {
+                productions[index] = prod;
+            } else {
                 productions.push(prod);
             }
         }
@@ -447,8 +451,10 @@ async function fusionnerDonneesDemo(packDemo, prefixe) {
         const evaluations = await db.get(cleEvaluations) || [];
 
         for (const evalDemo of evaluationsDemo) {
-            const existe = evaluations.some(e => e.id === evalDemo.id);
-            if (!existe) {
+            const index = evaluations.findIndex(e => e.id === evalDemo.id);
+            if (index >= 0) {
+                evaluations[index] = evalDemo;
+            } else {
                 evaluations.push(evalDemo);
             }
         }
@@ -462,9 +468,11 @@ async function fusionnerDonneesDemo(packDemo, prefixe) {
         const grillesDemo = packDemo.grillesTemplates || [];
 
         for (const grille of grillesDemo) {
-            const existe = grilles.some(g => g.id === grille.id);
-            if (!existe) {
-                grille.estDemo = true;
+            grille.estDemo = true;
+            const index = grilles.findIndex(g => g.id === grille.id);
+            if (index >= 0) {
+                grilles[index] = grille;
+            } else {
                 grilles.push(grille);
             }
         }
@@ -478,9 +486,11 @@ async function fusionnerDonneesDemo(packDemo, prefixe) {
         const echelles = await db.get('echellesTemplates') || [];
 
         for (const echelle of echellesDemo) {
-            const existe = echelles.some(e => e.id === echelle.id);
-            if (!existe) {
-                echelle.estDemo = true;
+            echelle.estDemo = true;
+            const index = echelles.findIndex(e => e.id === echelle.id);
+            if (index >= 0) {
+                echelles[index] = echelle;
+            } else {
                 echelles.push(echelle);
             }
         }
