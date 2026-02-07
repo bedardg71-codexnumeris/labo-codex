@@ -187,8 +187,9 @@ async function quitterDemo() {
         // 2. Désactiver le flag démo
         db.setSync('demo-actif', null);
 
-        // 3. Masquer le bandeau
+        // 3. Masquer le bandeau + retirer encarts de guidage
         afficherBandeauDemo(false);
+        if (typeof retirerGuidageDemo === 'function') retirerGuidageDemo();
 
         // 4. Restaurer l'état précédent
         await restaurerEtatApresDemo();

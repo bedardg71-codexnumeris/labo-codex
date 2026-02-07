@@ -496,6 +496,11 @@ function afficherSousSection(idSousSection) {
             setTimeout(() => chargerTableauBordApercu(), 150);
         }
     }
+
+    // Chantier 4 : Guidage contextuel en mode démo
+    if (typeof afficherGuidageDemo === 'function') {
+        afficherGuidageDemo(idSousSection);
+    }
 }
 
 /* ===============================
