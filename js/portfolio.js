@@ -9,6 +9,9 @@
    - Sauvegarde des sélections
    =============================== */
 
+(function() {
+'use strict';
+
 /* ===============================
    DÉPENDANCES
 
@@ -833,8 +836,8 @@ function calculerPerformanceParObjectif(da, ensembleId) {
 
     ensemble.objectifs.forEach(objectif => {
         // Trouver toutes les évaluations liées à cet objectif
-        const evaluationsObjectif = evaluationsEleve.filter(eval => {
-            const prod = productions.find(p => p.id === eval.productionId);
+        const evaluationsObjectif = evaluationsEleve.filter(ev => {
+            const prod = productions.find(p => p.id === ev.productionId);
             return prod && prod.objectif === objectif.id;
         });
 
@@ -1028,12 +1031,12 @@ function calculerNoteAvecCategories(da, configCategories) {
     // 5. SÉLECTION : Récupérer les évaluations et prendre les N meilleures
     const evalsSelection = [];
     prodsSelection.forEach(prod => {
-        const eval = evaluationsEleve.find(e => e.productionId === prod.id);
-        if (eval) {
+        const ev = evaluationsEleve.find(e => e.productionId === prod.id);
+        if (ev) {
             evalsSelection.push({
                 productionId: prod.id,
                 titre: prod.titre || prod.description,
-                note: eval.noteFinale
+                note: ev.noteFinale
             });
         }
     });
@@ -1049,12 +1052,12 @@ function calculerNoteAvecCategories(da, configCategories) {
     // 6. OBLIGATOIRES : Toutes comptent (0 si manquante)
     const notesObligatoires = [];
     prodsObligatoires.forEach(prod => {
-        const eval = evaluationsEleve.find(e => e.productionId === prod.id);
+        const ev = evaluationsEleve.find(e => e.productionId === prod.id);
         notesObligatoires.push({
             productionId: prod.id,
             titre: prod.titre || prod.description,
-            note: eval ? eval.noteFinale : 0,  // 0 si non remise
-            manquante: !eval
+            note: ev ? ev.noteFinale : 0,  // 0 si non remise
+            manquante: !ev
         });
     });
 
@@ -1148,3 +1151,5 @@ window.obtenirIndicesCPAsync = obtenirIndicesCPAsync;
 window.obtenirHistoriqueIndicesCP = obtenirHistoriqueIndicesCP;
 
 console.log('✅ Module portfolio.js chargé (Beta 95.5 - indices C/P optimisés)');
+
+})();

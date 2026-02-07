@@ -27,6 +27,9 @@
  * EMAIL : xavierC.@cegepjonquiere.ca
  */
 
+(function() {
+'use strict';
+
 class PratiquePANObjectifs {
 
     constructor() {
@@ -632,3 +635,6 @@ if (typeof window !== 'undefined') {
 }
 
 console.log('✅ Module pratique-pan-objectifs.js chargé');
+
+
+})();

@@ -13,6 +13,9 @@
  * AUTEUR : Grégoire Bédard (Labo Codex)
  */
 
+(function() {
+'use strict';
+
 // ============================================================================
 // CLASSE PRINCIPALE
 // ============================================================================
@@ -654,3 +657,6 @@ class PratiqueConfigurable {
 window.PratiqueConfigurable = PratiqueConfigurable;
 
 console.log('✅ Module pratique-configurable.js chargé');
+
+
+})();

@@ -14,6 +14,9 @@
    - Les heures sont calculées automatiquement pour rétrocompatibilité
    =============================== */
 
+(function() {
+'use strict';
+
 /* ===============================
    🚀 INITIALISATION DU MODULE
    =============================== */
@@ -2382,3 +2385,5 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 console.log('✅ Module saisie-presences.js chargé (version refondée complète)');
+
+})();

@@ -3,6 +3,9 @@
    Gestion des interventions RàI
    =============================== */
 
+(function() {
+'use strict';
+
 /**
  * MODULE INTERVENTIONS - SOURCE UNIQUE
  *
@@ -1589,3 +1592,6 @@ window.initialiserModuleInterventions = initialiserModuleInterventions;
 window.formaterDateLisible = formaterDateLisible;
 window.genererBadgeStatut = genererBadgeStatut;
 window.obtenirAbsencesMotiveesParDate = obtenirAbsencesMotiveesParDate;
+
+
+})();

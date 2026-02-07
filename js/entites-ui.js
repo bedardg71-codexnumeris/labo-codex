@@ -11,6 +11,9 @@
    Dépend de: cours-entite.js, enseignants.js, horaires.js, groupe-cours.js
    =============================== */
 
+(function() {
+'use strict';
+
 // ============================================
 // VARIABLES D'ÉTAT
 // ============================================
@@ -1031,3 +1034,6 @@ window.supprimerGroupeCoursV2 = supprimerGroupeCoursV2;
 window.mettreAJourApercuGroupeCours = mettreAJourApercuGroupeCours;
 
 console.log('[Entités UI] Module chargé');
+
+
+})();

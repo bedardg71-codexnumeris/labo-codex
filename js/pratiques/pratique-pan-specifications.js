@@ -24,6 +24,9 @@
  * AUTEUR : Grégoire Bédard (Labo Codex)
  */
 
+(function() {
+'use strict';
+
 class PratiquePanSpecifications {
 
     constructor() {
@@ -687,3 +690,6 @@ class PratiquePanSpecifications {
 window.PratiquePanSpecifications = PratiquePanSpecifications;
 
 console.log('✅ Module pratique-pan-specifications.js chargé');
+
+
+})();

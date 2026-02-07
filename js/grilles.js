@@ -15,6 +15,9 @@
    - Verrouillage des critères
    =============================== */
 
+(function() {
+'use strict';
+
 /* ===============================
    DÉPENDANCES DE CE MODULE
    
@@ -3857,3 +3860,5 @@ window.initialiserSousCriteresParDefaut = initialiserSousCriteresParDefaut;
 window.ajouterSousCritere = ajouterSousCritere;
 window.modifierSousCritere = modifierSousCritere;
 window.supprimerSousCritere = supprimerSousCritere;
+
+})();

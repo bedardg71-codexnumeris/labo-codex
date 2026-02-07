@@ -12,6 +12,9 @@
  * Note : Tutoiement systématique (cohérence avec Primo)
  */
 
+(function() {
+'use strict';
+
 const AIDE_CONTEXTUELLE = {
 
     // =========================================================================
@@ -546,3 +549,6 @@ const AIDE_CONTEXTUELLE = {
 if (typeof window !== 'undefined') {
     window.AIDE_CONTEXTUELLE = AIDE_CONTEXTUELLE;
 }
+
+
+})();

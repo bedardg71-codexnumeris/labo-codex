@@ -8,6 +8,9 @@
  * DATE : 29 novembre 2025
  */
 
+(function() {
+'use strict';
+
 // ============================================================================
 // GESTION DES POPUPS
 // ============================================================================
@@ -169,3 +172,6 @@ window.afficherPopupPrimo = afficherPopupPrimo;
 window.fermerPopupPrimo = fermerPopupPrimo;
 window.initialiserPrimoTooltips = initialiserPrimoTooltips;
 window.gererVisibilitePrimoSelonMode = gererVisibilitePrimoSelonMode;
+
+
+})();

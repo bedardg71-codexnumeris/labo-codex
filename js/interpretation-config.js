@@ -12,6 +12,9 @@
    - Les valeurs par défaut sont restaurées si aucune configuration n'existe
    =============================== */
 
+(function() {
+'use strict';
+
 /* ===============================
    VALEURS PAR DÉFAUT
    =============================== */
@@ -322,3 +325,6 @@ if (typeof window !== 'undefined') {
     window.sauvegarderSeuil = sauvegarderSeuil;
     window.restaurerValeursParDefaut = restaurerValeursParDefaut;
 }
+
+
+})();

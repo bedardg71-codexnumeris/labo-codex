@@ -15,6 +15,9 @@
    - Réorganisation et verrouillage
    =============================== */
 
+(function() {
+'use strict';
+
 /* ===============================
    DÉPENDANCES DE CE MODULE
    
@@ -3559,3 +3562,5 @@ window.supprimerProduction = async function(id) {
 
     alert('Production supprimée');
 };
+
+})();

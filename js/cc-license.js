@@ -6,6 +6,9 @@
  * de matériel pédagogique (grilles, échelles, cartouches, productions)
  */
 
+(function() {
+'use strict';
+
 // ============================================
 // MÉTADONNÉES CC PAR DÉFAUT
 // ============================================
@@ -1634,3 +1637,6 @@ window.genererPanneauMetadonnees = genererPanneauMetadonnees;
 window.afficherModalEditionMetadonnees = afficherModalEditionMetadonnees;
 window.fermerModalEditionMetadonnees = fermerModalEditionMetadonnees;
 window.sauvegarderMetadonnees = sauvegarderMetadonnees;
+
+
+})();

@@ -16,6 +16,9 @@
    - (À développer) Graphiques de progression
    =============================== */
 
+(function() {
+'use strict';
+
 /* ===============================
    DÉPENDANCES DE CE MODULE
    
@@ -8149,9 +8152,9 @@ function calculerDetailsNoteFinale(da) {
     let artefactsRetenus = [...evaluationsArtefacts];
 
     // Helper: obtenir le numéro de production pour une évaluation
-    const getNumeroProduction = (eval) => {
-        const prod = productions.find(p => p.id === eval.productionId);
-        return prod?.numero || parseInt(eval.productionId.match(/(\d+)$/)?.[1]) || 0;
+    const getNumeroProduction = (ev) => {
+        const prod = productions.find(p => p.id === ev.productionId);
+        return prod?.numero || parseInt(ev.productionId.match(/(\d+)$/)?.[1]) || 0;
     };
 
     if (methodeSelection === 'meilleurs') {
@@ -8814,3 +8817,5 @@ window.genererEtAfficherRapport = genererEtAfficherRapport;
 window.copierRapport = copierRapport;
 window.consulterEvaluation = consulterEvaluation;
 window.evaluerProduction = evaluerProduction;
+
+})();

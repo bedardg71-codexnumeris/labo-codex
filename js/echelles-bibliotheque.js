@@ -11,6 +11,9 @@
    Clé de stockage: 'bibliothequeEchelles' (sans namespace)
    =============================== */
 
+(function() {
+'use strict';
+
 /**
  * Clé de stockage pour la bibliothèque (NON namespacée = partagée entre trimestres)
  */
@@ -268,3 +271,6 @@ window.CLE_BIBLIOTHEQUE_ECHELLES = CLE_BIBLIOTHEQUE_ECHELLES;
 
 // Rétrocompatibilité: ECHELLES_BIBLIOTHEQUE vide (plus de hardcodé)
 window.ECHELLES_BIBLIOTHEQUE = {};
+
+
+})();

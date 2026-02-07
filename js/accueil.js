@@ -9,6 +9,9 @@
    Exports: afficherAccueil, initialiserAccueil, definirModeExpert
    =============================== */
 
+(function() {
+'use strict';
+
 /**
  * Vérifie si c'est le premier lancement (aucun cours réel créé)
  */
@@ -190,3 +193,6 @@ function initialiserAccueil() {
 window.afficherAccueil = afficherAccueil;
 window.initialiserAccueil = initialiserAccueil;
 window.definirModeExpert = definirModeExpert;
+
+
+})();

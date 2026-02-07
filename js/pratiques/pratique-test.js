@@ -9,6 +9,9 @@
  * AUTEUR : Grégoire Bédard (Labo Codex)
  */
 
+(function() {
+'use strict';
+
 class PratiqueTest {
     // ========================================================================
     // MÉTHODES D'IDENTITÉ
@@ -245,3 +248,6 @@ window.PratiqueTest = PratiqueTest;
 
 console.log('✅ Module pratique-test.js chargé');
 console.log('💡 Pour tester, exécutez : testerPratiqueTest()');
+
+
+})();

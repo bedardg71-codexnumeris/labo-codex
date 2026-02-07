@@ -13,6 +13,9 @@
    - Initialisations conditionnelles des modules
    =============================== */
 
+(function() {
+'use strict';
+
 /* ===============================
    FONCTION GLOBALE: Génération d'ID uniques
    =============================== */
@@ -630,3 +633,5 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log('✅ Système initialisé avec succès');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 });
+
+})();

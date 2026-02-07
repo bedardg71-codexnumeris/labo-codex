@@ -12,6 +12,9 @@
  * AUTEUR : Grégoire Bédard (Labo Codex)
  */
 
+(function() {
+'use strict';
+
 // ============================================================================
 // PRATIQUE 1 : PAN-Standards 5 niveaux (Bruno V.)
 // ============================================================================
@@ -815,3 +818,6 @@ window.PRATIQUES_PREDEFINES = {
 
 console.log('✅ Module pratiques-predefines.js chargé');
 console.log(`   • ${Object.keys(window.PRATIQUES_PREDEFINES).length} pratiques disponibles`);
+
+
+})();

@@ -11,6 +11,9 @@
    Clé de stockage: 'bibliothequeGrilles' (sans namespace)
    =============================== */
 
+(function() {
+'use strict';
+
 /**
  * Clé de stockage pour la bibliothèque (NON namespacée = partagée entre trimestres)
  */
@@ -268,3 +271,6 @@ window.CLE_BIBLIOTHEQUE_GRILLES = CLE_BIBLIOTHEQUE_GRILLES;
 
 // Rétrocompatibilité: GRILLES_BIBLIOTHEQUE vide (plus de hardcodé)
 window.GRILLES_BIBLIOTHEQUE = {};
+
+
+})();

@@ -3,6 +3,9 @@
    Affichage des statistiques globales d'évaluation du groupe
    =============================== */
 
+(function() {
+'use strict';
+
 /**
  * Initialise le module d'aperçu des évaluations
  * Appelée par main.js au chargement
@@ -133,3 +136,6 @@ function setStatText(id, valeur) {
         console.warn(`⚠️ Élément ${id} non trouvé`);
     }
 }
+
+
+})();

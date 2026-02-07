@@ -10,6 +10,9 @@
  * AUTEUR : Grégoire Bédard avec Claude
  */
 
+(function() {
+'use strict';
+
 // ============================================
 // CONFIGURATION DES ÉTAPES GUIDÉES
 // ============================================
@@ -369,3 +372,6 @@ if (document.readyState === 'loading') {
 } else {
     initialiserGuidage();
 }
+
+
+})();

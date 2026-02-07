@@ -13,6 +13,9 @@
    - État stockage pertinent
    =============================== */
 
+(function() {
+'use strict';
+
 // ===============================
 // VERSION DE L'APPLICATION
 // ===============================
@@ -1120,3 +1123,6 @@ window.afficherRapportComplet = afficherRapportComplet;
 window.viderRapportsArchives = viderRapportsArchives;
 
 console.log('Module rapport-bug.js chargé (version améliorée avec archivage)');
+
+
+})();

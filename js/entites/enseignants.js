@@ -8,6 +8,9 @@
    Clé de stockage: 'enseignants' (array, non-namespacé)
    =============================== */
 
+(function() {
+'use strict';
+
 /**
  * Clé de stockage pour les enseignants
  */
@@ -362,3 +365,6 @@ window.EnseignantsEntite = {
 };
 
 console.log('[Entités] Module Enseignants chargé');
+
+
+})();

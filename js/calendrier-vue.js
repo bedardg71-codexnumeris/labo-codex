@@ -14,6 +14,9 @@
    - Illumination interactive des semaines
    =============================== */
 
+(function() {
+'use strict';
+
 /* ===============================
    DÉPENDANCES DE CE MODULE
    
@@ -570,3 +573,5 @@ function afficherCalendrierScolaire() {
  * - Navigateurs modernes
  * - Pas de dépendances externes
  */
+
+})();

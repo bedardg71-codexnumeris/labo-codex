@@ -14,6 +14,9 @@
  * @version 1.1.0 - Uniformisation visuelle + persistance légende
  */
 
+(function() {
+'use strict';
+
 /* ===============================
    CONFIGURATION GLOBALE
    =============================== */
@@ -4573,3 +4576,6 @@ window.creerGraphiqueDistributionACPE = creerGraphiqueDistributionACPE;
 window.detruireGraphique = detruireGraphique;
 
 console.log('📊 Module graphiques-progression.js chargé');
+
+
+})();

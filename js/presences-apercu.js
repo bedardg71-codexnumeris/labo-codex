@@ -3,6 +3,9 @@
    Affichage des statistiques globales de présence du groupe
    =============================== */
 
+(function() {
+'use strict';
+
 /**
  * Initialise le module d'aperçu des présences
  * Appelée par main.js au chargement
@@ -371,3 +374,6 @@ function setStatText(id, valeur) {
         console.warn(`⚠️ Élément ${id} non trouvé`);
     }
 }
+
+
+})();

@@ -11,6 +11,9 @@
    Clé de stockage: 'bibliothequePratiques' (sans namespace)
    =============================== */
 
+(function() {
+'use strict';
+
 /**
  * Clé de stockage pour la bibliothèque (NON namespacée = partagée entre trimestres)
  */
@@ -1155,3 +1158,6 @@ window.CLE_BIBLIOTHEQUE_PRATIQUES = CLE_BIBLIOTHEQUE_PRATIQUES;
 window.MODELES_PRATIQUES_PREDEFINIS = MODELES_PRATIQUES_PREDEFINIS;
 
 console.log('[pratiques-bibliotheque] Module chargé');
+
+
+})();

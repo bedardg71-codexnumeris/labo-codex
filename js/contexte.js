@@ -7,6 +7,9 @@
    - Rang de la séance dans la semaine
    =============================== */
 
+(function() {
+'use strict';
+
 /**
  * Met à jour l'affichage des informations contextuelles dans l'en-tête principal
  * ✅ BETA 95 : Dropdown de sélection de cours pour multi-cours
@@ -455,3 +458,6 @@ window.mettreAJourContexteEntete = mettreAJourContexteEntete;
 window.initialiserModuleContexte = initialiserModuleContexte;
 window.changerCoursDepuisEntete = changerCoursDepuisEntete;
 window.rafraichirVuesApresCours = rafraichirVuesApresCours;
+
+
+})();

@@ -6,6 +6,9 @@
  * [Chantier 2 — 6 fev 2026] Mode Simulation (Assisté) supprimé
  */
 
+(function() {
+'use strict';
+
 // ============================================
 // CONSTANTES
 // ============================================
@@ -1022,3 +1025,6 @@ if (document.readyState === 'loading') {
     initialiserSystemeModes();
 }
 
+
+
+})();

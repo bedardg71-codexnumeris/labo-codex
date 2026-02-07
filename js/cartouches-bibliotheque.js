@@ -11,6 +11,9 @@
    Clé de stockage: 'bibliothequeCartouches' (sans namespace)
    =============================== */
 
+(function() {
+'use strict';
+
 /**
  * Clé de stockage pour la bibliothèque (NON namespacée = partagée entre trimestres)
  */
@@ -268,3 +271,6 @@ window.CLE_BIBLIOTHEQUE_CARTOUCHES = CLE_BIBLIOTHEQUE_CARTOUCHES;
 
 // Rétrocompatibilité: CARTOUCHES_BIBLIOTHEQUE vide (plus de hardcodé)
 window.CARTOUCHES_BIBLIOTHEQUE = {};
+
+
+})();

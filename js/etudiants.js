@@ -26,6 +26,9 @@
    - Police système moderne
    =============================== */
 
+(function() {
+'use strict';
+
 /* ===============================
    VARIABLES GLOBALES DE TRI
    =============================== */
@@ -1548,3 +1551,5 @@ window.afficherListeEtudiantsConsultation = afficherListeEtudiantsConsultation;
 window.trierTableauPar = trierTableauPar;
 window.obtenirNomProgramme = obtenirNomProgramme;
 window.reinitialiserFiltresListeEtudiants = reinitialiserFiltresListeEtudiants;
+
+})();

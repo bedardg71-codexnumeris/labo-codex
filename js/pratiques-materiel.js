@@ -11,6 +11,9 @@
    - db.js (stockage IndexedDB/localStorage)
    =============================== */
 
+(function() {
+'use strict';
+
 /**
  * Clé de stockage pour les configurations de pratiques de l'utilisateur
  * IMPORTANT: Doit être identique à celle utilisée dans pratiques.js
@@ -2724,3 +2727,6 @@ window.CLE_PRATIQUES_CONFIGURATIONS = CLE_PRATIQUES_CONFIGURATIONS;
 window.pratiqueEnEditionMateriel = pratiqueEnEditionMateriel;
 
 console.log('[pratiques-materiel] Module chargé');
+
+
+})();

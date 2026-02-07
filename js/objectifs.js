@@ -9,6 +9,9 @@
  * AUTEUR : Grégoire Bédard (Labo Codex)
  */
 
+(function() {
+'use strict';
+
 // ============================================================================
 // INITIALISATION
 // ============================================================================
@@ -1109,3 +1112,6 @@ window.desactiverPratiqueMultiObjectifs = desactiverPratiqueMultiObjectifs;
 window.verifierPratiqueMultiObjectifs = verifierPratiqueMultiObjectifs;
 
 console.log('✅ Module objectifs.js chargé');
+
+
+})();
