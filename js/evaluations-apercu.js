@@ -138,4 +138,10 @@ function setStatText(id, valeur) {
 }
 
 
+/* ===============================
+   EXPORTS GLOBAUX
+   =============================== */
+
+window.chargerApercuEvaluations = chargerApercuEvaluations;
+
 })();
