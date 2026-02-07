@@ -111,7 +111,7 @@ function afficherAccueilRetour(conteneur) {
         <div class="accueil-cartes">
             <div class="accueil-carte" onclick="afficherSection('presences');">
                 <div class="accueil-carte-icone">&#x1F4CB;</div>
-                <div class="accueil-carte-titre">Prendre les pr\u00e9sences</div>
+                <div class="accueil-carte-titre">Saisir les pr\u00e9sences</div>
                 <div class="accueil-carte-desc">
                     Saisir les pr\u00e9sences du jour pour votre groupe.
                 </div>
@@ -132,7 +132,7 @@ function afficherAccueilRetour(conteneur) {
             </div>
             <div class="accueil-carte" onclick="afficherSection('tableau-bord');">
                 <div class="accueil-carte-icone">&#x1F4C8;</div>
-                <div class="accueil-carte-titre">Voir la progression</div>
+                <div class="accueil-carte-titre">Voir l'état des lieux</div>
                 <div class="accueil-carte-desc">
                     Consulter le tableau de bord et les indicateurs.
                 </div>

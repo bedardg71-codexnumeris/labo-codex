@@ -89,7 +89,7 @@ const AIDE_CONTEXTUELLE = {
     // =========================================================================
 
     'evaluations-proceder': {
-        titre: "Procéder à une évaluation",
+        titre: "Évaluer une production",
         sections: [
             {
                 type: 'texte',

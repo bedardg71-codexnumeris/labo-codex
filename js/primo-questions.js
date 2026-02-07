@@ -1775,7 +1775,7 @@ const QUESTIONS_PRIMO = [
     // ========================================================================
     {
         id: 'navigation-evaluations',
-        texte: '**Étape 4 : Accéder aux évaluations**\n\n1️⃣ Va dans **Évaluations → Procéder à une évaluation**\n2️⃣ Clique sur **Nouvelle évaluation**\n\nQuand c\'est fait, clique sur **"Suivant →"** en bas à droite.',
+        texte: '**Étape 4 : Accéder aux évaluations**\n\n1️⃣ Va dans **Évaluations → Évaluer une production**\n2️⃣ Clique sur **Nouvelle évaluation**\n\nQuand c\'est fait, clique sur **"Suivant →"** en bas à droite.',
         type: 'instruction',
         champsCibles: [],
         validation: { requis: false }
