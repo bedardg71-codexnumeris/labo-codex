@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Système de suivi Beta 97.1 - Hiver 2026</title>
+    <title>Système de suivi Beta 97.2 - Hiver 2026</title>
 
     <!-- CSS externe requis pour styles complets -->
     <link rel="stylesheet" href="styles.css?v=2026013001">
@@ -3304,7 +3304,7 @@
                     <div class="titre-section">
                         <h1>Système de suivi des apprentissages et de construction de la note</h1>
                         <p class="meta">
-                            Beta 97.1 <span id="build-numero" class="build-numero"></span>
+                            Beta 97.2 <span id="build-numero" class="build-numero"></span>
                             <span class="pastille-nouveautes" onclick="afficherModalNouveautes()" title="Nouveautés">✉️</span>
                             <span class="pastille-intro" onclick="afficherModalIntro()" title="Premiers pas">😎</span>
                             <button class="btn-backup-warning" onclick="window.backupReminder.afficherModal()" title="Protégez tes données">⚠️</button>
@@ -3399,6 +3399,18 @@
 
                 <!-- Titre principal -->
                 <h2 class="modal-titre">Nouveautés</h2>
+
+                <!-- Beta 97.2 - 6 février -->
+                <div class="changelog-entry changelog-entry--bleu">
+                    <strong class="changelog-title">Beta 97.2 (6 f&eacute;vrier) - D&eacute;mo et accueil :</strong>
+                    <ul class="changelog-list">
+                        <li><strong>Nouveau syst&egrave;me de d&eacute;mo</strong> : La d&eacute;mo est d&eacute;sormais une route isol&eacute;e (et non plus un mode). Entrez et sortez librement via un bouton d&eacute;di&eacute;, vos donn&eacute;es r&eacute;elles sont pr&eacute;serv&eacute;es.</li>
+                        <li><strong>Pack d&eacute;mo 20&nbsp;&eacute;tudiants</strong> : Donn&eacute;es r&eacute;elles A2025 anonymis&eacute;es &mdash; 20&nbsp;&eacute;tudiants, 200&nbsp;&eacute;valuations, 627&nbsp;pr&eacute;sences, 11&nbsp;productions, 3&nbsp;grilles de crit&egrave;res.</li>
+                        <li><strong>Page d&rsquo;accueil permanente</strong> : Nouvel &eacute;cran d&rsquo;accueil par d&eacute;faut avec deux &eacute;tats &mdash; premier lancement (cr&eacute;er un cours ou explorer la d&eacute;mo) et retour (4&nbsp;cartes par intention). Mode expert dans R&eacute;glages pour court-circuiter vers le tableau de bord.</li>
+                        <li><strong>Guidage contextuel</strong> : En mode d&eacute;mo, chaque section affiche un encart explicatif d&eacute;crivant ce que vous voyez (16&nbsp;encarts couvrant toutes les sous-sections).</li>
+                        <li><strong>Bandeau d&eacute;mo</strong> : Barre verte fixe en bas de l&rsquo;&eacute;cran en mode d&eacute;mo avec bouton &laquo;&nbsp;Quitter la d&eacute;mo&nbsp;&raquo;.</li>
+                    </ul>
+                </div>
 
                 <!-- Beta 97.1 - 6 février -->
                 <div class="changelog-entry changelog-entry--bleu">
@@ -15850,7 +15862,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97';
-        const BUILD_ID = '0206-1945';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0206-2045';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
