@@ -77,15 +77,7 @@ let tempImportData = [];
  */
 // function sauvegarderDonneesSelonMode(cle, donnees) - SUPPRIMÉE
 
-/**
- * Filtre les étudiants selon le mode (exclut le groupe 9999 par défaut)
- * @param {Array} etudiants - Tableau des étudiants
- * @returns {Array} - Étudiants filtrés
- */
-function filtrerEtudiantsParMode(etudiants) {
-    // Exclure le groupe 9999 (groupe de démonstration/anonyme)
-    return etudiants.filter(e => e.groupe !== '9999');
-}
+// [Chantier 1 — 6 fev 2026] filtrerEtudiantsParMode supprimee (doublon conflictuel de modes.js)
 
 /**
  * ✅ CORRECTION CRITIQUE (Beta 95 - 2 jan 2026)

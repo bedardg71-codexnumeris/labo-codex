@@ -51,9 +51,6 @@ function initialiserTrimestreV2() {
     // Charger la liste des étudiants dans l'accordéon Groupes
     chargerListeEtudiantsV2();
 
-    // Charger l'état de la checkbox données démo
-    chargerEtatDonneesDemoV2();
-
     // Populer le dropdown trimestre et afficher le formulaire
     populerDropdownTrimestreV2();
     afficherFormulaireTrimestreActif();
@@ -4980,37 +4977,7 @@ window.supprimerGroupeCoursDepuisBibliotheque = supprimerGroupeCoursDepuisBiblio
 window.masquerGroupeCoursDepuisBibliotheque = masquerGroupeCoursDepuisBibliotheque; // 🆕 (10 jan 2026)
 window.afficherGroupeCoursDepuisBibliotheque = afficherGroupeCoursDepuisBibliotheque; // 🆕 (10 jan 2026)
 
-/* ===============================
-   DONNÉES DE DÉMONSTRATION
-   =============================== */
-
-/**
- * Charge l'état de la checkbox données démo
- */
-function chargerEtatDonneesDemoV2() {
-    const checkbox = document.getElementById('v2-checkboxDonneesDemo');
-    if (!checkbox) return;
-
-    // Vérifier si le groupe 9999 existe
-    // ✅ CORRECTION (31 déc 2025): Utiliser namespace + vérifier aussi groupe "demo"
-    const cleEtud = cle('groupeEtudiants');
-    const etudiants = db.getSync(cleEtud, []);
-    const groupeDemoExiste = etudiants.some(e => e.groupe === '9999' || e.groupe === 'demo');
-
-    checkbox.checked = groupeDemoExiste;
-}
-
-/**
- * Bascule les données de démonstration
- */
-function basculerDonneesDemoV2(activer) {
-    // Réutiliser la fonction existante si disponible
-    if (typeof basculerDonneesDemo === 'function') {
-        basculerDonneesDemo(activer);
-    } else {
-        console.warn('[Trimestre V2] Fonction basculerDonneesDemo non disponible');
-    }
-}
+// [Chantier 1 — 6 fev 2026] chargerEtatDonneesDemoV2 + basculerDonneesDemoV2 supprimees (demantelement demo)
 
 /* ===============================
    FORMAT HORAIRE DYNAMIQUE (6 jan 2026)
@@ -5165,8 +5132,7 @@ window.modifierSeanceV2 = modifierSeanceV2;
 window.annulerFormSeanceV2 = annulerFormSeanceV2;
 window.confirmerSeanceV2 = confirmerSeanceV2;
 window.supprimerSeanceV2 = supprimerSeanceV2;
-window.chargerEtatDonneesDemoV2 = chargerEtatDonneesDemoV2;
-window.basculerDonneesDemoV2 = basculerDonneesDemoV2;
+// [Chantier 1] exports demo supprimes
 window.mettreAJourGuideGroupeCours = mettreAJourGuideGroupeCours;
 
 /* ===============================

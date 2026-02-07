@@ -1369,11 +1369,7 @@ function afficherPortfolio(da) {
         // Fallback basique si le module n'est pas chargé
         console.warn('⚠️ Module profil-etudiant.js non chargé, affichage basique');
 
-        const tousEtudiants = obtenirDonneesSelonMode('groupeEtudiants');
-        // ✅ NOUVEAU (9 décembre 2025) : Filtrer le groupe demo (99) selon le mode
-        const etudiants = typeof filtrerEtudiantsDemo === 'function'
-            ? filtrerEtudiantsDemo(tousEtudiants)
-            : tousEtudiants;
+        const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
         const etudiant = etudiants.find(e => e.da === da);
 
         if (!etudiant) {

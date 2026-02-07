@@ -13446,6 +13446,10 @@ body.mode-assiste .btn-aide-contextuelle,
     min-height: 20px;
 }
 
+.travaux-btn-couleur[style*="ffffff"] {
+    border: 1px solid #ccc;
+}
+
 .travaux-btn-couleur:hover {
     transform: scale(1.15);
 }

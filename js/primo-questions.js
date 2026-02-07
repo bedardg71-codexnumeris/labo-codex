@@ -1825,19 +1825,7 @@ const QUESTIONS_PRIMO = [
         }
     },
 
-    {
-        id: 'execution-import-demo',
-        texte: 'Import des données de démonstration en cours...',
-        type: 'action',
-        action: 'importerDonneesDemo',
-        champsCibles: [],
-        validation: {
-            requis: false
-        },
-        sautSi: function(reponses) {
-            return reponses['intro-magie'] !== 'oui';
-        }
-    },
+    // [Chantier 1 — 6 fev 2026] question 'execution-import-demo' supprimee (demantelement demo)
 
     {
         id: 'confirmation-import-demo',
