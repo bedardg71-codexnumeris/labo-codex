@@ -54,6 +54,44 @@
         travauxVisionneuse.initialiser();
         travauxAnnotation.initialiser();
 
+        // Ecouter les evenements d'annotation (une seule fois)
+        window.addEventListener('travaux-annotation-activee', () => {
+            const btnAnnoter = document.getElementById('travaux-btn-annoter');
+            const undoRedo = document.getElementById('travaux-undo-redo');
+            if (btnAnnoter) { btnAnnoter.textContent = 'Terminer'; btnAnnoter.classList.add('actif'); }
+            if (undoRedo) undoRedo.classList.remove('u-hide');
+            // Replier la sidebar pour maximiser l'espace d'annotation
+            const sidebar = document.getElementById('travaux-sidebar');
+            if (sidebar) sidebar.classList.add('replie');
+            const btnToggle = document.getElementById('travaux-btn-toggle-sidebar');
+            if (btnToggle) {
+                btnToggle.classList.add('visible');
+                btnToggle.innerHTML = '&#x25B6;';
+            }
+        });
+
+        window.addEventListener('travaux-annotation-desactivee', () => {
+            const btnAnnoter = document.getElementById('travaux-btn-annoter');
+            const undoRedo = document.getElementById('travaux-undo-redo');
+            if (btnAnnoter) { btnAnnoter.textContent = 'Annoter'; btnAnnoter.classList.remove('actif'); }
+            if (undoRedo) undoRedo.classList.add('u-hide');
+            // Redeployer la sidebar seulement si pas manuellement repliee
+            const sidebar = document.getElementById('travaux-sidebar');
+            const btnToggle = document.getElementById('travaux-btn-toggle-sidebar');
+            if (!sidebarManuelReplie) {
+                if (sidebar) sidebar.classList.remove('replie');
+                if (btnToggle) {
+                    btnToggle.classList.remove('visible');
+                    btnToggle.innerHTML = '&#x25C0;';
+                }
+            } else {
+                if (btnToggle) {
+                    btnToggle.classList.add('visible');
+                    btnToggle.innerHTML = '&#x25B6;';
+                }
+            }
+        });
+
         moduleInitialise = true;
         console.log('[Travaux-UI] Module Travaux initialise');
 
@@ -245,42 +283,6 @@
         // Initialiser le scroll virtuel si necessaire
         initialiserScrollVirtuel();
 
-        // Ecouter les evenements d'annotation
-        window.addEventListener('travaux-annotation-activee', () => {
-            document.getElementById('travaux-btn-annoter').textContent = 'Terminer';
-            document.getElementById('travaux-btn-annoter').classList.add('actif');
-            document.getElementById('travaux-undo-redo').classList.remove('u-hide');
-            // Replier la sidebar pour maximiser l'espace d'annotation
-            const sidebar = document.getElementById('travaux-sidebar');
-            if (sidebar) sidebar.classList.add('replie');
-            const btnToggle = document.getElementById('travaux-btn-toggle-sidebar');
-            if (btnToggle) {
-                btnToggle.classList.add('visible');
-                btnToggle.innerHTML = '&#x25B6;';
-            }
-        });
-
-        window.addEventListener('travaux-annotation-desactivee', () => {
-            document.getElementById('travaux-btn-annoter').textContent = 'Annoter';
-            document.getElementById('travaux-btn-annoter').classList.remove('actif');
-            document.getElementById('travaux-undo-redo').classList.add('u-hide');
-            // Redeployer la sidebar seulement si pas manuellement repliee
-            const sidebar = document.getElementById('travaux-sidebar');
-            const btnToggle = document.getElementById('travaux-btn-toggle-sidebar');
-            if (!sidebarManuelReplie) {
-                if (sidebar) sidebar.classList.remove('replie');
-                if (btnToggle) {
-                    btnToggle.classList.remove('visible');
-                    btnToggle.innerHTML = '&#x25C0;';
-                }
-            } else {
-                // Sidebar reste repliee, bouton reste visible
-                if (btnToggle) {
-                    btnToggle.classList.add('visible');
-                    btnToggle.innerHTML = '&#x25B6;';
-                }
-            }
-        });
     }
 
     /**
