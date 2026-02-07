@@ -782,7 +782,8 @@
 
     // Exporter globalement
     window.db = db;
-    window.obtenirDonneesSelonMode = obtenirDonneesSelonMode;
+    // NOTE: obtenirDonneesSelonMode est exportée par modes.js (version avec cle() namespace)
+    // Ne PAS exporter la version locale qui lit les clés brutes sans namespace
 
     // Export pour modules ES6 (futur)
     if (typeof module !== 'undefined' && module.exports) {
