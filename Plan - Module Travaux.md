@@ -2,7 +2,7 @@
 
 ## Contexte
 
-Le module Travaux (Beta 97) permet d'importer, visionner et annoter les travaux étudiants directement dans l'application. L'objectif est de remplacer GoodNotes dans le flux de correction : Omnivox → Application (import, annotation, évaluation, rétroaction) → Export PDF → Omnivox.
+Le module Travaux (Beta 97) permet d'importer, visionner et annoter les travaux étudiants directement dans l'application. Le flux de correction complet : Omnivox → Application (import, annotation, évaluation, rétroaction) → Export PDF → Omnivox.
 
 Les fonctionnalités d'import, de visionneuse et d'annotation au stylet sont déjà en place. Ce plan couvre les améliorations de l'interface et les fonctionnalités manquantes pour compléter le flux.
 

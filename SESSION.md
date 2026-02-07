@@ -226,7 +226,7 @@ Design system - Modules/
 
 ### Tache precedente (6 février - Beta 96.3)
 
-- **MODULE TRAVAUX - Import, Annotation et Archivage** (remplace GoodNotes)
+- **MODULE TRAVAUX - Import, Annotation et Archivage**
   - **Objectif** : Gestion complete des travaux etudiants directement dans Monitorage
   - **5 phases implementees** :
     1. **Import + Visualisation** : Import drag-drop de PDF/images, detection auto du DA etudiant, miniatures, PDF.js pour rendu PDF
