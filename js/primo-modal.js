@@ -1341,9 +1341,9 @@ async function terminerConfiguration() {
         // Importer le matériel pédagogique de démarrage (asynchrone)
         await importerMaterielDemarrage();
 
-        // Définir le mode de travail sur "simulation" (Mode Assisté)
-        db.setSync('modeApplication', 'simulation');
-        console.log('[Primo] Mode de travail défini sur "simulation" (Mode Assisté)');
+        // [Chantier 2] Mode Assisté supprimé — rester en mode normal
+        db.setSync('modeApplication', 'normal');
+        console.log('[Primo] Mode de travail défini sur "normal"');
 
         // Afficher notification de succès
         if (typeof afficherNotificationSucces === 'function') {
