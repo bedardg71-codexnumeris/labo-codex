@@ -30,6 +30,7 @@
  * ⚠️ NE PAS MODIFIER - Référencé dans noms_stables.json
  */
 const configurationsOnglets = {
+    'accueil': [],
     'tableau-bord': [
         { id: 'apercu', label: 'Aperçu' },
         { id: 'liste', label: 'Liste des individus' },

@@ -351,6 +351,155 @@
             padding-bottom: 50px;
         }
 
+        /* ===============================
+           Page d'accueil (Chantier 3)
+           Conforme au Design System :
+           - Variables --bleu-*, --shadow-*, --radius-*
+           - Gradients 135° light→dark
+           - Transitions all 0.3s ease
+           - Cartes = .carte pattern
+           =============================== */
+        .accueil-page {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 30px 60px;
+        }
+
+        .accueil-hero {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .accueil-hero h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--bleu-principal);
+            margin: 0 0 8px;
+        }
+
+        .accueil-hero .accueil-sous-titre {
+            font-size: 1.1rem;
+            color: var(--bleu-leger);
+            font-style: italic;
+            margin: 0 0 10px;
+        }
+
+        .accueil-hero .accueil-description {
+            font-size: 0.95rem;
+            color: var(--gris-moyen);
+            margin: 0;
+        }
+
+        .accueil-cours-actif {
+            background: var(--bleu-tres-pale);
+            border: 1px solid var(--bleu-pale);
+            border-radius: var(--radius-moyen, 8px);
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: var(--shadow-subtil);
+        }
+
+        .accueil-cours-actif .accueil-cours-icone {
+            font-size: 1.5rem;
+        }
+
+        .accueil-cours-actif .accueil-cours-info {
+            flex: 1;
+        }
+
+        .accueil-cours-actif .accueil-cours-nom {
+            font-weight: 600;
+            color: var(--bleu-principal);
+        }
+
+        .accueil-cours-actif .accueil-cours-detail {
+            font-size: 0.85rem;
+            color: var(--gris-moyen);
+        }
+
+        .accueil-cartes {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .accueil-carte {
+            background: white;
+            border: 1px solid var(--bleu-pale);
+            border-radius: var(--radius-moyen, 8px);
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            box-shadow: var(--shadow-subtil);
+        }
+
+        .accueil-carte:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-prononce);
+            border-color: var(--bleu-moyen);
+        }
+
+        .accueil-carte-icone {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .accueil-carte-titre {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--bleu-principal);
+            margin-bottom: 4px;
+        }
+
+        .accueil-carte-desc {
+            font-size: 0.85rem;
+            color: var(--gris-moyen);
+            line-height: 1.4;
+        }
+
+        .accueil-pied {
+            text-align: center;
+            padding-top: 15px;
+            border-top: 1px solid var(--bleu-pale);
+        }
+
+        .accueil-pied button {
+            background: none;
+            border: none;
+            color: var(--gris-moyen);
+            font-size: 0.85rem;
+            cursor: pointer;
+            text-decoration: underline;
+            padding: 4px 8px;
+            transition: all 0.3s ease;
+        }
+
+        .accueil-pied button:hover {
+            color: var(--bleu-moyen);
+        }
+
+        .accueil-pied .accueil-separateur {
+            color: var(--bleu-pale);
+            margin: 0 4px;
+        }
+
+        @media (max-width: 600px) {
+            .accueil-cartes {
+                grid-template-columns: 1fr;
+            }
+            .accueil-page {
+                padding: 25px 15px 40px;
+            }
+            .accueil-hero h1 {
+                font-size: 1.5rem;
+            }
+        }
+
         /* Mode archivé : désactivation visuelle des éléments interactifs */
         /* Exception : .mode-ecriture-temp réactive les contrôles */
         body.mode-archive:not(.mode-ecriture-temp) .btn-supprimer,
@@ -3168,10 +3317,7 @@
                         <div id="selecteur-mode" class="selecteur-mode-centre">
                             <!-- Sera généré dynamiquement par 17-modes.js -->
                         </div>
-                        <!-- Bouton Explorer la démo (Chantier 2) -->
-                        <button id="btn-entrer-demo" onclick="entrerEnDemo()" class="btn-action-header" title="Explorer la démonstration">
-                            Explorer la démo
-                        </button>
+                        <!-- Bouton Explorer la démo déplacé vers page d'accueil (Chantier 3) -->
                         <!-- Bouton Signaler un bug (Beta 95) -->
                         <button onclick="ouvrirModalRapportBug()" class="btn-action-header" title="Signaler un problème">
                             Signaler un bug
@@ -3610,6 +3756,12 @@
         <nav class="navigation-principale">
             <!-- Boutons de navigation centrés -->
             <div class="navigation-boutons">
+                <button data-onglet="accueil" class="btn-nav-icone" title="Accueil">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                </button>
                 <button data-onglet="tableau-bord">Tableau de bord</button>
                 <button data-onglet="presences">Présences</button>
                 <button data-onglet="evaluations">Évaluations</button>
@@ -3639,6 +3791,15 @@
 
         <!-- CONTENU PRINCIPAL -->
         <main class="contenu">
+
+            <!-- ===================================
+     SECTION: ACCUEIL (Chantier 3)
+     =================================== -->
+            <section id="section-accueil" class="section">
+                <div id="accueil-contenu" class="accueil-page">
+                    <!-- Contenu généré dynamiquement par accueil.js -->
+                </div>
+            </section>
 
             <!-- ===================================
      SECTION: TABLEAU DE BORD
@@ -11164,6 +11325,20 @@
                         </div>
                     </div>
 
+                    <!-- Carte : Navigation (Chantier 3) -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">Navigation</h3>
+                        <div class="form-group" style="padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                            <label style="cursor: pointer; display: flex; align-items: center;">
+                                <input type="checkbox" id="checkbox-mode-expert" onchange="definirModeExpert(this.checked)">
+                                <strong style="margin-left: 8px;">Ouvrir directement sur le tableau de bord</strong>
+                            </label>
+                            <small style="display: block; color: var(--gris-moyen); margin-top: 5px; margin-left: 28px; font-size: 0.85rem;">
+                                Court-circuite la page d'accueil au d&eacute;marrage de l'application.
+                            </small>
+                        </div>
+                    </div>
+
                     <!-- Bouton sauvegarder -->
                     <div class="u-mt-20">
                         <button class="btn btn-confirmer" onclick="sauvegarderToutesPreferencesV2()" style="width: 100%;">
@@ -15652,6 +15827,9 @@
 
     <!-- MIGRATIONS BETA 93.5 - Ajout coursId aux données (Beta 93.5) -->
     <script src="js/migrations.js?v=2025121101"></script>
+
+    <!-- Page d'accueil (Chantier 3) -->
+    <script src="js/accueil.js?v=2026020601"></script>
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
     <script src="js/main.js?v=2025123009"></script>

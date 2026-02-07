@@ -321,8 +321,17 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    afficherSection('tableau-bord');
-    console.log('✅ Navigation initialisée - Section par défaut: tableau-bord');
+    // Chantier 3 : Section par défaut selon contexte
+    const _modeExpert = db.getSync('preferencesAffichage', {}).modeExpert || false;
+    const _demoActif = db.getSync('demo-actif', null) === 'true';
+    if (_demoActif) {
+        afficherSection('tableau-bord');
+    } else if (_modeExpert) {
+        afficherSection('tableau-bord');
+    } else {
+        afficherSection('accueil');
+    }
+    console.log('✅ Navigation initialisée - Section par défaut:', _demoActif ? 'tableau-bord (démo)' : _modeExpert ? 'tableau-bord (expert)' : 'accueil');
 
 // ===============================
     // 2. CHARGEMENTS CONDITIONNELS
@@ -420,6 +429,12 @@ document.addEventListener('DOMContentLoaded', function () {
         nettoyerResiduDemo().then(cleaned => {
             if (cleaned) console.log('[Main] Résidus démo nettoyés');
         });
+    }
+
+    // MODULE ACCUEIL: Page d'accueil (Chantier 3)
+    if (typeof initialiserAccueil === 'function') {
+        console.log('   → Module Accueil détecté');
+        initialiserAccueil();
     }
 
     // MODULE 11: Gestion du groupe
