@@ -2,7 +2,8 @@
  * ============================================
  * MODULE 17 : GESTION DES MODES
  * ============================================
- * Gestion des modes Normal / Simulation / Anonymisation
+ * Gestion des modes Normal / Anonymisation
+ * [Chantier 2 — 6 fev 2026] Mode Simulation (Assisté) supprimé
  */
 
 // ============================================
@@ -11,7 +12,6 @@
 
 const MODES = {
     NORMAL: 'normal',
-    SIMULATION: 'simulation',
     ANONYMISATION: 'anonymisation'
 };
 
@@ -20,11 +20,6 @@ const THEMES = {
         couleur: '#032e5c', // Bleu principal (var(--bleu-principal))
         nom: 'Mode Normal',
         icone: ''
-    },
-    simulation: {
-        couleur: '#1a5266', // Teal/sarcelle
-        nom: 'Mode Assisté',
-        icone: '😎'
     },
     anonymisation: {
         couleur: '#0f1e3a', // Bleu très foncé
@@ -52,16 +47,23 @@ function initialiserSystemeModes() {
     // Récupérer le mode sauvegardé
     modeActuel = db.getSync('modeApplication', MODES.NORMAL);
 
+    // [Chantier 2] Migration : si mode 'simulation' en stockage, migrer vers 'normal'
+    if (modeActuel === 'simulation') {
+        console.log('🔄 Migration mode simulation → normal');
+        modeActuel = MODES.NORMAL;
+        db.setSync('modeApplication', MODES.NORMAL);
+    }
+
     // Appliquer le thème
     appliquerTheme(modeActuel);
 
     // Créer le sélecteur de mode
     creerSelecteurMode();
 
-    // Afficher/masquer le bouton Assistance Primo selon le mode
+    // Masquer les éléments Primo (mode Assisté supprimé)
     gererAffichageBoutonPrimo(modeActuel);
 
-    console.log(`✅ Mode actif: ${THEMES[modeActuel].nom}`);
+    console.log(`✅ Mode actif: ${THEMES[modeActuel]?.nom || modeActuel}`);
 }
 
 // ============================================
@@ -86,18 +88,15 @@ function creerSelecteurMode() {
     select.id = 'select-mode';
     select.className = 'select-mode';
 
-    // Créer les options pour chaque mode (tous adjectifs)
+    // Créer les options pour chaque mode
     const labels = {
         'normal': 'Normal',
-        'simulation': 'Assisté',
         'anonymisation': 'Anonymisé'
     };
 
-    // Ordre souhaité : Normal → Assisté → Anonymisé
-    // Note: Anonymisé en dernier pour éviter activation accidentelle
+    // Ordre souhaité : Normal → Anonymisé
     const ordreAffichage = [
         MODES.NORMAL,
-        MODES.SIMULATION,
         MODES.ANONYMISATION
     ];
 
@@ -146,19 +145,6 @@ async function changerMode(nouveauMode) {
 
     // Afficher/masquer le bouton Assistance Primo selon le mode
     gererAffichageBoutonPrimo(nouveauMode);
-
-    // ✅ NOUVEAU (9 décembre 2025) : Gérer les données demo selon le mode
-    if (typeof chargerDonneesDemo === 'function' && typeof dechargerDonneesDemo === 'function') {
-        if (nouveauMode === 'simulation') {  // ✅ CORRIGÉ : 'simulation' pas 'assiste'
-            // Charger les données demo en mode Assisté
-            console.log('   → Chargement données demo (mode Assisté)...');
-            await chargerDonneesDemo();
-        } else {
-            // Décharger les données demo en mode Normal/Anonymisé
-            console.log('   → Déchargement données demo...');
-            await dechargerDonneesDemo();
-        }
-    }
 
     // Recharger les données affichées selon le nouveau mode
     // SANS recharger toute la page
@@ -268,14 +254,11 @@ function appliquerTheme(mode) {
     // Ajouter l'attribut data-mode sur le body
     document.body.setAttribute('data-mode', mode);
 
-    // ✅ NOUVEAU (9 décembre 2025) : Ajouter classe pour compatibilité CSS Primo
     // Retirer toutes les classes de mode
-    document.body.classList.remove('mode-normal', 'mode-assiste', 'mode-anonymise');
+    document.body.classList.remove('mode-normal', 'mode-anonymise');
 
     // Ajouter la classe appropriée
-    if (mode === MODES.SIMULATION) {
-        document.body.classList.add('mode-assiste');
-    } else if (mode === MODES.ANONYMISATION) {
+    if (mode === MODES.ANONYMISATION) {
         document.body.classList.add('mode-anonymise');
     } else {
         document.body.classList.add('mode-normal');
@@ -292,7 +275,7 @@ function appliquerTheme(mode) {
         bandeau.id = 'bandeau-mode';
 
         // Texte du bandeau
-        let texte = `${THEMES[mode].icone} ${THEMES[mode].nom.toUpperCase()} - Les identités affichées ${mode === MODES.SIMULATION ? 'sont réelles' : 'sont anonymisées'}`;
+        let texte = `${THEMES[mode].icone} ${THEMES[mode].nom.toUpperCase()} - Les identités affichées sont anonymisées`;
 
         // Ajouter contrôle DA seulement en mode anonymisation
         if (mode === MODES.ANONYMISATION) {
@@ -377,7 +360,7 @@ function genererMappingAnonyme() {
     const cleEtudiants = cle('groupeEtudiants');
     const etudiants = db.getSync(cleEtudiants, []);
 
-    // Filtrer pour exclure le groupe 9999 (simulation)
+    // Filtrer pour exclure le groupe 9999 (demo)
     const etudiantsReels = etudiants.filter(e => e.groupe !== '9999');
 
     // Créer un tableau de numéros et le mélanger (Fisher-Yates shuffle)
@@ -585,7 +568,7 @@ function sauvegarderDonneesSelonMode(cle, donnees) {
         // Utiliser window.cle() pour le namespacing par trimestre (paramètre cle shadowed)
         const cleEffective = window.cle(cle);
         db.setSync(cleEffective, donnees);
-        console.log(`[${mode === MODES.SIMULATION ? 'Assisté' : 'Normal'}] Sauvegarde dans ${cleEffective}`);
+        console.log(`[${mode}] Sauvegarde dans ${cleEffective}`);
         return true;
     } catch (error) {
         // Détecter erreur de quota dépassé
@@ -765,10 +748,10 @@ function estModeeLectureSeule() {
  * @param {string} mode - Le mode actif
  */
 function gererAffichageBoutonPrimo(mode) {
-    // Bouton Assistance Primo (visible en mode Assisté)
+    // [Chantier 2] Mode Assisté supprimé — Primo toujours masqué
     const boutonPrimo = document.getElementById('btn-assistance-primo');
     if (boutonPrimo) {
-        toggleDisplay(boutonPrimo, mode === MODES.SIMULATION);
+        toggleDisplay(boutonPrimo, false);
     }
 
     // Boutons Soutenir/Feedback (visibles en mode Normal uniquement)
@@ -783,21 +766,15 @@ function gererAffichageBoutonPrimo(mode) {
         toggleDisplay(boutonFeedback, mode === MODES.NORMAL);
     }
 
-    // Section Aide dans la navigation (visible en mode Assisté)
+    // Section Aide masquée (mode Assisté supprimé)
     const boutonAide = document.getElementById('btn-section-aide');
     if (boutonAide) {
-        if (mode === MODES.SIMULATION) {
-            // Mode Assisté : section Aide visible
-            boutonAide.classList.remove('u-hide');
-        } else {
-            // Modes Normal et Anonymisé : section Aide masquée
-            boutonAide.classList.add('u-hide');
+        boutonAide.classList.add('u-hide');
 
-            // Si on est sur la section Aide, rediriger vers Tableau de bord
-            if (typeof sectionActive !== 'undefined' && sectionActive === 'aide') {
-                if (typeof afficherSection === 'function') {
-                    afficherSection('tableau-bord');
-                }
+        // Si on est sur la section Aide, rediriger vers Tableau de bord
+        if (typeof sectionActive !== 'undefined' && sectionActive === 'aide') {
+            if (typeof afficherSection === 'function') {
+                afficherSection('tableau-bord');
             }
         }
     }
@@ -808,23 +785,32 @@ function gererAffichageBoutonPrimo(mode) {
 // ============================================
 
 /**
- * Vérifie si on est en mode Assisté
- * @returns {boolean} true si mode Assisté actif
+ * Vérifie si on est en mode Assisté (OBSOLETE — toujours false)
+ * [Chantier 2] Mode Assisté supprimé, gardé pour compatibilité
+ * @returns {boolean} toujours false
  */
 function estModeAssiste() {
-    return modeActuel === MODES.SIMULATION; // 'simulation' = mode Assisté
+    return false;
 }
 
-// Alias pour compatibilité (à migrer progressivement)
 function estModeGuide() {
-    return estModeAssiste();
+    return false;
+}
+
+/**
+ * Vérifie si on est en mode Démo (route démo active)
+ * @returns {boolean} true si la route démo est active
+ */
+function estEnModeDemo() {
+    return db.getSync('demo-actif', null) === 'true';
 }
 
 window.MODES = MODES;
 window.initialiserSystemeModes = initialiserSystemeModes;
 window.changerMode = changerMode;
 window.estModeAssiste = estModeAssiste;
-window.estModeGuide = estModeGuide; // Alias compatibilité
+window.estModeGuide = estModeGuide;
+window.estEnModeDemo = estEnModeDemo;
 window.obtenirDonneesSelonMode = obtenirDonneesSelonMode;
 window.sauvegarderDonneesSelonMode = sauvegarderDonneesSelonMode;
 window.anonymiserNom = anonymiserNom;
@@ -842,9 +828,8 @@ window.obtenirDAAffichage = obtenirDAAffichage;
 
 /**
  * Filtre la liste des étudiants selon le mode actuel
- * - Mode Normal : affiche seulement les groupes réels (exclut 9999)
- * - Mode Assisté : affiche seulement le Groupe 9999 (données de démo/exploration)
- * - Mode Anonymisé : affiche les groupes réels (exclut 9999) avec noms anonymisés
+ * [Chantier 2] En mode démo, tous les étudiants passent (ils sont déjà demo)
+ * Hors démo : exclure les groupes demo
  *
  * @param {Array} etudiants - Liste complète des étudiants
  * @returns {Array} - Liste filtrée selon le mode
@@ -854,27 +839,14 @@ function filtrerEtudiantsParMode(etudiants) {
         return [];
     }
 
-    // Lire directement la variable modeActuel (pas un appel de fonction)
-    const mode = modeActuel;
-
-    // Groupes de démonstration (9999 legacy + demo nouveau)
-    const GROUPES_DEMO = ['9999', 'demo'];
-    const estGroupeDemo = (groupe) => GROUPES_DEMO.includes(groupe);
-
-    switch(mode) {
-        case 'simulation':
-            // Mode Assisté : afficher SEULEMENT les groupes démo
-            return etudiants.filter(e => estGroupeDemo(e.groupe));
-
-        case 'normal':
-        case 'anonymisation':
-            // Mode Normal et Anonymisé : exclure les groupes démo
-            return etudiants.filter(e => !estGroupeDemo(e.groupe));
-
-        default:
-            // Par défaut, exclure les groupes démo
-            return etudiants.filter(e => !estGroupeDemo(e.groupe));
+    // En mode démo, tous les étudiants sont des étudiants demo → pas de filtre
+    if (typeof estEnModeDemo === 'function' && estEnModeDemo()) {
+        return etudiants;
     }
+
+    // Hors démo : exclure les groupes demo
+    const GROUPES_DEMO = ['9999', 'demo'];
+    return etudiants.filter(e => !GROUPES_DEMO.includes(e.groupe));
 }
 
 // Exporter les fonctions

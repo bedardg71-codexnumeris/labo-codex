@@ -303,6 +303,54 @@
             padding-bottom: 50px;
         }
 
+        /* ===============================
+           BANDEAU DÉMO (Chantier 2 — route démo)
+           =============================== */
+        .bandeau-demo {
+            background: var(--vert-doux, #2d6a4f);
+            color: white;
+            padding: 8px 16px;
+            text-align: center;
+            font-size: 0.85rem;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 9998;
+            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .bandeau-demo-contenu {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .bandeau-demo-texte {
+            font-weight: 600;
+        }
+
+        .bandeau-demo-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 4px 12px;
+            border-radius: var(--radius-moyen);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .bandeau-demo-btn:hover {
+            background: rgba(255, 255, 255, 0.35);
+            border-color: white;
+        }
+
+        body.mode-demo {
+            padding-bottom: 50px;
+        }
+
         /* Mode archivé : désactivation visuelle des éléments interactifs */
         /* Exception : .mode-ecriture-temp réactive les contrôles */
         body.mode-archive:not(.mode-ecriture-temp) .btn-supprimer,
@@ -3120,6 +3168,10 @@
                         <div id="selecteur-mode" class="selecteur-mode-centre">
                             <!-- Sera généré dynamiquement par 17-modes.js -->
                         </div>
+                        <!-- Bouton Explorer la démo (Chantier 2) -->
+                        <button id="btn-entrer-demo" onclick="entrerEnDemo()" class="btn-action-header" title="Explorer la démonstration">
+                            Explorer la démo
+                        </button>
                         <!-- Bouton Signaler un bug (Beta 95) -->
                         <button onclick="ouvrirModalRapportBug()" class="btn-action-header" title="Signaler un problème">
                             Signaler un bug
@@ -3177,6 +3229,16 @@
                 </label>
                 <button onclick="window.location.href='#reglages-trimestre'; afficherSousSectionActuelle('sous-section-trimestre');" class="bandeau-archive-btn">
                     Trimestres
+                </button>
+            </div>
+        </div>
+
+        <!-- BANDEAU DÉMO (affiché quand la route démo est active) -->
+        <div id="bandeau-demo" class="bandeau-demo u-hide">
+            <div class="bandeau-demo-contenu">
+                <span class="bandeau-demo-texte">Mode démonstration</span>
+                <button onclick="quitterDemo()" class="bandeau-demo-btn">
+                    Quitter la démo
                 </button>
             </div>
         </div>

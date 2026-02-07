@@ -169,10 +169,7 @@ document.addEventListener('DOMContentLoaded', function () {
             chargerTableauBordApercu();
         }
 
-        // ✅ NOUVEAU (30 déc 2025): Mettre à jour l'état des checkboxes démo après sync
-        if (typeof chargerEtatCheckboxDemo === 'function') {
-            chargerEtatCheckboxDemo();
-        }
+        // [Chantier 1] chargerEtatCheckboxDemo supprimée
     });
 
     // ===============================
@@ -413,10 +410,16 @@ document.addEventListener('DOMContentLoaded', function () {
         initialiserModuleContexte();
     }
 
-    // MODULE DONNÉES DEMO: Chargement données demo en mode Assisté (9 déc 2025)
+    // MODULE DONNÉES DEMO: Initialisation + nettoyage résidus (Chantier 2)
     if (typeof initialiserModuleDonneesDemo === 'function') {
         console.log('   → Module Données Demo détecté');
         initialiserModuleDonneesDemo();
+    }
+    // Filet de sécurité : nettoyer les résidus de démo si crash pendant la démo
+    if (typeof nettoyerResiduDemo === 'function') {
+        nettoyerResiduDemo().then(cleaned => {
+            if (cleaned) console.log('[Main] Résidus démo nettoyés');
+        });
     }
 
     // MODULE 11: Gestion du groupe
