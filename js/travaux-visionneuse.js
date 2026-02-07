@@ -19,6 +19,8 @@
     const ZOOM_PAS = 0.1;
     const ZOOM_DEFAUT = 1.0;
     const ZOOM_FIT = 'fit'; // Ajuster a la fenetre
+    const ZOOM_FIT_WIDTH = 'fit-width';   // Pleine largeur
+    const ZOOM_FIT_HEIGHT = 'fit-height'; // Pleine hauteur
 
     /* ===============================
        ETAT DU MODULE
@@ -276,7 +278,7 @@
      * @returns {number} Scale a appliquer
      */
     function calculerZoomEffectif(page) {
-        if (modeZoom !== ZOOM_FIT) {
+        if (modeZoom !== ZOOM_FIT && modeZoom !== ZOOM_FIT_WIDTH && modeZoom !== ZOOM_FIT_HEIGHT) {
             return zoomActuel;
         }
 
@@ -287,10 +289,15 @@
         const largeurDispo = conteneur.clientWidth - 40; // marge
         const hauteurDispo = conteneur.clientHeight - 40;
 
-        const scaleX = largeurDispo / viewport.width;
-        const scaleY = hauteurDispo / viewport.height;
-
-        zoomActuel = Math.min(scaleX, scaleY, 2.0); // cap a 2x
+        if (modeZoom === ZOOM_FIT_WIDTH) {
+            zoomActuel = Math.min(largeurDispo / viewport.width, ZOOM_MAX);
+        } else if (modeZoom === ZOOM_FIT_HEIGHT) {
+            zoomActuel = Math.min(hauteurDispo / viewport.height, ZOOM_MAX);
+        } else {
+            const scaleX = largeurDispo / viewport.width;
+            const scaleY = hauteurDispo / viewport.height;
+            zoomActuel = Math.min(scaleX, scaleY, 2.0); // cap a 2x
+        }
         return zoomActuel;
     }
 
@@ -300,7 +307,7 @@
      * @returns {number} Scale a appliquer
      */
     function calculerZoomImage(img) {
-        if (modeZoom !== ZOOM_FIT) {
+        if (modeZoom !== ZOOM_FIT && modeZoom !== ZOOM_FIT_WIDTH && modeZoom !== ZOOM_FIT_HEIGHT) {
             return zoomActuel;
         }
 
@@ -310,10 +317,15 @@
         const largeurDispo = conteneur.clientWidth - 40;
         const hauteurDispo = conteneur.clientHeight - 40;
 
-        const scaleX = largeurDispo / img.width;
-        const scaleY = hauteurDispo / img.height;
-
-        zoomActuel = Math.min(scaleX, scaleY, 2.0);
+        if (modeZoom === ZOOM_FIT_WIDTH) {
+            zoomActuel = Math.min(largeurDispo / img.width, ZOOM_MAX);
+        } else if (modeZoom === ZOOM_FIT_HEIGHT) {
+            zoomActuel = Math.min(hauteurDispo / img.height, ZOOM_MAX);
+        } else {
+            const scaleX = largeurDispo / img.width;
+            const scaleY = hauteurDispo / img.height;
+            zoomActuel = Math.min(scaleX, scaleY, 2.0);
+        }
         return zoomActuel;
     }
 
@@ -438,6 +450,24 @@
      */
     async function zoomAjuster() {
         modeZoom = ZOOM_FIT;
+        cachePages.clear();
+        await reRendrePageActuelle();
+    }
+
+    /**
+     * Zoom pleine largeur : le document couvre toute la largeur du conteneur
+     */
+    async function zoomPleineLargeur() {
+        modeZoom = ZOOM_FIT_WIDTH;
+        cachePages.clear();
+        await reRendrePageActuelle();
+    }
+
+    /**
+     * Zoom pleine hauteur : le document tient en hauteur dans le conteneur
+     */
+    async function zoomPleineHauteur() {
+        modeZoom = ZOOM_FIT_HEIGHT;
         cachePages.clear();
         await reRendrePageActuelle();
     }
@@ -801,6 +831,8 @@
         zoomAvant: zoomAvant,
         zoomArriere: zoomArriere,
         zoomAjuster: zoomAjuster,
+        zoomPleineLargeur: zoomPleineLargeur,
+        zoomPleineHauteur: zoomPleineHauteur,
         configurerGestesZoom: configurerGestesZoom,
         // Accesseurs
         getFichierActuel: getFichierActuel,

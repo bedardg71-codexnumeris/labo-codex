@@ -497,8 +497,9 @@
 
             traitEnCours.points.push({ x: cxNorm, y: cyNorm, pressure: pression });
 
-            // Dessiner le segment
-            const epaisseur = travauxOutils.calculerEpaisseurPression(pression);
+            // Dessiner le segment (epaisseur ajustee a la resolution)
+            const epaisseurPression = travauxOutils.calculerEpaisseurPression(pression);
+            const epaisseur = travauxOutils.calculerEpaisseurReelle(epaisseurPression);
 
             ctxAnnotation.save();
             ctxAnnotation.globalAlpha = outil.opacite || 1.0;
@@ -1178,6 +1179,7 @@
         const w = canvasAnnotation.width;
         const h = canvasAnnotation.height;
         const outil = travauxOutils.OUTILS[trait.tool] || travauxOutils.OUTILS.stylo;
+        const ratioResolution = w / travauxOutils.RESOLUTION_REFERENCE;
 
         ctxAnnotation.save();
         ctxAnnotation.globalAlpha = trait.opacity || 1.0;
@@ -1192,10 +1194,10 @@
 
         for (let i = 1; i < trait.points.length; i++) {
             const p = trait.points[i];
-            const epaisseur = outil.sensiblePression
-                ? travauxOutils.calculerEpaisseurPression(p.pressure) * (trait.lineWidth / travauxOutils.OUTILS[trait.tool].epaisseurDefaut)
+            const epaisseurLogique = outil.sensiblePression
+                ? travauxOutils.calculerEpaisseurPression(p.pressure) * (trait.lineWidth / outil.epaisseurDefaut)
                 : trait.lineWidth;
-            ctxAnnotation.lineWidth = epaisseur;
+            ctxAnnotation.lineWidth = epaisseurLogique * ratioResolution;
             ctxAnnotation.lineTo(p.x * w, p.y * h);
             ctxAnnotation.stroke();
             ctxAnnotation.beginPath();
@@ -1212,10 +1214,11 @@
     function dessinerForme(forme) {
         const w = canvasAnnotation.width;
         const h = canvasAnnotation.height;
+        const ratioResolution = w / travauxOutils.RESOLUTION_REFERENCE;
 
         ctxAnnotation.save();
         ctxAnnotation.strokeStyle = forme.color;
-        ctxAnnotation.lineWidth = forme.lineWidth || 2;
+        ctxAnnotation.lineWidth = (forme.lineWidth || 2) * ratioResolution;
         ctxAnnotation.lineCap = 'round';
 
         const x1 = forme.x1 * w, y1 = forme.y1 * h;
@@ -1281,9 +1284,10 @@
         const mx = (x1 + x2) / 2;
         const my = (y1 + y2) / 2;
         const size = Math.min(Math.abs(x2 - x1), Math.abs(y2 - y1)) / 2;
+        const ratioResolution = (canvasAnnotation ? canvasAnnotation.width : 1000) / travauxOutils.RESOLUTION_REFERENCE;
 
         ctx.strokeStyle = color || '#00AA00';
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 3 * ratioResolution;
         ctx.beginPath();
         ctx.moveTo(mx - size, my);
         ctx.lineTo(mx - size * 0.3, my + size * 0.8);
@@ -1295,8 +1299,9 @@
      * Dessine une croix (X)
      */
     function dessinerCroix(ctx, x1, y1, x2, y2, color) {
+        const ratioResolution = (canvasAnnotation ? canvasAnnotation.width : 1000) / travauxOutils.RESOLUTION_REFERENCE;
         ctx.strokeStyle = color || '#FF0000';
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 3 * ratioResolution;
         ctx.beginPath();
         ctx.moveTo(x1, y1);
         ctx.lineTo(x2, y2);

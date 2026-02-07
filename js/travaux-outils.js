@@ -30,6 +30,7 @@
     ];
 
     const COULEUR_DEFAUT = '#ff8c00'; // Orange
+    const RESOLUTION_REFERENCE = 1000; // Largeur de reference pour normaliser l'epaisseur
 
     /* ===============================
        OUTILS
@@ -335,6 +336,9 @@
 
     function setEpaisseurActive(val) {
         epaisseurActive = val;
+        // Mettre a jour l'affichage pixels
+        const pxLabel = document.getElementById('travaux-epaisseur-px');
+        if (pxLabel) pxLabel.textContent = getEpaisseurReellePixels() + 'px';
     }
 
     function getTailleTexte() {
@@ -376,6 +380,29 @@
         const pressionAjustee = courbeDePresson(pressionBrute);
         const facteur = 0.5 + pressionAjustee * (outil.facteurPression - 0.5);
         return epaisseurActive * facteur;
+    }
+
+    /* ===============================
+       EPAISSEUR RELATIVE A LA RESOLUTION
+       =============================== */
+
+    /**
+     * Calcule l'epaisseur reelle en pixels ajustee a la resolution de l'image
+     * @param {number} epaisseurLogique - Epaisseur logique (valeur du slider)
+     * @returns {number} Epaisseur reelle en pixels canvas
+     */
+    function calculerEpaisseurReelle(epaisseurLogique) {
+        const canvas = document.getElementById('travaux-canvas-document');
+        const largeurImage = canvas ? canvas.width : RESOLUTION_REFERENCE;
+        return epaisseurLogique * (largeurImage / RESOLUTION_REFERENCE);
+    }
+
+    /**
+     * Retourne l'epaisseur reelle actuelle en pixels (pour affichage)
+     * @returns {number}
+     */
+    function getEpaisseurReellePixels() {
+        return Math.round(calculerEpaisseurReelle(epaisseurActive));
     }
 
     /* ===============================
@@ -436,9 +463,9 @@
 
         html += '</div></div>';
 
-        // Epaisseur (slider)
+        // Epaisseur (slider + affichage pixels)
         html += '<div class="travaux-palette-section">';
-        html += '<div class="travaux-palette-label">Epaisseur</div>';
+        html += '<div class="travaux-palette-label">Epaisseur <span id="travaux-epaisseur-px" class="travaux-epaisseur-px">' + getEpaisseurReellePixels() + 'px</span></div>';
         html += `<input type="range" class="travaux-slider-epaisseur" min="1" max="20" value="${epaisseurActive}" oninput="travauxOutils.setEpaisseurActive(parseInt(this.value))">`;
         html += '</div>';
 
@@ -506,6 +533,10 @@
         // Pression
         courbeDePresson: courbeDePresson,
         calculerEpaisseurPression: calculerEpaisseurPression,
+        // Resolution
+        calculerEpaisseurReelle: calculerEpaisseurReelle,
+        getEpaisseurReellePixels: getEpaisseurReellePixels,
+        RESOLUTION_REFERENCE: RESOLUTION_REFERENCE,
         // UI
         genererHTMLPalette: genererHTMLPalette,
         rafraichirPalette: rafraichirPalette,
