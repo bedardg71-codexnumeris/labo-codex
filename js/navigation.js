@@ -96,6 +96,11 @@ function afficherSection(nomSection) {
 
     // Afficher la sous-navigation appropriée
     afficherSousNavigation(nomSection);
+
+    // Chantier 3 : Rafraîchir la page d'accueil quand on y navigue
+    if (nomSection === 'accueil' && typeof afficherAccueil === 'function') {
+        afficherAccueil();
+    }
 }
 
 /* ===============================
@@ -142,9 +147,10 @@ function afficherSousNavigation(nomOnglet) {
     const configuration = configurationsOnglets[nomOnglet];
 
     if (!configuration || configuration.length === 0) {
-        // Pas de sous-navigation pour cette section
-        conteneurSousNav.innerHTML = '<div class="vide">Pas de sous-sections pour cette page</div>';
+        // Pas de sous-navigation pour cette section — masquer le conteneur
+        conteneurSousNav.innerHTML = '';
         conteneurSousNav.className = 'sous-navigation vide';
+        conteneurSousNav.style.display = 'none';
         sousSectionActive = null;
     } else {
         // Créer les boutons de sous-navigation
@@ -155,6 +161,7 @@ function afficherSousNavigation(nomOnglet) {
 
         conteneurSousNav.innerHTML = boutonsHtml;
         conteneurSousNav.className = 'sous-navigation';
+        conteneurSousNav.style.display = '';
 
         // Ajouter les événements aux sous-boutons
         conteneurSousNav.querySelectorAll('button').forEach(bouton => {
