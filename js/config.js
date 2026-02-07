@@ -45,8 +45,8 @@ const configurationsOnglets = {
     'evaluations': [
         { id: 'apercu', label: 'Aperçu' },
         { id: 'liste', label: 'Liste des évaluations' },
-        { id: 'individuelles', label: 'Procéder à une évaluation' },
-        { id: 'travaux', label: 'Travaux' },
+        { id: 'individuelles', label: 'Évaluer une production' },
+        { id: 'travaux', label: 'Annoter des travaux' },
         { id: 'archivage', label: 'Archivage' }
     ],
     // ✨ REFONTE (2 jan 2026) : "Matériel" → "Construction de la note"
