@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 7 février 2026 (Beta 97.3 - Build 0207-1100)
+> **Derniere mise a jour** : 7 février 2026 (Beta 97.4 - Build 0207-1439)
 
 ---
 
@@ -662,6 +662,39 @@
 - [ ] **#22** Mettre a jour fichier noms_stables.json
   - Verifier que tous les identifiants critiques sont documentes
   - Ajouter les nouveaux noms proteges
+
+---
+
+## Complete (Beta 97.4 - 7 février 2026)
+
+- [x] **#118** Zoom adaptatif : modes "Pleine largeur" et "Pleine hauteur"
+  - Remplacement des boutons +/- par deux modes de zoom adaptatifs
+  - Pleine largeur : le document couvre toute la largeur du conteneur
+  - Pleine hauteur : le document tient en hauteur dans la fenêtre
+  - **Fichiers** : `js/travaux-visionneuse.js`, `js/travaux-ui.js`
+
+- [x] **#119** Épaisseur du trait relative à la résolution + affichage pixels
+  - Résolution de référence 1000px : l'épaisseur visuelle est constante quelle que soit la résolution
+  - Slider affiche l'épaisseur en pixels réels (`Xpx`) en temps réel
+  - Ratio appliqué au dessin live, au rendu des annotations et à l'export PDF
+  - **Fichiers** : `js/travaux-outils.js`, `js/travaux-annotation.js`, `js/travaux-export-pdf.js`
+
+- [x] **#120** Bouton Annotation → Évaluation
+  - Bouton "Évaluer" dans la toolbar d'annotation
+  - Navigation directe vers le formulaire d'évaluation avec étudiant et production pré-remplis
+  - Utilise `evaluerProduction()` existant dans liste-evaluations.js
+  - **Fichier** : `js/travaux-ui.js`
+
+- [x] **#121** Export PDF dossier complet (travail annoté + grille + rétroaction)
+  - Nouvelle fonction `exporterDossierComplet(da, productionId)` dans travaux-export-pdf.js
+  - Assemble les pages annotées + page de synthèse (grille remplie + rétroaction)
+  - Bouton "Dossier PDF" ajouté dans la liste des évaluations complétées
+  - **Fichiers** : `js/travaux-export-pdf.js`, `js/liste-evaluations.js`
+
+- [x] **#122** Correctif : aperçu Construction de la note vide (exports IIFE manquants)
+  - `chargerStatistiquesApercu()` et `chargerMaterielConfigure()` non exportées après wrapping IIFE (#70)
+  - Ajout des exports `window.*` dans statistiques.js
+  - **Fichier** : `js/statistiques.js`
 
 ---
 

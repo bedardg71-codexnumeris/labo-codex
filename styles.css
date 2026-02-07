@@ -12932,8 +12932,8 @@ body.mode-assiste .btn-aide-contextuelle,
 
 /* --- Drop Zone --- */
 .travaux-drop-zone {
-    border: 2px dashed var(--gris-moyen, #ccc);
-    border-radius: 12px;
+    border: 2px dashed var(--gris-moyen);
+    border-radius: var(--radius-grand);
     padding: 40px 20px;
     text-align: center;
     cursor: pointer;
@@ -12943,8 +12943,8 @@ body.mode-assiste .btn-aide-contextuelle,
 
 .travaux-drop-zone:hover,
 .travaux-drop-zone.drag-over {
-    border-color: var(--bleu-clair, #065dbb);
-    background-color: rgba(6, 93, 187, 0.05);
+    border-color: var(--bleu-clair);
+    background-color: var(--bleu-tres-pale);
 }
 
 .travaux-drop-zone-icone {
@@ -12962,14 +12962,14 @@ body.mode-assiste .btn-aide-contextuelle,
     align-items: center;
     gap: 12px;
     padding: 10px 12px;
-    border: 1px solid var(--gris-clair, #e5e5e5);
+    border: 1px solid var(--bordure-claire);
     border-radius: var(--radius-moyen);
     margin-bottom: 6px;
 }
 
 .travaux-fichier-item.statut-erreur {
-    border-color: #dc3545;
-    background-color: rgba(220, 53, 69, 0.05);
+    border-color: var(--rouge-erreur);
+    background-color: var(--alerte-fond-erreur);
 }
 
 .travaux-fichier-icone {
@@ -12991,7 +12991,7 @@ body.mode-assiste .btn-aide-contextuelle,
 
 .travaux-fichier-details {
     font-size: 0.85rem;
-    color: var(--gris-fonce, #666);
+    color: var(--gris-moyen);
 }
 
 .travaux-fichier-etudiant {
@@ -13007,14 +13007,14 @@ body.mode-assiste .btn-aide-contextuelle,
     background: none;
     border: none;
     font-size: 20px;
-    color: #dc3545;
+    color: var(--rouge-erreur);
     cursor: pointer;
     padding: 4px 8px;
-    border-radius: 4px;
+    border-radius: var(--radius-petit);
 }
 
 .btn-supprimer-fichier:hover {
-    background-color: rgba(220, 53, 69, 0.1);
+    background-color: var(--alerte-fond-erreur);
 }
 
 /* --- Import actions --- */
@@ -13038,23 +13038,23 @@ body.mode-assiste .btn-aide-contextuelle,
     display: flex;
     gap: 16px;
     font-size: 0.85rem;
-    color: var(--gris-fonce, #666);
+    color: var(--gris-moyen);
 }
 
 /* --- Barre de progression --- */
 .travaux-barre-progression-container {
     width: 100%;
     height: 8px;
-    background: var(--gris-clair, #e5e5e5);
-    border-radius: 4px;
+    background: var(--bordure-claire);
+    border-radius: var(--radius-petit);
     overflow: hidden;
     margin: 8px 0;
 }
 
 .travaux-barre-progression {
     height: 100%;
-    background: var(--bleu-clair, #065dbb);
-    border-radius: 4px;
+    background: var(--bleu-clair);
+    border-radius: var(--radius-petit);
     transition: width 0.3s ease;
     width: 0%;
 }
@@ -13072,7 +13072,7 @@ body.mode-assiste .btn-aide-contextuelle,
 }
 
 .travaux-grille-item {
-    border: 1px solid var(--gris-clair, #e5e5e5);
+    border: 1px solid var(--bordure-claire);
     border-radius: var(--radius-moyen);
     overflow: hidden;
     cursor: pointer;
@@ -13081,7 +13081,7 @@ body.mode-assiste .btn-aide-contextuelle,
 
 .travaux-grille-item:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: var(--shadow-prononce);
 }
 
 .travaux-grille-thumb {
@@ -13089,7 +13089,7 @@ body.mode-assiste .btn-aide-contextuelle,
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #f8f9fa;
+    background: var(--gris-tres-pale);
     overflow: hidden;
 }
 
@@ -13116,7 +13116,7 @@ body.mode-assiste .btn-aide-contextuelle,
 
 .travaux-grille-etudiant {
     font-size: 0.75rem;
-    color: var(--gris-fonce, #666);
+    color: var(--gris-moyen);
 }
 
 /* --- Layout Visionneuse --- */
@@ -13130,7 +13130,7 @@ body.mode-assiste .btn-aide-contextuelle,
 .travaux-sidebar {
     width: 200px;
     min-width: 200px;
-    border-right: 1px solid var(--gris-clair, #e5e5e5);
+    border-right: 1px solid var(--bordure-claire);
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -13147,7 +13147,7 @@ body.mode-assiste .btn-aide-contextuelle,
 
 .travaux-sidebar-header {
     padding: 12px;
-    border-bottom: 1px solid var(--gris-clair, #e5e5e5);
+    border-bottom: 1px solid var(--bordure-claire);
 }
 
 .travaux-sidebar-header h4 {
@@ -13178,12 +13178,12 @@ body.mode-assiste .btn-aide-contextuelle,
 }
 
 .travaux-miniature:hover {
-    background-color: rgba(0,0,0,0.04);
+    background-color: var(--bleu-tres-pale);
 }
 
 .travaux-miniature.actif {
-    background-color: rgba(6, 93, 187, 0.1);
-    border-color: var(--bleu-clair, #065dbb);
+    background-color: var(--bleu-pale);
+    border-color: var(--bleu-clair);
 }
 
 .travaux-miniature-thumb {
@@ -13193,8 +13193,8 @@ body.mode-assiste .btn-aide-contextuelle,
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #f8f9fa;
-    border-radius: 4px;
+    background: var(--gris-tres-pale);
+    border-radius: var(--radius-petit);
     overflow: hidden;
 }
 
@@ -13219,10 +13219,10 @@ body.mode-assiste .btn-aide-contextuelle,
     z-index: 10;
     width: 20px;
     height: 48px;
-    border: 1px solid var(--gris-clair, #e5e5e5);
+    border: 1px solid var(--bordure-claire);
     border-left: none;
-    border-radius: 0 6px 6px 0;
-    background: #fafafa;
+    border-radius: 0 var(--radius-moyen) var(--radius-moyen) 0;
+    background: var(--gris-tres-pale);
     cursor: pointer;
     font-size: 10px;
     display: none;
@@ -13248,8 +13248,8 @@ body.mode-assiste .btn-aide-contextuelle,
     align-items: center;
     justify-content: space-between;
     padding: 8px 12px;
-    border-bottom: 1px solid var(--gris-clair, #e5e5e5);
-    background: #fafafa;
+    border-bottom: 1px solid var(--bordure-claire);
+    background: var(--gris-tres-pale);
     flex-shrink: 0;
     gap: 12px;
     flex-wrap: wrap;
@@ -13275,13 +13275,13 @@ body.mode-assiste .btn-aide-contextuelle,
 .travaux-separateur {
     width: 1px;
     height: 20px;
-    background: var(--gris-clair, #e5e5e5);
+    background: var(--bordure-claire);
 }
 
 .btn-icon {
     background: none;
-    border: 1px solid var(--gris-clair, #e5e5e5);
-    border-radius: 4px;
+    border: 1px solid var(--bordure-claire);
+    border-radius: var(--radius-petit);
     padding: 4px 10px;
     cursor: pointer;
     font-size: 14px;
@@ -13293,7 +13293,7 @@ body.mode-assiste .btn-aide-contextuelle,
 }
 
 .btn-icon:hover:not(:disabled) {
-    background: rgba(0,0,0,0.05);
+    background: var(--bleu-tres-pale);
 }
 
 .btn-icon:disabled {
@@ -13307,13 +13307,48 @@ body.mode-assiste .btn-aide-contextuelle,
 }
 
 .btn-petit.actif {
-    background: var(--bleu-clair, #065dbb);
+    background: var(--bleu-clair);
     color: white;
-    border-color: var(--bleu-clair, #065dbb);
+    border-color: var(--bleu-clair);
 }
 
 .btn-danger-petit {
-    color: #dc3545;
+    color: var(--rouge-erreur);
+}
+
+/* --- Boutons colorés toolbar travaux --- */
+.travaux-toolbar .btn-petit {
+    background: var(--bleu-principal);
+    color: white;
+    border: 1px solid var(--bleu-principal);
+    border-radius: var(--radius-moyen);
+}
+
+.travaux-toolbar .btn-petit:hover {
+    background: var(--btn-principal-hover);
+    border-color: var(--btn-principal-hover);
+}
+
+.travaux-toolbar .btn-petit.actif {
+    background: var(--bleu-clair);
+    border-color: var(--bleu-clair);
+}
+
+.travaux-toolbar .btn-icon {
+    background: var(--bleu-moyen);
+    color: white;
+    border: 1px solid var(--bleu-moyen);
+}
+
+.travaux-toolbar .btn-icon:hover:not(:disabled) {
+    background: var(--btn-principal-hover);
+    border-color: var(--btn-principal-hover);
+}
+
+.travaux-toolbar .btn-icon:disabled {
+    background: var(--bordure-claire);
+    color: var(--gris-clair);
+    border-color: var(--bordure-claire);
 }
 
 /* --- Canvas container --- */
@@ -13325,7 +13360,7 @@ body.mode-assiste .btn-aide-contextuelle,
     align-items: flex-start;
     justify-content: center;
     padding: 16px;
-    background: #e5e5e5;
+    background: var(--bordure-claire);
     touch-action: pan-x pan-y;
 }
 
@@ -13336,7 +13371,7 @@ body.mode-assiste .btn-aide-contextuelle,
 
 #travaux-canvas-document {
     display: block;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    box-shadow: var(--shadow-prononce);
     background: white;
 }
 
@@ -13354,7 +13389,7 @@ body.mode-assiste .btn-aide-contextuelle,
     left: 50%;
     transform: translate(-50%, -50%);
     text-align: center;
-    color: var(--gris-fonce, #666);
+    color: var(--gris-moyen);
 }
 
 /* --- Palette d'outils --- */
@@ -13363,8 +13398,8 @@ body.mode-assiste .btn-aide-contextuelle,
     align-items: center;
     gap: 16px;
     padding: 10px 16px;
-    background: #fafafa;
-    border-top: 1px solid var(--gris-clair, #e5e5e5);
+    background: var(--gris-tres-pale);
+    border-top: 1px solid var(--bordure-claire);
     flex-wrap: wrap;
 }
 
@@ -13377,7 +13412,7 @@ body.mode-assiste .btn-aide-contextuelle,
 .travaux-palette-label {
     font-size: 0.7rem;
     text-transform: uppercase;
-    color: var(--gris-fonce, #666);
+    color: var(--gris-moyen);
     letter-spacing: 0.5px;
     margin-right: 4px;
 }
@@ -13390,8 +13425,8 @@ body.mode-assiste .btn-aide-contextuelle,
 .travaux-btn-outil {
     width: 36px;
     height: 36px;
-    border: 1px solid var(--gris-clair, #e5e5e5);
-    border-radius: 6px;
+    border: 1px solid var(--bordure-claire);
+    border-radius: var(--radius-moyen);
     background: white;
     cursor: pointer;
     font-size: 14px;
@@ -13405,13 +13440,13 @@ body.mode-assiste .btn-aide-contextuelle,
 }
 
 .travaux-btn-outil:hover {
-    background: rgba(0,0,0,0.05);
+    background: var(--bleu-tres-pale);
 }
 
 .travaux-btn-outil.actif {
-    background: var(--bleu-clair, #065dbb);
+    background: var(--bleu-clair);
     color: white;
-    border-color: var(--bleu-clair, #065dbb);
+    border-color: var(--bleu-clair);
 }
 
 .travaux-palette-couleurs {
@@ -13432,7 +13467,7 @@ body.mode-assiste .btn-aide-contextuelle,
 }
 
 .travaux-btn-couleur[style*="ffffff"] {
-    border: 1px solid #ccc;
+    border: 1px solid var(--gris-tres-clair);
 }
 
 .travaux-btn-couleur:hover {
@@ -13440,8 +13475,8 @@ body.mode-assiste .btn-aide-contextuelle,
 }
 
 .travaux-btn-couleur.actif {
-    border-color: #333;
-    box-shadow: 0 0 0 1px white, 0 0 0 3px #333;
+    border-color: var(--gris-fonce);
+    box-shadow: 0 0 0 1px white, 0 0 0 3px var(--gris-fonce);
 }
 
 .travaux-slider-epaisseur {
@@ -13452,9 +13487,9 @@ body.mode-assiste .btn-aide-contextuelle,
 .travaux-popup-autocollants {
     position: fixed;
     background: white;
-    border: 1px solid var(--gris-clair, #e5e5e5);
-    border-radius: 10px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+    border: 1px solid var(--bordure-claire);
+    border-radius: var(--radius-grand);
+    box-shadow: var(--shadow-fort);
     padding: 12px 14px;
     z-index: 10000;
 }
@@ -13462,7 +13497,7 @@ body.mode-assiste .btn-aide-contextuelle,
 .travaux-autocollants-label {
     font-size: 0.65rem;
     text-transform: uppercase;
-    color: var(--gris-fonce, #666);
+    color: var(--gris-moyen);
     letter-spacing: 0.5px;
     margin-bottom: 4px;
     margin-top: 8px;
@@ -13484,12 +13519,12 @@ body.mode-assiste .btn-aide-contextuelle,
     align-items: center;
     padding: 6px 4px;
     cursor: pointer;
-    border-radius: 6px;
+    border-radius: var(--radius-moyen);
     min-width: 0;
 }
 
 .travaux-autocollant-item:hover {
-    background: rgba(0,0,0,0.06);
+    background: var(--bleu-tres-pale);
 }
 
 .travaux-autocollant-item img {
@@ -13513,8 +13548,8 @@ body.mode-assiste .btn-aide-contextuelle,
 .travaux-revision-stats {
     margin: 12px 0;
     padding: 12px;
-    background: #f8f9fa;
-    border-radius: 8px;
+    background: var(--gris-tres-pale);
+    border-radius: var(--radius-moyen);
 }
 
 .travaux-revision-stats p {
@@ -13538,7 +13573,7 @@ body.mode-assiste .btn-aide-contextuelle,
 
 .travaux-revision-criteres li {
     padding: 8px 0;
-    border-bottom: 1px solid var(--gris-clair, #e5e5e5);
+    border-bottom: 1px solid var(--bordure-claire);
     font-size: 0.85rem;
 }
 
@@ -13548,7 +13583,7 @@ body.mode-assiste .btn-aide-contextuelle,
     justify-content: flex-end;
     margin-top: 16px;
     padding-top: 12px;
-    border-top: 1px solid var(--gris-clair, #e5e5e5);
+    border-top: 1px solid var(--bordure-claire);
 }
 
 /* --- Undo/Redo --- */
@@ -13556,8 +13591,8 @@ body.mode-assiste .btn-aide-contextuelle,
     display: flex;
     gap: 6px;
     padding: 6px 12px;
-    background: #fafafa;
-    border-top: 1px solid var(--gris-clair, #e5e5e5);
+    background: var(--gris-tres-pale);
+    border-top: 1px solid var(--bordure-claire);
 }
 
 /* --- Archivage --- */
@@ -13569,8 +13604,8 @@ body.mode-assiste .btn-aide-contextuelle,
 }
 
 .travaux-archivage-carte {
-    border: 1px solid var(--gris-clair, #e5e5e5);
-    border-radius: 10px;
+    border: 1px solid var(--bordure-claire);
+    border-radius: var(--radius-grand);
     padding: 20px;
 }
 
@@ -13595,23 +13630,23 @@ body.mode-assiste .btn-aide-contextuelle,
 .travaux-quota-section {
     margin-top: 24px;
     padding: 16px;
-    border: 1px solid var(--gris-clair, #e5e5e5);
-    border-radius: 10px;
+    border: 1px solid var(--bordure-claire);
+    border-radius: var(--radius-grand);
 }
 
 .travaux-quota-barre-container {
     width: 100%;
     height: 12px;
-    background: var(--gris-clair, #e5e5e5);
-    border-radius: 6px;
+    background: var(--bordure-claire);
+    border-radius: var(--radius-moyen);
     overflow: hidden;
     margin: 8px 0;
 }
 
 .travaux-quota-barre {
     height: 100%;
-    background: var(--bleu-clair, #065dbb);
-    border-radius: 6px;
+    background: var(--bleu-clair);
+    border-radius: var(--radius-moyen);
     transition: width 0.3s;
 }
 
@@ -13628,7 +13663,7 @@ body.mode-assiste .btn-aide-contextuelle,
 }
 
 #travaux-split-travail {
-    border-right: 2px solid var(--gris-clair, #e5e5e5);
+    border-right: 2px solid var(--bordure-claire);
 }
 
 /* --- Import header --- */
@@ -13655,7 +13690,7 @@ body.mode-assiste .btn-aide-contextuelle,
         min-width: 100%;
         max-height: 200px;
         border-right: none;
-        border-bottom: 1px solid var(--gris-clair, #e5e5e5);
+        border-bottom: 1px solid var(--bordure-claire);
         transition: max-height 0.3s ease, opacity 0.2s ease;
     }
 
@@ -13699,21 +13734,21 @@ body.mode-assiste .btn-aide-contextuelle,
     align-items: center;
     gap: 12px;
     padding: 10px 16px;
-    background: rgba(6, 93, 187, 0.05);
-    border: 1px solid rgba(6, 93, 187, 0.15);
+    background: var(--bleu-tres-pale);
+    border: 1px solid var(--bleu-pale);
     border-radius: var(--radius-moyen);
     margin-bottom: 12px;
 }
 
 .travaux-fsapi-statut.actif {
-    color: #28a745;
+    color: var(--vert-succes);
     font-weight: 500;
 }
 
 .travaux-mode-stockage {
     padding: 2px 8px;
-    background: rgba(6, 93, 187, 0.1);
-    border-radius: 4px;
+    background: var(--bleu-pale);
+    border-radius: var(--radius-petit);
     font-size: 12px;
 }
 
@@ -13723,8 +13758,8 @@ body.mode-assiste .btn-aide-contextuelle,
     align-items: center;
     gap: 12px;
     padding: 12px 16px;
-    background: rgba(255, 193, 7, 0.1);
-    border: 1px solid rgba(255, 193, 7, 0.3);
+    background: var(--alerte-fond-attention);
+    border: 1px solid var(--alerte-bordure-attention);
     border-radius: var(--radius-moyen);
     margin-top: 12px;
 }

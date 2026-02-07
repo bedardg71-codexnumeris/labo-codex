@@ -221,9 +221,9 @@
                             <span id="travaux-nom-fichier" class="travaux-nom-fichier">Aucun fichier ouvert</span>
                         </div>
                         <div class="travaux-toolbar-centre">
-                            <button id="travaux-btn-page-prec" class="btn-icon" onclick="travauxVisionneuse.pagePrecedente()" disabled title="Page precedente">&lt;</button>
+                            <button id="travaux-btn-page-prec" class="btn-icon" onclick="travauxVisionneuse.pagePrecedente()" disabled title="Page precedente">&#x2190;</button>
                             <span id="travaux-indicateur-page">-- / --</span>
-                            <button id="travaux-btn-page-suiv" class="btn-icon" onclick="travauxVisionneuse.pageSuivante()" disabled title="Page suivante">&gt;</button>
+                            <button id="travaux-btn-page-suiv" class="btn-icon" onclick="travauxVisionneuse.pageSuivante()" disabled title="Page suivante">&#x2192;</button>
                         </div>
                         <div class="travaux-toolbar-droite">
                             <button class="btn btn-petit" onclick="travauxVisionneuse.zoomPleineLargeur()" title="Ajuster a la largeur du conteneur">Pleine largeur</button>

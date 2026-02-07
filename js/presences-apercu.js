@@ -376,4 +376,10 @@ function setStatText(id, valeur) {
 }
 
 
+/* ===============================
+   EXPORTS GLOBAUX
+   =============================== */
+
+window.chargerApercuPresences = chargerApercuPresences;
+
 })();
