@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 6 février 2026 (Beta 97.1 - Build 0206-1315)
+> **Derniere mise a jour** : 7 février 2026 (Beta 97.2 - Build 0207-1045)
 
 ---
 
@@ -663,6 +663,37 @@
 - [ ] **#22** Mettre a jour fichier noms_stables.json
   - Verifier que tous les identifiants critiques sont documentes
   - Ajouter les nouveaux noms proteges
+
+---
+
+## Complete (Beta 97.2 - 7 février 2026)
+
+- [x] **#110** Outil d'annotation — Panneau retractable avec memoire de session
+  - Bouton toggle avec fleche directionnelle (◀/▶) visible des que la sidebar est repliee
+  - Memoire manuelle via `sessionStorage` : la sidebar reste repliee si l'utilisateur l'a repliee
+  - Sortie d'annotation ne redéploie plus la sidebar si manuellement repliee
+  - **Fichier** : `js/travaux-ui.js`
+
+- [x] **#111** Outil d'annotation — Mode selection/edition des annotations
+  - Nouvel outil Selection (☝️) en position 0 de la palette
+  - Hit-testing reutilisable (`trouverAnnotationAuPoint`) : stickers > texte > formes > traits
+  - Cadre pointille bleu + 4 poignees blanches aux coins pour selection visuelle
+  - Deplacement : traits, formes, texte, stickers (drag dans la bbox)
+  - Redimensionnement V1 : formes, stickers, texte (traits = deplacement seulement)
+  - Suppression via Delete/Backspace, deselection via Escape
+  - Undo/redo pour modifications (`modification-annotation` avec avant/apres)
+  - Curseur contextuel (move, nw-resize, etc.)
+  - Apple Pencil : le mode selection accepte le touch (doigt) pour selection tactile iPad
+  - Gomme refactorisee pour utiliser le hit-testing partage
+  - **Fichiers** : `js/travaux-annotation.js`, `js/travaux-outils.js`
+
+- [x] **#112** Outil d'annotation — Export PDF annote dans archives ZIP
+  - Nouvelle fonction `rendrePDFAvecAnnotations()` partagee (export-pdf)
+  - Remplacement du `return null` pour les PDF dans `genererFichierAnnote()`
+  - Consolidation du code duplique : `dessinerAnnotationsSurCanvas` (91 lignes) → wrapper 3 lignes
+  - Le rendu partage inclut les stickers (manquant dans l'ancien code archivage)
+  - Callback de progression pour le rendu PDF multi-pages
+  - **Fichiers** : `js/travaux-export-pdf.js`, `js/travaux-archivage.js`
 
 ---
 

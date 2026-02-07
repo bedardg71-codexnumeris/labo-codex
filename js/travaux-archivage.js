@@ -203,8 +203,13 @@
             return await aplatirAnnotationsImage(blob, annotation);
         }
 
-        // Pour les PDF, retourner null pour l'instant
-        // (aplatir un PDF requiert la reconstruction via PDF.js + canvas)
+        // PDF : utiliser le moteur d'export PDF partage
+        if (fichier.typeMIME === 'application/pdf') {
+            return await travauxExportPDF.rendrePDFAvecAnnotations(blob, annotation, {
+                format: 'pdf', scale: 1.5, quality: 0.85
+            });
+        }
+
         return null;
     }
 
@@ -252,102 +257,11 @@
 
     /**
      * Dessine des annotations sur un canvas
-     * @param {CanvasRenderingContext2D} ctx - Contexte 2D
-     * @param {Object} donnees - Donnees de page
-     * @param {number} w - Largeur
-     * @param {number} h - Hauteur
+     * Delegue a la fonction partagee de travaux-export-pdf.js
+     * (inclut le rendu des stickers)
      */
     function dessinerAnnotationsSurCanvas(ctx, donnees, w, h) {
-        // Traits
-        for (const trait of (donnees.strokes || [])) {
-            if (!trait.points || trait.points.length < 2) continue;
-
-            ctx.save();
-            ctx.globalAlpha = trait.opacity || 1.0;
-            ctx.strokeStyle = trait.color;
-            ctx.lineWidth = trait.lineWidth;
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-
-            ctx.beginPath();
-            ctx.moveTo(trait.points[0].x * w, trait.points[0].y * h);
-
-            for (let i = 1; i < trait.points.length; i++) {
-                ctx.lineTo(trait.points[i].x * w, trait.points[i].y * h);
-            }
-
-            ctx.stroke();
-            ctx.restore();
-        }
-
-        // Formes
-        for (const forme of (donnees.shapes || [])) {
-            ctx.save();
-            ctx.strokeStyle = forme.color;
-            ctx.lineWidth = forme.lineWidth || 2;
-
-            const x1 = forme.x1 * w, y1 = forme.y1 * h;
-            const x2 = forme.x2 * w, y2 = forme.y2 * h;
-
-            switch (forme.type) {
-                case 'rectangle':
-                    ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
-                    break;
-                case 'cercle': {
-                    const cx = (x1 + x2) / 2, cy = (y1 + y2) / 2;
-                    const rx = Math.abs(x2 - x1) / 2, ry = Math.abs(y2 - y1) / 2;
-                    ctx.beginPath();
-                    ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
-                    ctx.stroke();
-                    break;
-                }
-                case 'fleche': {
-                    const headLen = 15;
-                    const angle = Math.atan2(y2 - y1, x2 - x1);
-                    ctx.beginPath();
-                    ctx.moveTo(x1, y1);
-                    ctx.lineTo(x2, y2);
-                    ctx.stroke();
-                    ctx.beginPath();
-                    ctx.moveTo(x2, y2);
-                    ctx.lineTo(x2 - headLen * Math.cos(angle - Math.PI / 6), y2 - headLen * Math.sin(angle - Math.PI / 6));
-                    ctx.moveTo(x2, y2);
-                    ctx.lineTo(x2 - headLen * Math.cos(angle + Math.PI / 6), y2 - headLen * Math.sin(angle + Math.PI / 6));
-                    ctx.stroke();
-                    break;
-                }
-                case 'crochet': {
-                    const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
-                    const sz = Math.min(Math.abs(x2 - x1), Math.abs(y2 - y1)) / 2;
-                    ctx.lineWidth = 3;
-                    ctx.beginPath();
-                    ctx.moveTo(mx - sz, my);
-                    ctx.lineTo(mx - sz * 0.3, my + sz * 0.8);
-                    ctx.lineTo(mx + sz, my - sz * 0.6);
-                    ctx.stroke();
-                    break;
-                }
-                case 'croix':
-                    ctx.lineWidth = 3;
-                    ctx.beginPath();
-                    ctx.moveTo(x1, y1);
-                    ctx.lineTo(x2, y2);
-                    ctx.moveTo(x2, y1);
-                    ctx.lineTo(x1, y2);
-                    ctx.stroke();
-                    break;
-            }
-            ctx.restore();
-        }
-
-        // Textes
-        for (const texte of (donnees.textAnnotations || [])) {
-            ctx.save();
-            ctx.font = `${texte.fontSize || 14}px sans-serif`;
-            ctx.fillStyle = texte.color || '#FF0000';
-            ctx.fillText(texte.text, texte.x * w, texte.y * h);
-            ctx.restore();
-        }
+        travauxExportPDF.dessinerAnnotationsSurCtx(ctx, w, h, donnees);
     }
 
     /* ===============================

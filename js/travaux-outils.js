@@ -36,6 +36,13 @@
        =============================== */
 
     const OUTILS = {
+        selection: {
+            id: 'selection',
+            nom: 'Selection',
+            icone: '☝️',
+            curseur: 'default',
+            type: 'selection'
+        },
         stylo: {
             id: 'stylo',
             nom: 'Stylo',
@@ -387,7 +394,7 @@
         html += '<div class="travaux-palette-label">Outils</div>';
         html += '<div class="travaux-palette-outils">';
 
-        const outilsDessin = ['stylo', 'surligneur', 'gomme', 'texte'];
+        const outilsDessin = ['selection', 'stylo', 'surligneur', 'gomme', 'texte'];
         outilsDessin.forEach(id => {
             const outil = OUTILS[id];
             const actif = outilActif === id ? ' actif' : '';
