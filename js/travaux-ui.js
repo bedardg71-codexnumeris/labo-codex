@@ -21,6 +21,7 @@
 
     let moduleInitialise = false;
     let vueCoteACote = false;
+    let sidebarManuelReplie = false;
 
     /* ===============================
        SCROLL VIRTUEL
@@ -221,6 +222,18 @@
             </div>
         `;
 
+        // Restaurer l'etat de la sidebar depuis la session
+        sidebarManuelReplie = sessionStorage.getItem('travaux-sidebar-replie') === '1';
+        if (sidebarManuelReplie) {
+            const sidebar = document.getElementById('travaux-sidebar');
+            const btnToggle = document.getElementById('travaux-btn-toggle-sidebar');
+            if (sidebar) sidebar.classList.add('replie');
+            if (btnToggle) {
+                btnToggle.classList.add('visible');
+                btnToggle.innerHTML = '&#x25B6;';
+            }
+        }
+
         // Configurer la visionneuse
         const conteneurDoc = document.getElementById('travaux-conteneur-document');
         travauxVisionneuse.setConteneur(conteneurDoc);
@@ -238,19 +251,35 @@
             document.getElementById('travaux-btn-annoter').classList.add('actif');
             document.getElementById('travaux-undo-redo').classList.remove('u-hide');
             // Replier la sidebar pour maximiser l'espace d'annotation
-            document.getElementById('travaux-sidebar')?.classList.add('replie');
+            const sidebar = document.getElementById('travaux-sidebar');
+            if (sidebar) sidebar.classList.add('replie');
             const btnToggle = document.getElementById('travaux-btn-toggle-sidebar');
-            if (btnToggle) btnToggle.classList.add('visible');
+            if (btnToggle) {
+                btnToggle.classList.add('visible');
+                btnToggle.innerHTML = '&#x25B6;';
+            }
         });
 
         window.addEventListener('travaux-annotation-desactivee', () => {
             document.getElementById('travaux-btn-annoter').textContent = 'Annoter';
             document.getElementById('travaux-btn-annoter').classList.remove('actif');
             document.getElementById('travaux-undo-redo').classList.add('u-hide');
-            // Redeployer la sidebar
-            document.getElementById('travaux-sidebar')?.classList.remove('replie');
+            // Redeployer la sidebar seulement si pas manuellement repliee
+            const sidebar = document.getElementById('travaux-sidebar');
             const btnToggle = document.getElementById('travaux-btn-toggle-sidebar');
-            if (btnToggle) btnToggle.classList.remove('visible');
+            if (!sidebarManuelReplie) {
+                if (sidebar) sidebar.classList.remove('replie');
+                if (btnToggle) {
+                    btnToggle.classList.remove('visible');
+                    btnToggle.innerHTML = '&#x25C0;';
+                }
+            } else {
+                // Sidebar reste repliee, bouton reste visible
+                if (btnToggle) {
+                    btnToggle.classList.add('visible');
+                    btnToggle.innerHTML = '&#x25B6;';
+                }
+            }
         });
     }
 
@@ -552,7 +581,7 @@
     }
 
     /**
-     * Bascule la sidebar repliee/deployee (pendant le mode annotation)
+     * Bascule la sidebar repliee/deployee
      */
     function toggleSidebar() {
         const sidebar = document.getElementById('travaux-sidebar');
@@ -560,9 +589,17 @@
         if (!sidebar) return;
 
         sidebar.classList.toggle('replie');
+        const estReplie = sidebar.classList.contains('replie');
+
+        // Mettre a jour la fleche directionnelle
         if (btnToggle) {
-            btnToggle.classList.toggle('visible', sidebar.classList.contains('replie'));
+            btnToggle.classList.toggle('visible', estReplie);
+            btnToggle.innerHTML = estReplie ? '&#x25B6;' : '&#x25C0;';
         }
+
+        // Memoriser le choix manuel
+        sidebarManuelReplie = estReplie;
+        sessionStorage.setItem('travaux-sidebar-replie', estReplie ? '1' : '0');
     }
 
     /**

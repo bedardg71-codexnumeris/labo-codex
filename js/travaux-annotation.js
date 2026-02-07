@@ -42,6 +42,13 @@
     let formeEnCours = null;
     let formeOrigine = null;
 
+    // Mode selection
+    let annotationSelectionnee = null;  // { type, index, data, bbox }
+    let poigneeActive = null;           // null | 'move' | 'nw' | 'ne' | 'sw' | 'se'
+    let deplacementOrigine = null;      // { x, y }
+    let dimensionsOriginales = null;    // bbox avant transformation
+    let donneesAvantModif = null;       // snapshot pour undo
+
     /* ===============================
        INITIALISATION
        =============================== */
@@ -152,6 +159,10 @@
         sauvegarderAnnotation();
         detacherEvenements();
         annotationActive = false;
+
+        // Deselectionner
+        annotationSelectionnee = null;
+        poigneeActive = null;
 
         // Garder le canvas visible en lecture seule (annotations restent affichees)
         if (canvasAnnotation) {
@@ -279,9 +290,16 @@
      * Debut du trait / interaction
      */
     function onPointerDown(e) {
-        // Rejet de paume: ignorer le touch en mode annotation (seulement pen et mouse)
-        if (e.pointerType === 'touch') {
-            return;
+        const outil = travauxOutils.getOutilActif();
+
+        // Mode selection : accepter touch (doigt) en plus de pen/mouse (Apple Pencil exception)
+        if (outil.type === 'selection') {
+            if (e.pointerType !== 'pen' && e.pointerType !== 'mouse' && e.pointerType !== 'touch') return;
+        } else {
+            // Rejet de paume: ignorer le touch en mode annotation (seulement pen et mouse)
+            if (e.pointerType === 'touch') {
+                return;
+            }
         }
 
         e.preventDefault();
@@ -294,7 +312,53 @@
         const xNorm = x / canvasAnnotation.width;
         const yNorm = y / canvasAnnotation.height;
 
-        const outilActifId = travauxOutils.getOutilActif().id;
+        const outilActifId = outil.id;
+
+        // Mode selection
+        if (outil.type === 'selection') {
+            // Verifier si on clique sur une poignee de la selection existante
+            if (annotationSelectionnee) {
+                const poignee = detecterPoignee(xNorm, yNorm, annotationSelectionnee.bbox);
+                if (poignee) {
+                    // Redimensionnement (sauf traits)
+                    if (annotationSelectionnee.type !== 'stroke') {
+                        poigneeActive = poignee;
+                        deplacementOrigine = { x: xNorm, y: yNorm };
+                        dimensionsOriginales = { ...annotationSelectionnee.bbox };
+                        donneesAvantModif = clonerDonneesAnnotation(annotationSelectionnee);
+                        enDessin = true;
+                        return;
+                    }
+                }
+
+                // Verifier si on clique dans la bbox (deplacement)
+                const bbox = annotationSelectionnee.bbox;
+                if (xNorm >= bbox.x1 && xNorm <= bbox.x2 && yNorm >= bbox.y1 && yNorm <= bbox.y2) {
+                    poigneeActive = 'move';
+                    deplacementOrigine = { x: xNorm, y: yNorm };
+                    dimensionsOriginales = { ...annotationSelectionnee.bbox };
+                    donneesAvantModif = clonerDonneesAnnotation(annotationSelectionnee);
+                    enDessin = true;
+                    return;
+                }
+            }
+
+            // Nouveau hit-test
+            const hit = trouverAnnotationAuPoint(xNorm, yNorm);
+            if (hit) {
+                annotationSelectionnee = hit;
+                poigneeActive = 'move';
+                deplacementOrigine = { x: xNorm, y: yNorm };
+                dimensionsOriginales = { ...hit.bbox };
+                donneesAvantModif = clonerDonneesAnnotation(hit);
+                enDessin = true;
+                reRendreAnnotations();
+            } else {
+                // Clic dans le vide -> deselectionner
+                deselectionner();
+            }
+            return;
+        }
 
         // Mode tampon : poser un autocollant
         if (outilActifId === 'tampon' || travauxOutils.getAutocollantActif()) {
@@ -304,8 +368,6 @@
             }
             return;
         }
-
-        const outil = travauxOutils.getOutilActif();
 
         if (outil.id === 'gomme') {
             effacerTraitAuContact(xNorm, yNorm);
@@ -359,10 +421,7 @@
      * Mouvement du stylet
      */
     function onPointerMove(e) {
-        if (!enDessin) return;
-        if (e.pointerType === 'touch') return;
-
-        e.preventDefault();
+        const outil = travauxOutils.getOutilActif();
 
         const rect = canvasAnnotation.getBoundingClientRect();
         const x = e.clientX - rect.left;
@@ -370,7 +429,38 @@
         const xNorm = x / canvasAnnotation.width;
         const yNorm = y / canvasAnnotation.height;
 
-        const outil = travauxOutils.getOutilActif();
+        // Mode selection : curseur contextuel meme sans drag
+        if (outil.type === 'selection' && !enDessin) {
+            mettreAJourCurseurSelection(xNorm, yNorm);
+            return;
+        }
+
+        if (!enDessin) return;
+
+        // Mode selection : drag en cours
+        if (outil.type === 'selection') {
+            if (e.pointerType !== 'pen' && e.pointerType !== 'mouse' && e.pointerType !== 'touch') return;
+            e.preventDefault();
+
+            if (!annotationSelectionnee || !deplacementOrigine) return;
+
+            const dx = xNorm - deplacementOrigine.x;
+            const dy = yNorm - deplacementOrigine.y;
+
+            if (poigneeActive === 'move') {
+                appliquerDeplacement(annotationSelectionnee, dx, dy);
+                deplacementOrigine = { x: xNorm, y: yNorm };
+            } else if (poigneeActive) {
+                appliquerRedimensionnement(annotationSelectionnee, poigneeActive, xNorm, yNorm);
+            }
+
+            reRendreAnnotations();
+            return;
+        }
+
+        if (e.pointerType === 'touch') return;
+
+        e.preventDefault();
 
         // Gomme en mode glissant
         if (outil.id === 'gomme') {
@@ -426,6 +516,37 @@
      */
     function onPointerUp(e) {
         if (!enDessin) return;
+
+        const outil = travauxOutils.getOutilActif();
+
+        // Mode selection : finaliser le drag
+        if (outil.type === 'selection') {
+            if (e.pointerType !== 'pen' && e.pointerType !== 'mouse' && e.pointerType !== 'touch') return;
+            enDessin = false;
+
+            if (annotationSelectionnee && donneesAvantModif && poigneeActive) {
+                // Verifier si les donnees ont change
+                const apres = clonerDonneesAnnotation(annotationSelectionnee);
+                const avantStr = JSON.stringify(donneesAvantModif);
+                const apresStr = JSON.stringify(apres);
+                if (avantStr !== apresStr) {
+                    empilerUndo('modification-annotation', {
+                        type: annotationSelectionnee.type,
+                        index: annotationSelectionnee.index,
+                        avant: donneesAvantModif,
+                        apres: apres
+                    });
+                    planifierSauvegarde();
+                }
+            }
+
+            poigneeActive = null;
+            deplacementOrigine = null;
+            dimensionsOriginales = null;
+            donneesAvantModif = null;
+            return;
+        }
+
         if (e.pointerType === 'touch') return;
 
         enDessin = false;
@@ -467,6 +588,20 @@
      */
     function onKeyDown(e) {
         if (!annotationActive) return;
+
+        // Delete/Backspace : supprimer l'annotation selectionnee
+        if ((e.key === 'Delete' || e.key === 'Backspace') && annotationSelectionnee) {
+            e.preventDefault();
+            supprimerSelection();
+            return;
+        }
+
+        // Escape : deselectionner
+        if (e.key === 'Escape' && annotationSelectionnee) {
+            e.preventDefault();
+            deselectionner();
+            return;
+        }
 
         // Ctrl/Cmd + Z : Undo
         if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
@@ -542,59 +677,42 @@
        =============================== */
 
     /**
-     * Efface le trait le plus proche du point donne
+     * Efface l'annotation la plus proche du point donne
+     * Utilise le hit-testing reutilisable
      * @param {number} xNorm - X normalise
      * @param {number} yNorm - Y normalise
      */
     function effacerTraitAuContact(xNorm, yNorm) {
+        const hit = trouverAnnotationAuPoint(xNorm, yNorm);
+        if (!hit) return;
+
         const donneesPage = obtenirDonneesPage();
-        const seuil = 0.02; // Distance de detection
 
-        // Chercher un trait a effacer
-        for (let i = donneesPage.strokes.length - 1; i >= 0; i--) {
-            const trait = donneesPage.strokes[i];
-            for (const point of trait.points) {
-                const dist = Math.sqrt(Math.pow(point.x - xNorm, 2) + Math.pow(point.y - yNorm, 2));
-                if (dist < seuil) {
-                    // Supprimer le trait
-                    const supprime = donneesPage.strokes.splice(i, 1)[0];
-                    empilerUndo('suppression-trait', supprime);
-                    reRendreAnnotations();
-                    planifierSauvegarde();
-                    return;
-                }
+        switch (hit.type) {
+            case 'stroke': {
+                const supprime = donneesPage.strokes.splice(hit.index, 1)[0];
+                empilerUndo('suppression-trait', supprime);
+                break;
             }
-        }
-
-        // Chercher une forme a effacer
-        for (let i = donneesPage.shapes.length - 1; i >= 0; i--) {
-            const forme = donneesPage.shapes[i];
-            const cx = (forme.x1 + forme.x2) / 2;
-            const cy = (forme.y1 + forme.y2) / 2;
-            const dist = Math.sqrt(Math.pow(cx - xNorm, 2) + Math.pow(cy - yNorm, 2));
-            if (dist < seuil * 3) {
-                const supprime = donneesPage.shapes.splice(i, 1)[0];
+            case 'shape': {
+                const supprime = donneesPage.shapes.splice(hit.index, 1)[0];
                 empilerUndo('suppression-forme', supprime);
-                reRendreAnnotations();
-                planifierSauvegarde();
-                return;
+                break;
+            }
+            case 'text': {
+                const supprime = donneesPage.textAnnotations.splice(hit.index, 1)[0];
+                empilerUndo('suppression-texte', supprime);
+                break;
+            }
+            case 'sticker': {
+                const supprime = donneesPage.stickers.splice(hit.index, 1)[0];
+                empilerUndo('suppression-autocollant', supprime);
+                break;
             }
         }
 
-        // Chercher un autocollant a effacer (hit-test bounding box)
-        if (donneesPage.stickers) {
-            for (let i = donneesPage.stickers.length - 1; i >= 0; i--) {
-                const stk = donneesPage.stickers[i];
-                if (xNorm >= stk.x && xNorm <= stk.x + stk.width &&
-                    yNorm >= stk.y && yNorm <= stk.y + stk.height) {
-                    const supprime = donneesPage.stickers.splice(i, 1)[0];
-                    empilerUndo('suppression-autocollant', supprime);
-                    reRendreAnnotations();
-                    planifierSauvegarde();
-                    return;
-                }
-            }
-        }
+        reRendreAnnotations();
+        planifierSauvegarde();
     }
 
     /* ===============================
@@ -659,6 +777,345 @@
     }
 
     /* ===============================
+       SELECTION : HIT-TESTING & BOUNDING BOX
+       =============================== */
+
+    /**
+     * Calcule la bounding box normalisee d'une annotation
+     * @param {string} type - 'stroke' | 'shape' | 'text' | 'sticker'
+     * @param {Object} data - Donnees de l'annotation
+     * @returns {{ x1: number, y1: number, x2: number, y2: number }}
+     */
+    function calculerBBox(type, data) {
+        switch (type) {
+            case 'stroke': {
+                let minX = 1, minY = 1, maxX = 0, maxY = 0;
+                const pad = (data.lineWidth || 2) / (canvasAnnotation?.width || 1000);
+                for (const p of data.points) {
+                    if (p.x < minX) minX = p.x;
+                    if (p.y < minY) minY = p.y;
+                    if (p.x > maxX) maxX = p.x;
+                    if (p.y > maxY) maxY = p.y;
+                }
+                return { x1: minX - pad, y1: minY - pad, x2: maxX + pad, y2: maxY + pad };
+            }
+            case 'shape':
+                return {
+                    x1: Math.min(data.x1, data.x2),
+                    y1: Math.min(data.y1, data.y2),
+                    x2: Math.max(data.x1, data.x2),
+                    y2: Math.max(data.y1, data.y2)
+                };
+            case 'text': {
+                const fontSize = data.fontSize || 14;
+                const w = canvasAnnotation?.width || 1000;
+                const h = canvasAnnotation?.height || 1000;
+                // Estimer la largeur du texte
+                const ctx = ctxAnnotation || document.createElement('canvas').getContext('2d');
+                ctx.font = `${fontSize}px sans-serif`;
+                const textW = ctx.measureText(data.text).width / w;
+                const textH = fontSize / h;
+                return { x1: data.x, y1: data.y - textH, x2: data.x + textW, y2: data.y + textH * 0.3 };
+            }
+            case 'sticker':
+                return { x1: data.x, y1: data.y, x2: data.x + data.width, y2: data.y + data.height };
+            default:
+                return { x1: 0, y1: 0, x2: 0, y2: 0 };
+        }
+    }
+
+    /**
+     * Trouve l'annotation la plus proche du point (topmost first)
+     * @param {number} xNorm - X normalise (0-1)
+     * @param {number} yNorm - Y normalise (0-1)
+     * @returns {{ type: string, index: number, data: Object, bbox: Object }|null}
+     */
+    function trouverAnnotationAuPoint(xNorm, yNorm) {
+        const donneesPage = obtenirDonneesPage();
+        const seuil = 0.02;
+
+        // Stickers (topmost = dernier dans le tableau)
+        if (donneesPage.stickers) {
+            for (let i = donneesPage.stickers.length - 1; i >= 0; i--) {
+                const stk = donneesPage.stickers[i];
+                if (xNorm >= stk.x && xNorm <= stk.x + stk.width &&
+                    yNorm >= stk.y && yNorm <= stk.y + stk.height) {
+                    return { type: 'sticker', index: i, data: stk, bbox: calculerBBox('sticker', stk) };
+                }
+            }
+        }
+
+        // Textes
+        for (let i = donneesPage.textAnnotations.length - 1; i >= 0; i--) {
+            const texte = donneesPage.textAnnotations[i];
+            const bbox = calculerBBox('text', texte);
+            if (xNorm >= bbox.x1 && xNorm <= bbox.x2 && yNorm >= bbox.y1 && yNorm <= bbox.y2) {
+                return { type: 'text', index: i, data: texte, bbox: bbox };
+            }
+        }
+
+        // Formes
+        for (let i = donneesPage.shapes.length - 1; i >= 0; i--) {
+            const forme = donneesPage.shapes[i];
+            const bbox = calculerBBox('shape', forme);
+            // Proximite des bords (pas de l'interieur)
+            const nearX = Math.min(Math.abs(xNorm - bbox.x1), Math.abs(xNorm - bbox.x2));
+            const nearY = Math.min(Math.abs(yNorm - bbox.y1), Math.abs(yNorm - bbox.y2));
+            const insideX = xNorm >= bbox.x1 - seuil && xNorm <= bbox.x2 + seuil;
+            const insideY = yNorm >= bbox.y1 - seuil && yNorm <= bbox.y2 + seuil;
+            if (insideX && insideY && (nearX < seuil * 2 || nearY < seuil * 2)) {
+                return { type: 'shape', index: i, data: forme, bbox: bbox };
+            }
+            // Pour les symboles (crochet, croix), accepter aussi le centre
+            if ((forme.type === 'crochet' || forme.type === 'croix') && insideX && insideY) {
+                return { type: 'shape', index: i, data: forme, bbox: bbox };
+            }
+        }
+
+        // Traits
+        for (let i = donneesPage.strokes.length - 1; i >= 0; i--) {
+            const trait = donneesPage.strokes[i];
+            for (const point of trait.points) {
+                const dist = Math.sqrt(Math.pow(point.x - xNorm, 2) + Math.pow(point.y - yNorm, 2));
+                if (dist < seuil) {
+                    return { type: 'stroke', index: i, data: trait, bbox: calculerBBox('stroke', trait) };
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Detecte si le point est sur une poignee de la selection
+     * @returns {string|null} 'nw' | 'ne' | 'sw' | 'se' | null
+     */
+    function detecterPoignee(xNorm, yNorm, bbox) {
+        const taille = 12 / (canvasAnnotation?.width || 1000); // 12px en normalise
+        const coins = {
+            nw: { x: bbox.x1, y: bbox.y1 },
+            ne: { x: bbox.x2, y: bbox.y1 },
+            sw: { x: bbox.x1, y: bbox.y2 },
+            se: { x: bbox.x2, y: bbox.y2 }
+        };
+
+        for (const [id, coin] of Object.entries(coins)) {
+            if (Math.abs(xNorm - coin.x) < taille && Math.abs(yNorm - coin.y) < taille) {
+                return id;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Dessine le cadre de selection et les poignees
+     */
+    function dessinerSelection() {
+        if (!annotationSelectionnee || !ctxAnnotation || !canvasAnnotation) return;
+
+        const w = canvasAnnotation.width;
+        const h = canvasAnnotation.height;
+        const bbox = annotationSelectionnee.bbox;
+
+        const x = bbox.x1 * w;
+        const y = bbox.y1 * h;
+        const bw = (bbox.x2 - bbox.x1) * w;
+        const bh = (bbox.y2 - bbox.y1) * h;
+
+        ctxAnnotation.save();
+
+        // Cadre pointille bleu
+        ctxAnnotation.strokeStyle = '#065dbb';
+        ctxAnnotation.lineWidth = 2;
+        ctxAnnotation.setLineDash([6, 4]);
+        ctxAnnotation.strokeRect(x, y, bw, bh);
+        ctxAnnotation.setLineDash([]);
+
+        // Poignees aux 4 coins (8px, blanc avec bordure bleue)
+        const taille = 8;
+        const coins = [
+            { x: x, y: y },
+            { x: x + bw, y: y },
+            { x: x, y: y + bh },
+            { x: x + bw, y: y + bh }
+        ];
+
+        for (const coin of coins) {
+            ctxAnnotation.fillStyle = '#ffffff';
+            ctxAnnotation.strokeStyle = '#065dbb';
+            ctxAnnotation.lineWidth = 2;
+            ctxAnnotation.fillRect(coin.x - taille / 2, coin.y - taille / 2, taille, taille);
+            ctxAnnotation.strokeRect(coin.x - taille / 2, coin.y - taille / 2, taille, taille);
+        }
+
+        ctxAnnotation.restore();
+    }
+
+    /**
+     * Deselectionne l'annotation active
+     */
+    function deselectionner() {
+        annotationSelectionnee = null;
+        poigneeActive = null;
+        deplacementOrigine = null;
+        dimensionsOriginales = null;
+        donneesAvantModif = null;
+        reRendreAnnotations();
+    }
+
+    /**
+     * Applique un deplacement a une annotation
+     */
+    function appliquerDeplacement(sel, dx, dy) {
+        switch (sel.type) {
+            case 'stroke':
+                for (const p of sel.data.points) {
+                    p.x += dx;
+                    p.y += dy;
+                }
+                break;
+            case 'shape':
+                sel.data.x1 += dx;
+                sel.data.y1 += dy;
+                sel.data.x2 += dx;
+                sel.data.y2 += dy;
+                break;
+            case 'text':
+                sel.data.x += dx;
+                sel.data.y += dy;
+                break;
+            case 'sticker':
+                sel.data.x += dx;
+                sel.data.y += dy;
+                break;
+        }
+        // Recalculer la bbox
+        sel.bbox = calculerBBox(sel.type, sel.data);
+    }
+
+    /**
+     * Applique un redimensionnement (formes, stickers, texte seulement)
+     */
+    function appliquerRedimensionnement(sel, poignee, xNorm, yNorm) {
+        if (sel.type === 'stroke') return; // Pas de resize pour les traits en V1
+
+        const bbox = dimensionsOriginales;
+
+        if (sel.type === 'shape') {
+            switch (poignee) {
+                case 'nw': sel.data.x1 = xNorm; sel.data.y1 = yNorm; break;
+                case 'ne': sel.data.x2 = xNorm; sel.data.y1 = yNorm; break;
+                case 'sw': sel.data.x1 = xNorm; sel.data.y2 = yNorm; break;
+                case 'se': sel.data.x2 = xNorm; sel.data.y2 = yNorm; break;
+            }
+        } else if (sel.type === 'sticker') {
+            switch (poignee) {
+                case 'nw':
+                    sel.data.width = (bbox.x2 - xNorm);
+                    sel.data.height = (bbox.y2 - yNorm);
+                    sel.data.x = xNorm;
+                    sel.data.y = yNorm;
+                    break;
+                case 'ne':
+                    sel.data.width = (xNorm - bbox.x1);
+                    sel.data.height = (bbox.y2 - yNorm);
+                    sel.data.y = yNorm;
+                    break;
+                case 'sw':
+                    sel.data.width = (bbox.x2 - xNorm);
+                    sel.data.height = (yNorm - bbox.y1);
+                    sel.data.x = xNorm;
+                    break;
+                case 'se':
+                    sel.data.width = (xNorm - bbox.x1);
+                    sel.data.height = (yNorm - bbox.y1);
+                    break;
+            }
+        } else if (sel.type === 'text') {
+            // Ajuster fontSize proportionnellement
+            const origW = bbox.x2 - bbox.x1;
+            let newW;
+            switch (poignee) {
+                case 'ne': case 'se': newW = xNorm - bbox.x1; break;
+                case 'nw': case 'sw': newW = bbox.x2 - xNorm; sel.data.x = xNorm; break;
+                default: newW = origW;
+            }
+            if (origW > 0 && newW > 0) {
+                const ratio = newW / origW;
+                sel.data.fontSize = Math.max(8, Math.round((sel.data.fontSize || 14) * ratio));
+            }
+        }
+
+        sel.bbox = calculerBBox(sel.type, sel.data);
+    }
+
+    /**
+     * Clone les donnees d'une annotation pour undo
+     */
+    function clonerDonneesAnnotation(sel) {
+        return JSON.parse(JSON.stringify(sel.data));
+    }
+
+    /**
+     * Supprime l'annotation selectionnee
+     */
+    function supprimerSelection() {
+        if (!annotationSelectionnee) return;
+
+        const donneesPage = obtenirDonneesPage();
+        const sel = annotationSelectionnee;
+
+        switch (sel.type) {
+            case 'stroke':
+                donneesPage.strokes.splice(sel.index, 1);
+                empilerUndo('suppression-trait', sel.data);
+                break;
+            case 'shape':
+                donneesPage.shapes.splice(sel.index, 1);
+                empilerUndo('suppression-forme', sel.data);
+                break;
+            case 'text':
+                donneesPage.textAnnotations.splice(sel.index, 1);
+                empilerUndo('suppression-texte', sel.data);
+                break;
+            case 'sticker':
+                donneesPage.stickers.splice(sel.index, 1);
+                empilerUndo('suppression-autocollant', sel.data);
+                break;
+        }
+
+        annotationSelectionnee = null;
+        reRendreAnnotations();
+        planifierSauvegarde();
+    }
+
+    /**
+     * Met a jour le curseur en fonction de la position pour le mode selection
+     */
+    function mettreAJourCurseurSelection(xNorm, yNorm) {
+        if (!canvasAnnotation) return;
+
+        if (annotationSelectionnee) {
+            const poignee = detecterPoignee(xNorm, yNorm, annotationSelectionnee.bbox);
+            if (poignee) {
+                const curseurs = { nw: 'nw-resize', ne: 'ne-resize', sw: 'sw-resize', se: 'se-resize' };
+                canvasAnnotation.style.cursor = curseurs[poignee];
+                return;
+            }
+            // Dans la bbox = move
+            const bbox = annotationSelectionnee.bbox;
+            if (xNorm >= bbox.x1 && xNorm <= bbox.x2 && yNorm >= bbox.y1 && yNorm <= bbox.y2) {
+                canvasAnnotation.style.cursor = 'move';
+                return;
+            }
+        }
+
+        // Survol d'une annotation = move
+        const hit = trouverAnnotationAuPoint(xNorm, yNorm);
+        canvasAnnotation.style.cursor = hit ? 'move' : 'default';
+    }
+
+    /* ===============================
        RENDU ANNOTATIONS
        =============================== */
 
@@ -697,6 +1154,9 @@
                 dessinerAutocollant(sticker);
             }
         }
+
+        // Dessiner la selection si active
+        dessinerSelection();
     }
 
     /**
@@ -929,12 +1389,20 @@
             case 'suppression-forme':
                 donneesPage.shapes.push(action.donnees);
                 break;
+            case 'suppression-texte':
+                donneesPage.textAnnotations.push(action.donnees);
+                break;
             case 'suppression-autocollant':
                 if (!donneesPage.stickers) donneesPage.stickers = [];
                 donneesPage.stickers.push(action.donnees);
                 break;
+            case 'modification-annotation':
+                restaurerAnnotation(donneesPage, action.donnees.type, action.donnees.avant);
+                break;
         }
 
+        // Deselectionner apres undo
+        annotationSelectionnee = null;
         reRendreAnnotations();
         planifierSauvegarde();
         mettreAJourBoutonsUndoRedo();
@@ -951,7 +1419,7 @@
 
         const page = action.page;
         if (!annotationCourante.pages[page]) {
-            annotationCourante.pages[page] = { strokes: [], textAnnotations: [], shapes: [] };
+            annotationCourante.pages[page] = { strokes: [], textAnnotations: [], shapes: [], stickers: [] };
         }
 
         const donneesPage = annotationCourante.pages[page];
@@ -976,13 +1444,21 @@
             case 'suppression-forme':
                 donneesPage.shapes = donneesPage.shapes.filter(s => s.id !== action.donnees.id);
                 break;
+            case 'suppression-texte':
+                donneesPage.textAnnotations = donneesPage.textAnnotations.filter(t => t.id !== action.donnees.id);
+                break;
             case 'suppression-autocollant':
                 if (donneesPage.stickers) {
                     donneesPage.stickers = donneesPage.stickers.filter(s => s.id !== action.donnees.id);
                 }
                 break;
+            case 'modification-annotation':
+                restaurerAnnotation(donneesPage, action.donnees.type, action.donnees.apres);
+                break;
         }
 
+        // Deselectionner apres redo
+        annotationSelectionnee = null;
         reRendreAnnotations();
         planifierSauvegarde();
         mettreAJourBoutonsUndoRedo();
@@ -997,6 +1473,38 @@
 
         if (btnUndo) btnUndo.disabled = pileUndo.length === 0;
         if (btnRedo) btnRedo.disabled = pileRedo.length === 0;
+    }
+
+    /**
+     * Restaure les donnees d'une annotation (pour undo/redo de modification)
+     * @param {Object} donneesPage - Donnees de la page
+     * @param {string} type - Type d'annotation
+     * @param {Object} donnees - Donnees a restaurer
+     */
+    function restaurerAnnotation(donneesPage, type, donnees) {
+        switch (type) {
+            case 'stroke': {
+                const idx = donneesPage.strokes.findIndex(s => s.id === donnees.id);
+                if (idx >= 0) donneesPage.strokes[idx] = JSON.parse(JSON.stringify(donnees));
+                break;
+            }
+            case 'shape': {
+                const idx = donneesPage.shapes.findIndex(s => s.id === donnees.id);
+                if (idx >= 0) donneesPage.shapes[idx] = JSON.parse(JSON.stringify(donnees));
+                break;
+            }
+            case 'text': {
+                const idx = donneesPage.textAnnotations.findIndex(t => t.id === donnees.id);
+                if (idx >= 0) donneesPage.textAnnotations[idx] = JSON.parse(JSON.stringify(donnees));
+                break;
+            }
+            case 'sticker': {
+                if (!donneesPage.stickers) break;
+                const idx = donneesPage.stickers.findIndex(s => s.id === donnees.id);
+                if (idx >= 0) donneesPage.stickers[idx] = JSON.parse(JSON.stringify(donnees));
+                break;
+            }
+        }
     }
 
     /* ===============================

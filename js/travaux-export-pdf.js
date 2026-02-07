@@ -616,10 +616,73 @@
        EXPORTS GLOBAUX
        =============================== */
 
+    /**
+     * Rend un PDF avec annotations aplaties
+     * @param {Blob} blob - Le blob PDF original
+     * @param {Object} annotation - Les annotations
+     * @param {Object} options - { format: 'pdf', scale: 1.5, quality: 0.85, onProgression: Function }
+     * @returns {Promise<Blob>} Le PDF aplati comme blob
+     */
+    async function rendrePDFAvecAnnotations(blob, annotation, options = {}) {
+        const scale = options.scale || EXPORT_SCALE;
+        const quality = options.quality || 0.92;
+        const onProgression = options.onProgression || null;
+
+        const arrayBuffer = await blob.arrayBuffer();
+        const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        const numPages = pdfDoc.numPages;
+
+        const premierePage = await pdfDoc.getPage(1);
+        const vp0 = premierePage.getViewport({ scale: scale });
+        const isLandscape = vp0.width > vp0.height;
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({
+            orientation: isLandscape ? 'landscape' : 'portrait',
+            unit: 'px',
+            format: [vp0.width, vp0.height],
+            compress: true
+        });
+
+        for (let i = 1; i <= numPages; i++) {
+            if (i > 1) {
+                const page = await pdfDoc.getPage(i);
+                const vp = page.getViewport({ scale: scale });
+                doc.addPage([vp.width, vp.height], vp.width > vp.height ? 'landscape' : 'portrait');
+            }
+
+            const page = await pdfDoc.getPage(i);
+            const viewport = page.getViewport({ scale: scale });
+
+            const canvas = document.createElement('canvas');
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            const ctx = canvas.getContext('2d');
+
+            await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+
+            const donneesPage = annotation?.pages?.[i - 1];
+            if (donneesPage) {
+                dessinerAnnotationsSurCtx(ctx, canvas.width, canvas.height, donneesPage);
+            }
+
+            const dataUrl = canvas.toDataURL('image/jpeg', quality);
+            doc.addImage(dataUrl, 'JPEG', 0, 0, viewport.width, viewport.height);
+
+            if (onProgression) {
+                onProgression(i, numPages);
+            }
+        }
+
+        return doc.output('blob');
+    }
+
     window.travauxExportPDF = {
         exporterPDF: exporterPDF,
         afficherRevisionExport: afficherRevisionExport,
-        fermerRevision: fermerRevision
+        fermerRevision: fermerRevision,
+        rendrePDFAvecAnnotations: rendrePDFAvecAnnotations,
+        dessinerAnnotationsSurCtx: dessinerAnnotationsSurCtx
     };
 
 })();

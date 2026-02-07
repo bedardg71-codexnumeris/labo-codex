@@ -1,8 +1,8 @@
-# SESSION ACTIVE - BETA 97.1
+# SESSION ACTIVE - BETA 97.2
 
-**Date** : 6 février 2026
-**Version** : Beta 97.1 (build 0206-XXXX)
-**Statut** : Refactorisation progressive terminee (Phase 1-2) + Design System modernise (Phase 3)
+**Date** : 7 février 2026
+**Version** : Beta 97.2 (build 0207-1045)
+**Statut** : Outil d'annotation enrichi — panneau retractable, mode selection/edition, export PDF dans archives
 
 ---
 
