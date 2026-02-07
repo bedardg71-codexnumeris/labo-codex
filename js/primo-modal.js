@@ -872,7 +872,7 @@ async function executerAction(question) {
 
         // Exécuter l'action selon son type
         if (question.action === 'importerDonneesDemo') {
-            await importerDonneesDemo();
+            console.log('[Primo] importerDonneesDemo desactive (Chantier 1 — demantelement demo)');
         } else if (question.action === 'importerMaterielPedagogique') {
             await importerMaterielPedagogique();
         } else if (question.action === 'importerEchelleIDME') {
@@ -922,34 +922,7 @@ async function executerAction(question) {
     }
 }
 
-/**
- * Importe les données de démonstration
- */
-async function importerDonneesDemo() {
-    console.log('[Primo] Import des données de démonstration...');
-
-    try {
-        // Charger le fichier donnees-demo.json
-        const response = await fetch('donnees-demo.json');
-        if (!response.ok) {
-            throw new Error('Impossible de charger donnees-demo.json');
-        }
-
-        const donnees = await response.json();
-
-        // Importer les données via la fonction existante
-        if (typeof importerDonnees === 'function') {
-            await importerDonnees(donnees);
-            console.log('[Primo] ✅ Données de démonstration importées avec succès');
-        } else {
-            throw new Error('Fonction importerDonnees non disponible');
-        }
-
-    } catch (error) {
-        console.error('[Primo] Erreur import données demo:', error);
-        throw error;
-    }
-}
+// [Chantier 1 — 6 fev 2026] importerDonneesDemo supprimee (demantelement demo)
 
 /**
  * Importe le matériel pédagogique (échelle, grille, cartouches)

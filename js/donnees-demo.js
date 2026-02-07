@@ -461,22 +461,7 @@ function sontDonnesDemoChargees() {
  * @param {Array} etudiants - Liste complète des étudiants
  * @returns {Array} Liste filtrée (retourne tous les étudiants)
  */
-function filtrerEtudiantsDemo(etudiants) {
-    // ✅ Beta 93.5 : Groupe 9999 visible dans tous les modes
-    return etudiants; // Tout afficher
-}
-
-/**
- * Filtre les cours pour exclure le groupe 9999 si non en mode Assisté
- * ⚠️ MODIFIÉ Beta 93.5 : Le groupe 9999 est maintenant TOUJOURS visible
- * C'est un bac à sable permanent pour explorer l'application
- * @param {Array} cours - Liste complète des cours
- * @returns {Array} Liste filtrée (retourne tous les cours)
- */
-function filtrerCoursDemo(cours) {
-    // ✅ Beta 93.5 : Groupe 9999 visible dans tous les modes
-    return cours; // Tout afficher
-}
+// [Chantier 1 — 6 fev 2026] filtrerEtudiantsDemo + filtrerCoursDemo supprimees (no-op)
 
 /**
  * Initialise le module des données demo
@@ -523,6 +508,5 @@ async function initialiserModuleDonneesDemo() {
 window.chargerDonneesDemo = chargerDonneesDemo;
 window.dechargerDonneesDemo = dechargerDonneesDemo;
 window.sontDonnesDemoChargees = sontDonnesDemoChargees;
-window.filtrerEtudiantsDemo = filtrerEtudiantsDemo;
-window.filtrerCoursDemo = filtrerCoursDemo;
+// [Chantier 1] exports filtrerEtudiantsDemo + filtrerCoursDemo supprimes
 window.initialiserModuleDonneesDemo = initialiserModuleDonneesDemo;

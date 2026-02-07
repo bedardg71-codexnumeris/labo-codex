@@ -370,9 +370,7 @@ function afficherTableauCours() {
  */
 async function afficherListeCoursSidebar() {
     const tousLesCours = await db.get('listeCours') || [];
-    // ✅ NOUVEAU (9 décembre 2025) : Filtrer le groupe demo (99) selon le mode
-    const coursFiltres = typeof filtrerCoursDemo === 'function' ? filtrerCoursDemo(tousLesCours) : tousLesCours;
-    const coursDansBibliotheque = coursFiltres.filter(c => c.dansBibliotheque === true);
+    const coursDansBibliotheque = tousLesCours.filter(c => c.dansBibliotheque === true);
     const container = document.getElementById('listeCoursSidebar');
 
     if (!container) return;
@@ -419,9 +417,7 @@ async function afficherListeCoursSidebar() {
  */
 function obtenirTousLesCoursBibliotheque() {
     const tousLesCours = db.getSync('listeCours', []);
-    // ✅ NOUVEAU (9 décembre 2025) : Filtrer le groupe demo (99) selon le mode
-    const coursFiltres = typeof filtrerCoursDemo === 'function' ? filtrerCoursDemo(tousLesCours) : tousLesCours;
-    return coursFiltres.filter(c => c.dansBibliotheque === false);
+    return tousLesCours.filter(c => c.dansBibliotheque === false);
 }
 
 /* ===============================
