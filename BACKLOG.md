@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 7 février 2026 (Beta 97.4 - Build 0207-1439)
+> **Derniere mise a jour** : 7 février 2026 (Beta 97.3 - Build 0207-1510)
 
 ---
 
@@ -665,7 +665,7 @@
 
 ---
 
-## Complete (Beta 97.4 - 7 février 2026)
+## Complete (Beta 97.3 - 7 février 2026)
 
 - [x] **#118** Zoom adaptatif : modes "Pleine largeur" et "Pleine hauteur"
   - Remplacement des boutons +/- par deux modes de zoom adaptatifs
@@ -693,8 +693,34 @@
 
 - [x] **#122** Correctif : aperçu Construction de la note vide (exports IIFE manquants)
   - `chargerStatistiquesApercu()` et `chargerMaterielConfigure()` non exportées après wrapping IIFE (#70)
-  - Ajout des exports `window.*` dans statistiques.js
-  - **Fichier** : `js/statistiques.js`
+  - Ajout des exports `window.*` dans statistiques.js, presences-apercu.js, evaluations-apercu.js
+  - **Fichiers** : `js/statistiques.js`, `js/presences-apercu.js`, `js/evaluations-apercu.js`
+
+- [x] **#113** Correctif CRITIQUE : fontSize exponentielle lors du redimensionnement de texte
+  - `appliquerRedimensionnement()` multipliait la fontSize deja modifiee a chaque frame de drag
+  - Correction : utiliser `donneesAvantModif.fontSize` (valeur capturee au debut du drag)
+  - **Fichier** : `js/travaux-annotation.js`
+
+- [x] **#114** Correctif : selection fantome au changement de page
+  - `annotationSelectionnee` persistait entre les pages, causant un rectangle de selection fantome
+  - Correction : reset `annotationSelectionnee = null` dans le handler `travaux-page-rendue`
+  - **Fichier** : `js/travaux-annotation.js`
+
+- [x] **#115** Correctif : EXPORT_SCALE hardcode dans les fonctions de dessin d'export
+  - `dessinerAnnotationsSurCtx` utilisait `EXPORT_SCALE = 2.0` en dur, meme quand l'archive passe `scale: 1.5`
+  - Correction : parametre `scale` propage a `dessinerAnnotationsSurCtx`, `dessinerTrait`, `dessinerForme`
+  - L'archivage d'images (taille native) passe `scale = 1`
+  - **Fichiers** : `js/travaux-export-pdf.js`, `js/travaux-archivage.js`
+
+- [x] **#116** Correctif : event listeners qui s'accumulent dans la visionneuse
+  - `travaux-annotation-activee/desactivee` etaient ajoutes a chaque appel de `afficherVisionneuse()`
+  - Correction : listeners deplaces dans `initialiserModuleTravaux()` (execute une seule fois)
+  - **Fichier** : `js/travaux-ui.js`
+
+- [x] **#117** Correctif : Backspace intercepte globalement meme dans les champs de formulaire
+  - `onKeyDown` capturait Delete/Backspace dans les `<input>`, `<select>`, `<textarea>`
+  - Correction : guard `e.target.matches('input, select, textarea, [contenteditable]')` ajoute
+  - **Fichier** : `js/travaux-annotation.js`
 
 ---
 
@@ -726,36 +752,6 @@
   - Le rendu partage inclut les stickers (manquant dans l'ancien code archivage)
   - Callback de progression pour le rendu PDF multi-pages
   - **Fichiers** : `js/travaux-export-pdf.js`, `js/travaux-archivage.js`
-
----
-
-## Complete (Beta 97.3 - 7 février 2026)
-
-- [x] **#113** Correctif CRITIQUE : fontSize exponentielle lors du redimensionnement de texte
-  - `appliquerRedimensionnement()` multipliait la fontSize deja modifiee a chaque frame de drag
-  - Correction : utiliser `donneesAvantModif.fontSize` (valeur capturee au debut du drag)
-  - **Fichier** : `js/travaux-annotation.js`
-
-- [x] **#114** Correctif : selection fantome au changement de page
-  - `annotationSelectionnee` persistait entre les pages, causant un rectangle de selection fantome
-  - Correction : reset `annotationSelectionnee = null` dans le handler `travaux-page-rendue`
-  - **Fichier** : `js/travaux-annotation.js`
-
-- [x] **#115** Correctif : EXPORT_SCALE hardcode dans les fonctions de dessin d'export
-  - `dessinerAnnotationsSurCtx` utilisait `EXPORT_SCALE = 2.0` en dur, meme quand l'archive passe `scale: 1.5`
-  - Correction : parametre `scale` propage a `dessinerAnnotationsSurCtx`, `dessinerTrait`, `dessinerForme`
-  - L'archivage d'images (taille native) passe `scale = 1`
-  - **Fichiers** : `js/travaux-export-pdf.js`, `js/travaux-archivage.js`
-
-- [x] **#116** Correctif : event listeners qui s'accumulent dans la visionneuse
-  - `travaux-annotation-activee/desactivee` etaient ajoutes a chaque appel de `afficherVisionneuse()`
-  - Correction : listeners deplaces dans `initialiserModuleTravaux()` (execute une seule fois)
-  - **Fichier** : `js/travaux-ui.js`
-
-- [x] **#117** Correctif : Backspace intercepte globalement meme dans les champs de formulaire
-  - `onKeyDown` capturait Delete/Backspace dans les `<input>`, `<select>`, `<textarea>`
-  - Correction : guard `e.target.matches('input, select, textarea, [contenteditable]')` ajoute
-  - **Fichier** : `js/travaux-annotation.js`
 
 ---
 

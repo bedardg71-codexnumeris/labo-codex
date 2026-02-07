@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Système de suivi Beta 97.2 - Hiver 2026</title>
+    <title>Système de suivi Beta 97.3 - Hiver 2026</title>
 
     <!-- CSS externe requis pour styles complets -->
     <link rel="stylesheet" href="styles.css?v=2026013001">
@@ -3345,7 +3345,7 @@
                     <!-- Titre et version -->
                     <div class="titre-section">
                         <h1>Système de suivi des apprentissages et de construction de la note</h1>
-                        <p class="meta">Beta 97</p>
+                        <p class="meta">Beta 97.3</p>
                     </div>
 
                     <!-- Sélecteur de mode déplacé à droite -->
@@ -3418,6 +3418,20 @@
 
                 <!-- Titre principal -->
                 <h2 class="modal-titre">Nouveautés</h2>
+
+                <!-- Beta 97.3 - 7 février -->
+                <div class="changelog-entry changelog-entry--bleu">
+                    <strong class="changelog-title">Beta 97.3 (7 f&eacute;vrier) - Annotation et &eacute;valuation :</strong>
+                    <ul class="changelog-list">
+                        <li><strong>Zoom adaptatif</strong> : Deux nouveaux modes &laquo;&nbsp;Pleine largeur&nbsp;&raquo; et &laquo;&nbsp;Pleine hauteur&nbsp;&raquo; remplacent les boutons +/&minus; pour un affichage optimal du document.</li>
+                        <li><strong>&Eacute;paisseur relative</strong> : Le trait d&rsquo;annotation s&rsquo;adapte automatiquement &agrave; la r&eacute;solution de l&rsquo;image. Un trait de 3px aura la m&ecirc;me &eacute;paisseur visuelle sur une image 500px ou 3000px. Le slider affiche la valeur en pixels r&eacute;els.</li>
+                        <li><strong>Bouton &Eacute;valuer</strong> : Depuis l&rsquo;annotation d&rsquo;un travail, acc&eacute;dez directement au formulaire d&rsquo;&eacute;valuation avec l&rsquo;&eacute;tudiant et la production pr&eacute;-remplis.</li>
+                        <li><strong>Dossier PDF complet</strong> : Nouveau bouton &laquo;&nbsp;Dossier PDF&nbsp;&raquo; dans la liste des &eacute;valuations &mdash; g&eacute;n&egrave;re un PDF unique contenant le travail annot&eacute; + la grille remplie + la r&eacute;troaction.</li>
+                        <li><strong>S&eacute;lection et &eacute;dition</strong> : Nouvel outil S&eacute;lection pour d&eacute;placer, redimensionner et supprimer les annotations existantes (traits, formes, texte, autocollants).</li>
+                        <li><strong>Interface harmonis&eacute;e</strong> : Boutons de la toolbar color&eacute;s selon le design system, fl&egrave;ches de pagination, z&eacute;ro couleur hardcod&eacute;e dans le module Travaux.</li>
+                        <li><strong>5 correctifs</strong> : Export PDF des annotations sur fichiers PDF (#112), fontSize exponentielle (#113), s&eacute;lection fant&ocirc;me (#114), EXPORT_SCALE (#115), listeners accumul&eacute;s (#116), Backspace dans formulaires (#117).</li>
+                    </ul>
+                </div>
 
                 <!-- Beta 97.2 - 6 février -->
                 <div class="changelog-entry changelog-entry--bleu">
@@ -11562,6 +11576,49 @@
                     <h2>Notes de version</h2>
                     <p class="text-muted">Historique des changements majeurs</p>
 
+                    <!-- Beta 97.3 -->
+                    <div class="carte accordeon ouvert" id="accordeon-apropos-beta973">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Beta 97.3 — Annotation et &eacute;valuation
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu" style="display: block;">
+                        <p class="text-muted">7 f&eacute;vrier 2026</p>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Am&eacute;liorations de l'annotation</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Zoom adaptatif</strong> : Deux modes &laquo;&nbsp;Pleine largeur&nbsp;&raquo; et &laquo;&nbsp;Pleine hauteur&nbsp;&raquo; remplacent les boutons +/&minus; pour un affichage optimal.</li>
+                            <li><strong>&Eacute;paisseur relative &agrave; la r&eacute;solution</strong> : Le trait s'adapte automatiquement &agrave; la r&eacute;solution de l'image. Le slider affiche la valeur en pixels r&eacute;els.</li>
+                            <li><strong>S&eacute;lection et &eacute;dition</strong> : Nouvel outil S&eacute;lection pour d&eacute;placer, redimensionner et supprimer les annotations existantes.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Int&eacute;gration &eacute;valuation</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Bouton &Eacute;valuer</strong> : Depuis l'annotation, acc&eacute;dez directement au formulaire d'&eacute;valuation avec l'&eacute;tudiant et la production pr&eacute;-remplis.</li>
+                            <li><strong>Dossier PDF complet</strong> : Bouton &laquo;&nbsp;Dossier PDF&nbsp;&raquo; dans la liste des &eacute;valuations — g&eacute;n&egrave;re un PDF unique (travail annot&eacute; + grille + r&eacute;troaction).</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Interface</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Design system</strong> : Boutons de la toolbar color&eacute;s, fl&egrave;ches de pagination, z&eacute;ro couleur hardcod&eacute;e dans le module Travaux.</li>
+                            <li><strong>Avertissements retir&eacute;s</strong> : Les bandeaux &laquo;&nbsp;en d&eacute;veloppement&nbsp;&raquo; et &laquo;&nbsp;r&eacute;solution&nbsp;&raquo; sont retir&eacute;s de la page Annoter.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Correctifs</h4>
+                        <ul class="modal-liste">
+                            <li>Export PDF des annotations sur fichiers PDF (#112)</li>
+                            <li>fontSize exponentielle lors du redimensionnement (#113)</li>
+                            <li>S&eacute;lection fant&ocirc;me au changement de page (#114)</li>
+                            <li>EXPORT_SCALE non propag&eacute; &agrave; l'archivage (#115)</li>
+                            <li>Event listeners accumul&eacute;s dans la visionneuse (#116)</li>
+                            <li>Backspace intercept&eacute; dans les formulaires (#117)</li>
+                            <li>Aper&ccedil;us pr&eacute;sences et &eacute;valuations vides — exports IIFE manquants (#122)</li>
+                        </ul>
+
+                        </div>
+                    </div>
+
                     <!-- Beta 97 -->
                     <div class="carte accordeon ouvert" id="accordeon-apropos-beta97">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
@@ -15537,7 +15594,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97';
-        const BUILD_ID = '0207-1510';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0207-1520';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
