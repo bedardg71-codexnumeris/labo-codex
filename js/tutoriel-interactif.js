@@ -9,6 +9,9 @@
  * AUTEUR : Grégoire Bédard (avec Claude)
  */
 
+(function() {
+'use strict';
+
 // ============================================================================
 // CONFIGURATION DU TUTORIEL
 // ============================================================================
@@ -522,3 +525,6 @@ console.log('🎓 Module Tutoriel Interactif chargé');
 setTimeout(() => {
     verifierDemarrageAutoTutoriel();
 }, 2000);
+
+
+})();

@@ -8,6 +8,9 @@
    Exports: afficherGuidageDemo, retirerGuidageDemo
    =============================== */
 
+(function() {
+'use strict';
+
 const GUIDAGE_TEXTES = {
     'tableau-bord-apercu': {
         titre: 'Tableau de bord \u2014 \u00c9tat des lieux',
@@ -110,3 +113,6 @@ function retirerGuidageDemo() {
 // === EXPORTS ===
 window.afficherGuidageDemo = afficherGuidageDemo;
 window.retirerGuidageDemo = retirerGuidageDemo;
+
+
+})();

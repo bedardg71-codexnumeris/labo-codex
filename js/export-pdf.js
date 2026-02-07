@@ -6,6 +6,9 @@
  * Fonctionne 100% hors ligne
  */
 
+(function() {
+'use strict';
+
 // =============================================================================
 // CONFIGURATION ET CONSTANTES
 // =============================================================================
@@ -2915,3 +2918,6 @@ window.mettreAJourOptionsInlinePDF = mettreAJourOptionsInlinePDF;
 window.ouvrirApercuPDFDepuisInline = ouvrirApercuPDFDepuisInline;
 
 console.log('[export-pdf.js] Module charge - jsPDF disponible:', typeof window.jspdf !== 'undefined');
+
+
+})();

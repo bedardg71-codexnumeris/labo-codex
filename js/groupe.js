@@ -19,6 +19,9 @@
    - Statistiques par groupe
    =============================== */
 
+(function() {
+'use strict';
+
 /* ===============================
    DÉPENDANCES
    
@@ -1230,3 +1233,5 @@ window.resetFiltreGroupe = resetFiltreGroupe;
  * INITIALISATION:
  * Appelée automatiquement par 99-main.js via initialiserModuleGroupe()
  */
+
+})();

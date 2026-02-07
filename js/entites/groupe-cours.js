@@ -8,6 +8,9 @@
    Clé de stockage: '{trimestreId}_groupesCours' (array, namespacé)
    =============================== */
 
+(function() {
+'use strict';
+
 /**
  * Structure d'un groupe-cours
  * @typedef {Object} GroupeCours
@@ -515,3 +518,6 @@ window.GroupeCoursEntite = {
 };
 
 console.log('[Entités] Module GroupeCours chargé');
+
+
+})();

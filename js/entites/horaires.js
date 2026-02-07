@@ -8,6 +8,9 @@
    Clé de stockage: 'horaires' (array, non-namespacé)
    =============================== */
 
+(function() {
+'use strict';
+
 /**
  * Clé de stockage pour les horaires
  */
@@ -397,3 +400,6 @@ window.HorairesEntite = {
 };
 
 console.log('[Entités] Module Horaires chargé');
+
+
+})();

@@ -17,6 +17,9 @@
  * AUTEUR : Grégoire Bédard (Labo Codex)
  */
 
+(function() {
+'use strict';
+
 class PratiqueSommative {
 
     constructor() {
@@ -727,3 +730,6 @@ window.PratiqueSommative = PratiqueSommative;
 
 // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
 // console.log('✅ Module pratique-sommative.js chargé');
+
+
+})();

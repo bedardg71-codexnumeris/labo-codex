@@ -13,6 +13,9 @@
  * AUTEUR : Grégoire Bédard (Labo Codex)
  */
 
+(function() {
+'use strict';
+
 // ============================================================================
 // GESTIONNAIRE PRINCIPAL
 // ============================================================================
@@ -302,3 +305,6 @@ const PratiqueManager = {
 window.PratiqueManager = PratiqueManager;
 
 console.log('✅ Module pratique-manager.js chargé');
+
+
+})();

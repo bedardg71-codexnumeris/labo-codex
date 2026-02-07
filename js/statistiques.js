@@ -3,6 +3,9 @@
    Adapté de index 35-M5
    =============================== */
 
+(function() {
+'use strict';
+
 /**
  * MODULE: statistiques.js
  * 
@@ -289,3 +292,5 @@ function setStatText(id, valeur) {
  * Code extrait et adapté de index 35-M5 10-10-2025a
  * Fonction chargerStatistiquesApercu() conservée à l'identique
  */
+
+})();

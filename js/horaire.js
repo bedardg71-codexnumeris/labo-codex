@@ -14,6 +14,9 @@
    - Sauvegarde dans localStorage
    =============================== */
 
+(function() {
+'use strict';
+
 /* ===============================
    DÉPENDANCES DE CE MODULE
    
@@ -1637,3 +1640,5 @@ window.annulerAjoutSeance = annulerAjoutSeance;
 window.afficherSeancesExistantes = afficherSeancesExistantes;
 window.supprimerSeance = supprimerSeance;
 window.nettoyerDoublons = nettoyerDoublons;
+
+})();

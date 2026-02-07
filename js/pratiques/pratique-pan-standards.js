@@ -21,6 +21,9 @@
  * AUTEUR : Grégoire Bédard (Labo Codex)
  */
 
+(function() {
+'use strict';
+
 class PratiquePANStandards {
 
     constructor() {
@@ -1624,3 +1627,6 @@ window.PratiquePANStandards = PratiquePANStandards;
 
 // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
 // console.log('✅ Module pratique-pan-standards.js chargé');
+
+
+})();

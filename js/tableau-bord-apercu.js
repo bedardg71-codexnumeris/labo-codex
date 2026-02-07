@@ -3,6 +3,9 @@
    Calculs des indices A-C-P et affichage des métriques globales
    =============================== */
 
+(function() {
+'use strict';
+
 /**
  * MODULE: tableau-bord-apercu.js
  *
@@ -2939,3 +2942,5 @@ window.initialiserModuleTableauBordApercu = initialiserModuleTableauBordApercu;
  * - Fragile: 0.30 - 0.49
  * - Insuffisant: < 0.30
  */
+
+})();

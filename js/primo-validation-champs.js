@@ -9,6 +9,9 @@
  * AUTEUR : Grégoire Bédard (Labo Codex) avec Claude
  */
 
+(function() {
+'use strict';
+
 // ============================================================================
 // CONFIGURATION
 // ============================================================================
@@ -279,3 +282,6 @@ if (document.readyState === 'loading') {
 } else {
     initialiserValidationChamps();
 }
+
+
+})();

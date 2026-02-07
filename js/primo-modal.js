@@ -15,6 +15,9 @@
  * - 1.0 (27 nov 2025) : Version initiale
  */
 
+(function() {
+'use strict';
+
 // ============================================================================
 // ÉTAT DU MODAL
 // ============================================================================
@@ -2248,3 +2251,6 @@ window.passerEnModeNotification = passerEnModeNotification;
 window.demarrerModeNotification = demarrerModeNotification;
 
 console.log('✅ Module primo-modal.js chargé');
+
+
+})();

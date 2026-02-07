@@ -12,6 +12,9 @@
  * @date 26 décembre 2025
  */
 
+(function() {
+'use strict';
+
 // ============================================================================
 // ÉTAT DU WIZARD
 // ============================================================================
@@ -1896,3 +1899,6 @@ window.etapePrecedenteV2 = etapePrecedenteV2;
 window.creerPratiqueV2 = creerPratiqueV2;
 
 console.log('[WizardV2] Module chargé');
+
+
+})();

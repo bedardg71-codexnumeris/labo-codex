@@ -17,6 +17,9 @@
    4. Affichage des statistiques - AMÉLIORÉ (basé sur calendrierComplet)
    =============================== */
 
+(function() {
+'use strict';
+
 /* ===============================
    DÉPENDANCES
    =============================== */
@@ -1086,3 +1089,6 @@ function obtenirInfosJour(date) {
 
 // Export de la fonction d'initialisation pour main.js
 window.initialiserModuleTrimestre = initialiserModuleTrimestre;
+
+
+})();

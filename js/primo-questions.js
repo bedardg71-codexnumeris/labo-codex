@@ -27,6 +27,9 @@
  * - 1.0 (27 nov 2025) : Version initiale avec PAN-Standards + variantes par-objectifs
  */
 
+(function() {
+'use strict';
+
 // ============================================================================
 // STRUCTURE DES QUESTIONS
 // ============================================================================
@@ -2058,3 +2061,6 @@ window.transformerReponse = transformerReponse;
 window.obtenirOptions = obtenirOptions;
 
 console.log('✅ Module primo-questions.js chargé (' + QUESTIONS_PRIMO.length + ' questions)');
+
+
+})();

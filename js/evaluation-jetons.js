@@ -9,6 +9,9 @@
    - Pas de reload de page
    =============================== */
 
+(function() {
+'use strict';
+
 /* ===============================
    FONCTIONS HELPER DE CONFIGURATION
    =============================== */
@@ -799,3 +802,6 @@ window.attribuerJetonPersonnalise = attribuerJetonPersonnalise;
 window.retirerJetonPersonnalise = retirerJetonPersonnalise;
 
 console.log('✅ Module evaluation-jetons.js chargé');
+
+
+})();

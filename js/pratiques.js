@@ -17,6 +17,9 @@
    - Mise à jour du statut de configuration
    =============================== */
 
+(function() {
+'use strict';
+
 /* ===============================
    DÉPENDANCES DE CE MODULE
    
@@ -5492,3 +5495,5 @@ window.populerSelecteursNiveaux = populerSelecteursNiveaux;
 window.onEchelleConformiteChange = onEchelleConformiteChange;
 window.getReglesConformiteConfig = getReglesConformiteConfig;
 window.chargerReglesConformiteConfig = chargerReglesConformiteConfig;
+
+})();

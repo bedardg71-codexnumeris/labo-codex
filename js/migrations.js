@@ -12,6 +12,9 @@
    3. Présences → coursId
    =============================== */
 
+(function() {
+'use strict';
+
 /**
  * Migration 1: Ajouter coursId aux étudiants
  *
@@ -1334,3 +1337,6 @@ if (typeof window !== 'undefined') {
     window.migrerVersEntiteHoraires = migrerVersEntiteHoraires;
     window.migrerVersGroupeCours = migrerVersGroupeCours;
 }
+
+
+})();

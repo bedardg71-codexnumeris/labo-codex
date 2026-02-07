@@ -7,6 +7,9 @@
    les données existantes (cadreCalendrier, cours, etc.)
    =============================== */
 
+(function() {
+'use strict';
+
 /* ===============================
    INITIALISATION
    =============================== */
@@ -6244,3 +6247,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }, { once: true });
     }
 });
+
+
+})();

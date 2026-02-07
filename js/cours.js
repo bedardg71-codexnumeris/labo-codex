@@ -14,6 +14,9 @@
    - Suppression de cours
    =============================== */
 
+(function() {
+'use strict';
+
 /* ===============================
    DÉPENDANCES DE CE MODULE
    
@@ -1697,3 +1700,5 @@ window.importerCoursSimple = importerCoursSimple;
 window.naviguerVersPratiqueNotation = naviguerVersPratiqueNotation;
 window.partagerCours = partagerCours;
 window.partagerTousLesCours = partagerTousLesCours;
+
+})();

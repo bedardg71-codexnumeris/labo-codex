@@ -16,6 +16,9 @@
  * AUTEUR : Grégoire Bédard (Labo Codex)
  */
 
+(function() {
+'use strict';
+
 // ============================================================================
 // ÉTAT DU REGISTRE
 // ============================================================================
@@ -513,3 +516,6 @@ window.desenregistrerPratique = desenregistrerPratique;
 window.viderRegistre = viderRegistre;
 
 console.log('✅ Module pratique-registre.js chargé');
+
+
+})();

@@ -8,6 +8,9 @@
    Sécurité: nettoyerResiduDemo() au démarrage si crash pendant la demo
    =============================== */
 
+(function() {
+'use strict';
+
 // ============================================
 // SAUVEGARDE / RESTAURATION ÉTAT
 // ============================================
@@ -743,3 +746,6 @@ window.dechargerDonneesDemo = dechargerDonneesDemo;
 window.sontDonnesDemoChargees = sontDonnesDemoChargees;
 window.afficherBandeauDemo = afficherBandeauDemo;
 window.initialiserModuleDonneesDemo = initialiserModuleDonneesDemo;
+
+
+})();

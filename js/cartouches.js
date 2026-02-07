@@ -15,6 +15,9 @@
    - Calcul du pourcentage de complétion
    =============================== */
 
+(function() {
+'use strict';
+
 /* ===============================
    DÉPENDANCES DE CE MODULE
    
@@ -3765,3 +3768,6 @@ window.retirerCartoucheDeBibliotheque = retirerCartoucheDeBibliotheque;
 window.ajouterCartouchesABibliotheque = ajouterCartouchesABibliotheque;
 window.filtrerCartouchesParGrille = filtrerCartouchesParGrille;
 window.fermerModalBibliothequeCartouches = fermerModalBibliothequeCartouches;
+
+
+})();

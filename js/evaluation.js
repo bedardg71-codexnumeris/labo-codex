@@ -16,6 +16,9 @@
    - Navigation vers la liste des évaluations
    =============================== */
 
+(function() {
+'use strict';
+
 /* ===============================
    DÉPENDANCES DE CE MODULE
    
@@ -6034,3 +6037,6 @@ window.calculerNoteAlgorithmiqueSimple = calculerNoteAlgorithmiqueSimple;
 window.copierCriteresSRPN = copierCriteresSRPN;
 window.copierCriteresSRPNF = copierCriteresSRPNF;
 window.gererChangementCheckboxJetonRepriseCiblee = gererChangementCheckboxJetonRepriseCiblee;
+
+
+})();

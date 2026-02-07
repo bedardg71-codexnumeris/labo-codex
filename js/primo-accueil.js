@@ -9,6 +9,9 @@
  * AUTEUR : Grégoire Bédard (Labo Codex) avec Claude
  */
 
+(function() {
+'use strict';
+
 // ============================================================================
 // DÉTECTION PREMIÈRE UTILISATION
 // ============================================================================
@@ -477,3 +480,6 @@ window.consulterAide = consulterAide;
 // Auto-initialisation
 console.log('👋 Module Primo Accueil chargé');
 initialiserPrimoAccueil();
+
+
+})();

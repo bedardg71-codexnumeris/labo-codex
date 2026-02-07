@@ -62,12 +62,11 @@
     - `seancesHoraire` (~12 localisations dans calendrier-vue.js, saisie-presences.js, presences-apercu.js, horaire.js, profil-etudiant.js, migrations.js)
   - **Action** : Auditer chaque clé et ajouter à `CLES_NAMESPACEES` dans trimestres.js si elle contient des données par trimestre
 
-- [ ] **#70** 1 261 assignations `window.*` — pollution du namespace global
-  - **Symptôme** : Tout est global, risque élevé de collision entre modules
-  - **Pires fichiers** : trimestre-v2.js (127), pratiques.js (75), grilles.js (72), echelles.js (70), productions.js (60), pratiques-materiel.js (60)
-  - **Constat** : Seulement ~16 des ~75 fichiers JS utilisent un IIFE pour encapsuler
-  - **Correction progressive** : Encapsuler les modules dans des IIFE avec exports sélectifs (comme db.js et trimestres.js le font déjà)
-  - **Alternative** : Pattern namespace objet `window.ModuleName = { func1, func2 }`
+- [x] **#70** 1 261 assignations `window.*` — pollution du namespace global ✅ CORRIGÉ (7 fév 2026)
+  - **Résultat** : 91/93 fichiers JS encapsulés en IIFE avec `'use strict'` (2 protégés : config.js, navigation.js)
+  - **71 fichiers** nouvellement wrappés, 0 erreurs de syntaxe (node -c)
+  - **Corrections strict mode** : `eval` renommé `ev` dans portfolio.js, echelles.js, profil-etudiant.js
+  - **Impact** : Toutes les variables/fonctions locales sont encapsulées. Seuls les exports explicites `window.X =` restent globaux
 
 - [x] **#71** ~50 appels `localStorage.getItem()` contournant db.js ✅ CORRIGÉ (6 fév 2026)
   - **Fichiers concernés** : cc-license.js, primo-questions.js, modes.js, echelles-bibliotheque.js, grilles-bibliotheque.js, cartouches-bibliotheque.js, productions-bibliotheque.js, boite-outils.js

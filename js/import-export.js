@@ -3,6 +3,9 @@
    Adapté de index 35-M5
    =============================== */
 
+(function() {
+'use strict';
+
 /**
  * MODULE: import-export.js
  *
@@ -2447,3 +2450,5 @@ window.ouvrirModalExport = ouvrirModalExport;
 window.fermerModalExport = fermerModalExport;
 window.toggleToutesLesCles = toggleToutesLesCles;
 window.executerExport = executerExport;
+
+})();

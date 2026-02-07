@@ -7,6 +7,9 @@
  * 3 grilles • 2 échelles • 3 sets de cartouches
  */
 
+(function() {
+'use strict';
+
 const PACK_DEMARRAGE = {
   "_metadata": {
     "nom": "Pack démo A2025",
@@ -18727,3 +18730,6 @@ const PACK_DEMARRAGE = {
     }
   ]
 };
+
+
+})();

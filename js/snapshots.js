@@ -59,6 +59,9 @@
  * @version 1.1.0 (Beta 94 - Snapshots ponctuals A-C-P uniquement)
  */
 
+(function() {
+'use strict';
+
 /* ===============================
    INITIALISATION
    =============================== */
@@ -1090,3 +1093,6 @@ window.lancerReconstructionRetroactive = lancerReconstructionRetroactive;
 window.confirmerNettoyageSnapshots = confirmerNettoyageSnapshots;
 
 console.log('📦 Module snapshots.js chargé');
+
+
+})();

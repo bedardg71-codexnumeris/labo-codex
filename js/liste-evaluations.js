@@ -5,6 +5,9 @@
  * Gestion de l'affichage et filtrage des évaluations
  */
 
+(function() {
+'use strict';
+
 console.log('📦 Chargement du module liste-evaluations.js...');
 
 // ============================================
@@ -1487,3 +1490,5 @@ window.reinitialiserFiltresEval = reinitialiserFiltres;
 window.rechercherEvaluations = rechercherEvaluations;
 
 console.log('✅ Module liste-evaluations.js chargé - initialiserListeEvaluations disponible:', typeof window.initialiserListeEvaluations);
+
+})();

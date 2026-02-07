@@ -16,6 +16,9 @@
    - Chargement des échelles dans les selects
    =============================== */
 
+(function() {
+'use strict';
+
 /* ===============================
    DÉPENDANCES DE CE MODULE
    
@@ -3870,9 +3873,9 @@ async function migrerEvaluationsVersNouvelleEchelle(ancienneEchelleId, nouvelleE
     const evaluations = await db.get('evaluations') ||  [];
     let nbMigrees = 0;
 
-    evaluations.forEach(eval => {
-        if (eval.echelleId === ancienneEchelleId) {
-            eval.echelleId = nouvelleEchelleId;
+    evaluations.forEach(ev => {
+        if (ev.echelleId === ancienneEchelleId) {
+            ev.echelleId = nouvelleEchelleId;
             nbMigrees++;
         }
     });
@@ -4126,3 +4129,5 @@ window.fermerModalBibliothequeEchelles = fermerModalBibliothequeEchelles;
 window.afficherEchellesTrimestreModal = afficherEchellesTrimestreModal;
 window.importerToutEchellesTrimestreModal = importerToutEchellesTrimestreModal;
 window.importerUneEchelleTrimestre = importerUneEchelleTrimestre;
+
+})();

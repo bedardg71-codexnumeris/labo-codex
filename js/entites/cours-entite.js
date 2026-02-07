@@ -8,6 +8,9 @@
    Clé de stockage: 'cours' (array, non-namespacé)
    =============================== */
 
+(function() {
+'use strict';
+
 /**
  * Clé de stockage pour les cours
  */
@@ -279,3 +282,6 @@ window.CoursEntite = {
 };
 
 console.log('[Entités] Module Cours chargé');
+
+
+})();

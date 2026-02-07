@@ -8,6 +8,9 @@
    - (Futur) Ordonnancement
    =============================== */
 
+(function() {
+'use strict';
+
 /* ===============================
    TIRAGE AU SORT
    =============================== */
@@ -1203,3 +1206,6 @@ window.changerFiltreCategorie = changerFiltreCategorie;
 window.initialiserQuestions = initialiserQuestions;
 
 console.log('[Boîte à outils] Module chargé');
+
+
+})();
