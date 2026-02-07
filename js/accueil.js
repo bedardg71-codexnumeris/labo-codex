@@ -114,7 +114,7 @@ function afficherAccueilRetour(conteneur) {
                 </div>
             </div>
             <div class="accueil-carte" onclick="afficherSection('evaluations'); setTimeout(function(){ afficherSousSection('evaluations-travaux'); }, 100);">
-                <div class="accueil-carte-icone">&#x270F;&#xFE0F;</div>
+                <div class="accueil-carte-icone">&#x1F4DD;</div>
                 <div class="accueil-carte-titre">Annoter des travaux</div>
                 <div class="accueil-carte-desc">
                     Lire, annoter et apposer des autocollants dans les copies.
@@ -128,11 +128,26 @@ function afficherAccueilRetour(conteneur) {
                 </div>
             </div>
             <div class="accueil-carte" onclick="afficherSection('tableau-bord');">
-                <div class="accueil-carte-icone">&#x1F4CA;</div>
+                <div class="accueil-carte-icone">&#x1F4C8;</div>
                 <div class="accueil-carte-titre">Voir la progression</div>
                 <div class="accueil-carte-desc">
                     Consulter le tableau de bord et les indicateurs.
                 </div>
+            </div>
+        </div>
+
+        <div class="accueil-nouvelles">
+            <div class="accueil-nouvelles-header">
+                <span class="accueil-nouvelles-icone">\uD83D\uDCEC</span>
+                <span class="accueil-nouvelles-titre">Derni\u00e8res nouvelles</span>
+                <span class="accueil-nouvelles-version">Beta ${VERSION_MAJEURE} &nbsp;\uD83C\uDFD7\uFE0F Build.${BUILD_ID}</span>
+            </div>
+            <div class="accueil-nouvelles-contenu">
+                <span class="pastille-nouveautes" onclick="afficherModalNouveautes()" title="Nouveaut\u00e9s">\u2709\uFE0F</span>
+                <span class="accueil-nouvelles-lien" onclick="afficherModalNouveautes()">Nouveaut\u00e9s et corrections</span>
+                <span class="accueil-nouvelles-separateur">|</span>
+                <button class="btn-backup-warning" onclick="window.backupReminder.afficherModal()" title="Prot\u00e9gez vos donn\u00e9es">\u26A0\uFE0F</button>
+                <span class="accueil-nouvelles-lien" onclick="window.backupReminder.afficherModal()">Rappel de sauvegarde</span>
             </div>
         </div>
 
@@ -144,6 +159,9 @@ function afficherAccueilRetour(conteneur) {
             <button onclick="afficherSection('reglages'); setTimeout(function(){ if(typeof afficherSousSection==='function') afficherSousSection('reglages-a-propos'); }, 100);">Nouveaut\u00e9s</button>
         </div>
     `;
+
+    // Mettre a jour la pastille des nouveautes (elle est maintenant dans le DOM)
+    if (typeof mettreAJourPastille === 'function') mettreAJourPastille();
 }
 
 /**

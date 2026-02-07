@@ -488,6 +488,48 @@
             margin: 0 4px;
         }
 
+        /* Carte Dernières nouvelles */
+        .accueil-nouvelles {
+            background: var(--bleu-tres-pale);
+            border: 1px solid var(--bleu-pale);
+            border-radius: var(--radius-grand);
+            padding: 16px 20px;
+            margin-bottom: 20px;
+        }
+        .accueil-nouvelles-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .accueil-nouvelles-icone { font-size: 1.3rem; }
+        .accueil-nouvelles-titre {
+            font-weight: 600;
+            color: var(--bleu-principal);
+            font-size: 0.95rem;
+        }
+        .accueil-nouvelles-version {
+            margin-left: auto;
+            font-size: 0.8rem;
+            color: var(--gris-moyen);
+        }
+        .accueil-nouvelles-contenu {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .accueil-nouvelles-lien {
+            font-size: 0.85rem;
+            color: var(--bleu-principal);
+            cursor: pointer;
+        }
+        .accueil-nouvelles-lien:hover { text-decoration: underline; }
+        .accueil-nouvelles-separateur {
+            color: var(--bleu-pale);
+            margin: 0 4px;
+        }
+
         @media (max-width: 600px) {
             .accueil-cartes {
                 grid-template-columns: 1fr;
@@ -3303,11 +3345,7 @@
                     <!-- Titre et version -->
                     <div class="titre-section">
                         <h1>Système de suivi des apprentissages et de construction de la note</h1>
-                        <p class="meta">
-                            Beta 97.2 <span id="build-numero" class="build-numero"></span>
-                            <span class="pastille-nouveautes" onclick="afficherModalNouveautes()" title="Nouveautés">✉️</span>
-                            <button class="btn-backup-warning" onclick="window.backupReminder.afficherModal()" title="Protégez tes données">⚠️</button>
-                        </p>
+                        <p class="meta">Beta 97</p>
                     </div>
 
                     <!-- Sélecteur de mode déplacé à droite -->
@@ -3686,17 +3724,16 @@
                 <button data-onglet="evaluations">Évaluations</button>
                 <button data-onglet="construction">Construction de la note</button>
                 <button data-onglet="boite-outils">Boîte à outils</button>
+                <button id="btn-section-aide"
+                       data-onglet="aide"
+                       title="Consulter la documentation">
+                    Aide
+                </button>
                 <button data-onglet="reglages" class="btn-nav-icone" title="Réglages">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="3"></circle>
                         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
                     </svg>
-                </button>
-
-                <button id="btn-section-aide"
-                       data-onglet="aide"
-                       title="Consulter la documentation">
-                    Aide
                 </button>
             </div>
         </nav>
@@ -15506,7 +15543,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97';
-        const BUILD_ID = '0207-1100';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0207-1115';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
@@ -15634,10 +15671,7 @@
                 });
             }
 
-            // Afficher le numéro de build dans l'entête
-            afficherBuildNumero();
-
-            // Mettre à jour l'affichage de la pastille
+            // Mettre à jour l'affichage de la pastille (no-op si accueil pas encore rendu)
             mettreAJourPastille();
         });
 
