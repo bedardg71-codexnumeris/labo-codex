@@ -59,6 +59,10 @@
     function initialiserAnnotation() {
         // Ecouter le rendu de page pour synchroniser
         window.addEventListener('travaux-page-rendue', (e) => {
+            // Deselectionner au changement de page (evite sélection fantome)
+            annotationSelectionnee = null;
+            poigneeActive = null;
+
             if (annotationActive) {
                 dimensionnerCanvasAnnotation(e.detail.width, e.detail.height);
                 chargerAnnotationsPage();
@@ -589,6 +593,9 @@
     function onKeyDown(e) {
         if (!annotationActive) return;
 
+        // Ne pas intercepter les touches dans les champs de formulaire
+        if (e.target.matches('input, select, textarea, [contenteditable]')) return;
+
         // Delete/Backspace : supprimer l'annotation selectionnee
         if ((e.key === 'Delete' || e.key === 'Backspace') && annotationSelectionnee) {
             e.preventDefault();
@@ -1042,7 +1049,9 @@
             }
             if (origW > 0 && newW > 0) {
                 const ratio = newW / origW;
-                sel.data.fontSize = Math.max(8, Math.round((sel.data.fontSize || 14) * ratio));
+                // Utiliser la fontSize originale (avant drag) pour eviter la croissance exponentielle
+                const fontSizeOriginal = (donneesAvantModif && donneesAvantModif.fontSize) || sel.data.fontSize || 14;
+                sel.data.fontSize = Math.max(8, Math.round(fontSizeOriginal * ratio));
             }
         }
 

@@ -196,18 +196,19 @@
      * @param {number} h - Hauteur du canvas
      * @param {Object} donneesPage - { strokes, shapes, textAnnotations, stickers }
      */
-    function dessinerAnnotationsSurCtx(ctx, w, h, donneesPage) {
+    function dessinerAnnotationsSurCtx(ctx, w, h, donneesPage, scale) {
+        if (scale == null) scale = EXPORT_SCALE;
         // Traits
         if (donneesPage.strokes) {
             for (const trait of donneesPage.strokes) {
-                dessinerTrait(ctx, w, h, trait);
+                dessinerTrait(ctx, w, h, trait, scale);
             }
         }
 
         // Formes
         if (donneesPage.shapes) {
             for (const forme of donneesPage.shapes) {
-                dessinerForme(ctx, w, h, forme);
+                dessinerForme(ctx, w, h, forme, scale);
             }
         }
 
@@ -215,7 +216,7 @@
         if (donneesPage.textAnnotations) {
             for (const texte of donneesPage.textAnnotations) {
                 ctx.save();
-                ctx.font = `${(texte.fontSize || 14) * EXPORT_SCALE}px sans-serif`;
+                ctx.font = `${(texte.fontSize || 14) * scale}px sans-serif`;
                 ctx.fillStyle = texte.color || '#FF0000';
                 ctx.fillText(texte.text, texte.x * w, texte.y * h);
                 ctx.restore();
@@ -236,7 +237,7 @@
     /**
      * Dessine un trait
      */
-    function dessinerTrait(ctx, w, h, trait) {
+    function dessinerTrait(ctx, w, h, trait, scale) {
         if (!trait.points || trait.points.length < 2) return;
 
         const outil = travauxOutils.OUTILS[trait.tool] || travauxOutils.OUTILS.stylo;
@@ -254,8 +255,8 @@
         for (let i = 1; i < trait.points.length; i++) {
             const p = trait.points[i];
             const epaisseur = outil.sensiblePression
-                ? travauxOutils.calculerEpaisseurPression(p.pressure) * (trait.lineWidth / outil.epaisseurDefaut) * EXPORT_SCALE
-                : trait.lineWidth * EXPORT_SCALE;
+                ? travauxOutils.calculerEpaisseurPression(p.pressure) * (trait.lineWidth / outil.epaisseurDefaut) * scale
+                : trait.lineWidth * scale;
             ctx.lineWidth = epaisseur;
             ctx.lineTo(p.x * w, p.y * h);
             ctx.stroke();
@@ -269,10 +270,10 @@
     /**
      * Dessine une forme
      */
-    function dessinerForme(ctx, w, h, forme) {
+    function dessinerForme(ctx, w, h, forme, scale) {
         ctx.save();
         ctx.strokeStyle = forme.color;
-        ctx.lineWidth = (forme.lineWidth || 2) * EXPORT_SCALE;
+        ctx.lineWidth = (forme.lineWidth || 2) * scale;
         ctx.lineCap = 'round';
 
         const x1 = forme.x1 * w, y1 = forme.y1 * h;
@@ -293,7 +294,7 @@
                 break;
             }
             case 'fleche': {
-                const headLen = 15 * EXPORT_SCALE;
+                const headLen = 15 * scale;
                 const angle = Math.atan2(y2 - y1, x2 - x1);
                 ctx.beginPath();
                 ctx.moveTo(x1, y1);
@@ -312,7 +313,7 @@
                 const my = (y1 + y2) / 2;
                 const size = Math.min(Math.abs(x2 - x1), Math.abs(y2 - y1)) / 2;
                 ctx.strokeStyle = forme.color || '#00AA00';
-                ctx.lineWidth = 3 * EXPORT_SCALE;
+                ctx.lineWidth = 3 * scale;
                 ctx.beginPath();
                 ctx.moveTo(mx - size, my);
                 ctx.lineTo(mx - size * 0.3, my + size * 0.8);
@@ -322,7 +323,7 @@
             }
             case 'croix': {
                 ctx.strokeStyle = forme.color || '#FF0000';
-                ctx.lineWidth = 3 * EXPORT_SCALE;
+                ctx.lineWidth = 3 * scale;
                 ctx.beginPath();
                 ctx.moveTo(x1, y1);
                 ctx.lineTo(x2, y2);
@@ -663,7 +664,7 @@
 
             const donneesPage = annotation?.pages?.[i - 1];
             if (donneesPage) {
-                dessinerAnnotationsSurCtx(ctx, canvas.width, canvas.height, donneesPage);
+                dessinerAnnotationsSurCtx(ctx, canvas.width, canvas.height, donneesPage, scale);
             }
 
             const dataUrl = canvas.toDataURL('image/jpeg', quality);

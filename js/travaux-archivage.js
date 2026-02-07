@@ -261,7 +261,7 @@
      * (inclut le rendu des stickers)
      */
     function dessinerAnnotationsSurCanvas(ctx, donnees, w, h) {
-        travauxExportPDF.dessinerAnnotationsSurCtx(ctx, w, h, donnees);
+        travauxExportPDF.dessinerAnnotationsSurCtx(ctx, w, h, donnees, 1);
     }
 
     /* ===============================

@@ -1,8 +1,8 @@
-# SESSION ACTIVE - BETA 97.2
+# SESSION ACTIVE - BETA 97.3
 
 **Date** : 7 février 2026
-**Version** : Beta 97.2 (build 0207-1045)
-**Statut** : Outil d'annotation enrichi — panneau retractable, mode selection/edition, export PDF dans archives
+**Version** : Beta 97.3 (build 0207-1100)
+**Statut** : Correctifs annotation — 5 bugs audit (fontSize, selection fantome, scale export, listeners, Backspace)
 
 ---
 
