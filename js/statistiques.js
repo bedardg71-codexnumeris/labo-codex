@@ -293,4 +293,12 @@ function setStatText(id, valeur) {
  * Fonction chargerStatistiquesApercu() conservée à l'identique
  */
 
+/* ===============================
+   EXPORTS GLOBAUX
+   =============================== */
+
+window.initialiserModuleStatistiques = initialiserModuleStatistiques;
+window.chargerStatistiquesApercu = chargerStatistiquesApercu;
+window.chargerMaterielConfigure = chargerMaterielConfigure;
+
 })();
