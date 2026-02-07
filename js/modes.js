@@ -744,16 +744,10 @@ function estModeeLectureSeule() {
 // ============================================
 
 /**
- * Gère l'affichage des boutons d'en-tête et de la section Aide selon le mode actif
+ * Gère l'affichage des boutons d'en-tête selon le mode actif
  * @param {string} mode - Le mode actif
  */
 function gererAffichageBoutonPrimo(mode) {
-    // [Chantier 2] Mode Assisté supprimé — Primo toujours masqué
-    const boutonPrimo = document.getElementById('btn-assistance-primo');
-    if (boutonPrimo) {
-        toggleDisplay(boutonPrimo, false);
-    }
-
     // Boutons Soutenir/Feedback (visibles en mode Normal uniquement)
     const boutonSoutenir = document.getElementById('btn-soutenir-projet');
     const boutonFeedback = document.getElementById('btn-feedback');
@@ -764,19 +758,6 @@ function gererAffichageBoutonPrimo(mode) {
 
     if (boutonFeedback) {
         toggleDisplay(boutonFeedback, mode === MODES.NORMAL);
-    }
-
-    // Section Aide masquée (mode Assisté supprimé)
-    const boutonAide = document.getElementById('btn-section-aide');
-    if (boutonAide) {
-        boutonAide.classList.add('u-hide');
-
-        // Si on est sur la section Aide, rediriger vers Tableau de bord
-        if (typeof sectionActive !== 'undefined' && sectionActive === 'aide') {
-            if (typeof afficherSection === 'function') {
-                afficherSection('tableau-bord');
-            }
-        }
     }
 }
 

@@ -3332,24 +3332,6 @@
                         <!-- Sera rempli dynamiquement par JavaScript -->
                     </div>
 
-                    <!-- Émoji Assistance Primo avec cercle et pulsation (visible uniquement en mode Assisté) -->
-                    <div id="btn-assistance-primo"
-                         onclick="reafficherAccueilPrimo()"
-                         style="display: none; position: absolute; right: 20px; top: 60%; transform: translateY(-50%); cursor: pointer;"
-                         title="Obtenir de l'aide avec Primo">
-                        <div style="
-                            width: 60px;
-                            height: 60px;
-                            background: linear-gradient(135deg, #2d7a8c 0%, #45a8a0 100%);
-                            border-radius: 50%;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            animation: highlight-glow 3s ease-in-out infinite;
-                            box-shadow: 0 4px 15px rgba(45, 122, 140, 0.3);">
-                            <span style="font-size: 2rem;">😎</span>
-                        </div>
-                    </div>
                 </div>
             </div>
         </header>
@@ -3786,10 +3768,8 @@
                     </svg>
                 </button>
 
-                <!-- Bouton Aide (visible uniquement en mode Assisté) -->
                 <button id="btn-section-aide"
                        data-onglet="aide"
-                       style="display: none;"
                        title="Consulter la documentation">
                     Aide
                 </button>
@@ -11619,6 +11599,268 @@
                     </div>
                 </div>
 
+                <!-- ===================================
+                     SOUS-SECTION: À PROPOS
+                     =================================== -->
+                <div id="reglages-a-propos" class="sous-section">
+                    <h2>Notes de version</h2>
+                    <p class="text-muted">Historique des changements majeurs</p>
+
+                    <!-- Beta 97 -->
+                    <div class="carte accordeon ouvert" id="accordeon-apropos-beta97">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Beta 97 — Module Travaux
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu" style="display: block;">
+                        <p class="text-muted">6 février 2026</p>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Nouvel onglet Travaux</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Annotation int&eacute;gr&eacute;e</strong> : Gestion compl&egrave;te des travaux &eacute;tudiants directement dans Monitorage (import, annotation, archivage).</li>
+                            <li><strong>3 sous-sections</strong> : Import, Visionneuse et Archivage accessibles depuis l'onglet Travaux.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Import de fichiers</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Drag-and-drop</strong> : Glissez vos PDF et images (JPEG, PNG, HEIC, WebP) dans la zone de dépôt.</li>
+                            <li><strong>Détection automatique du DA</strong> : Le numéro d'admission est extrait du nom de fichier (ex: "Audet_9000175_travail.pdf").</li>
+                            <li><strong>Jumelage par nom</strong> : Si le DA n'est pas trouvé, recherche par nom/prénom dans le fichier.</li>
+                            <li><strong>Association manuelle</strong> : Dropdown pour corriger ou associer un étudiant avant l'import.</li>
+                            <li><strong>Compression images</strong> : Les images dépassant 2000px sont automatiquement redimensionnées (JPEG 85%).</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Visionneuse intégrée</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Rendu PDF natif</strong> : Affichage des PDF via PDF.js directement dans l'application.</li>
+                            <li><strong>Navigation multi-pages</strong> : Boutons précédent/suivant et indicateur de page.</li>
+                            <li><strong>Zoom</strong> : Zoom avant/arrière par paliers de 25%, ajustement automatique à la fenêtre.</li>
+                            <li><strong>Sidebar miniatures</strong> : Liste des fichiers avec filtrage par étudiant.</li>
+                            <li><strong>Pré-rendu</strong> : Les pages adjacentes sont pré-rendues en arrière-plan pour une navigation instantanée.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Annotation au stylet</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Outils de dessin</strong> : Stylo (rouge par défaut), surligneur (jaune, semi-transparent), gomme (supprime le trait entier au contact).</li>
+                            <li><strong>Formes et symboles</strong> : Cercle, flèche, rectangle, crochet (correct) et croix (incorrect).</li>
+                            <li><strong>Texte</strong> : Ajoutez des commentaires positionnés sur le document.</li>
+                            <li><strong>6 couleurs</strong> : Rouge, bleu, vert, orange, noir, violet.</li>
+                            <li><strong>Apple Pencil</strong> : Sensibilité à la pression (courbe Hermite), rejet de la paume, événements coalescés pour fluidité maximale.</li>
+                            <li><strong>Annuler/Rétablir</strong> : Ctrl+Z / Ctrl+Maj+Z, jusqu'à 50 niveaux.</li>
+                            <li><strong>Sauvegarde automatique</strong> : Les annotations sont sauvegardées automatiquement après 2 secondes d'inactivité.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Intégration avec les évaluations</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Bouton « Voir le travail »</strong> : Visible dans la page d'évaluation quand un fichier est associé à l'étudiant.</li>
+                            <li><strong>Vue côte à côte</strong> : Le travail s'affiche à gauche, la grille de critères à droite. Annotez tout en évaluant.</li>
+                            <li><strong>Section Profil étudiant</strong> : Nouvelle section « Travaux soumis » avec grille de miniatures et badge d'annotation.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Archivage et export</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Export par étudiant</strong> : Téléchargez un ZIP contenant tous les travaux d'un étudiant (originaux + annotés).</li>
+                            <li><strong>Export par production</strong> : Tous les travaux soumis pour une production donnée.</li>
+                            <li><strong>Export semestre complet</strong> : Archive complète organisée par étudiant.</li>
+                            <li><strong>Moniteur de stockage</strong> : Barre de progression avec alerte à 80% de capacité et suggestion de nettoyage.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Optimisations</h4>
+                        <ul class="modal-liste">
+                            <li><strong>File System Access API (Mac)</strong> : Option pour stocker les fichiers sur votre disque au lieu d'IndexedDB. Recommandé pour les gros volumes.</li>
+                            <li><strong>Scroll virtuel</strong> : Les listes de 50+ miniatures utilisent le rendu virtuel pour maintenir la fluidité.</li>
+                            <li><strong>Stockage persistant</strong> : Demande automatique de persistance au navigateur pour protéger les données.</li>
+                        </ul>
+                        <h4 class="titre-bleu-mb8 mt-15">35 correctifs (6 février)</h4>
+                        <ul class="modal-liste">
+                            <li><strong>5 bugs critiques</strong> : Clé productions unifiée, suppression demo sécurisée, calcul heures/assiduité corrigé, format présences normalisé, IDs uniques (crypto).</li>
+                            <li><strong>9 bugs haute priorité</strong> : Noms de clés corrigés dans 5 modules, filtrage assiduité par étudiant, taux de complétion, tri « récents-meilleurs » par date, race condition demo, éléments DOM protégés.</li>
+                            <li><strong>10 bugs moyenne priorité</strong> : Catch silencieux remplacés par diagnostics, clé legacy niveauxEchelle migrée, anonymisation crypto, double-stringify export corrigé, filtrage demo à l'export, timing db-ready, statistiques d'archive sur bon trimestre, évaluations remplacées exclues, Math.cbrt pour négatifs, tendance triée par date.</li>
+                            <li><strong>Namespacing renforcé</strong> : ~50 localStorage directs migrés vers db.js, 5 clés ajoutées à CLES_NAMESPACEES, storage listener corrigé, 12 fonctions dupliquées consolidées.</li>
+                            <li><strong>Design system</strong> : ~35 couleurs Material Design → variables CSS, border-radius harmonisés, tokens badges ajoutés, validation primo en classes CSS, box-shadows normalisés, en-tête styles.css mis à jour.</li>
+                        </ul>
+                        </div>
+                    </div>
+
+                    <!-- Beta 96 -->
+                    <div class="carte accordeon" id="accordeon-apropos-beta96">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Beta 96 — Visualisations avancées et stabilisation
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                        <p class="text-muted">25-26 janvier 2026</p>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Nouveaux graphiques (Tableau de bord)</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Graphique spaghetti ACP</strong> : Trajectoires d'évolution de tous les étudiants (indices A, C, P par semaine).</li>
+                            <li><strong>Graphique spaghetti par production</strong> : Résultats bruts par artefact montrant la volatilité réelle de l'apprentissage.</li>
+                            <li><strong>Courbes de distribution ACPE</strong> : Densité de probabilité (KDE) pour visualiser la répartition du groupe.</li>
+                            <li><strong>Mini-courbes de Gauss</strong> : Superposées sur chaque barre ACPE avec μ et ±σ.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Réorganisation du tableau de bord</h4>
+                        <ul class="modal-liste">
+                            <li><strong>4 sections distinctes</strong> : Observer, Intervenir (Patterns + RàI), Développement du groupe, Développement individuel.</li>
+                            <li><strong>Uniformisation visuelle</strong> : Tous les graphiques adoptent le même style (échelle Y dynamique, zones IDME, survol interactif).</li>
+                            <li><strong>Points uniformisés</strong> : Style blanc par défaut, noir au survol/sélection pour tous les graphiques.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Corrections importantes</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Export PDF (#30)</strong> : Affiche maintenant les infos cours et enseignant (fallbacks multiples vers profilEnseignant).</li>
+                            <li><strong>Indice P = Note finale (#37)</strong> : L'indice P reflète maintenant la vraie note de session (méthode de sélection, pondérations, conformité).</li>
+                            <li><strong>Aperçu des présences</strong> : Taux d'assiduité aligné sur le tableau de bord (sommatif uniquement, filtrage groupe actif).</li>
+                            <li><strong>Anonymisation archives</strong> : Les noms sont correctement anonymisés dans les graphiques spaghetti.</li>
+                            <li><strong>Clic sur noms étudiants</strong> : Le verrouillage fonctionne dans tous les graphiques (ratio scale CSS/canvas).</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Import historique A2024</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Archivage complet</strong> : 55 étudiants, 2 groupes, 14 artefacts, 750 évaluations, 1650 présences.</li>
+                            <li><strong>Échelle IDME documentée</strong> : I=40%, D=65%, M=85%, E=100%.</li>
+                            <li><strong>Pratique configurée</strong> : 6 artefacts récents (60%) + Analyse finale (40%).</li>
+                            <li><strong>Trimestre en lecture seule</strong> : Données historiques protégées.</li>
+                        </ul>
+                        </div>
+                    </div>
+
+                    <!-- Beta 95.3-95.7 -->
+                    <div class="carte accordeon" id="accordeon-apropos-beta957">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Beta 95.3-95.7 — Stabilisation et UX
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                        <p class="text-muted">9-24 janvier 2026</p>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Aide contextuelle (Beta 95.6)</h4>
+                        <ul class="modal-liste">
+                            <li><strong>15 sections d'aide</strong> : Boutons dans toutes les zones critiques.</li>
+                            <li><strong>Tutoiement systématique</strong> : Ton chaleureux et accessible.</li>
+                            <li><strong>Ordre de configuration clarifié</strong> : Échelles → Pratiques → Grilles → Productions.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Calcul d'assiduité corrigé (Beta 95.7)</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Formule en périodes</strong> : periodesPresentes / periodesOffertes (au lieu d'heures).</li>
+                            <li><strong>Moyenne A du groupe</strong> : Affichée dans l'en-tête et sur la barre Assiduité.</li>
+                            <li><strong>Points individuels</strong> : Distribution visible sur la barre (26 points à 100%, 2 à 0%).</li>
+                            <li><strong>Saisie numérique</strong> : Input numérique au lieu de dropdown (permet 1.5 périodes).</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Corrections multi-trimestres (Beta 95.3-95.5)</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Compatibilité A2025</strong> : Détection format ancien (SOM/PAN) vs nouveau (pratique unique).</li>
+                            <li><strong>Bug anonymisation corrigé</strong> : Liste étudiants vide en mode anonymisé (groupeReel préservé).</li>
+                            <li><strong>Filtrage présences</strong> : Présences correctement filtrées par groupe-cours actif.</li>
+                            <li><strong>Namespacing complet</strong> : groupesCours et horaires ajoutés à CLES_NAMESPACEES.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">UX améliorée (Beta 95.4-95.6)</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Séparation modal Bienvenue</strong> : News (nouveautés) + Introduction (guide démarrage).</li>
+                            <li><strong>Catégories Selection/Obligatoires</strong> : Deux cartes avec checkboxes exclusives.</li>
+                            <li><strong>Badge nb étudiants</strong> : Uniformisé dans Vue d'ensemble et Liste.</li>
+                            <li><strong>Vue calendaire corrigée</strong> : Affiche les bons jours selon groupe-cours actif.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Maintenance (Beta 95.3)</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Audit module évaluation</strong> : 3 problèmes critiques résolus (namespacing, groupe-cours, validations).</li>
+                            <li><strong>Import depuis trimestre</strong> : Échelles, grilles, productions réutilisables.</li>
+                            <li><strong>Nommage exports standardisé</strong> : type-nom-cours-discipline-date.json.</li>
+                            <li><strong>Design System v7</strong> : Audit conformité border-radius et box-shadow.</li>
+                        </ul>
+                        </div>
+                    </div>
+
+                    <!-- Beta 95.2 -->
+                    <div class="carte accordeon" id="accordeon-apropos-beta952">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Beta 95.2 — Architecture modulaire groupe-cours
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                        <p class="text-muted">6-8 janvier 2026</p>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Séparation des entités</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Toggle Cours</strong> : Informations générales uniquement (code, nom, compétence).</li>
+                            <li><strong>Toggle Enseignant·e</strong> : Profil auteur séparé (prénom, nom, courriel, institution, niveau).</li>
+                            <li><strong>Toggle Horaire</strong> : Séances hebdomadaires configurables (jours, heures, local).</li>
+                            <li><strong>Toggle Groupe-cours</strong> : Assemblage via dropdowns (cours + enseignant + horaire + pratique).</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Profil auteur pour métadonnées CC</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Source unique</strong> : L'enseignant·e du groupe-cours actif alimente automatiquement les métadonnées Creative Commons.</li>
+                            <li><strong>Plus d'édition manuelle</strong> : Les informations auteur sont centralisées dans le toggle Enseignant·e.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Migration automatique</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Extraction des enseignants</strong> : Les informations enseignant sont extraites de listeCours vers la nouvelle entité.</li>
+                            <li><strong>Extraction des horaires</strong> : Les séances hebdomadaires sont converties vers l'entité Horaire.</li>
+                            <li><strong>Création des groupe-cours</strong> : Les associations sont recréées automatiquement.</li>
+                            <li><strong>Rétrocompatibilité</strong> : listeCours reste lisible pour les modules legacy.</li>
+                        </ul>
+                        </div>
+                    </div>
+
+                    <!-- Beta 95 et antérieures -->
+                    <div class="carte accordeon" id="accordeon-apropos-beta95">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Beta 95 et versions antérieures
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                        <p class="text-muted">Septembre 2025 — janvier 2026</p>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Beta 95 — Stabilisation H2026</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Gestion multi-trimestres</strong> : A2025, H2026, etc. avec archivage automatique.</li>
+                            <li><strong>Gestion multi-cours</strong> : Plusieurs cours par trimestre avec données isolées.</li>
+                            <li><strong>Sauvegarde et protection</strong> : Rappel de backup périodique, export/import amélioré.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Beta 94 — Snapshots et suivi longitudinal</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Captures automatiques</strong> : Snapshots hebdomadaires de la progression.</li>
+                            <li><strong>Graphiques d'évolution</strong> : Indices A-C-P dans le temps avec Chart.js.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Beta 93 — Système universel de critères</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Critères configurables</strong> : N'importe quelle grille de critères.</li>
+                            <li><strong>Recommandations génériques</strong> : Interventions RàI adaptées.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Beta 91-92 — IndexedDB et Primo</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Stockage hybride</strong> : IndexedDB + localStorage (capacité GB).</li>
+                            <li><strong>Assistant de configuration</strong> : Parcours guidé pour nouveaux utilisateurs.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Beta 90 — Présentation AQPC</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Système de pratiques modulaire</strong> : Sommative, PAN-Standards, etc.</li>
+                            <li><strong>Engagement (E)</strong> : Remplacement du concept de « Risque d'échec ».</li>
+                            <li><strong>Barres de distribution</strong> : Nuages de points avec gradients.</li>
+                        </ul>
+                        </div>
+                    </div>
+
+                    <div class="alerte alerte-information">
+                        <strong>Versions antérieures :</strong> Pour l'historique complet des versions Beta 75 à 89, consultez les fichiers de documentation du projet.
+                    </div>
+                </div>
+
             </section><!-- fin section-reglages -->
 
             <!-- ===================================
@@ -15152,530 +15394,7 @@
                     </div>
                 </div>
 
-                <!-- ===================================
-                     SOUS-SECTION 7: NOTES DE VERSION
-                     =================================== -->
-                <div id="aide-versions" class="sous-section">
-                    <h2>Notes de version</h2>
-                    <p class="text-muted">Historique des changements majeurs</p>
-
-                    <!-- Beta 97 -->
-                    <div class="carte accordeon ouvert" id="accordeon-aide-beta97">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
-                            <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Beta 97 — Module Travaux
-                            </h3>
-                        </div>
-                        <div class="accordeon-contenu" style="display: block;">
-                        <p class="text-muted">6 février 2026</p>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Nouvel onglet Travaux</h4>
-                        <ul class="modal-liste">
-                            <li><strong>Annotation int&eacute;gr&eacute;e</strong> : Gestion compl&egrave;te des travaux &eacute;tudiants directement dans Monitorage (import, annotation, archivage).</li>
-                            <li><strong>3 sous-sections</strong> : Import, Visionneuse et Archivage accessibles depuis l'onglet Travaux.</li>
-                        </ul>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Import de fichiers</h4>
-                        <ul class="modal-liste">
-                            <li><strong>Drag-and-drop</strong> : Glissez vos PDF et images (JPEG, PNG, HEIC, WebP) dans la zone de dépôt.</li>
-                            <li><strong>Détection automatique du DA</strong> : Le numéro d'admission est extrait du nom de fichier (ex: "Audet_9000175_travail.pdf").</li>
-                            <li><strong>Jumelage par nom</strong> : Si le DA n'est pas trouvé, recherche par nom/prénom dans le fichier.</li>
-                            <li><strong>Association manuelle</strong> : Dropdown pour corriger ou associer un étudiant avant l'import.</li>
-                            <li><strong>Compression images</strong> : Les images dépassant 2000px sont automatiquement redimensionnées (JPEG 85%).</li>
-                        </ul>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Visionneuse intégrée</h4>
-                        <ul class="modal-liste">
-                            <li><strong>Rendu PDF natif</strong> : Affichage des PDF via PDF.js directement dans l'application.</li>
-                            <li><strong>Navigation multi-pages</strong> : Boutons précédent/suivant et indicateur de page.</li>
-                            <li><strong>Zoom</strong> : Zoom avant/arrière par paliers de 25%, ajustement automatique à la fenêtre.</li>
-                            <li><strong>Sidebar miniatures</strong> : Liste des fichiers avec filtrage par étudiant.</li>
-                            <li><strong>Pré-rendu</strong> : Les pages adjacentes sont pré-rendues en arrière-plan pour une navigation instantanée.</li>
-                        </ul>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Annotation au stylet</h4>
-                        <ul class="modal-liste">
-                            <li><strong>Outils de dessin</strong> : Stylo (rouge par défaut), surligneur (jaune, semi-transparent), gomme (supprime le trait entier au contact).</li>
-                            <li><strong>Formes et symboles</strong> : Cercle, flèche, rectangle, crochet (correct) et croix (incorrect).</li>
-                            <li><strong>Texte</strong> : Ajoutez des commentaires positionnés sur le document.</li>
-                            <li><strong>6 couleurs</strong> : Rouge, bleu, vert, orange, noir, violet.</li>
-                            <li><strong>Apple Pencil</strong> : Sensibilité à la pression (courbe Hermite), rejet de la paume, événements coalescés pour fluidité maximale.</li>
-                            <li><strong>Annuler/Rétablir</strong> : Ctrl+Z / Ctrl+Maj+Z, jusqu'à 50 niveaux.</li>
-                            <li><strong>Sauvegarde automatique</strong> : Les annotations sont sauvegardées automatiquement après 2 secondes d'inactivité.</li>
-                        </ul>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Intégration avec les évaluations</h4>
-                        <ul class="modal-liste">
-                            <li><strong>Bouton « Voir le travail »</strong> : Visible dans la page d'évaluation quand un fichier est associé à l'étudiant.</li>
-                            <li><strong>Vue côte à côte</strong> : Le travail s'affiche à gauche, la grille de critères à droite. Annotez tout en évaluant.</li>
-                            <li><strong>Section Profil étudiant</strong> : Nouvelle section « Travaux soumis » avec grille de miniatures et badge d'annotation.</li>
-                        </ul>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Archivage et export</h4>
-                        <ul class="modal-liste">
-                            <li><strong>Export par étudiant</strong> : Téléchargez un ZIP contenant tous les travaux d'un étudiant (originaux + annotés).</li>
-                            <li><strong>Export par production</strong> : Tous les travaux soumis pour une production donnée.</li>
-                            <li><strong>Export semestre complet</strong> : Archive complète organisée par étudiant.</li>
-                            <li><strong>Moniteur de stockage</strong> : Barre de progression avec alerte à 80% de capacité et suggestion de nettoyage.</li>
-                        </ul>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Optimisations</h4>
-                        <ul class="modal-liste">
-                            <li><strong>File System Access API (Mac)</strong> : Option pour stocker les fichiers sur votre disque au lieu d'IndexedDB. Recommandé pour les gros volumes.</li>
-                            <li><strong>Scroll virtuel</strong> : Les listes de 50+ miniatures utilisent le rendu virtuel pour maintenir la fluidité.</li>
-                            <li><strong>Stockage persistant</strong> : Demande automatique de persistance au navigateur pour protéger les données.</li>
-                        </ul>
-                        <h4 class="titre-bleu-mb8 mt-15">35 correctifs (6 février)</h4>
-                        <ul class="modal-liste">
-                            <li><strong>5 bugs critiques</strong> : Clé productions unifiée, suppression demo sécurisée, calcul heures/assiduité corrigé, format présences normalisé, IDs uniques (crypto).</li>
-                            <li><strong>9 bugs haute priorité</strong> : Noms de clés corrigés dans 5 modules, filtrage assiduité par étudiant, taux de complétion, tri « récents-meilleurs » par date, race condition demo, éléments DOM protégés.</li>
-                            <li><strong>10 bugs moyenne priorité</strong> : Catch silencieux remplacés par diagnostics, clé legacy niveauxEchelle migrée, anonymisation crypto, double-stringify export corrigé, filtrage demo à l'export, timing db-ready, statistiques d'archive sur bon trimestre, évaluations remplacées exclues, Math.cbrt pour négatifs, tendance triée par date.</li>
-                            <li><strong>Namespacing renforcé</strong> : ~50 localStorage directs migrés vers db.js, 5 clés ajoutées à CLES_NAMESPACEES, storage listener corrigé, 12 fonctions dupliquées consolidées.</li>
-                            <li><strong>Design system</strong> : ~35 couleurs Material Design → variables CSS, border-radius harmonisés, tokens badges ajoutés, validation primo en classes CSS, box-shadows normalisés, en-tête styles.css mis à jour.</li>
-                        </ul>
-                        </div><!-- fin accordeon-contenu beta97 -->
-                    </div>
-
-                    <!-- Beta 96 -->
-                    <div class="carte accordeon" id="accordeon-aide-beta96">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
-                            <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Beta 96 — Visualisations avancées et stabilisation
-                            </h3>
-                        </div>
-                        <div class="accordeon-contenu">
-                        <p class="text-muted">25-26 janvier 2026</p>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Nouveaux graphiques (Tableau de bord)</h4>
-                        <ul class="modal-liste">
-                            <li><strong>Graphique spaghetti ACP</strong> : Trajectoires d'évolution de tous les étudiants (indices A, C, P par semaine).</li>
-                            <li><strong>Graphique spaghetti par production</strong> : Résultats bruts par artefact montrant la volatilité réelle de l'apprentissage.</li>
-                            <li><strong>Courbes de distribution ACPE</strong> : Densité de probabilité (KDE) pour visualiser la répartition du groupe.</li>
-                            <li><strong>Mini-courbes de Gauss</strong> : Superposées sur chaque barre ACPE avec μ et ±σ.</li>
-                        </ul>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Réorganisation du tableau de bord</h4>
-                        <ul class="modal-liste">
-                            <li><strong>4 sections distinctes</strong> : Observer, Intervenir (Patterns + RàI), Développement du groupe, Développement individuel.</li>
-                            <li><strong>Uniformisation visuelle</strong> : Tous les graphiques adoptent le même style (échelle Y dynamique, zones IDME, survol interactif).</li>
-                            <li><strong>Points uniformisés</strong> : Style blanc par défaut, noir au survol/sélection pour tous les graphiques.</li>
-                        </ul>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Corrections importantes</h4>
-                        <ul class="modal-liste">
-                            <li><strong>Export PDF (#30)</strong> : Affiche maintenant les infos cours et enseignant (fallbacks multiples vers profilEnseignant).</li>
-                            <li><strong>Indice P = Note finale (#37)</strong> : L'indice P reflète maintenant la vraie note de session (méthode de sélection, pondérations, conformité).</li>
-                            <li><strong>Aperçu des présences</strong> : Taux d'assiduité aligné sur le tableau de bord (sommatif uniquement, filtrage groupe actif).</li>
-                            <li><strong>Anonymisation archives</strong> : Les noms sont correctement anonymisés dans les graphiques spaghetti.</li>
-                            <li><strong>Clic sur noms étudiants</strong> : Le verrouillage fonctionne dans tous les graphiques (ratio scale CSS/canvas).</li>
-                        </ul>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Import historique A2024</h4>
-                        <ul class="modal-liste">
-                            <li><strong>Archivage complet</strong> : 55 étudiants, 2 groupes, 14 artefacts, 750 évaluations, 1650 présences.</li>
-                            <li><strong>Échelle IDME documentée</strong> : I=40%, D=65%, M=85%, E=100%.</li>
-                            <li><strong>Pratique configurée</strong> : 6 artefacts récents (60%) + Analyse finale (40%).</li>
-                            <li><strong>Trimestre en lecture seule</strong> : Données historiques protégées.</li>
-                        </ul>
-                        </div><!-- fin accordeon-contenu beta96 -->
-                    </div>
-
-                    <!-- Beta 95.3-95.7 -->
-                    <div class="carte accordeon" id="accordeon-aide-beta957">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
-                            <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Beta 95.3-95.7 — Stabilisation et UX
-                            </h3>
-                        </div>
-                        <div class="accordeon-contenu">
-                        <p class="text-muted">9-24 janvier 2026</p>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Aide contextuelle 😎 (Beta 95.6)</h4>
-                        <ul class="modal-liste">
-                            <li><strong>15 sections d'aide</strong> : Boutons 😎 dans toutes les zones critiques (Mode Assisté uniquement).</li>
-                            <li><strong>Tutoiement systématique</strong> : Ton chaleureux et accessible.</li>
-                            <li><strong>Ordre de configuration clarifié</strong> : Échelles → Pratiques → Grilles → Productions.</li>
-                        </ul>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Calcul d'assiduité corrigé (Beta 95.7)</h4>
-                        <ul class="modal-liste">
-                            <li><strong>Formule en périodes</strong> : periodesPresentes / periodesOffertes (au lieu d'heures).</li>
-                            <li><strong>Moyenne A du groupe</strong> : Affichée dans l'en-tête et sur la barre Assiduité.</li>
-                            <li><strong>Points individuels</strong> : Distribution visible sur la barre (26 points à 100%, 2 à 0%).</li>
-                            <li><strong>Saisie numérique</strong> : Input numérique au lieu de dropdown (permet 1.5 périodes).</li>
-                        </ul>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Corrections multi-trimestres (Beta 95.3-95.5)</h4>
-                        <ul class="modal-liste">
-                            <li><strong>Compatibilité A2025</strong> : Détection format ancien (SOM/PAN) vs nouveau (pratique unique).</li>
-                            <li><strong>Bug anonymisation corrigé</strong> : Liste étudiants vide en mode anonymisé (groupeReel préservé).</li>
-                            <li><strong>Filtrage présences</strong> : Présences correctement filtrées par groupe-cours actif.</li>
-                            <li><strong>Namespacing complet</strong> : groupesCours et horaires ajoutés à CLES_NAMESPACEES.</li>
-                        </ul>
-
-                        <h4 class="titre-bleu-mb8 mt-15">UX améliorée (Beta 95.4-95.6)</h4>
-                        <ul class="modal-liste">
-                            <li><strong>Séparation modal Bienvenue</strong> : ✉️ News (nouveautés) + 😎 Introduction (guide démarrage).</li>
-                            <li><strong>Catégories Selection/Obligatoires</strong> : Deux cartes avec checkboxes exclusives.</li>
-                            <li><strong>Badge nb étudiants</strong> : Uniformisé dans Vue d'ensemble et Liste.</li>
-                            <li><strong>Vue calendaire corrigée</strong> : Affiche les bons jours selon groupe-cours actif.</li>
-                        </ul>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Maintenance (Beta 95.3)</h4>
-                        <ul class="modal-liste">
-                            <li><strong>Audit module évaluation</strong> : 3 problèmes critiques résolus (namespacing, groupe-cours, validations).</li>
-                            <li><strong>Import depuis trimestre</strong> : Échelles, grilles, productions réutilisables.</li>
-                            <li><strong>Nommage exports standardisé</strong> : type-nom-cours-discipline-date.json.</li>
-                            <li><strong>Design System v7</strong> : Audit conformité border-radius et box-shadow.</li>
-                        </ul>
-                        </div><!-- fin accordeon-contenu beta957 -->
-                    </div>
-
-                    <!-- Beta 95.2 -->
-                    <div class="carte accordeon" id="accordeon-aide-beta952">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
-                            <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Beta 95.2 — Architecture modulaire groupe-cours
-                            </h3>
-                        </div>
-                        <div class="accordeon-contenu">
-                        <p class="text-muted">6-8 janvier 2026</p>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Nouveautés (8 janvier après-midi)</h4>
-                        <ul class="modal-liste">
-                            <li><strong>5 dropdowns groupe-cours</strong> : Assemblage complet avec Trimestre + Cours + Groupe + Horaire + Enseignant.</li>
-                            <li><strong>Multi-profils enseignants</strong> : Dropdown de sélection, bouton "Nouveau profil" et suppression de profils.</li>
-                            <li><strong>Alignement SST Primo/Trimestre</strong> : Les deux modules utilisent exactement les mêmes sources de données.</li>
-                            <li><strong>Fix discipline cours</strong> : Le champ discipline est maintenant sauvegardé et affiché correctement par cours.</li>
-                            <li><strong>Fix affichage cours</strong> : Le formulaire cours s'affiche correctement quand un cours est sélectionné.</li>
-                        </ul>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Corrections (8 janvier matin)</h4>
-                        <ul class="modal-liste">
-                            <li><strong>Section Trimestre stabilisée</strong> : Tous les accordéons fonctionnent (Cours, Enseignant·e, Horaire, Groupe-cours).</li>
-                            <li><strong>Sélecteur groupe-cours</strong> : Le dropdown dans l'en-tête affiche correctement tes groupe-cours.</li>
-                            <li><strong>Persistance au rechargement</strong> : Le groupe-cours et l'horaire sélectionnés sont restaurés après rechargement de page.</li>
-                            <li><strong>Bouton suppression horaire</strong> : Les horaires peuvent être supprimés (changent chaque trimestre).</li>
-                            <li><strong>Présences par groupe-cours</strong> : Les présences sont maintenant correctement filtrées par groupe-cours actif.</li>
-                            <li><strong>Design harmonisé</strong> : Interface uniformisée selon le Design System v7.</li>
-                        </ul>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Retours testeurs (6 janvier)</h4>
-                        <ul class="modal-liste">
-                            <li><strong>Périodes au lieu d'heures</strong> : Format horaire dynamique selon le nombre de périodes (merci Olivier).</li>
-                            <li><strong>Finalisation Primo</strong> : L'interface se met à jour après la configuration (merci Olivier).</li>
-                            <li><strong>Sauvegarde des grilles</strong> : Les nouvelles grilles s'ajoutent correctement à la bibliothèque (merci Bruno).</li>
-                            <li><strong>Heures non piles</strong> : Entrée d'heures comme 8h55 dans Primo (merci Bruno).</li>
-                            <li><strong>Import/Export amélioré</strong> : Import sélectif avec protection des données (merci Bruno).</li>
-                        </ul>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Séparation des entités</h4>
-                        <ul class="modal-liste">
-                            <li><strong>Toggle Cours</strong> : Informations générales uniquement (code, nom, compétence).</li>
-                            <li><strong>Toggle Enseignant·e</strong> : Profil auteur séparé (prénom, nom, courriel, institution, niveau).</li>
-                            <li><strong>Toggle Horaire</strong> : Séances hebdomadaires configurables (jours, heures, local).</li>
-                            <li><strong>Toggle Groupe-cours</strong> : Assemblage via dropdowns (cours + enseignant + horaire + pratique).</li>
-                        </ul>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Profil auteur pour métadonnées CC</h4>
-                        <ul class="modal-liste">
-                            <li><strong>Source unique</strong> : L'enseignant·e du groupe-cours actif alimente automatiquement les métadonnées Creative Commons.</li>
-                            <li><strong>Plus d'édition manuelle</strong> : Les informations auteur sont centralisées dans le toggle Enseignant·e.</li>
-                            <li><strong>Niveau d'enseignement</strong> : Nouveau champ (Secondaire, Collégial, Universitaire, etc.).</li>
-                        </ul>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Réutilisation et flexibilité</h4>
-                        <ul class="modal-liste">
-                            <li><strong>Cours réutilisables</strong> : Un même cours peut être associé à plusieurs groupes.</li>
-                            <li><strong>Horaires indépendants</strong> : Créez des configurations d'horaire réutilisables (ex: "Lun-Mer 10h").</li>
-                            <li><strong>Enseignants partagés</strong> : Le même profil enseignant peut gérer plusieurs groupe-cours.</li>
-                        </ul>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Migration automatique</h4>
-                        <ul class="modal-liste">
-                            <li><strong>Extraction des enseignants</strong> : Les informations enseignant sont extraites de listeCours vers la nouvelle entité.</li>
-                            <li><strong>Extraction des horaires</strong> : Les séances hebdomadaires sont converties vers l'entité Horaire.</li>
-                            <li><strong>Création des groupe-cours</strong> : Les associations sont recréées automatiquement.</li>
-                            <li><strong>Rétrocompatibilité</strong> : listeCours reste lisible pour les modules legacy.</li>
-                        </ul>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Fichiers créés</h4>
-                        <ul class="modal-liste">
-                            <li><code>js/entites/cours-entite.js</code> : CRUD cours (infos générales)</li>
-                            <li><code>js/entites/enseignants.js</code> : CRUD enseignants (profil auteur)</li>
-                            <li><code>js/entites/horaires.js</code> : CRUD horaires (séances)</li>
-                            <li><code>js/entites/groupe-cours.js</code> : Assemblage et synchronisation</li>
-                        </ul>
-                        </div><!-- fin accordeon-contenu beta96 -->
-                    </div>
-
-                    <!-- Beta 95.1 -->
-                    <div class="carte accordeon" id="accordeon-aide-beta951">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
-                            <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Beta 95.1 — Import/Export amélioré
-                            </h3>
-                        </div>
-                        <div class="accordeon-contenu">
-                        <p class="text-muted">5-6 janvier 2026</p>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Partage de ressources pédagogiques</h4>
-                        <ul class="modal-liste">
-                            <li><strong>Import sélectif</strong> : Checkbox individuelle par élément (grille, échelle, production, pratique).</li>
-                            <li><strong>Toggle par catégorie</strong> : Sélection/désélection rapide de tous les éléments d'une catégorie.</li>
-                            <li><strong>Affichage de l'auteur</strong> : Les ressources importées affichent leur auteur original.</li>
-                            <li><strong>Détection automatique</strong> : L'application identifie si un fichier provient de toi ou d'un collègue.</li>
-                        </ul>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Protection des données confidentielles</h4>
-                        <ul class="modal-liste">
-                            <li><strong>Données étudiantes protégées</strong> : Les noms, présences et notes sont grisés et non importables.</li>
-                            <li><strong>Message explicite</strong> : « Partage impossible – Les données nominatives sont confidentielles ».</li>
-                            <li><strong>Filtrage intelligent à l'export</strong> : Les données démo et le matériel importé d'autres collègues sont automatiquement exclus.</li>
-                        </ul>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Corrections de bugs</h4>
-                        <ul class="modal-liste">
-                            <li><strong>Finalisation Primo</strong> : L'interface se met à jour correctement après le parcours de configuration (merci Olivier).</li>
-                            <li><strong>Sauvegarde des nouvelles grilles</strong> : Les grilles créées s'ajoutent maintenant correctement à la bibliothèque (merci Bruno).</li>
-                            <li><strong>Application des pratiques</strong> : Les pratiques créées via Primo s'appliquent correctement au cours.</li>
-                            <li><strong>Persistance des ressources</strong> : Les grilles, échelles, cartouches et productions restent visibles après sauvegarde.</li>
-                            <li><strong>Heures non piles</strong> : Entrée d'heures comme 8h55 dans Primo au lieu des heures rondes.</li>
-                        </ul>
-                        </div><!-- fin accordeon-contenu beta951 -->
-                    </div>
-
-                    <!-- Beta 95 -->
-                    <div class="carte accordeon" id="accordeon-aide-beta95">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
-                            <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Beta 95 — Stabilisation H2026
-                            </h3>
-                        </div>
-                        <div class="accordeon-contenu">
-                        <p class="text-muted">27 décembre 2025 — 4 janvier 2026</p>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Gestion multi-trimestres</h4>
-                        <ul class="modal-liste">
-                            <li><strong>Plusieurs trimestres</strong> : Gérez A2025, H2026, etc. séparément avec leurs propres données.</li>
-                            <li><strong>Archivage automatique</strong> : Les trimestres terminés passent en lecture seule pour protéger tes données.</li>
-                            <li><strong>Mode Correction</strong> : Réactivez temporairement les contrôles pour modifications ponctuelles (absences, jetons).</li>
-                            <li><strong>Mode Anonymisé</strong> : Masquez les identités pour captures d'écran ou présentations.</li>
-                        </ul>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Mode Assisté amélioré</h4>
-                        <ul class="modal-liste">
-                            <li><strong>Données de démonstration</strong> : 5 étudiants • 4 productions • 20 évaluations • 8 semaines de présences.</li>
-                            <li><strong>Exploration sans risque</strong> : L'application bascule en mode Assisté où tu peux tout expérimenter. Les données demo sont complètement isolées de tes vraies données. En cas de pépin, décochez la case pour tout réinitialiser.</li>
-                            <li><strong>Primo 😎</strong> : Assistant de configuration pas-à-pas pour nouveaux utilisateurs.</li>
-                        </ul>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Gestion multi-cours</h4>
-                        <ul class="modal-liste">
-                            <li><strong>Plusieurs cours</strong> : Gérez 601-101, 601-102, etc. dans le même trimestre.</li>
-                            <li><strong>Changement rapide</strong> : Menu déroulant dans l'en-tête pour basculer entre tes cours.</li>
-                            <li><strong>Données isolées</strong> : Chaque cours a ses propres étudiants, évaluations et présences.</li>
-                        </ul>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Sauvegarde et protection</h4>
-                        <ul class="modal-liste">
-                            <li><strong>Rappel de backup</strong> : Modal périodique rappelant l'importance de l'export régulier.</li>
-                            <li><strong>Export/Import amélioré</strong> : Configuration complète avec métadonnées Creative Commons.</li>
-                        </ul>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Corrections et stabilisation (27 déc — 4 jan)</h4>
-                        <ul class="modal-liste">
-                            <li><strong>Isolation des données par cours</strong> : Filtrage automatique par coursId pour éviter la contamination entre cours.</li>
-                            <li><strong>Anonymisation corrigée</strong> : Le mode anonymisé fonctionne maintenant dans le formulaire d'évaluation.</li>
-                            <li><strong>Namespacing complet</strong> : Toutes les clés localStorage utilisent le préfixe du trimestre actif.</li>
-                        </ul>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Design System v7 (1-2 jan 2026)</h4>
-                        <ul class="modal-liste">
-                            <li><strong>Harmonisation visuelle</strong> : 51 occurrences de border-radius harmonisées selon les standards.</li>
-                            <li><strong>Variables CSS</strong> : Gradients, ombres et rayons déclarés comme variables réutilisables.</li>
-                            <li><strong>Modals améliorées</strong> : Overlay bleu semi-transparent avec effet de flou.</li>
-                            <li><strong>Typographie unifiée</strong> : Tailles H1-H4 standardisées dans toute l'application.</li>
-                        </ul>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Guide groupe-cours (2 jan 2026)</h4>
-                        <ul class="modal-liste">
-                            <li><strong>Encadré permanent</strong> : Guide visuel en haut de la page Trimestre avec 4 indicateurs d'état.</li>
-                            <li><strong>Indicateurs dynamiques</strong> : Affichage en temps réel de la progression (Cours, Groupe, Horaire, Étudiants).</li>
-                            <li><strong>Accès rapide à Primo</strong> : Bouton « Assistant Primo » intégré pour les nouveaux utilisateurs.</li>
-                        </ul>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Refonte Construction de la note (2 jan 2026)</h4>
-                        <ul class="modal-liste">
-                            <li><strong>Renommage section</strong> : « Matériel » devient « Construction de la note » pour mieux refléter sa fonction.</li>
-                            <li><strong>Nouvelle sous-section</strong> : « Pratiques de notation » avec pattern sidebar + modal bibliothèque.</li>
-                            <li><strong>Bibliothèque universelle</strong> : Gabarits STD (Bruno, Michel, Xavier, Isabelle) et SPE (François) préchargés.</li>
-                        </ul>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Gabarits personnalisés (3-4 jan 2026)</h4>
-                        <ul class="modal-liste">
-                            <li><strong>10 pratiques créées</strong> : Configurations personnalisées pour chaque enseignant selon leur cartographie.</li>
-                            <li><strong>10 échelles créées</strong> : Échelles de performance adaptées à chaque discipline et pratique.</li>
-                            <li><strong>4 types de pratiques</strong> : SOM (sommative), STD (standards), SPE (spécifications), DEN (dénotation).</li>
-                            <li><strong>4 modes STD</strong> : Comptage, moyenne pondérée, seuils critiques, holistique.</li>
-                        </ul>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Harmonisation Primo (4 jan 2026)</h4>
-                        <ul class="modal-liste">
-                            <li><strong>Cohérence des champs</strong> : Les données collectées par Primo arrivent maintenant aux bons endroits dans les formulaires.</li>
-                            <li><strong>Noms harmonisés</strong> : seuilReussite, noteBaseReussite, bonusNiveau4 utilisés partout.</li>
-                            <li><strong>Rétrocompatibilité</strong> : Fallbacks pour les anciennes données avec anciens noms de champs.</li>
-                        </ul>
-                        </div><!-- fin accordeon-contenu beta95 -->
-                    </div>
-
-                    <!-- Beta 94 -->
-                    <div class="carte accordeon" id="accordeon-aide-beta94">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
-                            <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Beta 94 — Snapshots et suivi longitudinal
-                            </h3>
-                        </div>
-                        <div class="accordeon-contenu">
-                        <p class="text-muted">10-12 décembre 2025</p>
-
-                        <ul class="modal-liste">
-                            <li><strong>Captures automatiques</strong> : Snapshots hebdomadaires de la progression de chaque étudiant.</li>
-                            <li><strong>Graphiques d'évolution</strong> : Visualisez l'évolution des indices A-C-P dans le temps avec Chart.js.</li>
-                            <li><strong>Reconstruction rétroactive</strong> : Recalculez l'historique après corrections de données.</li>
-                            <li><strong>Architecture multi-cours</strong> : Préparation du support pour plusieurs cours simultanés.</li>
-                        </ul>
-                        </div><!-- fin accordeon-contenu beta94 -->
-                    </div>
-
-                    <!-- Beta 93 -->
-                    <div class="carte accordeon" id="accordeon-aide-beta93">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
-                            <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Beta 93 — Système universel de critères
-                            </h3>
-                        </div>
-                        <div class="accordeon-contenu">
-                        <p class="text-muted">3 décembre 2025</p>
-
-                        <ul class="modal-liste">
-                            <li><strong>Critères configurables</strong> : Utilisez n'importe quelle grille de critères, pas seulement SRPNF.</li>
-                            <li><strong>Détection dynamique</strong> : Forces et défis calculés automatiquement pour tes critères.</li>
-                            <li><strong>Recommandations génériques</strong> : Interventions RàI adaptées à n'importe quelle grille.</li>
-                        </ul>
-                        </div><!-- fin accordeon-contenu beta93 -->
-                    </div>
-
-                    <!-- Beta 92 -->
-                    <div class="carte accordeon" id="accordeon-aide-beta92">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
-                            <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Beta 92 — Primo Assistant
-                            </h3>
-                        </div>
-                        <div class="accordeon-contenu">
-                        <p class="text-muted">27-30 novembre 2025</p>
-
-                        <ul class="modal-liste">
-                            <li><strong>Primo 😎</strong> : Modal d'accueil conversationnel pour nouveaux utilisateurs.</li>
-                            <li><strong>4 parcours guidés</strong> : Créer un groupe-cours, évaluer une production, explorer les diagnostics, configurer une pratique.</li>
-                            <li><strong>Tutoriel interactif</strong> : 7 étapes pour découvrir l'application.</li>
-                            <li><strong>Import/Export CC</strong> : Métadonnées Creative Commons pour le partage pédagogique.</li>
-                        </ul>
-                        </div><!-- fin accordeon-contenu beta92 -->
-                    </div>
-
-                    <!-- Beta 91 -->
-                    <div class="carte accordeon" id="accordeon-aide-beta91">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
-                            <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Beta 91 — IndexedDB et capacité étendue
-                            </h3>
-                        </div>
-                        <div class="accordeon-contenu">
-                        <p class="text-muted">18-26 novembre 2025</p>
-
-                        <ul class="modal-liste">
-                            <li><strong>Stockage hybride</strong> : IndexedDB (stockage principal) + localStorage (cache rapide).</li>
-                            <li><strong>Capacité augmentée</strong> : Passage de 5-10 MB à plusieurs GB de stockage.</li>
-                            <li><strong>Compatibilité totale</strong> : API inchangée, tous les modules fonctionnent sans modification.</li>
-                        </ul>
-                        </div><!-- fin accordeon-contenu beta91 -->
-                    </div>
-
-                    <!-- Beta 90 -->
-                    <div class="carte accordeon" id="accordeon-aide-beta90">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
-                            <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Beta 90 — Présentation AQPC
-                            </h3>
-                        </div>
-                        <div class="accordeon-contenu">
-                        <p class="text-muted">5-16 novembre 2025</p>
-
-                        <ul class="modal-liste">
-                            <li><strong>Système de pratiques modulaire</strong> : Support de plusieurs pratiques de notation (Sommative, PAN-Standards).</li>
-                            <li><strong>Engagement (E)</strong> : Remplacement du concept de « Risque d'échec » par une perspective positive.</li>
-                            <li><strong>Jetons personnalisés</strong> : Délai, reprise, aide, bonus avec compteurs visuels.</li>
-                            <li><strong>Barres de distribution</strong> : Visualisation par nuages de points avec gradients.</li>
-                        </ul>
-                        </div><!-- fin accordeon-contenu beta90 -->
-                    </div>
-
-                    <!-- Historique pré-Git -->
-                    <div class="carte accordeon" id="accordeon-aide-pregit">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
-                            <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Historique pré-Git (septembre-octobre 2025)
-                            </h3>
-                        </div>
-                        <div class="accordeon-contenu">
-                        <p class="text-muted">Archéologie reconstituée à partir des artefacts conservés</p>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Phase 0 : Prototypes initiaux (10-20 sept)</h4>
-                        <ul class="modal-liste">
-                            <li><strong>10 sept 2025</strong> : Première version archivée (214 KB) — Titre : « Système de suivi - 601-101-MQ »</li>
-                            <li><strong>18-19 sept</strong> : Itérations rapides, optimisations (214-228 KB)</li>
-                            <li><strong>20-22 sept</strong> : Prototype minimal (27 KB) puis index2 stable (74 KB)</li>
-                        </ul>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Phase 1 : Version monolithique (22-28 sept)</h4>
-                        <ul class="modal-liste">
-                            <li><strong>22 sept</strong> : Documentation de l'architecture (Structure v22-09-25a)</li>
-                            <li><strong>23 sept</strong> : Version « index3 » stable (117 KB)</li>
-                            <li><strong>28 sept</strong> : Phase 1 OK, clarification terminologie Production vs Évaluation (415 KB)</li>
-                            <li><strong>Croissance</strong> : ×3.5 en 5 jours (117 → 415 KB)</li>
-                        </ul>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Phase 2 : Pic de complexité (octobre)</h4>
-                        <ul class="modal-liste">
-                            <li><strong>6 oct</strong> : Architecture Portfolio documentée (ARCHITECTURE_2025-10-06.md)</li>
-                            <li><strong>10 oct</strong> : Beta 35 (577 KB) — Limite du monolithique atteinte</li>
-                            <li>Nouvelles fonctionnalités : Portfolio, artefacts, sélection N meilleurs, calcul notes</li>
-                        </ul>
-
-                        <h4 class="titre-bleu-mb8 mt-15">Phase 3 : Migration modulaire (15-23 oct)</h4>
-                        <ul class="modal-liste">
-                            <li><strong>15 oct</strong> : Beta 50 — Début modularisation (169 KB, JavaScript externalisé)</li>
-                            <li><strong>17 oct</strong> : Beta 60 — Architecture modulaire v16 (186 KB)</li>
-                            <li><strong>20 oct</strong> : Beta 70 — Refonte des modules, début Git (183 KB)</li>
-                            <li><strong>23 oct</strong> : Premier CLAUDE.md créé (Beta 0.71)</li>
-                        </ul>
-
-                        <div class="alerte alerte-succes mt-15">
-                            <strong>Évolution des tailles :</strong>
-                            <p class="mt-5">214 KB (10 sept) → 415 KB (28 sept) → 577 KB (10 oct) → 183 KB (20 oct)</p>
-                            <p class="text-muted mt-5">La modularisation a réduit le fichier HTML de 68% en externalisant le JavaScript.</p>
-                        </div>
-
-                        <p class="text-muted mt-15"><em>17 artefacts pré-Git conservés dans le répertoire <code>artefacts 1-95/</code>. Documentation complète : <code>Documentation/HISTORIQUE_PRE_GIT.md</code></em></p>
-                        </div><!-- fin accordeon-contenu pregit -->
-                    </div>
-
-                    <div class="alerte alerte-information">
-                        <strong>Versions antérieures :</strong> Pour l'historique complet des versions Beta 75 à 89, consultez les fichiers de documentation du projet (CLAUDE.md, changelogs).
-                    </div>
-                </div>
+                <!-- Notes de version déplacées vers Réglages > À propos -->
                 <!-- LLM:OK_TO_EDIT -->
 
             </section><!-- fin section-aide -->

@@ -140,6 +140,8 @@ function afficherAccueilRetour(conteneur) {
             <button onclick="if(typeof entrerEnDemo==='function') entrerEnDemo();">Explorer la d\u00e9mo</button>
             <span class="accueil-separateur">|</span>
             <button onclick="afficherSection('tableau-bord');">Tableau de bord complet</button>
+            <span class="accueil-separateur">|</span>
+            <button onclick="afficherSection('reglages'); setTimeout(function(){ if(typeof afficherSousSection==='function') afficherSousSection('reglages-a-propos'); }, 100);">Nouveaut\u00e9s</button>
         </div>
     `;
 }

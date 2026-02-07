@@ -70,7 +70,8 @@ const configurationsOnglets = {
     'reglages': [
         { id: 'trimestre', label: 'Trimestre' },
         { id: 'preferences', label: 'Préférences' },
-        { id: 'donnees', label: 'Données' }
+        { id: 'donnees', label: 'Données' },
+        { id: 'a-propos', label: 'À propos' }
     ],
     // Anciennes sous-sections (conservées pour référence, à migrer)
     // 'reglages-legacy': [
@@ -90,8 +91,7 @@ const configurationsOnglets = {
       { id: 'formation', label: 'Formation et démonstration' },
       { id: 'utilisation', label: 'Utilisation hebdomadaire' },
       { id: 'consultation', label: 'Consultation' },
-      { id: 'reference', label: 'Référence rapide' },
-      { id: 'versions', label: 'Notes de version' }
+      { id: 'reference', label: 'Référence rapide' }
   ]
 };
 
