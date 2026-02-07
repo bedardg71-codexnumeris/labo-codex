@@ -4803,6 +4803,81 @@ const PACK_DEMARRAGE = {
       "coursId": "demo-cours"
     },
     {
+      "id": "EVAL_1764548348083",
+      "etudiantDA": "DEMO017",
+      "etudiantNom": "Samuel Poirier",
+      "groupe": "demo",
+      "productionId": "PROD1759762907652",
+      "productionNom": "Artefact 4",
+      "grilleId": "GRILLE1759243306842",
+      "grilleNom": "Global-5 FR-HOLIS",
+      "echelleId": "ECH1759264511178",
+      "cartoucheId": "CART1760483301927",
+      "dateEvaluation": "2025-12-01T00:19:08.083Z",
+      "heureEvaluation": "19:19",
+      "statutRemise": "remis",
+      "statutIntegrite": "recevable",
+      "notesIntegrite": "",
+      "criteres": [
+        {
+          "critereId": "CR1759243306842",
+          "critereNom": "Structure",
+          "niveauSelectionne": "M",
+          "retroaction": "",
+          "ponderation": 15
+        },
+        {
+          "critereId": "CR1759243331050",
+          "critereNom": "Rigueur",
+          "niveauSelectionne": "M",
+          "retroaction": "",
+          "ponderation": 20
+        },
+        {
+          "critereId": "CR1759243365467",
+          "critereNom": "Plausibilité",
+          "niveauSelectionne": "M",
+          "retroaction": "",
+          "ponderation": 10
+        },
+        {
+          "critereId": "CR1759243379949",
+          "critereNom": "Nuance",
+          "niveauSelectionne": "M",
+          "retroaction": "",
+          "ponderation": 25
+        },
+        {
+          "critereId": "CR1759243428715",
+          "critereNom": "Français écrit",
+          "niveauSelectionne": "M",
+          "retroaction": "",
+          "ponderation": 30
+        }
+      ],
+      "noteFinale": 75,
+      "niveauFinal": "M",
+      "retroactionFinale": "Production : Formuler 10 HOC\nObjectif : Développer ta capacité à reconnaître les intentions d'un auteur, ses stratégies d'écriture et les liens qui unissent différents récits d'une même œuvre.\nTâche : Analyser dix récits du recueil pour identifier leurs objectifs de communication, mécanismes littéraires et preuves textuelles, puis synthétiser les patterns observés.\n\nBonjour Samuel !\n\nCet exercice d'identification des HOC et des mécanismes littéraires vise à te préparer pour l'analyse littéraire autonome. En établissant des liens logiques entre l'intention de l'auteur (HOC), sa stratégie d'écriture (mécanisme) et les preuves textuelles, tu développes ta rigueur analytique. Ton paragraphe de synthèse, quant à lui, te permet de dégager une vue d'ensemble : identifier les patterns récurrents dans le recueil et réfléchir à l'effet global recherché par Bérubé.\n\nVoici quelques observations :\n\nStructure (M) : Ton tableau est bien structuré et méthodiquement organisé. L'alignement entre HOC, mécanismes et preuves est cohérent pour la majorité des récits, ce qui permet de suivre facilement ton raisonnement. Ton paragraphe de synthèse établit des liens entre tes observations et dégage une vue d'ensemble des stratégies de Bérubé. Cette structure efficace montre que tu es prêt à organiser une analyse littéraire complète.\n\nRigueur (M) : Ton travail démontre une bonne rigueur analytique. Tu as inclus tous les récits obligatoires et atteint le total de 10 récits. Tes HOC sont formulées avec précision. Les mécanismes sont appropriés et bien distingués des procédés stylistiques. Tes preuves textuelles sont pertinentes, correctement citées et bien expliquées. Ton paragraphe de synthèse dégage des patterns significatifs dans l'écriture de Bérubé. Cette rigueur te donnera une base solide pour ton analyse littéraire autonome.\n\nPlausibilité (M) : Ton analyse démontre une bonne plausibilité. Tes HOC sont généralement bien ancrées dans le contenu des récits et reflètent de façon crédible les intentions possibles de l'auteur. Les mécanismes identifiés soutiennent logiquement les HOC proposées. Les preuves textuelles appuient efficacement ton interprétation. Ton paragraphe de synthèse dégage des patterns convaincants qui révèlent une compréhension crédible des stratégies récurrentes de Bérubé. Cette plausibilité te permettra de construire une analyse littéraire solide et bien argumentée.\n\nNuance (M) : Ton analyse démontre une bonne sensibilité aux nuances du recueil. Tes HOC révèlent une compréhension fine des intentions variées de l'auteur selon les récits. Les mécanismes sont explorés dans leurs effets spécifiques et leurs variations. Les preuves choisies révèlent des aspects subtils des textes. Ton paragraphe de synthèse va au-delà de l'énumération : il analyse les récurrences tout en étant attentif aux variations dans les stratégies de Bérubé. Cette capacité à percevoir les subtilités te permettra de produire une analyse riche.\n\nFrançais écrit (M) : Ton travail démontre une bonne maîtrise générale du français. Quelques erreurs subsistent, mais elles sont mineures et n'affectent pas la compréhension de ton analyse. Tes HOC sont clairement formulées, tes explications sont précises et ton paragraphe de synthèse est bien rédigé. Cette qualité linguistique te permettra de communiquer efficacement tes idées dans ton analyse littéraire. Une révision attentive de ton travail avant la remise te permettrait d'éliminer les dernières erreurs.\n\nLe niveau global de cette production est : M.",
+      "optionsAffichage": {
+        "description": true,
+        "objectif": true,
+        "tache": true,
+        "adresse": true,
+        "contexte": true
+      },
+      "donneesAlgorithmiques": {},
+      "verrouillee": true,
+      "dateCreation": "2025-12-01T00:19:08.083Z",
+      "repriseDeIdCiblee": "EVAL_1760554077233",
+      "critereRepriseCiblee": null,
+      "jetonRepriseCibleeApplique": true,
+      "dateApplicationJetonRepriseCiblee": "2025-12-01T00:19:08.083Z",
+      "plafondNoteCiblee": "M",
+      "dateModification": "2025-12-01T00:19:15.000Z",
+      "heureModification": "19:19",
+      "coursId": "demo-cours"
+    },
+    {
       "id": "EVAL_1761675184757",
       "etudiantDA": "DEMO004",
       "etudiantNom": "Rosalie Côté",
@@ -8126,81 +8201,6 @@ const PACK_DEMARRAGE = {
       "coursId": "demo-cours"
     },
     {
-      "id": "EVAL_1764594208523",
-      "etudiantDA": "DEMO018",
-      "etudiantNom": "Maëlle Nadeau",
-      "groupe": "demo",
-      "productionId": "PROD1763652231596",
-      "productionNom": "Artefact 6",
-      "grilleId": "GRILLE1759529438501",
-      "grilleNom": "Global-5 FR-CALCUL",
-      "echelleId": "ECH1759264511178",
-      "cartoucheId": "CART1763652289229",
-      "dateEvaluation": "2025-12-01T13:03:28.523Z",
-      "heureEvaluation": "10:52",
-      "statutRemise": "remis",
-      "statutIntegrite": "recevable",
-      "notesIntegrite": "",
-      "criteres": [
-        {
-          "critereId": "CR1759529438502",
-          "critereNom": "Structure",
-          "niveauSelectionne": "M",
-          "retroaction": "",
-          "ponderation": 15
-        },
-        {
-          "critereId": "CR1759529458633",
-          "critereNom": "Rigueur",
-          "niveauSelectionne": "M",
-          "retroaction": "",
-          "ponderation": 20
-        },
-        {
-          "critereId": "CR1759529476784",
-          "critereNom": "Plausibilité",
-          "niveauSelectionne": "M",
-          "retroaction": "",
-          "ponderation": 10
-        },
-        {
-          "critereId": "CR1759529494819",
-          "critereNom": "Nuance",
-          "niveauSelectionne": "M",
-          "retroaction": "",
-          "ponderation": 25
-        },
-        {
-          "critereId": "CR1759529555936",
-          "critereNom": "Français écrit",
-          "niveauSelectionne": "M",
-          "retroaction": "",
-          "ponderation": 30
-        }
-      ],
-      "noteFinale": 75,
-      "niveauFinal": "M",
-      "retroactionFinale": "Production : Rédaction d'un texte suivi\nObjectif : Démontrer ta capacité à développer une analyse littéraire structurée, argumentée et bien écrite.\nTâche : Rédiger une analyse littéraire à partir de ton plan détaillé.\n\nBonjour Maëlle !\n\nLa rédaction est une étape terminale où il faut développer des paragraphes structurés, intégrer des preuves avec fluidité et assurer la progression logique des idées. Il s'agit ici de transformer ton plan détaillé en analyse littéraire complète. Ce moment est l'aboutissement de tout ton travail préparatoire.\n\nVoici quelques observations :\n\nStructure (M) : L'analyse présente une structure claire et bien développée. L'hypothèse est précise et les mécanismes sont reliés à celle-ci de façon cohérente. Les différentes parties du texte forment un ensemble logique, et la transition entre les paragraphes est efficace. Les organisateurs textuels guident bien la progression des idées.\n\nRigueur (M) : L'analyse comprend de nombreux éléments pertinents à observer, et les procédés littéraires sont aussi clairement identifiés et bien expliqués. Les effets de ces procédés sont bien reliés aux mécanismes littéraires, qui soutiennent efficacement l'objectif de communication. Le vocabulaire spécifique à l'analyse littéraire est utilisé avec précision et régularité.\n\nPlausibilité (M) : Les citations sont pertinentes et soutiennent efficacement l'analyse. Elles sont bien contextualisées dans l'œuvre et s'intègrent avec fluidité dans les phrases. Les liens entre ces preuves et l'argumentation sont clairement établis, ce qui rend l'analyse convaincante. Les interprétations découlent logiquement des preuves citées.\n\nNuance (M) : L'analyse propose des interprétations développées et les observations dépassent la simple description. Les déductions sont pertinentes et bien expliquées, révélant une compréhension approfondie du texte. Les inférences sont judicieuses et permettent de dégager des significations riches. La lecture analytique met en lumière des aspects significatifs de l'œuvre.\n\nFrançais écrit (M) : Ta rédaction contient 12 erreurs de français pour 575 mots. Tu fais en moyenne 1 erreur à chaque 48 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Centre d'aide en français (CAF).\n\nLe niveau global de cette production est : M.",
-      "optionsAffichage": {
-        "description": true,
-        "objectif": true,
-        "tache": true,
-        "adresse": true,
-        "contexte": true
-      },
-      "donneesAlgorithmiques": {},
-      "verrouillee": true,
-      "dateCreation": "2025-12-01T13:03:28.523Z",
-      "repriseDeIdCiblee": "EVAL_1763913174909",
-      "critereRepriseCiblee": null,
-      "jetonRepriseCibleeApplique": true,
-      "dateApplicationJetonRepriseCiblee": "2025-12-01T13:03:28.523Z",
-      "plafondNoteCiblee": "M",
-      "dateModification": "2025-12-01T13:03:35.536Z",
-      "heureModification": "08:03",
-      "coursId": "demo-cours"
-    },
-    {
       "id": "EVAL_1764594512618",
       "etudiantDA": "DEMO012",
       "etudiantNom": "Juliette Bergeron",
@@ -8282,6 +8282,10 @@ const PACK_DEMARRAGE = {
         }
       },
       "verrouillee": true,
+      "repriseDeIdCiblee": "EVAL_1763921443816",
+      "jetonRepriseCibleeApplique": true,
+      "dateApplicationJetonRepriseCiblee": "2025-12-01T13:08:32.618Z",
+      "plafondNoteCiblee": "M",
       "coursId": "demo-cours"
     },
     {
