@@ -1447,6 +1447,7 @@ function chargerCarte(carteId) {
 
     requestAnimationFrame(function() {
         centrerVueSurContenu();
+        mettreAJourTousLesBadges();
     });
 
     pileUndo = [];
