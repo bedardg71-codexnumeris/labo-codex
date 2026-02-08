@@ -13865,13 +13865,46 @@ body.mode-assiste .btn-aide-contextuelle,
 #planif-titre-carte:hover { border-bottom-color: var(--planif-couleur-bordure); }
 #planif-titre-carte:focus { border-bottom-color: var(--planif-couleur-selection); background: #f8fafc; }
 
-/* === PALETTE DE CATÉGORIES === */
+/* === PALETTE FLOTTANTE === */
 #planif-palette {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 80;
+    background: white;
+    border: 1px solid var(--planif-couleur-bordure);
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+    min-width: 140px;
+    user-select: none;
+}
+
+.planif-palette-barre {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    padding: 6px 10px;
+    cursor: grab;
+    border-bottom: 1px solid var(--planif-couleur-bordure);
+    border-radius: 10px 10px 0 0;
+    background: #f8fafc;
+}
+.planif-palette-barre:active { cursor: grabbing; }
+
+.planif-palette-titre { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; }
+
+.planif-palette-toggle {
+    width: 20px; height: 20px; border: none; background: none;
+    font-size: 16px; line-height: 1; cursor: pointer; color: #94a3b8;
+    border-radius: 4px; display: flex; align-items: center; justify-content: center;
+}
+.planif-palette-toggle:hover { background: #e2e8f0; color: #475569; }
+
+.planif-palette-contenu {
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
     gap: 4px;
-    width: 100%;
-    order: 10;
 }
 
 .planif-palette-zone-label {
@@ -13884,18 +13917,16 @@ body.mode-assiste .btn-aide-contextuelle,
     text-transform: uppercase;
     letter-spacing: 0.5px;
     white-space: nowrap;
-    flex-shrink: 0;
 }
 
 .planif-palette-groupe {
     display: flex;
+    flex-direction: column;
     gap: 3px;
 }
 
-.planif-palette-sep {
-    flex: 1;
-    min-width: 20px;
-}
+#planif-palette.planif-palette-replie .planif-palette-contenu { display: none; }
+#planif-palette.planif-palette-replie .planif-palette-barre { border-bottom: none; border-radius: 10px; }
 
 .planif-palette-btn {
     display: flex;
