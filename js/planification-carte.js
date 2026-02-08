@@ -807,15 +807,21 @@ function detacherDuConteneur(noeudId) {
     }
 }
 
+var _layoutEnCours = new Set();
+
 function reLayoutConteneur(conteneurId) {
+    if (_layoutEnCours.has(conteneurId)) return;
+    _layoutEnCours.add(conteneurId);
+
     var conteneur = etat.noeuds.get(conteneurId);
-    if (!conteneur) return;
+    if (!conteneur) { _layoutEnCours.delete(conteneurId); return; }
     var config = TYPES[conteneur.type];
-    if (!config || !config.conteneur) return;
+    if (!config || !config.conteneur) { _layoutEnCours.delete(conteneurId); return; }
 
     var enfants = (conteneur.enfants || []).filter(function(eid) { return etat.noeuds.has(eid); });
     if (enfants.length === 0) {
         mettreAJourZoneConteneur(conteneurId);
+        _layoutEnCours.delete(conteneurId);
         return;
     }
 
@@ -885,6 +891,8 @@ function reLayoutConteneur(conteneurId) {
     conteneur.x = conteneur.x;
     conteneur.y = conteneur.y;
     mettreAJourLiens(conteneurId);
+
+    _layoutEnCours.delete(conteneurId);
 
     // Recurse to parent
     if (conteneur.parent) {
