@@ -277,6 +277,7 @@ function deselectionner() {
 function ouvrirPanneau(id) {
     const donnees = etat.noeuds.get(id);
     if (!donnees) return;
+    if (!donnees.metadata) donnees.metadata = {};
     const config = TYPES[donnees.type];
 
     document.getElementById('planif-panneau-pastille').style.background = obtenirCouleurNoeud(donnees);
@@ -1223,6 +1224,7 @@ function chargerCarte(carteId) {
         if (!config) continue;
         if (n.enfants === undefined) n.enfants = [];
         if (n.parent === undefined) n.parent = null;
+        if (!n.metadata) n.metadata = {};
 
         // Remap IDs si nécessaire (ancien format sans préfixe)
         if (!n.id.startsWith('planif-')) {
