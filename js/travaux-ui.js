@@ -120,7 +120,7 @@
 
         conteneur.innerHTML = `
             <div class="travaux-import-header">
-                <h3>Importer des travaux</h3>
+                <h3>Importer des travaux <span class="badge-dev-actif">Développement actif</span></h3>
                 <div class="travaux-stats-rapides">
                     <span>${stats.nombre} fichier(s) en stock</span>
                     <span>${stats.tailleFormatee}</span>
