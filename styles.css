@@ -14456,55 +14456,6 @@ body.mode-assiste .btn-aide-contextuelle,
 }
 .planif-cal-btn-export:hover { background: #f1f5f9; color: var(--planif-couleur-texte); border-color: var(--planif-couleur-selection); }
 
-/* === ZONES VISUELLES === */
-.planif-zone-fond-gauche, .planif-zone-fond-droite {
-    position: absolute;
-    top: 0;
-    height: 100%;
-    pointer-events: none;
-    z-index: 0;
-}
-.planif-zone-fond-gauche {
-    left: 0;
-    width: 5000px;
-    background: rgba(99, 102, 241, 0.045);
-}
-.planif-zone-fond-droite {
-    left: 5000px;
-    right: 0;
-    background: rgba(249, 115, 22, 0.03);
-}
-.planif-zone-separateur {
-    position: absolute;
-    top: 0;
-    left: 5000px;
-    width: 0;
-    height: 100%;
-    border-left: 2px dashed rgba(148, 163, 184, 0.25);
-    pointer-events: none;
-    z-index: 1;
-}
-.planif-zone-label {
-    position: absolute;
-    top: 20px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: rgba(148, 163, 184, 0.5);
-    pointer-events: none;
-    z-index: 1;
-    white-space: nowrap;
-}
-.planif-zone-label-gauche {
-    left: 20px;
-    color: rgba(99, 102, 241, 0.35);
-}
-.planif-zone-label-droite {
-    left: 5020px;
-    color: rgba(249, 115, 22, 0.35);
-}
-
 .planif-zone-guide {
     flex: 1;
     display: flex;
@@ -14517,14 +14468,8 @@ body.mode-assiste .btn-aide-contextuelle,
     padding: 40px;
     transition: opacity 0.4s ease;
 }
-.planif-zone-guide span { max-width: 360px; }
+.planif-zone-guide span { max-width: 420px; }
 .planif-zone-guide.planif-masque { opacity: 0; }
-
-.planif-noeud.planif-hors-zone {
-    opacity: 0.45;
-    border-color: #ef4444 !important;
-    border-style: dashed !important;
-}
 
 /* === MENU CONTEXTUEL LIENS === */
 #planif-menu-lien {
