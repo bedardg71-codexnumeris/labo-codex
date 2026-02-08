@@ -23,7 +23,8 @@ const etat = {
     lienEnCours: null,
     panneauOuvert: false,
     zoom: 1,
-    initialise: false
+    initialise: false,
+    modeIndividuel: null
 };
 
 // === FLAG D'ACTIVATION ===
@@ -37,16 +38,21 @@ let _undoBatch = false;
 
 // === CONFIGURATION DES TYPES ===
 const TYPES = {
+    // Objectifs
     'competence':     { label: 'Compétence',       couleur: 'var(--planif-couleur-competence)' },
     'idee-maitresse': { label: 'Idée maîtresse',   couleur: 'var(--planif-couleur-idee-maitresse)' },
-    'connaissance':   { label: 'Connaissance',      couleur: 'var(--planif-couleur-connaissance)' },
-    'prerequis':      { label: 'Préalable',         couleur: 'var(--planif-couleur-prerequis)' },
+    // Connaissances
+    'connaissance':   { label: 'Information',       couleur: 'var(--planif-couleur-connaissance)' },
     'strategie':      { label: 'Stratégie',         couleur: 'var(--planif-couleur-strategie)' },
-    'soutien':        { label: 'Soutien',           couleur: 'var(--planif-couleur-soutien)' },
-    'revision':       { label: 'Révision',          couleur: 'var(--planif-couleur-revision)' },
+    'condition':      { label: 'Condition',          couleur: 'var(--planif-couleur-condition)' },
+    'prerequis':      { label: 'Préalable',         couleur: 'var(--planif-couleur-prerequis)' },
+    // Conteneurs
     'sequence':       { label: 'Séquence',          couleur: 'var(--planif-couleur-sequence)',  conteneur: true },
     'lecon':          { label: 'Leçon',             couleur: 'var(--planif-couleur-lecon)',     conteneur: true },
-    'activite':       { label: 'Activité',          couleur: 'var(--planif-couleur-activite)' }
+    // Activités
+    'activite':       { label: 'Apprentissage',     couleur: 'var(--planif-couleur-activite)' },
+    'soutien':        { label: 'Soutien',           couleur: 'var(--planif-couleur-soutien)' },
+    'revision':       { label: 'Révision',          couleur: 'var(--planif-couleur-revision)' }
 };
 
 const TYPES_LIENS = [
@@ -134,7 +140,7 @@ function creerNoeud(type, x, y) {
     const estConteneur = config.conteneur === true;
 
     const el = document.createElement('div');
-    el.className = estConteneur ? 'planif-noeud planif-conteneur' : 'planif-noeud';
+    el.className = (estConteneur ? 'planif-noeud planif-conteneur' : 'planif-noeud') + ' planif-type-' + type;
     el.id = id;
     el.style.left = x + 'px';
     el.style.top = y + 'px';
@@ -229,6 +235,12 @@ function toutSelectionner() {
 function deselectionner() {
     deselectionnerTout();
     fermerPanneau();
+    // Reset mode individuel
+    if (etat.modeIndividuel) {
+        var mEl = document.getElementById(etat.modeIndividuel);
+        if (mEl) mEl.classList.remove('planif-mode-individuel');
+        etat.modeIndividuel = null;
+    }
 }
 
 // === PANNEAU LATÉRAL ===
@@ -245,22 +257,6 @@ function ouvrirPanneau(id) {
     // Champs extra selon le type
     const extra = document.getElementById('planif-panneau-extra');
     extra.innerHTML = '';
-
-    if (donnees.type === 'connaissance') {
-        extra.innerHTML =
-            '<label for="planif-panneau-sous-type">Type de connaissance</label>' +
-            '<select id="planif-panneau-sous-type">' +
-                '<option value="">— Choisir —</option>' +
-                '<option value="declarative"' + (donnees.metadata.sousType === 'declarative' ? ' selected' : '') + '>Déclarative (quoi)</option>' +
-                '<option value="procedurale"' + (donnees.metadata.sousType === 'procedurale' ? ' selected' : '') + '>Procédurale (comment)</option>' +
-                '<option value="conditionnelle"' + (donnees.metadata.sousType === 'conditionnelle' ? ' selected' : '') + '>Conditionnelle (quand)</option>' +
-            '</select>';
-        extra.querySelector('#planif-panneau-sous-type').addEventListener('change', function(e) {
-            enregistrerPourUndo();
-            donnees.metadata.sousType = e.target.value;
-            sauvegarder();
-        });
-    }
 
     if (donnees.type === 'activite' || donnees.type === 'lecon') {
         extra.innerHTML +=
@@ -656,6 +652,12 @@ function trouverMeilleursPorts(sourceId, cibleId) {
 }
 
 // === GESTION DES CONTENEURS ===
+function trouverConteneurRacine(noeudId) {
+    var n = etat.noeuds.get(noeudId);
+    if (!n || !n.parent) return noeudId;
+    return trouverConteneurRacine(n.parent);
+}
+
 function collecterDescendants(racine, parent, liste) {
     var enfants = parent.enfants || [];
     for (var i = 0; i < enfants.length; i++) {
@@ -670,8 +672,8 @@ function collecterDescendants(racine, parent, liste) {
 }
 
 function peutContenir(conteneurType, enfantType) {
-    if (conteneurType === 'sequence') return true;
-    if (conteneurType === 'lecon') return !(TYPES[enfantType] && TYPES[enfantType].conteneur);
+    if (conteneurType === 'sequence') return enfantType === 'lecon';
+    if (conteneurType === 'lecon') return enfantType === 'activite' || enfantType === 'soutien' || enfantType === 'revision';
     return false;
 }
 
@@ -721,46 +723,189 @@ function rattacherAuConteneur(noeudId, conteneurId) {
         detacherDuConteneur(noeudId);
     }
 
-    var etaitVide = !conteneur.enfants || conteneur.enfants.length === 0;
-
     noeud.parent = conteneurId;
     if (!conteneur.enfants) conteneur.enfants = [];
     if (!conteneur.enfants.includes(noeudId)) {
         conteneur.enfants.push(noeudId);
     }
 
-    if (etaitVide) {
-        var cel = document.getElementById(conteneurId);
-        var nel = document.getElementById(noeudId);
-        if (cel && nel) {
-            var cw = cel.offsetWidth || 200;
-            var nw = nel.offsetWidth || 140;
-            noeud.x = conteneur.x + (cw - nw) / 2;
-            noeud.y = conteneur.y + 45 + 15;
-            nel.style.left = noeud.x + 'px';
-            nel.style.top = noeud.y + 'px';
-            mettreAJourLiens(noeudId);
-        }
-    }
-
     var el = document.getElementById(noeudId);
     if (el) el.classList.add('planif-enfant-conteneur');
-    mettreAJourZoneConteneur(conteneurId);
+    reLayoutConteneur(conteneurId);
 }
 
 function detacherDuConteneur(noeudId) {
     var noeud = etat.noeuds.get(noeudId);
     if (!noeud || !noeud.parent) return;
 
-    var ancienParent = etat.noeuds.get(noeud.parent);
+    var ancienParentId = noeud.parent;
+    var ancienParent = etat.noeuds.get(ancienParentId);
     if (ancienParent && ancienParent.enfants) {
         ancienParent.enfants = ancienParent.enfants.filter(function(eid) { return eid !== noeudId; });
-        mettreAJourZoneConteneur(noeud.parent);
     }
 
     noeud.parent = null;
     var el = document.getElementById(noeudId);
     if (el) el.classList.remove('planif-enfant-conteneur');
+
+    if (ancienParent) {
+        if (ancienParent.enfants && ancienParent.enfants.length > 0) {
+            reLayoutConteneur(ancienParentId);
+        } else {
+            mettreAJourZoneConteneur(ancienParentId);
+        }
+    }
+}
+
+function reLayoutConteneur(conteneurId) {
+    var conteneur = etat.noeuds.get(conteneurId);
+    if (!conteneur) return;
+    var config = TYPES[conteneur.type];
+    if (!config || !config.conteneur) return;
+
+    var enfants = (conteneur.enfants || []).filter(function(eid) { return etat.noeuds.has(eid); });
+    if (enfants.length === 0) {
+        mettreAJourZoneConteneur(conteneurId);
+        return;
+    }
+
+    // Recursively layout nested containers first
+    for (var i = 0; i < enfants.length; i++) {
+        var ed = etat.noeuds.get(enfants[i]);
+        if (ed && TYPES[ed.type] && TYPES[ed.type].conteneur && ed.enfants && ed.enfants.length > 0) {
+            reLayoutConteneur(enfants[i]);
+        }
+    }
+
+    // Sort children by Y position
+    enfants.sort(function(a, b) {
+        var da = etat.noeuds.get(a);
+        var db = etat.noeuds.get(b);
+        return (da ? da.y : 0) - (db ? db.y : 0);
+    });
+    conteneur.enfants = enfants;
+
+    var GAP = 12;
+    var PADDING = 30;
+    var HEADER_H = 45;
+
+    // Measure children widths/heights
+    var maxW = 0;
+    var totalH = 0;
+    var dims = [];
+    for (var j = 0; j < enfants.length; j++) {
+        var eel = document.getElementById(enfants[j]);
+        var w = eel ? (eel.offsetWidth || 140) : 140;
+        var h = eel ? (eel.offsetHeight || 50) : 50;
+        dims.push({ w: w, h: h });
+        if (w > maxW) maxW = w;
+        totalH += h;
+    }
+    totalH += GAP * (enfants.length - 1);
+
+    // Container dimensions
+    var newW = maxW + PADDING * 2;
+    var newH = totalH + PADDING * 2 + HEADER_H;
+
+    // Stack children in centered column
+    var curY = conteneur.y + HEADER_H + PADDING;
+    for (var k = 0; k < enfants.length; k++) {
+        var ed2 = etat.noeuds.get(enfants[k]);
+        if (!ed2) continue;
+        ed2.x = conteneur.x + (newW - dims[k].w) / 2;
+        ed2.y = curY;
+        var eel2 = document.getElementById(enfants[k]);
+        if (eel2) {
+            eel2.style.left = ed2.x + 'px';
+            eel2.style.top = ed2.y + 'px';
+        }
+        mettreAJourLiens(enfants[k]);
+        curY += dims[k].h + GAP;
+    }
+
+    var cel = document.getElementById(conteneurId);
+    if (cel) {
+        cel.style.width = newW + 'px';
+        cel.style.height = newH + 'px';
+        cel.classList.add('planif-a-enfants');
+        var zone = cel.querySelector('.planif-noeud-zone');
+        if (zone) zone.classList.remove('planif-vide');
+    }
+
+    conteneur.x = conteneur.x;
+    conteneur.y = conteneur.y;
+    mettreAJourLiens(conteneurId);
+
+    // Recurse to parent
+    if (conteneur.parent) {
+        reLayoutConteneur(conteneur.parent);
+    }
+}
+
+function reLayoutConteneurSaufDragged(conteneurId, draggedId) {
+    var conteneur = etat.noeuds.get(conteneurId);
+    if (!conteneur) return;
+    var config = TYPES[conteneur.type];
+    if (!config || !config.conteneur) return;
+
+    var enfants = (conteneur.enfants || []).filter(function(eid) {
+        return etat.noeuds.has(eid) && eid !== draggedId;
+    });
+    if (enfants.length === 0) return;
+
+    // Sort by Y
+    enfants.sort(function(a, b) {
+        var da = etat.noeuds.get(a);
+        var db = etat.noeuds.get(b);
+        return (da ? da.y : 0) - (db ? db.y : 0);
+    });
+
+    var GAP = 12;
+    var PADDING = 30;
+    var HEADER_H = 45;
+
+    var maxW = 0;
+    var totalH = 0;
+    var dims = [];
+    for (var j = 0; j < enfants.length; j++) {
+        var eel = document.getElementById(enfants[j]);
+        var w = eel ? (eel.offsetWidth || 140) : 140;
+        var h = eel ? (eel.offsetHeight || 50) : 50;
+        dims.push({ w: w, h: h });
+        if (w > maxW) maxW = w;
+        totalH += h;
+    }
+    totalH += GAP * (enfants.length - 1);
+
+    var newW = maxW + PADDING * 2;
+    var newH = totalH + PADDING * 2 + HEADER_H;
+
+    var curY = conteneur.y + HEADER_H + PADDING;
+    for (var k = 0; k < enfants.length; k++) {
+        var ed2 = etat.noeuds.get(enfants[k]);
+        if (!ed2) continue;
+        ed2.x = conteneur.x + (newW - dims[k].w) / 2;
+        ed2.y = curY;
+        var eel2 = document.getElementById(enfants[k]);
+        if (eel2) {
+            eel2.style.transition = 'left 150ms ease, top 150ms ease';
+            eel2.style.left = ed2.x + 'px';
+            eel2.style.top = ed2.y + 'px';
+            // Clear transition after animation
+            (function(el) {
+                setTimeout(function() { el.style.transition = ''; }, 160);
+            })(eel2);
+        }
+        mettreAJourLiens(enfants[k]);
+        curY += dims[k].h + GAP;
+    }
+
+    var cel = document.getElementById(conteneurId);
+    if (cel) {
+        cel.style.width = newW + 'px';
+        cel.style.height = newH + 'px';
+    }
+    mettreAJourLiens(conteneurId);
 }
 
 function mettreAJourZoneConteneur(conteneurId) {
@@ -859,7 +1004,7 @@ function reconstruireDOM() {
         if (!config) continue;
         var estConteneur = config.conteneur === true;
         var el = document.createElement('div');
-        el.className = estConteneur ? 'planif-noeud planif-conteneur' : 'planif-noeud';
+        el.className = (estConteneur ? 'planif-noeud planif-conteneur' : 'planif-noeud') + ' planif-type-' + n.type;
         if (n.parent) el.classList.add('planif-enfant-conteneur');
         el.id = n.id;
         el.style.left = n.x + 'px';
@@ -898,10 +1043,18 @@ function reconstruireDOM() {
     }
 
     requestAnimationFrame(function() {
+        // Layout root containers only (non-nested ones); nested ones are handled recursively
         for (var entry2 of etat.noeuds) {
             var n2 = entry2[1];
-            if (TYPES[n2.type] && TYPES[n2.type].conteneur && n2.enfants && n2.enfants.length > 0) {
-                mettreAJourZoneConteneur(n2.id);
+            if (TYPES[n2.type] && TYPES[n2.type].conteneur && n2.enfants && n2.enfants.length > 0 && !n2.parent) {
+                reLayoutConteneur(n2.id);
+            }
+        }
+        // Handle containers with no children
+        for (var entry2b of etat.noeuds) {
+            var n2b = entry2b[1];
+            if (TYPES[n2b.type] && TYPES[n2b.type].conteneur && (!n2b.enfants || n2b.enfants.length === 0)) {
+                mettreAJourZoneConteneur(n2b.id);
             }
         }
         for (var entry3 of etat.liens) {
@@ -935,6 +1088,7 @@ function restaurerSnapshot(snapshot) {
     reconstruireDOM();
     etat.selection = null;
     etat.multiSelection.clear();
+    etat.modeIndividuel = null;
     fermerPanneau();
     fermerMenuLien();
     sauvegarder();
@@ -1070,10 +1224,9 @@ function attacherEvenements(el, donnees) {
             return;
         }
 
+        // Multi-selection group drag
         var estDragGroupe = etat.multiSelection.size > 1 && etat.multiSelection.has(id);
-
         if (estDragGroupe) {
-            // DÉPLACEMENT GROUPÉ
             enregistrerPourUndo();
             var startMouseX = e.clientX;
             var startMouseY = e.clientY;
@@ -1114,26 +1267,12 @@ function attacherEvenements(el, donnees) {
                     }
                     mettreAJourLiens(nid4);
                 }
-
-                for (var nid5 of tousNoeuds) {
-                    var nd5 = etat.noeuds.get(nid5);
-                    if (nd5 && nd5.parent && !tousNoeuds.has(nd5.parent)) {
-                        mettreAJourZoneConteneur(nd5.parent);
-                    }
-                }
             }
 
             function onUpGroupe() {
                 el.classList.remove('planif-dragging');
                 document.removeEventListener('mousemove', onMoveGroupe);
                 document.removeEventListener('mouseup', onUpGroupe);
-
-                for (var nid7 of tousNoeuds) {
-                    var nd8 = etat.noeuds.get(nid7);
-                    if (nd8 && nd8.parent && !tousNoeuds.has(nd8.parent)) {
-                        mettreAJourZoneConteneur(nd8.parent);
-                    }
-                }
                 sauvegarder();
             }
 
@@ -1142,35 +1281,208 @@ function attacherEvenements(el, donnees) {
             return;
         }
 
-        // DÉPLACEMENT SIMPLE
         enregistrerPourUndo();
         if (etat.multiSelection.size > 0) {
             deselectionnerTout();
         }
-
         selectionnerNoeud(id);
+
         var startMouseX2 = e.clientX;
         var startMouseY2 = e.clientY;
         var startDataX = donnees.x;
         var startDataY = donnees.y;
-        el.classList.add('planif-dragging');
 
-        var descendantsInit = [];
-        if (estConteneur && donnees.enfants) {
-            collecterDescendants(donnees, donnees, descendantsInit);
+        // CAS A: Enfant en mode normal → drag du groupe entier (remonte au conteneur racine)
+        if (donnees.parent && etat.modeIndividuel !== id) {
+            var racineId = trouverConteneurRacine(id);
+            var racine = etat.noeuds.get(racineId);
+            if (!racine) return;
+
+            var racineStartX = racine.x;
+            var racineStartY = racine.y;
+            var descendantsGrp = [];
+            collecterDescendants(racine, racine, descendantsGrp);
+
+            var racineEl = document.getElementById(racineId);
+            if (racineEl) racineEl.classList.add('planif-dragging');
+
+            var peutDropRacine = racine.type === 'lecon';
+            var survolConteneurGrp = null;
+
+            function onMoveA(e2) {
+                var dx = (e2.clientX - startMouseX2) / etat.zoom;
+                var dy = (e2.clientY - startMouseY2) / etat.zoom;
+
+                racine.x = racineStartX + dx;
+                racine.y = racineStartY + dy;
+                if (racineEl) {
+                    racineEl.style.left = racine.x + 'px';
+                    racineEl.style.top = racine.y + 'px';
+                }
+                mettreAJourLiens(racineId);
+
+                for (var j = 0; j < descendantsGrp.length; j++) {
+                    var di = descendantsGrp[j];
+                    var dd = etat.noeuds.get(di.id);
+                    if (!dd) continue;
+                    dd.x = racine.x + di.dx;
+                    dd.y = racine.y + di.dy;
+                    var del2 = document.getElementById(di.id);
+                    if (del2) { del2.style.left = dd.x + 'px'; del2.style.top = dd.y + 'px'; }
+                    mettreAJourLiens(di.id);
+                }
+
+                if (peutDropRacine) {
+                    var ancienSurvol = survolConteneurGrp;
+                    survolConteneurGrp = trouverConteneurPour(e2.clientX, e2.clientY, racineId, racine.type);
+                    if (ancienSurvol !== survolConteneurGrp) {
+                        if (ancienSurvol) {
+                            var aEl = document.getElementById(ancienSurvol);
+                            if (aEl) aEl.classList.remove('planif-conteneur-survol');
+                        }
+                        if (survolConteneurGrp) {
+                            var sEl = document.getElementById(survolConteneurGrp);
+                            if (sEl) sEl.classList.add('planif-conteneur-survol');
+                        }
+                    }
+                }
+            }
+
+            function onUpA() {
+                if (racineEl) racineEl.classList.remove('planif-dragging');
+                document.removeEventListener('mousemove', onMoveA);
+                document.removeEventListener('mouseup', onUpA);
+                document.querySelectorAll('.planif-conteneur-survol').forEach(function(c) { c.classList.remove('planif-conteneur-survol'); });
+
+                if (peutDropRacine) {
+                    if (survolConteneurGrp && survolConteneurGrp !== racine.parent) {
+                        rattacherAuConteneur(racineId, survolConteneurGrp);
+                    } else if (!survolConteneurGrp && racine.parent) {
+                        detacherDuConteneur(racineId);
+                    }
+                }
+
+                sauvegarder();
+            }
+
+            document.addEventListener('mousemove', onMoveA);
+            document.addEventListener('mouseup', onUpA);
+            return;
         }
 
-        var peutEtreEnfant = !estConteneur || donnees.type === 'lecon';
-        var survolConteneur = null;
+        // CAS B: Enfant en mode individuel → drag individuel + réordonnancement + détachement
+        if (donnees.parent && etat.modeIndividuel === id) {
+            el.classList.add('planif-dragging');
+            var parentId = donnees.parent;
+            var parentData = etat.noeuds.get(parentId);
 
-        function onMove2(e2) {
-            donnees.x = startDataX + (e2.clientX - startMouseX2) / etat.zoom;
-            donnees.y = startDataY + (e2.clientY - startMouseY2) / etat.zoom;
-            el.style.left = donnees.x + 'px';
-            el.style.top = donnees.y + 'px';
-            mettreAJourLiens(id);
+            function onMoveB(e2) {
+                donnees.x = startDataX + (e2.clientX - startMouseX2) / etat.zoom;
+                donnees.y = startDataY + (e2.clientY - startMouseY2) / etat.zoom;
+                el.style.left = donnees.x + 'px';
+                el.style.top = donnees.y + 'px';
+                mettreAJourLiens(id);
 
-            if (estConteneur) {
+                // Check if dragged out of parent bounds
+                if (parentData) {
+                    var cel = document.getElementById(parentId);
+                    if (cel) {
+                        var cw = parseFloat(cel.style.width) || cel.offsetWidth || 200;
+                        var ch = parseFloat(cel.style.height) || cel.offsetHeight || 80;
+                        var outOfBounds = donnees.x + (el.offsetWidth || 140) < parentData.x ||
+                                          donnees.x > parentData.x + cw ||
+                                          donnees.y + (el.offsetHeight || 50) < parentData.y ||
+                                          donnees.y > parentData.y + ch;
+                        if (outOfBounds) {
+                            // Will detach on mouseup
+                            return;
+                        }
+                    }
+
+                    // Reorder: compare midY with siblings
+                    var midY = donnees.y + (el.offsetHeight || 50) / 2;
+                    var enfants = parentData.enfants || [];
+                    var myIdx = enfants.indexOf(id);
+                    if (myIdx !== -1) {
+                        for (var si = 0; si < enfants.length; si++) {
+                            if (si === myIdx) continue;
+                            var sib = etat.noeuds.get(enfants[si]);
+                            if (!sib) continue;
+                            var sibEl = document.getElementById(enfants[si]);
+                            var sibMidY = sib.y + ((sibEl ? sibEl.offsetHeight : 50) || 50) / 2;
+                            if (myIdx < si && midY > sibMidY) {
+                                enfants.splice(myIdx, 1);
+                                enfants.splice(si, 0, id);
+                                parentData.enfants = enfants;
+                                reLayoutConteneurSaufDragged(parentId, id);
+                                break;
+                            } else if (myIdx > si && midY < sibMidY) {
+                                enfants.splice(myIdx, 1);
+                                enfants.splice(si, 0, id);
+                                parentData.enfants = enfants;
+                                reLayoutConteneurSaufDragged(parentId, id);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            function onUpB() {
+                el.classList.remove('planif-dragging');
+                document.removeEventListener('mousemove', onMoveB);
+                document.removeEventListener('mouseup', onUpB);
+
+                // Check if out of bounds → detach
+                if (parentData) {
+                    var cel2 = document.getElementById(parentId);
+                    if (cel2) {
+                        var cw2 = parseFloat(cel2.style.width) || cel2.offsetWidth || 200;
+                        var ch2 = parseFloat(cel2.style.height) || cel2.offsetHeight || 80;
+                        var outOfBounds2 = donnees.x + (el.offsetWidth || 140) < parentData.x ||
+                                           donnees.x > parentData.x + cw2 ||
+                                           donnees.y + (el.offsetHeight || 50) < parentData.y ||
+                                           donnees.y > parentData.y + ch2;
+                        if (outOfBounds2) {
+                            etat.modeIndividuel = null;
+                            el.classList.remove('planif-mode-individuel');
+                            detacherDuConteneur(id);
+                            sauvegarder();
+                            return;
+                        }
+                    }
+                }
+
+                // Snap back with layout
+                if (donnees.parent) {
+                    reLayoutConteneur(donnees.parent);
+                }
+                sauvegarder();
+            }
+
+            document.addEventListener('mousemove', onMoveB);
+            document.addEventListener('mouseup', onUpB);
+            return;
+        }
+
+        // CAS C: Conteneur → drag du groupe entier (+ hover-detection pour Leçon)
+        if (estConteneur) {
+            el.classList.add('planif-dragging');
+            var descendantsInit = [];
+            if (donnees.enfants) {
+                collecterDescendants(donnees, donnees, descendantsInit);
+            }
+
+            var peutEtreEnfant = donnees.type === 'lecon';
+            var survolConteneur = null;
+
+            function onMoveC(e2) {
+                donnees.x = startDataX + (e2.clientX - startMouseX2) / etat.zoom;
+                donnees.y = startDataY + (e2.clientY - startMouseY2) / etat.zoom;
+                el.style.left = donnees.x + 'px';
+                el.style.top = donnees.y + 'px';
+                mettreAJourLiens(id);
+
                 for (var j = 0; j < descendantsInit.length; j++) {
                     var di = descendantsInit[j];
                     var dd = etat.noeuds.get(di.id);
@@ -1181,59 +1493,120 @@ function attacherEvenements(el, donnees) {
                     if (del2) { del2.style.left = dd.x + 'px'; del2.style.top = dd.y + 'px'; }
                     mettreAJourLiens(di.id);
                 }
+
+                if (donnees.parent) {
+                    mettreAJourZoneConteneur(donnees.parent);
+                }
+
+                if (peutEtreEnfant) {
+                    var ancienSurvol = survolConteneur;
+                    survolConteneur = trouverConteneurPour(e2.clientX, e2.clientY, id, donnees.type);
+                    if (ancienSurvol !== survolConteneur) {
+                        if (ancienSurvol) {
+                            var ancienEl = document.getElementById(ancienSurvol);
+                            if (ancienEl) ancienEl.classList.remove('planif-conteneur-survol');
+                            var zn = ancienEl ? ancienEl.querySelector('.planif-noeud-zone') : null;
+                            if (zn) zn.classList.remove('planif-survol');
+                        }
+                        if (survolConteneur) {
+                            var survolEl = document.getElementById(survolConteneur);
+                            if (survolEl) survolEl.classList.add('planif-conteneur-survol');
+                            var zn2 = survolEl ? survolEl.querySelector('.planif-noeud-zone') : null;
+                            if (zn2) zn2.classList.add('planif-survol');
+                        }
+                    }
+                }
             }
 
-            if (donnees.parent) {
-                mettreAJourZoneConteneur(donnees.parent);
+            function onUpC() {
+                el.classList.remove('planif-dragging');
+                document.removeEventListener('mousemove', onMoveC);
+                document.removeEventListener('mouseup', onUpC);
+
+                document.querySelectorAll('.planif-noeud-zone.planif-survol').forEach(function(z) { z.classList.remove('planif-survol'); });
+                document.querySelectorAll('.planif-conteneur-survol').forEach(function(c) { c.classList.remove('planif-conteneur-survol'); });
+
+                if (peutEtreEnfant) {
+                    if (survolConteneur && survolConteneur !== donnees.parent) {
+                        rattacherAuConteneur(id, survolConteneur);
+                    } else if (!survolConteneur && donnees.parent) {
+                        detacherDuConteneur(id);
+                    }
+                }
+
+                sauvegarder();
             }
 
-            if (peutEtreEnfant) {
-                var ancienSurvol = survolConteneur;
-                survolConteneur = trouverConteneurPour(e2.clientX, e2.clientY, id, donnees.type);
-                if (ancienSurvol !== survolConteneur) {
-                    if (ancienSurvol) {
-                        var ancienEl = document.getElementById(ancienSurvol);
-                        if (ancienEl) ancienEl.classList.remove('planif-conteneur-survol');
-                        var zn = ancienEl ? ancienEl.querySelector('.planif-noeud-zone') : null;
-                        if (zn) zn.classList.remove('planif-survol');
-                    }
-                    if (survolConteneur) {
-                        var survolEl = document.getElementById(survolConteneur);
-                        if (survolEl) survolEl.classList.add('planif-conteneur-survol');
-                        var zn2 = survolEl ? survolEl.querySelector('.planif-noeud-zone') : null;
-                        if (zn2) zn2.classList.add('planif-survol');
-                    }
+            document.addEventListener('mousemove', onMoveC);
+            document.addEventListener('mouseup', onUpC);
+            return;
+        }
+
+        // CAS D: Noeud libre → drag simple + hover-detection conteneur
+        el.classList.add('planif-dragging');
+        var survolConteneurD = null;
+
+        function onMoveD(e2) {
+            donnees.x = startDataX + (e2.clientX - startMouseX2) / etat.zoom;
+            donnees.y = startDataY + (e2.clientY - startMouseY2) / etat.zoom;
+            el.style.left = donnees.x + 'px';
+            el.style.top = donnees.y + 'px';
+            mettreAJourLiens(id);
+
+            var ancienSurvolD = survolConteneurD;
+            survolConteneurD = trouverConteneurPour(e2.clientX, e2.clientY, id, donnees.type);
+            if (ancienSurvolD !== survolConteneurD) {
+                if (ancienSurvolD) {
+                    var aElD = document.getElementById(ancienSurvolD);
+                    if (aElD) aElD.classList.remove('planif-conteneur-survol');
+                    var znD = aElD ? aElD.querySelector('.planif-noeud-zone') : null;
+                    if (znD) znD.classList.remove('planif-survol');
+                }
+                if (survolConteneurD) {
+                    var sElD = document.getElementById(survolConteneurD);
+                    if (sElD) sElD.classList.add('planif-conteneur-survol');
+                    var znD2 = sElD ? sElD.querySelector('.planif-noeud-zone') : null;
+                    if (znD2) znD2.classList.add('planif-survol');
                 }
             }
         }
 
-        function onUp2() {
+        function onUpD() {
             el.classList.remove('planif-dragging');
-            document.removeEventListener('mousemove', onMove2);
-            document.removeEventListener('mouseup', onUp2);
+            document.removeEventListener('mousemove', onMoveD);
+            document.removeEventListener('mouseup', onUpD);
 
             document.querySelectorAll('.planif-noeud-zone.planif-survol').forEach(function(z) { z.classList.remove('planif-survol'); });
             document.querySelectorAll('.planif-conteneur-survol').forEach(function(c) { c.classList.remove('planif-conteneur-survol'); });
 
-            if (peutEtreEnfant) {
-                if (survolConteneur && survolConteneur !== donnees.parent) {
-                    rattacherAuConteneur(id, survolConteneur);
-                } else if (!survolConteneur && donnees.parent) {
-                    detacherDuConteneur(id);
-                }
+            if (survolConteneurD && survolConteneurD !== donnees.parent) {
+                rattacherAuConteneur(id, survolConteneurD);
+            } else if (!survolConteneurD && donnees.parent) {
+                detacherDuConteneur(id);
             }
 
             sauvegarder();
         }
 
-        document.addEventListener('mousemove', onMove2);
-        document.addEventListener('mouseup', onUp2);
+        document.addEventListener('mousemove', onMoveD);
+        document.addEventListener('mouseup', onUpD);
     });
 
+    // Double-clic: mode individuel pour enfants, panneau pour le reste
     el.addEventListener('dblclick', function(e) {
         if (e.target.isContentEditable) return;
-        selectionnerNoeud(id);
-        ouvrirPanneau(id);
+
+        if (donnees.parent) {
+            // Enfant → active mode individuel
+            etat.modeIndividuel = id;
+            document.querySelectorAll('.planif-mode-individuel').forEach(function(mel) { mel.classList.remove('planif-mode-individuel'); });
+            el.classList.add('planif-mode-individuel');
+            selectionnerNoeud(id);
+            ouvrirPanneau(id);
+        } else {
+            selectionnerNoeud(id);
+            ouvrirPanneau(id);
+        }
     });
 
     var titreEl = el.querySelector('.planif-noeud-titre');
@@ -2106,6 +2479,9 @@ function initialiser() {
             document.getElementById('planif-fichier-import').click();
         });
     }
+
+    var btnAnnuler = document.getElementById('planif-btn-annuler');
+    if (btnAnnuler) btnAnnuler.addEventListener('click', annuler);
 
     var fichierImport = document.getElementById('planif-fichier-import');
     if (fichierImport) {
