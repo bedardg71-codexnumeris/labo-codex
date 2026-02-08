@@ -6879,8 +6879,8 @@
                                             </button>
                                         </div>
                                     </div>
-                                    <div class="planif-palette-categorie" style="background: rgba(139, 92, 246, 0.06);">
-                                        <div class="planif-palette-zone-label" style="color: #8B5CF6;">Vérifier l'apprentissage</div>
+                                    <div class="planif-palette-categorie" style="background: rgba(217, 70, 239, 0.06);">
+                                        <div class="planif-palette-zone-label" style="color: #D946EF;">Vérifier l'apprentissage</div>
                                         <div class="planif-palette-zone-sous-titre">preuve de réussite</div>
                                         <div class="planif-palette-groupe">
                                             <button class="planif-palette-btn" data-type="evaluation" draggable="true">
@@ -6902,6 +6902,19 @@
                                     </div>
                                 </div>
                                 <div id="planif-zone-guide" class="planif-zone-guide"><span>Glissez des éléments depuis la palette pour construire votre carte mentale. Reliez-les entre eux via les ports, puis cliquez sur « Séances » pour planifier.</span></div>
+                            </div>
+                            <div id="planif-carte-aide" class="planif-carte-aide">
+                                <div class="planif-carte-aide-barre">
+                                    <span class="planif-carte-aide-titre">Aide</span>
+                                    <button class="planif-carte-aide-fermer" id="planif-carte-aide-fermer" title="Fermer">&times;</button>
+                                </div>
+                                <div class="planif-carte-aide-contenu">
+                                    Glisser un élément sur le canevas pour l'ajouter.<br>
+                                    Relier deux éléments en tirant d'un port à l'autre.<br>
+                                    Déposer un élément dans une Séquence ou une Leçon pour l'y intégrer.<br><br>
+                                    🧬 Cloner un élément : double-cliquer pour ouvrir le panneau, puis « Cloner ».<br>
+                                    Les informations se propagent à toutes les copies.
+                                </div>
                             </div>
                             <div id="planif-zone-travail">
                                 <div id="planif-espace-wrapper">
@@ -6938,6 +6951,8 @@
                                 <label for="planif-panneau-description">Description</label>
                                 <textarea id="planif-panneau-description" placeholder="Description ou notes…"></textarea>
                                 <div id="planif-panneau-extra"></div>
+                                <div id="planif-panneau-clone-info" style="display:none"></div>
+                                <button class="planif-btn-cloner" id="planif-btn-cloner">🧬 Cloner</button>
                                 <button class="planif-btn-supprimer" id="planif-btn-supprimer">Supprimer ce nœud</button>
                             </div>
 
@@ -15880,7 +15895,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97';
-        const BUILD_ID = '0208-1334';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0208-1423';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';

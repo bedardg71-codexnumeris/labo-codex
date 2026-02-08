@@ -13808,8 +13808,8 @@ body.mode-assiste .btn-aide-contextuelle,
     --planif-couleur-activite: #16a34a;
     --planif-couleur-soutien: #22c55e;
     --planif-couleur-revision: #15803d;
-    /* Évaluation — Violet distinct */
-    --planif-couleur-evaluation: #8B5CF6;
+    /* Évaluation — Rose/magenta */
+    --planif-couleur-evaluation: #D946EF;
     /* Utilitaires */
     --planif-couleur-fond: #f8fafc;
     --planif-couleur-texte: #1e293b;
@@ -14238,6 +14238,51 @@ body.mode-assiste .btn-aide-contextuelle,
     z-index: 5;
     color: #F59E0B;
     filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15));
+}
+
+.indicateur-clone { position: absolute; top: 4px; left: 4px; font-size: 10px; cursor: help; opacity: 0.8; z-index: 2; }
+.clone-surbrillance { animation: pulse-clone 0.8s ease-in-out 3; }
+@keyframes pulse-clone { 0%,100% { box-shadow: 0 0 0 0 rgba(139,92,246,0); } 50% { box-shadow: 0 0 0 4px rgba(139,92,246,0.4); } }
+.planif-btn-cloner { width: 100%; padding: 8px; margin-bottom: 6px; border: 1px solid #e5e7eb; border-radius: 6px; background: #f9fafb; cursor: pointer; font-size: 13px; }
+.planif-btn-cloner:hover { background: #f3f4f6; }
+.planif-btn-cloner:disabled { opacity: 0.4; cursor: not-allowed; }
+.planif-carte-aide {
+    position: absolute;
+    top: 12px;
+    left: 220px;
+    z-index: 80;
+    background: white;
+    border: 1px solid var(--planif-couleur-bordure);
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+    min-width: 140px;
+    max-width: 200px;
+    user-select: none;
+    resize: both;
+    overflow: hidden;
+}
+.planif-carte-aide-barre {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 10px;
+    cursor: grab;
+    border-bottom: 1px solid #eee;
+}
+.planif-carte-aide-barre:active { cursor: grabbing; }
+.planif-carte-aide-titre { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; }
+.planif-carte-aide-fermer {
+    border: none; background: none; cursor: pointer; font-size: 16px; color: #94a3b8;
+    width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
+    border-radius: 4px; padding: 0; line-height: 1;
+}
+.planif-carte-aide-fermer:hover { background: #f1f5f9; color: #475569; }
+.planif-carte-aide-contenu {
+    color: #888;
+    font-size: 0.8em;
+    line-height: 1.4;
+    padding: 8px 12px;
+    overflow: auto;
 }
 
 .planif-noeud-titre {

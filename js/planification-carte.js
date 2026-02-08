@@ -57,60 +57,65 @@ const TYPES = {
 };
 
 const TYPES_LIENS = [
-    { id: 'developpe',      label: 'développe' },
-    { id: 'vise',           label: 'vise' },
-    { id: 'mobilise',       label: 'mobilise' },
-    { id: 'requiert',       label: 'requiert' },
-    { id: 'sappuie_sur',    label: "s'appuie sur" },
-    { id: 'evalue',         label: 'évalue' },
-    { id: 'verifie',        label: 'vérifie' }
+    { id: 'se_decline_en',        label: 'se décline en' },
+    { id: 'se_concretise_dans',   label: 'se concrétise dans' },
+    { id: 's_acquiert_par',       label: "s'acquiert par" },
+    { id: 'se_verifie_par',       label: 'se vérifie par' },
+    { id: 's_appuie_sur',         label: "s'appuie sur" }
 ];
 
-// Table des verbes automatiques : clé = "typeSource>typeCible", valeur = { verbe, inverser }
+// Table des verbes automatiques : direction amont → aval
+// clé = "typeSource>typeCible", valeur = { verbe, inverser }
 var VERBES_AUTO = {
-    'idee-maitresse>competence':   { verbe: 'developpe' },
-    'competence>idee-maitresse':   { verbe: 'developpe', inverser: true },
-    'lecon>idee-maitresse':        { verbe: 'vise' },
-    'idee-maitresse>lecon':        { verbe: 'vise', inverser: true },
-    'sequence>idee-maitresse':     { verbe: 'vise', inverser: true },
-    'idee-maitresse>sequence':     { verbe: 'vise' },
-    'activite>connaissance':       { verbe: 'mobilise' },
-    'activite>strategie':          { verbe: 'mobilise' },
-    'activite>condition':          { verbe: 'mobilise' },
-    'soutien>connaissance':        { verbe: 'mobilise' },
-    'soutien>strategie':           { verbe: 'mobilise' },
-    'soutien>condition':           { verbe: 'mobilise' },
-    'revision>connaissance':       { verbe: 'mobilise' },
-    'revision>strategie':          { verbe: 'mobilise' },
-    'revision>condition':          { verbe: 'mobilise' },
-    'connaissance>activite':       { verbe: 'mobilise', inverser: true },
-    'strategie>activite':          { verbe: 'mobilise', inverser: true },
-    'condition>activite':          { verbe: 'mobilise', inverser: true },
-    'connaissance>soutien':        { verbe: 'mobilise', inverser: true },
-    'strategie>soutien':           { verbe: 'mobilise', inverser: true },
-    'condition>soutien':           { verbe: 'mobilise', inverser: true },
-    'connaissance>revision':       { verbe: 'mobilise', inverser: true },
-    'strategie>revision':          { verbe: 'mobilise', inverser: true },
-    'condition>revision':          { verbe: 'mobilise', inverser: true },
-    'connaissance>connaissance':   { verbe: 'requiert' },
-    'strategie>strategie':         { verbe: 'requiert' },
-    'condition>condition':         { verbe: 'requiert' },
-    'connaissance>strategie':      { verbe: 'requiert' },
-    'strategie>connaissance':      { verbe: 'requiert' },
-    'connaissance>condition':      { verbe: 'requiert' },
-    'condition>connaissance':      { verbe: 'requiert' },
-    'strategie>condition':         { verbe: 'requiert' },
-    'condition>strategie':         { verbe: 'requiert' },
-    'idee-maitresse>idee-maitresse': { verbe: 'sappuie_sur' },
-    // Évaluation
-    'evaluation>idee-maitresse':     { verbe: 'evalue' },
-    'idee-maitresse>evaluation':     { verbe: 'evalue', inverser: true },
-    'evaluation>connaissance':       { verbe: 'verifie' },
-    'evaluation>strategie':          { verbe: 'verifie' },
-    'evaluation>condition':          { verbe: 'verifie' },
-    'connaissance>evaluation':       { verbe: 'verifie', inverser: true },
-    'strategie>evaluation':          { verbe: 'verifie', inverser: true },
-    'condition>evaluation':          { verbe: 'verifie', inverser: true }
+    // Compétence → Idée maîtresse (se décline en)
+    'competence>idee-maitresse':   { verbe: 'se_decline_en' },
+    'idee-maitresse>competence':   { verbe: 'se_decline_en', inverser: true },
+    // Idée maîtresse → Leçon (se concrétise dans)
+    'idee-maitresse>lecon':        { verbe: 'se_concretise_dans' },
+    'lecon>idee-maitresse':        { verbe: 'se_concretise_dans', inverser: true },
+    'idee-maitresse>sequence':     { verbe: 'se_concretise_dans' },
+    'sequence>idee-maitresse':     { verbe: 'se_concretise_dans', inverser: true },
+    // Connaissance → Activité (s'acquiert par)
+    'connaissance>activite':       { verbe: 's_acquiert_par' },
+    'connaissance>soutien':        { verbe: 's_acquiert_par' },
+    'connaissance>revision':       { verbe: 's_acquiert_par' },
+    'strategie>activite':          { verbe: 's_acquiert_par' },
+    'strategie>soutien':           { verbe: 's_acquiert_par' },
+    'strategie>revision':          { verbe: 's_acquiert_par' },
+    'condition>activite':          { verbe: 's_acquiert_par' },
+    'condition>soutien':           { verbe: 's_acquiert_par' },
+    'condition>revision':          { verbe: 's_acquiert_par' },
+    'activite>connaissance':       { verbe: 's_acquiert_par', inverser: true },
+    'activite>strategie':          { verbe: 's_acquiert_par', inverser: true },
+    'activite>condition':          { verbe: 's_acquiert_par', inverser: true },
+    'soutien>connaissance':        { verbe: 's_acquiert_par', inverser: true },
+    'soutien>strategie':           { verbe: 's_acquiert_par', inverser: true },
+    'soutien>condition':           { verbe: 's_acquiert_par', inverser: true },
+    'revision>connaissance':       { verbe: 's_acquiert_par', inverser: true },
+    'revision>strategie':          { verbe: 's_acquiert_par', inverser: true },
+    'revision>condition':          { verbe: 's_acquiert_par', inverser: true },
+    // Idée maîtresse → Évaluation (se vérifie par)
+    'idee-maitresse>evaluation':   { verbe: 'se_verifie_par' },
+    'evaluation>idee-maitresse':   { verbe: 'se_verifie_par', inverser: true },
+    // Connaissance → Évaluation (se vérifie par)
+    'connaissance>evaluation':     { verbe: 'se_verifie_par' },
+    'strategie>evaluation':        { verbe: 'se_verifie_par' },
+    'condition>evaluation':        { verbe: 'se_verifie_par' },
+    'evaluation>connaissance':     { verbe: 'se_verifie_par', inverser: true },
+    'evaluation>strategie':        { verbe: 'se_verifie_par', inverser: true },
+    'evaluation>condition':        { verbe: 'se_verifie_par', inverser: true },
+    // Connaissance ↔ Connaissance (s'appuie sur — horizontal)
+    'connaissance>connaissance':   { verbe: 's_appuie_sur' },
+    'strategie>strategie':         { verbe: 's_appuie_sur' },
+    'condition>condition':         { verbe: 's_appuie_sur' },
+    'connaissance>strategie':      { verbe: 's_appuie_sur' },
+    'strategie>connaissance':      { verbe: 's_appuie_sur' },
+    'connaissance>condition':      { verbe: 's_appuie_sur' },
+    'condition>connaissance':      { verbe: 's_appuie_sur' },
+    'strategie>condition':         { verbe: 's_appuie_sur' },
+    'condition>strategie':         { verbe: 's_appuie_sur' },
+    // Idée maîtresse ↔ Idée maîtresse (s'appuie sur — horizontal)
+    'idee-maitresse>idee-maitresse': { verbe: 's_appuie_sur' }
 };
 
 function resoudreVerbe(sourceId, cibleId) {
@@ -126,10 +131,26 @@ function resoudreVerbe(sourceId, cibleId) {
     return { verbe: match.verbe, source: sourceId, cible: cibleId };
 }
 
-// Compatibilité anciens verbes
+// Migration anciens verbes → nouveaux verbes
+var MIGRATION_VERBES = {
+    'developpe':    { nouveauVerbe: 'se_decline_en',      inverserDirection: true },
+    'vise':         { nouveauVerbe: 'se_concretise_dans', inverserDirection: true },
+    'mobilise':     { nouveauVerbe: 's_acquiert_par',     inverserDirection: true },
+    'evalue':       { nouveauVerbe: 'se_verifie_par',     inverserDirection: true },
+    'verifie':      { nouveauVerbe: 'se_verifie_par',     inverserDirection: true },
+    'requiert':     { nouveauVerbe: 's_appuie_sur',       inverserDirection: false },
+    'sappuie_sur':  { nouveauVerbe: 's_appuie_sur',       inverserDirection: false }
+};
+
+// Compatibilité anciens verbes pour affichage
 var VERBES_COMPAT = {
-    'prerequis_de': 'requiert', 'evalue_par': 'mobilise',
-    'soutenu_par': 'mobilise', 'revise_dans': 'mobilise', 'sequence_avant': 'vise'
+    'prerequis_de': 's_appuie_sur', 'evalue_par': 's_acquiert_par',
+    'soutenu_par': 's_acquiert_par', 'revise_dans': 's_acquiert_par',
+    'sequence_avant': 'se_concretise_dans',
+    'developpe': 'se_decline_en', 'vise': 'se_concretise_dans',
+    'mobilise': 's_acquiert_par', 'evalue': 'se_verifie_par',
+    'verifie': 'se_verifie_par', 'requiert': 's_appuie_sur',
+    'sappuie_sur': 's_appuie_sur'
 };
 function trouverConfigLien(typeId) {
     var t = TYPES_LIENS.find(function(tl) { return tl.id === typeId; });
@@ -203,7 +224,11 @@ function ideeMaitresseAtteinLecon(noeudId, visited) {
 // entree = amont (compétence/objectif), sortie = aval (leçon/activité)
 function evaluerBadge(noeud) {
     var type = noeud.type;
-    var liens = getLiensDeNoeud(noeud.id);
+    var tousLesClones = trouverClones(noeud.id);
+    var liens = [];
+    for (var ci = 0; ci < tousLesClones.length; ci++) {
+        liens = liens.concat(getLiensDeNoeud(tousLesClones[ci].id));
+    }
     var OK = { valide: true };
 
     switch (type) {
@@ -211,7 +236,7 @@ function evaluerBadge(noeud) {
             var devParIM = liens.some(function(l) { return l.noeudType === 'idee-maitresse'; });
             return {
                 entree: OK,
-                sortie: devParIM ? OK : { valide: false, message: 'Aucune idée maîtresse ne développe cette compétence' }
+                sortie: devParIM ? OK : { valide: false, message: 'Cette compétence ne se décline en aucune idée maîtresse' }
             };
 
         case 'idee-maitresse':
@@ -220,10 +245,10 @@ function evaluerBadge(noeud) {
             var evalueParEval = liens.some(function(l) { return l.noeudType === 'evaluation'; });
             var resIM = {
                 entree: atteinComp ? OK : { valide: false, message: "Aucune compétence reliée (directement ou via une autre idée)" },
-                sortie: atteinLecon ? OK : { valide: false, message: "Aucune leçon ne vise cette idée" }
+                sortie: atteinLecon ? OK : { valide: false, message: "Cette idée ne se concrétise dans aucune leçon" }
             };
             if (atteinComp && atteinLecon && !evalueParEval) {
-                resIM.avertissement = "Cette idée n'est formellement évaluée dans aucune évaluation";
+                resIM.avertissement = "Cette idée ne se vérifie par aucune évaluation";
             }
             return resIM;
 
@@ -276,7 +301,7 @@ function evaluerBadge(noeud) {
             if (!aConn) msgsSortie.push("Aucune connaissance");
             if (!aAct) msgsSortie.push("Aucune activité");
             return {
-                entree: viseIM ? OK : { valide: false, message: "Aucune idée maîtresse visée" },
+                entree: viseIM ? OK : { valide: false, message: "Aucune idée maîtresse ne se concrétise dans cette leçon" },
                 sortie: msgsSortie.length === 0 ? OK : { valide: false, message: msgsSortie.join(' · ') }
             };
 
@@ -285,7 +310,7 @@ function evaluerBadge(noeud) {
                 return l.noeudType === 'idee-maitresse' || l.noeudType === 'connaissance' || l.noeudType === 'strategie' || l.noeudType === 'condition';
             });
             return {
-                entree: evalueQqch ? OK : { valide: false, message: "Cette évaluation n'est reliée à aucun objectif ni connaissance" },
+                entree: evalueQqch ? OK : { valide: false, message: "Aucun objectif ni connaissance ne se vérifie par cette évaluation" },
                 sortie: OK
             };
 
@@ -356,6 +381,8 @@ function mettreAJourBadge(donnees) {
     } else if (triangle) {
         triangle.style.display = 'none';
     }
+
+    mettreAJourIndicateurClone(donnees);
 }
 
 function mettreAJourTousLesBadges() {
@@ -433,7 +460,8 @@ function creerNoeud(type, x, y) {
         x: x, y: y,
         parent: null,
         enfants: [],
-        metadata: {}
+        metadata: {},
+        cloneSourceId: null
     };
     etat.noeuds.set(id, donnees);
 
@@ -609,6 +637,57 @@ function ouvrirPanneau(id) {
         });
     }
 
+    if (donnees.type === 'evaluation') {
+        var retros = [['aucune', 'Aucune'], ['orale', 'Orale'], ['ecrite', 'Écrite'], ['pairs', 'Par les pairs']];
+        var retVal = donnees.metadata.retroaction || 'aucune';
+        var htmlRetro = '<label for="planif-panneau-retroaction">Rétroaction</label>' +
+            '<select id="planif-panneau-retroaction">';
+        for (var ri = 0; ri < retros.length; ri++) {
+            htmlRetro += '<option value="' + retros[ri][0] + '"' + (retVal === retros[ri][0] ? ' selected' : '') + '>' + retros[ri][1] + '</option>';
+        }
+        htmlRetro += '</select>';
+
+        var prodVal = donnees.metadata.productionId || '';
+        var productions = chargerProductions();
+        var htmlProd = '<label for="planif-panneau-production">Production</label>' +
+            '<select id="planif-panneau-production">' +
+            '<option value="">Aucune</option>';
+        if (productions.length > 0) {
+            var parType = {};
+            for (var pp = 0; pp < productions.length; pp++) {
+                var tp = productions[pp].type || 'autre';
+                if (!parType[tp]) parType[tp] = [];
+                parType[tp].push(productions[pp]);
+            }
+            var typesOrdre = ['travail', 'examen', 'projet', 'quiz', 'autre'];
+            var typesLabels = { travail: 'Travaux', examen: 'Examens', projet: 'Projets', quiz: 'Quiz', autre: 'Autres' };
+            for (var ti = 0; ti < typesOrdre.length; ti++) {
+                var grp = parType[typesOrdre[ti]];
+                if (!grp || grp.length === 0) continue;
+                htmlProd += '<optgroup label="' + (typesLabels[typesOrdre[ti]] || typesOrdre[ti]) + '">';
+                for (var pi = 0; pi < grp.length; pi++) {
+                    var selAttr = prodVal === grp[pi].id ? ' selected' : '';
+                    htmlProd += '<option value="' + grp[pi].id + '"' + selAttr + '>' + grp[pi].nom + ' (' + (grp[pi].ponderation || 0) + ' %)</option>';
+                }
+                htmlProd += '</optgroup>';
+            }
+        }
+        htmlProd += '</select>';
+
+        extra.innerHTML += htmlRetro + htmlProd;
+
+        extra.querySelector('#planif-panneau-retroaction').addEventListener('change', function(e) {
+            enregistrerPourUndo();
+            donnees.metadata.retroaction = e.target.value;
+            sauvegarder();
+        });
+        extra.querySelector('#planif-panneau-production').addEventListener('change', function(e) {
+            enregistrerPourUndo();
+            donnees.metadata.productionId = e.target.value || null;
+            sauvegarder();
+        });
+    }
+
     // Événements du panneau
     document.getElementById('planif-panneau-titre').onfocus = function() {
         enregistrerPourUndo();
@@ -620,6 +699,7 @@ function ouvrirPanneau(id) {
             const t = titreEl.querySelector('.planif-noeud-titre');
             if (t) t.textContent = donnees.titre;
         }
+        propagerModification(id, 'titre', e.target.value);
     };
 
     document.getElementById('planif-panneau-description').onfocus = function() {
@@ -627,8 +707,53 @@ function ouvrirPanneau(id) {
     };
     document.getElementById('planif-panneau-description').oninput = function(e) {
         donnees.description = e.target.value;
+        propagerModification(id, 'description', e.target.value);
         sauvegarder();
     };
+
+    // Clone info
+    var cloneInfo = document.getElementById('planif-panneau-clone-info');
+    if (cloneInfo) {
+        if (doitAfficherIndicateurClone(donnees)) {
+            var clones = trouverClones(id);
+            var nb = clones.length;
+            cloneInfo.style.display = '';
+            cloneInfo.innerHTML = '<span style="font-size:12px;color:#7c3aed;">\uD83E\uDDEC ' + nb + ' instance' + (nb > 1 ? 's' : '') + '</span>' +
+                ' <a href="#" id="planif-clone-voir-autres" style="font-size:11px;color:#7c3aed;">Voir les autres</a>';
+            var lienVoir = document.getElementById('planif-clone-voir-autres');
+            if (lienVoir) {
+                lienVoir.onclick = function(ev) {
+                    ev.preventDefault();
+                    var autresClones = trouverClones(id);
+                    for (var ac = 0; ac < autresClones.length; ac++) {
+                        if (autresClones[ac].id !== id) {
+                            var elClone = document.getElementById(autresClones[ac].id);
+                            if (elClone) {
+                                elClone.classList.add('clone-surbrillance');
+                                (function(el2) {
+                                    setTimeout(function() { el2.classList.remove('clone-surbrillance'); }, 2500);
+                                })(elClone);
+                            }
+                        }
+                    }
+                };
+            }
+        } else {
+            cloneInfo.style.display = 'none';
+            cloneInfo.innerHTML = '';
+        }
+    }
+
+    // Bouton cloner
+    var btnCloner = document.getElementById('planif-btn-cloner');
+    if (btnCloner) {
+        var estConteneur = config && config.conteneur;
+        btnCloner.disabled = !!estConteneur;
+        btnCloner.onclick = function() {
+            clonerNoeud(id);
+            fermerPanneau();
+        };
+    }
 
     document.getElementById('planif-btn-supprimer').onclick = function() {
         supprimerNoeud(id);
@@ -649,6 +774,22 @@ function supprimerNoeud(id) {
     enregistrerPourUndo();
     const donnees = etat.noeuds.get(id);
 
+    // Clone transfer: if deleting an original that has clones, promote first clone
+    if (donnees && !donnees.cloneSourceId && aDesClones(id)) {
+        var clonesATransferer = [];
+        for (var entry of etat.noeuds) {
+            var n = entry[1];
+            if (n.cloneSourceId === id) clonesATransferer.push(n);
+        }
+        if (clonesATransferer.length > 0) {
+            var nouvelOriginal = clonesATransferer[0];
+            nouvelOriginal.cloneSourceId = null;
+            for (var ct = 1; ct < clonesATransferer.length; ct++) {
+                clonesATransferer[ct].cloneSourceId = nouvelOriginal.id;
+            }
+        }
+    }
+
     if (donnees && donnees.enfants) {
         for (const eid of [].concat(donnees.enfants)) {
             detacherDuConteneur(eid);
@@ -668,98 +809,163 @@ function supprimerNoeud(id) {
     const el = document.getElementById(id);
     if (el) el.remove();
     if (etat.selection === id) etat.selection = null;
+
+    // Update clone indicators for remaining clones
+    if (donnees) {
+        var sourceId = donnees.cloneSourceId || id;
+        var restants = [];
+        for (var entryR of etat.noeuds) {
+            var nR = entryR[1];
+            if (nR.id === sourceId || nR.cloneSourceId === sourceId) restants.push(nR);
+        }
+        for (var ri = 0; ri < restants.length; ri++) {
+            mettreAJourIndicateurClone(restants[ri]);
+        }
+    }
+
     sauvegarder();
 }
 
-function dupliquerNoeud(noeudId) {
-    var original = etat.noeuds.get(noeudId);
-    if (!original) return;
+// === CLONAGE — UTILITAIRES ===
+function mettreAJourIndicateurClone(noeud) {
+    if (!noeud) return;
+    var el = document.getElementById(noeud.id);
+    if (!el) return;
+    var indicateur = el.querySelector('.indicateur-clone');
+    if (doitAfficherIndicateurClone(noeud)) {
+        if (!indicateur) {
+            indicateur = document.createElement('span');
+            indicateur.className = 'indicateur-clone';
+            indicateur.textContent = '\uD83E\uDDEC';
+            indicateur.title = 'Ce nœud est un clone';
+            el.appendChild(indicateur);
+            indicateur.addEventListener('mouseenter', function() {
+                var clones = trouverClones(noeud.id);
+                for (var i = 0; i < clones.length; i++) {
+                    if (clones[i].id !== noeud.id) {
+                        var clEl = document.getElementById(clones[i].id);
+                        if (clEl) clEl.classList.add('clone-surbrillance');
+                    }
+                }
+            });
+            indicateur.addEventListener('mouseleave', function() {
+                var clones = trouverClones(noeud.id);
+                for (var i = 0; i < clones.length; i++) {
+                    if (clones[i].id !== noeud.id) {
+                        var clEl = document.getElementById(clones[i].id);
+                        if (clEl) clEl.classList.remove('clone-surbrillance');
+                    }
+                }
+            });
+        }
+    } else {
+        if (indicateur) indicateur.remove();
+    }
+}
+
+function trouverClones(noeudId) {
+    var donnees = etat.noeuds.get(noeudId);
+    if (!donnees) return [donnees].filter(Boolean);
+    var sourceId = donnees.cloneSourceId || noeudId;
+    var resultats = [];
+    for (var entry of etat.noeuds) {
+        var n = entry[1];
+        if (n.id === sourceId || n.cloneSourceId === sourceId) {
+            resultats.push(n);
+        }
+    }
+    return resultats;
+}
+
+function estClone(noeudId) {
+    var donnees = etat.noeuds.get(noeudId);
+    return donnees != null && donnees.cloneSourceId != null;
+}
+
+function aDesClones(noeudId) {
+    for (var entry of etat.noeuds) {
+        var n = entry[1];
+        if (n.cloneSourceId === noeudId) return true;
+    }
+    return false;
+}
+
+function doitAfficherIndicateurClone(noeud) {
+    if (!noeud) return false;
+    if (noeud.cloneSourceId) return true;
+    return aDesClones(noeud.id);
+}
+
+function propagerModification(noeudId, champ, valeur) {
+    var clones = trouverClones(noeudId);
+    for (var i = 0; i < clones.length; i++) {
+        var c = clones[i];
+        if (c.id === noeudId) continue;
+        c[champ] = valeur;
+        if (champ === 'titre') {
+            var el = document.getElementById(c.id);
+            if (el) {
+                var t = el.querySelector('.planif-noeud-titre');
+                if (t) t.textContent = valeur;
+            }
+        }
+    }
+}
+
+function clonerNoeud(noeudId) {
+    var source = etat.noeuds.get(noeudId);
+    if (!source) return;
+    var config = TYPES[source.type];
+    if (config && config.conteneur) {
+        afficherToastLien('Les conteneurs ne peuvent pas être clonés.');
+        return;
+    }
     enregistrerPourUndo();
 
-    var DECALAGE = 30;
+    var DECALAGE = 60;
+    var newId = 'planif-noeud_' + (++etat.compteur);
+    var cloneSourceId = source.cloneSourceId || source.id;
 
-    function clonerUnNoeud(src, decalX, decalY) {
-        var newId = 'planif-noeud_' + (++etat.compteur);
-        var config = TYPES[src.type];
-        var estConteneur = config && config.conteneur === true;
+    var donnees = {
+        id: newId, type: source.type,
+        titre: source.titre || '',
+        description: source.description || '',
+        x: source.x + DECALAGE, y: source.y + DECALAGE,
+        parent: null,
+        enfants: [],
+        metadata: JSON.parse(JSON.stringify(source.metadata || {})),
+        cloneSourceId: cloneSourceId
+    };
+    etat.noeuds.set(newId, donnees);
 
-        var donnees = {
-            id: newId, type: src.type,
-            titre: src.titre || '',
-            description: src.description || '',
-            x: src.x + decalX, y: src.y + decalY,
-            parent: null,
-            enfants: [],
-            metadata: JSON.parse(JSON.stringify(src.metadata || {}))
-        };
-        etat.noeuds.set(newId, donnees);
+    var el = document.createElement('div');
+    el.className = 'planif-noeud planif-type-' + source.type;
+    el.id = newId;
+    el.style.left = donnees.x + 'px';
+    el.style.top = donnees.y + 'px';
+    el.style.borderColor = obtenirCouleurNoeud(donnees);
 
-        var el = document.createElement('div');
-        el.className = (estConteneur ? 'planif-noeud planif-conteneur' : 'planif-noeud') + ' planif-type-' + src.type;
-        el.id = newId;
-        el.style.left = donnees.x + 'px';
-        el.style.top = donnees.y + 'px';
-        el.style.borderColor = estConteneur ? '' : obtenirCouleurNoeud(donnees);
+    el.innerHTML =
+        '<div class="planif-noeud-entete">' +
+            '<span class="planif-noeud-type" style="color: ' + obtenirCouleurNoeud(donnees) + '">' + obtenirLabelNoeud(donnees) + '</span>' +
+        '</div>' +
+        '<div class="planif-noeud-titre" contenteditable="true">' + (donnees.titre || '') + '</div>' +
+        '<div class="planif-noeud-port planif-port-droite" data-dir="droite"></div>' +
+        '<div class="planif-noeud-port planif-port-gauche" data-dir="gauche"></div>' +
+        '<div class="planif-noeud-port planif-port-bas" data-dir="bas"></div>' +
+        '<div class="planif-noeud-port planif-port-haut" data-dir="haut"></div>';
 
-        if (estConteneur) {
-            el.innerHTML =
-                '<div class="planif-noeud-entete">' +
-                    '<span class="planif-noeud-type" style="color: ' + obtenirCouleurNoeud(donnees) + '">' + obtenirLabelNoeud(donnees) + '</span>' +
-                '</div>' +
-                '<div class="planif-noeud-titre" contenteditable="true">' + (donnees.titre || '') + '</div>' +
-                '<div class="planif-noeud-zone planif-vide"></div>' +
-                '<div class="planif-noeud-port planif-port-droite" data-dir="droite"></div>' +
-                '<div class="planif-noeud-port planif-port-gauche" data-dir="gauche"></div>' +
-                '<div class="planif-noeud-port planif-port-bas" data-dir="bas"></div>' +
-                '<div class="planif-noeud-port planif-port-haut" data-dir="haut"></div>';
-        } else {
-            el.innerHTML =
-                '<div class="planif-noeud-entete">' +
-                    '<span class="planif-noeud-type" style="color: ' + obtenirCouleurNoeud(donnees) + '">' + obtenirLabelNoeud(donnees) + '</span>' +
-                '</div>' +
-                '<div class="planif-noeud-titre" contenteditable="true">' + (donnees.titre || '') + '</div>' +
-                '<div class="planif-noeud-port planif-port-droite" data-dir="droite"></div>' +
-                '<div class="planif-noeud-port planif-port-gauche" data-dir="gauche"></div>' +
-                '<div class="planif-noeud-port planif-port-bas" data-dir="bas"></div>' +
-                '<div class="planif-noeud-port planif-port-haut" data-dir="haut"></div>';
-        }
+    attacherEvenements(el, donnees);
+    coucheNoeuds.appendChild(el);
 
-        attacherEvenements(el, donnees);
-        coucheNoeuds.appendChild(el);
-
-        // Clone children recursively if container
-        if (src.enfants && src.enfants.length > 0) {
-            for (var i = 0; i < src.enfants.length; i++) {
-                var enfantSrc = etat.noeuds.get(src.enfants[i]);
-                if (!enfantSrc) continue;
-                var enfantNewId = clonerUnNoeud(enfantSrc, decalX, decalY);
-                var enfantDonnees = etat.noeuds.get(enfantNewId);
-                if (enfantDonnees) {
-                    enfantDonnees.parent = newId;
-                    donnees.enfants.push(enfantNewId);
-                    var enfantEl = document.getElementById(enfantNewId);
-                    if (enfantEl) enfantEl.classList.add('planif-enfant-conteneur');
-                }
-            }
-            mettreAJourZoneConteneur(newId);
-        }
-
-        return newId;
-    }
-
-    var newId = clonerUnNoeud(original, DECALAGE, DECALAGE);
-
-    // If original was in a container, attach clone to same parent
-    if (original.parent) {
-        var parentData = etat.noeuds.get(original.parent);
-        var newDonnees = etat.noeuds.get(newId);
-        if (parentData && newDonnees) {
-            newDonnees.parent = original.parent;
-            if (!parentData.enfants) parentData.enfants = [];
-            parentData.enfants.push(newId);
-            var newEl = document.getElementById(newId);
-            if (newEl) newEl.classList.add('planif-enfant-conteneur');
-            mettreAJourZoneConteneur(original.parent);
+    mettreAJourIndicateurClone(donnees);
+    var sourceOriginal = etat.noeuds.get(cloneSourceId);
+    if (sourceOriginal) mettreAJourIndicateurClone(sourceOriginal);
+    // Also update other clones' indicators
+    var tousClones = trouverClones(newId);
+    for (var ci = 0; ci < tousClones.length; ci++) {
+        if (tousClones[ci].id !== newId && tousClones[ci].id !== cloneSourceId) {
+            mettreAJourIndicateurClone(tousClones[ci]);
         }
     }
 
@@ -1022,16 +1228,35 @@ function afficherMenuLienExistant(x, y, lienId) {
     if (!lien) return;
 
     menuLien.innerHTML = '';
-    var typeLienConfig = trouverConfigLien(lien.type);
-    if (typeLienConfig) {
-        var infoLabel = document.createElement('div');
-        infoLabel.style.cssText = 'padding: 4px 8px; font-size: 11px; color: #64748b; font-style: italic;';
-        infoLabel.textContent = typeLienConfig.label;
-        menuLien.appendChild(infoLabel);
-        var sep = document.createElement('hr');
-        sep.style.cssText = 'border: none; border-top: 1px solid #e2e8f0; margin: 4px 0;';
-        menuLien.appendChild(sep);
+
+    // Titre du menu
+    var titre = document.createElement('div');
+    titre.style.cssText = 'padding: 4px 8px 2px; font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;';
+    titre.textContent = 'Verbe du lien';
+    menuLien.appendChild(titre);
+
+    // Boutons pour chaque verbe disponible
+    for (var vi = 0; vi < TYPES_LIENS.length; vi++) {
+        (function(verbeDef) {
+            var btn = document.createElement('button');
+            btn.textContent = verbeDef.label;
+            if (lien.type === verbeDef.id) btn.classList.add('actif');
+            btn.addEventListener('click', function() {
+                if (lien.type !== verbeDef.id) {
+                    enregistrerPourUndo();
+                    lien.type = verbeDef.id;
+                    dessinerLien(lien);
+                    sauvegarder();
+                }
+                fermerMenuLien();
+            });
+            menuLien.appendChild(btn);
+        })(TYPES_LIENS[vi]);
     }
+
+    var sep = document.createElement('hr');
+    sep.style.cssText = 'border: none; border-top: 1px solid #e2e8f0; margin: 4px 0;';
+    menuLien.appendChild(sep);
 
     var btnSuppr = document.createElement('button');
     btnSuppr.textContent = 'Supprimer ce lien';
@@ -1119,7 +1344,7 @@ function collecterDescendants(racine, parent, liste) {
 
 function peutContenir(conteneurType, enfantType) {
     if (conteneurType === 'sequence') return enfantType === 'lecon';
-    if (conteneurType === 'lecon') return enfantType === 'activite' || enfantType === 'soutien' || enfantType === 'revision' || enfantType === 'connaissance' || enfantType === 'strategie' || enfantType === 'condition';
+    if (conteneurType === 'lecon') return enfantType === 'activite' || enfantType === 'soutien' || enfantType === 'revision' || enfantType === 'connaissance' || enfantType === 'strategie' || enfantType === 'condition' || enfantType === 'evaluation';
     return false;
 }
 
@@ -1274,7 +1499,7 @@ function reLayoutConteneur(conteneurId) {
     });
     conteneur.enfants = enfants;
 
-    var GAP = 12;
+    var GAP = 30;
     var PADDING = 30;
     var HEADER_H = 45;
 
@@ -1352,7 +1577,7 @@ function reLayoutConteneurSaufDragged(conteneurId, draggedId) {
         return (da ? da.y : 0) - (db ? db.y : 0);
     });
 
-    var GAP = 12;
+    var GAP = 30;
     var PADDING = 30;
     var HEADER_H = 45;
 
@@ -1471,7 +1696,8 @@ function clonerEtatPersistant() {
                 id: n.id, type: n.type, titre: n.titre, description: n.description,
                 x: n.x, y: n.y, parent: n.parent,
                 enfants: n.enfants ? n.enfants.slice() : [],
-                metadata: JSON.parse(JSON.stringify(n.metadata || {}))
+                metadata: JSON.parse(JSON.stringify(n.metadata || {})),
+                cloneSourceId: n.cloneSourceId || null
             };
         }),
         liens: Array.from(etat.liens.values()).map(function(l) {
@@ -1552,6 +1778,9 @@ function reconstruireDOM() {
             dessinerLien(entry3[1]);
         }
         mettreAJourGuidesZone();
+        for (var entryClone of etat.noeuds) {
+            mettreAJourIndicateurClone(entryClone[1]);
+        }
     });
 }
 
@@ -1572,7 +1801,8 @@ function restaurerSnapshot(snapshot) {
             id: n.id, type: n.type, titre: n.titre, description: n.description,
             x: n.x, y: n.y, parent: n.parent,
             enfants: n.enfants ? n.enfants.slice() : [],
-            metadata: JSON.parse(JSON.stringify(n.metadata || {}))
+            metadata: JSON.parse(JSON.stringify(n.metadata || {})),
+            cloneSourceId: n.cloneSourceId || null
         };
         etat.noeuds.set(clone.id, clone);
     }
@@ -1656,6 +1886,7 @@ function chargerCarte(carteId) {
         if (n.enfants === undefined) n.enfants = [];
         if (n.parent === undefined) n.parent = null;
         if (!n.metadata) n.metadata = {};
+        if (!('cloneSourceId' in n)) n.cloneSourceId = null;
 
         // Remap IDs si nécessaire (ancien format sans préfixe)
         if (!n.id.startsWith('planif-')) {
@@ -1674,15 +1905,28 @@ function chargerCarte(carteId) {
 
     // Remap et charger les liens
     var liensListe = donnees.liens || [];
+    var liensModifies = false;
     for (var m = 0; m < liensListe.length; m++) {
         var l = liensListe[m];
         if (!l.id.startsWith('planif-')) l.id = 'planif-' + l.id;
         if (!l.source.startsWith('planif-')) l.source = 'planif-' + l.source;
         if (!l.cible.startsWith('planif-')) l.cible = 'planif-' + l.cible;
+        // Migration anciens verbes → nouveaux verbes + inversion direction
+        var migration = MIGRATION_VERBES[l.type];
+        if (migration) {
+            if (migration.inverserDirection) {
+                var ancienneSource = l.source;
+                l.source = l.cible;
+                l.cible = ancienneSource;
+            }
+            l.type = migration.nouveauVerbe;
+            liensModifies = true;
+        }
         etat.liens.set(l.id, l);
     }
 
     reconstruireDOM();
+    if (liensModifies) sauvegarder();
 
     requestAnimationFrame(function() {
         centrerVueSurContenu();
@@ -3225,6 +3469,39 @@ function initialiser() {
         });
     }
 
+    // Carte d'aide flottante — drag + fermer
+    var carteAide = document.getElementById('planif-carte-aide');
+    var carteAideBarre = carteAide ? carteAide.querySelector('.planif-carte-aide-barre') : null;
+    var carteAideFermer = document.getElementById('planif-carte-aide-fermer');
+    if (carteAideBarre) {
+        carteAideBarre.addEventListener('mousedown', function(e) {
+            if (e.target.closest('.planif-carte-aide-fermer')) return;
+            e.preventDefault();
+            var startX = e.clientX;
+            var startY = e.clientY;
+            var rect = carteAide.getBoundingClientRect();
+            var wrapperRect = document.getElementById('planif-zone-wrapper').getBoundingClientRect();
+            var startLeft = rect.left - wrapperRect.left;
+            var startTop = rect.top - wrapperRect.top;
+
+            function onMove(e2) {
+                carteAide.style.left = (startLeft + e2.clientX - startX) + 'px';
+                carteAide.style.top = (startTop + e2.clientY - startY) + 'px';
+            }
+            function onUp() {
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup', onUp);
+            }
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onUp);
+        });
+    }
+    if (carteAideFermer && carteAide) {
+        carteAideFermer.addEventListener('click', function() {
+            carteAide.style.display = 'none';
+        });
+    }
+
     zoneTravail.addEventListener('dragover', function(e) {
         e.preventDefault();
         e.dataTransfer.dropEffect = 'copy';
@@ -3557,7 +3834,7 @@ function gererKeydown(e) {
 
     if ((e.metaKey || e.ctrlKey) && e.key === 'd' && pasDansChamp) {
         e.preventDefault();
-        if (etat.selection) dupliquerNoeud(etat.selection);
+        if (etat.selection) clonerNoeud(etat.selection);
         return;
     }
 
