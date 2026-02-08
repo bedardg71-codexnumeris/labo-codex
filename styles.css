@@ -14027,7 +14027,11 @@ body.mode-assiste .btn-aide-contextuelle,
     position: absolute;
     top: 0;
     left: 0;
+    z-index: 15;
+    pointer-events: none;
 }
+#planif-canvas .planif-lien-groupe { pointer-events: auto; }
+#planif-canvas .planif-lien { pointer-events: stroke; }
 
 /* === LIENS SVG === */
 .planif-lien {
@@ -14084,7 +14088,13 @@ body.mode-assiste .btn-aide-contextuelle,
 
 .planif-noeud:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 .planif-noeud.planif-dragging { cursor: grabbing; box-shadow: 0 8px 24px rgba(0,0,0,0.15); z-index: 50; }
-.planif-noeud.selected { border-color: var(--planif-couleur-selection); box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
+.planif-noeud.selected {
+    border-color: var(--planif-couleur-selection);
+    box-shadow: 0 0 0 4px rgba(59,130,246,0.35), 0 4px 16px rgba(59,130,246,0.15);
+}
+.planif-noeud.selected:not(.planif-conteneur) {
+    background: color-mix(in srgb, var(--planif-couleur-selection) 5%, white);
+}
 
 /* Conteneurs */
 .planif-noeud.planif-conteneur {
