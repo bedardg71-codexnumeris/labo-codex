@@ -13803,6 +13803,7 @@ body.mode-assiste .btn-aide-contextuelle,
     --planif-couleur-sequence: #9f1239;
     --planif-couleur-lecon: #f97316;
     --planif-couleur-activite: #d946ef;
+    --planif-couleur-condition: #6366f1;
     --planif-couleur-fond: #f8fafc;
     --planif-couleur-texte: #1e293b;
     --planif-couleur-bordure: #cbd5e1;
@@ -13840,7 +13841,7 @@ body.mode-assiste .btn-aide-contextuelle,
     display: flex;
     align-items: baseline;
     gap: 8px;
-    margin: 0;
+    margin: 0 auto;
 }
 
 #section-planification .planif-header h3 span { color: #64748b; font-weight: 400; }
@@ -14092,8 +14093,18 @@ body.mode-assiste .btn-aide-contextuelle,
     background: rgba(59,130,246,0.04) !important;
 }
 
+.planif-noeud.planif-conteneur.planif-type-sequence { z-index: 2; }
+.planif-noeud.planif-conteneur.planif-type-lecon    { z-index: 5; }
+
 .planif-noeud.planif-enfant-conteneur {
-    z-index: 11;
+    z-index: 10;
+}
+
+.planif-noeud.planif-mode-individuel {
+    border: 2px solid var(--planif-couleur-selection) !important;
+    border-style: solid !important;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.25);
+    z-index: 12;
 }
 
 .planif-noeud-entete {
@@ -14572,16 +14583,31 @@ body.mode-assiste .btn-aide-contextuelle,
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 26px;
-    height: 26px;
+    width: 28px;
+    height: 28px;
     border: 1px solid var(--planif-couleur-bordure);
     border-radius: 6px;
     background: white;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 15px;
+    padding: 0;
+    line-height: 1;
     color: #64748b;
     transition: all 0.15s;
 }
 
 .planif-btn-carte:hover { background: #f1f5f9; color: var(--planif-couleur-texte); border-color: var(--planif-couleur-selection); }
 .planif-btn-carte.planif-danger:hover { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
+
+/* Contours colorés boutons palette */
+.planif-palette-btn[data-type="competence"]     { border-color: var(--planif-couleur-competence); }
+.planif-palette-btn[data-type="idee-maitresse"] { border-color: var(--planif-couleur-idee-maitresse); }
+.planif-palette-btn[data-type="connaissance"]   { border-color: var(--planif-couleur-connaissance); }
+.planif-palette-btn[data-type="strategie"]      { border-color: var(--planif-couleur-strategie); }
+.planif-palette-btn[data-type="condition"]      { border-color: var(--planif-couleur-condition); }
+.planif-palette-btn[data-type="prerequis"]      { border-color: var(--planif-couleur-prerequis); }
+.planif-palette-btn[data-type="sequence"]       { border-color: var(--planif-couleur-sequence); }
+.planif-palette-btn[data-type="lecon"]          { border-color: var(--planif-couleur-lecon); }
+.planif-palette-btn[data-type="activite"]       { border-color: var(--planif-couleur-activite); }
+.planif-palette-btn[data-type="soutien"]        { border-color: var(--planif-couleur-soutien); }
+.planif-palette-btn[data-type="revision"]       { border-color: var(--planif-couleur-revision); }

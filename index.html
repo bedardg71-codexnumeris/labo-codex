@@ -6818,16 +6818,16 @@
                         <div class="planif-header">
                             <div id="planif-selecteur-cartes">
                                 <select id="planif-liste-cartes" title="Carte active"></select>
-                                <button class="planif-btn-carte" id="planif-btn-nouvelle-carte" title="Nouvelle carte">+</button>
-                                <button class="planif-btn-carte planif-danger" id="planif-btn-supprimer-carte" title="Supprimer cette carte" style="font-size:12px">&times;</button>
-                                <button class="planif-btn-carte" id="planif-btn-exporter-carte" title="Exporter cette carte" style="font-size:11px">&#8615;</button>
-                                <button class="planif-btn-carte" id="planif-btn-importer-carte" title="Importer une carte" style="font-size:11px">&#8613;</button>
+                                <button class="planif-btn-carte" id="planif-btn-nouvelle-carte" title="Nouvelle carte">➕</button>
+                                <button class="planif-btn-carte planif-danger" id="planif-btn-supprimer-carte" title="Supprimer cette carte">❌</button>
+                                <button class="planif-btn-carte" id="planif-btn-exporter-carte" title="Exporter cette carte">⬇️</button>
+                                <button class="planif-btn-carte" id="planif-btn-importer-carte" title="Importer une carte">⬆️</button>
+                                <button class="planif-btn-carte" id="planif-btn-annuler" title="Annuler (Ctrl+Z)">↩️</button>
                                 <input type="file" id="planif-fichier-import" accept=".json" style="display:none">
                             </div>
-                            <span class="badge-dev-actif">Développement actif</span>
                             <h3><input type="text" id="planif-titre-carte" value="Sans titre" placeholder="Titre de la carte…"></h3>
                             <div id="planif-palette">
-                                <div class="planif-palette-zone-label" style="background: rgba(99, 102, 241, 0.08); color: #6366f1;">Objectifs</div>
+                                <div class="planif-palette-zone-label" style="background: rgba(59, 130, 246, 0.08); color: #3b82f6;">Objectifs</div>
                                 <div class="planif-palette-groupe">
                                     <button class="planif-palette-btn" data-type="competence" draggable="true">
                                         <span class="planif-pastille" style="background: var(--planif-couleur-competence)"></span>Compétence
@@ -6835,18 +6835,25 @@
                                     <button class="planif-palette-btn" data-type="idee-maitresse" draggable="true">
                                         <span class="planif-pastille" style="background: var(--planif-couleur-idee-maitresse)"></span>Idée maîtresse
                                     </button>
+                                </div>
+                                <div class="planif-palette-sep"></div>
+                                <div class="planif-palette-zone-label" style="background: rgba(8, 145, 178, 0.08); color: #0891b2;">Connaissances</div>
+                                <div class="planif-palette-groupe">
                                     <button class="planif-palette-btn" data-type="connaissance" draggable="true">
-                                        <span class="planif-pastille" style="background: var(--planif-couleur-connaissance)"></span>Connaissance
-                                    </button>
-                                    <button class="planif-palette-btn" data-type="prerequis" draggable="true">
-                                        <span class="planif-pastille" style="background: var(--planif-couleur-prerequis)"></span>Préalable
+                                        <span class="planif-pastille" style="background: var(--planif-couleur-connaissance)"></span>Information
                                     </button>
                                     <button class="planif-palette-btn" data-type="strategie" draggable="true">
                                         <span class="planif-pastille" style="background: var(--planif-couleur-strategie)"></span>Stratégie
                                     </button>
+                                    <button class="planif-palette-btn" data-type="condition" draggable="true">
+                                        <span class="planif-pastille" style="background: var(--planif-couleur-condition)"></span>Condition
+                                    </button>
+                                    <button class="planif-palette-btn" data-type="prerequis" draggable="true">
+                                        <span class="planif-pastille" style="background: var(--planif-couleur-prerequis)"></span>Préalable
+                                    </button>
                                 </div>
                                 <div class="planif-palette-sep"></div>
-                                <div class="planif-palette-zone-label" style="background: rgba(249, 115, 22, 0.08); color: #ea580c;">Activités</div>
+                                <div class="planif-palette-zone-label" style="background: rgba(159, 18, 57, 0.08); color: #9f1239;">Conteneurs</div>
                                 <div class="planif-palette-groupe">
                                     <button class="planif-palette-btn" data-type="sequence" draggable="true">
                                         <span class="planif-pastille" style="background: var(--planif-couleur-sequence)"></span>Séquence
@@ -6854,8 +6861,12 @@
                                     <button class="planif-palette-btn" data-type="lecon" draggable="true">
                                         <span class="planif-pastille" style="background: var(--planif-couleur-lecon)"></span>Leçon
                                     </button>
+                                </div>
+                                <div class="planif-palette-sep"></div>
+                                <div class="planif-palette-zone-label" style="background: rgba(217, 70, 239, 0.08); color: #d946ef;">Activités</div>
+                                <div class="planif-palette-groupe">
                                     <button class="planif-palette-btn" data-type="activite" draggable="true">
-                                        <span class="planif-pastille" style="background: var(--planif-couleur-activite)"></span>Activité
+                                        <span class="planif-pastille" style="background: var(--planif-couleur-activite)"></span>Apprentissage
                                     </button>
                                     <button class="planif-palette-btn" data-type="soutien" draggable="true">
                                         <span class="planif-pastille" style="background: var(--planif-couleur-soutien)"></span>Soutien
