@@ -149,8 +149,6 @@ function mettreAJourApparenceNoeud(donnees) {
     if (!el) return;
     var couleur = obtenirCouleurNoeud(donnees);
     el.style.borderColor = couleur;
-    var pastille = el.querySelector('.planif-noeud-pastille');
-    if (pastille) pastille.style.background = couleur;
     var typeEl = el.querySelector('.planif-noeud-type');
     if (typeEl) {
         typeEl.textContent = obtenirLabelNoeud(donnees);
@@ -407,7 +405,6 @@ function creerNoeud(type, x, y) {
     if (estConteneur) {
         el.innerHTML =
             '<div class="planif-noeud-entete">' +
-                '<span class="planif-noeud-pastille" style="background: ' + obtenirCouleurNoeud(donnees) + '"></span>' +
                 '<span class="planif-noeud-type" style="color: ' + obtenirCouleurNoeud(donnees) + '">' + obtenirLabelNoeud(donnees) + '</span>' +
             '</div>' +
             '<div class="planif-noeud-titre" contenteditable="true"></div>' +
@@ -419,7 +416,6 @@ function creerNoeud(type, x, y) {
     } else {
         el.innerHTML =
             '<div class="planif-noeud-entete">' +
-                '<span class="planif-noeud-pastille" style="background: ' + obtenirCouleurNoeud(donnees) + '"></span>' +
                 '<span class="planif-noeud-type" style="color: ' + obtenirCouleurNoeud(donnees) + '">' + obtenirLabelNoeud(donnees) + '</span>' +
             '</div>' +
             '<div class="planif-noeud-titre" contenteditable="true"></div>' +
@@ -1337,7 +1333,6 @@ function reconstruireDOM() {
             var nbEnfants = (n.enfants || []).length;
             el.innerHTML =
                 '<div class="planif-noeud-entete">' +
-                    '<span class="planif-noeud-pastille" style="background: ' + obtenirCouleurNoeud(n) + '"></span>' +
                     '<span class="planif-noeud-type" style="color: ' + obtenirCouleurNoeud(n) + '">' + obtenirLabelNoeud(n) + '</span>' +
                 '</div>' +
                 '<div class="planif-noeud-titre" contenteditable="true">' + (n.titre || '') + '</div>' +
@@ -1351,7 +1346,6 @@ function reconstruireDOM() {
         } else {
             el.innerHTML =
                 '<div class="planif-noeud-entete">' +
-                    '<span class="planif-noeud-pastille" style="background: ' + obtenirCouleurNoeud(n) + '"></span>' +
                     '<span class="planif-noeud-type" style="color: ' + obtenirCouleurNoeud(n) + '">' + obtenirLabelNoeud(n) + '</span>' +
                 '</div>' +
                 '<div class="planif-noeud-titre" contenteditable="true">' + (n.titre || '') + '</div>' +
