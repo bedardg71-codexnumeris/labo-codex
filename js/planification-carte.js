@@ -51,7 +51,9 @@ const TYPES = {
     // Activités
     'activite':       { label: 'Apprentissage',     couleur: 'var(--planif-couleur-activite)' },
     'soutien':        { label: 'Soutien',           couleur: 'var(--planif-couleur-soutien)' },
-    'revision':       { label: 'Révision',          couleur: 'var(--planif-couleur-revision)' }
+    'revision':       { label: 'Révision',          couleur: 'var(--planif-couleur-revision)' },
+    // Évaluation
+    'evaluation':     { label: 'Évaluation',        couleur: 'var(--planif-couleur-evaluation)' }
 };
 
 const TYPES_LIENS = [
@@ -59,7 +61,9 @@ const TYPES_LIENS = [
     { id: 'vise',           label: 'vise' },
     { id: 'mobilise',       label: 'mobilise' },
     { id: 'requiert',       label: 'requiert' },
-    { id: 'sappuie_sur',    label: "s'appuie sur" }
+    { id: 'sappuie_sur',    label: "s'appuie sur" },
+    { id: 'evalue',         label: 'évalue' },
+    { id: 'verifie',        label: 'vérifie' }
 ];
 
 // Table des verbes automatiques : clé = "typeSource>typeCible", valeur = { verbe, inverser }
@@ -95,7 +99,16 @@ var VERBES_AUTO = {
     'condition>connaissance':      { verbe: 'requiert' },
     'strategie>condition':         { verbe: 'requiert' },
     'condition>strategie':         { verbe: 'requiert' },
-    'idee-maitresse>idee-maitresse': { verbe: 'sappuie_sur' }
+    'idee-maitresse>idee-maitresse': { verbe: 'sappuie_sur' },
+    // Évaluation
+    'evaluation>idee-maitresse':     { verbe: 'evalue' },
+    'idee-maitresse>evaluation':     { verbe: 'evalue', inverser: true },
+    'evaluation>connaissance':       { verbe: 'verifie' },
+    'evaluation>strategie':          { verbe: 'verifie' },
+    'evaluation>condition':          { verbe: 'verifie' },
+    'connaissance>evaluation':       { verbe: 'verifie', inverser: true },
+    'strategie>evaluation':          { verbe: 'verifie', inverser: true },
+    'condition>evaluation':          { verbe: 'verifie', inverser: true }
 };
 
 function resoudreVerbe(sourceId, cibleId) {
@@ -202,10 +215,15 @@ function evaluerBadge(noeud) {
         case 'idee-maitresse':
             var atteinComp = ideeMaitresseAtteinCompetence(noeud.id);
             var atteinLecon = ideeMaitresseAtteinLecon(noeud.id);
-            return {
+            var evalueParEval = liens.some(function(l) { return l.noeudType === 'evaluation'; });
+            var resIM = {
                 entree: atteinComp ? OK : { valide: false, message: "Aucune compétence reliée (directement ou via une autre idée)" },
                 sortie: atteinLecon ? OK : { valide: false, message: "Aucune leçon ne vise cette idée" }
             };
+            if (atteinComp && atteinLecon && !evalueParEval) {
+                resIM.avertissement = "Cette idée n'est formellement évaluée dans aucune évaluation";
+            }
+            return resIM;
 
         case 'connaissance':
         case 'strategie':
@@ -260,6 +278,15 @@ function evaluerBadge(noeud) {
                 sortie: msgsSortie.length === 0 ? OK : { valide: false, message: msgsSortie.join(' · ') }
             };
 
+        case 'evaluation':
+            var evalueQqch = liens.some(function(l) {
+                return l.noeudType === 'idee-maitresse' || l.noeudType === 'connaissance' || l.noeudType === 'strategie' || l.noeudType === 'condition';
+            });
+            return {
+                entree: evalueQqch ? OK : { valide: false, message: "Cette évaluation n'est reliée à aucun objectif ni connaissance" },
+                sortie: OK
+            };
+
         default:
             return { entree: OK, sortie: OK };
     }
@@ -312,6 +339,21 @@ function mettreAJourBadge(donnees) {
         el.appendChild(badgeSortie);
     }
     appliquerBadge(badgeSortie, resultat.sortie, couleur);
+
+    // Triangle d'avertissement (non bloquant, ex: IM sans évaluation)
+    var triangle = el.querySelector('.planif-badge-avertissement');
+    if (resultat.avertissement) {
+        if (!triangle) {
+            triangle = document.createElement('span');
+            triangle.className = 'planif-badge-avertissement';
+            el.appendChild(triangle);
+        }
+        triangle.textContent = '\u26A0';
+        triangle.title = resultat.avertissement;
+        triangle.style.display = '';
+    } else if (triangle) {
+        triangle.style.display = 'none';
+    }
 }
 
 function mettreAJourTousLesBadges() {
@@ -2313,6 +2355,49 @@ function trouverIdeesMaitressesAncetres(noeudId) {
     return resultats;
 }
 
+function chargerProductions() {
+    if (typeof db === 'undefined' || typeof window.cle !== 'function') return [];
+    try {
+        var productions = db.getSync(window.cle('productions'), []);
+        return productions.filter(function(p) { return p.estActive; }).map(function(p) {
+            return { id: p.id, nom: p.nom, type: p.type || 'autre', ponderation: p.ponderation || 0, grilleId: p.grilleId, dateEcheance: p.dateEcheance };
+        });
+    } catch(e) { return []; }
+}
+
+function afficherDetailsProduction(productionId, productions) {
+    if (!productionId) return null;
+    var prod = null;
+    for (var i = 0; i < productions.length; i++) {
+        if (productions[i].id === productionId) { prod = productions[i]; break; }
+    }
+    if (!prod) return null;
+    var nomGrille = 'Aucune grille';
+    var nomEchelle = 'Aucune échelle';
+    try {
+        if (typeof db !== 'undefined' && typeof window.cle === 'function' && prod.grilleId) {
+            var grilles = db.getSync(window.cle('grillesTemplates'), []);
+            var grille = grilles.find(function(g) { return g.id === prod.grilleId; });
+            if (grille) {
+                nomGrille = grille.nom || nomGrille;
+                var echelles = db.getSync(window.cle('echellesTemplates'), []);
+                var echelle = echelles.find(function(e) { return e.id === grille.echelleId; });
+                if (echelle) nomEchelle = echelle.nom || nomEchelle;
+            }
+        }
+    } catch(e) {}
+    return { nomProduction: prod.nom, ponderation: prod.ponderation, nomGrille: nomGrille, nomEchelle: nomEchelle, dateEcheance: prod.dateEcheance || null };
+}
+
+function sauvegarderChoixActivite(leconId, activiteId, retroaction, productionId) {
+    if (typeof db === 'undefined' || typeof window.cle !== 'function') return;
+    var seances = db.getSync(window.cle('planification_seances'), {});
+    if (!seances[leconId]) seances[leconId] = {};
+    if (!seances[leconId].activites) seances[leconId].activites = {};
+    seances[leconId].activites[activiteId] = { retroaction: retroaction, productionId: productionId || null };
+    db.setSync(window.cle('planification_seances'), seances);
+}
+
 function afficherLeconOrganisateur() {
     var leconId = orgSelectLecon.value;
     if (!leconId) {
@@ -2355,30 +2440,124 @@ function afficherLeconOrganisateur() {
     // Prérequis — placeholder (Phase 2)
     // Productions — placeholder (Phase 2)
 
-    // Cœur de la leçon — afficher les enfants (activités, soutiens, révisions)
+    // Signal de cohérence évaluation
+    var evalsLecon = (lecon.enfants || []).filter(function(eid) {
+        var e = etat.noeuds.get(eid);
+        return e && e.type === 'evaluation';
+    });
+
+    // Cœur de la leçon — afficher les enfants (activités, soutiens, révisions, évaluations)
     var coeurContenu = document.getElementById('planif-org-coeur-contenu');
     var enfants = (lecon.enfants || []).filter(function(eid) { return etat.noeuds.has(eid); });
-    if (enfants.length === 0) {
+    var activites = enfants.filter(function(eid) {
+        var e = etat.noeuds.get(eid);
+        return e && (e.type === 'activite' || e.type === 'soutien' || e.type === 'revision');
+    });
+
+    // Charger les productions depuis Construction de la note
+    var productions = chargerProductions();
+    var seances = typeof db !== 'undefined' ? db.getSync(window.cle('planification_seances'), {}) : {};
+
+    if (activites.length === 0) {
         coeurContenu.innerHTML = '<div class="planif-org-placeholder">Aucune activité dans cette leçon.</div>';
     } else {
+        // Vérifier cohérence évaluation
+        var aucuneProd = activites.every(function(eid) {
+            var choix = (seances[leconId] && seances[leconId].activites && seances[leconId].activites[eid]) || {};
+            return !choix.productionId;
+        });
         var h = '';
-        for (var j = 0; j < enfants.length; j++) {
-            var enf = etat.noeuds.get(enfants[j]);
+        if (evalsLecon.length > 0 && aucuneProd) {
+            h += '<div class="planif-org-avertissement">\u26A0 ' + evalsLecon.length + ' évaluation' + (evalsLecon.length > 1 ? 's' : '') + ' dans la carte ' + (evalsLecon.length > 1 ? 'ne sont reliées' : "n'est reliée") + ' à aucune activité ci-dessous.</div>';
+        }
+
+        for (var j = 0; j < activites.length; j++) {
+            var enf = etat.noeuds.get(activites[j]);
             if (!enf) continue;
-            h += '<div class="planif-cal-item" data-noeud="' + enf.id + '">';
+            var choixAct = (seances[leconId] && seances[leconId].activites && seances[leconId].activites[enf.id]) || { retroaction: 'aucune', productionId: null };
+
+            h += '<div class="planif-org-activite" data-noeud="' + enf.id + '">';
+            h += '<div class="planif-org-activite-entete">';
             h += '<span class="planif-cal-pastille-mini" style="background: ' + obtenirCouleurNoeud(enf) + '"></span>';
-            h += '<div><span class="planif-cal-item-titre">' + (enf.titre || obtenirLabelNoeud(enf)) + '</span>';
+            h += '<span class="planif-cal-item-titre">' + (enf.titre || obtenirLabelNoeud(enf)) + '</span>';
+            h += '<span class="planif-org-activite-type">' + obtenirLabelNoeud(enf).toUpperCase() + '</span>';
             if (enf.metadata && enf.metadata.duree) {
                 h += ' <span class="planif-cal-duree">' + enf.metadata.duree + ' min</span>';
             }
-            h += '</div></div>';
+            h += '</div>';
+
+            // Rétroaction
+            h += '<div class="planif-org-activite-detail">';
+            h += '<label>Rétroaction\u00a0:</label>';
+            h += '<select class="planif-org-select-retro" data-activite="' + enf.id + '" data-lecon="' + leconId + '">';
+            var retros = [['aucune', 'Aucune'], ['orale', 'Orale'], ['ecrite', 'Écrite'], ['pairs', 'Par les pairs']];
+            for (var r = 0; r < retros.length; r++) {
+                h += '<option value="' + retros[r][0] + '"' + (choixAct.retroaction === retros[r][0] ? ' selected' : '') + '>' + retros[r][1] + '</option>';
+            }
+            h += '</select>';
+            h += '</div>';
+
+            // Production
+            h += '<div class="planif-org-activite-detail">';
+            h += '<label>Production\u00a0:</label>';
+            h += '<select class="planif-org-select-prod" data-activite="' + enf.id + '" data-lecon="' + leconId + '">';
+            h += '<option value="">Aucune</option>';
+            if (productions.length > 0) {
+                var parType = {};
+                for (var p = 0; p < productions.length; p++) {
+                    var tp = productions[p].type || 'autre';
+                    if (!parType[tp]) parType[tp] = [];
+                    parType[tp].push(productions[p]);
+                }
+                var typesOrdre = ['travail', 'examen', 'projet', 'quiz', 'autre'];
+                var typesLabels = { travail: 'Travaux', examen: 'Examens', projet: 'Projets', quiz: 'Quiz', autre: 'Autres' };
+                for (var ti = 0; ti < typesOrdre.length; ti++) {
+                    var grp = parType[typesOrdre[ti]];
+                    if (!grp || grp.length === 0) continue;
+                    h += '<optgroup label="' + (typesLabels[typesOrdre[ti]] || typesOrdre[ti]) + '">';
+                    for (var pi = 0; pi < grp.length; pi++) {
+                        var selected = choixAct.productionId === grp[pi].id ? ' selected' : '';
+                        h += '<option value="' + grp[pi].id + '"' + selected + '>' + grp[pi].nom + ' (' + (grp[pi].ponderation || 0) + ' %)</option>';
+                    }
+                    h += '</optgroup>';
+                }
+            }
+            h += '</select>';
+            h += '</div>';
+
+            // Détails production (si sélectionnée)
+            if (choixAct.productionId) {
+                var details = afficherDetailsProduction(choixAct.productionId, productions);
+                if (details) {
+                    h += '<div class="planif-org-prod-details">';
+                    h += 'Grille\u00a0: ' + details.nomGrille + ' \u00b7 Échelle\u00a0: ' + details.nomEchelle;
+                    if (details.dateEcheance) h += '<br>Échéance\u00a0: ' + details.dateEcheance;
+                    h += '</div>';
+                }
+            }
+
+            h += '</div>';
         }
         coeurContenu.innerHTML = h;
-        // Rendre cliquables
-        coeurContenu.querySelectorAll('[data-noeud]').forEach(function(el) {
+
+        // Brancher les event listeners
+        coeurContenu.querySelectorAll('.planif-org-select-retro').forEach(function(sel) {
+            sel.addEventListener('change', function() {
+                sauvegarderChoixActivite(sel.dataset.lecon, sel.dataset.activite, sel.value, null);
+            });
+        });
+        coeurContenu.querySelectorAll('.planif-org-select-prod').forEach(function(sel) {
+            sel.addEventListener('change', function() {
+                var retro = sel.closest('.planif-org-activite').querySelector('.planif-org-select-retro');
+                sauvegarderChoixActivite(sel.dataset.lecon, sel.dataset.activite, retro ? retro.value : 'aucune', sel.value || null);
+                afficherLeconOrganisateur(); // Refresh to show production details
+            });
+        });
+        coeurContenu.querySelectorAll('.planif-org-activite-entete').forEach(function(el) {
             el.addEventListener('click', function(e) {
                 e.stopPropagation();
-                naviguerVers(el.dataset.noeud);
+                var nid = el.closest('[data-noeud]').dataset.noeud;
+                if (nid) naviguerVers(nid);
             });
         });
     }
