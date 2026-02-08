@@ -703,9 +703,13 @@
 
 - [x] **#32** Refonte architecture groupe Demo ✅ OBSOLÈTE (6 fév 2026) — Remplacé par Chantiers 1-4 (Beta 97.2) : route démo isolée, pack 20 étudiants anonymisés, page d'accueil, guidage contextuel
 
-- [ ] **#12** Audit db.get() vs db.getSync()
-  - Verifier tous les modules pour desynchronisation IndexedDB/localStorage
-  - Meme probleme que pratiques pourrait exister ailleurs
+- [x] **#12** Audit db.get() vs db.getSync() ✅ CORRIGÉ (8 fév 2026)
+  - **Résultat** : Architecture saine — `db.set()` ET `db.setSync()` écrivent dans les DEUX stores (localStorage + IndexedDB). Pas de désynchronisation systémique.
+  - **340 appels db.get()** (async), **992 appels db.getSync()** (sync) — 99.1% correctement awaités
+  - **Fix 1** : contexte.js:117 — ajout `.catch()` sur le `.then()` sans gestion d'erreur
+  - **Fix 2** : pratiques-materiel.js:1256 — double écriture `db.set()` + `db.setSync()` redondante retirée
+  - **Fix 3** : wizard-pratique-v2.js:1709 — double écriture `db.setSync()` + `db.set()` redondante retirée
+  - **Fichiers** : `js/contexte.js`, `js/pratiques-materiel.js`, `js/wizard-pratique-v2.js`
 
 - [ ] **#13** Outil verification integrite donnees
   - Comparer IndexedDB et localStorage

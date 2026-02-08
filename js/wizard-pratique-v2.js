@@ -1703,26 +1703,8 @@ async function sauvegarderPratique(pratique) {
         pratiques.push(pratique);
     }
 
-    // Sauvegarder avec double écriture pour fiabilité
-    try {
-        // 1. Écriture synchrone localStorage (immédiat)
-        db.setSync('pratiquesConfigurables', pratiques);
-
-        // 2. Écriture asynchrone IndexedDB (attendre pour fiabilité)
-        if (db.ready && db.useIndexedDB) {
-            await db.set('pratiquesConfigurables', pratiques);
-        }
-
-        // 3. Vérification
-        const verification = db.getSync('pratiquesConfigurables', []);
-        if (!verification.find(p => p.id === pratique.id)) {
-            console.error('[WizardV2] ⚠️ Vérification échouée - pratique non trouvée après sauvegarde');
-        } else {
-            console.log('[WizardV2] ✅ Pratique sauvegardée et vérifiée:', pratique.id);
-        }
-    } catch (e) {
-        console.error('[WizardV2] ❌ Erreur sauvegarde:', e);
-    }
+    // Sauvegarde localStorage + IndexedDB (setSync écrit dans les deux stores)
+    db.setSync('pratiquesConfigurables', pratiques);
 
     // Mettre à jour les modalités d'évaluation si c'est la pratique active
     const modalites = db.getSync('modalitesEvaluation', {});
