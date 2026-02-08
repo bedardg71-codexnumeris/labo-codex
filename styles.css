@@ -14292,6 +14292,14 @@ body.mode-assiste .btn-aide-contextuelle,
     line-height: 1;
 }
 
+/* === CHECKBOX PRÉALABLE === */
+.planif-panneau-prealable { margin-top: 8px; }
+.planif-checkbox-label {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px; color: var(--planif-couleur-texte); cursor: pointer;
+}
+.planif-checkbox-label input[type="checkbox"] { width: auto; margin: 0; accent-color: var(--planif-couleur-prerequis); }
+
 /* === PANNEAU SÉANCES === */
 #planif-btn-seances {
     display: flex;
@@ -14646,7 +14654,6 @@ body.mode-assiste .btn-aide-contextuelle,
 .planif-palette-btn[data-type="connaissance"]   { border-color: var(--planif-couleur-connaissance); }
 .planif-palette-btn[data-type="strategie"]      { border-color: var(--planif-couleur-strategie); }
 .planif-palette-btn[data-type="condition"]      { border-color: var(--planif-couleur-condition); }
-.planif-palette-btn[data-type="prerequis"]      { border-color: var(--planif-couleur-prerequis); }
 .planif-palette-btn[data-type="sequence"]       { border-color: var(--planif-couleur-sequence); border-style: dashed; }
 .planif-palette-btn[data-type="lecon"]          { border-color: var(--planif-couleur-lecon); border-style: dashed; }
 .planif-palette-btn[data-type="activite"]       { border-color: var(--planif-couleur-activite); }
