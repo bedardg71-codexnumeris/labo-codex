@@ -18731,5 +18731,7 @@ const PACK_DEMARRAGE = {
   ]
 };
 
+// Export global pour donnees-demo.js
+window.PACK_DEMARRAGE = PACK_DEMARRAGE;
 
 })();
