@@ -1175,7 +1175,7 @@ function rattacherAuConteneur(noeudId, conteneurId) {
 
     var el = document.getElementById(noeudId);
     if (el) el.classList.add('planif-enfant-conteneur');
-    mettreAJourZoneConteneur(conteneurId);
+    reLayoutAvecAnimation(conteneurId);
 }
 
 function detacherDuConteneur(noeudId) {
@@ -1202,6 +1202,31 @@ function detacherDuConteneur(noeudId) {
 }
 
 var _layoutEnCours = new Set();
+
+function reLayoutAvecAnimation(conteneurId) {
+    var conteneur = etat.noeuds.get(conteneurId);
+    if (!conteneur) return;
+    var enfants = (conteneur.enfants || []).filter(function(eid) { return etat.noeuds.has(eid); });
+    var elements = [];
+    for (var i = 0; i < enfants.length; i++) {
+        var eel = document.getElementById(enfants[i]);
+        if (eel) {
+            eel.classList.add('planif-snap-transition');
+            elements.push(eel);
+        }
+    }
+    var cel = document.getElementById(conteneurId);
+    if (cel) {
+        cel.classList.add('planif-snap-transition');
+        elements.push(cel);
+    }
+    reLayoutConteneur(conteneurId);
+    setTimeout(function() {
+        for (var j = 0; j < elements.length; j++) {
+            elements[j].classList.remove('planif-snap-transition');
+        }
+    }, 350);
+}
 
 function reLayoutConteneur(conteneurId) {
     if (_layoutEnCours.has(conteneurId)) return;
@@ -1495,11 +1520,11 @@ function reconstruireDOM() {
     }
 
     requestAnimationFrame(function() {
-        // Update container zones (preserve saved positions, free layout)
+        // Répartition automatique des conteneurs au chargement
         for (var entry2 of etat.noeuds) {
             var n2 = entry2[1];
             if (TYPES[n2.type] && TYPES[n2.type].conteneur && n2.enfants && n2.enfants.length > 0 && !n2.parent) {
-                mettreAJourZoneConteneur(n2.id);
+                reLayoutConteneur(n2.id);
             }
         }
         // Handle containers with no children
@@ -1930,9 +1955,9 @@ function attacherEvenements(el, donnees) {
                     }
                 }
 
-                // Update container zone (free layout)
+                // Répartition automatique au lâcher
                 if (donnees.parent) {
-                    mettreAJourZoneConteneur(donnees.parent);
+                    reLayoutAvecAnimation(donnees.parent);
                 }
                 sauvegarder();
             }
