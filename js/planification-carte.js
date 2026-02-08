@@ -29,6 +29,12 @@ const etat = {
 // === FLAG D'ACTIVATION ===
 let planificationActive = false;
 
+// === UNDO / REDO ===
+const UNDO_MAX = 50;
+let pileUndo = [];
+let pileRedo = [];
+let _undoBatch = false;
+
 // === CONFIGURATION DES TYPES ===
 const TYPES = {
     'competence':     { label: 'Compétence',       couleur: 'var(--planif-couleur-competence)' },
@@ -110,6 +116,7 @@ function zoomer(clientX, clientY, facteur) {
 
 // === CRÉER UN NŒUD ===
 function creerNoeud(type, x, y) {
+    enregistrerPourUndo();
     const id = 'planif-noeud_' + (++etat.compteur);
     const config = TYPES[type];
 
@@ -249,6 +256,7 @@ function ouvrirPanneau(id) {
                 '<option value="conditionnelle"' + (donnees.metadata.sousType === 'conditionnelle' ? ' selected' : '') + '>Conditionnelle (quand)</option>' +
             '</select>';
         extra.querySelector('#planif-panneau-sous-type').addEventListener('change', function(e) {
+            enregistrerPourUndo();
             donnees.metadata.sousType = e.target.value;
             sauvegarder();
         });
@@ -258,7 +266,9 @@ function ouvrirPanneau(id) {
         extra.innerHTML +=
             '<label for="planif-panneau-duree">Durée (minutes)</label>' +
             '<input type="number" id="planif-panneau-duree" value="' + (donnees.metadata.duree || '') + '" min="1" max="180" placeholder="50">';
-        extra.querySelector('#planif-panneau-duree').addEventListener('input', function(e) {
+        var dureeInput = extra.querySelector('#planif-panneau-duree');
+        dureeInput.addEventListener('focus', function() { enregistrerPourUndo(); });
+        dureeInput.addEventListener('input', function(e) {
             donnees.metadata.duree = parseInt(e.target.value) || null;
             sauvegarder();
         });
@@ -270,17 +280,24 @@ function ouvrirPanneau(id) {
             '<input type="number" id="planif-panneau-sem-debut" value="' + (donnees.metadata.semaineDebut || '') + '" min="1" max="15" placeholder="1">' +
             '<label for="planif-panneau-sem-fin">Semaine fin</label>' +
             '<input type="number" id="planif-panneau-sem-fin" value="' + (donnees.metadata.semaineFin || '') + '" min="1" max="15" placeholder="5">';
-        extra.querySelector('#planif-panneau-sem-debut').addEventListener('input', function(e) {
+        var semDebutInput = extra.querySelector('#planif-panneau-sem-debut');
+        semDebutInput.addEventListener('focus', function() { enregistrerPourUndo(); });
+        semDebutInput.addEventListener('input', function(e) {
             donnees.metadata.semaineDebut = parseInt(e.target.value) || null;
             sauvegarder();
         });
-        extra.querySelector('#planif-panneau-sem-fin').addEventListener('input', function(e) {
+        var semFinInput = extra.querySelector('#planif-panneau-sem-fin');
+        semFinInput.addEventListener('focus', function() { enregistrerPourUndo(); });
+        semFinInput.addEventListener('input', function(e) {
             donnees.metadata.semaineFin = parseInt(e.target.value) || null;
             sauvegarder();
         });
     }
 
     // Événements du panneau
+    document.getElementById('planif-panneau-titre').onfocus = function() {
+        enregistrerPourUndo();
+    };
     document.getElementById('planif-panneau-titre').oninput = function(e) {
         donnees.titre = e.target.value;
         const titreEl = document.getElementById(id);
@@ -290,6 +307,9 @@ function ouvrirPanneau(id) {
         }
     };
 
+    document.getElementById('planif-panneau-description').onfocus = function() {
+        enregistrerPourUndo();
+    };
     document.getElementById('planif-panneau-description').oninput = function(e) {
         donnees.description = e.target.value;
         sauvegarder();
@@ -311,6 +331,7 @@ function fermerPanneau() {
 
 // === SUPPRESSION ===
 function supprimerNoeud(id) {
+    enregistrerPourUndo();
     const donnees = etat.noeuds.get(id);
 
     if (donnees && donnees.enfants) {
@@ -336,6 +357,7 @@ function supprimerNoeud(id) {
 }
 
 function supprimerLien(lienId) {
+    enregistrerPourUndo();
     etat.liens.delete(lienId);
     const groupe = document.getElementById(lienId + '-groupe');
     if (groupe) groupe.remove();
@@ -378,6 +400,7 @@ function demarrerLien(noeudId, direction, e) {
 }
 
 function creerLien(sourceId, cibleId, typeLien) {
+    enregistrerPourUndo();
     var id = 'planif-lien_' + (++etat.compteurLiens);
     var donnees = { id: id, source: sourceId, cible: cibleId, type: typeLien };
     etat.liens.set(id, donnees);
@@ -500,6 +523,7 @@ function demarrerReconnexion(lienId, extremite, e) {
         var noeudCibleEl = elSous && elSous.closest ? elSous.closest('.planif-noeud') : null;
 
         if (noeudCibleEl && noeudCibleEl.id !== noeudFixeId) {
+            enregistrerPourUndo();
             if (extremite === 'source') {
                 lien.source = noeudCibleEl.id;
             } else {
@@ -554,6 +578,7 @@ function afficherMenuLienExistant(x, y, lienId) {
         btn.textContent = tl.label;
         if (tl.id === lien.type) btn.classList.add('actif');
         btn.addEventListener('click', function() {
+            enregistrerPourUndo();
             lien.type = tl.id;
             dessinerLien(lien);
             fermerMenuLien();
@@ -798,6 +823,135 @@ function mettreAJourGuidesZone() {
     if (guide) guide.classList.toggle('planif-masque', aDesNoeuds);
 }
 
+// === UNDO / REDO ===
+function clonerEtatPersistant() {
+    return {
+        compteur: etat.compteur,
+        compteurLiens: etat.compteurLiens,
+        noeuds: Array.from(etat.noeuds.values()).map(function(n) {
+            return {
+                id: n.id, type: n.type, titre: n.titre, description: n.description,
+                x: n.x, y: n.y, parent: n.parent,
+                enfants: n.enfants ? n.enfants.slice() : [],
+                metadata: JSON.parse(JSON.stringify(n.metadata || {}))
+            };
+        }),
+        liens: Array.from(etat.liens.values()).map(function(l) {
+            return { id: l.id, source: l.source, cible: l.cible, type: l.type };
+        })
+    };
+}
+
+function enregistrerPourUndo() {
+    if (_undoBatch) return;
+    pileUndo.push(clonerEtatPersistant());
+    if (pileUndo.length > UNDO_MAX) pileUndo.shift();
+    pileRedo = [];
+}
+
+function reconstruireDOM() {
+    if (coucheNoeuds) coucheNoeuds.innerHTML = '';
+    if (coucheLiens) coucheLiens.innerHTML = '';
+
+    for (var entry of etat.noeuds) {
+        var n = entry[1];
+        var config = TYPES[n.type];
+        if (!config) continue;
+        var estConteneur = config.conteneur === true;
+        var el = document.createElement('div');
+        el.className = estConteneur ? 'planif-noeud planif-conteneur' : 'planif-noeud';
+        if (n.parent) el.classList.add('planif-enfant-conteneur');
+        el.id = n.id;
+        el.style.left = n.x + 'px';
+        el.style.top = n.y + 'px';
+        el.style.borderColor = config.couleur;
+
+        if (estConteneur) {
+            var nbEnfants = (n.enfants || []).length;
+            el.innerHTML =
+                '<div class="planif-noeud-entete">' +
+                    '<span class="planif-noeud-pastille" style="background: ' + config.couleur + '"></span>' +
+                    '<span class="planif-noeud-type">' + config.label + '</span>' +
+                '</div>' +
+                '<div class="planif-noeud-titre" contenteditable="true">' + (n.titre || '') + '</div>' +
+                '<div class="planif-noeud-zone ' + (nbEnfants === 0 ? 'planif-vide' : '') + '">' +
+                    (nbEnfants > 0 ? nbEnfants + ' \u00e9l\u00e9ment' + (nbEnfants > 1 ? 's' : '') : '') +
+                '</div>' +
+                '<div class="planif-noeud-port planif-port-droite" data-dir="droite"></div>' +
+                '<div class="planif-noeud-port planif-port-gauche" data-dir="gauche"></div>' +
+                '<div class="planif-noeud-port planif-port-bas" data-dir="bas"></div>' +
+                '<div class="planif-noeud-port planif-port-haut" data-dir="haut"></div>';
+        } else {
+            el.innerHTML =
+                '<div class="planif-noeud-entete">' +
+                    '<span class="planif-noeud-pastille" style="background: ' + config.couleur + '"></span>' +
+                    '<span class="planif-noeud-type">' + config.label + '</span>' +
+                '</div>' +
+                '<div class="planif-noeud-titre" contenteditable="true">' + (n.titre || '') + '</div>' +
+                '<div class="planif-noeud-port planif-port-droite" data-dir="droite"></div>' +
+                '<div class="planif-noeud-port planif-port-gauche" data-dir="gauche"></div>' +
+                '<div class="planif-noeud-port planif-port-bas" data-dir="bas"></div>' +
+                '<div class="planif-noeud-port planif-port-haut" data-dir="haut"></div>';
+        }
+        attacherEvenements(el, n);
+        coucheNoeuds.appendChild(el);
+    }
+
+    requestAnimationFrame(function() {
+        for (var entry2 of etat.noeuds) {
+            var n2 = entry2[1];
+            if (TYPES[n2.type] && TYPES[n2.type].conteneur && n2.enfants && n2.enfants.length > 0) {
+                mettreAJourZoneConteneur(n2.id);
+            }
+        }
+        for (var entry3 of etat.liens) {
+            dessinerLien(entry3[1]);
+        }
+        mettreAJourGuidesZone();
+    });
+}
+
+function restaurerSnapshot(snapshot) {
+    etat.noeuds.clear();
+    etat.liens.clear();
+    etat.compteur = snapshot.compteur;
+    etat.compteurLiens = snapshot.compteurLiens;
+
+    for (var i = 0; i < snapshot.noeuds.length; i++) {
+        var n = snapshot.noeuds[i];
+        var clone = {
+            id: n.id, type: n.type, titre: n.titre, description: n.description,
+            x: n.x, y: n.y, parent: n.parent,
+            enfants: n.enfants ? n.enfants.slice() : [],
+            metadata: JSON.parse(JSON.stringify(n.metadata || {}))
+        };
+        etat.noeuds.set(clone.id, clone);
+    }
+    for (var j = 0; j < snapshot.liens.length; j++) {
+        var l = snapshot.liens[j];
+        etat.liens.set(l.id, { id: l.id, source: l.source, cible: l.cible, type: l.type });
+    }
+
+    reconstruireDOM();
+    etat.selection = null;
+    etat.multiSelection.clear();
+    fermerPanneau();
+    fermerMenuLien();
+    sauvegarder();
+}
+
+function annuler() {
+    if (pileUndo.length === 0) return;
+    pileRedo.push(clonerEtatPersistant());
+    restaurerSnapshot(pileUndo.pop());
+}
+
+function retablir() {
+    if (pileRedo.length === 0) return;
+    pileUndo.push(clonerEtatPersistant());
+    restaurerSnapshot(pileRedo.pop());
+}
+
 // === SAUVEGARDE ===
 function sauvegarder() {
     var index = window.planificationDonnees.getIndex();
@@ -823,6 +977,8 @@ function viderCanvas() {
     etat.compteurLiens = 0;
     etat.selection = null;
     etat.multiSelection.clear();
+    pileUndo = [];
+    pileRedo = [];
     fermerPanneau();
     fermerMenuLien();
     mettreAJourGuidesZone();
@@ -857,71 +1013,26 @@ function chargerCarte(carteId) {
         }
 
         etat.noeuds.set(n.id, n);
-
-        var estConteneur = config.conteneur === true;
-        var el = document.createElement('div');
-        el.className = estConteneur ? 'planif-noeud planif-conteneur' : 'planif-noeud';
-        if (n.parent) el.classList.add('planif-enfant-conteneur');
-        el.id = n.id;
-        el.style.left = n.x + 'px';
-        el.style.top = n.y + 'px';
-        el.style.borderColor = config.couleur;
-
-        if (estConteneur) {
-            var nbEnfants = (n.enfants || []).length;
-            el.innerHTML =
-                '<div class="planif-noeud-entete">' +
-                    '<span class="planif-noeud-pastille" style="background: ' + config.couleur + '"></span>' +
-                    '<span class="planif-noeud-type">' + config.label + '</span>' +
-                '</div>' +
-                '<div class="planif-noeud-titre" contenteditable="true">' + (n.titre || '') + '</div>' +
-                '<div class="planif-noeud-zone ' + (nbEnfants === 0 ? 'planif-vide' : '') + '">' +
-                    (nbEnfants > 0 ? nbEnfants + ' élément' + (nbEnfants > 1 ? 's' : '') : '') +
-                '</div>' +
-                '<div class="planif-noeud-port planif-port-droite" data-dir="droite"></div>' +
-                '<div class="planif-noeud-port planif-port-gauche" data-dir="gauche"></div>' +
-                '<div class="planif-noeud-port planif-port-bas" data-dir="bas"></div>' +
-                '<div class="planif-noeud-port planif-port-haut" data-dir="haut"></div>';
-        } else {
-            el.innerHTML =
-                '<div class="planif-noeud-entete">' +
-                    '<span class="planif-noeud-pastille" style="background: ' + config.couleur + '"></span>' +
-                    '<span class="planif-noeud-type">' + config.label + '</span>' +
-                '</div>' +
-                '<div class="planif-noeud-titre" contenteditable="true">' + (n.titre || '') + '</div>' +
-                '<div class="planif-noeud-port planif-port-droite" data-dir="droite"></div>' +
-                '<div class="planif-noeud-port planif-port-gauche" data-dir="gauche"></div>' +
-                '<div class="planif-noeud-port planif-port-bas" data-dir="bas"></div>' +
-                '<div class="planif-noeud-port planif-port-haut" data-dir="haut"></div>';
-        }
-        attacherEvenements(el, n);
-        coucheNoeuds.appendChild(el);
     }
 
+    // Remap et charger les liens
+    var liensListe = donnees.liens || [];
+    for (var m = 0; m < liensListe.length; m++) {
+        var l = liensListe[m];
+        if (!l.id.startsWith('planif-')) l.id = 'planif-' + l.id;
+        if (!l.source.startsWith('planif-')) l.source = 'planif-' + l.source;
+        if (!l.cible.startsWith('planif-')) l.cible = 'planif-' + l.cible;
+        etat.liens.set(l.id, l);
+    }
+
+    reconstruireDOM();
+
     requestAnimationFrame(function() {
-        // Recalculer conteneurs
-        for (var k = 0; k < noeudsListe.length; k++) {
-            var n2 = noeudsListe[k];
-            if (TYPES[n2.type] && TYPES[n2.type].conteneur && n2.enfants && n2.enfants.length > 0) {
-                mettreAJourZoneConteneur(n2.id);
-            }
-        }
-
-        // Dessiner les liens
-        var liensListe = donnees.liens || [];
-        for (var m = 0; m < liensListe.length; m++) {
-            var l = liensListe[m];
-            // Remap IDs liens
-            if (!l.id.startsWith('planif-')) l.id = 'planif-' + l.id;
-            if (!l.source.startsWith('planif-')) l.source = 'planif-' + l.source;
-            if (!l.cible.startsWith('planif-')) l.cible = 'planif-' + l.cible;
-            etat.liens.set(l.id, l);
-            dessinerLien(l);
-        }
-
         centrerVueSurContenu();
-        mettreAJourGuidesZone();
     });
+
+    pileUndo = [];
+    pileRedo = [];
 }
 
 function centrerVueSurContenu() {
@@ -963,6 +1074,7 @@ function attacherEvenements(el, donnees) {
 
         if (estDragGroupe) {
             // DÉPLACEMENT GROUPÉ
+            enregistrerPourUndo();
             var startMouseX = e.clientX;
             var startMouseY = e.clientY;
             var positionsInitiales = new Map();
@@ -1031,6 +1143,7 @@ function attacherEvenements(el, donnees) {
         }
 
         // DÉPLACEMENT SIMPLE
+        enregistrerPourUndo();
         if (etat.multiSelection.size > 0) {
             deselectionnerTout();
         }
@@ -1124,6 +1237,9 @@ function attacherEvenements(el, donnees) {
     });
 
     var titreEl = el.querySelector('.planif-noeud-titre');
+    titreEl.addEventListener('focus', function() {
+        enregistrerPourUndo();
+    });
     titreEl.addEventListener('input', function() {
         donnees.titre = titreEl.textContent;
         sauvegarder();
@@ -2108,12 +2224,29 @@ function gererKeydown(e) {
         return;
     }
 
+    if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key === 'z' && pasDansChamp) {
+        e.preventDefault();
+        annuler();
+        return;
+    }
+    if (((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'z') ||
+        ((e.metaKey || e.ctrlKey) && e.key === 'y')) {
+        if (pasDansChamp) {
+            e.preventDefault();
+            retablir();
+            return;
+        }
+    }
+
     if (e.key === 'Delete' || e.key === 'Backspace') {
         if (pasDansChamp) {
             if (etat.multiSelection.size > 0) {
+                enregistrerPourUndo();
+                _undoBatch = true;
                 for (var nid of Array.from(etat.multiSelection)) {
                     supprimerNoeud(nid);
                 }
+                _undoBatch = false;
                 etat.multiSelection.clear();
                 fermerPanneau();
             } else if (etat.selection) {
