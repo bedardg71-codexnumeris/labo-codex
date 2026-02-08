@@ -1251,17 +1251,12 @@ async function sauvegarderConfigPratiqueMat() {
         configurations[index] = ajouterContributeurSiNecessaire(configurations[index]);
     }
 
-    // 🆕 FIX (20 jan 2026) : Sauvegarde avec double écriture pour fiabilité
+    // Sauvegarde IndexedDB + localStorage (db.set écrit dans les deux stores)
     try {
         await db.set(CLE_PRATIQUES_CONFIGURATIONS, configurations);
-        // Écriture synchrone aussi pour garantir la persistance
-        db.setSync(CLE_PRATIQUES_CONFIGURATIONS, configurations);
-        console.log('[pratiques-materiel] ✅ Configuration sauvegardée (IndexedDB + localStorage)');
     } catch (e) {
-        console.error('[pratiques-materiel] ❌ Erreur sauvegarde:', e);
-        // Fallback sur localStorage uniquement
+        console.warn('[pratiques-materiel] Erreur db.set, fallback setSync:', e);
         db.setSync(CLE_PRATIQUES_CONFIGURATIONS, configurations);
-        console.log('[pratiques-materiel] ⚠️ Configuration sauvegardée (localStorage uniquement)');
     }
 }
 

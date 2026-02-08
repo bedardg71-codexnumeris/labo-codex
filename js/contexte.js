@@ -118,14 +118,14 @@ function mettreAJourContexteEntete() {
                         if (pratiques && Array.isArray(pratiques)) {
                             const pratique = pratiques.find(p => p.id === pratiqueIdCapture);
                             if (pratique && pratique.nom) {
-                                // Mettre à jour l'affichage via l'ID spécifique
                                 const spanPratique = document.getElementById('contexte-pratique-nom');
                                 if (spanPratique) {
                                     spanPratique.textContent = `Pratique : ${pratique.nom}`;
-                                    console.log('[Contexte] Nom pratique mis à jour async:', pratique.nom);
                                 }
                             }
                         }
+                    }).catch(function(e) {
+                        console.warn('[Contexte] Erreur lecture async pratiquesConfigurables:', e);
                     });
                 }
             }
