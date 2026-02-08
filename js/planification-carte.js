@@ -3501,6 +3501,13 @@ function initialiser() {
             carteAide.style.display = 'none';
         });
     }
+    var btnAidePalette = document.getElementById('planif-palette-aide-btn');
+    if (btnAidePalette && carteAide) {
+        btnAidePalette.addEventListener('click', function() {
+            var visible = carteAide.style.display !== 'none';
+            carteAide.style.display = visible ? 'none' : '';
+        });
+    }
 
     zoneTravail.addEventListener('dragover', function(e) {
         e.preventDefault();
