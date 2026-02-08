@@ -14246,6 +14246,8 @@ body.mode-assiste .btn-aide-contextuelle,
 .planif-btn-cloner { width: 100%; padding: 8px; margin-bottom: 6px; border: 1px solid #e5e7eb; border-radius: 6px; background: #f9fafb; cursor: pointer; font-size: 13px; }
 .planif-btn-cloner:hover { background: #f3f4f6; }
 .planif-btn-cloner:disabled { opacity: 0.4; cursor: not-allowed; }
+.planif-clone-compteur { font-size: 12px; color: #7c3aed; }
+.planif-clone-lien { font-size: 11px; color: #7c3aed; }
 .planif-carte-aide {
     position: absolute;
     top: 12px;
