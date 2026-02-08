@@ -99,10 +99,18 @@ async function restaurerEtatApresDemo() {
  * Appelé par le bouton "Explorer la démo"
  */
 async function entrerEnDemo() {
-    // Guard: déjà en démo
+    // Guard: déjà en démo — si on est sur la page d'accueil, c'est un résidu
     if (db.getSync('demo-actif', null) === 'true') {
-        console.log('[Demo] Déjà en mode démo');
-        return;
+        // Vérifier si on est réellement en démo (bandeau visible) ou si c'est un résidu
+        var bandeau = document.getElementById('bandeau-demo');
+        if (bandeau && bandeau.style.display !== 'none') {
+            console.log('[Demo] Déjà en mode démo');
+            return;
+        }
+        // Résidu d'une session crashée — nettoyer et continuer
+        console.log('[Demo] Résidu détecté, nettoyage avant re-entrée...');
+        db.setSync('demo-actif', null);
+        db.setSync('demo-chargees', null);
     }
 
     console.log('🎬 [Demo] Entrée en mode démo...');

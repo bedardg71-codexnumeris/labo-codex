@@ -427,6 +427,10 @@
             margin-bottom: 30px;
         }
 
+        .accueil-cartes--8 {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
         .accueil-carte {
             background: white;
             border: 1px solid var(--bleu-pale);
@@ -543,13 +547,19 @@
             margin: 0 4px;
         }
 
+        @media (max-width: 1100px) {
+            .accueil-cartes--8 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
         @media (max-width: 900px) {
             .accueil-cartes {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
         @media (max-width: 600px) {
-            .accueil-cartes {
+            .accueil-cartes,
+            .accueil-cartes--8 {
                 grid-template-columns: 1fr;
             }
             .accueil-page {
@@ -3363,7 +3373,7 @@
                     <!-- Titre et version -->
                     <div class="titre-section">
                         <h1>Système de suivi des apprentissages et de construction de la note</h1>
-                        <p class="meta">Beta 97.4</p>
+                        <p class="meta">Beta 97.4 <span id="build-numero"></span></p>
                     </div>
 
                     <!-- Sélecteur de mode déplacé à droite -->
@@ -15655,7 +15665,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97';
-        const BUILD_ID = '0208-1721';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0208-1728';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
@@ -15767,7 +15777,7 @@
         function afficherBuildNumero() {
             const span = document.getElementById('build-numero');
             if (span) {
-                span.textContent = `(Build.${BUILD_ID})`;
+                span.textContent = `(Build ${BUILD_ID})`;
             }
         }
 
@@ -15788,6 +15798,9 @@
             if (conteneur && typeof genererChangelogHTML === 'function') {
                 conteneur.innerHTML = genererChangelogHTML();
             }
+
+            // Afficher le numéro de build dans l'entête
+            afficherBuildNumero();
 
             // Mettre à jour l'affichage de la pastille (no-op si accueil pas encore rendu)
             mettreAJourPastille();
