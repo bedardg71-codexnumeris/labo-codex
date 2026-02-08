@@ -6838,7 +6838,8 @@
                                 </div>
                                 <div class="planif-palette-contenu">
                                     <div class="planif-palette-categorie" style="background: rgba(59, 130, 246, 0.06);">
-                                        <div class="planif-palette-zone-label" style="color: #3b82f6;">Objectifs</div>
+                                        <div class="planif-palette-zone-label" style="color: #3b82f6;">Pourquoi enseigner</div>
+                                        <div class="planif-palette-zone-sous-titre">intention curriculaire</div>
                                         <div class="planif-palette-groupe">
                                             <button class="planif-palette-btn" data-type="competence" draggable="true">
                                                 <span class="planif-pastille" style="background: var(--planif-couleur-competence)"></span>Compétence
@@ -6848,19 +6849,9 @@
                                             </button>
                                         </div>
                                     </div>
-                                    <div class="planif-palette-categorie" style="background: rgba(147, 51, 234, 0.06);">
-                                        <div class="planif-palette-zone-label" style="color: #9333ea;">Conteneurs</div>
-                                        <div class="planif-palette-groupe">
-                                            <button class="planif-palette-btn" data-type="sequence" draggable="true">
-                                                <span class="planif-pastille" style="background: var(--planif-couleur-sequence)"></span>Séquence
-                                            </button>
-                                            <button class="planif-palette-btn" data-type="lecon" draggable="true">
-                                                <span class="planif-pastille" style="background: var(--planif-couleur-lecon)"></span>Leçon
-                                            </button>
-                                        </div>
-                                    </div>
                                     <div class="planif-palette-categorie" style="background: rgba(249, 115, 22, 0.06);">
-                                        <div class="planif-palette-zone-label" style="color: #f97316;">Connaissances</div>
+                                        <div class="planif-palette-zone-label" style="color: #f97316;">Quoi enseigner</div>
+                                        <div class="planif-palette-zone-sous-titre">contenu de la leçon</div>
                                         <div class="planif-palette-groupe">
                                             <button class="planif-palette-btn" data-type="connaissance" draggable="true">
                                                 <span class="planif-pastille" style="background: var(--planif-couleur-connaissance)"></span>Information
@@ -6874,7 +6865,8 @@
                                         </div>
                                     </div>
                                     <div class="planif-palette-categorie" style="background: rgba(22, 163, 74, 0.06);">
-                                        <div class="planif-palette-zone-label" style="color: #16a34a;">Activités</div>
+                                        <div class="planif-palette-zone-label" style="color: #16a34a;">Comment enseigner</div>
+                                        <div class="planif-palette-zone-sous-titre">mise en action</div>
                                         <div class="planif-palette-groupe">
                                             <button class="planif-palette-btn" data-type="activite" draggable="true">
                                                 <span class="planif-pastille" style="background: var(--planif-couleur-activite)"></span>Apprentissage
@@ -6884,6 +6876,18 @@
                                             </button>
                                             <button class="planif-palette-btn" data-type="revision" draggable="true">
                                                 <span class="planif-pastille" style="background: var(--planif-couleur-revision)"></span>Révision
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="planif-palette-categorie" style="background: rgba(147, 51, 234, 0.06);">
+                                        <div class="planif-palette-zone-label" style="color: #9333ea;">Structure</div>
+                                        <div class="planif-palette-zone-sous-titre">organisation</div>
+                                        <div class="planif-palette-groupe">
+                                            <button class="planif-palette-btn" data-type="sequence" draggable="true">
+                                                <span class="planif-pastille" style="background: var(--planif-couleur-sequence)"></span>Séquence
+                                            </button>
+                                            <button class="planif-palette-btn" data-type="lecon" draggable="true">
+                                                <span class="planif-pastille" style="background: var(--planif-couleur-lecon)"></span>Leçon
                                             </button>
                                         </div>
                                     </div>
@@ -15867,7 +15871,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97';
-        const BUILD_ID = '0208-1126';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0208-1216';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
