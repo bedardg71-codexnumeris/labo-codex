@@ -13793,17 +13793,22 @@ body.mode-assiste .btn-aide-contextuelle,
 
 /* === TOKENS COULEUR NŒUDS (ajoutés au :root existant) === */
 :root {
+    /* Objectifs — Bleu */
     --planif-couleur-competence: #2563eb;
-    --planif-couleur-idee-maitresse: #7c3aed;
-    --planif-couleur-connaissance: #0891b2;
-    --planif-couleur-prerequis: #64748b;
-    --planif-couleur-strategie: #059669;
-    --planif-couleur-soutien: #65a30d;
-    --planif-couleur-revision: #ca8a04;
-    --planif-couleur-sequence: #9f1239;
-    --planif-couleur-lecon: #f97316;
-    --planif-couleur-activite: #d946ef;
-    --planif-couleur-condition: #6366f1;
+    --planif-couleur-idee-maitresse: #3b82f6;
+    /* Connaissances — Orange */
+    --planif-couleur-connaissance: #f97316;
+    --planif-couleur-strategie: #ea580c;
+    --planif-couleur-condition: #fb923c;
+    --planif-couleur-prerequis: #c2410c;
+    /* Conteneurs — Violet */
+    --planif-couleur-sequence: #9333ea;
+    --planif-couleur-lecon: #a855f7;
+    /* Activités — Vert */
+    --planif-couleur-activite: #16a34a;
+    --planif-couleur-soutien: #22c55e;
+    --planif-couleur-revision: #15803d;
+    /* Utilitaires */
     --planif-couleur-fond: #f8fafc;
     --planif-couleur-texte: #1e293b;
     --planif-couleur-bordure: #cbd5e1;
@@ -14637,8 +14642,8 @@ body.mode-assiste .btn-aide-contextuelle,
 .planif-palette-btn[data-type="strategie"]      { border-color: var(--planif-couleur-strategie); }
 .planif-palette-btn[data-type="condition"]      { border-color: var(--planif-couleur-condition); }
 .planif-palette-btn[data-type="prerequis"]      { border-color: var(--planif-couleur-prerequis); }
-.planif-palette-btn[data-type="sequence"]       { border-color: var(--planif-couleur-sequence); }
-.planif-palette-btn[data-type="lecon"]          { border-color: var(--planif-couleur-lecon); }
+.planif-palette-btn[data-type="sequence"]       { border-color: var(--planif-couleur-sequence); border-style: dashed; }
+.planif-palette-btn[data-type="lecon"]          { border-color: var(--planif-couleur-lecon); border-style: dashed; }
 .planif-palette-btn[data-type="activite"]       { border-color: var(--planif-couleur-activite); }
 .planif-palette-btn[data-type="soutien"]        { border-color: var(--planif-couleur-soutien); }
 .planif-palette-btn[data-type="revision"]       { border-color: var(--planif-couleur-revision); }
