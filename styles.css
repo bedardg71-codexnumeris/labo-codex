@@ -14532,6 +14532,37 @@ body.mode-assiste .btn-aide-contextuelle,
 }
 .planif-cal-btn-export:hover { background: #f1f5f9; color: var(--planif-couleur-texte); border-color: var(--planif-couleur-selection); }
 
+/* === ORGANISATEUR — SECTIONS === */
+.planif-org-selecteur {
+    display: flex; gap: 8px; padding: 10px 16px;
+    border-bottom: 1px solid var(--planif-couleur-bordure);
+    flex-shrink: 0;
+}
+.planif-org-selecteur select {
+    flex: 1; padding: 6px 8px;
+    border: 1px solid var(--planif-couleur-bordure);
+    border-radius: 6px; font-size: 12px;
+    background: white; color: var(--planif-couleur-texte);
+}
+.planif-org-section {
+    border-bottom: 1px solid #f1f5f9;
+    padding: 10px 16px;
+}
+.planif-org-section-titre {
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.3px;
+    color: #64748b; margin-bottom: 6px;
+}
+.planif-org-section-titre-collapse {
+    cursor: pointer; display: flex;
+    justify-content: space-between; align-items: center;
+    padding: 10px 16px; margin-bottom: 0;
+}
+.planif-org-section-titre-collapse:hover { color: var(--planif-couleur-selection); }
+.planif-org-chevron { font-size: 10px; }
+.planif-org-section-contenu { font-size: 12px; line-height: 1.5; color: var(--planif-couleur-texte); }
+.planif-org-placeholder { color: #94a3b8; font-style: italic; font-size: 12px; }
+
 .planif-zone-guide {
     text-align: center;
     font-size: 11px;
