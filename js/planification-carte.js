@@ -159,6 +159,20 @@ function mettreAJourApparenceNoeud(donnees) {
     mettreAJourBadge(donnees);
 }
 
+function ideeMaitresseAtteinCompetence(noeudId, visited) {
+    if (!visited) visited = {};
+    if (visited[noeudId]) return false;
+    visited[noeudId] = true;
+    var liens = getLiensDeNoeud(noeudId);
+    for (var i = 0; i < liens.length; i++) {
+        if (liens[i].direction === 'sortant' && liens[i].noeudType === 'competence') return true;
+        if (liens[i].direction === 'sortant' && liens[i].noeudType === 'idee-maitresse') {
+            if (ideeMaitresseAtteinCompetence(liens[i].noeudId, visited)) return true;
+        }
+    }
+    return false;
+}
+
 function evaluerBadge(noeud) {
     var type = noeud.type;
     var liens = getLiensDeNoeud(noeud.id);
@@ -169,7 +183,7 @@ function evaluerBadge(noeud) {
             return devParIM ? { valide: true } : { valide: false, message: 'Aucune idée maîtresse ne développe cette compétence' };
 
         case 'idee-maitresse':
-            var devComp = liens.some(function(l) { return l.direction === 'sortant' && l.noeudType === 'competence'; });
+            var devComp = ideeMaitresseAtteinCompetence(noeud.id);
             var viseeParLecon = liens.some(function(l) { return l.noeudType === 'lecon'; });
             if (!devComp) return { valide: false, message: "Cette idée ne développe aucune compétence" };
             if (!viseeParLecon) return { valide: false, message: "Cette idée n'est visée par aucune leçon" };
