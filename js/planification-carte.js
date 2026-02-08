@@ -56,9 +56,11 @@ const TYPES_LIENS = [
 // === CONSTANTES ===
 const OFFSET_X = 5000;
 const OFFSET_Y = 3000;
+const ESPACE_W = 10000;
+const ESPACE_H = 6000;
 
 // === RÉFÉRENCES DOM (initialisées dans initialiser()) ===
-let zoneTravail, espace, coucheNoeuds, coucheLiens, canvas, lienTemp;
+let zoneTravail, espace, espaceWrapper, coucheNoeuds, coucheLiens, canvas, lienTemp;
 let panneau, menuLien, rectSelection;
 let panneauSeances, panneauSeancesContenu, btnSeances;
 let seancesOuvert = false;
@@ -81,12 +83,18 @@ function clientVersEspace(clientX, clientY) {
 }
 
 // === ZOOM ===
+function appliquerZoom() {
+    espace.style.transform = 'scale(' + etat.zoom + ')';
+    espaceWrapper.style.width = (ESPACE_W * etat.zoom) + 'px';
+    espaceWrapper.style.height = (ESPACE_H * etat.zoom) + 'px';
+}
+
 function zoomer(clientX, clientY, facteur) {
     const oldZoom = etat.zoom;
     etat.zoom = Math.max(0.25, Math.min(3, etat.zoom * facteur));
     if (etat.zoom === oldZoom) return;
 
-    espace.style.zoom = etat.zoom;
+    appliquerZoom();
 
     const rect = zoneTravail.getBoundingClientRect();
     const cursorLocalX = clientX - rect.left;
@@ -1742,6 +1750,7 @@ function initialiser() {
     // Refs DOM
     zoneTravail = document.getElementById('planif-zone-travail');
     espace = document.getElementById('planif-espace');
+    espaceWrapper = document.getElementById('planif-espace-wrapper');
     coucheNoeuds = document.getElementById('planif-couche-noeuds');
     coucheLiens = document.getElementById('planif-couche-liens');
     canvas = document.getElementById('planif-canvas');
@@ -1757,6 +1766,8 @@ function initialiser() {
         console.warn('[Planification] DOM non prêt.');
         return;
     }
+
+    appliquerZoom();
 
     // Zoom molette
     var gestureEnCours = false;
@@ -1780,7 +1791,7 @@ function initialiser() {
             e.preventDefault();
             var oldZoom = etat.zoom;
             etat.zoom = Math.max(0.25, Math.min(3, gestureBaseZoom * e.scale));
-            espace.style.zoom = etat.zoom;
+            appliquerZoom();
             var rect = zoneTravail.getBoundingClientRect();
             var cx = rect.width / 2;
             var cy = rect.height / 2;
@@ -1816,7 +1827,7 @@ function initialiser() {
             var scale = dist / touchStartDist;
             var oldZoom = etat.zoom;
             etat.zoom = Math.max(0.25, Math.min(3, touchStartZoom * scale));
-            espace.style.zoom = etat.zoom;
+            appliquerZoom();
             var rect = zoneTravail.getBoundingClientRect();
             var midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
             var midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
@@ -2085,7 +2096,7 @@ function gererKeydown(e) {
     if ((e.metaKey || e.ctrlKey) && e.key === '0' && pasDansChamp) {
         e.preventDefault();
         etat.zoom = 1;
-        espace.style.zoom = 1;
+        appliquerZoom();
         var zoomInfo = document.getElementById('planif-zoom-info');
         if (zoomInfo) zoomInfo.textContent = '100%';
         centrerVueSurContenu();
