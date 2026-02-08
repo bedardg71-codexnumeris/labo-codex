@@ -1854,11 +1854,17 @@ function attacherEvenements(el, donnees) {
             return;
         }
 
-        // CAS B: Enfant en mode individuel → drag individuel + réordonnancement + détachement
+        // CAS B: Enfant en mode individuel → drag individuel + détachement
         if (donnees.parent && etat.modeIndividuel === id) {
             el.classList.add('planif-dragging');
             var parentId = donnees.parent;
             var parentData = etat.noeuds.get(parentId);
+
+            // Si c'est un conteneur avec enfants, collecter les descendants pour les déplacer ensemble
+            var descendantsB = [];
+            if (estConteneur && donnees.enfants && donnees.enfants.length > 0) {
+                collecterDescendants(donnees, donnees, descendantsB);
+            }
 
             function onMoveB(e2) {
                 donnees.x = startDataX + (e2.clientX - startMouseX2) / etat.zoom;
@@ -1866,6 +1872,18 @@ function attacherEvenements(el, donnees) {
                 el.style.left = donnees.x + 'px';
                 el.style.top = donnees.y + 'px';
                 mettreAJourLiens(id);
+
+                // Déplacer les descendants avec le conteneur
+                for (var db = 0; db < descendantsB.length; db++) {
+                    var dbi = descendantsB[db];
+                    var dbd = etat.noeuds.get(dbi.id);
+                    if (!dbd) continue;
+                    dbd.x = donnees.x + dbi.dx;
+                    dbd.y = donnees.y + dbi.dy;
+                    var dbEl = document.getElementById(dbi.id);
+                    if (dbEl) { dbEl.style.left = dbd.x + 'px'; dbEl.style.top = dbd.y + 'px'; }
+                    mettreAJourLiens(dbi.id);
+                }
 
                 // Check if dragged out of parent bounds
                 if (parentData) {
