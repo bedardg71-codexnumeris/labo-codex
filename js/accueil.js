@@ -138,7 +138,7 @@ function afficherAccueilRetour(conteneur) {
                 </div>
             </div>
             <div class="accueil-carte" onclick="afficherSection('planification'); setTimeout(function(){ afficherSousSection('planification-carte'); }, 100);">
-                <div class="accueil-carte-icone">\uD83D\uDDFA\uFE0F</div>
+                <div class="accueil-carte-icone">\uD83E\uDDE9</div>
                 <div class="accueil-carte-titre">Planifier mon cours</div>
                 <div class="accueil-carte-desc">
                     Planifier et organiser les s\u00e9quences, le\u00e7ons et activit\u00e9s pour leur alignement p\u00e9dagogique.
