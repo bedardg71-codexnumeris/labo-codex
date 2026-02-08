@@ -45,7 +45,6 @@ const TYPES = {
     'connaissance':   { label: 'Information',       couleur: 'var(--planif-couleur-connaissance)' },
     'strategie':      { label: 'Stratégie',         couleur: 'var(--planif-couleur-strategie)' },
     'condition':      { label: 'Condition',          couleur: 'var(--planif-couleur-condition)' },
-    'prerequis':      { label: 'Préalable',         couleur: 'var(--planif-couleur-prerequis)' },
     // Conteneurs
     'sequence':       { label: 'Séquence',          couleur: 'var(--planif-couleur-sequence)',  conteneur: true },
     'lecon':          { label: 'Leçon',             couleur: 'var(--planif-couleur-lecon)',     conteneur: true },
@@ -64,6 +63,37 @@ const TYPES_LIENS = [
     { id: 'revise_dans',    label: 'révisé dans' },
     { id: 'sequence_avant', label: 'séquencé avant' }
 ];
+
+var TYPES_PREALABLE = { 'connaissance': true, 'strategie': true, 'condition': true };
+
+function obtenirLabelNoeud(donnees) {
+    var config = TYPES[donnees.type];
+    if (!config) return '';
+    if (TYPES_PREALABLE[donnees.type] && donnees.metadata && donnees.metadata.prealable) {
+        return config.label + ' préalable';
+    }
+    return config.label;
+}
+
+function obtenirCouleurNoeud(donnees) {
+    var config = TYPES[donnees.type];
+    if (!config) return '#94a3b8';
+    if (TYPES_PREALABLE[donnees.type] && donnees.metadata && donnees.metadata.prealable) {
+        return 'var(--planif-couleur-prerequis)';
+    }
+    return config.couleur;
+}
+
+function mettreAJourApparenceNoeud(donnees) {
+    var el = document.getElementById(donnees.id);
+    if (!el) return;
+    var couleur = obtenirCouleurNoeud(donnees);
+    el.style.borderColor = couleur;
+    var pastille = el.querySelector('.planif-noeud-pastille');
+    if (pastille) pastille.style.background = couleur;
+    var typeEl = el.querySelector('.planif-noeud-type');
+    if (typeEl) typeEl.textContent = obtenirLabelNoeud(donnees);
+}
 
 // === CONSTANTES ===
 const OFFSET_X = 5000;
@@ -144,13 +174,13 @@ function creerNoeud(type, x, y) {
     el.id = id;
     el.style.left = x + 'px';
     el.style.top = y + 'px';
-    el.style.borderColor = config.couleur;
+    el.style.borderColor = obtenirCouleurNoeud(donnees);
 
     if (estConteneur) {
         el.innerHTML =
             '<div class="planif-noeud-entete">' +
-                '<span class="planif-noeud-pastille" style="background: ' + config.couleur + '"></span>' +
-                '<span class="planif-noeud-type">' + config.label + '</span>' +
+                '<span class="planif-noeud-pastille" style="background: ' + obtenirCouleurNoeud(donnees) + '"></span>' +
+                '<span class="planif-noeud-type">' + obtenirLabelNoeud(donnees) + '</span>' +
             '</div>' +
             '<div class="planif-noeud-titre" contenteditable="true"></div>' +
             '<div class="planif-noeud-zone planif-vide"></div>' +
@@ -161,8 +191,8 @@ function creerNoeud(type, x, y) {
     } else {
         el.innerHTML =
             '<div class="planif-noeud-entete">' +
-                '<span class="planif-noeud-pastille" style="background: ' + config.couleur + '"></span>' +
-                '<span class="planif-noeud-type">' + config.label + '</span>' +
+                '<span class="planif-noeud-pastille" style="background: ' + obtenirCouleurNoeud(donnees) + '"></span>' +
+                '<span class="planif-noeud-type">' + obtenirLabelNoeud(donnees) + '</span>' +
             '</div>' +
             '<div class="planif-noeud-titre" contenteditable="true"></div>' +
             '<div class="planif-noeud-port planif-port-droite" data-dir="droite"></div>' +
@@ -249,8 +279,8 @@ function ouvrirPanneau(id) {
     if (!donnees) return;
     const config = TYPES[donnees.type];
 
-    document.getElementById('planif-panneau-pastille').style.background = config.couleur;
-    document.getElementById('planif-panneau-type').textContent = config.label;
+    document.getElementById('planif-panneau-pastille').style.background = obtenirCouleurNoeud(donnees);
+    document.getElementById('planif-panneau-type').textContent = obtenirLabelNoeud(donnees);
     document.getElementById('planif-panneau-titre').value = donnees.titre;
     document.getElementById('planif-panneau-description').value = donnees.description || '';
 
@@ -286,6 +316,26 @@ function ouvrirPanneau(id) {
         semFinInput.addEventListener('focus', function() { enregistrerPourUndo(); });
         semFinInput.addEventListener('input', function(e) {
             donnees.metadata.semaineFin = parseInt(e.target.value) || null;
+            sauvegarder();
+        });
+    }
+
+    if (TYPES_PREALABLE[donnees.type]) {
+        var checked = donnees.metadata && donnees.metadata.prealable ? ' checked' : '';
+        extra.innerHTML +=
+            '<div class="planif-panneau-prealable">' +
+                '<label class="planif-checkbox-label">' +
+                    '<input type="checkbox" id="planif-panneau-prealable"' + checked + '>' +
+                    ' Préalable' +
+                '</label>' +
+            '</div>';
+        extra.querySelector('#planif-panneau-prealable').addEventListener('change', function(e) {
+            enregistrerPourUndo();
+            if (!donnees.metadata) donnees.metadata = {};
+            donnees.metadata.prealable = e.target.checked;
+            mettreAJourApparenceNoeud(donnees);
+            document.getElementById('planif-panneau-pastille').style.background = obtenirCouleurNoeud(donnees);
+            document.getElementById('planif-panneau-type').textContent = obtenirLabelNoeud(donnees);
             sauvegarder();
         });
     }
@@ -1009,14 +1059,14 @@ function reconstruireDOM() {
         el.id = n.id;
         el.style.left = n.x + 'px';
         el.style.top = n.y + 'px';
-        el.style.borderColor = config.couleur;
+        el.style.borderColor = obtenirCouleurNoeud(n);
 
         if (estConteneur) {
             var nbEnfants = (n.enfants || []).length;
             el.innerHTML =
                 '<div class="planif-noeud-entete">' +
-                    '<span class="planif-noeud-pastille" style="background: ' + config.couleur + '"></span>' +
-                    '<span class="planif-noeud-type">' + config.label + '</span>' +
+                    '<span class="planif-noeud-pastille" style="background: ' + obtenirCouleurNoeud(n) + '"></span>' +
+                    '<span class="planif-noeud-type">' + obtenirLabelNoeud(n) + '</span>' +
                 '</div>' +
                 '<div class="planif-noeud-titre" contenteditable="true">' + (n.titre || '') + '</div>' +
                 '<div class="planif-noeud-zone ' + (nbEnfants === 0 ? 'planif-vide' : '') + '">' +
@@ -1029,8 +1079,8 @@ function reconstruireDOM() {
         } else {
             el.innerHTML =
                 '<div class="planif-noeud-entete">' +
-                    '<span class="planif-noeud-pastille" style="background: ' + config.couleur + '"></span>' +
-                    '<span class="planif-noeud-type">' + config.label + '</span>' +
+                    '<span class="planif-noeud-pastille" style="background: ' + obtenirCouleurNoeud(n) + '"></span>' +
+                    '<span class="planif-noeud-type">' + obtenirLabelNoeud(n) + '</span>' +
                 '</div>' +
                 '<div class="planif-noeud-titre" contenteditable="true">' + (n.titre || '') + '</div>' +
                 '<div class="planif-noeud-port planif-port-droite" data-dir="droite"></div>' +
@@ -1072,6 +1122,11 @@ function restaurerSnapshot(snapshot) {
 
     for (var i = 0; i < snapshot.noeuds.length; i++) {
         var n = snapshot.noeuds[i];
+        if (n.type === 'prerequis') {
+            n.type = 'connaissance';
+            if (!n.metadata) n.metadata = {};
+            n.metadata.prealable = true;
+        }
         var clone = {
             id: n.id, type: n.type, titre: n.titre, description: n.description,
             x: n.x, y: n.y, parent: n.parent,
@@ -1149,6 +1204,11 @@ function chargerCarte(carteId) {
     var noeudsListe = donnees.noeuds || [];
     for (var i = 0; i < noeudsListe.length; i++) {
         var n = noeudsListe[i];
+        if (n.type === 'prerequis') {
+            n.type = 'connaissance';
+            if (!n.metadata) n.metadata = {};
+            n.metadata.prealable = true;
+        }
         var config = TYPES[n.type];
         if (!config) continue;
         if (n.enfants === undefined) n.enfants = [];
@@ -1719,9 +1779,9 @@ function genererSeancesHTML() {
         if (enfant.type === 'lecon') return genererLeconBloc(enfant);
 
         var itemHtml = '<div class="planif-cal-item" data-noeud="' + enfantId + '">';
-        itemHtml += '<span class="planif-cal-pastille-mini" style="background: ' + config.couleur + '"></span>';
+        itemHtml += '<span class="planif-cal-pastille-mini" style="background: ' + obtenirCouleurNoeud(enfant) + '"></span>';
         itemHtml += '<div>';
-        itemHtml += '<span class="planif-cal-item-titre">' + (enfant.titre || config.label) + '</span>';
+        itemHtml += '<span class="planif-cal-item-titre">' + (enfant.titre || obtenirLabelNoeud(enfant)) + '</span>';
 
         if (enfant.metadata && enfant.metadata.duree) {
             itemHtml += ' <span class="planif-cal-duree">' + enfant.metadata.duree + ' min</span>';
@@ -1732,8 +1792,8 @@ function genererSeancesHTML() {
             itemHtml += '<div class="planif-cal-liens">';
             for (var j = 0; j < liens.length; j++) {
                 var l = liens[j];
-                var lConfig = TYPES[l.noeudType];
-                var couleur = lConfig ? lConfig.couleur : '#94a3b8';
+                var lNoeud = etat.noeuds.get(l.noeudId);
+                var couleur = lNoeud ? obtenirCouleurNoeud(lNoeud) : '#94a3b8';
                 var fleche = l.direction === 'sortant' ? '→' : '←';
                 itemHtml += '<div class="planif-cal-lien-item" data-noeud="' + l.noeudId + '">';
                 itemHtml += '<span class="planif-cal-lien-pastille" style="background: ' + couleur + '"></span>';
@@ -1776,8 +1836,8 @@ function genererSeancesHTML() {
             bloc += '<div class="planif-cal-enfants">';
             for (var k = 0; k < liensLecon.length; k++) {
                 var ll = liensLecon[k];
-                var lConfig2 = TYPES[ll.noeudType];
-                var couleur2 = lConfig2 ? lConfig2.couleur : '#94a3b8';
+                var lNoeud2 = etat.noeuds.get(ll.noeudId);
+                var couleur2 = lNoeud2 ? obtenirCouleurNoeud(lNoeud2) : '#94a3b8';
                 var fleche2 = ll.direction === 'sortant' ? '→' : '←';
                 bloc += '<div class="planif-cal-lien-item" data-noeud="' + ll.noeudId + '">';
                 bloc += '<span class="planif-cal-lien-pastille" style="background: ' + couleur2 + '"></span>';
@@ -1841,8 +1901,8 @@ function genererSeancesHTML() {
             html += '<div class="planif-cal-enfants">';
             for (var m = 0; m < liensSeq.length; m++) {
                 var ls = liensSeq[m];
-                var lConfig3 = TYPES[ls.noeudType];
-                var couleur3 = lConfig3 ? lConfig3.couleur : '#94a3b8';
+                var lNoeud3 = etat.noeuds.get(ls.noeudId);
+                var couleur3 = lNoeud3 ? obtenirCouleurNoeud(lNoeud3) : '#94a3b8';
                 var fleche3 = ls.direction === 'sortant' ? '→' : '←';
                 html += '<div class="planif-cal-lien-item" data-noeud="' + ls.noeudId + '">';
                 html += '<span class="planif-cal-lien-pastille" style="background: ' + couleur3 + '"></span>';
@@ -1964,17 +2024,15 @@ function genererPlanTexte() {
                 for (var k = 0; k < enfantsLecon.length; k++) {
                     var cd = etat.noeuds.get(enfantsLecon[k]);
                     if (!cd) continue;
-                    var cfgAct = TYPES[cd.type];
                     var dureeAct = cd.metadata && cd.metadata.duree ? ' (' + formatDuree(cd.metadata.duree) + ')' : '';
-                    txt += '  │ • [' + (cfgAct ? cfgAct.label : cd.type) + '] ' + (cd.titre || 'Sans titre') + dureeAct + '\n';
+                    txt += '  │ • [' + obtenirLabelNoeud(cd) + '] ' + (cd.titre || 'Sans titre') + dureeAct + '\n';
                     txt += liensTexte(enfantsLecon[k], '  │   ');
                     if (cd.metadata && cd.metadata.duree) dureeSeq += cd.metadata.duree;
                 }
                 txt += '  └─\n';
             } else {
-                var cfgEd = TYPES[ed.type];
                 var dureeEd = ed.metadata && ed.metadata.duree ? ' (' + formatDuree(ed.metadata.duree) + ')' : '';
-                txt += '  • [' + (cfgEd ? cfgEd.label : ed.type) + '] ' + (ed.titre || 'Sans titre') + dureeEd + '\n';
+                txt += '  • [' + obtenirLabelNoeud(ed) + '] ' + (ed.titre || 'Sans titre') + dureeEd + '\n';
                 txt += liensTexte(enfants[j], '    ');
                 if (ed.metadata && ed.metadata.duree) dureeSeq += ed.metadata.duree;
             }
@@ -1997,9 +2055,8 @@ function genererPlanTexte() {
             for (var q = 0; q < enfOrph.length; q++) {
                 var cdOrph = etat.noeuds.get(enfOrph[q]);
                 if (!cdOrph) continue;
-                var cfgOrph = TYPES[cdOrph.type];
                 var dureeOrph = cdOrph.metadata && cdOrph.metadata.duree ? ' (' + formatDuree(cdOrph.metadata.duree) + ')' : '';
-                txt += '  │ • [' + (cfgOrph ? cfgOrph.label : cdOrph.type) + '] ' + (cdOrph.titre || 'Sans titre') + dureeOrph + '\n';
+                txt += '  │ • [' + obtenirLabelNoeud(cdOrph) + '] ' + (cdOrph.titre || 'Sans titre') + dureeOrph + '\n';
                 txt += liensTexte(enfOrph[q], '  │   ');
             }
             txt += '  └─\n';
@@ -2067,14 +2124,12 @@ function genererPlanTSV() {
                 for (var k = 0; k < enfantsLecon.length; k++) {
                     var cd = etat.noeuds.get(enfantsLecon[k]);
                     if (!cd) continue;
-                    var cfgCd = TYPES[cd.type];
                     var actLiens = liensCompacts(enfantsLecon[k]);
-                    tsv += seqNom + '\t' + semTxt + '\t' + leconNom + '\t' + leconDuree + '\t' + escape(cfgCd ? cfgCd.label : cd.type) + '\t' + escape(cd.titre || 'Sans titre') + '\t' + (cd.metadata && cd.metadata.duree || '') + '\t' + escape(actLiens) + '\n';
+                    tsv += seqNom + '\t' + semTxt + '\t' + leconNom + '\t' + leconDuree + '\t' + escape(obtenirLabelNoeud(cd)) + '\t' + escape(cd.titre || 'Sans titre') + '\t' + (cd.metadata && cd.metadata.duree || '') + '\t' + escape(actLiens) + '\n';
                 }
             } else {
-                var cfgEd = TYPES[ed.type];
                 var actLiens2 = liensCompacts(enfants[j]);
-                tsv += seqNom + '\t' + semTxt + '\t\t\t' + escape(cfgEd ? cfgEd.label : ed.type) + '\t' + escape(ed.titre || 'Sans titre') + '\t' + (ed.metadata && ed.metadata.duree || '') + '\t' + escape(actLiens2) + '\n';
+                tsv += seqNom + '\t' + semTxt + '\t\t\t' + escape(obtenirLabelNoeud(ed)) + '\t' + escape(ed.titre || 'Sans titre') + '\t' + (ed.metadata && ed.metadata.duree || '') + '\t' + escape(actLiens2) + '\n';
             }
         }
     }
@@ -2090,9 +2145,8 @@ function genererPlanTSV() {
         for (var q = 0; q < enfOrph.length; q++) {
             var cdOrph = etat.noeuds.get(enfOrph[q]);
             if (!cdOrph) continue;
-            var cfgOrph = TYPES[cdOrph.type];
             var actLiens3 = liensCompacts(enfOrph[q]);
-            tsv += '(Hors séquence)\t\t' + leconNom2 + '\t' + leconDuree2 + '\t' + escape(cfgOrph ? cfgOrph.label : cdOrph.type) + '\t' + escape(cdOrph.titre || 'Sans titre') + '\t' + (cdOrph.metadata && cdOrph.metadata.duree || '') + '\t' + escape(actLiens3) + '\n';
+            tsv += '(Hors séquence)\t\t' + leconNom2 + '\t' + leconDuree2 + '\t' + escape(obtenirLabelNoeud(cdOrph)) + '\t' + escape(cdOrph.titre || 'Sans titre') + '\t' + (cdOrph.metadata && cdOrph.metadata.duree || '') + '\t' + escape(actLiens3) + '\n';
         }
     }
 
