@@ -118,7 +118,7 @@ function afficherAccueilRetour(conteneur) {
             </div>
             <div class="accueil-carte" onclick="afficherSection('evaluations'); setTimeout(function(){ afficherSousSection('evaluations-travaux'); }, 100);">
                 <div class="accueil-carte-icone">&#x1F4DD;</div>
-                <div class="accueil-carte-titre">Annoter des travaux</div>
+                <div class="accueil-carte-titre">Annoter des travaux <span class="badge-dev-actif">D\u00e9veloppement actif</span></div>
                 <div class="accueil-carte-desc">
                     Lire, annoter et apposer des autocollants dans les copies.
                 </div>
@@ -139,7 +139,7 @@ function afficherAccueilRetour(conteneur) {
             </div>
             <div class="accueil-carte" onclick="afficherSection('planification'); setTimeout(function(){ afficherSousSection('planification-carte'); }, 100);">
                 <div class="accueil-carte-icone">\uD83D\uDDFA\uFE0F</div>
-                <div class="accueil-carte-titre">Planifier mon cours</div>
+                <div class="accueil-carte-titre">Planifier mon cours <span class="badge-dev-actif">D\u00e9veloppement actif</span></div>
                 <div class="accueil-carte-desc">
                     Organiser les s\u00e9quences, le\u00e7ons et activit\u00e9s sur la carte mentale.
                 </div>
