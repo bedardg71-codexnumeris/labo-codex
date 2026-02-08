@@ -55,14 +55,74 @@ const TYPES = {
 };
 
 const TYPES_LIENS = [
+    { id: 'developpe',      label: 'développe' },
     { id: 'vise',           label: 'vise' },
     { id: 'mobilise',       label: 'mobilise' },
-    { id: 'prerequis_de',   label: 'prérequis de' },
-    { id: 'evalue_par',     label: 'évalué par' },
-    { id: 'soutenu_par',    label: 'soutenu par' },
-    { id: 'revise_dans',    label: 'révisé dans' },
-    { id: 'sequence_avant', label: 'séquencé avant' }
+    { id: 'requiert',       label: 'requiert' },
+    { id: 'sappuie_sur',    label: "s'appuie sur" }
 ];
+
+// Table des verbes automatiques : clé = "typeSource>typeCible", valeur = { verbe, inverser }
+var VERBES_AUTO = {
+    'idee-maitresse>competence':   { verbe: 'developpe' },
+    'competence>idee-maitresse':   { verbe: 'developpe', inverser: true },
+    'lecon>idee-maitresse':        { verbe: 'vise' },
+    'idee-maitresse>lecon':        { verbe: 'vise', inverser: true },
+    'activite>connaissance':       { verbe: 'mobilise' },
+    'activite>strategie':          { verbe: 'mobilise' },
+    'activite>condition':          { verbe: 'mobilise' },
+    'soutien>connaissance':        { verbe: 'mobilise' },
+    'soutien>strategie':           { verbe: 'mobilise' },
+    'soutien>condition':           { verbe: 'mobilise' },
+    'revision>connaissance':       { verbe: 'mobilise' },
+    'revision>strategie':          { verbe: 'mobilise' },
+    'revision>condition':          { verbe: 'mobilise' },
+    'connaissance>activite':       { verbe: 'mobilise', inverser: true },
+    'strategie>activite':          { verbe: 'mobilise', inverser: true },
+    'condition>activite':          { verbe: 'mobilise', inverser: true },
+    'connaissance>soutien':        { verbe: 'mobilise', inverser: true },
+    'strategie>soutien':           { verbe: 'mobilise', inverser: true },
+    'condition>soutien':           { verbe: 'mobilise', inverser: true },
+    'connaissance>revision':       { verbe: 'mobilise', inverser: true },
+    'strategie>revision':          { verbe: 'mobilise', inverser: true },
+    'condition>revision':          { verbe: 'mobilise', inverser: true },
+    'connaissance>connaissance':   { verbe: 'requiert' },
+    'strategie>strategie':         { verbe: 'requiert' },
+    'condition>condition':         { verbe: 'requiert' },
+    'connaissance>strategie':      { verbe: 'requiert' },
+    'strategie>connaissance':      { verbe: 'requiert' },
+    'connaissance>condition':      { verbe: 'requiert' },
+    'condition>connaissance':      { verbe: 'requiert' },
+    'strategie>condition':         { verbe: 'requiert' },
+    'condition>strategie':         { verbe: 'requiert' },
+    'idee-maitresse>idee-maitresse': { verbe: 'sappuie_sur' }
+};
+
+function resoudreVerbe(sourceId, cibleId) {
+    var src = etat.noeuds.get(sourceId);
+    var cbl = etat.noeuds.get(cibleId);
+    if (!src || !cbl) return null;
+    var cle = src.type + '>' + cbl.type;
+    var match = VERBES_AUTO[cle];
+    if (!match) return null;
+    if (match.inverser) {
+        return { verbe: match.verbe, source: cibleId, cible: sourceId };
+    }
+    return { verbe: match.verbe, source: sourceId, cible: cibleId };
+}
+
+// Compatibilité anciens verbes
+var VERBES_COMPAT = {
+    'prerequis_de': 'requiert', 'evalue_par': 'mobilise',
+    'soutenu_par': 'mobilise', 'revise_dans': 'mobilise', 'sequence_avant': 'vise'
+};
+function trouverConfigLien(typeId) {
+    var t = TYPES_LIENS.find(function(tl) { return tl.id === typeId; });
+    if (t) return t;
+    var compat = VERBES_COMPAT[typeId];
+    if (compat) return TYPES_LIENS.find(function(tl) { return tl.id === compat; });
+    return null;
+}
 
 var TYPES_PREALABLE = { 'connaissance': true, 'strategie': true, 'condition': true };
 
@@ -92,7 +152,104 @@ function mettreAJourApparenceNoeud(donnees) {
     var pastille = el.querySelector('.planif-noeud-pastille');
     if (pastille) pastille.style.background = couleur;
     var typeEl = el.querySelector('.planif-noeud-type');
-    if (typeEl) typeEl.textContent = obtenirLabelNoeud(donnees);
+    if (typeEl) {
+        typeEl.textContent = obtenirLabelNoeud(donnees);
+        typeEl.style.color = couleur;
+    }
+    mettreAJourBadge(donnees);
+}
+
+function evaluerBadge(noeud) {
+    var type = noeud.type;
+    var liens = getLiensDeNoeud(noeud.id);
+
+    switch (type) {
+        case 'competence':
+            var devParIM = liens.some(function(l) { return l.noeudType === 'idee-maitresse'; });
+            return devParIM ? { valide: true } : { valide: false, message: 'Aucune idée maîtresse ne développe cette compétence' };
+
+        case 'idee-maitresse':
+            var devComp = liens.some(function(l) { return l.direction === 'sortant' && l.noeudType === 'competence'; });
+            var viseeParLecon = liens.some(function(l) { return l.noeudType === 'lecon'; });
+            if (!devComp) return { valide: false, message: "Cette idée ne développe aucune compétence" };
+            if (!viseeParLecon) return { valide: false, message: "Cette idée n'est visée par aucune leçon" };
+            return { valide: true };
+
+        case 'connaissance':
+        case 'strategie':
+        case 'condition':
+            var labelMap = { connaissance: 'information', strategie: 'stratégie', condition: 'condition' };
+            if (!noeud.parent) return { valide: false, message: 'Cette ' + labelMap[type] + " n'est associée à aucune leçon" };
+            var parentN = etat.noeuds.get(noeud.parent);
+            if (!parentN || parentN.type !== 'lecon') return { valide: false, message: 'Cette ' + labelMap[type] + " n'est associée à aucune leçon" };
+            return { valide: true };
+
+        case 'activite':
+        case 'soutien':
+        case 'revision':
+            if (!noeud.parent) return { valide: false, message: "N'est associé(e) à aucune leçon" };
+            var parentA = etat.noeuds.get(noeud.parent);
+            if (!parentA || parentA.type !== 'lecon') return { valide: false, message: "N'est associé(e) à aucune leçon" };
+            var aConnaissance = (parentA.enfants || []).some(function(eid) {
+                var e = etat.noeuds.get(eid);
+                return e && (e.type === 'connaissance' || e.type === 'strategie' || e.type === 'condition');
+            });
+            if (!aConnaissance) return { valide: false, message: "Aucune connaissance dans cette leçon" };
+            return { valide: true };
+
+        case 'sequence':
+            var contientLecon = (noeud.enfants || []).some(function(eid) {
+                var e = etat.noeuds.get(eid);
+                return e && e.type === 'lecon';
+            });
+            return contientLecon ? { valide: true } : { valide: false, message: "Cette séquence ne contient aucune leçon" };
+
+        case 'lecon':
+            var msgs = [];
+            var viseIM = liens.some(function(l) { return l.noeudType === 'idee-maitresse'; });
+            if (!viseIM) msgs.push("Aucune idée maîtresse visée");
+            var aConn = (noeud.enfants || []).some(function(eid) {
+                var e = etat.noeuds.get(eid);
+                return e && (e.type === 'connaissance' || e.type === 'strategie' || e.type === 'condition');
+            });
+            if (!aConn) msgs.push("Aucune connaissance");
+            var aAct = (noeud.enfants || []).some(function(eid) {
+                var e = etat.noeuds.get(eid);
+                return e && (e.type === 'activite' || e.type === 'soutien' || e.type === 'revision');
+            });
+            if (!aAct) msgs.push("Aucune activité");
+            return msgs.length === 0 ? { valide: true } : { valide: false, message: msgs.join(' · ') };
+
+        default:
+            return { valide: true };
+    }
+}
+
+function mettreAJourBadge(donnees) {
+    var el = document.getElementById(donnees.id);
+    if (!el) return;
+    var badge = el.querySelector('.planif-badge-validation');
+    if (!badge) {
+        badge = document.createElement('span');
+        badge.className = 'planif-badge-validation';
+        el.appendChild(badge);
+    }
+    var resultat = evaluerBadge(donnees);
+    if (resultat.valide) {
+        badge.style.backgroundColor = obtenirCouleurNoeud(donnees);
+        badge.title = 'Alignement complet';
+        badge.classList.remove('planif-badge-gris');
+    } else {
+        badge.style.backgroundColor = '#ccc';
+        badge.title = resultat.message;
+        badge.classList.add('planif-badge-gris');
+    }
+}
+
+function mettreAJourTousLesBadges() {
+    for (var entry of etat.noeuds) {
+        mettreAJourBadge(entry[1]);
+    }
 }
 
 // === CONSTANTES ===
@@ -181,7 +338,7 @@ function creerNoeud(type, x, y) {
         el.innerHTML =
             '<div class="planif-noeud-entete">' +
                 '<span class="planif-noeud-pastille" style="background: ' + obtenirCouleurNoeud(donnees) + '"></span>' +
-                '<span class="planif-noeud-type">' + obtenirLabelNoeud(donnees) + '</span>' +
+                '<span class="planif-noeud-type" style="color: ' + obtenirCouleurNoeud(donnees) + '">' + obtenirLabelNoeud(donnees) + '</span>' +
             '</div>' +
             '<div class="planif-noeud-titre" contenteditable="true"></div>' +
             '<div class="planif-noeud-zone planif-vide"></div>' +
@@ -193,7 +350,7 @@ function creerNoeud(type, x, y) {
         el.innerHTML =
             '<div class="planif-noeud-entete">' +
                 '<span class="planif-noeud-pastille" style="background: ' + obtenirCouleurNoeud(donnees) + '"></span>' +
-                '<span class="planif-noeud-type">' + obtenirLabelNoeud(donnees) + '</span>' +
+                '<span class="planif-noeud-type" style="color: ' + obtenirCouleurNoeud(donnees) + '">' + obtenirLabelNoeud(donnees) + '</span>' +
             '</div>' +
             '<div class="planif-noeud-titre" contenteditable="true"></div>' +
             '<div class="planif-noeud-port planif-port-droite" data-dir="droite"></div>' +
@@ -517,7 +674,7 @@ function dessinerLien(donnees) {
 
     groupe.appendChild(path);
 
-    var typeLienConfig = TYPES_LIENS.find(function(t) { return t.id === donnees.type; });
+    var typeLienConfig = trouverConfigLien(donnees.type);
     if (typeLienConfig) {
         var mx = (p1.x + p2.x) / 2;
         var my = (p1.y + p2.y) / 2;
@@ -631,21 +788,29 @@ function mettreAJourLiens(noeudId) {
 
 // === MENU TYPE DE LIEN ===
 function afficherMenuLien(x, y, sourceId, cibleId) {
-    menuLien.innerHTML = '';
-    TYPES_LIENS.forEach(function(tl) {
-        var btn = document.createElement('button');
-        btn.textContent = tl.label;
-        btn.addEventListener('click', function() {
-            creerLien(sourceId, cibleId, tl.id);
-            fermerMenuLien();
-        });
-        menuLien.appendChild(btn);
-    });
+    var resolution = resoudreVerbe(sourceId, cibleId);
+    if (!resolution) {
+        // Lien invalide — afficher un message discret
+        var src = etat.noeuds.get(sourceId);
+        var cbl = etat.noeuds.get(cibleId);
+        var srcLabel = src ? (TYPES[src.type] ? TYPES[src.type].label : src.type) : '?';
+        var cblLabel = cbl ? (TYPES[cbl.type] ? TYPES[cbl.type].label : cbl.type) : '?';
+        afficherToastLien('Ce lien n\'est pas possible entre ' + srcLabel + ' et ' + cblLabel + '.');
+        return;
+    }
+    creerLien(resolution.source, resolution.cible, resolution.verbe);
+}
 
-    var posMenu = clientVersEspace(x, y);
-    menuLien.style.left = posMenu.x + 'px';
-    menuLien.style.top = posMenu.y + 'px';
-    menuLien.style.display = 'block';
+function afficherToastLien(message) {
+    var toast = document.createElement('div');
+    toast.className = 'planif-toast-lien';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(function() { toast.classList.add('planif-toast-visible'); }, 10);
+    setTimeout(function() {
+        toast.classList.remove('planif-toast-visible');
+        setTimeout(function() { toast.remove(); }, 300);
+    }, 3000);
 }
 
 function afficherMenuLienExistant(x, y, lienId) {
@@ -653,23 +818,16 @@ function afficherMenuLienExistant(x, y, lienId) {
     if (!lien) return;
 
     menuLien.innerHTML = '';
-    TYPES_LIENS.forEach(function(tl) {
-        var btn = document.createElement('button');
-        btn.textContent = tl.label;
-        if (tl.id === lien.type) btn.classList.add('actif');
-        btn.addEventListener('click', function() {
-            enregistrerPourUndo();
-            lien.type = tl.id;
-            dessinerLien(lien);
-            fermerMenuLien();
-            sauvegarder();
-        });
-        menuLien.appendChild(btn);
-    });
-
-    var sep = document.createElement('hr');
-    sep.style.cssText = 'border: none; border-top: 1px solid #e2e8f0; margin: 4px 0;';
-    menuLien.appendChild(sep);
+    var typeLienConfig = trouverConfigLien(lien.type);
+    if (typeLienConfig) {
+        var infoLabel = document.createElement('div');
+        infoLabel.style.cssText = 'padding: 4px 8px; font-size: 11px; color: #64748b; font-style: italic;';
+        infoLabel.textContent = typeLienConfig.label;
+        menuLien.appendChild(infoLabel);
+        var sep = document.createElement('hr');
+        sep.style.cssText = 'border: none; border-top: 1px solid #e2e8f0; margin: 4px 0;';
+        menuLien.appendChild(sep);
+    }
 
     var btnSuppr = document.createElement('button');
     btnSuppr.textContent = 'Supprimer ce lien';
@@ -1110,7 +1268,7 @@ function reconstruireDOM() {
             el.innerHTML =
                 '<div class="planif-noeud-entete">' +
                     '<span class="planif-noeud-pastille" style="background: ' + obtenirCouleurNoeud(n) + '"></span>' +
-                    '<span class="planif-noeud-type">' + obtenirLabelNoeud(n) + '</span>' +
+                    '<span class="planif-noeud-type" style="color: ' + obtenirCouleurNoeud(n) + '">' + obtenirLabelNoeud(n) + '</span>' +
                 '</div>' +
                 '<div class="planif-noeud-titre" contenteditable="true">' + (n.titre || '') + '</div>' +
                 '<div class="planif-noeud-zone ' + (nbEnfants === 0 ? 'planif-vide' : '') + '">' +
@@ -1124,7 +1282,7 @@ function reconstruireDOM() {
             el.innerHTML =
                 '<div class="planif-noeud-entete">' +
                     '<span class="planif-noeud-pastille" style="background: ' + obtenirCouleurNoeud(n) + '"></span>' +
-                    '<span class="planif-noeud-type">' + obtenirLabelNoeud(n) + '</span>' +
+                    '<span class="planif-noeud-type" style="color: ' + obtenirCouleurNoeud(n) + '">' + obtenirLabelNoeud(n) + '</span>' +
                 '</div>' +
                 '<div class="planif-noeud-titre" contenteditable="true">' + (n.titre || '') + '</div>' +
                 '<div class="planif-noeud-port planif-port-droite" data-dir="droite"></div>' +
@@ -1219,6 +1377,7 @@ function sauvegarder() {
 
     if (seancesOuvert) rafraichirSeances();
     mettreAJourGuidesZone();
+    mettreAJourTousLesBadges();
 }
 
 function viderCanvas() {
@@ -1777,7 +1936,7 @@ function getLiensDeNoeud(noeudId) {
         if (lien.source === noeudId || lien.cible === noeudId) {
             var autreId = lien.source === noeudId ? lien.cible : lien.source;
             var autre = etat.noeuds.get(autreId);
-            var typeLienConfig = TYPES_LIENS.find(function(t) { return t.id === lien.type; });
+            var typeLienConfig = trouverConfigLien(lien.type);
             if (autre && typeLienConfig) {
                 resultat.push({
                     noeudId: autreId,
@@ -2058,10 +2217,12 @@ function peuplerSelecteurLecons() {
     afficherLeconOrganisateur();
 }
 
-function trouverIdeeMaitresseAncetre(noeudId) {
-    // Remonter les branches (parent + liens) pour trouver la dernière idée maîtresse
+function trouverIdeesMaitressesAncetres(noeudId) {
+    // Remonter les branches (parent + liens) pour trouver TOUTES les idées maîtresses
     var visite = {};
     var aExplorer = [noeudId];
+    var resultats = [];
+    var ids = {};
     while (aExplorer.length > 0) {
         var courantId = aExplorer.shift();
         if (visite[courantId]) continue;
@@ -2069,11 +2230,14 @@ function trouverIdeeMaitresseAncetre(noeudId) {
         var courant = etat.noeuds.get(courantId);
         if (!courant) continue;
 
-        // Vérifier les liens de ce nœud pour une idée maîtresse
+        // Vérifier les liens de ce nœud pour des idées maîtresses
         var liens = getLiensDeNoeud(courantId);
         for (var i = 0; i < liens.length; i++) {
             var cible = etat.noeuds.get(liens[i].noeudId);
-            if (cible && cible.type === 'idee-maitresse') return cible;
+            if (cible && cible.type === 'idee-maitresse' && !ids[cible.id]) {
+                resultats.push(cible);
+                ids[cible.id] = true;
+            }
         }
 
         // Remonter au parent (conteneur)
@@ -2081,7 +2245,7 @@ function trouverIdeeMaitresseAncetre(noeudId) {
             aExplorer.push(courant.parent);
         }
     }
-    return null;
+    return resultats;
 }
 
 function afficherLeconOrganisateur() {
@@ -2095,15 +2259,26 @@ function afficherLeconOrganisateur() {
     var lecon = etat.noeuds.get(leconId);
     if (!lecon) return;
 
-    // Objectif — remonter les branches pour trouver la dernière idée maîtresse
+    // Objectif — remonter les branches pour trouver toutes les idées maîtresses
     var objContenu = orgLecon.querySelector('#planif-org-objectif .planif-org-section-contenu');
-    var ideeM = trouverIdeeMaitresseAncetre(leconId);
-    if (ideeM) {
-        objContenu.textContent = 'Au terme de la leçon, l\'élève sera capable de ' + (ideeM.titre || '...').toLowerCase() + '.';
-        objContenu.classList.remove('planif-org-placeholder');
-    } else {
+    var ideesM = trouverIdeesMaitressesAncetres(leconId);
+    if (ideesM.length === 0) {
         objContenu.textContent = 'Aucune idée maîtresse associée. Reliez la branche à une idée maîtresse.';
         objContenu.classList.add('planif-org-placeholder');
+    } else if (ideesM.length === 1) {
+        var titre = (ideesM[0].titre || '...').toLowerCase();
+        var prefixe = /^[aeiouyàâéèêëïîôùûüæœh]/i.test(titre) ? "d'" : 'de ';
+        objContenu.textContent = 'Au terme de la leçon, l\'élève sera capable ' + prefixe + titre + '.';
+        objContenu.classList.remove('planif-org-placeholder');
+    } else {
+        var html = 'Au terme de la leçon, l\u2019élève sera capable\u00a0:<br>';
+        for (var k = 0; k < ideesM.length; k++) {
+            var t = (ideesM[k].titre || '...').toLowerCase();
+            var p = /^[aeiouyàâéèêëïîôùûüæœh]/i.test(t) ? "d'" : 'de ';
+            html += '\u00a0\u00a0— ' + p + t + (k < ideesM.length - 1 ? '\u00a0;' : '.') + '<br>';
+        }
+        objContenu.innerHTML = html;
+        objContenu.classList.remove('planif-org-placeholder');
     }
 
     // Enseignement explicite — checkbox
