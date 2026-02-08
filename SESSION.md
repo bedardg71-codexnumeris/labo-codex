@@ -1,8 +1,58 @@
-# SESSION ACTIVE - BETA 97.3
+# SESSION ACTIVE - BETA 97.4
 
-**Date** : 7 février 2026
-**Version** : Beta 97.3 (build 0207-1100)
-**Statut** : Correctifs annotation — 5 bugs audit (fontSize, selection fantome, scale export, listeners, Backspace)
+**Date** : 8 février 2026
+**Version** : Beta 97.4 (build 0208-1437)
+**Statut** : Alignement pédagogique — clonage, verbes horizontaux, évaluations, UX
+
+## SESSION DU 8 FÉVRIER 2026
+
+### Travail accompli
+
+1. **Système de clonage (PLAN-CLONAGE.md)**
+   - `cloneSourceId` ajouté au modèle de données (creerNoeud, clonerEtatPersistant, restaurerSnapshot, chargerCarte)
+   - `clonerNoeud()` remplace `dupliquerNoeud()` : copie avec identité partagée
+   - Propagation titre/description à tous les clones
+   - `supprimerNoeud()` : transfert d'original si l'original est supprimé
+   - `evaluerBadge()` : agrège les liens de tous les clones
+   - Indicateur visuel 🧬 avec surbrillance au survol
+   - Bouton « Cloner » dans le panneau d'information
+
+2. **Verbes verticaux refondus (PLAN-VERBES-LIENS.md)**
+   - 5 verbes amont→aval : se décline en, se concrétise dans, s'acquiert par, se vérifie par, s'appuie sur
+   - `VERBES_AUTO` réécrit avec direction inversée
+   - `MIGRATION_VERBES` + `VERBES_COMPAT` pour migration automatique des anciens liens
+   - Messages `evaluerBadge()` mis à jour
+
+3. **Verbes horizontaux (PLAN-VERBES-HORIZONTAUX.md)**
+   - 2 nouveaux verbes : complète, conduit à
+   - `VERBES_HORIZONTAUX` table séparée avec normalisation de types
+   - `resoudreVerbe()` retourne `type: 'vertical'` ou `type: 'horizontal'`
+   - Popup de choix pour liens horizontaux, attribution automatique pour verticaux
+   - `afficherMenuLienExistant()` filtre les verbes pertinents par couple
+
+4. **Évaluations**
+   - Nouveau type avec couleur #D946EF (rose/magenta)
+   - Insertion dans les conteneurs Leçon (`peutContenir()`)
+   - Champs Rétroaction et Production dans le panneau d'information
+
+5. **UX carte mentale**
+   - Carte d'aide flottante : draggable, redimensionnable, fermable
+   - Bouton « ? » dans la palette (toggle afficher/masquer)
+   - Espacement conteneurs augmenté (GAP 12→30px)
+   - Menu sélection verbes sur liens existants
+
+6. **Renommage**
+   - Onglet « Carte mentale » → « Alignement pédagogique » (config.js)
+
+### Fichiers modifiés
+- `js/planification-carte.js` — logique clonage, verbes, évaluations
+- `js/config.js` — label sous-nav
+- `index.html` — palette, panneau, carte d'aide, changelog, BUILD_ID
+- `styles.css` — clone, carte d'aide, évaluation
+
+---
+
+## HISTORIQUE PRÉCÉDENT — BETA 97.3
 
 ---
 

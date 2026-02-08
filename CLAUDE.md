@@ -18,8 +18,8 @@ Ce document te guidera vers :
 
 ## Etat actuel
 
-- **Version** : Beta 96.2
-- **Objectif** : Architecture modulaire groupe-cours + Categories productions
+- **Version** : Beta 97.4
+- **Objectif** : Alignement pedagogique (clonage, verbes, evaluations)
 - **Session en cours** : Voir `SESSION.md`
 - **Backlog** : Voir `BACKLOG.md` (taches a faire)
 
@@ -111,4 +111,4 @@ Points blancs dans les barres graduees de l'apercu :
 
 ---
 
-**Derniere mise a jour** : 1er février 2026
+**Derniere mise a jour** : 8 février 2026

@@ -61,7 +61,9 @@ const TYPES_LIENS = [
     { id: 'se_concretise_dans',   label: 'se concrétise dans' },
     { id: 's_acquiert_par',       label: "s'acquiert par" },
     { id: 'se_verifie_par',       label: 'se vérifie par' },
-    { id: 's_appuie_sur',         label: "s'appuie sur" }
+    { id: 's_appuie_sur',         label: "s'appuie sur" },
+    { id: 'complete',             label: 'complète' },
+    { id: 'conduit_a',            label: 'conduit à' }
 ];
 
 // Table des verbes automatiques : direction amont → aval
@@ -104,31 +106,50 @@ var VERBES_AUTO = {
     'evaluation>connaissance':     { verbe: 'se_verifie_par', inverser: true },
     'evaluation>strategie':        { verbe: 'se_verifie_par', inverser: true },
     'evaluation>condition':        { verbe: 'se_verifie_par', inverser: true },
-    // Connaissance ↔ Connaissance (s'appuie sur — horizontal)
-    'connaissance>connaissance':   { verbe: 's_appuie_sur' },
-    'strategie>strategie':         { verbe: 's_appuie_sur' },
-    'condition>condition':         { verbe: 's_appuie_sur' },
-    'connaissance>strategie':      { verbe: 's_appuie_sur' },
-    'strategie>connaissance':      { verbe: 's_appuie_sur' },
-    'connaissance>condition':      { verbe: 's_appuie_sur' },
-    'condition>connaissance':      { verbe: 's_appuie_sur' },
-    'strategie>condition':         { verbe: 's_appuie_sur' },
-    'condition>strategie':         { verbe: 's_appuie_sur' },
-    // Idée maîtresse ↔ Idée maîtresse (s'appuie sur — horizontal)
-    'idee-maitresse>idee-maitresse': { verbe: 's_appuie_sur' }
+};
+
+// Groupes de types pour normalisation (verbes horizontaux)
+var TYPES_CONNAISSANCE = ['connaissance', 'strategie', 'condition'];
+var TYPES_ACTIVITE = ['activite', 'soutien', 'revision'];
+
+function normaliserType(type) {
+    if (TYPES_CONNAISSANCE.indexOf(type) !== -1) return 'connaissance';
+    if (TYPES_ACTIVITE.indexOf(type) !== -1) return 'activite';
+    return type;
+}
+
+// Verbes horizontaux : plusieurs choix possibles par couple
+var VERBES_HORIZONTAUX = {
+    'connaissance>connaissance':     ['s_appuie_sur', 'complete', 'conduit_a'],
+    'activite>activite':             ['complete', 'conduit_a'],
+    'idee-maitresse>idee-maitresse': ['s_appuie_sur', 'complete']
 };
 
 function resoudreVerbe(sourceId, cibleId) {
     var src = etat.noeuds.get(sourceId);
     var cbl = etat.noeuds.get(cibleId);
     if (!src || !cbl) return null;
+
+    // 1. Chercher un verbe vertical (automatique)
     var cle = src.type + '>' + cbl.type;
     var match = VERBES_AUTO[cle];
-    if (!match) return null;
-    if (match.inverser) {
-        return { verbe: match.verbe, source: cibleId, cible: sourceId };
+    if (match) {
+        if (match.inverser) {
+            return { type: 'vertical', verbe: match.verbe, source: cibleId, cible: sourceId };
+        }
+        return { type: 'vertical', verbe: match.verbe, source: sourceId, cible: cibleId };
     }
-    return { verbe: match.verbe, source: sourceId, cible: cibleId };
+
+    // 2. Chercher des verbes horizontaux (choix utilisateur)
+    var srcN = normaliserType(src.type);
+    var cblN = normaliserType(cbl.type);
+    var cleH = srcN + '>' + cblN;
+    var verbesH = VERBES_HORIZONTAUX[cleH];
+    if (verbesH && verbesH.length > 0) {
+        return { type: 'horizontal', verbes: verbesH, source: sourceId, cible: cibleId };
+    }
+
+    return null;
 }
 
 // Migration anciens verbes → nouveaux verbes
@@ -1208,7 +1229,37 @@ function afficherMenuLien(x, y, sourceId, cibleId) {
         afficherToastLien('Ce lien n\'est pas possible entre ' + srcLabel + ' et ' + cblLabel + '.');
         return;
     }
-    creerLien(resolution.source, resolution.cible, resolution.verbe);
+
+    // Vertical : verbe automatique, pas de popup
+    if (resolution.type === 'vertical') {
+        creerLien(resolution.source, resolution.cible, resolution.verbe);
+        return;
+    }
+
+    // Horizontal : popup de choix de verbe
+    menuLien.innerHTML = '';
+    var titre = document.createElement('div');
+    titre.style.cssText = 'padding: 4px 8px 2px; font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;';
+    titre.textContent = 'Type de relation';
+    menuLien.appendChild(titre);
+
+    for (var vi = 0; vi < resolution.verbes.length; vi++) {
+        (function(verbeId) {
+            var cfg = trouverConfigLien(verbeId);
+            var btn = document.createElement('button');
+            btn.textContent = cfg ? cfg.label : verbeId;
+            btn.addEventListener('click', function() {
+                creerLien(resolution.source, resolution.cible, verbeId);
+                fermerMenuLien();
+            });
+            menuLien.appendChild(btn);
+        })(resolution.verbes[vi]);
+    }
+
+    var posMenu = clientVersEspace(x, y);
+    menuLien.style.left = posMenu.x + 'px';
+    menuLien.style.top = posMenu.y + 'px';
+    menuLien.style.display = 'block';
 }
 
 function afficherToastLien(message) {
@@ -1227,6 +1278,21 @@ function afficherMenuLienExistant(x, y, lienId) {
     var lien = etat.liens.get(lienId);
     if (!lien) return;
 
+    // Déterminer les verbes pertinents pour ce couple source-cible
+    var resolution = resoudreVerbe(lien.source, lien.cible);
+    var verbesPertinents = [];
+    if (resolution) {
+        if (resolution.type === 'vertical') {
+            verbesPertinents = [resolution.verbe];
+        } else {
+            verbesPertinents = resolution.verbes;
+        }
+    }
+    // Toujours inclure le verbe actuel (même si la résolution a changé)
+    if (lien.type && verbesPertinents.indexOf(lien.type) === -1) {
+        verbesPertinents.push(lien.type);
+    }
+
     menuLien.innerHTML = '';
 
     // Titre du menu
@@ -1235,23 +1301,24 @@ function afficherMenuLienExistant(x, y, lienId) {
     titre.textContent = 'Verbe du lien';
     menuLien.appendChild(titre);
 
-    // Boutons pour chaque verbe disponible
-    for (var vi = 0; vi < TYPES_LIENS.length; vi++) {
-        (function(verbeDef) {
+    // Boutons pour chaque verbe pertinent
+    for (var vi = 0; vi < verbesPertinents.length; vi++) {
+        (function(verbeId) {
+            var cfg = trouverConfigLien(verbeId);
             var btn = document.createElement('button');
-            btn.textContent = verbeDef.label;
-            if (lien.type === verbeDef.id) btn.classList.add('actif');
+            btn.textContent = cfg ? cfg.label : verbeId;
+            if (lien.type === verbeId) btn.classList.add('actif');
             btn.addEventListener('click', function() {
-                if (lien.type !== verbeDef.id) {
+                if (lien.type !== verbeId) {
                     enregistrerPourUndo();
-                    lien.type = verbeDef.id;
+                    lien.type = verbeId;
                     dessinerLien(lien);
                     sauvegarder();
                 }
                 fermerMenuLien();
             });
             menuLien.appendChild(btn);
-        })(TYPES_LIENS[vi]);
+        })(verbesPertinents[vi]);
     }
 
     var sep = document.createElement('hr');
