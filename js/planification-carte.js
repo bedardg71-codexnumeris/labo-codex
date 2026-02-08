@@ -2353,6 +2353,43 @@ function initialiser() {
         });
     });
 
+    // Drag palette flottante
+    var palette = document.getElementById('planif-palette');
+    var paletteBarre = palette ? palette.querySelector('.planif-palette-barre') : null;
+    if (paletteBarre) {
+        paletteBarre.addEventListener('mousedown', function(e) {
+            if (e.target.closest('.planif-palette-toggle')) return;
+            e.preventDefault();
+            var startX = e.clientX;
+            var startY = e.clientY;
+            var rect = palette.getBoundingClientRect();
+            var wrapperRect = document.getElementById('planif-zone-wrapper').getBoundingClientRect();
+            var startLeft = rect.left - wrapperRect.left;
+            var startTop = rect.top - wrapperRect.top;
+
+            function onMove(e2) {
+                palette.style.left = (startLeft + e2.clientX - startX) + 'px';
+                palette.style.top = (startTop + e2.clientY - startY) + 'px';
+            }
+            function onUp() {
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup', onUp);
+            }
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onUp);
+        });
+    }
+
+    // Toggle repli palette
+    var paletteToggle = document.getElementById('planif-palette-toggle');
+    if (paletteToggle && palette) {
+        paletteToggle.addEventListener('click', function() {
+            palette.classList.toggle('planif-palette-replie');
+            paletteToggle.textContent = palette.classList.contains('planif-palette-replie') ? '+' : '−';
+            paletteToggle.title = palette.classList.contains('planif-palette-replie') ? 'Ouvrir la palette' : 'Réduire la palette';
+        });
+    }
+
     zoneTravail.addEventListener('dragover', function(e) {
         e.preventDefault();
         e.dataTransfer.dropEffect = 'copy';
