@@ -14101,6 +14101,11 @@ body.mode-assiste .btn-aide-contextuelle,
 }
 
 .planif-noeud:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+
+.planif-snap-transition {
+    transition: left 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                top 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+}
 .planif-noeud.planif-dragging { cursor: grabbing; box-shadow: 0 8px 24px rgba(0,0,0,0.15); z-index: 50; }
 .planif-noeud.selected {
     border-color: var(--planif-couleur-selection);
