@@ -1,0 +1,2284 @@
+/* ===============================
+   MODULE: PLANIFICATION — MOTEUR CARTE MENTALE
+   Portage du prototype standalone vers la SPA Monitorage v6
+
+   Tous les IDs et classes sont préfixés 'planif-'
+   Toutes les refs DOM sont différées dans initialiser()
+   Events globaux gérés via flag planificationActive
+
+   Export: window.planificationCarte
+   =============================== */
+
+(function() {
+'use strict';
+
+// === ÉTAT DE L'APPLICATION ===
+const etat = {
+    noeuds: new Map(),
+    liens: new Map(),
+    compteur: 0,
+    compteurLiens: 0,
+    selection: null,
+    multiSelection: new Set(),
+    lienEnCours: null,
+    panneauOuvert: false,
+    zoom: 1,
+    initialise: false
+};
+
+// === FLAG D'ACTIVATION ===
+let planificationActive = false;
+
+// === CONFIGURATION DES TYPES ===
+const TYPES = {
+    'competence':     { label: 'Compétence',       couleur: 'var(--planif-couleur-competence)' },
+    'idee-maitresse': { label: 'Idée maîtresse',   couleur: 'var(--planif-couleur-idee-maitresse)' },
+    'connaissance':   { label: 'Connaissance',      couleur: 'var(--planif-couleur-connaissance)' },
+    'prerequis':      { label: 'Préalable',         couleur: 'var(--planif-couleur-prerequis)' },
+    'strategie':      { label: 'Stratégie',         couleur: 'var(--planif-couleur-strategie)' },
+    'soutien':        { label: 'Soutien',           couleur: 'var(--planif-couleur-soutien)' },
+    'revision':       { label: 'Révision',          couleur: 'var(--planif-couleur-revision)' },
+    'sequence':       { label: 'Séquence',          couleur: 'var(--planif-couleur-sequence)',  conteneur: true },
+    'lecon':          { label: 'Leçon',             couleur: 'var(--planif-couleur-lecon)',     conteneur: true },
+    'activite':       { label: 'Activité',          couleur: 'var(--planif-couleur-activite)' }
+};
+
+const TYPES_LIENS = [
+    { id: 'vise',           label: 'vise' },
+    { id: 'mobilise',       label: 'mobilise' },
+    { id: 'prerequis_de',   label: 'prérequis de' },
+    { id: 'evalue_par',     label: 'évalué par' },
+    { id: 'soutenu_par',    label: 'soutenu par' },
+    { id: 'revise_dans',    label: 'révisé dans' },
+    { id: 'sequence_avant', label: 'séquencé avant' }
+];
+
+// === CONSTANTES ===
+const OFFSET_X = 5000;
+const OFFSET_Y = 3000;
+const ZONE_LIMITE_X = 0;
+const ZONE_MARGE = 40;
+
+const ZONES = {
+    gauche: {
+        types: ['competence', 'idee-maitresse', 'connaissance', 'prerequis', 'strategie'],
+        label: 'Objectifs & Savoirs',
+        maxX: ZONE_LIMITE_X - ZONE_MARGE
+    },
+    droite: {
+        types: ['sequence', 'lecon', 'activite', 'soutien', 'revision'],
+        label: 'Organisation & Activités',
+        minX: ZONE_LIMITE_X + ZONE_MARGE
+    }
+};
+
+// === RÉFÉRENCES DOM (initialisées dans initialiser()) ===
+let zoneTravail, espace, coucheNoeuds, coucheLiens, canvas, lienTemp;
+let panneau, menuLien, rectSelection;
+let panneauSeances, panneauSeancesContenu, btnSeances;
+let seancesOuvert = false;
+
+// === UTILITAIRES DE ZONES ===
+function getZone(type) {
+    if (ZONES.gauche.types.includes(type)) return 'gauche';
+    if (ZONES.droite.types.includes(type)) return 'droite';
+    return null;
+}
+
+function estHorsZone(type, x) {
+    const zone = getZone(type);
+    if (zone === 'gauche' && x > ZONES.gauche.maxX) return true;
+    if (zone === 'droite' && x < ZONES.droite.minX) return true;
+    return false;
+}
+
+// === UTILITAIRES DE COORDONNÉES ===
+function clientVersData(clientX, clientY) {
+    const rect = zoneTravail.getBoundingClientRect();
+    return {
+        x: (clientX - rect.left + zoneTravail.scrollLeft) / etat.zoom - OFFSET_X,
+        y: (clientY - rect.top + zoneTravail.scrollTop) / etat.zoom - OFFSET_Y
+    };
+}
+
+function clientVersEspace(clientX, clientY) {
+    const rect = zoneTravail.getBoundingClientRect();
+    return {
+        x: (clientX - rect.left + zoneTravail.scrollLeft) / etat.zoom,
+        y: (clientY - rect.top + zoneTravail.scrollTop) / etat.zoom
+    };
+}
+
+// === ZOOM ===
+function zoomer(clientX, clientY, facteur) {
+    const oldZoom = etat.zoom;
+    etat.zoom = Math.max(0.25, Math.min(3, etat.zoom * facteur));
+    if (etat.zoom === oldZoom) return;
+
+    espace.style.zoom = etat.zoom;
+
+    const rect = zoneTravail.getBoundingClientRect();
+    const cursorLocalX = clientX - rect.left;
+    const cursorLocalY = clientY - rect.top;
+    const espaceX = (cursorLocalX + zoneTravail.scrollLeft) / oldZoom;
+    const espaceY = (cursorLocalY + zoneTravail.scrollTop) / oldZoom;
+    zoneTravail.scrollLeft = espaceX * etat.zoom - cursorLocalX;
+    zoneTravail.scrollTop = espaceY * etat.zoom - cursorLocalY;
+
+    const zoomInfo = document.getElementById('planif-zoom-info');
+    if (zoomInfo) zoomInfo.textContent = Math.round(etat.zoom * 100) + '%';
+}
+
+// === CRÉER UN NŒUD ===
+function creerNoeud(type, x, y) {
+    const id = 'planif-noeud_' + (++etat.compteur);
+    const config = TYPES[type];
+
+    const donnees = {
+        id: id, type: type,
+        titre: '',
+        description: '',
+        x: x, y: y,
+        parent: null,
+        enfants: [],
+        metadata: {}
+    };
+    etat.noeuds.set(id, donnees);
+
+    const estConteneur = config.conteneur === true;
+
+    const el = document.createElement('div');
+    el.className = estConteneur ? 'planif-noeud planif-conteneur' : 'planif-noeud';
+    el.id = id;
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+    el.style.borderColor = config.couleur;
+
+    if (estConteneur) {
+        el.innerHTML =
+            '<div class="planif-noeud-entete">' +
+                '<span class="planif-noeud-pastille" style="background: ' + config.couleur + '"></span>' +
+                '<span class="planif-noeud-type">' + config.label + '</span>' +
+            '</div>' +
+            '<div class="planif-noeud-titre" contenteditable="true"></div>' +
+            '<div class="planif-noeud-zone planif-vide"></div>' +
+            '<div class="planif-noeud-port planif-port-droite" data-dir="droite"></div>' +
+            '<div class="planif-noeud-port planif-port-gauche" data-dir="gauche"></div>' +
+            '<div class="planif-noeud-port planif-port-bas" data-dir="bas"></div>' +
+            '<div class="planif-noeud-port planif-port-haut" data-dir="haut"></div>';
+    } else {
+        el.innerHTML =
+            '<div class="planif-noeud-entete">' +
+                '<span class="planif-noeud-pastille" style="background: ' + config.couleur + '"></span>' +
+                '<span class="planif-noeud-type">' + config.label + '</span>' +
+            '</div>' +
+            '<div class="planif-noeud-titre" contenteditable="true"></div>' +
+            '<div class="planif-noeud-port planif-port-droite" data-dir="droite"></div>' +
+            '<div class="planif-noeud-port planif-port-gauche" data-dir="gauche"></div>' +
+            '<div class="planif-noeud-port planif-port-bas" data-dir="bas"></div>' +
+            '<div class="planif-noeud-port planif-port-haut" data-dir="haut"></div>';
+    }
+
+    attacherEvenements(el, donnees);
+    coucheNoeuds.appendChild(el);
+
+    const titreEl = el.querySelector('.planif-noeud-titre');
+    setTimeout(function() { titreEl.focus(); }, 50);
+
+    sauvegarder();
+    return id;
+}
+
+// === SÉLECTION ===
+function selectionnerNoeud(id) {
+    if (etat.selection) {
+        const ancien = document.getElementById(etat.selection);
+        if (ancien) ancien.classList.remove('selected');
+    }
+    etat.selection = id;
+    if (id) {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('selected');
+    }
+    fermerMenuLien();
+}
+
+function deselectionnerTout() {
+    if (etat.selection) {
+        const ancien = document.getElementById(etat.selection);
+        if (ancien) ancien.classList.remove('selected');
+        etat.selection = null;
+    }
+    for (const nid of etat.multiSelection) {
+        const el = document.getElementById(nid);
+        if (el) el.classList.remove('selected');
+    }
+    etat.multiSelection.clear();
+}
+
+function toggleMultiSelection(id) {
+    if (etat.multiSelection.has(id)) {
+        etat.multiSelection.delete(id);
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('selected');
+    } else {
+        if (etat.selection && !etat.multiSelection.has(etat.selection)) {
+            etat.multiSelection.add(etat.selection);
+        }
+        etat.multiSelection.add(id);
+        const el = document.getElementById(id);
+        if (el) el.classList.add('selected');
+    }
+}
+
+function toutSelectionner() {
+    etat.multiSelection.clear();
+    for (const [nid] of etat.noeuds) {
+        etat.multiSelection.add(nid);
+        const el = document.getElementById(nid);
+        if (el) el.classList.add('selected');
+    }
+}
+
+function deselectionner() {
+    deselectionnerTout();
+    fermerPanneau();
+}
+
+// === PANNEAU LATÉRAL ===
+function ouvrirPanneau(id) {
+    const donnees = etat.noeuds.get(id);
+    if (!donnees) return;
+    const config = TYPES[donnees.type];
+
+    document.getElementById('planif-panneau-pastille').style.background = config.couleur;
+    document.getElementById('planif-panneau-type').textContent = config.label;
+    document.getElementById('planif-panneau-titre').value = donnees.titre;
+    document.getElementById('planif-panneau-description').value = donnees.description || '';
+
+    // Champs extra selon le type
+    const extra = document.getElementById('planif-panneau-extra');
+    extra.innerHTML = '';
+
+    if (donnees.type === 'connaissance') {
+        extra.innerHTML =
+            '<label for="planif-panneau-sous-type">Type de connaissance</label>' +
+            '<select id="planif-panneau-sous-type">' +
+                '<option value="">— Choisir —</option>' +
+                '<option value="declarative"' + (donnees.metadata.sousType === 'declarative' ? ' selected' : '') + '>Déclarative (quoi)</option>' +
+                '<option value="procedurale"' + (donnees.metadata.sousType === 'procedurale' ? ' selected' : '') + '>Procédurale (comment)</option>' +
+                '<option value="conditionnelle"' + (donnees.metadata.sousType === 'conditionnelle' ? ' selected' : '') + '>Conditionnelle (quand)</option>' +
+            '</select>';
+        extra.querySelector('#planif-panneau-sous-type').addEventListener('change', function(e) {
+            donnees.metadata.sousType = e.target.value;
+            sauvegarder();
+        });
+    }
+
+    if (donnees.type === 'activite' || donnees.type === 'lecon') {
+        extra.innerHTML +=
+            '<label for="planif-panneau-duree">Durée (minutes)</label>' +
+            '<input type="number" id="planif-panneau-duree" value="' + (donnees.metadata.duree || '') + '" min="1" max="180" placeholder="50">';
+        extra.querySelector('#planif-panneau-duree').addEventListener('input', function(e) {
+            donnees.metadata.duree = parseInt(e.target.value) || null;
+            sauvegarder();
+        });
+    }
+
+    if (donnees.type === 'sequence') {
+        extra.innerHTML +=
+            '<label for="planif-panneau-sem-debut">Semaine début</label>' +
+            '<input type="number" id="planif-panneau-sem-debut" value="' + (donnees.metadata.semaineDebut || '') + '" min="1" max="15" placeholder="1">' +
+            '<label for="planif-panneau-sem-fin">Semaine fin</label>' +
+            '<input type="number" id="planif-panneau-sem-fin" value="' + (donnees.metadata.semaineFin || '') + '" min="1" max="15" placeholder="5">';
+        extra.querySelector('#planif-panneau-sem-debut').addEventListener('input', function(e) {
+            donnees.metadata.semaineDebut = parseInt(e.target.value) || null;
+            sauvegarder();
+        });
+        extra.querySelector('#planif-panneau-sem-fin').addEventListener('input', function(e) {
+            donnees.metadata.semaineFin = parseInt(e.target.value) || null;
+            sauvegarder();
+        });
+    }
+
+    // Événements du panneau
+    document.getElementById('planif-panneau-titre').oninput = function(e) {
+        donnees.titre = e.target.value;
+        const titreEl = document.getElementById(id);
+        if (titreEl) {
+            const t = titreEl.querySelector('.planif-noeud-titre');
+            if (t) t.textContent = donnees.titre;
+        }
+    };
+
+    document.getElementById('planif-panneau-description').oninput = function(e) {
+        donnees.description = e.target.value;
+        sauvegarder();
+    };
+
+    document.getElementById('planif-btn-supprimer').onclick = function() {
+        supprimerNoeud(id);
+        fermerPanneau();
+    };
+
+    panneau.classList.add('visible');
+    etat.panneauOuvert = true;
+}
+
+function fermerPanneau() {
+    if (panneau) panneau.classList.remove('visible');
+    etat.panneauOuvert = false;
+}
+
+// === SUPPRESSION ===
+function supprimerNoeud(id) {
+    const donnees = etat.noeuds.get(id);
+
+    if (donnees && donnees.enfants) {
+        for (const eid of [].concat(donnees.enfants)) {
+            detacherDuConteneur(eid);
+        }
+    }
+
+    if (donnees && donnees.parent) {
+        detacherDuConteneur(id);
+    }
+
+    for (const [lienId, lien] of etat.liens) {
+        if (lien.source === id || lien.cible === id) {
+            supprimerLien(lienId);
+        }
+    }
+    etat.noeuds.delete(id);
+    const el = document.getElementById(id);
+    if (el) el.remove();
+    if (etat.selection === id) etat.selection = null;
+    sauvegarder();
+}
+
+function supprimerLien(lienId) {
+    etat.liens.delete(lienId);
+    const groupe = document.getElementById(lienId + '-groupe');
+    if (groupe) groupe.remove();
+    sauvegarder();
+}
+
+// === LIENS ===
+function demarrerLien(noeudId, direction, e) {
+    etat.lienEnCours = { noeudSourceId: noeudId, portDirection: direction };
+    const pos = getPortPosition(noeudId, direction);
+    lienTemp.setAttribute('x1', pos.x);
+    lienTemp.setAttribute('y1', pos.y);
+    lienTemp.setAttribute('x2', pos.x);
+    lienTemp.setAttribute('y2', pos.y);
+    lienTemp.style.display = 'block';
+
+    function onMove(e2) {
+        var p = clientVersData(e2.clientX, e2.clientY);
+        lienTemp.setAttribute('x2', p.x);
+        lienTemp.setAttribute('y2', p.y);
+    }
+
+    function onUp(e2) {
+        lienTemp.style.display = 'none';
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+
+        var elSous = document.elementFromPoint(e2.clientX, e2.clientY);
+        if (elSous && elSous.classList.contains('planif-noeud-port')) {
+            var noeudCibleEl = elSous.closest('.planif-noeud');
+            if (noeudCibleEl && noeudCibleEl.id !== noeudId) {
+                afficherMenuLien(e2.clientX, e2.clientY, noeudId, noeudCibleEl.id);
+            }
+        }
+        etat.lienEnCours = null;
+    }
+
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+}
+
+function creerLien(sourceId, cibleId, typeLien) {
+    var id = 'planif-lien_' + (++etat.compteurLiens);
+    var donnees = { id: id, source: sourceId, cible: cibleId, type: typeLien };
+    etat.liens.set(id, donnees);
+    dessinerLien(donnees);
+    sauvegarder();
+    return id;
+}
+
+function dessinerLien(donnees) {
+    var sourceEl = document.getElementById(donnees.source);
+    var cibleEl = document.getElementById(donnees.cible);
+    if (!sourceEl || !cibleEl) return;
+
+    var ports = trouverMeilleursPorts(donnees.source, donnees.cible);
+    var p1 = getPortPosition(donnees.source, ports.portSource);
+    var p2 = getPortPosition(donnees.cible, ports.portCible);
+
+    var dx = p2.x - p1.x;
+    var dy = p2.y - p1.y;
+    var tension = Math.min(Math.abs(dx), Math.abs(dy), 80);
+    var cx1 = ports.portSource === 'droite' ? p1.x + tension : ports.portSource === 'gauche' ? p1.x - tension : p1.x;
+    var cy1 = ports.portSource === 'bas' ? p1.y + tension : ports.portSource === 'haut' ? p1.y - tension : p1.y;
+    var cx2 = ports.portCible === 'droite' ? p2.x + tension : ports.portCible === 'gauche' ? p2.x - tension : p2.x;
+    var cy2 = ports.portCible === 'bas' ? p2.y + tension : ports.portCible === 'haut' ? p2.y - tension : p2.y;
+
+    var ancien = document.getElementById(donnees.id + '-groupe');
+    if (ancien) ancien.remove();
+
+    var groupe = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    groupe.id = donnees.id + '-groupe';
+    groupe.setAttribute('class', 'planif-lien-groupe');
+
+    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.id = donnees.id;
+    path.setAttribute('d', 'M ' + p1.x + ' ' + p1.y + ' C ' + cx1 + ' ' + cy1 + ', ' + cx2 + ' ' + cy2 + ', ' + p2.x + ' ' + p2.y);
+    path.setAttribute('class', 'planif-lien');
+    path.setAttribute('marker-end', 'url(#planif-fleche)');
+
+    var sourceData = etat.noeuds.get(donnees.source);
+    if (sourceData) {
+        var couleur = TYPES[sourceData.type] ? TYPES[sourceData.type].couleur : 'var(--planif-couleur-lien)';
+        path.style.stroke = couleur;
+    }
+
+    path.addEventListener('click', function(e) {
+        e.stopPropagation();
+        afficherMenuLienExistant(e.clientX, e.clientY, donnees.id);
+    });
+
+    groupe.appendChild(path);
+
+    var typeLienConfig = TYPES_LIENS.find(function(t) { return t.id === donnees.type; });
+    if (typeLienConfig) {
+        var mx = (p1.x + p2.x) / 2;
+        var my = (p1.y + p2.y) / 2;
+        var label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        label.id = donnees.id + '-label';
+        label.setAttribute('x', mx);
+        label.setAttribute('y', my - 6);
+        label.setAttribute('class', 'planif-lien-label');
+        label.textContent = typeLienConfig.label;
+        groupe.appendChild(label);
+    }
+
+    var poigneeSource = creerPoigneeLien(p1.x, p1.y, donnees.id, 'source');
+    var poigneeCible = creerPoigneeLien(p2.x, p2.y, donnees.id, 'cible');
+    groupe.appendChild(poigneeSource);
+    groupe.appendChild(poigneeCible);
+
+    coucheLiens.appendChild(groupe);
+}
+
+// === POIGNÉES DE RECONNEXION ===
+function creerPoigneeLien(x, y, lienId, extremite) {
+    var cercle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    cercle.setAttribute('cx', x);
+    cercle.setAttribute('cy', y);
+    cercle.setAttribute('r', 7);
+    cercle.setAttribute('class', 'planif-lien-poignee');
+    cercle.setAttribute('data-lien', lienId);
+    cercle.setAttribute('data-extremite', extremite);
+
+    cercle.addEventListener('mousedown', function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        demarrerReconnexion(lienId, extremite, e);
+    });
+
+    return cercle;
+}
+
+function demarrerReconnexion(lienId, extremite, e) {
+    var lien = etat.liens.get(lienId);
+    if (!lien) return;
+
+    var noeudFixeId = extremite === 'source' ? lien.cible : lien.source;
+    var groupeEl = document.getElementById(lienId + '-groupe');
+    if (groupeEl) groupeEl.style.opacity = '0.2';
+
+    var fixePos = getCentre(noeudFixeId);
+    lienTemp.setAttribute('x1', fixePos.x);
+    lienTemp.setAttribute('y1', fixePos.y);
+    var pInit = clientVersData(e.clientX, e.clientY);
+    lienTemp.setAttribute('x2', pInit.x);
+    lienTemp.setAttribute('y2', pInit.y);
+    lienTemp.style.display = 'block';
+
+    function onMove(e2) {
+        var p = clientVersData(e2.clientX, e2.clientY);
+        lienTemp.setAttribute('x2', p.x);
+        lienTemp.setAttribute('y2', p.y);
+    }
+
+    function onUp(e2) {
+        lienTemp.style.display = 'none';
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+
+        var elSous = document.elementFromPoint(e2.clientX, e2.clientY);
+        var noeudCibleEl = elSous && elSous.closest ? elSous.closest('.planif-noeud') : null;
+
+        if (noeudCibleEl && noeudCibleEl.id !== noeudFixeId) {
+            if (extremite === 'source') {
+                lien.source = noeudCibleEl.id;
+            } else {
+                lien.cible = noeudCibleEl.id;
+            }
+            dessinerLien(lien);
+            sauvegarder();
+        } else {
+            if (groupeEl) groupeEl.style.opacity = '1';
+        }
+    }
+
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+}
+
+function mettreAJourLiens(noeudId) {
+    for (var entry of etat.liens) {
+        var lien = entry[1];
+        if (lien.source === noeudId || lien.cible === noeudId) {
+            dessinerLien(lien);
+        }
+    }
+}
+
+// === MENU TYPE DE LIEN ===
+function afficherMenuLien(x, y, sourceId, cibleId) {
+    menuLien.innerHTML = '';
+    TYPES_LIENS.forEach(function(tl) {
+        var btn = document.createElement('button');
+        btn.textContent = tl.label;
+        btn.addEventListener('click', function() {
+            creerLien(sourceId, cibleId, tl.id);
+            fermerMenuLien();
+        });
+        menuLien.appendChild(btn);
+    });
+
+    var posMenu = clientVersEspace(x, y);
+    menuLien.style.left = posMenu.x + 'px';
+    menuLien.style.top = posMenu.y + 'px';
+    menuLien.style.display = 'block';
+}
+
+function afficherMenuLienExistant(x, y, lienId) {
+    var lien = etat.liens.get(lienId);
+    if (!lien) return;
+
+    menuLien.innerHTML = '';
+    TYPES_LIENS.forEach(function(tl) {
+        var btn = document.createElement('button');
+        btn.textContent = tl.label;
+        if (tl.id === lien.type) btn.classList.add('actif');
+        btn.addEventListener('click', function() {
+            lien.type = tl.id;
+            dessinerLien(lien);
+            fermerMenuLien();
+            sauvegarder();
+        });
+        menuLien.appendChild(btn);
+    });
+
+    var sep = document.createElement('hr');
+    sep.style.cssText = 'border: none; border-top: 1px solid #e2e8f0; margin: 4px 0;';
+    menuLien.appendChild(sep);
+
+    var btnSuppr = document.createElement('button');
+    btnSuppr.textContent = 'Supprimer ce lien';
+    btnSuppr.style.color = '#dc2626';
+    btnSuppr.addEventListener('click', function() {
+        supprimerLien(lienId);
+        fermerMenuLien();
+    });
+    menuLien.appendChild(btnSuppr);
+
+    var posMenu = clientVersEspace(x, y);
+    menuLien.style.left = posMenu.x + 'px';
+    menuLien.style.top = posMenu.y + 'px';
+    menuLien.style.display = 'block';
+}
+
+function fermerMenuLien() {
+    if (menuLien) menuLien.style.display = 'none';
+}
+
+// === UTILITAIRES GÉOMÉTRIQUES ===
+function getCentre(noeudId) {
+    var el = document.getElementById(noeudId);
+    if (!el) return { x: 0, y: 0 };
+    var donnees = etat.noeuds.get(noeudId);
+    return {
+        x: donnees.x + el.offsetWidth / 2,
+        y: donnees.y + el.offsetHeight / 2
+    };
+}
+
+function getPortPosition(noeudId, direction) {
+    var el = document.getElementById(noeudId);
+    var donnees = etat.noeuds.get(noeudId);
+    if (!el || !donnees) return { x: 0, y: 0 };
+
+    var w = el.offsetWidth;
+    var h = el.offsetHeight;
+
+    switch (direction) {
+        case 'droite': return { x: donnees.x + w, y: donnees.y + h / 2 };
+        case 'gauche': return { x: donnees.x, y: donnees.y + h / 2 };
+        case 'bas':    return { x: donnees.x + w / 2, y: donnees.y + h };
+        case 'haut':   return { x: donnees.x + w / 2, y: donnees.y };
+        default:       return getCentre(noeudId);
+    }
+}
+
+function trouverMeilleursPorts(sourceId, cibleId) {
+    var s = getCentre(sourceId);
+    var c = getCentre(cibleId);
+    var dx = c.x - s.x;
+    var dy = c.y - s.y;
+
+    var portSource, portCible;
+    if (Math.abs(dx) > Math.abs(dy)) {
+        portSource = dx > 0 ? 'droite' : 'gauche';
+        portCible = dx > 0 ? 'gauche' : 'droite';
+    } else {
+        portSource = dy > 0 ? 'bas' : 'haut';
+        portCible = dy > 0 ? 'haut' : 'bas';
+    }
+    return { portSource: portSource, portCible: portCible };
+}
+
+// === GESTION DES CONTENEURS ===
+function collecterDescendants(racine, parent, liste) {
+    var enfants = parent.enfants || [];
+    for (var i = 0; i < enfants.length; i++) {
+        var eid = enfants[i];
+        var ed = etat.noeuds.get(eid);
+        if (!ed) continue;
+        liste.push({ id: eid, dx: ed.x - racine.x, dy: ed.y - racine.y });
+        if (TYPES[ed.type] && TYPES[ed.type].conteneur && ed.enfants) {
+            collecterDescendants(racine, ed, liste);
+        }
+    }
+}
+
+function peutContenir(conteneurType, enfantType) {
+    if (conteneurType === 'sequence') return true;
+    if (conteneurType === 'lecon') return !(TYPES[enfantType] && TYPES[enfantType].conteneur);
+    return false;
+}
+
+function trouverConteneurPour(clientX, clientY, excludeId, enfantType) {
+    var data = clientVersData(clientX, clientY);
+    var meilleur = null;
+    var meilleurAire = Infinity;
+    for (var entry of etat.noeuds) {
+        var cid = entry[0];
+        var cdata = entry[1];
+        if (cid === excludeId) continue;
+        var config = TYPES[cdata.type];
+        if (!config || !config.conteneur) continue;
+        if (!peutContenir(cdata.type, enfantType)) continue;
+        if (estDescendantDe(cid, excludeId)) continue;
+        var cel = document.getElementById(cid);
+        if (!cel) continue;
+        var w = parseFloat(cel.style.width) || cel.offsetWidth || 200;
+        var h = parseFloat(cel.style.height) || cel.offsetHeight || 80;
+        if (data.x >= cdata.x && data.x <= cdata.x + w && data.y >= cdata.y && data.y <= cdata.y + h) {
+            var aire = w * h;
+            if (aire < meilleurAire) {
+                meilleur = cid;
+                meilleurAire = aire;
+            }
+        }
+    }
+    return meilleur;
+}
+
+function estDescendantDe(candidatId, noeudId) {
+    var noeud = etat.noeuds.get(noeudId);
+    if (!noeud || !noeud.enfants) return false;
+    for (var i = 0; i < noeud.enfants.length; i++) {
+        if (noeud.enfants[i] === candidatId) return true;
+        if (estDescendantDe(candidatId, noeud.enfants[i])) return true;
+    }
+    return false;
+}
+
+function rattacherAuConteneur(noeudId, conteneurId) {
+    var noeud = etat.noeuds.get(noeudId);
+    var conteneur = etat.noeuds.get(conteneurId);
+    if (!noeud || !conteneur) return;
+
+    if (noeud.parent && noeud.parent !== conteneurId) {
+        detacherDuConteneur(noeudId);
+    }
+
+    var etaitVide = !conteneur.enfants || conteneur.enfants.length === 0;
+
+    noeud.parent = conteneurId;
+    if (!conteneur.enfants) conteneur.enfants = [];
+    if (!conteneur.enfants.includes(noeudId)) {
+        conteneur.enfants.push(noeudId);
+    }
+
+    if (etaitVide) {
+        var cel = document.getElementById(conteneurId);
+        var nel = document.getElementById(noeudId);
+        if (cel && nel) {
+            var cw = cel.offsetWidth || 200;
+            var nw = nel.offsetWidth || 140;
+            noeud.x = conteneur.x + (cw - nw) / 2;
+            noeud.y = conteneur.y + 45 + 15;
+            nel.style.left = noeud.x + 'px';
+            nel.style.top = noeud.y + 'px';
+            mettreAJourLiens(noeudId);
+        }
+    }
+
+    var el = document.getElementById(noeudId);
+    if (el) el.classList.add('planif-enfant-conteneur');
+    mettreAJourZoneConteneur(conteneurId);
+}
+
+function detacherDuConteneur(noeudId) {
+    var noeud = etat.noeuds.get(noeudId);
+    if (!noeud || !noeud.parent) return;
+
+    var ancienParent = etat.noeuds.get(noeud.parent);
+    if (ancienParent && ancienParent.enfants) {
+        ancienParent.enfants = ancienParent.enfants.filter(function(eid) { return eid !== noeudId; });
+        mettreAJourZoneConteneur(noeud.parent);
+    }
+
+    noeud.parent = null;
+    var el = document.getElementById(noeudId);
+    if (el) el.classList.remove('planif-enfant-conteneur');
+}
+
+function mettreAJourZoneConteneur(conteneurId) {
+    var conteneur = etat.noeuds.get(conteneurId);
+    var el = document.getElementById(conteneurId);
+    if (!conteneur || !el) return;
+
+    var enfants = (conteneur.enfants || []).filter(function(eid) { return etat.noeuds.has(eid); });
+    var zone = el.querySelector('.planif-noeud-zone');
+
+    if (enfants.length === 0) {
+        el.classList.remove('planif-a-enfants');
+        el.style.width = '';
+        el.style.height = '';
+        if (zone) { zone.classList.add('planif-vide'); zone.textContent = ''; }
+        return;
+    }
+
+    el.classList.add('planif-a-enfants');
+
+    var PADDING = 30;
+    var HEADER_H = 45;
+
+    var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (var i = 0; i < enfants.length; i++) {
+        var ed = etat.noeuds.get(enfants[i]);
+        var eel = document.getElementById(enfants[i]);
+        if (!ed || !eel) continue;
+        var w = eel.offsetWidth || 140;
+        var h = eel.offsetHeight || 50;
+        if (ed.x < minX) minX = ed.x;
+        if (ed.y < minY) minY = ed.y;
+        if (ed.x + w > maxX) maxX = ed.x + w;
+        if (ed.y + h > maxY) maxY = ed.y + h;
+    }
+
+    var newX = minX - PADDING;
+    var newY = minY - PADDING - HEADER_H;
+    var newW = (maxX - minX) + PADDING * 2;
+    var newH = (maxY - minY) + PADDING * 2 + HEADER_H;
+
+    conteneur.x = newX;
+    conteneur.y = newY;
+    el.style.left = newX + 'px';
+    el.style.top = newY + 'px';
+    el.style.width = newW + 'px';
+    el.style.height = newH + 'px';
+
+    mettreAJourLiens(conteneurId);
+
+    if (conteneur.parent) {
+        mettreAJourZoneConteneur(conteneur.parent);
+    }
+}
+
+// === GUIDES DE ZONE ===
+function mettreAJourGuidesZone() {
+    var aGauche = false, aDroite = false;
+    for (var entry of etat.noeuds) {
+        var nd = entry[1];
+        var z = getZone(nd.type);
+        if (z === 'gauche') aGauche = true;
+        if (z === 'droite') aDroite = true;
+        if (aGauche && aDroite) break;
+    }
+    var guideG = document.getElementById('planif-zone-guide-gauche');
+    var guideD = document.getElementById('planif-zone-guide-droite');
+    if (guideG) guideG.classList.toggle('planif-masque', aGauche);
+    if (guideD) guideD.classList.toggle('planif-masque', aDroite);
+}
+
+// === SAUVEGARDE ===
+function sauvegarder() {
+    var index = window.planificationDonnees.getIndex();
+    if (!index) return;
+    var donnees = {
+        compteur: etat.compteur,
+        compteurLiens: etat.compteurLiens,
+        noeuds: Array.from(etat.noeuds.values()),
+        liens: Array.from(etat.liens.values())
+    };
+    window.planificationDonnees.sauvegarderCarte(index.active, donnees);
+
+    if (seancesOuvert) rafraichirSeances();
+    mettreAJourGuidesZone();
+}
+
+function viderCanvas() {
+    if (coucheNoeuds) coucheNoeuds.innerHTML = '';
+    if (coucheLiens) coucheLiens.innerHTML = '';
+    etat.noeuds.clear();
+    etat.liens.clear();
+    etat.compteur = 0;
+    etat.compteurLiens = 0;
+    etat.selection = null;
+    etat.multiSelection.clear();
+    fermerPanneau();
+    fermerMenuLien();
+    mettreAJourGuidesZone();
+}
+
+function chargerCarte(carteId) {
+    viderCanvas();
+    var donnees = window.planificationDonnees.chargerCarte(carteId);
+    if (!donnees) { centrerVueSurContenu(); return; }
+
+    etat.compteur = donnees.compteur || 0;
+    etat.compteurLiens = donnees.compteurLiens || 0;
+
+    var noeudsListe = donnees.noeuds || [];
+    for (var i = 0; i < noeudsListe.length; i++) {
+        var n = noeudsListe[i];
+        var config = TYPES[n.type];
+        if (!config) continue;
+        if (n.enfants === undefined) n.enfants = [];
+        if (n.parent === undefined) n.parent = null;
+
+        // Remap IDs si nécessaire (ancien format sans préfixe)
+        if (!n.id.startsWith('planif-')) {
+            var oldId = n.id;
+            n.id = 'planif-' + oldId;
+            // Remap parent
+            if (n.parent && !n.parent.startsWith('planif-')) n.parent = 'planif-' + n.parent;
+            // Remap enfants
+            n.enfants = n.enfants.map(function(eid) {
+                return eid.startsWith('planif-') ? eid : 'planif-' + eid;
+            });
+        }
+
+        etat.noeuds.set(n.id, n);
+
+        var estConteneur = config.conteneur === true;
+        var el = document.createElement('div');
+        el.className = estConteneur ? 'planif-noeud planif-conteneur' : 'planif-noeud';
+        if (n.parent) el.classList.add('planif-enfant-conteneur');
+        el.id = n.id;
+        el.style.left = n.x + 'px';
+        el.style.top = n.y + 'px';
+        el.style.borderColor = config.couleur;
+
+        if (estConteneur) {
+            var nbEnfants = (n.enfants || []).length;
+            el.innerHTML =
+                '<div class="planif-noeud-entete">' +
+                    '<span class="planif-noeud-pastille" style="background: ' + config.couleur + '"></span>' +
+                    '<span class="planif-noeud-type">' + config.label + '</span>' +
+                '</div>' +
+                '<div class="planif-noeud-titre" contenteditable="true">' + (n.titre || '') + '</div>' +
+                '<div class="planif-noeud-zone ' + (nbEnfants === 0 ? 'planif-vide' : '') + '">' +
+                    (nbEnfants > 0 ? nbEnfants + ' élément' + (nbEnfants > 1 ? 's' : '') : '') +
+                '</div>' +
+                '<div class="planif-noeud-port planif-port-droite" data-dir="droite"></div>' +
+                '<div class="planif-noeud-port planif-port-gauche" data-dir="gauche"></div>' +
+                '<div class="planif-noeud-port planif-port-bas" data-dir="bas"></div>' +
+                '<div class="planif-noeud-port planif-port-haut" data-dir="haut"></div>';
+        } else {
+            el.innerHTML =
+                '<div class="planif-noeud-entete">' +
+                    '<span class="planif-noeud-pastille" style="background: ' + config.couleur + '"></span>' +
+                    '<span class="planif-noeud-type">' + config.label + '</span>' +
+                '</div>' +
+                '<div class="planif-noeud-titre" contenteditable="true">' + (n.titre || '') + '</div>' +
+                '<div class="planif-noeud-port planif-port-droite" data-dir="droite"></div>' +
+                '<div class="planif-noeud-port planif-port-gauche" data-dir="gauche"></div>' +
+                '<div class="planif-noeud-port planif-port-bas" data-dir="bas"></div>' +
+                '<div class="planif-noeud-port planif-port-haut" data-dir="haut"></div>';
+        }
+        attacherEvenements(el, n);
+        coucheNoeuds.appendChild(el);
+    }
+
+    requestAnimationFrame(function() {
+        // Migration zones
+        var aMigre = false;
+        for (var entry of etat.noeuds) {
+            var nid = entry[0];
+            var nd = entry[1];
+            if (nd.parent) continue;
+            if (estHorsZone(nd.type, nd.x)) {
+                var ancienX = nd.x;
+                var zone = getZone(nd.type);
+                if (zone === 'gauche') nd.x = ZONES.gauche.maxX - 100 - Math.random() * 200;
+                else if (zone === 'droite') nd.x = ZONES.droite.minX + 50 + Math.random() * 200;
+                var deltaX = nd.x - ancienX;
+                var nel = document.getElementById(nid);
+                if (nel) { nel.style.left = nd.x + 'px'; nel.style.top = nd.y + 'px'; }
+                if (nd.enfants && nd.enfants.length > 0) {
+                    (function deplacerEnfants(parentNode) {
+                        for (var j = 0; j < (parentNode.enfants || []).length; j++) {
+                            var eid = parentNode.enfants[j];
+                            var ed = etat.noeuds.get(eid);
+                            if (!ed) continue;
+                            ed.x += deltaX;
+                            var eel = document.getElementById(eid);
+                            if (eel) { eel.style.left = ed.x + 'px'; eel.style.top = ed.y + 'px'; }
+                            if (ed.enfants && ed.enfants.length > 0) deplacerEnfants(ed);
+                        }
+                    })(nd);
+                }
+                aMigre = true;
+            }
+        }
+
+        // Recalculer conteneurs
+        for (var k = 0; k < noeudsListe.length; k++) {
+            var n2 = noeudsListe[k];
+            if (TYPES[n2.type] && TYPES[n2.type].conteneur && n2.enfants && n2.enfants.length > 0) {
+                mettreAJourZoneConteneur(n2.id);
+            }
+        }
+
+        // Dessiner les liens
+        var liensListe = donnees.liens || [];
+        for (var m = 0; m < liensListe.length; m++) {
+            var l = liensListe[m];
+            // Remap IDs liens
+            if (!l.id.startsWith('planif-')) l.id = 'planif-' + l.id;
+            if (!l.source.startsWith('planif-')) l.source = 'planif-' + l.source;
+            if (!l.cible.startsWith('planif-')) l.cible = 'planif-' + l.cible;
+            etat.liens.set(l.id, l);
+            dessinerLien(l);
+        }
+
+        centrerVueSurContenu();
+        mettreAJourGuidesZone();
+        if (aMigre) sauvegarder();
+    });
+}
+
+function centrerVueSurContenu() {
+    if (!zoneTravail) return;
+    if (etat.noeuds.size === 0) {
+        zoneTravail.scrollLeft = OFFSET_X * etat.zoom - zoneTravail.clientWidth / 2;
+        zoneTravail.scrollTop = OFFSET_Y * etat.zoom - zoneTravail.clientHeight / 2;
+    } else {
+        var sumX = 0, sumY = 0, count = 0;
+        for (var entry of etat.noeuds) {
+            var nd = entry[1];
+            sumX += nd.x;
+            sumY += nd.y;
+            count++;
+        }
+        var cx = (sumX / count + OFFSET_X) * etat.zoom;
+        var cy = (sumY / count + OFFSET_Y) * etat.zoom;
+        zoneTravail.scrollLeft = cx - zoneTravail.clientWidth / 2;
+        zoneTravail.scrollTop = cy - zoneTravail.clientHeight / 2;
+    }
+}
+
+// === ATTACHER ÉVÉNEMENTS D'UN NŒUD ===
+function attacherEvenements(el, donnees) {
+    var id = donnees.id;
+    var config = TYPES[donnees.type];
+    var estConteneur = config && config.conteneur === true;
+
+    el.addEventListener('mousedown', function(e) {
+        if (e.target.classList.contains('planif-noeud-port') || e.target.isContentEditable) return;
+        e.preventDefault();
+
+        if (e.metaKey || e.ctrlKey) {
+            toggleMultiSelection(id);
+            return;
+        }
+
+        var estDragGroupe = etat.multiSelection.size > 1 && etat.multiSelection.has(id);
+
+        if (estDragGroupe) {
+            // DÉPLACEMENT GROUPÉ
+            var startMouseX = e.clientX;
+            var startMouseY = e.clientY;
+            var positionsInitiales = new Map();
+            var tousNoeuds = new Set(etat.multiSelection);
+
+            for (var nid2 of etat.multiSelection) {
+                var nd2 = etat.noeuds.get(nid2);
+                if (nd2 && TYPES[nd2.type] && TYPES[nd2.type].conteneur && nd2.enfants) {
+                    var desc2 = [];
+                    collecterDescendants(nd2, nd2, desc2);
+                    for (var d2 = 0; d2 < desc2.length; d2++) tousNoeuds.add(desc2[d2].id);
+                }
+            }
+
+            for (var nid3 of tousNoeuds) {
+                var nd3 = etat.noeuds.get(nid3);
+                if (nd3) positionsInitiales.set(nid3, { x: nd3.x, y: nd3.y });
+            }
+
+            el.classList.add('planif-dragging');
+
+            function onMoveGroupe(e2) {
+                var dx2 = (e2.clientX - startMouseX) / etat.zoom;
+                var dy2 = (e2.clientY - startMouseY) / etat.zoom;
+
+                for (var entry2 of positionsInitiales) {
+                    var nid4 = entry2[0];
+                    var pos2 = entry2[1];
+                    var nd4 = etat.noeuds.get(nid4);
+                    if (!nd4) continue;
+                    nd4.x = pos2.x + dx2;
+                    nd4.y = pos2.y + dy2;
+                    var nel2 = document.getElementById(nid4);
+                    if (nel2) {
+                        nel2.style.left = nd4.x + 'px';
+                        nel2.style.top = nd4.y + 'px';
+                        if (estHorsZone(nd4.type, nd4.x)) nel2.classList.add('planif-hors-zone');
+                        else nel2.classList.remove('planif-hors-zone');
+                    }
+                    mettreAJourLiens(nid4);
+                }
+
+                for (var nid5 of tousNoeuds) {
+                    var nd5 = etat.noeuds.get(nid5);
+                    if (nd5 && nd5.parent && !tousNoeuds.has(nd5.parent)) {
+                        mettreAJourZoneConteneur(nd5.parent);
+                    }
+                }
+            }
+
+            function onUpGroupe() {
+                el.classList.remove('planif-dragging');
+                document.removeEventListener('mousemove', onMoveGroupe);
+                document.removeEventListener('mouseup', onUpGroupe);
+
+                var horsZone = false;
+                for (var entry3 of positionsInitiales) {
+                    var nd6 = etat.noeuds.get(entry3[0]);
+                    if (nd6 && estHorsZone(nd6.type, nd6.x)) { horsZone = true; break; }
+                }
+
+                if (horsZone) {
+                    for (var entry4 of positionsInitiales) {
+                        var nid6 = entry4[0];
+                        var pos3 = entry4[1];
+                        var nd7 = etat.noeuds.get(nid6);
+                        if (!nd7) continue;
+                        nd7.x = pos3.x;
+                        nd7.y = pos3.y;
+                        var nel3 = document.getElementById(nid6);
+                        if (nel3) {
+                            nel3.classList.remove('planif-hors-zone');
+                            nel3.style.transition = 'left 0.3s ease, top 0.3s ease';
+                            nel3.style.left = nd7.x + 'px';
+                            nel3.style.top = nd7.y + 'px';
+                            setTimeout(function(e3) { return function() { e3.style.transition = ''; }; }(nel3), 350);
+                        }
+                        mettreAJourLiens(nid6);
+                    }
+                    sauvegarder();
+                    return;
+                }
+
+                for (var entry5 of positionsInitiales) {
+                    var nel4 = document.getElementById(entry5[0]);
+                    if (nel4) nel4.classList.remove('planif-hors-zone');
+                }
+
+                for (var nid7 of tousNoeuds) {
+                    var nd8 = etat.noeuds.get(nid7);
+                    if (nd8 && nd8.parent && !tousNoeuds.has(nd8.parent)) {
+                        mettreAJourZoneConteneur(nd8.parent);
+                    }
+                }
+                sauvegarder();
+            }
+
+            document.addEventListener('mousemove', onMoveGroupe);
+            document.addEventListener('mouseup', onUpGroupe);
+            return;
+        }
+
+        // DÉPLACEMENT SIMPLE
+        if (etat.multiSelection.size > 0) {
+            deselectionnerTout();
+        }
+
+        selectionnerNoeud(id);
+        var startMouseX2 = e.clientX;
+        var startMouseY2 = e.clientY;
+        var startDataX = donnees.x;
+        var startDataY = donnees.y;
+        el.classList.add('planif-dragging');
+
+        var descendantsInit = [];
+        if (estConteneur && donnees.enfants) {
+            collecterDescendants(donnees, donnees, descendantsInit);
+        }
+
+        var peutEtreEnfant = !estConteneur || donnees.type === 'lecon';
+        var survolConteneur = null;
+
+        function onMove2(e2) {
+            donnees.x = startDataX + (e2.clientX - startMouseX2) / etat.zoom;
+            donnees.y = startDataY + (e2.clientY - startMouseY2) / etat.zoom;
+            el.style.left = donnees.x + 'px';
+            el.style.top = donnees.y + 'px';
+            mettreAJourLiens(id);
+
+            if (!donnees.parent && estHorsZone(donnees.type, donnees.x)) {
+                el.classList.add('planif-hors-zone');
+            } else {
+                el.classList.remove('planif-hors-zone');
+            }
+
+            if (estConteneur) {
+                for (var j = 0; j < descendantsInit.length; j++) {
+                    var di = descendantsInit[j];
+                    var dd = etat.noeuds.get(di.id);
+                    if (!dd) continue;
+                    dd.x = donnees.x + di.dx;
+                    dd.y = donnees.y + di.dy;
+                    var del2 = document.getElementById(di.id);
+                    if (del2) { del2.style.left = dd.x + 'px'; del2.style.top = dd.y + 'px'; }
+                    mettreAJourLiens(di.id);
+                }
+            }
+
+            if (donnees.parent) {
+                mettreAJourZoneConteneur(donnees.parent);
+            }
+
+            if (peutEtreEnfant) {
+                var ancienSurvol = survolConteneur;
+                survolConteneur = trouverConteneurPour(e2.clientX, e2.clientY, id, donnees.type);
+                if (ancienSurvol !== survolConteneur) {
+                    if (ancienSurvol) {
+                        var ancienEl = document.getElementById(ancienSurvol);
+                        if (ancienEl) ancienEl.classList.remove('planif-conteneur-survol');
+                        var zn = ancienEl ? ancienEl.querySelector('.planif-noeud-zone') : null;
+                        if (zn) zn.classList.remove('planif-survol');
+                    }
+                    if (survolConteneur) {
+                        var survolEl = document.getElementById(survolConteneur);
+                        if (survolEl) survolEl.classList.add('planif-conteneur-survol');
+                        var zn2 = survolEl ? survolEl.querySelector('.planif-noeud-zone') : null;
+                        if (zn2) zn2.classList.add('planif-survol');
+                    }
+                }
+            }
+        }
+
+        function onUp2() {
+            el.classList.remove('planif-dragging');
+            el.classList.remove('planif-hors-zone');
+            document.removeEventListener('mousemove', onMove2);
+            document.removeEventListener('mouseup', onUp2);
+
+            document.querySelectorAll('.planif-noeud-zone.planif-survol').forEach(function(z) { z.classList.remove('planif-survol'); });
+            document.querySelectorAll('.planif-conteneur-survol').forEach(function(c) { c.classList.remove('planif-conteneur-survol'); });
+
+            var rattacheAConteneur = false;
+            if (peutEtreEnfant) {
+                if (survolConteneur && survolConteneur !== donnees.parent) {
+                    rattacherAuConteneur(id, survolConteneur);
+                    rattacheAConteneur = true;
+                } else if (!survolConteneur && donnees.parent) {
+                    detacherDuConteneur(id);
+                }
+            }
+
+            if (!rattacheAConteneur && !donnees.parent && estHorsZone(donnees.type, donnees.x)) {
+                donnees.x = startDataX;
+                donnees.y = startDataY;
+                el.style.transition = 'left 0.3s ease, top 0.3s ease';
+                el.style.left = donnees.x + 'px';
+                el.style.top = donnees.y + 'px';
+                mettreAJourLiens(id);
+                if (estConteneur) {
+                    for (var j2 = 0; j2 < descendantsInit.length; j2++) {
+                        var di2 = descendantsInit[j2];
+                        var dd2 = etat.noeuds.get(di2.id);
+                        if (!dd2) continue;
+                        dd2.x = donnees.x + di2.dx;
+                        dd2.y = donnees.y + di2.dy;
+                        var del3 = document.getElementById(di2.id);
+                        if (del3) {
+                            del3.style.transition = 'left 0.3s ease, top 0.3s ease';
+                            del3.style.left = dd2.x + 'px';
+                            del3.style.top = dd2.y + 'px';
+                            setTimeout(function(e3) { return function() { e3.style.transition = ''; }; }(del3), 350);
+                        }
+                        mettreAJourLiens(di2.id);
+                    }
+                }
+                setTimeout(function() { el.style.transition = ''; }, 350);
+                sauvegarder();
+                return;
+            }
+
+            sauvegarder();
+        }
+
+        document.addEventListener('mousemove', onMove2);
+        document.addEventListener('mouseup', onUp2);
+    });
+
+    el.addEventListener('dblclick', function(e) {
+        if (e.target.isContentEditable) return;
+        selectionnerNoeud(id);
+        ouvrirPanneau(id);
+    });
+
+    var titreEl = el.querySelector('.planif-noeud-titre');
+    titreEl.addEventListener('input', function() {
+        donnees.titre = titreEl.textContent;
+        sauvegarder();
+    });
+    titreEl.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); titreEl.blur(); }
+    });
+
+    el.querySelectorAll('.planif-noeud-port').forEach(function(port) {
+        port.addEventListener('mousedown', function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            demarrerLien(id, port.dataset.dir, e);
+        });
+    });
+
+    el.addEventListener('click', function(e) {
+        if (e.target.classList.contains('planif-noeud-port')) return;
+        if (e.metaKey || e.ctrlKey) return;
+        if (etat.multiSelection.size === 0) {
+            selectionnerNoeud(id);
+        }
+    });
+}
+
+// === PANNEAU SÉANCES ===
+function toggleSeances() {
+    seancesOuvert = !seancesOuvert;
+    if (panneauSeances) panneauSeances.classList.toggle('visible', seancesOuvert);
+    if (btnSeances) btnSeances.classList.toggle('actif', seancesOuvert);
+    if (seancesOuvert) rafraichirSeances();
+}
+
+function getLiensDeNoeud(noeudId) {
+    var resultat = [];
+    for (var entry of etat.liens) {
+        var lien = entry[1];
+        if (lien.source === noeudId || lien.cible === noeudId) {
+            var autreId = lien.source === noeudId ? lien.cible : lien.source;
+            var autre = etat.noeuds.get(autreId);
+            var typeLienConfig = TYPES_LIENS.find(function(t) { return t.id === lien.type; });
+            if (autre && typeLienConfig) {
+                resultat.push({
+                    noeudId: autreId,
+                    noeudTitre: autre.titre || (TYPES[autre.type] ? TYPES[autre.type].label : '?'),
+                    noeudType: autre.type,
+                    lienLabel: typeLienConfig.label,
+                    direction: lien.source === noeudId ? 'sortant' : 'entrant'
+                });
+            }
+        }
+    }
+    return resultat;
+}
+
+function naviguerVers(noeudId) {
+    var donnees = etat.noeuds.get(noeudId);
+    if (!donnees) return;
+
+    deselectionnerTout();
+    selectionnerNoeud(noeudId);
+
+    var el = document.getElementById(noeudId);
+    if (!el) return;
+    var targetX = (donnees.x + OFFSET_X + (el.offsetWidth || 140) / 2) * etat.zoom - zoneTravail.clientWidth / 2;
+    var targetY = (donnees.y + OFFSET_Y + (el.offsetHeight || 50) / 2) * etat.zoom - zoneTravail.clientHeight / 2;
+
+    zoneTravail.scrollTo({ left: targetX, top: targetY, behavior: 'smooth' });
+
+    el.style.transition = 'box-shadow 0.3s';
+    el.style.boxShadow = '0 0 0 4px rgba(59,130,246,0.4), 0 0 20px rgba(59,130,246,0.2)';
+    setTimeout(function() {
+        el.style.boxShadow = '';
+        el.style.transition = '';
+    }, 1200);
+}
+
+function genererSeancesHTML() {
+    var sequences = [];
+    var leconsOrphelines = [];
+
+    for (var entry of etat.noeuds) {
+        var nd = entry[1];
+        if (nd.type === 'sequence') sequences.push(nd);
+        else if (nd.type === 'lecon' && !nd.parent) leconsOrphelines.push(nd);
+    }
+
+    if (sequences.length === 0 && leconsOrphelines.length === 0) {
+        return '<div class="planif-cal-vide">Aucune séquence ou leçon pour le moment.<br>Ajoute des éléments à la carte.</div>';
+    }
+
+    sequences.sort(function(a, b) {
+        return (a.metadata && a.metadata.semaineDebut || 999) - (b.metadata && b.metadata.semaineDebut || 999);
+    });
+
+    var html = '';
+
+    function genererEnfant(enfantId) {
+        var enfant = etat.noeuds.get(enfantId);
+        if (!enfant) return '';
+        var config = TYPES[enfant.type];
+        if (!config) return '';
+
+        if (enfant.type === 'lecon') return genererLeconBloc(enfant);
+
+        var itemHtml = '<div class="planif-cal-item" data-noeud="' + enfantId + '">';
+        itemHtml += '<span class="planif-cal-pastille-mini" style="background: ' + config.couleur + '"></span>';
+        itemHtml += '<div>';
+        itemHtml += '<span class="planif-cal-item-titre">' + (enfant.titre || config.label) + '</span>';
+
+        if (enfant.metadata && enfant.metadata.duree) {
+            itemHtml += ' <span class="planif-cal-duree">' + enfant.metadata.duree + ' min</span>';
+        }
+
+        var liens = getLiensDeNoeud(enfantId);
+        if (liens.length > 0) {
+            itemHtml += '<div class="planif-cal-liens">';
+            for (var j = 0; j < liens.length; j++) {
+                var l = liens[j];
+                var lConfig = TYPES[l.noeudType];
+                var couleur = lConfig ? lConfig.couleur : '#94a3b8';
+                var fleche = l.direction === 'sortant' ? '→' : '←';
+                itemHtml += '<div class="planif-cal-lien-item" data-noeud="' + l.noeudId + '">';
+                itemHtml += '<span class="planif-cal-lien-pastille" style="background: ' + couleur + '"></span>';
+                itemHtml += fleche + ' ' + l.lienLabel + ' : ' + l.noeudTitre;
+                itemHtml += '</div>';
+            }
+            itemHtml += '</div>';
+        }
+
+        itemHtml += '</div></div>';
+        return itemHtml;
+    }
+
+    function genererLeconBloc(lecon) {
+        var config = TYPES['lecon'];
+        var dureeTotal = 0;
+        var bloc = '<div class="planif-cal-lecon">';
+        bloc += '<div class="planif-cal-lecon-header" data-noeud="' + lecon.id + '">';
+        bloc += '<span class="planif-cal-pastille" style="background: ' + config.couleur + '"></span>';
+        bloc += '<span class="planif-cal-titre">' + (lecon.titre || 'Leçon') + '</span>';
+        if (lecon.metadata && lecon.metadata.duree) {
+            bloc += '<span class="planif-cal-duree">' + lecon.metadata.duree + ' min</span>';
+            dureeTotal += lecon.metadata.duree;
+        }
+        bloc += '</div>';
+
+        var enfants = (lecon.enfants || []).filter(function(eid) { return etat.noeuds.has(eid); });
+        if (enfants.length > 0) {
+            bloc += '<div class="planif-cal-enfants">';
+            for (var j = 0; j < enfants.length; j++) {
+                var ed = etat.noeuds.get(enfants[j]);
+                if (ed && ed.metadata && ed.metadata.duree) dureeTotal += ed.metadata.duree;
+                bloc += genererEnfant(enfants[j]);
+            }
+            bloc += '</div>';
+        }
+
+        var liensLecon = getLiensDeNoeud(lecon.id);
+        if (liensLecon.length > 0) {
+            bloc += '<div class="planif-cal-enfants">';
+            for (var k = 0; k < liensLecon.length; k++) {
+                var ll = liensLecon[k];
+                var lConfig2 = TYPES[ll.noeudType];
+                var couleur2 = lConfig2 ? lConfig2.couleur : '#94a3b8';
+                var fleche2 = ll.direction === 'sortant' ? '→' : '←';
+                bloc += '<div class="planif-cal-lien-item" data-noeud="' + ll.noeudId + '">';
+                bloc += '<span class="planif-cal-lien-pastille" style="background: ' + couleur2 + '"></span>';
+                bloc += fleche2 + ' ' + ll.lienLabel + ' : ' + ll.noeudTitre;
+                bloc += '</div>';
+            }
+            bloc += '</div>';
+        }
+
+        if (dureeTotal > 0) {
+            var h = Math.floor(dureeTotal / 60);
+            var m = dureeTotal % 60;
+            var tempsStr = h > 0 ? h + 'h' + (m > 0 ? String(m).padStart(2, '0') : '') : m + ' min';
+            bloc += '<div class="planif-cal-total">Total : <strong>' + tempsStr + '</strong></div>';
+        }
+
+        bloc += '</div>';
+        return bloc;
+    }
+
+    // Séquences
+    for (var i = 0; i < sequences.length; i++) {
+        var seq = sequences[i];
+        var configSeq = TYPES['sequence'];
+        html += '<div class="planif-cal-sequence">';
+        html += '<div class="planif-cal-sequence-header" data-noeud="' + seq.id + '">';
+        html += '<span class="planif-cal-pastille" style="background: ' + configSeq.couleur + '"></span>';
+        html += '<span class="planif-cal-titre">' + (seq.titre || 'Séquence') + '</span>';
+
+        if (seq.metadata && seq.metadata.semaineDebut) {
+            var semTxt = 'Sem. ' + seq.metadata.semaineDebut;
+            if (seq.metadata.semaineFin && seq.metadata.semaineFin !== seq.metadata.semaineDebut) {
+                semTxt += '–' + seq.metadata.semaineFin;
+            }
+            html += '<span class="planif-cal-semaines">' + semTxt + '</span>';
+        }
+        html += '</div>';
+
+        var enfSeq = (seq.enfants || []).filter(function(eid) { return etat.noeuds.has(eid); });
+        var dureeSeq = 0;
+
+        for (var j = 0; j < enfSeq.length; j++) {
+            var ed = etat.noeuds.get(enfSeq[j]);
+            if (!ed) continue;
+
+            if (ed.type === 'lecon') {
+                html += genererLeconBloc(ed);
+                if (ed.metadata && ed.metadata.duree) dureeSeq += ed.metadata.duree;
+                for (var k = 0; k < (ed.enfants || []).length; k++) {
+                    var cd = etat.noeuds.get(ed.enfants[k]);
+                    if (cd && cd.metadata && cd.metadata.duree) dureeSeq += cd.metadata.duree;
+                }
+            } else {
+                html += '<div class="planif-cal-enfants">' + genererEnfant(enfSeq[j]) + '</div>';
+                if (ed.metadata && ed.metadata.duree) dureeSeq += ed.metadata.duree;
+            }
+        }
+
+        var liensSeq = getLiensDeNoeud(seq.id);
+        if (liensSeq.length > 0) {
+            html += '<div class="planif-cal-enfants">';
+            for (var m = 0; m < liensSeq.length; m++) {
+                var ls = liensSeq[m];
+                var lConfig3 = TYPES[ls.noeudType];
+                var couleur3 = lConfig3 ? lConfig3.couleur : '#94a3b8';
+                var fleche3 = ls.direction === 'sortant' ? '→' : '←';
+                html += '<div class="planif-cal-lien-item" data-noeud="' + ls.noeudId + '">';
+                html += '<span class="planif-cal-lien-pastille" style="background: ' + couleur3 + '"></span>';
+                html += fleche3 + ' ' + ls.lienLabel + ' : ' + ls.noeudTitre;
+                html += '</div>';
+            }
+            html += '</div>';
+        }
+
+        if (dureeSeq > 0) {
+            var hSeq = Math.floor(dureeSeq / 60);
+            var mSeq = dureeSeq % 60;
+            var tempsSeq = hSeq > 0 ? hSeq + 'h' + (mSeq > 0 ? String(mSeq).padStart(2, '0') : '') : mSeq + ' min';
+            html += '<div class="planif-cal-total">Durée totale : <strong>' + tempsSeq + '</strong></div>';
+        }
+
+        html += '</div>';
+    }
+
+    // Leçons orphelines
+    if (leconsOrphelines.length > 0) {
+        html += '<div class="planif-cal-orphelines">';
+        html += '<div class="planif-cal-orphelines-titre">Leçons hors séquence</div>';
+        for (var p = 0; p < leconsOrphelines.length; p++) {
+            html += genererLeconBloc(leconsOrphelines[p]);
+        }
+        html += '</div>';
+    }
+
+    return html;
+}
+
+function rafraichirSeances() {
+    if (!seancesOuvert || !panneauSeancesContenu) return;
+    panneauSeancesContenu.innerHTML = genererSeancesHTML();
+
+    panneauSeancesContenu.querySelectorAll('[data-noeud]').forEach(function(el) {
+        el.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var noeudId = el.dataset.noeud;
+            if (noeudId) naviguerVers(noeudId);
+        });
+    });
+}
+
+// === EXPORT DU PLAN DE COURS ===
+function genererPlanTexte() {
+    var sequences = [];
+    var leconsOrphelines = [];
+    var index = window.planificationDonnees.getIndex();
+    var nomCarte = 'Sans titre';
+    if (index && index.cartes) {
+        var c = index.cartes.find(function(cc) { return cc.id === index.active; });
+        if (c) nomCarte = c.nom;
+    }
+
+    for (var entry of etat.noeuds) {
+        var nd = entry[1];
+        if (nd.type === 'sequence') sequences.push(nd);
+        else if (nd.type === 'lecon' && !nd.parent) leconsOrphelines.push(nd);
+    }
+
+    sequences.sort(function(a, b) { return (a.metadata && a.metadata.semaineDebut || 999) - (b.metadata && b.metadata.semaineDebut || 999); });
+
+    function formatDuree(min) {
+        if (!min) return '';
+        var h = Math.floor(min / 60);
+        var m = min % 60;
+        return h > 0 ? h + 'h' + (m > 0 ? String(m).padStart(2, '0') : '') : m + ' min';
+    }
+
+    function liensTexte(noeudId, indent) {
+        var liens = getLiensDeNoeud(noeudId);
+        if (liens.length === 0) return '';
+        var s = '';
+        for (var i = 0; i < liens.length; i++) {
+            var l = liens[i];
+            var fleche = l.direction === 'sortant' ? '→' : '←';
+            s += indent + fleche + ' ' + l.lienLabel + ' : ' + l.noeudTitre + '\n';
+        }
+        return s;
+    }
+
+    var txt = '═══════════════════════════════════════\n';
+    txt += 'PLAN DE COURS — ' + nomCarte + '\n';
+    txt += 'Exporté le ' + new Date().toLocaleDateString('fr-CA') + '\n';
+    txt += '═══════════════════════════════════════\n\n';
+
+    for (var i = 0; i < sequences.length; i++) {
+        var seq = sequences[i];
+        var semTxt = '';
+        if (seq.metadata && seq.metadata.semaineDebut) {
+            semTxt = ' (Sem. ' + seq.metadata.semaineDebut;
+            if (seq.metadata.semaineFin && seq.metadata.semaineFin !== seq.metadata.semaineDebut) {
+                semTxt += '–' + seq.metadata.semaineFin;
+            }
+            semTxt += ')';
+        }
+
+        txt += '───────────────────────────────────────\n';
+        txt += '▌ SÉQUENCE : ' + (seq.titre || 'Sans titre') + semTxt + '\n';
+        txt += '───────────────────────────────────────\n';
+        txt += liensTexte(seq.id, '  ');
+
+        var enfants = (seq.enfants || []).filter(function(eid) { return etat.noeuds.has(eid); });
+        var dureeSeq = 0;
+
+        for (var j = 0; j < enfants.length; j++) {
+            var ed = etat.noeuds.get(enfants[j]);
+            if (!ed) continue;
+
+            if (ed.type === 'lecon') {
+                var dureeLecon = ed.metadata && ed.metadata.duree ? ' — ' + formatDuree(ed.metadata.duree) : '';
+                txt += '\n  ┌ SÉANCE : ' + (ed.titre || 'Sans titre') + dureeLecon + '\n';
+                txt += liensTexte(ed.id, '  │ ');
+                if (ed.metadata && ed.metadata.duree) dureeSeq += ed.metadata.duree;
+
+                var enfantsLecon = (ed.enfants || []).filter(function(cid) { return etat.noeuds.has(cid); });
+                for (var k = 0; k < enfantsLecon.length; k++) {
+                    var cd = etat.noeuds.get(enfantsLecon[k]);
+                    if (!cd) continue;
+                    var cfgAct = TYPES[cd.type];
+                    var dureeAct = cd.metadata && cd.metadata.duree ? ' (' + formatDuree(cd.metadata.duree) + ')' : '';
+                    txt += '  │ • [' + (cfgAct ? cfgAct.label : cd.type) + '] ' + (cd.titre || 'Sans titre') + dureeAct + '\n';
+                    txt += liensTexte(enfantsLecon[k], '  │   ');
+                    if (cd.metadata && cd.metadata.duree) dureeSeq += cd.metadata.duree;
+                }
+                txt += '  └─\n';
+            } else {
+                var cfgEd = TYPES[ed.type];
+                var dureeEd = ed.metadata && ed.metadata.duree ? ' (' + formatDuree(ed.metadata.duree) + ')' : '';
+                txt += '  • [' + (cfgEd ? cfgEd.label : ed.type) + '] ' + (ed.titre || 'Sans titre') + dureeEd + '\n';
+                txt += liensTexte(enfants[j], '    ');
+                if (ed.metadata && ed.metadata.duree) dureeSeq += ed.metadata.duree;
+            }
+        }
+
+        if (dureeSeq > 0) txt += '  Durée totale : ' + formatDuree(dureeSeq) + '\n';
+        txt += '\n';
+    }
+
+    if (leconsOrphelines.length > 0) {
+        txt += '───────────────────────────────────────\n';
+        txt += '▌ SÉANCES HORS SÉQUENCE\n';
+        txt += '───────────────────────────────────────\n';
+        for (var p = 0; p < leconsOrphelines.length; p++) {
+            var lecon = leconsOrphelines[p];
+            var dlOrph = lecon.metadata && lecon.metadata.duree ? ' — ' + formatDuree(lecon.metadata.duree) : '';
+            txt += '\n  ┌ SÉANCE : ' + (lecon.titre || 'Sans titre') + dlOrph + '\n';
+            txt += liensTexte(lecon.id, '  │ ');
+            var enfOrph = (lecon.enfants || []).filter(function(cid) { return etat.noeuds.has(cid); });
+            for (var q = 0; q < enfOrph.length; q++) {
+                var cdOrph = etat.noeuds.get(enfOrph[q]);
+                if (!cdOrph) continue;
+                var cfgOrph = TYPES[cdOrph.type];
+                var dureeOrph = cdOrph.metadata && cdOrph.metadata.duree ? ' (' + formatDuree(cdOrph.metadata.duree) + ')' : '';
+                txt += '  │ • [' + (cfgOrph ? cfgOrph.label : cdOrph.type) + '] ' + (cdOrph.titre || 'Sans titre') + dureeOrph + '\n';
+                txt += liensTexte(enfOrph[q], '  │   ');
+            }
+            txt += '  └─\n';
+        }
+    }
+
+    return txt;
+}
+
+function genererPlanTSV() {
+    var sequences = [];
+    var leconsOrphelines = [];
+
+    for (var entry of etat.noeuds) {
+        var nd = entry[1];
+        if (nd.type === 'sequence') sequences.push(nd);
+        else if (nd.type === 'lecon' && !nd.parent) leconsOrphelines.push(nd);
+    }
+
+    sequences.sort(function(a, b) { return (a.metadata && a.metadata.semaineDebut || 999) - (b.metadata && b.metadata.semaineDebut || 999); });
+
+    var tsv = 'Séquence\tSemaines\tSéance\tDurée séance (min)\tType\tTitre\tDurée (min)\tLiens\n';
+
+    function liensCompacts(noeudId) {
+        var liens = getLiensDeNoeud(noeudId);
+        return liens.map(function(l) {
+            var fleche = l.direction === 'sortant' ? '→' : '←';
+            return fleche + ' ' + l.lienLabel + ' : ' + l.noeudTitre;
+        }).join(' ; ');
+    }
+
+    function escape(str) {
+        return (str || '').replace(/\t/g, ' ').replace(/\n/g, ' ').replace(/\r/g, '');
+    }
+
+    for (var i = 0; i < sequences.length; i++) {
+        var seq = sequences[i];
+        var semTxt = '';
+        if (seq.metadata && seq.metadata.semaineDebut) {
+            semTxt = seq.metadata.semaineDebut.toString();
+            if (seq.metadata.semaineFin && seq.metadata.semaineFin !== seq.metadata.semaineDebut) {
+                semTxt += '–' + seq.metadata.semaineFin;
+            }
+        }
+        var seqLiens = liensCompacts(seq.id);
+        var seqNom = escape(seq.titre || 'Sans titre');
+        var enfants = (seq.enfants || []).filter(function(eid) { return etat.noeuds.has(eid); });
+
+        if (enfants.length === 0) {
+            tsv += seqNom + '\t' + semTxt + '\t\t\tSéquence\t' + seqNom + '\t\t' + escape(seqLiens) + '\n';
+            continue;
+        }
+
+        for (var j = 0; j < enfants.length; j++) {
+            var ed = etat.noeuds.get(enfants[j]);
+            if (!ed) continue;
+
+            if (ed.type === 'lecon') {
+                var leconNom = escape(ed.titre || 'Sans titre');
+                var leconDuree = ed.metadata && ed.metadata.duree || '';
+                var leconLiens = liensCompacts(ed.id);
+                tsv += seqNom + '\t' + semTxt + '\t' + leconNom + '\t' + leconDuree + '\tSéance\t' + leconNom + '\t' + leconDuree + '\t' + escape(leconLiens) + '\n';
+
+                var enfantsLecon = (ed.enfants || []).filter(function(cid) { return etat.noeuds.has(cid); });
+                for (var k = 0; k < enfantsLecon.length; k++) {
+                    var cd = etat.noeuds.get(enfantsLecon[k]);
+                    if (!cd) continue;
+                    var cfgCd = TYPES[cd.type];
+                    var actLiens = liensCompacts(enfantsLecon[k]);
+                    tsv += seqNom + '\t' + semTxt + '\t' + leconNom + '\t' + leconDuree + '\t' + escape(cfgCd ? cfgCd.label : cd.type) + '\t' + escape(cd.titre || 'Sans titre') + '\t' + (cd.metadata && cd.metadata.duree || '') + '\t' + escape(actLiens) + '\n';
+                }
+            } else {
+                var cfgEd = TYPES[ed.type];
+                var actLiens2 = liensCompacts(enfants[j]);
+                tsv += seqNom + '\t' + semTxt + '\t\t\t' + escape(cfgEd ? cfgEd.label : ed.type) + '\t' + escape(ed.titre || 'Sans titre') + '\t' + (ed.metadata && ed.metadata.duree || '') + '\t' + escape(actLiens2) + '\n';
+            }
+        }
+    }
+
+    for (var p = 0; p < leconsOrphelines.length; p++) {
+        var lecon2 = leconsOrphelines[p];
+        var leconNom2 = escape(lecon2.titre || 'Sans titre');
+        var leconDuree2 = lecon2.metadata && lecon2.metadata.duree || '';
+        var leconLiens2 = liensCompacts(lecon2.id);
+        tsv += '(Hors séquence)\t\t' + leconNom2 + '\t' + leconDuree2 + '\tSéance\t' + leconNom2 + '\t' + leconDuree2 + '\t' + escape(leconLiens2) + '\n';
+
+        var enfOrph = (lecon2.enfants || []).filter(function(cid) { return etat.noeuds.has(cid); });
+        for (var q = 0; q < enfOrph.length; q++) {
+            var cdOrph = etat.noeuds.get(enfOrph[q]);
+            if (!cdOrph) continue;
+            var cfgOrph = TYPES[cdOrph.type];
+            var actLiens3 = liensCompacts(enfOrph[q]);
+            tsv += '(Hors séquence)\t\t' + leconNom2 + '\t' + leconDuree2 + '\t' + escape(cfgOrph ? cfgOrph.label : cdOrph.type) + '\t' + escape(cdOrph.titre || 'Sans titre') + '\t' + (cdOrph.metadata && cdOrph.metadata.duree || '') + '\t' + escape(actLiens3) + '\n';
+        }
+    }
+
+    return tsv;
+}
+
+function telechargerFichier(contenu, nomFichier, type) {
+    var blob = new Blob(['\uFEFF' + contenu], { type: type + ';charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = nomFichier;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// === MULTI-CARTES UI ===
+function mettreAJourListeCartes() {
+    var index = window.planificationDonnees.getIndex();
+    if (!index) return;
+    var select = document.getElementById('planif-liste-cartes');
+    if (!select) return;
+    select.innerHTML = '';
+    for (var i = 0; i < index.cartes.length; i++) {
+        var carte = index.cartes[i];
+        var opt = document.createElement('option');
+        opt.value = carte.id;
+        opt.textContent = carte.nom;
+        if (carte.id === index.active) {
+            opt.selected = true;
+            var titreCarte = document.getElementById('planif-titre-carte');
+            if (titreCarte) titreCarte.value = carte.nom;
+        }
+        select.appendChild(opt);
+    }
+}
+
+function nouvelleCarte(nom) {
+    var index = window.planificationDonnees.getIndex();
+    if (!index) index = { active: null, compteurCartes: 0, cartes: [] };
+    var id = 'carte_' + (++index.compteurCartes);
+    index.cartes.push({ id: id, nom: nom || 'Sans titre', dateCreation: new Date().toISOString() });
+    index.active = id;
+    window.planificationDonnees.sauvegarderIndex(index);
+    viderCanvas();
+    mettreAJourListeCartes();
+    sauvegarder();
+    centrerVueSurContenu();
+}
+
+function renommerCarteActive(nouveauNom) {
+    var index = window.planificationDonnees.getIndex();
+    if (!index) return;
+    var carte = index.cartes.find(function(c) { return c.id === index.active; });
+    if (!carte) return;
+    carte.nom = nouveauNom || 'Sans titre';
+    window.planificationDonnees.sauvegarderIndex(index);
+    mettreAJourListeCartes();
+}
+
+function exporterCarte() {
+    var index = window.planificationDonnees.getIndex();
+    if (!index) return;
+    var carte = index.cartes.find(function(c) { return c.id === index.active; });
+    var donnees = {
+        nom: carte ? carte.nom : 'Sans titre',
+        dateExport: new Date().toISOString(),
+        compteur: etat.compteur,
+        compteurLiens: etat.compteurLiens,
+        noeuds: Array.from(etat.noeuds.values()),
+        liens: Array.from(etat.liens.values())
+    };
+    var blob = new Blob([JSON.stringify(donnees, null, 2)], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = ((carte ? carte.nom : 'carte').replace(/[^a-zA-Z0-9\u00C0-\u017F _-]/g, '')) + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function importerCarte(fichier) {
+    var lecteur = new FileReader();
+    lecteur.onload = function(e) {
+        try {
+            var donnees = JSON.parse(e.target.result);
+            if (!donnees.noeuds || !Array.isArray(donnees.noeuds)) {
+                console.warn('[Planification] Format de fichier invalide.');
+                return;
+            }
+            var nom = donnees.nom || fichier.name.replace('.json', '') || 'Importée';
+            var index = window.planificationDonnees.getIndex();
+            if (!index) index = { active: null, compteurCartes: 0, cartes: [] };
+            var id = 'carte_' + (++index.compteurCartes);
+            index.cartes.push({ id: id, nom: nom, dateCreation: new Date().toISOString() });
+            index.active = id;
+            window.planificationDonnees.sauvegarderIndex(index);
+            var contenu = {
+                compteur: donnees.compteur || 0,
+                compteurLiens: donnees.compteurLiens || 0,
+                noeuds: donnees.noeuds,
+                liens: donnees.liens || []
+            };
+            window.planificationDonnees.sauvegarderCarte(id, contenu);
+            mettreAJourListeCartes();
+            chargerCarte(id);
+        } catch (err) {
+            console.warn('[Planification] Erreur importation :', err.message);
+        }
+    };
+    lecteur.readAsText(fichier);
+}
+
+function supprimerCarteActive() {
+    var index = window.planificationDonnees.getIndex();
+    if (!index || index.cartes.length <= 1) {
+        console.warn('[Planification] Impossible de supprimer la dernière carte.');
+        return;
+    }
+    var carte = index.cartes.find(function(c) { return c.id === index.active; });
+    if (!confirm('Supprimer la carte « ' + (carte ? carte.nom : '') + ' » ?')) return;
+
+    window.planificationDonnees.supprimerCarte(index.active);
+    index.cartes = index.cartes.filter(function(c) { return c.id !== index.active; });
+    index.active = index.cartes[0].id;
+    window.planificationDonnees.sauvegarderIndex(index);
+    mettreAJourListeCartes();
+    chargerCarte(index.active);
+}
+
+function changerCarte(carteId) {
+    var index = window.planificationDonnees.getIndex();
+    if (!index) return;
+    sauvegarder();
+    index.active = carteId;
+    window.planificationDonnees.sauvegarderIndex(index);
+    chargerCarte(carteId);
+}
+
+// === INITIALISATION ===
+function initialiser() {
+    if (etat.initialise) return;
+
+    // Refs DOM
+    zoneTravail = document.getElementById('planif-zone-travail');
+    espace = document.getElementById('planif-espace');
+    coucheNoeuds = document.getElementById('planif-couche-noeuds');
+    coucheLiens = document.getElementById('planif-couche-liens');
+    canvas = document.getElementById('planif-canvas');
+    lienTemp = document.getElementById('planif-lien-temp');
+    panneau = document.getElementById('planif-panneau');
+    menuLien = document.getElementById('planif-menu-lien');
+    rectSelection = document.getElementById('planif-rect-selection');
+    panneauSeances = document.getElementById('planif-panneau-seances');
+    panneauSeancesContenu = document.getElementById('planif-panneau-seances-contenu');
+    btnSeances = document.getElementById('planif-btn-seances');
+
+    if (!zoneTravail || !espace) {
+        console.warn('[Planification] DOM non prêt.');
+        return;
+    }
+
+    // Zoom molette
+    var gestureEnCours = false;
+    zoneTravail.addEventListener('wheel', function(e) {
+        if (e.ctrlKey && !gestureEnCours) {
+            e.preventDefault();
+            var facteur = e.deltaY < 0 ? 1.05 : 0.95;
+            zoomer(e.clientX, e.clientY, facteur);
+        }
+    }, { passive: false });
+
+    // Zoom gestuel Safari
+    if ('GestureEvent' in window) {
+        var gestureBaseZoom = 1;
+        zoneTravail.addEventListener('gesturestart', function(e) {
+            e.preventDefault();
+            gestureEnCours = true;
+            gestureBaseZoom = etat.zoom;
+        });
+        zoneTravail.addEventListener('gesturechange', function(e) {
+            e.preventDefault();
+            var oldZoom = etat.zoom;
+            etat.zoom = Math.max(0.25, Math.min(3, gestureBaseZoom * e.scale));
+            espace.style.zoom = etat.zoom;
+            var rect = zoneTravail.getBoundingClientRect();
+            var cx = rect.width / 2;
+            var cy = rect.height / 2;
+            var espaceX = (cx + zoneTravail.scrollLeft) / oldZoom;
+            var espaceY = (cy + zoneTravail.scrollTop) / oldZoom;
+            zoneTravail.scrollLeft = espaceX * etat.zoom - cx;
+            zoneTravail.scrollTop = espaceY * etat.zoom - cy;
+            var zoomInfo = document.getElementById('planif-zoom-info');
+            if (zoomInfo) zoomInfo.textContent = Math.round(etat.zoom * 100) + '%';
+        });
+        zoneTravail.addEventListener('gestureend', function(e) {
+            e.preventDefault();
+            gestureEnCours = false;
+        });
+    }
+
+    // Zoom tactile
+    var touchStartDist = null;
+    var touchStartZoom = null;
+    zoneTravail.addEventListener('touchstart', function(e) {
+        if (e.touches.length === 2) {
+            var dx = e.touches[0].clientX - e.touches[1].clientX;
+            var dy = e.touches[0].clientY - e.touches[1].clientY;
+            touchStartDist = Math.hypot(dx, dy);
+            touchStartZoom = etat.zoom;
+        }
+    }, { passive: true });
+    zoneTravail.addEventListener('touchmove', function(e) {
+        if (e.touches.length === 2 && touchStartDist) {
+            var dx = e.touches[0].clientX - e.touches[1].clientX;
+            var dy = e.touches[0].clientY - e.touches[1].clientY;
+            var dist = Math.hypot(dx, dy);
+            var scale = dist / touchStartDist;
+            var oldZoom = etat.zoom;
+            etat.zoom = Math.max(0.25, Math.min(3, touchStartZoom * scale));
+            espace.style.zoom = etat.zoom;
+            var rect = zoneTravail.getBoundingClientRect();
+            var midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+            var midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+            var localX = midX - rect.left;
+            var localY = midY - rect.top;
+            var espaceX = (localX + zoneTravail.scrollLeft) / oldZoom;
+            var espaceY = (localY + zoneTravail.scrollTop) / oldZoom;
+            zoneTravail.scrollLeft = espaceX * etat.zoom - localX;
+            zoneTravail.scrollTop = espaceY * etat.zoom - localY;
+            var zoomInfo = document.getElementById('planif-zoom-info');
+            if (zoomInfo) zoomInfo.textContent = Math.round(etat.zoom * 100) + '%';
+        }
+    }, { passive: true });
+    zoneTravail.addEventListener('touchend', function() {
+        touchStartDist = null;
+        touchStartZoom = null;
+    });
+
+    // Palette drag & drop
+    document.querySelectorAll('#planif-palette .planif-palette-btn').forEach(function(btn) {
+        btn.addEventListener('dragstart', function(e) {
+            e.dataTransfer.setData('planif-type', btn.dataset.type);
+            e.dataTransfer.effectAllowed = 'copy';
+        });
+
+        btn.addEventListener('click', function(e) {
+            if (e.detail === 1) {
+                var rect = zoneTravail.getBoundingClientRect();
+                var centre = clientVersData(rect.left + rect.width / 2, rect.top + rect.height / 2);
+                var x = centre.x - 70 + (Math.random() - 0.5) * 100;
+                var y = centre.y - 30 + (Math.random() - 0.5) * 100;
+                var zone = getZone(btn.dataset.type);
+                if (zone === 'gauche' && x >= ZONES.gauche.maxX) x = ZONES.gauche.maxX - 100 + (Math.random() - 0.5) * 60;
+                if (zone === 'droite' && x < ZONES.droite.minX) x = ZONES.droite.minX + 50 + (Math.random() - 0.5) * 60;
+                creerNoeud(btn.dataset.type, x, y);
+            }
+        });
+    });
+
+    zoneTravail.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
+    });
+
+    zoneTravail.addEventListener('drop', function(e) {
+        e.preventDefault();
+        var type = e.dataTransfer.getData('planif-type');
+        if (!type || !TYPES[type]) return;
+        var pos = clientVersData(e.clientX, e.clientY);
+        var x = pos.x - 70;
+        var zone = getZone(type);
+        if (zone === 'gauche' && x >= ZONES.gauche.maxX) x = ZONES.gauche.maxX - 100;
+        if (zone === 'droite' && x < ZONES.droite.minX) x = ZONES.droite.minX + 50;
+        creerNoeud(type, x, pos.y - 20);
+    });
+
+    // Sélection par rectangle (lasso)
+    espace.addEventListener('mousedown', function(e) {
+        if (e.target.closest('.planif-noeud') || e.target.closest('.planif-lien-groupe') || e.target.closest('.planif-noeud-port')) return;
+        if (e.target !== espace && e.target !== canvas && e.target.tagName !== 'svg'
+            && e.target.id !== 'planif-couche-noeuds' && !e.target.closest('#planif-couche-svg-offset')) return;
+        if (e.target.closest('#planif-panneau') || e.target.closest('#planif-menu-lien')) return;
+
+        var startEspace = clientVersEspace(e.clientX, e.clientY);
+        var startEspaceX = startEspace.x;
+        var startEspaceY = startEspace.y;
+        var moved = false;
+
+        deselectionnerTout();
+
+        function onMove(e2) {
+            moved = true;
+            var cur = clientVersEspace(e2.clientX, e2.clientY);
+            var x = Math.min(startEspaceX, cur.x);
+            var y = Math.min(startEspaceY, cur.y);
+            var w = Math.abs(cur.x - startEspaceX);
+            var h = Math.abs(cur.y - startEspaceY);
+
+            rectSelection.style.left = x + 'px';
+            rectSelection.style.top = y + 'px';
+            rectSelection.style.width = w + 'px';
+            rectSelection.style.height = h + 'px';
+            rectSelection.style.display = 'block';
+
+            for (var entry of etat.noeuds) {
+                var nid = entry[0];
+                var nd = entry[1];
+                var nel = document.getElementById(nid);
+                if (!nel) continue;
+                var nx = nd.x + OFFSET_X;
+                var ny = nd.y + OFFSET_Y;
+                var nw = nel.offsetWidth || 140;
+                var nh = nel.offsetHeight || 50;
+                var intersecte = !(nx + nw < x || nx > x + w || ny + nh < y || ny > y + h);
+                if (intersecte) nel.classList.add('selected');
+                else nel.classList.remove('selected');
+            }
+        }
+
+        function onUp(e2) {
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup', onUp);
+            rectSelection.style.display = 'none';
+
+            if (!moved) { deselectionner(); return; }
+
+            var cur = clientVersEspace(e2.clientX, e2.clientY);
+            var x = Math.min(startEspaceX, cur.x);
+            var y = Math.min(startEspaceY, cur.y);
+            var w = Math.abs(cur.x - startEspaceX);
+            var h = Math.abs(cur.y - startEspaceY);
+
+            etat.multiSelection.clear();
+            for (var entry of etat.noeuds) {
+                var nid = entry[0];
+                var nd = entry[1];
+                var nel = document.getElementById(nid);
+                if (!nel) continue;
+                var nx = nd.x + OFFSET_X;
+                var ny = nd.y + OFFSET_Y;
+                var nw = nel.offsetWidth || 140;
+                var nh = nel.offsetHeight || 50;
+                var intersecte = !(nx + nw < x || nx > x + w || ny + nh < y || ny > y + h);
+                if (intersecte) {
+                    etat.multiSelection.add(nid);
+                    nel.classList.add('selected');
+                }
+            }
+
+            if (etat.multiSelection.size === 1) {
+                var seul = Array.from(etat.multiSelection)[0];
+                etat.multiSelection.clear();
+                selectionnerNoeud(seul);
+            } else if (etat.multiSelection.size === 0) {
+                deselectionner();
+            }
+        }
+
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
+    });
+
+    // Événements multi-cartes
+    var listeCartes = document.getElementById('planif-liste-cartes');
+    if (listeCartes) {
+        listeCartes.addEventListener('change', function(e) { changerCarte(e.target.value); });
+    }
+
+    var btnNouvelle = document.getElementById('planif-btn-nouvelle-carte');
+    if (btnNouvelle) {
+        btnNouvelle.addEventListener('click', function() {
+            var nom = prompt('Nom de la nouvelle carte :', 'Nouvelle carte');
+            if (nom === null) return;
+            nouvelleCarte(nom.trim() || 'Sans titre');
+        });
+    }
+
+    var btnSupprimerCarte = document.getElementById('planif-btn-supprimer-carte');
+    if (btnSupprimerCarte) btnSupprimerCarte.addEventListener('click', supprimerCarteActive);
+
+    var btnExporterCarte = document.getElementById('planif-btn-exporter-carte');
+    if (btnExporterCarte) btnExporterCarte.addEventListener('click', exporterCarte);
+
+    var btnImporterCarte = document.getElementById('planif-btn-importer-carte');
+    if (btnImporterCarte) {
+        btnImporterCarte.addEventListener('click', function() {
+            document.getElementById('planif-fichier-import').click();
+        });
+    }
+
+    var fichierImport = document.getElementById('planif-fichier-import');
+    if (fichierImport) {
+        fichierImport.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                importerCarte(e.target.files[0]);
+                e.target.value = '';
+            }
+        });
+    }
+
+    // Titre carte éditable
+    var titreCarte = document.getElementById('planif-titre-carte');
+    if (titreCarte) {
+        titreCarte.addEventListener('input', function() {
+            renommerCarteActive(titreCarte.value.trim());
+        });
+        titreCarte.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') { e.preventDefault(); titreCarte.blur(); }
+        });
+    }
+
+    // Fermer panneau
+    var btnFermerPanneau = document.getElementById('planif-btn-fermer-panneau');
+    if (btnFermerPanneau) btnFermerPanneau.addEventListener('click', fermerPanneau);
+
+    // Séances
+    if (btnSeances) btnSeances.addEventListener('click', toggleSeances);
+    var btnFermerCal = document.getElementById('planif-btn-fermer-seances');
+    if (btnFermerCal) btnFermerCal.addEventListener('click', toggleSeances);
+
+    // Export texte/TSV
+    var btnExportTexte = document.getElementById('planif-btn-export-texte');
+    if (btnExportTexte) {
+        btnExportTexte.addEventListener('click', function() {
+            var index = window.planificationDonnees.getIndex();
+            var nomCarte = 'plan';
+            if (index && index.cartes) {
+                var c = index.cartes.find(function(cc) { return cc.id === index.active; });
+                if (c) nomCarte = c.nom;
+            }
+            var nomFichier = nomCarte.replace(/[^a-zA-Z0-9\u00C0-\u017F _-]/g, '') + '_plan.txt';
+            telechargerFichier(genererPlanTexte(), nomFichier, 'text/plain');
+        });
+    }
+
+    var btnExportTSV = document.getElementById('planif-btn-export-tsv');
+    if (btnExportTSV) {
+        btnExportTSV.addEventListener('click', function() {
+            var index = window.planificationDonnees.getIndex();
+            var nomCarte = 'plan';
+            if (index && index.cartes) {
+                var c = index.cartes.find(function(cc) { return cc.id === index.active; });
+                if (c) nomCarte = c.nom;
+            }
+            var nomFichier = nomCarte.replace(/[^a-zA-Z0-9\u00C0-\u017F _-]/g, '') + '_plan.tsv';
+            telechargerFichier(genererPlanTSV(), nomFichier, 'text/tab-separated-values');
+        });
+    }
+
+    // Recentrer
+    var btnRecentrer = document.getElementById('planif-btn-recentrer');
+    if (btnRecentrer) btnRecentrer.addEventListener('click', function() { centrerVueSurContenu(); });
+
+    etat.initialise = true;
+
+    // Charger les données
+    window.planificationDonnees.migrerDonneesProto();
+    var index = window.planificationDonnees.initialiserSiNecessaire();
+    mettreAJourListeCartes();
+    chargerCarte(index.active);
+}
+
+// === RACCOURCIS CLAVIER (gérés via planificationActive flag) ===
+function gererKeydown(e) {
+    if (!planificationActive) return;
+
+    var pasDansChamp = !document.activeElement.isContentEditable
+        && document.activeElement.tagName !== 'INPUT'
+        && document.activeElement.tagName !== 'TEXTAREA';
+
+    // Vérifier qu'on est bien dans la section planification
+    var sectionPlanif = document.getElementById('section-planification');
+    if (!sectionPlanif || !sectionPlanif.classList.contains('active')) return;
+
+    if ((e.metaKey || e.ctrlKey) && e.key === 'a' && pasDansChamp) {
+        e.preventDefault();
+        toutSelectionner();
+        return;
+    }
+
+    if ((e.metaKey || e.ctrlKey) && (e.key === '=' || e.key === '+') && pasDansChamp) {
+        e.preventDefault();
+        var rect = zoneTravail.getBoundingClientRect();
+        zoomer(rect.left + rect.width / 2, rect.top + rect.height / 2, 1.15);
+        return;
+    }
+    if ((e.metaKey || e.ctrlKey) && e.key === '-' && pasDansChamp) {
+        e.preventDefault();
+        var rect2 = zoneTravail.getBoundingClientRect();
+        zoomer(rect2.left + rect2.width / 2, rect2.top + rect2.height / 2, 0.85);
+        return;
+    }
+    if ((e.metaKey || e.ctrlKey) && e.key === '0' && pasDansChamp) {
+        e.preventDefault();
+        etat.zoom = 1;
+        espace.style.zoom = 1;
+        var zoomInfo = document.getElementById('planif-zoom-info');
+        if (zoomInfo) zoomInfo.textContent = '100%';
+        centrerVueSurContenu();
+        return;
+    }
+    if ((e.metaKey || e.ctrlKey) && e.key === '1' && pasDansChamp) {
+        e.preventDefault();
+        centrerVueSurContenu();
+        return;
+    }
+
+    if (e.key === 'Delete' || e.key === 'Backspace') {
+        if (pasDansChamp) {
+            if (etat.multiSelection.size > 0) {
+                for (var nid of Array.from(etat.multiSelection)) {
+                    supprimerNoeud(nid);
+                }
+                etat.multiSelection.clear();
+                fermerPanneau();
+            } else if (etat.selection) {
+                supprimerNoeud(etat.selection);
+                fermerPanneau();
+            }
+        }
+    }
+    if (e.key === 'Escape') {
+        deselectionner();
+        fermerMenuLien();
+    }
+}
+
+// Attacher/détacher le keydown global
+document.addEventListener('keydown', gererKeydown);
+
+// === EXPORT ===
+window.planificationCarte = {
+    initialiser: initialiser,
+    activer: function() { planificationActive = true; },
+    desactiver: function() { planificationActive = false; },
+    centrerVueSurContenu: centrerVueSurContenu,
+    mettreAJourListeCartes: mettreAJourListeCartes,
+    chargerCarte: chargerCarte,
+    etat: etat
+};
+
+})();

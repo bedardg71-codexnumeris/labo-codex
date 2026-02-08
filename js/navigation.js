@@ -436,6 +436,14 @@ function afficherSousSection(idSousSection) {
             }
             break;
 
+        // Module Planification (Carte mentale)
+        case 'planification-carte':
+            console.log('🔄 Initialisation du module Planification...');
+            if (typeof initialiserModulePlanification === 'function') {
+                setTimeout(initialiserModulePlanification, 100);
+            }
+            break;
+
         // 🆕 BETA 96.1 : Boîte à outils
         case 'boite-outils-tirage':
             console.log('🔄 Initialisation de la boîte à outils...');
@@ -485,8 +493,30 @@ function afficherSousSection(idSousSection) {
             setTimeout(() => chargerListeEtudiants(), 100);
         }
     } else if (idSousSection === 'tableau-bord-profil') {
-        // Le profil se charge quand on clique sur un étudiant
-        // Pas de chargement automatique
+        // Charger le dernier profil consulté, ou le premier étudiant
+        // Garde anti-réentrance : afficherProfilComplet() appelle afficherSousSection()
+        if (!window._profilAutoChargement) {
+            window._profilAutoChargement = true;
+            setTimeout(() => {
+                try {
+                    if (window.profilActuelDA) {
+                        if (typeof afficherProfilComplet === 'function') afficherProfilComplet(window.profilActuelDA);
+                    } else {
+                        const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
+                            ? obtenirEtudiantsCoursActif()
+                            : (typeof obtenirDonneesSelonMode === 'function'
+                                ? obtenirDonneesSelonMode('groupeEtudiants') : []);
+                        const actifs = etudiants.filter(e => e.statut !== 'décrochage' && e.statut !== 'abandon');
+                        actifs.sort((a, b) => (a.nom || '').localeCompare(b.nom || '', 'fr'));
+                        if (actifs.length > 0 && typeof afficherProfilComplet === 'function') {
+                            afficherProfilComplet(actifs[0].da);
+                        }
+                    }
+                } finally {
+                    window._profilAutoChargement = false;
+                }
+            }, 100);
+        }
     }
 
         // Recharger le tableau de bord selon la sous-section

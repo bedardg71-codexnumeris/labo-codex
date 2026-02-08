@@ -422,7 +422,7 @@
 
         .accueil-cartes {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 15px;
             margin-bottom: 30px;
         }
@@ -530,6 +530,11 @@
             margin: 0 4px;
         }
 
+        @media (max-width: 900px) {
+            .accueil-cartes {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
         @media (max-width: 600px) {
             .accueil-cartes {
                 grid-template-columns: 1fr;
@@ -3738,6 +3743,7 @@
                 <button data-onglet="evaluations">Évaluations</button>
                 <button data-onglet="construction">Construction de la note</button>
                 <button data-onglet="boite-outils">Boîte à outils</button>
+                <button data-onglet="planification">Planification</button>
                 <button id="btn-section-aide"
                        data-onglet="aide"
                        title="Consulter la documentation">
@@ -6776,6 +6782,145 @@
                 </div><!-- fin sous-section tirage -->
 
             </section><!-- fin section-boite-outils -->
+
+            <!-- ===================================
+                 SECTION: PLANIFICATION (Carte mentale)
+                 =================================== -->
+            <section id="section-planification" class="section">
+                <div id="planification-carte" class="sous-section">
+                    <div class="planif-wrapper">
+
+                        <!-- Barre supérieure -->
+                        <div class="planif-header">
+                            <div id="planif-selecteur-cartes">
+                                <select id="planif-liste-cartes" title="Carte active"></select>
+                                <button class="planif-btn-carte" id="planif-btn-nouvelle-carte" title="Nouvelle carte">+</button>
+                                <button class="planif-btn-carte planif-danger" id="planif-btn-supprimer-carte" title="Supprimer cette carte" style="font-size:12px">&times;</button>
+                                <button class="planif-btn-carte" id="planif-btn-exporter-carte" title="Exporter cette carte" style="font-size:11px">&#8615;</button>
+                                <button class="planif-btn-carte" id="planif-btn-importer-carte" title="Importer une carte" style="font-size:11px">&#8613;</button>
+                                <input type="file" id="planif-fichier-import" accept=".json" style="display:none">
+                            </div>
+                            <h3><input type="text" id="planif-titre-carte" value="Sans titre" placeholder="Titre de la carte…"></h3>
+                            <div id="planif-palette">
+                                <div class="planif-palette-zone-label" style="background: rgba(99, 102, 241, 0.08); color: #6366f1;">Objectifs</div>
+                                <div class="planif-palette-groupe">
+                                    <button class="planif-palette-btn" data-type="competence" draggable="true">
+                                        <span class="planif-pastille" style="background: var(--planif-couleur-competence)"></span>Compétence
+                                    </button>
+                                    <button class="planif-palette-btn" data-type="idee-maitresse" draggable="true">
+                                        <span class="planif-pastille" style="background: var(--planif-couleur-idee-maitresse)"></span>Idée maîtresse
+                                    </button>
+                                    <button class="planif-palette-btn" data-type="connaissance" draggable="true">
+                                        <span class="planif-pastille" style="background: var(--planif-couleur-connaissance)"></span>Connaissance
+                                    </button>
+                                    <button class="planif-palette-btn" data-type="prerequis" draggable="true">
+                                        <span class="planif-pastille" style="background: var(--planif-couleur-prerequis)"></span>Préalable
+                                    </button>
+                                    <button class="planif-palette-btn" data-type="strategie" draggable="true">
+                                        <span class="planif-pastille" style="background: var(--planif-couleur-strategie)"></span>Stratégie
+                                    </button>
+                                </div>
+                                <div class="planif-palette-sep"></div>
+                                <div class="planif-palette-zone-label" style="background: rgba(249, 115, 22, 0.08); color: #ea580c;">Activités</div>
+                                <div class="planif-palette-groupe">
+                                    <button class="planif-palette-btn" data-type="sequence" draggable="true">
+                                        <span class="planif-pastille" style="background: var(--planif-couleur-sequence)"></span>Séquence
+                                    </button>
+                                    <button class="planif-palette-btn" data-type="lecon" draggable="true">
+                                        <span class="planif-pastille" style="background: var(--planif-couleur-lecon)"></span>Leçon
+                                    </button>
+                                    <button class="planif-palette-btn" data-type="activite" draggable="true">
+                                        <span class="planif-pastille" style="background: var(--planif-couleur-activite)"></span>Activité
+                                    </button>
+                                    <button class="planif-palette-btn" data-type="soutien" draggable="true">
+                                        <span class="planif-pastille" style="background: var(--planif-couleur-soutien)"></span>Soutien
+                                    </button>
+                                    <button class="planif-palette-btn" data-type="revision" draggable="true">
+                                        <span class="planif-pastille" style="background: var(--planif-couleur-revision)"></span>Révision
+                                    </button>
+                                </div>
+                            </div>
+                            <button id="planif-btn-seances" style="margin-left:auto">&#128197; Séances</button>
+                        </div>
+
+                        <!-- Zone de travail -->
+                        <div id="planif-zone-wrapper">
+                            <div id="planif-guides-overlay">
+                                <div id="planif-zone-guide-gauche" class="planif-zone-guide"><span>Créez et reliez vos compétences, idées maîtresses, connaissances et stratégies pour aligner vos objectifs pédagogiques.</span></div>
+                                <div id="planif-zone-guide-droite" class="planif-zone-guide"><span>Créez et reliez vos séquences, leçons et activités pour organiser l'apprentissage. Cliquez sur « Séances » pour planifier le tout.</span></div>
+                            </div>
+                            <div id="planif-zone-travail">
+                                <div id="planif-espace">
+                                    <div class="planif-zone-fond-gauche"></div>
+                                    <div class="planif-zone-fond-droite"></div>
+                                    <div class="planif-zone-separateur"></div>
+                                    <div class="planif-zone-label planif-zone-label-gauche">Objectifs & Savoirs</div>
+                                    <div class="planif-zone-label planif-zone-label-droite">Organisation & Activités</div>
+                                    <svg id="planif-canvas">
+                                        <defs>
+                                            <marker id="planif-fleche" viewBox="0 0 10 10" refX="9" refY="5"
+                                                    markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+                                                <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--planif-couleur-lien)" />
+                                            </marker>
+                                            <marker id="planif-fleche-active" viewBox="0 0 10 10" refX="9" refY="5"
+                                                    markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+                                                <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--planif-couleur-selection)" />
+                                            </marker>
+                                        </defs>
+                                        <g id="planif-couche-svg-offset" transform="translate(5000, 3000)">
+                                            <g id="planif-couche-liens"></g>
+                                            <line id="planif-lien-temp" style="display:none" stroke="var(--planif-couleur-selection)"
+                                                  stroke-width="2" stroke-dasharray="6,4" />
+                                        </g>
+                                    </svg>
+                                    <div id="planif-couche-noeuds"></div>
+                                    <div id="planif-rect-selection"></div>
+                                    <div id="planif-menu-lien"></div>
+                                </div>
+                            </div>
+
+                            <div id="planif-panneau">
+                                <button class="planif-btn-fermer" id="planif-btn-fermer-panneau">&times;</button>
+                                <h3><span class="planif-pastille" id="planif-panneau-pastille"></span><span id="planif-panneau-type"></span></h3>
+                                <label for="planif-panneau-titre">Titre</label>
+                                <input type="text" id="planif-panneau-titre" placeholder="Titre du nœud">
+                                <label for="planif-panneau-description">Description</label>
+                                <textarea id="planif-panneau-description" placeholder="Description ou notes…"></textarea>
+                                <div id="planif-panneau-extra"></div>
+                                <button class="planif-btn-supprimer" id="planif-btn-supprimer">Supprimer ce nœud</button>
+                            </div>
+
+                            <div id="planif-panneau-seances">
+                                <div class="planif-cal-header">
+                                    <h3>Séances</h3>
+                                    <div class="planif-cal-header-actions">
+                                        <button class="planif-cal-btn-export" id="planif-btn-export-texte" title="Exporter en texte">&#128196; Texte</button>
+                                        <button class="planif-cal-btn-export" id="planif-btn-export-tsv" title="Exporter en TSV (tableur)">&#128202; TSV</button>
+                                        <button class="planif-btn-fermer" id="planif-btn-fermer-seances">&times;</button>
+                                    </div>
+                                </div>
+                                <div id="planif-panneau-seances-contenu">
+                                    <div class="planif-cal-vide">Aucune séquence ou leçon pour le moment.<br>Ajoute des éléments à la carte.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Barre d'état -->
+                        <div class="planif-footer">
+                            <span>Glisser un type depuis la palette</span>
+                            <span><kbd>Suppr</kbd> Supprimer</span>
+                            <span><kbd>⌘A</kbd> Tout sélectionner</span>
+                            <span><kbd>⌘+Clic</kbd> Multi-sélection</span>
+                            <span><kbd>Rectangle</kbd> Sélection par zone</span>
+                            <span><kbd>⌘+/-</kbd> Zoom</span>
+                            <span><kbd>⌘0</kbd> Reset zoom</span>
+                            <button id="planif-btn-recentrer" title="Recentrer la vue sur le contenu (⌘1)">⊕ Recentrer</button>
+                            <span id="planif-zoom-info">100%</span>
+                        </div>
+
+                    </div><!-- fin planif-wrapper -->
+                </div><!-- fin sous-section planification-carte -->
+            </section><!-- fin section-planification -->
 
             <!-- SECTION TRAVAUX : migrée sous Évaluations (sous-onglets evaluations-travaux et evaluations-archivage) -->
 
@@ -15517,6 +15662,11 @@
     <script src="js/evaluations-apercu.js?v=2025111026"></script>
     <script src="js/boite-outils.js?v=2026013005"></script> <!-- Beta 96.1 : Boîte à outils pédagogiques -->
 
+    <!-- Module Planification (Carte mentale) -->
+    <script src="js/planification-donnees.js?v=2026020701"></script>
+    <script src="js/planification-carte.js?v=2026020701"></script>
+    <script src="js/planification.js?v=2026020701"></script>
+
     <!-- BETA 96.3 : Module Travaux (import, annotation, archivage) -->
     <script src="libs/pdf.min.js?v=3.11.174"></script>
     <script src="libs/jszip.min.js?v=3.10.1"></script>
@@ -15594,7 +15744,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97';
-        const BUILD_ID = '0207-1520';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0207-2041';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
