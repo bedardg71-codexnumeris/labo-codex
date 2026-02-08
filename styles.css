@@ -13808,6 +13808,8 @@ body.mode-assiste .btn-aide-contextuelle,
     --planif-couleur-activite: #16a34a;
     --planif-couleur-soutien: #22c55e;
     --planif-couleur-revision: #15803d;
+    /* Évaluation — Violet distinct */
+    --planif-couleur-evaluation: #8B5CF6;
     /* Utilitaires */
     --planif-couleur-fond: #f8fafc;
     --planif-couleur-texte: #1e293b;
@@ -14222,6 +14224,16 @@ body.mode-assiste .btn-aide-contextuelle,
 }
 .planif-badge-entree { left: 4px; }
 .planif-badge-sortie { right: 4px; }
+.planif-badge-avertissement {
+    position: absolute;
+    top: 3px;
+    right: 22px;
+    font-size: 11px;
+    cursor: help;
+    z-index: 5;
+    color: #F59E0B;
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15));
+}
 
 .planif-noeud-titre {
     padding: 2px 10px 8px;
@@ -14631,6 +14643,40 @@ body.mode-assiste .btn-aide-contextuelle,
 .planif-org-ee-bar { background: #fefce8; padding: 8px 16px; }
 .planif-org-ee-bar .planif-checkbox-label { font-size: 12px; }
 
+/* Activités dans l'Organisateur */
+.planif-org-activite {
+    border: 1px solid #e2e8f0; border-radius: 8px;
+    padding: 8px 10px; margin-bottom: 8px; background: #fafbfc;
+}
+.planif-org-activite-entete {
+    display: flex; align-items: center; gap: 6px; cursor: pointer;
+    margin-bottom: 4px;
+}
+.planif-org-activite-entete:hover { color: var(--planif-couleur-selection); }
+.planif-org-activite-type {
+    font-size: 9px; font-weight: 600; color: #94a3b8;
+    text-transform: uppercase; letter-spacing: 0.3px; margin-left: auto;
+}
+.planif-org-activite-detail {
+    display: flex; align-items: center; gap: 6px;
+    padding: 3px 0 3px 18px; font-size: 12px;
+}
+.planif-org-activite-detail label {
+    color: #64748b; font-size: 11px; min-width: 80px; flex-shrink: 0;
+}
+.planif-org-activite-detail select {
+    flex: 1; padding: 3px 6px; border: 1px solid #e2e8f0;
+    border-radius: 4px; font-size: 11px; background: white;
+}
+.planif-org-prod-details {
+    padding: 4px 18px; font-size: 11px; color: #94a3b8;
+    line-height: 1.4; font-style: italic;
+}
+.planif-org-avertissement {
+    background: #fffbeb; border: 1px solid #fcd34d; border-radius: 6px;
+    padding: 6px 10px; font-size: 11px; color: #92400e; margin-bottom: 8px;
+}
+
 .planif-zone-guide {
     text-align: center;
     font-size: 11px;
@@ -14764,3 +14810,4 @@ body.mode-assiste .btn-aide-contextuelle,
 .planif-palette-btn[data-type="activite"]       { border-color: var(--planif-couleur-activite); }
 .planif-palette-btn[data-type="soutien"]        { border-color: var(--planif-couleur-soutien); }
 .planif-palette-btn[data-type="revision"]       { border-color: var(--planif-couleur-revision); }
+.planif-palette-btn[data-type="evaluation"]     { border-color: var(--planif-couleur-evaluation); }
