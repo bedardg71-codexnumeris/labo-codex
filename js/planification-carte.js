@@ -159,83 +159,111 @@ function mettreAJourApparenceNoeud(donnees) {
     mettreAJourBadge(donnees);
 }
 
+// Traverse la chaîne IM→IM pour trouver une compétence (toute direction de lien)
 function ideeMaitresseAtteinCompetence(noeudId, visited) {
     if (!visited) visited = {};
     if (visited[noeudId]) return false;
     visited[noeudId] = true;
     var liens = getLiensDeNoeud(noeudId);
     for (var i = 0; i < liens.length; i++) {
-        if (liens[i].direction === 'sortant' && liens[i].noeudType === 'competence') return true;
-        if (liens[i].direction === 'sortant' && liens[i].noeudType === 'idee-maitresse') {
+        if (liens[i].noeudType === 'competence') return true;
+        if (liens[i].noeudType === 'idee-maitresse') {
             if (ideeMaitresseAtteinCompetence(liens[i].noeudId, visited)) return true;
         }
     }
     return false;
 }
 
+// Traverse la chaîne IM→IM pour trouver une leçon (toute direction de lien)
+function ideeMaitresseAtteinLecon(noeudId, visited) {
+    if (!visited) visited = {};
+    if (visited[noeudId]) return false;
+    visited[noeudId] = true;
+    var liens = getLiensDeNoeud(noeudId);
+    for (var i = 0; i < liens.length; i++) {
+        if (liens[i].noeudType === 'lecon') return true;
+    }
+    return false;
+}
+
+// Retourne { entree: {valide, message}, sortie: {valide, message} }
+// entree = amont (compétence/objectif), sortie = aval (leçon/activité)
 function evaluerBadge(noeud) {
     var type = noeud.type;
     var liens = getLiensDeNoeud(noeud.id);
+    var OK = { valide: true };
 
     switch (type) {
         case 'competence':
             var devParIM = liens.some(function(l) { return l.noeudType === 'idee-maitresse'; });
-            return devParIM ? { valide: true } : { valide: false, message: 'Aucune idée maîtresse ne développe cette compétence' };
+            return {
+                entree: OK,
+                sortie: devParIM ? OK : { valide: false, message: 'Aucune idée maîtresse ne développe cette compétence' }
+            };
 
         case 'idee-maitresse':
-            var devComp = ideeMaitresseAtteinCompetence(noeud.id);
-            var viseeParLecon = liens.some(function(l) { return l.noeudType === 'lecon'; });
-            if (!devComp) return { valide: false, message: "Cette idée ne développe aucune compétence" };
-            if (!viseeParLecon) return { valide: false, message: "Cette idée n'est visée par aucune leçon" };
-            return { valide: true };
+            var atteinComp = ideeMaitresseAtteinCompetence(noeud.id);
+            var atteinLecon = ideeMaitresseAtteinLecon(noeud.id);
+            return {
+                entree: atteinComp ? OK : { valide: false, message: "Aucune compétence reliée (directement ou via une autre idée)" },
+                sortie: atteinLecon ? OK : { valide: false, message: "Aucune leçon ne vise cette idée" }
+            };
 
         case 'connaissance':
         case 'strategie':
         case 'condition':
             var labelMap = { connaissance: 'information', strategie: 'stratégie', condition: 'condition' };
-            if (!noeud.parent) return { valide: false, message: 'Cette ' + labelMap[type] + " n'est associée à aucune leçon" };
-            var parentN = etat.noeuds.get(noeud.parent);
-            if (!parentN || parentN.type !== 'lecon') return { valide: false, message: 'Cette ' + labelMap[type] + " n'est associée à aucune leçon" };
-            return { valide: true };
+            var dansLecon = noeud.parent && etat.noeuds.get(noeud.parent);
+            var estDansLecon = dansLecon && dansLecon.type === 'lecon';
+            return {
+                entree: estDansLecon ? OK : { valide: false, message: 'Cette ' + labelMap[type] + " n'est dans aucune leçon" },
+                sortie: OK
+            };
 
         case 'activite':
         case 'soutien':
         case 'revision':
-            if (!noeud.parent) return { valide: false, message: "N'est associé(e) à aucune leçon" };
-            var parentA = etat.noeuds.get(noeud.parent);
-            if (!parentA || parentA.type !== 'lecon') return { valide: false, message: "N'est associé(e) à aucune leçon" };
-            var aConnaissance = (parentA.enfants || []).some(function(eid) {
+            var parentA = noeud.parent ? etat.noeuds.get(noeud.parent) : null;
+            var dansLeconA = parentA && parentA.type === 'lecon';
+            var aConnaissance = dansLeconA && (parentA.enfants || []).some(function(eid) {
                 var e = etat.noeuds.get(eid);
                 return e && (e.type === 'connaissance' || e.type === 'strategie' || e.type === 'condition');
             });
-            if (!aConnaissance) return { valide: false, message: "Aucune connaissance dans cette leçon" };
-            return { valide: true };
+            return {
+                entree: dansLeconA ? OK : { valide: false, message: "N'est dans aucune leçon" },
+                sortie: aConnaissance ? OK : { valide: false, message: "Aucune connaissance dans cette leçon" }
+            };
 
         case 'sequence':
             var contientLecon = (noeud.enfants || []).some(function(eid) {
                 var e = etat.noeuds.get(eid);
                 return e && e.type === 'lecon';
             });
-            return contientLecon ? { valide: true } : { valide: false, message: "Cette séquence ne contient aucune leçon" };
+            return {
+                entree: OK,
+                sortie: contientLecon ? OK : { valide: false, message: "Aucune leçon dans cette séquence" }
+            };
 
         case 'lecon':
-            var msgs = [];
             var viseIM = liens.some(function(l) { return l.noeudType === 'idee-maitresse'; });
-            if (!viseIM) msgs.push("Aucune idée maîtresse visée");
             var aConn = (noeud.enfants || []).some(function(eid) {
                 var e = etat.noeuds.get(eid);
                 return e && (e.type === 'connaissance' || e.type === 'strategie' || e.type === 'condition');
             });
-            if (!aConn) msgs.push("Aucune connaissance");
             var aAct = (noeud.enfants || []).some(function(eid) {
                 var e = etat.noeuds.get(eid);
                 return e && (e.type === 'activite' || e.type === 'soutien' || e.type === 'revision');
             });
-            if (!aAct) msgs.push("Aucune activité");
-            return msgs.length === 0 ? { valide: true } : { valide: false, message: msgs.join(' · ') };
+            var msgsSortie = [];
+            if (!aConn) msgsSortie.push("Aucune connaissance");
+            if (!aAct) msgsSortie.push("Aucune activité");
+            return {
+                entree: viseIM ? OK : { valide: false, message: "Aucune idée maîtresse visée" },
+                sortie: msgsSortie.length === 0 ? OK : { valide: false, message: msgsSortie.join(' · ') }
+            };
 
         default:
-            return { valide: true };
+            return { entree: OK, sortie: OK };
     }
 }
 
@@ -249,20 +277,11 @@ function resoudreCouleur(cssVar) {
     return resolved;
 }
 
-function mettreAJourBadge(donnees) {
-    var el = document.getElementById(donnees.id);
-    if (!el) return;
-    var badge = el.querySelector('.planif-badge-validation');
-    if (!badge) {
-        badge = document.createElement('span');
-        badge.className = 'planif-badge-validation';
-        el.appendChild(badge);
-    }
-    var resultat = evaluerBadge(donnees);
+function appliquerBadge(badge, resultat, couleur) {
     if (resultat.valide) {
-        badge.style.backgroundColor = resoudreCouleur(obtenirCouleurNoeud(donnees));
+        badge.style.backgroundColor = couleur;
         badge.textContent = '\u2713';
-        badge.title = 'Alignement complet';
+        badge.title = 'OK';
         badge.classList.remove('planif-badge-gris');
     } else {
         badge.style.backgroundColor = '#b0b0b0';
@@ -270,6 +289,31 @@ function mettreAJourBadge(donnees) {
         badge.title = resultat.message;
         badge.classList.add('planif-badge-gris');
     }
+}
+
+function mettreAJourBadge(donnees) {
+    var el = document.getElementById(donnees.id);
+    if (!el) return;
+    var couleur = resoudreCouleur(obtenirCouleurNoeud(donnees));
+    var resultat = evaluerBadge(donnees);
+
+    // Badge entrée (amont — coin supérieur gauche)
+    var badgeEntree = el.querySelector('.planif-badge-entree');
+    if (!badgeEntree) {
+        badgeEntree = document.createElement('span');
+        badgeEntree.className = 'planif-badge-validation planif-badge-entree';
+        el.appendChild(badgeEntree);
+    }
+    appliquerBadge(badgeEntree, resultat.entree, couleur);
+
+    // Badge sortie (aval — coin supérieur droit)
+    var badgeSortie = el.querySelector('.planif-badge-sortie');
+    if (!badgeSortie) {
+        badgeSortie = document.createElement('span');
+        badgeSortie.className = 'planif-badge-validation planif-badge-sortie';
+        el.appendChild(badgeSortie);
+    }
+    appliquerBadge(badgeSortie, resultat.sortie, couleur);
 }
 
 function mettreAJourTousLesBadges() {
