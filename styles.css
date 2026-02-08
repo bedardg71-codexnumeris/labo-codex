@@ -14203,7 +14203,6 @@ body.mode-assiste .btn-aide-contextuelle,
 .planif-badge-validation {
     position: absolute;
     top: 4px;
-    right: 4px;
     width: 16px;
     height: 16px;
     border-radius: 50%;
@@ -14221,6 +14220,8 @@ body.mode-assiste .btn-aide-contextuelle,
     border: 1.5px solid rgba(255,255,255,0.8);
     box-shadow: 0 1px 3px rgba(0,0,0,0.15);
 }
+.planif-badge-entree { left: 4px; }
+.planif-badge-sortie { right: 4px; }
 
 .planif-noeud-titre {
     padding: 2px 10px 8px;
