@@ -13881,6 +13881,7 @@ body.mode-assiste .btn-aide-contextuelle,
     border-radius: 10px;
     box-shadow: 0 4px 16px rgba(0,0,0,0.10);
     min-width: 140px;
+    max-width: 200px;
     user-select: none;
 }
 
@@ -13906,17 +13907,24 @@ body.mode-assiste .btn-aide-contextuelle,
 .planif-palette-toggle:hover { background: #e2e8f0; color: #475569; }
 
 .planif-palette-contenu {
-    padding: 8px;
+    padding: 6px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
+}
+
+.planif-palette-categorie {
+    border-radius: 6px;
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
 }
 
 .planif-palette-zone-label {
     display: flex;
     align-items: center;
-    padding: 2px 6px;
-    border-radius: 4px;
+    padding: 1px 4px;
     font-size: 9px;
     font-weight: 700;
     text-transform: uppercase;
@@ -13938,7 +13946,7 @@ body.mode-assiste .btn-aide-contextuelle,
     align-items: center;
     gap: 4px;
     padding: 3px 8px;
-    border: 2px solid transparent;
+    border: 1px solid transparent;
     border-radius: 6px;
     font-size: 11px;
     font-weight: 500;
@@ -14511,19 +14519,16 @@ body.mode-assiste .btn-aide-contextuelle,
 .planif-cal-btn-export:hover { background: #f1f5f9; color: var(--planif-couleur-texte); border-color: var(--planif-couleur-selection); }
 
 .planif-zone-guide {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     text-align: center;
-    font-size: 14px;
-    line-height: 1.6;
-    color: rgba(148, 163, 184, 0.6);
-    padding: 40px;
+    font-size: 11px;
+    line-height: 1.5;
+    color: #94a3b8;
+    padding: 8px 10px;
+    border-top: 1px solid var(--planif-couleur-bordure);
     transition: opacity 0.4s ease;
 }
-.planif-zone-guide span { max-width: 420px; }
-.planif-zone-guide.planif-masque { opacity: 0; }
+.planif-zone-guide.planif-masque { opacity: 0; display: none; }
+#planif-palette.planif-palette-replie .planif-zone-guide { display: none; }
 
 /* === MENU CONTEXTUEL LIENS === */
 #planif-menu-lien {
