@@ -108,63 +108,62 @@ function afficherAccueilRetour(conteneur) {
 
         ${coursHTML}
 
-        <div class="accueil-cartes">
+        <div class="accueil-cartes accueil-cartes--8">
             <div class="accueil-carte" onclick="afficherSection('presences');">
                 <div class="accueil-carte-icone">&#x1F4CB;</div>
                 <div class="accueil-carte-titre">Saisir les pr\u00e9sences</div>
                 <div class="accueil-carte-desc">
-                    Saisir les pr\u00e9sences du jour pour votre groupe.
+                    Saisir les pr\u00e9sences du jour pour votre groupe et inclure des observations.
                 </div>
             </div>
             <div class="accueil-carte" onclick="afficherSection('evaluations'); setTimeout(function(){ afficherSousSection('evaluations-travaux'); }, 100);">
                 <div class="accueil-carte-icone">&#x1F4DD;</div>
-                <div class="accueil-carte-titre">Annoter des travaux <span class="badge-dev-actif">D\u00e9veloppement actif</span></div>
+                <div class="accueil-carte-titre">Annoter des travaux</div>
                 <div class="accueil-carte-desc">
-                    Lire, annoter et apposer des autocollants dans les copies.
+                    Annoter les travaux et y apposer des r\u00e9troactions cibl\u00e9es et visuelles.
                 </div>
             </div>
             <div class="accueil-carte" onclick="afficherSection('evaluations'); setTimeout(function(){ afficherSousSection('evaluations-liste'); }, 100);">
                 <div class="accueil-carte-icone">&#x2696;&#xFE0F;</div>
                 <div class="accueil-carte-titre">\u00c9valuer une production</div>
                 <div class="accueil-carte-desc">
-                    Appliquer la grille de crit\u00e8res et construire la r\u00e9troaction.
+                    Appliquer une grille de crit\u00e8res et construire une r\u00e9troaction diff\u00e9renci\u00e9e.
                 </div>
             </div>
             <div class="accueil-carte" onclick="afficherSection('tableau-bord');">
                 <div class="accueil-carte-icone">&#x1F4C8;</div>
                 <div class="accueil-carte-titre">Voir l'\u00e9tat des lieux</div>
                 <div class="accueil-carte-desc">
-                    Consulter le tableau de bord et les indicateurs.
+                    Suivre la participation, les r\u00e9sultats et la progression du groupe.
                 </div>
             </div>
             <div class="accueil-carte" onclick="afficherSection('planification'); setTimeout(function(){ afficherSousSection('planification-carte'); }, 100);">
                 <div class="accueil-carte-icone">\uD83D\uDDFA\uFE0F</div>
                 <div class="accueil-carte-titre">Planifier mon cours</div>
                 <div class="accueil-carte-desc">
-                    Organiser les s\u00e9quences, le\u00e7ons et activit\u00e9s sur la carte mentale.
+                    Planifier et organiser les s\u00e9quences, le\u00e7ons et activit\u00e9s pour leur alignement p\u00e9dagogique.
                 </div>
             </div>
             <div class="accueil-carte" onclick="afficherSection('tableau-bord'); setTimeout(function(){ afficherSousSection('tableau-bord-profil'); }, 100);">
                 <div class="accueil-carte-icone">\uD83D\uDC64</div>
                 <div class="accueil-carte-titre">Consulter un profil \u00e9tudiant</div>
                 <div class="accueil-carte-desc">
-                    Voir la progression, les pr\u00e9sences et les r\u00e9sultats d\u2019un \u00e9l\u00e8ve.
+                    Consulter le portrait d\u2019un \u00e9l\u00e8ve\u00a0: pr\u00e9sences, r\u00e9sultats et progression.
                 </div>
             </div>
-        </div>
-
-        <div class="accueil-nouvelles">
-            <div class="accueil-nouvelles-header">
-                <span class="accueil-nouvelles-icone">\uD83D\uDCEC</span>
-                <span class="accueil-nouvelles-titre">Derni\u00e8res nouvelles</span>
-                <span class="accueil-nouvelles-version">Beta ${VERSION_MAJEURE} &nbsp;\uD83C\uDFD7\uFE0F Build.${BUILD_ID}</span>
+            <div class="accueil-carte" onclick="afficherModalNouveautes();">
+                <div class="accueil-carte-icone"><span class="pastille-nouveautes" title="Nouveaut\u00e9s">\u2709\uFE0F</span></div>
+                <div class="accueil-carte-titre">Suivre le d\u00e9veloppement du projet</div>
+                <div class="accueil-carte-desc">
+                    Prendre connaissance des nouvelles fonctionnalit\u00e9s et des r\u00e9centes corrections de bugs.
+                </div>
             </div>
-            <div class="accueil-nouvelles-contenu">
-                <span class="pastille-nouveautes" onclick="afficherModalNouveautes()" title="Nouveaut\u00e9s">\u2709\uFE0F</span>
-                <span class="accueil-nouvelles-lien" onclick="afficherModalNouveautes()">Nouveaut\u00e9s et corrections</span>
-                <span class="accueil-nouvelles-separateur">|</span>
-                <button class="btn-backup-warning" onclick="window.backupReminder.afficherModal()" title="Prot\u00e9gez vos donn\u00e9es">\u26A0\uFE0F</button>
-                <span class="accueil-nouvelles-lien" onclick="window.backupReminder.afficherModal()">Rappel de sauvegarde</span>
+            <div class="accueil-carte" onclick="if(window.backupReminder) window.backupReminder.afficherModal();">
+                <div class="accueil-carte-icone">\uD83D\uDCBE</div>
+                <div class="accueil-carte-titre">Faire une sauvegarde des donn\u00e9es</div>
+                <div class="accueil-carte-desc">
+                    Exporter en lieu s\u00fbr tout votre mat\u00e9riel dans un document JSON.
+                </div>
             </div>
         </div>
 
@@ -172,8 +171,6 @@ function afficherAccueilRetour(conteneur) {
             <button onclick="if(typeof entrerEnDemo==='function') entrerEnDemo();">Explorer la d\u00e9mo</button>
             <span class="accueil-separateur">|</span>
             <button onclick="afficherSection('tableau-bord');">Tableau de bord complet</button>
-            <span class="accueil-separateur">|</span>
-            <button onclick="afficherSection('reglages'); setTimeout(function(){ if(typeof afficherSousSection==='function') afficherSousSection('reglages-a-propos'); }, 100);">Nouveaut\u00e9s</button>
         </div>
     `;
 

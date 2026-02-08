@@ -86,7 +86,8 @@ Gregoire a la memoire contextuelle reelle du projet.
 
 ## Avant chaque commit
 
-**Mettre a jour le BUILD_ID** dans `index.html` (ligne ~15470) :
+1. **Demander le numero de beta** a Gregoire. Ne jamais renumeroter automatiquement.
+2. **Mettre a jour le BUILD_ID** dans `index.html` (ligne ~15470) :
 ```javascript
 const BUILD_ID = 'MMJJ-HHMM';  // Format: mois-jour-heure-minute (Toronto)
 ```
