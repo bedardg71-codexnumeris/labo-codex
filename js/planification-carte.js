@@ -1245,13 +1245,25 @@ function reLayoutConteneur(conteneurId) {
     }
 
     // Recursively layout nested containers first
+    var aDesEnfantsConteneurs = false;
     for (var i = 0; i < enfants.length; i++) {
         var ed = etat.noeuds.get(enfants[i]);
-        if (ed && TYPES[ed.type] && TYPES[ed.type].conteneur && ed.enfants && ed.enfants.length > 0) {
-            reLayoutConteneur(enfants[i]);
+        if (ed && TYPES[ed.type] && TYPES[ed.type].conteneur) {
+            aDesEnfantsConteneurs = true;
+            if (ed.enfants && ed.enfants.length > 0) {
+                reLayoutConteneur(enfants[i]);
+            }
         }
     }
 
+    // Conteneurs avec enfants-conteneurs (ex: séquence → leçons) : disposition libre
+    if (aDesEnfantsConteneurs) {
+        _layoutEnCours.delete(conteneurId);
+        mettreAJourZoneConteneur(conteneurId);
+        return;
+    }
+
+    // Enfants feuilles (ex: leçon → activités) : colonne verticale centrée
     // Sort children by Y position
     enfants.sort(function(a, b) {
         var da = etat.noeuds.get(a);
