@@ -1,11 +1,128 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 7 février 2026 (Beta 97.3 - Build 0207-2041)
+> **Derniere mise a jour** : 8 février 2026 (Beta 97.4 - Build 0208-1440)
 
 ---
 
 ## A faire
+
+### Priorite CRITIQUE - Planification / Carte mentale (Audit 8 fév 2026)
+
+- [x] **#124** BUG CRITIQUE : supprimerNoeud() modifie etat.liens pendant iteration (liens orphelins) ✅ CORRIGÉ (8 fév 2026)
+  - **Ligne** : `planification-carte.js:824-828`
+  - **Symptome** : `for (const [lienId, lien] of etat.liens)` appelle `supprimerLien(lienId)` qui fait `etat.liens.delete()` pendant la boucle
+  - **Impact** : Comportement indefini en JavaScript — des liens peuvent etre sautes et rester en memoire apres suppression du noeud
+  - **Correction** : Collecter les IDs dans un tableau temporaire, puis supprimer apres la boucle
+  - **Fichier** : `js/planification-carte.js`
+
+- [x] **#125** BUG CRITIQUE : mettreAJourZoneConteneur() sans protection contre cycles (stack overflow) ✅ CORRIGÉ (8 fév 2026)
+  - **Ligne** : `planification-carte.js:1744-1745`
+  - **Symptome** : Si corruption cree un cycle (conteneur A parent de B, B parent de A), recursion infinie → crash navigateur
+  - **Contraste** : `reLayoutConteneur()` a deja une garde `_layoutEnCours.has()`, mais pas `mettreAJourZoneConteneur()`
+  - **Correction** : Ajouter un Set `_zoneEnCours` comme garde anti-cycle, similaire a `_layoutEnCours`
+  - **Fichier** : `js/planification-carte.js`
+
+- [x] **#126** BUG CRITIQUE : estDescendantDe() sans protection contre cycles (stack overflow) ✅ CORRIGÉ (8 fév 2026)
+  - **Ligne** : `planification-carte.js:1445-1453`
+  - **Symptome** : Recursion infinie si le graphe parent/enfants contient un cycle
+  - **Utilise par** : `trouverConteneurPour()` appele pendant le drag → freeze du drag si structure corrompue
+  - **Correction** : Ajouter parametre `visited = new Set()` pour detecter les cycles
+  - **Fichier** : `js/planification-carte.js`
+
+- [x] **#127** evaluerBadge() : asymétrie clones/parent documentée (comportement voulu) ✅ DOCUMENTÉ (8 fév 2026)
+  - **Lignes** : `planification-carte.js:248-252, 281, 291`
+  - **Symptome** : Agrege les liens de TOUS les clones (via `trouverClones`) mais verifie `noeud.parent` du noeud courant seulement
+  - **Exemple** : Clone A dans Lecon L1, Clone B hors lecon → B affiche badge vert car les liens de A sont agreges, mais parent de B n'est pas une lecon
+  - **Correction** : Verifier le parent de chaque clone individuellement, ou documenter le comportement voulu
+  - **Fichier** : `js/planification-carte.js`
+
+### Priorite haute - Planification / Carte mentale (Audit 8 fév 2026)
+
+- [x] **#128** VERBES_COMPAT : mapping incorrect pour 'evalue_par' ✅ CORRIGÉ (8 fév 2026)
+  - **Ligne** : `planification-carte.js:168`
+  - **Symptome** : `'evalue_par': 's_acquiert_par'` — devrait etre `'se_verifie_par'`
+  - **Impact** : Les liens d'evaluation anciens (avant migration) affichent un verbe incorrect
+  - **Correction** : Changer en `'evalue_par': 'se_verifie_par'`
+  - **Fichier** : `js/planification-carte.js`
+
+- [x] **#129** Metadonnees (duree, semaines) non propagees aux clones ✅ CORRIGÉ (8 fév 2026)
+  - **Lignes** : `planification-carte.js:616, 630, 636`
+  - **Symptome** : Changer la duree d'un clone ne met pas a jour les autres instances
+  - **Contraste** : `titre` et `description` sont propages via `propagerModification()`, mais pas `metadata.duree`, `metadata.semaineDebut`, `metadata.semaineFin`
+  - **Correction** : Appeler `propagerModification()` pour les metadonnees, ou creer une fonction dediee
+  - **Fichier** : `js/planification-carte.js`
+
+- [x] **#130** creerLien() ne verifie pas les doublons ✅ CORRIGÉ (8 fév 2026)
+  - **Ligne** : `planification-carte.js:1038-1046`
+  - **Symptome** : Possible de creer plusieurs liens identiques source→cible avec le meme verbe
+  - **Impact** : Lignes SVG superposees, `getLiensDeNoeud()` retourne des doublons
+  - **Correction** : Verifier l'existence d'un lien identique avant creation
+  - **Fichier** : `js/planification-carte.js`
+
+- [x] **#131** restaurerSnapshot() ne valide pas les references (liens orphelins) ✅ CORRIGÉ (8 fév 2026)
+  - **Lignes** : `planification-carte.js:1860-1878`
+  - **Symptome** : Apres undo, des liens peuvent pointer vers des noeuds inexistants, et des enfants peuvent referencer un parent supprime
+  - **Impact** : `dessinerLien()` echoue silencieusement (return), le lien reste en memoire sans affichage
+  - **Correction** : Apres restauration, filtrer les liens dont source/cible n'existent pas, et nettoyer les references parent/enfants invalides
+  - **Fichier** : `js/planification-carte.js`
+
+- [x] **#132** chargerCarte() ne valide pas l'integrite des donnees chargees ✅ CORRIGÉ (8 fév 2026)
+  - **Ligne** : `planification-carte.js:1935-2005`
+  - **Symptome** : Donnees corrompues (compteur negatif, x/y = NaN, IDs invalides) sont chargees sans erreur
+  - **Impact** : Canvas vide ou affichage incoherent, NaN se propage dans les calculs de layout
+  - **Correction** : Ajouter validation minimale des champs critiques (type existe dans TYPES, x/y numeriques, etc.)
+  - **Fichier** : `js/planification-carte.js`
+
+- [x] **#133** Constantes GAP/PADDING/HEADER_H dupliquees en 3 fonctions (risque de divergence) ✅ CORRIGÉ (8 fév 2026)
+  - **Lignes** : `planification-carte.js:1569, 1647, 1714`
+  - **Symptome** : `var GAP=30; var PADDING=30; var HEADER_H=45;` defini localement dans `reLayoutConteneur()`, `reLayoutConteneurSaufDragged()` et `mettreAJourZoneConteneur()`
+  - **Impact** : Si on change une valeur dans une fonction et oublie les autres, les conteneurs se chevauchent
+  - **Correction** : Extraire en constante module unique `LAYOUT_CONFIG = { GAP: 30, PADDING: 30, HEADER_H: 45 }`
+  - **Fichier** : `js/planification-carte.js`
+
+- [x] **#134** afficherMenuLienExistant() affiche des doublons pour verbes non migres ✅ CORRIGÉ (8 fév 2026)
+  - **Lignes** : `planification-carte.js:1291-1294`
+  - **Symptome** : Si `lien.type = 'developpe'` (ancien verbe), le bouton 'developpe' ET 'se_decline_en' apparaissent dans le menu
+  - **Cause** : Le verbe actuel est ajoute brut a `verbesPertinents` sans normalisation via VERBES_COMPAT
+  - **Correction** : Normaliser via `VERBES_COMPAT[lien.type] || lien.type` avant insertion
+  - **Fichier** : `js/planification-carte.js`
+
+- [x] **#135** Badges non recalcules apres undo/redo ✅ CORRIGÉ (8 fév 2026)
+  - **Ligne** : `planification-carte.js:1887`
+  - **Symptome** : Apres un undo, les badges affichent un etat obsolete jusqu'au prochain rafraichissement
+  - **Correction** : Appeler `mettreAJourTousLesBadges()` dans un `requestAnimationFrame` apres `restaurerSnapshot()`
+  - **Fichier** : `js/planification-carte.js`
+
+- [x] **#136** Position menuLien : vérifié correct (menu enfant de la zone transformée) ✅ FAUX POSITIF (8 fév 2026)
+  - **Lignes** : `planification-carte.js:1260-1262, 1337-1340`
+  - **Symptome** : `clientVersEspace(x, y)` convertit en coordonnees d'espace, mais le menu est positionne en absolu dans le document
+  - **Impact** : Apres zoom, le menu apparait decale ou hors ecran
+  - **Correction** : Positionner relativement au viewport au lieu des coordonnees espace
+  - **Fichier** : `js/planification-carte.js`
+
+### Priorite moyenne - Planification / Carte mentale (Audit 8 fév 2026)
+
+- [x] **#137** Mode individuel non sauvegarde dans undo/redo ✅ CORRIGÉ (8 fév 2026)
+  - `modeIndividuel` ajouté dans `clonerEtatPersistant()` et restauré depuis le snapshot au lieu d'être forcé à `null`
+
+- [x] **#138** Indicateurs clone 🧬 crees en async (requestAnimationFrame) ✅ CORRIGÉ (8 fév 2026)
+  - Indicateur créé synchroniquement dans `reconstruireDOM()` après `attacherEvenements()`, retiré du bloc rAF
+
+- [x] **#139** Event listeners non nettoyes lors de suppression de noeuds ✅ FAUX POSITIF (8 fév 2026)
+  - Les listeners sont attachés à l'élément DOM lui-même (pas au document). Quand `el.remove()` est appelé et qu'aucune référence ne subsiste, le GC du navigateur collecte l'élément ET ses listeners. Les listeners document temporaires (mousemove/mouseup pendant drag) sont retirés dans le handler mouseup.
+
+- [x] **#140** Cle `planification_seances` non centralisee ✅ CORRIGÉ (8 fév 2026)
+  - Constante `CLE_SEANCES` ajoutée en haut du module, 3 occurrences remplacées par `window.cle(CLE_SEANCES)`
+
+- [x] **#141** CSS inline dans le panneau clone ✅ CORRIGÉ (8 fév 2026)
+  - Styles inline du panneau clone-info extraits vers classes CSS `.planif-clone-compteur` et `.planif-clone-lien` dans styles.css
+
+- [x] **#142** Performance O(n²) dans trouverClones() et evaluerBadge() ✅ CORRIGÉ (8 fév 2026)
+  - Index inverse `_cloneIndex: Map(sourceId → Set)` maintenu via `_indexerClone()`/`_desindexerClone()`, reconstruit dans `restaurerSnapshot()`, `chargerCarte()`, `viderCanvas()`
+
+- [x] **#143** Migration VERBES_COMPAT non appliquee au chargement ✅ CORRIGÉ (8 fév 2026)
+  - Post-migration `VERBES_COMPAT` ajoutée dans `chargerCarte()` : après MIGRATION_VERBES (direction), normalise les noms restants via VERBES_COMPAT (renommage simple)
 
 ### Priorite CRITIQUE - Namespacing (Audit 5 fév 2026)
 

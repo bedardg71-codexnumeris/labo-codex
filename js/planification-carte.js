@@ -36,6 +36,12 @@ let pileUndo = [];
 let pileRedo = [];
 let _undoBatch = false;
 
+// === CLÉ DE STOCKAGE SÉANCES ===
+var CLE_SEANCES = 'planification_seances';
+
+// === INDEX INVERSE CLONES (sourceId → Set d'IDs) ===
+var _cloneIndex = new Map();
+
 // === CONFIGURATION DES TYPES ===
 const TYPES = {
     // Objectifs
@@ -165,7 +171,7 @@ var MIGRATION_VERBES = {
 
 // Compatibilité anciens verbes pour affichage
 var VERBES_COMPAT = {
-    'prerequis_de': 's_appuie_sur', 'evalue_par': 's_acquiert_par',
+    'prerequis_de': 's_appuie_sur', 'evalue_par': 'se_verifie_par',
     'soutenu_par': 's_acquiert_par', 'revise_dans': 's_acquiert_par',
     'sequence_avant': 'se_concretise_dans',
     'developpe': 'se_decline_en', 'vise': 'se_concretise_dans',
@@ -243,6 +249,9 @@ function ideeMaitresseAtteinLecon(noeudId, visited) {
 
 // Retourne { entree: {valide, message}, sortie: {valide, message} }
 // entree = amont (compétence/objectif), sortie = aval (leçon/activité)
+// NOTE clones : Les LIENS sont agrégés sur tous les clones (identité partagée),
+// mais le PARENT (containment) est vérifié sur le nœud courant seulement
+// car chaque clone vit à sa propre position dans la hiérarchie.
 function evaluerBadge(noeud) {
     var type = noeud.type;
     var tousLesClones = trouverClones(noeud.id);
@@ -614,6 +623,7 @@ function ouvrirPanneau(id) {
         dureeInput.addEventListener('focus', function() { enregistrerPourUndo(); });
         dureeInput.addEventListener('input', function(e) {
             donnees.metadata.duree = parseInt(e.target.value) || null;
+            propagerModification(id, 'metadata', JSON.parse(JSON.stringify(donnees.metadata)));
             sauvegarder();
         });
     }
@@ -628,12 +638,14 @@ function ouvrirPanneau(id) {
         semDebutInput.addEventListener('focus', function() { enregistrerPourUndo(); });
         semDebutInput.addEventListener('input', function(e) {
             donnees.metadata.semaineDebut = parseInt(e.target.value) || null;
+            propagerModification(id, 'metadata', JSON.parse(JSON.stringify(donnees.metadata)));
             sauvegarder();
         });
         var semFinInput = extra.querySelector('#planif-panneau-sem-fin');
         semFinInput.addEventListener('focus', function() { enregistrerPourUndo(); });
         semFinInput.addEventListener('input', function(e) {
             donnees.metadata.semaineFin = parseInt(e.target.value) || null;
+            propagerModification(id, 'metadata', JSON.parse(JSON.stringify(donnees.metadata)));
             sauvegarder();
         });
     }
@@ -739,8 +751,8 @@ function ouvrirPanneau(id) {
             var clones = trouverClones(id);
             var nb = clones.length;
             cloneInfo.style.display = '';
-            cloneInfo.innerHTML = '<span style="font-size:12px;color:#7c3aed;">\uD83E\uDDEC ' + nb + ' instance' + (nb > 1 ? 's' : '') + '</span>' +
-                ' <a href="#" id="planif-clone-voir-autres" style="font-size:11px;color:#7c3aed;">Voir les autres</a>';
+            cloneInfo.innerHTML = '<span class="planif-clone-compteur">\uD83E\uDDEC ' + nb + ' instance' + (nb > 1 ? 's' : '') + '</span>' +
+                ' <a href="#" id="planif-clone-voir-autres" class="planif-clone-lien">Voir les autres</a>';
             var lienVoir = document.getElementById('planif-clone-voir-autres');
             if (lienVoir) {
                 lienVoir.onclick = function(ev) {
@@ -802,13 +814,20 @@ function supprimerNoeud(id) {
             var n = entry[1];
             if (n.cloneSourceId === id) clonesATransferer.push(n);
         }
+        // Désindexer tous les clones de l'ancien sourceId avant transfert
+        for (var cdi = 0; cdi < clonesATransferer.length; cdi++) {
+            _desindexerClone(clonesATransferer[cdi]);
+        }
         if (clonesATransferer.length > 0) {
             var nouvelOriginal = clonesATransferer[0];
             nouvelOriginal.cloneSourceId = null;
             for (var ct = 1; ct < clonesATransferer.length; ct++) {
                 clonesATransferer[ct].cloneSourceId = nouvelOriginal.id;
+                _indexerClone(clonesATransferer[ct]);
             }
         }
+    } else if (donnees) {
+        _desindexerClone(donnees);
     }
 
     if (donnees && donnees.enfants) {
@@ -821,10 +840,14 @@ function supprimerNoeud(id) {
         detacherDuConteneur(id);
     }
 
+    var liensASupprimer = [];
     for (const [lienId, lien] of etat.liens) {
         if (lien.source === id || lien.cible === id) {
-            supprimerLien(lienId);
+            liensASupprimer.push(lienId);
         }
+    }
+    for (var li = 0; li < liensASupprimer.length; li++) {
+        supprimerLien(liensASupprimer[li]);
     }
     etat.noeuds.delete(id);
     const el = document.getElementById(id);
@@ -884,15 +907,44 @@ function mettreAJourIndicateurClone(noeud) {
     }
 }
 
+// --- Maintenance de l'index inverse clones ---
+function _indexerClone(noeud) {
+    if (!noeud || !noeud.cloneSourceId) return;
+    var set = _cloneIndex.get(noeud.cloneSourceId);
+    if (!set) { set = new Set(); _cloneIndex.set(noeud.cloneSourceId, set); }
+    set.add(noeud.id);
+}
+
+function _desindexerClone(noeud) {
+    if (!noeud || !noeud.cloneSourceId) return;
+    var set = _cloneIndex.get(noeud.cloneSourceId);
+    if (set) {
+        set.delete(noeud.id);
+        if (set.size === 0) _cloneIndex.delete(noeud.cloneSourceId);
+    }
+}
+
+function _reconstruireCloneIndex() {
+    _cloneIndex.clear();
+    for (var entry of etat.noeuds) {
+        _indexerClone(entry[1]);
+    }
+}
+
 function trouverClones(noeudId) {
     var donnees = etat.noeuds.get(noeudId);
-    if (!donnees) return [donnees].filter(Boolean);
+    if (!donnees) return [];
     var sourceId = donnees.cloneSourceId || noeudId;
     var resultats = [];
-    for (var entry of etat.noeuds) {
-        var n = entry[1];
-        if (n.id === sourceId || n.cloneSourceId === sourceId) {
-            resultats.push(n);
+    // L'original
+    var original = etat.noeuds.get(sourceId);
+    if (original) resultats.push(original);
+    // Les clones via l'index
+    var set = _cloneIndex.get(sourceId);
+    if (set) {
+        for (var cid of set) {
+            var c = etat.noeuds.get(cid);
+            if (c && c.id !== sourceId) resultats.push(c);
         }
     }
     return resultats;
@@ -904,11 +956,8 @@ function estClone(noeudId) {
 }
 
 function aDesClones(noeudId) {
-    for (var entry of etat.noeuds) {
-        var n = entry[1];
-        if (n.cloneSourceId === noeudId) return true;
-    }
-    return false;
+    var set = _cloneIndex.get(noeudId);
+    return set != null && set.size > 0;
 }
 
 function doitAfficherIndicateurClone(noeud) {
@@ -922,7 +971,11 @@ function propagerModification(noeudId, champ, valeur) {
     for (var i = 0; i < clones.length; i++) {
         var c = clones[i];
         if (c.id === noeudId) continue;
-        c[champ] = valeur;
+        if (champ === 'metadata') {
+            c.metadata = JSON.parse(JSON.stringify(valeur));
+        } else {
+            c[champ] = valeur;
+        }
         if (champ === 'titre') {
             var el = document.getElementById(c.id);
             if (el) {
@@ -958,6 +1011,7 @@ function clonerNoeud(noeudId) {
         cloneSourceId: cloneSourceId
     };
     etat.noeuds.set(newId, donnees);
+    _indexerClone(donnees);
 
     var el = document.createElement('div');
     el.className = 'planif-noeud planif-type-' + source.type;
@@ -1036,6 +1090,13 @@ function demarrerLien(noeudId, direction, e) {
 }
 
 function creerLien(sourceId, cibleId, typeLien) {
+    // #130 : vérifier doublon avant création
+    for (var entry of etat.liens) {
+        var ex = entry[1];
+        if (ex.source === sourceId && ex.cible === cibleId && ex.type === typeLien) {
+            return ex.id;
+        }
+    }
     enregistrerPourUndo();
     var id = 'planif-lien_' + (++etat.compteurLiens);
     var donnees = { id: id, source: sourceId, cible: cibleId, type: typeLien };
@@ -1288,9 +1349,10 @@ function afficherMenuLienExistant(x, y, lienId) {
             verbesPertinents = resolution.verbes;
         }
     }
-    // Toujours inclure le verbe actuel (même si la résolution a changé)
-    if (lien.type && verbesPertinents.indexOf(lien.type) === -1) {
-        verbesPertinents.push(lien.type);
+    // Toujours inclure le verbe actuel normalisé (même si la résolution a changé)
+    var verbeNormalise = VERBES_COMPAT[lien.type] || lien.type;
+    if (verbeNormalise && verbesPertinents.indexOf(verbeNormalise) === -1) {
+        verbesPertinents.push(verbeNormalise);
     }
 
     menuLien.innerHTML = '';
@@ -1442,12 +1504,15 @@ function trouverConteneurPour(clientX, clientY, excludeId, enfantType) {
     return meilleur;
 }
 
-function estDescendantDe(candidatId, noeudId) {
+function estDescendantDe(candidatId, noeudId, visited) {
+    if (!visited) visited = new Set();
+    if (visited.has(noeudId)) return false;
+    visited.add(noeudId);
     var noeud = etat.noeuds.get(noeudId);
     if (!noeud || !noeud.enfants) return false;
     for (var i = 0; i < noeud.enfants.length; i++) {
         if (noeud.enfants[i] === candidatId) return true;
-        if (estDescendantDe(candidatId, noeud.enfants[i])) return true;
+        if (estDescendantDe(candidatId, noeud.enfants[i], visited)) return true;
     }
     return false;
 }
@@ -1496,6 +1561,10 @@ function detacherDuConteneur(noeudId) {
 }
 
 var _layoutEnCours = new Set();
+var _zoneEnCours = new Set();
+var LAYOUT_GAP = 30;
+var LAYOUT_PADDING = 30;
+var LAYOUT_HEADER_H = 45;
 
 function reLayoutAvecAnimation(conteneurId) {
     var conteneur = etat.noeuds.get(conteneurId);
@@ -1566,9 +1635,9 @@ function reLayoutConteneur(conteneurId) {
     });
     conteneur.enfants = enfants;
 
-    var GAP = 30;
-    var PADDING = 30;
-    var HEADER_H = 45;
+    var GAP = LAYOUT_GAP;
+    var PADDING = LAYOUT_PADDING;
+    var HEADER_H = LAYOUT_HEADER_H;
 
     // Measure children widths/heights
     var maxW = 0;
@@ -1644,9 +1713,9 @@ function reLayoutConteneurSaufDragged(conteneurId, draggedId) {
         return (da ? da.y : 0) - (db ? db.y : 0);
     });
 
-    var GAP = 30;
-    var PADDING = 30;
-    var HEADER_H = 45;
+    var GAP = LAYOUT_GAP;
+    var PADDING = LAYOUT_PADDING;
+    var HEADER_H = LAYOUT_HEADER_H;
 
     var maxW = 0;
     var totalH = 0;
@@ -1693,9 +1762,11 @@ function reLayoutConteneurSaufDragged(conteneurId, draggedId) {
 }
 
 function mettreAJourZoneConteneur(conteneurId) {
+    if (_zoneEnCours.has(conteneurId)) return;
+    _zoneEnCours.add(conteneurId);
     var conteneur = etat.noeuds.get(conteneurId);
     var el = document.getElementById(conteneurId);
-    if (!conteneur || !el) return;
+    if (!conteneur || !el) { _zoneEnCours.delete(conteneurId); return; }
 
     var enfants = (conteneur.enfants || []).filter(function(eid) { return etat.noeuds.has(eid); });
     var zone = el.querySelector('.planif-noeud-zone');
@@ -1706,13 +1777,14 @@ function mettreAJourZoneConteneur(conteneurId) {
         el.style.height = '';
         el.style.borderColor = '';
         if (zone) { zone.classList.add('planif-vide'); zone.textContent = ''; }
+        _zoneEnCours.delete(conteneurId);
         return;
     }
 
     el.classList.add('planif-a-enfants');
 
-    var PADDING = 30;
-    var HEADER_H = 45;
+    var PADDING = LAYOUT_PADDING;
+    var HEADER_H = LAYOUT_HEADER_H;
 
     var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
     for (var i = 0; i < enfants.length; i++) {
@@ -1741,6 +1813,8 @@ function mettreAJourZoneConteneur(conteneurId) {
 
     mettreAJourLiens(conteneurId);
 
+    _zoneEnCours.delete(conteneurId);
+
     if (conteneur.parent) {
         mettreAJourZoneConteneur(conteneur.parent);
     }
@@ -1758,6 +1832,7 @@ function clonerEtatPersistant() {
     return {
         compteur: etat.compteur,
         compteurLiens: etat.compteurLiens,
+        modeIndividuel: etat.modeIndividuel,
         noeuds: Array.from(etat.noeuds.values()).map(function(n) {
             return {
                 id: n.id, type: n.type, titre: n.titre, description: n.description,
@@ -1824,6 +1899,8 @@ function reconstruireDOM() {
         }
         attacherEvenements(el, n);
         coucheNoeuds.appendChild(el);
+        // Indicateur clone synchrone (avant le rAF layout)
+        mettreAJourIndicateurClone(n);
     }
 
     requestAnimationFrame(function() {
@@ -1845,15 +1922,13 @@ function reconstruireDOM() {
             dessinerLien(entry3[1]);
         }
         mettreAJourGuidesZone();
-        for (var entryClone of etat.noeuds) {
-            mettreAJourIndicateurClone(entryClone[1]);
-        }
     });
 }
 
 function restaurerSnapshot(snapshot) {
     etat.noeuds.clear();
     etat.liens.clear();
+    _cloneIndex.clear();
     etat.compteur = snapshot.compteur;
     etat.compteurLiens = snapshot.compteurLiens;
 
@@ -1875,16 +1950,26 @@ function restaurerSnapshot(snapshot) {
     }
     for (var j = 0; j < snapshot.liens.length; j++) {
         var l = snapshot.liens[j];
-        etat.liens.set(l.id, { id: l.id, source: l.source, cible: l.cible, type: l.type });
+        if (etat.noeuds.has(l.source) && etat.noeuds.has(l.cible)) {
+            etat.liens.set(l.id, { id: l.id, source: l.source, cible: l.cible, type: l.type });
+        }
     }
+    // Nettoyer les références parent/enfants invalides
+    for (var entryV of etat.noeuds) {
+        var nV = entryV[1];
+        if (nV.parent && !etat.noeuds.has(nV.parent)) nV.parent = null;
+        if (nV.enfants) nV.enfants = nV.enfants.filter(function(eid) { return etat.noeuds.has(eid); });
+    }
+    _reconstruireCloneIndex();
 
     reconstruireDOM();
     etat.selection = null;
     etat.multiSelection.clear();
-    etat.modeIndividuel = null;
+    etat.modeIndividuel = snapshot.modeIndividuel || null;
     fermerPanneau();
     fermerMenuLien();
     sauvegarder();
+    requestAnimationFrame(function() { mettreAJourTousLesBadges(); });
 }
 
 function annuler() {
@@ -1921,6 +2006,7 @@ function viderCanvas() {
     if (coucheLiens) coucheLiens.innerHTML = '';
     etat.noeuds.clear();
     etat.liens.clear();
+    _cloneIndex.clear();
     etat.compteur = 0;
     etat.compteurLiens = 0;
     etat.selection = null;
@@ -1950,6 +2036,8 @@ function chargerCarte(carteId) {
         }
         var config = TYPES[n.type];
         if (!config) continue;
+        if (isNaN(n.x)) n.x = 100;
+        if (isNaN(n.y)) n.y = 100;
         if (n.enfants === undefined) n.enfants = [];
         if (n.parent === undefined) n.parent = null;
         if (!n.metadata) n.metadata = {};
@@ -1969,6 +2057,7 @@ function chargerCarte(carteId) {
 
         etat.noeuds.set(n.id, n);
     }
+    _reconstruireCloneIndex();
 
     // Remap et charger les liens
     var liensListe = donnees.liens || [];
@@ -1987,6 +2076,12 @@ function chargerCarte(carteId) {
                 l.cible = ancienneSource;
             }
             l.type = migration.nouveauVerbe;
+            liensModifies = true;
+        }
+        // Post-migration : normaliser via VERBES_COMPAT (renommage simple)
+        var compat = VERBES_COMPAT[l.type];
+        if (compat) {
+            l.type = compat;
             liensModifies = true;
         }
         etat.liens.set(l.id, l);
@@ -2828,11 +2923,11 @@ function afficherDetailsProduction(productionId, productions) {
 
 function sauvegarderChoixActivite(leconId, activiteId, retroaction, productionId) {
     if (typeof db === 'undefined' || typeof window.cle !== 'function') return;
-    var seances = db.getSync(window.cle('planification_seances'), {});
+    var seances = db.getSync(window.cle(CLE_SEANCES), {});
     if (!seances[leconId]) seances[leconId] = {};
     if (!seances[leconId].activites) seances[leconId].activites = {};
     seances[leconId].activites[activiteId] = { retroaction: retroaction, productionId: productionId || null };
-    db.setSync(window.cle('planification_seances'), seances);
+    db.setSync(window.cle(CLE_SEANCES), seances);
 }
 
 function afficherLeconOrganisateur() {
@@ -2893,7 +2988,7 @@ function afficherLeconOrganisateur() {
 
     // Charger les productions depuis Construction de la note
     var productions = chargerProductions();
-    var seances = typeof db !== 'undefined' ? db.getSync(window.cle('planification_seances'), {}) : {};
+    var seances = typeof db !== 'undefined' ? db.getSync(window.cle(CLE_SEANCES), {}) : {};
 
     if (activites.length === 0) {
         coeurContenu.innerHTML = '<div class="planif-org-placeholder">Aucune activité dans cette leçon.</div>';
