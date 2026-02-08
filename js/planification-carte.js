@@ -225,6 +225,16 @@ function evaluerBadge(noeud) {
     }
 }
 
+function resoudreCouleur(cssVar) {
+    if (!cssVar || !cssVar.startsWith('var(')) return cssVar;
+    var temp = document.createElement('span');
+    temp.style.color = cssVar;
+    document.body.appendChild(temp);
+    var resolved = getComputedStyle(temp).color;
+    document.body.removeChild(temp);
+    return resolved;
+}
+
 function mettreAJourBadge(donnees) {
     var el = document.getElementById(donnees.id);
     if (!el) return;
@@ -236,11 +246,13 @@ function mettreAJourBadge(donnees) {
     }
     var resultat = evaluerBadge(donnees);
     if (resultat.valide) {
-        badge.style.backgroundColor = obtenirCouleurNoeud(donnees);
+        badge.style.backgroundColor = resoudreCouleur(obtenirCouleurNoeud(donnees));
+        badge.textContent = '\u2713';
         badge.title = 'Alignement complet';
         badge.classList.remove('planif-badge-gris');
     } else {
-        badge.style.backgroundColor = '#ccc';
+        badge.style.backgroundColor = '#b0b0b0';
+        badge.textContent = '!';
         badge.title = resultat.message;
         badge.classList.add('planif-badge-gris');
     }
