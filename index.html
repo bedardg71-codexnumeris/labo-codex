@@ -6948,6 +6948,12 @@
                                 <div id="planif-panneau-seances-contenu">
                                     <!-- Sections leçon (visibles quand une leçon est sélectionnée) -->
                                     <div id="planif-org-lecon" style="display:none">
+                                        <div class="planif-org-section planif-org-ee-bar">
+                                            <label class="planif-checkbox-label">
+                                                <input type="checkbox" id="planif-org-ee-checkbox">
+                                                Enseignement explicite
+                                            </label>
+                                        </div>
                                         <div class="planif-org-section" id="planif-org-objectif">
                                             <div class="planif-org-section-titre">Objectif de la leçon</div>
                                             <div class="planif-org-section-contenu planif-org-placeholder">
@@ -15861,7 +15867,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97';
-        const BUILD_ID = '0208-1044';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0208-1052';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';

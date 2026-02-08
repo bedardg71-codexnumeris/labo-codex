@@ -2007,6 +2007,32 @@ function peuplerSelecteurLecons() {
     afficherLeconOrganisateur();
 }
 
+function trouverIdeeMaitresseAncetre(noeudId) {
+    // Remonter les branches (parent + liens) pour trouver la dernière idée maîtresse
+    var visite = {};
+    var aExplorer = [noeudId];
+    while (aExplorer.length > 0) {
+        var courantId = aExplorer.shift();
+        if (visite[courantId]) continue;
+        visite[courantId] = true;
+        var courant = etat.noeuds.get(courantId);
+        if (!courant) continue;
+
+        // Vérifier les liens de ce nœud pour une idée maîtresse
+        var liens = getLiensDeNoeud(courantId);
+        for (var i = 0; i < liens.length; i++) {
+            var cible = etat.noeuds.get(liens[i].noeudId);
+            if (cible && cible.type === 'idee-maitresse') return cible;
+        }
+
+        // Remonter au parent (conteneur)
+        if (courant.parent && !visite[courant.parent]) {
+            aExplorer.push(courant.parent);
+        }
+    }
+    return null;
+}
+
 function afficherLeconOrganisateur() {
     var leconId = orgSelectLecon.value;
     if (!leconId) {
@@ -2018,22 +2044,21 @@ function afficherLeconOrganisateur() {
     var lecon = etat.noeuds.get(leconId);
     if (!lecon) return;
 
-    // Objectif — placeholder (Phase 2 implémentera l'auto-dérivation)
+    // Objectif — remonter les branches pour trouver la dernière idée maîtresse
     var objContenu = orgLecon.querySelector('#planif-org-objectif .planif-org-section-contenu');
-    var liens = getLiensDeNoeud(leconId);
-    var ideeM = null;
-    for (var i = 0; i < liens.length; i++) {
-        if (liens[i].direction === 'sortant') {
-            var cible = etat.noeuds.get(liens[i].noeudId);
-            if (cible && cible.type === 'idee-maitresse') { ideeM = cible; break; }
-        }
-    }
+    var ideeM = trouverIdeeMaitresseAncetre(leconId);
     if (ideeM) {
         objContenu.textContent = 'Au terme de la leçon, l\'élève sera capable de ' + (ideeM.titre || '...').toLowerCase() + '.';
         objContenu.classList.remove('planif-org-placeholder');
     } else {
-        objContenu.textContent = 'Aucune idée maîtresse associée. Créez un lien « vise » depuis cette leçon.';
+        objContenu.textContent = 'Aucune idée maîtresse associée. Reliez la branche à une idée maîtresse.';
         objContenu.classList.add('planif-org-placeholder');
+    }
+
+    // Enseignement explicite — checkbox
+    var eeContenu = document.getElementById('planif-org-ee-checkbox');
+    if (eeContenu) {
+        eeContenu.checked = !!(lecon.metadata && lecon.metadata.enseignementExplicite);
     }
 
     // Prérequis — placeholder (Phase 2)
@@ -2820,6 +2845,19 @@ function initialiser() {
     // Organisateur — sélecteurs et collapse calendrier
     if (orgSelectSequence) orgSelectSequence.addEventListener('change', peuplerSelecteurLecons);
     if (orgSelectLecon) orgSelectLecon.addEventListener('change', afficherLeconOrganisateur);
+    var eeCheckbox = document.getElementById('planif-org-ee-checkbox');
+    if (eeCheckbox) {
+        eeCheckbox.addEventListener('change', function(e) {
+            var leconId = orgSelectLecon ? orgSelectLecon.value : '';
+            if (!leconId) return;
+            var lecon = etat.noeuds.get(leconId);
+            if (!lecon) return;
+            enregistrerPourUndo();
+            if (!lecon.metadata) lecon.metadata = {};
+            lecon.metadata.enseignementExplicite = e.target.checked;
+            sauvegarder();
+        });
+    }
     if (orgCalendrierToggle) {
         orgCalendrierToggle.addEventListener('click', function() {
             var contenu = orgCalendrierContenu;
