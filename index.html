@@ -3425,6 +3425,17 @@
                 <h2 class="modal-titre">Nouveautés</h2>
 
                 <!-- Beta 97.3 - 7 février -->
+                <div class="changelog-entry changelog-entry--vert">
+                    <strong class="changelog-title">Beta 97.3 (7 f&eacute;vrier) - Planification :</strong>
+                    <ul class="changelog-list">
+                        <li><strong>Nouvel onglet Planification</strong> : Carte mentale int&eacute;gr&eacute;e pour organiser visuellement comp&eacute;tences, s&eacute;quences, le&ccedil;ons et activit&eacute;s. Deux zones : Objectifs &amp; Savoirs (gauche) et Organisation &amp; Activit&eacute;s (droite).</li>
+                        <li><strong>10 types de n&oelig;uds</strong> : Comp&eacute;tence, id&eacute;e ma&icirc;tresse, connaissance, pr&eacute;alable, strat&eacute;gie, s&eacute;quence, le&ccedil;on, activit&eacute;, soutien, r&eacute;vision &mdash; chacun avec sa couleur distinctive.</li>
+                        <li><strong>Panneau S&eacute;ances</strong> : Vue calendrier lat&eacute;rale pour planifier la r&eacute;partition des s&eacute;quences et le&ccedil;ons sur les semaines du trimestre. Export texte et TSV.</li>
+                        <li><strong>Multi-cartes</strong> : Cr&eacute;ez plusieurs cartes, renommez-les, importez/exportez en JSON.</li>
+                        <li><strong>Glisser-d&eacute;poser</strong> : Cr&eacute;ez des n&oelig;uds en glissant depuis la palette, reliez-les par clic, s&eacute;lectionnez par rectangle, multi-s&eacute;lection avec &#8984;+clic.</li>
+                    </ul>
+                </div>
+
                 <div class="changelog-entry changelog-entry--bleu">
                     <strong class="changelog-title">Beta 97.3 (7 f&eacute;vrier) - Annotation et &eacute;valuation :</strong>
                     <ul class="changelog-list">
@@ -11721,7 +11732,41 @@
                     <h2>Notes de version</h2>
                     <p class="text-muted">Historique des changements majeurs</p>
 
-                    <!-- Beta 97.3 -->
+                    <!-- Beta 97.3 - Planification -->
+                    <div class="carte accordeon ouvert" id="accordeon-apropos-beta973-planif">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Beta 97.3 — Planification (carte mentale)
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu" style="display: block;">
+                        <p class="text-muted">7 f&eacute;vrier 2026</p>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Nouvel onglet Planification</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Carte mentale</strong> : Organisez visuellement vos comp&eacute;tences, s&eacute;quences, le&ccedil;ons et activit&eacute;s. Deux zones de travail : Objectifs &amp; Savoirs (gauche) et Organisation &amp; Activit&eacute;s (droite).</li>
+                            <li><strong>10 types de n&oelig;uds</strong> : Comp&eacute;tence, id&eacute;e ma&icirc;tresse, connaissance, pr&eacute;alable, strat&eacute;gie, s&eacute;quence, le&ccedil;on, activit&eacute;, soutien, r&eacute;vision &mdash; chacun avec sa couleur distinctive.</li>
+                            <li><strong>Liens visuels</strong> : Reliez les n&oelig;uds entre eux par clic pour mat&eacute;rialiser les relations p&eacute;dagogiques (comp&eacute;tence &rarr; s&eacute;quence &rarr; le&ccedil;on &rarr; activit&eacute;).</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Panneau S&eacute;ances</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Vue calendrier</strong> : Panneau lat&eacute;ral pour visualiser la r&eacute;partition des s&eacute;quences et le&ccedil;ons sur les semaines du trimestre.</li>
+                            <li><strong>Export</strong> : Export en texte brut ou en TSV (compatible tableur).</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Fonctionnalit&eacute;s</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Multi-cartes</strong> : Cr&eacute;ez plusieurs cartes mentales, renommez-les, passez de l'une &agrave; l'autre.</li>
+                            <li><strong>Import/Export JSON</strong> : Sauvegardez et partagez vos cartes.</li>
+                            <li><strong>Glisser-d&eacute;poser</strong> : Cr&eacute;ez des n&oelig;uds en glissant depuis la palette vers la zone de travail.</li>
+                            <li><strong>S&eacute;lection avanc&eacute;e</strong> : Rectangle de s&eacute;lection, multi-s&eacute;lection avec &#8984;+clic, zoom avec &#8984;+/&minus;.</li>
+                        </ul>
+
+                        </div>
+                    </div>
+
+                    <!-- Beta 97.3 - Annotation -->
                     <div class="carte accordeon ouvert" id="accordeon-apropos-beta973">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
@@ -15744,7 +15789,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97';
-        const BUILD_ID = '0207-2041';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0207-2048';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
