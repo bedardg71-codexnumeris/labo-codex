@@ -1397,6 +1397,25 @@ function attacherEvenements(el, donnees) {
         var startDataX = donnees.x;
         var startDataY = donnees.y;
 
+        // Si l'enfant est visuellement hors de son conteneur, activer le mode individuel
+        if (donnees.parent && etat.modeIndividuel !== id) {
+            var parentConteneur = etat.noeuds.get(donnees.parent);
+            if (parentConteneur) {
+                var pEl = document.getElementById(donnees.parent);
+                var pw = pEl ? (parseFloat(pEl.style.width) || pEl.offsetWidth || 200) : 200;
+                var ph = pEl ? (parseFloat(pEl.style.height) || pEl.offsetHeight || 80) : 80;
+                var horsLimites = donnees.x + 20 < parentConteneur.x ||
+                                  donnees.x > parentConteneur.x + pw + 20 ||
+                                  donnees.y + 20 < parentConteneur.y ||
+                                  donnees.y > parentConteneur.y + ph + 20;
+                if (horsLimites) {
+                    etat.modeIndividuel = id;
+                    document.querySelectorAll('.planif-mode-individuel').forEach(function(mel) { mel.classList.remove('planif-mode-individuel'); });
+                    el.classList.add('planif-mode-individuel');
+                }
+            }
+        }
+
         // CAS A: Enfant en mode normal → drag du groupe entier (remonte au conteneur racine)
         if (donnees.parent && etat.modeIndividuel !== id) {
             var racineId = trouverConteneurRacine(id);
