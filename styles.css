@@ -14050,6 +14050,11 @@ body.mode-assiste .btn-aide-contextuelle,
     pointer-events: none;
     text-anchor: middle;
 }
+.planif-lien-label-bg {
+    fill: white;
+    fill-opacity: 0.9;
+    pointer-events: none;
+}
 
 .planif-lien-poignee {
     fill: white;

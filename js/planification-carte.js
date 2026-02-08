@@ -485,13 +485,30 @@ function dessinerLien(donnees) {
     path.id = donnees.id;
     path.setAttribute('d', 'M ' + p1.x + ' ' + p1.y + ' C ' + cx1 + ' ' + cy1 + ', ' + cx2 + ' ' + cy2 + ', ' + p2.x + ' ' + p2.y);
     path.setAttribute('class', 'planif-lien');
-    path.setAttribute('marker-end', 'url(#planif-fleche)');
 
     var sourceData = etat.noeuds.get(donnees.source);
-    if (sourceData) {
-        var couleur = TYPES[sourceData.type] ? TYPES[sourceData.type].couleur : 'var(--planif-couleur-lien)';
-        path.style.stroke = couleur;
-    }
+    var couleur = (sourceData && TYPES[sourceData.type]) ? TYPES[sourceData.type].couleur : 'var(--planif-couleur-lien)';
+    path.style.stroke = couleur;
+
+    // Créer un marker de flèche dédié avec la couleur du lien
+    var markerId = donnees.id + '-fleche';
+    var ancienMarker = document.getElementById(markerId);
+    if (ancienMarker) ancienMarker.remove();
+    var defs = canvas.querySelector('defs');
+    var marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+    marker.id = markerId;
+    marker.setAttribute('viewBox', '0 0 10 10');
+    marker.setAttribute('refX', '9');
+    marker.setAttribute('refY', '5');
+    marker.setAttribute('markerWidth', '8');
+    marker.setAttribute('markerHeight', '8');
+    marker.setAttribute('orient', 'auto-start-reverse');
+    var arrowPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    arrowPath.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z');
+    arrowPath.setAttribute('fill', couleur);
+    marker.appendChild(arrowPath);
+    defs.appendChild(marker);
+    path.setAttribute('marker-end', 'url(#' + markerId + ')');
 
     path.addEventListener('click', function(e) {
         e.stopPropagation();
@@ -504,13 +521,28 @@ function dessinerLien(donnees) {
     if (typeLienConfig) {
         var mx = (p1.x + p2.x) / 2;
         var my = (p1.y + p2.y) / 2;
+        // Fond blanc derrière le libellé pour la lisibilité
+        var bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        bg.setAttribute('class', 'planif-lien-label-bg');
         var label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         label.id = donnees.id + '-label';
         label.setAttribute('x', mx);
         label.setAttribute('y', my - 6);
         label.setAttribute('class', 'planif-lien-label');
         label.textContent = typeLienConfig.label;
+        groupe.appendChild(bg);
         groupe.appendChild(label);
+        // Ajuster le rect de fond après insertion (pour mesurer le texte)
+        requestAnimationFrame(function() {
+            try {
+                var bbox = label.getBBox();
+                bg.setAttribute('x', bbox.x - 3);
+                bg.setAttribute('y', bbox.y - 1);
+                bg.setAttribute('width', bbox.width + 6);
+                bg.setAttribute('height', bbox.height + 2);
+                bg.setAttribute('rx', '3');
+            } catch(e) {}
+        });
     }
 
     var poigneeSource = creerPoigneeLien(p1.x, p1.y, donnees.id, 'source');
