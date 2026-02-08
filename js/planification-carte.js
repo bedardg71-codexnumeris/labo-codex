@@ -2494,6 +2494,9 @@ function initialiser() {
         var type = e.dataTransfer.getData('planif-type');
         if (!type || !TYPES[type]) return;
 
+        // Capturer le conteneur cible détecté pendant le dragover
+        var conteneurCible = paletteSurvolConteneur;
+
         // Nettoyer le feedback visuel du survol palette
         if (paletteSurvolConteneur) {
             var scEl = document.getElementById(paletteSurvolConteneur);
@@ -2507,14 +2510,17 @@ function initialiser() {
         var pos = clientVersData(e.clientX, e.clientY);
         var newId = creerNoeud(type, pos.x - 70, pos.y - 20);
 
-        // Auto-rattacher au conteneur si déposé sur un conteneur valide
-        var conteneurCible = trouverConteneurPour(e.clientX, e.clientY, newId, type);
+        // Fallback: re-détecter le conteneur si pas détecté pendant le dragover
+        if (!conteneurCible) {
+            conteneurCible = trouverConteneurPour(e.clientX, e.clientY, newId, type);
+        }
+
         if (conteneurCible) {
-            // Différer pour laisser le navigateur calculer les dimensions du nouvel élément
-            requestAnimationFrame(function() {
+            // Différer au prochain macrotask pour garantir le rendu complet de l'élément
+            setTimeout(function() {
                 rattacherAuConteneur(newId, conteneurCible);
                 sauvegarder();
-            });
+            }, 0);
         }
 
         paletteDragType = null;
