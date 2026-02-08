@@ -3437,6 +3437,18 @@
                 <!-- Titre principal -->
                 <h2 class="modal-titre">Nouveautés</h2>
 
+                <!-- Beta 97.4 - 8 février -->
+                <div class="changelog-entry changelog-entry--vert">
+                    <strong class="changelog-title">Beta 97.4 (8 f&eacute;vrier) - Alignement p&eacute;dagogique :</strong>
+                    <ul class="changelog-list">
+                        <li><strong>Clonage &#x1F9EC;</strong> : Dupliquer un &eacute;l&eacute;ment en clone partag&eacute; (titre et description synchronis&eacute;s, badges agr&eacute;g&eacute;s).</li>
+                        <li><strong>Verbes refondus</strong> : 5 verbes verticaux automatiques + 2 horizontaux au choix (compl&egrave;te, conduit &agrave;). Migration automatique.</li>
+                        <li><strong>&Eacute;valuations</strong> : Nouveau type rose/magenta, ins&eacute;rable dans les le&ccedil;ons, champs r&eacute;troaction/production au panneau.</li>
+                        <li><strong>Carte d'aide</strong> : Flottante, d&eacute;pla&ccedil;able, redimensionnable. Bouton &laquo;&nbsp;?&nbsp;&raquo; pour l'afficher/masquer.</li>
+                        <li><strong>Onglet renomm&eacute;</strong> : &laquo;&nbsp;Carte mentale&nbsp;&raquo; &rarr; &laquo;&nbsp;Alignement p&eacute;dagogique&nbsp;&raquo;.</li>
+                    </ul>
+                </div>
+
                 <!-- Beta 97.3 - 7 février -->
                 <div class="changelog-entry changelog-entry--vert">
                     <strong class="changelog-title">Beta 97.3 (7 f&eacute;vrier) - Planification :</strong>
@@ -11839,14 +11851,56 @@
                     <h2>Notes de version</h2>
                     <p class="text-muted">Historique des changements majeurs</p>
 
-                    <!-- Beta 97.3 - Planification -->
-                    <div class="carte accordeon ouvert" id="accordeon-apropos-beta973-planif">
+                    <!-- Beta 97.4 - Alignement pédagogique -->
+                    <div class="carte accordeon ouvert" id="accordeon-apropos-beta974-planif">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Beta 97.3 — Planification (carte mentale)
+                                <span class="accordeon-chevron">▼</span> Beta 97.4 &mdash; Alignement p&eacute;dagogique
                             </h3>
                         </div>
                         <div class="accordeon-contenu" style="display: block;">
+                        <p class="text-muted">8 f&eacute;vrier 2026</p>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Syst&egrave;me de clonage &#x1F9EC;</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Cloner un &eacute;l&eacute;ment</strong> : Double-cliquer pour ouvrir le panneau, puis &laquo;&nbsp;Cloner&nbsp;&raquo;. Les clones partagent titre et description &mdash; modifier l'un met &agrave; jour les autres.</li>
+                            <li><strong>Indicateur visuel</strong> : Les clones affichent &#x1F9EC;. Survoler l'indicateur met en surbrillance toutes les instances.</li>
+                            <li><strong>Badges agr&eacute;g&eacute;s</strong> : Les liens de tous les clones sont pris en compte pour la validation des badges.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Verbes de liaison refondus</h4>
+                        <ul class="modal-liste">
+                            <li><strong>5 verbes verticaux</strong> (automatiques) : se d&eacute;cline en, se concr&eacute;tise dans, s'acquiert par, se v&eacute;rifie par, s'appuie sur.</li>
+                            <li><strong>2 verbes horizontaux</strong> (au choix) : compl&egrave;te, conduit &agrave; &mdash; pour les relations entre &eacute;l&eacute;ments de m&ecirc;me niveau.</li>
+                            <li><strong>Direction amont &rarr; aval</strong> : les liens partent de l'intention (comp&eacute;tence) vers la r&eacute;alisation (activit&eacute;). Migration automatique des anciens liens.</li>
+                            <li><strong>S&eacute;lection de verbe</strong> : Cliquer sur un lien pour modifier son verbe parmi les options autoris&eacute;es.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">&Eacute;valuations</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Nouveau type</strong> : &Eacute;valuation (rose/magenta) ajout&eacute; &agrave; la palette.</li>
+                            <li><strong>Int&eacute;gration</strong> : Peut &ecirc;tre ins&eacute;r&eacute;e dans les le&ccedil;ons et reli&eacute;e aux id&eacute;es ma&icirc;tresses et connaissances.</li>
+                            <li><strong>Panneau d&eacute;di&eacute;</strong> : Champs R&eacute;troaction et Production directement dans le panneau d'information.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Am&eacute;liorations UX</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Carte d'aide flottante</strong> : D&eacute;pla&ccedil;able, redimensionnable, fermable. Bouton &laquo;&nbsp;?&nbsp;&raquo; dans la palette pour la r&eacute;afficher.</li>
+                            <li><strong>Espacement conteneurs</strong> : Distance entre &eacute;l&eacute;ments augment&eacute;e pour faciliter le tra&ccedil;age des liens.</li>
+                            <li><strong>Onglet renomm&eacute;</strong> : &laquo;&nbsp;Carte mentale&nbsp;&raquo; devient &laquo;&nbsp;Alignement p&eacute;dagogique&nbsp;&raquo;.</li>
+                        </ul>
+
+                        </div>
+                    </div>
+
+                    <!-- Beta 97.3 - Planification -->
+                    <div class="carte accordeon" id="accordeon-apropos-beta973-planif">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Beta 97.3 &mdash; Planification (carte initiale)
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
                         <p class="text-muted">7 f&eacute;vrier 2026</p>
 
                         <h4 class="titre-bleu-mb8 mt-15">Nouvel onglet Planification</h4>
@@ -15896,7 +15950,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97';
-        const BUILD_ID = '0208-1431';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0208-1437';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
