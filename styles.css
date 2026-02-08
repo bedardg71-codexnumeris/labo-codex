@@ -14562,6 +14562,8 @@ body.mode-assiste .btn-aide-contextuelle,
 .planif-org-chevron { font-size: 10px; }
 .planif-org-section-contenu { font-size: 12px; line-height: 1.5; color: var(--planif-couleur-texte); }
 .planif-org-placeholder { color: #94a3b8; font-style: italic; font-size: 12px; }
+.planif-org-ee-bar { background: #fefce8; padding: 8px 16px; }
+.planif-org-ee-bar .planif-checkbox-label { font-size: 12px; }
 
 .planif-zone-guide {
     text-align: center;
