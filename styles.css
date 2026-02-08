@@ -13802,8 +13802,8 @@ body.mode-assiste .btn-aide-contextuelle,
     --planif-couleur-condition: #fb923c;
     --planif-couleur-prerequis: #c2410c;
     /* Conteneurs — Violet */
-    --planif-couleur-sequence: #9333ea;
-    --planif-couleur-lecon: #a855f7;
+    --planif-couleur-sequence: #7e22ce;
+    --planif-couleur-lecon: #c084fc;
     /* Activités — Vert */
     --planif-couleur-activite: #16a34a;
     --planif-couleur-soutien: #22c55e;
@@ -14100,7 +14100,13 @@ body.mode-assiste .btn-aide-contextuelle,
 }
 
 .planif-noeud.planif-conteneur.planif-a-enfants {
-    background: rgba(255,255,255,0.5);
+    border-style: solid;
+}
+.planif-noeud.planif-conteneur.planif-a-enfants.planif-type-sequence {
+    background: color-mix(in srgb, var(--planif-couleur-sequence) 6%, white);
+}
+.planif-noeud.planif-conteneur.planif-a-enfants.planif-type-lecon {
+    background: color-mix(in srgb, var(--planif-couleur-lecon) 6%, white);
 }
 
 .planif-noeud.planif-conteneur .planif-noeud-zone {

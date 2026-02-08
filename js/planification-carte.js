@@ -174,7 +174,7 @@ function creerNoeud(type, x, y) {
     el.id = id;
     el.style.left = x + 'px';
     el.style.top = y + 'px';
-    el.style.borderColor = obtenirCouleurNoeud(donnees);
+    el.style.borderColor = estConteneur ? '' : obtenirCouleurNoeud(donnees);
 
     if (estConteneur) {
         el.innerHTML =
@@ -883,6 +883,7 @@ function reLayoutConteneur(conteneurId) {
     if (cel) {
         cel.style.width = newW + 'px';
         cel.style.height = newH + 'px';
+        cel.style.borderColor = obtenirCouleurNoeud(conteneur);
         cel.classList.add('planif-a-enfants');
         var zone = cel.querySelector('.planif-noeud-zone');
         if (zone) zone.classList.remove('planif-vide');
@@ -978,6 +979,7 @@ function mettreAJourZoneConteneur(conteneurId) {
         el.classList.remove('planif-a-enfants');
         el.style.width = '';
         el.style.height = '';
+        el.style.borderColor = '';
         if (zone) { zone.classList.add('planif-vide'); zone.textContent = ''; }
         return;
     }
@@ -1067,7 +1069,7 @@ function reconstruireDOM() {
         el.id = n.id;
         el.style.left = n.x + 'px';
         el.style.top = n.y + 'px';
-        el.style.borderColor = obtenirCouleurNoeud(n);
+        el.style.borderColor = (estConteneur && !(n.enfants && n.enfants.length > 0)) ? '' : obtenirCouleurNoeud(n);
 
         if (estConteneur) {
             var nbEnfants = (n.enfants || []).length;
