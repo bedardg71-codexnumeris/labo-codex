@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 7 février 2026 (Beta 97.3 - Build 0207-1510)
+> **Derniere mise a jour** : 7 février 2026 (Beta 97.3 - Build 0207-2041)
 
 ---
 
@@ -522,32 +522,24 @@
 
 ### Planification pedagogique
 
-- [ ] **#34** Module Planification de l'enseignement explicite (PLANIFICATION REQUISE)
-  - **Concept** : Planifier les lecons et le calendrier du trimestre selon le modele de l'enseignement explicite
-  - **Public cible** : Enseignants novices qui decouvrent l'enseignement explicite
-  - **Concepteur** : Gregoire (5-6 ans de pratique, formation TELUQ en enseignement efficace)
-  - **Primo comme wizard** : Guide de planification des lecons (objectifs, modelisation, pratique guidee, pratique autonome)
-  - **Integration calendrier** : Repartition des lecons sur les semaines du trimestre
-  - **Les 5 phases d'une lecon** :
-    1. Ouverture (objectif, prerequis)
-    2. Modelage ("je fais" - enseignant verbalise sa pensee)
-    3. Pratique guidee ("nous faisons" - avec aide)
+- [ ] **#34** Module Planification — Phase 2 : Enseignement explicite
+  - **Phase 1 LIVRÉE** (7 fév 2026) : Carte mentale intégrée dans l'app (voir #123)
+  - **Phase 2** : Enrichir la carte mentale avec le modèle de l'enseignement explicite
+  - **Public cible** : Enseignants novices qui découvrent l'enseignement explicite
+  - **Concepteur** : Grégoire (5-6 ans de pratique, formation TELUQ en enseignement efficace)
+  - **Les 5 phases d'une leçon** :
+    1. Ouverture (objectif, prérequis)
+    2. Modelage ("je fais" - enseignant verbalise sa pensée)
+    3. Pratique guidée ("nous faisons" - avec aide)
     4. Pratique autonome ("vous faites" - sans aide)
-    5. Cloture (synthese, annonce suite)
-  - **Liens avec le module actuel** :
-    - Productions = evaluations planifiees
-    - Objectifs d'apprentissage = cibles des lecons
-    - Calendrier = visualisation des lecons sur les seances
-    - Sequences d'enseignement = progression logique
-  - **Questions a explorer** :
-    - Quand tu as commence, qu'est-ce qui t'a le plus manque ?
-    - Quelles erreurs font les novices ? (modelage trop long, pratique autonome trop tot, etc.)
-    - L'outil doit-il "enseigner" la methode ou juste aider a planifier ?
-    - Niveau de detail : sequence ou lecon individuelle ?
-    - Wizard Primo (questions guidees) ou formulaire structure ?
+    5. Clôture (synthèse, annonce suite)
+  - **Fonctionnalités envisagées** :
+    - Wizard/Primo pour guider la planification des leçons
+    - Templates de leçons selon les 5 phases
+    - Lien entre nœuds de la carte et productions/évaluations existantes
   - **Fichier de specs** : `docs/enseignement explicite/SPEC-MODULE-PLANIFICATION.md`
-  - **Reference PDF** : `docs/enseignement explicite/livret-enseignement_explicite_2024-01-03.pdf` (Academie de Paris)
-  - **Prerequis** : Documentation complete de la logique pedagogique avant codage
+  - **Référence PDF** : `docs/enseignement explicite/livret-enseignement_explicite_2024-01-03.pdf` (Académie de Paris)
+  - **Prérequis** : Documentation complète de la logique pédagogique avant codage
 
 ### Mode simplifie
 
@@ -666,6 +658,18 @@
 ---
 
 ## Complete (Beta 97.3 - 7 février 2026)
+
+- [x] **#123** Module Planification — Carte mentale intégrée + renommage Calendrier → Séances
+  - Portage du prototype standalone (3608 lignes) vers 3 modules : `planification-donnees.js`, `planification-carte.js`, `planification.js`
+  - ~849 lignes CSS ajoutées à `styles.css` (préfixe `planif-`)
+  - Carte mentale à 2 zones : Objectifs & Savoirs (gauche) / Organisation & Activités (droite)
+  - 10 types de nœuds : compétence, idée maîtresse, connaissance, prérequis, stratégie, séquence, leçon, activité, soutien, révision
+  - Panneau latéral Séances avec vue calendrier, export texte et TSV
+  - Multi-cartes avec sélecteur, import/export JSON
+  - Storage : `cle('planification_mindmap')` via db.getSync/setSync
+  - Auto-migration des clés prototype (`proto_cm_*`) au premier chargement
+  - Navigation et config intégrées (`config.js`, `navigation.js`)
+  - **Fichiers** : `index.html`, `styles.css`, `js/planification-*.js`, `js/config.js`, `js/navigation.js`, `js/accueil.js`
 
 - [x] **#118** Zoom adaptatif : modes "Pleine largeur" et "Pleine hauteur"
   - Remplacement des boutons +/- par deux modes de zoom adaptatifs
