@@ -723,7 +723,7 @@ function collecterDescendants(racine, parent, liste) {
 
 function peutContenir(conteneurType, enfantType) {
     if (conteneurType === 'sequence') return enfantType === 'lecon';
-    if (conteneurType === 'lecon') return enfantType === 'activite' || enfantType === 'soutien' || enfantType === 'revision';
+    if (conteneurType === 'lecon') return enfantType === 'activite' || enfantType === 'soutien' || enfantType === 'revision' || enfantType === 'connaissance' || enfantType === 'strategie' || enfantType === 'condition';
     return false;
 }
 
@@ -2390,10 +2390,27 @@ function initialiser() {
     });
 
     // Palette drag & drop
+    var paletteDragType = null;
+    var paletteSurvolConteneur = null;
+
     document.querySelectorAll('#planif-palette .planif-palette-btn').forEach(function(btn) {
         btn.addEventListener('dragstart', function(e) {
+            paletteDragType = btn.dataset.type;
             e.dataTransfer.setData('planif-type', btn.dataset.type);
             e.dataTransfer.effectAllowed = 'copy';
+        });
+
+        btn.addEventListener('dragend', function() {
+            if (paletteSurvolConteneur) {
+                var el = document.getElementById(paletteSurvolConteneur);
+                if (el) {
+                    el.classList.remove('planif-conteneur-survol');
+                    var zn = el.querySelector('.planif-noeud-zone');
+                    if (zn) zn.classList.remove('planif-survol');
+                }
+            }
+            paletteDragType = null;
+            paletteSurvolConteneur = null;
         });
 
         btn.addEventListener('click', function(e) {
@@ -2447,14 +2464,61 @@ function initialiser() {
     zoneTravail.addEventListener('dragover', function(e) {
         e.preventDefault();
         e.dataTransfer.dropEffect = 'copy';
+
+        if (paletteDragType) {
+            var ancien = paletteSurvolConteneur;
+            paletteSurvolConteneur = trouverConteneurPour(e.clientX, e.clientY, null, paletteDragType);
+            if (ancien !== paletteSurvolConteneur) {
+                if (ancien) {
+                    var aEl = document.getElementById(ancien);
+                    if (aEl) {
+                        aEl.classList.remove('planif-conteneur-survol');
+                        var zn = aEl.querySelector('.planif-noeud-zone');
+                        if (zn) zn.classList.remove('planif-survol');
+                    }
+                }
+                if (paletteSurvolConteneur) {
+                    var sEl = document.getElementById(paletteSurvolConteneur);
+                    if (sEl) {
+                        sEl.classList.add('planif-conteneur-survol');
+                        var zn2 = sEl.querySelector('.planif-noeud-zone');
+                        if (zn2) zn2.classList.add('planif-survol');
+                    }
+                }
+            }
+        }
     });
 
     zoneTravail.addEventListener('drop', function(e) {
         e.preventDefault();
         var type = e.dataTransfer.getData('planif-type');
         if (!type || !TYPES[type]) return;
+
+        // Nettoyer le feedback visuel du survol palette
+        if (paletteSurvolConteneur) {
+            var scEl = document.getElementById(paletteSurvolConteneur);
+            if (scEl) {
+                scEl.classList.remove('planif-conteneur-survol');
+                var scZn = scEl.querySelector('.planif-noeud-zone');
+                if (scZn) scZn.classList.remove('planif-survol');
+            }
+        }
+
         var pos = clientVersData(e.clientX, e.clientY);
-        creerNoeud(type, pos.x - 70, pos.y - 20);
+        var newId = creerNoeud(type, pos.x - 70, pos.y - 20);
+
+        // Auto-rattacher au conteneur si déposé sur un conteneur valide
+        var conteneurCible = trouverConteneurPour(e.clientX, e.clientY, newId, type);
+        if (conteneurCible) {
+            // Différer pour laisser le navigateur calculer les dimensions du nouvel élément
+            requestAnimationFrame(function() {
+                rattacherAuConteneur(newId, conteneurCible);
+                sauvegarder();
+            });
+        }
+
+        paletteDragType = null;
+        paletteSurvolConteneur = null;
     });
 
     // Sélection par rectangle (lasso)
