@@ -669,6 +669,102 @@ function supprimerNoeud(id) {
     sauvegarder();
 }
 
+function dupliquerNoeud(noeudId) {
+    var original = etat.noeuds.get(noeudId);
+    if (!original) return;
+    enregistrerPourUndo();
+
+    var DECALAGE = 30;
+
+    function clonerUnNoeud(src, decalX, decalY) {
+        var newId = 'planif-noeud_' + (++etat.compteur);
+        var config = TYPES[src.type];
+        var estConteneur = config && config.conteneur === true;
+
+        var donnees = {
+            id: newId, type: src.type,
+            titre: src.titre || '',
+            description: src.description || '',
+            x: src.x + decalX, y: src.y + decalY,
+            parent: null,
+            enfants: [],
+            metadata: JSON.parse(JSON.stringify(src.metadata || {}))
+        };
+        etat.noeuds.set(newId, donnees);
+
+        var el = document.createElement('div');
+        el.className = (estConteneur ? 'planif-noeud planif-conteneur' : 'planif-noeud') + ' planif-type-' + src.type;
+        el.id = newId;
+        el.style.left = donnees.x + 'px';
+        el.style.top = donnees.y + 'px';
+        el.style.borderColor = estConteneur ? '' : obtenirCouleurNoeud(donnees);
+
+        if (estConteneur) {
+            el.innerHTML =
+                '<div class="planif-noeud-entete">' +
+                    '<span class="planif-noeud-type" style="color: ' + obtenirCouleurNoeud(donnees) + '">' + obtenirLabelNoeud(donnees) + '</span>' +
+                '</div>' +
+                '<div class="planif-noeud-titre" contenteditable="true">' + (donnees.titre || '') + '</div>' +
+                '<div class="planif-noeud-zone planif-vide"></div>' +
+                '<div class="planif-noeud-port planif-port-droite" data-dir="droite"></div>' +
+                '<div class="planif-noeud-port planif-port-gauche" data-dir="gauche"></div>' +
+                '<div class="planif-noeud-port planif-port-bas" data-dir="bas"></div>' +
+                '<div class="planif-noeud-port planif-port-haut" data-dir="haut"></div>';
+        } else {
+            el.innerHTML =
+                '<div class="planif-noeud-entete">' +
+                    '<span class="planif-noeud-type" style="color: ' + obtenirCouleurNoeud(donnees) + '">' + obtenirLabelNoeud(donnees) + '</span>' +
+                '</div>' +
+                '<div class="planif-noeud-titre" contenteditable="true">' + (donnees.titre || '') + '</div>' +
+                '<div class="planif-noeud-port planif-port-droite" data-dir="droite"></div>' +
+                '<div class="planif-noeud-port planif-port-gauche" data-dir="gauche"></div>' +
+                '<div class="planif-noeud-port planif-port-bas" data-dir="bas"></div>' +
+                '<div class="planif-noeud-port planif-port-haut" data-dir="haut"></div>';
+        }
+
+        attacherEvenements(el, donnees);
+        coucheNoeuds.appendChild(el);
+
+        // Clone children recursively if container
+        if (src.enfants && src.enfants.length > 0) {
+            for (var i = 0; i < src.enfants.length; i++) {
+                var enfantSrc = etat.noeuds.get(src.enfants[i]);
+                if (!enfantSrc) continue;
+                var enfantNewId = clonerUnNoeud(enfantSrc, decalX, decalY);
+                var enfantDonnees = etat.noeuds.get(enfantNewId);
+                if (enfantDonnees) {
+                    enfantDonnees.parent = newId;
+                    donnees.enfants.push(enfantNewId);
+                    var enfantEl = document.getElementById(enfantNewId);
+                    if (enfantEl) enfantEl.classList.add('planif-enfant-conteneur');
+                }
+            }
+            mettreAJourZoneConteneur(newId);
+        }
+
+        return newId;
+    }
+
+    var newId = clonerUnNoeud(original, DECALAGE, DECALAGE);
+
+    // If original was in a container, attach clone to same parent
+    if (original.parent) {
+        var parentData = etat.noeuds.get(original.parent);
+        var newDonnees = etat.noeuds.get(newId);
+        if (parentData && newDonnees) {
+            newDonnees.parent = original.parent;
+            if (!parentData.enfants) parentData.enfants = [];
+            parentData.enfants.push(newId);
+            var newEl = document.getElementById(newId);
+            if (newEl) newEl.classList.add('planif-enfant-conteneur');
+            mettreAJourZoneConteneur(original.parent);
+        }
+    }
+
+    selectionnerNoeud(newId);
+    sauvegarder();
+}
+
 function supprimerLien(lienId) {
     enregistrerPourUndo();
     etat.liens.delete(lienId);
@@ -699,11 +795,9 @@ function demarrerLien(noeudId, direction, e) {
         document.removeEventListener('mouseup', onUp);
 
         var elSous = document.elementFromPoint(e2.clientX, e2.clientY);
-        if (elSous && elSous.classList.contains('planif-noeud-port')) {
-            var noeudCibleEl = elSous.closest('.planif-noeud');
-            if (noeudCibleEl && noeudCibleEl.id !== noeudId) {
-                afficherMenuLien(e2.clientX, e2.clientY, noeudId, noeudCibleEl.id);
-            }
+        var noeudCibleEl = elSous ? elSous.closest('.planif-noeud') : null;
+        if (noeudCibleEl && noeudCibleEl.id !== noeudId) {
+            afficherMenuLien(e2.clientX, e2.clientY, noeudId, noeudCibleEl.id);
         }
         etat.lienEnCours = null;
     }
@@ -1081,7 +1175,7 @@ function rattacherAuConteneur(noeudId, conteneurId) {
 
     var el = document.getElementById(noeudId);
     if (el) el.classList.add('planif-enfant-conteneur');
-    reLayoutConteneur(conteneurId);
+    mettreAJourZoneConteneur(conteneurId);
 }
 
 function detacherDuConteneur(noeudId) {
@@ -1401,11 +1495,11 @@ function reconstruireDOM() {
     }
 
     requestAnimationFrame(function() {
-        // Layout root containers only (non-nested ones); nested ones are handled recursively
+        // Update container zones (preserve saved positions, free layout)
         for (var entry2 of etat.noeuds) {
             var n2 = entry2[1];
             if (TYPES[n2.type] && TYPES[n2.type].conteneur && n2.enfants && n2.enfants.length > 0 && !n2.parent) {
-                reLayoutConteneur(n2.id);
+                mettreAJourZoneConteneur(n2.id);
             }
         }
         // Handle containers with no children
@@ -1789,32 +1883,7 @@ function attacherEvenements(el, donnees) {
                         }
                     }
 
-                    // Reorder: compare midY with siblings
-                    var midY = donnees.y + (el.offsetHeight || 50) / 2;
-                    var enfants = parentData.enfants || [];
-                    var myIdx = enfants.indexOf(id);
-                    if (myIdx !== -1) {
-                        for (var si = 0; si < enfants.length; si++) {
-                            if (si === myIdx) continue;
-                            var sib = etat.noeuds.get(enfants[si]);
-                            if (!sib) continue;
-                            var sibEl = document.getElementById(enfants[si]);
-                            var sibMidY = sib.y + ((sibEl ? sibEl.offsetHeight : 50) || 50) / 2;
-                            if (myIdx < si && midY > sibMidY) {
-                                enfants.splice(myIdx, 1);
-                                enfants.splice(si, 0, id);
-                                parentData.enfants = enfants;
-                                reLayoutConteneurSaufDragged(parentId, id);
-                                break;
-                            } else if (myIdx > si && midY < sibMidY) {
-                                enfants.splice(myIdx, 1);
-                                enfants.splice(si, 0, id);
-                                parentData.enfants = enfants;
-                                reLayoutConteneurSaufDragged(parentId, id);
-                                break;
-                            }
-                        }
-                    }
+                    mettreAJourZoneConteneur(parentId);
                 }
             }
 
@@ -1843,9 +1912,9 @@ function attacherEvenements(el, donnees) {
                     }
                 }
 
-                // Snap back with layout
+                // Update container zone (free layout)
                 if (donnees.parent) {
-                    reLayoutConteneur(donnees.parent);
+                    mettreAJourZoneConteneur(donnees.parent);
                 }
                 sauvegarder();
             }
@@ -3426,6 +3495,12 @@ function gererKeydown(e) {
     if ((e.metaKey || e.ctrlKey) && e.key === '1' && pasDansChamp) {
         e.preventDefault();
         centrerVueSurContenu();
+        return;
+    }
+
+    if ((e.metaKey || e.ctrlKey) && e.key === 'd' && pasDansChamp) {
+        e.preventDefault();
+        if (etat.selection) dupliquerNoeud(etat.selection);
         return;
     }
 
