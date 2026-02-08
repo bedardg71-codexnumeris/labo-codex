@@ -105,6 +105,7 @@ const ESPACE_H = 6000;
 let zoneTravail, espace, espaceWrapper, coucheNoeuds, coucheLiens, canvas, lienTemp;
 let panneau, menuLien, rectSelection;
 let panneauSeances, panneauSeancesContenu, btnSeances;
+let orgSelectSequence, orgSelectLecon, orgLecon, orgCalendrierContenu, orgCalendrierToggle;
 let seancesOuvert = false;
 
 // === UTILITAIRES DE COORDONNÉES ===
@@ -1947,11 +1948,136 @@ function genererSeancesHTML() {
     return html;
 }
 
-function rafraichirSeances() {
-    if (!seancesOuvert || !panneauSeancesContenu) return;
-    panneauSeancesContenu.innerHTML = genererSeancesHTML();
+// === ORGANISATEUR — SÉLECTEURS ET AFFICHAGE LEÇON ===
 
-    panneauSeancesContenu.querySelectorAll('[data-noeud]').forEach(function(el) {
+function peuplerSelecteursOrganisateur() {
+    // Collecter séquences
+    var sequences = [];
+    for (var entry of etat.noeuds) {
+        if (entry[1].type === 'sequence') sequences.push(entry[1]);
+    }
+    sequences.sort(function(a, b) {
+        return (a.metadata && a.metadata.semaineDebut || 999) - (b.metadata && b.metadata.semaineDebut || 999);
+    });
+
+    // Peupler select séquence
+    var valActuelle = orgSelectSequence.value;
+    orgSelectSequence.innerHTML = '<option value="">— Séquence —</option>';
+    for (var i = 0; i < sequences.length; i++) {
+        var opt = document.createElement('option');
+        opt.value = sequences[i].id;
+        opt.textContent = sequences[i].titre || 'Séquence ' + (i + 1);
+        orgSelectSequence.appendChild(opt);
+    }
+    orgSelectSequence.value = valActuelle;
+
+    peuplerSelecteurLecons();
+}
+
+function peuplerSelecteurLecons() {
+    var seqId = orgSelectSequence.value;
+    var lecons = [];
+
+    if (seqId) {
+        // Leçons enfants de la séquence sélectionnée
+        var seq = etat.noeuds.get(seqId);
+        if (seq && seq.enfants) {
+            for (var i = 0; i < seq.enfants.length; i++) {
+                var e = etat.noeuds.get(seq.enfants[i]);
+                if (e && e.type === 'lecon') lecons.push(e);
+            }
+        }
+    } else {
+        // Toutes les leçons
+        for (var entry of etat.noeuds) {
+            if (entry[1].type === 'lecon') lecons.push(entry[1]);
+        }
+    }
+
+    var valActuelle = orgSelectLecon.value;
+    orgSelectLecon.innerHTML = '<option value="">— Leçon —</option>';
+    for (var j = 0; j < lecons.length; j++) {
+        var opt = document.createElement('option');
+        opt.value = lecons[j].id;
+        opt.textContent = lecons[j].titre || 'Leçon ' + (j + 1);
+        orgSelectLecon.appendChild(opt);
+    }
+    orgSelectLecon.value = valActuelle;
+
+    afficherLeconOrganisateur();
+}
+
+function afficherLeconOrganisateur() {
+    var leconId = orgSelectLecon.value;
+    if (!leconId) {
+        orgLecon.style.display = 'none';
+        return;
+    }
+    orgLecon.style.display = '';
+
+    var lecon = etat.noeuds.get(leconId);
+    if (!lecon) return;
+
+    // Objectif — placeholder (Phase 2 implémentera l'auto-dérivation)
+    var objContenu = orgLecon.querySelector('#planif-org-objectif .planif-org-section-contenu');
+    var liens = getLiensDeNoeud(leconId);
+    var ideeM = null;
+    for (var i = 0; i < liens.length; i++) {
+        if (liens[i].direction === 'sortant') {
+            var cible = etat.noeuds.get(liens[i].noeudId);
+            if (cible && cible.type === 'idee-maitresse') { ideeM = cible; break; }
+        }
+    }
+    if (ideeM) {
+        objContenu.textContent = 'Au terme de la leçon, l\'élève sera capable de ' + (ideeM.titre || '...').toLowerCase() + '.';
+        objContenu.classList.remove('planif-org-placeholder');
+    } else {
+        objContenu.textContent = 'Aucune idée maîtresse associée. Créez un lien « vise » depuis cette leçon.';
+        objContenu.classList.add('planif-org-placeholder');
+    }
+
+    // Prérequis — placeholder (Phase 2)
+    // Productions — placeholder (Phase 2)
+
+    // Cœur de la leçon — afficher les enfants (activités, soutiens, révisions)
+    var coeurContenu = document.getElementById('planif-org-coeur-contenu');
+    var enfants = (lecon.enfants || []).filter(function(eid) { return etat.noeuds.has(eid); });
+    if (enfants.length === 0) {
+        coeurContenu.innerHTML = '<div class="planif-org-placeholder">Aucune activité dans cette leçon.</div>';
+    } else {
+        var h = '';
+        for (var j = 0; j < enfants.length; j++) {
+            var enf = etat.noeuds.get(enfants[j]);
+            if (!enf) continue;
+            h += '<div class="planif-cal-item" data-noeud="' + enf.id + '">';
+            h += '<span class="planif-cal-pastille-mini" style="background: ' + obtenirCouleurNoeud(enf) + '"></span>';
+            h += '<div><span class="planif-cal-item-titre">' + (enf.titre || obtenirLabelNoeud(enf)) + '</span>';
+            if (enf.metadata && enf.metadata.duree) {
+                h += ' <span class="planif-cal-duree">' + enf.metadata.duree + ' min</span>';
+            }
+            h += '</div></div>';
+        }
+        coeurContenu.innerHTML = h;
+        // Rendre cliquables
+        coeurContenu.querySelectorAll('[data-noeud]').forEach(function(el) {
+            el.addEventListener('click', function(e) {
+                e.stopPropagation();
+                naviguerVers(el.dataset.noeud);
+            });
+        });
+    }
+}
+
+function rafraichirSeances() {
+    if (!seancesOuvert) return;
+
+    // Peupler les sélecteurs
+    if (orgSelectSequence) peuplerSelecteursOrganisateur();
+
+    // Vue calendrier (dans la sous-section en bas)
+    var cible = orgCalendrierContenu || panneauSeancesContenu;
+    cible.innerHTML = genererSeancesHTML();
+    cible.querySelectorAll('[data-noeud]').forEach(function(el) {
         el.addEventListener('click', function(e) {
             e.stopPropagation();
             var noeudId = el.dataset.noeud;
@@ -2316,6 +2442,11 @@ function initialiser() {
     panneauSeances = document.getElementById('planif-panneau-seances');
     panneauSeancesContenu = document.getElementById('planif-panneau-seances-contenu');
     btnSeances = document.getElementById('planif-btn-seances');
+    orgSelectSequence = document.getElementById('planif-org-select-sequence');
+    orgSelectLecon = document.getElementById('planif-org-select-lecon');
+    orgLecon = document.getElementById('planif-org-lecon');
+    orgCalendrierContenu = document.getElementById('planif-org-calendrier-contenu');
+    orgCalendrierToggle = document.getElementById('planif-org-calendrier-toggle');
 
     if (!zoneTravail || !espace) {
         console.warn('[Planification] DOM non prêt.');
@@ -2685,6 +2816,23 @@ function initialiser() {
     if (btnSeances) btnSeances.addEventListener('click', toggleSeances);
     var btnFermerCal = document.getElementById('planif-btn-fermer-seances');
     if (btnFermerCal) btnFermerCal.addEventListener('click', toggleSeances);
+
+    // Organisateur — sélecteurs et collapse calendrier
+    if (orgSelectSequence) orgSelectSequence.addEventListener('change', peuplerSelecteurLecons);
+    if (orgSelectLecon) orgSelectLecon.addEventListener('change', afficherLeconOrganisateur);
+    if (orgCalendrierToggle) {
+        orgCalendrierToggle.addEventListener('click', function() {
+            var contenu = orgCalendrierContenu;
+            var chevron = orgCalendrierToggle.querySelector('.planif-org-chevron');
+            if (contenu.style.display === 'none') {
+                contenu.style.display = '';
+                if (chevron) chevron.textContent = '▾';
+            } else {
+                contenu.style.display = 'none';
+                if (chevron) chevron.textContent = '▸';
+            }
+        });
+    }
 
     // Export texte/TSV
     var btnExportTexte = document.getElementById('planif-btn-export-texte');

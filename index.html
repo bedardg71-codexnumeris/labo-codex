@@ -6930,15 +6930,60 @@
 
                             <div id="planif-panneau-seances">
                                 <div class="planif-cal-header">
-                                    <h3>Séances</h3>
+                                    <h3>Organisateur</h3>
                                     <div class="planif-cal-header-actions">
                                         <button class="planif-cal-btn-export" id="planif-btn-export-texte" title="Exporter en texte">&#128196; Texte</button>
-                                        <button class="planif-cal-btn-export" id="planif-btn-export-tsv" title="Exporter en TSV (tableur)">&#128202; TSV</button>
+                                        <button class="planif-cal-btn-export" id="planif-btn-export-tsv" title="Exporter en TSV">&#128202; TSV</button>
                                         <button class="planif-btn-fermer" id="planif-btn-fermer-seances">&times;</button>
                                     </div>
                                 </div>
+
+                                <!-- Sélecteur séquence / leçon -->
+                                <div id="planif-org-selecteur" class="planif-org-section planif-org-selecteur">
+                                    <select id="planif-org-select-sequence"><option value="">— Séquence —</option></select>
+                                    <select id="planif-org-select-lecon"><option value="">— Leçon —</option></select>
+                                </div>
+
+                                <!-- Contenu scrollable -->
                                 <div id="planif-panneau-seances-contenu">
-                                    <div class="planif-cal-vide">Aucune séquence ou leçon pour le moment.<br>Ajoute des éléments à la carte.</div>
+                                    <!-- Sections leçon (visibles quand une leçon est sélectionnée) -->
+                                    <div id="planif-org-lecon" style="display:none">
+                                        <div class="planif-org-section" id="planif-org-objectif">
+                                            <div class="planif-org-section-titre">Objectif de la leçon</div>
+                                            <div class="planif-org-section-contenu planif-org-placeholder">
+                                                Sélectionner une leçon pour voir son objectif dérivé.
+                                            </div>
+                                        </div>
+                                        <div class="planif-org-section" id="planif-org-prealables">
+                                            <div class="planif-org-section-titre">Connaissances préalables à vérifier</div>
+                                            <div class="planif-org-section-contenu planif-org-placeholder">
+                                                Les prérequis seront dérivés des liens de la carte.
+                                            </div>
+                                        </div>
+                                        <div class="planif-org-section" id="planif-org-productions">
+                                            <div class="planif-org-section-titre">Productions associées</div>
+                                            <div class="planif-org-section-contenu planif-org-placeholder">
+                                                Les productions seront dérivées de Construction de la note.
+                                            </div>
+                                        </div>
+                                        <div class="planif-org-section" id="planif-org-coeur">
+                                            <div class="planif-org-section-titre">Cœur de la leçon</div>
+                                            <div class="planif-org-section-contenu" id="planif-org-coeur-contenu">
+                                                <!-- Activités, soutiens, révisions de la leçon -->
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Vue calendrier (toujours visible, en bas) -->
+                                    <div id="planif-org-calendrier">
+                                        <div class="planif-org-section-titre planif-org-section-titre-collapse" id="planif-org-calendrier-toggle">
+                                            Vue calendrier
+                                            <span class="planif-org-chevron">▾</span>
+                                        </div>
+                                        <div id="planif-org-calendrier-contenu">
+                                            <div class="planif-cal-vide">Aucune séquence ou leçon pour le moment.<br>Ajoute des éléments à la carte.</div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -15816,7 +15861,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97';
-        const BUILD_ID = '0208-1028';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0208-1044';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
