@@ -56,41 +56,12 @@ const TYPES_LIENS = [
 // === CONSTANTES ===
 const OFFSET_X = 5000;
 const OFFSET_Y = 3000;
-const ZONE_LIMITE_X = 0;
-const ZONE_MARGE = 40;
-
-const ZONES = {
-    gauche: {
-        types: ['competence', 'idee-maitresse', 'connaissance', 'prerequis', 'strategie'],
-        label: 'Objectifs & Savoirs',
-        maxX: ZONE_LIMITE_X - ZONE_MARGE
-    },
-    droite: {
-        types: ['sequence', 'lecon', 'activite', 'soutien', 'revision'],
-        label: 'Organisation & Activités',
-        minX: ZONE_LIMITE_X + ZONE_MARGE
-    }
-};
 
 // === RÉFÉRENCES DOM (initialisées dans initialiser()) ===
 let zoneTravail, espace, coucheNoeuds, coucheLiens, canvas, lienTemp;
 let panneau, menuLien, rectSelection;
 let panneauSeances, panneauSeancesContenu, btnSeances;
 let seancesOuvert = false;
-
-// === UTILITAIRES DE ZONES ===
-function getZone(type) {
-    if (ZONES.gauche.types.includes(type)) return 'gauche';
-    if (ZONES.droite.types.includes(type)) return 'droite';
-    return null;
-}
-
-function estHorsZone(type, x) {
-    const zone = getZone(type);
-    if (zone === 'gauche' && x > ZONES.gauche.maxX) return true;
-    if (zone === 'droite' && x < ZONES.droite.minX) return true;
-    return false;
-}
 
 // === UTILITAIRES DE COORDONNÉES ===
 function clientVersData(clientX, clientY) {
@@ -812,20 +783,11 @@ function mettreAJourZoneConteneur(conteneurId) {
     }
 }
 
-// === GUIDES DE ZONE ===
+// === GUIDE CANEVAS ===
 function mettreAJourGuidesZone() {
-    var aGauche = false, aDroite = false;
-    for (var entry of etat.noeuds) {
-        var nd = entry[1];
-        var z = getZone(nd.type);
-        if (z === 'gauche') aGauche = true;
-        if (z === 'droite') aDroite = true;
-        if (aGauche && aDroite) break;
-    }
-    var guideG = document.getElementById('planif-zone-guide-gauche');
-    var guideD = document.getElementById('planif-zone-guide-droite');
-    if (guideG) guideG.classList.toggle('planif-masque', aGauche);
-    if (guideD) guideD.classList.toggle('planif-masque', aDroite);
+    var aDesNoeuds = etat.noeuds.size > 0;
+    var guide = document.getElementById('planif-zone-guide');
+    if (guide) guide.classList.toggle('planif-masque', aDesNoeuds);
 }
 
 // === SAUVEGARDE ===
@@ -929,37 +891,6 @@ function chargerCarte(carteId) {
     }
 
     requestAnimationFrame(function() {
-        // Migration zones
-        var aMigre = false;
-        for (var entry of etat.noeuds) {
-            var nid = entry[0];
-            var nd = entry[1];
-            if (nd.parent) continue;
-            if (estHorsZone(nd.type, nd.x)) {
-                var ancienX = nd.x;
-                var zone = getZone(nd.type);
-                if (zone === 'gauche') nd.x = ZONES.gauche.maxX - 100 - Math.random() * 200;
-                else if (zone === 'droite') nd.x = ZONES.droite.minX + 50 + Math.random() * 200;
-                var deltaX = nd.x - ancienX;
-                var nel = document.getElementById(nid);
-                if (nel) { nel.style.left = nd.x + 'px'; nel.style.top = nd.y + 'px'; }
-                if (nd.enfants && nd.enfants.length > 0) {
-                    (function deplacerEnfants(parentNode) {
-                        for (var j = 0; j < (parentNode.enfants || []).length; j++) {
-                            var eid = parentNode.enfants[j];
-                            var ed = etat.noeuds.get(eid);
-                            if (!ed) continue;
-                            ed.x += deltaX;
-                            var eel = document.getElementById(eid);
-                            if (eel) { eel.style.left = ed.x + 'px'; eel.style.top = ed.y + 'px'; }
-                            if (ed.enfants && ed.enfants.length > 0) deplacerEnfants(ed);
-                        }
-                    })(nd);
-                }
-                aMigre = true;
-            }
-        }
-
         // Recalculer conteneurs
         for (var k = 0; k < noeudsListe.length; k++) {
             var n2 = noeudsListe[k];
@@ -982,7 +913,6 @@ function chargerCarte(carteId) {
 
         centrerVueSurContenu();
         mettreAJourGuidesZone();
-        if (aMigre) sauvegarder();
     });
 }
 
@@ -1061,8 +991,6 @@ function attacherEvenements(el, donnees) {
                     if (nel2) {
                         nel2.style.left = nd4.x + 'px';
                         nel2.style.top = nd4.y + 'px';
-                        if (estHorsZone(nd4.type, nd4.x)) nel2.classList.add('planif-hors-zone');
-                        else nel2.classList.remove('planif-hors-zone');
                     }
                     mettreAJourLiens(nid4);
                 }
@@ -1079,39 +1007,6 @@ function attacherEvenements(el, donnees) {
                 el.classList.remove('planif-dragging');
                 document.removeEventListener('mousemove', onMoveGroupe);
                 document.removeEventListener('mouseup', onUpGroupe);
-
-                var horsZone = false;
-                for (var entry3 of positionsInitiales) {
-                    var nd6 = etat.noeuds.get(entry3[0]);
-                    if (nd6 && estHorsZone(nd6.type, nd6.x)) { horsZone = true; break; }
-                }
-
-                if (horsZone) {
-                    for (var entry4 of positionsInitiales) {
-                        var nid6 = entry4[0];
-                        var pos3 = entry4[1];
-                        var nd7 = etat.noeuds.get(nid6);
-                        if (!nd7) continue;
-                        nd7.x = pos3.x;
-                        nd7.y = pos3.y;
-                        var nel3 = document.getElementById(nid6);
-                        if (nel3) {
-                            nel3.classList.remove('planif-hors-zone');
-                            nel3.style.transition = 'left 0.3s ease, top 0.3s ease';
-                            nel3.style.left = nd7.x + 'px';
-                            nel3.style.top = nd7.y + 'px';
-                            setTimeout(function(e3) { return function() { e3.style.transition = ''; }; }(nel3), 350);
-                        }
-                        mettreAJourLiens(nid6);
-                    }
-                    sauvegarder();
-                    return;
-                }
-
-                for (var entry5 of positionsInitiales) {
-                    var nel4 = document.getElementById(entry5[0]);
-                    if (nel4) nel4.classList.remove('planif-hors-zone');
-                }
 
                 for (var nid7 of tousNoeuds) {
                     var nd8 = etat.noeuds.get(nid7);
@@ -1154,12 +1049,6 @@ function attacherEvenements(el, donnees) {
             el.style.top = donnees.y + 'px';
             mettreAJourLiens(id);
 
-            if (!donnees.parent && estHorsZone(donnees.type, donnees.x)) {
-                el.classList.add('planif-hors-zone');
-            } else {
-                el.classList.remove('planif-hors-zone');
-            }
-
             if (estConteneur) {
                 for (var j = 0; j < descendantsInit.length; j++) {
                     var di = descendantsInit[j];
@@ -1199,50 +1088,18 @@ function attacherEvenements(el, donnees) {
 
         function onUp2() {
             el.classList.remove('planif-dragging');
-            el.classList.remove('planif-hors-zone');
             document.removeEventListener('mousemove', onMove2);
             document.removeEventListener('mouseup', onUp2);
 
             document.querySelectorAll('.planif-noeud-zone.planif-survol').forEach(function(z) { z.classList.remove('planif-survol'); });
             document.querySelectorAll('.planif-conteneur-survol').forEach(function(c) { c.classList.remove('planif-conteneur-survol'); });
 
-            var rattacheAConteneur = false;
             if (peutEtreEnfant) {
                 if (survolConteneur && survolConteneur !== donnees.parent) {
                     rattacherAuConteneur(id, survolConteneur);
-                    rattacheAConteneur = true;
                 } else if (!survolConteneur && donnees.parent) {
                     detacherDuConteneur(id);
                 }
-            }
-
-            if (!rattacheAConteneur && !donnees.parent && estHorsZone(donnees.type, donnees.x)) {
-                donnees.x = startDataX;
-                donnees.y = startDataY;
-                el.style.transition = 'left 0.3s ease, top 0.3s ease';
-                el.style.left = donnees.x + 'px';
-                el.style.top = donnees.y + 'px';
-                mettreAJourLiens(id);
-                if (estConteneur) {
-                    for (var j2 = 0; j2 < descendantsInit.length; j2++) {
-                        var di2 = descendantsInit[j2];
-                        var dd2 = etat.noeuds.get(di2.id);
-                        if (!dd2) continue;
-                        dd2.x = donnees.x + di2.dx;
-                        dd2.y = donnees.y + di2.dy;
-                        var del3 = document.getElementById(di2.id);
-                        if (del3) {
-                            del3.style.transition = 'left 0.3s ease, top 0.3s ease';
-                            del3.style.left = dd2.x + 'px';
-                            del3.style.top = dd2.y + 'px';
-                            setTimeout(function(e3) { return function() { e3.style.transition = ''; }; }(del3), 350);
-                        }
-                        mettreAJourLiens(di2.id);
-                    }
-                }
-                setTimeout(function() { el.style.transition = ''; }, 350);
-                sauvegarder();
-                return;
             }
 
             sauvegarder();
@@ -1991,9 +1848,6 @@ function initialiser() {
                 var centre = clientVersData(rect.left + rect.width / 2, rect.top + rect.height / 2);
                 var x = centre.x - 70 + (Math.random() - 0.5) * 100;
                 var y = centre.y - 30 + (Math.random() - 0.5) * 100;
-                var zone = getZone(btn.dataset.type);
-                if (zone === 'gauche' && x >= ZONES.gauche.maxX) x = ZONES.gauche.maxX - 100 + (Math.random() - 0.5) * 60;
-                if (zone === 'droite' && x < ZONES.droite.minX) x = ZONES.droite.minX + 50 + (Math.random() - 0.5) * 60;
                 creerNoeud(btn.dataset.type, x, y);
             }
         });
@@ -2009,11 +1863,7 @@ function initialiser() {
         var type = e.dataTransfer.getData('planif-type');
         if (!type || !TYPES[type]) return;
         var pos = clientVersData(e.clientX, e.clientY);
-        var x = pos.x - 70;
-        var zone = getZone(type);
-        if (zone === 'gauche' && x >= ZONES.gauche.maxX) x = ZONES.gauche.maxX - 100;
-        if (zone === 'droite' && x < ZONES.droite.minX) x = ZONES.droite.minX + 50;
-        creerNoeud(type, x, pos.y - 20);
+        creerNoeud(type, pos.x - 70, pos.y - 20);
     });
 
     // Sélection par rectangle (lasso)
