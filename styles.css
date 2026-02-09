@@ -14296,7 +14296,7 @@ body.mode-assiste .btn-aide-contextuelle,
 .planif-carte-aide {
     position: absolute;
     top: 12px;
-    left: 220px;
+    left: 195px;
     z-index: 80;
     background: white;
     border: 1px solid var(--planif-couleur-bordure);
@@ -14794,17 +14794,6 @@ body.mode-assiste .btn-aide-contextuelle,
     padding: 6px 10px; font-size: 11px; color: #92400e; margin-bottom: 8px;
 }
 
-.planif-zone-guide {
-    text-align: center;
-    font-size: 11px;
-    line-height: 1.5;
-    color: #94a3b8;
-    padding: 8px 10px;
-    border-top: 1px solid var(--planif-couleur-bordure);
-    transition: opacity 0.4s ease;
-}
-.planif-zone-guide.planif-masque { opacity: 0; display: none; }
-#planif-palette.planif-palette-replie .planif-zone-guide { display: none; }
 
 /* === MENU CONTEXTUEL LIENS === */
 #planif-menu-lien {
