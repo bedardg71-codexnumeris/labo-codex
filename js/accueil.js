@@ -122,6 +122,13 @@ function afficherAccueilRetour(conteneur) {
         ${coursHTML}
 
         <div class="accueil-cartes accueil-cartes--8">
+            <div class="accueil-carte" onclick="afficherSection('planification'); setTimeout(function(){ afficherSousSection('planification-carte'); }, 100);">
+                <div class="accueil-carte-icone">\uD83E\uDDE9</div>
+                <div class="accueil-carte-titre">Planifier mon cours</div>
+                <div class="accueil-carte-desc">
+                    Planifier et organiser les s\u00e9quences, le\u00e7ons et activit\u00e9s pour leur alignement p\u00e9dagogique.
+                </div>
+            </div>
             <div class="accueil-carte" onclick="afficherSection('presences');">
                 <div class="accueil-carte-icone">&#x1F4CB;</div>
                 <div class="accueil-carte-titre">Saisir les pr\u00e9sences</div>
@@ -143,25 +150,18 @@ function afficherAccueilRetour(conteneur) {
                     Appliquer une grille de crit\u00e8res et construire une r\u00e9troaction diff\u00e9renci\u00e9e.
                 </div>
             </div>
-            <div class="accueil-carte" onclick="afficherSection('tableau-bord');">
-                <div class="accueil-carte-icone">&#x1F4C8;</div>
-                <div class="accueil-carte-titre">Voir l'\u00e9tat des lieux</div>
-                <div class="accueil-carte-desc">
-                    Suivre la participation, les r\u00e9sultats et la progression du groupe.
-                </div>
-            </div>
-            <div class="accueil-carte" onclick="afficherSection('planification'); setTimeout(function(){ afficherSousSection('planification-carte'); }, 100);">
-                <div class="accueil-carte-icone">\uD83E\uDDE9</div>
-                <div class="accueil-carte-titre">Planifier mon cours</div>
-                <div class="accueil-carte-desc">
-                    Planifier et organiser les s\u00e9quences, le\u00e7ons et activit\u00e9s pour leur alignement p\u00e9dagogique.
-                </div>
-            </div>
             <div class="accueil-carte" onclick="afficherSection('tableau-bord'); setTimeout(function(){ afficherSousSection('tableau-bord-profil'); }, 100);">
                 <div class="accueil-carte-icone">\uD83D\uDC64</div>
                 <div class="accueil-carte-titre">Consulter un profil \u00e9tudiant</div>
                 <div class="accueil-carte-desc">
                     Consulter le portrait d\u2019un \u00e9l\u00e8ve\u00a0: pr\u00e9sences, r\u00e9sultats et progression.
+                </div>
+            </div>
+            <div class="accueil-carte" onclick="afficherSection('tableau-bord');">
+                <div class="accueil-carte-icone">&#x1F4C8;</div>
+                <div class="accueil-carte-titre">Voir l'\u00e9tat des lieux</div>
+                <div class="accueil-carte-desc">
+                    Suivre la participation, les r\u00e9sultats et la progression du groupe.
                 </div>
             </div>
             <div class="accueil-carte" onclick="if(window.backupReminder) window.backupReminder.afficherModal();">

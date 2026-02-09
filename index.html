@@ -420,6 +420,16 @@
             color: var(--gris-moyen);
         }
 
+        .accueil-invite-demo {
+            transition: all 0.3s ease;
+        }
+
+        .accueil-invite-demo:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-prononce);
+            border-color: var(--bleu-moyen);
+        }
+
         .accueil-cartes {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -15665,7 +15675,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97';
-        const BUILD_ID = '0208-2017';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0209-0739';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
