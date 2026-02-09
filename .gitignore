@@ -9,3 +9,20 @@
 
 # Calendriers institutionnels (fichiers locaux)
 >DE_*.pdf
+
+# Archives (conservées localement, pas dans git)
+Archives/
+
+# Fichiers backup dans js/
+js/*.backup*
+js/*.bak
+js/pratiques/*.bak
+
+# Retours testeurs (sauf SUIVI-BUGS.md)
+Retours des testeurs/bruno/
+Retours des testeurs/gregoire/
+Retours des testeurs/jordan/
+Retours des testeurs/olivier/
+
+# PDFs volumineux dans docs
+docs/**/*.pdf
