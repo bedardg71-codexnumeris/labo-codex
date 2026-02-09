@@ -254,6 +254,49 @@ function ideeMaitresseAtteinLecon(noeudId, visited) {
     return false;
 }
 
+// Traverse la chaîne IM→IM et descend via leçon→contenu→activité pour trouver une évaluation
+function ideeMaitresseAtteinEvaluation(noeudId, visited) {
+    if (!visited) visited = {};
+    if (visited[noeudId]) return false;
+    visited[noeudId] = true;
+    var tousLesClones = trouverClones(noeudId);
+    var liens = [];
+    for (var ci = 0; ci < tousLesClones.length; ci++) {
+        liens = liens.concat(getLiensDeNoeud(tousLesClones[ci].id));
+    }
+    for (var i = 0; i < liens.length; i++) {
+        var l = liens[i];
+        // Lien direct vers une évaluation
+        if (l.noeudType === 'evaluation') return true;
+        // Traverser la chaîne IM→IM (complète, s'appuie sur)
+        if (l.noeudType === 'idee-maitresse') {
+            if (ideeMaitresseAtteinEvaluation(l.noeudId, visited)) return true;
+        }
+        // Descendre via leçon/séquence → enfants → évaluation
+        if (l.noeudType === 'lecon' || l.noeudType === 'sequence') {
+            var conteneur = etat.noeuds.get(l.noeudId);
+            if (conteneur && conteneur.enfants) {
+                for (var j = 0; j < conteneur.enfants.length; j++) {
+                    var enfant = etat.noeuds.get(conteneur.enfants[j]);
+                    if (!enfant) continue;
+                    var liensEnfant = getLiensDeNoeud(enfant.id);
+                    if (liensEnfant.some(function(le) { return le.noeudType === 'evaluation'; })) return true;
+                    // Connaissance/stratégie/condition → activité → évaluation
+                    if (enfant.type === 'connaissance' || enfant.type === 'strategie' || enfant.type === 'condition') {
+                        for (var k = 0; k < liensEnfant.length; k++) {
+                            if (liensEnfant[k].noeudType === 'activite' || liensEnfant[k].noeudType === 'soutien' || liensEnfant[k].noeudType === 'revision') {
+                                var liensAct = getLiensDeNoeud(liensEnfant[k].noeudId);
+                                if (liensAct.some(function(la) { return la.noeudType === 'evaluation'; })) return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return false;
+}
+
 // Retourne { entree: {valide, message}, sortie: {valide, message} }
 // entree = amont (compétence/objectif), sortie = aval (leçon/activité)
 // NOTE clones : Les LIENS sont agrégés sur tous les clones (identité partagée),
@@ -269,17 +312,24 @@ function evaluerBadge(noeud) {
     switch (type) {
         case 'competence':
             var devParIM = liens.some(function(l) { return l.noeudType === 'idee-maitresse'; });
-            return {
+            var compAtteinEval = devParIM && liens.some(function(l) {
+                return l.noeudType === 'idee-maitresse' && ideeMaitresseAtteinEvaluation(l.noeudId);
+            });
+            var resComp = {
                 entree: { valide: true, message: "Point de départ de l'alignement" },
                 sortie: devParIM
                     ? { valide: true, message: "Se décline en idée(s) maîtresse(s)" }
                     : { valide: false, message: "Cette compétence ne se décline en aucune idée maîtresse" }
             };
+            if (devParIM && !compAtteinEval) {
+                resComp.avertissement = "Aucune évaluation ne vérifie cette compétence";
+            }
+            return resComp;
 
         case 'idee-maitresse':
             var atteinComp = ideeMaitresseAtteinCompetence(noeud.id);
             var atteinLecon = ideeMaitresseAtteinLecon(noeud.id);
-            var evalueParEval = liens.some(function(l) { return l.noeudType === 'evaluation'; });
+            var atteinEval = ideeMaitresseAtteinEvaluation(noeud.id);
             var resIM = {
                 entree: atteinComp
                     ? { valide: true, message: "Reliée à une compétence" }
@@ -288,7 +338,7 @@ function evaluerBadge(noeud) {
                     ? { valide: true, message: "Se concrétise dans une séquence ou leçon" }
                     : { valide: false, message: "Cette idée ne se concrétise dans aucune séquence ou leçon" }
             };
-            if (atteinComp && atteinLecon && !evalueParEval) {
+            if (atteinComp && atteinLecon && !atteinEval) {
                 resIM.avertissement = "Cette idée ne se vérifie par aucune évaluation";
             }
             return resIM;
@@ -359,9 +409,22 @@ function evaluerBadge(noeud) {
             };
 
         case 'evaluation':
+            var typesAmont = ['idee-maitresse', 'connaissance', 'strategie', 'condition'];
             var evalueQqch = liens.some(function(l) {
-                return l.noeudType === 'idee-maitresse' || l.noeudType === 'connaissance' || l.noeudType === 'strategie' || l.noeudType === 'condition';
+                return typesAmont.indexOf(l.noeudType) !== -1;
             });
+            // Remonter la chaîne : si lié à une activité, vérifier ses liens amont
+            if (!evalueQqch) {
+                evalueQqch = liens.some(function(l) {
+                    if (l.noeudType === 'activite' || l.noeudType === 'soutien' || l.noeudType === 'revision') {
+                        var liensAct = getLiensDeNoeud(l.noeudId);
+                        return liensAct.some(function(la) {
+                            return typesAmont.indexOf(la.noeudType) !== -1;
+                        });
+                    }
+                    return false;
+                });
+            }
             return {
                 entree: evalueQqch
                     ? { valide: true, message: "Vérifie un objectif ou une connaissance" }
@@ -503,6 +566,15 @@ function zoomer(clientX, clientY, facteur) {
 
     const zoomInfo = document.getElementById('planif-zoom-info');
     if (zoomInfo) zoomInfo.textContent = Math.round(etat.zoom * 100) + '%';
+    mettreAJourBoutonsZoomPreset();
+}
+
+function mettreAJourBoutonsZoomPreset() {
+    var zoomArrondi = Math.round(etat.zoom * 100);
+    document.querySelectorAll('.planif-btn-zoom-preset').forEach(function(btn) {
+        var presetVal = Math.round(parseFloat(btn.dataset.zoom) * 100);
+        btn.classList.toggle('actif', presetVal === zoomArrondi);
+    });
 }
 
 // === CRÉER UN NŒUD ===
@@ -3566,6 +3638,7 @@ function initialiser() {
             zoneTravail.scrollTop = espaceY * etat.zoom - cy;
             var zoomInfo = document.getElementById('planif-zoom-info');
             if (zoomInfo) zoomInfo.textContent = Math.round(etat.zoom * 100) + '%';
+            mettreAJourBoutonsZoomPreset();
         });
         zoneTravail.addEventListener('gestureend', function(e) {
             e.preventDefault();
@@ -3604,6 +3677,7 @@ function initialiser() {
             zoneTravail.scrollTop = espaceY * etat.zoom - localY;
             var zoomInfo = document.getElementById('planif-zoom-info');
             if (zoomInfo) zoomInfo.textContent = Math.round(etat.zoom * 100) + '%';
+            mettreAJourBoutonsZoomPreset();
         }
     }, { passive: true });
     zoneTravail.addEventListener('touchend', function() {
@@ -4002,6 +4076,19 @@ function initialiser() {
     var btnRecentrer = document.getElementById('planif-btn-recentrer');
     if (btnRecentrer) btnRecentrer.addEventListener('click', function() { centrerVueSurContenu(); });
 
+    // Boutons de zoom prédéfinis (100%, 75%, 50%, 25%)
+    document.querySelectorAll('.planif-btn-zoom-preset').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var niveauZoom = parseFloat(btn.dataset.zoom);
+            etat.zoom = niveauZoom;
+            appliquerZoom();
+            var zoomInfo = document.getElementById('planif-zoom-info');
+            if (zoomInfo) zoomInfo.textContent = Math.round(niveauZoom * 100) + '%';
+            mettreAJourBoutonsZoomPreset();
+            centrerVueSurContenu();
+        });
+    });
+
     etat.initialise = true;
 
     // Charger les données
@@ -4047,6 +4134,7 @@ function gererKeydown(e) {
         appliquerZoom();
         var zoomInfo = document.getElementById('planif-zoom-info');
         if (zoomInfo) zoomInfo.textContent = '100%';
+        mettreAJourBoutonsZoomPreset();
         centrerVueSurContenu();
         return;
     }

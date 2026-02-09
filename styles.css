@@ -14862,6 +14862,21 @@ body.mode-assiste .btn-aide-contextuelle,
     margin-left: auto;
 }
 
+.planif-btn-zoom-preset {
+    padding: 2px 6px;
+    border: 1px solid var(--planif-couleur-bordure);
+    border-radius: 4px;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+    min-width: 0;
+}
+.planif-btn-zoom-preset:hover { background: #e2e8f0; color: var(--planif-couleur-texte); }
+.planif-btn-zoom-preset.actif { background: #e2e8f0; color: var(--planif-couleur-texte); font-weight: 600; }
+
 /* === SÉLECTEUR DE CARTES === */
 #planif-selecteur-cartes {
     display: flex;
