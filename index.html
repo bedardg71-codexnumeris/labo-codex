@@ -10037,13 +10037,13 @@
                     </div>
 
                     <!-- ========== ACCORDÉON: COURS ========== -->
-                    <div class="carte accordeon" id="accordeon-cours">
+                    <div class="carte accordeon ferme" id="accordeon-cours">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu" style="margin: 0;">
                                 <span class="accordeon-chevron">▶</span> Cours
                             </h3>
                         </div>
-                        <div class="accordeon-contenu" style="display: none;">
+                        <div class="accordeon-contenu">
                             <!-- Layout Bibliothèque + Formulaire -->
                             <div class="disposition-bibliotheque-formulaire">
 
@@ -10079,7 +10079,7 @@
                                         </div>
 
                                         <!-- Formulaire (caché par défaut) -->
-                                        <div id="cours-formulaire-edition" style="display: none;">
+                                        <div id="cours-formulaire-edition" class="u-hide">
                                             <h4 id="v2-titreFormCours" class="titre-formulaire">
                                                 Nouveau cours
                                             </h4>
@@ -10263,7 +10263,7 @@
 
                                             <!-- Boutons d'action -->
                                             <div class="actions-formulaire">
-                                                <button id="v2-btnSupprimerCours" class="btn btn-supprimer" onclick="supprimerCoursV2()" style="display: none;">
+                                                <button id="v2-btnSupprimerCours" class="btn btn-supprimer u-hide" onclick="supprimerCoursV2()">
                                                     Supprimer
                                                 </button>
                                                 <div>
@@ -10284,13 +10284,13 @@
                     </div><!-- FIN accordéon Cours -->
 
                     <!-- ========== ACCORDÉON: ENSEIGNANT·E (Beta 95.2 - Profil Auteur) ========== -->
-                    <div class="carte accordeon" id="accordeon-enseignant">
+                    <div class="carte accordeon ferme" id="accordeon-enseignant">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu" style="margin: 0;">
                                 <span class="accordeon-chevron">▶</span> Enseignant·e
                             </h3>
                         </div>
-                        <div class="accordeon-contenu" style="display: none;">
+                        <div class="accordeon-contenu">
                             <!-- Layout Carte profil + Formulaire -->
                             <div class="disposition-bibliotheque-formulaire">
 
@@ -10521,7 +10521,7 @@
                     </div><!-- FIN accordéon Enseignant·e -->
 
                     <!-- ========== ACCORDÉON: GROUPE D'ÉTUDIANTS (Beta 95.2) ========== -->
-                    <div class="carte accordeon" id="accordeon-groupe-etudiants">
+                    <div class="carte accordeon ferme" id="accordeon-groupe-etudiants">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu" style="margin: 0;">
                                 <span class="accordeon-chevron">▶</span> Groupe d'étudiants
@@ -10530,7 +10530,7 @@
                                 <span id="v2-nbEtudiantsTotal">0</span> étudiant(s)
                             </div>
                         </div>
-                        <div class="accordeon-contenu" style="display: none;">
+                        <div class="accordeon-contenu">
 
                             <div class="disposition-bibliotheque-formulaire disposition-etudiants">
 
@@ -10555,11 +10555,11 @@
                                         <div class="resume-details" id="v2-resumeGroupes">
                                             <!-- Rempli dynamiquement -->
                                         </div>
-                                        <div class="resume-sa" id="v2-resumeSA" style="display: none;">
+                                        <div class="resume-sa u-hide" id="v2-resumeSA">
                                             <span class="badge-sa">SA</span> <span id="v2-resumeNbSA">0</span> étudiant(s)
                                         </div>
                                         <!-- Top programmes (Beta 95.3) -->
-                                        <div class="top-programmes" id="v2-topProgrammes" style="display: none;">
+                                        <div class="top-programmes u-hide" id="v2-topProgrammes">
                                             <!-- Rempli dynamiquement -->
                                         </div>
                                     </div>
@@ -10569,7 +10569,7 @@
                                         <button class="btn btn-secondaire btn-sm btn-block" onclick="exporterEtudiantsV2()">
                                             Exporter CSV
                                         </button>
-                                        <button class="btn btn-annuler btn-sm btn-block" id="v2-btnSupprimerGroupe" onclick="supprimerGroupeSelectionneV2()" style="display: none;">
+                                        <button class="btn btn-annuler btn-sm btn-block u-hide" id="v2-btnSupprimerGroupe" onclick="supprimerGroupeSelectionneV2()">
                                             Supprimer ce groupe
                                         </button>
                                         <button class="btn btn-annuler btn-sm btn-block" onclick="viderListeEtudiantsV2()">
@@ -10623,7 +10623,7 @@
                                             <button class="btn btn-confirmer btn-sm" id="v2-btnSoumettreEtudiant" onclick="soumettreEtudiantV2()">
                                                 Ajouter l'étudiant
                                             </button>
-                                            <button class="btn btn-annuler btn-sm" id="v2-btnAnnulerEdition" style="display: none;" onclick="annulerEditionEtudiantV2()">
+                                            <button class="btn btn-annuler btn-sm u-hide" id="v2-btnAnnulerEdition" onclick="annulerEditionEtudiantV2()">
                                                 Annuler
                                             </button>
                                         </div>
@@ -10674,13 +10674,13 @@
                     </div><!-- FIN accordéon Groupe d'étudiants -->
 
                     <!-- ========== ACCORDÉON: HORAIRE (Beta 95.2) ========== -->
-                    <div class="carte accordeon" id="accordeon-horaire">
+                    <div class="carte accordeon ferme" id="accordeon-horaire">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu" style="margin: 0;">
                                 <span class="accordeon-chevron">▶</span> Horaire
                             </h3>
                         </div>
-                        <div class="accordeon-contenu" style="display: none;">
+                        <div class="accordeon-contenu">
 
                             <div class="disposition-bibliotheque-formulaire">
 
@@ -10729,7 +10729,7 @@
                                     </div>
 
                                     <!-- Formulaire (caché par défaut) -->
-                                    <div id="v2-formulaireHoraire" style="display: none; padding: 15px;">
+                                    <div id="v2-formulaireHoraire" class="u-hide" style="padding: 15px;">
                                         <h4 id="v2-titreFormHoraire" class="titre-formulaire">Nouvel horaire</h4>
 
                                         <!-- Groupe associé (obligatoire) -->
@@ -10781,7 +10781,7 @@
 
                                         <!-- Boutons d'action -->
                                         <div class="actions-formulaire">
-                                            <button id="v2-btnSupprimerHoraire" class="btn btn-supprimer" onclick="supprimerHoraireV2()" style="display: none;">
+                                            <button id="v2-btnSupprimerHoraire" class="btn btn-supprimer u-hide" onclick="supprimerHoraireV2()">
                                                 Supprimer
                                             </button>
                                             <div>
@@ -10803,13 +10803,13 @@
                     </div><!-- FIN accordéon Horaire -->
 
                     <!-- ========== ACCORDÉON: GROUPE-COURS (Beta 95.2 - Assemblage) ========== -->
-                    <div class="carte accordeon" id="accordeon-groupe-cours">
+                    <div class="carte accordeon ferme" id="accordeon-groupe-cours">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu" style="margin: 0;">
                                 <span class="accordeon-chevron">▶</span> Groupe-cours
                             </h3>
                         </div>
-                        <div class="accordeon-contenu" style="display: none;">
+                        <div class="accordeon-contenu">
 
                             <!-- Consigne groupe-cours -->
                             <p class="texte-aide">
@@ -10869,7 +10869,7 @@
                                     </div>
 
                                     <!-- Formulaire (caché par défaut) -->
-                                    <div id="v2-formulaireGroupeCours" style="display: none; padding: 15px;">
+                                    <div id="v2-formulaireGroupeCours" class="u-hide" style="padding: 15px;">
                                         <h4 id="v2-titreFormGroupeCours" class="titre-formulaire">Nouveau groupe-cours</h4>
 
                                         <!-- Nom généré dynamiquement -->
@@ -10931,7 +10931,7 @@
 
                                         <!-- Boutons d'action -->
                                         <div class="actions-formulaire">
-                                            <button id="v2-btnSupprimerGroupeCours" class="btn btn-supprimer" onclick="supprimerGroupeCoursV2()" style="display: none;">
+                                            <button id="v2-btnSupprimerGroupeCours" class="btn btn-supprimer u-hide" onclick="supprimerGroupeCoursV2()">
                                                 Supprimer
                                             </button>
                                             <div>
@@ -15675,7 +15675,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97';
-        const BUILD_ID = '0209-0914';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0209-1003';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';

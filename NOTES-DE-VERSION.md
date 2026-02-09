@@ -1,7 +1,16 @@
 # Notes de version — Monitorage pedagogique
 
 > Document de gestion locale. Historique complet avec dates.
-> Derniere mise a jour : 6 fevrier 2026
+> Derniere mise a jour : 9 fevrier 2026
+
+---
+
+## Beta 97.5 (9 fevrier 2026)
+
+**Correctifs**
+
+- **Fix Horaire/Groupe-cours invisibles** : Les formulaires des sections Horaire et Groupe-cours dans l'onglet Trimestre restaient invisibles meme quand un element etait selectionne dans le dropdown. Cause : les elements HTML utilisaient `style="display: none"` (inline) alors que le JS utilise `classList.remove('u-hide')` pour les afficher — le style inline n'etait jamais retire. Corrige en remplacant les `style="display: none"` par `class="u-hide"`.
+- **Nettoyage inline styles** : Remplacement systematique de `style="display: none"` par `class="u-hide"` dans tous les accordeons Trimestre (Cours, Enseignant, Groupe d'etudiants, Horaire, Groupe-cours) pour coherence avec le pattern JS existant.
 
 ---
 

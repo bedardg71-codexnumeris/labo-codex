@@ -5131,6 +5131,7 @@ function toggleAccordeonV2(headerElement) {
         // Ouvrir - retirer la classe, le CSS fait le reste
         carte.classList.remove('ferme');
         // Nettoyer les styles inline qui pourraient interférer
+        contenu.style.display = '';
         contenu.style.maxHeight = '';
         contenu.style.opacity = '';
     } else {
