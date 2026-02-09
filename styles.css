@@ -14236,6 +14236,8 @@ body.mode-assiste .btn-aide-contextuelle,
     align-items: center;
     gap: 6px;
     padding: 8px 26px 4px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    margin-bottom: 2px;
 }
 
 .planif-noeud-pastille {
