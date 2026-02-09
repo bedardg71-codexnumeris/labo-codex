@@ -568,13 +568,15 @@ function convertirNiveauEnPourcentage(niveau, echelleId = null) {
  *
  * @returns {Promise<Object>} - Structure avec indices pour chaque étudiant
  */
-async function calculerEtStockerIndicesCP() {
+function calculerEtStockerIndicesCP() {
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
     const productions = obtenirDonneesSelonMode('productions');
 
-    // 🆕 BETA 95.5 : Récupérer depuis IndexedDB (async)
+    // 🔧 FIX Beta 97.4 : Converti en synchrone pour éviter race condition
+    // L'appelant (chargerTableauBordApercu) n'await pas cette fonction,
+    // donc les indices doivent être disponibles immédiatement après l'appel
     const cleIndices = cle('indicesCP');
-    let indicesCP = await db.get(cleIndices, {});
+    let indicesCP = db.getSync(cleIndices, {});
 
     // 🆕 BETA 95.5 : Obtenir la pratique active du groupe-cours
     const pratiqueId = typeof obtenirPratiqueActiveGroupeCours === 'function'
@@ -633,6 +635,7 @@ async function calculerEtStockerIndicesCP() {
         // Convertir 0-1 → 0-100
         const C = C_decimal !== null ? Math.round(C_decimal * 100) : 0;
         const P = P_decimal !== null ? Math.round(P_decimal * 100) : 0;
+
 
         // ========================================
         // CALCUL ENGAGEMENT (E) - PRINCIPE SST
@@ -693,8 +696,8 @@ async function calculerEtStockerIndicesCP() {
     // Ajouter la date de calcul globale
     indicesCP.dateCalcul = dateCalcul;
 
-    // 🆕 BETA 95.5 : Sauvegarder dans IndexedDB (async, pas de limite de taille)
-    await db.set(cleIndices, indicesCP);
+    // 🔧 FIX Beta 97.4 : Sauvegarde synchrone (localStorage + IndexedDB en arrière-plan)
+    db.setSync(cleIndices, indicesCP);
 
     console.log(`✅ [Beta 95.5] Indices C/P sauvegardés (pratique: ${pratiqueId})`);
     console.log(`   Étudiants: ${etudiantsActifs.length}`);

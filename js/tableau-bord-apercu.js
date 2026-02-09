@@ -90,15 +90,20 @@ function mettreAJourContextesSections(nbEtudiants) {
     if (typeof obtenirTrimestreActif === 'function') {
         const trimestre = obtenirTrimestreActif();
         if (trimestre) {
-            const sessionNom = {
-                'hiver': 'Hiver',
-                'automne': 'Automne',
-                'ete': 'Été',
-                'h': 'Hiver',
-                'a': 'Automne',
-                'e': 'Été'
-            }[trimestre.session?.toLowerCase()] || trimestre.session || '';
-            nomTrimestre = `${sessionNom} ${trimestre.annee || ''}`.trim();
+            const sessionLower = trimestre.session?.toLowerCase();
+            if (sessionLower === 'd') {
+                nomTrimestre = 'Données de démonstration';
+            } else {
+                const sessionNom = {
+                    'hiver': 'Hiver',
+                    'automne': 'Automne',
+                    'ete': 'Été',
+                    'h': 'Hiver',
+                    'a': 'Automne',
+                    'e': 'Été'
+                }[sessionLower] || trimestre.session || '';
+                nomTrimestre = `${sessionNom} ${trimestre.annee || ''}`.trim();
+            }
         }
     }
     // Fallback sur window.trimestreActif si fonction non disponible
@@ -2387,8 +2392,6 @@ function afficherPatternsApprentissage(etudiants) {
     // Vérifier si au moins un étudiant a des données C ou P significatives
     const aucuneDonneeCP = etudiantsAvecDonneesCP.length === 0;
 
-    console.log(`📊 [Patterns] Total: ${nbTotal}, avec données CP: ${etudiantsAvecDonneesCP.length}, sans données CP: ${nbSansDonneesCP}, aucuneDonneeCP: ${aucuneDonneeCP}`);
-
     // NOUVEAU Beta 90 : Récupérer les pratiques spécifiques
     // IMPORTANT : Utiliser determinerCibleIntervention() pour garantir la cohérence
     // avec le tableau de liste des étudiants. Les patterns doivent être identiques
@@ -2401,24 +2404,37 @@ function afficherPatternsApprentissage(etudiants) {
     const etudiantsPAN = [];
 
     etudiantsAvecDonneesCP.forEach(e => {
-        if (typeof determinerCibleIntervention === 'function') {
-            const cibleInfo = determinerCibleIntervention(e.da);
-            const pattern = cibleInfo ? cibleInfo.pattern : null;
+        try {
+            if (typeof determinerCibleIntervention === 'function') {
+                const cibleInfo = determinerCibleIntervention(e.da);
+                const pattern = cibleInfo ? cibleInfo.pattern : null;
 
-            // Normaliser le pattern
-            const patternNormalise = pattern ? pattern.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-') : null;
+                // Normaliser le pattern
+                const patternNormalise = pattern ? pattern.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-') : null;
 
-            if (patternNormalise) {
-                const etudiantData = {
-                    da: e.da,
-                    nom: e.nom,
-                    prenom: e.prenom,
-                    pattern: patternNormalise
-                };
+                if (patternNormalise) {
+                    const etudiantData = {
+                        da: e.da,
+                        nom: e.nom,
+                        prenom: e.prenom,
+                        pattern: patternNormalise
+                    };
 
-                // Ajouter à SOM et PAN (même pattern pour les deux car basé sur les mêmes données)
-                etudiantsSOM.push(etudiantData);
-                etudiantsPAN.push({...etudiantData});
+                    // Ajouter à SOM et PAN (même pattern pour les deux car basé sur les mêmes données)
+                    etudiantsSOM.push(etudiantData);
+                    etudiantsPAN.push({...etudiantData});
+                }
+            }
+        } catch (error) {
+            console.warn('⚠️ [Patterns] Erreur pour DA', e.da, ':', error.message);
+            // 🔧 FIX Beta 97.4 : Fallback sur le pattern stocké par calculerEtStockerPatternsGroupe
+            const patternStocke = typeof obtenirPatternEtudiant === 'function' ? obtenirPatternEtudiant(e.da) : null;
+            if (patternStocke && patternStocke.pattern) {
+                const patternNormalise = patternStocke.pattern.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-');
+                if (patternNormalise && patternNormalise !== 'inconnu') {
+                    etudiantsSOM.push({ da: e.da, nom: e.nom, prenom: e.prenom, pattern: patternNormalise });
+                    etudiantsPAN.push({ da: e.da, nom: e.nom, prenom: e.prenom, pattern: patternNormalise });
+                }
             }
         }
     });

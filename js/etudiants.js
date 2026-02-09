@@ -1551,5 +1551,6 @@ window.afficherListeEtudiantsConsultation = afficherListeEtudiantsConsultation;
 window.trierTableauPar = trierTableauPar;
 window.obtenirNomProgramme = obtenirNomProgramme;
 window.reinitialiserFiltresListeEtudiants = reinitialiserFiltresListeEtudiants;
+window.calculerTauxCompletion = calculerTauxCompletion;
 
 })();

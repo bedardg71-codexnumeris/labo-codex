@@ -176,12 +176,17 @@ async function entrerEnDemo() {
         // 8. Afficher le bandeau démo
         afficherBandeauDemo(true);
 
-        // 9. Naviguer vers le tableau de bord
+        // 9. Rafraîchir le dropdown groupe-cours dans le bandeau
+        if (typeof peuplerDropdownGroupeCoursActif === 'function') {
+            peuplerDropdownGroupeCoursActif();
+        }
+
+        // 10. Naviguer vers le tableau de bord
         if (typeof afficherSection === 'function') {
             afficherSection('tableau-bord');
         }
 
-        // 10. Rafraîchir le contenu
+        // 11. Rafraîchir le contenu
         if (typeof rafraichirContenuSelonMode === 'function') {
             rafraichirContenuSelonMode();
         }
@@ -226,12 +231,17 @@ async function quitterDemo() {
             initialiserSystemeModes();
         }
 
-        // 6. Naviguer vers le tableau de bord
+        // 6. Rafraîchir le dropdown groupe-cours dans le bandeau
+        if (typeof peuplerDropdownGroupeCoursActif === 'function') {
+            peuplerDropdownGroupeCoursActif();
+        }
+
+        // 7. Naviguer vers le tableau de bord
         if (typeof afficherSection === 'function') {
             afficherSection('tableau-bord');
         }
 
-        // 7. Rafraîchir le contenu
+        // 8. Rafraîchir le contenu
         if (typeof rafraichirContenuSelonMode === 'function') {
             rafraichirContenuSelonMode();
         }
@@ -338,7 +348,7 @@ async function chargerDonneesDemo() {
         console.log(`   → Pack: ${packDemo.groupeEtudiants?.length || 0} étudiants, ${packDemo.listeCours?.length || 0} cours`);
 
         // Créer le trimestre demo s'il n'existe pas
-        const trimestres = await db.get('trimestres') || [];
+        const trimestres = db.getSync('trimestres', []);
         const indexDemo = trimestres.findIndex(t => t.id === 'demo');
         const trimestreDemo = {
             id: 'demo',
@@ -354,19 +364,18 @@ async function chargerDonneesDemo() {
         } else {
             trimestres.push(trimestreDemo);
         }
-        await db.set('trimestres', trimestres);
-        await db.syncToLocalStorageCache();
+        db.setSync('trimestres', trimestres);
 
         // Fusionner avec les données existantes (préfixe demo_ explicite)
-        await fusionnerDonneesDemo(packDemo, 'demo_');
+        fusionnerDonneesDemo(packDemo, 'demo_');
 
         // [Chantier 2] Charger cadreCalendrier et horaireHebdo (manquants dans fusionnerDonneesDemo)
         if (packDemo.cadreCalendrier) {
-            await db.set('demo_cadreCalendrier', packDemo.cadreCalendrier);
+            db.setSync('demo_cadreCalendrier', packDemo.cadreCalendrier);
             console.log('   ➜ demo_cadreCalendrier chargé');
         }
         if (packDemo.horaireHebdo) {
-            await db.set('demo_horaireHebdo', packDemo.horaireHebdo);
+            db.setSync('demo_horaireHebdo', packDemo.horaireHebdo);
             console.log('   ➜ demo_horaireHebdo chargé');
         }
 
@@ -397,11 +406,11 @@ async function chargerDonneesDemo() {
  * @param {Object} packDemo - Données du pack de démonstration
  * @param {string} prefixe - Préfixe de clé explicite (ex: 'demo_') pour éviter race condition avec cle()
  */
-async function fusionnerDonneesDemo(packDemo, prefixe) {
+function fusionnerDonneesDemo(packDemo, prefixe) {
     // Helper pour construire la clé sans dépendre de cle() (évite race condition)
     const cleDemo = (nom) => prefixe ? prefixe + nom : cle(nom);
     // 1. Fusionner listeCours
-    const listeCours = await db.get('listeCours') || [];
+    const listeCours = db.getSync('listeCours', []);
     const coursDemo = packDemo.listeCours || [];
 
     // Ajouter les cours demo s'ils n'existent pas déjà
@@ -413,13 +422,13 @@ async function fusionnerDonneesDemo(packDemo, prefixe) {
             listeCours.push(cours);
         }
     }
-    await db.set('listeCours', listeCours);
+    db.setSync('listeCours', listeCours);
     console.log('   ➜ listeCours fusionnée');
 
     // 2. Fusionner groupeEtudiants
     const cleEtudiants = cleDemo('groupeEtudiants');
     console.log(`   📦 Clé étudiants: ${cleEtudiants}`);
-    const groupeEtudiants = await db.get(cleEtudiants) || [];
+    const groupeEtudiants = db.getSync(cleEtudiants, []);
     const etudiantsDemo = packDemo.groupeEtudiants || [];
 
     for (const etudiant of etudiantsDemo) {
@@ -431,14 +440,14 @@ async function fusionnerDonneesDemo(packDemo, prefixe) {
             groupeEtudiants.push(etudiant);
         }
     }
-    await db.set(cleEtudiants, groupeEtudiants);
+    db.setSync(cleEtudiants, groupeEtudiants);
     console.log(`   ➜ ${cleEtudiants} fusionné (${etudiantsDemo.length} étudiants demo)`);
 
     // 3. Fusionner productions
     if (packDemo.productions) {
         const cleProductions = cleDemo('productions');
         console.log(`   📦 Clé productions: ${cleProductions}`);
-        const productions = await db.get(cleProductions) || [];
+        const productions = db.getSync(cleProductions, []);
         const productionsDemo = packDemo.productions || [];
 
         for (const prod of productionsDemo) {
@@ -450,7 +459,7 @@ async function fusionnerDonneesDemo(packDemo, prefixe) {
                 productions.push(prod);
             }
         }
-        await db.set(cleProductions, productions);
+        db.setSync(cleProductions, productions);
         console.log(`   ➜ ${cleProductions} fusionnées (${productionsDemo.length} productions demo)`);
     }
 
@@ -459,7 +468,7 @@ async function fusionnerDonneesDemo(packDemo, prefixe) {
     if (evaluationsDemo.length > 0) {
         const cleEvaluations = cleDemo('evaluationsSauvegardees');
         console.log(`   📦 Clé évaluations: ${cleEvaluations}`);
-        const evaluations = await db.get(cleEvaluations) || [];
+        const evaluations = db.getSync(cleEvaluations, []);
 
         for (const evalDemo of evaluationsDemo) {
             const index = evaluations.findIndex(e => e.id === evalDemo.id);
@@ -469,13 +478,13 @@ async function fusionnerDonneesDemo(packDemo, prefixe) {
                 evaluations.push(evalDemo);
             }
         }
-        await db.set(cleEvaluations, evaluations);
+        db.setSync(cleEvaluations, evaluations);
         console.log(`   ➜ ${cleEvaluations} fusionnées (${evaluationsDemo.length} évaluations demo)`);
     }
 
     // 5. Fusionner grilles (si présentes)
     if (packDemo.grillesTemplates) {
-        const grilles = await db.get('grillesTemplates') || [];
+        const grilles = db.getSync('grillesTemplates', []);
         const grillesDemo = packDemo.grillesTemplates || [];
 
         for (const grille of grillesDemo) {
@@ -487,14 +496,14 @@ async function fusionnerDonneesDemo(packDemo, prefixe) {
                 grilles.push(grille);
             }
         }
-        await db.set('grillesTemplates', grilles);
+        db.setSync('grillesTemplates', grilles);
         console.log('   ➜ grillesTemplates fusionnées');
     }
 
     // 6. Fusionner échelles (si présentes)
     const echellesDemo = packDemo.echellesTemplates || packDemo.echellesPerformance || [];
     if (echellesDemo.length > 0) {
-        const echelles = await db.get('echellesTemplates') || [];
+        const echelles = db.getSync('echellesTemplates', []);
 
         for (const echelle of echellesDemo) {
             echelle.estDemo = true;
@@ -505,7 +514,7 @@ async function fusionnerDonneesDemo(packDemo, prefixe) {
                 echelles.push(echelle);
             }
         }
-        await db.set('echellesTemplates', echelles);
+        db.setSync('echellesTemplates', echelles);
         console.log(`   ➜ echellesTemplates fusionnées (${echellesDemo.length} ajoutées)`);
     }
 
@@ -513,7 +522,7 @@ async function fusionnerDonneesDemo(packDemo, prefixe) {
     if (packDemo.presences) {
         const clePresences = cleDemo('presences');
         console.log(`   📦 Clé présences: ${clePresences}`);
-        let presences = await db.get(clePresences) || [];
+        let presences = db.getSync(clePresences, []);
         if (!Array.isArray(presences)) presences = [];
         const presencesDemo = packDemo.presences || {};
 
@@ -531,7 +540,7 @@ async function fusionnerDonneesDemo(packDemo, prefixe) {
                 }
             }
         }
-        await db.set(clePresences, presences);
+        db.setSync(clePresences, presences);
         console.log(`   ➜ ${clePresences} fusionnées (${presences.length} entrées)`);
     }
 
@@ -540,7 +549,7 @@ async function fusionnerDonneesDemo(packDemo, prefixe) {
     for (const cleCartouche of clesCartouches) {
         const cartouchesDemo = packDemo[cleCartouche] || [];
         if (cartouchesDemo.length > 0) {
-            const cartouches = await db.get(cleCartouche) || [];
+            const cartouches = db.getSync(cleCartouche, []);
 
             for (const cartouche of cartouchesDemo) {
                 const existe = cartouches.some(c => c.id === cartouche.id);
@@ -549,7 +558,7 @@ async function fusionnerDonneesDemo(packDemo, prefixe) {
                     cartouches.push(cartouche);
                 }
             }
-            await db.set(cleCartouche, cartouches);
+            db.setSync(cleCartouche, cartouches);
             console.log(`   ➜ ${cleCartouche} fusionnées (${cartouchesDemo.length} ajoutées)`);
         }
     }
@@ -557,7 +566,7 @@ async function fusionnerDonneesDemo(packDemo, prefixe) {
     // 9. Créer un horaire demo (s'il n'existe pas)
     const cleHoraires = cleDemo('horaires');
     console.log(`   📦 Clé horaires: ${cleHoraires}`);
-    let horaires = await db.get(cleHoraires) || [];
+    let horaires = db.getSync(cleHoraires, []);
     const horaireDemo = horaires.find(h => h.id === 'HOR_DEMO');
 
     let horaireId = 'HOR_DEMO';
@@ -574,7 +583,7 @@ async function fusionnerDonneesDemo(packDemo, prefixe) {
             dateCreation: new Date().toISOString()
         };
         horaires.push(nouvelHoraire);
-        await db.set(cleHoraires, horaires);
+        db.setSync(cleHoraires, horaires);
         console.log(`   ➜ Horaire demo créé: ${nouvelHoraire.nom}`);
     } else {
         console.log('   ➜ Horaire demo déjà existant');
@@ -583,7 +592,7 @@ async function fusionnerDonneesDemo(packDemo, prefixe) {
     // 10. Créer un groupe-cours demo (s'il n'existe pas)
     const cleGC = cleDemo('groupesCours');
     console.log(`   📦 Clé groupesCours: ${cleGC}`);
-    let groupesCours = await db.get(cleGC) || [];
+    let groupesCours = db.getSync(cleGC, []);
     const gcDemo = groupesCours.find(gc => gc.id === 'GC_DEMO');
 
     if (!gcDemo) {
@@ -606,14 +615,11 @@ async function fusionnerDonneesDemo(packDemo, prefixe) {
             isDemo: true
         };
         groupesCours.push(nouveauGC);
-        await db.set(cleGC, groupesCours);
+        db.setSync(cleGC, groupesCours);
         console.log(`   ➜ Groupe-cours demo créé: ${nouveauGC.nom}`);
     } else {
         console.log('   ➜ Groupe-cours demo déjà existant');
     }
-
-    // Synchroniser vers localStorage cache
-    await db.syncToLocalStorageCache();
 }
 
 // ============================================
