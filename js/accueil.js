@@ -108,7 +108,7 @@ function afficherAccueilRetour(conteneur) {
                 <span class="accueil-cours-icone">&#x1F5FA;&#xFE0F;</span>
                 <div class="accueil-cours-info">
                     <div class="accueil-cours-nom">Donn\u00e9es de d\u00e9monstration</div>
-                    <div class="accueil-cours-detail">Explorez l\u2019application avec un lot de donn\u00e9es fictives pour d\u00e9couvrir le suivi des apprentissages et la construction de la note.</div>
+                    <div class="accueil-cours-detail">Explorer l\u2019application avec un lot de donn\u00e9es fictives pour d\u00e9couvrir le suivi des apprentissages et la construction de la note.</div>
                 </div>
             </div>
         `;
