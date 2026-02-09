@@ -642,12 +642,16 @@ async function dechargerDonneesDemo() {
         await supprimerDonneesGlobalesDemo();
 
         // 3. Supprimer le trimestre demo de la liste des trimestres
-        const trimestres = await db.get('trimestres') || [];
+        // 🔧 FIX: Écrire aux deux storages pour éviter résidus après rechargement
+        const trimestres = db.getSync('trimestres', []);
         const trimSansDemo = trimestres.filter(t => t.id !== 'demo');
+        db.setSync('trimestres', trimSansDemo);
         await db.set('trimestres', trimSansDemo);
         console.log('   ➜ Trimestre demo supprimé de la liste');
 
         // 4. Nettoyer les clés spécifiques demo
+        db.removeSync('demo_cadreCalendrier');
+        db.removeSync('demo_horaireHebdo');
         await db.remove('demo_cadreCalendrier');
         await db.remove('demo_horaireHebdo');
         console.log('   ➜ Clés demo supplémentaires nettoyées');
@@ -680,9 +684,10 @@ async function supprimerDonneesNamespaceesDemo() {
     ];
 
     for (const cle of clesNamespacees) {
-        await db.remove(prefixe + cle);
+        db.removeSync(prefixe + cle);   // 🔧 FIX: Nettoyer localStorage immédiatement
+        await db.remove(prefixe + cle); // Nettoyer IndexedDB
     }
-    console.log(`   ➜ ${clesNamespacees.length} clés demo_* supprimées`);
+    console.log(`   ➜ ${clesNamespacees.length} clés demo_* supprimées (localStorage + IndexedDB)`);
 }
 
 /**
@@ -690,29 +695,33 @@ async function supprimerDonneesNamespaceesDemo() {
  * (cours, grilles, échelles, cartouches marqués estDemo/isDemo)
  */
 async function supprimerDonneesGlobalesDemo() {
+    // 🔧 FIX: Lire depuis localStorage (source de vérité synchrone) et écrire aux deux
+
     // Cours demo (listeCours est globale)
-    const listeCours = await db.get('listeCours') || [];
+    const listeCours = db.getSync('listeCours', []);
     const coursFiltres = listeCours.filter(c => !c.isDemo);
+    db.setSync('listeCours', coursFiltres);
     await db.set('listeCours', coursFiltres);
     console.log(`   ➜ Cours demo supprimés (${listeCours.length - coursFiltres.length})`);
 
     // Grilles demo (grillesTemplates est globale)
-    const grilles = await db.get('grillesTemplates') || [];
+    const grilles = db.getSync('grillesTemplates', []);
     const grillesFiltrees = grilles.filter(g => !g.estDemo);
+    db.setSync('grillesTemplates', grillesFiltrees);
     await db.set('grillesTemplates', grillesFiltrees);
     console.log(`   ➜ Grilles demo supprimées (${grilles.length - grillesFiltrees.length})`);
 
     // Échelles demo (echellesTemplates est globale)
-    const echelles = await db.get('echellesTemplates') || [];
+    const echelles = db.getSync('echellesTemplates', []);
     const echellesFiltrees = echelles.filter(e => !e.estDemo);
+    db.setSync('echellesTemplates', echellesFiltrees);
     await db.set('echellesTemplates', echellesFiltrees);
     console.log(`   ➜ Échelles demo supprimées (${echelles.length - echellesFiltrees.length})`);
 
     // Cartouches demo (clés cartouches_* sont globales)
-    // Identifier les clés cartouches qui contiennent des entrées demo
-    // On nettoie spécifiquement cartouches_GRILLE_DEMO (connue du pack)
-    const cartouchesDemo = await db.get('cartouches_GRILLE_DEMO') || [];
+    const cartouchesDemo = db.getSync('cartouches_GRILLE_DEMO', []);
     if (cartouchesDemo.length > 0) {
+        db.removeSync('cartouches_GRILLE_DEMO');
         await db.remove('cartouches_GRILLE_DEMO');
         console.log('   ➜ cartouches_GRILLE_DEMO supprimées');
     }

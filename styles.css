@@ -244,6 +244,53 @@
 }
 
 /* ===============================
+   MODE DÉMO - CONVERSION BLEU → SARCELLE
+   Même palette que le mode Assisté, activée via body.mode-demo
+   (classe ajoutée/retirée par donnees-demo.js)
+   =============================== */
+
+body.mode-demo {
+    /* Conversion complète bleu → sarcelle */
+    --bleu-principal: var(--sarcelle-principal);
+    --bleu-fonce: var(--sarcelle-fonce);
+    --bleu-moyen: var(--sarcelle-moyen);
+    --bleu-clair: var(--sarcelle-clair);
+    --bleu-leger: var(--sarcelle-leger);
+    --bleu-carte: var(--sarcelle-carte);
+    --bleu-pale: var(--sarcelle-pale);
+    --bleu-tres-pale: var(--sarcelle-tres-pale);
+
+    /* Navigation */
+    --nav-normal: var(--sarcelle-principal);
+    --nav-actif: var(--sarcelle-moyen);
+    --nav-actif-normal: var(--sarcelle-moyen);
+
+    /* Sous-navigation */
+    --sous-nav-bg: var(--sarcelle-pale);
+    --sous-nav-bg-normal: var(--sarcelle-pale);
+    --sous-nav-normal: var(--sarcelle-moyen);
+    --sous-nav-actif: var(--sarcelle-clair);
+
+    /* Boutons */
+    --btn-principal: var(--sarcelle-principal);
+    --btn-principal-hover: var(--sarcelle-moyen);
+
+    /* Fond de page saturé sarcelle */
+    --fond-page-sature: #d4ebe5;
+    --fond-page-clair: #e8f5f2;
+
+    /* Variables orphelines utilisées par les règles body[data-mode="simulation"] */
+    --vert-pale-assiste: var(--sarcelle-pale);
+    --vert-tres-pale-assiste: var(--sarcelle-tres-pale);
+}
+
+body.mode-demo .sous-navigation {
+    background:
+        linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+        linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%) !important;
+}
+
+/* ===============================
    MODE ANONYMISÉ - BLEUS DÉSATURÉS
    =============================== */
 
