@@ -5967,8 +5967,8 @@ function determinerCibleIntervention(da) {
         engagement: indices.E,
         pattern: M,
         defi: N,
-        francais: I.toFixed(1) + '%',
-        perfPAN3: (performancePAN3 * 100).toFixed(1) + '%'
+        francais: (I != null ? I.toFixed(1) : '?') + '%',
+        perfPAN3: (performancePAN3 != null ? (performancePAN3 * 100).toFixed(1) : '?') + '%'
     });
 
     // LOGIQUE DE DÉCISION (formule Excel traduite en JavaScript)
@@ -8367,6 +8367,7 @@ window.retirerJetonPersonnaliseAvecConfirmation = retirerJetonPersonnaliseAvecCo
 // 🆕 Exporter les nouvelles fonctions de niveau RàI (Beta 90+)
 window.determinerNiveauRaiPedagogique = determinerNiveauRaiPedagogique;
 window.determinerAlerteContextuelle = determinerAlerteContextuelle;
+window.determinerCibleIntervention = determinerCibleIntervention; // 🔧 FIX Beta 97.4 : Nécessaire pour afficherPatternsApprentissage
 
 /**
  * 🆕 BETA 91: Calcule et stocke les patterns + RàI pour TOUT le groupe

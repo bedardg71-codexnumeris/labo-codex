@@ -5599,8 +5599,10 @@ async function peuplerDropdownGroupeCoursActif() {
         options += '</optgroup>';
 
         // 🆕 BETA 95.3 : Section Cours (tous groupes fusionnés)
-        // Afficher pour tous les cours (même avec 1 seul groupe visible, car il peut y avoir des étudiants dans d'autres groupes)
-        if (coursMap.size > 0) {
+        // Masquer en mode démo (un seul groupe-cours, pas besoin de la vue fusionnée)
+        const trimestreActifDropdown = trimestres.find(t => t.actif);
+        const estDemo = trimestreActifDropdown && trimestreActifDropdown.isDemo;
+        if (coursMap.size > 0 && !estDemo) {
             options += '<optgroup label="Cours (tous groupes)">';
             coursMap.forEach((gcs, coursId) => {
                 let coursInfo = cours.find(c => c.id === coursId);
