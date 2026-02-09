@@ -15665,7 +15665,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97';
-        const BUILD_ID = '0208-2003';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0208-2017';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
@@ -15696,8 +15696,8 @@
             if (!pastille) return;
 
             const { aDesNouveautes } = verifierNouveautes();
-            pastille.textContent = aDesNouveautes ? '✉️🔴' : '✉️';
-            pastille.title = aDesNouveautes ? 'Nouveautés disponibles' : 'Notes de version';
+            pastille.textContent = aDesNouveautes ? '\uD83D\uDD34' : '';
+            pastille.parentElement.title = aDesNouveautes ? 'Nouveautés disponibles' : 'Notes de version';
         }
 
         /**
