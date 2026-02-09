@@ -336,6 +336,16 @@
         // Mettre à jour le bandeau d'archivage après changement
         mettreAJourBandeauArchive();
 
+        // Régénérer le calendrier complet pour le nouveau trimestre
+        if (typeof genererCalendrierComplet === 'function') {
+            try {
+                genererCalendrierComplet();
+                console.log('[Trimestres] Calendrier régénéré pour', id);
+            } catch (e) {
+                console.warn('[Trimestres] Erreur régénération calendrier:', e);
+            }
+        }
+
         return true;
     }
 

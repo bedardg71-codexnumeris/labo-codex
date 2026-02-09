@@ -574,4 +574,10 @@ function afficherCalendrierScolaire() {
  * - Pas de dépendances externes
  */
 
+// Exports globaux (utilisés par main.js et HTML inline handlers)
+window.initialiserModuleVueCalendaire = initialiserModuleVueCalendaire;
+window.afficherCalendrierScolaire = afficherCalendrierScolaire;
+window.illuminerSemaineAmelioree = illuminerSemaineAmelioree;
+window.desilluminerSemaines = desilluminerSemaines;
+
 })();

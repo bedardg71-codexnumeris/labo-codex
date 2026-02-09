@@ -355,7 +355,7 @@ async function chargerDonneesDemo() {
             nom: 'Démonstration',
             session: 'D',
             annee: '2025',
-            actif: true,
+            actif: false,   // changerTrimestreActif('demo') l'activera proprement
             isDemo: true
         };
 
@@ -649,17 +649,10 @@ async function dechargerDonneesDemo() {
         await db.set('trimestres', trimSansDemo);
         console.log('   ➜ Trimestre demo supprimé de la liste');
 
-        // 4. Nettoyer les clés spécifiques demo
-        db.removeSync('demo_cadreCalendrier');
-        db.removeSync('demo_horaireHebdo');
-        await db.remove('demo_cadreCalendrier');
-        await db.remove('demo_horaireHebdo');
-        console.log('   ➜ Clés demo supplémentaires nettoyées');
-
-        // 5. Marquer comme non chargées
+        // 4. Marquer comme non chargées
         db.setSync('demo-chargees', null);
 
-        // 6. Synchroniser
+        // 5. Synchroniser
         await db.syncToLocalStorageCache();
 
         console.log('   ✅ Données demo déchargées avec succès');
@@ -680,7 +673,8 @@ async function supprimerDonneesNamespaceesDemo() {
         'groupeEtudiants', 'productions', 'evaluationsSauvegardees',
         'presences', 'horaires', 'groupesCours',
         'indicesAssiduiteDetailles', 'indicesCP', 'indicesAssiduite',
-        'calendrierComplet', 'snapshots'
+        'calendrierComplet', 'snapshots',
+        'cadreCalendrier', 'horaireHebdo'
     ];
 
     for (const cle of clesNamespacees) {

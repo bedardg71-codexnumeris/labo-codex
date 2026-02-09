@@ -403,10 +403,10 @@ function confirmerAjoutEvenement() {
 function supprimerEvenement(id, type) {
     if (!confirm('Supprimer cet événement ?')) return;
 
-    const cle = type === 'prevus' ? 'evenementsPrevus' : 'evenementsImprevus';
-    let evenements = db.getSync(cle, []);
+    const cleEvt = type === 'prevus' ? cle('evenementsPrevus') : cle('evenementsImprevus');
+    let evenements = db.getSync(cleEvt, []);
     evenements = evenements.filter(e => e.id !== id);
-    db.setSync(cle, evenements);
+    db.setSync(cleEvt, evenements);
 
     // CRITIQUE: Régénérer le calendrier complet
     genererCalendrierComplet();
@@ -424,8 +424,8 @@ function supprimerEvenement(id, type) {
  * Passe une carte en mode édition en place
  */
 function modifierEvenementEnPlace(id, type) {
-    const cle = type === 'prevus' ? 'evenementsPrevus' : 'evenementsImprevus';
-    const evenements = db.getSync(cle, []);
+    const cleEvt = type === 'prevus' ? cle('evenementsPrevus') : cle('evenementsImprevus');
+    const evenements = db.getSync(cleEvt, []);
     const evt = evenements.find(e => e.id === id);
 
     if (!evt) {
@@ -474,8 +474,8 @@ function sauvegarderEditionEnPlace(id, type) {
         return;
     }
 
-    const cle = type === 'prevus' ? 'evenementsPrevus' : 'evenementsImprevus';
-    const evenements = db.getSync(cle, []);
+    const cleEvt = type === 'prevus' ? cle('evenementsPrevus') : cle('evenementsImprevus');
+    const evenements = db.getSync(cleEvt, []);
     const index = evenements.findIndex(e => e.id === id);
 
     if (index !== -1) {
@@ -486,7 +486,7 @@ function sauvegarderEditionEnPlace(id, type) {
             horaireReprise: horaireReprise || '',
             dateReprise: dateReprise || ''
         };
-        db.setSync(cle, evenements);
+        db.setSync(cleEvt, evenements);
 
         // Régénérer tout
         genererCalendrierComplet();
@@ -1002,8 +1002,8 @@ function annulerFormEvenementImprevu() {
 }
 
 function modifierEvenement(id, type) {
-    const cle = type === 'prevus' ? 'evenementsPrevus' : 'evenementsImprevus';
-    const evenements = db.getSync(cle, []);
+    const cleEvt = type === 'prevus' ? cle('evenementsPrevus') : cle('evenementsImprevus');
+    const evenements = db.getSync(cleEvt, []);
     const evt = evenements.find(e => e.id === id);
 
     if (!evt) {
@@ -1089,6 +1089,33 @@ function obtenirInfosJour(date) {
 
 // Export de la fonction d'initialisation pour main.js
 window.initialiserModuleTrimestre = initialiserModuleTrimestre;
+
+// Exports calendrier (utilisés par trimestres.js, calendrier-vue.js, saisie-presences.js, trimestre-v2.js)
+window.genererCalendrierComplet = genererCalendrierComplet;
+window.obtenirCalendrierComplet = obtenirCalendrierComplet;
+window.obtenirInfosJour = obtenirInfosJour;
+window.afficherStatistiquesTrimestre = afficherStatistiquesTrimestre;
+
+// Exports cadre calendrier (utilisés par index.html onclick)
+window.sauvegarderCadreCalendrier = sauvegarderCadreCalendrier;
+
+// Exports événements (utilisés par index.html onclick et HTML généré)
+window.confirmerAjoutEvenement = confirmerAjoutEvenement;
+window.confirmerAjoutEvenementImprevu = confirmerAjoutEvenementImprevu;
+window.supprimerEvenement = supprimerEvenement;
+window.modifierEvenement = modifierEvenement;
+window.modifierEvenementEnPlace = modifierEvenementEnPlace;
+window.sauvegarderEditionEnPlace = sauvegarderEditionEnPlace;
+window.annulerEditionEnPlace = annulerEditionEnPlace;
+
+// Exports formulaires (utilisés par index.html onclick)
+window.afficherFormEvenement = afficherFormEvenement;
+window.annulerFormEvenement = annulerFormEvenement;
+window.afficherFormEvenementImprevu = afficherFormEvenementImprevu;
+window.annulerFormEvenementImprevu = annulerFormEvenementImprevu;
+
+// Exports utilitaires (utilisés par d'autres modules)
+window.afficherNotification = afficherNotification;
 
 
 })();
