@@ -12,6 +12,19 @@
         {
             version: 'Beta 97.4',
             date: '8 février',
+            couleur: 'bleu',
+            titre: 'Démo et expérience utilisateur',
+            items: [
+                '<strong>Thème sarcelle en démo</strong> : L\'interface bascule automatiquement vers la palette sarcelle du mode Assisté quand les données de démonstration sont actives. Retour au bleu normal en quittant.',
+                '<strong>Patterns d\'apprentissage corrigés</strong> : La répartition des patterns (Stable, Défi, Blocage) s\'affiche maintenant correctement en mode démo.',
+                '<strong>Page d\'accueil enrichie</strong> : La carte du groupe est remplacée par une invitation à explorer la démo. Nouveau lien codexnumeris.org en pied de page.',
+                '<strong>Nettoyage démo robuste</strong> : Quitter la démo nettoie désormais les deux couches de stockage (localStorage + IndexedDB), éliminant les résidus après rechargement.',
+                '<strong>Dropdown corrigé</strong> : La section «\u00a0Cours (tous groupes)\u00a0» est masquée en mode démo. Le contexte affiche «\u00a0Données de démonstration\u00a0» au lieu de «\u00a0Démonstration 2025\u00a0».'
+            ]
+        },
+        {
+            version: 'Beta 97.4',
+            date: '8 février',
             couleur: 'vert',
             titre: 'Alignement pédagogique',
             items: [

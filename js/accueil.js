@@ -58,7 +58,7 @@ function afficherAccueilPremierLancement(conteneur) {
                 </div>
             </div>
             <div class="accueil-carte" onclick="if(typeof entrerEnDemo==='function') entrerEnDemo();">
-                <div class="accueil-carte-icone">&#x1F50D;</div>
+                <div class="accueil-carte-icone">&#x1F5FA;&#xFE0F;</div>
                 <div class="accueil-carte-titre">Explorer la d\u00e9mo</div>
                 <div class="accueil-carte-desc">
                     D\u00e9couvrez l\u2019application avec des donn\u00e9es fictives de 20\u00a0\u00e9tudiants.
@@ -67,9 +67,7 @@ function afficherAccueilPremierLancement(conteneur) {
         </div>
 
         <div class="accueil-pied">
-            <span style="font-size: 0.8rem; color: var(--gris-moyen);">
-                Monitorage p\u00e9dagogique \u2014 Suivi de l\u2019apprentissage
-            </span>
+            <a href="https://codexnumeris.org" target="_blank" style="font-size: 0.8rem; color: var(--gris-moyen); text-decoration: none;">codexnumeris.org</a>
         </div>
     `;
 }
@@ -78,24 +76,39 @@ function afficherAccueilPremierLancement(conteneur) {
  * Affichage retour : info cours actif + 4 cartes par intention
  */
 function afficherAccueilRetour(conteneur) {
-    // Récupérer infos du cours actif
-    const infoCours = db.getSync('infoCours', null);
+    // Carte contextuelle : invitation démo (mode normal) ou info cours (mode démo)
+    const enDemo = typeof estEnModeDemo === 'function' && estEnModeDemo();
     let coursHTML = '';
 
-    if (infoCours) {
-        const sigle = infoCours.sigle || '';
-        const titre = infoCours.titre || '';
-        const groupe = infoCours.groupe || '';
-        const session = infoCours.session || '';
-        const annee = infoCours.annee || '';
-        const detail = [sigle, groupe ? `Groupe ${groupe}` : '', session && annee ? `${session}${annee}` : ''].filter(Boolean).join(' \u2022 ');
+    if (enDemo) {
+        // En démo : afficher le cours demo actif
+        const infoCours = db.getSync('infoCours', null);
+        if (infoCours) {
+            const sigle = infoCours.sigle || '';
+            const titre = infoCours.titre || '';
+            const groupe = infoCours.groupe || '';
+            const session = infoCours.session || '';
+            const annee = infoCours.annee || '';
+            const detail = [sigle, groupe ? `Groupe ${groupe}` : '', session && annee ? `${session}${annee}` : ''].filter(Boolean).join(' \u2022 ');
 
+            coursHTML = `
+                <div class="accueil-cours-actif">
+                    <span class="accueil-cours-icone">&#x1F4DA;</span>
+                    <div class="accueil-cours-info">
+                        <div class="accueil-cours-nom">${echapperHtml(titre || sigle)}</div>
+                        <div class="accueil-cours-detail">${echapperHtml(detail)}</div>
+                    </div>
+                </div>
+            `;
+        }
+    } else {
+        // Mode normal : invitation à explorer la démo
         coursHTML = `
-            <div class="accueil-cours-actif">
-                <span class="accueil-cours-icone">&#x1F4DA;</span>
+            <div class="accueil-cours-actif accueil-invite-demo" onclick="if(typeof entrerEnDemo==='function') entrerEnDemo();" style="cursor: pointer;">
+                <span class="accueil-cours-icone">&#x1F5FA;&#xFE0F;</span>
                 <div class="accueil-cours-info">
-                    <div class="accueil-cours-nom">${echapperHtml(titre || sigle)}</div>
-                    <div class="accueil-cours-detail">${echapperHtml(detail)}</div>
+                    <div class="accueil-cours-nom">Donn\u00e9es de d\u00e9monstration</div>
+                    <div class="accueil-cours-detail">Explorez l\u2019application avec un lot de donn\u00e9es fictives pour d\u00e9couvrir le suivi des apprentissages et la construction de la note.</div>
                 </div>
             </div>
         `;
@@ -151,13 +164,6 @@ function afficherAccueilRetour(conteneur) {
                     Consulter le portrait d\u2019un \u00e9l\u00e8ve\u00a0: pr\u00e9sences, r\u00e9sultats et progression.
                 </div>
             </div>
-            <div class="accueil-carte" onclick="afficherModalNouveautes();">
-                <div class="accueil-carte-icone"><span class="pastille-nouveautes" title="Nouveaut\u00e9s">\u2709\uFE0F</span></div>
-                <div class="accueil-carte-titre">Suivre le d\u00e9veloppement du projet</div>
-                <div class="accueil-carte-desc">
-                    Prendre connaissance des nouvelles fonctionnalit\u00e9s et des r\u00e9centes corrections de bugs.
-                </div>
-            </div>
             <div class="accueil-carte" onclick="if(window.backupReminder) window.backupReminder.afficherModal();">
                 <div class="accueil-carte-icone">\uD83D\uDCBE</div>
                 <div class="accueil-carte-titre">Faire une sauvegarde des donn\u00e9es</div>
@@ -165,12 +171,17 @@ function afficherAccueilRetour(conteneur) {
                     Exporter en lieu s\u00fbr tout votre mat\u00e9riel dans un document JSON.
                 </div>
             </div>
+            <div class="accueil-carte" onclick="afficherModalNouveautes();">
+                <div class="accueil-carte-icone">\u2709\uFE0F<span class="pastille-nouveautes"></span></div>
+                <div class="accueil-carte-titre">Suivre le d\u00e9veloppement du projet</div>
+                <div class="accueil-carte-desc">
+                    Prendre connaissance des nouvelles fonctionnalit\u00e9s et des r\u00e9centes corrections de bugs.
+                </div>
+            </div>
         </div>
 
         <div class="accueil-pied">
-            <button onclick="if(typeof entrerEnDemo==='function') entrerEnDemo();">Explorer la d\u00e9mo</button>
-            <span class="accueil-separateur">|</span>
-            <button onclick="afficherSection('tableau-bord');">Tableau de bord complet</button>
+            <a href="https://codexnumeris.org" target="_blank" style="font-size: 0.8rem; color: var(--gris-moyen); text-decoration: none;">codexnumeris.org</a>
         </div>
     `;
 

@@ -1,12 +1,57 @@
 # SESSION ACTIVE - BETA 97.4
 
 **Date** : 8 février 2026
-**Version** : Beta 97.4 (build 0208-1437)
-**Statut** : Alignement pédagogique — clonage, verbes horizontaux, évaluations, UX
+**Version** : Beta 97.4 (build 0208-2017)
+**Statut** : Alignement pédagogique + correctifs démo/UX
 
-## SESSION DU 8 FÉVRIER 2026
+## SESSION DU 8 FÉVRIER 2026 (soir)
 
-### Travail accompli
+### Travail accompli — Démo et UX
+
+7. **Thème sarcelle en mode démo**
+   - `body.mode-demo` redéfinit toutes les variables `--bleu-*` → `--sarcelle-*`
+   - Navigation, boutons, fonds, info-boxes basculent automatiquement
+   - Retour au bleu normal quand on quitte la démo
+
+8. **Fix patterns d'apprentissage à 0%**
+   - Export manquant `window.determinerCibleIntervention` depuis l'IIFE de profil-etudiant.js
+   - Export manquant `window.calculerTauxCompletion` depuis etudiants.js
+   - Race condition `calculerEtStockerIndicesCP` async→sync (portfolio.js)
+   - Crash `I.toFixed(1)` quand `francaisMoyen` est null
+
+9. **Nettoyage démo robuste**
+   - `db.removeSync()` + `db.remove()` pour chaque clé demo (deux couches de stockage)
+   - `db.setSync()` + `db.set()` pour les données globales filtrées
+   - Élimine les résidus après rechargement
+
+10. **Page d'accueil**
+    - Carte groupe remplacée par invitation démo (mode normal)
+    - Boutons "Explorer la démo | Tableau de bord" retirés du pied de page
+    - Lien codexnumeris.org en pied de page
+    - Cartes interverties : Sauvegarde avant Suivre le projet
+    - Émoji 🔍→🗺️, pastille ✉️ à taille normale + 🔴 petit en exposant
+
+11. **Correctifs visuels démo**
+    - "Démonstration 2025" → "Données de démonstration"
+    - Section "Cours (tous groupes)" masquée en mode démo
+    - Encarts guidage : classe `.info-box--info` hérite du thème sarcelle automatiquement
+
+### Fichiers modifiés (soir)
+- `styles.css` — bloc `body.mode-demo` sarcelle, `.pastille-nouveautes` réduite
+- `js/donnees-demo.js` — nettoyage dual localStorage+IndexedDB
+- `js/accueil.js` — invitation démo, pied de page, interversion cartes
+- `js/guidage-demo.js` — commentaire mis à jour
+- `js/profil-etudiant.js` — export `determinerCibleIntervention`
+- `js/etudiants.js` — export `calculerTauxCompletion`
+- `js/portfolio.js` — `calculerEtStockerIndicesCP` sync
+- `js/tableau-bord-apercu.js` — contexte démo, try/catch patterns
+- `js/trimestre-v2.js` — masquer dropdown "Cours (tous groupes)" en démo
+- `js/changelog-data.js` — nouvelle entrée changelog
+- `index.html` — BUILD_ID, `mettreAJourPastille` adapté
+
+---
+
+### Travail accompli — Alignement pédagogique
 
 1. **Système de clonage (PLAN-CLONAGE.md)**
    - `cloneSourceId` ajouté au modèle de données (creerNoeud, clonerEtatPersistant, restaurerSnapshot, chargerCarte)
