@@ -69,7 +69,8 @@ const TYPES_LIENS = [
     { id: 'se_verifie_par',       label: 'se vérifie par' },
     { id: 's_appuie_sur',         label: "s'appuie sur" },
     { id: 'complete',             label: 'complète' },
-    { id: 'conduit_a',            label: 'conduit à' }
+    { id: 'conduit_a',            label: 'conduit à' },
+    { id: 'est_mobilise_par',     label: 'est mobilisé(e) par' }
 ];
 
 // Table des verbes automatiques : direction amont → aval
@@ -133,7 +134,7 @@ function normaliserType(type) {
 
 // Verbes horizontaux : plusieurs choix possibles par couple
 var VERBES_HORIZONTAUX = {
-    'connaissance>connaissance':     ['s_appuie_sur', 'complete', 'conduit_a'],
+    'connaissance>connaissance':     ['s_appuie_sur', 'complete', 'conduit_a', 'est_mobilise_par'],
     'activite>activite':             ['complete', 'conduit_a'],
     'idee-maitresse>idee-maitresse': ['s_appuie_sur', 'complete']
 };
@@ -254,6 +255,26 @@ function ideeMaitresseAtteinLecon(noeudId, visited) {
     return false;
 }
 
+// Traverse la chaîne horizontale connaissance→connaissance pour trouver un lien vers une activité
+function connaissanceAtteinActivite(noeudId, visited) {
+    if (!visited) visited = {};
+    if (visited[noeudId]) return false;
+    visited[noeudId] = true;
+    var tousLesClones = trouverClones(noeudId);
+    var liens = [];
+    for (var ci = 0; ci < tousLesClones.length; ci++) {
+        liens = liens.concat(getLiensDeNoeud(tousLesClones[ci].id));
+    }
+    for (var i = 0; i < liens.length; i++) {
+        var l = liens[i];
+        if (l.noeudType === 'activite' || l.noeudType === 'soutien' || l.noeudType === 'revision') return true;
+        if (l.noeudType === 'connaissance' || l.noeudType === 'strategie' || l.noeudType === 'condition') {
+            if (connaissanceAtteinActivite(l.noeudId, visited)) return true;
+        }
+    }
+    return false;
+}
+
 // Traverse la chaîne IM→IM et descend via leçon→contenu→activité pour trouver une évaluation
 function ideeMaitresseAtteinEvaluation(noeudId, visited) {
     if (!visited) visited = {};
@@ -349,11 +370,14 @@ function evaluerBadge(noeud) {
             var labelMap = { connaissance: 'information', strategie: 'stratégie', condition: 'condition' };
             var dansLecon = noeud.parent && etat.noeuds.get(noeud.parent);
             var estDansLecon = dansLecon && dansLecon.type === 'lecon';
+            var atteinActivite = connaissanceAtteinActivite(noeud.id);
             return {
                 entree: estDansLecon
                     ? { valide: true, message: "Intégrée dans une leçon" }
                     : { valide: false, message: 'Cette ' + labelMap[type] + " n'est dans aucune leçon" },
-                sortie: { valide: true, message: "Contenu disponible pour les activités" }
+                sortie: atteinActivite
+                    ? { valide: true, message: "Reliée à une activité" }
+                    : { valide: false, message: "Aucune activité reliée (tracer un lien)" }
             };
 
         case 'activite':
@@ -361,17 +385,16 @@ function evaluerBadge(noeud) {
         case 'revision':
             var parentA = noeud.parent ? etat.noeuds.get(noeud.parent) : null;
             var dansLeconA = parentA && parentA.type === 'lecon';
-            var aConnaissance = dansLeconA && (parentA.enfants || []).some(function(eid) {
-                var e = etat.noeuds.get(eid);
-                return e && (e.type === 'connaissance' || e.type === 'strategie' || e.type === 'condition');
+            var lieeConnaissance = liens.some(function(l) {
+                return l.noeudType === 'connaissance' || l.noeudType === 'strategie' || l.noeudType === 'condition';
             });
             return {
                 entree: dansLeconA
                     ? { valide: true, message: "Intégrée dans une leçon" }
                     : { valide: false, message: "N'est dans aucune leçon" },
-                sortie: aConnaissance
-                    ? { valide: true, message: "La leçon contient du contenu à mobiliser" }
-                    : { valide: false, message: "Aucune connaissance dans cette leçon" }
+                sortie: lieeConnaissance
+                    ? { valide: true, message: "Reliée à du contenu" }
+                    : { valide: false, message: "Aucune connaissance reliée (tracer un lien)" }
             };
 
         case 'sequence':
