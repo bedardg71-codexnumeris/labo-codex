@@ -383,16 +383,14 @@ function evaluerBadge(noeud) {
         case 'activite':
         case 'soutien':
         case 'revision':
-            var parentA = noeud.parent ? etat.noeuds.get(noeud.parent) : null;
-            var dansLeconA = parentA && parentA.type === 'lecon';
-            var lieeConnaissance = liens.some(function(l) {
+            var lieeConnaissanceE = liens.some(function(l) {
                 return l.noeudType === 'connaissance' || l.noeudType === 'strategie' || l.noeudType === 'condition';
             });
             return {
-                entree: dansLeconA
-                    ? { valide: true, message: "Intégrée dans une leçon" }
-                    : { valide: false, message: "N'est dans aucune leçon" },
-                sortie: lieeConnaissance
+                entree: lieeConnaissanceE
+                    ? { valide: true, message: "Reliée à du contenu" }
+                    : { valide: false, message: "Aucune connaissance reliée (tracer un lien)" },
+                sortie: lieeConnaissanceE
                     ? { valide: true, message: "Reliée à du contenu" }
                     : { valide: false, message: "Aucune connaissance reliée (tracer un lien)" }
             };
@@ -432,26 +430,15 @@ function evaluerBadge(noeud) {
             };
 
         case 'evaluation':
-            var typesAmont = ['idee-maitresse', 'connaissance', 'strategie', 'condition'];
-            var evalueQqch = liens.some(function(l) {
-                return typesAmont.indexOf(l.noeudType) !== -1;
+            var typesAmontEval = ['idee-maitresse', 'connaissance', 'strategie', 'condition'];
+            var typesActivite = ['activite', 'soutien', 'revision'];
+            var lieeActiviteOuContenu = liens.some(function(l) {
+                return typesAmontEval.indexOf(l.noeudType) !== -1 || typesActivite.indexOf(l.noeudType) !== -1;
             });
-            // Remonter la chaîne : si lié à une activité, vérifier ses liens amont
-            if (!evalueQqch) {
-                evalueQqch = liens.some(function(l) {
-                    if (l.noeudType === 'activite' || l.noeudType === 'soutien' || l.noeudType === 'revision') {
-                        var liensAct = getLiensDeNoeud(l.noeudId);
-                        return liensAct.some(function(la) {
-                            return typesAmont.indexOf(la.noeudType) !== -1;
-                        });
-                    }
-                    return false;
-                });
-            }
             return {
-                entree: evalueQqch
-                    ? { valide: true, message: "Vérifie un objectif ou une connaissance" }
-                    : { valide: false, message: "Aucun objectif ni connaissance ne se vérifie par cette évaluation" },
+                entree: lieeActiviteOuContenu
+                    ? { valide: true, message: "Vérifie un objectif, une connaissance ou une activité" }
+                    : { valide: false, message: "Aucun élément relié (tracer un lien vers une activité ou un contenu)" },
                 sortie: { valide: true, message: "Preuve de réussite" }
             };
 
