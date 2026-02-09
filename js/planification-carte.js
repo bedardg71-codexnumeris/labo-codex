@@ -112,6 +112,13 @@ var VERBES_AUTO = {
     'evaluation>connaissance':     { verbe: 'se_verifie_par', inverser: true },
     'evaluation>strategie':        { verbe: 'se_verifie_par', inverser: true },
     'evaluation>condition':        { verbe: 'se_verifie_par', inverser: true },
+    // Activité → Évaluation (se vérifie par)
+    'activite>evaluation':         { verbe: 'se_verifie_par' },
+    'soutien>evaluation':          { verbe: 'se_verifie_par' },
+    'revision>evaluation':         { verbe: 'se_verifie_par' },
+    'evaluation>activite':         { verbe: 'se_verifie_par', inverser: true },
+    'evaluation>soutien':          { verbe: 'se_verifie_par', inverser: true },
+    'evaluation>revision':         { verbe: 'se_verifie_par', inverser: true },
 };
 
 // Groupes de types pour normalisation (verbes horizontaux)
@@ -242,7 +249,7 @@ function ideeMaitresseAtteinLecon(noeudId, visited) {
     visited[noeudId] = true;
     var liens = getLiensDeNoeud(noeudId);
     for (var i = 0; i < liens.length; i++) {
-        if (liens[i].noeudType === 'lecon') return true;
+        if (liens[i].noeudType === 'lecon' || liens[i].noeudType === 'sequence') return true;
     }
     return false;
 }
@@ -259,14 +266,14 @@ function evaluerBadge(noeud) {
     for (var ci = 0; ci < tousLesClones.length; ci++) {
         liens = liens.concat(getLiensDeNoeud(tousLesClones[ci].id));
     }
-    var OK = { valide: true };
-
     switch (type) {
         case 'competence':
             var devParIM = liens.some(function(l) { return l.noeudType === 'idee-maitresse'; });
             return {
-                entree: OK,
-                sortie: devParIM ? OK : { valide: false, message: 'Cette compétence ne se décline en aucune idée maîtresse' }
+                entree: { valide: true, message: "Point de départ de l'alignement" },
+                sortie: devParIM
+                    ? { valide: true, message: "Se décline en idée(s) maîtresse(s)" }
+                    : { valide: false, message: "Cette compétence ne se décline en aucune idée maîtresse" }
             };
 
         case 'idee-maitresse':
@@ -274,8 +281,12 @@ function evaluerBadge(noeud) {
             var atteinLecon = ideeMaitresseAtteinLecon(noeud.id);
             var evalueParEval = liens.some(function(l) { return l.noeudType === 'evaluation'; });
             var resIM = {
-                entree: atteinComp ? OK : { valide: false, message: "Aucune compétence reliée (directement ou via une autre idée)" },
-                sortie: atteinLecon ? OK : { valide: false, message: "Cette idée ne se concrétise dans aucune leçon" }
+                entree: atteinComp
+                    ? { valide: true, message: "Reliée à une compétence" }
+                    : { valide: false, message: "Aucune compétence reliée (directement ou via une autre idée)" },
+                sortie: atteinLecon
+                    ? { valide: true, message: "Se concrétise dans une séquence ou leçon" }
+                    : { valide: false, message: "Cette idée ne se concrétise dans aucune séquence ou leçon" }
             };
             if (atteinComp && atteinLecon && !evalueParEval) {
                 resIM.avertissement = "Cette idée ne se vérifie par aucune évaluation";
@@ -289,8 +300,10 @@ function evaluerBadge(noeud) {
             var dansLecon = noeud.parent && etat.noeuds.get(noeud.parent);
             var estDansLecon = dansLecon && dansLecon.type === 'lecon';
             return {
-                entree: estDansLecon ? OK : { valide: false, message: 'Cette ' + labelMap[type] + " n'est dans aucune leçon" },
-                sortie: OK
+                entree: estDansLecon
+                    ? { valide: true, message: "Intégrée dans une leçon" }
+                    : { valide: false, message: 'Cette ' + labelMap[type] + " n'est dans aucune leçon" },
+                sortie: { valide: true, message: "Contenu disponible pour les activités" }
             };
 
         case 'activite':
@@ -303,8 +316,12 @@ function evaluerBadge(noeud) {
                 return e && (e.type === 'connaissance' || e.type === 'strategie' || e.type === 'condition');
             });
             return {
-                entree: dansLeconA ? OK : { valide: false, message: "N'est dans aucune leçon" },
-                sortie: aConnaissance ? OK : { valide: false, message: "Aucune connaissance dans cette leçon" }
+                entree: dansLeconA
+                    ? { valide: true, message: "Intégrée dans une leçon" }
+                    : { valide: false, message: "N'est dans aucune leçon" },
+                sortie: aConnaissance
+                    ? { valide: true, message: "La leçon contient du contenu à mobiliser" }
+                    : { valide: false, message: "Aucune connaissance dans cette leçon" }
             };
 
         case 'sequence':
@@ -313,8 +330,10 @@ function evaluerBadge(noeud) {
                 return e && e.type === 'lecon';
             });
             return {
-                entree: OK,
-                sortie: contientLecon ? OK : { valide: false, message: "Aucune leçon dans cette séquence" }
+                entree: { valide: true, message: "Structure organisationnelle" },
+                sortie: contientLecon
+                    ? { valide: true, message: "Contient au moins une leçon" }
+                    : { valide: false, message: "Aucune leçon dans cette séquence" }
             };
 
         case 'lecon':
@@ -331,8 +350,12 @@ function evaluerBadge(noeud) {
             if (!aConn) msgsSortie.push("Aucune connaissance");
             if (!aAct) msgsSortie.push("Aucune activité");
             return {
-                entree: viseIM ? OK : { valide: false, message: "Aucune idée maîtresse ne se concrétise dans cette leçon" },
-                sortie: msgsSortie.length === 0 ? OK : { valide: false, message: msgsSortie.join(' · ') }
+                entree: viseIM
+                    ? { valide: true, message: "Reliée à une idée maîtresse" }
+                    : { valide: false, message: "Aucune idée maîtresse ne se concrétise dans cette leçon" },
+                sortie: msgsSortie.length === 0
+                    ? { valide: true, message: "Contient du contenu et des activités" }
+                    : { valide: false, message: msgsSortie.join(' · ') }
             };
 
         case 'evaluation':
@@ -340,12 +363,17 @@ function evaluerBadge(noeud) {
                 return l.noeudType === 'idee-maitresse' || l.noeudType === 'connaissance' || l.noeudType === 'strategie' || l.noeudType === 'condition';
             });
             return {
-                entree: evalueQqch ? OK : { valide: false, message: "Aucun objectif ni connaissance ne se vérifie par cette évaluation" },
-                sortie: OK
+                entree: evalueQqch
+                    ? { valide: true, message: "Vérifie un objectif ou une connaissance" }
+                    : { valide: false, message: "Aucun objectif ni connaissance ne se vérifie par cette évaluation" },
+                sortie: { valide: true, message: "Preuve de réussite" }
             };
 
         default:
-            return { entree: OK, sortie: OK };
+            return {
+                entree: { valide: true, message: "" },
+                sortie: { valide: true, message: "" }
+            };
     }
 }
 
@@ -363,7 +391,7 @@ function appliquerBadge(badge, resultat, couleur) {
     if (resultat.valide) {
         badge.style.backgroundColor = couleur;
         badge.textContent = '\u2713';
-        badge.title = 'OK';
+        badge.title = resultat.message || '';
         badge.classList.remove('planif-badge-gris');
     } else {
         badge.style.backgroundColor = '#b0b0b0';
@@ -1102,6 +1130,14 @@ function creerLien(sourceId, cibleId, typeLien) {
     var donnees = { id: id, source: sourceId, cible: cibleId, type: typeLien };
     etat.liens.set(id, donnees);
     dessinerLien(donnees);
+
+    // Re-layouter si les deux nœuds partagent le même conteneur
+    var srcNode = etat.noeuds.get(sourceId);
+    var cblNode = etat.noeuds.get(cibleId);
+    if (srcNode && cblNode && srcNode.parent && srcNode.parent === cblNode.parent) {
+        reLayoutConteneur(srcNode.parent);
+    }
+
     sauvegarder();
     return id;
 }
@@ -1117,7 +1153,8 @@ function dessinerLien(donnees) {
 
     var dx = p2.x - p1.x;
     var dy = p2.y - p1.y;
-    var tension = Math.min(Math.abs(dx), Math.abs(dy), 80);
+    var dist = Math.sqrt(dx * dx + dy * dy);
+    var tension = Math.max(Math.min(dist * 0.35, 80), 30);
     var cx1 = ports.portSource === 'droite' ? p1.x + tension : ports.portSource === 'gauche' ? p1.x - tension : p1.x;
     var cy1 = ports.portSource === 'bas' ? p1.y + tension : ports.portSource === 'haut' ? p1.y - tension : p1.y;
     var cx2 = ports.portCible === 'droite' ? p2.x + tension : ports.portCible === 'gauche' ? p2.x - tension : p2.x;
@@ -1562,7 +1599,7 @@ function detacherDuConteneur(noeudId) {
 
 var _layoutEnCours = new Set();
 var _zoneEnCours = new Set();
-var LAYOUT_GAP = 30;
+var LAYOUT_GAP = 60;
 var LAYOUT_PADDING = 30;
 var LAYOUT_HEADER_H = 45;
 
@@ -1820,12 +1857,6 @@ function mettreAJourZoneConteneur(conteneurId) {
     }
 }
 
-// === GUIDE CANEVAS ===
-function mettreAJourGuidesZone() {
-    var aDesNoeuds = etat.noeuds.size > 0;
-    var guide = document.getElementById('planif-zone-guide');
-    if (guide) guide.classList.toggle('planif-masque', aDesNoeuds);
-}
 
 // === UNDO / REDO ===
 function clonerEtatPersistant() {
@@ -1921,7 +1952,6 @@ function reconstruireDOM() {
         for (var entry3 of etat.liens) {
             dessinerLien(entry3[1]);
         }
-        mettreAJourGuidesZone();
     });
 }
 
@@ -1997,7 +2027,6 @@ function sauvegarder() {
     window.planificationDonnees.sauvegarderCarte(index.active, donnees);
 
     if (seancesOuvert) rafraichirSeances();
-    mettreAJourGuidesZone();
     mettreAJourTousLesBadges();
 }
 
@@ -2015,7 +2044,6 @@ function viderCanvas() {
     pileRedo = [];
     fermerPanneau();
     fermerMenuLien();
-    mettreAJourGuidesZone();
 }
 
 function chargerCarte(carteId) {
@@ -3442,6 +3470,29 @@ function supprimerCarteActive() {
     chargerCarte(index.active);
 }
 
+function dupliquerCarteActive() {
+    sauvegarder();
+    var index = window.planificationDonnees.getIndex();
+    if (!index) return;
+    var carteOrigine = index.cartes.find(function(c) { return c.id === index.active; });
+    var nomOrigine = carteOrigine ? carteOrigine.nom : 'Sans titre';
+    var nom = prompt('Nom de la copie :', nomOrigine + ' (copie)');
+    if (nom === null) return;
+    var id = 'carte_' + (++index.compteurCartes);
+    index.cartes.push({ id: id, nom: nom.trim() || nomOrigine + ' (copie)', dateCreation: new Date().toISOString() });
+    var contenu = {
+        compteur: etat.compteur,
+        compteurLiens: etat.compteurLiens,
+        noeuds: Array.from(etat.noeuds.values()),
+        liens: Array.from(etat.liens.values())
+    };
+    window.planificationDonnees.sauvegarderCarte(id, contenu);
+    index.active = id;
+    window.planificationDonnees.sauvegarderIndex(index);
+    mettreAJourListeCartes();
+    chargerCarte(id);
+}
+
 function changerCarte(carteId) {
     var index = window.planificationDonnees.getIndex();
     if (!index) return;
@@ -3449,6 +3500,7 @@ function changerCarte(carteId) {
     index.active = carteId;
     window.planificationDonnees.sauvegarderIndex(index);
     chargerCarte(carteId);
+    mettreAJourListeCartes();
 }
 
 // === INITIALISATION ===
@@ -3840,6 +3892,9 @@ function initialiser() {
 
     var btnSupprimerCarte = document.getElementById('planif-btn-supprimer-carte');
     if (btnSupprimerCarte) btnSupprimerCarte.addEventListener('click', supprimerCarteActive);
+
+    var btnDupliquerCarte = document.getElementById('planif-btn-dupliquer-carte');
+    if (btnDupliquerCarte) btnDupliquerCarte.addEventListener('click', dupliquerCarteActive);
 
     var btnExporterCarte = document.getElementById('planif-btn-exporter-carte');
     if (btnExporterCarte) btnExporterCarte.addEventListener('click', exporterCarte);

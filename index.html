@@ -6554,13 +6554,14 @@
                                 <select id="planif-liste-cartes" title="Carte active"></select>
                                 <button class="planif-btn-carte" id="planif-btn-nouvelle-carte" title="Nouvelle carte">➕</button>
                                 <button class="planif-btn-carte planif-danger" id="planif-btn-supprimer-carte" title="Supprimer cette carte">❌</button>
+                                <button class="planif-btn-carte" id="planif-btn-dupliquer-carte" title="Dupliquer cette carte">📋</button>
                                 <button class="planif-btn-carte" id="planif-btn-exporter-carte" title="Exporter cette carte">⬇️</button>
                                 <button class="planif-btn-carte" id="planif-btn-importer-carte" title="Importer une carte">⬆️</button>
                                 <button class="planif-btn-carte" id="planif-btn-annuler" title="Annuler (Ctrl+Z)">↩️</button>
                                 <input type="file" id="planif-fichier-import" accept=".json" style="display:none">
                             </div>
                             <h3><input type="text" id="planif-titre-carte" value="Sans titre" placeholder="Titre de la carte…"></h3>
-                            <button id="planif-btn-seances" style="margin-left:auto">&#128197; Séances</button>
+                            <button id="planif-btn-seances" style="margin-left:auto">Organisateur</button>
                         </div>
 
                         <!-- Zone de travail -->
@@ -6635,7 +6636,6 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div id="planif-zone-guide" class="planif-zone-guide"><span>Glissez des éléments depuis la palette pour construire votre carte mentale. Reliez-les entre eux via les ports, puis cliquez sur « Séances » pour planifier.</span></div>
                                 <button id="planif-palette-aide-btn" class="planif-palette-aide-btn" title="Afficher l'aide">?</button>
                             </div>
                             <div id="planif-carte-aide" class="planif-carte-aide">
@@ -15675,7 +15675,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97';
-        const BUILD_ID = '0209-0739';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0209-0914';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
