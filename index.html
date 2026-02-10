@@ -304,6 +304,66 @@
         }
 
         /* ===============================
+           BANDEAU MISE À JOUR DISPONIBLE
+           =============================== */
+        .bandeau-mise-a-jour {
+            background: linear-gradient(135deg, #1b6d2f, #28a745);
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 10000;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);
+            transform: translateY(100%);
+            transition: transform 0.4s ease;
+        }
+
+        .bandeau-mise-a-jour.visible {
+            transform: translateY(0);
+        }
+
+        .bandeau-mise-a-jour-contenu {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .bandeau-mise-a-jour-icone {
+            font-size: 1.2rem;
+        }
+
+        .bandeau-mise-a-jour-texte {
+            font-size: 0.9rem;
+        }
+
+        .bandeau-mise-a-jour-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 4px 12px;
+            border-radius: var(--radius-moyen);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: bold;
+        }
+
+        .bandeau-mise-a-jour-btn:hover {
+            background: rgba(255, 255, 255, 0.35);
+            border-color: white;
+        }
+
+        body.mise-a-jour-disponible {
+            padding-bottom: 50px;
+        }
+
+        /* ===============================
            BANDEAU DÉMO (Chantier 2 — route démo)
            =============================== */
         .bandeau-demo {
@@ -3442,6 +3502,19 @@
                 <span class="bandeau-demo-texte">Mode démonstration</span>
                 <button onclick="quitterDemo()" class="bandeau-demo-btn">
                     Quitter la démo
+                </button>
+            </div>
+        </div>
+
+        <!-- BANDEAU MISE À JOUR DISPONIBLE (polling version.json) -->
+        <div id="bandeau-mise-a-jour" class="bandeau-mise-a-jour">
+            <div class="bandeau-mise-a-jour-contenu">
+                <span class="bandeau-mise-a-jour-icone">🔄</span>
+                <span class="bandeau-mise-a-jour-texte">
+                    Une <strong>mise à jour</strong> est disponible
+                </span>
+                <button onclick="window.location.reload()" class="bandeau-mise-a-jour-btn">
+                    Recharger
                 </button>
             </div>
         </div>
@@ -15845,7 +15918,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97';
-        const BUILD_ID = '0210-1015';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0210-1059';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
@@ -15984,6 +16057,40 @@
 
             // Mettre à jour l'affichage de la pastille (no-op si accueil pas encore rendu)
             mettreAJourPastille();
+        });
+
+        /**
+         * POLLING — Vérification de mise à jour en arrière-plan
+         * Interroge version.json toutes les 5 minutes.
+         * Si le build distant diffère du BUILD_ID local, affiche un bandeau discret.
+         */
+        let miseAJourDejaSignalee = false;
+
+        async function verifierMiseAJourDistante() {
+            if (miseAJourDejaSignalee) return;
+            try {
+                const reponse = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
+                if (!reponse.ok) return;
+                const data = await reponse.json();
+                if (data.build && data.build !== BUILD_ID) {
+                    miseAJourDejaSignalee = true;
+                    const bandeau = document.getElementById('bandeau-mise-a-jour');
+                    if (bandeau) {
+                        bandeau.classList.add('visible');
+                        document.body.classList.add('mise-a-jour-disponible');
+                    }
+                }
+            } catch (e) {
+                // Silencieux si hors-ligne ou erreur réseau
+            }
+        }
+
+        // Lancer le polling après le chargement
+        document.addEventListener('DOMContentLoaded', function() {
+            // Première vérification après 30 secondes (laisser l'app se charger)
+            setTimeout(verifierMiseAJourDistante, 30000);
+            // Puis toutes les 5 minutes
+            setInterval(verifierMiseAJourDistante, 5 * 60 * 1000);
         });
 
         // Export des fonctions pour usage global

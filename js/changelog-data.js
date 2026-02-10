@@ -18,7 +18,8 @@
                 '<strong>Suppression complète</strong> : Le bouton «\u00a0Supprimer\u00a0» dans les bibliothèques (grilles, échelles, productions, cartouches) retire maintenant l\u2019élément des deux stores (local + partagé). Plus de fantômes qui réapparaissent.',
                 '<strong>Supprimer depuis «\u00a0Disponibles\u00a0»</strong> : Nouveau bouton «\u00a0Supprimer\u00a0» dans la section 2 des bibliothèques pour faire le ménage directement depuis la liste des éléments disponibles.',
                 '<strong>Ajouter à la bibliothèque</strong> : Nouveaux boutons «\u00a0Ajouter mes grilles/échelles à la bibliothèque\u00a0» pour partager ses éléments, comme c\u2019était déjà possible pour les productions.',
-                '<strong>Indicateurs 🚧</strong> : Les sous-sections en développement actif affichent un emoji 🚧 pulsant sur leur onglet. Visible dans Construction de la note et Planification.'
+                '<strong>Indicateurs 🚧</strong> : Les sous-sections en développement actif affichent un emoji 🚧 pulsant sur leur onglet. Visible dans Construction de la note, Planification et Aide.',
+                '<strong>Notification de mise à jour</strong> : Un bandeau vert discret apparaît automatiquement quand une nouvelle version est déployée, sans avoir à recharger la page. Vérification toutes les 5\u00a0minutes.'
             ]
         },
         {
