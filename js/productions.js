@@ -1494,10 +1494,9 @@ function initialiserModuleProductions() {
  * 1. Productions dans ma sélection (avec bouton "Retirer")
  * 2. Productions disponibles à ajouter (bibliothèque + productions retirées)
  */
-async function afficherBibliothequeProductions() {
+async function preparerDonneesBibliothequeProductions() {
     if (typeof obtenirToutesLesProductionsBibliotheque !== 'function') {
-        alert('Le module bibliothèque n\'est pas chargé.\n\nVérifiez que le fichier productions-bibliotheque.js est bien chargé.');
-        return;
+        return null;
     }
 
     const productionsUtilisateur = await db.get(getCleProductions()) || [];
@@ -1507,23 +1506,85 @@ async function afficherBibliothequeProductions() {
     const doublonsDetectes = detecterDoublonsProductions(productionsUtilisateur, toutesProductionsBiblio);
 
     // Section 1
-    let contenuSection1 = '';
-    if (productionsDansSelection.length === 0) {
-        contenuSection1 = '<p style="color: var(--gris-clair); font-style: italic;">Aucune production dans la barre latérale</p>';
-    } else {
-        productionsDansSelection.forEach(prod => {
-            contenuSection1 += BibliothequeUI.renderCarteSelection({
+    const cartesSection1 = productionsDansSelection.map(prod => ({
+        nom: `${prod.titre}${prod.description ? ' - ' + prod.description : ''}`,
+        id: prod.id,
+        badgeSource: BibliothequeUI.genererBadgeSource(prod, productionsDansSelection),
+        metadonnees: `Type: ${getTypeLabel(prod.type)} • Pondération: ${prod.ponderation}%${prod.objectif ? ' • Objectif: ' + prod.objectif : ''}`,
+        boutons: [
+            { label: 'Dupliquer', onclick: `dupliquerProductionBibliotheque('${prod.id}')`, classe: 'btn-confirmer', title: 'Créer une copie' },
+            { label: 'Exporter', onclick: `partagerProduction('${prod.id}')`, classe: 'btn-secondaire', title: 'Exporter en JSON' },
+            { label: 'Retirer', onclick: `retirerProductionDeBibliotheque('${prod.id}')`, classe: 'btn-secondaire', title: 'Retirer de la barre latérale (données conservées)' },
+            { label: 'Supprimer', onclick: `supprimerProductionDefinitivement('${prod.id}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
+        ]
+    }));
+
+    // Section 2 : fusionner retirées + bibliothèque, exclure celles déjà en sélection
+    const toutesProductionsDisponibles = [...toutesProductionsBiblio, ...productionsRetirees];
+    const disciplinesSet = new Set();
+    const cartesSection2 = [];
+    const parDiscipline = {};
+
+    toutesProductionsDisponibles.forEach(prod => {
+        if (productionsDansSelection.find(p => p.id === prod.id)) return;
+        const discipline = prod.discipline || 'Autres';
+        disciplinesSet.add(discipline);
+        if (!parDiscipline[discipline]) parDiscipline[discipline] = [];
+        parDiscipline[discipline].push(prod);
+    });
+
+    const disciplines = Array.from(disciplinesSet).sort();
+
+    Object.keys(parDiscipline).sort().forEach(discipline => {
+        parDiscipline[discipline].forEach(prod => {
+            cartesSection2.push({
                 nom: `${prod.titre}${prod.description ? ' - ' + prod.description : ''}`,
                 id: prod.id,
-                badgeSource: BibliothequeUI.genererBadgeSource(prod, productionsDansSelection),
-                metadonnees: `Type: ${getTypeLabel(prod.type)} • Pondération: ${prod.ponderation}%${prod.objectif ? ' • Objectif: ' + prod.objectif : ''}`,
+                badgeSource: BibliothequeUI.genererBadgeSource(prod, productionsUtilisateur),
+                metadonnees: `Type: ${getTypeLabel(prod.type)} • Pondération: ${prod.ponderation}%${prod.auteur ? ' • Par ' + prod.auteur : ''}`,
+                description: prod.objectif ? 'Objectif: ' + prod.objectif : '',
+                dejaPresent: false,
+                classeItem: 'production-disponible-item',
+                dataAttrs: `data-discipline="${prod.discipline || 'Autres'}"`,
                 boutons: [
-                    { label: 'Dupliquer', onclick: `dupliquerProductionBibliotheque('${prod.id}')`, classe: 'btn-confirmer', title: 'Créer une copie' },
-                    { label: 'Exporter', onclick: `partagerProduction('${prod.id}')`, classe: 'btn-secondaire', title: 'Exporter en JSON' },
-                    { label: 'Retirer', onclick: `retirerProductionDeBibliotheque('${prod.id}')`, classe: 'btn-secondaire', title: 'Retirer de la barre latérale (données conservées)' },
-                    { label: 'Supprimer', onclick: `supprimerProductionDefinitivement('${prod.id}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
-                ]
+                    { label: 'Ajouter à ma sélection', onclick: `ajouterProductionIndividuelle('${prod.id}')`, classe: 'btn-confirmer', title: 'Ajouter cette production à votre sélection' },
+                    { label: 'Supprimer', onclick: `supprimerProductionDeBibliothequePartagee('${prod.id}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true }
+                ],
+                groupe: discipline
             });
+        });
+    });
+
+    // Import trimestre
+    const trimestresDisponibles = listerTrimestresAvecProductions();
+    const sectionImportTrimestre = trimestresDisponibles.length > 0 ? { trimestres: trimestresDisponibles } : null;
+
+    return {
+        cartesSection1,
+        cartesSection2,
+        doublonsDetectes,
+        disciplines,
+        sectionImportTrimestre,
+        nombreSelection: productionsDansSelection.length
+    };
+}
+
+async function afficherBibliothequeProductions() {
+    if (typeof obtenirToutesLesProductionsBibliotheque !== 'function') {
+        alert('Le module bibliothèque n\'est pas chargé.\n\nVérifiez que le fichier productions-bibliotheque.js est bien chargé.');
+        return;
+    }
+
+    const data = await preparerDonneesBibliothequeProductions();
+    if (!data) return;
+
+    // Section 1
+    let contenuSection1 = '';
+    if (data.cartesSection1.length === 0) {
+        contenuSection1 = '<p style="color: var(--gris-clair); font-style: italic;">Aucune production dans la barre latérale</p>';
+    } else {
+        data.cartesSection1.forEach(carte => {
+            contenuSection1 += BibliothequeUI.renderCarteSelection(carte);
         });
     }
 
@@ -1537,15 +1598,15 @@ async function afficherBibliothequeProductions() {
 
     // Section import trimestre
     let sectionImportTrimestre = '';
-    const trimestresDisponibles = listerTrimestresAvecProductions();
-    if (trimestresDisponibles.length > 0) {
+    if (data.sectionImportTrimestre) {
+        const trimestres = data.sectionImportTrimestre.trimestres;
         sectionImportTrimestre = `
             <div style="margin-top: 20px; padding: 15px; background: var(--gris-tres-pale); border-radius: 6px; border: 1px solid var(--bordure-claire);">
                 <h4 style="color: var(--bleu-principal); font-size: 1rem; margin: 0 0 10px 0;">Importer depuis un autre trimestre</h4>
                 <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                     <select id="selectTrimestreImport" class="controle-form" style="flex: 1; min-width: 200px;" onchange="mettreAJourFiltreCoursTrimestreProductions()">
                         <option value="">-- Choisir un trimestre --</option>
-                        ${trimestresDisponibles.map(t => `<option value="${t.cle}">${t.nom} (${t.nombre} production${t.nombre > 1 ? 's' : ''})</option>`).join('')}
+                        ${trimestres.map(t => `<option value="${t.cle}">${t.nom} (${t.nombre} production${t.nombre > 1 ? 's' : ''})</option>`).join('')}
                     </select>
                     <select id="selectCoursImportProductions" class="controle-form" style="flex: 1; min-width: 150px; display: none;">
                         <option value="">Tous les cours</option>
@@ -1557,53 +1618,25 @@ async function afficherBibliothequeProductions() {
             </div>`;
     }
 
-    // Section 2 : données
-    const toutesProductionsDisponibles = [...toutesProductionsBiblio, ...productionsRetirees];
-    const disciplinesSet = new Set();
-    toutesProductionsDisponibles.forEach(prod => {
-        if (!productionsDansSelection.find(p => p.id === prod.id)) {
-            disciplinesSet.add(prod.discipline || 'Autres');
-        }
-    });
-    const disciplinesDisponibles = Array.from(disciplinesSet).sort();
-
+    // Filtres Section 2
     const filtresHTML = `
         <div style="margin-bottom: 15px;">
             <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">Filtrer par discipline :</label>
             <select id="filtreDisciplineProductions" onchange="filtrerProductionsParDiscipline()" class="controle-form" style="max-width: 300px;">
                 <option value="">Toutes les disciplines</option>
-                ${disciplinesDisponibles.map(d => `<option value="${d}">${d}</option>`).join('')}
+                ${data.disciplines.map(d => `<option value="${d}">${d}</option>`).join('')}
             </select>
         </div>`;
 
     // Section 2
     let contenuSection2 = '';
-    const parDiscipline = {};
-    toutesProductionsDisponibles.forEach(prod => {
-        if (productionsDansSelection.find(p => p.id === prod.id)) return;
-        const discipline = prod.discipline || 'Autres';
-        if (!parDiscipline[discipline]) parDiscipline[discipline] = [];
-        parDiscipline[discipline].push(prod);
-    });
-
-    Object.keys(parDiscipline).sort().forEach(discipline => {
-        contenuSection2 += `<h4 style="color: var(--gris-moyen); font-size: 0.95rem; margin-top: 15px; margin-bottom: 10px; border-bottom: 1px solid var(--bordure-claire); padding-bottom: 5px;">${discipline}</h4>`;
-        parDiscipline[discipline].forEach(prod => {
-            contenuSection2 += BibliothequeUI.renderCarteDisponible({
-                nom: `${prod.titre}${prod.description ? ' - ' + prod.description : ''}`,
-                id: prod.id,
-                badgeSource: BibliothequeUI.genererBadgeSource(prod, productionsUtilisateur),
-                metadonnees: `Type: ${getTypeLabel(prod.type)} • Pondération: ${prod.ponderation}%${prod.auteur ? ' • Par ' + prod.auteur : ''}`,
-                description: prod.objectif ? 'Objectif: ' + prod.objectif : '',
-                dejaPresent: false,
-                classeItem: 'production-disponible-item',
-                dataAttrs: `data-discipline="${prod.discipline || 'Autres'}"`,
-                boutons: [
-                    { label: 'Ajouter à ma sélection', onclick: `ajouterProductionIndividuelle('${prod.id}')`, classe: 'btn-confirmer', title: 'Ajouter cette production à votre sélection' },
-                    { label: 'Supprimer', onclick: `supprimerProductionDeBibliothequePartagee('${prod.id}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true }
-                ]
-            });
-        });
+    let groupeCourant = null;
+    data.cartesSection2.forEach(carte => {
+        if (carte.groupe && carte.groupe !== groupeCourant) {
+            groupeCourant = carte.groupe;
+            contenuSection2 += `<h4 style="color: var(--gris-moyen); font-size: 0.95rem; margin-top: 15px; margin-bottom: 10px; border-bottom: 1px solid var(--bordure-claire); padding-bottom: 5px;">${groupeCourant}</h4>`;
+        }
+        contenuSection2 += BibliothequeUI.renderCarteDisponible(carte);
     });
 
     BibliothequeUI.creerModal({
@@ -1611,8 +1644,8 @@ async function afficherBibliothequeProductions() {
         titre: 'Bibliothèque de productions',
         sousTitre: 'Gérez les productions affichées dans la barre latérale.',
         onFermer: 'fermerModalBibliothequeProductions',
-        doublonsHTML: BibliothequeUI.renderAvertissementDoublons(doublonsDetectes),
-        titreSection1: `Productions dans votre sélection (${productionsDansSelection.length})`,
+        doublonsHTML: BibliothequeUI.renderAvertissementDoublons(data.doublonsDetectes),
+        titreSection1: `Productions dans votre sélection (${data.nombreSelection})`,
         contenuSection1: contenuSection1,
         boutonsApresSection1: boutonsApresSection1,
         sectionImportTrimestre: sectionImportTrimestre,

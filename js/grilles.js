@@ -2168,33 +2168,72 @@ async function afficherListeGrilles() {
  * Permet d'ajouter/retirer des grilles de la barre latérale
  * Avec filtre par discipline
  */
-async function afficherBibliothequeGrilles() {
+async function preparerDonneesBibliothequeGrilles() {
     const grilles = await db.get('grillesTemplates') || [];
     const grillesDansBibliotheque = grilles.filter(g => g.dansBibliotheque !== false);
     const grillesDisponibles = await obtenirToutesLesGrillesBibliotheque();
     const doublonsDetectes = detecterDoublonsGrilles(grillesDansBibliotheque, grillesDisponibles);
     const disciplines = obtenirDisciplinesDisponiblesGrilles();
 
-    // Section 1 : Grilles dans la sélection
-    let contenuSection1 = '';
-    if (grillesDansBibliotheque.length === 0) {
-        contenuSection1 = '<p style="color: var(--gris-clair); font-style: italic;">Aucune grille dans la barre latérale</p>';
-    } else {
-        grillesDansBibliotheque.forEach(grille => {
-            const badgesPratiques = typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(grille) : '';
-            contenuSection1 += BibliothequeUI.renderCarteSelection({
+    // Section 1 : cartes pour les grilles dans la sélection
+    const cartesSection1 = grillesDansBibliotheque.map(grille => ({
+        nom: grille.nom || 'Sans titre',
+        id: grille.id,
+        badgeSource: BibliothequeUI.genererBadgeSource(grille, grillesDansBibliotheque),
+        badgesPratiques: typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(grille) : '',
+        metadonnees: `${grille.criteres?.length || 0} critère(s)${grille.discipline ? ' • ' + grille.discipline : ''}${grille.auteurOriginal ? ' • ' + grille.auteurOriginal : ''}`,
+        boutons: [
+            { label: 'Dupliquer', onclick: `dupliquerGrilleBibliotheque('${grille.id}')`, classe: 'btn-confirmer', title: 'Créer une copie' },
+            { label: 'Exporter', onclick: `partagerGrille('${grille.id}')`, classe: 'btn-secondaire', title: 'Exporter en JSON' },
+            { label: 'Retirer', onclick: `retirerGrilleDeBibliotheque('${grille.id}')`, classe: 'btn-secondaire', title: 'Retirer de la barre latérale (données conservées)' },
+            { label: 'Supprimer', onclick: `supprimerGrilleDefinitivement('${grille.id}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
+        ]
+    }));
+
+    // Section 2 : cartes groupées par discipline
+    const cartesSection2 = [];
+    const grillesParDiscipline = {};
+    grillesDisponibles.forEach(grille => {
+        const disc = grille.discipline || 'Autre';
+        if (!grillesParDiscipline[disc]) grillesParDiscipline[disc] = [];
+        grillesParDiscipline[disc].push(grille);
+    });
+
+    Object.keys(grillesParDiscipline).sort().forEach(discipline => {
+        grillesParDiscipline[discipline].forEach(grille => {
+            const dejaPresent = grilles.some(g => (g.id === grille.id || g.idOriginal === grille.id) && g.dansBibliotheque !== false);
+            cartesSection2.push({
                 nom: grille.nom || 'Sans titre',
                 id: grille.id,
                 badgeSource: BibliothequeUI.genererBadgeSource(grille, grillesDansBibliotheque),
-                badgesPratiques: badgesPratiques,
-                metadonnees: `${grille.criteres?.length || 0} critère(s)${grille.discipline ? ' • ' + grille.discipline : ''}${grille.auteurOriginal ? ' • ' + grille.auteurOriginal : ''}`,
+                badgesPratiques: typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(grille) : '',
+                metadonnees: `${grille.criteres?.length || 0} critère(s)${grille.auteur ? ' • ' + grille.auteur : ''}`,
+                description: grille.description || '',
+                dejaPresent: dejaPresent,
+                classeItem: 'grille-disponible-item',
+                dataAttrs: `data-discipline="${discipline}"`,
                 boutons: [
-                    { label: 'Dupliquer', onclick: `dupliquerGrilleBibliotheque('${grille.id}')`, classe: 'btn-confirmer', title: 'Créer une copie' },
-                    { label: 'Exporter', onclick: `partagerGrille('${grille.id}')`, classe: 'btn-secondaire', title: 'Exporter en JSON' },
-                    { label: 'Retirer', onclick: `retirerGrilleDeBibliotheque('${grille.id}')`, classe: 'btn-secondaire', title: 'Retirer de la barre latérale (données conservées)' },
-                    { label: 'Supprimer', onclick: `supprimerGrilleDefinitivement('${grille.id}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
-                ]
+                    { label: 'Ajouter à ma sélection', onclick: `ajouterGrilleIndividuelle('${grille.id}')`, classe: 'btn-confirmer', title: 'Ajouter cette grille à votre sélection' },
+                    { label: 'Supprimer', onclick: `supprimerGrilleDeBibliothequePartagee('${grille.id}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true }
+                ],
+                groupe: discipline
             });
+        });
+    });
+
+    return { cartesSection1, cartesSection2, doublonsDetectes, disciplines };
+}
+
+async function afficherBibliothequeGrilles() {
+    const data = await preparerDonneesBibliothequeGrilles();
+
+    // Section 1
+    let contenuSection1 = '';
+    if (data.cartesSection1.length === 0) {
+        contenuSection1 = '<p style="color: var(--gris-clair); font-style: italic;">Aucune grille dans la barre latérale</p>';
+    } else {
+        data.cartesSection1.forEach(carte => {
+            contenuSection1 += BibliothequeUI.renderCarteSelection(carte);
         });
     }
 
@@ -2208,45 +2247,24 @@ async function afficherBibliothequeGrilles() {
         </div>`;
 
     // Filtres Section 2
-    let filtresHTML = `
+    const filtresHTML = `
         <div class="u-mb-15">
             <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">Filtrer par discipline :</label>
             <select id="filtreDisciplineGrilles" class="controle-form" onchange="filtrerGrillesParDiscipline()" style="max-width: 300px;">
                 <option value="">Toutes les disciplines</option>
-                ${disciplines.map(d => `<option value="${d}">${d}</option>`).join('')}
+                ${data.disciplines.map(d => `<option value="${d}">${d}</option>`).join('')}
             </select>
         </div>`;
 
-    // Section 2 : Grilles disponibles
+    // Section 2
     let contenuSection2 = '';
-    const grillesParDiscipline = {};
-    grillesDisponibles.forEach(grille => {
-        const disc = grille.discipline || 'Autre';
-        if (!grillesParDiscipline[disc]) grillesParDiscipline[disc] = [];
-        grillesParDiscipline[disc].push(grille);
-    });
-
-    Object.keys(grillesParDiscipline).sort().forEach(discipline => {
-        contenuSection2 += `<h4 style="margin-top: 20px; margin-bottom: 10px; color: var(--gris-moyen);">${discipline}</h4>`;
-        grillesParDiscipline[discipline].forEach(grille => {
-            const dejaPresent = grilles.some(g => (g.id === grille.id || g.idOriginal === grille.id) && g.dansBibliotheque !== false);
-            const badgesPratiques = typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(grille) : '';
-            contenuSection2 += BibliothequeUI.renderCarteDisponible({
-                nom: grille.nom || 'Sans titre',
-                id: grille.id,
-                badgeSource: BibliothequeUI.genererBadgeSource(grille, grillesDansBibliotheque),
-                badgesPratiques: badgesPratiques,
-                metadonnees: `${grille.criteres?.length || 0} critère(s)${grille.auteur ? ' • ' + grille.auteur : ''}`,
-                description: grille.description || '',
-                dejaPresent: dejaPresent,
-                classeItem: 'grille-disponible-item',
-                dataAttrs: `data-discipline="${discipline}"`,
-                boutons: [
-                    { label: 'Ajouter à ma sélection', onclick: `ajouterGrilleIndividuelle('${grille.id}')`, classe: 'btn-confirmer', title: 'Ajouter cette grille à votre sélection' },
-                    { label: 'Supprimer', onclick: `supprimerGrilleDeBibliothequePartagee('${grille.id}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true }
-                ]
-            });
-        });
+    let groupeCourant = null;
+    data.cartesSection2.forEach(carte => {
+        if (carte.groupe && carte.groupe !== groupeCourant) {
+            groupeCourant = carte.groupe;
+            contenuSection2 += `<h4 style="margin-top: 20px; margin-bottom: 10px; color: var(--gris-moyen);">${groupeCourant}</h4>`;
+        }
+        contenuSection2 += BibliothequeUI.renderCarteDisponible(carte);
     });
 
     BibliothequeUI.creerModal({
@@ -2254,7 +2272,7 @@ async function afficherBibliothequeGrilles() {
         titre: 'Bibliothèque de grilles de critères',
         sousTitre: 'Gérez les grilles de critères affichées dans la barre latérale.',
         onFermer: 'fermerModalBibliothequeGrilles',
-        doublonsHTML: BibliothequeUI.renderAvertissementDoublons(doublonsDetectes),
+        doublonsHTML: BibliothequeUI.renderAvertissementDoublons(data.doublonsDetectes),
         titreSection1: 'Grilles dans la barre latérale',
         contenuIdListe1: 'listeGrillesDansBibliotheque',
         contenuSection1: contenuSection1,

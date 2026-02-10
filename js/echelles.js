@@ -2379,7 +2379,7 @@ async function afficherListeEchelles() {
  * Permet d'ajouter/retirer des échelles de la barre latérale
  * Avec filtre par discipline
  */
-async function afficherBibliothequeEchelles() {
+async function preparerDonneesBibliothequeEchelles() {
     const echelles = await db.get('echellesTemplates') || [];
     const echellesDansBibliotheque = echelles.filter(e => e.dansBibliotheque !== false);
     const echellesDisponibles = await obtenirToutesLesEchellesBibliotheque();
@@ -2387,80 +2387,22 @@ async function afficherBibliothequeEchelles() {
     const disciplines = obtenirDisciplinesDisponiblesEchelles();
 
     // Section 1
-    let contenuSection1 = '';
-    if (echellesDansBibliotheque.length === 0) {
-        contenuSection1 = '<p style="color: var(--gris-clair); font-style: italic;">Aucune échelle dans la barre latérale</p>';
-    } else {
-        echellesDansBibliotheque.forEach(echelle => {
-            const badgesPratiques = typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(echelle) : '';
-            contenuSection1 += BibliothequeUI.renderCarteSelection({
-                nom: echelle.nom || 'Sans titre',
-                id: echelle.id,
-                badgeSource: BibliothequeUI.genererBadgeSource(echelle, echellesDansBibliotheque),
-                badgesPratiques: badgesPratiques,
-                metadonnees: `${echelle.niveaux?.length || 0} niveau(x)${echelle.discipline ? ' • ' + echelle.discipline : ''}${echelle.auteurOriginal ? ' • ' + echelle.auteurOriginal : ''}`,
-                boutons: [
-                    { label: 'Dupliquer', onclick: `dupliquerEchelleBibliotheque('${echelle.id}')`, classe: 'btn-confirmer', title: 'Créer une copie' },
-                    { label: 'Exporter', onclick: `partagerEchelle('${echelle.id}')`, classe: 'btn-secondaire', title: 'Exporter en JSON' },
-                    { label: 'Retirer', onclick: `retirerEchelleDeBibliotheque('${echelle.id}')`, classe: 'btn-secondaire', title: 'Retirer de la barre latérale (données conservées)' },
-                    { label: 'Supprimer', onclick: `supprimerEchelleDefinitivement('${echelle.id}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
-                ]
-            });
-        });
-    }
+    const cartesSection1 = echellesDansBibliotheque.map(echelle => ({
+        nom: echelle.nom || 'Sans titre',
+        id: echelle.id,
+        badgeSource: BibliothequeUI.genererBadgeSource(echelle, echellesDansBibliotheque),
+        badgesPratiques: typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(echelle) : '',
+        metadonnees: `${echelle.niveaux?.length || 0} niveau(x)${echelle.discipline ? ' • ' + echelle.discipline : ''}${echelle.auteurOriginal ? ' • ' + echelle.auteurOriginal : ''}`,
+        boutons: [
+            { label: 'Dupliquer', onclick: `dupliquerEchelleBibliotheque('${echelle.id}')`, classe: 'btn-confirmer', title: 'Créer une copie' },
+            { label: 'Exporter', onclick: `partagerEchelle('${echelle.id}')`, classe: 'btn-secondaire', title: 'Exporter en JSON' },
+            { label: 'Retirer', onclick: `retirerEchelleDeBibliotheque('${echelle.id}')`, classe: 'btn-secondaire', title: 'Retirer de la barre latérale (données conservées)' },
+            { label: 'Supprimer', onclick: `supprimerEchelleDefinitivement('${echelle.id}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
+        ]
+    }));
 
-    const boutonsApresSection1 = `
-        <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
-            <button onclick="ajouterMesEchellesALaBibliotheque()" class="btn btn-principal">Ajouter mes échelles à la bibliothèque</button>
-            <button onclick="exporterEchelles()" class="btn btn-secondaire">Exporter toutes mes échelles</button>
-            <button onclick="document.getElementById('fichier-import-echelles-modal').click()" class="btn btn-secondaire">Importer des échelles</button>
-            <input type="file" id="fichier-import-echelles-modal" accept=".json" style="display: none;" onchange="importerEchelles(event)">
-        </div>`;
-
-    // Section import trimestre
-    let sectionImportTrimestre = '';
-    const trimestresDisponibles = typeof listerTrimestresAvecEchelles === 'function' ? listerTrimestresAvecEchelles() : [];
-    if (trimestresDisponibles.length > 0) {
-        sectionImportTrimestre = `
-            <div style="margin-top: 20px; padding: 15px; background: var(--gris-tres-pale); border-radius: 6px; border: 1px solid var(--bordure-claire);">
-                <h4 style="color: var(--bleu-principal); font-size: 1rem; margin: 0 0 10px 0;">Importer depuis un autre trimestre</h4>
-                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                    <select id="selectTrimestreImportEchelles" class="controle-form" style="flex: 1; min-width: 200px;">
-                        <option value="">-- Choisir un trimestre --</option>
-                        ${trimestresDisponibles.map(t => `<option value="${t.cle}">${t.nom} (${t.nombre} échelle${t.nombre > 1 ? 's' : ''})</option>`).join('')}
-                    </select>
-                    <button onclick="afficherEchellesTrimestreModal()" class="btn btn-secondaire btn-compact">Voir les échelles</button>
-                    <button onclick="importerToutEchellesTrimestreModal()" class="btn btn-principal btn-compact">Tout importer</button>
-                </div>
-                <div id="previewEchellesTrimestre" style="margin-top: 10px; display: none;"></div>
-            </div>`;
-    }
-
-    // Filtres Section 2
-    const filtresHTML = `
-        <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 15px;">
-            <div style="flex: 1; min-width: 200px;">
-                <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">Filtrer par discipline :</label>
-                <select id="filtreDisciplineEchelles" class="controle-form" onchange="filtrerEchellesBibliotheque()" style="max-width: 300px;">
-                    <option value="">Toutes les disciplines</option>
-                    ${disciplines.map(d => `<option value="${d}">${d}</option>`).join('')}
-                </select>
-            </div>
-            <div style="flex: 1; min-width: 200px;">
-                <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">Filtrer par pratique :</label>
-                <select id="filtrePratiqueEchelles" class="controle-form" onchange="filtrerEchellesBibliotheque()" style="max-width: 300px;">
-                    <option value="">Toutes les pratiques</option>
-                    <option value="SOM">Sommative</option>
-                    <option value="STD">PAN-Standards</option>
-                    <option value="SPE">PAN-Spécifications</option>
-                    <option value="DEN">PAN-Dénotation</option>
-                    <option value="all">Multi-pratiques</option>
-                </select>
-            </div>
-        </div>`;
-
-    // Section 2
-    let contenuSection2 = '';
+    // Section 2 : groupée par discipline
+    const cartesSection2 = [];
     const echellesParDiscipline = {};
     echellesDisponibles.forEach(echelle => {
         const disc = echelle.discipline || 'Autre';
@@ -2469,7 +2411,6 @@ async function afficherBibliothequeEchelles() {
     });
 
     Object.keys(echellesParDiscipline).sort().forEach(discipline => {
-        contenuSection2 += `<h4 style="margin-top: 20px; margin-bottom: 10px; color: var(--gris-moyen);">${discipline}</h4>`;
         echellesParDiscipline[discipline].forEach(echelle => {
             const pratiques = echelle.pratiques || (echelle.gabaritType ? [echelle.gabaritType] : ['all']);
             let badgesPratiques = '';
@@ -2488,7 +2429,7 @@ async function afficherBibliothequeEchelles() {
             const styleGabarit = estGabarit ? 'border-left: 4px solid #6f42c1; background: linear-gradient(135deg, #f8f4ff 0%, #fff 100%);' : '';
             const gabaritBadge = estGabarit ? '<span style="font-size: 0.7rem; color: #6f42c1; font-weight: 500;">(gabarit)</span>' : '';
 
-            contenuSection2 += BibliothequeUI.renderCarteDisponible({
+            cartesSection2.push({
                 nom: (echelle.nom || 'Sans titre') + ' ' + gabaritBadge,
                 id: echelle.id,
                 badgeSource: BibliothequeUI.genererBadgeSource(echelle, echellesDansBibliotheque),
@@ -2502,9 +2443,91 @@ async function afficherBibliothequeEchelles() {
                 boutons: [
                     { label: 'Ajouter à ma sélection', onclick: `ajouterEchelleIndividuelle('${echelle.id}')`, classe: 'btn-confirmer', title: 'Ajouter cette échelle à votre sélection' },
                     { label: 'Supprimer', onclick: `supprimerEchelleDeBibliothequePartagee('${echelle.id}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true }
-                ]
+                ],
+                groupe: discipline
             });
         });
+    });
+
+    // Import trimestre
+    const trimestresDisponibles = typeof listerTrimestresAvecEchelles === 'function' ? listerTrimestresAvecEchelles() : [];
+    const sectionImportTrimestre = trimestresDisponibles.length > 0 ? { trimestres: trimestresDisponibles } : null;
+
+    return { cartesSection1, cartesSection2, doublonsDetectes, disciplines, sectionImportTrimestre };
+}
+
+async function afficherBibliothequeEchelles() {
+    const data = await preparerDonneesBibliothequeEchelles();
+
+    // Section 1
+    let contenuSection1 = '';
+    if (data.cartesSection1.length === 0) {
+        contenuSection1 = '<p style="color: var(--gris-clair); font-style: italic;">Aucune échelle dans la barre latérale</p>';
+    } else {
+        data.cartesSection1.forEach(carte => {
+            contenuSection1 += BibliothequeUI.renderCarteSelection(carte);
+        });
+    }
+
+    const boutonsApresSection1 = `
+        <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+            <button onclick="ajouterMesEchellesALaBibliotheque()" class="btn btn-principal">Ajouter mes échelles à la bibliothèque</button>
+            <button onclick="exporterEchelles()" class="btn btn-secondaire">Exporter toutes mes échelles</button>
+            <button onclick="document.getElementById('fichier-import-echelles-modal').click()" class="btn btn-secondaire">Importer des échelles</button>
+            <input type="file" id="fichier-import-echelles-modal" accept=".json" style="display: none;" onchange="importerEchelles(event)">
+        </div>`;
+
+    // Section import trimestre
+    let sectionImportTrimestre = '';
+    if (data.sectionImportTrimestre) {
+        const trimestres = data.sectionImportTrimestre.trimestres;
+        sectionImportTrimestre = `
+            <div style="margin-top: 20px; padding: 15px; background: var(--gris-tres-pale); border-radius: 6px; border: 1px solid var(--bordure-claire);">
+                <h4 style="color: var(--bleu-principal); font-size: 1rem; margin: 0 0 10px 0;">Importer depuis un autre trimestre</h4>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <select id="selectTrimestreImportEchelles" class="controle-form" style="flex: 1; min-width: 200px;">
+                        <option value="">-- Choisir un trimestre --</option>
+                        ${trimestres.map(t => `<option value="${t.cle}">${t.nom} (${t.nombre} échelle${t.nombre > 1 ? 's' : ''})</option>`).join('')}
+                    </select>
+                    <button onclick="afficherEchellesTrimestreModal()" class="btn btn-secondaire btn-compact">Voir les échelles</button>
+                    <button onclick="importerToutEchellesTrimestreModal()" class="btn btn-principal btn-compact">Tout importer</button>
+                </div>
+                <div id="previewEchellesTrimestre" style="margin-top: 10px; display: none;"></div>
+            </div>`;
+    }
+
+    // Filtres Section 2
+    const filtresHTML = `
+        <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 15px;">
+            <div style="flex: 1; min-width: 200px;">
+                <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">Filtrer par discipline :</label>
+                <select id="filtreDisciplineEchelles" class="controle-form" onchange="filtrerEchellesBibliotheque()" style="max-width: 300px;">
+                    <option value="">Toutes les disciplines</option>
+                    ${data.disciplines.map(d => `<option value="${d}">${d}</option>`).join('')}
+                </select>
+            </div>
+            <div style="flex: 1; min-width: 200px;">
+                <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">Filtrer par pratique :</label>
+                <select id="filtrePratiqueEchelles" class="controle-form" onchange="filtrerEchellesBibliotheque()" style="max-width: 300px;">
+                    <option value="">Toutes les pratiques</option>
+                    <option value="SOM">Sommative</option>
+                    <option value="STD">PAN-Standards</option>
+                    <option value="SPE">PAN-Spécifications</option>
+                    <option value="DEN">PAN-Dénotation</option>
+                    <option value="all">Multi-pratiques</option>
+                </select>
+            </div>
+        </div>`;
+
+    // Section 2
+    let contenuSection2 = '';
+    let groupeCourant = null;
+    data.cartesSection2.forEach(carte => {
+        if (carte.groupe && carte.groupe !== groupeCourant) {
+            groupeCourant = carte.groupe;
+            contenuSection2 += `<h4 style="margin-top: 20px; margin-bottom: 10px; color: var(--gris-moyen);">${groupeCourant}</h4>`;
+        }
+        contenuSection2 += BibliothequeUI.renderCarteDisponible(carte);
     });
 
     BibliothequeUI.creerModal({
@@ -2512,7 +2535,7 @@ async function afficherBibliothequeEchelles() {
         titre: "Bibliothèque d'échelles de performance",
         sousTitre: 'Gérez les échelles de performance affichées dans la barre latérale.',
         onFermer: 'fermerModalBibliothequeEchelles',
-        doublonsHTML: BibliothequeUI.renderAvertissementDoublons(doublonsDetectes),
+        doublonsHTML: BibliothequeUI.renderAvertissementDoublons(data.doublonsDetectes),
         titreSection1: 'Échelles dans la barre latérale',
         contenuIdListe1: 'listeEchellesDansBibliotheque',
         contenuSection1: contenuSection1,
