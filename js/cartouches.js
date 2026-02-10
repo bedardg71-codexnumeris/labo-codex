@@ -3211,7 +3211,7 @@ function genererChecklistCriteresImport() {
  * Affiche le modal de gestion de la bibliothèque de cartouches
  * Permet d'ajouter/retirer des cartouches de la sidebar
  */
-async function afficherBibliothequeCartouches() {
+async function preparerDonneesBibliothequeCartouches() {
     const grilles = await db.get('grillesTemplates') || [];
 
     // Récupérer les cartouches locales (de toutes les grilles)
@@ -3224,10 +3224,8 @@ async function afficherBibliothequeCartouches() {
         });
     }
 
-    // Section 1 = cartouches locales actives uniquement
     const cartouchesDansBibliotheque = cartouchesLocales.filter(c => c.dansBibliotheque !== false);
 
-    // Section 2 = bibliothèque partagée + cartouches retirées localement
     let cartouchesDisponibles = cartouchesLocales.filter(c => c.dansBibliotheque === false);
     if (window.CARTOUCHES_BIBLIOTHEQUE) {
         const cartouchesBibliothequePartagee = await obtenirToutesLesCartouchesBibliotheque();
@@ -3239,33 +3237,80 @@ async function afficherBibliothequeCartouches() {
     const disciplines = [...new Set(toutesLesGrilleNoms)].sort();
 
     // Section 1 : groupée par grille (#146)
+    const cartesSection1 = [];
+    const cartouchesParGrilleSection1 = {};
+    cartouchesDansBibliotheque.forEach(c => {
+        const g = c.grilleNom || 'Grille inconnue';
+        if (!cartouchesParGrilleSection1[g]) cartouchesParGrilleSection1[g] = [];
+        cartouchesParGrilleSection1[g].push(c);
+    });
+
+    Object.keys(cartouchesParGrilleSection1).sort().forEach(grilleNom => {
+        cartouchesParGrilleSection1[grilleNom].forEach(cartouche => {
+            cartesSection1.push({
+                nom: cartouche.nom || 'Sans titre',
+                id: cartouche.id,
+                badgeSource: BibliothequeUI.genererBadgeSource(cartouche, cartouchesDansBibliotheque),
+                metadonnees: `${Object.keys(cartouche.commentaires || {}).length} commentaire(s)${cartouche.auteurOriginal ? ' • ' + cartouche.auteurOriginal : ''}`,
+                boutons: [
+                    { label: 'Dupliquer', onclick: `dupliquerCartoucheBibliotheque('${cartouche.id}', '${cartouche.grilleId}')`, classe: 'btn-confirmer', title: 'Créer une copie' },
+                    { label: 'Exporter', onclick: `partagerCartouche('${cartouche.id}', '${cartouche.grilleId}')`, classe: 'btn-secondaire', title: 'Exporter en JSON' },
+                    { label: 'Retirer', onclick: `retirerCartoucheDeBibliotheque('${cartouche.id}', '${cartouche.grilleId}')`, classe: 'btn-secondaire', title: 'Retirer de la barre latérale (données conservées)' },
+                    { label: 'Supprimer', onclick: `supprimerCartoucheDefinitivement('${cartouche.id}', '${cartouche.grilleId}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
+                ],
+                groupe: grilleNom
+            });
+        });
+    });
+
+    // Section 2 : groupée par grille
+    const cartesSection2 = [];
+    const cartouchesParGrille = {};
+    cartouchesDisponibles.forEach(c => {
+        const g = c.grilleNom || 'Autre';
+        if (!cartouchesParGrille[g]) cartouchesParGrille[g] = [];
+        cartouchesParGrille[g].push(c);
+    });
+
+    Object.keys(cartouchesParGrille).sort().forEach(grilleNom => {
+        cartouchesParGrille[grilleNom].forEach(cartouche => {
+            const dejaPresent = cartouchesDansBibliotheque.some(c => c.id === cartouche.id || c.idOriginal === cartouche.id);
+            cartesSection2.push({
+                nom: cartouche.nom || 'Sans titre',
+                id: cartouche.id,
+                badgeSource: BibliothequeUI.genererBadgeSource(cartouche, cartouchesDansBibliotheque),
+                metadonnees: `${Object.keys(cartouche.commentaires || {}).length} commentaire(s)${cartouche.auteur ? ' • ' + cartouche.auteur : ''}`,
+                description: cartouche.description || '',
+                dejaPresent: dejaPresent,
+                classeItem: 'cartouche-disponible-item',
+                dataAttrs: `data-grille="${grilleNom}"`,
+                boutons: [
+                    { label: 'Ajouter à ma sélection', onclick: `ajouterCartoucheIndividuelle('${cartouche.id}', '${cartouche.grilleId}')`, classe: 'btn-confirmer', title: 'Ajouter cette cartouche à votre sélection' },
+                    { label: 'Supprimer', onclick: `supprimerCartoucheDeBibliothequePartagee('${cartouche.id}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true }
+                ],
+                groupe: grilleNom
+            });
+        });
+    });
+
+    return { cartesSection1, cartesSection2, doublonsDetectes, disciplines };
+}
+
+async function afficherBibliothequeCartouches() {
+    const data = await preparerDonneesBibliothequeCartouches();
+
+    // Section 1
     let contenuSection1 = '';
-    if (cartouchesDansBibliotheque.length === 0) {
+    if (data.cartesSection1.length === 0) {
         contenuSection1 = '<p style="color: var(--gris-clair); font-style: italic;">Aucune cartouche dans la barre latérale</p>';
     } else {
-        const cartouchesParGrilleSection1 = {};
-        cartouchesDansBibliotheque.forEach(c => {
-            const g = c.grilleNom || 'Grille inconnue';
-            if (!cartouchesParGrilleSection1[g]) cartouchesParGrilleSection1[g] = [];
-            cartouchesParGrilleSection1[g].push(c);
-        });
-
-        Object.keys(cartouchesParGrilleSection1).sort().forEach(grilleNom => {
-            contenuSection1 += `<h4 style="margin-top: 15px; margin-bottom: 10px; color: var(--gris-moyen);">${grilleNom}</h4>`;
-            cartouchesParGrilleSection1[grilleNom].forEach(cartouche => {
-                contenuSection1 += BibliothequeUI.renderCarteSelection({
-                    nom: cartouche.nom || 'Sans titre',
-                    id: cartouche.id,
-                    badgeSource: BibliothequeUI.genererBadgeSource(cartouche, cartouchesDansBibliotheque),
-                    metadonnees: `${Object.keys(cartouche.commentaires || {}).length} commentaire(s)${cartouche.auteurOriginal ? ' • ' + cartouche.auteurOriginal : ''}`,
-                    boutons: [
-                        { label: 'Dupliquer', onclick: `dupliquerCartoucheBibliotheque('${cartouche.id}', '${cartouche.grilleId}')`, classe: 'btn-confirmer', title: 'Créer une copie' },
-                        { label: 'Exporter', onclick: `partagerCartouche('${cartouche.id}', '${cartouche.grilleId}')`, classe: 'btn-secondaire', title: 'Exporter en JSON' },
-                        { label: 'Retirer', onclick: `retirerCartoucheDeBibliotheque('${cartouche.id}', '${cartouche.grilleId}')`, classe: 'btn-secondaire', title: 'Retirer de la barre latérale (données conservées)' },
-                        { label: 'Supprimer', onclick: `supprimerCartoucheDefinitivement('${cartouche.id}', '${cartouche.grilleId}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
-                    ]
-                });
-            });
+        let groupeCourant = null;
+        data.cartesSection1.forEach(carte => {
+            if (carte.groupe && carte.groupe !== groupeCourant) {
+                groupeCourant = carte.groupe;
+                contenuSection1 += `<h4 style="margin-top: 15px; margin-bottom: 10px; color: var(--gris-moyen);">${groupeCourant}</h4>`;
+            }
+            contenuSection1 += BibliothequeUI.renderCarteSelection(carte);
         });
     }
 
@@ -3282,38 +3327,19 @@ async function afficherBibliothequeCartouches() {
             <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">Filtrer par grille :</label>
             <select id="filtreGrilleCartouches" class="controle-form" onchange="filtrerCartouchesParGrille()" style="max-width: 300px;">
                 <option value="">Toutes les grilles</option>
-                ${disciplines.map(g => `<option value="${g}">${g}</option>`).join('')}
+                ${data.disciplines.map(g => `<option value="${g}">${g}</option>`).join('')}
             </select>
         </div>`;
 
     // Section 2
     let contenuSection2 = '';
-    const cartouchesParGrille = {};
-    cartouchesDisponibles.forEach(c => {
-        const g = c.grilleNom || 'Autre';
-        if (!cartouchesParGrille[g]) cartouchesParGrille[g] = [];
-        cartouchesParGrille[g].push(c);
-    });
-
-    Object.keys(cartouchesParGrille).sort().forEach(grilleNom => {
-        contenuSection2 += `<h4 style="margin-top: 20px; margin-bottom: 10px; color: var(--gris-moyen);">${grilleNom}</h4>`;
-        cartouchesParGrille[grilleNom].forEach(cartouche => {
-            const dejaPresent = cartouchesDansBibliotheque.some(c => c.id === cartouche.id || c.idOriginal === cartouche.id);
-            contenuSection2 += BibliothequeUI.renderCarteDisponible({
-                nom: cartouche.nom || 'Sans titre',
-                id: cartouche.id,
-                badgeSource: BibliothequeUI.genererBadgeSource(cartouche, cartouchesDansBibliotheque),
-                metadonnees: `${Object.keys(cartouche.commentaires || {}).length} commentaire(s)${cartouche.auteur ? ' • ' + cartouche.auteur : ''}`,
-                description: cartouche.description || '',
-                dejaPresent: dejaPresent,
-                classeItem: 'cartouche-disponible-item',
-                dataAttrs: `data-grille="${grilleNom}"`,
-                boutons: [
-                    { label: 'Ajouter à ma sélection', onclick: `ajouterCartoucheIndividuelle('${cartouche.id}', '${cartouche.grilleId}')`, classe: 'btn-confirmer', title: 'Ajouter cette cartouche à votre sélection' },
-                    { label: 'Supprimer', onclick: `supprimerCartoucheDeBibliothequePartagee('${cartouche.id}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true }
-                ]
-            });
-        });
+    let groupeCourant = null;
+    data.cartesSection2.forEach(carte => {
+        if (carte.groupe && carte.groupe !== groupeCourant) {
+            groupeCourant = carte.groupe;
+            contenuSection2 += `<h4 style="margin-top: 20px; margin-bottom: 10px; color: var(--gris-moyen);">${groupeCourant}</h4>`;
+        }
+        contenuSection2 += BibliothequeUI.renderCarteDisponible(carte);
     });
 
     BibliothequeUI.creerModal({
@@ -3321,7 +3347,7 @@ async function afficherBibliothequeCartouches() {
         titre: 'Bibliothèque de cartouches de rétroaction',
         sousTitre: 'Gérez les cartouches de rétroaction affichées dans la barre latérale.',
         onFermer: 'fermerModalBibliothequeCartouches',
-        doublonsHTML: BibliothequeUI.renderAvertissementDoublons(doublonsDetectes),
+        doublonsHTML: BibliothequeUI.renderAvertissementDoublons(data.doublonsDetectes),
         titreSection1: 'Cartouches dans la barre latérale',
         contenuIdListe1: 'listeCartouchesDansBibliotheque',
         contenuSection1: contenuSection1,

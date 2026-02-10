@@ -857,11 +857,14 @@
   - **Fichier a creer** : `js/bibliotheque-ui.js`
   - **Fichiers a modifier** : `js/grilles.js`, `js/echelles.js`, `js/productions.js`, `js/cartouches.js`
 
-- [ ] **#157** Separer logique metier et rendu HTML dans les modales
-  - **Etat actuel** : Les fonctions `afficherBibliothequeX()` contiennent la logique de filtrage, la detection de doublons, le tri par discipline ET la generation HTML — tout dans un seul bloc
-  - **Action** : Extraire la preparation des donnees (filtrage, doublons, tri) dans des fonctions separees. Le rendu ne fait que consommer des donnees pre-formatees
-  - **Benefice** : Testabilite, lisibilite, reutilisation
+- [x] **#157** Separer logique metier et rendu HTML dans les modales ✅ FAIT (10 fev 2026)
+  - **Action** : Extrait `preparerDonneesBibliothequeX()` dans chaque module — le rendu ne fait que consommer des donnees pre-formatees
   - **Fichiers** : `js/grilles.js`, `js/echelles.js`, `js/productions.js`, `js/cartouches.js`
+
+- [ ] **#160** UX : Alleger l'apparence des bibliotheques (boutons et badges)
+  - **Symptome** : Les modales de bibliotheques sont visuellement lourdes — trop de boutons visibles simultanement et badges trop proeminents
+  - **Action** : Reduire la taille/densite des boutons d'action (icones ou boutons compacts), alleger les badges (plus discrets, moins de couleurs saturees)
+  - **Fichiers** : `js/bibliotheque-ui.js`, `styles.css`
 
 - [ ] **#159** UX : Previsualisation cartouche sous le gabarit ou navigation gabarit/previsualisation
   - **Symptome** : L'editeur de cartouche (gabarit + matrice) et la previsualisation sont empiles verticalement, forcant un long scroll
