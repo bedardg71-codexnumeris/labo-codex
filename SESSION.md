@@ -1,10 +1,18 @@
 # SESSION ACTIVE - BETA 97.4
 
 **Date** : 10 février 2026
-**Version** : Beta 97.4 (build 0210-1358)
-**Statut** : Corrections bibliothèques + badges développement actif + notification mise à jour + tooltips
+**Version** : Beta 97.4 (build 0210-1411)
+**Statut** : Corrections bibliothèques + badges développement actif + notification mise à jour + tooltips + onglet Dépistage
 
 ## SESSION DU 10 FÉVRIER 2026
+
+### Travail accompli — Onglet Dépistage (Réglages)
+
+16. **Nouvel onglet Dépistage** : Extraction des 2 cartes dépistage (Configuration du dépistage + Seuils d'interprétation) depuis Préférences vers un onglet dédié dans Réglages.
+    - `js/config.js` : Ajout entrée `{ id: 'depistage', label: 'Dépistage' }` dans le tableau `reglages`
+    - `js/navigation.js` : Ajout case `reglages-depistage` qui réutilise `initialiserPreferencesV2()`
+    - `index.html` : HTML déplacé vers `<div id="reglages-depistage" class="sous-section">`, description Préférences mise à jour
+    - L'onglet Préférences ne contient plus que : Outils, Affichage, Expérience visuelle, Navigation
 
 ### Travail accompli — Tooltips au survol
 

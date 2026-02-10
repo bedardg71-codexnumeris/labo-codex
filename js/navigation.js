@@ -378,6 +378,13 @@ function afficherSousSection(idSousSection) {
             }
             break;
 
+        case 'reglages-depistage':
+            console.log('🔄 Chargement du Dépistage...');
+            if (typeof initialiserPreferencesV2 === 'function') {
+                setTimeout(initialiserPreferencesV2, 100);
+            }
+            break;
+
         case 'reglages-donnees':
             console.log('🔄 Chargement de Données...');
             if (typeof chargerVueDonnees === 'function') {
