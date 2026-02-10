@@ -557,9 +557,8 @@
   - Notes de version Beta 95.3-95.7 consolidées
   - Section Introduction et Configuration à jour
 
-- [ ] **#11** Message "Nouveautes de la beta" automatise
-  - Mise a jour automatique apres chaque correctif fonctionnel
-  - Synchronise avec le numero de build
+- [x] **#11** Message "Nouveautes de la beta" automatise ✅ FAIT (10 fev 2026)
+  - Pastille rouge accueil, modale changelog couleur-codee, bandeau vert mise a jour, polling version.json, persistance localStorage
 
 - [ ] **#18** Etendre aide contextuelle 😎
   - Ajouter aides pour cas d'erreur frequents
@@ -718,9 +717,9 @@
   - Code duplique pour creation de pratiques
   - Factoriser logique commune
 
-- [ ] **#16** Systeme changelog automatise
-  - Generer notes de version depuis commits ou SESSION.md
-  - Reduire maintenance manuelle
+- [ ] **#16** Systeme changelog automatise ✅ PARTIEL (10 fev 2026)
+  - **Fait** : changelog-data.js structure, script update-version.sh, changelogs markdown par beta
+  - **Reste** : Generation automatique depuis commits ou SESSION.md (actuellement tout est manuel)
 
 - [ ] **#17** Checklist tests de regression
   - Documenter verifications manuelles apres chaque build
