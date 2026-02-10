@@ -112,26 +112,11 @@ function detecterDoublonsCartouches(cartouchesLocales, cartouchesBibliotheque) {
  * @returns {string} HTML du badge
  */
 function genererBadgeSourceCartouche(cartouche, cartouchesLocales) {
-    const estLocale = cartouchesLocales.some(c => c.id === cartouche.id);
-    const estRetiree = cartouche.dansBibliotheque === false;
-
-    if (estRetiree) {
-        return '<span class="badge-source badge-source--retiree">Retirée</span>';
-    } else if (estLocale) {
-        return '<span class="badge-source badge-source--locale">Locale</span>';
-    } else {
-        return '<span class="badge-source badge-source--bibliotheque">Bibliothèque</span>';
-    }
+    return BibliothequeUI.genererBadgeSource(cartouche, cartouchesLocales);
 }
 
-/**
- * Générer un ID court pour affichage
- * @param {string} id - L'ID complet
- * @returns {string} Les 6 derniers caractères
- */
 function genererIdCourtCartouche(id) {
-    if (!id || id.length < 6) return id || '?';
-    return id.slice(-6);
+    return BibliothequeUI.genererIdCourt(id);
 }
 
 /* ===============================
@@ -583,7 +568,7 @@ async function afficherMatriceRetroaction() {
     // Si echelleId est défini, charger les couleurs depuis l'échelle source
     if (cartoucheActuel.echelleId) {
         const echelles = await db.get('echellesTemplates') || [];
-        const echelleSource = echelles.find(e => e.id === cartoucheActuel.echelleId);
+        const echelleSource = echelles.find(e => e.id === cartoucheActuel.echelleId) || echelles.find(e => e.idOriginal === cartoucheActuel.echelleId);
 
         if (echelleSource && echelleSource.niveaux) {
             // Utiliser les niveaux de l'échelle avec leurs couleurs
@@ -2792,7 +2777,7 @@ async function populerDropdownsCartouche(grilleId = '', echelleId = '', disabled
         const grilles = await db.get('grillesTemplates') || [];
         let optionsHtml = '<option value="">-- Grille --</option>';
         grilles.forEach(grille => {
-            const selected = grille.id === grilleId ? 'selected' : '';
+            const selected = (grille.id === grilleId || grille.idOriginal === grilleId) ? 'selected' : '';
             const nbCriteres = grille.criteres?.length || 0;
             optionsHtml += `<option value="${grille.id}" ${selected}>${echapperHtml(grille.nom)} (${nbCriteres} crit.)</option>`;
         });
@@ -2804,13 +2789,17 @@ async function populerDropdownsCartouche(grilleId = '', echelleId = '', disabled
     if (selectEchelle) {
         const echelles = await db.get('echellesTemplates') || [];
         let optionsHtml = '<option value="">-- Échelle --</option>';
+        let echelleMatchee = false;
         echelles.forEach(echelle => {
-            const selected = echelle.id === echelleId ? 'selected' : '';
+            const match = (echelle.id === echelleId || echelle.idOriginal === echelleId);
+            if (match) echelleMatchee = true;
+            const selected = match ? 'selected' : '';
             const nbNiveaux = echelle.niveaux?.length || 0;
             optionsHtml += `<option value="${echelle.id}" ${selected}>${echapperHtml(echelle.nom)} (${nbNiveaux} niv.)</option>`;
         });
         selectEchelle.innerHTML = optionsHtml;
-        selectEchelle.disabled = disabled;
+        // Ne pas désactiver si aucune échelle n'est matchée (permet la correction manuelle)
+        selectEchelle.disabled = disabled && echelleMatchee;
     }
 }
 
@@ -3225,310 +3214,123 @@ function genererChecklistCriteresImport() {
 async function afficherBibliothequeCartouches() {
     const grilles = await db.get('grillesTemplates') || [];
 
-    // Récupérer toutes les cartouches (locales + bibliothèque)
-    let toutesLesCartouches = [];
+    // Récupérer les cartouches locales (de toutes les grilles)
+    let cartouchesLocales = [];
     for (const grille of grilles) {
         let cartouches = await db.get(`cartouches_${grille.id}`) || [];
-
-        // ✅ CORRECTION (30 déc 2025): Gérer le cas où cartouches est un objet unique
-        if (cartouches && !Array.isArray(cartouches)) {
-            cartouches = [cartouches];
-        }
-
+        if (cartouches && !Array.isArray(cartouches)) cartouches = [cartouches];
         cartouches.forEach(cart => {
-            toutesLesCartouches.push({
-                ...cart,
-                grilleId: grille.id,
-                grilleNom: grille.nom
+            cartouchesLocales.push({ ...cart, grilleId: grille.id, grilleNom: grille.nom });
+        });
+    }
+
+    // Section 1 = cartouches locales actives uniquement
+    const cartouchesDansBibliotheque = cartouchesLocales.filter(c => c.dansBibliotheque !== false);
+
+    // Section 2 = bibliothèque partagée + cartouches retirées localement
+    let cartouchesDisponibles = cartouchesLocales.filter(c => c.dansBibliotheque === false);
+    if (window.CARTOUCHES_BIBLIOTHEQUE) {
+        const cartouchesBibliothequePartagee = await obtenirToutesLesCartouchesBibliotheque();
+        cartouchesDisponibles = [...cartouchesDisponibles, ...cartouchesBibliothequePartagee];
+    }
+
+    const doublonsDetectes = detecterDoublonsCartouches(cartouchesDansBibliotheque, cartouchesDisponibles);
+    const toutesLesGrilleNoms = [...cartouchesLocales, ...cartouchesDisponibles].map(c => c.grilleNom || 'Autre');
+    const disciplines = [...new Set(toutesLesGrilleNoms)].sort();
+
+    // Section 1 : groupée par grille (#146)
+    let contenuSection1 = '';
+    if (cartouchesDansBibliotheque.length === 0) {
+        contenuSection1 = '<p style="color: var(--gris-clair); font-style: italic;">Aucune cartouche dans la barre latérale</p>';
+    } else {
+        const cartouchesParGrilleSection1 = {};
+        cartouchesDansBibliotheque.forEach(c => {
+            const g = c.grilleNom || 'Grille inconnue';
+            if (!cartouchesParGrilleSection1[g]) cartouchesParGrilleSection1[g] = [];
+            cartouchesParGrilleSection1[g].push(c);
+        });
+
+        Object.keys(cartouchesParGrilleSection1).sort().forEach(grilleNom => {
+            contenuSection1 += `<h4 style="margin-top: 15px; margin-bottom: 10px; color: var(--gris-moyen);">${grilleNom}</h4>`;
+            cartouchesParGrilleSection1[grilleNom].forEach(cartouche => {
+                contenuSection1 += BibliothequeUI.renderCarteSelection({
+                    nom: cartouche.nom || 'Sans titre',
+                    id: cartouche.id,
+                    badgeSource: BibliothequeUI.genererBadgeSource(cartouche, cartouchesDansBibliotheque),
+                    metadonnees: `${Object.keys(cartouche.commentaires || {}).length} commentaire(s)${cartouche.auteurOriginal ? ' • ' + cartouche.auteurOriginal : ''}`,
+                    boutons: [
+                        { label: 'Dupliquer', onclick: `dupliquerCartoucheBibliotheque('${cartouche.id}', '${cartouche.grilleId}')`, classe: 'btn-confirmer', title: 'Créer une copie' },
+                        { label: 'Exporter', onclick: `partagerCartouche('${cartouche.id}', '${cartouche.grilleId}')`, classe: 'btn-secondaire', title: 'Exporter en JSON' },
+                        { label: 'Retirer', onclick: `retirerCartoucheDeBibliotheque('${cartouche.id}', '${cartouche.grilleId}')`, classe: 'btn-secondaire', title: 'Retirer de la barre latérale (données conservées)' },
+                        { label: 'Supprimer', onclick: `supprimerCartoucheDefinitivement('${cartouche.id}', '${cartouche.grilleId}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
+                    ]
+                });
             });
         });
     }
 
-    // Ajouter les cartouches de la bibliothèque partagée
-    if (window.CARTOUCHES_BIBLIOTHEQUE) {
-        const cartouchesBibliotheque = await obtenirToutesLesCartouchesBibliotheque();
-        toutesLesCartouches.push(...cartouchesBibliotheque);
-    }
+    const boutonsApresSection1 = `
+        <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px;">
+            <button onclick="exporterCartouches()" class="btn btn-secondaire">Exporter toutes mes cartouches</button>
+            <button onclick="document.getElementById('fichier-import-cartouches-modal').click()" class="btn btn-secondaire">Importer des cartouches</button>
+            <input type="file" id="fichier-import-cartouches-modal" accept=".json" style="display: none;" onchange="importerCartouches(event)">
+        </div>`;
 
-    // Séparer en deux groupes
-    const cartouchesDansBibliotheque = toutesLesCartouches.filter(c => c.dansBibliotheque !== false);
-    const cartouchesDisponibles = toutesLesCartouches.filter(c => c.dansBibliotheque === false);
+    // Filtres Section 2
+    const filtresHTML = `
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">Filtrer par grille :</label>
+            <select id="filtreGrilleCartouches" class="controle-form" onchange="filtrerCartouchesParGrille()" style="max-width: 300px;">
+                <option value="">Toutes les grilles</option>
+                ${disciplines.map(g => `<option value="${g}">${g}</option>`).join('')}
+            </select>
+        </div>`;
 
-    // ✅ AJOUT (28 janvier 2026) : Détecter les doublons
-    const doublonsDetectes = detecterDoublonsCartouches(cartouchesDansBibliotheque, cartouchesDisponibles);
-
-    // Extraire disciplines uniques
-    const disciplines = [...new Set(toutesLesCartouches.map(c => c.grilleNom || 'Autre'))].sort();
-
-    let html = `
-        <div id="modalBibliothequeCartouches" style="
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-        ">
-            <div style="
-                background: white;
-                border-radius: 8px;
-                padding: 30px;
-                max-width: 800px;
-                max-height: 80vh;
-                overflow-y: auto;
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-                position: relative;
-            ">
-                <!-- Bouton X sticky -->
-                <button onclick="fermerModalBibliothequeCartouches()" style="
-                    position: sticky;
-                    top: 0;
-                    right: 0;
-                    float: right;
-                    background: transparent;
-                    border: none;
-                    font-size: 28px;
-                    color: var(--gris-clair);
-                    cursor: pointer;
-                    padding: 0;
-                    width: 30px;
-                    height: 30px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    z-index: 1;
-                " onmouseover="this.style.color='var(--gris-fonce)'" onmouseout="this.style.color='var(--gris-clair)'">
-                    ×
-                </button>
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
-                    <h2 style="margin: 0; color: var(--bleu-principal);">Bibliothèque de cartouches de rétroaction</h2>
-                    <button class="btn-aide-contextuelle" data-aide="bibliotheque-fonctionnement" title="Comment fonctionne la bibliothèque">😎</button>
-                </div>
-                <p style="color: var(--gris-clair); margin-bottom: 20px;">
-                    Gérez les cartouches de rétroaction affichées dans la barre latérale.
-                </p>
-    `;
-
-    // ✅ AJOUT (28 janvier 2026) : Afficher avertissement doublons
-    if (doublonsDetectes.length > 0) {
-        html += `
-                <div class="info-box info-box--attention" style="margin-bottom: 20px;">
-                    <div style="font-weight: bold; margin-bottom: 8px;">
-                        ⚠️ ${doublonsDetectes.length} doublon(s) potentiel(s) détecté(s)
-                    </div>
-                    <p style="font-size: 0.9em; margin: 0 0 10px 0;">
-                        Des cartouches avec des noms similaires existent en plusieurs exemplaires.
-                    </p>
-                    <details style="font-size: 0.85em;">
-                        <summary style="cursor: pointer; font-weight: 500;">Voir les détails</summary>
-                        <ul style="margin: 10px 0 0 0; padding-left: 20px;">
-                            ${doublonsDetectes.map(d => `<li><strong>${d.nom}</strong> : ${d.count} exemplaires (IDs: ${d.ids.map(id => '#' + genererIdCourtCartouche(id)).join(', ')})</li>`).join('')}
-                        </ul>
-                    </details>
-                </div>
-        `;
-    }
-
-    html += `
-                <!-- Section 1 : Cartouches dans votre sélection -->
-                <h3 style="color: var(--bleu-clair); font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
-                    Cartouches dans la barre latérale
-                </h3>
-                <div style="margin-bottom: 30px;">
-                    <div id="listeCartouchesDansBibliotheque">
-    `;
-
-    if (cartouchesDansBibliotheque.length === 0) {
-        html += '<p style="color: var(--gris-clair); font-style: italic;">Aucune cartouche dans la barre latérale</p>';
-    } else {
-        cartouchesDansBibliotheque.forEach(cartouche => {
-            const nomCartouche = cartouche.nom || 'Sans titre';
-            const grilleNom = cartouche.grilleNom || 'Grille inconnue';
-            const nbCommentaires = Object.keys(cartouche.commentaires || {}).length;
-            const auteurOriginal = cartouche.auteurOriginal || '';
-            // ✅ AJOUT (28 janvier 2026) : ID court pour identifier les doublons
-            const idCourt = genererIdCourtCartouche(cartouche.id);
-            // ✅ AJOUT (28 janvier 2026) : Badge source
-            const badgeSource = genererBadgeSourceCartouche(cartouche, cartouchesDansBibliotheque);
-
-            html += `
-                <div style="
-                    border: 1px solid var(--bleu-clair);
-                    border-radius: 6px;
-                    padding: 15px;
-                    margin-bottom: 10px;
-                    background: var(--bleu-tres-pale);
-                ">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                        <div style="flex: 1;">
-                            <div style="font-weight: bold; color: var(--bleu-principal); margin-bottom: 4px;">
-                                ${nomCartouche}
-                                <span class="badge-source badge-source--id" title="ID: ${cartouche.id}">#${idCourt}</span>
-                                ${badgeSource}
-                            </div>
-                            <div style="color: var(--gris-clair); font-size: 0.9em;">
-                                ${nbCommentaires} commentaire(s) • ${grilleNom}${auteurOriginal ? ' • ' + auteurOriginal : ''}
-                            </div>
-                        </div>
-                        <div style="display: flex; gap: 8px; margin-left: 10px;">
-                            <button
-                                onclick="dupliquerCartoucheBibliotheque('${cartouche.id}', '${cartouche.grilleId}')"
-                                class="btn btn-confirmer btn-tres-compact"
-                                title="Créer une copie">
-                                Dupliquer
-                            </button>
-                            <button
-                                onclick="partagerCartouche('${cartouche.id}', '${cartouche.grilleId}')"
-                                class="btn btn-secondaire btn-tres-compact"
-                                title="Exporter en JSON">
-                                Exporter
-                            </button>
-                            <button
-                                onclick="retirerCartoucheDeBibliotheque('${cartouche.id}', '${cartouche.grilleId}')"
-                                class="btn btn-secondaire btn-tres-compact"
-                                title="Retirer de la barre latérale (données conservées)">
-                                Retirer
-                            </button>
-                            <button
-                                onclick="supprimerCartoucheDefinitivement('${cartouche.id}', '${cartouche.grilleId}')"
-                                class="btn btn-supprimer btn-tres-compact"
-                                title="Supprimer définitivement">
-                                Supprimer
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-    }
-
-    html += `
-                    </div>
-
-                    <!-- Boutons Import/Export après la Section 1 -->
-                    <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px;">
-                        <button onclick="exporterCartouches()" class="btn btn-secondaire">
-                            Exporter toutes mes cartouches
-                        </button>
-                        <button onclick="document.getElementById('fichier-import-cartouches-modal').click()" class="btn btn-secondaire">
-                            Importer des cartouches
-                        </button>
-                        <input type="file" id="fichier-import-cartouches-modal" accept=".json" style="display: none;" onchange="importerCartouches(event)">
-                    </div>
-                </div>
-
-                <!-- Section 2 : Cartouches disponibles -->
-                <h3 style="color: var(--bleu-clair); font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
-                    Cartouches disponibles à ajouter à la barre latérale
-                </h3>
-
-                <!-- Filtre par grille -->
-                <div style="margin-bottom: 15px;">
-                    <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">
-                        Filtrer par grille :
-                    </label>
-                    <select id="filtreGrilleCartouches"
-                            class="controle-form"
-                            onchange="filtrerCartouchesParGrille()"
-                            style="max-width: 300px;">
-                        <option value="">Toutes les grilles</option>
-    `;
-
-    disciplines.forEach(grille => {
-        html += `<option value="${grille}">${grille}</option>`;
-    });
-
-    html += `
-                    </select>
-                </div>
-
-                <div id="listeCartouchesDisponibles">
-    `;
-
-    // Organiser par grille
+    // Section 2
+    let contenuSection2 = '';
     const cartouchesParGrille = {};
-    cartouchesDisponibles.forEach(cartouche => {
-        const grille = cartouche.grilleNom || 'Autre';
-        if (!cartouchesParGrille[grille]) {
-            cartouchesParGrille[grille] = [];
-        }
-        cartouchesParGrille[grille].push(cartouche);
+    cartouchesDisponibles.forEach(c => {
+        const g = c.grilleNom || 'Autre';
+        if (!cartouchesParGrille[g]) cartouchesParGrille[g] = [];
+        cartouchesParGrille[g].push(c);
     });
 
-    // Afficher par grille
     Object.keys(cartouchesParGrille).sort().forEach(grilleNom => {
-        html += `<h4 style="margin-top: 20px; margin-bottom: 10px; color: var(--gris-moyen);">${grilleNom}</h4>`;
-
+        contenuSection2 += `<h4 style="margin-top: 20px; margin-bottom: 10px; color: var(--gris-moyen);">${grilleNom}</h4>`;
         cartouchesParGrille[grilleNom].forEach(cartouche => {
-            const nomCartouche = cartouche.nom || 'Sans titre';
-            const nbCommentaires = Object.keys(cartouche.commentaires || {}).length;
-            const description = cartouche.description || '';
-            const auteur = cartouche.auteur || '';
-            // ✅ AJOUT (28 janvier 2026) : ID court pour identifier les doublons
-            const idCourt = genererIdCourtCartouche(cartouche.id);
-            // ✅ AJOUT (28 janvier 2026) : Badge source (cartouches disponibles = bibliothèque)
-            const badgeSource = genererBadgeSourceCartouche(cartouche, cartouchesDansBibliotheque);
-
-            // Vérifier si déjà dans la bibliothèque
-            const dejaPresent = toutesLesCartouches.some(c => c.id === cartouche.id && c.dansBibliotheque !== false);
-
-            html += `
-                <div class="cartouche-disponible-item" data-grille="${grilleNom}" style="
-                    padding: 12px;
-                    background: white;
-                    border: 1px solid var(--bordure-claire);
-                    border-radius: 6px;
-                    margin-bottom: 10px;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: start;
-                    gap: 12px;
-                    ${dejaPresent ? 'opacity: 0.5;' : ''}
-                ">
-                    <div style="flex: 1;">
-                        <div style="font-weight: 500; margin-bottom: 4px;">
-                            ${nomCartouche}
-                            <span class="badge-source badge-source--id" title="ID: ${cartouche.id}">#${idCourt}</span>
-                            ${badgeSource}
-                        </div>
-                        <div style="font-size: 0.85rem; color: var(--gris-moyen); margin-bottom: 4px;">
-                            ${nbCommentaires} commentaire(s)${auteur ? ' • ' + auteur : ''}
-                        </div>
-                        ${description ? `<div style="font-size: 0.85rem; color: var(--gris-clair);">${description}</div>` : ''}
-                        ${dejaPresent ? '<div style="font-size: 0.8rem; color: var(--bleu-clair); font-style: italic; margin-top: 4px;">Déjà dans la barre latérale</div>' : ''}
-                    </div>
-                    <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-end;">
-                        ${!dejaPresent ? `
-                            <button
-                                onclick="ajouterCartoucheIndividuelle('${cartouche.id}', '${cartouche.grilleId}')"
-                                class="btn btn-confirmer btn-tres-compact"
-                                title="Ajouter cette cartouche à votre sélection">
-                                Ajouter à ma sélection
-                            </button>
-                        ` : ''}
-                        <button
-                            onclick="supprimerCartoucheDeBibliothequePartagee('${cartouche.id}')"
-                            class="btn btn-supprimer btn-tres-compact"
-                            title="Supprimer définitivement de la bibliothèque">
-                            Supprimer
-                        </button>
-                    </div>
-                </div>
-            `;
+            const dejaPresent = cartouchesDansBibliotheque.some(c => c.id === cartouche.id || c.idOriginal === cartouche.id);
+            contenuSection2 += BibliothequeUI.renderCarteDisponible({
+                nom: cartouche.nom || 'Sans titre',
+                id: cartouche.id,
+                badgeSource: BibliothequeUI.genererBadgeSource(cartouche, cartouchesDansBibliotheque),
+                metadonnees: `${Object.keys(cartouche.commentaires || {}).length} commentaire(s)${cartouche.auteur ? ' • ' + cartouche.auteur : ''}`,
+                description: cartouche.description || '',
+                dejaPresent: dejaPresent,
+                classeItem: 'cartouche-disponible-item',
+                dataAttrs: `data-grille="${grilleNom}"`,
+                boutons: [
+                    { label: 'Ajouter à ma sélection', onclick: `ajouterCartoucheIndividuelle('${cartouche.id}', '${cartouche.grilleId}')`, classe: 'btn-confirmer', title: 'Ajouter cette cartouche à votre sélection' },
+                    { label: 'Supprimer', onclick: `supprimerCartoucheDeBibliothequePartagee('${cartouche.id}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true }
+                ]
+            });
         });
     });
 
-    html += `
-                    </div>
-            </div>
-        </div>
-    `;
-
-    document.body.insertAdjacentHTML('beforeend', html);
+    BibliothequeUI.creerModal({
+        modalId: 'modalBibliothequeCartouches',
+        titre: 'Bibliothèque de cartouches de rétroaction',
+        sousTitre: 'Gérez les cartouches de rétroaction affichées dans la barre latérale.',
+        onFermer: 'fermerModalBibliothequeCartouches',
+        doublonsHTML: BibliothequeUI.renderAvertissementDoublons(doublonsDetectes),
+        titreSection1: 'Cartouches dans la barre latérale',
+        contenuIdListe1: 'listeCartouchesDansBibliotheque',
+        contenuSection1: contenuSection1,
+        boutonsApresSection1: boutonsApresSection1,
+        titreSection2: 'Cartouches disponibles à ajouter à la barre latérale',
+        filtresSection2: filtresHTML,
+        contenuIdListe2: 'listeCartouchesDisponibles',
+        contenuSection2: contenuSection2
+    });
 }
 
 /**
@@ -3541,15 +3343,37 @@ async function afficherBibliothequeCartouches() {
  */
 async function ajouterCartoucheIndividuelle(id, grilleId) {
     try {
-        const cartouches = await db.get(`cartouches_${grilleId}`) || [];
+        // Résoudre le grilleId vers une grille locale (le grilleId partagé peut différer)
+        const grilles = await db.get('grillesTemplates') || [];
+        let grilleLocale = grilles.find(g => g.id === grilleId);
+        if (!grilleLocale) {
+            grilleLocale = grilles.find(g => g.idOriginal === grilleId);
+        }
+        const grilleIdLocal = grilleLocale ? grilleLocale.id : grilleId;
+
+        const cartouches = await db.get(`cartouches_${grilleIdLocal}`) || [];
         let cartouche = cartouches.find(c => c.id === id);
+        if (!cartouche) {
+            cartouche = cartouches.find(c => c.idOriginal === id);
+        }
 
         if (!cartouche) {
             const toutesCartouches = await obtenirToutesLesCartouchesBibliotheque();
             const cartoucheSource = toutesCartouches.find(c => c.id === id);
             if (cartoucheSource) {
-                cartouche = { ...cartoucheSource };
-                cartouche.dansBibliotheque = true;
+                if (!grilleLocale) {
+                    alert('Veuillez d\'abord importer la grille associée depuis la bibliothèque de grilles.');
+                    return;
+                }
+                // Générer un nouvel ID pour éviter les conflits (pattern Productions)
+                const nouvelId = `cartouche_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                cartouche = {
+                    ...cartoucheSource,
+                    id: nouvelId,
+                    idOriginal: cartoucheSource.id,
+                    dansBibliotheque: true,
+                    dateImport: new Date().toISOString()
+                };
                 cartouches.push(cartouche);
             } else {
                 alert('Cartouche introuvable');
@@ -3559,9 +3383,9 @@ async function ajouterCartoucheIndividuelle(id, grilleId) {
             cartouche.dansBibliotheque = true;
         }
 
-        await db.set(`cartouches_${grilleId}`, cartouches);
+        await db.set(`cartouches_${grilleIdLocal}`, cartouches);
         fermerModalBibliothequeCartouches();
-        await afficherListeCartouches();
+        await afficherBanqueCartouches();
         await afficherBibliothequeCartouches();
         alert('Cartouche ajoutée à votre sélection avec succès !');
     } catch (error) {
@@ -3788,10 +3612,7 @@ function filtrerCartouchesParGrille() {
  * Fermer le modal de gestion de bibliothèque
  */
 function fermerModalBibliothequeCartouches() {
-    const modal = document.getElementById('modalBibliothequeCartouches');
-    if (modal) {
-        modal.remove();
-    }
+    BibliothequeUI.fermerModal('modalBibliothequeCartouches');
 }
 
 // Exporter les fonctions
@@ -3800,6 +3621,11 @@ window.retirerCartoucheDeBibliotheque = retirerCartoucheDeBibliotheque;
 window.ajouterCartouchesABibliotheque = ajouterCartouchesABibliotheque;
 window.filtrerCartouchesParGrille = filtrerCartouchesParGrille;
 window.fermerModalBibliothequeCartouches = fermerModalBibliothequeCartouches;
+window.ajouterCartoucheIndividuelle = ajouterCartoucheIndividuelle;
+window.dupliquerCartoucheBibliotheque = dupliquerCartoucheBibliotheque;
+window.partagerCartouche = partagerCartouche;
+window.supprimerCartoucheDefinitivement = supprimerCartoucheDefinitivement;
+window.supprimerCartoucheDeBibliothequePartagee = supprimerCartoucheDeBibliothequePartagee;
 
 
 })();

@@ -863,6 +863,12 @@
   - **Benefice** : Testabilite, lisibilite, reutilisation
   - **Fichiers** : `js/grilles.js`, `js/echelles.js`, `js/productions.js`, `js/cartouches.js`
 
+- [ ] **#159** UX : Previsualisation cartouche sous le gabarit ou navigation gabarit/previsualisation
+  - **Symptome** : L'editeur de cartouche (gabarit + matrice) et la previsualisation sont empiles verticalement, forcant un long scroll
+  - **Options** : (1) Deplacer la previsualisation sous le gabarit au lieu d'a cote, (2) Ajouter des boutons "Afficher gabarit" / "Afficher previsualisation" pour basculer sans scroll, (3) Navigation par onglets gabarit vs previsualisation
+  - **Benefice** : Meilleure ergonomie, moins de scroll vertical
+  - **Fichiers** : `js/cartouches.js`, `index.html`, `styles.css`
+
 ### Deploiement / Mise a jour
 
 - [x] **#158** Notification de mise a jour en temps reel (sans rechargement) — 10 fev (build 0210-1059)

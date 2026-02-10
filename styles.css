@@ -2553,22 +2553,35 @@ textarea {
     border-color: var(--rouge-erreur);
 }
 
-/* Badges source — remplace inline style="background: #4caf50; color: white; padding: 2px 6px; ..." */
+/* Badges source — style outline/pastel pour se distinguer des boutons (#153) */
 .badge-source {
-    color: white;
     padding: 2px 6px;
     border-radius: 3px;
     font-size: 0.75em;
     font-weight: 600;
     margin-left: 6px;
     display: inline-block;
+    border: 1.5px solid;
 }
-.badge-source--locale { background: var(--vert-succes); }
-.badge-source--bibliotheque { background: var(--bleu-clair); }
-.badge-source--retiree { background: var(--orange-accent); }
+.badge-source--locale {
+    color: var(--vert-succes);
+    background: #e8f5e9;
+    border-color: var(--vert-succes);
+}
+.badge-source--bibliotheque {
+    color: var(--bleu-clair);
+    background: #e3f2fd;
+    border-color: var(--bleu-clair);
+}
+.badge-source--retiree {
+    color: var(--orange-accent);
+    background: #fff3e0;
+    border-color: var(--orange-accent);
+}
 .badge-source--id {
-    background: #e0e0e0;
+    background: #f5f5f5;
     color: #666;
+    border-color: #e0e0e0;
     font-family: monospace;
     font-size: 0.7em;
 }
@@ -2592,6 +2605,92 @@ textarea {
     max-height: 90vh;
     overflow-y: auto;
     box-shadow: var(--shadow-fort);
+}
+.modal-js-btn-fermer,
+.modal-js-fermer {
+    position: sticky;
+    top: 0;
+    float: right;
+    background: transparent;
+    border: none;
+    font-size: 28px;
+    color: var(--gris-clair);
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    transition: color 0.2s;
+}
+.modal-js-btn-fermer:hover,
+.modal-js-fermer:hover {
+    color: var(--gris-fonce);
+}
+
+/* BibliothequeUI — Composant cartes bibliothèque */
+.biblio-section-titre {
+    color: var(--bleu-clair);
+    font-size: 1.1rem;
+    margin-top: 20px;
+    margin-bottom: 15px;
+}
+.biblio-carte {
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 10px;
+}
+.biblio-carte--selection {
+    border: 1px solid var(--bleu-clair);
+    background: var(--bleu-tres-pale);
+}
+.biblio-carte--disponible {
+    border: 1px solid var(--bordure-claire);
+    background: white;
+}
+.biblio-carte-contenu {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+.biblio-carte-titre {
+    font-weight: bold;
+    color: var(--bleu-principal);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.biblio-carte-meta {
+    color: var(--gris-clair);
+    font-size: 0.9em;
+    margin-bottom: 4px;
+}
+.biblio-carte-desc {
+    font-size: 0.85rem;
+    color: var(--gris-clair);
+}
+.biblio-carte-deja {
+    font-size: 0.8rem;
+    color: var(--bleu-clair);
+    font-style: italic;
+    margin-top: 4px;
+}
+.biblio-carte-actions {
+    display: flex;
+    gap: 8px;
+    margin-left: 10px;
+    border-top: 1px solid var(--bordure-claire);
+    padding-top: 8px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+.biblio-carte-actions--vertical {
+    flex-direction: column;
+    align-items: flex-end;
 }
 
 /* Changelog entries — remplace inline style="background: linear-gradient(...); border-left: 3px solid ..." */
@@ -14796,6 +14895,451 @@ body.mode-assiste .btn-aide-contextuelle,
     padding: 6px 10px; font-size: 11px; color: #92400e; margin-bottom: 8px;
 }
 
+/* =============================================================
+   ORGANISATEUR — MODULE INDÉPENDANT (sous-onglet Planification)
+   ============================================================= */
+
+/* Conteneur principal pleine page */
+.org-conteneur {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: linear-gradient(135deg, #fefefe 0%, #fdf8f4 100%);
+}
+
+/* En-tête */
+.org-entete {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid #e2e8f0;
+    flex-shrink: 0;
+}
+.org-entete h2 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--planif-couleur-texte, #1e293b);
+}
+.org-actions { display: flex; gap: 8px; }
+
+/* Corps scrollable */
+.org-corps {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Sélecteurs séquence/leçon */
+.org-selecteurs {
+    display: flex;
+    gap: 10px;
+    padding: 14px 24px;
+    border-bottom: 1px solid #e2e8f0;
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.7);
+    position: sticky;
+    top: 0;
+    z-index: 5;
+}
+.org-selecteurs select {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 13px;
+    background: white;
+    color: var(--planif-couleur-texte, #1e293b);
+}
+
+/* Sections */
+.org-section {
+    border-bottom: 1px solid #f1f5f9;
+    padding: 14px 24px;
+}
+.org-section-titre {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #64748b;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.org-section-contenu {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--planif-couleur-texte, #1e293b);
+}
+.org-placeholder {
+    color: #94a3b8;
+    font-style: italic;
+    font-size: 12px;
+}
+
+/* Bouton réinitialiser objectif */
+.org-btn-reinit {
+    background: none;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 10px;
+    color: #64748b;
+    cursor: pointer;
+    padding: 2px 6px;
+    margin-left: auto;
+}
+.org-btn-reinit:hover { color: #3b82f6; border-color: #3b82f6; }
+
+/* Objectif éditable */
+.org-objectif-contenu {
+    min-height: 40px;
+    padding: 8px 12px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    transition: border-color 0.15s;
+}
+.org-objectif-contenu:hover { border-color: #e2e8f0; }
+.org-objectif-contenu:focus {
+    border-color: #3b82f6;
+    outline: none;
+    background: white;
+}
+
+/* Prérequis */
+.org-prerequis-item {
+    padding: 4px 0;
+    font-size: 12px;
+    line-height: 1.5;
+}
+.org-prerequis-nom { font-weight: 600; }
+.org-prerequis-type { color: #94a3b8; }
+.org-prerequis-fleche { color: #94a3b8; }
+.org-prerequis-cible { color: var(--planif-couleur-texte, #1e293b); }
+
+/* Productions associées */
+.org-production-item {
+    padding: 6px 0;
+    font-size: 12px;
+    line-height: 1.5;
+    border-bottom: 1px solid #f8fafc;
+}
+.org-production-item:last-child { border-bottom: none; }
+.org-production-pond { color: #64748b; }
+.org-production-detail { color: #94a3b8; font-size: 11px; }
+
+/* Pastille couleur */
+.org-pastille {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* Durée */
+.org-duree {
+    font-size: 10px;
+    color: #64748b;
+    background: #f1f5f9;
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+/* Activités dans le cœur */
+.org-activite {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    background: #fafbfc;
+    transition: box-shadow 0.15s;
+}
+.org-activite:hover { box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.org-activite-entete {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+.org-activite-titre {
+    font-size: 13px;
+    font-weight: 500;
+    flex: 1;
+}
+.org-activite-type {
+    font-size: 9px;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-left: auto;
+}
+.org-activite-detail {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0 4px 20px;
+    font-size: 12px;
+}
+.org-activite-detail label {
+    color: #64748b;
+    font-size: 11px;
+    min-width: 80px;
+    flex-shrink: 0;
+}
+.org-activite-detail select {
+    flex: 1;
+    padding: 4px 8px;
+    border: 1px solid #e2e8f0;
+    border-radius: 5px;
+    font-size: 11px;
+    background: white;
+}
+.org-prod-details {
+    padding: 4px 20px;
+    font-size: 11px;
+    color: #94a3b8;
+    line-height: 1.4;
+    font-style: italic;
+}
+.org-avertissement {
+    background: #fffbeb;
+    border: 1px solid #fcd34d;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: #92400e;
+    margin-bottom: 10px;
+}
+
+/* En-tête calendrier */
+#org-entete-calendrier .org-section-contenu {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: #0369a1;
+    line-height: 1.6;
+}
+
+/* Checkbox label */
+.org-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    font-weight: 500;
+}
+.org-checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+/* Enseignement explicite — barre */
+.org-ee-section { padding: 0; }
+.org-ee-bar {
+    background: #fefce8;
+    padding: 12px 24px;
+    border-bottom: 1px solid #fde68a;
+}
+
+/* Étapes EE */
+#org-coeur-brut { padding: 14px 24px; }
+#org-ee-etapes { padding: 0; }
+
+.org-ee-non-assignees {
+    background: #f8fafc;
+    padding: 12px 24px;
+    border-bottom: 1px solid #e2e8f0;
+}
+.org-ee-liste {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-height: 32px;
+}
+
+.org-ee-etape {
+    border-bottom: 1px solid #e2e8f0;
+}
+.org-ee-etape-entete {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 24px;
+    background: rgba(59, 130, 246, 0.04);
+}
+.org-ee-etape-desc {
+    font-size: 11px;
+    color: #94a3b8;
+    font-style: italic;
+}
+.org-ee-etape-corps {
+    padding: 10px 24px 14px;
+}
+.org-ee-notes {
+    width: 100%;
+    min-height: 48px;
+    padding: 8px 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: inherit;
+    resize: vertical;
+    margin-bottom: 8px;
+    color: var(--planif-couleur-texte, #1e293b);
+}
+.org-ee-notes:focus { border-color: #3b82f6; outline: none; }
+
+/* Zone de dépôt drag & drop */
+.org-ee-zone-depot {
+    min-height: 36px;
+    border: 2px dashed #d1d5db;
+    border-radius: 8px;
+    padding: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    transition: border-color 0.15s, background 0.15s;
+}
+.org-ee-zone-depot .org-placeholder {
+    width: 100%;
+    text-align: center;
+    font-size: 11px;
+}
+.org-depot-survol {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.05);
+}
+
+/* Activité mini (dans EE) */
+.org-ee-activite-mini {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: grab;
+    transition: box-shadow 0.15s;
+}
+.org-ee-activite-mini:hover { box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+.org-ee-activite-mini.org-drag-en-cours { opacity: 0.4; }
+.org-ee-activite-titre { font-weight: 500; }
+.org-ee-activite-type {
+    font-size: 9px;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+/* Activité draggable dans le cœur brut */
+.org-activite[draggable="true"] { cursor: grab; }
+.org-activite.org-drag-en-cours { opacity: 0.4; }
+
+/* Calendrier toggle */
+.org-section-titre-collapse {
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.org-section-titre-collapse:hover { color: var(--planif-couleur-selection, #3b82f6); }
+.org-chevron { font-size: 10px; }
+.org-cal-vide {
+    text-align: center;
+    padding: 32px 16px;
+    color: #94a3b8;
+    font-size: 13px;
+}
+
+/* Modale d'export */
+.org-modale {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.org-modale-contenu {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    width: 420px;
+    max-width: 90vw;
+    overflow: hidden;
+}
+.org-modale-entete {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e2e8f0;
+}
+.org-modale-entete h3 { font-size: 15px; font-weight: 600; margin: 0; }
+.org-modale-fermer {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #94a3b8;
+    line-height: 1;
+}
+.org-modale-corps { padding: 20px; }
+.org-modale-groupe { margin-bottom: 16px; }
+.org-modale-groupe > label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+.org-modale-options {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.org-radio-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 6px 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    transition: border-color 0.15s;
+}
+.org-radio-label:hover { border-color: #3b82f6; }
+.org-radio-label input[type="radio"] { cursor: pointer; }
+.org-modale-pied {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 12px 20px;
+    border-top: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+/* === FIN ORGANISATEUR === */
 
 /* === MENU CONTEXTUEL LIENS === */
 #planif-menu-lien {
