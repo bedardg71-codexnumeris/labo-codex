@@ -23,7 +23,13 @@
         'construction-pratiques-notation',
         'construction-productions',
         'planification-carte',
-        'planification-organisateur'
+        'planification-organisateur',
+        'aide-introduction',
+        'aide-configuration',
+        'aide-formation',
+        'aide-utilisation',
+        'aide-consultation',
+        'aide-reference'
     ];
 
     const TOOLTIP = 'En développement actif — cette fonctionnalité peut être instable';
