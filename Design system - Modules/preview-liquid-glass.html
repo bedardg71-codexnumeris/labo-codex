@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aperçu Effet Liquid Glass - Barres Graduées</title>
+    <style>
+        :root {
+            --radius-grand: 12px;
+            --shadow-subtil: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f1e3a 0%, #1a2d4d 50%, #0d1929 100%);
+            min-height: 100vh;
+            padding: 40px;
+            color: #e0e7ef;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-weight: 300;
+            font-size: 1.8rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            opacity: 0.7;
+            margin-bottom: 50px;
+            font-size: 0.95rem;
+        }
+
+        .section {
+            max-width: 900px;
+            margin: 0 auto 60px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #60a5fa;
+        }
+
+        .section-desc {
+            font-size: 0.85rem;
+            opacity: 0.6;
+            margin-bottom: 25px;
+        }
+
+        .bar-container {
+            margin-bottom: 20px;
+        }
+
+        .bar-label {
+            font-size: 0.8rem;
+            opacity: 0.5;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ===============================
+           BARRE DE BASE (ACTUELLE)
+           =============================== */
+        .barre-base {
+            height: 55px;
+            border-radius: var(--radius-grand);
+            position: relative;
+            background: linear-gradient(to right,
+                #ff8c00 0%,
+                #ffa500 10%,
+                #98d025 30%,
+                #22c55e 50%,
+                #14b8a6 65%,
+                #06b6d4 80%,
+                #0ea5e9 100%
+            );
+            box-shadow: var(--shadow-subtil);
+            overflow: hidden;
+        }
+
+        .barre-base-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 30, 58, 0.2);
+            border-radius: var(--radius-grand);
+            pointer-events: none;
+        }
+
+        /* ===============================
+           OPTION 1: SUBTIL (reflet statique)
+           =============================== */
+        .barre-subtil {
+            height: 55px;
+            border-radius: var(--radius-grand);
+            position: relative;
+            background: linear-gradient(to right,
+                #ff8c00 0%,
+                #ffa500 10%,
+                #98d025 30%,
+                #22c55e 50%,
+                #14b8a6 65%,
+                #06b6d4 80%,
+                #0ea5e9 100%
+            );
+            overflow: hidden;
+
+            /* Effet 3D de profondeur */
+            box-shadow:
+                0 4px 16px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4),
+                inset 0 -2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .barre-subtil::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: inherit;
+            z-index: 3;
+            pointer-events: none;
+
+            /* Reflet de verre diagonal */
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.35) 0%,
+                rgba(255, 255, 255, 0.1) 30%,
+                transparent 50%,
+                rgba(255, 255, 255, 0.05) 70%,
+                rgba(255, 255, 255, 0.15) 100%
+            );
+        }
+
+        /* ===============================
+           OPTION 2: MOYEN (reflet + shimmer)
+           =============================== */
+        .barre-moyen {
+            height: 55px;
+            border-radius: var(--radius-grand);
+            position: relative;
+            background: linear-gradient(to right,
+                #ff8c00 0%,
+                #ffa500 10%,
+                #98d025 30%,
+                #22c55e 50%,
+                #14b8a6 65%,
+                #06b6d4 80%,
+                #0ea5e9 100%
+            );
+            overflow: hidden;
+
+            box-shadow:
+                0 4px 16px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4),
+                inset 0 -2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .barre-moyen::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: inherit;
+            z-index: 3;
+            pointer-events: none;
+
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.35) 0%,
+                rgba(255, 255, 255, 0.1) 30%,
+                transparent 50%,
+                rgba(255, 255, 255, 0.05) 70%,
+                rgba(255, 255, 255, 0.15) 100%
+            );
+        }
+
+        .barre-moyen::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            z-index: 4;
+            pointer-events: none;
+            border-radius: inherit;
+
+            background: linear-gradient(
+                90deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.15) 40%,
+                rgba(255, 255, 255, 0.3) 50%,
+                rgba(255, 255, 255, 0.15) 60%,
+                transparent 100%
+            );
+
+            animation: liquid-shimmer 8s ease-in-out infinite;
+        }
+
+        @keyframes liquid-shimmer {
+            0%, 100% {
+                left: -100%;
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            50% {
+                left: 200%;
+                opacity: 1;
+            }
+            60%, 100% {
+                opacity: 0;
+            }
+        }
+
+        /* ===============================
+           OPTION 3: COMPLET (tout + vague)
+           =============================== */
+        .barre-complet {
+            height: 55px;
+            border-radius: var(--radius-grand);
+            position: relative;
+            background: linear-gradient(to right,
+                #ff8c00 0%,
+                #ffa500 10%,
+                #98d025 30%,
+                #22c55e 50%,
+                #14b8a6 65%,
+                #06b6d4 80%,
+                #0ea5e9 100%
+            );
+            overflow: hidden;
+
+            box-shadow:
+                0 4px 20px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5),
+                inset 0 -3px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .barre-complet-glass {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: inherit;
+            z-index: 3;
+            pointer-events: none;
+
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.4) 0%,
+                rgba(255, 255, 255, 0.1) 25%,
+                transparent 50%,
+                rgba(255, 255, 255, 0.05) 75%,
+                rgba(255, 255, 255, 0.2) 100%
+            );
+        }
+
+        .barre-complet-shimmer {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            z-index: 4;
+            pointer-events: none;
+            border-radius: inherit;
+
+            background: linear-gradient(
+                90deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.2) 40%,
+                rgba(255, 255, 255, 0.4) 50%,
+                rgba(255, 255, 255, 0.2) 60%,
+                transparent 100%
+            );
+
+            animation: liquid-shimmer 8s ease-in-out infinite;
+        }
+
+        .barre-complet-wave {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 2;
+            pointer-events: none;
+            border-radius: inherit;
+            overflow: hidden;
+        }
+
+        .barre-complet-wave::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(
+                ellipse at center,
+                rgba(255, 255, 255, 0.12) 0%,
+                transparent 50%
+            );
+            animation: liquid-wave 6s ease-in-out infinite;
+        }
+
+        @keyframes liquid-wave {
+            0%, 100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            33% {
+                transform: translate(5%, 3%) rotate(2deg);
+            }
+            66% {
+                transform: translate(-3%, -2%) rotate(-1deg);
+            }
+        }
+
+        /* ===============================
+           OPTION 4: INTENSE (effet max)
+           =============================== */
+        .barre-intense {
+            height: 55px;
+            border-radius: var(--radius-grand);
+            position: relative;
+            background: linear-gradient(to right,
+                #ff8c00 0%,
+                #ffa500 10%,
+                #98d025 30%,
+                #22c55e 50%,
+                #14b8a6 65%,
+                #06b6d4 80%,
+                #0ea5e9 100%
+            );
+            overflow: hidden;
+
+            box-shadow:
+                0 6px 24px rgba(0, 0, 0, 0.25),
+                0 0 40px rgba(14, 165, 233, 0.15),
+                inset 0 2px 0 rgba(255, 255, 255, 0.5),
+                inset 0 -4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .barre-intense-glass {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            border-radius: var(--radius-grand) var(--radius-grand) 50% 50% / var(--radius-grand) var(--radius-grand) 20px 20px;
+            z-index: 3;
+            pointer-events: none;
+
+            background: linear-gradient(
+                180deg,
+                rgba(255, 255, 255, 0.45) 0%,
+                rgba(255, 255, 255, 0.15) 50%,
+                transparent 100%
+            );
+        }
+
+        .barre-intense-shimmer {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 40%;
+            height: 100%;
+            z-index: 5;
+            pointer-events: none;
+
+            background: linear-gradient(
+                90deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.1) 30%,
+                rgba(255, 255, 255, 0.5) 50%,
+                rgba(255, 255, 255, 0.1) 70%,
+                transparent 100%
+            );
+
+            animation: intense-shimmer 6s ease-in-out infinite;
+        }
+
+        @keyframes intense-shimmer {
+            0%, 100% {
+                left: -100%;
+                opacity: 0;
+            }
+            5% {
+                opacity: 1;
+            }
+            45% {
+                left: 200%;
+                opacity: 1;
+            }
+            50%, 100% {
+                opacity: 0;
+            }
+        }
+
+        .barre-intense-bubbles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 2;
+            pointer-events: none;
+            overflow: hidden;
+            border-radius: inherit;
+        }
+
+        .bubble {
+            position: absolute;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.6), transparent 70%);
+            border-radius: 50%;
+            animation: bubble-rise linear infinite;
+        }
+
+        @keyframes bubble-rise {
+            0% {
+                transform: translateY(100%) scale(0.5);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.8;
+            }
+            90% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-100%) scale(1);
+                opacity: 0;
+            }
+        }
+
+        /* ===============================
+           VARIANTES DE COULEUR (Patterns & RàI)
+           =============================== */
+        .barre-patterns-glass {
+            background: linear-gradient(to right,
+                #22c55e 0%,
+                #14b8a6 25%,
+                #0ea5e9 50%,
+                #3b82f6 75%,
+                #6366f1 100%
+            );
+        }
+
+        .barre-rai-glass {
+            background: linear-gradient(to right,
+                #0ea5e9 0%,
+                #3b82f6 25%,
+                #6366f1 50%,
+                #8b5cf6 75%,
+                #6b21a8 100%
+            );
+        }
+
+        /* ===============================
+           POINTS ÉTUDIANTS (démo)
+           =============================== */
+        .demo-points {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 10;
+        }
+
+        .point-etudiant {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #ffffff 0%, #c8d4e0 100%);
+            box-shadow:
+                3px 3px 6px rgba(60, 60, 60, 0.4),
+                inset -1px -1px 2px rgba(60, 60, 60, 0.1),
+                inset 1px 1px 2px rgba(255, 255, 255, 0.8);
+            animation: float-vertical 6s linear infinite;
+        }
+
+        @keyframes float-vertical {
+            0%, 100% {
+                transform: translate(-50%, -50%) translateY(0px) scale(1.1);
+            }
+            25% {
+                transform: translate(-50%, -50%) translateY(-10px) scale(1);
+            }
+            50% {
+                transform: translate(-50%, -50%) translateY(0px) scale(0.9);
+            }
+            75% {
+                transform: translate(-50%, -50%) translateY(10px) scale(1);
+            }
+        }
+
+        /* ===============================
+           CONTRÔLES
+           =============================== */
+        .controls {
+            max-width: 900px;
+            margin: 0 auto 40px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .control-btn {
+            padding: 10px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            color: #e0e7ef;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .control-btn.active {
+            background: rgba(96, 165, 250, 0.2);
+            border-color: #60a5fa;
+        }
+
+        /* ===============================
+           COMPARAISON CÔTE À CÔTE
+           =============================== */
+        .comparison {
+            max-width: 900px;
+            margin: 60px auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .comparison-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .comparison-title {
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            opacity: 0.8;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0.5;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>Effet Liquid Glass</h1>
+    <p class="subtitle">Aperçu des différentes options pour les barres graduées du tableau de bord</p>
+
+    <!-- OPTION 0: BASE -->
+    <div class="section">
+        <div class="section-title">Actuel (référence)</div>
+        <div class="section-desc">Style actuel sans effet liquid glass</div>
+        <div class="bar-container">
+            <div class="barre-base">
+                <div class="barre-base-overlay"></div>
+                <div class="demo-points">
+                    <div class="point-etudiant" style="left: 15%; animation-delay: 0s;"></div>
+                    <div class="point-etudiant" style="left: 25%; animation-delay: 1.2s;"></div>
+                    <div class="point-etudiant" style="left: 45%; animation-delay: 0.5s;"></div>
+                    <div class="point-etudiant" style="left: 55%; animation-delay: 2.1s;"></div>
+                    <div class="point-etudiant" style="left: 60%; animation-delay: 0.8s;"></div>
+                    <div class="point-etudiant" style="left: 72%; animation-delay: 1.5s;"></div>
+                    <div class="point-etudiant" style="left: 85%; animation-delay: 2.8s;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OPTION 1: SUBTIL -->
+    <div class="section">
+        <div class="section-title">Option 1 : Subtil</div>
+        <div class="section-desc">Reflet de verre statique diagonal + ombres 3D (pas d'animation)</div>
+        <div class="bar-container">
+            <div class="barre-subtil">
+                <div class="demo-points">
+                    <div class="point-etudiant" style="left: 15%; animation-delay: 0s;"></div>
+                    <div class="point-etudiant" style="left: 25%; animation-delay: 1.2s;"></div>
+                    <div class="point-etudiant" style="left: 45%; animation-delay: 0.5s;"></div>
+                    <div class="point-etudiant" style="left: 55%; animation-delay: 2.1s;"></div>
+                    <div class="point-etudiant" style="left: 60%; animation-delay: 0.8s;"></div>
+                    <div class="point-etudiant" style="left: 72%; animation-delay: 1.5s;"></div>
+                    <div class="point-etudiant" style="left: 85%; animation-delay: 2.8s;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OPTION 2: MOYEN -->
+    <div class="section">
+        <div class="section-title">Option 2 : Moyen</div>
+        <div class="section-desc">Reflet statique + bande lumineuse animée (shimmer)</div>
+        <div class="bar-container">
+            <div class="barre-moyen">
+                <div class="demo-points">
+                    <div class="point-etudiant" style="left: 15%; animation-delay: 0s;"></div>
+                    <div class="point-etudiant" style="left: 25%; animation-delay: 1.2s;"></div>
+                    <div class="point-etudiant" style="left: 45%; animation-delay: 0.5s;"></div>
+                    <div class="point-etudiant" style="left: 55%; animation-delay: 2.1s;"></div>
+                    <div class="point-etudiant" style="left: 60%; animation-delay: 0.8s;"></div>
+                    <div class="point-etudiant" style="left: 72%; animation-delay: 1.5s;"></div>
+                    <div class="point-etudiant" style="left: 85%; animation-delay: 2.8s;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OPTION 3: COMPLET -->
+    <div class="section">
+        <div class="section-title">Option 3 : Complet</div>
+        <div class="section-desc">Reflet + shimmer + effet vague subtile (mouvement organique)</div>
+        <div class="bar-container">
+            <div class="barre-complet">
+                <div class="barre-complet-wave"></div>
+                <div class="barre-complet-glass"></div>
+                <div class="barre-complet-shimmer"></div>
+                <div class="demo-points">
+                    <div class="point-etudiant" style="left: 15%; animation-delay: 0s;"></div>
+                    <div class="point-etudiant" style="left: 25%; animation-delay: 1.2s;"></div>
+                    <div class="point-etudiant" style="left: 45%; animation-delay: 0.5s;"></div>
+                    <div class="point-etudiant" style="left: 55%; animation-delay: 2.1s;"></div>
+                    <div class="point-etudiant" style="left: 60%; animation-delay: 0.8s;"></div>
+                    <div class="point-etudiant" style="left: 72%; animation-delay: 1.5s;"></div>
+                    <div class="point-etudiant" style="left: 85%; animation-delay: 2.8s;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OPTION 4: INTENSE -->
+    <div class="section">
+        <div class="section-title">Option 4 : Intense</div>
+        <div class="section-desc">Effet verre bombé + shimmer rapide + micro-bulles (maximal)</div>
+        <div class="bar-container">
+            <div class="barre-intense">
+                <div class="barre-intense-bubbles">
+                    <div class="bubble" style="left: 10%; width: 4px; height: 4px; animation-duration: 4s; animation-delay: 0s;"></div>
+                    <div class="bubble" style="left: 25%; width: 3px; height: 3px; animation-duration: 5s; animation-delay: 1s;"></div>
+                    <div class="bubble" style="left: 40%; width: 5px; height: 5px; animation-duration: 4.5s; animation-delay: 2s;"></div>
+                    <div class="bubble" style="left: 55%; width: 3px; height: 3px; animation-duration: 5.5s; animation-delay: 0.5s;"></div>
+                    <div class="bubble" style="left: 70%; width: 4px; height: 4px; animation-duration: 4s; animation-delay: 1.5s;"></div>
+                    <div class="bubble" style="left: 85%; width: 3px; height: 3px; animation-duration: 5s; animation-delay: 2.5s;"></div>
+                </div>
+                <div class="barre-intense-glass"></div>
+                <div class="barre-intense-shimmer"></div>
+                <div class="demo-points">
+                    <div class="point-etudiant" style="left: 15%; animation-delay: 0s;"></div>
+                    <div class="point-etudiant" style="left: 25%; animation-delay: 1.2s;"></div>
+                    <div class="point-etudiant" style="left: 45%; animation-delay: 0.5s;"></div>
+                    <div class="point-etudiant" style="left: 55%; animation-delay: 2.1s;"></div>
+                    <div class="point-etudiant" style="left: 60%; animation-delay: 0.8s;"></div>
+                    <div class="point-etudiant" style="left: 72%; animation-delay: 1.5s;"></div>
+                    <div class="point-etudiant" style="left: 85%; animation-delay: 2.8s;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- COMPARAISON VARIANTES -->
+    <h2 style="text-align: center; font-weight: 300; margin: 60px 0 30px;">Variantes de couleur (Option 3)</h2>
+
+    <div class="comparison">
+        <div class="comparison-item">
+            <div class="comparison-title">Patterns d'apprentissage</div>
+            <div class="barre-complet barre-patterns-glass">
+                <div class="barre-complet-wave"></div>
+                <div class="barre-complet-glass"></div>
+                <div class="barre-complet-shimmer"></div>
+                <div class="demo-points">
+                    <div class="point-etudiant" style="left: 20%; animation-delay: 0.3s;"></div>
+                    <div class="point-etudiant" style="left: 50%; animation-delay: 1.1s;"></div>
+                    <div class="point-etudiant" style="left: 75%; animation-delay: 2s;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="comparison-item">
+            <div class="comparison-title">Modèle RàI</div>
+            <div class="barre-complet barre-rai-glass">
+                <div class="barre-complet-wave"></div>
+                <div class="barre-complet-glass"></div>
+                <div class="barre-complet-shimmer"></div>
+                <div class="demo-points">
+                    <div class="point-etudiant" style="left: 30%; animation-delay: 0.7s;"></div>
+                    <div class="point-etudiant" style="left: 55%; animation-delay: 1.8s;"></div>
+                    <div class="point-etudiant" style="left: 80%; animation-delay: 0.2s;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        Monitorage Pédagogique - Aperçu Liquid Glass - Beta 96.2
+    </div>
+</body>
+</html>

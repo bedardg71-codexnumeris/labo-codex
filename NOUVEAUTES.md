@@ -4,6 +4,16 @@
 
 ---
 
+## Beta 97.5
+
+**Tooltips au survol**
+
+- **Aide contextuelle au survol** : Survolez les elements de l'en-tete et des reglages pour obtenir une description de leur role. 31 tooltips couvrant l'en-tete (logo, version, pratique, semaine, groupe-cours, navigation) et l'onglet Trimestre des reglages (6 panneaux, 12 champs, 3 boutons bibliotheque).
+- **Positionnement intelligent** : La bulle se place automatiquement pour rester visible dans la fenetre.
+- **Extensible** : Le systeme est concu pour etre etendu a tous les modules de l'application.
+
+---
+
 ## Beta 97.2
 
 **Demo et accueil**

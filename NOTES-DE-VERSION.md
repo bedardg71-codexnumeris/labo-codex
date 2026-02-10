@@ -1,7 +1,19 @@
 # Notes de version — Monitorage pedagogique
 
 > Document de gestion locale. Historique complet avec dates.
-> Derniere mise a jour : 9 fevrier 2026
+> Derniere mise a jour : 10 fevrier 2026
+
+---
+
+## Beta 97.5 (10 fevrier 2026)
+
+**Tooltips au survol**
+
+- **Nouveau systeme de tooltips** : Moteur leger (delegation d'evenements, positionnement automatique bas/haut/droite/gauche) avec base de contenu centralisee. Trois fichiers : `css/tooltips.css`, `js/tooltips.js`, `js/tooltips-contenu.js`.
+- **En-tete (10 tooltips)** : Logo, version/build, mode affichage, signaler un bug, pratique de notation, semaine courante, selecteur groupe-cours, navigation principale, sous-navigation, bouton reglages.
+- **Reglages — Trimestre (21 tooltips)** : 6 panneaux accordeon (Gestion des trimestres, Cours, Enseignant, Groupe d'etudiants, Horaire, Groupe-cours) + 12 champs specifiques (identification, bornes, semaines speciales, conges, imprevus, competence, elements de competence, SA, import etudiants, periodes horaire, nom genere, pratique de notation) + 3 boutons bibliotheque.
+- **Integration au theme** : Utilise les variables CSS du projet (`--bleu-fonce`, `--shadow-fort`, `--radius-moyen`) pour s'adapter automatiquement au mode demo (sarcelle).
+- **Curseur adaptatif** : `cursor: help` sur les elements informatifs, `cursor: pointer` preserve sur les elements interactifs (boutons, selecteurs, accordeons).
 
 ---
 

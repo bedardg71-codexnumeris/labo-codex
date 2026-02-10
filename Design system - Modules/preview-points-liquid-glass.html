@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aperçu Points Étudiants - Effet Liquid Glass</title>
+    <style>
+        :root {
+            --radius-grand: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f1e3a 0%, #1a2d4d 50%, #0d1929 100%);
+            min-height: 100vh;
+            padding: 40px;
+            color: #e0e7ef;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-weight: 300;
+            font-size: 1.8rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            opacity: 0.7;
+            margin-bottom: 50px;
+            font-size: 0.95rem;
+        }
+
+        .section {
+            max-width: 900px;
+            margin: 0 auto 50px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #60a5fa;
+        }
+
+        .section-desc {
+            font-size: 0.85rem;
+            opacity: 0.6;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        /* ===============================
+           BARRE DE BASE
+           =============================== */
+        .barre {
+            height: 55px;
+            border-radius: var(--radius-grand);
+            position: relative;
+            background: linear-gradient(to right,
+                #ff8c00 0%,
+                #ffa500 10%,
+                #98d025 30%,
+                #22c55e 50%,
+                #14b8a6 65%,
+                #06b6d4 80%,
+                #0ea5e9 100%
+            );
+            overflow: hidden;
+            box-shadow:
+                0 4px 16px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                inset 0 -2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .barre-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 30, 58, 0.2);
+            border-radius: var(--radius-grand);
+            pointer-events: none;
+        }
+
+        .demo-points {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 10;
+        }
+
+        /* ===============================
+           POINT ACTUEL (RÉFÉRENCE)
+           =============================== */
+        .point-actuel {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+
+            /* Style actuel */
+            background: linear-gradient(135deg, #ffffff 0%, #c8d4e0 100%);
+            box-shadow:
+                3px 3px 6px rgba(60, 60, 60, 0.4),
+                inset -1px -1px 2px rgba(60, 60, 60, 0.1),
+                inset 1px 1px 2px rgba(255, 255, 255, 0.8);
+
+            animation: float-vertical 6s linear infinite;
+        }
+
+        /* ===============================
+           OPTION 1: VERRE BOMBÉ SIMPLE
+           Highlight en demi-lune supérieure
+           =============================== */
+        .point-verre-bombe {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+
+            /* Fond légèrement translucide */
+            background: radial-gradient(
+                ellipse 60% 50% at 50% 65%,
+                rgba(255, 255, 255, 0.95) 0%,
+                rgba(220, 230, 240, 0.9) 50%,
+                rgba(180, 200, 220, 0.85) 100%
+            );
+
+            /* Ombre externe + profondeur */
+            box-shadow:
+                0 3px 8px rgba(0, 0, 0, 0.3),
+                0 1px 3px rgba(0, 0, 0, 0.2),
+                inset 0 -3px 6px rgba(0, 0, 0, 0.1);
+
+            animation: float-vertical 6s linear infinite;
+        }
+
+        /* Highlight bombé (pseudo-élément) */
+        .point-verre-bombe::before {
+            content: '';
+            position: absolute;
+            top: 8%;
+            left: 15%;
+            width: 70%;
+            height: 45%;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            background: linear-gradient(
+                180deg,
+                rgba(255, 255, 255, 0.9) 0%,
+                rgba(255, 255, 255, 0.4) 50%,
+                transparent 100%
+            );
+        }
+
+        /* ===============================
+           OPTION 2: GOUTTE D'EAU
+           Effet bulle de savon / goutte
+           =============================== */
+        .point-goutte {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+
+            /* Fond avec effet de réfraction */
+            background: radial-gradient(
+                circle at 35% 35%,
+                rgba(255, 255, 255, 0.95) 0%,
+                rgba(240, 248, 255, 0.85) 30%,
+                rgba(200, 220, 240, 0.7) 60%,
+                rgba(180, 200, 230, 0.6) 100%
+            );
+
+            /* Bordure subtile + ombres */
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow:
+                0 4px 12px rgba(0, 0, 0, 0.25),
+                0 2px 4px rgba(0, 0, 0, 0.15),
+                inset 0 0 8px rgba(255, 255, 255, 0.3);
+
+            animation: float-vertical 6s linear infinite;
+        }
+
+        /* Point lumineux principal */
+        .point-goutte::before {
+            content: '';
+            position: absolute;
+            top: 12%;
+            left: 18%;
+            width: 35%;
+            height: 35%;
+            border-radius: 50%;
+            background: radial-gradient(
+                circle,
+                rgba(255, 255, 255, 1) 0%,
+                rgba(255, 255, 255, 0.6) 50%,
+                transparent 100%
+            );
+        }
+
+        /* Point lumineux secondaire (petit) */
+        .point-goutte::after {
+            content: '';
+            position: absolute;
+            bottom: 20%;
+            right: 18%;
+            width: 15%;
+            height: 15%;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        /* ===============================
+           OPTION 3: PERLE NACRÉE
+           Effet irisé / nacré
+           =============================== */
+        .point-perle {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+
+            /* Fond nacré avec reflets multiples */
+            background:
+                radial-gradient(
+                    ellipse 80% 50% at 30% 30%,
+                    rgba(255, 255, 255, 0.9) 0%,
+                    transparent 50%
+                ),
+                radial-gradient(
+                    ellipse 60% 60% at 70% 70%,
+                    rgba(200, 220, 255, 0.4) 0%,
+                    transparent 50%
+                ),
+                linear-gradient(
+                    135deg,
+                    #f8fafc 0%,
+                    #e2e8f0 25%,
+                    #f1f5f9 50%,
+                    #e2e8f0 75%,
+                    #f8fafc 100%
+                );
+
+            box-shadow:
+                0 3px 10px rgba(0, 0, 0, 0.2),
+                0 1px 3px rgba(0, 0, 0, 0.15),
+                inset 0 1px 2px rgba(255, 255, 255, 0.8),
+                inset 0 -2px 4px rgba(100, 120, 150, 0.15);
+
+            animation: float-vertical 6s linear infinite;
+        }
+
+        /* ===============================
+           OPTION 4: CRISTAL
+           Effet verre taillé / gemme
+           =============================== */
+        .point-cristal {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+
+            /* Fond cristallin avec facettes simulées */
+            background:
+                conic-gradient(
+                    from 0deg at 50% 50%,
+                    rgba(255, 255, 255, 0.95) 0deg,
+                    rgba(240, 245, 250, 0.9) 60deg,
+                    rgba(255, 255, 255, 0.95) 120deg,
+                    rgba(230, 240, 250, 0.9) 180deg,
+                    rgba(255, 255, 255, 0.95) 240deg,
+                    rgba(240, 248, 255, 0.9) 300deg,
+                    rgba(255, 255, 255, 0.95) 360deg
+                );
+
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow:
+                0 2px 8px rgba(0, 0, 0, 0.2),
+                0 4px 16px rgba(100, 150, 200, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+
+            animation: float-vertical 6s linear infinite;
+        }
+
+        /* Reflet central */
+        .point-cristal::before {
+            content: '';
+            position: absolute;
+            top: 15%;
+            left: 20%;
+            width: 40%;
+            height: 35%;
+            border-radius: 50%;
+            background: linear-gradient(
+                180deg,
+                rgba(255, 255, 255, 0.95) 0%,
+                rgba(255, 255, 255, 0.3) 100%
+            );
+        }
+
+        /* ===============================
+           OPTION 5: BULLE DE VERRE 3D
+           Effet sphère de verre réaliste
+           =============================== */
+        .point-bulle-3d {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+
+            /* Fond avec dégradé 3D réaliste */
+            background: radial-gradient(
+                circle at 30% 30%,
+                rgba(255, 255, 255, 1) 0%,
+                rgba(255, 255, 255, 0.8) 10%,
+                rgba(230, 240, 250, 0.6) 30%,
+                rgba(200, 215, 235, 0.4) 50%,
+                rgba(180, 200, 225, 0.3) 70%,
+                rgba(160, 185, 215, 0.2) 100%
+            );
+
+            /* Bordure très subtile */
+            border: 1px solid rgba(255, 255, 255, 0.3);
+
+            /* Ombres complexes pour profondeur */
+            box-shadow:
+                /* Ombre portée */
+                0 4px 12px rgba(0, 0, 0, 0.25),
+                /* Lueur ambiante */
+                0 0 8px rgba(255, 255, 255, 0.2),
+                /* Profondeur interne bas */
+                inset 0 -4px 8px rgba(0, 50, 100, 0.15),
+                /* Highlight interne haut */
+                inset 0 2px 4px rgba(255, 255, 255, 0.4);
+
+            animation: float-vertical-3d 6s linear infinite;
+        }
+
+        /* Reflet principal (highlight) */
+        .point-bulle-3d::before {
+            content: '';
+            position: absolute;
+            top: 10%;
+            left: 15%;
+            width: 45%;
+            height: 40%;
+            border-radius: 50%;
+            background: radial-gradient(
+                ellipse at 50% 50%,
+                rgba(255, 255, 255, 0.95) 0%,
+                rgba(255, 255, 255, 0.5) 40%,
+                transparent 70%
+            );
+        }
+
+        /* Reflet secondaire (contre-jour) */
+        .point-bulle-3d::after {
+            content: '';
+            position: absolute;
+            bottom: 12%;
+            right: 15%;
+            width: 25%;
+            height: 20%;
+            border-radius: 50%;
+            background: radial-gradient(
+                ellipse,
+                rgba(255, 255, 255, 0.5) 0%,
+                transparent 70%
+            );
+        }
+
+        /* Animation 3D améliorée */
+        @keyframes float-vertical-3d {
+            0%, 100% {
+                transform: translate(-50%, -50%) translateY(0px) scale(1.05);
+                box-shadow:
+                    0 4px 12px rgba(0, 0, 0, 0.25),
+                    0 0 8px rgba(255, 255, 255, 0.2),
+                    inset 0 -4px 8px rgba(0, 50, 100, 0.15),
+                    inset 0 2px 4px rgba(255, 255, 255, 0.4);
+            }
+            25% {
+                transform: translate(-50%, -50%) translateY(-10px) scale(1);
+                box-shadow:
+                    0 8px 20px rgba(0, 0, 0, 0.2),
+                    0 0 12px rgba(255, 255, 255, 0.25),
+                    inset 0 -3px 6px rgba(0, 50, 100, 0.12),
+                    inset 0 3px 6px rgba(255, 255, 255, 0.5);
+            }
+            50% {
+                transform: translate(-50%, -50%) translateY(0px) scale(0.95);
+                box-shadow:
+                    0 2px 8px rgba(0, 0, 0, 0.3),
+                    0 0 6px rgba(255, 255, 255, 0.15),
+                    inset 0 -5px 10px rgba(0, 50, 100, 0.18),
+                    inset 0 1px 2px rgba(255, 255, 255, 0.3);
+            }
+            75% {
+                transform: translate(-50%, -50%) translateY(10px) scale(1);
+                box-shadow:
+                    0 1px 4px rgba(0, 0, 0, 0.35),
+                    0 0 10px rgba(255, 255, 255, 0.2),
+                    inset 0 -4px 8px rgba(0, 50, 100, 0.15),
+                    inset 0 2px 4px rgba(255, 255, 255, 0.35);
+            }
+        }
+
+        /* ===============================
+           ANIMATION FLOTTANTE DE BASE
+           =============================== */
+        @keyframes float-vertical {
+            0%, 100% {
+                transform: translate(-50%, -50%) translateY(0px) scale(1.1);
+            }
+            25% {
+                transform: translate(-50%, -50%) translateY(-10px) scale(1);
+            }
+            50% {
+                transform: translate(-50%, -50%) translateY(0px) scale(0.9);
+            }
+            75% {
+                transform: translate(-50%, -50%) translateY(10px) scale(1);
+            }
+        }
+
+        /* ===============================
+           ÉTATS HOVER
+           =============================== */
+        .point-verre-bombe:hover,
+        .point-goutte:hover,
+        .point-perle:hover,
+        .point-cristal:hover,
+        .point-bulle-3d:hover {
+            transform: translate(-50%, -50%) scale(1.4);
+            z-index: 100;
+            animation-play-state: paused;
+        }
+
+        .point-verre-bombe:hover {
+            box-shadow:
+                0 6px 16px rgba(0, 0, 0, 0.35),
+                0 0 20px rgba(255, 255, 255, 0.3),
+                inset 0 -3px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .point-goutte:hover {
+            box-shadow:
+                0 8px 20px rgba(0, 0, 0, 0.3),
+                0 0 25px rgba(255, 255, 255, 0.4),
+                inset 0 0 12px rgba(255, 255, 255, 0.4);
+        }
+
+        .point-bulle-3d:hover {
+            box-shadow:
+                0 8px 24px rgba(0, 0, 0, 0.3),
+                0 0 30px rgba(255, 255, 255, 0.35),
+                inset 0 -4px 8px rgba(0, 50, 100, 0.15),
+                inset 0 2px 4px rgba(255, 255, 255, 0.5);
+        }
+
+        /* ===============================
+           ZOOM COMPARATIF
+           =============================== */
+        .zoom-section {
+            max-width: 900px;
+            margin: 60px auto;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .zoom-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .zoom-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .zoom-point-container {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg,
+                #22c55e 0%,
+                #14b8a6 50%,
+                #0ea5e9 100%
+            );
+            border-radius: 12px;
+            position: relative;
+        }
+
+        .zoom-label {
+            font-size: 0.75rem;
+            text-align: center;
+            opacity: 0.7;
+            line-height: 1.3;
+        }
+
+        /* Points zoomés (taille x3) */
+        .zoom-point-actuel {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ffffff 0%, #c8d4e0 100%);
+            box-shadow:
+                3px 3px 6px rgba(60, 60, 60, 0.4),
+                inset -1px -1px 2px rgba(60, 60, 60, 0.1),
+                inset 1px 1px 2px rgba(255, 255, 255, 0.8);
+        }
+
+        .zoom-point-bombe {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            position: relative;
+            background: radial-gradient(
+                ellipse 60% 50% at 50% 65%,
+                rgba(255, 255, 255, 0.95) 0%,
+                rgba(220, 230, 240, 0.9) 50%,
+                rgba(180, 200, 220, 0.85) 100%
+            );
+            box-shadow:
+                0 3px 8px rgba(0, 0, 0, 0.3),
+                0 1px 3px rgba(0, 0, 0, 0.2),
+                inset 0 -3px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .zoom-point-bombe::before {
+            content: '';
+            position: absolute;
+            top: 8%;
+            left: 15%;
+            width: 70%;
+            height: 45%;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            background: linear-gradient(
+                180deg,
+                rgba(255, 255, 255, 0.9) 0%,
+                rgba(255, 255, 255, 0.4) 50%,
+                transparent 100%
+            );
+        }
+
+        .zoom-point-goutte {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            position: relative;
+            background: radial-gradient(
+                circle at 35% 35%,
+                rgba(255, 255, 255, 0.95) 0%,
+                rgba(240, 248, 255, 0.85) 30%,
+                rgba(200, 220, 240, 0.7) 60%,
+                rgba(180, 200, 230, 0.6) 100%
+            );
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow:
+                0 4px 12px rgba(0, 0, 0, 0.25),
+                0 2px 4px rgba(0, 0, 0, 0.15),
+                inset 0 0 8px rgba(255, 255, 255, 0.3);
+        }
+
+        .zoom-point-goutte::before {
+            content: '';
+            position: absolute;
+            top: 12%;
+            left: 18%;
+            width: 35%;
+            height: 35%;
+            border-radius: 50%;
+            background: radial-gradient(
+                circle,
+                rgba(255, 255, 255, 1) 0%,
+                rgba(255, 255, 255, 0.6) 50%,
+                transparent 100%
+            );
+        }
+
+        .zoom-point-goutte::after {
+            content: '';
+            position: absolute;
+            bottom: 20%;
+            right: 18%;
+            width: 15%;
+            height: 15%;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        .zoom-point-perle {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background:
+                radial-gradient(
+                    ellipse 80% 50% at 30% 30%,
+                    rgba(255, 255, 255, 0.9) 0%,
+                    transparent 50%
+                ),
+                radial-gradient(
+                    ellipse 60% 60% at 70% 70%,
+                    rgba(200, 220, 255, 0.4) 0%,
+                    transparent 50%
+                ),
+                linear-gradient(
+                    135deg,
+                    #f8fafc 0%,
+                    #e2e8f0 25%,
+                    #f1f5f9 50%,
+                    #e2e8f0 75%,
+                    #f8fafc 100%
+                );
+            box-shadow:
+                0 3px 10px rgba(0, 0, 0, 0.2),
+                0 1px 3px rgba(0, 0, 0, 0.15),
+                inset 0 1px 2px rgba(255, 255, 255, 0.8),
+                inset 0 -2px 4px rgba(100, 120, 150, 0.15);
+        }
+
+        .zoom-point-cristal {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            position: relative;
+            background:
+                conic-gradient(
+                    from 0deg at 50% 50%,
+                    rgba(255, 255, 255, 0.95) 0deg,
+                    rgba(240, 245, 250, 0.9) 60deg,
+                    rgba(255, 255, 255, 0.95) 120deg,
+                    rgba(230, 240, 250, 0.9) 180deg,
+                    rgba(255, 255, 255, 0.95) 240deg,
+                    rgba(240, 248, 255, 0.9) 300deg,
+                    rgba(255, 255, 255, 0.95) 360deg
+                );
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow:
+                0 2px 8px rgba(0, 0, 0, 0.2),
+                0 4px 16px rgba(100, 150, 200, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        }
+
+        .zoom-point-cristal::before {
+            content: '';
+            position: absolute;
+            top: 15%;
+            left: 20%;
+            width: 40%;
+            height: 35%;
+            border-radius: 50%;
+            background: linear-gradient(
+                180deg,
+                rgba(255, 255, 255, 0.95) 0%,
+                rgba(255, 255, 255, 0.3) 100%
+            );
+        }
+
+        .zoom-point-bulle {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            position: relative;
+            background: radial-gradient(
+                circle at 30% 30%,
+                rgba(255, 255, 255, 1) 0%,
+                rgba(255, 255, 255, 0.8) 10%,
+                rgba(230, 240, 250, 0.6) 30%,
+                rgba(200, 215, 235, 0.4) 50%,
+                rgba(180, 200, 225, 0.3) 70%,
+                rgba(160, 185, 215, 0.2) 100%
+            );
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow:
+                0 4px 12px rgba(0, 0, 0, 0.25),
+                0 0 8px rgba(255, 255, 255, 0.2),
+                inset 0 -4px 8px rgba(0, 50, 100, 0.15),
+                inset 0 2px 4px rgba(255, 255, 255, 0.4);
+        }
+
+        .zoom-point-bulle::before {
+            content: '';
+            position: absolute;
+            top: 10%;
+            left: 15%;
+            width: 45%;
+            height: 40%;
+            border-radius: 50%;
+            background: radial-gradient(
+                ellipse at 50% 50%,
+                rgba(255, 255, 255, 0.95) 0%,
+                rgba(255, 255, 255, 0.5) 40%,
+                transparent 70%
+            );
+        }
+
+        .zoom-point-bulle::after {
+            content: '';
+            position: absolute;
+            bottom: 12%;
+            right: 15%;
+            width: 25%;
+            height: 20%;
+            border-radius: 50%;
+            background: radial-gradient(
+                ellipse,
+                rgba(255, 255, 255, 0.5) 0%,
+                transparent 70%
+            );
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0.5;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>Points Étudiants - Effet Liquid Glass</h1>
+    <p class="subtitle">Comparaison des différents styles de verre pour les points sur les barres graduées</p>
+
+    <!-- ZOOM COMPARATIF -->
+    <div class="zoom-section">
+        <div class="section-title">Vue rapprochée (x3)</div>
+        <div class="section-desc">Cliquez sur les points dans les barres ci-dessous pour voir l'effet au survol</div>
+
+        <div class="zoom-grid">
+            <div class="zoom-item">
+                <div class="zoom-point-container">
+                    <div class="zoom-point-actuel"></div>
+                </div>
+                <span class="zoom-label">Actuel</span>
+            </div>
+            <div class="zoom-item">
+                <div class="zoom-point-container">
+                    <div class="zoom-point-bombe"></div>
+                </div>
+                <span class="zoom-label">Verre<br>bombé</span>
+            </div>
+            <div class="zoom-item">
+                <div class="zoom-point-container">
+                    <div class="zoom-point-goutte"></div>
+                </div>
+                <span class="zoom-label">Goutte<br>d'eau</span>
+            </div>
+            <div class="zoom-item">
+                <div class="zoom-point-container">
+                    <div class="zoom-point-perle"></div>
+                </div>
+                <span class="zoom-label">Perle<br>nacrée</span>
+            </div>
+            <div class="zoom-item">
+                <div class="zoom-point-container">
+                    <div class="zoom-point-cristal"></div>
+                </div>
+                <span class="zoom-label">Cristal</span>
+            </div>
+            <div class="zoom-item">
+                <div class="zoom-point-container">
+                    <div class="zoom-point-bulle"></div>
+                </div>
+                <span class="zoom-label">Bulle 3D<br>(recommandé)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ACTUEL -->
+    <div class="section">
+        <div class="section-title">Actuel (référence)</div>
+        <div class="section-desc">Style actuel : gradient 135° blanc→gris + ombre externe</div>
+        <div class="barre">
+            <div class="barre-overlay"></div>
+            <div class="demo-points">
+                <div class="point-actuel" style="left: 12%; animation-delay: 0s;"></div>
+                <div class="point-actuel" style="left: 23%; animation-delay: 1.2s;"></div>
+                <div class="point-actuel" style="left: 38%; animation-delay: 0.5s;"></div>
+                <div class="point-actuel" style="left: 52%; animation-delay: 2.1s;"></div>
+                <div class="point-actuel" style="left: 61%; animation-delay: 0.8s;"></div>
+                <div class="point-actuel" style="left: 74%; animation-delay: 1.5s;"></div>
+                <div class="point-actuel" style="left: 88%; animation-delay: 2.8s;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OPTION 1: VERRE BOMBÉ -->
+    <div class="section">
+        <div class="section-title">Option 1 : Verre bombé</div>
+        <div class="section-desc">Highlight en demi-lune supérieure + ombre interne basse. Effet classique de bouton en verre.</div>
+        <div class="barre">
+            <div class="barre-overlay"></div>
+            <div class="demo-points">
+                <div class="point-verre-bombe" style="left: 12%; animation-delay: 0s;"></div>
+                <div class="point-verre-bombe" style="left: 23%; animation-delay: 1.2s;"></div>
+                <div class="point-verre-bombe" style="left: 38%; animation-delay: 0.5s;"></div>
+                <div class="point-verre-bombe" style="left: 52%; animation-delay: 2.1s;"></div>
+                <div class="point-verre-bombe" style="left: 61%; animation-delay: 0.8s;"></div>
+                <div class="point-verre-bombe" style="left: 74%; animation-delay: 1.5s;"></div>
+                <div class="point-verre-bombe" style="left: 88%; animation-delay: 2.8s;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OPTION 2: GOUTTE D'EAU -->
+    <div class="section">
+        <div class="section-title">Option 2 : Goutte d'eau</div>
+        <div class="section-desc">Double point lumineux (principal + contre-jour) + fond translucide. Effet bulle de savon.</div>
+        <div class="barre">
+            <div class="barre-overlay"></div>
+            <div class="demo-points">
+                <div class="point-goutte" style="left: 12%; animation-delay: 0s;"></div>
+                <div class="point-goutte" style="left: 23%; animation-delay: 1.2s;"></div>
+                <div class="point-goutte" style="left: 38%; animation-delay: 0.5s;"></div>
+                <div class="point-goutte" style="left: 52%; animation-delay: 2.1s;"></div>
+                <div class="point-goutte" style="left: 61%; animation-delay: 0.8s;"></div>
+                <div class="point-goutte" style="left: 74%; animation-delay: 1.5s;"></div>
+                <div class="point-goutte" style="left: 88%; animation-delay: 2.8s;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OPTION 3: PERLE NACRÉE -->
+    <div class="section">
+        <div class="section-title">Option 3 : Perle nacrée</div>
+        <div class="section-desc">Reflets multiples + dégradé diagonal subtil. Effet nacre/perle de culture.</div>
+        <div class="barre">
+            <div class="barre-overlay"></div>
+            <div class="demo-points">
+                <div class="point-perle" style="left: 12%; animation-delay: 0s;"></div>
+                <div class="point-perle" style="left: 23%; animation-delay: 1.2s;"></div>
+                <div class="point-perle" style="left: 38%; animation-delay: 0.5s;"></div>
+                <div class="point-perle" style="left: 52%; animation-delay: 2.1s;"></div>
+                <div class="point-perle" style="left: 61%; animation-delay: 0.8s;"></div>
+                <div class="point-perle" style="left: 74%; animation-delay: 1.5s;"></div>
+                <div class="point-perle" style="left: 88%; animation-delay: 2.8s;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OPTION 4: CRISTAL -->
+    <div class="section">
+        <div class="section-title">Option 4 : Cristal</div>
+        <div class="section-desc">Gradient conique simulant des facettes taillées. Effet gemme/diamant.</div>
+        <div class="barre">
+            <div class="barre-overlay"></div>
+            <div class="demo-points">
+                <div class="point-cristal" style="left: 12%; animation-delay: 0s;"></div>
+                <div class="point-cristal" style="left: 23%; animation-delay: 1.2s;"></div>
+                <div class="point-cristal" style="left: 38%; animation-delay: 0.5s;"></div>
+                <div class="point-cristal" style="left: 52%; animation-delay: 2.1s;"></div>
+                <div class="point-cristal" style="left: 61%; animation-delay: 0.8s;"></div>
+                <div class="point-cristal" style="left: 74%; animation-delay: 1.5s;"></div>
+                <div class="point-cristal" style="left: 88%; animation-delay: 2.8s;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OPTION 5: BULLE 3D -->
+    <div class="section">
+        <div class="section-title">Option 5 : Bulle de verre 3D (recommandé)</div>
+        <div class="section-desc">Sphère réaliste avec highlight principal, reflet secondaire, ombre dynamique qui change avec l'animation flottante. Effet le plus "liquid glass".</div>
+        <div class="barre">
+            <div class="barre-overlay"></div>
+            <div class="demo-points">
+                <div class="point-bulle-3d" style="left: 12%; animation-delay: 0s;"></div>
+                <div class="point-bulle-3d" style="left: 23%; animation-delay: 1.2s;"></div>
+                <div class="point-bulle-3d" style="left: 38%; animation-delay: 0.5s;"></div>
+                <div class="point-bulle-3d" style="left: 52%; animation-delay: 2.1s;"></div>
+                <div class="point-bulle-3d" style="left: 61%; animation-delay: 0.8s;"></div>
+                <div class="point-bulle-3d" style="left: 74%; animation-delay: 1.5s;"></div>
+                <div class="point-bulle-3d" style="left: 88%; animation-delay: 2.8s;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        Monitorage Pédagogique - Aperçu Points Liquid Glass - Beta 96.2
+    </div>
+</body>
+</html>

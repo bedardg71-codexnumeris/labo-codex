@@ -149,7 +149,7 @@ function mettreAJourContexteEntete() {
             if (htmlLigne1) {
                 htmlLigne1 += '<span class="separateur-contexte">•</span>';
             }
-            htmlLigne1 += `<span class="info-contexte-item" id="contexte-pratique-nom">Pratique : ${echapperHtml(pratiqueName)}</span>`;
+            htmlLigne1 += `<span class="info-contexte-item" id="contexte-pratique-nom" data-tooltip="entete-pratique">Pratique : ${echapperHtml(pratiqueName)}</span>`;
         }
 
         // ========================================
@@ -198,7 +198,7 @@ function mettreAJourContexteEntete() {
         // ========================================
         const htmlFinal = `
             <div class="info-contexte-ligne">${htmlLigne1}</div>
-            <div class="info-contexte-ligne">${htmlLigne2}</div>
+            <div class="info-contexte-ligne" data-tooltip="entete-semaine">${htmlLigne2}</div>
         `;
 
         conteneur.innerHTML = htmlFinal;

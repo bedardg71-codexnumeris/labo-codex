@@ -1,0 +1,82 @@
+/* =================================================================
+   tooltips.css — Tooltips au survol — Monitorage Pedagogique
+   ================================================================= */
+
+.tooltip-bulle {
+    position: absolute;
+    z-index: 10000;
+    padding: 10px 14px;
+    border-radius: var(--radius-moyen, 6px);
+    background: var(--bleu-fonce, #1a1a2e);
+    color: #e0e0e0;
+    font-size: 0.85rem;
+    line-height: 1.45;
+    box-shadow: var(--shadow-fort, 0 4px 12px rgba(0, 0, 0, 0.4));
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.tooltip-bulle.tooltip-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.tooltip-bulle.tooltip-mesure {
+    opacity: 0;
+    visibility: hidden;
+    display: block;
+}
+
+/* Fleche — positionnee dynamiquement via data-position */
+.tooltip-fleche {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: var(--bleu-fonce, #1a1a2e);
+    transform: rotate(45deg);
+}
+
+.tooltip-bulle[data-position="bas"] .tooltip-fleche {
+    top: -4px;
+    left: 50%;
+    margin-left: -4px;
+}
+
+.tooltip-bulle[data-position="haut"] .tooltip-fleche {
+    bottom: -4px;
+    left: 50%;
+    margin-left: -4px;
+}
+
+.tooltip-bulle[data-position="droite"] .tooltip-fleche {
+    left: -4px;
+    top: 50%;
+    margin-top: -4px;
+}
+
+.tooltip-bulle[data-position="gauche"] .tooltip-fleche {
+    right: -4px;
+    top: 50%;
+    margin-top: -4px;
+}
+
+.tooltip-contenu {
+    position: relative;
+    z-index: 1;
+}
+
+/* Elements avec tooltip : curseur d'aide */
+[data-tooltip] {
+    cursor: help;
+}
+
+/* Conserver le curseur natif sur les elements interactifs */
+button[data-tooltip],
+select[data-tooltip],
+a[data-tooltip],
+.accordeon-header[data-tooltip],
+.navigation-boutons[data-tooltip] {
+    cursor: pointer;
+}
