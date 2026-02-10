@@ -190,26 +190,11 @@ function detecterDoublonsEchelles(echellesLocales, echellesBibliotheque) {
  * @returns {string} HTML du badge
  */
 function genererBadgeSourceEchelle(echelle, echellesLocales) {
-    const estLocale = echellesLocales.some(e => e.id === echelle.id);
-    const estRetiree = echelle.dansBibliotheque === false;
-
-    if (estRetiree) {
-        return '<span class="badge-source badge-source--retiree" style="margin-left: 6px;">Retirée</span>';
-    } else if (estLocale) {
-        return '<span class="badge-source badge-source--locale" style="margin-left: 6px;">Locale</span>';
-    } else {
-        return '<span class="badge-source badge-source--bibliotheque" style="margin-left: 6px;">Bibliothèque</span>';
-    }
+    return BibliothequeUI.genererBadgeSource(echelle, echellesLocales);
 }
 
-/**
- * Générer un ID court pour affichage
- * @param {string} id - L'ID complet
- * @returns {string} Les 6 derniers caractères
- */
 function genererIdCourtEchelle(id) {
-    if (!id || id.length < 6) return id || '?';
-    return id.slice(-6);
+    return BibliothequeUI.genererIdCourt(id);
 }
 
 /* ===============================
@@ -2396,262 +2381,101 @@ async function afficherListeEchelles() {
  */
 async function afficherBibliothequeEchelles() {
     const echelles = await db.get('echellesTemplates') || [];
-
-    // Séparer échelles dans la bibliothèque vs disponibles
     const echellesDansBibliotheque = echelles.filter(e => e.dansBibliotheque !== false);
     const echellesDisponibles = await obtenirToutesLesEchellesBibliotheque();
-
-    // ✅ AJOUT (28 janvier 2026) : Détecter les doublons
     const doublonsDetectes = detecterDoublonsEchelles(echellesDansBibliotheque, echellesDisponibles);
-
-    // Obtenir les disciplines disponibles
     const disciplines = obtenirDisciplinesDisponiblesEchelles();
 
-    let html = `
-        <div id="modalBibliothequeEchelles" class="modal-js-overlay" style="z-index: 10000;">
-            <div class="modal-js-contenu" style="max-width: 800px;">
-                <!-- Bouton X sticky -->
-                <button onclick="fermerModalBibliothequeEchelles()" class="modal-js-btn-fermer">
-                    ×
-                </button>
-                <div class="u-flex-gap-10 u-align-center" style="margin-bottom: 5px;">
-                    <h2 style="margin: 0; color: var(--gris-fonce);">Bibliothèque d'échelles de performance</h2>
-                    <button class="btn-aide-contextuelle" data-aide="bibliotheque-fonctionnement" title="Comment fonctionne la bibliothèque">😎</button>
-                </div>
-                <p style="color: var(--gris-clair); margin-bottom: 20px;">
-                    Gérez les échelles de performance affichées dans la barre latérale.
-                </p>
-    `;
-
-    // ✅ AJOUT (28 janvier 2026) : Afficher avertissement doublons
-    if (doublonsDetectes.length > 0) {
-        html += `
-                <div class="info-box info-box--attention" style="margin-bottom: 20px;">
-                    <div style="font-weight: bold; margin-bottom: 8px;">
-                        ⚠️ ${doublonsDetectes.length} doublon(s) potentiel(s) détecté(s)
-                    </div>
-                    <p style="font-size: 0.9em; margin: 0 0 10px 0;">
-                        Des échelles avec des noms similaires existent en plusieurs exemplaires.
-                    </p>
-                    <details style="font-size: 0.85em;">
-                        <summary style="cursor: pointer; font-weight: 500;">Voir les détails</summary>
-                        <ul style="margin: 10px 0 0 0; padding-left: 20px;">
-                            ${doublonsDetectes.map(d => `<li><strong>${d.nom}</strong> : ${d.count} exemplaires (IDs: ${d.ids.map(id => '#' + genererIdCourtEchelle(id)).join(', ')})</li>`).join('')}
-                        </ul>
-                    </details>
-                </div>
-        `;
-    }
-
-    html += `
-                <!-- Section 1 : Échelles dans votre sélection -->
-                <h3 style="color: var(--bleu-clair); font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
-                    Échelles dans la barre latérale
-                </h3>
-                <div style="margin-bottom: 30px;">
-                    <div id="listeEchellesDansBibliotheque">
-    `;
-
+    // Section 1
+    let contenuSection1 = '';
     if (echellesDansBibliotheque.length === 0) {
-        html += '<p style="color: var(--gris-clair); font-style: italic;">Aucune échelle dans la barre latérale</p>';
+        contenuSection1 = '<p style="color: var(--gris-clair); font-style: italic;">Aucune échelle dans la barre latérale</p>';
     } else {
         echellesDansBibliotheque.forEach(echelle => {
-            const nomEchelle = echelle.nom || 'Sans titre';
-            const nbNiveaux = echelle.niveaux?.length || 0;
-            const discipline = echelle.discipline || '';
-            const auteurOriginal = echelle.auteurOriginal || '';
-            // ✅ AJOUT (28 janvier 2026) : ID court pour identifier les doublons
-            const idCourt = genererIdCourtEchelle(echelle.id);
-            // ✅ AJOUT (28 janvier 2026) : Badge source
-            const badgeSource = genererBadgeSourceEchelle(echelle, echellesDansBibliotheque);
-
-            html += `
-                <div style="
-                    border: 1px solid var(--bleu-clair);
-                    border-radius: 6px;
-                    padding: 15px;
-                    margin-bottom: 10px;
-                    background: var(--bleu-tres-pale);
-                ">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                        <div style="flex: 1;">
-                            <div style="font-weight: bold; color: var(--gris-fonce); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-                                ${typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(echelle) : ''}
-                                ${nomEchelle}
-                                <span style="background: var(--bordure-claire); color: var(--gris-moyen); padding: 2px 6px; border-radius: 3px; font-size: 0.7em; font-family: monospace;" title="ID: ${echelle.id}">#${idCourt}</span>
-                                ${badgeSource}
-                            </div>
-                            <div style="color: var(--gris-clair); font-size: 0.9em;">
-                                ${nbNiveaux} niveau(x)${discipline ? ' • ' + discipline : ''}${auteurOriginal ? ' • ' + auteurOriginal : ''}
-                            </div>
-                        </div>
-                        <div style="display: flex; gap: 8px; margin-left: 10px;">
-                            <button
-                                onclick="dupliquerEchelleBibliotheque('${echelle.id}')"
-                                class="btn btn-confirmer btn-tres-compact"
-                                title="Créer une copie">
-                                Dupliquer
-                            </button>
-                            <button
-                                onclick="partagerEchelle('${echelle.id}')"
-                                class="btn btn-secondaire btn-tres-compact"
-                                title="Exporter en JSON">
-                                Exporter
-                            </button>
-                            <button
-                                onclick="retirerEchelleDeBibliotheque('${echelle.id}')"
-                                class="btn btn-secondaire btn-tres-compact"
-                                title="Retirer de la barre latérale (données conservées)">
-                                Retirer
-                            </button>
-                            <button
-                                onclick="supprimerEchelleDefinitivement('${echelle.id}')"
-                                class="btn btn-supprimer btn-tres-compact"
-                                title="Supprimer définitivement">
-                                Supprimer
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
+            const badgesPratiques = typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(echelle) : '';
+            contenuSection1 += BibliothequeUI.renderCarteSelection({
+                nom: echelle.nom || 'Sans titre',
+                id: echelle.id,
+                badgeSource: BibliothequeUI.genererBadgeSource(echelle, echellesDansBibliotheque),
+                badgesPratiques: badgesPratiques,
+                metadonnees: `${echelle.niveaux?.length || 0} niveau(x)${echelle.discipline ? ' • ' + echelle.discipline : ''}${echelle.auteurOriginal ? ' • ' + echelle.auteurOriginal : ''}`,
+                boutons: [
+                    { label: 'Dupliquer', onclick: `dupliquerEchelleBibliotheque('${echelle.id}')`, classe: 'btn-confirmer', title: 'Créer une copie' },
+                    { label: 'Exporter', onclick: `partagerEchelle('${echelle.id}')`, classe: 'btn-secondaire', title: 'Exporter en JSON' },
+                    { label: 'Retirer', onclick: `retirerEchelleDeBibliotheque('${echelle.id}')`, classe: 'btn-secondaire', title: 'Retirer de la barre latérale (données conservées)' },
+                    { label: 'Supprimer', onclick: `supprimerEchelleDefinitivement('${echelle.id}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
+                ]
+            });
         });
     }
 
-    html += `
-                    </div>
+    const boutonsApresSection1 = `
+        <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+            <button onclick="ajouterMesEchellesALaBibliotheque()" class="btn btn-principal">Ajouter mes échelles à la bibliothèque</button>
+            <button onclick="exporterEchelles()" class="btn btn-secondaire">Exporter toutes mes échelles</button>
+            <button onclick="document.getElementById('fichier-import-echelles-modal').click()" class="btn btn-secondaire">Importer des échelles</button>
+            <input type="file" id="fichier-import-echelles-modal" accept=".json" style="display: none;" onchange="importerEchelles(event)">
+        </div>`;
 
-                    <!-- Boutons Import/Export après la Section 1 -->
-                    <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
-                        <button onclick="ajouterMesEchellesALaBibliotheque()" class="btn btn-principal">
-                            Ajouter mes échelles à la bibliothèque
-                        </button>
-                        <button onclick="exporterEchelles()" class="btn btn-secondaire">
-                            Exporter toutes mes échelles
-                        </button>
-                        <button onclick="document.getElementById('fichier-import-echelles-modal').click()" class="btn btn-secondaire">
-                            Importer des échelles
-                        </button>
-                        <input type="file" id="fichier-import-echelles-modal" accept=".json" style="display: none;" onchange="importerEchelles(event)">
-                    </div>
-                </div>
-    `;
-
-    // 🆕 Beta 95.3 : Section "Importer depuis un autre trimestre"
-    const trimestresDisponibles = typeof listerTrimestresAvecEchelles === 'function'
-        ? listerTrimestresAvecEchelles()
-        : [];
-
+    // Section import trimestre
+    let sectionImportTrimestre = '';
+    const trimestresDisponibles = typeof listerTrimestresAvecEchelles === 'function' ? listerTrimestresAvecEchelles() : [];
     if (trimestresDisponibles.length > 0) {
-        html += `
-                <div style="margin-top: 20px; padding: 15px; background: var(--gris-tres-pale); border-radius: 6px; border: 1px solid var(--bordure-claire);">
-                    <h4 style="color: var(--bleu-principal); font-size: 1rem; margin: 0 0 10px 0;">
-                        Importer depuis un autre trimestre
-                    </h4>
-                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                        <select id="selectTrimestreImportEchelles" class="controle-form" style="flex: 1; min-width: 200px;">
-                            <option value="">-- Choisir un trimestre --</option>
-                            ${trimestresDisponibles.map(t =>
-                                `<option value="${t.cle}">${t.nom} (${t.nombre} échelle${t.nombre > 1 ? 's' : ''})</option>`
-                            ).join('')}
-                        </select>
-                        <button onclick="afficherEchellesTrimestreModal()" class="btn btn-secondaire btn-compact">
-                            Voir les échelles
-                        </button>
-                        <button onclick="importerToutEchellesTrimestreModal()" class="btn btn-principal btn-compact">
-                            Tout importer
-                        </button>
-                    </div>
-                    <div id="previewEchellesTrimestre" style="margin-top: 10px; display: none;">
-                        <!-- Preview des échelles du trimestre sélectionné -->
-                    </div>
+        sectionImportTrimestre = `
+            <div style="margin-top: 20px; padding: 15px; background: var(--gris-tres-pale); border-radius: 6px; border: 1px solid var(--bordure-claire);">
+                <h4 style="color: var(--bleu-principal); font-size: 1rem; margin: 0 0 10px 0;">Importer depuis un autre trimestre</h4>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <select id="selectTrimestreImportEchelles" class="controle-form" style="flex: 1; min-width: 200px;">
+                        <option value="">-- Choisir un trimestre --</option>
+                        ${trimestresDisponibles.map(t => `<option value="${t.cle}">${t.nom} (${t.nombre} échelle${t.nombre > 1 ? 's' : ''})</option>`).join('')}
+                    </select>
+                    <button onclick="afficherEchellesTrimestreModal()" class="btn btn-secondaire btn-compact">Voir les échelles</button>
+                    <button onclick="importerToutEchellesTrimestreModal()" class="btn btn-principal btn-compact">Tout importer</button>
                 </div>
-        `;
+                <div id="previewEchellesTrimestre" style="margin-top: 10px; display: none;"></div>
+            </div>`;
     }
 
-    html += `
-                <!-- Section 2 : Échelles disponibles -->
-                <h3 style="color: var(--bleu-clair); font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
-                    Échelles disponibles à ajouter à la barre latérale
-                </h3>
+    // Filtres Section 2
+    const filtresHTML = `
+        <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 15px;">
+            <div style="flex: 1; min-width: 200px;">
+                <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">Filtrer par discipline :</label>
+                <select id="filtreDisciplineEchelles" class="controle-form" onchange="filtrerEchellesBibliotheque()" style="max-width: 300px;">
+                    <option value="">Toutes les disciplines</option>
+                    ${disciplines.map(d => `<option value="${d}">${d}</option>`).join('')}
+                </select>
+            </div>
+            <div style="flex: 1; min-width: 200px;">
+                <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">Filtrer par pratique :</label>
+                <select id="filtrePratiqueEchelles" class="controle-form" onchange="filtrerEchellesBibliotheque()" style="max-width: 300px;">
+                    <option value="">Toutes les pratiques</option>
+                    <option value="SOM">Sommative</option>
+                    <option value="STD">PAN-Standards</option>
+                    <option value="SPE">PAN-Spécifications</option>
+                    <option value="DEN">PAN-Dénotation</option>
+                    <option value="all">Multi-pratiques</option>
+                </select>
+            </div>
+        </div>`;
 
-                <!-- Filtres -->
-                <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 15px;">
-                    <!-- Filtre par discipline -->
-                    <div style="flex: 1; min-width: 200px;">
-                        <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">
-                            Filtrer par discipline :
-                        </label>
-                        <select id="filtreDisciplineEchelles"
-                                class="controle-form"
-                                onchange="filtrerEchellesBibliotheque()"
-                                style="max-width: 300px;">
-                            <option value="">Toutes les disciplines</option>
-    `;
-
-    disciplines.forEach(discipline => {
-        html += `<option value="${discipline}">${discipline}</option>`;
-    });
-
-    html += `
-                        </select>
-                    </div>
-
-                    <!-- Filtre par pratique -->
-                    <div style="flex: 1; min-width: 200px;">
-                        <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">
-                            Filtrer par pratique :
-                        </label>
-                        <select id="filtrePratiqueEchelles"
-                                class="controle-form"
-                                onchange="filtrerEchellesBibliotheque()"
-                                style="max-width: 300px;">
-                            <option value="">Toutes les pratiques</option>
-                            <option value="SOM">Sommative</option>
-                            <option value="STD">PAN-Standards</option>
-                            <option value="SPE">PAN-Spécifications</option>
-                            <option value="DEN">PAN-Dénotation</option>
-                            <option value="all">Multi-pratiques</option>
-                        </select>
-                    </div>
-                </div>
-
-                    <div id="listeEchellesDisponibles">
-    `;
-
-    // Organiser par discipline
+    // Section 2
+    let contenuSection2 = '';
     const echellesParDiscipline = {};
     echellesDisponibles.forEach(echelle => {
         const disc = echelle.discipline || 'Autre';
-        if (!echellesParDiscipline[disc]) {
-            echellesParDiscipline[disc] = [];
-        }
+        if (!echellesParDiscipline[disc]) echellesParDiscipline[disc] = [];
         echellesParDiscipline[disc].push(echelle);
     });
 
-    // Afficher par discipline
     Object.keys(echellesParDiscipline).sort().forEach(discipline => {
-        html += `<h4 style="margin-top: 20px; margin-bottom: 10px; color: var(--gris-moyen);">${discipline}</h4>`;
-
+        contenuSection2 += `<h4 style="margin-top: 20px; margin-bottom: 10px; color: var(--gris-moyen);">${discipline}</h4>`;
         echellesParDiscipline[discipline].forEach(echelle => {
-            const nomEchelle = echelle.nom || 'Sans titre';
-            const nbNiveaux = echelle.niveaux?.length || 0;
-            const description = echelle.description || '';
-            const auteur = echelle.auteur || '';
-            // ✅ AJOUT (28 janvier 2026) : ID court pour identifier les doublons
-            const idCourt = genererIdCourtEchelle(echelle.id);
-            // ✅ AJOUT (28 janvier 2026) : Badge source (échelles disponibles = bibliothèque)
-            const badgeSource = genererBadgeSourceEchelle(echelle, echellesDansBibliotheque);
-
-            // Obtenir les pratiques de l'échelle
             const pratiques = echelle.pratiques || (echelle.gabaritType ? [echelle.gabaritType] : ['all']);
-            const pratiquesStr = pratiques.join(',');
-
-            // Générer les badges de pratique
             let badgesPratiques = '';
             if (window.GabaritsUtils) {
                 badgesPratiques = window.GabaritsUtils.genererBadgesPratiques(echelle);
             } else {
-                // Fallback sans le module
                 pratiques.forEach(p => {
                     const label = p === 'all' ? 'Multi' : p;
                     const classeCSS = p === 'all' ? '' : p.toLowerCase();
@@ -2659,69 +2483,46 @@ async function afficherBibliothequeEchelles() {
                 });
             }
 
-            // Vérifier si déjà dans la bibliothèque
-            const dejaPresent = echelles.some(e => e.id === echelle.id && e.dansBibliotheque !== false);
-
-            // Style spécial si c'est un gabarit
+            const dejaPresent = echelles.some(e => (e.id === echelle.id || e.idOriginal === echelle.id) && e.dansBibliotheque !== false);
             const estGabarit = echelle.estGabarit === true;
             const styleGabarit = estGabarit ? 'border-left: 4px solid #6f42c1; background: linear-gradient(135deg, #f8f4ff 0%, #fff 100%);' : '';
+            const gabaritBadge = estGabarit ? '<span style="font-size: 0.7rem; color: #6f42c1; font-weight: 500;">(gabarit)</span>' : '';
 
-            html += `
-                <div class="echelle-disponible-item" data-discipline="${discipline}" data-pratiques="${pratiquesStr}" style="
-                    padding: 12px;
-                    background: white;
-                    border: 1px solid var(--bordure-claire);
-                    border-radius: 6px;
-                    margin-bottom: 10px;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: start;
-                    gap: 12px;
-                    ${dejaPresent ? 'opacity: 0.5;' : ''}
-                    ${styleGabarit}
-                ">
-                    <div style="flex: 1;">
-                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                            ${badgesPratiques}
-                            <span style="font-weight: 500;">${nomEchelle}</span>
-                            <span style="background: var(--bordure-claire); color: var(--gris-moyen); padding: 2px 6px; border-radius: 3px; font-size: 0.7em; font-family: monospace;" title="ID: ${echelle.id}">#${idCourt}</span>
-                            ${badgeSource}
-                            ${estGabarit ? '<span style="font-size: 0.7rem; color: #6f42c1; font-weight: 500;">(gabarit)</span>' : ''}
-                        </div>
-                        <div style="font-size: 0.85rem; color: var(--gris-moyen); margin-bottom: 4px;">
-                            ${nbNiveaux} niveau(x)${auteur ? ' • ' + auteur : ''}
-                        </div>
-                        ${description ? `<div style="font-size: 0.85rem; color: var(--gris-clair);">${description}</div>` : ''}
-                        ${dejaPresent ? '<div style="font-size: 0.8rem; color: var(--bleu-clair); font-style: italic; margin-top: 4px;">Déjà dans la barre latérale</div>' : ''}
-                    </div>
-                    <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-end;">
-                        ${!dejaPresent ? `
-                            <button
-                                onclick="ajouterEchelleIndividuelle('${echelle.id}')"
-                                class="btn btn-confirmer btn-tres-compact"
-                                title="Ajouter cette échelle à votre sélection">
-                                Ajouter à ma sélection
-                            </button>
-                        ` : ''}
-                        <button
-                            onclick="supprimerEchelleDeBibliothequePartagee('${echelle.id}')"
-                            class="btn btn-supprimer btn-tres-compact"
-                            title="Supprimer définitivement de la bibliothèque">
-                            Supprimer
-                        </button>
-                    </div>
-                </div>
-            `;
+            contenuSection2 += BibliothequeUI.renderCarteDisponible({
+                nom: (echelle.nom || 'Sans titre') + ' ' + gabaritBadge,
+                id: echelle.id,
+                badgeSource: BibliothequeUI.genererBadgeSource(echelle, echellesDansBibliotheque),
+                badgesPratiques: badgesPratiques,
+                metadonnees: `${echelle.niveaux?.length || 0} niveau(x)${echelle.auteur ? ' • ' + echelle.auteur : ''}`,
+                description: echelle.description || '',
+                dejaPresent: dejaPresent,
+                classeItem: 'echelle-disponible-item',
+                dataAttrs: `data-discipline="${discipline}" data-pratiques="${pratiques.join(',')}"`,
+                styleExtra: styleGabarit,
+                boutons: [
+                    { label: 'Ajouter à ma sélection', onclick: `ajouterEchelleIndividuelle('${echelle.id}')`, classe: 'btn-confirmer', title: 'Ajouter cette échelle à votre sélection' },
+                    { label: 'Supprimer', onclick: `supprimerEchelleDeBibliothequePartagee('${echelle.id}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true }
+                ]
+            });
         });
     });
 
-    html += `
-                    </div>
-            </div>
-        </div>
-    `;
-
-    document.body.insertAdjacentHTML('beforeend', html);
+    BibliothequeUI.creerModal({
+        modalId: 'modalBibliothequeEchelles',
+        titre: "Bibliothèque d'échelles de performance",
+        sousTitre: 'Gérez les échelles de performance affichées dans la barre latérale.',
+        onFermer: 'fermerModalBibliothequeEchelles',
+        doublonsHTML: BibliothequeUI.renderAvertissementDoublons(doublonsDetectes),
+        titreSection1: 'Échelles dans la barre latérale',
+        contenuIdListe1: 'listeEchellesDansBibliotheque',
+        contenuSection1: contenuSection1,
+        boutonsApresSection1: boutonsApresSection1,
+        sectionImportTrimestre: sectionImportTrimestre,
+        titreSection2: 'Échelles disponibles à ajouter à la barre latérale',
+        filtresSection2: filtresHTML,
+        contenuIdListe2: 'listeEchellesDisponibles',
+        contenuSection2: contenuSection2
+    });
 }
 
 /**
@@ -2735,13 +2536,23 @@ async function ajouterEchelleIndividuelle(id) {
     try {
         const echelles = await db.get('echellesTemplates') || [];
         let echelle = echelles.find(e => e.id === id);
+        if (!echelle) {
+            echelle = echelles.find(e => e.idOriginal === id);
+        }
 
         if (!echelle) {
             const toutesEchelles = await obtenirToutesLesEchellesBibliotheque();
             const echelleSource = toutesEchelles.find(e => e.id === id);
             if (echelleSource) {
-                echelle = { ...echelleSource };
-                echelle.dansBibliotheque = true;
+                // Générer un nouvel ID pour éviter les conflits (pattern Productions)
+                const nouvelId = `echelle_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                echelle = {
+                    ...echelleSource,
+                    id: nouvelId,
+                    idOriginal: echelleSource.id,
+                    dansBibliotheque: true,
+                    dateImport: new Date().toISOString()
+                };
                 echelles.push(echelle);
             } else {
                 alert('Échelle introuvable');
@@ -3054,10 +2865,7 @@ function filtrerEchellesBibliotheque() {
  * ✅ AJOUT (8 décembre 2025) : Fermer le modal de bibliothèque
  */
 function fermerModalBibliothequeEchelles() {
-    const modal = document.getElementById('modalBibliothequeEchelles');
-    if (modal) {
-        modal.remove();
-    }
+    BibliothequeUI.fermerModal('modalBibliothequeEchelles');
 }
 
 /**
@@ -4190,6 +3998,12 @@ window.ajouterEchellesABibliotheque = ajouterEchellesABibliotheque;
 window.filtrerEchellesParDiscipline = filtrerEchellesParDiscipline;
 window.filtrerEchellesBibliotheque = filtrerEchellesBibliotheque;
 window.fermerModalBibliothequeEchelles = fermerModalBibliothequeEchelles;
+window.ajouterEchelleIndividuelle = ajouterEchelleIndividuelle;
+window.dupliquerEchelleBibliotheque = dupliquerEchelleBibliotheque;
+window.partagerEchelle = partagerEchelle;
+window.supprimerEchelleDefinitivement = supprimerEchelleDefinitivement;
+window.supprimerEchelleDeBibliothequePartagee = supprimerEchelleDeBibliothequePartagee;
+window.ajouterMesEchellesALaBibliotheque = ajouterMesEchellesALaBibliotheque;
 
 // 🆕 Beta 95.3 : Exports fonctions import depuis trimestre
 window.afficherEchellesTrimestreModal = afficherEchellesTrimestreModal;

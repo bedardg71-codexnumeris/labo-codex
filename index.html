@@ -359,6 +359,22 @@
             border-color: white;
         }
 
+        .bandeau-mise-a-jour-fermer {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.4rem;
+            cursor: pointer;
+            padding: 0 4px;
+            line-height: 1;
+            margin-left: 10px;
+            transition: color 0.2s ease;
+        }
+
+        .bandeau-mise-a-jour-fermer:hover {
+            color: white;
+        }
+
         body.mise-a-jour-disponible {
             padding-bottom: 50px;
         }
@@ -3506,16 +3522,17 @@
             </div>
         </div>
 
-        <!-- BANDEAU MISE À JOUR DISPONIBLE (polling version.json) -->
+        <!-- BANDEAU VERSION / MISE À JOUR (polling version.json + affichage local) -->
         <div id="bandeau-mise-a-jour" class="bandeau-mise-a-jour">
             <div class="bandeau-mise-a-jour-contenu">
                 <span class="bandeau-mise-a-jour-icone">🔄</span>
-                <span class="bandeau-mise-a-jour-texte">
+                <span id="bandeau-mise-a-jour-texte" class="bandeau-mise-a-jour-texte">
                     Une <strong>mise à jour</strong> est disponible
                 </span>
                 <button onclick="window.location.reload()" class="bandeau-mise-a-jour-btn">
                     Recharger
                 </button>
+                <button onclick="fermerBandeauMiseAJour()" class="bandeau-mise-a-jour-fermer" title="Fermer">&times;</button>
             </div>
         </div>
 
@@ -15771,6 +15788,7 @@
 
     <script src="js/pratique-notation-v2.js?v=2026010226"></script> <!-- Beta 95 : dropdown productions + terminologie "production" -->
     <script src="js/gabarits-utils.js?v=2026010202"></script> <!-- Beta 95 : Module utilitaire gabarits + filtres pratique -->
+    <script src="js/bibliotheque-ui.js?v=2026021001"></script> <!-- Beta 97.4 : Composant générique modales bibliothèque -->
     <script src="js/spe-specifications.js?v=2026010206"></script> <!-- Beta 95 : Module PAN-Spécifications + gabarits François -->
     <script src="js/pratiques-bibliotheque.js?v=2026010401"></script> <!-- Beta 95 : Bibliothèque universelle STD + SPE -->
     <script src="js/pratiques-materiel.js?v=2026010601"></script> <!-- Beta 95 : retirerPratiqueDeBibliothequeMateriel -->
@@ -15918,7 +15936,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97';
-        const BUILD_ID = '0210-1059';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0210-1232';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
@@ -16060,12 +16078,44 @@
         });
 
         /**
-         * POLLING — Vérification de mise à jour en arrière-plan
-         * Interroge version.json toutes les 5 minutes.
-         * Si le build distant diffère du BUILD_ID local, affiche un bandeau discret.
+         * BANDEAU VERSION — Affiché à chaque nouveau build (local + distant)
+         * Persistant jusqu'à ce que l'utilisateur clique sur X.
+         * Mémorise le build "vu" dans localStorage pour ne pas réafficher.
          */
+        const CLE_BANDEAU_VU = 'monitorage-bandeau-vu';
         let miseAJourDejaSignalee = false;
 
+        function afficherBandeauVersion(beta, build, distant) {
+            const bandeau = document.getElementById('bandeau-mise-a-jour');
+            const texte = document.getElementById('bandeau-mise-a-jour-texte');
+            if (!bandeau || !texte) return;
+
+            const maintenant = new Date();
+            const dateStr = maintenant.toLocaleDateString('fr-CA', { day: 'numeric', month: 'long', year: 'numeric' });
+            const heureStr = maintenant.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' });
+
+            if (distant) {
+                texte.innerHTML = `<strong>Mise à jour disponible</strong> — Beta ${beta} · Build ${build} — ${dateStr} à ${heureStr}`;
+            } else {
+                texte.innerHTML = `<strong>Nouveau build</strong> — Beta ${beta} · Build ${build} — ${dateStr} à ${heureStr}`;
+            }
+
+            bandeau.classList.add('visible');
+            document.body.classList.add('mise-a-jour-disponible');
+        }
+
+        function fermerBandeauMiseAJour() {
+            const bandeau = document.getElementById('bandeau-mise-a-jour');
+            if (bandeau) {
+                bandeau.classList.remove('visible');
+                document.body.classList.remove('mise-a-jour-disponible');
+            }
+            localStorage.setItem(CLE_BANDEAU_VU, BUILD_ID);
+        }
+
+        /**
+         * POLLING — Vérification de mise à jour distante (version.json)
+         */
         async function verifierMiseAJourDistante() {
             if (miseAJourDejaSignalee) return;
             try {
@@ -16074,22 +16124,22 @@
                 const data = await reponse.json();
                 if (data.build && data.build !== BUILD_ID) {
                     miseAJourDejaSignalee = true;
-                    const bandeau = document.getElementById('bandeau-mise-a-jour');
-                    if (bandeau) {
-                        bandeau.classList.add('visible');
-                        document.body.classList.add('mise-a-jour-disponible');
-                    }
+                    afficherBandeauVersion(data.beta || VERSION_MAJEURE, data.build, true);
                 }
             } catch (e) {
                 // Silencieux si hors-ligne ou erreur réseau
             }
         }
 
-        // Lancer le polling après le chargement
+        // Au chargement : afficher le bandeau si ce build n'a pas été vu
         document.addEventListener('DOMContentLoaded', function() {
-            // Première vérification après 30 secondes (laisser l'app se charger)
+            const bandeauVu = localStorage.getItem(CLE_BANDEAU_VU);
+            if (bandeauVu !== BUILD_ID) {
+                afficherBandeauVersion(VERSION_MAJEURE, BUILD_ID, false);
+            }
+
+            // Polling distant : première vérif après 30s, puis toutes les 5 min
             setTimeout(verifierMiseAJourDistante, 30000);
-            // Puis toutes les 5 minutes
             setInterval(verifierMiseAJourDistante, 5 * 60 * 1000);
         });
 
@@ -16097,6 +16147,7 @@
         window.afficherModalNouveautes = afficherModalNouveautes;
         window.fermerModalNouveautes = fermerModalNouveautes;
         window.allerVersNotesDeVersion = allerVersNotesDeVersion;
+        window.fermerBandeauMiseAJour = fermerBandeauMiseAJour;
         window.BUILD_ID = BUILD_ID;
         window.VERSION_MAJEURE = VERSION_MAJEURE;
     </script>

@@ -97,26 +97,11 @@ function detecterDoublonsProductions(productionsLocales, productionsBibliotheque
  * @returns {string} HTML du badge
  */
 function genererBadgeSourceProduction(prod, productionsLocales) {
-    const estLocale = productionsLocales.some(p => p.id === prod.id);
-    const estRetiree = prod.dansBibliotheque === false;
-
-    if (estRetiree) {
-        return '<span class="badge-source badge-source--retiree" style="margin-left: 6px;">Retirée</span>';
-    } else if (estLocale) {
-        return '<span class="badge-source badge-source--locale" style="margin-left: 6px;">Locale</span>';
-    } else {
-        return '<span class="badge-source badge-source--bibliotheque" style="margin-left: 6px;">Bibliothèque</span>';
-    }
+    return BibliothequeUI.genererBadgeSource(prod, productionsLocales);
 }
 
-/**
- * ✅ AJOUT (28 janvier 2026) : Générer un ID court pour affichage
- * @param {string} id - L'ID complet
- * @returns {string} Les 6 derniers caractères
- */
 function genererIdCourtProduction(id) {
-    if (!id || id.length < 6) return id || '?';
-    return id.slice(-6);
+    return BibliothequeUI.genererIdCourt(id);
 }
 
 /* ===============================
@@ -1510,180 +1495,70 @@ function initialiserModuleProductions() {
  * 2. Productions disponibles à ajouter (bibliothèque + productions retirées)
  */
 async function afficherBibliothequeProductions() {
-    // Vérifier que le module bibliothèque est chargé
     if (typeof obtenirToutesLesProductionsBibliotheque !== 'function') {
-        alert('❌ Erreur : Le module bibliothèque n\'est pas chargé.\n\nVérifiez que le fichier productions-bibliotheque.js est bien chargé.');
+        alert('Le module bibliothèque n\'est pas chargé.\n\nVérifiez que le fichier productions-bibliotheque.js est bien chargé.');
         return;
     }
 
-    // Récupérer les productions existantes de l'utilisateur
     const productionsUtilisateur = await db.get(getCleProductions()) || [];
-
-    // Séparer productions dans sélection vs retirées
     const productionsDansSelection = productionsUtilisateur.filter(p => p.dansBibliotheque !== false);
     const productionsRetirees = productionsUtilisateur.filter(p => p.dansBibliotheque === false);
-
-    // Construire le HTML du modal
-    let modalHTML = `
-        <div id="modalBibliothequeProductions" class="modal-js-overlay" style="z-index: 10000;">
-            <div class="modal-js-contenu" style="max-width: 800px;">
-                <!-- Bouton X sticky -->
-                <button onclick="fermerModalBibliothequeProductions()" class="modal-js-fermer">
-                    ×
-                </button>
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
-                    <h2 style="margin: 0; color: var(--bleu-principal);">Bibliothèque de productions</h2>
-                    <button class="btn-aide-contextuelle" data-aide="bibliotheque-fonctionnement" title="Comment fonctionne la bibliothèque">😎</button>
-                </div>
-                <p style="color: var(--gris-clair); margin-bottom: 20px;">
-                    Gérez les productions affichées dans la barre latérale.
-                </p>
-    `;
-
-    // ✅ AJOUT (28 jan 2026) : Détecter les doublons potentiels
     const toutesProductionsBiblio = await obtenirToutesLesProductionsBibliotheque();
     const doublonsDetectes = detecterDoublonsProductions(productionsUtilisateur, toutesProductionsBiblio);
 
-    if (doublonsDetectes.length > 0) {
-        modalHTML += `
-                <div class="info-box info-box--attention" style="margin-bottom: 20px;">
-                    <div style="font-weight: bold; color: var(--gris-fonce); margin-bottom: 8px;">
-                        ⚠️ ${doublonsDetectes.length} doublon(s) potentiel(s) détecté(s)
-                    </div>
-                    <p style="color: var(--gris-fonce); font-size: 0.9em; margin: 0 0 10px 0;">
-                        Des productions avec des noms similaires existent en plusieurs exemplaires.
-                        Vérifiez les <code style="background: var(--gris-tres-pale); padding: 2px 4px; border-radius: 3px;">ID</code> pour distinguer les originaux des copies.
-                    </p>
-                    <details style="color: var(--gris-fonce);">
-                        <summary style="cursor: pointer; font-size: 0.9em;">Voir les doublons</summary>
-                        <ul style="margin: 10px 0 0 0; padding-left: 20px; font-size: 0.85em;">
-                            ${doublonsDetectes.map(d => `<li><strong>${d.titre}</strong> : ${d.count} exemplaire(s)</li>`).join('')}
-                        </ul>
-                    </details>
-                </div>
-        `;
-    }
-
-    // SECTION 1 : Productions dans ma sélection
-    if (productionsDansSelection.length > 0) {
-        modalHTML += `
-                <h3 style="color: var(--bleu-clair); font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
-                    Productions dans votre sélection (${productionsDansSelection.length})
-                </h3>
-                <div style="margin-bottom: 30px;">`;
-
+    // Section 1
+    let contenuSection1 = '';
+    if (productionsDansSelection.length === 0) {
+        contenuSection1 = '<p style="color: var(--gris-clair); font-style: italic;">Aucune production dans la barre latérale</p>';
+    } else {
         productionsDansSelection.forEach(prod => {
-            const typeLabel = getTypeLabel(prod.type);
-            const idCourt = genererIdCourtProduction(prod.id);
-            modalHTML += `
-                <div style="
-                    border: 1px solid var(--bleu-clair);
-                    border-radius: 6px;
-                    padding: 15px;
-                    margin-bottom: 10px;
-                    background: var(--bleu-tres-pale);
-                ">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                        <div style="flex: 1;">
-                            <div style="font-weight: bold; color: var(--bleu-principal); margin-bottom: 4px;">
-                                ${prod.titre} ${prod.description ? '- ' + prod.description : ''}
-                                <span class="badge-source badge-source--id" style="margin-left: 6px; font-family: monospace;" title="ID: ${prod.id}">#${idCourt}</span>
-                            </div>
-                            <div style="color: var(--gris-clair); font-size: 0.9em; margin-bottom: 4px;">
-                                Type: ${typeLabel} • Pondération: ${prod.ponderation}%
-                            </div>
-                            ${prod.objectif ? `<div style="color: var(--gris-clair); font-size: 0.85em;">Objectif: ${prod.objectif}</div>` : ''}
-                        </div>
-                        <div style="display: flex; gap: 8px; margin-left: 10px;">
-                            <button
-                                onclick="dupliquerProductionBibliotheque('${prod.id}')"
-                                class="btn btn-confirmer btn-tres-compact"
-                                title="Créer une copie">
-                                Dupliquer
-                            </button>
-                            <button
-                                onclick="partagerProduction('${prod.id}')"
-                                class="btn btn-secondaire btn-tres-compact"
-                                title="Exporter en JSON">
-                                Exporter
-                            </button>
-                            <button
-                                onclick="retirerProductionDeBibliotheque('${prod.id}')"
-                                class="btn btn-secondaire btn-tres-compact"
-                                title="Retirer de la barre latérale (données conservées)">
-                                Retirer
-                            </button>
-                            <button
-                                onclick="supprimerProductionDefinitivement('${prod.id}')"
-                                class="btn btn-supprimer btn-tres-compact"
-                                title="Supprimer définitivement">
-                                Supprimer
-                            </button>
-                        </div>
-                    </div>
-                </div>`;
+            contenuSection1 += BibliothequeUI.renderCarteSelection({
+                nom: `${prod.titre}${prod.description ? ' - ' + prod.description : ''}`,
+                id: prod.id,
+                badgeSource: BibliothequeUI.genererBadgeSource(prod, productionsDansSelection),
+                metadonnees: `Type: ${getTypeLabel(prod.type)} • Pondération: ${prod.ponderation}%${prod.objectif ? ' • Objectif: ' + prod.objectif : ''}`,
+                boutons: [
+                    { label: 'Dupliquer', onclick: `dupliquerProductionBibliotheque('${prod.id}')`, classe: 'btn-confirmer', title: 'Créer une copie' },
+                    { label: 'Exporter', onclick: `partagerProduction('${prod.id}')`, classe: 'btn-secondaire', title: 'Exporter en JSON' },
+                    { label: 'Retirer', onclick: `retirerProductionDeBibliotheque('${prod.id}')`, classe: 'btn-secondaire', title: 'Retirer de la barre latérale (données conservées)' },
+                    { label: 'Supprimer', onclick: `supprimerProductionDefinitivement('${prod.id}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
+                ]
+            });
         });
-
-        modalHTML += `</div>`;
     }
 
-    // Boutons d'action après la Section 1
-    modalHTML += `
-                <div style="margin-top: 15px; text-align: center; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-                    <button onclick="ajouterMesProductionsALaBibliotheque()" class="btn btn-principal">
-                        Ajouter mes productions à la bibliothèque
-                    </button>
-                    <button onclick="exporterProductions()" class="btn btn-secondaire">
-                        Exporter toutes mes productions
-                    </button>
-                    <button onclick="document.getElementById('fichier-import-productions-modal').click()" class="btn btn-secondaire">
-                        Importer des productions
-                    </button>
-                    <input type="file" id="fichier-import-productions-modal" accept=".json" style="display: none;" onchange="importerProductions(event)">
-                </div>
-    `;
+    const boutonsApresSection1 = `
+        <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+            <button onclick="ajouterMesProductionsALaBibliotheque()" class="btn btn-principal">Ajouter mes productions à la bibliothèque</button>
+            <button onclick="exporterProductions()" class="btn btn-secondaire">Exporter toutes mes productions</button>
+            <button onclick="document.getElementById('fichier-import-productions-modal').click()" class="btn btn-secondaire">Importer des productions</button>
+            <input type="file" id="fichier-import-productions-modal" accept=".json" style="display: none;" onchange="importerProductions(event)">
+        </div>`;
 
-    // SECTION 1.5 : Importer depuis un autre trimestre
+    // Section import trimestre
+    let sectionImportTrimestre = '';
     const trimestresDisponibles = listerTrimestresAvecProductions();
     if (trimestresDisponibles.length > 0) {
-        modalHTML += `
-                <div style="margin-top: 20px; padding: 15px; background: var(--gris-tres-pale); border-radius: 6px; border: 1px solid var(--bordure-claire);">
-                    <h4 style="color: var(--bleu-principal); font-size: 1rem; margin: 0 0 10px 0;">
-                        Importer depuis un autre trimestre
-                    </h4>
-                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                        <select id="selectTrimestreImport" class="controle-form" style="flex: 1; min-width: 200px;" onchange="mettreAJourFiltreCoursTrimestreProductions()">
-                            <option value="">-- Choisir un trimestre --</option>
-                            ${trimestresDisponibles.map(t =>
-                                `<option value="${t.cle}">${t.nom} (${t.nombre} production${t.nombre > 1 ? 's' : ''})</option>`
-                            ).join('')}
-                        </select>
-                        <!-- 🆕 Beta 95.3 : Filtre par cours -->
-                        <select id="selectCoursImportProductions" class="controle-form" style="flex: 1; min-width: 150px; display: none;">
-                            <option value="">Tous les cours</option>
-                        </select>
-                        <button onclick="afficherProductionsTrimestreModal()" class="btn btn-secondaire btn-compact">
-                            Voir les productions
-                        </button>
-                        <button onclick="importerToutTrimestreModal()" class="btn btn-principal btn-compact">
-                            Tout importer
-                        </button>
-                    </div>
-                    <div id="previewProductionsTrimestre" style="margin-top: 10px; display: none;">
-                        <!-- Preview des productions du trimestre sélectionné -->
-                    </div>
+        sectionImportTrimestre = `
+            <div style="margin-top: 20px; padding: 15px; background: var(--gris-tres-pale); border-radius: 6px; border: 1px solid var(--bordure-claire);">
+                <h4 style="color: var(--bleu-principal); font-size: 1rem; margin: 0 0 10px 0;">Importer depuis un autre trimestre</h4>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <select id="selectTrimestreImport" class="controle-form" style="flex: 1; min-width: 200px;" onchange="mettreAJourFiltreCoursTrimestreProductions()">
+                        <option value="">-- Choisir un trimestre --</option>
+                        ${trimestresDisponibles.map(t => `<option value="${t.cle}">${t.nom} (${t.nombre} production${t.nombre > 1 ? 's' : ''})</option>`).join('')}
+                    </select>
+                    <select id="selectCoursImportProductions" class="controle-form" style="flex: 1; min-width: 150px; display: none;">
+                        <option value="">Tous les cours</option>
+                    </select>
+                    <button onclick="afficherProductionsTrimestreModal()" class="btn btn-secondaire btn-compact">Voir les productions</button>
+                    <button onclick="importerToutTrimestreModal()" class="btn btn-principal btn-compact">Tout importer</button>
                 </div>
-        `;
+                <div id="previewProductionsTrimestre" style="margin-top: 10px; display: none;"></div>
+            </div>`;
     }
 
-    // SECTION 2 : Productions disponibles
-    // Obtenir toutes les productions de la bibliothèque (asynchrone)
-    const toutesProductionsBibliotheque = await obtenirToutesLesProductionsBibliotheque();
-
-    // Combiner avec les productions retirées
-    const toutesProductionsDisponibles = [...toutesProductionsBibliotheque, ...productionsRetirees];
-
-    // Obtenir la liste des disciplines disponibles
+    // Section 2 : données
+    const toutesProductionsDisponibles = [...toutesProductionsBiblio, ...productionsRetirees];
     const disciplinesSet = new Set();
     toutesProductionsDisponibles.forEach(prod => {
         if (!productionsDansSelection.find(p => p.id === prod.id)) {
@@ -1692,101 +1567,60 @@ async function afficherBibliothequeProductions() {
     });
     const disciplinesDisponibles = Array.from(disciplinesSet).sort();
 
-    modalHTML += `
-                <h3 style="color: var(--bleu-clair); font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
-                    Productions disponibles à ajouter à la barre latérale
-                </h3>
+    const filtresHTML = `
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">Filtrer par discipline :</label>
+            <select id="filtreDisciplineProductions" onchange="filtrerProductionsParDiscipline()" class="controle-form" style="max-width: 300px;">
+                <option value="">Toutes les disciplines</option>
+                ${disciplinesDisponibles.map(d => `<option value="${d}">${d}</option>`).join('')}
+            </select>
+        </div>`;
 
-                <!-- Filtre par discipline -->
-                <div style="margin-bottom: 15px;">
-                    <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">
-                        Filtrer par discipline :
-                    </label>
-                    <select id="filtreDisciplineProductions" onchange="filtrerProductionsParDiscipline()" class="controle-form" style="max-width: 300px;">
-                        <option value="">Toutes les disciplines</option>
-                        ${disciplinesDisponibles.map(d => `<option value="${d}">${d}</option>`).join('')}
-                    </select>
-                </div>
-
-                <div id="listeProductionsDisponibles" style="margin-bottom: 20px;">
-    `;
-
-    // Grouper par discipline
+    // Section 2
+    let contenuSection2 = '';
     const parDiscipline = {};
     toutesProductionsDisponibles.forEach(prod => {
-        // Vérifier si déjà dans la sélection
-        if (productionsDansSelection.find(p => p.id === prod.id)) {
-            return;
-        }
-
+        if (productionsDansSelection.find(p => p.id === prod.id)) return;
         const discipline = prod.discipline || 'Autres';
-        if (!parDiscipline[discipline]) {
-            parDiscipline[discipline] = [];
-        }
+        if (!parDiscipline[discipline]) parDiscipline[discipline] = [];
         parDiscipline[discipline].push(prod);
     });
 
-    // Afficher par discipline
     Object.keys(parDiscipline).sort().forEach(discipline => {
-        modalHTML += `
-                    <h4 style="color: var(--gris-moyen); font-size: 0.95rem; margin-top: 15px; margin-bottom: 10px; border-bottom: 1px solid var(--bordure-claire); padding-bottom: 5px;">
-                        ${discipline}
-                    </h4>
-        `;
-
+        contenuSection2 += `<h4 style="color: var(--gris-moyen); font-size: 0.95rem; margin-top: 15px; margin-bottom: 10px; border-bottom: 1px solid var(--bordure-claire); padding-bottom: 5px;">${discipline}</h4>`;
         parDiscipline[discipline].forEach(prod => {
-            const typeLabel = getTypeLabel(prod.type);
-            const badgeSource = genererBadgeSourceProduction(prod, productionsUtilisateur);
-            const idCourt = genererIdCourtProduction(prod.id);
-
-            modalHTML += `
-                <div class="production-disponible-item" data-discipline="${prod.discipline || 'Autres'}" style="
-                    border: 1px solid var(--bordure-claire);
-                    border-radius: 6px;
-                    padding: 15px;
-                    margin-bottom: 10px;
-                    background: white;
-                ">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                        <div style="flex: 1;">
-                            <div style="font-weight: bold; color: var(--bleu-principal); margin-bottom: 4px;">
-                                ${prod.titre} ${prod.description ? '- ' + prod.description : ''}
-                                <span class="badge-source badge-source--id" style="margin-left: 6px; font-family: monospace;" title="ID: ${prod.id}">#${idCourt}</span>
-                                ${badgeSource}
-                            </div>
-                            <div style="color: var(--gris-clair); font-size: 0.9em; margin-bottom: 4px;">
-                                Type: ${typeLabel} • Pondération: ${prod.ponderation}%
-                                ${prod.auteur ? ` • Par ${prod.auteur}` : ''}
-                            </div>
-                            ${prod.objectif ? `<div style="color: var(--gris-clair); font-size: 0.85em;">Objectif: ${prod.objectif}</div>` : ''}
-                        </div>
-                        <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-end;">
-                            <button
-                                onclick="ajouterProductionIndividuelle('${prod.id}')"
-                                class="btn btn-confirmer btn-tres-compact"
-                                title="Ajouter cette production à votre sélection">
-                                Ajouter à ma sélection
-                            </button>
-                            <button
-                                onclick="supprimerProductionDeBibliothequePartagee('${prod.id}')"
-                                class="btn btn-supprimer btn-tres-compact"
-                                title="Supprimer définitivement de la bibliothèque">
-                                Supprimer
-                            </button>
-                        </div>
-                    </div>
-                </div>`;
+            contenuSection2 += BibliothequeUI.renderCarteDisponible({
+                nom: `${prod.titre}${prod.description ? ' - ' + prod.description : ''}`,
+                id: prod.id,
+                badgeSource: BibliothequeUI.genererBadgeSource(prod, productionsUtilisateur),
+                metadonnees: `Type: ${getTypeLabel(prod.type)} • Pondération: ${prod.ponderation}%${prod.auteur ? ' • Par ' + prod.auteur : ''}`,
+                description: prod.objectif ? 'Objectif: ' + prod.objectif : '',
+                dejaPresent: false,
+                classeItem: 'production-disponible-item',
+                dataAttrs: `data-discipline="${prod.discipline || 'Autres'}"`,
+                boutons: [
+                    { label: 'Ajouter à ma sélection', onclick: `ajouterProductionIndividuelle('${prod.id}')`, classe: 'btn-confirmer', title: 'Ajouter cette production à votre sélection' },
+                    { label: 'Supprimer', onclick: `supprimerProductionDeBibliothequePartagee('${prod.id}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true }
+                ]
+            });
         });
     });
 
-    modalHTML += `
-                </div>
-            </div>
-        </div>
-    `;
-
-    // Ajouter le modal au DOM
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    BibliothequeUI.creerModal({
+        modalId: 'modalBibliothequeProductions',
+        titre: 'Bibliothèque de productions',
+        sousTitre: 'Gérez les productions affichées dans la barre latérale.',
+        onFermer: 'fermerModalBibliothequeProductions',
+        doublonsHTML: BibliothequeUI.renderAvertissementDoublons(doublonsDetectes),
+        titreSection1: `Productions dans votre sélection (${productionsDansSelection.length})`,
+        contenuSection1: contenuSection1,
+        boutonsApresSection1: boutonsApresSection1,
+        sectionImportTrimestre: sectionImportTrimestre,
+        titreSection2: 'Productions disponibles à ajouter à la barre latérale',
+        filtresSection2: filtresHTML,
+        contenuIdListe2: 'listeProductionsDisponibles',
+        contenuSection2: contenuSection2
+    });
 }
 
 /**
@@ -2310,10 +2144,7 @@ function filtrerProductionsParDiscipline() {
  * Ferme le modal bibliothèque
  */
 function fermerModalBibliothequeProductions() {
-    const modal = document.getElementById('modalBibliothequeProductions');
-    if (modal) {
-        modal.remove();
-    }
+    BibliothequeUI.fermerModal('modalBibliothequeProductions');
 }
 
 /* ===============================
@@ -3018,6 +2849,9 @@ window.afficherProductionsTrimestreModal = afficherProductionsTrimestreModal;
 window.importerToutTrimestreModal = importerToutTrimestreModal;
 window.importerUneProductionTrimestre = importerUneProductionTrimestre;
 window.mettreAJourFiltreCoursTrimestreProductions = mettreAJourFiltreCoursTrimestreProductions; // 🆕 Beta 95.3
+window.supprimerProductionDefinitivement = supprimerProductionDefinitivement;
+window.supprimerProductionDeBibliothequePartagee = supprimerProductionDeBibliothequePartagee;
+window.dupliquerProductionBibliotheque = dupliquerProductionBibliotheque;
 
 // 🆕 Beta 95.4 : Assistant de migration des catégories
 window.verifierMigrationCategories = verifierMigrationCategories;
