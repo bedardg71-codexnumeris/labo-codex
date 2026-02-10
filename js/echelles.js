@@ -2522,6 +2522,9 @@ async function afficherBibliothequeEchelles() {
 
                     <!-- Boutons Import/Export après la Section 1 -->
                     <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+                        <button onclick="ajouterMesEchellesALaBibliotheque()" class="btn btn-principal">
+                            Ajouter mes échelles à la bibliothèque
+                        </button>
                         <button onclick="exporterEchelles()" class="btn btn-secondaire">
                             Exporter toutes mes échelles
                         </button>
@@ -2691,14 +2694,22 @@ async function afficherBibliothequeEchelles() {
                         ${description ? `<div style="font-size: 0.85rem; color: var(--gris-clair);">${description}</div>` : ''}
                         ${dejaPresent ? '<div style="font-size: 0.8rem; color: var(--bleu-clair); font-style: italic; margin-top: 4px;">Déjà dans la barre latérale</div>' : ''}
                     </div>
-                    ${!dejaPresent ? `
+                    <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-end;">
+                        ${!dejaPresent ? `
+                            <button
+                                onclick="ajouterEchelleIndividuelle('${echelle.id}')"
+                                class="btn btn-confirmer btn-tres-compact"
+                                title="Ajouter cette échelle à votre sélection">
+                                Ajouter à ma sélection
+                            </button>
+                        ` : ''}
                         <button
-                            onclick="ajouterEchelleIndividuelle('${echelle.id}')"
-                            class="btn btn-confirmer btn-tres-compact"
-                            title="Ajouter cette échelle à votre sélection">
-                            Ajouter à ma sélection
+                            onclick="supprimerEchelleDeBibliothequePartagee('${echelle.id}')"
+                            class="btn btn-supprimer btn-tres-compact"
+                            title="Supprimer définitivement de la bibliothèque">
+                            Supprimer
                         </button>
-                    ` : ''}
+                    </div>
                 </div>
             `;
         });
@@ -2818,9 +2829,14 @@ async function supprimerEchelleDefinitivement(id) {
         return;
     }
 
-    // Suppression définitive
+    // Suppression définitive du store local
     const nouvellesEchelles = echelles.filter(e => e.id !== id);
     await db.set('echellesTemplates', nouvellesEchelles);
+
+    // Suppression du store partagé
+    if (typeof retirerEchelleDeLaBibliotheque === 'function') {
+        await retirerEchelleDeLaBibliotheque(id);
+    }
 
     // Rafraîchir UI
     fermerModalBibliothequeEchelles();
@@ -2828,6 +2844,56 @@ async function supprimerEchelleDefinitivement(id) {
     await afficherBibliothequeEchelles();
 
     console.log(`Échelle "${echelle.nom}" supprimée définitivement`);
+}
+
+/**
+ * Supprimer une échelle de la bibliothèque partagée uniquement (Section 2)
+ * @param {string} id - ID de l'échelle à supprimer
+ */
+async function supprimerEchelleDeBibliothequePartagee(id) {
+    const biblio = typeof obtenirToutesLesEchellesBibliotheque === 'function'
+        ? await obtenirToutesLesEchellesBibliotheque()
+        : [];
+    const echelle = biblio.find(e => e.id === id);
+    if (!echelle) return;
+
+    if (!confirm(`Supprimer définitivement «${echelle.nom || 'Sans titre'}» de la bibliothèque partagée ?\n\nCette action est irréversible.`)) return;
+
+    await retirerEchelleDeLaBibliotheque(id);
+
+    fermerModalBibliothequeEchelles();
+    await afficherBibliothequeEchelles();
+}
+
+/**
+ * Ajouter toutes les échelles locales à la bibliothèque partagée
+ */
+async function ajouterMesEchellesALaBibliotheque() {
+    try {
+        const echelles = await db.get('echellesTemplates') || [];
+
+        if (echelles.length === 0) {
+            alert('Aucune échelle à ajouter.\n\nCréez d\'abord des échelles.');
+            return;
+        }
+
+        if (!confirm(`Voulez-vous ajouter vos ${echelles.length} échelle(s) à la bibliothèque partagée ?\n\nElles seront disponibles dans tous vos trimestres et pourront être partagées avec des collègues.`)) return;
+
+        const resultat = await importerEchellesDansBibliotheque(echelles);
+
+        fermerModalBibliothequeEchelles();
+        await afficherBibliothequeEchelles();
+
+        if (resultat.ajoutees > 0) {
+            alert(`${resultat.ajoutees} échelle(s) ajoutée(s) à la bibliothèque !` +
+                (resultat.existantes > 0 ? `\n${resultat.existantes} étai(en)t déjà présente(s).` : ''));
+        } else {
+            alert('Toutes vos échelles étaient déjà dans la bibliothèque.');
+        }
+    } catch (error) {
+        console.error('Erreur lors de l\'ajout à la bibliothèque:', error);
+        alert('Erreur lors de l\'ajout des échelles à la bibliothèque.');
+    }
 }
 
 /**

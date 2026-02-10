@@ -639,24 +639,23 @@
 
 ### Planification pedagogique
 
-- [ ] **#34** Module Planification — Phase 2 : Enseignement explicite
+- [x] **#34** Module Planification — Phase 2 : Enseignement explicite ✅ LIVRÉ (10 fév 2026)
   - **Phase 1 LIVRÉE** (7 fév 2026) : Carte mentale intégrée dans l'app (voir #123)
-  - **Phase 2** : Enrichir la carte mentale avec le modèle de l'enseignement explicite
-  - **Public cible** : Enseignants novices qui découvrent l'enseignement explicite
-  - **Concepteur** : Grégoire (5-6 ans de pratique, formation TELUQ en enseignement efficace)
-  - **Les 5 phases d'une leçon** :
-    1. Ouverture (objectif, prérequis)
-    2. Modelage ("je fais" - enseignant verbalise sa pensée)
-    3. Pratique guidée ("nous faisons" - avec aide)
-    4. Pratique autonome ("vous faites" - sans aide)
-    5. Clôture (synthèse, annonce suite)
-  - **Fonctionnalités envisagées** :
-    - Wizard/Primo pour guider la planification des leçons
-    - Templates de leçons selon les 5 phases
-    - Lien entre nœuds de la carte et productions/évaluations existantes
-  - **Fichier de specs** : `docs/enseignement explicite/SPEC-MODULE-PLANIFICATION.md`
-  - **Référence PDF** : `docs/enseignement explicite/livret-enseignement_explicite_2024-01-03.pdf` (Académie de Paris)
-  - **Prérequis** : Documentation complète de la logique pédagogique avant codage
+  - **Phase 2 LIVRÉE** (10 fév 2026) : Organisateur — sous-onglet indépendant de Planification
+    - Objectif auto-dérivé (éditable), prérequis, productions associées
+    - Enseignement explicite 5 étapes avec drag-drop des activités
+    - Exports élève/enseignant en TXT et MD
+    - Vue calendrier intégrée
+  - **Fichiers créés** : `js/organisateur.js` (1354 lignes), HTML + CSS
+  - **Fichiers modifiés** : `config.js`, `navigation.js`, `planification-carte.js`, `planification.js`, `index.html`, `styles.css`
+
+- [ ] **#140** Organisateur — Refonte layout deux colonnes
+  - **Problème** : Layout vertical actuel nécessite trop de scroll
+  - **Solution** : Colonne gauche (vue d'ensemble leçon) + panneau droit (détail contextuel)
+  - **Panneau droit** : 3 modes — Détail activité, Enseignement explicite, Vue calendrier
+  - **Responsive** : Empilage vertical sous 900px
+  - **Plan complet** : `docs/PLAN-ORGANISATEUR-LAYOUT.md`
+  - **Prérequis** : Résoudre les bugs en cours d'abord
 
 ### Mode simplifie
 
@@ -769,6 +768,100 @@
   - Duplication avec nouvel ID et suffixe "(copie)"
   - Métadonnées CC nettoyées sur la copie
   - **Fichiers modifiés** : `js/grilles.js`, `js/cartouches.js`, `js/echelles.js`, `js/pratiques-materiel.js`, `js/productions.js`
+
+#### Refonte des modales de bibliotheque (Audit 10 fev 2026)
+
+> **Contexte** : Les 4 modales de bibliotheque (grilles, echelles, productions, cartouches) ont diverge
+> independamment. Chacune est une fonction de 200-300 lignes qui concatene du HTML en string.
+> Il en resulte des bugs fonctionnels, des inconsistances visuelles majeures, et une maintenance couteuse
+> (tout changement doit etre replique 4 fois x 2 sections).
+> Voir l'analyse complete dans le transcript Claude Code du 10 fevrier 2026.
+
+**Niveau 1 — Corrections fonctionnelles urgentes**
+
+- [ ] **#144** BUG : "Ajouter a ma selection" ne fonctionne pas (grilles et echelles)
+  - **Symptome** : Le bouton existe dans le code mais ne produit aucun effet visible
+  - **Cause probable** : `ajouterGrilleIndividuelle()` / `ajouterEchelleIndividuelle()` echouent silencieusement (pas de try/catch visible dans l'UI, ou la modale se ferme sans que l'ajout soit effectif)
+  - **Contraste** : Productions fonctionne (`ajouterProductionIndividuelle()` genere un nouvel ID a l'import, les autres gardent l'ID original)
+  - **Action** : Debugger en console, ajouter gestion d'erreur visible, verifier le flux ID original vs nouvel ID
+  - **Fichiers** : `js/grilles.js`, `js/echelles.js`
+
+- [ ] **#145** BUG : Bouton "Ajouter a ma selection" invisible dans cartouches
+  - **Symptome** : Aucun bouton "Ajouter" visible dans Section 2 de la bibliotheque cartouches
+  - **Cause** : Le bouton est conditionnel (`${!dejaPresent ? ... : ''}`) — si toutes les cartouches de la bibliotheque partagee sont deja presentes localement, le bouton est masque pour chaque element
+  - **Action** : Revoir la logique `dejaPresent` pour les cartouches, ou toujours afficher le bouton avec un etat desactive
+  - **Fichier** : `js/cartouches.js`
+
+- [ ] **#146** BUG : Titre mensonger "Cartouches dans la barre laterale" dans la modale
+  - **Symptome** : La sidebar montre 1 cartouche (grille active), la modale en montre 6 (toutes grilles)
+  - **Cause** : La sidebar filtre par `cartouches_${grilleId}` (grille courante), la modale boucle sur TOUTES les `grillesTemplates`
+  - **Action** : Soit changer le titre ("Toutes mes cartouches"), soit grouper par grille dans la modale, soit filtrer par grille active
+  - **Fichier** : `js/cartouches.js`
+
+- [ ] **#147** CSS manquant : boutons X des modales (grilles, echelles, productions)
+  - **Symptome** : Le X de fermeture est un bouton HTML brut sans aucun style
+  - **Cause** : Classes `modal-js-btn-fermer` et `modal-js-fermer` n'ont aucune regle CSS dans `styles.css` — seul le X des cartouches (100% inline) fonctionne visuellement
+  - **Action** : Ajouter les regles CSS pour `.modal-js-btn-fermer` (position, taille, couleur, hover)
+  - **Fichier** : `styles.css`
+
+- [ ] **#148** Supprimer ne supprime pas de la bibliotheque partagee
+  - **Symptome** : Le bouton "Supprimer" dans Section 1 retire du store local mais PAS du store partage — l'element reapparait dans "Disponibles a ajouter"
+  - **Etat** : Partiellement corrige le 10 fev 2026 (appels a `retirerXDeLaBibliotheque` ajoutes dans les 4 `supprimerXDefinitivement`). A valider en test.
+  - **Fichiers** : `js/grilles.js`, `js/echelles.js`, `js/productions.js`, `js/cartouches.js`
+
+**Niveau 2 — Uniformisation visuelle**
+
+- [ ] **#149** Unifier le bouton X de fermeture des 4 modales
+  - **Etat actuel** : 3 implementations differentes (classe `modal-js-btn-fermer`, classe `modal-js-fermer`, inline 20 lignes)
+  - **Action** : Choisir un seul nom de classe, ecrire le CSS (sticky top-right, transparent, hover gris fonce), migrer les 4 modales
+  - **Fichiers** : `styles.css`, `js/grilles.js`, `js/echelles.js`, `js/productions.js`, `js/cartouches.js`
+
+- [ ] **#150** Migrer la modale cartouches vers les classes CSS communes
+  - **Etat actuel** : Cartouches utilise 100% inline styles pour le conteneur modal (overlay, contenu, X). Les 3 autres utilisent `modal-js-overlay` / `modal-js-contenu`
+  - **Differences** : `max-height: 80vh` (cartouches) vs `90vh` (autres), `border-radius: 8px` vs `var(--radius-grand)`, `box-shadow` inline vs `var(--shadow-fort)`
+  - **Action** : Remplacer les inline styles par les classes CSS existantes
+  - **Fichier** : `js/cartouches.js`
+
+- [ ] **#151** Unifier couleurs et styles des titres H2 et conteneurs de titre
+  - **Etat actuel** : H2 en `var(--gris-fonce)` (grilles, echelles) vs `var(--bleu-principal)` (productions, cartouches). Conteneur titre en classe utilitaire (`u-flex-gap-10`) vs inline flex
+  - **Action** : Choisir une couleur et un pattern uniques pour les 4 modales
+  - **Fichiers** : `js/grilles.js`, `js/echelles.js`, `js/productions.js`, `js/cartouches.js`
+
+- [ ] **#152** Unifier les ID badges (inline vs classe CSS)
+  - **Etat actuel** : Grilles et echelles utilisent des styles inline pour le badge `#idCourt`. Productions et cartouches utilisent la classe `.badge-source--id`
+  - **Action** : Migrer grilles et echelles vers `.badge-source--id`
+  - **Fichiers** : `js/grilles.js`, `js/echelles.js`
+
+- [ ] **#153** Separer visuellement badges et boutons
+  - **Symptome** : Badge "Locale" (vert plein) et bouton "Dupliquer" (vert fonce) ont taille et forme similaires — confusion badges informatifs vs boutons interactifs
+  - **Action** : Passer les badges source a un style outline/pastel (bordure coloree, fond transparent/pale) pour les differencier des boutons solid. Reduire leur taille par rapport aux boutons
+  - **Fichier** : `styles.css`
+
+- [ ] **#154** Reduire la densite visuelle de Section 1 (boutons d'action)
+  - **Symptome** : Chaque carte affiche 2-3 badges + 4 boutons sur la meme ligne. 7 elements colores alignes horizontalement = surchargé
+  - **Pistes** : (a) Placer les boutons sur une 2e ligne sous la carte. (b) Grouper les actions secondaires dans un menu "..." (Exporter, Retirer). (c) Icones seules sans texte pour certains boutons
+  - **Fichiers** : `js/grilles.js`, `js/echelles.js`, `js/productions.js`, `js/cartouches.js`
+
+- [ ] **#155** Supprimer les styles inline redondants sur les badges source
+  - **Etat actuel** : Les fonctions `genererBadgeSourceX()` ajoutent `style="margin-left: 6px;"` alors que la classe `.badge-source` a deja `margin-left: 6px` en CSS
+  - **Action** : Retirer les `style="margin-left: 6px;"` des 4 fonctions `genererBadgeSource`
+  - **Fichiers** : `js/grilles.js`, `js/echelles.js`, `js/productions.js`, `js/cartouches.js`
+
+**Niveau 3 — Refactoring architectural (post-stabilisation)**
+
+- [ ] **#156** Extraire un composant `ModalBibliotheque` reutilisable
+  - **Etat actuel** : 4 fonctions independantes de 200-300 lignes chacune generent le HTML par concatenation de strings. Aucune factorisation — le conteneur modal, le X, le titre, la structure Section 1/Section 2 sont dupliques
+  - **Action** : Creer un module `bibliotheque-ui.js` avec des fonctions generiques : `creerModalBibliotheque({titre, sousTitre, sections})`, `creerCarteItem({nom, badges, boutons, metadata})`, `creerSectionDisponibles({items, filtres})`
+  - **Impact** : Tout changement de design se fait en 1 seul endroit au lieu de 4 x 2
+  - **Risque** : Moyen — necessite de bien parametriser les variations (filtres, boutons specifiques a chaque module)
+  - **Fichier a creer** : `js/bibliotheque-ui.js`
+  - **Fichiers a modifier** : `js/grilles.js`, `js/echelles.js`, `js/productions.js`, `js/cartouches.js`
+
+- [ ] **#157** Separer logique metier et rendu HTML dans les modales
+  - **Etat actuel** : Les fonctions `afficherBibliothequeX()` contiennent la logique de filtrage, la detection de doublons, le tri par discipline ET la generation HTML — tout dans un seul bloc
+  - **Action** : Extraire la preparation des donnees (filtrage, doublons, tri) dans des fonctions separees. Le rendu ne fait que consommer des donnees pre-formatees
+  - **Benefice** : Testabilite, lisibilite, reutilisation
+  - **Fichiers** : `js/grilles.js`, `js/echelles.js`, `js/productions.js`, `js/cartouches.js`
 
 ### Configuration
 

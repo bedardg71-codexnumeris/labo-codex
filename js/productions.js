@@ -1760,12 +1760,20 @@ async function afficherBibliothequeProductions() {
                             </div>
                             ${prod.objectif ? `<div style="color: var(--gris-clair); font-size: 0.85em;">Objectif: ${prod.objectif}</div>` : ''}
                         </div>
-                        <button
-                            onclick="ajouterProductionIndividuelle('${prod.id}')"
-                            class="btn btn-confirmer btn-tres-compact"
-                            title="Ajouter cette production à votre sélection">
-                            Ajouter à ma sélection
-                        </button>
+                        <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-end;">
+                            <button
+                                onclick="ajouterProductionIndividuelle('${prod.id}')"
+                                class="btn btn-confirmer btn-tres-compact"
+                                title="Ajouter cette production à votre sélection">
+                                Ajouter à ma sélection
+                            </button>
+                            <button
+                                onclick="supprimerProductionDeBibliothequePartagee('${prod.id}')"
+                                class="btn btn-supprimer btn-tres-compact"
+                                title="Supprimer définitivement de la bibliothèque">
+                                Supprimer
+                            </button>
+                        </div>
                     </div>
                 </div>`;
         });
@@ -2135,9 +2143,14 @@ async function supprimerProductionDefinitivement(id) {
         return;
     }
 
-    // Suppression définitive
+    // Suppression définitive du store local
     const nouvellesProductions = productions.filter(p => p.id !== id);
     await db.set(getCleProductions(), nouvellesProductions);
+
+    // Suppression du store partagé
+    if (typeof retirerDeLaBibliotheque === 'function') {
+        await retirerDeLaBibliotheque(id);
+    }
 
     // Rafraîchir UI
     fermerModalBibliothequeProductions();
@@ -2145,6 +2158,25 @@ async function supprimerProductionDefinitivement(id) {
     await afficherListeProductions();
 
     console.log(`Production "${production.titre}" supprimée définitivement`);
+}
+
+/**
+ * Supprimer une production de la bibliothèque partagée uniquement (Section 2)
+ * @param {string} id - ID de la production à supprimer
+ */
+async function supprimerProductionDeBibliothequePartagee(id) {
+    const biblio = typeof obtenirToutesLesProductionsBibliotheque === 'function'
+        ? await obtenirToutesLesProductionsBibliotheque()
+        : [];
+    const prod = biblio.find(p => p.id === id);
+    if (!prod) return;
+
+    if (!confirm(`Supprimer définitivement «${prod.titre || 'Sans titre'}» de la bibliothèque partagée ?\n\nCette action est irréversible.`)) return;
+
+    await retirerDeLaBibliotheque(id);
+
+    fermerModalBibliothequeProductions();
+    await afficherBibliothequeProductions();
 }
 
 /**

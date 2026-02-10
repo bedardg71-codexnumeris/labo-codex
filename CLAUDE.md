@@ -112,4 +112,4 @@ Points blancs dans les barres graduees de l'apercu :
 
 ---
 
-**Derniere mise a jour** : 8 février 2026
+**Derniere mise a jour** : 10 février 2026

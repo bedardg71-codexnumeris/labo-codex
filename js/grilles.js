@@ -2304,7 +2304,10 @@ async function afficherBibliothequeGrilles() {
                     </div>
 
                     <!-- Boutons Import/Export après la Section 1 -->
-                    <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px;">
+                    <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+                        <button onclick="ajouterMesGrillesALaBibliotheque()" class="btn btn-principal">
+                            Ajouter mes grilles à la bibliothèque
+                        </button>
                         <button onclick="exporterGrilles()" class="btn btn-secondaire">
                             Exporter toutes mes grilles
                         </button>
@@ -2396,14 +2399,22 @@ async function afficherBibliothequeGrilles() {
                         ${description ? `<div style="font-size: 0.85rem; color: var(--gris-clair);">${description}</div>` : ''}
                         ${dejaPresent ? '<div style="font-size: 0.8rem; color: var(--bleu-clair); font-style: italic; margin-top: 4px;">Déjà dans la barre latérale</div>' : ''}
                     </div>
-                    ${!dejaPresent ? `
+                    <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-end;">
+                        ${!dejaPresent ? `
+                            <button
+                                onclick="ajouterGrilleIndividuelle('${grille.id}')"
+                                class="btn btn-confirmer btn-tres-compact"
+                                title="Ajouter cette grille à votre sélection">
+                                Ajouter à ma sélection
+                            </button>
+                        ` : ''}
                         <button
-                            onclick="ajouterGrilleIndividuelle('${grille.id}')"
-                            class="btn btn-confirmer btn-tres-compact"
-                            title="Ajouter cette grille à votre sélection">
-                            Ajouter à ma sélection
+                            onclick="supprimerGrilleDeBibliothequePartagee('${grille.id}')"
+                            class="btn btn-supprimer btn-tres-compact"
+                            title="Supprimer définitivement de la bibliothèque">
+                            Supprimer
                         </button>
-                    ` : ''}
+                    </div>
                 </div>
             `;
         });
@@ -2549,9 +2560,14 @@ async function supprimerGrilleDefinitivement(id) {
         return;
     }
 
-    // Suppression définitive
+    // Suppression définitive du store local
     const nouvellesGrilles = grilles.filter(g => g.id !== id);
     await db.set('grillesTemplates', nouvellesGrilles);
+
+    // Suppression du store partagé
+    if (typeof retirerGrilleDeLaBibliotheque === 'function') {
+        await retirerGrilleDeLaBibliotheque(id);
+    }
 
     // Rafraîchir UI
     fermerModalBibliothequeGrilles();
@@ -2559,6 +2575,56 @@ async function supprimerGrilleDefinitivement(id) {
     await afficherBibliothequeGrilles();
 
     console.log(`Grille "${grille.nom}" supprimée définitivement`);
+}
+
+/**
+ * Supprimer une grille de la bibliothèque partagée uniquement (Section 2)
+ * @param {string} id - ID de la grille à supprimer
+ */
+async function supprimerGrilleDeBibliothequePartagee(id) {
+    const biblio = typeof obtenirToutesLesGrillesBibliotheque === 'function'
+        ? await obtenirToutesLesGrillesBibliotheque()
+        : [];
+    const grille = biblio.find(g => g.id === id);
+    if (!grille) return;
+
+    if (!confirm(`Supprimer définitivement «${grille.nom || 'Sans titre'}» de la bibliothèque partagée ?\n\nCette action est irréversible.`)) return;
+
+    await retirerGrilleDeLaBibliotheque(id);
+
+    fermerModalBibliothequeGrilles();
+    await afficherBibliothequeGrilles();
+}
+
+/**
+ * Ajouter toutes les grilles locales à la bibliothèque partagée
+ */
+async function ajouterMesGrillesALaBibliotheque() {
+    try {
+        const grilles = await db.get('grillesTemplates') || [];
+
+        if (grilles.length === 0) {
+            alert('Aucune grille à ajouter.\n\nCréez d\'abord des grilles.');
+            return;
+        }
+
+        if (!confirm(`Voulez-vous ajouter vos ${grilles.length} grille(s) à la bibliothèque partagée ?\n\nElles seront disponibles dans tous vos trimestres et pourront être partagées avec des collègues.`)) return;
+
+        const resultat = await importerGrillesDansBibliotheque(grilles);
+
+        fermerModalBibliothequeGrilles();
+        await afficherBibliothequeGrilles();
+
+        if (resultat.ajoutees > 0) {
+            alert(`${resultat.ajoutees} grille(s) ajoutée(s) à la bibliothèque !` +
+                (resultat.existantes > 0 ? `\n${resultat.existantes} étai(en)t déjà présente(s).` : ''));
+        } else {
+            alert('Toutes vos grilles étaient déjà dans la bibliothèque.');
+        }
+    } catch (error) {
+        console.error('Erreur lors de l\'ajout à la bibliothèque:', error);
+        alert('Erreur lors de l\'ajout des grilles à la bibliothèque.');
+    }
 }
 
 /**

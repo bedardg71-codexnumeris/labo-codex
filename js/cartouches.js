@@ -3501,14 +3501,22 @@ async function afficherBibliothequeCartouches() {
                         ${description ? `<div style="font-size: 0.85rem; color: var(--gris-clair);">${description}</div>` : ''}
                         ${dejaPresent ? '<div style="font-size: 0.8rem; color: var(--bleu-clair); font-style: italic; margin-top: 4px;">Déjà dans la barre latérale</div>' : ''}
                     </div>
-                    ${!dejaPresent ? `
+                    <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-end;">
+                        ${!dejaPresent ? `
+                            <button
+                                onclick="ajouterCartoucheIndividuelle('${cartouche.id}', '${cartouche.grilleId}')"
+                                class="btn btn-confirmer btn-tres-compact"
+                                title="Ajouter cette cartouche à votre sélection">
+                                Ajouter à ma sélection
+                            </button>
+                        ` : ''}
                         <button
-                            onclick="ajouterCartoucheIndividuelle('${cartouche.id}', '${cartouche.grilleId}')"
-                            class="btn btn-confirmer btn-tres-compact"
-                            title="Ajouter cette cartouche à votre sélection">
-                            Ajouter à ma sélection
+                            onclick="supprimerCartoucheDeBibliothequePartagee('${cartouche.id}')"
+                            class="btn btn-supprimer btn-tres-compact"
+                            title="Supprimer définitivement de la bibliothèque">
+                            Supprimer
                         </button>
-                    ` : ''}
+                    </div>
                 </div>
             `;
         });
@@ -3624,9 +3632,14 @@ async function supprimerCartoucheDefinitivement(id, grilleId) {
         return;
     }
 
-    // Suppression définitive
+    // Suppression définitive du store local
     const nouveauxCartouches = cartouches.filter(c => c.id !== id);
     await db.set(`cartouches_${grilleId}`, nouveauxCartouches);
+
+    // Suppression du store partagé
+    if (typeof retirerCartoucheDeLaBibliotheque === 'function') {
+        await retirerCartoucheDeLaBibliotheque(id);
+    }
 
     // Rafraîchir UI
     fermerModalBibliothequeCartouches();
@@ -3634,6 +3647,25 @@ async function supprimerCartoucheDefinitivement(id, grilleId) {
     await afficherBibliothequeCartouches();
 
     console.log(`Cartouche "${cartouche.nom}" supprimée définitivement`);
+}
+
+/**
+ * Supprimer une cartouche de la bibliothèque partagée uniquement (Section 2)
+ * @param {string} id - ID de la cartouche à supprimer
+ */
+async function supprimerCartoucheDeBibliothequePartagee(id) {
+    const biblio = typeof obtenirToutesLesCartouchesBibliotheque === 'function'
+        ? await obtenirToutesLesCartouchesBibliotheque()
+        : [];
+    const cartouche = biblio.find(c => c.id === id);
+    if (!cartouche) return;
+
+    if (!confirm(`Supprimer définitivement «${cartouche.nom || 'Sans titre'}» de la bibliothèque partagée ?\n\nCette action est irréversible.`)) return;
+
+    await retirerCartoucheDeLaBibliotheque(id);
+
+    fermerModalBibliothequeCartouches();
+    await afficherBibliothequeCartouches();
 }
 
 /**
