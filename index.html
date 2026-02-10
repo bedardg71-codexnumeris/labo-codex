@@ -4789,7 +4789,7 @@
                             </div>
 
                             <!-- Formulaire d'édition -->
-                            <div id="formulaireProduction" style="display: none;">
+                            <div id="formulaireProduction" class="u-hide">
 
                                 <!-- ═══════════════════════════════════════════════════════════
                                      SECTION 1 : EN-TÊTE
@@ -4937,10 +4937,10 @@
                                 <div class="btn-groupe u-flex-between">
                                     <!-- Boutons gauche (actions sur la production) -->
                                     <div class="u-flex-gap-10">
-                                        <button id="btnDupliquerProduction" class="btn btn-secondaire" onclick="dupliquerProductionActive()" style="display: none;" title="Créer une copie de cette production">
+                                        <button id="btnDupliquerProduction" class="btn btn-secondaire u-hide" onclick="dupliquerProductionActive()" title="Créer une copie de cette production">
                                             Dupliquer
                                         </button>
-                                        <button id="btnSupprimerProduction" class="btn btn-supprimer" onclick="supprimerProductionActive()" style="display: none;" title="Supprimer cette production">
+                                        <button id="btnSupprimerProduction" class="btn btn-supprimer u-hide" onclick="supprimerProductionActive()" title="Supprimer cette production">
                                             Supprimer
                                         </button>
                                     </div>
@@ -5123,7 +5123,7 @@
                             </div>
 
                             <!-- Formulaire d'édition de grille -->
-                            <div id="conteneurEditionGrille" style="display: none;">
+                            <div id="conteneurEditionGrille" class="u-hide">
 
                                 <!-- Nom + Pratiques compatibles sur même ligne -->
                                 <div style="display: flex; gap: 20px; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap;">
@@ -5153,13 +5153,13 @@
                                 <div class="btn-groupe u-flex-between">
                                     <!-- Boutons gauche (actions sur la grille) -->
                                     <div class="u-flex-gap-10">
-                                        <button id="btnDupliquerGrille" class="btn btn-secondaire" onclick="dupliquerGrilleActive()" style="display: none;" title="Créer une copie de cette grille">
+                                        <button id="btnDupliquerGrille" class="btn btn-secondaire u-hide" onclick="dupliquerGrilleActive()" title="Créer une copie de cette grille">
                                             Dupliquer
                                         </button>
                                     </div>
                                     <!-- Boutons droite (actions principales) -->
                                     <div class="u-flex-gap-10">
-                                        <button id="btnSupprimerGrille" class="btn btn-supprimer" onclick="supprimerGrilleActive()" style="display: none;" title="Supprimer cette grille">
+                                        <button id="btnSupprimerGrille" class="btn btn-supprimer u-hide" onclick="supprimerGrilleActive()" title="Supprimer cette grille">
                                             Supprimer
                                         </button>
                                         <button class="btn btn-annuler" onclick="annulerFormGrille()">Annuler</button>
@@ -5250,7 +5250,7 @@
                             </div>
 
                             <!-- Formulaire d'édition -->
-                            <div id="conteneurEditionEchelle" style="display: none;">
+                            <div id="conteneurEditionEchelle" class="u-hide">
 
                                 <!-- Nom + Pratiques compatibles sur même ligne -->
                                 <div style="display: flex; gap: 20px; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap;">
@@ -5280,13 +5280,13 @@
                                 <div class="btn-groupe u-flex-between">
                                     <!-- Boutons gauche (actions sur l'échelle) -->
                                     <div class="u-flex-gap-10">
-                                        <button id="btnDupliquerEchelle" class="btn btn-secondaire" onclick="dupliquerEchelleActive()" style="display: none;" title="Créer une copie de cette échelle">
+                                        <button id="btnDupliquerEchelle" class="btn btn-secondaire u-hide" onclick="dupliquerEchelleActive()" title="Créer une copie de cette échelle">
                                             Dupliquer
                                         </button>
                                     </div>
                                     <!-- Boutons droite (actions principales) -->
                                     <div class="u-flex-gap-10">
-                                        <button id="btnSupprimerEchelle" class="btn btn-supprimer" onclick="supprimerEchelleActive()" style="display: none;" title="Supprimer cette échelle">
+                                        <button id="btnSupprimerEchelle" class="btn btn-supprimer u-hide" onclick="supprimerEchelleActive()" title="Supprimer cette échelle">
                                             Supprimer
                                         </button>
                                         <button class="btn btn-annuler" onclick="annulerFormEchelle()">Annuler</button>
@@ -5530,7 +5530,7 @@
                             </div>
 
                             <!-- Conteneur pour le formulaire d'édition -->
-                            <div id="conteneurEditionPratique" style="display: none;">
+                            <div id="conteneurEditionPratique" class="u-hide">
 
                                 <!-- En-tête avec nom et actions -->
                                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
@@ -6331,7 +6331,7 @@
                                 </div>
 
                                 <!-- Informations de la cartouche -->
-                                <div id="infoCartouche" class="hidden-mb-20">
+                                <div id="infoCartouche" class="u-hide">
 
                                     <!-- Message de verrouillage -->
                                     <div id="alerteVerrouillage" class="hidden-my15-warning">
@@ -6388,7 +6388,7 @@
                                 </div>
 
                                 <!-- MATRICE DE RÉTROACTION -->
-                                <div id="matriceRetroaction" style="display: none;">
+                                <div id="matriceRetroaction" class="u-hide">
                             <h4 class="titre-bleu-mb-15">
                                 Matrice des commentaires de rétroaction
                             </h4>
@@ -6421,10 +6421,10 @@
                                     <!-- Boutons gauche (actions sur la cartouche) -->
                                     <!-- Note: Export/Import se font maintenant via la bibliothèque -->
                                     <div class="u-flex-gap-10">
-                                        <button id="btnDupliquerCartouche" class="btn btn-secondaire" onclick="dupliquerCartoucheActive()" style="display: none;" title="Créer une copie de cette cartouche">
+                                        <button id="btnDupliquerCartouche" class="btn btn-secondaire u-hide" onclick="dupliquerCartoucheActive()" title="Créer une copie de cette cartouche">
                                             Dupliquer
                                         </button>
-                                        <button id="btnSupprimerCartouche" class="btn btn-supprimer" onclick="supprimerCartoucheActive()" style="display: none;" title="Supprimer cette cartouche">
+                                        <button id="btnSupprimerCartouche" class="btn btn-supprimer u-hide" onclick="supprimerCartoucheActive()" title="Supprimer cette cartouche">
                                             Supprimer
                                         </button>
                                     </div>
@@ -6776,6 +6776,168 @@
 
                     </div><!-- fin planif-wrapper -->
                 </div><!-- fin sous-section planification-carte -->
+
+                <!-- Sous-section: Organisateur -->
+                <div id="planification-organisateur" class="sous-section">
+                    <div class="org-conteneur">
+                        <div class="org-entete">
+                            <h2>Organisateur</h2>
+                            <div class="org-actions">
+                                <button id="org-btn-export" class="btn-secondaire">Exporter</button>
+                            </div>
+                        </div>
+                        <div class="org-corps">
+                            <!-- Sélecteurs -->
+                            <div class="org-selecteurs">
+                                <select id="org-select-sequence"><option value="">— Séquence —</option></select>
+                                <select id="org-select-lecon"><option value="">— Leçon —</option></select>
+                            </div>
+                            <!-- En-tête automatique (date, heure, local) -->
+                            <div id="org-entete-calendrier" class="org-section" style="display:none">
+                                <div class="org-section-titre">En-tête de la leçon</div>
+                                <div class="org-section-contenu" id="org-entete-calendrier-contenu"></div>
+                            </div>
+                            <!-- Contenu leçon (généré dynamiquement) -->
+                            <div id="org-contenu-lecon" style="display:none">
+                                <!-- Objectif de la leçon -->
+                                <div class="org-section" id="org-objectif">
+                                    <div class="org-section-titre">
+                                        Objectif de la leçon
+                                        <button class="org-btn-reinit" id="org-btn-reinit-objectif" title="Réinitialiser l'objectif dérivé" style="display:none">↺ Réinitialiser</button>
+                                    </div>
+                                    <div class="org-section-contenu org-objectif-contenu" id="org-objectif-contenu" contenteditable="false">
+                                        Sélectionner une leçon pour voir son objectif dérivé.
+                                    </div>
+                                </div>
+                                <!-- Prérequis -->
+                                <div class="org-section" id="org-prerequis">
+                                    <div class="org-section-titre">Connaissances préalables à vérifier</div>
+                                    <div class="org-section-contenu" id="org-prerequis-contenu">
+                                        <span class="org-placeholder">Les prérequis seront dérivés des liens de la carte.</span>
+                                    </div>
+                                </div>
+                                <!-- Productions associées -->
+                                <div class="org-section" id="org-productions">
+                                    <div class="org-section-titre">Productions associées</div>
+                                    <div class="org-section-contenu" id="org-productions-contenu">
+                                        <span class="org-placeholder">Les productions seront dérivées de Construction de la note.</span>
+                                    </div>
+                                </div>
+                                <!-- Enseignement explicite -->
+                                <div class="org-section org-ee-section" id="org-ee">
+                                    <div class="org-ee-bar">
+                                        <label class="org-checkbox-label">
+                                            <input type="checkbox" id="org-ee-checkbox">
+                                            Enseignement explicite (5 étapes)
+                                        </label>
+                                    </div>
+                                    <!-- Cœur brut (visible quand EE décoché) -->
+                                    <div id="org-coeur-brut">
+                                        <div class="org-section-titre">Cœur de la leçon</div>
+                                        <div class="org-section-contenu" id="org-coeur-contenu"></div>
+                                    </div>
+                                    <!-- 5 étapes EE (visible quand EE coché) -->
+                                    <div id="org-ee-etapes" style="display:none">
+                                        <div class="org-ee-non-assignees" id="org-ee-non-assignees">
+                                            <div class="org-section-titre">Activités non assignées</div>
+                                            <div class="org-ee-liste" id="org-ee-liste-non-assignees"></div>
+                                        </div>
+                                        <div class="org-ee-etape" data-etape="ouverture">
+                                            <div class="org-ee-etape-entete">
+                                                <label class="org-checkbox-label"><input type="checkbox" class="org-ee-etape-check" data-etape="ouverture" checked> 1. Ouverture</label>
+                                                <span class="org-ee-etape-desc">Captation de l'attention, justification de l'objectif, vérification des préalables</span>
+                                            </div>
+                                            <div class="org-ee-etape-corps">
+                                                <textarea class="org-ee-notes" data-etape="ouverture" placeholder="Notes de l'enseignant…"></textarea>
+                                                <div class="org-ee-zone-depot" data-etape="ouverture"><span class="org-placeholder">Glisser des activités ici</span></div>
+                                            </div>
+                                        </div>
+                                        <div class="org-ee-etape" data-etape="modelisation">
+                                            <div class="org-ee-etape-entete">
+                                                <label class="org-checkbox-label"><input type="checkbox" class="org-ee-etape-check" data-etape="modelisation" checked> 2. Modélisation</label>
+                                                <span class="org-ee-etape-desc">Démonstration, exemples et contre-exemples, aide-mémoire</span>
+                                            </div>
+                                            <div class="org-ee-etape-corps">
+                                                <textarea class="org-ee-notes" data-etape="modelisation" placeholder="Notes de l'enseignant…"></textarea>
+                                                <div class="org-ee-zone-depot" data-etape="modelisation"><span class="org-placeholder">Glisser des activités ici</span></div>
+                                            </div>
+                                        </div>
+                                        <div class="org-ee-etape" data-etape="pratiqueGuidee">
+                                            <div class="org-ee-etape-entete">
+                                                <label class="org-checkbox-label"><input type="checkbox" class="org-ee-etape-check" data-etape="pratiqueGuidee" checked> 3. Pratique guidée</label>
+                                                <span class="org-ee-etape-desc">Pratique collective, rétroactions, évaluation formative</span>
+                                            </div>
+                                            <div class="org-ee-etape-corps">
+                                                <textarea class="org-ee-notes" data-etape="pratiqueGuidee" placeholder="Notes de l'enseignant…"></textarea>
+                                                <div class="org-ee-zone-depot" data-etape="pratiqueGuidee"><span class="org-placeholder">Glisser des activités ici</span></div>
+                                            </div>
+                                        </div>
+                                        <div class="org-ee-etape" data-etape="pratiqueAutonome">
+                                            <div class="org-ee-etape-entete">
+                                                <label class="org-checkbox-label"><input type="checkbox" class="org-ee-etape-check" data-etape="pratiqueAutonome" checked> 4. Pratique autonome</label>
+                                                <span class="org-ee-etape-desc">Exercices individuels, différenciation, retrait des aides</span>
+                                            </div>
+                                            <div class="org-ee-etape-corps">
+                                                <textarea class="org-ee-notes" data-etape="pratiqueAutonome" placeholder="Notes de l'enseignant…"></textarea>
+                                                <div class="org-ee-zone-depot" data-etape="pratiqueAutonome"><span class="org-placeholder">Glisser des activités ici</span></div>
+                                            </div>
+                                        </div>
+                                        <div class="org-ee-etape" data-etape="cloture">
+                                            <div class="org-ee-etape-entete">
+                                                <label class="org-checkbox-label"><input type="checkbox" class="org-ee-etape-check" data-etape="cloture" checked> 5. Clôture</label>
+                                                <span class="org-ee-etape-desc">Synthèse, métacognition, objectif de la prochaine leçon</span>
+                                            </div>
+                                            <div class="org-ee-etape-corps">
+                                                <textarea class="org-ee-notes" data-etape="cloture" placeholder="Notes de l'enseignant…"></textarea>
+                                                <div class="org-ee-zone-depot" data-etape="cloture"><span class="org-placeholder">Glisser des activités ici</span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Vue calendrier (collapsible) -->
+                            <div id="org-calendrier" class="org-section">
+                                <div class="org-section-titre org-section-titre-collapse" id="org-calendrier-toggle">
+                                    Vue calendrier
+                                    <span class="org-chevron">▾</span>
+                                </div>
+                                <div id="org-calendrier-contenu">
+                                    <div class="org-cal-vide">Aucune séquence ou leçon pour le moment.<br>Ajoute des éléments à la carte.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Modale d'export -->
+                    <div id="org-modale-export" class="org-modale" style="display:none">
+                        <div class="org-modale-contenu">
+                            <div class="org-modale-entete">
+                                <h3>Exporter le plan de cours</h3>
+                                <button class="org-modale-fermer" id="org-modale-fermer">&times;</button>
+                            </div>
+                            <div class="org-modale-corps">
+                                <div class="org-modale-groupe">
+                                    <label>Public cible</label>
+                                    <div class="org-modale-options">
+                                        <label class="org-radio-label"><input type="radio" name="org-export-audience" value="eleve" checked> Élève (contractuel)</label>
+                                        <label class="org-radio-label"><input type="radio" name="org-export-audience" value="enseignant"> Enseignant (pédagogique complet)</label>
+                                    </div>
+                                </div>
+                                <div class="org-modale-groupe">
+                                    <label>Format</label>
+                                    <div class="org-modale-options">
+                                        <label class="org-radio-label"><input type="radio" name="org-export-format" value="txt" checked> TXT (traitement de texte)</label>
+                                        <label class="org-radio-label"><input type="radio" name="org-export-format" value="md"> MD (document de classe)</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="org-modale-pied">
+                                <button class="btn-secondaire" id="org-modale-annuler">Annuler</button>
+                                <button class="btn-primaire" id="org-modale-telecharger">Télécharger</button>
+                            </div>
+                        </div>
+                    </div>
+                </div><!-- fin sous-section planification-organisateur -->
+
             </section><!-- fin section-planification -->
 
             <!-- SECTION TRAVAUX : migrée sous Évaluations (sous-onglets evaluations-travaux et evaluations-archivage) -->
@@ -15597,6 +15759,7 @@
     <!-- Module Planification (Carte mentale) -->
     <script src="js/planification-donnees.js?v=2026020701"></script>
     <script src="js/planification-carte.js?v=2026020701"></script>
+    <script src="js/organisateur.js?v=2026021001"></script>
     <script src="js/planification.js?v=2026020701"></script>
 
     <!-- BETA 96.3 : Module Travaux (import, annotation, archivage) -->
