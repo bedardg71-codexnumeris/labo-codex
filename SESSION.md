@@ -1,8 +1,8 @@
 # SESSION ACTIVE - BETA 97.4
 
 **Date** : 10 février 2026
-**Version** : Beta 97.4 (build 0210-1015)
-**Statut** : Corrections bibliothèques + badges développement actif
+**Version** : Beta 97.4 (build 0210-1059)
+**Statut** : Corrections bibliothèques + badges développement actif + notification mise à jour
 
 ## SESSION DU 10 FÉVRIER 2026
 
@@ -16,7 +16,13 @@
 ### Travail accompli — Indicateurs de développement
 
 5. **Nouveau module `badges-dev.js`** : MutationObserver non-intrusif qui appose 🚧 pulsant sur les onglets de sous-navigation en développement actif
-6. **Sections marquées** : Construction de la note (5 sous-sections) + Planification (2 sous-sections)
+6. **Sections marquées** : Construction de la note (5 sous-sections) + Planification (2 sous-sections) + Aide (6 sous-sections)
+
+### Travail accompli — Notification de mise à jour
+
+7. **Polling `version.json`** : Vérifie toutes les 5 minutes si une nouvelle version est déployée (première vérification après 30s)
+8. **Bandeau vert discret** : Apparaît en bas de l'écran avec animation slide-up quand le build distant diffère du local. Bouton "Recharger" pour appliquer la mise à jour
+9. **Résilience offline** : Échecs réseau silencieux, cache-busting via `?t=timestamp`, détection unique (pas de spam)
 
 ---
 

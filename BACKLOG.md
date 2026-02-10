@@ -865,11 +865,10 @@
 
 ### Deploiement / Mise a jour
 
-- [ ] **#158** Notification de mise a jour en temps reel (sans rechargement)
-  - **Etat actuel** : La pastille nouveautes n'apparait qu'au rechargement de la page. Un utilisateur avec l'onglet ouvert reste sur une version obsolete indefiniment
-  - **Piste** : Polling leger (`version.json` ou `BUILD_ID` verifie toutes les X minutes via `fetch`) + bandeau discret "Une mise a jour est disponible — Recharger"
-  - **Contrainte** : L'app fonctionne hors-ligne — le polling doit echouer silencieusement sans connexion
-  - **Cloudflare** : Headers `Cache-Control` sur `index.html` (no-cache) + cache long sur JS/CSS (cache-bust via `?v=`)
+- [x] **#158** Notification de mise a jour en temps reel (sans rechargement) — 10 fev (build 0210-1059)
+  - Polling `version.json` toutes les 5 min (premiere verif apres 30s)
+  - Bandeau vert fixe en bas avec animation slide-up + bouton Recharger
+  - Resilience offline (catch silencieux), cache-busting, detection unique
 
 ### Configuration
 
