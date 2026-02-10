@@ -3442,7 +3442,7 @@
                 <!-- LIGNE 1 : Logo + Titre + Version + Boutons -->
                 <div class="entete-ligne1">
                     <!-- Logo et métadonnées -->
-                    <div class="logo-section">
+                    <div class="logo-section" data-tooltip="entete-logo">
                         <a href="https://codexnumeris.org" target="_blank" rel="noopener noreferrer" class="logo-link">
                             <div class="logo">
                                 <img src="img/logo-codex-numeris.png" alt="Logo Codex Numeris">
@@ -3459,18 +3459,18 @@
                     <!-- Titre et version -->
                     <div class="titre-section">
                         <h1>Système de suivi des apprentissages et de construction de la note</h1>
-                        <p class="meta">Beta 97.4 <span id="build-numero"></span></p>
+                        <p class="meta" data-tooltip="entete-version">Beta 97.4 <span id="build-numero"></span></p>
                     </div>
 
                     <!-- Sélecteur de mode déplacé à droite -->
                     <div class="info-legales-section">
                         <!-- Sélecteur de mode -->
-                        <div id="selecteur-mode" class="selecteur-mode-centre">
+                        <div id="selecteur-mode" class="selecteur-mode-centre" data-tooltip="entete-mode-affichage">
                             <!-- Sera généré dynamiquement par 17-modes.js -->
                         </div>
                         <!-- Bouton Explorer la démo déplacé vers page d'accueil (Chantier 3) -->
                         <!-- Bouton Signaler un bug (Beta 95) -->
-                        <button onclick="ouvrirModalRapportBug()" class="btn-action-header" title="Signaler un problème">
+                        <button onclick="ouvrirModalRapportBug()" class="btn-action-header" title="Signaler un problème" data-tooltip="entete-signaler-bug">
                             Signaler un bug
                         </button>
                     </div>
@@ -3567,7 +3567,7 @@
         <!-- ========== MODAL INTRODUCTION (😎) ========== -->
 
         <!-- SÉLECTEUR GROUPE-COURS ACTIF (Beta 95.2) -->
-        <div id="bandeau-groupe-cours" class="bandeau-groupe-cours">
+        <div id="bandeau-groupe-cours" class="bandeau-groupe-cours" data-tooltip="entete-groupe-cours">
             <div class="bandeau-groupe-cours-contenu">
                 <label>Groupe-cours actif :</label>
                 <select id="selectGroupeCoursHeader" class="dropdown-groupe-cours-header" onchange="changerGroupeCoursDepuisHeader(this.value)">
@@ -3579,7 +3579,7 @@
         <!-- NAVIGATION PRINCIPALE -->
         <nav class="navigation-principale">
             <!-- Boutons de navigation centrés -->
-            <div class="navigation-boutons">
+            <div class="navigation-boutons" data-tooltip="entete-nav-principale">
                 <button data-onglet="accueil" class="btn-nav-icone" title="Accueil">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
@@ -3597,7 +3597,7 @@
                        title="Consulter la documentation">
                     Aide
                 </button>
-                <button data-onglet="reglages" class="btn-nav-icone" title="Réglages">
+                <button data-onglet="reglages" class="btn-nav-icone" title="Réglages" data-tooltip="entete-reglages">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="3"></circle>
                         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
@@ -3607,7 +3607,7 @@
         </nav>
 
         <!-- SOUS-NAVIGATION (générée dynamiquement par 02-navigation.js) -->
-        <div id="sous-navigation" class="sous-navigation"></div>
+        <div id="sous-navigation" class="sous-navigation" data-tooltip="entete-sous-nav"></div>
 
     <div class="conteneur">
 
@@ -10038,7 +10038,7 @@
 
                     <!-- ========== GESTION DES TRIMESTRES ========== -->
                     <div class="carte accordeon" id="accordeon-gestion-trimestres">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();" data-tooltip="reglages-gestion-trimestres">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▶</span> Gestion des trimestres
                             </h3>
@@ -10049,7 +10049,7 @@
 
                                 <!-- GAUCHE : Bibliothèque + Sélection -->
                                 <div class="panneau-bibliotheque">
-                                    <button class="btn btn-secondaire btn-bibliotheque" onclick="ouvrirBibliothequeTrimestreV2()">
+                                    <button class="btn btn-secondaire btn-bibliotheque" onclick="ouvrirBibliothequeTrimestreV2()" data-tooltip="reglages-bibliotheque">
                                         📚 Bibliothèque
                                     </button>
 
@@ -10078,7 +10078,7 @@
 
                                     <!-- Identification du trimestre -->
                                     <div class="bloc-section bloc-section--vert">
-                                        <h5 class="sous-titre-section" style="margin-top: 0; margin-bottom: 12px;">Identification du trimestre</h5>
+                                        <h5 class="sous-titre-section" style="margin-top: 0; margin-bottom: 12px;" data-tooltip="reglages-trim-identification">Identification du trimestre</h5>
                                         <div class="grille-identification">
                                             <div class="groupe-form">
                                                 <label style="font-size: 0.8rem; font-weight: 500;">Nom du trimestre <span class="text-danger">*</span></label>
@@ -10109,7 +10109,7 @@
                                         <!-- COLONNE GAUCHE: Bornes du trimestre -->
                                         <div class="bloc-section bloc-section--bleu bloc-section--compact">
                                             <button onclick="reinitialiserBornesTrimestreV2()" class="btn-reset-bloc" title="Réinitialiser les bornes">✕</button>
-                                            <h5 class="sous-titre-section" style="margin-top: 0;">Bornes du trimestre</h5>
+                                            <h5 class="sous-titre-section" style="margin-top: 0;" data-tooltip="reglages-trim-bornes">Bornes du trimestre</h5>
                                             <div class="grille-2col-gap15">
                                                 <div class="groupe-form">
                                                     <label style="font-size: 0.8rem; font-weight: 500;">Début du trimestre :</label>
@@ -10137,7 +10137,7 @@
                                         <!-- COLONNE DROITE: Semaines spéciales -->
                                         <div class="bloc-section bloc-section--bleu bloc-section--compact">
                                             <button onclick="reinitialiserSemainesSpecialesV2()" class="btn-reset-bloc" title="Réinitialiser les semaines spéciales">✕</button>
-                                            <h5 class="sous-titre-section" style="margin-top: 0;">Semaines spéciales</h5>
+                                            <h5 class="sous-titre-section" style="margin-top: 0;" data-tooltip="reglages-trim-semaines-speciales">Semaines spéciales</h5>
                                             <div class="grille-2col-gap15">
                                                 <!-- Semaine de planification -->
                                                 <div>
@@ -10182,7 +10182,7 @@
 
                                         <!-- COLONNE GAUCHE: Congés prévus -->
                                         <div class="bloc-section bloc-section--bleu bloc-section--compact" style="margin-bottom: 0;">
-                                            <h5 class="sous-titre-section" style="margin-top: 0; font-size: 0.85rem;">Congés fériés et activités institutionnelles</h5>
+                                            <h5 class="sous-titre-section" style="margin-top: 0; font-size: 0.85rem;" data-tooltip="reglages-trim-conges">Congés fériés et activités institutionnelles</h5>
                                             <div id="v2-congesPrevusContainer" style="margin-bottom: 10px; max-height: 150px; overflow-y: auto;">
                                                 <!-- Liste des événements prévus générée dynamiquement -->
                                             </div>
@@ -10230,7 +10230,7 @@
 
                                         <!-- COLONNE DROITE: Événements imprévus -->
                                         <div class="bloc-section bloc-section--bleu bloc-section--compact" style="margin-bottom: 0;">
-                                            <h5 class="sous-titre-section" style="margin-top: 0; font-size: 0.85rem;">Événements imprévus</h5>
+                                            <h5 class="sous-titre-section" style="margin-top: 0; font-size: 0.85rem;" data-tooltip="reglages-trim-imprevus">Événements imprévus</h5>
                                             <div id="v2-congesImprevusContainer" style="margin-bottom: 10px; max-height: 150px; overflow-y: auto;">
                                                 <!-- Liste des événements imprévus générée dynamiquement -->
                                             </div>
@@ -10294,7 +10294,7 @@
 
                     <!-- ========== ACCORDÉON: COURS ========== -->
                     <div class="carte accordeon ferme" id="accordeon-cours">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();" data-tooltip="reglages-cours">
                             <h3 class="carte-titre-bleu" style="margin: 0;">
                                 <span class="accordeon-chevron">▶</span> Cours
                             </h3>
@@ -10305,7 +10305,7 @@
 
                                 <!-- GAUCHE : Bibliothèque + Sélection -->
                                 <div class="panneau-bibliotheque">
-                                    <button class="btn btn-secondaire btn-bibliotheque" onclick="ouvrirModalBibliothequeCours()">
+                                    <button class="btn btn-secondaire btn-bibliotheque" onclick="ouvrirModalBibliothequeCours()" data-tooltip="reglages-bibliotheque">
                                         📚 Bibliothèque
                                     </button>
 
@@ -10352,7 +10352,7 @@
                                                 </div>
                                             </div>
 
-                                            <div class="grille-form-2col u-mb-15">
+                                            <div class="grille-form-2col u-mb-15" data-tooltip="reglages-cours-competence">
                                                 <div class="groupe-form">
                                                     <label>N° de la compétence</label>
                                                     <input type="text" id="v2-numeroCompetence" class="controle-form" placeholder="Ex: 4EF0">
@@ -10510,7 +10510,7 @@
                                                         </optgroup>
                                                     </select>
                                                 </div>
-                                                <div class="groupe-form">
+                                                <div class="groupe-form" data-tooltip="reglages-cours-elements">
                                                     <label>Éléments de compétence</label>
                                                     <textarea id="v2-elementsCompetence" class="controle-form" rows="2"
                                                         placeholder="• Reconnaître le propos du texte&#10;• Repérer et classer des thèmes"></textarea>
@@ -10541,7 +10541,7 @@
 
                     <!-- ========== ACCORDÉON: ENSEIGNANT·E (Beta 95.2 - Profil Auteur) ========== -->
                     <div class="carte accordeon ferme" id="accordeon-enseignant">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();" data-tooltip="reglages-enseignant">
                             <h3 class="carte-titre-bleu" style="margin: 0;">
                                 <span class="accordeon-chevron">▶</span> Enseignant·e
                             </h3>
@@ -10778,7 +10778,7 @@
 
                     <!-- ========== ACCORDÉON: GROUPE D'ÉTUDIANTS (Beta 95.2) ========== -->
                     <div class="carte accordeon ferme" id="accordeon-groupe-etudiants">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();" data-tooltip="reglages-groupe-etudiants">
                             <h3 class="carte-titre-bleu" style="margin: 0;">
                                 <span class="accordeon-chevron">▶</span> Groupe d'étudiants
                             </h3>
@@ -10867,7 +10867,7 @@
                                                 <label>Programme</label>
                                                 <input type="text" id="v2-etudiantProgramme" class="controle-form controle-form-compact" placeholder="200.B0" list="liste-programmes-etudes">
                                             </div>
-                                            <div class="groupe-form">
+                                            <div class="groupe-form" data-tooltip="reglages-etudiants-sa">
                                                 <label>SA</label>
                                                 <select id="v2-etudiantSA" class="controle-form controle-form-compact">
                                                     <option value="">Non</option>
@@ -10887,7 +10887,7 @@
 
                                     <!-- Section Import (Beta 95.3 : déplacée à droite) -->
                                     <div class="section-import-droite">
-                                        <h5 class="sous-titre-section" style="margin-bottom: 10px;">Importer des étudiants</h5>
+                                        <h5 class="sous-titre-section" style="margin-bottom: 10px;" data-tooltip="reglages-etudiants-import">Importer des étudiants</h5>
 
                                         <div class="grille-import-2col">
                                             <!-- Colonne 1 : Coller -->
@@ -10931,7 +10931,7 @@
 
                     <!-- ========== ACCORDÉON: HORAIRE (Beta 95.2) ========== -->
                     <div class="carte accordeon ferme" id="accordeon-horaire">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();" data-tooltip="reglages-horaire">
                             <h3 class="carte-titre-bleu" style="margin: 0;">
                                 <span class="accordeon-chevron">▶</span> Horaire
                             </h3>
@@ -11002,7 +11002,7 @@
                                             <input type="text" id="v2-hor-nom" class="controle-form" placeholder="Ex: Lun-Mer 10h">
                                         </div>
 
-                                        <div class="grille-form-2col u-mb-15">
+                                        <div class="grille-form-2col u-mb-15" data-tooltip="reglages-horaire-periodes">
                                             <div class="groupe-form">
                                                 <label>Séances par semaine</label>
                                                 <select id="v2-hor-nbSeances" class="controle-form" onchange="mettreAJourSeancesHoraireV2()">
@@ -11060,7 +11060,7 @@
 
                     <!-- ========== ACCORDÉON: GROUPE-COURS (Beta 95.2 - Assemblage) ========== -->
                     <div class="carte accordeon ferme" id="accordeon-groupe-cours">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();" data-tooltip="reglages-groupe-cours">
                             <h3 class="carte-titre-bleu" style="margin: 0;">
                                 <span class="accordeon-chevron">▶</span> Groupe-cours
                             </h3>
@@ -11078,7 +11078,7 @@
                                 <div class="panneau-bibliotheque">
 
                                     <!-- 🆕 Beta 95.3 : Bouton bibliothèque -->
-                                    <button class="btn btn-secondaire btn-bibliotheque" onclick="ouvrirModalBibliothequeGroupeCours()">
+                                    <button class="btn btn-secondaire btn-bibliotheque" onclick="ouvrirModalBibliothequeGroupeCours()" data-tooltip="reglages-bibliotheque">
                                         📚 Bibliothèque
                                     </button>
 
@@ -11129,7 +11129,7 @@
                                         <h4 id="v2-titreFormGroupeCours" class="titre-formulaire">Nouveau groupe-cours</h4>
 
                                         <!-- Nom généré dynamiquement -->
-                                        <div class="apercu-nom-groupe-cours" id="v2-apercuNomGroupeCours">
+                                        <div class="apercu-nom-groupe-cours" id="v2-apercuNomGroupeCours" data-tooltip="reglages-gc-nom-genere">
                                             <span class="label-apercu">NOM GÉNÉRÉ :</span>
                                             <span class="nom-genere" id="v2-nomGroupeCoursGenere">—</span>
                                         </div>
@@ -11177,7 +11177,7 @@
                                                     <option value="">— Choisir un enseignant —</option>
                                                 </select>
                                             </div>
-                                            <div class="groupe-form">
+                                            <div class="groupe-form" data-tooltip="reglages-gc-pratique">
                                                 <label>6. Pratique de notation</label>
                                                 <select id="v2-gc-pratique" class="controle-form">
                                                     <option value="">— À compléter quand configurée —</option>
@@ -15919,6 +15919,11 @@
     <!-- Badges "En développement actif" sur sous-navigation -->
     <script src="js/badges-dev.js?v=2026021001"></script>
 
+    <!-- Tooltips au survol -->
+    <link rel="stylesheet" href="css/tooltips.css">
+    <script src="js/tooltips-contenu.js?v=2026021001"></script>
+    <script src="js/tooltips.js?v=2026021001"></script>
+
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
     <script src="js/main.js?v=2025123009"></script>
 
@@ -15936,7 +15941,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97';
-        const BUILD_ID = '0210-1256';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0210-1358';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';

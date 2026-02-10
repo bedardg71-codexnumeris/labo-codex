@@ -444,6 +444,14 @@ function afficherSousSection(idSousSection) {
             }
             break;
 
+        // Module Organisateur (sous-onglet Planification)
+        case 'planification-organisateur':
+            console.log('🔄 Initialisation du module Organisateur...');
+            if (typeof initialiserModuleOrganisateur === 'function') {
+                setTimeout(initialiserModuleOrganisateur, 100);
+            }
+            break;
+
         // 🆕 BETA 96.1 : Boîte à outils
         case 'boite-outils-tirage':
             console.log('🔄 Initialisation de la boîte à outils...');

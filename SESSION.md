@@ -1,10 +1,29 @@
 # SESSION ACTIVE - BETA 97.4
 
 **Date** : 10 février 2026
-**Version** : Beta 97.4 (build 0210-1059)
-**Statut** : Corrections bibliothèques + badges développement actif + notification mise à jour
+**Version** : Beta 97.4 (build 0210-1358)
+**Statut** : Corrections bibliothèques + badges développement actif + notification mise à jour + tooltips
 
 ## SESSION DU 10 FÉVRIER 2026
+
+### Travail accompli — Tooltips au survol
+
+12. **Nouveau systeme de tooltips** : Moteur leger avec delegation d'evenements (`mouseenter`/`mouseleave`), positionnement automatique (bas/haut/droite/gauche), animation CSS.
+    - `css/tooltips.css` : Styles integres au theme via variables CSS (`--bleu-fonce`, `--shadow-fort`, `--radius-moyen`)
+    - `js/tooltips-contenu.js` : 31 cles de contenu regroupees par zone (en-tete + reglages)
+    - `js/tooltips.js` : Moteur de positionnement et cycle de vie
+13. **En-tete (10 tooltips)** : Logo, version, mode affichage, signaler bug, pratique, semaine, groupe-cours, nav principale, sous-nav, reglages
+14. **Reglages Trimestre (21 tooltips)** : 6 panneaux accordeon + 12 champs specifiques + 3 boutons bibliotheque
+15. **Tooltips dynamiques** : `entete-pratique` et `entete-semaine` marques dans le HTML genere par `contexte.js`
+
+### Fichiers crees
+- `css/tooltips.css`
+- `js/tooltips.js`
+- `js/tooltips-contenu.js`
+
+### Fichiers modifies (tooltips)
+- `index.html` — 29 attributs `data-tooltip` + chargement des 3 fichiers
+- `js/contexte.js` — 2 attributs `data-tooltip` sur contenu dynamique
 
 ### Travail accompli — Bibliothèques
 

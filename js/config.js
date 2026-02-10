@@ -65,7 +65,8 @@ const configurationsOnglets = {
         { id: 'tirage', label: 'Tirage au sort' }
     ],
     'planification': [
-        { id: 'carte', label: 'Alignement pédagogique' }
+        { id: 'carte', label: 'Alignement pédagogique' },
+        { id: 'organisateur', label: 'Organisateur' }
     ],
     // 🆕 BETA 96.3 : Module Travaux (migré sous Évaluations)
     // ✨ REFONTE UX (18 déc 2025) : 3 onglets (Pratique de notation migrée vers Construction)

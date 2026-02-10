@@ -4018,12 +4018,26 @@ function initialiser() {
     var btnFermerPanneau = document.getElementById('planif-btn-fermer-panneau');
     if (btnFermerPanneau) btnFermerPanneau.addEventListener('click', fermerPanneau);
 
-    // Séances
-    if (btnSeances) btnSeances.addEventListener('click', toggleSeances);
-    var btnFermerCal = document.getElementById('planif-btn-fermer-seances');
-    if (btnFermerCal) btnFermerCal.addEventListener('click', toggleSeances);
+    // Séances — Naviguer vers le sous-onglet Organisateur
+    if (btnSeances) btnSeances.addEventListener('click', function() {
+        // Pré-sélectionner la leçon active si possible
+        var leconId = etat.selection;
+        if (leconId) {
+            var noeud = etat.noeuds.get(leconId);
+            if (!noeud || noeud.type !== 'lecon') leconId = null;
+        }
+        if (typeof window.organisateur !== 'undefined' && leconId) {
+            window.organisateur.naviguerVersLecon(leconId);
+        } else if (typeof afficherSousSection === 'function') {
+            afficherSousSection('planification-organisateur');
+            var boutons = document.querySelectorAll('.sous-navigation button');
+            boutons.forEach(function(btn) {
+                btn.classList.toggle('actif', btn.getAttribute('data-sous-onglet') === 'planification-organisateur');
+            });
+        }
+    });
 
-    // Organisateur — sélecteurs et collapse calendrier
+    // Legacy: Organisateur side panel selectors (kept for backward compat)
     if (orgSelectSequence) orgSelectSequence.addEventListener('change', peuplerSelecteurLecons);
     if (orgSelectLecon) orgSelectLecon.addEventListener('change', afficherLeconOrganisateur);
     var eeCheckbox = document.getElementById('planif-org-ee-checkbox');
@@ -4208,7 +4222,18 @@ window.planificationCarte = {
     centrerVueSurContenu: centrerVueSurContenu,
     mettreAJourListeCartes: mettreAJourListeCartes,
     chargerCarte: chargerCarte,
-    etat: etat
+    etat: etat,
+    getLiensDeNoeud: getLiensDeNoeud,
+    obtenirLabelNoeud: obtenirLabelNoeud,
+    obtenirCouleurNoeud: obtenirCouleurNoeud,
+    TYPES: TYPES,
+    TYPES_LIENS: TYPES_LIENS,
+    genererSeancesHTML: genererSeancesHTML,
+    trouverIdeesMaitressesAncetres: trouverIdeesMaitressesAncetres,
+    chargerProductions: chargerProductions,
+    afficherDetailsProduction: afficherDetailsProduction,
+    naviguerVers: naviguerVers,
+    CLE_SEANCES: CLE_SEANCES
 };
 
 })();
