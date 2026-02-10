@@ -1,8 +1,24 @@
 # SESSION ACTIVE - BETA 97.4
 
-**Date** : 8 février 2026
-**Version** : Beta 97.4 (build 0208-2017)
-**Statut** : Alignement pédagogique + correctifs démo/UX
+**Date** : 10 février 2026
+**Version** : Beta 97.4 (build 0210-1015)
+**Statut** : Corrections bibliothèques + badges développement actif
+
+## SESSION DU 10 FÉVRIER 2026
+
+### Travail accompli — Bibliothèques
+
+1. **Suppression deux stores** : `supprimerXDefinitivement()` appelle maintenant `retirerXDeLaBibliotheque()` dans les 4 modules (grilles, échelles, productions, cartouches)
+2. **Bouton Supprimer en Section 2** : Ajout d'un bouton "Supprimer" dans la section "Disponibles à ajouter" des 4 bibliothèques + fonctions `supprimerXDeBibliothequePartagee()`
+3. **Boutons "Ajouter à la bibliothèque"** : Grilles et échelles ont maintenant un bouton `ajouterMesXALaBibliotheque()` comme productions
+4. **Audit complet** : Analyse des 4 modales → 14 tâches ajoutées au BACKLOG (#144-#157) couvrant bugs fonctionnels, uniformisation visuelle et refactoring architectural
+
+### Travail accompli — Indicateurs de développement
+
+5. **Nouveau module `badges-dev.js`** : MutationObserver non-intrusif qui appose 🚧 pulsant sur les onglets de sous-navigation en développement actif
+6. **Sections marquées** : Construction de la note (5 sous-sections) + Planification (2 sous-sections)
+
+---
 
 ## SESSION DU 8 FÉVRIER 2026 (soir)
 

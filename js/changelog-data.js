@@ -11,6 +11,18 @@
     var CHANGELOG = [
         {
             version: 'Beta 97.4',
+            date: '10 février',
+            couleur: 'orange',
+            titre: 'Bibliothèques et indicateurs',
+            items: [
+                '<strong>Suppression complète</strong> : Le bouton «\u00a0Supprimer\u00a0» dans les bibliothèques (grilles, échelles, productions, cartouches) retire maintenant l\u2019élément des deux stores (local + partagé). Plus de fantômes qui réapparaissent.',
+                '<strong>Supprimer depuis «\u00a0Disponibles\u00a0»</strong> : Nouveau bouton «\u00a0Supprimer\u00a0» dans la section 2 des bibliothèques pour faire le ménage directement depuis la liste des éléments disponibles.',
+                '<strong>Ajouter à la bibliothèque</strong> : Nouveaux boutons «\u00a0Ajouter mes grilles/échelles à la bibliothèque\u00a0» pour partager ses éléments, comme c\u2019était déjà possible pour les productions.',
+                '<strong>Indicateurs 🚧</strong> : Les sous-sections en développement actif affichent un emoji 🚧 pulsant sur leur onglet. Visible dans Construction de la note et Planification.'
+            ]
+        },
+        {
+            version: 'Beta 97.4',
             date: '8 février',
             couleur: 'bleu',
             titre: 'Démo et expérience utilisateur',
