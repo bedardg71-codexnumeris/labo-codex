@@ -12,6 +12,15 @@
         {
             version: 'Beta 97.4',
             date: '10 février',
+            couleur: 'bleu',
+            titre: 'Onglet Dépistage',
+            items: [
+                '<strong>Nouvel onglet Dépistage</strong> : Les paramètres de dépistage (configuration des patterns, seuils de détection, seuils d\u2019interprétation) ont leur propre onglet dans Réglages, séparé des Préférences d\u2019affichage.',
+            ]
+        },
+        {
+            version: 'Beta 97.4',
+            date: '10 février',
             couleur: 'orange',
             titre: 'Bibliothèques et indicateurs',
             items: [
