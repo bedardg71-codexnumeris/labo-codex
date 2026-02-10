@@ -1525,7 +1525,7 @@ async function afficherBibliothequeProductions() {
 
     // Construire le HTML du modal
     let modalHTML = `
-        <div id="modalBibliothequeProductions" class="modal-js-overlay">
+        <div id="modalBibliothequeProductions" class="modal-js-overlay" style="z-index: 10000;">
             <div class="modal-js-contenu" style="max-width: 800px;">
                 <!-- Bouton X sticky -->
                 <button onclick="fermerModalBibliothequeProductions()" class="modal-js-fermer">
