@@ -529,7 +529,7 @@ function genererApercuProductions(productions) {
     let html = `
         <div class="apercu-pdf">
             <div class="apercu-pdf-entete">
-                <h3>Productions pedagogiques</h3>
+                <h3 data-tooltip="cn-prod-tableau">Productions pedagogiques</h3>
                 <span class="apercu-pdf-date">Apercu - ${new Date().toLocaleDateString('fr-CA')}</span>
             </div>
             <p class="apercu-pdf-info">${productions.length} production(s)</p>

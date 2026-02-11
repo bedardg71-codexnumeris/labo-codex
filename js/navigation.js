@@ -142,6 +142,36 @@ function afficherSection(nomSection) {
  * afficherSousNavigation('etudiants');
  * // → Génère 3 boutons: Aperçu, Liste des individus, Profil
  */
+// Mapping sous-onglet → clé tooltip (généré depuis Tooltips_Navigation.md)
+const TOOLTIPS_SOUS_NAV = {
+    'tableau-bord-apercu': 'nav-tdb-apercu',
+    'tableau-bord-liste': 'nav-tdb-liste',
+    'tableau-bord-profil': 'nav-tdb-profil',
+    'tableau-bord-interventions': 'nav-tdb-interventions',
+    'presences-apercu': 'nav-pres-apercu',
+    'presences-calendrier': 'nav-pres-calendrier',
+    'presences-saisie': 'nav-pres-saisie',
+    'evaluations-apercu': 'nav-eval-apercu',
+    'evaluations-liste': 'nav-eval-liste',
+    'evaluations-individuelles': 'nav-eval-evaluer',
+    'evaluations-travaux': 'nav-eval-annoter',
+    'evaluations-archivage': 'nav-eval-archivage',
+    'construction-apercu': 'nav-cn-apercu',
+    'construction-productions': 'nav-cn-productions',
+    'construction-grille-criteres': 'nav-cn-grilles',
+    'construction-echelle-performance': 'nav-cn-echelles',
+    'construction-retroactions': 'nav-cn-cartouches',
+    'construction-pratiques-notation': 'nav-cn-pratiques',
+    'boite-outils-tirage': 'nav-bao-tirage',
+    'planification-carte': 'nav-planif-alignement',
+    'planification-organisateur': 'nav-planif-organisateur',
+    'reglages-trimestre': 'nav-reg-trimestre',
+    'reglages-preferences': 'nav-reg-preferences',
+    'reglages-depistage': 'nav-reg-depistage',
+    'reglages-donnees': 'nav-reg-donnees',
+    'reglages-a-propos': 'nav-reg-apropos'
+};
+
 function afficherSousNavigation(nomOnglet) {
     const conteneurSousNav = document.getElementById('sous-navigation');
     const configuration = configurationsOnglets[nomOnglet];
@@ -156,7 +186,9 @@ function afficherSousNavigation(nomOnglet) {
         // Créer les boutons de sous-navigation
         const boutonsHtml = configuration.map((item, index) => {
             const classeActive = index === 0 ? ' class="actif"' : '';
-            return `<button data-sous-onglet="${nomOnglet}-${item.id}"${classeActive}>${item.label}</button>`;
+            const sousOngletId = `${nomOnglet}-${item.id}`;
+            const tooltipAttr = TOOLTIPS_SOUS_NAV[sousOngletId] ? ` data-tooltip="${TOOLTIPS_SOUS_NAV[sousOngletId]}"` : '';
+            return `<button data-sous-onglet="${sousOngletId}"${classeActive}${tooltipAttr}>${item.label}</button>`;
         }).join('');
 
         conteneurSousNav.innerHTML = boutonsHtml;

@@ -3517,7 +3517,7 @@
                         </div>
                         <!-- Bouton Explorer la démo déplacé vers page d'accueil (Chantier 3) -->
                         <!-- Bouton Signaler un bug (Beta 95) -->
-                        <button onclick="ouvrirModalRapportBug()" class="btn-action-header" title="Signaler un problème" data-tooltip="entete-signaler-bug">
+                        <button onclick="ouvrirModalRapportBug()" class="btn-action-header" data-tooltip="entete-signaler-bug">
                             Signaler un bug
                         </button>
                     </div>
@@ -3628,24 +3628,24 @@
         <!-- NAVIGATION PRINCIPALE -->
         <nav class="navigation-principale">
             <!-- Boutons de navigation centrés -->
-            <div class="navigation-boutons" data-tooltip="entete-nav-principale">
-                <button data-onglet="accueil" class="btn-nav-icone" title="Accueil">
+            <div class="navigation-boutons">
+                <button data-onglet="accueil" class="btn-nav-icone" data-tooltip="nav-accueil">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                         <polyline points="9 22 9 12 15 12 15 22"></polyline>
                     </svg>
                 </button>
-                <button data-onglet="tableau-bord">Tableau de bord</button>
-                <button data-onglet="presences">Présences</button>
-                <button data-onglet="evaluations">Évaluations</button>
-                <button data-onglet="construction">Construction de la note</button>
-                <button data-onglet="boite-outils">Boîte à outils</button>
-                <button data-onglet="planification">Planification</button>
+                <button data-onglet="tableau-bord" data-tooltip="nav-tableau-bord">Tableau de bord</button>
+                <button data-onglet="presences" data-tooltip="nav-presences">Présences</button>
+                <button data-onglet="evaluations" data-tooltip="nav-evaluations">Évaluations</button>
+                <button data-onglet="construction" data-tooltip="nav-construction">Construction de la note</button>
+                <button data-onglet="boite-outils" data-tooltip="nav-boite-outils">Boîte à outils</button>
+                <button data-onglet="planification" data-tooltip="nav-planification">Planification</button>
                 <button id="btn-section-aide"
-                       data-onglet="aide">
+                       data-onglet="aide" data-tooltip="nav-aide">
                     Aide
                 </button>
-                <button data-onglet="reglages" class="btn-nav-icone" title="Réglages" data-tooltip="entete-reglages">
+                <button data-onglet="reglages" class="btn-nav-icone" data-tooltip="entete-reglages">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="3"></circle>
                         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
@@ -3655,7 +3655,7 @@
         </nav>
 
         <!-- SOUS-NAVIGATION (générée dynamiquement par 02-navigation.js) -->
-        <div id="sous-navigation" class="sous-navigation" data-tooltip="entete-sous-nav"></div>
+        <div id="sous-navigation" class="sous-navigation"></div>
 
     <div class="conteneur">
 
@@ -3971,7 +3971,7 @@
                                         <th onclick="trierTableauPar('rai')" class="td-center-100-clickable" title="Cliquer pour trier">
                                             RàI<span id="tri-rai" class="ml-4">↕</span>
                                         </th>
-                                        <th class="td-center-80" title="Nombre d'interventions reçues" data-tooltip="liste-col-interv">
+                                        <th class="td-center-80" data-tooltip="liste-col-interv">
                                             Interv.
                                         </th>
                                     </tr>
@@ -4399,10 +4399,10 @@
                                     <th class="td-left-clickable" onclick="trierTableauParColonne('production')" title="Cliquer pour trier">
                                         Production <span id="tri-production" style="font-size: 0.8em; color: var(--gris-clair);">↕</span>
                                     </th>
-                                    <th class="td-center-clickable" data-tooltip="eval-col-jeton" onclick="trierTableauParColonne('jetons')" title="Cliquer pour trier">
+                                    <th class="td-center-clickable" data-tooltip="eval-col-jeton" onclick="trierTableauParColonne('jetons')">
                                         Jeton <span id="tri-jetons" style="font-size: 0.8em; color: var(--gris-clair);">↕</span>
                                     </th>
-                                    <th class="td-center-clickable" data-tooltip="eval-col-niveau" onclick="trierTableauParColonne('niveau')" title="Cliquer pour trier">
+                                    <th class="td-center-clickable" data-tooltip="eval-col-niveau" onclick="trierTableauParColonne('niveau')">
                                         Niveau <span id="tri-niveau" style="font-size: 0.8em; color: var(--gris-clair);">↕</span>
                                     </th>
                                     <th class="td-center-clickable" onclick="trierTableauParColonne('note')" title="Cliquer pour trier">
@@ -4765,7 +4765,7 @@
                 <!-- Sous-section: Aperçu du matériel -->
                 <div id="construction-apercu" class="sous-section">
                     <h2 class="titre-avec-emoji-toggles">
-                        <span>Vue d'ensemble</span>
+                        <span data-tooltip="cn-apercu">Vue d'ensemble</span>
                         <span class="titre-emoji-container">
                             <button class="btn-aide-contextuelle" data-aide="construction-apercu" aria-label="Aide contextuelle">😎</button>
                             <button class="btn-aide-contextuelle" data-aide="construction-objectifs-reflexion" aria-label="Réfléchir à tes objectifs" title="Réfléchir à tes objectifs">😎</button>
@@ -4791,7 +4791,7 @@
                     </div>
 
                     <div class="carte">
-                        <h3 class="carte-titre-bleu">Ressources configurées</h3>
+                        <h3 class="carte-titre-bleu" data-tooltip="cn-ressources">Ressources configurées</h3>
 
                         <div class="grid-auto-200-mt15">
                             <!-- Productions -->
@@ -4840,7 +4840,7 @@
                 <!-- Sous-section: Productions -->
                 <div id="construction-productions" class="sous-section">
                     <h2 class="titre-avec-emoji-toggles">
-                        <span>Productions étudiantes</span>
+                        <span data-tooltip="cn-prod-titre">Productions étudiantes</span>
                         <span class="titre-emoji-container">
                             <button class="btn-aide-contextuelle" data-aide="construction-productions" aria-label="Aide contextuelle">😎</button>
                             <span class="primo-aide" data-target="note-productions">😎</span>
@@ -4876,6 +4876,7 @@
                             <div class="sidebar-nav-buttons u-mb-15">
                                 <button onclick="afficherBibliothequeProductions()"
                                         class="btn btn-principal"
+                                        data-tooltip="cn-bibliotheque"
                                         style="width: 100%; font-size: 0.9rem;"
                                         title="Consulter la bibliothèque de productions">
                                     Consulter la bibliothèque
@@ -4895,7 +4896,7 @@
 
                             <!-- Boutons actions en haut à droite -->
                             <div style="margin-bottom: 20px; text-align: right; display: flex; gap: 10px; justify-content: flex-end;">
-                                <button onclick="afficherFormulairePDFDepuisProduction()" class="btn btn-secondaire" title="Préparer un PDF avec une grille de critères">
+                                <button onclick="afficherFormulairePDFDepuisProduction()" class="btn btn-secondaire" data-tooltip="cn-preparer-pdf">
                                     📄 Préparer le PDF
                                 </button>
                                 <button id="btnExporterProductionsPDF" onclick="exporterProductionsEnPDF()" class="btn btn-secondaire btn-export-pdf" title="Exporter la liste des productions en PDF">
@@ -4946,7 +4947,7 @@
                                 <!-- Ligne 2 : Type + Description -->
                                 <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px; margin-bottom: 15px;">
                                     <div class="groupe-form">
-                                        <label>Type</label>
+                                        <label data-tooltip="cn-prod-type">Type</label>
                                         <select id="productionType" class="controle-form"
                                             onchange="gererChangementTypeProduction()">
                                             <option value="">Choisir...</option>
@@ -4968,7 +4969,7 @@
                                         </select>
                                     </div>
                                     <div class="groupe-form">
-                                        <label>Activité d'apprentissage
+                                        <label data-tooltip="cn-prod-activite">Activité d'apprentissage
                                             <span class="tooltip-aide" title="Dans une approche par compétences (APC), une activité d'évaluation est généralement centrée sur l'apprentissage plutôt que sur un comportement (ex. : participation, présence). Elle repose sur des objectifs explicites liés à la compétence du cours.">📌</span>
                                         </label>
                                         <input type="text" id="productionDescription" class="controle-form"
@@ -4992,7 +4993,7 @@
                                     <!-- Pondération + Note explicative -->
                                     <div id="champPonderation" style="display: grid; grid-template-columns: 150px 1fr; gap: 15px; align-items: start;">
                                         <div class="groupe-form" style="margin: 0;">
-                                            <label>Pondération (%)</label>
+                                            <label data-tooltip="cn-prod-ponderation">Pondération (%)</label>
                                             <input type="number" id="productionPonderation" class="controle-form" min="0"
                                                 max="100" placeholder="Ex: 20">
                                         </div>
@@ -5001,7 +5002,7 @@
                                     <!-- Grille de critères + Note explicative -->
                                     <div id="champGrille" style="display: grid; grid-template-columns: 200px 1fr; gap: 15px; align-items: start;">
                                         <div class="groupe-form" style="margin: 0;">
-                                            <label>Grille de critères
+                                            <label data-tooltip="cn-prod-grille">Grille de critères
                                                 <span class="tooltip-aide" title="Dans une approche par compétences, l'évaluation est généralement individuelle afin de rendre compte du degré d'acquisition de chaque apprenant. Les travaux d'équipe peuvent être évalués, mais la contribution individuelle devrait idéalement être distinguée.">📌</span>
                                             </label>
                                             <select id="productionGrille" class="controle-form">
@@ -5024,7 +5025,7 @@
                                      ═══════════════════════════════════════════════════════════ -->
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                                     <div class="groupe-form">
-                                        <label>Objectif d'apprentissage
+                                        <label data-tooltip="cn-prod-objectif">Objectif d'apprentissage
                                             <span class="tooltip-aide" title="Utilisez des verbes actifs et observables selon la taxonomie de Bloom (ex : nommer, décrire, analyser, créer, résoudre). Évitez les verbes vagues comme savoir, comprendre ou connaître.">📌</span>
                                         </label>
                                         <p style="font-size: 0.85rem; color: var(--gris-moyen); margin: 0 0 6px 0;">À la fin de cette activité, l'apprenant sera capable de...</p>
@@ -5032,7 +5033,7 @@
                                             placeholder="Ex: Reconnaître le propos du texte"></textarea>
                                     </div>
                                     <div class="groupe-form">
-                                        <label>Description de la tâche</label>
+                                        <label data-tooltip="cn-prod-tache">Description de la tâche</label>
                                         <p style="font-size: 0.85rem; color: var(--gris-moyen); margin: 0 0 6px 0;">La tâche permet de démontrer l'atteinte de l'objectif...</p>
                                         <textarea id="productionTache" class="controle-form" rows="3"
                                             placeholder="Ex: Rédiger un texte de 500 mots..."></textarea>
@@ -5107,7 +5108,7 @@
                 <!-- Sous-section : Grilles de critères -->
                 <div id="construction-grille-criteres" class="sous-section">
                     <h2 class="titre-avec-emoji-toggles">
-                        <span>Grilles de critères</span>
+                        <span data-tooltip="cn-grille-titre">Grilles de critères</span>
                         <span class="titre-emoji-container">
                             <button class="btn-aide-contextuelle" data-aide="construction-grilles" aria-label="Aide contextuelle">😎</button>
                             <span class="primo-aide" data-target="note-grilles">😎</span>
@@ -5152,7 +5153,7 @@
 
                             <!-- Boutons actions en haut à droite -->
                             <div style="margin-bottom: 20px; text-align: right; display: flex; gap: 10px; justify-content: flex-end;">
-                                <button onclick="afficherFormulairePreparationPDF()" class="btn btn-secondaire" title="Préparer un PDF avec cette grille">
+                                <button onclick="afficherFormulairePreparationPDF()" class="btn btn-secondaire" data-tooltip="cn-preparer-pdf">
                                     📄 Préparer le PDF
                                 </button>
                                 <button onclick="creerNouvelleGrille()" class="btn btn-principal">
@@ -5275,7 +5276,7 @@
 
                                 <!-- Total pondération -->
                                 <div style="margin-bottom: 15px; padding: 10px; background: var(--bleu-tres-pale); border-radius: var(--radius-moyen); display: flex; justify-content: space-between; align-items: center;">
-                                    <span style="font-weight: 500;">Pondération totale des critères :</span>
+                                    <span style="font-weight: 500;" data-tooltip="cn-grille-ponderation-totale">Pondération totale des critères :</span>
                                     <span id="totalPonderationAffichage" style="font-size: 1.2rem; font-weight: 600; color: var(--bleu-fonce);">0%</span>
                                 </div>
 
@@ -5325,7 +5326,7 @@
                 <!-- Sous-section : Échelle de performance -->
                 <div id="construction-echelle-performance" class="sous-section">
                     <h2 class="titre-avec-emoji-toggles">
-                        <span>Échelles de performance</span>
+                        <span data-tooltip="cn-echelle-titre">Échelles de performance</span>
                         <span class="titre-emoji-container">
                             <button class="btn-aide-contextuelle" data-aide="construction-echelles" aria-label="Aide contextuelle">😎</button>
                             <span class="primo-aide" data-target="note-echelle">😎</span>
@@ -5359,7 +5360,7 @@
 
                             <!-- Boutons actions en haut à droite -->
                             <div style="margin-bottom: 20px; text-align: right; display: flex; gap: 10px; justify-content: flex-end;">
-                                <button onclick="afficherFormulairePDFDepuisEchelle()" class="btn btn-secondaire" title="Préparer un PDF avec cette échelle">
+                                <button onclick="afficherFormulairePDFDepuisEchelle()" class="btn btn-secondaire" data-tooltip="cn-preparer-pdf">
                                     📄 Préparer le PDF
                                 </button>
                                 <button onclick="creerNouvelleEchelle()" class="btn btn-principal">
@@ -5401,7 +5402,7 @@
                                 </div>
 
                                 <!-- Aperçu visuel -->
-                                <div id="apercuEchelleNiveaux" style="display: flex; gap: 10px; flex-wrap: wrap;
+                                <div id="apercuEchelleNiveaux" data-tooltip="cn-echelle-apercu" style="display: flex; gap: 10px; flex-wrap: wrap;
                      align-items: center; padding: 10px; background: white; border-radius: var(--radius-moyen); margin-bottom: 20px;">
                                     <!-- Généré par afficherApercuEchelle() -->
                                 </div>
@@ -5612,7 +5613,7 @@
                 <!-- Sous-section : Pratiques de notation (✨ AJOUTÉ 2 jan 2026) -->
                 <div id="construction-pratiques-notation" class="sous-section">
                     <h2 class="titre-avec-emoji-toggles">
-                        <span>Pratiques de notation</span>
+                        <span data-tooltip="cn-pratique-titre">Pratiques de notation</span>
                         <span class="titre-emoji-container">
                             <button class="btn-aide-contextuelle" data-aide="construction-pratiques" aria-label="Aide contextuelle">😎</button>
                             <span class="primo-aide" data-target="note-pratiques">😎</span>
@@ -5637,7 +5638,7 @@
                         <div class="sidebar-navigation">
                             <!-- Bouton bibliothèque (toujours visible) -->
                             <div class="u-mb-15">
-                                <button onclick="afficherBibliothequePratiques()" class="btn btn-principal" style="width: 100%; font-size: 0.9rem;">
+                                <button onclick="afficherBibliothequePratiques()" class="btn btn-principal" data-tooltip="cn-bibliotheque" style="width: 100%; font-size: 0.9rem;">
                                     Consulter la bibliothèque
                                 </button>
                             </div>
@@ -5695,7 +5696,7 @@
                                             <input type="text" id="mat-pratique-nom" class="controle-form" placeholder="Ex: PAN-Standards Littérature" onchange="mettreAJourNomPratiqueMat()">
                                         </div>
                                         <div class="groupe-form">
-                                            <label for="mat-pratique-type" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                            <label for="mat-pratique-type" data-tooltip="cn-pratique-type" style="font-weight: 600; display: block; margin-bottom: 6px;">
                                                 Type de pratique
                                             </label>
                                             <select id="mat-pratique-type" class="controle-form" onchange="changerTypePratiqueMat()">
@@ -5737,7 +5738,7 @@
                                     </div>
 
                                     <div class="groupe-form u-mt-15">
-                                        <label for="mat-pratique-discipline" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                        <label for="mat-pratique-discipline" data-tooltip="cn-pratique-discipline" style="font-weight: 600; display: block; margin-bottom: 6px;">
                                             Discipline
                                         </label>
                                         <select id="mat-pratique-discipline" class="controle-form" onchange="mettreAJourDisciplinePratiqueMat()">
@@ -5894,7 +5895,7 @@
                                     </p>
                                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: start;">
                                         <div class="groupe-form">
-                                            <label for="mat-echelle-id" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                            <label for="mat-echelle-id" data-tooltip="cn-pratique-echelle" style="font-weight: 600; display: block; margin-bottom: 6px;">
                                                 Échelle à utiliser
                                             </label>
                                             <select id="mat-echelle-id" class="controle-form" onchange="afficherPreviewEchelleMat(); peuplerDropdownNoteMaximaleMat()">
@@ -6261,7 +6262,7 @@
                                 <!-- Accordéon : Système de jetons -->
                                 <div class="carte accordeon u-mt-20" id="mat-accordeon-jetons">
                                     <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
-                                        <h3 style="margin: 0; font-size: 1rem;">Système de jetons</h3>
+                                        <h3 data-tooltip="cn-pratique-jetons" style="margin: 0; font-size: 1rem;">Système de jetons</h3>
                                         <span class="accordeon-chevron">▼</span>
                                     </div>
                                     <div class="accordeon-contenu">
@@ -6370,7 +6371,7 @@
 
                                 <!-- Actions finales -->
                                 <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
-                                    <button onclick="appliquerPratiqueAuCours(pratiqueEnEditionMateriel)" class="btn btn-principal">
+                                    <button onclick="appliquerPratiqueAuCours(pratiqueEnEditionMateriel)" class="btn btn-principal" data-tooltip="cn-pratique-appliquer">
                                         Appliquer au cours actif
                                     </button>
                                     <button onclick="sauvegarderPratiqueMaterielComplet()" class="btn btn-confirmer">
@@ -6390,7 +6391,7 @@
                 <!-- Sous-section : Rétroactions -->
                 <div id="construction-retroactions" class="sous-section">
                     <h2 class="titre-avec-emoji-toggles">
-                        <span>Cartouches de rétroaction</span>
+                        <span data-tooltip="cn-cartouche-titre">Cartouches de rétroaction</span>
                         <span class="titre-emoji-container">
                             <button class="btn-aide-contextuelle" data-aide="construction-cartouches" aria-label="Aide contextuelle">😎</button>
                             <span class="primo-aide" data-target="note-retroactions">😎</span>
@@ -6433,7 +6434,7 @@
 
                                 <!-- Boutons actions en haut à droite -->
                                 <div style="margin-bottom: 20px; text-align: right; display: flex; gap: 10px; justify-content: flex-end;">
-                                    <button onclick="afficherFormulairePDFDepuisCartouche()" class="btn btn-secondaire" title="Préparer un PDF avec cette cartouche">
+                                    <button onclick="afficherFormulairePDFDepuisCartouche()" class="btn btn-secondaire" data-tooltip="cn-preparer-pdf">
                                         📄 Préparer le PDF
                                     </button>
                                     <button onclick="creerNouvelleCartouche()" class="btn btn-principal">
@@ -6480,7 +6481,7 @@
                                     </div>
 
                             <!-- Grille + Échelle + Nom sur même ligne -->
-                            <div style="display: flex; gap: 15px; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap;">
+                            <div data-tooltip="cn-cartouche-selectors" style="display: flex; gap: 15px; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap;">
                                 <div class="groupe-form" style="flex: 0 0 200px; margin: 0;">
                                     <label>Grille (critères) :
                                         <span class="tooltip-aide" title="La rétroaction fournie à l'apprenant repose sur le croisement de deux éléments : les critères d'évaluation et les niveaux de performance. Ce croisement forme une grille descriptive qui précise : le niveau atteint, ce qui est maîtrisé, ce qui reste à travailler, et comment progresser. Une rétroaction efficace est spécifique, actionnable, utile et bienveillante. Il est préférable d'éviter le « sandwich » (positif-négatif-positif) qui n'atteint pas ces objectifs.">📌</span>
@@ -6506,7 +6507,7 @@
                             </div>
 
                             <div class="groupe-form">
-                                <label>Contexte de la rétroaction (optionnel) :</label>
+                                <label data-tooltip="cn-cartouche-contexte">Contexte de la rétroaction (optionnel) :</label>
                                 <textarea id="contexteCartouche" class="controle-form" rows="3"
                                     placeholder="Ex: Cette production porte sur l'analyse d'un texte argumentatif. L'étudiant·e devait démontrer sa capacité à..."></textarea>
                                 <small style="color: var(--gris-moyen); font-size: 0.85rem;">Ce texte apparaîtra au début de la
@@ -6522,7 +6523,7 @@
 
                                 <!-- MATRICE DE RÉTROACTION -->
                                 <div id="matriceRetroaction" class="u-hide">
-                            <h4 class="titre-bleu-mb-15">
+                            <h4 class="titre-bleu-mb-15" data-tooltip="cn-cartouche-matrice">
                                 Matrice des commentaires de rétroaction
                             </h4>
 
@@ -6684,7 +6685,7 @@
                         <!-- Barre supérieure -->
                         <div class="planif-header">
                             <div id="planif-selecteur-cartes" data-tooltip="planif-boutons-action">
-                                <select id="planif-liste-cartes" title="Carte active" data-tooltip="planif-selecteur-cours"></select>
+                                <select id="planif-liste-cartes" data-tooltip="planif-selecteur-cours"></select>
                                 <button class="planif-btn-carte" id="planif-btn-nouvelle-carte" title="Nouvelle carte">➕</button>
                                 <button class="planif-btn-carte planif-danger" id="planif-btn-supprimer-carte" title="Supprimer cette carte">❌</button>
                                 <button class="planif-btn-carte" id="planif-btn-dupliquer-carte" title="Dupliquer cette carte">📋</button>
@@ -6769,7 +6770,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <button id="planif-palette-aide-btn" class="planif-palette-aide-btn" title="Afficher l'aide" data-tooltip="planif-aide">?</button>
+                                <button id="planif-palette-aide-btn" class="planif-palette-aide-btn" data-tooltip="planif-aide">?</button>
                             </div>
                             <div id="planif-carte-aide" class="planif-carte-aide">
                                 <div class="planif-carte-aide-barre">
@@ -16008,7 +16009,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97.4';
-        const BUILD_ID = '0211-1150';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0211-1250';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';

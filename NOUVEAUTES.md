@@ -4,13 +4,21 @@
 
 ---
 
-## Beta 97.5
+## Beta 97.4
 
-**Tooltips au survol**
+**Alignement pedagogique**
 
-- **Aide contextuelle au survol** : Survolez les elements de l'en-tete et des reglages pour obtenir une description de leur role. 31 tooltips couvrant l'en-tete (logo, version, pratique, semaine, groupe-cours, navigation) et l'onglet Trimestre des reglages (6 panneaux, 12 champs, 3 boutons bibliotheque).
+- **Systeme de clonage** : Double-cliquer un element pour le cloner. Les clones partagent titre et description. Indicateur 🧬 avec surbrillance au survol.
+- **Verbes de liaison refondus** : 5 verbes verticaux automatiques et 2 verbes horizontaux au choix pour decrire les relations pedagogiques. Selection de verbe au clic sur un lien.
+- **Evaluations dans la carte** : Nouveau type Evaluation (rose/magenta) integrable dans les lecons avec champs Retroaction et Production.
+- **Carte d'aide flottante** : Deplacable, redimensionnable, fermable.
+
+**248 tooltips au survol**
+
+- **Aide contextuelle au survol** : Survolez n'importe quel element de l'interface pour obtenir une description de son role. 248 tooltips couvrant l'en-tete (8), les reglages (60), la planification (34), le tableau de bord (57), les evaluations (24), la construction de la note (31) et la navigation (34).
+- **Navigation enrichie** : Chaque onglet et sous-onglet affiche un tooltip decrivant le contenu de la section.
 - **Positionnement intelligent** : La bulle se place automatiquement pour rester visible dans la fenetre.
-- **Extensible** : Le systeme est concu pour etre etendu a tous les modules de l'application.
+- **Style soigne** : Bulles avec contour orange accent et fleche bordee assortie.
 
 ---
 

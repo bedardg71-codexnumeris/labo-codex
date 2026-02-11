@@ -2707,7 +2707,7 @@ function afficherCriteresTemp() {
                     </div>
                 </div>
                 <div class="groupe-form">
-                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Nom du critère</label>
+                    <label data-tooltip="cn-grille-critere" style="font-size: 0.85rem; color: var(--gris-moyen);">Nom du critère</label>
                     <input type="text"
                            class="controle-form"
                            value="${critere.nom}"
@@ -2716,7 +2716,7 @@ function afficherCriteresTemp() {
                            style="font-weight: 500;">
                 </div>
                 <div class="groupe-form">
-                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Type
+                    <label data-tooltip="cn-grille-type-critere" style="font-size: 0.85rem; color: var(--gris-moyen);">Type
                         <span class="tooltip-aide" title="Holistique : évalue l'ensemble en considérant les interrelations entre les éléments. Analytique : décompose et évalue chaque élément séparément. Algorithmique : calcul automatique basé sur une formule (ex : nombre d'erreurs en français écrit).">📌</span>
                     </label>
                     <select class="controle-form"
@@ -2964,7 +2964,7 @@ function afficherCriteresGrille(grille) {
                     </div>
                 </div>
                 <div class="groupe-form">
-                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Nom du critère</label>
+                    <label data-tooltip="cn-grille-critere" style="font-size: 0.85rem; color: var(--gris-moyen);">Nom du critère</label>
                     <input type="text"
                            class="controle-form"
                            value="${critere.nom}"
@@ -2972,7 +2972,7 @@ function afficherCriteresGrille(grille) {
                            style="font-weight: 500;">
                 </div>
                 <div class="groupe-form">
-                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Type
+                    <label data-tooltip="cn-grille-type-critere" style="font-size: 0.85rem; color: var(--gris-moyen);">Type
                         <span class="tooltip-aide" title="Holistique : évalue l'ensemble en considérant les interrelations entre les éléments. Analytique : décompose et évalue chaque élément séparément. Algorithmique : calcul automatique basé sur une formule (ex : nombre d'erreurs en français écrit).">📌</span>
                     </label>
                     <select class="controle-form"
