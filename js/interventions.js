@@ -418,7 +418,7 @@ function afficherListeInterventions() {
 
     interventions.forEach(intervention => {
         const badgeStatut = genererBadgeStatut(intervention.statut);
-        const badgeType = intervention.type === 'groupe' ? 'Groupe' : 'Individuel';
+        const badgeType = intervention.type === 'groupe' ? 'Groupe' : intervention.type === 'mio' ? 'MIO' : 'Individuel';
         const badgeNiveau = `Niveau ${intervention.niveauRai}`;
 
         html += `
@@ -667,6 +667,7 @@ function afficherFormulaireIntervention() {
                                 <select id="interventionType" class="controle-form" required>
                                     <option value="groupe">Groupe (séance en classe)</option>
                                     <option value="individuel">Individuel (rencontre en dispo)</option>
+                                    <option value="mio">Message écrit (MIO) à un groupe ciblé</option>
                                 </select>
                             </div>
                         </div>
@@ -808,6 +809,7 @@ function afficherFormulaireModification(interventionId) {
                                 <select id="interventionType" class="controle-form" required>
                                     <option value="groupe" ${intervention.type === 'groupe' ? 'selected' : ''}>Groupe (séance en classe)</option>
                                     <option value="individuel" ${intervention.type === 'individuel' ? 'selected' : ''}>Individuel (rencontre en dispo)</option>
+                                    <option value="mio" ${intervention.type === 'mio' ? 'selected' : ''}>Message écrit (MIO) à un groupe ciblé</option>
                                 </select>
                             </div>
                         </div>
@@ -1006,6 +1008,7 @@ function ouvrirIntervention(interventionId) {
                             <select id="interventionType" class="controle-form" required>
                                 <option value="groupe" ${intervention.type === 'groupe' ? 'selected' : ''}>Groupe (séance en classe)</option>
                                 <option value="individuel" ${intervention.type === 'individuel' ? 'selected' : ''}>Individuel (rencontre en dispo)</option>
+                                <option value="mio" ${intervention.type === 'mio' ? 'selected' : ''}>Message écrit (MIO) à un groupe ciblé</option>
                             </select>
                         </div>
                     </div>
@@ -1396,6 +1399,12 @@ function transfererPresencesVersModule(interventionId) {
     const intervention = obtenirIntervention(interventionId);
     if (!intervention) {
         console.error('❌ Intervention introuvable:', interventionId);
+        return;
+    }
+
+    // Les MIO ne génèrent pas d'entrées de présences/absences
+    if (intervention.type === 'mio') {
+        console.log('   ✉️ Type MIO — aucun impact sur les présences');
         return;
     }
 

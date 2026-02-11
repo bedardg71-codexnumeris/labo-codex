@@ -1,10 +1,24 @@
 # SESSION ACTIVE - BETA 97.4
 
-**Date** : 10 février 2026
-**Version** : Beta 97.4 (build 0210-1411)
-**Statut** : Corrections bibliothèques + badges développement actif + notification mise à jour + tooltips + onglet Dépistage
+**Date** : 11 février 2026
+**Version** : Beta 97.4 (build 0211-0706)
+**Statut** : Onglet Dépistage + notification toast + corrections UX + MIO + verrouillage présences
 
-## SESSION DU 10 FÉVRIER 2026
+## SESSION DU 11 FÉVRIER 2026
+
+### Travail accompli — Corrections et améliorations
+
+17. **Notification toast** : Bandeau de mise à jour remplacé par une notification compacte en haut à droite (slide-in, X pour fermer).
+18. **Double tooltip Aide** : Retiré l'attribut `title` obsolète du bouton Aide (le tooltip custom du parent suffisait).
+19. **Bouton Confidentiel** : Modal corrigé — utilise `.classList.add('actif')` / `.remove('actif')` au lieu de `u-hide` (compatible avec `.modal-overlay` CSS).
+    - `js/profil-etudiant.js` : `ouvrirModalConfidentiel()` et `fermerModalConfidentiel()` corrigés
+    - `index.html` : Retiré `style="display: none;"` et `u-hide` du modal
+20. **Type d'intervention MIO** : Nouveau type «Message écrit (MIO) à un groupe ciblé» ajouté aux interventions.
+    - `js/interventions.js` : Ajouté aux 3 dropdowns, badge "MIO", garde dans `transfererPresencesVersModule()` pour ne pas affecter les présences
+    - `js/profil-etudiant.js` : Icône ✉️ pour le type MIO
+21. **Verrouillage des présences** : Contrôle refait et intégré dans la barre de statistiques (Présents/Absents/Total).
+    - `js/saisie-presences.js` : Nouvelles fonctions `basculerVerrouillageDateActive()` et `mettreAJourControleVerrouillage()`, checkbox injecté par `restaurerCompteurPresences()`
+    - Ancien mécanisme `enteteDateSeance` remplacé par une approche autonome sans dépendance à `obtenirInfosJourCalendrier`
 
 ### Travail accompli — Onglet Dépistage (Réglages)
 
@@ -13,6 +27,8 @@
     - `js/navigation.js` : Ajout case `reglages-depistage` qui réutilise `initialiserPreferencesV2()`
     - `index.html` : HTML déplacé vers `<div id="reglages-depistage" class="sous-section">`, description Préférences mise à jour
     - L'onglet Préférences ne contient plus que : Outils, Affichage, Expérience visuelle, Navigation
+
+## SESSION DU 10 FÉVRIER 2026
 
 ### Travail accompli — Tooltips au survol
 
