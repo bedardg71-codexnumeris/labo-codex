@@ -4,6 +4,18 @@
 
 ---
 
+## Beta 97.5
+
+**Nouveau theme Ocean & Boussole**
+
+- **Interface sombre definitive** : L'application adopte une palette ocean profond avec des accents sarcelle et laiton. Fonds sombres, textes clairs, contraste optimise.
+- **Tooltips** : Bulles bleu-vert profond avec bordures sarcelle.
+- **Navigation** : Glassmorphism teinte sarcelle translucide.
+- **Graphiques** : Grilles et labels adaptes pour le fond sombre.
+- **Impression** : Les couleurs repassent en clair automatiquement a l'impression.
+
+---
+
 ## Beta 97.4
 
 **Alignement pedagogique**
