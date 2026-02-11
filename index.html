@@ -435,7 +435,7 @@
         }
 
         .bandeau-mise-a-jour-btn:hover {
-            background: #333;
+            background: var(--surface-carte, #1a3a48);
         }
 
         /* ===============================
@@ -734,7 +734,7 @@
         body.mode-archive:not(.mode-ecriture-temp) select:not(#selectTrimestreActif):not(#select-mode):not([id^="filtre-"]):not([id^="v2-"]):not(#select-rappel-backup) {
             pointer-events: none;
             opacity: 0.7;
-            background-color: #f5f5f5;
+            background-color: var(--surface-carte, #1a3a48);
         }
 
         /* ===============================
@@ -1223,11 +1223,11 @@
         @keyframes fadeIn {
             from {
                 opacity: 0;
-                background-color: #fff;
+                background-color: var(--surface-conteneur, #142428);
             }
             to {
                 opacity: 1;
-                background-color: #ffeb3b;
+                background-color: rgba(200, 160, 96, 0.3);
             }
         }
 
@@ -2537,7 +2537,7 @@
         .alerte-warning-orange-clair {
             margin: 15px 0;
             padding: 15px;
-            background: #fff3e0;
+            background: rgba(200, 160, 96, 0.12);
             border-left: 4px solid #ff9800;
             border-radius: var(--radius-moyen);
         }
@@ -3043,7 +3043,7 @@
             margin-top: 10px;
         }
         .carte-orange-my15 {
-            background: #fff3e0;
+            background: rgba(200, 160, 96, 0.12);
             padding: 15px;
             border-radius: 6px;
             margin: 15px 0;
@@ -3137,7 +3137,7 @@
             margin-bottom: 20px;
         }
         .bg-f0f8ff { background: var(--bleu-tres-pale); }
-        .bg-fff9e6 { background: #fff9e6; }
+        .bg-fff9e6 { background: rgba(200, 160, 96, 0.1); }
 
         /* Textes avec tailles et marges */
         .text-09-mb10 {
@@ -3444,13 +3444,13 @@
         }
 
         .badge-jeton-soupcon {
-            background-color: #fff3e0;
+            background-color: rgba(200, 160, 96, 0.12);
             color: #e65100;
             border: 1px solid #ff9800;
         }
 
         .badge-jeton-delai {
-            background-color: #fff3e0;
+            background-color: rgba(200, 160, 96, 0.12);
             color: #e65100;
             border: 1px solid #ff9800;
         }
@@ -3470,7 +3470,7 @@
         }
 
         .badge-statut.non-evalue {
-            background-color: #f5f5f5;
+            background-color: var(--surface-carte, #1a3a48);
             color: #757575;
             border: 1px solid #bdbdbd;
         }
@@ -6147,7 +6147,7 @@
 
                                             <!-- Section Mode Seuils critiques (Xavier C.-T.) -->
                                             <div id="mat-config-mode-seuils-critiques" style="display: none;">
-                                                <div style="margin-bottom: 15px; padding: 12px; background: #fff3e0; border-left: 3px solid #ff9800; border-radius: 6px;">
+                                                <div style="margin-bottom: 15px; padding: 12px; background: rgba(200, 160, 96, 0.12); border-left: 3px solid #ff9800; border-radius: 6px;">
                                                     <p style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
                                                         <strong>Seuils critiques (Xavier C.-T.)</strong> : Tous les objectifs doivent atteindre un niveau minimum.
                                                         Bonus pour les objectifs au niveau supérieur.
@@ -9917,7 +9917,7 @@
                         </div>
 
                         <!-- Nettoyage -->
-                        <div class="carte-bleu-pale-p15-mb20" style="background: #fff3e0;">
+                        <div class="carte-bleu-pale-p15-mb20" style="background: rgba(200, 160, 96, 0.12);">
                             <h4 style="color: #ff6f00; margin-bottom: 10px;">Nettoyage des données</h4>
                             <p>
                                 Supprime toutes les captures enregistrées. Cette action est irréversible.
@@ -11504,7 +11504,7 @@
                         <h4 style="margin: 25px 0 15px 0; color: var(--bleu-principal); font-size: 0.95rem; border-top: 1px solid #e0e0e0; padding-top: 20px;">Seuils de détection avancés</h4>
 
                         <!-- Seuil progression -->
-                        <div style="margin-bottom: 15px; padding: 12px; background: #f5f5f5; border-radius: 6px;">
+                        <div style="margin-bottom: 15px; padding: 12px; background: var(--surface-carte, #1a3a48); border-radius: 6px;">
                             <label for="v2-seuil-progression" style="font-weight: 600; display: block; margin-bottom: 8px;" data-tooltip="depist-seuil-progression">
                                 Progression des artefacts
                                 <span id="v2-valeur-progression" style="margin-left: 10px; color: var(--bleu-principal);">10 points (%)</span>
@@ -11524,7 +11524,7 @@
                         </div>
 
                         <!-- Direction du risque -->
-                        <div style="margin-bottom: 15px; padding: 12px; background: #f5f5f5; border-radius: 6px;">
+                        <div style="margin-bottom: 15px; padding: 12px; background: var(--surface-carte, #1a3a48); border-radius: 6px;">
                             <label for="v2-seuil-risque" style="font-weight: 600; display: block; margin-bottom: 8px;" data-tooltip="depist-seuil-direction">
                                 Direction du risque
                                 <span id="v2-valeur-risque" style="margin-left: 10px; color: var(--bleu-principal);">5 points (%)</span>
@@ -11544,7 +11544,7 @@
                         </div>
 
                         <!-- Défi spécifique -->
-                        <div style="margin-bottom: 15px; padding: 12px; background: #f5f5f5; border-radius: 6px;">
+                        <div style="margin-bottom: 15px; padding: 12px; background: var(--surface-carte, #1a3a48); border-radius: 6px;">
                             <label for="v2-seuil-defi" style="font-weight: 600; display: block; margin-bottom: 8px;" data-tooltip="depist-seuil-defi">
                                 Seuil de défi spécifique
                                 <span id="v2-valeur-defi" style="margin-left: 10px; color: var(--bleu-principal);">70%</span>
@@ -11605,7 +11605,7 @@
                                 </div>
 
                                 <!-- Seuil Acceptable -->
-                                <div class="groupe-form" style="padding: 12px; background: #fff8e1; border-radius: 6px; border-left: 4px solid #ffc107;">
+                                <div class="groupe-form" style="padding: 12px; background: rgba(200, 160, 96, 0.1); border-radius: 6px; border-left: 4px solid #ffc107;">
                                     <label for="v2-seuil-acceptable" style="font-weight: 600; display: block; margin-bottom: 8px; color: #f57f17;" data-tooltip="depist-seuil-acceptable">
                                         Acceptable si inférieur à
                                     </label>
@@ -11799,7 +11799,7 @@
                         </div>
                         <div class="accordeon-contenu">
                             <!-- Réinitialisation -->
-                            <div style="padding: 15px; background: #fff3e0; border-radius: var(--radius-grand); margin-top: 15px;">
+                            <div style="padding: 15px; background: rgba(200, 160, 96, 0.12); border-radius: var(--radius-grand); margin-top: 15px;">
                                 <h4 style="color: #e65100; margin-bottom: 10px;" data-tooltip="donnees-reinitialiser">Réinitialisation complète</h4>
                                 <p class="u-mb-15">
                                     Efface <strong>toutes</strong> les données et revient à l'état initial.
@@ -13245,7 +13245,7 @@
                             <ol>
                                 <li>Lors de la correction, noter le code de chaque erreur rencontrée</li>
                                 <li>Dans le formulaire d'évaluation, saisir les codes séparés par des points-virgules :
-                                    <div style="background: #f5f5f5; padding: 10px; border-radius: var(--radius-moyen); margin: 10px 0; font-family: monospace;">
+                                    <div style="background: var(--surface-carte, #1a3a48); padding: 10px; border-radius: var(--radius-moyen); margin: 10px 0; font-family: monospace;">
                                         3;3;1;4;4;6;1
                                     </div>
                                 </li>
@@ -13548,7 +13548,7 @@
                                 <li>Observer les messages dans la console</li>
                             </ol>
                             <p><strong>✅ Messages attendus dans la console :</strong></p>
-                            <pre style="background: #f5f5f5; padding: 10px; border-radius: var(--radius-moyen); font-size: 0.85rem;">✅ Module Interprétation initialisé
+                            <pre style="background: var(--surface-carte, #1a3a48); padding: 10px; border-radius: var(--radius-moyen); font-size: 0.85rem;">✅ Module Interprétation initialisé
 ✅ 1 grille(s) chargée(s) dans le sélecteur de référence
 ✅ Grille de référence: "Grille SRPNF Littérature" (5 critères)</pre>
                         </div>
@@ -14212,7 +14212,7 @@
                                 le fichier créditera les trois personnes dans l'ordre chronologique.
                             </p>
 
-                            <p style="margin-top: 15px; padding: 10px; background: #fff3e0; border-left: 4px solid #f57c00; border-radius: var(--radius-moyen);">
+                            <p style="margin-top: 15px; padding: 10px; background: rgba(200, 160, 96, 0.12); border-left: 4px solid #f57c00; border-radius: var(--radius-moyen);">
                                 💡 <strong>Conseil :</strong> Même si tu n'as fait que de petites modifications,
                                 entrez ton nom lors de l'export. Cela permet de tracer l'évolution du matériel
                                 et de reconnaître le travail de chacun·e dans la communauté pédagogique.
