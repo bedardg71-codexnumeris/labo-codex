@@ -92,7 +92,7 @@ function afficherAccueilRetour(conteneur) {
             const detail = [sigle, groupe ? `Groupe ${groupe}` : '', session && annee ? `${session}${annee}` : ''].filter(Boolean).join(' \u2022 ');
 
             coursHTML = `
-                <div class="accueil-cours-actif">
+                <div class="accueil-cours-actif" style="flex: 1; min-width: 0; margin-bottom: 0;">
                     <span class="accueil-cours-icone">&#x1F4DA;</span>
                     <div class="accueil-cours-info">
                         <div class="accueil-cours-nom">${echapperHtml(titre || sigle)}</div>
@@ -104,7 +104,7 @@ function afficherAccueilRetour(conteneur) {
     } else {
         // Mode normal : invitation à explorer la démo
         coursHTML = `
-            <div class="accueil-cours-actif accueil-invite-demo" onclick="if(typeof entrerEnDemo==='function') entrerEnDemo();" style="cursor: pointer;">
+            <div class="accueil-cours-actif accueil-invite-demo" onclick="if(typeof entrerEnDemo==='function') entrerEnDemo();" style="cursor: pointer; flex: 1; min-width: 0; margin-bottom: 0;">
                 <span class="accueil-cours-icone">&#x1F5FA;&#xFE0F;</span>
                 <div class="accueil-cours-info">
                     <div class="accueil-cours-nom">Donn\u00e9es de d\u00e9monstration</div>
@@ -114,12 +114,32 @@ function afficherAccueilRetour(conteneur) {
         `;
     }
 
+    // Section toggle tooltips (miroir de Reglages > Preferences > Navigation)
+    const prefsAff = db.getSync('preferencesAffichage', {});
+    const tooltipsActifs = prefsAff.tooltips !== false;
+    const tooltipToggleHTML = `
+        <div class="accueil-cours-actif" style="flex: 1; min-width: 0; margin-bottom: 0;">
+            <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; margin: 0; width: 100%;">
+                <span style="font-size: 1.5rem;">\uD83E\uDDED</span>
+                <input type="checkbox" id="checkbox-tooltips-accueil" ${tooltipsActifs ? 'checked' : ''}
+                    onchange="if(typeof definirTooltips==='function') definirTooltips(this.checked);">
+                <div>
+                    <div class="accueil-cours-nom">Info-bulles d\u2019aide au survol</div>
+                    <div class="accueil-cours-detail">Affiche des descriptions contextuelles au survol des \u00e9l\u00e9ments de l\u2019interface.</div>
+                </div>
+            </label>
+        </div>
+    `;
+
     conteneur.innerHTML = `
         <div class="accueil-hero">
             <h1>Que souhaitez-vous faire\u00a0?</h1>
         </div>
 
-        ${coursHTML}
+        <div style="display: flex; gap: 15px; margin-bottom: 25px;">
+            ${coursHTML}
+            ${tooltipToggleHTML}
+        </div>
 
         <div class="accueil-cartes accueil-cartes--8">
             <div class="accueil-carte" onclick="afficherSection('planification'); setTimeout(function(){ afficherSousSection('planification-carte'); }, 100);">
