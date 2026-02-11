@@ -186,6 +186,8 @@ document.addEventListener('keydown', function(e) {
 function definirTooltips(etat) {
     actif = !!etat;
     if (!actif) masquer();
+    // Synchroniser tous les checkboxes miroirs (Preferences + Accueil)
+    document.querySelectorAll('#checkbox-tooltips, #checkbox-tooltips-accueil').forEach(cb => cb.checked = actif);
     // Persister dans preferencesAffichage
     try {
         const prefs = window.db ? window.db.getSync('preferencesAffichage', {}) : {};
@@ -202,8 +204,7 @@ function initialiserTooltips() {
     } catch (e) {
         actif = true;
     }
-    const checkbox = document.getElementById('checkbox-tooltips');
-    if (checkbox) checkbox.checked = actif;
+    document.querySelectorAll('#checkbox-tooltips, #checkbox-tooltips-accueil').forEach(cb => cb.checked = actif);
 }
 
 document.addEventListener('DOMContentLoaded', initialiserTooltips);
