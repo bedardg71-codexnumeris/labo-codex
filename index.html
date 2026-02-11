@@ -307,7 +307,7 @@
            NOTIFICATION MISE À JOUR (toast haut-droite)
            =============================== */
         .bandeau-mise-a-jour {
-            background: linear-gradient(135deg, #1b6d2f, #28a745);
+            background: linear-gradient(135deg, #28a745, #1b6d2f);
             color: white;
             padding: 14px 18px;
             font-weight: bold;
@@ -15961,7 +15961,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97.4';
-        const BUILD_ID = '0211-0706';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0211-0718';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
@@ -16120,9 +16120,9 @@
             const heureStr = maintenant.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' });
 
             if (distant) {
-                texte.innerHTML = `Beta ${beta} · Build ${build}<br>${dateStr} à ${heureStr}`;
+                texte.innerHTML = `Une mise à jour de la Beta ${beta} (build ${build}) a été déployée en arrière-plan pendant que vous travaillez. Rechargez la page si vous souhaitez l\u2019activer.`;
             } else {
-                texte.innerHTML = `Beta ${beta} · Build ${build}<br>${dateStr} à ${heureStr}`;
+                texte.innerHTML = `Beta ${beta} · Build ${build} — ${dateStr} à ${heureStr}`;
             }
 
             bandeau.classList.add('visible');
