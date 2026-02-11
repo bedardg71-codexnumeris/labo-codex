@@ -45,21 +45,8 @@ const TOOLTIPS = {
     // EN-TETE — Zone 4 : Navigation
     // =================================================================
 
-    'entete-nav-principale':
-        'Modules principaux du syst\u00e8me. Chaque onglet ouvre une section d\u00e9di\u00e9e avec sa propre sous-navigation.',
-
-    'entete-sous-nav':
-        'Sous-sections du module actif. Ce menu change selon l\u2019onglet principal s\u00e9lectionn\u00e9.',
-
     'entete-reglages':
         'R\u00e9glages de base : configuration du trimestre actif, du cours, du groupe-cours, de l\u2019horaire et des pr\u00e9f\u00e9rences.',
-
-    // =================================================================
-    // REGLAGES — Sous-navigation
-    // =================================================================
-
-    'reglages-sous-nav':
-        'Configuration de base de l\u2019application. Commence par Trimestre pour d\u00e9finir le cadre organisationnel.',
 
     // =================================================================
     // REGLAGES — Panneaux du sous-onglet Trimestre
@@ -193,9 +180,6 @@ const TOOLTIPS = {
     // REGLAGES — Depistage
     // =================================================================
 
-    'depist-sous-nav':
-        'Configuration de la d\u00e9tection des patterns et de l\u2019identification des forces et d\u00e9fis. Influence la sensibilit\u00e9 des alertes du tableau de bord.',
-
     // --- Configuration du depistage ---
 
     'depist-activer-patterns':
@@ -247,9 +231,6 @@ const TOOLTIPS = {
     // =================================================================
     // REGLAGES — Donnees
     // =================================================================
-
-    'donnees-sous-nav':
-        'Sauvegarde, restauration, captures de progression et maintenance de l\u2019application.',
 
     // --- Sauvegarde et restauration ---
 
@@ -728,7 +709,262 @@ const TOOLTIPS = {
         'Codes num\u00e9riques des erreurs s\u00e9par\u00e9s par points-virgules. Voir la grille pour la correspondance codes \u2192 cat\u00e9gories.',
 
     'eval-niveau-idme':
-        'Niveau calcul\u00e9 automatiquement. Modifier uniquement si n\u00e9cessaire (ex. : reprise cibl\u00e9e).'
+        'Niveau calcul\u00e9 automatiquement. Modifier uniquement si n\u00e9cessaire (ex. : reprise cibl\u00e9e).',
+
+    // =================================================================
+    // CONSTRUCTION DE LA NOTE — Concepts transversaux
+    // =================================================================
+
+    'cn-bibliotheque':
+        'G\u00e9rer les ressources : cr\u00e9er, importer depuis la biblioth\u00e8que communautaire, dupliquer, exporter ou supprimer.',
+
+    'cn-pratiques-compat':
+        'Pratiques compatibles : SOM = Sommative, STD = PAN-Standards, SPE = Sp\u00e9cifique, DEN = D\u00e9nombrement.',
+
+    'cn-preparer-pdf':
+        'G\u00e9n\u00e9rer un PDF de la ressource. Choisir la grille et l\u2019\u00e9chelle, puis pr\u00e9visualiser.',
+
+    // =================================================================
+    // CONSTRUCTION DE LA NOTE — Aper\u00e7u
+    // =================================================================
+
+    'cn-apercu':
+        'D\u00e9compte des ressources configur\u00e9es : productions, grilles, \u00e9chelles, pratiques et cartouches.',
+
+    'cn-ressources':
+        'Nombre total de ressources disponibles (locales + biblioth\u00e8que) pour chaque type.',
+
+    // =================================================================
+    // CONSTRUCTION DE LA NOTE — Productions
+    // =================================================================
+
+    'cn-prod-titre':
+        'D\u00e9finir les productions \u00e9tudiantes : portfolio, artefacts et travaux avec pond\u00e9rations et \u00e9ch\u00e9ances.',
+
+    'cn-prod-type':
+        'Portfolio (conteneur d\u2019artefacts pond\u00e9r\u00e9), Artefact (production du portfolio) ou Travail (\u00e9valuation ind\u00e9pendante).',
+
+    'cn-prod-ponderation':
+        'Poids dans la note finale. Les artefacts contribuent au portfolio ; les portfolios et travaux se partagent le 100%.',
+
+    'cn-prod-activite':
+        'Nom de l\u2019activit\u00e9 p\u00e9dagogique associ\u00e9e \u00e0 cette production. Cliquer sur \u270f\ufe0f pour modifier.',
+
+    'cn-prod-grille':
+        'Associer une grille d\u2019\u00e9valuation \u00e0 cette production. D\u00e9finit les crit\u00e8res utilis\u00e9s lors de l\u2019\u00e9valuation.',
+
+    'cn-prod-objectif':
+        'Ce que l\u2019\u00e9tudiant sera capable de faire. Utilis\u00e9 dans la r\u00e9troaction et le dossier PDF.',
+
+    'cn-prod-tache':
+        'Ce qui est demand\u00e9 \u00e0 l\u2019\u00e9tudiant. Appara\u00eet dans le dossier PDF de r\u00e9troaction.',
+
+    'cn-prod-tableau':
+        'Tableau r\u00e9capitulatif de toutes les productions : titre, type, pond\u00e9ration et \u00e9ch\u00e9ance.',
+
+    // =================================================================
+    // CONSTRUCTION DE LA NOTE — Grilles de crit\u00e8res
+    // =================================================================
+
+    'cn-grille-titre':
+        'Grilles r\u00e9utilisables avec crit\u00e8res pond\u00e9r\u00e9s. Chaque grille d\u00e9finit les crit\u00e8res d\u2019\u00e9valuation d\u2019une production.',
+
+    'cn-grille-critere':
+        'Crit\u00e8res avec nom, type, pond\u00e9ration et description. La pond\u00e9ration totale doit atteindre 100%.',
+
+    'cn-grille-type-critere':
+        'M\u00e9thode d\u2019\u00e9valuation : Holistique (attribution manuelle d\u2019un niveau) ou Algorithmique (calcul automatique).',
+
+    'cn-grille-ponderation-totale':
+        'Somme des pond\u00e9rations de tous les crit\u00e8res. Doit atteindre 100% pour que la grille soit valide.',
+
+    // =================================================================
+    // CONSTRUCTION DE LA NOTE — \u00c9chelles de performance
+    // =================================================================
+
+    'cn-echelle-titre':
+        '\u00c9chelles de conversion pourcentage \u2192 niveaux de performance. Configurer les seuils et couleurs.',
+
+    'cn-echelle-niveau':
+        'Niveaux avec code, nom, plages de pourcentage, valeur ponctuelle et couleur.',
+
+    'cn-echelle-valeur-ponctuelle':
+        'Valeur num\u00e9rique fixe attribu\u00e9e au niveau pour les calculs de note. Limite l\u2019impact des r\u00e9sultats extr\u00eames.',
+
+    'cn-echelle-apercu':
+        'Barre color\u00e9e montrant les plages de chaque niveau. V\u00e9rifie visuellement la coh\u00e9rence des seuils.',
+
+    // =================================================================
+    // CONSTRUCTION DE LA NOTE — Cartouches de r\u00e9troaction
+    // =================================================================
+
+    'cn-cartouche-titre':
+        'Matrices de commentaires automatiques. Chaque cartouche g\u00e9n\u00e8re une r\u00e9troaction par crit\u00e8re \u00d7 niveau.',
+
+    'cn-cartouche-selectors':
+        'La grille d\u00e9termine les crit\u00e8res (lignes), l\u2019\u00e9chelle d\u00e9termine les niveaux (colonnes) de la matrice.',
+
+    'cn-cartouche-contexte':
+        'Texte introductif optionnel affich\u00e9 au d\u00e9but de la r\u00e9troaction si l\u2019option \u00ab Contexte \u00bb est coch\u00e9e.',
+
+    'cn-cartouche-matrice':
+        'Tableau crit\u00e8res \u00d7 niveaux. Chaque cellule est un commentaire de r\u00e9troaction. Assemblage automatique lors de l\u2019\u00e9valuation.',
+
+    // =================================================================
+    // CONSTRUCTION DE LA NOTE — Pratiques de notation
+    // =================================================================
+
+    'cn-pratique-titre':
+        'Assemblage final : type de pratique, \u00e9chelle, structure des \u00e9valuations et syst\u00e8me de jetons.',
+
+    'cn-pratique-type':
+        'SOM = Sommative (moyenne pond\u00e9r\u00e9e), STD = PAN-Standards (meilleures \u00e9valuations), SPE = Sp\u00e9cifique, DEN = D\u00e9nombrement.',
+
+    'cn-pratique-discipline':
+        'Discipline acad\u00e9mique associ\u00e9e. Filtre les ressources de la biblioth\u00e8que par pertinence.',
+
+    'cn-pratique-echelle':
+        '\u00c9chelle IDME utilis\u00e9e pour convertir les pourcentages en niveaux. Configurable dans \u00c9chelles de performance.',
+
+    'cn-pratique-jetons':
+        'Ressources limit\u00e9es (D\u00e9lai, Reprise, Reprise cibl\u00e9e) pour adapter le parcours \u00e9valuatif de l\u2019\u00e9tudiant.',
+
+    'cn-pratique-appliquer':
+        'D\u00e9finir cette pratique comme configuration active du cours. Conditionne tous les calculs de notes et indices.',
+
+    // =================================================================
+    // NAVIGATION PRINCIPALE — Onglets principaux
+    // =================================================================
+
+    'nav-accueil':
+        'Retour \u00e0 la page d\u2019accueil du syst\u00e8me.',
+
+    'nav-tableau-bord':
+        'Vue d\u2019ensemble du groupe : indices A-C-E-P, patterns d\u2019apprentissage, niveaux R\u00e0I et profils individuels.',
+
+    'nav-presences':
+        'Suivi de l\u2019assiduit\u00e9 : statistiques de pr\u00e9sence, calendrier des s\u00e9ances et saisie des pr\u00e9sences.',
+
+    'nav-evaluations':
+        '\u00c9valuation des productions : grilles crit\u00e9ri\u00e9es, niveaux IDME et r\u00e9troaction diff\u00e9renci\u00e9e automatique.',
+
+    'nav-construction':
+        'Configuration de l\u2019\u00e9valuation : productions, grilles, \u00e9chelles, cartouches et pratiques de notation.',
+
+    'nav-boite-outils':
+        'Utilitaires compl\u00e9mentaires pour l\u2019enseignement.',
+
+    'nav-planification':
+        'Planification p\u00e9dagogique : alignement objectifs-activit\u00e9s-\u00e9valuations et organisation des le\u00e7ons.',
+
+    'nav-aide':
+        'Documentation, tutoriels et ressources d\u2019aide.',
+
+    // =================================================================
+    // SOUS-NAVIGATION — Tableau de bord
+    // =================================================================
+
+    'nav-tdb-apercu':
+        'Observer les indices A-C-E-P, les patterns, les niveaux R\u00e0I et le d\u00e9veloppement du groupe via des graphiques.',
+
+    'nav-tdb-liste':
+        'Tableau complet des \u00e9tudiants avec indices, patterns et niveaux R\u00e0I. Filtrable et triable par colonne.',
+
+    'nav-tdb-profil':
+        'Fiche individuelle d\u2019un \u00e9tudiant : productions, engagement, progression, habilet\u00e9s, accompagnement et rapport.',
+
+    'nav-tdb-interventions':
+        'Planifier et documenter les interventions R\u00e0I de niveaux 2 (pr\u00e9ventif) et 3 (intensif).',
+
+    // =================================================================
+    // SOUS-NAVIGATION — Pr\u00e9sences
+    // =================================================================
+
+    'nav-pres-apercu':
+        'Statistiques synth\u00e9tiques : taux d\u2019assiduit\u00e9 moyen, s\u00e9ances donn\u00e9es, prochaine s\u00e9ance et effectif.',
+
+    'nav-pres-calendrier':
+        'Calendrier du trimestre : grilles mensuelles, jours de cours, cong\u00e9s et reprises.',
+
+    'nav-pres-saisie':
+        'Saisir les pr\u00e9sences et absences pour chaque s\u00e9ance du groupe.',
+
+    // =================================================================
+    // SOUS-NAVIGATION — \u00c9valuations
+    // =================================================================
+
+    'nav-eval-apercu':
+        'Statistiques synth\u00e9tiques : taux de compl\u00e9tion moyen, productions r\u00e9alis\u00e9es et configur\u00e9es.',
+
+    'nav-eval-liste':
+        'Tableau exhaustif des \u00e9valuations : r\u00e9sultats, niveaux IDME, jetons et dossiers PDF.',
+
+    'nav-eval-evaluer':
+        'Interface d\u2019\u00e9valuation crit\u00e9ri\u00e9e avec grille, \u00e9chelle, cartouche, jetons et r\u00e9troaction automatique.',
+
+    'nav-eval-annoter':
+        'Annoter les travaux soumis par les \u00e9tudiants.',
+
+    'nav-eval-archivage':
+        'Archiver les \u00e9valuations et les donn\u00e9es du trimestre.',
+
+    // =================================================================
+    // SOUS-NAVIGATION — Construction de la note
+    // =================================================================
+
+    'nav-cn-apercu':
+        'D\u00e9compte des ressources configur\u00e9es : productions, grilles, \u00e9chelles, pratiques et cartouches.',
+
+    'nav-cn-productions':
+        'D\u00e9finir les productions \u00e9tudiantes : portfolio, artefacts et travaux avec pond\u00e9rations et \u00e9ch\u00e9ances.',
+
+    'nav-cn-grilles':
+        'Cr\u00e9er des grilles r\u00e9utilisables avec crit\u00e8res nomm\u00e9s, typ\u00e9s et pond\u00e9r\u00e9s.',
+
+    'nav-cn-echelles':
+        'Configurer les \u00e9chelles IDME : seuils, valeurs ponctuelles, couleurs et aper\u00e7u visuel.',
+
+    'nav-cn-cartouches':
+        'Cr\u00e9er des matrices de commentaires automatiques (crit\u00e8res \u00d7 niveaux) pour la r\u00e9troaction diff\u00e9renci\u00e9e.',
+
+    'nav-cn-pratiques':
+        'Assembler une pratique compl\u00e8te (SOM, STD, SPE, DEN) en associant \u00e9chelle, structure et jetons.',
+
+    // =================================================================
+    // SOUS-NAVIGATION — Bo\u00eete \u00e0 outils
+    // =================================================================
+
+    'nav-bao-tirage':
+        'Tirage au sort al\u00e9atoire dans le groupe d\u2019\u00e9tudiants.',
+
+    // =================================================================
+    // SOUS-NAVIGATION — Planification
+    // =================================================================
+
+    'nav-planif-alignement':
+        'Carte mentale interactive : visualiser l\u2019alignement objectifs \u2192 activit\u00e9s \u2192 \u00e9valuations.',
+
+    'nav-planif-organisateur':
+        'Calendrier des s\u00e9quences sur 15 semaines et plans de le\u00e7ons avec enseignement explicite en 5 \u00e9tapes.',
+
+    // =================================================================
+    // SOUS-NAVIGATION — R\u00e9glages
+    // =================================================================
+
+    'nav-reg-trimestre':
+        'Configuration du trimestre, du cours, de l\u2019enseignant, du groupe d\u2019\u00e9tudiants, de l\u2019horaire et du groupe-cours.',
+
+    'nav-reg-preferences':
+        'Personnaliser l\u2019interface : outils actifs, ressources affich\u00e9es, effets visuels et comportement de navigation.',
+
+    'nav-reg-depistage':
+        'Configurer les seuils de d\u00e9tection des patterns et d\u2019interpr\u00e9tation des indices A-C-P.',
+
+    'nav-reg-donnees':
+        'Sauvegarde, restauration, snapshots A-C-P-E, export anonymis\u00e9, r\u00e9initialisation et maintenance.',
+
+    'nav-reg-apropos':
+        'Notes de version du syst\u00e8me.'
 };
 
 // Export global

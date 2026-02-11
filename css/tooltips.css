@@ -11,6 +11,7 @@
     color: #e0e0e0;
     font-size: 0.85rem;
     line-height: 1.45;
+    border: 1.5px solid var(--orange-accent, #ff6b35);
     box-shadow: var(--shadow-fort, 0 4px 12px rgba(0, 0, 0, 0.4));
     pointer-events: none;
     opacity: 0;
@@ -29,48 +30,48 @@
     display: block;
 }
 
-/* Fleche — triangle CSS pur, amorce de 12px */
+/* Fleche — carre tourne a 45° avec bordure orange sur l'amorce */
 .tooltip-fleche {
     position: absolute;
-    width: 0;
-    height: 0;
-    border-style: solid;
+    width: 12px;
+    height: 12px;
+    background: var(--bleu-fonce, #1a1a2e);
 }
 
 /* Bulle A DROITE de l'element -> fleche pointe vers la GAUCHE */
 .tooltip-bulle[data-position="droite"] .tooltip-fleche {
-    left: -12px;
+    left: -7px;
     top: 50%;
-    margin-top: -8px;
-    border-width: 8px 12px 8px 0;
-    border-color: transparent var(--bleu-fonce, #1a1a2e) transparent transparent;
+    transform: translateY(-50%) rotate(45deg);
+    border-left: 1.5px solid var(--orange-accent, #ff6b35);
+    border-bottom: 1.5px solid var(--orange-accent, #ff6b35);
 }
 
 /* Bulle A GAUCHE de l'element -> fleche pointe vers la DROITE */
 .tooltip-bulle[data-position="gauche"] .tooltip-fleche {
-    right: -12px;
+    right: -7px;
     top: 50%;
-    margin-top: -8px;
-    border-width: 8px 0 8px 12px;
-    border-color: transparent transparent transparent var(--bleu-fonce, #1a1a2e);
+    transform: translateY(-50%) rotate(45deg);
+    border-right: 1.5px solid var(--orange-accent, #ff6b35);
+    border-top: 1.5px solid var(--orange-accent, #ff6b35);
 }
 
 /* Bulle SOUS l'element -> fleche pointe vers le HAUT (fallback) */
 .tooltip-bulle[data-position="bas"] .tooltip-fleche {
-    top: -12px;
+    top: -7px;
     left: 50%;
-    margin-left: -8px;
-    border-width: 0 8px 12px 8px;
-    border-color: transparent transparent var(--bleu-fonce, #1a1a2e) transparent;
+    transform: translateX(-50%) rotate(45deg);
+    border-left: 1.5px solid var(--orange-accent, #ff6b35);
+    border-top: 1.5px solid var(--orange-accent, #ff6b35);
 }
 
 /* Bulle AU-DESSUS de l'element -> fleche pointe vers le BAS (fallback) */
 .tooltip-bulle[data-position="haut"] .tooltip-fleche {
-    bottom: -12px;
+    bottom: -7px;
     left: 50%;
-    margin-left: -8px;
-    border-width: 12px 8px 0 8px;
-    border-color: var(--bleu-fonce, #1a1a2e) transparent transparent transparent;
+    transform: translateX(-50%) rotate(45deg);
+    border-right: 1.5px solid var(--orange-accent, #ff6b35);
+    border-bottom: 1.5px solid var(--orange-accent, #ff6b35);
 }
 
 .tooltip-contenu {
@@ -88,7 +89,8 @@ button[data-tooltip],
 select[data-tooltip],
 a[data-tooltip],
 .accordeon-header[data-tooltip],
-.navigation-boutons[data-tooltip] {
+nav [data-tooltip],
+.sous-navigation [data-tooltip] {
     cursor: pointer;
 }
 

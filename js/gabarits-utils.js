@@ -493,7 +493,7 @@
         }).join('');
 
         return `
-            <div class="champ-pratiques-compatibles">
+            <div class="champ-pratiques-compatibles" data-tooltip="cn-pratiques-compat">
                 <div style="font-weight: 500; font-size: 0.9rem; margin-bottom: 8px;">
                     Pratiques compatibles :
                 </div>

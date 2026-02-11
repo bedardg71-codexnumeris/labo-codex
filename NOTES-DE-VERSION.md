@@ -1,28 +1,38 @@
 # Notes de version — Monitorage pedagogique
 
 > Document de gestion locale. Historique complet avec dates.
-> Derniere mise a jour : 10 fevrier 2026
+> Derniere mise a jour : 11 fevrier 2026
 
 ---
 
-## Beta 97.5 (10 fevrier 2026)
+## Beta 97.4 (8-11 fevrier 2026)
 
-**Tooltips au survol**
+**Alignement pedagogique**
 
-- **Nouveau systeme de tooltips** : Moteur leger (delegation d'evenements, positionnement automatique bas/haut/droite/gauche) avec base de contenu centralisee. Trois fichiers : `css/tooltips.css`, `js/tooltips.js`, `js/tooltips-contenu.js`.
-- **En-tete (10 tooltips)** : Logo, version/build, mode affichage, signaler un bug, pratique de notation, semaine courante, selecteur groupe-cours, navigation principale, sous-navigation, bouton reglages.
-- **Reglages — Trimestre (21 tooltips)** : 6 panneaux accordeon (Gestion des trimestres, Cours, Enseignant, Groupe d'etudiants, Horaire, Groupe-cours) + 12 champs specifiques (identification, bornes, semaines speciales, conges, imprevus, competence, elements de competence, SA, import etudiants, periodes horaire, nom genere, pratique de notation) + 3 boutons bibliotheque.
-- **Integration au theme** : Utilise les variables CSS du projet (`--bleu-fonce`, `--shadow-fort`, `--radius-moyen`) pour s'adapter automatiquement au mode demo (sarcelle).
-- **Curseur adaptatif** : `cursor: help` sur les elements informatifs, `cursor: pointer` preserve sur les elements interactifs (boutons, selecteurs, accordeons).
+- **Systeme de clonage** : Double-cliquer un element de la carte pour ouvrir le panneau, puis « Cloner ». Les clones partagent titre et description — modifier l'un met a jour les autres. Indicateur 🧬 avec surbrillance au survol. Badges agreges tenant compte de tous les clones.
+- **Verbes de liaison refondus** : 5 verbes verticaux automatiques (se decline en, se concretise dans, s'acquiert par, se verifie par, s'appuie sur) et 2 verbes horizontaux au choix (complete, conduit a). Direction amont → aval. Selection de verbe au clic sur un lien.
+- **Evaluations dans la carte** : Nouveau type Evaluation (rose/magenta) dans la palette. Integrable dans les lecons avec champs Retroaction et Production dedies.
+- **Carte d'aide flottante** : Deplacable, redimensionnable, fermable. Bouton « ? » dans la palette pour la reafficher.
+- **Onglet renomme** : « Carte mentale » devient « Alignement pedagogique ».
 
----
+**248 tooltips au survol**
 
-## Beta 97.5 (9 fevrier 2026)
+- **Moteur de tooltips** : Delegation d'evenements, positionnement automatique (droite/gauche/bas/haut), base de contenu centralisee. Trois fichiers : `css/tooltips.css`, `js/tooltips.js`, `js/tooltips-contenu.js`.
+- **En-tete (8)** : Logo, version/build, mode affichage, signaler un bug, pratique de notation, semaine courante, selecteur groupe-cours, bouton reglages.
+- **Reglages (60)** : Trimestre (19 : panneaux accordeon + champs specifiques + boutons bibliotheque), Preferences (13), Depistage (14), Donnees (14).
+- **Planification (34)** : Alignement pedagogique + Organisateur.
+- **Tableau de bord (57)** : Apercu, Liste des individus, Profil etudiant, Interventions RaI.
+- **Evaluations (24)** : Apercu, Liste des evaluations, Evaluer une production.
+- **Construction de la note (31)** : Concepts transversaux, Apercu, Productions, Grilles, Echelles, Cartouches, Pratiques.
+- **Navigation (34)** : 8 onglets principaux + 26 sous-onglets dynamiques generes via un mapping JS centralise (`TOOLTIPS_SOUS_NAV`).
+- **Style** : Contour orange accent sur les bulles et les fleches (carre tourne a 45° pour support de bordure). Integration au theme via variables CSS (`--bleu-fonce`, `--shadow-fort`, `--radius-moyen`).
+- **Curseur adaptatif** : `cursor: help` sur les elements informatifs, `cursor: pointer` preserve sur la navigation et les boutons interactifs.
+- **Nettoyage** : 11 attributs `title` natifs redondants retires au profit des tooltips enrichis.
 
 **Correctifs**
 
-- **Fix Horaire/Groupe-cours invisibles** : Les formulaires des sections Horaire et Groupe-cours dans l'onglet Trimestre restaient invisibles meme quand un element etait selectionne dans le dropdown. Cause : les elements HTML utilisaient `style="display: none"` (inline) alors que le JS utilise `classList.remove('u-hide')` pour les afficher — le style inline n'etait jamais retire. Corrige en remplacant les `style="display: none"` par `class="u-hide"`.
-- **Nettoyage inline styles** : Remplacement systematique de `style="display: none"` par `class="u-hide"` dans tous les accordeons Trimestre (Cours, Enseignant, Groupe d'etudiants, Horaire, Groupe-cours) pour coherence avec le pattern JS existant.
+- **Fix Horaire/Groupe-cours invisibles** : Les formulaires des sections Horaire et Groupe-cours dans l'onglet Trimestre restaient invisibles meme quand un element etait selectionne dans le dropdown. Cause : `style="display: none"` inline vs `classList.remove('u-hide')`. Corrige en remplacant les styles inline par `class="u-hide"`.
+- **Nettoyage inline styles** : Remplacement systematique de `style="display: none"` par `class="u-hide"` dans tous les accordeons Trimestre pour coherence avec le pattern JS existant.
 
 ---
 

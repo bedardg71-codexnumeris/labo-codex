@@ -3149,7 +3149,7 @@ function afficherNiveauxNouvelleEchelle() {
                            style="font-weight: 600; text-align: center;">
                 </div>
                 <div class="groupe-form">
-                    <label class="echelle-texte-detail">Nom du niveau</label>
+                    <label class="echelle-texte-detail" data-tooltip="cn-echelle-niveau">Nom du niveau</label>
                     <input type="text"
                            class="controle-form"
                            value="${niveau.nom}"
@@ -3178,7 +3178,7 @@ function afficherNiveauxNouvelleEchelle() {
                            onchange="modifierNiveauTemp(${index}, 'max', parseFloat(this.value))">
                 </div>
                 <div class="groupe-form">
-                    <label class="echelle-texte-detail">Valeur ponctuelle
+                    <label class="echelle-texte-detail" data-tooltip="cn-echelle-valeur-ponctuelle">Valeur ponctuelle
                         <span class="tooltip-aide" title="Valeur fixe pour le calcul des notes, la conversion d'une note lettrée en note chiffrée, la pratique sommative traditionnelle et le dépistage.">📌</span>
                     </label>
                     <input type="number"
@@ -3415,7 +3415,7 @@ function afficherNiveauxEchelle(echelle) {
                            style="font-weight: 600; text-align: center;">
                 </div>
                 <div class="groupe-form">
-                    <label class="echelle-texte-detail">Nom du niveau</label>
+                    <label class="echelle-texte-detail" data-tooltip="cn-echelle-niveau">Nom du niveau</label>
                     <input type="text"
                            class="controle-form"
                            value="${niveau.nom}"
@@ -3443,7 +3443,7 @@ function afficherNiveauxEchelle(echelle) {
                            onchange="modifierNiveauEchelle('${echelle.id}', ${index}, 'max', parseFloat(this.value))">
                 </div>
                 <div class="groupe-form">
-                    <label class="echelle-texte-detail">Valeur ponctuelle
+                    <label class="echelle-texte-detail" data-tooltip="cn-echelle-valeur-ponctuelle">Valeur ponctuelle
                         <span class="tooltip-aide" title="Valeur fixe pour le calcul des notes, la conversion d'une note lettrée en note chiffrée, la pratique sommative traditionnelle et le dépistage.">📌</span>
                     </label>
                     <input type="number"
