@@ -186,6 +186,9 @@ const TOOLTIPS = {
     'pref-navigation':
         'Court-circuiter la page d\u2019accueil pour ouvrir directement sur le tableau de bord au d\u00e9marrage.',
 
+    'pref-tooltips':
+        'Affiche des descriptions contextuelles au survol des \u00e9l\u00e9ments de l\u2019interface. D\u00e9sactiver si tu ma\u00eetrises d\u00e9j\u00e0 l\u2019application.',
+
     // =================================================================
     // REGLAGES — Depistage
     // =================================================================

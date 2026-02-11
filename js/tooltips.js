@@ -19,6 +19,7 @@ let timerAffichage = null;
 let timerDisparition = null;
 let bulleActive = null;
 let cibleActive = null;
+let actif = true; // desactivable via Preferences > Navigation
 
 /**
  * Cree l'element bulle s'il n'existe pas
@@ -98,6 +99,7 @@ function positionnerBulle(cible, bulle) {
  * @param {HTMLElement} cible
  */
 function afficher(cible) {
+    if (!actif) return;
     const cle = cible.dataset.tooltip;
     if (!cle || !window.TOOLTIPS || !window.TOOLTIPS[cle]) return;
 
@@ -179,7 +181,35 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
+// --- Preference : activer/desactiver les tooltips ---
+
+function definirTooltips(etat) {
+    actif = !!etat;
+    if (!actif) masquer();
+    // Persister dans preferencesAffichage
+    try {
+        const prefs = window.db ? window.db.getSync('preferencesAffichage', {}) : {};
+        prefs.tooltips = actif;
+        if (window.db) window.db.setSync('preferencesAffichage', prefs);
+    } catch (e) { /* silencieux */ }
+}
+
+// Initialisation : lire la preference et synchroniser le checkbox
+function initialiserTooltips() {
+    try {
+        const prefs = window.db ? window.db.getSync('preferencesAffichage', {}) : {};
+        actif = prefs.tooltips !== false; // actif par defaut
+    } catch (e) {
+        actif = true;
+    }
+    const checkbox = document.getElementById('checkbox-tooltips');
+    if (checkbox) checkbox.checked = actif;
+}
+
+document.addEventListener('DOMContentLoaded', initialiserTooltips);
+
 // Export
 window.tooltips = { afficher, masquer };
+window.definirTooltips = definirTooltips;
 
 })();

@@ -11401,6 +11401,15 @@
                                 Court-circuite la page d'accueil au d&eacute;marrage de l'application.
                             </small>
                         </div>
+                        <div class="form-group" style="padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px; margin-top: 10px;">
+                            <label style="cursor: pointer; display: flex; align-items: center;" data-tooltip="pref-tooltips">
+                                <input type="checkbox" id="checkbox-tooltips" checked onchange="definirTooltips(this.checked)">
+                                <strong style="margin-left: 8px;">Info-bulles d'aide au survol</strong>
+                            </label>
+                            <small style="display: block; color: var(--gris-moyen); margin-top: 5px; margin-left: 28px; font-size: 0.85rem;">
+                                Affiche des descriptions contextuelles au survol des &eacute;l&eacute;ments de l'interface.
+                            </small>
+                        </div>
                     </div>
 
                     <!-- Bouton sauvegarder -->
@@ -15999,7 +16008,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97.4';
-        const BUILD_ID = '0211-0924';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0211-1014';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
