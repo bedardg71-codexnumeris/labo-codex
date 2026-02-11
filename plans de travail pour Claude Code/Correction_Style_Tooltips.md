@@ -230,31 +230,38 @@ Quand le tooltip s'affiche, l'élément survolé reçoit une bordure lumineuse o
 
 ### 6a. CSS — tooltips.css — Animation et classe de surbrillance
 
+**Historique du bug** :
+1. Version initiale (`box-shadow`) : contour rogné sur les 4 côtés des accordéons Trimestre à cause de `overflow: hidden` sur le parent.
+2. Version 2 (`outline` + `outline-offset: 2px`) : amélioration — haut et bas visibles, mais Safari rogne encore les côtés gauche et droit quand l'élément est à ras bord de son parent.
+3. **Version actuelle (`outline` + `outline-offset: -2px`)** : contour dessiné **à l'intérieur** de l'élément. Rien ne dépasse, donc rien à rogner. Garanti visible sur les 4 côtés dans tous les contextes.
+
 ```css
 /* --- Surbrillance de la cible du tooltip --- */
 
 @keyframes tooltip-pulse {
-    0%, 100% { box-shadow: 0 0 0 2px rgba(var(--orange-accent-rgb, 255, 152, 0), 0.4); }
-    50%      { box-shadow: 0 0 0 3px rgba(var(--orange-accent-rgb, 255, 152, 0), 0.8); }
+    0%, 100% { outline-color: color-mix(in srgb, var(--orange-accent, #ff9800) 40%, transparent); }
+    50%      { outline-color: color-mix(in srgb, var(--orange-accent, #ff9800) 80%, transparent); }
 }
 
 .tooltip-cible-active {
-    outline: none;
-    box-shadow: 0 0 0 2px var(--orange-accent, #ff9800);
+    outline: 4px solid var(--orange-accent, #ff9800);
+    outline-offset: -4px;
+    box-shadow: inset 0 0 0 9999px color-mix(in srgb, var(--orange-accent, #ff9800) 15%, transparent);
     animation: tooltip-pulse 1.8s ease-in-out infinite;
-    border-radius: inherit;
-    transition: box-shadow 0.2s ease;
+    transition: outline-color 0.2s ease;
 }
 ```
 
 **Choix techniques** :
 
-- `box-shadow` plutôt que `border` : n'affecte pas le layout (pas de décalage des éléments voisins).
-- `border-radius: inherit` : la surbrillance épouse la forme de l'élément (arrondi si bouton, droit si libellé).
-- `var(--orange-accent, #ff9800)` : utilise la variable CSS existante de l'application, avec un fallback.
-- `--orange-accent-rgb` : version RGB nécessaire pour `rgba()` dans le `@keyframes`. Si cette variable n'existe pas dans l'application, le fallback `255, 152, 0` est utilisé.
-- Cycle de 1.8s : assez lent pour ne pas être agressif visuellement.
-- Amplitude du pulse : le `box-shadow` oscille entre 2px à 40% d'opacité et 3px à 80% d'opacité — subtil mais perceptible.
+- `outline: 4px` (doublé, était 2px) : contour plus épais, bien visible même sur les en-têtes sombres.
+- `outline-offset: -4px` (négatif, inset) : le contour est dessiné 4px **à l'intérieur** du bord de l'élément. Immunisé contre tout rognage par `overflow: hidden` car rien ne dépasse du box model.
+- `box-shadow: inset 0 0 0 9999px ... 15%` : crée un voile orange à 15% d'opacité qui remplit l'intérieur de l'élément. Le `box-shadow inset` avec un `spread` énorme (9999px) couvre toute la surface. Dessiné par-dessus le fond mais sous le contenu texte — l'élément se teinte subtilement sans masquer son libellé.
+- `color-mix(in srgb, var(--orange-accent) X%, transparent)` : dérive les niveaux d'opacité directement depuis la variable CSS `--orange-accent`, sans hardcoder de valeurs RGB. Supporté par Safari 16.2+, Chrome 111+, Firefox 113+.
+- `var(--orange-accent, #ff9800)` : utilise la variable CSS existante de l'application, avec fallback.
+- `outline` respecte `border-radius` dans les navigateurs modernes (Safari 16.4+).
+- Cycle de 1.8s, amplitude 40%↔80% : subtil mais perceptible.
+- Le fond teinté est **statique** (ne pulse pas) — seul le contour pulse. Cela évite un effet trop chargé visuellement.
 
 ### 6b. JS — tooltips.js — Ajouter/retirer la classe
 
@@ -321,7 +328,7 @@ function masquer() {
 | Masquage à Escape | Non | **Oui** (optionnel) |
 | Animation d'entrée | translateY(4px), 0.2s | **scale(0.97→1), 0.15s** |
 | Masquage de l'interface | Fréquent (placement vertical) | **Rare (placement latéral)** |
-| Surbrillance de la cible | Aucune | **Bordure orange pulsante** (box-shadow + var(--orange-accent)) |
+| Surbrillance de la cible | Aucune | **Contour 4px orange pulsant + fond teinté 15%** (outline inset + box-shadow inset + var(--orange-accent)) |
 
 ---
 
@@ -338,8 +345,11 @@ function masquer() {
 - [ ] L'animation d'entrée (scale) est fluide et discrète
 - [ ] Le triangle est de la même couleur que la bulle (#1a1a2e), sans artefact
 - [ ] Pas de décalage visible entre le triangle et le bord de la bulle
-- [ ] L'élément survolé reçoit une **bordure orange pulsante** pendant l'affichage du tooltip
+- [ ] L'élément survolé reçoit un **contour orange de 4px pulsant** + un **fond teinté orange 15%** pendant l'affichage du tooltip
 - [ ] La surbrillance disparaît en même temps que le tooltip
 - [ ] Le pulse est subtil (pas d'effet agressif ou épileptogène)
-- [ ] La surbrillance ne décale pas les éléments voisins (box-shadow, pas border)
-- [ ] La surbrillance épouse la forme de l'élément (border-radius: inherit)
+- [ ] La surbrillance ne décale pas les éléments voisins (outline inset, pas border)
+- [ ] La surbrillance est **complète sur les 4 côtés** des accordéons du Trimestre (outline inset, pas de rognage)
+- [ ] La surbrillance est **complète sur les 4 côtés** des en-têtes de Préférences
+- [ ] La couleur du contour utilise `var(--orange-accent)` et correspond bien à l'orange accent de l'application
+- [ ] La surbrillance épouse la forme de l'élément (outline suit border-radius en navigateurs modernes)
