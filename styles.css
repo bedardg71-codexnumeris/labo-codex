@@ -2,8 +2,8 @@
    SYSTÈME DE DESIGN - Beta 97
    Index: 97 06-02-2026
    Convention: 100% français
-   Palette: "Nuit Élégante" (Terracotta)
-   Dernière mise à jour: 06-02-2026
+   Palette: "Océan & Boussole" (C4)
+   Dernière mise à jour: 11-02-2026
    =============================== */
 
 /* ===============================
@@ -912,7 +912,7 @@ h1, h2, h3, h4 {
 }
 
 .site-link {
-    color: #d0e4f5;
+    color: var(--texte-principal, #d0e0e4);
     text-decoration: none;
     border-bottom: 1px solid transparent;
     transition: all 0.2s;
@@ -1823,24 +1823,24 @@ h1, h2, h3, h4 {
     margin: 0;
 }
 
-/* État ERREUR - Jaune */
+/* État ERREUR - Laiton */
 #enteteDateSeance.etat-erreur {
-    background: #fff3cd;
+    background: rgba(200, 160, 96, 0.15);
     border-color: var(--btn-annuler);
 }
 
 #enteteDateSeance.etat-erreur #texteDateSeance {
-    color: #856404;
+    color: #d4b878;
 }
 
 /* État VALIDE - Vert */
 #enteteDateSeance.etat-valide {
-    background: #d4edda;
-    border-color: #28a745;
+    background: rgba(52, 199, 89, 0.12);
+    border-color: #34c759;
 }
 
 #enteteDateSeance.etat-valide #texteDateSeance {
-    color: #155724;
+    color: #5ae080;
 }
 
 /* État VERROUILLÉ - Gris */
@@ -1968,65 +1968,65 @@ input[type="number"].controle-form {
 
 /* === BADGES DE RISQUE (sans émojis) - OBSOLÈTE - Gardé pour compatibilité === */
 .badge-risque-minimal {
-    background: #eff6ff;
-    color: #2563eb;
+    background: rgba(106, 172, 184, 0.12);
+    color: #6aacb8;
 }
 
 .badge-risque-faible {
-    background: #f0fdf4;
-    color: #16a34a;
+    background: rgba(52, 199, 89, 0.12);
+    color: #5ae080;
 }
 
 .badge-risque-modere {
-    background: #fef9c3;
-    color: #ca8a04;
+    background: rgba(255, 193, 7, 0.12);
+    color: #ffc107;
 }
 
 .badge-risque-eleve {
-    background: #ffedd5;
-    color: #ea580c;
+    background: rgba(253, 126, 20, 0.12);
+    color: #fd7e14;
 }
 
 .badge-risque-tres-eleve {
-    background: #fee2e2;
-    color: #dc2626;
+    background: rgba(232, 64, 87, 0.12);
+    color: #e84057;
 }
 
 .badge-risque-critique {
-    background: #fef2f2;
-    color: #991b1b;
+    background: rgba(160, 32, 48, 0.12);
+    color: #d04050;
 }
 
 /* === BADGES D'ENGAGEMENT (remplace les badges de risque) === */
 .badge-engagement-tres-favorable {
-    background: #e3f2fd;
+    background: rgba(106, 172, 184, 0.12);
     color: var(--bleu-clair);
 }
 
 .badge-engagement-favorable {
-    background: #f0fdf4;
-    color: #16a34a;
+    background: rgba(52, 199, 89, 0.12);
+    color: #5ae080;
 }
 
 .badge-engagement-modere {
-    background: #fef9c3;
-    color: #ca8a04;
+    background: rgba(255, 193, 7, 0.12);
+    color: #ffc107;
 }
 
 .badge-engagement-fragile {
-    background: #ffedd5;
-    color: #ea580c;
+    background: rgba(253, 126, 20, 0.12);
+    color: #fd7e14;
 }
 
 .badge-engagement-insuffisant {
-    background: #fef2f2;
-    color: #991b1b;
+    background: rgba(160, 32, 48, 0.12);
+    color: #d04050;
 }
 
 /* 🆕 BETA 96.1: Badge pour données en attente */
 .badge-attente {
-    background: #f1f5f9;
-    color: #64748b;
+    background: rgba(106, 172, 184, 0.08);
+    color: var(--texte-muted, #5a7a88);
     font-style: italic;
 }
 
@@ -2132,7 +2132,7 @@ input[type="number"].controle-form {
     font-size: var(--font-compact);
     font-weight: 600;
     line-height: 1.2;
-    background: #dbeafe;
+    background: rgba(106, 172, 184, 0.15);
     color: var(--bleu-clair);
     transition: all 0.2s ease;
 }
@@ -2144,8 +2144,8 @@ input[type="number"].controle-form {
     font-size: var(--font-compact);
     font-weight: 600;
     line-height: 1.2;
-    background: #e0e7ff;
-    color: #6366f1;
+    background: rgba(99, 102, 241, 0.15);
+    color: #818cf8;
     transition: all 0.2s ease;
 }
 
@@ -2156,8 +2156,8 @@ input[type="number"].controle-form {
     font-size: var(--font-compact);
     font-weight: 600;
     line-height: 1.2;
-    background: #ede9fe;
-    color: #7c3aed;
+    background: rgba(124, 58, 237, 0.15);
+    color: #a78bfa;
     transition: all 0.2s ease;
 }
 
@@ -2186,7 +2186,7 @@ input[type="number"].controle-form {
 /* === Badges RàI pour analyse === */
 /* Styles uniformisés avec les badges du tableau individuel */
 .badge-rai-analyse-1 {
-    background: #dbeafe;
+    background: rgba(106, 172, 184, 0.15);
     color: var(--bleu-clair);
 }
 
@@ -2195,8 +2195,8 @@ input[type="number"].controle-form {
 }
 
 .badge-rai-analyse-2 {
-    background: #e0e7ff;
-    color: #6366f1;
+    background: rgba(99, 102, 241, 0.15);
+    color: #818cf8;
 }
 
 .badge-rai-analyse-2 .badge-analyse-count {
@@ -2204,8 +2204,8 @@ input[type="number"].controle-form {
 }
 
 .badge-rai-analyse-3 {
-    background: #ede9fe;
-    color: #7c3aed;
+    background: rgba(124, 58, 237, 0.15);
+    color: #a78bfa;
 }
 
 .badge-rai-analyse-3 .badge-analyse-count {
@@ -2213,21 +2213,21 @@ input[type="number"].controle-form {
 }
 
 /* === Badges de risque pour analyse === */
-/* Styles uniformisés - fonds pleins sans bordures */
+/* Styles uniformisés - fonds semi-transparents */
 .badge-risque-analyse-minimal,
 .badge-risque-analyse-faible {
-    background: #d4edda;
-    color: #155724;
+    background: rgba(52, 199, 89, 0.12);
+    color: #5ae080;
 }
 
 .badge-risque-analyse-minimal .badge-analyse-count,
 .badge-risque-analyse-faible .badge-analyse-count {
-    background: #28a745;
+    background: #34c759;
 }
 
 .badge-risque-analyse-modere {
-    background: #fff3cd;
-    color: #856404;
+    background: rgba(200, 160, 96, 0.15);
+    color: #d4b878;
 }
 
 .badge-risque-analyse-modere .badge-analyse-count {
@@ -2235,7 +2235,7 @@ input[type="number"].controle-form {
 }
 
 .badge-risque-analyse-eleve {
-    background: #ffe5d0;
+    background: rgba(253, 126, 20, 0.12);
     color: #fd7e14;
 }
 
@@ -2245,19 +2245,19 @@ input[type="number"].controle-form {
 
 .badge-risque-analyse-tres-eleve,
 .badge-risque-analyse-critique {
-    background: #f8d7da;
-    color: #dc3545;
+    background: rgba(232, 64, 87, 0.12);
+    color: #e84057;
 }
 
 .badge-risque-analyse-tres-eleve .badge-analyse-count,
 .badge-risque-analyse-critique .badge-analyse-count {
-    background: #dc3545;
+    background: #e84057;
 }
 
 /* Badge de risque par défaut (gris neutre) */
 .badge-risque-analyse-defaut {
-    background: #e2e3e5;
-    color: #383d41;
+    background: rgba(106, 172, 184, 0.08);
+    color: var(--texte-secondaire, #8aa4b0);
 }
 
 .badge-risque-analyse-defaut .badge-analyse-count {
@@ -2266,8 +2266,8 @@ input[type="number"].controle-form {
 
 /* === Badge pattern d'apprentissage (neutre gris) === */
 .badge-pattern-analyse {
-    background: #e2e3e5;
-    color: #383d41;
+    background: rgba(106, 172, 184, 0.08);
+    color: var(--texte-secondaire, #8aa4b0);
 }
 
 .badge-pattern-analyse .badge-analyse-count {
@@ -2537,7 +2537,7 @@ textarea {
    CLASSES UTILITAIRES - REFACTORISATION 97.1
    =============================== */
 
-/* Info boxes — remplace inline style="background: #fff3cd; border-left: 4px solid ..." */
+/* Info boxes — remplace inline style="background: rgba(200, 160, 96, 0.15); border-left: 4px solid ..." */
 .info-box {
     padding: 12px 15px;
     border-left: 4px solid;
@@ -2545,20 +2545,20 @@ textarea {
     margin-bottom: 12px;
 }
 .info-box--attention {
-    background: #fff3cd;
+    background: rgba(200, 160, 96, 0.15);
     border-color: var(--btn-annuler);
-    color: #856404;
+    color: #d4b878;
 }
 .info-box--info {
     background: var(--bleu-tres-pale);
     border-color: var(--bleu-moyen);
 }
 .info-box--succes {
-    background: #d4edda;
+    background: rgba(52, 199, 89, 0.12);
     border-color: var(--vert-succes);
 }
 .info-box--erreur {
-    background: #f8d7da;
+    background: rgba(232, 64, 87, 0.12);
     border-color: var(--rouge-erreur);
 }
 
@@ -4757,7 +4757,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 
 /* Alerte (avertissements, calculs partiels, etc.) */
 .details-calculs-alerte {
-    background: #fff3cd;
+    background: rgba(200, 160, 96, 0.15);
     padding: 8px;
     border-radius: var(--radius-moyen);
     margin-bottom: 10px;
@@ -4765,7 +4765,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 .details-calculs-alerte strong {
-    color: #856404;
+    color: #d4b878;
 }
 
 /* Liste de détails dans les toggles */
@@ -5292,7 +5292,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 
 /* Artefact retenu (sélectionné) */
 .portfolio-artefact-retenu {
-    background: linear-gradient(to right, #d4edda, #e8f5e9);
+    background: linear-gradient(to right, rgba(52, 199, 89, 0.12), rgba(52, 199, 89, 0.08));
     border: 3px solid #28a745;
     box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);
 }
@@ -5333,7 +5333,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 .portfolio-artefact-titre-retenu {
-    color: #155724;
+    color: #5ae080;
 }
 
 .portfolio-artefact-titre-normal {
@@ -5381,12 +5381,12 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 .portfolio-note-finale {
-    background: #d4edda;
+    background: rgba(52, 199, 89, 0.12);
     border-left-color: #28a745;
 }
 
 .portfolio-note-provisoire {
-    background: #fff3cd;
+    background: rgba(200, 160, 96, 0.15);
     border-left-color: var(--btn-annuler);
 }
 
@@ -5395,11 +5395,11 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 .portfolio-note-finale h4 {
-    color: #155724;
+    color: #5ae080;
 }
 
 .portfolio-note-provisoire h4 {
-    color: #856404;
+    color: #d4b878;
 }
 
 .portfolio-note-carte p:last-child {
@@ -5407,11 +5407,11 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 .portfolio-note-finale p:last-child {
-    color: #155724;
+    color: #5ae080;
 }
 
 .portfolio-note-provisoire p:last-child {
-    color: #856404;
+    color: #d4b878;
 }
 
 .portfolio-note-detail {
@@ -5953,9 +5953,9 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 .profil-zone-centre-verte {
     text-align: center;
     padding: 15px;
-    background: #d4edda;
+    background: rgba(52, 199, 89, 0.12);
     border-radius: var(--radius-moyen);
-    color: #155724;
+    color: #5ae080;
     margin-bottom: 20px;
 }
 
@@ -7702,7 +7702,7 @@ summary.summary-materiel:hover {
     flex: 0 0 auto;
     min-width: 140px;
     padding: 8px 10px;
-    background: #d4edda;
+    background: rgba(52, 199, 89, 0.12);
     border-left: 3px solid #28a745;
     border-radius: var(--radius-moyen);
 }
@@ -7721,9 +7721,9 @@ summary.summary-materiel:hover {
 .profil-message-succes {
     text-align: center;
     padding: 15px;
-    background: #d4edda;
+    background: rgba(52, 199, 89, 0.12);
     border-radius: var(--radius-moyen);
-    color: #155724;
+    color: #5ae080;
 }
 
 .profil-message-succes-icone {
@@ -7928,13 +7928,13 @@ summary.summary-materiel:hover {
 
 .profil-artefact-selectionne {
     padding: 8px 10px;
-    background: #d4edda;
+    background: rgba(52, 199, 89, 0.12);
     border-left: 3px solid #28a745;
     border-radius: var(--radius-moyen);
 }
 
 .profil-artefact-selectionne-nom {
-    color: #155724;
+    color: #5ae080;
     font-weight: 500;
 }
 
@@ -7970,9 +7970,9 @@ summary.summary-materiel:hover {
 .profil-message-tous-remis {
     text-align: center;
     padding: 10px;
-    background: #d4edda;
+    background: rgba(52, 199, 89, 0.12);
     border-radius: var(--radius-moyen);
-    color: #155724;
+    color: #5ae080;
     font-size: 0.85rem;
 }
 
@@ -8119,12 +8119,12 @@ summary.summary-materiel:hover {
 }
 
 .profil-recommandations-avertissement {
-    background: #fff3cd;
+    background: rgba(200, 160, 96, 0.15);
     border-color: var(--btn-annuler);
 }
 
 .profil-recommandations-danger {
-    background: #f8d7da;
+    background: rgba(232, 64, 87, 0.12);
     border-color: #dc3545;
 }
 
@@ -8134,13 +8134,13 @@ summary.summary-materiel:hover {
 }
 
 .profil-recommandations-succes {
-    background: #d4edda;
+    background: rgba(52, 199, 89, 0.12);
     border-color: #28a745;
 }
 
 /* Texte de couleur dynamique pour recommandations */
 .profil-texte-avertissement {
-    color: #856404;
+    color: #d4b878;
 }
 
 
@@ -10556,13 +10556,13 @@ body[data-mode="simulation"] table tr:hover {
 
 /* Message de plafonnement */
 .note-finale-plafonnement {
-    background: #fff3cd;
+    background: rgba(200, 160, 96, 0.15);
     border: 1px solid var(--btn-annuler);
     border-radius: var(--radius-moyen);
     padding: 8px 12px;
     margin-bottom: 10px;
     font-size: 0.85rem;
-    color: #856404;
+    color: #d4b878;
 }
 
 /* Note originale barrée */
@@ -10866,11 +10866,11 @@ body[data-mode="simulation"] table tr:hover {
 /* Alerte */
 .wizard-v2-alerte {
     padding: 12px 15px;
-    background: #fff3cd;
+    background: rgba(200, 160, 96, 0.15);
     border: 1px solid var(--btn-annuler);
     border-radius: var(--radius-moyen);
     font-size: 0.9rem;
-    color: #856404;
+    color: #d4b878;
 }
 
 .wizard-v2-info {
@@ -10999,7 +10999,7 @@ body[data-mode="simulation"] table tr:hover {
 }
 
 .spe-spec-item.checked {
-    background: #d4edda;
+    background: rgba(52, 199, 89, 0.12);
     border-color: #28a745;
 }
 
@@ -11026,13 +11026,13 @@ body[data-mode="simulation"] table tr:hover {
 }
 
 .spe-resultat.acceptable {
-    background: #d4edda;
+    background: rgba(52, 199, 89, 0.12);
     border: 2px solid #28a745;
     color: #28a745;
 }
 
 .spe-resultat.non-acceptable {
-    background: #f8d7da;
+    background: rgba(232, 64, 87, 0.12);
     border: 2px solid #dc3545;
     color: #dc3545;
 }
@@ -11051,7 +11051,7 @@ body[data-mode="simulation"] table tr:hover {
 }
 
 .spe-forfait-atteint {
-    background: #d4edda;
+    background: rgba(52, 199, 89, 0.12);
     border: 2px solid #28a745;
     border-radius: var(--radius-grand);
     padding: 15px;
@@ -11060,7 +11060,7 @@ body[data-mode="simulation"] table tr:hover {
 }
 
 .spe-forfait-atteint.aucun {
-    background: #fff3cd;
+    background: rgba(200, 160, 96, 0.15);
     border-color: var(--btn-annuler);
 }
 
@@ -13963,12 +13963,12 @@ body.mode-assiste .btn-aide-contextuelle,
     --planif-couleur-revision: #15803d;
     /* Évaluation — Rose/magenta */
     --planif-couleur-evaluation: #D946EF;
-    /* Utilitaires */
-    --planif-couleur-fond: #f8fafc;
-    --planif-couleur-texte: #1e293b;
-    --planif-couleur-bordure: #cbd5e1;
-    --planif-couleur-lien: #94a3b8;
-    --planif-couleur-selection: #3b82f6;
+    /* Utilitaires — adaptés palette ocean */
+    --planif-couleur-fond: var(--surface-conteneur, #142428);
+    --planif-couleur-texte: var(--texte-principal, #d0e0e4);
+    --planif-couleur-bordure: rgba(106, 172, 184, 0.2);
+    --planif-couleur-lien: var(--texte-muted, #5a7a88);
+    --planif-couleur-selection: #6aacb8;
 }
 
 /* === LAYOUT PRINCIPAL === */
@@ -14023,7 +14023,7 @@ body.mode-assiste .btn-aide-contextuelle,
 }
 
 #planif-titre-carte:hover { border-bottom-color: var(--planif-couleur-bordure); }
-#planif-titre-carte:focus { border-bottom-color: var(--planif-couleur-selection); background: #f8fafc; }
+#planif-titre-carte:focus { border-bottom-color: var(--planif-couleur-selection); background: var(--surface-conteneur, #142428); }
 
 /* === PALETTE FLOTTANTE === */
 #planif-palette {
@@ -14048,7 +14048,7 @@ body.mode-assiste .btn-aide-contextuelle,
     cursor: grab;
     border-bottom: 1px solid var(--planif-couleur-bordure);
     border-radius: 10px 10px 0 0;
-    background: #f8fafc;
+    background: var(--surface-conteneur, #142428);
 }
 .planif-palette-barre:active { cursor: grabbing; }
 
@@ -14059,7 +14059,7 @@ body.mode-assiste .btn-aide-contextuelle,
     font-size: 16px; line-height: 1; cursor: pointer; color: #94a3b8;
     border-radius: 4px; display: flex; align-items: center; justify-content: center;
 }
-.planif-palette-toggle:hover { background: #e2e8f0; color: #475569; }
+.planif-palette-toggle:hover { background: rgba(106, 172, 184, 0.1); color: #475569; }
 
 .planif-palette-contenu {
     padding: 6px;
@@ -14265,7 +14265,7 @@ body.mode-assiste .btn-aide-contextuelle,
     box-shadow: 0 0 0 4px rgba(59,130,246,0.35), 0 4px 16px rgba(59,130,246,0.15);
 }
 .planif-noeud.selected:not(.planif-conteneur) {
-    background: color-mix(in srgb, var(--planif-couleur-selection) 5%, white);
+    background: color-mix(in srgb, var(--planif-couleur-selection) 10%, var(--surface-conteneur, #142428));
 }
 
 /* Conteneurs */
@@ -14285,10 +14285,10 @@ body.mode-assiste .btn-aide-contextuelle,
     border-style: solid;
 }
 .planif-noeud.planif-conteneur.planif-a-enfants.planif-type-sequence {
-    background: color-mix(in srgb, var(--planif-couleur-sequence) 6%, white);
+    background: color-mix(in srgb, var(--planif-couleur-sequence) 12%, var(--surface-conteneur, #142428));
 }
 .planif-noeud.planif-conteneur.planif-a-enfants.planif-type-lecon {
-    background: color-mix(in srgb, var(--planif-couleur-lecon) 6%, white);
+    background: color-mix(in srgb, var(--planif-couleur-lecon) 12%, var(--surface-conteneur, #142428));
 }
 
 .planif-noeud.planif-conteneur .planif-noeud-zone {
@@ -14433,7 +14433,7 @@ body.mode-assiste .btn-aide-contextuelle,
     width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
     border-radius: 4px; padding: 0; line-height: 1;
 }
-.planif-carte-aide-fermer:hover { background: #f1f5f9; color: #475569; }
+.planif-carte-aide-fermer:hover { background: rgba(106, 172, 184, 0.06); color: #475569; }
 .planif-carte-aide-contenu {
     color: #888;
     font-size: 0.8em;
@@ -14606,8 +14606,8 @@ body.mode-assiste .btn-aide-contextuelle,
     transition: all 0.15s;
     white-space: nowrap;
 }
-#planif-btn-seances:hover { background: #f1f5f9; color: var(--planif-couleur-texte); border-color: var(--planif-couleur-selection); }
-#planif-btn-seances.actif { background: #eff6ff; color: var(--planif-couleur-selection); border-color: var(--planif-couleur-selection); }
+#planif-btn-seances:hover { background: rgba(106, 172, 184, 0.06); color: var(--planif-couleur-texte); border-color: var(--planif-couleur-selection); }
+#planif-btn-seances.actif { background: rgba(106, 172, 184, 0.1); color: var(--planif-couleur-selection); border-color: var(--planif-couleur-selection); }
 
 #planif-panneau-seances {
     position: absolute;
@@ -14661,11 +14661,11 @@ body.mode-assiste .btn-aide-contextuelle,
     align-items: center;
     gap: 8px;
     padding: 10px 12px;
-    background: color-mix(in srgb, var(--planif-couleur-sequence) 8%, white);
+    background: color-mix(in srgb, var(--planif-couleur-sequence) 15%, var(--surface-conteneur, #142428));
     border-bottom: 1px solid #e2e8f0;
     cursor: pointer;
 }
-.planif-cal-sequence-header:hover { background: color-mix(in srgb, var(--planif-couleur-sequence) 14%, white); }
+.planif-cal-sequence-header:hover { background: color-mix(in srgb, var(--planif-couleur-sequence) 22%, var(--surface-conteneur, #142428)); }
 .planif-cal-sequence-header .planif-cal-pastille {
     width: 10px;
     height: 10px;
@@ -14690,11 +14690,11 @@ body.mode-assiste .btn-aide-contextuelle,
     align-items: center;
     gap: 8px;
     padding: 10px 12px 10px 24px;
-    background: color-mix(in srgb, var(--planif-couleur-lecon) 6%, white);
+    background: color-mix(in srgb, var(--planif-couleur-lecon) 12%, var(--surface-conteneur, #142428));
     cursor: pointer;
     line-height: 1.4;
 }
-.planif-cal-lecon-header:hover { background: color-mix(in srgb, var(--planif-couleur-lecon) 12%, white); }
+.planif-cal-lecon-header:hover { background: color-mix(in srgb, var(--planif-couleur-lecon) 20%, var(--surface-conteneur, #142428)); }
 .planif-cal-lecon-header .planif-cal-pastille {
     width: 8px;
     height: 8px;
@@ -14709,7 +14709,7 @@ body.mode-assiste .btn-aide-contextuelle,
 .planif-cal-duree {
     font-size: 10px;
     color: #64748b;
-    background: #f1f5f9;
+    background: rgba(106, 172, 184, 0.06);
     padding: 2px 6px;
     border-radius: 4px;
     white-space: nowrap;
@@ -14729,7 +14729,7 @@ body.mode-assiste .btn-aide-contextuelle,
     transition: background 0.1s;
     line-height: 1.45;
 }
-.planif-cal-item:hover { background: #f8fafc; }
+.planif-cal-item:hover { background: var(--surface-conteneur, #142428); }
 .planif-cal-item .planif-cal-pastille-mini {
     width: 7px;
     height: 7px;
@@ -14814,7 +14814,7 @@ body.mode-assiste .btn-aide-contextuelle,
     color: #64748b;
     transition: all 0.15s;
 }
-.planif-cal-btn-export:hover { background: #f1f5f9; color: var(--planif-couleur-texte); border-color: var(--planif-couleur-selection); }
+.planif-cal-btn-export:hover { background: rgba(106, 172, 184, 0.06); color: var(--planif-couleur-texte); border-color: var(--planif-couleur-selection); }
 
 /* === TOAST LIEN INVALIDE === */
 .planif-toast-lien {
@@ -15055,7 +15055,7 @@ body.mode-assiste .btn-aide-contextuelle,
 .org-duree {
     font-size: 10px;
     color: #64748b;
-    background: #f1f5f9;
+    background: rgba(106, 172, 184, 0.06);
     padding: 2px 6px;
     border-radius: 4px;
     white-space: nowrap;
@@ -15167,7 +15167,7 @@ body.mode-assiste .btn-aide-contextuelle,
 #org-ee-etapes { padding: 0; }
 
 .org-ee-non-assignees {
-    background: #f8fafc;
+    background: var(--surface-conteneur, #142428);
     padding: 12px 24px;
     border-bottom: 1px solid #e2e8f0;
 }
@@ -15345,7 +15345,7 @@ body.mode-assiste .btn-aide-contextuelle,
     gap: 8px;
     padding: 12px 20px;
     border-top: 1px solid #e2e8f0;
-    background: #f8fafc;
+    background: var(--surface-conteneur, #142428);
 }
 
 /* === FIN ORGANISATEUR === */
@@ -15375,8 +15375,8 @@ body.mode-assiste .btn-aide-contextuelle,
     cursor: pointer;
 }
 
-#planif-menu-lien button:hover { background: #f1f5f9; }
-#planif-menu-lien button.actif { background: #eff6ff; color: var(--planif-couleur-selection); font-weight: 600; }
+#planif-menu-lien button:hover { background: rgba(106, 172, 184, 0.06); }
+#planif-menu-lien button.actif { background: rgba(106, 172, 184, 0.1); color: var(--planif-couleur-selection); font-weight: 600; }
 
 /* === BARRE D'ÉTAT === */
 #section-planification .planif-footer {
@@ -15393,7 +15393,7 @@ body.mode-assiste .btn-aide-contextuelle,
 
 #section-planification .planif-footer kbd {
     padding: 1px 5px;
-    background: #f1f5f9;
+    background: rgba(106, 172, 184, 0.06);
     border: 1px solid var(--planif-couleur-bordure);
     border-radius: 3px;
     font-family: inherit;
@@ -15404,14 +15404,14 @@ body.mode-assiste .btn-aide-contextuelle,
     padding: 2px 8px;
     border: 1px solid var(--planif-couleur-bordure);
     border-radius: 4px;
-    background: #f8fafc;
+    background: var(--surface-conteneur, #142428);
     color: #64748b;
     font-size: 11px;
     cursor: pointer;
     transition: all 0.15s;
     font-family: inherit;
 }
-#planif-btn-recentrer:hover { background: #e2e8f0; color: var(--planif-couleur-texte); }
+#planif-btn-recentrer:hover { background: rgba(106, 172, 184, 0.1); color: var(--planif-couleur-texte); }
 
 #planif-zoom-info {
     margin-left: auto;
@@ -15421,7 +15421,7 @@ body.mode-assiste .btn-aide-contextuelle,
     padding: 2px 6px;
     border: 1px solid var(--planif-couleur-bordure);
     border-radius: 4px;
-    background: #f8fafc;
+    background: var(--surface-conteneur, #142428);
     color: #64748b;
     font-size: 11px;
     cursor: pointer;
@@ -15429,8 +15429,8 @@ body.mode-assiste .btn-aide-contextuelle,
     font-family: inherit;
     min-width: 0;
 }
-.planif-btn-zoom-preset:hover { background: #e2e8f0; color: var(--planif-couleur-texte); }
-.planif-btn-zoom-preset.actif { background: #e2e8f0; color: var(--planif-couleur-texte); font-weight: 600; }
+.planif-btn-zoom-preset:hover { background: rgba(106, 172, 184, 0.1); color: var(--planif-couleur-texte); }
+.planif-btn-zoom-preset.actif { background: rgba(106, 172, 184, 0.1); color: var(--planif-couleur-texte); font-weight: 600; }
 
 /* === SÉLECTEUR DE CARTES === */
 #planif-selecteur-cartes {
@@ -15472,7 +15472,7 @@ body.mode-assiste .btn-aide-contextuelle,
     transition: all 0.15s;
 }
 
-.planif-btn-carte:hover { background: #f1f5f9; color: var(--planif-couleur-texte); border-color: var(--planif-couleur-selection); }
+.planif-btn-carte:hover { background: rgba(106, 172, 184, 0.06); color: var(--planif-couleur-texte); border-color: var(--planif-couleur-selection); }
 .planif-btn-carte.planif-danger:hover { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
 
 /* Contours colorés boutons palette */
@@ -15487,3 +15487,65 @@ body.mode-assiste .btn-aide-contextuelle,
 .planif-palette-btn[data-type="soutien"]        { border-color: var(--planif-couleur-soutien); }
 .planif-palette-btn[data-type="revision"]       { border-color: var(--planif-couleur-revision); }
 .planif-palette-btn[data-type="evaluation"]     { border-color: var(--planif-couleur-evaluation); }
+
+/* ===============================
+   SCROLLBARS — THÈME OCEAN
+   =============================== */
+
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--surface-page, #0c1a22);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(106, 172, 184, 0.25);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(106, 172, 184, 0.4);
+}
+
+/* Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(106, 172, 184, 0.25) var(--surface-page, #0c1a22);
+}
+
+/* ===============================
+   @MEDIA PRINT — FORCER FONDS CLAIRS
+   =============================== */
+
+@media print {
+    :root {
+        --surface-page: #ffffff;
+        --surface-conteneur: #ffffff;
+        --surface-carte: #f8f9fa;
+        --texte-principal: #1a1a1a;
+        --texte-secondaire: #555555;
+        --texte-muted: #888888;
+        --bleu-principal: #032e5c;
+        --bleu-fonce: #0f1e3a;
+        --bleu-moyen: #2a4a8a;
+        --bleu-clair: #065dbb;
+    }
+
+    body {
+        background: white !important;
+        color: #1a1a1a !important;
+    }
+
+    .conteneur {
+        background: white !important;
+    }
+
+    .navigation-principale,
+    .sous-navigation,
+    .bandeau-mode {
+        display: none !important;
+    }
+}
