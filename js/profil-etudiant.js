@@ -1490,7 +1490,7 @@ function genererSectionMobilisationEngagement(da) {
                         ${genererValeursComparatives(Math.round(E_SOM * 100), Math.round(E_PAN * 100), modeComparatif)}
                     </div>
 
-                    <div style="margin-bottom: 15px; font-size: 0.9rem; color: var(--gris-fonce);">
+                    <div style="margin-bottom: 15px; font-size: 0.9rem; color: var(--gris-fonce);" data-tooltip="profil-formule-engagement">
                         Formule : E = ∛(A × C × P)
                         <span class="primo-aide" data-target="conseil-formule-engagement-mobilisation" style="margin-left: 5px; display: inline-block !important; cursor: pointer;">😎</span>
                     </div>
@@ -1657,7 +1657,7 @@ function genererSectionAccompagnement(da) {
             <div class="profil-grid-3col">
                 <!-- Carte 1 : Modèle de la Réponse à l'intervention (RàI) -->
                 <div class="profil-carte">
-                    <h2 class="profil-section-titre-sous">Modèle de la Réponse à l'intervention (RàI)</h2>
+                    <h2 class="profil-section-titre-sous" data-tooltip="profil-accomp-rai">Modèle de la Réponse à l'intervention (RàI)</h2>
                     <div class="profil-message-vide" style="margin: 20px 0;">
                         En attente de données
                     </div>
@@ -1666,7 +1666,7 @@ function genererSectionAccompagnement(da) {
 
                 <!-- Carte 2 : Contexte d'apprentissage -->
                 <div class="profil-carte">
-                    <h2 class="profil-section-titre-sous">Contexte d'apprentissage</h2>
+                    <h2 class="profil-section-titre-sous" data-tooltip="profil-accomp-contexte">Contexte d'apprentissage</h2>
                     <div class="profil-message-vide" style="margin: 20px 0;">
                         En attente de données
                     </div>
@@ -1675,7 +1675,7 @@ function genererSectionAccompagnement(da) {
 
                 <!-- Carte 3 : Observation SOLO -->
                 <div class="profil-carte">
-                    <h2 class="profil-section-titre-sous">Observation de la structure des résultats d'apprentissage</h2>
+                    <h2 class="profil-section-titre-sous" data-tooltip="profil-accomp-solo">Observation de la structure des résultats d'apprentissage</h2>
                     <div class="profil-message-vide" style="margin: 20px 0;">
                         En attente de données
                     </div>
@@ -1772,7 +1772,7 @@ function genererSectionAccompagnement(da) {
         })()}">
             <!-- Carte 1 : Modèle de la Réponse à l'intervention (RàI) -->
             <div class="profil-carte">
-                <h2 class="profil-section-titre-sous">Modèle de la Réponse à l'intervention (RàI)</h2>
+                <h2 class="profil-section-titre-sous" data-tooltip="profil-accomp-rai">Modèle de la Réponse à l'intervention (RàI)</h2>
 
                 <div class="badge-sys ${niveauRai.badgeClasse}">
                     ${niveauRai.label}
@@ -1824,7 +1824,7 @@ function genererSectionAccompagnement(da) {
 
             <!-- Carte 2 : Contexte d'apprentissage -->
             <div class="profil-carte">
-                <h2 class="profil-section-titre-sous">Contexte d'apprentissage</h2>
+                <h2 class="profil-section-titre-sous" data-tooltip="profil-accomp-contexte">Contexte d'apprentissage</h2>
 
                 <div class="badge-sys ${alerteContexte.badgeClasse}">
                     ${alerteContexte.label}
@@ -1854,7 +1854,7 @@ function genererSectionAccompagnement(da) {
                     <strong>Services adaptés :</strong> ${etudiant.caf === 'Oui' ? '✓ CAF' : ''} ${etudiant.sa === 'Oui' ? '✓ SA' : ''} ${etudiant.caf !== 'Oui' && etudiant.sa !== 'Oui' ? 'Aucun' : ''}
                 </p>
 
-                <button onclick="ouvrirModalConfidentiel('${da}')" class="btn btn-secondaire" style="margin-top: 12px; font-size: 0.85rem;">
+                <button onclick="ouvrirModalConfidentiel('${da}')" class="btn btn-secondaire" style="margin-top: 12px; font-size: 0.85rem;" data-tooltip="profil-confidentiel">
                     🔒 Confidentiel ${aDesInfosConfidentielles(da) ? '<span style="color: var(--vert-principal);">●</span>' : ''}
                 </button>
             </div>
@@ -1876,7 +1876,7 @@ function genererSectionAccompagnement(da) {
                 if (forcesSolo.length === 0 && defisSolo.length === 0) {
                     return `
             <div class="profil-carte">
-                <h2 class="profil-section-titre-sous">Observation de la structure des résultats d'apprentissage</h2>
+                <h2 class="profil-section-titre-sous" data-tooltip="profil-accomp-solo">Observation de la structure des résultats d'apprentissage</h2>
                 <p class="profil-texte-italique-gris">
                     Aucune force ni défi identifié selon la taxonomie SOLO.
                 </p>
@@ -1890,7 +1890,7 @@ function genererSectionAccompagnement(da) {
 
                 return `
             <div class="profil-carte">
-                <h2 class="profil-section-titre-sous">Observation de la structure des résultats d'apprentissage</h2>
+                <h2 class="profil-section-titre-sous" data-tooltip="profil-accomp-solo">Observation de la structure des résultats d'apprentissage</h2>
 
                 ${(() => {
                     // Obtenir les couleurs IDME depuis l'échelle configurée
@@ -1992,7 +1992,7 @@ function genererSectionAccompagnement(da) {
         <!-- Historique compact -->
         <div class="u-mt-15">
             <div class="u-flex-between-mb10">
-                <h4 style="color: var(--bleu-principal); font-size: 0.95rem; margin: 0; font-weight: 600;">
+                <h4 style="color: var(--bleu-principal); font-size: 0.95rem; margin: 0; font-weight: 600;" data-tooltip="profil-historique">
                     HISTORIQUE ${interventions && interventions.length > 0 ? `(${interventions.length} intervention${interventions.length > 1 ? 's' : ''})` : ''}
                 </h4>
                 <button class="btn btn-principal" onclick="naviguerVersNouvelleIntervention();">+ Nouvelle intervention</button>
@@ -3037,7 +3037,7 @@ function changerSectionProfil(section) {
     contenuContainer.innerHTML = `
         <div class="profil-contenu-header">
             <h2 class="u-flex-between-mb20">
-                <span>${titre}</span>
+                <span data-tooltip="${{'productions':'profil-productions','mobilisation':'profil-engagement','progression':'profil-progression','performance':'profil-habiletes','accompagnement':'profil-accompagnement','travaux':'profil-travaux','rapport':'profil-rapport'}[section] || ''}">${titre}</span>
                 ${toggleInfo}
             </h2>
         </div>
@@ -3511,7 +3511,7 @@ function afficherProfilComplet(da) {
             <div class="sidebar-navigation">
                 <!-- Sélecteur d'étudiant -->
                 <div class="sidebar-filtre">
-                    <label class="u-texte-mini u-texte-gris" style="margin-bottom: 5px; display: block;">Étudiant·e :</label>
+                    <label class="u-texte-mini u-texte-gris" style="margin-bottom: 5px; display: block;" data-tooltip="profil-selecteur">Étudiant·e :</label>
                     <select id="selecteurEtudiantProfil" class="controle-form" onchange="afficherProfilComplet(this.value)">
                         ${etudiants.map(e => {
                             // ✅ CORRIGÉ (29 déc 2025): Ne pas afficher DA en mode anonymisation
@@ -3557,7 +3557,7 @@ function afficherProfilComplet(da) {
 
                 <!-- Navigation sections (utilise les classes matériel) -->
                 <div class="sidebar-liste">
-                    <div class="sidebar-section-titre">OBSERVATIONS</div>
+                    <div class="sidebar-section-titre" data-tooltip="profil-nav-observations">OBSERVATIONS</div>
 
                     <!-- 1. Productions -->
                     <div class="sidebar-item ${sectionAffichee === 'productions' ? 'active' : ''}" onclick="changerSectionProfil('productions')">
@@ -3603,7 +3603,7 @@ function afficherProfilComplet(da) {
                 <!-- Contenu dynamique chargé par changerSectionProfil() -->
                 <div class="profil-contenu-header">
                     <h2 class="u-flex-between-mb20">
-                        <span>${titreSection}</span>
+                        <span data-tooltip="${{'productions':'profil-productions','mobilisation':'profil-engagement','progression':'profil-progression','performance':'profil-habiletes','accompagnement':'profil-accompagnement','travaux':'profil-travaux','rapport':'profil-rapport'}[sectionAffichee] || ''}">${titreSection}</span>
                         <span class="primo-aide" data-target="details-calculs-risque-${da}">😎</span>
                     </h2>
                 </div>
@@ -3976,7 +3976,7 @@ function genererSectionProductions(da) {
                         <tr>
                             <th>Production</th>
                             <th>Description</th>
-                            <th>Jeton</th>
+                            <th data-tooltip="profil-col-jeton">Jeton</th>
                             <th style="text-align: center;">Note</th>
                             <th style="text-align: center;">Date</th>
                             <th style="text-align: center;">Actions</th>
@@ -7759,7 +7759,7 @@ function genererSectionRapport(da) {
                     <!-- Colonne gauche : Paramètres -->
                     <div>
                         <!-- Sections à inclure -->
-                        <div class="u-texte-mini" style="color: var(--gris-moyen); margin-bottom: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                        <div class="u-texte-mini" style="color: var(--gris-moyen); margin-bottom: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;" data-tooltip="profil-rapport-sections">
                             Sections à inclure
                         </div>
                         <div class="grille-checkboxes u-mb-10">

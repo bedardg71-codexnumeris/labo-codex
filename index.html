@@ -3689,7 +3689,7 @@
                     <!-- ========== SECTION 1: OBSERVER ========== -->
                     <div class="carte" id="carte-indicateurs-acpe">
                         <h3 class="carte-titre-bleu carte-titre-avec-toggle" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
-                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;" data-tooltip="tdb-observer">
                                 <span>Observer</span>
                                 <span class="emoji-container">
                                     <span class="primo-aide" data-target="note-indicateurs">😎</span>
@@ -3722,7 +3722,7 @@
                     <!-- ========== SECTION 2: INTERVENIR ========== -->
                     <div class="carte" id="carte-indicateurs-apprentissage" style="margin-top: 2rem;">
                         <h3 class="carte-titre-bleu carte-titre-avec-toggle" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
-                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;" data-tooltip="tdb-intervenir">
                                 <span>Intervenir</span>
                                 <span class="emoji-container">
                                     <span class="primo-aide" data-target="note-apprentissage">😎</span>
@@ -3760,14 +3760,14 @@
                     <div class="carte" id="carte-evolution-temporelle" style="margin-top: 2rem;">
                         <h3 class="carte-titre-bleu" style="display: flex; flex-direction: column; gap: 0.5rem;">
                             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; width: 100%;">
-                                <span>Développement du groupe</span>
+                                <span data-tooltip="tdb-dev-groupe">Développement du groupe</span>
                                 <div id="contexte-evolution-temporelle" class="carte-contexte-ligne" style="font-size: 0.8rem; font-weight: normal; opacity: 0.9; display: flex; align-items: center; gap: 0.75rem;">
                                     <!-- Trimestre | Cours | Badge - rempli par JS -->
                                 </div>
                             </div>
                             <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; font-size: 0.9rem; font-weight: normal;">
                                 <div style="display: flex; gap: 0.5rem; align-items: center;">
-                                    <label style="color: rgba(255,255,255,0.8);">Indice :</label>
+                                    <label style="color: rgba(255,255,255,0.8);" data-tooltip="tdb-selecteur-indice">Indice :</label>
                                     <select id="selecteur-indice-acp" onchange="rafraichirGraphiqueSpaghettiACP()" style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.3); font-size: 0.85rem; background: rgba(255,255,255,0.15); color: white;">
                                         <option value="A" selected style="color: var(--gris-fonce);">Assiduité (A)</option>
                                         <option value="C" style="color: var(--gris-fonce);">Complétion (C)</option>
@@ -3775,7 +3775,7 @@
                                     </select>
                                 </div>
                                 <div style="display: flex; gap: 0.5rem; align-items: center;">
-                                    <label style="color: rgba(255,255,255,0.8);">Élève :</label>
+                                    <label style="color: rgba(255,255,255,0.8);" data-tooltip="tdb-selecteur-eleve-groupe">Élève :</label>
                                     <select id="selecteur-etudiant-acp" onchange="selectionnerEtudiantACP()" style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.3); font-size: 0.85rem; background: rgba(255,255,255,0.15); color: white;">
                                         <option value="" style="color: var(--gris-fonce);">-- Sélectionner --</option>
                                     </select>
@@ -3783,7 +3783,7 @@
                             </div>
                         </h3>
 
-                        <div style="position: relative; height: 450px; width: 100%;">
+                        <div style="position: relative; height: 450px; width: 100%;" data-tooltip="tdb-graphique-groupe">
                             <canvas id="graphique-groupe-moyennes"></canvas>
                         </div>
 
@@ -3796,7 +3796,7 @@
                     <div class="carte" id="carte-trajectoire-apprentissage" style="margin-top: 2rem;">
                         <h3 class="carte-titre-bleu" style="display: flex; flex-direction: column; gap: 0.5rem;">
                             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; width: 100%;">
-                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem;" data-tooltip="tdb-dev-individuel">
                                     <span>Développement individuel</span>
                                     <span class="emoji-container">
                                         <span class="primo-aide" data-target="note-spaghetti">😎</span>
@@ -3807,7 +3807,7 @@
                                 </div>
                             </div>
                             <div style="display: flex; gap: 0.5rem; align-items: center; font-size: 0.9rem; font-weight: normal;">
-                                <label style="color: rgba(255,255,255,0.8);">Élève :</label>
+                                <label style="color: rgba(255,255,255,0.8);" data-tooltip="tdb-selecteur-eleve-indiv">Élève :</label>
                                 <select id="selecteur-etudiant-spaghetti" onchange="selectionnerEtudiantSpaghetti()" style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.3); font-size: 0.85rem; background: rgba(255,255,255,0.15); color: white;">
                                     <option value="" style="color: var(--gris-fonce);">-- Sélectionner --</option>
                                 </select>
@@ -3836,7 +3836,7 @@
                             <em style="color: var(--gris-moyen); font-size: 0.9rem;">💡 Survolez un point pour voir le nom de l'étudiant et sa note sur cet artefact.</em>
                         </div>
 
-                        <div style="position: relative; height: 550px; width: 100%;">
+                        <div style="position: relative; height: 550px; width: 100%;" data-tooltip="tdb-graphique-individuel">
                             <canvas id="graphique-groupe-spaghetti"></canvas>
                         </div>
 
@@ -3872,7 +3872,7 @@
                     </div>
 
                     <div class="carte">
-                        <h3 class="carte-titre-bleu" style="display: flex; align-items: center; justify-content: space-between;">
+                        <h3 class="carte-titre-bleu" style="display: flex; align-items: center; justify-content: space-between;" data-tooltip="liste-titre">
                             <span>Étudiant·es inscrit·es</span>
                             <span id="compteur-tableau-bord-liste" class="badge-compteur-header"
                                 style="font-size: 0.75rem; padding: 3px 10px; background: rgba(255,255,255,0.2); border-radius: 20px; color: white; font-weight: normal;">
@@ -3880,7 +3880,7 @@
                         </h3>
 
                         <!-- FILTRAGE ET RECHERCHE -->
-                        <div class="carte-grise-mb20">
+                        <div class="carte-grise-mb20" data-tooltip="liste-filtres">
                             <div class="grid-auto-180">
                                 <div class="groupe-form">
                                     <label for="filtre-groupe-liste">Groupe</label>
@@ -3897,7 +3897,7 @@
                                     </select>
                                 </div>
                                 <div class="groupe-form">
-                                    <label for="filtre-rai-liste">Niveau RàI</label>
+                                    <label for="filtre-rai-liste" data-tooltip="liste-filtre-rai">Niveau RàI</label>
                                     <select id="filtre-rai-liste" class="controle-form"
                                         onchange="afficherListeEtudiantsConsultation()">
                                         <option value="">Tous les niveaux</option>
@@ -3907,7 +3907,7 @@
                                     </select>
                                 </div>
                                 <div class="groupe-form">
-                                    <label for="filtre-pattern-liste">Pattern d'apprentissage</label>
+                                    <label for="filtre-pattern-liste" data-tooltip="liste-filtre-pattern">Pattern d'apprentissage</label>
                                     <select id="filtre-pattern-liste" class="controle-form"
                                         onchange="afficherListeEtudiantsConsultation()">
                                         <option value="">Tous les patterns</option>
@@ -3919,7 +3919,7 @@
                                     </select>
                                 </div>
                                 <div class="groupe-form">
-                                    <label for="recherche-nom-liste">Recherche</label>
+                                    <label for="recherche-nom-liste" data-tooltip="liste-recherche">Recherche</label>
                                     <input type="text" id="recherche-nom-liste" class="controle-form"
                                         placeholder="Nom, prénom ou DA..." oninput="afficherListeEtudiantsConsultation()">
                                 </div>
@@ -3952,7 +3952,7 @@
                                         <th onclick="trierTableauPar('prenom')" class="td-left-clickable" title="Cliquer pour trier">
                                             Prénom<span id="tri-prenom" class="ml-4">↕</span>
                                         </th>
-                                        <th class="td-center-40">SA</th>
+                                        <th class="td-center-40" data-tooltip="liste-col-sa">SA</th>
                                         <th onclick="trierTableauPar('assiduite')" class="td-center-clickable" title="Cliquer pour trier">
                                             A<br><span class="text-xs-normal">(assiduité)</span><span id="tri-assiduite" class="ml-4">↕</span>
                                         </th>
@@ -3971,7 +3971,7 @@
                                         <th onclick="trierTableauPar('rai')" class="td-center-100-clickable" title="Cliquer pour trier">
                                             RàI<span id="tri-rai" class="ml-4">↕</span>
                                         </th>
-                                        <th class="td-center-80" title="Nombre d'interventions reçues">
+                                        <th class="td-center-80" title="Nombre d'interventions reçues" data-tooltip="liste-col-interv">
                                             Interv.
                                         </th>
                                     </tr>
@@ -4014,7 +4014,7 @@
                 <!-- Sous-section: Interventions RàI -->
                 <div id="tableau-bord-interventions" class="sous-section">
                     <h2 class="titre-avec-emoji-toggles">
-                        <span>Planification et documentation des interventions</span>
+                        <span data-tooltip="interv-titre">Planification et documentation des interventions</span>
                         <span class="titre-emoji-container">
                             <button class="btn-aide-contextuelle" data-aide="tableau-bord-rai" aria-label="Aide contextuelle">😎</button>
                         </span>
@@ -4261,7 +4261,7 @@
                 <!-- Sous-section: Aperçu -->
                 <div id="evaluations-apercu" class="sous-section">
                     <h2 class="carte-titre-avec-toggle">
-                        <span>Aperçu des évaluations</span>
+                        <span data-tooltip="eval-apercu">Aperçu des évaluations</span>
                         <span class="emoji-container">
                             <span class="primo-aide" data-target="note-evaluations-apercu">😎</span>
                         </span>
@@ -4277,13 +4277,13 @@
 
                     <!-- STATISTIQUES GLOBALES -->
                     <div class="carte">
-                        <h3 class="carte-titre-bleu">Statistiques du groupe</h3>
+                        <h3 class="carte-titre-bleu" data-tooltip="eval-stats-groupe">Statistiques du groupe</h3>
 
                         <div class="grille-cartes-metriques" class="mt-15">
                             <!-- Taux de complétion -->
                             <div class="carte-metrique-bleue">
                                 <div class="carte-metrique-contenu">
-                                    <span class="carte-metrique-label">Taux de complétion moyen</span>
+                                    <span class="carte-metrique-label" data-tooltip="eval-taux-completion">Taux de complétion moyen</span>
                                     <strong id="ea-taux-completion" class="carte-metrique-valeur">—</strong>
                                 </div>
                             </div>
@@ -4310,7 +4310,7 @@
                 <!-- Sous-section: Liste des évaluations -->
                 <div id="evaluations-liste" class="sous-section">
                     <h2 class="titre-avec-emoji-toggles">
-                        <span>Historique et filtres</span>
+                        <span data-tooltip="eval-liste">Historique et filtres</span>
                         <span class="titre-emoji-container">
                             <button class="btn-aide-contextuelle" data-aide="evaluations-liste" aria-label="Aide contextuelle">😎</button>
                         </span>
@@ -4367,7 +4367,7 @@
 
                 <!-- Statistiques globales -->
                 <div class="carte">
-                    <div id="stats-evaluations" style="display: flex; gap: 30px; flex-wrap: wrap; align-items: baseline;">
+                    <div id="stats-evaluations" data-tooltip="eval-liste-resume" style="display: flex; gap: 30px; flex-wrap: wrap; align-items: baseline;">
                         <div style="font-weight: 600; color: var(--bleu-principal);" id="compteur-evaluations">
                             Chargement...
                         </div>
@@ -4399,10 +4399,10 @@
                                     <th class="td-left-clickable" onclick="trierTableauParColonne('production')" title="Cliquer pour trier">
                                         Production <span id="tri-production" style="font-size: 0.8em; color: var(--gris-clair);">↕</span>
                                     </th>
-                                    <th class="td-center-clickable" onclick="trierTableauParColonne('jetons')" title="Cliquer pour trier">
+                                    <th class="td-center-clickable" data-tooltip="eval-col-jeton" onclick="trierTableauParColonne('jetons')" title="Cliquer pour trier">
                                         Jeton <span id="tri-jetons" style="font-size: 0.8em; color: var(--gris-clair);">↕</span>
                                     </th>
-                                    <th class="td-center-clickable" onclick="trierTableauParColonne('niveau')" title="Cliquer pour trier">
+                                    <th class="td-center-clickable" data-tooltip="eval-col-niveau" onclick="trierTableauParColonne('niveau')" title="Cliquer pour trier">
                                         Niveau <span id="tri-niveau" style="font-size: 0.8em; color: var(--gris-clair);">↕</span>
                                     </th>
                                     <th class="td-center-clickable" onclick="trierTableauParColonne('note')" title="Cliquer pour trier">
@@ -4431,7 +4431,7 @@
             <!-- Sous-section: Évaluer (formulaire d'évaluation) -->
             <div id="evaluations-individuelles" class="sous-section">
                 <h2 class="titre-avec-emoji-toggles">
-                    <span>Évaluation des productions et rétroaction différenciée automatique</span>
+                    <span data-tooltip="eval-page">Évaluation des productions et rétroaction différenciée automatique</span>
                     <span class="titre-emoji-container">
                         <button class="btn-aide-contextuelle" data-aide="evaluations-proceder" aria-label="Aide contextuelle">😎</button>
                     </span>
@@ -4515,14 +4515,14 @@
                             </div>
 
                             <div class="groupe-form" class="mb-12">
-                                <label class="label-formulaire">Grille d'évaluation :</label>
+                                <label class="label-formulaire" data-tooltip="eval-grille">Grille d'évaluation :</label>
                                 <select id="selectGrille1" class="controle-form" onchange="chargerGrilleSelectionnee()">
                                     <option value="">-- Choisir une grille --</option>
                                 </select>
                             </div>
 
                             <div class="groupe-form" class="mb-12">
-                                <label class="label-formulaire">Échelle de performance :</label>
+                                <label class="label-formulaire" data-tooltip="eval-echelle">Échelle de performance :</label>
                                 <select id="selectEchelle1" class="controle-form"
                                     onchange="changerEchelleEvaluation(1)">
                                     <option value="">-- Choisir une échelle --</option>
@@ -4530,7 +4530,7 @@
                             </div>
 
                             <div class="groupe-form" class="mb-12">
-                                <label class="label-formulaire">Cartouche de rétroaction :</label>
+                                <label class="label-formulaire" data-tooltip="eval-cartouche">Cartouche de rétroaction :</label>
                                 <select id="selectCartoucheEval" class="controle-form"
                                     onchange="cartoucheSelectionnee()">
                                     <option value="">-- Choisir une cartouche --</option>
@@ -4538,7 +4538,7 @@
                             </div>
 
                             <div class="groupe-form" class="mb-12">
-                                <label class="label-formulaire">Statut de remise :</label>
+                                <label class="label-formulaire" data-tooltip="eval-statut-remise">Statut de remise :</label>
                                 <select id="remiseProduction1" class="controle-form" onchange="changerStatutRemise(1)">
                                     <option value="non-remis">Non remis</option>
                                     <option value="remis">Remis</option>
@@ -4547,7 +4547,7 @@
 
                             <!-- STATUT D'INTÉGRITÉ ACADÉMIQUE -->
                             <div class="groupe-form" class="mb-12">
-                                <label class="label-formulaire">Intégrité académique :</label>
+                                <label class="label-formulaire" data-tooltip="eval-integrite">Intégrité académique :</label>
                                 <select id="statutIntegrite" class="controle-form" onchange="changerStatutIntegrite()">
                                     <option value="recevable">Recevable</option>
                                     <option value="soupcon">Soupçon à vérifier</option>
@@ -4567,7 +4567,7 @@
 
                             <!-- OPTIONS DE JETONS -->
                             <div id="optionsJetons" class="groupe-form" style="display: none;">
-                                <label class="label-formulaire">Appliquer un jeton :</label>
+                                <label class="label-formulaire" data-tooltip="eval-jetons">Appliquer un jeton :</label>
 
                                 <div style="display: flex; flex-direction: column; gap: 10px;">
                                     <!-- Jetons standards (Délai, Reprise, Reprise ciblée) -->
@@ -4576,7 +4576,7 @@
                                         <div id="badgeJetonDelaiOption" style="display: flex; align-items: center; gap: 8px;">
                                             <input type="checkbox" id="checkboxJetonDelai" onchange="gererChangementCheckboxJetonDelai()">
                                             <span class="badge-jeton-delai-wrapper">
-                                                <span class="badge-jeton-titre">Délai</span>
+                                                <span class="badge-jeton-titre" data-tooltip="eval-jeton-delai">Délai</span>
                                             </span>
                                         </div>
 
@@ -4584,7 +4584,7 @@
                                         <div id="badgeJetonRepriseOption" style="display: flex; align-items: center; gap: 8px;">
                                             <input type="checkbox" id="checkboxJetonReprise" onchange="gererChangementCheckboxJetonReprise()">
                                             <span class="badge-jeton-reprise-wrapper">
-                                                <span class="badge-jeton-titre">Reprise</span>
+                                                <span class="badge-jeton-titre" data-tooltip="eval-jeton-reprise">Reprise</span>
                                             </span>
                                         </div>
 
@@ -4592,7 +4592,7 @@
                                         <div id="badgeJetonRepriseCibleeOption" style="display: flex; align-items: center; gap: 8px;">
                                             <input type="checkbox" id="checkboxJetonRepriseCiblee" onchange="gererChangementCheckboxJetonRepriseCiblee()">
                                             <span class="badge-jeton-reprise-ciblee-wrapper">
-                                                <span class="badge-jeton-titre">Reprise ciblée</span>
+                                                <span class="badge-jeton-titre" data-tooltip="eval-jeton-reprise-ciblee">Reprise ciblée</span>
                                             </span>
                                         </div>
                                     </div>
@@ -4605,7 +4605,7 @@
                             </div>
 
                             <!-- NOTE ET NIVEAU -->
-                            <div id="noteFinale1" class="boite-note-finale">
+                            <div id="noteFinale1" class="boite-note-finale" data-tooltip="eval-note-finale">
                                 <!-- Note finale et niveau sur la même ligne -->
                                 <div style="display: flex; align-items: center; justify-content: space-between;">
                                     <div>
@@ -4637,14 +4637,14 @@
                             <!-- RÉTROACTION FINALE (déplacée sous la prévisualisation) -->
                             <div class="zone-retroaction u-mt-20">
                                 <div class="zone-retroaction-header u-flex-between">
-                                    <h4>Rétroaction finale</h4>
+                                    <h4 data-tooltip="eval-retroaction">Rétroaction finale</h4>
                                     <button class="btn btn-confirmer btn-compact" onclick="copierRetroaction(1)">
                                         Copier dans le presse-papier
                                     </button>
                                 </div>
 
                                 <!-- Options à inclure (TOUTES COCHÉES PAR DÉFAUT) -->
-                                <div class="grille-checkboxes" class="mb-15">
+                                <div class="grille-checkboxes" data-tooltip="eval-retroaction-options" class="mb-15">
                                     <label class="text-sm-pointer">
                                         <input type="checkbox" id="afficherDescription1" onchange="genererRetroaction(1)"
                                             checked>
@@ -16008,7 +16008,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97.4';
-        const BUILD_ID = '0211-1033';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0211-1150';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
@@ -16864,7 +16864,7 @@
 
                     <!-- Parcours -->
                     <fieldset style="border: 1px solid var(--bordure-legere); border-radius: var(--radius-moyen); padding: 8px 10px; margin: 0;">
-                        <legend style="font-weight: 600; color: var(--bleu-fonce); padding: 0 6px; font-size: 0.85rem;">Parcours</legend>
+                        <legend style="font-weight: 600; color: var(--bleu-fonce); padding: 0 6px; font-size: 0.85rem;" data-tooltip="profil-conf-parcours">Parcours</legend>
                         <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin-bottom: 6px; font-size: 0.8rem;">
                             <input type="checkbox" id="confidentiel-epgc">
                             <span><strong>ÉPGC</strong> — 1re génération cégep</span>
@@ -16893,7 +16893,7 @@
 
                     <!-- Portrait de lecteur -->
                     <fieldset style="border: 1px solid var(--bordure-legere); border-radius: var(--radius-moyen); padding: 8px 10px; margin: 0;">
-                        <legend style="font-weight: 600; color: var(--bleu-fonce); padding: 0 6px; font-size: 0.85rem;">Portrait de lecteur</legend>
+                        <legend style="font-weight: 600; color: var(--bleu-fonce); padding: 0 6px; font-size: 0.85rem;" data-tooltip="profil-conf-lecteur">Portrait de lecteur</legend>
                         <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px;">
                             <div class="u-text-center">
                                 <label style="font-size: 0.7rem; font-weight: 500; display: block; margin-bottom: 2px;">Structure</label>
@@ -16982,7 +16982,7 @@
 
                     <!-- Diagnostic -->
                     <fieldset style="border: 1px solid var(--bordure-legere); border-radius: var(--radius-moyen); padding: 8px 10px; margin: 0;">
-                        <legend style="font-weight: 600; color: var(--bleu-fonce); padding: 0 6px; font-size: 0.85rem;">Diagnostic</legend>
+                        <legend style="font-weight: 600; color: var(--bleu-fonce); padding: 0 6px; font-size: 0.85rem;" data-tooltip="profil-conf-diagnostic">Diagnostic</legend>
                         <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.8rem; margin-bottom: 8px;">
                             <input type="checkbox" id="confidentiel-services-adaptes">
                             <span><strong>Services adaptés</strong></span>

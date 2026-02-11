@@ -1284,7 +1284,7 @@ function afficherMetriquesGlobales(etudiants) {
 
     // Générer la légende unique en haut
     const legendeUnique = `
-        <div class="distribution-legende-commune tb-barre-rai">
+        <div class="distribution-legende-commune tb-barre-rai" data-tooltip="tdb-zones-couleur">
             <div class="tb-flex-center-around">
                 <span style="color: #ff9800; text-align: center; font-weight: 600;">Fragile<br><span class="tb-texte-mini">30-49%</span></span>
                 <span style="color: var(--btn-annuler); text-align: center; font-weight: 600;">Modéré<br><span class="tb-texte-mini">50-64%</span></span>
@@ -1709,7 +1709,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
 
     return `
         <div class="distribution-container u-mb-20">
-            <h4 class="tb-titre-simple" style="margin-bottom: 4px;">${label}</h4>
+            <h4 class="tb-titre-simple" style="margin-bottom: 4px;" data-tooltip="${{A:'tdb-assiduite',C:'tdb-completion',E:'tdb-engagement',P:'tdb-performance'}[type]}">${label}</h4>
             <div style="position: relative; margin-top: 20px; margin-bottom: ${interpretationFinale ? '8px' : '0'};">
                 ${moyennePositionneeHTML}
                 <div class="barre-indicateur">
@@ -1742,7 +1742,7 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
     if (tousEnAttente) {
         return `
             <div class="distribution-container u-mb-15">
-                <h4 class="tb-titre-metrique">Répartition des patterns d'apprentissage</h4>
+                <h4 class="tb-titre-metrique" data-tooltip="tdb-patterns">Répartition des patterns d'apprentissage</h4>
                 <div class="tb-texte-description" style="color: #94a3b8; font-style: italic;">
                     En attente de données pour ${nbTotal} étudiant${nbTotal > 1 ? 's' : ''}.
                 </div>
@@ -1956,7 +1956,7 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
 
     return `
         <div class="distribution-container u-mb-15">
-            <h4 class="tb-titre-metrique" style="margin-bottom: 4px;">Répartition des patterns d'apprentissage</h4>
+            <h4 class="tb-titre-metrique" style="margin-bottom: 4px;" data-tooltip="tdb-patterns">Répartition des patterns d'apprentissage</h4>
             <div class="barre-patterns tb-barre-simple">
                 <div class="barre-patterns-overlay"></div>
                 ${lignesSOM}
@@ -1991,7 +1991,7 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, n
     if (tousEnAttente) {
         return `
             <div class="distribution-container u-mb-15">
-                <h4 class="tb-titre-metrique">Modèle de la Réponse à l'intervention (RàI)</h4>
+                <h4 class="tb-titre-metrique" data-tooltip="tdb-rai">Modèle de la Réponse à l'intervention (RàI)</h4>
                 <div class="tb-texte-description" style="color: #94a3b8; font-style: italic;">
                     En attente de données pour ${nbTotal} étudiant${nbTotal > 1 ? 's' : ''}.
                 </div>
@@ -2182,7 +2182,7 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, n
 
     return `
         <div class="distribution-container u-mb-15">
-            <h4 class="tb-titre-metrique" style="margin-bottom: 4px;">Modèle de la Réponse à l'intervention (RàI)</h4>
+            <h4 class="tb-titre-metrique" style="margin-bottom: 4px;" data-tooltip="tdb-rai">Modèle de la Réponse à l'intervention (RàI)</h4>
             <div class="barre-rai tb-barre-simple">
                 <div class="barre-rai-overlay"></div>
                 ${lignesSOM}
