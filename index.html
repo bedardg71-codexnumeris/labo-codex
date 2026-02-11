@@ -15,49 +15,49 @@
            Synchronisé avec styles.css
            =============================== */
         :root {
-            /* === PALETTE DE COULEURS === */
+            /* === PALETTE OCÉAN & BOUSSOLE (C4) === */
 
-            /* Bleus - Couleurs principales */
-            --bleu-principal: #032e5c;
-            --bleu-fonce: #0f1e3a;
-            --bleu-moyen: #2a4a8a;
-            --bleu-clair: #065dbb;
-            --bleu-leger: #6b85b3;
-            --bleu-carte: #9fc5e8;
-            --bleu-pale: #e8f2fd;
-            --bleu-tres-pale: #f0f8ff;
+            /* Bleus - Couleurs principales (ocean) */
+            --bleu-principal: #1a4a5e;
+            --bleu-fonce: #0c1a22;
+            --bleu-moyen: #244858;
+            --bleu-clair: #6aacb8;
+            --bleu-leger: #4a8a94;
+            --bleu-carte: #1a3a48;
+            --bleu-pale: #122a34;
+            --bleu-tres-pale: #0e1e28;
             --bleu-simulation: #1a5266;
-            --bleu-anonymisation: #0f1e3a;
+            --bleu-anonymisation: #0c1a22;
 
-            /* Couleurs d'accent */
-            --orange-accent: #ff6b35;
-            --vert-pale: #f8fef8;
-            --vert-doux: #b8d4b8;
-            --vert-leger: #2a8a6a;
-            --vert-succes: #28a745;
+            /* Couleurs d'accent (ocean: sarcelle + laiton) */
+            --orange-accent: #c8a060;
+            --vert-pale: #0e2a28;
+            --vert-doux: #2a5a4a;
+            --vert-leger: #3aaa8a;
+            --vert-succes: #34c759;
 
             /* === COULEURS PRATIQUES D'ÉVALUATION (codes 3 lettres) === */
             --som-orange: #ff6f00;    /* Sommative */
             --std-bleu: #0277bd;      /* Standards (ex-PAN) */
-            --spe-vert: #16a34a;      /* Spécifications */
-            --den-violet: #9c27b0;    /* Dénotation */
+            --spe-vert: #22c55e;      /* Spécifications */
+            --den-violet: #8b5cf6;    /* Dénotation */
 
             /* === GRADIENTS === */
-            --gradient-entete: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%);
-            --gradient-fond-page: linear-gradient(135deg, #e8f2fd 0%, #f0f8ff 100%);
+            --gradient-entete: linear-gradient(135deg, #0a1820 0%, #1a3848 100%);
+            --gradient-fond-page: linear-gradient(135deg, #0e1e28 0%, #0c1a22 100%);
 
-            /* === BOX-SHADOW (5 niveaux) === */
-            --shadow-subtil: 0 1px 4px rgba(3, 46, 92, 0.1);
-            --shadow-normal: 0 2px 8px rgba(3, 46, 92, 0.15);
-            --shadow-prononce: 0 4px 12px rgba(3, 46, 92, 0.25);
-            --shadow-fort: 0 8px 24px rgba(3, 46, 92, 0.3);
-            --shadow-inset: inset 0 1px 3px rgba(3, 46, 92, 0.08);
+            /* === BOX-SHADOW (renforcées pour fond sombre) === */
+            --shadow-subtil: 0 1px 4px rgba(10, 30, 40, 0.3);
+            --shadow-normal: 0 2px 8px rgba(10, 30, 40, 0.4);
+            --shadow-prononce: 0 4px 14px rgba(10, 30, 40, 0.5);
+            --shadow-fort: 0 8px 24px rgba(10, 30, 40, 0.55);
+            --shadow-inset: inset 0 1px 3px rgba(10, 30, 40, 0.15);
 
             /* === BORDER-RADIUS === */
-            --radius-petit: 5px;      /* Badges Tétris */
-            --radius-moyen: 6px;      /* Boutons, inputs */
-            --radius-grand: 12px;     /* Conteneurs (harmonisé toggles) */
-            --radius-pill: 20px;      /* Pills uniformes */
+            --radius-petit: 5px;
+            --radius-moyen: 6px;
+            --radius-grand: 12px;
+            --radius-pill: 20px;
 
             /* === SYSTÈME TÉTRIS (3 échelles) === */
             --padding-compact: 3px 8px;
@@ -71,117 +71,128 @@
             --font-large: 1rem;
 
             /* Couleurs de tableau */
-            --table-hover: var(--bleu-carte);    /* Couleur hover des rangées (plus foncé, texte reste lisible) */
+            --table-hover: rgba(106, 172, 184, 0.12);
 
             /* === NAVIGATION === */
-            --nav-bg: #f8f9fa;
-            --nav-normal: #04376f;
-            --nav-hover: #3e98f9;
-            --nav-actif: #054a95;
+            --nav-bg: #122a34;
+            --nav-normal: #8aa4b0;
+            --nav-hover: #6aacb8;
+            --nav-actif: #6aacb8;
             --nav-bordure-actif: var(--orange-accent);
 
             /* Navigation - États actifs par mode */
-            --nav-actif-normal: #2a4a8a;
-            --nav-actif-simulation: #2a6a7a;
-            --nav-actif-anonymisation: #2a3d5a;
+            --nav-actif-normal: #6aacb8;
+            --nav-actif-simulation: #6aacb8;
+            --nav-actif-anonymisation: #5a7a88;
 
             /* === SOUS-NAVIGATION === */
-            --sous-nav-bg: #e8f2fd;
-            --sous-nav-normal: #054a95;
-            --sous-nav-hover: #3e98f9;
-            --sous-nav-actif: #065dbb;
+            --sous-nav-bg: #0e1e28;
+            --sous-nav-normal: #8aa4b0;
+            --sous-nav-hover: #6aacb8;
+            --sous-nav-actif: #7ec8d4;
 
             /* Sous-navigation - Fonds par mode */
-            --sous-nav-bg-normal: #e8f2fd;
-            --sous-nav-bg-simulation: #e0f0f0;
-            --sous-nav-bg-anonymisation: #dce8f5;
+            --sous-nav-bg-normal: #0e1e28;
+            --sous-nav-bg-simulation: #0e1e28;
+            --sous-nav-bg-anonymisation: #0e1e28;
 
-            /* === BOUTONS D'ACTION - Palette Nuit Élégante === */
-            --btn-principal: #032e5c;
-            --btn-principal-hover: #054a95;
+            /* === BOUTONS D'ACTION - Palette Océan & Boussole === */
+            --btn-principal: #1a4a5e;
+            --btn-principal-hover: #246478;
             --btn-ajouter: #1e5a4a;
-            --btn-ajouter-hover: #165040;
-            --btn-modifier: #4a3a6a;
-            --btn-modifier-hover: #3a2a5a;
+            --btn-ajouter-hover: #287a64;
+            --btn-modifier: #3a5070;
+            --btn-modifier-hover: #4a6888;
             --btn-confirmer: #1e5a4a;
-            --btn-confirmer-hover: #165040;
-            --btn-annuler: #d97706;
-            --btn-annuler-hover: #b45309;
-            --btn-supprimer: #8a2a2a;
-            --btn-supprimer-hover: #7a1a1a;
+            --btn-confirmer-hover: #287a64;
+            --btn-annuler: #b8864a;
+            --btn-annuler-hover: #9a7040;
+            --btn-supprimer: #7a3a3a;
+            --btn-supprimer-hover: #6a2a2a;
 
             /* === INDICATEURS DE RISQUE === */
-            --risque-nul: #065dbb;
-            --risque-minimal: #28a745;
-            --risque-faible: #90EE90;
+            --risque-nul: #6aacb8;
+            --risque-minimal: #34c759;
+            --risque-faible: #7ae8a0;
             --risque-modere: #ffc107;
             --risque-eleve: #fd7e14;
-            --risque-tres-eleve: #dc3545;
-            --risque-critique: #721c24;
+            --risque-tres-eleve: #e84057;
+            --risque-critique: #a02030;
 
-            /* === COULEURS GRISES === */
-            --gris-tres-fonce: #222222;
-            --gris-fonce: #333333;
-            --gris-moyen: #666666;
-            --gris-clair: #999999;
-            --gris-tres-clair: #cccccc;
-            --gris-tres-pale: #f9f9f9;
+            /* === COULEURS GRISES (inversées pour fond sombre) === */
+            --gris-tres-fonce: #d0e0e4;
+            --gris-fonce: #b0c4cc;
+            --gris-moyen: #8aa4b0;
+            --gris-clair: #5a7a88;
+            --gris-tres-clair: #2a4a54;
+            --gris-tres-pale: #142428;
 
             /* === BORDURES === */
-            --bordure-claire: #dddddd;
-            --bordure-moyenne: #cccccc;
+            --bordure-claire: rgba(106, 172, 184, 0.15);
+            --bordure-moyenne: rgba(106, 172, 184, 0.25);
 
-            /* === ALERTES - Attention (orange/terracotta) === */
-            --alerte-fond-attention: #fff8f0;
-            --alerte-bordure-attention: #ff6b35;
-            --alerte-texte-attention: #8a4a2a;
+            /* === ALERTES - Attention (laiton) === */
+            --alerte-fond-attention: rgba(200, 160, 96, 0.12);
+            --alerte-bordure-attention: #c8a060;
+            --alerte-texte-attention: #d4b878;
 
-            /* === ALERTES - Information (bleue) === */
-            --alerte-fond-information: #e8f2fd;
-            --alerte-bordure-information: #032e5c;
-            --alerte-texte-information: #032e5c;
+            /* === ALERTES - Information (sarcelle) === */
+            --alerte-fond-information: rgba(106, 172, 184, 0.12);
+            --alerte-bordure-information: #6aacb8;
+            --alerte-texte-information: #7ec8d4;
 
-            /* === ALERTES - Succès (sarcelle) === */
-            --alerte-fond-succes: #e8f5f2;
-            --alerte-bordure-succes: #1e5a4a;
-            --alerte-texte-succes: #165040;
+            /* === ALERTES - Succès (vert) === */
+            --alerte-fond-succes: rgba(52, 199, 89, 0.12);
+            --alerte-bordure-succes: #34c759;
+            --alerte-texte-succes: #5ae080;
 
             /* === ALERTES - Erreur (rouge) === */
-            --alerte-fond-erreur: #f8e8e8;
-            --alerte-bordure-erreur: #8a2a2a;
-            --alerte-texte-erreur: #7a1a1a;
+            --alerte-fond-erreur: rgba(232, 64, 87, 0.12);
+            --alerte-bordure-erreur: #e84057;
+            --alerte-texte-erreur: #f06878;
 
             /* === ÉTATS FORMULAIRES === */
-            --etat-erreur-fond: #fff8f0;
-            --etat-erreur-bordure: #ff6b35;
-            --etat-erreur-texte: #8a4a2a;
-            --etat-valide-fond: #e8f5f2;
-            --etat-valide-bordure: #1e5a4a;
-            --etat-valide-texte: #165040;
-            --etat-verrouille-fond: #e9ecef;
-            --etat-verrouille-bordure: #6c757d;
-            --etat-verrouille-texte: #495057;
+            --etat-erreur-fond: rgba(232, 64, 87, 0.1);
+            --etat-erreur-bordure: #e84057;
+            --etat-erreur-texte: #f06878;
+            --etat-valide-fond: rgba(52, 199, 89, 0.1);
+            --etat-valide-bordure: #34c759;
+            --etat-valide-texte: #5ae080;
+            --etat-verrouille-fond: rgba(106, 172, 184, 0.06);
+            --etat-verrouille-bordure: #5a7a88;
+            --etat-verrouille-texte: #8aa4b0;
 
             /* === BADGES - Statuts d'évaluation === */
-            --badge-evalue-fond: #e8f5f2;
-            --badge-evalue-texte: #165040;
-            --badge-evalue-bordure: #b3d9cf;
-            --badge-non-evalue-fond: #f8f9fa;
-            --badge-non-evalue-texte: #6c757d;
-            --badge-non-evalue-bordure: #dee2e6;
+            --badge-evalue-fond: rgba(52, 199, 89, 0.12);
+            --badge-evalue-texte: #5ae080;
+            --badge-evalue-bordure: rgba(52, 199, 89, 0.3);
+            --badge-non-evalue-fond: rgba(106, 172, 184, 0.08);
+            --badge-non-evalue-texte: #8aa4b0;
+            --badge-non-evalue-bordure: rgba(106, 172, 184, 0.2);
 
             /* === ESPACEMENT === */
             --espacement-petit: 10px;
             --espacement-moyen: 20px;
             --espacement-grand: 30px;
 
-            /* === CALENDRIER === */
-            --jour-cours-reel-bg: #e3f2fd;
-            --reprise-bg: #fff3e0;
-            --conge-bg: #ffebee;
-            --planification-bg: #f3e5f5;
-            --examens-bg: #fce4ec;
-            --weekend-bg: #f5f5f5;
+            /* === CALENDRIER (fonds semi-transparents sur base sombre) === */
+            --jour-cours-reel-bg: rgba(106, 172, 184, 0.15);
+            --reprise-bg: rgba(200, 160, 96, 0.15);
+            --conge-bg: rgba(232, 64, 87, 0.12);
+            --planification-bg: rgba(139, 92, 246, 0.12);
+            --examens-bg: rgba(232, 64, 87, 0.08);
+            --weekend-bg: rgba(106, 172, 184, 0.05);
+
+            /* === NOUVELLES VARIABLES SÉMANTIQUES OCÉAN === */
+            --surface-page: #0c1a22;
+            --surface-conteneur: #142428;
+            --surface-carte: #1a3a48;
+            --surface-input: rgba(106, 172, 184, 0.08);
+            --texte-principal: #d0e0e4;
+            --texte-secondaire: #8aa4b0;
+            --texte-muted: #5a7a88;
+            --accent-primaire: #6aacb8;
+            --accent-secondaire: #c8a060;
 
             /* === COMPATIBILITÉ (anciennes variables) === */
             --succes: var(--vert-succes);
@@ -191,16 +202,16 @@
            MODE ASSISTÉ - CONVERSION BLEU → SARCELLE
            =============================== */
         body[data-mode="simulation"] {
-            --bleu-carte: #9ac5d5;            /* Sarcelle carte (équivalent sarcelle) */
-            --table-hover: #9ac5d5;           /* Hover sarcelle pour tableaux */
+            --bleu-carte: var(--surface-carte, #1a3a48);
+            --table-hover: rgba(106, 172, 184, 0.12);
         }
 
         /* ===============================
-           MODE ANONYMISÉ - BLEUS DÉSATURÉS
+           MODE ANONYMISÉ - OCEAN DÉSATURÉ
            =============================== */
         body[data-mode="anonymisation"] {
-            --bleu-carte: #9aacba;            /* Bleu désaturé carte */
-            --table-hover: #9aacba;           /* Hover bleu gris pour tableaux */
+            --bleu-carte: #162a34;
+            --table-hover: rgba(90, 122, 136, 0.12);
         }
 
         /* ===============================
@@ -221,7 +232,8 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: white;
+            background: var(--surface-page, #0c1a22);
+            color: var(--texte-principal, #d0e0e4);
             min-height: 100vh;
             margin: 0;
             padding: 0;
@@ -234,7 +246,7 @@
            =============================== */
         .conteneur {
             /* Styles principaux dans styles.css - max-width: 95%, margin: 0 auto */
-            background: white;
+            background: var(--surface-conteneur, #142428);
             overflow: hidden;
         }
 
@@ -3616,10 +3628,10 @@
         <!-- ========== MODAL INTRODUCTION (😎) ========== -->
 
         <!-- SÉLECTEUR GROUPE-COURS ACTIF (Beta 95.2) -->
-        <div id="bandeau-groupe-cours" class="bandeau-groupe-cours" data-tooltip="entete-groupe-cours">
+        <div id="bandeau-groupe-cours" class="bandeau-groupe-cours">
             <div class="bandeau-groupe-cours-contenu">
                 <label>Groupe-cours actif :</label>
-                <select id="selectGroupeCoursHeader" class="dropdown-groupe-cours-header" onchange="changerGroupeCoursDepuisHeader(this.value)">
+                <select id="selectGroupeCoursHeader" class="dropdown-groupe-cours-header" onchange="changerGroupeCoursDepuisHeader(this.value)" data-tooltip="entete-groupe-cours">
                     <option value="">-- Aucun groupe-cours --</option>
                 </select>
             </div>
