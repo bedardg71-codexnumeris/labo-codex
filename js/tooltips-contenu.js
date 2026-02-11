@@ -297,7 +297,135 @@ const TOOLTIPS = {
         'Stockage local (IndexedDB + localStorage), JSON lisible, aucune donn\u00e9e envoy\u00e9e sur internet.',
 
     'donnees-gestion-ressources':
-        'Auditer et nettoyer les ressources p\u00e9dagogiques accumul\u00e9es. S\u00e9lectionner un type pour afficher la liste.'
+        'Auditer et nettoyer les ressources p\u00e9dagogiques accumul\u00e9es. S\u00e9lectionner un type pour afficher la liste.',
+
+    // =================================================================
+    // PLANIFICATION — Alignement pedagogique
+    // =================================================================
+
+    'planif-sous-nav':
+        'Deux vues compl\u00e9mentaires : la carte mentale d\u2019alignement et l\u2019organisateur du cours.',
+
+    'planif-alignement':
+        'Carte mentale interactive pour construire visuellement l\u2019alignement p\u00e9dagogique du cours.',
+
+    // --- Barre d'outils ---
+
+    'planif-selecteur-cours':
+        'Choisir le cours \u00e0 planifier. Chaque cours a sa propre carte d\u2019alignement.',
+
+    'planif-boutons-action':
+        'Ajouter, supprimer, couper, copier et coller des n\u0153uds sur le canevas.',
+
+    // --- Palette d'elements ---
+
+    'planif-palette':
+        'Glisser un \u00e9l\u00e9ment vers le canevas pour l\u2019ajouter \u00e0 la carte mentale.',
+
+    'planif-pouvoir-enseigner':
+        'Cadre curriculaire : comp\u00e9tence minist\u00e9rielle et id\u00e9es ma\u00eetresses du cours.',
+
+    'planif-quoi-enseigner':
+        'Savoirs, informations pr\u00e9alables, strat\u00e9gies cognitives et conditions d\u2019apprentissage.',
+
+    'planif-comment-enseigner':
+        'Dispositifs d\u2019enseignement : activit\u00e9s, soutien et r\u00e9vision.',
+
+    'planif-design-apprentissages':
+        '\u00c9valuations et productions : lier les objectifs aux moyens d\u2019\u00e9valuation.',
+
+    'planif-structure':
+        'Organisation temporelle : s\u00e9quences (semaines) et le\u00e7ons (s\u00e9ances).',
+
+    'planif-aide':
+        'Instructions rapides : glisser, relier, int\u00e9grer et cloner des \u00e9l\u00e9ments.',
+
+    // --- Canevas ---
+
+    'planif-canevas':
+        'Espace de travail de la carte mentale. Glisser des \u00e9l\u00e9ments, cr\u00e9er des liens, organiser visuellement le cours.',
+
+    // --- Panneau de proprietes ---
+
+    'planif-panneau-proprietes':
+        'Propri\u00e9t\u00e9s du n\u0153ud s\u00e9lectionn\u00e9 : titre, description, clonage et suppression.',
+
+    'planif-titre-noeud':
+        'Nom de l\u2019\u00e9l\u00e9ment p\u00e9dagogique tel qu\u2019il appara\u00eet sur la carte.',
+
+    'planif-description-noeud':
+        'Notes ou pr\u00e9cisions sur cet \u00e9l\u00e9ment. Champ libre.',
+
+    'planif-cloner':
+        'Cr\u00e9er un clone de ce n\u0153ud. Les modifications se propagent \u00e0 toutes les copies.',
+
+    'planif-supprimer-noeud':
+        'Supprimer ce n\u0153ud et ses liens de la carte.',
+
+    // --- Barre inferieure ---
+
+    'planif-barre-outils':
+        'Contr\u00f4les de zoom, filtres d\u2019affichage et options de vue du canevas.',
+
+    'planif-zoom':
+        'Ajuster le niveau de zoom du canevas.',
+
+    'planif-filtres':
+        'Filtrer l\u2019affichage des n\u0153uds et des liens sur le canevas.',
+
+    // =================================================================
+    // PLANIFICATION — Organisateur
+    // =================================================================
+
+    'orga-sous-nav':
+        'Vue textuelle et structur\u00e9e des donn\u00e9es de la carte mentale. S\u00e9lectionner une s\u00e9quence et une le\u00e7on pour afficher son plan.',
+
+    // --- Selecteurs de navigation ---
+
+    'orga-selecteur-sequence':
+        'Filtrer par s\u00e9quence pour restreindre la vue calendrier.',
+
+    'orga-selecteur-lecon':
+        'S\u00e9lectionner une le\u00e7on pour afficher son plan d\u00e9taill\u00e9.',
+
+    // --- Vue calendrier ---
+
+    'orga-vue-calendrier':
+        'Vue hi\u00e9rarchique textuelle des s\u00e9quences, s\u00e9ances et activit\u00e9s avec leurs liens p\u00e9dagogiques.',
+
+    // --- Plan de lecon ---
+
+    'orga-entete-lecon':
+        'Groupes-cours auxquels cette le\u00e7on s\u2019applique, avec leurs plages horaires.',
+
+    'orga-objectif':
+        'Ce que l\u2019\u00e9l\u00e8ve sera capable de faire au terme de la le\u00e7on.',
+
+    'orga-connaissances-prealables':
+        'Savoirs pr\u00e9alables \u00e0 v\u00e9rifier ou revoir avant d\u2019aborder cette le\u00e7on.',
+
+    'orga-productions':
+        'Productions et artefacts \u00e9valuatifs li\u00e9s aux activit\u00e9s de cette le\u00e7on.',
+
+    'orga-enseignement-explicite':
+        'Structure en 5 phases : ouverture, modelage, pratique guid\u00e9e, pratique autonome, objectivation.',
+
+    'orga-coeur-lecon':
+        'Activit\u00e9s p\u00e9dagogiques de la le\u00e7on. Associer des productions pour compl\u00e9ter l\u2019alignement.',
+
+    // --- Elements contextuels du plan ---
+
+    'orga-alerte-alignement':
+        'Incoh\u00e9rence d\u2019alignement d\u00e9tect\u00e9e : une \u00e9valuation ou un objectif n\u2019est pas encore reli\u00e9 \u00e0 une production.',
+
+    'orga-selecteur-production':
+        'Associer une production (artefact \u00e9valuatif) \u00e0 cette activit\u00e9.',
+
+    'orga-lien-pedagogique':
+        'Connexion vers un autre \u00e9l\u00e9ment de la carte mentale (comp\u00e9tence, pr\u00e9requis, strat\u00e9gie, etc.).',
+
+    'orga-item-a-revoir':
+        '\u00c9l\u00e9ment pr\u00e9alable \u00e0 revoir en d\u00e9but de s\u00e9ance avant de poursuivre.'
 };
 
 // Export global
