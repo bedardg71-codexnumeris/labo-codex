@@ -1741,7 +1741,7 @@ h1, h2, h3, h4 {
 }
 
 .tableau tbody tr:nth-child(even) {
-    background: #f9f9f9;
+    background: rgba(106, 172, 184, 0.04);
 }
 
 .tableau td {
@@ -1789,7 +1789,7 @@ h1, h2, h3, h4 {
 }
 
 .tableau-blanc tbody tr:nth-child(even) {
-    background: #f9f9f9;
+    background: rgba(106, 172, 184, 0.04);
 }
 
 .tableau-blanc td {
@@ -1846,11 +1846,11 @@ h1, h2, h3, h4 {
 /* État VERROUILLÉ - Gris */
 #enteteDateSeance.etat-verrouille {
     background: var(--surface-carte, #1a3a48);
-    border-color: #6c757d;
+    border-color: var(--texte-muted, #5a7a88);
 }
 
 #enteteDateSeance.etat-verrouille #texteDateSeance {
-    color: #495057;
+    color: var(--texte-secondaire, #8aa4b0);
 }
 
 /* ===============================
@@ -1896,43 +1896,43 @@ h1, h2, h3, h4 {
    CODES COULEUR POUR SAISIE DES HEURES
    =============================== */
 
-/* Absence complète (0h) - Rouge léger */
+/* Absence complète (0h) - Rouge sur fond sombre */
 input.saisie-absence {
-    background-color: #f8d7da !important;
-    border-color: #f5c6cb !important;
-    color: #721c24 !important;
+    background-color: rgba(232, 64, 87, 0.15) !important;
+    border-color: rgba(232, 64, 87, 0.4) !important;
+    color: #f06878 !important;
     font-weight: 600;
 }
 
-/* Retard ou absence partielle - Orange/Jaune */
+/* Retard ou absence partielle - Laiton/Jaune */
 input.saisie-retard {
-    background-color: #fff3cd !important;
+    background-color: rgba(200, 160, 96, 0.15) !important;
     border-color: var(--btn-annuler) !important;
-    color: #856404 !important;
+    color: #d4b878 !important;
     font-weight: 600;
 }
 
-/* Absence motivée/facultative (RàI) - Ambre/Orange clair */
+/* Absence motivée/facultative (RàI) - Ambre/Orange */
 input.saisie-absence-motivee {
-    background-color: #ffe8cc !important;
-    border-color: #ffb74d !important;
-    color: #e65100 !important;
+    background-color: rgba(255, 183, 77, 0.12) !important;
+    border-color: rgba(255, 183, 77, 0.4) !important;
+    color: #ffb74d !important;
     font-weight: 600;
 }
 
-/* Présence complète - Vert léger */
+/* Présence complète - Vert sur fond sombre */
 input.saisie-present {
-    background-color: #d4edda !important;
-    border-color: #c3e6cb !important;
-    color: #155724 !important;
+    background-color: rgba(52, 199, 89, 0.12) !important;
+    border-color: rgba(52, 199, 89, 0.3) !important;
+    color: #5ae080 !important;
     font-weight: 600;
 }
 
 /* État par défaut (vide ou non saisi) */
 input.saisie-vide {
     background-color: var(--surface-conteneur, #142428);
-    border-color: #ced4da;
-    color: #495057;
+    border-color: rgba(106, 172, 184, 0.15);
+    color: var(--texte-secondaire, #8aa4b0);
 }
 
 /* Transition douce pour les changements de couleur */
@@ -2261,7 +2261,7 @@ input[type="number"].controle-form {
 }
 
 .badge-risque-analyse-defaut .badge-analyse-count {
-    background: #6c757d;
+    background: var(--texte-muted, #5a7a88);
 }
 
 /* === Badge pattern d'apprentissage (neutre gris) === */
@@ -2271,7 +2271,7 @@ input[type="number"].controle-form {
 }
 
 .badge-pattern-analyse .badge-analyse-count {
-    background: #6c757d;
+    background: var(--texte-muted, #5a7a88);
 }
 
 /* === Badge type d'intervention (Groupe/Individuel) === */
@@ -2467,7 +2467,7 @@ input[type="number"].controle-form {
 .controle-form:focus {
     outline: none;
     border-color: var(--bleu-clair);
-    box-shadow: 0 0 0 3px rgba(6, 93, 187, 0.1);
+    box-shadow: 0 0 0 3px rgba(106, 172, 184, 0.2);
 }
 
 /* Style de base pour TOUS les textarea - fix texte invisible */
@@ -2478,7 +2478,7 @@ textarea {
 
 /* Inputs spéciaux pour saisie de présences */
 #tbody-saisie-presences input[type="number"]:placeholder-shown {
-    background-color: #fff9e6;
+    background-color: rgba(200, 160, 96, 0.1);
     border: 1px dashed var(--btn-annuler);
 }
 
@@ -5583,7 +5583,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 
 .profil-texte-paragraphe {
     margin: 10px 0;
-    color: #495057;
+    color: var(--texte-secondaire, #8aa4b0);
     font-size: 0.95rem;
 }
 
@@ -5596,7 +5596,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 /* Séparateurs */
 .profil-separateur {
     border: none;
-    border-top: 1px solid #dee2e6;
+    border-top: 1px solid rgba(106, 172, 184, 0.15);
     margin: 20px 0;
 }
 
@@ -6408,7 +6408,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 .sous-criteres-liste-conteneur {
-    background: #f9f9f9;
+    background: rgba(106, 172, 184, 0.04);
     padding: 10px;
     border-radius: var(--radius-moyen);
 }
@@ -6457,7 +6457,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     color: var(--texte-muted, #5a7a88);
     margin: 0 0 12px 0;
     padding: 12px;
-    background: #f9f9f9;
+    background: rgba(106, 172, 184, 0.04);
     border-radius: var(--radius-moyen);
     text-align: center;
 }
@@ -6832,7 +6832,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 .section-accordeon summary {
     padding: 12px 15px;
     cursor: pointer;
-    background: #f9f9f9;
+    background: rgba(106, 172, 184, 0.04);
     font-weight: 600;
     color: var(--bleu-principal);
     user-select: none;
@@ -7678,7 +7678,7 @@ summary.summary-materiel:hover {
 /* Séparateur horizontal */
 .profil-separateur {
     border: none;
-    border-top: 1px solid #dee2e6;
+    border-top: 1px solid rgba(106, 172, 184, 0.15);
     margin: 20px 0;
 }
 
@@ -8713,7 +8713,7 @@ summary.summary-materiel:hover {
 }
 
 .intervention-timeline-item:hover {
-    background: #f9f9f9;
+    background: rgba(106, 172, 184, 0.04);
 }
 
 .intervention-timeline-badges {
@@ -8949,7 +8949,7 @@ summary.summary-materiel:hover {
 }
 
 .matrice-tableau tbody tr:nth-child(odd) {
-    background: #f9f9f9;
+    background: rgba(106, 172, 184, 0.04);
 }
 
 .matrice-tableau tbody tr:nth-child(even) {
@@ -10963,7 +10963,7 @@ body[data-mode="simulation"] table tr:hover {
     min-width: 24px;
     padding: 2px 8px;
     border-radius: var(--radius-grand);
-    background: #6c757d;
+    background: var(--texte-muted, #5a7a88);
     color: white;
     font-weight: bold;
     text-align: center;
@@ -10995,7 +10995,7 @@ body[data-mode="simulation"] table tr:hover {
 }
 
 .spe-spec-item:hover {
-    border-color: #adb5bd;
+    border-color: rgba(106, 172, 184, 0.3);
 }
 
 .spe-spec-item.checked {
@@ -11088,7 +11088,7 @@ body[data-mode="simulation"] table tr:hover {
 /* Gabarit SPE */
 .spe-gabarit {
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border: 2px dashed #6c757d;
+    border: 2px dashed var(--texte-muted, #5a7a88);
     border-radius: var(--radius-grand);
     padding: 20px;
     margin: 15px 0;
