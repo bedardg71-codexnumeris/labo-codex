@@ -688,7 +688,7 @@ h1, h2, h3, h4 {
     align-items: center;
     justify-content: center;
     padding: 8px 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-top: 1px solid rgba(106, 172, 184, 0.2);
 }
 
 .info-contextuelles-centre {
@@ -728,8 +728,8 @@ h1, h2, h3, h4 {
 
 /* ✅ BETA 95 : Dropdown de sélection de cours dans l'en-tête */
 .dropdown-cours-entete {
-    background: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(106, 172, 184, 0.12);
+    border: 1px solid rgba(106, 172, 184, 0.25);
     border-radius: var(--radius-moyen);
     color: white;
     font-size: 0.95rem;
@@ -747,14 +747,14 @@ h1, h2, h3, h4 {
 }
 
 .dropdown-cours-entete:hover {
-    background: rgba(255, 255, 255, 0.25);
-    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(106, 172, 184, 0.22);
+    border-color: rgba(106, 172, 184, 0.4);
 }
 
 .dropdown-cours-entete:focus {
-    background: rgba(255, 255, 255, 0.3);
-    border-color: rgba(255, 255, 255, 0.6);
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+    background: rgba(106, 172, 184, 0.28);
+    border-color: rgba(106, 172, 184, 0.5);
+    box-shadow: 0 0 0 2px rgba(106, 172, 184, 0.2);
 }
 
 .dropdown-cours-entete option {
@@ -908,7 +908,7 @@ h1, h2, h3, h4 {
 }
 
 .logo-link:hover .logo {
-    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(106, 172, 184, 0.2);
 }
 
 .site-link {
@@ -937,7 +937,7 @@ h1, h2, h3, h4 {
     display: flex;
     justify-content: center;
     align-items: center;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid rgba(106, 172, 184, 0.1);
 }
 
 .bandeau-groupe-cours-contenu {
@@ -954,8 +954,8 @@ h1, h2, h3, h4 {
 }
 
 .dropdown-groupe-cours-header {
-    background: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(106, 172, 184, 0.12);
+    border: 1px solid rgba(106, 172, 184, 0.25);
     border-radius: var(--radius-moyen);
     color: white;
     font-size: 0.9rem;
@@ -973,14 +973,14 @@ h1, h2, h3, h4 {
 }
 
 .dropdown-groupe-cours-header:hover {
-    background: rgba(255, 255, 255, 0.25);
-    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(106, 172, 184, 0.22);
+    border-color: rgba(106, 172, 184, 0.4);
 }
 
 .dropdown-groupe-cours-header:focus {
-    background: rgba(255, 255, 255, 0.3);
-    border-color: rgba(255, 255, 255, 0.6);
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+    background: rgba(106, 172, 184, 0.28);
+    border-color: rgba(106, 172, 184, 0.5);
+    box-shadow: 0 0 0 3px rgba(106, 172, 184, 0.2);
 }
 
 .dropdown-groupe-cours-header option {
@@ -1003,10 +1003,10 @@ h1, h2, h3, h4 {
 
 .navigation-principale button {
     padding: 12px 24px;
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(106, 172, 184, 0.12);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(106, 172, 184, 0.2);
     border-radius: var(--radius-grand);
     color: white;
     font-size: 0.95rem;
@@ -1017,15 +1017,15 @@ h1, h2, h3, h4 {
 }
 
 .navigation-principale button:hover {
-    background: rgba(255, 255, 255, 0.25);
-    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(106, 172, 184, 0.22);
+    border-color: rgba(106, 172, 184, 0.35);
     transform: translateY(-2px);
     box-shadow: var(--shadow-prononce);
 }
 
 .navigation-principale button.actif {
-    background: rgba(255, 255, 255, 0.3);
-    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(106, 172, 184, 0.28);
+    border-color: rgba(106, 172, 184, 0.4);
     box-shadow: var(--shadow-prononce);
 }
 
@@ -1056,15 +1056,15 @@ h1, h2, h3, h4 {
     gap: 8px;
     flex-wrap: wrap;
     justify-content: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(106, 172, 184, 0.1);
 }
 
 .sous-navigation button {
     padding: 8px 16px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(106, 172, 184, 0.08);
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(106, 172, 184, 0.2);
     border-radius: var(--radius-moyen);
     color: white;
     font-size: 0.85rem;
@@ -1073,15 +1073,15 @@ h1, h2, h3, h4 {
 }
 
 .sous-navigation button:hover {
-    background: rgba(255, 255, 255, 0.18);
-    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(106, 172, 184, 0.15);
+    border-color: rgba(106, 172, 184, 0.3);
     color: white;
     box-shadow: var(--shadow-normal);
 }
 
 .sous-navigation button.actif {
-    background: rgba(255, 255, 255, 0.25);
-    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(106, 172, 184, 0.22);
+    border-color: rgba(106, 172, 184, 0.35);
     color: white;
     box-shadow: var(--shadow-normal);
 }
@@ -1385,7 +1385,7 @@ h1, h2, h3, h4 {
 }
 
 .carte-contexte-ligne .contexte-badge {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(106, 172, 184, 0.18);
     padding: 2px 10px;
     border-radius: 12px;
     font-size: 0.75rem;
@@ -1863,7 +1863,7 @@ h1, h2, h3, h4 {
     gap: 8px;
     margin-left: 15px;
     padding: 4px 12px;
-    background: rgba(255, 255, 255, 0.5);
+    background: rgba(106, 172, 184, 0.4);
     border-radius: var(--radius-moyen);
     border: 1px solid rgba(0, 0, 0, 0.1);
     font-size: 0.9rem;
@@ -4205,11 +4205,11 @@ textarea {
     font-size: 0.9rem;
     padding: 2px 8px;
     border-radius: var(--radius-moyen);
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(106, 172, 184, 0.12);
 }
 
 .profil-nav-item.actif .profil-nav-item-valeur {
-    background: rgba(255, 255, 255, 0.25);
+    background: rgba(106, 172, 184, 0.22);
 }
 
 /* Sous-ligne optionnelle pour détails */
@@ -4890,9 +4890,9 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 
 .select-mode {
     padding: 6px 12px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    border: 2px solid rgba(106, 172, 184, 0.25);
     border-radius: var(--radius-moyen);
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(106, 172, 184, 0.12);
     color: white;
     font-size: 0.9rem;
     font-weight: 500;
@@ -4902,14 +4902,14 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 .select-mode:hover {
-    background: rgba(255, 255, 255, 0.25);
-    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(106, 172, 184, 0.22);
+    border-color: rgba(106, 172, 184, 0.4);
 }
 
 .select-mode:focus {
     outline: none;
-    border-color: rgba(255, 255, 255, 0.7);
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+    border-color: rgba(106, 172, 184, 0.6);
+    box-shadow: 0 0 0 3px rgba(106, 172, 184, 0.1);
 }
 
 .select-mode option {
