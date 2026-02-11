@@ -1,18 +1,22 @@
 /* =================================================================
    tooltips.css — Tooltips au survol — Monitorage Pedagogique
+   Palette: Océan & Boussole (C4) — sarcelle #6aacb8
    ================================================================= */
 
 .tooltip-bulle {
     position: absolute;
     z-index: 10000;
-    padding: 10px 14px;
-    border-radius: var(--radius-moyen, 6px);
-    background: var(--bleu-fonce, #1a1a2e);
-    color: #e0e0e0;
+    padding: 14px 20px;
+    border-radius: 20px;
+    background: radial-gradient(ellipse at 35% 25%, #1a3040 0%, var(--bleu-fonce, #142428) 65%);
+    color: #d0e0e4;
     font-size: 0.85rem;
     line-height: 1.45;
-    border: 1.5px solid var(--orange-accent, #ff6b35);
-    box-shadow: var(--shadow-fort, 0 4px 12px rgba(0, 0, 0, 0.4));
+    border: 1.5px solid var(--accent-primaire, #6aacb8);
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.5),
+        inset 0 0 12px rgba(106, 172, 184, 0.08),
+        inset 0 2px 4px rgba(106, 172, 184, 0.05);
     pointer-events: none;
     opacity: 0;
     transform: scale(0.97);
@@ -30,12 +34,12 @@
     display: block;
 }
 
-/* Fleche — carre tourne a 45° avec bordure orange sur l'amorce */
+/* Fleche — carre tourne a 45° avec bordure sarcelle sur l'amorce */
 .tooltip-fleche {
     position: absolute;
     width: 12px;
     height: 12px;
-    background: var(--bleu-fonce, #1a1a2e);
+    background: #162a30;
 }
 
 /* Bulle A DROITE de l'element -> fleche pointe vers la GAUCHE */
@@ -43,8 +47,8 @@
     left: -7px;
     top: 50%;
     transform: translateY(-50%) rotate(45deg);
-    border-left: 1.5px solid var(--orange-accent, #ff6b35);
-    border-bottom: 1.5px solid var(--orange-accent, #ff6b35);
+    border-left: 1.5px solid var(--accent-primaire, #6aacb8);
+    border-bottom: 1.5px solid var(--accent-primaire, #6aacb8);
 }
 
 /* Bulle A GAUCHE de l'element -> fleche pointe vers la DROITE */
@@ -52,8 +56,8 @@
     right: -7px;
     top: 50%;
     transform: translateY(-50%) rotate(45deg);
-    border-right: 1.5px solid var(--orange-accent, #ff6b35);
-    border-top: 1.5px solid var(--orange-accent, #ff6b35);
+    border-right: 1.5px solid var(--accent-primaire, #6aacb8);
+    border-top: 1.5px solid var(--accent-primaire, #6aacb8);
 }
 
 /* Bulle SOUS l'element -> fleche pointe vers le HAUT (fallback) */
@@ -61,8 +65,8 @@
     top: -7px;
     left: 50%;
     transform: translateX(-50%) rotate(45deg);
-    border-left: 1.5px solid var(--orange-accent, #ff6b35);
-    border-top: 1.5px solid var(--orange-accent, #ff6b35);
+    border-left: 1.5px solid var(--accent-primaire, #6aacb8);
+    border-top: 1.5px solid var(--accent-primaire, #6aacb8);
 }
 
 /* Bulle AU-DESSUS de l'element -> fleche pointe vers le BAS (fallback) */
@@ -70,8 +74,8 @@
     bottom: -7px;
     left: 50%;
     transform: translateX(-50%) rotate(45deg);
-    border-right: 1.5px solid var(--orange-accent, #ff6b35);
-    border-bottom: 1.5px solid var(--orange-accent, #ff6b35);
+    border-right: 1.5px solid var(--accent-primaire, #6aacb8);
+    border-bottom: 1.5px solid var(--accent-primaire, #6aacb8);
 }
 
 .tooltip-contenu {
@@ -97,14 +101,14 @@ nav [data-tooltip],
 /* --- Surbrillance de la cible du tooltip --- */
 
 @keyframes tooltip-pulse {
-    0%, 100% { outline-color: color-mix(in srgb, var(--orange-accent, #ff9800) 40%, transparent); }
-    50%      { outline-color: color-mix(in srgb, var(--orange-accent, #ff9800) 80%, transparent); }
+    0%, 100% { outline-color: color-mix(in srgb, var(--accent-primaire, #6aacb8) 40%, transparent); }
+    50%      { outline-color: color-mix(in srgb, var(--accent-primaire, #6aacb8) 80%, transparent); }
 }
 
 .tooltip-cible-active {
-    outline: 4px solid var(--orange-accent, #ff9800);
+    outline: 4px solid var(--accent-primaire, #6aacb8);
     outline-offset: -4px;
-    box-shadow: inset 0 0 0 9999px color-mix(in srgb, var(--orange-accent, #ff9800) 15%, transparent);
+    box-shadow: inset 0 0 0 9999px color-mix(in srgb, var(--accent-primaire, #6aacb8) 15%, transparent);
     animation: tooltip-pulse 1.8s ease-in-out infinite;
     transition: outline-color 0.2s ease;
 }
