@@ -20,12 +20,12 @@ const MODES = {
 
 const THEMES = {
     normal: {
-        couleur: '#032e5c', // Bleu principal (var(--bleu-principal))
+        couleur: '#1a4a5e', // Bleu principal ocean (var(--bleu-principal))
         nom: 'Mode Normal',
         icone: ''
     },
     anonymisation: {
-        couleur: '#0f1e3a', // Bleu très foncé
+        couleur: '#0c1a22', // Ocean profond (var(--bleu-fonce))
         nom: 'Mode Anonymisation',
         icone: ''
     }
