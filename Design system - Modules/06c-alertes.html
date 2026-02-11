@@ -137,7 +137,222 @@
         </div>
     </section>
 
-    <!-- SECTION 11: BADGES -->
-    <section id="badges" class="guide-section"></div>
+    <!-- SECTION 11: PANNEAU CHANTIER (Toast mise à jour) -->
+    <section id="panneau-chantier" class="guide-section">
+        <div class="guide-component">
+            <h3 class="guide-component-title">Panneau chantier (toast de mise à jour)</h3>
+            <p class="guide-component-description">
+                Notification fixe en haut à droite, inspirée des panneaux de signalisation routière québécois.
+                Utilisée pour signaler une mise à jour déployée en arrière-plan. Le style évoque un chantier
+                routier : fond orange construction, texte noir, contour intérieur décalé du bord comme sur
+                un vrai panneau, et coins arrondis.
+            </p>
+
+            <div class="guide-example">
+                <div style="position: relative; min-height: 220px;">
+                    <!-- Démo statique du panneau -->
+                    <div style="
+                        background: #E8700A;
+                        color: #1a1a1a;
+                        padding: 22px 24px;
+                        border-radius: 14px;
+                        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+                        max-width: 340px;
+                        position: relative;
+                    ">
+                        <!-- Contour intérieur décalé -->
+                        <div style="
+                            position: absolute;
+                            top: 6px; right: 6px; bottom: 6px; left: 6px;
+                            border: 2.5px solid #1a1a1a;
+                            border-radius: 9px;
+                            pointer-events: none;
+                        "></div>
+                        <!-- Bouton fermer -->
+                        <div style="position: absolute; top: 6px; right: 10px; font-size: 1.2rem; font-weight: 700; color: #1a1a1a; opacity: 0.7;">&times;</div>
+                        <!-- En-tête -->
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px; margin-right: 16px;">
+                            <span style="font-size: 1.4rem; line-height: 1;">➡︎</span>
+                            <span style="font-size: 0.9rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; color: #1a1a1a;">BETA 97.4 (BUILD 0211-0733)</span>
+                        </div>
+                        <!-- Message -->
+                        <span style="font-size: 0.78rem; font-weight: 600; line-height: 1.45; display: block; margin-bottom: 4px; margin-right: 16px; color: #1a1a1a;">
+                            Une mise à jour a été déployée en arrière-plan pendant que vous travaillez. Rafraîchissez la page si vous souhaitez l'activer.
+                        </span>
+                        <!-- Footer -->
+                        <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 8px; margin-top: 10px;">
+                            <span style="font-size: 0.72rem; font-weight: 600; color: rgba(26, 26, 26, 0.65);">11 février 2026 à 08:03</span>
+                            <button style="background: #1a1a1a; color: #E8700A; border: none; padding: 5px 14px; border-radius: 6px; font-size: 0.78rem; cursor: pointer; font-weight: 800; text-transform: uppercase; letter-spacing: 0.3px;">Recharger</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="guide-specs">
+                <div class="guide-specs-title">Spécifications du panneau chantier</div>
+                <ul>
+                    <li><strong>Fond :</strong> #E8700A (orange construction, uni, sans dégradé)</li>
+                    <li><strong>Texte :</strong> #1a1a1a (noir quasi-pur)</li>
+                    <li><strong>Contour intérieur :</strong> 2.5px solid #1a1a1a, décalé de 6px du bord (via ::before absolu)</li>
+                    <li><strong>Coins extérieurs :</strong> border-radius: 14px</li>
+                    <li><strong>Coins du contour :</strong> border-radius: 9px</li>
+                    <li><strong>Largeur max :</strong> 340px</li>
+                    <li><strong>Padding :</strong> 22px 24px</li>
+                    <li><strong>Ombre :</strong> 0 6px 24px rgba(0, 0, 0, 0.35)</li>
+                    <li><strong>Position :</strong> fixed, top: 20px, right: 20px, z-index: 10000</li>
+                    <li><strong>Animation :</strong> slide-in depuis la droite (translateX + opacity, 0.4s ease)</li>
+                </ul>
+            </div>
+
+            <div class="guide-specs">
+                <div class="guide-specs-title">Structure du contenu</div>
+                <ul>
+                    <li><strong>Bouton fermer (×) :</strong> position absolute, top: 6px, right: 10px, opacity 0.7 → 1 au hover</li>
+                    <li><strong>En-tête :</strong> flèche ➡︎ (1.4rem) + numéro de build en majuscules (font-weight: 900)</li>
+                    <li><strong>Message :</strong> texte descriptif en minuscules (0.78rem, font-weight: 600)</li>
+                    <li><strong>Footer :</strong> date à gauche (0.72rem, opacité 65%) + bouton à droite (justify-content: space-between)</li>
+                    <li><strong>Bouton Recharger :</strong> fond #1a1a1a, texte #E8700A, uppercase, font-weight: 800, border-radius: 6px</li>
+                </ul>
+            </div>
+
+            <div class="guide-code-title">Code HTML</div>
+            <div class="guide-code">&lt;div id="bandeau-mise-a-jour" class="bandeau-mise-a-jour"&gt;
+    &lt;button onclick="fermerBandeauMiseAJour()" class="bandeau-mise-a-jour-close" title="Fermer"&gt;&amp;times;&lt;/button&gt;
+    &lt;div class="bandeau-mise-a-jour-header"&gt;
+        &lt;span class="bandeau-mise-a-jour-arrow"&gt;➡︎&lt;/span&gt;
+        &lt;span id="bandeau-mise-a-jour-build" class="bandeau-mise-a-jour-build"&gt;&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;span id="bandeau-mise-a-jour-texte" class="bandeau-mise-a-jour-texte"&gt;&lt;/span&gt;
+    &lt;div class="bandeau-mise-a-jour-footer"&gt;
+        &lt;span id="bandeau-mise-a-jour-date" class="bandeau-mise-a-jour-date"&gt;&lt;/span&gt;
+        &lt;button onclick="window.location.reload()" class="bandeau-mise-a-jour-btn"&gt;Recharger&lt;/button&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</div>
+
+            <div class="guide-code-title">Code CSS</div>
+            <div class="guide-code">/* Panneau chantier — conteneur */
+.bandeau-mise-a-jour {
+    background: #E8700A;
+    color: #1a1a1a;
+    padding: 22px 24px;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    border-radius: 14px;
+    border: none;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+    max-width: 340px;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    pointer-events: none;
+}
+
+/* Contour intérieur décalé (style panneau routier) */
+.bandeau-mise-a-jour::before {
+    content: '';
+    position: absolute;
+    top: 6px; right: 6px; bottom: 6px; left: 6px;
+    border: 2.5px solid #1a1a1a;
+    border-radius: 9px;
+    pointer-events: none;
+}
+
+.bandeau-mise-a-jour.visible {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+}
+
+/* Bouton fermer */
+.bandeau-mise-a-jour-close {
+    position: absolute;
+    top: 6px; right: 10px;
+    background: none; border: none;
+    color: #1a1a1a;
+    font-size: 1.2rem; font-weight: 700;
+    cursor: pointer; opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+/* En-tête : flèche + build */
+.bandeau-mise-a-jour-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    margin-right: 16px;
+}
+
+.bandeau-mise-a-jour-arrow { font-size: 1.4rem; }
+
+.bandeau-mise-a-jour-build {
+    font-size: 0.9rem;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+/* Message */
+.bandeau-mise-a-jour-texte {
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1.45;
+    display: block;
+    margin-right: 16px;
+}
+
+/* Footer : date à gauche, bouton à droite */
+.bandeau-mise-a-jour-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 10px;
+}
+
+.bandeau-mise-a-jour-date {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: rgba(26, 26, 26, 0.65);
+}
+
+/* Bouton Recharger */
+.bandeau-mise-a-jour-btn {
+    background: #1a1a1a;
+    color: #E8700A;
+    border: none;
+    padding: 5px 14px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    cursor: pointer;
+}</div>
+
+            <div class="guide-do-dont">
+                <div class="guide-do">
+                    <div class="guide-do-title">À FAIRE</div>
+                    <ul style="margin: 10px 0 0 0; padding-left: 20px;">
+                        <li>Utiliser ce panneau uniquement pour les mises à jour système</li>
+                        <li>Toujours offrir un bouton de fermeture (×)</li>
+                        <li>Garder le contour intérieur décalé (signature panneau routier)</li>
+                        <li>Conserver le fond orange #E8700A uni (pas de dégradé)</li>
+                        <li>Date et bouton dans le footer, séparés gauche/droite</li>
+                    </ul>
+                </div>
+                <div class="guide-dont">
+                    <div class="guide-dont-title">À ÉVITER</div>
+                    <ul style="margin: 10px 0 0 0; padding-left: 20px;">
+                        <li>Ajouter un dégradé ou du blanc sur le fond orange</li>
+                        <li>Utiliser du texte blanc (toujours noir #1a1a1a)</li>
+                        <li>Dépasser 340px de largeur</li>
+                        <li>Utiliser ce style pour d'autres types de notifications</li>
+                        <li>Omettre l'animation slide-in depuis la droite</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
 </body>
 </html>

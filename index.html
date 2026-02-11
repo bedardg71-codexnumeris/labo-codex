@@ -304,23 +304,36 @@
         }
 
         /* ===============================
-           NOTIFICATION MISE À JOUR (toast haut-droite)
+           NOTIFICATION MISE À JOUR (toast chantier routier)
            =============================== */
         .bandeau-mise-a-jour {
-            background: linear-gradient(135deg, var(--orange-accent, #ff6b35), #f57c00);
-            color: white;
-            padding: 16px 20px;
+            background: #E8700A;
+            color: #1a1a1a;
+            padding: 22px 24px;
             font-size: 0.9rem;
             position: fixed;
             top: 20px;
             right: 20px;
             z-index: 10000;
-            border-radius: var(--radius-moyen, 8px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-            max-width: 420px;
+            border-radius: 14px;
+            border: none;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+            max-width: 340px;
             opacity: 0;
             transform: translateX(100%);
             transition: opacity 0.4s ease, transform 0.4s ease;
+            pointer-events: none;
+        }
+
+        .bandeau-mise-a-jour::before {
+            content: '';
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            bottom: 6px;
+            left: 6px;
+            border: 2.5px solid #1a1a1a;
+            border-radius: 9px;
             pointer-events: none;
         }
 
@@ -330,29 +343,87 @@
             pointer-events: auto;
         }
 
+        .bandeau-mise-a-jour-close {
+            position: absolute;
+            top: 6px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #1a1a1a;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            line-height: 1;
+            padding: 2px 6px;
+            opacity: 0.7;
+            transition: opacity 0.2s ease;
+        }
+
+        .bandeau-mise-a-jour-close:hover {
+            opacity: 1;
+        }
+
+        .bandeau-mise-a-jour-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+            margin-right: 16px;
+        }
+
+        .bandeau-mise-a-jour-arrow {
+            font-size: 1.4rem;
+            line-height: 1;
+        }
+
+        .bandeau-mise-a-jour-build {
+            font-size: 0.9rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #1a1a1a;
+        }
+
         .bandeau-mise-a-jour-texte {
-            font-size: 0.88rem;
-            font-weight: normal;
-            line-height: 1.5;
+            font-size: 0.78rem;
+            font-weight: 600;
+            line-height: 1.45;
             display: block;
-            margin-bottom: 12px;
+            margin-bottom: 4px;
+            margin-right: 16px;
+            color: #1a1a1a;
+        }
+
+        .bandeau-mise-a-jour-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .bandeau-mise-a-jour-date {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: rgba(26, 26, 26, 0.65);
         }
 
         .bandeau-mise-a-jour-btn {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            padding: 7px 16px;
-            border-radius: var(--radius-moyen, 8px);
-            font-size: 0.85rem;
+            background: #1a1a1a;
+            color: #E8700A;
+            border: none;
+            padding: 5px 14px;
+            border-radius: 6px;
+            font-size: 0.78rem;
             cursor: pointer;
             transition: all 0.2s ease;
-            font-weight: bold;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
 
         .bandeau-mise-a-jour-btn:hover {
-            background: rgba(255, 255, 255, 0.35);
-            border-color: white;
+            background: #333;
         }
 
         /* ===============================
@@ -3498,14 +3569,20 @@
             </div>
         </div>
 
-        <!-- NOTIFICATION VERSION / MISE À JOUR (toast haut-droite) -->
+        <!-- NOTIFICATION VERSION / MISE À JOUR (toast chantier routier) -->
         <div id="bandeau-mise-a-jour" class="bandeau-mise-a-jour">
-            <span id="bandeau-mise-a-jour-texte" class="bandeau-mise-a-jour-texte">
-                Une mise à jour est disponible
-            </span>
-            <button onclick="window.location.reload()" class="bandeau-mise-a-jour-btn">
-                Recharger 🔄
-            </button>
+            <button onclick="fermerBandeauMiseAJour()" class="bandeau-mise-a-jour-close" title="Fermer">&times;</button>
+            <div class="bandeau-mise-a-jour-header">
+                <span class="bandeau-mise-a-jour-arrow">➡︎</span>
+                <span id="bandeau-mise-a-jour-build" class="bandeau-mise-a-jour-build"></span>
+            </div>
+            <span id="bandeau-mise-a-jour-texte" class="bandeau-mise-a-jour-texte"></span>
+            <div class="bandeau-mise-a-jour-footer">
+                <span id="bandeau-mise-a-jour-date" class="bandeau-mise-a-jour-date"></span>
+                <button onclick="window.location.reload()" class="bandeau-mise-a-jour-btn">
+                    Recharger
+                </button>
+            </div>
         </div>
 
         <!-- MODAL NOUVEAUTÉS BETA -->
@@ -15922,7 +15999,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97.4';
-        const BUILD_ID = '0211-0733';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0211-0825';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
@@ -16073,18 +16150,18 @@
 
         function afficherBandeauVersion(beta, build, distant) {
             const bandeau = document.getElementById('bandeau-mise-a-jour');
-            const texte = document.getElementById('bandeau-mise-a-jour-texte');
-            if (!bandeau || !texte) return;
+            const elBuild = document.getElementById('bandeau-mise-a-jour-build');
+            const elTexte = document.getElementById('bandeau-mise-a-jour-texte');
+            const elDate = document.getElementById('bandeau-mise-a-jour-date');
+            if (!bandeau || !elBuild || !elTexte || !elDate) return;
 
             const maintenant = new Date();
             const dateStr = maintenant.toLocaleDateString('fr-CA', { day: 'numeric', month: 'long', year: 'numeric' });
             const heureStr = maintenant.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' });
 
-            if (distant) {
-                texte.innerHTML = `🚧 Une mise à jour de la Beta ${beta} (build ${build}) a été déployée en arrière-plan pendant que vous travaillez. Rafraîchissez la page si vous souhaitez l\u2019activer.`;
-            } else {
-                texte.innerHTML = `🚧 Beta ${beta} (build ${build}) — ${dateStr} à ${heureStr}`;
-            }
+            elBuild.textContent = `BETA ${beta} (BUILD ${build})`;
+            elTexte.textContent = `Une mise à jour a été déployée en arrière-plan pendant que vous travaillez. Rafraîchissez la page si vous souhaitez l\u2019activer.`;
+            elDate.textContent = `${dateStr} à ${heureStr}`;
 
             bandeau.classList.add('visible');
         }

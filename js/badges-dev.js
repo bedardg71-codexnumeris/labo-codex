@@ -35,38 +35,35 @@
     const TOOLTIP = 'En développement actif — cette fonctionnalité peut être instable';
 
     // ===== INJECTION CSS (une seule fois) =====
+    // ===== INJECTION CSS (animation) =====
     const style = document.createElement('style');
     style.textContent = `
-        .badge-dev-actif {
-            display: inline-block;
-            margin-left: 4px;
-            font-size: 0.75em;
-            vertical-align: middle;
-            animation: pulse-dev 2s ease-in-out infinite;
-        }
         @keyframes pulse-dev {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.4; }
         }
+        .indicateur-dev {
+            animation: pulse-dev 2s ease-in-out infinite;
+        }
     `;
     document.head.appendChild(style);
 
-    // ===== LOGIQUE D'APPLICATION DES BADGES =====
+    // ===== LOGIQUE D'APPLICATION DES INDICATEURS =====
     function apposerBadgesDev() {
         const conteneur = document.getElementById('sous-navigation');
         if (!conteneur) return;
 
         conteneur.querySelectorAll('button[data-sous-onglet]').forEach(function (bouton) {
             var id = bouton.getAttribute('data-sous-onglet');
-            // Ne pas doubler le badge
-            if (bouton.querySelector('.badge-dev-actif')) return;
+            // Ne pas doubler l'indicateur
+            if (bouton.querySelector('.indicateur-dev')) return;
 
             if (SOUS_SECTIONS_EN_DEV.indexOf(id) !== -1) {
-                var badge = document.createElement('span');
-                badge.className = 'badge-dev-actif';
-                badge.textContent = '\uD83D\uDEA7';
-                badge.title = TOOLTIP;
-                bouton.appendChild(badge);
+                var indicateur = document.createElement('span');
+                indicateur.className = 'indicateur-dev';
+                indicateur.textContent = ' \uD83D\uDD36';
+                indicateur.title = TOOLTIP;
+                bouton.appendChild(indicateur);
                 bouton.title = TOOLTIP;
             }
         });
