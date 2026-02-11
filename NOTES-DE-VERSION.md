@@ -5,6 +5,24 @@
 
 ---
 
+## Beta 97.5 (11 fevrier 2026)
+
+**Migration palette Ocean & Boussole (C4)**
+
+- **Nouveau theme sombre definitif** : Migration complete de la palette « Nuit Elegante » vers « Ocean & Boussole » (C4). Fonds sombres (#0c1a22 a #244858), accent sarcelle (#6aacb8), accent laiton (#c8a060).
+- **Variables :root** : Toutes les variables CSS (~1 327 usages de `var()`) basculees vers la palette ocean dans `styles.css` et `index.html`.
+- **Surfaces hardcodees** : ~276 couleurs hex hardcodees (`white`, `#fff`, `#f8f9fa`, `#333`, `#666`, `#999`, etc.) remplacees par des variables semantiques (`--surface-conteneur`, `--texte-principal`, `--texte-secondaire`).
+- **Tooltips C4** : Fond radial-gradient ocean profond, bordures sarcelle, animation pulse sarcelle.
+- **Glassmorphism sarcelle** : Navigation et sous-navigation teintees sarcelle (`rgba(106, 172, 184, X)` au lieu de blanc).
+- **Composants** : Badges, alertes, tables, formulaires — tous en fonds semi-transparents adaptes au fond sombre.
+- **Chart.js** : Grilles, labels et tooltips adaptes au fond sombre dans tous les fichiers JS de graphiques.
+- **Planification** : Variables utilitaires (`--planif-couleur-fond/texte/bordure/lien`) adaptees; couleurs des noeuds (bleu, orange, violet, vert) conservees vives.
+- **Impression** : `@media print` force les fonds blancs et textes sombres.
+- **Scrollbars** : Stylisees sarcelle pour WebKit et Firefox.
+- **Modes** : Simulation et Anonymisation adaptes a la base ocean sombre.
+
+---
+
 ## Beta 97.4 (8-11 fevrier 2026)
 
 **Alignement pedagogique**
