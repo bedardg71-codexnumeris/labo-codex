@@ -821,7 +821,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
                             minRotation: 45,
                             font: { size: 10 }
                         },
-                        grid: { display: true, color: 'rgba(0,0,0,0.05)' }
+                        grid: { display: true, color: 'rgba(106,172,184,0.1)' }
                     },
                     y: {
                         min: bornesY.min,
@@ -835,7 +835,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
                             callback: value => (value * 100).toFixed(0) + '%',
                             stepSize: 0.05
                         },
-                        grid: { display: true, color: 'rgba(0,0,0,0.08)' }
+                        grid: { display: true, color: 'rgba(106,172,184,0.12)' }
                     }
                 },
                 interaction: {
@@ -1214,7 +1214,7 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
                             { size: 16, weight: 'bold' },
                             { size: 11, weight: 'normal', style: 'italic' }
                         ],
-                        color: ['#333', '#777'],
+                        color: ['#d0e0e4', '#8aa4b0'],
                         padding: { top: 10, bottom: 20 }
                     },
                     legend: {
@@ -1651,7 +1651,7 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
                 },
                 scales: {
                     x: {
-                        grid: { display: true, color: 'rgba(0,0,0,0.05)' },
+                        grid: { display: true, color: 'rgba(106,172,184,0.1)' },
                         ticks: {
                             font: { size: 10 },
                             maxRotation: 45,
@@ -1661,7 +1661,7 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
                     y: {
                         min: bornesY.min,
                         max: bornesY.max,
-                        grid: { display: true, color: 'rgba(0,0,0,0.08)' },
+                        grid: { display: true, color: 'rgba(106,172,184,0.12)' },
                         ticks: {
                             callback: value => (value * 100).toFixed(0) + '%',
                             stepSize: 0.05
@@ -3373,13 +3373,13 @@ function afficherMessageAttente(canvas, titre, details) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     ctx.font = 'bold 14px Arial';
-    ctx.fillStyle = '#666';
+    ctx.fillStyle = '#8aa4b0';
     ctx.textAlign = 'center';
     ctx.fillText(titre, canvas.width / 2, canvas.height / 2 - 10);
 
     if (details) {
         ctx.font = '12px Arial';
-        ctx.fillStyle = '#999';
+        ctx.fillStyle = '#5a7a88';
         ctx.fillText(details, canvas.width / 2, canvas.height / 2 + 15);
     }
 }
@@ -3732,7 +3732,7 @@ function creerGraphiqueCriteres(canvasId, da) {
                             minRotation: 45,
                             font: { size: 10 }
                         },
-                        grid: { display: true, color: 'rgba(0,0,0,0.05)' }
+                        grid: { display: true, color: 'rgba(106,172,184,0.1)' }
                     },
                     y: {
                         title: {
@@ -3748,7 +3748,7 @@ function creerGraphiqueCriteres(canvasId, da) {
                                 return value + '%';
                             }
                         },
-                        grid: { display: true, color: 'rgba(0,0,0,0.08)' }
+                        grid: { display: true, color: 'rgba(106,172,184,0.12)' }
                     }
                 },
                 interaction: {
@@ -4209,7 +4209,7 @@ function creerGraphiqueDistributionACPE(canvasId) {
         if (datasetsCourbes.length === 0) {
             console.warn('[Distribution ACPE] Aucune donnée à afficher');
             ctx.font = '14px Arial';
-            ctx.fillStyle = '#666';
+            ctx.fillStyle = '#8aa4b0';
             ctx.textAlign = 'center';
             ctx.fillText('Données insuffisantes pour afficher la distribution', canvas.width / 2, canvas.height / 2);
             return null;
@@ -4375,7 +4375,7 @@ function creerGraphiqueDistributionACPE(canvasId) {
                         display: true,
                         text: 'Courbes de Gauss + points = position réelle des étudiants | Bandes colorées = zones ±1σ et ±2σ',
                         font: { size: 10, style: 'italic' },
-                        color: '#666',
+                        color: '#8aa4b0',
                         padding: { bottom: 10 }
                     },
                     legend: {
@@ -4486,7 +4486,7 @@ function creerGraphiqueDistributionACPE(canvasId) {
                         },
                         grid: {
                             display: true,
-                            color: 'rgba(0,0,0,0.05)'
+                            color: 'rgba(106,172,184,0.1)'
                         }
                     },
                     y: {

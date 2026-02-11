@@ -2257,9 +2257,9 @@ function afficherAlertesPrioritairesCompteurs(etudiants) {
     const html = `
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
             ${genererCarteEngagement('Engagement favorable', somTresFavorable + somFavorable, panTresFavorable + panFavorable, nbTotal, afficherSom, afficherPan, 'var(--alerte-fond-succes)', 'var(--btn-confirmer)')}
-            ${genererCarteEngagement('Engagement modéré', somModere, panModere, nbTotal, afficherSom, afficherPan, '#fffbf0', '#fbc02d')}
-            ${genererCarteEngagement('Engagement fragile', somFragile, panFragile, nbTotal, afficherSom, afficherPan, '#fff8f0', 'var(--risque-tres-eleve)')}
-            ${genererCarteEngagement('Engagement insuffisant', somInsuffisant, panInsuffisant, nbTotal, afficherSom, afficherPan, '#fff5f5', 'var(--risque-critique)')}
+            ${genererCarteEngagement('Engagement modéré', somModere, panModere, nbTotal, afficherSom, afficherPan, 'rgba(200,160,96,0.1)', '#c8a060')}
+            ${genererCarteEngagement('Engagement fragile', somFragile, panFragile, nbTotal, afficherSom, afficherPan, 'rgba(232,64,87,0.08)', 'var(--risque-tres-eleve)')}
+            ${genererCarteEngagement('Engagement insuffisant', somInsuffisant, panInsuffisant, nbTotal, afficherSom, afficherPan, 'rgba(160,32,48,0.1)', 'var(--risque-critique)')}
         </div>
     `;
 
@@ -2317,7 +2317,7 @@ function afficherListeEtudiantsCritiques(etudiants, afficherSommatif) {
         const indices = afficherSommatif ? e.sommatif : e.alternatif;
         return `
             <div style="display: flex; justify-content: space-between; align-items: center;
-                        padding: 12px; background: white; border-radius: 6px;
+                        padding: 12px; background: #142428; border-radius: 6px;
                         border-left: 4px solid var(--risque-critique);">
                 <div>
                     <strong>${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}</strong>
@@ -2666,7 +2666,7 @@ function afficherActionsRecommandees(etudiants) {
         const recommendation = genererRecommandation(indices);
 
         return `
-            <div style="padding: 15px; background: white; border-radius: 8px;
+            <div style="padding: 15px; background: #142428; border-radius: 8px;
                         border-left: 4px solid ${getCouleurEngagement(indices.niveauEngagement)};">
                 <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
                     <div>
@@ -2781,7 +2781,7 @@ function afficherDistributionRisques(etudiants) {
     
     // Générer le HTML
     container.innerHTML = Object.entries(distribution).map(([niveau, nombre]) => `
-        <div style="padding: 15px; background: white; border-left: 4px solid ${couleurs[niveau]}; 
+        <div style="padding: 15px; background: #142428; border-left: 4px solid ${couleurs[niveau]}; 
                     border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
             <div style="font-size: 1.5rem; font-weight: bold; color: ${couleurs[niveau]};">
                 ${nombre}
