@@ -399,7 +399,7 @@ function afficherListeInterventions() {
     // Bouton pour planifier une nouvelle intervention
     let html = `
         <div class="actions-principales">
-            <button onclick="afficherFormulaireIntervention()" class="btn btn-principal">
+            <button onclick="afficherFormulaireIntervention()" class="btn btn-principal" data-tooltip="interv-btn-planifier">
                 Planifier une intervention
             </button>
         </div>
@@ -425,7 +425,7 @@ function afficherListeInterventions() {
             <div class="carte intervention-item u-mb-15">
                 <div class="intervention-header">
                     <div>
-                        <h4 class="intervention-titre">${intervention.titre}</h4>
+                        <h4 class="intervention-titre" data-tooltip="interv-carte">${intervention.titre}</h4>
                         <div class="intervention-badges">
                             <span>${badgeStatut}</span>
                             <span class="badge-type-intervention">${badgeType}</span>
@@ -533,7 +533,7 @@ function genererAffichageAnalyseCartes(analyse) {
 
     html += `
         <div class="carte-metrique-header">
-            <h4>Patterns d'apprentissage</h4>
+            <h4 data-tooltip="interv-patterns">Patterns d'apprentissage</h4>
             <strong>${nbPatterns}</strong>
         </div>
     `;
@@ -566,7 +566,7 @@ function genererAffichageAnalyseCartes(analyse) {
 
     html += `
         <div class="carte-metrique-header">
-            <h4>Niveaux RàI</h4>
+            <h4 data-tooltip="interv-niveaux-rai">Niveaux RàI</h4>
             <strong>${nbNiveauxRai}</strong>
         </div>
     `;
@@ -606,7 +606,7 @@ function genererAffichageNotesIndividuelles(notesIndividuelles) {
     let html = `
         <div class="profil-carte">
             <div class="carte-metrique-header">
-                <h4>Notes individuelles</h4>
+                <h4 data-tooltip="interv-notes-individuelles">Notes individuelles</h4>
                 <strong>${nbNotes}</strong>
             </div>
     `;
@@ -700,7 +700,7 @@ function afficherFormulaireIntervention() {
 
                     <!-- Colonne droite : Gestion des absences -->
                     <div class="carte" style="background: var(--bleu-tres-pale); padding: 15px; margin: 0; height: fit-content;">
-                        <h4 style="margin: 0 0 10px 0; color: var(--bleu-principal);">Gestion des absences</h4>
+                        <h4 style="margin: 0 0 10px 0; color: var(--bleu-principal);" data-tooltip="interv-gestion-absences">Gestion des absences</h4>
                         <p class="text-muted" style="margin: 0 0 15px 0; font-size: 0.9rem;">
                             Si cette intervention correspond à une séance de cours, vous pouvez marquer comme motivée l'absence des non-participants.
                         </p>
@@ -842,7 +842,7 @@ function afficherFormulaireModification(interventionId) {
 
                     <!-- Colonne droite : Gestion des absences -->
                     <div class="carte" style="background: var(--bleu-tres-pale); padding: 15px; margin: 0; height: fit-content;">
-                        <h4 style="margin: 0 0 10px 0; color: var(--bleu-principal);">Gestion des absences</h4>
+                        <h4 style="margin: 0 0 10px 0; color: var(--bleu-principal);" data-tooltip="interv-gestion-absences">Gestion des absences</h4>
                         <p class="text-muted" style="margin: 0 0 15px 0; font-size: 0.9rem;">
                             Si cette intervention correspond à une séance de cours, vous pouvez marquer comme motivée l'absence des non-participants.
                         </p>
@@ -1057,7 +1057,7 @@ function ouvrirIntervention(interventionId) {
 
                     <hr style="border: none; border-top: 1px solid var(--bordure-claire); margin: 15px 0;">
 
-                    <h4 style="margin: 0 0 10px 0; color: var(--bleu-principal);">Gestion des absences</h4>
+                    <h4 style="margin: 0 0 10px 0; color: var(--bleu-principal);" data-tooltip="interv-gestion-absences">Gestion des absences</h4>
                     <p class="text-muted" style="margin: 0 0 15px 0; font-size: 0.9rem;">
                         Si cette intervention correspond à une séance de cours, vous pouvez marquer comme motivée l'absence des non-participants.
                     </p>
@@ -1084,7 +1084,7 @@ function ouvrirIntervention(interventionId) {
             <div style="display: grid; grid-template-columns: 40fr 60fr; gap: 20px; align-items: start; margin-bottom: 20px;">
                 <!-- Colonne gauche: Aperçu du sous-groupe (40%) -->
                 <div>
-                    <h4>Aperçu du sous-groupe</h4>
+                    <h4 data-tooltip="interv-apercu-sous-groupe">Aperçu du sous-groupe</h4>
                     <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 15px;">
                         Cette aggrégation des profils des étudiant·e·s vise à éclairer votre préparation.
                     </p>
@@ -1093,7 +1093,7 @@ function ouvrirIntervention(interventionId) {
 
                 <!-- Colonne droite: Liste des étudiants avec notes (60%) -->
                 <div>
-                    <h4>Marquer les présences et notes individuelles</h4>
+                    <h4 data-tooltip="interv-presences-notes">Marquer les présences et notes individuelles</h4>
                     <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 15px;">
                         Cochez les étudiant·e·s présent·e·s et documentez vos observations spécifiques.
                     </p>

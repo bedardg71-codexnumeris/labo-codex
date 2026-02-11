@@ -425,7 +425,310 @@ const TOOLTIPS = {
         'Connexion vers un autre \u00e9l\u00e9ment de la carte mentale (comp\u00e9tence, pr\u00e9requis, strat\u00e9gie, etc.).',
 
     'orga-item-a-revoir':
-        '\u00c9l\u00e9ment pr\u00e9alable \u00e0 revoir en d\u00e9but de s\u00e9ance avant de poursuivre.'
+        '\u00c9l\u00e9ment pr\u00e9alable \u00e0 revoir en d\u00e9but de s\u00e9ance avant de poursuivre.',
+
+    // =================================================================
+    // TABLEAU DE BORD — Aperçu
+    // =================================================================
+
+    'tdb-sous-nav':
+        'Quatre vues : aper\u00e7u du groupe, liste des individus, profil \u00e9tudiant et interventions R\u00e0I.',
+
+    'tdb-apercu':
+        'Portrait complet du groupe-cours : indices d\u2019apprentissage, patterns, interventions et graphiques de d\u00e9veloppement.',
+
+    'tdb-liste-individus':
+        'Vue d\u00e9taill\u00e9e de chaque \u00e9tudiant avec ses indices individuels.',
+
+    'tdb-profil':
+        'Fiche individuelle d\u2019un \u00e9tudiant : trajectoire, indices et historique.',
+
+    'tdb-interventions-rai':
+        'Gestion des interventions par niveau R\u00e0I : universel, pr\u00e9ventif, intensif.',
+
+    // --- Section Observer ---
+
+    'tdb-observer':
+        'Indices A-C-E-P du groupe. Chaque barre positionne les \u00e9tudiants de Fragile \u00e0 Tr\u00e8s favorable.',
+
+    'tdb-zones-couleur':
+        'Fragile (30-49%), Mod\u00e9r\u00e9 (50-64%), Favorable (65-79%), Tr\u00e8s favorable (\u226580%). Seuils configurables dans R\u00e9glages.',
+
+    'tdb-assiduite':
+        'Taux de pr\u00e9sence aux s\u00e9ances. Chaque point = un \u00e9tudiant.',
+
+    'tdb-completion':
+        'Taux de remise des travaux. La corr\u00e9lation C\u00d7P indique le lien entre remise et r\u00e9sultats.',
+
+    'tdb-engagement':
+        'Niveau d\u2019engagement dans les activit\u00e9s d\u2019apprentissage. Combine plusieurs signaux comportementaux.',
+
+    'tdb-performance':
+        'R\u00e9sultats aux \u00e9valuations par niveaux : Insuffisant, En D\u00e9veloppement, Ma\u00eetris\u00e9, \u00c9tendu.',
+
+    // --- Section Intervenir ---
+
+    'tdb-intervenir':
+        'D\u00e9tection de patterns d\u2019apprentissage et r\u00e9partition par niveaux d\u2019intervention R\u00e0I.',
+
+    'tdb-patterns':
+        'R\u00e9partition des trajectoires : progression stable, d\u00e9fi sp\u00e9cifique, blocage \u00e9mergent ou critique.',
+
+    'tdb-rai':
+        'Trois niveaux R\u00e0I : universel, pr\u00e9ventif, intensif. Indique le type d\u2019intervention sugg\u00e9r\u00e9 pour chaque groupe d\u2019\u00e9tudiants.',
+
+    // --- Section Développement du groupe ---
+
+    'tdb-dev-groupe':
+        '\u00c9volution d\u2019un indice dans le temps pour tout le groupe. Chaque ligne = un \u00e9tudiant.',
+
+    'tdb-selecteur-indice':
+        'Choisir l\u2019indice \u00e0 visualiser : Assiduit\u00e9, Compl\u00e9tion, Engagement ou Performance.',
+
+    'tdb-selecteur-eleve-groupe':
+        'Isoler la trajectoire d\u2019un \u00e9tudiant sp\u00e9cifique sur le graphique du groupe.',
+
+    'tdb-graphique-groupe':
+        'Graphique longitudinal du groupe. Cliquer sur une courbe pour la verrouiller.',
+
+    // --- Section Développement individuel ---
+
+    'tdb-dev-individuel':
+        'R\u00e9sultats par artefact. Chaque point = un \u00e9tudiant sur une activit\u00e9. Les trajectoires isol\u00e9es m\u00e9ritent attention.',
+
+    'tdb-selecteur-eleve-indiv':
+        'Isoler la trajectoire d\u2019un \u00e9tudiant sp\u00e9cifique sur le graphique des artefacts.',
+
+    'tdb-graphique-individuel':
+        'R\u00e9sultats par activit\u00e9 d\u2019apprentissage. Les zones denses r\u00e9v\u00e8lent les tendances du groupe.',
+
+    // =================================================================
+    // TABLEAU DE BORD — Liste des individus
+    // =================================================================
+
+    'liste-titre':
+        'Liste compl\u00e8te des \u00e9tudiants avec indices A-C-E-P, patterns et niveaux R\u00e0I. Filtrable et triable.',
+
+    'liste-filtres':
+        'Filtrer par groupe, programme, niveau R\u00e0I ou pattern. Le champ recherche accepte nom, pr\u00e9nom ou DA.',
+
+    'liste-filtre-rai':
+        'Filtrer par niveau d\u2019intervention : Tous, Niveau 1 (universel), Niveau 2 (pr\u00e9ventif), Niveau 3 (intensif).',
+
+    'liste-filtre-pattern':
+        'Filtrer par trajectoire d\u00e9tect\u00e9e : progression stable, d\u00e9fi sp\u00e9cifique, blocage \u00e9mergent ou critique.',
+
+    'liste-recherche':
+        'Rechercher un \u00e9tudiant par nom, pr\u00e9nom ou num\u00e9ro d\u2019admission (DA).',
+
+    'liste-col-sa':
+        'Services adapt\u00e9s. Une coche indique que l\u2019\u00e9tudiant b\u00e9n\u00e9ficie d\u2019un plan de services.',
+
+    'liste-col-interv':
+        'Interventions document\u00e9es pour cet \u00e9tudiant. Cliquer pour consulter l\u2019historique.',
+
+    // =================================================================
+    // TABLEAU DE BORD — Profil
+    // =================================================================
+
+    // --- Panneau latéral ---
+
+    'profil-selecteur':
+        'Choisir un \u00e9tudiant. Les boutons Pr\u00e9c./Suiv. parcourent la liste s\u00e9quentiellement.',
+
+    'profil-nav-observations':
+        'Sept vues d\u2019observation : productions, engagement, progression, habilet\u00e9s, accompagnement, travaux, rapport.',
+
+    // --- Vue Productions ---
+
+    'profil-productions':
+        'Liste des artefacts avec description, jeton, note, date et acc\u00e8s direct \u00e0 l\u2019\u00e9valuation.',
+
+    'profil-col-jeton':
+        'Jeton de reprise : permet \u00e0 l\u2019\u00e9tudiant de reprendre un artefact pour am\u00e9liorer son r\u00e9sultat.',
+
+    // --- Vue Engagement ---
+
+    'profil-engagement':
+        'Trois composantes (A, C, P) et calcul de l\u2019engagement E = \u221b(A \u00d7 C \u00d7 P). Barre de positionnement dans les zones.',
+
+    'profil-formule-engagement':
+        'E = \u221b(A \u00d7 C \u00d7 P). Moyenne g\u00e9om\u00e9trique : un indice tr\u00e8s bas tire l\u2019engagement vers le bas m\u00eame si les autres sont \u00e9lev\u00e9s.',
+
+    // --- Vue Progression temporelle ---
+
+    'profil-progression':
+        '\u00c9volution des indices A-C-P au fil des semaines. Zones : Insuffisant, En D\u00e9veloppement, Ma\u00eetris\u00e9, \u00c9tendu.',
+
+    // --- Vue Développement des habiletés ---
+
+    'profil-habiletes':
+        'Performance du portfolio et forces/d\u00e9fis par crit\u00e8re. N\u00e9cessite la configuration d\u2019une grille de r\u00e9f\u00e9rence.',
+
+    // --- Vue Accompagnement ---
+
+    'profil-accompagnement':
+        'Analyse R\u00e0I, contexte d\u2019apprentissage, structure SOLO et historique des interventions.',
+
+    'profil-accomp-rai':
+        'Performance globale et progression par crit\u00e8re. D\u00e9termine le niveau d\u2019intervention sugg\u00e9r\u00e9.',
+
+    'profil-accomp-contexte':
+        'Assiduit\u00e9 et compl\u00e9tion de l\u2019\u00e9tudiant. Interpr\u00e9tation du contexte apr\u00e8s les premi\u00e8res remises.',
+
+    'profil-accomp-solo':
+        'Analyse des r\u00e9ponses selon la taxonomie SOLO (Biggs & Collis). Identifie forces et d\u00e9fis structurels.',
+
+    // --- Modale Informations confidentielles ---
+
+    'profil-confidentiel':
+        'Donn\u00e9es confidentielles stock\u00e9es localement : parcours, d\u00e9fis, portrait de lecteur, diagnostic, notes.',
+
+    'profil-conf-parcours':
+        '\u00c9PGC (1re g\u00e9n\u00e9ration c\u00e9gep) et historique du cours ant\u00e9rieur.',
+
+    'profil-conf-lecteur':
+        '\u00c9valuation des comp\u00e9tences de lecture : structure, rigueur, plausibilit\u00e9, nuance, fran\u00e7ais.',
+
+    'profil-conf-diagnostic':
+        'Services adapt\u00e9s, cat\u00e9gorie et sous-cat\u00e9gorie du diagnostic. Confidentiel.',
+
+    // --- Historique des interventions ---
+
+    'profil-historique':
+        'Interventions R\u00e0I document\u00e9es pour cet \u00e9tudiant. Cr\u00e9er une nouvelle intervention depuis le profil.',
+
+    // --- Vue Travaux soumis ---
+
+    'profil-travaux':
+        'Travaux soumis par l\u2019\u00e9tudiant. Les fichiers sont import\u00e9s depuis Travaux > Import.',
+
+    // --- Vue Rapport ---
+
+    'profil-rapport':
+        'Rapport textuel configurable. Cocher les sections \u00e0 inclure et copier dans le presse-papier.',
+
+    'profil-rapport-sections':
+        'Cocher les sections souhait\u00e9es : Identification, Assiduit\u00e9, Compl\u00e9tion, Performance, Jetons, Date.',
+
+    // =================================================================
+    // TABLEAU DE BORD — Interventions RàI
+    // =================================================================
+
+    'interv-titre':
+        'Planification et suivi des interventions R\u00e0I de niveaux 2 et 3. Cr\u00e9er, consulter et documenter.',
+
+    'interv-btn-planifier':
+        'Cr\u00e9er une nouvelle intervention de niveau 2 (pr\u00e9ventif) ou 3 (intensif) pour un groupe ou un individu.',
+
+    'interv-carte':
+        'Fiche d\u2019une intervention : statut, niveau, aper\u00e7u du sous-groupe (patterns, R\u00e0I, notes individuelles).',
+
+    'interv-apercu-sous-groupe':
+        'Agr\u00e9gation des profils du sous-groupe : patterns d\u2019apprentissage, niveaux R\u00e0I et notes individuelles.',
+
+    'interv-patterns':
+        'R\u00e9partition des patterns d\u00e9tect\u00e9s dans le sous-groupe cibl\u00e9 par l\u2019intervention.',
+
+    'interv-niveaux-rai':
+        'R\u00e9partition des niveaux R\u00e0I (1, 2, 3) dans le sous-groupe cibl\u00e9 par l\u2019intervention.',
+
+    'interv-notes-individuelles':
+        'Observations de l\u2019enseignant pour chaque \u00e9tudiant lors de l\u2019intervention.',
+
+    'interv-gestion-absences':
+        'Lier l\u2019intervention \u00e0 une s\u00e9ance. Les non-participants sont marqu\u00e9s absents motiv\u00e9s (cong\u00e9).',
+
+    'interv-presences-notes':
+        'Cocher les pr\u00e9sents et documenter les observations individuelles. Le badge indique le niveau R\u00e0I.',
+
+    // =================================================================
+    // ÉVALUATIONS — Aperçu
+    // =================================================================
+
+    'eval-apercu':
+        'Statistiques synth\u00e9tiques : taux de compl\u00e9tion moyen, productions r\u00e9alis\u00e9es et productions configur\u00e9es.',
+
+    'eval-stats-groupe':
+        'Indicateurs cl\u00e9s du groupe-cours : compl\u00e9tion, productions r\u00e9alis\u00e9es et nombre d\u2019artefacts configur\u00e9s.',
+
+    'eval-taux-completion':
+        'Moyenne des taux de remise individuels. Correspond \u00e0 l\u2019indice C (Compl\u00e9tion) du Tableau de bord.',
+
+    // =================================================================
+    // ÉVALUATIONS — Liste des évaluations
+    // =================================================================
+
+    'eval-liste':
+        'Toutes les \u00e9valuations du groupe : r\u00e9sultats, niveaux IDME, jetons et acc\u00e8s aux dossiers PDF.',
+
+    'eval-liste-resume':
+        'R\u00e9sultats totaux, \u00e9valuations recevables (exclut les non-recevables), moyenne du groupe et nombre de productions.',
+
+    'eval-col-jeton':
+        'Type de jeton : I = Initial, D = D\u00e9lai, R = Reprise, RC = Reprise cibl\u00e9e. M\u00e9canisme de diff\u00e9renciation.',
+
+    'eval-col-niveau':
+        'Niveau IDME : I = Insuffisant, D = en D\u00e9veloppement, M = Ma\u00eetris\u00e9, E = \u00c9tendu.',
+
+    // =================================================================
+    // ÉVALUATIONS — Évaluer une production
+    // =================================================================
+
+    // --- Paramètres (panneau gauche) ---
+
+    'eval-page':
+        'Interface d\u2019\u00e9valuation crit\u00e9ri\u00e9e. S\u00e9lectionner les param\u00e8tres \u00e0 gauche, \u00e9valuer et pr\u00e9visualiser la r\u00e9troaction \u00e0 droite.',
+
+    'eval-grille':
+        'Grille crit\u00e9ri\u00e9e avec pond\u00e9rations. D\u00e9termine les crit\u00e8res affich\u00e9s pour l\u2019\u00e9valuation.',
+
+    'eval-echelle':
+        '\u00c9chelle de conversion pourcentage \u2192 niveau IDME. Seuils configurables dans R\u00e9glages.',
+
+    'eval-cartouche':
+        'Mod\u00e8le de r\u00e9troaction automatique adapt\u00e9 au type de production. D\u00e9termine le vocabulaire et le ton des commentaires.',
+
+    'eval-statut-remise':
+        'Indiquer si la production a \u00e9t\u00e9 remise. Conditionne le calcul de l\u2019indice de compl\u00e9tion (C).',
+
+    'eval-integrite':
+        'Recevable ou non. Les travaux non recevables sont exclus des calculs de moyenne.',
+
+    'eval-jetons':
+        'D\u00e9lai (orange), Reprise (vert) ou Reprise cibl\u00e9e (violet). Permet \u00e0 l\u2019\u00e9tudiant de d\u00e9montrer sa progression.',
+
+    'eval-jeton-delai':
+        'Prolonge l\u2019\u00e9ch\u00e9ance de remise. L\u2019\u00e9valuation porte sur la m\u00eame production, remise plus tard.',
+
+    'eval-jeton-reprise':
+        'L\u2019\u00e9tudiant reprend enti\u00e8rement la production. La nouvelle \u00e9valuation remplace la note.',
+
+    'eval-jeton-reprise-ciblee':
+        'L\u2019\u00e9tudiant reprend un aspect sp\u00e9cifique cibl\u00e9 par l\u2019enseignant. Le niveau IDME peut \u00eatre ajust\u00e9.',
+
+    'eval-note-finale':
+        'R\u00e9sultat calcul\u00e9 en temps r\u00e9el : pourcentage pond\u00e9r\u00e9 et niveau IDME correspondant.',
+
+    // --- Zone d'évaluation (panneau droit) ---
+
+    'eval-retroaction':
+        'R\u00e9troaction g\u00e9n\u00e9r\u00e9e automatiquement. Modifier le texte si n\u00e9cessaire, puis copier dans le presse-papier.',
+
+    'eval-retroaction-options':
+        'Sections \u00e0 inclure : Description, Objectif, T\u00e2che, Adresse (interpellation) et Contexte d\u2019apprentissage.',
+
+    'eval-critere':
+        '\u00c9valuer le crit\u00e8re en attribuant un niveau. La r\u00e9troaction est g\u00e9n\u00e9r\u00e9e automatiquement selon la cartouche.',
+
+    'eval-francais-ecrit':
+        '\u00c9valuation algorithmique : saisir les codes d\u2019erreurs et le nombre de mots. Calcul et r\u00e9troaction automatiques.',
+
+    'eval-codes-erreurs':
+        'Codes num\u00e9riques des erreurs s\u00e9par\u00e9s par points-virgules. Voir la grille pour la correspondance codes \u2192 cat\u00e9gories.',
+
+    'eval-niveau-idme':
+        'Niveau calcul\u00e9 automatiquement. Modifier uniquement si n\u00e9cessaire (ex. : reprise cibl\u00e9e).'
 };
 
 // Export global

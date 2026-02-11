@@ -694,9 +694,9 @@ function cartoucheSelectionnee() {
         <div class="eval-grid-critere">
             <div>
     <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px;">
-        <strong class="u-texte-09">${echapperHtml(critere.nom)}</strong>
+        <strong class="u-texte-09" data-tooltip="eval-critere">${echapperHtml(critere.nom)}</strong>
         <small style="color: var(--gris-moyen);">(${ponderation}%)</small>
-        ${estAlgorithmique ? '<span style="font-size: 0.7rem; color: var(--orange-accent); font-weight: bold; margin-left: 6px;">ALGORITHMIQUE</span>' : ''}
+        ${estAlgorithmique ? '<span data-tooltip="eval-francais-ecrit" style="font-size: 0.7rem; color: var(--orange-accent); font-weight: bold; margin-left: 6px;">ALGORITHMIQUE</span>' : ''}
     </div>
     ${critereGrille?.description ?
                 `<small style="display: block; color: var(--gris-clair); font-style: italic; margin-bottom: 10px; line-height: 1.3;">${echapperHtml(critereGrille.description)}</small>` : ''}
@@ -705,7 +705,7 @@ function cartoucheSelectionnee() {
         <!-- Interface algorithmique AVEC catégorisation -->
         <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-bottom: 10px;">
             <div class="groupe-form">
-                <label style="font-size: 0.75rem; color: var(--gris-moyen);">Codes d'erreurs → séparer par ;</label>
+                <label data-tooltip="eval-codes-erreurs" style="font-size: 0.75rem; color: var(--gris-moyen);">Codes d'erreurs → séparer par ;</label>
                 <input type="text"
                        id="eval_categories_${critere.id}"
                        class="controle-form"
@@ -731,7 +731,7 @@ function cartoucheSelectionnee() {
         </div>
         <!-- Menu sélecteur IDME pour modification manuelle (ex: jeton de reprise ciblée) -->
         <div style="margin-top: 8px;">
-            <label style="font-size: 0.75rem; color: var(--gris-moyen); margin-bottom: 4px; display: block;">Niveau IDME (modifiable manuellement) :</label>
+            <label data-tooltip="eval-niveau-idme" style="font-size: 0.75rem; color: var(--gris-moyen); margin-bottom: 4px; display: block;">Niveau IDME (modifiable manuellement) :</label>
             <select id="eval_${critere.id}" class="controle-form"
                     onchange="niveauSelectionne('${critere.id}')"
                     style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 2px solid var(--bordure-claire); width: 100%;">
@@ -769,7 +769,7 @@ function cartoucheSelectionnee() {
         </div>
         <!-- Menu sélecteur IDME pour modification manuelle (ex: jeton de reprise ciblée) -->
         <div style="margin-top: 8px;">
-            <label style="font-size: 0.75rem; color: var(--gris-moyen); margin-bottom: 4px; display: block;">Niveau IDME (modifiable manuellement) :</label>
+            <label data-tooltip="eval-niveau-idme" style="font-size: 0.75rem; color: var(--gris-moyen); margin-bottom: 4px; display: block;">Niveau IDME (modifiable manuellement) :</label>
             <select id="eval_${critere.id}" class="controle-form"
                     onchange="niveauSelectionne('${critere.id}')"
                     style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 2px solid var(--bordure-claire); width: 100%;">
@@ -860,9 +860,9 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
         <div class="eval-grid-critere">
             <div>
                 <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px;">
-                    <strong class="u-texte-09">${echapperHtml(critere.nom)}</strong>
+                    <strong class="u-texte-09" data-tooltip="eval-critere">${echapperHtml(critere.nom)}</strong>
                     <small style="color: var(--gris-moyen);">(${ponderation}%)</small>
-                    ${estAlgorithmique ? '<span style="font-size: 0.7rem; color: var(--orange-accent); font-weight: bold; margin-left: 6px;">ALGORITHMIQUE</span>' : ''}
+                    ${estAlgorithmique ? '<span data-tooltip="eval-francais-ecrit" style="font-size: 0.7rem; color: var(--orange-accent); font-weight: bold; margin-left: 6px;">ALGORITHMIQUE</span>' : ''}
                 </div>
                 ${critere.description ? `<small style="display: block; color: var(--gris-clair); font-style: italic; margin-bottom: 10px; line-height: 1.3;">${echapperHtml(critere.description)}</small>` : ''}
 
