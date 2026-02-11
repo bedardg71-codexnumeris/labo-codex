@@ -560,9 +560,12 @@
 - [x] **#11** Message "Nouveautes de la beta" automatise ✅ FAIT (10 fev 2026)
   - Pastille rouge accueil, modale changelog couleur-codee, bandeau vert mise a jour, polling version.json, persistance localStorage
 
-- [ ] **#18** Etendre aide contextuelle 😎
-  - Ajouter aides pour cas d'erreur frequents
-  - Pas seulement les sections, aussi les messages d'erreur
+- [ ] **#18** Tooltips d'aide au survol — déploiement progressif par zone
+  - **Mécanisme** : attributs `data-tooltip="cle"` + moteur `tooltips.js` + base `tooltips-contenu.js`
+  - **Plans de travail** : `plans de travail pour Claude Code/Plan_Implementation_Tooltips.md` (plan maître)
+  - **Corrections style** : Placement latéral (droite→gauche→bas→haut), flèche triangle 12px, marge 4px, masquage clic/Escape, surbrillance orange pulsante
+  - **Complété** : En-tête (10), Réglages Trimestre (29), Préférences (12), Dépistage (14), Données (14) = 79 attributs HTML, 72 clés JS
+  - **Futur** : Planification, Présences, Évaluations, Construction de la note, Tableau de bord, Boîte à outils, Aide
 
 - [x] **#43** Apercu avant impression fidele au PDF final ✅ FAIT (28 jan 2026)
   - Correction des en-têtes de niveaux : fond blanc comme le PDF (au lieu de gris)

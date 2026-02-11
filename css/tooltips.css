@@ -14,13 +14,13 @@
     box-shadow: var(--shadow-fort, 0 4px 12px rgba(0, 0, 0, 0.4));
     pointer-events: none;
     opacity: 0;
-    transform: translateY(4px);
-    transition: opacity 0.2s ease, transform 0.2s ease;
+    transform: scale(0.97);
+    transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
 .tooltip-bulle.tooltip-visible {
     opacity: 1;
-    transform: translateY(0);
+    transform: scale(1);
 }
 
 .tooltip-bulle.tooltip-mesure {
@@ -29,37 +29,48 @@
     display: block;
 }
 
-/* Fleche — positionnee dynamiquement via data-position */
+/* Fleche — triangle CSS pur, amorce de 12px */
 .tooltip-fleche {
     position: absolute;
-    width: 8px;
-    height: 8px;
-    background: var(--bleu-fonce, #1a1a2e);
-    transform: rotate(45deg);
+    width: 0;
+    height: 0;
+    border-style: solid;
 }
 
-.tooltip-bulle[data-position="bas"] .tooltip-fleche {
-    top: -4px;
-    left: 50%;
-    margin-left: -4px;
-}
-
-.tooltip-bulle[data-position="haut"] .tooltip-fleche {
-    bottom: -4px;
-    left: 50%;
-    margin-left: -4px;
-}
-
+/* Bulle A DROITE de l'element -> fleche pointe vers la GAUCHE */
 .tooltip-bulle[data-position="droite"] .tooltip-fleche {
-    left: -4px;
+    left: -12px;
     top: 50%;
-    margin-top: -4px;
+    margin-top: -8px;
+    border-width: 8px 12px 8px 0;
+    border-color: transparent var(--bleu-fonce, #1a1a2e) transparent transparent;
 }
 
+/* Bulle A GAUCHE de l'element -> fleche pointe vers la DROITE */
 .tooltip-bulle[data-position="gauche"] .tooltip-fleche {
-    right: -4px;
+    right: -12px;
     top: 50%;
-    margin-top: -4px;
+    margin-top: -8px;
+    border-width: 8px 0 8px 12px;
+    border-color: transparent transparent transparent var(--bleu-fonce, #1a1a2e);
+}
+
+/* Bulle SOUS l'element -> fleche pointe vers le HAUT (fallback) */
+.tooltip-bulle[data-position="bas"] .tooltip-fleche {
+    top: -12px;
+    left: 50%;
+    margin-left: -8px;
+    border-width: 0 8px 12px 8px;
+    border-color: transparent transparent var(--bleu-fonce, #1a1a2e) transparent;
+}
+
+/* Bulle AU-DESSUS de l'element -> fleche pointe vers le BAS (fallback) */
+.tooltip-bulle[data-position="haut"] .tooltip-fleche {
+    bottom: -12px;
+    left: 50%;
+    margin-left: -8px;
+    border-width: 12px 8px 0 8px;
+    border-color: var(--bleu-fonce, #1a1a2e) transparent transparent transparent;
 }
 
 .tooltip-contenu {
@@ -79,4 +90,19 @@ a[data-tooltip],
 .accordeon-header[data-tooltip],
 .navigation-boutons[data-tooltip] {
     cursor: pointer;
+}
+
+/* --- Surbrillance de la cible du tooltip --- */
+
+@keyframes tooltip-pulse {
+    0%, 100% { box-shadow: 0 0 0 2px rgba(var(--orange-accent-rgb, 255, 152, 0), 0.4); }
+    50%      { box-shadow: 0 0 0 3px rgba(var(--orange-accent-rgb, 255, 152, 0), 0.8); }
+}
+
+.tooltip-cible-active {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--orange-accent, #ff9800);
+    animation: tooltip-pulse 1.8s ease-in-out infinite;
+    border-radius: inherit;
+    transition: box-shadow 0.2s ease;
 }

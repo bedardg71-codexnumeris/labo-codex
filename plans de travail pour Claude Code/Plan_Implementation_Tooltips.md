@@ -1,9 +1,9 @@
-# Plan d'implémentation — Tooltips (En-tête + Réglages)
+# Plan d'implémentation — Tooltips (En-tête + Réglages complet)
 
 **Destinataire** : Claude Code (accès direct au dépôt Monitorage_v6)
 **Mécanisme** : Survol (hover) — tooltips légers
 **Contraintes** : Vanilla JS ES6+, zéro dépendance, client-side uniquement
-**Scope** : En-tête (sauf titre de l'application) + Onglet Réglages (sous-onglet Trimestre)
+**Scope** : En-tête (sauf titre) + Réglages (Trimestre, Préférences, Dépistage)
 
 ---
 
@@ -118,7 +118,7 @@ const TOOLTIPS = {
         'Assembler un groupe-cours en réunissant trimestre, cours, groupe, horaire, enseignant et pratique de notation. Le groupe-cours actif détermine les données affichées dans toute l\'application.',
 
     // =================================================================
-    // RÉGLAGES — Champs spécifiques (Gestion des trimestres)
+    // RÉGLAGES — Champs spécifiques (Trimestre)
     // =================================================================
 
     'reglages-trim-identification':
@@ -178,7 +178,103 @@ const TOOLTIPS = {
     // =================================================================
 
     'reglages-bibliotheque':
-        'Bibliothèque d\'entités réutilisables. Sélectionne une entité existante ou crée-en une nouvelle. Permet de réutiliser des configurations d\'un trimestre à l\'autre.'
+        'Bibliothèque d\'entités réutilisables. Sélectionne une entité existante ou crée-en une nouvelle. Permet de réutiliser des configurations d\'un trimestre à l\'autre.',
+
+    // =================================================================
+    // RÉGLAGES — Préférences
+    // =================================================================
+
+    'pref-sous-nav':
+        'Personnaliser l\'expérience : outils actifs, ressources affichées, effets visuels et comportement de navigation.',
+
+    'pref-outils':
+        'Activer ou désactiver les fonctionnalités avancées (indices ACP, système RàI). Les outils désactivés sont masqués de l\'interface.',
+
+    'pref-outils-acp':
+        'Indices prédictifs Assiduité, Complétion, Performance. Calculés sur une fenêtre glissante, ils alimentent le tableau de bord et la détection précoce des difficultés.',
+
+    'pref-outils-rai':
+        'Niveaux d\'intervention et recommandations personnalisées. Structure le soutien aux étudiants en trois niveaux d\'intensité (universel, ciblé, intensif).',
+
+    'pref-affichage':
+        'Choisir les ressources visibles dans l\'interface : cartes SOLO, snapshots, graphiques, détails techniques, mode comparatif. Adapte la densité d\'information affichée.',
+
+    'pref-affichage-solo':
+        'Affiche une carte avec les descriptions détaillées basées sur la taxonomie SOLO. Utile pour interpréter le niveau cognitif des apprentissages.',
+
+    'pref-affichage-snapshots':
+        'Historique hebdomadaire des indices A-C-P. Permet de suivre l\'évolution dans le temps.',
+
+    'pref-affichage-graphiques':
+        'Visualisation de la progression dans le temps via Chart.js.',
+
+    'pref-affichage-details':
+        'Affiche les formules de calcul et les données brutes. Destiné aux utilisateurs souhaitant vérifier les calculs sous-jacents.',
+
+    'pref-affichage-assiduité':
+        'Choisir comment afficher les totaux de présence et d\'assiduité (ex. : en périodes).',
+
+    'pref-affichage-comparatif':
+        'Mode expérimental. Affiche les deux pratiques de notation (SOM et PAN) côte à côte pour comparer les approches.',
+
+    'pref-visuel':
+        'Effets visuels de l\'interface. L\'animation des points du tableau de bord peut être désactivée pour réduire les distractions.',
+
+    'pref-navigation':
+        'Court-circuiter la page d\'accueil pour ouvrir directement sur le tableau de bord au démarrage.',
+
+    // =================================================================
+    // RÉGLAGES — Dépistage
+    // =================================================================
+
+    'depist-sous-nav':
+        'Configuration de la détection des patterns et de l\'identification des forces et défis. Influence la sensibilité des alertes du tableau de bord.',
+
+    'depist-activer-patterns':
+        'Activer ou désactiver l\'identification des tendances récurrentes (progression, stagnation, régression) dans les résultats.',
+
+    'depist-grille':
+        'Grille utilisée pour identifier les forces et défis. Doit être la même pour tous les artefacts du trimestre.',
+
+    'depist-decoupler-pr':
+        'Séparer le calcul de la note (P, selon la pratique) du calcul de risque (R, basé sur les N dernières productions). Recommandé avec « N meilleurs ».',
+
+    'depist-fenetre':
+        'Nombre de dernières productions analysées pour détecter les tendances. Valeur basse = détection précoce. Valeur élevée = détection plus fiable.',
+
+    'depist-seuil-progression':
+        'Différence minimale (%) pour signaler une progression ou régression entre deux artefacts. Bas = sensible, élevé = moins sensible.',
+
+    'depist-seuil-direction':
+        'Variation minimale (%) pour afficher une tendance du risque. Contrôle la sensibilité de l\'indicateur directionnel.',
+
+    'depist-seuil-defi':
+        'Score (%) sous lequel un critère est identifié comme un défi nécessitant attention. Bas = plus exigeant, élevé = moins exigeant.',
+
+    'depist-restaurer':
+        'Réinitialiser tous les seuils de détection à leurs valeurs par défaut.',
+
+    // =================================================================
+    // RÉGLAGES — Seuils d'interprétation
+    // =================================================================
+
+    'depist-seuils-interpretation':
+        'Seuils de couleur pour les indices A-C-P. Fragile (rouge), Acceptable (jaune), Bon (vert). Détermine les alertes du tableau de bord.',
+
+    'depist-seuils-visuels':
+        'Activer ou désactiver l\'affichage des couleurs Fragile / Acceptable / Bon dans les tableaux et indicateurs.',
+
+    'depist-seuil-fragile':
+        'Indice sous lequel la situation est considérée préoccupante (rouge). Nécessite une intervention.',
+
+    'depist-seuil-acceptable':
+        'Indice sous lequel la situation est en zone de vigilance (jaune). À surveiller.',
+
+    'depist-seuil-bon':
+        'Indice au-dessus duquel la situation est satisfaisante (vert).',
+
+    'depist-seuils-restaurer':
+        'Réinitialiser les seuils d\'interprétation à leurs valeurs par défaut (70/80/85%).'
 };
 
 // Export global
@@ -254,32 +350,29 @@ function positionnerBulle(cible, bulle) {
     const vh = window.innerHeight;
 
     let top, left;
-    let position = 'bas'; // position de la bulle par rapport à la cible
+    let position = 'bas';
 
     // Essayer en bas
     top = rect.bottom + MARGE;
     left = rect.left + (rect.width / 2) - (bulleRect.width / 2);
 
     if (top + bulleRect.height > vh) {
-        // Pas assez de place en bas → essayer en haut
         top = rect.top - bulleRect.height - MARGE;
         position = 'haut';
     }
 
     if (top < 0) {
-        // Pas assez de place en haut non plus → à droite
         top = rect.top + (rect.height / 2) - (bulleRect.height / 2);
         left = rect.right + MARGE;
         position = 'droite';
 
         if (left + bulleRect.width > vw) {
-            // Pas de place à droite → à gauche
             left = rect.left - bulleRect.width - MARGE;
             position = 'gauche';
         }
     }
 
-    // Contraindre horizontalement dans le viewport
+    // Contraindre dans le viewport
     left = Math.max(MARGE, Math.min(left, vw - bulleRect.width - MARGE));
     top = Math.max(MARGE, top);
 
@@ -303,11 +396,9 @@ function afficher(cible) {
     contenu.textContent = texte;
     bulle.style.maxWidth = `${LARGEUR_MAX}px`;
 
-    // Rendre visible pour calculer les dimensions (mais pas encore animé)
     bulle.classList.add('tooltip-mesure');
     bulle.classList.remove('tooltip-visible');
 
-    // Positionner puis animer
     requestAnimationFrame(() => {
         positionnerBulle(cible, bulle);
         bulle.classList.remove('tooltip-mesure');
@@ -347,7 +438,6 @@ document.addEventListener('mouseleave', function(e) {
     timerDisparition = setTimeout(masquer, DELAI_DISPARITION);
 }, true);
 
-// Masquer si scroll ou redimensionnement
 window.addEventListener('scroll', masquer, { passive: true });
 window.addEventListener('resize', masquer);
 
@@ -393,7 +483,6 @@ window.tooltips = { afficher, masquer };
     display: block;
 }
 
-/* Flèche — positionnée dynamiquement via data-position */
 .tooltip-fleche {
     position: absolute;
     width: 8px;
@@ -431,7 +520,6 @@ window.tooltips = { afficher, masquer };
     z-index: 1;
 }
 
-/* Éléments avec tooltip : curseur d'aide */
 [data-tooltip] {
     cursor: help;
 }
@@ -439,67 +527,91 @@ window.tooltips = { afficher, masquer };
 
 ---
 
-## 5. Intégration HTML
+## 5. Cartographie HTML — Éléments cibles
 
-### Chargement des scripts
+Le travail principal consiste à ajouter `data-tooltip="cle"` sur les éléments HTML existants.
 
-Ajouter dans `index.html`, **avant** la fermeture de `</body>` :
+### En-tête (sauf titre)
 
-```html
-<!-- Tooltips -->
-<link rel="stylesheet" href="css/tooltips.css">
-<script src="js/tooltips-contenu.js"></script>
-<script src="js/tooltips.js"></script>
-```
+| Clé | Élément |
+|-----|---------|
+| `entete-logo` | Logo + nom codexnumeris.org |
+| `entete-version` | Numéro de version et build |
+| `entete-mode-affichage` | Sélecteur Normal/Anonymisation |
+| `entete-signaler-bug` | Lien « Signaler un bug » |
+| `entete-pratique` | Ligne de la pratique active |
+| `entete-semaine` | Repère temporel (Semaine X) |
+| `entete-groupe-cours` | Sélecteur du groupe-cours actif |
+| `entete-nav-principale` | Barre d'onglets principaux |
+| `entete-sous-nav` | Barre d'onglets secondaires |
+| `entete-reglages` | Icône ⚙ Réglages |
 
-### Marquage des éléments cibles
+### Réglages — Trimestre (panneaux)
 
-Le travail principal consiste à ajouter `data-tooltip="cle"` sur les éléments HTML existants. Voici la cartographie complète :
+| Clé | Élément |
+|-----|---------|
+| `reglages-gestion-trimestres` | En-tête du panneau Gestion des trimestres |
+| `reglages-cours` | En-tête du panneau Cours |
+| `reglages-enseignant` | En-tête du panneau Enseignant-e |
+| `reglages-groupe-etudiants` | En-tête du panneau Groupe d'étudiants |
+| `reglages-horaire` | En-tête du panneau Horaire |
+| `reglages-groupe-cours` | En-tête du panneau Groupe-cours |
 
-#### En-tête (sauf titre de l'application)
+### Réglages — Trimestre (champs spécifiques)
 
-| Clé | Sélecteur CSS probable | Élément |
-|-----|------------------------|---------|
-| `entete-logo` | `.header-logo` ou `a[href*="codexnumeris"]` | Logo + nom codexnumeris.org |
-| `entete-version` | Élément contenant « Béta XX.X » | Numéro de version et build |
-| `entete-mode-affichage` | `select` ou `.dropdown` contenant « Normal » | Sélecteur Normal/Anonymisation |
-| `entete-signaler-bug` | `a` ou `button` contenant « Signaler un bug » | Lien de signalement |
-| `entete-pratique` | Élément contenant « PAN-SDT-Litt » | Ligne de la pratique active |
-| `entete-semaine` | Élément contenant « Semaine X » | Repère temporel |
-| `entete-groupe-cours` | `select` ou `.dropdown` du groupe-cours | Sélecteur du groupe-cours actif |
-| `entete-nav-principale` | Conteneur `<nav>` ou `.tabs` principal | Barre d'onglets principaux |
-| `entete-sous-nav` | Conteneur de la sous-navigation | Barre d'onglets secondaires |
-| `entete-reglages` | Bouton/lien de l'icône engrenage | Icône ⚙ Réglages |
+| Clé | Élément |
+|-----|---------|
+| `reglages-trim-identification` | Titre zone Identification |
+| `reglages-trim-bornes` | Titre zone Bornes |
+| `reglages-trim-semaines-speciales` | Titre zone Semaines spéciales |
+| `reglages-trim-conges` | Titre zone Congés fériés |
+| `reglages-trim-imprevus` | Titre zone Événements imprévus |
+| `reglages-cours-competence` | Labels Compétence |
+| `reglages-cours-elements` | Label Éléments de compétence |
+| `reglages-etudiants-sa` | En-tête colonne SA |
+| `reglages-etudiants-import` | Titre zone Import |
+| `reglages-horaire-periodes` | Labels Séances/Périodes |
+| `reglages-gc-nom-genere` | Nom structuré généré |
+| `reglages-gc-pratique` | Label Pratique de notation |
+| `reglages-bibliotheque` | Boutons Bibliothèque |
 
-#### Réglages — Sous-navigation et panneaux
+### Réglages — Préférences
 
-| Clé | Sélecteur CSS probable | Élément |
-|-----|------------------------|---------|
-| `reglages-sous-nav` | Conteneur des onglets Trimestre/Préférences/Données/À propos | Sous-navigation Réglages |
-| `reglages-gestion-trimestres` | Titre/bandeau du panneau « Gestion des trimestres » | En-tête du panneau dépliable |
-| `reglages-cours` | Titre/bandeau du panneau « Cours » | En-tête du panneau dépliable |
-| `reglages-enseignant` | Titre/bandeau du panneau « Enseignant-e » | En-tête du panneau dépliable |
-| `reglages-groupe-etudiants` | Titre/bandeau du panneau « Groupe d'étudiants » | En-tête du panneau dépliable |
-| `reglages-horaire` | Titre/bandeau du panneau « Horaire » | En-tête du panneau dépliable |
-| `reglages-groupe-cours` | Titre/bandeau du panneau « Groupe-cours » | En-tête du panneau dépliable |
+| Clé | Élément |
+|-----|---------|
+| `pref-sous-nav` | Sous-onglet Préférences |
+| `pref-outils` | Titre section Outils à exploiter |
+| `pref-outils-acp` | Checkbox Micro données ACP |
+| `pref-outils-rai` | Checkbox Système RàI |
+| `pref-affichage` | Titre section Affichage des ressources |
+| `pref-affichage-solo` | Checkbox SOLO |
+| `pref-affichage-snapshots` | Checkbox Snapshots |
+| `pref-affichage-graphiques` | Checkbox Graphiques d'évolution |
+| `pref-affichage-details` | Checkbox Détails techniques |
+| `pref-affichage-assiduité` | Sélecteur Unité d'affichage |
+| `pref-affichage-comparatif` | Checkbox Mode comparatif SOM/PAN |
+| `pref-visuel` | Titre section Expérience visuelle |
+| `pref-navigation` | Checkbox Ouvrir sur le tableau de bord |
 
-#### Réglages — Champs spécifiques
+### Réglages — Dépistage
 
-| Clé | Sélecteur CSS probable | Élément |
-|-----|------------------------|---------|
-| `reglages-trim-identification` | Zone « Identification du trimestre » | Titre de la zone |
-| `reglages-trim-bornes` | Zone « Bornes du trimestre » | Titre de la zone |
-| `reglages-trim-semaines-speciales` | Zone « Semaines spéciales » | Titre de la zone |
-| `reglages-trim-conges` | Zone « Congés fériés et activités institutionnelles » | Titre de la zone |
-| `reglages-trim-imprevus` | Zone « Événements imprévus » | Titre de la zone |
-| `reglages-cours-competence` | Champs « N° de la compétence » et « Compétence » | Labels des champs |
-| `reglages-cours-elements` | Champ « Éléments de compétence » | Label du champ |
-| `reglages-etudiants-sa` | Colonne ou champ « SA » | En-tête de colonne SA |
-| `reglages-etudiants-import` | Zone « Importer des étudiants » | Titre de la zone |
-| `reglages-horaire-periodes` | Champs « Séances par semaine » et « Périodes par séance » | Labels des champs |
-| `reglages-gc-nom-genere` | Zone affichant le nom généré (bandeau bleu) | Nom structuré du groupe-cours |
-| `reglages-gc-pratique` | Champ « Pratique de notation » | Label du champ |
-| `reglages-bibliotheque` | Boutons « Bibliothèque » dans les barres latérales | Bouton Bibliothèque |
+| Clé | Élément |
+|-----|---------|
+| `depist-sous-nav` | Sous-onglet Dépistage |
+| `depist-activer-patterns` | Checkbox Activer la détection |
+| `depist-grille` | Sélecteur Grille de critères |
+| `depist-decoupler-pr` | Checkbox Découpler P et R |
+| `depist-fenetre` | Champ Fenêtre d'analyse |
+| `depist-seuil-progression` | Curseur Progression des artefacts |
+| `depist-seuil-direction` | Curseur Direction du risque |
+| `depist-seuil-defi` | Curseur Seuil de défi spécifique |
+| `depist-restaurer` | Bouton Restaurer (dépistage) |
+| `depist-seuils-interpretation` | Titre section Seuils d'interprétation |
+| `depist-seuils-visuels` | Checkbox Indicateurs visuels |
+| `depist-seuil-fragile` | Carte Fragile (rouge) |
+| `depist-seuil-acceptable` | Carte Acceptable (jaune) |
+| `depist-seuil-bon` | Carte Bon (vert) |
+| `depist-seuils-restaurer` | Bouton Restaurer (seuils) |
 
 ---
 
@@ -511,47 +623,60 @@ Créer les trois fichiers (`tooltips.js`, `tooltips-contenu.js`, `tooltips.css`)
 
 ### Étape 2 — Charger les scripts
 
-Dans `index.html`, ajouter les balises `<link>` et `<script>` selon la section 5.
+Dans `index.html`, ajouter avant `</body>` :
+
+```html
+<link rel="stylesheet" href="css/tooltips.css">
+<script src="js/tooltips-contenu.js"></script>
+<script src="js/tooltips.js"></script>
+```
 
 ### Étape 3 — Identifier les sélecteurs réels
 
-La colonne « Sélecteur CSS probable » de la section 5 est indicative. Claude Code doit :
-1. Ouvrir `index.html` et les fichiers de template/modules pertinents.
-2. Identifier les sélecteurs réels pour chaque élément listé.
-3. Ajouter `data-tooltip="cle"` sur chaque élément cible.
+Ouvrir `index.html` et les modules JS qui génèrent l'interface. Identifier les sélecteurs réels pour chaque élément listé dans la section 5. Ajouter `data-tooltip="cle"` sur chaque élément cible.
 
-**Règle** : placer l'attribut sur l'élément le plus spécifique possible (le titre du panneau, pas le panneau entier ; le label du champ, pas le conteneur du formulaire).
+**Règle** : placer l'attribut sur l'élément le plus spécifique possible (le titre du panneau, pas le panneau entier ; le label du champ, pas le conteneur).
 
 ### Étape 4 — Adapter les couleurs
 
-Le CSS proposé utilise `background: #1a1a2e` (fond sombre). Si le thème de l'application est différent, ajuster :
-- `background` de `.tooltip-bulle` et `.tooltip-fleche`
-- `color` de `.tooltip-bulle`
-- `box-shadow` pour la cohérence visuelle
+Ajuster le CSS si nécessaire pour s'harmoniser avec le thème existant de l'application.
 
 ### Étape 5 — Tester
 
-Vérifier que :
-- [ ] Chaque tooltip apparaît au survol après un léger délai (~400ms).
-- [ ] Le tooltip disparaît quand le curseur quitte l'élément.
-- [ ] Le positionnement est correct (pas de débordement hors viewport).
-- [ ] L'en-tête fonctionne (10 tooltips).
-- [ ] Les panneaux Réglages fonctionnent (6 tooltips de panneaux + champs spécifiques).
-- [ ] Le tooltip ne bloque pas l'interaction avec les sélecteurs (dropdowns).
-- [ ] Le curseur `help` s'affiche sur les éléments marqués.
-- [ ] Aucun conflit avec les styles ou scripts existants.
+- [ ] Chaque tooltip apparaît au survol après ~400ms
+- [ ] Le tooltip disparaît quand le curseur quitte l'élément
+- [ ] Le positionnement est correct (pas de débordement)
+- [ ] En-tête : 10 tooltips fonctionnels
+- [ ] Réglages Trimestre : 6 panneaux + champs spécifiques
+- [ ] Réglages Préférences : 13 tooltips fonctionnels
+- [ ] Réglages Dépistage : 15 tooltips fonctionnels
+- [ ] Le tooltip ne bloque pas les sélecteurs (dropdowns)
+- [ ] Le curseur `help` s'affiche sur les éléments marqués
+- [ ] Aucun conflit avec les styles ou scripts existants
 
 ---
 
-## 7. Extensibilité
+## 7. Inventaire des clés
 
-Ce système est conçu pour être étendu à tous les modules de l'application. Pour documenter un nouveau module :
+| Zone | Nombre de clés |
+|------|---------------|
+| En-tête | 10 |
+| Réglages — Trimestre (panneaux) | 6 |
+| Réglages — Trimestre (champs) | 13 |
+| Réglages — Préférences | 13 |
+| Réglages — Dépistage | 15 |
+| **Total** | **57** |
 
+---
+
+## 8. Extensibilité
+
+Pour documenter un nouveau module :
 1. Ajouter les clés et textes dans `tooltips-contenu.js`.
 2. Ajouter `data-tooltip="cle"` dans le HTML du module.
-3. Aucune modification du moteur (`tooltips.js`) ou du CSS n'est requise.
+3. Aucune modification du moteur ou du CSS n'est requise.
 
-Les prochains modules à documenter dans l'ordre du workflow :
+Prochains modules dans l'ordre du workflow :
 - Planification
 - Présences
 - Évaluations
