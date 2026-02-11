@@ -6683,8 +6683,8 @@
 
                         <!-- Barre supérieure -->
                         <div class="planif-header">
-                            <div id="planif-selecteur-cartes">
-                                <select id="planif-liste-cartes" title="Carte active"></select>
+                            <div id="planif-selecteur-cartes" data-tooltip="planif-boutons-action">
+                                <select id="planif-liste-cartes" title="Carte active" data-tooltip="planif-selecteur-cours"></select>
                                 <button class="planif-btn-carte" id="planif-btn-nouvelle-carte" title="Nouvelle carte">➕</button>
                                 <button class="planif-btn-carte planif-danger" id="planif-btn-supprimer-carte" title="Supprimer cette carte">❌</button>
                                 <button class="planif-btn-carte" id="planif-btn-dupliquer-carte" title="Dupliquer cette carte">📋</button>
@@ -6701,12 +6701,12 @@
                         <div id="planif-zone-wrapper">
                             <div id="planif-palette" class="planif-palette-flottante">
                                 <div class="planif-palette-barre">
-                                    <span class="planif-palette-titre">Éléments</span>
+                                    <span class="planif-palette-titre" data-tooltip="planif-palette">Éléments</span>
                                     <button class="planif-palette-toggle" id="planif-palette-toggle" title="Réduire la palette">−</button>
                                 </div>
                                 <div class="planif-palette-contenu">
                                     <div class="planif-palette-categorie" style="background: rgba(59, 130, 246, 0.06);">
-                                        <div class="planif-palette-zone-label" style="color: #3b82f6;">Pourquoi enseigner</div>
+                                        <div class="planif-palette-zone-label" style="color: #3b82f6;" data-tooltip="planif-pouvoir-enseigner">Pourquoi enseigner</div>
                                         <div class="planif-palette-zone-sous-titre">intention curriculaire</div>
                                         <div class="planif-palette-groupe">
                                             <button class="planif-palette-btn" data-type="competence" draggable="true">
@@ -6718,7 +6718,7 @@
                                         </div>
                                     </div>
                                     <div class="planif-palette-categorie" style="background: rgba(249, 115, 22, 0.06);">
-                                        <div class="planif-palette-zone-label" style="color: #f97316;">Quoi enseigner</div>
+                                        <div class="planif-palette-zone-label" style="color: #f97316;" data-tooltip="planif-quoi-enseigner">Quoi enseigner</div>
                                         <div class="planif-palette-zone-sous-titre">contenu de la leçon</div>
                                         <div class="planif-palette-groupe">
                                             <button class="planif-palette-btn" data-type="connaissance" draggable="true">
@@ -6733,7 +6733,7 @@
                                         </div>
                                     </div>
                                     <div class="planif-palette-categorie" style="background: rgba(22, 163, 74, 0.06);">
-                                        <div class="planif-palette-zone-label" style="color: #16a34a;">Comment enseigner</div>
+                                        <div class="planif-palette-zone-label" style="color: #16a34a;" data-tooltip="planif-comment-enseigner">Comment enseigner</div>
                                         <div class="planif-palette-zone-sous-titre">mise en action</div>
                                         <div class="planif-palette-groupe">
                                             <button class="planif-palette-btn" data-type="activite" draggable="true">
@@ -6748,7 +6748,7 @@
                                         </div>
                                     </div>
                                     <div class="planif-palette-categorie" style="background: rgba(217, 70, 239, 0.06);">
-                                        <div class="planif-palette-zone-label" style="color: #D946EF;">Vérifier l'apprentissage</div>
+                                        <div class="planif-palette-zone-label" style="color: #D946EF;" data-tooltip="planif-design-apprentissages">Vérifier l'apprentissage</div>
                                         <div class="planif-palette-zone-sous-titre">preuve de réussite</div>
                                         <div class="planif-palette-groupe">
                                             <button class="planif-palette-btn" data-type="evaluation" draggable="true">
@@ -6757,7 +6757,7 @@
                                         </div>
                                     </div>
                                     <div class="planif-palette-categorie" style="background: rgba(147, 51, 234, 0.06);">
-                                        <div class="planif-palette-zone-label" style="color: #9333ea;">Structure</div>
+                                        <div class="planif-palette-zone-label" style="color: #9333ea;" data-tooltip="planif-structure">Structure</div>
                                         <div class="planif-palette-zone-sous-titre">organisation</div>
                                         <div class="planif-palette-groupe">
                                             <button class="planif-palette-btn" data-type="sequence" draggable="true">
@@ -6769,7 +6769,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <button id="planif-palette-aide-btn" class="planif-palette-aide-btn" title="Afficher l'aide">?</button>
+                                <button id="planif-palette-aide-btn" class="planif-palette-aide-btn" title="Afficher l'aide" data-tooltip="planif-aide">?</button>
                             </div>
                             <div id="planif-carte-aide" class="planif-carte-aide">
                                 <div class="planif-carte-aide-barre">
@@ -6784,7 +6784,7 @@
                                     Les informations se propagent à toutes les copies.
                                 </div>
                             </div>
-                            <div id="planif-zone-travail">
+                            <div id="planif-zone-travail" data-tooltip="planif-canevas">
                                 <div id="planif-espace-wrapper">
                                 <div id="planif-espace">
                                     <svg id="planif-canvas">
@@ -6813,15 +6813,15 @@
 
                             <div id="planif-panneau">
                                 <button class="planif-btn-fermer" id="planif-btn-fermer-panneau">&times;</button>
-                                <h3><span class="planif-pastille" id="planif-panneau-pastille"></span><span id="planif-panneau-type"></span></h3>
-                                <label for="planif-panneau-titre">Titre</label>
+                                <h3 data-tooltip="planif-panneau-proprietes"><span class="planif-pastille" id="planif-panneau-pastille"></span><span id="planif-panneau-type"></span></h3>
+                                <label for="planif-panneau-titre" data-tooltip="planif-titre-noeud">Titre</label>
                                 <input type="text" id="planif-panneau-titre" placeholder="Titre du nœud">
-                                <label for="planif-panneau-description">Description</label>
+                                <label for="planif-panneau-description" data-tooltip="planif-description-noeud">Description</label>
                                 <textarea id="planif-panneau-description" placeholder="Description ou notes…"></textarea>
                                 <div id="planif-panneau-extra"></div>
                                 <div id="planif-panneau-clone-info" style="display:none"></div>
-                                <button class="planif-btn-cloner" id="planif-btn-cloner">🧬 Cloner</button>
-                                <button class="planif-btn-supprimer" id="planif-btn-supprimer">Supprimer ce nœud</button>
+                                <button class="planif-btn-cloner" id="planif-btn-cloner" data-tooltip="planif-cloner">🧬 Cloner</button>
+                                <button class="planif-btn-supprimer" id="planif-btn-supprimer" data-tooltip="planif-supprimer-noeud">Supprimer ce nœud</button>
                             </div>
 
                             <div id="planif-panneau-seances">
@@ -6891,7 +6891,7 @@
                         </div>
 
                         <!-- Barre d'état -->
-                        <div class="planif-footer">
+                        <div class="planif-footer" data-tooltip="planif-barre-outils">
                             <span>Glisser un type depuis la palette</span>
                             <span><kbd>Suppr</kbd> Supprimer</span>
                             <span><kbd>⌘A</kbd> Tout sélectionner</span>
@@ -6900,7 +6900,7 @@
                             <span><kbd>⌘+/-</kbd> Zoom</span>
                             <span><kbd>⌘0</kbd> Reset zoom</span>
                             <button id="planif-btn-recentrer" title="Recentrer la vue sur le contenu (⌘1)">⊕ Recentrer</button>
-                            <span id="planif-zoom-info">100%</span>
+                            <span id="planif-zoom-info" data-tooltip="planif-zoom">100%</span>
                             <button class="planif-btn-zoom-preset" data-zoom="1.00">100%</button>
                             <button class="planif-btn-zoom-preset" data-zoom="0.75">75%</button>
                             <button class="planif-btn-zoom-preset" data-zoom="0.50">50%</button>
@@ -6922,19 +6922,19 @@
                         <div class="org-corps">
                             <!-- Sélecteurs -->
                             <div class="org-selecteurs">
-                                <select id="org-select-sequence"><option value="">— Séquence —</option></select>
-                                <select id="org-select-lecon"><option value="">— Leçon —</option></select>
+                                <select id="org-select-sequence" data-tooltip="orga-selecteur-sequence"><option value="">— Séquence —</option></select>
+                                <select id="org-select-lecon" data-tooltip="orga-selecteur-lecon"><option value="">— Leçon —</option></select>
                             </div>
                             <!-- En-tête automatique (date, heure, local) -->
                             <div id="org-entete-calendrier" class="org-section" style="display:none">
-                                <div class="org-section-titre">En-tête de la leçon</div>
+                                <div class="org-section-titre" data-tooltip="orga-entete-lecon">En-tête de la leçon</div>
                                 <div class="org-section-contenu" id="org-entete-calendrier-contenu"></div>
                             </div>
                             <!-- Contenu leçon (généré dynamiquement) -->
                             <div id="org-contenu-lecon" style="display:none">
                                 <!-- Objectif de la leçon -->
                                 <div class="org-section" id="org-objectif">
-                                    <div class="org-section-titre">
+                                    <div class="org-section-titre" data-tooltip="orga-objectif">
                                         Objectif de la leçon
                                         <button class="org-btn-reinit" id="org-btn-reinit-objectif" title="Réinitialiser l'objectif dérivé" style="display:none">↺ Réinitialiser</button>
                                     </div>
@@ -6944,14 +6944,14 @@
                                 </div>
                                 <!-- Prérequis -->
                                 <div class="org-section" id="org-prerequis">
-                                    <div class="org-section-titre">Connaissances préalables à vérifier</div>
+                                    <div class="org-section-titre" data-tooltip="orga-connaissances-prealables">Connaissances préalables à vérifier</div>
                                     <div class="org-section-contenu" id="org-prerequis-contenu">
                                         <span class="org-placeholder">Les prérequis seront dérivés des liens de la carte.</span>
                                     </div>
                                 </div>
                                 <!-- Productions associées -->
                                 <div class="org-section" id="org-productions">
-                                    <div class="org-section-titre">Productions associées</div>
+                                    <div class="org-section-titre" data-tooltip="orga-productions">Productions associées</div>
                                     <div class="org-section-contenu" id="org-productions-contenu">
                                         <span class="org-placeholder">Les productions seront dérivées de Construction de la note.</span>
                                     </div>
@@ -6959,14 +6959,14 @@
                                 <!-- Enseignement explicite -->
                                 <div class="org-section org-ee-section" id="org-ee">
                                     <div class="org-ee-bar">
-                                        <label class="org-checkbox-label">
+                                        <label class="org-checkbox-label" data-tooltip="orga-enseignement-explicite">
                                             <input type="checkbox" id="org-ee-checkbox">
                                             Enseignement explicite (5 étapes)
                                         </label>
                                     </div>
                                     <!-- Cœur brut (visible quand EE décoché) -->
                                     <div id="org-coeur-brut">
-                                        <div class="org-section-titre">Cœur de la leçon</div>
+                                        <div class="org-section-titre" data-tooltip="orga-coeur-lecon">Cœur de la leçon</div>
                                         <div class="org-section-contenu" id="org-coeur-contenu"></div>
                                     </div>
                                     <!-- 5 étapes EE (visible quand EE coché) -->
@@ -7030,7 +7030,7 @@
                             </div>
                             <!-- Vue calendrier (collapsible) -->
                             <div id="org-calendrier" class="org-section">
-                                <div class="org-section-titre org-section-titre-collapse" id="org-calendrier-toggle">
+                                <div class="org-section-titre org-section-titre-collapse" id="org-calendrier-toggle" data-tooltip="orga-vue-calendrier">
                                     Vue calendrier
                                     <span class="org-chevron">▾</span>
                                 </div>
@@ -16008,7 +16008,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97.4';
-        const BUILD_ID = '0211-1014';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0211-1033';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
