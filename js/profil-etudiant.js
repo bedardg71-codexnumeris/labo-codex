@@ -1127,7 +1127,7 @@ function genererSectionMobilisationEngagement(da) {
                                 const options = { weekday: 'short', day: 'numeric', month: 'short' };
                                 const dateFormatee = date.toLocaleDateString('fr-CA', options);
                                 const duree = intervention.duree || 2;
-                                const typeIcone = intervention.type === 'individuel' ? '👤' : '👥';
+                                const typeIcone = intervention.type === 'individuel' ? '👤' : intervention.type === 'mio' ? '✉️' : '👥';
 
                                 return `
                                     <span class="badge-intervention-vert" onclick="naviguerVersIntervention('${intervention.id}');">
@@ -2025,7 +2025,7 @@ function genererSectionAccompagnement(da) {
         const options = { weekday: 'short', day: 'numeric', month: 'short' };
         const dateFormatee = date.toLocaleDateString('fr-CA', options);
         const duree = intervention.duree || 2;
-        const typeIcone = intervention.type === 'individuel' ? '👤' : '👥';
+        const typeIcone = intervention.type === 'individuel' ? '👤' : intervention.type === 'mio' ? '✉️' : '👥';
         const noteIndividuelle = intervention.notesIndividuelles?.[da] || '';
         const niveauRai = intervention.niveauRai || 3;
 
@@ -8534,7 +8534,7 @@ function ouvrirModalConfidentiel(da) {
     chargerNotesPresencesConfidentiel(da);
 
     // Afficher le modal
-    document.getElementById('modalConfidentiel').classList.remove('u-hide');
+    document.getElementById('modalConfidentiel').classList.add('actif');
 }
 
 /**
@@ -8632,7 +8632,7 @@ function sauvegarderNotesPresencesConfidentiel() {
  * Ferme le modal des informations confidentielles
  */
 function fermerModalConfidentiel() {
-    document.getElementById('modalConfidentiel').classList.add('u-hide');
+    document.getElementById('modalConfidentiel').classList.remove('actif');
     _confidentielDaActuel = null;
 }
 

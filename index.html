@@ -3604,8 +3604,7 @@
                 <button data-onglet="boite-outils">Boîte à outils</button>
                 <button data-onglet="planification">Planification</button>
                 <button id="btn-section-aide"
-                       data-onglet="aide"
-                       title="Consulter la documentation">
+                       data-onglet="aide">
                     Aide
                 </button>
                 <button data-onglet="reglages" class="btn-nav-icone" title="Réglages" data-tooltip="entete-reglages">
@@ -4095,11 +4094,6 @@
                         </p>
                     </div>
 
-                    <!-- En-tête de la séance -->
-                    <div id="enteteDateSeance" style="display: none;">
-                        <div id="texteDateSeance"></div>
-                    </div>
-
                     <!-- Contrôles de saisie -->
                     <div class="carte" class="mb-20">
                         <div class="grille-saisie-presences">
@@ -4156,7 +4150,7 @@
                             </div>
 
                             <!-- Compteur présents/absents -->
-                            <div id="compteur-presences" style="background: var(--bleu-tres-pale); padding: 12px 16px; margin-bottom: 15px; display: flex; justify-content: center; gap: 30px; font-size: 0.95rem; font-weight: 500; border-left: 4px solid var(--bleu-principal); color: var(--bleu-moyen);">
+                            <div id="compteur-presences" style="background: var(--bleu-tres-pale); padding: 12px 16px; margin-bottom: 15px; display: flex; align-items: center; gap: 30px; font-size: 0.95rem; font-weight: 500; border-left: 4px solid var(--bleu-principal); color: var(--bleu-moyen);">
                                 <span>
                                     Présents : <span id="nb-presents">0</span>
                                 </span>
@@ -15967,7 +15961,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97.4';
-        const BUILD_ID = '0211-0200';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0211-0706';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
@@ -16801,7 +16795,7 @@
     <!-- MODAL INFORMATIONS CONFIDENTIELLES (Beta 96.1) -->
     <!-- Informations sensibles sur l'étudiant -->
     <!-- ========================================= -->
-    <div id="modalConfidentiel" class="modal-overlay" style="display: none;">
+    <div id="modalConfidentiel" class="modal-overlay">
         <div class="modal-contenu" style="max-width: 750px; padding: 16px;">
             <button onclick="fermerModalConfidentiel()" class="modal-fermer">✕</button>
 

@@ -1003,6 +1003,39 @@ function basculerVerrouillageDate(dateStr) {
 }
 
 /**
+ * Bascule le verrouillage de la date actuellement affichée (appelé par le checkbox HTML)
+ */
+function basculerVerrouillageDateActive() {
+    const dateInput = document.getElementById('date-cours');
+    if (!dateInput || !dateInput.value) return;
+    basculerVerrouillageDate(dateInput.value);
+}
+
+/**
+ * Met à jour l'affichage du contrôle de verrouillage
+ */
+function mettreAJourControleVerrouillage(dateStr, estVerrouille) {
+    const conteneur = document.getElementById('controle-verrouillage-presences');
+    const checkbox = document.getElementById('checkbox-verrouillage-presences');
+    const icone = document.getElementById('icone-verrouillage-presences');
+    const texte = document.getElementById('texte-verrouillage-presences');
+    if (!conteneur) return;
+
+    if (!dateStr) {
+        conteneur.classList.add('u-hide');
+        return;
+    }
+
+    checkbox.checked = estVerrouille;
+    icone.textContent = estVerrouille ? '🔒' : '🔓';
+    texte.textContent = estVerrouille ? 'Verrouillée' : 'Verrouiller';
+
+    conteneur.classList.remove('u-hide');
+}
+
+window.basculerVerrouillageDateActive = basculerVerrouillageDateActive;
+
+/**
  * 🆕 FIX (3 fév 2026) : Sauvegarde les présences sans validation
  * Utilisé lors du verrouillage pour ne pas perdre les données saisies
  */
@@ -1184,11 +1217,13 @@ function initialiserSaisiePresences() {
         afficherMessageCompteurPresences(messageCompteur);
 
         mettreAJourEnteteDateSeance('');
+        mettreAJourControleVerrouillage(null, false);
         return;
     }
 
     mettreAJourEnteteDateSeance(dateInput.value);
     chargerTableauPresences(dateInput.value, validation.verrouille);
+    mettreAJourControleVerrouillage(dateInput.value, validation.verrouille);
     mettreAJourBoutonsNavigation();
 
     // Restaurer la valeur de recherche sauvegardée (persistance lors de la navigation)
@@ -2305,7 +2340,7 @@ function afficherMessageCompteurPresences(message) {
     compteur.style.borderLeftColor = 'var(--jaune-principal, #f0ad4e)';
     compteur.style.background = 'var(--jaune-tres-pale, #fff8e1)';
 
-    // Remplacer le contenu par le message
+    // Remplacer le contenu par le message (sans le contrôle de verrouillage)
     compteur.innerHTML = `
         <span style="color: var(--texte-secondaire); font-style: italic;">
             ${message}
@@ -2328,6 +2363,15 @@ function restaurerCompteurPresences() {
         <span>Absents : <span id="nb-absents">0</span></span>
         <span>Total : <span id="nb-total">0</span></span>
         <span>Assiduité aujourd'hui : <span id="assiduite-aujourdhui">0%</span></span>
+        <span id="controle-verrouillage-presences" class="u-hide" style="margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 0.85rem;">
+            <input type="checkbox" id="checkbox-verrouillage-presences"
+                   style="width: 16px; height: 16px; accent-color: var(--bleu-principal, #1a73e8); cursor: pointer;"
+                   onchange="basculerVerrouillageDateActive()">
+            <label for="checkbox-verrouillage-presences" style="cursor: pointer; user-select: none; white-space: nowrap;">
+                <span id="icone-verrouillage-presences">🔓</span>
+                <span id="texte-verrouillage-presences">Verrouiller</span>
+            </label>
+        </span>
     `;
 }
 

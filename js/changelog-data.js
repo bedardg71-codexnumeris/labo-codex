@@ -11,11 +11,16 @@
     var CHANGELOG = [
         {
             version: 'Beta 97.4',
-            date: '10 février',
+            date: '11 février',
             couleur: 'bleu',
-            titre: 'Onglet Dépistage',
+            titre: 'Corrections et améliorations',
             items: [
                 '<strong>Nouvel onglet Dépistage</strong> : Les paramètres de dépistage (configuration des patterns, seuils de détection, seuils d\u2019interprétation) ont leur propre onglet dans Réglages, séparé des Préférences d\u2019affichage.',
+                '<strong>Notification toast</strong> : La notification de mise à jour s\u2019affiche maintenant en haut à droite (au lieu d\u2019un bandeau pleine largeur en bas).',
+                '<strong>Bouton Confidentiel corrigé</strong> : Le modal s\u2019ouvre correctement depuis la page Accompagnement du profil étudiant.',
+                '<strong>Nouveau type d\u2019intervention MIO</strong> : «\u00a0Message écrit (MIO) à un groupe ciblé\u00a0» disponible dans les interventions. N\u2019affecte pas les présences.',
+                '<strong>Verrouillage des présences</strong> : Le contrôle de verrouillage est de retour, intégré dans la barre de statistiques (Présents/Absents/Total).',
+                '<strong>Double tooltip corrigé</strong> : Le bouton Aide n\u2019affiche plus deux tooltips superposés.',
             ]
         },
         {
