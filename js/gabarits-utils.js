@@ -241,9 +241,9 @@
             html += `
                 <div class="gabarit-item" style="
                     padding: 12px;
-                    background: linear-gradient(135deg, #f8f4ff 0%, #fff 100%);
-                    border: 1px solid #d8ceff;
-                    border-left: 4px solid #6f42c1;
+                    background: linear-gradient(135deg, rgba(139,92,246,0.08) 0%, #142428 100%);
+                    border: 1px solid rgba(139,92,246,0.2);
+                    border-left: 4px solid #8b5cf6;
                     border-radius: 6px;
                     margin-bottom: 10px;
                     cursor: pointer;
@@ -259,7 +259,7 @@
                             </div>
                             ${description ? `<div style="font-size: 0.85rem; color: var(--gris-moyen);">${description}</div>` : ''}
                         </div>
-                        <div style="color: #6f42c1; font-size: 1.2rem; margin-left: 10px;">
+                        <div style="color: #8b5cf6; font-size: 1.2rem; margin-left: 10px;">
                             →
                         </div>
                     </div>
@@ -279,7 +279,7 @@
         return `
             <hr style="
                 border: none;
-                border-top: 1px dashed #ccc;
+                border-top: 1px dashed rgba(106,172,184,0.2);
                 margin: 20px 0;
             ">
         `;
