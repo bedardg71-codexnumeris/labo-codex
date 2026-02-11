@@ -11,7 +11,7 @@
 // --- Configuration ---
 const DELAI_AFFICHAGE = 400;    // ms avant apparition
 const DELAI_DISPARITION = 200;  // ms avant disparition
-const MARGE = 8;                // px entre la bulle et l'element
+const MARGE = 4;                // px entre la bulle et l'element
 const LARGEUR_MAX = 320;        // px largeur max de la bulle
 
 // --- Etat ---
@@ -46,8 +46,9 @@ function obtenirBulle() {
 }
 
 /**
- * Calcule la position optimale de la bulle
- * Essaie : bas, haut, droite, gauche (dans cet ordre)
+ * Calcule la position optimale de la bulle.
+ * Priorite laterale : droite -> gauche -> bas -> haut.
+ * Le placement lateral evite de masquer l'interface sous/sur la cible.
  * @param {HTMLElement} cible
  * @param {HTMLElement} bulle
  */
@@ -58,34 +59,34 @@ function positionnerBulle(cible, bulle) {
     const vh = window.innerHeight;
 
     let top, left;
-    let position = 'bas'; // position de la bulle par rapport a la cible
+    let position = 'droite';
 
-    // Essayer en bas
-    top = rect.bottom + MARGE;
-    left = rect.left + (rect.width / 2) - (bulleRect.width / 2);
+    // --- 1. Essayer A DROITE ---
+    left = rect.right + MARGE;
+    top = rect.top + (rect.height / 2) - (bulleRect.height / 2);
 
-    if (top + bulleRect.height > vh) {
-        // Pas assez de place en bas -> essayer en haut
-        top = rect.top - bulleRect.height - MARGE;
-        position = 'haut';
-    }
+    if (left + bulleRect.width > vw) {
+        // --- 2. Essayer A GAUCHE ---
+        left = rect.left - bulleRect.width - MARGE;
+        position = 'gauche';
 
-    if (top < 0) {
-        // Pas assez de place en haut non plus -> a droite
-        top = rect.top + (rect.height / 2) - (bulleRect.height / 2);
-        left = rect.right + MARGE;
-        position = 'droite';
+        if (left < 0) {
+            // --- 3. Essayer EN BAS ---
+            left = rect.left + (rect.width / 2) - (bulleRect.width / 2);
+            top = rect.bottom + MARGE;
+            position = 'bas';
 
-        if (left + bulleRect.width > vw) {
-            // Pas de place a droite -> a gauche
-            left = rect.left - bulleRect.width - MARGE;
-            position = 'gauche';
+            if (top + bulleRect.height > vh) {
+                // --- 4. Essayer EN HAUT ---
+                top = rect.top - bulleRect.height - MARGE;
+                position = 'haut';
+            }
         }
     }
 
-    // Contraindre horizontalement dans le viewport
+    // Contraindre dans le viewport
     left = Math.max(MARGE, Math.min(left, vw - bulleRect.width - MARGE));
-    top = Math.max(MARGE, top);
+    top = Math.max(MARGE, Math.min(top, vh - bulleRect.height - MARGE));
 
     bulle.style.top = `${top + window.scrollY}px`;
     bulle.style.left = `${left + window.scrollX}px`;
@@ -106,6 +107,12 @@ function afficher(cible) {
 
     contenu.textContent = texte;
     bulle.style.maxWidth = `${LARGEUR_MAX}px`;
+
+    // Surbrillance de la cible
+    if (cibleActive && cibleActive !== cible) {
+        cibleActive.classList.remove('tooltip-cible-active');
+    }
+    cible.classList.add('tooltip-cible-active');
 
     // Rendre visible pour calculer les dimensions (mais pas encore anime)
     bulle.classList.add('tooltip-mesure');
@@ -129,6 +136,9 @@ function masquer() {
     if (bulleActive) {
         bulleActive.classList.remove('tooltip-visible');
         bulleActive = null;
+    }
+    if (cibleActive) {
+        cibleActive.classList.remove('tooltip-cible-active');
         cibleActive = null;
     }
 }
@@ -154,6 +164,20 @@ document.addEventListener('mouseleave', function(e) {
 // Masquer si scroll ou redimensionnement
 window.addEventListener('scroll', masquer, { passive: true });
 window.addEventListener('resize', masquer);
+
+// Masquage instantane au clic
+document.addEventListener('click', function() {
+    clearTimeout(timerAffichage);
+    masquer();
+}, true);
+
+// Masquage au clavier (Escape)
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        clearTimeout(timerAffichage);
+        masquer();
+    }
+});
 
 // Export
 window.tooltips = { afficher, masquer };

@@ -11264,14 +11264,14 @@
 
                     <!-- Carte : Outils à exploiter -->
                     <div class="carte">
-                        <h3 class="carte-titre-bleu">Outils à exploiter</h3>
+                        <h3 class="carte-titre-bleu" data-tooltip="pref-outils">Outils à exploiter</h3>
                         <p class="text-muted" style="margin-bottom: 15px; font-size: 0.9rem;">
                             Activez ou désactivez les fonctionnalités selon tes besoins. Les outils désactivés seront masqués.
                         </p>
 
                         <!-- Micro données ACP -->
                         <div class="form-group" style="margin-bottom: 15px; padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
-                            <label style="cursor: pointer; display: flex; align-items: center;">
+                            <label style="cursor: pointer; display: flex; align-items: center;" data-tooltip="pref-outils-acp">
                                 <input type="checkbox" id="v2-pref-depistage-acp" checked onchange="sauvegarderPreferencesV2()">
                                 <strong style="margin-left: 8px;">Micro données ACP</strong>
                             </label>
@@ -11282,7 +11282,7 @@
 
                         <!-- Système RàI -->
                         <div class="form-group" style="margin-bottom: 15px; padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
-                            <label style="cursor: pointer; display: flex; align-items: center;">
+                            <label style="cursor: pointer; display: flex; align-items: center;" data-tooltip="pref-outils-rai">
                                 <input type="checkbox" id="v2-pref-rai" checked onchange="sauvegarderPreferencesV2()">
                                 <strong style="margin-left: 8px;">Système RàI (Réponse à l'Intervention)</strong>
                             </label>
@@ -11294,14 +11294,14 @@
 
                     <!-- Carte : Affichage des ressources -->
                     <div class="carte">
-                        <h3 class="carte-titre-bleu">Affichage des ressources</h3>
+                        <h3 class="carte-titre-bleu" data-tooltip="pref-affichage">Affichage des ressources</h3>
                         <p class="text-muted" style="margin-bottom: 15px; font-size: 0.9rem;">
                             Choisissez ce que tu veux voir dans l'interface.
                         </p>
 
                         <!-- Analyse SOLO -->
                         <div class="form-group u-mb-15">
-                            <label style="cursor: pointer; display: flex; align-items: center;">
+                            <label style="cursor: pointer; display: flex; align-items: center;" data-tooltip="pref-affichage-solo">
                                 <input type="checkbox" id="v2-pref-solo" checked onchange="sauvegarderPreferencesV2()">
                                 <strong style="margin-left: 8px;">Observation de la structure des résultats (SOLO)</strong>
                             </label>
@@ -11312,7 +11312,7 @@
 
                         <!-- Snapshots -->
                         <div class="form-group u-mb-15">
-                            <label style="cursor: pointer; display: flex; align-items: center;">
+                            <label style="cursor: pointer; display: flex; align-items: center;" data-tooltip="pref-affichage-snapshots">
                                 <input type="checkbox" id="v2-pref-snapshots" checked onchange="sauvegarderPreferencesV2()">
                                 <strong style="margin-left: 8px;">Snapshots (captures de progression)</strong>
                             </label>
@@ -11323,7 +11323,7 @@
 
                         <!-- Graphiques -->
                         <div class="form-group u-mb-15">
-                            <label style="cursor: pointer; display: flex; align-items: center;">
+                            <label style="cursor: pointer; display: flex; align-items: center;" data-tooltip="pref-affichage-graphiques">
                                 <input type="checkbox" id="v2-pref-graphiques" checked onchange="sauvegarderPreferencesV2()">
                                 <strong style="margin-left: 8px;">Graphiques d'évolution</strong>
                             </label>
@@ -11334,7 +11334,7 @@
 
                         <!-- Détails techniques -->
                         <div class="form-group u-mb-15">
-                            <label style="cursor: pointer; display: flex; align-items: center;">
+                            <label style="cursor: pointer; display: flex; align-items: center;" data-tooltip="pref-affichage-details">
                                 <input type="checkbox" id="v2-pref-details-techniques" onchange="sauvegarderPreferencesV2()">
                                 <strong style="margin-left: 8px;">Détails techniques</strong>
                             </label>
@@ -11345,7 +11345,7 @@
 
                         <!-- 🆕 BETA 95.1 : Unité d'affichage de l'assiduité -->
                         <div class="groupe-form u-mb-15">
-                            <label for="v2-pref-unite-affichage" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                            <label for="v2-pref-unite-affichage" style="font-weight: 600; display: block; margin-bottom: 6px;" data-tooltip="pref-affichage-assiduite">
                                 Unité d'affichage de l'assiduité
                             </label>
                             <select id="v2-pref-unite-affichage" class="controle-form" onchange="sauvegarderPreferencesV2()" style="max-width: 250px;">
@@ -11360,7 +11360,7 @@
 
                         <!-- Mode comparatif (expérimental) -->
                         <div class="form-group" style="padding: 12px; background: var(--alerte-fond-attention); border-radius: 6px;">
-                            <label style="cursor: pointer; display: flex; align-items: center;">
+                            <label style="cursor: pointer; display: flex; align-items: center;" data-tooltip="pref-affichage-comparatif">
                                 <input type="checkbox" id="v2-pref-comparatif" onchange="sauvegarderPreferencesV2()">
                                 <strong style="margin-left: 8px;">Mode comparatif SOM/PAN (expérimental)</strong>
                             </label>
@@ -11372,7 +11372,7 @@
 
                     <!-- Carte : Expérience visuelle -->
                     <div class="carte">
-                        <h3 class="carte-titre-bleu">Expérience visuelle</h3>
+                        <h3 class="carte-titre-bleu" data-tooltip="pref-visuel">Expérience visuelle</h3>
                         <p class="text-muted" style="margin-bottom: 15px; font-size: 0.9rem;">
                             Options d'animation et d'effets visuels.
                         </p>
@@ -11393,7 +11393,7 @@
                     <div class="carte">
                         <h3 class="carte-titre-bleu">Navigation</h3>
                         <div class="form-group" style="padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
-                            <label style="cursor: pointer; display: flex; align-items: center;">
+                            <label style="cursor: pointer; display: flex; align-items: center;" data-tooltip="pref-navigation">
                                 <input type="checkbox" id="checkbox-mode-expert" onchange="definirModeExpert(this.checked)">
                                 <strong style="margin-left: 8px;">Ouvrir directement sur le tableau de bord</strong>
                             </label>
@@ -11428,7 +11428,7 @@
 
                         <!-- Détection des patterns -->
                         <div class="form-group u-mb-20">
-                            <label style="cursor: pointer; display: flex; align-items: center;">
+                            <label style="cursor: pointer; display: flex; align-items: center;" data-tooltip="depist-activer-patterns">
                                 <input type="checkbox" id="v2-pref-patterns" checked onchange="sauvegarderPreferencesV2()">
                                 <span style="margin-left: 8px; font-weight: 600;">Activer la détection des patterns</span>
                             </label>
@@ -11439,7 +11439,7 @@
 
                         <!-- Grille de référence -->
                         <div class="groupe-form u-mb-15">
-                            <label for="v2-pref-grille-reference" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                            <label for="v2-pref-grille-reference" style="font-weight: 600; display: block; margin-bottom: 6px;" data-tooltip="depist-grille">
                                 Grille de critères pour le dépistage
                             </label>
                             <select id="v2-pref-grille-reference" class="controle-form" onchange="sauvegarderPreferencesV2()">
@@ -11453,7 +11453,7 @@
 
                         <!-- Option : Découpler Performance et Risque -->
                         <div class="groupe-form u-mt-15">
-                            <label style="cursor: pointer; display: flex; align-items: center;">
+                            <label style="cursor: pointer; display: flex; align-items: center;" data-tooltip="depist-decoupler-pr">
                                 <input type="checkbox" id="v2-pref-decoupler-pr" onchange="sauvegarderPreferencesV2()">
                                 <strong style="margin-left: 8px;">Découpler Performance (P) et Risque (R)</strong>
                             </label>
@@ -11466,7 +11466,7 @@
 
                         <!-- Fenêtre d'analyse des patterns -->
                         <div class="groupe-form u-mt-15">
-                            <label for="v2-pref-fenetre-patterns" style="font-weight: 600; display: block; margin-bottom: 8px;">
+                            <label for="v2-pref-fenetre-patterns" style="font-weight: 600; display: block; margin-bottom: 8px;" data-tooltip="depist-fenetre">
                                 Fenêtre d'analyse des patterns
                             </label>
                             <div style="display: flex; align-items: center; gap: 10px;">
@@ -11483,7 +11483,7 @@
 
                         <!-- Seuil progression -->
                         <div style="margin-bottom: 15px; padding: 12px; background: #f5f5f5; border-radius: 6px;">
-                            <label for="v2-seuil-progression" style="font-weight: 600; display: block; margin-bottom: 8px;">
+                            <label for="v2-seuil-progression" style="font-weight: 600; display: block; margin-bottom: 8px;" data-tooltip="depist-seuil-progression">
                                 Progression des artefacts
                                 <span id="v2-valeur-progression" style="margin-left: 10px; color: var(--bleu-principal);">10 points (%)</span>
                             </label>
@@ -11503,7 +11503,7 @@
 
                         <!-- Direction du risque -->
                         <div style="margin-bottom: 15px; padding: 12px; background: #f5f5f5; border-radius: 6px;">
-                            <label for="v2-seuil-risque" style="font-weight: 600; display: block; margin-bottom: 8px;">
+                            <label for="v2-seuil-risque" style="font-weight: 600; display: block; margin-bottom: 8px;" data-tooltip="depist-seuil-direction">
                                 Direction du risque
                                 <span id="v2-valeur-risque" style="margin-left: 10px; color: var(--bleu-principal);">5 points (%)</span>
                             </label>
@@ -11523,7 +11523,7 @@
 
                         <!-- Défi spécifique -->
                         <div style="margin-bottom: 15px; padding: 12px; background: #f5f5f5; border-radius: 6px;">
-                            <label for="v2-seuil-defi" style="font-weight: 600; display: block; margin-bottom: 8px;">
+                            <label for="v2-seuil-defi" style="font-weight: 600; display: block; margin-bottom: 8px;" data-tooltip="depist-seuil-defi">
                                 Seuil de défi spécifique
                                 <span id="v2-valeur-defi" style="margin-left: 10px; color: var(--bleu-principal);">70%</span>
                             </label>
@@ -11542,14 +11542,14 @@
                         </div>
 
                         <!-- Bouton restaurer seuils de détection -->
-                        <button class="btn btn-secondaire" onclick="restaurerSeuilsDetectionDefautV2()" style="margin-top: 10px;">
+                        <button class="btn btn-secondaire" onclick="restaurerSeuilsDetectionDefautV2()" style="margin-top: 10px;" data-tooltip="depist-restaurer">
                             Restaurer les valeurs par défaut
                         </button>
                     </div>
 
                     <!-- Accordéon : Seuils d'interprétation -->
                     <div class="carte accordeon" id="v2-accordeon-seuils">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();" data-tooltip="depist-seuils-interpretation">
                             <h3 style="margin: 0; font-size: 1rem; text-decoration: none;">Seuils d'interprétation</h3>
                             <span class="accordeon-chevron">▼</span>
                         </div>
@@ -11560,7 +11560,7 @@
 
                             <!-- Indicateurs visuels des seuils -->
                             <div class="form-group u-mb-20">
-                                <label style="cursor: pointer; display: flex; align-items: center;">
+                                <label style="cursor: pointer; display: flex; align-items: center;" data-tooltip="depist-seuils-visuels">
                                     <input type="checkbox" id="v2-pref-seuils-visuels" checked onchange="sauvegarderPreferencesV2()">
                                     <span style="margin-left: 8px; font-weight: 600;">Indicateurs visuels des seuils</span>
                                 </label>
@@ -11573,7 +11573,7 @@
                             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
                                 <!-- Seuil Fragile -->
                                 <div class="groupe-form" style="padding: 12px; background: #ffebee; border-radius: 6px; border-left: 4px solid #f44336;">
-                                    <label for="v2-seuil-fragile" style="font-weight: 600; display: block; margin-bottom: 8px; color: #c62828;">
+                                    <label for="v2-seuil-fragile" style="font-weight: 600; display: block; margin-bottom: 8px; color: #c62828;" data-tooltip="depist-seuil-fragile">
                                         Fragile si inférieur à
                                     </label>
                                     <div style="display: flex; align-items: center; gap: 8px;">
@@ -11584,7 +11584,7 @@
 
                                 <!-- Seuil Acceptable -->
                                 <div class="groupe-form" style="padding: 12px; background: #fff8e1; border-radius: 6px; border-left: 4px solid #ffc107;">
-                                    <label for="v2-seuil-acceptable" style="font-weight: 600; display: block; margin-bottom: 8px; color: #f57f17;">
+                                    <label for="v2-seuil-acceptable" style="font-weight: 600; display: block; margin-bottom: 8px; color: #f57f17;" data-tooltip="depist-seuil-acceptable">
                                         Acceptable si inférieur à
                                     </label>
                                     <div style="display: flex; align-items: center; gap: 8px;">
@@ -11595,7 +11595,7 @@
 
                                 <!-- Seuil Bon -->
                                 <div class="groupe-form" style="padding: 12px; background: #e8f5e9; border-radius: 6px; border-left: 4px solid #4caf50;">
-                                    <label for="v2-seuil-bon" style="font-weight: 600; display: block; margin-bottom: 8px; color: var(--vert-succes);">
+                                    <label for="v2-seuil-bon" style="font-weight: 600; display: block; margin-bottom: 8px; color: var(--vert-succes);" data-tooltip="depist-seuil-bon">
                                         Bon si supérieur ou égal à
                                     </label>
                                     <div style="display: flex; align-items: center; gap: 8px;">
@@ -11606,7 +11606,7 @@
                             </div>
 
                             <!-- Bouton restaurer seuils d'interprétation -->
-                            <button class="btn btn-secondaire u-mt-15" onclick="restaurerSeuilsInterpretationDefautV2()">
+                            <button class="btn btn-secondaire u-mt-15" onclick="restaurerSeuilsInterpretationDefautV2()" data-tooltip="depist-seuils-restaurer">
                                 Restaurer les valeurs par défaut
                             </button>
                         </div>
@@ -11631,7 +11631,7 @@
                          CARTE 1 : SAUVEGARDE ET RESTAURATION
                          ======================================== -->
                     <div class="carte">
-                        <h3 class="carte-titre-bleu">Sauvegarde et restauration</h3>
+                        <h3 class="carte-titre-bleu" data-tooltip="donnees-sauvegarde">Sauvegarde et restauration</h3>
                         <p class="text-muted u-mb-20">
                             Exporte tes données pour les sauvegarder ou les partager, ou importe un fichier existant.
                         </p>
@@ -11639,7 +11639,7 @@
                         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
                             <!-- Export sauvegarde -->
                             <div class="carte-bleu-pale-p15">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">
+                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px;" data-tooltip="donnees-export-complet">
                                     Sauvegarde complète
                                 </h4>
                                 <p style="font-size: 0.9rem; margin-bottom: 15px; color: var(--gris-moyen);">
@@ -11653,7 +11653,7 @@
 
                             <!-- Export config pédagogique -->
                             <div class="carte-bleu-pale-p15">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">
+                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px;" data-tooltip="donnees-export-config">
                                     Configuration pédagogique
                                 </h4>
                                 <p style="font-size: 0.9rem; margin-bottom: 15px; color: var(--gris-moyen);">
@@ -11667,7 +11667,7 @@
 
                             <!-- Importer -->
                             <div class="carte-bleu-pale-p15">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">
+                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px;" data-tooltip="donnees-import">
                                     Importer un fichier
                                 </h4>
                                 <p style="font-size: 0.9rem; margin-bottom: 15px; color: var(--gris-moyen);">
@@ -11685,14 +11685,14 @@
                          CARTE 2 : CAPTURES ET RECHERCHE (Accordéon)
                          ======================================== -->
                     <div class="carte accordeon ferme" id="accordeon-captures-recherche">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();" data-tooltip="donnees-captures">
                             <h3 class="carte-titre-bleu" style="margin: 0;">Captures et recherche</h3>
                             <span class="accordeon-chevron">▼</span>
                         </div>
                         <div class="accordeon-contenu">
                             <!-- Sous-section: Snapshots -->
                             <div style="margin-top: 15px; padding: 15px; background: var(--bleu-tres-pale); border-radius: var(--radius-grand);">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">Captures de progression (Snapshots)</h4>
+                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px;" data-tooltip="donnees-snapshots">Captures de progression (Snapshots)</h4>
                                 <p class="text-muted u-mb-15">
                                     Les captures enregistrent l'état des indices A-C-P-E à des moments clés pour le suivi longitudinal.
                                 </p>
@@ -11722,7 +11722,7 @@
                                 <!-- Actions -->
                                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
                                     <div>
-                                        <button class="btn btn-secondaire" onclick="capturerSnapshotManuel()" style="width: 100%;">
+                                        <button class="btn btn-secondaire" onclick="capturerSnapshotManuel()" style="width: 100%;" data-tooltip="donnees-capturer">
                                             Capturer maintenant
                                         </button>
                                         <p class="text-muted" style="font-size: 0.8rem; margin-top: 5px; text-align: center;">
@@ -11730,7 +11730,7 @@
                                         </p>
                                     </div>
                                     <div>
-                                        <button class="btn btn-secondaire" onclick="lancerReconstructionRetroactive()" style="width: 100%;">
+                                        <button class="btn btn-secondaire" onclick="lancerReconstructionRetroactive()" style="width: 100%;" data-tooltip="donnees-reconstruire">
                                             Reconstruire l'historique
                                         </button>
                                         <p class="text-muted" style="font-size: 0.8rem; margin-top: 5px; text-align: center;">
@@ -11738,7 +11738,7 @@
                                         </p>
                                     </div>
                                     <div>
-                                        <button class="btn btn-secondaire" onclick="confirmerNettoyageSnapshots()" style="width: 100%; border-color: #ff6f00; color: #ff6f00;">
+                                        <button class="btn btn-secondaire" onclick="confirmerNettoyageSnapshots()" style="width: 100%; border-color: #ff6f00; color: #ff6f00;" data-tooltip="donnees-supprimer-captures">
                                             Supprimer les captures
                                         </button>
                                         <p class="text-muted" style="font-size: 0.8rem; margin-top: 5px; text-align: center;">
@@ -11750,7 +11750,7 @@
 
                             <!-- Sous-section: Export recherche -->
                             <div style="margin-top: 20px; padding: 15px; background: var(--bleu-tres-pale); border-radius: var(--radius-grand);">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">Export anonymisé pour la recherche</h4>
+                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px;" data-tooltip="donnees-export-recherche">Export anonymisé pour la recherche</h4>
                                 <p class="text-muted u-mb-15">
                                     Génère un export anonymisé des données d'apprentissage pour la recherche en éducation.
                                 </p>
@@ -11771,14 +11771,14 @@
                          CARTE 4 : MAINTENANCE (Zone danger)
                          ======================================== -->
                     <div class="carte accordeon ferme" id="accordeon-maintenance">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();" style="background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();" style="background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);" data-tooltip="donnees-maintenance">
                             <h3 style="margin: 0; color: #c62828;">Maintenance</h3>
                             <span class="accordeon-chevron" style="color: #c62828;">▼</span>
                         </div>
                         <div class="accordeon-contenu">
                             <!-- Réinitialisation -->
                             <div style="padding: 15px; background: #fff3e0; border-radius: var(--radius-grand); margin-top: 15px;">
-                                <h4 style="color: #e65100; margin-bottom: 10px;">Réinitialisation complète</h4>
+                                <h4 style="color: #e65100; margin-bottom: 10px;" data-tooltip="donnees-reinitialiser">Réinitialisation complète</h4>
                                 <p class="u-mb-15">
                                     Efface <strong>toutes</strong> les données et revient à l'état initial.
                                     <strong>Cette action est irréversible.</strong>
@@ -11793,7 +11793,7 @@
 
                             <!-- Informations techniques -->
                             <div style="margin-top: 20px; padding: 15px; background: var(--bleu-tres-pale); border-radius: var(--radius-grand);">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">Informations techniques</h4>
+                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px;" data-tooltip="donnees-info-techniques">Informations techniques</h4>
                                 <ul style="margin: 0 0 0 20px; line-height: 1.8;">
                                     <li><strong>Stockage :</strong> Local dans le navigateur (IndexedDB + localStorage)</li>
                                     <li><strong>Format :</strong> Fichiers JSON lisibles</li>
@@ -11805,7 +11805,7 @@
 
                             <!-- Gestion avancée des ressources -->
                             <div id="section-gestion-ressources" class="u-mt-20">
-                                <h4 style="margin-bottom: 10px;">Gestion avancée des ressources</h4>
+                                <h4 style="margin-bottom: 10px;" data-tooltip="donnees-gestion-ressources">Gestion avancée des ressources</h4>
                                 <p class="text-muted u-mb-15">
                                     Outil de développement pour auditer et nettoyer les ressources pédagogiques accumulées.
                                 </p>
@@ -15999,7 +15999,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97.4';
-        const BUILD_ID = '0211-0825';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0211-0924';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';

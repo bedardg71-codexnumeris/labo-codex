@@ -144,7 +144,157 @@ const TOOLTIPS = {
     // =================================================================
 
     'reglages-bibliotheque':
-        'Biblioth\u00e8que d\u2019entit\u00e9s r\u00e9utilisables. S\u00e9lectionne une entit\u00e9 existante ou cr\u00e9es-en une nouvelle. Permet de r\u00e9utiliser des configurations d\u2019un trimestre \u00e0 l\u2019autre.'
+        'Biblioth\u00e8que d\u2019entit\u00e9s r\u00e9utilisables. S\u00e9lectionne une entit\u00e9 existante ou cr\u00e9es-en une nouvelle. Permet de r\u00e9utiliser des configurations d\u2019un trimestre \u00e0 l\u2019autre.',
+
+    // =================================================================
+    // REGLAGES — Preferences
+    // =================================================================
+
+    'pref-outils':
+        'Activer ou d\u00e9sactiver les fonctionnalit\u00e9s avanc\u00e9es (indices ACP, syst\u00e8me R\u00e0I). Les outils d\u00e9sactiv\u00e9s sont masqu\u00e9s de l\u2019interface.',
+
+    'pref-outils-acp':
+        'Indices pr\u00e9dictifs Assiduit\u00e9, Compl\u00e9tion, Performance. Calcul\u00e9s sur une fen\u00eatre glissante, ils alimentent le tableau de bord et la d\u00e9tection pr\u00e9coce des difficult\u00e9s.',
+
+    'pref-outils-rai':
+        'Niveaux d\u2019intervention et recommandations personnalis\u00e9es. Structure le soutien aux \u00e9tudiants en trois niveaux d\u2019intensit\u00e9 (universel, cibl\u00e9, intensif).',
+
+    'pref-affichage':
+        'Choisir les ressources visibles dans l\u2019interface : cartes SOLO, snapshots, graphiques, d\u00e9tails techniques, mode comparatif. Adapte la densit\u00e9 d\u2019information affich\u00e9e.',
+
+    'pref-affichage-solo':
+        'Affiche une carte avec les descriptions d\u00e9taill\u00e9es bas\u00e9es sur la taxonomie SOLO. Utile pour interpr\u00e9ter le niveau cognitif des apprentissages.',
+
+    'pref-affichage-snapshots':
+        'Historique hebdomadaire des indices A-C-P. Permet de suivre l\u2019\u00e9volution dans le temps.',
+
+    'pref-affichage-graphiques':
+        'Visualisation de la progression dans le temps via Chart.js.',
+
+    'pref-affichage-details':
+        'Affiche les formules de calcul et les donn\u00e9es brutes. Destin\u00e9 aux utilisateurs souhaitant v\u00e9rifier les calculs sous-jacents.',
+
+    'pref-affichage-assiduite':
+        'Choisir comment afficher les totaux de pr\u00e9sence et d\u2019assiduit\u00e9 (ex. : en p\u00e9riodes).',
+
+    'pref-affichage-comparatif':
+        'Mode exp\u00e9rimental. Affiche les deux pratiques de notation (SOM et PAN) c\u00f4te \u00e0 c\u00f4te pour comparer les approches.',
+
+    'pref-visuel':
+        'Effets visuels de l\u2019interface. L\u2019animation des points du tableau de bord peut \u00eatre d\u00e9sactiv\u00e9e pour r\u00e9duire les distractions.',
+
+    'pref-navigation':
+        'Court-circuiter la page d\u2019accueil pour ouvrir directement sur le tableau de bord au d\u00e9marrage.',
+
+    // =================================================================
+    // REGLAGES — Depistage
+    // =================================================================
+
+    'depist-sous-nav':
+        'Configuration de la d\u00e9tection des patterns et de l\u2019identification des forces et d\u00e9fis. Influence la sensibilit\u00e9 des alertes du tableau de bord.',
+
+    // --- Configuration du depistage ---
+
+    'depist-activer-patterns':
+        'Activer ou d\u00e9sactiver l\u2019identification des tendances r\u00e9currentes (progression, stagnation, r\u00e9gression) dans les r\u00e9sultats.',
+
+    'depist-grille':
+        'Grille utilis\u00e9e pour identifier les forces et d\u00e9fis. Doit \u00eatre la m\u00eame pour tous les artefacts du trimestre.',
+
+    'depist-decoupler-pr':
+        'S\u00e9parer le calcul de la note (P, selon la pratique) du calcul de risque (R, bas\u00e9 sur les N derni\u00e8res productions). Recommand\u00e9 avec \u00ab N meilleurs \u00bb.',
+
+    'depist-fenetre':
+        'Nombre de derni\u00e8res productions analys\u00e9es pour d\u00e9tecter les tendances. Valeur basse = d\u00e9tection pr\u00e9coce. Valeur \u00e9lev\u00e9e = d\u00e9tection plus fiable.',
+
+    // --- Seuils de detection avances ---
+
+    'depist-seuil-progression':
+        'Diff\u00e9rence minimale (%) pour signaler une progression ou r\u00e9gression entre deux artefacts. Bas = sensible, \u00e9lev\u00e9 = moins sensible.',
+
+    'depist-seuil-direction':
+        'Variation minimale (%) pour afficher une tendance du risque. Contr\u00f4le la sensibilit\u00e9 de l\u2019indicateur directionnel.',
+
+    'depist-seuil-defi':
+        'Score (%) sous lequel un crit\u00e8re est identifi\u00e9 comme un d\u00e9fi n\u00e9cessitant attention. Bas = plus exigeant, \u00e9lev\u00e9 = moins exigeant.',
+
+    'depist-restaurer':
+        'R\u00e9initialiser tous les seuils de d\u00e9tection \u00e0 leurs valeurs par d\u00e9faut.',
+
+    // --- Seuils d'interpretation ---
+
+    'depist-seuils-interpretation':
+        'Seuils de couleur pour les indices A-C-P. Fragile (rouge), Acceptable (jaune), Bon (vert). D\u00e9termine les alertes du tableau de bord.',
+
+    'depist-seuils-visuels':
+        'Activer ou d\u00e9sactiver l\u2019affichage des couleurs Fragile / Acceptable / Bon dans les tableaux et indicateurs.',
+
+    'depist-seuil-fragile':
+        'Indice sous lequel la situation est consid\u00e9r\u00e9e pr\u00e9occupante (rouge). N\u00e9cessite une intervention.',
+
+    'depist-seuil-acceptable':
+        'Indice sous lequel la situation est en zone de vigilance (jaune). \u00c0 surveiller.',
+
+    'depist-seuil-bon':
+        'Indice au-dessus duquel la situation est satisfaisante (vert).',
+
+    'depist-seuils-restaurer':
+        'R\u00e9initialiser les seuils d\u2019interpr\u00e9tation \u00e0 leurs valeurs par d\u00e9faut (70/80/85%).',
+
+    // =================================================================
+    // REGLAGES — Donnees
+    // =================================================================
+
+    'donnees-sous-nav':
+        'Sauvegarde, restauration, captures de progression et maintenance de l\u2019application.',
+
+    // --- Sauvegarde et restauration ---
+
+    'donnees-sauvegarde':
+        'Exporter tes donn\u00e9es (sauvegarde compl\u00e8te ou configuration p\u00e9dagogique seule) ou importer un fichier existant.',
+
+    'donnees-export-complet':
+        'Toutes les donn\u00e9es : cours, \u00e9tudiants, pr\u00e9sences, \u00e9valuations. Pour restaurer sur cet appareil ou un autre.',
+
+    'donnees-export-config':
+        'Uniquement les outils (grilles, \u00e9chelles, productions, cartouches). Pour partager avec des coll\u00e8gues (CC BY-NC-SA).',
+
+    'donnees-import':
+        'Charger une sauvegarde personnelle ou la configuration d\u2019un coll\u00e8gue. Le type sera d\u00e9tect\u00e9 automatiquement.',
+
+    // --- Captures et recherche ---
+
+    'donnees-captures':
+        'Snapshots de suivi longitudinal et export anonymis\u00e9 pour la recherche en \u00e9ducation.',
+
+    'donnees-snapshots':
+        'Enregistre l\u2019\u00e9tat des indices A-C-P-E \u00e0 des moments cl\u00e9s pour le suivi longitudinal.',
+
+    'donnees-capturer':
+        'Capture manuelle imm\u00e9diate de l\u2019\u00e9tat actuel des indices.',
+
+    'donnees-reconstruire':
+        'Recalcule l\u2019historique des captures depuis le d\u00e9but. Utile apr\u00e8s un changement de param\u00e8tres.',
+
+    'donnees-supprimer-captures':
+        'Efface toutes les captures enregistr\u00e9es. Action irr\u00e9versible.',
+
+    'donnees-export-recherche':
+        'Export anonymis\u00e9 des indices A-C-P-E et statistiques agr\u00e9g\u00e9es pour la recherche. Aucune donn\u00e9e nominative incluse.',
+
+    // --- Maintenance ---
+
+    'donnees-maintenance':
+        'Outils techniques : r\u00e9initialisation, informations de stockage et gestion avanc\u00e9e des ressources.',
+
+    'donnees-reinitialiser':
+        'Efface toutes les donn\u00e9es et revient \u00e0 l\u2019\u00e9tat initial. Triple confirmation + mot de passe requis. Irr\u00e9versible.',
+
+    'donnees-info-techniques':
+        'Stockage local (IndexedDB + localStorage), JSON lisible, aucune donn\u00e9e envoy\u00e9e sur internet.',
+
+    'donnees-gestion-ressources':
+        'Auditer et nettoyer les ressources p\u00e9dagogiques accumul\u00e9es. S\u00e9lectionner un type pour afficher la liste.'
 };
 
 // Export global
