@@ -1031,6 +1031,14 @@ function mettreAJourControleVerrouillage(dateStr, estVerrouille) {
     texte.textContent = estVerrouille ? 'Verrouillée' : 'Verrouiller';
 
     conteneur.classList.remove('u-hide');
+
+    // Refléter l'état de verrouillage sur la bordure du compteur
+    const compteur = document.getElementById('compteur-presences');
+    if (compteur) {
+        compteur.style.borderLeftColor = estVerrouille
+            ? 'var(--texte-muted, #5a7a88)'
+            : 'var(--accent-primaire)';
+    }
 }
 
 window.basculerVerrouillageDateActive = basculerVerrouillageDateActive;
@@ -1221,8 +1229,8 @@ function initialiserSaisiePresences() {
         return;
     }
 
-    mettreAJourEnteteDateSeance(dateInput.value);
     chargerTableauPresences(dateInput.value, validation.verrouille);
+    mettreAJourEnteteDateSeance(dateInput.value);
     mettreAJourControleVerrouillage(dateInput.value, validation.verrouille);
     mettreAJourBoutonsNavigation();
 
@@ -1242,70 +1250,45 @@ function initialiserSaisiePresences() {
 // et exportée globalement via window.obtenirRangSeanceDansSemaine
 
 function mettreAJourEnteteDateSeance(dateStr) {
-    const entete = document.getElementById('enteteDateSeance');
-    const texte = document.getElementById('texteDateSeance');
-
-    if (!entete || !texte) return;
+    const infoSeance = document.getElementById('info-seance');
+    if (!infoSeance) return;
 
     if (!dateStr) {
-        entete.classList.add('u-hide');
+        infoSeance.classList.add('u-hide');
+        infoSeance.textContent = '';
         return;
     }
 
     const infoJour = obtenirInfosJourCalendrier(dateStr);
 
     if (!infoJour) {
-        entete.classList.add('u-hide');
+        infoSeance.classList.add('u-hide');
+        infoSeance.textContent = '';
         return;
     }
 
-    const dateFr = formaterDateComplete(dateStr);
     const heures = obtenirHeuresSeance(dateStr);
     const heuresFormatees = formaterHeuresAffichage(heures);
-    const estVerrouille = estDateVerrouillee(dateStr);
     const rangSeance = obtenirRangSeanceDansSemaine(dateStr);
-
-    // 🆕 BETA 95 : Récupérer le groupe depuis seancesCompletes du cours actif
-    let seancesCompletes;
-    if (typeof obtenirSeancesCompletes === 'function') {
-        seancesCompletes = obtenirSeancesCompletes();
-    } else {
-        const cleCours = typeof cleSeancesCompletes === 'function' ? cleSeancesCompletes() : cle('seancesCompletes');
-        seancesCompletes = db.getSync(cleCours, {});
-    }
-    const seancesDuJour = seancesCompletes[dateStr];
-    let groupePrefix = '';
-    if (seancesDuJour && seancesDuJour.length > 0 && seancesDuJour[0].groupe) {
-        groupePrefix = `Groupe ${seancesDuJour[0].groupe} : `;
-    }
-
-    // Retirer toutes les classes d'état
-    entete.classList.remove('etat-erreur', 'etat-valide', 'etat-verrouille');
 
     let message = '';
 
     if (infoJour.statut === 'cours') {
-        message = `${groupePrefix}Présences au cours du ${dateFr}`;
-
-        // Ajouter le rang de la séance
         if (rangSeance && infoJour.numeroSemaine) {
-            message += ` - ${rangSeance.ordinal} séance de la semaine ${infoJour.numeroSemaine}`;
+            message = `${rangSeance.ordinal} séance de la semaine ${infoJour.numeroSemaine}`;
         } else if (infoJour.numeroSemaine) {
-            message += ` - Semaine ${infoJour.numeroSemaine}`;
+            message = `Semaine ${infoJour.numeroSemaine}`;
         }
 
         if (heuresFormatees) {
-            message += ` (${heuresFormatees})`;
+            message += message ? ` (${heuresFormatees})` : heuresFormatees;
         }
 
-        entete.classList.add(estVerrouille ? 'etat-verrouille' : 'etat-valide');
-
     } else if (infoJour.statut === 'reprise') {
-        message = `${groupePrefix}Présences au cours du ${dateFr} - REPRISE`;
-
-        // Ajouter le rang de la séance
         if (rangSeance && infoJour.numeroSemaine) {
-            message += ` - ${rangSeance.ordinal} séance de la semaine ${infoJour.numeroSemaine}`;
+            message = `REPRISE — ${rangSeance.ordinal} séance de la semaine ${infoJour.numeroSemaine}`;
+        } else {
+            message = 'REPRISE';
         }
 
         if (infoJour.jourRemplace) {
@@ -1313,40 +1296,23 @@ function mettreAJourEnteteDateSeance(dateStr) {
         }
 
         if (heuresFormatees) {
-            message += ` - ${heuresFormatees}`;
+            message += ` — ${heuresFormatees}`;
         }
 
-        entete.classList.add(estVerrouille ? 'etat-verrouille' : 'etat-valide');
-
     } else if (infoJour.statut === 'conge') {
-        message = `${dateFr} - CONGÉ`;
+        message = 'CONGÉ';
         if (infoJour.motif) {
             message += ` (${infoJour.motif})`;
         }
-        entete.classList.add('etat-erreur');
-        entete.classList.remove('u-hide');
-        texte.innerHTML = message;
-        return;
     }
 
-    // Ajouter le contrôle de verrouillage pour les jours de cours/reprise
-    if (infoJour.statut === 'cours' || infoJour.statut === 'reprise') {
-        const controleVerrou = `
-            <span class="controle-verrouillage">
-                <input type="checkbox"
-                       id="checkbox-verrouillage-${dateStr}"
-                       ${estVerrouille ? 'checked' : ''}
-                       onchange="basculerVerrouillageDate('${dateStr}')">
-                <label for="checkbox-verrouillage-${dateStr}">
-                    <span class="icone-cadenas">${estVerrouille ? '🔒' : '🔓'}</span>
-                    ${estVerrouille ? 'Verrouillée' : 'Déverrouillée'}
-                </label>
-            </span>`;
-        message += controleVerrou;
+    if (message) {
+        infoSeance.textContent = message;
+        infoSeance.classList.remove('u-hide');
+    } else {
+        infoSeance.classList.add('u-hide');
+        infoSeance.textContent = '';
     }
-
-    entete.classList.remove('u-hide');
-    texte.innerHTML = message;
 }
 
 /**
@@ -2359,19 +2325,22 @@ function restaurerCompteurPresences() {
     compteur.style.background = 'var(--bleu-tres-pale)';
 
     compteur.innerHTML = `
-        <span>Présents : <span id="nb-presents">0</span></span>
-        <span>Absents : <span id="nb-absents">0</span></span>
-        <span>Total : <span id="nb-total">0</span></span>
-        <span>Assiduité aujourd'hui : <span id="assiduite-aujourdhui">0%</span></span>
-        <span id="controle-verrouillage-presences" class="u-hide" style="margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 0.85rem;">
-            <input type="checkbox" id="checkbox-verrouillage-presences"
-                   style="width: 16px; height: 16px; accent-color: var(--bleu-principal, #1a73e8); cursor: pointer;"
-                   onchange="basculerVerrouillageDateActive()">
-            <label for="checkbox-verrouillage-presences" style="cursor: pointer; user-select: none; white-space: nowrap;">
-                <span id="icone-verrouillage-presences">🔓</span>
-                <span id="texte-verrouillage-presences">Verrouiller</span>
-            </label>
-        </span>
+        <div id="info-seance" class="u-hide" style="font-size: 0.85rem; opacity: 0.8;"></div>
+        <div style="display: flex; align-items: center; gap: 30px; flex-wrap: wrap;">
+            <span>Présents : <span id="nb-presents">0</span></span>
+            <span>Absents : <span id="nb-absents">0</span></span>
+            <span>Total : <span id="nb-total">0</span></span>
+            <span>Assiduité aujourd'hui : <span id="assiduite-aujourdhui">0%</span></span>
+            <span id="controle-verrouillage-presences" class="u-hide" style="margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 0.85rem;">
+                <input type="checkbox" id="checkbox-verrouillage-presences"
+                       style="width: 16px; height: 16px; accent-color: var(--bleu-principal, #1a73e8); cursor: pointer;"
+                       onchange="basculerVerrouillageDateActive()">
+                <label for="checkbox-verrouillage-presences" style="cursor: pointer; user-select: none; white-space: nowrap;">
+                    <span id="icone-verrouillage-presences">🔓</span>
+                    <span id="texte-verrouillage-presences">Verrouiller</span>
+                </label>
+            </span>
+        </div>
     `;
 }
 
