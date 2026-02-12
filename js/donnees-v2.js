@@ -1249,7 +1249,7 @@
                          type === 'grille' ? 'grille de critères' : 'cartouche de rétroaction';
         infoDiv.innerHTML = `
             <p>Tu es sur le point de supprimer définitivement la ${typeLabel} :</p>
-            <p style="font-size: 1.2rem; font-weight: bold; color: var(--bleu-principal); margin: 15px 0;">
+            <p style="font-size: 1.2rem; font-weight: bold; color: var(--accent-primaire); margin: 15px 0;">
                 ${escapeHtml(ressource.nom)}
             </p>
             <p class="text-muted">Cette action est irréversible.</p>

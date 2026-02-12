@@ -1992,7 +1992,7 @@ function genererSectionAccompagnement(da) {
         <!-- Historique compact -->
         <div class="u-mt-15">
             <div class="u-flex-between-mb10">
-                <h4 style="color: var(--bleu-principal); font-size: 0.95rem; margin: 0; font-weight: 600;" data-tooltip="profil-historique">
+                <h4 style="color: var(--accent-primaire); font-size: 0.95rem; margin: 0; font-weight: 600;" data-tooltip="profil-historique">
                     HISTORIQUE ${interventions && interventions.length > 0 ? `(${interventions.length} intervention${interventions.length > 1 ? 's' : ''})` : ''}
                 </h4>
                 <button class="btn btn-principal" onclick="naviguerVersNouvelleIntervention();">+ Nouvelle intervention</button>
@@ -2245,7 +2245,7 @@ function genererSectionEngagement(da) {
                     <strong class="profil-valeur-grande-bleu">${indices.P}%</strong>
                 </div>
             </div>
-            <div style="background: var(--bleu-tres-pale); padding: 15px; border: 2px solid var(--bleu-principal); border-left: 4px solid ${interpE.couleur};">
+            <div style="background: var(--bleu-tres-pale); padding: 15px; border: 2px solid var(--accent-primaire); border-left: 4px solid ${interpE.couleur};">
                 <div class="carte-metrique-header">
                     <span class="profil-texte-detail">Engagement (E)</span>
                     <strong class="profil-valeur-grande-bleu">${indices.E}</strong>
@@ -3969,7 +3969,7 @@ function genererSectionProductions(da) {
     return `
         <!-- Tableau des productions -->
         <div class="profil-carte">
-            <h3 style="color: var(--bleu-principal); margin: 0 0 15px 0;">Liste des productions</h3>
+            <h3 style="color: var(--accent-primaire); margin: 0 0 15px 0;">Liste des productions</h3>
             <div style="overflow-x: auto;">
                 <table class="tableau">
                     <thead>
@@ -4093,7 +4093,7 @@ function genererTableauObjectifs(da, ensembleId, noteFinaleMultiObjectifs) {
 
     return `
         <!-- Note finale pratique multi-objectifs -->
-        <div style="background: #142428; padding: 20px; border-radius: 6px; text-align: center; margin-bottom: 20px;">
+        <div style="background: #162c36; padding: 20px; border-radius: 6px; text-align: center; margin-bottom: 20px;">
             <div class="u-texte-09 u-texte-gris" style="margin-bottom: 5px;">
                 Note finale pondérée (${noteFinaleMultiObjectifs.nbObjectifsEvalues}/${ensemble.objectifs.length} objectifs évalués)
             </div>
@@ -4124,7 +4124,7 @@ function genererTableauObjectifs(da, ensembleId, noteFinaleMultiObjectifs) {
             🎯 Détail des ${ensemble.objectifs.length} objectifs d'apprentissage
         </h4>
 
-        <div style="background: #142428; border-radius: 6px; overflow: hidden;">
+        <div style="background: #162c36; border-radius: 6px; overflow: hidden;">
             <table class="tableau-objectifs-profil">
                 <thead>
                     <tr>
@@ -4217,7 +4217,7 @@ function genererTableauObjectifs(da, ensembleId, noteFinaleMultiObjectifs) {
         </div>
 
         <!-- Légende -->
-        <div style="background: #142428; padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.85rem; color: var(--gris-moyen);">
+        <div style="background: #162c36; padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.85rem; color: var(--gris-moyen);">
             <div style="margin-bottom: 10px;"><strong>Légende types :</strong></div>
             <div class="u-flex-gap-15">
                 <div><span style="color: ${couleurType.fondamental}; font-weight: bold;">●</span> Fondamental : Concepts de base</div>
@@ -4299,7 +4299,7 @@ function genererSectionProgression(da) {
     const html = `
         <div class="profil-zone-moyenne-bleu">
             <!-- Légende des indices -->
-            <div style="background: #142428; padding: 12px 20px; border-radius: 6px; margin-bottom: 10px; display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+            <div style="background: #162c36; padding: 12px 20px; border-radius: 6px; margin-bottom: 10px; display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
                 <span style="font-weight: 600; color: var(--gris-fonce);">Indices :</span>
                 <span style="display: flex; align-items: center; gap: 6px;">
                     <span style="width: 12px; height: 12px; background: var(--bleu-clair); border-radius: 50%;"></span>
@@ -4317,11 +4317,11 @@ function genererSectionProgression(da) {
             </div>
 
             <!-- Canvas pour le graphique Chart.js -->
-            <div style="background: #142428; padding: 20px; border-radius: 6px; height: 450px;">
+            <div style="background: #162c36; padding: 20px; border-radius: 6px; height: 450px;">
                 <canvas id="${canvasId}"></canvas>
             </div>
 
-            <div style="background: #142428; padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.85rem; color: var(--gris-moyen);">
+            <div style="background: #162c36; padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.85rem; color: var(--gris-moyen);">
                 <strong>Zones colorées :</strong> ${texteZones}
             </div>
         </div>
@@ -4392,14 +4392,14 @@ function genererSectionPerformance(da) {
             graphiqueCriteres = `
                 <div class="profil-zone-moyenne-bleu" style="margin-bottom: 20px;">
                     <!-- Légende des critères -->
-                    <div style="background: #142428; padding: 12px 20px; border-radius: 6px; margin-bottom: 10px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                    <div style="background: #162c36; padding: 12px 20px; border-radius: 6px; margin-bottom: 10px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
                         <span style="font-weight: 600; color: var(--gris-fonce);">Critères :</span>
                         ${legendeHTML}
                         <span style="color: var(--gris-clair); font-size: 0.85rem; margin-left: auto;">Survolez une courbe pour l'identifier</span>
                     </div>
 
                     <!-- Canvas pour le graphique Chart.js -->
-                    <div style="background: #142428; padding: 20px; border-radius: 6px; height: 450px;">
+                    <div style="background: #162c36; padding: 20px; border-radius: 6px; height: 450px;">
                         <canvas id="${canvasIdCriteres}"></canvas>
                     </div>
                 </div>
@@ -4457,7 +4457,7 @@ function genererSectionPerformance(da) {
     return `
         ${graphiqueCriteres}
         <div style="padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
-            <div style="background: #142428; padding: 20px; border-radius: 6px; text-align: center; margin-bottom: 20px;">
+            <div style="background: #162c36; padding: 20px; border-radius: 6px; text-align: center; margin-bottom: 20px;">
                 <div class="u-texte-09 u-texte-gris" style="margin-bottom: 5px;">
                     Moyenne PAN (${meilleures.length} meilleur${meilleures.length > 1 ? 's' : ''} artefact${meilleures.length > 1 ? 's' : ''})
                 </div>
@@ -4471,7 +4471,7 @@ function genererSectionPerformance(da) {
             </h4>
 
             ${meilleures.map((art, index) => `
-                <div style="background: #142428; padding: 15px; margin-bottom: 10px; border-left: 4px solid ${obtenirCouleurIndice(art.note)};">
+                <div style="background: #162c36; padding: 15px; margin-bottom: 10px; border-left: 4px solid ${obtenirCouleurIndice(art.note)};">
                     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
                         <div style="flex: 1;">
                             <div style="font-weight: bold; font-size: 1.1rem; margin-bottom: 5px;">
@@ -4485,7 +4485,7 @@ function genererSectionPerformance(da) {
                             <div style="font-size: 1.8rem; font-weight: bold; color: ${obtenirCouleurIndice(art.note)};">
                                 ${art.note}/100
                             </div>
-                            <div style="font-size: 0.9rem; color: var(--bleu-moyen); font-weight: bold;">
+                            <div style="font-size: 0.9rem; color: var(--texte-secondaire); font-weight: bold;">
                                 ${art.niveau}
                             </div>
                         </div>
@@ -4493,7 +4493,7 @@ function genererSectionPerformance(da) {
                 </div>
             `).join('')}
 
-            <div style="background: #142428; padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.9rem; color: var(--gris-moyen);">
+            <div style="background: #162c36; padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.9rem; color: var(--gris-moyen);">
                 <strong>Principe PAN :</strong> La note finale est calculée sur la moyenne des 3 meilleurs ${obtenirTermeProduction('pluriel')}
                 plutôt que sur la moyenne de tous les artefacts.
             </div>
@@ -4549,7 +4549,7 @@ function toggleDetailIndice(indice, da) {
 
     // Récupérer la couleur de la carte cliquée
     const carteCliquee = document.getElementById(`carte-indice-${indice}`);
-    let couleurBordure = 'var(--bleu-principal)';
+    let couleurBordure = 'var(--accent-primaire)';
     if (carteCliquee) {
         const style = window.getComputedStyle(carteCliquee);
         couleurBordure = style.borderColor;
@@ -4812,7 +4812,7 @@ function genererSectionCompletion(da) {
 
             <!-- Placeholder graphique (en conclusion) -->
             <div style="background: var(--bleu-tres-pale); border: 2px dashed var(--bleu-pale); border-radius: 8px;
-                        padding: 30px 20px; text-align: center; color: var(--bleu-moyen); font-style: italic;">
+                        padding: 30px 20px; text-align: center; color: var(--texte-secondaire); font-style: italic;">
                 📈 Évolution temporelle de la complétion (à venir)
             </div>
 
@@ -6396,7 +6396,7 @@ function genererDiagnosticSRPNF(da, defisInfo) {
                             </div>
                         </div>
                     ` : ''}
-                    <div style="background: #142428; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
+                    <div style="background: #162c36; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
                         <div class="u-texte-mini u-texte-gris" style="margin-bottom: 8px;">
                             <strong>Formule :</strong> ${formuleTexte}
                         </div>
@@ -6654,8 +6654,8 @@ function genererDiagnosticGenerique(da, defisInfo) {
     if (defisInfo.statistiques) {
         const stats = defisInfo.statistiques;
         html += `
-            <div style="background: #142428; padding: 12px; border-radius: 6px; border: 1px solid var(--bordure-claire); margin-bottom: 10px;">
-                <div style="font-weight: bold; color: var(--bleu-principal); margin-bottom: 8px;">
+            <div style="background: #162c36; padding: 12px; border-radius: 6px; border: 1px solid var(--bordure-claire); margin-bottom: 10px;">
+                <div style="font-weight: bold; color: var(--accent-primaire); margin-bottom: 8px;">
                     📊 Statistiques descriptives
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.9rem;">
@@ -6711,11 +6711,11 @@ function genererSectionPerformance(da) {
             graphiqueCriteres = `
                 <div class="profil-zone-moyenne-bleu" style="margin-bottom: 20px;">
                     <!-- Canvas pour le graphique Chart.js -->
-                    <div style="background: #142428; padding: 20px; border-radius: 6px; height: 450px;">
+                    <div style="background: #162c36; padding: 20px; border-radius: 6px; height: 450px;">
                         <canvas id="${canvasIdCriteres}"></canvas>
                     </div>
 
-                    <div style="background: #142428; padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.85rem; color: var(--gris-moyen);">
+                    <div style="background: #162c36; padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.85rem; color: var(--gris-moyen);">
                         <strong>Conseil :</strong> Cliquez sur un critère dans la légende pour le masquer ou l'afficher.
                         Survolez les points pour voir les détails.
                     </div>
@@ -7339,7 +7339,7 @@ function genererSectionAssiduiteLegacy(da) {
 
             <!-- Placeholder graphique (en conclusion) -->
             <div style="background: var(--bleu-tres-pale); border: 2px dashed var(--bleu-pale); border-radius: 8px;
-                        padding: 30px 20px; text-align: center; color: var(--bleu-moyen); font-style: italic;">
+                        padding: 30px 20px; text-align: center; color: var(--texte-secondaire); font-style: italic;">
                 📈 Évolution temporelle de l'assiduité (à venir)
             </div>
 
@@ -7744,7 +7744,7 @@ function genererSectionRapport(da) {
             <!-- Carte principale (Proposition 2) -->
             <div class="profil-carte">
                 <!-- En-tête minimaliste -->
-                <h3 style="margin: 0 0 20px 0; color: var(--bleu-principal); font-size: 1.1rem; border-bottom: 2px solid var(--bleu-pale); padding-bottom: 10px;">
+                <h3 style="margin: 0 0 20px 0; color: var(--accent-primaire); font-size: 1.1rem; border-bottom: 2px solid var(--bleu-pale); padding-bottom: 10px;">
                     <span class="primo-aide" data-target="conseil-rapport">😎</span>
                 </h3>
 
@@ -7803,7 +7803,7 @@ function genererSectionRapport(da) {
             <div class="profil-position-relative-mt15">
                 <textarea id="textarea-rapport-${da}"
                           placeholder="Le rapport apparaîtra ici. Vous pouvez le modifier et ajouter vos commentaires avant de le copier."
-                          style="width: 100%; height: 300px; padding: 15px; font-family: 'Courier New', monospace; font-size: 0.9rem; border: 2px solid var(--bleu-pale); border-radius: 6px; resize: vertical; line-height: 1.6; background: #142428; overflow-y: auto;"></textarea>
+                          style="width: 100%; height: 300px; padding: 15px; font-family: 'Courier New', monospace; font-size: 0.9rem; border: 2px solid var(--bleu-pale); border-radius: 6px; resize: vertical; line-height: 1.6; background: #162c36; overflow-y: auto;"></textarea>
             </div>
         </div>
     `;
@@ -8581,7 +8581,7 @@ function chargerNotesPresencesConfidentiel(da) {
 
         html += `
             <div style="display: flex; gap: 8px; align-items: flex-start;">
-                <span style="min-width: 55px; font-weight: 600; color: var(--bleu-principal); padding-top: 4px;">${dateFormatee}</span>
+                <span style="min-width: 55px; font-weight: 600; color: var(--accent-primaire); padding-top: 4px;">${dateFormatee}</span>
                 <textarea
                     class="controle-form note-presence-editable"
                     data-date="${p.date}"

@@ -700,7 +700,7 @@ function afficherFormulaireIntervention() {
 
                     <!-- Colonne droite : Gestion des absences -->
                     <div class="carte" style="background: var(--bleu-tres-pale); padding: 15px; margin: 0; height: fit-content;">
-                        <h4 style="margin: 0 0 10px 0; color: var(--bleu-principal);" data-tooltip="interv-gestion-absences">Gestion des absences</h4>
+                        <h4 style="margin: 0 0 10px 0; color: var(--accent-primaire);" data-tooltip="interv-gestion-absences">Gestion des absences</h4>
                         <p class="text-muted" style="margin: 0 0 15px 0; font-size: 0.9rem;">
                             Si cette intervention correspond à une séance de cours, vous pouvez marquer comme motivée l'absence des non-participants.
                         </p>
@@ -842,7 +842,7 @@ function afficherFormulaireModification(interventionId) {
 
                     <!-- Colonne droite : Gestion des absences -->
                     <div class="carte" style="background: var(--bleu-tres-pale); padding: 15px; margin: 0; height: fit-content;">
-                        <h4 style="margin: 0 0 10px 0; color: var(--bleu-principal);" data-tooltip="interv-gestion-absences">Gestion des absences</h4>
+                        <h4 style="margin: 0 0 10px 0; color: var(--accent-primaire);" data-tooltip="interv-gestion-absences">Gestion des absences</h4>
                         <p class="text-muted" style="margin: 0 0 15px 0; font-size: 0.9rem;">
                             Si cette intervention correspond à une séance de cours, vous pouvez marquer comme motivée l'absence des non-participants.
                         </p>
@@ -1041,7 +1041,7 @@ function ouvrirIntervention(interventionId) {
 
                 <!-- Colonne droite : Statut et gestion des absences -->
                 <div class="carte" style="background: var(--bleu-tres-pale); padding: 15px; margin: 0; height: fit-content;">
-                    <h4 style="margin: 0 0 10px 0; color: var(--bleu-principal);">Statut de l'intervention</h4>
+                    <h4 style="margin: 0 0 10px 0; color: var(--accent-primaire);">Statut de l'intervention</h4>
                     <div class="champ-formulaire" style="margin: 0 0 20px 0;">
                         <div style="display: flex; gap: 15px;">
                             <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
@@ -1057,7 +1057,7 @@ function ouvrirIntervention(interventionId) {
 
                     <hr style="border: none; border-top: 1px solid var(--bordure-claire); margin: 15px 0;">
 
-                    <h4 style="margin: 0 0 10px 0; color: var(--bleu-principal);" data-tooltip="interv-gestion-absences">Gestion des absences</h4>
+                    <h4 style="margin: 0 0 10px 0; color: var(--accent-primaire);" data-tooltip="interv-gestion-absences">Gestion des absences</h4>
                     <p class="text-muted" style="margin: 0 0 15px 0; font-size: 0.9rem;">
                         Si cette intervention correspond à une séance de cours, vous pouvez marquer comme motivée l'absence des non-participants.
                     </p>
@@ -1184,7 +1184,7 @@ function afficherNotesIndividuelles(interventionId, dasSelectionnes) {
 
         html += `
             <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--bordure-claire);">
-                <label style="display: block; font-weight: 600; margin-bottom: 5px; color: var(--bleu-principal);">
+                <label style="display: block; font-weight: 600; margin-bottom: 5px; color: var(--accent-primaire);">
                     ${etudiant.prenom} ${etudiant.nom}
                 </label>
                 <textarea

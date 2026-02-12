@@ -236,7 +236,7 @@ async function afficherToutesLesEchellesNiveaux() {
                 <div class="echelle-grid-niveaux">
                     <div>
                         <label class="echelle-texte-mini-bleu">Code</label>
-                        <strong style="font-size: 1.1rem; color: var(--bleu-principal);">${echapperHtml(niveau.code)}</strong>
+                        <strong style="font-size: 1.1rem; color: var(--accent-primaire);">${echapperHtml(niveau.code)}</strong>
                     </div>
                     <div>
                         <label class="echelle-texte-mini-bleu">Nom</label>
@@ -269,8 +269,8 @@ async function afficherToutesLesEchellesNiveaux() {
 
         return `
             <details class="echelle-section" open style="margin-bottom: 20px; border: 2px solid var(--bleu-moyen);
-                     border-radius: 8px; background: white; overflow: hidden;">
-                <summary style="padding: 15px; background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-moyen) 100%);
+                     border-radius: 8px; background: var(--surface-conteneur, #162c36); overflow: hidden;">
+                <summary style="padding: 15px; background: linear-gradient(135deg, var(--accent-primaire) 0%, var(--bleu-moyen) 100%);
                          color: white; font-weight: 600; font-size: 1.05rem; cursor: pointer;
                          user-select: none; display: flex; justify-content: space-between; align-items: center;">
                     <span>📊 ${echapperHtml(echelle.nom)}</span>
@@ -286,7 +286,7 @@ async function afficherToutesLesEchellesNiveaux() {
 
                         <!-- Aperçu visuel de l'échelle -->
                         <div style="margin-bottom: 15px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
-                            <strong style="display: block; margin-bottom: 10px; color: var(--bleu-principal);">Aperçu visuel :</strong>
+                            <strong style="display: block; margin-bottom: 10px; color: var(--accent-primaire);">Aperçu visuel :</strong>
                             <div class="echelle-relative">
                                 <div class="echelle-flex-seuils">
                                     ${niveaux.map(n => {
@@ -2483,7 +2483,7 @@ async function afficherBibliothequeEchelles() {
         const trimestres = data.sectionImportTrimestre.trimestres;
         sectionImportTrimestre = `
             <div style="margin-top: 20px; padding: 15px; background: var(--gris-tres-pale); border-radius: 6px; border: 1px solid var(--bordure-claire);">
-                <h4 style="color: var(--bleu-principal); font-size: 1rem; margin: 0 0 10px 0;">Importer depuis un autre trimestre</h4>
+                <h4 style="color: var(--accent-primaire); font-size: 1rem; margin: 0 0 10px 0;">Importer depuis un autre trimestre</h4>
                 <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                     <select id="selectTrimestreImportEchelles" class="controle-form" style="flex: 1; min-width: 200px;">
                         <option value="">-- Choisir un trimestre --</option>
@@ -3111,7 +3111,7 @@ function afficherNiveauxNouvelleEchelle() {
     const html = niveaux.map((niveau, index) => {
         const ph = placeholders[index] || { code: 'X', nom: 'Niveau' };
         return `
-        <div class="item-liste" style="position: relative; padding: 15px; background: white; margin-bottom: 10px;">
+        <div class="item-liste" style="position: relative; padding: 15px; background: var(--surface-conteneur, #162c36); margin-bottom: 10px;">
             ${niveaux.length > 1 ? `
                 <button onclick="supprimerNiveauTemp(${index})"
                         class="btn btn-supprimer btn-tres-compact"
@@ -3376,7 +3376,7 @@ function afficherNiveauxEchelle(echelle) {
 
     // Afficher le tableau des niveaux en mode édition
     const html = echelle.niveaux.map((niveau, index) => `
-        <div class="item-liste" style="position: relative; padding: 15px; background: white; margin-bottom: 10px;">
+        <div class="item-liste" style="position: relative; padding: 15px; background: var(--surface-conteneur, #162c36); margin-bottom: 10px;">
             ${echelle.niveaux.length > 1 ? `
                 <button onclick="(async () => { await supprimerNiveauEchelle('${echelle.id}', ${index}); })()"
                         class="btn btn-supprimer btn-tres-compact"

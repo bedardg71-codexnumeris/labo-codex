@@ -242,7 +242,7 @@ function chargerEvenementsPrevus() {
     if (!conteneur) return;
 
     if (evenements.length === 0) {
-        conteneur.innerHTML = '<p style="color: var(--bleu-moyen); font-style: italic;">Aucun événement prévu déclaré.</p>';
+        conteneur.innerHTML = '<p style="color: var(--texte-secondaire); font-style: italic;">Aucun événement prévu déclaré.</p>';
         return;
     }
 
@@ -516,7 +516,7 @@ function chargerEvenementsImprevus() {
     if (!conteneur) return;
 
     if (evenements.length === 0) {
-        conteneur.innerHTML = '<p style="color: var(--bleu-moyen); font-style: italic;">Aucun événement imprévu déclaré.</p>';
+        conteneur.innerHTML = '<p style="color: var(--texte-secondaire); font-style: italic;">Aucun événement imprévu déclaré.</p>';
         return;
     }
 

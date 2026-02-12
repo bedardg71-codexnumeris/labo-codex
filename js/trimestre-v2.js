@@ -516,12 +516,12 @@ function genererCarteEvenementV2(evt, type) {
         </div>` : '';
 
     return `
-    <div class="item-carte-compact" style="margin-bottom: 12px; padding: 12px 15px; background: var(--bleu-tres-pale); border-radius: 8px; border-left: 4px solid var(--bleu-principal);">
+    <div class="item-carte-compact" style="margin-bottom: 12px; padding: 12px 15px; background: var(--bleu-tres-pale); border-radius: 8px; border-left: 4px solid var(--accent-primaire);">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 15px;">
             <div style="flex: 1; min-width: 0;">
                 <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                     <strong style="font-size: 1rem;">${evt.description}</strong>
-                    <span style="color: var(--bleu-principal); font-weight: 500;">${evt.dateEvenement}</span>
+                    <span style="color: var(--accent-primaire); font-weight: 500;">${evt.dateEvenement}</span>
                 </div>
                 ${repriseInfo}
             </div>
@@ -594,7 +594,7 @@ function ajouterBoutonRetourV2(sectionLegacy) {
     btnRetour.style.cssText = 'position: sticky; top: 60px; z-index: 100; background: var(--orange-accent); color: white; padding: 10px 20px; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;';
     btnRetour.innerHTML = `
         <span>Mode édition (ancienne interface)</span>
-        <button class="btn" style="background: white; color: var(--orange-accent); padding: 5px 15px;" onclick="retournerVueV2()">
+        <button class="btn" style="background: var(--surface-conteneur, #162c36); color: var(--orange-accent); padding: 5px 15px;" onclick="retournerVueV2()">
             ← Retour à la nouvelle interface
         </button>
     `;
@@ -1595,7 +1595,7 @@ function afficherDetailsCoursV2(cours) {
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
             <div>
                 <label class="text-muted" style="font-size: 0.85rem;">Code du cours</label>
-                <div style="font-weight: 600; font-size: 1.1rem; color: var(--bleu-principal);">${sigle}</div>
+                <div style="font-weight: 600; font-size: 1.1rem; color: var(--accent-primaire);">${sigle}</div>
             </div>
             <div>
                 <label class="text-muted" style="font-size: 0.85rem;">Nom du cours</label>
@@ -3125,7 +3125,7 @@ function chargerSeancesV2() {
 
         html += `
             <div class="item-carte-compact" style="display: flex; align-items: center; padding: 10px 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
-                <span style="width: 90px; font-weight: 600; color: var(--bleu-principal);">${jourNom}</span>
+                <span style="width: 90px; font-weight: 600; color: var(--accent-primaire);">${jourNom}</span>
                 <span style="flex: 1;">${heureDebut} (${periodes} pér.)</span>
                 <span class="text-muted" style="width: 80px;">${local}</span>
                 <div style="display: flex; gap: 5px;">
@@ -4634,7 +4634,7 @@ function ouvrirModalBibliothequeGroupeCours() {
             ">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                     <div style="flex: 1; min-width: 200px;">
-                        <div style="font-weight: 600; color: var(--bleu-principal);">
+                        <div style="font-weight: 600; color: var(--accent-primaire);">
                             ${titre}${badgeActif}
                         </div>
                         ${sousInfo.length > 0 ? `
@@ -4689,7 +4689,7 @@ function ouvrirModalBibliothequeGroupeCours() {
             z-index: 10000;
         ">
             <div style="
-                background: white;
+                background: var(--surface-conteneur, #162c36);
                 border-radius: 12px;
                 width: 90%;
                 max-width: 800px;
@@ -4719,7 +4719,7 @@ function ouvrirModalBibliothequeGroupeCours() {
                 " onmouseover="this.style.color='#333'" onmouseout="this.style.color='#999'">
                     ×
                 </button>
-                <h2 style="margin-top: 0; color: var(--bleu-principal);">📚 Bibliothèque groupe-cours</h2>
+                <h2 style="margin-top: 0; color: var(--accent-primaire);">📚 Bibliothèque groupe-cours</h2>
                 <p class="text-muted">Gérez les groupe-cours affichés dans le dropdown de l'en-tête.</p>
     `;
 
@@ -6194,7 +6194,7 @@ async function mettreAJourApercuGroupeCours() {
 
     apercuSpan.textContent = apercu;
     apercuSpan.className = '';
-    apercuSpan.style.color = 'var(--bleu-principal)';
+    apercuSpan.style.color = 'var(--accent-primaire)';
     apercuSpan.style.fontWeight = '500';
 }
 

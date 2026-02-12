@@ -187,7 +187,7 @@
             '<div class="modal-js-contenu" style="max-width: 800px;">' +
                 '<button onclick="' + config.onFermer + '()" class="modal-js-btn-fermer">×</button>' +
                 '<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">' +
-                    '<h2 style="margin: 0; color: var(--bleu-principal);">' + config.titre + '</h2>' +
+                    '<h2 style="margin: 0; color: var(--accent-primaire);">' + config.titre + '</h2>' +
                     '<button class="btn-aide-contextuelle" data-aide="bibliotheque-fonctionnement" title="Comment fonctionne la bibliothèque">😎</button>' +
                 '</div>' +
                 '<p style="color: var(--gris-clair); margin-bottom: 20px;">' + config.sousTitre + '</p>' +

@@ -1810,9 +1810,9 @@ function genererSelecteurPratiqueParDefaut() {
     const pratiqueDefaut = getPratiqueParDefaut();
 
     return `
-        <div style="margin-bottom: 15px; padding: 12px; background: var(--bleu-tres-pale); border-left: 4px solid var(--bleu-principal);">
+        <div style="margin-bottom: 15px; padding: 12px; background: var(--bleu-tres-pale); border-left: 4px solid var(--accent-primaire);">
             <div style="margin-bottom: 8px;">
-                <strong style="font-size: 0.9rem; color: var(--bleu-principal);">Pratique par défaut</strong>
+                <strong style="font-size: 0.9rem; color: var(--accent-primaire);">Pratique par défaut</strong>
             </div>
             <p style="margin: 0 0 10px 0; font-size: 0.8rem; line-height: 1.4; color: var(--gris-moyen);">
                 Présélectionnée lors de la création de nouveaux cours
@@ -1903,16 +1903,16 @@ function genererCartePratique(pratique, estActive, modifiable) {
             <!-- Header cliquable (toujours visible) -->
             <div class="pratique-header" onclick="togglePratique('${pratique.id}')" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                 <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
-                    <strong style="font-size: 1rem; color: var(--bleu-principal);">${pratique.nom}</strong>
+                    <strong style="font-size: 1rem; color: var(--accent-primaire);">${pratique.nom}</strong>
                     ${badgeActif}
                     ${badgeParDefaut}
                 </div>
                 <div style="display: flex; align-items: center; gap: 12px;">
                     <div style="text-align: right;">
-                        <div style="font-size: 1.2rem; font-weight: 600; color: var(--bleu-principal);">${nbCours}</div>
+                        <div style="font-size: 1.2rem; font-weight: 600; color: var(--accent-primaire);">${nbCours}</div>
                         <div style="font-size: 0.75rem; color: var(--gris-moyen);">cours</div>
                     </div>
-                    <div class="pratique-toggle-icon" style="font-size: 1.2rem; color: var(--bleu-principal); user-select: none;">
+                    <div class="pratique-toggle-icon" style="font-size: 1.2rem; color: var(--accent-primaire); user-select: none;">
                         ${iconeToggle}
                     </div>
                 </div>
@@ -2806,23 +2806,23 @@ function afficherPreviewGrilleWizard() {
     if (grilleId === 'defaut-srpnf') {
         contenu.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 8px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; border-radius: 4px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--surface-conteneur, #162c36); border-radius: 4px;">
                     <strong>Structure</strong>
                     <span style="color: var(--gris-moyen); font-size: 0.9rem;">15%</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; border-radius: 4px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--surface-conteneur, #162c36); border-radius: 4px;">
                     <strong>Rigueur</strong>
                     <span style="color: var(--gris-moyen); font-size: 0.9rem;">20%</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; border-radius: 4px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--surface-conteneur, #162c36); border-radius: 4px;">
                     <strong>Plausibilité</strong>
                     <span style="color: var(--gris-moyen); font-size: 0.9rem;">10%</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; border-radius: 4px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--surface-conteneur, #162c36); border-radius: 4px;">
                     <strong>Nuance</strong>
                     <span style="color: var(--gris-moyen); font-size: 0.9rem;">25%</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; border-radius: 4px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--surface-conteneur, #162c36); border-radius: 4px;">
                     <strong>Français</strong>
                     <span style="color: var(--gris-moyen); font-size: 0.9rem;">30%</span>
                 </div>
@@ -2846,7 +2846,7 @@ function afficherPreviewGrilleWizard() {
 
     grille.criteres.forEach(critere => {
         html += `
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; border-radius: 4px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--surface-conteneur, #162c36); border-radius: 4px;">
                 <strong>${critere.nom}</strong>
                 <span style="color: var(--gris-moyen); font-size: 0.9rem;">${critere.ponderation}%</span>
             </div>
@@ -2913,28 +2913,28 @@ function afficherPreviewEchelleWizard() {
     if (echelleId === 'defaut-idme') {
         contenu.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 8px;">
-                <div style="display: flex; align-items: center; gap: 10px; padding: 8px; background: white; border-radius: 4px;">
+                <div style="display: flex; align-items: center; gap: 10px; padding: 8px; background: var(--surface-conteneur, #162c36); border-radius: 4px;">
                     <div style="width: 30px; height: 30px; border-radius: 4px; background: #FF6B6B;"></div>
                     <div style="flex: 1;">
                         <strong>I - Insuffisant</strong>
                         <div style="font-size: 0.85rem; color: var(--gris-moyen);">Plage : 0-64% • Calcul : 50%</div>
                     </div>
                 </div>
-                <div style="display: flex; align-items: center; gap: 10px; padding: 8px; background: white; border-radius: 4px;">
+                <div style="display: flex; align-items: center; gap: 10px; padding: 8px; background: var(--surface-conteneur, #162c36); border-radius: 4px;">
                     <div style="width: 30px; height: 30px; border-radius: 4px; background: #FFD93D;"></div>
                     <div style="flex: 1;">
                         <strong>D - En développement</strong>
                         <div style="font-size: 0.85rem; color: var(--gris-moyen);">Plage : 65-74% • Calcul : 70%</div>
                     </div>
                 </div>
-                <div style="display: flex; align-items: center; gap: 10px; padding: 8px; background: white; border-radius: 4px;">
+                <div style="display: flex; align-items: center; gap: 10px; padding: 8px; background: var(--surface-conteneur, #162c36); border-radius: 4px;">
                     <div style="width: 30px; height: 30px; border-radius: 4px; background: #6BCF7F;"></div>
                     <div style="flex: 1;">
                         <strong>M - Maîtrisé</strong>
                         <div style="font-size: 0.85rem; color: var(--gris-moyen);">Plage : 75-84% • Calcul : 80%</div>
                     </div>
                 </div>
-                <div style="display: flex; align-items: center; gap: 10px; padding: 8px; background: white; border-radius: 4px;">
+                <div style="display: flex; align-items: center; gap: 10px; padding: 8px; background: var(--surface-conteneur, #162c36); border-radius: 4px;">
                     <div style="width: 30px; height: 30px; border-radius: 4px; background: #4D96FF;"></div>
                     <div style="flex: 1;">
                         <strong>E - Étendu</strong>
@@ -2979,7 +2979,7 @@ function afficherPreviewEchelleWizard() {
         const valeurCalculFormatee = valeurCalcul.toFixed(1).replace('.', ',');
 
         html += `
-            <div style="display: flex; align-items: center; gap: 10px; padding: 8px; background: white; border-radius: 4px;">
+            <div style="display: flex; align-items: center; gap: 10px; padding: 8px; background: var(--surface-conteneur, #162c36); border-radius: 4px;">
                 <div style="width: 30px; height: 30px; border-radius: 4px; background: ${couleurStyle};"></div>
                 <div style="flex: 1;">
                     <strong>${niveau.code} - ${niveau.nom}</strong>
@@ -3288,7 +3288,7 @@ function ajouterNiveauWizard(niveauDefaut = null) {
 
     const div = document.createElement('div');
     div.className = 'niveau-item';
-    div.style.cssText = 'display: grid; grid-template-columns: 80px 1fr 100px 80px 40px; gap: 10px; margin-bottom: 10px; padding: 12px; background: white; border-radius: 4px; border: 1px solid var(--gris-leger);';
+    div.style.cssText = 'display: grid; grid-template-columns: 80px 1fr 100px 80px 40px; gap: 10px; margin-bottom: 10px; padding: 12px; background: var(--surface-conteneur, #162c36); border-radius: 4px; border: 1px solid var(--gris-leger);';
 
     div.innerHTML = `
         <input type="text" class="controle-form" placeholder="Code" value="${niveau.code}" data-field="code" style="padding: 6px;">
@@ -3351,7 +3351,7 @@ function ajouterEvaluationWizard() {
 
     const div = document.createElement('div');
     div.className = 'evaluation-item';
-    div.style.cssText = 'display: grid; grid-template-columns: 1fr 100px 40px; gap: 10px; margin-bottom: 10px; padding: 12px; background: white; border-radius: 4px; border: 1px solid var(--gris-leger);';
+    div.style.cssText = 'display: grid; grid-template-columns: 1fr 100px 40px; gap: 10px; margin-bottom: 10px; padding: 12px; background: var(--surface-conteneur, #162c36); border-radius: 4px; border: 1px solid var(--gris-leger);';
 
     div.innerHTML = `
         <input type="text" class="controle-form" placeholder="Nom de l'évaluation" data-field="nom" style="padding: 6px;">
@@ -3579,16 +3579,16 @@ function afficherSeuilsActuelsWizard() {
 
     const html = `
         <div style="display: flex; flex-direction: column; gap: 10px;">
-            <div style="padding: 10px; background: white; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
-                <strong style="color: var(--bleu-principal);">Bon</strong>
+            <div style="padding: 10px; background: var(--surface-conteneur, #162c36); border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                <strong style="color: var(--accent-primaire);">Bon</strong>
                 <span style="color: var(--gris-fonce); font-size: 1.1rem; font-weight: 600;">≥ ${seuils.bon}%</span>
             </div>
-            <div style="padding: 10px; background: white; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
-                <strong style="color: var(--bleu-principal);">Acceptable</strong>
+            <div style="padding: 10px; background: var(--surface-conteneur, #162c36); border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                <strong style="color: var(--accent-primaire);">Acceptable</strong>
                 <span style="color: var(--gris-fonce); font-size: 1.1rem; font-weight: 600;">≥ ${seuils.acceptable}%</span>
             </div>
-            <div style="padding: 10px; background: white; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
-                <strong style="color: var(--bleu-principal);">Fragile</strong>
+            <div style="padding: 10px; background: var(--surface-conteneur, #162c36); border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                <strong style="color: var(--accent-primaire);">Fragile</strong>
                 <span style="color: var(--gris-fonce); font-size: 1.1rem; font-weight: 600;">≥ ${seuils.fragile}%</span>
             </div>
         </div>
@@ -3622,8 +3622,8 @@ function toggleResumeJetonsWizard() {
             // Allocation générale
             if (jetons.nombreParEleve) {
                 html += `
-                    <div style="padding: 10px; background: white; border-radius: 4px;">
-                        <strong style="display: block; margin-bottom: 4px; color: var(--bleu-principal);">Allocation générale</strong>
+                    <div style="padding: 10px; background: var(--surface-conteneur, #162c36); border-radius: 4px;">
+                        <strong style="display: block; margin-bottom: 4px; color: var(--accent-primaire);">Allocation générale</strong>
                         <span style="color: var(--gris-fonce);">${jetons.nombreParEleve} jetons par élève</span>
                     </div>
                 `;
@@ -3632,8 +3632,8 @@ function toggleResumeJetonsWizard() {
             // Jetons de délai
             if (jetons.delai && jetons.delai.actif) {
                 html += `
-                    <div style="padding: 10px; background: white; border-radius: 4px;">
-                        <strong style="display: block; margin-bottom: 4px; color: var(--bleu-principal);">Jetons de délai</strong>
+                    <div style="padding: 10px; background: var(--surface-conteneur, #162c36); border-radius: 4px;">
+                        <strong style="display: block; margin-bottom: 4px; color: var(--accent-primaire);">Jetons de délai</strong>
                         <span style="color: var(--gris-fonce);">Prolongation de ${jetons.delai.dureeJours || 0} jours</span>
                     </div>
                 `;
@@ -3643,8 +3643,8 @@ function toggleResumeJetonsWizard() {
             if (jetons.reprise && jetons.reprise.actif) {
                 const action = jetons.reprise.archiverOriginale ? 'Archive l\'évaluation originale' : 'Remplace l\'évaluation originale';
                 html += `
-                    <div style="padding: 10px; background: white; border-radius: 4px;">
-                        <strong style="display: block; margin-bottom: 4px; color: var(--bleu-principal);">Jetons de reprise</strong>
+                    <div style="padding: 10px; background: var(--surface-conteneur, #162c36); border-radius: 4px;">
+                        <strong style="display: block; margin-bottom: 4px; color: var(--accent-primaire);">Jetons de reprise</strong>
                         <span style="color: var(--gris-fonce);">${action}</span>
                     </div>
                 `;
@@ -3654,8 +3654,8 @@ function toggleResumeJetonsWizard() {
             if (jetons.typesPersonnalises && jetons.typesPersonnalises.length > 0) {
                 jetons.typesPersonnalises.forEach(type => {
                     html += `
-                        <div style="padding: 10px; background: white; border-radius: 4px;">
-                            <strong style="display: block; margin-bottom: 4px; color: var(--bleu-principal);">${type.nom}</strong>
+                        <div style="padding: 10px; background: var(--surface-conteneur, #162c36); border-radius: 4px;">
+                            <strong style="display: block; margin-bottom: 4px; color: var(--accent-primaire);">${type.nom}</strong>
                             <span style="color: var(--gris-fonce); font-size: 0.85rem;">${type.description}</span>
                         </div>
                     `;
@@ -4429,7 +4429,7 @@ async function ouvrirModalBibliothequePratiques() {
 
                 <!-- En-tête -->
                 <div style="padding: 20px; border-bottom: 1px solid var(--gris-clair); display: flex; justify-content: space-between; align-items: center;">
-                    <h2 style="margin: 0; color: var(--bleu-principal);">Bibliothèque de pratiques</h2>
+                    <h2 style="margin: 0; color: var(--accent-primaire);">Bibliothèque de pratiques</h2>
                     <button onclick="fermerModalBibliothequePratiques()" class="modal-js-btn-fermer">&times;</button>
                 </div>
 
@@ -4445,7 +4445,7 @@ async function ouvrirModalBibliothequePratiques() {
 
                     <!-- SECTION 0 : Canevas de base (templates) -->
                     <div style="margin-bottom: 30px;">
-                        <h3 style="color: var(--bleu-principal); margin-bottom: 10px;">
+                        <h3 style="color: var(--accent-primaire); margin-bottom: 10px;">
                             Canevas de base (${canevasDeBase.length})
                         </h3>
                         <p style="color: var(--gris-fonce); font-size: 0.9em; margin-bottom: 15px; font-style: italic;">
@@ -4461,12 +4461,12 @@ async function ouvrirModalBibliothequePratiques() {
                                 const auteur = c.auteur ? `Par ${c.auteur}${c.etablissement ? ' (' + c.etablissement + ')' : ''}` : '';
                                 const description = c.description || '';
                                 return `
-                                    <div style="border: 2px solid var(--bleu-principal); border-radius: 6px; padding: 15px; background: var(--bleu-tres-pale);">
+                                    <div style="border: 2px solid var(--accent-primaire); border-radius: 6px; padding: 15px; background: var(--bleu-tres-pale);">
                                         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                                             <div style="flex: 1;">
                                                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                                                    <div style="font-weight: bold; color: var(--bleu-principal);">${echapperHtml(nomAffiche)}</div>
-                                                    <span style="background: var(--bleu-principal); color: white; font-size: 0.75em; padding: 2px 8px; border-radius: 10px; font-weight: 600;">CANEVAS</span>
+                                                    <div style="font-weight: bold; color: var(--accent-primaire);">${echapperHtml(nomAffiche)}</div>
+                                                    <span style="background: var(--accent-primaire); color: white; font-size: 0.75em; padding: 2px 8px; border-radius: 10px; font-weight: 600;">CANEVAS</span>
                                                 </div>
                                                 ${auteur ? `<div style="color: var(--gris-clair); font-size: 0.9em; margin-bottom: 4px;">${echapperHtml(auteur)}</div>` : ''}
                                                 ${description ? `<div style="color: var(--gris-moyen); font-size: 0.85em;">${echapperHtml(description)}</div>` : ''}
@@ -4483,7 +4483,7 @@ async function ouvrirModalBibliothequePratiques() {
 
                     <!-- SECTION 1 : Ma sélection -->
                     <div style="margin-bottom: 30px;">
-                        <h3 style="color: var(--bleu-principal); margin-bottom: 15px;">
+                        <h3 style="color: var(--accent-primaire); margin-bottom: 15px;">
                             Ma sélection (${pratiquesDansBibliotheque.length})
                         </h3>
 
@@ -4524,7 +4524,7 @@ async function ouvrirModalBibliothequePratiques() {
 
                     <!-- SECTION 2 : Disponibles à ajouter -->
                     <div>
-                        <h3 style="color: var(--bleu-principal); margin-bottom: 15px;">
+                        <h3 style="color: var(--accent-primaire); margin-bottom: 15px;">
                             Disponibles à ajouter (${pratiquesDisponibles.length})
                         </h3>
 
@@ -4536,7 +4536,7 @@ async function ouvrirModalBibliothequePratiques() {
                                     const auteur = p.auteur ? `Par ${p.auteur}${p.etablissement ? ' (' + p.etablissement + ')' : ''}` : '';
                                     const description = p.description || '';
                                     return `
-                                        <div style="border: 1px solid var(--bleu-clair); border-radius: 6px; padding: 15px; background: white;">
+                                        <div style="border: 1px solid var(--bleu-clair); border-radius: 6px; padding: 15px; background: var(--surface-conteneur, #162c36);">
                                             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                                                 <div style="flex: 1;">
                                                     <div style="font-weight: bold; color: var(--gris-fonce); margin-bottom: 4px;">${echapperHtml(nomAffiche)}</div>
@@ -4857,10 +4857,10 @@ function ajouterTypeTravailSpec() {
 
     const div = document.createElement('div');
     div.className = 'wizard-item-liste';
-    div.style.cssText = 'padding: 15px; margin-bottom: 12px; background: white; border: 1px solid var(--gris-clair); border-radius: 6px;';
+    div.style.cssText = 'padding: 15px; margin-bottom: 12px; background: var(--surface-conteneur, #162c36); border: 1px solid var(--gris-clair); border-radius: 6px;';
     div.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
-            <h5 style="margin: 0; color: var(--bleu-principal);">Type de travail ${index + 1}</h5>
+            <h5 style="margin: 0; color: var(--accent-primaire);">Type de travail ${index + 1}</h5>
             <button type="button" class="btn-icon" onclick="retirerTypeTravailSpec(this)" style="color: var(--rouge-erreur);">✕</button>
         </div>
         <div class="groupe-form">
@@ -4906,10 +4906,10 @@ function ajouterPalierBundle() {
 
     const div = document.createElement('div');
     div.className = 'wizard-item-liste';
-    div.style.cssText = 'padding: 15px; margin-bottom: 12px; background: white; border: 1px solid var(--gris-clair); border-radius: 6px;';
+    div.style.cssText = 'padding: 15px; margin-bottom: 12px; background: var(--surface-conteneur, #162c36); border: 1px solid var(--gris-clair); border-radius: 6px;';
     div.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
-            <h5 style="margin: 0; color: var(--bleu-principal);">Palier ${index + 1}</h5>
+            <h5 style="margin: 0; color: var(--accent-primaire);">Palier ${index + 1}</h5>
             <button type="button" class="btn-icon" onclick="retirerPalierBundle(this)" style="color: var(--rouge-erreur);">✕</button>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
@@ -4958,9 +4958,9 @@ function genererObjectifsSpec() {
     for (let i = 1; i <= nbObjectifs; i++) {
         const div = document.createElement('div');
         div.className = 'wizard-item-liste';
-        div.style.cssText = 'padding: 15px; margin-bottom: 12px; background: white; border: 1px solid var(--gris-clair); border-radius: 6px;';
+        div.style.cssText = 'padding: 15px; margin-bottom: 12px; background: var(--surface-conteneur, #162c36); border: 1px solid var(--gris-clair); border-radius: 6px;';
         div.innerHTML = `
-            <h5 style="margin: 0 0 10px 0; color: var(--bleu-principal);">Objectif ${i}</h5>
+            <h5 style="margin: 0 0 10px 0; color: var(--accent-primaire);">Objectif ${i}</h5>
             <div class="groupe-form">
                 <label>Nom de l'objectif</label>
                 <input type="text" class="controle-form spec-objectif-nom" placeholder="Ex: Normalisation des bases de données" required>

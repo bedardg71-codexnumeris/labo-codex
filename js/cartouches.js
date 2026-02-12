@@ -1269,8 +1269,8 @@ async function afficherToutesLesGrillesEtCartouches() {
 
         htmlSections.push(`
             <details class="grille-section" open style="margin-bottom: 20px; border: 2px solid var(--bleu-moyen);
-                     border-radius: 8px; background: white; overflow: hidden;">
-                <summary style="padding: 15px; background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-moyen) 100%);
+                     border-radius: 8px; background: var(--surface-conteneur, #162c36); overflow: hidden;">
+                <summary style="padding: 15px; background: linear-gradient(135deg, var(--accent-primaire) 0%, var(--bleu-moyen) 100%);
                          color: white; font-weight: 600; font-size: 1.05rem; cursor: pointer;
                          user-select: none; display: flex; justify-content: space-between; align-items: center;">
                     <span>${nomGrilleEchappe}</span>
@@ -1799,7 +1799,7 @@ async function importerCartouches(event) {
             const modal = document.createElement('div');
             modal.innerHTML = `
                 <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10001; display: flex; align-items: center; justify-content: center;">
-                    <div style="background: white; padding: 20px; border-radius: 8px; max-width: 600px; max-height: 80vh; overflow-y: auto;">
+                    <div style="background: var(--surface-conteneur, #162c36); padding: 20px; border-radius: 8px; max-width: 600px; max-height: 80vh; overflow-y: auto;">
                         ${message}
                         <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: flex-end;">
                             <button class="btn btn-annuler" onclick="this.closest('div[style*=fixed]').parentElement.remove(); delete window._cartouchesImportEnAttente;">Annuler</button>

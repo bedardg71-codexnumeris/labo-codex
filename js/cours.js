@@ -1216,7 +1216,7 @@ async function ouvrirModalBibliothequeCours() {
             z-index: 10000;
         ">
             <div style="
-                background: white;
+                background: var(--surface-conteneur, #162c36);
                 border-radius: 12px;
                 width: 90%;
                 max-width: 800px;
@@ -1247,7 +1247,7 @@ async function ouvrirModalBibliothequeCours() {
                 " onmouseover="this.style.color='var(--gris-fonce)'" onmouseout="this.style.color='var(--gris-clair)'">
                     ×
                 </button>
-                <h2 style="margin-top: 0; color: var(--bleu-principal);">Bibliothèque de cours</h2>
+                <h2 style="margin-top: 0; color: var(--accent-primaire);">Bibliothèque de cours</h2>
                 <p class="text-muted">Gérez vos configurations de cours</p>
 
                 <!-- SECTION 1 : Ma sélection -->
@@ -1272,7 +1272,7 @@ async function ouvrirModalBibliothequeCours() {
                     background: var(--bleu-tres-pale);">
                     <div style="display: flex; justify-content: space-between;">
                         <div style="flex: 1;">
-                            <div style="font-weight: 600; color: var(--bleu-principal); margin-bottom: 5px;">
+                            <div style="font-weight: 600; color: var(--accent-primaire); margin-bottom: 5px;">
                                 ${echapperHtml(cours.codeCours)} - ${echapperHtml(cours.nomCours)}${actifBadge}
                             </div>
                             <div style="font-size: 0.9rem; color: var(--gris-moyen); margin-bottom: 3px;">
@@ -1331,10 +1331,10 @@ async function ouvrirModalBibliothequeCours() {
                     border-radius: 6px;
                     padding: 15px;
                     margin-bottom: 10px;
-                    background: white;">
+                    background: var(--surface-conteneur, #162c36);">
                     <div style="display: flex; justify-content: space-between;">
                         <div style="flex: 1;">
-                            <div style="font-weight: 600; color: var(--bleu-principal); margin-bottom: 5px;">
+                            <div style="font-weight: 600; color: var(--accent-primaire); margin-bottom: 5px;">
                                 ${echapperHtml(cours.codeCours)} - ${echapperHtml(cours.nomCours)}
                             </div>
                             <div style="font-size: 0.9rem; color: var(--gris-moyen); margin-bottom: 3px;">

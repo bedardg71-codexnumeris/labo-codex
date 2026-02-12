@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Système de suivi Beta 97.4 - Hiver 2026</title>
+    <title>Système de suivi Beta 98 - Hiver 2026</title>
 
     <!-- CSS externe requis pour styles complets -->
     <link rel="stylesheet" href="styles.css?v=2026013001">
@@ -15,6 +15,7 @@
            Synchronisé avec styles.css
            =============================== */
         :root {
+            color-scheme: dark;
             /* === PALETTE OCÉAN & BOUSSOLE (C4) === */
 
             /* Bleus - Couleurs principales (ocean) */
@@ -24,7 +25,7 @@
             --bleu-clair: #6aacb8;
             --bleu-leger: #4a8a94;
             --bleu-carte: #1a3a48;
-            --bleu-pale: #122a34;
+            --bleu-pale: #1e3a48;
             --bleu-tres-pale: #0e1e28;
             --bleu-simulation: #1a5266;
             --bleu-anonymisation: #0c1a22;
@@ -128,8 +129,8 @@
             --gris-tres-pale: #142428;
 
             /* === BORDURES === */
-            --bordure-claire: rgba(106, 172, 184, 0.15);
-            --bordure-moyenne: rgba(106, 172, 184, 0.25);
+            --bordure-claire: rgba(106, 172, 184, 0.25);
+            --bordure-moyenne: rgba(106, 172, 184, 0.35);
 
             /* === ALERTES - Attention (laiton) === */
             --alerte-fond-attention: rgba(200, 160, 96, 0.12);
@@ -176,7 +177,7 @@
             --espacement-grand: 30px;
 
             /* === CALENDRIER (fonds semi-transparents sur base sombre) === */
-            --jour-cours-reel-bg: rgba(106, 172, 184, 0.15);
+            --jour-cours-reel-bg: rgba(106, 172, 184, 0.25);
             --reprise-bg: rgba(200, 160, 96, 0.15);
             --conge-bg: rgba(232, 64, 87, 0.12);
             --planification-bg: rgba(139, 92, 246, 0.12);
@@ -188,6 +189,7 @@
             --surface-conteneur: #142428;
             --surface-carte: #1a3a48;
             --surface-input: rgba(106, 172, 184, 0.08);
+            --ocean-moyen: #1a3040;
             --texte-principal: #d0e0e4;
             --texte-secondaire: #8aa4b0;
             --texte-muted: #5a7a88;
@@ -246,7 +248,7 @@
            =============================== */
         .conteneur {
             /* Styles principaux dans styles.css - max-width: 95%, margin: 0 auto */
-            background: var(--surface-conteneur, #142428);
+            background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
             overflow: hidden;
         }
 
@@ -508,7 +510,7 @@
         .accueil-hero h1 {
             font-size: 2rem;
             font-weight: 700;
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
             margin: 0 0 8px;
         }
 
@@ -526,8 +528,8 @@
         }
 
         .accueil-cours-actif {
-            background: var(--bleu-tres-pale);
-            border: 1px solid var(--bleu-pale);
+            background: #0c1a22;
+            border: 1px solid rgba(106, 172, 184, 0.15);
             border-radius: var(--radius-moyen, 8px);
             padding: 15px 20px;
             margin-bottom: 25px;
@@ -547,7 +549,7 @@
 
         .accueil-cours-actif .accueil-cours-nom {
             font-weight: 600;
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
         }
 
         .accueil-cours-actif .accueil-cours-detail {
@@ -577,8 +579,8 @@
         }
 
         .accueil-carte {
-            background: white;
-            border: 1px solid var(--bleu-pale);
+            background: #0c1a22;
+            border: 1px solid rgba(106, 172, 184, 0.15);
             border-radius: var(--radius-moyen, 8px);
             padding: 20px;
             cursor: pointer;
@@ -601,7 +603,7 @@
         .accueil-carte-titre {
             font-size: 1rem;
             font-weight: 600;
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
             margin-bottom: 4px;
         }
 
@@ -642,7 +644,7 @@
         }
 
         .accueil-pied button:hover {
-            color: var(--bleu-moyen);
+            color: var(--accent-primaire);
         }
 
         .accueil-pied .accueil-separateur {
@@ -667,7 +669,7 @@
         .accueil-nouvelles-icone { font-size: 1.3rem; }
         .accueil-nouvelles-titre {
             font-weight: 600;
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
             font-size: 0.95rem;
         }
         .accueil-nouvelles-version {
@@ -683,7 +685,7 @@
         }
         .accueil-nouvelles-lien {
             font-size: 0.85rem;
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
             cursor: pointer;
         }
         .accueil-nouvelles-lien:hover { text-decoration: underline; }
@@ -811,7 +813,7 @@
 
         .section-export-recherche h4 {
             margin: 0 0 10px 0;
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
             font-size: 1rem;
         }
 
@@ -860,7 +862,7 @@
         }
 
         .export-trimestre-cible strong {
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
         }
 
         .export-actions {
@@ -894,7 +896,7 @@
             display: block;
             font-size: 1.5rem;
             font-weight: 700;
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
         }
 
         .statistique-label {
@@ -923,7 +925,7 @@
             padding: 12px 15px;
             cursor: pointer;
             font-weight: 600;
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
             list-style: none;
         }
 
@@ -982,23 +984,17 @@
         /* Mode Normal (par défaut) */
         body[data-mode="normal"] .sous-navigation,
         .sous-navigation {
-            background:
-                linear-gradient(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15)),
-                linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%) !important;
+            background: transparent !important;
         }
 
         /* Mode Anonymisé */
         body[data-mode="anonymisation"] .sous-navigation {
-            background:
-                linear-gradient(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15)),
-                linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%) !important;
+            background: transparent !important;
         }
 
-        /* Mode Assisté (sarcelle - plus foncé pour compenser luminosité) */
+        /* Mode Assisté */
         body[data-mode="simulation"] .sous-navigation {
-            background:
-                linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
-                linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%) !important;
+            background: transparent !important;
         }
 
         /* ===============================
@@ -1046,7 +1042,7 @@
            CARTES
            =============================== */
         .carte {
-            background: white;
+            background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
             border: 1px solid var(--bleu-pale);
             border-radius: var(--radius-grand);
             padding: var(--espacement-moyen);
@@ -1055,7 +1051,7 @@
         }
 
         .carte h3 {
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
             font-size: 1.1rem;
             margin-bottom: 15px;
             padding-bottom: 10px;
@@ -1081,7 +1077,7 @@
 
         .controle-form:focus {
             outline: none;
-            border-color: var(--bleu-principal);
+            border-color: var(--accent-primaire);
             box-shadow: 0 0 0 3px rgba(3, 46, 92, 0.1);
         }
 
@@ -1093,7 +1089,7 @@
             display: block;
             margin-bottom: 5px;
             font-weight: 500;
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
         }
 
         /* ===============================
@@ -1207,7 +1203,7 @@
            MOTEUR DE RECHERCHE AIDE
            =============================== */
         #aide-recherche-input:focus {
-            border-color: var(--bleu-principal);
+            border-color: var(--accent-primaire);
             box-shadow: 0 0 0 3px rgba(3, 46, 92, 0.1);
         }
 
@@ -1223,7 +1219,7 @@
         @keyframes fadeIn {
             from {
                 opacity: 0;
-                background-color: var(--surface-conteneur, #142428);
+                background-color: var(--surface-conteneur, #162c36);
             }
             to {
                 opacity: 1;
@@ -1313,7 +1309,7 @@
 
         .carte-metrique-valeur {
             font-size: 1.8rem;
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
         }
 
         .carte-metrique-valeur-verte {
@@ -1344,7 +1340,7 @@
         /* Barres de progression pour patterns */
         .barre-progression-container {
             margin-top: 8px;
-            background: white;
+            background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
             height: 8px;
             border-radius: var(--radius-moyen);
             overflow: hidden;
@@ -1455,7 +1451,7 @@
         }
 
         .carte-config-portfolio h5 {
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
             margin-bottom: 15px;
         }
 
@@ -1465,7 +1461,7 @@
             padding: 10px;
             background: var(--bleu-pale);
             border-radius: var(--radius-moyen);
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
             font-size: 0.85rem;
             margin-bottom: 15px;
         }
@@ -1548,7 +1544,7 @@
 
         /* Alignement et texte */
         .text-center { text-align: center; }
-        .text-bleu-principal { color: var(--bleu-principal); }
+        .text-bleu-principal { color: var(--accent-primaire); }
         .text-muted {
             font-size: 0.9rem;
             color: var(--gris-moyen);
@@ -1583,12 +1579,12 @@
         /* Styles de titres réutilisables */
         .titre-section-aide {
             font-weight: bold;
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
             margin-top: 15px;
         }
 
         .titre-section-principal {
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
             border-bottom: 2px solid var(--bleu-pale);
             padding-bottom: 5px;
             margin: 25px 0 15px 0;
@@ -1597,11 +1593,11 @@
         .titre-cliquable {
             font-weight: bold;
             cursor: pointer;
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
         }
 
         .titre-bleu-mb10 {
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
             margin-bottom: 10px;
         }
 
@@ -1621,7 +1617,7 @@
         .carte-encadree {
             margin: 20px 0;
             padding: 15px;
-            background: white;
+            background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
             border: 2px solid var(--bleu-moyen);
             border-radius: 6px;
         }
@@ -1643,12 +1639,12 @@
         .tableau-blanc {
             width: 100%;
             border-collapse: collapse;
-            background: white;
+            background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
         }
 
         .titre-1-8 {
             font-size: 1.8rem;
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
         }
 
         .carte-bleu-encadree {
@@ -1667,13 +1663,13 @@
         }
 
         .titre-section-haut {
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
             margin-top: 25px;
             margin-bottom: 15px;
         }
 
         .titre-sans-marge-haut {
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
             margin-top: 0;
         }
 
@@ -1756,7 +1752,7 @@
         }
 
         /* Backgrounds */
-        .bg-white { background: white; }
+        .bg-white { background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%); }
 
         /* Dimensions supplémentaires */
         .w-100px { width: 100px; }
@@ -1774,7 +1770,7 @@
         /* Marges horizontales supplémentaires */
         .mr-10 { margin-right: 10px; }
         .ml-10-bleu {
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
             margin-left: 10px;
         }
 
@@ -1836,11 +1832,11 @@
         }
         .label-fw-600-bleu {
             font-weight: 600;
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
             margin-bottom: 5px;
         }
         .titre-bleu-mb8 {
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
             margin-bottom: 8px;
         }
         .titre-105-mt20 {
@@ -1976,15 +1972,15 @@
 
         /* Titres colorés avec marges */
         .titre-bleu-mb-15 {
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
             margin-bottom: 15px;
         }
         .titre-bleu-mb-20 {
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
             margin-bottom: 20px;
         }
         .titre-bleu-lg-mb8 {
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
             font-size: 1.5rem;
             margin-bottom: 8px;
         }
@@ -1995,7 +1991,7 @@
         .titre-mt15-fw-bold-bleu {
             margin-top: 15px;
             font-weight: bold;
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
         }
 
         /* Bordures spécifiques */
@@ -2005,7 +2001,7 @@
 
         /* Cartes spécifiques */
         .carte-blanche-centree {
-            background: white;
+            background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
             padding: 15px;
             border-radius: 6px;
             border: 1px solid var(--bleu-pale);
@@ -2363,7 +2359,7 @@
         }
         .carte-white-p15 {
             padding: 15px;
-            background: white;
+            background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
         }
         .carte-purple-header {
             width: 100%;
@@ -2461,7 +2457,7 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            background: white;
+            background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
             padding: 20px;
             border-bottom: 2px solid var(--bleu-principal);
             margin-bottom: 20px;
@@ -2619,7 +2615,7 @@
         .m-15-0-0-0-sm-bleu {
             margin: 15px 0 0 0;
             font-size: 0.9em;
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
         }
         .m-15-0-0-0-primary {
             margin: 15px 0 0 0;
@@ -2630,20 +2626,20 @@
         .m-0-fw600-bleu {
             margin: 0;
             font-weight: 600;
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
         }
         .m-0-bleu-principal {
             margin: 0;
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
         }
         .m-0-bleu-moyen {
             margin: 0;
-            color: var(--bleu-moyen);
+            color: var(--texte-secondaire, #8aa4b0);
         }
         .m-0-bleu-moyen-sm {
             margin: 0;
             font-size: 0.95rem;
-            color: var(--bleu-moyen);
+            color: var(--texte-secondaire, #8aa4b0);
         }
         .m-0-success {
             margin: 0;
@@ -2690,7 +2686,7 @@
             margin-top: 20px;
             text-align: center;
             font-style: italic;
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
         }
         .carte-grise-mt20-sm-muted {
             margin-top: 20px;
@@ -2724,7 +2720,7 @@
         .mb-30 { margin-bottom: 30px; }
         .mt-0-bleu {
             margin-top: 0;
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
         }
         .mt-0-warning {
             margin-top: 0;
@@ -2800,11 +2796,11 @@
         .fw-600 { font-weight: 600; }
         .fw-500-bleu {
             font-weight: 500;
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
         }
         .fw-normal-bleu-moyen-sm {
             font-weight: normal;
-            color: var(--bleu-moyen);
+            color: var(--texte-secondaire, #8aa4b0);
             font-size: 0.9rem;
         }
 
@@ -2817,12 +2813,12 @@
         .stat-2rem-bold-bleu {
             font-size: 2rem;
             font-weight: bold;
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
         }
         .stat-2rem-bold-bleu-moyen {
             font-size: 2rem;
             font-weight: bold;
-            color: var(--bleu-moyen);
+            color: var(--texte-secondaire, #8aa4b0);
         }
 
         /* Grilles responsive */
@@ -2994,7 +2990,7 @@
 
         /* Cartes avec backgrounds variés */
         .carte-white-border {
-            background: white;
+            background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
             border: 1px solid var(--bleu-leger);
             border-radius: 6px;
             padding: 15px;
@@ -3090,14 +3086,14 @@
 
         /* Modales */
         .modal-content-small {
-            background: white;
+            background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
             border-radius: 12px;
             padding: 30px;
             max-width: 600px;
             width: 90%;
         }
         .modal-content-scroll {
-            background: white;
+            background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
             border-radius: 12px;
             padding: 30px;
             max-width: 600px;
@@ -3168,13 +3164,13 @@
         .titre-11-bold-bleu-mb10 {
             font-size: 1.1em;
             font-weight: bold;
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
             margin-bottom: 10px;
         }
         .titre-11-bold-bleu-mb15 {
             font-size: 1.1em;
             font-weight: bold;
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
             margin-bottom: 15px;
         }
 
@@ -3362,7 +3358,7 @@
 
         /* Sous-titre de section */
         .sous-titre-section {
-            color: var(--bleu-moyen);
+            color: var(--texte-secondaire, #8aa4b0);
             margin-bottom: 15px;
             padding-bottom: 8px;
             border-bottom: 2px solid var(--bleu-leger);
@@ -3518,7 +3514,7 @@
                     <!-- Titre et version -->
                     <div class="titre-section">
                         <h1>Système de suivi des apprentissages et de construction de la note</h1>
-                        <p class="meta" data-tooltip="entete-version">Beta 97.4 <span id="build-numero"></span></p>
+                        <p class="meta" data-tooltip="entete-version">Beta 98 <span id="build-numero"></span></p>
                     </div>
 
                     <!-- Sélecteur de mode déplacé à droite -->
@@ -3613,7 +3609,7 @@
 
                 <!-- Lien vers notes de version complètes -->
                 <p style="text-align: center; margin: 1rem 0;">
-                    <a href="#" onclick="fermerModalNouveautes(); allerVersNotesDeVersion(); return false;" style="color: var(--bleu-principal);">Voir toutes les notes de version →</a>
+                    <a href="#" onclick="fermerModalNouveautes(); allerVersNotesDeVersion(); return false;" style="color: var(--accent-primaire);">Voir toutes les notes de version →</a>
                 </p>
 
                 <!-- Bouton fermer en bas -->
@@ -4200,7 +4196,7 @@
                             </div>
 
                             <!-- Compteur présents/absents -->
-                            <div id="compteur-presences" style="background: var(--bleu-tres-pale); padding: 12px 16px; margin-bottom: 15px; display: flex; align-items: center; gap: 30px; font-size: 0.95rem; font-weight: 500; border-left: 4px solid var(--bleu-principal); color: var(--bleu-moyen);">
+                            <div id="compteur-presences" style="background: var(--bleu-tres-pale); padding: 12px 16px; margin-bottom: 15px; display: flex; align-items: center; gap: 30px; font-size: 0.95rem; font-weight: 500; border-left: 4px solid var(--accent-primaire); color: var(--texte-secondaire, #8aa4b0);">
                                 <span>
                                     Présents : <span id="nb-presents">0</span>
                                 </span>
@@ -4380,7 +4376,7 @@
                 <!-- Statistiques globales -->
                 <div class="carte">
                     <div id="stats-evaluations" data-tooltip="eval-liste-resume" style="display: flex; gap: 30px; flex-wrap: wrap; align-items: baseline;">
-                        <div style="font-weight: 600; color: var(--bleu-principal);" id="compteur-evaluations">
+                        <div style="font-weight: 600; color: var(--accent-primaire);" id="compteur-evaluations">
                             Chargement...
                         </div>
                         <div style="color: var(--gris-moyen);" id="moyenne-evaluations"></div>
@@ -4622,13 +4618,13 @@
                                 <div style="display: flex; align-items: center; justify-content: space-between;">
                                     <div>
                                         <div class="label" style="font-size: 0.8rem; color: #888; margin-bottom: 5px;">Note finale</div>
-                                        <div class="valeur" style="font-size: 2rem; font-weight: bold; color: var(--bleu-principal);">
+                                        <div class="valeur" style="font-size: 2rem; font-weight: bold; color: var(--accent-primaire);">
                                             <span id="noteProduction1">0.0</span>
                                         </div>
                                     </div>
                                     <div style="text-align: right;">
                                         <div style="font-size: 0.8rem; color: #888; margin-bottom: 5px;">Niveau</div>
-                                        <div style="font-size: 2rem; font-weight: bold; color: var(--bleu-principal);">
+                                        <div style="font-size: 2rem; font-weight: bold; color: var(--accent-primaire);">
                                             <span id="niveauProduction1">--</span>
                                         </div>
                                     </div>
@@ -4685,7 +4681,7 @@
                                     placeholder="La rétroaction sera générée automatiquement ici selon tes évaluations et les options cochées. Tu peux modifier le texte avant de le copier."
                                     style="width: 100%; height: 200px; padding: 12px; border-radius: 5px;
         border: 1px solid var(--bordure-claire); font-family: inherit; resize: vertical;
-        font-size: 0.85rem; line-height: 1.5; background: white;">
+        font-size: 0.85rem; line-height: 1.5; background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);">
 </textarea>
                             </div>
                         </div>
@@ -4720,7 +4716,7 @@
                     <h2 class="modal-titre">Réparation des évaluations</h2>
 
                     <div class="mb-25">
-                        <h3 style="color: var(--bleu-principal); font-size: 1rem; margin-bottom: 10px;">Qu'est-ce que cette fonction ?</h3>
+                        <h3 style="color: var(--accent-primaire); font-size: 1rem; margin-bottom: 10px;">Qu'est-ce que cette fonction ?</h3>
                         <p style="color: var(--gris-moyen); line-height: 1.6;">
                             Cette fonction permet de <strong>réparer automatiquement</strong> les évaluations dont les critères n'ont pas été correctement sauvegardés.
                             Elle extrait les niveaux (I, D, M, E) depuis la rétroaction finale et reconstruit le tableau des critères manquants.
@@ -5415,7 +5411,7 @@
 
                                 <!-- Aperçu visuel -->
                                 <div id="apercuEchelleNiveaux" data-tooltip="cn-echelle-apercu" style="display: flex; gap: 10px; flex-wrap: wrap;
-                     align-items: center; padding: 10px; background: white; border-radius: var(--radius-moyen); margin-bottom: 20px;">
+                     align-items: center; padding: 10px; background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%); border-radius: var(--radius-moyen); margin-bottom: 20px;">
                                     <!-- Généré par afficherApercuEchelle() -->
                                 </div>
 
@@ -5590,7 +5586,7 @@
              border-radius: 6px; border: 1px solid var(--vert-leger);">
                             <h5 class="text-vert-leger-mb10">Aperçu de l'échelle</h5>
                             <div id="apercuEchelle" style="display: flex; justify-content: space-between; 
-                 align-items: center; padding: 10px; background: white; border-radius: var(--radius-moyen);">
+                 align-items: center; padding: 10px; background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%); border-radius: var(--radius-moyen);">
                                 <!-- L'aperçu sera généré ici par afficherApercuEchelle() -->
                             </div>
                         </div>
@@ -5599,7 +5595,7 @@
                         <details class="mb-20">
                             <summary style="cursor: pointer; padding: 12px; background: var(--bleu-tres-pale);
                                 border-radius: 6px; border-left: 3px solid var(--bleu-moyen);
-                                color: var(--bleu-principal); user-select: none; display: flex;
+                                color: var(--accent-primaire); user-select: none; display: flex;
                                 justify-content: space-between; align-items: center;">
                                 <span></span>
                                 <span class="text-12">💡</span>
@@ -5992,7 +5988,7 @@
 
                                                     <!-- CARTE SÉLECTION -->
                                                     <div class="carte-categorie" style="border: 2px solid var(--bleu-clair); border-radius: var(--radius-moyen); padding: 15px;">
-                                                        <h4 style="color: var(--bleu-principal); margin: 0 0 15px 0; font-size: 1rem;">
+                                                        <h4 style="color: var(--accent-primaire); margin: 0 0 15px 0; font-size: 1rem;">
                                                             Sélection (N meilleures)
                                                         </h4>
 
@@ -6011,11 +6007,11 @@
                                                             </div>
                                                         </div>
 
-                                                        <div id="mat-selection-unitaire" style="font-size: 0.85rem; color: var(--bleu-principal); margin-bottom: 10px; padding: 8px; background: rgba(52, 152, 219, 0.08); border-radius: var(--radius-moyen);">
+                                                        <div id="mat-selection-unitaire" style="font-size: 0.85rem; color: var(--accent-primaire); margin-bottom: 10px; padding: 8px; background: rgba(52, 152, 219, 0.08); border-radius: var(--radius-moyen);">
                                                             Pondération unitaire : <strong>16.25%</strong> par production retenue
                                                         </div>
 
-                                                        <div id="mat-selection-liste" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--gris-clair); border-radius: var(--radius-moyen); background: white;">
+                                                        <div id="mat-selection-liste" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--gris-clair); border-radius: var(--radius-moyen); background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);">
                                                             <!-- Checkboxes générées dynamiquement -->
                                                             <p style="padding: 15px; color: var(--gris-moyen); text-align: center;">Chargement...</p>
                                                         </div>
@@ -6042,7 +6038,7 @@
                                                             Note = 0 si production non remise.
                                                         </p>
 
-                                                        <div id="mat-obligatoires-liste" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--gris-clair); border-radius: var(--radius-moyen); background: white;">
+                                                        <div id="mat-obligatoires-liste" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--gris-clair); border-radius: var(--radius-moyen); background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);">
                                                             <!-- Checkboxes générées dynamiquement -->
                                                             <p style="padding: 15px; color: var(--gris-moyen); text-align: center;">Chargement...</p>
                                                         </div>
@@ -6239,8 +6235,8 @@
                                         </div>
 
                                         <!-- Types de productions -->
-                                        <div style="margin-bottom: 25px; padding: 15px; background: white; border: 1px solid var(--gris-bordure); border-radius: 6px;">
-                                            <h4 style="margin: 0 0 10px 0; font-size: 1rem; color: var(--bleu-principal);">Types de productions</h4>
+                                        <div style="margin-bottom: 25px; padding: 15px; background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%); border: 1px solid var(--gris-bordure); border-radius: 6px;">
+                                            <h4 style="margin: 0 0 10px 0; font-size: 1rem; color: var(--accent-primaire);">Types de productions</h4>
                                             <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 15px;">
                                                 Définis les types de productions que les étudiants devront compléter.
                                             </p>
@@ -6251,8 +6247,8 @@
                                         </div>
 
                                         <!-- Table des forfaits -->
-                                        <div style="padding: 15px; background: white; border: 1px solid var(--gris-bordure); border-radius: 6px;">
-                                            <h4 style="margin: 0 0 10px 0; font-size: 1rem; color: var(--bleu-principal);">Table des forfaits (bundles)</h4>
+                                        <div style="padding: 15px; background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%); border: 1px solid var(--gris-bordure); border-radius: 6px;">
+                                            <h4 style="margin: 0 0 10px 0; font-size: 1rem; color: var(--accent-primaire);">Table des forfaits (bundles)</h4>
                                             <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 15px;">
                                                 Chaque forfait définit un ensemble de productions requises et la note associée.
                                             </p>
@@ -6550,7 +6546,7 @@
                                     <h5 class="text-vert-leger-mb10">
                                         Aperçu d'une rétroaction générée
                                     </h5>
-                                    <div id="exempleRetroaction" style="padding: 15px; background: white;
+                                    <div id="exempleRetroaction" style="padding: 15px; background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
                  border-radius: var(--radius-moyen); font-size: 0.9rem; line-height: 1.6;">
                                         <!-- L'aperçu sera généré ici par genererApercuAleatoire() -->
                                     </div>
@@ -8017,7 +8013,7 @@
 
                         <!-- FORMULAIRE D'AJOUT MANUEL -->
                         <details class="mb-20">
-                            <summary style="cursor: pointer; font-weight: 600; color: var(--bleu-principal); 
+                            <summary style="cursor: pointer; font-weight: 600; color: var(--accent-primaire); 
        padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px; user-select: none;">
                                 Ajouter un·e étudiant·e manuellement
                             </summary>
@@ -8094,7 +8090,7 @@
 
                         <!-- ZONE D'IMPORT -->
                         <details class="mb-20">
-                            <summary style="cursor: pointer; font-weight: 600; color: var(--bleu-principal); 
+                            <summary style="cursor: pointer; font-weight: 600; color: var(--accent-primaire); 
                            padding: 12px; background: var(--gris-tres-pale); border-radius: 6px; 
                            user-select: none;">
                                 Importer des étudiants (CSV/TSV ou copier-coller)
@@ -8134,7 +8130,7 @@
                                 Section Legacy désactivée.
                             </p>
                             <div id="legacy-previewTable" style="overflow-x: auto; max-height: 300px;
-                                          border: 1px solid var(--bordure-claire); border-radius: var(--radius-moyen); background: white;">
+                                          border: 1px solid var(--bordure-claire); border-radius: var(--radius-moyen); background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);">
                                 <!-- Le tableau sera généré ici -->
                             </div>
                             <div class="d-flex-gap10-mt15">
@@ -8151,7 +8147,7 @@
                         <div id="legacy-students-list-container" class="hidden-mb-20" style="display: none;">
                             <div
                                 class="d-flex-between-mb15">
-                                <h4 style="color: var(--bleu-principal); margin: 0;">
+                                <h4 style="color: var(--accent-primaire); margin: 0;">
                                     Liste des étudiants (Legacy) <span id="legacy-compteurFiltres"></span>
                                 </h4>
                                 <div class="d-flex-gap-10">
@@ -8324,7 +8320,7 @@
                             <!-- En-tête de la pratique sélectionnée -->
                             <div style="margin-bottom: 20px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px; display: flex; justify-content: space-between; align-items: flex-start;">
                                 <div style="flex: 1;">
-                                    <h3 id="nomPratiqueSelectionnee" style="margin: 0 0 5px 0; color: var(--bleu-principal);"></h3>
+                                    <h3 id="nomPratiqueSelectionnee" style="margin: 0 0 5px 0; color: var(--accent-primaire);"></h3>
                                     <p id="descriptionPratiqueSelectionnee" class="text-muted" style="margin: 0; font-size: 0.9rem;"></p>
                                 </div>
                                 <div style="display: flex; gap: 10px; margin-left: 15px;">
@@ -8614,7 +8610,7 @@
 
                                     <!-- Colonne droite : Types de jetons personnalisés -->
                                     <div>
-                                        <h4 style="font-size: 0.95rem; margin-bottom: 10px; color: var(--bleu-principal); font-weight: 500;">
+                                        <h4 style="font-size: 0.95rem; margin-bottom: 10px; color: var(--accent-primaire); font-weight: 500;">
                                             Types de jetons personnalisés
                                         </h4>
 
@@ -8748,7 +8744,7 @@
                                         <div style="flex: 1;">
                                             <h2 class="modal-titre" style="margin: 0 0 5px 0;">Créons ensemble ta pratique !</h2>
                                             <p style="margin: 0; color: var(--gris-moyen); font-size: 0.9rem;">
-                                                <strong style="color: var(--bleu-principal);">Étape <span id="wizard-etape-actuelle">1</span>/8</strong> :
+                                                <strong style="color: var(--accent-primaire);">Étape <span id="wizard-etape-actuelle">1</span>/8</strong> :
                                                 <span id="wizard-etape-titre">Informations de base</span>
                                             </p>
                                         </div>
@@ -9059,7 +9055,7 @@
                                                 <div id="wizard-evaluations-liste"></div>
                                                 <button type="button" class="btn btn-tres-compact" onclick="ajouterEvaluationWizard()">+ Ajouter une évaluation</button>
 
-                                                <h4 style="margin-top: 25px; margin-bottom: 15px; color: var(--bleu-principal);">Options d'affichage (pratique sommative)</h4>
+                                                <h4 style="margin-top: 25px; margin-bottom: 15px; color: var(--accent-primaire);">Options d'affichage (pratique sommative)</h4>
 
                                                 <div class="groupe-form">
                                                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
@@ -9106,7 +9102,7 @@
 
                                                 <!-- Configuration BINAIRE (François) -->
                                                 <div id="wizard-spec-config-binaire" style="display: none;">
-                                                    <h4 style="margin: 25px 0 15px 0; color: var(--bleu-principal);">Types de travaux</h4>
+                                                    <h4 style="margin: 25px 0 15px 0; color: var(--accent-primaire);">Types de travaux</h4>
                                                     <div style="margin-bottom: 15px; padding: 12px; background: var(--orange-tres-pale); border-left: 4px solid var(--orange-accent); border-radius: var(--radius-moyen);">
                                                         <p class="text-muted" style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
                                                             Définis les types de travaux avec leurs spécifications. Un travail est <strong>acceptable</strong>
@@ -9117,7 +9113,7 @@
                                                     <div id="wizard-spec-types-travaux-liste"></div>
                                                     <button type="button" class="btn btn-tres-compact" onclick="ajouterTypeTravailSpec()">+ Ajouter un type de travail</button>
 
-                                                    <h4 style="margin: 25px 0 15px 0; color: var(--bleu-principal);">Table de correspondance (Bundles → Notes)</h4>
+                                                    <h4 style="margin: 25px 0 15px 0; color: var(--accent-primaire);">Table de correspondance (Bundles → Notes)</h4>
                                                     <div style="margin-bottom: 15px; padding: 12px; background: var(--orange-tres-pale); border-left: 4px solid var(--orange-accent); border-radius: var(--radius-moyen);">
                                                         <p class="text-muted" style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
                                                             Définis les paliers de notes selon le nombre de travaux acceptables de chaque type.
@@ -9131,7 +9127,7 @@
 
                                                 <!-- Configuration NIVEAUX (Xavier) -->
                                                 <div id="wizard-spec-config-niveaux" style="display: none;">
-                                                    <h4 style="margin: 25px 0 15px 0; color: var(--bleu-principal);">Objectifs d'apprentissage</h4>
+                                                    <h4 style="margin: 25px 0 15px 0; color: var(--accent-primaire);">Objectifs d'apprentissage</h4>
                                                     <div style="margin-bottom: 15px; padding: 12px; background: var(--orange-tres-pale); border-left: 4px solid var(--orange-accent); border-radius: var(--radius-moyen);">
                                                         <p class="text-muted" style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
                                                             Définis tes objectifs d'apprentissage techniques. Chaque objectif sera évalué selon des niveaux
@@ -9146,7 +9142,7 @@
 
                                                     <div id="wizard-spec-objectifs-liste"></div>
 
-                                                    <h4 style="margin: 25px 0 15px 0; color: var(--bleu-principal);">Calcul de la note finale</h4>
+                                                    <h4 style="margin: 25px 0 15px 0; color: var(--accent-primaire);">Calcul de la note finale</h4>
                                                     <div style="margin-bottom: 15px; padding: 12px; background: var(--orange-tres-pale); border-left: 4px solid var(--orange-accent); border-radius: var(--radius-moyen);">
                                                         <p class="text-muted" style="margin: 0 0 10px 0; font-size: 0.85rem; line-height: 1.5;">
                                                             <strong>Logique de Xavier</strong> : La note finale dépend des niveaux atteints pour chaque objectif.
@@ -9444,7 +9440,7 @@
                                                 </label>
                                             </div>
 
-                                            <h4 style="margin-top: 25px; margin-bottom: 15px; color: var(--bleu-principal);">Terminologie</h4>
+                                            <h4 style="margin-top: 25px; margin-bottom: 15px; color: var(--accent-primaire);">Terminologie</h4>
 
                                             <div class="groupe-form">
                                                 <label>Terme pour «Évaluation»</label>
@@ -9511,12 +9507,12 @@
 
                             <!-- INFO PAN -->
                             <div id="infoPAN" style="display: none; margin-top: 15px; padding: 10px;
-                 background: white; border-radius: var(--radius-moyen); font-size: 0.85rem; color: var(--gris-moyen);">
+                 background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%); border-radius: var(--radius-moyen); font-size: 0.85rem; color: var(--gris-moyen);">
                             </div>
 
                             <!-- Activation portfolio et jetons -->
                             <div id="activationsExtras" style="display: none; margin-top: 20px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
-                                <h4 style="font-size: 0.95rem; margin-bottom: 12px; color: var(--bleu-principal);">Options de configuration</h4>
+                                <h4 style="font-size: 0.95rem; margin-bottom: 12px; color: var(--accent-primaire);">Options de configuration</h4>
 
                                 <!-- Grille 2 colonnes pour les checkboxes -->
                                 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
@@ -9540,7 +9536,7 @@
 
                             <!-- Affichage au tableau de bord -->
                             <div id="sectionAffichageTableauBord" style="display: none; margin-top: 20px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
-                                <h4 style="font-size: 0.95rem; margin-bottom: 10px; color: var(--bleu-principal);">Affichage au tableau de bord</h4>
+                                <h4 style="font-size: 0.95rem; margin-bottom: 10px; color: var(--accent-primaire);">Affichage au tableau de bord</h4>
 
                                 <p class="text-muted" style="margin-bottom: 12px; font-size: 0.8rem; line-height: 1.5;">
                                     Par défaut, le tableau de bord affiche uniquement les indices de la pratique choisie ci-dessus.
@@ -9891,7 +9887,7 @@
 
                         <!-- Capture manuelle -->
                         <div class="carte-bleu-pale-p15-mb20">
-                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">Capture manuelle</h4>
+                            <h4 style="color: var(--accent-primaire); margin-bottom: 10px;">Capture manuelle</h4>
                             <p>
                                 Capture immédiate de tous les étudiants avec les indices actuels.
                                 Utile pour marquer un moment important dans la session.
@@ -9903,7 +9899,7 @@
 
                         <!-- Reconstruction rétroactive -->
                         <div class="carte-bleu-pale-p15-mb20">
-                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">Reconstruction rétroactive</h4>
+                            <h4 style="color: var(--accent-primaire); margin-bottom: 10px;">Reconstruction rétroactive</h4>
                             <p>
                                 Recalcule toutes les captures hebdomadaires depuis le début du trimestre en utilisant
                                 les données d'évaluations et de présences existantes. Cette opération peut prendre quelques secondes.
@@ -9946,7 +9942,7 @@
 
                         <!-- Export -->
                         <div class="carte-bleu-pale-p15-mb20">
-                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px"> Exporter les données</h4>
+                            <h4 style="color: var(--accent-primaire); margin-bottom: 10px"> Exporter les données</h4>
                             <p>
                                 Sauvegarde tes données dans un fichier JSON. Tu pourras choisir quelles
                                 données exporter (toutes ou sélection personnalisée).
@@ -9961,7 +9957,7 @@
 
                         <!-- Import -->
                         <div class="carte-bleu-pale-p15">
-                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px"> Importer des données</h4>
+                            <h4 style="color: var(--accent-primaire); margin-bottom: 10px"> Importer des données</h4>
                             <p>
                                 Restaure des données depuis un fichier JSON exporté précédemment.
                             </p>
@@ -11501,13 +11497,13 @@
                         </div>
 
                         <!-- Seuils de détection avancés -->
-                        <h4 style="margin: 25px 0 15px 0; color: var(--bleu-principal); font-size: 0.95rem; border-top: 1px solid #e0e0e0; padding-top: 20px;">Seuils de détection avancés</h4>
+                        <h4 style="margin: 25px 0 15px 0; color: var(--accent-primaire); font-size: 0.95rem; border-top: 1px solid #e0e0e0; padding-top: 20px;">Seuils de détection avancés</h4>
 
                         <!-- Seuil progression -->
                         <div style="margin-bottom: 15px; padding: 12px; background: var(--surface-carte, #1a3a48); border-radius: 6px;">
                             <label for="v2-seuil-progression" style="font-weight: 600; display: block; margin-bottom: 8px;" data-tooltip="depist-seuil-progression">
                                 Progression des artefacts
-                                <span id="v2-valeur-progression" style="margin-left: 10px; color: var(--bleu-principal);">10 points (%)</span>
+                                <span id="v2-valeur-progression" style="margin-left: 10px; color: var(--accent-primaire);">10 points (%)</span>
                             </label>
                             <input type="range" id="v2-seuil-progression" class="controle-form"
                                    min="0.05" max="0.20" step="0.01" value="0.10"
@@ -11527,7 +11523,7 @@
                         <div style="margin-bottom: 15px; padding: 12px; background: var(--surface-carte, #1a3a48); border-radius: 6px;">
                             <label for="v2-seuil-risque" style="font-weight: 600; display: block; margin-bottom: 8px;" data-tooltip="depist-seuil-direction">
                                 Direction du risque
-                                <span id="v2-valeur-risque" style="margin-left: 10px; color: var(--bleu-principal);">5 points (%)</span>
+                                <span id="v2-valeur-risque" style="margin-left: 10px; color: var(--accent-primaire);">5 points (%)</span>
                             </label>
                             <input type="range" id="v2-seuil-risque" class="controle-form"
                                    min="0.03" max="0.15" step="0.01" value="0.05"
@@ -11547,7 +11543,7 @@
                         <div style="margin-bottom: 15px; padding: 12px; background: var(--surface-carte, #1a3a48); border-radius: 6px;">
                             <label for="v2-seuil-defi" style="font-weight: 600; display: block; margin-bottom: 8px;" data-tooltip="depist-seuil-defi">
                                 Seuil de défi spécifique
-                                <span id="v2-valeur-defi" style="margin-left: 10px; color: var(--bleu-principal);">70%</span>
+                                <span id="v2-valeur-defi" style="margin-left: 10px; color: var(--accent-primaire);">70%</span>
                             </label>
                             <input type="range" id="v2-seuil-defi" class="controle-form"
                                    min="0.60" max="0.80" step="0.01" value="0.70"
@@ -11661,7 +11657,7 @@
                         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
                             <!-- Export sauvegarde -->
                             <div class="carte-bleu-pale-p15">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px;" data-tooltip="donnees-export-complet">
+                                <h4 style="color: var(--accent-primaire); margin-bottom: 10px;" data-tooltip="donnees-export-complet">
                                     Sauvegarde complète
                                 </h4>
                                 <p style="font-size: 0.9rem; margin-bottom: 15px; color: var(--gris-moyen);">
@@ -11675,7 +11671,7 @@
 
                             <!-- Export config pédagogique -->
                             <div class="carte-bleu-pale-p15">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px;" data-tooltip="donnees-export-config">
+                                <h4 style="color: var(--accent-primaire); margin-bottom: 10px;" data-tooltip="donnees-export-config">
                                     Configuration pédagogique
                                 </h4>
                                 <p style="font-size: 0.9rem; margin-bottom: 15px; color: var(--gris-moyen);">
@@ -11689,7 +11685,7 @@
 
                             <!-- Importer -->
                             <div class="carte-bleu-pale-p15">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px;" data-tooltip="donnees-import">
+                                <h4 style="color: var(--accent-primaire); margin-bottom: 10px;" data-tooltip="donnees-import">
                                     Importer un fichier
                                 </h4>
                                 <p style="font-size: 0.9rem; margin-bottom: 15px; color: var(--gris-moyen);">
@@ -11714,7 +11710,7 @@
                         <div class="accordeon-contenu">
                             <!-- Sous-section: Snapshots -->
                             <div style="margin-top: 15px; padding: 15px; background: var(--bleu-tres-pale); border-radius: var(--radius-grand);">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px;" data-tooltip="donnees-snapshots">Captures de progression (Snapshots)</h4>
+                                <h4 style="color: var(--accent-primaire); margin-bottom: 10px;" data-tooltip="donnees-snapshots">Captures de progression (Snapshots)</h4>
                                 <p class="text-muted u-mb-15">
                                     Les captures enregistrent l'état des indices A-C-P-E à des moments clés pour le suivi longitudinal.
                                 </p>
@@ -11772,7 +11768,7 @@
 
                             <!-- Sous-section: Export recherche -->
                             <div style="margin-top: 20px; padding: 15px; background: var(--bleu-tres-pale); border-radius: var(--radius-grand);">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px;" data-tooltip="donnees-export-recherche">Export anonymisé pour la recherche</h4>
+                                <h4 style="color: var(--accent-primaire); margin-bottom: 10px;" data-tooltip="donnees-export-recherche">Export anonymisé pour la recherche</h4>
                                 <p class="text-muted u-mb-15">
                                     Génère un export anonymisé des données d'apprentissage pour la recherche en éducation.
                                 </p>
@@ -11815,7 +11811,7 @@
 
                             <!-- Informations techniques -->
                             <div style="margin-top: 20px; padding: 15px; background: var(--bleu-tres-pale); border-radius: var(--radius-grand);">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px;" data-tooltip="donnees-info-techniques">Informations techniques</h4>
+                                <h4 style="color: var(--accent-primaire); margin-bottom: 10px;" data-tooltip="donnees-info-techniques">Informations techniques</h4>
                                 <ul style="margin: 0 0 0 20px; line-height: 1.8;">
                                     <li><strong>Stockage :</strong> Local dans le navigateur (IndexedDB + localStorage)</li>
                                     <li><strong>Format :</strong> Fichiers JSON lisibles</li>
@@ -12341,7 +12337,7 @@
                             <p>Cette application de suivi des apprentissages permet de capturer les <em>micro data</em> générées dans la classe, de les trier et de les interpréter afin de mieux organiser l'apprentissage et l'accompagnement des élèves.</p>
 
                             <div class="alerte alerte-information">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Qu'est-ce que les micro data ?</h4>
+                                <h4 style="color: var(--accent-primaire); margin-bottom: 10px">Qu'est-ce que les micro data ?</h4>
                                 <p>Les <strong>micro données</strong> sont des informations créées, collectées et traitées localement par un·e enseignant·e tout au long du trimestre : présences, notes, observations, interventions. Ces données sont généralement perdues en fin de session.</p>
                                 <p class="mt-10">L'application permet de <strong>mettre en relation</strong> ces informations pour créer des portraits dynamiques de l'apprentissage, tant individuels que collectifs.</p>
                             </div>
@@ -12423,21 +12419,21 @@
                         </div>
                         <div class="accordeon-contenu">
                             <div class="alerte alerte-information">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">A - Assiduité</h4>
+                                <h4 style="color: var(--accent-primaire); margin-bottom: 10px">A - Assiduité</h4>
                                 <p><strong>Présence en classe</strong> - Mesure l'engagement cognitif</p>
                                 <p class="text-muted" style="font-size: 0.9rem"><em>Module source : saisie-presences.js</em></p>
                                 <p>Les étudiants assidus sont davantage exposés au contenu, aux explications et aux pratiques guidées.</p>
                             </div>
 
                             <div class="alerte alerte-information">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">C - Complétion</h4>
+                                <h4 style="color: var(--accent-primaire); margin-bottom: 10px">C - Complétion</h4>
                                 <p><strong>Remise des travaux</strong> - Mesure la mobilisation</p>
                                 <p class="text-muted" style="font-size: 0.9rem"><em>Module source : portfolio.js</em></p>
                                 <p>Reflète la constance et la persévérance dans les efforts, la régularité d'exécution et le respect des délais.</p>
                             </div>
 
                             <div class="alerte alerte-information">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">P - Performance</h4>
+                                <h4 style="color: var(--accent-primaire); margin-bottom: 10px">P - Performance</h4>
                                 <p><strong>Qualité des productions</strong> - Mesure la maîtrise</p>
                                 <p class="text-muted" style="font-size: 0.9rem"><em>Module source : portfolio.js</em></p>
                                 <p>Évalue la qualité des travaux selon tes critères et ton échelle de notation.</p>
@@ -12601,17 +12597,17 @@
                             <p>L'application fonctionne selon trois modes distincts :</p>
 
                             <div class="alerte alerte-information">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Mode Normal</h4>
+                                <h4 style="color: var(--accent-primaire); margin-bottom: 10px">Mode Normal</h4>
                                 <p>Toutes les fonctionnalités de gestion de cours et d'évaluation sont disponibles. C'est le mode par défaut pour l'utilisation quotidienne.</p>
                             </div>
 
                             <div class="alerte alerte-information">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Mode Assisté</h4>
+                                <h4 style="color: var(--accent-primaire); margin-bottom: 10px">Mode Assisté</h4>
                                 <p>Active l'assistant de configuration <strong>Primo</strong> qui guide l'enseignant·e à travers les étapes de mise en place : définition du trimestre, création du cours, importation du groupe, configuration des pratiques de notation. Ce mode facilite l'appropriation de l'outil sans être surchargé par la complexité des options disponibles.</p>
                             </div>
 
                             <div class="alerte alerte-information">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Mode Anonymisé</h4>
+                                <h4 style="color: var(--accent-primaire); margin-bottom: 10px">Mode Anonymisé</h4>
                                 <p>Masque toutes les informations nominatives (noms, DA) pour permettre :</p>
                                 <ul class="mt-5">
                                     <li>Des <strong>démonstrations publiques</strong> sans compromettre la vie privée</li>
@@ -12647,7 +12643,7 @@
                             </ul>
 
                             <div class="alerte alerte-information">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Import depuis un trimestre précédent (Beta 95.3)</h4>
+                                <h4 style="color: var(--accent-primaire); margin-bottom: 10px">Import depuis un trimestre précédent (Beta 95.3)</h4>
                                 <p>Réutilisez votre matériel d'un trimestre à l'autre sans tout recréer :</p>
                                 <ul class="mt-5">
                                     <li><strong>Échelles</strong> : Section "Importer depuis un autre trimestre" dans la bibliothèque</li>
@@ -12663,7 +12659,7 @@
                             </div>
 
                             <div class="alerte alerte-information">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Licence Creative Commons</h4>
+                                <h4 style="color: var(--accent-primaire); margin-bottom: 10px">Licence Creative Commons</h4>
                                 <p>Tout matériel exporté est protégé par la licence <strong>CC BY-NC-SA 4.0</strong>, qui permet le partage et l'adaptation tout en préservant l'attribution à la personne autrice originale.</p>
                                 <p class="mt-10">Cette approche favorise l'émergence de <strong>communs éducatifs</strong> : plutôt que de recommencer à zéro, on peut s'inspirer du travail de ses pairs, l'adapter à son contexte et le redistribuer à son tour.</p>
                             </div>
@@ -12749,7 +12745,7 @@
                             <p><strong>Les 4 modules de Primo :</strong></p>
 
                             <div class="alerte alerte-information">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Module 1 : Créer un groupe-cours</h4>
+                                <h4 style="color: var(--accent-primaire); margin-bottom: 10px">Module 1 : Créer un groupe-cours</h4>
                                 <p><strong>Durée :</strong> ~3 minutes</p>
                                 <p>Questions conversationnelles pour configurer :</p>
                                 <ul class="mt-5">
@@ -12764,20 +12760,20 @@
                             </div>
 
                             <div class="alerte alerte-information">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Module 2 : Évaluer une production</h4>
+                                <h4 style="color: var(--accent-primaire); margin-bottom: 10px">Module 2 : Évaluer une production</h4>
                                 <p><strong>Prérequis :</strong> Avoir au moins un cours-groupe créé</p>
                                 <p>Guide direct vers le formulaire d'évaluation avec explications contextuelles.</p>
                             </div>
 
                             <div class="alerte alerte-information">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Module 3 : Explorer les diagnostics</h4>
+                                <h4 style="color: var(--accent-primaire); margin-bottom: 10px">Module 3 : Explorer les diagnostics</h4>
                                 <p><strong>Prérequis :</strong> Avoir des données (évaluations, présences)</p>
                                 <p>Visite guidée du tableau de bord et des profils étudiants.</p>
                                 <p class="text-muted mt-5" style="font-size: 0.9rem"><em>En développement</em></p>
                             </div>
 
                             <div class="alerte alerte-information">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Module 4 : Créer une pratique de notation</h4>
+                                <h4 style="color: var(--accent-primaire); margin-bottom: 10px">Module 4 : Créer une pratique de notation</h4>
                                 <p><strong>Durée :</strong> ~8 minutes</p>
                                 <p>Wizard interactif pour configurer ta pratique personnalisée :</p>
                                 <ul class="mt-5">
@@ -12853,7 +12849,7 @@
                             </div>
 
                             <div class="alerte alerte-information">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Synthèses intelligentes (Beta 95.3)</h4>
+                                <h4 style="color: var(--accent-primaire); margin-bottom: 10px">Synthèses intelligentes (Beta 95.3)</h4>
                                 <p>Chaque accordéon affiche une <strong>synthèse calculée</strong> dans sa barre latérale :</p>
                                 <ul class="mt-5">
                                     <li><strong>Trimestre</strong> : "Hiver 2026 • 15 sem., 31 jours cours, 10 congés"</li>
@@ -12915,7 +12911,7 @@
                             </ul>
 
                             <div class="alerte alerte-information">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Expérience complète du système</h4>
+                                <h4 style="color: var(--accent-primaire); margin-bottom: 10px">Expérience complète du système</h4>
                                 <p>Avec le groupe demo, tu peux :</p>
                                 <ul class="m-10-0-0-0">
                                     <li><strong>Tableau de bord</strong> : Visualiser les indices A-C-P de 10 étudiants</li>
@@ -12973,7 +12969,7 @@
                             </ul>
 
                             <div class="alerte alerte-information">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Bibliothèque groupe-cours (Beta 95.3)</h4>
+                                <h4 style="color: var(--accent-primaire); margin-bottom: 10px">Bibliothèque groupe-cours (Beta 95.3)</h4>
                                 <p>Le bouton <strong>📚 Bibliothèque</strong> dans l'accordéon Groupe-cours ouvre une modal avec :</p>
                                 <ul class="mt-5">
                                     <li>Liste de tous vos groupes-cours du trimestre</li>
@@ -13057,7 +13053,7 @@
                             <p>Le système supporte différentes pratiques pédagogiques. Choisissez celle qui correspond à ton approche :</p>
 
                             <div class="alerte alerte-information">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">📝 PAN-Standards (Évaluation par compétences)</h4>
+                                <h4 style="color: var(--accent-primaire); margin-bottom: 10px">📝 PAN-Standards (Évaluation par compétences)</h4>
                                 <p><strong>Principes :</strong> Sélection des N meilleurs artefacts, échelle IDME, système de jetons</p>
                                 <p><strong>Paramètres à définir :</strong></p>
                                 <ul class="mt-5">
@@ -13073,7 +13069,7 @@
                             </div>
 
                             <div class="alerte alerte-information">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">📊 Sommative (Évaluation traditionnelle)</h4>
+                                <h4 style="color: var(--accent-primaire); margin-bottom: 10px">📊 Sommative (Évaluation traditionnelle)</h4>
                                 <p><strong>Principes :</strong> Moyenne pondérée de toutes les évaluations, notation 0-100%</p>
                                 <p><strong>Fonctionnement :</strong> Toutes les évaluations comptent selon leur pondération. Approche traditionnelle utilisée dans la plupart des disciplines.</p>
                             </div>
@@ -13312,7 +13308,7 @@
                             <p>L'archivage permet de <strong>préserver un trimestre terminé</strong> tout en libérant l'espace pour un nouveau trimestre de travail.</p>
 
                             <div class="alerte alerte-information">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Que se passe-t-il lors de l'archivage ?</h4>
+                                <h4 style="color: var(--accent-primaire); margin-bottom: 10px">Que se passe-t-il lors de l'archivage ?</h4>
                                 <ul class="lh-2">
                                     <li>Le trimestre passe en <strong>mode lecture seule</strong> (aucune modification possible)</li>
                                     <li>Les statistiques finales sont calculées et sauvegardées</li>
@@ -13516,7 +13512,7 @@
                         </div>
 
                         <div class="alerte alerte-information">
-                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Test 2 : Créer une grille pour ta discipline</h4>
+                            <h4 style="color: var(--accent-primaire); margin-bottom: 10px">Test 2 : Créer une grille pour ta discipline</h4>
                             <p><strong>Étapes :</strong></p>
                             <ol class="lh-relaxed">
                                 <li>Aller dans <strong>Construction de la note → Critères d'évaluation</strong></li>
@@ -13777,7 +13773,7 @@
                         <p>Le système distingue clairement deux situations différentes qui affectent les calculs de manière distincte :</p>
 
                         <div class="alerte alerte-information">
-                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Travail NON REMIS</h4>
+                            <h4 style="color: var(--accent-primaire); margin-bottom: 10px">Travail NON REMIS</h4>
                             <p><strong>Définition :</strong> L'étudiant n'a pas soumis de travail.</p>
                             <p><strong>Affichage :</strong> Badge «Non remis» dans le tableau des évaluations.</p>
                             <p><strong>Impact sur les calculs :</strong></p>
@@ -13790,7 +13786,7 @@
                         </div>
 
                         <div class="alerte alerte-attention">
-                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Travail NON RECEVABLE (Plagiat ou IA)</h4>
+                            <h4 style="color: var(--accent-primaire); margin-bottom: 10px">Travail NON RECEVABLE (Plagiat ou IA)</h4>
                             <p><strong>Définition :</strong> Le travail existe mais ne peut être évalué pour des raisons d'intégrité académique.</p>
                             <p><strong>Affichage :</strong></p>
                             <ul class="m-10-0-0-0">
@@ -13808,7 +13804,7 @@
                         </div>
 
                         <div class="alerte alerte-information">
-                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Travail SOUPÇONNÉ (À vérifier)</h4>
+                            <h4 style="color: var(--accent-primaire); margin-bottom: 10px">Travail SOUPÇONNÉ (À vérifier)</h4>
                             <p><strong>Définition :</strong> Cas en investigation, pas encore confirmé.</p>
                             <p><strong>Affichage :</strong> Badge orange «À vérifier»</p>
                             <p><strong>Impact sur les calculs :</strong> Aucun - le travail est évalué normalement en attendant la décision finale.</p>
@@ -13988,7 +13984,7 @@
                         <p><strong>Distinction ponctuel vs cumulatif :</strong></p>
 
                         <div class="alerte alerte-information">
-                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Graphique INDIVIDUEL (Profil étudiant)</h4>
+                            <h4 style="color: var(--accent-primaire); margin-bottom: 10px">Graphique INDIVIDUEL (Profil étudiant)</h4>
                             <p><strong>Tous les indices sont CUMULATIFS</strong> (depuis le début du trimestre) :</p>
                             <ul class="m-10-0-0-0">
                                 <li><strong>A cumulatif</strong> : Assiduité totale depuis le début (ex: 24h présentes / 26h offertes = 92%)</li>
@@ -13999,7 +13995,7 @@
                         </div>
 
                         <div class="alerte alerte-information">
-                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Graphique GROUPE (Tableau de bord)</h4>
+                            <h4 style="color: var(--accent-primaire); margin-bottom: 10px">Graphique GROUPE (Tableau de bord)</h4>
                             <p><strong>Indices mixtes</strong> pour détecter les variations récentes :</p>
                             <ul class="m-10-0-0-0">
                                 <li><strong>A ponctuel</strong> : Taux de présence à cette séance spécifique (ex: 28/30 présents = 93%)</li>
@@ -14132,7 +14128,7 @@
                         </div>
 
                         <div class="carte-gradient-bleu-mt15">
-                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Flux typique de partage</h4>
+                            <h4 style="color: var(--accent-primaire); margin-bottom: 10px">Flux typique de partage</h4>
                             <ol class="lh-relaxed">
                                 <li><strong>Enseignant·e A</strong> : Exporte son matériel (boutons d'export dans chaque section)</li>
                                 <li><strong>Partage</strong> : Fichiers JSON envoyés par courriel, Drive, Teams, etc.</li>
@@ -14239,7 +14235,7 @@
                         </div>
 
                         <div class="carte-gradient-bleu">
-                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px">📋 Contexte pédagogique</h4>
+                            <h4 style="color: var(--accent-primaire); margin-bottom: 10px">📋 Contexte pédagogique</h4>
                             <p>Lorsque tu planifies une intervention RàI ciblée :</p>
                             <ul class="lh-16">
                                 <li>Certains étudiants ont besoin de soutien spécifique (niveau 2 ou 3)</li>
@@ -14255,10 +14251,10 @@
                         </div>
 
                         <div class="carte-gradient-bleu">
-                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px">🔍 Distinction entre niveaux 2 et 3</h4>
+                            <h4 style="color: var(--accent-primaire); margin-bottom: 10px">🔍 Distinction entre niveaux 2 et 3</h4>
                             <p class="mb-10"><strong>Le système traite différemment les interventions selon leur nature :</strong></p>
 
-                            <div style="background: white; padding: 12px; border-radius: 6px; margin-bottom: 12px;">
+                            <div style="background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%); padding: 12px; border-radius: 6px; margin-bottom: 12px;">
                                 <p class="mb-5"><strong style="color: var(--orange-accent);">Niveau 2 (Préventif - en classe ou en période de disponibilité)</strong></p>
                                 <ul class="lh-16">
                                     <li><strong>Contexte :</strong> Intervention en classe pendant le cours régulier</li>
@@ -14279,7 +14275,7 @@
                                 </ul>
                             </div>
 
-                            <div style="background: white; padding: 12px; border-radius: 6px;">
+                            <div style="background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%); padding: 12px; border-radius: 6px;">
                                 <p class="mb-5"><strong style="color: var(--bleu-moyen);">Niveau 3 (Intensif - hors classe, au bureau)</strong></p>
                                 <ul class="lh-16">
                                     <li><strong>Contexte :</strong> Rencontre individuelle ou petit groupe à ton bureau</li>
@@ -14595,7 +14591,7 @@
                         <p><strong>Le système offre deux fonctionnalités optionnelles</strong> que tu peux activer/désactiver selon ta pratique de notation :</p>
 
                         <div class="alerte alerte-info u-mt-15">
-                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">Option 1 : Détection des patterns et RàI</h4>
+                            <h4 style="color: var(--accent-primaire); margin-bottom: 10px;">Option 1 : Détection des patterns et RàI</h4>
                             <p><strong>Activation :</strong> Réglages → Pratique de notation → Cocher «Activer RàI et détection des patterns»</p>
                             <p><strong>Fonction :</strong> Identifie automatiquement 4 patterns d'apprentissage (Stable, Défi spécifique, Blocage émergent, Blocage critique) et recommande des niveaux d'intervention selon le cadre Réponse à l'Intervention (RàI).</p>
                             <p><strong>Utilisation recommandée :</strong></p>
@@ -14606,7 +14602,7 @@
                         </div>
 
                         <div class="alerte alerte-info u-mt-15">
-                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">Option 2 : Observation de la structure SOLO</h4>
+                            <h4 style="color: var(--accent-primaire); margin-bottom: 10px;">Option 2 : Observation de la structure SOLO</h4>
                             <p><strong>Activation :</strong> Réglages → Pratique de notation → Cocher «Afficher l'observation de la structure des résultats d'apprentissage (SOLO)»</p>
                             <p><strong>Fonction :</strong> Affiche une carte dans le profil étudiant (section Accompagnement) avec les forces et défis identifiés selon les 4 niveaux IDME (Insuffisant, Développement, Maîtrisé, Étendu) basés sur la taxonomie SOLO de Biggs & Collis.</p>
                             <p><strong>Utilisation recommandée :</strong></p>
@@ -15540,7 +15536,7 @@
                         <div class="accordeon-contenu">
 
                         <div class="my-15">
-                            <h4 style="color: var(--bleu-principal); border-bottom: 2px solid var(--bleu-pale); padding-bottom: 5px; margin-bottom: 15px;">A</h4>
+                            <h4 style="color: var(--accent-primaire); border-bottom: 2px solid var(--bleu-pale); padding-bottom: 5px; margin-bottom: 15px;">A</h4>
 
                             <dl class="ml-10">
                                 <dt class="titre-section-aide">Artefact</dt>
@@ -16020,8 +16016,8 @@
          */
 
         // === CONFIGURATION ===
-        const VERSION_MAJEURE = '97.4';
-        const BUILD_ID = '0211-1302';  // Auto-updated by Claude before each commit (Toronto time)
+        const VERSION_MAJEURE = '98';
+        const BUILD_ID = '0211-1959';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';

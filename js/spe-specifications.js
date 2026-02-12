@@ -471,7 +471,7 @@
 
         let html = `
             <div class="spe-dashboard" style="padding: 15px; background: var(--gris-tres-pale); border-radius: 8px; margin: 10px 0;">
-                <h4 style="margin: 0 0 15px 0; color: var(--bleu-principal);">
+                <h4 style="margin: 0 0 15px 0; color: var(--accent-primaire);">
                     Progression PAN-Spécifications
                 </h4>
 
@@ -615,7 +615,7 @@
 
         let html = `
             <div class="spe-checklist" style="margin: 15px 0;">
-                <h5 style="margin-bottom: 10px; color: var(--bleu-principal);">
+                <h5 style="margin-bottom: 10px; color: var(--accent-primaire);">
                     Spécifications à vérifier
                 </h5>
                 <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 15px;">
@@ -754,7 +754,7 @@
                 z-index: 10000;
             ">
                 <div style="
-                    background: white;
+                    background: var(--surface-conteneur, #162c36);
                     border-radius: 8px;
                     padding: 30px;
                     max-width: 700px;
@@ -764,7 +764,7 @@
                     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
                 ">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h3 style="margin: 0; color: var(--bleu-principal);">
+                        <h3 style="margin: 0; color: var(--accent-primaire);">
                             Créer une grille de spécifications
                         </h3>
                         <button onclick="fermerModalGrilleSPE()" style="

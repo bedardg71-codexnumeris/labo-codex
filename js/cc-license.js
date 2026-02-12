@@ -1321,7 +1321,7 @@ function genererPanneauMetadonnees(ressource, typeRessource) {
             <span class="meta-label">Licence</span>
             <span class="meta-valeur">
                 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank"
-                   style="color: var(--bleu-moyen); text-decoration: none;">
+                   style="color: var(--texte-secondaire); text-decoration: none;">
                     ${echapperHtmlCC(licence)}
                 </a>
             </span>

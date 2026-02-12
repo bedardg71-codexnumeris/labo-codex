@@ -78,7 +78,7 @@ function afficherModalAccueil() {
     // Contenu du modal
     modal.innerHTML = `
         <div style="
-            background: white;
+            background: var(--surface-conteneur, #162c36);
             border-radius: var(--primo-border-radius, 12px);
             padding: 25px;
             max-width: var(--primo-modal-width, 500px);
@@ -103,7 +103,7 @@ function afficherModalAccueil() {
                 </div>
                 <div style="flex: 1;">
                     <h2 style="
-                        color: var(--bleu-principal);
+                        color: var(--accent-primaire);
                         margin: 0 0 5px;
                         font-size: 1.8rem;
                     ">Allô, je suis Primo !</h2>
@@ -118,7 +118,7 @@ function afficherModalAccueil() {
             <!-- Parcours modulaire -->
             <div style="margin-bottom: 25px;">
                 <h3 style="
-                    color: var(--bleu-principal);
+                    color: var(--accent-primaire);
                     font-size: 1.1rem;
                     margin: 0 0 15px;
                     text-transform: uppercase;
@@ -130,15 +130,15 @@ function afficherModalAccueil() {
                     width: 100%;
                     padding: 15px 20px;
                     margin-bottom: 8px;
-                    background: white;
-                    color: var(--bleu-principal);
-                    border: 2px solid var(--bleu-principal);
+                    background: var(--surface-conteneur, #162c36);
+                    color: var(--accent-primaire);
+                    border: 2px solid var(--accent-primaire);
                     border-radius: 8px;
                     font-size: 1rem;
                     cursor: pointer;
                     text-align: left;
                     transition: all 0.2s;
-                " onmouseover="this.style.background='var(--bleu-tres-pale)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='white'; this.style.transform='translateY(0)';">
+                " onmouseover="this.style.background='var(--bleu-tres-pale)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='var(--surface-conteneur)'; this.style.transform='translateY(0)';">
                     <strong>MODULE 1 : Créer un groupe-cours</strong>
                     <div style="font-size: 0.85rem; margin-top: 5px; opacity: 0.8;">
                         Configurer cours, trimestre, horaire, groupe (3 minutes)
@@ -150,15 +150,15 @@ function afficherModalAccueil() {
                     width: 100%;
                     padding: 15px 20px;
                     margin-bottom: 8px;
-                    background: white;
-                    color: var(--bleu-principal);
-                    border: 2px solid var(--bleu-principal);
+                    background: var(--surface-conteneur, #162c36);
+                    color: var(--accent-primaire);
+                    border: 2px solid var(--accent-primaire);
                     border-radius: 8px;
                     font-size: 1rem;
                     cursor: pointer;
                     text-align: left;
                     transition: all 0.2s;
-                " onmouseover="this.style.background='var(--bleu-tres-pale)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='white'; this.style.transform='translateY(0)';">
+                " onmouseover="this.style.background='var(--bleu-tres-pale)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='var(--surface-conteneur)'; this.style.transform='translateY(0)';">
                     <strong>MODULE 2 : Évaluer une production</strong>
                     <div style="font-size: 0.85rem; margin-top: 5px; opacity: 0.8;">
                         Importer matériel et compléter une évaluation
@@ -190,15 +190,15 @@ function afficherModalAccueil() {
                     width: 100%;
                     padding: 15px 20px;
                     margin-bottom: 8px;
-                    background: white;
-                    color: var(--bleu-principal);
-                    border: 2px solid var(--bleu-principal);
+                    background: var(--surface-conteneur, #162c36);
+                    color: var(--accent-primaire);
+                    border: 2px solid var(--accent-primaire);
                     border-radius: 8px;
                     font-size: 1rem;
                     cursor: pointer;
                     text-align: left;
                     transition: all 0.2s;
-                " onmouseover="this.style.background='var(--bleu-tres-pale)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='white'; this.style.transform='translateY(0)';">
+                " onmouseover="this.style.background='var(--bleu-tres-pale)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='var(--surface-conteneur)'; this.style.transform='translateY(0)';">
                     <strong>MODULE 4 : Créer ma pratique de notation</strong>
                     <div style="font-size: 0.85rem; margin-top: 5px; opacity: 0.8;">
                         Configurer pratique, seuils, échelle, grille (8 minutes)
@@ -210,7 +210,7 @@ function afficherModalAccueil() {
                     width: 100%;
                     padding: 15px 20px;
                     margin-bottom: 8px;
-                    background: white;
+                    background: var(--surface-conteneur, #162c36);
                     color: var(--gris-moyen);
                     border: 1px solid var(--bordure-claire);
                     border-radius: 8px;
@@ -218,7 +218,7 @@ function afficherModalAccueil() {
                     cursor: pointer;
                     text-align: left;
                     transition: all 0.2s;
-                " onmouseover="this.style.background='var(--gris-tres-pale)'; this.style.borderColor='var(--gris-moyen)';" onmouseout="this.style.background='white'; this.style.borderColor='var(--bordure-claire)';">
+                " onmouseover="this.style.background='var(--gris-tres-pale)'; this.style.borderColor='var(--gris-moyen)';" onmouseout="this.style.background='var(--surface-conteneur)'; this.style.borderColor='var(--bordure-claire)';">
                     <strong>Consulter l'aide</strong>
                     <div style="font-size: 0.85rem; margin-top: 5px; opacity: 0.8;">
                         Accéder à la documentation
@@ -229,7 +229,7 @@ function afficherModalAccueil() {
                 <button onclick="explorerLibrement()" style="
                     width: 100%;
                     padding: 15px 20px;
-                    background: white;
+                    background: var(--surface-conteneur, #162c36);
                     color: var(--gris-moyen);
                     border: 1px solid var(--bordure-claire);
                     border-radius: 8px;
@@ -237,7 +237,7 @@ function afficherModalAccueil() {
                     cursor: pointer;
                     text-align: center;
                     transition: all 0.2s;
-                " onmouseover="this.style.background='var(--gris-tres-pale)'; this.style.borderColor='var(--gris-moyen)';" onmouseout="this.style.background='white'; this.style.borderColor='var(--bordure-claire)';">
+                " onmouseover="this.style.background='var(--gris-tres-pale)'; this.style.borderColor='var(--gris-moyen)';" onmouseout="this.style.background='var(--surface-conteneur)'; this.style.borderColor='var(--bordure-claire)';">
                     <strong>Retour à la navigation libre</strong>
                 </button>
             </div>
