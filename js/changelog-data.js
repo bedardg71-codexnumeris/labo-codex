@@ -11,6 +11,19 @@
     var CHANGELOG = [
         {
             version: 'Beta 97.5',
+            date: '12 février',
+            couleur: 'bleu',
+            titre: 'Tour guide & accueil enrichi',
+            items: [
+                '<strong>Tour guide 🧭</strong> : Le personnage Primo\u00a0😎 est remplac\u00e9 par un syst\u00e8me de tour guide\u00a0🧭. L\u2019emoji, les textes utilisateur et les r\u00e9f\u00e9rences \u00e0 Primo sont mis \u00e0 jour dans toute l\u2019interface (index.html + 14\u00a0fichiers JS).',
+                '<strong>Activation par checkbox</strong> : Le tour guide s\u2019active depuis la page d\u2019accueil. La pr\u00e9f\u00e9rence persiste (IndexedDB) et les ic\u00f4nes\u00a0🧭 apparaissent/disparaissent en temps r\u00e9el.',
+                '<strong>estModeAssiste() fonctionnel</strong> : La fonction lit d\u00e9sormais la pr\u00e9f\u00e9rence <code>tourGuide</code> au lieu de retourner <code>false</code>. Nouvelle fonction <code>definirTourGuide()</code> synchronise checkboxes, classe CSS et \u00e9v\u00e9nement.',
+                '<strong>Accueil \u00e9largi (10\u00a0cartes)</strong> : Deux nouvelles cartes\u00a0: \u00ab\u00a0\uD83C\uDFAF\u00a0Construire la note\u00a0\u00bb (ouvre le wizard) et \u00ab\u00a0\uD83D\uDEDF\u00a0Pr\u00e9parer des interventions\u00a0\u00bb (ouvre la planification R\u00e0I). Grille pass\u00e9e \u00e0 5\u00a0colonnes, conteneur \u00e9largi \u00e0 1200\u00a0px.',
+                '<strong>Glossaire et aide</strong> : Entr\u00e9e \u00ab\u00a0Primo (Assistant\u00a0😎)\u00a0\u00bb remplac\u00e9e par \u00ab\u00a0Tour guide (🧭)\u00a0\u00bb avec d\u00e9finition mise \u00e0 jour.'
+            ]
+        },
+        {
+            version: 'Beta 97.5',
             date: '11 février',
             couleur: 'sarcelle',
             titre: 'Retouches visuelles Océan & Boussole',
@@ -313,7 +326,7 @@
             couleur: 'bleu',
             titre: 'Améliorations',
             items: [
-                '<strong>Boutons 😎 d\'aide</strong> : En Mode Assisté, des boutons apparaissent pour expliquer chaque section (14 thèmes couverts)',
+                '<strong>Boutons 🧭 d\'aide</strong> : Des boutons apparaissent pour expliquer chaque section (14 thèmes couverts)',
                 '<strong>Ordre de configuration clarifié</strong> : Échelles → Pratiques → Grilles → Productions (chaque élément dépend du précédent)',
                 '<strong>Design System v7</strong> : Harmonisation des styles (border-radius, box-shadow) selon la charte graphique',
                 '<strong>Diverses corrections d\'affichage</strong> :<ul style="margin: 4px 0 0 0; padding-left: 16px;"><li><strong>Tiret "—" au lieu de "0%"</strong> : La liste des étudiants affiche maintenant un tiret quand aucune donnée n\'est saisie</li><li><strong>Barres "En attente"</strong> : Les barres de distribution indiquent "En attente de données" au lieu de 0%</li><li><strong>Dropdown synchronisé</strong> : Le sélecteur d\'étudiant se met à jour lors du changement de groupe-cours</li><li><strong>Calendrier corrigé</strong> : L\'horaire affiché correspond au groupe-cours actif</li></ul>'

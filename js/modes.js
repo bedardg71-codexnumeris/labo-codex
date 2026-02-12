@@ -63,8 +63,13 @@ function initialiserSystemeModes() {
     // Créer le sélecteur de mode
     creerSelecteurMode();
 
-    // Masquer les éléments Primo (mode Assisté supprimé)
+    // Gérer l'affichage des boutons selon le mode
     gererAffichageBoutonPrimo(modeActuel);
+
+    // Appliquer la classe mode-assiste si le tour guide est actif
+    if (estModeAssiste()) {
+        document.body.classList.add('mode-assiste');
+    }
 
     console.log(`✅ Mode actif: ${THEMES[modeActuel]?.nom || modeActuel}`);
 }
@@ -767,16 +772,32 @@ function gererAffichageBoutonPrimo(mode) {
 // ============================================
 
 /**
- * Vérifie si on est en mode Assisté (OBSOLETE — toujours false)
- * [Chantier 2] Mode Assisté supprimé, gardé pour compatibilité
- * @returns {boolean} toujours false
+ * Vérifie si le Tour guide est actif (lecture de la préférence)
+ * @returns {boolean} true si le tour guide est activé
  */
 function estModeAssiste() {
-    return false;
+    const prefs = db.getSync('preferencesAffichage', {});
+    return !!prefs.tourGuide;
 }
 
 function estModeGuide() {
-    return false;
+    return estModeAssiste();
+}
+
+/**
+ * Active ou désactive le Tour guide
+ * @param {boolean} etat - true pour activer, false pour désactiver
+ */
+function definirTourGuide(etat) {
+    const prefs = db.getSync('preferencesAffichage', {});
+    prefs.tourGuide = !!etat;
+    db.setSync('preferencesAffichage', prefs);
+    // Synchroniser les checkboxes miroirs
+    document.querySelectorAll('#checkbox-tour-guide, #checkbox-tour-guide-accueil').forEach(cb => cb.checked = !!etat);
+    // Appliquer la classe CSS qui contrôle la visibilité des icônes
+    document.body.classList.toggle('mode-assiste', !!etat);
+    // Notifier les modules (primo-tooltips écoute cet événement)
+    window.dispatchEvent(new Event('modeChanged'));
 }
 
 /**
@@ -799,6 +820,7 @@ window.initialiserSystemeModes = initialiserSystemeModes;
 window.changerMode = changerMode;
 window.estModeAssiste = estModeAssiste;
 window.estModeGuide = estModeGuide;
+window.definirTourGuide = definirTourGuide;
 window.estEnModeDemo = estEnModeDemo;
 window.obtenirDonneesSelonMode = obtenirDonneesSelonMode;
 window.sauvegarderDonneesSelonMode = sauvegarderDonneesSelonMode;

@@ -99,19 +99,19 @@ function afficherModalAccueil() {
                     box-shadow: 0 4px 15px rgba(26, 82, 102, 0.3);
                     flex-shrink: 0;
                 ">
-                    😎
+                    🧭
                 </div>
                 <div style="flex: 1;">
                     <h2 style="
                         color: var(--accent-primaire);
                         margin: 0 0 5px;
                         font-size: 1.8rem;
-                    ">Allô, je suis Primo !</h2>
+                    ">Bienvenue dans le tour guidé !</h2>
                     <p style="
                         color: var(--gris-moyen);
                         font-size: 0.95rem;
                         margin: 0;
-                    ">Je te propose un tour guidé !</p>
+                    ">Explorez les modules ci-dessous.</p>
                 </div>
             </div>
 
@@ -307,12 +307,12 @@ function demarrerWizard() {
 
     // Délai pour permettre la fermeture du modal d'accueil
     setTimeout(() => {
-        console.log('[Primo] Ouverture du Wizard V2...');
+        console.log('[Guide] Ouverture du Wizard V2...');
 
         if (typeof ouvrirWizardV2 === 'function') {
             ouvrirWizardV2();
         } else {
-            console.error('[Primo] Fonction ouvrirWizardV2 non disponible');
+            console.error('[Guide] Fonction ouvrirWizardV2 non disponible');
             alert('Erreur : Le module Wizard V2 n\'est pas chargé.');
         }
     }, 300);
@@ -329,7 +329,7 @@ function demarrerConfigComplete() {
         if (typeof ouvrirModalConversationnel === 'function') {
             ouvrirModalConversationnel();
         } else {
-            console.error('[Primo] Fonction ouvrirModalConversationnel non disponible');
+            console.error('[Guide] Fonction ouvrirModalConversationnel non disponible');
             alert('Erreur : Le module de configuration n\'est pas chargé.');
         }
     }, 500);
@@ -360,7 +360,7 @@ function demarrerEvaluation() {
         message += '\nComplète le Module 1 avant de pouvoir évaluer une production.';
 
         alert(message);
-        console.warn('[Primo] Module 2 bloqué - prérequis manquants:', { aCours, aEtudiants });
+        console.warn('[Guide] Module 2 bloqué - prérequis manquants:', { aCours, aEtudiants });
         return;
     }
 
@@ -375,7 +375,7 @@ function demarrerEvaluation() {
     const indexEtapeEvaluation = questionsActives.findIndex(q => q.id === 'transition-mode-guide');
 
     if (indexEtapeEvaluation === -1) {
-        console.error('[Primo] Étape transition-mode-guide introuvable');
+        console.error('[Guide] Étape transition-mode-guide introuvable');
         alert('Erreur : L\'étape d\'évaluation n\'a pas été trouvée.');
         return;
     }
@@ -385,7 +385,7 @@ function demarrerEvaluation() {
         if (typeof demarrerModeNotification === 'function') {
             demarrerModeNotification(indexEtapeEvaluation);
         } else {
-            console.error('[Primo] Fonction demarrerModeNotification non disponible');
+            console.error('[Guide] Fonction demarrerModeNotification non disponible');
             alert('Erreur : Le module de configuration n\'est pas chargé.');
         }
     }, 300);
@@ -410,7 +410,7 @@ function consulterAide() {
         if (typeof afficherSection === 'function') {
             afficherSection('aide');
         } else {
-            console.error('[Primo] Fonction afficherSection non disponible');
+            console.error('[Guide] Fonction afficherSection non disponible');
         }
     }, 300);
 }
@@ -451,7 +451,7 @@ function verifierEtAfficherAccueil() {
             console.log('👋 Première utilisation détectée - Affichage AUTO de Primo');
             afficherModalAccueil();
         } else {
-            console.log('✅ Utilisateur existant - Primo accessible via bouton 😎 seulement');
+            console.log('✅ Utilisateur existant - Tour guide accessible via bouton 🧭 seulement');
         }
     }, 1000);
 }
@@ -478,7 +478,7 @@ window.explorerLibrement = explorerLibrement;
 window.consulterAide = consulterAide;
 
 // Auto-initialisation
-console.log('👋 Module Primo Accueil chargé');
+console.log('👋 Module Tour Guide chargé');
 initialiserPrimoAccueil();
 
 

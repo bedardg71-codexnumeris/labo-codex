@@ -161,7 +161,7 @@ const QUESTIONS_PRIMO = [
         texte: function(reponses) {
             // Message d'accueil seulement si pas de profil existant
             if (!reponses['enseignant-config-existante']) {
-                return 'Salut, je suis Primo ! Je vais t\'assister dans la configuration des paramètres de l\'application.\n\nToi, quel est ton nom ?';
+                return 'Bienvenue ! Ce guide va vous assister dans la configuration des paramètres de l\'application.\n\nQuel est votre nom ?';
             }
             return 'Quel est ton nom ?';
         },
@@ -289,7 +289,7 @@ const QUESTIONS_PRIMO = [
                 reponses['titre-cours'] = coursChoisi.titre || coursChoisi.nom || '';
                 reponses['code-cours'] = coursChoisi.code || coursChoisi.sigle || '';
                 reponses['numero-groupe'] = coursChoisi.groupe || '00001';
-                console.log('[Primo] Cours existant sélectionné:', reponses['code-cours']);
+                console.log('[Guide] Cours existant sélectionné:', reponses['code-cours']);
             }
         }
     },

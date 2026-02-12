@@ -1,8 +1,53 @@
-# SESSION ACTIVE - BETA 97.4
+# SESSION ACTIVE - BETA 97.5
 
-**Date** : 11 février 2026
-**Version** : Beta 97.4 (build 0211-0706)
-**Statut** : Onglet Dépistage + notification toast + corrections UX + MIO + verrouillage présences
+**Date** : 12 février 2026
+**Version** : Beta 97.5 (build 0212-1430)
+**Statut** : Tour guide + accueil enrichi (10 cartes)
+
+## SESSION DU 12 FÉVRIER 2026
+
+### Travail accompli — Tour guide & accueil enrichi
+
+22. **Primo → Tour guide** : Remplacement de l'emoji 😎 par 🧭 et suppression des références au personnage "Primo" dans tous les textes utilisateur.
+    - `index.html` : 46 emojis remplacés, textes d'aide/glossaire mis à jour
+    - `js/primo-accueil.js` : Textes d'accueil modernisés ("Bienvenue dans le tour guidé")
+    - `js/primo-modal.js` : Avatar et texte de confirmation mis à jour
+    - `js/primo-tooltips.js` : Popup "Conseil de Primo" → "Conseil"
+    - `js/primo-validation-champs.js` : Tooltips "Complété par Primo" → "Complété automatiquement"
+    - `js/primo-questions.js` : Message d'accueil vouvoiement
+    - 8 fichiers JS additionnels (aide-contextuelle, modal-bienvenue, profil-etudiant, etudiants, bibliotheque-ui, pratiques-materiel, changelog-data, aide-contextuelle-contenu)
+    - Console logs `[Primo]` → `[Guide]` dans tous les fichiers primo-*.js
+
+23. **Activation Tour guide** : Checkbox fonctionnelle sur la page d'accueil.
+    - `js/accueil.js` : Checkbox déverrouillée, lecture de `preferencesAffichage.tourGuide`
+    - `js/modes.js` : `estModeAssiste()` lit la préférence au lieu de retourner `false`
+    - `js/modes.js` : Nouvelle fonction `definirTourGuide()` (sauvegarde, sync checkboxes, toggle classe CSS, événement)
+    - `js/modes.js` : Initialisation au démarrage (`document.body.classList.add('mode-assiste')` si actif)
+
+24. **Accueil élargi (10 cartes)** : Deux nouvelles cartes d'action.
+    - 🎯 Construire la note → ouvre directement le wizard de création de pratique
+    - 🛟 Préparer des interventions → navigue vers Tableau de bord > Interventions RàI
+    - Grille passée de 4 à 5 colonnes (`accueil-cartes--10`)
+    - Conteneur élargi de 800px à 1200px
+    - Descriptions réduites (0.75rem) pour décompacter les colonnes
+
+### Fichiers modifiés
+- `index.html` — Emojis, textes, glossaire, CSS grille 5 colonnes, notes de version, BUILD_ID
+- `js/accueil.js` — 10 cartes, checkbox tour guide, grille --10
+- `js/modes.js` — estModeAssiste(), definirTourGuide(), init mode-assiste
+- `js/primo-accueil.js` — Textes et console logs
+- `js/primo-modal.js` — Avatar, texte, console logs
+- `js/primo-tooltips.js` — Popup titre, console logs
+- `js/primo-validation-champs.js` — Tooltips, console logs
+- `js/primo-questions.js` — Message accueil, console logs
+- `js/changelog-data.js` — Entrée Beta 97.5
+- `js/aide-contextuelle.js` — Emoji titre modal
+- `js/modal-bienvenue.js` — Emoji et textes Primo
+- `js/aide-contextuelle-contenu.js` — Texte bouton
+- `js/profil-etudiant.js` — Emojis spans et commentaires
+- `js/etudiants.js` — Emoji et commentaire
+- `js/bibliotheque-ui.js` — Emoji bouton
+- `js/pratiques-materiel.js` — Emoji bouton
 
 ## SESSION DU 11 FÉVRIER 2026
 

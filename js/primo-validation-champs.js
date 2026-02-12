@@ -71,11 +71,11 @@ function validerChampsSousSection(sousSectionId) {
     const champs = CHAMPS_A_VALIDER[sousSectionId];
 
     if (!champs) {
-        console.log('[Primo] Pas de validation pour:', sousSectionId);
+        console.log('[Guide] Pas de validation pour:', sousSectionId);
         return;
     }
 
-    console.log('[Primo] Validation des champs pour:', sousSectionId);
+    console.log('[Guide] Validation des champs pour:', sousSectionId);
 
     // Cas spécial: groupe d'étudiants
     if (sousSectionId === 'reglages-groupe') {
@@ -97,7 +97,7 @@ function validerChamp(config) {
     const element = document.getElementById(id);
 
     if (!element) {
-        console.warn('[Primo] Élément introuvable:', id);
+        console.warn('[Guide] Élément introuvable:', id);
         return;
     }
 
@@ -139,7 +139,7 @@ function appliquerStyleVide(element) {
 
     // Ajouter tooltip
     if (!element.hasAttribute('data-primo-tooltip')) {
-        element.setAttribute('title', '⚠️ Champ non rempli - Complété par Primo ou à remplir manuellement');
+        element.setAttribute('title', '⚠️ Champ non rempli - Complété automatiquement ou à remplir manuellement');
         element.setAttribute('data-primo-tooltip', 'true');
     }
 }
@@ -153,7 +153,7 @@ function appliquerStyleRempli(element) {
 
     // Ajouter tooltip
     if (!element.hasAttribute('data-primo-tooltip')) {
-        element.setAttribute('title', '✓ Champ rempli par Primo');
+        element.setAttribute('title', '✓ Champ rempli automatiquement');
         element.setAttribute('data-primo-tooltip', 'true');
     }
 }
@@ -219,7 +219,7 @@ function initialiserValidationChamps() {
     const primoComplete = db.getSync('primo_accueil_vu', false);
 
     if (primoComplete) {
-        console.log('[Primo] Configuration complétée - Validation activée');
+        console.log('[Guide] Configuration complétée - Validation activée');
         activerValidationAutomatique();
     }
 }

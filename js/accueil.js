@@ -99,6 +99,7 @@ function afficherAccueilRetour(conteneur) {
     // Section toggle tooltips (miroir de Reglages > Preferences > Navigation)
     const prefsAff = db.getSync('preferencesAffichage', {});
     const tooltipsActifs = prefsAff.tooltips !== false;
+    const tourGuideActif = !!prefsAff.tourGuide;
     const tooltipToggleHTML = `
         <div class="accueil-cours-actif" style="flex: 1; min-width: 0; margin-bottom: 0; flex-direction: column; align-items: stretch;">
             <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; margin: 0;">
@@ -110,12 +111,13 @@ function afficherAccueilRetour(conteneur) {
                     <div class="accueil-cours-detail">D\u00e9crire l\u2019interface au survol</div>
                 </div>
             </label>
-            <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; margin: 12px 0 0 0; opacity: 0.5;">
+            <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; margin: 12px 0 0 0;">
                 <span style="font-size: 1.5rem;">\uD83E\uDDED</span>
-                <input type="checkbox" disabled>
+                <input type="checkbox" id="checkbox-tour-guide-accueil" ${tourGuideActif ? 'checked' : ''}
+                    onchange="if(typeof definirTourGuide==='function') definirTourGuide(this.checked);">
                 <div>
-                    <div class="accueil-cours-nom">Tour guid\u00e9</div>
-                    <div class="accueil-cours-detail">Bient\u00f4t disponible</div>
+                    <div class="accueil-cours-nom">Tour guide</div>
+                    <div class="accueil-cours-detail">Afficher les conseils contextuels</div>
                 </div>
             </label>
         </div>
@@ -131,7 +133,7 @@ function afficherAccueilRetour(conteneur) {
             ${tooltipToggleHTML}
         </div>
 
-        <div class="accueil-cartes accueil-cartes--8">
+        <div class="accueil-cartes accueil-cartes--10">
             <div class="accueil-carte" onclick="afficherSection('planification'); setTimeout(function(){ afficherSousSection('planification-carte'); }, 100);">
                 <div class="accueil-carte-icone">\uD83E\uDDE9</div>
                 <div class="accueil-carte-titre">Planifier mon cours</div>
@@ -160,6 +162,13 @@ function afficherAccueilRetour(conteneur) {
                     Appliquer une grille de crit\u00e8res et construire une r\u00e9troaction diff\u00e9renci\u00e9e.
                 </div>
             </div>
+            <div class="accueil-carte" onclick="afficherSection('construction'); setTimeout(function(){ if(typeof ouvrirWizardV2==='function') ouvrirWizardV2(); }, 300);">
+                <div class="accueil-carte-icone">\uD83C\uDFAF</div>
+                <div class="accueil-carte-titre">Construire la note</div>
+                <div class="accueil-carte-desc">
+                    D\u00e9finir ce qu\u2019on mesure et comment on le fait\u00a0: approche sommative traditionnelle ou alternative (par standards, par sp\u00e9cification).
+                </div>
+            </div>
             <div class="accueil-carte" onclick="afficherSection('tableau-bord'); setTimeout(function(){ afficherSousSection('tableau-bord-profil'); }, 100);">
                 <div class="accueil-carte-icone">\uD83D\uDC64</div>
                 <div class="accueil-carte-titre">Consulter un profil \u00e9tudiant</div>
@@ -172,6 +181,13 @@ function afficherAccueilRetour(conteneur) {
                 <div class="accueil-carte-titre">Voir l'\u00e9tat des lieux</div>
                 <div class="accueil-carte-desc">
                     Suivre la participation, les r\u00e9sultats et la progression du groupe.
+                </div>
+            </div>
+            <div class="accueil-carte" onclick="afficherSection('tableau-bord'); setTimeout(function(){ afficherSousSection('tableau-bord-interventions'); }, 100);">
+                <div class="accueil-carte-icone">\uD83D\uDEDF</div>
+                <div class="accueil-carte-titre">Pr\u00e9parer des interventions</div>
+                <div class="accueil-carte-desc">
+                    Identifier les \u00e9l\u00e8ves \u00e0 risque et planifier des interventions diff\u00e9renci\u00e9es selon leurs besoins (niveaux 1, 2, 3).
                 </div>
             </div>
             <div class="accueil-carte" onclick="if(window.backupReminder) window.backupReminder.afficherModal();">

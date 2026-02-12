@@ -499,7 +499,7 @@
            - Cartes = .carte pattern
            =============================== */
         .accueil-page {
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 40px 30px 60px;
         }
@@ -580,6 +580,10 @@
             grid-template-columns: repeat(4, 1fr);
         }
 
+        .accueil-cartes--10 {
+            grid-template-columns: repeat(5, 1fr);
+        }
+
         .accueil-carte {
             background: #0c1a22;
             border: 1px solid rgba(106, 172, 184, 0.15);
@@ -610,9 +614,9 @@
         }
 
         .accueil-carte-desc {
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             color: var(--gris-moyen);
-            line-height: 1.4;
+            line-height: 1.3;
         }
 
         .badge-dev-actif {
@@ -696,8 +700,14 @@
             margin: 0 4px;
         }
 
+        @media (max-width: 1300px) {
+            .accueil-cartes--10 {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
         @media (max-width: 1100px) {
-            .accueil-cartes--8 {
+            .accueil-cartes--8,
+            .accueil-cartes--10 {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
@@ -708,7 +718,8 @@
         }
         @media (max-width: 600px) {
             .accueil-cartes,
-            .accueil-cartes--8 {
+            .accueil-cartes--8,
+            .accueil-cartes--10 {
                 grid-template-columns: 1fr;
             }
             .accueil-page {
@@ -3623,7 +3634,7 @@
             </div>
         </div>
 
-        <!-- ========== MODAL INTRODUCTION (😎) ========== -->
+        <!-- ========== MODAL INTRODUCTION (🧭) ========== -->
 
         <!-- SÉLECTEUR GROUPE-COURS ACTIF (Beta 95.2) -->
         <div id="bandeau-groupe-cours" class="bandeau-groupe-cours">
@@ -3691,7 +3702,7 @@
                     <h2 class="titre-avec-emoji-toggles">
                         <span>État des lieux</span>
                         <span class="titre-emoji-container">
-                            <button class="btn-aide-contextuelle" data-aide="tableau-bord-apercu" aria-label="Aide contextuelle">😎</button>
+                            <button class="btn-aide-contextuelle" data-aide="tableau-bord-apercu" aria-label="Aide contextuelle">🧭</button>
                         </span>
                     </h2>
                     <p class="text-muted">Suivi de l'apprentissage et priorisation des interventions</p>
@@ -3702,7 +3713,7 @@
                             <div style="display: flex; align-items: center; gap: 0.5rem;" data-tooltip="tdb-observer">
                                 <span>Observer</span>
                                 <span class="emoji-container">
-                                    <span class="primo-aide" data-target="note-indicateurs">😎</span>
+                                    <span class="primo-aide" data-target="note-indicateurs">🧭</span>
                                 </span>
                             </div>
                             <div id="contexte-indicateurs-acpe" class="carte-contexte-ligne" style="font-size: 0.8rem; font-weight: normal; opacity: 0.9; display: flex; align-items: center; gap: 0.75rem;">
@@ -3735,7 +3746,7 @@
                             <div style="display: flex; align-items: center; gap: 0.5rem;" data-tooltip="tdb-intervenir">
                                 <span>Intervenir</span>
                                 <span class="emoji-container">
-                                    <span class="primo-aide" data-target="note-apprentissage">😎</span>
+                                    <span class="primo-aide" data-target="note-apprentissage">🧭</span>
                                 </span>
                             </div>
                             <div id="contexte-indicateurs-apprentissage" class="carte-contexte-ligne" style="font-size: 0.8rem; font-weight: normal; opacity: 0.9; display: flex; align-items: center; gap: 0.75rem;">
@@ -3809,7 +3820,7 @@
                                 <div style="display: flex; align-items: center; gap: 0.5rem;" data-tooltip="tdb-dev-individuel">
                                     <span>Développement individuel</span>
                                     <span class="emoji-container">
-                                        <span class="primo-aide" data-target="note-spaghetti">😎</span>
+                                        <span class="primo-aide" data-target="note-spaghetti">🧭</span>
                                     </span>
                                 </div>
                                 <div id="contexte-trajectoire-apprentissage" class="carte-contexte-ligne" style="font-size: 0.8rem; font-weight: normal; opacity: 0.9; display: flex; align-items: center; gap: 0.75rem;">
@@ -3864,8 +3875,8 @@
                     <h2 id="titre-liste-etudiants" class="titre-avec-emoji-toggles">
                         <span>Liste des étudiant·es</span>
                         <span class="titre-emoji-container">
-                            <button class="btn-aide-contextuelle" data-aide="tableau-bord-liste" aria-label="Aide contextuelle">😎</button>
-                            <span class="primo-aide" data-target="conseil-liste-etudiants">😎</span>
+                            <button class="btn-aide-contextuelle" data-aide="tableau-bord-liste" aria-label="Aide contextuelle">🧭</button>
+                            <span class="primo-aide" data-target="conseil-liste-etudiants">🧭</span>
                         </span>
                     </h2>
                     <p class="text-muted">Consultation de la liste complète et accès aux portfolios individuels</p>
@@ -4026,7 +4037,7 @@
                     <h2 class="titre-avec-emoji-toggles">
                         <span data-tooltip="interv-titre">Planification et documentation des interventions</span>
                         <span class="titre-emoji-container">
-                            <button class="btn-aide-contextuelle" data-aide="tableau-bord-rai" aria-label="Aide contextuelle">😎</button>
+                            <button class="btn-aide-contextuelle" data-aide="tableau-bord-rai" aria-label="Aide contextuelle">🧭</button>
                         </span>
                     </h2>
                     <p class="text-muted">Gardez une trace des interventions de niveau 2 et 3</p>
@@ -4050,7 +4061,7 @@
                     <h2 class="carte-titre-avec-toggle">
                         <span>Aperçu des présences</span>
                         <span class="emoji-container">
-                            <span class="primo-aide" data-target="note-presences-apercu">😎</span>
+                            <span class="primo-aide" data-target="note-presences-apercu">🧭</span>
                         </span>
                     </h2>
                     <p class="text-muted">Vue d'ensemble des statistiques de présence du groupe</p>
@@ -4107,7 +4118,7 @@
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Calendrier des présences</span>
                         <span class="titre-emoji-container">
-                            <button class="btn-aide-contextuelle" data-aide="presences-calendrier" aria-label="Aide contextuelle">😎</button>
+                            <button class="btn-aide-contextuelle" data-aide="presences-calendrier" aria-label="Aide contextuelle">🧭</button>
                         </span>
                     </h2>
                     <div class="carte">
@@ -4123,7 +4134,7 @@
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Enregistrement quotidien</span>
                         <span class="titre-emoji-container">
-                            <button class="btn-aide-contextuelle" data-aide="presences-saisie" aria-label="Aide contextuelle">😎</button>
+                            <button class="btn-aide-contextuelle" data-aide="presences-saisie" aria-label="Aide contextuelle">🧭</button>
                         </span>
                     </h2>
                     <p class="text-muted">Enregistrer les présences pour une séance</p>
@@ -4268,7 +4279,7 @@
                     <h2 class="carte-titre-avec-toggle">
                         <span data-tooltip="eval-apercu">Aperçu des évaluations</span>
                         <span class="emoji-container">
-                            <span class="primo-aide" data-target="note-evaluations-apercu">😎</span>
+                            <span class="primo-aide" data-target="note-evaluations-apercu">🧭</span>
                         </span>
                     </h2>
                     <p class="text-muted">Vue d'ensemble des évaluations du groupe</p>
@@ -4317,7 +4328,7 @@
                     <h2 class="titre-avec-emoji-toggles">
                         <span data-tooltip="eval-liste">Historique et filtres</span>
                         <span class="titre-emoji-container">
-                            <button class="btn-aide-contextuelle" data-aide="evaluations-liste" aria-label="Aide contextuelle">😎</button>
+                            <button class="btn-aide-contextuelle" data-aide="evaluations-liste" aria-label="Aide contextuelle">🧭</button>
                         </span>
                     </h2>
                 <p class="description-section">Vue d'ensemble des évaluations et calcul automatique des indices C et P</p>
@@ -4438,7 +4449,7 @@
                 <h2 class="titre-avec-emoji-toggles">
                     <span data-tooltip="eval-page">Évaluation des productions et rétroaction différenciée automatique</span>
                     <span class="titre-emoji-container">
-                        <button class="btn-aide-contextuelle" data-aide="evaluations-proceder" aria-label="Aide contextuelle">😎</button>
+                        <button class="btn-aide-contextuelle" data-aide="evaluations-proceder" aria-label="Aide contextuelle">🧭</button>
                     </span>
                 </h2>
                 <p class="text-muted">Évaluation détaillée selon les critères et les échelles de performance</p>
@@ -4772,10 +4783,10 @@
                     <h2 class="titre-avec-emoji-toggles">
                         <span data-tooltip="cn-apercu">Vue d'ensemble</span>
                         <span class="titre-emoji-container">
-                            <button class="btn-aide-contextuelle" data-aide="construction-apercu" aria-label="Aide contextuelle">😎</button>
-                            <button class="btn-aide-contextuelle" data-aide="construction-objectifs-reflexion" aria-label="Réfléchir à tes objectifs" title="Réfléchir à tes objectifs">😎</button>
-                            <span class="primo-aide" data-target="note-apercu">😎</span>
-                            <span class="primo-aide" data-target="conseil-apercu">😎</span>
+                            <button class="btn-aide-contextuelle" data-aide="construction-apercu" aria-label="Aide contextuelle">🧭</button>
+                            <button class="btn-aide-contextuelle" data-aide="construction-objectifs-reflexion" aria-label="Réfléchir à tes objectifs" title="Réfléchir à tes objectifs">🧭</button>
+                            <span class="primo-aide" data-target="note-apercu">🧭</span>
+                            <span class="primo-aide" data-target="conseil-apercu">🧭</span>
                         </span>
                     </h2>
                     <p class="text-muted">Résumé du matériel pédagogique configuré</p>
@@ -4847,9 +4858,9 @@
                     <h2 class="titre-avec-emoji-toggles">
                         <span data-tooltip="cn-prod-titre">Productions étudiantes</span>
                         <span class="titre-emoji-container">
-                            <button class="btn-aide-contextuelle" data-aide="construction-productions" aria-label="Aide contextuelle">😎</button>
-                            <span class="primo-aide" data-target="note-productions">😎</span>
-                            <span class="primo-aide" data-target="conseil-productions">😎</span>
+                            <button class="btn-aide-contextuelle" data-aide="construction-productions" aria-label="Aide contextuelle">🧭</button>
+                            <span class="primo-aide" data-target="note-productions">🧭</span>
+                            <span class="primo-aide" data-target="conseil-productions">🧭</span>
                         </span>
                     </h2>
                     <p class="text-muted">Définir les évaluations du cours et leurs pondérations</p>
@@ -5115,9 +5126,9 @@
                     <h2 class="titre-avec-emoji-toggles">
                         <span data-tooltip="cn-grille-titre">Grilles de critères</span>
                         <span class="titre-emoji-container">
-                            <button class="btn-aide-contextuelle" data-aide="construction-grilles" aria-label="Aide contextuelle">😎</button>
-                            <span class="primo-aide" data-target="note-grilles">😎</span>
-                            <span class="primo-aide" data-target="conseil-grilles">😎</span>
+                            <button class="btn-aide-contextuelle" data-aide="construction-grilles" aria-label="Aide contextuelle">🧭</button>
+                            <span class="primo-aide" data-target="note-grilles">🧭</span>
+                            <span class="primo-aide" data-target="conseil-grilles">🧭</span>
                         </span>
                     </h2>
                     <p class="text-muted">Créer des grilles de critères réutilisables pour évaluer différents types
@@ -5291,8 +5302,8 @@
                     <h2 class="titre-avec-emoji-toggles">
                         <span data-tooltip="cn-echelle-titre">Échelles de performance</span>
                         <span class="titre-emoji-container">
-                            <button class="btn-aide-contextuelle" data-aide="construction-echelles" aria-label="Aide contextuelle">😎</button>
-                            <span class="primo-aide" data-target="note-echelle">😎</span>
+                            <button class="btn-aide-contextuelle" data-aide="construction-echelles" aria-label="Aide contextuelle">🧭</button>
+                            <span class="primo-aide" data-target="note-echelle">🧭</span>
                         </span>
                     </h2>
                     <p class="text-muted">Configuration de l'échelle de notation pour les PAN/SBG</p>
@@ -5578,8 +5589,8 @@
                     <h2 class="titre-avec-emoji-toggles">
                         <span data-tooltip="cn-pratique-titre">Pratiques de notation</span>
                         <span class="titre-emoji-container">
-                            <button class="btn-aide-contextuelle" data-aide="construction-pratiques" aria-label="Aide contextuelle">😎</button>
-                            <span class="primo-aide" data-target="note-pratiques">😎</span>
+                            <button class="btn-aide-contextuelle" data-aide="construction-pratiques" aria-label="Aide contextuelle">🧭</button>
+                            <span class="primo-aide" data-target="note-pratiques">🧭</span>
                         </span>
                     </h2>
                     <p class="text-muted">Configure tes pratiques de notation (SOM, STD, SPE, DEN)</p>
@@ -6356,9 +6367,9 @@
                     <h2 class="titre-avec-emoji-toggles">
                         <span data-tooltip="cn-cartouche-titre">Cartouches de rétroaction</span>
                         <span class="titre-emoji-container">
-                            <button class="btn-aide-contextuelle" data-aide="construction-cartouches" aria-label="Aide contextuelle">😎</button>
-                            <span class="primo-aide" data-target="note-retroactions">😎</span>
-                            <span class="primo-aide" data-target="conseil-retroactions">😎</span>
+                            <button class="btn-aide-contextuelle" data-aide="construction-cartouches" aria-label="Aide contextuelle">🧭</button>
+                            <span class="primo-aide" data-target="note-retroactions">🧭</span>
+                            <span class="primo-aide" data-target="conseil-retroactions">🧭</span>
                         </span>
                     </h2>
                     <p class="text-muted">Créer des cartouches de rétroaction basées sur les critères et l'échelle
@@ -7370,7 +7381,7 @@
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Configuration du cours</span>
                         <span class="titre-emoji-container">
-                            <span class="primo-aide" data-target="conseil-cours">😎</span>
+                            <span class="primo-aide" data-target="conseil-cours">🧭</span>
                         </span>
                     </h2>
                     <p class="text-muted">Informations techniques du cours : code, nom, compétences, enseignant·e,
@@ -7789,7 +7800,7 @@
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Configuration de l'horaire</span>
                         <span class="titre-emoji-container">
-                            <span class="primo-aide" data-target="conseil-horaire">😎</span>
+                            <span class="primo-aide" data-target="conseil-horaire">🧭</span>
                         </span>
                     </h2>
                     <p class="text-muted">Définis le format horaire hebdomadaire de tes séances de cours</p>
@@ -7893,7 +7904,7 @@
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Configuration du groupe d'étudiants</span>
                         <span class="titre-emoji-container">
-                            <span class="primo-aide" data-target="conseil-groupe">😎</span>
+                            <span class="primo-aide" data-target="conseil-groupe">🧭</span>
                         </span>
                     </h2>
                     <p class="text-muted">Liste complète des étudiants inscrits : ajout, import, modification,
@@ -8208,8 +8219,8 @@
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Pratiques de notation</span>
                         <span class="titre-emoji-container">
-                            <span class="primo-aide" data-target="note-pratiques">😎</span>
-                            <span class="primo-aide" data-target="conseil-pratiques">😎</span>
+                            <span class="primo-aide" data-target="note-pratiques">🧭</span>
+                            <span class="primo-aide" data-target="conseil-pratiques">🧭</span>
                         </span>
                     </h2>
                     <p class="text-muted">Configurer la pratique d'évaluation du cours</p>
@@ -8694,7 +8705,7 @@
                                             box-shadow: 0 4px 15px rgba(26, 82, 102, 0.3);
                                             flex-shrink: 0;
                                         ">
-                                            😎
+                                            🧭
                                         </div>
                                         <div style="flex: 1;">
                                             <h2 class="modal-titre" style="margin: 0 0 5px 0;">Créons ensemble ta pratique !</h2>
@@ -9564,8 +9575,8 @@
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Configuration des seuils d'interprétation</span>
                         <span class="titre-emoji-container">
-                            <span class="primo-aide" data-target="note-interpretation">😎</span>
-                            <span class="primo-aide" data-target="conseil-interpretation">😎</span>
+                            <span class="primo-aide" data-target="note-interpretation">🧭</span>
+                            <span class="primo-aide" data-target="conseil-interpretation">🧭</span>
                         </span>
                     </h2>
                     <p class="text-muted">
@@ -10035,7 +10046,7 @@
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Trimestre</span>
                         <span class="titre-emoji-container">
-                            <button class="btn-aide-contextuelle" data-aide="reglages-trimestre" aria-label="Aide contextuelle">😎</button>
+                            <button class="btn-aide-contextuelle" data-aide="reglages-trimestre" aria-label="Aide contextuelle">🧭</button>
                         </span>
                     </h2>
 
@@ -11860,8 +11871,35 @@
                     <h2>Notes de version</h2>
                     <p class="text-muted">Historique des changements majeurs</p>
 
+                    <!-- Beta 97.5 - Tour guide & accueil -->
+                    <div class="carte accordeon ouvert" id="accordeon-apropos-beta975-tourguide">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Beta 97.5 &mdash; Tour guide &amp; accueil enrichi
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu" style="display: block;">
+                        <p class="text-muted">12 f&eacute;vrier 2026</p>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Tour guide &#x1F9ED;</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Primo &rarr; Tour guide</strong> : L&rsquo;emoji &#x1F60E; est remplac&eacute; par &#x1F9ED; dans toute l&rsquo;interface (boutons, popups, glossaire, aide, wizard).</li>
+                            <li><strong>Activation par checkbox</strong> : Nouvelle option sur la page d&rsquo;accueil pour activer le tour guide. La pr&eacute;f&eacute;rence persiste entre les sessions.</li>
+                            <li><strong>Ic&ocirc;nes contextuelles</strong> : Les &#x1F9ED; d&rsquo;aide apparaissent/disparaissent en temps r&eacute;el selon l&rsquo;&eacute;tat du toggle.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Accueil &eacute;largi</h4>
+                        <ul class="modal-liste">
+                            <li><strong>10 cartes d&rsquo;action</strong> : Grille pass&eacute;e de 4 &agrave; 5 colonnes. Conteneur &eacute;largi &agrave; 1200&nbsp;px.</li>
+                            <li><strong>&#x1F3AF; Construire la note</strong> : Ouvre directement le wizard de cr&eacute;ation de pratique.</li>
+                            <li><strong>&#x1F6DF; Pr&eacute;parer des interventions</strong> : Navigue vers la planification R&agrave;I (niveaux 1, 2, 3).</li>
+                        </ul>
+
+                        </div>
+                    </div>
+
                     <!-- Beta 97.4 - Alignement pédagogique -->
-                    <div class="carte accordeon ouvert" id="accordeon-apropos-beta974-planif">
+                    <div class="carte accordeon" id="accordeon-apropos-beta974-planif">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Beta 97.4 &mdash; Alignement p&eacute;dagogique
@@ -12678,7 +12716,7 @@
                     <div class="carte accordeon" id="accordeon-aide-primo">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Configuration avec l'assistant Primo 😎
+                                <span class="accordeon-chevron">▼</span> Configuration avec le tour guide 🧭
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
@@ -12741,7 +12779,7 @@
                             <p><strong>Comment accéder à Primo :</strong></p>
                             <ul>
                                 <li><strong>Automatiquement</strong> : Au premier chargement de l'application</li>
-                                <li><strong>Mode Assisté</strong> : Cliquez sur le bouton 😎 dans l'en-tête (visible uniquement en mode Assisté)</li>
+                                <li><strong>Tour guide</strong> : Cliquez sur le bouton 🧭 dans l'en-tête (visible lorsque le tour guide est activé)</li>
                                 <li><strong>Réglages → Préférences</strong> : Activez le «Mode Assisté» pour afficher le bouton Primo</li>
                             </ul>
 
@@ -13325,13 +13363,13 @@
                             </div>
 
                             <div class="alerte-warning-jaune">
-                                <h4 class="text-warning-856-mb10">😎 Mode Assisté</h4>
+                                <h4 class="text-warning-856-mb10">🧭 Tour guide</h4>
                                 <p><strong>Découverte et exploration</strong> — Données de démonstration</p>
                                 <ul class="mt-8">
                                     <li>Groupe fictif de 5 étudiants avec résultats complets</li>
                                     <li>4 productions évaluées, 20 évaluations, 8 semaines de présences</li>
                                     <li>Données isolées (préfixe <code>demo_</code>) — tes vraies données restent intactes</li>
-                                    <li>Primo 😎 disponible pour te guider pas à pas</li>
+                                    <li>Tour guide 🧭 disponible pour te guider pas à pas</li>
                                 </ul>
                                 <p class="mt-10"><strong>Idéal pour :</strong> Découvrir l'application, tester des fonctionnalités, voir le tableau de bord en action</p>
                             </div>
@@ -13382,7 +13420,7 @@
                                 <li>Utilise le sélecteur de mode en haut à droite</li>
                                 <li>Choisis <strong>Assisté</strong> dans le menu déroulant</li>
                                 <li>L'interface change de couleur (teinte sarcelle) pour t'indiquer que tu es en mode démo</li>
-                                <li>Le bouton 😎 apparaît pour accéder à Primo</li>
+                                <li>Le bouton 🧭 affiche des conseils contextuels</li>
                             </ol>
 
                             <div class="alerte alerte-succes">
@@ -13402,7 +13440,7 @@
                             <p>L'application s'adapte à ton niveau de familiarité avec le système.</p>
 
                             <div class="alerte-warning-jaune">
-                                <h4 class="text-warning-856-mb10">😎 Parcours Primo — Pour débuter</h4>
+                                <h4 class="text-warning-856-mb10">🧭 Tour guide — Pour débuter</h4>
                                 <p><strong>Recommandé si :</strong> C'est ta première utilisation ou tu préfères être guidé·e</p>
                                 <ul class="mt-8">
                                     <li>Primo te pose des questions simples en langage courant</li>
@@ -13410,7 +13448,7 @@
                                     <li>Configuration rapide (~5 minutes pour un cours complet)</li>
                                     <li>Tu peux toujours affiner ensuite avec les formulaires</li>
                                 </ul>
-                                <p class="mt-10"><strong>Comment :</strong> Mode Assisté → Clique sur 😎 → Choisis un module</p>
+                                <p class="mt-10"><strong>Comment :</strong> Active le tour guide → Clique sur 🧭 → Choisis un module</p>
                             </div>
 
                             <div class="alerte-success-bleu-pale">
@@ -14900,7 +14938,7 @@
                             </ol>
 
                             <div class="alerte alerte-info" class="mt-15">
-                                <strong>😎 Astuce :</strong> Les artefacts marqués d'une étoile ★ sont ceux sélectionnés automatiquement par les règles PAN (les N meilleurs). Si un étudiant a 9 artefacts mais que seuls les 3 meilleurs comptent, seuls ces 3 auront l'étoile.
+                                <strong>🧭 Astuce :</strong> Les artefacts marqués d'une étoile ★ sont ceux sélectionnés automatiquement par les règles PAN (les N meilleurs). Si un étudiant a 9 artefacts mais que seuls les 3 meilleurs comptent, seuls ces 3 auront l'étoile.
                             </div>
 
                             <p class="mt-15"><strong>Actions possibles depuis ce tableau :</strong></p>
@@ -15595,8 +15633,8 @@
                                 <dt class="titre-section-aide">Production</dt>
                                 <dd class="ml-20-mb-10">Terme générique désignant toute évaluation du cours : examen, travail écrit, quiz, présentation, portfolio. Chaque production a un type, une pondération, et peut être liée à une grille de critères.</dd>
 
-                                <dt class="titre-section-aide">Primo (Assistant 😎)</dt>
-                                <dd class="ml-20-mb-10">Assistant conversationnel guidant les nouveaux utilisateurs dans la configuration du système. Apparaît automatiquement à la première utilisation. Propose 4 modules : créer un groupe-cours, évaluer une production, explorer les diagnostics, créer une pratique de notation. Accessible via le bouton 😎 en mode Assisté. Voir la section Configuration pour plus de détails.</dd>
+                                <dt class="titre-section-aide">Tour guide (🧭)</dt>
+                                <dd class="ml-20-mb-10">Système d'aide contextuelle guidant les utilisateurs dans l'interface. Propose des conseils contextuels dans chaque section. Activable depuis la page d'accueil ou les réglages. Propose 4 modules : créer un groupe-cours, évaluer une production, explorer les diagnostics, créer une pratique de notation. Voir la section Configuration pour plus de détails.</dd>
                             </dl>
 
                             <h4 class="titre-section-principal">R</h4>
@@ -15644,7 +15682,7 @@
                         </div>
 
                         <div class="alerte alerte-info" class="mt-20">
-                            <strong>😎 Note :</strong> Ce glossaire est une référence rapide. Pour des explications détaillées avec exemples et formules, consultez le Guide complet (PDF) disponible dans les ressources ci-dessous.
+                            <strong>🧭 Note :</strong> Ce glossaire est une référence rapide. Pour des explications détaillées avec exemples et formules, consultez le Guide complet (PDF) disponible dans les ressources ci-dessous.
                         </div>
                         </div><!-- fin accordeon-contenu glossaire -->
                     </div>
@@ -15714,7 +15752,7 @@
                                     </ul>
                                 </li>
                             </ul>
-                            <p class="m-15-0-0-0-sm-bleu"><strong>😎 Détails complets :</strong> Voir LICENSE.md dans le dépôt du projet</p>
+                            <p class="m-15-0-0-0-sm-bleu"><strong>🧭 Détails complets :</strong> Voir LICENSE.md dans le dépôt du projet</p>
                         </div>
                         </div><!-- fin accordeon-contenu ressources -->
                     </div>
@@ -15920,7 +15958,7 @@
     <script src="js/primo-validation-champs.js?v=2025112727"></script>
     <script src="js/primo-tooltips.js?v=2025120901"></script>
 
-    <!-- AIDE CONTEXTUELLE - Modals d'aide avec boutons 😎 (Beta 95.5) -->
+    <!-- AIDE CONTEXTUELLE - Modals d'aide avec boutons 🧭 (Beta 95.5) -->
     <script src="js/aide-contextuelle-contenu.js?v=2026011901"></script>
     <script src="js/aide-contextuelle.js?v=2026011901"></script>
 
@@ -15972,7 +16010,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97.5';
-        const BUILD_ID = '0212-1349';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0212-1430';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
@@ -16313,7 +16351,7 @@
             <div
                 class="carte-mb20-orange">
                 <p class="m-0-bleu-principal">
-                    <strong>😎 Attention :</strong> L'importation écrasera les données existantes pour les clés
+                    <strong>🧭 Attention :</strong> L'importation écrasera les données existantes pour les clés
                     importées.
                 </p>
             </div>
@@ -16590,7 +16628,7 @@
             }
 
             // Vérifier échelles
-            console.log('\n😎 Échelles de performance:');
+            console.log('\n🧭 Échelles de performance:');
             const echellesTemplates = localStorage.getItem('echellesTemplates');
             const niveauxEchelle = localStorage.getItem('niveauxEchelle');
             const configEchelle = localStorage.getItem('configEchelle');
@@ -16662,7 +16700,7 @@
 
             <!-- En-tête avec Primo -->
             <div class="wizard-v2-header">
-                <div class="wizard-v2-primo-avatar">😎</div>
+                <div class="wizard-v2-primo-avatar">🧭</div>
                 <div class="wizard-v2-header-texte">
                     <h2 id="wizard-v2-titre">Informations de base</h2>
                     <p id="wizard-v2-description">Donnez un nom à ta pratique de notation</p>
