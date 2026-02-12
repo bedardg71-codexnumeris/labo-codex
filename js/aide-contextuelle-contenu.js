@@ -78,7 +78,7 @@ const AIDE_CONTEXTUELLE = {
             {
                 type: 'alerte',
                 niveau: 'important',
-                contenu: "Prendre le temps de réfléchir à tes objectifs d'apprentissage avant de configurer ton matériel peut t'aider à créer des grilles plus cohérentes. Clique sur le bouton 😎 « Réfléchir à tes objectifs » si tu veux des pistes de réflexion."
+                contenu: "Prendre le temps de réfléchir à tes objectifs d'apprentissage avant de configurer ton matériel peut t'aider à créer des grilles plus cohérentes. Clique sur le bouton 🧭 « Réfléchir à tes objectifs » si tu veux des pistes de réflexion."
             }
         ],
         voirAussi: ['construction-objectifs-reflexion', 'construction-productions', 'construction-grilles', 'construction-pratiques']

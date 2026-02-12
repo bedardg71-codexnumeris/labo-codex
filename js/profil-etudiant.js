@@ -1492,7 +1492,7 @@ function genererSectionMobilisationEngagement(da) {
 
                     <div style="margin-bottom: 15px; font-size: 0.9rem; color: var(--gris-fonce);" data-tooltip="profil-formule-engagement">
                         Formule : E = ∛(A × C × P)
-                        <span class="primo-aide" data-target="conseil-formule-engagement-mobilisation" style="margin-left: 5px; display: inline-block !important; cursor: pointer;">😎</span>
+                        <span class="primo-aide" data-target="conseil-formule-engagement-mobilisation" style="margin-left: 5px; display: inline-block !important; cursor: pointer;">🧭</span>
                     </div>
 
                     <!-- Conseil Primo: Explication de la formule d'engagement (section Mobilisation) -->
@@ -2252,7 +2252,7 @@ function genererSectionEngagement(da) {
                 </div>
                 <div style="margin-top: 8px; font-size: 0.85rem; color: var(--gris-fonce);">
                     E = ∛(A × C × P)
-                    <span class="primo-aide" data-target="conseil-formule-engagement-carte" style="margin-left: 5px; display: inline-block !important; cursor: pointer;">😎</span>
+                    <span class="primo-aide" data-target="conseil-formule-engagement-carte" style="margin-left: 5px; display: inline-block !important; cursor: pointer;">🧭</span>
                 </div>
                 <div style="margin-top: 8px; padding: 6px 10px; background: var(--alerte-fond-attention); border-left: 3px solid var(--orange-accent); font-size: 0.8rem; color: var(--gris-fonce);">
                     <strong>💡 Note :</strong> Indice longitudinal (historique complet depuis le début du trimestre)
@@ -2304,7 +2304,7 @@ function genererSectionEngagement(da) {
         <div class="profil-carte-simple">
             <div class="profil-texte-mono-centre-bleu">
                 E = ∛(A × C × P)
-                <span class="primo-aide" data-target="conseil-formule-engagement-principale" style="display: inline-block !important; cursor: pointer;">😎</span>
+                <span class="primo-aide" data-target="conseil-formule-engagement-principale" style="display: inline-block !important; cursor: pointer;">🧭</span>
             </div>
             <div class="profil-texte-mono-centre-bleu">
                 E = ∛(${A.toFixed(2)} × ${C.toFixed(2)} × ${P.toFixed(2)}) = ${indices.E}
@@ -2467,7 +2467,7 @@ function genererSectionRisque(da) {
 
         <div class="profil-formule-explications">
             L'engagement mesure la <strong>mobilisation globale</strong> de l'étudiant selon la formule : E = ∛(A × C × P)
-            <span class="primo-aide" data-target="conseil-formule-engagement">😎</span>
+            <span class="primo-aide" data-target="conseil-formule-engagement">🧭</span>
             <br>Engagement actuel : <strong style="color: ${interpE.couleur};">${interpE.niveau}</strong>
         </div>
 
@@ -3025,13 +3025,13 @@ function changerSectionProfil(section) {
     // Générer l'aide Primo selon la section (popup au clic)
     let toggleInfo = '';
     if (section === 'cible') {
-        toggleInfo = `<span class="primo-aide" data-target="details-calculs-risque-${da}">😎</span>`;
+        toggleInfo = `<span class="primo-aide" data-target="details-calculs-risque-${da}">🧭</span>`;
     } else if (section === 'performance') {
-        toggleInfo = `<span class="primo-aide" data-target="details-calculs-performance-${da}">😎</span>`;
+        toggleInfo = `<span class="primo-aide" data-target="details-calculs-performance-${da}">🧭</span>`;
     } else if (section === 'mobilisation') {
-        toggleInfo = `<span class="primo-aide" data-target="details-calculs-mobilisation-${da}">😎</span>`;
+        toggleInfo = `<span class="primo-aide" data-target="details-calculs-mobilisation-${da}">🧭</span>`;
     } else if (section === 'accompagnement') {
-        toggleInfo = `<span class="primo-aide" data-target="details-calculs-accompagnement-${da}">😎</span>`;
+        toggleInfo = `<span class="primo-aide" data-target="details-calculs-accompagnement-${da}">🧭</span>`;
     }
 
     contenuContainer.innerHTML = `
@@ -3052,7 +3052,7 @@ function changerSectionProfil(section) {
             reattacherEvenementsToggles();
         }
 
-        // Réinitialiser les tooltips Primo pour les icônes 😎 dynamiques
+        // Réinitialiser les tooltips pour les icônes 🧭 dynamiques
         if (typeof initialiserPrimoTooltips === 'function') {
             initialiserPrimoTooltips();
         }
@@ -3604,7 +3604,7 @@ function afficherProfilComplet(da) {
                 <div class="profil-contenu-header">
                     <h2 class="u-flex-between-mb20">
                         <span data-tooltip="${{'productions':'profil-productions','mobilisation':'profil-engagement','progression':'profil-progression','performance':'profil-habiletes','accompagnement':'profil-accompagnement','travaux':'profil-travaux','rapport':'profil-rapport'}[sectionAffichee] || ''}">${titreSection}</span>
-                        <span class="primo-aide" data-target="details-calculs-risque-${da}">😎</span>
+                        <span class="primo-aide" data-target="details-calculs-risque-${da}">🧭</span>
                     </h2>
                 </div>
                 <div class="profil-contenu-body">
@@ -3620,7 +3620,7 @@ function afficherProfilComplet(da) {
             reattacherEvenementsToggles();
         }
 
-        // Réinitialiser les tooltips Primo pour les icônes 😎 dynamiques
+        // Réinitialiser les tooltips pour les icônes 🧭 dynamiques
         if (typeof initialiserPrimoTooltips === 'function') {
             initialiserPrimoTooltips();
         }
@@ -7745,7 +7745,7 @@ function genererSectionRapport(da) {
             <div class="profil-carte">
                 <!-- En-tête minimaliste -->
                 <h3 style="margin: 0 0 20px 0; color: var(--accent-primaire); font-size: 1.1rem; border-bottom: 2px solid var(--bleu-pale); padding-bottom: 10px;">
-                    <span class="primo-aide" data-target="conseil-rapport">😎</span>
+                    <span class="primo-aide" data-target="conseil-rapport">🧭</span>
                 </h3>
 
                 <!-- Conseil Primo: Informations sur le rapport -->

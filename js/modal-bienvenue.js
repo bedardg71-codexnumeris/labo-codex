@@ -150,8 +150,8 @@
                             <span class="repere-texte"><strong>Nouveautés</strong> — Corrections et nouvelles fonctionnalités</span>
                         </div>
                         <div class="modal-bienvenue-repere">
-                            <span class="repere-icone">😎</span>
-                            <span class="repere-texte"><strong>Primo</strong> — Guide interactif et navigation générale</span>
+                            <span class="repere-icone">🧭</span>
+                            <span class="repere-texte"><strong>Tour guide</strong> — Aide contextuelle et navigation générale</span>
                         </div>
                         <div class="modal-bienvenue-repere">
                             <span class="repere-icone">⚠️</span>
@@ -166,10 +166,10 @@
 
                 <div class="modal-bienvenue-actions">
                     <button class="btn-bienvenue btn-bienvenue-principal" onclick="window.modalBienvenue.commencerConfiguration()">
-                        <span class="btn-bienvenue-icone">😎</span>
+                        <span class="btn-bienvenue-icone">🧭</span>
                         <span class="btn-bienvenue-texte">
                             <strong>Configuration guidée</strong>
-                            <small>Primo te pose quelques questions et configure l'app pour toi</small>
+                            <small>Le guide te pose quelques questions et configure l'app pour toi</small>
                         </span>
                     </button>
 
