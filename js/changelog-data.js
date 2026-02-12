@@ -10,7 +10,7 @@
 
     var CHANGELOG = [
         {
-            version: 'Beta 98',
+            version: 'Beta 97.5',
             date: '11 février',
             couleur: 'sarcelle',
             titre: 'Retouches visuelles Océan & Boussole',
