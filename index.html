@@ -4803,44 +4803,44 @@
                     <div class="carte">
                         <h3 class="carte-titre-bleu" data-tooltip="cn-ressources">Ressources configurées</h3>
 
-                        <div class="grid-auto-200-mt15">
+                        <div class="grille-cartes-metriques">
                             <!-- Productions -->
-                            <div class="carte-bleu-encadree">
-                                <div class="d-flex-between">
-                                    <span class="text-muted">Productions</span>
-                                    <strong id="stat-productions" class="titre-1-8">—</strong>
+                            <div class="carte-metrique-bleue">
+                                <div class="carte-metrique-contenu">
+                                    <span class="carte-metrique-label">Productions</span>
+                                    <strong id="stat-productions" class="carte-metrique-valeur">—</strong>
                                 </div>
                             </div>
 
                             <!-- Grilles de critères -->
-                            <div class="carte-bleu-encadree">
-                                <div class="d-flex-between">
-                                    <span class="text-muted">Grilles de critères</span>
-                                    <strong id="stat-grilles" class="titre-1-8">—</strong>
+                            <div class="carte-metrique-bleue">
+                                <div class="carte-metrique-contenu">
+                                    <span class="carte-metrique-label">Grilles de critères</span>
+                                    <strong id="stat-grilles" class="carte-metrique-valeur">—</strong>
                                 </div>
                             </div>
 
                             <!-- Échelles de performance -->
-                            <div class="carte-bleu-encadree">
-                                <div class="d-flex-between">
-                                    <span class="text-muted">Échelles de performance</span>
-                                    <strong id="stat-echelles" class="titre-1-8">—</strong>
+                            <div class="carte-metrique-bleue">
+                                <div class="carte-metrique-contenu">
+                                    <span class="carte-metrique-label">Échelles de performance</span>
+                                    <strong id="stat-echelles" class="carte-metrique-valeur">—</strong>
                                 </div>
                             </div>
 
                             <!-- Pratiques de notation -->
-                            <div class="carte-bleu-encadree">
-                                <div class="d-flex-between">
-                                    <span class="text-muted">Pratiques de notation</span>
-                                    <strong id="stat-pratiques" class="titre-1-8">—</strong>
+                            <div class="carte-metrique-bleue">
+                                <div class="carte-metrique-contenu">
+                                    <span class="carte-metrique-label">Pratiques de notation</span>
+                                    <strong id="stat-pratiques" class="carte-metrique-valeur">—</strong>
                                 </div>
                             </div>
 
                             <!-- Cartouches de rétroaction -->
-                            <div class="carte-bleu-encadree">
-                                <div class="d-flex-between">
-                                    <span class="text-muted">Cartouches de rétroaction</span>
-                                    <strong id="stat-cartouches" class="titre-1-8">—</strong>
+                            <div class="carte-metrique-bleue">
+                                <div class="carte-metrique-contenu">
+                                    <span class="carte-metrique-label">Cartouches de rétroaction</span>
+                                    <strong id="stat-cartouches" class="carte-metrique-valeur">—</strong>
                                 </div>
                             </div>
                         </div>
@@ -5176,87 +5176,45 @@
                                 <p>Sélectionnez une grille dans la barre latérale ou créez une nouvelle grille</p>
                             </div>
 
-                            <!-- Formulaire de préparation PDF (Beta 95.7 - #30) -->
-                            <div id="formulairePreparationPDF" style="display: none;">
-                                <h3 style="margin-bottom: 20px; color: var(--bleu-fonce);">📄 Préparer le PDF</h3>
-                                <p style="color: var(--texte-secondaire); margin-bottom: 20px;">
-                                    Créez un document de référence complet pour une production.
-                                </p>
+                            <!-- Formulaire de préparation PDF (identique au formulaire inline) -->
+                            <div id="formulairePreparationPDF" class="carte u-hide">
+                                <h3 class="prep-pdf-titre">📄 Préparer le PDF</h3>
 
-                                <!-- SECTION 1 : Production (optionnel) -->
-                                <fieldset style="border: 1px solid var(--bordure-legere); border-radius: var(--radius-moyen); padding: 15px; margin-bottom: 20px;">
-                                    <legend style="font-weight: 600; color: var(--bleu-fonce); padding: 0 10px;">1. Production (optionnel)</legend>
+                                <fieldset class="prep-pdf-fieldset">
+                                    <legend class="prep-pdf-legend">Éléments du document</legend>
 
                                     <div class="groupe-form u-mb-15">
-                                        <label for="prepPDF-production">Sélectionner une production</label>
+                                        <label for="prepPDF-production" class="prep-pdf-label-sm">Production (optionnel)</label>
                                         <select id="prepPDF-production" class="controle-form" onchange="mettreAJourOptionsPreparationPDF()">
                                             <option value="">-- Aucune (grille générique) --</option>
                                         </select>
                                     </div>
 
-                                    <div id="prepPDF-options-production" style="display: none;">
-                                        <p style="font-size: 0.9rem; margin-bottom: 10px; color: var(--texte-secondaire);">Informations à inclure :</p>
-                                        <div style="display: flex; flex-wrap: wrap; gap: 15px;">
-                                            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                                                <input type="checkbox" id="prepPDF-prod-nom" checked>
-                                                <span>Nom de la production</span>
-                                            </label>
-                                            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                                                <input type="checkbox" id="prepPDF-prod-objectif" checked>
-                                                <span>Objectif d'apprentissage</span>
-                                            </label>
-                                            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                                                <input type="checkbox" id="prepPDF-prod-description" checked>
-                                                <span>Description de la tâche</span>
-                                            </label>
-                                        </div>
-                                        <div style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--bordure-legere);">
-                                            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                                                <input type="checkbox" id="prepPDF-desc-criteres">
-                                                <span>Description des critères dans le tableau</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </fieldset>
-
-                                <!-- SECTION 2 : Grille et Échelle -->
-                                <fieldset style="border: 1px solid var(--bordure-legere); border-radius: var(--radius-moyen); padding: 15px; margin-bottom: 20px;">
-                                    <legend style="font-weight: 600; color: var(--bleu-fonce); padding: 0 10px;">2. Grille et Échelle <span style="color: #d32f2f;">*</span></legend>
-
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                                        <div class="groupe-form">
-                                            <label for="prepPDF-grille">Grille de critères</label>
+                                    <div class="prep-pdf-grille-selects">
+                                        <div class="groupe-form u-mb-0">
+                                            <label for="prepPDF-grille" class="prep-pdf-label-sm">Grille de critères <span class="prep-pdf-requis">*</span></label>
                                             <select id="prepPDF-grille" class="controle-form" onchange="mettreAJourOptionsPreparationPDF()">
                                                 <option value="">-- Sélectionner --</option>
                                             </select>
                                         </div>
 
-                                        <div class="groupe-form">
-                                            <label for="prepPDF-echelle">Échelle de performance</label>
+                                        <div class="groupe-form u-mb-0">
+                                            <label for="prepPDF-echelle" class="prep-pdf-label-sm">Échelle de performance <span class="prep-pdf-requis">*</span></label>
                                             <select id="prepPDF-echelle" class="controle-form" onchange="mettreAJourOptionsPreparationPDF()">
                                                 <option value="">-- Sélectionner --</option>
+                                            </select>
+                                        </div>
+
+                                        <div id="prepPDF-section-cartouche" class="groupe-form u-mb-0 u-hide">
+                                            <label for="prepPDF-cartouche" class="prep-pdf-label-sm">Cartouche (optionnel)</label>
+                                            <select id="prepPDF-cartouche" class="controle-form">
+                                                <option value="">-- Sans rétroaction --</option>
                                             </select>
                                         </div>
                                     </div>
                                 </fieldset>
 
-                                <!-- SECTION 3 : Cartouche (optionnel) -->
-                                <fieldset id="prepPDF-section-cartouche" style="border: 1px solid var(--bordure-legere); border-radius: var(--radius-moyen); padding: 15px; margin-bottom: 20px; display: none;">
-                                    <legend style="font-weight: 600; color: var(--bleu-fonce); padding: 0 10px;">3. Rétroaction (optionnel)</legend>
-
-                                    <div class="groupe-form">
-                                        <label for="prepPDF-cartouche">Cartouche de rétroaction</label>
-                                        <select id="prepPDF-cartouche" class="controle-form">
-                                            <option value="">-- Sans rétroaction --</option>
-                                        </select>
-                                        <p style="font-size: 0.85rem; color: var(--texte-secondaire); margin-top: 5px;">
-                                            Ajoute les commentaires prédéfinis pour chaque croisement critère × niveau
-                                        </p>
-                                    </div>
-                                </fieldset>
-
-                                <!-- Boutons -->
-                                <div class="btn-groupe" style="display: flex; justify-content: space-between;">
+                                <div class="prep-pdf-actions">
                                     <button onclick="fermerFormulairePreparationPDF()" class="btn btn-annuler">
                                         Annuler
                                     </button>
@@ -15881,7 +15839,7 @@
     <script src="js/echelles.js?v=2026010601"></script>
     <script src="js/cartouches-bibliotheque.js?v=2026010220"></script> <!-- refactoring: plus de hardcodé -->
     <script src="js/cartouches.js?v=2026010601"></script>
-    <script src="js/export-pdf.js?v=2026012001"></script> <!-- Beta 95.7 #30 : Export PDF -->
+    <script src="js/export-pdf.js?v=2026021202"></script> <!-- Beta 95.7 #30 : Export PDF -->
     <script src="js/cours.js?v=2025121601"></script>
     <script src="js/contexte.js?v=2026013001"></script> <!-- Beta 95.2 : Support groupe-cours -->
 
@@ -16019,7 +15977,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97.5';
-        const BUILD_ID = '0212-0630';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0212-0857';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
@@ -16756,7 +16714,7 @@
     <!-- MODAL APERÇU PDF (Beta 95.7 - #30) -->
     <!-- Affiche un aperçu fidèle au rendu PDF final -->
     <!-- ========================================= -->
-    <div id="modalApercuPDF" class="modal-overlay" style="display: none;">
+    <div id="modalApercuPDF" class="modal-overlay">
         <div class="modal-contenu" style="max-width: 95vw; width: auto; padding: 20px;">
             <button onclick="fermerModalApercuPDF()" class="modal-fermer">✕</button>
 
@@ -16805,9 +16763,9 @@
             </div>
 
             <!-- Options de production (affiché uniquement si une production est sélectionnée) -->
-            <div id="apercuPDF-options-production" style="display: none; margin-bottom: 12px; padding: 10px 15px; background: var(--bleu-tres-pale, #f0f8ff); border-radius: var(--radius-moyen); font-size: 0.85rem;">
+            <div id="apercuPDF-options-production" class="u-hide" style="margin-bottom: 12px; padding: 10px 15px; background: var(--bleu-tres-pale, #f0f8ff); border-radius: var(--radius-moyen); font-size: 0.85rem;">
                 <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
-                    <span style="font-weight: 500; color: var(--bleu-fonce);">Production :</span>
+                    <span style="font-weight: 500; color: var(--texte-principal);">Production :</span>
                     <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
                         <input type="checkbox" id="apercuPDF-prod-nom" checked onchange="rafraichirApercuPDF()">
                         <span>Nom</span>

@@ -342,6 +342,7 @@ body.mode-demo .sous-navigation {
 
 /* === MARGES === */
 .u-m-0 { margin: 0; }
+.u-mb-0 { margin-bottom: 0; }
 .u-mb-8 { margin-bottom: 8px; }
 .u-mb-10 { margin-bottom: 10px; }
 .u-mb-15 { margin-bottom: 15px; }
@@ -11930,6 +11931,86 @@ body.mode-assiste .btn-aide-contextuelle,
 }
 
 /* ===========================================================================
+   FORMULAIRE PREPARATION PDF
+   Beta 97.5 - Classes partagees par le formulaire statique (Grilles)
+   et le formulaire inline (Productions, Echelles, Cartouches)
+   =========================================================================== */
+
+.prep-pdf-titre {
+    margin-bottom: 15px;
+    color: var(--accent-primaire, #6aacb8);
+}
+
+.prep-pdf-description {
+    color: var(--texte-secondaire);
+    margin-bottom: 20px;
+}
+
+.prep-pdf-fieldset {
+    border: 1px solid rgba(106, 172, 184, 0.25);
+    border-radius: var(--radius-moyen);
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.prep-pdf-legend {
+    font-weight: 600;
+    color: var(--accent-primaire, #6aacb8);
+    padding: 0 8px;
+    font-size: 0.95rem;
+}
+
+.prep-pdf-grille-selects {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    align-items: start;
+}
+
+.prep-pdf-label-sm {
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+}
+
+.prep-pdf-requis {
+    color: var(--rouge-erreur, #e84057);
+}
+
+.prep-pdf-checkbox-groupe {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.prep-pdf-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.prep-pdf-texte-sm {
+    font-size: 0.85rem;
+    color: var(--texte-secondaire);
+}
+
+.prep-pdf-separateur {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px dashed rgba(106, 172, 184, 0.25);
+}
+
+.prep-pdf-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.prep-pdf-actions--between {
+    justify-content: space-between;
+}
+
+/* ===========================================================================
    APERCU PDF - Styles pour la previsualisation des exports PDF
    Beta 95.7 - Tache #30
    =========================================================================== */
@@ -11939,8 +12020,8 @@ body.mode-assiste .btn-aide-contextuelle,
     display: none;
     padding: 16px;
     margin: 16px 0;
-    background: var(--fond-secondaire, #f8f9fa);
-    border: 1px solid var(--bordure-legere, #e0e0e0);
+    background: var(--surface-section, #142428);
+    border: 1px solid rgba(106, 172, 184, 0.15);
     border-radius: var(--radius-moyen, 8px);
 }
 
@@ -11954,7 +12035,7 @@ body.mode-assiste .btn-aide-contextuelle,
     gap: 12px;
     margin-top: 16px;
     padding-top: 16px;
-    border-top: 1px solid var(--bordure-legere, #e0e0e0);
+    border-top: 1px solid rgba(106, 172, 184, 0.15);
 }
 
 /* Conteneur principal de l'apercu */
@@ -11977,32 +12058,32 @@ body.mode-assiste .btn-aide-contextuelle,
     align-items: center;
     margin-bottom: 16px;
     padding-bottom: 12px;
-    border-bottom: 2px solid var(--bleu-principal, #2962ff);
+    border-bottom: 2px solid var(--accent-primaire, #6aacb8);
 }
 
 .apercu-pdf-entete h3 {
     margin: 0;
     font-size: 1.25rem;
-    color: var(--bleu-principal, #2962ff);
+    color: var(--accent-primaire, #6aacb8);
 }
 
 .apercu-pdf-date {
     font-size: 0.85rem;
-    color: var(--texte-secondaire, #757575);
+    color: var(--texte-secondaire, #8aa4b0);
 }
 
 /* Description et info */
 .apercu-pdf-description {
     margin: 0 0 16px 0;
     font-style: italic;
-    color: var(--texte-secondaire, #757575);
+    color: var(--texte-secondaire, #8aa4b0);
     line-height: 1.5;
 }
 
 .apercu-pdf-info {
     margin: 0 0 12px 0;
     font-size: 0.9rem;
-    color: var(--texte-secondaire, #757575);
+    color: var(--texte-secondaire, #8aa4b0);
 }
 
 /* Tableau de l'apercu */
@@ -12013,12 +12094,12 @@ body.mode-assiste .btn-aide-contextuelle,
 }
 
 .apercu-pdf-table thead th {
-    background: var(--bleu-principal, #2962ff);
-    color: white;
+    background: var(--surface-element, #244858);
+    color: var(--texte-principal, #d0e0e4);
     padding: 10px 12px;
     text-align: left;
     font-weight: 600;
-    border: 1px solid var(--bleu-principal, #2962ff);
+    border: 1px solid rgba(106, 172, 184, 0.25);
 }
 
 .apercu-pdf-table tbody td {
@@ -12032,7 +12113,7 @@ body.mode-assiste .btn-aide-contextuelle,
 }
 
 .apercu-pdf-table tbody tr:hover {
-    background: #e3f2fd;
+    background: var(--surface-element, #244858);
 }
 
 /* Tableau matrice (cartouches) */
@@ -12048,7 +12129,7 @@ body.mode-assiste .btn-aide-contextuelle,
 .apercu-cell-commentaire {
     font-size: 0.8rem;
     line-height: 1.4;
-    color: var(--texte-principal, #333);
+    color: var(--texte-principal, #d0e0e4);
 }
 
 /* Couleurs IDME pour les niveaux */
@@ -12116,20 +12197,20 @@ body.mode-assiste .btn-aide-contextuelle,
 .apercu-pdf-section {
     margin-bottom: 15px;
     padding: 10px 12px;
-    background: var(--surface-carte, #1a3a48);
-    border-left: 3px solid var(--bleu-principal, #2962ff);
+    background: var(--surface-section, #142428);
+    border-left: 3px solid var(--accent-primaire, #6aacb8);
     border-radius: 0 var(--radius-petit, 4px) var(--radius-petit, 4px) 0;
 }
 
 .apercu-pdf-section strong {
-    color: var(--bleu-fonce, #1a3a4a);
+    color: var(--accent-primaire, #6aacb8);
     display: block;
     margin-bottom: 5px;
 }
 
 .apercu-pdf-section p {
     margin: 0;
-    color: var(--texte-principal, #333);
+    color: var(--texte-principal, #d0e0e4);
     line-height: 1.5;
 }
 
@@ -12144,13 +12225,13 @@ body.mode-assiste .btn-aide-contextuelle,
     align-items: flex-start;
 }
 
-/* Page simulée - base commune */
+/* Page simulée - base commune (toujours en mode clair = papier blanc) */
 .apercu-pdf-page {
-    background: var(--surface-carte, #1a3040);
+    background: #ffffff;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     margin: 0 auto;
     position: relative;
-    /* overflow: visible pour permettre au contenu de s'étendre */
+    color: #333333;
 }
 
 /* Portrait : ratio Letter (8.5 x 11) - echelle 0.7 pour tenir dans le modal */
@@ -12169,13 +12250,12 @@ body.mode-assiste .btn-aide-contextuelle,
     /* aspect-ratio retiré pour permettre au contenu de s'étendre verticalement */
 }
 
-/* Contenu de la page avec marges simulées */
+/* Contenu de la page avec marges simulées (toujours mode clair) */
 .apercu-pdf-page-contenu {
     padding: 40px 45px 60px; /* Simule les marges PDF (~15mm) + espace pour footer */
     font-size: 10pt;
     line-height: 1.4;
-    color: var(--texte-principal, #d0e0e4);
-    /* BETA 96.1: Hauteur minimale pour permettre au footer de se positionner */
+    color: #333333;
     min-height: calc(100% - 60px);
     display: flex;
     flex-direction: column;
@@ -12188,6 +12268,14 @@ body.mode-assiste .btn-aide-contextuelle,
 
 .apercu-pdf-page.apercu-taille-grand .apercu-pdf-page-contenu {
     font-size: 11.5pt;
+}
+
+/* Conteneur apercu dans la page (transparent, pas de bordure dark) */
+.apercu-pdf-page .apercu-pdf {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
 }
 
 /* En-tête simulé dans la page */
@@ -12208,9 +12296,10 @@ body.mode-assiste .btn-aide-contextuelle,
     color: #757575;
 }
 
-/* Tables dans la simulation */
+/* Tables dans la simulation (mode clair) */
 .apercu-pdf-page .apercu-pdf-table {
     font-size: inherit;
+    color: #333333;
 }
 
 .apercu-pdf-page .apercu-pdf-table thead th {
@@ -12218,44 +12307,66 @@ body.mode-assiste .btn-aide-contextuelle,
     color: white;
     font-size: 8pt;
     padding: 4px 5px;
+    border-color: #032e5c;
 }
 
 .apercu-pdf-page .apercu-pdf-table tbody td {
     font-size: 7pt;
     padding: 3px 4px;
     vertical-align: top;
+    border-color: #cccccc;
+    color: #333333;
 }
 
-/* Légende des niveaux dans simulation */
+.apercu-pdf-page .apercu-pdf-table tbody tr:nth-child(even) {
+    background: #f8f9fa;
+}
+
+.apercu-pdf-page .apercu-cell-commentaire {
+    color: #555555;
+}
+
+/* Légende des niveaux dans simulation (mode clair) */
 .apercu-pdf-page .apercu-legende-niveaux {
     display: flex;
     gap: 12px;
     flex-wrap: wrap;
     padding: 8px 10px;
-    background: var(--surface-carte, #1a3a48);
+    background: #f0f4f8;
     border-radius: 4px;
     margin-bottom: 12px;
     font-size: 8pt;
+    color: #333333;
 }
 
 /* Info echelle */
 .apercu-pdf-page .apercu-pdf-info {
     font-size: 9pt;
     margin-bottom: 10px;
+    color: #666666;
 }
 
-/* Sections info production */
+/* Description dans simulation (mode clair) */
+.apercu-pdf-page .apercu-pdf-description {
+    color: #666666;
+}
+
+/* Sections info production (mode clair) */
 .apercu-pdf-page .apercu-pdf-section {
     margin-bottom: 12px;
     padding: 8px 10px;
+    background: #f5f5f5;
+    border-left-color: #032e5c;
 }
 
 .apercu-pdf-page .apercu-pdf-section strong {
     font-size: 9pt;
+    color: #032e5c;
 }
 
 .apercu-pdf-page .apercu-pdf-section p {
     font-size: 9pt;
+    color: #333333;
 }
 
 /* Pied de page simulé - désactivé car footer HTML dans genererApercuCombine()
