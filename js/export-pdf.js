@@ -55,20 +55,22 @@ const CLE_REGLAGES_PDF = 'exportPDF_derniersReglages';
  * Sauvegarde les réglages actuels du formulaire PDF
  */
 function sauvegarderReglagesPDF() {
+    // Lire les dropdowns depuis le formulaire actif (inline ou statique)
+    const scope = _zonePrincipalePDF || document;
+    const inline = !!_zonePrincipalePDF;
+    const prefix = inline ? 'inlinePDF' : 'prepPDF';
+
     const reglages = {
-        productionId: document.getElementById('prepPDF-production')?.value || '',
-        grilleId: document.getElementById('prepPDF-grille')?.value || '',
-        echelleId: document.getElementById('prepPDF-echelle')?.value || '',
-        cartoucheId: document.getElementById('prepPDF-cartouche')?.value || '',
-        inclureNomProduction: document.getElementById('prepPDF-prod-nom')?.checked ?? true,
-        inclureObjectif: document.getElementById('prepPDF-prod-objectif')?.checked ?? true,
-        inclureDescription: document.getElementById('prepPDF-prod-description')?.checked ?? true,
-        inclureDescCriteres: document.getElementById('prepPDF-desc-criteres')?.checked ?? false,
+        // Dropdowns du formulaire actif
+        productionId: scope.querySelector(`#${prefix}-production`)?.value || '',
+        grilleId: scope.querySelector(`#${prefix}-grille`)?.value || '',
+        echelleId: scope.querySelector(`#${prefix}-echelle`)?.value || '',
+        cartoucheId: scope.querySelector(`#${prefix}-cartouche`)?.value || '',
+        // Options du modal (toujours dans document)
         orientation: document.getElementById('apercuPDF-orientation')?.value || 'portrait',
         afficherTrimestre: document.getElementById('apercuPDF-afficher-trimestre')?.checked ?? true,
         piedEnseignant: document.getElementById('apercuPDF-pied-enseignant')?.checked ?? true,
         piedLicence: document.getElementById('apercuPDF-pied-licence')?.checked ?? true
-        // piedCours retiré - les infos du cours sont maintenant dans l'en-tête
     };
     db.setSync(CLE_REGLAGES_PDF, reglages);
 }
@@ -1797,8 +1799,8 @@ function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
             }
             html += `
                 <tr style="background: ${bgColor};">
-                    <td style="${styleTableCritere} padding: 4px 5px; border: 1px solid var(--bordure-claire); vertical-align: top;">${contenuCritere}</td>
-                    <td style="${styleTableCritere} padding: 4px 5px; border: 1px solid var(--bordure-claire); text-align: center; vertical-align: top;">${c.ponderation || '—'}</td>
+                    <td style="${styleTableCritere} padding: 4px 5px; border: 1px solid ${couleurBordure}; vertical-align: top;">${contenuCritere}</td>
+                    <td style="${styleTableCritere} padding: 4px 5px; border: 1px solid ${couleurBordure}; text-align: center; vertical-align: top;">${c.ponderation || '—'}</td>
             `;
 
             // Cellules pour chaque niveau - RETROACTIONS avec taille auto
@@ -1808,7 +1810,7 @@ function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
                     const cle = `${c.id}_${n.code}`;
                     contenu = cartouche.commentaires[cle] || '—';
                 }
-                html += `<td style="${styleRetroaction} padding: 3px 4px; border: 1px solid var(--bordure-claire); vertical-align: top; color: ${couleurTexte};">${escapeHtml(contenu)}</td>`;
+                html += `<td style="${styleRetroaction} padding: 3px 4px; border: 1px solid ${couleurBordure}; vertical-align: top; color: ${couleurTexte};">${escapeHtml(contenu)}</td>`;
             });
 
             html += `</tr>`;
@@ -2216,18 +2218,6 @@ async function afficherFormulairePreparationPDF(options = {}) {
         if (selectProduction) selectProduction.value = reglages.productionId;
     }
 
-    // Restaurer les checkboxes
-    if (reglages) {
-        const checkNom = document.getElementById('prepPDF-prod-nom');
-        const checkObjectif = document.getElementById('prepPDF-prod-objectif');
-        const checkDescription = document.getElementById('prepPDF-prod-description');
-        const checkDescCriteres = document.getElementById('prepPDF-desc-criteres');
-        if (checkNom) checkNom.checked = reglages.inclureNomProduction ?? true;
-        if (checkObjectif) checkObjectif.checked = reglages.inclureObjectif ?? true;
-        if (checkDescription) checkDescription.checked = reglages.inclureDescription ?? true;
-        if (checkDescCriteres) checkDescCriteres.checked = reglages.inclureDescCriteres ?? false;
-    }
-
     // Mettre a jour les options dependantes (cartouches, etc.)
     await mettreAJourOptionsPreparationPDF();
 
@@ -2404,13 +2394,16 @@ async function ouvrirApercuPDF() {
             echelle: echelle,
             cartouche: cartouche,
             production: production,
-            inclureNomProduction: document.getElementById('prepPDF-prod-nom')?.checked,
-            inclureObjectif: document.getElementById('prepPDF-prod-objectif')?.checked,
-            inclureDescription: document.getElementById('prepPDF-prod-description')?.checked,
-            inclureDescCriteres: document.getElementById('prepPDF-desc-criteres')?.checked,
             nomEnseignant: nomEnseignant,
-            nomCours: nomCours
+            nomCours: nomCours,
+            infosCours: infosCours
         };
+
+        // Afficher/masquer les options de production dans le modal
+        const optionsProd = document.getElementById('apercuPDF-options-production');
+        if (optionsProd) {
+            toggleDisplay(optionsProd, !!production);
+        }
 
         // Restaurer les options du modal depuis les réglages sauvegardés
         const reglages = restaurerReglagesPDF();
@@ -2424,7 +2417,7 @@ async function ouvrirApercuPDF() {
             selectOrientation.value = reglages?.orientation || (cartouche ? 'paysage' : 'portrait');
         }
 
-        // Restaurer les options de pied de page (piedCours retiré - cours maintenant dans l'en-tête)
+        // Restaurer les options de pied de page
         if (checkPiedEnseignant) checkPiedEnseignant.checked = reglages?.piedEnseignant ?? true;
         if (checkPiedLicence) checkPiedLicence.checked = reglages?.piedLicence ?? true;
         if (checkAfficherTrimestre) checkAfficherTrimestre.checked = reglages?.afficherTrimestre ?? true;
@@ -2432,8 +2425,8 @@ async function ouvrirApercuPDF() {
         // Sauvegarder les réglages actuels
         sauvegarderReglagesPDF();
 
-        // Afficher le modal
-        modal.classList.remove('u-hide');
+        // Afficher le modal (.modal-overlay utilise .actif)
+        modal.classList.add('actif');
 
         // Generer l'apercu initial
         rafraichirApercuPDF();
@@ -2513,7 +2506,7 @@ function rafraichirApercuPDF() {
  */
 function fermerModalApercuPDF() {
     const modal = document.getElementById('modalApercuPDF');
-    if (modal) modal.classList.add('u-hide');
+    if (modal) modal.classList.remove('actif');
     // Ne pas nettoyer _apercuPDFData ici pour permettre de revenir au modal
 }
 
@@ -2574,6 +2567,14 @@ async function exporterPDFDepuisApercu() {
             _apercuPDFData.cartouche,
             options
         );
+
+        // Sauvegarder les options du modal (orientation, pied de page, etc.)
+        const reglagesSauves = restaurerReglagesPDF() || {};
+        reglagesSauves.orientation = orientation;
+        reglagesSauves.piedEnseignant = piedEnseignant;
+        reglagesSauves.piedLicence = piedLicence;
+        reglagesSauves.afficherTrimestre = enteteTrimestre;
+        db.setSync(CLE_REGLAGES_PDF, reglagesSauves);
 
         // Fermer le modal apres export
         fermerModalApercuPDF();
@@ -2649,39 +2650,36 @@ let _zonePrincipalePDF = null;
  */
 function genererHTMLFormulairePDF() {
     return `
-        <div id="formulairePDFInline">
-            <h3 style="margin-bottom: 12px; color: var(--bleu-fonce);">📄 Préparer le PDF</h3>
+        <div id="formulairePDFInline" class="carte">
+            <h3 class="prep-pdf-titre">📄 Préparer le PDF</h3>
 
-            <!-- Sélection des éléments sur deux lignes -->
-            <fieldset style="border: 1px solid var(--bordure-legere); border-radius: var(--radius-moyen); padding: 12px 15px; margin-bottom: 15px;">
-                <legend style="font-weight: 600; color: var(--bleu-fonce); padding: 0 8px; font-size: 0.95rem;">Éléments du document</legend>
+            <fieldset class="prep-pdf-fieldset">
+                <legend class="prep-pdf-legend">Éléments du document</legend>
 
-                <!-- Ligne 1 : Production (optionnel) -->
-                <div class="groupe-form" style="margin-bottom: 12px;">
-                    <label for="inlinePDF-production" style="font-size: 0.85rem; margin-bottom: 4px;">Production (optionnel)</label>
+                <div class="groupe-form u-mb-15">
+                    <label for="inlinePDF-production" class="prep-pdf-label-sm">Production (optionnel)</label>
                     <select id="inlinePDF-production" class="controle-form" onchange="mettreAJourOptionsInlinePDF()">
                         <option value="">-- Aucune (grille générique) --</option>
                     </select>
                 </div>
 
-                <!-- Ligne 2 : Grille, Échelle, Cartouche -->
-                <div id="inlinePDF-grid-selects" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: start;">
-                    <div class="groupe-form" style="margin-bottom: 0;">
-                        <label for="inlinePDF-grille" style="font-size: 0.85rem; margin-bottom: 4px;">Grille de critères <span style="color: #d32f2f;">*</span></label>
+                <div id="inlinePDF-grid-selects" class="prep-pdf-grille-selects">
+                    <div class="groupe-form u-mb-0">
+                        <label for="inlinePDF-grille" class="prep-pdf-label-sm">Grille de critères <span class="prep-pdf-requis">*</span></label>
                         <select id="inlinePDF-grille" class="controle-form" onchange="mettreAJourOptionsInlinePDF()">
                             <option value="">-- Sélectionner --</option>
                         </select>
                     </div>
 
-                    <div class="groupe-form" style="margin-bottom: 0;">
-                        <label for="inlinePDF-echelle" style="font-size: 0.85rem; margin-bottom: 4px;">Échelle de performance <span style="color: #d32f2f;">*</span></label>
+                    <div class="groupe-form u-mb-0">
+                        <label for="inlinePDF-echelle" class="prep-pdf-label-sm">Échelle de performance <span class="prep-pdf-requis">*</span></label>
                         <select id="inlinePDF-echelle" class="controle-form" onchange="mettreAJourOptionsInlinePDF()">
                             <option value="">-- Sélectionner --</option>
                         </select>
                     </div>
 
-                    <div id="inlinePDF-section-cartouche" class="groupe-form" style="margin-bottom: 0; display: none;">
-                        <label for="inlinePDF-cartouche" style="font-size: 0.85rem; margin-bottom: 4px;">Cartouche (optionnel)</label>
+                    <div id="inlinePDF-section-cartouche" class="groupe-form u-mb-0 u-hide">
+                        <label for="inlinePDF-cartouche" class="prep-pdf-label-sm">Cartouche (optionnel)</label>
                         <select id="inlinePDF-cartouche" class="controle-form">
                             <option value="">-- Sans rétroaction --</option>
                         </select>
@@ -2689,8 +2687,7 @@ function genererHTMLFormulairePDF() {
                 </div>
             </fieldset>
 
-            <!-- Boutons -->
-            <div class="btn-groupe" style="display: flex; justify-content: flex-end; gap: 10px;">
+            <div class="prep-pdf-actions">
                 <button onclick="fermerFormulairePDFInline()" class="btn btn-annuler">
                     Annuler
                 </button>
@@ -2707,6 +2704,9 @@ function genererHTMLFormulairePDF() {
  * @param {Object} options - Options de pré-sélection
  */
 async function afficherFormulairePDFInline(options = {}) {
+    // Nettoyer tout formulaire inline précédent (évite les IDs dupliqués dans le DOM)
+    fermerFormulairePDFInline();
+
     // Trouver la zone principale visible de la section actuelle (classe .active)
     const zonePrincipale = document.querySelector('.sous-section.active .zone-principale');
     if (!zonePrincipale) {
@@ -2721,29 +2721,46 @@ async function afficherFormulairePDFInline(options = {}) {
     // Injecter le formulaire
     zonePrincipale.innerHTML = genererHTMLFormulairePDF();
 
-    // Charger les options des dropdowns
+    // Charger les options des dropdowns (scopé à _zonePrincipalePDF)
     await chargerOptionsInlinePDF();
 
-    // Pré-sélectionner les valeurs si fournies
+    // Restaurer les derniers réglages sauvegardés
+    const reglages = restaurerReglagesPDF();
+
+    // Pré-sélectionner : priorité options > réglages sauvegardés
+    const selectProd = _zonePrincipalePDF.querySelector('#inlinePDF-production');
+    const selectGrille = _zonePrincipalePDF.querySelector('#inlinePDF-grille');
+    const selectEchelle = _zonePrincipalePDF.querySelector('#inlinePDF-echelle');
+
     if (options.productionId) {
-        const selectProd = document.getElementById('inlinePDF-production');
         if (selectProd) selectProd.value = options.productionId;
-    }
-    if (options.grilleId) {
-        const selectGrille = document.getElementById('inlinePDF-grille');
-        if (selectGrille) selectGrille.value = options.grilleId;
-    }
-    if (options.echelleId) {
-        const selectEchelle = document.getElementById('inlinePDF-echelle');
-        if (selectEchelle) selectEchelle.value = options.echelleId;
-    }
-    if (options.cartoucheId) {
-        const selectCartouche = document.getElementById('inlinePDF-cartouche');
-        if (selectCartouche) selectCartouche.value = options.cartoucheId;
+    } else if (reglages?.productionId) {
+        if (selectProd) selectProd.value = reglages.productionId;
     }
 
-    // Mettre à jour l'affichage des options
+    if (options.grilleId) {
+        if (selectGrille) selectGrille.value = options.grilleId;
+    } else if (reglages?.grilleId) {
+        if (selectGrille) selectGrille.value = reglages.grilleId;
+    }
+
+    if (options.echelleId) {
+        if (selectEchelle) selectEchelle.value = options.echelleId;
+    } else if (reglages?.echelleId) {
+        if (selectEchelle) selectEchelle.value = reglages.echelleId;
+    }
+
+    // Mettre à jour les options dépendantes (cartouches, bouton aperçu)
     await mettreAJourOptionsInlinePDF();
+
+    // Pré-sélectionner la cartouche après chargement des options dépendantes
+    if (options.cartoucheId) {
+        const selectCartouche = _zonePrincipalePDF.querySelector('#inlinePDF-cartouche');
+        if (selectCartouche) selectCartouche.value = options.cartoucheId;
+    } else if (reglages?.cartoucheId) {
+        const selectCartouche = _zonePrincipalePDF.querySelector('#inlinePDF-cartouche');
+        if (selectCartouche) selectCartouche.value = reglages.cartoucheId;
+    }
 }
 
 /**
@@ -2761,8 +2778,11 @@ function fermerFormulairePDFInline() {
  * Charge les options dans les dropdowns du formulaire inline
  */
 async function chargerOptionsInlinePDF() {
+    // Scopé à _zonePrincipalePDF pour éviter les conflits d'IDs dupliqués
+    const scope = _zonePrincipalePDF || document;
+
     // Charger les productions
-    const selectProd = document.getElementById('inlinePDF-production');
+    const selectProd = scope.querySelector('#inlinePDF-production');
     if (selectProd) {
         const cleProductions = cle('productions');
         const productions = await db.get(cleProductions) || [];
@@ -2771,7 +2791,7 @@ async function chargerOptionsInlinePDF() {
     }
 
     // Charger les grilles
-    const selectGrille = document.getElementById('inlinePDF-grille');
+    const selectGrille = scope.querySelector('#inlinePDF-grille');
     if (selectGrille) {
         const grilles = await db.get('grillesTemplates') || [];
         selectGrille.innerHTML = '<option value="">-- Sélectionner --</option>' +
@@ -2779,7 +2799,7 @@ async function chargerOptionsInlinePDF() {
     }
 
     // Charger les échelles
-    const selectEchelle = document.getElementById('inlinePDF-echelle');
+    const selectEchelle = scope.querySelector('#inlinePDF-echelle');
     if (selectEchelle) {
         const echelles = await db.get('echellesTemplates') || [];
         selectEchelle.innerHTML = '<option value="">-- Sélectionner --</option>' +
@@ -2791,20 +2811,23 @@ async function chargerOptionsInlinePDF() {
  * Met à jour l'affichage des options du formulaire inline selon les sélections
  */
 async function mettreAJourOptionsInlinePDF() {
-    const productionId = document.getElementById('inlinePDF-production')?.value;
-    const grilleId = document.getElementById('inlinePDF-grille')?.value;
-    const echelleId = document.getElementById('inlinePDF-echelle')?.value;
+    // Scopé à _zonePrincipalePDF pour éviter les conflits d'IDs dupliqués
+    const scope = _zonePrincipalePDF || document;
+
+    const productionId = scope.querySelector('#inlinePDF-production')?.value;
+    const grilleId = scope.querySelector('#inlinePDF-grille')?.value;
+    const echelleId = scope.querySelector('#inlinePDF-echelle')?.value;
 
     // Afficher/masquer les options de production
-    const optionsProd = document.getElementById('inlinePDF-options-production');
+    const optionsProd = scope.querySelector('#inlinePDF-options-production');
     if (optionsProd) {
         toggleDisplay(optionsProd, !!productionId);
     }
 
     // Charger les cartouches si une grille est sélectionnée
-    const sectionCartouche = document.getElementById('inlinePDF-section-cartouche');
-    const selectCartouche = document.getElementById('inlinePDF-cartouche');
-    const gridContainer = document.getElementById('inlinePDF-grid-selects');
+    const sectionCartouche = scope.querySelector('#inlinePDF-section-cartouche');
+    const selectCartouche = scope.querySelector('#inlinePDF-cartouche');
+    const gridContainer = scope.querySelector('#inlinePDF-grid-selects');
 
     if (grilleId && selectCartouche) {
         const cartouches = await db.get(`cartouches_${grilleId}`) || [];
@@ -2823,7 +2846,7 @@ async function mettreAJourOptionsInlinePDF() {
     }
 
     // Activer/désactiver le bouton aperçu
-    const btnApercu = document.getElementById('inlinePDF-btn-apercu');
+    const btnApercu = scope.querySelector('#inlinePDF-btn-apercu');
     if (btnApercu) {
         btnApercu.disabled = !(grilleId && echelleId);
     }
@@ -2833,10 +2856,12 @@ async function mettreAJourOptionsInlinePDF() {
  * Ouvre l'aperçu PDF depuis le formulaire inline
  */
 async function ouvrirApercuPDFDepuisInline() {
-    const productionId = document.getElementById('inlinePDF-production')?.value;
-    const grilleId = document.getElementById('inlinePDF-grille')?.value;
-    const echelleId = document.getElementById('inlinePDF-echelle')?.value;
-    const cartoucheId = document.getElementById('inlinePDF-cartouche')?.value;
+    // Scopé à _zonePrincipalePDF pour éviter les conflits d'IDs dupliqués
+    const scope = _zonePrincipalePDF || document;
+    const productionId = scope.querySelector('#inlinePDF-production')?.value;
+    const grilleId = scope.querySelector('#inlinePDF-grille')?.value;
+    const echelleId = scope.querySelector('#inlinePDF-echelle')?.value;
+    const cartoucheId = scope.querySelector('#inlinePDF-cartouche')?.value;
 
     if (!grilleId || !echelleId) {
         alert('Veuillez sélectionner une grille et une échelle.');
@@ -2867,7 +2892,7 @@ async function ouvrirApercuPDFDepuisInline() {
     const infosCours = obtenirInfosCoursPDF();
     const nomCours = infosCours.sigleTitre;
 
-    // Stocker les données pour l'aperçu (les options checkboxes sont lues depuis le modal)
+    // Stocker les données pour l'aperçu
     _apercuPDFData = {
         grille: grille,
         echelle: echelle,
@@ -2878,6 +2903,9 @@ async function ouvrirApercuPDFDepuisInline() {
         infosCours: infosCours
     };
 
+    // Sauvegarder les réglages AVANT de fermer le formulaire (_zonePrincipalePDF encore valide)
+    sauvegarderReglagesPDF();
+
     // Fermer le formulaire inline (restaure le contenu précédent)
     fermerFormulairePDFInline();
 
@@ -2887,10 +2915,24 @@ async function ouvrirApercuPDFDepuisInline() {
         toggleDisplay(optionsProd, !!production);
     }
 
-    // Ouvrir le modal d'aperçu
+    // Restaurer les options du modal depuis les réglages sauvegardés
+    const reglages = restaurerReglagesPDF();
+    const selectOrientation = document.getElementById('apercuPDF-orientation');
+    const checkPiedEnseignant = document.getElementById('apercuPDF-pied-enseignant');
+    const checkPiedLicence = document.getElementById('apercuPDF-pied-licence');
+    const checkAfficherTrimestre = document.getElementById('apercuPDF-afficher-trimestre');
+
+    if (selectOrientation) {
+        selectOrientation.value = reglages?.orientation || (cartouche ? 'paysage' : 'portrait');
+    }
+    if (checkPiedEnseignant) checkPiedEnseignant.checked = reglages?.piedEnseignant ?? true;
+    if (checkPiedLicence) checkPiedLicence.checked = reglages?.piedLicence ?? true;
+    if (checkAfficherTrimestre) checkAfficherTrimestre.checked = reglages?.afficherTrimestre ?? true;
+
+    // Ouvrir le modal d'aperçu (.modal-overlay utilise .actif)
     const modalApercu = document.getElementById('modalApercuPDF');
     if (modalApercu) {
-        modalApercu.classList.remove('u-hide');
+        modalApercu.classList.add('actif');
         rafraichirApercuPDF();
     }
 }
