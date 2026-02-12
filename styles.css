@@ -9369,8 +9369,8 @@ label:has(+ textarea:disabled) {
         0 0 20px rgba(255, 255, 255, 0.3),
         0 0 0 2px rgba(255, 255, 255, 0.85),
         inset 0 -3px 6px rgba(0, 0, 0, 0.3);
-    /* 🆕 BETA 96.1: Animation verticale au hover (même animation, grossie) */
-    animation: float-vertical 12s ease-in-out infinite;
+    /* BETA 97.5: Stopper l'animation au hover pour stabiliser le tooltip */
+    animation: none;
 }
 
 /* Point sélectionné au clic - couleur bleue distincte */
