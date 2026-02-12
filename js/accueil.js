@@ -118,22 +118,24 @@ function afficherAccueilRetour(conteneur) {
     const prefsAff = db.getSync('preferencesAffichage', {});
     const tooltipsActifs = prefsAff.tooltips !== false;
     const tooltipToggleHTML = `
-        <div class="accueil-cours-actif" style="flex: 1; min-width: 0; margin-bottom: 0;">
-            <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; margin: 0; width: 100%;">
+        <div class="accueil-cours-actif" style="margin-bottom: 0;">
+            <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; margin: 0;">
                 <span style="font-size: 1.5rem;">\uD83D\uDCAC</span>
                 <input type="checkbox" id="checkbox-tooltips-accueil" ${tooltipsActifs ? 'checked' : ''}
                     onchange="if(typeof definirTooltips==='function') definirTooltips(this.checked);">
                 <div>
-                    <div class="accueil-cours-nom">Info-bulles d\u2019aide au survol</div>
-                    <div class="accueil-cours-detail">Afficher des descriptions contextuelles au survol des \u00e9l\u00e9ments de l\u2019interface.</div>
+                    <div class="accueil-cours-nom">Info-bulles</div>
+                    <div class="accueil-cours-detail">D\u00e9crire l\u2019interface au survol</div>
                 </div>
             </label>
-            <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; margin: 12px 0 0 0; width: 100%; opacity: 0.5;">
+        </div>
+        <div class="accueil-cours-actif" style="margin-bottom: 0; opacity: 0.5;">
+            <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; margin: 0;">
                 <span style="font-size: 1.5rem;">\uD83E\uDDED</span>
                 <input type="checkbox" disabled>
                 <div>
-                    <div class="accueil-cours-nom">Faire un tour guid\u00e9 de l\u2019application</div>
-                    <div class="accueil-cours-detail">Bient\u00f4t disponible.</div>
+                    <div class="accueil-cours-nom">Tour guid\u00e9</div>
+                    <div class="accueil-cours-detail">Bient\u00f4t disponible</div>
                 </div>
             </label>
         </div>
@@ -144,7 +146,7 @@ function afficherAccueilRetour(conteneur) {
             <h1>Que souhaitez-vous faire\u00a0?</h1>
         </div>
 
-        <div style="display: flex; gap: 15px; margin-bottom: 25px;">
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px;">
             ${coursHTML}
             ${tooltipToggleHTML}
         </div>
