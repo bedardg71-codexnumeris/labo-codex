@@ -118,7 +118,7 @@ function afficherAccueilRetour(conteneur) {
     const prefsAff = db.getSync('preferencesAffichage', {});
     const tooltipsActifs = prefsAff.tooltips !== false;
     const tooltipToggleHTML = `
-        <div class="accueil-cours-actif" style="margin-bottom: 0;">
+        <div class="accueil-cours-actif" style="flex: 1; min-width: 0; margin-bottom: 0;">
             <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; margin: 0;">
                 <span style="font-size: 1.5rem;">\uD83D\uDCAC</span>
                 <input type="checkbox" id="checkbox-tooltips-accueil" ${tooltipsActifs ? 'checked' : ''}
@@ -128,9 +128,7 @@ function afficherAccueilRetour(conteneur) {
                     <div class="accueil-cours-detail">D\u00e9crire l\u2019interface au survol</div>
                 </div>
             </label>
-        </div>
-        <div class="accueil-cours-actif" style="margin-bottom: 0; opacity: 0.5;">
-            <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; margin: 0;">
+            <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; margin: 12px 0 0 0; opacity: 0.5;">
                 <span style="font-size: 1.5rem;">\uD83E\uDDED</span>
                 <input type="checkbox" disabled>
                 <div>
@@ -146,7 +144,7 @@ function afficherAccueilRetour(conteneur) {
             <h1>Que souhaitez-vous faire\u00a0?</h1>
         </div>
 
-        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px;">
+        <div style="display: flex; gap: 15px; margin-bottom: 25px;">
             ${coursHTML}
             ${tooltipToggleHTML}
         </div>
