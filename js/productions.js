@@ -1246,7 +1246,7 @@ async function afficherToutesLesProductionsParType() {
         const estPortfolio = prod.type === 'portfolio';
         const estArtefact = prod.type === 'artefact-portfolio';
         const bgColor = estPortfolio ? 'var(--bleu-carte)' : 'white';
-        const borderColor = estPortfolio ? 'var(--bleu-principal)' : estArtefact ? 'var(--bleu-leger)' : 'var(--orange-accent)';
+        const borderColor = estPortfolio ? 'var(--accent-primaire)' : estArtefact ? 'var(--bleu-leger)' : 'var(--orange-accent)';
 
         return `
             <div class="item-liste" style="background: ${bgColor}; margin-bottom: 8px; padding: 12px 15px;
@@ -1300,8 +1300,8 @@ async function afficherToutesLesProductionsParType() {
     if (portfolio || artefacts.length > 0) {
         html += `
             <details class="production-section" open style="margin-bottom: 20px; border: 2px solid var(--bleu-moyen);
-                     border-radius: 8px; background: white; overflow: hidden;">
-                <summary style="padding: 15px; background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-moyen) 100%);
+                     border-radius: 8px; background: var(--surface-conteneur, #162c36); overflow: hidden;">
+                <summary style="padding: 15px; background: linear-gradient(135deg, var(--accent-primaire) 0%, var(--bleu-moyen) 100%);
                          color: white; font-weight: 600; font-size: 1.05rem; cursor: pointer;
                          user-select: none; display: flex; justify-content: space-between; align-items: center;">
                     <span>📁 Portfolio et artefacts</span>
@@ -1329,8 +1329,8 @@ async function afficherToutesLesProductionsParType() {
     if (sommatives.length > 0) {
         html += `
             <details class="production-section" open style="margin-bottom: 20px; border: 2px solid var(--bleu-moyen);
-                     border-radius: 8px; background: white; overflow: hidden;">
-                <summary style="padding: 15px; background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-moyen) 100%);
+                     border-radius: 8px; background: var(--surface-conteneur, #162c36); overflow: hidden;">
+                <summary style="padding: 15px; background: linear-gradient(135deg, var(--accent-primaire) 0%, var(--bleu-moyen) 100%);
                          color: white; font-weight: 600; font-size: 1.05rem; cursor: pointer;
                          user-select: none; display: flex; justify-content: space-between; align-items: center;">
                     <span>📝 Évaluations sommatives</span>
@@ -1352,8 +1352,8 @@ async function afficherToutesLesProductionsParType() {
     if (formatives.length > 0) {
         html += `
             <details class="production-section" style="margin-bottom: 20px; border: 2px solid var(--bleu-moyen);
-                     border-radius: 8px; background: white; overflow: hidden;">
-                <summary style="padding: 15px; background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-moyen) 100%);
+                     border-radius: 8px; background: var(--surface-conteneur, #162c36); overflow: hidden;">
+                <summary style="padding: 15px; background: linear-gradient(135deg, var(--accent-primaire) 0%, var(--bleu-moyen) 100%);
                          color: white; font-weight: 600; font-size: 1.05rem; cursor: pointer;
                          user-select: none; display: flex; justify-content: space-between; align-items: center;">
                     <span>📝 Évaluations formatives</span>
@@ -1602,7 +1602,7 @@ async function afficherBibliothequeProductions() {
         const trimestres = data.sectionImportTrimestre.trimestres;
         sectionImportTrimestre = `
             <div style="margin-top: 20px; padding: 15px; background: var(--gris-tres-pale); border-radius: 6px; border: 1px solid var(--bordure-claire);">
-                <h4 style="color: var(--bleu-principal); font-size: 1rem; margin: 0 0 10px 0;">Importer depuis un autre trimestre</h4>
+                <h4 style="color: var(--accent-primaire); font-size: 1rem; margin: 0 0 10px 0;">Importer depuis un autre trimestre</h4>
                 <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                     <select id="selectTrimestreImport" class="controle-form" style="flex: 1; min-width: 200px;" onchange="mettreAJourFiltreCoursTrimestreProductions()">
                         <option value="">-- Choisir un trimestre --</option>
@@ -2724,8 +2724,8 @@ async function afficherAssistantMigrationCategories() {
 
     const modalHTML = `
         <div id="modal-migration-categories" class="modal-overlay" style="display: flex; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999;">
-            <div class="modal-contenu" style="background: white; border-radius: var(--radius-grand); max-width: 700px; width: 95%; max-height: 80vh; overflow: auto; padding: 24px;">
-                <h3 style="margin-top: 0; color: var(--bleu-principal);">🔄 Migration des catégories</h3>
+            <div class="modal-contenu" style="background: var(--surface-conteneur, #162c36); border-radius: var(--radius-grand); max-width: 700px; width: 95%; max-height: 80vh; overflow: auto; padding: 24px;">
+                <h3 style="margin-top: 0; color: var(--accent-primaire);">🔄 Migration des catégories</h3>
                 <p style="color: var(--gris-fonce); margin-bottom: 20px;">
                     <strong>${sansCategorie.length}</strong> production(s) n'ont pas encore de catégorie assignée.
                     Assignez-leur une catégorie pour activer le calcul Sélection/Obligatoires.

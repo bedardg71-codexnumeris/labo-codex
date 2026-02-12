@@ -241,7 +241,7 @@
             html += `
                 <div class="gabarit-item" style="
                     padding: 12px;
-                    background: linear-gradient(135deg, rgba(139,92,246,0.08) 0%, #142428 100%);
+                    background: linear-gradient(135deg, rgba(139,92,246,0.08) 0%, #162c36 100%);
                     border: 1px solid rgba(139,92,246,0.2);
                     border-left: 4px solid #8b5cf6;
                     border-radius: 6px;
@@ -255,7 +255,7 @@
                         <div style="flex: 1;">
                             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
                                 ${badges}
-                                <span style="font-weight: 600; color: var(--bleu-principal);">${nom}</span>
+                                <span style="font-weight: 600; color: var(--accent-primaire);">${nom}</span>
                             </div>
                             ${description ? `<div style="font-size: 0.85rem; color: var(--gris-moyen);">${description}</div>` : ''}
                         </div>

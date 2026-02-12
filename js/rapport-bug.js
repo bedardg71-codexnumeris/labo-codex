@@ -110,10 +110,10 @@ function ouvrirModalRapportsArchives() {
     const listeHTML = archives.length === 0
         ? '<p style="text-align: center; color: var(--gris-moyen); padding: 30px;">Aucun rapport archivé</p>'
         : archives.map(r => `
-            <div style="background: var(--gris-tres-pale); border-radius: 8px; padding: 12px; margin-bottom: 10px; border-left: 3px solid var(--bleu-principal);">
+            <div style="background: var(--gris-tres-pale); border-radius: 8px; padding: 12px; margin-bottom: 10px; border-left: 3px solid var(--accent-primaire);">
                 <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
                     <div>
-                        <strong style="color: var(--bleu-principal);">${r.prenom}</strong>
+                        <strong style="color: var(--accent-primaire);">${r.prenom}</strong>
                         <span style="color: var(--gris-moyen); font-size: 0.85rem; margin-left: 10px;">${formatDate(r.date)}</span>
                     </div>
                     <button onclick="supprimerEtRafraichirArchive(${r.id})" style="
@@ -134,12 +134,12 @@ function ouvrirModalRapportsArchives() {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.6); display: flex; align-items: center;
             justify-content: center; z-index: 10001;">
-            <div style="background: white; border-radius: 12px; width: 90%; max-width: 600px;
+            <div style="background: var(--surface-conteneur, #162c36); border-radius: 12px; width: 90%; max-width: 600px;
                  max-height: 80vh; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
                 <div style="padding: 20px; border-bottom: 1px solid var(--gris-clair);
                      display: flex; justify-content: space-between; align-items: center;
                      background: var(--bleu-tres-pale);">
-                    <h3 style="margin: 0; color: var(--bleu-principal);">
+                    <h3 style="margin: 0; color: var(--accent-primaire);">
                         Rapports archivés (${archives.length})
                     </h3>
                     <button onclick="fermerModalRapportsArchives()" style="
@@ -747,7 +747,7 @@ function ouvrirModalRapportBug() {
             z-index: 10000;
         ">
             <div style="
-                background: white;
+                background: var(--surface-conteneur, #162c36);
                 border-radius: 12px;
                 width: 90%;
                 max-width: 700px;
@@ -766,7 +766,7 @@ function ouvrirModalRapportBug() {
                     background: var(--bleu-tres-pale);
                     border-radius: 12px 12px 0 0;
                 ">
-                    <h2 style="margin: 0; color: var(--bleu-principal); font-size: 1.3rem;">
+                    <h2 style="margin: 0; color: var(--accent-primaire); font-size: 1.3rem;">
                         Signaler un problème
                     </h2>
                     <button onclick="fermerModalRapportBug()" style="
@@ -801,7 +801,7 @@ function ouvrirModalRapportBug() {
                             display: block;
                             font-weight: 600;
                             margin-bottom: 8px;
-                            color: var(--bleu-principal);
+                            color: var(--accent-primaire);
                         ">
                             Votre prénom :
                         </label>
@@ -823,7 +823,7 @@ function ouvrirModalRapportBug() {
                             display: block;
                             font-weight: 600;
                             margin-bottom: 8px;
-                            color: var(--bleu-principal);
+                            color: var(--accent-primaire);
                         ">
                             Décrivez le problème rencontré :
                         </label>
@@ -850,7 +850,7 @@ function ouvrirModalRapportBug() {
                             display: block;
                             font-weight: 600;
                             margin-bottom: 8px;
-                            color: var(--bleu-principal);
+                            color: var(--accent-primaire);
                         ">
                             Rapport technique (généré automatiquement) :
                         </label>
@@ -899,7 +899,7 @@ function ouvrirModalRapportBug() {
                     <!-- Lien vers archives -->
                     <div style="text-align: center;">
                         <button onclick="ouvrirModalRapportsArchives()" style="
-                            background: none; border: none; color: var(--bleu-principal);
+                            background: none; border: none; color: var(--accent-primaire);
                             cursor: pointer; font-size: 0.85rem; text-decoration: underline;">
                             📋 Voir mes rapports archivés
                         </button>

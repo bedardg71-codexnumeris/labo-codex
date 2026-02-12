@@ -553,15 +553,15 @@ function afficherListeCriteres(criteres, grilleId) {
 
     container.innerHTML = criteres.map(critere => `
         <div class="item-liste" style="margin-bottom: 8px; padding: 12px 15px;
-             border-left: 4px solid var(--bleu-principal);
+             border-left: 4px solid var(--accent-primaire);
              display: flex; justify-content: space-between; align-items: center;">
             <div class="grille-flex-1">
-                <div style="font-weight: 600; color: var(--bleu-principal); margin-bottom: 2px;">
+                <div style="font-weight: 600; color: var(--accent-primaire); margin-bottom: 2px;">
                     ${critere.nom} (${critere.ponderation || 0}%) • ${getTypeCritereLabel(critere.type)}${critere.type === 'algorithmique' && critere.formule ? ` • ${critere.formule}` : ''}
                 </div>
                 ${critere.description ? `
                     <details class="grille-mt-4">
-                        <summary style="cursor: pointer; color: var(--bleu-moyen); font-size: 0.85rem; padding: 4px 0;">
+                        <summary style="cursor: pointer; color: var(--texte-secondaire); font-size: 0.85rem; padding: 4px 0;">
                             Voir la description
                         </summary>
                         <div style="margin-top: 8px; padding: 8px; background: var(--bleu-tres-pale);
@@ -806,7 +806,7 @@ async function afficherGrillesCriteres() {
             <div class="item-liste" style="background: var(--bleu-tres-pale); padding: 15px; margin-bottom: 15px;">
                 <div class="grille-flex-between-mb10">
                     <div>
-                        <strong style="color: var(--bleu-principal);">${grille.nom}</strong>
+                        <strong style="color: var(--accent-primaire);">${grille.nom}</strong>
                         <small style="color: var(--bleu-leger); margin-left: 10px;">
                             ${new Date(grille.dateCreation).toLocaleDateString()}
                         </small>
@@ -829,10 +829,10 @@ async function afficherGrillesCriteres() {
                     <span>Pondération totale : ${grille.criteres?.reduce((sum, c) => sum + (parseInt(c.ponderation) || 0), 0) || 0}%</span>
                 </div>
                 <details class="u-mt-10">
-                    <summary style="cursor: pointer; color: var(--bleu-moyen); font-size: 0.9rem;">
+                    <summary style="cursor: pointer; color: var(--texte-secondaire); font-size: 0.9rem;">
                         Voir les critères
                     </summary>
-                    <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px;">
+                    <div style="margin-top: 10px; padding: 10px; background: var(--surface-conteneur, #162c36); border-radius: 4px;">
                         ${(grille.criteres || []).map(c => `
                             <div style="margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--bleu-tres-pale);">
                                 <strong>${c.nom}</strong> (${c.ponderation}% - ${getTypeCritereLabel(c.type)})
@@ -1278,16 +1278,16 @@ async function afficherToutesLesGrillesCriteres() {
     function genererHtmlCritere(critere, grilleId) {
         return `
             <div class="item-liste" style="margin-bottom: 8px; padding: 12px 15px;
-                 border-left: 4px solid var(--bleu-principal);
+                 border-left: 4px solid var(--accent-primaire);
                  display: flex; justify-content: space-between; align-items: center;
                  transition: background 0.2s;">
                 <div class="grille-flex-1">
-                    <div style="font-weight: 600; color: var(--bleu-principal); margin-bottom: 2px;">
+                    <div style="font-weight: 600; color: var(--accent-primaire); margin-bottom: 2px;">
                         ${echapperHtml(critere.nom)} (${critere.ponderation || 0}%) • ${getTypeCritereLabel(critere.type)}${critere.type === 'algorithmique' && critere.formule ? ` • ${echapperHtml(critere.formule)}` : ''}
                     </div>
                     ${critere.description ? `
                         <details class="grille-mt-4">
-                            <summary style="cursor: pointer; color: var(--bleu-moyen); font-size: 0.85rem; padding: 4px 0;">
+                            <summary style="cursor: pointer; color: var(--texte-secondaire); font-size: 0.85rem; padding: 4px 0;">
                                 Voir la description
                             </summary>
                             <div style="margin-top: 8px; padding: 8px; background: var(--bleu-tres-pale);
@@ -1340,8 +1340,8 @@ async function afficherToutesLesGrillesCriteres() {
 
         return `
             <details class="grille-section" open style="margin-bottom: 20px; border: 2px solid var(--bleu-moyen);
-                     border-radius: 8px; background: white; overflow: hidden;">
-                <summary style="padding: 15px; background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-moyen) 100%);
+                     border-radius: 8px; background: var(--surface-conteneur, #162c36); overflow: hidden;">
+                <summary style="padding: 15px; background: linear-gradient(135deg, var(--accent-primaire) 0%, var(--bleu-moyen) 100%);
                          color: white; font-weight: 600; font-size: 1.05rem; cursor: pointer;
                          user-select: none; display: flex; justify-content: space-between; align-items: center;">
                     <span>📋 ${echapperHtml(grille.nom)}</span>
@@ -2681,7 +2681,7 @@ function afficherCriteresTemp() {
     }
 
     const html = window.tempCriteres.map((critere, index) => `
-        <div class="item-liste" style="position: relative; padding: 15px; background: white; border: 1px solid var(--bordure-claire); border-radius: 6px; margin-bottom: 10px;">
+        <div class="item-liste" style="position: relative; padding: 15px; background: var(--surface-conteneur, #162c36); border: 1px solid var(--bordure-claire); border-radius: 6px; margin-bottom: 10px;">
             <button class="btn btn-supprimer btn-tres-compact"
                     onclick="supprimerCritereTemp(${index})"
                     title="Supprimer ce critère"
@@ -2938,7 +2938,7 @@ function afficherCriteresGrille(grille) {
     }
 
     const html = grille.criteres.map((critere, index) => `
-        <div class="item-liste" style="position: relative; padding: 15px; background: white; border: 1px solid var(--bordure-claire); border-radius: 6px; margin-bottom: 10px;">
+        <div class="item-liste" style="position: relative; padding: 15px; background: var(--surface-conteneur, #162c36); border: 1px solid var(--bordure-claire); border-radius: 6px; margin-bottom: 10px;">
             <button class="btn btn-supprimer btn-tres-compact"
                     onclick="supprimerCritereGrille('${grille.id}', ${index})"
                     title="Supprimer ce critère"
@@ -3650,14 +3650,14 @@ async function afficherConfigurationCategoriesErreurs(grilleId, critereIndex) {
     const modalHtml = `
         <div id="modalCategoriesErreurs" class="modal-js-overlay" style="z-index: 9999;">
             <div class="modal-js-contenu" style="max-width: 900px; width: 90%;">
-                <h3 style="margin-top: 0; color: var(--bleu-principal);">⚙️ Configuration des catégories d'erreurs</h3>
+                <h3 style="margin-top: 0; color: var(--accent-primaire);">⚙️ Configuration des catégories d'erreurs</h3>
                 <p style="color: var(--gris-moyen); font-size: 0.9rem;">Personnalisez les catégories d'erreurs (codes 0-10) et leurs rétroactions associées.</p>
 
                 <div id="listeCategoriesErreurs" style="margin-top: 20px;">
                     ${critere.categoriesErreurs.map((cat, idx) => `
                         <div class="categorie-erreur-item" style="margin-bottom: 20px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 8px; border-left: 4px solid var(--bleu-moyen);">
                             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                                <strong style="color: var(--bleu-principal); font-size: 1.1rem;">Code ${cat.code}</strong>
+                                <strong style="color: var(--accent-primaire); font-size: 1.1rem;">Code ${cat.code}</strong>
                             </div>
                             <textarea id="cat_retro_${idx}"
                                       class="controle-form"

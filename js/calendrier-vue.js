@@ -238,7 +238,7 @@ function genererHtmlMois(annee, mois, calendrierComplet) {
     for (let i = 0; i < nomsJours.length; i++) {
         const jour = nomsJours[i];
         const estWeekendHeader = (jour === 'DIM' || jour === 'SAM');
-        const couleur = estWeekendHeader ? 'var(--gris-moyen)' : 'var(--bleu-principal)';
+        const couleur = estWeekendHeader ? 'var(--gris-moyen)' : 'var(--accent-primaire)';
         html += '<th class="calendrier-jour-header" style="color: ' + couleur + ';">' + jour + '</th>';
     }
 

@@ -5,6 +5,22 @@
 
 ---
 
+## Beta 98 (11 fevrier 2026)
+
+**Retouches visuelles Ocean & Boussole — Fidelite a la maquette C4**
+
+- **En-tete** : Gradient 4 stops (`#0a1820 → #142a38 → #1a3848 → #0e2028`) conforme a la maquette. Separateurs retires (border-top ligne 2, border-bottom entete).
+- **Cartes et conteneurs** : Radial-gradient volumetrique (`radial-gradient(ellipse at 30% 15%, #1a3040, #142428)`) applique a `.carte`, `.outil-carte`, `.conteneur`, `.section.active`, modales, profils, calendrier et tous les panneaux (~60 elements). Bordure sarcelle subtile + inset highlight.
+- **En-tetes de section** : 10 occurrences de `linear-gradient(bleu-principal → bleu-fonce/bleu-moyen)` remplacees par fond uni `#244858` (accordeons, titres bleus, summary, cartouches, popups).
+- **Navigation transparente** : `.navigation-principale`, `.sous-navigation` et `.bandeau-groupe-cours` : fond passe a `transparent`. Overrides `!important` dans index.html (3 modes) alignes.
+- **Boite a outils** : 20 `color: var(--bleu-principal, #032e5c)` et 8 `color: var(--bleu-moyen, #065dbb)` corriges vers `--accent-primaire` (titres) ou `--texte-principal` (contenu).
+- **Variable `--ocean-moyen`** : Ajoutee (`#1a3040`) dans `:root` de `styles.css` et `index.html` pour le radial-gradient.
+- **Accueil** : `.accueil-carte` et `.accueil-cours-actif` : fond uni `#0c1a22` avec bordure sarcelle.
+- **Fallbacks JS** : 99 occurrences de `#142428` mises a jour dans 20 fichiers JS.
+- **48 fichiers modifies** : styles.css, index.html, css/tooltips.css, 34 fichiers JS, documentation.
+
+---
+
 ## Beta 97.5 (11 fevrier 2026)
 
 **Migration palette Ocean & Boussole (C4)**

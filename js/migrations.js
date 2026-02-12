@@ -596,13 +596,13 @@ function afficherModalMigrationLegacy(detailsLegacy) {
         <div id="modalMigrationLegacy" style="display: flex; position: fixed; top: 0; left: 0;
              width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10001;
              align-items: center; justify-content: center;">
-            <div style="background: white; border-radius: 12px; padding: 30px; max-width: 580px;
+            <div style="background: var(--surface-conteneur, #162c36); border-radius: 12px; padding: 30px; max-width: 580px;
                  width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
 
                 <!-- Icône et titre -->
                 <div style="text-align: center; margin-bottom: 20px;">
                     <div style="font-size: 3rem; margin-bottom: 10px;">🔄</div>
-                    <h2 style="margin: 0; color: var(--bleu-moyen); font-size: 1.4rem;">
+                    <h2 style="margin: 0; color: var(--texte-secondaire); font-size: 1.4rem;">
                         Mise à jour de vos données
                     </h2>
                 </div>
@@ -659,7 +659,7 @@ function afficherModalMigrationLegacy(detailsLegacy) {
                 <!-- Boutons -->
                 <div style="display: flex; gap: 12px; justify-content: center;">
                     <button onclick="reporterMigrationLegacy()"
-                            style="padding: 12px 24px; background: white; color: var(--gris-fonce);
+                            style="padding: 12px 24px; background: var(--surface-conteneur, #162c36); color: var(--gris-fonce);
                                    border: 1px solid var(--gris-clair); border-radius: 6px;
                                    cursor: pointer; font-size: 0.95rem;">
                         Plus tard

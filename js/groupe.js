@@ -803,7 +803,7 @@ function filtrerParGroupe() {
         if (compteurFiltres) {
             if (groupeSelectionné) {
                 compteurFiltres.textContent = `(${etudiantsFiltres.length} sur ${students.length})`;
-                compteurFiltres.style.color = 'var(--bleu-principal)';
+                compteurFiltres.style.color = 'var(--accent-primaire)';
                 compteurFiltres.style.fontWeight = 'bold';
             } else {
                 compteurFiltres.textContent = '';

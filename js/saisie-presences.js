@@ -2323,7 +2323,7 @@ function mettreAJourCompteurPresences() {
     // Restaurer l'affichage normal du compteur (au cas où un message était affiché)
     const compteur = document.getElementById('compteur-presences');
     if (compteur) {
-        compteur.style.borderLeftColor = 'var(--bleu-principal)';
+        compteur.style.borderLeftColor = 'var(--accent-primaire)';
         compteur.style.background = 'var(--bleu-tres-pale)';
     }
 }
@@ -2355,7 +2355,7 @@ function restaurerCompteurPresences() {
     const compteur = document.getElementById('compteur-presences');
     if (!compteur) return;
 
-    compteur.style.borderLeftColor = 'var(--bleu-principal)';
+    compteur.style.borderLeftColor = 'var(--accent-primaire)';
     compteur.style.background = 'var(--bleu-tres-pale)';
 
     compteur.innerHTML = `

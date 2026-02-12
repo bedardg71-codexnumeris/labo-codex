@@ -58,7 +58,7 @@ function ouvrirModalConversationnel(indexDepart = 0) {
 
     modal.innerHTML = `
         <div id="primo-conversation-contenu" style="
-            background: white;
+            background: var(--surface-conteneur, #162c36);
             border-radius: var(--primo-border-radius, 12px);
             padding: var(--primo-padding, 35px);
             width: var(--primo-modal-width, 700px);
@@ -136,7 +136,7 @@ function ajouterAnimationsCSS() {
         .primo-progress-bar {
             position: sticky;
             top: 0;
-            background: white;
+            background: var(--surface-conteneur, #162c36);
             padding-bottom: 15px;
             margin-bottom: 20px;
             border-bottom: 1px solid var(--bordure-claire);
@@ -151,7 +151,7 @@ function ajouterAnimationsCSS() {
         }
         .primo-progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, var(--bleu-principal), #2d7a8c);
+            background: linear-gradient(90deg, var(--accent-primaire), #2d7a8c);
             border-radius: 3px;
             transition: width 0.4s ease-out;
         }
@@ -165,7 +165,7 @@ function ajouterAnimationsCSS() {
         #primo-conversation-contenu h3 {
             font-size: 1.15rem;
             font-weight: 600;
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
             margin: 20px 0 12px 0;
             line-height: 1.4;
         }
@@ -208,14 +208,14 @@ function ajouterAnimationsCSS() {
         }
 
         #primo-conversation-contenu strong {
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
             font-weight: 600;
         }
 
         /* Cartes d'instruction */
         .primo-instruction-card {
             background: var(--bleu-tres-pale);
-            border-left: 4px solid var(--bleu-principal);
+            border-left: 4px solid var(--accent-primaire);
             padding: 15px;
             border-radius: 6px;
             margin: 15px 0;
@@ -359,9 +359,9 @@ function genererHTMLQuestion(question) {
                 😎
             </div>
             <div style="flex: 1;">
-                <h2 style="margin: 0 0 5px 0; font-size: 1.5rem; color: var(--bleu-principal);">${titreModule}</h2>
+                <h2 style="margin: 0 0 5px 0; font-size: 1.5rem; color: var(--accent-primaire);">${titreModule}</h2>
                 <p style="margin: 0; color: var(--gris-moyen); font-size: 0.9rem;">
-                    <strong style="color: var(--bleu-principal);">${etapeTexte}</strong>
+                    <strong style="color: var(--accent-primaire);">${etapeTexte}</strong>
                 </p>
             </div>
         </div>
@@ -396,7 +396,7 @@ function genererHTMLQuestion(question) {
                 margin-top: var(--primo-spacing-sm, 10px);
                 padding: 12px 15px;
                 background: var(--bleu-tres-pale);
-                border-left: 4px solid var(--bleu-principal);
+                border-left: 4px solid var(--accent-primaire);
                 border-radius: 6px;
                 font-size: 0.9rem;
                 color: var(--gris-fonce);
@@ -443,7 +443,7 @@ function genererInputQuestion(question) {
                         font-size: 1rem;
                         transition: border-color 0.2s;
                     "
-                    onfocus="this.style.borderColor='var(--bleu-principal)'"
+                    onfocus="this.style.borderColor='var(--accent-primaire)'"
                     onblur="this.style.borderColor='var(--bordure-claire)'"
                 />
             `;
@@ -463,7 +463,7 @@ function genererInputQuestion(question) {
                         font-size: 1rem;
                         transition: border-color 0.2s;
                     "
-                    onfocus="this.style.borderColor='var(--bleu-principal)'"
+                    onfocus="this.style.borderColor='var(--accent-primaire)'"
                     onblur="this.style.borderColor='var(--bordure-claire)'"
                 />
             `;
@@ -480,7 +480,7 @@ function genererInputQuestion(question) {
                         font-size: 1rem;
                         transition: border-color 0.2s;
                     "
-                    onfocus="this.style.borderColor='var(--bleu-principal)'"
+                    onfocus="this.style.borderColor='var(--accent-primaire)'"
                     onblur="this.style.borderColor='var(--bordure-claire)'"
                 />
             `;
@@ -498,7 +498,7 @@ function genererInputQuestion(question) {
                         font-size: 1rem;
                         transition: border-color 0.2s;
                     "
-                    onfocus="this.style.borderColor='var(--bleu-principal)'"
+                    onfocus="this.style.borderColor='var(--accent-primaire)'"
                     onblur="this.style.borderColor='var(--bordure-claire)'"
                 />
             `;
@@ -518,7 +518,7 @@ function genererInputQuestion(question) {
                         resize: vertical;
                         transition: border-color 0.2s;
                     "
-                    onfocus="this.style.borderColor='var(--bleu-principal)'"
+                    onfocus="this.style.borderColor='var(--accent-primaire)'"
                     onblur="this.style.borderColor='var(--bordure-claire)'"
                 ></textarea>
             `;
@@ -532,11 +532,11 @@ function genererInputQuestion(question) {
                 border: 2px solid var(--bordure-claire);
                 border-radius: 8px;
                 font-size: 1rem;
-                background: white;
+                background: var(--surface-conteneur, #162c36);
                 cursor: pointer;
                 transition: border-color 0.2s;
             "
-            onfocus="this.style.borderColor='var(--bleu-principal)'"
+            onfocus="this.style.borderColor='var(--accent-primaire)'"
             onblur="this.style.borderColor='var(--bordure-claire)'">
                 <option value="">-- Choisis une option --</option>`;
 
@@ -571,15 +571,15 @@ function genererInputQuestion(question) {
 
                 const hoverEvents = isDisabled
                     ? ''
-                    : `onmouseover="this.style.background='var(--bleu-tres-pale)'; this.style.borderColor='var(--bleu-principal)';"
-                       onmouseout="if(!this.querySelector('input').checked) { this.style.background='white'; this.style.borderColor='var(--bordure-claire)'; }"`;
+                    : `onmouseover="this.style.background='var(--bleu-tres-pale)'; this.style.borderColor='var(--accent-primaire)';"
+                       onmouseout="if(!this.querySelector('input').checked) { this.style.background='var(--surface-conteneur)'; this.style.borderColor='var(--bordure-claire)'; }"`;
 
                 html += `
                     <label style="${labelStyle}" ${hoverEvents}>
                         <input type="radio" name="${inputId}" value="${opt.value}"
                             style="margin-right: 10px;"
                             ${isDisabled ? 'disabled' : ''}
-                            onchange="this.parentElement.parentElement.querySelectorAll('label').forEach(l => { if(!l.querySelector('input').disabled) { l.style.background='white'; l.style.borderColor='var(--bordure-claire)'; } }); this.parentElement.style.background='var(--bleu-tres-pale)'; this.parentElement.style.borderColor='var(--bleu-principal)';"
+                            onchange="this.parentElement.parentElement.querySelectorAll('label').forEach(l => { if(!l.querySelector('input').disabled) { l.style.background='var(--surface-conteneur)'; l.style.borderColor='var(--bordure-claire)'; } }); this.parentElement.style.background='var(--bleu-tres-pale)'; this.parentElement.style.borderColor='var(--accent-primaire)';"
                         />
                         <strong>${opt.label}</strong>
                         ${opt.description ? `<div style="font-size: 0.85rem; color: var(--gris-moyen); margin-top: 5px; margin-left: 24px;">${opt.description}</div>` : ''}
@@ -605,7 +605,7 @@ function genererInputQuestion(question) {
                 <div style="
                     padding: 20px;
                     background: var(--bleu-tres-pale);
-                    border-left: 4px solid var(--bleu-principal);
+                    border-left: 4px solid var(--accent-primaire);
                     border-radius: 8px;
                     margin-top: 10px;
                 ">
@@ -623,7 +623,7 @@ function genererInputQuestion(question) {
                 <div id="action-status" style="
                     padding: 20px;
                     background: var(--bleu-tres-pale);
-                    border-left: 4px solid var(--bleu-principal);
+                    border-left: 4px solid var(--accent-primaire);
                     border-radius: 8px;
                     text-align: center;
                 ">
@@ -656,15 +656,15 @@ function genererBoutonsNavigation() {
             <button onclick="primoQuestionPrecedente()" style="
                 flex: 1;
                 padding: 8px 16px;
-                background: white;
-                color: var(--bleu-principal);
-                border: 2px solid var(--bleu-principal);
+                background: var(--surface-conteneur, #162c36);
+                color: var(--accent-primaire);
+                border: 2px solid var(--accent-primaire);
                 border-radius: 8px;
                 font-size: 0.9rem;
                 cursor: pointer;
                 transition: all 0.2s;
             " onmouseover="this.style.background='var(--bleu-tres-pale)';"
-               onmouseout="this.style.background='white';">
+               onmouseout="this.style.background='var(--surface-conteneur)';">
                 ← Précédent
             </button>
         `;
@@ -736,7 +736,7 @@ function genererBoutonsNavigation() {
     html += `
         <button onclick="confirmerAnnulation()" style="
             padding: 8px 16px;
-            background: white;
+            background: var(--surface-conteneur, #162c36);
             color: var(--gris-moyen);
             border: 1px solid var(--bordure-claire);
             border-radius: 8px;
@@ -744,7 +744,7 @@ function genererBoutonsNavigation() {
             cursor: pointer;
             transition: all 0.2s;
         " onmouseover="this.style.background='var(--gris-tres-pale)'; this.style.borderColor='var(--gris-moyen)';"
-           onmouseout="this.style.background='white'; this.style.borderColor='var(--bordure-claire)';">
+           onmouseout="this.style.background='var(--surface-conteneur)'; this.style.borderColor='var(--bordure-claire)';">
             Annuler
         </button>
     `;
@@ -914,7 +914,7 @@ async function executerAction(question) {
                 <button onclick="indexQuestionActuelle++; afficherQuestionActuelle();" style="
                     margin-top: 15px;
                     padding: 10px 20px;
-                    background: var(--bleu-principal);
+                    background: var(--accent-primaire);
                     color: white;
                     border: none;
                     border-radius: 8px;
@@ -1160,7 +1160,7 @@ function preremplirReponse(questionId, valeur) {
                 radio.checked = true;
                 // Appliquer le style sélectionné
                 radio.parentElement.style.background = 'var(--bleu-tres-pale)';
-                radio.parentElement.style.borderColor = 'var(--bleu-principal)';
+                radio.parentElement.style.borderColor = 'var(--accent-primaire)';
             }
             break;
     }
@@ -1941,7 +1941,7 @@ function passerEnModeNotification() {
         bottom: 80px;
         right: 190px;
         padding: 15px 30px;
-        background: white;
+        background: var(--surface-conteneur, #162c36);
         color: var(--gris-moyen);
         border: 2px solid var(--bordure-claire);
         border-radius: 30px;
@@ -1998,7 +1998,7 @@ function passerEnModeNotification() {
         bottom: 80px;
         right: 330px;
         padding: 15px 30px;
-        background: white;
+        background: var(--surface-conteneur, #162c36);
         color: var(--gris-moyen);
         border: 2px solid var(--bordure-claire);
         border-radius: 30px;
@@ -2088,12 +2088,12 @@ function afficherNotificationActuelle() {
     const notification = document.createElement('div');
     notification.className = 'primo-notification';
     notification.style.cssText = `
-        background: white;
+        background: var(--surface-conteneur, #162c36);
         border-radius: 12px;
         padding: 20px;
         margin-bottom: 15px;
         box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-        border-left: 4px solid var(--bleu-principal);
+        border-left: 4px solid var(--accent-primaire);
         pointer-events: auto;
         animation: slideInRight 0.4s ease-out;
     `;
@@ -2202,7 +2202,7 @@ function revenirEnModeModal() {
 
     modal.innerHTML = `
         <div id="primo-conversation-contenu" style="
-            background: white;
+            background: var(--surface-conteneur, #162c36);
             border-radius: 12px;
             max-width: 600px;
             width: 90%;

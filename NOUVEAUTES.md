@@ -4,6 +4,18 @@
 
 ---
 
+## Beta 98
+
+**Retouches visuelles Ocean & Boussole**
+
+- **Degrades fideles a la maquette** : En-tete avec gradient 4 stops atmospherique. Cartes et conteneurs avec radial-gradient volumetrique (spot lumineux en haut-gauche). Surfaces enrichies conformes au design system C4.
+- **En-tetes de section uniformes** : Les barres degradees dans les accordeons, titres de cartes et en-tetes de panneaux sont remplacees par un fond uni #244858 pour un rendu plus propre.
+- **Navigation epuree** : Fonds des barres de navigation principale, secondaire et bandeau groupe-cours rendus transparents. Separateurs retires entre l'en-tete et les sections. Les boutons glassmorphism flottent sur le gradient du conteneur.
+- **Contraste ameliore** : Textes de la Boite a outils (Questions Flash, Tirage au sort), badges, compteurs et selects corrigees pour lisibilite sur fond sombre.
+- **Accueil harmonise** : Les 10 cartes d'actions utilisent un fond ocean profond (#0c1a22) uniforme.
+
+---
+
 ## Beta 97.5
 
 **Nouveau theme Ocean & Boussole**

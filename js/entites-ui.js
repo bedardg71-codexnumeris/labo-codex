@@ -856,7 +856,7 @@ async function mettreAJourApercuGroupeCours() {
 
         apercuSpan.textContent = apercu;
         apercuSpan.className = '';
-        apercuSpan.style.color = 'var(--bleu-principal)';
+        apercuSpan.style.color = 'var(--accent-primaire)';
         apercuSpan.style.fontWeight = '500';
     } catch (err) {
         apercuSpan.textContent = 'Erreur lors du chargement de l\'aperçu';

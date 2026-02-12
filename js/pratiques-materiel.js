@@ -232,7 +232,7 @@ function genererBadgeCaracteristiques(pratique) {
 
     if (caracteristiques.length === 0) return '';
 
-    // Formater chaque caractéristique en badge (couleur gérée par CSS via var(--bleu-principal))
+    // Formater chaque caractéristique en badge (couleur gérée par CSS via var(--accent-primaire))
     return caracteristiques.map(c =>
         `<span class="badge-caracteristique">${c}</span>`
     ).join(' ');
@@ -312,7 +312,7 @@ async function afficherBibliothequePratiques() {
                     ×
                 </button>
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
-                    <h2 style="margin: 0; color: var(--bleu-principal);">Bibliothèque de pratiques de notation</h2>
+                    <h2 style="margin: 0; color: var(--accent-primaire);">Bibliothèque de pratiques de notation</h2>
                     <button class="btn-aide-contextuelle" data-aide="bibliotheque-fonctionnement" title="Comment fonctionne la bibliothèque">😎</button>
                 </div>
                 <p style="color: var(--gris-clair); margin-bottom: 15px;">
@@ -377,7 +377,7 @@ async function afficherBibliothequePratiques() {
                 ">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                         <div style="flex: 1;">
-                            <div style="font-weight: bold; color: var(--bleu-principal); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                            <div style="font-weight: bold; color: var(--accent-primaire); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
                                 ${badge}
                                 ${nomPratique}
                                 <span class="badge-source badge-source--id" style="font-family: monospace;" title="ID: ${pratique.id}">#${idCourt}</span>
@@ -512,7 +512,7 @@ async function afficherBibliothequePratiques() {
                      ">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                         <div style="flex: 1;">
-                            <div style="font-weight: bold; color: var(--bleu-principal); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                            <div style="font-weight: bold; color: var(--accent-primaire); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
                                 ${badge}
                                 ${nomPratique}
                                 <span class="badge-source badge-source--id" style="font-family: monospace;" title="ID: ${pratique.id}">#${idCourt}</span>
@@ -2175,7 +2175,7 @@ function genererCheckboxesCategorie(productions, categorie) {
         const checked = prod.categorie === categorie ? 'checked' : '';
         const estDansAutre = prod.categorie && prod.categorie !== categorie;
         const opacite = estDansAutre ? '0.4' : '1';
-        const colorCategorie = categorie === 'selection' ? 'var(--bleu-principal)' : 'var(--orange-principal, #e67e22)';
+        const colorCategorie = categorie === 'selection' ? 'var(--accent-primaire)' : 'var(--orange-principal, #e67e22)';
 
         return `
             <label style="display: flex; align-items: center; gap: 10px; padding: 8px 12px;
@@ -2259,7 +2259,7 @@ async function recalculerPonderationsUnitaires() {
         const totalPond = pondSelection + pondObligatoires;
 
         let html = `<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">`;
-        html += `<span style="color: var(--bleu-principal);"><strong>${nombreARetenir}</strong> meilleure${nombreARetenir > 1 ? 's' : ''}</span>`;
+        html += `<span style="color: var(--accent-primaire);"><strong>${nombreARetenir}</strong> meilleure${nombreARetenir > 1 ? 's' : ''}</span>`;
         html += `<span style="color: var(--gris-moyen);">+</span>`;
         html += `<span style="color: var(--orange-principal);"><strong>${nbObligatoires}</strong> obligatoire${nbObligatoires > 1 ? 's' : ''}</span>`;
         html += `<span style="color: var(--gris-moyen);">=</span>`;

@@ -762,9 +762,9 @@ function genererFormulaireSeance(index, seance) {
     const lettre = lettres[index] || `S${index + 1}`;
 
     return `
-        <div class="seance-form-item" data-index="${index}" style="background: white; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid var(--bleu-leger);">
+        <div class="seance-form-item" data-index="${index}" style="background: var(--surface-conteneur, #162c36); padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid var(--bleu-leger);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <strong style="color: var(--bleu-moyen); font-size: 1.05rem;">Séance ${lettre}</strong>
+                <strong style="color: var(--texte-secondaire); font-size: 1.05rem;">Séance ${lettre}</strong>
                 ${seancesEnCours.length > 1 ? `
                     <button type="button" class="btn btn-supprimer btn-tres-compact" onclick="supprimerFormulaireSeance(${index})">
                         Supprimer
@@ -826,7 +826,7 @@ function rafraichirFormulairesSeances() {
     if (seancesEnCours.length < 6) {
         html += `
             <button type="button" class="btn" onclick="ajouterFormulaireSeance()"
-                    style="width: 100%; margin-top: 10px; background: var(--bleu-leger); color: var(--bleu-moyen);">
+                    style="width: 100%; margin-top: 10px; background: var(--bleu-leger); color: var(--texte-secondaire);">
                 Ajouter une séance
             </button>
         `;

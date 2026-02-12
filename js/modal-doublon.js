@@ -74,7 +74,7 @@
                 <div class="modal-section">
                     <p style="margin-bottom: 15px;">
                         Une <strong id="doublonType">ressource</strong> portant le nom
-                        <strong style="color: var(--bleu-principal);">"<span id="doublonNomExistant"></span>"</strong>
+                        <strong style="color: var(--accent-primaire);">"<span id="doublonNomExistant"></span>"</strong>
                         existe deja.
                     </p>
 

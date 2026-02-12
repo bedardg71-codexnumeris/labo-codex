@@ -690,7 +690,7 @@ function cartoucheSelectionnee() {
         }
 
         return `
-    <div style="margin-bottom: 15px; padding: 12px; background: white; border-left: 3px solid ${estAlgorithmique ? 'var(--orange-accent)' : 'var(--bleu-moyen)'};">
+    <div style="margin-bottom: 15px; padding: 12px; background: var(--surface-conteneur, #162c36); border-left: 3px solid ${estAlgorithmique ? 'var(--orange-accent)' : 'var(--bleu-moyen)'};">
         <div class="eval-grid-critere">
             <div>
     <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px;">
@@ -856,7 +856,7 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
         const facteur = critere.facteurNormalisation || 500;
 
         return `
-    <div style="margin-bottom: 15px; padding: 12px; background: white; border-left: 3px solid ${estAlgorithmique ? 'var(--orange-accent)' : 'var(--bleu-moyen)'};">
+    <div style="margin-bottom: 15px; padding: 12px; background: var(--surface-conteneur, #162c36); border-left: 3px solid ${estAlgorithmique ? 'var(--orange-accent)' : 'var(--bleu-moyen)'};">
         <div class="eval-grid-critere">
             <div>
                 <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px;">
@@ -3876,9 +3876,9 @@ function mettreAJourIndicateurProgression() {
     if (nbEvaluations === totalEtudiants) {
         indicateur.style.color = 'var(--vert-succes)'; // Vert - Terminé
     } else if (nbEvaluations > totalEtudiants / 2) {
-        indicateur.style.color = 'var(--bleu-principal)'; // Bleu - En cours (meilleur contraste)
+        indicateur.style.color = 'var(--accent-primaire)'; // Bleu - En cours (meilleur contraste)
     } else {
-        indicateur.style.color = 'var(--bleu-principal)'; // Bleu - Début
+        indicateur.style.color = 'var(--accent-primaire)'; // Bleu - Début
     }
 }
 

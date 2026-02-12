@@ -713,7 +713,7 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
         }).join('');
 
         return `
-            <div style="background: white; border-radius: 6px; margin-bottom: 12px;
+            <div style="background: var(--surface-conteneur, #162c36); border-radius: 6px; margin-bottom: 12px;
                    border: 1px solid var(--bordure-claire); overflow: hidden;">
                 <!-- En-tête de catégorie avec checkbox "tout sélectionner" -->
                 <label style="display: flex; align-items: center; gap: 10px; padding: 12px;
@@ -742,7 +742,7 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
         if (!info) return '';
         return `
             <label style="display: flex; align-items: center; gap: 10px; padding: 10px;
-                   background: white; border-radius: 6px; margin-bottom: 8px; cursor: pointer;
+                   background: var(--surface-conteneur, #162c36); border-radius: 6px; margin-bottom: 8px; cursor: pointer;
                    border: 1px solid var(--bordure-claire); transition: all 0.2s;"
                    onmouseover="this.style.borderColor='var(--gris-moyen)'" onmouseout="this.style.borderColor='var(--bordure-claire)'">
                 <input type="checkbox" id="import-${id}"
@@ -759,10 +759,10 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
         <div id="modalPreviewConfigComplete" style="display: flex; position: fixed; top: 0; left: 0;
              width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000;
              align-items: center; justify-content: center;">
-            <div style="background: white; border-radius: 10px; padding: 30px; max-width: 650px;
+            <div style="background: var(--surface-conteneur, #162c36); border-radius: 10px; padding: 30px; max-width: 650px;
                  width: 90%; max-height: 90vh; overflow-y: auto;">
 
-                <h2 style="margin-top: 0; color: var(--bleu-moyen); border-bottom: 2px solid var(--bleu-pale);
+                <h2 style="margin-top: 0; color: var(--texte-secondaire); border-bottom: 2px solid var(--bleu-pale);
                      padding-bottom: 10px;">
                     Contenu du fichier
                 </h2>
@@ -846,7 +846,7 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                         <p style="margin: 0 0 12px 0; font-size: 0.85rem; color: var(--gris-fonce);">
                             <strong>Source non identifiée</strong> – Le fichier ne contient pas d'information sur son auteur.
                         </p>
-                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 10px; background: white; border-radius: 6px; border: 2px solid var(--btn-annuler);">
+                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 10px; background: var(--surface-conteneur, #162c36); border-radius: 6px; border: 2px solid var(--btn-annuler);">
                             <input type="checkbox" id="confirmMaSauvegarde" onchange="toggleDonneesPersoImport(this.checked)" style="width: 20px; height: 20px;">
                             <span style="font-size: 0.9rem; color: var(--gris-fonce);"><strong>C'est ma propre sauvegarde</strong> – Je confirme que ce fichier m'appartient</span>
                         </label>
@@ -909,7 +909,7 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                 <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;
                      padding-top: 15px; border-top: 1px solid var(--bordure-claire);">
                     <button onclick="fermerModalPreviewConfigComplete()"
-                            style="padding: 10px 20px; background: white; color: var(--gris-fonce);
+                            style="padding: 10px 20px; background: var(--surface-conteneur, #162c36); color: var(--gris-fonce);
                                    border: 1px solid var(--gris-clair); border-radius: 4px;
                                    cursor: pointer; font-size: 0.95rem;">
                         Annuler
@@ -1210,10 +1210,10 @@ function afficherModalPreviewConfigComplete(config) {
         <div id="modalPreviewConfigComplete" style="display: flex; position: fixed; top: 0; left: 0;
              width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000;
              align-items: center; justify-content: center;">
-            <div style="background: white; border-radius: 10px; padding: 30px; max-width: 600px;
+            <div style="background: var(--surface-conteneur, #162c36); border-radius: 10px; padding: 30px; max-width: 600px;
                  width: 90%; max-height: 85vh; overflow-y: auto;">
 
-                <h2 style="margin-top: 0; color: var(--bleu-moyen); border-bottom: 2px solid var(--bleu-pale);
+                <h2 style="margin-top: 0; color: var(--texte-secondaire); border-bottom: 2px solid var(--bleu-pale);
                      padding-bottom: 10px;">
                     Fichier analysé
                 </h2>
@@ -1235,7 +1235,7 @@ function afficherModalPreviewConfigComplete(config) {
                 <!-- Infos auteur -->
                 <div style="background: var(--bleu-tres-pale); border-radius: 8px;
                      padding: 15px; margin-bottom: 20px;">
-                    <h3 style="margin: 0 0 8px 0; font-size: 1.05rem; color: var(--bleu-moyen);">
+                    <h3 style="margin: 0 0 8px 0; font-size: 1.05rem; color: var(--texte-secondaire);">
                         ${meta.nom}
                     </h3>
                     <p style="margin: 0; font-size: 0.9rem; color: var(--gris-moyen);">
@@ -1254,10 +1254,10 @@ function afficherModalPreviewConfigComplete(config) {
                         Ressources incluses (${totalRessources}) :
                     </p>
                     <div style="display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.9rem;">
-                        ${nbEchelles > 0 ? `<span style="background: white; padding: 4px 10px; border-radius: 4px; border: 1px solid var(--bordure-claire);">✓ ${nbEchelles} échelle(s)</span>` : ''}
-                        ${nbGrilles > 0 ? `<span style="background: white; padding: 4px 10px; border-radius: 4px; border: 1px solid var(--bordure-claire);">✓ ${nbGrilles} grille(s)</span>` : ''}
-                        ${nbProductions > 0 ? `<span style="background: white; padding: 4px 10px; border-radius: 4px; border: 1px solid var(--bordure-claire);">✓ ${nbProductions} production(s)</span>` : ''}
-                        ${nbCartouches > 0 ? `<span style="background: white; padding: 4px 10px; border-radius: 4px; border: 1px solid var(--bordure-claire);">✓ ${nbCartouches} cartouche(s)</span>` : ''}
+                        ${nbEchelles > 0 ? `<span style="background: var(--surface-conteneur, #162c36); padding: 4px 10px; border-radius: 4px; border: 1px solid var(--bordure-claire);">✓ ${nbEchelles} échelle(s)</span>` : ''}
+                        ${nbGrilles > 0 ? `<span style="background: var(--surface-conteneur, #162c36); padding: 4px 10px; border-radius: 4px; border: 1px solid var(--bordure-claire);">✓ ${nbGrilles} grille(s)</span>` : ''}
+                        ${nbProductions > 0 ? `<span style="background: var(--surface-conteneur, #162c36); padding: 4px 10px; border-radius: 4px; border: 1px solid var(--bordure-claire);">✓ ${nbProductions} production(s)</span>` : ''}
+                        ${nbCartouches > 0 ? `<span style="background: var(--surface-conteneur, #162c36); padding: 4px 10px; border-radius: 4px; border: 1px solid var(--bordure-claire);">✓ ${nbCartouches} cartouche(s)</span>` : ''}
                     </div>
                 </div>
 
@@ -1272,7 +1272,7 @@ function afficherModalPreviewConfigComplete(config) {
                 <!-- Boutons -->
                 <div style="display: flex; gap: 10px; justify-content: flex-end;">
                     <button onclick="fermerModalPreviewConfigComplete()"
-                            style="padding: 10px 20px; background: white; color: var(--gris-fonce);
+                            style="padding: 10px 20px; background: var(--surface-conteneur, #162c36); color: var(--gris-fonce);
                                    border: 1px solid var(--gris-clair); border-radius: 4px;
                                    cursor: pointer; font-size: 0.95rem;">
                         Annuler

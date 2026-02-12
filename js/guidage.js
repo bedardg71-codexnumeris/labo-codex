@@ -221,7 +221,7 @@ function afficherMessageGuidage() {
         top: 80px;
         right: 30px;
         max-width: 400px;
-        background: white;
+        background: var(--surface-conteneur, #162c36);
         border-left: 4px solid #1a5266;
         border-radius: 8px;
         padding: 16px;

@@ -1241,7 +1241,7 @@ function afficherListeEtudiantsConsultation() {
             : 0;
 
         if (nbInterventions > 0) {
-            html += '<td class="etud-text-center"><span style="color: var(--bleu-principal); font-weight: 600;">📋 ' + nbInterventions + '</span></td>';
+            html += '<td class="etud-text-center"><span style="color: var(--accent-primaire); font-weight: 600;">📋 ' + nbInterventions + '</span></td>';
         } else {
             html += '<td class="etud-text-center"><span class="etud-texte-gris-clair">—</span></td>';
         }

@@ -190,7 +190,7 @@ function creerBulle(etape, index) {
     bulleElement.id = 'tutoriel-bulle';
     bulleElement.style.cssText = `
         position: fixed;
-        background: white;
+        background: var(--surface-conteneur, #162c36);
         border-radius: 12px;
         padding: 25px;
         max-width: 400px;
@@ -212,7 +212,7 @@ function creerBulle(etape, index) {
                 <div style="
                     height: 100%;
                     width: ${((index + 1) / ETAPES_TUTORIEL.length) * 100}%;
-                    background: linear-gradient(135deg, var(--bleu-principal), var(--bleu-clair));
+                    background: linear-gradient(135deg, var(--accent-primaire), var(--bleu-clair));
                     transition: width 0.3s ease;
                 "></div>
             </div>
@@ -228,7 +228,7 @@ function creerBulle(etape, index) {
 
         <!-- Titre -->
         <h3 style="
-            color: var(--bleu-principal);
+            color: var(--accent-primaire);
             margin: 0 0 15px;
             font-size: 1.3rem;
         ">${etape.titre}</h3>
@@ -250,7 +250,7 @@ function creerBulle(etape, index) {
             ${index > 0 ? `
                 <button onclick="etapePrecedente()" style="
                     padding: 10px 20px;
-                    background: white;
+                    background: var(--surface-conteneur, #162c36);
                     color: var(--gris-moyen);
                     border: 1px solid var(--bordure-claire);
                     border-radius: 6px;
@@ -258,7 +258,7 @@ function creerBulle(etape, index) {
                     font-size: 0.95rem;
                     transition: all 0.2s;
                 " onmouseover="this.style.background='var(--gris-tres-pale)';"
-                   onmouseout="this.style.background='white';">
+                   onmouseout="this.style.background='var(--surface-conteneur)';">
                     ← Précédent
                 </button>
             ` : '<div></div>'}
@@ -266,7 +266,7 @@ function creerBulle(etape, index) {
             <div style="display: flex; gap: 10px;">
                 <button onclick="terminerTutoriel()" style="
                     padding: 10px 20px;
-                    background: white;
+                    background: var(--surface-conteneur, #162c36);
                     color: var(--gris-moyen);
                     border: 1px solid var(--bordure-claire);
                     border-radius: 6px;
@@ -274,14 +274,14 @@ function creerBulle(etape, index) {
                     font-size: 0.95rem;
                     transition: all 0.2s;
                 " onmouseover="this.style.background='var(--gris-tres-pale)';"
-                   onmouseout="this.style.background='white';">
+                   onmouseout="this.style.background='var(--surface-conteneur)';">
                     Terminer
                 </button>
 
                 ${index < ETAPES_TUTORIEL.length - 1 ? `
                     <button onclick="etapeSuivante()" style="
                         padding: 10px 20px;
-                        background: linear-gradient(135deg, var(--bleu-principal), var(--bleu-clair));
+                        background: linear-gradient(135deg, var(--accent-primaire), var(--bleu-clair));
                         color: white;
                         border: none;
                         border-radius: 6px;
