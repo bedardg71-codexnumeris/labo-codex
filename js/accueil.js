@@ -116,7 +116,7 @@ function afficherAccueilRetour(conteneur) {
                 <input type="checkbox" id="checkbox-tour-guide-accueil" ${tourGuideActif ? 'checked' : ''}
                     onchange="if(typeof definirTourGuide==='function') definirTourGuide(this.checked);">
                 <div>
-                    <div class="accueil-cours-nom">Tour guide</div>
+                    <div class="accueil-cours-nom">Tour guid\u00e9</div>
                     <div class="accueil-cours-detail">Afficher les conseils contextuels</div>
                 </div>
             </label>
