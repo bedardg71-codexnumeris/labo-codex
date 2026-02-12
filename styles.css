@@ -2706,30 +2706,31 @@ textarea {
     border-radius: var(--radius-moyen);
     padding: 12px 16px;
     margin-bottom: 1rem;
+    color: var(--texte-principal, #d0e0e4);
 }
 .changelog-entry--bleu {
-    background: linear-gradient(135deg, #e3f2fd 0%, #e8eaf6 100%);
-    border-color: var(--bleu-moyen);
+    background: #1a3040;
+    border-color: #6aacb8;
 }
 .changelog-entry--vert {
-    background: linear-gradient(135deg, #e8f5e9 0%, #e3f2fd 100%);
-    border-color: #2e7d32;
+    background: #1a3040;
+    border-color: #66bb6a;
 }
 .changelog-entry--orange {
-    background: linear-gradient(135deg, #fff8e1 0%, #fff3e0 100%);
-    border-color: var(--orange-accent);
+    background: #1a3040;
+    border-color: var(--orange-accent, #c8a060);
 }
 .changelog-entry--rose {
-    background: linear-gradient(135deg, #ffebee 0%, #fce4ec 100%);
-    border-color: #e91e63;
+    background: #1a3040;
+    border-color: #f48fb1;
 }
 .changelog-entry--violet {
-    background: linear-gradient(135deg, #f3e5f5 0%, #ede7f6 100%);
-    border-color: #512da8;
+    background: #1a3040;
+    border-color: #b39ddb;
 }
 .changelog-entry--sarcelle {
-    background: linear-gradient(135deg, #e0f7fa 0%, #e8f5e9 100%);
-    border-color: #00897b;
+    background: #1a3040;
+    border-color: #6aacb8;
 }
 .changelog-title {
     display: block;
@@ -2742,12 +2743,12 @@ textarea {
     font-size: 0.9rem;
     line-height: 1.6;
 }
-.changelog-entry--vert .changelog-title { color: #1b5e20; }
-.changelog-entry--orange .changelog-title { color: #e65100; }
-.changelog-entry--bleu .changelog-title { color: #1565c0; }
-.changelog-entry--rose .changelog-title { color: #c2185b; }
-.changelog-entry--violet .changelog-title { color: #512da8; }
-.changelog-entry--sarcelle .changelog-title { color: #00897b; }
+.changelog-entry--vert .changelog-title { color: #81c784; }
+.changelog-entry--orange .changelog-title { color: #c8a060; }
+.changelog-entry--bleu .changelog-title { color: #6aacb8; }
+.changelog-entry--rose .changelog-title { color: #f48fb1; }
+.changelog-entry--violet .changelog-title { color: #b39ddb; }
+.changelog-entry--sarcelle .changelog-title { color: #6aacb8; }
 
 /* ===============================
    BOUTONS (padding unifié 10px 15px)
