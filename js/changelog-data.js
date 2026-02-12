@@ -10,6 +10,20 @@
 
     var CHANGELOG = [
         {
+            version: 'Beta 98',
+            date: '11 février',
+            couleur: 'sarcelle',
+            titre: 'Retouches visuelles Océan & Boussole',
+            items: [
+                '<strong>Dégradés fidèles à la maquette</strong> : En-tête avec gradient 4\u00a0stops atmosphérique. Cartes et conteneurs avec radial-gradient volumétrique (spot lumineux en haut-gauche). Surfaces enrichies conformes au design system C4.',
+                '<strong>En-têtes de section uniformes</strong> : Les barres dégradées dans les accordéons, titres de cartes et en-têtes de panneaux sont remplacées par un fond uni #244858 pour un rendu plus propre.',
+                '<strong>Navigation épurée</strong> : Fonds des barres de navigation principale, secondaire et bandeau groupe-cours rendus transparents. Séparateurs retirés entre l\u2019en-tête et les sections. Les boutons glassmorphism flottent sur le gradient du conteneur.',
+                '<strong>Contraste amélioré</strong> : Textes de la Boîte à outils (Questions Flash, Tirage au sort), badges, compteurs et selects corrigés pour lisibilité sur fond sombre.',
+                '<strong>Accueil harmonisé</strong> : Les 10\u00a0cartes d\u2019actions utilisent un fond océan profond (#0c1a22) uniforme.',
+                '<strong>Nouveautés adaptées</strong> : Les cartes du changelog adoptent le thème sombre avec surfaces unies.'
+            ]
+        },
+        {
             version: 'Beta 97.4',
             date: '11 février',
             couleur: 'bleu',
