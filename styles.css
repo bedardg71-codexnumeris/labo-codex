@@ -1228,11 +1228,10 @@ h1, h2, h3, h4 {
    =============================== */
 
 .carte {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: #0c1a22;
     border: 1px solid rgba(106, 172, 184, 0.15);
     border-radius: var(--radius-grand);
     padding: var(--espacement-moyen);
-    box-shadow: var(--shadow-normal), inset 0 1px 3px rgba(255, 255, 255, 0.04);
     margin-bottom: var(--espacement-moyen);
     box-shadow: var(--shadow-normal);
     transition: box-shadow 0.2s ease, transform 0.2s ease;
