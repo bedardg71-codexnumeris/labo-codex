@@ -118,7 +118,7 @@ function afficherAccueilRetour(conteneur) {
     const prefsAff = db.getSync('preferencesAffichage', {});
     const tooltipsActifs = prefsAff.tooltips !== false;
     const tooltipToggleHTML = `
-        <div class="accueil-cours-actif" style="flex: 1; min-width: 0; margin-bottom: 0;">
+        <div class="accueil-cours-actif" style="flex: 1; min-width: 0; margin-bottom: 0; flex-direction: column; align-items: stretch;">
             <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; margin: 0;">
                 <span style="font-size: 1.5rem;">\uD83D\uDCAC</span>
                 <input type="checkbox" id="checkbox-tooltips-accueil" ${tooltipsActifs ? 'checked' : ''}
