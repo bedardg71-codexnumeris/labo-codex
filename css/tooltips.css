@@ -8,7 +8,7 @@
     z-index: 10000;
     padding: 14px 20px;
     border-radius: 20px;
-    background: radial-gradient(ellipse at 35% 25%, #1a3040 0%, var(--bleu-fonce, #162c36) 65%);
+    background: var(--surface-carte, #1a3040);
     color: #d0e0e4;
     font-size: 0.85rem;
     line-height: 1.45;

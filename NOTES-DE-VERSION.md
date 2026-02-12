@@ -1,41 +1,41 @@
 # Notes de version — Monitorage pedagogique
 
 > Document de gestion locale. Historique complet avec dates.
-> Derniere mise a jour : 11 fevrier 2026
+> Derniere mise a jour : 12 fevrier 2026
 
 ---
 
-## Beta 98 (11 fevrier 2026)
+## Beta 97.5 (11-12 fevrier 2026)
 
-**Retouches visuelles Ocean & Boussole — Fidelite a la maquette C4**
+**Migration palette Ocean & Boussole (C4) + Hierarchie des surfaces**
 
-- **En-tete** : Gradient 4 stops (`#0a1820 → #142a38 → #1a3848 → #0e2028`) conforme a la maquette. Separateurs retires (border-top ligne 2, border-bottom entete).
-- **Cartes et conteneurs** : Radial-gradient volumetrique (`radial-gradient(ellipse at 30% 15%, #1a3040, #142428)`) applique a `.carte`, `.outil-carte`, `.conteneur`, `.section.active`, modales, profils, calendrier et tous les panneaux (~60 elements). Bordure sarcelle subtile + inset highlight.
-- **En-tetes de section** : 10 occurrences de `linear-gradient(bleu-principal → bleu-fonce/bleu-moyen)` remplacees par fond uni `#244858` (accordeons, titres bleus, summary, cartouches, popups).
-- **Navigation transparente** : `.navigation-principale`, `.sous-navigation` et `.bandeau-groupe-cours` : fond passe a `transparent`. Overrides `!important` dans index.html (3 modes) alignes.
-- **Boite a outils** : 20 `color: var(--bleu-principal, #032e5c)` et 8 `color: var(--bleu-moyen, #065dbb)` corriges vers `--accent-primaire` (titres) ou `--texte-principal` (contenu).
-- **Variable `--ocean-moyen`** : Ajoutee (`#1a3040`) dans `:root` de `styles.css` et `index.html` pour le radial-gradient.
-- **Accueil** : `.accueil-carte` et `.accueil-cours-actif` : fond uni `#0c1a22` avec bordure sarcelle.
-- **Fallbacks JS** : 99 occurrences de `#142428` mises a jour dans 20 fichiers JS.
-- **48 fichiers modifies** : styles.css, index.html, css/tooltips.css, 34 fichiers JS, documentation.
-
----
-
-## Beta 97.5 (11 fevrier 2026)
-
-**Migration palette Ocean & Boussole (C4)**
-
+*Migration initiale (11 fevrier)*
 - **Nouveau theme sombre definitif** : Migration complete de la palette « Nuit Elegante » vers « Ocean & Boussole » (C4). Fonds sombres (#0c1a22 a #244858), accent sarcelle (#6aacb8), accent laiton (#c8a060).
 - **Variables :root** : Toutes les variables CSS (~1 327 usages de `var()`) basculees vers la palette ocean dans `styles.css` et `index.html`.
 - **Surfaces hardcodees** : ~276 couleurs hex hardcodees (`white`, `#fff`, `#f8f9fa`, `#333`, `#666`, `#999`, etc.) remplacees par des variables semantiques (`--surface-conteneur`, `--texte-principal`, `--texte-secondaire`).
-- **Tooltips C4** : Fond radial-gradient ocean profond, bordures sarcelle, animation pulse sarcelle.
-- **Glassmorphism sarcelle** : Navigation et sous-navigation teintees sarcelle (`rgba(106, 172, 184, X)` au lieu de blanc).
+- **En-tete** : Gradient 4 stops (`#0a1820 → #142a38 → #1a3848 → #0e2028`) conforme a la maquette. Separateurs retires.
+- **En-tetes de section** : 10 occurrences de `linear-gradient` remplacees par fond uni `#244858`.
+- **Navigation transparente** : `.navigation-principale`, `.sous-navigation` et `.bandeau-groupe-cours` : fond `transparent`. Overrides `!important` alignes.
+- **Tooltips C4** : Fond ocean profond, bordures sarcelle, animation pulse sarcelle.
+- **Glassmorphism sarcelle** : Navigation et sous-navigation teintees sarcelle.
 - **Composants** : Badges, alertes, tables, formulaires — tous en fonds semi-transparents adaptes au fond sombre.
 - **Chart.js** : Grilles, labels et tooltips adaptes au fond sombre dans tous les fichiers JS de graphiques.
-- **Planification** : Variables utilitaires (`--planif-couleur-fond/texte/bordure/lien`) adaptees; couleurs des noeuds (bleu, orange, violet, vert) conservees vives.
+- **Planification** : Variables utilitaires adaptees; couleurs des noeuds conservees vives.
 - **Impression** : `@media print` force les fonds blancs et textes sombres.
 - **Scrollbars** : Stylisees sarcelle pour WebKit et Firefox.
 - **Modes** : Simulation et Anonymisation adaptes a la base ocean sombre.
+- **Boite a outils** : Textes corriges vers `--accent-primaire` / `--texte-principal`.
+- **Accueil** : `.accueil-carte` et `.accueil-cours-actif` : fond uni `#0c1a22` avec bordure sarcelle.
+- **Fallbacks JS** : 99 occurrences mises a jour dans 20 fichiers JS.
+
+*Hierarchie des surfaces — 4 niveaux (12 fevrier)*
+- **4 niveaux de surface** : N0 Page (`#0c1a22`), N1 Section (`#142428`), N2 Carte (`#1a3040`), N3 Element (`#244858`). Variables CSS : `--surface-page`, `--surface-section`, `--surface-carte`, `--surface-element`.
+- **~130 radial-gradients supprimes** : remplaces par des fonds solides selon le role (N1 sections, N2 cartes/modales/panneaux, N3 inputs/hover).
+- **`.section.active`** : fond N1 + padding 20px + border-radius 12px.
+- **`.carte`** : fond N2 + `border-left: 3px solid` accent sarcelle.
+- **Variables legacy alignees** : `--bleu-pale` → N2, `--bleu-tres-pale` → N1. 118 usages basculent automatiquement.
+- **Inputs/textareas** : fond N3 pour lisibilite.
+- **Fallbacks `#162c36` elimines** dans CSS et HTML.
 
 ---
 

@@ -1,9 +1,9 @@
 /* ===============================
-   SYSTÈME DE DESIGN - Beta 97
-   Index: 97 06-02-2026
+   SYSTÈME DE DESIGN - Beta 97.5
+   Index: 97.5 12-02-2026
    Convention: 100% français
    Palette: "Océan & Boussole" (C4)
-   Dernière mise à jour: 11-02-2026
+   Dernière mise à jour: 12-02-2026
    =============================== */
 
 /* ===============================
@@ -21,8 +21,8 @@
     --bleu-clair: #6aacb8;
     --bleu-leger: #4a8a94;
     --bleu-carte: #1a3a48;
-    --bleu-pale: #1e3a48;
-    --bleu-tres-pale: #0e1e28;
+    --bleu-pale: #1a3040;
+    --bleu-tres-pale: #142428;
     --bleu-simulation: #1a5266;
 
     /* Fond de page - Palette ocean sombre */
@@ -202,8 +202,10 @@
 
     /* === NOUVELLES VARIABLES SÉMANTIQUES OCÉAN === */
     --surface-page: #0c1a22;
+    --surface-section: #142428;
     --surface-conteneur: #142428;
-    --surface-carte: #1a3a48;
+    --surface-carte: #1a3040;
+    --surface-element: #244858;
     --surface-input: rgba(106, 172, 184, 0.08);
     --ocean-moyen: #1a3040;
     --texte-principal: #d0e0e4;
@@ -447,7 +449,7 @@ body.mode-demo .sous-navigation {
 .u-ml-5 { margin-left: 5px; }
 
 /* === BACKGROUNDS === */
-.u-bg-blanc { background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%); }
+.u-bg-blanc { background: var(--surface-carte, #1a3040); }
 .u-bg-bleu-pale { background: var(--bleu-pale); }
 .u-bg-bleu-tres-pale { background: var(--bleu-tres-pale); }
 .u-bg-gris-pale { background: var(--surface-carte, #1a3a48); }
@@ -516,7 +518,7 @@ h1, h2, h3, h4 {
 .conteneur {
     max-width: 95%;  /* Adaptatif au lieu de 1400px fixe */
     margin: 0 auto;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-section, #142428);
     border: 1px solid rgba(106, 172, 184, 0.1);
     border-radius: var(--radius-grand);
     box-shadow:
@@ -569,7 +571,7 @@ h1, h2, h3, h4 {
 .logo {
     width: 50px;
     height: 50px;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border-radius: var(--radius-grand);  /* 12px - conteneur */
     display: flex;
     align-items: center;
@@ -1137,7 +1139,9 @@ h1, h2, h3, h4 {
 
 .section.active {
     display: block;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-section, #142428);
+    padding: var(--espacement-moyen);
+    border-radius: var(--radius-grand);
     animation: apparition 0.3s ease;
 }
 
@@ -1228,8 +1232,9 @@ h1, h2, h3, h4 {
    =============================== */
 
 .carte {
-    background: #0c1a22;
+    background: var(--surface-carte, #1a3040);
     border: 1px solid rgba(106, 172, 184, 0.15);
+    border-left: 3px solid var(--accent-primaire, #6aacb8);
     border-radius: var(--radius-grand);
     padding: var(--espacement-moyen);
     margin-bottom: var(--espacement-moyen);
@@ -1489,7 +1494,7 @@ h1, h2, h3, h4 {
 }
 
 .item-carte-valeur.readonly {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-element, #244858);
     border: 1px solid var(--bleu-tres-pale);
     border-radius: var(--radius-moyen);
     padding: 6px 10px;
@@ -1515,7 +1520,7 @@ h1, h2, h3, h4 {
 .item-carte-badge {
     display: inline-block;
     padding: 4px 10px;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border-radius: var(--radius-moyen);
     font-size: 0.85rem;
     color: var(--accent-primaire);
@@ -1734,7 +1739,7 @@ h1, h2, h3, h4 {
 }
 
 .tableau tbody tr {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-section, #142428);
 }
 
 .tableau tbody tr:nth-child(even) {
@@ -1755,7 +1760,7 @@ h1, h2, h3, h4 {
     width: 100%;
     border-collapse: collapse;
     margin: var(--espacement-moyen) 0;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
 }
 
 .tableau-blanc thead {
@@ -1782,7 +1787,7 @@ h1, h2, h3, h4 {
 }
 
 .tableau-blanc tbody tr {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
 }
 
 .tableau-blanc tbody tr:nth-child(even) {
@@ -1927,7 +1932,7 @@ input.saisie-present {
 
 /* État par défaut (vide ou non saisi) */
 input.saisie-vide {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-element, #244858);
     border-color: rgba(106, 172, 184, 0.25);
     color: var(--texte-secondaire, #8aa4b0);
 }
@@ -2470,7 +2475,7 @@ input[type="number"].controle-form {
 /* Style de base pour TOUS les textarea - fix texte invisible */
 textarea {
     color: var(--texte-principal, #d0e0e4);
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-element, #244858);
 }
 
 /* Inputs spéciaux pour saisie de présences */
@@ -2480,7 +2485,7 @@ textarea {
 }
 
 #tbody-saisie-presences input[type="number"]:not(:placeholder-shown) {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-element, #244858);
     border: 1px solid var(--bleu-leger);
 }
 
@@ -2603,7 +2608,7 @@ textarea {
     justify-content: center;
 }
 .modal-js-contenu {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     padding: 30px;
     border-radius: var(--radius-grand);
     max-width: 700px;
@@ -2654,7 +2659,7 @@ textarea {
 }
 .biblio-carte--disponible {
     border: 1px solid var(--bordure-claire);
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
 }
 .biblio-carte-contenu {
     display: flex;
@@ -2913,7 +2918,7 @@ textarea {
 /* Classe sémantique pour items de liste/cartes */
 .item-liste {
     padding: 12px;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border: 1px solid var(--bleu-leger);
     border-radius: var(--radius-moyen);
     margin-bottom: 10px;
@@ -2973,7 +2978,7 @@ textarea {
 .modal-contenu {
     max-width: 800px;
     margin: 50px auto;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border-radius: var(--radius-grand);
     padding: 30px;
     position: relative;
@@ -3168,7 +3173,7 @@ textarea {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border-radius: var(--radius-grand);
     box-shadow: var(--shadow-fort);
     max-width: 520px;
@@ -3250,7 +3255,7 @@ textarea {
     border: 1px solid var(--gris-moyen);
     border-radius: var(--radius-moyen);
     font-size: 0.9rem;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     color: var(--gris-fonce);
     cursor: pointer;
     min-width: 140px;
@@ -3299,7 +3304,7 @@ textarea {
 }
 
 .modal-bienvenue-contenu {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border-radius: var(--radius-grand);
     box-shadow: var(--shadow-fort);
     max-width: 480px;
@@ -3544,7 +3549,7 @@ textarea {
 .cc-badge-conditions {
     margin-top: 12px;
     padding: 10px;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border-radius: var(--radius-moyen);
 }
 
@@ -3741,7 +3746,7 @@ textarea {
     grid-template-columns: repeat(5, 1fr);
     gap: 10px;
     padding: 10px;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border-radius: var(--radius-moyen);
 }
 
@@ -3957,7 +3962,7 @@ textarea {
 
 @media print {
     body {
-        background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+        background: var(--surface-section, #142428);
         padding: 0;
     }
 
@@ -3979,7 +3984,7 @@ textarea {
     }
 
     .entete {
-        background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+        background: var(--surface-section, #142428);
         color: var(--accent-primaire);
         border-bottom: 2px solid var(--bleu-principal);
     }
@@ -4070,7 +4075,7 @@ textarea {
 
 /* Colonne gauche (sidebar) */
 .profil-sidebar {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border-radius: var(--radius-grand);
     border: 1px solid var(--bleu-moyen);
     padding: 15px;
@@ -4256,7 +4261,7 @@ textarea {
 
 /* Colonne droite (contenu) */
 .profil-contenu {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border-radius: var(--radius-grand);
     border: 1px solid var(--bleu-pale);
     padding: 20px;
@@ -4333,7 +4338,7 @@ textarea {
 }
 
 .metrique-compacte:hover {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-element, #244858);
     box-shadow: var(--shadow-normal);
     transform: translateY(-1px);
 }
@@ -4354,7 +4359,7 @@ textarea {
 
 /* Carte premium pour cible d'intervention */
 .carte-cible-intervention {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border: 2px solid;
     border-radius: var(--radius-grand);
     padding: 20px;
@@ -4414,7 +4419,7 @@ textarea {
 
 /* Sections collapsibles */
 .section-collapsible {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border: 1px solid var(--bleu-pale);
     border-radius: var(--radius-grand);
     margin-bottom: 12px;
@@ -4824,7 +4829,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 
 /* Variantes de couleur (selon echelles.js) - Fond blanc */
 .carte-metrique-bleue {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border-color: var(--accent-primaire);
 }
 
@@ -4834,7 +4839,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 
 .carte-metrique-verte,
 .carte-metrique-standard.carte-metrique-minimal {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border-color: var(--risque-minimal);
 }
 
@@ -4845,7 +4850,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 
 .carte-metrique-violette,
 .carte-metrique-standard.carte-metrique-nul {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border-color: var(--risque-nul);
 }
 
@@ -4856,7 +4861,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 
 .carte-metrique-terracotta,
 .carte-metrique-standard.carte-metrique-modere {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border-color: var(--risque-modere);
 }
 
@@ -4866,7 +4871,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 .carte-metrique-standard.carte-metrique-critique {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border-color: var(--risque-critique);
 }
 
@@ -4922,7 +4927,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 
 /* Conteneur principal du calendrier */
 .calendrier-conteneur {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border-radius: var(--radius-grand);
     padding: 25px;
     box-shadow: var(--shadow-normal);
@@ -5026,7 +5031,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 
 /* Jour ouvrable (sans horaire planifié) */
 .calendrier-jour-ouvrable {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     color: var(--accent-primaire);
     border: 2px solid var(--bleu-carte);
     font-weight: 400;
@@ -5297,7 +5302,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 
 /* Artefact disponible (non retenu) */
 .portfolio-artefact-disponible {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border: 2px solid rgba(106, 172, 184, 0.2);
 }
 
@@ -5477,7 +5482,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 .production-portfolio-info {
     margin-top: 10px;
     padding: 10px;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border-radius: var(--radius-moyen);
 }
 
@@ -5606,7 +5611,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 
 /* Carte simple (alternative à profil-carte) */
 .profil-carte-simple {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     padding: 15px;
     border-radius: var(--radius-moyen);
     margin-bottom: 15px;
@@ -5614,7 +5619,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 
 .profil-carte-bordure {
     border: 1px solid rgba(106, 172, 184, 0.25);
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border-radius: var(--radius-grand);
     padding: 20px;
     margin-bottom: 20px;
@@ -5742,7 +5747,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 .profil-encadre-jetons-barre {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     height: 8px;
     border-radius: var(--radius-moyen);
     overflow: hidden;
@@ -5837,7 +5842,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 
 .profil-carte-bordure-blanche {
     border: 1px solid rgba(106, 172, 184, 0.25);
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border-radius: var(--radius-grand);
     padding: 20px;
     margin-bottom: 20px;
@@ -6412,7 +6417,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 .sous-critere-item {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     padding: 10px;
     border: 1px solid rgba(106, 172, 184, 0.25);
     border-radius: var(--radius-moyen);
@@ -6859,7 +6864,7 @@ summary.summary-materiel:hover {
 .panneau-import,
 .accordeon-contenu {
     padding: 15px;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
 }
 
 .banque-vide,
@@ -6975,7 +6980,7 @@ summary.summary-materiel:hover {
 
 /* Panneau droite : Formulaire d'édition */
 .panneau-formulaire {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     padding: 20px;
     border-radius: var(--radius-grand);
     border: 1px solid var(--gris-bordure);
@@ -7215,7 +7220,7 @@ summary.summary-materiel:hover {
 }
 
 .zone-preview {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border: 1px solid var(--bleu-leger);
     border-radius: var(--radius-standard);
     padding: 15px;
@@ -7249,7 +7254,7 @@ summary.summary-materiel:hover {
     margin-bottom: 15px;
     border: 1px solid var(--bleu-leger);
     border-radius: var(--radius-standard);
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
 }
 
 .conteneur-liste-etudiants table {
@@ -7419,7 +7424,7 @@ summary.summary-materiel:hover {
     gap: 10px;
     align-items: center;
     padding: 10px;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border: 1px solid var(--bleu-leger);
     border-radius: var(--radius-standard);
 }
@@ -7585,7 +7590,7 @@ summary.summary-materiel:hover {
 /* Carte blanche standard */
 .profil-carte {
     border: 1px solid rgba(106, 172, 184, 0.25);
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border-radius: var(--radius-grand);
     padding: 20px;
     margin-bottom: 30px;
@@ -8027,7 +8032,7 @@ summary.summary-materiel:hover {
 }
 
 .profil-details-contenu {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     padding: 12px;
     border-radius: var(--radius-moyen);
     font-family: 'Courier New', monospace;
@@ -8077,7 +8082,7 @@ summary.summary-materiel:hover {
 
 /* Formule mathématique */
 .profil-formule {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     padding: 15px;
     border-radius: var(--radius-moyen);
     margin-bottom: 15px;
@@ -8177,7 +8182,7 @@ summary.summary-materiel:hover {
 }
 
 .profil-carte-risque-urgence {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     padding: 12px;
     border-radius: var(--radius-moyen);
     margin-top: 12px;
@@ -8951,7 +8956,7 @@ summary.summary-materiel:hover {
 }
 
 .matrice-tableau tbody tr:nth-child(even) {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
 }
 
 .matrice-tableau tbody tr:hover {
@@ -8980,7 +8985,7 @@ summary.summary-materiel:hover {
     font-family: inherit;
     resize: vertical;
     color: var(--texte-principal, #d0e0e4); /* Force texte sombre - fix texte invisible */
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%); /* Force fond blanc */
+    background: var(--surface-element, #244858); /* Force fond blanc */
 }
 
 .matrice-tableau textarea:focus {
@@ -9655,7 +9660,7 @@ label:has(+ textarea:disabled) {
 }
 
 .cal-carte-blanche {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border: 2px solid var(--bleu-carte);
 }
 
@@ -9831,7 +9836,7 @@ label:has(+ textarea:disabled) {
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border: 2px solid rgba(3, 46, 92, 0.2);
     box-shadow: var(--shadow-normal);
 }
@@ -9972,7 +9977,7 @@ label:has(+ textarea:disabled) {
     gap: 10px;
     margin-bottom: 10px;
     padding: 12px;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border-radius: var(--radius-moyen);
     border: 1px solid var(--gris-leger);
 }
@@ -10171,7 +10176,7 @@ label:has(+ textarea:disabled) {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border-radius: var(--radius-grand);
     box-shadow: var(--shadow-fort);
     max-width: 500px;
@@ -10428,7 +10433,7 @@ body[data-mode="simulation"] table tr:hover {
 
 /* Carte composante (Portfolio ou Terminal) */
 .note-finale-composante {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     padding: 15px;
     border-radius: var(--radius-grand);
     box-shadow: var(--shadow-subtil);
@@ -10496,7 +10501,7 @@ body[data-mode="simulation"] table tr:hover {
 
 /* Carte de résultat final */
 .note-finale-resultat {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     padding: 15px;
     border-radius: var(--radius-grand);
     text-align: center;
@@ -10755,7 +10760,7 @@ body[data-mode="simulation"] table tr:hover {
     left: 2px;
     width: 20px;
     height: 20px;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border-radius: 50%;
     transition: transform 0.3s ease;
     box-shadow: var(--shadow-normal);
@@ -10790,7 +10795,7 @@ body[data-mode="simulation"] table tr:hover {
     border-radius: var(--radius-grand);
     cursor: pointer;
     transition: all 0.2s ease;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
 }
 
 .wizard-v2-radio-card:hover:not(.wizard-v2-card-disabled) {
@@ -10836,7 +10841,7 @@ body[data-mode="simulation"] table tr:hover {
 
 .wizard-v2-card-disabled:hover {
     border-color: var(--gris-clair);
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
 }
 
 /* Bloc d'information */
@@ -10985,7 +10990,7 @@ body[data-mode="simulation"] table tr:hover {
     align-items: flex-start;
     gap: 10px;
     padding: 10px;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border: 1px solid rgba(106, 172, 184, 0.25);
     border-radius: var(--radius-moyen);
     margin-bottom: 8px;
@@ -11152,7 +11157,7 @@ body[data-mode="simulation"] table tr:hover {
 
 /* Formulaire interne (popup dans les blocs) */
 .formulaire-interne {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     padding: 10px;
     border-radius: var(--radius-moyen);
     margin-bottom: 10px;
@@ -11954,7 +11959,7 @@ body.mode-assiste .btn-aide-contextuelle,
 
 /* Conteneur principal de l'apercu */
 .apercu-pdf {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     padding: 20px;
     border: 1px solid rgba(106, 172, 184, 0.25);
     border-radius: var(--radius-moyen, 8px);
@@ -12141,7 +12146,7 @@ body.mode-assiste .btn-aide-contextuelle,
 
 /* Page simulée - base commune */
 .apercu-pdf-page {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     margin: 0 auto;
     position: relative;
@@ -12343,7 +12348,7 @@ body.mode-assiste .btn-aide-contextuelle,
 
 /* Carte générique pour chaque outil */
 .outil-carte {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border: 1px solid rgba(106, 172, 184, 0.15);
     border-radius: var(--radius-grand, 12px);
     box-shadow: var(--shadow-normal), inset 0 1px 3px rgba(255, 255, 255, 0.04);
@@ -12372,7 +12377,7 @@ body.mode-assiste .btn-aide-contextuelle,
 
 /* Bouton paramètres (engrenage) - générique */
 .btn-params-outil {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border: 2px solid var(--bleu-pale, #e8f2fd);
     border-radius: var(--radius-moyen);
     padding: 8px;
@@ -12388,8 +12393,8 @@ body.mode-assiste .btn-aide-contextuelle,
 
 /* Zone d'affichage générique */
 .outil-zone-affichage {
-    background: var(--bleu-tres-pale, #f0f8ff);
-    border: 3px solid var(--bleu-pale, #e8f2fd);
+    background: var(--bleu-tres-pale, #142428);
+    border: 1px solid rgba(106, 172, 184, 0.15);
     border-radius: 16px;
     width: 100%;
     min-height: 180px;
@@ -12420,7 +12425,7 @@ body.mode-assiste .btn-aide-contextuelle,
 .outil-compteur {
     margin-top: 15px;
     font-size: 0.9rem;
-    color: var(--gris-moyen, #6c757d);
+    color: var(--texte-secondaire, #8aa4b0);
 }
 
 .outil-compteur span {
@@ -12441,7 +12446,7 @@ body.mode-assiste .btn-aide-contextuelle,
     border-radius: 6px;
     font-size: 0.9rem;
     color: var(--texte-principal, #d0e0e4);
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     cursor: pointer;
 }
 
@@ -12483,7 +12488,7 @@ body.mode-assiste .btn-aide-contextuelle,
     align-items: center;
     gap: 15px;
     padding: 10px 20px;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border-radius: var(--radius-moyen);
     box-shadow: var(--shadow-normal);
 }
@@ -12565,7 +12570,7 @@ body.mode-assiste .btn-aide-contextuelle,
 }
 
 .tirage-etudiant-item:hover {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-element, #244858);
 }
 
 .tirage-etudiant-item.exclu {
@@ -12652,7 +12657,7 @@ body.mode-assiste .btn-aide-contextuelle,
 }
 
 .question-item:hover {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-element, #244858);
 }
 
 .question-item.deja-posee {
@@ -12913,7 +12918,7 @@ body.mode-assiste .btn-aide-contextuelle,
     padding: 10px 12px;
     border-radius: 6px;
     margin-bottom: 5px;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
 }
 
 .question-item:last-child {
@@ -12960,7 +12965,7 @@ body.mode-assiste .btn-aide-contextuelle,
     font-size: 0.75rem;
     border: 1px solid var(--bleu-pale, #e8f2fd);
     border-radius: 4px;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     color: var(--texte-principal, #d0e0e4);
     cursor: pointer;
     max-width: 120px;
@@ -13524,7 +13529,7 @@ body.mode-assiste .btn-aide-contextuelle,
 #travaux-canvas-document {
     display: block;
     box-shadow: var(--shadow-prononce);
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
 }
 
 #travaux-canvas-annotation {
@@ -13579,7 +13584,7 @@ body.mode-assiste .btn-aide-contextuelle,
     height: 36px;
     border: 1px solid var(--bordure-claire);
     border-radius: var(--radius-moyen);
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     cursor: pointer;
     font-size: 14px;
     font-weight: 600;
@@ -13638,7 +13643,7 @@ body.mode-assiste .btn-aide-contextuelle,
 /* --- Popup autocollants --- */
 .travaux-popup-autocollants {
     position: fixed;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border: 1px solid var(--bordure-claire);
     border-radius: var(--radius-grand);
     box-shadow: var(--shadow-fort);
@@ -13963,7 +13968,7 @@ body.mode-assiste .btn-aide-contextuelle,
     /* Évaluation — Rose/magenta */
     --planif-couleur-evaluation: #D946EF;
     /* Utilitaires — adaptés palette ocean */
-    --planif-couleur-fond: var(--surface-conteneur, #162c36);
+    --planif-couleur-fond: var(--surface-conteneur, #142428);
     --planif-couleur-texte: var(--texte-principal, #d0e0e4);
     --planif-couleur-bordure: rgba(106, 172, 184, 0.2);
     --planif-couleur-lien: var(--texte-muted, #5a7a88);
@@ -13988,7 +13993,7 @@ body.mode-assiste .btn-aide-contextuelle,
     align-items: center;
     gap: 6px 12px;
     padding: 6px 16px;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border-bottom: 1px solid var(--planif-couleur-bordure);
     z-index: 100;
     flex-shrink: 0;
@@ -14022,7 +14027,7 @@ body.mode-assiste .btn-aide-contextuelle,
 }
 
 #planif-titre-carte:hover { border-bottom-color: var(--planif-couleur-bordure); }
-#planif-titre-carte:focus { border-bottom-color: var(--planif-couleur-selection); background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%); }
+#planif-titre-carte:focus { border-bottom-color: var(--planif-couleur-selection); background: var(--surface-element, #244858); }
 
 /* === PALETTE FLOTTANTE === */
 #planif-palette {
@@ -14030,7 +14035,7 @@ body.mode-assiste .btn-aide-contextuelle,
     top: 12px;
     left: 12px;
     z-index: 80;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border: 1px solid var(--planif-couleur-bordure);
     border-radius: 10px;
     box-shadow: 0 4px 16px rgba(0,0,0,0.10);
@@ -14047,7 +14052,7 @@ body.mode-assiste .btn-aide-contextuelle,
     cursor: grab;
     border-bottom: 1px solid var(--planif-couleur-bordure);
     border-radius: 10px 10px 0 0;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
 }
 .planif-palette-barre:active { cursor: grabbing; }
 
@@ -14114,7 +14119,7 @@ body.mode-assiste .btn-aide-contextuelle,
     cursor: grab;
     user-select: none;
     transition: all 0.15s;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     white-space: nowrap;
 }
 
@@ -14212,7 +14217,7 @@ body.mode-assiste .btn-aide-contextuelle,
     text-anchor: middle;
 }
 .planif-lien-label-bg {
-    fill: var(--surface-conteneur, #162c36);
+    fill: var(--surface-conteneur, #142428);
     fill-opacity: 0.95;
     pointer-events: none;
 }
@@ -14243,7 +14248,7 @@ body.mode-assiste .btn-aide-contextuelle,
     min-width: 140px;
     max-width: 240px;
     border-radius: 10px;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border: 2px solid var(--planif-couleur-bordure);
     box-shadow: 0 1px 4px rgba(0,0,0,0.06);
     cursor: grab;
@@ -14264,7 +14269,7 @@ body.mode-assiste .btn-aide-contextuelle,
     box-shadow: 0 0 0 4px rgba(59,130,246,0.35), 0 4px 16px rgba(59,130,246,0.15);
 }
 .planif-noeud.selected:not(.planif-conteneur) {
-    background: color-mix(in srgb, var(--planif-couleur-selection) 10%, var(--surface-conteneur, #162c36));
+    background: color-mix(in srgb, var(--planif-couleur-selection) 10%, var(--surface-conteneur, #142428));
 }
 
 /* Conteneurs */
@@ -14284,10 +14289,10 @@ body.mode-assiste .btn-aide-contextuelle,
     border-style: solid;
 }
 .planif-noeud.planif-conteneur.planif-a-enfants.planif-type-sequence {
-    background: color-mix(in srgb, var(--planif-couleur-sequence) 12%, var(--surface-conteneur, #162c36));
+    background: color-mix(in srgb, var(--planif-couleur-sequence) 12%, var(--surface-conteneur, #142428));
 }
 .planif-noeud.planif-conteneur.planif-a-enfants.planif-type-lecon {
-    background: color-mix(in srgb, var(--planif-couleur-lecon) 12%, var(--surface-conteneur, #162c36));
+    background: color-mix(in srgb, var(--planif-couleur-lecon) 12%, var(--surface-conteneur, #142428));
 }
 
 .planif-noeud.planif-conteneur .planif-noeud-zone {
@@ -14407,7 +14412,7 @@ body.mode-assiste .btn-aide-contextuelle,
     top: 12px;
     left: 195px;
     z-index: 80;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border: 1px solid var(--planif-couleur-bordure);
     border-radius: 10px;
     box-shadow: 0 4px 16px rgba(0,0,0,0.10);
@@ -14480,7 +14485,7 @@ body.mode-assiste .btn-aide-contextuelle,
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border: 2px solid var(--planif-couleur-bordure);
     cursor: crosshair;
     z-index: 20;
@@ -14505,7 +14510,7 @@ body.mode-assiste .btn-aide-contextuelle,
     top: 0;
     bottom: 0;
     width: 300px;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border-left: 1px solid var(--planif-couleur-bordure);
     padding: 16px;
     z-index: 60;
@@ -14551,7 +14556,7 @@ body.mode-assiste .btn-aide-contextuelle,
     font-size: 13px;
     font-family: inherit;
     resize: vertical;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-element, #244858);
     color: var(--planif-couleur-texte);
 }
 
@@ -14599,7 +14604,7 @@ body.mode-assiste .btn-aide-contextuelle,
     padding: 4px 10px;
     border: 1px solid var(--planif-couleur-bordure);
     border-radius: 6px;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     font-size: 12px;
     font-weight: 500;
     cursor: pointer;
@@ -14662,11 +14667,11 @@ body.mode-assiste .btn-aide-contextuelle,
     align-items: center;
     gap: 8px;
     padding: 10px 12px;
-    background: color-mix(in srgb, var(--planif-couleur-sequence) 15%, var(--surface-conteneur, #162c36));
+    background: color-mix(in srgb, var(--planif-couleur-sequence) 15%, var(--surface-conteneur, #142428));
     border-bottom: 1px solid rgba(106, 172, 184, 0.25);
     cursor: pointer;
 }
-.planif-cal-sequence-header:hover { background: color-mix(in srgb, var(--planif-couleur-sequence) 22%, var(--surface-conteneur, #162c36)); }
+.planif-cal-sequence-header:hover { background: color-mix(in srgb, var(--planif-couleur-sequence) 22%, var(--surface-conteneur, #142428)); }
 .planif-cal-sequence-header .planif-cal-pastille {
     width: 10px;
     height: 10px;
@@ -14691,11 +14696,11 @@ body.mode-assiste .btn-aide-contextuelle,
     align-items: center;
     gap: 8px;
     padding: 10px 12px 10px 24px;
-    background: color-mix(in srgb, var(--planif-couleur-lecon) 12%, var(--surface-conteneur, #162c36));
+    background: color-mix(in srgb, var(--planif-couleur-lecon) 12%, var(--surface-conteneur, #142428));
     cursor: pointer;
     line-height: 1.4;
 }
-.planif-cal-lecon-header:hover { background: color-mix(in srgb, var(--planif-couleur-lecon) 20%, var(--surface-conteneur, #162c36)); }
+.planif-cal-lecon-header:hover { background: color-mix(in srgb, var(--planif-couleur-lecon) 20%, var(--surface-conteneur, #142428)); }
 .planif-cal-lecon-header .planif-cal-pastille {
     width: 8px;
     height: 8px;
@@ -14730,7 +14735,7 @@ body.mode-assiste .btn-aide-contextuelle,
     transition: background 0.1s;
     line-height: 1.45;
 }
-.planif-cal-item:hover { background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%); }
+.planif-cal-item:hover { background: var(--surface-element, #244858); }
 .planif-cal-item .planif-cal-pastille-mini {
     width: 7px;
     height: 7px;
@@ -14809,7 +14814,7 @@ body.mode-assiste .btn-aide-contextuelle,
     padding: 4px 8px;
     border: 1px solid var(--planif-couleur-bordure);
     border-radius: 5px;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     font-size: 11px;
     cursor: pointer;
     color: var(--texte-secondaire, #8aa4b0);
@@ -14848,7 +14853,7 @@ body.mode-assiste .btn-aide-contextuelle,
     flex: 1; padding: 6px 8px;
     border: 1px solid var(--planif-couleur-bordure);
     border-radius: 6px; font-size: 12px;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%); color: var(--planif-couleur-texte);
+    background: var(--surface-carte, #1a3040); color: var(--planif-couleur-texte);
 }
 .planif-org-section {
     border-bottom: 1px solid rgba(106, 172, 184, 0.15);
@@ -14894,7 +14899,7 @@ body.mode-assiste .btn-aide-contextuelle,
 }
 .planif-org-activite-detail select {
     flex: 1; padding: 3px 6px; border: 1px solid rgba(106, 172, 184, 0.25);
-    border-radius: 4px; font-size: 11px; background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    border-radius: 4px; font-size: 11px; background: var(--surface-carte, #1a3040);
     color: var(--planif-couleur-texte);
 }
 .planif-org-prod-details {
@@ -14963,7 +14968,7 @@ body.mode-assiste .btn-aide-contextuelle,
     border: 1px solid rgba(106, 172, 184, 0.2);
     border-radius: 8px;
     font-size: 13px;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     color: var(--planif-couleur-texte, #1e293b);
 }
 
@@ -15019,7 +15024,7 @@ body.mode-assiste .btn-aide-contextuelle,
 .org-objectif-contenu:focus {
     border-color: #3b82f6;
     outline: none;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-element, #244858);
 }
 
 /* Prérequis */
@@ -15111,7 +15116,7 @@ body.mode-assiste .btn-aide-contextuelle,
     border: 1px solid rgba(106, 172, 184, 0.25);
     border-radius: 5px;
     font-size: 11px;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     color: var(--planif-couleur-texte);
 }
 .org-prod-details {
@@ -15170,7 +15175,7 @@ body.mode-assiste .btn-aide-contextuelle,
 #org-ee-etapes { padding: 0; }
 
 .org-ee-non-assignees {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     padding: 12px 24px;
     border-bottom: 1px solid rgba(106, 172, 184, 0.25);
 }
@@ -15241,7 +15246,7 @@ body.mode-assiste .btn-aide-contextuelle,
     align-items: center;
     gap: 6px;
     padding: 4px 10px;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border: 1px solid rgba(106, 172, 184, 0.25);
     border-radius: 6px;
     font-size: 12px;
@@ -15290,7 +15295,7 @@ body.mode-assiste .btn-aide-contextuelle,
     justify-content: center;
 }
 .org-modale-contenu {
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border-radius: 12px;
     box-shadow: 0 8px 32px rgba(0,0,0,0.15);
     width: 420px;
@@ -15348,7 +15353,7 @@ body.mode-assiste .btn-aide-contextuelle,
     gap: 8px;
     padding: 12px 20px;
     border-top: 1px solid #e2e8f0;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
 }
 
 /* === FIN ORGANISATEUR === */
@@ -15356,7 +15361,7 @@ body.mode-assiste .btn-aide-contextuelle,
 /* === MENU CONTEXTUEL LIENS === */
 #planif-menu-lien {
     position: absolute;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border: 1px solid var(--planif-couleur-bordure);
     border-radius: 8px;
     box-shadow: 0 4px 16px rgba(0,0,0,0.12);
@@ -15387,7 +15392,7 @@ body.mode-assiste .btn-aide-contextuelle,
     align-items: center;
     gap: 16px;
     padding: 4px 16px;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     border-top: 1px solid var(--planif-couleur-bordure);
     font-size: 11px;
     color: var(--texte-muted, #5a7a88);
@@ -15407,7 +15412,7 @@ body.mode-assiste .btn-aide-contextuelle,
     padding: 2px 8px;
     border: 1px solid var(--planif-couleur-bordure);
     border-radius: 4px;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     color: var(--texte-secondaire, #8aa4b0);
     font-size: 11px;
     cursor: pointer;
@@ -15424,7 +15429,7 @@ body.mode-assiste .btn-aide-contextuelle,
     padding: 2px 6px;
     border: 1px solid var(--planif-couleur-bordure);
     border-radius: 4px;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     color: var(--texte-secondaire, #8aa4b0);
     font-size: 11px;
     cursor: pointer;
@@ -15451,7 +15456,7 @@ body.mode-assiste .btn-aide-contextuelle,
     border-radius: 6px;
     font-size: 13px;
     font-family: inherit;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     color: var(--planif-couleur-texte);
     max-width: 200px;
     cursor: pointer;
@@ -15467,7 +15472,7 @@ body.mode-assiste .btn-aide-contextuelle,
     height: 28px;
     border: 1px solid var(--planif-couleur-bordure);
     border-radius: 6px;
-    background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+    background: var(--surface-carte, #1a3040);
     cursor: pointer;
     font-size: 15px;
     padding: 0;

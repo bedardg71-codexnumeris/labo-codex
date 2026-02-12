@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Système de suivi Beta 98 - Hiver 2026</title>
+    <title>Système de suivi Beta 97.5 - Hiver 2026</title>
 
     <!-- CSS externe requis pour styles complets -->
     <link rel="stylesheet" href="styles.css?v=2026013001">
@@ -25,8 +25,8 @@
             --bleu-clair: #6aacb8;
             --bleu-leger: #4a8a94;
             --bleu-carte: #1a3a48;
-            --bleu-pale: #1e3a48;
-            --bleu-tres-pale: #0e1e28;
+            --bleu-pale: #1a3040;
+            --bleu-tres-pale: #142428;
             --bleu-simulation: #1a5266;
             --bleu-anonymisation: #0c1a22;
 
@@ -186,8 +186,10 @@
 
             /* === NOUVELLES VARIABLES SÉMANTIQUES OCÉAN === */
             --surface-page: #0c1a22;
+            --surface-section: #142428;
             --surface-conteneur: #142428;
-            --surface-carte: #1a3a48;
+            --surface-carte: #1a3040;
+            --surface-element: #244858;
             --surface-input: rgba(106, 172, 184, 0.08);
             --ocean-moyen: #1a3040;
             --texte-principal: #d0e0e4;
@@ -248,7 +250,7 @@
            =============================== */
         .conteneur {
             /* Styles principaux dans styles.css - max-width: 95%, margin: 0 auto */
-            background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+            background: var(--surface-carte, #1a3040);
             overflow: hidden;
         }
 
@@ -1042,7 +1044,7 @@
            CARTES
            =============================== */
         .carte {
-            background: #0c1a22;
+            background: var(--surface-carte, #1a3040);
             border: 1px solid rgba(106, 172, 184, 0.15);
             border-radius: var(--radius-grand);
             padding: var(--espacement-moyen);
@@ -1219,7 +1221,7 @@
         @keyframes fadeIn {
             from {
                 opacity: 0;
-                background-color: var(--surface-conteneur, #162c36);
+                background-color: var(--surface-conteneur, #142428);
             }
             to {
                 opacity: 1;
@@ -1340,7 +1342,7 @@
         /* Barres de progression pour patterns */
         .barre-progression-container {
             margin-top: 8px;
-            background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+            background: var(--surface-carte, #1a3040);
             height: 8px;
             border-radius: var(--radius-moyen);
             overflow: hidden;
@@ -1617,7 +1619,7 @@
         .carte-encadree {
             margin: 20px 0;
             padding: 15px;
-            background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+            background: var(--surface-carte, #1a3040);
             border: 2px solid var(--bleu-moyen);
             border-radius: 6px;
         }
@@ -1639,7 +1641,7 @@
         .tableau-blanc {
             width: 100%;
             border-collapse: collapse;
-            background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+            background: var(--surface-carte, #1a3040);
         }
 
         .titre-1-8 {
@@ -1648,7 +1650,7 @@
         }
 
         .carte-bleu-encadree {
-            background: var(--bleu-tres-pale);
+            background: var(--surface-element, #244858);
             padding: 15px;
             border-radius: var(--radius-grand);
             border: 2px solid var(--bleu-principal);
@@ -1752,7 +1754,7 @@
         }
 
         /* Backgrounds */
-        .bg-white { background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%); }
+        .bg-white { background: var(--surface-carte, #1a3040); }
 
         /* Dimensions supplémentaires */
         .w-100px { width: 100px; }
@@ -2001,7 +2003,7 @@
 
         /* Cartes spécifiques */
         .carte-blanche-centree {
-            background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+            background: var(--surface-carte, #1a3040);
             padding: 15px;
             border-radius: 6px;
             border: 1px solid var(--bleu-pale);
@@ -2359,7 +2361,7 @@
         }
         .carte-white-p15 {
             padding: 15px;
-            background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+            background: var(--surface-carte, #1a3040);
         }
         .carte-purple-header {
             width: 100%;
@@ -2457,7 +2459,7 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+            background: var(--surface-carte, #1a3040);
             padding: 20px;
             border-bottom: 2px solid var(--bleu-principal);
             margin-bottom: 20px;
@@ -2990,7 +2992,7 @@
 
         /* Cartes avec backgrounds variés */
         .carte-white-border {
-            background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+            background: var(--surface-carte, #1a3040);
             border: 1px solid var(--bleu-leger);
             border-radius: 6px;
             padding: 15px;
@@ -3086,14 +3088,14 @@
 
         /* Modales */
         .modal-content-small {
-            background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+            background: var(--surface-carte, #1a3040);
             border-radius: 12px;
             padding: 30px;
             max-width: 600px;
             width: 90%;
         }
         .modal-content-scroll {
-            background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+            background: var(--surface-carte, #1a3040);
             border-radius: 12px;
             padding: 30px;
             max-width: 600px;
@@ -3514,7 +3516,7 @@
                     <!-- Titre et version -->
                     <div class="titre-section">
                         <h1>Système de suivi des apprentissages et de construction de la note</h1>
-                        <p class="meta" data-tooltip="entete-version">Beta 98 <span id="build-numero"></span></p>
+                        <p class="meta" data-tooltip="entete-version">Beta 97.5 <span id="build-numero"></span></p>
                     </div>
 
                     <!-- Sélecteur de mode déplacé à droite -->
@@ -4681,7 +4683,7 @@
                                     placeholder="La rétroaction sera générée automatiquement ici selon tes évaluations et les options cochées. Tu peux modifier le texte avant de le copier."
                                     style="width: 100%; height: 200px; padding: 12px; border-radius: 5px;
         border: 1px solid var(--bordure-claire); font-family: inherit; resize: vertical;
-        font-size: 0.85rem; line-height: 1.5; background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);">
+        font-size: 0.85rem; line-height: 1.5; background: var(--surface-carte, #1a3040);">
 </textarea>
                             </div>
                         </div>
@@ -5411,7 +5413,7 @@
 
                                 <!-- Aperçu visuel -->
                                 <div id="apercuEchelleNiveaux" data-tooltip="cn-echelle-apercu" style="display: flex; gap: 10px; flex-wrap: wrap;
-                     align-items: center; padding: 10px; background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%); border-radius: var(--radius-moyen); margin-bottom: 20px;">
+                     align-items: center; padding: 10px; background: var(--surface-carte, #1a3040); border-radius: var(--radius-moyen); margin-bottom: 20px;">
                                     <!-- Généré par afficherApercuEchelle() -->
                                 </div>
 
@@ -5586,7 +5588,7 @@
              border-radius: 6px; border: 1px solid var(--vert-leger);">
                             <h5 class="text-vert-leger-mb10">Aperçu de l'échelle</h5>
                             <div id="apercuEchelle" style="display: flex; justify-content: space-between; 
-                 align-items: center; padding: 10px; background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%); border-radius: var(--radius-moyen);">
+                 align-items: center; padding: 10px; background: var(--surface-carte, #1a3040); border-radius: var(--radius-moyen);">
                                 <!-- L'aperçu sera généré ici par afficherApercuEchelle() -->
                             </div>
                         </div>
@@ -6011,7 +6013,7 @@
                                                             Pondération unitaire : <strong>16.25%</strong> par production retenue
                                                         </div>
 
-                                                        <div id="mat-selection-liste" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--gris-clair); border-radius: var(--radius-moyen); background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);">
+                                                        <div id="mat-selection-liste" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--gris-clair); border-radius: var(--radius-moyen); background: var(--surface-carte, #1a3040);">
                                                             <!-- Checkboxes générées dynamiquement -->
                                                             <p style="padding: 15px; color: var(--gris-moyen); text-align: center;">Chargement...</p>
                                                         </div>
@@ -6038,7 +6040,7 @@
                                                             Note = 0 si production non remise.
                                                         </p>
 
-                                                        <div id="mat-obligatoires-liste" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--gris-clair); border-radius: var(--radius-moyen); background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);">
+                                                        <div id="mat-obligatoires-liste" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--gris-clair); border-radius: var(--radius-moyen); background: var(--surface-carte, #1a3040);">
                                                             <!-- Checkboxes générées dynamiquement -->
                                                             <p style="padding: 15px; color: var(--gris-moyen); text-align: center;">Chargement...</p>
                                                         </div>
@@ -6235,7 +6237,7 @@
                                         </div>
 
                                         <!-- Types de productions -->
-                                        <div style="margin-bottom: 25px; padding: 15px; background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%); border: 1px solid var(--gris-bordure); border-radius: 6px;">
+                                        <div style="margin-bottom: 25px; padding: 15px; background: var(--surface-carte, #1a3040); border: 1px solid var(--gris-bordure); border-radius: 6px;">
                                             <h4 style="margin: 0 0 10px 0; font-size: 1rem; color: var(--accent-primaire);">Types de productions</h4>
                                             <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 15px;">
                                                 Définis les types de productions que les étudiants devront compléter.
@@ -6247,7 +6249,7 @@
                                         </div>
 
                                         <!-- Table des forfaits -->
-                                        <div style="padding: 15px; background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%); border: 1px solid var(--gris-bordure); border-radius: 6px;">
+                                        <div style="padding: 15px; background: var(--surface-carte, #1a3040); border: 1px solid var(--gris-bordure); border-radius: 6px;">
                                             <h4 style="margin: 0 0 10px 0; font-size: 1rem; color: var(--accent-primaire);">Table des forfaits (bundles)</h4>
                                             <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 15px;">
                                                 Chaque forfait définit un ensemble de productions requises et la note associée.
@@ -6546,7 +6548,7 @@
                                     <h5 class="text-vert-leger-mb10">
                                         Aperçu d'une rétroaction générée
                                     </h5>
-                                    <div id="exempleRetroaction" style="padding: 15px; background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);
+                                    <div id="exempleRetroaction" style="padding: 15px; background: var(--surface-carte, #1a3040);
                  border-radius: var(--radius-moyen); font-size: 0.9rem; line-height: 1.6;">
                                         <!-- L'aperçu sera généré ici par genererApercuAleatoire() -->
                                     </div>
@@ -8130,7 +8132,7 @@
                                 Section Legacy désactivée.
                             </p>
                             <div id="legacy-previewTable" style="overflow-x: auto; max-height: 300px;
-                                          border: 1px solid var(--bordure-claire); border-radius: var(--radius-moyen); background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%);">
+                                          border: 1px solid var(--bordure-claire); border-radius: var(--radius-moyen); background: var(--surface-carte, #1a3040);">
                                 <!-- Le tableau sera généré ici -->
                             </div>
                             <div class="d-flex-gap10-mt15">
@@ -9507,7 +9509,7 @@
 
                             <!-- INFO PAN -->
                             <div id="infoPAN" style="display: none; margin-top: 15px; padding: 10px;
-                 background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%); border-radius: var(--radius-moyen); font-size: 0.85rem; color: var(--gris-moyen);">
+                 background: var(--surface-carte, #1a3040); border-radius: var(--radius-moyen); font-size: 0.85rem; color: var(--gris-moyen);">
                             </div>
 
                             <!-- Activation portfolio et jetons -->
@@ -14254,7 +14256,7 @@
                             <h4 style="color: var(--accent-primaire); margin-bottom: 10px">🔍 Distinction entre niveaux 2 et 3</h4>
                             <p class="mb-10"><strong>Le système traite différemment les interventions selon leur nature :</strong></p>
 
-                            <div style="background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%); padding: 12px; border-radius: 6px; margin-bottom: 12px;">
+                            <div style="background: var(--surface-carte, #1a3040); padding: 12px; border-radius: 6px; margin-bottom: 12px;">
                                 <p class="mb-5"><strong style="color: var(--orange-accent);">Niveau 2 (Préventif - en classe ou en période de disponibilité)</strong></p>
                                 <ul class="lh-16">
                                     <li><strong>Contexte :</strong> Intervention en classe pendant le cours régulier</li>
@@ -14275,7 +14277,7 @@
                                 </ul>
                             </div>
 
-                            <div style="background: radial-gradient(ellipse at 30% 15%, var(--ocean-moyen, #1a3040) 0%, var(--surface-conteneur, #162c36) 70%); padding: 12px; border-radius: 6px;">
+                            <div style="background: var(--surface-carte, #1a3040); padding: 12px; border-radius: 6px;">
                                 <p class="mb-5"><strong style="color: var(--bleu-moyen);">Niveau 3 (Intensif - hors classe, au bureau)</strong></p>
                                 <ul class="lh-16">
                                     <li><strong>Contexte :</strong> Rencontre individuelle ou petit groupe à ton bureau</li>
@@ -16016,8 +16018,8 @@
          */
 
         // === CONFIGURATION ===
-        const VERSION_MAJEURE = '98';
-        const BUILD_ID = '0211-2031';  // Auto-updated by Claude before each commit (Toronto time)
+        const VERSION_MAJEURE = '97.5';
+        const BUILD_ID = '0212-0630';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
