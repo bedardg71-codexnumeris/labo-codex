@@ -653,20 +653,17 @@ function obtenirSeancesJour(dateStr, coursId = null) {
 function obtenirRangSeanceDansSemaine(dateStr, coursId = null) {
     try {
         const calendrier = db.getSync(cle('calendrierComplet'), {});
-        const seancesCompletes = obtenirSeancesCompletes(coursId);
 
         const infoJour = calendrier[dateStr];
         if (!infoJour || !infoJour.numeroSemaine) return null;
 
         const numSemaine = infoJour.numeroSemaine;
 
-        // Trouver tous les jours de cours de cette semaine qui ont des séances
+        // Trouver tous les jours de cours de cette semaine selon le calendrier
         const joursAvecSeances = Object.entries(calendrier)
             .filter(([date, info]) =>
                 info.numeroSemaine === numSemaine &&
-                (info.statut === 'cours' || info.statut === 'reprise') &&
-                seancesCompletes[date] &&
-                seancesCompletes[date].length > 0
+                (info.statut === 'cours' || info.statut === 'reprise')
             )
             .map(([date]) => date)
             .sort();

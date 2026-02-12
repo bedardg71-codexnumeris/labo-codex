@@ -76,43 +76,25 @@ function afficherAccueilPremierLancement(conteneur) {
  * Affichage retour : info cours actif + 4 cartes par intention
  */
 function afficherAccueilRetour(conteneur) {
-    // Carte contextuelle : invitation démo (mode normal) ou info cours (mode démo)
+    // Checkbox démo : activée si en mode démo, ou par défaut si aucun cours réel
     const enDemo = typeof estEnModeDemo === 'function' && estEnModeDemo();
-    let coursHTML = '';
+    const listeCours = db.getSync('listeCours', []);
+    const aDesCoursReels = listeCours.some(c => !c.isDemo && !c.estDemo);
+    const demoChecked = enDemo || !aDesCoursReels;
 
-    if (enDemo) {
-        // En démo : afficher le cours demo actif
-        const infoCours = db.getSync('infoCours', null);
-        if (infoCours) {
-            const sigle = infoCours.sigle || '';
-            const titre = infoCours.titre || '';
-            const groupe = infoCours.groupe || '';
-            const session = infoCours.session || '';
-            const annee = infoCours.annee || '';
-            const detail = [sigle, groupe ? `Groupe ${groupe}` : '', session && annee ? `${session}${annee}` : ''].filter(Boolean).join(' \u2022 ');
-
-            coursHTML = `
-                <div class="accueil-cours-actif" style="flex: 1; min-width: 0; margin-bottom: 0;">
-                    <span class="accueil-cours-icone">&#x1F4DA;</span>
-                    <div class="accueil-cours-info">
-                        <div class="accueil-cours-nom">${echapperHtml(titre || sigle)}</div>
-                        <div class="accueil-cours-detail">${echapperHtml(detail)}</div>
-                    </div>
-                </div>
-            `;
-        }
-    } else {
-        // Mode normal : invitation à explorer la démo
-        coursHTML = `
-            <div class="accueil-cours-actif accueil-invite-demo" onclick="if(typeof entrerEnDemo==='function') entrerEnDemo();" style="cursor: pointer; flex: 1; min-width: 0; margin-bottom: 0;">
-                <span class="accueil-cours-icone">&#x1F5FA;&#xFE0F;</span>
-                <div class="accueil-cours-info">
+    const coursHTML = `
+        <div class="accueil-cours-actif" style="flex: 1; min-width: 0; margin-bottom: 0;">
+            <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; margin: 0;">
+                <span style="font-size: 1.5rem;">&#x1F5FA;&#xFE0F;</span>
+                <input type="checkbox" id="checkbox-demo-accueil" ${demoChecked ? 'checked' : ''}
+                    onchange="if(this.checked) { if(typeof entrerEnDemo==='function') entrerEnDemo(); } else { if(typeof quitterDemo==='function') quitterDemo(); }">
+                <div>
                     <div class="accueil-cours-nom">Donn\u00e9es de d\u00e9monstration</div>
                     <div class="accueil-cours-detail">Explorer l\u2019application avec un lot de donn\u00e9es fictives pour d\u00e9couvrir le suivi des apprentissages et la construction de la note.</div>
                 </div>
-            </div>
-        `;
-    }
+            </label>
+        </div>
+    `;
 
     // Section toggle tooltips (miroir de Reglages > Preferences > Navigation)
     const prefsAff = db.getSync('preferencesAffichage', {});

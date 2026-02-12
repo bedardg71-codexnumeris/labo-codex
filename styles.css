@@ -1805,58 +1805,6 @@ h1, h2, h3, h4 {
 }
 
 /* ===============================
-   ENCADRÉ DE DATE - ÉTATS
-   =============================== */
-
-/* Base commune pour tous les encadrés de date */
-#enteteDateSeance {
-    padding: 16px 24px;
-    border-radius: var(--radius-grand);
-    border-width: 2px;
-    border-style: solid;
-    margin-bottom: 20px;
-    text-align: center;
-    transition: all 0.3s ease;
-    /* Caché par défaut */
-}
-
-#enteteDateSeance #texteDateSeance {
-    font-size: 1rem;
-    line-height: 1.6;
-    margin: 0;
-}
-
-/* État ERREUR - Laiton */
-#enteteDateSeance.etat-erreur {
-    background: rgba(200, 160, 96, 0.15);
-    border-color: var(--btn-annuler);
-}
-
-#enteteDateSeance.etat-erreur #texteDateSeance {
-    color: #d4b878;
-}
-
-/* État VALIDE - Vert */
-#enteteDateSeance.etat-valide {
-    background: rgba(52, 199, 89, 0.12);
-    border-color: #34c759;
-}
-
-#enteteDateSeance.etat-valide #texteDateSeance {
-    color: #5ae080;
-}
-
-/* État VERROUILLÉ - Gris */
-#enteteDateSeance.etat-verrouille {
-    background: var(--surface-carte, #1a3a48);
-    border-color: var(--texte-muted, #5a7a88);
-}
-
-#enteteDateSeance.etat-verrouille #texteDateSeance {
-    color: var(--texte-secondaire, #8aa4b0);
-}
-
-/* ===============================
    CONTRÔLE DE VERROUILLAGE COMPACT
    =============================== */
 
