@@ -12,6 +12,15 @@
         {
             version: 'Beta 97.6',
             date: '13 f\u00e9vrier',
+            couleur: 'orange',
+            titre: 'Correction wizard pratique',
+            items: [
+                '<strong>Bug #68 — Bouton Précédent invisible</strong> : Le bouton «\u00a0← Précédent\u00a0» du wizard de création de pratique ne s\u2019affichait jamais (style inline prioritaire sur la classe CSS). Corrigé.'
+            ]
+        },
+        {
+            version: 'Beta 97.6',
+            date: '13 f\u00e9vrier',
             couleur: 'rose',
             titre: 'Corrections bugs testeurs (\u00c9lise)',
             items: [
