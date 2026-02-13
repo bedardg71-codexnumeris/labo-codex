@@ -746,7 +746,7 @@
 
         body.mode-archive:not(.mode-ecriture-temp) input:not([type="search"]):not([id^="recherche-"]):not([id^="inclure-"]):not([id^="checkbox-"]):not([id^="v2-"]),
         body.mode-archive:not(.mode-ecriture-temp) textarea:not([id^="textarea-rapport-"]),
-        body.mode-archive:not(.mode-ecriture-temp) select:not(#selectTrimestreActif):not(#select-mode):not([id^="filtre-"]):not([id^="v2-"]):not(#select-rappel-backup) {
+        body.mode-archive:not(.mode-ecriture-temp) select:not(#selectTrimestreActif):not(#select-mode):not([id^="filtre-"]):not([id^="v2-"]):not(#select-rappel-backup):not([id^="selecteur-"]) {
             pointer-events: none;
             opacity: 0.7;
             background-color: var(--surface-carte, #1a3a48);
@@ -3556,7 +3556,7 @@
         </header>
 
         <!-- BANDEAU ARCHIVAGE (affiché quand un trimestre archivé est actif) -->
-        <div id="bandeau-archive" class="bandeau-archive" style="display: none;">
+        <div id="bandeau-archive" class="bandeau-archive u-hide">
             <div class="bandeau-archive-contenu">
                 <span class="bandeau-archive-icone">📁</span>
                 <span class="bandeau-archive-texte">
@@ -3719,7 +3719,23 @@
                             <div id="contexte-indicateurs-acpe" class="carte-contexte-ligne" style="font-size: 0.8rem; font-weight: normal; opacity: 0.9; display: flex; align-items: center; gap: 0.75rem;">
                                 <!-- Trimestre | Cours | Badge - rempli dynamiquement par JS -->
                             </div>
+                            <button id="btn-toggle-panneau-suivi" class="btn-toggle-suivi" title="Suivre jusqu'à 5 étudiants">
+                                Suivi
+                            </button>
                         </h3>
+
+                        <!-- Panneau suivi d'étudiants -->
+                        <div id="panneau-suivi-etudiants" class="panneau-suivi-etudiants">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <span style="font-size: 0.85rem; color: var(--texte-secondaire); font-weight: 600;">
+                                    Suivi d'étudiants <span id="compteur-suivi" style="opacity: 0.6;">(0/5)</span>
+                                </span>
+                                <button id="btn-reinitialiser-suivi" class="btn-toggle-suivi">Réinitialiser</button>
+                            </div>
+                            <div id="liste-etudiants-suivi" class="liste-etudiants-suivi">
+                                <!-- Rempli dynamiquement -->
+                            </div>
+                        </div>
 
                         <!-- Carte Note -->
                         <div id="note-indicateurs" class="carte-info-toggle carte-info-note" style="display: none;">
@@ -11871,8 +11887,30 @@
                     <h2>Notes de version</h2>
                     <p class="text-muted">Historique des changements majeurs</p>
 
+                    <!-- Beta 97.5 - Suivi d'étudiants -->
+                    <div class="carte accordeon ouvert" id="accordeon-apropos-beta975-suivi">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Beta 97.5 &mdash; Suivi d'&eacute;tudiants au tableau de bord
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu" style="display: block;">
+                        <p class="text-muted">13 f&eacute;vrier 2026</p>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Suivi d'&eacute;tudiants</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Panneau de suivi</strong> : Bouton &laquo;&nbsp;Suivi&nbsp;&raquo; dans la section Observer pour tracker jusqu'&agrave; 5&nbsp;&eacute;tudiants. Badges semi-transparentes style palette Oc&eacute;an.</li>
+                            <li><strong>Points color&eacute;s</strong> : Les points des &eacute;tudiants suivis deviennent des billes 3D color&eacute;es (danger, laiton, succ&egrave;s, sarcelle, alerte) dans toutes les barres ACPE, Patterns et R&agrave;I.</li>
+                            <li><strong>Lien point &harr; badge</strong> : Cliquer un point sur une barre surligne la badge correspondante dans le panneau.</li>
+                            <li><strong>Nettoyage automatique</strong> : Les entr&eacute;es d'un autre groupe sont retir&eacute;es automatiquement.</li>
+                            <li><strong>Compatibilit&eacute;</strong> : Mode anonymisation et mode archive pris en charge.</li>
+                        </ul>
+
+                        </div>
+                    </div>
+
                     <!-- Beta 97.5 - Tour guide & accueil -->
-                    <div class="carte accordeon ouvert" id="accordeon-apropos-beta975-tourguide">
+                    <div class="carte accordeon" id="accordeon-apropos-beta975-tourguide">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Beta 97.5 &mdash; Tour guide &amp; accueil enrichi
@@ -16010,7 +16048,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97.5';
-        const BUILD_ID = '0212-1430';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0213-1101';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';

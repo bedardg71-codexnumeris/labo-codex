@@ -11,6 +11,19 @@
     var CHANGELOG = [
         {
             version: 'Beta 97.5',
+            date: '13 février',
+            couleur: 'vert',
+            titre: 'Suivi d\u2019\u00e9tudiants au tableau de bord',
+            items: [
+                '<strong>Suivi d\u2019\u00e9tudiants</strong> : Nouveau panneau dans la section Observer pour tracker jusqu\u2019\u00e0\u00a05\u00a0\u00e9tudiants simultan\u00e9ment. Chaque \u00e9tudiant suivi re\u00e7oit une couleur distincte de la palette Oc\u00e9an (danger, laiton, succ\u00e8s, sarcelle, alerte).',
+                '<strong>Points color\u00e9s</strong> : Les points blancs des \u00e9tudiants suivis deviennent des billes 3D color\u00e9es dans toutes les barres gradu\u00e9es (A, C, P, E, Patterns, R\u00e0I).',
+                '<strong>Lien point \u2194 badge</strong> : Cliquer un point sur une barre surligne la badge correspondante dans le panneau de suivi.',
+                '<strong>Nettoyage automatique</strong> : Les entr\u00e9es de suivi obsol\u00e8tes (d\u2019un autre groupe) sont retir\u00e9es automatiquement lors du changement de groupe.',
+                '<strong>Compatibilit\u00e9</strong> : Fonctionne en mode anonymisation (\u00e9l\u00e8ve anonymis\u00e9, matching par DA) et en mode archive (lecture seule).'
+            ]
+        },
+        {
+            version: 'Beta 97.5',
             date: '12 février',
             couleur: 'bleu',
             titre: 'Tour guide & accueil enrichi',

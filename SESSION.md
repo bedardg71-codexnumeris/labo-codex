@@ -1,8 +1,31 @@
 # SESSION ACTIVE - BETA 97.5
 
-**Date** : 12 février 2026
-**Version** : Beta 97.5 (build 0212-1430)
-**Statut** : Tour guide + accueil enrichi (10 cartes)
+**Date** : 13 février 2026
+**Version** : Beta 97.5 (build 0213-1101)
+**Statut** : Suivi d'étudiants au tableau de bord
+
+## SESSION DU 13 FÉVRIER 2026
+
+### Travail accompli — Suivi d'étudiants au tableau de bord
+
+25. **Suivi d'étudiants** : Nouveau panneau dans la section Observer du tableau de bord.
+    - Bouton « Suivi » + panneau collapsible avec liste des étudiants du groupe actif
+    - Jusqu'à 5 étudiants trackés simultanément, chacun avec couleur distincte (palette Océan)
+    - Points blancs deviennent des billes 3D colorées dans toutes les barres (A, C, P, E, Patterns, RàI)
+    - Clic sur un point → surligne la badge correspondante dans le panneau
+    - Nettoyage automatique des entrées obsolètes lors du changement de groupe
+    - Compatible mode anonymisation et mode archive
+    - Badges semi-transparentes avec backdrop-filter, style design system Océan
+    - Stockage : `db.setSync('etudiantsSuivis', [...])` (préférence UI, non namespacée)
+
+### Fichiers modifiés (13 février)
+- `styles.css` — Classes .tracked-0 à .tracked-4 (billes 3D), panneau suivi, badges, surlignage
+- `index.html` — Bouton Suivi + panneau collapsible dans carte Observer, notes de version, BUILD_ID
+- `js/tableau-bord-apercu.js` — Logique complète : stockage, couleurs, nettoyage, UI panneau, événements délégués
+- `js/changelog-data.js` — Entrée changelog suivi d'étudiants
+- `version.json` — Build 0213-1101
+
+---
 
 ## SESSION DU 12 FÉVRIER 2026
 
