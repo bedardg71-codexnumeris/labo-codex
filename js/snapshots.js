@@ -90,7 +90,8 @@ function obtenirCoursIdPourSnapshots() {
 function cleSnapshots() {
     const coursId = obtenirCoursIdPourSnapshots();
     if (!coursId) {
-        return cle('snapshots'); // Fallback si aucun cours actif
+        // Pas de cours actif : retourner null pour empêcher la création de snapshots orphelins
+        return null;
     }
     return cle('snapshots') + '_' + coursId;
 }
@@ -98,8 +99,14 @@ function cleSnapshots() {
 function initialiserModuleSnapshots() {
     console.log('🔄 Initialisation module snapshots...');
 
+    const cleSnap = cleSnapshots();
+    if (!cleSnap) {
+        console.log('⚠️ Aucun cours actif – module snapshots en attente');
+        return;
+    }
+
     // Créer structure si première utilisation
-    const snapshots = db.getSync(cleSnapshots(), null);
+    const snapshots = db.getSync(cleSnap, null);
     if (!snapshots) {
         const structure = {
             hebdomadaires: [],
@@ -111,7 +118,7 @@ function initialiserModuleSnapshots() {
                 dernierSnapshotIntervention: null
             }
         };
-        db.setSync(cleSnapshots(), structure);
+        db.setSync(cleSnap, structure);
         console.log('✅ Structure snapshots créée');
     }
 
@@ -417,9 +424,10 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null, 
         // ✅ CORRECTIF (13 fév 2026): Utiliser obtenirEtudiantsCoursActif() qui filtre par
         // coursId ET par groupe (obtenirDonneesSelonMode ne filtre que par coursId, ce qui
         // retourne les étudiants de TOUS les groupes du même cours)
+        // Fallback vers [] (pas obtenirDonneesSelonMode) pour éviter de mélanger les groupes
         const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
             ? obtenirEtudiantsCoursActif()
-            : obtenirDonneesSelonMode('groupeEtudiants');
+            : [];
         const snapshotsEtudiants = [];
 
         // ✅ Compteurs séparés pour gérer les valeurs null
@@ -820,9 +828,10 @@ async function reconstruireSnapshotsHistoriques() {
 
         // ✨ Charger les étudiants pour estimation précise (universel, pas codé en dur)
         // ✅ CORRECTIF (13 fév 2026): Utiliser obtenirEtudiantsCoursActif() pour filtrer par groupe
+        // Fallback vers [] (pas obtenirDonneesSelonMode) pour éviter de mélanger les groupes
         const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
             ? obtenirEtudiantsCoursActif()
-            : obtenirDonneesSelonMode('groupeEtudiants');
+            : [];
         const nbEtudiants = etudiants.length;
 
         console.log(`✓ Séances du groupe détectées: ${datesCours.length}`);

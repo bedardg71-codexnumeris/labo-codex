@@ -118,6 +118,142 @@ function filtrerRessourcesNonDemo(ressources, type) {
 }
 
 /* ===============================
+   ASSAINISSEMENT DES IMPORTS (anti-XSS / validation)
+   =============================== */
+
+/**
+ * Assainit une chaîne importée : vérifie le type, tronque, retire les balises HTML
+ * @param {*} str - Valeur à assainir
+ * @param {number} maxLen - Longueur maximale (défaut 500)
+ * @returns {string} Chaîne nettoyée
+ */
+function assainirChaine(str, maxLen = 500) {
+    if (typeof str !== 'string') return '';
+    // Tronquer si trop long
+    let resultat = str.length > maxLen ? str.substring(0, maxLen) : str;
+    // Retirer les balises HTML (<...>)
+    resultat = resultat.replace(/<[^>]*>/g, '');
+    return resultat;
+}
+
+/**
+ * Assainit un objet importé selon un schéma (whitelist de propriétés)
+ * @param {Object} obj - Objet à assainir
+ * @param {Object} schema - Schéma { nomProp: { type: 'string'|'array'|'number'|'boolean'|'object', maxLen?: number, schema?: Object } }
+ * @returns {Object} Objet nettoyé (seules les clés du schéma sont conservées)
+ */
+function assainirObjet(obj, schema) {
+    if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return {};
+    const resultat = {};
+
+    for (const [cle, spec] of Object.entries(schema)) {
+        if (!(cle in obj)) {
+            // Propriété absente : ignorer (optionnelle)
+            continue;
+        }
+        const valeur = obj[cle];
+
+        switch (spec.type) {
+            case 'string':
+                resultat[cle] = assainirChaine(valeur, spec.maxLen || 500);
+                break;
+            case 'number':
+                resultat[cle] = typeof valeur === 'number' ? valeur : 0;
+                break;
+            case 'boolean':
+                resultat[cle] = !!valeur;
+                break;
+            case 'array':
+                if (Array.isArray(valeur)) {
+                    if (spec.schema) {
+                        // Assainir chaque élément récursivement
+                        resultat[cle] = valeur.map(item =>
+                            typeof item === 'object' && item !== null
+                                ? assainirObjet(item, spec.schema)
+                                : (typeof item === 'string' ? assainirChaine(item, spec.maxLen || 500) : item)
+                        );
+                    } else {
+                        resultat[cle] = valeur;
+                    }
+                } else {
+                    resultat[cle] = [];
+                }
+                break;
+            case 'object':
+                if (spec.schema && typeof valeur === 'object' && valeur !== null) {
+                    resultat[cle] = assainirObjet(valeur, spec.schema);
+                } else {
+                    resultat[cle] = valeur;
+                }
+                break;
+            default:
+                // Type inconnu : copier tel quel (fallback safe)
+                resultat[cle] = valeur;
+        }
+    }
+
+    return resultat;
+}
+
+/** Schémas de validation pour les ressources partageables */
+const SCHEMAS_IMPORT = {
+    grille: {
+        id: { type: 'string', maxLen: 100 },
+        nom: { type: 'string', maxLen: 200 },
+        criteres: { type: 'array' },
+        auteurOriginal: { type: 'string', maxLen: 100 },
+        dateImport: { type: 'string', maxLen: 50 },
+        estDemo: { type: 'boolean' },
+        isDemo: { type: 'boolean' },
+        dateCreation: { type: 'string', maxLen: 50 },
+        description: { type: 'string', maxLen: 500 }
+    },
+    echelle: {
+        id: { type: 'string', maxLen: 100 },
+        nom: { type: 'string', maxLen: 200 },
+        niveaux: { type: 'array' },
+        auteurOriginal: { type: 'string', maxLen: 100 },
+        dateImport: { type: 'string', maxLen: 50 },
+        estDemo: { type: 'boolean' },
+        isDemo: { type: 'boolean' },
+        dateCreation: { type: 'string', maxLen: 50 },
+        description: { type: 'string', maxLen: 500 }
+    },
+    pratique: {
+        id: { type: 'string', maxLen: 100 },
+        nom: { type: 'string', maxLen: 200 },
+        type: { type: 'string', maxLen: 100 },
+        description: { type: 'string', maxLen: 500 },
+        auteurOriginal: { type: 'string', maxLen: 100 },
+        dateImport: { type: 'string', maxLen: 50 },
+        estDemo: { type: 'boolean' },
+        isDemo: { type: 'boolean' },
+        criteres: { type: 'array' },
+        ponderation: { type: 'object' },
+        seuilReussite: { type: 'number' }
+    },
+    production: {
+        id: { type: 'string', maxLen: 100 },
+        nom: { type: 'string', maxLen: 200 },
+        titre: { type: 'string', maxLen: 200 },
+        type: { type: 'string', maxLen: 100 },
+        description: { type: 'string', maxLen: 500 },
+        auteurOriginal: { type: 'string', maxLen: 100 },
+        dateImport: { type: 'string', maxLen: 50 },
+        dateEcheance: { type: 'string', maxLen: 50 },
+        estDemo: { type: 'boolean' },
+        isDemo: { type: 'boolean' },
+        facultatif: { type: 'boolean' },
+        grilleId: { type: 'string', maxLen: 100 },
+        echelleId: { type: 'string', maxLen: 100 },
+        pratiqueId: { type: 'string', maxLen: 100 }
+    }
+};
+
+/** Limite de taille max pour un fichier JSON importé (10 Mo) */
+const TAILLE_MAX_IMPORT_OCTETS = 10 * 1024 * 1024;
+
+/* ===============================
    EXPORT DES DONNÉES
    =============================== */
 
@@ -156,9 +292,9 @@ async function ouvrirModalExport() {
                    background: var(--bleu-tres-pale); margin-bottom: 5px;
                    border-radius: 4px; border: 1px solid var(--bleu-pale);
                    transition: all 0.2s; cursor: pointer;">
-                <input type="checkbox" class="cle-export" value="${cle}"
+                <input type="checkbox" class="cle-export" value="${echapperHtml(cle)}"
                        style="margin-right: 10px; transform: scale(1.2);">
-                <span style="flex: 1; font-family: monospace; font-size: 0.9rem;">${cle}</span>
+                <span style="flex: 1; font-family: monospace; font-size: 0.9rem;">${echapperHtml(cle)}</span>
                 <span style="color: var(--bleu-leger); font-size: 0.85rem;">${tailleKo} Ko</span>
             </label>
         `;
@@ -190,6 +326,21 @@ async function executerExport() {
     if (clesSelectionnees.length === 0) {
         alert('Aucune clé sélectionnée');
         return;
+    }
+
+    // Détecter si des clés contiennent des données personnelles
+    const CLES_DONNEES_PERSONNELLES = ['groupeEtudiants', 'presences', 'evaluationsSauvegardees', 'snapshots'];
+    const contientDonneesPerso = clesSelectionnees.some(cle =>
+        CLES_DONNEES_PERSONNELLES.some(pattern => cle.includes(pattern))
+    );
+
+    if (contientDonneesPerso) {
+        const continuer = confirm(
+            'Ce fichier contiendra des données personnelles d\'étudiants (noms, DA, notes, présences).\n\n' +
+            'Ne le partagez pas.\n\n' +
+            'Continuer l\'export ?'
+        );
+        if (!continuer) return;
     }
 
     const donnees = {};
@@ -258,7 +409,42 @@ async function executerExport() {
                 nbDemoExclus += avant - valeur.length;
             }
 
-            // Stocker la valeur (stringify final sur ligne 246)
+            // Retirer les noms des étudiants dans les snapshots exportés
+            // (le nom sera re-résolu localement à l'import via la liste d'étudiants)
+            if (cle.includes('snapshots') && valeur && typeof valeur === 'object') {
+                const retirerNomsSnapshots = (snapArray) => {
+                    if (!Array.isArray(snapArray)) return snapArray;
+                    return snapArray.map(snap => {
+                        if (snap && Array.isArray(snap.etudiants)) {
+                            return {
+                                ...snap,
+                                etudiants: snap.etudiants.map(e => {
+                                    const { nom, prenom, ...sansNom } = e;
+                                    return sansNom;
+                                })
+                            };
+                        }
+                        return snap;
+                    });
+                };
+                if (valeur.hebdomadaires) valeur.hebdomadaires = retirerNomsSnapshots(valeur.hebdomadaires);
+                if (valeur.interventions) valeur.interventions = retirerNomsSnapshots(valeur.interventions);
+            }
+
+            // Pour les ressources partageables, vérifier qu'aucun champ personnel ne s'y glisse
+            if ((cle === 'grillesTemplates' || cle === 'echellesTemplates' || cle === 'pratiquesConfigurables' || cle.includes('productions')) && Array.isArray(valeur)) {
+                valeur = valeur.map(item => {
+                    const copie = { ...item };
+                    // Retirer les champs personnels qui ne devraient pas être dans les ressources
+                    delete copie.etudiantDA;
+                    delete copie.da;
+                    delete copie.prenom;
+                    // Ne pas supprimer 'nom' car c'est le nom de la ressource, pas d'un étudiant
+                    return copie;
+                });
+            }
+
+            // Stocker la valeur
             donnees[cle] = valeur;
         }
     }
@@ -283,9 +469,10 @@ async function executerExport() {
     const auteurBrut = infoCours?.enseignant;
     const auteur = (typeof auteurBrut === 'string') ? auteurBrut : '';
     const auteurNettoye = auteur ? auteur.replace(/[^a-z0-9]/gi, '-').toLowerCase() : '';
+    const prefixeConfidentiel = contientDonneesPerso ? 'CONFIDENTIEL-' : '';
     const nomFichier = auteurNettoye
-        ? `sauvegarde-${auteurNettoye}-${dateStr}.json`
-        : `sauvegarde-monitorage-${dateStr}.json`;
+        ? `sauvegarde-${prefixeConfidentiel}${auteurNettoye}-${dateStr}.json`
+        : `sauvegarde-${prefixeConfidentiel}monitorage-${dateStr}.json`;
     a.download = nomFichier;
     a.click();
     URL.revokeObjectURL(url);
@@ -325,6 +512,12 @@ function fermerModalImport() {
 function previsualiserImport(event) {
     const fichier = event.target.files[0];
     if (!fichier) return;
+
+    // Limite de taille (10 Mo)
+    if (fichier.size > TAILLE_MAX_IMPORT_OCTETS) {
+        alert(`Fichier trop volumineux (${(fichier.size / 1024 / 1024).toFixed(1)} Mo).\n\nLimite : 10 Mo.`);
+        return;
+    }
 
     const nomFichier = fichier.name;
 
@@ -506,6 +699,12 @@ function ouvrirImportConfigComplete() {
 function previsualiserConfigComplete(event) {
     const fichier = event.target.files[0];
     if (!fichier) return;
+
+    // Limite de taille (10 Mo)
+    if (fichier.size > TAILLE_MAX_IMPORT_OCTETS) {
+        alert(`Fichier trop volumineux (${(fichier.size / 1024 / 1024).toFixed(1)} Mo).\n\nLimite : 10 Mo.`);
+        return;
+    }
 
     const lecteur = new FileReader();
     lecteur.onload = function(e) {
@@ -695,9 +894,9 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
         // Générer les checkboxes individuelles pour chaque item
         const itemsHTML = items.map((item, index) => {
             const itemId = item.id || `${id}_${index}`;
-            const nomAffiche = item.nom || 'Sans nom';
-            // Ajouter l'auteur original si présent
-            const auteurInfo = item.auteurOriginal ? ` <span style="color: var(--gris-clair); font-size: 0.75rem;">(${item.auteurOriginal})</span>` : '';
+            const nomAffiche = echapperHtml(item.nom || 'Sans nom');
+            // Ajouter l'auteur original si présent (échappé contre XSS)
+            const auteurInfo = item.auteurOriginal ? ` <span style="color: var(--gris-clair); font-size: 0.75rem;">(${echapperHtml(item.auteurOriginal)})</span>` : '';
 
             return `
                 <label style="display: flex; align-items: center; gap: 8px; padding: 6px 10px;
@@ -770,9 +969,9 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                 <!-- Info fichier + source -->
                 <div style="background: var(--gris-tres-pale); border-radius: 8px; padding: 12px; margin-bottom: 20px;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <strong style="font-size: 0.95rem;">${nomFichier}</strong>
+                        <strong style="font-size: 0.95rem;">${echapperHtml(nomFichier)}</strong>
                         <span style="background: ${estCollègue ? 'var(--alerte-fond-attention)' : sourceInconnue ? 'var(--gris-tres-pale)' : 'var(--alerte-fond-succes, #d4edda)'}; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">
-                            ${sourceLabel}
+                            ${echapperHtml(sourceLabel)}
                         </span>
                     </div>
                     <p style="margin: 4px 0 0 0; font-size: 0.8rem; color: var(--gris-moyen);">
@@ -1923,10 +2122,10 @@ async function executerImportSelectif() {
                     .filter(p => selectedIds.includes(p.id) || selectedIds.includes(p.nom))
                     .filter(p => !idsPratiquesExistants.has(p.id)) // Éviter doublons par ID uniquement
                     .map(p => ({
-                        ...p,
+                        ...assainirObjet(p, SCHEMAS_IMPORT.pratique),
                         // IMPORTANT: Garder l'ID original pour préserver les références
                         dateImport: new Date().toISOString(),
-                        auteurOriginal: auteurSource || p.auteurOriginal || ''
+                        auteurOriginal: assainirChaine(auteurSource || p.auteurOriginal || '', 100)
                     }));
                 if (pratiquesNouvelles.length > 0) {
                     db.setSync('pratiquesConfigurables', [...pratiquesExistantes, ...pratiquesNouvelles]);
@@ -1955,11 +2154,11 @@ async function executerImportSelectif() {
                                 // Vérifier si l'ID existe déjà
                                 const idExiste = grillesExistantes.some(ge => ge.id === g.id);
                                 grillesNouvelles.push({
-                                    ...g,
+                                    ...assainirObjet(g, SCHEMAS_IMPORT.grille),
                                     // Garder l'ID original sauf si conflit d'ID
                                     ...(idExiste ? { id: 'GRILLE_' + Date.now() + '_' + Math.floor(Math.random() * 1000) } : {}),
                                     dateImport: new Date().toISOString(),
-                                    auteurOriginal: auteurSource || g.auteurOriginal || ''
+                                    auteurOriginal: assainirChaine(auteurSource || g.auteurOriginal || '', 100)
                                 });
                             }
                         });
@@ -1988,11 +2187,11 @@ async function executerImportSelectif() {
                         // Vérifier si l'ID existe déjà
                         const idExiste = echellesExistantes.some(ee => ee.id === e.id);
                         return {
-                            ...e,
+                            ...assainirObjet(e, SCHEMAS_IMPORT.echelle),
                             // Garder l'ID original sauf si conflit d'ID
                             ...(idExiste ? { id: 'ECH_' + Date.now() + '_' + Math.floor(Math.random() * 1000) } : {}),
                             dateImport: new Date().toISOString(),
-                            auteurOriginal: auteurSource || e.auteurOriginal || ''
+                            auteurOriginal: assainirChaine(auteurSource || e.auteurOriginal || '', 100)
                         };
                     });
                 if (echellesNouvelles.length > 0) {
@@ -2050,11 +2249,11 @@ async function executerImportSelectif() {
                     // Vérifier si l'ID existe déjà
                     const idExiste = prodsExistantes.some(pe => pe.id === p.id);
                     return {
-                        ...p,
+                        ...assainirObjet(p, SCHEMAS_IMPORT.production),
                         // Garder l'ID original sauf si conflit d'ID
                         ...(idExiste ? { id: 'PROD_' + Date.now() + '_' + Math.floor(Math.random() * 1000) } : {}),
                         dateImport: new Date().toISOString(),
-                        auteurOriginal: auteurSource || p.auteurOriginal || ''
+                        auteurOriginal: assainirChaine(auteurSource || p.auteurOriginal || '', 100)
                     };
                 });
             if (prodsNouvelles.length > 0) {
@@ -2077,11 +2276,18 @@ async function executerImportSelectif() {
                         // Filtrer par sélection et ajouter auteurOriginal
                         const cartouchesSelectionnees = cartouches
                             .filter(c => selectedIds.includes(c.id) || selectedIds.includes(c.nom))
-                            .map(c => ({
-                                ...c,
-                                dateImport: new Date().toISOString(),
-                                auteurOriginal: auteurSource || c.auteurOriginal || ''
-                            }));
+                            .map(c => {
+                                // Assainir les champs string des cartouches
+                                const assaini = { ...c };
+                                for (const [k, v] of Object.entries(assaini)) {
+                                    if (typeof v === 'string') assaini[k] = assainirChaine(v, 500);
+                                }
+                                return {
+                                    ...assaini,
+                                    dateImport: new Date().toISOString(),
+                                    auteurOriginal: assainirChaine(auteurSource || c.auteurOriginal || '', 100)
+                                };
+                            });
                         if (cartouchesSelectionnees.length > 0) {
                             const cartouchesFusionnees = [...cartouchesExistantes, ...cartouchesSelectionnees];
                             db.setSync(cle, cartouchesFusionnees);

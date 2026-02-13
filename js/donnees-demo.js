@@ -682,6 +682,26 @@ async function supprimerDonneesNamespaceesDemo() {
         await db.remove(prefixe + cle); // Nettoyer IndexedDB
     }
     console.log(`   ➜ ${clesNamespacees.length} clés demo_* supprimées (localStorage + IndexedDB)`);
+
+    // Supprimer la clé snapshots avec suffixe groupe-cours démo (demo_snapshots_GC_DEMO)
+    db.removeSync('demo_snapshots_GC_DEMO');
+    await db.remove('demo_snapshots_GC_DEMO');
+    console.log('   ➜ demo_snapshots_GC_DEMO supprimée');
+
+    // Nettoyage générique : supprimer TOUTE clé commençant par demo_ dans IndexedDB
+    try {
+        const toutesCles = await db.keys();
+        const clesDemoRestantes = toutesCles.filter(c => c.startsWith('demo_'));
+        for (const cleDemo of clesDemoRestantes) {
+            db.removeSync(cleDemo);
+            await db.remove(cleDemo);
+        }
+        if (clesDemoRestantes.length > 0) {
+            console.log(`   ➜ ${clesDemoRestantes.length} clé(s) demo_* résiduelles supprimées`);
+        }
+    } catch (e) {
+        console.warn('   ⚠️ Nettoyage générique demo_* impossible:', e.message);
+    }
 }
 
 /**
