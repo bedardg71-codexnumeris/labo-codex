@@ -1,7 +1,7 @@
 # Suivi des bugs testeurs
 
 > **Objectif** : Tracker les bugs rapportés par les testeurs pour éviter le travail en double.
-> **Dernière mise à jour** : 13 février 2026 (Build 0213-1351)
+> **Dernière mise à jour** : 13 février 2026 (Build 0213-1530)
 
 ---
 
@@ -18,6 +18,8 @@
 |---|---------|--------------|---------|-------|-------------|------------|
 | 64 | Elise | 13 fév | 13 fév | 0213-1351 | Sauvegardes Réglages impossibles (enseignant, horaire, groupe-cours) | afficherNotificationSucces/Erreur non exportées vers window — wrappers locaux + exports (trimestre-v2.js, evaluation.js, groupe.js) |
 | 65 | Elise | 13 fév | 13 fév | 0213-1351 | Erreur console e.target.closest dans tooltips | Guard typeof check avant .closest() (tooltips.js:151,159) |
+| 66 | Elise | 13 fév | 13 fév | 0213-1530 | 0 étudiants affichés — filtrage silencieux si champ groupe absent | Inclusion étudiants sans groupe dans obtenirDonneesSelonMode et obtenirEtudiantsCoursActif (modes.js) |
+| 67 | Elise | 13 fév | 13 fév | 0213-1530 | Rapport bug affiche "Cours actif: undefined" | Lecture infoCours au lieu de listeCours (rapport-bug.js) |
 
 ---
 
@@ -56,7 +58,7 @@
 1. Créer une entrée dans la section "Ouverts"
 2. Assigner un numéro séquentiel (prochain : **#66**)
 3. Documenter dans le sous-dossier du testeur si fichiers/screenshots fournis
-4. Prochain numéro : **#66**
+4. Prochain numéro : **#68**
 
 ### Pour marquer comme corrigé
 1. Déplacer la ligne vers "Corrigés"

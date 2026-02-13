@@ -523,6 +523,10 @@ function obtenirDonneesSelonMode(cle) {
                         if (estModeCours) {
                             return true;
                         }
+                        // Étudiant sans groupe : l'inclure (import CSV sans association)
+                        if (!item.groupe && !item.groupeReel) {
+                            return true;
+                        }
                         const groupeCours = coursActif.groupe || coursActif.groupes?.[0];
                         // ✅ CORRECTION (9 jan 2026) : Normaliser les groupes avant comparaison
                         // "1" et "00001" doivent être considérés comme égaux
@@ -909,6 +913,10 @@ function obtenirEtudiantsCoursActif() {
             // En mode cours, accepter tous les étudiants (pas de filtre groupe)
             if (estModeCours) {
                 return true; // Inclure tous les étudiants du trimestre
+            }
+            // Étudiant sans groupe : l'inclure (import CSV sans association)
+            if (!groupeEtudiant) {
+                return true;
             }
             const groupeCours = coursActif.groupe || coursActif.groupes?.[0];
             // ✅ CORRECTION (9 jan 2026) : Normaliser les groupes avant comparaison

@@ -406,12 +406,17 @@ function obtenirEtatApplication() {
         etat.nbEtudiants = 'erreur';
     }
 
-    // Nombre de cours
+    // Nombre de cours et cours actif
     try {
         const cours = db.getSync('listeCours', []);
         etat.nbCours = Array.isArray(cours) ? cours.length : 0;
-        const coursActif = Array.isArray(cours) ? cours.find(c => c.actif) : null;
-        etat.coursActif = coursActif ? `${coursActif.codeCours} (${coursActif.session}${coursActif.annee})` : 'aucun';
+        // Utiliser infoCours (source de vérité) plutôt que chercher dans listeCours
+        const infoCours = db.getSync('infoCours', null);
+        if (infoCours && infoCours.id) {
+            etat.coursActif = `${infoCours.codeCours || infoCours.sigle || infoCours.id} (${infoCours.session || '?'}${infoCours.annee || ''})`;
+        } else {
+            etat.coursActif = 'aucun';
+        }
     } catch (e) {
         etat.nbCours = 'erreur';
     }
