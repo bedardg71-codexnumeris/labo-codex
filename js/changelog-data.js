@@ -12,6 +12,16 @@
         {
             version: 'Beta 97.6',
             date: '13 f\u00e9vrier',
+            couleur: 'rose',
+            titre: 'Corrections bugs testeurs (\u00c9lise)',
+            items: [
+                '<strong>Bug #64 \u2014 Sauvegardes impossibles dans R\u00e9glages</strong> : Les fonctions de notification (<code>afficherNotificationSucces</code> / <code>afficherNotificationErreur</code>) n\u2019\u00e9taient pas accessibles depuis le module Trimestre, ce qui faisait planter silencieusement toutes les sauvegardes (enseignant, horaire, groupe-cours). Corrig\u00e9.',
+                '<strong>Bug #65 \u2014 Erreur tooltips</strong> : Le survol de certains \u00e9l\u00e9ments (n\u0153uds texte) provoquait une erreur console. Corrig\u00e9.'
+            ]
+        },
+        {
+            version: 'Beta 97.6',
+            date: '13 f\u00e9vrier',
             couleur: 'orange',
             titre: 'S\u00e9curisation des donn\u00e9es personnelles',
             items: [

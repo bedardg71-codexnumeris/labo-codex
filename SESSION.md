@@ -1,8 +1,8 @@
 # SESSION ACTIVE - BETA 97.6
 
 **Date** : 13 février 2026
-**Version** : Beta 97.6 (build 0213-1351)
-**Statut** : Sécurisation des données personnelles
+**Version** : Beta 97.6 (build 0213-1414)
+**Statut** : Corrections bugs Élise + sécurisation données
 
 ## SESSION DU 13 FÉVRIER 2026
 
@@ -15,6 +15,10 @@
     - **Isolation groupes** : `cleSnapshots()` retourne null sans cours actif. Fallbacks vers `[]` au lieu de `obtenirDonneesSelonMode('groupeEtudiants')` dans snapshots.js.
     - **Nettoyage démo** : Suppression de `demo_snapshots_GC_DEMO` + balayage générique de toutes les clés `demo_*` via `db.keys()`.
 
+27. **Corrections bugs Élise** (#64, #65) :
+    - **Bug #64** : `afficherNotificationSucces` / `afficherNotificationErreur` non accessibles depuis trimestre-v2.js → wrappers locaux + exports vers window dans evaluation.js et groupe.js
+    - **Bug #65** : `e.target.closest is not a function` dans tooltips.js → guard typeof avant appel
+
 ### Fichiers modifiés (13 février - Beta 97.6)
 - `js/import-export.js` — Échappement HTML, fonctions assainissement, schémas validation, limite taille, barrière exports
 - `js/grilles.js` — Échappement HTML dans option grille
@@ -23,7 +27,12 @@
 - `js/donnees-demo.js` — Nettoyage demo_snapshots_GC_DEMO + balayage générique demo_*
 - `js/changelog-data.js` — Entrée changelog sécurisation
 - `index.html` — VERSION_MAJEURE 97.6, BUILD_ID 0213-1351
-- `version.json` — Build 0213-1351, Beta 97.6
+- `js/trimestre-v2.js` — Wrappers locaux afficherNotificationSucces/Erreur
+- `js/evaluation.js` — Export window.afficherNotificationSucces
+- `js/groupe.js` — Export window.afficherNotificationErreur
+- `js/tooltips.js` — Guard typeof sur e.target.closest
+- `Retours des testeurs/SUIVI-BUGS.md` — Bugs #64, #65 documentés
+- `version.json` — Build 0213-1414, Beta 97.6
 
 ---
 

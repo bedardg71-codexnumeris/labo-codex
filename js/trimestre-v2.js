@@ -11,6 +11,28 @@
 'use strict';
 
 /* ===============================
+   WRAPPERS NOTIFICATIONS
+   (les fonctions originales sont dans evaluation.js / groupe.js,
+    pas encore chargées quand ce module s'exécute)
+   =============================== */
+
+function afficherNotificationSucces(message, details) {
+    if (typeof window.afficherNotificationSucces === 'function') {
+        window.afficherNotificationSucces(message, details);
+    } else {
+        console.log('[Trimestre V2] Succès :', message, details || '');
+    }
+}
+
+function afficherNotificationErreur(message, details) {
+    if (typeof window.afficherNotificationErreur === 'function') {
+        window.afficherNotificationErreur(message, details);
+    } else {
+        console.warn('[Trimestre V2] Erreur :', message, details || '');
+    }
+}
+
+/* ===============================
    INITIALISATION
    =============================== */
 
