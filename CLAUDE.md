@@ -18,7 +18,7 @@ Ce document te guidera vers :
 
 ## Etat actuel
 
-- **Version** : Beta 97.4
+- **Version** : Beta 97.5
 - **Objectif** : Alignement pedagogique (clonage, verbes, evaluations)
 - **Session en cours** : Voir `SESSION.md`
 - **Backlog** : Voir `BACKLOG.md` (taches a faire)
@@ -87,13 +87,16 @@ Gregoire a la memoire contextuelle reelle du projet.
 ## Avant chaque commit
 
 1. **Demander le numero de beta** a Gregoire. Ne jamais renumeroter automatiquement.
-2. **Mettre a jour le BUILD_ID** dans `index.html` (ligne ~15470) :
+2. **Mettre a jour le BUILD_ID** dans `index.html` (ligne ~15986) :
 ```javascript
 const BUILD_ID = 'MMJJ-HHMM';  // Format: mois-jour-heure-minute (Toronto)
 ```
 Exemple : `'0201-0840'` = 1er fevrier, 08h40
-
-Ce numero s'affiche dans l'en-tete de l'application et sert a identifier les versions.
+3. **Mettre a jour `version.json`** a la racine du projet (OBLIGATOIRE, sinon la notification de mise a jour affiche l'ancienne version) :
+```json
+{"build":"MMJJ-HHMM","beta":"XX.X"}
+```
+Les deux fichiers doivent avoir les memes valeurs. `version.json` est lu par le polling de mise a jour distante.
 
 ---
 
@@ -112,4 +115,4 @@ Points blancs dans les barres graduees de l'apercu :
 
 ---
 
-**Derniere mise a jour** : 10 février 2026
+**Derniere mise a jour** : 12 février 2026
