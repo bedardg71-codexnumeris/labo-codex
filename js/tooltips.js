@@ -148,6 +148,7 @@ function masquer() {
 // --- Delegation d'evenements ---
 
 document.addEventListener('mouseenter', function(e) {
+    if (!e.target || typeof e.target.closest !== 'function') return;
     const cible = e.target.closest('[data-tooltip]');
     if (!cible) return;
 
@@ -156,6 +157,7 @@ document.addEventListener('mouseenter', function(e) {
 }, true);
 
 document.addEventListener('mouseleave', function(e) {
+    if (!e.target || typeof e.target.closest !== 'function') return;
     const cible = e.target.closest('[data-tooltip]');
     if (!cible) return;
 

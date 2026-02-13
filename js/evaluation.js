@@ -5813,6 +5813,7 @@ window.ouvrirTravailDepuisEvaluation = ouvrirTravailDepuisEvaluation;
 window.mettreAJourBoutonVoirTravail = mettreAJourBoutonVoirTravail;
 window.chargerProductionsDansSelect = chargerProductionsDansSelect; // Pour mise à jour après duplication/modification de productions
 window.rechargerFiltreProduction = rechargerFiltreProduction; // Pour mise à jour du filtre après ajout/modification de productions
+window.afficherNotificationSucces = afficherNotificationSucces; // Utilisé par trimestre-v2.js et autres modules
 // window.gererCheckboxJetonDelai = gererCheckboxJetonDelai; // FIXME: Fonctions non définies dans ce fichier
 // window.gererCheckboxJetonReprise = gererCheckboxJetonReprise; // FIXME: Fonctions non définies dans ce fichier
 

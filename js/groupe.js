@@ -1205,6 +1205,7 @@ window.confirmImport = confirmImport;
 window.cancelImport = cancelImport;
 window.addStudent = addStudent;
 window.filtrerParGroupe = filtrerParGroupe;
+window.afficherNotificationErreur = afficherNotificationErreur; // Utilisé par trimestre-v2.js et autres modules
 window.resetFiltreGroupe = resetFiltreGroupe;
 
 

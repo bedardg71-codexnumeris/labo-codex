@@ -1,7 +1,7 @@
 # Suivi des bugs testeurs
 
 > **Objectif** : Tracker les bugs rapportés par les testeurs pour éviter le travail en double.
-> **Dernière mise à jour** : 1er février 2026 (Build 0201-0840)
+> **Dernière mise à jour** : 13 février 2026 (Build 0213-1351)
 
 ---
 
@@ -9,6 +9,15 @@
 
 | # | Testeur | Date | Description | Priorité | Fichier(s) concerné(s) |
 |---|---------|------|-------------|----------|------------------------|
+
+---
+
+## Corrigés (Beta 97.6)
+
+| # | Testeur | Date rapport | Corrigé | Build | Description | Correction |
+|---|---------|--------------|---------|-------|-------------|------------|
+| 64 | Elise | 13 fév | 13 fév | 0213-1351 | Sauvegardes Réglages impossibles (enseignant, horaire, groupe-cours) | afficherNotificationSucces/Erreur non exportées vers window — wrappers locaux + exports (trimestre-v2.js, evaluation.js, groupe.js) |
+| 65 | Elise | 13 fév | 13 fév | 0213-1351 | Erreur console e.target.closest dans tooltips | Guard typeof check avant .closest() (tooltips.js:151,159) |
 
 ---
 
@@ -45,8 +54,9 @@
 
 ### Pour ajouter un bug
 1. Créer une entrée dans la section "Ouverts"
-2. Assigner un numéro séquentiel (prochain : **#64**)
+2. Assigner un numéro séquentiel (prochain : **#66**)
 3. Documenter dans le sous-dossier du testeur si fichiers/screenshots fournis
+4. Prochain numéro : **#66**
 
 ### Pour marquer comme corrigé
 1. Déplacer la ligne vers "Corrigés"
