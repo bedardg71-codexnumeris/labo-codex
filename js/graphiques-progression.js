@@ -1508,7 +1508,14 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
             }
         });
 
-        const etudiants = Array.from(etudiantsMap.values());
+        // Filtrer pour ne garder que les étudiants du groupe actif
+        // (les anciens snapshots peuvent contenir des DAs d'autres groupes)
+        const etudiantsGroupeActif = typeof obtenirEtudiantsCoursActif === 'function'
+            ? obtenirEtudiantsCoursActif() : [];
+        const dasGroupeActif = new Set(etudiantsGroupeActif.map(e => e.da));
+        const etudiants = dasGroupeActif.size > 0
+            ? Array.from(etudiantsMap.values()).filter(e => dasGroupeActif.has(e.da))
+            : Array.from(etudiantsMap.values());
         if (etudiants.length === 0) {
             afficherMessageAttente(canvas, 'Aucun étudiant', 'Les snapshots ne contiennent pas de données étudiants.');
             return null;
@@ -2683,9 +2690,11 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
             return null;
         }
 
-        // Récupérer la liste des étudiants
+        // Récupérer la liste des étudiants du groupe actif
         let etudiants = [];
-        if (typeof obtenirDonneesSelonMode === 'function') {
+        if (typeof obtenirEtudiantsCoursActif === 'function') {
+            etudiants = obtenirEtudiantsCoursActif();
+        } else if (typeof obtenirDonneesSelonMode === 'function') {
             etudiants = obtenirDonneesSelonMode('groupeEtudiants') || [];
         } else {
             const cleEtudiants = cle('groupeEtudiants');
