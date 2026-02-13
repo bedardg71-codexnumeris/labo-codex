@@ -10,6 +10,19 @@
 
     var CHANGELOG = [
         {
+            version: 'Beta 97.6',
+            date: '13 f\u00e9vrier',
+            couleur: 'orange',
+            titre: 'S\u00e9curisation des donn\u00e9es personnelles',
+            items: [
+                '<strong>Anti-XSS</strong> : Toutes les donn\u00e9es provenant de la base ou d\u2019un import sont d\u00e9sormais \u00e9chapp\u00e9es (<code>echapperHtml()</code>) avant insertion dans l\u2019interface. Prot\u00e8ge contre les fichiers JSON malveillants.',
+                '<strong>Validation des imports</strong> : Les ressources import\u00e9es (grilles, \u00e9chelles, pratiques, productions) sont assainies par un sch\u00e9ma (whitelist de propri\u00e9t\u00e9s, troncature des cha\u00eenes, retrait des balises HTML). Limite de 10\u00a0Mo par fichier.',
+                '<strong>Exports s\u00e9curis\u00e9s</strong> : Un avertissement s\u2019affiche quand l\u2019export contient des donn\u00e9es personnelles. Le fichier porte le pr\u00e9fixe <code>CONFIDENTIEL</code>. Les noms d\u2019\u00e9tudiants sont retir\u00e9s des snapshots export\u00e9s (seul le DA est conserv\u00e9).',
+                '<strong>Isolation par groupe</strong> : Les snapshots ne se cr\u00e9ent plus sans groupe actif. Le fallback dangereux vers tous les groupes du cours a \u00e9t\u00e9 remplac\u00e9 par un tableau vide.',
+                '<strong>Nettoyage d\u00e9mo complet</strong> : Toutes les cl\u00e9s <code>demo_*</code> (y compris les snapshots avec suffixe groupe-cours) sont d\u00e9sormais supprim\u00e9es lors de la sortie du mode d\u00e9mo.'
+            ]
+        },
+        {
             version: 'Beta 97.5',
             date: '13 février',
             couleur: 'vert',

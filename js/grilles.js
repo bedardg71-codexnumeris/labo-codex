@@ -133,7 +133,7 @@ async function chargerListeGrillesTemplates() {
     select.innerHTML = '<option value="">-- Nouvelle grille --</option>';
     select.innerHTML += '<option value="new">➕ Créer une nouvelle grille</option>';
     grilles.forEach(grille => {
-        select.innerHTML += `<option value="${grille.id}">${grille.nom}</option>`;
+        select.innerHTML += `<option value="${grille.id}">${echapperHtml(grille.nom)}</option>`;
     });
 }
 

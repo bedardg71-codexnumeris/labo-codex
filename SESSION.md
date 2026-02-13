@@ -1,10 +1,31 @@
-# SESSION ACTIVE - BETA 97.5
+# SESSION ACTIVE - BETA 97.6
 
 **Date** : 13 février 2026
-**Version** : Beta 97.5 (build 0213-1101)
-**Statut** : Suivi d'étudiants au tableau de bord
+**Version** : Beta 97.6 (build 0213-1351)
+**Statut** : Sécurisation des données personnelles
 
 ## SESSION DU 13 FÉVRIER 2026
+
+### Travail accompli — Sécurisation des données personnelles (Beta 97.6)
+
+26. **Sécurisation des données personnelles** : Audit et corrections systémiques pour protéger les données d'étudiants.
+    - **Anti-XSS** : `echapperHtml()` appliqué systématiquement dans import-export.js, grilles.js, entites-ui.js
+    - **Validation imports** : Fonctions `assainirChaine()` et `assainirObjet()` avec schémas whitelist (grille, échelle, pratique, production). Limite 10 Mo par fichier JSON importé.
+    - **Exports sécurisés** : Avertissement données personnelles + préfixe CONFIDENTIEL dans le nom de fichier. Noms d'étudiants retirés des snapshots exportés (DA conservé).
+    - **Isolation groupes** : `cleSnapshots()` retourne null sans cours actif. Fallbacks vers `[]` au lieu de `obtenirDonneesSelonMode('groupeEtudiants')` dans snapshots.js.
+    - **Nettoyage démo** : Suppression de `demo_snapshots_GC_DEMO` + balayage générique de toutes les clés `demo_*` via `db.keys()`.
+
+### Fichiers modifiés (13 février - Beta 97.6)
+- `js/import-export.js` — Échappement HTML, fonctions assainissement, schémas validation, limite taille, barrière exports
+- `js/grilles.js` — Échappement HTML dans option grille
+- `js/entites-ui.js` — Échappement HTML dans options groupe-cours et enseignant
+- `js/snapshots.js` — Isolation groupe (fallback []), cleSnapshots null-safe
+- `js/donnees-demo.js` — Nettoyage demo_snapshots_GC_DEMO + balayage générique demo_*
+- `js/changelog-data.js` — Entrée changelog sécurisation
+- `index.html` — VERSION_MAJEURE 97.6, BUILD_ID 0213-1351
+- `version.json` — Build 0213-1351, Beta 97.6
+
+---
 
 ### Travail accompli — Suivi d'étudiants au tableau de bord
 

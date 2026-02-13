@@ -103,7 +103,7 @@ async function peuplerDropdownGroupeCoursActif() {
             if (nomHor) label += ` (${nomHor})`;
 
             const selected = gcActif && gc.id === gcActif.id ? ' selected' : '';
-            options += `<option value="${gc.id}"${selected}>${label}</option>`;
+            options += `<option value="${gc.id}"${selected}>${echapperHtml(label)}</option>`;
         });
     }
 
@@ -147,7 +147,7 @@ async function peuplerDropdownEnseignants() {
     let options = '<option value="">Sélectionner un enseignant·e</option>';
     enseignants.forEach(ens => {
         const libelle = EnseignantsEntite.genererLibelle(ens);
-        options += `<option value="${ens.id}">${libelle}</option>`;
+        options += `<option value="${ens.id}">${echapperHtml(libelle)}</option>`;
     });
 
     // Appliquer aux selects
