@@ -28,6 +28,118 @@
  */
 
 /* ===============================
+   🎯 SUIVI D'ÉTUDIANTS (tracking)
+   =============================== */
+
+const COULEURS_SUIVI = ['#d08080', '#d4b878', '#5ec49a', '#7ec8d4', '#d8a070'];
+const MAX_ETUDIANTS_SUIVIS = 5;
+const CLE_SUIVI = 'etudiantsSuivis';
+
+function obtenirEtudiantsSuivis() {
+    return db.getSync(CLE_SUIVI, []);
+}
+
+function sauvegarderEtudiantsSuivis(liste) {
+    db.setSync(CLE_SUIVI, liste);
+}
+
+/** Nettoie la liste en retirant les DAs absents du groupe actif */
+function nettoyerEtudiantsSuivis() {
+    const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
+        ? obtenirEtudiantsCoursActif() : [];
+    const dasActifs = new Set(etudiants.map(e => e.da));
+    const liste = obtenirEtudiantsSuivis();
+    const filtre = liste.filter(s => dasActifs.has(s.da));
+    if (filtre.length !== liste.length) {
+        sauvegarderEtudiantsSuivis(filtre);
+    }
+    return filtre;
+}
+
+function ajouterEtudiantSuivi(da) {
+    const liste = nettoyerEtudiantsSuivis();
+    if (liste.length >= MAX_ETUDIANTS_SUIVIS) return false;
+    if (liste.some(s => s.da === da)) return false;
+    // Trouver le premier index libre (0-4)
+    const indicesUtilises = new Set(liste.map(s => s.couleurIndex));
+    let couleurIndex = 0;
+    for (let i = 0; i < MAX_ETUDIANTS_SUIVIS; i++) {
+        if (!indicesUtilises.has(i)) { couleurIndex = i; break; }
+    }
+    liste.push({ da, couleurIndex });
+    sauvegarderEtudiantsSuivis(liste);
+    return true;
+}
+
+function retirerEtudiantSuivi(da) {
+    const liste = obtenirEtudiantsSuivis().filter(s => s.da !== da);
+    sauvegarderEtudiantsSuivis(liste);
+}
+
+function appliquerCouleursEtudiantsSuivis() {
+    // Retirer toutes les classes tracked existantes
+    for (let i = 0; i < MAX_ETUDIANTS_SUIVIS; i++) {
+        document.querySelectorAll('.barre-etudiant.tracked-' + i).forEach(el => {
+            el.classList.remove('tracked-' + i);
+        });
+    }
+    // Appliquer les couleurs pour chaque étudiant suivi
+    const suivis = obtenirEtudiantsSuivis();
+    suivis.forEach(s => {
+        document.querySelectorAll('.barre-etudiant[data-da="' + s.da + '"]').forEach(el => {
+            el.classList.add('tracked-' + s.couleurIndex);
+        });
+    });
+}
+
+function genererPanneauSuiviEtudiants() {
+    const conteneur = document.getElementById('liste-etudiants-suivi');
+    const compteur = document.getElementById('compteur-suivi');
+    if (!conteneur) return;
+
+    const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
+        ? obtenirEtudiantsCoursActif()
+        : [];
+    const etudiantsActifs = etudiants.filter(e =>
+        e.statut !== 'décrochage' && e.statut !== 'abandon'
+    );
+    const suivis = nettoyerEtudiantsSuivis();
+    const modeActif = db.getSync('modeApplication', 'normal');
+
+    if (compteur) compteur.textContent = '(' + suivis.length + '/' + MAX_ETUDIANTS_SUIVIS + ')';
+
+    // Trier : suivis en premier, puis alphabétique
+    const trierEtudiants = [...etudiantsActifs].sort((a, b) => {
+        const aSuivi = suivis.some(s => s.da === a.da);
+        const bSuivi = suivis.some(s => s.da === b.da);
+        if (aSuivi && !bSuivi) return -1;
+        if (!aSuivi && bSuivi) return 1;
+        return (a.nom || '').localeCompare(b.nom || '');
+    });
+
+    conteneur.innerHTML = trierEtudiants.map(e => {
+        const suivi = suivis.find(s => s.da === e.da);
+        const estSuivi = !!suivi;
+        let nomAffiche;
+        if (modeActif === 'anonymisation') {
+            if (e.prenom && e.prenom.startsWith('Élève')) {
+                nomAffiche = e.prenom;
+            } else {
+                nomAffiche = (typeof anonymiserNom === 'function' && anonymiserNom(e.da)) || 'Étudiant Anonyme';
+            }
+        } else {
+            nomAffiche = e.nom + ', ' + e.prenom;
+        }
+        const classeActif = estSuivi ? ' actif-' + suivi.couleurIndex : '';
+        const pastille = estSuivi
+            ? '<span class="pastille-couleur-suivi" style="background: ' + COULEURS_SUIVI[suivi.couleurIndex] + ';"></span>'
+            : '';
+        return '<div class="etudiant-suivi-item' + classeActif + '" data-da="' + e.da + '">'
+            + pastille + '<span>' + (typeof echapperHtml === 'function' ? echapperHtml(nomAffiche) : nomAffiche) + '</span></div>';
+    }).join('');
+}
+
+/* ===============================
    🔧 FONCTIONS HELPERS
    =============================== */
 
@@ -552,6 +664,43 @@ function initialiserModuleTableauBordApercu() {
         chargerTableauBordApercu();
     }
 
+    // Événements du panneau de suivi d'étudiants (délégation pour survivre aux rebuilds innerHTML)
+    document.addEventListener('click', function(ev) {
+        // Toggle du panneau
+        if (ev.target.closest('#btn-toggle-panneau-suivi')) {
+            const panneau = document.getElementById('panneau-suivi-etudiants');
+            if (panneau) {
+                panneau.classList.toggle('ouvert');
+                if (panneau.classList.contains('ouvert')) {
+                    genererPanneauSuiviEtudiants();
+                }
+            }
+            return;
+        }
+        // Clic sur un étudiant dans le panneau
+        const item = ev.target.closest('.etudiant-suivi-item');
+        if (item) {
+            const da = item.dataset.da;
+            if (!da) return;
+            const suivis = obtenirEtudiantsSuivis();
+            if (suivis.some(s => s.da === da)) {
+                retirerEtudiantSuivi(da);
+            } else {
+                if (!ajouterEtudiantSuivi(da)) return;
+            }
+            genererPanneauSuiviEtudiants();
+            appliquerCouleursEtudiantsSuivis();
+            return;
+        }
+        // Réinitialiser
+        if (ev.target.closest('#btn-reinitialiser-suivi')) {
+            sauvegarderEtudiantsSuivis([]);
+            genererPanneauSuiviEtudiants();
+            appliquerCouleursEtudiantsSuivis();
+            return;
+        }
+    });
+
     // 🆕 BETA 96.1: Gestionnaire de clic sur les points (délégation d'événement)
     document.addEventListener('click', function(e) {
         const point = e.target.closest('.barre-etudiant');
@@ -587,12 +736,23 @@ function initialiserModuleTableauBordApercu() {
                 info.style.transform = 'translateX(-50%)';
                 document.body.appendChild(info);
             }
+
+            // Surligner la badge correspondante dans le panneau
+            document.querySelectorAll('.etudiant-suivi-item.surligne').forEach(el => el.classList.remove('surligne'));
+            if (point.classList.contains('selected') && point.dataset.da) {
+                const badge = document.querySelector('.etudiant-suivi-item[data-da="' + point.dataset.da + '"]');
+                if (badge) {
+                    badge.classList.add('surligne');
+                    badge.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }
         } else {
             // Clic ailleurs : désélectionner tout
             const selection = document.querySelector('.barre-etudiant.selected');
             if (selection) {
                 selection.classList.remove('selected');
             }
+            document.querySelectorAll('.etudiant-suivi-item.surligne').forEach(el => el.classList.remove('surligne'));
         }
     });
 }
@@ -716,6 +876,9 @@ function chargerTableauBordApercu() {
 
         // 🆕 BETA 91: Initialiser les événements toggle après génération du HTML
         initialiserEvenementsToggle();
+
+        // Appliquer les couleurs des étudiants suivis après génération du HTML
+        appliquerCouleursEtudiantsSuivis();
 
     } catch (error) {
         console.error('❌ Erreur chargement tableau de bord:', error);
@@ -1271,16 +1434,24 @@ function afficherMetriquesGlobales(etudiants) {
 
     if (!carteIndicateurs) return;
 
-    // Conserver le header et la note toggle AVANT de vider
+    // Conserver le header, le panneau suivi et la note toggle AVANT de vider
     const noteToggle = carteIndicateurs.querySelector('.carte-info-toggle');
     const header = carteIndicateurs.querySelector('h3');
+    const panneauSuivi = carteIndicateurs.querySelector('#panneau-suivi-etudiants');
 
     // Sauvegarder le HTML des éléments à préserver
     const headerHTML = header ? header.outerHTML : '';
+    const panneauSuiviHTML = panneauSuivi ? panneauSuivi.outerHTML : '';
     const noteToggleHTML = noteToggle ? noteToggle.outerHTML : '';
 
-    // Vider et reconstruire avec header et note
-    carteIndicateurs.innerHTML = headerHTML + noteToggleHTML;
+    // Vider et reconstruire avec header, panneau suivi et note
+    const panneauEtaitOuvert = panneauSuivi && panneauSuivi.classList.contains('ouvert');
+    carteIndicateurs.innerHTML = headerHTML + panneauSuiviHTML + noteToggleHTML;
+
+    // Regénérer le contenu du panneau si ouvert (pour refléter le mode anonymisation courant)
+    if (panneauEtaitOuvert) {
+        genererPanneauSuiviEtudiants();
+    }
 
     // Générer la légende unique en haut
     const legendeUnique = `
@@ -2912,6 +3083,7 @@ function setBarre(id, pourcentage) {
 // Export pour permettre le rafraîchissement depuis d'autres modules
 window.chargerTableauBordApercu = chargerTableauBordApercu;
 window.initialiserModuleTableauBordApercu = initialiserModuleTableauBordApercu;
+window.appliquerCouleursEtudiantsSuivis = appliquerCouleursEtudiantsSuivis;
 
 /* ===============================
    📌 NOTES D'UTILISATION

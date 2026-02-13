@@ -70,10 +70,29 @@
  * Initialise le module snapshots au chargement
  */
 /**
- * Helper pour obtenir la clé snapshots avec namespacing par trimestre
+ * Helper pour obtenir l'identifiant unique du groupe-cours actif
+ * Priorité : _groupeCoursId (toujours unique par groupe-cours)
+ * Fallback : id (peut être coursId partagé entre groupes selon le code path)
+ */
+function obtenirCoursIdPourSnapshots() {
+    const infoCours = db.getSync('infoCours', null);
+    if (!infoCours) return null;
+    // _groupeCoursId est fiable : unique par groupe-cours dans les deux chemins
+    // (changerGroupeCoursActifV2 et synchroniserInfoCours)
+    // infoCours.id peut être le coursId (partagé entre groupes) dans changerGroupeCoursActifV2
+    return infoCours._groupeCoursId || infoCours.id || null;
+}
+
+/**
+ * Helper pour obtenir la clé snapshots avec namespacing par trimestre ET par groupe-cours
+ * Clé format : h2026_snapshots_GC123456789
  */
 function cleSnapshots() {
-    return cle('snapshots');
+    const coursId = obtenirCoursIdPourSnapshots();
+    if (!coursId) {
+        return cle('snapshots'); // Fallback si aucun cours actif
+    }
+    return cle('snapshots') + '_' + coursId;
 }
 
 function initialiserModuleSnapshots() {
@@ -359,9 +378,11 @@ async function verifierEtCapturerSnapshotHebdomadaire() {
  * ✨ REFONTE (Beta 93) : Capture un snapshot pour UNE séance spécifique
  * @param {string} dateSeance - Date de la séance au format 'YYYY-MM-DD'
  * @param {Array} evaluationsCacheParam - Cache optionnel des évaluations (pour éviter QuotaExceededError)
+ * @param {Object} options - Options supplémentaires
+ * @param {number} options.numeroSemaine - Si fourni, court-circuite la validation calendrier (utilisé par reconstruction)
  * @returns {Object|null} - Snapshot créé ou null si erreur
  */
-async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null) {
+async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null, options = {}) {
     try {
         // ✨ NOUVEAU (8 déc 2025) : Empêcher la capture de snapshots pour dates futures
         const aujourdhui = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
@@ -370,21 +391,35 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null) 
             return null;
         }
 
-        // Vérifier que la date est valide
-        const calendrier = obtenirCalendrierComplet();
-        const infoJour = calendrier[dateSeance];
+        let numeroSemaine;
 
-        if (!infoJour || (infoJour.statut !== 'cours' && infoJour.statut !== 'reprise')) {
-            console.warn(`⚠️ Date ${dateSeance} n'est pas un jour de cours`);
-            return null;
+        if (options.numeroSemaine) {
+            // Mode reconstruction : le numéro de semaine vient de obtenirSeancesCompletes() (group-specific)
+            // Pas besoin de valider contre calendrierComplet qui est partagé et peut ne pas
+            // refléter les jours de cours du groupe actif
+            numeroSemaine = options.numeroSemaine;
+        } else {
+            // Mode normal : valider contre le calendrier
+            const calendrier = obtenirCalendrierComplet();
+            const infoJour = calendrier[dateSeance];
+
+            if (!infoJour || (infoJour.statut !== 'cours' && infoJour.statut !== 'reprise')) {
+                console.warn(`⚠️ Date ${dateSeance} n'est pas un jour de cours`);
+                return null;
+            }
+
+            numeroSemaine = infoJour.numeroSemaine;
         }
-
-        const numeroSemaine = infoJour.numeroSemaine;
 
         console.log(`📸 Capture snapshot pour séance du ${dateSeance} (semaine ${numeroSemaine})`);
 
         // Calculer indices pour chaque étudiant
-        const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+        // ✅ CORRECTIF (13 fév 2026): Utiliser obtenirEtudiantsCoursActif() qui filtre par
+        // coursId ET par groupe (obtenirDonneesSelonMode ne filtre que par coursId, ce qui
+        // retourne les étudiants de TOUS les groupes du même cours)
+        const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
+            ? obtenirEtudiantsCoursActif()
+            : obtenirDonneesSelonMode('groupeEtudiants');
         const snapshotsEtudiants = [];
 
         // ✅ Compteurs séparés pour gérer les valeurs null
@@ -730,6 +765,20 @@ async function reconstruireSnapshotsHistoriques() {
     console.log('🔄 Début reconstruction snapshots historiques (PAR SÉANCE)...');
 
     try {
+        // ✅ CORRECTIF (13 fév 2026): Régénérer calendrier + séances pour le groupe actif
+        // Le calendrierComplet est partagé par trimestre et construit à partir de horaireHebdo.
+        // Si horaireHebdo reflète un autre groupe, les jours de cours sont faux.
+        // On synchronise horaireHebdo → régénère le calendrier → régénère les séancesCompletes.
+        console.log('🔄 Synchronisation calendrier avec le groupe actif...');
+        if (typeof obtenirSeancesHoraire === 'function' && typeof genererCalendrierComplet === 'function') {
+            const seancesHoraire = obtenirSeancesHoraire();
+            if (seancesHoraire && seancesHoraire.length > 0) {
+                db.setSync(cle('horaireHebdo'), seancesHoraire);
+                genererCalendrierComplet();
+                console.log('✅ Calendrier régénéré pour le groupe actif');
+            }
+        }
+
         // ⚡ Charger les évaluations depuis IndexedDB (évite QuotaExceededError)
         console.log('⚡ Chargement évaluations depuis IndexedDB...');
         // ✅ CORRECTION (7 déc 2025): Utiliser 'evaluationsSauvegardees' (clé correcte)
@@ -737,10 +786,15 @@ async function reconstruireSnapshotsHistoriques() {
         const evaluationsCache = await db.get(cle('evaluationsSauvegardees'));
         console.log(`✓ ${evaluationsCache ? evaluationsCache.length : 0} évaluations chargées`);
 
-        // ✨ CORRECTION (7 déc 2025): Utiliser seancesCompletes au lieu du calendrier brut
-        // seancesCompletes contient SEULEMENT les dates où le groupe a effectivement cours
-        // (ex: 2 séances/semaine × 15 semaines = ~30 snapshots au lieu de ~75)
-        const seancesCompletes = obtenirSeancesCompletes();
+        // ✅ CORRECTIF (13 fév 2026): Forcer la régénération des séancesCompletes
+        // depuis le calendrier fraîchement régénéré (évite données périmées d'un autre trimestre)
+        let seancesCompletes;
+        if (typeof genererSeancesCompletes === 'function') {
+            console.log('🔄 Régénération séancesCompletes pour le groupe actif...');
+            seancesCompletes = genererSeancesCompletes();
+        } else {
+            seancesCompletes = obtenirSeancesCompletes();
+        }
         if (!seancesCompletes || Object.keys(seancesCompletes).length === 0) {
             console.error('❌ Aucune séance configurée dans l\'horaire');
             return {
@@ -765,7 +819,10 @@ async function reconstruireSnapshotsHistoriques() {
             .sort();
 
         // ✨ Charger les étudiants pour estimation précise (universel, pas codé en dur)
-        const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+        // ✅ CORRECTIF (13 fév 2026): Utiliser obtenirEtudiantsCoursActif() pour filtrer par groupe
+        const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
+            ? obtenirEtudiantsCoursActif()
+            : obtenirDonneesSelonMode('groupeEtudiants');
         const nbEtudiants = etudiants.length;
 
         console.log(`✓ Séances du groupe détectées: ${datesCours.length}`);
@@ -799,8 +856,14 @@ async function reconstruireSnapshotsHistoriques() {
             const progression = Math.round(((index + 1) / nbSeancesTotal) * 100);
             console.log(`📸 [${index + 1}/${nbSeancesTotal}] Séance ${dateSeance} (${progression}%)...`);
 
+            // Obtenir le numéro de semaine depuis seancesCompletes (group-specific)
+            // Ceci court-circuite la validation calendrierComplet qui est partagé par trimestre
+            // et peut ne pas refléter les jours de cours du groupe actif
+            const seancesDuJour = seancesCompletes[dateSeance];
+            const numSemaine = seancesDuJour && seancesDuJour[0] ? seancesDuJour[0].numeroSemaine : null;
+
             // Capturer snapshot pour cette séance
-            const snapshot = await capturerSnapshotSeance(dateSeance, evaluationsCache);
+            const snapshot = await capturerSnapshotSeance(dateSeance, evaluationsCache, { numeroSemaine: numSemaine });
             if (snapshot) {
                 nbSnapshots++;
                 console.log(`  ✅ Séance ${dateSeance} capturée (${snapshot.etudiants.length} étudiants)`);
@@ -915,6 +978,8 @@ function obtenirSnapshotsInterventions() {
 
 /**
  * Affiche les statistiques des captures dans l'interface Réglages
+ * ✅ CORRECTIF (13 fév 2026): Lecture async depuis IndexedDB car les snapshots
+ * peuvent être trop volumineux pour le cache localStorage (db.getSync)
  */
 function afficherStatutSnapshots() {
     const snapshots = db.getSync(cleSnapshots(), { hebdomadaires: [], interventions: [] });
@@ -929,7 +994,7 @@ function afficherStatutSnapshots() {
         derniereCapture = dernier.id || '—';
     }
 
-    // Mettre à jour les cartes métriques
+    // Mettre à jour les cartes métriques (V1 + V2)
     const elemHebdo = document.getElementById('stat-snapshots-hebdo');
     const elemInterventions = document.getElementById('stat-snapshots-interventions');
     const elemDerniere = document.getElementById('stat-derniere-capture');
@@ -938,7 +1003,28 @@ function afficherStatutSnapshots() {
     if (elemInterventions) elemInterventions.textContent = nbInterventions;
     if (elemDerniere) elemDerniere.textContent = derniereCapture;
 
-    // Message de statut
+    // ✅ CORRECTIF (13 fév 2026): Mettre à jour aussi les éléments V2
+    const elemHebdoV2 = document.getElementById('v2-stat-snapshots-hebdo');
+    const elemInterventionsV2 = document.getElementById('v2-stat-snapshots-interventions');
+    const elemDerniereV2 = document.getElementById('v2-stat-derniere-capture');
+
+    if (elemHebdoV2) elemHebdoV2.textContent = nbHebdo;
+    if (elemInterventionsV2) elemInterventionsV2.textContent = nbInterventions;
+    if (elemDerniereV2) {
+        if (nbHebdo > 0) {
+            const dernier = snapshots.hebdomadaires[snapshots.hebdomadaires.length - 1];
+            if (dernier.dateSeance) {
+                const options = { day: 'numeric', month: 'short' };
+                elemDerniereV2.textContent = new Date(dernier.dateSeance).toLocaleDateString('fr-CA', options);
+            } else {
+                elemDerniereV2.textContent = derniereCapture;
+            }
+        } else {
+            elemDerniereV2.textContent = '—';
+        }
+    }
+
+    // Message de statut (V1 uniquement)
     const elemStatus = document.getElementById('info-snapshots-status');
     if (elemStatus) {
         if (nbHebdo === 0 && nbInterventions === 0) {
