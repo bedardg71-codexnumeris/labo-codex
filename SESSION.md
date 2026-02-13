@@ -1,7 +1,7 @@
 # SESSION ACTIVE - BETA 97.6
 
 **Date** : 13 février 2026
-**Version** : Beta 97.6 (build 0213-1414)
+**Version** : Beta 97.6 (build 0213-1530)
 **Statut** : Corrections bugs Élise + sécurisation données
 
 ## SESSION DU 13 FÉVRIER 2026
@@ -15,9 +15,11 @@
     - **Isolation groupes** : `cleSnapshots()` retourne null sans cours actif. Fallbacks vers `[]` au lieu de `obtenirDonneesSelonMode('groupeEtudiants')` dans snapshots.js.
     - **Nettoyage démo** : Suppression de `demo_snapshots_GC_DEMO` + balayage générique de toutes les clés `demo_*` via `db.keys()`.
 
-27. **Corrections bugs Élise** (#64, #65) :
+27. **Corrections bugs Élise** (#64, #65, #66, #67) :
     - **Bug #64** : `afficherNotificationSucces` / `afficherNotificationErreur` non accessibles depuis trimestre-v2.js → wrappers locaux + exports vers window dans evaluation.js et groupe.js
     - **Bug #65** : `e.target.closest is not a function` dans tooltips.js → guard typeof avant appel
+    - **Bug #66** : 0 étudiants affichés malgré 24 dans la DB — étudiants importés sans champ `groupe` filtrés silencieusement par `normaliserGroupe(undefined)="00000" ≠ "00001"`. Correction : inclusion des étudiants sans groupe dans `obtenirDonneesSelonMode()` et `obtenirEtudiantsCoursActif()` (modes.js)
+    - **Bug #67** : Rapport de bug affichait "Cours actif: undefined (A2025)" — `rapport-bug.js` cherchait dans `listeCours` au lieu de lire `infoCours` (source de vérité)
 
 ### Fichiers modifiés (13 février - Beta 97.6)
 - `js/import-export.js` — Échappement HTML, fonctions assainissement, schémas validation, limite taille, barrière exports
@@ -31,8 +33,10 @@
 - `js/evaluation.js` — Export window.afficherNotificationSucces
 - `js/groupe.js` — Export window.afficherNotificationErreur
 - `js/tooltips.js` — Guard typeof sur e.target.closest
-- `Retours des testeurs/SUIVI-BUGS.md` — Bugs #64, #65 documentés
-- `version.json` — Build 0213-1414, Beta 97.6
+- `js/modes.js` — Inclusion étudiants sans champ groupe (bug #66)
+- `js/rapport-bug.js` — Lecture infoCours au lieu de listeCours (bug #67)
+- `Retours des testeurs/SUIVI-BUGS.md` — Bugs #64, #65, #66, #67 documentés
+- `version.json` — Build 0213-1530, Beta 97.6
 
 ---
 

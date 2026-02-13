@@ -16,7 +16,9 @@
             titre: 'Corrections bugs testeurs (\u00c9lise)',
             items: [
                 '<strong>Bug #64 \u2014 Sauvegardes impossibles dans R\u00e9glages</strong> : Les fonctions de notification (<code>afficherNotificationSucces</code> / <code>afficherNotificationErreur</code>) n\u2019\u00e9taient pas accessibles depuis le module Trimestre, ce qui faisait planter silencieusement toutes les sauvegardes (enseignant, horaire, groupe-cours). Corrig\u00e9.',
-                '<strong>Bug #65 \u2014 Erreur tooltips</strong> : Le survol de certains \u00e9l\u00e9ments (n\u0153uds texte) provoquait une erreur console. Corrig\u00e9.'
+                '<strong>Bug #65 \u2014 Erreur tooltips</strong> : Le survol de certains \u00e9l\u00e9ments (n\u0153uds texte) provoquait une erreur console. Corrig\u00e9.',
+                '<strong>Bug #66 \u2014 0 \u00e9tudiants affich\u00e9s</strong> : Les \u00e9tudiants import\u00e9s sans champ <code>groupe</code> \u00e9taient filtr\u00e9s silencieusement. Ils sont d\u00e9sormais inclus automatiquement.',
+                '<strong>Bug #67 \u2014 Cours actif incorrect dans rapport</strong> : Le rapport de bug affichait \u00ab\u00a0undefined\u00a0\u00bb au lieu du cours actif. Corrig\u00e9.'
             ]
         },
         {
