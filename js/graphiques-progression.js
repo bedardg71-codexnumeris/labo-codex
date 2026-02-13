@@ -1510,12 +1510,16 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
 
         // Filtrer pour ne garder que les étudiants du groupe actif
         // (les anciens snapshots peuvent contenir des DAs d'autres groupes)
+        // ✅ CORRECTIF (13 fév 2026): Ne JAMAIS afficher les snapshots orphelins
+        // quand aucun groupe n'est actif (fuite de données personnelles)
         const etudiantsGroupeActif = typeof obtenirEtudiantsCoursActif === 'function'
             ? obtenirEtudiantsCoursActif() : [];
         const dasGroupeActif = new Set(etudiantsGroupeActif.map(e => e.da));
-        const etudiants = dasGroupeActif.size > 0
-            ? Array.from(etudiantsMap.values()).filter(e => dasGroupeActif.has(e.da))
-            : Array.from(etudiantsMap.values());
+        if (dasGroupeActif.size === 0) {
+            afficherMessageAttente(canvas, 'Aucun groupe actif', 'Sélectionnez un groupe pour voir les données.');
+            return null;
+        }
+        const etudiants = Array.from(etudiantsMap.values()).filter(e => dasGroupeActif.has(e.da));
         if (etudiants.length === 0) {
             afficherMessageAttente(canvas, 'Aucun étudiant', 'Les snapshots ne contiennent pas de données étudiants.');
             return null;
