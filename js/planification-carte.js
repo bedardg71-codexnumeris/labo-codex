@@ -47,10 +47,11 @@ const TYPES = {
     // Objectifs
     'competence':     { label: 'Compétence',       couleur: 'var(--planif-couleur-competence)' },
     'idee-maitresse': { label: 'Idée maîtresse',   couleur: 'var(--planif-couleur-idee-maitresse)' },
-    // Connaissances
-    'connaissance':   { label: 'Information',       couleur: 'var(--planif-couleur-connaissance)' },
-    'strategie':      { label: 'Stratégie',         couleur: 'var(--planif-couleur-strategie)' },
-    'condition':      { label: 'Condition',          couleur: 'var(--planif-couleur-condition)' },
+    // Types de connaissances (Anderson & Krathwohl, 2001)
+    'factuelle':      { label: 'Factuelle',          couleur: 'var(--planif-couleur-factuelle)' },
+    'conceptuelle':   { label: 'Conceptuelle',       couleur: 'var(--planif-couleur-conceptuelle)' },
+    'procedurale':    { label: 'Procédurale',        couleur: 'var(--planif-couleur-procedurale)' },
+    'metacognitive':  { label: 'Métacognitive',      couleur: 'var(--planif-couleur-metacognitive)' },
     // Conteneurs
     'sequence':       { label: 'Séquence',          couleur: 'var(--planif-couleur-sequence)',  conteneur: true },
     'lecon':          { label: 'Leçon',             couleur: 'var(--planif-couleur-lecon)',     conteneur: true },
@@ -85,34 +86,42 @@ var VERBES_AUTO = {
     'idee-maitresse>sequence':     { verbe: 'se_concretise_dans' },
     'sequence>idee-maitresse':     { verbe: 'se_concretise_dans', inverser: true },
     // Connaissance → Activité (s'acquiert par)
-    'connaissance>activite':       { verbe: 's_acquiert_par' },
-    'connaissance>soutien':        { verbe: 's_acquiert_par' },
-    'connaissance>revision':       { verbe: 's_acquiert_par' },
-    'strategie>activite':          { verbe: 's_acquiert_par' },
-    'strategie>soutien':           { verbe: 's_acquiert_par' },
-    'strategie>revision':          { verbe: 's_acquiert_par' },
-    'condition>activite':          { verbe: 's_acquiert_par' },
-    'condition>soutien':           { verbe: 's_acquiert_par' },
-    'condition>revision':          { verbe: 's_acquiert_par' },
-    'activite>connaissance':       { verbe: 's_acquiert_par', inverser: true },
-    'activite>strategie':          { verbe: 's_acquiert_par', inverser: true },
-    'activite>condition':          { verbe: 's_acquiert_par', inverser: true },
-    'soutien>connaissance':        { verbe: 's_acquiert_par', inverser: true },
-    'soutien>strategie':           { verbe: 's_acquiert_par', inverser: true },
-    'soutien>condition':           { verbe: 's_acquiert_par', inverser: true },
-    'revision>connaissance':       { verbe: 's_acquiert_par', inverser: true },
-    'revision>strategie':          { verbe: 's_acquiert_par', inverser: true },
-    'revision>condition':          { verbe: 's_acquiert_par', inverser: true },
+    'factuelle>activite':          { verbe: 's_acquiert_par' },
+    'factuelle>soutien':           { verbe: 's_acquiert_par' },
+    'factuelle>revision':          { verbe: 's_acquiert_par' },
+    'conceptuelle>activite':       { verbe: 's_acquiert_par' },
+    'conceptuelle>soutien':        { verbe: 's_acquiert_par' },
+    'conceptuelle>revision':       { verbe: 's_acquiert_par' },
+    'procedurale>activite':        { verbe: 's_acquiert_par' },
+    'procedurale>soutien':         { verbe: 's_acquiert_par' },
+    'procedurale>revision':        { verbe: 's_acquiert_par' },
+    'metacognitive>activite':      { verbe: 's_acquiert_par' },
+    'metacognitive>soutien':       { verbe: 's_acquiert_par' },
+    'metacognitive>revision':      { verbe: 's_acquiert_par' },
+    'activite>factuelle':          { verbe: 's_acquiert_par', inverser: true },
+    'activite>conceptuelle':       { verbe: 's_acquiert_par', inverser: true },
+    'activite>procedurale':        { verbe: 's_acquiert_par', inverser: true },
+    'activite>metacognitive':      { verbe: 's_acquiert_par', inverser: true },
+    'soutien>factuelle':           { verbe: 's_acquiert_par', inverser: true },
+    'soutien>conceptuelle':        { verbe: 's_acquiert_par', inverser: true },
+    'soutien>procedurale':         { verbe: 's_acquiert_par', inverser: true },
+    'soutien>metacognitive':       { verbe: 's_acquiert_par', inverser: true },
+    'revision>factuelle':          { verbe: 's_acquiert_par', inverser: true },
+    'revision>conceptuelle':       { verbe: 's_acquiert_par', inverser: true },
+    'revision>procedurale':        { verbe: 's_acquiert_par', inverser: true },
+    'revision>metacognitive':      { verbe: 's_acquiert_par', inverser: true },
     // Idée maîtresse → Évaluation (se vérifie par)
     'idee-maitresse>evaluation':   { verbe: 'se_verifie_par' },
     'evaluation>idee-maitresse':   { verbe: 'se_verifie_par', inverser: true },
     // Connaissance → Évaluation (se vérifie par)
-    'connaissance>evaluation':     { verbe: 'se_verifie_par' },
-    'strategie>evaluation':        { verbe: 'se_verifie_par' },
-    'condition>evaluation':        { verbe: 'se_verifie_par' },
-    'evaluation>connaissance':     { verbe: 'se_verifie_par', inverser: true },
-    'evaluation>strategie':        { verbe: 'se_verifie_par', inverser: true },
-    'evaluation>condition':        { verbe: 'se_verifie_par', inverser: true },
+    'factuelle>evaluation':        { verbe: 'se_verifie_par' },
+    'conceptuelle>evaluation':     { verbe: 'se_verifie_par' },
+    'procedurale>evaluation':      { verbe: 'se_verifie_par' },
+    'metacognitive>evaluation':    { verbe: 'se_verifie_par' },
+    'evaluation>factuelle':        { verbe: 'se_verifie_par', inverser: true },
+    'evaluation>conceptuelle':     { verbe: 'se_verifie_par', inverser: true },
+    'evaluation>procedurale':      { verbe: 'se_verifie_par', inverser: true },
+    'evaluation>metacognitive':    { verbe: 'se_verifie_par', inverser: true },
     // Activité → Évaluation (se vérifie par)
     'activite>evaluation':         { verbe: 'se_verifie_par' },
     'soutien>evaluation':          { verbe: 'se_verifie_par' },
@@ -123,7 +132,7 @@ var VERBES_AUTO = {
 };
 
 // Groupes de types pour normalisation (verbes horizontaux)
-var TYPES_CONNAISSANCE = ['connaissance', 'strategie', 'condition'];
+var TYPES_CONNAISSANCE = ['factuelle', 'conceptuelle', 'procedurale', 'metacognitive'];
 var TYPES_ACTIVITE = ['activite', 'soutien', 'revision'];
 
 function normaliserType(type) {
@@ -134,10 +143,32 @@ function normaliserType(type) {
 
 // Verbes horizontaux : plusieurs choix possibles par couple
 var VERBES_HORIZONTAUX = {
-    'connaissance>connaissance':     ['s_appuie_sur', 'complete', 'conduit_a', 'est_mobilise_par'],
+    'connaissance>connaissance':     ['s_appuie_sur', 'complete', 'conduit_a', 'est_mobilise_par'],  // normaliserType → 'connaissance'
     'activite>activite':             ['complete', 'conduit_a'],
     'idee-maitresse>idee-maitresse': ['s_appuie_sur', 'complete']
 };
+
+// === NIVEAUX COGNITIFS (Anderson & Krathwohl, 2001) ===
+var NIVEAUX_COGNITIFS = [
+    { id: 'memoriser',   label: 'Mémoriser',   ordre: 1, description: 'Retrouver des connaissances en mémoire' },
+    { id: 'comprendre',  label: 'Comprendre',  ordre: 2, description: 'Construire du sens à partir de l\'information' },
+    { id: 'appliquer',   label: 'Appliquer',   ordre: 3, description: 'Utiliser une procédure dans une situation donnée' },
+    { id: 'analyser',    label: 'Analyser',    ordre: 4, description: 'Décomposer en parties et comprendre les relations' },
+    { id: 'evaluer',     label: 'Évaluer',     ordre: 5, description: 'Porter un jugement selon des critères' },
+    { id: 'creer',       label: 'Créer',       ordre: 6, description: 'Assembler des éléments pour produire quelque chose de nouveau' }
+];
+
+var BANQUE_VERBES = {
+    memoriser:  ['reconnaître', 'identifier', 'rappeler', 'nommer', 'lister', 'définir', 'répéter', 'énoncer', 'repérer', 'associer'],
+    comprendre: ['interpréter', 'illustrer', 'classifier', 'résumer', 'inférer', 'comparer', 'expliquer', 'paraphraser', 'décrire', 'distinguer'],
+    appliquer:  ['exécuter', 'utiliser', 'résoudre', 'démontrer', 'calculer', 'appliquer', 'mettre en œuvre', 'réaliser', 'employer', 'opérer'],
+    analyser:   ['différencier', 'organiser', 'attribuer', 'décomposer', 'structurer', 'examiner', 'déconstruire', 'catégoriser', 'schématiser', 'questionner'],
+    evaluer:    ['vérifier', 'critiquer', 'juger', 'justifier', 'évaluer', 'argumenter', 'défendre', 'valider', 'recommander', 'prioriser'],
+    creer:      ['générer', 'planifier', 'produire', 'concevoir', 'élaborer', 'construire', 'composer', 'formuler', 'inventer', 'synthétiser']
+};
+
+// Types de nœuds qui acceptent le sélecteur de niveau cognitif
+var TYPES_AVEC_NIVEAU_COGNITIF = ['competence', 'idee-maitresse', 'activite', 'soutien', 'revision', 'evaluation'];
 
 function resoudreVerbe(sourceId, cibleId) {
     var src = etat.noeuds.get(sourceId);
@@ -195,7 +226,7 @@ function trouverConfigLien(typeId) {
     return null;
 }
 
-var TYPES_PREALABLE = { 'connaissance': true, 'strategie': true, 'condition': true };
+var TYPES_PREALABLE = { 'factuelle': true, 'conceptuelle': true, 'procedurale': true, 'metacognitive': true };
 
 function obtenirLabelNoeud(donnees) {
     var config = TYPES[donnees.type];
@@ -224,6 +255,21 @@ function mettreAJourApparenceNoeud(donnees) {
     if (typeEl) {
         typeEl.textContent = obtenirLabelNoeud(donnees);
         typeEl.style.color = couleur;
+    }
+    // Badge niveau cognitif
+    var badgeCognitif = el.querySelector('.planif-badge-cognitif');
+    if (donnees.metadata && donnees.metadata.niveauCognitif && TYPES_AVEC_NIVEAU_COGNITIF.indexOf(donnees.type) !== -1) {
+        var nc = NIVEAUX_COGNITIFS.find(function(n) { return n.id === donnees.metadata.niveauCognitif; });
+        if (nc) {
+            if (!badgeCognitif) {
+                badgeCognitif = document.createElement('span');
+                badgeCognitif.className = 'planif-badge-cognitif';
+                el.appendChild(badgeCognitif);
+            }
+            badgeCognitif.textContent = nc.label;
+        }
+    } else if (badgeCognitif) {
+        badgeCognitif.remove();
     }
     mettreAJourBadge(donnees);
 }
@@ -268,7 +314,7 @@ function connaissanceAtteinActivite(noeudId, visited) {
     for (var i = 0; i < liens.length; i++) {
         var l = liens[i];
         if (l.noeudType === 'activite' || l.noeudType === 'soutien' || l.noeudType === 'revision') return true;
-        if (l.noeudType === 'connaissance' || l.noeudType === 'strategie' || l.noeudType === 'condition') {
+        if (TYPES_CONNAISSANCE.indexOf(l.noeudType) !== -1) {
             if (connaissanceAtteinActivite(l.noeudId, visited)) return true;
         }
     }
@@ -302,8 +348,8 @@ function ideeMaitresseAtteinEvaluation(noeudId, visited) {
                     if (!enfant) continue;
                     var liensEnfant = getLiensDeNoeud(enfant.id);
                     if (liensEnfant.some(function(le) { return le.noeudType === 'evaluation'; })) return true;
-                    // Connaissance/stratégie/condition → activité → évaluation
-                    if (enfant.type === 'connaissance' || enfant.type === 'strategie' || enfant.type === 'condition') {
+                    // Connaissance (factuelle/conceptuelle/procédurale/métacognitive) → activité → évaluation
+                    if (TYPES_CONNAISSANCE.indexOf(enfant.type) !== -1) {
                         for (var k = 0; k < liensEnfant.length; k++) {
                             if (liensEnfant[k].noeudType === 'activite' || liensEnfant[k].noeudType === 'soutien' || liensEnfant[k].noeudType === 'revision') {
                                 var liensAct = getLiensDeNoeud(liensEnfant[k].noeudId);
@@ -364,17 +410,18 @@ function evaluerBadge(noeud) {
             }
             return resIM;
 
-        case 'connaissance':
-        case 'strategie':
-        case 'condition':
-            var labelMap = { connaissance: 'information', strategie: 'stratégie', condition: 'condition' };
+        case 'factuelle':
+        case 'conceptuelle':
+        case 'procedurale':
+        case 'metacognitive':
+            var labelConn = TYPES[type] ? TYPES[type].label.toLowerCase() : type;
             var dansLecon = noeud.parent && etat.noeuds.get(noeud.parent);
             var estDansLecon = dansLecon && dansLecon.type === 'lecon';
             var atteinActivite = connaissanceAtteinActivite(noeud.id);
             return {
                 entree: estDansLecon
                     ? { valide: true, message: "Intégrée dans une leçon" }
-                    : { valide: false, message: 'Cette ' + labelMap[type] + " n'est dans aucune leçon" },
+                    : { valide: false, message: 'Cette connaissance ' + labelConn + " n'est dans aucune leçon" },
                 sortie: atteinActivite
                     ? { valide: true, message: "Reliée à une activité" }
                     : { valide: false, message: "Aucune activité reliée (tracer un lien)" }
@@ -384,7 +431,7 @@ function evaluerBadge(noeud) {
         case 'soutien':
         case 'revision':
             var lieeConnaissanceE = liens.some(function(l) {
-                return l.noeudType === 'connaissance' || l.noeudType === 'strategie' || l.noeudType === 'condition';
+                return TYPES_CONNAISSANCE.indexOf(l.noeudType) !== -1;
             });
             return {
                 entree: lieeConnaissanceE
@@ -411,7 +458,7 @@ function evaluerBadge(noeud) {
             var viseIM = liens.some(function(l) { return l.noeudType === 'idee-maitresse'; });
             var aConn = (noeud.enfants || []).some(function(eid) {
                 var e = etat.noeuds.get(eid);
-                return e && (e.type === 'connaissance' || e.type === 'strategie' || e.type === 'condition');
+                return e && TYPES_CONNAISSANCE.indexOf(e.type) !== -1;
             });
             var aAct = (noeud.enfants || []).some(function(eid) {
                 var e = etat.noeuds.get(eid);
@@ -430,7 +477,7 @@ function evaluerBadge(noeud) {
             };
 
         case 'evaluation':
-            var typesAmontEval = ['idee-maitresse', 'connaissance', 'strategie', 'condition'];
+            var typesAmontEval = ['idee-maitresse', 'factuelle', 'conceptuelle', 'procedurale', 'metacognitive'];
             var typesActivite = ['activite', 'soutien', 'revision'];
             var lieeActiviteOuContenu = liens.some(function(l) {
                 return typesAmontEval.indexOf(l.noeudType) !== -1 || typesActivite.indexOf(l.noeudType) !== -1;
@@ -827,6 +874,68 @@ function ouvrirPanneau(id) {
         extra.querySelector('#planif-panneau-production').addEventListener('change', function(e) {
             enregistrerPourUndo();
             donnees.metadata.productionId = e.target.value || null;
+            sauvegarder();
+        });
+    }
+
+    // Sélecteur de niveau cognitif (Anderson)
+    if (TYPES_AVEC_NIVEAU_COGNITIF.indexOf(donnees.type) !== -1) {
+        var niveauVal = donnees.metadata.niveauCognitif || '';
+        var htmlNiveau = '<label for="planif-panneau-niveau-cognitif">Niveau cognitif</label>' +
+            '<select id="planif-panneau-niveau-cognitif">' +
+            '<option value="">— Non défini —</option>';
+        for (var ni = 0; ni < NIVEAUX_COGNITIFS.length; ni++) {
+            var nc = NIVEAUX_COGNITIFS[ni];
+            htmlNiveau += '<option value="' + nc.id + '"' + (niveauVal === nc.id ? ' selected' : '') + '>' + nc.ordre + '. ' + nc.label + '</option>';
+        }
+        htmlNiveau += '</select>';
+        htmlNiveau += '<div id="planif-panneau-niveau-desc" class="planif-panneau-niveau-desc"></div>';
+        htmlNiveau += '<div id="planif-panneau-verbes" class="planif-panneau-verbes"></div>';
+        extra.innerHTML += htmlNiveau;
+
+        var selectNiveau = extra.querySelector('#planif-panneau-niveau-cognitif');
+        var descDiv = extra.querySelector('#planif-panneau-niveau-desc');
+        var verbesDiv = extra.querySelector('#planif-panneau-verbes');
+
+        function afficherVerbes(niveauId) {
+            if (!niveauId) {
+                descDiv.textContent = '';
+                verbesDiv.innerHTML = '';
+                return;
+            }
+            var niveauObj = NIVEAUX_COGNITIFS.find(function(n) { return n.id === niveauId; });
+            if (niveauObj) descDiv.textContent = niveauObj.description;
+            var verbes = BANQUE_VERBES[niveauId] || [];
+            verbesDiv.innerHTML = '';
+            for (var vi = 0; vi < verbes.length; vi++) {
+                var tag = document.createElement('button');
+                tag.type = 'button';
+                tag.className = 'planif-verbe-tag';
+                tag.textContent = verbes[vi];
+                tag.dataset.verbe = verbes[vi];
+                tag.addEventListener('click', function() {
+                    var verbe = this.dataset.verbe;
+                    var titreInput = document.getElementById('planif-panneau-titre');
+                    if (titreInput) {
+                        var titreCourant = titreInput.value.trim();
+                        if (!titreCourant.toLowerCase().startsWith(verbe.toLowerCase())) {
+                            enregistrerPourUndo();
+                            var nouveauTitre = verbe.charAt(0).toUpperCase() + verbe.slice(1) + (titreCourant ? ' ' + titreCourant : '');
+                            titreInput.value = nouveauTitre;
+                            titreInput.dispatchEvent(new Event('input'));
+                        }
+                    }
+                });
+                verbesDiv.appendChild(tag);
+            }
+        }
+        afficherVerbes(niveauVal);
+
+        selectNiveau.addEventListener('change', function(e) {
+            enregistrerPourUndo();
+            donnees.metadata.niveauCognitif = e.target.value || null;
+            afficherVerbes(e.target.value);
+            mettreAJourApparenceNoeud(donnees);
             sauvegarder();
         });
     }
@@ -1592,7 +1701,7 @@ function collecterDescendants(racine, parent, liste) {
 
 function peutContenir(conteneurType, enfantType) {
     if (conteneurType === 'sequence') return enfantType === 'lecon';
-    if (conteneurType === 'lecon') return enfantType === 'activite' || enfantType === 'soutien' || enfantType === 'revision' || enfantType === 'connaissance' || enfantType === 'strategie' || enfantType === 'condition' || enfantType === 'evaluation';
+    if (conteneurType === 'lecon') return enfantType === 'activite' || enfantType === 'soutien' || enfantType === 'revision' || TYPES_CONNAISSANCE.indexOf(enfantType) !== -1 || enfantType === 'evaluation';
     return false;
 }
 
@@ -2014,6 +2123,16 @@ function reconstruireDOM() {
         coucheNoeuds.appendChild(el);
         // Indicateur clone synchrone (avant le rAF layout)
         mettreAJourIndicateurClone(n);
+        // Badge cognitif (si défini)
+        if (n.metadata && n.metadata.niveauCognitif && TYPES_AVEC_NIVEAU_COGNITIF.indexOf(n.type) !== -1) {
+            var ncObj = NIVEAUX_COGNITIFS.find(function(nc) { return nc.id === n.metadata.niveauCognitif; });
+            if (ncObj) {
+                var badgeC = document.createElement('span');
+                badgeC.className = 'planif-badge-cognitif';
+                badgeC.textContent = ncObj.label;
+                el.appendChild(badgeC);
+            }
+        }
     }
 
     requestAnimationFrame(function() {
@@ -2047,10 +2166,14 @@ function restaurerSnapshot(snapshot) {
     for (var i = 0; i < snapshot.noeuds.length; i++) {
         var n = snapshot.noeuds[i];
         if (n.type === 'prerequis') {
-            n.type = 'connaissance';
+            n.type = 'factuelle';
             if (!n.metadata) n.metadata = {};
             n.metadata.prealable = true;
         }
+        // Migration anciens types de connaissances → Anderson
+        if (n.type === 'connaissance') n.type = 'factuelle';
+        else if (n.type === 'strategie') n.type = 'procedurale';
+        else if (n.type === 'condition') n.type = 'procedurale';
         var clone = {
             id: n.id, type: n.type, titre: n.titre, description: n.description,
             x: n.x, y: n.y, parent: n.parent,
@@ -2140,10 +2263,14 @@ function chargerCarte(carteId) {
     for (var i = 0; i < noeudsListe.length; i++) {
         var n = noeudsListe[i];
         if (n.type === 'prerequis') {
-            n.type = 'connaissance';
+            n.type = 'factuelle';
             if (!n.metadata) n.metadata = {};
             n.metadata.prealable = true;
         }
+        // Migration anciens types de connaissances → Anderson
+        if (n.type === 'connaissance') n.type = 'factuelle';
+        else if (n.type === 'strategie') n.type = 'procedurale';
+        else if (n.type === 'condition') n.type = 'procedurale';
         var config = TYPES[n.type];
         if (!config) continue;
         if (isNaN(n.x)) n.x = 100;
@@ -3519,6 +3646,18 @@ function importerCarte(fichier) {
             index.cartes.push({ id: id, nom: nom, dateCreation: new Date().toISOString() });
             index.active = id;
             window.planificationDonnees.sauvegarderIndex(index);
+            // Migration anciens types de connaissances → Anderson (fichiers importés)
+            for (var mi = 0; mi < donnees.noeuds.length; mi++) {
+                var nm = donnees.noeuds[mi];
+                if (nm.type === 'connaissance') nm.type = 'factuelle';
+                else if (nm.type === 'strategie') nm.type = 'procedurale';
+                else if (nm.type === 'condition') nm.type = 'procedurale';
+                else if (nm.type === 'prerequis') {
+                    nm.type = 'factuelle';
+                    if (!nm.metadata) nm.metadata = {};
+                    nm.metadata.prealable = true;
+                }
+            }
             var contenu = {
                 compteur: donnees.compteur || 0,
                 compteurLiens: donnees.compteurLiens || 0,

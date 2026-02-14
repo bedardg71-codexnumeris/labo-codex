@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Système de suivi Beta 97.7 - Hiver 2026</title>
+    <title>Système de suivi Beta 97.8 - Hiver 2026</title>
 
     <!-- CSS externe requis pour styles complets -->
     <link rel="stylesheet" href="styles.css?v=2026013001">
@@ -3527,7 +3527,7 @@
                     <!-- Titre et version -->
                     <div class="titre-section">
                         <h1>Système de suivi des apprentissages et de construction de la note</h1>
-                        <p class="meta" data-tooltip="entete-version">Beta 97.7 <span id="build-numero"></span></p>
+                        <p class="meta" data-tooltip="entete-version">Beta 97.8 <span id="build-numero"></span></p>
                     </div>
 
                     <!-- Sélecteur de mode déplacé à droite -->
@@ -6710,16 +6710,19 @@
                                     </div>
                                     <div class="planif-palette-categorie" style="background: rgba(249, 115, 22, 0.06);">
                                         <div class="planif-palette-zone-label" style="color: #f97316;" data-tooltip="planif-quoi-enseigner">Quoi enseigner</div>
-                                        <div class="planif-palette-zone-sous-titre">contenu de la leçon</div>
+                                        <div class="planif-palette-zone-sous-titre">types de connaissances</div>
                                         <div class="planif-palette-groupe">
-                                            <button class="planif-palette-btn" data-type="connaissance" draggable="true">
-                                                <span class="planif-pastille" style="background: var(--planif-couleur-connaissance)"></span>Information
+                                            <button class="planif-palette-btn" data-type="factuelle" draggable="true">
+                                                <span class="planif-pastille" style="background: var(--planif-couleur-factuelle)"></span>Factuelle
                                             </button>
-                                            <button class="planif-palette-btn" data-type="strategie" draggable="true">
-                                                <span class="planif-pastille" style="background: var(--planif-couleur-strategie)"></span>Stratégie
+                                            <button class="planif-palette-btn" data-type="conceptuelle" draggable="true">
+                                                <span class="planif-pastille" style="background: var(--planif-couleur-conceptuelle)"></span>Conceptuelle
                                             </button>
-                                            <button class="planif-palette-btn" data-type="condition" draggable="true">
-                                                <span class="planif-pastille" style="background: var(--planif-couleur-condition)"></span>Condition
+                                            <button class="planif-palette-btn" data-type="procedurale" draggable="true">
+                                                <span class="planif-pastille" style="background: var(--planif-couleur-procedurale)"></span>Procédurale
+                                            </button>
+                                            <button class="planif-palette-btn" data-type="metacognitive" draggable="true">
+                                                <span class="planif-pastille" style="background: var(--planif-couleur-metacognitive)"></span>Métacognitive
                                             </button>
                                         </div>
                                     </div>
@@ -16048,7 +16051,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97.7';
-        const BUILD_ID = '0214-0940';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0214-1015';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
