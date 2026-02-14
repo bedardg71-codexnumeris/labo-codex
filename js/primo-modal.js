@@ -302,29 +302,29 @@ function parserMarkdownSimple(texte) {
  * @returns {Object} - { indexDansParcours, totalParcours, titre }
  */
 function calculerInfosParcours(questionsActives, indexActuel) {
-    // Trouver les indices des fins de parcours et de début MODULE 2
+    // Trouver les indices des fins de parcours
     const indexFinParcoursCourt = questionsActives.findIndex(q => q.finParcoursCourt);
-    const indexTransitionModeGuide = questionsActives.findIndex(q => q.id === 'transition-mode-guide');
-    const indexFinParcoursEvaluer = questionsActives.findIndex(q => q.finParcoursEvaluer);
+    const indexMaterielIntro = questionsActives.findIndex(q => q.id === 'materiel-intro');
+    const indexFinParcoursMateriel = questionsActives.findIndex(q => q.finParcoursMateriel);
 
     let indexDansParcours, totalParcours, titre;
 
     // Déterminer dans quel parcours on se trouve
-    if (indexFinParcoursCourt !== -1 && indexActuel <= indexFinParcoursCourt) {
+    if (indexMaterielIntro !== -1 && indexFinParcoursMateriel !== -1 && indexActuel >= indexMaterielIntro && indexActuel <= indexFinParcoursMateriel) {
+        // MODULE MATÉRIEL : Créer du matériel pédagogique
+        indexDansParcours = indexActuel - indexMaterielIntro + 1;
+        totalParcours = indexFinParcoursMateriel - indexMaterielIntro + 1;
+        titre = 'Création de matériel pédagogique';
+    } else if (indexFinParcoursCourt !== -1 && indexActuel <= indexFinParcoursCourt) {
         // MODULE 1 : Créer un groupe-cours (parcours court)
         indexDansParcours = indexActuel + 1;
         totalParcours = indexFinParcoursCourt + 1;
-        titre = 'Créons ensemble ton groupe-cours !';
-    } else if (indexTransitionModeGuide !== -1 && indexFinParcoursEvaluer !== -1 && indexActuel >= indexTransitionModeGuide && indexActuel <= indexFinParcoursEvaluer) {
-        // MODULE 2 : Évaluer une production
-        indexDansParcours = indexActuel - indexTransitionModeGuide + 1;
-        totalParcours = indexFinParcoursEvaluer - indexTransitionModeGuide + 1;
-        titre = 'Évaluons une production !';
+        titre = 'Configuration du groupe-cours';
     } else {
-        // MODULE 1 étendu (après finParcoursCourt mais avant transition-mode-guide)
+        // MODULE 1 étendu
         indexDansParcours = indexActuel + 1;
         totalParcours = questionsActives.length;
-        titre = 'Créons ensemble ton groupe-cours !';
+        titre = 'Configuration du groupe-cours';
     }
 
     return { indexDansParcours, totalParcours, titre };
@@ -336,7 +336,7 @@ function calculerInfosParcours(questionsActives, indexActuel) {
 function genererHTMLQuestion(question) {
     let html = '';
 
-    // En-tête Primo simplifié
+    // En-tête du parcours
     const questionsActives = obtenirQuestionsActives(reponsesPrimo);
     const infos = calculerInfosParcours(questionsActives, indexQuestionActuelle);
     const etapeTexte = `Étape ${infos.indexDansParcours}/${infos.totalParcours}`;
@@ -844,7 +844,7 @@ function primoQuestionPrecedente() {
  * Confirme l'annulation de la configuration
  */
 function confirmerAnnulation() {
-    if (confirm('Es-tu sûr de vouloir annuler la configuration ? Tes réponses seront perdues.')) {
+    if (confirm('Souhaitez-vous vraiment annuler ? Les réponses non sauvegardées seront perdues.')) {
         fermerModalConversationnel();
     }
 }
@@ -882,6 +882,16 @@ async function executerAction(question) {
             await importerEchelleIDME();
         } else if (question.action === 'creerProduction') {
             await creerProduction();
+        } else if (question.action === 'detecterContexteMateriel') {
+            detecterContexteMateriel();
+        } else if (question.action === 'creerEchelleDepuisParcours') {
+            creerEchelleDepuisParcours();
+        } else if (question.action === 'creerGrilleDepuisParcours') {
+            creerGrilleDepuisParcours();
+        } else if (question.action === 'creerProductionDepuisParcours') {
+            creerProductionDepuisParcours();
+        } else if (question.action === 'creerCartoucheDepuisParcours') {
+            creerCartoucheDepuisParcours();
         }
 
         // Succès - afficher confirmation
@@ -1103,6 +1113,280 @@ async function creerProduction() {
 }
 
 // ============================================================================
+// CRÉATION PROGRAMMATIQUE — MODULE MATÉRIEL (Beta 97.5+)
+// Fonctions appelées par les questions type 'action' du parcours matériel
+// ============================================================================
+
+/**
+ * Détecte le contexte de pratique pour le parcours matériel
+ * Stocke le résultat dans reponsesPrimo['materiel-pratique-detectee']
+ */
+function detecterContexteMateriel() {
+    var modalites = db.getSync('modalitesEvaluation', {});
+    var pratique = modalites.pratique || null;
+
+    if (!pratique) {
+        reponsesPrimo['materiel-pratique-detectee'] = 'aucune';
+    } else {
+        reponsesPrimo['materiel-pratique-detectee'] = pratique;
+    }
+
+    console.log('[Guide] Pratique détectée pour module matériel:', reponsesPrimo['materiel-pratique-detectee']);
+}
+
+/**
+ * Crée une échelle de performance depuis le parcours matériel
+ * Modèles prédéfinis : IDME, ABCD. Personnalisé : depuis réponses M2a-M2c.
+ * Patron : wizardV2CreerGrilleDemo() — lecture/écriture synchrone dans IndexedDB
+ */
+function creerEchelleDepuisParcours() {
+    var choix = reponsesPrimo['materiel-echelle-choix'];
+    var echelle;
+
+    if (choix === 'idme') {
+        echelle = {
+            id: 'echelle-idme-' + Date.now(),
+            nom: 'IDME',
+            niveaux: [
+                { code: 'I', nom: 'Insuffisant', couleur: '#ff9800', valeur: 50, min: 0, max: 64 },
+                { code: 'D', nom: 'En développement', couleur: '#ffc107', valeur: 69.5, min: 65, max: 74 },
+                { code: 'M', nom: 'Maîtrise', couleur: '#4caf50', valeur: 79.5, min: 75, max: 84 },
+                { code: 'E', nom: 'Exemplaire', couleur: '#2196f3', valeur: 92.5, min: 85, max: 100 }
+            ],
+            dateCreation: new Date().toISOString()
+        };
+    } else if (choix === 'abcd') {
+        echelle = {
+            id: 'echelle-abcd-' + Date.now(),
+            nom: 'ABCD',
+            niveaux: [
+                { code: 'D', nom: 'D', couleur: '#ff9800', valeur: 50, min: 0, max: 59 },
+                { code: 'C', nom: 'C', couleur: '#ffc107', valeur: 65, min: 60, max: 69 },
+                { code: 'B', nom: 'B', couleur: '#4caf50', valeur: 79.5, min: 70, max: 84 },
+                { code: 'A', nom: 'A', couleur: '#2196f3', valeur: 92.5, min: 85, max: 100 }
+            ],
+            dateCreation: new Date().toISOString()
+        };
+    } else if (choix === 'personnaliser') {
+        var nom = reponsesPrimo['materiel-echelle-nom'] || 'Échelle personnalisée';
+        var nbNiveaux = parseInt(reponsesPrimo['materiel-echelle-niveaux']) || 4;
+        var nomsNiveaux = (reponsesPrimo['materiel-echelle-noms-niveaux'] || '')
+            .split('\n')
+            .map(function(n) { return n.trim(); })
+            .filter(function(n) { return n; });
+
+        var couleurs = ['#ff9800', '#ffc107', '#4caf50', '#2196f3', '#9c27b0', '#e91e63'];
+        var pas = 100 / nbNiveaux;
+
+        var niveaux = [];
+        for (var i = 0; i < nbNiveaux; i++) {
+            var min = Math.round(i * pas);
+            var max = i === nbNiveaux - 1 ? 100 : Math.round((i + 1) * pas) - 1;
+            niveaux.push({
+                code: (nomsNiveaux[i] || 'N' + (i + 1)).charAt(0).toUpperCase(),
+                nom: nomsNiveaux[i] || 'Niveau ' + (i + 1),
+                couleur: couleurs[i % couleurs.length],
+                valeur: (min + max) / 2,
+                min: min,
+                max: max
+            });
+        }
+
+        echelle = {
+            id: 'echelle-perso-' + Date.now(),
+            nom: nom,
+            niveaux: niveaux,
+            dateCreation: new Date().toISOString()
+        };
+    }
+
+    if (echelle) {
+        var echelles = db.getSync('echellesTemplates', []);
+        echelles.push(echelle);
+        db.setSync('echellesTemplates', echelles);
+
+        // Vérification post-création
+        var echellesVerif = db.getSync('echellesTemplates', []);
+        var trouvee = echellesVerif.find(function(e) { return e.id === echelle.id; });
+
+        if (trouvee) {
+            reponsesPrimo['materiel-echelle-id-cree'] = echelle.id;
+            reponsesPrimo['materiel-echelle-nom-cree'] = echelle.nom;
+            reponsesPrimo['materiel-echelle-nb-niveaux-crees'] = echelle.niveaux.length.toString();
+            console.log('[Guide] ✅ Échelle créée:', echelle.nom, '(' + echelle.niveaux.length + ' niveaux)');
+        } else {
+            throw new Error('Échelle non trouvée après création dans IndexedDB');
+        }
+    }
+}
+
+/**
+ * Crée une grille de critères depuis le parcours matériel
+ * Modèle de base : 4 critères à 25%. Personnalisé : N critères depuis textarea.
+ * Patron : wizardV2CreerGrilleDemo()
+ */
+function creerGrilleDepuisParcours() {
+    var choix = reponsesPrimo['materiel-grille-choix'];
+    var grille;
+
+    if (choix === 'base') {
+        grille = {
+            id: 'grille-base-' + Date.now(),
+            nom: 'Grille de base',
+            description: 'Grille générique avec 4 critères à pondération égale.',
+            criteres: [
+                { id: 'c1', nom: 'Compréhension du sujet', description: 'Démontrer une compréhension juste du sujet traité.', poids: 25 },
+                { id: 'c2', nom: 'Qualité de la démarche', description: 'Appliquer une démarche méthodique et rigoureuse.', poids: 25 },
+                { id: 'c3', nom: 'Communication', description: 'Présenter les résultats de façon claire et structurée.', poids: 25 },
+                { id: 'c4', nom: 'Esprit critique', description: 'Porter un regard critique et nuancé sur la production.', poids: 25 }
+            ],
+            dateCreation: new Date().toISOString()
+        };
+    } else if (choix === 'personnaliser') {
+        var nbCriteres = parseInt(reponsesPrimo['materiel-grille-nb-criteres']) || 4;
+        var nomsCriteres = (reponsesPrimo['materiel-grille-noms-criteres'] || '')
+            .split('\n')
+            .map(function(n) { return n.trim(); })
+            .filter(function(n) { return n; });
+
+        var poidsEgal = Math.round(100 / nbCriteres * 100) / 100;
+        var criteres = [];
+
+        for (var i = 0; i < nbCriteres; i++) {
+            criteres.push({
+                id: 'c' + (i + 1),
+                nom: nomsCriteres[i] || 'Critère ' + (i + 1),
+                description: '',
+                poids: i === nbCriteres - 1 ? Math.round((100 - poidsEgal * (nbCriteres - 1)) * 100) / 100 : poidsEgal
+            });
+        }
+
+        grille = {
+            id: 'grille-perso-' + Date.now(),
+            nom: 'Grille personnalisée',
+            description: 'Grille avec ' + nbCriteres + ' critères à pondération égale.',
+            criteres: criteres,
+            dateCreation: new Date().toISOString()
+        };
+    }
+
+    if (grille) {
+        var grilles = db.getSync('grillesTemplates', []);
+        grilles.push(grille);
+        db.setSync('grillesTemplates', grilles);
+
+        // Vérification post-création
+        var grillesVerif = db.getSync('grillesTemplates', []);
+        var trouvee = grillesVerif.find(function(g) { return g.id === grille.id; });
+
+        if (trouvee) {
+            reponsesPrimo['materiel-grille-id-cree'] = grille.id;
+            reponsesPrimo['materiel-grille-nom-cree'] = grille.nom;
+            reponsesPrimo['materiel-grille-nb-criteres-crees'] = grille.criteres.length.toString();
+            console.log('[Guide] ✅ Grille créée:', grille.nom, '(' + grille.criteres.length + ' critères)');
+        } else {
+            throw new Error('Grille non trouvée après création dans IndexedDB');
+        }
+    }
+}
+
+/**
+ * Crée une production depuis le parcours matériel
+ * Lie automatiquement la grille créée (si existante)
+ * Clé : db.setSync(cle('productions'), [...])
+ */
+function creerProductionDepuisParcours() {
+    var titre = reponsesPrimo['materiel-production-titre'] || 'Évaluation';
+    var type = reponsesPrimo['materiel-production-type'] || 'travail';
+    var ponderation = parseInt(reponsesPrimo['materiel-production-ponderation']) || 25;
+    var grilleId = reponsesPrimo['materiel-grille-id-cree'] || null;
+
+    var production = {
+        id: 'PROD-' + Date.now(),
+        titre: titre,
+        description: '',
+        type: type,
+        ponderation: ponderation,
+        grilleId: grilleId,
+        verrouille: false,
+        dateCreation: new Date().toISOString()
+    };
+
+    var cleProductions = typeof cle === 'function' ? cle('productions') : 'productions';
+    var productions = db.getSync(cleProductions, []);
+    productions.push(production);
+    db.setSync(cleProductions, productions);
+
+    // Vérification post-création
+    var prodsVerif = db.getSync(cleProductions, []);
+    var trouvee = prodsVerif.find(function(p) { return p.id === production.id; });
+
+    if (trouvee) {
+        reponsesPrimo['materiel-production-id-cree'] = production.id;
+        console.log('[Guide] ✅ Production créée:', titre, '(' + ponderation + '%)');
+    } else {
+        throw new Error('Production non trouvée après création dans IndexedDB');
+    }
+}
+
+/**
+ * Crée une cartouche vide (matrice critère × niveau) depuis le parcours matériel
+ * Lie à la grille et l'échelle créées
+ * Clé : db.setSync('cartouches_' + grilleId, [...])
+ */
+function creerCartoucheDepuisParcours() {
+    var grilleId = reponsesPrimo['materiel-grille-id-cree'];
+    var echelleId = reponsesPrimo['materiel-echelle-id-cree'];
+
+    if (!grilleId || !echelleId) {
+        throw new Error('Grille ou échelle manquante pour créer la cartouche');
+    }
+
+    // Récupérer la grille et l'échelle
+    var grilles = db.getSync('grillesTemplates', []);
+    var grille = grilles.find(function(g) { return g.id === grilleId; });
+    var echelles = db.getSync('echellesTemplates', []);
+    var echelle = echelles.find(function(e) { return e.id === echelleId; });
+
+    if (!grille || !echelle) {
+        throw new Error('Grille ou échelle introuvable dans IndexedDB');
+    }
+
+    // Créer la matrice critère × niveau (textes vides)
+    var retroactions = {};
+    grille.criteres.forEach(function(critere) {
+        retroactions[critere.id] = {};
+        echelle.niveaux.forEach(function(niveau) {
+            retroactions[critere.id][niveau.code] = '';
+        });
+    });
+
+    var cartouche = {
+        id: 'cartouche-' + Date.now(),
+        grilleId: grilleId,
+        echelleId: echelleId,
+        nom: 'Cartouche - ' + grille.nom,
+        retroactions: retroactions,
+        dateCreation: new Date().toISOString()
+    };
+
+    var cleCartouche = 'cartouches_' + grilleId;
+    var cartouches = db.getSync(cleCartouche, []);
+    cartouches.push(cartouche);
+    db.setSync(cleCartouche, cartouches);
+
+    // Vérification post-création
+    var cartouchesVerif = db.getSync(cleCartouche, []);
+    var trouvee = cartouchesVerif.find(function(c) { return c.id === cartouche.id; });
+
+    if (trouvee) {
+        console.log('[Guide] ✅ Cartouche créée:', cartouche.nom);
+    } else {
+        throw new Error('Cartouche non trouvée après création dans IndexedDB');
+    }
+}
+
+// ============================================================================
 // RÉCUPÉRATION ET PRÉ-REMPLISSAGE
 // ============================================================================
 
@@ -1269,7 +1553,8 @@ async function terminerConfiguration() {
     const questionActuelle = questionsActives[indexQuestionActuelle];
     const estParcoursCourt = questionActuelle && questionActuelle.finParcoursCourt === true;
     const estParcoursEvaluer = questionActuelle && questionActuelle.finParcoursEvaluer === true;
-    const estParcoursModulaire = estParcoursCourt || estParcoursEvaluer;
+    const estParcoursMateriel = questionActuelle && questionActuelle.finParcoursMateriel === true;
+    const estParcoursModulaire = estParcoursCourt || estParcoursEvaluer || estParcoursMateriel;
 
     // Sauvegarder toutes les réponses dans localStorage
     sauvegarderReponses(reponsesPrimo);
@@ -1309,6 +1594,9 @@ async function terminerConfiguration() {
             if (estParcoursCourt) {
                 messageType = 'Configuration de base';
                 messageDetails = 'L\'application va se recharger pour appliquer les changements.';
+            } else if (estParcoursMateriel) {
+                messageType = 'Matériel pédagogique créé';
+                messageDetails = 'Le matériel est disponible dans la section Matériel.';
             } else {
                 messageType = 'Pratique de notation configurée';
                 messageDetails = 'Les paramètres ont été appliqués au cours actif.';
@@ -1329,7 +1617,7 @@ async function terminerConfiguration() {
                 location.reload();
             }, 1500);
         } else {
-            // Parcours évaluer : retour au menu d'accueil (pas besoin de reload)
+            // Parcours matériel ou autre : retour au menu d'accueil (pas besoin de reload)
             setTimeout(() => {
                 if (typeof afficherModalAccueil === 'function') {
                     afficherModalAccueil();
@@ -1968,7 +2256,7 @@ function passerEnModeNotification() {
 
     boutonArreter.onclick = function() {
         // Demander confirmation avant d'arrêter
-        if (confirm('Veux-tu vraiment quitter le MODULE 2 ?\n\nTu pourras toujours le relancer plus tard via le bouton 🧭.')) {
+        if (confirm('Souhaitez-vous vraiment quitter ce parcours ?\n\nVous pourrez le relancer plus tard via le bouton 🧭.')) {
             // Nettoyer le mode notification
             const container = document.getElementById('primo-notification-container');
             const boutonSuivant = document.getElementById('primo-bouton-suivant');
@@ -2098,7 +2386,7 @@ function afficherNotificationActuelle() {
         animation: slideInRight 0.4s ease-out;
     `;
 
-    // Icône Primo (petit)
+    // Icône tour guidé (petit)
     const icone = document.createElement('div');
     icone.style.cssText = `
         width: 40px;
