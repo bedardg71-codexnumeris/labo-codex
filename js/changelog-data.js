@@ -12,6 +12,16 @@
         {
             version: 'Beta 97.7',
             date: '14 f\u00e9vrier',
+            couleur: 'bleu',
+            titre: 'Simplification de la page d\u2019accueil',
+            items: [
+                '<strong>Nouvel ordre des cartes</strong> : Planifier \u2192 Configurer pratique \u2192 Pr\u00e9sences \u2192 Annoter \u2192 \u00c9valuer. La configuration de la pratique de notation est maintenant en 2e position.',
+                '<strong>Textes simplifi\u00e9s</strong> : \u00ab\u00a0Configurer ma pratique de notation\u00a0\u00bb, \u00ab\u00a0Derni\u00e8res nouvelles\u00a0\u00bb, descriptions all\u00e9g\u00e9es.'
+            ]
+        },
+        {
+            version: 'Beta 97.7',
+            date: '14 f\u00e9vrier',
             couleur: 'vert',
             titre: 'Refonte du wizard de configuration des pratiques',
             items: [

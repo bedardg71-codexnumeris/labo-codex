@@ -1,10 +1,21 @@
 # SESSION ACTIVE - BETA 97.7
 
 **Date** : 14 février 2026
-**Version** : Beta 97.7 (build 0214-0932)
+**Version** : Beta 97.7 (build 0214-0940)
 **Statut** : Refonte wizard de configuration des pratiques
 
 ## SESSION DU 14 FÉVRIER 2026
+
+### Travail accompli — Simplification page d'accueil (Beta 97.7, build 0214-0940)
+
+36. **Réorganisation des cartes d'accueil** : Nouvel ordre → Planifier → Configurer pratique → Présences → Annoter → Évaluer → Profil → État des lieux → Interventions → Sauvegarde → Nouvelles. La carte « Configurer ma pratique de notation » monte en 2e position.
+
+37. **Textes simplifiés** :
+    - « Configurer une pratique » → « Configurer ma pratique de notation » + description simplifiée
+    - « Préparer des interventions » → description sans « (niveaux 1, 2, 3) »
+    - « Suivre le développement du projet » → « Dernières nouvelles »
+
+38. **Entête corrigée** : Beta 97.6 → 97.7 dans le bandeau et le titre de page
 
 ### Travail accompli — Améliorations UX du wizard (Beta 97.7, build 0214-0932)
 
@@ -46,8 +57,10 @@
 - `js/pratiques/pratique-configurable.js` — 3 méthodes de calcul implémentées (+190 lignes)
 - `js/pratiques/pratique-registre.js` — Extension construireConfigComplete() pour nouveaux champs (+5 lignes)
 - `styles.css` — CSS checkbox-cards, dynamic-list, weight-slider, replacement-pair (+150 lignes)
-- `js/accueil.js` — Carte « Configurer une pratique de notation » (icône, titre, description)
-- `js/changelog-data.js` — Entrées changelog wizard
+- `js/accueil.js` — Réorganisation cartes, textes simplifiés, nouvel ordre
+- `js/changelog-data.js` — Entrées changelog wizard + accueil
+- `index.html` — Entête Beta 97.7, titre page, BUILD_ID 0214-0940
+- `version.json` — Build 0214-0940
 - `index.html` — VERSION_MAJEURE 97.7, BUILD_ID 0214-0932
 - `version.json` — Build 0214-0932, Beta 97.7
 
