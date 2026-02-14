@@ -584,6 +584,50 @@
             grid-template-columns: repeat(5, 1fr);
         }
 
+        /* Section Découvrir — accueil */
+        #accueil-decouvrir {
+            margin-bottom: 25px;
+            border: 1px solid rgba(106, 172, 184, 0.2);
+        }
+        #accueil-decouvrir .accordeon-header h3 {
+            color: var(--gris-moyen);
+        }
+        .accueil-cartes-decouvrir {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 15px;
+        }
+        .accueil-carte-decouvrir {
+            background: var(--surface-conteneur, #0c1a22);
+            border: 1px dashed rgba(106, 172, 184, 0.25);
+            border-radius: var(--radius-moyen, 8px);
+            padding: 15px;
+            font-size: 0.9rem;
+        }
+        .accueil-carte-decouvrir--action {
+            cursor: pointer;
+            border-style: solid;
+            border-color: var(--accent-primaire);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s;
+        }
+        .accueil-carte-decouvrir--action:hover {
+            transform: translateY(-2px);
+            background: var(--bleu-tres-pale);
+        }
+        .decouvrir-titre {
+            font-weight: 600;
+            color: var(--texte-principal);
+            margin-bottom: 2px;
+        }
+        .decouvrir-desc {
+            font-size: 0.8rem;
+            color: var(--gris-moyen);
+        }
+
         .accueil-carte {
             background: #0c1a22;
             border: 1px solid rgba(106, 172, 184, 0.15);
@@ -710,6 +754,9 @@
             .accueil-cartes--10 {
                 grid-template-columns: repeat(2, 1fr);
             }
+            .accueil-cartes-decouvrir {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
         @media (max-width: 900px) {
             .accueil-cartes {
@@ -720,6 +767,9 @@
             .accueil-cartes,
             .accueil-cartes--8,
             .accueil-cartes--10 {
+                grid-template-columns: 1fr;
+            }
+            .accueil-cartes-decouvrir {
                 grid-template-columns: 1fr;
             }
             .accueil-page {
@@ -4865,6 +4915,25 @@
                                     <strong id="stat-cartouches" class="carte-metrique-valeur">—</strong>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Bannière assistant création de matériel -->
+                    <div class="carte" style="margin-top: 20px; border-left: 4px solid var(--accent-primaire);">
+                        <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                            <div style="font-size: 2rem; flex-shrink: 0;">&#x1F6E0;&#xFE0F;</div>
+                            <div style="flex: 1; min-width: 200px;">
+                                <h3 style="margin: 0 0 4px; color: var(--accent-primaire); font-size: 1rem;">
+                                    Assistant de création de matériel
+                                </h3>
+                                <p style="margin: 0; font-size: 0.85rem; color: var(--gris-moyen);">
+                                    Créer une échelle, une grille de critères, une production ou des cartouches en quelques étapes guidées.
+                                </p>
+                            </div>
+                            <button onclick="if(typeof demarrerCreationMateriel==='function') demarrerCreationMateriel();"
+                                    class="btn btn-principal" style="white-space: nowrap;">
+                                Lancer l'assistant
+                            </button>
                         </div>
                     </div>
                 </div>

@@ -82,44 +82,67 @@ function afficherAccueilRetour(conteneur) {
     const aDesCoursReels = listeCours.some(c => !c.isDemo && !c.estDemo);
     const demoChecked = enDemo || !aDesCoursReels;
 
-    const coursHTML = `
-        <div class="accueil-cours-actif" style="flex: 1; min-width: 0; margin-bottom: 0;">
-            <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; margin: 0;">
-                <span style="font-size: 1.5rem;">&#x1F5FA;&#xFE0F;</span>
-                <input type="checkbox" id="checkbox-demo-accueil" ${demoChecked ? 'checked' : ''}
-                    onchange="if(this.checked) { if(typeof entrerEnDemo==='function') entrerEnDemo(); } else { if(typeof quitterDemo==='function') quitterDemo(); }">
-                <div>
-                    <div class="accueil-cours-nom">Donn\u00e9es de d\u00e9monstration</div>
-                    <div class="accueil-cours-detail">Explorer l\u2019application avec un lot de donn\u00e9es fictives pour d\u00e9couvrir le suivi des apprentissages et la construction de la note.</div>
-                </div>
-            </label>
-        </div>
-    `;
-
     // Section toggle tooltips (miroir de Reglages > Preferences > Navigation)
     const prefsAff = db.getSync('preferencesAffichage', {});
     const tooltipsActifs = prefsAff.tooltips !== false;
     const tourGuideActif = !!prefsAff.tourGuide;
-    const tooltipToggleHTML = `
-        <div class="accueil-cours-actif" style="flex: 1; min-width: 0; margin-bottom: 0; flex-direction: column; align-items: stretch;">
-            <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; margin: 0;">
-                <span style="font-size: 1.5rem;">\uD83D\uDCAC</span>
-                <input type="checkbox" id="checkbox-tooltips-accueil" ${tooltipsActifs ? 'checked' : ''}
-                    onchange="if(typeof definirTooltips==='function') definirTooltips(this.checked);">
-                <div>
-                    <div class="accueil-cours-nom">Info-bulles</div>
-                    <div class="accueil-cours-detail">D\u00e9crire l\u2019interface au survol</div>
+
+    const decouvrirHTML = `
+        <div class="carte accordeon" id="accueil-decouvrir">
+            <div class="accordeon-header" onclick="toggleAccordeonV2(this);">
+                <h3 style="margin: 0; font-size: 1.1rem;">D\u00e9couvrir</h3>
+                <span class="accordeon-chevron">\u25BC</span>
+            </div>
+            <div class="accordeon-contenu">
+                <div class="accueil-cartes-decouvrir">
+
+                    <div class="accueil-carte-decouvrir">
+                        <label style="display:flex; align-items:center; gap:12px; cursor:pointer;">
+                            <span style="font-size:1.5rem;">&#x1F5FA;&#xFE0F;</span>
+                            <input type="checkbox" id="checkbox-demo-accueil" ${demoChecked ? 'checked' : ''}
+                                onchange="if(this.checked) { if(typeof entrerEnDemo==='function') entrerEnDemo(); } else { if(typeof quitterDemo==='function') quitterDemo(); }">
+                            <div>
+                                <div class="decouvrir-titre">Donn\u00e9es de d\u00e9monstration</div>
+                                <div class="decouvrir-desc">Explorer avec des donn\u00e9es fictives</div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="accueil-carte-decouvrir">
+                        <label style="display:flex; align-items:center; gap:12px; cursor:pointer;">
+                            <span style="font-size:1.5rem;">\uD83E\uDDED</span>
+                            <input type="checkbox" id="checkbox-tour-guide-accueil" ${tourGuideActif ? 'checked' : ''}
+                                onchange="if(typeof definirTourGuide==='function') definirTourGuide(this.checked);">
+                            <div>
+                                <div class="decouvrir-titre">Tour guid\u00e9</div>
+                                <div class="decouvrir-desc">Afficher les conseils contextuels</div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="accueil-carte-decouvrir">
+                        <label style="display:flex; align-items:center; gap:12px; cursor:pointer;">
+                            <span style="font-size:1.5rem;">\uD83D\uDCAC</span>
+                            <input type="checkbox" id="checkbox-tooltips-accueil" ${tooltipsActifs ? 'checked' : ''}
+                                onchange="if(typeof definirTooltips==='function') definirTooltips(this.checked);">
+                            <div>
+                                <div class="decouvrir-titre">Info-bulles</div>
+                                <div class="decouvrir-desc">D\u00e9crire l\u2019interface au survol</div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="accueil-carte-decouvrir accueil-carte-decouvrir--action"
+                         onclick="if(typeof demarrerCreationMateriel==='function') demarrerCreationMateriel();">
+                        <span style="font-size:1.5rem;">\uD83D\uDEE0\uFE0F</span>
+                        <div>
+                            <div class="decouvrir-titre">Cr\u00e9er du mat\u00e9riel p\u00e9dagogique</div>
+                            <div class="decouvrir-desc">\u00c9chelle, grille, production ou cartouches en quelques \u00e9tapes guid\u00e9es</div>
+                        </div>
+                    </div>
+
                 </div>
-            </label>
-            <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; margin: 12px 0 0 0;">
-                <span style="font-size: 1.5rem;">\uD83E\uDDED</span>
-                <input type="checkbox" id="checkbox-tour-guide-accueil" ${tourGuideActif ? 'checked' : ''}
-                    onchange="if(typeof definirTourGuide==='function') definirTourGuide(this.checked);">
-                <div>
-                    <div class="accueil-cours-nom">Tour guid\u00e9</div>
-                    <div class="accueil-cours-detail">Afficher les conseils contextuels</div>
-                </div>
-            </label>
+            </div>
         </div>
     `;
 
@@ -128,10 +151,7 @@ function afficherAccueilRetour(conteneur) {
             <h1>Que souhaitez-vous faire\u00a0?</h1>
         </div>
 
-        <div style="display: flex; gap: 15px; margin-bottom: 25px;">
-            ${coursHTML}
-            ${tooltipToggleHTML}
-        </div>
+        ${decouvrirHTML}
 
         <div class="accueil-cartes accueil-cartes--10">
             <div class="accueil-carte" onclick="afficherSection('planification'); setTimeout(function(){ afficherSousSection('planification-carte'); }, 100);">
