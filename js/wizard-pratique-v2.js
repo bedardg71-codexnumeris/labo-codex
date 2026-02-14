@@ -60,53 +60,420 @@ const ETAPES_WIZARD = {
             { id: 'description', label: 'Description', type: 'textarea', required: false, placeholder: 'Décrivez brièvement votre pratique (optionnel)' },
             { id: 'infoCC', type: 'info', texte: 'Le partage n\'est pas obligatoire, mais ces informations permettent de protéger votre travail sous licence Creative Commons (CC BY-NC-SA 4.0) et d\'en attribuer la création si vous choisissez de le partager.' }
         ],
-        suivant: () => 'type-pratique',
+        suivant: () => 'calcul-note-finale',
         precedent: () => null
     },
 
-    'type-pratique': {
-        id: 'type-pratique',
-        titre: 'Type de pratique',
-        description: 'Choisissez le type de pratique de notation que vous souhaitez utiliser',
+    // ─────────────────────────────────────────────────────────────────────────
+    // CLASSIFICATION COMPORTEMENTALE (Q1-Q5)
+    // Remplace l'ancien type-pratique par des questions concrètes
+    // ─────────────────────────────────────────────────────────────────────────
+
+    'calcul-note-finale': {
+        id: 'calcul-note-finale',
+        titre: 'Comment calculez-vous la note finale ?',
+        description: 'Cette question nous aide à identifier le type de pratique qui correspond à votre méthode.',
         branche: 'commune',
         ordre: 2,
         champs: [
             {
-                id: 'typePratique',
+                id: 'calcNoteFinale',
                 type: 'radio-cards',
                 required: true,
                 options: [
                     {
-                        value: 'sommative',
-                        label: 'Sommative',
-                        description: 'Pratique traditionnelle avec moyenne pondérée de toutes les évaluations.'
+                        value: 'moyenne',
+                        label: 'Moyenne pondérée des évaluations',
+                        description: 'La note finale est calculée à partir de la moyenne des notes obtenues aux différentes évaluations, chacune ayant un poids.'
                     },
                     {
-                        value: 'pan-standards',
-                        label: 'PAN-Standards',
-                        description: 'Évaluation par niveaux de maîtrise (échelle IDME ou similaire). Supporte l\'approche par artefacts ou par objectifs.'
+                        value: 'niveaux',
+                        label: 'Niveaux de maîtrise (ex: I-D-M-E, A-B-C-D)',
+                        description: 'Vous utilisez une échelle de niveaux pour évaluer la maîtrise des apprentissages, puis convertissez en note.'
                     },
                     {
-                        value: 'pan-specifications',
-                        label: 'PAN-Spécifications',
-                        description: 'Évaluation binaire (acceptable/non-acceptable) avec système de jetons optionnel.'
+                        value: 'acceptable',
+                        label: 'Acceptable / Non acceptable avec forfaits',
+                        description: 'Chaque travail est jugé acceptable ou non. La note finale dépend du nombre de spécifications réussies.'
                     },
                     {
-                        value: 'pan-denotation',
-                        label: 'PAN-Dénotation',
-                        description: 'Évaluation sans notes chiffrées (bientôt disponible).',
-                        disabled: true
+                        value: 'pas-certain',
+                        label: 'Je ne suis pas certain(e)',
+                        description: 'Des questions supplémentaires vous aideront à identifier votre méthode.'
                     }
                 ]
             }
         ],
         suivant: (reponses) => {
-            if (reponses.typePratique === 'sommative') return 'config-sommative';
-            if (reponses.typePratique === 'pan-standards') return 'mode-configuration';
-            if (reponses.typePratique === 'pan-specifications') return 'mode-configuration';
+            if (reponses.calcNoteFinale === 'moyenne') return 'regles-sommative';
+            if (reponses.calcNoteFinale === 'niveaux') return 'approche-evaluation';
+            if (reponses.calcNoteFinale === 'acceptable') return 'nb-evaluations';
+            if (reponses.calcNoteFinale === 'pas-certain') return 'sous-questions-guidees';
             return null;
         },
         precedent: () => 'infos-base'
+    },
+
+    'sous-questions-guidees': {
+        id: 'sous-questions-guidees',
+        titre: 'Aidons-nous à identifier votre méthode',
+        description: 'Choisissez l\'énoncé qui décrit le mieux votre pratique de notation.',
+        branche: 'commune',
+        ordre: 2,
+        champs: [
+            {
+                id: 'calcNoteFinale',
+                type: 'radio-cards',
+                required: true,
+                options: [
+                    {
+                        value: 'moyenne',
+                        label: 'Je calcule une moyenne de pourcentages',
+                        description: 'Chaque évaluation vaut un certain pourcentage de la note finale (ex: examen 30%, travail 20%). Je fais la somme pondérée.'
+                    },
+                    {
+                        value: 'niveaux',
+                        label: 'J\'attribue des niveaux de maîtrise',
+                        description: 'J\'utilise des échelons comme A-B-C-D, 1-2-3-4 ou I-D-M-E pour évaluer chaque apprentissage, puis je convertis en note.'
+                    },
+                    {
+                        value: 'acceptable',
+                        label: 'Je vérifie si des critères sont réussis ou non',
+                        description: 'Chaque travail est acceptable ou non. La note dépend du nombre de critères/spécifications satisfaits.'
+                    }
+                ]
+            }
+        ],
+        suivant: (reponses) => {
+            if (reponses.calcNoteFinale === 'moyenne') return 'regles-sommative';
+            if (reponses.calcNoteFinale === 'niveaux') return 'approche-evaluation';
+            if (reponses.calcNoteFinale === 'acceptable') return 'nb-evaluations';
+            return null;
+        },
+        precedent: () => 'calcul-note-finale'
+    },
+
+    'regles-sommative': {
+        id: 'regles-sommative',
+        titre: 'Utilisez-vous des règles spéciales ?',
+        description: 'Sélectionnez toutes les règles qui s\'appliquent à votre pratique de notation.',
+        branche: 'sommative',
+        ordre: 3,
+        champs: [
+            {
+                id: 'reglesSommatives',
+                type: 'checkbox-cards',
+                required: true,
+                options: [
+                    {
+                        value: 'remplacement',
+                        label: 'Remplacement automatique',
+                        description: 'L\'évaluation finale remplace la mi-session si la note est supérieure.'
+                    },
+                    {
+                        value: 'double_verrou',
+                        label: 'Verrou sur une évaluation',
+                        description: 'Une évaluation spécifique (ex: la finale) doit être réussie pour passer le cours.'
+                    },
+                    {
+                        value: 'portfolio',
+                        label: 'Portfolio de progression',
+                        description: 'Un portfolio d\'artefacts contribue à la note, avec progression prise en compte.'
+                    },
+                    {
+                        value: 'plafonnement',
+                        label: 'Plafonnement conditionnel',
+                        description: 'La note est plafonnée si certaines conditions ne sont pas remplies.'
+                    },
+                    {
+                        value: 'aucune',
+                        label: 'Aucune règle spéciale',
+                        description: 'Moyenne pondérée classique sans règle particulière.',
+                        exclusive: true
+                    }
+                ]
+            }
+        ],
+        suivant: () => 'nb-evaluations',
+        precedent: () => 'calcul-note-finale'
+    },
+
+    'nb-evaluations': {
+        id: 'nb-evaluations',
+        titre: 'Nombre d\'évaluations',
+        description: 'Combien d\'évaluations prévoyez-vous pour cette session ?',
+        branche: 'commune',
+        ordre: 4,
+        champs: [
+            {
+                id: 'nbEvaluationsPrevues',
+                label: 'Nombre d\'évaluations prévues',
+                type: 'number',
+                min: 1,
+                max: 50,
+                default: 6,
+                required: true
+            }
+        ],
+        suivant: () => 'seuils-personnels',
+        precedent: (reponses) => {
+            if (reponses.calcNoteFinale === 'moyenne') return 'regles-sommative';
+            if (reponses.calcNoteFinale === 'niveaux') return 'approche-evaluation';
+            return 'calcul-note-finale';
+        }
+    },
+
+    'seuils-personnels': {
+        id: 'seuils-personnels',
+        titre: 'Vos seuils personnels',
+        description: 'Ces seuils servent au dépistage automatique des étudiants en difficulté.',
+        branche: 'commune',
+        ordre: 5,
+        champs: [
+            {
+                id: 'seuilVaBien',
+                label: 'Ça va bien à partir de (%)',
+                type: 'number',
+                min: 0,
+                max: 100,
+                default: 75,
+                required: true
+            },
+            {
+                id: 'seuilDifficulte',
+                label: 'En difficulté à partir de (%)',
+                type: 'number',
+                min: 0,
+                max: 100,
+                default: 65,
+                required: true
+            },
+            {
+                id: 'seuilGrandeDifficulte',
+                label: 'Grande difficulté sous (%)',
+                type: 'number',
+                min: 0,
+                max: 100,
+                default: 55,
+                required: true
+            }
+        ],
+        suivant: (reponses) => {
+            const classification = deduireTypePratique(reponses);
+            const type = classification.type;
+            const regles = classification.regles || [];
+            // Sommative avec règles spéciales → configurer les règles
+            if (type === 'sommative' && regles.length > 0 && !regles.includes('aucune')) {
+                return 'config-sommative-regles';
+            }
+            if (type === 'sommative') return 'config-sommative';
+            if (type === 'pan-standards') {
+                if (reponses.approcheEvaluation === 'par-objectifs') return 'config-objectifs-definition';
+                if (reponses.approcheEvaluation === 'par-artefacts') return 'config-portfolio';
+                return 'mode-calcul-objectifs';
+            }
+            if (type === 'pan-specifications') return 'config-specifications';
+            return 'recapitulatif';
+        },
+        precedent: () => 'nb-evaluations'
+    },
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // PHASE 2 : ENRICHISSEMENT DE LA CAPTURE
+    // ─────────────────────────────────────────────────────────────────────────
+
+    'config-sommative-regles': {
+        id: 'config-sommative-regles',
+        titre: 'Configuration des règles spéciales',
+        description: 'Précisez les détails de vos règles de notation.',
+        branche: 'sommative',
+        ordre: 6,
+        champs: [],
+        getChampsDynamiques: (reponses) => {
+            const regles = reponses.reglesSommatives || [];
+            const champs = [];
+
+            if (regles.includes('remplacement')) {
+                champs.push({
+                    id: 'infoRemplacement',
+                    type: 'info',
+                    texte: 'Remplacement automatique : l\'évaluation finale remplace l\'initiale si la note est supérieure.'
+                });
+                champs.push({
+                    id: 'nbPairesRemplacement',
+                    label: 'Nombre de paires d\'évaluations avec remplacement',
+                    type: 'number',
+                    min: 1,
+                    max: 10,
+                    default: 2,
+                    required: true
+                });
+            }
+
+            if (regles.includes('double_verrou')) {
+                champs.push({
+                    id: 'infoVerrou',
+                    type: 'info',
+                    texte: 'Verrou : une évaluation doit être réussie pour que la note finale dépasse un plafond.'
+                });
+                champs.push({
+                    id: 'nomEvalVerrouillee',
+                    label: 'Nom de l\'évaluation verrouillée',
+                    type: 'text',
+                    placeholder: 'Ex: Analyse finale',
+                    required: true
+                });
+                champs.push({
+                    id: 'seuilVerrou',
+                    label: 'Seuil minimum requis (%)',
+                    type: 'number',
+                    min: 0,
+                    max: 100,
+                    default: 60,
+                    required: true
+                });
+                champs.push({
+                    id: 'plafondVerrou',
+                    label: 'Note maximale si seuil non atteint (%)',
+                    type: 'number',
+                    min: 0,
+                    max: 100,
+                    default: 55,
+                    required: true
+                });
+            }
+
+            if (regles.includes('portfolio')) {
+                champs.push({
+                    id: 'infoPortfolio',
+                    type: 'info',
+                    texte: 'Portfolio de progression : les artefacts contribuent à la note avec prise en compte de la progression.'
+                });
+                champs.push({
+                    id: 'nbArtefactsPortfolio',
+                    label: 'Nombre d\'artefacts dans le portfolio',
+                    type: 'number',
+                    min: 1,
+                    max: 20,
+                    default: 5,
+                    required: true
+                });
+                champs.push({
+                    id: 'portfolioQualitatif',
+                    label: 'Portfolio qualitatif (sans note chiffrée) ?',
+                    type: 'toggle',
+                    default: false
+                });
+            }
+
+            if (regles.includes('plafonnement')) {
+                champs.push({
+                    id: 'infoPlafonnement',
+                    type: 'info',
+                    texte: 'Plafonnement : la note est plafonnée si certaines conditions ne sont pas remplies.'
+                });
+                champs.push({
+                    id: 'conditionPlafonnement',
+                    label: 'Condition de plafonnement',
+                    type: 'text',
+                    placeholder: 'Ex: Moyenne des standards terminaux < 60%',
+                    required: true
+                });
+                champs.push({
+                    id: 'valeurPlafonnement',
+                    label: 'Note maximale si condition remplie (%)',
+                    type: 'number',
+                    min: 0,
+                    max: 100,
+                    default: 55,
+                    required: true
+                });
+            }
+
+            return champs;
+        },
+        suivant: () => 'config-sommative',
+        precedent: () => 'seuils-personnels'
+    },
+
+    'config-objectifs-definition': {
+        id: 'config-objectifs-definition',
+        titre: 'Définition des objectifs d\'apprentissage',
+        description: 'Ajoutez vos objectifs d\'apprentissage avec leurs pondérations. Les poids doivent totaliser 100%.',
+        branche: 'pan-standards-objectifs',
+        ordre: 6,
+        champs: [
+            {
+                id: 'infoObjectifs',
+                type: 'info',
+                texte: 'Chaque objectif a un nom, un poids (%) et un type (fondamental, intégrateur ou transversal). Les objectifs intégrateurs sont les plus complexes et les plus importants.'
+            },
+            {
+                id: 'nbObjectifs',
+                label: 'Nombre d\'objectifs d\'apprentissage',
+                type: 'number',
+                min: 1,
+                max: 30,
+                default: 6,
+                required: true
+            },
+            {
+                id: 'infoObjectifsConfig',
+                type: 'info',
+                texte: 'La définition détaillée de chaque objectif (nom, poids, type) sera configurable dans Réglages → Ensembles d\'objectifs après la création de la pratique.'
+            }
+        ],
+        suivant: () => 'mode-calcul-objectifs',
+        precedent: () => 'seuils-personnels'
+    },
+
+    'config-reprises': {
+        id: 'config-reprises',
+        titre: 'Reprises',
+        description: 'Configurez les reprises pour vos évaluations.',
+        branche: 'commune',
+        ordre: 7,
+        champs: [
+            {
+                id: 'reprisesPermisesGlobal',
+                label: 'Reprises permises ?',
+                type: 'toggle',
+                default: false
+            },
+            {
+                id: 'modeReprises',
+                label: 'Mode de reprises',
+                type: 'select',
+                options: [
+                    { value: 'illimite', label: 'Illimitées' },
+                    { value: 'limite', label: 'Limitées' },
+                    { value: 'non', label: 'Non permises' }
+                ],
+                default: 'non'
+            },
+            {
+                id: 'nbMaxReprises',
+                label: 'Nombre maximum de tentatives (si limitées)',
+                type: 'number',
+                min: 1,
+                max: 10,
+                default: 3
+            }
+        ],
+        suivant: (reponses) => {
+            if (reponses.typePratique === 'pan-standards' || reponses.typePratique === 'pan-specifications') {
+                return 'echelle-performance';
+            }
+            return 'recapitulatif';
+        },
+        precedent: (reponses) => {
+            if (reponses.typePratique === 'sommative') return 'config-sommative';
+            if (reponses.typePratique === 'pan-standards') {
+                if (reponses.approcheEvaluation === 'par-artefacts') return 'config-portfolio';
+                return 'config-mode-calcul';
+            }
+            return 'choix-modele-bundles';
+        }
     },
 
     'mode-configuration': {
@@ -168,7 +535,7 @@ const ETAPES_WIZARD = {
             }
         ],
         suivant: () => 'recapitulatif',
-        precedent: () => 'type-pratique'
+        precedent: () => 'seuils-personnels'
     },
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -200,12 +567,8 @@ const ETAPES_WIZARD = {
                 ]
             }
         ],
-        suivant: (reponses) => {
-            if (reponses.approcheEvaluation === 'par-artefacts') return 'config-portfolio';
-            if (reponses.approcheEvaluation === 'par-objectifs') return 'mode-calcul-objectifs';
-            return null;
-        },
-        precedent: () => 'mode-configuration'
+        suivant: () => 'nb-evaluations',
+        precedent: () => 'calcul-note-finale'
     },
 
     // --- Branche artefacts ---
@@ -277,7 +640,7 @@ const ETAPES_WIZARD = {
             }
         ],
         suivant: () => 'echelle-performance',
-        precedent: () => 'approche-evaluation'
+        precedent: () => 'seuils-personnels'
     },
 
     // --- Branche objectifs ---
@@ -318,7 +681,7 @@ const ETAPES_WIZARD = {
             }
         ],
         suivant: (reponses) => 'config-mode-calcul',
-        precedent: () => 'approche-evaluation'
+        precedent: () => 'seuils-personnels'
     },
 
     'config-mode-calcul': {
@@ -450,7 +813,7 @@ const ETAPES_WIZARD = {
             if (reponses.utiliserJetons) return 'config-jetons';
             return 'choix-modele-bundles';
         },
-        precedent: () => 'mode-configuration'
+        precedent: () => 'seuils-personnels'
     },
 
     'config-jetons': {
@@ -680,6 +1043,18 @@ function etapeSuivanteV2() {
     // Sauvegarder les réponses
     sauvegarderReponsesEtape(wizardState.etapeActuelle);
 
+    // Auto-déduire le type de pratique après les étapes de classification
+    const etapesClassification = ['calcul-note-finale', 'sous-questions-guidees', 'regles-sommative', 'approche-evaluation'];
+    if (etapesClassification.includes(wizardState.etapeActuelle)) {
+        const classification = deduireTypePratique(wizardState.reponses);
+        wizardState.reponses.typePratique = classification.type;
+        wizardState.reponses.typeVariante = classification.variante;
+        if (!wizardState.reponses.modeConfig) {
+            wizardState.reponses.modeConfig = 'exploration';
+        }
+        console.log('[WizardV2] Classification déduite:', classification);
+    }
+
     // Obtenir l'étape suivante
     const suivante = obtenirEtapeSuivante(wizardState.etapeActuelle, wizardState.reponses);
 
@@ -712,13 +1087,18 @@ function etapePrecedenteV2() {
  */
 function calculerNbEtapes() {
     const reponses = wizardState.reponses;
-    let count = 3; // infos-base, type-pratique, recapitulatif
+    // Base: infos-base, calcul-note-finale, nb-evaluations, seuils-personnels, recapitulatif
+    let count = 5;
 
-    if (reponses.typePratique === 'sommative') {
-        return 4; // + config-sommative
+    if (reponses.calcNoteFinale === 'pas-certain') {
+        count++; // sous-questions-guidees
     }
 
-    count++; // mode-configuration
+    if (reponses.typePratique === 'sommative') {
+        count++; // regles-sommative
+        count++; // config-sommative
+        return count;
+    }
 
     if (reponses.typePratique === 'pan-standards') {
         count++; // approche-evaluation
@@ -730,8 +1110,7 @@ function calculerNbEtapes() {
     } else if (reponses.typePratique === 'pan-specifications') {
         count++; // config-specifications
         if (reponses.utiliserJetons) count++; // config-jetons
-        count += 2; // choix-modele-bundles, recapitulatif (déjà compté)
-        // Pas d'échelle/grille pour PAN-Spécifications
+        count++; // choix-modele-bundles
     }
 
     return count;
@@ -845,6 +1224,8 @@ function genererChamp(champ) {
             return genererChampSelect(champ);
         case 'radio-cards':
             return genererRadioCards(champ);
+        case 'checkbox-cards':
+            return genererCheckboxCards(champ);
         case 'select-echelle':
             return genererSelectEchelle(champ);
         case 'select-grille':
@@ -1086,6 +1467,36 @@ function genererRadioCards(champ) {
 }
 
 /**
+ * Génère des cartes checkbox (multi-sélection)
+ */
+function genererCheckboxCards(champ) {
+    let cards = champ.options.map(opt => {
+        const exclusiveAttr = opt.exclusive ? 'data-exclusive="true"' : '';
+        return `
+            <label class="wizard-v2-radio-card wizard-v2-checkbox-card">
+                <input type="checkbox"
+                       name="${champ.id}"
+                       value="${opt.value}"
+                       ${exclusiveAttr}
+                       onclick="wizardV2GererExclusionCheckbox(this)">
+                <div class="wizard-v2-card-content">
+                    <div class="wizard-v2-card-title">${opt.label}</div>
+                    <div class="wizard-v2-card-description">${opt.description}</div>
+                </div>
+            </label>
+        `;
+    }).join('');
+
+    return `
+        <div class="wizard-v2-champ">
+            <div class="wizard-v2-radio-cards wizard-v2-checkbox-cards">
+                ${cards}
+            </div>
+        </div>
+    `;
+}
+
+/**
  * Génère un sélecteur d'échelle
  */
 function genererSelectEchelle(champ) {
@@ -1185,16 +1596,57 @@ function genererRecapitulatif() {
     if (r.discipline) html += `<p><strong>Discipline :</strong> ${r.discipline}</p>`;
     html += '</div>';
 
-    // Section : Type de pratique
+    // Section : Type de pratique (déduit automatiquement)
     html += '<div class="wizard-v2-recap-section">';
-    html += '<h4>Type de pratique</h4>';
+    html += '<h4>Type de pratique (déduit)</h4>';
     const typeLabels = {
         'sommative': 'Sommative (traditionnelle)',
         'pan-standards': 'PAN-Standards (niveaux de maîtrise)',
         'pan-specifications': 'PAN-Spécifications (binaire)'
     };
-    html += `<p>${typeLabels[r.typePratique] || r.typePratique}</p>`;
+    const classification = deduireTypePratique(r);
+    html += `<p><strong>Type :</strong> ${typeLabels[classification.type] || classification.type}</p>`;
+    if (classification.variante) {
+        const varianteLabels = {
+            'classique': 'Classique',
+            'progressive': 'Avec remplacement progressif',
+            'verrou': 'Avec verrou d\'évaluation',
+            'portfolio': 'Avec portfolio',
+            'plafonnement': 'Avec plafonnement conditionnel',
+            'n-meilleurs': 'Par artefacts (N meilleurs)',
+            'objectifs-ponderes': 'Par objectifs pondérés',
+            'moyenne-ponderee': 'Moyenne pondérée des objectifs',
+            'comptage': 'Comptage d\'objectifs',
+            'seuils-critiques': 'Seuils critiques',
+            'holistique': 'Holistique',
+            'bundles': 'Forfaits de spécifications'
+        };
+        html += `<p><strong>Variante :</strong> ${varianteLabels[classification.variante] || classification.variante}</p>`;
+    }
+    if (classification.regles && classification.regles.length > 0 && !classification.regles.includes('aucune')) {
+        const reglesLabels = {
+            'remplacement': 'Remplacement automatique',
+            'double_verrou': 'Verrou d\'évaluation',
+            'portfolio': 'Portfolio de progression',
+            'plafonnement': 'Plafonnement conditionnel'
+        };
+        const reglesTexte = classification.regles.map(r => reglesLabels[r] || r).join(', ');
+        html += `<p><strong>Règles :</strong> ${reglesTexte}</p>`;
+    }
     html += '</div>';
+
+    // Section : Paramètres généraux
+    if (r.nbEvaluationsPrevues || r.seuilVaBien) {
+        html += '<div class="wizard-v2-recap-section">';
+        html += '<h4>Paramètres généraux</h4>';
+        if (r.nbEvaluationsPrevues) {
+            html += `<p><strong>Évaluations prévues :</strong> ${r.nbEvaluationsPrevues}</p>`;
+        }
+        if (r.seuilVaBien) {
+            html += `<p><strong>Seuils :</strong> Bien ≥${r.seuilVaBien}% | Difficulté ≤${r.seuilDifficulte}% | Grande difficulté &lt;${r.seuilGrandeDifficulte}%</p>`;
+        }
+        html += '</div>';
+    }
 
     // Section spécifique selon le type
     if (r.typePratique === 'sommative') {
@@ -1375,6 +1827,11 @@ function validerEtape(etapeId) {
                 // Pour les radio-cards, chercher le radio coché
                 element = document.querySelector(`input[name="${champ.id}"]:checked`);
                 valeurTrouvee = element?.value || '';
+            } else if (champ.type === 'checkbox-cards') {
+                // Pour les checkbox-cards, chercher au moins une case cochée
+                const checked = document.querySelectorAll(`input[name="${champ.id}"]:checked`);
+                element = checked.length > 0 ? checked[0] : null;
+                valeurTrouvee = checked.length > 0 ? 'selected' : '';
             } else {
                 // Pour les autres champs, chercher par ID avec préfixe V2
                 element = document.getElementById(`${WIZARD_V2_ID_PREFIX}${champ.id}`);
@@ -1391,8 +1848,8 @@ function validerEtape(etapeId) {
 
             // Validation selon le type
             let estValide = false;
-            if (champ.type === 'radio-cards') {
-                // Pour radio-cards, vérifier qu'un radio est coché
+            if (champ.type === 'radio-cards' || champ.type === 'checkbox-cards') {
+                // Pour radio/checkbox-cards, vérifier qu'au moins un est coché
                 estValide = !!element;
             } else {
                 // Pour les autres champs, vérifier que la valeur n'est pas vide
@@ -1463,6 +1920,9 @@ function sauvegarderReponsesEtape(etapeId) {
             if (checked) {
                 wizardState.reponses[champ.id] = checked.value;
             }
+        } else if (champ.type === 'checkbox-cards') {
+            const checked = document.querySelectorAll(`input[name="${champ.id}"]:checked`);
+            wizardState.reponses[champ.id] = Array.from(checked).map(cb => cb.value);
         } else if (champ.type === 'toggle') {
             wizardState.reponses[champ.id] = element?.checked || false;
         } else if (element) {
@@ -1507,6 +1967,12 @@ function restaurerValeursEtape(etapeId) {
         if (champ.type === 'radio-cards') {
             const radio = document.querySelector(`input[name="${champ.id}"][value="${valeur}"]`);
             if (radio) radio.checked = true;
+        } else if (champ.type === 'checkbox-cards') {
+            const values = Array.isArray(valeur) ? valeur : [];
+            values.forEach(val => {
+                const cb = document.querySelector(`input[name="${champ.id}"][value="${val}"]`);
+                if (cb) cb.checked = true;
+            });
         } else if (champ.type === 'toggle') {
             if (element) element.checked = valeur;
         } else if (element) {
@@ -1515,6 +1981,67 @@ function restaurerValeursEtape(etapeId) {
     };
 
     champs.forEach(restaurerChamp);
+}
+
+// ============================================================================
+// CLASSIFICATION COMPORTEMENTALE - Moteur d'inférence
+// ============================================================================
+
+/**
+ * Déduit le type de pratique à partir des réponses comportementales
+ * @param {Object} reponses - Réponses collectées dans le wizard
+ * @returns {{ type: string, variante: string, regles: string[], confiance: number }}
+ */
+function deduireTypePratique(reponses) {
+    const q1 = reponses.calcNoteFinale;
+
+    if (q1 === 'moyenne') {
+        const regles = reponses.reglesSommatives || [];
+        let variante = 'classique';
+
+        if (regles.includes('remplacement')) variante = 'progressive';
+        else if (regles.includes('double_verrou')) variante = 'verrou';
+        else if (regles.includes('portfolio')) variante = 'portfolio';
+        else if (regles.includes('plafonnement')) variante = 'plafonnement';
+
+        return { type: 'sommative', variante, regles, confiance: 1.0 };
+    }
+
+    if (q1 === 'niveaux') {
+        let variante = '';
+        if (reponses.approcheEvaluation === 'par-artefacts') {
+            variante = 'n-meilleurs';
+        } else if (reponses.approcheEvaluation === 'par-objectifs') {
+            variante = reponses.modeCalcul || 'objectifs-ponderes';
+        }
+
+        return { type: 'pan-standards', variante, regles: [], confiance: 1.0 };
+    }
+
+    if (q1 === 'acceptable') {
+        return { type: 'pan-specifications', variante: 'bundles', regles: [], confiance: 1.0 };
+    }
+
+    return { type: null, variante: null, regles: [], confiance: 0 };
+}
+
+/**
+ * Gestion de l'exclusion mutuelle pour checkbox-cards
+ * Quand une option exclusive (ex: "aucune") est cochée, les autres sont décochées et vice-versa
+ */
+function wizardV2GererExclusionCheckbox(el) {
+    const container = el.closest('.wizard-v2-checkbox-cards');
+    if (!container) return;
+
+    if (el.dataset.exclusive === 'true' && el.checked) {
+        container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            if (cb !== el) cb.checked = false;
+        });
+    } else if (el.checked) {
+        container.querySelectorAll('input[type="checkbox"][data-exclusive="true"]').forEach(cb => {
+            cb.checked = false;
+        });
+    }
 }
 
 // ============================================================================
@@ -1529,13 +2056,16 @@ async function creerPratiqueV2() {
     const r = wizardState.reponses;
 
     // Construire l'objet pratique
-    // 🆕 FIX (20 jan 2026) : Ajouter dansBibliotheque et pratiques pour sidebar
     const typeMapping = {
         'sommative': 'SOM',
         'pan-standards': 'STD',
         'pan-specifications': 'SPE',
         'pan-maitrise': 'PAN'
     };
+
+    // Utiliser la classification comportementale déduite
+    const classification = deduireTypePratique(r);
+    const typeFinal = classification.type || r.typePratique;
 
     const pratique = {
         id: wizardState.pratiqueId || `pratique-${Date.now()}`,
@@ -1544,20 +2074,93 @@ async function creerPratiqueV2() {
         etablissement: r.etablissement || '',
         description: r.description || '',
         discipline: r.discipline || '',
-        type: r.typePratique,
-        pratiques: [typeMapping[r.typePratique] || 'STD'],  // Pour le badge
+        type: typeFinal,
+        variante: classification.variante || null,
+        pratiques: [typeMapping[typeFinal] || 'STD'],  // Pour le badge
         dansBibliotheque: true,  // Pour apparaître dans la sidebar
         dateCreation: new Date().toISOString(),
         configuration: {}
     };
 
+    // Seuils personnels (toutes branches)
+    if (r.seuilVaBien || r.seuilDifficulte || r.seuilGrandeDifficulte) {
+        pratique.seuils = {
+            type: 'pourcentage',
+            va_bien: parseInt(r.seuilVaBien) || 75,
+            difficulte: parseInt(r.seuilDifficulte) || 65,
+            grande_difficulte: parseInt(r.seuilGrandeDifficulte) || 55
+        };
+    }
+
+    // Nombre d'évaluations prévues
+    if (r.nbEvaluationsPrevues) {
+        pratique.nbEvaluationsPrevues = parseInt(r.nbEvaluationsPrevues) || 6;
+    }
+
+    // Règles sommatives (stockées pour référence)
+    if (classification.regles && classification.regles.length > 0) {
+        pratique.reglesSpeciales = classification.regles;
+    }
+
     // Configuration selon le type
-    if (r.typePratique === 'sommative') {
+    if (typeFinal === 'sommative') {
         pratique.configuration = {
             afficherRang: r.afficherRang || false,
-            afficherMoyenneGroupe: r.afficherMoyenneGroupe !== false
+            afficherMoyenneGroupe: r.afficherMoyenneGroupe !== false,
+            reglesSommatives: classification.regles || []
         };
-    } else if (r.typePratique === 'pan-standards') {
+
+        // Phase 2 : Enrichissement sommative
+        const regles = classification.regles || [];
+        if (regles.includes('remplacement')) {
+            pratique.configuration.remplacement = {
+                actif: true,
+                nbPaires: parseInt(r.nbPairesRemplacement) || 2
+            };
+        }
+        if (regles.includes('double_verrou')) {
+            pratique.configuration.conditions_speciales = pratique.configuration.conditions_speciales || [];
+            pratique.configuration.conditions_speciales.push({
+                type: 'double_verrou',
+                condition: {
+                    evaluation: r.nomEvalVerrouillee || 'Analyse finale',
+                    comparateur: '<',
+                    seuil: parseInt(r.seuilVerrou) || 60
+                },
+                consequence: {
+                    action: 'echec',
+                    note_max: parseInt(r.plafondVerrou) || 55
+                }
+            });
+        }
+        if (regles.includes('portfolio')) {
+            pratique.configuration.portfolio = {
+                utiliser: true,
+                nbArtefacts: parseInt(r.nbArtefactsPortfolio) || 5,
+                qualitatif: r.portfolioQualitatif || false
+            };
+        }
+        if (regles.includes('plafonnement')) {
+            pratique.configuration.conditions_speciales = pratique.configuration.conditions_speciales || [];
+            pratique.configuration.conditions_speciales.push({
+                type: 'plafonnement',
+                description: r.conditionPlafonnement || '',
+                consequence: {
+                    action: 'plafonner',
+                    valeur: parseInt(r.valeurPlafonnement) || 55
+                }
+            });
+        }
+
+        // Reprises
+        if (r.reprisesPermisesGlobal) {
+            pratique.configuration.reprises = {
+                permises: true,
+                mode: r.modeReprises || 'non',
+                max: parseInt(r.nbMaxReprises) || 3
+            };
+        }
+    } else if (typeFinal === 'pan-standards') {
         // 🆕 #24 : Récupérer le mode de sélection pour déterminer varianteCalcul
         const modeSelection = r.modeSelectionPortfolio || 'n_meilleurs';
         const estHybride = modeSelection === 'hybride';
@@ -1617,7 +2220,8 @@ async function creerPratiqueV2() {
             }
         } else if (r.approcheEvaluation === 'par-objectifs') {
             pratique.configuration.objectifs = {
-                modeCalcul: r.modeCalcul
+                modeCalcul: r.modeCalcul,
+                nbObjectifs: parseInt(r.nbObjectifs) || 6
             };
 
             if (r.modeCalcul === 'comptage') {
@@ -1638,7 +2242,7 @@ async function creerPratiqueV2() {
                 };
             }
         }
-    } else if (r.typePratique === 'pan-specifications') {
+    } else if (typeFinal === 'pan-specifications') {
         pratique.configuration = {
             seuilAcceptabilite: parseInt(r.seuilAcceptabilite) || 100,
             jetons: {
@@ -1822,13 +2426,27 @@ function chargerPratiqueExistante(pratiqueId) {
     }
 
     // Mapper les données vers les réponses du wizard
+    // Déduire calcNoteFinale à partir du type stocké (rétro-compatibilité)
+    const calcNoteFinaleMap = {
+        'sommative': 'moyenne',
+        'pan-standards': 'niveaux',
+        'pan-specifications': 'acceptable'
+    };
+
     wizardState.reponses = {
         nom: pratique.nom,
         auteur: pratique.auteur,
         etablissement: pratique.etablissement,
         description: pratique.description,
         discipline: pratique.discipline,
-        typePratique: pratique.type
+        typePratique: pratique.type,
+        calcNoteFinale: calcNoteFinaleMap[pratique.type] || 'moyenne',
+        typeVariante: pratique.variante || null,
+        reglesSommatives: pratique.reglesSpeciales || pratique.configuration?.reglesSommatives || [],
+        nbEvaluationsPrevues: pratique.nbEvaluationsPrevues || null,
+        seuilVaBien: pratique.seuils?.va_bien || null,
+        seuilDifficulte: pratique.seuils?.difficulte || null,
+        seuilGrandeDifficulte: pratique.seuils?.grande_difficulte || null
     };
 
     // Ajouter la configuration spécifique
@@ -1879,8 +2497,10 @@ window.fermerWizardV2 = fermerWizardV2;
 window.etapeSuivanteV2 = etapeSuivanteV2;
 window.etapePrecedenteV2 = etapePrecedenteV2;
 window.creerPratiqueV2 = creerPratiqueV2;
+window.deduireTypePratique = deduireTypePratique;
+window.wizardV2GererExclusionCheckbox = wizardV2GererExclusionCheckbox;
 
-console.log('[WizardV2] Module chargé');
+console.log('[WizardV2] Module chargé (classification comportementale active)');
 
 
 })();

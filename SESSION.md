@@ -1,8 +1,60 @@
-# SESSION ACTIVE - BETA 97.6
+# SESSION ACTIVE - BETA 97.7
 
-**Date** : 13 février 2026
-**Version** : Beta 97.6 (build 0213-1530)
-**Statut** : Corrections bugs Élise + sécurisation données
+**Date** : 14 février 2026
+**Version** : Beta 97.7 (build 0214-0909)
+**Statut** : Refonte wizard de configuration des pratiques
+
+## SESSION DU 14 FÉVRIER 2026
+
+### Travail accompli — Refonte du wizard de configuration (Beta 97.7)
+
+28. **Classification comportementale** : Remplacement de l'étape `type-pratique` (qui demandait aux enseignants de se classer dans une taxonomie académique) par des questions concrètes sur le comportement de notation.
+    - **Q1** : « Comment calculez-vous la note finale ? » → moyenne / niveaux / acceptable / pas certain
+    - **Q2** : « Utilisez-vous des règles spéciales ? » (multi-select) → remplacement / verrou / portfolio / plafonnement / aucune
+    - **Q3** : « Comment structurez-vous vos évaluations ? » → par artefacts / par objectifs
+    - **Q4** : « Combien d'évaluations prévoyez-vous ? » → nombre
+    - **Q5** : « Quels sont vos seuils personnels ? » → 3 seuils en %
+    - **`deduireTypePratique()`** : Fonction d'inférence qui retourne `{ type, variante, regles, confiance }` — score 12/12 enseignants
+    - **Nouveau type de champ** : `checkbox-cards` (multi-sélection avec exclusion mutuelle pour "aucune")
+
+29. **Méthodes de calcul manquantes** (pratique-configurable.js) :
+    - **`calculerParSpecifications()`** : Vérifie les spécifications satisfaites, retourne la note du forfait le plus élevé (ref: François)
+    - **`appliquerDoubleVerrou()`** : Plafonne la note finale si l'évaluation verrouillée est sous le seuil (ref: Marie-Hélène)
+    - **`calculerParRemplacementProgression()`** : Pour chaque paire, utilise `max(initiale, finale)` avec pondérations (ref: Jordan)
+
+30. **Enrichissement de la capture** (Phase 2) :
+    - **`config-sommative-regles`** : Étape conditionnelle pour configurer remplacement/verrou/portfolio/plafonnement
+    - **`config-objectifs-definition`** : Capture du nombre d'objectifs d'apprentissage
+    - **`config-reprises`** : Toggle reprises + mode (illimité/limité/non) + nb max
+    - **CSS** : Styles pour checkbox-cards, dynamic-list, weight-slider, replacement-pair
+    - **`construireConfigComplete()`** : Extension pour les nouveaux champs (variante, reglesSpeciales, objectifs, seuils)
+
+### Fichiers modifiés (14 février - Beta 97.7)
+- `js/wizard-pratique-v2.js` — Classification comportementale Q1-Q5, deduireTypePratique(), checkbox-cards, étapes enrichies (+619 lignes)
+- `js/pratiques/pratique-configurable.js` — 3 méthodes de calcul implémentées (+190 lignes)
+- `js/pratiques/pratique-registre.js` — Extension construireConfigComplete() pour nouveaux champs (+5 lignes)
+- `styles.css` — CSS checkbox-cards, dynamic-list, weight-slider, replacement-pair (+150 lignes)
+- `js/changelog-data.js` — Entrée changelog refonte wizard
+- `index.html` — VERSION_MAJEURE 97.7, BUILD_ID 0214-0909
+- `version.json` — Build 0214-0909, Beta 97.7
+
+### Matrice de validation (12 cartographies)
+| # | Enseignant | Q1 | Type déduit | Variante | OK |
+|---|-----------|-----|-------------|----------|-----|
+| 1 | Jordan R. | moyenne | sommative | progressive | OK |
+| 2 | Bruno V. | niveaux | pan-standards | n-meilleurs | OK |
+| 3 | Michel B. | niveaux | pan-standards | moyenne-ponderee | OK |
+| 4 | Étienne L. | moyenne | sommative | classique | OK |
+| 5 | Olivier L. | moyenne | sommative | classique | OK |
+| 6 | Marie-Hélène L. | moyenne | sommative | verrou | OK |
+| 7 | François A.-H. | acceptable | pan-specifications | bundles | OK |
+| 8 | Hélène C. | moyenne | sommative | portfolio | OK |
+| 9 | Annie Bourgoin | moyenne | sommative | portfolio | OK |
+| 10 | Xavier C.-T. | niveaux | pan-standards | seuils-critiques | OK |
+| 11 | Élise Desgreniers | niveaux | pan-standards | comptage | OK |
+| 12 | Grégoire Bédard | niveaux | pan-standards | n-meilleurs | OK |
+
+---
 
 ## SESSION DU 13 FÉVRIER 2026
 

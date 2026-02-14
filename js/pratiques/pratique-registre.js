@@ -172,11 +172,17 @@ function construireConfigComplete(pratiqueData) {
         structure_evaluations: config.structure_evaluations || pratiqueData.structure_evaluations,
         systeme_reprises: config.systeme_reprises || pratiqueData.systeme_reprises,
         gestion_criteres: config.gestion_criteres || pratiqueData.gestion_criteres,
-        seuils: config.seuils || pratiqueData.seuils,
+        seuils: config.seuils || pratiqueData.seuils || pratiqueData.configuration?.seuils,
         interface: config.interface || pratiqueData.interface,
         affichage: config.affichage || pratiqueData.affichage,
         portfolio: config.portfolio || pratiqueData.portfolio || pratiqueData.configuration?.portfolio,
         jetons: config.jetons || pratiqueData.jetons,
+        objectifs: config.objectifs || pratiqueData.objectifs || pratiqueData.configuration?.objectifs,
+
+        // Champs ajoutés par le wizard comportemental
+        variante: pratiqueData.variante || null,
+        reglesSpeciales: pratiqueData.reglesSpeciales || null,
+        nbEvaluationsPrevues: pratiqueData.nbEvaluationsPrevues || null,
 
         // Configuration spécifique (pour pratiques avec approcheEvaluation, etc.)
         configuration: pratiqueData.configuration
