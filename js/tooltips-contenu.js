@@ -307,7 +307,7 @@ const TOOLTIPS = {
         'Cadre curriculaire : comp\u00e9tence minist\u00e9rielle et id\u00e9es ma\u00eetresses du cours.',
 
     'planif-quoi-enseigner':
-        'Savoirs, informations pr\u00e9alables, strat\u00e9gies cognitives et conditions d\u2019apprentissage.',
+        'Types de connaissances (Anderson) : factuelle, conceptuelle, proc\u00e9durale et m\u00e9tacognitive.',
 
     'planif-comment-enseigner':
         'Dispositifs d\u2019enseignement : activit\u00e9s, soutien et r\u00e9vision.',

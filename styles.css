@@ -14291,10 +14291,11 @@ body.mode-assiste .btn-aide-contextuelle,
     /* Objectifs — Bleu */
     --planif-couleur-competence: #2563eb;
     --planif-couleur-idee-maitresse: #3b82f6;
-    /* Connaissances — Orange */
-    --planif-couleur-connaissance: #f97316;
-    --planif-couleur-strategie: #ea580c;
-    --planif-couleur-condition: #fb923c;
+    /* Types de connaissances (Anderson) — Orange */
+    --planif-couleur-factuelle: #fb923c;
+    --planif-couleur-conceptuelle: #f97316;
+    --planif-couleur-procedurale: #ea580c;
+    --planif-couleur-metacognitive: #d97706;
     --planif-couleur-prerequis: #c2410c;
     /* Conteneurs — Violet */
     --planif-couleur-sequence: #7e22ce;
@@ -14933,6 +14934,46 @@ body.mode-assiste .btn-aide-contextuelle,
     font-size: 13px; color: var(--planif-couleur-texte); cursor: pointer;
 }
 .planif-checkbox-label input[type="checkbox"] { width: auto; margin: 0; accent-color: var(--planif-couleur-prerequis); }
+
+/* === NIVEAU COGNITIF (Anderson) === */
+.planif-panneau-niveau-desc {
+    font-size: 11px;
+    color: var(--texte-muted, #5a7a88);
+    font-style: italic;
+    margin: 4px 0 8px;
+    min-height: 14px;
+}
+.planif-panneau-verbes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 12px;
+}
+.planif-verbe-tag {
+    display: inline-block;
+    padding: 3px 8px;
+    font-size: 11px;
+    background: rgba(249, 115, 22, 0.1);
+    color: #f97316;
+    border: 1px solid rgba(249, 115, 22, 0.25);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+.planif-verbe-tag:hover {
+    background: rgba(249, 115, 22, 0.2);
+    border-color: rgba(249, 115, 22, 0.5);
+}
+.planif-badge-cognitif {
+    position: absolute;
+    bottom: 2px;
+    right: 6px;
+    font-size: 9px;
+    color: var(--texte-muted, #5a7a88);
+    opacity: 0.7;
+    pointer-events: none;
+    white-space: nowrap;
+}
 
 /* === PANNEAU SÉANCES === */
 #planif-btn-seances {
@@ -15825,9 +15866,10 @@ body.mode-assiste .btn-aide-contextuelle,
 /* Contours colorés boutons palette */
 .planif-palette-btn[data-type="competence"]     { border-color: var(--planif-couleur-competence); }
 .planif-palette-btn[data-type="idee-maitresse"] { border-color: var(--planif-couleur-idee-maitresse); }
-.planif-palette-btn[data-type="connaissance"]   { border-color: var(--planif-couleur-connaissance); }
-.planif-palette-btn[data-type="strategie"]      { border-color: var(--planif-couleur-strategie); }
-.planif-palette-btn[data-type="condition"]      { border-color: var(--planif-couleur-condition); }
+.planif-palette-btn[data-type="factuelle"]      { border-color: var(--planif-couleur-factuelle); }
+.planif-palette-btn[data-type="conceptuelle"]   { border-color: var(--planif-couleur-conceptuelle); }
+.planif-palette-btn[data-type="procedurale"]    { border-color: var(--planif-couleur-procedurale); }
+.planif-palette-btn[data-type="metacognitive"]  { border-color: var(--planif-couleur-metacognitive); }
 .planif-palette-btn[data-type="sequence"]       { border-color: var(--planif-couleur-sequence); border-style: dashed; }
 .planif-palette-btn[data-type="lecon"]          { border-color: var(--planif-couleur-lecon); border-style: dashed; }
 .planif-palette-btn[data-type="activite"]       { border-color: var(--planif-couleur-activite); }

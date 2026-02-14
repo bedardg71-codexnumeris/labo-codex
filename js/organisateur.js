@@ -402,7 +402,7 @@ function afficherPrerequis(leconId) {
     var connaissances = [];
     for (var i = 0; i < enfants.length; i++) {
         var e = etat.noeuds.get(enfants[i]);
-        if (e && (e.type === 'connaissance' || e.type === 'strategie' || e.type === 'condition')) {
+        if (e && (e.type === 'factuelle' || e.type === 'conceptuelle' || e.type === 'procedurale' || e.type === 'metacognitive')) {
             connaissances.push(e);
         }
     }

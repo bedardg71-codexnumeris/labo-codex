@@ -1,10 +1,24 @@
-# SESSION ACTIVE - BETA 97.7
+# SESSION ACTIVE - BETA 97.8
 
 **Date** : 14 février 2026
-**Version** : Beta 97.7 (build 0214-0940)
-**Statut** : Refonte wizard de configuration des pratiques
+**Version** : Beta 97.8 (build 0214-1015)
+**Statut** : Taxonomie d'Anderson dans la carte mentale
 
 ## SESSION DU 14 FÉVRIER 2026
+
+### Travail accompli — Taxonomie d'Anderson dans la carte mentale (Beta 97.8, build 0214-1015)
+
+39. **Types de connaissances (Anderson)** : Remplacement des 3 anciens types (Information, Stratégie, Condition) par les 4 types d'Anderson & Krathwohl (2001) : Factuelle (#fb923c), Conceptuelle (#f97316), Procédurale (#ea580c), Métacognitive (#d97706). Palette, TYPES, VERBES_AUTO, badges, conteneurs, CSS et tooltips mis à jour.
+
+40. **Migration automatique** : Les cartes existantes sont migrées silencieusement au chargement (connaissance→factuelle, strategie→procedurale, condition→procedurale). Migration aussi dans restaurerSnapshot() et importerCarte(). Liens et badges préservés.
+
+41. **Banque de verbes cognitifs** : 6 niveaux (Mémoriser→Créer) avec 10 verbes chacun. Constantes NIVEAUX_COGNITIFS et BANQUE_VERBES ajoutées. Sélecteur dans le panneau de propriétés pour les types : compétence, idée maîtresse, activité, soutien, révision, évaluation.
+
+42. **Verbes cliquables** : Étiquettes cliquables sous le sélecteur. Un clic insère le verbe au début du titre du nœud (avec majuscule). Description du niveau affichée en aide contextuelle grisée.
+
+43. **Badge cognitif sur le canevas** : Indicateur discret (.planif-badge-cognitif) dans le coin inférieur droit du nœud. Rendu au chargement et mis à jour via mettreAJourApparenceNoeud().
+
+44. **Organisateur mis à jour** : Le filtre de type dans organisateur.js reconnaît les 4 nouveaux types de connaissances.
 
 ### Travail accompli — Simplification page d'accueil (Beta 97.7, build 0214-0940)
 

@@ -10,6 +10,19 @@
 
     var CHANGELOG = [
         {
+            version: 'Beta 97.8',
+            date: '14 f\u00e9vrier',
+            couleur: 'vert',
+            titre: 'Carte mentale \u2014 Taxonomie d\u2019Anderson',
+            items: [
+                '<strong>Types de connaissances (Anderson)</strong> : Les 3 anciens types (Information, Strat\u00e9gie, Condition) sont remplac\u00e9s par les 4 types d\u2019Anderson\u00a0: <em>Factuelle</em>, <em>Conceptuelle</em>, <em>Proc\u00e9durale</em> et <em>M\u00e9tacognitive</em>. Couleurs distinctes dans la famille orange.',
+                '<strong>Migration automatique</strong> : Les cartes existantes sont migr\u00e9es silencieusement au chargement (Information \u2192 Factuelle, Strat\u00e9gie \u2192 Proc\u00e9durale, Condition \u2192 Proc\u00e9durale). Liens et badges pr\u00e9serv\u00e9s.',
+                '<strong>Banque de verbes cognitifs</strong> : 6 niveaux (M\u00e9moriser, Comprendre, Appliquer, Analyser, \u00c9valuer, Cr\u00e9er) avec 10 verbes chacun. S\u00e9lecteur dans le panneau de propri\u00e9t\u00e9s pour comp\u00e9tences, id\u00e9es ma\u00eetresses, activit\u00e9s et \u00e9valuations.',
+                '<strong>Verbes cliquables</strong> : Cliquer sur un verbe l\u2019ins\u00e8re au d\u00e9but du titre du n\u0153ud. Description du niveau affich\u00e9e en aide contextuelle.',
+                '<strong>Badge cognitif sur le canevas</strong> : Un indicateur discret affiche le niveau cognitif s\u00e9lectionn\u00e9 dans le coin du n\u0153ud.'
+            ]
+        },
+        {
             version: 'Beta 97.7',
             date: '14 f\u00e9vrier',
             couleur: 'bleu',
