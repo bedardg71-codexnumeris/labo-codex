@@ -141,6 +141,13 @@ function afficherAccueilRetour(conteneur) {
                     Planifier et organiser les s\u00e9quences, le\u00e7ons et activit\u00e9s pour leur alignement p\u00e9dagogique.
                 </div>
             </div>
+            <div class="accueil-carte" onclick="afficherSection('construction'); setTimeout(function(){ if(typeof ouvrirWizardV2==='function') ouvrirWizardV2(); }, 300);">
+                <div class="accueil-carte-icone">\uD83C\uDFA8</div>
+                <div class="accueil-carte-titre">Configurer ma pratique de notation</div>
+                <div class="accueil-carte-desc">
+                    D\u00e9finir ce que je mesure et comment je le fais pour cr\u00e9er ma pratique de notation.
+                </div>
+            </div>
             <div class="accueil-carte" onclick="afficherSection('presences');">
                 <div class="accueil-carte-icone">&#x1F4CB;</div>
                 <div class="accueil-carte-titre">Saisir les pr\u00e9sences</div>
@@ -162,13 +169,6 @@ function afficherAccueilRetour(conteneur) {
                     Appliquer une grille de crit\u00e8res et construire une r\u00e9troaction diff\u00e9renci\u00e9e.
                 </div>
             </div>
-            <div class="accueil-carte" onclick="afficherSection('construction'); setTimeout(function(){ if(typeof ouvrirWizardV2==='function') ouvrirWizardV2(); }, 300);">
-                <div class="accueil-carte-icone">\uD83C\uDFA8</div>
-                <div class="accueil-carte-titre">Configurer une pratique de notation</div>
-                <div class="accueil-carte-desc">
-                    D\u00e9finir ce qu\u2019on mesure et comment on le fait pour cr\u00e9er sa pratique de notation\u00a0: sommative traditionnelle ou alternative (par standards, par sp\u00e9cification).
-                </div>
-            </div>
             <div class="accueil-carte" onclick="afficherSection('tableau-bord'); setTimeout(function(){ afficherSousSection('tableau-bord-profil'); }, 100);">
                 <div class="accueil-carte-icone">\uD83D\uDC64</div>
                 <div class="accueil-carte-titre">Consulter un profil \u00e9tudiant</div>
@@ -187,7 +187,7 @@ function afficherAccueilRetour(conteneur) {
                 <div class="accueil-carte-icone">\uD83D\uDEDF</div>
                 <div class="accueil-carte-titre">Pr\u00e9parer des interventions</div>
                 <div class="accueil-carte-desc">
-                    Identifier les \u00e9l\u00e8ves \u00e0 risque et planifier des interventions diff\u00e9renci\u00e9es selon leurs besoins (niveaux 1, 2, 3).
+                    Identifier les \u00e9l\u00e8ves \u00e0 risque et planifier des interventions diff\u00e9renci\u00e9es selon leurs besoins.
                 </div>
             </div>
             <div class="accueil-carte" onclick="if(window.backupReminder) window.backupReminder.afficherModal();">
@@ -199,7 +199,7 @@ function afficherAccueilRetour(conteneur) {
             </div>
             <div class="accueil-carte" onclick="afficherModalNouveautes();">
                 <div class="accueil-carte-icone">\u2709\uFE0F<span class="pastille-nouveautes"></span></div>
-                <div class="accueil-carte-titre">Suivre le d\u00e9veloppement du projet</div>
+                <div class="accueil-carte-titre">Derni\u00e8res nouvelles</div>
                 <div class="accueil-carte-desc">
                     Prendre connaissance des nouvelles fonctionnalit\u00e9s et des r\u00e9centes corrections de bugs.
                 </div>
