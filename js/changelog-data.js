@@ -10,6 +10,21 @@
 
     var CHANGELOG = [
         {
+            version: 'Beta 97.7',
+            date: '14 f\u00e9vrier',
+            couleur: 'vert',
+            titre: 'Refonte du wizard de configuration des pratiques',
+            items: [
+                '<strong>Classification comportementale</strong> : Le wizard ne demande plus de choisir entre Sommative / PAN-Standards / PAN-Sp\u00e9cifications. Il pose des questions concr\u00e8tes sur votre m\u00e9thode de notation et d\u00e9duit automatiquement le type de pratique. Score : 12/12 enseignants correctement classifi\u00e9s (vs 1/12 avant).',
+                '<strong>Questions guid\u00e9es</strong> : Comment calculez-vous la note finale ? Utilisez-vous des r\u00e8gles sp\u00e9ciales ? Combien d\u2019\u00e9valuations pr\u00e9voyez-vous ? Quels sont vos seuils personnels ?',
+                '<strong>Variantes automatiques</strong> : Le moteur d\u00e9tecte les variantes (remplacement progressif, verrou, portfolio, plafonnement, N meilleurs, objectifs pond\u00e9r\u00e9s, comptage, seuils critiques).',
+                '<strong>Calcul par sp\u00e9cifications</strong> : La m\u00e9thode de calcul PAN-Sp\u00e9cifications (fran\u00e7ois) est d\u00e9sormais impl\u00e9ment\u00e9e \u2014 v\u00e9rifie les sp\u00e9cifications satisfaites et retourne la note du forfait le plus \u00e9lev\u00e9.',
+                '<strong>Double verrou</strong> : La m\u00e9thode de plafonnement par verrou (Marie-H\u00e9l\u00e8ne) est impl\u00e9ment\u00e9e \u2014 plafonne la note finale si l\u2019\u00e9valuation verrouill\u00e9e est sous le seuil.',
+                '<strong>Remplacement progressif</strong> : La m\u00e9thode de remplacement (Jordan) est impl\u00e9ment\u00e9e \u2014 pour chaque paire, utilise max(initiale, finale) si la note finale est sup\u00e9rieure.',
+                '<strong>Configuration enrichie</strong> : Le wizard capture d\u00e9sormais les r\u00e8gles sp\u00e9ciales, le nombre d\u2019objectifs, les param\u00e8tres de verrou/plafonnement, et les reprises.'
+            ]
+        },
+        {
             version: 'Beta 97.6',
             date: '13 f\u00e9vrier',
             couleur: 'orange',

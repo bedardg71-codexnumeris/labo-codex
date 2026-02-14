@@ -436,6 +436,9 @@ class PratiqueConfigurable {
             case 'specifications':
                 return this.calculerParSpecifications(evaluations);
 
+            case 'remplacement-progression':
+                return this.calculerParRemplacementProgression(evaluations);
+
             case 'jugement_global':
                 // Pas de calcul automatique
                 return null;
@@ -498,14 +501,158 @@ class PratiqueConfigurable {
     }
 
     /**
-     * Calcule note par spécifications (ex: François)
+     * Calcule note par remplacement progressif (ex: Jordan R.)
+     * Pour chaque paire d'évaluations, utilise max(initiale, finale) × poids.
+     *
+     * Référence : PRATIQUE_SOMMATIVE_REMPLACEMENT_JORDAN dans pratiques-predefines.js
+     * @private
+     */
+    calculerParRemplacementProgression(evaluations) {
+        const structure = this.config.structure_evaluations;
+        if (!structure) {
+            console.warn('[PratiqueConfigurable] Pas de structure d\'évaluations configurée');
+            return this.calculerMoyennePonderee(evaluations);
+        }
+
+        let somme = 0;
+        let poidsTotal = 0;
+
+        // Traiter les paires de remplacement
+        const paires = structure.paires_remplacement || [];
+        for (const paire of paires) {
+            const evalInitiale = evaluations.find(e =>
+                e.id === paire.evaluation_initiale.id ||
+                e.nom === paire.evaluation_initiale.nom ||
+                e.evaluationId === paire.evaluation_initiale.id
+            );
+            const evalFinale = evaluations.find(e =>
+                e.id === paire.evaluation_finale.id ||
+                e.nom === paire.evaluation_finale.nom ||
+                e.evaluationId === paire.evaluation_finale.id
+            );
+
+            const noteInitiale = (evalInitiale && evalInitiale.note != null) ? evalInitiale.note : null;
+            const noteFinale = (evalFinale && evalFinale.note != null) ? evalFinale.note : null;
+
+            const poidsInitial = paire.evaluation_initiale.poids || 0;
+            const poidsFinal = paire.evaluation_finale.poids || 0;
+
+            if (paire.regle_remplacement === 'max' && noteInitiale != null && noteFinale != null) {
+                // Si la note finale est supérieure, elle remplace l'initiale
+                if (noteFinale >= noteInitiale) {
+                    // Finale remplace : tout le poids combiné va à la note finale
+                    somme += noteFinale * (poidsInitial + poidsFinal);
+                    poidsTotal += poidsInitial + poidsFinal;
+                } else {
+                    // Pas de remplacement : chacune garde son poids
+                    somme += noteInitiale * poidsInitial + noteFinale * poidsFinal;
+                    poidsTotal += poidsInitial + poidsFinal;
+                }
+            } else {
+                // Pas de remplacement ou données incomplètes
+                if (noteInitiale != null) {
+                    somme += noteInitiale * poidsInitial;
+                    poidsTotal += poidsInitial;
+                }
+                if (noteFinale != null) {
+                    somme += noteFinale * poidsFinal;
+                    poidsTotal += poidsFinal;
+                }
+            }
+        }
+
+        // Traiter les autres évaluations (non appariées)
+        const autresEvals = structure.autres_evaluations || [];
+        for (const autreConfig of autresEvals) {
+            const evaluation = evaluations.find(e =>
+                e.id === autreConfig.id ||
+                e.nom === autreConfig.nom ||
+                e.evaluationId === autreConfig.id
+            );
+            if (evaluation && evaluation.note != null) {
+                const poids = autreConfig.poids || 0;
+                somme += evaluation.note * poids;
+                poidsTotal += poids;
+            }
+        }
+
+        const noteBrute = poidsTotal > 0 ? somme / poidsTotal : 0;
+
+        // Appliquer conditions spéciales si configurées
+        if (this.config.calcul_note.conditions_speciales) {
+            return this.appliquerConditionsSpeciales(noteBrute, evaluations);
+        }
+
+        return Math.round(noteBrute * 10) / 10;
+    }
+
+    /**
+     * Calcule note par spécifications (ex: François A.-H.)
+     * Vérifie quelles spécifications sont satisfaites et retourne
+     * la note du forfait (bundle) le plus élevé satisfait.
+     *
+     * Référence : PRATIQUE_PAN_SPECIFICATIONS dans pratiques-predefines.js
      * @private
      */
     calculerParSpecifications(evaluations) {
-        // TODO : Implémenter la logique des spécifications
-        // Pour l'instant, retourner 0
-        console.warn('Méthode "specifications" pas encore implémentée');
-        return 0;
+        const structure = this.config.structure_evaluations;
+        if (!structure || !structure.specifications) {
+            console.warn('[PratiqueConfigurable] Pas de spécifications configurées');
+            return 0;
+        }
+
+        const specifications = structure.specifications;
+
+        // Déterminer quelles spécifications sont satisfaites
+        const specsSatisfaites = new Set();
+        for (const spec of specifications) {
+            // Chercher une évaluation correspondante qui est réussie
+            const evalCorrespondante = evaluations.find(e =>
+                (e.nom === spec.nom || e.specificationId === spec.id) &&
+                e.note !== null && e.note !== undefined &&
+                (e.reussi === true || e.note >= (spec.seuil || 60))
+            );
+            if (evalCorrespondante) {
+                specsSatisfaites.add(spec.nom || spec.id);
+            }
+        }
+
+        // Déterminer les notes possibles (forfaits), triées du plus élevé au plus bas
+        const echelle = this.config.echelle;
+        const notesPossibles = (echelle && echelle.notes_possibles)
+            ? [...echelle.notes_possibles].sort((a, b) => b - a)
+            : [100, 80, 60, 50];
+
+        // Pour chaque note (de la plus haute à la plus basse),
+        // vérifier si toutes les spécifications requises sont satisfaites
+        for (const note of notesPossibles) {
+            const specsRequises = specifications.filter(s =>
+                s.requis_pour && s.requis_pour.includes(note)
+            );
+
+            const toutesRequisesSatisfaites = specsRequises.every(s =>
+                specsSatisfaites.has(s.nom || s.id)
+            );
+
+            if (toutesRequisesSatisfaites && specsRequises.length > 0) {
+                return note;
+            }
+        }
+
+        // Aucun forfait satisfait — note minimale ou 0
+        const noteMin = notesPossibles.length > 0
+            ? notesPossibles[notesPossibles.length - 1]
+            : 0;
+
+        // Vérifier si au moins les specs du niveau minimal sont satisfaites
+        const specsMin = specifications.filter(s =>
+            s.requis_pour && s.requis_pour.includes(noteMin)
+        );
+        const minSatisfait = specsMin.every(s =>
+            specsSatisfaites.has(s.nom || s.id)
+        );
+
+        return minSatisfait ? noteMin : 0;
     }
 
     /**
@@ -587,11 +734,55 @@ class PratiqueConfigurable {
     }
 
     /**
-     * Applique un double verrou
+     * Applique un double verrou (ex: Marie-Hélène L.)
+     * Si l'évaluation verrouillée est sous le seuil, la note finale est plafonnée.
+     *
+     * Référence : PRATIQUE_SOMMATIVE_TRADITIONNELLE dans pratiques-predefines.js
      * @private
      */
     appliquerDoubleVerrou(noteActuelle, evaluations, condition) {
-        // TODO : Implémenter la logique du double verrou
+        // Trouver l'évaluation verrouillée
+        const nomCible = condition.condition.evaluation;
+        const evalVerrouillee = evaluations.find(e =>
+            e.nom === nomCible || e.id === nomCible || e.evaluationId === nomCible
+        );
+
+        if (!evalVerrouillee || evalVerrouillee.note === null || evalVerrouillee.note === undefined) {
+            // Évaluation pas encore passée — pas de verrou appliqué
+            return noteActuelle;
+        }
+
+        // Vérifier la condition
+        const seuil = condition.condition.seuil;
+        const comparateur = condition.condition.comparateur || '<';
+        let conditionRemplie = false;
+
+        switch (comparateur) {
+            case '<':
+                conditionRemplie = evalVerrouillee.note < seuil;
+                break;
+            case '<=':
+                conditionRemplie = evalVerrouillee.note <= seuil;
+                break;
+            case '>':
+                conditionRemplie = evalVerrouillee.note > seuil;
+                break;
+            case '>=':
+                conditionRemplie = evalVerrouillee.note >= seuil;
+                break;
+        }
+
+        // Appliquer la conséquence
+        if (conditionRemplie) {
+            if (condition.consequence.action === 'echec') {
+                // Note plafonnée au maximum spécifié (ex: 55%)
+                const noteMax = condition.consequence.note_max || 55;
+                return Math.min(noteActuelle, noteMax);
+            } else if (condition.consequence.action === 'plafonner') {
+                return Math.min(noteActuelle, condition.consequence.valeur);
+            }
+        }
+
         return noteActuelle;
     }
 
