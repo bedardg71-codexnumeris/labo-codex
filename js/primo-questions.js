@@ -1,7 +1,7 @@
 /**
  * PRIMO QUESTIONS - Structure des questions conversationnelles
  *
- * Définit toutes les questions que Primo pose pour configurer l'application.
+ * Définit toutes les questions du tour guidé pour configurer l'application.
  * Chaque question est liée à un champ spécifique dans les formulaires de Réglages.
  *
  * VERSION : 1.3
@@ -131,9 +131,9 @@ const QUESTIONS_PRIMO = [
             const nom = ens.prenom || ens.nom || 'Enseignant';
             const courriel = ens.courriel ? `\n• Courriel : **${ens.courriel}**` : '';
 
-            return `Salut ! Je vois que tu as déjà un profil configuré :\n\n` +
+            return `Un profil enseignant est déjà configuré :\n\n` +
                    `• Nom : **${nom}**${courriel}\n\n` +
-                   `Veux-tu utiliser ce profil pour ce groupe-cours ?`;
+                   `Souhaitez-vous utiliser ce profil pour ce groupe-cours ?`;
         },
         type: 'radio',
         options: [
@@ -163,7 +163,7 @@ const QUESTIONS_PRIMO = [
             if (!reponses['enseignant-config-existante']) {
                 return 'Bienvenue ! Ce guide va vous assister dans la configuration des paramètres de l\'application.\n\nQuel est votre nom ?';
             }
-            return 'Quel est ton nom ?';
+            return 'Quel est votre nom ?';
         },
         type: 'text',
         placeholder: 'Ton prénom',
@@ -1681,132 +1681,373 @@ const QUESTIONS_PRIMO = [
     },
 
     // ========================================================================
-    // ÉTAPE 7 : PRÉPARATION MATÉRIEL PÉDAGOGIQUE
+    // MODULE MATÉRIEL : CRÉATION ACTIVE DE MATÉRIEL PÉDAGOGIQUE
+    // Remplace les anciennes étapes 7-14 passives (Beta 97.5+)
+    // Lancé via le module "Créer du matériel" du tour guidé
     // ========================================================================
-    {
-        id: 'intro-materiel',
-        texte: 'Des collègues ont créé du matériel pédagogique pour toi et l\'ont partagé sous licence libre (CC BY-NC-SA 4.0). C\'est une caractéristique de cette application : la collaboration entre enseignant·es ! 🤝\n\nTu vas trouver ce matériel dans le dossier **materiel-demo/** :\n\n📁 materiel-demo/\n   ├── echelle-idme.json\n   ├── grille-srpnf.json\n   └── cartouches-srpnf.json\n\nOuvre ce dossier dans une autre fenêtre, on va en avoir besoin ! 📂',
-        type: 'instruction',
-        champsCibles: [],
-        validation: {
-            requis: false
-        },
-        aide: 'Le dossier materiel-demo/ se trouve à la racine du projet.'
-    },
 
+    // M1 — Détection du contexte (pratique de notation)
     {
-        id: 'confirmation-dossier-ouvert',
-        texte: 'As-tu ouvert le dossier **materiel-demo/** ?',
-        type: 'radio',
-        options: [
-            { value: 'oui', label: 'Oui, c\'est ouvert !' },
-            { value: 'aide', label: 'J\'ai besoin d\'aide pour le trouver' }
-        ],
-        champsCibles: [],
-        validation: {
-            requis: true
-        }
-    },
-
-    {
-        id: 'aide-dossier',
-        texte: 'Le dossier **materiel-demo/** se trouve au même endroit que le fichier index 92.html.\n\nSi tu utilises le Finder (macOS), tu peux faire un clic droit sur le fichier index 92.html et choisir «Afficher dans le Finder».\n\nC\'est bon, tu l\'as trouvé ?',
-        type: 'radio',
-        options: [
-            { value: 'oui', label: 'Oui, trouvé !' },
-            { value: 'non', label: 'Non, je continue sans' }
-        ],
-        champsCibles: [],
-        validation: {
-            requis: false
-        },
-        sautSi: function(reponses) {
-            return reponses['confirmation-dossier-ouvert'] === 'oui';
-        }
-    },
-
-    // ========================================================================
-    // ÉTAPE 8 : PASSAGE EN MODE GUIDÉ (NOTIFICATIONS)
-    // ========================================================================
-    {
-        id: 'transition-mode-guide',
-        texte: '**Maintenant, place à la pratique !**\n\nJe vais te guider pas à pas pour créer ta première production et évaluation directement dans l\'application.\n\nJe vais me transformer en **assistant discret** (notifications en haut à droite) pendant que tu navigues librement.\n\nUtilise le bouton **"Suivant →"** en bas à droite pour avancer dans les étapes.\n\nC\'est parti !',
+        id: 'materiel-intro',
+        texte: 'Détection de la pratique de notation en cours...',
         type: 'action',
-        action: 'passerEnModeNotification',
+        action: 'detecterContexteMateriel',
         champsCibles: [],
         validation: { requis: false }
     },
 
-    // ========================================================================
-    // ÉTAPE 9 : IMPORT MANUEL DE L'ÉCHELLE IDME (MODE NOTIFICATION)
-    // ========================================================================
+    // M1b — Aucune pratique configurée → message d'orientation
     {
-        id: 'importer-echelle-idme',
-        texte: '**Étape 1 : Importer l\'échelle de performance**\n\n1️⃣ Va dans **Matériel → Échelles de performance**\n2️⃣ Clique sur **Nouvelle échelle**\n3️⃣ Clique sur **Options d\'import/export**\n4️⃣ Clique sur **Importer une échelle**\n5️⃣ Sélectionne le fichier **echelle-idme.json** (dans le dossier de données de démonstration)\n6️⃣ Confirme l\'importation\n\nTu devrais voir apparaître **Échelle IDME** avec 4 niveaux (I, D, M, E).\n\nClique **"Suivant →"** quand c\'est fait.',
-        type: 'instruction',
-        champsCibles: [],
-        validation: { requis: false }
-    },
-
-    // ========================================================================
-    // ÉTAPE 10 : IMPORT MANUEL DE LA GRILLE SRPNF (MODE NOTIFICATION)
-    // ========================================================================
-    {
-        id: 'importer-grille-srpnf',
-        texte: '**Étape 2 : Importer la grille d\'évaluation**\n\n1️⃣ Va dans **Matériel → Grilles de critères**\n2️⃣ Clique sur **Nouvelle grille**\n3️⃣ Clique sur **Options d\'import/export**\n4️⃣ Clique sur **Importer des grilles**\n5️⃣ Sélectionne le fichier **grille-srpnf.json** (dans le dossier de données de démonstration)\n6️⃣ Confirme l\'importation\n\nTu devrais voir apparaître **Grille SRPNF** avec 5 critères.\n\nClique **"Suivant →"** quand c\'est fait.',
-        type: 'instruction',
-        champsCibles: [],
-        validation: { requis: false }
-    },
-
-    // ========================================================================
-    // ÉTAPE 11 : CRÉATION D'UNE PRODUCTION (MODE NOTIFICATION)
-    // ========================================================================
-    {
-        id: 'creer-production-guidee',
-        texte: '**Étape 3 : Créer ta production**\n\n1️⃣ Va dans **Matériel → Productions**\n2️⃣ Clique sur **Nouvelle production**\n3️⃣ Remplis le formulaire :\n   • **Titre** : Ce que tu veux (ex: "Analyse littéraire")\n   • **Description** : Une courte description\n   • **Type** : Artefact portfolio\n   • **Pondération** : 15 à 25%\n   • **Grille liée** : **Grille Test** (celle que tu as importée)\n4️⃣ Sauvegarde !\n\nMaintenant ta production est liée à la grille d\'évaluation !\n\nClique **"Suivant →"** quand c\'est fait.',
-        type: 'instruction',
-        champsCibles: [],
-        validation: { requis: false }
-    },
-
-    // ========================================================================
-    // ÉTAPE 12 : CRÉATION D'UNE ÉVALUATION (MODE NOTIFICATION)
-    // ========================================================================
-    {
-        id: 'navigation-evaluations',
-        texte: '**Étape 4 : Accéder aux évaluations**\n\n1️⃣ Va dans **Évaluations → Évaluer une production**\n2️⃣ Clique sur **Nouvelle évaluation**\n\nQuand c\'est fait, clique sur **"Suivant →"** en bas à droite.',
-        type: 'instruction',
-        champsCibles: [],
-        validation: { requis: false }
-    },
-
-    {
-        id: 'selection-etudiant',
-        texte: '**Étape 5 : Choisir un étudiant et la production**\n\n1️⃣ Choisis n\'importe quel étudiant de ta liste\n2️⃣ Sélectionne la production que tu viens de créer\n\nTu devrais maintenant voir le formulaire d\'évaluation avec :\n✅ **Échelle IDME Test** (niveaux I et M)\n✅ **Grille Test** (critères A et B)\n\n**Tout est là ! Le matériel importé est bien disponible.**\n\nClique **"Suivant →"** quand tu vois tout ça.',
-        type: 'instruction',
-        champsCibles: [],
-        validation: { requis: false }
-    },
-
-    {
-        id: 'attribuer-niveaux',
-        texte: '**Étape 6 : Évaluer**\n\nAttribue des niveaux pour chaque critère :\n• **Critère A** : M (Maîtrisé)\n• **Critère B** : I (Insuffisant)\n\nUne note est calculée automatiquement !\n\nTu peux aussi ajouter des commentaires si tu veux.\n\nSauvegarde l\'évaluation, puis clique **"Suivant →"**.',
-        type: 'instruction',
-        champsCibles: [],
-        validation: { requis: false }
-    },
-
-    // ========================================================================
-    // FIN DE LA SÉQUENCE "ÉVALUER" - RETOUR AU MENU
-    // ========================================================================
-    {
-        id: 'fin-sequence-evaluer',
-        texte: '**Bravo !** Tu as terminé la séquence d\'évaluation !\n\n✅ Échelle de performance importée\n✅ Grille de critères importée\n✅ Production créée\n✅ Évaluation complétée',
+        id: 'materiel-pas-configure',
+        texte: 'Aucune pratique de notation n\'est configurée.\n\nPour créer du matériel pédagogique, configurez d\'abord votre pratique de notation via le **Module 4 : Créer ma pratique de notation** du tour guidé.\n\nVous pouvez fermer cette fenêtre et lancer le Module 4.',
         type: 'message',
         champsCibles: [],
         validation: { requis: false },
-        finParcoursEvaluer: true  // Indicateur pour retourner au menu
+        finParcoursMateriel: true,
+        sautSi: function(reponses) {
+            return reponses['materiel-pratique-detectee'] && reponses['materiel-pratique-detectee'] !== 'aucune';
+        }
+    },
+
+    // M1c — Résumé du contexte détecté
+    {
+        id: 'materiel-contexte',
+        texte: function(reponses) {
+            var pratique = reponses['materiel-pratique-detectee'];
+            var labels = {
+                'sommative': 'Sommative',
+                'pan-standards': 'PAN-Standards',
+                'pan-specifications': 'PAN-Spécifications'
+            };
+            var label = labels[pratique] || pratique;
+            var detail = '';
+            if (pratique === 'sommative') {
+                detail = '\n\nEn pratique sommative, une grille de critères et une production seront créées (pas d\'échelle de performance).';
+            } else if (pratique === 'pan-standards') {
+                detail = '\n\nEn PAN-Standards, le parcours complet sera proposé : échelle de performance, grille de critères, production et cartouches de rétroaction.';
+            } else if (pratique === 'pan-specifications') {
+                detail = '\n\nEn PAN-Spécifications, une grille de spécifications et une production seront créées.';
+            }
+            return 'Pratique détectée : **' + label + '**' + detail;
+        },
+        type: 'instruction',
+        champsCibles: [],
+        sautSi: function(reponses) {
+            return !reponses['materiel-pratique-detectee'] || reponses['materiel-pratique-detectee'] === 'aucune';
+        }
+    },
+
+    // M2 — Choix d'échelle de performance (PAN seulement)
+    {
+        id: 'materiel-echelle-choix',
+        texte: 'Quelle échelle de performance souhaitez-vous utiliser ?',
+        type: 'radio',
+        options: [
+            {
+                value: 'idme',
+                label: 'IDME (Insuffisant / Développement / Maîtrise / Exemplaire)',
+                description: 'Échelle à 4 niveaux, la plus courante en PAN-Standards.'
+            },
+            {
+                value: 'abcd',
+                label: 'ABCD (4 niveaux lettres)',
+                description: 'Échelle à 4 niveaux avec notation par lettres.'
+            },
+            {
+                value: 'personnaliser',
+                label: 'Personnaliser',
+                description: 'Créer une échelle sur mesure avec vos propres niveaux.'
+            }
+        ],
+        champsCibles: [],
+        validation: { requis: true },
+        sautSi: function(reponses) {
+            var p = reponses['materiel-pratique-detectee'];
+            return p === 'sommative' || p === 'pan-specifications' || p === 'aucune' || !p;
+        }
+    },
+
+    // M2a — Nom personnalisé de l'échelle
+    {
+        id: 'materiel-echelle-nom',
+        texte: 'Comment souhaitez-vous appeler votre échelle ?',
+        type: 'text',
+        placeholder: 'Ex: Mon échelle de performance',
+        champsCibles: [],
+        validation: { requis: true, minLength: 2 },
+        sautSi: function(reponses) {
+            return reponses['materiel-echelle-choix'] !== 'personnaliser';
+        }
+    },
+
+    // M2b — Nombre de niveaux
+    {
+        id: 'materiel-echelle-niveaux',
+        texte: 'Combien de niveaux comporte votre échelle ?',
+        type: 'number',
+        placeholder: '4',
+        champsCibles: [],
+        validation: { requis: true, min: 2, max: 6 },
+        sautSi: function(reponses) {
+            return reponses['materiel-echelle-choix'] !== 'personnaliser';
+        }
+    },
+
+    // M2c — Noms des niveaux
+    {
+        id: 'materiel-echelle-noms-niveaux',
+        texte: 'Nommez chaque niveau du plus faible au plus fort (un par ligne).',
+        type: 'textarea',
+        placeholder: 'Ex:\nInsuffisant\nEn développement\nMaîtrise\nExemplaire',
+        champsCibles: [],
+        validation: { requis: true },
+        sautSi: function(reponses) {
+            return reponses['materiel-echelle-choix'] !== 'personnaliser';
+        }
+    },
+
+    // M2-action — Création de l'échelle
+    {
+        id: 'materiel-echelle-creer',
+        texte: 'Création de l\'échelle en cours...',
+        type: 'action',
+        action: 'creerEchelleDepuisParcours',
+        champsCibles: [],
+        validation: { requis: false },
+        sautSi: function(reponses) {
+            var p = reponses['materiel-pratique-detectee'];
+            return p === 'sommative' || p === 'pan-specifications' || p === 'aucune' || !p;
+        }
+    },
+
+    // M3 — Confirmation échelle
+    {
+        id: 'materiel-echelle-confirmation',
+        texte: function(reponses) {
+            var nom = reponses['materiel-echelle-nom-cree'] || 'Échelle';
+            var nb = reponses['materiel-echelle-nb-niveaux-crees'] || '4';
+            return '✅ Échelle **' + nom + '** créée avec ' + nb + ' niveaux.\n\nVous pourrez la modifier dans **Matériel → Échelles de performance**.';
+        },
+        type: 'instruction',
+        champsCibles: [],
+        sautSi: function(reponses) {
+            var p = reponses['materiel-pratique-detectee'];
+            return p === 'sommative' || p === 'pan-specifications' || p === 'aucune' || !p;
+        }
+    },
+
+    // M4 — Grille de critères
+    {
+        id: 'materiel-grille-choix',
+        texte: 'Souhaitez-vous créer une grille de critères d\'évaluation ?',
+        type: 'radio',
+        options: [
+            {
+                value: 'base',
+                label: 'Grille de base (4 critères à 25%)',
+                description: 'Critères génériques : Compréhension, Démarche, Communication, Esprit critique.'
+            },
+            {
+                value: 'personnaliser',
+                label: 'Personnaliser',
+                description: 'Définir vos propres critères d\'évaluation.'
+            },
+            {
+                value: 'passer',
+                label: 'J\'en ai déjà une',
+                description: 'Passer cette étape.'
+            }
+        ],
+        champsCibles: [],
+        validation: { requis: true },
+        sautSi: function(reponses) {
+            return reponses['materiel-pratique-detectee'] === 'aucune' || !reponses['materiel-pratique-detectee'];
+        }
+    },
+
+    // M4a — Nombre de critères
+    {
+        id: 'materiel-grille-nb-criteres',
+        texte: 'Combien de critères d\'évaluation souhaitez-vous ?',
+        type: 'number',
+        placeholder: '4',
+        champsCibles: [],
+        validation: { requis: true, min: 1, max: 10 },
+        sautSi: function(reponses) {
+            return reponses['materiel-grille-choix'] !== 'personnaliser';
+        }
+    },
+
+    // M4b — Noms des critères
+    {
+        id: 'materiel-grille-noms-criteres',
+        texte: 'Nommez chaque critère (un par ligne).',
+        type: 'textarea',
+        placeholder: 'Ex:\nCompréhension du sujet\nQualité de la démarche\nCommunication\nEsprit critique',
+        champsCibles: [],
+        validation: { requis: true },
+        sautSi: function(reponses) {
+            return reponses['materiel-grille-choix'] !== 'personnaliser';
+        }
+    },
+
+    // M4-action — Création de la grille
+    {
+        id: 'materiel-grille-creer',
+        texte: 'Création de la grille en cours...',
+        type: 'action',
+        action: 'creerGrilleDepuisParcours',
+        champsCibles: [],
+        validation: { requis: false },
+        sautSi: function(reponses) {
+            var p = reponses['materiel-pratique-detectee'];
+            return reponses['materiel-grille-choix'] === 'passer' || p === 'aucune' || !p;
+        }
+    },
+
+    // M4-confirmation
+    {
+        id: 'materiel-grille-confirmation',
+        texte: function(reponses) {
+            var nom = reponses['materiel-grille-nom-cree'] || 'Grille';
+            var nb = reponses['materiel-grille-nb-criteres-crees'] || '4';
+            return '✅ Grille **' + nom + '** créée avec ' + nb + ' critères.\n\nVous pourrez la modifier dans **Matériel → Grilles de critères**.';
+        },
+        type: 'instruction',
+        champsCibles: [],
+        sautSi: function(reponses) {
+            var p = reponses['materiel-pratique-detectee'];
+            return reponses['materiel-grille-choix'] === 'passer' || p === 'aucune' || !p;
+        }
+    },
+
+    // M5 — Production : titre
+    {
+        id: 'materiel-production-titre',
+        texte: 'Comment s\'appelle votre première évaluation ?',
+        type: 'text',
+        placeholder: 'Ex: Examen mi-session, Analyse littéraire...',
+        champsCibles: [],
+        validation: { requis: true, minLength: 2 },
+        sautSi: function(reponses) {
+            return reponses['materiel-pratique-detectee'] === 'aucune' || !reponses['materiel-pratique-detectee'];
+        }
+    },
+
+    // M5b — Type de production
+    {
+        id: 'materiel-production-type',
+        texte: 'Quel type d\'évaluation ?',
+        type: 'radio',
+        options: [
+            { value: 'travail', label: 'Travail', description: 'Travail remis (dissertation, rapport, etc.)' },
+            { value: 'examen', label: 'Examen', description: 'Examen en classe ou en ligne' },
+            { value: 'projet', label: 'Projet', description: 'Projet de longue durée' },
+            { value: 'quiz', label: 'Quiz', description: 'Évaluation courte' }
+        ],
+        champsCibles: [],
+        validation: { requis: true },
+        sautSi: function(reponses) {
+            return reponses['materiel-pratique-detectee'] === 'aucune' || !reponses['materiel-pratique-detectee'];
+        }
+    },
+
+    // M5c — Pondération
+    {
+        id: 'materiel-production-ponderation',
+        texte: 'Quelle est la pondération de cette évaluation ?',
+        type: 'number',
+        placeholder: '25',
+        champsCibles: [],
+        validation: { requis: true, min: 1, max: 100 },
+        aide: 'Poids dans la note finale (en %).',
+        sautSi: function(reponses) {
+            return reponses['materiel-pratique-detectee'] === 'aucune' || !reponses['materiel-pratique-detectee'];
+        }
+    },
+
+    // M5-action — Création de la production
+    {
+        id: 'materiel-production-creer',
+        texte: 'Création de la production en cours...',
+        type: 'action',
+        action: 'creerProductionDepuisParcours',
+        champsCibles: [],
+        validation: { requis: false },
+        sautSi: function(reponses) {
+            return reponses['materiel-pratique-detectee'] === 'aucune' || !reponses['materiel-pratique-detectee'];
+        }
+    },
+
+    // M6 — Cartouches de rétroaction (PAN + échelle + grille existent)
+    {
+        id: 'materiel-cartouches-choix',
+        texte: 'Souhaitez-vous préparer des modèles de rétroaction ?',
+        type: 'radio',
+        options: [
+            {
+                value: 'oui',
+                label: 'Oui, créer une cartouche vide',
+                description: 'Crée la matrice critère × niveau avec des textes vides à compléter.'
+            },
+            {
+                value: 'non',
+                label: 'Plus tard',
+                description: 'Vous pourrez les créer plus tard dans Matériel → Cartouches.'
+            }
+        ],
+        champsCibles: [],
+        validation: { requis: true },
+        aide: 'Les cartouches sont des textes pré-rédigés pour chaque combinaison critère/niveau.',
+        sautSi: function(reponses) {
+            var pratique = reponses['materiel-pratique-detectee'];
+            var echelleCreee = reponses['materiel-echelle-id-cree'];
+            var grilleCreee = reponses['materiel-grille-id-cree'];
+            // Cartouches uniquement si PAN + échelle + grille créées
+            return pratique === 'sommative' || pratique === 'pan-specifications' || !echelleCreee || !grilleCreee;
+        }
+    },
+
+    // M6-action — Création de la cartouche
+    {
+        id: 'materiel-cartouches-creer',
+        texte: 'Création de la cartouche en cours...',
+        type: 'action',
+        action: 'creerCartoucheDepuisParcours',
+        champsCibles: [],
+        validation: { requis: false },
+        sautSi: function(reponses) {
+            return reponses['materiel-cartouches-choix'] !== 'oui';
+        }
+    },
+
+    // M7 — Récapitulatif
+    {
+        id: 'materiel-recapitulatif',
+        texte: function(reponses) {
+            var resume = '**Récapitulatif du matériel créé :**\n\n';
+            if (reponses['materiel-echelle-nom-cree']) {
+                resume += '✅ Échelle : **' + reponses['materiel-echelle-nom-cree'] + '**\n';
+            }
+            if (reponses['materiel-grille-nom-cree']) {
+                resume += '✅ Grille : **' + reponses['materiel-grille-nom-cree'] + '**\n';
+            }
+            if (reponses['materiel-production-titre']) {
+                resume += '✅ Production : **' + reponses['materiel-production-titre'] + '**\n';
+            }
+            if (reponses['materiel-cartouches-choix'] === 'oui') {
+                resume += '✅ Cartouche de rétroaction créée\n';
+            }
+            if (!reponses['materiel-echelle-nom-cree'] && !reponses['materiel-grille-nom-cree'] && !reponses['materiel-production-titre']) {
+                resume += 'Aucun matériel créé lors de ce parcours.\n';
+            }
+            resume += '\nVous pouvez modifier ce matériel dans la section **Matériel** de l\'application.';
+            return resume;
+        },
+        type: 'message',
+        champsCibles: [],
+        validation: { requis: false },
+        finParcoursMateriel: true
     },
 
     // ========================================================================

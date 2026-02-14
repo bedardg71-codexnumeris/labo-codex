@@ -4,6 +4,22 @@
 
 ---
 
+## Beta 97.8
+
+**Assistant actif de creation de materiel pedagogique**
+
+- **Nouveau module « Creer du materiel »** : Le tour guide propose desormais un 5e module qui cree directement les ressources pedagogiques dans l'application. Plus besoin d'importer des fichiers JSON manuellement.
+- **Parcours adaptatif** : Le module detecte automatiquement la pratique de notation configuree (sommative, PAN-Standards, PAN-Specifications) et adapte les etapes proposees.
+- **Echelle de performance** : Choix entre IDME (4 niveaux), ABCD (4 niveaux) ou une echelle personnalisee (2 a 6 niveaux avec noms et couleurs). Creee en un clic.
+- **Grille de criteres** : Grille de base (4 criteres generiques a 25%) ou grille personnalisee avec vos propres criteres. Poids calcules automatiquement.
+- **Production** : Nom, type (travail, examen, projet, quiz) et ponderation. Liee automatiquement a la grille creee.
+- **Cartouches de retroaction** : Matrice critere × niveau prete a remplir, liee a l'echelle et la grille. Disponible uniquement en PAN avec echelle et grille.
+- **Recapitulatif dynamique** : En fin de parcours, un resume affiche tout le materiel cree avec des liens vers les sections correspondantes.
+- **Tour guide neutre** : Le personnage de Primo est retire. Le tour guide utilise des formulations impersonnelles.
+- **Module 2 simplifie** : « Evaluer une production » navigue directement vers la section d'evaluation.
+
+---
+
 ## Beta 97.5
 
 **Theme Ocean & Boussole — Hierarchie des surfaces**

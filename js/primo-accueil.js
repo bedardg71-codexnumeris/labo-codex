@@ -1,12 +1,17 @@
 /**
- * PRIMO ACCUEIL - Assistant de démarrage
+ * PRIMO ACCUEIL - Tour guidé de démarrage
  *
  * Détecte la première utilisation et guide les nouveaux utilisateurs
  * avec un modal accueillant et des options de démarrage rapide.
  *
- * VERSION : 1.0
- * DATE : 27 novembre 2025
+ * VERSION : 1.1
+ * DATE : 14 février 2026
  * AUTEUR : Grégoire Bédard (Labo Codex) avec Claude
+ *
+ * CHANGELOG :
+ * - 1.1 (14 fév 2026) : Retrait persona Primo, ajout Module 5 "Créer du matériel",
+ *   Module 2 navigue directement vers Évaluations (Beta 97.5+)
+ * - 1.0 (27 nov 2025) : Version initiale
  */
 
 (function() {
@@ -85,7 +90,7 @@ function afficherModalAccueil() {
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
             animation: slideUp 0.4s ease-out;
         ">
-            <!-- En-tête avec Primo -->
+            <!-- En-tête tour guidé -->
             <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 25px;">
                 <div style="
                     width: 80px;
@@ -161,7 +166,7 @@ function afficherModalAccueil() {
                 " onmouseover="this.style.background='var(--bleu-tres-pale)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='var(--surface-conteneur)'; this.style.transform='translateY(0)';">
                     <strong>MODULE 2 : Évaluer une production</strong>
                     <div style="font-size: 0.85rem; margin-top: 5px; opacity: 0.8;">
-                        Importer matériel et compléter une évaluation
+                        Accéder à la section d'évaluation des productions
                     </div>
                 </button>
 
@@ -202,6 +207,26 @@ function afficherModalAccueil() {
                     <strong>MODULE 4 : Créer ma pratique de notation</strong>
                     <div style="font-size: 0.85rem; margin-top: 5px; opacity: 0.8;">
                         Configurer pratique, seuils, échelle, grille (8 minutes)
+                    </div>
+                </button>
+
+                <!-- MODULE 5: Créer du matériel pédagogique -->
+                <button onclick="demarrerCreationMateriel()" style="
+                    width: 100%;
+                    padding: 15px 20px;
+                    margin-bottom: 8px;
+                    background: var(--surface-conteneur, #162c36);
+                    color: var(--accent-primaire);
+                    border: 2px solid var(--accent-primaire);
+                    border-radius: 8px;
+                    font-size: 1rem;
+                    cursor: pointer;
+                    text-align: left;
+                    transition: all 0.2s;
+                " onmouseover="this.style.background='var(--bleu-tres-pale)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='var(--surface-conteneur)'; this.style.transform='translateY(0)';">
+                    <strong>MODULE 5 : Créer du matériel pédagogique</strong>
+                    <div style="font-size: 0.85rem; margin-top: 5px; opacity: 0.8;">
+                        Échelle, grille de critères, production et cartouches de rétroaction (5 minutes)
                     </div>
                 </button>
 
@@ -337,8 +362,8 @@ function demarrerConfigComplete() {
 
 /**
  * Option 3: Démarrer le parcours "Évaluer"
- * Commence directement à l'étape d'import de matériel
- * Beta 95 : Vérifie les prérequis (cours et étudiants)
+ * Navigue directement vers la section Évaluations
+ * Beta 97.5+ : Navigation directe (l'ancien mode notification a été retiré)
  */
 function demarrerEvaluation() {
     // Vérifier les prérequis avant de démarrer
@@ -353,11 +378,10 @@ function demarrerEvaluation() {
     const aEtudiants = etudiants.length > 0;
 
     if (!aCours || !aEtudiants) {
-        // Afficher message d'erreur
-        let message = 'Tu dois d\'abord configurer :\n\n';
+        let message = 'Vous devez d\'abord configurer :\n\n';
         if (!aCours) message += '• Un cours (MODULE 1 : Créer un groupe-cours)\n';
         if (!aEtudiants) message += '• Des étudiants (MODULE 1 : Créer un groupe-cours)\n';
-        message += '\nComplète le Module 1 avant de pouvoir évaluer une production.';
+        message += '\nComplétez le Module 1 avant de pouvoir évaluer une production.';
 
         alert(message);
         console.warn('[Guide] Module 2 bloqué - prérequis manquants:', { aCours, aEtudiants });
@@ -366,27 +390,12 @@ function demarrerEvaluation() {
 
     fermerModalAccueil();
 
-    // Calculer les questions actives (avec réponses vides car on démarre)
-    const questionsActives = typeof obtenirQuestionsActives === 'function'
-        ? obtenirQuestionsActives({})
-        : QUESTIONS_PRIMO;
-
-    // Trouver l'index de l'étape 'transition-mode-guide' dans questionsActives
-    const indexEtapeEvaluation = questionsActives.findIndex(q => q.id === 'transition-mode-guide');
-
-    if (indexEtapeEvaluation === -1) {
-        console.error('[Guide] Étape transition-mode-guide introuvable');
-        alert('Erreur : L\'étape d\'évaluation n\'a pas été trouvée.');
-        return;
-    }
-
-    // Passer directement en mode notification (sans modal)
+    // Naviguer directement vers la section Évaluations
     setTimeout(() => {
-        if (typeof demarrerModeNotification === 'function') {
-            demarrerModeNotification(indexEtapeEvaluation);
+        if (typeof afficherSection === 'function') {
+            afficherSection('evaluations');
         } else {
-            console.error('[Guide] Fonction demarrerModeNotification non disponible');
-            alert('Erreur : Le module de configuration n\'est pas chargé.');
+            console.error('[Guide] Fonction afficherSection non disponible');
         }
     }, 300);
 }
@@ -399,7 +408,36 @@ function explorerLibrement() {
 }
 
 /**
- * Option 5: Consulter l'aide
+ * Option 5: Démarrer la création de matériel pédagogique
+ * Lance le parcours actif de création (échelle, grille, production, cartouches)
+ */
+function demarrerCreationMateriel() {
+    fermerModalAccueil();
+
+    setTimeout(() => {
+        if (typeof ouvrirModalConversationnel !== 'function' || typeof obtenirQuestionsActives !== 'function') {
+            console.error('[Guide] Fonctions conversationnelles non disponibles');
+            alert('Erreur : Le module de configuration n\'est pas chargé.');
+            return;
+        }
+
+        // Trouver l'index de materiel-intro dans les questions actives
+        const questionsActives = obtenirQuestionsActives({});
+        const indexMateriel = questionsActives.findIndex(q => q.id === 'materiel-intro');
+
+        if (indexMateriel === -1) {
+            console.error('[Guide] Question materiel-intro introuvable');
+            alert('Erreur : Le parcours de création de matériel n\'a pas été trouvé.');
+            return;
+        }
+
+        console.log('[Guide] Lancement du parcours matériel à l\'index', indexMateriel);
+        ouvrirModalConversationnel(indexMateriel);
+    }, 500);
+}
+
+/**
+ * Option 6: Consulter l'aide
  * Navigue vers la section Aide
  */
 function consulterAide() {
@@ -443,15 +481,15 @@ function verifierEtAfficherAccueil() {
         const modeAssiste = typeof estModeAssiste === 'function' ? estModeAssiste() : false;
 
         if (!modeAssiste) {
-            console.log('ℹ️ Mode Normal/Anonymisé - Primo désactivé (auto)');
+            console.log('ℹ️ Mode Normal/Anonymisé - Tour guidé désactivé (auto)');
             return;
         }
 
         if (estPremiereUtilisation()) {
-            console.log('👋 Première utilisation détectée - Affichage AUTO de Primo');
+            console.log('👋 Première utilisation détectée - Affichage AUTO du tour guidé');
             afficherModalAccueil();
         } else {
-            console.log('✅ Utilisateur existant - Tour guide accessible via bouton 🧭 seulement');
+            console.log('✅ Utilisateur existant - Tour guidé accessible via bouton 🧭 seulement');
         }
     }, 1000);
 }
@@ -474,6 +512,7 @@ window.fermerModalAccueil = fermerModalAccueil;
 window.naviguerVersImportDemo = naviguerVersImportDemo;
 window.demarrerConfigComplete = demarrerConfigComplete;
 window.demarrerWizard = demarrerWizard;
+window.demarrerCreationMateriel = demarrerCreationMateriel;
 window.explorerLibrement = explorerLibrement;
 window.consulterAide = consulterAide;
 

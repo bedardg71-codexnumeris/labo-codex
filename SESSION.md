@@ -1,10 +1,20 @@
 # SESSION ACTIVE - BETA 97.8
 
 **Date** : 14 février 2026
-**Version** : Beta 97.8 (build 0214-1015)
-**Statut** : Taxonomie d'Anderson dans la carte mentale
+**Version** : Beta 97.8 (build 0214-1736)
+**Statut** : Assistant actif de création de matériel pédagogique
 
 ## SESSION DU 14 FÉVRIER 2026
+
+### Travail accompli — Assistant actif de création de matériel pédagogique (Beta 97.8, build 0214-1736)
+
+45. **Retrait persona Primo** : Le personnage de Primo est retiré du tour guidé. Textes reformulés en vouvoiement impersonnel. Emoji 🧭 conservé. Commentaires et console.log nettoyés dans primo-accueil.js, primo-modal.js, primo-questions.js.
+
+46. **Module 5 « Créer du matériel »** : Nouvelle carte dans le tour guidé. 21 nouvelles questions (materiel-intro → materiel-recapitulatif) remplacent les 11 anciennes étapes passives. Parcours adaptatif selon la pratique détectée (sommative, PAN-Standards, PAN-Spécifications).
+
+47. **Création programmatique** : 5 nouvelles fonctions dans primo-modal.js — detecterContexteMateriel(), creerEchelleDepuisParcours() (IDME/ABCD/perso), creerGrilleDepuisParcours() (base/perso), creerProductionDepuisParcours() (titre/type/poids), creerCartoucheDepuisParcours() (matrice critère×niveau vide). Vérification post-création dans IndexedDB.
+
+48. **Module 2 simplifié** : demarrerEvaluation() navigue directement vers la section Évaluations au lieu de lancer le mode notification supprimé.
 
 ### Travail accompli — Taxonomie d'Anderson dans la carte mentale (Beta 97.8, build 0214-1015)
 

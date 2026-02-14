@@ -1,7 +1,32 @@
 # Notes de version — Monitorage pedagogique
 
 > Document de gestion locale. Historique complet avec dates.
-> Derniere mise a jour : 12 fevrier 2026
+> Derniere mise a jour : 14 fevrier 2026
+
+---
+
+## Beta 97.8 (14 fevrier 2026)
+
+**Assistant actif de creation de materiel pedagogique**
+
+*Phase 1 — Retrait persona Primo*
+- **Tour guide neutre** : Retrait du personnage de Primo. Textes reformules en vouvoiement impersonnel (« Souhaitez-vous... » au lieu de « Veux-tu... »). Emoji 🧭 conserve.
+- **Commentaires nettoyes** : En-tetes, annotations et console.log mis a jour dans les 3 fichiers (primo-accueil.js, primo-modal.js, primo-questions.js).
+
+*Phase 2 — Parcours actif de creation de materiel*
+- **Module 5 dans le tour guide** : Nouvelle carte « Creer du materiel pedagogique » dans le modal d'accueil. Fonction `demarrerCreationMateriel()` qui ouvre le conversationnel a `materiel-intro`.
+- **21 nouvelles questions** (materiel-intro → materiel-recapitulatif) remplacent les 11 anciennes etapes passives (intro-materiel → fin-sequence-evaluer).
+- **Detection du contexte** : Action `detecterContexteMateriel()` lit `modalitesEvaluation.pratique` dans IndexedDB. Branchement selon sommative / PAN-Standards / PAN-Specifications / non configure.
+- **Creation d'echelle** : `creerEchelleDepuisParcours()` — 3 modeles (IDME, ABCD, personnalise). Ecriture dans `echellesTemplates`. Verification post-creation.
+- **Creation de grille** : `creerGrilleDepuisParcours()` — modele de base (4 criteres a 25%) ou personnalise (N criteres, poids egaux). Ecriture dans `grillesTemplates`.
+- **Creation de production** : `creerProductionDepuisParcours()` — titre, type, ponderation. Liaison automatique avec la grille. Ecriture dans `cle('productions')`.
+- **Creation de cartouche** : `creerCartoucheDepuisParcours()` — matrice critere × niveau vide. Ecriture dans `cartouches_{grilleId}`.
+- **`calculerInfosParcours()`** : Mis a jour pour detecter le module materiel (materiel-intro → finParcoursMateriel).
+- **`terminerConfiguration()`** : Gere `finParcoursMateriel` — notification « Materiel pedagogique cree » et retour au menu sans rechargement.
+
+*Phase 3 — Nettoyage*
+- **11 questions supprimees** : intro-materiel, confirmation-dossier-ouvert, aide-dossier, transition-mode-guide, importer-echelle-idme, importer-grille-srpnf, creer-production-guidee, navigation-evaluations, selection-etudiant, attribuer-niveaux, fin-sequence-evaluer.
+- **Module 2 simplifie** : `demarrerEvaluation()` navigue directement vers la section Evaluations (plus de mode notification).
 
 ---
 
