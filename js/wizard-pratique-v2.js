@@ -50,7 +50,7 @@ const ETAPES_WIZARD = {
         branche: 'commune',
         ordre: 1,
         champs: [
-            { id: 'nom', label: 'Nom de la pratique', type: 'text', required: true, placeholder: 'Ex: PAN-Standards Littérature H2026' },
+            { id: 'nom', label: 'Nom de la pratique', type: 'text', required: true, placeholder: 'Ex: Ma pratique de notation' },
             { id: 'auteur-row', type: 'row', champs: [
                 { id: 'prenom', label: 'Prénom', type: 'text', required: true, placeholder: 'Prénom' },
                 { id: 'nomAuteur', label: 'Nom', type: 'text', required: true, placeholder: 'Nom' }
@@ -1542,9 +1542,19 @@ function genererSelectGrille(champ) {
         return `
             <div class="wizard-v2-champ">
                 <label>${champ.label}</label>
-                <div class="wizard-v2-info">
-                    Aucune grille de critères n'a été créée.
-                    Ce n'est pas obligatoire pour commencer.
+                <div class="wizard-v2-info-block" style="flex-direction: column; align-items: stretch;">
+                    <p style="margin: 0 0 10px 0;">Aucune grille de critères n'a été créée. Vous pouvez en générer une de base pour commencer.</p>
+                    <button type="button" class="wizard-v2-btn-demo-grille" onclick="wizardV2CreerGrilleDemo()" style="
+                        background: var(--bleu-principal, #4A90D9);
+                        color: white;
+                        border: none;
+                        padding: 8px 16px;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-size: 0.9rem;
+                        align-self: flex-start;
+                    ">Créer une grille de base (4\u00a0critères)</button>
+                    <p style="margin: 8px 0 0 0; font-size: 0.8rem; color: var(--gris-moyen, #888);">Vous pourrez la modifier plus tard dans Matériel → Critères d'évaluation.</p>
                 </div>
             </div>
         `;
@@ -1567,6 +1577,34 @@ function genererSelectGrille(champ) {
 }
 
 /**
+ * Crée une grille de critères démo (4 critères de base) et rafraîchit l'affichage
+ */
+function wizardV2CreerGrilleDemo() {
+    const grilleDemo = {
+        id: 'grille-base-' + Date.now(),
+        nom: 'Grille de base',
+        description: 'Grille générique créée par le wizard. Modifiable dans Matériel → Critères.',
+        criteres: [
+            { id: 'c1', nom: 'Compréhension du sujet', description: 'Démontrer une compréhension juste du sujet traité.', poids: 25 },
+            { id: 'c2', nom: 'Qualité de la démarche', description: 'Appliquer une démarche méthodique et rigoureuse.', poids: 25 },
+            { id: 'c3', nom: 'Communication', description: 'Présenter les résultats de façon claire et structurée.', poids: 25 },
+            { id: 'c4', nom: 'Esprit critique', description: 'Porter un regard critique et nuancé sur la production.', poids: 25 }
+        ],
+        dateCreation: new Date().toISOString()
+    };
+
+    const grilles = db.getSync('grillesTemplates', []);
+    grilles.push(grilleDemo);
+    db.setSync('grillesTemplates', grilles);
+
+    // Stocker l'ID pour pré-sélection
+    wizardState.reponses.grilleId = grilleDemo.id;
+
+    // Rafraîchir l'affichage de l'étape
+    afficherEtapeV2(wizardState.etapeActuelle);
+}
+
+/**
  * Génère un bloc d'information
  */
 function genererInfo(champ) {
@@ -1585,27 +1623,41 @@ function genererInfo(champ) {
  */
 function genererRecapitulatif() {
     const r = wizardState.reponses;
+    const classification = deduireTypePratique(r);
     let html = '<div class="wizard-v2-recapitulatif">';
 
-    // Section : Informations de base
-    html += '<div class="wizard-v2-recap-section">';
-    html += '<h4>Informations de base</h4>';
-    html += `<p><strong>Nom :</strong> ${r.nom || 'Non spécifié'}</p>`;
-    if (r.auteur) html += `<p><strong>Auteur :</strong> ${r.auteur}</p>`;
-    if (r.etablissement) html += `<p><strong>Établissement :</strong> ${r.etablissement}</p>`;
-    if (r.discipline) html += `<p><strong>Discipline :</strong> ${r.discipline}</p>`;
-    html += '</div>';
-
-    // Section : Type de pratique (déduit automatiquement)
-    html += '<div class="wizard-v2-recap-section">';
-    html += '<h4>Type de pratique (déduit)</h4>';
-    const typeLabels = {
-        'sommative': 'Sommative (traditionnelle)',
-        'pan-standards': 'PAN-Standards (niveaux de maîtrise)',
-        'pan-specifications': 'PAN-Spécifications (binaire)'
+    // ─── Section 1 : Diagnostic du type de notation (proéminent) ───
+    const typeBadges = {
+        'sommative': { code: 'SOM', couleur: '#4A90D9', label: 'Sommative', description: 'Votre note finale est calculée par une moyenne pondérée des évaluations. C\'est la méthode traditionnelle, largement utilisée.' },
+        'pan-standards': { code: 'PAN', couleur: '#E67E22', label: 'PAN \u2013 Standards', description: 'Vous évaluez par niveaux de maîtrise (ex.\u00a0: I-D-M-E). La note est construite à partir de la démonstration de compétences, pas d\'une simple moyenne.' },
+        'pan-specifications': { code: 'SPE', couleur: '#27AE60', label: 'PAN \u2013 Spécifications', description: 'Chaque travail est jugé acceptable ou non. La note finale dépend du nombre de spécifications réussies (forfaits).' }
     };
-    const classification = deduireTypePratique(r);
-    html += `<p><strong>Type :</strong> ${typeLabels[classification.type] || classification.type}</p>`;
+    const badge = typeBadges[classification.type] || { code: '?', couleur: '#888', label: 'Indéterminé', description: '' };
+
+    html += `
+        <div class="wizard-v2-recap-diagnostic" style="
+            background: ${badge.couleur}12;
+            border: 2px solid ${badge.couleur};
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        ">
+            <div style="font-size: 0.85rem; color: var(--gris-moyen, #888); margin-bottom: 8px;">Votre pratique de notation a été identifiée comme</div>
+            <div style="display: inline-flex; align-items: center; gap: 12px; margin-bottom: 10px;">
+                <span style="
+                    background: ${badge.couleur};
+                    color: white;
+                    padding: 6px 16px;
+                    border-radius: 20px;
+                    font-weight: 700;
+                    font-size: 1.1rem;
+                    letter-spacing: 1px;
+                ">${badge.code}</span>
+                <span style="font-size: 1.2rem; font-weight: 600; color: ${badge.couleur};">${badge.label}</span>
+            </div>
+            <p style="font-size: 0.9rem; color: var(--texte-secondaire, #555); margin: 8px 0 0 0; max-width: 500px; margin-left: auto; margin-right: auto;">${badge.description}</p>
+    `;
     if (classification.variante) {
         const varianteLabels = {
             'classique': 'Classique',
@@ -1621,7 +1673,7 @@ function genererRecapitulatif() {
             'holistique': 'Holistique',
             'bundles': 'Forfaits de spécifications'
         };
-        html += `<p><strong>Variante :</strong> ${varianteLabels[classification.variante] || classification.variante}</p>`;
+        html += `<p style="font-size: 0.85rem; margin: 6px 0 0 0; color: var(--gris-moyen, #888);">Variante\u00a0: <strong>${varianteLabels[classification.variante] || classification.variante}</strong></p>`;
     }
     if (classification.regles && classification.regles.length > 0 && !classification.regles.includes('aucune')) {
         const reglesLabels = {
@@ -1630,9 +1682,34 @@ function genererRecapitulatif() {
             'portfolio': 'Portfolio de progression',
             'plafonnement': 'Plafonnement conditionnel'
         };
-        const reglesTexte = classification.regles.map(r => reglesLabels[r] || r).join(', ');
-        html += `<p><strong>Règles :</strong> ${reglesTexte}</p>`;
+        const reglesTexte = classification.regles.map(rl => reglesLabels[rl] || rl).join(', ');
+        html += `<p style="font-size: 0.85rem; margin: 4px 0 0 0; color: var(--gris-moyen, #888);">Règles\u00a0: ${reglesTexte}</p>`;
     }
+    html += '</div>';
+
+    // ─── Section 2 : Nom de la pratique (modifiable) ───
+    const nomActuel = r.nom || 'Ma pratique de notation';
+    html += `
+        <div class="wizard-v2-recap-section" style="margin-bottom: 16px;">
+            <h4>Nom de la pratique</h4>
+            <p style="font-size: 0.85rem; color: var(--gris-moyen, #888); margin: 0 0 8px 0;">Maintenant que vous connaissez votre type de notation, vous pouvez ajuster le nom si vous le souhaitez.</p>
+            <input type="text" id="wizard-v2-recap-nom" value="${nomActuel.replace(/"/g, '&quot;')}" style="
+                width: 100%;
+                padding: 10px 12px;
+                border: 1px solid var(--bordure, #ddd);
+                border-radius: 6px;
+                font-size: 1rem;
+                box-sizing: border-box;
+            " placeholder="Ex\u00a0: ${badge.label} \u2013 Littérature H2026">
+        </div>
+    `;
+
+    // ─── Section 3 : Informations de base ───
+    html += '<div class="wizard-v2-recap-section">';
+    html += '<h4>Informations de base</h4>';
+    if (r.auteur) html += `<p><strong>Auteur\u00a0:</strong> ${r.auteur}</p>`;
+    if (r.etablissement) html += `<p><strong>Établissement\u00a0:</strong> ${r.etablissement}</p>`;
+    if (r.discipline) html += `<p><strong>Discipline\u00a0:</strong> ${r.discipline}</p>`;
     html += '</div>';
 
     // Section : Paramètres généraux
@@ -1640,10 +1717,10 @@ function genererRecapitulatif() {
         html += '<div class="wizard-v2-recap-section">';
         html += '<h4>Paramètres généraux</h4>';
         if (r.nbEvaluationsPrevues) {
-            html += `<p><strong>Évaluations prévues :</strong> ${r.nbEvaluationsPrevues}</p>`;
+            html += `<p><strong>Évaluations prévues\u00a0:</strong> ${r.nbEvaluationsPrevues}</p>`;
         }
         if (r.seuilVaBien) {
-            html += `<p><strong>Seuils :</strong> Bien ≥${r.seuilVaBien}% | Difficulté ≤${r.seuilDifficulte}% | Grande difficulté &lt;${r.seuilGrandeDifficulte}%</p>`;
+            html += `<p><strong>Seuils\u00a0:</strong> Bien \u2265${r.seuilVaBien}% | Difficulté \u2264${r.seuilDifficulte}% | Grande difficulté &lt;${r.seuilGrandeDifficulte}%</p>`;
         }
         html += '</div>';
     }
@@ -1652,8 +1729,8 @@ function genererRecapitulatif() {
     if (r.typePratique === 'sommative') {
         html += '<div class="wizard-v2-recap-section">';
         html += '<h4>Configuration</h4>';
-        html += `<p><strong>Afficher le rang :</strong> ${r.afficherRang ? 'Oui' : 'Non'}</p>`;
-        html += `<p><strong>Afficher la moyenne du groupe :</strong> ${r.afficherMoyenneGroupe ? 'Oui' : 'Non'}</p>`;
+        html += `<p><strong>Afficher le rang\u00a0:</strong> ${r.afficherRang ? 'Oui' : 'Non'}</p>`;
+        html += `<p><strong>Afficher la moyenne du groupe\u00a0:</strong> ${r.afficherMoyenneGroupe ? 'Oui' : 'Non'}</p>`;
         html += '</div>';
     }
 
@@ -1664,16 +1741,14 @@ function genererRecapitulatif() {
             'par-artefacts': 'Par artefacts (portfolio)',
             'par-objectifs': 'Par objectifs d\'apprentissage'
         };
-        html += `<p><strong>Approche :</strong> ${approcheLabels[r.approcheEvaluation] || r.approcheEvaluation}</p>`;
+        html += `<p><strong>Approche\u00a0:</strong> ${approcheLabels[r.approcheEvaluation] || r.approcheEvaluation}</p>`;
 
         if (r.approcheEvaluation === 'par-artefacts') {
-            // 🆕 Beta 95.7 : Lire depuis Primo OU wizard (#4)
             const modalites = db.getSync('modalitesEvaluation', {});
             const nbSoumis = modalites.nArtefactsPAN || r.nbArtefactsSoumis || '?';
             const nbRetenus = modalites.nArtefactsRetenus || r.nbArtefactsRetenus || '?';
-            html += `<p><strong>Artefacts à soumettre :</strong> ${nbSoumis}</p>`;
-            html += `<p><strong>Artefacts retenus :</strong> ${nbRetenus}</p>`;
-            // 🆕 #24 : Afficher la construction de la note
+            html += `<p><strong>Artefacts à soumettre\u00a0:</strong> ${nbSoumis}</p>`;
+            html += `<p><strong>Artefacts retenus\u00a0:</strong> ${nbRetenus}</p>`;
             const modeSelectionLabels = {
                 'n_meilleurs': 'N meilleurs artefacts',
                 'tous': 'Tous les artefacts',
@@ -1681,7 +1756,7 @@ function genererRecapitulatif() {
                 'hybride': 'Hybride (N meilleures + Obligatoires)'
             };
             const modeSelection = r.modeSelectionPortfolio || 'n_meilleurs';
-            html += `<p><strong>Construction de la note :</strong> ${modeSelectionLabels[modeSelection] || modeSelection}</p>`;
+            html += `<p><strong>Construction de la note\u00a0:</strong> ${modeSelectionLabels[modeSelection] || modeSelection}</p>`;
         } else if (r.approcheEvaluation === 'par-objectifs') {
             const modeLabels = {
                 'comptage': 'Comptage d\'objectifs',
@@ -1689,7 +1764,7 @@ function genererRecapitulatif() {
                 'seuils-critiques': 'Seuils critiques',
                 'holistique': 'Holistique'
             };
-            html += `<p><strong>Mode de calcul :</strong> ${modeLabels[r.modeCalcul] || r.modeCalcul}</p>`;
+            html += `<p><strong>Mode de calcul\u00a0:</strong> ${modeLabels[r.modeCalcul] || r.modeCalcul}</p>`;
         }
         html += '</div>';
     }
@@ -1697,11 +1772,11 @@ function genererRecapitulatif() {
     if (r.typePratique === 'pan-specifications') {
         html += '<div class="wizard-v2-recap-section">';
         html += '<h4>Configuration PAN-Spécifications</h4>';
-        html += `<p><strong>Seuil d'acceptabilité :</strong> ${r.seuilAcceptabilite}%</p>`;
-        html += `<p><strong>Système de jetons :</strong> ${r.utiliserJetons ? 'Activé' : 'Désactivé'}</p>`;
+        html += `<p><strong>Seuil d'acceptabilité\u00a0:</strong> ${r.seuilAcceptabilite}%</p>`;
+        html += `<p><strong>Système de jetons\u00a0:</strong> ${r.utiliserJetons ? 'Activé' : 'Désactivé'}</p>`;
         if (r.utiliserJetons) {
-            html += `<p><strong>Jetons délai :</strong> ${r.nbJetonsDelai} (${r.dureeDelaiJours} jours)</p>`;
-            html += `<p><strong>Jetons reprise :</strong> ${r.nbJetonsReprise}</p>`;
+            html += `<p><strong>Jetons délai\u00a0:</strong> ${r.nbJetonsDelai} (${r.dureeDelaiJours} jours)</p>`;
+            html += `<p><strong>Jetons reprise\u00a0:</strong> ${r.nbJetonsReprise}</p>`;
         }
         html += '</div>';
     }
@@ -1713,14 +1788,14 @@ function genererRecapitulatif() {
         if (r.echelleId) {
             const echelles = db.getSync('echellesTemplates', []);
             const echelle = echelles.find(e => e.id === r.echelleId);
-            html += `<p><strong>Échelle :</strong> ${echelle?.nom || r.echelleId}</p>`;
+            html += `<p><strong>Échelle\u00a0:</strong> ${echelle?.nom || r.echelleId}</p>`;
         }
         if (r.grilleId) {
             const grilles = db.getSync('grillesTemplates', []);
             const grille = grilles.find(g => g.id === r.grilleId);
-            html += `<p><strong>Grille :</strong> ${grille?.nom || r.grilleId}</p>`;
+            html += `<p><strong>Grille\u00a0:</strong> ${grille?.nom || r.grilleId}</p>`;
         } else {
-            html += `<p><strong>Grille :</strong> <em>À configurer plus tard</em></p>`;
+            html += `<p><strong>Grille\u00a0:</strong> <em>À configurer plus tard</em></p>`;
         }
         html += '</div>';
     }
@@ -2054,6 +2129,12 @@ function wizardV2GererExclusionCheckbox(el) {
  */
 async function creerPratiqueV2() {
     const r = wizardState.reponses;
+
+    // Lire le nom final depuis le champ éditable du récapitulatif (si présent)
+    const champNomRecap = document.getElementById('wizard-v2-recap-nom');
+    if (champNomRecap && champNomRecap.value.trim()) {
+        r.nom = champNomRecap.value.trim();
+    }
 
     // Construire l'objet pratique
     const typeMapping = {
@@ -2499,6 +2580,7 @@ window.etapePrecedenteV2 = etapePrecedenteV2;
 window.creerPratiqueV2 = creerPratiqueV2;
 window.deduireTypePratique = deduireTypePratique;
 window.wizardV2GererExclusionCheckbox = wizardV2GererExclusionCheckbox;
+window.wizardV2CreerGrilleDemo = wizardV2CreerGrilleDemo;
 
 console.log('[WizardV2] Module chargé (classification comportementale active)');
 

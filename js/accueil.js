@@ -163,10 +163,10 @@ function afficherAccueilRetour(conteneur) {
                 </div>
             </div>
             <div class="accueil-carte" onclick="afficherSection('construction'); setTimeout(function(){ if(typeof ouvrirWizardV2==='function') ouvrirWizardV2(); }, 300);">
-                <div class="accueil-carte-icone">\uD83C\uDFAF</div>
-                <div class="accueil-carte-titre">Construire la note</div>
+                <div class="accueil-carte-icone">\uD83C\uDFA8</div>
+                <div class="accueil-carte-titre">Configurer une pratique de notation</div>
                 <div class="accueil-carte-desc">
-                    D\u00e9finir ce qu\u2019on mesure et comment on le fait\u00a0: approche sommative traditionnelle ou alternative (par standards, par sp\u00e9cification).
+                    D\u00e9finir ce qu\u2019on mesure et comment on le fait pour cr\u00e9er sa pratique de notation\u00a0: sommative traditionnelle ou alternative (par standards, par sp\u00e9cification).
                 </div>
             </div>
             <div class="accueil-carte" onclick="afficherSection('tableau-bord'); setTimeout(function(){ afficherSousSection('tableau-bord-profil'); }, 100);">

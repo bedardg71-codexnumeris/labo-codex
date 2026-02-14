@@ -21,7 +21,10 @@
                 '<strong>Calcul par sp\u00e9cifications</strong> : La m\u00e9thode de calcul PAN-Sp\u00e9cifications (fran\u00e7ois) est d\u00e9sormais impl\u00e9ment\u00e9e \u2014 v\u00e9rifie les sp\u00e9cifications satisfaites et retourne la note du forfait le plus \u00e9lev\u00e9.',
                 '<strong>Double verrou</strong> : La m\u00e9thode de plafonnement par verrou (Marie-H\u00e9l\u00e8ne) est impl\u00e9ment\u00e9e \u2014 plafonne la note finale si l\u2019\u00e9valuation verrouill\u00e9e est sous le seuil.',
                 '<strong>Remplacement progressif</strong> : La m\u00e9thode de remplacement (Jordan) est impl\u00e9ment\u00e9e \u2014 pour chaque paire, utilise max(initiale, finale) si la note finale est sup\u00e9rieure.',
-                '<strong>Configuration enrichie</strong> : Le wizard capture d\u00e9sormais les r\u00e8gles sp\u00e9ciales, le nombre d\u2019objectifs, les param\u00e8tres de verrou/plafonnement, et les reprises.'
+                '<strong>Configuration enrichie</strong> : Le wizard capture d\u00e9sormais les r\u00e8gles sp\u00e9ciales, le nombre d\u2019objectifs, les param\u00e8tres de verrou/plafonnement, et les reprises.',
+                '<strong>Grille de base</strong> : Quand aucune grille de crit\u00e8res n\u2019existe, le wizard propose d\u2019en cr\u00e9er une automatiquement (4\u00a0crit\u00e8res g\u00e9n\u00e9riques \u00e0 25\u00a0%). Modifiable ult\u00e9rieurement.',
+                '<strong>Diagnostic au r\u00e9capitulatif</strong> : Le r\u00e9capitulatif affiche d\u00e9sormais un badge color\u00e9 (SOM / PAN / SPE) avec une explication p\u00e9dagogique du type de notation identifi\u00e9.',
+                '<strong>Nom modifiable</strong> : Le nom de la pratique peut \u00eatre ajust\u00e9 au r\u00e9capitulatif, apr\u00e8s avoir vu le type diagnostiqu\u00e9.'
             ]
         },
         {
