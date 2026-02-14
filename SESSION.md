@@ -1,12 +1,24 @@
 # SESSION ACTIVE - BETA 97.7
 
 **Date** : 14 février 2026
-**Version** : Beta 97.7 (build 0214-0909)
+**Version** : Beta 97.7 (build 0214-0932)
 **Statut** : Refonte wizard de configuration des pratiques
 
 ## SESSION DU 14 FÉVRIER 2026
 
-### Travail accompli — Refonte du wizard de configuration (Beta 97.7)
+### Travail accompli — Améliorations UX du wizard (Beta 97.7, build 0214-0932)
+
+31. **Grille démo** : Quand aucune grille de critères n'existe, le wizard propose un bouton « Créer une grille de base (4 critères) » qui génère une grille générique (Compréhension, Démarche, Communication, Esprit critique à 25% chacun). Auto-sélectionnée après création. Modifiable dans Matériel → Critères.
+
+32. **Annonce du type diagnostiqué au récapitulatif** : Le récapitulatif commence par un encadré proéminent avec badge coloré (SOM bleu / PAN orange / SPE vert), le nom du type, et une explication pédagogique vulgarisant la méthode. Variante et règles aussi affichées.
+
+33. **Champ nom modifiable au récapitulatif** : Sous le diagnostic, un champ texte éditable pré-rempli avec le nom saisi à l'étape 1. Le placeholder suggère un format contextualisé. `creerPratiqueV2()` lit ce champ avant de sauvegarder.
+
+34. **Carte d'accueil renommée** : « Construire la note » → « Configurer une pratique de notation » avec description actualisée.
+
+35. **Placeholder simplifié** : « Ex: PAN-Standards Littérature H2026 » → « Ex: Ma pratique de notation » (moins intimidant pour les novices).
+
+### Travail accompli — Refonte du wizard de configuration (Beta 97.7, build 0214-0909)
 
 28. **Classification comportementale** : Remplacement de l'étape `type-pratique` (qui demandait aux enseignants de se classer dans une taxonomie académique) par des questions concrètes sur le comportement de notation.
     - **Q1** : « Comment calculez-vous la note finale ? » → moyenne / niveaux / acceptable / pas certain
@@ -30,13 +42,14 @@
     - **`construireConfigComplete()`** : Extension pour les nouveaux champs (variante, reglesSpeciales, objectifs, seuils)
 
 ### Fichiers modifiés (14 février - Beta 97.7)
-- `js/wizard-pratique-v2.js` — Classification comportementale Q1-Q5, deduireTypePratique(), checkbox-cards, étapes enrichies (+619 lignes)
+- `js/wizard-pratique-v2.js` — Classification comportementale Q1-Q5, deduireTypePratique(), grille démo, récapitulatif refondu, nom modifiable
 - `js/pratiques/pratique-configurable.js` — 3 méthodes de calcul implémentées (+190 lignes)
 - `js/pratiques/pratique-registre.js` — Extension construireConfigComplete() pour nouveaux champs (+5 lignes)
 - `styles.css` — CSS checkbox-cards, dynamic-list, weight-slider, replacement-pair (+150 lignes)
-- `js/changelog-data.js` — Entrée changelog refonte wizard
-- `index.html` — VERSION_MAJEURE 97.7, BUILD_ID 0214-0909
-- `version.json` — Build 0214-0909, Beta 97.7
+- `js/accueil.js` — Carte « Configurer une pratique de notation » (icône, titre, description)
+- `js/changelog-data.js` — Entrées changelog wizard
+- `index.html` — VERSION_MAJEURE 97.7, BUILD_ID 0214-0932
+- `version.json` — Build 0214-0932, Beta 97.7
 
 ### Matrice de validation (12 cartographies)
 | # | Enseignant | Q1 | Type déduit | Variante | OK |
