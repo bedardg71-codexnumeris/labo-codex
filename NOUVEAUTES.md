@@ -24,6 +24,11 @@
 - **Tour guide neutre** : Le personnage de Primo est retire. Le tour guide utilise des formulations impersonnelles.
 - **Module 2 simplifie** : « Evaluer une production » navigue directement vers la section d'evaluation.
 
+**Harmonisation nomenclature IDME**
+
+- **Noms corriges** : L'echelle de performance IDME utilise desormais partout les noms officiels : Incomplet / en Developpement / Maitrise / Etendu.
+- **18 fichiers harmonises** : Echelles, graphiques, tooltips, gabarits, cartouches, profil etudiant, evaluations, pratiques predefinies et aide contextuelle.
+
 ---
 
 ## Beta 97.5
