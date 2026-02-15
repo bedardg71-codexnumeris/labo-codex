@@ -216,8 +216,14 @@
         popup.id = 'travaux-popup-autocollants';
         popup.className = 'travaux-popup-autocollants visible';
 
+        // Texte introductif si aide contextuelle active
+        const aideActive = typeof estAideContextuelleActive === 'function' && estAideContextuelleActive();
+        let html = aideActive
+            ? '<div class="autocollants-aide">📍 Appose un autocollant pour donner une rétroaction visuelle rapide. Les verts soulignent les forces, les oranges signalent des points à travailler.</div>'
+            : '';
+
         // Qualite (rang du haut)
-        let html = '<div class="travaux-autocollants-label">Qualite</div>';
+        html += '<div class="travaux-autocollants-label">Qualite</div>';
         html += '<div class="travaux-autocollants-grille">';
         AUTOCOLLANTS.filter(a => a.categorie === 'qualite').forEach(a => {
             html += `<div class="travaux-autocollant-item" onclick="travauxOutils.setAutocollantActif('${a.id}')" title="${a.nom}">`;

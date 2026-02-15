@@ -118,15 +118,54 @@
         const fsapiDispo = travauxStockage.estFSAPIDisponible();
         const fsapiActif = travauxStockage.estFSAPIActif();
 
+        // Zero-state pour les novices
+        const aideActive = typeof estAideContextuelleActive === 'function' && estAideContextuelleActive();
+        const zeroStateHTML = (fichiersTravaux.length === 0 && aideActive) ? `
+            <div class="travaux-zero-state">
+                <div class="zero-state-icone">&#x1F4DD;</div>
+                <h3>Annoter les travaux de tes étudiants</h3>
+                <p class="texte-muted">
+                    L'annotation te permet de marquer directement sur les copies :
+                    surlignage, commentaires, symboles et autocollants de rétroaction.
+                </p>
+                <div class="zero-state-etapes">
+                    <div class="zero-state-etape">
+                        <span class="etape-numero">1</span>
+                        <div>
+                            <strong>Choisis la production concernée</strong>
+                            <small>Le travail ou l'examen que tu corriges</small>
+                        </div>
+                    </div>
+                    <div class="zero-state-etape">
+                        <span class="etape-numero">2</span>
+                        <div>
+                            <strong>Importe les copies</strong>
+                            <small>Glisse des fichiers PDF ou images dans la zone ci-dessous</small>
+                        </div>
+                    </div>
+                    <div class="zero-state-etape">
+                        <span class="etape-numero">3</span>
+                        <div>
+                            <strong>Annote et exporte</strong>
+                            <small>Marque les copies, puis exporte les PDF annotés</small>
+                        </div>
+                    </div>
+                </div>
+            </div>` : '';
+
         conteneur.innerHTML = `
             <div class="travaux-import-header">
-                <h3>Importer des travaux <span class="badge-dev-actif">Développement actif</span></h3>
+                <h3>Importer des travaux <span class="badge-dev-actif">Développement actif</span>
+                    <button class="btn-aide-contextuelle" data-aide="evaluations-annoter" aria-label="Aide contextuelle">📍</button>
+                </h3>
                 <div class="travaux-stats-rapides">
                     <span>${stats.nombre} fichier(s) en stock</span>
                     <span>${stats.tailleFormatee}</span>
                     <span class="travaux-mode-stockage">${fsapiActif ? 'Disque local' : 'IndexedDB'}</span>
                 </div>
             </div>
+
+            ${zeroStateHTML}
 
             ${fsapiDispo ? `
             <div class="travaux-fsapi-config">
@@ -138,9 +177,11 @@
             </div>` : ''}
 
             <div class="travaux-select-production">
-                <label>Production concernee :</label>
+                <label>Production concernée :
+                    <span class="tooltip-aide" title="Choisis la production (travail, examen) à laquelle correspondent les copies que tu vas importer. Cela permet d'associer les fichiers aux évaluations.">📍</span>
+                </label>
                 <select id="travaux-select-production" class="form-select">
-                    <option value="">-- Selectionner --</option>
+                    <option value="">-- Sélectionner --</option>
                     ${productions.map(p => `<option value="${p.id}">${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
                 </select>
             </div>
@@ -581,6 +622,21 @@
             document.querySelectorAll('.travaux-miniature').forEach(m => {
                 m.classList.toggle('actif', m.dataset.fichierId === fichierId);
             });
+
+            // Bulle de decouverte au premier fichier ouvert (aide-contextuelle)
+            if (typeof estAideContextuelleActive === 'function' && estAideContextuelleActive()
+                && !sessionStorage.getItem('travaux_bulle_annoter_vu')) {
+                setTimeout(function() {
+                    if (typeof afficherBulleDecouverte === 'function') {
+                        afficherBulleDecouverte({
+                            cible: '#travaux-btn-annoter',
+                            message: 'Clique ici pour activer les outils d\'annotation : stylo, surlignage, formes et autocollants.',
+                            position: 'bas'
+                        });
+                    }
+                    sessionStorage.setItem('travaux_bulle_annoter_vu', 'true');
+                }, 500);
+            }
         }, 100);
     }
 
