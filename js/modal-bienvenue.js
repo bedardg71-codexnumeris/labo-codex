@@ -78,9 +78,15 @@
     }
 
     /**
-     * Lance Primo en mode Assisté
+     * Lance le mode explicite (🗺️ Étape par étape)
+     * Initialise le parcours, puis lance Primo en mode Assisté
      */
     function commencerConfiguration() {
+        // Enregistrer le choix dans le parcours d'apprentissage
+        if (window.parcours) {
+            window.parcours.setMode('explicite');
+        }
+
         fermerModal();
 
         // Changer vers le mode Assisté
@@ -100,16 +106,24 @@
     }
 
     /**
-     * Explorer par soi-même
+     * Lance le mode découverte (🧭 Par exploration)
+     * Initialise le parcours, puis charge la démo
      */
     function explorerApplication() {
+        // Enregistrer le choix dans le parcours d'apprentissage
+        if (window.parcours) {
+            window.parcours.setMode('decouverte');
+        }
+
         fermerModal();
 
-        // Montrer un petit guide rapide
+        // Charger les données de démonstration
         setTimeout(() => {
-            if (typeof afficherNotification === 'function') {
+            if (typeof entrerEnDemo === 'function') {
+                entrerEnDemo();
+            } else if (typeof afficherNotification === 'function') {
                 afficherNotification(
-                    'Commence par la section Trimestre pour configurer ton cours.',
+                    'Explore librement ! L\'aide est toujours disponible via 🧭.',
                     'info',
                     5000
                 );
@@ -160,30 +174,30 @@
                     </div>
 
                     <p style="margin-top: 1rem;">
-                        <strong>Comment veux-tu commencer ?</strong>
+                        <strong>Comment préfères-tu apprendre un nouvel outil ?</strong>
                     </p>
                 </div>
 
                 <div class="modal-bienvenue-actions">
                     <button class="btn-bienvenue btn-bienvenue-principal" onclick="window.modalBienvenue.commencerConfiguration()">
-                        <span class="btn-bienvenue-icone">🧭</span>
+                        <span class="btn-bienvenue-icone">🗺️</span>
                         <span class="btn-bienvenue-texte">
-                            <strong>Configuration guidée</strong>
-                            <small>Le guide te pose quelques questions et configure l'app pour toi</small>
+                            <strong>Étape par étape</strong>
+                            <small>Je te guide à travers chaque fonction dans l'ordre. Tu avances à ton rythme.</small>
                         </span>
                     </button>
 
                     <button class="btn-bienvenue btn-bienvenue-secondaire" onclick="window.modalBienvenue.explorerApplication()">
                         <span class="btn-bienvenue-icone">🧭</span>
                         <span class="btn-bienvenue-texte">
-                            <strong>Explorer par moi-même</strong>
-                            <small>Je préfère découvrir l'application à mon rythme</small>
+                            <strong>Par exploration</strong>
+                            <small>Tu explores librement avec des données de démo. L'aide est toujours là si tu en as besoin.</small>
                         </span>
                     </button>
                 </div>
 
                 <div class="modal-bienvenue-footer">
-                    <p>Tu pourras toujours relancer Primo plus tard via le menu</p>
+                    <p>Tu pourras changer d'avis à tout moment dans Réglages → Préférences</p>
                 </div>
             </div>
         `;

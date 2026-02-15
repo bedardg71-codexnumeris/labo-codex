@@ -3601,6 +3601,11 @@
                         <!-- Sera rempli dynamiquement par JavaScript -->
                     </div>
 
+                    <!-- Indicateur parcours d'apprentissage (mode explicite) -->
+                    <div id="parcours-indicateur-header" class="parcours-indicateur-header" style="display: none;">
+                        <!-- Rempli par parcours-apprentissage.js -->
+                    </div>
+
                 </div>
             </div>
         </header>
@@ -5025,6 +5030,7 @@
 
                             <!-- Formulaire d'édition -->
                             <div id="formulaireProduction" class="u-hide">
+                                <div class="panneau-formulaire">
 
                                 <!-- ═══════════════════════════════════════════════════════════
                                      SECTION 1 : EN-TÊTE
@@ -5160,6 +5166,8 @@
                                         </p>
                                     </div>
                                 </div>
+
+                                </div><!-- /.panneau-formulaire -->
 
                                 <!-- Panneau métadonnées (Beta 95.1) -->
                                 <div id="panneauMetadonneesProduction"></div>
@@ -5317,6 +5325,7 @@
 
                             <!-- Formulaire d'édition de grille -->
                             <div id="conteneurEditionGrille" class="u-hide">
+                                <div class="panneau-formulaire">
 
                                 <!-- Nom + Pratiques compatibles sur même ligne -->
                                 <div style="display: flex; gap: 20px; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap;">
@@ -5338,6 +5347,8 @@
                                     <span style="font-weight: 500;" data-tooltip="cn-grille-ponderation-totale">Pondération totale des critères :</span>
                                     <span id="totalPonderationAffichage" style="font-size: 1.2rem; font-weight: 600; color: var(--bleu-fonce);">0%</span>
                                 </div>
+
+                                </div><!-- /.panneau-formulaire -->
 
                                 <!-- Panneau métadonnées (Beta 95.1) -->
                                 <div id="panneauMetadonneesGrille"></div>
@@ -5444,6 +5455,7 @@
 
                             <!-- Formulaire d'édition -->
                             <div id="conteneurEditionEchelle" class="u-hide">
+                                <div class="panneau-formulaire">
 
                                 <!-- Nom + Pratiques compatibles sur même ligne -->
                                 <div style="display: flex; gap: 20px; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap;">
@@ -5465,6 +5477,8 @@
                      align-items: center; padding: 10px; background: var(--surface-carte, #1a3040); border-radius: var(--radius-moyen); margin-bottom: 20px;">
                                     <!-- Généré par afficherApercuEchelle() -->
                                 </div>
+
+                                </div><!-- /.panneau-formulaire -->
 
                                 <!-- Panneau métadonnées (Beta 95.1) -->
                                 <div id="panneauMetadonneesEchelle"></div>
@@ -6525,6 +6539,7 @@
 
                                 <!-- Informations de la cartouche -->
                                 <div id="infoCartouche" class="u-hide">
+                                    <div class="panneau-formulaire">
 
                                     <!-- Message de verrouillage -->
                                     <div id="alerteVerrouillage" class="hidden-my15-warning">
@@ -6605,6 +6620,8 @@
                                         Générer un aperçu aléatoire
                                     </button>
                                 </div>
+
+                                    </div><!-- /.panneau-formulaire -->
 
                                 <!-- Panneau métadonnées (Beta 95.1) -->
                                 <div id="panneauMetadonneesCartouche"></div>
@@ -16086,8 +16103,11 @@
     <!-- TUTORIEL INTERACTIF - Guide après données démo (Beta 92) -->
     <script src="js/tutoriel-interactif.js?v=2025120102"></script>
 
+    <!-- PARCOURS D'APPRENTISSAGE - Orchestration des mécanismes d'aide -->
+    <script src="js/parcours-apprentissage.js?v=2026021501"></script>
+
     <!-- MODAL BIENVENUE - Accueil premier lancement (Beta 96.2) -->
-    <script src="js/modal-bienvenue.js?v=2026020101"></script>
+    <script src="js/modal-bienvenue.js?v=2026021501"></script>
 
     <!-- RAPPEL BACKUP - Avertissement perte de données (Beta 95) -->
     <script src="js/modal-backup-reminder.js?v=2025122803"></script>
@@ -16096,7 +16116,7 @@
     <script src="js/migrations.js?v=2025121101"></script>
 
     <!-- Page d'accueil (Chantier 3) -->
-    <script src="js/accueil.js?v=2026020601"></script>
+    <script src="js/accueil.js?v=2026021501"></script>
     <!-- Guidage contextuel démo (Chantier 4) -->
     <script src="js/guidage-demo.js?v=2026020601"></script>
 
@@ -16128,7 +16148,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97.8';
-        const BUILD_ID = '0214-2040';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0215-0857';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';

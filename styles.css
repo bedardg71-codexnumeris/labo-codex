@@ -16047,4 +16047,174 @@ body.mode-assiste .btn-aide-contextuelle,
     .bandeau-mode {
         display: none !important;
     }
+
+    .parcours-panneau,
+    .parcours-notification {
+        display: none !important;
+    }
+}
+
+/* ============================================
+   PARCOURS D'APPRENTISSAGE
+   Panneau de progression sur la page d'accueil
+   ============================================ */
+
+.parcours-panneau {
+    background: var(--surface-carte, #1a3040);
+    border: 1px solid var(--gris-bordure);
+    border-radius: var(--radius-grand);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.parcours-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.parcours-titre {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.parcours-compteur {
+    font-size: 0.9rem;
+    color: var(--gris-moyen);
+    font-weight: 500;
+}
+
+/* Barre de progression */
+.parcours-barre-conteneur {
+    height: 6px;
+    background: var(--gris-bordure, #2a4a5a);
+    border-radius: 3px;
+    margin-bottom: 16px;
+    overflow: hidden;
+}
+
+.parcours-barre-remplie {
+    height: 100%;
+    background: linear-gradient(90deg, #1a5266, #2ecc71);
+    border-radius: 3px;
+    transition: width 0.5s ease;
+}
+
+/* Chapitres */
+.parcours-chapitre {
+    margin-bottom: 8px;
+    padding: 10px 12px;
+    border-radius: var(--radius-moyen);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.parcours-chapitre--complete {
+    opacity: 0.7;
+}
+
+.parcours-chapitre--en-cours {
+    background: rgba(26, 82, 102, 0.15);
+    border-left: 3px solid #1a5266;
+}
+
+.parcours-chapitre-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.parcours-chapitre-titre {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.parcours-chapitre-statut {
+    font-size: 0.8rem;
+    color: var(--gris-moyen);
+}
+
+/* Jalons */
+.parcours-jalon {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.88rem;
+    transition: background 0.15s;
+}
+
+.parcours-jalon--a-faire:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.parcours-jalon--fait {
+    opacity: 0.6;
+}
+
+.parcours-jalon-icone {
+    flex-shrink: 0;
+    width: 24px;
+    text-align: center;
+    font-size: 0.95rem;
+}
+
+.parcours-jalon-titre {
+    flex: 1;
+}
+
+.parcours-jalon-date {
+    font-size: 0.75rem;
+    color: var(--gris-moyen);
+}
+
+/* Notification de jalon complété */
+.parcours-notification {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 9999;
+    animation: slideInRight 0.3s ease-out;
+}
+
+.parcours-notification--sortie {
+    animation: slideOutRight 0.3s ease-in forwards;
+}
+
+.parcours-notification-contenu {
+    background: var(--surface-conteneur, #162c36);
+    border-left: 4px solid #2ecc71;
+    border-radius: 8px;
+    padding: 16px;
+    max-width: 360px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes slideOutRight {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100px); opacity: 0; }
+}
+
+/* Indicateur compact dans l'en-tête */
+.parcours-indicateur-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 12px;
+    background: rgba(26, 82, 102, 0.2);
+    border-radius: 20px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+.parcours-indicateur-texte {
+    color: var(--gris-clair);
+}
+
+.parcours-indicateur-compteur {
+    color: var(--gris-moyen);
+    font-weight: 600;
 }

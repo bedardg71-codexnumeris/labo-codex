@@ -578,6 +578,11 @@ function afficherSousSection(idSousSection) {
     if (typeof afficherGuidageDemo === 'function') {
         afficherGuidageDemo(idSousSection);
     }
+
+    // Parcours d'apprentissage : vérifier les jalons
+    if (window.parcours && typeof window.parcours.onNavigationChange === 'function') {
+        window.parcours.onNavigationChange(idSousSection);
+    }
 }
 
 /* ===============================
