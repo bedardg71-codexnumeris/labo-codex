@@ -353,16 +353,16 @@ body.mode-clair {
     --bleu-simulation: #1a5266;
 
     /* Fond de page */
-    --fond-page-sature: #e8f2fd;
-    --fond-page-clair: #f0f8ff;
-    --gradient-fond-page: linear-gradient(135deg, #e8f2fd 0%, #f0f8ff 100%);
+    --fond-page-sature: #d4e6f5;
+    --fond-page-clair: #e8f2fd;
+    --gradient-fond-page: linear-gradient(135deg, #d4e6f5 0%, #e8f2fd 100%);
 
-    /* Ombres — plus légères sur fond clair */
-    --shadow-subtil: 0 1px 4px rgba(0, 0, 0, 0.08);
-    --shadow-normal: 0 2px 8px rgba(0, 0, 0, 0.1);
-    --shadow-prononce: 0 4px 14px rgba(0, 0, 0, 0.12);
-    --shadow-fort: 0 8px 24px rgba(0, 0, 0, 0.15);
-    --shadow-inset: inset 0 1px 3px rgba(0, 0, 0, 0.06);
+    /* Ombres — bleutées double couche */
+    --shadow-subtil: 0 1px 3px rgba(3,46,92,0.06), 0 2px 6px rgba(3,46,92,0.08);
+    --shadow-normal: 0 2px 4px rgba(3,46,92,0.08), 0 4px 12px rgba(3,46,92,0.15);
+    --shadow-prononce: 0 4px 8px rgba(3,46,92,0.1), 0 8px 20px rgba(3,46,92,0.18);
+    --shadow-fort: 0 6px 12px rgba(3,46,92,0.12), 0 12px 32px rgba(3,46,92,0.2);
+    --shadow-inset: inset 0 1px 3px rgba(3,46,92,0.06);
 
     /* Gris — inversés (foncés pour texte, clairs pour fond) */
     --gris-tres-fonce: #1a1a2e;
@@ -382,34 +382,34 @@ body.mode-clair {
     --accent-secondaire: #a07830;
 
     /* Surfaces */
-    --surface-page: #f0f8ff;
+    --surface-page: #d4e6f5;
     --surface-section: #ffffff;
     --surface-conteneur: #ffffff;
-    --surface-carte: #e8f2fd;
-    --surface-element: #d8e8f5;
+    --surface-carte: #ffffff;
+    --surface-element: #f0f8ff;
     --surface-input: rgba(3, 46, 92, 0.06);
-    --ocean-moyen: #e8f2fd;
+    --ocean-moyen: #f0f8ff;
 
     /* Navigation — RESTE SOMBRE (en-tête conservé) */
     /* pas de redéfinition des --nav-* ni --sous-nav-* */
 
-    /* Boutons — tons plus saturés pour fond clair */
+    /* Boutons — tons design system */
     --btn-principal: #032e5c;
     --btn-principal-hover: #0a4a7e;
-    --btn-ajouter: #1e7a5a;
-    --btn-ajouter-hover: #28946e;
-    --btn-modifier: #2a4a8a;
-    --btn-modifier-hover: #3a5aa0;
-    --btn-confirmer: #1e7a5a;
-    --btn-confirmer-hover: #28946e;
-    --btn-annuler: #a07830;
-    --btn-annuler-hover: #8a6828;
-    --btn-supprimer: #c0392b;
-    --btn-supprimer-hover: #a93226;
+    --btn-ajouter: #1e5a4a;
+    --btn-ajouter-hover: #267060;
+    --btn-modifier: #4a3a6a;
+    --btn-modifier-hover: #5a4a7a;
+    --btn-confirmer: #1e5a4a;
+    --btn-confirmer-hover: #267060;
+    --btn-annuler: #d97706;
+    --btn-annuler-hover: #b86505;
+    --btn-supprimer: #8a2a2a;
+    --btn-supprimer-hover: #a03333;
 
-    /* Bordures — opaques sur clair */
-    --bordure-claire: rgba(3, 46, 92, 0.15);
-    --bordure-moyenne: rgba(3, 46, 92, 0.25);
+    /* Bordures — ultra-subtiles */
+    --bordure-claire: rgba(3, 46, 92, 0.04);
+    --bordure-moyenne: rgba(3, 46, 92, 0.12);
 
     /* Tableaux */
     --table-hover: rgba(3, 46, 92, 0.06);
@@ -464,7 +464,7 @@ body.mode-clair {
     --vert-leger: #43a047;
 
     /* Orange accent ajusté */
-    --orange-accent: #a07830;
+    --orange-accent: #ff6b35;
 }
 
 /* ===============================
@@ -16173,8 +16173,9 @@ body.mode-clair {
     color: var(--texte-principal);
 }
 
-/* EN-TÊTE — reste SOMBRE, forcer le texte blanc */
+/* EN-TÊTE — gradient bleu pur design system */
 body.mode-clair .entete {
+    background: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%);
     color: white;
 }
 
@@ -16222,16 +16223,16 @@ body.mode-clair .dropdown-cours-entete option {
     background: var(--bleu-fonce);
 }
 
-/* Conteneur — bordure adaptée */
+/* Conteneur — bordure ultra-subtile */
 body.mode-clair .conteneur {
-    border-color: rgba(3, 46, 92, 0.1);
+    border: 1px solid rgba(3,46,92,0.04);
     box-shadow: var(--shadow-normal);
 }
 
-/* Cartes — bordure adaptée */
+/* Cartes — bordure ultra-subtile + accent gauche */
 body.mode-clair .carte {
-    border-color: rgba(3, 46, 92, 0.12);
-    border-left-color: var(--accent-primaire);
+    border: 1px solid rgba(3,46,92,0.04);
+    border-left: 3px solid var(--accent-primaire);
 }
 
 /* Profil sidebar — bordure adaptée */
