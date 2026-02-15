@@ -16068,6 +16068,13 @@ body.mode-assiste .btn-aide-contextuelle,
     margin-bottom: 20px;
 }
 
+/* Quand le parcours est un accordéon, laisser .carte gérer le chrome visuel */
+.parcours-panneau.accordeon {
+    border: 1px solid rgba(106, 172, 184, 0.15);
+    border-left: 3px solid var(--accent-primaire, #6aacb8);
+    padding: var(--espacement-moyen);
+}
+
 /* Variante CTA (call-to-action, parcours non initialisé) */
 .parcours-panneau--cta {
     border-style: dashed;
