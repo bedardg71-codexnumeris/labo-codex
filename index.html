@@ -11959,6 +11959,26 @@
                     <h2>Notes de version</h2>
                     <p class="text-muted">Historique des changements majeurs</p>
 
+                    <!-- Beta 97.8 - Section Découvrir + assistant matériel -->
+                    <div class="carte accordeon ouvert" id="accordeon-apropos-beta978-decouvrir">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Beta 97.8 &mdash; Section D&eacute;couvrir &amp; assistant de cr&eacute;ation
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu" style="display: block;">
+                        <p class="text-muted">14 f&eacute;vrier 2026</p>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Section &laquo;&nbsp;D&eacute;couvrir&nbsp;&raquo; sur l'accueil</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Section repliable</strong> : Les toggles d'onboarding (donn&eacute;es d&eacute;mo, tour guid&eacute;, info-bulles) sont regroup&eacute;s dans une section accord&eacute;on &laquo;&nbsp;D&eacute;couvrir&nbsp;&raquo; avec 4 cartes.</li>
+                            <li><strong>Cr&eacute;er du mat&eacute;riel</strong> : Nouvelle carte d'action directe vers l'assistant de cr&eacute;ation de mat&eacute;riel p&eacute;dagogique (&eacute;chelle, grille, production, cartouches).</li>
+                            <li><strong>Banni&egrave;re Construction</strong> : Point d'entr&eacute;e secondaire dans Construction &gt; Aper&ccedil;u avec bouton &laquo;&nbsp;Lancer l'assistant&nbsp;&raquo;.</li>
+                        </ul>
+
+                        </div>
+                    </div>
+
                     <!-- Beta 97.5 - Suivi d'étudiants -->
                     <div class="carte accordeon ouvert" id="accordeon-apropos-beta975-suivi">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
@@ -16120,7 +16140,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97.8';
-        const BUILD_ID = '0214-1736';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0214-2001';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
