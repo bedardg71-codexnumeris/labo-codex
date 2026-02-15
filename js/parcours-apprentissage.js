@@ -1012,6 +1012,92 @@ function pulserIndicateurHeader() {
 }
 
 // ============================================
+// PRÉFÉRENCES (Réglages > Préférences)
+// ============================================
+
+/**
+ * Change le mode d'apprentissage depuis les préférences.
+ * Gère le nettoyage si passage en autonome.
+ */
+function changerModeParcours(nouveauMode) {
+    var progression = chargerProgression();
+    var ancienMode = progression.mode;
+
+    if (nouveauMode === ancienMode) return;
+
+    progression.mode = nouveauMode;
+
+    if (nouveauMode === 'autonome') {
+        progression.autonome = true;
+        if (!progression.dateAutonomie) {
+            progression.dateAutonomie = new Date().toISOString().split('T')[0];
+        }
+        nettoyerMecanismesActifs();
+    } else {
+        progression.autonome = false;
+    }
+
+    if (!progression.dateDebut) {
+        progression.dateDebut = new Date().toISOString().split('T')[0];
+    }
+
+    sauvegarderProgression(progression);
+    mettreAJourUI();
+    initialiserPreferencesParcours();
+
+    if (typeof afficherNotification === 'function') {
+        var labels = { explicite: '🗺️ Étape par étape', decouverte: '🧭 Par exploration', autonome: '🎓 Autonome' };
+        afficherNotification('Mode changé : ' + (labels[nouveauMode] || nouveauMode), 'succes', 3000);
+    }
+}
+
+/**
+ * Initialise l'affichage des préférences parcours.
+ * Pré-remplit le sélecteur et affiche la progression.
+ */
+function initialiserPreferencesParcours() {
+    var select = document.getElementById('select-mode-parcours');
+    var conteneur = document.getElementById('parcours-progression-preferences');
+    if (!select && !conteneur) return;
+
+    var progression = getProgression();
+
+    // Pré-remplir le sélecteur
+    if (select) {
+        if (progression.mode) {
+            select.value = progression.mode;
+        } else {
+            select.value = 'explicite';
+        }
+    }
+
+    // Afficher la progression
+    if (conteneur) {
+        if (!progression.mode) {
+            conteneur.innerHTML = '<span style="color: var(--gris-moyen); font-size: 0.9rem;">Parcours non initialisé. Il sera proposé au prochain démarrage.</span>';
+            return;
+        }
+
+        var jalonsListe = '';
+        progression.chapitres.forEach(function(chap) {
+            var faits = chap.jalons.filter(function(j) { return j.fait; }).length;
+            var total = chap.jalons.length;
+            var icone = chap.complete ? '✅' : (chap.enCours ? '▶' : '○');
+            jalonsListe += '<div style="display: flex; justify-content: space-between; padding: 2px 0;">';
+            jalonsListe += '<span>' + icone + ' ' + chap.icone + ' ' + chap.titre + '</span>';
+            jalonsListe += '<span style="color: var(--gris-moyen);">' + faits + '/' + total + '</span>';
+            jalonsListe += '</div>';
+        });
+
+        conteneur.innerHTML =
+            '<div style="font-weight: 600; margin-bottom: 8px;">Progression : ' +
+            progression.jalonsFaits + '/' + progression.totalJalons +
+            ' (' + progression.pourcentage + '%)</div>' +
+            jalonsListe;
+    }
+}
+
+// ============================================
 // EXPORTS
 // ============================================
 
@@ -1037,6 +1123,8 @@ window.parcours = {
 
     // Configuration
     reinitialiser: reinitialiser,
+    changerModeParcours: changerModeParcours,
+    initialiserPreferencesParcours: initialiserPreferencesParcours,
 
     // Données (pour les autres modules)
     CHAPITRES: CHAPITRES,
