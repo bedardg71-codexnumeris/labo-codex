@@ -862,6 +862,19 @@
   - Valider que l'assistant conversationnel (demarrerCreationMateriel) fonctionne correctement depuis les nouveaux points d'entree (section Decouvrir sur l'accueil + banniere dans Construction > Apercu)
   - Tester la creation d'echelle, grille, production et cartouches sans activer le tour guide
 
+### Parcours d'apprentissage — Verification et guide
+
+- [ ] **#164** Verifier le parcours complet d'initiation de l'utilisateur
+  - Tester le flux complet depuis un localStorage vierge : panneau CTA → choix de mode → progression des 12 jalons → certification d'autonomie
+  - Valider le modal de bienvenue, le panneau CTA sur l'accueil, le hero adaptatif, les notifications de jalon, les suggestions proactives
+  - Verifier la reinitialisation (Reglages → Preferences), l'export/import de la progression, le responsive (600px, 900px, 1300px)
+  - S'assurer que tous les mecanismes d'aide (guidage configuration, tutoriel presences, tour guide, tooltips) s'orchestrent correctement selon le mode choisi
+
+- [ ] **#165** Revoir le format du guide dans l'alignement pedagogique (Anderson)
+  - Revoir la mise en page et le contenu du guide integre (7 pages) dans le module Carte mentale
+  - Verifier la coherence avec la taxonomie d'Anderson (types de connaissances, niveaux cognitifs, verbes)
+  - **Fichiers** : `js/planification-carte.js`, `styles.css`
+
 ---
 
 ## Complete (Beta 97.3 - 7 février 2026)
