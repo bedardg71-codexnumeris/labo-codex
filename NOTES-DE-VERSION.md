@@ -1,11 +1,11 @@
 # Notes de version — Monitorage pedagogique
 
 > Document de gestion locale. Historique complet avec dates.
-> Derniere mise a jour : 14 fevrier 2026
+> Derniere mise a jour : 15 fevrier 2026
 
 ---
 
-## Beta 97.8 (14 fevrier 2026)
+## Beta 97.8 (14-15 fevrier 2026)
 
 **Guide integre pour la carte d'alignement pedagogique**
 
@@ -36,6 +36,17 @@
 *Phase 3 — Nettoyage*
 - **11 questions supprimees** : intro-materiel, confirmation-dossier-ouvert, aide-dossier, transition-mode-guide, importer-echelle-idme, importer-grille-srpnf, creer-production-guidee, navigation-evaluations, selection-etudiant, attribuer-niveaux, fin-sequence-evaluer.
 - **Module 2 simplifie** : `demarrerEvaluation()` navigue directement vers la section Evaluations (plus de mode notification).
+
+*Correctifs materiel pedagogique*
+- **Detection invisible** : `demarrerCreationMateriel()` detecte la pratique AVANT l'ouverture du modal. L'etape `materiel-intro` est sautee — l'utilisateur voit directement la premiere question.
+- **Numerotation corrigee** : `calculerInfosParcours()` exclut `materiel-intro` du compteur. L'etape affichee commence a 1/12 (au lieu de 2/13).
+
+*Harmonisation nomenclature IDME (15 fevrier 2026)*
+- **Nomenclature officielle** : L'echelle IDME utilise desormais partout « Incomplet / en Developpement / Maitrise / Etendu ».
+- **« Insuffisant » → « Incomplet »** : Label du niveau I corrige dans 18 fichiers (echelles.js, graphiques-progression.js, tooltips-contenu.js, evaluation.js, cartouches.js, pratiques.js, pratiques-predefines.js, pratique-registre.js, etudiants.js, profil-etudiant.js, gabarits-utils.js, primo-modal.js, primo-questions.js, aide-contextuelle-contenu.js, snapshots.js, pratique-pan-standards.js, interpretation-config.js, tableau-bord-apercu.js).
+- **« En developpement » → « en Developpement »** : Casse harmonisee (minuscule « en », majuscule « D ») dans tous les contextes IDME.
+- **« Exemplaire » → « Etendu »** : Corrige dans aide-contextuelle-contenu.js et primo-questions.js.
+- **Non modifie** : Niveaux d'engagement (interventions.js, profil-etudiant.js), variables techniques (seuilInsuffisant), changelog historique, echelle ABCDE (echelles.js:3108).
 
 ---
 
