@@ -408,6 +408,9 @@ function afficherSousSection(idSousSection) {
             if (typeof initialiserPreferencesV2 === 'function') {
                 setTimeout(initialiserPreferencesV2, 100);
             }
+            if (window.parcours && window.parcours.initialiserPreferencesParcours) {
+                setTimeout(window.parcours.initialiserPreferencesParcours, 150);
+            }
             break;
 
         case 'reglages-depistage':
