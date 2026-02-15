@@ -14444,6 +14444,8 @@ body.mode-assiste .btn-aide-contextuelle,
 }
 
 #planif-palette.planif-palette-replie .planif-palette-contenu { display: none; }
+#planif-palette.planif-palette-replie .planif-guide { display: none; }
+#planif-palette.planif-palette-replie .planif-palette-aide-btn { display: none; }
 #planif-palette.planif-palette-replie .planif-palette-barre { border-bottom: none; border-radius: 10px; }
 
 .planif-palette-btn {
@@ -14803,6 +14805,113 @@ body.mode-assiste .btn-aide-contextuelle,
 .planif-palette-aide-btn:hover {
     background: var(--surface-carte, #1a3a48);
     color: var(--texte-secondaire, #8aa4b0);
+}
+
+/* === GUIDE INTÉGRÉ (#162) === */
+.planif-guide {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    max-height: 520px;
+}
+.planif-guide-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 8px 10px 6px;
+    border-bottom: 1px solid rgba(106, 172, 184, 0.15);
+}
+.planif-guide-fermer {
+    border: none; background: none; cursor: pointer; font-size: 16px;
+    color: var(--texte-muted, #5a7a88); width: 22px; height: 22px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 4px; padding: 0; line-height: 1; flex-shrink: 0;
+}
+.planif-guide-fermer:hover { background: rgba(106, 172, 184, 0.06); color: var(--texte-principal, #d0e0e4); }
+.planif-guide-titre {
+    font-size: 12px; font-weight: 700; color: var(--texte-principal, #d0e0e4);
+    line-height: 1.3; flex: 1;
+}
+.planif-guide-corps {
+    flex: 1; overflow-y: auto; padding: 8px 12px;
+    font-size: 11px; line-height: 1.55; color: var(--texte-secondaire, #8aa4b0);
+}
+.planif-guide-corps p { margin: 0 0 6px; }
+.planif-guide-corps ol, .planif-guide-corps ul { margin: 4px 0 8px; padding-left: 18px; }
+.planif-guide-corps li { margin-bottom: 4px; }
+.planif-guide-corps strong { color: var(--texte-principal, #d0e0e4); }
+.planif-guide-corps em { color: var(--texte-muted, #5a7a88); font-style: italic; }
+.planif-guide-pourquoi {
+    color: var(--texte-principal, #d0e0e4);
+    font-style: italic;
+    border-left: 2px solid rgba(106, 172, 184, 0.3);
+    padding-left: 8px;
+    margin-bottom: 8px;
+}
+.planif-guide-astuce {
+    background: rgba(249, 115, 22, 0.06);
+    border: 1px solid rgba(249, 115, 22, 0.15);
+    border-radius: 6px;
+    padding: 6px 8px;
+    margin-top: 6px;
+    font-size: 10.5px;
+    line-height: 1.5;
+}
+.planif-guide-astuce::before { content: '\1F4A1 '; }
+.planif-guide-type {
+    display: inline-block; width: 10px; height: 10px;
+    border-radius: 3px; vertical-align: middle; margin-right: 2px;
+}
+.planif-guide-badge {
+    display: inline-block; width: 8px; height: 8px;
+    border-radius: 50%; vertical-align: middle; margin-right: 2px;
+}
+.planif-guide-ref {
+    margin-top: 10px;
+    font-size: 9px;
+    color: var(--texte-muted, #5a7a88);
+    opacity: 0.7;
+    line-height: 1.4;
+}
+.planif-guide-ref a {
+    color: var(--texte-muted, #5a7a88);
+    text-decoration: underline;
+    text-decoration-style: dotted;
+}
+.planif-guide-ref a:hover {
+    color: var(--texte-secondaire, #8aa4b0);
+    opacity: 1;
+}
+.planif-guide-types-liste { list-style: none; padding-left: 4px; }
+.planif-guide-types-liste li { margin-bottom: 5px; }
+.planif-guide-nav {
+    display: flex; align-items: center; justify-content: center;
+    gap: 8px; padding: 6px 10px 2px;
+    border-top: 1px solid rgba(106, 172, 184, 0.15);
+}
+.planif-guide-btn-prev, .planif-guide-btn-next {
+    border: 1px solid rgba(106, 172, 184, 0.2); background: var(--surface-carte, #1a3a48);
+    color: var(--texte-secondaire, #8aa4b0); cursor: pointer;
+    border-radius: 4px; padding: 2px 8px; font-size: 12px; min-width: 28px;
+}
+.planif-guide-btn-prev:hover, .planif-guide-btn-next:hover {
+    background: rgba(106, 172, 184, 0.1); color: var(--texte-principal, #d0e0e4);
+}
+.planif-guide-btn-prev:disabled, .planif-guide-btn-next:disabled {
+    opacity: 0.3; cursor: default;
+}
+.planif-guide-dots { display: flex; gap: 5px; align-items: center; }
+.planif-guide-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    border: 1px solid rgba(106, 172, 184, 0.3); background: transparent;
+    cursor: pointer; padding: 0; transition: background 0.15s;
+}
+.planif-guide-dot:hover { background: rgba(106, 172, 184, 0.3); }
+.planif-guide-dot-actif { background: var(--texte-secondaire, #8aa4b0); border-color: var(--texte-secondaire, #8aa4b0); }
+.planif-guide-page-num {
+    text-align: center; font-size: 9px;
+    color: var(--texte-muted, #5a7a88);
+    padding: 2px 0 6px;
 }
 
 .planif-noeud-titre {

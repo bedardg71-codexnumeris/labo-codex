@@ -170,6 +170,196 @@ var BANQUE_VERBES = {
 // Types de nœuds qui acceptent le sélecteur de niveau cognitif
 var TYPES_AVEC_NIVEAU_COGNITIF = ['competence', 'idee-maitresse', 'activite', 'soutien', 'revision', 'evaluation'];
 
+// === GUIDE INTÉGRÉ — 7 pages pédagogiques ===
+var GUIDE_PAGES = [
+    {
+        titre: 'Construis ta carte d\u2019alignement',
+        contenu:
+            '<p>Cette carte t\u2019aide à vérifier que tout ce que tu enseignes est relié à ce que tu évalues. C\u2019est ça, l\u2019alignement pédagogique.</p>' +
+            '<p>Les <strong>badges</strong> sur chaque élément te montrent où tu en es\u00a0:</p>' +
+            '<ul>' +
+                '<li><span class="planif-guide-badge" style="background:#22c55e"></span> <strong>Vert</strong> = cet élément est bien relié en amont et en aval.</li>' +
+                '<li><span class="planif-guide-badge" style="background:#94a3b8"></span> <strong>Gris</strong> = il manque une connexion.</li>' +
+                '<li><span class="planif-guide-badge" style="background:#f97316"></span> <strong>Orange</strong> = attention, une évaluation manque quelque part.</li>' +
+            '</ul>' +
+            '<p>Ce guide te propose 6\u00a0étapes pour construire ta carte. Tu peux le consulter à tout moment avec le bouton <strong>?</strong> en bas de la palette.</p>' +
+            '<p class="planif-guide-ref">Anderson, L.\u00a0W. (2026). <em>Curricular alignment: A re-examination</em> (Educational Practices Series, No.\u00a037). UNESCO International Bureau of Education. <a href="https://unesdoc.unesco.org/ark:/48223/pf0000397143.locale=en" target="_blank" rel="noopener">unesdoc.unesco.org</a></p>'
+    },
+    {
+        titre: 'Commence par le pourquoi',
+        contenu:
+            '<p class="planif-guide-pourquoi">Chaque cours vise des compétences — c\u2019est ce que l\u2019étudiant sera capable de faire à la fin. Tout le reste de ta carte en découle.</p>' +
+            '<ol>' +
+                '<li>Glisse un élément <span class="planif-guide-type" style="background:var(--planif-couleur-competence)"></span> <strong>Compétence</strong> de la palette sur le canevas.</li>' +
+                '<li>Double-clique dessus pour écrire l\u2019énoncé de compétence.</li>' +
+            '</ol>' +
+            '<div class="planif-guide-astuce">Sélectionne la compétence et utilise le <strong>sélecteur de niveau cognitif</strong> dans le panneau de droite pour choisir le niveau visé (ex.\u00a0: Analyser, Créer). Les verbes suggérés t\u2019aideront à formuler ton énoncé.</div>'
+    },
+    {
+        titre: 'Ce que l\u2019étudiant doit retenir',
+        contenu:
+            '<p class="planif-guide-pourquoi">Une idée maîtresse, c\u2019est l\u2019essentiel — ce qui restera quand l\u2019étudiant aura oublié les détails. Chaque compétence se décline en une ou plusieurs idées maîtresses.</p>' +
+            '<ol>' +
+                '<li>Glisse une <span class="planif-guide-type" style="background:var(--planif-couleur-idee-maitresse)"></span> <strong>Idée maîtresse</strong> sur le canevas.</li>' +
+                '<li>Relie-la à sa compétence en tirant un lien d\u2019un port à l\u2019autre. Le verbe <em>«\u00a0se décline en\u00a0»</em> s\u2019affiche automatiquement.</li>' +
+                '<li>Le badge d\u2019entrée de l\u2019idée maîtresse passe au vert — elle est connectée en amont.</li>' +
+            '</ol>'
+    },
+    {
+        titre: 'Organise dans le temps',
+        contenu:
+            '<p class="planif-guide-pourquoi">Les séquences et les leçons structurent ton cours dans le temps. Une séquence regroupe des leçons qui poursuivent les mêmes idées maîtresses.</p>' +
+            '<ol>' +
+                '<li>Glisse une <span class="planif-guide-type" style="background:var(--planif-couleur-sequence)"></span> <strong>Séquence</strong> sur le canevas, puis des <span class="planif-guide-type" style="background:var(--planif-couleur-lecon)"></span> <strong>Leçons</strong> à l\u2019intérieur.</li>' +
+                '<li>Relie chaque leçon à une ou plusieurs idées maîtresses. Le verbe <em>«\u00a0se concrétise dans\u00a0»</em> apparaît.</li>' +
+            '</ol>' +
+            '<div class="planif-guide-astuce">Tu peux déplacer une leçon d\u2019une séquence à l\u2019autre en la glissant.</div>'
+    },
+    {
+        titre: 'Ce que tu enseignes concrètement',
+        contenu:
+            '<p class="planif-guide-pourquoi">Chaque leçon transmet des connaissances. Il en existe 4\u00a0types\u00a0:</p>' +
+            '<ul class="planif-guide-types-liste">' +
+                '<li><span class="planif-guide-type" style="background:var(--planif-couleur-factuelle)"></span> <strong>Factuelle</strong> — des faits, termes, données. <em>(Ex.\u00a0: les dates clés, les définitions, une formule.)</em></li>' +
+                '<li><span class="planif-guide-type" style="background:var(--planif-couleur-conceptuelle)"></span> <strong>Conceptuelle</strong> — des principes, théories, modèles. <em>(Ex.\u00a0: la loi de l\u2019offre et la demande, la structure d\u2019un récit.)</em></li>' +
+                '<li><span class="planif-guide-type" style="background:var(--planif-couleur-procedurale)"></span> <strong>Procédurale</strong> — des méthodes, techniques, savoir-faire. <em>(Ex.\u00a0: résoudre une équation, rédiger une introduction.)</em></li>' +
+                '<li><span class="planif-guide-type" style="background:var(--planif-couleur-metacognitive)"></span> <strong>Métacognitive</strong> — la conscience de son propre apprentissage. <em>(Ex.\u00a0: planifier son étude, s\u2019autoévaluer.)</em></li>' +
+            '</ul>' +
+            '<ol>' +
+                '<li>Glisse le type de connaissance approprié dans une <strong>Leçon</strong>.</li>' +
+                '<li>Double-clique pour nommer la connaissance.</li>' +
+            '</ol>' +
+            '<div class="planif-guide-astuce">Si tu hésites entre Factuelle et Conceptuelle\u00a0: un fait se vérifie, un concept s\u2019explique.</div>'
+    },
+    {
+        titre: 'Comment l\u2019étudiant va apprendre',
+        contenu:
+            '<p class="planif-guide-pourquoi">Chaque connaissance a besoin d\u2019une activité pour être acquise. Le type d\u2019activité dépend de ce que tu vises\u00a0: un exercice de mémorisation ne développe pas la même chose qu\u2019une analyse de cas.</p>' +
+            '<ol>' +
+                '<li>Glisse une <span class="planif-guide-type" style="background:var(--planif-couleur-activite)"></span> <strong>Activité</strong> dans la leçon.</li>' +
+                '<li>Relie-la à la connaissance qu\u2019elle permet d\u2019acquérir. Le verbe <em>«\u00a0s\u2019acquiert par\u00a0»</em> apparaît.</li>' +
+                '<li>Utilise le <strong>sélecteur de niveau cognitif</strong> (panneau de droite) pour t\u2019assurer que l\u2019activité vise le bon niveau.</li>' +
+            '</ol>' +
+            '<div class="planif-guide-astuce"><span class="planif-guide-type" style="background:var(--planif-couleur-soutien)"></span> <strong>Soutien</strong> et <span class="planif-guide-type" style="background:var(--planif-couleur-revision)"></span> <strong>Révision</strong> sont des types d\u2019activités spécialisées. Utilise «\u00a0Soutien\u00a0» pour l\u2019aide supplémentaire, «\u00a0Révision\u00a0» pour le réinvestissement.</div>'
+    },
+    {
+        titre: 'Vérifie que c\u2019est acquis',
+        contenu:
+            '<p class="planif-guide-pourquoi">L\u2019évaluation ferme la boucle de l\u2019alignement. Elle doit vérifier ce que tu as enseigné, au niveau cognitif que tu as visé — ni plus, ni moins.</p>' +
+            '<ol>' +
+                '<li>Glisse une <span class="planif-guide-type" style="background:var(--planif-couleur-evaluation)"></span> <strong>Évaluation</strong> sur le canevas.</li>' +
+                '<li>Relie-la aux éléments qu\u2019elle évalue\u00a0: idées maîtresses, connaissances ou activités. Le verbe <em>«\u00a0se vérifie par\u00a0»</em> apparaît.</li>' +
+                '<li>Quand une compétence est atteinte par au moins une évaluation à travers la chaîne, son badge d\u2019avertissement disparaît.</li>' +
+            '</ol>' +
+            '<p style="margin-top:10px;font-weight:600;color:var(--planif-couleur-evaluation);">L\u2019objectif\u00a0: quand tous les badges de ta carte sont verts, ton cours est aligné — chaque compétence est enseignée et évaluée de manière cohérente.</p>'
+    }
+];
+
+var _guidePageCourante = 0;
+var _guideOuvert = false;
+
+function ouvrirGuide() {
+    var palette = document.getElementById('planif-palette');
+    if (!palette) return;
+    _guideOuvert = true;
+    _guidePageCourante = 0;
+
+    var contenu = palette.querySelector('.planif-palette-contenu');
+    var btnAide = document.getElementById('planif-palette-aide-btn');
+    if (contenu) contenu.style.display = 'none';
+    if (btnAide) btnAide.style.display = 'none';
+
+    // Supprimer un éventuel guide existant
+    var ancien = palette.querySelector('.planif-guide');
+    if (ancien) ancien.remove();
+
+    var guide = document.createElement('div');
+    guide.className = 'planif-guide';
+    guide.innerHTML =
+        '<div class="planif-guide-header">' +
+            '<button class="planif-guide-fermer" title="Fermer">&times;</button>' +
+            '<div class="planif-guide-titre"></div>' +
+        '</div>' +
+        '<div class="planif-guide-corps"></div>' +
+        '<div class="planif-guide-nav">' +
+            '<button class="planif-guide-btn-prev" title="Précédent">&larr;</button>' +
+            '<div class="planif-guide-dots"></div>' +
+            '<button class="planif-guide-btn-next" title="Suivant">&rarr;</button>' +
+        '</div>' +
+        '<div class="planif-guide-page-num"></div>';
+
+    palette.appendChild(guide);
+
+    var btnPrev = guide.querySelector('.planif-guide-btn-prev');
+    var btnNext = guide.querySelector('.planif-guide-btn-next');
+    var dotsContainer = guide.querySelector('.planif-guide-dots');
+    var fermer = guide.querySelector('.planif-guide-fermer');
+
+    // Créer les 7 points de navigation
+    for (var i = 0; i < GUIDE_PAGES.length; i++) {
+        var dot = document.createElement('button');
+        dot.className = 'planif-guide-dot';
+        dot.dataset.page = i;
+        dot.title = 'Page ' + (i + 1);
+        dot.addEventListener('click', function() {
+            _guidePageCourante = parseInt(this.dataset.page);
+            rendrePageGuide(guide);
+        });
+        dotsContainer.appendChild(dot);
+    }
+
+    fermer.addEventListener('click', fermerGuide);
+    btnPrev.addEventListener('click', function() {
+        if (_guidePageCourante > 0) {
+            _guidePageCourante--;
+            rendrePageGuide(guide);
+        }
+    });
+    btnNext.addEventListener('click', function() {
+        if (_guidePageCourante < GUIDE_PAGES.length - 1) {
+            _guidePageCourante++;
+            rendrePageGuide(guide);
+        } else {
+            fermerGuide();
+        }
+    });
+
+    rendrePageGuide(guide);
+}
+
+function rendrePageGuide(guide) {
+    var page = GUIDE_PAGES[_guidePageCourante];
+    if (!page) return;
+
+    guide.querySelector('.planif-guide-titre').textContent = page.titre;
+    guide.querySelector('.planif-guide-corps').innerHTML = page.contenu;
+    guide.querySelector('.planif-guide-page-num').textContent = 'Page ' + (_guidePageCourante + 1) + ' / ' + GUIDE_PAGES.length;
+
+    var btnPrev = guide.querySelector('.planif-guide-btn-prev');
+    var btnNext = guide.querySelector('.planif-guide-btn-next');
+    btnPrev.disabled = _guidePageCourante === 0;
+    btnNext.textContent = _guidePageCourante === GUIDE_PAGES.length - 1 ? 'Terminer' : '\u2192';
+
+    var dots = guide.querySelectorAll('.planif-guide-dot');
+    for (var i = 0; i < dots.length; i++) {
+        dots[i].classList.toggle('planif-guide-dot-actif', i === _guidePageCourante);
+    }
+}
+
+function fermerGuide() {
+    var palette = document.getElementById('planif-palette');
+    if (!palette) return;
+    _guideOuvert = false;
+
+    var guide = palette.querySelector('.planif-guide');
+    if (guide) guide.remove();
+
+    var contenu = palette.querySelector('.planif-palette-contenu');
+    var btnAide = document.getElementById('planif-palette-aide-btn');
+    if (contenu) contenu.style.display = '';
+    if (btnAide) btnAide.style.display = '';
+}
+
 function resoudreVerbe(sourceId, cibleId) {
     var src = etat.noeuds.get(sourceId);
     var cbl = etat.noeuds.get(cibleId);
@@ -3906,43 +4096,15 @@ function initialiser() {
         });
     }
 
-    // Carte d'aide flottante — drag + fermer
-    var carteAide = document.getElementById('planif-carte-aide');
-    var carteAideBarre = carteAide ? carteAide.querySelector('.planif-carte-aide-barre') : null;
-    var carteAideFermer = document.getElementById('planif-carte-aide-fermer');
-    if (carteAideBarre) {
-        carteAideBarre.addEventListener('mousedown', function(e) {
-            if (e.target.closest('.planif-carte-aide-fermer')) return;
-            e.preventDefault();
-            var startX = e.clientX;
-            var startY = e.clientY;
-            var rect = carteAide.getBoundingClientRect();
-            var wrapperRect = document.getElementById('planif-zone-wrapper').getBoundingClientRect();
-            var startLeft = rect.left - wrapperRect.left;
-            var startTop = rect.top - wrapperRect.top;
-
-            function onMove(e2) {
-                carteAide.style.left = (startLeft + e2.clientX - startX) + 'px';
-                carteAide.style.top = (startTop + e2.clientY - startY) + 'px';
-            }
-            function onUp() {
-                document.removeEventListener('mousemove', onMove);
-                document.removeEventListener('mouseup', onUp);
-            }
-            document.addEventListener('mousemove', onMove);
-            document.addEventListener('mouseup', onUp);
-        });
-    }
-    if (carteAideFermer && carteAide) {
-        carteAideFermer.addEventListener('click', function() {
-            carteAide.style.display = 'none';
-        });
-    }
+    // Guide intégré — bouton « ? » de la palette
     var btnAidePalette = document.getElementById('planif-palette-aide-btn');
-    if (btnAidePalette && carteAide) {
+    if (btnAidePalette) {
         btnAidePalette.addEventListener('click', function() {
-            var visible = carteAide.style.display !== 'none';
-            carteAide.style.display = visible ? 'none' : '';
+            if (_guideOuvert) {
+                fermerGuide();
+            } else {
+                ouvrirGuide();
+            }
         });
     }
 
