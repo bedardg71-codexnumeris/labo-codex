@@ -451,6 +451,11 @@ function verifierAutonomie(progression) {
         progression.dateAutonomie = new Date().toISOString().split('T')[0];
         progression.mode = 'autonome';
         sauvegarderProgression(progression);
+
+        // Nettoyer tous les mécanismes actifs
+        nettoyerMecanismesActifs();
+
+        // Afficher le modal de certification
         afficherCertificationAutonomie();
     }
 }
@@ -601,6 +606,36 @@ function afficherNotificationJalon(jalon, progression) {
 }
 
 /**
+ * Nettoie tous les mécanismes d'aide actifs.
+ * Appelé lors du passage en mode autonome.
+ */
+function nettoyerMecanismesActifs() {
+    // Arrêter le guidage configuration s'il est actif
+    if (typeof arreterGuidage === 'function') {
+        arreterGuidage();
+    }
+
+    // Retirer la suggestion proactive
+    var suggestion = document.getElementById('suggestion-parcours');
+    if (suggestion) suggestion.remove();
+
+    // Retirer la notification de jalon
+    var notifJalon = document.getElementById('notification-jalon');
+    if (notifJalon) notifJalon.remove();
+
+    // Retirer le message de guidage
+    var msgGuidage = document.getElementById('message-guidage');
+    if (msgGuidage) msgGuidage.remove();
+
+    // Retirer le bouton étape suivante
+    var btnEtape = document.getElementById('bouton-etape-suivante');
+    if (btnEtape) btnEtape.remove();
+
+    // Masquer l'indicateur header
+    mettreAJourIndicateurHeader();
+}
+
+/**
  * Affiche le modal de certification d'autonomie
  */
 function afficherCertificationAutonomie() {
@@ -635,7 +670,11 @@ function afficherCertificationAutonomie() {
                 '</div>' +
             '</div>' +
             '<div class="modal-bienvenue-actions">' +
-                '<button class="btn-bienvenue btn-bienvenue-principal" onclick="document.getElementById(\'modal-autonomie\').remove();">' +
+                '<button class="btn-bienvenue btn-bienvenue-principal" onclick="' +
+                    'document.getElementById(\'modal-autonomie\').remove(); ' +
+                    'if (window.parcours) window.parcours.mettreAJourUI(); ' +
+                    'if (typeof afficherSection === \'function\') afficherSection(\'accueil\'); ' +
+                '">' +
                     '<span class="btn-bienvenue-icone">🧭</span>' +
                     '<span class="btn-bienvenue-texte">' +
                         '<strong>C\'est parti !</strong>' +
@@ -683,10 +722,31 @@ function genererPanneauParcours() {
     if (!progression.mode) return '';
 
     var html = '<div class="parcours-panneau" id="panneau-parcours">';
+
+    // === MODE AUTONOME : panneau compact de félicitation ===
+    if (progression.autonome) {
+        var dateAuto = chargerProgression().dateAutonomie || '';
+        html += '<div class="parcours-header">';
+        html += '<h3 class="parcours-titre">🧭 Parcours complété</h3>';
+        html += '<span class="parcours-compteur">' + progression.jalonsFaits + '/' + progression.totalJalons + '</span>';
+        html += '</div>';
+        html += '<div class="parcours-barre-conteneur">';
+        html += '<div class="parcours-barre-remplie" style="width: 100%;"></div>';
+        html += '</div>';
+        html += '<p style="color: var(--gris-moyen); font-size: 0.9rem; margin: 12px 0 4px;">';
+        html += 'Tu maîtrises les bases de Monitorage.';
+        if (dateAuto) html += ' Autonomie obtenue le ' + dateAuto + '.';
+        html += '</p>';
+        html += '<p style="margin: 4px 0 0;">';
+        html += '<button class="btn btn-secondaire btn-sm" onclick="window.parcours.reinitialiser(); if(typeof afficherAccueil===\'function\') afficherAccueil();">Relancer le parcours</button>';
+        html += '</p>';
+        html += '</div>';
+        return html;
+    }
+
+    // === MODE NORMAL : panneau détaillé ===
     html += '<div class="parcours-header">';
-    html += '<h3 class="parcours-titre">';
-    html += progression.autonome ? '🧭 Parcours complété' : '📍 Ton parcours';
-    html += '</h3>';
+    html += '<h3 class="parcours-titre">📍 Ton parcours</h3>';
     html += '<span class="parcours-compteur">' + progression.jalonsFaits + '/' + progression.totalJalons + '</span>';
     html += '</div>';
 
