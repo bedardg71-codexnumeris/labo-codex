@@ -781,8 +781,17 @@ function genererPanneauParcours() {
     }
 
     // === MODE NORMAL : panneau détaillé repliable ===
+    var autreMode = progression.mode === 'explicite' ? 'decouverte' : 'explicite';
+    var autreIcone = progression.mode === 'explicite' ? '🧭' : '🗺️';
+    var autreTitre = progression.mode === 'explicite' ? 'Passer en exploration' : 'Passer en guidé';
+
     html += '<div class="accordeon-header" onclick="toggleAccordeonV2(this);">';
     html += '<h3 style="margin: 0; font-size: 1.1rem;">📍 Ton parcours — ' + progression.jalonsFaits + '/' + progression.totalJalons + '</h3>';
+    html += '<button class="parcours-btn-mode" title="' + autreTitre + '" onclick="' +
+        'event.stopPropagation(); ' +
+        'window.parcours.changerModeParcours(\'' + autreMode + '\'); ' +
+        'if(typeof afficherAccueil===\'function\') afficherAccueil();">' +
+        autreIcone + '</button>';
     html += '<span class="accordeon-chevron">▼</span>';
     html += '</div>';
     html += '<div class="accordeon-contenu">';

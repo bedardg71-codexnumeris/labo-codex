@@ -16075,6 +16075,24 @@ body.mode-assiste .btn-aide-contextuelle,
     padding: var(--espacement-moyen);
 }
 
+/* Bouton de changement de mode dans l'en-tête du parcours */
+.parcours-btn-mode {
+    background: none;
+    border: 1px solid rgba(106, 172, 184, 0.3);
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    line-height: 1;
+    opacity: 0.7;
+    transition: opacity 0.2s, background 0.2s;
+}
+
+.parcours-btn-mode:hover {
+    opacity: 1;
+    background: rgba(106, 172, 184, 0.15);
+}
+
 /* Variante CTA (call-to-action, parcours non initialisé) */
 .parcours-panneau--cta {
     border-style: dashed;
