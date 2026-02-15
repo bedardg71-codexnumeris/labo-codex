@@ -41,6 +41,10 @@
 - **Detection invisible** : `demarrerCreationMateriel()` detecte la pratique AVANT l'ouverture du modal. L'etape `materiel-intro` est sautee — l'utilisateur voit directement la premiere question.
 - **Numerotation corrigee** : `calculerInfosParcours()` exclut `materiel-intro` du compteur. L'etape affichee commence a 1/12 (au lieu de 2/13).
 
+*Correctifs et ameliorations (15 fevrier 2026)*
+- **Ponderation pre-remplie** : Ajout de `valeurDefaut` sur les inputs `type: 'number'` dans `primo-modal.js`. Le champ `materiel-production-ponderation` est pre-rempli a 25%.
+- **Tooltip objectif d'apprentissage** : Reference a Bloom remplacee par Anderson et Krathwohl dans `index.html` (ligne ~5130). Renvoi vers la banque de verbes de la carte d'alignement (Planification → Carte).
+
 *Harmonisation nomenclature IDME (15 fevrier 2026)*
 - **Nomenclature officielle** : L'echelle IDME utilise desormais partout « Incomplet / en Developpement / Maitrise / Etendu ».
 - **« Insuffisant » → « Incomplet »** : Label du niveau I corrige dans 18 fichiers (echelles.js, graphiques-progression.js, tooltips-contenu.js, evaluation.js, cartouches.js, pratiques.js, pratiques-predefines.js, pratique-registre.js, etudiants.js, profil-etudiant.js, gabarits-utils.js, primo-modal.js, primo-questions.js, aide-contextuelle-contenu.js, snapshots.js, pratique-pan-standards.js, interpretation-config.js, tableau-bord-apercu.js).
