@@ -461,7 +461,7 @@
             couleur: 'bleu',
             titre: 'Améliorations',
             items: [
-                '<strong>Boutons 🧭 d\'aide</strong> : Des boutons apparaissent pour expliquer chaque section (14 thèmes couverts)',
+                '<strong>Boutons 📍 d\'aide</strong> : Des boutons apparaissent pour expliquer chaque section (14 thèmes couverts)',
                 '<strong>Ordre de configuration clarifié</strong> : Échelles → Pratiques → Grilles → Productions (chaque élément dépend du précédent)',
                 '<strong>Design System v7</strong> : Harmonisation des styles (border-radius, box-shadow) selon la charte graphique',
                 '<strong>Diverses corrections d\'affichage</strong> :<ul style="margin: 4px 0 0 0; padding-left: 16px;"><li><strong>Tiret "—" au lieu de "0%"</strong> : La liste des étudiants affiche maintenant un tiret quand aucune donnée n\'est saisie</li><li><strong>Barres "En attente"</strong> : Les barres de distribution indiquent "En attente de données" au lieu de 0%</li><li><strong>Dropdown synchronisé</strong> : Le sélecteur d\'étudiant se met à jour lors du changement de groupe-cours</li><li><strong>Calendrier corrigé</strong> : L\'horaire affiché correspond au groupe-cours actif</li></ul>'
