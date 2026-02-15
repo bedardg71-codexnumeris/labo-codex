@@ -842,6 +842,23 @@
   - Verifier que tous les identifiants critiques sont documentes
   - Ajouter les nouveaux noms proteges
 
+### Carte mentale — Taxonomie d'Anderson et guide integre
+
+- [ ] **#161** Banque de verbes cognitifs et types de connaissances (Anderson)
+  - Integrer un selecteur de niveau cognitif (6 niveaux) dans le panneau de proprietes des noeuds
+  - Remplacer les types de savoirs actuels (Information / Strategie / Condition) par les 4 types de connaissances d'Anderson (Factuelle / Conceptuelle / Procedurale / Metacognitive)
+  - **Plan detaille** : `plans de travail pour Claude Code/Plan_BanqueVerbes_TypesConnaissances.md`
+
+- [ ] **#162** Guide integre par etapes pour le module Carte mentale
+  - Remplacer le panneau d'aide actuel (bouton « ? ») par un guide pagine de 7 etapes
+  - Accompagner l'enseignant dans la construction de sa carte d'alignement pedagogique (pourquoi + comment)
+  - **Dependance** : implémenter APRES #161 (le contenu du guide depend des verbes/types)
+  - **Plan detaille** : `plans de travail pour Claude Code/Plan_GuideIntegre_CarteMentale.md`
+
+- [ ] **#163** Verifier l'implementation de l'accompagnement de creation de materiel pedagogique
+  - Valider que l'assistant conversationnel (demarrerCreationMateriel) fonctionne correctement depuis les nouveaux points d'entree (section Decouvrir sur l'accueil + banniere dans Construction > Apercu)
+  - Tester la creation d'echelle, grille, production et cartouches sans activer le tour guide
+
 ---
 
 ## Complete (Beta 97.3 - 7 février 2026)

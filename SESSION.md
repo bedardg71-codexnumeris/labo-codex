@@ -1,10 +1,18 @@
 # SESSION ACTIVE - BETA 97.8
 
 **Date** : 14 février 2026
-**Version** : Beta 97.8 (build 0214-1736)
-**Statut** : Assistant actif de création de matériel pédagogique
+**Version** : Beta 97.8 (build 0214-2001)
+**Statut** : Section Découvrir + assistant de création de matériel
 
 ## SESSION DU 14 FÉVRIER 2026
+
+### Travail accompli — Section Découvrir et points d'entrée assistant (Beta 97.8, build 0214-2001)
+
+49. **Section « Découvrir » sur l'accueil** : Les toggles d'onboarding (données démo, tour guidé, info-bulles) sont regroupés dans une section accordéon repliable avec 4 cartes visuelles. La 4e carte « Créer du matériel pédagogique » lance directement l'assistant conversationnel sans passer par le tour guidé.
+
+50. **Bannière dans Construction > Aperçu** : Point d'entrée secondaire vers l'assistant de création de matériel avec bouton « Lancer l'assistant », placé après la carte « Ressources configurées ».
+
+51. **Backlog mis à jour** : Ajout des tâches #161 (banque de verbes cognitifs Anderson), #162 (guide intégré carte mentale) et #163 (vérification accompagnement création matériel).
 
 ### Travail accompli — Assistant actif de création de matériel pédagogique (Beta 97.8, build 0214-1736)
 
