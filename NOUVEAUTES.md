@@ -6,6 +6,12 @@
 
 ## Beta 97.8
 
+**Guide integre pour la carte d'alignement**
+
+- **Guide pas a pas** : Le bouton « ? » de la palette ouvre un guide de 7 pages qui accompagne la construction de ta carte d'alignement pedagogique. Chaque etape explique le pourquoi et le comment.
+- **Contenu pedagogique** : Competences, idees maitresses, sequences, types de connaissances (Anderson), activites, evaluation — dans l'ordre naturel de construction.
+- **Reference** : Base sur Anderson, L. W. (2026). *Curricular alignment: A re-examination*. UNESCO IBE.
+
 **Assistant actif de creation de materiel pedagogique**
 
 - **Nouveau module « Creer du materiel »** : Le tour guide propose desormais un 5e module qui cree directement les ressources pedagogiques dans l'application. Plus besoin d'importer des fichiers JSON manuellement.

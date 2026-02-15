@@ -7,6 +7,15 @@
 
 ## Beta 97.8 (14 fevrier 2026)
 
+**Guide integre pour la carte d'alignement pedagogique**
+
+- **Guide pagine de 7 pages** : Le bouton « ? » de la palette ouvre un guide pas a pas dans la palette laterale. Chaque page explique le *pourquoi* pedagogique et le *comment* technique d'une etape de construction de la carte.
+- **7 etapes** : Bienvenue → Competences → Idees maitresses → Sequences et lecons → Types de connaissances (Anderson) → Activites → Evaluation.
+- **Navigation fluide** : Boutons precedent/suivant, 7 points cliquables pour sauter a une page, bouton « Terminer » sur la derniere page. Fermeture par ✕ ou Terminer restaure la palette.
+- **Carres de couleur** : Chaque type de noeud est accompagne de son carre de couleur pour creer un lien visuel avec la palette.
+- **Reference** : Anderson, L. W. (2026). *Curricular alignment: A re-examination* (Educational Practices Series, No. 37). UNESCO IBE. Hyperlien vers unesdoc.unesco.org.
+- **Fichiers** : `js/planification-carte.js` (constante GUIDE_PAGES, fonctions ouvrirGuide/fermerGuide/rendrePageGuide), `index.html` (ancien panneau d'aide supprime), `styles.css` (~70 lignes CSS pour le guide).
+
 **Assistant actif de creation de materiel pedagogique**
 
 *Phase 1 — Retrait persona Primo*

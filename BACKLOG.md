@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 10 février 2026 (Beta 97.4 - Build 0210-1256)
+> **Derniere mise a jour** : 14 février 2026 (Beta 97.8 - Build 0214-2040)
 
 ---
 
@@ -844,16 +844,19 @@
 
 ### Carte mentale — Taxonomie d'Anderson et guide integre
 
-- [ ] **#161** Banque de verbes cognitifs et types de connaissances (Anderson)
-  - Integrer un selecteur de niveau cognitif (6 niveaux) dans le panneau de proprietes des noeuds
-  - Remplacer les types de savoirs actuels (Information / Strategie / Condition) par les 4 types de connaissances d'Anderson (Factuelle / Conceptuelle / Procedurale / Metacognitive)
-  - **Plan detaille** : `plans de travail pour Claude Code/Plan_BanqueVerbes_TypesConnaissances.md`
+- [x] **#161** Banque de verbes cognitifs et types de connaissances (Anderson) ✅ FAIT (14 fév 2026)
+  - 4 types Anderson (Factuelle, Conceptuelle, Procédurale, Métacognitive) dans TYPES, palette HTML, CSS
+  - Sélecteur de niveau cognitif (6 niveaux) dans le panneau de propriétés
+  - Banque de 60 verbes en étiquettes cliquables, badge cognitif sur les nœuds
+  - Migration automatique des anciens types (connaissance→factuelle, strategie→procedurale, condition→procedurale)
+  - **Fichier** : `js/planification-carte.js`
 
-- [ ] **#162** Guide integre par etapes pour le module Carte mentale
-  - Remplacer le panneau d'aide actuel (bouton « ? ») par un guide pagine de 7 etapes
-  - Accompagner l'enseignant dans la construction de sa carte d'alignement pedagogique (pourquoi + comment)
-  - **Dependance** : implémenter APRES #161 (le contenu du guide depend des verbes/types)
-  - **Plan detaille** : `plans de travail pour Claude Code/Plan_GuideIntegre_CarteMentale.md`
+- [x] **#162** Guide intégré par étapes pour le module Carte mentale ✅ FAIT (14 fév 2026)
+  - Guide paginé de 7 pages remplaçant le panneau d'aide basique
+  - Chaque page : volet *pourquoi* (pédagogique) + *comment* (technique)
+  - Navigation ← → + 7 points cliquables + bouton Terminer
+  - Référence APA : Anderson, L. W. (2026). UNESCO IBE. Hyperlien intégré
+  - **Fichiers** : `js/planification-carte.js`, `index.html`, `styles.css`
 
 - [ ] **#163** Verifier l'implementation de l'accompagnement de creation de materiel pedagogique
   - Valider que l'assistant conversationnel (demarrerCreationMateriel) fonctionne correctement depuis les nouveaux points d'entree (section Decouvrir sur l'accueil + banniere dans Construction > Apercu)
