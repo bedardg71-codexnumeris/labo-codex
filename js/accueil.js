@@ -132,15 +132,6 @@ function afficherAccueilRetour(conteneur) {
                         </label>
                     </div>
 
-                    <div class="accueil-carte-decouvrir accueil-carte-decouvrir--action"
-                         onclick="if(typeof demarrerCreationMateriel==='function') demarrerCreationMateriel();">
-                        <span style="font-size:1.5rem;">\uD83D\uDEE0\uFE0F</span>
-                        <div>
-                            <div class="decouvrir-titre">Cr\u00e9er du mat\u00e9riel p\u00e9dagogique</div>
-                            <div class="decouvrir-desc">\u00c9chelle, grille, production ou cartouches en quelques \u00e9tapes guid\u00e9es</div>
-                        </div>
-                    </div>
-
                 </div>
             </div>
         </div>

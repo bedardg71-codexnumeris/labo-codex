@@ -826,6 +826,15 @@ function genererPanneauParcours() {
             html += '</div>';
         });
 
+        // Bouton assistant pour le chapitre Construire (non complété)
+        if (chapitre.id === 'construire' && !chapitre.complete) {
+            html += '<button class="parcours-btn-assistant" onclick="' +
+                'event.stopPropagation(); ' +
+                'if(typeof demarrerCreationMateriel===\'function\') demarrerCreationMateriel();">' +
+                '🛠️ Lancer l\u2019assistant de création' +
+            '</button>';
+        }
+
         html += '</div>';
     });
 
