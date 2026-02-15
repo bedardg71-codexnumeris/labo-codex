@@ -76,6 +76,13 @@ function initialiserSystemeModes() {
         document.body.classList.add('aide-contextuelle-active');
     }
 
+    // Appliquer le thème clair si la préférence est active
+    if (estModeClair()) {
+        document.body.classList.add('mode-clair');
+        var btnTheme = document.getElementById('btn-toggle-theme');
+        if (btnTheme) btnTheme.textContent = '🌑';
+    }
+
     console.log(`✅ Mode actif: ${THEMES[modeActuel]?.nom || modeActuel}`);
 }
 
@@ -835,6 +842,46 @@ function definirAideContextuelle(etat) {
     window.dispatchEvent(new Event('modeChanged'));
 }
 
+// ============================================
+// THÈME CLAIR / SOMBRE
+// ============================================
+
+/**
+ * Vérifie si le mode clair est activé (lecture de la préférence)
+ * @returns {boolean} true si le mode clair est activé
+ */
+function estModeClair() {
+    const prefs = db.getSync('preferencesAffichage', {});
+    return !!prefs.modeClair;
+}
+
+/**
+ * Active ou désactive le mode clair
+ * @param {boolean} clair - true pour activer le mode clair, false pour le mode sombre
+ */
+function definirTheme(clair) {
+    const prefs = db.getSync('preferencesAffichage', {});
+    prefs.modeClair = !!clair;
+    db.setSync('preferencesAffichage', prefs);
+    document.body.classList.toggle('mode-clair', !!clair);
+    // Synchroniser les checkboxes
+    document.querySelectorAll('#checkbox-mode-clair, #checkbox-mode-clair-accueil')
+        .forEach(function(cb) { cb.checked = !!clair; });
+    // Mettre à jour l'icône dans l'en-tête
+    var btnTheme = document.getElementById('btn-toggle-theme');
+    if (btnTheme) btnTheme.textContent = clair ? '🌑' : '🌕';
+    // Notifier les modules (graphiques, etc.)
+    window.dispatchEvent(new CustomEvent('themeChanged', { detail: { clair: !!clair } }));
+    window.dispatchEvent(new Event('modeChanged'));
+}
+
+/**
+ * Bascule entre le mode clair et le mode sombre
+ */
+function basculerTheme() {
+    definirTheme(!estModeClair());
+}
+
 /**
  * Vérifie si on est en mode Démo (route démo active)
  * @returns {boolean} true si la route démo est active
@@ -868,6 +915,9 @@ window.obtenirOptionAffichageDA = obtenirOptionAffichageDA;
 window.definirOptionAffichageDA = definirOptionAffichageDA;
 window.reinitialiserMappingAnonyme = reinitialiserMappingAnonyme;
 window.obtenirDAAffichage = obtenirDAAffichage;
+window.estModeClair = estModeClair;
+window.definirTheme = definirTheme;
+window.basculerTheme = basculerTheme;
 
 
 // ============================================

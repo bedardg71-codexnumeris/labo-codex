@@ -336,6 +336,138 @@ body.mode-demo .sous-navigation {
 }
 
 /* ===============================
+   MODE CLAIR
+   =============================== */
+body.mode-clair {
+    color-scheme: light;
+
+    /* Bleus — Palette originale Mode Normal */
+    --bleu-principal: #032e5c;
+    --bleu-fonce: #0f1e3a;
+    --bleu-moyen: #2a4a8a;
+    --bleu-clair: #065dbb;
+    --bleu-leger: #3a7cc6;
+    --bleu-carte: #e8f2fd;
+    --bleu-pale: #e8f2fd;
+    --bleu-tres-pale: #f0f8ff;
+    --bleu-simulation: #1a5266;
+
+    /* Fond de page */
+    --fond-page-sature: #e8f2fd;
+    --fond-page-clair: #f0f8ff;
+    --gradient-fond-page: linear-gradient(135deg, #e8f2fd 0%, #f0f8ff 100%);
+
+    /* Ombres — plus légères sur fond clair */
+    --shadow-subtil: 0 1px 4px rgba(0, 0, 0, 0.08);
+    --shadow-normal: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --shadow-prononce: 0 4px 14px rgba(0, 0, 0, 0.12);
+    --shadow-fort: 0 8px 24px rgba(0, 0, 0, 0.15);
+    --shadow-inset: inset 0 1px 3px rgba(0, 0, 0, 0.06);
+
+    /* Gris — inversés (foncés pour texte, clairs pour fond) */
+    --gris-tres-fonce: #1a1a2e;
+    --gris-fonce: #333344;
+    --gris-moyen: #666677;
+    --gris-clair: #999aab;
+    --gris-tres-clair: #d0d1dd;
+    --gris-tres-pale: #f0f1f5;
+
+    /* Texte */
+    --texte-principal: #1a1a2e;
+    --texte-secondaire: #555566;
+    --texte-muted: #888899;
+
+    /* Accents — rester vifs, légèrement assombris pour contraste sur clair */
+    --accent-primaire: #065dbb;
+    --accent-secondaire: #a07830;
+
+    /* Surfaces */
+    --surface-page: #f0f8ff;
+    --surface-section: #ffffff;
+    --surface-conteneur: #ffffff;
+    --surface-carte: #e8f2fd;
+    --surface-element: #d8e8f5;
+    --surface-input: rgba(3, 46, 92, 0.06);
+    --ocean-moyen: #e8f2fd;
+
+    /* Navigation — RESTE SOMBRE (en-tête conservé) */
+    /* pas de redéfinition des --nav-* ni --sous-nav-* */
+
+    /* Boutons — tons plus saturés pour fond clair */
+    --btn-principal: #032e5c;
+    --btn-principal-hover: #0a4a7e;
+    --btn-ajouter: #1e7a5a;
+    --btn-ajouter-hover: #28946e;
+    --btn-modifier: #2a4a8a;
+    --btn-modifier-hover: #3a5aa0;
+    --btn-confirmer: #1e7a5a;
+    --btn-confirmer-hover: #28946e;
+    --btn-annuler: #a07830;
+    --btn-annuler-hover: #8a6828;
+    --btn-supprimer: #c0392b;
+    --btn-supprimer-hover: #a93226;
+
+    /* Bordures — opaques sur clair */
+    --bordure-claire: rgba(3, 46, 92, 0.15);
+    --bordure-moyenne: rgba(3, 46, 92, 0.25);
+
+    /* Tableaux */
+    --table-hover: rgba(3, 46, 92, 0.06);
+
+    /* Alertes — fond plus visible sur clair */
+    --alerte-fond-attention: rgba(160, 120, 48, 0.12);
+    --alerte-bordure-attention: #a07830;
+    --alerte-texte-attention: #7a5a20;
+
+    --alerte-fond-information: rgba(6, 93, 187, 0.1);
+    --alerte-bordure-information: #065dbb;
+    --alerte-texte-information: #044a94;
+
+    --alerte-fond-succes: rgba(40, 167, 69, 0.1);
+    --alerte-bordure-succes: #28a745;
+    --alerte-texte-succes: #1e7e34;
+
+    --alerte-fond-erreur: rgba(200, 50, 50, 0.1);
+    --alerte-bordure-erreur: #c0392b;
+    --alerte-texte-erreur: #a93226;
+
+    /* États formulaires */
+    --etat-erreur-fond: rgba(200, 50, 50, 0.08);
+    --etat-erreur-bordure: #c0392b;
+    --etat-erreur-texte: #a93226;
+    --etat-valide-fond: rgba(40, 167, 69, 0.08);
+    --etat-valide-bordure: #28a745;
+    --etat-valide-texte: #1e7e34;
+    --etat-verrouille-fond: rgba(3, 46, 92, 0.05);
+    --etat-verrouille-bordure: #999aab;
+    --etat-verrouille-texte: #666677;
+
+    /* Badges évaluation */
+    --badge-evalue-fond: rgba(40, 167, 69, 0.1);
+    --badge-evalue-texte: #1e7e34;
+    --badge-evalue-bordure: rgba(40, 167, 69, 0.3);
+    --badge-non-evalue-fond: rgba(3, 46, 92, 0.06);
+    --badge-non-evalue-texte: #666677;
+    --badge-non-evalue-bordure: rgba(3, 46, 92, 0.15);
+
+    /* Calendrier */
+    --jour-cours-reel-bg: rgba(6, 93, 187, 0.12);
+    --reprise-bg: rgba(160, 120, 48, 0.1);
+    --conge-bg: rgba(200, 50, 50, 0.08);
+    --planification-bg: rgba(139, 92, 246, 0.08);
+    --examens-bg: rgba(200, 50, 50, 0.06);
+    --weekend-bg: rgba(3, 46, 92, 0.03);
+
+    /* Couleurs accent vert */
+    --vert-pale: #e8f5e9;
+    --vert-doux: #66bb6a;
+    --vert-leger: #43a047;
+
+    /* Orange accent ajusté */
+    --orange-accent: #a07830;
+}
+
+/* ===============================
    CLASSES UTILITAIRES GLOBALES (Phase C)
    Préfixe: u- (utility)
    =============================== */
@@ -16030,6 +16162,173 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 * {
     scrollbar-width: thin;
     scrollbar-color: rgba(106, 172, 184, 0.25) var(--surface-page, #0c1a22);
+}
+
+/* ===============================
+   MODE CLAIR — CORRECTIONS HARDCODED
+   =============================== */
+
+/* Texte général — couvre la majorité des color: white sur éléments de contenu */
+body.mode-clair {
+    color: var(--texte-principal);
+}
+
+/* Conteneur — bordure adaptée */
+body.mode-clair .conteneur {
+    border-color: rgba(3, 46, 92, 0.1);
+    box-shadow: var(--shadow-normal);
+}
+
+/* Cartes — bordure adaptée */
+body.mode-clair .carte {
+    border-color: rgba(3, 46, 92, 0.12);
+    border-left-color: var(--accent-primaire);
+}
+
+/* Profil sidebar — bordure adaptée */
+body.mode-clair .profil-sidebar {
+    border-color: rgba(3, 46, 92, 0.15);
+}
+
+/* Modaux — fond blanc, bordure douce */
+body.mode-clair .modal-js-contenu {
+    border: 1px solid rgba(3, 46, 92, 0.1);
+}
+
+/* Titres de section — couleur texte foncée */
+body.mode-clair .titre-section h1,
+body.mode-clair .titre-section h2,
+body.mode-clair .titre-section h3 {
+    color: var(--texte-principal);
+}
+
+/* Labels, texte courant */
+body.mode-clair label,
+body.mode-clair .form-group label,
+body.mode-clair td,
+body.mode-clair th {
+    color: var(--texte-principal);
+}
+
+/* Texte secondaire */
+body.mode-clair .texte-secondaire,
+body.mode-clair small,
+body.mode-clair .info-texte {
+    color: var(--texte-secondaire);
+}
+
+/* Select mode option — lisible sur fond clair */
+body.mode-clair .select-mode option {
+    color: #1a1a2e;
+    background: white;
+}
+
+/* Dropdowns entête — restent sombres car dans l'en-tête */
+/* (pas de changement nécessaire) */
+
+/* Dropdown options hors entête */
+body.mode-clair .dropdown-groupe-cours-header option {
+    color: white;
+    background: var(--bleu-principal);
+}
+
+/* Scrollbar — couleurs claires */
+body.mode-clair ::-webkit-scrollbar-track {
+    background: #f0f8ff;
+}
+
+body.mode-clair ::-webkit-scrollbar-thumb {
+    background: rgba(3, 46, 92, 0.2);
+}
+
+body.mode-clair ::-webkit-scrollbar-thumb:hover {
+    background: rgba(3, 46, 92, 0.35);
+}
+
+body.mode-clair * {
+    scrollbar-color: rgba(3, 46, 92, 0.2) #f0f8ff;
+}
+
+/* Sous-navigation — fond translucide sur clair */
+body.mode-clair .sous-navigation button {
+    color: var(--texte-principal);
+    background: rgba(3, 46, 92, 0.06);
+    border-color: rgba(3, 46, 92, 0.12);
+}
+
+body.mode-clair .sous-navigation button:hover {
+    color: var(--bleu-principal);
+    background: rgba(3, 46, 92, 0.12);
+    border-color: rgba(3, 46, 92, 0.2);
+}
+
+body.mode-clair .sous-navigation button.active,
+body.mode-clair .sous-navigation button.actif {
+    color: white;
+    background: var(--bleu-principal);
+}
+
+/* Bouton principal — fond sombre, texte reste blanc */
+body.mode-clair .bouton-principal {
+    color: white;
+}
+
+/* Liens site — couleur adaptée */
+body.mode-clair .site-link {
+    color: var(--bleu-clair);
+}
+
+body.mode-clair .site-link:hover {
+    color: var(--bleu-principal);
+    border-bottom-color: var(--bleu-principal);
+}
+
+/* Glassmorphism — adapter pour fond clair */
+body.mode-clair .carte-metrique-bleue,
+body.mode-clair .item-carte,
+body.mode-clair .item-carte-header,
+body.mode-clair .item-carte-body {
+    border-color: rgba(3, 46, 92, 0.1);
+}
+
+/* Badge source */
+body.mode-clair .badge-source--id {
+    background: var(--surface-carte);
+    color: var(--texte-secondaire);
+    border-color: rgba(3, 46, 92, 0.15);
+}
+
+/* Tableaux — lignes alternées et bordures */
+body.mode-clair .tableau thead th {
+    background: var(--bleu-principal);
+    color: white;
+}
+
+body.mode-clair .tableau tbody tr {
+    border-bottom-color: rgba(3, 46, 92, 0.08);
+}
+
+/* Inputs — fond et bordure adaptés */
+body.mode-clair input[type="text"],
+body.mode-clair input[type="number"],
+body.mode-clair input[type="email"],
+body.mode-clair input[type="date"],
+body.mode-clair input[type="search"],
+body.mode-clair textarea,
+body.mode-clair select {
+    background: white;
+    color: var(--texte-principal);
+    border-color: rgba(3, 46, 92, 0.2);
+}
+
+body.mode-clair input::placeholder,
+body.mode-clair textarea::placeholder {
+    color: var(--gris-clair);
+}
+
+/* u-bg-blanc utilitaire */
+body.mode-clair .u-bg-blanc {
+    background: var(--surface-carte);
 }
 
 /* ===============================

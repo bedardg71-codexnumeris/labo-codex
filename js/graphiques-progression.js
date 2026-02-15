@@ -38,6 +38,18 @@ const COULEURS_INDICES = {
 const EPAISSEUR_LIGNE_STANDARD = 2;
 
 /**
+ * Couleur de grille dynamique selon le thème clair/sombre
+ * @param {number} [opacite=0.1] - Opacité de la grille
+ * @returns {string} - Couleur rgba adaptée au thème
+ */
+function couleurGrille(opacite) {
+    if (opacite === undefined) opacite = 0.1;
+    return document.body.classList.contains('mode-clair')
+        ? 'rgba(3, 46, 92, ' + opacite + ')'
+        : 'rgba(106, 172, 184, ' + opacite + ')';
+}
+
+/**
  * ✨ NOUVELLE FONCTIONNALITÉ (8 déc 2025) : Persistance de l'état de la légende
  * Permet de comparer le même critère/indice entre plusieurs élèves
  */
@@ -821,7 +833,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
                             minRotation: 45,
                             font: { size: 10 }
                         },
-                        grid: { display: true, color: 'rgba(106,172,184,0.1)' }
+                        grid: { display: true, color: couleurGrille(0.1) }
                     },
                     y: {
                         min: bornesY.min,
@@ -835,7 +847,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
                             callback: value => (value * 100).toFixed(0) + '%',
                             stepSize: 0.05
                         },
-                        grid: { display: true, color: 'rgba(106,172,184,0.12)' }
+                        grid: { display: true, color: couleurGrille(0.12) }
                     }
                 },
                 interaction: {
@@ -1662,7 +1674,7 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
                 },
                 scales: {
                     x: {
-                        grid: { display: true, color: 'rgba(106,172,184,0.1)' },
+                        grid: { display: true, color: couleurGrille(0.1) },
                         ticks: {
                             font: { size: 10 },
                             maxRotation: 45,
@@ -1672,7 +1684,7 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
                     y: {
                         min: bornesY.min,
                         max: bornesY.max,
-                        grid: { display: true, color: 'rgba(106,172,184,0.12)' },
+                        grid: { display: true, color: couleurGrille(0.12) },
                         ticks: {
                             callback: value => (value * 100).toFixed(0) + '%',
                             stepSize: 0.05
@@ -3745,7 +3757,7 @@ function creerGraphiqueCriteres(canvasId, da) {
                             minRotation: 45,
                             font: { size: 10 }
                         },
-                        grid: { display: true, color: 'rgba(106,172,184,0.1)' }
+                        grid: { display: true, color: couleurGrille(0.1) }
                     },
                     y: {
                         title: {
@@ -3761,7 +3773,7 @@ function creerGraphiqueCriteres(canvasId, da) {
                                 return value + '%';
                             }
                         },
-                        grid: { display: true, color: 'rgba(106,172,184,0.12)' }
+                        grid: { display: true, color: couleurGrille(0.12) }
                     }
                 },
                 interaction: {
@@ -4499,7 +4511,7 @@ function creerGraphiqueDistributionACPE(canvasId) {
                         },
                         grid: {
                             display: true,
-                            color: 'rgba(106,172,184,0.1)'
+                            color: couleurGrille(0.1)
                         }
                     },
                     y: {
@@ -4587,6 +4599,21 @@ window.selectionnerEtudiantSpaghetti = selectionnerEtudiantSpaghetti;
 window.creerGraphiqueCriteres = creerGraphiqueCriteres;
 window.creerGraphiqueDistributionACPE = creerGraphiqueDistributionACPE;
 window.detruireGraphique = detruireGraphique;
+
+// Recréer les graphiques visibles lors d'un changement de thème
+window.addEventListener('themeChanged', function() {
+    // Les graphiques seront recréés avec les bonnes couleurs
+    // lors du prochain appel de rafraîchissement de la section
+    if (typeof rafraichirGraphiqueIndividuel === 'function' && window.profilActuelDA) {
+        rafraichirGraphiqueIndividuel(window.profilActuelDA);
+    }
+    if (typeof rafraichirGraphiqueSpaghettiACP === 'function') {
+        try { rafraichirGraphiqueSpaghettiACP(); } catch(e) { /* section pas visible */ }
+    }
+    if (typeof rafraichirGraphiqueSpaghetti === 'function') {
+        try { rafraichirGraphiqueSpaghetti(); } catch(e) { /* section pas visible */ }
+    }
+});
 
 console.log('📊 Module graphiques-progression.js chargé');
 
