@@ -121,12 +121,21 @@
         setTimeout(() => {
             if (typeof entrerEnDemo === 'function') {
                 entrerEnDemo();
-            } else if (typeof afficherNotification === 'function') {
-                afficherNotification(
-                    'Explore librement ! L\'aide est toujours disponible via 🧭.',
-                    'info',
-                    5000
-                );
+
+                // Rappel discret après chargement de la démo
+                setTimeout(() => {
+                    if (typeof afficherNotification === 'function') {
+                        afficherNotification(
+                            '🧭 Explore librement ! Clique sur 🧭 dans l\'en-tête pour un tour guidé.',
+                            'info',
+                            8000
+                        );
+                    }
+                    // Mettre à jour l'indicateur header
+                    if (window.parcours && window.parcours.mettreAJourUI) {
+                        window.parcours.mettreAJourUI();
+                    }
+                }, 2000);
             }
         }, 500);
     }

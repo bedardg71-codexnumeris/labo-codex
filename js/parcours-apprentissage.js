@@ -770,6 +770,21 @@ function mettreAJourIndicateurHeader() {
             '<span class="parcours-indicateur-compteur">' +
             progression.jalonsFaits + '/' + progression.totalJalons +
             '</span>';
+    } else if (progression.mode === 'decouverte') {
+        // Mode découverte : indicateur compact et cliquable
+        indicateur.style.display = 'flex';
+        indicateur.style.cursor = 'pointer';
+        indicateur.title = 'Voir ton parcours';
+        indicateur.onclick = function() {
+            if (typeof afficherSection === 'function') {
+                afficherSection('accueil');
+            }
+        };
+        indicateur.innerHTML =
+            '<span class="parcours-indicateur-texte">🧭 Parcours</span>' +
+            '<span class="parcours-indicateur-compteur">' +
+            progression.jalonsFaits + '/' + progression.totalJalons +
+            '</span>';
     } else {
         indicateur.style.display = 'none';
     }
@@ -817,7 +832,15 @@ function onNavigationChange(idSousSection) {
     }
 
     // Vérifier tous les jalons détectables automatiquement
-    verifierJalons();
+    var nouveauxJalons = verifierJalons();
+
+    // === MODE DÉCOUVERTE : pulse discret sur l'indicateur header ===
+    if (progression.mode === 'decouverte') {
+        if (nouveauxJalons.length > 0) {
+            pulserIndicateurHeader();
+        }
+        return; // Pas de suggestions proactives en découverte
+    }
 
     // === MODE EXPLICITE : suggestions proactives ===
     if (progression.mode !== 'explicite') return;
@@ -908,6 +931,24 @@ function afficherSuggestionProactive(jalon, texteAction, callback) {
             setTimeout(function() { if (suggestion.parentNode) suggestion.remove(); }, 300);
         }
     }, 10000);
+}
+
+// ============================================
+// PULSE INDICATEUR (MODE DÉCOUVERTE)
+// ============================================
+
+/**
+ * Fait pulser brièvement l'indicateur header pour attirer l'attention
+ * sans être intrusif. Utilisé en mode découverte quand un jalon est complété.
+ */
+function pulserIndicateurHeader() {
+    var indicateur = document.getElementById('parcours-indicateur-header');
+    if (!indicateur) return;
+
+    indicateur.classList.add('parcours-indicateur--pulse');
+    setTimeout(function() {
+        indicateur.classList.remove('parcours-indicateur--pulse');
+    }, 2000);
 }
 
 // ============================================
