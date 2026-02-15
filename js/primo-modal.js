@@ -33,10 +33,10 @@ let reponsesPrimo = {};
 /**
  * Ouvre le modal conversationnel de Primo
  */
-function ouvrirModalConversationnel(indexDepart = 0) {
+function ouvrirModalConversationnel(indexDepart = 0, reponsesInitiales = null) {
     // Réinitialiser l'état
     indexQuestionActuelle = indexDepart;
-    reponsesPrimo = {};
+    reponsesPrimo = reponsesInitiales || {};
     modalPrimoActif = true;
 
     // Créer le modal
