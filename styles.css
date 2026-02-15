@@ -16220,6 +16220,16 @@ body.mode-assiste .btn-aide-contextuelle,
     font-weight: 600;
 }
 
+/* Pulse discret sur l'indicateur header (mode découverte, jalon complété) */
+.parcours-indicateur--pulse {
+    animation: indicateurPulse 0.6s ease-in-out 3;
+}
+
+@keyframes indicateurPulse {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.08); background: rgba(26, 82, 102, 0.3); }
+}
+
 /* Suggestion proactive (barre flottante bas de page) */
 .parcours-suggestion {
     position: fixed;
