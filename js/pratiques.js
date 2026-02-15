@@ -2916,7 +2916,7 @@ function afficherPreviewEchelleWizard() {
                 <div style="display: flex; align-items: center; gap: 10px; padding: 8px; background: var(--surface-conteneur, #162c36); border-radius: 4px;">
                     <div style="width: 30px; height: 30px; border-radius: 4px; background: #FF6B6B;"></div>
                     <div style="flex: 1;">
-                        <strong>I - Insuffisant</strong>
+                        <strong>I - Incomplet</strong>
                         <div style="font-size: 0.85rem; color: var(--gris-moyen);">Plage : 0-64% • Calcul : 50%</div>
                     </div>
                 </div>
@@ -3258,8 +3258,8 @@ function afficherConfigEchelle() {
  */
 function initialiserNiveauxIDME() {
     const niveauxIDME = [
-        { code: 'I', label: 'Insuffisant', pct: 50, couleur: '#FF6B6B' },
-        { code: 'D', label: 'En développement', pct: 70, couleur: '#FFD93D' },
+        { code: 'I', label: 'Incomplet', pct: 50, couleur: '#FF6B6B' },
+        { code: 'D', label: 'en Développement', pct: 70, couleur: '#FFD93D' },
         { code: 'M', label: 'Maîtrisé', pct: 80, couleur: '#6BCF7F' },
         { code: 'E', label: 'Étendu', pct: 92.5, couleur: '#4D96FF' }
     ];
@@ -3852,8 +3852,8 @@ function construireEchelle() {
             type: 'niveaux',
             echelle_id: 'defaut-idme',
             niveaux: [
-                { code: 'I', label: 'Insuffisant', description: '', valeur_numerique: 1, valeur_pourcentage: 50, couleur: '#FF6B6B', ordre: 1 },
-                { code: 'D', label: 'En développement', description: '', valeur_numerique: 2, valeur_pourcentage: 70, couleur: '#FFD93D', ordre: 2 },
+                { code: 'I', label: 'Incomplet', description: '', valeur_numerique: 1, valeur_pourcentage: 50, couleur: '#FF6B6B', ordre: 1 },
+                { code: 'D', label: 'en Développement', description: '', valeur_numerique: 2, valeur_pourcentage: 70, couleur: '#FFD93D', ordre: 2 },
                 { code: 'M', label: 'Maîtrisé', description: '', valeur_numerique: 3, valeur_pourcentage: 80, couleur: '#6BCF7F', ordre: 3 },
                 { code: 'E', label: 'Étendu', description: '', valeur_numerique: 4, valeur_pourcentage: 92.5, couleur: '#4D96FF', ordre: 4 }
             ]

@@ -1745,7 +1745,7 @@ const QUESTIONS_PRIMO = [
         options: [
             {
                 value: 'idme',
-                label: 'IDME (Insuffisant / Développement / Maîtrise / Exemplaire)',
+                label: 'IDME (Incomplet / en Développement / Maîtrisé / Étendu)',
                 description: 'Échelle à 4 niveaux, la plus courante en PAN-Standards.'
             },
             {
@@ -1798,7 +1798,7 @@ const QUESTIONS_PRIMO = [
         id: 'materiel-echelle-noms-niveaux',
         texte: 'Nommez chaque niveau du plus faible au plus fort (un par ligne).',
         type: 'textarea',
-        placeholder: 'Ex:\nInsuffisant\nEn développement\nMaîtrise\nExemplaire',
+        placeholder: 'Ex:\nIncomplet\nen Développement\nMaîtrisé\nÉtendu',
         champsCibles: [],
         validation: { requis: true },
         sautSi: function(reponses) {

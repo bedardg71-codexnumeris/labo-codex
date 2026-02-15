@@ -1958,7 +1958,7 @@ function genererSectionAccompagnement(da) {
                         `;
                     }
 
-                    // DÉFIS I (Insuffisant) - Rouge
+                    // DÉFIS I (Incomplet) - Rouge
                     if (defisSolo.some(d => d.valeur < obtenirSeuil('idme.insuffisant'))) {
                         html += `
                 <div>
@@ -1967,7 +1967,7 @@ function genererSectionAccompagnement(da) {
                     </h4>
                     <div style="background: ${couleurI}22; border-left: 4px solid ${couleurI}; padding: 10px 12px;">
                         <div style="font-weight: bold; color: ${couleurI};">
-                            ${defisSolo.filter(d => d.valeur < obtenirSeuil('idme.insuffisant')).map(d => d.nom).join(', ')} : Insuffisant ou incomplet (I)
+                            ${defisSolo.filter(d => d.valeur < obtenirSeuil('idme.insuffisant')).map(d => d.nom).join(', ')} : Incomplet (I)
                         </div>
                         <div class="profil-texte-explicatif">
                             À ce niveau unistructurel, l'élève ne traite que d'un seul aspect du savoir ou d'un savoir-faire à la fois. L'élève n'a pas encore de réelle compréhension.
@@ -5688,7 +5688,7 @@ function identifierPatternActuel(performancePAN3, aUnDefi) {
         seuilDeveloppement: (seuilDeveloppement * 100) + '%'
     });
 
-    // Blocage critique : Performance < 64% (Insuffisant - unistructurel)
+    // Blocage critique : Performance < 64% (Incomplet - unistructurel)
     if (performancePAN3 < seuilInsuffisant) {
         console.log('   → Pattern: Blocage critique');
         return 'Blocage critique';
@@ -6499,7 +6499,7 @@ function genererDiagnosticSRPNF(da, defisInfo) {
                 `;
             }
 
-            // Afficher Défis I (Insuffisant) - Rouge
+            // Afficher Défis I (Incomplet) - Rouge
             if (parNiveau['I'].length > 0) {
                 const couleur = obtenirCouleurNiveauIDME('I');
                 html += `

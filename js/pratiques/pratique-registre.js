@@ -143,8 +143,8 @@ function construireConfigComplete(pratiqueData) {
                 echelle = {
                     type: 'niveaux',
                     niveaux: [
-                        { code: 'I', label: 'Insuffisant', valeur_pourcentage: 50, ordre: 1 },
-                        { code: 'D', label: 'Développement', valeur_pourcentage: 65, ordre: 2 },
+                        { code: 'I', label: 'Incomplet', valeur_pourcentage: 50, ordre: 1 },
+                        { code: 'D', label: 'en Développement', valeur_pourcentage: 65, ordre: 2 },
                         { code: 'M', label: 'Maîtrisé', valeur_pourcentage: 80, ordre: 3 },
                         { code: 'E', label: 'Étendu', valeur_pourcentage: 95, ordre: 4 }
                     ]

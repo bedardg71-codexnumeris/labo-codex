@@ -371,7 +371,7 @@ const PRATIQUE_PAN_MAITRISE = {
         niveaux: [
             {
                 code: 'I',
-                label: 'Insuffisant',
+                label: 'Incomplet',
                 description: 'Compréhension superficielle ou incompréhension',
                 valeur_numerique: 1,
                 valeur_pourcentage: 50,
@@ -380,7 +380,7 @@ const PRATIQUE_PAN_MAITRISE = {
             },
             {
                 code: 'D',
-                label: 'En développement',
+                label: 'en Développement',
                 description: 'Points pertinents sans liens entre eux',
                 valeur_numerique: 2,
                 valeur_pourcentage: 70,
@@ -486,7 +486,7 @@ const PRATIQUE_PAN_OBJECTIFS_PONDERES_MICHEL = {
         niveaux: [
             {
                 code: 'I',
-                label: 'Insuffisant',
+                label: 'Incomplet',
                 description: 'Compréhension insuffisante de l\'objectif',
                 valeur_numerique: 1,
                 valeur_pourcentage: 50,
@@ -495,7 +495,7 @@ const PRATIQUE_PAN_OBJECTIFS_PONDERES_MICHEL = {
             },
             {
                 code: 'D',
-                label: 'Développement',
+                label: 'en Développement',
                 description: 'Développement en cours, maîtrise partielle',
                 valeur_numerique: 2,
                 valeur_pourcentage: 70,
@@ -713,7 +713,7 @@ const PRATIQUE_PAN_JUGEMENT_GLOBAL_ISABELLE = {
         niveaux: [
             {
                 code: 'I',
-                label: 'Insuffisant',
+                label: 'Incomplet',
                 description: 'Compréhension insuffisante ou incompréhension majeure',
                 valeur_numerique: 1,
                 valeur_pourcentage: 50,
@@ -722,7 +722,7 @@ const PRATIQUE_PAN_JUGEMENT_GLOBAL_ISABELLE = {
             },
             {
                 code: 'D',
-                label: 'Développement',
+                label: 'en Développement',
                 description: 'En développement, maîtrise partielle avec lacunes',
                 valeur_numerique: 2,
                 valeur_pourcentage: 70,

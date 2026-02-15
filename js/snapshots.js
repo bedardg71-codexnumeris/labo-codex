@@ -279,8 +279,8 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
                             // Si c'est une lettre IDME, utiliser valeurs configurées
                             // (40% pour I, 65% pour D, 75% pour M, 100% pour E selon l'échelle utilisateur)
                             if (niveau === '0') return 0;       // Aucun/Plagiat
-                            if (niveau === 'I') return 40;      // Insuffisant
-                            if (niveau === 'D') return 65;      // Développement
+                            if (niveau === 'I') return 40;      // Incomplet
+                            if (niveau === 'D') return 65;      // en Développement
                             if (niveau === 'M') return 75;      // Maîtrisé
                             if (niveau === 'E') return 100;     // Étendu
 
@@ -314,8 +314,8 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
 
                     // Si c'est une lettre IDME, utiliser valeurs configurées
                     if (niveau === '0') return 0;       // Aucun/Plagiat
-                    if (niveau === 'I') return 40;      // Insuffisant
-                    if (niveau === 'D') return 65;      // Développement
+                    if (niveau === 'I') return 40;      // Incomplet
+                    if (niveau === 'D') return 65;      // en Développement
                     if (niveau === 'M') return 75;      // Maîtrisé
                     if (niveau === 'E') return 100;     // Étendu
 

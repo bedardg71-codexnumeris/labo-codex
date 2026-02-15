@@ -297,12 +297,12 @@
             id: 'GABARIT_ECHELLE_IDME',
             nom: '[Multi] IDME - 4 niveaux',
             type: 'standard',
-            description: 'Gabarit multi-pratiques : Insuffisant, Développement, Maîtrise, Excellence',
+            description: 'Gabarit multi-pratiques : Incomplet, en Développement, Maîtrisé, Étendu',
             niveaux: [
-                { code: 'E', nom: 'Excellence', description: 'Dépasse les attentes', min: 90, max: 100, couleur: '#28a745' },
-                { code: 'M', nom: 'Maîtrise', description: 'Atteint les attentes', min: 75, max: 89, couleur: '#17a2b8' },
-                { code: 'D', nom: 'Développement', description: 'En voie d\'atteindre les attentes', min: 60, max: 74, couleur: '#ffc107' },
-                { code: 'I', nom: 'Insuffisant', description: 'N\'atteint pas les attentes', min: 0, max: 59, couleur: '#dc3545' }
+                { code: 'E', nom: 'Étendu', description: 'Dépasse les attentes', min: 90, max: 100, couleur: '#28a745' },
+                { code: 'M', nom: 'Maîtrisé', description: 'Atteint les attentes', min: 75, max: 89, couleur: '#17a2b8' },
+                { code: 'D', nom: 'en Développement', description: 'En voie d\'atteindre les attentes', min: 60, max: 74, couleur: '#ffc107' },
+                { code: 'I', nom: 'Incomplet', description: 'N\'atteint pas les attentes', min: 0, max: 59, couleur: '#dc3545' }
             ],
             estGabarit: true,
             pratiques: ['all'],

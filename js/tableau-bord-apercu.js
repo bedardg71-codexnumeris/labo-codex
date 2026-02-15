@@ -548,7 +548,7 @@ function calculerDistributionPerformance(etudiants) {
 
     console.log('📊 Distribution P : compteurs =', compteurs);
 
-    // Générer le HTML compact avec noms complets : "Incomplet ou insuffisant : 5 • En Développement : 11 • etc."
+    // Générer le HTML compact avec noms complets : "Incomplet : 5 • en Développement : 11 • etc."
     const parts = niveaux.map(niveau => {
         const count = compteurs[niveau.code] || 0;
         // Utiliser le nom complet du niveau au lieu du code
