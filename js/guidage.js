@@ -73,6 +73,16 @@ let etapeActuelle = null;
 // ============================================
 
 /**
+ * Vérifie si le guidage est autorisé dans le contexte actuel
+ * Autorisé en Mode Assisté OU en parcours explicite
+ */
+function estGuidageAutorise() {
+    if (typeof estModeGuide === 'function' && estModeGuide()) return true;
+    if (window.parcours && window.parcours.getMode() === 'explicite') return true;
+    return false;
+}
+
+/**
  * Démarre le guidage de configuration complète
  */
 function demarrerGuidageConfiguration() {
@@ -121,6 +131,11 @@ function etapeSuivante() {
             afficherNotificationSucces('Configuration complète terminée ! 🎉');
         }
         arreterGuidage();
+
+        // Notifier le parcours pour vérifier les jalons
+        if (window.parcours) {
+            setTimeout(() => window.parcours.verifierJalons(), 500);
+        }
         return;
     }
 
@@ -153,7 +168,7 @@ function afficherBoutonEtapeSuivante() {
     // Retirer bouton existant si présent
     masquerBoutonEtapeSuivante();
 
-    if (!guidageActif || !estModeGuide()) return;
+    if (!guidageActif || !estGuidageAutorise()) return;
 
     const etape = ETAPES_CONFIGURATION.find(e => e.id === etapeActuelle);
     if (!etape) return;
@@ -208,7 +223,7 @@ function afficherMessageGuidage() {
     // Retirer message existant
     masquerMessageGuidage();
 
-    if (!guidageActif || !estModeGuide()) return;
+    if (!guidageActif || !estGuidageAutorise()) return;
 
     const etape = ETAPES_CONFIGURATION.find(e => e.id === etapeActuelle);
     if (!etape) return;
@@ -334,7 +349,7 @@ function initialiserGuidage() {
     const guidageSauvegarde = db.getSync('guidage_actif', false);
     const etapeSauvegarde = db.getSync('guidage_etape', null);
 
-    if (guidageSauvegarde && etapeSauvegarde && estModeGuide()) {
+    if (guidageSauvegarde && etapeSauvegarde && estGuidageAutorise()) {
         guidageActif = true;
         etapeActuelle = etapeSauvegarde;
 

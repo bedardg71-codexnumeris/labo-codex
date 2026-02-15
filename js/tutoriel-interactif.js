@@ -483,6 +483,18 @@ function verifierDemarrageAutoTutoriel() {
     }
 }
 
+/**
+ * Démarre le tutoriel si appelé par le parcours d'apprentissage (mode explicite)
+ * Vérifie que le tutoriel n'a pas déjà été vu
+ */
+function demarrerTutorielParcours() {
+    const tutorielVu = db.getSync('tutoriel_demo_vu', false);
+    if (tutorielVu || tutorielActif) return;
+
+    console.log('🎓 Tutoriel déclenché par le parcours d\'apprentissage');
+    demarrerTutoriel();
+}
+
 // ============================================================================
 // ANIMATIONS CSS
 // ============================================================================
@@ -515,6 +527,7 @@ document.head.appendChild(styleTutoriel);
 // ============================================================================
 
 window.demarrerTutoriel = demarrerTutoriel;
+window.demarrerTutorielParcours = demarrerTutorielParcours;
 window.terminerTutoriel = terminerTutoriel;
 window.etapeSuivante = etapeSuivante;
 window.etapePrecedente = etapePrecedente;

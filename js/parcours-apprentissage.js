@@ -791,9 +791,13 @@ function reinitialiser() {
 // HOOK DE NAVIGATION
 // ============================================
 
+// Cooldown pour éviter les suggestions répétitives
+var _derniereSuggestion = 0;
+var _derniereSuggestionJalon = '';
+
 /**
  * Appelé par navigation.js à chaque changement de sous-section.
- * Vérifie les jalons et marque la visite du TDB si applicable.
+ * Vérifie les jalons, déclenche les modules et affiche les suggestions.
  */
 function onNavigationChange(idSousSection) {
     var progression = chargerProgression();
@@ -814,6 +818,96 @@ function onNavigationChange(idSousSection) {
 
     // Vérifier tous les jalons détectables automatiquement
     verifierJalons();
+
+    // === MODE EXPLICITE : suggestions proactives ===
+    if (progression.mode !== 'explicite') return;
+
+    var prog = getProgression();
+    var prochain = prog.prochainJalon;
+    if (!prochain) return;
+
+    // Déclencher le tutoriel interactif au jalon ⑩ (presences-saisie)
+    if (prochain.id === 'prendre-presences' && idSousSection === 'presences-saisie') {
+        if (typeof demarrerTutorielParcours === 'function') {
+            setTimeout(function() { demarrerTutorielParcours(); }, 1000);
+        }
+        return; // Le tutoriel prend le relais
+    }
+
+    // Proposer le guidage configuration si jalons ①②③ non faits
+    // et que l'utilisateur vient d'arriver dans Réglages
+    if (prochain.chapitre === 'configurer' && idSousSection.indexOf('reglages') === 0) {
+        var guidageDejaActif = typeof guidageActif !== 'undefined' && guidageActif;
+        if (!guidageDejaActif && typeof demarrerGuidageConfiguration === 'function') {
+            afficherSuggestionProactive(
+                prochain,
+                'Lancer la configuration guidée ?',
+                function() { demarrerGuidageConfiguration(); }
+            );
+        }
+        return;
+    }
+
+    // Suggestion générique : rappeler le prochain jalon
+    // Seulement si la section actuelle n'est pas celle du prochain jalon
+    if (prochain.navigation) {
+        var sectionProchain = prochain.navigation.sousSection;
+        if (sectionProchain && idSousSection !== sectionProchain) {
+            afficherSuggestionProactive(prochain);
+        }
+    }
+}
+
+/**
+ * Affiche une suggestion proactive discrète en bas de l'écran
+ * Avec cooldown pour ne pas harceler l'utilisateur
+ */
+function afficherSuggestionProactive(jalon, texteAction, callback) {
+    // Cooldown : pas plus d'une suggestion toutes les 60 secondes pour le même jalon
+    var maintenant = Date.now();
+    if (jalon.id === _derniereSuggestionJalon && maintenant - _derniereSuggestion < 60000) return;
+    _derniereSuggestion = maintenant;
+    _derniereSuggestionJalon = jalon.id;
+
+    // Retirer suggestion existante
+    var existante = document.getElementById('suggestion-parcours');
+    if (existante) existante.remove();
+
+    var suggestion = document.createElement('div');
+    suggestion.id = 'suggestion-parcours';
+    suggestion.className = 'parcours-suggestion';
+
+    var contenu = '<span class="parcours-suggestion-texte">' +
+        '📍 Prochaine étape : <strong>' + jalon.numero + ' ' + jalon.titre + '</strong>' +
+        '</span>';
+
+    if (texteAction && callback) {
+        // Suggestion avec bouton d'action
+        suggestion._callback = callback;
+        contenu += '<button class="btn btn-principal btn-sm" onclick="' +
+            'var s = document.getElementById(\'suggestion-parcours\'); ' +
+            'if (s && s._callback) s._callback(); ' +
+            's.remove();">' + texteAction + '</button>';
+    } else {
+        // Suggestion avec lien de navigation
+        contenu += '<button class="btn btn-secondaire btn-sm" onclick="' +
+            'window.parcours.naviguerVersJalon(\'' + jalon.id + '\'); ' +
+            'this.closest(\'#suggestion-parcours\').remove();">Y aller →</button>';
+    }
+
+    contenu += '<button class="parcours-suggestion-fermer" onclick="' +
+        'this.closest(\'#suggestion-parcours\').remove();">×</button>';
+
+    suggestion.innerHTML = contenu;
+    document.body.appendChild(suggestion);
+
+    // Auto-fermeture après 10 secondes
+    setTimeout(function() {
+        if (suggestion.parentNode) {
+            suggestion.classList.add('parcours-suggestion--sortie');
+            setTimeout(function() { if (suggestion.parentNode) suggestion.remove(); }, 300);
+        }
+    }, 10000);
 }
 
 // ============================================
