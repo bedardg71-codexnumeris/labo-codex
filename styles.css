@@ -1138,30 +1138,30 @@ h1, h2, h3, h4 {
 
 .navigation-principale button {
     padding: 12px 24px;
-    background: rgba(106, 172, 184, 0.12);
+    background: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(106, 172, 184, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: var(--radius-grand);
     color: white;
     font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: var(--shadow-subtil);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .navigation-principale button:hover {
-    background: rgba(106, 172, 184, 0.22);
-    border-color: rgba(106, 172, 184, 0.35);
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.4);
     transform: translateY(-2px);
-    box-shadow: var(--shadow-prononce);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .navigation-principale button.actif {
-    background: rgba(106, 172, 184, 0.28);
-    border-color: rgba(106, 172, 184, 0.4);
-    box-shadow: var(--shadow-prononce);
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 /* Bouton icône dans la navigation (Réglages) */
@@ -16221,6 +16221,22 @@ body.mode-clair .dropdown-groupe-cours-header option {
 body.mode-clair .dropdown-cours-entete option {
     color: white;
     background: var(--bleu-fonce);
+}
+
+/* Navigation principale — bleu principal + liquid glass sur fond clair */
+body.mode-clair .navigation-principale button {
+    background: rgba(3, 46, 92, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+body.mode-clair .navigation-principale button:hover {
+    background: rgba(3, 46, 92, 0.75);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+body.mode-clair .navigation-principale button.actif {
+    background: rgba(3, 46, 92, 0.8);
+    border-color: rgba(255, 255, 255, 0.35);
 }
 
 /* Conteneur — bordure ultra-subtile */
