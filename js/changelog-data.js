@@ -12,6 +12,40 @@
         {
             version: 'Beta 97.7',
             date: '15 f\u00e9vrier',
+            couleur: 'rose',
+            titre: 'Corrections signal\u00e9es par les testeurs',
+            items: [
+                '<strong>Bug import (#Bruno)</strong> : Le bouton \u00ab\u00a0Choisir un fichier\u00a0\u00bb dans R\u00e9glages \u2192 Donn\u00e9es \u2192 Importer ne fonctionnait pas (<code>ouvrirModalImport is not defined</code>). La fonction existait mais n\u2019\u00e9tait pas export\u00e9e. Corrig\u00e9.',
+                '<strong>Lisibilit\u00e9 \u00ab\u00a0Voir aussi\u00a0\u00bb</strong> : Les boutons de liens dans les fen\u00eatres d\u2019aide contextuelle \u00e9taient illisibles (texte fonc\u00e9 sur fond fonc\u00e9). Contraste corrig\u00e9.',
+                '<strong>Badge retir\u00e9</strong> : Le badge \u00ab\u00a0D\u00e9veloppement actif\u00a0\u00bb dans Annoter des travaux a \u00e9t\u00e9 retir\u00e9.'
+            ]
+        },
+        {
+            version: 'Beta 97.7',
+            date: '15 f\u00e9vrier',
+            couleur: 'vert',
+            titre: 'Assistance \u00e0 l\u2019annotation et \u00e0 l\u2019\u00e9valuation',
+            items: [
+                '<strong>Jalon \u2469\u20de Annoter des travaux</strong> : Nouveau jalon dans le parcours d\u2019apprentissage (chapitre Enseigner). D\u00e9tection automatique quand un fichier est import\u00e9.',
+                '<strong>Panneau \u00e9tat z\u00e9ro</strong> : Quand aucun fichier n\u2019est import\u00e9, un guide en 3\u00a0\u00e9tapes explique comment d\u00e9marrer l\u2019annotation.',
+                '<strong>Bulles de d\u00e9couverte</strong> : Nouveau micro-composant pour afficher un conseil contextuel \u00e0 c\u00f4t\u00e9 d\u2019un \u00e9l\u00e9ment (utilis\u00e9 \u00e0 la premi\u00e8re ouverture de fichier).',
+                '<strong>Aide contextuelle enrichie</strong> : Nouvelles entr\u00e9es pour l\u2019annotation (formats, nommage, autocollants) et l\u2019\u00e9valuation (pr\u00e9requis, liens).'
+            ]
+        },
+        {
+            version: 'Beta 97.7',
+            date: '15 f\u00e9vrier',
+            couleur: 'bleu',
+            titre: 'Harmonisation des emojis et assistants conditionnels',
+            items: [
+                '<strong>Tour guid\u00e9 \uD83D\uDDFA\uFE0F</strong> : L\u2019ic\u00f4ne du tour guid\u00e9 passe de \uD83D\uDD26 \u00e0 \uD83D\uDDFA\uFE0F dans l\u2019ensemble de l\u2019application (8\u00a0fichiers).',
+                '<strong>Donn\u00e9es d\u00e9mo \uD83D\uDEB8</strong> : L\u2019ic\u00f4ne des donn\u00e9es de d\u00e9monstration passe de \uD83D\uDDFA\uFE0F \u00e0 \uD83D\uDEB8 pour \u00e9viter la confusion avec le tour guid\u00e9.',
+                '<strong>Assistants conditionnels</strong> : La banni\u00e8re \u00ab\u00a0Assistant de cr\u00e9ation de mat\u00e9riel\u00a0\u00bb (Construction) est d\u00e9sormais masqu\u00e9e quand le tour guid\u00e9 est d\u00e9sactiv\u00e9.'
+            ]
+        },
+        {
+            version: 'Beta 97.7',
+            date: '15 f\u00e9vrier',
             couleur: 'bleu',
             titre: 'Coh\u00e9rence iconographique et organisation de l\u2019accueil',
             items: [
@@ -58,7 +92,7 @@
             ]
         },
         {
-            version: 'Beta 97.8',
+            version: 'Beta 97.7',
             date: '15 f\u00e9vrier',
             couleur: 'vert',
             titre: 'Parcours d\u2019apprentissage unifi\u00e9',
@@ -71,7 +105,7 @@
             ]
         },
         {
-            version: 'Beta 97.8',
+            version: 'Beta 97.7',
             date: '14 f\u00e9vrier',
             couleur: 'vert',
             titre: 'Carte mentale \u2014 Taxonomie d\u2019Anderson',

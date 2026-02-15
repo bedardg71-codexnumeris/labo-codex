@@ -2641,6 +2641,7 @@ async function exporterConfigurationComplete() {
    =============================== */
 
 // Fonctions appelées depuis le HTML (onclick)
+window.ouvrirModalImport = ouvrirModalImport;
 window.executerImport = executerImport;
 window.fermerModalImport = fermerModalImport;
 // window.exporterDonneesJSON = exporterDonneesJSON; // ❌ Fonction n'existe plus
