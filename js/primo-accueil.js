@@ -421,8 +421,16 @@ function demarrerCreationMateriel() {
             return;
         }
 
-        // Trouver l'index de materiel-intro dans les questions actives
-        const questionsActives = obtenirQuestionsActives({});
+        // Détecter la pratique AVANT d'ouvrir le modal (évite l'étape action visible)
+        var modalites = db.getSync('modalitesEvaluation', {});
+        var pratique = modalites.pratique || null;
+        var reponsesInitiales = {
+            'materiel-pratique-detectee': pratique || 'aucune'
+        };
+        console.log('[Guide] Pratique pré-détectée:', reponsesInitiales['materiel-pratique-detectee']);
+
+        // Trouver l'index de materiel-intro et sauter au suivant
+        const questionsActives = obtenirQuestionsActives(reponsesInitiales);
         const indexMateriel = questionsActives.findIndex(q => q.id === 'materiel-intro');
 
         if (indexMateriel === -1) {
@@ -431,8 +439,9 @@ function demarrerCreationMateriel() {
             return;
         }
 
-        console.log('[Guide] Lancement du parcours matériel à l\'index', indexMateriel);
-        ouvrirModalConversationnel(indexMateriel);
+        // Ouvrir à l'étape suivante (la détection est déjà faite)
+        console.log('[Guide] Lancement du parcours matériel à l\'index', indexMateriel + 1);
+        ouvrirModalConversationnel(indexMateriel + 1, reponsesInitiales);
     }, 500);
 }
 
