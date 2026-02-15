@@ -157,7 +157,7 @@ function afficherAccueilRetour(conteneur) {
 
         ${decouvrirHTML}
 
-        <div class="accueil-cartes accueil-cartes--10">
+        <div class="accueil-cartes accueil-cartes--8">
             <div class="accueil-carte" onclick="afficherSection('planification'); setTimeout(function(){ afficherSousSection('planification-carte'); }, 100);">
                 <div class="accueil-carte-icone">\uD83E\uDDE9</div>
                 <div class="accueil-carte-titre">Planifier ton cours</div>
@@ -214,20 +214,15 @@ function afficherAccueilRetour(conteneur) {
                     Identifie les \u00e9l\u00e8ves \u00e0 risque et planifie des interventions diff\u00e9renci\u00e9es selon leurs besoins.
                 </div>
             </div>
-            <div class="accueil-carte" onclick="if(window.backupReminder) window.backupReminder.afficherModal();">
-                <div class="accueil-carte-icone">\uD83D\uDCBE</div>
-                <div class="accueil-carte-titre">Sauvegarder tes donn\u00e9es</div>
-                <div class="accueil-carte-desc">
-                    Exporte en lieu s\u00fbr tout ton mat\u00e9riel dans un document JSON.
-                </div>
-            </div>
-            <div class="accueil-carte" onclick="afficherModalNouveautes();">
-                <div class="accueil-carte-icone">\u2709\uFE0F<span class="pastille-nouveautes"></span></div>
-                <div class="accueil-carte-titre">Derni\u00e8res nouvelles</div>
-                <div class="accueil-carte-desc">
-                    D\u00e9couvre les nouvelles fonctionnalit\u00e9s et les r\u00e9centes corrections.
-                </div>
-            </div>
+        </div>
+
+        <div class="accueil-utilitaires">
+            <button class="accueil-utilitaire" onclick="if(window.backupReminder) window.backupReminder.afficherModal();">
+                \uD83D\uDCBE Sauvegarder
+            </button>
+            <button class="accueil-utilitaire" onclick="afficherModalNouveautes();">
+                \u2709\uFE0F<span class="pastille-nouveautes"></span> Nouvelles
+            </button>
         </div>
 
         <div class="accueil-pied">
