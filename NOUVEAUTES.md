@@ -24,6 +24,11 @@
 - **Tour guide neutre** : Le personnage de Primo est retire. Le tour guide utilise des formulations impersonnelles.
 - **Module 2 simplifie** : « Evaluer une production » navigue directement vers la section d'evaluation.
 
+**Correctifs et ameliorations**
+
+- **Ponderation pre-remplie** : Le champ de ponderation dans le parcours de creation de materiel est pre-rempli a 25% au lieu d'un simple placeholder.
+- **Tooltip objectif** : La reference a Bloom est remplacee par Anderson et Krathwohl, avec un renvoi vers la banque de verbes dans la carte d'alignement (Planification → Carte).
+
 **Harmonisation nomenclature IDME**
 
 - **Noms corriges** : L'echelle de performance IDME utilise desormais partout les noms officiels : Incomplet / en Developpement / Maitrise / Etendu.
