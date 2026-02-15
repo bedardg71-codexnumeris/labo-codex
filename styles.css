@@ -10244,7 +10244,8 @@ label:has(+ textarea:disabled) {
     display: none !important;
 }
 
-.mode-assiste .primo-aide {
+.mode-assiste .primo-aide,
+.aide-contextuelle-active .primo-aide {
     display: inline-block !important;
 }
 
@@ -11976,12 +11977,21 @@ body[data-mode="simulation"] table tr:hover {
     outline-offset: 2px;
 }
 
-/* Affichage en Mode Assisté uniquement - avec !important pour éviter les conflits */
+/* Affichage en Mode Assisté ou Aide contextuelle - avec !important pour éviter les conflits */
 .mode-assiste .btn-aide-contextuelle,
 body.mode-assiste .btn-aide-contextuelle,
 .mode-assiste h2 .btn-aide-contextuelle,
-.mode-assiste .titre-emoji-container .btn-aide-contextuelle {
+.mode-assiste .titre-emoji-container .btn-aide-contextuelle,
+.aide-contextuelle-active .btn-aide-contextuelle,
+body.aide-contextuelle-active .btn-aide-contextuelle,
+.aide-contextuelle-active h2 .btn-aide-contextuelle,
+.aide-contextuelle-active .titre-emoji-container .btn-aide-contextuelle {
     display: inline-flex !important;
+}
+
+/* Tooltip-aide (📍) visible uniquement quand aide contextuelle active */
+.aide-contextuelle-active .tooltip-aide {
+    display: inline !important;
 }
 
 /* Overlay du modal */

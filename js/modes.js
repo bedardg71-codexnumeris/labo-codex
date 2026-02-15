@@ -71,6 +71,11 @@ function initialiserSystemeModes() {
         document.body.classList.add('mode-assiste');
     }
 
+    // Appliquer la classe aide-contextuelle-active si la préférence est active
+    if (estAideContextuelleActive()) {
+        document.body.classList.add('aide-contextuelle-active');
+    }
+
     console.log(`✅ Mode actif: ${THEMES[modeActuel]?.nom || modeActuel}`);
 }
 
@@ -805,6 +810,32 @@ function definirTourGuide(etat) {
 }
 
 /**
+ * Vérifie si l'aide contextuelle est active (lecture de la préférence)
+ * @returns {boolean} true si l'aide contextuelle est activée (true par défaut)
+ */
+function estAideContextuelleActive() {
+    const prefs = db.getSync('preferencesAffichage', {});
+    return prefs.aideContextuelle !== false; // true par défaut
+}
+
+/**
+ * Active ou désactive l'aide contextuelle (📍 pins d'aide)
+ * @param {boolean} etat - true pour activer, false pour désactiver
+ */
+function definirAideContextuelle(etat) {
+    const prefs = db.getSync('preferencesAffichage', {});
+    prefs.aideContextuelle = !!etat;
+    db.setSync('preferencesAffichage', prefs);
+    // Synchroniser les checkboxes miroirs
+    document.querySelectorAll('#checkbox-aide-contextuelle, #checkbox-aide-contextuelle-accueil')
+        .forEach(cb => cb.checked = !!etat);
+    // Appliquer la classe CSS qui contrôle la visibilité des éléments d'aide
+    document.body.classList.toggle('aide-contextuelle-active', !!etat);
+    // Notifier les modules (primo-tooltips écoute cet événement)
+    window.dispatchEvent(new Event('modeChanged'));
+}
+
+/**
  * Vérifie si on est en mode Démo (route démo active)
  * @returns {boolean} true si la route démo est active
  */
@@ -825,6 +856,8 @@ window.changerMode = changerMode;
 window.estModeAssiste = estModeAssiste;
 window.estModeGuide = estModeGuide;
 window.definirTourGuide = definirTourGuide;
+window.estAideContextuelleActive = estAideContextuelleActive;
+window.definirAideContextuelle = definirAideContextuelle;
 window.estEnModeDemo = estEnModeDemo;
 window.obtenirDonneesSelonMode = obtenirDonneesSelonMode;
 window.sauvegarderDonneesSelonMode = sauvegarderDonneesSelonMode;

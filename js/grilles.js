@@ -2717,7 +2717,7 @@ function afficherCriteresTemp() {
                 </div>
                 <div class="groupe-form">
                     <label data-tooltip="cn-grille-type-critere" style="font-size: 0.85rem; color: var(--gris-moyen);">Type
-                        <span class="tooltip-aide" title="Holistique : évalue l'ensemble en considérant les interrelations entre les éléments. Analytique : décompose et évalue chaque élément séparément. Algorithmique : calcul automatique basé sur une formule (ex : nombre d'erreurs en français écrit).">📌</span>
+                        <span class="tooltip-aide" title="Holistique : évalue l'ensemble en considérant les interrelations entre les éléments. Analytique : décompose et évalue chaque élément séparément. Algorithmique : calcul automatique basé sur une formule (ex : nombre d'erreurs en français écrit).">📍</span>
                     </label>
                     <select class="controle-form"
                             onchange="modifierCritereTemp(${index}, 'type', this.value); afficherCriteresTemp();">
@@ -2973,7 +2973,7 @@ function afficherCriteresGrille(grille) {
                 </div>
                 <div class="groupe-form">
                     <label data-tooltip="cn-grille-type-critere" style="font-size: 0.85rem; color: var(--gris-moyen);">Type
-                        <span class="tooltip-aide" title="Holistique : évalue l'ensemble en considérant les interrelations entre les éléments. Analytique : décompose et évalue chaque élément séparément. Algorithmique : calcul automatique basé sur une formule (ex : nombre d'erreurs en français écrit).">📌</span>
+                        <span class="tooltip-aide" title="Holistique : évalue l'ensemble en considérant les interrelations entre les éléments. Analytique : décompose et évalue chaque élément séparément. Algorithmique : calcul automatique basé sur une formule (ex : nombre d'erreurs en français écrit).">📍</span>
                     </label>
                     <select class="controle-form"
                             onchange="modifierCritereGrille('${grille.id}', ${index}, 'type', this.value); afficherCriteresGrille(obtenirGrilleParId('${grille.id}'));">
