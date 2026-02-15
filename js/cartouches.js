@@ -204,8 +204,8 @@ async function assurerCartoucheGenerique() {
             { id: 'CR_SYNTHESE', nom: 'Synthèse' }
         ],
         niveaux: [
-            { code: 'I', nom: 'Insuffisant' },
-            { code: 'D', nom: 'En développement' },
+            { code: 'I', nom: 'Incomplet' },
+            { code: 'D', nom: 'en Développement' },
             { code: 'M', nom: 'Maîtrisé' },
             { code: 'E', nom: 'Étendu' }
         ],
@@ -412,7 +412,7 @@ async function initialiserNouveauCartouche(grilleId) {
     // Récupérer l'échelle de performance depuis echellesTemplates
     const niveauxDefaut = [
         { code: 'I', nom: 'Incomplet', min: 0, max: 64 },
-        { code: 'D', nom: 'En Développement', min: 65, max: 74 },
+        { code: 'D', nom: 'en Développement', min: 65, max: 74 },
         { code: 'M', nom: 'Maîtrisé', min: 75, max: 84 },
         { code: 'E', nom: 'Étendu', min: 85, max: 100 }
     ];

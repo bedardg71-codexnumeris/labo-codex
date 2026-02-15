@@ -1149,10 +1149,10 @@ function creerEchelleDepuisParcours() {
             id: 'echelle-idme-' + Date.now(),
             nom: 'IDME',
             niveaux: [
-                { code: 'I', nom: 'Insuffisant', couleur: '#ff9800', valeur: 50, min: 0, max: 64 },
-                { code: 'D', nom: 'En développement', couleur: '#ffc107', valeur: 69.5, min: 65, max: 74 },
-                { code: 'M', nom: 'Maîtrise', couleur: '#4caf50', valeur: 79.5, min: 75, max: 84 },
-                { code: 'E', nom: 'Exemplaire', couleur: '#2196f3', valeur: 92.5, min: 85, max: 100 }
+                { code: 'I', nom: 'Incomplet', couleur: '#ff9800', valeur: 50, min: 0, max: 64 },
+                { code: 'D', nom: 'en Développement', couleur: '#ffc107', valeur: 69.5, min: 65, max: 74 },
+                { code: 'M', nom: 'Maîtrisé', couleur: '#4caf50', valeur: 79.5, min: 75, max: 84 },
+                { code: 'E', nom: 'Étendu', couleur: '#2196f3', valeur: 92.5, min: 85, max: 100 }
             ],
             dateCreation: new Date().toISOString()
         };
@@ -1758,10 +1758,10 @@ function creerEchelleIDMEParDefaut() {
     // Créer l'échelle IDME par défaut
     const echelleIDME = {
         id: 'echelle-idme-defaut',
-        nom: 'IDME (Insuffisant, Développement, Maîtrisé, Étendu)',
+        nom: 'IDME (Incomplet, en Développement, Maîtrisé, Étendu)',
         niveaux: [
-            { code: 'I', nom: 'Insuffisant', min: 0, max: 64, valeur: 50, couleur: '#ef5350' },
-            { code: 'D', nom: 'Développement', min: 65, max: 74, valeur: 69.5, couleur: '#ffa726' },
+            { code: 'I', nom: 'Incomplet', min: 0, max: 64, valeur: 50, couleur: '#ef5350' },
+            { code: 'D', nom: 'en Développement', min: 65, max: 74, valeur: 69.5, couleur: '#ffa726' },
             { code: 'M', nom: 'Maîtrisé', min: 75, max: 84, valeur: 79.5, couleur: '#66bb6a' },
             { code: 'E', nom: 'Étendu', min: 85, max: 100, valeur: 92.5, couleur: '#42a5f5' }
         ],

@@ -35,8 +35,8 @@ const SEUILS_PAR_DEFAUT = {
     // Taxonomie SOLO - Niveaux IDME
     // Seuils de passage entre les niveaux de compréhension
     idme: {
-        insuffisant: 0.64,      // < 64% = Insuffisant (unistructurel)
-        developpement: 0.75,    // 64-74% = En développement (multistructurel)
+        insuffisant: 0.64,      // < 64% = Incomplet (unistructurel)
+        developpement: 0.75,    // 64-74% = en Développement (multistructurel)
         maitrise: 0.85          // 75-84% = Maîtrisé (relationnel), ≥85% = Étendu (abstrait)
     },
 

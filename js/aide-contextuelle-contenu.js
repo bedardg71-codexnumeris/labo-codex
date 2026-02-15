@@ -191,7 +191,7 @@ const AIDE_CONTEXTUELLE = {
                 type: 'liste',
                 titre: "Échelles prédéfinies disponibles",
                 items: [
-                    "4 niveaux : Insuffisant, En développement, Maîtrisé, Exemplaire",
+                    "4 niveaux : Incomplet, en Développement, Maîtrisé, Étendu",
                     "Pourcentage (5 niveaux) : 0-20%, 20-40%, 40-60%, 60-80%, 80-100%",
                     "Lettres (5 niveaux) : E, D, C, B, A",
                     "Personnalisée : crée ta propre échelle"

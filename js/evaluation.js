@@ -842,8 +842,8 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
     // Fallback: niveaux IDME par défaut
     if (niveauxDisponibles.length === 0) {
         niveauxDisponibles = [
-            { code: 'I', nom: 'Insuffisant' },
-            { code: 'D', nom: 'En développement' },
+            { code: 'I', nom: 'Incomplet' },
+            { code: 'D', nom: 'en Développement' },
             { code: 'M', nom: 'Maîtrisé' },
             { code: 'E', nom: 'Étendu' }
         ];

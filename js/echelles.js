@@ -67,7 +67,7 @@
 const niveauxDefaut = [
     {
         code: 'I',
-        nom: 'Incomplet ou insuffisant',
+        nom: 'Incomplet',
         description: 'Préstructurel, unistructurel',
         min: 0,
         max: 64.99,
@@ -76,7 +76,7 @@ const niveauxDefaut = [
     },
     {
         code: 'D',
-        nom: 'En Développement',
+        nom: 'en Développement',
         description: 'Multistructurel',
         min: 65,
         max: 74.99,
@@ -468,8 +468,8 @@ async function assurerEchelleGenerique() {
         nom: 'Échelle générique (exemple)',
         description: 'Échelle 4 niveaux de performance - Modifiez ou dupliquez selon vos besoins',
         niveaux: [
-            { code: 'I', nom: 'Insuffisant', min: 0, max: 59, valeur: 45, couleur: '#dc3545' },
-            { code: 'D', nom: 'En développement', min: 60, max: 74, valeur: 67, couleur: '#fd7e14' },
+            { code: 'I', nom: 'Incomplet', min: 0, max: 59, valeur: 45, couleur: '#dc3545' },
+            { code: 'D', nom: 'en Développement', min: 60, max: 74, valeur: 67, couleur: '#fd7e14' },
             { code: 'M', nom: 'Maîtrisé', min: 75, max: 89, valeur: 82, couleur: '#28a745' },
             { code: 'E', nom: 'Étendu', min: 90, max: 100, valeur: 95, couleur: '#007bff' }
         ],
@@ -504,8 +504,8 @@ async function assurerEchellesPersonnalisees() {
             auteur: 'Bruno V.',
             discipline: 'Chimie',
             niveaux: [
-                { code: 'I', nom: 'Insuffisant', min: 0, max: 54, valeur: 40, couleur: '#dc3545' },
-                { code: 'D', nom: 'En développement', min: 55, max: 74, valeur: 65, couleur: '#fd7e14' },
+                { code: 'I', nom: 'Incomplet', min: 0, max: 54, valeur: 40, couleur: '#dc3545' },
+                { code: 'D', nom: 'en Développement', min: 55, max: 74, valeur: 65, couleur: '#fd7e14' },
                 { code: 'M', nom: 'Maîtrisé', min: 75, max: 89, valeur: 82, couleur: '#28a745' },
                 { code: 'E', nom: 'Étendu', min: 90, max: 100, valeur: 95, couleur: '#007bff' }
             ],
@@ -554,8 +554,8 @@ async function assurerEchellesPersonnalisees() {
             auteur: 'Isabelle M.',
             discipline: 'Biologie',
             niveaux: [
-                { code: 'I', nom: 'Insuffisant', min: 0, max: 49, valeur: 40, couleur: '#dc3545' },
-                { code: 'D', nom: 'En développement', min: 50, max: 64, valeur: 57, couleur: '#fd7e14' },
+                { code: 'I', nom: 'Incomplet', min: 0, max: 49, valeur: 40, couleur: '#dc3545' },
+                { code: 'D', nom: 'en Développement', min: 50, max: 64, valeur: 57, couleur: '#fd7e14' },
                 { code: 'M', nom: 'Maîtrisé', min: 65, max: 84, valeur: 75, couleur: '#28a745' },
                 { code: 'E', nom: 'Étendu', min: 85, max: 100, valeur: 92, couleur: '#007bff' }
             ],
@@ -580,8 +580,8 @@ async function assurerEchellesPersonnalisees() {
             auteur: 'Hélène C.',
             discipline: 'Philosophie',
             niveaux: [
-                { code: 'I', nom: 'Insuffisant', min: 0, max: 49, valeur: 35, couleur: '#dc3545' },
-                { code: 'D', nom: 'En développement', min: 50, max: 59, valeur: 55, couleur: '#fd7e14' },
+                { code: 'I', nom: 'Incomplet', min: 0, max: 49, valeur: 35, couleur: '#dc3545' },
+                { code: 'D', nom: 'en Développement', min: 50, max: 59, valeur: 55, couleur: '#fd7e14' },
                 { code: 'M', nom: 'Maîtrisé', min: 60, max: 79, valeur: 70, couleur: '#28a745' },
                 { code: 'E', nom: 'Étendu', min: 80, max: 100, valeur: 90, couleur: '#007bff' }
             ],
@@ -605,8 +605,8 @@ async function assurerEchellesPersonnalisees() {
             auteur: 'Marie-Hélène L.',
             discipline: 'Littérature',
             niveaux: [
-                { code: 'I', nom: 'Insuffisant', min: 0, max: 54, valeur: 40, couleur: '#dc3545' },
-                { code: 'D', nom: 'En développement', min: 55, max: 64, valeur: 60, couleur: '#fd7e14' },
+                { code: 'I', nom: 'Incomplet', min: 0, max: 54, valeur: 40, couleur: '#dc3545' },
+                { code: 'D', nom: 'en Développement', min: 55, max: 64, valeur: 60, couleur: '#fd7e14' },
                 { code: 'M', nom: 'Maîtrisé', min: 65, max: 84, valeur: 75, couleur: '#28a745' },
                 { code: 'E', nom: 'Étendu', min: 85, max: 100, valeur: 92, couleur: '#007bff' }
             ],
@@ -630,8 +630,8 @@ async function assurerEchellesPersonnalisees() {
             auteur: 'Étienne L.',
             discipline: 'Administration',
             niveaux: [
-                { code: 'I', nom: 'Insuffisant', min: 0, max: 59, valeur: 45, couleur: '#dc3545' },
-                { code: 'D', nom: 'En développement', min: 60, max: 69, valeur: 65, couleur: '#fd7e14' },
+                { code: 'I', nom: 'Incomplet', min: 0, max: 59, valeur: 45, couleur: '#dc3545' },
+                { code: 'D', nom: 'en Développement', min: 60, max: 69, valeur: 65, couleur: '#fd7e14' },
                 { code: 'M', nom: 'Maîtrisé', min: 70, max: 89, valeur: 80, couleur: '#28a745' },
                 { code: 'E', nom: 'Étendu', min: 90, max: 100, valeur: 95, couleur: '#007bff' }
             ],
@@ -655,8 +655,8 @@ async function assurerEchellesPersonnalisees() {
             auteur: 'Olivier L.',
             discipline: 'Géographie',
             niveaux: [
-                { code: 'I', nom: 'Insuffisant', min: 0, max: 54, valeur: 40, couleur: '#dc3545' },
-                { code: 'D', nom: 'En développement', min: 55, max: 64, valeur: 60, couleur: '#fd7e14' },
+                { code: 'I', nom: 'Incomplet', min: 0, max: 54, valeur: 40, couleur: '#dc3545' },
+                { code: 'D', nom: 'en Développement', min: 55, max: 64, valeur: 60, couleur: '#fd7e14' },
                 { code: 'M', nom: 'Maîtrisé', min: 65, max: 79, valeur: 72, couleur: '#28a745' },
                 { code: 'E', nom: 'Étendu', min: 80, max: 100, valeur: 90, couleur: '#007bff' }
             ],
@@ -680,8 +680,8 @@ async function assurerEchellesPersonnalisees() {
             auteur: 'Jordan R.',
             discipline: 'Philosophie',
             niveaux: [
-                { code: 'I', nom: 'Insuffisant', min: 0, max: 49, valeur: 35, couleur: '#dc3545' },
-                { code: 'D', nom: 'En développement', min: 50, max: 59, valeur: 55, couleur: '#fd7e14' },
+                { code: 'I', nom: 'Incomplet', min: 0, max: 49, valeur: 35, couleur: '#dc3545' },
+                { code: 'D', nom: 'en Développement', min: 50, max: 59, valeur: 55, couleur: '#fd7e14' },
                 { code: 'M', nom: 'Maîtrisé', min: 60, max: 79, valeur: 70, couleur: '#28a745' },
                 { code: 'E', nom: 'Étendu', min: 80, max: 100, valeur: 90, couleur: '#007bff' }
             ],

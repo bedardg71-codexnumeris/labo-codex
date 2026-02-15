@@ -5,7 +5,7 @@
  * Évaluation formative basée sur les N meilleurs artefacts de portfolio.
  *
  * CARACTÉRISTIQUES :
- * - Échelle de niveaux (ex: IDME - Insuffisant, Développement, Maîtrisé, Étendu)
+ * - Échelle de niveaux (ex: IDME - Incomplet, en Développement, Maîtrisé, Étendu)
  * - ✅ Critères d'évaluation configurables (grille de référence)
  * - Performance calculée sur N meilleurs artefacts (configurable: 3, 7 ou 12)
  * - Meilleur résultat retenu (non-rétrogradable)
@@ -1591,8 +1591,8 @@ class PratiquePANStandards {
     _convertirNoteEnNiveau(note) {
         if (note >= 0.85) return 4; // Étendu
         if (note >= 0.75) return 3; // Maîtrisé
-        if (note >= 0.65) return 2; // Développement
-        return 1; // Insuffisant
+        if (note >= 0.65) return 2; // en Développement
+        return 1; // Incomplet
     }
 }
 

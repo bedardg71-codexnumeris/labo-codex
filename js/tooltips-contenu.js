@@ -445,7 +445,7 @@ const TOOLTIPS = {
         'Niveau d\u2019engagement dans les activit\u00e9s d\u2019apprentissage. Combine plusieurs signaux comportementaux.',
 
     'tdb-performance':
-        'R\u00e9sultats aux \u00e9valuations par niveaux : Insuffisant, En D\u00e9veloppement, Ma\u00eetris\u00e9, \u00c9tendu.',
+        'R\u00e9sultats aux \u00e9valuations par niveaux : Incomplet, en D\u00e9veloppement, Ma\u00eetris\u00e9, \u00c9tendu.',
 
     // --- Section Intervenir ---
 
@@ -539,7 +539,7 @@ const TOOLTIPS = {
     // --- Vue Progression temporelle ---
 
     'profil-progression':
-        '\u00c9volution des indices A-C-P au fil des semaines. Zones : Insuffisant, En D\u00e9veloppement, Ma\u00eetris\u00e9, \u00c9tendu.',
+        '\u00c9volution des indices A-C-P au fil des semaines. Zones : Incomplet, en D\u00e9veloppement, Ma\u00eetris\u00e9, \u00c9tendu.',
 
     // --- Vue Développement des habiletés ---
 
@@ -650,7 +650,7 @@ const TOOLTIPS = {
         'Type de jeton : I = Initial, D = D\u00e9lai, R = Reprise, RC = Reprise cibl\u00e9e. M\u00e9canisme de diff\u00e9renciation.',
 
     'eval-col-niveau':
-        'Niveau IDME : I = Insuffisant, D = en D\u00e9veloppement, M = Ma\u00eetris\u00e9, E = \u00c9tendu.',
+        'Niveau IDME : I = Incomplet, D = en D\u00e9veloppement, M = Ma\u00eetris\u00e9, E = \u00c9tendu.',
 
     // =================================================================
     // ÉVALUATIONS — Évaluer une production

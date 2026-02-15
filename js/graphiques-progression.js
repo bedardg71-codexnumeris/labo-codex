@@ -54,21 +54,21 @@ const ZONES_IDME = [
         yMax: 0.40,
         backgroundColor: 'rgba(255, 140, 0, 0.25)',   // Orange (#ff8c00) - comme barre gauche
         borderColor: 'rgba(255, 140, 0, 0.4)',
-        label: 'Insuffisant'
+        label: 'Incomplet'
     },
     {
         yMin: 0.40,
         yMax: 0.65,
         backgroundColor: 'rgba(255, 193, 7, 0.25)',   // Jaune (#ffc107) - transition
         borderColor: 'rgba(255, 193, 7, 0.4)',
-        label: 'En Développement'
+        label: 'en Développement'
     },
     {
         yMin: 0.65,
         yMax: 0.75,
         backgroundColor: 'rgba(152, 208, 37, 0.25)',  // Vert citron (#98d025) - comme barre centre-gauche
         borderColor: 'rgba(152, 208, 37, 0.4)',
-        label: 'En Développement'
+        label: 'en Développement'
     },
     {
         yMin: 0.75,
@@ -2081,7 +2081,7 @@ const pluginGradientFond100 = {
 
         // Couleurs du gradient alignées sur les zones réelles (échelle 0-100)
         const couleurs = [
-            { pos: 0, couleur: '#ff8c00' },    // Orange (Insuffisant 0-64%)
+            { pos: 0, couleur: '#ff8c00' },    // Orange (Incomplet 0-64%)
             { pos: 65, couleur: '#ffc107' },   // Jaune (En Développement 65-74%)
             { pos: 75, couleur: '#22c55e' },   // Vert (Maîtrisé 75-84%)
             { pos: 85, couleur: '#0ea5e9' },   // Bleu (Étendu 85-100%)
@@ -2130,8 +2130,8 @@ const pluginEtiquettesZones100 = {
 
         // Zones en échelle 0-100 (alignées sur l'échelle de performance IDME)
         const zones = [
-            { yMin: 0, yMax: 64, label: 'Insuffisant' },
-            { yMin: 65, yMax: 74, label: 'En Développement' },
+            { yMin: 0, yMax: 64, label: 'Incomplet' },
+            { yMin: 65, yMax: 74, label: 'en Développement' },
             { yMin: 75, yMax: 84, label: 'Maîtrisé' },
             { yMin: 85, yMax: 103, label: 'Étendu' }
         ];
@@ -3445,7 +3445,7 @@ const pluginGradientFond = {
         // Couleurs du gradient (identiques à la barre ACPE)
         // De bas (0%) à haut (100%) = orange → bleu
         const couleurs = [
-            { pos: 0.00, couleur: '#ff8c00' },  // Orange (Insuffisant 0-64%)
+            { pos: 0.00, couleur: '#ff8c00' },  // Orange (Incomplet 0-64%)
             { pos: 0.65, couleur: '#ffc107' },  // Jaune (En Développement 65-74%)
             { pos: 0.75, couleur: '#22c55e' },  // Vert (Maîtrisé 75-84%)
             { pos: 0.85, couleur: '#0ea5e9' },  // Bleu (Étendu 85-100%)
