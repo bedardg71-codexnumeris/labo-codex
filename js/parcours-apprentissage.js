@@ -755,15 +755,16 @@ function genererPanneauParcours() {
     var progression = getProgression();
     if (!progression.mode) return genererPanneauCTA();
 
-    var html = '<div class="parcours-panneau" id="panneau-parcours">';
+    var html = '<div class="carte accordeon parcours-panneau" id="panneau-parcours">';
 
     // === MODE AUTONOME : panneau compact de félicitation ===
     if (progression.autonome) {
         var dateAuto = chargerProgression().dateAutonomie || '';
-        html += '<div class="parcours-header">';
-        html += '<h3 class="parcours-titre">🧭 Parcours complété</h3>';
-        html += '<span class="parcours-compteur">' + progression.jalonsFaits + '/' + progression.totalJalons + '</span>';
+        html += '<div class="accordeon-header" onclick="toggleAccordeonV2(this);">';
+        html += '<h3 style="margin: 0; font-size: 1.1rem;">🧭 Parcours complété — ' + progression.jalonsFaits + '/' + progression.totalJalons + '</h3>';
+        html += '<span class="accordeon-chevron">▼</span>';
         html += '</div>';
+        html += '<div class="accordeon-contenu">';
         html += '<div class="parcours-barre-conteneur">';
         html += '<div class="parcours-barre-remplie" style="width: 100%;"></div>';
         html += '</div>';
@@ -775,14 +776,16 @@ function genererPanneauParcours() {
         html += '<button class="btn btn-secondaire btn-sm" onclick="window.parcours.reinitialiser(); if(typeof afficherAccueil===\'function\') afficherAccueil();">Relancer le parcours</button>';
         html += '</p>';
         html += '</div>';
+        html += '</div>';
         return html;
     }
 
-    // === MODE NORMAL : panneau détaillé ===
-    html += '<div class="parcours-header">';
-    html += '<h3 class="parcours-titre">📍 Ton parcours</h3>';
-    html += '<span class="parcours-compteur">' + progression.jalonsFaits + '/' + progression.totalJalons + '</span>';
+    // === MODE NORMAL : panneau détaillé repliable ===
+    html += '<div class="accordeon-header" onclick="toggleAccordeonV2(this);">';
+    html += '<h3 style="margin: 0; font-size: 1.1rem;">📍 Ton parcours — ' + progression.jalonsFaits + '/' + progression.totalJalons + '</h3>';
+    html += '<span class="accordeon-chevron">▼</span>';
     html += '</div>';
+    html += '<div class="accordeon-contenu">';
 
     // Barre de progression
     html += '<div class="parcours-barre-conteneur">';
@@ -817,7 +820,8 @@ function genererPanneauParcours() {
         html += '</div>';
     });
 
-    html += '</div>';
+    html += '</div>'; // ferme accordeon-contenu
+    html += '</div>'; // ferme panneau-parcours
     return html;
 }
 

@@ -154,8 +154,8 @@ function afficherAccueilRetour(conteneur) {
     // Hero adaptatif selon l'état du parcours
     const parcoursInitialise = window.parcours && window.parcours.estInitialise && window.parcours.estInitialise();
     const heroTitre = parcoursInitialise
-        ? 'Que souhaitez-vous faire\u00a0?'
-        : 'Bienvenue\u00a0! Par où commencer\u00a0?';
+        ? 'Que souhaites-tu faire\u00a0?'
+        : 'Bienvenue\u00a0! Par o\u00f9 commencer\u00a0?';
 
     conteneur.innerHTML = `
         <div class="accueil-hero">
@@ -169,72 +169,72 @@ function afficherAccueilRetour(conteneur) {
         <div class="accueil-cartes accueil-cartes--10">
             <div class="accueil-carte" onclick="afficherSection('planification'); setTimeout(function(){ afficherSousSection('planification-carte'); }, 100);">
                 <div class="accueil-carte-icone">\uD83E\uDDE9</div>
-                <div class="accueil-carte-titre">Planifier mon cours</div>
+                <div class="accueil-carte-titre">Planifier ton cours</div>
                 <div class="accueil-carte-desc">
-                    Planifier et organiser les s\u00e9quences, le\u00e7ons et activit\u00e9s pour leur alignement p\u00e9dagogique.
+                    Organise tes s\u00e9quences, le\u00e7ons et activit\u00e9s pour leur alignement p\u00e9dagogique.
                 </div>
             </div>
             <div class="accueil-carte" onclick="afficherSection('construction'); setTimeout(function(){ if(typeof ouvrirWizardV2==='function') ouvrirWizardV2(); }, 300);">
                 <div class="accueil-carte-icone">\uD83C\uDFA8</div>
-                <div class="accueil-carte-titre">Configurer ma pratique de notation</div>
+                <div class="accueil-carte-titre">Configurer ta pratique de notation</div>
                 <div class="accueil-carte-desc">
-                    D\u00e9finir ce que je mesure et comment je le fais pour cr\u00e9er ma pratique de notation.
+                    D\u00e9finis ce que tu mesures et comment tu le fais pour cr\u00e9er ta pratique de notation.
                 </div>
             </div>
             <div class="accueil-carte" onclick="afficherSection('presences');">
                 <div class="accueil-carte-icone">&#x1F4CB;</div>
                 <div class="accueil-carte-titre">Saisir les pr\u00e9sences</div>
                 <div class="accueil-carte-desc">
-                    Saisir les pr\u00e9sences du jour pour votre groupe et inclure des observations.
+                    Saisis les pr\u00e9sences du jour pour ton groupe et ajoute des observations.
                 </div>
             </div>
             <div class="accueil-carte" onclick="afficherSection('evaluations'); setTimeout(function(){ afficherSousSection('evaluations-travaux'); }, 100);">
                 <div class="accueil-carte-icone">&#x1F4DD;</div>
                 <div class="accueil-carte-titre">Annoter des travaux</div>
                 <div class="accueil-carte-desc">
-                    Annoter les travaux et y apposer des r\u00e9troactions cibl\u00e9es et visuelles.
+                    Annote les travaux de tes \u00e9tudiants et appose des r\u00e9troactions cibl\u00e9es et visuelles.
                 </div>
             </div>
             <div class="accueil-carte" onclick="afficherSection('evaluations'); setTimeout(function(){ afficherSousSection('evaluations-liste'); }, 100);">
                 <div class="accueil-carte-icone">&#x2696;&#xFE0F;</div>
                 <div class="accueil-carte-titre">\u00c9valuer une production</div>
                 <div class="accueil-carte-desc">
-                    Appliquer une grille de crit\u00e8res et construire une r\u00e9troaction diff\u00e9renci\u00e9e.
+                    Applique une grille de crit\u00e8res et construis une r\u00e9troaction diff\u00e9renci\u00e9e.
                 </div>
             </div>
             <div class="accueil-carte" onclick="afficherSection('tableau-bord'); setTimeout(function(){ afficherSousSection('tableau-bord-profil'); }, 100);">
                 <div class="accueil-carte-icone">\uD83D\uDC64</div>
                 <div class="accueil-carte-titre">Consulter un profil \u00e9tudiant</div>
                 <div class="accueil-carte-desc">
-                    Consulter le portrait d\u2019un \u00e9l\u00e8ve\u00a0: pr\u00e9sences, r\u00e9sultats et progression.
+                    Consulte le portrait d\u2019un \u00e9l\u00e8ve\u00a0: pr\u00e9sences, r\u00e9sultats et progression.
                 </div>
             </div>
             <div class="accueil-carte" onclick="afficherSection('tableau-bord');">
                 <div class="accueil-carte-icone">&#x1F4C8;</div>
-                <div class="accueil-carte-titre">Voir l'\u00e9tat des lieux</div>
+                <div class="accueil-carte-titre">Voir l\u2019\u00e9tat des lieux</div>
                 <div class="accueil-carte-desc">
-                    Suivre la participation, les r\u00e9sultats et la progression du groupe.
+                    Suis la participation, les r\u00e9sultats et la progression de ton groupe.
                 </div>
             </div>
             <div class="accueil-carte" onclick="afficherSection('tableau-bord'); setTimeout(function(){ afficherSousSection('tableau-bord-interventions'); }, 100);">
                 <div class="accueil-carte-icone">\uD83D\uDEDF</div>
                 <div class="accueil-carte-titre">Pr\u00e9parer des interventions</div>
                 <div class="accueil-carte-desc">
-                    Identifier les \u00e9l\u00e8ves \u00e0 risque et planifier des interventions diff\u00e9renci\u00e9es selon leurs besoins.
+                    Identifie les \u00e9l\u00e8ves \u00e0 risque et planifie des interventions diff\u00e9renci\u00e9es selon leurs besoins.
                 </div>
             </div>
             <div class="accueil-carte" onclick="if(window.backupReminder) window.backupReminder.afficherModal();">
                 <div class="accueil-carte-icone">\uD83D\uDCBE</div>
-                <div class="accueil-carte-titre">Faire une sauvegarde des donn\u00e9es</div>
+                <div class="accueil-carte-titre">Sauvegarder tes donn\u00e9es</div>
                 <div class="accueil-carte-desc">
-                    Exporter en lieu s\u00fbr tout votre mat\u00e9riel dans un document JSON.
+                    Exporte en lieu s\u00fbr tout ton mat\u00e9riel dans un document JSON.
                 </div>
             </div>
             <div class="accueil-carte" onclick="afficherModalNouveautes();">
                 <div class="accueil-carte-icone">\u2709\uFE0F<span class="pastille-nouveautes"></span></div>
                 <div class="accueil-carte-titre">Derni\u00e8res nouvelles</div>
                 <div class="accueil-carte-desc">
-                    Prendre connaissance des nouvelles fonctionnalit\u00e9s et des r\u00e9centes corrections de bugs.
+                    D\u00e9couvre les nouvelles fonctionnalit\u00e9s et les r\u00e9centes corrections.
                 </div>
             </div>
         </div>
