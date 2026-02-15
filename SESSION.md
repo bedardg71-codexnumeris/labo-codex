@@ -1,10 +1,26 @@
 # SESSION ACTIVE - BETA 97.7
 
 **Date** : 15 février 2026
-**Version** : Beta 97.7 (build 0215-0941)
-**Statut** : Point d'entrée visible du parcours sur l'accueil
+**Version** : Beta 97.7 (build 0215-1230)
+**Statut** : Cohérence iconographique et UX de l'accueil
 
 ## SESSION DU 15 FÉVRIER 2026
+
+### Travail accompli — Cohérence iconographique et organisation accueil (Beta 97.7, build 0215-1230)
+
+56. **Parcours repliable** : Le panneau « Ton parcours » est désormais un accordéon repliable (`.carte.accordeon` + `toggleAccordeonV2`) comme « Découvrir ». Ouvert par défaut.
+
+57. **Tutoiement unifié** : Les 8 cartes d'action de la page d'accueil sont reformulées au « tu » pour s'aligner avec le ton du parcours d'apprentissage.
+
+58. **Boutons d'aide contextuelle 📍** : Toutes les icônes 🧭 utilisées pour l'aide contextuelle (boutons `.btn-aide-contextuelle` et `.primo-aide`) sont remplacées par 📍 dans 9 fichiers (44 occurrences). 🧭 reste réservé au mode découverte.
+
+59. **Bouton changement de mode** : Nouveau bouton `.parcours-btn-mode` dans l'en-tête du parcours pour basculer entre mode explicite (🗺️) et découverte (🧭) sans passer par les réglages.
+
+60. **Assistant intégré au parcours** : Le chapitre « Construire » du parcours affiche un bouton « 🛠️ Lancer l'assistant de création » quand il n'est pas complété. La carte « Créer du matériel » est retirée de l'accordéon Découvrir (4 → 3 toggles).
+
+61. **Barre utilitaire compacte** : « 💾 Sauvegarder » et « ✉️ Nouvelles » sont déplacés des cartes principales vers une barre compacte `.accueil-utilitaires` sous les 8 cartes pédagogiques. Grille réduite de 10 à 8 colonnes.
+
+62. **Séparation tour guidé 🔦** : L'icône du tour guidé est séparée du mode découverte (🧭). Le tour guidé utilise désormais 🔦 (18 occurrences dans 6 fichiers : accueil.js, modal-bienvenue.js, parcours-apprentissage.js, primo-modal.js, primo-accueil.js, index.html). Système d'icônes finalisé : 🗺️ explicite, 🧭 découverte, 🔦 tour guidé, 📍 aide contextuelle, 💬 info-bulles, 📌 conseils pédagogiques, 🎓 autonome.
 
 ### Travail accompli — Point d'entrée visible du parcours sur l'accueil (Beta 97.7, build 0215-0941)
 

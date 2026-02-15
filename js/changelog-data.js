@@ -12,6 +12,20 @@
         {
             version: 'Beta 97.7',
             date: '15 f\u00e9vrier',
+            couleur: 'bleu',
+            titre: 'Coh\u00e9rence iconographique et organisation de l\u2019accueil',
+            items: [
+                '<strong>S\u00e9paration tour guid\u00e9 \uD83D\uDD26</strong> : L\u2019ic\u00f4ne du tour guid\u00e9 est d\u00e9sormais \uD83D\uDD26 (distinct du mode d\u00e9couverte \uD83E\uDDED). Syst\u00e8me d\u2019ic\u00f4nes finalis\u00e9\u00a0: \uD83D\uDDFA\uFE0F\u00a0explicite, \uD83E\uDDED\u00a0d\u00e9couverte, \uD83D\uDD26\u00a0tour guid\u00e9, \uD83D\uDCCD\u00a0aide contextuelle, \uD83D\uDCAC\u00a0info-bulles, \uD83D\uDCCC\u00a0conseils p\u00e9dagogiques, \uD83C\uDF93\u00a0autonome.',
+                '<strong>Boutons d\u2019aide contextuelle \uD83D\uDCCD</strong> : Toutes les ic\u00f4nes \uD83E\uDDED utilis\u00e9es pour l\u2019aide contextuelle sont remplac\u00e9es par \uD83D\uDCCD dans 9\u00a0fichiers.',
+                '<strong>Parcours repliable</strong> : Le panneau \u00ab\u00a0Ton parcours\u00a0\u00bb est d\u00e9sormais un accord\u00e9on repliable, comme \u00ab\u00a0D\u00e9couvrir\u00a0\u00bb. Bouton de changement de mode dans l\u2019en-t\u00eate.',
+                '<strong>Barre utilitaire compacte</strong> : \u00ab\u00a0\uD83D\uDCBE\u00a0Sauvegarder\u00a0\u00bb et \u00ab\u00a0\u2709\uFE0F\u00a0Nouvelles\u00a0\u00bb sont d\u00e9plac\u00e9s vers une barre compacte sous les 8\u00a0cartes p\u00e9dagogiques.',
+                '<strong>Tutoiement unifi\u00e9</strong> : Toutes les cartes de l\u2019accueil sont reformul\u00e9es au \u00ab\u00a0tu\u00a0\u00bb.',
+                '<strong>Assistant int\u00e9gr\u00e9 au parcours</strong> : Le chapitre \u00ab\u00a0Construire\u00a0\u00bb affiche un bouton \u00ab\u00a0\uD83D\uDEE0\uFE0F\u00a0Lancer l\u2019assistant\u00a0\u00bb quand il n\u2019est pas compl\u00e9t\u00e9.'
+            ]
+        },
+        {
+            version: 'Beta 97.7',
+            date: '15 f\u00e9vrier',
             couleur: 'vert',
             titre: 'Point d\u2019entr\u00e9e visible du parcours sur l\u2019accueil',
             items: [

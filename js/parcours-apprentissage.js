@@ -660,8 +660,8 @@ function afficherCertificationAutonomie() {
                         '<span class="repere-texte">Survole un élément pour voir son info-bulle</span>' +
                     '</div>' +
                     '<div class="modal-bienvenue-repere">' +
-                        '<span class="repere-icone">🧭</span>' +
-                        '<span class="repere-texte">Clique sur 🧭 pour relancer un tour guidé</span>' +
+                        '<span class="repere-icone">🔦</span>' +
+                        '<span class="repere-texte">Clique sur 🔦 pour relancer un tour guidé</span>' +
                     '</div>' +
                     '<div class="modal-bienvenue-repere">' +
                         '<span class="repere-icone">📚</span>' +

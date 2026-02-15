@@ -110,7 +110,7 @@ function afficherAccueilRetour(conteneur) {
 
                     <div class="accueil-carte-decouvrir">
                         <label style="display:flex; align-items:center; gap:12px; cursor:pointer;">
-                            <span style="font-size:1.5rem;">\uD83E\uDDED</span>
+                            <span style="font-size:1.5rem;">\uD83D\uDD26</span>
                             <input type="checkbox" id="checkbox-tour-guide-accueil" ${tourGuideActif ? 'checked' : ''}
                                 onchange="if(typeof definirTourGuide==='function') definirTourGuide(this.checked);">
                             <div>

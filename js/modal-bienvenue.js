@@ -126,7 +126,7 @@
                 setTimeout(() => {
                     if (typeof afficherNotification === 'function') {
                         afficherNotification(
-                            '🧭 Explore librement ! Clique sur 🧭 dans l\'en-tête pour un tour guidé.',
+                            '🧭 Explore librement ! Clique sur 🔦 dans l\'en-tête pour un tour guidé.',
                             'info',
                             8000
                         );
@@ -173,8 +173,8 @@
                             <span class="repere-texte"><strong>Nouveautés</strong> — Corrections et nouvelles fonctionnalités</span>
                         </div>
                         <div class="modal-bienvenue-repere">
-                            <span class="repere-icone">🧭</span>
-                            <span class="repere-texte"><strong>Tour guide</strong> — Aide contextuelle et navigation générale</span>
+                            <span class="repere-icone">🔦</span>
+                            <span class="repere-texte"><strong>Tour guidé</strong> — Aide contextuelle et navigation générale</span>
                         </div>
                         <div class="modal-bienvenue-repere">
                             <span class="repere-icone">⚠️</span>

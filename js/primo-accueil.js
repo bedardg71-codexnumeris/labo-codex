@@ -145,7 +145,7 @@ function afficherModalAccueil() {
                     box-shadow: 0 4px 15px rgba(26, 82, 102, 0.3);
                     flex-shrink: 0;
                 ">
-                    🧭
+                    🔦
                 </div>
                 <div style="flex: 1;">
                     <h2 style="
@@ -540,7 +540,7 @@ function verifierEtAfficherAccueil() {
             console.log('👋 Première utilisation détectée - Affichage AUTO du tour guidé');
             afficherModalAccueil();
         } else {
-            console.log('✅ Utilisateur existant - Tour guidé accessible via bouton 🧭 seulement');
+            console.log('✅ Utilisateur existant - Tour guidé accessible via bouton 🔦 seulement');
         }
     }, 1000);
 }
