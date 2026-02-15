@@ -357,7 +357,7 @@ function genererHTMLQuestion(question) {
                 box-shadow: 0 4px 15px rgba(26, 82, 102, 0.3);
                 flex-shrink: 0;
             ">
-                🔦
+                🗺️
             </div>
             <div style="flex: 1;">
                 <h2 style="margin: 0 0 5px 0; font-size: 1.5rem; color: var(--accent-primaire);">${titreModule}</h2>
@@ -2258,7 +2258,7 @@ function passerEnModeNotification() {
 
     boutonArreter.onclick = function() {
         // Demander confirmation avant d'arrêter
-        if (confirm('Souhaitez-vous vraiment quitter ce parcours ?\n\nVous pourrez le relancer plus tard via le bouton 🔦.')) {
+        if (confirm('Souhaitez-vous vraiment quitter ce parcours ?\n\nVous pourrez le relancer plus tard via le bouton 🗺️.')) {
             // Nettoyer le mode notification
             const container = document.getElementById('primo-notification-container');
             const boutonSuivant = document.getElementById('primo-bouton-suivant');
@@ -2403,7 +2403,7 @@ function afficherNotificationActuelle() {
         float: left;
         margin-right: 15px;
     `;
-    icone.innerHTML = '🔦';
+    icone.innerHTML = '🗺️';
 
     // Bouton fermer
     const boutonFermer = document.createElement('button');

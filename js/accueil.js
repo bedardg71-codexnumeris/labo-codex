@@ -58,7 +58,7 @@ function afficherAccueilPremierLancement(conteneur) {
                 </div>
             </div>
             <div class="accueil-carte" onclick="if(typeof entrerEnDemo==='function') entrerEnDemo();">
-                <div class="accueil-carte-icone">&#x1F5FA;&#xFE0F;</div>
+                <div class="accueil-carte-icone">&#x1F6B8;</div>
                 <div class="accueil-carte-titre">Explorer la d\u00e9mo</div>
                 <div class="accueil-carte-desc">
                     D\u00e9couvrez l\u2019application avec des donn\u00e9es fictives de 20\u00a0\u00e9tudiants.
@@ -99,7 +99,7 @@ function afficherAccueilRetour(conteneur) {
 
                     <div class="accueil-carte-decouvrir">
                         <label style="display:flex; align-items:center; gap:12px; cursor:pointer;">
-                            <span style="font-size:1.5rem;">&#x1F5FA;&#xFE0F;</span>
+                            <span style="font-size:1.5rem;">&#x1F6B8;</span>
                             <input type="checkbox" id="checkbox-demo-accueil" ${demoChecked ? 'checked' : ''}
                                 onchange="if(this.checked) { if(typeof entrerEnDemo==='function') entrerEnDemo(); } else { if(typeof quitterDemo==='function') quitterDemo(); }">
                             <div>
@@ -111,7 +111,7 @@ function afficherAccueilRetour(conteneur) {
 
                     <div class="accueil-carte-decouvrir">
                         <label style="display:flex; align-items:center; gap:12px; cursor:pointer;">
-                            <span style="font-size:1.5rem;">\uD83D\uDD26</span>
+                            <span style="font-size:1.5rem;">&#x1F5FA;&#xFE0F;</span>
                             <input type="checkbox" id="checkbox-tour-guide-accueil" ${tourGuideActif ? 'checked' : ''}
                                 onchange="if(typeof definirTourGuide==='function') definirTourGuide(this.checked);">
                             <div>

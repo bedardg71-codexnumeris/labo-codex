@@ -11994,6 +11994,14 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     display: inline !important;
 }
 
+/* Bannières d'assistants guidés (🗺️) — visibles seulement si Tour guidé actif */
+.banniere-assistant-guide {
+    display: none !important;
+}
+.mode-assiste .banniere-assistant-guide {
+    display: block !important;
+}
+
 /* Overlay du modal */
 .aide-contextuelle-overlay {
     display: none;
@@ -12139,9 +12147,9 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 .aide-lien-voir-aussi {
     display: inline-block;
     padding: 6px 12px;
-    background: var(--bleu-tres-pale, #e3f2fd);
-    color: var(--bleu-principal, #1976d2);
-    border: none;
+    background: rgba(106, 172, 184, 0.15);
+    color: var(--accent-primaire, #6aacb8);
+    border: 1px solid rgba(106, 172, 184, 0.3);
     border-radius: var(--radius-petit, 4px);
     font-size: 0.85rem;
     cursor: pointer;
@@ -12149,8 +12157,8 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 }
 
 .aide-lien-voir-aussi:hover {
-    background: var(--bleu-pale, #bbdefb);
-    color: var(--bleu-fonce, #0d47a1);
+    background: rgba(106, 172, 184, 0.25);
+    color: #8ecad6;
 }
 
 /* Responsive */

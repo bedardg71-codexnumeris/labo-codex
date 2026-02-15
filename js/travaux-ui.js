@@ -155,7 +155,7 @@
 
         conteneur.innerHTML = `
             <div class="travaux-import-header">
-                <h3>Importer des travaux <span class="badge-dev-actif">Développement actif</span>
+                <h3>Importer des travaux
                     <button class="btn-aide-contextuelle" data-aide="evaluations-annoter" aria-label="Aide contextuelle">📍</button>
                 </h3>
                 <div class="travaux-stats-rapides">

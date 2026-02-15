@@ -3719,7 +3719,7 @@
             </div>
         </div>
 
-        <!-- ========== MODAL INTRODUCTION (🔦) ========== -->
+        <!-- ========== MODAL INTRODUCTION (🗺️) ========== -->
 
         <!-- SÉLECTEUR GROUPE-COURS ACTIF (Beta 95.2) -->
         <div id="bandeau-groupe-cours" class="bandeau-groupe-cours">
@@ -4953,8 +4953,8 @@
                         </div>
                     </div>
 
-                    <!-- Bannière assistant création de matériel -->
-                    <div class="carte" style="margin-top: 20px; border-left: 4px solid var(--accent-primaire);">
+                    <!-- Bannière assistant création de matériel (visible si Tour guidé actif) -->
+                    <div class="carte banniere-assistant-guide" style="margin-top: 20px; border-left: 4px solid var(--accent-primaire);">
                         <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
                             <div style="font-size: 2rem; flex-shrink: 0;">&#x1F6E0;&#xFE0F;</div>
                             <div style="flex: 1; min-width: 200px;">
@@ -8828,7 +8828,7 @@
                                             box-shadow: 0 4px 15px rgba(26, 82, 102, 0.3);
                                             flex-shrink: 0;
                                         ">
-                                            🔦
+                                            🗺️
                                         </div>
                                         <div style="flex: 1;">
                                             <h2 class="modal-titre" style="margin: 0 0 5px 0;">Créons ensemble ta pratique !</h2>
@@ -12928,7 +12928,7 @@
                     <div class="carte accordeon" id="accordeon-aide-primo">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Configuration avec le tour guidé 🔦
+                                <span class="accordeon-chevron">▼</span> Configuration avec le tour guidé 🗺️
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
@@ -12991,7 +12991,7 @@
                             <p><strong>Comment accéder à Primo :</strong></p>
                             <ul>
                                 <li><strong>Automatiquement</strong> : Au premier chargement de l'application</li>
-                                <li><strong>Tour guidé</strong> : Clique sur le bouton 🔦 dans l'en-tête (visible lorsque le tour guidé est activé)</li>
+                                <li><strong>Tour guidé</strong> : Clique sur le bouton 🗺️ dans l'en-tête (visible lorsque le tour guidé est activé)</li>
                                 <li><strong>Réglages → Préférences</strong> : Activez le «Mode Assisté» pour afficher le bouton Primo</li>
                             </ul>
 
@@ -13575,13 +13575,13 @@
                             </div>
 
                             <div class="alerte-warning-jaune">
-                                <h4 class="text-warning-856-mb10">🔦 Tour guidé</h4>
+                                <h4 class="text-warning-856-mb10">🗺️ Tour guidé</h4>
                                 <p><strong>Découverte et exploration</strong> — Données de démonstration</p>
                                 <ul class="mt-8">
                                     <li>Groupe fictif de 5 étudiants avec résultats complets</li>
                                     <li>4 productions évaluées, 20 évaluations, 8 semaines de présences</li>
                                     <li>Données isolées (préfixe <code>demo_</code>) — tes vraies données restent intactes</li>
-                                    <li>Tour guidé 🔦 disponible pour te guider pas à pas</li>
+                                    <li>Tour guidé 🗺️ disponible pour te guider pas à pas</li>
                                 </ul>
                                 <p class="mt-10"><strong>Idéal pour :</strong> Découvrir l'application, tester des fonctionnalités, voir le tableau de bord en action</p>
                             </div>
@@ -13652,7 +13652,7 @@
                             <p>L'application s'adapte à ton niveau de familiarité avec le système.</p>
 
                             <div class="alerte-warning-jaune">
-                                <h4 class="text-warning-856-mb10">🔦 Tour guidé — Pour débuter</h4>
+                                <h4 class="text-warning-856-mb10">🗺️ Tour guidé — Pour débuter</h4>
                                 <p><strong>Recommandé si :</strong> C'est ta première utilisation ou tu préfères être guidé·e</p>
                                 <ul class="mt-8">
                                     <li>Primo te pose des questions simples en langage courant</li>
@@ -13660,7 +13660,7 @@
                                     <li>Configuration rapide (~5 minutes pour un cours complet)</li>
                                     <li>Tu peux toujours affiner ensuite avec les formulaires</li>
                                 </ul>
-                                <p class="mt-10"><strong>Comment :</strong> Active le tour guidé → Clique sur 🔦 → Choisis un module</p>
+                                <p class="mt-10"><strong>Comment :</strong> Active le tour guidé → Clique sur 🗺️ → Choisis un module</p>
                             </div>
 
                             <div class="alerte-success-bleu-pale">
@@ -15845,7 +15845,7 @@
                                 <dt class="titre-section-aide">Production</dt>
                                 <dd class="ml-20-mb-10">Terme générique désignant toute évaluation du cours : examen, travail écrit, quiz, présentation, portfolio. Chaque production a un type, une pondération, et peut être liée à une grille de critères.</dd>
 
-                                <dt class="titre-section-aide">Tour guidé (🔦)</dt>
+                                <dt class="titre-section-aide">Tour guidé (🗺️)</dt>
                                 <dd class="ml-20-mb-10">Système d'aide contextuelle guidant les utilisateurs dans l'interface. Propose des conseils contextuels dans chaque section. Activable depuis la page d'accueil ou les réglages. Propose 4 modules : créer un groupe-cours, évaluer une production, explorer les diagnostics, créer une pratique de notation. Voir la section Configuration pour plus de détails.</dd>
                             </dl>
 
@@ -16915,7 +16915,7 @@
 
             <!-- En-tête avec Primo -->
             <div class="wizard-v2-header">
-                <div class="wizard-v2-primo-avatar">🔦</div>
+                <div class="wizard-v2-primo-avatar">🗺️</div>
                 <div class="wizard-v2-header-texte">
                     <h2 id="wizard-v2-titre">Informations de base</h2>
                     <p id="wizard-v2-description">Donnez un nom à ta pratique de notation</p>
