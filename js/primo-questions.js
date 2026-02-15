@@ -1958,6 +1958,7 @@ const QUESTIONS_PRIMO = [
         texte: 'Quelle est la pondération de cette évaluation ?',
         type: 'number',
         placeholder: '25',
+        valeurDefaut: '25',
         champsCibles: [],
         validation: { requis: true, min: 1, max: 100 },
         aide: 'Poids dans la note finale (en %).',
