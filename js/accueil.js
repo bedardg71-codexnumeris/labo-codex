@@ -146,10 +146,17 @@ function afficherAccueilRetour(conteneur) {
         </div>
     `;
 
+    // Panneau de parcours d'apprentissage (si initialisé)
+    const parcoursHTML = (window.parcours && window.parcours.estInitialise())
+        ? window.parcours.genererPanneauParcours()
+        : '';
+
     conteneur.innerHTML = `
         <div class="accueil-hero">
             <h1>Que souhaitez-vous faire\u00a0?</h1>
         </div>
+
+        ${parcoursHTML}
 
         ${decouvrirHTML}
 

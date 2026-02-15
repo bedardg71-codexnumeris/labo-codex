@@ -11,6 +11,19 @@
     var CHANGELOG = [
         {
             version: 'Beta 97.8',
+            date: '15 f\u00e9vrier',
+            couleur: 'vert',
+            titre: 'Parcours d\u2019apprentissage unifi\u00e9',
+            items: [
+                '<strong>Deux modes d\u2019apprentissage</strong> : Au premier lancement, l\u2019utilisateur choisit entre \uD83D\uDDFA\uFE0F\u00a0<em>\u00c9tape par \u00e9tape</em> (enseignement explicite) et \uD83E\uDDED\u00a0<em>Par exploration</em> (apprentissage par d\u00e9couverte). Le choix orchestre tous les m\u00e9canismes d\u2019aide existants.',
+                '<strong>12 jalons en 4 chapitres</strong> : Configurer (\u2460\u2461\u2462), Construire (\u2463\u2464\u2465\u2466), Planifier (\u2467\u2468, optionnel), Enseigner (\u2469\u246A\u246B). Chaque jalon est d\u00e9tect\u00e9 automatiquement.',
+                '<strong>Panneau de parcours</strong> : Affich\u00e9 sur la page d\u2019accueil, montre la progression avec barre visuelle, chapitres et jalons cliquables.',
+                '<strong>Certification d\u2019autonomie</strong> : Quand les chapitres essentiels sont compl\u00e9t\u00e9s, un modal \uD83E\uDDED confirme que l\u2019utilisateur ma\u00eetrise les bases et peut naviguer seul.',
+                '<strong>Conteneurs visuels</strong> : Les formulaires Productions, Grilles, \u00c9chelles et Cartouches sont envelopp\u00e9s dans un panneau arrondi (<code>.panneau-formulaire</code>) pour une meilleure coh\u00e9sion visuelle.'
+            ]
+        },
+        {
+            version: 'Beta 97.8',
             date: '14 f\u00e9vrier',
             couleur: 'vert',
             titre: 'Carte mentale \u2014 Taxonomie d\u2019Anderson',
