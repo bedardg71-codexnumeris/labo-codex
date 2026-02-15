@@ -312,8 +312,9 @@ function calculerInfosParcours(questionsActives, indexActuel) {
     // Déterminer dans quel parcours on se trouve
     if (indexMaterielIntro !== -1 && indexFinParcoursMateriel !== -1 && indexActuel >= indexMaterielIntro && indexActuel <= indexFinParcoursMateriel) {
         // MODULE MATÉRIEL : Créer du matériel pédagogique
-        indexDansParcours = indexActuel - indexMaterielIntro + 1;
-        totalParcours = indexFinParcoursMateriel - indexMaterielIntro + 1;
+        // materiel-intro (détection) est exécutée en amont et masquée → on l'exclut du compteur
+        indexDansParcours = indexActuel - indexMaterielIntro;
+        totalParcours = indexFinParcoursMateriel - indexMaterielIntro;
         titre = 'Création de matériel pédagogique';
     } else if (indexFinParcoursCourt !== -1 && indexActuel <= indexFinParcoursCourt) {
         // MODULE 1 : Créer un groupe-cours (parcours court)
