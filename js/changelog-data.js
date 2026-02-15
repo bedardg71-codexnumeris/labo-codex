@@ -12,6 +12,24 @@
         {
             version: 'Beta 97.7',
             date: '15 f\u00e9vrier',
+            couleur: 'bleu',
+            titre: 'Alignement du mode clair sur le design system',
+            items: [
+                '<strong>Fond de page</strong> : Fond bleu satur\u00e9 (#d4e6f5) pour que les sections blanches ressortent par contraste.',
+                '<strong>Cartes et sections blanches</strong> : Toutes les cartes passent en fond blanc (#ffffff) conform\u00e9ment au design system.',
+                '<strong>Ombres bleut\u00e9es</strong> : Ombres double couche rgba(3,46,92,...) au lieu de noir.',
+                '<strong>Navigation principale et secondaire</strong> : Boutons bleu principal solide (#032e5c) au lieu du glassmorphisme teal.',
+                '<strong>En-t\u00eates de section</strong> : D\u00e9grad\u00e9 bleu principal \u2192 bleu fonc\u00e9 (#032e5c \u2192 #0f1e3a), rempla\u00e7ant le sarcelle #244858. Titres blancs.',
+                '<strong>Boutons</strong> : Modifier (violet #4a3a6a), Annuler (orange #d97706), Supprimer (rouge sombre #8a2a2a).',
+                '<strong>En-t\u00eates Outils</strong> : Questions Flash et Tirage au sort ont d\u00e9sormais un bandeau d\u00e9grad\u00e9 comme les autres sections.',
+                '<strong>Cartes d\u2019accueil</strong> : Les 8 cartes de t\u00e2ches passent en fond blanc avec ombres bleut\u00e9es.',
+                '<strong>Bulles anim\u00e9es</strong> : Blanches sur l\u2019en-t\u00eate bleu en mode clair.',
+                '<strong>Carte mentale</strong> : Fond blanc, palette des \u00e9l\u00e9ments en bleu p\u00e2le (#e8f2fd).'
+            ]
+        },
+        {
+            version: 'Beta 97.7',
+            date: '15 f\u00e9vrier',
             couleur: 'rose',
             titre: 'Corrections signal\u00e9es par les testeurs',
             items: [
