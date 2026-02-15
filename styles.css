@@ -16049,7 +16049,8 @@ body.mode-assiste .btn-aide-contextuelle,
     }
 
     .parcours-panneau,
-    .parcours-notification {
+    .parcours-notification,
+    .parcours-suggestion {
         display: none !important;
     }
 }
@@ -16217,4 +16218,61 @@ body.mode-assiste .btn-aide-contextuelle,
 .parcours-indicateur-compteur {
     color: var(--gris-moyen);
     font-weight: 600;
+}
+
+/* Suggestion proactive (barre flottante bas de page) */
+.parcours-suggestion {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface-carte, #1a3040);
+    border: 1px solid var(--gris-bordure);
+    border-radius: var(--radius-grand);
+    padding: 10px 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    z-index: 9990;
+    animation: slideInUp 0.3s ease-out;
+    max-width: 90vw;
+}
+
+.parcours-suggestion--sortie {
+    animation: fadeOut 0.3s ease-out forwards;
+}
+
+.parcours-suggestion-texte {
+    color: var(--texte-principal, #e0e0e0);
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.parcours-suggestion-fermer {
+    background: none;
+    border: none;
+    color: var(--gris-moyen);
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 0 4px;
+    line-height: 1;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.parcours-suggestion-fermer:hover {
+    opacity: 1;
+}
+
+@keyframes slideInUp {
+    from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+    to   { transform: translateX(-50%) translateY(0);    opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to   { opacity: 0; }
 }

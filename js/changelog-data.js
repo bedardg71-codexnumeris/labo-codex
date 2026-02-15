@@ -10,6 +10,18 @@
 
     var CHANGELOG = [
         {
+            version: 'Beta 97.7',
+            date: '15 f\u00e9vrier',
+            couleur: 'bleu',
+            titre: 'Parcours d\u2019apprentissage \u2014 Phase\u00a02 orchestration',
+            items: [
+                '<strong>Guidage en mode explicite</strong> : Le guidage de configuration (5\u00a0\u00e9tapes) se d\u00e9clenche aussi quand le parcours est en mode \uD83D\uDDFA\uFE0F\u00a0\u00c9tape par \u00e9tape, plus seulement en Mode\u00a0Assist\u00e9.',
+                '<strong>Primo recommand\u00e9</strong> : En mode explicite, l\u2019accueil Primo affiche un bandeau \u00ab\u00a0\uD83D\uDCCD\u00a0Recommand\u00e9\u00a0\u00bb pointant vers le module qui correspond au jalon en cours.',
+                '<strong>Tutoriel parcours</strong> : Le tutoriel interactif (7\u00a0\u00e9tapes) se d\u00e9clenche automatiquement au jalon \u2469\u00a0<em>Prendre les pr\u00e9sences</em> en mode explicite.',
+                '<strong>Suggestions proactives</strong> : En mode explicite, une barre flottante propose l\u2019\u00e9tape suivante avec bouton d\u2019action. Cooldown de 60\u00a0s, auto-fermeture \u00e0 10\u00a0s.'
+            ]
+        },
+        {
             version: 'Beta 97.8',
             date: '15 f\u00e9vrier',
             couleur: 'vert',

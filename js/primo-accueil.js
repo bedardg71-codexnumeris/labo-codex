@@ -60,6 +60,47 @@ function marquerAccueilVu() {
 // ============================================================================
 
 /**
+ * Génère un bandeau de recommandation basé sur le parcours d'apprentissage
+ * Indique quel module correspond au prochain jalon
+ */
+function genererBandeauRecommandation() {
+    if (!window.parcours || !window.parcours.estInitialise()) return '';
+    if (window.parcours.estAutonome()) return '';
+
+    var progression = window.parcours.getProgression();
+    var prochain = progression.prochainJalon;
+    if (!prochain) return '';
+
+    // Mapper les jalons aux modules Primo
+    var recommandation = '';
+    var chapitreId = prochain.chapitre || '';
+
+    if (chapitreId === 'configurer') {
+        recommandation = 'MODULE 1';
+    } else if (prochain.id === 'creer-pratique') {
+        recommandation = 'MODULE 4';
+    } else if (chapitreId === 'construire') {
+        recommandation = 'MODULE 5';
+    } else if (prochain.id === 'evaluer-production') {
+        recommandation = 'MODULE 2';
+    }
+
+    if (!recommandation) return '';
+
+    return '<div style="' +
+        'background: rgba(26, 82, 102, 0.2); ' +
+        'border-left: 3px solid #1a5266; ' +
+        'border-radius: 6px; ' +
+        'padding: 10px 14px; ' +
+        'margin-bottom: 15px; ' +
+        'font-size: 0.9rem; ' +
+        'color: var(--gris-clair);">' +
+        '📍 <strong>Recommandé</strong> : ' + recommandation +
+        ' — ' + prochain.numero + ' ' + prochain.titre +
+        '</div>';
+}
+
+/**
  * Affiche le modal d'accueil de Primo
  */
 function afficherModalAccueil() {
@@ -122,6 +163,7 @@ function afficherModalAccueil() {
 
             <!-- Parcours modulaire -->
             <div style="margin-bottom: 25px;">
+                ${genererBandeauRecommandation()}
                 <h3 style="
                     color: var(--accent-primaire);
                     font-size: 1.1rem;

@@ -3,7 +3,7 @@
 **Auteur** : Grégoire Bédard (Cégep de Drummondville) + Claude Code
 **Date** : 15 février 2026
 **Version** : 1.0
-**Statut** : Phase 1 implémentée (Beta 97.8, build 0215-0857)
+**Statut** : Phase 2 implémentée (Beta 97.7, build 0115-0908)
 
 ---
 
