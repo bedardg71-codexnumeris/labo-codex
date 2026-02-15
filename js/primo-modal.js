@@ -454,6 +454,7 @@ function genererInputQuestion(question) {
             html += `
                 <input type="number" id="${inputId}"
                     placeholder="${question.placeholder || ''}"
+                    value="${question.valeurDefaut || ''}"
                     min="${question.validation?.min || 0}"
                     max="${question.validation?.max || 999}"
                     style="
