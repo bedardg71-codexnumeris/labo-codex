@@ -119,13 +119,15 @@ function gererVisibilitePrimoSelonMode() {
     }
 
     const modeAssiste = estModeAssiste();
+    const aideActive = typeof estAideContextuelleActive === 'function' && estAideContextuelleActive();
+    const afficherPrimo = modeAssiste || aideActive;
     const icones = document.querySelectorAll('.primo-aide');
 
     icones.forEach(icone => {
-        toggleDisplay(icone, modeAssiste);
+        toggleDisplay(icone, afficherPrimo);
     });
 
-    console.log(`🎯 [Guide Tooltips] Mode Assisté: ${modeAssiste} - ${icones.length} icônes ${modeAssiste ? 'affichées' : 'masquées'}`);
+    console.log(`🎯 [Guide Tooltips] Mode Assisté: ${modeAssiste}, Aide contextuelle: ${aideActive} - ${icones.length} icônes ${afficherPrimo ? 'affichées' : 'masquées'}`);
 }
 
 /**

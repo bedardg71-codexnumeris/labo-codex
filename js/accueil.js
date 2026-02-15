@@ -86,6 +86,7 @@ function afficherAccueilRetour(conteneur) {
     const prefsAff = db.getSync('preferencesAffichage', {});
     const tooltipsActifs = prefsAff.tooltips !== false;
     const tourGuideActif = !!prefsAff.tourGuide;
+    const aideContextuelleActive = prefsAff.aideContextuelle !== false;
 
     const decouvrirHTML = `
         <div class="carte accordeon" id="accueil-decouvrir">
@@ -128,6 +129,18 @@ function afficherAccueilRetour(conteneur) {
                             <div>
                                 <div class="decouvrir-titre">Info-bulles</div>
                                 <div class="decouvrir-desc">D\u00e9crire l\u2019interface au survol</div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="accueil-carte-decouvrir">
+                        <label style="display:flex; align-items:center; gap:12px; cursor:pointer;">
+                            <span style="font-size:1.5rem;">\uD83D\uDCCD</span>
+                            <input type="checkbox" id="checkbox-aide-contextuelle-accueil" ${aideContextuelleActive ? 'checked' : ''}
+                                onchange="if(typeof definirAideContextuelle==='function') definirAideContextuelle(this.checked);">
+                            <div>
+                                <div class="decouvrir-titre">Aide contextuelle</div>
+                                <div class="decouvrir-desc">Afficher les rep\u00e8res d\u2019aide</div>
                             </div>
                         </label>
                     </div>
