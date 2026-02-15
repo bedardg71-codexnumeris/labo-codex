@@ -16173,6 +16173,55 @@ body.mode-clair {
     color: var(--texte-principal);
 }
 
+/* EN-TÊTE — reste SOMBRE, forcer le texte blanc */
+body.mode-clair .entete {
+    color: white;
+}
+
+body.mode-clair .titre-section h1 {
+    color: white;
+}
+
+body.mode-clair .titre-section .meta {
+    color: #9fc5e8;
+}
+
+body.mode-clair .info-contextuelles-centre {
+    color: rgba(255, 255, 255, 0.90);
+}
+
+body.mode-clair .info-contexte-item {
+    color: rgba(255, 255, 255, 0.90);
+}
+
+body.mode-clair .logo-meta {
+    color: #9fc5e8;
+}
+
+body.mode-clair .separateur-contexte {
+    color: rgba(255, 255, 255, 0.60);
+}
+
+/* Dropdown cours dans en-tête — reste sombre */
+body.mode-clair .dropdown-cours-entete {
+    color: white;
+}
+
+/* Dropdown groupe-cours dans en-tête — reste sombre */
+body.mode-clair .dropdown-groupe-cours-header {
+    color: white;
+}
+
+body.mode-clair .dropdown-groupe-cours-header option {
+    color: white;
+    background: var(--bleu-fonce);
+}
+
+body.mode-clair .dropdown-cours-entete option {
+    color: white;
+    background: var(--bleu-fonce);
+}
+
 /* Conteneur — bordure adaptée */
 body.mode-clair .conteneur {
     border-color: rgba(3, 46, 92, 0.1);
@@ -16195,10 +16244,10 @@ body.mode-clair .modal-js-contenu {
     border: 1px solid rgba(3, 46, 92, 0.1);
 }
 
-/* Titres de section — couleur texte foncée */
-body.mode-clair .titre-section h1,
-body.mode-clair .titre-section h2,
-body.mode-clair .titre-section h3 {
+/* Titres hors en-tête — couleur texte foncée */
+body.mode-clair .contenu h1,
+body.mode-clair .contenu h2,
+body.mode-clair .contenu h3 {
     color: var(--texte-principal);
 }
 
@@ -16223,15 +16272,6 @@ body.mode-clair .select-mode option {
     background: white;
 }
 
-/* Dropdowns entête — restent sombres car dans l'en-tête */
-/* (pas de changement nécessaire) */
-
-/* Dropdown options hors entête */
-body.mode-clair .dropdown-groupe-cours-header option {
-    color: white;
-    background: var(--bleu-principal);
-}
-
 /* Scrollbar — couleurs claires */
 body.mode-clair ::-webkit-scrollbar-track {
     background: #f0f8ff;
@@ -16249,23 +16289,26 @@ body.mode-clair * {
     scrollbar-color: rgba(3, 46, 92, 0.2) #f0f8ff;
 }
 
-/* Sous-navigation — fond translucide sur clair */
+/* Sous-navigation — fond adapté pour page claire */
 body.mode-clair .sous-navigation button {
-    color: var(--texte-principal);
-    background: rgba(3, 46, 92, 0.06);
-    border-color: rgba(3, 46, 92, 0.12);
+    color: var(--bleu-principal);
+    background: rgba(3, 46, 92, 0.08);
+    border: 1px solid rgba(3, 46, 92, 0.15);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
 }
 
 body.mode-clair .sous-navigation button:hover {
-    color: var(--bleu-principal);
-    background: rgba(3, 46, 92, 0.12);
-    border-color: rgba(3, 46, 92, 0.2);
+    color: white;
+    background: rgba(3, 46, 92, 0.7);
+    border-color: rgba(3, 46, 92, 0.8);
 }
 
 body.mode-clair .sous-navigation button.active,
 body.mode-clair .sous-navigation button.actif {
     color: white;
     background: var(--bleu-principal);
+    border-color: var(--bleu-principal);
 }
 
 /* Bouton principal — fond sombre, texte reste blanc */
@@ -16304,18 +16347,50 @@ body.mode-clair .tableau thead th {
     color: white;
 }
 
+/* Parcours d'apprentissage — bordures adaptées */
+body.mode-clair .parcours-panneau.accordeon {
+    border-color: rgba(3, 46, 92, 0.12);
+    border-left-color: var(--accent-primaire);
+}
+
+body.mode-clair .parcours-btn-mode {
+    border-color: rgba(3, 46, 92, 0.2);
+}
+
+body.mode-clair .parcours-btn-mode:hover {
+    background: rgba(3, 46, 92, 0.08);
+}
+
+body.mode-clair .parcours-btn-assistant {
+    background: rgba(6, 93, 187, 0.08);
+    border-color: var(--accent-primaire);
+    color: var(--accent-primaire);
+}
+
+body.mode-clair .parcours-btn-assistant:hover {
+    background: rgba(6, 93, 187, 0.15);
+}
+
+body.mode-clair .parcours-barre-conteneur {
+    background: rgba(3, 46, 92, 0.1);
+}
+
 body.mode-clair .tableau tbody tr {
     border-bottom-color: rgba(3, 46, 92, 0.08);
 }
 
 /* Inputs — fond et bordure adaptés */
-body.mode-clair input[type="text"],
-body.mode-clair input[type="number"],
-body.mode-clair input[type="email"],
-body.mode-clair input[type="date"],
-body.mode-clair input[type="search"],
-body.mode-clair textarea,
-body.mode-clair select {
+body.mode-clair .contenu input[type="text"],
+body.mode-clair .contenu input[type="number"],
+body.mode-clair .contenu input[type="email"],
+body.mode-clair .contenu input[type="date"],
+body.mode-clair .contenu input[type="search"],
+body.mode-clair .contenu textarea,
+body.mode-clair .contenu select,
+body.mode-clair .modal-js-contenu input[type="text"],
+body.mode-clair .modal-js-contenu input[type="number"],
+body.mode-clair .modal-js-contenu textarea,
+body.mode-clair .modal-js-contenu select {
     background: white;
     color: var(--texte-principal);
     border-color: rgba(3, 46, 92, 0.2);
