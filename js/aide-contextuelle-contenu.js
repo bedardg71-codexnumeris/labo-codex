@@ -96,11 +96,17 @@ const AIDE_CONTEXTUELLE = {
                 contenu: "Cette interface permet d'évaluer le travail d'un·e étudiant·e sur une production. L'évaluation génère automatiquement une rétroaction personnalisée basée sur tes critères."
             },
             {
+                type: 'alerte',
+                niveau: 'attention',
+                contenu: "Avant d'évaluer, assure-toi d'avoir créé au moins : une <strong>grille de critères</strong>, une <strong>échelle de performance</strong>, une <strong>cartouche de rétroaction</strong> et une <strong>production</strong>. Ces éléments se configurent dans l'onglet Construction de la note."
+            },
+            {
                 type: 'liste',
                 titre: "Étapes recommandées",
                 items: [
                     "Sélectionne l'étudiant·e dans la liste déroulante",
                     "Choisis la production à évaluer",
+                    "Vérifie que la grille, l'échelle et la cartouche sont bien associées",
                     "Évalue chaque critère de la grille en cliquant sur le niveau atteint",
                     "Vérifie et ajuste la rétroaction générée si nécessaire",
                     "Clique sur « Sauvegarder l'évaluation »"
@@ -116,7 +122,7 @@ const AIDE_CONTEXTUELLE = {
                 contenu: "Utilise les touches 1-2-3-4-5 pour évaluer rapidement chaque critère sans utiliser la souris."
             }
         ],
-        voirAussi: ['construction-grilles', 'construction-echelles']
+        voirAussi: ['evaluations-annoter', 'construction-grilles', 'construction-echelles', 'construction-cartouches']
     },
 
     'construction-productions': {
@@ -512,6 +518,38 @@ const AIDE_CONTEXTUELLE = {
             }
         ],
         voirAussi: ['construction-grilles', 'construction-echelles', 'construction-cartouches', 'construction-pratiques']
+    },
+
+    'evaluations-annoter': {
+        titre: 'Annoter des travaux',
+        sections: [
+            {
+                type: 'texte',
+                contenu: 'L\'annotation te permet de marquer directement sur les copies de tes étudiants : surlignage, commentaires écrits, symboles (crochet, X) et autocollants de rétroaction pédagogique.'
+            },
+            {
+                type: 'liste',
+                titre: 'Étapes',
+                items: [
+                    'Sélectionne la production concernée (le travail que tu corriges)',
+                    'Importe les copies (PDF, JPEG, PNG) par glisser-déposer ou via le bouton parcourir',
+                    'Clique sur une copie pour l\'ouvrir dans la visionneuse',
+                    'Clique sur « Annoter » pour activer la palette d\'outils',
+                    'Utilise les autocollants pour apposer des rétroactions visuelles rapides',
+                    'Exporte le PDF annoté ou passe directement à l\'évaluation'
+                ]
+            },
+            {
+                type: 'conseil',
+                contenu: 'Nomme tes fichiers avec le DA de l\'étudiant (ex: 1234567_travail1.pdf) pour que l\'association soit automatique. Sinon, tu pourras associer manuellement chaque fichier à un étudiant.'
+            },
+            {
+                type: 'exemple',
+                titre: 'Formats de noms reconnus',
+                contenu: '« 1234567_essai.pdf », « DA1234567_travail.jpg », « Dupont_Marie_1234567.pdf »'
+            }
+        ],
+        voirAussi: ['evaluations-proceder', 'evaluations-liste']
     },
 
     'evaluations-liste': {

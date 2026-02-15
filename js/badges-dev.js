@@ -17,11 +17,6 @@
     // ===== CONFIGURATION =====
     // Format : 'section-sousSection' (correspond à data-sous-onglet)
     const SOUS_SECTIONS_EN_DEV = [
-        'construction-grille-criteres',
-        'construction-echelle-performance',
-        'construction-retroactions',
-        'construction-pratiques-notation',
-        'construction-productions',
         'planification-carte',
         'planification-organisateur',
         'aide-introduction',

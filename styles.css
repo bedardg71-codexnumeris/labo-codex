@@ -16381,3 +16381,113 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     from { opacity: 1; }
     to   { opacity: 0; }
 }
+
+/* =============================================================================
+   BULLE DE DÉCOUVERTE — Micro-composant d'aide contextuelle ponctuelle
+   ============================================================================= */
+
+.bulle-decouverte {
+    background: var(--bleu-tres-pale, #0c1a22);
+    border: 1px solid var(--accent-primaire, #6aacb8);
+    border-radius: var(--radius-moyen, 8px);
+    padding: 10px 14px;
+    font-size: 0.88rem;
+    max-width: 320px;
+    box-shadow: var(--shadow-elevee, 0 4px 12px rgba(0,0,0,0.3));
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: primoFadeIn 0.3s ease;
+    color: var(--texte-principal, #e0e0e0);
+}
+
+.bulle-decouverte-fermer {
+    background: none;
+    border: none;
+    color: var(--gris-moyen, #888);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0 4px;
+    flex-shrink: 0;
+}
+
+.bulle-decouverte-fermer:hover {
+    color: var(--texte-principal, #e0e0e0);
+}
+
+/* =============================================================================
+   ZERO-STATE — Panneau d'accueil pour les novices (module Travaux)
+   ============================================================================= */
+
+.travaux-zero-state {
+    text-align: center;
+    padding: 24px 20px;
+    margin-bottom: 16px;
+    background: rgba(106, 172, 184, 0.06);
+    border: 1px dashed rgba(106, 172, 184, 0.25);
+    border-radius: var(--radius-moyen, 8px);
+}
+
+.travaux-zero-state .zero-state-icone {
+    font-size: 2.5rem;
+    margin-bottom: 8px;
+}
+
+.travaux-zero-state h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.1rem;
+    color: var(--accent-primaire, #6aacb8);
+}
+
+.zero-state-etapes {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin-top: 16px;
+    flex-wrap: wrap;
+}
+
+.zero-state-etape {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    text-align: left;
+    max-width: 220px;
+}
+
+.etape-numero {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--accent-primaire, #6aacb8);
+    color: var(--fond-principal, #0b1117);
+    font-weight: 700;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.zero-state-etape strong {
+    display: block;
+    font-size: 0.9rem;
+    margin-bottom: 2px;
+}
+
+.zero-state-etape small {
+    color: var(--gris-moyen, #888);
+    font-size: 0.8rem;
+}
+
+/* =============================================================================
+   AUTOCOLLANTS AIDE — Texte introductif dans le popup autocollants
+   ============================================================================= */
+
+.autocollants-aide {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    color: var(--gris-moyen, #888);
+    border-bottom: 1px solid rgba(106, 172, 184, 0.15);
+    margin-bottom: 8px;
+}

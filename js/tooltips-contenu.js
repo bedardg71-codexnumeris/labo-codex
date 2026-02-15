@@ -905,6 +905,12 @@ const TOOLTIPS = {
     'nav-eval-annoter':
         'Annoter les travaux soumis par les \u00e9tudiants.',
 
+    'travaux-production':
+        'S\u00e9lectionne la production (travail, examen) que tu es en train de corriger. Les fichiers import\u00e9s seront associ\u00e9s \u00e0 cette production pour l\u2019\u00e9valuation.',
+
+    'travaux-evaluer':
+        'Ouvre l\u2019interface d\u2019\u00e9valuation avec l\u2019\u00e9tudiant et la production pr\u00e9-s\u00e9lectionn\u00e9s. Tu pourras appliquer une grille de crit\u00e8res et g\u00e9n\u00e9rer une r\u00e9troaction.',
+
     'nav-eval-archivage':
         'Archiver les \u00e9valuations et les donn\u00e9es du trimestre.',
 

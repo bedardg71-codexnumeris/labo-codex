@@ -50,7 +50,7 @@ const CHAPITRES = [
         description: 'Au quotidien',
         icone: '📋',
         obligatoire: true,
-        jalons: ['prendre-presences', 'evaluer-production', 'consulter-tdb']
+        jalons: ['prendre-presences', 'annoter-travaux', 'evaluer-production', 'consulter-tdb']
     }
 ];
 
@@ -125,15 +125,22 @@ const JALONS = {
         chapitre: 'enseigner',
         navigation: { section: 'presences', sousSection: 'presences-saisie' }
     },
-    'evaluer-production': {
+    'annoter-travaux': {
         numero: '⑪',
+        titre: 'Annoter des travaux',
+        description: 'Importer et annoter les copies de tes étudiants.',
+        chapitre: 'enseigner',
+        navigation: { section: 'evaluations', sousSection: 'evaluations-travaux' }
+    },
+    'evaluer-production': {
+        numero: '⑫',
         titre: 'Évaluer une production',
         description: 'Appliquer une grille et attribuer des niveaux.',
         chapitre: 'enseigner',
         navigation: { section: 'evaluations', sousSection: 'evaluations-liste' }
     },
     'consulter-tdb': {
-        numero: '⑫',
+        numero: '⑬',
         titre: 'Consulter le tableau de bord',
         description: 'Voir l\'état des lieux de ton groupe.',
         chapitre: 'enseigner',
@@ -265,6 +272,20 @@ const CRITERES = {
             }
             var presencesGen = db.getSync('presences', []);
             return presencesGen.length > 0;
+        } catch(e) {
+            return false;
+        }
+    },
+
+    'annoter-travaux': function() {
+        // Vérifie si au moins un fichier a été importé dans le module travaux
+        try {
+            if (typeof window.cle === 'function') {
+                var travaux = db.getSync(window.cle('fichiersTravaux'), []);
+                if (travaux.length > 0) return true;
+            }
+            var travauxGen = db.getSync('fichiersTravaux', []);
+            return travauxGen.length > 0;
         } catch(e) {
             return false;
         }

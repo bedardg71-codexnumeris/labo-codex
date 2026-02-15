@@ -212,6 +212,54 @@
     }
 
     // =========================================================================
+    // BULLE DE DÉCOUVERTE
+    // =========================================================================
+
+    /**
+     * Affiche une bulle de découverte temporaire près d'un élément cible.
+     * Utilisée pour guider le novice vers un bouton ou une action spécifique.
+     * @param {Object} options - { cible, message, position, duree }
+     */
+    function afficherBulleDecouverte({ cible, message, position = 'bas', duree = 8000 }) {
+        var el = document.querySelector(cible);
+        if (!el) return;
+
+        // Supprimer une bulle existante
+        var existante = document.querySelector('.bulle-decouverte');
+        if (existante) existante.remove();
+
+        var bulle = document.createElement('div');
+        bulle.className = 'bulle-decouverte bulle-decouverte--' + position;
+        bulle.innerHTML =
+            '<span>' + message + '</span>' +
+            '<button class="bulle-decouverte-fermer" aria-label="Fermer">×</button>';
+
+        bulle.querySelector('.bulle-decouverte-fermer').addEventListener('click', function() {
+            bulle.remove();
+        });
+
+        // Positionner près de l'élément
+        document.body.appendChild(bulle);
+        var rect = el.getBoundingClientRect();
+        bulle.style.position = 'fixed';
+        bulle.style.zIndex = '9998';
+
+        if (position === 'bas') {
+            bulle.style.top = (rect.bottom + 8) + 'px';
+            bulle.style.left = rect.left + 'px';
+        } else if (position === 'haut') {
+            bulle.style.bottom = (window.innerHeight - rect.top + 8) + 'px';
+            bulle.style.left = rect.left + 'px';
+        } else if (position === 'droite') {
+            bulle.style.top = rect.top + 'px';
+            bulle.style.left = (rect.right + 8) + 'px';
+        }
+
+        // Auto-disparition
+        setTimeout(function() { if (bulle.parentElement) bulle.remove(); }, duree);
+    }
+
+    // =========================================================================
     // EXPOSITION GLOBALE
     // =========================================================================
 
@@ -219,6 +267,7 @@
     window.afficherAideContextuelle = afficherAideContextuelle;
     window.fermerAideContextuelle = fermerAideContextuelle;
     window.initialiserAideContextuelle = initialiserAideContextuelle;
+    window.afficherBulleDecouverte = afficherBulleDecouverte;
 
     // Initialiser au chargement du DOM
     if (document.readyState === 'loading') {
