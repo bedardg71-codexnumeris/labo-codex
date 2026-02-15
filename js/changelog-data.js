@@ -13,6 +13,17 @@
             version: 'Beta 97.7',
             date: '15 f\u00e9vrier',
             couleur: 'bleu',
+            titre: 'Parcours d\u2019apprentissage \u2014 Phases\u00a03 \u00e0 5',
+            items: [
+                '<strong>Mode d\u00e9couverte</strong> : Indicateur \uD83E\uDDED compact et cliquable dans l\u2019en-t\u00eate, rappel discret apr\u00e8s chargement de la d\u00e9mo, pulse visuel sur l\u2019indicateur quand un jalon est compl\u00e9t\u00e9.',
+                '<strong>Certification d\u2019autonomie</strong> : Nettoyage propre de tous les m\u00e9canismes actifs (guidage, suggestions, notifications) lors du passage en mode autonome. Panneau d\u2019accueil compact avec date et bouton \u00ab\u00a0Relancer\u00a0\u00bb.',
+                '<strong>Pr\u00e9f\u00e9rences parcours</strong> : Nouvelle carte dans R\u00e9glages \u2192 Pr\u00e9f\u00e9rences pour changer de mode (\uD83D\uDDFA\uFE0F\u00a0explicite / \uD83E\uDDED\u00a0d\u00e9couverte / \uD83C\uDF93\u00a0autonome), voir la progression par chapitre et r\u00e9initialiser le parcours.'
+            ]
+        },
+        {
+            version: 'Beta 97.7',
+            date: '15 f\u00e9vrier',
+            couleur: 'bleu',
             titre: 'Parcours d\u2019apprentissage \u2014 Phase\u00a02 orchestration',
             items: [
                 '<strong>Guidage en mode explicite</strong> : Le guidage de configuration (5\u00a0\u00e9tapes) se d\u00e9clenche aussi quand le parcours est en mode \uD83D\uDDFA\uFE0F\u00a0\u00c9tape par \u00e9tape, plus seulement en Mode\u00a0Assist\u00e9.',
