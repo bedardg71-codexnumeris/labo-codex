@@ -1,7 +1,7 @@
 /**
  * PRIMO TOOLTIPS - Système de tooltips riches (mode Assisté uniquement)
  *
- * Gère l'affichage des aides contextuelles du Tour guide (🧭)
+ * Gère l'affichage des aides contextuelles du Tour guide (📍)
  * Visible uniquement en mode Assisté
  *
  * VERSION : 1.0
@@ -42,7 +42,7 @@ function afficherPopupPrimo(contentHTML) {
     // Contenu du popup
     popup.innerHTML = `
         <div class="primo-popup-header">
-            <span><span class="primo-icon">🧭</span> Conseil</span>
+            <span><span class="primo-icon">📍</span> Conseil</span>
             <button class="primo-popup-close" onclick="fermerPopupPrimo()">×</button>
         </div>
         <div class="primo-popup-body">
