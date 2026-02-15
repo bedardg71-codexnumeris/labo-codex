@@ -16093,6 +16093,25 @@ body.mode-assiste .btn-aide-contextuelle,
     background: rgba(106, 172, 184, 0.15);
 }
 
+/* Bouton assistant dans le chapitre Construire */
+.parcours-btn-assistant {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: rgba(106, 172, 184, 0.1);
+    border: 1px dashed var(--accent-primaire, #6aacb8);
+    border-radius: var(--radius-moyen, 8px);
+    color: var(--accent-primaire, #6aacb8);
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.parcours-btn-assistant:hover {
+    background: rgba(106, 172, 184, 0.2);
+}
+
 /* Variante CTA (call-to-action, parcours non initialisé) */
 .parcours-panneau--cta {
     border-style: dashed;
