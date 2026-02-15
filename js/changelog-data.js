@@ -12,6 +12,17 @@
         {
             version: 'Beta 97.7',
             date: '15 f\u00e9vrier',
+            couleur: 'vert',
+            titre: 'Point d\u2019entr\u00e9e visible du parcours sur l\u2019accueil',
+            items: [
+                '<strong>Panneau CTA sur l\u2019accueil</strong> : Quand le parcours n\u2019est pas initialis\u00e9, un panneau \u00ab\u00a0Commence ton parcours\u00a0\u00bb est affich\u00e9 avec les deux boutons de choix de mode (\uD83D\uDDFA\uFE0F\u00a0\u00c9tape par \u00e9tape / \uD83E\uDDED\u00a0Par exploration).',
+                '<strong>Hero adaptatif</strong> : Le titre de la page d\u2019accueil s\u2019adapte \u00e0 l\u2019\u00e9tat du parcours\u00a0: \u00ab\u00a0Bienvenue\u00a0! Par o\u00f9 commencer\u00a0?\u00a0\u00bb avant le choix, \u00ab\u00a0Que souhaitez-vous faire\u00a0?\u00a0\u00bb apr\u00e8s.',
+                '<strong>Parcours toujours visible</strong> : Le panneau parcours est d\u00e9sormais affich\u00e9 en permanence sur l\u2019accueil (CTA ou progression), sans condition pr\u00e9alable.'
+            ]
+        },
+        {
+            version: 'Beta 97.7',
+            date: '15 f\u00e9vrier',
             couleur: 'bleu',
             titre: 'Parcours d\u2019apprentissage \u2014 Phases\u00a03 \u00e0 5',
             items: [

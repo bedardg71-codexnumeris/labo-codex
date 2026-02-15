@@ -715,11 +715,45 @@ function naviguerVersJalon(jalonId) {
 // ============================================
 
 /**
+ * Génère le panneau CTA (call-to-action) quand le parcours n'est pas initialisé.
+ * Affiche les deux boutons de choix de mode, identiques au modal de bienvenue.
+ */
+function genererPanneauCTA() {
+    return '<div class="parcours-panneau parcours-panneau--cta" id="panneau-parcours">' +
+        '<div class="parcours-cta-header">' +
+            '<h3 class="parcours-titre">Commence ton parcours</h3>' +
+            '<p class="parcours-cta-desc">Comment préfères-tu apprendre un nouvel outil\u00a0?</p>' +
+        '</div>' +
+        '<div class="parcours-cta-actions">' +
+            '<button class="btn-bienvenue btn-bienvenue-principal" onclick="' +
+                'window.parcours.setMode(\'explicite\'); ' +
+                'if(typeof afficherAccueil===\'function\') afficherAccueil();">' +
+                '<span class="btn-bienvenue-icone">\uD83D\uDDFA\uFE0F</span>' +
+                '<span class="btn-bienvenue-texte">' +
+                    '<strong>Étape par étape</strong>' +
+                    '<small>Je suis guidé du début à la fin</small>' +
+                '</span>' +
+            '</button>' +
+            '<button class="btn-bienvenue btn-bienvenue-secondaire" onclick="' +
+                'window.parcours.setMode(\'decouverte\'); ' +
+                'if(typeof afficherAccueil===\'function\') afficherAccueil();">' +
+                '<span class="btn-bienvenue-icone">\uD83E\uDDED</span>' +
+                '<span class="btn-bienvenue-texte">' +
+                    '<strong>Par exploration</strong>' +
+                    '<small>Je découvre à mon rythme</small>' +
+                '</span>' +
+            '</button>' +
+        '</div>' +
+        '<p class="parcours-cta-footer">Tu pourras changer d\u2019avis dans Réglages \u2192 Préférences</p>' +
+    '</div>';
+}
+
+/**
  * Génère le HTML du panneau de parcours pour la page d'accueil
  */
 function genererPanneauParcours() {
     var progression = getProgression();
-    if (!progression.mode) return '';
+    if (!progression.mode) return genererPanneauCTA();
 
     var html = '<div class="parcours-panneau" id="panneau-parcours">';
 

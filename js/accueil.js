@@ -146,14 +146,20 @@ function afficherAccueilRetour(conteneur) {
         </div>
     `;
 
-    // Panneau de parcours d'apprentissage (si initialisé)
-    const parcoursHTML = (window.parcours && window.parcours.estInitialise())
+    // Panneau de parcours d'apprentissage (toujours visible : CTA ou progression)
+    const parcoursHTML = (window.parcours && window.parcours.genererPanneauParcours)
         ? window.parcours.genererPanneauParcours()
         : '';
 
+    // Hero adaptatif selon l'état du parcours
+    const parcoursInitialise = window.parcours && window.parcours.estInitialise && window.parcours.estInitialise();
+    const heroTitre = parcoursInitialise
+        ? 'Que souhaitez-vous faire\u00a0?'
+        : 'Bienvenue\u00a0! Par où commencer\u00a0?';
+
     conteneur.innerHTML = `
         <div class="accueil-hero">
-            <h1>Que souhaitez-vous faire\u00a0?</h1>
+            <h1>${heroTitre}</h1>
         </div>
 
         ${parcoursHTML}

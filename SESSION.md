@@ -1,8 +1,20 @@
-# SESSION ACTIVE - BETA 97.8
+# SESSION ACTIVE - BETA 97.7
 
-**Date** : 14 février 2026
-**Version** : Beta 97.8 (build 0214-2001)
-**Statut** : Section Découvrir + assistant de création de matériel
+**Date** : 15 février 2026
+**Version** : Beta 97.7 (build 0215-0941)
+**Statut** : Point d'entrée visible du parcours sur l'accueil
+
+## SESSION DU 15 FÉVRIER 2026
+
+### Travail accompli — Point d'entrée visible du parcours sur l'accueil (Beta 97.7, build 0215-0941)
+
+52. **Panneau CTA sur l'accueil** : Nouvelle fonction `genererPanneauCTA()` dans parcours-apprentissage.js. Quand le parcours n'est pas initialisé (`mode === null`), un panneau à bordure dashed affiche « Commence ton parcours » avec deux boutons `.btn-bienvenue` (🗺️ Étape par étape → `setMode('explicite')` / 🧭 Par exploration → `setMode('decouverte')`). Pied de panneau : « Tu pourras changer d'avis dans Réglages → Préférences ».
+
+53. **Parcours toujours visible** : `genererPanneauParcours()` retourne désormais le CTA au lieu d'une chaîne vide quand le mode est null. Dans accueil.js, le guard `estInitialise()` est retiré : `genererPanneauParcours()` est toujours appelé.
+
+54. **Hero adaptatif** : Le titre de l'accueil s'adapte à l'état du parcours : « Bienvenue ! Par où commencer ? » (non initialisé) vs « Que souhaitez-vous faire ? » (initialisé).
+
+55. **CSS variante CTA** : Styles `.parcours-panneau--cta`, `.parcours-cta-header`, `.parcours-cta-desc`, `.parcours-cta-actions`, `.parcours-cta-footer` avec responsive 600px. Le CTA hérite du masquage `@media print` existant.
 
 ## SESSION DU 14 FÉVRIER 2026
 
