@@ -172,7 +172,7 @@
 
                 <div class="modal-backup-solution">
                     <p>
-                        <strong>💡 Solution :</strong> Exportez régulièrement vos données via
+                        <strong>Solution :</strong> Exportez régulièrement vos données via
                         <strong>Réglages → Données</strong>. Le fichier JSON peut être réimporté
                         à tout moment pour restaurer vos données.
                     </p>
