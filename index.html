@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Système de suivi Beta 97.7 - Hiver 2026</title>
+    <title>Système de suivi Beta 97.8 - Hiver 2026</title>
 
     <!-- CSS externe requis pour styles complets -->
     <link rel="stylesheet" href="styles.css?v=2026021401">
@@ -3627,7 +3627,7 @@
                     <!-- Titre et version -->
                     <div class="titre-section">
                         <h1>Système de suivi des apprentissages et de construction de la note</h1>
-                        <p class="meta" data-tooltip="entete-version">Beta 97.7 <span id="build-numero"></span></p>
+                        <p class="meta" data-tooltip="entete-version">Beta 97.8 <span id="build-numero"></span></p>
                     </div>
 
                     <!-- Sélecteur de mode déplacé à droite -->
@@ -12073,14 +12073,44 @@
                     <h2>Notes de version</h2>
                     <p class="text-muted">Historique des changements majeurs</p>
 
+                    <!-- Beta 97.8 - Cohérence visuelle + emojis -->
+                    <div class="carte accordeon ouvert" id="accordeon-apropos-beta978-coherence">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Beta 97.8 &mdash; Coh&eacute;rence visuelle et normalisation
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu" style="display: block;">
+                        <p class="text-muted">16 f&eacute;vrier 2026</p>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Audit modes clair et sombre</h4>
+                        <ul class="modal-liste">
+                            <li><strong>~60 couleurs hardcod&eacute;es</strong> remplac&eacute;es par des variables CSS dans 10&nbsp;fichiers.</li>
+                            <li><strong>Cartes info</strong> : Note, Conseil et P&eacute;dagogique s'adaptent au th&egrave;me actif.</li>
+                            <li><strong>Badges pattern</strong> : 5&nbsp;badges d'apprentissage th&eacute;m&eacute;s (blocage critique, &eacute;mergent, d&eacute;fi, stable, progression).</li>
+                            <li><strong>Calendrier</strong> : Couleurs texte/bordure des jours th&eacute;m&eacute;es (weekend, examens, cong&eacute;, reprise).</li>
+                            <li><strong>Jetons profil</strong> : Sections reprise (violet) et d&eacute;lai (orange) respectent le th&egrave;me.</li>
+                            <li><strong>Gabarit</strong> : Nouvelle variable <code>--gabarit-couleur</code> pour les &eacute;chelles et biblioth&egrave;ques.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Normalisation des emojis</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Guide d&eacute;tach&eacute; &#x1F4D4;</strong> : Panneau flottant ind&eacute;pendant dans la carte mentale.</li>
+                            <li><strong>Conventions</strong> : &#x1F4D4;&nbsp;guidage, &#x1F4DA;&nbsp;biblioth&egrave;ques, &#x1F512;/&#x1F513;&nbsp;verrouillage, &#x1F94B;&nbsp;assistants.</li>
+                            <li><strong>Accents</strong> : Caract&egrave;res manquants corrig&eacute;s dans la page Archivage.</li>
+                        </ul>
+
+                        </div>
+                    </div>
+
                     <!-- Beta 97.7 - Section Découvrir + assistant matériel -->
-                    <div class="carte accordeon ouvert" id="accordeon-apropos-beta978-decouvrir">
+                    <div class="carte accordeon" id="accordeon-apropos-beta977-decouvrir">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Beta 97.7 &mdash; Section D&eacute;couvrir &amp; assistant de cr&eacute;ation
                             </h3>
                         </div>
-                        <div class="accordeon-contenu" style="display: block;">
+                        <div class="accordeon-contenu" style="display: none;">
                         <p class="text-muted">14 f&eacute;vrier 2026</p>
 
                         <h4 class="titre-bleu-mb8 mt-15">Section &laquo;&nbsp;D&eacute;couvrir&nbsp;&raquo; sur l'accueil</h4>
@@ -16256,8 +16286,8 @@
          */
 
         // === CONFIGURATION ===
-        const VERSION_MAJEURE = '97.7';
-        const BUILD_ID = '0215-1740';  // Auto-updated by Claude before each commit (Toronto time)
+        const VERSION_MAJEURE = '97.8';
+        const BUILD_ID = '0216-0950';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';

@@ -1,8 +1,22 @@
-# SESSION ACTIVE - BETA 97.7
+# SESSION ACTIVE - BETA 97.8
 
-**Date** : 15 février 2026
-**Version** : Beta 97.7 (build 0215-1230)
-**Statut** : Cohérence iconographique et UX de l'accueil
+**Date** : 16 février 2026
+**Version** : Beta 97.8 (build 0216-0950)
+**Statut** : Cohérence visuelle modes clair/sombre et normalisation emojis
+
+## SESSION DU 16 FÉVRIER 2026
+
+### Travail accompli — Cohérence visuelle et normalisation (Beta 97.8, build 0216-0950)
+
+63. **Audit modes clair/sombre (#172)** : ~50 variables CSS ajoutées dans `:root` et `body.mode-clair`, ~60 couleurs hardcodées remplacées par `var(--...)` dans styles.css, index.html et 7 fichiers JS. Phases : cartes info pédagogiques, badges pattern, jetons profil, calendrier, utilitaires texte/gris, inline styles HTML, couleurs JS.
+
+64. **Guide détaché (#167)** : Le guide d'utilisation de la carte mentale est détaché en panneau flottant indépendant, accessible via le bouton 📔.
+
+65. **Normalisation emojis (#168-#171)** : 📔 guidage, 📚 bibliothèques, 🔒/🔓 verrouillage, 🥋 assistants de création — normalisés dans toute l'application.
+
+66. **Accents Archivage (#173)** : Caractères accentués manquants corrigés dans la page Archivage de Construction de la note.
+
+67. **Élimination couleurs hardcodées (#166)** : 6 phases antérieures : badge-compteur/controle-form, alertes inline, variables IDME/planification, hex hardcodés CSS, couleurs JS, mise à jour design-system.html.
 
 ## SESSION DU 15 FÉVRIER 2026
 
