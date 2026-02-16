@@ -136,6 +136,13 @@
     --risque-tres-eleve: #e84057;
     --risque-critique: #a02030;
 
+    /* === NIVEAUX IDME (zones spaghetti) === */
+    --idme-etendu: #64B5F6;
+    --idme-maitrise: #8BC34A;
+    --idme-developpement: #FFEB3B;
+    --idme-reussite: #FF9800;
+    --idme-insuffisant: #F44336;
+
     /* === COULEURS GRISES (inversées pour fond sombre) === */
     --gris-tres-fonce: #d0e0e4;
     --gris-fonce: #b0c4cc;
@@ -465,6 +472,13 @@ body.mode-clair {
 
     /* Orange accent ajusté */
     --orange-accent: #ff6b35;
+
+    /* IDME — teintes plus foncées pour contraste sur fond blanc */
+    --idme-etendu: #1E88E5;
+    --idme-maitrise: #558B2F;
+    --idme-developpement: #F9A825;
+    --idme-reussite: #E65100;
+    --idme-insuffisant: #C62828;
 }
 
 /* ===============================
@@ -14605,6 +14619,19 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     flex-direction: column;
     gap: 3px;
 }
+
+/* Palette planification — couleurs par zone */
+.planif-palette-categorie[data-zone="pourquoi"]  { background: rgba(59, 130, 246, 0.06); }
+.planif-palette-categorie[data-zone="quoi"]      { background: rgba(249, 115, 22, 0.06); }
+.planif-palette-categorie[data-zone="comment"]   { background: rgba(22, 163, 74, 0.06); }
+.planif-palette-categorie[data-zone="verifier"]  { background: rgba(217, 70, 239, 0.06); }
+.planif-palette-categorie[data-zone="structure"] { background: rgba(147, 51, 234, 0.06); }
+
+.planif-palette-categorie[data-zone="pourquoi"]  .planif-palette-zone-label { color: #3b82f6; }
+.planif-palette-categorie[data-zone="quoi"]      .planif-palette-zone-label { color: #f97316; }
+.planif-palette-categorie[data-zone="comment"]   .planif-palette-zone-label { color: #16a34a; }
+.planif-palette-categorie[data-zone="verifier"]  .planif-palette-zone-label { color: #D946EF; }
+.planif-palette-categorie[data-zone="structure"] .planif-palette-zone-label { color: #9333ea; }
 
 .planif-palette-zone-label {
     display: flex;
