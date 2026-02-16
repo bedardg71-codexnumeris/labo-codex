@@ -852,7 +852,7 @@ function genererPanneauParcours() {
             html += '<button class="parcours-btn-assistant" onclick="' +
                 'event.stopPropagation(); ' +
                 'if(typeof demarrerCreationMateriel===\'function\') demarrerCreationMateriel();">' +
-                '🛠️ Lancer l\u2019assistant de création' +
+                '🥋 Lancer l\u2019assistant de création' +
             '</button>';
         }
 
