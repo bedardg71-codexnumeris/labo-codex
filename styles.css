@@ -16694,7 +16694,6 @@ body.mode-clair .parcours-chapitre {
 body.mode-clair .parcours-chapitre--en-cours {
     background: rgba(6, 93, 187, 0.08);
     border-color: rgba(6, 93, 187, 0.2);
-    border-left: 3px solid var(--accent-primaire);
 }
 
 body.mode-clair .parcours-jalon--a-faire:hover {
@@ -17111,7 +17110,6 @@ body.mode-clair .barre-etudiant.tracked-4 {
 
 .parcours-chapitre--en-cours {
     background: rgba(26, 82, 102, 0.15);
-    border-left: 3px solid #1a5266;
 }
 
 .parcours-chapitre-header {
