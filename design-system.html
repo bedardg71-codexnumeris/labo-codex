@@ -1812,6 +1812,137 @@
     </div>
 </section>
 
+<!-- ===============================
+     SECTION: Composants d'en-tête et zones danger
+     =============================== -->
+<section class="guide-section" id="section-composants-entete">
+    <h2 class="guide-section-title">15. Composants d'en-tête et conventions inline</h2>
+    <p class="guide-section-intro">Classes réutilisables pour les en-têtes bleus, zones danger, et variables IDME.</p>
+
+    <div class="guide-component">
+        <h3 class="guide-component-title">.badge-compteur-header</h3>
+        <p>Pill blanc semi-transparent pour afficher un compteur dans un titre bleu (<code>.carte-titre-bleu</code>).</p>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div style="background: var(--bleu-moyen); padding: 15px 20px; border-radius: var(--radius-grand); display: flex; align-items: center; justify-content: space-between;">
+                    <span style="color: white; font-weight: 600;">Titre de section</span>
+                    <span class="badge-compteur-header">24 items</span>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div style="background: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%); padding: 15px 20px; border-radius: var(--radius-grand); display: flex; align-items: center; justify-content: space-between;">
+                    <span style="color: white; font-weight: 600;">Titre de section</span>
+                    <span class="badge-compteur-header">24 items</span>
+                </div>
+            </div>
+        </div>
+        <div class="guide-specs">
+            <div class="guide-specs-title">Specs</div>
+            <ul>
+                <li><code>font-size: 0.75rem</code> | <code>padding: 3px 10px</code> | <code>border-radius: var(--radius-pill)</code></li>
+                <li><code>background: rgba(255,255,255,0.2)</code> | <code>color: white</code></li>
+            </ul>
+        </div>
+
+        <h3 class="guide-component-title">.controle-form-header</h3>
+        <p>Select ou input glass-like sur fond bleu (graphiques ACP, spaghetti).</p>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div style="background: var(--bleu-moyen); padding: 15px 20px; border-radius: var(--radius-grand);">
+                    <select class="controle-form-header">
+                        <option>Option A</option>
+                        <option>Option B</option>
+                    </select>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div style="background: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%); padding: 15px 20px; border-radius: var(--radius-grand);">
+                    <select class="controle-form-header">
+                        <option>Option A</option>
+                        <option>Option B</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="guide-component-title">.zone-danger-header</h3>
+        <p>En-tête gradient rose pour sections maintenance et modaux de suppression.</p>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="zone-danger-header" style="padding: 15px 20px; border-radius: var(--radius-grand); display: flex; align-items: center; justify-content: space-between;">
+                    <h3>Maintenance</h3>
+                    <span style="color: #c62828;">&#9660;</span>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="zone-danger-header" style="padding: 15px 20px; border-radius: var(--radius-grand); display: flex; align-items: center; justify-content: space-between;">
+                    <h3>Maintenance</h3>
+                    <span style="color: #c62828;">&#9660;</span>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="guide-component-title">Variables --idme-*</h3>
+        <p>Couleurs pour les 5 niveaux d'apprentissage IDME, avec overrides mode clair automatiques.</p>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    <span style="color: var(--idme-etendu); font-weight: 600;">Etendu</span>
+                    <span style="color: var(--idme-maitrise); font-weight: 600;">Maitrise</span>
+                    <span style="color: var(--idme-developpement); font-weight: 600;">Developpement</span>
+                    <span style="color: var(--idme-reussite); font-weight: 600;">Reussite</span>
+                    <span style="color: var(--idme-insuffisant); font-weight: 600;">Insuffisant</span>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    <span style="color: var(--idme-etendu); font-weight: 600;">Etendu</span>
+                    <span style="color: var(--idme-maitrise); font-weight: 600;">Maitrise</span>
+                    <span style="color: var(--idme-developpement); font-weight: 600;">Developpement</span>
+                    <span style="color: var(--idme-reussite); font-weight: 600;">Reussite</span>
+                    <span style="color: var(--idme-insuffisant); font-weight: 600;">Insuffisant</span>
+                </div>
+            </div>
+        </div>
+        <div class="guide-specs">
+            <div class="guide-specs-title">Variables</div>
+            <ul>
+                <li><code>--idme-etendu</code> : Bleu (85-100%)</li>
+                <li><code>--idme-maitrise</code> : Vert (75-85%)</li>
+                <li><code>--idme-developpement</code> : Jaune (65-75%)</li>
+                <li><code>--idme-reussite</code> : Orange (40-65%)</li>
+                <li><code>--idme-insuffisant</code> : Rouge (0-40%)</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="guide-component">
+        <h3 class="guide-component-title">Convention : styles inline</h3>
+        <div class="guide-specs">
+            <div class="guide-specs-title">Acceptables</div>
+            <ul>
+                <li><code>display: none</code> pour le pilotage JS (toggle de visibilite)</li>
+                <li>Layout ponctuel unique : <code>gap</code>, <code>grid-template-columns</code>, <code>width</code> sur un seul element</li>
+                <li><code>style="color: var(--variable)"</code> quand la couleur vient d'une donnee dynamique</li>
+            </ul>
+            <div class="guide-specs-title">Interdits</div>
+            <ul>
+                <li>Couleurs hex hardcodees (<code>color: #ff9800</code>) : utiliser une variable CSS ou une classe utilitaire</li>
+                <li>Patterns repetes 3+ fois : extraire dans une classe CSS</li>
+                <li>Gradients inline : definir dans styles.css ou utiliser une classe (<code>.zone-danger-header</code>)</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
 </div><!-- /guide-container -->
 </body>
 </html>
