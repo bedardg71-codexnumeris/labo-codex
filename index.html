@@ -6893,9 +6893,18 @@
                                         </div>
                                     </div>
                                 </div>
-                                <button id="planif-palette-aide-btn" class="planif-palette-aide-btn" data-tooltip="planif-aide">?</button>
+                                <button id="planif-palette-aide-btn" class="planif-palette-aide-btn" data-tooltip="planif-aide">📔</button>
                             </div>
-                            <!-- Ancien panneau d'aide remplacé par le guide intégré (#162) -->
+                            <!-- Panneau guide flottant indépendant (#167) -->
+                            <div id="planif-guide-panel" class="planif-guide-flottante" style="display: none;">
+                                <div class="planif-guide-barre">
+                                    <span class="planif-guide-barre-titre">📔 Guide</span>
+                                    <button class="planif-guide-panel-fermer" title="Fermer le guide">&times;</button>
+                                </div>
+                                <div class="planif-guide-panel-contenu">
+                                    <!-- Rempli dynamiquement par ouvrirGuide() -->
+                                </div>
+                            </div>
                             <div id="planif-zone-travail" data-tooltip="planif-canevas">
                                 <div id="planif-espace-wrapper">
                                 <div id="planif-espace">

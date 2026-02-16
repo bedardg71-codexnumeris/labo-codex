@@ -259,25 +259,18 @@ var _guidePageCourante = 0;
 var _guideOuvert = false;
 
 function ouvrirGuide() {
-    var palette = document.getElementById('planif-palette');
-    if (!palette) return;
+    var panel = document.getElementById('planif-guide-panel');
+    if (!panel) return;
     _guideOuvert = true;
     _guidePageCourante = 0;
 
-    var contenu = palette.querySelector('.planif-palette-contenu');
-    var btnAide = document.getElementById('planif-palette-aide-btn');
-    if (contenu) contenu.style.display = 'none';
-    if (btnAide) btnAide.style.display = 'none';
-
-    // Supprimer un éventuel guide existant
-    var ancien = palette.querySelector('.planif-guide');
-    if (ancien) ancien.remove();
+    var conteneur = panel.querySelector('.planif-guide-panel-contenu');
+    conteneur.innerHTML = '';
 
     var guide = document.createElement('div');
     guide.className = 'planif-guide';
     guide.innerHTML =
         '<div class="planif-guide-header">' +
-            '<button class="planif-guide-fermer" title="Fermer">&times;</button>' +
             '<div class="planif-guide-titre"></div>' +
         '</div>' +
         '<div class="planif-guide-corps"></div>' +
@@ -288,12 +281,11 @@ function ouvrirGuide() {
         '</div>' +
         '<div class="planif-guide-page-num"></div>';
 
-    palette.appendChild(guide);
+    conteneur.appendChild(guide);
 
     var btnPrev = guide.querySelector('.planif-guide-btn-prev');
     var btnNext = guide.querySelector('.planif-guide-btn-next');
     var dotsContainer = guide.querySelector('.planif-guide-dots');
-    var fermer = guide.querySelector('.planif-guide-fermer');
 
     // Créer les 7 points de navigation
     for (var i = 0; i < GUIDE_PAGES.length; i++) {
@@ -308,7 +300,6 @@ function ouvrirGuide() {
         dotsContainer.appendChild(dot);
     }
 
-    fermer.addEventListener('click', fermerGuide);
     btnPrev.addEventListener('click', function() {
         if (_guidePageCourante > 0) {
             _guidePageCourante--;
@@ -324,6 +315,7 @@ function ouvrirGuide() {
         }
     });
 
+    panel.style.display = '';
     rendrePageGuide(guide);
 }
 
@@ -347,17 +339,13 @@ function rendrePageGuide(guide) {
 }
 
 function fermerGuide() {
-    var palette = document.getElementById('planif-palette');
-    if (!palette) return;
+    var panel = document.getElementById('planif-guide-panel');
+    if (!panel) return;
     _guideOuvert = false;
 
-    var guide = palette.querySelector('.planif-guide');
-    if (guide) guide.remove();
-
-    var contenu = palette.querySelector('.planif-palette-contenu');
-    var btnAide = document.getElementById('planif-palette-aide-btn');
-    if (contenu) contenu.style.display = '';
-    if (btnAide) btnAide.style.display = '';
+    var conteneur = panel.querySelector('.planif-guide-panel-contenu');
+    if (conteneur) conteneur.innerHTML = '';
+    panel.style.display = 'none';
 }
 
 function resoudreVerbe(sourceId, cibleId) {
@@ -4096,7 +4084,7 @@ function initialiser() {
         });
     }
 
-    // Guide intégré — bouton « ? » de la palette
+    // Guide flottant — bouton 📔 de la palette (#167)
     var btnAidePalette = document.getElementById('planif-palette-aide-btn');
     if (btnAidePalette) {
         btnAidePalette.addEventListener('click', function() {
@@ -4105,6 +4093,40 @@ function initialiser() {
             } else {
                 ouvrirGuide();
             }
+        });
+    }
+
+    // Bouton fermer du panneau guide
+    var guidePanel = document.getElementById('planif-guide-panel');
+    var guideFermerBtn = guidePanel ? guidePanel.querySelector('.planif-guide-panel-fermer') : null;
+    if (guideFermerBtn) {
+        guideFermerBtn.addEventListener('click', fermerGuide);
+    }
+
+    // Drag panneau guide flottant — même pattern que la palette
+    var guideBarre = guidePanel ? guidePanel.querySelector('.planif-guide-barre') : null;
+    if (guideBarre) {
+        guideBarre.addEventListener('mousedown', function(e) {
+            if (e.target.closest('.planif-guide-panel-fermer')) return;
+            e.preventDefault();
+            var startX = e.clientX;
+            var startY = e.clientY;
+            var rect = guidePanel.getBoundingClientRect();
+            var wrapperRect = document.getElementById('planif-zone-wrapper').getBoundingClientRect();
+            var startLeft = rect.left - wrapperRect.left;
+            var startTop = rect.top - wrapperRect.top;
+
+            function onMove(e2) {
+                guidePanel.style.left = (startLeft + e2.clientX - startX) + 'px';
+                guidePanel.style.top = (startTop + e2.clientY - startY) + 'px';
+                guidePanel.style.right = 'auto';
+            }
+            function onUp() {
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup', onUp);
+            }
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onUp);
         });
     }
 
