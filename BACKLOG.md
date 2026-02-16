@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 15 février 2026 (Beta 97.8 - Build 0214-2040)
+> **Derniere mise a jour** : 16 fevrier 2026 (Beta 97.8)
 
 ---
 
@@ -874,6 +874,65 @@
   - Revoir la mise en page et le contenu du guide integre (7 pages) dans le module Carte mentale
   - Verifier la coherence avec la taxonomie d'Anderson (types de connaissances, niveaux cognitifs, verbes)
   - **Fichiers** : `js/planification-carte.js`, `styles.css`
+
+### Coherence visuelle et design system (16 fevrier 2026)
+
+- [ ] **#166** Eliminer les couleurs hardcodees et les styles inlines dans toute l'application
+  - Auditer `index.html`, `styles.css` et les fichiers JS pour identifier les couleurs en dur et les `style="..."` evitables
+  - Assurer la conformite de `styles.css` avec `design-system.html` (source de verite visuelle)
+  - Ajuster les deux fichiers au besoin pour qu'ils correspondent a la meilleure pratique
+  - Signaler explicitement les mises a jour faites dans l'un et/ou l'autre
+  - **Fichiers** : `index.html`, `styles.css`, `design-system.html`, fichiers JS concernes
+
+- [ ] **#167** Detacher le guide d'utilisation de l'alignement pedagogique en palette independante
+  - Revoir le guide d'utilisation de la carte mentale sur le plan visuel
+  - Le detacher de la palette des elements pour en faire une palette independante
+  - Apparition via un bouton dans la palette principale, icone : 📔
+  - Ajouter le bouton 📔 au design system
+  - **Fichiers** : `js/planification-carte.js`, `styles.css`, `design-system.html`
+
+- [ ] **#168** Normaliser l'emoji 📔 pour tout element de guidage, description de processus ou information a suivre
+  - Auditer toute l'application pour identifier les elements de guidage/documentation/info a suivre
+  - S'assurer qu'ils utilisent tous l'emoji 📔
+  - Mettre a jour le design system en consequence
+  - **Fichiers** : `index.html`, `styles.css`, `design-system.html`, fichiers JS concernes
+
+- [ ] **#169** Normaliser l'emoji 📚 pour toutes les bibliotheques
+  - Auditer toute l'application pour verifier que chaque bibliotheque utilise l'icone 📚
+  - Corriger les incohérences le cas echeant
+  - Mettre a jour le design system
+  - **Fichiers** : `index.html`, `design-system.html`, fichiers JS concernes
+
+- [ ] **#170** Normaliser les icones de verrouillage/deverrouillage 🔒 et 🔓
+  - Auditer tout systeme de verrouillage/deverrouillage dans l'application
+  - S'assurer que l'etat verrouille affiche 🔒 et l'etat deverrouille affiche 🔓
+  - Ajouter la convention au design system
+  - **Fichiers** : `index.html`, `design-system.html`, fichiers JS concernes
+
+- [ ] **#171** Normaliser l'emoji 🥋 pour tous les assistants de creation
+  - Remplacer les icones 😎, ⚒️ et 🛠️ par 🥋 dans tous les assistants de creation
+  - Mettre a jour le design system
+  - **Fichiers** : `index.html`, `design-system.html`, fichiers JS concernes
+
+- [ ] **#172** Audit complet de coherence visuelle modes clair et sombre
+  - Parcourir chaque section/module de l'application dans les deux modes (clair et sombre)
+  - Verifier la fidelite au design system pour chaque ecran
+  - Corriger les ecarts dans les modules, le HTML et le CSS
+  - Assurer que `styles.css` et `design-system.html` sont synchronises
+  - **Fichiers** : `index.html`, `styles.css`, `design-system.html`, fichiers JS concernes
+
+- [ ] **#173** Corriger les caracteres accentues dans la page Archivage de Construction de la note
+  - Verifier que tous les textes de la page Archivage utilisent les accents francais corrects
+  - Corriger les caracteres manquants ou mal encodes
+  - **Fichiers** : `index.html` (section Construction de la note > Archivage)
+
+- [ ] **#174** Mise a jour Beta 97.7 — documentation, build et publication
+  - Mettre a jour le numero de beta dans l'application
+  - Renumeroter le BUILD_ID dans `index.html` et `version.json`
+  - Mettre a jour les news / changelog
+  - Documenter les changements de la session
+  - Commit et push
+  - **Fichiers** : `index.html`, `version.json`, `SESSION.md`, `BACKLOG.md`
 
 ---
 
