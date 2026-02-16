@@ -319,7 +319,7 @@ const TOOLTIPS = {
         'Organisation temporelle : s\u00e9quences (semaines) et le\u00e7ons (s\u00e9ances).',
 
     'planif-aide':
-        'Instructions rapides : glisser, relier, int\u00e9grer et cloner des \u00e9l\u00e9ments.',
+        'Ouvrir le guide de la carte mentale (7 pages, panneau flottant ind\u00e9pendant).',
 
     // --- Canevas ---
 
