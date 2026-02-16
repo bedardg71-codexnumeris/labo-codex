@@ -3912,7 +3912,7 @@
                             <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; font-size: 0.9rem; font-weight: normal;">
                                 <div style="display: flex; gap: 0.5rem; align-items: center;">
                                     <label style="color: rgba(255,255,255,0.8);" data-tooltip="tdb-selecteur-indice">Indice :</label>
-                                    <select id="selecteur-indice-acp" onchange="rafraichirGraphiqueSpaghettiACP()" style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.3); font-size: 0.85rem; background: rgba(255,255,255,0.15); color: white;">
+                                    <select id="selecteur-indice-acp" onchange="rafraichirGraphiqueSpaghettiACP()" class="controle-form-header">
                                         <option value="A" selected style="color: var(--gris-fonce);">Assiduité (A)</option>
                                         <option value="C" style="color: var(--gris-fonce);">Complétion (C)</option>
                                         <option value="P" style="color: var(--gris-fonce);">Construction de P</option>
@@ -3920,7 +3920,7 @@
                                 </div>
                                 <div style="display: flex; gap: 0.5rem; align-items: center;">
                                     <label style="color: rgba(255,255,255,0.8);" data-tooltip="tdb-selecteur-eleve-groupe">Élève :</label>
-                                    <select id="selecteur-etudiant-acp" onchange="selectionnerEtudiantACP()" style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.3); font-size: 0.85rem; background: rgba(255,255,255,0.15); color: white;">
+                                    <select id="selecteur-etudiant-acp" onchange="selectionnerEtudiantACP()" class="controle-form-header">
                                         <option value="" style="color: var(--gris-fonce);">-- Sélectionner --</option>
                                     </select>
                                 </div>
@@ -3952,7 +3952,7 @@
                             </div>
                             <div style="display: flex; gap: 0.5rem; align-items: center; font-size: 0.9rem; font-weight: normal;">
                                 <label style="color: rgba(255,255,255,0.8);" data-tooltip="tdb-selecteur-eleve-indiv">Élève :</label>
-                                <select id="selecteur-etudiant-spaghetti" onchange="selectionnerEtudiantSpaghetti()" style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.3); font-size: 0.85rem; background: rgba(255,255,255,0.15); color: white;">
+                                <select id="selecteur-etudiant-spaghetti" onchange="selectionnerEtudiantSpaghetti()" class="controle-form-header">
                                     <option value="" style="color: var(--gris-fonce);">-- Sélectionner --</option>
                                 </select>
                             </div>
@@ -4018,8 +4018,7 @@
                     <div class="carte">
                         <h3 class="carte-titre-bleu" style="display: flex; align-items: center; justify-content: space-between;" data-tooltip="liste-titre">
                             <span>Étudiant·es inscrit·es</span>
-                            <span id="compteur-tableau-bord-liste" class="badge-compteur-header"
-                                style="font-size: 0.75rem; padding: 3px 10px; background: rgba(255,255,255,0.2); border-radius: 20px; color: white; font-weight: normal;">
+                            <span id="compteur-tableau-bord-liste" class="badge-compteur-header">
                             </span>
                         </h3>
 
@@ -4280,8 +4279,7 @@
                     <div class="carte">
                         <h3 class="carte-titre-bleu" style="display: flex; align-items: center; justify-content: space-between;">
                             <span>Enregistrement</span>
-                            <span id="nbEtudiantsPresences" class="badge-compteur-header"
-                                style="font-size: 0.75rem; padding: 3px 10px; background: rgba(255,255,255,0.2); border-radius: 20px; color: white; font-weight: normal;">
+                            <span id="nbEtudiantsPresences" class="badge-compteur-header">
                                 (0 étudiant·e)
                             </span>
                         </h3>
@@ -4456,7 +4454,7 @@
                 <div class="carte">
                     <h3 class="carte-titre-bleu" style="display: flex; align-items: center; justify-content: space-between;" data-tooltip="eval-liste-resume">
                         <span>Évaluations</span>
-                        <span id="stats-evaluations" class="badge-compteur-header" style="display: flex; gap: 15px; align-items: baseline; font-size: 0.75rem; padding: 3px 10px; background: rgba(255,255,255,0.2); border-radius: 20px; color: white; font-weight: normal;">
+                        <span id="stats-evaluations" class="badge-compteur-header" style="display: flex; gap: 15px; align-items: baseline;">
                             <span id="compteur-evaluations">Chargement...</span>
                             <span id="moyenne-evaluations" style="opacity: 0.8;"></span>
                             <span id="nb-productions" style="opacity: 0.8;"></span>
