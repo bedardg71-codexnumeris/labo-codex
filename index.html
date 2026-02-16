@@ -4277,109 +4277,106 @@
                     </div>
 
                     <!-- Contrôles de saisie -->
-                    <div class="carte" class="mb-20">
-                        <div class="grille-saisie-presences">
-                            <div class="groupe-form">
-                                <label for="date-cours" class="label-formulaire">Date du cours</label>
-                                <div class="d-flex-gap8-center">
-                                    <button id="btn-cours-precedent" onclick="allerCoursPrecedent()"
-                                        class="btn btn-principal btn-compact" class="flex-shrink-0">
-                                        ← Précédent
-                                    </button>
-                                    <input type="date" id="date-cours" class="controle-form"
-                                        onchange="initialiserSaisiePresences(); mettreAJourBoutonsNavigation();"
-                                        class="flex-1">
-                                    <button id="btn-cours-suivant" onclick="allerCoursSuivant()"
-                                        class="btn btn-principal btn-compact" class="flex-shrink-0">
-                                        Suivant →
-                                    </button>
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu" style="display: flex; align-items: center; justify-content: space-between;">
+                            <span>Enregistrement</span>
+                            <span id="nbEtudiantsPresences" class="badge-compteur-header"
+                                style="font-size: 0.75rem; padding: 3px 10px; background: rgba(255,255,255,0.2); border-radius: 20px; color: white; font-weight: normal;">
+                                (0 étudiant·e)
+                            </span>
+                        </h3>
+
+                        <!-- Filtres et recherche -->
+                        <div class="carte-grise-mb20">
+                            <div class="grid-auto-180">
+                                <div class="groupe-form">
+                                    <label for="date-cours" class="label-formulaire">Date du cours</label>
+                                    <div class="d-flex-gap8-center">
+                                        <button id="btn-cours-precedent" onclick="allerCoursPrecedent()"
+                                            class="btn btn-principal btn-compact">
+                                            ← Précédent
+                                        </button>
+                                        <input type="date" id="date-cours" class="controle-form"
+                                            onchange="initialiserSaisiePresences(); mettreAJourBoutonsNavigation();">
+                                        <button id="btn-cours-suivant" onclick="allerCoursSuivant()"
+                                            class="btn btn-principal btn-compact">
+                                            Suivant →
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="groupe-form">
+                                    <label for="selectGroupePresences" class="label-formulaire">Filtrer par groupe</label>
+                                    <select id="selectGroupePresences" class="controle-form"
+                                        onchange="initialiserSaisiePresences()">
+                                        <option value="">Tous les groupes</option>
+                                    </select>
+                                </div>
+                                <div class="groupe-form">
+                                    <label for="selectTriPresences" class="label-formulaire">Trier par</label>
+                                    <select id="selectTriPresences" class="controle-form"
+                                        onchange="initialiserSaisiePresences()">
+                                        <option value="nom">Ordre alphabétique (nom)</option>
+                                        <option value="assiduite-croissant">Assiduité croissante (↑)</option>
+                                        <option value="assiduite-decroissant">Assiduité décroissante (↓)</option>
+                                    </select>
+                                </div>
+                                <div class="groupe-form">
+                                    <label for="recherche-saisie-presences" class="label-formulaire">Recherche</label>
+                                    <input type="text" id="recherche-saisie-presences" class="controle-form"
+                                        placeholder="Nom, prénom ou DA..."
+                                        oninput="filtrerTableauPresences()">
                                 </div>
                             </div>
-                            <div class="groupe-form">
-                                <label for="selectGroupePresences" class="label-formulaire">Filtrer par groupe</label>
-                                <select id="selectGroupePresences" class="controle-form"
-                                    onchange="initialiserSaisiePresences()">
-                                    <option value="">Tous les groupes</option>
-                                </select>
-                            </div>
-                            <div class="groupe-form">
-                                <label for="selectTriPresences" class="label-formulaire">Trier par</label>
-                                <select id="selectTriPresences" class="controle-form"
-                                    onchange="initialiserSaisiePresences()">
-                                    <option value="nom">Ordre alphabétique (nom)</option>
-                                    <option value="assiduite-croissant">Assiduité croissante (↑)</option>
-                                    <option value="assiduite-decroissant">Assiduité décroissante (↓)</option>
-                                </select>
-                            </div>
-
                         </div>
 
-                        <!-- Tableau de saisie -->
-                        <div class="carte">
-                            <h3 class="carte-titre-bleu">
-                                Liste des étudiant·es
-                                <span id="nbEtudiantsPresences"
-                                    style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem; font-weight: normal;">
-                                    (0 étudiant·e)
-                                </span>
-                            </h3>
-
-                            <!-- Champ de recherche -->
-                            <div class="groupe-form" class="mb-15">
-                                <input type="text" id="recherche-saisie-presences" class="controle-form"
-                                    placeholder="Rechercher un étudiant (nom, prénom, DA)..."
-                                    oninput="filtrerTableauPresences()">
+                        <!-- Compteur présents/absents + info séance -->
+                        <div id="compteur-presences" style="background: var(--bleu-tres-pale); padding: 12px 16px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 4px; font-size: 0.95rem; font-weight: 500; border-left: 4px solid var(--accent-primaire); color: var(--texte-secondaire, #8aa4b0);">
+                            <div id="info-seance" class="u-hide" style="font-size: 0.85rem; opacity: 0.8;"></div>
+                            <div style="display: flex; align-items: center; gap: 30px; flex-wrap: wrap;">
+                                <span>Présents : <span id="nb-presents">0</span></span>
+                                <span>Absents : <span id="nb-absents">0</span></span>
+                                <span>Total : <span id="nb-total">0</span></span>
+                                <span>Assiduité aujourd'hui : <span id="assiduite-aujourdhui">0%</span></span>
                             </div>
-
-                            <!-- Compteur présents/absents + info séance -->
-                            <div id="compteur-presences" style="background: var(--bleu-tres-pale); padding: 12px 16px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 4px; font-size: 0.95rem; font-weight: 500; border-left: 4px solid var(--accent-primaire); color: var(--texte-secondaire, #8aa4b0);">
-                                <div id="info-seance" class="u-hide" style="font-size: 0.85rem; opacity: 0.8;"></div>
-                                <div style="display: flex; align-items: center; gap: 30px; flex-wrap: wrap;">
-                                    <span>Présents : <span id="nb-presents">0</span></span>
-                                    <span>Absents : <span id="nb-absents">0</span></span>
-                                    <span>Total : <span id="nb-total">0</span></span>
-                                    <span>Assiduité aujourd'hui : <span id="assiduite-aujourdhui">0%</span></span>
-                                </div>
-                            </div>
-
-                            <table class="tableau">
-                                <thead>
-                                    <tr>
-                                        <th class="w-100px">DA</th>
-                                        <th>Prénom</th>
-                                        <th>Nom</th>
-                                        <th id="colonneHeuresTitre" class="w-100-center">
-                                            Présence
-                                            <div class="mt-8-flex-col-gap4">
-                                                <button class="btn btn-principal btn-tres-compact"
-                                                        onclick="tousPresents()"
-                                                        title="Mettre tous présents">
-                                                    Tous 2h
-                                                </button>
-                                                <button class="btn btn-annuler btn-tres-compact"
-                                                        onclick="reinitialiserSaisie()"
-                                                        title="Réinitialiser">
-                                                    ↻
-                                                </button>
-                                            </div>
-                                        </th>
-                                        <th class="w-200">Notes</th>
-                                        <th class="w-80px">Total pér.</th>
-                                        <th class="w-100px">Assiduité</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tbody-saisie-presences">
-                                    <tr>
-                                        <td colspan="7" class="empty-state-center-30">
-                                            Sélectionnez une date pour afficher le tableau de saisie
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
                         </div>
+
+                        <table class="tableau">
+                            <thead>
+                                <tr>
+                                    <th class="w-100px">DA</th>
+                                    <th>Prénom</th>
+                                    <th>Nom</th>
+                                    <th id="colonneHeuresTitre" class="w-100-center">
+                                        Présence
+                                        <div class="mt-8-flex-col-gap4">
+                                            <button class="btn btn-principal btn-tres-compact"
+                                                    onclick="tousPresents()"
+                                                    title="Mettre tous présents">
+                                                Tous 2h
+                                            </button>
+                                            <button class="btn btn-annuler btn-tres-compact"
+                                                    onclick="reinitialiserSaisie()"
+                                                    title="Réinitialiser">
+                                                ↻
+                                            </button>
+                                        </div>
+                                    </th>
+                                    <th class="w-200">Notes</th>
+                                    <th class="w-80px">Total pér.</th>
+                                    <th class="w-100px">Assiduité</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-saisie-presences">
+                                <tr>
+                                    <td colspan="7" class="empty-state-center-30">
+                                        Sélectionnez une date pour afficher le tableau de saisie
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
 
                         <!-- Boutons d'action -->
-                        <div class="btn-groupe" class="mt-20">
+                        <div class="btn-groupe" style="margin-top: 20px;">
                             <button class="btn btn-confirmer" onclick="enregistrerPresences()">
                                 Enregistrer les présences
                             </button>
@@ -4456,73 +4453,70 @@
                     </h2>
                 <p class="description-section">Vue d'ensemble des évaluations et calcul automatique des indices C et P</p>
 
-                <!-- Filtres -->
                 <div class="carte">
-                    <h3 class="carte-titre-bleu">Filtres</h3>
-                    <div class="grille-filtres">
-                        <div class="groupe-form">
-                            <label for="filtre-groupe-eval">Filtrer par groupe</label>
-                            <select id="filtre-groupe-eval" class="controle-form" onchange="filtrerListeEvaluations()">
-                                <option value="">Tous les groupes</option>
-                            </select>
+                    <h3 class="carte-titre-bleu" style="display: flex; align-items: center; justify-content: space-between;" data-tooltip="eval-liste-resume">
+                        <span>Évaluations</span>
+                        <span id="stats-evaluations" class="badge-compteur-header" style="display: flex; gap: 15px; align-items: baseline; font-size: 0.75rem; padding: 3px 10px; background: rgba(255,255,255,0.2); border-radius: 20px; color: white; font-weight: normal;">
+                            <span id="compteur-evaluations">Chargement...</span>
+                            <span id="moyenne-evaluations" style="opacity: 0.8;"></span>
+                            <span id="nb-productions" style="opacity: 0.8;"></span>
+                        </span>
+                    </h3>
+
+                    <!-- Filtres et recherche -->
+                    <div class="carte-grise-mb20">
+                        <div class="grid-auto-180">
+                            <div class="groupe-form">
+                                <label for="filtre-groupe-eval">Groupe</label>
+                                <select id="filtre-groupe-eval" class="controle-form" onchange="filtrerListeEvaluations()">
+                                    <option value="">Tous les groupes</option>
+                                </select>
+                            </div>
+                            <div class="groupe-form">
+                                <label for="filtre-production-eval">Production</label>
+                                <select id="filtre-production-eval" class="controle-form"
+                                    onchange="filtrerListeEvaluations()">
+                                    <option value="">Toutes les productions</option>
+                                </select>
+                            </div>
+                            <div class="groupe-form">
+                                <label for="filtre-statut-eval">Statut</label>
+                                <select id="filtre-statut-eval" class="controle-form" onchange="filtrerListeEvaluations()">
+                                    <option value="">Tous</option>
+                                    <option value="remis">Remis</option>
+                                    <option value="non-remis">Non remis</option>
+                                    <option value="evalue">Évalués seulement</option>
+                                    <option value="non-evalue">Non évalués</option>
+                                    <option value="jeton-delai">Jeton de délai</option>
+                                    <option value="jeton-reprise">Jeton de reprise</option>
+                                    <option value="jeton-reprise-ciblee">Jeton de reprise ciblée</option>
+                                    <option value="tous-jetons">Tous les jetons</option>
+                                    <option value="remplacees">Remplacées</option>
+                                </select>
+                            </div>
+                            <div class="groupe-form">
+                                <label for="recherche-evaluations">Recherche</label>
+                                <input type="text"
+                                       id="recherche-evaluations"
+                                       class="controle-form"
+                                       placeholder="Nom, prénom, DA, production..."
+                                       oninput="rechercherEvaluations()">
+                            </div>
+                            <div class="groupe-form" style="display: flex; align-items: flex-end;">
+                                <button class="btn btn-secondaire" onclick="reinitialiserFiltresEval()">
+                                    Réinitialiser
+                                </button>
+                            </div>
                         </div>
-                        <div class="groupe-form">
-                            <label for="filtre-production-eval">Filtrer par production</label>
-                            <select id="filtre-production-eval" class="controle-form"
-                                onchange="filtrerListeEvaluations()">
-                                <option value="">Toutes les productions</option>
-                            </select>
-                        </div>
-                        <div class="groupe-form">
-                            <label for="filtre-statut-eval">Filtrer par statut</label>
-                            <select id="filtre-statut-eval" class="controle-form" onchange="filtrerListeEvaluations()">
-                                <option value="">Tous</option>
-                                <option value="remis">Remis</option>
-                                <option value="non-remis">Non remis</option>
-                                <option value="evalue">Évalués seulement</option>
-                                <option value="non-evalue">Non évalués</option>
-                                <option value="jeton-delai">Jeton de délai</option>
-                                <option value="jeton-reprise">Jeton de reprise</option>
-                                <option value="jeton-reprise-ciblee">Jeton de reprise ciblée</option>
-                                <option value="tous-jetons">Tous les jetons</option>
-                                <option value="remplacees">Remplacées</option>
-                            </select>
-                        </div>
-                        <button class="btn btn-principal btn-compact" onclick="reinitialiserFiltresEval()"
-                            class="whitespace-nowrap">
-                            ↻ Réinit.
-                        </button>
                     </div>
-                </div>
 
-                <!-- Champ de recherche -->
-                <div class="carte">
-                    <input type="text"
-                           id="recherche-evaluations"
-                           class="controle-form"
-                           placeholder="Rechercher par nom, prénom, DA, production..."
-                           oninput="rechercherEvaluations()">
-                </div>
-
-                <!-- Statistiques globales -->
-                <div class="carte">
-                    <div id="stats-evaluations" data-tooltip="eval-liste-resume" style="display: flex; gap: 30px; flex-wrap: wrap; align-items: baseline;">
-                        <div style="font-weight: 600; color: var(--accent-primaire);" id="compteur-evaluations">
-                            Chargement...
-                        </div>
-                        <div style="color: var(--gris-moyen);" id="moyenne-evaluations"></div>
-                        <div style="color: var(--gris-moyen);" id="nb-productions"></div>
+                    <!-- Zone de chargement -->
+                    <div id="zone-chargement-evaluations" style="text-align: center; padding: 40px;">
+                        <p style="color: var(--gris-moyen);">Chargement des évaluations...</p>
                     </div>
-                </div>
 
-                <!-- Zone de chargement -->
-                <div id="zone-chargement-evaluations" class="carte" style="text-align: center; padding: 40px;">
-                    <p style="color: var(--gris-moyen);">Chargement des évaluations...</p>
-                </div>
-
-                <!-- Tableau des évaluations -->
-                <div id="conteneur-tableau-evaluations" class="u-hide">
-                    <div class="carte" style="overflow-x: auto;">
+                    <!-- Tableau des évaluations -->
+                    <div id="conteneur-tableau-evaluations" class="u-hide" style="overflow-x: auto;">
                         <table class="tableau">
                             <thead class="thead-sticky-bleu">
                                 <tr>
@@ -4555,13 +4549,13 @@
                             </tbody>
                         </table>
                     </div>
-                </div>
 
-                <!-- Message si aucun résultat -->
-                <div id="message-aucun-resultat" class="carte u-hide" style="text-align: center; padding: 40px;">
-                    <p style="color: var(--gris-clair); font-style: italic;">
-                        Aucune évaluation ne correspond aux filtres sélectionnés
-                    </p>
+                    <!-- Message si aucun résultat -->
+                    <div id="message-aucun-resultat" class="u-hide" style="text-align: center; padding: 40px;">
+                        <p style="color: var(--gris-clair); font-style: italic;">
+                            Aucune évaluation ne correspond aux filtres sélectionnés
+                        </p>
+                    </div>
                 </div>
             </div>
 
