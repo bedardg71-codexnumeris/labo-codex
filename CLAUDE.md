@@ -63,7 +63,7 @@ Utiliser `window.cle('nomCle')` pour obtenir la cle namespacee.
 3. Consulter `SESSION.md` pour le contexte actuel
 4. Identifier le module concerne dans `docs/modules/`
 5. Verifier `docs/legacy/` pour les problemes connus
-6. **Si travail visuel/UI** : consulter `Design system - Modules/08-reference-visuelle.html`
+6. **Si travail visuel/UI** : consulter `design-system.html`
 
 ---
 
@@ -105,7 +105,7 @@ Les deux fichiers doivent avoir les memes valeurs. `version.json` est lu par le 
 
 **AVANT de creer ou modifier tout element visuel** (bouton, carte, formulaire, alerte, badge, tableau, navigation, etc.), consulter OBLIGATOIREMENT :
 
-**`Design system - Modules/08-reference-visuelle.html`**
+**`design-system.html`** (racine du projet)
 
 Ce document est la source de verite pour :
 - La palette de couleurs (modes sombre et clair)
