@@ -2542,6 +2542,20 @@ input[type="number"].controle-form {
     margin: 8px 0 0 20px;
 }
 
+/* Zone danger — en-tête gradient rose pour sections maintenance/suppression */
+.zone-danger-header {
+    background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+}
+
+.zone-danger-header h3 {
+    color: #c62828;
+    margin: 0;
+}
+
+.zone-danger-header .accordeon-chevron {
+    color: #c62828;
+}
+
 /* ===============================
    FORMULAIRES
    =============================== */

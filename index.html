@@ -6252,7 +6252,7 @@
 
                                             <!-- Section Mode Seuils critiques (Xavier C.-T.) -->
                                             <div id="mat-config-mode-seuils-critiques" style="display: none;">
-                                                <div style="margin-bottom: 15px; padding: 12px; background: rgba(200, 160, 96, 0.12); border-left: 3px solid #ff9800; border-radius: 6px;">
+                                                <div class="alerte alerte-attention" style="margin-bottom: 15px;">
                                                     <p style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
                                                         <strong>Seuils critiques (Xavier C.-T.)</strong> : Tous les objectifs doivent atteindre un niveau minimum.
                                                         Bonus pour les objectifs au niveau supérieur.
@@ -10016,8 +10016,8 @@
                         </div>
 
                         <!-- Nettoyage -->
-                        <div class="carte-bleu-pale-p15-mb20" style="background: rgba(200, 160, 96, 0.12);">
-                            <h4 style="color: #ff6f00; margin-bottom: 10px;">Nettoyage des données</h4>
+                        <div class="alerte alerte-attention">
+                            <h4 style="margin-bottom: 10px;">Nettoyage des données</h4>
                             <p>
                                 Supprime toutes les captures enregistrées. Cette action est irréversible.
                             </p>
@@ -11760,7 +11760,7 @@
                                 </div>
 
                                 <!-- Seuil Acceptable -->
-                                <div class="groupe-form" style="padding: 12px; background: rgba(200, 160, 96, 0.1); border-radius: 6px; border-left: 4px solid #ffc107;">
+                                <div class="groupe-form alerte alerte-attention">
                                     <label for="v2-seuil-acceptable" style="font-weight: 600; display: block; margin-bottom: 8px; color: #f57f17;" data-tooltip="depist-seuil-acceptable">
                                         Acceptable si inférieur à
                                     </label>
@@ -11948,9 +11948,9 @@
                          CARTE 4 : MAINTENANCE (Zone danger)
                          ======================================== -->
                     <div class="carte accordeon ferme" id="accordeon-maintenance">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();" style="background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);" data-tooltip="donnees-maintenance">
-                            <h3 style="margin: 0; color: #c62828;">Maintenance</h3>
-                            <span class="accordeon-chevron" style="color: #c62828;">▼</span>
+                        <div class="accordeon-header zone-danger-header" onclick="toggleAccordeonV2(this); event.stopPropagation();" data-tooltip="donnees-maintenance">
+                            <h3>Maintenance</h3>
+                            <span class="accordeon-chevron">▼</span>
                         </div>
                         <div class="accordeon-contenu">
                             <!-- Réinitialisation -->
@@ -12015,8 +12015,8 @@
                      ======================================== -->
                 <div id="modal-suppression-ressource" class="modal-overlay" style="display: none;">
                     <div class="modal-contenu" style="max-width: 500px;">
-                        <div class="modal-header" style="background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);">
-                            <h3 style="color: #c62828; margin: 0;">Supprimer définitivement</h3>
+                        <div class="modal-header zone-danger-header">
+                            <h3>Supprimer définitivement</h3>
                             <button class="modal-fermer" onclick="fermerModalSuppressionRessource()">&times;</button>
                         </div>
                         <div class="modal-body">
@@ -14436,7 +14436,7 @@
                                 le fichier créditera les trois personnes dans l'ordre chronologique.
                             </p>
 
-                            <p style="margin-top: 15px; padding: 10px; background: rgba(200, 160, 96, 0.12); border-left: 4px solid #f57c00; border-radius: var(--radius-moyen);">
+                            <p class="alerte alerte-attention" style="margin-top: 15px;">
                                 💡 <strong>Conseil :</strong> Même si tu n'as fait que de petites modifications,
                                 entrez ton nom lors de l'export. Cela permet de tracer l'évolution du matériel
                                 et de reconnaître le travail de chacun·e dans la communauté pédagogique.
