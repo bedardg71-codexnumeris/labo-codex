@@ -342,44 +342,44 @@
             <p class="texte-muted">${stats.nombre} fichier(s) en stock (${stats.tailleFormatee})</p>
 
             <div class="travaux-archivage-options">
-                <!-- Export par etudiant -->
+                <!-- Export par étudiant -->
                 <div class="travaux-archivage-carte">
-                    <h4>Par etudiant</h4>
-                    <p class="texte-muted">Telecharger tous les travaux d'un etudiant</p>
+                    <h4>Par étudiant</h4>
+                    <p class="texte-muted">Télécharger tous les travaux d'un étudiant</p>
                     <select id="travaux-archivage-etudiant" class="form-select">
-                        <option value="">-- Choisir un etudiant --</option>
+                        <option value="">-- Choisir un étudiant --</option>
                         ${etudiants.map(e => `<option value="${e.da}">${echapperHtml(e.prenom + ' ' + e.nom)} (${e.da})</option>`).join('')}
                     </select>
                     <div class="travaux-archivage-checks">
-                        <label><input type="checkbox" id="arch-etudiant-annotes" checked> Inclure annotes</label>
-                        <label><input type="checkbox" id="arch-etudiant-evals"> Inclure evaluations</label>
+                        <label><input type="checkbox" id="arch-etudiant-annotes" checked> Inclure annotés</label>
+                        <label><input type="checkbox" id="arch-etudiant-evals"> Inclure évaluations</label>
                     </div>
-                    <button class="btn btn-principal" onclick="travauxUI.lancerArchivageEtudiant()">Telecharger ZIP</button>
+                    <button class="btn btn-principal" onclick="travauxUI.lancerArchivageEtudiant()">Télécharger ZIP</button>
                 </div>
 
                 <!-- Export par production -->
                 <div class="travaux-archivage-carte">
                     <h4>Par production</h4>
-                    <p class="texte-muted">Telecharger tous les travaux d'une production</p>
+                    <p class="texte-muted">Télécharger tous les travaux d'une production</p>
                     <select id="travaux-archivage-production" class="form-select">
                         <option value="">-- Choisir une production --</option>
                         ${productions.map(p => `<option value="${p.id}">${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
                     </select>
                     <div class="travaux-archivage-checks">
-                        <label><input type="checkbox" id="arch-prod-annotes" checked> Inclure annotes</label>
+                        <label><input type="checkbox" id="arch-prod-annotes" checked> Inclure annotés</label>
                     </div>
-                    <button class="btn btn-principal" onclick="travauxUI.lancerArchivageProduction()">Telecharger ZIP</button>
+                    <button class="btn btn-principal" onclick="travauxUI.lancerArchivageProduction()">Télécharger ZIP</button>
                 </div>
 
                 <!-- Export semestre complet -->
                 <div class="travaux-archivage-carte">
                     <h4>Semestre complet</h4>
-                    <p class="texte-muted">Archive complete de tous les travaux du semestre</p>
+                    <p class="texte-muted">Archive complète de tous les travaux du semestre</p>
                     <div id="travaux-texte-progression" class="texte-muted"></div>
                     <div class="travaux-barre-progression-container">
                         <div id="travaux-barre-progression" class="travaux-barre-progression"></div>
                     </div>
-                    <button class="btn btn-principal" onclick="travauxUI.lancerArchivageSemestre()">Telecharger archive complete</button>
+                    <button class="btn btn-principal" onclick="travauxUI.lancerArchivageSemestre()">Télécharger archive complète</button>
                 </div>
             </div>
 
@@ -406,7 +406,7 @@
     function genererGrilleFichiers(fichiers) {
         if (fichiers.length === 0) return '';
 
-        let html = '<div class="travaux-grille-fichiers"><h4>Fichiers importes</h4><div class="travaux-grille">';
+        let html = '<div class="travaux-grille-fichiers"><h4>Fichiers importés</h4><div class="travaux-grille">';
 
         fichiers.forEach(f => {
             const thumb = f.thumbnailDataUrl || '';
@@ -414,7 +414,7 @@
             const etudiant = travauxImport.trouverEtudiantParDA(f.etudiantDA);
             const nomEtudiant = etudiant
                 ? `${echapperHtml(etudiant.prenom)} ${echapperHtml(etudiant.nom)}`
-                : (f.etudiantDA || 'Non associe');
+                : (f.etudiantDA || 'Non associé');
 
             html += `
                 <div class="travaux-grille-item" onclick="travauxUI.ouvrirFichier('${f.id}')" title="${echapperHtml(f.nomFichier)}">
@@ -582,7 +582,7 @@
             const barre = document.getElementById('travaux-barre-progression');
             if (barre) barre.style.width = pourcent + '%';
             const texte = document.getElementById('travaux-texte-progression');
-            if (texte) texte.textContent = `${i}/${total} fichier(s) importes...`;
+            if (texte) texte.textContent = `${i}/${total} fichier(s) importés...`;
         });
 
         if (progression) progression.classList.add('u-hide');
@@ -590,7 +590,7 @@
         // Rafraichir l'affichage
         afficherImport();
 
-        alert(`Import termine: ${resultat.importes} fichier(s) importe(s), ${resultat.erreurs} erreur(s)`);
+        alert(`Import terminé : ${resultat.importes} fichier(s) importé(s), ${resultat.erreurs} erreur(s)`);
     }
 
     /**
@@ -685,7 +685,7 @@
     function lancerArchivageEtudiant() {
         const da = document.getElementById('travaux-archivage-etudiant')?.value;
         if (!da) {
-            alert('Selectionnez un etudiant');
+            alert('Sélectionnez un étudiant');
             return;
         }
 
@@ -807,7 +807,7 @@
         const productionId = fichier.productionId;
 
         if (!da || !productionId) {
-            alert('Ce fichier n\'est pas associe a un etudiant ou une production.');
+            alert('Ce fichier n\'est pas associé à un étudiant ou une production.');
             return;
         }
 
