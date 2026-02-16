@@ -74,6 +74,15 @@ ARRETE et demande validation a Gregoire AVANT de :
 - Modifier plus de 3 fichiers simultanement
 - Toucher aux modules proteges (config.js, navigation.js)
 
+### Conformite visuelle (Design System)
+
+**Tout element visuel nouveau ou modifie** doit etre conforme a la reference :
+`Design system - Modules/08-reference-visuelle.html`
+
+- Utiliser les variables CSS de `styles.css` (jamais de couleurs en dur)
+- Verifier le rendu en mode sombre ET en mode clair
+- Respecter la hierarchie des surfaces, ombres et radius
+
 ---
 
 ## Protocole en cas de bug
@@ -118,4 +127,4 @@ Gregoire a la memoire contextuelle reelle du projet.
 
 ---
 
-**Derniere mise a jour** : 6 janvier 2026
+**Derniere mise a jour** : 16 fevrier 2026

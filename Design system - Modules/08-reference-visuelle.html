@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 08 : Reference visuelle des styles - Design System v7</title>
+<title>Module 08 : Référence visuelle des styles - Design System v7</title>
 <link rel="stylesheet" href="../styles.css">
 <link rel="stylesheet" href="guide-common.css">
 <style>
 /* ============================================================
-   Layout grille du guide — dual mode sombre / clair
+   Layout grille du guide —dual mode sombre / clair
    ============================================================ */
 .ref-dual {
     display: grid;
@@ -120,7 +120,16 @@
     border: 2px solid;
 }
 
-/* Supprimer la bordure gauche coloree des cartes dans le guide */
+/* Titres et textes de section lisibles sur fond sombre */
+.guide-section-title {
+    color: #6aacb8;
+}
+
+.guide-section-intro {
+    color: #8aa4b0;
+}
+
+/* Supprimer la bordure gauche colorée des cartes dans le guide */
 .ref-panel-sombre .carte {
     border-left: 1px solid rgba(106, 172, 184, 0.15);
 }
@@ -161,7 +170,7 @@
 }
 
 /* ============================================================
-   Bridge .mode-clair — replique body.mode-clair variables
+   Bridge .mode-clair —replique body.mode-clair variables
    (les custom properties sur body ne cascadent pas dans un div enfant)
    ============================================================ */
 .mode-clair {
@@ -262,7 +271,7 @@
     --vert-leger: #43a047;
 }
 
-/* Bridge : overrides de composants specifiques en mode clair */
+/* Bridge : overrides de composants spécifiques en mode clair */
 .mode-clair .carte {
     border: 1px solid rgba(3,46,92,0.04);
 }
@@ -329,13 +338,13 @@
 </head>
 <body>
 
-<!-- EN-TETE -->
+<!-- EN-TÊTE -->
 <div class="guide-header">
-    <h1>Module 08 : Reference visuelle des styles</h1>
-    <p>Palette couleurs | Surfaces | Ombres | Boutons | Formulaires | Cartes | En-tetes | Navigation | Tableaux | Alertes & Badges</p>
+    <h1>Module 08 : Référence visuelle des styles</h1>
+    <p>Palette couleurs | Surfaces | Ombres | Boutons | Formulaires | Cartes | En-têtes | Navigation | Tableaux | Alertes &amp; Badges</p>
     <div class="guide-header-nav">
         <a href="07-primo-assistant.html">&larr; Module 7 : Primo Assistant</a>
-        <a href="design-system-index.html">Retour a l'index</a>
+        <a href="_archives/design-system-index.html">Ancien index (archive)</a>
     </div>
 </div>
 
@@ -346,7 +355,7 @@
      ============================================================ -->
 <section id="palette" class="guide-section">
     <h2 class="guide-section-title">1. Palette de couleurs</h2>
-    <p class="guide-section-intro">Bleus ocean, gris, accents et couleurs semantiques dans les deux modes.</p>
+    <p class="guide-section-intro">Bleus océan, gris, accents et couleurs sémantiques dans les deux modes.</p>
 
     <div class="guide-component">
         <h3 class="guide-component-title">Bleus principaux</h3>
@@ -405,7 +414,7 @@
             </div>
         </div>
 
-        <h3 class="guide-component-title">Accents et couleurs semantiques</h3>
+        <h3 class="guide-component-title">Accents et couleurs sémantiques</h3>
         <div class="ref-dual">
             <div class="ref-panel ref-panel-sombre">
                 <div class="ref-panel-label">Mode sombre</div>
@@ -442,7 +451,7 @@
      ============================================================ -->
 <section id="surfaces" class="guide-section">
     <h2 class="guide-section-title">2. Fonds et surfaces</h2>
-    <p class="guide-section-intro">Hierarchie des surfaces : page &rarr; section &rarr; conteneur &rarr; carte &rarr; element.</p>
+    <p class="guide-section-intro">Hiérarchie des surfaces : page &rarr; section &rarr; conteneur &rarr; carte &rarr; élément.</p>
 
     <div class="guide-component">
         <h3 class="guide-component-title">Niveaux de surface</h3>
@@ -532,7 +541,7 @@
      ============================================================ -->
 <section id="boutons" class="guide-section">
     <h2 class="guide-section-title">4. Boutons</h2>
-    <p class="guide-section-intro">Boutons d'action : principal, ajouter, modifier, confirmer, annuler, supprimer + etats.</p>
+    <p class="guide-section-intro">Boutons d'action : principal, ajouter, modifier, confirmer, annuler, supprimer + états.</p>
 
     <div class="guide-component">
         <h3 class="guide-component-title">Types de boutons</h3>
@@ -558,7 +567,7 @@
                         <button class="btn btn-principal btn-large">Large</button>
                         <button class="btn btn-principal">Standard</button>
                         <button class="btn btn-principal btn-compact">Compact</button>
-                        <button class="btn btn-principal btn-tres-compact">Tres compact</button>
+                        <button class="btn btn-principal btn-tres-compact">Très compact</button>
                         <button class="btn btn-principal btn-mini">Mini</button>
                     </div>
                 </div>
@@ -584,7 +593,7 @@
                         <button class="btn btn-principal btn-large">Large</button>
                         <button class="btn btn-principal">Standard</button>
                         <button class="btn btn-principal btn-compact">Compact</button>
-                        <button class="btn btn-principal btn-tres-compact">Tres compact</button>
+                        <button class="btn btn-principal btn-tres-compact">Très compact</button>
                         <button class="btn btn-principal btn-mini">Mini</button>
                     </div>
                 </div>
@@ -598,7 +607,7 @@
      ============================================================ -->
 <section id="formulaires" class="guide-section">
     <h2 class="guide-section-title">5. Formulaires</h2>
-    <p class="guide-section-intro">Champs texte, nombre, date, select, textarea et etats de validation.</p>
+    <p class="guide-section-intro">Champs texte, nombre, date, select, textarea et états de validation.</p>
 
     <div class="guide-component">
         <h3 class="guide-component-title">Champs de formulaire</h3>
@@ -663,21 +672,21 @@
             </div>
         </div>
 
-        <h3 class="guide-component-title">Etats de validation</h3>
+        <h3 class="guide-component-title">États de validation</h3>
         <div class="ref-dual">
             <div class="ref-panel ref-panel-sombre">
                 <div class="ref-panel-label">Mode sombre</div>
                 <div class="ref-form-grid">
                     <div class="groupe-form">
-                        <label>Etat erreur</label>
+                        <label>État erreur</label>
                         <input type="text" class="controle-form etat-erreur" value="Valeur invalide">
                     </div>
                     <div class="groupe-form">
-                        <label>Etat valide</label>
+                        <label>État valide</label>
                         <input type="text" class="controle-form etat-valide" value="Valeur correcte">
                     </div>
                     <div class="groupe-form">
-                        <label>Etat verrouille</label>
+                        <label>État verrouillé</label>
                         <input type="text" class="controle-form etat-verrouille" value="Lecture seule" readonly>
                     </div>
                 </div>
@@ -686,15 +695,15 @@
                 <div class="ref-panel-label">Mode clair</div>
                 <div class="ref-form-grid">
                     <div class="groupe-form">
-                        <label>Etat erreur</label>
+                        <label>État erreur</label>
                         <input type="text" class="controle-form etat-erreur" value="Valeur invalide">
                     </div>
                     <div class="groupe-form">
-                        <label>Etat valide</label>
+                        <label>État valide</label>
                         <input type="text" class="controle-form etat-valide" value="Valeur correcte">
                     </div>
                     <div class="groupe-form">
-                        <label>Etat verrouille</label>
+                        <label>État verrouillé</label>
                         <input type="text" class="controle-form etat-verrouille" value="Lecture seule" readonly>
                     </div>
                 </div>
@@ -717,14 +726,14 @@
                 <div class="ref-panel-label">Mode sombre</div>
                 <div class="carte">
                     <h3>Titre de la carte</h3>
-                    <p style="color:var(--texte-secondaire); font-size:0.9rem; margin:0">Contenu de la carte avec texte secondaire. La carte a une bordure gauche coloree et un fond surface-carte.</p>
+                    <p style="color:var(--texte-secondaire); font-size:0.9rem; margin:0">Contenu de la carte avec texte secondaire. La carte a une bordure gauche colorée et un fond surface-carte.</p>
                 </div>
             </div>
             <div class="ref-panel ref-panel-clair mode-clair">
                 <div class="ref-panel-label">Mode clair</div>
                 <div class="carte">
                     <h3>Titre de la carte</h3>
-                    <p style="color:var(--texte-secondaire); font-size:0.9rem; margin:0">Contenu de la carte avec texte secondaire. La carte a une bordure gauche coloree et un fond surface-carte.</p>
+                    <p style="color:var(--texte-secondaire); font-size:0.9rem; margin:0">Contenu de la carte avec texte secondaire. La carte a une bordure gauche colorée et un fond surface-carte.</p>
                 </div>
             </div>
         </div>
@@ -735,14 +744,14 @@
                 <div class="ref-panel-label">Mode sombre</div>
                 <div class="carte">
                     <h3 class="carte-titre-bleu">Titre bandeau bleu</h3>
-                    <p style="color:var(--texte-secondaire); font-size:0.9rem; margin:0">Le titre est dans un bandeau colore en haut de la carte, avec coins arrondis.</p>
+                    <p style="color:var(--texte-secondaire); font-size:0.9rem; margin:0">Le titre est dans un bandeau coloré en haut de la carte, avec coins arrondis.</p>
                 </div>
             </div>
             <div class="ref-panel ref-panel-clair mode-clair">
                 <div class="ref-panel-label">Mode clair</div>
                 <div class="carte">
                     <h3 class="carte-titre-bleu">Titre bandeau bleu</h3>
-                    <p style="color:var(--texte-secondaire); font-size:0.9rem; margin:0">Le titre est dans un bandeau colore en haut de la carte, avec coins arrondis.</p>
+                    <p style="color:var(--texte-secondaire); font-size:0.9rem; margin:0">Le titre est dans un bandeau coloré en haut de la carte, avec coins arrondis.</p>
                 </div>
             </div>
         </div>
@@ -766,10 +775,10 @@
 </section>
 
 <!-- ============================================================
-     SECTION 7 — EN-TETES DE SECTION
+     SECTION 7 — EN-TÊTES DE SECTION
      ============================================================ -->
 <section id="entetes" class="guide-section">
-    <h2 class="guide-section-title">7. En-tetes de section</h2>
+    <h2 class="guide-section-title">7. En-têtes de section</h2>
     <p class="guide-section-intro">Bandeaux .carte-titre-bleu et .outil-carte-header.</p>
 
     <div class="guide-component">
@@ -778,14 +787,14 @@
             <div class="ref-panel ref-panel-sombre">
                 <div class="ref-panel-label">Mode sombre</div>
                 <div class="carte">
-                    <h3 class="carte-titre-bleu">Criteres d'evaluation</h3>
+                    <h3 class="carte-titre-bleu">Critères d'évaluation</h3>
                     <p style="color:var(--texte-secondaire); font-size:0.85rem; margin:0">Bandeau en haut de carte, fond #244858 (sombre) ou gradient bleu (clair).</p>
                 </div>
             </div>
             <div class="ref-panel ref-panel-clair mode-clair">
                 <div class="ref-panel-label">Mode clair</div>
                 <div class="carte">
-                    <h3 class="carte-titre-bleu">Criteres d'evaluation</h3>
+                    <h3 class="carte-titre-bleu">Critères d'évaluation</h3>
                     <p style="color:var(--texte-secondaire); font-size:0.85rem; margin:0">Bandeau en haut de carte, fond #244858 (sombre) ou gradient bleu (clair).</p>
                 </div>
             </div>
@@ -797,7 +806,7 @@
                 <div class="ref-panel-label">Mode sombre</div>
                 <div class="carte" style="padding:25px">
                     <div class="outil-carte-header">
-                        <h3 class="outil-carte-titre">Outil pedagogique</h3>
+                        <h3 class="outil-carte-titre">Outil pédagogique</h3>
                     </div>
                     <p style="color:var(--texte-secondaire); font-size:0.85rem; margin:0">Header d'outil avec fond bleu, flex entre titre et boutons.</p>
                 </div>
@@ -806,7 +815,7 @@
                 <div class="ref-panel-label">Mode clair</div>
                 <div class="carte" style="padding:25px">
                     <div class="outil-carte-header">
-                        <h3 class="outil-carte-titre">Outil pedagogique</h3>
+                        <h3 class="outil-carte-titre">Outil pédagogique</h3>
                     </div>
                     <p style="color:var(--texte-secondaire); font-size:0.85rem; margin:0">Header d'outil avec fond bleu, flex entre titre et boutons.</p>
                 </div>
@@ -830,8 +839,8 @@
                 <div class="ref-nav-mock" style="background:linear-gradient(135deg, #0a1820 0%, #1a3848 100%); padding:15px">
                     <div class="navigation-principale">
                         <button>Accueil</button>
-                        <button class="actif">Evaluations</button>
-                        <button>Presences</button>
+                        <button class="actif">Évaluations</button>
+                        <button>Présences</button>
                         <button>Outils</button>
                     </div>
                 </div>
@@ -841,8 +850,8 @@
                 <div class="ref-nav-mock" style="background:linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%); padding:15px">
                     <div class="navigation-principale">
                         <button>Accueil</button>
-                        <button class="actif">Evaluations</button>
-                        <button>Presences</button>
+                        <button class="actif">Évaluations</button>
+                        <button>Présences</button>
                         <button>Outils</button>
                     </div>
                 </div>
@@ -856,9 +865,9 @@
                 <div class="ref-nav-mock" style="background:#0e1e28; padding:10px">
                     <div class="sous-navigation">
                         <button>Grilles</button>
-                        <button class="actif">Resultats</button>
+                        <button class="actif">Résultats</button>
                         <button>Statistiques</button>
-                        <button>Criteres</button>
+                        <button>Critères</button>
                     </div>
                 </div>
             </div>
@@ -867,9 +876,9 @@
                 <div class="ref-nav-mock" style="background:#032e5c; padding:10px">
                     <div class="sous-navigation">
                         <button>Grilles</button>
-                        <button class="actif">Resultats</button>
+                        <button class="actif">Résultats</button>
                         <button>Statistiques</button>
-                        <button>Criteres</button>
+                        <button>Critères</button>
                     </div>
                 </div>
             </div>
@@ -882,7 +891,7 @@
      ============================================================ -->
 <section id="tableaux" class="guide-section">
     <h2 class="guide-section-title">9. Tableaux</h2>
-    <p class="guide-section-intro">Tableau standard .tableau avec en-tete colore et lignes alternees.</p>
+    <p class="guide-section-intro">Tableau standard .tableau avec en-tête coloré et lignes alternées.</p>
 
     <div class="guide-component">
         <h3 class="guide-component-title">Tableau standard</h3>
@@ -893,17 +902,17 @@
                     <table class="tableau">
                         <thead>
                             <tr>
-                                <th>Etudiant</th>
+                                <th>Étudiant</th>
                                 <th>Note</th>
                                 <th>Statut</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr><td>Alice Tremblay</td><td>85%</td><td>Reussi</td></tr>
-                            <tr><td>Bob Gagnon</td><td>72%</td><td>Reussi</td></tr>
-                            <tr><td>Claire Dubois</td><td>91%</td><td>Reussi</td></tr>
-                            <tr><td>David Lavoie</td><td>58%</td><td>En progres</td></tr>
-                            <tr><td>Eva Morin</td><td>67%</td><td>Reussi</td></tr>
+                            <tr><td>Alice Tremblay</td><td>85%</td><td>Réussi</td></tr>
+                            <tr><td>Bob Gagnon</td><td>72%</td><td>Réussi</td></tr>
+                            <tr><td>Claire Dubois</td><td>91%</td><td>Réussi</td></tr>
+                            <tr><td>David Lavoie</td><td>58%</td><td>En progrès</td></tr>
+                            <tr><td>Eva Morin</td><td>67%</td><td>Réussi</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -914,17 +923,17 @@
                     <table class="tableau">
                         <thead>
                             <tr>
-                                <th>Etudiant</th>
+                                <th>Étudiant</th>
                                 <th>Note</th>
                                 <th>Statut</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr><td>Alice Tremblay</td><td>85%</td><td>Reussi</td></tr>
-                            <tr><td>Bob Gagnon</td><td>72%</td><td>Reussi</td></tr>
-                            <tr><td>Claire Dubois</td><td>91%</td><td>Reussi</td></tr>
-                            <tr><td>David Lavoie</td><td>58%</td><td>En progres</td></tr>
-                            <tr><td>Eva Morin</td><td>67%</td><td>Reussi</td></tr>
+                            <tr><td>Alice Tremblay</td><td>85%</td><td>Réussi</td></tr>
+                            <tr><td>Bob Gagnon</td><td>72%</td><td>Réussi</td></tr>
+                            <tr><td>Claire Dubois</td><td>91%</td><td>Réussi</td></tr>
+                            <tr><td>David Lavoie</td><td>58%</td><td>En progrès</td></tr>
+                            <tr><td>Eva Morin</td><td>67%</td><td>Réussi</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -938,7 +947,7 @@
      ============================================================ -->
 <section id="alertes-badges" class="guide-section">
     <h2 class="guide-section-title">10. Alertes et badges</h2>
-    <p class="guide-section-intro">4 types d'alertes, badges d'evaluation et badges de notation.</p>
+    <p class="guide-section-intro">4 types d'alertes, badges d'évaluation et badges de notation.</p>
 
     <div class="guide-component">
         <h3 class="guide-component-title">Alertes</h3>
@@ -946,18 +955,18 @@
             <div class="ref-panel ref-panel-sombre">
                 <div class="ref-panel-label">Mode sombre</div>
                 <div class="ref-alert-grid">
-                    <div class="alerte alerte-attention"><strong>Attention :</strong> Certaines evaluations sont incompletes.</div>
-                    <div class="alerte alerte-information"><strong>Information :</strong> Le trimestre a ete configure avec succes.</div>
-                    <div class="alerte alerte-succes"><strong>Succes :</strong> Les 30 etudiants ont ete importes.</div>
+                    <div class="alerte alerte-attention"><strong>Attention :</strong> Certaines évaluations sont incomplètes.</div>
+                    <div class="alerte alerte-information"><strong>Information :</strong> Le trimestre a été configuré avec succès.</div>
+                    <div class="alerte alerte-succes"><strong>Succès :</strong> Les 30 étudiants ont été importés.</div>
                     <div class="alerte alerte-erreur"><strong>Erreur :</strong> Impossible de charger le fichier JSON.</div>
                 </div>
             </div>
             <div class="ref-panel ref-panel-clair mode-clair">
                 <div class="ref-panel-label">Mode clair</div>
                 <div class="ref-alert-grid">
-                    <div class="alerte alerte-attention"><strong>Attention :</strong> Certaines evaluations sont incompletes.</div>
-                    <div class="alerte alerte-information"><strong>Information :</strong> Le trimestre a ete configure avec succes.</div>
-                    <div class="alerte alerte-succes"><strong>Succes :</strong> Les 30 etudiants ont ete importes.</div>
+                    <div class="alerte alerte-attention"><strong>Attention :</strong> Certaines évaluations sont incomplètes.</div>
+                    <div class="alerte alerte-information"><strong>Information :</strong> Le trimestre a été configuré avec succès.</div>
+                    <div class="alerte alerte-succes"><strong>Succès :</strong> Les 30 étudiants ont été importés.</div>
                     <div class="alerte alerte-erreur"><strong>Erreur :</strong> Impossible de charger le fichier JSON.</div>
                 </div>
             </div>
@@ -968,37 +977,37 @@
             <div class="ref-panel ref-panel-sombre">
                 <div class="ref-panel-label">Mode sombre</div>
                 <div class="ref-alert-grid">
-                    <div class="info-box info-box--attention">Attention : verifiez les donnees avant de continuer.</div>
-                    <div class="info-box info-box--info">Information complementaire sur le module.</div>
-                    <div class="info-box info-box--succes">Operation completee avec succes.</div>
+                    <div class="info-box info-box--attention">Attention : vérifiez les données avant de continuer.</div>
+                    <div class="info-box info-box--info">Information complémentaire sur le module.</div>
+                    <div class="info-box info-box--succes">Opération complétée avec succès.</div>
                     <div class="info-box info-box--erreur">Une erreur est survenue lors du traitement.</div>
                 </div>
             </div>
             <div class="ref-panel ref-panel-clair mode-clair">
                 <div class="ref-panel-label">Mode clair</div>
                 <div class="ref-alert-grid">
-                    <div class="info-box info-box--attention">Attention : verifiez les donnees avant de continuer.</div>
-                    <div class="info-box info-box--info">Information complementaire sur le module.</div>
-                    <div class="info-box info-box--succes">Operation completee avec succes.</div>
+                    <div class="info-box info-box--attention">Attention : vérifiez les données avant de continuer.</div>
+                    <div class="info-box info-box--info">Information complémentaire sur le module.</div>
+                    <div class="info-box info-box--succes">Opération complétée avec succès.</div>
                     <div class="info-box info-box--erreur">Une erreur est survenue lors du traitement.</div>
                 </div>
             </div>
         </div>
 
-        <h3 class="guide-component-title">Badges d'evaluation</h3>
+        <h3 class="guide-component-title">Badges d'évaluation</h3>
         <div class="ref-dual">
             <div class="ref-panel ref-panel-sombre">
                 <div class="ref-panel-label">Mode sombre</div>
                 <div class="ref-badge-row">
-                    <span class="badge-statut evalue">Evalue</span>
-                    <span class="badge-statut non-evalue">Non evalue</span>
+                    <span class="badge-statut evalue">Évalué</span>
+                    <span class="badge-statut non-evalue">Non évalué</span>
                 </div>
             </div>
             <div class="ref-panel ref-panel-clair mode-clair">
                 <div class="ref-panel-label">Mode clair</div>
                 <div class="ref-badge-row">
-                    <span class="badge-statut evalue">Evalue</span>
-                    <span class="badge-statut non-evalue">Non evalue</span>
+                    <span class="badge-statut evalue">Évalué</span>
+                    <span class="badge-statut non-evalue">Non évalué</span>
                 </div>
             </div>
         </div>
@@ -1049,9 +1058,9 @@
                     <div class="ref-swatch"><div class="ref-swatch-color" style="background:#6aacb8"></div><div class="ref-swatch-name">Nul<br>#6aacb8</div></div>
                     <div class="ref-swatch"><div class="ref-swatch-color" style="background:#34c759"></div><div class="ref-swatch-name">Minimal<br>#34c759</div></div>
                     <div class="ref-swatch"><div class="ref-swatch-color" style="background:#7ae8a0"></div><div class="ref-swatch-name">Faible<br>#7ae8a0</div></div>
-                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#ffc107"></div><div class="ref-swatch-name">Modere<br>#ffc107</div></div>
-                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#fd7e14"></div><div class="ref-swatch-name">Eleve<br>#fd7e14</div></div>
-                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#e84057"></div><div class="ref-swatch-name">Tres eleve<br>#e84057</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#ffc107"></div><div class="ref-swatch-name">Modéré<br>#ffc107</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#fd7e14"></div><div class="ref-swatch-name">Élevé<br>#fd7e14</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#e84057"></div><div class="ref-swatch-name">Très élevé<br>#e84057</div></div>
                     <div class="ref-swatch"><div class="ref-swatch-color" style="background:#a02030"></div><div class="ref-swatch-name">Critique<br>#a02030</div></div>
                 </div>
             </div>
@@ -1061,12 +1070,745 @@
                     <div class="ref-swatch"><div class="ref-swatch-color" style="background:#6aacb8"></div><div class="ref-swatch-name">Nul<br>#6aacb8</div></div>
                     <div class="ref-swatch"><div class="ref-swatch-color" style="background:#34c759"></div><div class="ref-swatch-name">Minimal<br>#34c759</div></div>
                     <div class="ref-swatch"><div class="ref-swatch-color" style="background:#7ae8a0"></div><div class="ref-swatch-name">Faible<br>#7ae8a0</div></div>
-                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#ffc107"></div><div class="ref-swatch-name">Modere<br>#ffc107</div></div>
-                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#fd7e14"></div><div class="ref-swatch-name">Eleve<br>#fd7e14</div></div>
-                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#e84057"></div><div class="ref-swatch-name">Tres eleve<br>#e84057</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#ffc107"></div><div class="ref-swatch-name">Modéré<br>#ffc107</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#fd7e14"></div><div class="ref-swatch-name">Élevé<br>#fd7e14</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#e84057"></div><div class="ref-swatch-name">Très élevé<br>#e84057</div></div>
                     <div class="ref-swatch"><div class="ref-swatch-color" style="background:#a02030"></div><div class="ref-swatch-name">Critique<br>#a02030</div></div>
                 </div>
             </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     SECTION 11 — TYPOGRAPHIE
+     ============================================================ -->
+<section id="typographie" class="guide-section">
+    <h2 class="guide-section-title">11. Typographie</h2>
+    <p class="guide-section-intro">Hiérarchie des titres, tailles utilitaires et règle des guillemets français.</p>
+
+    <div class="guide-component">
+        <h3 class="guide-component-title">Hiérarchie des titres</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div style="display:flex; flex-direction:column; gap:8px">
+                    <h1 style="margin:0">H1 —2rem (32px)</h1>
+                    <h2 style="margin:0">H2 —1.5rem (24px)</h2>
+                    <h3 style="margin:0">H3 —1.2rem (19px)</h3>
+                    <h4 style="margin:0">H4 —1rem (16px)</h4>
+                    <p style="margin:0">Paragraphe —0.95rem (15px)</p>
+                    <p style="font-size:0.7rem; color:var(--texte-muted); margin:8px 0 0">Font : system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif</p>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div style="display:flex; flex-direction:column; gap:8px">
+                    <h1 style="margin:0">H1 —2rem (32px)</h1>
+                    <h2 style="margin:0">H2 —1.5rem (24px)</h2>
+                    <h3 style="margin:0">H3 —1.2rem (19px)</h3>
+                    <h4 style="margin:0">H4 —1rem (16px)</h4>
+                    <p style="margin:0">Paragraphe —0.95rem (15px)</p>
+                    <p style="font-size:0.7rem; color:var(--texte-muted); margin:8px 0 0">Font : system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif</p>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="guide-component-title">Tailles utilitaires .u-texte-*</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div style="display:flex; flex-direction:column; gap:6px">
+                    <span class="u-texte-mini">u-texte-mini —0.7rem</span>
+                    <span class="u-texte-petit">u-texte-petit —0.85rem</span>
+                    <span class="u-texte-09">u-texte-09 —0.9rem</span>
+                    <span class="u-texte-moyen">u-texte-moyen —0.95rem</span>
+                    <span class="u-texte-11">u-texte-11 —1.1rem</span>
+                    <span class="u-texte-grand">u-texte-grand —1.2rem</span>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div style="display:flex; flex-direction:column; gap:6px">
+                    <span class="u-texte-mini">u-texte-mini —0.7rem</span>
+                    <span class="u-texte-petit">u-texte-petit —0.85rem</span>
+                    <span class="u-texte-09">u-texte-09 —0.9rem</span>
+                    <span class="u-texte-moyen">u-texte-moyen —0.95rem</span>
+                    <span class="u-texte-11">u-texte-11 —1.1rem</span>
+                    <span class="u-texte-grand">u-texte-grand —1.2rem</span>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="guide-component-title">Guillemets français (règle critique)</h3>
+        <div class="guide-specs">
+            <div class="guide-specs-title">Règle obligatoire</div>
+            <ul>
+                <li><strong>Correct :</strong> &laquo;&nbsp;Texte entre guillemets&nbsp;&raquo; —utiliser <code>&amp;laquo;&amp;nbsp;...&amp;nbsp;&amp;raquo;</code></li>
+                <li><strong>Interdit :</strong> "Texte entre guillemets" —ne jamais utiliser les guillemets anglais</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     SECTION 12 — BADGES TETRIS COMPLETS
+     ============================================================ -->
+<section id="badges-tetris" class="guide-section">
+    <h2 class="guide-section-title">12. Badges Tetris complets</h2>
+    <p class="guide-section-intro">Système unifié : 3px 8px padding, 0.75rem, radius 5px. Tous les types de badges de l'application.</p>
+
+    <div class="guide-component">
+        <h3 class="guide-component-title">Badges absence / retard</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="ref-badge-row">
+                    <span class="badge-absence badge-absence-complete"><span class="badge-absence-date">15 jan</span><span class="badge-absence-heures">3h</span></span>
+                    <span class="badge-absence badge-absence-partielle"><span class="badge-absence-date">22 jan</span><span class="badge-absence-heures">1h</span></span>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="ref-badge-row">
+                    <span class="badge-absence badge-absence-complete"><span class="badge-absence-date">15 jan</span><span class="badge-absence-heures">3h</span></span>
+                    <span class="badge-absence badge-absence-partielle"><span class="badge-absence-date">22 jan</span><span class="badge-absence-heures">1h</span></span>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="guide-component-title">Badge intervention RaI</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="ref-badge-row">
+                    <span class="badge-absence badge-intervention-rai"><span class="badge-absence-date">RaI</span><span class="badge-absence-heures">N2</span></span>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="ref-badge-row">
+                    <span class="badge-absence badge-intervention-rai"><span class="badge-absence-date">RaI</span><span class="badge-absence-heures">N2</span></span>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="guide-component-title">Badges artefacts / productions</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="ref-badge-row">
+                    <span class="badge-artefact" style="background:rgba(40,167,69,0.15); border-color:#28a745"><span class="badge-artefact-titre" style="color:#5ae080">TP1</span><span class="badge-artefact-note" style="background:#28a745">85%</span></span>
+                    <span class="badge-artefact-non-remis"><span class="badge-artefact-titre">TP2</span></span>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="ref-badge-row">
+                    <span class="badge-artefact" style="background:rgba(40,167,69,0.15); border-color:#28a745"><span class="badge-artefact-titre" style="color:#1e7e34">TP1</span><span class="badge-artefact-note" style="background:#28a745">85%</span></span>
+                    <span class="badge-artefact-non-remis"><span class="badge-artefact-titre">TP2</span></span>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="guide-component-title">Badges jetons (délai / reprise / personnalisé)</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="ref-badge-row">
+                    <span class="badge-jeton-delai-wrapper"><span class="badge-jeton-titre">Délai</span><span class="badge-jeton-numero badge-jeton-numero-delai">J1</span></span>
+                    <span class="badge-jeton-reprise-wrapper"><span class="badge-jeton-titre">Reprise</span><span class="badge-jeton-numero badge-jeton-numero-reprise">R1</span></span>
+                    <span class="badge-jeton-personnalise-wrapper"><span class="badge-jeton-titre">Perso</span><span class="badge-jeton-numero badge-jeton-numero-personnalise">P1</span></span>
+                </div>
+                <div class="ref-badge-row" style="margin-top:8px">
+                    <span class="badge-jeton badge-jeton-delai" style="margin-left:0">Délai</span>
+                    <span class="badge-jeton badge-jeton-reprise" style="margin-left:0">Reprise</span>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="ref-badge-row">
+                    <span class="badge-jeton-delai-wrapper"><span class="badge-jeton-titre">Délai</span><span class="badge-jeton-numero badge-jeton-numero-delai">J1</span></span>
+                    <span class="badge-jeton-reprise-wrapper"><span class="badge-jeton-titre">Reprise</span><span class="badge-jeton-numero badge-jeton-numero-reprise">R1</span></span>
+                    <span class="badge-jeton-personnalise-wrapper"><span class="badge-jeton-titre">Perso</span><span class="badge-jeton-numero badge-jeton-numero-personnalise">P1</span></span>
+                </div>
+                <div class="ref-badge-row" style="margin-top:8px">
+                    <span class="badge-jeton badge-jeton-delai" style="margin-left:0">Délai</span>
+                    <span class="badge-jeton badge-jeton-reprise" style="margin-left:0">Reprise</span>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="guide-component-title">Badges statut intervention</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="ref-badge-row">
+                    <span class="badge-statut-planifiee">Planifiée</span>
+                    <span class="badge-statut-en-cours">En cours</span>
+                    <span class="badge-statut-completee">Complétée</span>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="ref-badge-row">
+                    <span class="badge-statut-planifiee">Planifiée</span>
+                    <span class="badge-statut-en-cours">En cours</span>
+                    <span class="badge-statut-completee">Complétée</span>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="guide-component-title">Badges source</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="ref-badge-row">
+                    <span class="badge-source badge-source--locale" style="margin-left:0">Locale</span>
+                    <span class="badge-source badge-source--bibliotheque" style="margin-left:0">Bibliothèque</span>
+                    <span class="badge-source badge-source--retiree" style="margin-left:0">Retirée</span>
+                    <span class="badge-source badge-source--id" style="margin-left:0">ID-a1b2c3</span>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="ref-badge-row">
+                    <span class="badge-source badge-source--locale" style="margin-left:0">Locale</span>
+                    <span class="badge-source badge-source--bibliotheque" style="margin-left:0">Bibliothèque</span>
+                    <span class="badge-source badge-source--retiree" style="margin-left:0">Retirée</span>
+                    <span class="badge-source badge-source--id" style="margin-left:0">ID-a1b2c3</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     SECTION 13 — MODALS
+     ============================================================ -->
+<section id="modals" class="guide-section">
+    <h2 class="guide-section-title">13. Modals</h2>
+    <p class="guide-section-intro">Système de modals avec overlay, 3 tailles et bouton fermer.</p>
+
+    <div class="guide-component">
+        <h3 class="guide-component-title">Modal standard (simulée)</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div style="background:rgba(3,46,92,0.4); backdrop-filter:blur(2px); padding:20px; border-radius:8px">
+                    <div class="modal-contenu" style="position:relative; margin:0">
+                        <button class="modal-fermer">&times;</button>
+                        <h3 class="modal-titre">Titre du modal</h3>
+                        <div class="modal-section">
+                            <p style="color:var(--texte-secondaire); font-size:0.9rem; margin:0">Contenu du modal avec fond surface-carte, radius grand et shadow fort.</p>
+                        </div>
+                        <div class="modal-actions">
+                            <button class="btn btn-annuler">Annuler</button>
+                            <button class="btn btn-confirmer">Confirmer</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div style="background:rgba(3,46,92,0.2); backdrop-filter:blur(2px); padding:20px; border-radius:8px">
+                    <div class="modal-contenu" style="position:relative; margin:0; border:1px solid rgba(3,46,92,0.1)">
+                        <button class="modal-fermer">&times;</button>
+                        <h3 class="modal-titre">Titre du modal</h3>
+                        <div class="modal-section">
+                            <p style="color:var(--texte-secondaire); font-size:0.9rem; margin:0">Contenu du modal avec fond surface-carte, radius grand et shadow fort.</p>
+                        </div>
+                        <div class="modal-actions">
+                            <button class="btn btn-annuler">Annuler</button>
+                            <button class="btn btn-confirmer">Confirmer</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="guide-specs">
+            <div class="guide-specs-title">Tailles disponibles</div>
+            <ul>
+                <li><strong>.modal-compact :</strong> max-width 600px</li>
+                <li><strong>(défaut) :</strong> max-width 800px</li>
+                <li><strong>.modal-large :</strong> max-width 1200px</li>
+            </ul>
+        </div>
+
+        <h3 class="guide-component-title">Modal JS (variante)</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div style="background:rgba(0,0,0,0.5); padding:20px; border-radius:8px">
+                    <div class="modal-js-contenu" style="max-width:100%; width:100%">
+                        <button class="modal-js-fermer">&times;</button>
+                        <h3 style="color:var(--accent-primaire); margin:0 0 12px">Modal JS</h3>
+                        <p style="color:var(--texte-secondaire); font-size:0.9rem; margin:0">Variante centrée avec flex, fond rgba(0,0,0,0.5).</p>
+                    </div>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div style="background:rgba(0,0,0,0.3); padding:20px; border-radius:8px">
+                    <div class="modal-js-contenu" style="max-width:100%; width:100%; border:1px solid rgba(3,46,92,0.1)">
+                        <button class="modal-js-fermer">&times;</button>
+                        <h3 style="color:var(--accent-primaire); margin:0 0 12px">Modal JS</h3>
+                        <p style="color:var(--texte-secondaire); font-size:0.9rem; margin:0">Variante centrée avec flex, fond rgba(0,0,0,0.5).</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     SECTION 14 — CARTES MÉTRIQUES
+     ============================================================ -->
+<section id="cartes-metriques" class="guide-section">
+    <h2 class="guide-section-title">14. Cartes métriques</h2>
+    <p class="guide-section-intro">Indicateurs numériques avec label et valeur. Variantes colorées selon le niveau de risque.</p>
+
+    <div class="guide-component">
+        <h3 class="guide-component-title">Carte métrique standard</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div style="display:flex; flex-direction:column; gap:10px">
+                    <div class="carte-metrique"><span class="label">Étudiants inscrits</span><strong>32</strong></div>
+                    <div class="carte-metrique"><span class="label">Taux de réussite</span><strong>87%</strong></div>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div style="display:flex; flex-direction:column; gap:10px">
+                    <div class="carte-metrique"><span class="label">Étudiants inscrits</span><strong>32</strong></div>
+                    <div class="carte-metrique"><span class="label">Taux de réussite</span><strong>87%</strong></div>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="guide-component-title">Variantes colorées</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div style="display:flex; flex-direction:column; gap:10px">
+                    <div class="carte-metrique-standard carte-metrique-bleue"><span class="label">Bleue (accent)</span><span class="valeur">42</span></div>
+                    <div class="carte-metrique-standard" style="background:var(--surface-carte); border-color:var(--risque-minimal)"><span class="label">Verte (minimal)</span><span class="valeur" style="color:var(--risque-minimal)">91%</span></div>
+                    <div class="carte-metrique-standard" style="background:var(--surface-carte); border-color:var(--risque-modere)"><span class="label">Modéré</span><span class="valeur" style="color:var(--risque-modere)">65%</span></div>
+                    <div class="carte-metrique-standard" style="background:var(--surface-carte); border-color:var(--risque-critique)"><span class="label">Critique</span><span class="valeur" style="color:var(--risque-critique)">23%</span></div>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div style="display:flex; flex-direction:column; gap:10px">
+                    <div class="carte-metrique-standard carte-metrique-bleue"><span class="label">Bleue (accent)</span><span class="valeur">42</span></div>
+                    <div class="carte-metrique-standard" style="background:var(--surface-carte); border-color:var(--risque-minimal)"><span class="label">Verte (minimal)</span><span class="valeur" style="color:var(--risque-minimal)">91%</span></div>
+                    <div class="carte-metrique-standard" style="background:var(--surface-carte); border-color:var(--risque-modere)"><span class="label">Modéré</span><span class="valeur" style="color:var(--risque-modere)">65%</span></div>
+                    <div class="carte-metrique-standard" style="background:var(--surface-carte); border-color:var(--risque-critique)"><span class="label">Critique</span><span class="valeur" style="color:var(--risque-critique)">23%</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     SECTION 15 — SIDEBAR NAVIGATION
+     ============================================================ -->
+<section id="sidebar" class="guide-section">
+    <h2 class="guide-section-title">15. Sidebar navigation</h2>
+    <p class="guide-section-intro">Panneau latéral 280px sticky avec filtre, info-card, items et actions.</p>
+
+    <div class="guide-component">
+        <h3 class="guide-component-title">Sidebar complète</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="sidebar-navigation" style="position:static; max-height:none">
+                    <div class="sidebar-section-titre">Grilles d'évaluation</div>
+                    <div class="sidebar-info-card">
+                        <div class="sidebar-info-card-nom">Alice Tremblay</div>
+                        <div class="sidebar-info-card-details">DA: 1234567 | Programme: TI</div>
+                    </div>
+                    <div class="sidebar-nav-buttons">
+                        <button class="btn btn-principal" style="flex:1; font-size:0.85rem; padding:8px">&larr;</button>
+                        <button class="btn btn-principal" style="flex:1; font-size:0.85rem; padding:8px">&rarr;</button>
+                    </div>
+                    <div class="sidebar-liste">
+                        <div class="sidebar-item active">
+                            <div class="sidebar-item-titre">Grille TP1</div>
+                            <div class="sidebar-item-badges"><span class="sidebar-item-badge">évaluée</span></div>
+                        </div>
+                        <div class="sidebar-item">
+                            <div class="sidebar-item-titre">Grille TP2</div>
+                            <div class="sidebar-item-description">Non évaluée</div>
+                        </div>
+                        <div class="sidebar-item">
+                            <div class="sidebar-item-titre">Grille Examen</div>
+                            <div class="sidebar-item-description">Planifiée</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="sidebar-navigation" style="position:static; max-height:none">
+                    <div class="sidebar-section-titre">Grilles d'évaluation</div>
+                    <div class="sidebar-info-card">
+                        <div class="sidebar-info-card-nom">Alice Tremblay</div>
+                        <div class="sidebar-info-card-details">DA: 1234567 | Programme: TI</div>
+                    </div>
+                    <div class="sidebar-nav-buttons">
+                        <button class="btn btn-principal" style="flex:1; font-size:0.85rem; padding:8px">&larr;</button>
+                        <button class="btn btn-principal" style="flex:1; font-size:0.85rem; padding:8px">&rarr;</button>
+                    </div>
+                    <div class="sidebar-liste">
+                        <div class="sidebar-item active">
+                            <div class="sidebar-item-titre">Grille TP1</div>
+                            <div class="sidebar-item-badges"><span class="sidebar-item-badge">évaluée</span></div>
+                        </div>
+                        <div class="sidebar-item">
+                            <div class="sidebar-item-titre">Grille TP2</div>
+                            <div class="sidebar-item-description">Non évaluée</div>
+                        </div>
+                        <div class="sidebar-item">
+                            <div class="sidebar-item-titre">Grille Examen</div>
+                            <div class="sidebar-item-description">Planifiée</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     SECTION 16 — TOGGLES D'INFORMATION
+     ============================================================ -->
+<section id="toggles" class="guide-section">
+    <h2 class="guide-section-title">16. Toggles d'information</h2>
+    <p class="guide-section-intro">3 types de cartes dépliables : pratique (jaune), technique (vert), pédagogique (rouge).</p>
+
+    <div class="guide-component">
+        <h3 class="guide-component-title">Les 3 types de cartes toggle</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div style="display:flex; flex-direction:column; gap:12px">
+                    <div class="carte-info-toggle carte-info-note" style="display:block">
+                        <div class="carte-info-toggle-titre"><span class="emoji">&#x1F4A1;</span><span class="texte">Conseil pratique</span></div>
+                        <p style="margin:0; font-size:0.85rem">Astuce concrète pour l'utilisation de l'outil.</p>
+                    </div>
+                    <div class="carte-info-toggle carte-info-conseil" style="display:block">
+                        <div class="carte-info-toggle-titre"><span class="emoji">&#x1F4CF;</span><span class="texte">Information technique</span></div>
+                        <p style="margin:0; font-size:0.85rem">Détail technique sur le fonctionnement interne.</p>
+                    </div>
+                    <div class="carte-info-toggle carte-info-pedagogique" style="display:block">
+                        <div class="carte-info-toggle-titre"><span class="emoji">&#x1F34E;</span><span class="texte">Note pédagogique</span></div>
+                        <p style="margin:0; font-size:0.85rem">Fondement pédagogique de cette fonctionnalité.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div style="display:flex; flex-direction:column; gap:12px">
+                    <div class="carte-info-toggle carte-info-note" style="display:block">
+                        <div class="carte-info-toggle-titre"><span class="emoji">&#x1F4A1;</span><span class="texte">Conseil pratique</span></div>
+                        <p style="margin:0; font-size:0.85rem">Astuce concrète pour l'utilisation de l'outil.</p>
+                    </div>
+                    <div class="carte-info-toggle carte-info-conseil" style="display:block">
+                        <div class="carte-info-toggle-titre"><span class="emoji">&#x1F4CF;</span><span class="texte">Information technique</span></div>
+                        <p style="margin:0; font-size:0.85rem">Détail technique sur le fonctionnement interne.</p>
+                    </div>
+                    <div class="carte-info-toggle carte-info-pedagogique" style="display:block">
+                        <div class="carte-info-toggle-titre"><span class="emoji">&#x1F34E;</span><span class="texte">Note pédagogique</span></div>
+                        <p style="margin:0; font-size:0.85rem">Fondement pédagogique de cette fonctionnalité.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="guide-specs">
+            <div class="guide-specs-title">Règle emojis (CRITIQUE)</div>
+            <ul>
+                <li><strong>Seuls 4 emojis autorisés :</strong> &#x1F4A1; (pratique), &#x1F4CF; (technique), &#x1F34E; (pédagogique), &#x26A0;&#xFE0F; (modals uniquement)</li>
+                <li>Aucun autre emoji ne doit apparaître dans l'interface</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     SECTION 17 — BARRES DE GRADIENT ET POINTS ÉTUDIANTS
+     ============================================================ -->
+<section id="barres-gradient" class="guide-section">
+    <h2 class="guide-section-title">17. Barres de gradient et points étudiants</h2>
+    <p class="guide-section-intro">Barres A-C-P-E, patterns, RaI avec overlays. Points 3D animés (sphere blanche, float-vertical).</p>
+
+    <div class="guide-component">
+        <h3 class="guide-component-title">Barre indicateur A-C-P-E</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div style="position:relative">
+                    <div class="barre-indicateur">
+                        <div class="barre-indicateur-overlay"></div>
+                    </div>
+                    <p style="font-size:0.7rem; color:var(--texte-muted); margin:6px 0 0">orange &rarr; vert &rarr; bleu | overlay 20% | 55px height</p>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div style="position:relative">
+                    <div class="barre-indicateur">
+                        <div class="barre-indicateur-overlay"></div>
+                    </div>
+                    <p style="font-size:0.7rem; color:var(--texte-muted); margin:6px 0 0">orange &rarr; vert &rarr; bleu | overlay 20% | 55px height</p>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="guide-component-title">Barre patterns d'apprentissage</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div style="position:relative">
+                    <div class="barre-patterns">
+                        <div class="barre-patterns-overlay"></div>
+                    </div>
+                    <p style="font-size:0.7rem; color:var(--texte-muted); margin:6px 0 0">vert &rarr; indigo | overlay 35% | 55px height</p>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div style="position:relative">
+                    <div class="barre-patterns">
+                        <div class="barre-patterns-overlay"></div>
+                    </div>
+                    <p style="font-size:0.7rem; color:var(--texte-muted); margin:6px 0 0">vert &rarr; indigo | overlay 35% | 55px height</p>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="guide-component-title">Barre RaI (niveaux d'intervention)</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div style="position:relative">
+                    <div class="barre-rai">
+                        <div class="barre-rai-overlay"></div>
+                    </div>
+                    <p style="font-size:0.7rem; color:var(--texte-muted); margin:6px 0 0">bleu &rarr; violet | overlay 40% | 55px height</p>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div style="position:relative">
+                    <div class="barre-rai">
+                        <div class="barre-rai-overlay"></div>
+                    </div>
+                    <p style="font-size:0.7rem; color:var(--texte-muted); margin:6px 0 0">bleu &rarr; violet | overlay 40% | 55px height</p>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="guide-component-title">Points étudiants 3D (barre-etudiant)</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div style="position:relative">
+                    <div class="barre-indicateur" style="height:60px">
+                        <div class="barre-indicateur-overlay"></div>
+                        <div class="barre-etudiant" style="left:15%; --duration:4s; --amp:6px; --scaleUp:1.1; --scaleDown:0.9"></div>
+                        <div class="barre-etudiant" style="left:30%; --duration:5s; --amp:8px; --scaleUp:1.15; --scaleDown:0.85; animation-delay:-1.5s"></div>
+                        <div class="barre-etudiant" style="left:50%; --duration:6s; --amp:10px; --scaleUp:1.1; --scaleDown:0.9; animation-delay:-3s"></div>
+                        <div class="barre-etudiant" style="left:65%; --duration:4.5s; --amp:7px; --scaleUp:1.12; --scaleDown:0.88; animation-delay:-2s"></div>
+                        <div class="barre-etudiant" style="left:80%; --duration:5.5s; --amp:9px; --scaleUp:1.1; --scaleDown:0.9; animation-delay:-4s"></div>
+                    </div>
+                    <p style="font-size:0.7rem; color:var(--texte-muted); margin:6px 0 0">Sphères blanches 10px | radial-gradient | animation float-vertical | ombre 3D</p>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div style="position:relative">
+                    <div class="barre-indicateur" style="height:60px">
+                        <div class="barre-indicateur-overlay"></div>
+                        <div class="barre-etudiant" style="left:15%; --duration:4s; --amp:6px; --scaleUp:1.1; --scaleDown:0.9"></div>
+                        <div class="barre-etudiant" style="left:30%; --duration:5s; --amp:8px; --scaleUp:1.15; --scaleDown:0.85; animation-delay:-1.5s"></div>
+                        <div class="barre-etudiant" style="left:50%; --duration:6s; --amp:10px; --scaleUp:1.1; --scaleDown:0.9; animation-delay:-3s"></div>
+                        <div class="barre-etudiant" style="left:65%; --duration:4.5s; --amp:7px; --scaleUp:1.12; --scaleDown:0.88; animation-delay:-2s"></div>
+                        <div class="barre-etudiant" style="left:80%; --duration:5.5s; --amp:9px; --scaleUp:1.1; --scaleDown:0.9; animation-delay:-4s"></div>
+                    </div>
+                    <p style="font-size:0.7rem; color:var(--texte-muted); margin:6px 0 0">Sphères blanches 10px | radial-gradient | animation float-vertical | ombre 3D</p>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="guide-component-title">Points colorés (étudiants suivis)</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap">
+                    <div style="display:flex; align-items:center; gap:6px">
+                        <div class="barre-etudiant" style="position:static; transform:none; animation:none; width:14px; height:14px"></div>
+                        <span style="font-size:0.75rem; color:var(--texte-secondaire)">Standard (blanc)</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:6px">
+                        <div class="barre-etudiant tracked-0" style="position:static; transform:none; animation:none; width:14px; height:14px"></div>
+                        <span style="font-size:0.75rem; color:var(--texte-secondaire)">Suivi 1 (rouge)</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:6px">
+                        <div class="barre-etudiant tracked-1" style="position:static; transform:none; animation:none; width:14px; height:14px"></div>
+                        <span style="font-size:0.75rem; color:var(--texte-secondaire)">Suivi 2 (jaune)</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:6px">
+                        <div class="barre-etudiant tracked-2" style="position:static; transform:none; animation:none; width:14px; height:14px"></div>
+                        <span style="font-size:0.75rem; color:var(--texte-secondaire)">Suivi 3 (vert)</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:6px">
+                        <div class="barre-etudiant tracked-3" style="position:static; transform:none; animation:none; width:14px; height:14px"></div>
+                        <span style="font-size:0.75rem; color:var(--texte-secondaire)">Suivi 4 (cyan)</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:6px">
+                        <div class="barre-etudiant tracked-4" style="position:static; transform:none; animation:none; width:14px; height:14px"></div>
+                        <span style="font-size:0.75rem; color:var(--texte-secondaire)">Suivi 5 (orange)</span>
+                    </div>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap">
+                    <div style="display:flex; align-items:center; gap:6px">
+                        <div class="barre-etudiant" style="position:static; transform:none; animation:none; width:14px; height:14px"></div>
+                        <span style="font-size:0.75rem; color:var(--texte-secondaire)">Standard (blanc)</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:6px">
+                        <div class="barre-etudiant tracked-0" style="position:static; transform:none; animation:none; width:14px; height:14px"></div>
+                        <span style="font-size:0.75rem; color:var(--texte-secondaire)">Suivi 1 (rouge)</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:6px">
+                        <div class="barre-etudiant tracked-1" style="position:static; transform:none; animation:none; width:14px; height:14px"></div>
+                        <span style="font-size:0.75rem; color:var(--texte-secondaire)">Suivi 2 (jaune)</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:6px">
+                        <div class="barre-etudiant tracked-2" style="position:static; transform:none; animation:none; width:14px; height:14px"></div>
+                        <span style="font-size:0.75rem; color:var(--texte-secondaire)">Suivi 3 (vert)</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:6px">
+                        <div class="barre-etudiant tracked-3" style="position:static; transform:none; animation:none; width:14px; height:14px"></div>
+                        <span style="font-size:0.75rem; color:var(--texte-secondaire)">Suivi 4 (cyan)</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:6px">
+                        <div class="barre-etudiant tracked-4" style="position:static; transform:none; animation:none; width:14px; height:14px"></div>
+                        <span style="font-size:0.75rem; color:var(--texte-secondaire)">Suivi 5 (orange)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     SECTION 18 — PANNEAU CHANTIER (TOAST)
+     ============================================================ -->
+<section id="panneau-chantier" class="guide-section">
+    <h2 class="guide-section-title">18. Panneau chantier (toast mise à jour)</h2>
+    <p class="guide-section-intro">Notification orange fixe en haut à droite avec contour interne et animation slide-in. Défini dans index.html.</p>
+
+    <div class="guide-component">
+        <h3 class="guide-component-title">Bandeau mise à jour (simulation statique)</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div style="position:relative; display:inline-block; max-width:340px; background:#E8700A; color:#1a1a1a; padding:22px 24px; border-radius:14px; box-shadow:0 6px 24px rgba(0,0,0,0.35); font-size:0.9rem">
+                    <div style="position:absolute; top:6px; right:6px; bottom:6px; left:6px; border:2.5px solid #1a1a1a; border-radius:9px; pointer-events:none"></div>
+                    <div style="position:absolute; top:6px; right:10px; font-weight:700; font-size:1.2rem; opacity:0.7; cursor:pointer">&times;</div>
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px; margin-right:16px">
+                        <span style="font-size:1.4rem">&#x2192;</span>
+                        <span style="font-weight:900; text-transform:uppercase; letter-spacing:0.5px">BETA 97.5</span>
+                    </div>
+                    <span style="font-size:0.78rem; font-weight:600; line-height:1.45; display:block; margin-bottom:4px; margin-right:16px">Correction alignement mode clair et glassmorphisme navigation.</span>
+                    <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:8px; margin-top:10px">
+                        <span style="font-size:0.72rem; font-weight:600; color:rgba(26,26,26,0.65)">15 fev. 2026</span>
+                        <button style="background:#1a1a1a; color:#E8700A; border:none; padding:5px 14px; border-radius:6px; font-size:0.78rem; cursor:pointer; font-weight:800; text-transform:uppercase; letter-spacing:0.3px">OK</button>
+                    </div>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div style="position:relative; display:inline-block; max-width:340px; background:#E8700A; color:#1a1a1a; padding:22px 24px; border-radius:14px; box-shadow:0 6px 24px rgba(0,0,0,0.35); font-size:0.9rem">
+                    <div style="position:absolute; top:6px; right:6px; bottom:6px; left:6px; border:2.5px solid #1a1a1a; border-radius:9px; pointer-events:none"></div>
+                    <div style="position:absolute; top:6px; right:10px; font-weight:700; font-size:1.2rem; opacity:0.7; cursor:pointer">&times;</div>
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px; margin-right:16px">
+                        <span style="font-size:1.4rem">&#x2192;</span>
+                        <span style="font-weight:900; text-transform:uppercase; letter-spacing:0.5px">BETA 97.5</span>
+                    </div>
+                    <span style="font-size:0.78rem; font-weight:600; line-height:1.45; display:block; margin-bottom:4px; margin-right:16px">Correction alignement mode clair et glassmorphisme navigation.</span>
+                    <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:8px; margin-top:10px">
+                        <span style="font-size:0.72rem; font-weight:600; color:rgba(26,26,26,0.65)">15 fev. 2026</span>
+                        <button style="background:#1a1a1a; color:#E8700A; border:none; padding:5px 14px; border-radius:6px; font-size:0.78rem; cursor:pointer; font-weight:800; text-transform:uppercase; letter-spacing:0.3px">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="guide-specs">
+            <div class="guide-specs-title">Spécifications</div>
+            <ul>
+                <li>Fond #E8700A | Texte #1a1a1a | Contour interne 2.5px solid #1a1a1a (6px inset)</li>
+                <li>Position fixed top:20px right:20px | z-index 10000 | max-width 340px</li>
+                <li>Animation slide-in depuis la droite (translateX(100%) &rarr; 0)</li>
+                <li>Le panneau chantier est identique dans les deux modes (composant autonome)</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     SECTION 19 — PANNEAUX FORMULAIRE ET BOUTONS X
+     ============================================================ -->
+<section id="panneaux-form" class="guide-section">
+    <h2 class="guide-section-title">19. Panneaux formulaire et boutons X</h2>
+    <p class="guide-section-intro">Conteneur fond bleu pour formulaires et distinction bouton X orange (réinitialisation) vs rouge (annulation).</p>
+
+    <div class="guide-component">
+        <h3 class="guide-component-title">Panneau formulaire avec fond bleu</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div style="background:var(--bleu-tres-pale); padding:20px; border-radius:var(--radius-grand); border:1px solid rgba(106,172,184,0.15)">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
+                        <h4 style="margin:0; color:var(--accent-primaire)">Ajouter un élément</h4>
+                        <button style="background:none; border:none; font-size:1.3rem; cursor:pointer; color:var(--orange-accent); font-weight:700">&times;</button>
+                    </div>
+                    <div class="groupe-form">
+                        <label>Nom</label>
+                        <input type="text" class="controle-form" placeholder="Saisir...">
+                    </div>
+                    <button class="btn btn-confirmer">Enregistrer</button>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div style="background:var(--bleu-tres-pale); padding:20px; border-radius:var(--radius-grand); border:1px solid rgba(3,46,92,0.08)">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
+                        <h4 style="margin:0; color:var(--accent-primaire)">Ajouter un élément</h4>
+                        <button style="background:none; border:none; font-size:1.3rem; cursor:pointer; color:var(--orange-accent); font-weight:700">&times;</button>
+                    </div>
+                    <div class="groupe-form">
+                        <label>Nom</label>
+                        <input type="text" class="controle-form" placeholder="Saisir...">
+                    </div>
+                    <button class="btn btn-confirmer">Enregistrer</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="guide-specs">
+            <div class="guide-specs-title">Boutons X : distinction de couleur</div>
+            <ul>
+                <li><strong style="color:#c8a060">X orange</strong> = Réinitialisation (demande confirmation avant d'agir)</li>
+                <li><strong style="color:#e84057">X rouge</strong> = Annulation / Fermeture (action immédiate, pas de confirmation)</li>
+            </ul>
         </div>
     </div>
 </section>

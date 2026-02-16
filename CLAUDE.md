@@ -63,6 +63,7 @@ Utiliser `window.cle('nomCle')` pour obtenir la cle namespacee.
 3. Consulter `SESSION.md` pour le contexte actuel
 4. Identifier le module concerne dans `docs/modules/`
 5. Verifier `docs/legacy/` pour les problemes connus
+6. **Si travail visuel/UI** : consulter `Design system - Modules/08-reference-visuelle.html`
 
 ---
 
@@ -100,6 +101,26 @@ Les deux fichiers doivent avoir les memes valeurs. `version.json` est lu par le 
 
 ---
 
+## Reference visuelle obligatoire (Design System)
+
+**AVANT de creer ou modifier tout element visuel** (bouton, carte, formulaire, alerte, badge, tableau, navigation, etc.), consulter OBLIGATOIREMENT :
+
+**`Design system - Modules/08-reference-visuelle.html`**
+
+Ce document est la source de verite pour :
+- La palette de couleurs (modes sombre et clair)
+- Les surfaces, ombres et border-radius
+- Les boutons, formulaires, cartes, en-tetes
+- La navigation, les tableaux, alertes et badges
+
+**Regles** :
+- Tout nouveau composant DOIT utiliser les variables CSS existantes de `styles.css`
+- Ne jamais inventer de nouvelles couleurs en dur — utiliser les `--variables`
+- Verifier la conformite dans les DEUX modes (sombre et clair)
+- L'ancien design system modulaire (01a-07) est archive dans `Design system - Modules/_archives/`
+
+---
+
 ## References visuelles importantes
 
 ### Animation bulles en-tete (parallaxe)
@@ -115,4 +136,4 @@ Points blancs dans les barres graduees de l'apercu :
 
 ---
 
-**Derniere mise a jour** : 12 février 2026
+**Derniere mise a jour** : 16 fevrier 2026
