@@ -2985,6 +2985,41 @@ textarea {
 .changelog-entry--violet .changelog-title { color: #b39ddb; }
 .changelog-entry--sarcelle .changelog-title { color: #6aacb8; }
 
+/* Mode clair — changelog */
+body.mode-clair .changelog-entry {
+    color: var(--texte-principal);
+}
+body.mode-clair .changelog-entry--bleu {
+    background: #f0f8ff;
+    border-color: #065dbb;
+}
+body.mode-clair .changelog-entry--vert {
+    background: #f0fdf4;
+    border-color: #28a745;
+}
+body.mode-clair .changelog-entry--orange {
+    background: #fff8f0;
+    border-color: var(--orange-accent);
+}
+body.mode-clair .changelog-entry--rose {
+    background: #fdf0f5;
+    border-color: #d81b60;
+}
+body.mode-clair .changelog-entry--violet {
+    background: #f5f0ff;
+    border-color: #7c3aed;
+}
+body.mode-clair .changelog-entry--sarcelle {
+    background: #f0f8ff;
+    border-color: #065dbb;
+}
+body.mode-clair .changelog-entry--vert .changelog-title { color: #1e7e34; }
+body.mode-clair .changelog-entry--orange .changelog-title { color: #a07830; }
+body.mode-clair .changelog-entry--bleu .changelog-title { color: #065dbb; }
+body.mode-clair .changelog-entry--rose .changelog-title { color: #c2185b; }
+body.mode-clair .changelog-entry--violet .changelog-title { color: #5b21b6; }
+body.mode-clair .changelog-entry--sarcelle .changelog-title { color: #065dbb; }
+
 /* ===============================
    BOUTONS (padding unifié 10px 15px)
    =============================== */
