@@ -249,7 +249,7 @@ function afficherMessageGuidage() {
         <div style="display: flex; align-items: start; gap: 12px;">
             <div style="font-size: 24px;">👋</div>
             <div style="flex: 1;">
-                <div style="font-weight: 600; color: #1a5266; margin-bottom: 8px;">
+                <div style="font-weight: 600; color: var(--accent-primaire); margin-bottom: 8px;">
                     ${etape.titre}
                 </div>
                 <div style="color: var(--gris-moyen); font-size: 0.9rem; line-height: 1.4;">

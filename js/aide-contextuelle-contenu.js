@@ -488,9 +488,9 @@ const AIDE_CONTEXTUELLE = {
                 type: 'liste',
                 titre: "Comprendre les badges de source",
                 items: [
-                    "<strong style='color: #4caf50;'>Locale</strong> : élément que tu as créé ou modifié toi-même",
-                    "<strong style='color: #2196f3;'>Bibliothèque</strong> : élément provenant de la bibliothèque partagée (gabarits)",
-                    "<strong style='color: #ff9800;'>Retirée</strong> : élément retiré de la barre latérale mais conservé dans tes données"
+                    "<strong style='color: var(--vert-succes);'>Locale</strong> : élément que tu as créé ou modifié toi-même",
+                    "<strong style='color: var(--bleu-clair);'>Bibliothèque</strong> : élément provenant de la bibliothèque partagée (gabarits)",
+                    "<strong style='color: var(--orange-accent);'>Retirée</strong> : élément retiré de la barre latérale mais conservé dans tes données"
                 ]
             },
             {

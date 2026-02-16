@@ -692,7 +692,7 @@ function appliquerBadge(badge, resultat, couleur) {
         badge.title = resultat.message || '';
         badge.classList.remove('planif-badge-gris');
     } else {
-        badge.style.backgroundColor = '#b0b0b0';
+        badge.style.backgroundColor = 'var(--gris-clair)';
         badge.textContent = '!';
         badge.title = resultat.message;
         badge.classList.add('planif-badge-gris');

@@ -2426,8 +2426,8 @@ async function preparerDonneesBibliothequeEchelles() {
 
             const dejaPresent = echelles.some(e => (e.id === echelle.id || e.idOriginal === echelle.id) && e.dansBibliotheque !== false);
             const estGabarit = echelle.estGabarit === true;
-            const styleGabarit = estGabarit ? 'border-left: 4px solid #6f42c1; background: linear-gradient(135deg, #f8f4ff 0%, #fff 100%);' : '';
-            const gabaritBadge = estGabarit ? '<span style="font-size: 0.7rem; color: #6f42c1; font-weight: 500;">(gabarit)</span>' : '';
+            const styleGabarit = estGabarit ? 'border-left: 4px solid var(--gabarit-couleur); background: var(--gabarit-fond);' : '';
+            const gabaritBadge = estGabarit ? '<span style="font-size: 0.7rem; color: var(--gabarit-couleur); font-weight: 500;">(gabarit)</span>' : '';
 
             cartesSection2.push({
                 nom: (echelle.nom || 'Sans titre') + ' ' + gabaritBadge,
