@@ -77,7 +77,7 @@ ARRETE et demande validation a Gregoire AVANT de :
 ### Conformite visuelle (Design System)
 
 **Tout element visuel nouveau ou modifie** doit etre conforme a la reference :
-`Design system - Modules/08-reference-visuelle.html`
+`design-system.html` (racine du projet)
 
 - Utiliser les variables CSS de `styles.css` (jamais de couleurs en dur)
 - Verifier le rendu en mode sombre ET en mode clair
