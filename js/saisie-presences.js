@@ -720,7 +720,7 @@ function obtenirToutesDatesCours() {
             // Cours normal : vérifier si c'est un jour de l'horaire
             // 🆕 BETA 95.6 : Comparer en minuscules (jourSemaine = "Lundi", seances stockent "Lundi" ou "lundi")
             const jourSemaineLower = jour.jourSemaine ? jour.jourSemaine.toLowerCase() : '';
-            if (jour.statut === 'cours' && joursAvecSeances.has(jourSemaineLower)) {
+            if ((jour.statut === 'cours' || jour.statut === 'jour-ouvrable') && joursAvecSeances.has(jourSemaineLower)) {
                 datesCours.push(date);
             }
             // Reprise : toujours inclure (utilise jourRemplace)
@@ -945,7 +945,27 @@ function validerDateSaisie(dateStr) {
 
     // Vérifier le statut - accepter cours ET reprise
     if (infoJour.statut !== 'cours' && infoJour.statut !== 'reprise') {
-        return { valide: false, raison: 'pas-cours', verrouille: false };
+        // 🆕 FIX (16 fév 2026) : En multi-cours, le calendrier partagé peut ne pas
+        // refléter l'horaire de tous les groupes-cours. Si le jour est ouvrable,
+        // vérifier l'horaire spécifique du cours actif avant de rejeter.
+        if (infoJour.statut === 'jour-ouvrable' && typeof obtenirSeancesHoraire === 'function') {
+            const seancesHoraire = obtenirSeancesHoraire();
+            if (seancesHoraire && seancesHoraire.length > 0) {
+                const joursNoms = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+                const jourSemaine = joursNoms[new Date(dateStr + 'T00:00:00').getDay()];
+                const aCoursAujourdhui = seancesHoraire.some(s => s.jour && s.jour.toLowerCase() === jourSemaine);
+                if (aCoursAujourdhui) {
+                    console.log(`✅ [validerDateSaisie] ${dateStr} (${jourSemaine}) : jour-ouvrable dans le calendrier mais cours confirmé par l'horaire du cours actif`);
+                    // Continuer la validation normalement
+                } else {
+                    return { valide: false, raison: 'pas-cours', verrouille: false };
+                }
+            } else {
+                return { valide: false, raison: 'pas-cours', verrouille: false };
+            }
+        } else {
+            return { valide: false, raison: 'pas-cours', verrouille: false };
+        }
     }
 
     // Vérifier si c'est un jour où il y a des séances
@@ -2348,6 +2368,7 @@ window.tousPresents = tousPresents;
 window.reinitialiserSaisie = reinitialiserSaisie;
 window.allerCoursSuivant = allerCoursSuivant;
 window.allerCoursPrecedent = allerCoursPrecedent;
+window.mettreAJourBoutonsNavigation = mettreAJourBoutonsNavigation;
 window.basculerVerrouillageDate = basculerVerrouillageDate;
 window.ouvrirSaisiePresence = ouvrirSaisiePresence;
 window.mettreAJourLigne = mettreAJourLigne;
