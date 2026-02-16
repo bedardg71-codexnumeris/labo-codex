@@ -495,18 +495,21 @@ function calculerTotalPoidsEnsemble() {
     totalSpan.textContent = total + '%';
 
     // Changer la couleur selon la validité
+    totalSpan.classList.remove('u-texte-succes', 'u-texte-danger', 'u-texte-warning');
+    validationP.classList.remove('u-texte-succes', 'u-texte-danger', 'u-texte-warning');
+
     if (total === 100) {
-        totalSpan.style.color = 'var(--vert-succes)'; // Vert
+        totalSpan.classList.add('u-texte-succes');
         validationP.textContent = '✓ Total valide ! L\'ensemble peut être utilisé.';
-        validationP.style.color = 'var(--vert-succes)';
+        validationP.classList.add('u-texte-succes');
     } else if (total > 100) {
-        totalSpan.style.color = 'var(--rouge-erreur)'; // Rouge
+        totalSpan.classList.add('u-texte-danger');
         validationP.textContent = '⚠ Le total dépasse 100% (' + total + '%). Ajustez les pondérations.';
-        validationP.style.color = 'var(--rouge-erreur)';
+        validationP.classList.add('u-texte-danger');
     } else {
-        totalSpan.style.color = '#f0ad4e'; // Orange
+        totalSpan.classList.add('u-texte-warning');
         validationP.textContent = 'Le total doit atteindre 100% (actuellement ' + total + '%)';
-        validationP.style.color = '#f0ad4e';
+        validationP.classList.add('u-texte-warning');
     }
 
     return total;

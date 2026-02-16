@@ -1089,7 +1089,7 @@ async function mettreAJourPonderationTotale() {
         statut.style.color = 'var(--rouge-erreur)';
     } else {
         statut.textContent = `${100 - total}% manquant`;
-        statut.style.color = 'orange';
+        statut.style.color = 'var(--btn-annuler)';
     }
 }
 
