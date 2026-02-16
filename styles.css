@@ -31,7 +31,7 @@
     --bleu-anonymisation: #0c1a22;
 
     /* === GRADIENTS (04b-box-shadow) === */
-    --gradient-entete: linear-gradient(135deg, #0a1820 0%, #1a3848 100%);
+    --gradient-entete: linear-gradient(135deg, #0a1820 0%, #142a38 40%, #1a3848 70%, #0e2028 100%);
     --gradient-fond-page: linear-gradient(135deg, #0e1e28 0%, #0c1a22 100%);
 
     /* === OMBRES - 5 niveaux (renforcées pour fond sombre) === */
@@ -1462,7 +1462,7 @@ h1, h2, h3, h4 {
     user-select: none;
     margin: -20px -20px 0 -20px;
     padding: 15px 20px;
-    background: #244858;
+    background: var(--bleu-moyen);
     border-radius: var(--radius-grand) var(--radius-grand) 0 0;
 }
 
@@ -1508,7 +1508,7 @@ h1, h2, h3, h4 {
 
 /* Titre avec fond bleu dégradé (comme l'en-tête) */
 .carte h3.carte-titre-bleu {
-    background: #244858;
+    background: var(--bleu-moyen);
     color: white;
     margin: -20px -20px 15px -20px;
     padding: 15px 20px;
@@ -2096,17 +2096,17 @@ input[type="number"].controle-form {
 
 .badge-risque-modere {
     background: rgba(255, 193, 7, 0.12);
-    color: #ffc107;
+    color: var(--risque-modere);
 }
 
 .badge-risque-eleve {
     background: rgba(253, 126, 20, 0.12);
-    color: #fd7e14;
+    color: var(--risque-eleve);
 }
 
 .badge-risque-tres-eleve {
     background: rgba(232, 64, 87, 0.12);
-    color: #e84057;
+    color: var(--risque-tres-eleve);
 }
 
 .badge-risque-critique {
@@ -2127,12 +2127,12 @@ input[type="number"].controle-form {
 
 .badge-engagement-modere {
     background: rgba(255, 193, 7, 0.12);
-    color: #ffc107;
+    color: var(--risque-modere);
 }
 
 .badge-engagement-fragile {
     background: rgba(253, 126, 20, 0.12);
-    color: #fd7e14;
+    color: var(--risque-eleve);
 }
 
 .badge-engagement-insuffisant {
@@ -2353,22 +2353,22 @@ input[type="number"].controle-form {
 
 .badge-risque-analyse-eleve {
     background: rgba(253, 126, 20, 0.12);
-    color: #fd7e14;
+    color: var(--risque-eleve);
 }
 
 .badge-risque-analyse-eleve .badge-analyse-count {
-    background: #fd7e14;
+    background: var(--risque-eleve);
 }
 
 .badge-risque-analyse-tres-eleve,
 .badge-risque-analyse-critique {
     background: rgba(232, 64, 87, 0.12);
-    color: #e84057;
+    color: var(--risque-tres-eleve);
 }
 
 .badge-risque-analyse-tres-eleve .badge-analyse-count,
 .badge-risque-analyse-critique .badge-analyse-count {
-    background: #e84057;
+    background: var(--risque-tres-eleve);
 }
 
 /* Badge de risque par défaut (gris neutre) */
