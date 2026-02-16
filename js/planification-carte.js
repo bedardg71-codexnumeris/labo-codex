@@ -1807,7 +1807,7 @@ function afficherMenuLienExistant(x, y, lienId) {
 
     var btnSuppr = document.createElement('button');
     btnSuppr.textContent = 'Supprimer ce lien';
-    btnSuppr.style.color = '#dc2626';
+    btnSuppr.classList.add('u-texte-danger');
     btnSuppr.addEventListener('click', function() {
         supprimerLien(lienId);
         fermerMenuLien();

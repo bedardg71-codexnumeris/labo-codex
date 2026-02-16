@@ -3506,17 +3506,17 @@ function calculerTotalPoidsObjectifs() {
     validationP.className = 'total-poids-message';
 
     if (total === 100) {
-        totalSpan.style.color = '#4caf50'; // Vert
+        totalSpan.classList.add('u-texte-succes');
         validationP.textContent = 'Total valide ! Vous pouvez continuer.';
-        validationP.style.color = '#4caf50';
+        validationP.classList.add('u-texte-succes');
     } else if (total > 100) {
-        totalSpan.style.color = '#dc3545'; // Rouge
+        totalSpan.classList.add('u-texte-danger');
         validationP.textContent = 'Le total dépasse 100% (' + total + '%). Ajustez les pondérations.';
-        validationP.style.color = '#dc3545';
+        validationP.classList.add('u-texte-danger');
     } else {
-        totalSpan.style.color = '#f0ad4e'; // Orange
+        totalSpan.classList.add('u-texte-warning');
         validationP.textContent = 'Le total doit atteindre 100% pour continuer (actuellement ' + total + '%)';
-        validationP.style.color = '#f0ad4e';
+        validationP.classList.add('u-texte-warning');
     }
 
     return total;
