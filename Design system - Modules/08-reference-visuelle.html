@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 08 : Reference visuelle des styles - Design System v7</title>
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="guide-common.css">
+<style>
+/* ============================================================
+   Layout grille du guide — dual mode sombre / clair
+   ============================================================ */
+.ref-dual {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.ref-panel {
+    border-radius: var(--radius-grand, 12px);
+    padding: 24px;
+    overflow: hidden;
+}
+
+.ref-panel-sombre {
+    background: #0c1a22;
+    color: #d0e0e4;
+}
+
+.ref-panel-clair {
+    background: #d4e6f5;
+    color: #1a1a2e;
+}
+
+.ref-panel-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid;
+    opacity: 0.7;
+}
+
+.ref-panel-sombre .ref-panel-label {
+    border-color: rgba(106, 172, 184, 0.3);
+}
+
+.ref-panel-clair .ref-panel-label {
+    border-color: rgba(3, 46, 92, 0.15);
+}
+
+.ref-swatch-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.ref-swatch {
+    width: 70px;
+    text-align: center;
+}
+
+.ref-swatch-color {
+    width: 70px;
+    height: 50px;
+    border-radius: 6px;
+    border: 1px solid rgba(128,128,128,0.2);
+    margin-bottom: 4px;
+}
+
+.ref-swatch-name {
+    font-size: 0.65rem;
+    line-height: 1.2;
+    word-break: break-all;
+}
+
+.ref-surface-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ref-surface-item {
+    padding: 14px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border: 1px solid rgba(128,128,128,0.15);
+}
+
+.ref-shadow-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.ref-shadow-item {
+    padding: 16px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+}
+
+.ref-radius-grid {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.ref-radius-item {
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    border: 2px solid;
+}
+
+.ref-btn-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.ref-form-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ref-nav-mock {
+    border-radius: var(--radius-grand, 12px);
+    overflow: hidden;
+}
+
+.ref-table-wrap {
+    overflow-x: auto;
+}
+
+.ref-alert-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ref-badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+/* ============================================================
+   Bridge .mode-clair — replique body.mode-clair variables
+   (les custom properties sur body ne cascadent pas dans un div enfant)
+   ============================================================ */
+.mode-clair {
+    color-scheme: light;
+
+    --bleu-principal: #032e5c;
+    --bleu-fonce: #0f1e3a;
+    --bleu-moyen: #2a4a8a;
+    --bleu-clair: #065dbb;
+    --bleu-leger: #3a7cc6;
+    --bleu-carte: #e8f2fd;
+    --bleu-pale: #e8f2fd;
+    --bleu-tres-pale: #f0f8ff;
+    --bleu-simulation: #1a5266;
+
+    --fond-page-sature: #d4e6f5;
+    --fond-page-clair: #e8f2fd;
+    --gradient-fond-page: linear-gradient(135deg, #d4e6f5 0%, #e8f2fd 100%);
+
+    --shadow-subtil: 0 1px 3px rgba(3,46,92,0.06), 0 2px 6px rgba(3,46,92,0.08);
+    --shadow-normal: 0 2px 4px rgba(3,46,92,0.08), 0 4px 12px rgba(3,46,92,0.15);
+    --shadow-prononce: 0 4px 8px rgba(3,46,92,0.1), 0 8px 20px rgba(3,46,92,0.18);
+    --shadow-fort: 0 6px 12px rgba(3,46,92,0.12), 0 12px 32px rgba(3,46,92,0.2);
+    --shadow-inset: inset 0 1px 3px rgba(3,46,92,0.06);
+
+    --gris-tres-fonce: #1a1a2e;
+    --gris-fonce: #333344;
+    --gris-moyen: #666677;
+    --gris-clair: #999aab;
+    --gris-tres-clair: #d0d1dd;
+    --gris-tres-pale: #f0f1f5;
+
+    --texte-principal: #1a1a2e;
+    --texte-secondaire: #555566;
+    --texte-muted: #888899;
+
+    --accent-primaire: #065dbb;
+    --accent-secondaire: #a07830;
+
+    --surface-page: #d4e6f5;
+    --surface-section: #ffffff;
+    --surface-conteneur: #ffffff;
+    --surface-carte: #ffffff;
+    --surface-element: #f0f8ff;
+    --surface-input: rgba(3, 46, 92, 0.06);
+    --ocean-moyen: #f0f8ff;
+
+    --btn-principal: #032e5c;
+    --btn-principal-hover: #0a4a7e;
+    --btn-ajouter: #1e5a4a;
+    --btn-ajouter-hover: #267060;
+    --btn-modifier: #4a3a6a;
+    --btn-modifier-hover: #5a4a7a;
+    --btn-confirmer: #1e5a4a;
+    --btn-confirmer-hover: #267060;
+    --btn-annuler: #d97706;
+    --btn-annuler-hover: #b86505;
+    --btn-supprimer: #8a2a2a;
+    --btn-supprimer-hover: #a03333;
+
+    --bordure-claire: rgba(3, 46, 92, 0.04);
+    --bordure-moyenne: rgba(3, 46, 92, 0.12);
+    --table-hover: rgba(3, 46, 92, 0.06);
+
+    --alerte-fond-attention: rgba(160, 120, 48, 0.12);
+    --alerte-bordure-attention: #a07830;
+    --alerte-texte-attention: #7a5a20;
+    --alerte-fond-information: rgba(6, 93, 187, 0.1);
+    --alerte-bordure-information: #065dbb;
+    --alerte-texte-information: #044a94;
+    --alerte-fond-succes: rgba(40, 167, 69, 0.1);
+    --alerte-bordure-succes: #28a745;
+    --alerte-texte-succes: #1e7e34;
+    --alerte-fond-erreur: rgba(200, 50, 50, 0.1);
+    --alerte-bordure-erreur: #c0392b;
+    --alerte-texte-erreur: #a93226;
+
+    --etat-erreur-fond: rgba(200, 50, 50, 0.08);
+    --etat-erreur-bordure: #c0392b;
+    --etat-erreur-texte: #a93226;
+    --etat-valide-fond: rgba(40, 167, 69, 0.08);
+    --etat-valide-bordure: #28a745;
+    --etat-valide-texte: #1e7e34;
+    --etat-verrouille-fond: rgba(3, 46, 92, 0.05);
+    --etat-verrouille-bordure: #999aab;
+    --etat-verrouille-texte: #666677;
+
+    --badge-evalue-fond: rgba(40, 167, 69, 0.1);
+    --badge-evalue-texte: #1e7e34;
+    --badge-evalue-bordure: rgba(40, 167, 69, 0.3);
+    --badge-non-evalue-fond: rgba(3, 46, 92, 0.06);
+    --badge-non-evalue-texte: #666677;
+    --badge-non-evalue-bordure: rgba(3, 46, 92, 0.15);
+
+    --orange-accent: #ff6b35;
+    --vert-pale: #e8f5e9;
+    --vert-doux: #66bb6a;
+    --vert-leger: #43a047;
+}
+
+/* Bridge : overrides de composants specifiques en mode clair */
+.mode-clair .carte {
+    border: 1px solid rgba(3,46,92,0.04);
+}
+
+.mode-clair .carte h3.carte-titre-bleu,
+.mode-clair .outil-carte-header {
+    background: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%);
+    color: white;
+}
+
+.mode-clair .conteneur {
+    border: 1px solid rgba(3,46,92,0.04);
+    box-shadow: var(--shadow-normal);
+}
+
+.mode-clair .tableau thead th {
+    background: var(--bleu-principal);
+    color: white;
+}
+
+.mode-clair .tableau tbody tr {
+    border-bottom-color: rgba(3, 46, 92, 0.08);
+}
+
+.mode-clair .navigation-principale button {
+    background: #032e5c;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: none;
+}
+
+.mode-clair .navigation-principale button.actif {
+    background: #0a4a7e;
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 12px rgba(3, 46, 92, 0.3);
+}
+
+.mode-clair .sous-navigation button {
+    color: white;
+    background: #032e5c;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: none;
+}
+
+.mode-clair .sous-navigation button.actif {
+    background: #0a4a7e;
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 12px rgba(3, 46, 92, 0.3);
+}
+
+.mode-clair input[type="text"],
+.mode-clair input[type="number"],
+.mode-clair input[type="date"],
+.mode-clair textarea,
+.mode-clair select {
+    background: white;
+    color: var(--texte-principal);
+    border-color: rgba(3, 46, 92, 0.2);
+}
+
+.mode-clair label {
+    color: var(--texte-principal);
+}
+</style>
+</head>
+<body>
+
+<!-- EN-TETE -->
+<div class="guide-header">
+    <h1>Module 08 : Reference visuelle des styles</h1>
+    <p>Palette couleurs | Surfaces | Ombres | Boutons | Formulaires | Cartes | En-tetes | Navigation | Tableaux | Alertes & Badges</p>
+    <div class="guide-header-nav">
+        <a href="07-primo-assistant.html">&larr; Module 7 : Primo Assistant</a>
+        <a href="design-system-index.html">Retour a l'index</a>
+    </div>
+</div>
+
+<div class="guide-container">
+
+<!-- ============================================================
+     SECTION 1 — PALETTE DE COULEURS
+     ============================================================ -->
+<section id="palette" class="guide-section">
+    <h2 class="guide-section-title">1. Palette de couleurs</h2>
+    <p class="guide-section-intro">Bleus ocean, gris, accents et couleurs semantiques dans les deux modes.</p>
+
+    <div class="guide-component">
+        <h3 class="guide-component-title">Bleus principaux</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="ref-swatch-grid">
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#0c1a22"></div><div class="ref-swatch-name">bleu-fonce<br>#0c1a22</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#1a4a5e"></div><div class="ref-swatch-name">bleu-principal<br>#1a4a5e</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#244858"></div><div class="ref-swatch-name">bleu-moyen<br>#244858</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#4a8a94"></div><div class="ref-swatch-name">bleu-leger<br>#4a8a94</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#6aacb8"></div><div class="ref-swatch-name">bleu-clair<br>#6aacb8</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#1a3a48"></div><div class="ref-swatch-name">bleu-carte<br>#1a3a48</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#1a3040"></div><div class="ref-swatch-name">bleu-pale<br>#1a3040</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#142428"></div><div class="ref-swatch-name">bleu-tres-pale<br>#142428</div></div>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="ref-swatch-grid">
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#0f1e3a"></div><div class="ref-swatch-name">bleu-fonce<br>#0f1e3a</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#032e5c"></div><div class="ref-swatch-name">bleu-principal<br>#032e5c</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#2a4a8a"></div><div class="ref-swatch-name">bleu-moyen<br>#2a4a8a</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#3a7cc6"></div><div class="ref-swatch-name">bleu-leger<br>#3a7cc6</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#065dbb"></div><div class="ref-swatch-name">bleu-clair<br>#065dbb</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#e8f2fd"></div><div class="ref-swatch-name">bleu-carte<br>#e8f2fd</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#e8f2fd"></div><div class="ref-swatch-name">bleu-pale<br>#e8f2fd</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#f0f8ff"></div><div class="ref-swatch-name">bleu-tres-pale<br>#f0f8ff</div></div>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="guide-component-title">Gris</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="ref-swatch-grid">
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#d0e0e4"></div><div class="ref-swatch-name">gris-tres-fonce<br>#d0e0e4</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#b0c4cc"></div><div class="ref-swatch-name">gris-fonce<br>#b0c4cc</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#8aa4b0"></div><div class="ref-swatch-name">gris-moyen<br>#8aa4b0</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#5a7a88"></div><div class="ref-swatch-name">gris-clair<br>#5a7a88</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#2a4a54"></div><div class="ref-swatch-name">gris-tres-clair<br>#2a4a54</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#142428"></div><div class="ref-swatch-name">gris-tres-pale<br>#142428</div></div>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="ref-swatch-grid">
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#1a1a2e"></div><div class="ref-swatch-name">gris-tres-fonce<br>#1a1a2e</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#333344"></div><div class="ref-swatch-name">gris-fonce<br>#333344</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#666677"></div><div class="ref-swatch-name">gris-moyen<br>#666677</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#999aab"></div><div class="ref-swatch-name">gris-clair<br>#999aab</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#d0d1dd"></div><div class="ref-swatch-name">gris-tres-clair<br>#d0d1dd</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#f0f1f5"></div><div class="ref-swatch-name">gris-tres-pale<br>#f0f1f5</div></div>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="guide-component-title">Accents et couleurs semantiques</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="ref-swatch-grid">
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#6aacb8"></div><div class="ref-swatch-name">accent-primaire<br>#6aacb8</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#c8a060"></div><div class="ref-swatch-name">accent-secondaire<br>#c8a060</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#34c759"></div><div class="ref-swatch-name">vert-succes<br>#34c759</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#e84057"></div><div class="ref-swatch-name">rouge-erreur<br>#e84057</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#ff6f00"></div><div class="ref-swatch-name">som-orange<br>#ff6f00</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#0277bd"></div><div class="ref-swatch-name">std-bleu<br>#0277bd</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#22c55e"></div><div class="ref-swatch-name">spe-vert<br>#22c55e</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#8b5cf6"></div><div class="ref-swatch-name">den-violet<br>#8b5cf6</div></div>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="ref-swatch-grid">
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#065dbb"></div><div class="ref-swatch-name">accent-primaire<br>#065dbb</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#a07830"></div><div class="ref-swatch-name">accent-secondaire<br>#a07830</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#28a745"></div><div class="ref-swatch-name">vert-succes<br>#28a745</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#c0392b"></div><div class="ref-swatch-name">rouge-erreur<br>#c0392b</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#ff6f00"></div><div class="ref-swatch-name">som-orange<br>#ff6f00</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#0277bd"></div><div class="ref-swatch-name">std-bleu<br>#0277bd</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#22c55e"></div><div class="ref-swatch-name">spe-vert<br>#22c55e</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#8b5cf6"></div><div class="ref-swatch-name">den-violet<br>#8b5cf6</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     SECTION 2 — FONDS ET SURFACES
+     ============================================================ -->
+<section id="surfaces" class="guide-section">
+    <h2 class="guide-section-title">2. Fonds et surfaces</h2>
+    <p class="guide-section-intro">Hierarchie des surfaces : page &rarr; section &rarr; conteneur &rarr; carte &rarr; element.</p>
+
+    <div class="guide-component">
+        <h3 class="guide-component-title">Niveaux de surface</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="ref-surface-row">
+                    <div class="ref-surface-item" style="background:#0c1a22; color:#d0e0e4">--surface-page: #0c1a22</div>
+                    <div class="ref-surface-item" style="background:#142428; color:#d0e0e4">--surface-section / conteneur: #142428</div>
+                    <div class="ref-surface-item" style="background:#1a3040; color:#d0e0e4">--surface-carte: #1a3040</div>
+                    <div class="ref-surface-item" style="background:#244858; color:#d0e0e4">--surface-element: #244858</div>
+                    <div class="ref-surface-item" style="background:rgba(106,172,184,0.08); color:#d0e0e4; border:1px solid rgba(106,172,184,0.25)">--surface-input: rgba(106,172,184,0.08)</div>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="ref-surface-row">
+                    <div class="ref-surface-item" style="background:#d4e6f5; color:#1a1a2e">--surface-page: #d4e6f5</div>
+                    <div class="ref-surface-item" style="background:#ffffff; color:#1a1a2e">--surface-section / conteneur: #ffffff</div>
+                    <div class="ref-surface-item" style="background:#ffffff; color:#1a1a2e; border:1px solid rgba(3,46,92,0.08)">--surface-carte: #ffffff</div>
+                    <div class="ref-surface-item" style="background:#f0f8ff; color:#1a1a2e">--surface-element: #f0f8ff</div>
+                    <div class="ref-surface-item" style="background:rgba(3,46,92,0.06); color:#1a1a2e; border:1px solid rgba(3,46,92,0.15)">--surface-input: rgba(3,46,92,0.06)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     SECTION 3 — OMBRES ET RADIUS
+     ============================================================ -->
+<section id="ombres-radius" class="guide-section">
+    <h2 class="guide-section-title">3. Ombres et radius</h2>
+    <p class="guide-section-intro">5 niveaux d'ombres progressives et 4 niveaux de border-radius.</p>
+
+    <div class="guide-component">
+        <h3 class="guide-component-title">Ombres</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="ref-shadow-grid">
+                    <div class="ref-shadow-item" style="background:#1a3040; color:#d0e0e4; box-shadow:0 1px 4px rgba(10,30,40,0.3)">--shadow-subtil</div>
+                    <div class="ref-shadow-item" style="background:#1a3040; color:#d0e0e4; box-shadow:0 2px 8px rgba(10,30,40,0.4)">--shadow-normal</div>
+                    <div class="ref-shadow-item" style="background:#1a3040; color:#d0e0e4; box-shadow:0 4px 14px rgba(10,30,40,0.5)">--shadow-prononce</div>
+                    <div class="ref-shadow-item" style="background:#1a3040; color:#d0e0e4; box-shadow:0 8px 24px rgba(10,30,40,0.55)">--shadow-fort</div>
+                    <div class="ref-shadow-item" style="background:#1a3040; color:#d0e0e4; box-shadow:inset 0 1px 3px rgba(10,30,40,0.15)">--shadow-inset</div>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="ref-shadow-grid">
+                    <div class="ref-shadow-item" style="background:#ffffff; color:#1a1a2e; box-shadow:0 1px 3px rgba(3,46,92,0.06), 0 2px 6px rgba(3,46,92,0.08)">--shadow-subtil</div>
+                    <div class="ref-shadow-item" style="background:#ffffff; color:#1a1a2e; box-shadow:0 2px 4px rgba(3,46,92,0.08), 0 4px 12px rgba(3,46,92,0.15)">--shadow-normal</div>
+                    <div class="ref-shadow-item" style="background:#ffffff; color:#1a1a2e; box-shadow:0 4px 8px rgba(3,46,92,0.1), 0 8px 20px rgba(3,46,92,0.18)">--shadow-prononce</div>
+                    <div class="ref-shadow-item" style="background:#ffffff; color:#1a1a2e; box-shadow:0 6px 12px rgba(3,46,92,0.12), 0 12px 32px rgba(3,46,92,0.2)">--shadow-fort</div>
+                    <div class="ref-shadow-item" style="background:#ffffff; color:#1a1a2e; box-shadow:inset 0 1px 3px rgba(3,46,92,0.06)">--shadow-inset</div>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="guide-component-title">Border-radius</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="ref-radius-grid">
+                    <div class="ref-radius-item" style="border-radius:5px; background:#1a3040; color:#d0e0e4; border-color:#6aacb8">5px<br>petit</div>
+                    <div class="ref-radius-item" style="border-radius:6px; background:#1a3040; color:#d0e0e4; border-color:#6aacb8">6px<br>moyen</div>
+                    <div class="ref-radius-item" style="border-radius:12px; background:#1a3040; color:#d0e0e4; border-color:#6aacb8">12px<br>grand</div>
+                    <div class="ref-radius-item" style="border-radius:20px; background:#1a3040; color:#d0e0e4; border-color:#6aacb8">20px<br>pill</div>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="ref-radius-grid">
+                    <div class="ref-radius-item" style="border-radius:5px; background:#ffffff; color:#1a1a2e; border-color:#065dbb">5px<br>petit</div>
+                    <div class="ref-radius-item" style="border-radius:6px; background:#ffffff; color:#1a1a2e; border-color:#065dbb">6px<br>moyen</div>
+                    <div class="ref-radius-item" style="border-radius:12px; background:#ffffff; color:#1a1a2e; border-color:#065dbb">12px<br>grand</div>
+                    <div class="ref-radius-item" style="border-radius:20px; background:#ffffff; color:#1a1a2e; border-color:#065dbb">20px<br>pill</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     SECTION 4 — BOUTONS
+     ============================================================ -->
+<section id="boutons" class="guide-section">
+    <h2 class="guide-section-title">4. Boutons</h2>
+    <p class="guide-section-intro">Boutons d'action : principal, ajouter, modifier, confirmer, annuler, supprimer + etats.</p>
+
+    <div class="guide-component">
+        <h3 class="guide-component-title">Types de boutons</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="ref-btn-grid">
+                    <button class="btn btn-principal">Principal</button>
+                    <button class="btn btn-ajouter">Ajouter</button>
+                    <button class="btn btn-modifier">Modifier</button>
+                    <button class="btn btn-confirmer">Confirmer</button>
+                    <button class="btn btn-annuler">Annuler</button>
+                    <button class="btn btn-supprimer">Supprimer</button>
+                </div>
+                <div class="ref-btn-grid">
+                    <button class="btn btn-principal" disabled>Disabled</button>
+                    <button class="btn btn-secondaire">Secondaire</button>
+                    <button class="btn btn-danger">Danger</button>
+                </div>
+                <div style="margin-top:12px">
+                    <p style="font-size:0.8rem; color:#8aa4b0; margin:0 0 8px">Tailles :</p>
+                    <div class="ref-btn-grid">
+                        <button class="btn btn-principal btn-large">Large</button>
+                        <button class="btn btn-principal">Standard</button>
+                        <button class="btn btn-principal btn-compact">Compact</button>
+                        <button class="btn btn-principal btn-tres-compact">Tres compact</button>
+                        <button class="btn btn-principal btn-mini">Mini</button>
+                    </div>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="ref-btn-grid">
+                    <button class="btn btn-principal">Principal</button>
+                    <button class="btn btn-ajouter">Ajouter</button>
+                    <button class="btn btn-modifier">Modifier</button>
+                    <button class="btn btn-confirmer">Confirmer</button>
+                    <button class="btn btn-annuler">Annuler</button>
+                    <button class="btn btn-supprimer">Supprimer</button>
+                </div>
+                <div class="ref-btn-grid">
+                    <button class="btn btn-principal" disabled>Disabled</button>
+                    <button class="btn btn-secondaire">Secondaire</button>
+                    <button class="btn btn-danger">Danger</button>
+                </div>
+                <div style="margin-top:12px">
+                    <p style="font-size:0.8rem; color:#555566; margin:0 0 8px">Tailles :</p>
+                    <div class="ref-btn-grid">
+                        <button class="btn btn-principal btn-large">Large</button>
+                        <button class="btn btn-principal">Standard</button>
+                        <button class="btn btn-principal btn-compact">Compact</button>
+                        <button class="btn btn-principal btn-tres-compact">Tres compact</button>
+                        <button class="btn btn-principal btn-mini">Mini</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     SECTION 5 — FORMULAIRES
+     ============================================================ -->
+<section id="formulaires" class="guide-section">
+    <h2 class="guide-section-title">5. Formulaires</h2>
+    <p class="guide-section-intro">Champs texte, nombre, date, select, textarea et etats de validation.</p>
+
+    <div class="guide-component">
+        <h3 class="guide-component-title">Champs de formulaire</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="ref-form-grid">
+                    <div class="groupe-form">
+                        <label>Champ texte</label>
+                        <input type="text" class="controle-form" placeholder="Saisir du texte..." value="">
+                    </div>
+                    <div class="groupe-form">
+                        <label>Champ nombre</label>
+                        <input type="number" class="controle-form" placeholder="0" value="42">
+                    </div>
+                    <div class="groupe-form">
+                        <label>Date</label>
+                        <input type="date" class="controle-form" value="2026-02-15">
+                    </div>
+                    <div class="groupe-form">
+                        <label>Select</label>
+                        <select class="controle-form">
+                            <option>Option 1</option>
+                            <option>Option 2</option>
+                            <option>Option 3</option>
+                        </select>
+                    </div>
+                    <div class="groupe-form">
+                        <label>Textarea</label>
+                        <textarea class="controle-form" rows="3" placeholder="Commentaire..."></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="ref-form-grid">
+                    <div class="groupe-form">
+                        <label>Champ texte</label>
+                        <input type="text" class="controle-form" placeholder="Saisir du texte..." value="">
+                    </div>
+                    <div class="groupe-form">
+                        <label>Champ nombre</label>
+                        <input type="number" class="controle-form" placeholder="0" value="42">
+                    </div>
+                    <div class="groupe-form">
+                        <label>Date</label>
+                        <input type="date" class="controle-form" value="2026-02-15">
+                    </div>
+                    <div class="groupe-form">
+                        <label>Select</label>
+                        <select class="controle-form">
+                            <option>Option 1</option>
+                            <option>Option 2</option>
+                            <option>Option 3</option>
+                        </select>
+                    </div>
+                    <div class="groupe-form">
+                        <label>Textarea</label>
+                        <textarea class="controle-form" rows="3" placeholder="Commentaire..."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="guide-component-title">Etats de validation</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="ref-form-grid">
+                    <div class="groupe-form">
+                        <label>Etat erreur</label>
+                        <input type="text" class="controle-form etat-erreur" value="Valeur invalide">
+                    </div>
+                    <div class="groupe-form">
+                        <label>Etat valide</label>
+                        <input type="text" class="controle-form etat-valide" value="Valeur correcte">
+                    </div>
+                    <div class="groupe-form">
+                        <label>Etat verrouille</label>
+                        <input type="text" class="controle-form etat-verrouille" value="Lecture seule" readonly>
+                    </div>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="ref-form-grid">
+                    <div class="groupe-form">
+                        <label>Etat erreur</label>
+                        <input type="text" class="controle-form etat-erreur" value="Valeur invalide">
+                    </div>
+                    <div class="groupe-form">
+                        <label>Etat valide</label>
+                        <input type="text" class="controle-form etat-valide" value="Valeur correcte">
+                    </div>
+                    <div class="groupe-form">
+                        <label>Etat verrouille</label>
+                        <input type="text" class="controle-form etat-verrouille" value="Lecture seule" readonly>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     SECTION 6 — CARTES ET CONTENEURS
+     ============================================================ -->
+<section id="cartes" class="guide-section">
+    <h2 class="guide-section-title">6. Cartes et conteneurs</h2>
+    <p class="guide-section-intro">Composants .carte, .conteneur et .carte-titre-bleu.</p>
+
+    <div class="guide-component">
+        <h3 class="guide-component-title">Carte standard</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="carte">
+                    <h3>Titre de la carte</h3>
+                    <p style="color:var(--texte-secondaire); font-size:0.9rem; margin:0">Contenu de la carte avec texte secondaire. La carte a une bordure gauche coloree et un fond surface-carte.</p>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="carte">
+                    <h3>Titre de la carte</h3>
+                    <p style="color:var(--texte-secondaire); font-size:0.9rem; margin:0">Contenu de la carte avec texte secondaire. La carte a une bordure gauche coloree et un fond surface-carte.</p>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="guide-component-title">Carte avec titre bleu</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="carte">
+                    <h3 class="carte-titre-bleu">Titre bandeau bleu</h3>
+                    <p style="color:var(--texte-secondaire); font-size:0.9rem; margin:0">Le titre est dans un bandeau colore en haut de la carte, avec coins arrondis.</p>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="carte">
+                    <h3 class="carte-titre-bleu">Titre bandeau bleu</h3>
+                    <p style="color:var(--texte-secondaire); font-size:0.9rem; margin:0">Le titre est dans un bandeau colore en haut de la carte, avec coins arrondis.</p>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="guide-component-title">Conteneur</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="conteneur" style="max-width:100%; padding:20px">
+                    <p style="color:var(--texte-principal); font-size:0.9rem; margin:0">Le conteneur est le wrapper principal de section. Fond surface-section, bordure subtile, radius grand.</p>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="conteneur" style="max-width:100%; padding:20px">
+                    <p style="color:var(--texte-principal); font-size:0.9rem; margin:0">Le conteneur est le wrapper principal de section. Fond surface-section, bordure subtile, radius grand.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     SECTION 7 — EN-TETES DE SECTION
+     ============================================================ -->
+<section id="entetes" class="guide-section">
+    <h2 class="guide-section-title">7. En-tetes de section</h2>
+    <p class="guide-section-intro">Bandeaux .carte-titre-bleu et .outil-carte-header.</p>
+
+    <div class="guide-component">
+        <h3 class="guide-component-title">Carte-titre-bleu (dans une carte)</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="carte">
+                    <h3 class="carte-titre-bleu">Criteres d'evaluation</h3>
+                    <p style="color:var(--texte-secondaire); font-size:0.85rem; margin:0">Bandeau en haut de carte, fond #244858 (sombre) ou gradient bleu (clair).</p>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="carte">
+                    <h3 class="carte-titre-bleu">Criteres d'evaluation</h3>
+                    <p style="color:var(--texte-secondaire); font-size:0.85rem; margin:0">Bandeau en haut de carte, fond #244858 (sombre) ou gradient bleu (clair).</p>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="guide-component-title">Outil-carte-header</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="carte" style="padding:25px">
+                    <div class="outil-carte-header">
+                        <h3 class="outil-carte-titre">Outil pedagogique</h3>
+                    </div>
+                    <p style="color:var(--texte-secondaire); font-size:0.85rem; margin:0">Header d'outil avec fond bleu, flex entre titre et boutons.</p>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="carte" style="padding:25px">
+                    <div class="outil-carte-header">
+                        <h3 class="outil-carte-titre">Outil pedagogique</h3>
+                    </div>
+                    <p style="color:var(--texte-secondaire); font-size:0.85rem; margin:0">Header d'outil avec fond bleu, flex entre titre et boutons.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     SECTION 8 — NAVIGATION
+     ============================================================ -->
+<section id="navigation" class="guide-section">
+    <h2 class="guide-section-title">8. Navigation</h2>
+    <p class="guide-section-intro">Navigation principale (glassmorphism) et sous-navigation.</p>
+
+    <div class="guide-component">
+        <h3 class="guide-component-title">Navigation principale</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="ref-nav-mock" style="background:linear-gradient(135deg, #0a1820 0%, #1a3848 100%); padding:15px">
+                    <div class="navigation-principale">
+                        <button>Accueil</button>
+                        <button class="actif">Evaluations</button>
+                        <button>Presences</button>
+                        <button>Outils</button>
+                    </div>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="ref-nav-mock" style="background:linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%); padding:15px">
+                    <div class="navigation-principale">
+                        <button>Accueil</button>
+                        <button class="actif">Evaluations</button>
+                        <button>Presences</button>
+                        <button>Outils</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="guide-component-title">Sous-navigation</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="ref-nav-mock" style="background:#0e1e28; padding:10px">
+                    <div class="sous-navigation">
+                        <button>Grilles</button>
+                        <button class="actif">Resultats</button>
+                        <button>Statistiques</button>
+                        <button>Criteres</button>
+                    </div>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="ref-nav-mock" style="background:#032e5c; padding:10px">
+                    <div class="sous-navigation">
+                        <button>Grilles</button>
+                        <button class="actif">Resultats</button>
+                        <button>Statistiques</button>
+                        <button>Criteres</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     SECTION 9 — TABLEAUX
+     ============================================================ -->
+<section id="tableaux" class="guide-section">
+    <h2 class="guide-section-title">9. Tableaux</h2>
+    <p class="guide-section-intro">Tableau standard .tableau avec en-tete colore et lignes alternees.</p>
+
+    <div class="guide-component">
+        <h3 class="guide-component-title">Tableau standard</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="ref-table-wrap">
+                    <table class="tableau">
+                        <thead>
+                            <tr>
+                                <th>Etudiant</th>
+                                <th>Note</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Alice Tremblay</td><td>85%</td><td>Reussi</td></tr>
+                            <tr><td>Bob Gagnon</td><td>72%</td><td>Reussi</td></tr>
+                            <tr><td>Claire Dubois</td><td>91%</td><td>Reussi</td></tr>
+                            <tr><td>David Lavoie</td><td>58%</td><td>En progres</td></tr>
+                            <tr><td>Eva Morin</td><td>67%</td><td>Reussi</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="ref-table-wrap">
+                    <table class="tableau">
+                        <thead>
+                            <tr>
+                                <th>Etudiant</th>
+                                <th>Note</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Alice Tremblay</td><td>85%</td><td>Reussi</td></tr>
+                            <tr><td>Bob Gagnon</td><td>72%</td><td>Reussi</td></tr>
+                            <tr><td>Claire Dubois</td><td>91%</td><td>Reussi</td></tr>
+                            <tr><td>David Lavoie</td><td>58%</td><td>En progres</td></tr>
+                            <tr><td>Eva Morin</td><td>67%</td><td>Reussi</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     SECTION 10 — ALERTES ET BADGES
+     ============================================================ -->
+<section id="alertes-badges" class="guide-section">
+    <h2 class="guide-section-title">10. Alertes et badges</h2>
+    <p class="guide-section-intro">4 types d'alertes, badges d'evaluation et badges de notation.</p>
+
+    <div class="guide-component">
+        <h3 class="guide-component-title">Alertes</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="ref-alert-grid">
+                    <div class="alerte alerte-attention"><strong>Attention :</strong> Certaines evaluations sont incompletes.</div>
+                    <div class="alerte alerte-information"><strong>Information :</strong> Le trimestre a ete configure avec succes.</div>
+                    <div class="alerte alerte-succes"><strong>Succes :</strong> Les 30 etudiants ont ete importes.</div>
+                    <div class="alerte alerte-erreur"><strong>Erreur :</strong> Impossible de charger le fichier JSON.</div>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="ref-alert-grid">
+                    <div class="alerte alerte-attention"><strong>Attention :</strong> Certaines evaluations sont incompletes.</div>
+                    <div class="alerte alerte-information"><strong>Information :</strong> Le trimestre a ete configure avec succes.</div>
+                    <div class="alerte alerte-succes"><strong>Succes :</strong> Les 30 etudiants ont ete importes.</div>
+                    <div class="alerte alerte-erreur"><strong>Erreur :</strong> Impossible de charger le fichier JSON.</div>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="guide-component-title">Info-box</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="ref-alert-grid">
+                    <div class="info-box info-box--attention">Attention : verifiez les donnees avant de continuer.</div>
+                    <div class="info-box info-box--info">Information complementaire sur le module.</div>
+                    <div class="info-box info-box--succes">Operation completee avec succes.</div>
+                    <div class="info-box info-box--erreur">Une erreur est survenue lors du traitement.</div>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="ref-alert-grid">
+                    <div class="info-box info-box--attention">Attention : verifiez les donnees avant de continuer.</div>
+                    <div class="info-box info-box--info">Information complementaire sur le module.</div>
+                    <div class="info-box info-box--succes">Operation completee avec succes.</div>
+                    <div class="info-box info-box--erreur">Une erreur est survenue lors du traitement.</div>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="guide-component-title">Badges d'evaluation</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="ref-badge-row">
+                    <span class="badge-statut evalue">Evalue</span>
+                    <span class="badge-statut non-evalue">Non evalue</span>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="ref-badge-row">
+                    <span class="badge-statut evalue">Evalue</span>
+                    <span class="badge-statut non-evalue">Non evalue</span>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="guide-component-title">Badges de notation (pratiques)</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="ref-badge-row">
+                    <span class="badge-pratique som" style="margin-left:0">SOM</span>
+                    <span class="badge-pratique std" style="margin-left:0">STD</span>
+                    <span class="badge-pratique spe" style="margin-left:0">SPE</span>
+                    <span class="badge-pratique den" style="margin-left:0">DEN</span>
+                    <span class="badge-pratique multi" style="margin-left:0">Multi</span>
+                </div>
+                <div class="ref-badge-row">
+                    <span class="badge-pratique-compact som" style="margin-left:0">SOM</span>
+                    <span class="badge-pratique-compact std" style="margin-left:0">STD</span>
+                    <span class="badge-pratique-compact spe" style="margin-left:0">SPE</span>
+                    <span class="badge-pratique-compact den" style="margin-left:0">DEN</span>
+                    <span class="badge-pratique-compact multi" style="margin-left:0">Multi</span>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="ref-badge-row">
+                    <span class="badge-pratique som" style="margin-left:0">SOM</span>
+                    <span class="badge-pratique std" style="margin-left:0">STD</span>
+                    <span class="badge-pratique spe" style="margin-left:0">SPE</span>
+                    <span class="badge-pratique den" style="margin-left:0">DEN</span>
+                    <span class="badge-pratique multi" style="margin-left:0">Multi</span>
+                </div>
+                <div class="ref-badge-row">
+                    <span class="badge-pratique-compact som" style="margin-left:0">SOM</span>
+                    <span class="badge-pratique-compact std" style="margin-left:0">STD</span>
+                    <span class="badge-pratique-compact spe" style="margin-left:0">SPE</span>
+                    <span class="badge-pratique-compact den" style="margin-left:0">DEN</span>
+                    <span class="badge-pratique-compact multi" style="margin-left:0">Multi</span>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="guide-component-title">Badges de risque</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="ref-swatch-grid">
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#6aacb8"></div><div class="ref-swatch-name">Nul<br>#6aacb8</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#34c759"></div><div class="ref-swatch-name">Minimal<br>#34c759</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#7ae8a0"></div><div class="ref-swatch-name">Faible<br>#7ae8a0</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#ffc107"></div><div class="ref-swatch-name">Modere<br>#ffc107</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#fd7e14"></div><div class="ref-swatch-name">Eleve<br>#fd7e14</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#e84057"></div><div class="ref-swatch-name">Tres eleve<br>#e84057</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#a02030"></div><div class="ref-swatch-name">Critique<br>#a02030</div></div>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="ref-swatch-grid">
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#6aacb8"></div><div class="ref-swatch-name">Nul<br>#6aacb8</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#34c759"></div><div class="ref-swatch-name">Minimal<br>#34c759</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#7ae8a0"></div><div class="ref-swatch-name">Faible<br>#7ae8a0</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#ffc107"></div><div class="ref-swatch-name">Modere<br>#ffc107</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#fd7e14"></div><div class="ref-swatch-name">Eleve<br>#fd7e14</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#e84057"></div><div class="ref-swatch-name">Tres eleve<br>#e84057</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#a02030"></div><div class="ref-swatch-name">Critique<br>#a02030</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+</div><!-- /guide-container -->
+</body>
+</html>
