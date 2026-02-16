@@ -1,7 +1,7 @@
 # Suivi des bugs testeurs
 
 > **Objectif** : Tracker les bugs rapportés par les testeurs pour éviter le travail en double.
-> **Dernière mise à jour** : 13 février 2026 (Build 0213-1530)
+> **Dernière mise à jour** : 16 février 2026 (Build 0216-0950)
 
 ---
 
@@ -9,6 +9,14 @@
 
 | # | Testeur | Date | Description | Priorité | Fichier(s) concerné(s) |
 |---|---------|------|-------------|----------|------------------------|
+
+---
+
+## Corrigés (Beta 97.8)
+
+| # | Testeur | Date rapport | Corrigé | Build | Description | Correction |
+|---|---------|--------------|---------|-------|-------------|------------|
+| 68 | Grégoire | 16 fév | 16 fév | 0216-* | ReferenceError mettreAJourBoutonsNavigation + "Pas de cours pour ce groupe" | Export window.mettreAJourBoutonsNavigation + fallback horaire cours actif dans validerDateSaisie (saisie-presences.js) |
 
 ---
 
@@ -56,7 +64,7 @@
 
 ### Pour ajouter un bug
 1. Créer une entrée dans la section "Ouverts"
-2. Assigner un numéro séquentiel (prochain : **#66**)
+2. Assigner un numéro séquentiel (prochain : **#69**)
 3. Documenter dans le sous-dossier du testeur si fichiers/screenshots fournis
 4. Prochain numéro : **#68**
 
