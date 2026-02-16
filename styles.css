@@ -16448,6 +16448,21 @@ body.mode-clair .parcours-barre-conteneur {
     background: rgba(3, 46, 92, 0.1);
 }
 
+body.mode-clair .parcours-chapitre {
+    background: rgba(3, 46, 92, 0.04);
+    border: 1px solid rgba(3, 46, 92, 0.1);
+}
+
+body.mode-clair .parcours-chapitre--en-cours {
+    background: rgba(6, 93, 187, 0.08);
+    border-color: rgba(6, 93, 187, 0.2);
+    border-left: 3px solid var(--accent-primaire);
+}
+
+body.mode-clair .parcours-jalon--a-faire:hover {
+    background: rgba(3, 46, 92, 0.06);
+}
+
 body.mode-clair .tableau tbody tr {
     border-bottom-color: rgba(3, 46, 92, 0.08);
 }
