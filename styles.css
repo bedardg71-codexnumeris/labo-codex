@@ -10606,7 +10606,7 @@ body[data-mode="simulation"] table tr:hover {
 
 /* Conteneur principal de la section note finale */
 .note-finale-section {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    background: var(--bleu-tres-pale);
     border-radius: var(--radius-grand);
     padding: 20px;
     margin-bottom: 20px;
@@ -10707,7 +10707,7 @@ body[data-mode="simulation"] table tr:hover {
     padding: 4px 12px;
     border-radius: var(--radius-pill);
     font-size: 0.85rem;
-    background: #333;
+    background: var(--gris-fonce, #333);
 }
 
 /* Carte de résultat final */
@@ -10716,7 +10716,7 @@ body[data-mode="simulation"] table tr:hover {
     padding: 15px;
     border-radius: var(--radius-grand);
     text-align: center;
-    border: 2px solid #333;
+    border: 2px solid var(--gris-fonce, #333);
 }
 
 /* Formule de calcul */
@@ -10753,7 +10753,7 @@ body[data-mode="simulation"] table tr:hover {
 /* Composante avec plafonnement appliqué */
 .note-finale-composante-plafonnee {
     border: 2px solid #dc3545;
-    background: #fff5f5;
+    background: rgba(220, 53, 69, 0.1);
 }
 
 /* Indicateur de déficit */
