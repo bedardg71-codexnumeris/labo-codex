@@ -507,6 +507,12 @@ function initialiserModuleSaisiePresences() {
         return;
     }
 
+    // 🆕 FIX (16 fév 2026) : Régénérer le calendrier pour s'assurer qu'il reflète
+    // tous les groupes-cours (synchronisation horaireHebdo incluse)
+    if (typeof genererCalendrierComplet === 'function') {
+        genererCalendrierComplet();
+    }
+
     chargerGroupesPresences();
     verifierConfigurationFormatHoraire();
 
@@ -1293,7 +1299,19 @@ function mettreAJourEnteteDateSeance(dateStr) {
 
     let message = '';
 
-    if (infoJour.statut === 'cours') {
+    // 🆕 FIX (16 fév 2026) : Traiter 'jour-ouvrable' comme 'cours' si le cours actif
+    // a effectivement une séance ce jour (calendrier périmé en multi-cours)
+    let statutEffectif = infoJour.statut;
+    if (statutEffectif === 'jour-ouvrable' && typeof obtenirSeancesHoraire === 'function') {
+        const seancesHoraire = obtenirSeancesHoraire();
+        const joursNoms = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+        const jourSemaine = joursNoms[new Date(dateStr + 'T00:00:00').getDay()];
+        if (seancesHoraire && seancesHoraire.some(s => s.jour && s.jour.toLowerCase() === jourSemaine)) {
+            statutEffectif = 'cours';
+        }
+    }
+
+    if (statutEffectif === 'cours') {
         if (rangSeance && infoJour.numeroSemaine) {
             message = `${rangSeance.ordinal} séance de la semaine ${infoJour.numeroSemaine}`;
         } else if (infoJour.numeroSemaine) {
@@ -1304,7 +1322,7 @@ function mettreAJourEnteteDateSeance(dateStr) {
             message += message ? ` (${heuresFormatees})` : heuresFormatees;
         }
 
-    } else if (infoJour.statut === 'reprise') {
+    } else if (statutEffectif === 'reprise') {
         if (rangSeance && infoJour.numeroSemaine) {
             message = `REPRISE — ${rangSeance.ordinal} séance de la semaine ${infoJour.numeroSemaine}`;
         } else {

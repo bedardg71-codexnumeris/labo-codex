@@ -655,9 +655,39 @@ function obtenirRangSeanceDansSemaine(dateStr, coursId = null) {
         const calendrier = db.getSync(cle('calendrierComplet'), {});
 
         const infoJour = calendrier[dateStr];
-        if (!infoJour || !infoJour.numeroSemaine) return null;
 
-        const numSemaine = infoJour.numeroSemaine;
+        // 🆕 FIX (16 fév 2026) : Si le jour n'a pas de numeroSemaine (ex: 'jour-ouvrable'
+        // en multi-cours), tenter de le déduire du voisinage calendaire
+        let numSemaine = infoJour ? infoJour.numeroSemaine : null;
+
+        if (!numSemaine && infoJour) {
+            // Chercher le numéro de semaine d'un jour 'cours' dans la même semaine calendaire
+            const dateObj = new Date(dateStr + 'T00:00:00');
+            const jourDeSemaine = dateObj.getDay(); // 0=dim, 1=lun...
+            // Parcourir les jours autour (lun-ven de la même semaine)
+            for (let delta = -6; delta <= 6; delta++) {
+                if (delta === 0) continue;
+                const voisin = new Date(dateObj);
+                voisin.setDate(voisin.getDate() + delta);
+                const voisinStr = voisin.toISOString().split('T')[0];
+                const infoVoisin = calendrier[voisinStr];
+                if (infoVoisin && infoVoisin.numeroSemaine &&
+                    (infoVoisin.statut === 'cours' || infoVoisin.statut === 'reprise')) {
+                    // Vérifier que c'est la même semaine calendaire (même lundi)
+                    const lundiDate = new Date(dateObj);
+                    lundiDate.setDate(lundiDate.getDate() - ((jourDeSemaine + 6) % 7));
+                    const lundiVoisin = new Date(voisin);
+                    const jourVoisin = voisin.getDay();
+                    lundiVoisin.setDate(lundiVoisin.getDate() - ((jourVoisin + 6) % 7));
+                    if (lundiDate.toISOString().split('T')[0] === lundiVoisin.toISOString().split('T')[0]) {
+                        numSemaine = infoVoisin.numeroSemaine;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!numSemaine) return null;
 
         // Trouver tous les jours de cours de cette semaine selon le calendrier
         const joursAvecSeances = Object.entries(calendrier)
@@ -667,6 +697,13 @@ function obtenirRangSeanceDansSemaine(dateStr, coursId = null) {
             )
             .map(([date]) => date)
             .sort();
+
+        // 🆕 FIX (16 fév 2026) : Si dateStr n'est pas dans la liste (jour-ouvrable),
+        // l'insérer à la bonne position pour calculer le rang
+        if (!joursAvecSeances.includes(dateStr)) {
+            joursAvecSeances.push(dateStr);
+            joursAvecSeances.sort();
+        }
 
         const rang = joursAvecSeances.indexOf(dateStr) + 1;
         const total = joursAvecSeances.length;
