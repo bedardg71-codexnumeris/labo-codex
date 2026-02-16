@@ -17,8 +17,6 @@
     // ===== CONFIGURATION =====
     // Format : 'section-sousSection' (correspond à data-sous-onglet)
     const SOUS_SECTIONS_EN_DEV = [
-        'planification-carte',
-        'planification-organisateur',
         'aide-introduction',
         'aide-configuration',
         'aide-formation',

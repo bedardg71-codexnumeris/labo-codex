@@ -10,6 +10,31 @@
 
     var CHANGELOG = [
         {
+            version: 'Beta 97.8',
+            date: '16 f\u00e9vrier',
+            couleur: 'bleu',
+            titre: 'Coh\u00e9rence visuelle modes clair et sombre',
+            items: [
+                '<strong>Audit complet</strong> : ~60 couleurs hardcod\u00e9es remplac\u00e9es par des variables CSS dans 10\u00a0fichiers (styles.css, index.html, 7\u00a0fichiers JS).',
+                '<strong>Cartes info p\u00e9dagogiques</strong> : Les cartes Note, Conseil et P\u00e9dagogique s\u2019adaptent d\u00e9sormais au mode clair et sombre.',
+                '<strong>Badges pattern</strong> : Les 5\u00a0badges d\u2019apprentissage (blocage critique, \u00e9mergent, d\u00e9fi, stable, progression) utilisent des variables th\u00e9m\u00e9es.',
+                '<strong>Calendrier</strong> : Couleurs de texte et bordures des jours (weekend, examens, cong\u00e9, reprise) th\u00e9m\u00e9es.',
+                '<strong>Jetons profil</strong> : Les sections reprise (violet) et d\u00e9lai (orange) du profil \u00e9tudiant respectent le th\u00e8me actif.',
+                '<strong>Gabarit violet</strong> : Nouvelle variable <code>--gabarit-couleur</code> pour les \u00e9l\u00e9ments de type gabarit dans les \u00e9chelles et la biblioth\u00e8que.'
+            ]
+        },
+        {
+            version: 'Beta 97.8',
+            date: '16 f\u00e9vrier',
+            couleur: 'vert',
+            titre: 'Normalisation des emojis et guide ind\u00e9pendant',
+            items: [
+                '<strong>Guide d\u00e9tach\u00e9 \uD83D\uDCD4</strong> : Le guide d\u2019utilisation de la carte mentale est d\u00e9sormais un panneau flottant ind\u00e9pendant, accessible via le bouton \uD83D\uDCD4.',
+                '<strong>Conventions emojis</strong> : \uD83D\uDCD4\u00a0guidage, \uD83D\uDCDA\u00a0biblioth\u00e8ques, \uD83D\uDD12/\uD83D\uDD13\u00a0verrouillage, \uD83E\uDD4B\u00a0assistants de cr\u00e9ation \u2014 normalis\u00e9s dans toute l\u2019application.',
+                '<strong>Accents corrig\u00e9s</strong> : Caract\u00e8res accentu\u00e9s manquants dans la page Archivage de Construction de la note.'
+            ]
+        },
+        {
             version: 'Beta 97.7',
             date: '15 f\u00e9vrier',
             couleur: 'bleu',

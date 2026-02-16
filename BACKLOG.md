@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 16 fevrier 2026 (Beta 97.8)
+> **Derniere mise a jour** : 16 fevrier 2026 (Beta 97.8, build 0216-0950)
 
 ---
 
@@ -877,62 +877,44 @@
 
 ### Coherence visuelle et design system (16 fevrier 2026)
 
-- [ ] **#166** Eliminer les couleurs hardcodees et les styles inlines dans toute l'application
-  - Auditer `index.html`, `styles.css` et les fichiers JS pour identifier les couleurs en dur et les `style="..."` evitables
-  - Assurer la conformite de `styles.css` avec `design-system.html` (source de verite visuelle)
-  - Ajuster les deux fichiers au besoin pour qu'ils correspondent a la meilleure pratique
-  - Signaler explicitement les mises a jour faites dans l'un et/ou l'autre
+- [x] **#166** Eliminer les couleurs hardcodees et les styles inlines dans toute l'application ✅ FAIT (16 fev 2026)
+  - 6 phases : badge-compteur/controle-form, alertes inline, variables IDME/planification, hex hardcodes CSS, couleurs JS, mise a jour design-system.html
   - **Fichiers** : `index.html`, `styles.css`, `design-system.html`, fichiers JS concernes
 
-- [ ] **#167** Detacher le guide d'utilisation de l'alignement pedagogique en palette independante
-  - Revoir le guide d'utilisation de la carte mentale sur le plan visuel
-  - Le detacher de la palette des elements pour en faire une palette independante
-  - Apparition via un bouton dans la palette principale, icone : 📔
-  - Ajouter le bouton 📔 au design system
-  - **Fichiers** : `js/planification-carte.js`, `styles.css`, `design-system.html`
+- [x] **#167** Detacher le guide d'utilisation de l'alignement pedagogique en palette independante ✅ FAIT (16 fev 2026)
+  - Guide detache en panneau flottant independant avec bouton 📔
+  - **Fichiers** : `js/planification-carte.js`, `styles.css`
 
-- [ ] **#168** Normaliser l'emoji 📔 pour tout element de guidage, description de processus ou information a suivre
-  - Auditer toute l'application pour identifier les elements de guidage/documentation/info a suivre
-  - S'assurer qu'ils utilisent tous l'emoji 📔
-  - Mettre a jour le design system en consequence
-  - **Fichiers** : `index.html`, `styles.css`, `design-system.html`, fichiers JS concernes
+- [x] **#168** Normaliser l'emoji 📔 pour tout element de guidage ✅ FAIT (16 fev 2026)
+  - Audit et normalisation des emojis de guidage dans toute l'application
+  - **Fichiers** : `index.html`, `styles.css`, fichiers JS concernes
 
-- [ ] **#169** Normaliser l'emoji 📚 pour toutes les bibliotheques
-  - Auditer toute l'application pour verifier que chaque bibliotheque utilise l'icone 📚
-  - Corriger les incohérences le cas echeant
-  - Mettre a jour le design system
-  - **Fichiers** : `index.html`, `design-system.html`, fichiers JS concernes
+- [x] **#169** Normaliser l'emoji 📚 pour toutes les bibliotheques ✅ FAIT (16 fev 2026)
+  - Audit et normalisation des emojis de bibliotheques
+  - **Fichiers** : `index.html`, fichiers JS concernes
 
-- [ ] **#170** Normaliser les icones de verrouillage/deverrouillage 🔒 et 🔓
-  - Auditer tout systeme de verrouillage/deverrouillage dans l'application
-  - S'assurer que l'etat verrouille affiche 🔒 et l'etat deverrouille affiche 🔓
-  - Ajouter la convention au design system
-  - **Fichiers** : `index.html`, `design-system.html`, fichiers JS concernes
+- [x] **#170** Normaliser les icones de verrouillage/deverrouillage 🔒 et 🔓 ✅ FAIT (16 fev 2026)
+  - Audit et normalisation des icones de verrouillage dans toute l'application
+  - **Fichiers** : `index.html`, fichiers JS concernes
 
-- [ ] **#171** Normaliser l'emoji 🥋 pour tous les assistants de creation
-  - Remplacer les icones 😎, ⚒️ et 🛠️ par 🥋 dans tous les assistants de creation
-  - Mettre a jour le design system
-  - **Fichiers** : `index.html`, `design-system.html`, fichiers JS concernes
+- [x] **#171** Normaliser l'emoji 🥋 pour tous les assistants de creation ✅ FAIT (16 fev 2026)
+  - Remplacement des icones 😎, ⚒️ et 🛠️ par 🥋 dans tous les assistants
+  - **Fichiers** : `index.html`, fichiers JS concernes
 
-- [ ] **#172** Audit complet de coherence visuelle modes clair et sombre
-  - Parcourir chaque section/module de l'application dans les deux modes (clair et sombre)
-  - Verifier la fidelite au design system pour chaque ecran
-  - Corriger les ecarts dans les modules, le HTML et le CSS
-  - Assurer que `styles.css` et `design-system.html` sont synchronises
-  - **Fichiers** : `index.html`, `styles.css`, `design-system.html`, fichiers JS concernes
+- [x] **#172** Audit complet de coherence visuelle modes clair et sombre ✅ FAIT (16 fev 2026)
+  - ~50 variables CSS ajoutees dans `:root` et `body.mode-clair`
+  - ~60 couleurs hardcodees remplacees par `var(--...)` dans styles.css, index.html et 7 fichiers JS
+  - Phases : cartes info, badges pattern, jetons profil, calendrier, utilitaires texte/gris, inline styles, couleurs JS
+  - **Fichiers** : `styles.css`, `index.html`, `js/trimestres.js`, `js/planification-carte.js`, `js/etudiants.js`, `js/guidage.js`, `js/echelles.js`, `js/aide-contextuelle-contenu.js`, `js/tableau-bord-apercu.js`
 
-- [ ] **#173** Corriger les caracteres accentues dans la page Archivage de Construction de la note
-  - Verifier que tous les textes de la page Archivage utilisent les accents francais corrects
-  - Corriger les caracteres manquants ou mal encodes
-  - **Fichiers** : `index.html` (section Construction de la note > Archivage)
+- [x] **#173** Corriger les caracteres accentues dans la page Archivage de Construction de la note ✅ FAIT (16 fev 2026)
+  - Accents manquants corriges dans la section Archivage
+  - **Fichiers** : `index.html`
 
-- [ ] **#174** Mise a jour Beta 97.7 — documentation, build et publication
-  - Mettre a jour le numero de beta dans l'application
-  - Renumeroter le BUILD_ID dans `index.html` et `version.json`
-  - Mettre a jour les news / changelog
-  - Documenter les changements de la session
-  - Commit et push
-  - **Fichiers** : `index.html`, `version.json`, `SESSION.md`, `BACKLOG.md`
+- [x] **#174** Mise a jour Beta 97.8 — documentation, build et publication ✅ FAIT (16 fev 2026)
+  - Beta 97.8, build 0216-0950
+  - Changelog, notes de version, SESSION.md, BACKLOG.md mis a jour
+  - **Fichiers** : `index.html`, `version.json`, `styles.css`, `js/changelog-data.js`, `SESSION.md`, `BACKLOG.md`
 
 ---
 
