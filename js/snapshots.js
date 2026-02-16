@@ -773,18 +773,13 @@ async function reconstruireSnapshotsHistoriques() {
     console.log('🔄 Début reconstruction snapshots historiques (PAR SÉANCE)...');
 
     try {
-        // ✅ CORRECTIF (13 fév 2026): Régénérer calendrier + séances pour le groupe actif
-        // Le calendrierComplet est partagé par trimestre et construit à partir de horaireHebdo.
-        // Si horaireHebdo reflète un autre groupe, les jours de cours sont faux.
-        // On synchronise horaireHebdo → régénère le calendrier → régénère les séancesCompletes.
-        console.log('🔄 Synchronisation calendrier avec le groupe actif...');
-        if (typeof obtenirSeancesHoraire === 'function' && typeof genererCalendrierComplet === 'function') {
-            const seancesHoraire = obtenirSeancesHoraire();
-            if (seancesHoraire && seancesHoraire.length > 0) {
-                db.setSync(cle('horaireHebdo'), seancesHoraire);
-                genererCalendrierComplet();
-                console.log('✅ Calendrier régénéré pour le groupe actif');
-            }
+        // ✅ CORRECTIF (16 fév 2026): Régénérer le calendrier avec l'union de tous les horaires.
+        // genererCalendrierComplet() synchronise désormais horaireHebdo automatiquement
+        // depuis toutes les entités horaire (couvre tous les groupes-cours).
+        console.log('🔄 Régénération calendrier...');
+        if (typeof genererCalendrierComplet === 'function') {
+            genererCalendrierComplet();
+            console.log('✅ Calendrier régénéré');
         }
 
         // ⚡ Charger les évaluations depuis IndexedDB (évite QuotaExceededError)

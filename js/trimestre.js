@@ -692,6 +692,29 @@ function genererCalendrierComplet() {
     const evenementsPrevus = db.getSync(cle('evenementsPrevus'), []);
     const evenementsImprevus = db.getSync(cle('evenementsImprevus'), []);
 
+    // 🆕 FIX (16 fév 2026) : Synchroniser horaireHebdo depuis TOUTES les entités horaire
+    // avant de générer le calendrier. Garantit que le calendrier reflète tous les groupes-cours.
+    const horairesEntites = db.getSync(cle('horaires'), []);
+    if (horairesEntites.length > 0) {
+        const toutesSeances = [];
+        const joursDejaVus = new Set();
+        horairesEntites.forEach(h => {
+            if (h.seances && Array.isArray(h.seances)) {
+                h.seances.forEach(s => {
+                    const jourNormalise = s.jour.toLowerCase();
+                    if (!joursDejaVus.has(jourNormalise)) {
+                        joursDejaVus.add(jourNormalise);
+                        toutesSeances.push(s);
+                    }
+                });
+            }
+        });
+        if (toutesSeances.length > 0) {
+            db.setSync(cle('horaireHebdo'), toutesSeances);
+            console.log('   📅 horaireHebdo synchronisé depuis', horairesEntites.length, 'entité(s) horaire:', toutesSeances.map(s => s.jour).join(', '));
+        }
+    }
+
     // ✅ CORRECTION (31 déc 2025): Utiliser horaireHebdo pour déterminer les jours de cours
     // Si horaireHebdo est défini, seuls les jours avec des séances sont des jours de cours
     // Sinon, tous les jours ouvrables sont considérés comme jours de cours (comportement legacy)
