@@ -1773,7 +1773,7 @@
             // Changer la couleur du bandeau archive pour indiquer l'anonymisation
             const bandeauArchive = document.getElementById('bandeau-archive');
             if (bandeauArchive) {
-                bandeauArchive.style.background = '#0f1e3a'; // Bleu très foncé (anonymisation)
+                bandeauArchive.style.background = 'var(--bleu-fonce)'; // Bleu très foncé (anonymisation)
             }
             console.log('Mode anonymisation activé - identités masquées');
         } else {

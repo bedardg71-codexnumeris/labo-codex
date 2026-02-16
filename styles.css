@@ -207,6 +207,57 @@
     --examens-bg: rgba(232, 64, 87, 0.08);
     --weekend-bg: rgba(106, 172, 184, 0.05);
 
+    /* === CARTES INFO PÉDAGOGIQUES === */
+    --carte-info-note-fond: #2a2818;
+    --carte-info-note-bordure: #f5c842;
+    --carte-info-note-titre: #d97706;
+    --carte-info-conseil-fond: #0e2a28;
+    --carte-info-conseil-bordure: #4ade80;
+    --carte-info-conseil-titre: #34c759;
+    --carte-info-pedagogique-fond: #2a1418;
+    --carte-info-pedagogique-bordure: #f87171;
+    --carte-info-pedagogique-titre: #f06878;
+
+    /* === BADGES PATTERN D'APPRENTISSAGE === */
+    --badge-pattern-critique-fond: rgba(79, 116, 243, 0.15);
+    --badge-pattern-critique-texte: #7a9cff;
+    --badge-pattern-emergent-fond: rgba(41, 148, 238, 0.15);
+    --badge-pattern-emergent-texte: #5ab4ff;
+    --badge-pattern-defi-fond: rgba(17, 174, 197, 0.15);
+    --badge-pattern-defi-texte: #3cc8d8;
+    --badge-pattern-stable-fond: rgba(27, 189, 126, 0.15);
+    --badge-pattern-stable-texte: #4cd8a0;
+
+    /* === JETONS PROFIL ÉTUDIANT === */
+    --jetons-reprise-fond: rgba(156, 39, 176, 0.12);
+    --jetons-reprise-bordure: #9c27b0;
+    --jetons-reprise-titre: #ce93d8;
+    --jetons-delai-fond: rgba(255, 111, 0, 0.12);
+    --jetons-delai-bordure: #ff6f00;
+    --jetons-delai-titre: #ffab40;
+
+    /* === CALENDRIER - COULEURS TEXTE/BORDURE === */
+    --calendrier-weekend-texte: #757575;
+    --calendrier-examens-bordure: #f06292;
+    --calendrier-planification-bordure: #ba68c8;
+    --calendrier-conge-texte: #f06878;
+    --calendrier-conge-bordure: #ef5350;
+    --calendrier-reprise-texte: #ffab40;
+
+    /* === ALERTES INLINE (holistique violet, seuils) === */
+    --alerte-fond-violet: rgba(156, 39, 176, 0.12);
+    --alerte-bordure-violet: #9c27b0;
+
+    /* === GABARIT (violet) === */
+    --gabarit-couleur: #a78bfa;
+    --gabarit-fond: linear-gradient(135deg, rgba(139,92,246,0.08) 0%, #162c36 100%);
+
+    /* === GRIS UTILITAIRES === */
+    --gris-bordure-dashed: #5a7a88;
+    --gris-separateur: #5a7a88;
+    --gris-encadre-jetons: #5a7a88;
+    --gris-encadre-jetons-progression: #5a7a88;
+
     /* === NOUVELLES VARIABLES SÉMANTIQUES OCÉAN === */
     --surface-page: #0c1a22;
     --surface-section: #142428;
@@ -479,6 +530,57 @@ body.mode-clair {
     --idme-developpement: #F9A825;
     --idme-reussite: #E65100;
     --idme-insuffisant: #C62828;
+
+    /* Cartes info pédagogiques */
+    --carte-info-note-fond: #fffbea;
+    --carte-info-note-bordure: #f5c842;
+    --carte-info-note-titre: #92600a;
+    --carte-info-conseil-fond: #f0fdf4;
+    --carte-info-conseil-bordure: #4ade80;
+    --carte-info-conseil-titre: #15803d;
+    --carte-info-pedagogique-fond: #fef2f2;
+    --carte-info-pedagogique-bordure: #f87171;
+    --carte-info-pedagogique-titre: #b91c1c;
+
+    /* Badges pattern d'apprentissage */
+    --badge-pattern-critique-fond: #dbeafe;
+    --badge-pattern-critique-texte: #3b5dc9;
+    --badge-pattern-emergent-fond: #dbeafe;
+    --badge-pattern-emergent-texte: #1e74c0;
+    --badge-pattern-defi-fond: #cffafe;
+    --badge-pattern-defi-texte: #0d8a9e;
+    --badge-pattern-stable-fond: #d1fae5;
+    --badge-pattern-stable-texte: #15875e;
+
+    /* Jetons profil étudiant */
+    --jetons-reprise-fond: #f3e5f5;
+    --jetons-reprise-bordure: #9c27b0;
+    --jetons-reprise-titre: #7b1fa2;
+    --jetons-delai-fond: #fff3e0;
+    --jetons-delai-bordure: #ff6f00;
+    --jetons-delai-titre: #e65100;
+
+    /* Calendrier - couleurs texte/bordure */
+    --calendrier-weekend-texte: #757575;
+    --calendrier-examens-bordure: #f06292;
+    --calendrier-planification-bordure: #ba68c8;
+    --calendrier-conge-texte: #c62828;
+    --calendrier-conge-bordure: #ef5350;
+    --calendrier-reprise-texte: #e65100;
+
+    /* Alertes inline (holistique violet, seuils) */
+    --alerte-fond-violet: #f3e5f5;
+    --alerte-bordure-violet: #9c27b0;
+
+    /* Gabarit (violet) */
+    --gabarit-couleur: #6f42c1;
+    --gabarit-fond: linear-gradient(135deg, #f8f4ff 0%, #fff 100%);
+
+    /* Gris utilitaires */
+    --gris-bordure-dashed: #ccc;
+    --gris-separateur: #ccc;
+    --gris-encadre-jetons: #999aab;
+    --gris-encadre-jetons-progression: #999aab;
 }
 
 /* ===============================
@@ -519,8 +621,8 @@ body.mode-clair {
 .u-texte-bleu { color: var(--accent-primaire); }
 .u-texte-gris { color: var(--texte-secondaire, #8aa4b0); }
 .u-texte-gris-clair { color: var(--texte-muted, #5a7a88); }
-.u-texte-danger { color: #dc2626; }
-.u-texte-succes { color: #16a34a; }
+.u-texte-danger { color: var(--rouge-erreur); }
+.u-texte-succes { color: var(--vert-succes); }
 .u-texte-warning { color: var(--btn-annuler); }
 
 /* === TEXTE - ALIGNEMENT === */
@@ -2176,12 +2278,12 @@ input[type="number"].controle-form {
     border-radius: var(--radius-moyen);
     font-size: 0.8rem;
     font-weight: 600;
-    background: #dbeafe;
-    color: #4f74f3;
+    background: var(--badge-pattern-critique-fond);
+    color: var(--badge-pattern-critique-texte);
 }
 
 .badge-pattern-blocage-critique .badge-analyse-count {
-    background: #4f74f3;
+    background: var(--badge-pattern-critique-texte);
 }
 
 .badge-pattern-blocage-emergent {
@@ -2190,12 +2292,12 @@ input[type="number"].controle-form {
     border-radius: var(--radius-moyen);
     font-size: 0.8rem;
     font-weight: 600;
-    background: #dbeafe;
-    color: #2994ee;
+    background: var(--badge-pattern-emergent-fond);
+    color: var(--badge-pattern-emergent-texte);
 }
 
 .badge-pattern-blocage-emergent .badge-analyse-count {
-    background: #2994ee;
+    background: var(--badge-pattern-emergent-texte);
 }
 
 .badge-pattern-defi-specifique {
@@ -2204,12 +2306,12 @@ input[type="number"].controle-form {
     border-radius: var(--radius-moyen);
     font-size: 0.8rem;
     font-weight: 600;
-    background: #cffafe;
-    color: #11aec5;
+    background: var(--badge-pattern-defi-fond);
+    color: var(--badge-pattern-defi-texte);
 }
 
 .badge-pattern-defi-specifique .badge-analyse-count {
-    background: #11aec5;
+    background: var(--badge-pattern-defi-texte);
 }
 
 .badge-pattern-stable {
@@ -2218,12 +2320,12 @@ input[type="number"].controle-form {
     border-radius: var(--radius-moyen);
     font-size: 0.8rem;
     font-weight: 600;
-    background: #d1fae5;
-    color: #1bbd7e;
+    background: var(--badge-pattern-stable-fond);
+    color: var(--badge-pattern-stable-texte);
 }
 
 .badge-pattern-stable .badge-analyse-count {
-    background: #1bbd7e;
+    background: var(--badge-pattern-stable-texte);
 }
 
 .badge-pattern-progression {
@@ -2232,12 +2334,12 @@ input[type="number"].controle-form {
     border-radius: var(--radius-moyen);
     font-size: 0.8rem;
     font-weight: 600;
-    background: #d1fae5;
-    color: #1bbd7e;
+    background: var(--badge-pattern-stable-fond);
+    color: var(--badge-pattern-stable-texte);
 }
 
 .badge-pattern-progression .badge-analyse-count {
-    background: #1bbd7e;
+    background: var(--badge-pattern-stable-texte);
 }
 
 /* === BADGES TÉTRIS : Niveau RàI === */
@@ -4764,28 +4866,28 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 
 /* Variante Note (💡) - Style post-it jaune */
 .carte-info-note {
-    background: #fffbea;
-    border-left-color: #f5c842;
+    background: var(--carte-info-note-fond);
+    border-left-color: var(--carte-info-note-bordure);
 }
 
 /* Variante Conseil (📐) - Style vert technique */
 .carte-info-conseil {
-    background: #f0fdf4;
-    border-left-color: #4ade80;
+    background: var(--carte-info-conseil-fond);
+    border-left-color: var(--carte-info-conseil-bordure);
 }
 
 .carte-info-conseil .carte-info-toggle-titre .texte {
-    color: #16a34a;
+    color: var(--carte-info-conseil-titre);
 }
 
 /* Variante Pédagogique (🍎) - Style rouge pédagogique */
 .carte-info-pedagogique {
-    background: #fef2f2;
-    border-left-color: #f87171;
+    background: var(--carte-info-pedagogique-fond);
+    border-left-color: var(--carte-info-pedagogique-bordure);
 }
 
 .carte-info-pedagogique .carte-info-toggle-titre .texte {
-    color: #dc2626;
+    color: var(--carte-info-pedagogique-titre);
 }
 
 /* En-tête de la carte avec emoji et titre */
@@ -4804,7 +4906,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 
 .carte-info-toggle-titre .texte {
     font-weight: 600;
-    color: #d97706;
+    color: var(--carte-info-note-titre);
 }
 
 /* Listes à l'intérieur des cartes info-toggle */
@@ -5109,7 +5211,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 /* Weekend */
 .calendrier-jour-weekend {
     background: var(--weekend-bg);
-    color: #757575;
+    color: var(--calendrier-weekend-texte);
     border: 2px solid rgba(106, 172, 184, 0.2);
 }
 
@@ -5117,7 +5219,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 .calendrier-jour-examens {
     background: var(--examens-bg);
     color: var(--accent-primaire);
-    border: 2px solid #f06292;
+    border: 2px solid var(--calendrier-examens-bordure);
     font-weight: 400;
 }
 
@@ -5125,22 +5227,22 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 .calendrier-jour-planification {
     background: var(--planification-bg);
     color: var(--accent-primaire);
-    border: 2px solid #ba68c8;
+    border: 2px solid var(--calendrier-planification-bordure);
     font-weight: 400;
 }
 
 /* Congé prévu au calendrier */
 .calendrier-jour-conge {
     background: var(--conge-bg);
-    color: #c62828;
-    border: 2px solid #ef5350;
+    color: var(--calendrier-conge-texte);
+    border: 2px solid var(--calendrier-conge-bordure);
     font-weight: 600;
 }
 
 /* Reprise */
 .calendrier-jour-reprise {
     background: var(--reprise-bg);
-    color: #e65100;
+    color: var(--calendrier-reprise-texte);
     border: 2px solid var(--orange-accent);
     font-weight: 600;
 }
@@ -5488,7 +5590,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 .portfolio-artefact-checkbox-vide {
     width: 18px;
     height: 18px;
-    border: 2px dashed #ccc;
+    border: 2px dashed var(--gris-bordure-dashed);
     border-radius: var(--radius-petit);  /* 5px - petit element */
     flex-shrink: 0;
 }
@@ -5669,7 +5771,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 
 .production-separateur {
     margin: 0 8px;
-    color: #ccc;
+    color: var(--gris-separateur);
 }
 
 .production-ponderation {
@@ -5850,7 +5952,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 /* Encadré de gestion des jetons */
 .profil-encadre-jetons {
     background: var(--surface-carte, #1a3a48);
-    border: 2px solid #757575;
+    border: 2px solid var(--gris-encadre-jetons);
     border-radius: var(--radius-grand);
     padding: 12px;
     margin-bottom: 10px;
@@ -5864,13 +5966,13 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 .profil-encadre-jetons-titre {
-    color: #757575;
+    color: var(--gris-encadre-jetons);
     font-size: 0.9rem;
     font-weight: bold;
 }
 
 .profil-encadre-jetons-compteur {
-    color: #757575;
+    color: var(--gris-encadre-jetons);
     font-weight: bold;
     font-size: 0.9rem;
 }
@@ -5883,7 +5985,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 .profil-encadre-jetons-progression {
-    background: #757575;
+    background: var(--gris-encadre-jetons-progression);
     height: 100%;
     transition: width 0.3s ease;
 }
@@ -6664,7 +6766,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 .etud-texte-gris-clair {
-    color: #ccc;
+    color: var(--gris-clair);
 }
 
 
@@ -7876,13 +7978,13 @@ summary.summary-materiel:hover {
 
 /* Jetons de reprise (violet) */
 .profil-jetons-reprise {
-    background: #f3e5f5;
-    border-color: #9c27b0;
+    background: var(--jetons-reprise-fond);
+    border-color: var(--jetons-reprise-bordure);
 }
 
 .profil-jetons-reprise-titre {
     font-size: 1rem;
-    color: #7b1fa2;
+    color: var(--jetons-reprise-titre);
     font-weight: 600;
 }
 
@@ -7902,13 +8004,13 @@ summary.summary-materiel:hover {
 
 /* Jetons de délai (orange) */
 .profil-jetons-delai {
-    background: #fff3e0;
-    border-color: #ff6f00;
+    background: var(--jetons-delai-fond);
+    border-color: var(--jetons-delai-bordure);
 }
 
 .profil-jetons-delai-titre {
     font-size: 1rem;
-    color: #e65100;
+    color: var(--jetons-delai-titre);
     font-weight: 600;
 }
 

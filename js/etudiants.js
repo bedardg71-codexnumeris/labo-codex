@@ -1165,7 +1165,7 @@ function afficherListeEtudiantsConsultation() {
 
         // NOUVEAU: Construire le HTML avec toutes les colonnes
         let html = '';
-        html += '<td style="text-align: center; color: #64748b; font-weight: 600;">' + etudiant.num + '</td>';
+        html += '<td style="text-align: center; color: var(--texte-muted); font-weight: 600;">' + etudiant.num + '</td>';
         html += '<td>' + da + '</td>';
         html += '<td class="etud-text-center"><strong>' + groupe + '</strong></td>';
         html += '<td>' + nom + '</td>';

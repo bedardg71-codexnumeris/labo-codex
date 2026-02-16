@@ -1829,7 +1829,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
     let messageAttenteHTML = '';
     if (tousEnAttente) {
         messageAttenteHTML = `
-            <div class="tb-texte-description" style="color: #94a3b8; font-style: italic;">
+            <div class="tb-texte-description" style="color: var(--texte-muted); font-style: italic;">
                 ${texteAttente}
             </div>
         `;
@@ -1842,7 +1842,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
     let indicateurAttenteHTML = '';
     const moyenneSignificative = (afficherSom && moyenneSOM > 0) || (afficherPan && moyennePAN > 0);
     if (donneesEnAttente && !tousEnAttente && !moyenneSignificative) {
-        indicateurAttenteHTML = `<span style="color: #94a3b8; font-size: 0.8rem; margin-left: 8px;">(${texteAttente})</span>`;
+        indicateurAttenteHTML = `<span style="color: var(--texte-muted); font-size: 0.8rem; margin-left: 8px;">(${texteAttente})</span>`;
     }
 
     // Si tous en attente, remplacer l'interprétation par le message d'attente
@@ -1914,17 +1914,17 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
         return `
             <div class="distribution-container u-mb-15">
                 <h4 class="tb-titre-metrique" data-tooltip="tdb-patterns">Répartition des patterns d'apprentissage</h4>
-                <div class="tb-texte-description" style="color: #94a3b8; font-style: italic;">
+                <div class="tb-texte-description" style="color: var(--texte-muted); font-style: italic;">
                     En attente de données pour ${nbTotal} étudiant${nbTotal > 1 ? 's' : ''}.
                 </div>
                 <div class="barre-patterns tb-barre-simple" style="opacity: 0.5;">
                     <div class="barre-patterns-overlay"></div>
                 </div>
                 <div class="distribution-legende tb-barre-distribution">
-                    <span style="position: absolute; left: 12.5%; transform: translateX(-50%); color: #1bbd7e; font-weight: 600; text-align: center;">Progression<br>stable<br><span class="tb-texte-mini" style="color: #94a3b8;">0 (0%)</span></span>
-                    <span style="position: absolute; left: 37.5%; transform: translateX(-50%); color: #11aec5; font-weight: 600; text-align: center;">Défi<br>spécifique<br><span class="tb-texte-mini" style="color: #94a3b8;">0 (0%)</span></span>
-                    <span style="position: absolute; left: 62.5%; transform: translateX(-50%); color: #2994ee; font-weight: 600; text-align: center;">Blocage<br>émergent<br><span class="tb-texte-mini" style="color: #94a3b8;">0 (0%)</span></span>
-                    <span style="position: absolute; left: 87.5%; transform: translateX(-50%); color: #4f74f3; font-weight: 600; text-align: center;">Blocage<br>critique<br><span class="tb-texte-mini" style="color: #94a3b8;">0 (0%)</span></span>
+                    <span style="position: absolute; left: 12.5%; transform: translateX(-50%); color: var(--badge-pattern-stable-texte); font-weight: 600; text-align: center;">Progression<br>stable<br><span class="tb-texte-mini" style="color: var(--texte-muted);">0 (0%)</span></span>
+                    <span style="position: absolute; left: 37.5%; transform: translateX(-50%); color: var(--badge-pattern-defi-texte); font-weight: 600; text-align: center;">Défi<br>spécifique<br><span class="tb-texte-mini" style="color: var(--texte-muted);">0 (0%)</span></span>
+                    <span style="position: absolute; left: 62.5%; transform: translateX(-50%); color: var(--badge-pattern-emergent-texte); font-weight: 600; text-align: center;">Blocage<br>émergent<br><span class="tb-texte-mini" style="color: var(--texte-muted);">0 (0%)</span></span>
+                    <span style="position: absolute; left: 87.5%; transform: translateX(-50%); color: var(--badge-pattern-critique-texte); font-weight: 600; text-align: center;">Blocage<br>critique<br><span class="tb-texte-mini" style="color: var(--texte-muted);">0 (0%)</span></span>
                 </div>
             </div>
         `;
@@ -2163,16 +2163,16 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, n
         return `
             <div class="distribution-container u-mb-15">
                 <h4 class="tb-titre-metrique" data-tooltip="tdb-rai">Modèle de la Réponse à l'intervention (RàI)</h4>
-                <div class="tb-texte-description" style="color: #94a3b8; font-style: italic;">
+                <div class="tb-texte-description" style="color: var(--texte-muted); font-style: italic;">
                     En attente de données pour ${nbTotal} étudiant${nbTotal > 1 ? 's' : ''}.
                 </div>
                 <div class="barre-rai tb-barre-simple" style="opacity: 0.5;">
                     <div class="barre-rai-overlay"></div>
                 </div>
                 <div class="distribution-legende tb-barre-distribution">
-                    <span style="position: absolute; left: 16.5%; transform: translateX(-50%); color: var(--bleu-clair); font-weight: 600; text-align: center;">Niveau 1<br>Universel<br><span class="tb-texte-mini" style="color: #94a3b8;">0 (0%)</span></span>
-                    <span style="position: absolute; left: 49.5%; transform: translateX(-50%); color: #9c55d6; font-weight: 600; text-align: center;">Niveau 2<br>Préventif<br><span class="tb-texte-mini" style="color: #94a3b8;">0 (0%)</span></span>
-                    <span style="position: absolute; left: 83%; transform: translateX(-50%); color: #7c3aed; font-weight: 600; text-align: center;">Niveau 3<br>Intensif<br><span class="tb-texte-mini" style="color: #94a3b8;">0 (0%)</span></span>
+                    <span style="position: absolute; left: 16.5%; transform: translateX(-50%); color: var(--bleu-clair); font-weight: 600; text-align: center;">Niveau 1<br>Universel<br><span class="tb-texte-mini" style="color: var(--texte-muted);">0 (0%)</span></span>
+                    <span style="position: absolute; left: 49.5%; transform: translateX(-50%); color: var(--jetons-reprise-titre); font-weight: 600; text-align: center;">Niveau 2<br>Préventif<br><span class="tb-texte-mini" style="color: var(--texte-muted);">0 (0%)</span></span>
+                    <span style="position: absolute; left: 83%; transform: translateX(-50%); color: var(--den-violet); font-weight: 600; text-align: center;">Niveau 3<br>Intensif<br><span class="tb-texte-mini" style="color: var(--texte-muted);">0 (0%)</span></span>
                 </div>
             </div>
         `;
