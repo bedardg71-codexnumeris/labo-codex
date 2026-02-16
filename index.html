@@ -3971,11 +3971,11 @@
                             </ul>
                             Les <strong>zones colorées</strong> en arrière-plan correspondent aux niveaux IDME :
                             <ul style="margin: 10px 0; padding-left: 20px;">
-                                <li><span style="color: #64B5F6;">Bleu</span> : Étendu ou enrichi (85-100%)</li>
-                                <li><span style="color: #8BC34A;">Vert</span> : Maîtrisé (75-85%)</li>
-                                <li><span style="color: #FFEB3B;">Jaune</span> : En développement (65-75%)</li>
-                                <li><span style="color: #FF9800;">Orange</span> : Réussite (40-65%)</li>
-                                <li><span style="color: #F44336;">Rouge</span> : Insuffisant (0-40%)</li>
+                                <li><span style="color: var(--idme-etendu);">Bleu</span> : Étendu ou enrichi (85-100%)</li>
+                                <li><span style="color: var(--idme-maitrise);">Vert</span> : Maîtrisé (75-85%)</li>
+                                <li><span style="color: var(--idme-developpement);">Jaune</span> : En développement (65-75%)</li>
+                                <li><span style="color: var(--idme-reussite);">Orange</span> : Réussite (40-65%)</li>
+                                <li><span style="color: var(--idme-insuffisant);">Rouge</span> : Insuffisant (0-40%)</li>
                             </ul>
                             <em style="color: var(--gris-moyen); font-size: 0.9rem;">💡 Survolez un point pour voir le nom de l'étudiant et sa note sur cet artefact.</em>
                         </div>
@@ -6826,8 +6826,8 @@
                                     <button class="planif-palette-toggle" id="planif-palette-toggle" title="Réduire la palette">−</button>
                                 </div>
                                 <div class="planif-palette-contenu">
-                                    <div class="planif-palette-categorie" style="background: rgba(59, 130, 246, 0.06);">
-                                        <div class="planif-palette-zone-label" style="color: #3b82f6;" data-tooltip="planif-pouvoir-enseigner">Pourquoi enseigner</div>
+                                    <div class="planif-palette-categorie" data-zone="pourquoi">
+                                        <div class="planif-palette-zone-label" data-tooltip="planif-pouvoir-enseigner">Pourquoi enseigner</div>
                                         <div class="planif-palette-zone-sous-titre">intention curriculaire</div>
                                         <div class="planif-palette-groupe">
                                             <button class="planif-palette-btn" data-type="competence" draggable="true">
@@ -6838,8 +6838,8 @@
                                             </button>
                                         </div>
                                     </div>
-                                    <div class="planif-palette-categorie" style="background: rgba(249, 115, 22, 0.06);">
-                                        <div class="planif-palette-zone-label" style="color: #f97316;" data-tooltip="planif-quoi-enseigner">Quoi enseigner</div>
+                                    <div class="planif-palette-categorie" data-zone="quoi">
+                                        <div class="planif-palette-zone-label" data-tooltip="planif-quoi-enseigner">Quoi enseigner</div>
                                         <div class="planif-palette-zone-sous-titre">types de connaissances</div>
                                         <div class="planif-palette-groupe">
                                             <button class="planif-palette-btn" data-type="factuelle" draggable="true">
@@ -6856,8 +6856,8 @@
                                             </button>
                                         </div>
                                     </div>
-                                    <div class="planif-palette-categorie" style="background: rgba(22, 163, 74, 0.06);">
-                                        <div class="planif-palette-zone-label" style="color: #16a34a;" data-tooltip="planif-comment-enseigner">Comment enseigner</div>
+                                    <div class="planif-palette-categorie" data-zone="comment">
+                                        <div class="planif-palette-zone-label" data-tooltip="planif-comment-enseigner">Comment enseigner</div>
                                         <div class="planif-palette-zone-sous-titre">mise en action</div>
                                         <div class="planif-palette-groupe">
                                             <button class="planif-palette-btn" data-type="activite" draggable="true">
@@ -6871,8 +6871,8 @@
                                             </button>
                                         </div>
                                     </div>
-                                    <div class="planif-palette-categorie" style="background: rgba(217, 70, 239, 0.06);">
-                                        <div class="planif-palette-zone-label" style="color: #D946EF;" data-tooltip="planif-design-apprentissages">Vérifier l'apprentissage</div>
+                                    <div class="planif-palette-categorie" data-zone="verifier">
+                                        <div class="planif-palette-zone-label" data-tooltip="planif-design-apprentissages">Vérifier l'apprentissage</div>
                                         <div class="planif-palette-zone-sous-titre">preuve de réussite</div>
                                         <div class="planif-palette-groupe">
                                             <button class="planif-palette-btn" data-type="evaluation" draggable="true">
@@ -6880,8 +6880,8 @@
                                             </button>
                                         </div>
                                     </div>
-                                    <div class="planif-palette-categorie" style="background: rgba(147, 51, 234, 0.06);">
-                                        <div class="planif-palette-zone-label" style="color: #9333ea;" data-tooltip="planif-structure">Structure</div>
+                                    <div class="planif-palette-categorie" data-zone="structure">
+                                        <div class="planif-palette-zone-label" data-tooltip="planif-structure">Structure</div>
                                         <div class="planif-palette-zone-sous-titre">organisation</div>
                                         <div class="planif-palette-groupe">
                                             <button class="planif-palette-btn" data-type="sequence" draggable="true">
