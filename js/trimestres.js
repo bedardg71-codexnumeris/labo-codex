@@ -50,7 +50,9 @@
         'indicesEvaluation',
         'indicesPatternsRaI',
         'horaireSelectionne',
-        'seancesHoraire'
+        'seancesHoraire',
+        // 🆕 FIX (17 fév 2026) : Carte mentale doit être namespacée pour le mode démo
+        'planification_mindmap'
     ];
 
     // Clés globales (partagées entre trimestres)
