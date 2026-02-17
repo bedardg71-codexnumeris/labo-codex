@@ -368,6 +368,13 @@ function afficherEnteteCalendrier(leconId) {
             return;
         }
 
+        // Filtrer : ne garder que les groupes du même cours que le groupe actif
+        var gcActif = db.getSync('groupeCoursActif', null);
+        var coursIdActif = gcActif ? gcActif.coursId : null;
+        if (coursIdActif) {
+            groupes = groupes.filter(function(g) { return g.coursId === coursIdActif; });
+        }
+
         var html = '';
         for (var i = 0; i < groupes.length; i++) {
             var gc = groupes[i];
