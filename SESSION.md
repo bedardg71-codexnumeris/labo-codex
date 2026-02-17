@@ -1,10 +1,16 @@
 # SESSION ACTIVE - BETA 97.8
 
 **Date** : 17 février 2026
-**Version** : Beta 97.8 (build 0217-1445)
+**Version** : Beta 97.8 (build 0217-1505)
 **Statut** : Refonte interface carte mentale et alignement pédagogique
 
 ## SESSION DU 17 FÉVRIER 2026
+
+### Travail accompli — Carte démo et licence CC (Beta 97.8, build 0217-1505)
+
+85. **Carte démo mise à jour** : La carte démo hardcodée « Écriture et littérature (démo) » est remplacée par l'export réel de la carte reconstruite manuellement (16 nœuds, 14 liens, IDs `planif-` corrects, positions exactes). Compteurs alignés sur l'export (compteur: 26, compteurLiens: 45).
+
+86. **Métadonnées CC BY-NC-SA 4.0** : Ajout du champ `metadata_cc` à la carte démo suivant le patron de `cc-license.js` (licence, auteur, dates, type `alignement_pedagogique`, version 2.0).
 
 ### Travail accompli — Plan de la leçon et mode clair (Beta 97.8, build 0217-1445)
 
