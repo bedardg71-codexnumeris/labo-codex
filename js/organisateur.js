@@ -1313,37 +1313,91 @@ function copierDansPressePapiers(texte, btn) {
 // ============================================================
 
 function ouvrirModaleExport() {
-    if (modaleExport) modaleExport.style.display = 'flex';
+    if (!modaleExport) return;
+    // Mettre à jour le résumé avec les statistiques
+    var resume = document.getElementById('org-export-resume');
+    if (resume) {
+        var stats = compterElementsExport();
+        resume.textContent = 'Exporte ' + stats.sequences + ' séquence' + (stats.sequences > 1 ? 's' : '') +
+            ', ' + stats.lecons + ' leçon' + (stats.lecons > 1 ? 's' : '') +
+            ' et ' + stats.noeuds + ' nœud' + (stats.noeuds > 1 ? 's' : '') +
+            ' d\u2019alignement dans un fichier JSON réimportable via l\u2019alignement pédagogique.';
+    }
+    modaleExport.classList.add('actif');
 }
 
 function fermerModaleExport() {
-    if (modaleExport) modaleExport.style.display = 'none';
+    if (modaleExport) modaleExport.classList.remove('actif');
+}
+
+function compterElementsExport() {
+    var carte = window.planificationCarte;
+    var stats = { sequences: 0, lecons: 0, noeuds: 0 };
+    if (!carte || !carte.etat) return stats;
+    for (var entry of carte.etat.noeuds) {
+        var nd = entry[1];
+        if (nd.type === 'sequence') stats.sequences++;
+        else if (nd.type === 'lecon') stats.lecons++;
+        stats.noeuds++;
+    }
+    return stats;
 }
 
 function lancerExport() {
-    var audience = document.querySelector('input[name="org-export-audience"]:checked');
-    var format = document.querySelector('input[name="org-export-format"]:checked');
-    if (!audience || !format) return;
-
-    var estEleve = audience.value === 'eleve';
-    var estMD = format.value === 'md';
-
-    var contenu = estMD ? genererExportMD(estEleve) : genererExportTXT(estEleve);
+    var json = genererExportJSON();
+    if (!json) return;
 
     var index = window.planificationDonnees ? window.planificationDonnees.getIndex() : null;
-    var nomCarte = 'plan';
+    var nomCarte = 'alignement';
     if (index && index.cartes) {
         var c = index.cartes.find(function(cc) { return cc.id === index.active; });
         if (c) nomCarte = c.nom;
     }
 
-    var suffixe = estEleve ? '_eleve' : '_enseignant';
-    var ext = estMD ? '.md' : '.txt';
-    var nomFichier = nomCarte.replace(/[^a-zA-Z0-9\u00C0-\u017F _-]/g, '') + suffixe + ext;
-    var typeF = estMD ? 'text/markdown' : 'text/plain';
-
-    telechargerFichier(contenu, nomFichier, typeF);
+    var nomFichier = nomCarte.replace(/[^a-zA-Z0-9\u00C0-\u017F _-]/g, '') + '.json';
+    telechargerFichier(JSON.stringify(json, null, 2), nomFichier, 'application/json');
     fermerModaleExport();
+}
+
+function genererExportJSON() {
+    var carte = window.planificationCarte;
+    if (!carte || !carte.etat) return null;
+    var etat = carte.etat;
+
+    var index = window.planificationDonnees ? window.planificationDonnees.getIndex() : null;
+    var carteId = index ? index.active : null;
+    var nomCarte = 'Sans titre';
+    if (index && index.cartes) {
+        var c = index.cartes.find(function(cc) { return cc.id === carteId; });
+        if (c) nomCarte = c.nom;
+    }
+
+    // Données de la carte (noeuds + liens)
+    var donneesCarteBrutes = carteId && window.planificationDonnees
+        ? window.planificationDonnees.chargerCarte(carteId)
+        : null;
+
+    var donneesCarteExport = donneesCarteBrutes || {
+        compteur: etat.compteur,
+        compteurLiens: etat.compteurLiens,
+        noeuds: Array.from(etat.noeuds.values()),
+        liens: Array.from(etat.liens.values())
+    };
+
+    // Données des séances (plan de leçon)
+    var seances = chargerSeances();
+
+    return {
+        version: '1.0',
+        type: 'monitorage-alignement',
+        exportDate: new Date().toISOString(),
+        carte: {
+            id: carteId,
+            nom: nomCarte,
+            donnees: donneesCarteExport
+        },
+        seances: seances
+    };
 }
 
 function genererExportTXT(estEleve) {
@@ -1716,7 +1770,9 @@ function formatDuree(min) {
 }
 
 function telechargerFichier(contenu, nomFichier, type) {
-    var blob = new Blob(['\uFEFF' + contenu], { type: type + ';charset=utf-8' });
+    // BOM uniquement pour les fichiers texte (pas JSON)
+    var prefixe = type.indexOf('json') === -1 ? '\uFEFF' : '';
+    var blob = new Blob([prefixe + contenu], { type: type + ';charset=utf-8' });
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
     a.href = url;

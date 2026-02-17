@@ -7064,7 +7064,7 @@
                         <div class="org-entete">
                             <h2>Plan de la leçon</h2>
                             <div class="org-actions">
-                                <button id="org-btn-export" class="btn-secondaire">Exporter</button>
+                                <button id="org-btn-export" class="btn btn-secondaire">Exporter</button>
                             </div>
                         </div>
                         <div class="org-corps">
@@ -7193,31 +7193,18 @@
                         </div>
                     </div>
                     <!-- Modale d'export -->
-                    <div id="org-modale-export" class="org-modale" style="display:none">
-                        <div class="org-modale-contenu">
-                            <div class="org-modale-entete">
-                                <h3>Exporter le plan de cours</h3>
-                                <button class="org-modale-fermer" id="org-modale-fermer">&times;</button>
+                    <div id="org-modale-export" class="modal-overlay">
+                        <div class="modal-contenu modal-compact">
+                            <button class="modal-fermer" id="org-modale-fermer">&times;</button>
+                            <h3 class="modal-titre">Exporter l'alignement pédagogique</h3>
+                            <div class="modal-section">
+                                <p id="org-export-resume" style="color:var(--texte-secondaire); font-size:0.9rem; line-height:1.6; margin:0">
+                                    Exporte l'ensemble des séquences, leçons et données d'alignement dans un fichier JSON réimportable via l'alignement pédagogique.
+                                </p>
                             </div>
-                            <div class="org-modale-corps">
-                                <div class="org-modale-groupe">
-                                    <label>Public cible</label>
-                                    <div class="org-modale-options">
-                                        <label class="org-radio-label"><input type="radio" name="org-export-audience" value="eleve" checked> Élève (contractuel)</label>
-                                        <label class="org-radio-label"><input type="radio" name="org-export-audience" value="enseignant"> Enseignant (pédagogique complet)</label>
-                                    </div>
-                                </div>
-                                <div class="org-modale-groupe">
-                                    <label>Format</label>
-                                    <div class="org-modale-options">
-                                        <label class="org-radio-label"><input type="radio" name="org-export-format" value="txt" checked> TXT (traitement de texte)</label>
-                                        <label class="org-radio-label"><input type="radio" name="org-export-format" value="md"> MD (document de classe)</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="org-modale-pied">
-                                <button class="btn-secondaire" id="org-modale-annuler">Annuler</button>
-                                <button class="btn-primaire" id="org-modale-telecharger">Télécharger</button>
+                            <div class="modal-actions">
+                                <button class="btn btn-annuler" id="org-modale-annuler">Annuler</button>
+                                <button class="btn btn-confirmer" id="org-modale-telecharger">Exporter JSON</button>
                             </div>
                         </div>
                     </div>
