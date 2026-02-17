@@ -15935,19 +15935,52 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 }
 .org-actions { display: flex; gap: 8px; }
 
-/* Corps scrollable */
+/* Corps — conteneur flex vertical */
 .org-corps {
     flex: 1;
-    overflow-y: auto;
+    overflow: hidden;
     padding: 0;
-    max-width: 900px;
-    margin: 0 auto;
     width: 100%;
+}
+
+/* Split 2 colonnes */
+.org-corps-split {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    height: 100%;
+}
+
+/* Colonne gauche : plan de la leçon */
+.org-plan-lecon {
+    flex: 1;
+    overflow-y: auto;
+    max-width: 900px;
+    padding: 0;
+}
+
+/* Colonne droite : panneau calendrier */
+.org-panneau-calendrier {
+    width: 420px;
+    flex-shrink: 0;
+    overflow-y: auto;
+    border-left: 1px solid rgba(106, 172, 184, 0.25);
+    padding: 14px 20px;
+    background: rgba(106, 172, 184, 0.03);
+}
+.org-panneau-calendrier-titre {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--accent-primaire, #6aacb8);
+    margin-bottom: 12px;
 }
 
 /* Sélecteurs séquence/leçon */
 .org-selecteurs {
     display: flex;
+    align-items: center;
     gap: 10px;
     padding: 14px 24px;
     border-bottom: 1px solid rgba(106, 172, 184, 0.25);
@@ -15956,6 +15989,12 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     position: sticky;
     top: 0;
     z-index: 5;
+}
+.org-ee-toggle {
+    flex-shrink: 0;
+    white-space: nowrap;
+    font-size: 12px;
+    margin-left: 4px;
 }
 .org-selecteurs select {
     flex: 1;
@@ -16175,12 +16214,27 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     cursor: pointer;
 }
 
-/* Enseignement explicite — barre */
+/* Enseignement explicite — barre (legacy, plus utilisée dans l'entête) */
 .org-ee-section { padding: 0; }
 .org-ee-bar {
     background: rgba(200, 160, 96, 0.12);
     padding: 12px 24px;
     border-bottom: 1px solid rgba(200, 160, 96, 0.3);
+}
+
+/* Sections déplacées dans les étapes EE (Ouverture / Clôture) */
+#org-ee-ouverture-sections .org-section,
+#org-ee-cloture-sections .org-section {
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(106, 172, 184, 0.15);
+}
+#org-ee-ouverture-sections .org-section:last-child,
+#org-ee-cloture-sections .org-section:last-child {
+    margin-bottom: 8px;
+}
+.org-ee-cloture-rappel .org-section-contenu {
+    font-style: italic;
+    color: var(--texte-secondaire, #8aa4b0);
 }
 
 /* Étapes EE */
@@ -16281,15 +16335,7 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 .org-activite[draggable="true"] { cursor: grab; }
 .org-activite.org-drag-en-cours { opacity: 0.4; }
 
-/* Calendrier toggle */
-.org-section-titre-collapse {
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.org-section-titre-collapse:hover { color: var(--planif-couleur-selection, #3b82f6); }
-.org-chevron { font-size: 10px; }
+/* Calendrier */
 .org-cal-vide {
     text-align: center;
     padding: 32px 16px;

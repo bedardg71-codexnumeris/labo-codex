@@ -21,7 +21,7 @@ var contenuLecon, enteteCalendrier, enteteCalendrierContenu;
 var objectifContenu, btnReinitObjectif;
 var prerequisContenu, productionsContenu;
 var eeCheckbox, coeurBrut, coeurContenu, eeEtapes;
-var listeNonAssignees, calendrierContenu, calendrierToggle;
+var listeNonAssignees, calendrierContenu;
 var btnExport, modaleExport;
 
 // === NOMS DES ÉTAPES EE ===
@@ -57,7 +57,6 @@ function initialiserModuleOrganisateur() {
         eeEtapes = document.getElementById('org-ee-etapes');
         listeNonAssignees = document.getElementById('org-ee-liste-non-assignees');
         calendrierContenu = document.getElementById('org-calendrier-contenu');
-        calendrierToggle = document.getElementById('org-calendrier-toggle');
         btnExport = document.getElementById('org-btn-export');
         modaleExport = document.getElementById('org-modale-export');
 
@@ -156,21 +155,6 @@ function brancherEvenements() {
             sauvegarderDonneeLecon(leconId, 'objectifPersonnalise', null);
             btnReinitObjectif.style.display = 'none';
             afficherObjectif(leconId);
-        });
-    }
-
-    // Calendrier toggle
-    if (calendrierToggle) {
-        calendrierToggle.addEventListener('click', function() {
-            var contenu = calendrierContenu;
-            var chevron = calendrierToggle.querySelector('.org-chevron');
-            if (contenu.style.display === 'none') {
-                contenu.style.display = '';
-                if (chevron) chevron.textContent = '▾';
-            } else {
-                contenu.style.display = 'none';
-                if (chevron) chevron.textContent = '▸';
-            }
         });
     }
 
@@ -766,6 +750,45 @@ function brancherSelecteursActivites(conteneur, leconId) {
 function basculerEE(actif) {
     if (coeurBrut) coeurBrut.style.display = actif ? 'none' : '';
     if (eeEtapes) eeEtapes.style.display = actif ? '' : 'none';
+
+    var ouvertureContainer = document.getElementById('org-ee-ouverture-sections');
+    var clotureContainer = document.getElementById('org-ee-cloture-sections');
+    var objectifSection = document.getElementById('org-objectif');
+    var prerequisSection = document.getElementById('org-prerequis');
+    var contenuLecon = document.getElementById('org-contenu-lecon');
+
+    if (actif) {
+        // Déplacer Objectif et Prérequis dans l'Ouverture
+        if (ouvertureContainer && objectifSection) ouvertureContainer.appendChild(objectifSection);
+        if (ouvertureContainer && prerequisSection) ouvertureContainer.appendChild(prerequisSection);
+
+        // Générer le rappel des compétences dans la Clôture
+        if (clotureContainer) {
+            var objectifTexte = objectifContenu ? objectifContenu.textContent.trim() : '';
+            clotureContainer.innerHTML = '';
+            if (objectifTexte) {
+                var div = document.createElement('div');
+                div.className = 'org-section org-ee-cloture-rappel';
+                var titre = document.createElement('div');
+                titre.className = 'org-section-titre';
+                titre.textContent = 'Compétences développées';
+                var contenu = document.createElement('div');
+                contenu.className = 'org-section-contenu';
+                contenu.textContent = objectifTexte;
+                div.appendChild(titre);
+                div.appendChild(contenu);
+                clotureContainer.appendChild(div);
+            }
+        }
+    } else {
+        // Remettre Objectif et Prérequis dans le contenu leçon (avant Productions)
+        var productionsSection = document.getElementById('org-productions');
+        if (contenuLecon && objectifSection) contenuLecon.insertBefore(objectifSection, productionsSection);
+        if (contenuLecon && prerequisSection) contenuLecon.insertBefore(prerequisSection, productionsSection);
+
+        // Vider le rappel Clôture
+        if (clotureContainer) clotureContainer.innerHTML = '';
+    }
 }
 
 function afficherEtapesEE(leconId, activites, donnees) {
