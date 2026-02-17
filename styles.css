@@ -15976,6 +15976,25 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     color: var(--accent-primaire, #6aacb8);
     margin-bottom: 12px;
 }
+.org-cal-btn-copier {
+    background: rgba(106, 172, 184, 0.1);
+    border: 1px solid rgba(106, 172, 184, 0.25);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 10px;
+    color: var(--accent-primaire, #6aacb8);
+    cursor: pointer;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+.org-cal-btn-copier:hover { background: rgba(106, 172, 184, 0.2); }
+.org-cal-date-lecon {
+    display: block;
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--texte-muted, #5a7a88);
+    margin-top: 1px;
+}
 
 /* Sélecteurs séquence/leçon */
 .org-selecteurs {
