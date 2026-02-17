@@ -16322,6 +16322,18 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 }
 .org-ee-activite-mini:hover { box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
 .org-ee-activite-mini.org-drag-en-cours { opacity: 0.4; }
+.org-ee-retirer {
+    background: none;
+    border: none;
+    color: var(--texte-muted, #5a7a88);
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0 2px;
+    line-height: 1;
+    margin-left: 2px;
+    flex-shrink: 0;
+}
+.org-ee-retirer:hover { color: #ef4444; }
 .org-ee-activite-titre { font-weight: 500; }
 .org-ee-activite-type {
     font-size: 9px;
