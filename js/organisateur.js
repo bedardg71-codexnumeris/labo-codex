@@ -850,6 +850,15 @@ function afficherEtapesEE(leconId, activites, donnees) {
     var etapesData = donnees.etapes || creerEtapesVides();
     var activitesAssignees = {}; // actId → true si dans au moins une étape
 
+    // Index d'ordre selon la position dans la carte (enfants de la leçon)
+    var lecon = etat.noeuds.get(leconId);
+    var ordreCarteIndex = {};
+    if (lecon && lecon.enfants) {
+        for (var o = 0; o < lecon.enfants.length; o++) {
+            ordreCarteIndex[lecon.enfants[o]] = o;
+        }
+    }
+
     // Pré-calculer quelles activités sont assignées à au moins une étape
     for (var p = 0; p < NOMS_ETAPES.length; p++) {
         var acts = (etapesData[NOMS_ETAPES[p]] || {}).activites || [];
@@ -873,11 +882,13 @@ function afficherEtapesEE(leconId, activites, donnees) {
         var notesEl = document.querySelector('.org-ee-notes[data-etape="' + nomEtape + '"]');
         if (notesEl) notesEl.value = etapeData.contenu || '';
 
-        // Remplir la zone de dépôt avec les activités assignées
+        // Remplir la zone de dépôt avec les activités assignées (triées selon l'ordre de la carte)
         var zoneDepot = document.querySelector('.org-ee-zone-depot[data-etape="' + nomEtape + '"]');
         if (zoneDepot) {
             var htmlZone = '';
-            var actsEtape = etapeData.activites || [];
+            var actsEtape = (etapeData.activites || []).slice().sort(function(a, b) {
+                return (ordreCarteIndex[a] || 0) - (ordreCarteIndex[b] || 0);
+            });
             for (var a = 0; a < actsEtape.length; a++) {
                 var actId = actsEtape[a];
                 var noeud = etat.noeuds.get(actId);
