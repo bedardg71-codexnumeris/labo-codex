@@ -14653,36 +14653,91 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 }
 
 /* === LAYOUT PRINCIPAL === */
+#section-planification.section.active {
+    padding: 0;
+    background: none;
+    border-radius: 0;
+}
 #section-planification .planif-wrapper {
     display: flex;
     flex-direction: column;
     height: calc(100vh - 120px);
     background: var(--planif-couleur-fond);
-    border-radius: var(--radius-grand);
+    border-radius: 0;
     overflow: hidden;
-    box-shadow: var(--shadow-subtil);
 }
 
 /* === BARRE SUPÉRIEURE === */
 #section-planification .planif-header {
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px 12px;
-    padding: 6px 16px;
+    flex-direction: column;
+    gap: 2px;
+    padding: 4px 12px;
     background: var(--surface-carte, #1a3040);
     border-bottom: 1px solid var(--planif-couleur-bordure);
     z-index: 100;
     flex-shrink: 0;
 }
 
-#section-planification .planif-header h3 {
-    font-size: 16px;
-    font-weight: 600;
+.planif-header-titre {
+    text-align: center;
+    margin: 0;
+}
+
+.planif-header-toolbar {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     gap: 8px;
-    margin: 0 auto;
+}
+.planif-toolbar-gauche {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding-right: 10px;
+    border-right: 1px solid var(--planif-couleur-bordure);
+}
+.planif-toolbar-centre {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-size: 11px;
+    color: var(--texte-muted, #5a7a88);
+}
+.planif-toolbar-centre kbd {
+    padding: 1px 5px;
+    background: rgba(106, 172, 184, 0.06);
+    border: 1px solid var(--planif-couleur-bordure);
+    border-radius: 3px;
+    font-family: inherit;
+    font-size: 10px;
+}
+.planif-toolbar-droite {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding-left: 10px;
+    border-left: 1px solid var(--planif-couleur-bordure);
+}
+.planif-header-zoom-raccourci {
+    font-size: 10px;
+    color: var(--texte-muted, #5a7a88);
+}
+.planif-header-zoom-raccourci kbd {
+    padding: 1px 5px;
+    background: rgba(106, 172, 184, 0.06);
+    border: 1px solid var(--planif-couleur-bordure);
+    border-radius: 3px;
+    font-family: inherit;
+    font-size: 10px;
+}
+.planif-zoom-info-header {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--texte-secondaire, #8aa4b0);
+    min-width: 32px;
+    text-align: right;
 }
 
 #section-planification .planif-header h3 span { color: var(--texte-secondaire, #8aa4b0); font-weight: 400; }
@@ -15162,7 +15217,7 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 .planif-guide-flottante {
     position: absolute;
     top: 12px;
-    right: 12px;
+    left: 220px;
     z-index: 80;
     background: var(--surface-carte, #1a3040);
     border: 1px solid var(--planif-couleur-bordure);
@@ -15187,11 +15242,16 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     font-weight: 700;
     color: var(--texte-principal, #d0e0e4);
 }
+.planif-guide-barre-actions {
+    display: flex; align-items: center; gap: 2px;
+}
+.planif-guide-panel-replier,
 .planif-guide-panel-fermer {
     width: 20px; height: 20px; border: none; background: none;
     font-size: 16px; line-height: 1; cursor: pointer; color: var(--texte-muted, #5a7a88);
     border-radius: 4px; display: flex; align-items: center; justify-content: center;
 }
+.planif-guide-panel-replier:hover,
 .planif-guide-panel-fermer:hover { background: rgba(106, 172, 184, 0.1); color: var(--texte-principal, #d0e0e4); }
 
 .planif-guide-panel-contenu {
@@ -15225,7 +15285,7 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 }
 .planif-guide-corps {
     flex: 1; overflow-y: auto; padding: 8px 12px;
-    font-size: 11px; line-height: 1.55; color: var(--texte-secondaire, #8aa4b0);
+    font-size: 10.5px; line-height: 1.55; color: var(--texte-secondaire, #8aa4b0);
 }
 .planif-guide-corps p { margin: 0 0 6px; }
 .planif-guide-corps ol, .planif-guide-corps ul { margin: 4px 0 8px; padding-left: 18px; }
@@ -15256,6 +15316,11 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 .planif-guide-badge {
     display: inline-block; width: 8px; height: 8px;
     border-radius: 50%; vertical-align: middle; margin-right: 2px;
+}
+.planif-guide-conclusion {
+    margin-top: 10px;
+    font-weight: 600;
+    color: var(--planif-couleur-evaluation);
 }
 .planif-guide-ref {
     margin-top: 10px;
@@ -16324,9 +16389,6 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     display: flex;
     align-items: center;
     gap: 6px;
-    padding-right: 12px;
-    border-right: 1px solid var(--planif-couleur-bordure);
-    margin-right: 4px;
 }
 
 #planif-selecteur-cartes select {

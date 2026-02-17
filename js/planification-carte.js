@@ -251,7 +251,7 @@ var GUIDE_PAGES = [
                 '<li>Relie-la aux éléments qu\u2019elle évalue\u00a0: idées maîtresses, connaissances ou activités. Le verbe <em>«\u00a0se vérifie par\u00a0»</em> apparaît.</li>' +
                 '<li>Quand une compétence est atteinte par au moins une évaluation à travers la chaîne, son badge d\u2019avertissement disparaît.</li>' +
             '</ol>' +
-            '<p style="margin-top:10px;font-weight:600;color:var(--planif-couleur-evaluation);">L\u2019objectif\u00a0: quand tous les badges de ta carte sont verts, ton cours est aligné — chaque compétence est enseignée et évaluée de manière cohérente.</p>'
+            '<p class="planif-guide-conclusion">L\u2019objectif\u00a0: quand tous les badges de ta carte sont verts, ton cours est aligné — chaque compétence est enseignée et évaluée de manière cohérente.</p>'
     }
 ];
 
@@ -266,6 +266,9 @@ function ouvrirGuide() {
 
     var conteneur = panel.querySelector('.planif-guide-panel-contenu');
     conteneur.innerHTML = '';
+    conteneur.style.display = '';
+    var btnReplier = panel.querySelector('.planif-guide-panel-replier');
+    if (btnReplier) { btnReplier.textContent = '−'; btnReplier.title = 'Replier le guide'; }
 
     var guide = document.createElement('div');
     guide.className = 'planif-guide';
@@ -806,10 +809,15 @@ function zoomer(clientX, clientY, facteur) {
 
 function mettreAJourBoutonsZoomPreset() {
     var zoomArrondi = Math.round(etat.zoom * 100);
+    var texte = zoomArrondi + '%';
     document.querySelectorAll('.planif-btn-zoom-preset').forEach(function(btn) {
         var presetVal = Math.round(parseFloat(btn.dataset.zoom) * 100);
         btn.classList.toggle('actif', presetVal === zoomArrondi);
     });
+    var infoHeader = document.getElementById('planif-zoom-info-header');
+    if (infoHeader) infoHeader.textContent = texte;
+    var infoFooter = document.getElementById('planif-zoom-info');
+    if (infoFooter) infoFooter.textContent = texte;
 }
 
 // === CRÉER UN NŒUD ===
@@ -4103,11 +4111,24 @@ function initialiser() {
         guideFermerBtn.addEventListener('click', fermerGuide);
     }
 
+    // Bouton replier/déplier du panneau guide
+    var guideReplierBtn = guidePanel ? guidePanel.querySelector('.planif-guide-panel-replier') : null;
+    if (guideReplierBtn) {
+        guideReplierBtn.addEventListener('click', function() {
+            var contenu = guidePanel.querySelector('.planif-guide-panel-contenu');
+            if (!contenu) return;
+            var estReplie = contenu.style.display === 'none';
+            contenu.style.display = estReplie ? '' : 'none';
+            guideReplierBtn.textContent = estReplie ? '−' : '+';
+            guideReplierBtn.title = estReplie ? 'Replier le guide' : 'Déplier le guide';
+        });
+    }
+
     // Drag panneau guide flottant — même pattern que la palette
     var guideBarre = guidePanel ? guidePanel.querySelector('.planif-guide-barre') : null;
     if (guideBarre) {
         guideBarre.addEventListener('mousedown', function(e) {
-            if (e.target.closest('.planif-guide-panel-fermer')) return;
+            if (e.target.closest('.planif-guide-panel-fermer') || e.target.closest('.planif-guide-panel-replier')) return;
             e.preventDefault();
             var startX = e.clientX;
             var startY = e.clientY;

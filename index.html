@@ -6804,18 +6804,34 @@
 
                         <!-- Barre supérieure -->
                         <div class="planif-header">
-                            <div id="planif-selecteur-cartes" data-tooltip="planif-boutons-action">
-                                <select id="planif-liste-cartes" data-tooltip="planif-selecteur-cours"></select>
-                                <button class="planif-btn-carte" id="planif-btn-nouvelle-carte" title="Nouvelle carte">➕</button>
-                                <button class="planif-btn-carte planif-danger" id="planif-btn-supprimer-carte" title="Supprimer cette carte">❌</button>
-                                <button class="planif-btn-carte" id="planif-btn-dupliquer-carte" title="Dupliquer cette carte">📋</button>
-                                <button class="planif-btn-carte" id="planif-btn-exporter-carte" title="Exporter cette carte">⬇️</button>
-                                <button class="planif-btn-carte" id="planif-btn-importer-carte" title="Importer une carte">⬆️</button>
-                                <button class="planif-btn-carte" id="planif-btn-annuler" title="Annuler (Ctrl+Z)">↩️</button>
-                                <input type="file" id="planif-fichier-import" accept=".json" style="display:none">
+                            <h3 class="planif-header-titre"><input type="text" id="planif-titre-carte" value="Sans titre" placeholder="Titre de la carte…"></h3>
+                            <div class="planif-header-toolbar">
+                                <div id="planif-selecteur-cartes" class="planif-toolbar-gauche" data-tooltip="planif-boutons-action">
+                                    <select id="planif-liste-cartes" data-tooltip="planif-selecteur-cours"></select>
+                                    <button class="planif-btn-carte" id="planif-btn-nouvelle-carte" title="Nouvelle carte">➕</button>
+                                    <button class="planif-btn-carte planif-danger" id="planif-btn-supprimer-carte" title="Supprimer cette carte">❌</button>
+                                    <button class="planif-btn-carte" id="planif-btn-dupliquer-carte" title="Dupliquer cette carte">📋</button>
+                                    <button class="planif-btn-carte" id="planif-btn-exporter-carte" title="Exporter cette carte">⬇️</button>
+                                    <button class="planif-btn-carte" id="planif-btn-importer-carte" title="Importer une carte">⬆️</button>
+                                    <button class="planif-btn-carte" id="planif-btn-annuler" title="Annuler (Ctrl+Z)">↩️</button>
+                                    <input type="file" id="planif-fichier-import" accept=".json" style="display:none">
+                                </div>
+                                <div class="planif-toolbar-centre">
+                                    <span><kbd>Suppr</kbd> Supprimer</span>
+                                    <span><kbd>⌘A</kbd> Tout sélectionner</span>
+                                    <span><kbd>⌘+Clic</kbd> Multi-sélection</span>
+                                    <span><kbd>Rectangle</kbd> Sélection par zone</span>
+                                </div>
+                                <div class="planif-toolbar-droite">
+                                    <span id="planif-zoom-info-header" class="planif-zoom-info-header" data-tooltip="planif-zoom">100%</span>
+                                    <button id="planif-btn-recentrer" title="Recentrer la vue sur le contenu (⌘1)">⊕ Recentrer</button>
+                                    <button class="planif-btn-zoom-preset" data-zoom="1.00">100%</button>
+                                    <button class="planif-btn-zoom-preset" data-zoom="0.75">75%</button>
+                                    <button class="planif-btn-zoom-preset" data-zoom="0.50">50%</button>
+                                    <button class="planif-btn-zoom-preset" data-zoom="0.25">25%</button>
+                                    <span class="planif-header-zoom-raccourci"><kbd>⌘+/-</kbd></span>
+                                </div>
                             </div>
-                            <h3><input type="text" id="planif-titre-carte" value="Sans titre" placeholder="Titre de la carte…"></h3>
-                            <button id="planif-btn-seances" style="margin-left:auto">Organisateur</button>
                         </div>
 
                         <!-- Zone de travail -->
@@ -6899,7 +6915,10 @@
                             <div id="planif-guide-panel" class="planif-guide-flottante" style="display: none;">
                                 <div class="planif-guide-barre">
                                     <span class="planif-guide-barre-titre">📔 Guide</span>
-                                    <button class="planif-guide-panel-fermer" title="Fermer le guide">&times;</button>
+                                    <div class="planif-guide-barre-actions">
+                                        <button class="planif-guide-panel-replier" title="Replier le guide">−</button>
+                                        <button class="planif-guide-panel-fermer" title="Fermer le guide">&times;</button>
+                                    </div>
                                 </div>
                                 <div class="planif-guide-panel-contenu">
                                     <!-- Rempli dynamiquement par ouvrirGuide() -->
@@ -7011,22 +7030,8 @@
                             </div>
                         </div>
 
-                        <!-- Barre d'état -->
-                        <div class="planif-footer" data-tooltip="planif-barre-outils">
-                            <span>Glisser un type depuis la palette</span>
-                            <span><kbd>Suppr</kbd> Supprimer</span>
-                            <span><kbd>⌘A</kbd> Tout sélectionner</span>
-                            <span><kbd>⌘+Clic</kbd> Multi-sélection</span>
-                            <span><kbd>Rectangle</kbd> Sélection par zone</span>
-                            <span><kbd>⌘+/-</kbd> Zoom</span>
-                            <span><kbd>⌘0</kbd> Reset zoom</span>
-                            <button id="planif-btn-recentrer" title="Recentrer la vue sur le contenu (⌘1)">⊕ Recentrer</button>
-                            <span id="planif-zoom-info" data-tooltip="planif-zoom">100%</span>
-                            <button class="planif-btn-zoom-preset" data-zoom="1.00">100%</button>
-                            <button class="planif-btn-zoom-preset" data-zoom="0.75">75%</button>
-                            <button class="planif-btn-zoom-preset" data-zoom="0.50">50%</button>
-                            <button class="planif-btn-zoom-preset" data-zoom="0.25">25%</button>
-                        </div>
+                        <!-- planif-zoom-info conservé pour compatibilité JS -->
+                        <span id="planif-zoom-info" style="display:none">100%</span>
 
                     </div><!-- fin planif-wrapper -->
                 </div><!-- fin sous-section planification-carte -->
