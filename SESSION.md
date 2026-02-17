@@ -1,10 +1,14 @@
 # SESSION ACTIVE - BETA 97.8
 
 **Date** : 17 février 2026
-**Version** : Beta 97.8 (build 0217-1505)
+**Version** : Beta 97.8 (build 0217-1837)
 **Statut** : Refonte interface carte mentale et alignement pédagogique
 
 ## SESSION DU 17 FÉVRIER 2026
+
+### Travail accompli — Fix carte démo en mode démo (Beta 97.8, build 0217-1837)
+
+87. **Fix carte démo invisible** : La carte démo n'apparaissait pas en mode démonstration. Cause : `planification_mindmap` n'était pas dans `CLES_NAMESPACEES` de `trimestres.js`, donc `cle('planification_mindmap')` retournait la clé sans préfixe au lieu de `demo_planification_mindmap`. Fix : ajout de la clé dans la liste namespacée.
 
 ### Travail accompli — Carte démo et licence CC (Beta 97.8, build 0217-1505)
 
