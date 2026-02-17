@@ -73,9 +73,12 @@ function initialiserModuleOrganisateur() {
     if (selections) {
         if (selections.carte && selectCarte) {
             selectCarte.value = selections.carte;
-            var carte = window.planificationCarte;
-            if (carte && carte.changerCarte && selections.carte) {
-                carte.changerCarte(selections.carte);
+            // Ne changer la carte QUE si elle diffère de l'active
+            // (sinon reconstruireDOM s'exécute pendant display:none → layout cassé)
+            var carteModule = window.planificationCarte;
+            var indexActuel = window.planificationDonnees ? window.planificationDonnees.getIndex() : null;
+            if (carteModule && carteModule.changerCarte && indexActuel && indexActuel.active !== selections.carte) {
+                carteModule.changerCarte(selections.carte);
             }
         }
     }
