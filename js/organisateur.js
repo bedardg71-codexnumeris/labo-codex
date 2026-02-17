@@ -16,7 +16,7 @@ var initialise = false;
 var leconActiveId = null;
 
 // === RÉFÉRENCES DOM (initialisées dans initialiser) ===
-var selectSequence, selectLecon;
+var selectCarte, selectSequence, selectLecon;
 var contenuLecon, enteteCalendrier, enteteCalendrierContenu;
 var objectifContenu, btnReinitObjectif;
 var prerequisContenu, productionsContenu;
@@ -41,6 +41,7 @@ function initialiserModuleOrganisateur() {
 
     if (!initialise) {
         // Références DOM
+        selectCarte = document.getElementById('org-select-carte');
         selectSequence = document.getElementById('org-select-sequence');
         selectLecon = document.getElementById('org-select-lecon');
         contenuLecon = document.getElementById('org-contenu-lecon');
@@ -66,6 +67,7 @@ function initialiserModuleOrganisateur() {
     }
 
     // Rafraîchir les données
+    peuplerSelecteurCartes();
     peuplerSelecteursOrganisateur();
     rafraichirCalendrier();
 }
@@ -75,6 +77,17 @@ function initialiserModuleOrganisateur() {
 // ============================================================
 
 function brancherEvenements() {
+    if (selectCarte) selectCarte.addEventListener('change', function() {
+        var carteId = selectCarte.value;
+        if (!carteId) return;
+        var carte = window.planificationCarte;
+        if (carte && carte.changerCarte) {
+            carte.changerCarte(carteId);
+        }
+        peuplerSelecteursOrganisateur();
+        rafraichirCalendrier();
+    });
+
     if (selectSequence) selectSequence.addEventListener('change', function() {
         peuplerSelecteurLecons();
     });
@@ -172,6 +185,27 @@ function brancherEvenements() {
 
     // Drag & drop pour les activités dans les étapes EE
     configurerDragDrop();
+}
+
+// ============================================================
+//  SÉLECTEUR DE CARTE
+// ============================================================
+
+function peuplerSelecteurCartes() {
+    if (!selectCarte) return;
+    var index = window.planificationDonnees ? window.planificationDonnees.getIndex() : null;
+    if (!index || !index.cartes) return;
+
+    var valActuelle = selectCarte.value || index.active;
+    selectCarte.innerHTML = '';
+    for (var i = 0; i < index.cartes.length; i++) {
+        var c = index.cartes[i];
+        var opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = c.nom;
+        selectCarte.appendChild(opt);
+    }
+    selectCarte.value = valActuelle;
 }
 
 // ============================================================

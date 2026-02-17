@@ -4655,6 +4655,7 @@ window.planificationCarte = {
     centrerVueSurContenu: centrerVueSurContenu,
     mettreAJourListeCartes: mettreAJourListeCartes,
     chargerCarte: chargerCarte,
+    changerCarte: changerCarte,
     etat: etat,
     getLiensDeNoeud: getLiensDeNoeud,
     obtenirLabelNoeud: obtenirLabelNoeud,
