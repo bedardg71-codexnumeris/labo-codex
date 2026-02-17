@@ -1047,34 +1047,263 @@ function rafraichirCalendrier() {
         var html = carte.genererSeancesHTML();
         calendrierContenu.innerHTML = html;
 
+        // Post-traitement : supprimer les liens d'alignement (flèches → ←)
+        calendrierContenu.querySelectorAll('.planif-cal-lien-item').forEach(function(el) {
+            el.remove();
+        });
+        // Supprimer les conteneurs de liens maintenant vides
+        calendrierContenu.querySelectorAll('.planif-cal-liens').forEach(function(el) {
+            if (el.children.length === 0) el.remove();
+        });
+
+        // Post-traitement : ajouter les dates aux leçons
+        ajouterDatesAuxLecons();
+
+        // Post-traitement : ajouter boutons Copier sur séquences et leçons
+        ajouterBoutonsCopier();
+
         // Ajouter listeners de navigation
         calendrierContenu.querySelectorAll('[data-noeud]').forEach(function(el) {
             el.addEventListener('click', function(e) {
                 e.stopPropagation();
                 var noeudId = el.dataset.noeud;
                 if (noeudId) {
-                    // Si c'est une leçon, sélectionner dans le sélecteur
                     var carte2 = window.planificationCarte;
                     if (carte2 && carte2.etat) {
                         var noeud = carte2.etat.noeuds.get(noeudId);
                         if (noeud) {
                             if (noeud.type === 'lecon') {
-                                // Trouver la séquence parente
                                 if (noeud.parent) {
                                     selectSequence.value = noeud.parent;
+                                    sauvegarderSelectionsOrg();
                                     peuplerSelecteurLecons();
                                 }
                                 selectLecon.value = noeudId;
                                 leconActiveId = noeudId;
+                                sauvegarderSelectionsOrg();
                                 afficherLecon();
                             } else if (noeud.type === 'sequence') {
                                 selectSequence.value = noeudId;
+                                sauvegarderSelectionsOrg();
                                 peuplerSelecteurLecons();
                             }
                         }
                     }
                 }
             });
+        });
+    }
+}
+
+/**
+ * Ajoute les dates exactes des séances à côté de chaque leçon dans la vue calendrier.
+ * Réutilise la même logique de résolution que afficherEnteteCalendrier.
+ */
+function ajouterDatesAuxLecons() {
+    var carte = window.planificationCarte;
+    if (!carte || !carte.etat) return;
+    if (typeof db === 'undefined' || typeof window.cle !== 'function') return;
+
+    try {
+        var groupes = db.getSync(window.cle('groupesCours'), null) || [];
+        var horaires = db.getSync(window.cle('horaires'), null) || [];
+        var calendrier = db.getSync(window.cle('calendrierComplet'), null) || {};
+        var cours = db.getSync('cours', []);
+        var gcActif = db.getSync('groupeCoursActif', null);
+        var coursIdActif = gcActif ? gcActif.coursId : null;
+        if (coursIdActif) {
+            groupes = groupes.filter(function(g) { return g.coursId === coursIdActif; });
+        }
+        if (groupes.length === 0) return;
+
+        var JOURS = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+        var MOIS_COURTS = ['jan.','fév.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+
+        function formaterDateCourte(ds) {
+            if (!ds) return '';
+            var p = ds.split('-');
+            var d = parseInt(p[2], 10);
+            var m = parseInt(p[1], 10) - 1;
+            var dateObj = new Date(parseInt(p[0], 10), m, d);
+            var jour = JOURS[dateObj.getDay()];
+            return jour + ' ' + d + ' ' + MOIS_COURTS[m];
+        }
+
+        // Pour chaque leçon dans la vue calendrier
+        calendrierContenu.querySelectorAll('.planif-cal-lecon-header[data-noeud]').forEach(function(headerEl) {
+            var leconId = headerEl.dataset.noeud;
+            var lecon = carte.etat.noeuds.get(leconId);
+            if (!lecon) return;
+
+            var seq = lecon.parent ? carte.etat.noeuds.get(lecon.parent) : null;
+            var numSemaine = (seq && seq.metadata) ? seq.metadata.semaineDebut : null;
+
+            // Rang de la leçon dans la séquence
+            var rangLecon = 0;
+            if (seq && seq.enfants) {
+                var leconsSeq = seq.enfants.filter(function(eid) {
+                    var n = carte.etat.noeuds.get(eid);
+                    return n && n.type === 'lecon';
+                });
+                leconsSeq.sort(function(a, b) {
+                    var na = carte.etat.noeuds.get(a), nb = carte.etat.noeuds.get(b);
+                    return ((na && na.x) || 0) - ((nb && nb.x) || 0);
+                });
+                for (var r = 0; r < leconsSeq.length; r++) {
+                    if (leconsSeq[r] === leconId) { rangLecon = r; break; }
+                }
+            }
+
+            // Résoudre les dates
+            var datesSemaine = {};
+            if (numSemaine && calendrier) {
+                for (var dateStr in calendrier) {
+                    var info = calendrier[dateStr];
+                    if (info && info.numeroSemaine === numSemaine && (info.statut === 'cours' || info.statut === 'reprise')) {
+                        var jourCal = (info.jourRemplace || info.jourSemaine || '').toLowerCase();
+                        if (jourCal) datesSemaine[jourCal] = dateStr;
+                    }
+                }
+            }
+
+            var dates = [];
+            for (var i = 0; i < groupes.length; i++) {
+                var gc = groupes[i];
+                var horaireGC = horaires.filter(function(h) { return h.groupeCoursId === gc.id; });
+                horaireGC.sort(function(a, b) { return (a.jour || '').localeCompare(b.jour || '') || (a.heureDebut || '').localeCompare(b.heureDebut || ''); });
+                var seanceIdx = 0;
+                for (var s = 0; s < horaireGC.length; s++) {
+                    if (seanceIdx === rangLecon) {
+                        var jourH = (horaireGC[s].jour || '').toLowerCase();
+                        var dateExacte = datesSemaine[jourH] || '';
+                        if (dateExacte) {
+                            dates.push(formaterDateCourte(dateExacte));
+                        }
+                        break;
+                    }
+                    seanceIdx++;
+                }
+            }
+
+            if (dates.length > 0) {
+                var uniqueDates = dates.filter(function(d, idx, arr) { return arr.indexOf(d) === idx; });
+                var span = document.createElement('span');
+                span.className = 'org-cal-date-lecon';
+                span.textContent = uniqueDates.join(' / ');
+                headerEl.appendChild(span);
+            }
+        });
+    } catch(e) {
+        console.warn('Dates leçons calendrier:', e);
+    }
+}
+
+/**
+ * Copie le contenu de la vue calendrier en texte indenté pour traitement de texte.
+ */
+/**
+ * Ajoute des boutons « Copier » sur chaque en-tête de séquence et de leçon.
+ */
+function ajouterBoutonsCopier() {
+    if (!calendrierContenu) return;
+
+    // Boutons sur les séquences
+    calendrierContenu.querySelectorAll('.planif-cal-sequence-header').forEach(function(header) {
+        var btn = document.createElement('button');
+        btn.className = 'org-cal-btn-copier';
+        btn.textContent = 'Copier';
+        btn.title = 'Copier la séquence';
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var seqEl = header.closest('.planif-cal-sequence');
+            if (seqEl) {
+                var texte = extraireTexteSequence(seqEl);
+                copierDansPressePapiers(texte, btn);
+            }
+        });
+        header.appendChild(btn);
+    });
+
+    // Boutons sur les leçons
+    calendrierContenu.querySelectorAll('.planif-cal-lecon-header').forEach(function(header) {
+        var btn = document.createElement('button');
+        btn.className = 'org-cal-btn-copier';
+        btn.textContent = 'Copier';
+        btn.title = 'Copier la leçon';
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var leconEl = header.closest('.planif-cal-lecon');
+            if (leconEl) {
+                var texte = extraireTexteLecon(leconEl, '');
+                copierDansPressePapiers(texte, btn);
+            }
+        });
+        header.appendChild(btn);
+    });
+}
+
+/**
+ * Extrait le texte d'une leçon depuis le DOM du calendrier.
+ */
+function extraireTexteLecon(leconEl, indent) {
+    var lignes = [];
+    var header = leconEl.querySelector('.planif-cal-lecon-header');
+    var titreLecon = header ? header.querySelector('.planif-cal-titre') : null;
+    var dateLecon = header ? header.querySelector('.org-cal-date-lecon') : null;
+    var dureeLecon = header ? header.querySelector('.planif-cal-duree') : null;
+
+    var l = indent + (titreLecon ? titreLecon.textContent.trim() : 'Leçon');
+    if (dateLecon) l += '  —  ' + dateLecon.textContent.trim();
+    if (dureeLecon) l += '  (' + dureeLecon.textContent.trim() + ')';
+    lignes.push(l);
+
+    // Enfants (connaissances/activités)
+    leconEl.querySelectorAll('.planif-cal-item').forEach(function(itemEl) {
+        var titreItem = itemEl.querySelector('.planif-cal-item-titre');
+        var dureeItem = itemEl.querySelector('.planif-cal-duree');
+        var txt = indent + '    ' + (titreItem ? titreItem.textContent.trim() : '');
+        if (dureeItem) txt += '  (' + dureeItem.textContent.trim() + ')';
+        lignes.push(txt);
+    });
+
+    var total = leconEl.querySelector('.planif-cal-total');
+    if (total) lignes.push(indent + '    ' + total.textContent.trim());
+
+    return lignes.join('\n');
+}
+
+/**
+ * Extrait le texte d'une séquence complète (titre + toutes ses leçons).
+ */
+function extraireTexteSequence(seqEl) {
+    var lignes = [];
+    var titreSeq = seqEl.querySelector('.planif-cal-titre');
+    var semaines = seqEl.querySelector('.planif-cal-semaines');
+
+    if (titreSeq) {
+        lignes.push(titreSeq.textContent.trim() + (semaines ? '  (' + semaines.textContent.trim() + ')' : ''));
+    }
+
+    seqEl.querySelectorAll('.planif-cal-lecon').forEach(function(leconEl) {
+        lignes.push(extraireTexteLecon(leconEl, '    '));
+    });
+
+    var totalSeq = seqEl.querySelector(':scope > .planif-cal-total');
+    if (totalSeq) lignes.push('    ' + totalSeq.textContent.trim());
+
+    return lignes.join('\n');
+}
+
+/**
+ * Copie du texte dans le presse-papiers et montre un feedback visuel.
+ */
+function copierDansPressePapiers(texte, btn) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(texte).then(function() {
+            if (btn) {
+                btn.textContent = 'Copié ✓';
+                setTimeout(function() { btn.textContent = 'Copier'; }, 1500);
+            }
         });
     }
 }
