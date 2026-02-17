@@ -12,6 +12,17 @@
         {
             version: 'Beta 97.8',
             date: '17 f\u00e9vrier',
+            couleur: 'bleu',
+            titre: 'Plan de la le\u00e7on et mode clair',
+            items: [
+                '<strong>Menu Actions</strong> : Les boutons \u00e9mojis de la carte mentale sont remplac\u00e9s par un menu d\u00e9roulant \u00ab\u00a0Actions\u00a0\u25be\u00a0\u00bb explicite (Nouvelle carte, Dupliquer, Importer, Supprimer). Bouton Annuler gard\u00e9 visible.',
+                '<strong>Mode clair complet</strong> : Surcharges CSS pour la carte mentale (n\u0153uds, liens, palette, titre, s\u00e9lecteur, zoom) et le Plan de la le\u00e7on (organisateur, calendrier, activit\u00e9s, badges, \u00e9tapes EE). Tout est lisible sur fond blanc.',
+                '<strong>Correction layout</strong> : La carte mentale n\u2019est plus d\u00e9sordonn\u00e9e apr\u00e8s un aller-retour vers le Plan de la le\u00e7on. L\u2019organisateur ne reconstruit plus le DOM de la carte quand elle est invisible.'
+            ]
+        },
+        {
+            version: 'Beta 97.8',
+            date: '17 f\u00e9vrier',
             couleur: 'vert',
             titre: 'Refonte de l\u2019interface de la carte mentale',
             items: [
