@@ -1,10 +1,20 @@
 # SESSION ACTIVE - BETA 97.8
 
 **Date** : 17 février 2026
-**Version** : Beta 97.8 (build 0217-0900)
+**Version** : Beta 97.8 (build 0217-1445)
 **Statut** : Refonte interface carte mentale et alignement pédagogique
 
 ## SESSION DU 17 FÉVRIER 2026
+
+### Travail accompli — Plan de la leçon et mode clair (Beta 97.8, build 0217-1445)
+
+81. **Menu Actions déroulant** : Les boutons émojis (➕❌📋⬆️⬇️↩️) de la carte mentale sont remplacés par un menu déroulant « Actions ▾ » contenant : Nouvelle carte, Dupliquer cette carte, Importer un alignement, Supprimer cette carte. Le bouton Annuler reste visible dans la toolbar. Le bouton Exporter est retiré (déplacé dans Plan de la leçon).
+
+82. **Mode clair — Carte mentale** : Surcharges CSS pour les nœuds (bordures), liens SVG (trait gris), labels de liens (fond blanc), titre de carte, sélecteur, dropdown Actions, boutons zoom, palette, items calendrier.
+
+83. **Mode clair — Plan de la leçon** : Surcharges CSS pour l'organisateur complet : conteneur, sélecteurs, sections, objectif, prérequis, activités, badges séances, panneau calendrier, avertissements, étapes EE, zone de dépôt, mini-activités, notes, checkbox.
+
+84. **Fix layout carte mentale** : Correction du désordre d'affichage après bascule Plan de la leçon → Alignement pédagogique. Cause : `initialiserModuleOrganisateur()` appelait `changerCarte()` systématiquement, déclenchant `reconstruireDOM()` pendant que la sous-section carte avait `display:none` (offsetWidth/offsetHeight = 0). Fix : ne changer que si la carte sélectionnée diffère de l'active.
 
 ### Travail accompli — Refonte interface carte mentale (Beta 97.8, build 0217-0900)
 
