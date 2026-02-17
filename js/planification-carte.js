@@ -176,13 +176,13 @@ var GUIDE_PAGES = [
         titre: 'Construis ta carte d\u2019alignement',
         contenu:
             '<p>Cette carte t\u2019aide à vérifier que tout ce que tu enseignes est relié à ce que tu évalues. C\u2019est ça, l\u2019alignement pédagogique.</p>' +
-            '<p>Les <strong>badges</strong> sur chaque élément te montrent où tu en es\u00a0:</p>' +
+            '<p>Chaque élément affiche deux <strong>badges</strong> (gauche\u00a0= amont, droite\u00a0= aval) qui t\u2019indiquent l\u2019état de ses connexions\u00a0:</p>' +
             '<ul>' +
-                '<li><span class="planif-guide-badge" style="background:#22c55e"></span> <strong>Vert</strong> = cet élément est bien relié en amont et en aval.</li>' +
-                '<li><span class="planif-guide-badge" style="background:#94a3b8"></span> <strong>Gris</strong> = il manque une connexion.</li>' +
-                '<li><span class="planif-guide-badge" style="background:#f97316"></span> <strong>Orange</strong> = attention, une évaluation manque quelque part.</li>' +
+                '<li><strong>✓</strong> = cet élément est bien relié (le badge prend la couleur de l\u2019élément).</li>' +
+                '<li><strong>!</strong> (badge gris) = il manque une connexion.</li>' +
+                '<li><strong>⚠</strong> = attention, une évaluation manque quelque part dans la chaîne.</li>' +
             '</ul>' +
-            '<p>Ce guide te propose 6\u00a0étapes pour construire ta carte. Tu peux le consulter à tout moment avec le bouton <strong>?</strong> en bas de la palette.</p>' +
+            '<p>Ce guide te propose 6\u00a0étapes pour construire ta carte. Tu peux le consulter à tout moment depuis la palette.</p>' +
             '<p class="planif-guide-ref">Anderson, L.\u00a0W. (2026). <em>Curricular alignment: A re-examination</em> (Educational Practices Series, No.\u00a037). UNESCO International Bureau of Education. <a href="https://unesdoc.unesco.org/ark:/48223/pf0000397143.locale=en" target="_blank" rel="noopener">unesdoc.unesco.org</a></p>'
     },
     {
@@ -193,7 +193,7 @@ var GUIDE_PAGES = [
                 '<li>Glisse un élément <span class="planif-guide-type" style="background:var(--planif-couleur-competence)"></span> <strong>Compétence</strong> de la palette sur le canevas.</li>' +
                 '<li>Double-clique dessus pour écrire l\u2019énoncé de compétence.</li>' +
             '</ol>' +
-            '<div class="planif-guide-astuce">Sélectionne la compétence et utilise le <strong>sélecteur de niveau cognitif</strong> dans le panneau de droite pour choisir le niveau visé (ex.\u00a0: Analyser, Créer). Les verbes suggérés t\u2019aideront à formuler ton énoncé.</div>'
+            '<div class="planif-guide-astuce">Sélectionne la compétence et utilise le <strong>sélecteur de niveau cognitif</strong> dans l\u2019<strong>Inspecteur</strong> (panneau de droite) pour choisir le niveau visé (ex.\u00a0: Analyser, Créer). Les verbes suggérés t\u2019aideront à formuler ton énoncé.</div>'
     },
     {
         titre: 'Ce que l\u2019étudiant doit retenir',
@@ -202,7 +202,7 @@ var GUIDE_PAGES = [
             '<ol>' +
                 '<li>Glisse une <span class="planif-guide-type" style="background:var(--planif-couleur-idee-maitresse)"></span> <strong>Idée maîtresse</strong> sur le canevas.</li>' +
                 '<li>Relie-la à sa compétence en tirant un lien d\u2019un port à l\u2019autre. Le verbe <em>«\u00a0se décline en\u00a0»</em> s\u2019affiche automatiquement.</li>' +
-                '<li>Le badge d\u2019entrée de l\u2019idée maîtresse passe au vert — elle est connectée en amont.</li>' +
+                '<li>Le badge d\u2019entrée de l\u2019idée maîtresse affiche <strong>✓</strong> — elle est connectée en amont.</li>' +
             '</ol>'
     },
     {
@@ -238,7 +238,7 @@ var GUIDE_PAGES = [
             '<ol>' +
                 '<li>Glisse une <span class="planif-guide-type" style="background:var(--planif-couleur-activite)"></span> <strong>Activité</strong> dans la leçon.</li>' +
                 '<li>Relie-la à la connaissance qu\u2019elle permet d\u2019acquérir. Le verbe <em>«\u00a0s\u2019acquiert par\u00a0»</em> apparaît.</li>' +
-                '<li>Utilise le <strong>sélecteur de niveau cognitif</strong> (panneau de droite) pour t\u2019assurer que l\u2019activité vise le bon niveau.</li>' +
+                '<li>Utilise le <strong>sélecteur de niveau cognitif</strong> dans l\u2019<strong>Inspecteur</strong> pour t\u2019assurer que l\u2019activité vise le bon niveau.</li>' +
             '</ol>' +
             '<div class="planif-guide-astuce"><span class="planif-guide-type" style="background:var(--planif-couleur-soutien)"></span> <strong>Soutien</strong> et <span class="planif-guide-type" style="background:var(--planif-couleur-revision)"></span> <strong>Révision</strong> sont des types d\u2019activités spécialisées. Utilise «\u00a0Soutien\u00a0» pour l\u2019aide supplémentaire, «\u00a0Révision\u00a0» pour le réinvestissement.</div>'
     },
@@ -251,7 +251,7 @@ var GUIDE_PAGES = [
                 '<li>Relie-la aux éléments qu\u2019elle évalue\u00a0: idées maîtresses, connaissances ou activités. Le verbe <em>«\u00a0se vérifie par\u00a0»</em> apparaît.</li>' +
                 '<li>Quand une compétence est atteinte par au moins une évaluation à travers la chaîne, son badge d\u2019avertissement disparaît.</li>' +
             '</ol>' +
-            '<p class="planif-guide-conclusion">L\u2019objectif\u00a0: quand tous les badges de ta carte sont verts, ton cours est aligné — chaque compétence est enseignée et évaluée de manière cohérente.</p>'
+            '<p class="planif-guide-conclusion">L\u2019objectif\u00a0: quand tous les badges de ta carte affichent <strong>✓</strong> et qu\u2019il n\u2019y a plus de <strong>⚠</strong>, ton cours est aligné — chaque compétence est enseignée et évaluée de manière cohérente.</p>'
     }
 ];
 
