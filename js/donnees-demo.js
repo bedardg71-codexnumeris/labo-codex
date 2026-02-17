@@ -12,6 +12,69 @@
 'use strict';
 
 // ============================================
+// CARTE MENTALE DÉMO (alignement pédagogique)
+// ============================================
+
+var CARTE_DEMO_ALIGNEMENT = {
+    index: {
+        active: 'carte_1',
+        compteurCartes: 1,
+        cartes: [{ id: 'carte_1', nom: 'Écriture et littérature (démo)', dateCreation: '2026-02-17T00:00:00.000Z' }]
+    },
+    cartes: {
+        'carte_1': {
+            compteur: 14,
+            compteurLiens: 14,
+            modeIndividuel: null,
+            noeuds: [
+                // Compétence
+                { id: 'noeud_1', type: 'competence', titre: 'Analyser des textes littéraires en reconnaissant les procédés utilisés et en rendant compte de sa compréhension dans une analyse littéraire', description: '', x: 5200, y: 3000, parent: null, enfants: [], metadata: { niveauCognitif: 'analyser' }, cloneSourceId: null },
+                // 3 Idées maîtresses
+                { id: 'noeud_2', type: 'idee-maitresse', titre: 'Les procédés littéraires sont des outils que l\u2019auteur utilise intentionnellement pour produire un effet sur le lecteur', description: '', x: 4900, y: 3200, parent: null, enfants: [], metadata: {}, cloneSourceId: null },
+                { id: 'noeud_3', type: 'idee-maitresse', titre: 'L\u2019analyse littéraire repose sur une méthode structurée qui relie observation, interprétation et argumentation', description: '', x: 5200, y: 3200, parent: null, enfants: [], metadata: {}, cloneSourceId: null },
+                { id: 'noeud_4', type: 'idee-maitresse', titre: 'La qualité de la langue est indissociable de la qualité de l\u2019analyse', description: '', x: 5500, y: 3200, parent: null, enfants: [], metadata: {}, cloneSourceId: null },
+                // Séquence
+                { id: 'noeud_5', type: 'sequence', titre: 'Séquence 1 — L\u2019analyse littéraire', description: '', x: 4900, y: 3420, parent: null, enfants: ['noeud_6', 'noeud_7'], metadata: {}, cloneSourceId: null },
+                // Leçon 1 (dans séquence)
+                { id: 'noeud_6', type: 'lecon', titre: 'Leçon 1 — Lire et observer le texte', description: '', x: 4930, y: 3490, parent: 'noeud_5', enfants: ['noeud_8', 'noeud_9', 'noeud_10'], metadata: {}, cloneSourceId: null },
+                // Leçon 2 (dans séquence)
+                { id: 'noeud_7', type: 'lecon', titre: 'Leçon 2 — Rédiger l\u2019analyse', description: '', x: 5330, y: 3490, parent: 'noeud_5', enfants: ['noeud_11', 'noeud_12', 'noeud_13'], metadata: {}, cloneSourceId: null },
+                // Contenu Leçon 1
+                { id: 'noeud_8', type: 'factuelle', titre: 'Les procédés stylistiques (figures de style, champs lexicaux, tonalités)', description: '', x: 4950, y: 3560, parent: 'noeud_6', enfants: [], metadata: {}, cloneSourceId: null },
+                { id: 'noeud_9', type: 'procedurale', titre: 'Appliquer une méthode d\u2019annotation efficace', description: '', x: 4950, y: 3640, parent: 'noeud_6', enfants: [], metadata: {}, cloneSourceId: null },
+                { id: 'noeud_10', type: 'activite', titre: 'Atelier d\u2019annotation guidée', description: '', x: 4950, y: 3720, parent: 'noeud_6', enfants: [], metadata: {}, cloneSourceId: null },
+                // Contenu Leçon 2
+                { id: 'noeud_11', type: 'factuelle', titre: 'La structure de l\u2019analyse littéraire (introduction, développement, conclusion)', description: '', x: 5350, y: 3560, parent: 'noeud_7', enfants: [], metadata: {}, cloneSourceId: null },
+                { id: 'noeud_12', type: 'procedurale', titre: 'Rédiger un paragraphe argumentatif avec preuve textuelle', description: '', x: 5350, y: 3640, parent: 'noeud_7', enfants: [], metadata: {}, cloneSourceId: null },
+                { id: 'noeud_13', type: 'activite', titre: 'Rédaction d\u2019un paragraphe de développement', description: '', x: 5350, y: 3720, parent: 'noeud_7', enfants: [], metadata: {}, cloneSourceId: null },
+                // Évaluation
+                { id: 'noeud_14', type: 'evaluation', titre: 'Analyse littéraire (rédaction finale)', description: '', x: 5200, y: 3900, parent: null, enfants: [], metadata: {}, cloneSourceId: null }
+            ],
+            liens: [
+                // Compétence → Idées maîtresses
+                { id: 'lien_1', source: 'noeud_1', cible: 'noeud_2', type: 'se_decline_en' },
+                { id: 'lien_2', source: 'noeud_1', cible: 'noeud_3', type: 'se_decline_en' },
+                { id: 'lien_3', source: 'noeud_1', cible: 'noeud_4', type: 'se_decline_en' },
+                // Idées maîtresses → Leçons
+                { id: 'lien_4', source: 'noeud_2', cible: 'noeud_6', type: 'se_concretise_dans' },
+                { id: 'lien_5', source: 'noeud_3', cible: 'noeud_6', type: 'se_concretise_dans' },
+                { id: 'lien_6', source: 'noeud_3', cible: 'noeud_7', type: 'se_concretise_dans' },
+                { id: 'lien_7', source: 'noeud_4', cible: 'noeud_7', type: 'se_concretise_dans' },
+                // Connaissances → Activités
+                { id: 'lien_8', source: 'noeud_8', cible: 'noeud_10', type: 's_acquiert_par' },
+                { id: 'lien_9', source: 'noeud_9', cible: 'noeud_10', type: 's_acquiert_par' },
+                { id: 'lien_10', source: 'noeud_11', cible: 'noeud_13', type: 's_acquiert_par' },
+                { id: 'lien_11', source: 'noeud_12', cible: 'noeud_13', type: 's_acquiert_par' },
+                // Idées maîtresses → Évaluation
+                { id: 'lien_12', source: 'noeud_2', cible: 'noeud_14', type: 'se_verifie_par' },
+                { id: 'lien_13', source: 'noeud_3', cible: 'noeud_14', type: 'se_verifie_par' },
+                { id: 'lien_14', source: 'noeud_4', cible: 'noeud_14', type: 'se_verifie_par' }
+            ]
+        }
+    }
+};
+
+// ============================================
 // SAUVEGARDE / RESTAURATION ÉTAT
 // ============================================
 
@@ -385,6 +448,10 @@ async function chargerDonneesDemo() {
             console.log('   ➜ modalitesEvaluation demo écrasé');
         }
 
+        // Carte mentale démo (alignement pédagogique)
+        db.setSync('demo_planification_mindmap', CARTE_DEMO_ALIGNEMENT);
+        console.log('   ➜ demo_planification_mindmap chargée');
+
         // Marquer comme chargées
         db.setSync('demo-chargees', 'true');
 
@@ -674,7 +741,8 @@ async function supprimerDonneesNamespaceesDemo() {
         'presences', 'horaires', 'groupesCours',
         'indicesAssiduiteDetailles', 'indicesCP', 'indicesAssiduite',
         'calendrierComplet', 'snapshots',
-        'cadreCalendrier', 'horaireHebdo'
+        'cadreCalendrier', 'horaireHebdo',
+        'planification_mindmap'
     ];
 
     for (const cle of clesNamespacees) {
