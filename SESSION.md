@@ -1,8 +1,34 @@
 # SESSION ACTIVE - BETA 97.8
 
-**Date** : 16 février 2026
-**Version** : Beta 97.8 (build 0216-0950)
-**Statut** : Cohérence visuelle modes clair/sombre et normalisation emojis
+**Date** : 17 février 2026
+**Version** : Beta 97.8 (build 0217-0825)
+**Statut** : Refonte interface carte mentale et alignement pédagogique
+
+## SESSION DU 17 FÉVRIER 2026
+
+### Travail accompli — Refonte interface carte mentale (Beta 97.8, build 0217-0825)
+
+68. **Fix #68 multi-cours** : Correction "Pas de cours pour ce groupe" en multi-cours + export `mettreAJourBoutonsNavigation`. Fallback via `obtenirSeancesHoraire()` pour les jours 'jour-ouvrable'.
+
+69. **Fix séance/semaine** : Affichage info séance/semaine corrigé en multi-cours. Synchronisation `horaireHebdo` depuis toutes les entités horaire dans `genererCalendrierComplet()`.
+
+70. **Toolbar unifiée** : Barre d'outils unique — sélecteur + boutons (gauche), titre centré auto-dimensionné (centre), zoom + recentrer (droite). Footer supprimé.
+
+71. **Plein écran** : Padding parent `.contenu` retiré via `:has()`, wrapper `height: 100vh`. Surface de travail maximisée.
+
+72. **Palette Raccourcis** : Nouveau panneau flottant 🛎️ avec raccourcis clavier, draggable, −/+/×. Positionné en haut à droite.
+
+73. **Panneau Inspecteur** : Panneau de propriétés renommé "Inspecteur" avec en-tête dédiée. Accessible via bouton 🔎 dans la palette ou double-clic sur un noeud.
+
+74. **Guide repliant** : Boutons −/+ pour replier/déplier le contenu. Police uniformisée à 10.5px. Classe `.planif-guide-conclusion` pour le mot de la fin. Positionné à gauche près de la palette.
+
+75. **Titres uniformisés** : Tous les panneaux (INSPECTEUR, GUIDE, RACCOURCIS, ÉLÉMENTS) partagent la classe `.planif-palette-titre` — majuscules, 11px, 700.
+
+76. **Emojis export/import** : ⬆️ = Exporter, ⬇️ = Importer (inversés pour cohérence conceptuelle).
+
+77. **Panneaux premier plan** : Clic sur un panneau flottant l'amène au premier plan (z-index incrémental).
+
+78. **Description Beta 97.8** : Document marketing mis à jour avec alignement pédagogique, systèmes d'assistance, module annotation.
 
 ## SESSION DU 16 FÉVRIER 2026
 

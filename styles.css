@@ -15463,6 +15463,19 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 
 #planif-panneau.visible { transform: translateX(0); }
 
+.planif-panneau-entete {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: -16px -16px 12px;
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--planif-couleur-bordure);
+    background: var(--surface-carte, #1a3040);
+}
+.planif-panneau-entete .planif-btn-fermer {
+    position: static;
+}
+
 #planif-panneau h3 {
     font-size: 14px;
     margin-bottom: 12px;

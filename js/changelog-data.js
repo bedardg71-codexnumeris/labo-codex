@@ -11,6 +11,20 @@
     var CHANGELOG = [
         {
             version: 'Beta 97.8',
+            date: '17 f\u00e9vrier',
+            couleur: 'vert',
+            titre: 'Refonte de l\u2019interface de la carte mentale',
+            items: [
+                '<strong>Toolbar unifi\u00e9e</strong> : Barre d\u2019outils unique avec s\u00e9lecteur de carte, titre centr\u00e9 auto-dimensionn\u00e9 et contr\u00f4les de zoom.',
+                '<strong>Plein \u00e9cran</strong> : La carte mentale occupe d\u00e9sormais toute la surface disponible (padding et bordures retir\u00e9s).',
+                '<strong>Palette Raccourcis \uD83D\uDECE\uFE0F</strong> : Nouveau panneau flottant listant les raccourcis clavier, accessible depuis la palette \u00c9l\u00e9ments.',
+                '<strong>Panneau Inspecteur \uD83D\uDD0E</strong> : Le panneau de propri\u00e9t\u00e9s est renomm\u00e9 \u00ab\u00a0Inspecteur\u00a0\u00bb, accessible via le bouton \uD83D\uDD0E ou un double-clic sur un n\u0153ud.',
+                '<strong>Guide repliant</strong> : Boutons \u2212/+ pour replier et d\u00e9plier le guide sans le fermer. Police uniform\u00e9e \u00e0 10.5px.',
+                '<strong>Titres uniformis\u00e9s</strong> : Tous les panneaux (INSPECTEUR, GUIDE, RACCOURCIS, \u00c9L\u00c9MENTS) partagent le m\u00eame style de titre en majuscules.'
+            ]
+        },
+        {
+            version: 'Beta 97.8',
             date: '16 f\u00e9vrier',
             couleur: 'bleu',
             titre: 'Coh\u00e9rence visuelle modes clair et sombre',
