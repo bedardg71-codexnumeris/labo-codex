@@ -6810,8 +6810,8 @@
                                     <button class="planif-btn-carte" id="planif-btn-nouvelle-carte" title="Nouvelle carte">➕</button>
                                     <button class="planif-btn-carte planif-danger" id="planif-btn-supprimer-carte" title="Supprimer cette carte">❌</button>
                                     <button class="planif-btn-carte" id="planif-btn-dupliquer-carte" title="Dupliquer cette carte">📋</button>
-                                    <button class="planif-btn-carte" id="planif-btn-exporter-carte" title="Exporter cette carte">⬇️</button>
-                                    <button class="planif-btn-carte" id="planif-btn-importer-carte" title="Importer une carte">⬆️</button>
+                                    <button class="planif-btn-carte" id="planif-btn-exporter-carte" title="Exporter cette carte">⬆️</button>
+                                    <button class="planif-btn-carte" id="planif-btn-importer-carte" title="Importer une carte">⬇️</button>
                                     <button class="planif-btn-carte" id="planif-btn-annuler" title="Annuler (Ctrl+Z)">↩️</button>
                                     <input type="file" id="planif-fichier-import" accept=".json" style="display:none">
                                 </div>
@@ -6903,6 +6903,7 @@
                                     </div>
                                 </div>
                                 <div class="planif-palette-bas-btns">
+                                    <button id="planif-palette-inspecteur-btn" class="planif-palette-aide-btn" title="Inspecteur">🔎</button>
                                     <button id="planif-palette-raccourcis-btn" class="planif-palette-aide-btn" title="Raccourcis clavier">🛎️</button>
                                     <button id="planif-palette-aide-btn" class="planif-palette-aide-btn" data-tooltip="planif-aide">📔</button>
                                 </div>
@@ -6910,7 +6911,7 @@
                             <!-- Panneau raccourcis flottant -->
                             <div id="planif-raccourcis-panel" class="planif-guide-flottante" style="display: none;">
                                 <div class="planif-guide-barre">
-                                    <span class="planif-guide-barre-titre">🛎️ Raccourcis</span>
+                                    <span class="planif-palette-titre">Raccourcis</span>
                                     <div class="planif-guide-barre-actions">
                                         <button class="planif-raccourcis-panel-replier" title="Replier">−</button>
                                         <button class="planif-raccourcis-panel-fermer" title="Fermer">&times;</button>
@@ -6932,7 +6933,7 @@
                             <!-- Panneau guide flottant indépendant (#167) -->
                             <div id="planif-guide-panel" class="planif-guide-flottante" style="display: none;">
                                 <div class="planif-guide-barre">
-                                    <span class="planif-guide-barre-titre">📔 Guide</span>
+                                    <span class="planif-palette-titre">Guide</span>
                                     <div class="planif-guide-barre-actions">
                                         <button class="planif-guide-panel-replier" title="Replier le guide">−</button>
                                         <button class="planif-guide-panel-fermer" title="Fermer le guide">&times;</button>
@@ -6970,7 +6971,10 @@
                             </div>
 
                             <div id="planif-panneau">
-                                <button class="planif-btn-fermer" id="planif-btn-fermer-panneau">&times;</button>
+                                <div class="planif-panneau-entete">
+                                    <span class="planif-palette-titre">Inspecteur</span>
+                                    <button class="planif-btn-fermer" id="planif-btn-fermer-panneau">&times;</button>
+                                </div>
                                 <h3 data-tooltip="planif-panneau-proprietes"><span class="planif-pastille" id="planif-panneau-pastille"></span><span id="planif-panneau-type"></span></h3>
                                 <label for="planif-panneau-titre" data-tooltip="planif-titre-noeud">Titre</label>
                                 <input type="text" id="planif-panneau-titre" placeholder="Titre du nœud">
@@ -16310,7 +16314,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97.8';
-        const BUILD_ID = '0216-0950';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0217-0825';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';

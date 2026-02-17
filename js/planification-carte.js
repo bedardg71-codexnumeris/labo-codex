@@ -4095,6 +4095,18 @@ function initialiser() {
         });
     }
 
+    // Inspecteur — bouton 🔎 de la palette
+    var btnInspecteur = document.getElementById('planif-palette-inspecteur-btn');
+    if (btnInspecteur) {
+        btnInspecteur.addEventListener('click', function() {
+            if (etat.panneauOuvert) {
+                fermerPanneau();
+            } else if (etat.selection) {
+                ouvrirPanneau(etat.selection);
+            }
+        });
+    }
+
     // Raccourcis flottant — bouton 🛎️ de la palette
     var raccourcisPanel = document.getElementById('planif-raccourcis-panel');
     var btnRaccourcis = document.getElementById('planif-palette-raccourcis-btn');
