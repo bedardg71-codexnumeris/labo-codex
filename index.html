@@ -6804,7 +6804,6 @@
 
                         <!-- Barre supérieure -->
                         <div class="planif-header">
-                            <h3 class="planif-header-titre"><input type="text" id="planif-titre-carte" value="Sans titre" placeholder="Titre de la carte…"></h3>
                             <div class="planif-header-toolbar">
                                 <div id="planif-selecteur-cartes" class="planif-toolbar-gauche" data-tooltip="planif-boutons-action">
                                     <select id="planif-liste-cartes" data-tooltip="planif-selecteur-cours"></select>
@@ -6816,12 +6815,7 @@
                                     <button class="planif-btn-carte" id="planif-btn-annuler" title="Annuler (Ctrl+Z)">↩️</button>
                                     <input type="file" id="planif-fichier-import" accept=".json" style="display:none">
                                 </div>
-                                <div class="planif-toolbar-centre">
-                                    <span><kbd>Suppr</kbd> Supprimer</span>
-                                    <span><kbd>⌘A</kbd> Tout sélectionner</span>
-                                    <span><kbd>⌘+Clic</kbd> Multi-sélection</span>
-                                    <span><kbd>Rectangle</kbd> Sélection par zone</span>
-                                </div>
+                                <h3 class="planif-toolbar-titre"><input type="text" id="planif-titre-carte" value="Sans titre" placeholder="Titre de la carte…"></h3>
                                 <div class="planif-toolbar-droite">
                                     <span id="planif-zoom-info-header" class="planif-zoom-info-header" data-tooltip="planif-zoom">100%</span>
                                     <button id="planif-btn-recentrer" title="Recentrer la vue sur le contenu (⌘1)">⊕ Recentrer</button>
@@ -6829,7 +6823,6 @@
                                     <button class="planif-btn-zoom-preset" data-zoom="0.75">75%</button>
                                     <button class="planif-btn-zoom-preset" data-zoom="0.50">50%</button>
                                     <button class="planif-btn-zoom-preset" data-zoom="0.25">25%</button>
-                                    <span class="planif-header-zoom-raccourci"><kbd>⌘+/-</kbd></span>
                                 </div>
                             </div>
                         </div>
@@ -6909,7 +6902,32 @@
                                         </div>
                                     </div>
                                 </div>
-                                <button id="planif-palette-aide-btn" class="planif-palette-aide-btn" data-tooltip="planif-aide">📔</button>
+                                <div class="planif-palette-bas-btns">
+                                    <button id="planif-palette-raccourcis-btn" class="planif-palette-aide-btn" title="Raccourcis clavier">🛎️</button>
+                                    <button id="planif-palette-aide-btn" class="planif-palette-aide-btn" data-tooltip="planif-aide">📔</button>
+                                </div>
+                            </div>
+                            <!-- Panneau raccourcis flottant -->
+                            <div id="planif-raccourcis-panel" class="planif-guide-flottante" style="display: none;">
+                                <div class="planif-guide-barre">
+                                    <span class="planif-guide-barre-titre">🛎️ Raccourcis</span>
+                                    <div class="planif-guide-barre-actions">
+                                        <button class="planif-raccourcis-panel-replier" title="Replier">−</button>
+                                        <button class="planif-raccourcis-panel-fermer" title="Fermer">&times;</button>
+                                    </div>
+                                </div>
+                                <div class="planif-raccourcis-panel-contenu">
+                                    <table class="planif-raccourcis-table">
+                                        <tr><td><kbd>Suppr</kbd></td><td>Supprimer</td></tr>
+                                        <tr><td><kbd>⌘A</kbd></td><td>Tout sélectionner</td></tr>
+                                        <tr><td><kbd>⌘+Clic</kbd></td><td>Multi-sélection</td></tr>
+                                        <tr><td><kbd>Rectangle</kbd></td><td>Sélection par zone</td></tr>
+                                        <tr><td><kbd>⌘+/-</kbd></td><td>Zoom avant/arrière</td></tr>
+                                        <tr><td><kbd>⌘0</kbd></td><td>Reset zoom</td></tr>
+                                        <tr><td><kbd>⌘1</kbd></td><td>Recentrer</td></tr>
+                                        <tr><td><kbd>⌘Z</kbd></td><td>Annuler</td></tr>
+                                    </table>
+                                </div>
                             </div>
                             <!-- Panneau guide flottant indépendant (#167) -->
                             <div id="planif-guide-panel" class="planif-guide-flottante" style="display: none;">
