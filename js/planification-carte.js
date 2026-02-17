@@ -3050,7 +3050,10 @@ function genererSeancesHTML() {
     }
 
     sequences.sort(function(a, b) {
-        return (a.metadata && a.metadata.semaineDebut || 999) - (b.metadata && b.metadata.semaineDebut || 999);
+        var sa = (a.metadata && a.metadata.semaineDebut) || 0;
+        var sb = (b.metadata && b.metadata.semaineDebut) || 0;
+        if (sa !== sb) return sa - sb;
+        return (a.x || 0) - (b.x || 0);
     });
 
     var html = '';
@@ -3162,6 +3165,10 @@ function genererSeancesHTML() {
         html += '</div>';
 
         var enfSeq = (seq.enfants || []).filter(function(eid) { return etat.noeuds.has(eid); });
+        enfSeq.sort(function(a, b) {
+            var na = etat.noeuds.get(a), nb = etat.noeuds.get(b);
+            return ((na && na.x) || 0) - ((nb && nb.x) || 0);
+        });
         var dureeSeq = 0;
 
         for (var j = 0; j < enfSeq.length; j++) {
