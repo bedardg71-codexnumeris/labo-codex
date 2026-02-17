@@ -16,59 +16,75 @@
 // ============================================
 
 var CARTE_DEMO_ALIGNEMENT = {
+    metadata_cc: {
+        licence: "CC BY-NC-SA 4.0",
+        licence_url: "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+        licence_resume: "Attribution - Pas d'utilisation commerciale - Partage dans les m\u00eames conditions 4.0 International",
+        auteur_original: "Gr\u00e9goire B\u00e9dard",
+        email_auteur: "labo@codexnumeris.org",
+        site_auteur: "https://codexnumeris.org",
+        type: "alignement_pedagogique",
+        nom: "\u00c9criture et litt\u00e9rature (d\u00e9mo)",
+        date_creation: "2026-02-07",
+        date_modification: "2026-02-17",
+        version: "2.0",
+        description_courte: "Carte d\u00e9mo d'alignement p\u00e9dagogique pour le cours \u00c9criture et litt\u00e9rature"
+    },
     index: {
         active: 'carte_1',
         compteurCartes: 1,
-        cartes: [{ id: 'carte_1', nom: 'Écriture et littérature (démo)', dateCreation: '2026-02-17T00:00:00.000Z' }]
+        cartes: [{ id: 'carte_1', nom: '\u00c9criture et litt\u00e9rature (d\u00e9mo)', dateCreation: '2026-02-07T15:18:14.105Z' }]
     },
     cartes: {
         'carte_1': {
-            compteur: 14,
-            compteurLiens: 14,
-            modeIndividuel: null,
+            compteur: 26,
+            compteurLiens: 45,
             noeuds: [
-                // Compétence
-                { id: 'noeud_1', type: 'competence', titre: 'Analyser des textes littéraires en reconnaissant les procédés utilisés et en rendant compte de sa compréhension dans une analyse littéraire', description: '', x: 5200, y: 3000, parent: null, enfants: [], metadata: { niveauCognitif: 'analyser' }, cloneSourceId: null },
-                // 3 Idées maîtresses
-                { id: 'noeud_2', type: 'idee-maitresse', titre: 'Les procédés littéraires sont des outils que l\u2019auteur utilise intentionnellement pour produire un effet sur le lecteur', description: '', x: 4900, y: 3200, parent: null, enfants: [], metadata: {}, cloneSourceId: null },
-                { id: 'noeud_3', type: 'idee-maitresse', titre: 'L\u2019analyse littéraire repose sur une méthode structurée qui relie observation, interprétation et argumentation', description: '', x: 5200, y: 3200, parent: null, enfants: [], metadata: {}, cloneSourceId: null },
-                { id: 'noeud_4', type: 'idee-maitresse', titre: 'La qualité de la langue est indissociable de la qualité de l\u2019analyse', description: '', x: 5500, y: 3200, parent: null, enfants: [], metadata: {}, cloneSourceId: null },
-                // Séquence
-                { id: 'noeud_5', type: 'sequence', titre: 'Séquence 1 — L\u2019analyse littéraire', description: '', x: 4900, y: 3420, parent: null, enfants: ['noeud_6', 'noeud_7'], metadata: {}, cloneSourceId: null },
-                // Leçon 1 (dans séquence)
-                { id: 'noeud_6', type: 'lecon', titre: 'Leçon 1 — Lire et observer le texte', description: '', x: 4930, y: 3490, parent: 'noeud_5', enfants: ['noeud_8', 'noeud_9', 'noeud_10'], metadata: {}, cloneSourceId: null },
-                // Leçon 2 (dans séquence)
-                { id: 'noeud_7', type: 'lecon', titre: 'Leçon 2 — Rédiger l\u2019analyse', description: '', x: 5330, y: 3490, parent: 'noeud_5', enfants: ['noeud_11', 'noeud_12', 'noeud_13'], metadata: {}, cloneSourceId: null },
-                // Contenu Leçon 1
-                { id: 'noeud_8', type: 'factuelle', titre: 'Les procédés stylistiques (figures de style, champs lexicaux, tonalités)', description: '', x: 4950, y: 3560, parent: 'noeud_6', enfants: [], metadata: {}, cloneSourceId: null },
-                { id: 'noeud_9', type: 'procedurale', titre: 'Appliquer une méthode d\u2019annotation efficace', description: '', x: 4950, y: 3640, parent: 'noeud_6', enfants: [], metadata: {}, cloneSourceId: null },
-                { id: 'noeud_10', type: 'activite', titre: 'Atelier d\u2019annotation guidée', description: '', x: 4950, y: 3720, parent: 'noeud_6', enfants: [], metadata: {}, cloneSourceId: null },
-                // Contenu Leçon 2
-                { id: 'noeud_11', type: 'factuelle', titre: 'La structure de l\u2019analyse littéraire (introduction, développement, conclusion)', description: '', x: 5350, y: 3560, parent: 'noeud_7', enfants: [], metadata: {}, cloneSourceId: null },
-                { id: 'noeud_12', type: 'procedurale', titre: 'Rédiger un paragraphe argumentatif avec preuve textuelle', description: '', x: 5350, y: 3640, parent: 'noeud_7', enfants: [], metadata: {}, cloneSourceId: null },
-                { id: 'noeud_13', type: 'activite', titre: 'Rédaction d\u2019un paragraphe de développement', description: '', x: 5350, y: 3720, parent: 'noeud_7', enfants: [], metadata: {}, cloneSourceId: null },
-                // Évaluation
-                { id: 'noeud_14', type: 'evaluation', titre: 'Analyse littéraire (rédaction finale)', description: '', x: 5200, y: 3900, parent: null, enfants: [], metadata: {}, cloneSourceId: null }
+                // Comp\u00e9tence
+                { id: 'planif-noeud_1', type: 'competence', titre: 'Analyser un texte litt\u00e9raire', description: '', x: -1374.739362305048, y: -167.13476902957674, parent: null, enfants: [], metadata: { niveauCognitif: 'analyser' }, cloneSourceId: null },
+                // 3 Id\u00e9es ma\u00eetresses
+                { id: 'planif-noeud_2', type: 'idee-maitresse', titre: 'Mettre en \u0153uvre une posture analytique', description: '', x: -1403.0123338130581, y: 7.585377465095772, parent: null, enfants: [], metadata: { niveauCognitif: 'appliquer' }, cloneSourceId: null },
+                { id: 'planif-noeud_19', type: 'idee-maitresse', titre: 'Appliquer diff\u00e9rentes strat\u00e9gies de lecture', description: '', x: -1039.9693420352505, y: 51.23377180784709, parent: null, enfants: [], metadata: { niveauCognitif: 'appliquer' }, cloneSourceId: null },
+                { id: 'planif-noeud_20', type: 'idee-maitresse', titre: 'Mettre en \u0153uvre une m\u00e9thode d\u2019annotation', description: '', x: -1750.4115500096973, y: 52.816054087974415, parent: null, enfants: [], metadata: { niveauCognitif: 'appliquer' }, cloneSourceId: null },
+                // S\u00e9quence
+                { id: 'planif-noeud_11', type: 'sequence', titre: 'Semaine 1 (introduction)', description: 'description\n', x: -1626.3487399504672, y: 197.32957752851541, parent: null, enfants: ['planif-noeud_10', 'planif-noeud_9'], metadata: {}, cloneSourceId: null },
+                // Le\u00e7on 1 (dans s\u00e9quence)
+                { id: 'planif-noeud_9', type: 'lecon', titre: 'S\u00e9ance 1 (2 p\u00e9riodes)', description: '', x: -1596.3487399504672, y: 272.3295775285154, parent: 'planif-noeud_11', enfants: ['planif-noeud_7', 'planif-noeud_26', 'planif-noeud_17', 'planif-noeud_12', 'planif-noeud_24'], metadata: { enseignementExplicite: false }, cloneSourceId: null },
+                // Le\u00e7on 2 (dans s\u00e9quence)
+                { id: 'planif-noeud_10', type: 'lecon', titre: 'S\u00e9ance 2 (2 p\u00e9riodes)', description: '', x: -1284.9499182684067, y: 278.46050312184747, parent: 'planif-noeud_11', enfants: ['planif-noeud_8', 'planif-noeud_18', 'planif-noeud_3', 'planif-noeud_13', 'planif-noeud_22'], metadata: {}, cloneSourceId: null },
+                // Contenu S\u00e9ance 1
+                { id: 'planif-noeud_7', type: 'factuelle', titre: 'Distinguer diff\u00e9rentes postures de lecture', description: '', x: -1566.3487399504672, y: 347.3295775285154, parent: 'planif-noeud_9', enfants: [], metadata: { prealable: true }, cloneSourceId: null },
+                { id: 'planif-noeud_26', type: 'procedurale', titre: 'Appliquer une m\u00e9thode d\u2019annotation efficace', description: '', x: -1566.3487399504672, y: 492.3295775285154, parent: 'planif-noeud_9', enfants: [], metadata: {}, cloneSourceId: null },
+                { id: 'planif-noeud_17', type: 'procedurale', titre: 'Noter ses r\u00e9actions spontan\u00e9es', description: '', x: -1558.3487399504672, y: 637.3295775285154, parent: 'planif-noeud_9', enfants: [], metadata: {}, cloneSourceId: null },
+                { id: 'planif-noeud_12', type: 'activite', titre: 'Analyser \u00abPour que nous puissions vivre\u00bb', description: '', x: -1566.3487399504672, y: 762.3295775285154, parent: 'planif-noeud_9', enfants: [], metadata: {}, cloneSourceId: null },
+                { id: 'planif-noeud_24', type: 'evaluation', titre: 'R\u00e9troaction formative', description: '', x: -1526.8487399504672, y: 907.3295775285154, parent: 'planif-noeud_9', enfants: [], metadata: {}, cloneSourceId: null },
+                // Contenu S\u00e9ance 2
+                { id: 'planif-noeud_8', type: 'factuelle', titre: 'Reconnaitre diff\u00e9rents proc\u00e9d\u00e9s litt\u00e9raires (insistance et opposition)', description: '', x: -1254.9499182684067, y: 353.46050312184747, parent: 'planif-noeud_10', enfants: [], metadata: { prealable: true }, cloneSourceId: null },
+                { id: 'planif-noeud_18', type: 'procedurale', titre: 'Observer le paratexte', description: '', x: -1215.4499182684067, y: 518.4605031218475, parent: 'planif-noeud_10', enfants: [], metadata: {}, cloneSourceId: null },
+                { id: 'planif-noeud_3', type: 'procedurale', titre: 'Observer les motifs et les contrastes', description: '', x: -1254.9499182684067, y: 643.4605031218475, parent: 'planif-noeud_10', enfants: [], metadata: {}, cloneSourceId: null },
+                { id: 'planif-noeud_13', type: 'activite', titre: 'Annoter le texte \u00abMarine\u00bb', description: '', x: -1229.4499182684067, y: 788.4605031218475, parent: 'planif-noeud_10', enfants: [], metadata: {}, cloneSourceId: null },
+                { id: 'planif-noeud_22', type: 'evaluation', titre: 'R\u00e9troaction formative', description: '', x: -1215.4499182684067, y: 913.4605031218475, parent: 'planif-noeud_10', enfants: [], metadata: {}, cloneSourceId: null }
             ],
             liens: [
-                // Compétence → Idées maîtresses
-                { id: 'lien_1', source: 'noeud_1', cible: 'noeud_2', type: 'se_decline_en' },
-                { id: 'lien_2', source: 'noeud_1', cible: 'noeud_3', type: 'se_decline_en' },
-                { id: 'lien_3', source: 'noeud_1', cible: 'noeud_4', type: 'se_decline_en' },
-                // Idées maîtresses → Leçons
-                { id: 'lien_4', source: 'noeud_2', cible: 'noeud_6', type: 'se_concretise_dans' },
-                { id: 'lien_5', source: 'noeud_3', cible: 'noeud_6', type: 'se_concretise_dans' },
-                { id: 'lien_6', source: 'noeud_3', cible: 'noeud_7', type: 'se_concretise_dans' },
-                { id: 'lien_7', source: 'noeud_4', cible: 'noeud_7', type: 'se_concretise_dans' },
-                // Connaissances → Activités
-                { id: 'lien_8', source: 'noeud_8', cible: 'noeud_10', type: 's_acquiert_par' },
-                { id: 'lien_9', source: 'noeud_9', cible: 'noeud_10', type: 's_acquiert_par' },
-                { id: 'lien_10', source: 'noeud_11', cible: 'noeud_13', type: 's_acquiert_par' },
-                { id: 'lien_11', source: 'noeud_12', cible: 'noeud_13', type: 's_acquiert_par' },
-                // Idées maîtresses → Évaluation
-                { id: 'lien_12', source: 'noeud_2', cible: 'noeud_14', type: 'se_verifie_par' },
-                { id: 'lien_13', source: 'noeud_3', cible: 'noeud_14', type: 'se_verifie_par' },
-                { id: 'lien_14', source: 'noeud_4', cible: 'noeud_14', type: 'se_verifie_par' }
+                // Comp\u00e9tence \u2192 Id\u00e9es ma\u00eetresses
+                { id: 'planif-lien_38', source: 'planif-noeud_1', cible: 'planif-noeud_2', type: 'se_decline_en' },
+                // Id\u00e9es ma\u00eetresses \u2192 relations
+                { id: 'planif-lien_18', source: 'planif-noeud_2', cible: 'planif-noeud_19', type: 's_appuie_sur' },
+                { id: 'planif-lien_41', source: 'planif-noeud_2', cible: 'planif-noeud_20', type: 's_appuie_sur' },
+                // Id\u00e9es ma\u00eetresses \u2192 S\u00e9quence / Le\u00e7ons
+                { id: 'planif-lien_28', source: 'planif-noeud_2', cible: 'planif-noeud_11', type: 'se_concretise_dans' },
+                { id: 'planif-lien_26', source: 'planif-noeud_20', cible: 'planif-noeud_9', type: 'se_concretise_dans' },
+                { id: 'planif-lien_27', source: 'planif-noeud_19', cible: 'planif-noeud_10', type: 'se_concretise_dans' },
+                // S\u00e9ance 1 : cha\u00eene p\u00e9dagogique
+                { id: 'planif-lien_43', source: 'planif-noeud_7', cible: 'planif-noeud_26', type: 'complete' },
+                { id: 'planif-lien_42', source: 'planif-noeud_26', cible: 'planif-noeud_17', type: 'conduit_a' },
+                { id: 'planif-lien_32', source: 'planif-noeud_17', cible: 'planif-noeud_12', type: 's_acquiert_par' },
+                { id: 'planif-lien_33', source: 'planif-noeud_12', cible: 'planif-noeud_24', type: 'se_verifie_par' },
+                // S\u00e9ance 2 : cha\u00eene p\u00e9dagogique
+                { id: 'planif-lien_45', source: 'planif-noeud_8', cible: 'planif-noeud_18', type: 'complete' },
+                { id: 'planif-lien_35', source: 'planif-noeud_18', cible: 'planif-noeud_3', type: 'complete' },
+                { id: 'planif-lien_44', source: 'planif-noeud_3', cible: 'planif-noeud_13', type: 's_acquiert_par' },
+                { id: 'planif-lien_37', source: 'planif-noeud_13', cible: 'planif-noeud_22', type: 'se_verifie_par' }
             ]
         }
     }
