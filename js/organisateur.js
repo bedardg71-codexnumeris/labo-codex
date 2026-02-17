@@ -464,9 +464,9 @@ function afficherEnteteCalendrier(leconId) {
                 if (seance.local) detail += ' (local ' + seance.local + ')';
             }
 
-            html += '<div class="org-entete-groupe">';
-            html += '<strong>' + label + '</strong>';
-            if (detail) html += ' — ' + detail;
+            html += '<div class="org-seance-badge">';
+            html += '<div class="org-seance-badge-groupe">' + label + '</div>';
+            if (detail) html += '<div class="org-seance-badge-detail">' + detail + '</div>';
             html += '</div>';
         }
 
