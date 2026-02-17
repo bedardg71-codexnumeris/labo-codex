@@ -3766,7 +3766,10 @@ function mettreAJourListeCartes() {
         if (carte.id === index.active) {
             opt.selected = true;
             var titreCarte = document.getElementById('planif-titre-carte');
-            if (titreCarte) titreCarte.value = carte.nom;
+            if (titreCarte) {
+                titreCarte.value = carte.nom;
+                titreCarte.size = Math.max(10, carte.nom.length + 2);
+            }
         }
         select.appendChild(opt);
     }
@@ -4092,6 +4095,58 @@ function initialiser() {
         });
     }
 
+    // Raccourcis flottant — bouton 🛎️ de la palette
+    var raccourcisPanel = document.getElementById('planif-raccourcis-panel');
+    var btnRaccourcis = document.getElementById('planif-palette-raccourcis-btn');
+    if (btnRaccourcis && raccourcisPanel) {
+        btnRaccourcis.addEventListener('click', function() {
+            var estVisible = raccourcisPanel.style.display !== 'none';
+            raccourcisPanel.style.display = estVisible ? 'none' : '';
+        });
+        var raccFermerBtn = raccourcisPanel.querySelector('.planif-raccourcis-panel-fermer');
+        if (raccFermerBtn) {
+            raccFermerBtn.addEventListener('click', function() {
+                raccourcisPanel.style.display = 'none';
+            });
+        }
+        var raccReplierBtn = raccourcisPanel.querySelector('.planif-raccourcis-panel-replier');
+        if (raccReplierBtn) {
+            raccReplierBtn.addEventListener('click', function() {
+                var contenu = raccourcisPanel.querySelector('.planif-raccourcis-panel-contenu');
+                if (!contenu) return;
+                var estReplie = contenu.style.display === 'none';
+                contenu.style.display = estReplie ? '' : 'none';
+                raccReplierBtn.textContent = estReplie ? '−' : '+';
+                raccReplierBtn.title = estReplie ? 'Replier' : 'Déplier';
+            });
+        }
+        // Drag panneau raccourcis
+        var raccBarre = raccourcisPanel.querySelector('.planif-guide-barre');
+        if (raccBarre) {
+            raccBarre.addEventListener('mousedown', function(e) {
+                if (e.target.closest('.planif-raccourcis-panel-fermer') || e.target.closest('.planif-raccourcis-panel-replier')) return;
+                e.preventDefault();
+                var startX = e.clientX;
+                var startY = e.clientY;
+                var rect = raccourcisPanel.getBoundingClientRect();
+                var wrapperRect = document.getElementById('planif-zone-wrapper').getBoundingClientRect();
+                var startLeft = rect.left - wrapperRect.left;
+                var startTop = rect.top - wrapperRect.top;
+                function onMove(e2) {
+                    raccourcisPanel.style.left = (startLeft + e2.clientX - startX) + 'px';
+                    raccourcisPanel.style.top = (startTop + e2.clientY - startY) + 'px';
+                    raccourcisPanel.style.right = 'auto';
+                }
+                function onUp() {
+                    document.removeEventListener('mousemove', onMove);
+                    document.removeEventListener('mouseup', onUp);
+                }
+                document.addEventListener('mousemove', onMove);
+                document.addEventListener('mouseup', onUp);
+            });
+        }
+    }
+
     // Guide flottant — bouton 📔 de la palette (#167)
     var btnAidePalette = document.getElementById('planif-palette-aide-btn');
     if (btnAidePalette) {
@@ -4150,6 +4205,16 @@ function initialiser() {
             document.addEventListener('mouseup', onUp);
         });
     }
+
+    // Clic sur un panneau flottant = premier plan
+    var _zIndexPanneaux = 81;
+    [raccourcisPanel, guidePanel].forEach(function(panel) {
+        if (panel) {
+            panel.addEventListener('mousedown', function() {
+                panel.style.zIndex = ++_zIndexPanneaux;
+            });
+        }
+    });
 
     zoneTravail.addEventListener('dragover', function(e) {
         e.preventDefault();
@@ -4350,12 +4415,17 @@ function initialiser() {
     // Titre carte éditable
     var titreCarte = document.getElementById('planif-titre-carte');
     if (titreCarte) {
+        function ajusterLargeurTitre() {
+            titreCarte.size = Math.max(10, titreCarte.value.length + 2);
+        }
         titreCarte.addEventListener('input', function() {
             renommerCarteActive(titreCarte.value.trim());
+            ajusterLargeurTitre();
         });
         titreCarte.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') { e.preventDefault(); titreCarte.blur(); }
         });
+        ajusterLargeurTitre();
     }
 
     // Fermer panneau

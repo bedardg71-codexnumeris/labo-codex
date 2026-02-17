@@ -14655,13 +14655,18 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 /* === LAYOUT PRINCIPAL === */
 #section-planification.section.active {
     padding: 0;
+    margin: 0;
     background: none;
     border-radius: 0;
+}
+/* Retirer le padding du conteneur parent quand planification est active */
+.contenu:has(#section-planification.active) {
+    padding: 0;
 }
 #section-planification .planif-wrapper {
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 120px);
+    height: 100vh;
     background: var(--planif-couleur-fond);
     border-radius: 0;
     overflow: hidden;
@@ -14670,8 +14675,6 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 /* === BARRE SUPÉRIEURE === */
 #section-planification .planif-header {
     display: flex;
-    flex-direction: column;
-    gap: 2px;
     padding: 4px 12px;
     background: var(--surface-carte, #1a3040);
     border-bottom: 1px solid var(--planif-couleur-bordure);
@@ -14679,15 +14682,21 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     flex-shrink: 0;
 }
 
-.planif-header-titre {
-    text-align: center;
-    margin: 0;
-}
-
 .planif-header-toolbar {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 8px;
+    width: 100%;
+    position: relative;
+}
+
+.planif-toolbar-titre {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+    pointer-events: auto;
 }
 .planif-toolbar-gauche {
     display: flex;
@@ -14696,29 +14705,11 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     padding-right: 10px;
     border-right: 1px solid var(--planif-couleur-bordure);
 }
-.planif-toolbar-centre {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    font-size: 11px;
-    color: var(--texte-muted, #5a7a88);
-}
-.planif-toolbar-centre kbd {
-    padding: 1px 5px;
-    background: rgba(106, 172, 184, 0.06);
-    border: 1px solid var(--planif-couleur-bordure);
-    border-radius: 3px;
-    font-family: inherit;
-    font-size: 10px;
-}
 .planif-toolbar-droite {
     display: flex;
     align-items: center;
     gap: 4px;
-    padding-left: 10px;
-    border-left: 1px solid var(--planif-couleur-bordure);
+    margin-left: auto;
 }
 .planif-header-zoom-raccourci {
     font-size: 10px;
@@ -14753,8 +14744,9 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     padding: 2px 4px;
     border-radius: 4px;
     outline: none;
-    min-width: 80px;
-    max-width: 300px;
+    width: auto;
+    min-width: 200px;
+    text-align: center;
     transition: all 0.15s;
 }
 
@@ -14851,7 +14843,8 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 
 #planif-palette.planif-palette-replie .planif-palette-contenu { display: none; }
 #planif-palette.planif-palette-replie .planif-guide { display: none; }
-#planif-palette.planif-palette-replie .planif-palette-aide-btn { display: none; }
+#planif-palette.planif-palette-replie .planif-palette-aide-btn,
+#planif-palette.planif-palette-replie .planif-palette-bas-btns { display: none; }
 #planif-palette.planif-palette-replie .planif-palette-barre { border-bottom: none; border-radius: 10px; }
 
 .planif-palette-btn {
@@ -15192,9 +15185,14 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     padding: 8px 12px;
     overflow: auto;
 }
+.planif-palette-bas-btns {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    padding: 4px 0;
+}
 .planif-palette-aide-btn {
     display: block;
-    margin: 6px auto 4px;
     width: 24px;
     height: 24px;
     border-radius: 50%;
@@ -15212,6 +15210,46 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     background: var(--surface-carte, #1a3a48);
     color: var(--texte-secondaire, #8aa4b0);
 }
+
+/* === PANNEAU RACCOURCIS FLOTTANT === */
+#planif-raccourcis-panel {
+    top: 12px;
+    left: auto;
+    right: 12px;
+}
+.planif-raccourcis-panel-contenu {
+    padding: 8px 10px;
+}
+.planif-raccourcis-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10.5px;
+    color: var(--texte-secondaire, #8aa4b0);
+}
+.planif-raccourcis-table td {
+    padding: 3px 4px;
+}
+.planif-raccourcis-table td:first-child {
+    width: 70px;
+    text-align: right;
+    padding-right: 8px;
+}
+.planif-raccourcis-table kbd {
+    padding: 1px 5px;
+    background: rgba(106, 172, 184, 0.06);
+    border: 1px solid var(--planif-couleur-bordure);
+    border-radius: 3px;
+    font-family: inherit;
+    font-size: 10px;
+}
+.planif-raccourcis-panel-replier,
+.planif-raccourcis-panel-fermer {
+    width: 20px; height: 20px; border: none; background: none;
+    font-size: 16px; line-height: 1; cursor: pointer; color: var(--texte-muted, #5a7a88);
+    border-radius: 4px; display: flex; align-items: center; justify-content: center;
+}
+.planif-raccourcis-panel-replier:hover,
+.planif-raccourcis-panel-fermer:hover { background: rgba(106, 172, 184, 0.1); color: var(--texte-principal, #d0e0e4); }
 
 /* === PANNEAU GUIDE FLOTTANT (#167) === */
 .planif-guide-flottante {
