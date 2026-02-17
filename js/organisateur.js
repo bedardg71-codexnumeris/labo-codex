@@ -358,53 +358,115 @@ function afficherEnteteCalendrier(leconId) {
     }
 
     try {
-        var groupes = db.getSync(window.cle('groupesCours'), null);
+        var carte = window.planificationCarte;
+        if (!carte || !carte.etat) { enteteCalendrier.style.display = 'none'; return; }
+
+        var lecon = carte.etat.noeuds.get(leconId);
+        if (!lecon) { enteteCalendrier.style.display = 'none'; return; }
+
+        // 1. Trouver la séquence parente → numéro de semaine
+        var seq = lecon.parent ? carte.etat.noeuds.get(lecon.parent) : null;
+        var numSemaine = (seq && seq.metadata) ? seq.metadata.semaineDebut : null;
+
+        // 2. Rang de la leçon dans la séquence (triée par X, comme la vue calendrier)
+        var rangLecon = 0;
+        if (seq && seq.enfants) {
+            var leconsSeq = seq.enfants.filter(function(eid) {
+                var n = carte.etat.noeuds.get(eid);
+                return n && n.type === 'lecon';
+            });
+            leconsSeq.sort(function(a, b) {
+                var na = carte.etat.noeuds.get(a), nb = carte.etat.noeuds.get(b);
+                return ((na && na.x) || 0) - ((nb && nb.x) || 0);
+            });
+            for (var r = 0; r < leconsSeq.length; r++) {
+                if (leconsSeq[r] === leconId) { rangLecon = r; break; }
+            }
+        }
+
+        // 3. Charger données
+        var groupes = db.getSync(window.cle('groupesCours'), null) || [];
         var horaires = db.getSync(window.cle('horaires'), null) || [];
+        var calendrier = db.getSync(window.cle('calendrierComplet'), null) || {};
         var cours = db.getSync('cours', []);
         var listeCours = db.getSync('listeCours', []);
 
-        if (!groupes || !Array.isArray(groupes) || groupes.length === 0) {
-            enteteCalendrier.style.display = 'none';
-            return;
-        }
-
-        // Filtrer : ne garder que les groupes du même cours que le groupe actif
+        // Filtrer groupes du même cours
         var gcActif = db.getSync('groupeCoursActif', null);
         var coursIdActif = gcActif ? gcActif.coursId : null;
         if (coursIdActif) {
             groupes = groupes.filter(function(g) { return g.coursId === coursIdActif; });
         }
 
+        if (groupes.length === 0) { enteteCalendrier.style.display = 'none'; return; }
+
+        // 4. Construire un index : dates du calendrier pour la semaine N, par jour
+        var datesSemaine = {}; // { "lundi": "2025-09-08", "jeudi": "2025-09-11", ... }
+        if (numSemaine && calendrier) {
+            for (var dateStr in calendrier) {
+                var info = calendrier[dateStr];
+                if (info && info.numeroSemaine === numSemaine && (info.statut === 'cours' || info.statut === 'reprise')) {
+                    var jourCal = (info.jourRemplace || info.jourSemaine || '').toLowerCase();
+                    if (jourCal) datesSemaine[jourCal] = dateStr;
+                }
+            }
+        }
+
+        // Helper : formater une date "2025-09-08" → "lundi 8 sept."
+        var MOIS_COURTS = ['jan.','fév.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+        function formaterDate(ds) {
+            if (!ds) return '';
+            var p = ds.split('-');
+            var d = parseInt(p[2], 10);
+            var m = parseInt(p[1], 10) - 1;
+            var jourSem = calendrier[ds] ? calendrier[ds].jourSemaine : '';
+            return (jourSem ? jourSem + ' ' : '') + d + ' ' + MOIS_COURTS[m];
+        }
+
+        // 5. Pour chaque groupe, résoudre la séance exacte
         var html = '';
         for (var i = 0; i < groupes.length; i++) {
             var gc = groupes[i];
 
-            // Nom lisible du cours
+            // Nom lisible
             var coursInfo = cours.find(function(c) { return c.id === gc.coursId; });
             if (!coursInfo) coursInfo = listeCours.find(function(c) { return c.id === gc.coursId || c.sigle === gc.coursId; });
             var sigle = coursInfo ? (coursInfo.codeCours || coursInfo.code || coursInfo.sigle || '') : '';
             var groupe = gc.groupeNum || gc.groupe || '';
             var label = sigle ? sigle + ' gr.' + groupe : 'Groupe ' + groupe;
 
-            // Horaire du groupe
+            // Séances du groupe (triées par ordre de semaine)
             var hor = gc.horaireId ? horaires.find(function(h) { return h.id === gc.horaireId; }) : null;
-            var joursStr = '';
-            if (hor && hor.plages && Array.isArray(hor.plages)) {
-                var plages = hor.plages.map(function(p) {
-                    var j = (p.jour || '').substring(0, 3);
-                    var h1 = p.heureDebut || '';
-                    var h2 = p.heureFin || '';
-                    var local = p.local ? ' (' + p.local + ')' : '';
-                    return j + ' ' + h1 + '–' + h2 + local;
-                });
-                joursStr = plages.join(', ');
-            } else if (hor && hor.nom) {
-                joursStr = hor.nom;
+            var seances = (hor && hor.seances) ? hor.seances : [];
+            var ordreJours = ['lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+            seances = seances.slice().sort(function(a, b) {
+                return ordreJours.indexOf((a.jour || '').toLowerCase()) - ordreJours.indexOf((b.jour || '').toLowerCase());
+            });
+
+            // La séance correspondant au rang de la leçon
+            var seance = seances[rangLecon] || seances[0] || null;
+            var detail = '';
+
+            if (seance && numSemaine) {
+                var jourSeance = (seance.jour || '').toLowerCase();
+                var dateSeance = datesSemaine[jourSeance] || '';
+                if (dateSeance) {
+                    detail = formaterDate(dateSeance);
+                } else {
+                    // Pas de date trouvée, afficher le jour seul
+                    detail = seance.jour ? (seance.jour.charAt(0).toUpperCase() + seance.jour.slice(1)) : '';
+                }
+                if (seance.heureDebut) detail += ' ' + seance.heureDebut + '–' + (seance.heureFin || '');
+                if (seance.local) detail += ' (local ' + seance.local + ')';
+            } else if (seance) {
+                detail = seance.jour ? (seance.jour.charAt(0).toUpperCase() + seance.jour.slice(1)) : '';
+                if (seance.heureDebut) detail += ' ' + seance.heureDebut + '–' + (seance.heureFin || '');
+                if (seance.local) detail += ' (local ' + seance.local + ')';
             }
 
             html += '<div class="org-entete-groupe">';
             html += '<strong>' + label + '</strong>';
-            if (joursStr) html += ' — ' + joursStr;
+            if (detail) html += ' — ' + detail;
             html += '</div>';
         }
 
