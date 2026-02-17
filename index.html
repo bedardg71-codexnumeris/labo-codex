@@ -6807,12 +6807,17 @@
                             <div class="planif-header-toolbar">
                                 <div id="planif-selecteur-cartes" class="planif-toolbar-gauche" data-tooltip="planif-boutons-action">
                                     <select id="planif-liste-cartes" data-tooltip="planif-selecteur-cours"></select>
-                                    <button class="planif-btn-carte" id="planif-btn-nouvelle-carte" title="Nouvelle carte">➕</button>
-                                    <button class="planif-btn-carte planif-danger" id="planif-btn-supprimer-carte" title="Supprimer cette carte">❌</button>
-                                    <button class="planif-btn-carte" id="planif-btn-dupliquer-carte" title="Dupliquer cette carte">📋</button>
-                                    <button class="planif-btn-carte" id="planif-btn-exporter-carte" title="Exporter cette carte">⬆️</button>
-                                    <button class="planif-btn-carte" id="planif-btn-importer-carte" title="Importer une carte">⬇️</button>
-                                    <button class="planif-btn-carte" id="planif-btn-annuler" title="Annuler (Ctrl+Z)">↩️</button>
+                                    <div class="planif-actions-menu">
+                                        <button class="planif-btn-carte" id="planif-btn-actions">Actions ▾</button>
+                                        <div class="planif-actions-dropdown" id="planif-actions-dropdown">
+                                            <button class="planif-action-item" id="planif-btn-nouvelle-carte">Nouvelle carte</button>
+                                            <button class="planif-action-item" id="planif-btn-dupliquer-carte">Dupliquer cette carte</button>
+                                            <button class="planif-action-item" id="planif-btn-importer-carte">Importer un alignement</button>
+                                            <hr class="planif-action-sep">
+                                            <button class="planif-action-item planif-danger" id="planif-btn-supprimer-carte">Supprimer cette carte</button>
+                                        </div>
+                                    </div>
+                                    <button class="planif-btn-carte" id="planif-btn-annuler" title="Ctrl+Z">Annuler</button>
                                     <input type="file" id="planif-fichier-import" accept=".json" style="display:none">
                                 </div>
                                 <h3 class="planif-toolbar-titre"><input type="text" id="planif-titre-carte" value="Sans titre" placeholder="Titre de la carte…"></h3>

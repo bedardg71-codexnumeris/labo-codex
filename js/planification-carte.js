@@ -4393,6 +4393,22 @@ function initialiser() {
         listeCartes.addEventListener('change', function(e) { changerCarte(e.target.value); });
     }
 
+    // Menu déroulant Actions
+    var btnActions = document.getElementById('planif-btn-actions');
+    var dropdown = document.getElementById('planif-actions-dropdown');
+    if (btnActions && dropdown) {
+        btnActions.addEventListener('click', function(e) {
+            e.stopPropagation();
+            dropdown.classList.toggle('ouvert');
+        });
+        document.addEventListener('click', function() {
+            dropdown.classList.remove('ouvert');
+        });
+        dropdown.addEventListener('click', function() {
+            dropdown.classList.remove('ouvert');
+        });
+    }
+
     var btnNouvelle = document.getElementById('planif-btn-nouvelle-carte');
     if (btnNouvelle) {
         btnNouvelle.addEventListener('click', function() {
@@ -4407,9 +4423,6 @@ function initialiser() {
 
     var btnDupliquerCarte = document.getElementById('planif-btn-dupliquer-carte');
     if (btnDupliquerCarte) btnDupliquerCarte.addEventListener('click', dupliquerCarteActive);
-
-    var btnExporterCarte = document.getElementById('planif-btn-exporter-carte');
-    if (btnExporterCarte) btnExporterCarte.addEventListener('click', exporterCarte);
 
     var btnImporterCarte = document.getElementById('planif-btn-importer-carte');
     if (btnImporterCarte) {
