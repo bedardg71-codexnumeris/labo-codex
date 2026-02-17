@@ -12,6 +12,16 @@
         {
             version: 'Beta 97.8',
             date: '17 f\u00e9vrier',
+            couleur: 'vert',
+            titre: 'Carte d\u00e9mo et licence CC',
+            items: [
+                '<strong>Carte d\u00e9mo mise \u00e0 jour</strong> : La carte d\u00e9mo \u00ab\u00a0\u00c9criture et litt\u00e9rature\u00a0\u00bb est remplac\u00e9e par l\u2019export r\u00e9el reconstruit manuellement (16\u00a0n\u0153uds, 14\u00a0liens, positions exactes).',
+                '<strong>Licence CC BY-NC-SA 4.0</strong> : M\u00e9tadonn\u00e9es Creative Commons ajout\u00e9es \u00e0 la carte d\u00e9mo (auteur, dates, type, version).'
+            ]
+        },
+        {
+            version: 'Beta 97.8',
+            date: '17 f\u00e9vrier',
             couleur: 'bleu',
             titre: 'Plan de la le\u00e7on et mode clair',
             items: [
