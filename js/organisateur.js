@@ -189,7 +189,10 @@ function peuplerSelecteursOrganisateur() {
         if (entry[1].type === 'sequence') sequences.push(entry[1]);
     }
     sequences.sort(function(a, b) {
-        return (a.metadata && a.metadata.semaineDebut || 999) - (b.metadata && b.metadata.semaineDebut || 999);
+        var sa = (a.metadata && a.metadata.semaineDebut) || 0;
+        var sb = (b.metadata && b.metadata.semaineDebut) || 0;
+        if (sa !== sb) return sa - sb;
+        return (a.x || 0) - (b.x || 0);
     });
 
     var valActuelle = selectSequence.value;
@@ -226,6 +229,7 @@ function peuplerSelecteurLecons() {
             if (entry[1].type === 'lecon') lecons.push(entry[1]);
         }
     }
+    lecons.sort(function(a, b) { return (a.x || 0) - (b.x || 0); });
 
     var valActuelle = selectLecon.value;
     selectLecon.innerHTML = '<option value="">— Leçon —</option>';
