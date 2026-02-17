@@ -7062,129 +7062,132 @@
                 <div id="planification-organisateur" class="sous-section">
                     <div class="org-conteneur">
                         <div class="org-entete">
-                            <h2>Organisateur</h2>
+                            <h2>Plan de la leçon</h2>
                             <div class="org-actions">
                                 <button id="org-btn-export" class="btn-secondaire">Exporter</button>
                             </div>
                         </div>
                         <div class="org-corps">
-                            <!-- Sélecteurs -->
-                            <div class="org-selecteurs">
-                                <select id="org-select-carte"><option value="">— Carte —</option></select>
-                                <select id="org-select-sequence" data-tooltip="orga-selecteur-sequence"><option value="">— Séquence —</option></select>
-                                <select id="org-select-lecon" data-tooltip="orga-selecteur-lecon"><option value="">— Leçon —</option></select>
-                            </div>
-                            <!-- Séances planifiées (badges groupe-cours / date / heure / local) -->
-                            <div id="org-entete-calendrier" class="org-section" style="display:none">
-                                <div class="org-section-titre" data-tooltip="orga-entete-lecon">Séances planifiées</div>
-                                <div class="org-section-contenu org-seances-badges" id="org-entete-calendrier-contenu"></div>
-                            </div>
-                            <!-- Contenu leçon (généré dynamiquement) -->
-                            <div id="org-contenu-lecon" style="display:none">
-                                <!-- Objectif de la leçon -->
-                                <div class="org-section" id="org-objectif">
-                                    <div class="org-section-titre" data-tooltip="orga-objectif">
-                                        Objectif de la leçon
-                                        <button class="org-btn-reinit" id="org-btn-reinit-objectif" title="Réinitialiser l'objectif dérivé" style="display:none">↺ Réinitialiser</button>
-                                    </div>
-                                    <div class="org-section-contenu org-objectif-contenu" id="org-objectif-contenu" contenteditable="false">
-                                        Sélectionner une leçon pour voir son objectif dérivé.
-                                    </div>
-                                </div>
-                                <!-- Prérequis -->
-                                <div class="org-section" id="org-prerequis">
-                                    <div class="org-section-titre" data-tooltip="orga-connaissances-prealables">Connaissances préalables à vérifier</div>
-                                    <div class="org-section-contenu" id="org-prerequis-contenu">
-                                        <span class="org-placeholder">Les prérequis seront dérivés des liens de la carte.</span>
-                                    </div>
-                                </div>
-                                <!-- Productions associées -->
-                                <div class="org-section" id="org-productions">
-                                    <div class="org-section-titre" data-tooltip="orga-productions">Productions associées</div>
-                                    <div class="org-section-contenu" id="org-productions-contenu">
-                                        <span class="org-placeholder">Les productions seront dérivées de Construction de la note.</span>
-                                    </div>
-                                </div>
-                                <!-- Enseignement explicite -->
-                                <div class="org-section org-ee-section" id="org-ee">
-                                    <div class="org-ee-bar">
-                                        <label class="org-checkbox-label" data-tooltip="orga-enseignement-explicite">
+                            <!-- Layout 2 colonnes -->
+                            <div class="org-corps-split">
+                                <!-- Colonne gauche : plan de la leçon -->
+                                <div class="org-plan-lecon">
+                                    <!-- Sélecteurs -->
+                                    <div class="org-selecteurs">
+                                        <select id="org-select-carte"><option value="">— Carte —</option></select>
+                                        <select id="org-select-sequence" data-tooltip="orga-selecteur-sequence"><option value="">— Séquence —</option></select>
+                                        <select id="org-select-lecon" data-tooltip="orga-selecteur-lecon"><option value="">— Leçon —</option></select>
+                                        <label class="org-checkbox-label org-ee-toggle" data-tooltip="orga-enseignement-explicite">
                                             <input type="checkbox" id="org-ee-checkbox">
-                                            Enseignement explicite (5 étapes)
+                                            EE (5 étapes)
                                         </label>
                                     </div>
-                                    <!-- Cœur brut (visible quand EE décoché) -->
-                                    <div id="org-coeur-brut">
-                                        <div class="org-section-titre" data-tooltip="orga-coeur-lecon">Cœur de la leçon</div>
-                                        <div class="org-section-contenu" id="org-coeur-contenu"></div>
+                                    <!-- Séances planifiées (badges groupe-cours / date / heure / local) -->
+                                    <div id="org-entete-calendrier" class="org-section" style="display:none">
+                                        <div class="org-section-titre" data-tooltip="orga-entete-lecon">Séances planifiées</div>
+                                        <div class="org-section-contenu org-seances-badges" id="org-entete-calendrier-contenu"></div>
                                     </div>
-                                    <!-- 5 étapes EE (visible quand EE coché) -->
-                                    <div id="org-ee-etapes" style="display:none">
-                                        <div class="org-ee-non-assignees" id="org-ee-non-assignees">
-                                            <div class="org-section-titre">Activités non assignées</div>
-                                            <div class="org-ee-liste" id="org-ee-liste-non-assignees"></div>
-                                        </div>
-                                        <div class="org-ee-etape" data-etape="ouverture">
-                                            <div class="org-ee-etape-entete">
-                                                <label class="org-checkbox-label"><input type="checkbox" class="org-ee-etape-check" data-etape="ouverture" checked> 1. Ouverture</label>
-                                                <span class="org-ee-etape-desc">Captation de l'attention, justification de l'objectif, vérification des préalables</span>
+                                    <!-- Contenu leçon (généré dynamiquement) -->
+                                    <div id="org-contenu-lecon" style="display:none">
+                                        <!-- Objectif de la leçon -->
+                                        <div class="org-section" id="org-objectif">
+                                            <div class="org-section-titre" data-tooltip="orga-objectif">
+                                                Objectif de la leçon
+                                                <button class="org-btn-reinit" id="org-btn-reinit-objectif" title="Réinitialiser l'objectif dérivé" style="display:none">↺ Réinitialiser</button>
                                             </div>
-                                            <div class="org-ee-etape-corps">
-                                                <textarea class="org-ee-notes" data-etape="ouverture" placeholder="Notes de l'enseignant…"></textarea>
-                                                <div class="org-ee-zone-depot" data-etape="ouverture"><span class="org-placeholder">Glisser des activités ici</span></div>
+                                            <div class="org-section-contenu org-objectif-contenu" id="org-objectif-contenu" contenteditable="false">
+                                                Sélectionner une leçon pour voir son objectif dérivé.
                                             </div>
                                         </div>
-                                        <div class="org-ee-etape" data-etape="modelisation">
-                                            <div class="org-ee-etape-entete">
-                                                <label class="org-checkbox-label"><input type="checkbox" class="org-ee-etape-check" data-etape="modelisation" checked> 2. Modélisation</label>
-                                                <span class="org-ee-etape-desc">Démonstration, exemples et contre-exemples, aide-mémoire</span>
-                                            </div>
-                                            <div class="org-ee-etape-corps">
-                                                <textarea class="org-ee-notes" data-etape="modelisation" placeholder="Notes de l'enseignant…"></textarea>
-                                                <div class="org-ee-zone-depot" data-etape="modelisation"><span class="org-placeholder">Glisser des activités ici</span></div>
+                                        <!-- Prérequis -->
+                                        <div class="org-section" id="org-prerequis">
+                                            <div class="org-section-titre" data-tooltip="orga-connaissances-prealables">Connaissances préalables à vérifier</div>
+                                            <div class="org-section-contenu" id="org-prerequis-contenu">
+                                                <span class="org-placeholder">Les prérequis seront dérivés des liens de la carte.</span>
                                             </div>
                                         </div>
-                                        <div class="org-ee-etape" data-etape="pratiqueGuidee">
-                                            <div class="org-ee-etape-entete">
-                                                <label class="org-checkbox-label"><input type="checkbox" class="org-ee-etape-check" data-etape="pratiqueGuidee" checked> 3. Pratique guidée</label>
-                                                <span class="org-ee-etape-desc">Pratique collective, rétroactions, évaluation formative</span>
-                                            </div>
-                                            <div class="org-ee-etape-corps">
-                                                <textarea class="org-ee-notes" data-etape="pratiqueGuidee" placeholder="Notes de l'enseignant…"></textarea>
-                                                <div class="org-ee-zone-depot" data-etape="pratiqueGuidee"><span class="org-placeholder">Glisser des activités ici</span></div>
+                                        <!-- Productions associées -->
+                                        <div class="org-section" id="org-productions">
+                                            <div class="org-section-titre" data-tooltip="orga-productions">Productions associées</div>
+                                            <div class="org-section-contenu" id="org-productions-contenu">
+                                                <span class="org-placeholder">Les productions seront dérivées de Construction de la note.</span>
                                             </div>
                                         </div>
-                                        <div class="org-ee-etape" data-etape="pratiqueAutonome">
-                                            <div class="org-ee-etape-entete">
-                                                <label class="org-checkbox-label"><input type="checkbox" class="org-ee-etape-check" data-etape="pratiqueAutonome" checked> 4. Pratique autonome</label>
-                                                <span class="org-ee-etape-desc">Exercices individuels, différenciation, retrait des aides</span>
+                                        <!-- Enseignement explicite -->
+                                        <div class="org-section org-ee-section" id="org-ee">
+                                            <!-- Cœur brut (visible quand EE décoché) -->
+                                            <div id="org-coeur-brut">
+                                                <div class="org-section-titre" data-tooltip="orga-coeur-lecon">Cœur de la leçon</div>
+                                                <div class="org-section-contenu" id="org-coeur-contenu"></div>
                                             </div>
-                                            <div class="org-ee-etape-corps">
-                                                <textarea class="org-ee-notes" data-etape="pratiqueAutonome" placeholder="Notes de l'enseignant…"></textarea>
-                                                <div class="org-ee-zone-depot" data-etape="pratiqueAutonome"><span class="org-placeholder">Glisser des activités ici</span></div>
-                                            </div>
-                                        </div>
-                                        <div class="org-ee-etape" data-etape="cloture">
-                                            <div class="org-ee-etape-entete">
-                                                <label class="org-checkbox-label"><input type="checkbox" class="org-ee-etape-check" data-etape="cloture" checked> 5. Clôture</label>
-                                                <span class="org-ee-etape-desc">Synthèse, métacognition, objectif de la prochaine leçon</span>
-                                            </div>
-                                            <div class="org-ee-etape-corps">
-                                                <textarea class="org-ee-notes" data-etape="cloture" placeholder="Notes de l'enseignant…"></textarea>
-                                                <div class="org-ee-zone-depot" data-etape="cloture"><span class="org-placeholder">Glisser des activités ici</span></div>
+                                            <!-- 5 étapes EE (visible quand EE coché) -->
+                                            <div id="org-ee-etapes" style="display:none">
+                                                <div class="org-ee-non-assignees" id="org-ee-non-assignees">
+                                                    <div class="org-section-titre">Activités non assignées</div>
+                                                    <div class="org-ee-liste" id="org-ee-liste-non-assignees"></div>
+                                                </div>
+                                                <div class="org-ee-etape" data-etape="ouverture">
+                                                    <div class="org-ee-etape-entete">
+                                                        <label class="org-checkbox-label"><input type="checkbox" class="org-ee-etape-check" data-etape="ouverture" checked> 1. Ouverture</label>
+                                                        <span class="org-ee-etape-desc">Captation de l'attention, justification de l'objectif, vérification des préalables</span>
+                                                    </div>
+                                                    <div class="org-ee-etape-corps">
+                                                        <div id="org-ee-ouverture-sections"></div>
+                                                        <textarea class="org-ee-notes" data-etape="ouverture" placeholder="Notes de l'enseignant…"></textarea>
+                                                        <div class="org-ee-zone-depot" data-etape="ouverture"><span class="org-placeholder">Glisser des activités ici</span></div>
+                                                    </div>
+                                                </div>
+                                                <div class="org-ee-etape" data-etape="modelisation">
+                                                    <div class="org-ee-etape-entete">
+                                                        <label class="org-checkbox-label"><input type="checkbox" class="org-ee-etape-check" data-etape="modelisation" checked> 2. Modélisation</label>
+                                                        <span class="org-ee-etape-desc">Démonstration, exemples et contre-exemples, aide-mémoire</span>
+                                                    </div>
+                                                    <div class="org-ee-etape-corps">
+                                                        <textarea class="org-ee-notes" data-etape="modelisation" placeholder="Notes de l'enseignant…"></textarea>
+                                                        <div class="org-ee-zone-depot" data-etape="modelisation"><span class="org-placeholder">Glisser des activités ici</span></div>
+                                                    </div>
+                                                </div>
+                                                <div class="org-ee-etape" data-etape="pratiqueGuidee">
+                                                    <div class="org-ee-etape-entete">
+                                                        <label class="org-checkbox-label"><input type="checkbox" class="org-ee-etape-check" data-etape="pratiqueGuidee" checked> 3. Pratique guidée</label>
+                                                        <span class="org-ee-etape-desc">Pratique collective, rétroactions, évaluation formative</span>
+                                                    </div>
+                                                    <div class="org-ee-etape-corps">
+                                                        <textarea class="org-ee-notes" data-etape="pratiqueGuidee" placeholder="Notes de l'enseignant…"></textarea>
+                                                        <div class="org-ee-zone-depot" data-etape="pratiqueGuidee"><span class="org-placeholder">Glisser des activités ici</span></div>
+                                                    </div>
+                                                </div>
+                                                <div class="org-ee-etape" data-etape="pratiqueAutonome">
+                                                    <div class="org-ee-etape-entete">
+                                                        <label class="org-checkbox-label"><input type="checkbox" class="org-ee-etape-check" data-etape="pratiqueAutonome" checked> 4. Pratique autonome</label>
+                                                        <span class="org-ee-etape-desc">Exercices individuels, différenciation, retrait des aides</span>
+                                                    </div>
+                                                    <div class="org-ee-etape-corps">
+                                                        <textarea class="org-ee-notes" data-etape="pratiqueAutonome" placeholder="Notes de l'enseignant…"></textarea>
+                                                        <div class="org-ee-zone-depot" data-etape="pratiqueAutonome"><span class="org-placeholder">Glisser des activités ici</span></div>
+                                                    </div>
+                                                </div>
+                                                <div class="org-ee-etape" data-etape="cloture">
+                                                    <div class="org-ee-etape-entete">
+                                                        <label class="org-checkbox-label"><input type="checkbox" class="org-ee-etape-check" data-etape="cloture" checked> 5. Clôture</label>
+                                                        <span class="org-ee-etape-desc">Synthèse, métacognition, objectif de la prochaine leçon</span>
+                                                    </div>
+                                                    <div class="org-ee-etape-corps">
+                                                        <div id="org-ee-cloture-sections"></div>
+                                                        <textarea class="org-ee-notes" data-etape="cloture" placeholder="Notes de l'enseignant…"></textarea>
+                                                        <div class="org-ee-zone-depot" data-etape="cloture"><span class="org-placeholder">Glisser des activités ici</span></div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <!-- Vue calendrier (collapsible) -->
-                            <div id="org-calendrier" class="org-section">
-                                <div class="org-section-titre org-section-titre-collapse" id="org-calendrier-toggle" data-tooltip="orga-vue-calendrier">
-                                    Vue calendrier
-                                    <span class="org-chevron">▾</span>
-                                </div>
-                                <div id="org-calendrier-contenu">
-                                    <div class="org-cal-vide">Aucune séquence ou leçon pour le moment.<br>Ajoute des éléments à la carte.</div>
+                                <!-- Colonne droite : vue calendrier (panneau latéral) -->
+                                <div class="org-panneau-calendrier">
+                                    <div class="org-panneau-calendrier-titre" data-tooltip="orga-vue-calendrier">Vue calendrier</div>
+                                    <div id="org-calendrier-contenu">
+                                        <div class="org-cal-vide">Aucune séquence ou leçon pour le moment.<br>Ajoute des éléments à la carte.</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
