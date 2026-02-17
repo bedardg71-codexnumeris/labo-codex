@@ -358,63 +358,52 @@ function afficherEnteteCalendrier(leconId) {
     }
 
     try {
-        var calendrier = db.getSync(window.cle('calendrierComplet'), null);
-        var horaire = db.getSync(window.cle('horaireHebdo'), null) || db.getSync(window.cle('horaire'), null);
         var groupes = db.getSync(window.cle('groupesCours'), null);
+        var horaires = db.getSync(window.cle('horaires'), null) || [];
+        var cours = db.getSync('cours', []);
+        var listeCours = db.getSync('listeCours', []);
 
-        if (!calendrier && !horaire) {
+        if (!groupes || !Array.isArray(groupes) || groupes.length === 0) {
             enteteCalendrier.style.display = 'none';
             return;
         }
 
-        var carte = window.planificationCarte;
-        if (!carte || !carte.etat) {
-            enteteCalendrier.style.display = 'none';
-            return;
-        }
+        var html = '';
+        for (var i = 0; i < groupes.length; i++) {
+            var gc = groupes[i];
 
-        // Trouver la séquence parent pour avoir la semaine
-        var lecon = carte.etat.noeuds.get(leconId);
-        if (!lecon) { enteteCalendrier.style.display = 'none'; return; }
+            // Nom lisible du cours
+            var coursInfo = cours.find(function(c) { return c.id === gc.coursId; });
+            if (!coursInfo) coursInfo = listeCours.find(function(c) { return c.id === gc.coursId || c.sigle === gc.coursId; });
+            var sigle = coursInfo ? (coursInfo.codeCours || coursInfo.code || coursInfo.sigle || '') : '';
+            var groupe = gc.groupeNum || gc.groupe || '';
+            var label = sigle ? sigle + ' gr.' + groupe : 'Groupe ' + groupe;
 
-        var seqId = lecon.parent;
-        var seq = seqId ? carte.etat.noeuds.get(seqId) : null;
-        var semaineDebut = seq && seq.metadata ? seq.metadata.semaineDebut : null;
-
-        var parts = [];
-
-        // Date de la semaine
-        if (calendrier && semaineDebut && Array.isArray(calendrier)) {
-            var semaine = calendrier.find(function(s) { return s.numero === semaineDebut; });
-            if (semaine && semaine.dateDebut) {
-                parts.push('Semaine ' + semaineDebut + ' — ' + semaine.dateDebut);
-            } else if (semaineDebut) {
-                parts.push('Semaine ' + semaineDebut);
+            // Horaire du groupe
+            var hor = gc.horaireId ? horaires.find(function(h) { return h.id === gc.horaireId; }) : null;
+            var joursStr = '';
+            if (hor && hor.plages && Array.isArray(hor.plages)) {
+                var plages = hor.plages.map(function(p) {
+                    var j = (p.jour || '').substring(0, 3);
+                    var h1 = p.heureDebut || '';
+                    var h2 = p.heureFin || '';
+                    var local = p.local ? ' (' + p.local + ')' : '';
+                    return j + ' ' + h1 + '–' + h2 + local;
+                });
+                joursStr = plages.join(', ');
+            } else if (hor && hor.nom) {
+                joursStr = hor.nom;
             }
-        } else if (semaineDebut) {
-            parts.push('Semaine ' + semaineDebut);
+
+            html += '<div class="org-entete-groupe">';
+            html += '<strong>' + label + '</strong>';
+            if (joursStr) html += ' — ' + joursStr;
+            html += '</div>';
         }
 
-        // Horaire
-        if (horaire) {
-            if (typeof horaire === 'object' && !Array.isArray(horaire)) {
-                var infos = [];
-                if (horaire.jour) infos.push(horaire.jour);
-                if (horaire.heure) infos.push(horaire.heure);
-                if (horaire.local) infos.push('Local ' + horaire.local);
-                if (infos.length > 0) parts.push(infos.join(' · '));
-            }
-        }
-
-        // Groupes
-        if (groupes && Array.isArray(groupes) && groupes.length > 0) {
-            var noms = groupes.map(function(g) { return g.nom || g; }).filter(Boolean);
-            if (noms.length > 0) parts.push(noms.join(', '));
-        }
-
-        if (parts.length > 0) {
+        if (html) {
             enteteCalendrier.style.display = '';
-            enteteCalendrierContenu.innerHTML = parts.join('<br>');
+            enteteCalendrierContenu.innerHTML = html;
         } else {
             enteteCalendrier.style.display = 'none';
         }

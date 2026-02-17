@@ -16141,6 +16141,8 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     color: var(--accent-primaire, #6aacb8);
     line-height: 1.6;
 }
+.org-entete-groupe { padding: 2px 0; }
+.org-entete-groupe + .org-entete-groupe { border-top: 1px solid rgba(106, 172, 184, 0.1); margin-top: 2px; padding-top: 4px; }
 
 /* Checkbox label */
 .org-checkbox-label {
