@@ -1,12 +1,12 @@
 # SESSION ACTIVE - BETA 97.8
 
 **Date** : 17 février 2026
-**Version** : Beta 97.8 (build 0217-0825)
+**Version** : Beta 97.8 (build 0217-0900)
 **Statut** : Refonte interface carte mentale et alignement pédagogique
 
 ## SESSION DU 17 FÉVRIER 2026
 
-### Travail accompli — Refonte interface carte mentale (Beta 97.8, build 0217-0825)
+### Travail accompli — Refonte interface carte mentale (Beta 97.8, build 0217-0900)
 
 68. **Fix #68 multi-cours** : Correction "Pas de cours pour ce groupe" en multi-cours + export `mettreAJourBoutonsNavigation`. Fallback via `obtenirSeancesHoraire()` pour les jours 'jour-ouvrable'.
 
@@ -29,6 +29,10 @@
 77. **Panneaux premier plan** : Clic sur un panneau flottant l'amène au premier plan (z-index incrémental).
 
 78. **Description Beta 97.8** : Document marketing mis à jour avec alignement pédagogique, systèmes d'assistance, module annotation.
+
+79. **Guide badges corrigé** : Page 1 — système couleurs (vert/gris/orange) remplacé par symboles réels (✓/!/⚠). Pages 2, 6 — « panneau de droite » → « Inspecteur ». Page 3 — « passe au vert » → « affiche ✓ ». Page 7 — conclusion mise à jour.
+
+80. **Carte mentale démo** : Carte « Écriture et littérature (démo) » hardcodée dans `donnees-demo.js`. 14 nœuds (compétence, 3 IM, séquence, 2 leçons, 4 connaissances, 2 activités, évaluation) + 14 liens formant un alignement pédagogique complet. Injectée au chargement démo, nettoyée à la sortie.
 
 ## SESSION DU 16 FÉVRIER 2026
 

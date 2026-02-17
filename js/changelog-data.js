@@ -20,7 +20,9 @@
                 '<strong>Palette Raccourcis \uD83D\uDECE\uFE0F</strong> : Nouveau panneau flottant listant les raccourcis clavier, accessible depuis la palette \u00c9l\u00e9ments.',
                 '<strong>Panneau Inspecteur \uD83D\uDD0E</strong> : Le panneau de propri\u00e9t\u00e9s est renomm\u00e9 \u00ab\u00a0Inspecteur\u00a0\u00bb, accessible via le bouton \uD83D\uDD0E ou un double-clic sur un n\u0153ud.',
                 '<strong>Guide repliant</strong> : Boutons \u2212/+ pour replier et d\u00e9plier le guide sans le fermer. Police uniform\u00e9e \u00e0 10.5px.',
-                '<strong>Titres uniformis\u00e9s</strong> : Tous les panneaux (INSPECTEUR, GUIDE, RACCOURCIS, \u00c9L\u00c9MENTS) partagent le m\u00eame style de titre en majuscules.'
+                '<strong>Titres uniformis\u00e9s</strong> : Tous les panneaux (INSPECTEUR, GUIDE, RACCOURCIS, \u00c9L\u00c9MENTS) partagent le m\u00eame style de titre en majuscules.',
+                '<strong>Carte d\u00e9mo</strong> : Exemple d\u2019alignement p\u00e9dagogique complet \u00ab\u00a0\u00c9criture et litt\u00e9rature\u00a0\u00bb int\u00e9gr\u00e9 au mode d\u00e9monstration (14\u00a0n\u0153uds, 14\u00a0liens).',
+                '<strong>Guide badges</strong> : Description des badges corrig\u00e9e\u00a0: symboles \u2713/!/\u26A0 au lieu de couleurs. R\u00e9f\u00e9rences \u00ab\u00a0Inspecteur\u00a0\u00bb ajout\u00e9es.'
             ]
         },
         {
