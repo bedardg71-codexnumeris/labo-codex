@@ -67,7 +67,31 @@ function initialiserModuleOrganisateur() {
 
     // Rafraîchir les données
     peuplerSelecteurCartes();
+
+    // Restaurer les sélections persistées
+    var selections = chargerSelectionsOrg();
+    if (selections) {
+        if (selections.carte && selectCarte) {
+            selectCarte.value = selections.carte;
+            var carte = window.planificationCarte;
+            if (carte && carte.changerCarte && selections.carte) {
+                carte.changerCarte(selections.carte);
+            }
+        }
+    }
+
     peuplerSelecteursOrganisateur();
+
+    if (selections) {
+        if (selections.sequence && selectSequence) selectSequence.value = selections.sequence;
+        peuplerSelecteurLecons();
+        if (selections.lecon && selectLecon) {
+            selectLecon.value = selections.lecon;
+            leconActiveId = selectLecon.value || null;
+            afficherLecon();
+        }
+    }
+
     rafraichirCalendrier();
 }
 
@@ -83,15 +107,18 @@ function brancherEvenements() {
         if (carte && carte.changerCarte) {
             carte.changerCarte(carteId);
         }
+        sauvegarderSelectionsOrg();
         peuplerSelecteursOrganisateur();
         rafraichirCalendrier();
     });
 
     if (selectSequence) selectSequence.addEventListener('change', function() {
+        sauvegarderSelectionsOrg();
         peuplerSelecteurLecons();
     });
     if (selectLecon) selectLecon.addEventListener('change', function() {
         leconActiveId = selectLecon.value || null;
+        sauvegarderSelectionsOrg();
         afficherLecon();
     });
 
@@ -190,6 +217,29 @@ function peuplerSelecteurCartes() {
         selectCarte.appendChild(opt);
     }
     selectCarte.value = valActuelle;
+}
+
+// ============================================================
+//  PERSISTANCE DES SÉLECTIONS
+// ============================================================
+
+var CLE_SELECTIONS_ORG = 'org_selections';
+
+function sauvegarderSelectionsOrg() {
+    try {
+        localStorage.setItem(CLE_SELECTIONS_ORG, JSON.stringify({
+            carte: selectCarte ? selectCarte.value : '',
+            sequence: selectSequence ? selectSequence.value : '',
+            lecon: selectLecon ? selectLecon.value : ''
+        }));
+    } catch(e) {}
+}
+
+function chargerSelectionsOrg() {
+    try {
+        var data = localStorage.getItem(CLE_SELECTIONS_ORG);
+        return data ? JSON.parse(data) : null;
+    } catch(e) { return null; }
 }
 
 // ============================================================
@@ -603,11 +653,12 @@ function afficherCoeurLecon(leconId) {
     if (eeCheckbox) eeCheckbox.checked = eeActif;
     basculerEE(eeActif);
 
-    // Collecter les activités enfants
+    // Collecter les enfants de la leçon (activités + types de connaissances)
+    var TYPES_CONTENEURS = { 'sequence': true, 'lecon': true };
     var enfants = (lecon.enfants || []).filter(function(eid) { return etat.noeuds.has(eid); });
     var activites = enfants.filter(function(eid) {
         var e = etat.noeuds.get(eid);
-        return e && (e.type === 'activite' || e.type === 'soutien' || e.type === 'revision');
+        return e && !TYPES_CONTENEURS[e.type] && e.type !== 'evaluation';
     });
 
     // Évaluations pour avertissement
@@ -797,9 +848,17 @@ function afficherEtapesEE(leconId, activites, donnees) {
     var etat = carte.etat;
 
     var etapesData = donnees.etapes || creerEtapesVides();
-    var activitesAssignees = {};
+    var activitesAssignees = {}; // actId → true si dans au moins une étape
 
-    // Repérer les activités déjà assignées à des étapes
+    // Pré-calculer quelles activités sont assignées à au moins une étape
+    for (var p = 0; p < NOMS_ETAPES.length; p++) {
+        var acts = (etapesData[NOMS_ETAPES[p]] || {}).activites || [];
+        for (var q = 0; q < acts.length; q++) {
+            activitesAssignees[acts[q]] = true;
+        }
+    }
+
+    // Remplir chaque étape
     for (var i = 0; i < NOMS_ETAPES.length; i++) {
         var nomEtape = NOMS_ETAPES[i];
         var etapeData = etapesData[nomEtape] || { active: true, contenu: '', activites: [] };
@@ -818,26 +877,25 @@ function afficherEtapesEE(leconId, activites, donnees) {
         var zoneDepot = document.querySelector('.org-ee-zone-depot[data-etape="' + nomEtape + '"]');
         if (zoneDepot) {
             var htmlZone = '';
-            var acts = etapeData.activites || [];
-            for (var a = 0; a < acts.length; a++) {
-                var actId = acts[a];
+            var actsEtape = etapeData.activites || [];
+            for (var a = 0; a < actsEtape.length; a++) {
+                var actId = actsEtape[a];
                 var noeud = etat.noeuds.get(actId);
                 if (noeud) {
-                    activitesAssignees[actId] = true;
-                    htmlZone += genererActiviteMiniHTML(noeud, carte);
+                    htmlZone += genererActiviteMiniHTML(noeud, carte, nomEtape);
                 }
             }
             zoneDepot.innerHTML = htmlZone || '<span class="org-placeholder">Glisser des activités ici</span>';
         }
     }
 
-    // Activités non assignées
+    // Activités non assignées (dans aucune étape)
     if (listeNonAssignees) {
         var htmlNon = '';
         for (var j = 0; j < activites.length; j++) {
             var actNoeud = etat.noeuds.get(activites[j]);
             if (actNoeud && !activitesAssignees[actNoeud.id]) {
-                htmlNon += genererActiviteMiniHTML(actNoeud, carte);
+                htmlNon += genererActiviteMiniHTML(actNoeud, carte, null);
             }
         }
         listeNonAssignees.innerHTML = htmlNon || '<span class="org-placeholder">Toutes les activités sont assignées.</span>';
@@ -850,7 +908,7 @@ function afficherEtapesEE(leconId, activites, donnees) {
     }
 }
 
-function genererActiviteMiniHTML(noeud, carte) {
+function genererActiviteMiniHTML(noeud, carte, etape) {
     var couleur = carte.obtenirCouleurNoeud(noeud);
     var label = carte.obtenirLabelNoeud(noeud);
     var h = '<div class="org-ee-activite-mini" data-noeud="' + noeud.id + '" draggable="true">';
@@ -859,6 +917,9 @@ function genererActiviteMiniHTML(noeud, carte) {
     h += '<span class="org-ee-activite-type">' + label.toUpperCase() + '</span>';
     if (noeud.metadata && noeud.metadata.duree) {
         h += '<span class="org-duree">' + noeud.metadata.duree + ' min</span>';
+    }
+    if (etape) {
+        h += '<button class="org-ee-retirer" data-noeud="' + noeud.id + '" data-etape="' + etape + '" title="Retirer de cette étape">&times;</button>';
     }
     h += '</div>';
     return h;
@@ -871,6 +932,25 @@ function genererActiviteMiniHTML(noeud, carte) {
 function configurerDragDrop() {
     var conteneur = document.getElementById('planification-organisateur');
     if (!conteneur) return;
+
+    // Retirer une activité d'une étape spécifique (bouton ×)
+    conteneur.addEventListener('click', function(e) {
+        var btn = e.target.closest('.org-ee-retirer');
+        if (!btn) return;
+        e.preventDefault();
+        var noeudId = btn.dataset.noeud;
+        var etape = btn.dataset.etape;
+        var leconId = selectLecon ? selectLecon.value : '';
+        if (!leconId || !noeudId || !etape) return;
+
+        var seances = chargerSeances();
+        if (!seances[leconId] || !seances[leconId].etapes) return;
+        var actsEtape = seances[leconId].etapes[etape].activites;
+        var idx = actsEtape.indexOf(noeudId);
+        if (idx !== -1) actsEtape.splice(idx, 1);
+        sauvegarderSeances(seances);
+        afficherCoeurLecon(leconId);
+    });
 
     conteneur.addEventListener('dragstart', function(e) {
         var activiteEl = e.target.closest('.org-ee-activite-mini, .org-activite');
@@ -920,21 +1000,23 @@ function configurerDragDrop() {
         if (!seances[leconId]) seances[leconId] = {};
         if (!seances[leconId].etapes) seances[leconId].etapes = creerEtapesVides();
 
-        // Retirer de toutes les étapes
-        for (var i = 0; i < NOMS_ETAPES.length; i++) {
-            var actsEtape = seances[leconId].etapes[NOMS_ETAPES[i]].activites;
-            var idx = actsEtape.indexOf(noeudId);
-            if (idx !== -1) actsEtape.splice(idx, 1);
-        }
-
-        // Si zone est une étape, ajouter
         if (zone.classList.contains('org-ee-zone-depot')) {
+            // Ajouter à l'étape cible (sans retirer des autres)
             var etapeCible = zone.dataset.etape;
             if (etapeCible && seances[leconId].etapes[etapeCible]) {
-                seances[leconId].etapes[etapeCible].activites.push(noeudId);
+                var actsTarget = seances[leconId].etapes[etapeCible].activites;
+                if (actsTarget.indexOf(noeudId) === -1) {
+                    actsTarget.push(noeudId);
+                }
+            }
+        } else {
+            // Drop dans non-assignées → retirer de toutes les étapes
+            for (var i = 0; i < NOMS_ETAPES.length; i++) {
+                var actsEtape = seances[leconId].etapes[NOMS_ETAPES[i]].activites;
+                var idx = actsEtape.indexOf(noeudId);
+                if (idx !== -1) actsEtape.splice(idx, 1);
             }
         }
-        // Si zone est la liste non-assignées, on ne fait rien (déjà retiré)
 
         sauvegarderSeances(seances);
         afficherCoeurLecon(leconId);
