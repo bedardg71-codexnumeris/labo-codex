@@ -33,7 +33,7 @@
     const EXPOSITION_MIN = -20;          // -2.0 EV
     const EXPOSITION_MAX = 20;           // +2.0 EV
     const BATCH_SIZE = 10000;         // Pixels par lot pour le rendu final
-    const PERSPECTIVE_MARGE = 0.5;    // 50% de marge autour de l'image pour perspective
+    const PERSPECTIVE_MARGE = 1.0;    // 100% de marge autour de l'image pour perspective (coins hors cadre)
 
     /* ===============================
        ETAT DU MODULE
@@ -1028,7 +1028,8 @@
 
     /* ===============================
        DETECTION AUTOMATIQUE DES COINS
-       Pipeline : downscale → grayscale → blur → Canny → Hough → coins
+       Pipeline : downscale → grayscale → blur → Otsu → fermeture → bordure → Hough → coins
+       Fallback : Canny → Hough si la segmentation echoue
        =============================== */
 
     const DETECT_SIZE = 400;          // Taille max pour la detection (vitesse)
@@ -1098,20 +1099,89 @@
         // 3. Gaussian blur 5x5
         const blurred = gaussianBlur5x5(gray, dw, dh);
 
-        // 4. Canny edge detection
-        const edges = cannyEdgeDetection(blurred, dw, dh);
+        // 4. Segmentation papier/fond par seuil d'Otsu
+        let seuil = seuilOtsu(blurred, dw, dh);
+        console.log('[Auto-persp] Otsu seuil:', seuil);
 
-        // 5. Hough line transform (seuil proportionnel a la taille)
-        const seuilHough = Math.max(30, Math.round(Math.min(dw, dh) * 0.12));
-        const lines = houghLines(edges, dw, dh, seuilHough);
+        // Creer le masque initial
+        let mask = new Uint8Array(dw * dh);
+        for (let i = 0; i < mask.length; i++) {
+            mask[i] = blurred[i] >= seuil ? 255 : 0;
+        }
 
-        if (lines.length < 2) return null;
+        // Verifier la proportion : si >55%, le seuil est trop bas
+        // (il separe ombres/fond-clair au lieu de fond/papier)
+        let nbBlancs = 0;
+        for (let i = 0; i < mask.length; i++) if (mask[i]) nbBlancs++;
+        let ratio = nbBlancs / (dw * dh);
+        console.log('[Auto-persp] Masque: ' + (ratio * 100).toFixed(1) + '% blancs');
+
+        if (ratio > 0.55) {
+            // Re-appliquer Otsu sur les pixels clairs pour isoler le papier du fond
+            const subGray = new Float32Array(nbBlancs);
+            let j = 0;
+            for (let i = 0; i < blurred.length; i++) {
+                if (blurred[i] >= seuil) subGray[j++] = blurred[i];
+            }
+            const seuil2 = seuilOtsu(subGray, nbBlancs, 1);
+            console.log('[Auto-persp] Seuil raffine:', seuil2);
+            seuil = seuil2;
+            mask = new Uint8Array(dw * dh);
+            for (let i = 0; i < mask.length; i++) {
+                mask[i] = blurred[i] >= seuil ? 255 : 0;
+            }
+            nbBlancs = 0;
+            for (let i = 0; i < mask.length; i++) if (mask[i]) nbBlancs++;
+            ratio = nbBlancs / (dw * dh);
+            console.log('[Auto-persp] Masque raffine: ' + (ratio * 100).toFixed(1) + '% blancs');
+        }
+
+        // Si le masque est trop petit (<5%) ou trop grand (>90%), pas fiable
+        if (ratio < 0.05 || ratio > 0.90) {
+            console.log('[Auto-persp] Masque non fiable, fallback Canny direct');
+            const cannyEdges = cannyEdgeDetection(blurred, dw, dh);
+            const seuilH = Math.max(30, Math.round(Math.min(dw, dh) * 0.12));
+            var lines = houghLines(cannyEdges, dw, dh, seuilH);
+            console.log('[Auto-persp] Canny fallback: ' + lines.length + ' lignes');
+        } else {
+            // 5. Fermeture morphologique — comble le texte et les trous internes
+            const maskFerme = fermetureMorphologique(mask, dw, dh, 5);
+
+            // 6. Extraire les pixels de bordure papier/fond
+            const bordure = extraireBordure(maskFerme, dw, dh);
+            let nbBord = 0;
+            for (let i = 0; i < bordure.length; i++) if (bordure[i]) nbBord++;
+            console.log('[Auto-persp] Pixels bordure:', nbBord);
+
+            // 7. Hough sur la bordure
+            let seuilHough = Math.max(15, Math.round(Math.min(dw, dh) * 0.08));
+            var lines = houghLines(bordure, dw, dh, seuilHough);
+            console.log('[Auto-persp] Hough bordure: seuil=' + seuilHough + ', lignes=' + lines.length);
+
+            // Fallback Canny si pas assez de lignes
+            if (lines.length < 4) {
+                console.log('[Auto-persp] Fallback Canny');
+                const cannyEdges = cannyEdgeDetection(blurred, dw, dh);
+                seuilHough = Math.max(30, Math.round(Math.min(dw, dh) * 0.12));
+                lines = houghLines(cannyEdges, dw, dh, seuilHough);
+                console.log('[Auto-persp] Canny: seuil=' + seuilHough + ', lignes=' + lines.length);
+            }
+        }
+
+        if (lines.length < 2) {
+            console.log('[Auto-persp] ECHEC: pas assez de lignes (' + lines.length + ')');
+            return null;
+        }
 
         // 6. Clustering des lignes par angle (groupes de bords paralleles)
         const clusters = clusteriserLignesParAngle(lines, 15);
 
         // Il faut au moins 2 clusters d'orientations differentes
-        if (clusters.length < 2) return null;
+        console.log('[Auto-persp] Clusters:', clusters.length, clusters.map(c => c.length + ' lignes, theta~' + Math.round(c[0].theta) + '°').join(' | '));
+        if (clusters.length < 2) {
+            console.log('[Auto-persp] ECHEC: < 2 clusters');
+            return null;
+        }
 
         // 7. Prendre les 2 clusters les plus forts
         //    (chaque cluster = un ensemble de lignes quasi-paralleles = un pair de bords)
@@ -1129,7 +1199,12 @@
         const paire1 = trouverBordsOpposes(cluster1, Math.min(dw, dh) * 0.1);
         const paire2 = trouverBordsOpposes(cluster2, Math.min(dw, dh) * 0.1);
 
-        if (!paire1 || !paire2) return null;
+        console.log('[Auto-persp] Paire1:', paire1 ? 'OK (rho ' + paire1.map(l => l.rho).join(',') + ')' : 'NULL');
+        console.log('[Auto-persp] Paire2:', paire2 ? 'OK (rho ' + paire2.map(l => l.rho).join(',') + ')' : 'NULL');
+        if (!paire1 || !paire2) {
+            console.log('[Auto-persp] ECHEC: paire(s) manquante(s)');
+            return null;
+        }
 
         // 9. Calculer les 4 intersections (chaque ligne de paire1 × chaque ligne de paire2)
         const intersections = [];
@@ -1140,7 +1215,11 @@
             }
         }
 
-        if (intersections.length !== 4) return null;
+        console.log('[Auto-persp] Intersections:', intersections.length, intersections.map(p => '(' + p.x.toFixed(0) + ',' + p.y.toFixed(0) + ')').join(' '));
+        if (intersections.length !== 4) {
+            console.log('[Auto-persp] ECHEC: ' + intersections.length + ' intersections au lieu de 4');
+            return null;
+        }
 
         // 10. Ordonner les coins : TL, TR, BR, BL
         const coins = ordonnerCoins(intersections);
@@ -1160,8 +1239,14 @@
 
         // Verifier que le quadrilatere a une surface minimale (>5% de l'image)
         const surface = surfaceQuad(result);
-        if (!valide || surface < 0.05) return null;
+        console.log('[Auto-persp] Coins finaux:', result.map(p => '(' + p.x.toFixed(3) + ',' + p.y.toFixed(3) + ')').join(' '));
+        console.log('[Auto-persp] Surface:', surface.toFixed(3), ', valide:', valide);
+        if (!valide || surface < 0.05) {
+            console.log('[Auto-persp] ECHEC: valide=' + valide + ', surface=' + surface.toFixed(3));
+            return null;
+        }
 
+        console.log('[Auto-persp] SUCCES');
         return result;
     }
 
@@ -1242,6 +1327,122 @@
         }
 
         return meilleurePaire;
+    }
+
+    /**
+     * Seuil d'Otsu — trouve le seuil optimal separant deux classes
+     * (papier clair vs fond sombre) dans une image en niveaux de gris.
+     * @param {Float32Array} gray - Pixels en niveaux de gris (0-255)
+     * @param {number} w - Largeur
+     * @param {number} h - Hauteur
+     * @returns {number} Seuil optimal (0-255)
+     */
+    function seuilOtsu(gray, w, h) {
+        const hist = new Uint32Array(256);
+        const n = w * h;
+        for (let i = 0; i < n; i++) {
+            hist[Math.min(255, Math.max(0, Math.round(gray[i])))]++;
+        }
+
+        let sumTotal = 0;
+        for (let i = 0; i < 256; i++) sumTotal += i * hist[i];
+
+        let sumB = 0, wB = 0;
+        let maxVariance = 0, seuil = 128;
+
+        for (let t = 0; t < 256; t++) {
+            wB += hist[t];
+            if (wB === 0) continue;
+            const wF = n - wB;
+            if (wF === 0) break;
+
+            sumB += t * hist[t];
+            const mB = sumB / wB;
+            const mF = (sumTotal - sumB) / wF;
+            const variance = wB * wF * (mB - mF) * (mB - mF);
+
+            if (variance > maxVariance) {
+                maxVariance = variance;
+                seuil = t;
+            }
+        }
+
+        return seuil;
+    }
+
+    /**
+     * Fermeture morphologique (dilatation puis erosion) sur masque binaire.
+     * Comble les trous internes du masque (texte, petites images)
+     * pour ne garder que le contour global du document.
+     *
+     * @param {Uint8Array} mask - Masque binaire (0 ou 255)
+     * @param {number} w - Largeur
+     * @param {number} h - Hauteur
+     * @param {number} rayon - Rayon du noyau carre
+     * @returns {Uint8Array} Masque ferme
+     */
+    function fermetureMorphologique(mask, w, h, rayon) {
+        // Dilatation : un pixel devient 255 si au moins un voisin est 255
+        const dilated = new Uint8Array(w * h);
+        for (let y = 0; y < h; y++) {
+            for (let x = 0; x < w; x++) {
+                let found = false;
+                for (let dy = -rayon; dy <= rayon && !found; dy++) {
+                    for (let dx = -rayon; dx <= rayon && !found; dx++) {
+                        const ny = y + dy, nx = x + dx;
+                        if (ny >= 0 && ny < h && nx >= 0 && nx < w && mask[ny * w + nx]) found = true;
+                    }
+                }
+                if (found) dilated[y * w + x] = 255;
+            }
+        }
+
+        // Erosion : un pixel reste 255 seulement si tous les voisins sont 255
+        const result = new Uint8Array(w * h);
+        for (let y = 0; y < h; y++) {
+            for (let x = 0; x < w; x++) {
+                let allSet = true;
+                for (let dy = -rayon; dy <= rayon && allSet; dy++) {
+                    for (let dx = -rayon; dx <= rayon && allSet; dx++) {
+                        const ny = y + dy, nx = x + dx;
+                        if (ny < 0 || ny >= h || nx < 0 || nx >= w || !dilated[ny * w + nx]) allSet = false;
+                    }
+                }
+                if (allSet) result[y * w + x] = 255;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Extrait les pixels de bordure d'un masque binaire.
+     * Un pixel est «bordure» s'il est blanc (papier) et a au moins
+     * un voisin noir (fond) parmi ses 4-voisins a l'interieur de l'image.
+     *
+     * Les pixels de papier touchant le bord de l'image ne sont PAS
+     * marques comme bordure — evite de detecter le cadrage photo
+     * comme un bord de document.
+     *
+     * @param {Uint8Array} mask - Masque binaire
+     * @param {number} w - Largeur
+     * @param {number} h - Hauteur
+     * @returns {Uint8Array} Carte binaire des bordures
+     */
+    function extraireBordure(mask, w, h) {
+        const boundary = new Uint8Array(w * h);
+        for (let y = 0; y < h; y++) {
+            for (let x = 0; x < w; x++) {
+                if (!mask[y * w + x]) continue;
+                let isBord = false;
+                if (y > 0 && !mask[(y - 1) * w + x]) isBord = true;
+                if (!isBord && y < h - 1 && !mask[(y + 1) * w + x]) isBord = true;
+                if (!isBord && x > 0 && !mask[y * w + (x - 1)]) isBord = true;
+                if (!isBord && x < w - 1 && !mask[y * w + (x + 1)]) isBord = true;
+                if (isBord) boundary[y * w + x] = 255;
+            }
+        }
+        return boundary;
     }
 
     /**
