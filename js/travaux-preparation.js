@@ -30,6 +30,8 @@
     const LUMINOSITE_MAX = 100;
     const CONTRASTE_MIN = -100;
     const CONTRASTE_MAX = 100;
+    const EXPOSITION_MIN = -20;          // -2.0 EV
+    const EXPOSITION_MAX = 20;           // +2.0 EV
     const BATCH_SIZE = 10000;         // Pixels par lot pour le rendu final
     const PERSPECTIVE_MARGE = 0.15;   // 15% de marge autour de l'image pour perspective
 
@@ -380,6 +382,9 @@
                 parts.push(`brightness(${100 + op.value}%)`);
             } else if (op.type === 'contrast') {
                 parts.push(`contrast(${100 + op.value}%)`);
+            } else if (op.type === 'exposure') {
+                // Courbe exponentielle : 2^EV (stops photo)
+                parts.push(`brightness(${Math.pow(2, op.value / 10) * 100}%)`);
             } else if (op.type === 'grayscale' && op.active) {
                 parts.push('grayscale(1)');
             }
@@ -1058,6 +1063,23 @@
         mettreAJourFiltresTempsReel();
     }
 
+    function changerExposition(value) {
+        if (operations.length > 0 && operations[operations.length - 1].type === 'exposure') {
+            operations.pop();
+        }
+        const v = parseInt(value);
+        if (v !== 0) {
+            operations.push({ type: 'exposure', value: v });
+            fichiers[indexActuel].operations = operations;
+        } else {
+            fichiers[indexActuel].operations = operations;
+        }
+        // Afficher la valeur en EV
+        const lbl = document.getElementById('prep-exposition-valeur');
+        if (lbl) lbl.textContent = v === 0 ? '0' : (v > 0 ? '+' : '') + (v / 10).toFixed(1) + ' EV';
+        mettreAJourFiltresTempsReel();
+    }
+
     function basculerNiveauxDeGris() {
         // Toggle : si la derniere op est grayscale, la retirer
         const derniere = operations[operations.length - 1];
@@ -1285,6 +1307,11 @@
                                         <input type="range" id="prep-contraste" min="${CONTRASTE_MIN}" max="${CONTRASTE_MAX}" value="0"
                                                oninput="travauxPreparation.changerContraste(this.value)">
                                     </div>
+                                    <div class="prep-slider-groupe">
+                                        <label>Exposition <span id="prep-exposition-valeur" class="texte-muted">0</span></label>
+                                        <input type="range" id="prep-exposition" min="${EXPOSITION_MIN}" max="${EXPOSITION_MAX}" value="0" step="1"
+                                               oninput="travauxPreparation.changerExposition(this.value)">
+                                    </div>
                                     <button class="prep-btn" id="prep-btn-balance" onclick="travauxPreparation.activerBalanceBlancs()" style="width:100%;">Balance des blancs</button>
                                     <button class="prep-btn" onclick="travauxPreparation.basculerNiveauxDeGris()" style="width:100%;">Niveaux de gris</button>
                                 </div>
@@ -1434,6 +1461,7 @@
         appliquerPerspective: appliquerPerspective,
         changerLuminosite: changerLuminosite,
         changerContraste: changerContraste,
+        changerExposition: changerExposition,
         basculerNiveauxDeGris: basculerNiveauxDeGris,
         activerBalanceBlancs: activerBalanceBlancs,
         annulerDerniere: annulerDerniere,
