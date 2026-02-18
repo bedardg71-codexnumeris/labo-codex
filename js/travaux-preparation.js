@@ -1136,7 +1136,7 @@
         //     (ex: theta~175° et theta~3° = meme direction, 8° d'ecart)
         for (let i = 0; i < clusters.length; i++) {
             for (let j = i + 1; j < clusters.length; j++) {
-                if (diffAngle180(clusters[i][0].theta, clusters[j][0].theta) <= 10) {
+                if (diffAngle180(clusters[i][0].theta, clusters[j][0].theta) <= 18) {
                     clusters[i] = clusters[i].concat(clusters[j]);
                     clusters.splice(j, 1);
                     j--;
@@ -1164,57 +1164,66 @@
                 const angleDiff = diffAngle180(clusters[i][0].theta, clusters[j][0].theta);
                 if (angleDiff < 60 || angleDiff > 120) continue;
 
-                const p1 = trouverBordsOpposes(clusters[i], distMin, cx, cy);
-                const p2 = trouverBordsOpposes(clusters[j], distMin, cx, cy);
-                if (!p1 || !p2) continue;
+                // Top 3 paires par cluster — le scoring final (surface)
+                // departage, ce qui permet de battre les lignes d'ombre.
+                const pairesA = trouverBordsOpposes(clusters[i], distMin, cx, cy, 3);
+                const pairesB = trouverBordsOpposes(clusters[j], distMin, cx, cy, 3);
+                if (pairesA.length === 0 || pairesB.length === 0) continue;
 
-                // Calculer les 4 intersections
-                const inters = [];
-                for (const l1 of p1) {
-                    for (const l2 of p2) {
-                        const pt = intersectionLignes(l1, l2);
-                        if (pt) inters.push(pt);
+                for (const pa of pairesA) {
+                    for (const pb of pairesB) {
+                        // Calculer les 4 intersections
+                        const inters = [];
+                        for (const l1 of pa.paire) {
+                            for (const l2 of pb.paire) {
+                                const pt = intersectionLignes(l1, l2);
+                                if (pt) inters.push(pt);
+                            }
+                        }
+                        if (inters.length !== 4) continue;
+
+                        const coins = ordonnerCoins(inters);
+                        const result = coins.map(p => ({
+                            x: p.x / dw,
+                            y: p.y / dh
+                        }));
+
+                        // Valider les limites
+                        const valide = result.every(p =>
+                            p.x >= -PERSPECTIVE_MARGE && p.x <= 1 + PERSPECTIVE_MARGE &&
+                            p.y >= -PERSPECTIVE_MARGE && p.y <= 1 + PERSPECTIVE_MARGE
+                        );
+                        if (!valide) continue;
+
+                        const surface = surfaceQuad(result);
+                        if (surface < 0.05) continue;
+
+                        // Penaliser les coins tres eloignes du cadre image
+                        // Un coin a x=-0.88 est suspect ; un coin a x=-0.05 est normal
+                        let penalite = 1;
+                        for (const p of result) {
+                            const hors = Math.max(0, -p.x, p.x - 1, -p.y, p.y - 1);
+                            if (hors > 0.1) penalite *= 1 / (1 + (hors - 0.1) * 5);
+                        }
+                        const score = surface * penalite;
+
+                        candidats.push({
+                            result,
+                            surface,
+                            score,
+                            theta1: Math.round(clusters[i][0].theta),
+                            theta2: Math.round(clusters[j][0].theta)
+                        });
                     }
                 }
-                if (inters.length !== 4) continue;
-
-                const coins = ordonnerCoins(inters);
-                const result = coins.map(p => ({
-                    x: p.x / dw,
-                    y: p.y / dh
-                }));
-
-                // Valider les limites
-                const valide = result.every(p =>
-                    p.x >= -PERSPECTIVE_MARGE && p.x <= 1 + PERSPECTIVE_MARGE &&
-                    p.y >= -PERSPECTIVE_MARGE && p.y <= 1 + PERSPECTIVE_MARGE
-                );
-                if (!valide) continue;
-
-                const surface = surfaceQuad(result);
-                if (surface < 0.05) continue;
-
-                // Penaliser les coins tres eloignes du cadre image
-                // Un coin a x=-0.88 est suspect ; un coin a x=-0.05 est normal
-                let penalite = 1;
-                for (const p of result) {
-                    const hors = Math.max(0, -p.x, p.x - 1, -p.y, p.y - 1);
-                    if (hors > 0.1) penalite *= 1 / (1 + (hors - 0.1) * 5);
-                }
-                const score = surface * penalite;
-
-                candidats.push({
-                    result,
-                    surface,
-                    score,
-                    theta1: Math.round(clusters[i][0].theta),
-                    theta2: Math.round(clusters[j][0].theta)
-                });
             }
         }
 
+        // Trier et logger les top 5 candidats pour debug
+        candidats.sort((a, b) => b.score - a.score);
+        const top5 = candidats.slice(0, 5);
         console.log('[Auto-persp] Candidats valides:', candidats.length,
-            candidats.map(c => 'θ' + c.theta1 + '°×θ' + c.theta2 + '° surf=' + c.surface.toFixed(3) + ' score=' + c.score.toFixed(3)).join(' | '));
+            top5.map(c => 'θ' + c.theta1 + '°×θ' + c.theta2 + '° surf=' + c.surface.toFixed(3) + ' score=' + c.score.toFixed(3)).join(' | '));
 
         if (candidats.length === 0) {
             console.log('[Auto-persp] ECHEC: aucun candidat valide');
@@ -1283,11 +1292,13 @@
      * @param {number} distMin - Distance minimale entre les 2 bords (pixels)
      * @param {number} cx - Centre X de l'image
      * @param {number} cy - Centre Y de l'image
-     * @returns {Array|null} [ligne1, ligne2] ou null
+     * @param {number} [topN=3] - Nombre de paires candidates a retourner
+     * @returns {Array} Tableau de { paire: [ligne1, ligne2], score, dist }
      */
-    function trouverBordsOpposes(cluster, distMin, cx, cy) {
+    function trouverBordsOpposes(cluster, distMin, cx, cy, topN) {
+        topN = topN || 3;
         if (cluster.length < 2) {
-            return null;
+            return [];
         }
 
         // Distance signee de chaque ligne au centre de l'image
@@ -1303,27 +1314,30 @@
         // Trier par distance au centre
         withDist.sort((a, b) => a.d - b.d);
 
-        // Chercher la paire avec la plus grande separation geometrique,
-        // ponderee par les votes (lignes fortes preferees).
-        // Les ombres du telephone sont eliminees en amont par le filtre
-        // contraste (minSide < 120), donc dist * votes est fiable ici.
-        let meilleurePaire = null;
-        let meilleurScore = 0;
+        // Collecter toutes les paires valides, scorees par
+        // distance * log(votes). Le log compresse l'avantage des
+        // lignes a forte densite (ombres) pour laisser la distance
+        // (= ecart reel entre les 2 bords) dominer.
+        const paires = [];
 
         for (let i = 0; i < withDist.length; i++) {
             for (let j = i + 1; j < withDist.length; j++) {
                 const dist = Math.abs(withDist[j].d - withDist[i].d);
                 if (dist < distMin) continue;
 
-                const score = dist * (withDist[i].line.votes + withDist[j].line.votes);
-                if (score > meilleurScore) {
-                    meilleurScore = score;
-                    meilleurePaire = [withDist[i].line, withDist[j].line];
-                }
+                const score = dist * (Math.log(withDist[i].line.votes) + Math.log(withDist[j].line.votes));
+                paires.push({
+                    paire: [withDist[i].line, withDist[j].line],
+                    score,
+                    dist
+                });
             }
         }
 
-        return meilleurePaire;
+        // Retourner les top N paires par score.
+        // Le scoring final (surface du quadrilatere) departage.
+        paires.sort((a, b) => b.score - a.score);
+        return paires.slice(0, topN);
     }
 
     /**
