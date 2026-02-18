@@ -199,16 +199,8 @@
                 ${travauxImport.genererHTMLFileDAttente()}
             </div>
 
-            <div class="travaux-import-actions" ${travauxImport.obtenirFileDAttente().length === 0 ? 'style="display:none"' : ''}>
-                <button class="btn btn-principal" onclick="travauxUI.lancerImport()">
-                    Importer ${travauxImport.obtenirFileDAttente().length} fichier(s)
-                </button>
-                <button class="btn btn-secondaire" onclick="travauxUI.ouvrirPreparation()" title="Preparer les images avant import (rotation, crop, perspective, luminosite)">
-                    Preparer les images
-                </button>
-                <button class="btn btn-secondaire" onclick="travauxImport.viderFileDAttente(); travauxUI.afficherImport();">
-                    Annuler
-                </button>
+            <div class="travaux-import-actions ${travauxImport.obtenirFileDAttente().length === 0 ? 'u-hide' : ''}">
+                ${genererBoutonsActions()}
             </div>
 
             <div id="travaux-progression-import" style="display:none">
@@ -446,6 +438,27 @@
        =============================== */
 
     /**
+     * Genere les boutons d'action de la file d'attente
+     * Appele au rendu initial ET au rafraichissement apres drop
+     * @returns {string} HTML
+     */
+    function genererBoutonsActions() {
+        const queue = travauxImport.obtenirFileDAttente();
+        const aDesImages = queue.some(f => f.estImage);
+        return `
+            <button class="btn btn-principal" onclick="travauxUI.lancerImport()">
+                Importer ${queue.length} fichier(s)
+            </button>
+            ${aDesImages ? `
+            <button class="btn btn-secondaire" onclick="travauxUI.ouvrirPreparation()" title="Préparer les images avant import (rotation, crop, perspective, luminosité)">
+                Préparer les images
+            </button>` : ''}
+            <button class="btn btn-secondaire" onclick="travauxImport.viderFileDAttente(); travauxUI.afficherImport();">
+                Annuler
+            </button>`;
+    }
+
+    /**
      * Genere la grille de fichiers importes
      * @param {Array} fichiers - Les fichiers
      * @returns {string} HTML
@@ -472,8 +485,8 @@
             }
 
             html += `
-                <div class="travaux-grille-item" onclick="travauxUI.ouvrirFichier('${f.id}')" title="${echapperHtml(f.nomFichier)}">
-                    <div class="travaux-grille-thumb">
+                <div class="travaux-grille-item" title="${echapperHtml(f.nomFichier)}">
+                    <div class="travaux-grille-thumb" onclick="travauxUI.ouvrirFichier('${f.id}')">
                         ${thumb ? `<img src="${thumb}" alt="">` : `<span class="travaux-grille-icone">${icone}</span>`}
                         ${badge}
                     </div>
@@ -481,6 +494,7 @@
                         <div class="travaux-grille-nom">${echapperHtml(f.nomFichier)}</div>
                         <div class="travaux-grille-etudiant">${nomEtudiant}</div>
                     </div>
+                    <button class="btn btn-supprimer btn-tres-compact travaux-grille-btn-supprimer" onclick="travauxUI.supprimerFichierImporte('${f.id}')" title="Supprimer ce fichier">✕</button>
                 </div>`;
         });
 
@@ -915,6 +929,24 @@
        =============================== */
 
     /**
+     * Supprime un fichier importe apres confirmation
+     * @param {string} fichierId - ID du fichier
+     */
+    async function supprimerFichierImporte(fichierId) {
+        if (!confirm('Supprimer ce fichier importé ?')) return;
+
+        await travauxStockage.supprimerFichierTravail(fichierId);
+
+        // Rafraichir la vue courante
+        const sousSection = sousSectionActive;
+        if (sousSection === 'evaluations-importer') {
+            afficherImport();
+        } else if (sousSection === 'evaluations-annoter') {
+            afficherFichiers();
+        }
+    }
+
+    /**
      * Ouvre le poste de preparation avec les fichiers en attente
      */
     function ouvrirPreparation() {
@@ -1134,11 +1166,10 @@
 
         const actions = document.querySelector('.travaux-import-actions');
         if (actions) {
-            toggleDisplay(actions, travauxImport.obtenirFileDAttente().length > 0);
-            const btn = actions.querySelector('.btn-principal');
-            if (btn) {
-                btn.textContent = `Importer ${travauxImport.obtenirFileDAttente().length} fichier(s)`;
-            }
+            const queueLength = travauxImport.obtenirFileDAttente().length;
+            toggleDisplay(actions, queueLength > 0);
+            // Regenerer le contenu (boutons conditionnels selon le type de fichiers)
+            actions.innerHTML = genererBoutonsActions();
         }
     }
 
@@ -1197,6 +1228,8 @@
         proposerNettoyage: proposerNettoyage,
         // Preparation
         ouvrirPreparation: ouvrirPreparation,
+        // Suppression
+        supprimerFichierImporte: supprimerFichierImporte,
         // Cycle de vie
         allegerFichier: allegerFichier,
         reimporterFichier: reimporterFichier,
