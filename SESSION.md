@@ -1,8 +1,14 @@
 # SESSION ACTIVE - BETA 97.8
 
-**Date** : 17 février 2026
-**Version** : Beta 97.8 (build 0217-1837)
+**Date** : 18 février 2026
+**Version** : Beta 97.8 (build 0218-0550)
 **Statut** : Refonte interface carte mentale et alignement pédagogique
+
+## SESSION DU 18 FÉVRIER 2026
+
+### Travail accompli — Nettoyage données orphelines (Beta 97.8, build 0218-0550)
+
+88. **Nettoyage groupe-cours fantôme** : Un groupe-cours `GC_1771159365742` et un cours `COURS1771159365741` orphelins (créés accidentellement le ~16 février, code vide, titre vide) polluaient le dropdown du sélecteur de groupe-cours actif. Cause : données persistantes dans IndexedDB malgré nettoyage localStorage. Fix : suppression via `db.setSync`/`db.set` des deux stockages (localStorage + IndexedDB).
 
 ## SESSION DU 17 FÉVRIER 2026
 
