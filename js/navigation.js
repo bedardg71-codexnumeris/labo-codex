@@ -153,9 +153,9 @@ const TOOLTIPS_SOUS_NAV = {
     'presences-saisie': 'nav-pres-saisie',
     'evaluations-apercu': 'nav-eval-apercu',
     'evaluations-liste': 'nav-eval-liste',
-    'evaluations-individuelles': 'nav-eval-evaluer',
-    'evaluations-travaux': 'nav-eval-annoter',
-    'evaluations-archivage': 'nav-eval-archivage',
+    'evaluations-importer': 'nav-eval-importer',
+    'evaluations-annoter': 'nav-eval-annoter',
+    'evaluations-exporter': 'nav-eval-exporter',
     'construction-apercu': 'nav-cn-apercu',
     'construction-productions': 'nav-cn-productions',
     'construction-grille-criteres': 'nav-cn-grilles',
@@ -505,9 +505,9 @@ function afficherSousSection(idSousSection) {
             }
             break;
 
-        // Module Travaux (migré sous Évaluations)
-        case 'evaluations-travaux':
-            console.log('🔄 Initialisation du module Travaux...');
+        // Onglet Importer et préparer
+        case 'evaluations-importer':
+            console.log('🔄 Initialisation du module Travaux (Import)...');
             if (typeof initialiserModuleTravaux === 'function') {
                 setTimeout(() => {
                     initialiserModuleTravaux();
@@ -518,8 +518,22 @@ function afficherSousSection(idSousSection) {
             }
             break;
 
-        case 'evaluations-archivage':
-            console.log('🔄 Initialisation du module Travaux (Archivage)...');
+        // Onglet Annoter et évaluer
+        case 'evaluations-annoter':
+            console.log('🔄 Initialisation du module Travaux (Annoter)...');
+            if (typeof initialiserModuleTravaux === 'function') {
+                setTimeout(() => {
+                    initialiserModuleTravaux();
+                    if (typeof travauxUI !== 'undefined') {
+                        travauxUI.afficherFichiers();
+                    }
+                }, 100);
+            }
+            break;
+
+        // Onglet Exporter et archiver
+        case 'evaluations-exporter':
+            console.log('🔄 Initialisation du module Travaux (Exporter)...');
             if (typeof initialiserModuleTravaux === 'function') {
                 setTimeout(() => {
                     initialiserModuleTravaux();

@@ -4559,8 +4559,27 @@
 
 
 
-            <!-- Sous-section: Évaluer (formulaire d'évaluation) -->
-            <div id="evaluations-individuelles" class="sous-section">
+                <!-- Onglet 3 : Importer et préparer -->
+                <div id="evaluations-importer" class="sous-section">
+                    <div id="evaluations-contenu-import">
+                        <p class="texte-muted">Chargement...</p>
+                    </div>
+                </div>
+
+                <!-- Onglet 4 : Annoter et évaluer -->
+                <div id="evaluations-annoter" class="sous-section">
+                    <!-- Grille de fichiers (état initial, masquée quand visionneuse ouverte) -->
+                    <div id="evaluations-contenu-fichiers">
+                        <p class="texte-muted">Chargement...</p>
+                    </div>
+                    <!-- Visionneuse + annotation (masquée par défaut) -->
+                    <div id="evaluations-contenu-visionneuse" class="u-hide">
+                        <p class="texte-muted">Chargement...</p>
+                    </div>
+                    <!-- Formulaire évaluation (contenu existant de evaluations-individuelles) -->
+                    <!-- Tous les IDs internes conservés : selectGroupeEval, selectEtudiantEval, etc. -->
+                    <div id="evaluations-contenu-evaluation" class="u-hide">
+
                 <h2 class="titre-avec-emoji-toggles">
                     <span data-tooltip="eval-page">Évaluation des productions et rétroaction différenciée automatique</span>
                     <span class="titre-emoji-container">
@@ -4812,22 +4831,13 @@
 
                 </div><!-- fin carte du layout évaluation -->
 
-            </div><!-- fin sous-section evaluations-individuelles -->
+                    </div><!-- fin evaluations-contenu-evaluation -->
+                </div><!-- fin evaluations-annoter -->
 
-                <!-- Sous-section: Travaux (import + visionneuse fusionnés) -->
-                <div id="evaluations-travaux" class="sous-section">
-                    <div id="evaluations-contenu-import">
-                        <p class="texte-muted">Chargement du module Travaux...</p>
-                    </div>
-                    <div id="evaluations-contenu-visionneuse" class="u-hide">
-                        <p class="texte-muted">Chargement de la visionneuse...</p>
-                    </div>
-                </div>
-
-                <!-- Sous-section: Archivage -->
-                <div id="evaluations-archivage" class="sous-section">
+                <!-- Onglet 5 : Exporter et archiver -->
+                <div id="evaluations-exporter" class="sous-section">
                     <div id="evaluations-contenu-archivage">
-                        <p class="texte-muted">Chargement de l'archivage...</p>
+                        <p class="texte-muted">Chargement...</p>
                     </div>
                 </div>
 

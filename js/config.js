@@ -45,9 +45,9 @@ const configurationsOnglets = {
     'evaluations': [
         { id: 'apercu', label: 'Aperçu' },
         { id: 'liste', label: 'Liste des évaluations' },
-        { id: 'individuelles', label: 'Évaluer une production' },
-        { id: 'travaux', label: 'Annoter des travaux' },
-        { id: 'archivage', label: 'Archivage' }
+        { id: 'importer', label: 'Importer et préparer' },
+        { id: 'annoter', label: 'Annoter et évaluer' },
+        { id: 'exporter', label: 'Exporter et archiver' }
     ],
     // ✨ REFONTE (2 jan 2026) : "Matériel" → "Construction de la note"
     // Ajout "Pratiques de notation", retrait "Ensembles d'objectifs"

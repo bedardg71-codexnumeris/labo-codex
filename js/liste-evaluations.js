@@ -1060,8 +1060,21 @@ function consulterEvaluationDepuisListe(evaluationId) {
 function evaluerProduction(da, productionId) {
     console.log(`📝 Création nouvelle évaluation pour DA: ${da}, Production: ${productionId}`);
 
-    // Naviguer vers la section Évaluations › Évaluer
+    // Naviguer vers la section Évaluations › Annoter et évaluer
     afficherSection('evaluations');
+    if (typeof afficherSousSection === 'function') {
+        afficherSousSection('evaluations-annoter');
+    }
+
+    // Rendre le formulaire d'évaluation visible
+    setTimeout(() => {
+        const evalDiv = document.getElementById('evaluations-contenu-evaluation');
+        const fichiersDiv = document.getElementById('evaluations-contenu-fichiers');
+        const visDiv = document.getElementById('evaluations-contenu-visionneuse');
+        if (evalDiv) evalDiv.classList.remove('u-hide');
+        if (fichiersDiv) fichiersDiv.classList.add('u-hide');
+        if (visDiv) visDiv.classList.add('u-hide');
+    }, 50);
 
     // Attendre que la section soit chargée
     setTimeout(() => {
