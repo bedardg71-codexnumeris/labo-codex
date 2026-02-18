@@ -31,6 +31,7 @@
     const CONTRASTE_MIN = -100;
     const CONTRASTE_MAX = 100;
     const BATCH_SIZE = 10000;         // Pixels par lot pour le rendu final
+    const PERSPECTIVE_MARGE = 0.15;   // 15% de marge autour de l'image pour perspective
 
     /* ===============================
        ETAT DU MODULE
@@ -329,21 +330,32 @@
         const source = canvasGeometrique;
         const ctx = ctxApercu;
 
-        // Ajuster le canvas d'apercu aux dimensions du resultat geometrique
-        canvasApercu.width = source.width;
-        canvasApercu.height = source.height;
+        // Marge autour de l'image quand perspective active (poignees hors cadre)
+        const avecMarge = outilActif === 'perspective';
+        const margeX = avecMarge ? Math.round(source.width * PERSPECTIVE_MARGE) : 0;
+        const margeY = avecMarge ? Math.round(source.height * PERSPECTIVE_MARGE) : 0;
+
+        canvasApercu.width = source.width + margeX * 2;
+        canvasApercu.height = source.height + margeY * 2;
         ctx.clearRect(0, 0, canvasApercu.width, canvasApercu.height);
-        ctx.drawImage(source, 0, 0);
+
+        // Zone de marge sombre
+        if (avecMarge) {
+            ctx.fillStyle = 'rgba(0,0,0,0.4)';
+            ctx.fillRect(0, 0, canvasApercu.width, canvasApercu.height);
+        }
+
+        ctx.drawImage(source, margeX, margeY);
 
         // Appliquer les filtres CSS via style (GPU)
         canvasApercu.style.filter = construireFiltresCSS(operations);
 
         // Dessiner les poignees si un outil est actif
         if (outilActif === 'crop' && cropRect) {
-            dessinerCrop(ctx, canvasApercu.width, canvasApercu.height);
+            dessinerCrop(ctx, source.width, source.height);
         }
         if (outilActif === 'perspective' && perspectiveCorners) {
-            dessinerPerspective(ctx, canvasApercu.width, canvasApercu.height);
+            dessinerPerspective(ctx, source.width, source.height, margeX, margeY);
         }
     }
 
@@ -748,12 +760,14 @@
     /**
      * Dessine les poignees de perspective
      */
-    function dessinerPerspective(ctx, w, h) {
+    function dessinerPerspective(ctx, w, h, offsetX, offsetY) {
         if (!perspectiveCorners) return;
+        offsetX = offsetX || 0;
+        offsetY = offsetY || 0;
 
         const points = perspectiveCorners.map(p => ({
-            x: p.x * w,
-            y: p.y * h
+            x: p.x * w + offsetX,
+            y: p.y * h + offsetY
         }));
 
         // Lignes du quadrilatere
@@ -799,10 +813,19 @@
 
     function getCanvasPos(e) {
         const rect = canvasApercu.getBoundingClientRect();
-        return {
-            x: (e.clientX - rect.left) / rect.width,
-            y: (e.clientY - rect.top) / rect.height
-        };
+        const rawX = (e.clientX - rect.left) / rect.width;
+        const rawY = (e.clientY - rect.top) / rect.height;
+
+        // Quand perspective active, convertir de l'espace canvas (avec marge) vers l'espace image
+        if (outilActif === 'perspective') {
+            const total = 1 + PERSPECTIVE_MARGE * 2;
+            return {
+                x: rawX * total - PERSPECTIVE_MARGE,
+                y: rawY * total - PERSPECTIVE_MARGE
+            };
+        }
+
+        return { x: rawX, y: rawY };
     }
 
     function onPointerDown(e) {
@@ -835,8 +858,9 @@
         }
 
         if (outilActif === 'perspective' && perspectiveCorners) {
-            // Detecter si on touche une poignee
-            const seuil = POIGNEE_TAILLE / (2 * canvasApercu.getBoundingClientRect().width);
+            // Detecter si on touche une poignee (ajuster pour la marge)
+            const echelle = 1 + PERSPECTIVE_MARGE * 2;
+            const seuil = POIGNEE_TAILLE * echelle / (2 * canvasApercu.getBoundingClientRect().width);
             for (let i = 0; i < 4; i++) {
                 const dx = pos.x - perspectiveCorners[i].x;
                 const dy = pos.y - perspectiveCorners[i].y;
@@ -893,9 +917,11 @@
         const pos = getCanvasPos(e);
 
         if (outilActif === 'perspective' && poigneeActive >= 0) {
+            const limMin = -PERSPECTIVE_MARGE;
+            const limMax = 1 + PERSPECTIVE_MARGE;
             perspectiveCorners[poigneeActive] = {
-                x: Math.max(0, Math.min(1, pos.x)),
-                y: Math.max(0, Math.min(1, pos.y))
+                x: Math.max(limMin, Math.min(limMax, pos.x)),
+                y: Math.max(limMin, Math.min(limMax, pos.y))
             };
             mettreAJourApercu();
             return;
