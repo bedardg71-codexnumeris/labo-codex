@@ -1112,7 +1112,7 @@
         console.log('[Auto-persp] Aretes filtrees par contraste:', nbPaper, 'pixels');
 
         // 6. Hough sur les aretes filtrees
-        let seuilHough = Math.max(20, Math.round(Math.min(dw, dh) * 0.12));
+        let seuilHough = Math.max(20, Math.round(Math.min(dw, dh) * 0.09));
         let lines = houghLines(paperEdges, dw, dh, seuilHough);
         console.log('[Auto-persp] Hough: seuil=' + seuilHough + ', lignes=' + lines.length);
 
@@ -1472,8 +1472,8 @@
      * Filtre les aretes Canny pour ne garder que les frontieres papier/fond.
      * Pour chaque pixel d'arete, on echantillonne la luminosite de part et d'autre
      * (perpendiculairement au gradient). On garde seulement les aretes ou :
-     *   - Le contraste est fort (> 30)
-     *   - Le cote le plus clair est lumineux (> 150) = probablement du papier
+     *   - Le contraste est significatif (> 25)
+     *   - Le cote le plus clair est lumineux (> 130) = probablement du papier
      * Ceci elimine : texte (deux cotes clairs), grain du bois (deux cotes moyens),
      * surlignages (contraste faible), et preserve l'angle reel des bords du document.
      */
@@ -1507,8 +1507,8 @@
                 sideB /= count;
                 const contrast = Math.abs(sideA - sideB);
                 const maxSide = Math.max(sideA, sideB);
-                // Frontiere papier/fond : fort contraste + un cote clair (papier)
-                if (contrast > 30 && maxSide > 150) {
+                // Frontiere papier/fond : contraste significatif + un cote clair (papier)
+                if (contrast > 25 && maxSide > 130) {
                     filtered[y * w + x] = 255;
                 }
             }
