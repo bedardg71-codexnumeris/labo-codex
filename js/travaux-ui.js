@@ -203,6 +203,9 @@
                 <button class="btn btn-principal" onclick="travauxUI.lancerImport()">
                     Importer ${travauxImport.obtenirFileDAttente().length} fichier(s)
                 </button>
+                <button class="btn btn-secondaire" onclick="travauxUI.ouvrirPreparation()" title="Preparer les images avant import (rotation, crop, perspective, luminosite)">
+                    Preparer les images
+                </button>
                 <button class="btn btn-secondaire" onclick="travauxImport.viderFileDAttente(); travauxUI.afficherImport();">
                     Annuler
                 </button>
@@ -260,6 +263,7 @@
                         <div class="travaux-toolbar-gauche">
                             <button class="btn btn-petit" onclick="travauxUI.retourImport()" title="Retour a la liste">&#x2190; Retour</button>
                             <span id="travaux-nom-fichier" class="travaux-nom-fichier">Aucun fichier ouvert</span>
+                            <span id="travaux-badge-statut" class="u-hide"></span>
                         </div>
                         <div class="travaux-toolbar-centre">
                             <button id="travaux-btn-page-prec" class="btn-icon" onclick="travauxVisionneuse.pagePrecedente()" disabled title="Page precedente">&#x2190;</button>
@@ -274,6 +278,8 @@
                             <button id="travaux-btn-annoter" class="btn btn-petit" onclick="travauxAnnotation.basculerAnnotation()">Annoter</button>
                             <button id="travaux-btn-export-pdf" class="btn btn-petit u-hide" onclick="travauxExportPDF.afficherRevisionExport(travauxVisionneuse.getFichierActuel()?.id)" title="Exporter PDF annote">Exporter PDF</button>
                             <button id="travaux-btn-evaluer" class="btn btn-petit u-hide" onclick="travauxUI.evaluerDepuisAnnotation()" title="Evaluer cette production">Evaluer</button>
+                            <button id="travaux-btn-alleger" class="btn btn-petit u-hide" onclick="travauxUI.allegerFichier(travauxVisionneuse.getFichierActuel()?.id)" title="Alleger ce fichier">Alleger</button>
+                            <button id="travaux-btn-reimporter" class="btn btn-petit u-hide" onclick="travauxUI.reimporterFichier(travauxVisionneuse.getFichierActuel()?.id)" title="Re-importer l'original">Re-importer</button>
                         </div>
                     </div>
 
@@ -383,6 +389,13 @@
                 </div>
             </div>
 
+            <!-- Allegement -->
+            <div class="travaux-archivage-carte">
+                <h4>Alleger les travaux exportes</h4>
+                <p class="texte-muted">Convertit les originaux exportes en fac-similes (NdG, 800px). Les annotations et evaluations sont conservees.</p>
+                <button class="btn btn-secondaire" onclick="travauxArchivage.lancerAllegement()">Alleger les travaux exportes</button>
+            </div>
+
             <!-- Quota stockage -->
             <div class="travaux-quota-section">
                 <h4>Espace de stockage</h4>
@@ -416,10 +429,19 @@
                 ? `${echapperHtml(etudiant.prenom)} ${echapperHtml(etudiant.nom)}`
                 : (f.etudiantDA || 'Non associé');
 
+            // Badge cycle de vie
+            let badge = '';
+            if (f.blobStatut === 'facsimile') {
+                badge = '<span class="travaux-badge-facsimile" title="Version allegee">FAC</span>';
+            } else if (f.blobStatut === 'exporte') {
+                badge = '<span class="travaux-badge-exporte" title="Exporte">EXP</span>';
+            }
+
             html += `
                 <div class="travaux-grille-item" onclick="travauxUI.ouvrirFichier('${f.id}')" title="${echapperHtml(f.nomFichier)}">
                     <div class="travaux-grille-thumb">
                         ${thumb ? `<img src="${thumb}" alt="">` : `<span class="travaux-grille-icone">${icone}</span>`}
+                        ${badge}
                     </div>
                     <div class="travaux-grille-info">
                         <div class="travaux-grille-nom">${echapperHtml(f.nomFichier)}</div>
@@ -469,10 +491,19 @@
             const icone = f.typeMIME === 'application/pdf' ? '&#x1F4C4;' : '&#x1F5BC;';
             const actif = travauxVisionneuse.getFichierActuel()?.id === f.id ? ' actif' : '';
 
+            // Badge cycle de vie
+            let badge = '';
+            if (f.blobStatut === 'facsimile') {
+                badge = '<span class="travaux-badge-facsimile" title="Version allegee">FAC</span>';
+            } else if (f.blobStatut === 'exporte') {
+                badge = '<span class="travaux-badge-exporte" title="Exporte">EXP</span>';
+            }
+
             html += `
                 <div class="travaux-miniature${actif}" data-fichier-id="${f.id}" onclick="travauxUI.ouvrirFichier('${f.id}')">
                     <div class="travaux-miniature-thumb">
                         ${thumb ? `<img src="${thumb}" alt="">` : `<span>${icone}</span>`}
+                        ${badge}
                     </div>
                     <div class="travaux-miniature-nom">${echapperHtml(f.nomFichier)}</div>
                 </div>`;
@@ -524,12 +555,21 @@
             const actif = travauxVisionneuse.getFichierActuel()?.id === f.id ? ' actif' : '';
             const top = i * HAUTEUR_MINIATURE;
 
+            // Badge cycle de vie
+            let badge = '';
+            if (f.blobStatut === 'facsimile') {
+                badge = '<span class="travaux-badge-facsimile" title="Version allegee">FAC</span>';
+            } else if (f.blobStatut === 'exporte') {
+                badge = '<span class="travaux-badge-exporte" title="Exporte">EXP</span>';
+            }
+
             html += `
                 <div class="travaux-miniature travaux-miniature-virtuelle${actif}" data-fichier-id="${f.id}"
                      style="top: ${top}px; height: ${HAUTEUR_MINIATURE}px;"
                      onclick="travauxUI.ouvrirFichier('${f.id}')">
                     <div class="travaux-miniature-thumb">
                         ${thumb ? `<img src="${thumb}" alt="">` : `<span>${icone}</span>`}
+                        ${badge}
                     </div>
                     <div class="travaux-miniature-nom">${echapperHtml(f.nomFichier)}</div>
                 </div>`;
@@ -617,6 +657,43 @@
             if (btnExport) btnExport.classList.remove('u-hide');
             const btnEvaluer = document.getElementById('travaux-btn-evaluer');
             if (btnEvaluer) btnEvaluer.classList.remove('u-hide');
+
+            // Boutons et badge cycle de vie
+            const fichierOuvert = travauxVisionneuse.getFichierActuel();
+            const badgeStatut = document.getElementById('travaux-badge-statut');
+            const btnAlleger = document.getElementById('travaux-btn-alleger');
+            const btnReimporter = document.getElementById('travaux-btn-reimporter');
+
+            if (fichierOuvert) {
+                const statut = fichierOuvert.blobStatut || 'present';
+
+                // Badge
+                if (badgeStatut) {
+                    if (statut === 'facsimile') {
+                        badgeStatut.textContent = 'Version allegee';
+                        badgeStatut.className = 'travaux-badge-facsimile';
+                        badgeStatut.classList.remove('u-hide');
+                    } else if (statut === 'exporte') {
+                        badgeStatut.textContent = 'Exporte';
+                        badgeStatut.className = 'travaux-badge-exporte';
+                        badgeStatut.classList.remove('u-hide');
+                    } else {
+                        badgeStatut.classList.add('u-hide');
+                    }
+                }
+
+                // Bouton alleger : visible si exporte
+                if (btnAlleger) {
+                    if (statut === 'exporte') btnAlleger.classList.remove('u-hide');
+                    else btnAlleger.classList.add('u-hide');
+                }
+
+                // Bouton reimporter : visible si facsimile
+                if (btnReimporter) {
+                    if (statut === 'facsimile') btnReimporter.classList.remove('u-hide');
+                    else btnReimporter.classList.add('u-hide');
+                }
+            }
 
             // Mettre a jour la miniature active
             document.querySelectorAll('.travaux-miniature').forEach(m => {
@@ -786,6 +863,60 @@
 
         // Rafraichir
         afficherArchivage();
+    }
+
+    /* ===============================
+       PREPARATION DES IMAGES
+       =============================== */
+
+    /**
+     * Ouvre le poste de preparation avec les fichiers en attente
+     */
+    function ouvrirPreparation() {
+        const queue = travauxImport.obtenirFileDAttente();
+        if (queue.length === 0) {
+            alert('Aucun fichier en attente');
+            return;
+        }
+
+        // Filtrer seulement les images (pas les PDF)
+        const images = queue.filter(f => f.estImage);
+        if (images.length === 0) {
+            alert('Aucune image a preparer (les PDF ne necessitent pas de preparation)');
+            return;
+        }
+
+        travauxPreparation.ouvrir(queue, function() {
+            rafraichirImportUI();
+        });
+    }
+
+    /* ===============================
+       ACTIONS CYCLE DE VIE
+       =============================== */
+
+    /**
+     * Allege un fichier specifique (exporte → fac-simile)
+     * @param {string} fichierId
+     */
+    async function allegerFichier(fichierId) {
+        const ok = await travauxStockage.convertirEnFacsimile(fichierId);
+        if (ok) {
+            if (typeof afficherNotificationSucces === 'function') {
+                afficherNotificationSucces('Fichier allege en fac-simile');
+            }
+            rafraichirUI();
+        } else {
+            alert('Erreur lors de l\'allegement');
+        }
+    }
+
+    /**
+     * Lance le reimport d'un fichier (fac-simile → original)
+     * @param {string} fichierId
+     */
+    function reimporterFichier(fichierId) {
+        travauxImport.reimporterFichier(fichierId);
     }
 
     /* ===============================
@@ -981,6 +1112,11 @@
         fermerVueCoteACote: fermerVueCoteACote,
         // Quota / nettoyage
         proposerNettoyage: proposerNettoyage,
+        // Preparation
+        ouvrirPreparation: ouvrirPreparation,
+        // Cycle de vie
+        allegerFichier: allegerFichier,
+        reimporterFichier: reimporterFichier,
         // Rafraichissement
         rafraichirUI: rafraichirUI
     };

@@ -250,8 +250,8 @@ const SCHEMAS_IMPORT = {
     }
 };
 
-/** Limite de taille max pour un fichier JSON importé (10 Mo) */
-const TAILLE_MAX_IMPORT_OCTETS = 10 * 1024 * 1024;
+/** Limite de taille max pour un fichier JSON importé (50 Mo) */
+const TAILLE_MAX_IMPORT_OCTETS = 50 * 1024 * 1024;
 
 /* ===============================
    EXPORT DES DONNÉES
@@ -444,6 +444,23 @@ async function executerExport() {
                 });
             }
 
+            // 🔧 FIX (Beta 97.9) : Convertir les tableaux sparse en Object
+            // Un DA étudiant utilisé comme index crée des millions de slots null
+            if (Array.isArray(valeur) && valeur.length > 10000) {
+                const nbNonNull = valeur.filter(v => v != null).length;
+                if (nbNonNull < valeur.length * 0.01) {
+                    // Tableau sparse détecté (>99% de slots null)
+                    const converti = {};
+                    for (let i = 0; i < valeur.length; i++) {
+                        if (valeur[i] != null) {
+                            converti[String(i)] = valeur[i];
+                        }
+                    }
+                    console.log(`🔧 [Export] Clé "${cle}" sparse Array(${valeur.length}) → Object(${Object.keys(converti).length})`);
+                    valeur = converti;
+                }
+            }
+
             // Stocker la valeur
             donnees[cle] = valeur;
         }
@@ -513,9 +530,9 @@ function previsualiserImport(event) {
     const fichier = event.target.files[0];
     if (!fichier) return;
 
-    // Limite de taille (10 Mo)
+    // Limite de taille (50 Mo)
     if (fichier.size > TAILLE_MAX_IMPORT_OCTETS) {
-        alert(`Fichier trop volumineux (${(fichier.size / 1024 / 1024).toFixed(1)} Mo).\n\nLimite : 10 Mo.`);
+        alert(`Fichier trop volumineux (${(fichier.size / 1024 / 1024).toFixed(1)} Mo).\n\nLimite : 50 Mo.`);
         return;
     }
 
@@ -700,9 +717,9 @@ function previsualiserConfigComplete(event) {
     const fichier = event.target.files[0];
     if (!fichier) return;
 
-    // Limite de taille (10 Mo)
+    // Limite de taille (50 Mo)
     if (fichier.size > TAILLE_MAX_IMPORT_OCTETS) {
-        alert(`Fichier trop volumineux (${(fichier.size / 1024 / 1024).toFixed(1)} Mo).\n\nLimite : 10 Mo.`);
+        alert(`Fichier trop volumineux (${(fichier.size / 1024 / 1024).toFixed(1)} Mo).\n\nLimite : 50 Mo.`);
         return;
     }
 

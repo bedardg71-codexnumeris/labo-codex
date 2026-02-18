@@ -22,6 +22,31 @@
    =============================== */
 
 /* ===============================
+   FIX SPARSE ARRAY (Beta 97.9)
+   Si portfoliosEleves est un Array (bug: DA utilisé comme index numérique
+   crée un tableau sparse de millions de slots null → 36 Mo),
+   le convertir en Object indexé par DA en string.
+   =============================== */
+
+(function repararPortfoliosEleves() {
+    try {
+        const donnees = db.getSync(cle('portfoliosEleves'), null);
+        if (Array.isArray(donnees)) {
+            const repare = {};
+            for (let i = 0; i < donnees.length; i++) {
+                if (donnees[i] != null) {
+                    repare[String(i)] = donnees[i];
+                }
+            }
+            db.setSync(cle('portfoliosEleves'), repare);
+            console.log(`🔧 [Fix sparse] portfoliosEleves converti: Array(${donnees.length}) → Object(${Object.keys(repare).length} entrées)`);
+        }
+    } catch (e) {
+        console.warn('[Fix sparse] Erreur réparation portfoliosEleves:', e);
+    }
+})();
+
+/* ===============================
    FONCTION HELPER: SÉLECTION SELON MODALITÉ
    =============================== */
 
@@ -104,7 +129,7 @@ function chargerPortfolioEleveDetail(da) {
         const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da);
 
         // Récupérer les sélections de portfolio
-        const selectionsPortfolios = db.getSync('portfoliosEleves', {});
+        const selectionsPortfolios = db.getSync(cle('portfoliosEleves'), {});
         const selectionEleve = selectionsPortfolios[da]?.[portfolio.id] || { artefactsRetenus: [] };
 
         // ✅ Configuration depuis modalitesEvaluation (avec fallback sur portfolio.regles)
@@ -191,7 +216,7 @@ function chargerPortfolioEleveDetail(da) {
                     auto: true, // Flag pour indiquer sélection automatique
                     modalite: methodeSelection // Tracer quelle modalité a été utilisée
                 };
-                db.setSync('portfoliosEleves', selectionsPortfolios);
+                db.setSync(cle('portfoliosEleves'), selectionsPortfolios);
 
                 // 🔄 Recalculer les indices C et P après sélection automatique
                 if (typeof calculerEtStockerIndicesCP === 'function') {
@@ -335,7 +360,7 @@ function toggleArtefactPortfolio(event, da, portfolioId, nombreARetenir) {
         }
 
         // Sauvegarder la sélection
-        let selectionsPortfolios = db.getSync('portfoliosEleves', {});
+        let selectionsPortfolios = db.getSync(cle('portfoliosEleves'), {});
         if (!selectionsPortfolios[da]) {
             selectionsPortfolios[da] = {};
         }
@@ -345,7 +370,7 @@ function toggleArtefactPortfolio(event, da, portfolioId, nombreARetenir) {
             dateSelection: new Date().toISOString()
         };
 
-        db.setSync('portfoliosEleves', selectionsPortfolios);
+        db.setSync(cle('portfoliosEleves'), selectionsPortfolios);
 
         // 🔄 Recalculer les indices C et P après modification de sélection
         if (typeof calculerEtStockerIndicesCP === 'function') {

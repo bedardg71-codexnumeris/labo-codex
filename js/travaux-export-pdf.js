@@ -57,6 +57,10 @@
             // Telecharger
             const nomSortie = fichier.nomFichier.replace(/\.[^.]+$/, '') + '_annote.pdf';
             doc.save(nomSortie);
+
+            // Marquer le fichier comme exporte (cycle de vie)
+            travauxStockage.marquerExporte(fichierId);
+
             console.log('[Travaux-Export] PDF exporte:', nomSortie);
         } catch (e) {
             console.error('[Travaux-Export] Erreur export PDF:', e);
@@ -529,6 +533,10 @@
             const nomEtudiant = etudiant ? `${etudiant.prenom}_${etudiant.nom}` : da;
             const nomSortie = `dossier_${nomEtudiant}_${productionId}.pdf`;
             doc.save(nomSortie);
+
+            // Marquer le fichier comme exporte (cycle de vie)
+            travauxStockage.marquerExporte(fichier.id);
+
             console.log('[Travaux-Export] Dossier complet exporte:', nomSortie);
         } catch (e) {
             console.error('[Travaux-Export] Erreur export dossier complet:', e);

@@ -14043,6 +14043,31 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     line-height: 1.2;
 }
 
+/* --- Badges cycle de vie des blobs --- */
+.travaux-badge-facsimile,
+.travaux-badge-exporte {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 1px 4px;
+    border-radius: 3px;
+    line-height: 1.3;
+}
+.travaux-badge-facsimile {
+    background: var(--btn-annuler, #e67e22);
+    color: #fff;
+}
+.travaux-badge-exporte {
+    background: var(--bleu-clair, #3498db);
+    color: #fff;
+}
+.travaux-miniature-thumb,
+.travaux-grille-thumb {
+    position: relative;
+}
+
 /* --- Bouton toggle sidebar (visible quand sidebar repliee) --- */
 .travaux-btn-toggle-sidebar {
     position: absolute;
