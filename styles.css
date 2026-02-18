@@ -13984,7 +13984,7 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     z-index: 9999;
     display: flex;
     flex-direction: column;
-    background: var(--fond-principal);
+    background: var(--fond-page-clair, #0c1a22);
 }
 
 .prep-header-bar {
@@ -13992,9 +13992,9 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     align-items: center;
     justify-content: space-between;
     padding: 6px 12px;
-    border-bottom: 1px solid var(--bordure-legere);
+    border-bottom: 1px solid rgba(106, 172, 184, 0.2);
     flex-shrink: 0;
-    background: var(--fond-principal);
+    background: var(--surface-section, #142428);
     gap: 12px;
 }
 
@@ -14008,7 +14008,7 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     flex: 1;
     position: relative;
     overflow: hidden;
-    background: var(--fond-secondaire);
+    background: var(--surface-page, #0c1a22);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -14018,8 +14018,8 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 .prep-palette {
     position: absolute;
     z-index: 80;
-    background: var(--fond-principal);
-    border: 1px solid var(--bordure-legere);
+    background: var(--surface-carte, #1a3040);
+    border: 1px solid rgba(106, 172, 184, 0.2);
     border-radius: 10px;
     box-shadow: 0 4px 16px rgba(0,0,0,0.15);
     min-width: 190px;
@@ -14033,7 +14033,7 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     justify-content: space-between;
     padding: 6px 10px;
     cursor: grab;
-    border-bottom: 1px solid var(--bordure-legere);
+    border-bottom: 1px solid rgba(106, 172, 184, 0.2);
     border-radius: 10px 10px 0 0;
 }
 .prep-palette-barre:active { cursor: grabbing; }
@@ -14112,13 +14112,13 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     font-size: 0.8rem;
     font-weight: 500;
     cursor: pointer;
-    background: var(--fond-secondaire);
+    background: var(--surface-section, #142428);
     color: var(--texte-principal);
     transition: all 0.15s;
     white-space: nowrap;
 }
 .prep-btn:hover {
-    border-color: var(--bordure-legere);
+    border-color: rgba(106, 172, 184, 0.3);
     transform: translateY(-1px);
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
@@ -14162,7 +14162,7 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     display: flex;
     gap: 4px;
     padding: 6px;
-    border-top: 1px solid var(--bordure-legere);
+    border-top: 1px solid rgba(106, 172, 184, 0.2);
 }
 .prep-palette-footer .prep-btn {
     flex: 1;
