@@ -1208,11 +1208,9 @@
 
         const modal = document.createElement('div');
         modal.id = 'travaux-preparation-modal';
-        modal.className = 'modal-overlay actif';
-        modal.style.cssText = 'z-index:9999; display:flex; align-items:stretch; justify-content:center; padding:0; background:var(--fond-principal);';
+        modal.className = 'prep-page';
 
         modal.innerHTML = `
-            <div style="display:flex; width:100%; height:100%; background:var(--fond-principal); flex-direction:column;">
                 <!-- Barre compacte -->
                 <div class="prep-header-bar">
                     <button class="btn btn-petit" onclick="travauxPreparation.fermer()">&#x2190; Retour</button>
@@ -1311,7 +1309,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
         `;
 
         document.body.appendChild(modal);

@@ -13977,6 +13977,16 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
    PREPARATION IMAGES — PALETTES FLOTTANTES
    =============================== */
 
+/* Page autonome plein ecran (pas un modal) */
+.prep-page {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    background: var(--fond-principal);
+}
+
 .prep-header-bar {
     display: flex;
     align-items: center;
