@@ -1477,8 +1477,8 @@
      * (perpendiculairement au gradient). On garde seulement les aretes ou :
      *   - Le contraste est significatif (> 25)
      *   - Le cote le plus clair est lumineux (> 130) = probablement du papier
-     *   - Le cote le plus sombre est fonce (< 120) = probablement du bureau
-     *     (elimine les ombres du telephone : papier 200 vs papier ombre 140)
+     *   - Le cote le plus sombre est fonce (< 140) = probablement du bureau
+     *     (elimine les ombres du telephone : papier 200 vs papier ombre 140+)
      * Ceci elimine : texte (deux cotes clairs), grain du bois (deux cotes moyens),
      * surlignages (contraste faible), et preserve l'angle reel des bords du document.
      */
@@ -1516,11 +1516,11 @@
                 // Frontiere papier/fond :
                 //   - contraste significatif (> 25)
                 //   - un cote clair = papier (max > 130)
-                //   - un cote sombre = bureau (min < 120)
-                // Le critere minSide < 120 elimine les ombres sur papier
-                // (papier 200 vs papier ombre 140 : min=140 > 120 → rejete)
-                // tout en gardant les vrais bords (papier 130 vs bureau 90 : min=90 < 120 → garde)
-                if (contrast > 25 && maxSide > 130 && minSide < 120) {
+                //   - un cote sombre = bureau (min < 140)
+                // Le seuil 140 est entre le bureau eclaire (~125-135) et le
+                // papier ombre par le telephone (~140-160). Elimine les ombres
+                // (min=140+ rejete) tout en gardant le bureau eclaire (min~130 garde).
+                if (contrast > 25 && maxSide > 130 && minSide < 140) {
                     filtered[y * w + x] = 255;
                 }
             }
