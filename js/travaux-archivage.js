@@ -294,6 +294,10 @@
             const etudiant = etudiants.find(e => e.da === da);
             const nom = etudiant ? `${etudiant.nom}_${etudiant.prenom}` : da;
             telechargerBlob(zip, `travaux_${nom}.zip`);
+
+            // Marquer tous les fichiers de cet etudiant comme exportes
+            const fichiers = travauxStockage.obtenirFichiersEtudiant(da);
+            fichiers.forEach(f => travauxStockage.marquerExporte(f.id));
         } catch (e) {
             console.error('[Travaux-Archivage] Erreur export etudiant:', e);
             alert('Erreur lors de l\'export: ' + e.message);
@@ -309,6 +313,10 @@
         try {
             const zip = await exporterParProduction(productionId, options);
             telechargerBlob(zip, `travaux_production_${productionId}.zip`);
+
+            // Marquer tous les fichiers de cette production comme exportes
+            const fichiers = travauxStockage.obtenirFichiersProduction(productionId);
+            fichiers.forEach(f => travauxStockage.marquerExporte(f.id));
         } catch (e) {
             console.error('[Travaux-Archivage] Erreur export production:', e);
             alert('Erreur lors de l\'export: ' + e.message);
@@ -361,6 +369,45 @@
     }
 
     /* ===============================
+       ALLEGEMENT EN LOT
+       =============================== */
+
+    /**
+     * Convertit tous les fichiers exportes en fac-similes
+     * @returns {Promise<void>}
+     */
+    async function lancerAllegement() {
+        const fichiers = travauxStockage.obtenirFichiersTravaux();
+        const exportes = fichiers.filter(f => f.blobStatut === 'exporte');
+
+        if (exportes.length === 0) {
+            alert('Aucun fichier exporte a alleger.');
+            return;
+        }
+
+        const continuer = confirm(
+            `Alleger ${exportes.length} fichier(s) exporte(s) ?\n\n` +
+            `Les originaux seront remplaces par des versions allegees (niveaux de gris, 800px).\n` +
+            `Les annotations et evaluations sont conservees.`
+        );
+        if (!continuer) return;
+
+        const resultat = await travauxStockage.allegerFichiersExportes((traites, total) => {
+            const barre = document.getElementById('travaux-barre-progression');
+            const texte = document.getElementById('travaux-texte-progression');
+            if (barre) barre.style.width = Math.round((traites / total) * 100) + '%';
+            if (texte) texte.textContent = `${traites}/${total} fichiers alleges...`;
+        });
+
+        alert(`Allegement termine : ${resultat.convertis} fichier(s) allege(s), ${resultat.erreurs} erreur(s).`);
+
+        // Rafraichir l'UI
+        if (typeof travauxUI !== 'undefined' && typeof travauxUI.afficherArchivage === 'function') {
+            travauxUI.afficherArchivage();
+        }
+    }
+
+    /* ===============================
        EXPORTS GLOBAUX
        =============================== */
 
@@ -372,7 +419,8 @@
         lancerExportProduction: lancerExportProduction,
         lancerExportSemestre: lancerExportSemestre,
         nettoyerProduction: nettoyerProduction,
-        telechargerBlob: telechargerBlob
+        telechargerBlob: telechargerBlob,
+        lancerAllegement: lancerAllegement
     };
 
 })();

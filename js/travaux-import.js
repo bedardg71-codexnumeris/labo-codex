@@ -36,9 +36,9 @@
         /[_\-\s](\d{7})\./,               // _1234567. avant extension
     ];
 
-    // Compression images iPad
-    const MAX_IMAGE_DIMENSION = 2000;
-    const JPEG_QUALITY_IMPORT = 0.85;
+    // Compression images iPad (1400px, JPEG 0.80 pour import standard)
+    const MAX_IMAGE_DIMENSION = 1400;
+    const JPEG_QUALITY_IMPORT = 0.80;
 
     /* ===============================
        ETAT DU MODULE
@@ -524,6 +524,96 @@
     }
 
     /* ===============================
+       RE-IMPORT (Cycle de vie des blobs)
+       =============================== */
+
+    /**
+     * Ouvre le file picker pour reimporter un fichier (fac-simile -> original)
+     * Le nouveau blob remplace l'ancien avec le MEME id
+     * @param {string} fichierId - ID du fichier existant
+     */
+    async function reimporterFichier(fichierId) {
+        const fichier = travauxStockage.obtenirFichierParId(fichierId);
+        if (!fichier) {
+            alert('Fichier introuvable.');
+            return;
+        }
+
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = EXTENSIONS_ACCEPTEES.join(',');
+
+        input.addEventListener('change', async () => {
+            if (!input.files || input.files.length === 0) return;
+
+            const nouveauFichier = input.files[0];
+            if (!estTypeAccepte(nouveauFichier)) {
+                alert('Type de fichier non accepte.');
+                return;
+            }
+
+            try {
+                let blob = nouveauFichier;
+                const typeMIME = determinerTypeMIME(nouveauFichier);
+
+                // Compresser si c'est une image
+                if (estImage(typeMIME)) {
+                    blob = await compresserImageSiNecessaire(blob, typeMIME);
+                }
+
+                // Stocker avec le MEME id
+                await travauxStockage.stockerBlob(
+                    fichierId,
+                    blob,
+                    fichier.etudiantDA,
+                    fichier.productionId
+                );
+
+                // Mettre a jour les metadonnees
+                const fichiers = travauxStockage.obtenirFichiersTravaux();
+                const idx = fichiers.findIndex(f => f.id === fichierId);
+                if (idx !== -1) {
+                    fichiers[idx].tailleFichier = blob.size;
+                    fichiers[idx].blobStatut = 'present';
+                    fichiers[idx].dateModification = new Date().toISOString();
+                    delete fichiers[idx].dateFacsimile;
+                    travauxStockage.sauvegarderFichiersTravaux(fichiers);
+                }
+
+                // Regenerer la miniature
+                let thumbnail = '';
+                if (estImage(typeMIME)) {
+                    try { thumbnail = await travauxStockage.genererMiniatureImage(blob); } catch (e) {}
+                } else if (estPDF(typeMIME)) {
+                    try {
+                        const result = await travauxStockage.genererMiniaturePDF(blob);
+                        thumbnail = result.thumbnail;
+                    } catch (e) {}
+                }
+                if (thumbnail && idx !== -1) {
+                    fichiers[idx].thumbnailDataUrl = thumbnail;
+                    travauxStockage.sauvegarderFichiersTravaux(fichiers);
+                }
+
+                console.log(`[Travaux-Import] Fichier reimporte: ${fichierId}`);
+                if (typeof afficherNotificationSucces === 'function') {
+                    afficherNotificationSucces('Fichier reimporte avec succes');
+                }
+
+                // Rafraichir l'UI
+                if (typeof travauxUI !== 'undefined' && typeof travauxUI.rafraichirUI === 'function') {
+                    travauxUI.rafraichirUI();
+                }
+            } catch (e) {
+                console.error('[Travaux-Import] Erreur reimport:', e);
+                alert('Erreur lors du reimport: ' + e.message);
+            }
+        });
+
+        input.click();
+    }
+
+    /* ===============================
        EXPORTS GLOBAUX
        =============================== */
 
@@ -542,6 +632,7 @@
         // Import
         importerFichier: importerFichier,
         importerTous: importerTous,
+        reimporterFichier: reimporterFichier,
         // Drag & Drop
         initialiserDropZone: initialiserDropZone,
         // UI

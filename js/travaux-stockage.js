@@ -434,7 +434,8 @@
             dateImport: new Date().toISOString(),
             dateModification: new Date().toISOString(),
             source: metadonnees.source || 'import-local',
-            importePar: metadonnees.importePar || 'single'
+            importePar: metadonnees.importePar || 'single',
+            blobStatut: 'present'  // Cycle de vie: present → exporte → facsimile
         };
 
         fichiers.push(fichier);
@@ -689,6 +690,205 @@
     }
 
     /* ===============================
+       CYCLE DE VIE DES BLOBS
+       =============================== */
+
+    /**
+     * Migration : ajoute blobStatut = 'present' aux fichiers existants sans ce champ
+     */
+    function migrerBlobStatut() {
+        const fichiers = obtenirFichiersTravaux();
+        let modifie = false;
+        for (const f of fichiers) {
+            if (!f.blobStatut) {
+                f.blobStatut = 'present';
+                modifie = true;
+            }
+        }
+        if (modifie) {
+            sauvegarderFichiersTravaux(fichiers);
+            console.log('[Travaux-Stockage] Migration blobStatut effectuee');
+        }
+    }
+
+    /**
+     * Marque un fichier comme exporte
+     * @param {string} fichierId - ID du fichier
+     */
+    function marquerExporte(fichierId) {
+        const fichiers = obtenirFichiersTravaux();
+        const f = fichiers.find(x => x.id === fichierId);
+        if (f) {
+            f.blobStatut = 'exporte';
+            f.dateExport = new Date().toISOString();
+            sauvegarderFichiersTravaux(fichiers);
+        }
+    }
+
+    /**
+     * Convertit un fichier en fac-simile (version allegee)
+     * Niveaux de gris, 800px max, JPEG 0.5
+     * Poids cible : ~30-80 Ko (vs 1-12 Mo l'original)
+     *
+     * @param {string} fichierId - ID du fichier
+     * @returns {Promise<boolean>} true si conversion reussie
+     */
+    async function convertirEnFacsimile(fichierId) {
+        const blob = await recupererBlob(fichierId);
+        if (!blob) return false;
+
+        const fichiers = obtenirFichiersTravaux();
+        const fichier = fichiers.find(f => f.id === fichierId);
+        if (!fichier) return false;
+
+        try {
+            let facsimileBlob;
+
+            if (fichier.typeMIME.startsWith('image/')) {
+                facsimileBlob = await genererFacsimileImage(blob);
+            } else if (fichier.typeMIME === 'application/pdf') {
+                // Pour les PDF, convertir la premiere page en image allegee
+                facsimileBlob = await genererFacsimilePDF(blob);
+            } else {
+                return false;
+            }
+
+            if (!facsimileBlob) return false;
+
+            // Remplacer le blob original par le fac-simile
+            await stockerBlob(fichierId, facsimileBlob, fichier.etudiantDA, fichier.productionId);
+
+            // Mettre a jour les metadonnees
+            fichier.blobStatut = 'facsimile';
+            fichier.dateFacsimile = new Date().toISOString();
+            fichier.tailleFichier = facsimileBlob.size;
+            fichier.dateModification = new Date().toISOString();
+            sauvegarderFichiersTravaux(fichiers);
+
+            console.log(`[Travaux-Stockage] Fac-simile cree: ${fichierId} (${formaterTaille(facsimileBlob.size)})`);
+            return true;
+        } catch (e) {
+            console.error('[Travaux-Stockage] Erreur fac-simile:', e);
+            return false;
+        }
+    }
+
+    /**
+     * Genere un fac-simile image : niveaux de gris, 800px max, JPEG 0.5
+     * @param {Blob} blob - Image originale
+     * @returns {Promise<Blob>}
+     */
+    function genererFacsimileImage(blob) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            const url = URL.createObjectURL(blob);
+
+            img.onload = () => {
+                URL.revokeObjectURL(url);
+
+                let w = img.width;
+                let h = img.height;
+                const MAX_DIM = 800;
+
+                if (w > MAX_DIM || h > MAX_DIM) {
+                    if (w > h) {
+                        h = Math.round(h * (MAX_DIM / w));
+                        w = MAX_DIM;
+                    } else {
+                        w = Math.round(w * (MAX_DIM / h));
+                        h = MAX_DIM;
+                    }
+                }
+
+                const canvas = document.createElement('canvas');
+                canvas.width = w;
+                canvas.height = h;
+                const ctx = canvas.getContext('2d');
+
+                // Appliquer niveaux de gris via filter
+                ctx.filter = 'grayscale(1)';
+                ctx.drawImage(img, 0, 0, w, h);
+                ctx.filter = 'none';
+
+                canvas.toBlob(resolve, 'image/jpeg', 0.5);
+            };
+
+            img.onerror = () => {
+                URL.revokeObjectURL(url);
+                reject(new Error('Erreur chargement image'));
+            };
+
+            img.src = url;
+        });
+    }
+
+    /**
+     * Genere un fac-simile PDF : premiere page en NdG, 800px, JPEG 0.5
+     * @param {Blob} blob - PDF original
+     * @returns {Promise<Blob>}
+     */
+    async function genererFacsimilePDF(blob) {
+        if (typeof pdfjsLib === 'undefined') return null;
+
+        const arrayBuffer = await blob.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        const page = await pdf.getPage(1);
+
+        const viewport = page.getViewport({ scale: 1.0 });
+        let scale = 1.0;
+        const MAX_DIM = 800;
+
+        if (viewport.width > MAX_DIM || viewport.height > MAX_DIM) {
+            scale = Math.min(MAX_DIM / viewport.width, MAX_DIM / viewport.height);
+        }
+
+        const scaledViewport = page.getViewport({ scale });
+        const canvas = document.createElement('canvas');
+        canvas.width = scaledViewport.width;
+        canvas.height = scaledViewport.height;
+
+        const ctx = canvas.getContext('2d');
+        await page.render({ canvasContext: ctx, viewport: scaledViewport }).promise;
+
+        // Appliquer niveaux de gris
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+        for (let i = 0; i < data.length; i += 4) {
+            const gris = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
+            data[i] = data[i + 1] = data[i + 2] = gris;
+        }
+        ctx.putImageData(imageData, 0, 0);
+
+        return new Promise(resolve => {
+            canvas.toBlob(resolve, 'image/jpeg', 0.5);
+        });
+    }
+
+    /**
+     * Allegement en lot : convertit tous les fichiers 'exporte' en fac-similes
+     * @param {Function} onProgression - Callback (traites, total)
+     * @returns {Promise<{convertis: number, erreurs: number}>}
+     */
+    async function allegerFichiersExportes(onProgression) {
+        const fichiers = obtenirFichiersTravaux();
+        const exportes = fichiers.filter(f => f.blobStatut === 'exporte');
+        let convertis = 0;
+        let erreurs = 0;
+
+        for (let i = 0; i < exportes.length; i++) {
+            const ok = await convertirEnFacsimile(exportes[i].id);
+            if (ok) convertis++;
+            else erreurs++;
+
+            if (onProgression) {
+                onProgression(i + 1, exportes.length);
+            }
+        }
+
+        return { convertis, erreurs };
+    }
+
+    /* ===============================
        INITIALISATION
        =============================== */
 
@@ -709,6 +909,9 @@
                 const persistent = await navigator.storage.persist();
                 console.log(`[Travaux-Stockage] Stockage persistant: ${persistent ? 'accorde' : 'refuse'}`);
             }
+
+            // Migration blobStatut pour fichiers existants
+            migrerBlobStatut();
 
             console.log(`[Travaux-Stockage] Module initialise (mode: ${fsapiActif ? 'FSAPI' : 'IndexedDB'})`);
         } catch (error) {
@@ -768,7 +971,13 @@
         estFSAPIActif: estFSAPIActif,
         configurerRepertoireFSAPI: configurerRepertoireFSAPI,
         // Nettoyage
-        nettoyerFichiersArchives: nettoyerFichiersArchives
+        nettoyerFichiersArchives: nettoyerFichiersArchives,
+        // Cycle de vie des blobs
+        marquerExporte: marquerExporte,
+        convertirEnFacsimile: convertirEnFacsimile,
+        allegerFichiersExportes: allegerFichiersExportes,
+        // Sauvegarde (expose pour reimport)
+        sauvegarderFichiersTravaux: sauvegarderFichiersTravaux
     };
 
 })();
