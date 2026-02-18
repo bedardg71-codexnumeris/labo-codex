@@ -1173,81 +1173,84 @@
             return null;
         }
 
-        // 6. Clustering des lignes par angle (groupes de bords paralleles)
-        const clusters = clusteriserLignesParAngle(lines, 15);
+        // 8. Clustering des lignes par angle (tolerance reduite : 8° au lieu de 15°
+        //    pour separer les bords du document des lignes de texte)
+        const clusters = clusteriserLignesParAngle(lines, 8);
 
-        // Il faut au moins 2 clusters d'orientations differentes
         console.log('[Auto-persp] Clusters:', clusters.length, clusters.map(c => c.length + ' lignes, theta~' + Math.round(c[0].theta) + '°').join(' | '));
         if (clusters.length < 2) {
             console.log('[Auto-persp] ECHEC: < 2 clusters');
             return null;
         }
 
-        // 7. Prendre les 2 clusters les plus forts
-        //    (chaque cluster = un ensemble de lignes quasi-paralleles = un pair de bords)
-        clusters.sort((a, b) => {
-            const votesA = a.reduce((s, l) => s + l.votes, 0);
-            const votesB = b.reduce((s, l) => s + l.votes, 0);
-            return votesB - votesA;
-        });
+        // 9. Essayer toutes les paires de clusters quasi-perpendiculaires
+        //    et garder celle qui produit le plus grand quadrilatere valide.
+        //    Ceci evite de prendre les lignes de texte (0°/90°) au lieu des bords du document.
+        const distMin = Math.min(dw, dh) * 0.1;
+        const candidats = [];
 
-        const cluster1 = clusters[0];
-        const cluster2 = clusters[1];
+        for (let i = 0; i < clusters.length; i++) {
+            for (let j = i + 1; j < clusters.length; j++) {
+                // Les 2 clusters doivent etre quasi-perpendiculaires (45-135°)
+                const angleDiff = diffAngle180(clusters[i][0].theta, clusters[j][0].theta);
+                if (angleDiff < 30 || angleDiff > 150) continue;
 
-        // 8. Dans chaque cluster, trouver les 2 bords les plus eloignes
-        //    (= les 2 cotes opposes du document)
-        const paire1 = trouverBordsOpposes(cluster1, Math.min(dw, dh) * 0.1);
-        const paire2 = trouverBordsOpposes(cluster2, Math.min(dw, dh) * 0.1);
+                const p1 = trouverBordsOpposes(clusters[i], distMin);
+                const p2 = trouverBordsOpposes(clusters[j], distMin);
+                if (!p1 || !p2) continue;
 
-        console.log('[Auto-persp] Paire1:', paire1 ? 'OK (rho ' + paire1.map(l => l.rho).join(',') + ')' : 'NULL');
-        console.log('[Auto-persp] Paire2:', paire2 ? 'OK (rho ' + paire2.map(l => l.rho).join(',') + ')' : 'NULL');
-        if (!paire1 || !paire2) {
-            console.log('[Auto-persp] ECHEC: paire(s) manquante(s)');
-            return null;
-        }
+                // Calculer les 4 intersections
+                const inters = [];
+                for (const l1 of p1) {
+                    for (const l2 of p2) {
+                        const pt = intersectionLignes(l1, l2);
+                        if (pt) inters.push(pt);
+                    }
+                }
+                if (inters.length !== 4) continue;
 
-        // 9. Calculer les 4 intersections (chaque ligne de paire1 × chaque ligne de paire2)
-        const intersections = [];
-        for (const l1 of paire1) {
-            for (const l2 of paire2) {
-                const pt = intersectionLignes(l1, l2);
-                if (pt) intersections.push(pt);
+                const coins = ordonnerCoins(inters);
+                const result = coins.map(p => ({
+                    x: p.x / dw,
+                    y: p.y / dh
+                }));
+
+                // Valider les limites
+                const valide = result.every(p =>
+                    p.x >= -PERSPECTIVE_MARGE && p.x <= 1 + PERSPECTIVE_MARGE &&
+                    p.y >= -PERSPECTIVE_MARGE && p.y <= 1 + PERSPECTIVE_MARGE
+                );
+                if (!valide) continue;
+
+                const surface = surfaceQuad(result);
+                if (surface < 0.05) continue;
+
+                candidats.push({
+                    result,
+                    surface,
+                    theta1: Math.round(clusters[i][0].theta),
+                    theta2: Math.round(clusters[j][0].theta)
+                });
             }
         }
 
-        console.log('[Auto-persp] Intersections:', intersections.length, intersections.map(p => '(' + p.x.toFixed(0) + ',' + p.y.toFixed(0) + ')').join(' '));
-        if (intersections.length !== 4) {
-            console.log('[Auto-persp] ECHEC: ' + intersections.length + ' intersections au lieu de 4');
+        console.log('[Auto-persp] Candidats valides:', candidats.length,
+            candidats.map(c => 'θ' + c.theta1 + '°×θ' + c.theta2 + '° surface=' + c.surface.toFixed(3)).join(' | '));
+
+        if (candidats.length === 0) {
+            console.log('[Auto-persp] ECHEC: aucun candidat valide');
             return null;
         }
 
-        // 10. Ordonner les coins : TL, TR, BR, BL
-        const coins = ordonnerCoins(intersections);
+        // Prendre le candidat avec la plus grande surface (= le document, pas le texte)
+        candidats.sort((a, b) => b.surface - a.surface);
+        const meilleur = candidats[0];
 
-        // 11. Convertir en fractions 0-1
-        const result = coins.map(p => ({
-            x: p.x / dw,
-            y: p.y / dh
-        }));
-
-        // Verifier que les coins sont dans des limites raisonnables
-        // (genereux : jusqu'a PERSPECTIVE_MARGE hors cadre)
-        const valide = result.every(p =>
-            p.x >= -PERSPECTIVE_MARGE && p.x <= 1 + PERSPECTIVE_MARGE &&
-            p.y >= -PERSPECTIVE_MARGE && p.y <= 1 + PERSPECTIVE_MARGE
-        );
-
-        // Verifier que le quadrilatere a une surface minimale (>5% de l'image)
-        const surface = surfaceQuad(result);
-        console.log('[Auto-persp] Coins finaux:', result.map(p => '(' + p.x.toFixed(3) + ',' + p.y.toFixed(3) + ')').join(' '));
-        console.log('[Auto-persp] Surface:', surface.toFixed(3), ', valide:', valide);
-        if (!valide || surface < 0.05) {
-            console.log('[Auto-persp] ECHEC: valide=' + valide + ', surface=' + surface.toFixed(3));
-            return null;
-        }
-
+        console.log('[Auto-persp] Meilleur: θ' + meilleur.theta1 + '°×θ' + meilleur.theta2 +
+            '° surface=' + meilleur.surface.toFixed(3));
+        console.log('[Auto-persp] Coins:', meilleur.result.map(p => '(' + p.x.toFixed(3) + ',' + p.y.toFixed(3) + ')').join(' '));
         console.log('[Auto-persp] SUCCES');
-        return result;
+        return meilleur.result;
     }
 
     /**
