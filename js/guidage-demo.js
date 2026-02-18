@@ -48,9 +48,17 @@ const GUIDAGE_TEXTES = {
         titre: 'Liste des \u00e9valuations',
         texte: 'Toutes les \u00e9valuations enregistr\u00e9es, filtrables par production et par groupe. Cliquez sur une \u00e9valuation pour voir le d\u00e9tail crit\u00e9ri\u00e9.'
     },
-    'evaluations-travaux': {
-        titre: 'Travaux',
-        texte: 'Le module Travaux permet d\u2019importer les fichiers des \u00e9tudiants (PDF, images), de les annoter directement \u00e0 l\u2019\u00e9cran et d\u2019y apposer des tampons de r\u00e9troaction.'
+    'evaluations-importer': {
+        titre: 'Importer et préparer',
+        texte: 'Importer les fichiers des étudiants (PDF, images), les préparer (rotation, assemblage) et les associer à une production.'
+    },
+    'evaluations-annoter': {
+        titre: 'Annoter et évaluer',
+        texte: 'Annoter les copies directement à l\u2019écran, apposer des tampons de rétroaction et évaluer selon la grille de critères.'
+    },
+    'evaluations-exporter': {
+        titre: 'Exporter et archiver',
+        texte: 'Exporter les PDF annotés aux étudiants, archiver le semestre et alléger le stockage.'
     },
     'construction-apercu': {
         titre: 'Construction de la note \u2014 Aper\u00e7u',

@@ -192,11 +192,11 @@ function afficherAccueilRetour(conteneur) {
                     Saisis les pr\u00e9sences du jour pour ton groupe et ajoute des observations.
                 </div>
             </div>
-            <div class="accueil-carte" onclick="afficherSection('evaluations'); setTimeout(function(){ afficherSousSection('evaluations-travaux'); }, 100);">
+            <div class="accueil-carte" onclick="afficherSection('evaluations'); setTimeout(function(){ afficherSousSection('evaluations-annoter'); }, 100);">
                 <div class="accueil-carte-icone">&#x1F4DD;</div>
-                <div class="accueil-carte-titre">Annoter des travaux</div>
+                <div class="accueil-carte-titre">Annoter et \u00e9valuer</div>
                 <div class="accueil-carte-desc">
-                    Annote les travaux de tes \u00e9tudiants et appose des r\u00e9troactions cibl\u00e9es et visuelles.
+                    Annote les travaux de tes \u00e9tudiants et \u00e9value-les selon la grille de crit\u00e8res.
                 </div>
             </div>
             <div class="accueil-carte" onclick="afficherSection('evaluations'); setTimeout(function(){ afficherSousSection('evaluations-liste'); }, 100);">

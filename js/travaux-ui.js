@@ -229,6 +229,40 @@
     }
 
     /**
+     * Affiche la grille de fichiers dans l'onglet Annoter et évaluer
+     * État initial : sélection de fichier pour annotation
+     */
+    function afficherFichiers() {
+        const conteneur = document.getElementById('evaluations-contenu-fichiers');
+        if (!conteneur) return;
+
+        // S'assurer que la grille est visible et la visionneuse masquée
+        conteneur.classList.remove('u-hide');
+        const visDiv = document.getElementById('evaluations-contenu-visionneuse');
+        if (visDiv) visDiv.classList.add('u-hide');
+        const evalDiv = document.getElementById('evaluations-contenu-evaluation');
+        if (evalDiv) evalDiv.classList.add('u-hide');
+
+        const fichiersTravaux = travauxStockage.obtenirFichiersTravaux();
+
+        if (fichiersTravaux.length === 0) {
+            conteneur.innerHTML = `
+                <div class="conteneur">
+                    <h2>Annoter et évaluer</h2>
+                    <p class="text-muted">Aucun fichier importé. Importez des travaux depuis l'onglet « Importer et préparer ».</p>
+                </div>`;
+            return;
+        }
+
+        conteneur.innerHTML = `
+            <div class="conteneur">
+                <h2>Annoter et évaluer</h2>
+                <p class="text-muted">Sélectionnez un fichier pour commencer l'annotation</p>
+                ${genererGrilleFichiers(fichiersTravaux)}
+            </div>`;
+    }
+
+    /**
      * Affiche la sous-section Visionneuse
      */
     function afficherVisionneuse() {
@@ -261,7 +295,7 @@
                     <!-- Toolbar -->
                     <div class="travaux-toolbar">
                         <div class="travaux-toolbar-gauche">
-                            <button class="btn btn-petit" onclick="travauxUI.retourImport()" title="Retour a la liste">&#x2190; Retour</button>
+                            <button class="btn btn-petit" onclick="travauxUI.retourFichiers()" title="Retour a la grille">&#x2190; Retour</button>
                             <span id="travaux-nom-fichier" class="travaux-nom-fichier">Aucun fichier ouvert</span>
                             <span id="travaux-badge-statut" class="u-hide"></span>
                         </div>
@@ -277,7 +311,7 @@
                             <span class="travaux-separateur"></span>
                             <button id="travaux-btn-annoter" class="btn btn-petit" onclick="travauxAnnotation.basculerAnnotation()">Annoter</button>
                             <button id="travaux-btn-export-pdf" class="btn btn-petit u-hide" onclick="travauxExportPDF.afficherRevisionExport(travauxVisionneuse.getFichierActuel()?.id)" title="Exporter PDF annote">Exporter PDF</button>
-                            <button id="travaux-btn-evaluer" class="btn btn-petit u-hide" onclick="travauxUI.evaluerDepuisAnnotation()" title="Evaluer cette production">Evaluer</button>
+                            <button id="travaux-btn-evaluer" class="btn btn-ajouter btn-petit u-hide" onclick="travauxUI.evaluerDepuisAnnotation()" title="Evaluer cette production">Evaluer</button>
                             <button id="travaux-btn-alleger" class="btn btn-petit u-hide" onclick="travauxUI.allegerFichier(travauxVisionneuse.getFichierActuel()?.id)" title="Alleger ce fichier">Alleger</button>
                             <button id="travaux-btn-reimporter" class="btn btn-petit u-hide" onclick="travauxUI.reimporterFichier(travauxVisionneuse.getFichierActuel()?.id)" title="Re-importer l'original">Re-importer</button>
                         </div>
@@ -638,11 +672,22 @@
      * @param {string} fichierId - ID du fichier
      */
     async function ouvrirFichier(fichierId) {
-        // Toggle interne : masquer import, afficher visionneuse
-        const importDiv = document.getElementById('evaluations-contenu-import');
+        // Naviguer vers l'onglet Annoter et évaluer si pas déjà dessus
+        if (typeof afficherSousSection === 'function') {
+            const sousSectionActive = document.querySelector('#evaluations-annoter.sous-section.active') ||
+                                       document.querySelector('#evaluations-annoter.sous-section[style*="display: block"]');
+            if (!sousSectionActive || sousSectionActive.offsetParent === null) {
+                afficherSousSection('evaluations-annoter');
+            }
+        }
+
+        // Toggle interne : masquer grille fichiers, afficher visionneuse
+        const fichiersDiv = document.getElementById('evaluations-contenu-fichiers');
         const visDiv = document.getElementById('evaluations-contenu-visionneuse');
-        if (importDiv) importDiv.classList.add('u-hide');
+        const evalDiv = document.getElementById('evaluations-contenu-evaluation');
+        if (fichiersDiv) fichiersDiv.classList.add('u-hide');
         if (visDiv) visDiv.classList.remove('u-hide');
+        if (evalDiv) evalDiv.classList.add('u-hide');
         afficherVisionneuse();
 
         // Attendre que la visionneuse soit prete
@@ -942,13 +987,37 @@
             return;
         }
 
-        // Utiliser la fonction existante de liste-evaluations.js
-        if (typeof evaluerProduction === 'function') {
-            evaluerProduction(da, productionId);
-        } else {
-            console.error('[Travaux-UI] Fonction evaluerProduction non disponible');
-            alert('Erreur: Module d\'evaluation non charge.');
+        // Toggler le panneau d'évaluation dans l'onglet Annoter et évaluer
+        const evalDiv = document.getElementById('evaluations-contenu-evaluation');
+        if (evalDiv) {
+            const estVisible = !evalDiv.classList.contains('u-hide');
+            if (estVisible) {
+                evalDiv.classList.add('u-hide');
+                return;
+            }
+            evalDiv.classList.remove('u-hide');
         }
+
+        // Pré-remplir le formulaire d'évaluation
+        setTimeout(() => {
+            const selectEtudiant = document.getElementById('selectEtudiantEval');
+            const selectProduction = document.getElementById('selectProduction1');
+
+            if (selectEtudiant) {
+                selectEtudiant.value = da;
+                if (typeof chargerEvaluationsEtudiant === 'function') {
+                    chargerEvaluationsEtudiant();
+                }
+            }
+
+            setTimeout(() => {
+                if (selectProduction) {
+                    selectProduction.value = productionId;
+                    const event = new Event('change');
+                    selectProduction.dispatchEvent(event);
+                }
+            }, 100);
+        }, 100);
     }
 
     /* ===============================
@@ -1037,15 +1106,18 @@
         if (!sousSection) return;
 
         switch (sousSection) {
-            case 'evaluations-travaux':
+            case 'evaluations-importer':
+                afficherImport();
+                break;
+            case 'evaluations-annoter':
                 const visDiv = document.getElementById('evaluations-contenu-visionneuse');
                 if (visDiv && !visDiv.classList.contains('u-hide')) {
                     afficherVisionneuse();
                 } else {
-                    afficherImport();
+                    afficherFichiers();
                 }
                 break;
-            case 'evaluations-archivage':
+            case 'evaluations-exporter':
                 afficherArchivage();
                 break;
         }
@@ -1071,14 +1143,23 @@
     }
 
     /**
-     * Retour a la vue import depuis la visionneuse
+     * Retour a la grille de fichiers depuis la visionneuse (onglet Annoter)
+     */
+    function retourFichiers() {
+        const fichiersDiv = document.getElementById('evaluations-contenu-fichiers');
+        const visDiv = document.getElementById('evaluations-contenu-visionneuse');
+        const evalDiv = document.getElementById('evaluations-contenu-evaluation');
+        if (fichiersDiv) fichiersDiv.classList.remove('u-hide');
+        if (visDiv) visDiv.classList.add('u-hide');
+        if (evalDiv) evalDiv.classList.add('u-hide');
+        afficherFichiers();
+    }
+
+    /**
+     * Retour a la vue import (compat legacy)
      */
     function retourImport() {
-        const importDiv = document.getElementById('evaluations-contenu-import');
-        const visDiv = document.getElementById('evaluations-contenu-visionneuse');
-        if (importDiv) importDiv.classList.remove('u-hide');
-        if (visDiv) visDiv.classList.add('u-hide');
-        afficherImport();
+        retourFichiers();
     }
 
     // Fonction globale pour le callback de rafraichissement
@@ -1092,6 +1173,7 @@
         initialiser: initialiserModuleTravaux,
         // Sous-sections
         afficherImport: afficherImport,
+        afficherFichiers: afficherFichiers,
         afficherVisionneuse: afficherVisionneuse,
         afficherArchivage: afficherArchivage,
         // Actions
@@ -1100,6 +1182,7 @@
         ouvrirFichier: ouvrirFichier,
         filtrerParEtudiant: filtrerParEtudiant,
         toggleSidebar: toggleSidebar,
+        retourFichiers: retourFichiers,
         retourImport: retourImport,
         // Archivage
         lancerArchivageEtudiant: lancerArchivageEtudiant,

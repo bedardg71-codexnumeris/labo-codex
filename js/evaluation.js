@@ -2424,9 +2424,19 @@ function naviguerVersListeEvaluations() {
 function evaluerProduction(da, productionId) {
     console.log('🎯 Navigation vers évaluation:', { da, productionId });
 
-    // 1. Naviguer vers la section d'évaluation individuelle
+    // 1. Naviguer vers la section Évaluations › Annoter et évaluer
     afficherSection('evaluations');
-    afficherSousSection('evaluations-individuelles');
+    afficherSousSection('evaluations-annoter');
+
+    // Rendre le formulaire d'évaluation visible
+    setTimeout(() => {
+        const evalDiv = document.getElementById('evaluations-contenu-evaluation');
+        const fichiersDiv = document.getElementById('evaluations-contenu-fichiers');
+        const visDiv2 = document.getElementById('evaluations-contenu-visionneuse');
+        if (evalDiv) evalDiv.classList.remove('u-hide');
+        if (fichiersDiv) fichiersDiv.classList.add('u-hide');
+        if (visDiv2) visDiv2.classList.add('u-hide');
+    }, 50);
 
     // 2. Attendre que le DOM soit prêt et pré-remplir le formulaire
     setTimeout(() => {
@@ -4213,8 +4223,18 @@ function modifierEvaluation(evaluationId) {
 
     const estVerrouillee = evaluation.verrouillee || false;
 
-    // Naviguer vers la section d'évaluation
-    afficherSousSection('evaluations-individuelles');
+    // Naviguer vers la section d'évaluation (onglet Annoter et évaluer)
+    afficherSousSection('evaluations-annoter');
+
+    // Rendre le formulaire d'évaluation visible
+    setTimeout(() => {
+        const evalDiv = document.getElementById('evaluations-contenu-evaluation');
+        const fichiersDiv = document.getElementById('evaluations-contenu-fichiers');
+        const visDiv3 = document.getElementById('evaluations-contenu-visionneuse');
+        if (evalDiv) evalDiv.classList.remove('u-hide');
+        if (fichiersDiv) fichiersDiv.classList.add('u-hide');
+        if (visDiv3) visDiv3.classList.add('u-hide');
+    }, 50);
 
     // ========== FONCTIONS HELPER ==========
 
@@ -5629,7 +5649,7 @@ function desactiverFormulaireEvaluation(desactiver) {
     });
 
     // Désactiver le bouton de sauvegarde
-    const boutonsSauvegarde = document.querySelectorAll('#evaluations-individuelles button');
+    const boutonsSauvegarde = document.querySelectorAll('#evaluations-contenu-evaluation button');
     boutonsSauvegarde.forEach(btn => {
         if (btn.textContent.includes('Sauvegarder')) {
             btn.disabled = desactiver;

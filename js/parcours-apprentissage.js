@@ -130,7 +130,7 @@ const JALONS = {
         titre: 'Annoter des travaux',
         description: 'Importer et annoter les copies de tes étudiants.',
         chapitre: 'enseigner',
-        navigation: { section: 'evaluations', sousSection: 'evaluations-travaux' }
+        navigation: { section: 'evaluations', sousSection: 'evaluations-importer' }
     },
     'evaluer-production': {
         numero: '⑫',
