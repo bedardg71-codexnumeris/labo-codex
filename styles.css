@@ -13905,11 +13905,32 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 }
 
 .travaux-grille-item {
+    position: relative;
     border: 1px solid var(--bordure-claire);
     border-radius: var(--radius-moyen);
     overflow: hidden;
     cursor: pointer;
     transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.travaux-grille-btn-supprimer {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    font-size: 0.75rem;
+    line-height: 22px;
+    text-align: center;
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 2;
+}
+
+.travaux-grille-item:hover .travaux-grille-btn-supprimer {
+    opacity: 1;
 }
 
 .travaux-grille-item:hover {
@@ -13950,6 +13971,239 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 .travaux-grille-etudiant {
     font-size: 0.75rem;
     color: var(--gris-moyen);
+}
+
+/* ===============================
+   PREPARATION IMAGES — PALETTES FLOTTANTES
+   =============================== */
+
+.prep-header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 12px;
+    border-bottom: 1px solid var(--bordure-legere);
+    flex-shrink: 0;
+    background: var(--fond-principal);
+    gap: 12px;
+}
+
+.prep-header-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.prep-workspace {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: var(--fond-secondaire);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Palette flottante */
+.prep-palette {
+    position: absolute;
+    z-index: 80;
+    background: var(--fond-principal);
+    border: 1px solid var(--bordure-legere);
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    min-width: 190px;
+    max-width: 230px;
+    user-select: none;
+}
+
+.prep-palette-barre {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 10px;
+    cursor: grab;
+    border-bottom: 1px solid var(--bordure-legere);
+    border-radius: 10px 10px 0 0;
+}
+.prep-palette-barre:active { cursor: grabbing; }
+
+.prep-palette-titre {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--texte-muted);
+}
+
+.prep-palette-toggle {
+    background: none;
+    border: none;
+    color: var(--texte-muted);
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+}
+
+.prep-palette-contenu {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 6px;
+}
+.prep-palette.replie .prep-palette-contenu { display: none; }
+.prep-palette.replie .prep-palette-footer { display: none; }
+
+/* Sections (dropdowns) */
+.prep-section {
+    border-radius: 6px;
+}
+
+.prep-section-label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--texte-muted);
+    cursor: pointer;
+    border-radius: 4px;
+}
+.prep-section-label:hover { background: rgba(255,255,255,0.05); }
+
+.prep-section-label .prep-chevron {
+    font-size: 0.65rem;
+    transition: transform 0.15s;
+    display: inline-block;
+    width: 10px;
+}
+.prep-section.replie .prep-chevron { transform: rotate(-90deg); }
+
+.prep-section-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 4px 4px 6px;
+}
+.prep-section.replie .prep-section-body { display: none; }
+
+/* Boutons palette */
+.prep-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 8px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    background: var(--fond-secondaire);
+    color: var(--texte-principal);
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+.prep-btn:hover {
+    border-color: var(--bordure-legere);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+.prep-btn.actif {
+    background: var(--accent-principal);
+    color: #fff;
+    border-color: var(--accent-principal);
+}
+.prep-btn.prep-btn-appliquer {
+    background: var(--accent-principal);
+    color: #fff;
+    font-weight: 600;
+}
+
+.prep-btn-row {
+    display: flex;
+    gap: 4px;
+}
+.prep-btn-row .prep-btn {
+    flex: 1;
+    justify-content: center;
+}
+
+/* Sliders */
+.prep-slider-groupe {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 2px 4px;
+}
+.prep-slider-groupe label {
+    font-size: 0.75rem;
+    color: var(--texte-muted);
+    display: flex;
+    justify-content: space-between;
+}
+.prep-slider-groupe input[type="range"] { width: 100%; }
+
+/* Actions bas de palette */
+.prep-palette-footer {
+    display: flex;
+    gap: 4px;
+    padding: 6px;
+    border-top: 1px solid var(--bordure-legere);
+}
+.prep-palette-footer .prep-btn {
+    flex: 1;
+    justify-content: center;
+    font-size: 0.75rem;
+}
+
+/* Palette fichiers — miniatures */
+.prep-mini-liste {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.prep-mini {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    color: var(--texte-principal);
+}
+.prep-mini:hover { background: rgba(255,255,255,0.05); }
+.prep-mini.actif {
+    background: rgba(106, 172, 184, 0.15);
+    font-weight: 600;
+}
+.prep-mini-nom {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+}
+.prep-mini.modifie .prep-mini-nom::after {
+    content: ' *';
+    color: var(--accent-principal);
+    font-weight: bold;
+}
+.prep-mini-check {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 0 2px;
+    color: var(--texte-muted);
+    flex-shrink: 0;
 }
 
 /* --- Layout Visionneuse --- */
