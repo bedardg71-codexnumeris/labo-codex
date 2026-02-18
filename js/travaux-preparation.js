@@ -1,8 +1,8 @@
 /* ===============================
    MODULE: TRAVAUX - PREPARATION
    Poste de preparation des images AVANT import.
-   Outils semi-automatiques : rotation, crop, perspective,
-   luminosite, contraste, niveaux de gris.
+   Outils semi-automatiques : rotation, crop, perspective (+ auto-detection),
+   luminosite, contraste, exposition, balance des blancs, niveaux de gris.
 
    Pile de transformations non-destructive.
    Deux modes de rendu : apercu interactif (1600px) et final (pleine resolution).
@@ -1026,6 +1026,419 @@
         mettreAJourApercu();
     }
 
+    /* ===============================
+       DETECTION AUTOMATIQUE DES COINS
+       Pipeline : downscale → grayscale → blur → Canny → Hough → coins
+       =============================== */
+
+    const DETECT_SIZE = 400;          // Taille max pour la detection (vitesse)
+    const HOUGH_THETA_RES = 1;        // Resolution angulaire en degres
+    const HOUGH_RHO_RES = 1;          // Resolution en pixels
+    const CANNY_LOW = 30;             // Seuil bas Canny
+    const CANNY_HIGH = 90;            // Seuil haut Canny
+
+    /**
+     * Detecte automatiquement les 4 coins du document dans l'image
+     * et positionne les poignees de perspective dessus.
+     */
+    function detecterCoinsAuto() {
+        if (!imageTravail) return;
+
+        outilActif = 'perspective';
+        const coins = detecterCoinsDocument(imageTravail);
+
+        if (coins) {
+            perspectiveCorners = coins;
+        } else {
+            // Fallback : coins par defaut si detection echoue
+            perspectiveCorners = [
+                { x: 0.05, y: 0.05 },
+                { x: 0.95, y: 0.05 },
+                { x: 0.95, y: 0.95 },
+                { x: 0.05, y: 0.95 }
+            ];
+        }
+        mettreAJourApercu();
+    }
+
+    /**
+     * Pipeline complete de detection des coins d'un document
+     * @param {HTMLCanvasElement} source - Canvas source
+     * @returns {Array|null} 4 coins [{x,y}] en fractions 0-1, ou null si echec
+     */
+    function detecterCoinsDocument(source) {
+        const w = source.width;
+        const h = source.height;
+
+        // 1. Downscale pour la vitesse
+        const scale = Math.min(1, DETECT_SIZE / Math.max(w, h));
+        const dw = Math.round(w * scale);
+        const dh = Math.round(h * scale);
+
+        const small = document.createElement('canvas');
+        small.width = dw;
+        small.height = dh;
+        small.getContext('2d').drawImage(source, 0, 0, dw, dh);
+
+        const ctx = small.getContext('2d');
+        const imgData = ctx.getImageData(0, 0, dw, dh);
+        const pixels = imgData.data;
+
+        // 2. Grayscale
+        const gray = new Float32Array(dw * dh);
+        for (let i = 0; i < gray.length; i++) {
+            const idx = i * 4;
+            gray[i] = 0.299 * pixels[idx] + 0.587 * pixels[idx + 1] + 0.114 * pixels[idx + 2];
+        }
+
+        // 3. Gaussian blur 5x5
+        const blurred = gaussianBlur5x5(gray, dw, dh);
+
+        // 4. Canny edge detection
+        const edges = cannyEdgeDetection(blurred, dw, dh);
+
+        // 5. Hough line transform
+        const lines = houghLines(edges, dw, dh, 50);
+
+        if (lines.length < 4) return null;
+
+        // 6. Separer en lignes horizontales et verticales
+        const horizontales = [];
+        const verticales = [];
+
+        for (const line of lines) {
+            const angle = line.theta;
+            // Horizontale : theta proche de 90° (±30°)
+            if (angle > 60 && angle < 120) {
+                horizontales.push(line);
+            }
+            // Verticale : theta proche de 0° ou 180° (±30°)
+            else if (angle < 30 || angle > 150) {
+                verticales.push(line);
+            }
+        }
+
+        if (horizontales.length < 2 || verticales.length < 2) return null;
+
+        // 7. Prendre les 2 meilleures de chaque groupe (plus de votes)
+        horizontales.sort((a, b) => b.votes - a.votes);
+        verticales.sort((a, b) => b.votes - a.votes);
+
+        // Filtrer les lignes trop proches (doublets)
+        const h2 = filtrerLignesProches(horizontales, dh * 0.15);
+        const v2 = filtrerLignesProches(verticales, dw * 0.15);
+
+        if (h2.length < 2 || v2.length < 2) return null;
+
+        // 8. Calculer les 4 intersections
+        const intersections = [];
+        for (let i = 0; i < 2; i++) {
+            for (let j = 0; j < 2; j++) {
+                const pt = intersectionLignes(h2[i], v2[j]);
+                if (pt) intersections.push(pt);
+            }
+        }
+
+        if (intersections.length !== 4) return null;
+
+        // 9. Ordonner les coins : TL, TR, BR, BL
+        const coins = ordonnerCoins(intersections);
+
+        // 10. Convertir en fractions 0-1 et valider
+        const result = coins.map(p => ({
+            x: p.x / dw,
+            y: p.y / dh
+        }));
+
+        // Verifier que les coins sont dans des limites raisonnables
+        const valide = result.every(p =>
+            p.x >= -PERSPECTIVE_MARGE && p.x <= 1 + PERSPECTIVE_MARGE &&
+            p.y >= -PERSPECTIVE_MARGE && p.y <= 1 + PERSPECTIVE_MARGE
+        );
+
+        // Verifier que le quadrilatere a une surface minimale (>5% de l'image)
+        const surface = surfaceQuad(result);
+        if (!valide || surface < 0.05) return null;
+
+        return result;
+    }
+
+    /**
+     * Gaussian blur 5x5
+     */
+    function gaussianBlur5x5(src, w, h) {
+        const kernel = [
+            1, 4, 7, 4, 1,
+            4, 16, 26, 16, 4,
+            7, 26, 41, 26, 7,
+            4, 16, 26, 16, 4,
+            1, 4, 7, 4, 1
+        ];
+        const kSum = 273;
+        const dst = new Float32Array(w * h);
+
+        for (let y = 2; y < h - 2; y++) {
+            for (let x = 2; x < w - 2; x++) {
+                let sum = 0;
+                let ki = 0;
+                for (let ky = -2; ky <= 2; ky++) {
+                    for (let kx = -2; kx <= 2; kx++) {
+                        sum += src[(y + ky) * w + (x + kx)] * kernel[ki++];
+                    }
+                }
+                dst[y * w + x] = sum / kSum;
+            }
+        }
+        return dst;
+    }
+
+    /**
+     * Canny edge detection simplifie
+     * @returns {Uint8Array} Carte binaire des aretes (0 ou 255)
+     */
+    function cannyEdgeDetection(src, w, h) {
+        // Sobel X et Y
+        const gx = new Float32Array(w * h);
+        const gy = new Float32Array(w * h);
+        const mag = new Float32Array(w * h);
+        const dir = new Float32Array(w * h);
+
+        for (let y = 1; y < h - 1; y++) {
+            for (let x = 1; x < w - 1; x++) {
+                const idx = y * w + x;
+                // Sobel X
+                gx[idx] = -src[(y - 1) * w + (x - 1)] - 2 * src[y * w + (x - 1)] - src[(y + 1) * w + (x - 1)]
+                          + src[(y - 1) * w + (x + 1)] + 2 * src[y * w + (x + 1)] + src[(y + 1) * w + (x + 1)];
+                // Sobel Y
+                gy[idx] = -src[(y - 1) * w + (x - 1)] - 2 * src[(y - 1) * w + x] - src[(y - 1) * w + (x + 1)]
+                          + src[(y + 1) * w + (x - 1)] + 2 * src[(y + 1) * w + x] + src[(y + 1) * w + (x + 1)];
+
+                mag[idx] = Math.sqrt(gx[idx] * gx[idx] + gy[idx] * gy[idx]);
+                dir[idx] = Math.atan2(gy[idx], gx[idx]);
+            }
+        }
+
+        // Non-maximum suppression
+        const nms = new Float32Array(w * h);
+        for (let y = 1; y < h - 1; y++) {
+            for (let x = 1; x < w - 1; x++) {
+                const idx = y * w + x;
+                const angle = (dir[idx] * 180 / Math.PI + 180) % 180;
+                let m1 = 0, m2 = 0;
+
+                if (angle < 22.5 || angle >= 157.5) {
+                    m1 = mag[idx - 1];
+                    m2 = mag[idx + 1];
+                } else if (angle < 67.5) {
+                    m1 = mag[(y - 1) * w + (x + 1)];
+                    m2 = mag[(y + 1) * w + (x - 1)];
+                } else if (angle < 112.5) {
+                    m1 = mag[(y - 1) * w + x];
+                    m2 = mag[(y + 1) * w + x];
+                } else {
+                    m1 = mag[(y - 1) * w + (x - 1)];
+                    m2 = mag[(y + 1) * w + (x + 1)];
+                }
+
+                nms[idx] = (mag[idx] >= m1 && mag[idx] >= m2) ? mag[idx] : 0;
+            }
+        }
+
+        // Double seuil + hysteresis
+        const edges = new Uint8Array(w * h);
+        const STRONG = 255;
+        const WEAK = 75;
+
+        for (let i = 0; i < nms.length; i++) {
+            if (nms[i] >= CANNY_HIGH) edges[i] = STRONG;
+            else if (nms[i] >= CANNY_LOW) edges[i] = WEAK;
+        }
+
+        // Hysteresis : connecter les faibles aux forts
+        let changed = true;
+        while (changed) {
+            changed = false;
+            for (let y = 1; y < h - 1; y++) {
+                for (let x = 1; x < w - 1; x++) {
+                    const idx = y * w + x;
+                    if (edges[idx] !== WEAK) continue;
+
+                    // Verifier les 8 voisins
+                    if (edges[(y - 1) * w + (x - 1)] === STRONG || edges[(y - 1) * w + x] === STRONG ||
+                        edges[(y - 1) * w + (x + 1)] === STRONG || edges[y * w + (x - 1)] === STRONG ||
+                        edges[y * w + (x + 1)] === STRONG || edges[(y + 1) * w + (x - 1)] === STRONG ||
+                        edges[(y + 1) * w + x] === STRONG || edges[(y + 1) * w + (x + 1)] === STRONG) {
+                        edges[idx] = STRONG;
+                        changed = true;
+                    }
+                }
+            }
+        }
+
+        // Supprimer les faibles restants
+        for (let i = 0; i < edges.length; i++) {
+            if (edges[i] !== STRONG) edges[i] = 0;
+        }
+
+        return edges;
+    }
+
+    /**
+     * Transformee de Hough pour la detection de lignes
+     * @param {Uint8Array} edges - Carte binaire des aretes
+     * @param {number} w - Largeur
+     * @param {number} h - Hauteur
+     * @param {number} seuil - Nombre minimum de votes
+     * @returns {Array} Lignes detectees [{rho, theta, votes}]
+     */
+    function houghLines(edges, w, h, seuil) {
+        const maxRho = Math.ceil(Math.sqrt(w * w + h * h));
+        const thetaSteps = Math.ceil(180 / HOUGH_THETA_RES);
+        const rhoSteps = 2 * maxRho + 1;
+
+        // Precalculer cos/sin
+        const cosTable = new Float32Array(thetaSteps);
+        const sinTable = new Float32Array(thetaSteps);
+        for (let t = 0; t < thetaSteps; t++) {
+            const rad = (t * HOUGH_THETA_RES) * Math.PI / 180;
+            cosTable[t] = Math.cos(rad);
+            sinTable[t] = Math.sin(rad);
+        }
+
+        // Accumulateur
+        const accum = new Uint32Array(thetaSteps * rhoSteps);
+
+        for (let y = 0; y < h; y++) {
+            for (let x = 0; x < w; x++) {
+                if (edges[y * w + x] === 0) continue;
+                for (let t = 0; t < thetaSteps; t++) {
+                    const rho = Math.round(x * cosTable[t] + y * sinTable[t]) + maxRho;
+                    accum[t * rhoSteps + rho]++;
+                }
+            }
+        }
+
+        // Extraire les pics au-dessus du seuil
+        const lines = [];
+        for (let t = 0; t < thetaSteps; t++) {
+            for (let r = 0; r < rhoSteps; r++) {
+                const votes = accum[t * rhoSteps + r];
+                if (votes < seuil) continue;
+
+                // Suppression des non-maxima locaux (fenetre 5x5)
+                let estMax = true;
+                for (let dt = -2; dt <= 2 && estMax; dt++) {
+                    for (let dr = -2; dr <= 2 && estMax; dr++) {
+                        if (dt === 0 && dr === 0) continue;
+                        const nt = t + dt;
+                        const nr = r + dr;
+                        if (nt >= 0 && nt < thetaSteps && nr >= 0 && nr < rhoSteps) {
+                            if (accum[nt * rhoSteps + nr] > votes) estMax = false;
+                        }
+                    }
+                }
+
+                if (estMax) {
+                    lines.push({
+                        rho: r - maxRho,
+                        theta: t * HOUGH_THETA_RES,
+                        votes: votes
+                    });
+                }
+            }
+        }
+
+        lines.sort((a, b) => b.votes - a.votes);
+        return lines;
+    }
+
+    /**
+     * Filtre les lignes trop proches (garde la plus votee)
+     * @param {Array} lines - Lignes triees par votes decroissants
+     * @param {number} distMin - Distance rho minimale entre deux lignes
+     * @returns {Array} Lignes filtrees
+     */
+    function filtrerLignesProches(lines, distMin) {
+        const result = [];
+        for (const line of lines) {
+            const tropProche = result.some(l => Math.abs(l.rho - line.rho) < distMin);
+            if (!tropProche) {
+                result.push(line);
+                if (result.length >= 2) break;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Intersection de deux lignes Hough (rho, theta)
+     * @returns {{x, y}|null}
+     */
+    function intersectionLignes(l1, l2) {
+        const t1 = l1.theta * Math.PI / 180;
+        const t2 = l2.theta * Math.PI / 180;
+
+        const cos1 = Math.cos(t1), sin1 = Math.sin(t1);
+        const cos2 = Math.cos(t2), sin2 = Math.sin(t2);
+
+        const det = cos1 * sin2 - cos2 * sin1;
+        if (Math.abs(det) < 1e-6) return null;  // Paralleles
+
+        return {
+            x: (l1.rho * sin2 - l2.rho * sin1) / det,
+            y: (l2.rho * cos1 - l1.rho * cos2) / det
+        };
+    }
+
+    /**
+     * Ordonne 4 points en TL, TR, BR, BL
+     */
+    function ordonnerCoins(points) {
+        // Centroid
+        const cx = points.reduce((s, p) => s + p.x, 0) / 4;
+        const cy = points.reduce((s, p) => s + p.y, 0) / 4;
+
+        const tl = points.filter(p => p.x < cx && p.y < cy)[0];
+        const tr = points.filter(p => p.x >= cx && p.y < cy)[0];
+        const br = points.filter(p => p.x >= cx && p.y >= cy)[0];
+        const bl = points.filter(p => p.x < cx && p.y >= cy)[0];
+
+        if (!tl || !tr || !br || !bl) {
+            // Fallback : trier par angle depuis le centroid
+            const sorted = points.slice().sort((a, b) => {
+                return Math.atan2(a.y - cy, a.x - cx) - Math.atan2(b.y - cy, b.x - cx);
+            });
+            // Le plus en haut-gauche en premier (angle ~= -135°)
+            // Trouver celui avec x+y minimal (top-left)
+            let minIdx = 0;
+            let minSum = Infinity;
+            for (let i = 0; i < sorted.length; i++) {
+                const sum = sorted[i].x + sorted[i].y;
+                if (sum < minSum) { minSum = sum; minIdx = i; }
+            }
+            const ordered = [];
+            for (let i = 0; i < 4; i++) {
+                ordered.push(sorted[(minIdx + i) % 4]);
+            }
+            return ordered;
+        }
+
+        return [tl, tr, br, bl];
+    }
+
+    /**
+     * Surface d'un quadrilatere (Shoelace formula) en fractions
+     */
+    function surfaceQuad(pts) {
+        let area = 0;
+        for (let i = 0; i < 4; i++) {
+            const j = (i + 1) % 4;
+            area += pts[i].x * pts[j].y;
+            area -= pts[j].x * pts[i].y;
+        }
+        return Math.abs(area) / 2;
+    }
+
     function appliquerPerspective() {
         if (!perspectiveCorners) return;
         ajouterOperation({
@@ -1287,6 +1700,7 @@
                                     <button class="prep-btn" onclick="travauxPreparation.activerCrop()" style="width:100%;">Recadrage</button>
                                     <button class="prep-btn prep-btn-appliquer" id="prep-btn-appliquer-crop" onclick="travauxPreparation.appliquerCrop()" style="display:none; width:100%;">Appliquer crop</button>
                                     <button class="prep-btn" onclick="travauxPreparation.activerPerspective()" style="width:100%;">Perspective</button>
+                                    <button class="prep-btn" onclick="travauxPreparation.detecterCoinsAuto()" style="width:100%;" title="Detecte automatiquement les 4 coins du document">Auto-perspective</button>
                                     <button class="prep-btn prep-btn-appliquer" id="prep-btn-appliquer-persp" onclick="travauxPreparation.appliquerPerspective()" style="display:none; width:100%;">Appliquer perspective</button>
                                 </div>
                             </div>
@@ -1459,6 +1873,7 @@
         appliquerCrop: appliquerCrop,
         activerPerspective: activerPerspective,
         appliquerPerspective: appliquerPerspective,
+        detecterCoinsAuto: detecterCoinsAuto,
         changerLuminosite: changerLuminosite,
         changerContraste: changerContraste,
         changerExposition: changerExposition,
