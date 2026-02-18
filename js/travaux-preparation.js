@@ -1334,32 +1334,10 @@
             }
         }
 
-        // Top N-1 paires par score (scoring classique).
+        // Retourner les top N paires par score.
+        // Le scoring final (surface du quadrilatere) departage.
         paires.sort((a, b) => b.score - a.score);
-        const resultat = paires.slice(0, topN - 1);
-
-        // Ajouter la paire "distance maximale" : les deux lignes les plus
-        // eloignees du cluster (les vrais bords du document sont les plus
-        // exterieurs). Filtre : au moins 10% du max votes pour eviter le bruit.
-        const maxVotes = cluster.reduce((m, l) => Math.max(m, l.votes), 0);
-        const seuilVotes = Math.max(3, Math.round(maxVotes * 0.1));
-        const eligible = withDist.filter(w => w.line.votes >= seuilVotes);
-        if (eligible.length >= 2) {
-            const distMax = Math.abs(eligible[eligible.length - 1].d - eligible[0].d);
-            if (distMax >= distMin) {
-                const dejaDansResultat = resultat.some(p =>
-                    Math.abs(p.dist - distMax) < 2);
-                if (!dejaDansResultat) {
-                    resultat.push({
-                        paire: [eligible[0].line, eligible[eligible.length - 1].line],
-                        score: 0,
-                        dist: distMax
-                    });
-                }
-            }
-        }
-
-        return resultat;
+        return paires.slice(0, topN);
     }
 
     /**
@@ -1556,7 +1534,7 @@
                 // Le seuil 140 est entre le bureau eclaire (~125-135) et le
                 // papier ombre par le telephone (~140-160). Elimine les ombres
                 // (min=140+ rejete) tout en gardant le bureau eclaire (min~130 garde).
-                if (contrast > 25 && maxSide > 130 && minSide < 150) {
+                if (contrast > 25 && maxSide > 130 && minSide < 140) {
                     filtered[y * w + x] = 255;
                 }
             }
