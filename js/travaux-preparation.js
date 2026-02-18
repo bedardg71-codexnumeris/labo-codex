@@ -1303,24 +1303,20 @@
         // Trier par distance au centre
         withDist.sort((a, b) => a.d - b.d);
 
-        // Chercher la paire avec la plus grande separation geometrique
-        let meilleurePaire = null;
-        let meilleurScore = 0;
+        // Prendre les 2 lignes les plus eloignees (distance pure).
+        // Justification : les vrais bords du papier sont TOUJOURS les lignes
+        // les plus exterieures du cluster. Les elements internes (ombre du
+        // telephone, marge de texte, pli) sont toujours entre les deux bords.
+        // Le score `dist * votes` favorisait les ombres a fort contraste ;
+        // la distance pure selectionne correctement les bords reels meme
+        // quand ils ont peu de votes (ex: bord gauche dans l'ombre).
+        const premier = withDist[0];                      // ligne la plus a gauche/haut
+        const dernier = withDist[withDist.length - 1];    // ligne la plus a droite/bas
+        const dist = Math.abs(dernier.d - premier.d);
 
-        for (let i = 0; i < withDist.length; i++) {
-            for (let j = i + 1; j < withDist.length; j++) {
-                const dist = Math.abs(withDist[j].d - withDist[i].d);
-                if (dist < distMin) continue;
+        if (dist < distMin) return null;
 
-                const score = dist * (withDist[i].line.votes + withDist[j].line.votes);
-                if (score > meilleurScore) {
-                    meilleurScore = score;
-                    meilleurePaire = [withDist[i].line, withDist[j].line];
-                }
-            }
-        }
-
-        return meilleurePaire;
+        return [premier.line, dernier.line];
     }
 
     /**
