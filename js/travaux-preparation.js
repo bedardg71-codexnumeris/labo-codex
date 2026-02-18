@@ -1303,20 +1303,27 @@
         // Trier par distance au centre
         withDist.sort((a, b) => a.d - b.d);
 
-        // Prendre les 2 lignes les plus eloignees (distance pure).
-        // Justification : les vrais bords du papier sont TOUJOURS les lignes
-        // les plus exterieures du cluster. Les elements internes (ombre du
-        // telephone, marge de texte, pli) sont toujours entre les deux bords.
-        // Le score `dist * votes` favorisait les ombres a fort contraste ;
-        // la distance pure selectionne correctement les bords reels meme
-        // quand ils ont peu de votes (ex: bord gauche dans l'ombre).
-        const premier = withDist[0];                      // ligne la plus a gauche/haut
-        const dernier = withDist[withDist.length - 1];    // ligne la plus a droite/bas
-        const dist = Math.abs(dernier.d - premier.d);
+        // Chercher la paire avec la plus grande separation geometrique,
+        // ponderee par les votes (lignes fortes preferees).
+        // Les ombres du telephone sont eliminees en amont par le filtre
+        // contraste (minSide < 120), donc dist * votes est fiable ici.
+        let meilleurePaire = null;
+        let meilleurScore = 0;
 
-        if (dist < distMin) return null;
+        for (let i = 0; i < withDist.length; i++) {
+            for (let j = i + 1; j < withDist.length; j++) {
+                const dist = Math.abs(withDist[j].d - withDist[i].d);
+                if (dist < distMin) continue;
 
-        return [premier.line, dernier.line];
+                const score = dist * (withDist[i].line.votes + withDist[j].line.votes);
+                if (score > meilleurScore) {
+                    meilleurScore = score;
+                    meilleurePaire = [withDist[i].line, withDist[j].line];
+                }
+            }
+        }
+
+        return meilleurePaire;
     }
 
     /**
@@ -1470,6 +1477,8 @@
      * (perpendiculairement au gradient). On garde seulement les aretes ou :
      *   - Le contraste est significatif (> 25)
      *   - Le cote le plus clair est lumineux (> 130) = probablement du papier
+     *   - Le cote le plus sombre est fonce (< 120) = probablement du bureau
+     *     (elimine les ombres du telephone : papier 200 vs papier ombre 140)
      * Ceci elimine : texte (deux cotes clairs), grain du bois (deux cotes moyens),
      * surlignages (contraste faible), et preserve l'angle reel des bords du document.
      */
@@ -1503,8 +1512,15 @@
                 sideB /= count;
                 const contrast = Math.abs(sideA - sideB);
                 const maxSide = Math.max(sideA, sideB);
-                // Frontiere papier/fond : contraste significatif + un cote clair (papier)
-                if (contrast > 25 && maxSide > 130) {
+                const minSide = Math.min(sideA, sideB);
+                // Frontiere papier/fond :
+                //   - contraste significatif (> 25)
+                //   - un cote clair = papier (max > 130)
+                //   - un cote sombre = bureau (min < 120)
+                // Le critere minSide < 120 elimine les ombres sur papier
+                // (papier 200 vs papier ombre 140 : min=140 > 120 → rejete)
+                // tout en gardant les vrais bords (papier 130 vs bureau 90 : min=90 < 120 → garde)
+                if (contrast > 25 && maxSide > 130 && minSide < 120) {
                     filtered[y * w + x] = 255;
                 }
             }
