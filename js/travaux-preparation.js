@@ -45,8 +45,11 @@
     let ctxApercu = null;
     let operations = [];              // Pile d'operations pour le fichier courant
 
+    // Cache geometrie (canvas intermediaire pre-calcule)
+    let canvasGeometrique = null;     // Canvas avec ops geometriques appliquees
+
     // Etat des outils interactifs
-    let outilActif = null;            // 'crop' | 'perspective' | null
+    let outilActif = null;            // 'crop' | 'perspective' | 'balance' | null
     let cropRect = null;              // {x, y, width, height} en fractions 0-1
     let perspectiveCorners = null;    // [{x,y}, {x,y}, {x,y}, {x,y}] en fractions 0-1
     let poigneeActive = -1;           // Index de la poignee draggee (-1 = aucune)
@@ -143,6 +146,11 @@
             imageTravail.height = 0;
             imageTravail = null;
         }
+        if (canvasGeometrique) {
+            canvasGeometrique.width = 0;
+            canvasGeometrique.height = 0;
+            canvasGeometrique = null;
+        }
         if (canvasApercu) {
             canvasApercu.width = 0;
             canvasApercu.height = 0;
@@ -178,6 +186,7 @@
         outilActif = null;
         cropRect = null;
         perspectiveCorners = null;
+        canvasGeometrique = null;
 
         // Charger l'image
         const blob = f.fichier;
@@ -237,13 +246,23 @@
        =============================== */
 
     /**
-     * Ajoute une operation a la pile
-     * @param {Object} op - L'operation
+     * Determine si une operation est geometrique (necessite un redessin)
      */
+    function estOperationGeometrique(op) {
+        return op.type === 'rotation90' || op.type === 'fineRotation' ||
+               op.type === 'crop' || op.type === 'perspective' || op.type === 'whiteBalance';
+    }
+
     function ajouterOperation(op) {
         operations.push(op);
         fichiers[indexActuel].operations = operations;
-        mettreAJourApercu();
+
+        if (estOperationGeometrique(op)) {
+            canvasGeometrique = null;
+            mettreAJourApercu();
+        } else {
+            mettreAJourFiltresTempsReel();
+        }
     }
 
     /**
@@ -253,6 +272,7 @@
         if (operations.length === 0) return;
         operations.pop();
         fichiers[indexActuel].operations = operations;
+        canvasGeometrique = null;
         mettreAJourApercu();
     }
 
@@ -265,6 +285,7 @@
         outilActif = null;
         cropRect = null;
         perspectiveCorners = null;
+        canvasGeometrique = null;
         mettreAJourApercu();
     }
 
@@ -273,42 +294,49 @@
        =============================== */
 
     /**
-     * Applique toutes les operations sur la copie de travail et affiche l'apercu
+     * Recalcule le canvas intermediaire avec les operations geometriques uniquement
+     * (rotation, crop, perspective, whiteBalance)
+     */
+    function mettreAJourGeometrie() {
+        if (!imageTravail) return;
+
+        let tempCanvas = document.createElement('canvas');
+        tempCanvas.width = imageTravail.width;
+        tempCanvas.height = imageTravail.height;
+        tempCanvas.getContext('2d').drawImage(imageTravail, 0, 0);
+
+        for (const op of operations) {
+            if (estOperationGeometrique(op)) {
+                tempCanvas = appliquerOperationApercu(tempCanvas, op);
+            }
+        }
+
+        canvasGeometrique = tempCanvas;
+    }
+
+    /**
+     * Applique toutes les operations sur la copie de travail et affiche l'apercu.
+     * Utilise le cache geometrique quand disponible.
      */
     function mettreAJourApercu() {
         if (!imageTravail || !canvasApercu) return;
 
+        // Recalculer la geometrie si necessaire
+        if (!canvasGeometrique) {
+            mettreAJourGeometrie();
+        }
+
+        const source = canvasGeometrique;
         const ctx = ctxApercu;
-        let source = imageTravail;
-        let w = imageTravail.width;
-        let h = imageTravail.height;
 
-        // Appliquer les operations une par une
-        let tempCanvas = document.createElement('canvas');
-        tempCanvas.width = w;
-        tempCanvas.height = h;
-        let tempCtx = tempCanvas.getContext('2d');
-        tempCtx.drawImage(source, 0, 0);
-
-        for (const op of operations) {
-            const result = appliquerOperationApercu(tempCanvas, op);
-            tempCanvas = result;
-        }
-
-        // Construire la chaine de filtres CSS
-        const filtres = construireFiltresCSS(operations);
-
-        // Ajuster le canvas d'apercu
-        canvasApercu.width = tempCanvas.width;
-        canvasApercu.height = tempCanvas.height;
+        // Ajuster le canvas d'apercu aux dimensions du resultat geometrique
+        canvasApercu.width = source.width;
+        canvasApercu.height = source.height;
         ctx.clearRect(0, 0, canvasApercu.width, canvasApercu.height);
+        ctx.drawImage(source, 0, 0);
 
-        if (filtres) {
-            ctx.filter = filtres;
-        }
-
-        ctx.drawImage(tempCanvas, 0, 0);
-        ctx.filter = 'none';
+        // Appliquer les filtres CSS via style (GPU)
+        canvasApercu.style.filter = construireFiltresCSS(operations);
 
         // Dessiner les poignees si un outil est actif
         if (outilActif === 'crop' && cropRect) {
@@ -317,9 +345,15 @@
         if (outilActif === 'perspective' && perspectiveCorners) {
             dessinerPerspective(ctx, canvasApercu.width, canvasApercu.height);
         }
+    }
 
-        // Liberer le canvas temporaire
-        tempCanvas.width = 0;
+    /**
+     * Met a jour uniquement les filtres CSS (brightness/contrast/grayscale)
+     * directement via canvas.style.filter — ultra-rapide, aucun redessin canvas.
+     */
+    function mettreAJourFiltresTempsReel() {
+        if (!canvasApercu) return;
+        canvasApercu.style.filter = construireFiltresCSS(operations);
     }
 
     /**
@@ -403,6 +437,18 @@
 
             case 'perspective': {
                 return appliquerPerspectiveMesh(source, op.corners);
+            }
+
+            case 'whiteBalance': {
+                const imgData = source.getContext('2d').getImageData(0, 0, source.width, source.height);
+                const d = imgData.data;
+                for (let i = 0; i < d.length; i += 4) {
+                    d[i]     = Math.min(255, Math.round(d[i]     * op.rFactor));
+                    d[i + 1] = Math.min(255, Math.round(d[i + 1] * op.gFactor));
+                    d[i + 2] = Math.min(255, Math.round(d[i + 2] * op.bFactor));
+                }
+                source.getContext('2d').putImageData(imgData, 0, 0);
+                return source;
             }
 
             // brightness, contrast, grayscale sont traites par CSS filter
@@ -539,10 +585,19 @@
         canvas.height = img.height;
         canvas.getContext('2d').drawImage(img, 0, 0);
 
-        // Appliquer les operations geometriques
+        // Appliquer les operations
         for (const op of fichierData.operations) {
             if (op.type === 'perspective') {
                 canvas = await renduPerspectivePixel(canvas, op.corners);
+            } else if (op.type === 'whiteBalance') {
+                const imgData = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
+                const d = imgData.data;
+                for (let i = 0; i < d.length; i += 4) {
+                    d[i]     = Math.min(255, Math.round(d[i]     * op.rFactor));
+                    d[i + 1] = Math.min(255, Math.round(d[i + 1] * op.gFactor));
+                    d[i + 2] = Math.min(255, Math.round(d[i + 2] * op.bFactor));
+                }
+                canvas.getContext('2d').putImageData(imgData, 0, 0);
             } else if (op.type === 'brightness' || op.type === 'contrast' || op.type === 'grayscale') {
                 // Appliquer via CSS filter
                 const temp = document.createElement('canvas');
@@ -753,6 +808,32 @@
     function onPointerDown(e) {
         const pos = getCanvasPos(e);
 
+        if (outilActif === 'balance') {
+            // Echantillonner le pixel clique
+            const rect = canvasApercu.getBoundingClientRect();
+            const px = Math.round((e.clientX - rect.left) * (canvasApercu.width / rect.width));
+            const py = Math.round((e.clientY - rect.top) * (canvasApercu.height / rect.height));
+            const pixel = ctxApercu.getImageData(px, py, 1, 1).data;
+            const r = pixel[0], g = pixel[1], b = pixel[2];
+
+            // Eviter division par zero
+            if (r < 5 && g < 5 && b < 5) {
+                outilActif = null;
+                canvasApercu.style.cursor = '';
+                return;
+            }
+
+            // Calculer les facteurs de correction, limites entre 0.5 et 2.0
+            const rFactor = Math.max(0.5, Math.min(2.0, 255 / Math.max(r, 1)));
+            const gFactor = Math.max(0.5, Math.min(2.0, 255 / Math.max(g, 1)));
+            const bFactor = Math.max(0.5, Math.min(2.0, 255 / Math.max(b, 1)));
+
+            ajouterOperation({ type: 'whiteBalance', rFactor, gFactor, bFactor });
+            outilActif = null;
+            canvasApercu.style.cursor = '';
+            return;
+        }
+
         if (outilActif === 'perspective' && perspectiveCorners) {
             // Detecter si on touche une poignee
             const seuil = POIGNEE_TAILLE / (2 * canvasApercu.getBoundingClientRect().width);
@@ -930,11 +1011,12 @@
             operations.pop();
         }
         if (value !== 0) {
-            ajouterOperation({ type: 'brightness', value: parseInt(value) });
+            operations.push({ type: 'brightness', value: parseInt(value) });
+            fichiers[indexActuel].operations = operations;
         } else {
             fichiers[indexActuel].operations = operations;
-            mettreAJourApercu();
         }
+        mettreAJourFiltresTempsReel();
     }
 
     function changerContraste(value) {
@@ -942,11 +1024,12 @@
             operations.pop();
         }
         if (value !== 0) {
-            ajouterOperation({ type: 'contrast', value: parseInt(value) });
+            operations.push({ type: 'contrast', value: parseInt(value) });
+            fichiers[indexActuel].operations = operations;
         } else {
             fichiers[indexActuel].operations = operations;
-            mettreAJourApercu();
         }
+        mettreAJourFiltresTempsReel();
     }
 
     function basculerNiveauxDeGris() {
@@ -955,10 +1038,26 @@
         if (derniere && derniere.type === 'grayscale') {
             operations.pop();
             fichiers[indexActuel].operations = operations;
-            mettreAJourApercu();
+            mettreAJourFiltresTempsReel();
         } else {
-            ajouterOperation({ type: 'grayscale', active: true });
+            operations.push({ type: 'grayscale', active: true });
+            fichiers[indexActuel].operations = operations;
+            mettreAJourFiltresTempsReel();
         }
+    }
+
+    /**
+     * Active l'outil pipette balance des blancs
+     */
+    function activerBalanceBlancs() {
+        if (outilActif === 'balance') {
+            // Desactiver si deja actif
+            outilActif = null;
+            if (canvasApercu) canvasApercu.style.cursor = '';
+            return;
+        }
+        outilActif = 'balance';
+        if (canvasApercu) canvasApercu.style.cursor = 'crosshair';
     }
 
     /* ===============================
@@ -1087,7 +1186,7 @@
         const modal = document.createElement('div');
         modal.id = 'travaux-preparation-modal';
         modal.className = 'modal-overlay actif';
-        modal.style.cssText = 'z-index:9999; display:flex; align-items:stretch; justify-content:center; padding:0;';
+        modal.style.cssText = 'z-index:9999; display:flex; align-items:stretch; justify-content:center; padding:0; background:var(--fond-principal);';
 
         modal.innerHTML = `
             <div class="prep-layout" style="display:flex; width:100%; height:100%; background:var(--fond-principal); flex-direction:column;">
@@ -1174,6 +1273,12 @@
                             <button class="btn btn-secondaire btn-petit" onclick="travauxPreparation.basculerNiveauxDeGris()" style="width:100%;">Niveaux de gris</button>
                         </div>
 
+                        <!-- Balance des blancs -->
+                        <div class="prep-outil-groupe">
+                            <button class="btn btn-secondaire btn-petit" id="prep-btn-balance"
+                                    onclick="travauxPreparation.activerBalanceBlancs()" style="width:100%;">Balance des blancs</button>
+                        </div>
+
                         <hr style="border:none; border-top:1px solid var(--bordure-legere); margin:12px 0;">
 
                         <!-- Actions -->
@@ -1211,6 +1316,18 @@
             if (btnCrop) btnCrop.style.display = outilActif === 'crop' ? 'block' : 'none';
             if (btnPersp) btnPersp.style.display = outilActif === 'perspective' ? 'block' : 'none';
 
+            // Feedback visuel balance des blancs
+            const btnBalance = document.getElementById('prep-btn-balance');
+            if (btnBalance) {
+                if (outilActif === 'balance') {
+                    btnBalance.classList.add('btn-principal');
+                    btnBalance.classList.remove('btn-secondaire');
+                } else {
+                    btnBalance.classList.remove('btn-principal');
+                    btnBalance.classList.add('btn-secondaire');
+                }
+            }
+
             // Mise a jour valeur rotation fine
             const rotSlider = document.getElementById('prep-rotation-fine');
             const rotVal = document.getElementById('prep-rotation-valeur');
@@ -1247,6 +1364,7 @@
         changerLuminosite: changerLuminosite,
         changerContraste: changerContraste,
         basculerNiveauxDeGris: basculerNiveauxDeGris,
+        activerBalanceBlancs: activerBalanceBlancs,
         annulerDerniere: annulerDerniere,
         reinitialiser: reinitialiser,
         // Assemblage
