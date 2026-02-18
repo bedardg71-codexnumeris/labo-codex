@@ -1129,9 +1129,20 @@
             return null;
         }
 
-        // 8. Clustering des lignes par angle (tolerance reduite : 8° au lieu de 15°
-        //    pour separer les bords du document des lignes de texte)
+        // 8. Clustering des lignes par angle (tolerance 8°)
         const clusters = clusteriserLignesParAngle(lines, 8);
+
+        // 8b. Fusionner les clusters proches a cause du wraparound 0°/180°
+        //     (ex: theta~175° et theta~3° = meme direction, 8° d'ecart)
+        for (let i = 0; i < clusters.length; i++) {
+            for (let j = i + 1; j < clusters.length; j++) {
+                if (diffAngle180(clusters[i][0].theta, clusters[j][0].theta) <= 10) {
+                    clusters[i] = clusters[i].concat(clusters[j]);
+                    clusters.splice(j, 1);
+                    j--;
+                }
+            }
+        }
 
         console.log('[Auto-persp] Clusters:', clusters.length, clusters.map(c => c.length + ' lignes, theta~' + Math.round(c[0].theta) + '°').join(' | '));
         if (clusters.length < 2) {
@@ -1143,6 +1154,7 @@
         //    et garder celle qui produit le plus grand quadrilatere valide.
         //    Ceci evite de prendre les lignes de texte (0°/90°) au lieu des bords du document.
         const distMin = Math.min(dw, dh) * 0.1;
+        const cx = dw / 2, cy = dh / 2;
         const candidats = [];
 
         for (let i = 0; i < clusters.length; i++) {
@@ -1152,8 +1164,8 @@
                 const angleDiff = diffAngle180(clusters[i][0].theta, clusters[j][0].theta);
                 if (angleDiff < 60 || angleDiff > 120) continue;
 
-                const p1 = trouverBordsOpposes(clusters[i], distMin);
-                const p2 = trouverBordsOpposes(clusters[j], distMin);
+                const p1 = trouverBordsOpposes(clusters[i], distMin, cx, cy);
+                const p2 = trouverBordsOpposes(clusters[j], distMin, cx, cy);
                 if (!p1 || !p2) continue;
 
                 // Calculer les 4 intersections
@@ -1264,34 +1276,46 @@
     /**
      * Dans un cluster de lignes quasi-paralleles, trouve les 2 lignes
      * les plus eloignees l'une de l'autre (= les 2 bords opposes du document).
+     * Utilise la distance perpendiculaire depuis le centre de l'image
+     * pour gerer correctement les clusters fusionnes (theta variable).
      *
      * @param {Array} cluster - Lignes du cluster
-     * @param {number} distMin - Distance rho minimale entre les 2 bords
+     * @param {number} distMin - Distance minimale entre les 2 bords (pixels)
+     * @param {number} cx - Centre X de l'image
+     * @param {number} cy - Centre Y de l'image
      * @returns {Array|null} [ligne1, ligne2] ou null
      */
-    function trouverBordsOpposes(cluster, distMin) {
+    function trouverBordsOpposes(cluster, distMin, cx, cy) {
         if (cluster.length < 2) {
-            // Un seul bord visible — on ne peut pas former une paire
             return null;
         }
 
-        // Trier par rho pour separer les bords
-        const sorted = cluster.slice().sort((a, b) => a.rho - b.rho);
+        // Distance signee de chaque ligne au centre de l'image
+        // d = cx*cos(theta) + cy*sin(theta) - rho
+        // Positif = la ligne est du cote "gauche/haut" du centre
+        // Negatif = la ligne est du cote "droit/bas" du centre
+        const withDist = cluster.map(line => {
+            const rad = line.theta * Math.PI / 180;
+            const d = cx * Math.cos(rad) + cy * Math.sin(rad) - line.rho;
+            return { line, d };
+        });
 
-        // Chercher la paire avec la plus grande separation rho
-        // en gardant les 2 lignes les plus votees de chaque cote
+        // Trier par distance au centre
+        withDist.sort((a, b) => a.d - b.d);
+
+        // Chercher la paire avec la plus grande separation geometrique
         let meilleurePaire = null;
-        let meilleureDistance = 0;
+        let meilleurScore = 0;
 
-        for (let i = 0; i < sorted.length; i++) {
-            for (let j = i + 1; j < sorted.length; j++) {
-                const dist = Math.abs(sorted[j].rho - sorted[i].rho);
+        for (let i = 0; i < withDist.length; i++) {
+            for (let j = i + 1; j < withDist.length; j++) {
+                const dist = Math.abs(withDist[j].d - withDist[i].d);
                 if (dist < distMin) continue;
 
-                const score = dist * (sorted[i].votes + sorted[j].votes);
-                if (score > meilleureDistance) {
-                    meilleureDistance = score;
-                    meilleurePaire = [sorted[i], sorted[j]];
+                const score = dist * (withDist[i].line.votes + withDist[j].line.votes);
+                if (score > meilleurScore) {
+                    meilleurScore = score;
+                    meilleurePaire = [withDist[i].line, withDist[j].line];
                 }
             }
         }
