@@ -33,7 +33,7 @@
     const EXPOSITION_MIN = -20;          // -2.0 EV
     const EXPOSITION_MAX = 20;           // +2.0 EV
     const BATCH_SIZE = 10000;         // Pixels par lot pour le rendu final
-    const PERSPECTIVE_MARGE = 0.15;   // 15% de marge autour de l'image pour perspective
+    const PERSPECTIVE_MARGE = 0.5;    // 50% de marge autour de l'image pour perspective
 
     /* ===============================
        ETAT DU MODULE
@@ -1062,7 +1062,11 @@
     }
 
     /**
-     * Pipeline complete de detection des coins d'un document
+     * Pipeline complete de detection des bords d'un document.
+     * Detecte les BORDS (pas les coins) puis extrapole les coins
+     * par intersection des droites — fonctionne meme quand les coins
+     * sont hors cadre.
+     *
      * @param {HTMLCanvasElement} source - Canvas source
      * @returns {Array|null} 4 coins [{x,y}] en fractions 0-1, ou null si echec
      */
@@ -1097,60 +1101,58 @@
         // 4. Canny edge detection
         const edges = cannyEdgeDetection(blurred, dw, dh);
 
-        // 5. Hough line transform
-        const lines = houghLines(edges, dw, dh, 50);
+        // 5. Hough line transform (seuil proportionnel a la taille)
+        const seuilHough = Math.max(30, Math.round(Math.min(dw, dh) * 0.12));
+        const lines = houghLines(edges, dw, dh, seuilHough);
 
-        if (lines.length < 4) return null;
+        if (lines.length < 2) return null;
 
-        // 6. Separer en lignes horizontales et verticales
-        const horizontales = [];
-        const verticales = [];
+        // 6. Clustering des lignes par angle (groupes de bords paralleles)
+        const clusters = clusteriserLignesParAngle(lines, 15);
 
-        for (const line of lines) {
-            const angle = line.theta;
-            // Horizontale : theta proche de 90° (±30°)
-            if (angle > 60 && angle < 120) {
-                horizontales.push(line);
-            }
-            // Verticale : theta proche de 0° ou 180° (±30°)
-            else if (angle < 30 || angle > 150) {
-                verticales.push(line);
-            }
-        }
+        // Il faut au moins 2 clusters d'orientations differentes
+        if (clusters.length < 2) return null;
 
-        if (horizontales.length < 2 || verticales.length < 2) return null;
+        // 7. Prendre les 2 clusters les plus forts
+        //    (chaque cluster = un ensemble de lignes quasi-paralleles = un pair de bords)
+        clusters.sort((a, b) => {
+            const votesA = a.reduce((s, l) => s + l.votes, 0);
+            const votesB = b.reduce((s, l) => s + l.votes, 0);
+            return votesB - votesA;
+        });
 
-        // 7. Prendre les 2 meilleures de chaque groupe (plus de votes)
-        horizontales.sort((a, b) => b.votes - a.votes);
-        verticales.sort((a, b) => b.votes - a.votes);
+        const cluster1 = clusters[0];
+        const cluster2 = clusters[1];
 
-        // Filtrer les lignes trop proches (doublets)
-        const h2 = filtrerLignesProches(horizontales, dh * 0.15);
-        const v2 = filtrerLignesProches(verticales, dw * 0.15);
+        // 8. Dans chaque cluster, trouver les 2 bords les plus eloignes
+        //    (= les 2 cotes opposes du document)
+        const paire1 = trouverBordsOpposes(cluster1, Math.min(dw, dh) * 0.1);
+        const paire2 = trouverBordsOpposes(cluster2, Math.min(dw, dh) * 0.1);
 
-        if (h2.length < 2 || v2.length < 2) return null;
+        if (!paire1 || !paire2) return null;
 
-        // 8. Calculer les 4 intersections
+        // 9. Calculer les 4 intersections (chaque ligne de paire1 × chaque ligne de paire2)
         const intersections = [];
-        for (let i = 0; i < 2; i++) {
-            for (let j = 0; j < 2; j++) {
-                const pt = intersectionLignes(h2[i], v2[j]);
+        for (const l1 of paire1) {
+            for (const l2 of paire2) {
+                const pt = intersectionLignes(l1, l2);
                 if (pt) intersections.push(pt);
             }
         }
 
         if (intersections.length !== 4) return null;
 
-        // 9. Ordonner les coins : TL, TR, BR, BL
+        // 10. Ordonner les coins : TL, TR, BR, BL
         const coins = ordonnerCoins(intersections);
 
-        // 10. Convertir en fractions 0-1 et valider
+        // 11. Convertir en fractions 0-1
         const result = coins.map(p => ({
             x: p.x / dw,
             y: p.y / dh
         }));
 
         // Verifier que les coins sont dans des limites raisonnables
+        // (genereux : jusqu'a PERSPECTIVE_MARGE hors cadre)
         const valide = result.every(p =>
             p.x >= -PERSPECTIVE_MARGE && p.x <= 1 + PERSPECTIVE_MARGE &&
             p.y >= -PERSPECTIVE_MARGE && p.y <= 1 + PERSPECTIVE_MARGE
@@ -1161,6 +1163,85 @@
         if (!valide || surface < 0.05) return null;
 
         return result;
+    }
+
+    /**
+     * Regroupe les lignes en clusters de directions similaires.
+     * Deux lignes sont dans le meme cluster si leur theta differe de < toleranceDeg.
+     * Gere le wrap-around 0°/180° (les lignes a 2° et 178° sont paralleles).
+     *
+     * @param {Array} lines - Lignes Hough [{rho, theta, votes}]
+     * @param {number} toleranceDeg - Tolerance angulaire en degres
+     * @returns {Array<Array>} Clusters de lignes
+     */
+    function clusteriserLignesParAngle(lines, toleranceDeg) {
+        const clusters = [];
+
+        for (const line of lines) {
+            let placed = false;
+            for (const cluster of clusters) {
+                // Comparer avec l'angle moyen du cluster
+                const refTheta = cluster[0].theta;
+                if (diffAngle180(line.theta, refTheta) < toleranceDeg) {
+                    cluster.push(line);
+                    placed = true;
+                    break;
+                }
+            }
+            if (!placed) {
+                clusters.push([line]);
+            }
+        }
+
+        // Garder seulement les clusters avec au moins 1 ligne significative
+        return clusters.filter(c => c.length >= 1);
+    }
+
+    /**
+     * Difference angulaire en tenant compte du wrap 0°/180°
+     * (en Hough, theta=0° et theta=180° representent des lignes paralleles)
+     */
+    function diffAngle180(a, b) {
+        let d = Math.abs(a - b) % 180;
+        return Math.min(d, 180 - d);
+    }
+
+    /**
+     * Dans un cluster de lignes quasi-paralleles, trouve les 2 lignes
+     * les plus eloignees l'une de l'autre (= les 2 bords opposes du document).
+     *
+     * @param {Array} cluster - Lignes du cluster
+     * @param {number} distMin - Distance rho minimale entre les 2 bords
+     * @returns {Array|null} [ligne1, ligne2] ou null
+     */
+    function trouverBordsOpposes(cluster, distMin) {
+        if (cluster.length < 2) {
+            // Un seul bord visible — on ne peut pas former une paire
+            return null;
+        }
+
+        // Trier par rho pour separer les bords
+        const sorted = cluster.slice().sort((a, b) => a.rho - b.rho);
+
+        // Chercher la paire avec la plus grande separation rho
+        // en gardant les 2 lignes les plus votees de chaque cote
+        let meilleurePaire = null;
+        let meilleureDistance = 0;
+
+        for (let i = 0; i < sorted.length; i++) {
+            for (let j = i + 1; j < sorted.length; j++) {
+                const dist = Math.abs(sorted[j].rho - sorted[i].rho);
+                if (dist < distMin) continue;
+
+                const score = dist * (sorted[i].votes + sorted[j].votes);
+                if (score > meilleureDistance) {
+                    meilleureDistance = score;
+                    meilleurePaire = [sorted[i], sorted[j]];
+                }
+            }
+        }
+
+        return meilleurePaire;
     }
 
     /**
@@ -1350,24 +1431,6 @@
 
         lines.sort((a, b) => b.votes - a.votes);
         return lines;
-    }
-
-    /**
-     * Filtre les lignes trop proches (garde la plus votee)
-     * @param {Array} lines - Lignes triees par votes decroissants
-     * @param {number} distMin - Distance rho minimale entre deux lignes
-     * @returns {Array} Lignes filtrees
-     */
-    function filtrerLignesProches(lines, distMin) {
-        const result = [];
-        for (const line of lines) {
-            const tropProche = result.some(l => Math.abs(l.rho - line.rho) < distMin);
-            if (!tropProche) {
-                result.push(line);
-                if (result.length >= 2) break;
-            }
-        }
-        return result;
     }
 
     /**
