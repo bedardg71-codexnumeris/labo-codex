@@ -1028,8 +1028,8 @@
 
     /* ===============================
        DETECTION AUTOMATIQUE DES COINS
-       Pipeline : downscale → grayscale → blur → Otsu → fermeture → bordure → Hough → coins
-       Fallback : Canny → Hough si la segmentation echoue
+       Pipeline : downscale → grayscale → blur → Canny → filtre contraste (papier/fond) → Hough → coins
+       Fallback : Canny brut → Hough si le filtre contraste donne < 4 lignes
        =============================== */
 
     const DETECT_SIZE = 400;          // Taille max pour la detection (vitesse)
@@ -1099,73 +1099,29 @@
         // 3. Gaussian blur 5x5
         const blurred = gaussianBlur5x5(gray, dw, dh);
 
-        // 4. Segmentation papier/fond par seuil d'Otsu
-        let seuil = seuilOtsu(blurred, dw, dh);
-        console.log('[Auto-persp] Otsu seuil:', seuil);
+        // 4. Canny edge detection
+        const edges = cannyEdgeDetection(blurred, dw, dh);
 
-        // Creer le masque initial
-        let mask = new Uint8Array(dw * dh);
-        for (let i = 0; i < mask.length; i++) {
-            mask[i] = blurred[i] >= seuil ? 255 : 0;
-        }
+        // 5. Filtrer : ne garder que les aretes a fort contraste lumineux.
+        //    Frontiere papier/fond = contraste eleve (papier clair vs bureau).
+        //    Texte, grain du bois, surlignages = contraste faible (deux cotes similaires).
+        //    Ceci preserve l'inclinaison reelle des bords (pas d'escalier morphologique).
+        const paperEdges = filtrerAretesDocument(edges, blurred, dw, dh);
+        let nbPaper = 0;
+        for (let i = 0; i < paperEdges.length; i++) if (paperEdges[i]) nbPaper++;
+        console.log('[Auto-persp] Aretes filtrees par contraste:', nbPaper, 'pixels');
 
-        // Verifier la proportion : si >55%, le seuil est trop bas
-        // (il separe ombres/fond-clair au lieu de fond/papier)
-        let nbBlancs = 0;
-        for (let i = 0; i < mask.length; i++) if (mask[i]) nbBlancs++;
-        let ratio = nbBlancs / (dw * dh);
-        console.log('[Auto-persp] Masque: ' + (ratio * 100).toFixed(1) + '% blancs');
+        // 6. Hough sur les aretes filtrees
+        let seuilHough = Math.max(20, Math.round(Math.min(dw, dh) * 0.12));
+        let lines = houghLines(paperEdges, dw, dh, seuilHough);
+        console.log('[Auto-persp] Hough: seuil=' + seuilHough + ', lignes=' + lines.length);
 
-        if (ratio > 0.55) {
-            // Re-appliquer Otsu sur les pixels clairs pour isoler le papier du fond
-            const subGray = new Float32Array(nbBlancs);
-            let j = 0;
-            for (let i = 0; i < blurred.length; i++) {
-                if (blurred[i] >= seuil) subGray[j++] = blurred[i];
-            }
-            const seuil2 = seuilOtsu(subGray, nbBlancs, 1);
-            console.log('[Auto-persp] Seuil raffine:', seuil2);
-            seuil = seuil2;
-            mask = new Uint8Array(dw * dh);
-            for (let i = 0; i < mask.length; i++) {
-                mask[i] = blurred[i] >= seuil ? 255 : 0;
-            }
-            nbBlancs = 0;
-            for (let i = 0; i < mask.length; i++) if (mask[i]) nbBlancs++;
-            ratio = nbBlancs / (dw * dh);
-            console.log('[Auto-persp] Masque raffine: ' + (ratio * 100).toFixed(1) + '% blancs');
-        }
-
-        // Si le masque est trop petit (<5%) ou trop grand (>90%), pas fiable
-        if (ratio < 0.05 || ratio > 0.90) {
-            console.log('[Auto-persp] Masque non fiable, fallback Canny direct');
-            const cannyEdges = cannyEdgeDetection(blurred, dw, dh);
-            const seuilH = Math.max(30, Math.round(Math.min(dw, dh) * 0.12));
-            var lines = houghLines(cannyEdges, dw, dh, seuilH);
-            console.log('[Auto-persp] Canny fallback: ' + lines.length + ' lignes');
-        } else {
-            // 5. Fermeture morphologique — comble le texte et les trous internes
-            const maskFerme = fermetureMorphologique(mask, dw, dh, 5);
-
-            // 6. Extraire les pixels de bordure papier/fond
-            const bordure = extraireBordure(maskFerme, dw, dh);
-            let nbBord = 0;
-            for (let i = 0; i < bordure.length; i++) if (bordure[i]) nbBord++;
-            console.log('[Auto-persp] Pixels bordure:', nbBord);
-
-            // 7. Hough sur la bordure
-            let seuilHough = Math.max(15, Math.round(Math.min(dw, dh) * 0.08));
-            var lines = houghLines(bordure, dw, dh, seuilHough);
-            console.log('[Auto-persp] Hough bordure: seuil=' + seuilHough + ', lignes=' + lines.length);
-
-            // Fallback Canny si pas assez de lignes
-            if (lines.length < 4) {
-                console.log('[Auto-persp] Fallback Canny');
-                const cannyEdges = cannyEdgeDetection(blurred, dw, dh);
-                seuilHough = Math.max(30, Math.round(Math.min(dw, dh) * 0.12));
-                lines = houghLines(cannyEdges, dw, dh, seuilHough);
-                console.log('[Auto-persp] Canny: seuil=' + seuilHough + ', lignes=' + lines.length);
-            }
+        // Fallback : aretes Canny brutes si pas assez de lignes
+        if (lines.length < 4) {
+            console.log('[Auto-persp] Fallback Canny brut');
+            seuilHough = Math.max(40, Math.round(Math.min(dw, dh) * 0.20));
+            lines = houghLines(edges, dw, dh, seuilHough);
+            console.log('[Auto-persp] Canny brut: seuil=' + seuilHough + ', lignes=' + lines.length);
         }
 
         if (lines.length < 2) {
@@ -1191,9 +1147,10 @@
 
         for (let i = 0; i < clusters.length; i++) {
             for (let j = i + 1; j < clusters.length; j++) {
-                // Les 2 clusters doivent etre quasi-perpendiculaires (45-135°)
+                // Les 2 clusters doivent etre quasi-perpendiculaires (60-120°)
+                // Un document est rectangulaire : ses bords forment des angles proches de 90°.
                 const angleDiff = diffAngle180(clusters[i][0].theta, clusters[j][0].theta);
-                if (angleDiff < 30 || angleDiff > 150) continue;
+                if (angleDiff < 60 || angleDiff > 120) continue;
 
                 const p1 = trouverBordsOpposes(clusters[i], distMin);
                 const p2 = trouverBordsOpposes(clusters[j], distMin);
@@ -1225,9 +1182,19 @@
                 const surface = surfaceQuad(result);
                 if (surface < 0.05) continue;
 
+                // Penaliser les coins tres eloignes du cadre image
+                // Un coin a x=-0.88 est suspect ; un coin a x=-0.05 est normal
+                let penalite = 1;
+                for (const p of result) {
+                    const hors = Math.max(0, -p.x, p.x - 1, -p.y, p.y - 1);
+                    if (hors > 0.1) penalite *= 1 / (1 + (hors - 0.1) * 5);
+                }
+                const score = surface * penalite;
+
                 candidats.push({
                     result,
                     surface,
+                    score,
                     theta1: Math.round(clusters[i][0].theta),
                     theta2: Math.round(clusters[j][0].theta)
                 });
@@ -1235,19 +1202,19 @@
         }
 
         console.log('[Auto-persp] Candidats valides:', candidats.length,
-            candidats.map(c => 'θ' + c.theta1 + '°×θ' + c.theta2 + '° surface=' + c.surface.toFixed(3)).join(' | '));
+            candidats.map(c => 'θ' + c.theta1 + '°×θ' + c.theta2 + '° surf=' + c.surface.toFixed(3) + ' score=' + c.score.toFixed(3)).join(' | '));
 
         if (candidats.length === 0) {
             console.log('[Auto-persp] ECHEC: aucun candidat valide');
             return null;
         }
 
-        // Prendre le candidat avec la plus grande surface (= le document, pas le texte)
-        candidats.sort((a, b) => b.surface - a.surface);
+        // Prendre le candidat avec le meilleur score (surface ponderee par proximite au cadre)
+        candidats.sort((a, b) => b.score - a.score);
         const meilleur = candidats[0];
 
         console.log('[Auto-persp] Meilleur: θ' + meilleur.theta1 + '°×θ' + meilleur.theta2 +
-            '° surface=' + meilleur.surface.toFixed(3));
+            '° surf=' + meilleur.surface.toFixed(3) + ' score=' + meilleur.score.toFixed(3));
         console.log('[Auto-persp] Coins:', meilleur.result.map(p => '(' + p.x.toFixed(3) + ',' + p.y.toFixed(3) + ')').join(' '));
         console.log('[Auto-persp] SUCCES');
         return meilleur.result;
@@ -1475,6 +1442,54 @@
             }
         }
         return dst;
+    }
+
+    /**
+     * Filtre les aretes Canny pour ne garder que les frontieres papier/fond.
+     * Pour chaque pixel d'arete, on echantillonne la luminosite de part et d'autre
+     * (perpendiculairement au gradient). On garde seulement les aretes ou :
+     *   - Le contraste est fort (> 30)
+     *   - Le cote le plus clair est lumineux (> 150) = probablement du papier
+     * Ceci elimine : texte (deux cotes clairs), grain du bois (deux cotes moyens),
+     * surlignages (contraste faible), et preserve l'angle reel des bords du document.
+     */
+    function filtrerAretesDocument(edges, gray, w, h) {
+        const filtered = new Uint8Array(w * h);
+        const R = 3; // rayon d'echantillonnage perpendiculaire
+        for (let y = R; y < h - R; y++) {
+            for (let x = R; x < w - R; x++) {
+                if (!edges[y * w + x]) continue;
+                // Direction du gradient (perpendiculaire a l'arete)
+                const gx = gray[y * w + (x + 1)] - gray[y * w + (x - 1)];
+                const gy = gray[(y + 1) * w + x] - gray[(y - 1) * w + x];
+                const mag = Math.sqrt(gx * gx + gy * gy);
+                if (mag < 1) continue;
+                const nx = gx / mag;
+                const ny = gy / mag;
+                // Echantillonner la luminosite de chaque cote
+                let sideA = 0, sideB = 0, count = 0;
+                for (let r = 1; r <= R; r++) {
+                    const ax = Math.round(x + nx * r), ay = Math.round(y + ny * r);
+                    const bx = Math.round(x - nx * r), by = Math.round(y - ny * r);
+                    if (ax >= 0 && ax < w && ay >= 0 && ay < h &&
+                        bx >= 0 && bx < w && by >= 0 && by < h) {
+                        sideA += gray[ay * w + ax];
+                        sideB += gray[by * w + bx];
+                        count++;
+                    }
+                }
+                if (count === 0) continue;
+                sideA /= count;
+                sideB /= count;
+                const contrast = Math.abs(sideA - sideB);
+                const maxSide = Math.max(sideA, sideB);
+                // Frontiere papier/fond : fort contraste + un cote clair (papier)
+                if (contrast > 30 && maxSide > 150) {
+                    filtered[y * w + x] = 255;
+                }
+            }
+        }
+        return filtered;
     }
 
     /**
