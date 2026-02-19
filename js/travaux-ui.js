@@ -1030,26 +1030,67 @@
             evalDiv.classList.remove('u-hide');
         }
 
-        // Pré-remplir le formulaire d'évaluation
-        setTimeout(() => {
-            const selectEtudiant = document.getElementById('selectEtudiantEval');
-            const selectProduction = document.getElementById('selectProduction1');
+        // Pre-remplir le formulaire d'evaluation avec retry robuste
+        preRemplirEvaluation(da, productionId);
+    }
 
-            if (selectEtudiant) {
-                selectEtudiant.value = da;
-                if (typeof chargerEvaluationsEtudiant === 'function') {
-                    chargerEvaluationsEtudiant();
+    /**
+     * Pre-remplit les selects etudiant/production avec une boucle de retry
+     * @param {string} da - DA de l'etudiant
+     * @param {string} productionId - ID de la production
+     */
+    function preRemplirEvaluation(da, productionId) {
+        let essais = 0;
+        const MAX_ESSAIS = 10;
+        const INTERVALLE = 150;
+
+        function tentative() {
+            essais++;
+            const selectEtudiant = document.getElementById('selectEtudiantEval');
+
+            if (!selectEtudiant) {
+                if (essais < MAX_ESSAIS) { setTimeout(tentative, INTERVALLE); }
+                return;
+            }
+
+            // Selectionner l'etudiant
+            selectEtudiant.value = da;
+            if (typeof chargerEvaluationsEtudiant === 'function') {
+                chargerEvaluationsEtudiant();
+            }
+
+            // Attendre que l'option production apparaisse dans le select
+            attendreOptionProduction(productionId);
+        }
+
+        function attendreOptionProduction(prodId) {
+            let essaisProd = 0;
+
+            function tenterProduction() {
+                essaisProd++;
+                const selectProduction = document.getElementById('selectProduction1');
+                if (!selectProduction) {
+                    if (essaisProd < MAX_ESSAIS) { setTimeout(tenterProduction, INTERVALLE); }
+                    return;
+                }
+
+                // Verifier que l'option existe dans le select
+                const optionExiste = Array.from(selectProduction.options).some(o => o.value === prodId);
+                if (!optionExiste && essaisProd < MAX_ESSAIS) {
+                    setTimeout(tenterProduction, INTERVALLE);
+                    return;
+                }
+
+                if (optionExiste) {
+                    selectProduction.value = prodId;
+                    selectProduction.dispatchEvent(new Event('change'));
                 }
             }
 
-            setTimeout(() => {
-                if (selectProduction) {
-                    selectProduction.value = productionId;
-                    const event = new Event('change');
-                    selectProduction.dispatchEvent(event);
-                }
-            }, 100);
-        }, 100);
+            setTimeout(tenterProduction, INTERVALLE);
+        }
+
+        setTimeout(tentative, INTERVALLE);
     }
 
     /* ===============================
@@ -1063,6 +1104,10 @@
      */
     async function ouvrirVueCoteACote(fichierId, conteneurGrille) {
         vueCoteACote = true;
+
+        // Masquer la visionneuse standard pour eviter les conflits d'IDs canvas
+        const visStandard = document.getElementById('evaluations-contenu-visionneuse');
+        if (visStandard) visStandard.classList.add('u-hide');
 
         // Creer la mise en page cote-a-cote
         const parent = conteneurGrille.parentElement;
@@ -1080,9 +1125,9 @@
         conteneurTravail.innerHTML = `
             <div class="travaux-zone-document" id="travaux-split-document-container">
                 <div class="travaux-toolbar">
-                    <button id="travaux-btn-page-prec" class="btn-icon" onclick="travauxVisionneuse.pagePrecedente()" disabled>&lt;</button>
+                    <button id="travaux-split-btn-page-prec" class="btn-icon" onclick="travauxVisionneuse.pagePrecedente()" disabled>&lt;</button>
                     <span id="travaux-indicateur-page">-- / --</span>
-                    <button id="travaux-btn-page-suiv" class="btn-icon" onclick="travauxVisionneuse.pageSuivante()" disabled>&gt;</button>
+                    <button id="travaux-split-btn-page-suiv" class="btn-icon" onclick="travauxVisionneuse.pageSuivante()" disabled>&gt;</button>
                     <button class="btn btn-petit" onclick="travauxAnnotation.basculerAnnotation()">Annoter</button>
                     <button class="btn-icon" onclick="travauxUI.fermerVueCoteACote()" title="Fermer">&times;</button>
                 </div>

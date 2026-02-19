@@ -14780,7 +14780,7 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 
 .travaux-split-panel {
     flex: 1;
-    min-width: 0;
+    min-width: 300px;
     overflow: auto;
 }
 

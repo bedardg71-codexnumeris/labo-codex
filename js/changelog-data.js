@@ -11,6 +11,18 @@
     var CHANGELOG = [
         {
             version: 'Beta 97.8',
+            date: '19 f\u00e9vrier',
+            couleur: 'bleu',
+            titre: 'Module Travaux \u2014 Pipeline fonctionnel',
+            items: [
+                '<strong>Autocollants fiabilis\u00e9s</strong> : Les 12\u00a0autocollants de r\u00e9troaction se chargent d\u00e9sormais avec suivi onload/onerror. Si une image n\u2019est pas encore pr\u00eate, elle se dessine automatiquement d\u00e8s qu\u2019elle est charg\u00e9e. L\u2019export PDF attend le chargement complet avant de dessiner.',
+                '<strong>Saisie de texte am\u00e9lior\u00e9e</strong> : Le prompt natif est remplac\u00e9 par une modale avec zone de texte multiligne et curseur de taille (10\u201332\u00a0px). Le texte multiligne s\u2019affiche correctement sur le canvas et dans l\u2019export PDF.',
+                '<strong>Vue c\u00f4te-\u00e0-c\u00f4te corrig\u00e9e</strong> : Les conflits d\u2019identifiants canvas entre la visionneuse standard et le mode c\u00f4te-\u00e0-c\u00f4te sont r\u00e9solus. Largeur minimale de 300\u00a0px par panneau.',
+                '<strong>Flux Annoter \u2192 \u00c9valuer robuste</strong> : Le pr\u00e9-remplissage des s\u00e9lecteurs \u00e9tudiant/production utilise d\u00e9sormais une boucle de r\u00e9essai (max 10\u00a0tentatives) au lieu de d\u00e9lais fixes.'
+            ]
+        },
+        {
+            version: 'Beta 97.8',
             date: '17 f\u00e9vrier',
             couleur: 'vert',
             titre: 'Carte d\u00e9mo et licence CC',

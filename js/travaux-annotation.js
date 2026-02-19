@@ -667,7 +667,16 @@
      */
     function dessinerAutocollant(sticker) {
         const img = travauxOutils.getImageAutocollant(sticker.autocollantId);
-        if (!img || !img.complete) return;
+        if (!img) return;
+
+        if (!img.complete) {
+            // Image pas encore chargee: attacher un listener one-shot pour re-rendre
+            img.addEventListener('load', function onStickerLoad() {
+                img.removeEventListener('load', onStickerLoad);
+                reRendreAnnotations();
+            });
+            return;
+        }
 
         const w = canvasAnnotation.width;
         const h = canvasAnnotation.height;
@@ -733,23 +742,82 @@
      * @param {number} yNorm - Y normalise
      */
     function ajouterTexte(xNorm, yNorm) {
-        const texte = prompt('Commentaire :');
-        if (!texte || !texte.trim()) return;
+        // Creer la modale de saisie de texte
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay actif';
+        overlay.id = 'travaux-modal-texte';
 
-        const annotation = {
-            id: 'TXT_' + Date.now(),
-            x: xNorm,
-            y: yNorm,
-            text: texte.trim(),
-            fontSize: travauxOutils.getTailleTexte(),
-            color: travauxOutils.getCouleurActive()
-        };
+        const tailleCourante = travauxOutils.getTailleTexte();
 
-        const donneesPage = obtenirDonneesPage();
-        donneesPage.textAnnotations.push(annotation);
-        empilerUndo('ajout-texte', annotation);
-        reRendreAnnotations();
-        planifierSauvegarde();
+        overlay.innerHTML = `
+            <div class="modal-contenu modal-compact" style="max-width:450px;">
+                <h3>Ajouter un commentaire</h3>
+                <textarea id="travaux-modal-texte-input" rows="4" style="width:100%;resize:vertical;font-size:14px;padding:8px;border-radius:var(--radius-standard);border:1px solid var(--bordure-claire);background:var(--surface-input,#0d1f2d);color:var(--texte-principal,#e0e0e0);font-family:sans-serif;" placeholder="Saisissez votre commentaire..."></textarea>
+                <div style="margin-top:12px;display:flex;align-items:center;gap:12px;">
+                    <label style="white-space:nowrap;">Taille : <span id="travaux-modal-texte-taille-val">${tailleCourante}px</span></label>
+                    <input type="range" id="travaux-modal-texte-taille" min="10" max="32" value="${tailleCourante}" style="flex:1;">
+                </div>
+                <div style="margin-top:16px;display:flex;justify-content:flex-end;gap:8px;">
+                    <button class="btn btn-secondaire" id="travaux-modal-texte-annuler">Annuler</button>
+                    <button class="btn btn-principal" id="travaux-modal-texte-ajouter">Ajouter</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        const textarea = document.getElementById('travaux-modal-texte-input');
+        const slider = document.getElementById('travaux-modal-texte-taille');
+        const valLabel = document.getElementById('travaux-modal-texte-taille-val');
+        const btnAnnuler = document.getElementById('travaux-modal-texte-annuler');
+        const btnAjouter = document.getElementById('travaux-modal-texte-ajouter');
+
+        textarea.focus();
+
+        slider.addEventListener('input', () => {
+            valLabel.textContent = slider.value + 'px';
+        });
+
+        function fermerModale() {
+            overlay.remove();
+        }
+
+        function confirmerTexte() {
+            const texte = textarea.value.trim();
+            if (!texte) { fermerModale(); return; }
+
+            const taille = parseInt(slider.value, 10) || tailleCourante;
+            travauxOutils.setTailleTexte(taille);
+
+            const ann = {
+                id: 'TXT_' + Date.now(),
+                x: xNorm,
+                y: yNorm,
+                text: texte,
+                fontSize: taille,
+                color: travauxOutils.getCouleurActive()
+            };
+
+            const donneesPage = obtenirDonneesPage();
+            donneesPage.textAnnotations.push(ann);
+            empilerUndo('ajout-texte', ann);
+            reRendreAnnotations();
+            planifierSauvegarde();
+            fermerModale();
+        }
+
+        btnAnnuler.addEventListener('click', fermerModale);
+        btnAjouter.addEventListener('click', confirmerTexte);
+
+        // Fermer via Escape
+        overlay.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') { e.stopPropagation(); fermerModale(); }
+        });
+
+        // Fermer via clic arriere-plan
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) fermerModale();
+        });
     }
 
     /* ===============================
@@ -818,12 +886,19 @@
                 const fontSize = data.fontSize || 14;
                 const w = canvasAnnotation?.width || 1000;
                 const h = canvasAnnotation?.height || 1000;
-                // Estimer la largeur du texte
                 const ctx = ctxAnnotation || document.createElement('canvas').getContext('2d');
                 ctx.font = `${fontSize}px sans-serif`;
-                const textW = ctx.measureText(data.text).width / w;
+                // Support multiligne
+                const lignes = (data.text || '').split('\n');
+                let maxTextW = 0;
+                for (const ligne of lignes) {
+                    const lw = ctx.measureText(ligne).width / w;
+                    if (lw > maxTextW) maxTextW = lw;
+                }
+                const interligne = fontSize * 1.3;
                 const textH = fontSize / h;
-                return { x1: data.x, y1: data.y - textH, x2: data.x + textW, y2: data.y + textH * 0.3 };
+                const totalH = (lignes.length * interligne) / h;
+                return { x1: data.x, y1: data.y - textH, x2: data.x + maxTextW, y2: data.y + totalH };
             }
             case 'sticker':
                 return { x1: data.x, y1: data.y, x2: data.x + data.width, y2: data.y + data.height };
@@ -1317,11 +1392,21 @@
     function dessinerTexte(texte) {
         const w = canvasAnnotation.width;
         const h = canvasAnnotation.height;
+        const fontSize = texte.fontSize || 14;
 
         ctxAnnotation.save();
-        ctxAnnotation.font = `${texte.fontSize || 14}px sans-serif`;
+        ctxAnnotation.font = `${fontSize}px sans-serif`;
         ctxAnnotation.fillStyle = texte.color || '#FF0000';
-        ctxAnnotation.fillText(texte.text, texte.x * w, texte.y * h);
+
+        const lignes = (texte.text || '').split('\n');
+        const interligne = fontSize * 1.3;
+        const xPx = texte.x * w;
+        const yPx = texte.y * h;
+
+        for (let i = 0; i < lignes.length; i++) {
+            ctxAnnotation.fillText(lignes[i], xPx, yPx + i * interligne);
+        }
+
         ctxAnnotation.restore();
     }
 

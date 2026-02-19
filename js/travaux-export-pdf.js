@@ -118,7 +118,7 @@
             // Dessiner les annotations par-dessus
             const donneesPage = annotation?.pages?.[i - 1];
             if (donneesPage) {
-                dessinerAnnotationsSurCtx(ctx, canvas.width, canvas.height, donneesPage);
+                await dessinerAnnotationsSurCtx(ctx, canvas.width, canvas.height, donneesPage);
             }
 
             // Ajouter au PDF
@@ -164,7 +164,7 @@
         // Dessiner les annotations
         const donneesPage = annotation?.pages?.[0];
         if (donneesPage) {
-            dessinerAnnotationsSurCtx(ctx, w, h, donneesPage);
+            await dessinerAnnotationsSurCtx(ctx, w, h, donneesPage);
         }
 
         const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
@@ -200,8 +200,11 @@
      * @param {number} h - Hauteur du canvas
      * @param {Object} donneesPage - { strokes, shapes, textAnnotations, stickers }
      */
-    function dessinerAnnotationsSurCtx(ctx, w, h, donneesPage, scale) {
+    async function dessinerAnnotationsSurCtx(ctx, w, h, donneesPage, scale) {
         if (scale == null) scale = EXPORT_SCALE;
+
+        // Attendre le chargement de tous les autocollants references
+        await travauxOutils.attendreChargementAutocollants(donneesPage);
         // Traits
         if (donneesPage.strokes) {
             for (const trait of donneesPage.strokes) {
@@ -216,14 +219,24 @@
             }
         }
 
-        // Textes
+        // Textes (avec support multiligne)
         if (donneesPage.textAnnotations) {
             const ratioResolutionTexte = w / travauxOutils.RESOLUTION_REFERENCE;
             for (const texte of donneesPage.textAnnotations) {
+                const fontSize = (texte.fontSize || 14) * ratioResolutionTexte;
                 ctx.save();
-                ctx.font = `${(texte.fontSize || 14) * ratioResolutionTexte}px sans-serif`;
+                ctx.font = `${fontSize}px sans-serif`;
                 ctx.fillStyle = texte.color || '#FF0000';
-                ctx.fillText(texte.text, texte.x * w, texte.y * h);
+
+                const lignes = (texte.text || '').split('\n');
+                const interligne = fontSize * 1.3;
+                const xPx = texte.x * w;
+                const yPx = texte.y * h;
+
+                for (let i = 0; i < lignes.length; i++) {
+                    ctx.fillText(lignes[i], xPx, yPx + i * interligne);
+                }
+
                 ctx.restore();
             }
         }
@@ -733,7 +746,7 @@
 
             const donneesPage = annotation?.pages?.[i - 1];
             if (donneesPage) {
-                dessinerAnnotationsSurCtx(ctx, canvas.width, canvas.height, donneesPage, scale);
+                await dessinerAnnotationsSurCtx(ctx, canvas.width, canvas.height, donneesPage, scale);
             }
 
             const dataUrl = canvas.toDataURL('image/jpeg', quality);
