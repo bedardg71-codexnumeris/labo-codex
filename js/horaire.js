@@ -521,7 +521,18 @@ function genererSeancesCompletes(coursId = null) {
     Object.entries(calendrierComplet).forEach(([dateStr, infosJour]) => {
         // Ne traiter QUE les jours de cours ou reprises
         if (infosJour.statut !== 'cours' && infosJour.statut !== 'reprise') {
-            return;
+            // 🆕 FIX (19 fév 2026) : En multi-cours, le calendrier partagé peut marquer
+            // un jour comme 'jour-ouvrable' alors que le cours actif a une séance ce jour.
+            // Vérifier l'horaire spécifique avant de rejeter (aligné avec saisie-presences.js).
+            if (infosJour.statut === 'jour-ouvrable') {
+                const jourPourVerif = infosJour.jourSemaine;
+                if (!jourPourVerif || !seancesParJour[jourPourVerif] || seancesParJour[jourPourVerif].length === 0) {
+                    return;
+                }
+                // Le cours actif a bien une séance ce jour → continuer le traitement
+            } else {
+                return;
+            }
         }
 
         const numSemaine = infosJour.numeroSemaine;

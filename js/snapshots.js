@@ -410,9 +410,26 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null, 
             const calendrier = obtenirCalendrierComplet();
             const infoJour = calendrier[dateSeance];
 
-            if (!infoJour || (infoJour.statut !== 'cours' && infoJour.statut !== 'reprise')) {
-                console.warn(`⚠️ Date ${dateSeance} n'est pas un jour de cours`);
+            if (!infoJour) {
+                console.warn(`⚠️ Date ${dateSeance} n'est pas dans le calendrier`);
                 return null;
+            }
+
+            if (infoJour.statut !== 'cours' && infoJour.statut !== 'reprise') {
+                // 🆕 FIX (19 fév 2026) : En multi-cours, 'jour-ouvrable' peut être un jour
+                // de cours pour le groupe actif (aligné avec saisie-presences.js et horaire.js)
+                if (infoJour.statut === 'jour-ouvrable' && typeof obtenirSeancesHoraire === 'function') {
+                    const seancesHoraire = obtenirSeancesHoraire();
+                    const joursNoms = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+                    const jourSemaine = joursNoms[new Date(dateSeance + 'T00:00:00').getDay()];
+                    if (!seancesHoraire || !seancesHoraire.some(s => s.jour && s.jour.toLowerCase() === jourSemaine)) {
+                        console.warn(`⚠️ Date ${dateSeance} n'est pas un jour de cours`);
+                        return null;
+                    }
+                } else {
+                    console.warn(`⚠️ Date ${dateSeance} n'est pas un jour de cours`);
+                    return null;
+                }
             }
 
             numeroSemaine = infoJour.numeroSemaine;
