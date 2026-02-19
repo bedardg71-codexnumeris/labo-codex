@@ -153,18 +153,51 @@
     ];
 
     let imagesAutocollants = {};   // Cache { id: HTMLImageElement }
+    let promessesAutocollants = {}; // Cache { id: Promise<HTMLImageElement> }
     let autocollantActif = null;   // ID de l'autocollant selectionne (ou null)
     let paletteAutoVisible = false;
 
     /**
-     * Precharge les 12 images autocollants
+     * Precharge les 12 images autocollants avec suivi onload/onerror
      */
     function prechargerAutocollants() {
         AUTOCOLLANTS.forEach(a => {
             const img = new Image();
+            const promesse = new Promise((resolve, reject) => {
+                img.onload = () => resolve(img);
+                img.onerror = () => {
+                    console.warn('[Travaux-Outils] Echec chargement autocollant:', a.fichier);
+                    reject(new Error('Echec chargement: ' + a.fichier));
+                };
+            });
             img.src = DOSSIER_AUTOCOLLANTS + a.fichier;
             imagesAutocollants[a.id] = img;
+            promessesAutocollants[a.id] = promesse;
         });
+    }
+
+    /**
+     * Retourne la promesse de chargement d'un autocollant
+     * @param {string} id - ID de l'autocollant
+     * @returns {Promise<HTMLImageElement>|null}
+     */
+    function getPromesseAutocollant(id) {
+        return promessesAutocollants[id] || null;
+    }
+
+    /**
+     * Attend le chargement de tous les autocollants references dans les donnees d'une page
+     * @param {Object} donneesPage - { stickers: [...] }
+     * @returns {Promise<void>}
+     */
+    async function attendreChargementAutocollants(donneesPage) {
+        if (!donneesPage || !donneesPage.stickers || donneesPage.stickers.length === 0) return;
+
+        const promesses = donneesPage.stickers
+            .map(stk => promessesAutocollants[stk.autocollantId])
+            .filter(Boolean);
+
+        await Promise.allSettled(promesses);
     }
 
     /**
@@ -529,6 +562,8 @@
         getEpaisseurActive: getEpaisseurActive,
         getTailleTexte: getTailleTexte,
         getImageAutocollant: getImageAutocollant,
+        getPromesseAutocollant: getPromesseAutocollant,
+        attendreChargementAutocollants: attendreChargementAutocollants,
         getAutocollantActif: getAutocollantActif,
         // Setters
         setOutilActif: setOutilActif,

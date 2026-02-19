@@ -1,8 +1,20 @@
 # SESSION ACTIVE - BETA 97.8
 
-**Date** : 18 février 2026
-**Version** : Beta 97.8 (build 0218-0550)
-**Statut** : Refonte interface carte mentale et alignement pédagogique
+**Date** : 19 février 2026
+**Version** : Beta 97.8 (build 0219-1515)
+**Statut** : Module Travaux — Pipeline fonctionnel
+
+## SESSION DU 19 FÉVRIER 2026
+
+### Travail accompli — Module Travaux : pipeline fonctionnel (Beta 97.8, build 0219-1515)
+
+89. **Autocollants fiabilisés** : `prechargerAutocollants()` (travaux-outils.js) crée désormais les images avec `onload`/`onerror` et stocke une Promise par image. `dessinerAutocollant()` (travaux-annotation.js) attache un listener one-shot si l'image n'est pas encore chargée. `dessinerAnnotationsSurCtx()` (travaux-export-pdf.js) est devenue `async` et attend le chargement complet des autocollants avant le dessin.
+
+90. **Modale texte multiligne** : `ajouterTexte()` (travaux-annotation.js) remplace `prompt()` par une modale HTML (textarea multiligne, slider taille 10-32px, boutons Annuler/Ajouter, fermeture Escape/clic arrière-plan). `dessinerTexte()` et le rendu export PDF gèrent le multiligne (split `\n`, interligne 1.3×). La bounding box texte est corrigée pour le multiligne.
+
+91. **Vue côte-à-côte corrigée** : `ouvrirVueCoteACote()` (travaux-ui.js) masque la visionneuse standard avant de créer les canvas split-view, évitant les conflits d'IDs `getElementById`. CSS `.travaux-split-panel` : `min-width` passée de 0 à 300px.
+
+92. **Flux Annotation → Évaluation robuste** : `evaluerDepuisAnnotation()` (travaux-ui.js) remplace les `setTimeout` en cascade par `preRemplirEvaluation()` — boucle de retry (max 10 essais, 150ms intervalle) qui attend que l'option production existe dans le select avant de la sélectionner.
 
 ## SESSION DU 18 FÉVRIER 2026
 
