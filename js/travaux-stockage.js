@@ -495,6 +495,23 @@
         return obtenirFichiersTravaux().find(f => f.id === id) || null;
     }
 
+    /**
+     * Met a jour les metadonnees d'un fichier travail existant
+     * @param {string} id - ID du fichier
+     * @param {Object} modifications - Champs a modifier (ex: { productionId: '...', etudiantDA: '...' })
+     * @returns {boolean} true si mis a jour
+     */
+    function mettreAJourFichier(id, modifications) {
+        const fichiers = obtenirFichiersTravaux();
+        const idx = fichiers.findIndex(f => f.id === id);
+        if (idx === -1) return false;
+
+        Object.assign(fichiers[idx], modifications);
+        fichiers[idx].dateModification = new Date().toISOString();
+        sauvegarderFichiersTravaux(fichiers);
+        return true;
+    }
+
     /* ===============================
        GENERATION MINIATURES
        =============================== */
@@ -955,6 +972,7 @@
         obtenirFichiersEtudiant: obtenirFichiersEtudiant,
         obtenirFichiersProduction: obtenirFichiersProduction,
         obtenirFichierParId: obtenirFichierParId,
+        mettreAJourFichier: mettreAJourFichier,
         // Miniatures
         genererMiniatureImage: genererMiniatureImage,
         genererMiniaturePDF: genererMiniaturePDF,

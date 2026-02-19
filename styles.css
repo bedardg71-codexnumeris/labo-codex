@@ -14788,6 +14788,18 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     border-right: 2px solid var(--bordure-claire);
 }
 
+/* --- Production dropdown dans grille fichiers --- */
+.travaux-grille-select-production {
+    font-size: 0.75rem;
+    padding: 2px 4px;
+    margin-top: 2px;
+    max-width: 100%;
+}
+
+.travaux-grille-select-production.travaux-manque-production {
+    border-color: var(--btn-annuler, #e67e22);
+}
+
 /* --- Import header --- */
 .travaux-import-header {
     display: flex;
