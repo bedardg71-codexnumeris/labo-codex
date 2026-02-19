@@ -466,6 +466,8 @@
     function genererGrilleFichiers(fichiers) {
         if (fichiers.length === 0) return '';
 
+        const productions = obtenirDonneesSelonMode(cle('productions'));
+
         let html = '<div class="travaux-grille-fichiers"><h4>Fichiers importés</h4><div class="travaux-grille">';
 
         fichiers.forEach(f => {
@@ -475,6 +477,11 @@
             const nomEtudiant = etudiant
                 ? `${echapperHtml(etudiant.prenom)} ${echapperHtml(etudiant.nom)}`
                 : (f.etudiantDA || 'Non associé');
+
+            // Production associee
+            const prod = productions.find(p => p.id === f.productionId);
+            const prodNom = prod ? echapperHtml(prod.titre || prod.nom || prod.id) : '';
+            const manqueProduction = !f.productionId;
 
             // Badge cycle de vie
             let badge = '';
@@ -493,6 +500,10 @@
                     <div class="travaux-grille-info">
                         <div class="travaux-grille-nom">${echapperHtml(f.nomFichier)}</div>
                         <div class="travaux-grille-etudiant">${nomEtudiant}</div>
+                        <select class="form-select travaux-grille-select-production${manqueProduction ? ' travaux-manque-production' : ''}" onchange="travauxUI.changerProductionFichier('${f.id}', this.value)" title="Production associée">
+                            <option value="">-- Production --</option>
+                            ${productions.map(p => `<option value="${p.id}" ${f.productionId === p.id ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
+                        </select>
                     </div>
                     <button class="btn btn-supprimer btn-tres-compact travaux-grille-btn-supprimer" onclick="travauxUI.supprimerFichierImporte('${f.id}')" title="Supprimer ce fichier">✕</button>
                 </div>`;
@@ -989,6 +1000,18 @@
     }
 
     /**
+     * Change la production associee a un fichier deja importe
+     * @param {string} fichierId - ID du fichier
+     * @param {string} productionId - Nouvel ID de production
+     */
+    function changerProductionFichier(fichierId, productionId) {
+        const ok = travauxStockage.mettreAJourFichier(fichierId, { productionId: productionId });
+        if (ok) {
+            console.log('[Travaux-UI] Production mise a jour pour', fichierId, '→', productionId);
+        }
+    }
+
+    /**
      * Lance le reimport d'un fichier (fac-simile → original)
      * @param {string} fichierId
      */
@@ -1278,6 +1301,8 @@
         // Cycle de vie
         allegerFichier: allegerFichier,
         reimporterFichier: reimporterFichier,
+        // Association production
+        changerProductionFichier: changerProductionFichier,
         // Rafraichissement
         rafraichirUI: rafraichirUI
     };
