@@ -34,7 +34,7 @@
     const EXPOSITION_MIN = -20;          // -2.0 EV
     const EXPOSITION_MAX = 20;           // +2.0 EV
     const BATCH_SIZE = 10000;         // Pixels par lot pour le rendu final
-    const PERSPECTIVE_MARGE_MIN = 0.15;  // marge initiale (15%)
+    const PERSPECTIVE_MARGE_MIN = 0;     // pas de marge initiale
     const PERSPECTIVE_MARGE_MAX = 0.80;  // marge maximale (80%)
 
     /* ===============================
@@ -119,6 +119,13 @@
      * Confirme et applique les transformations
      */
     async function confirmer() {
+        // Auto-confirmer l'outil actif s'il reste en attente
+        if (outilActif === 'perspective' && perspectiveCorners) {
+            appliquerPerspective();
+        } else if (outilActif === 'crop' && cropRect) {
+            appliquerCrop();
+        }
+
         // Appliquer le rendu final sur chaque fichier modifie
         for (let i = 0; i < fichiers.length; i++) {
             const f = fichiers[i];

@@ -17968,10 +17968,16 @@ body.mode-clair .prep-palette-barre {
 }
 body.mode-clair .prep-btn {
     background: #ffffff;
+    color: var(--texte-principal);
     border-color: rgba(3, 46, 92, 0.12);
 }
 body.mode-clair .prep-btn:hover {
     border-color: var(--bleu-principal);
+}
+body.mode-clair .prep-btn.actif {
+    background: var(--accent-primaire);
+    color: #fff;
+    border-color: var(--accent-primaire);
 }
 body.mode-clair .prep-section[id="prep-section-fichiers"]  { background: rgba(59, 130, 246, 0.08); }
 body.mode-clair .prep-section[id="prep-section-rotation"]  { background: rgba(249, 115, 22, 0.08); }
