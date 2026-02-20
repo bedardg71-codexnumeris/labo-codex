@@ -34,8 +34,13 @@
     const EXPOSITION_MIN = -20;          // -2.0 EV
     const EXPOSITION_MAX = 20;           // +2.0 EV
     const BATCH_SIZE = 10000;         // Pixels par lot pour le rendu final
-    const PERSPECTIVE_MARGE_MIN = 0;     // pas de marge initiale
-    const PERSPECTIVE_MARGE_MAX = 0.80;  // marge maximale (80%)
+    const PERSPECTIVE_MARGE_MAX = 1.0;   // limites des coins perspective (-1.0 a 2.0)
+
+    // Workspace zoomable (3 couches imbriquees)
+    const PREP_WORKSPACE_MULT = 3;       // workspace = 3x image dans chaque dimension
+    const PREP_ZOOM_MIN = 0.15;
+    const PREP_ZOOM_MAX = 4;
+    const PREP_ZOOM_WHEEL_FACTOR = 1.08;
 
     /* ===============================
        ETAT DU MODULE
@@ -59,8 +64,19 @@
     let perspectiveCorners = null;    // [{x,y}, {x,y}, {x,y}, {x,y}] en fractions 0-1
     let poigneeActive = -1;           // Index de la poignee draggee (-1 = aucune)
     let cropDragState = null;         // Etat du drag pour le crop
-    let perspectiveMarge = PERSPECTIVE_MARGE_MIN;  // Marge dynamique perspective
     let perspectiveFill = 'white';  // 'none' | 'white' | 'auto'
+
+    // Etat zoom/pan du workspace
+    let prepZoom = 1;
+    let prepEspaceW = 0;              // largeur workspace (pixels non-zoomes)
+    let prepEspaceH = 0;              // hauteur workspace
+    let prepOffsetX = 0;              // position X de l'image dans le workspace
+    let prepOffsetY = 0;              // position Y de l'image dans le workspace
+    let prepScrollContainer = null;
+    let prepEspaceWrapper = null;
+    let prepEspace = null;
+    let canvasOverlay = null;
+    let ctxOverlay = null;
 
     // Assemblage multi-pages
     let selections = new Set();       // Indices des fichiers selectionnes pour grouper
@@ -211,11 +227,22 @@
             canvasApercu.width = 0;
             canvasApercu.height = 0;
         }
+        if (canvasOverlay) {
+            canvasOverlay.width = 0;
+            canvasOverlay.height = 0;
+        }
         imageOriginale = null;
         operations = [];
         outilActif = null;
         cropRect = null;
         perspectiveCorners = null;
+        // Reset zoom state
+        prepZoom = 1;
+        prepScrollContainer = null;
+        prepEspaceWrapper = null;
+        prepEspace = null;
+        canvasOverlay = null;
+        ctxOverlay = null;
     }
 
     /* ===============================
@@ -259,6 +286,7 @@
         imageTravail = creerCopieTravail(imageOriginale);
 
         mettreAJourApercu();
+        prepZoomFit();
         mettreAJourMiniatures();
         mettreAJourNavigation();
     }
@@ -353,6 +381,70 @@
     }
 
     /* ===============================
+       ZOOM / PAN DU WORKSPACE
+       =============================== */
+
+    function calculerEspaceParams() {
+        const source = canvasGeometrique || imageTravail;
+        if (!source) return;
+        prepEspaceW = source.width * PREP_WORKSPACE_MULT;
+        prepEspaceH = source.height * PREP_WORKSPACE_MULT;
+        prepOffsetX = source.width;   // 1x image de marge a gauche
+        prepOffsetY = source.height;  // 1x image de marge en haut
+    }
+
+    function prepAppliquerZoom() {
+        if (!prepEspace || !prepEspaceWrapper) return;
+        prepEspace.style.transform = 'scale(' + prepZoom + ')';
+        prepEspaceWrapper.style.width = (prepEspaceW * prepZoom) + 'px';
+        prepEspaceWrapper.style.height = (prepEspaceH * prepZoom) + 'px';
+        var info = document.getElementById('prep-zoom-info');
+        if (info) info.textContent = Math.round(prepZoom * 100) + '%';
+        // Mettre a jour les boutons preset
+        var zoomArrondi = Math.round(prepZoom * 100);
+        document.querySelectorAll('.prep-btn-zoom').forEach(function(btn) {
+            var val = btn.dataset.zoom;
+            if (val && val !== 'fit') {
+                btn.classList.toggle('actif', Math.round(parseFloat(val) * 100) === zoomArrondi);
+            }
+        });
+    }
+
+    function prepZoomer(clientX, clientY, facteur) {
+        var oldZoom = prepZoom;
+        prepZoom = Math.max(PREP_ZOOM_MIN, Math.min(PREP_ZOOM_MAX, prepZoom * facteur));
+        if (prepZoom === oldZoom) return;
+        prepAppliquerZoom();
+        // Zoom-to-cursor : garder le point sous le curseur stable
+        var rect = prepScrollContainer.getBoundingClientRect();
+        var cx = clientX - rect.left, cy = clientY - rect.top;
+        var espX = (cx + prepScrollContainer.scrollLeft) / oldZoom;
+        var espY = (cy + prepScrollContainer.scrollTop) / oldZoom;
+        prepScrollContainer.scrollLeft = espX * prepZoom - cx;
+        prepScrollContainer.scrollTop = espY * prepZoom - cy;
+    }
+
+    function prepZoomFit() {
+        var source = canvasGeometrique || imageTravail;
+        if (!source || !prepScrollContainer) return;
+        var vpW = prepScrollContainer.clientWidth;
+        var vpH = prepScrollContainer.clientHeight;
+        prepZoom = Math.min(vpW / (source.width * 1.4), vpH / (source.height * 1.4), 2);
+        prepZoom = Math.max(PREP_ZOOM_MIN, Math.min(PREP_ZOOM_MAX, prepZoom));
+        prepAppliquerZoom();
+        prepCentrerSurImage();
+    }
+
+    function prepCentrerSurImage() {
+        var source = canvasGeometrique || imageTravail;
+        if (!source || !prepScrollContainer) return;
+        var cx = (prepOffsetX + source.width / 2) * prepZoom;
+        var cy = (prepOffsetY + source.height / 2) * prepZoom;
+        prepScrollContainer.scrollLeft = cx - prepScrollContainer.clientWidth / 2;
+        prepScrollContainer.scrollTop = cy - prepScrollContainer.clientHeight / 2;
+    }
+
+    /* ===============================
        RENDU APERCU (interactif)
        =============================== */
 
@@ -380,6 +472,7 @@
     /**
      * Applique toutes les operations sur la copie de travail et affiche l'apercu.
      * Utilise le cache geometrique quand disponible.
+     * Canvas image (apercu) = image seule, Canvas overlay = poignees.
      */
     function mettreAJourApercu() {
         if (!imageTravail || !canvasApercu) return;
@@ -390,45 +483,47 @@
         }
 
         const source = canvasGeometrique;
-        const ctx = ctxApercu;
 
-        // Marge autour de l'image quand perspective active (poignees hors cadre)
-        const avecMarge = outilActif === 'perspective';
-        const margeX = avecMarge ? Math.round(source.width * perspectiveMarge) : 0;
-        const margeY = avecMarge ? Math.round(source.height * perspectiveMarge) : 0;
+        calculerEspaceParams();
 
-        canvasApercu.width = source.width + margeX * 2;
-        canvasApercu.height = source.height + margeY * 2;
-
-        // Taille CSS : image tient dans le container, marges debordent → scroll
-        const container = document.getElementById('prep-canvas-scroll');
-        if (container) {
-            const maxW = container.clientWidth - 48;
-            const maxH = container.clientHeight - 48;
-            const scale = Math.min(maxW / source.width, maxH / source.height, 1);
-            canvasApercu.style.width = Math.round(canvasApercu.width * scale) + 'px';
-            canvasApercu.style.height = Math.round(canvasApercu.height * scale) + 'px';
-        }
-
-        ctx.clearRect(0, 0, canvasApercu.width, canvasApercu.height);
-
-        // Zone de marge sombre
-        if (avecMarge) {
-            ctx.fillStyle = 'rgba(0,0,0,0.4)';
-            ctx.fillRect(0, 0, canvasApercu.width, canvasApercu.height);
-        }
-
-        ctx.drawImage(source, margeX, margeY);
+        // Canvas image = taille exacte de l'image, positionne a l'offset
+        canvasApercu.width = source.width;
+        canvasApercu.height = source.height;
+        canvasApercu.style.left = prepOffsetX + 'px';
+        canvasApercu.style.top = prepOffsetY + 'px';
+        canvasApercu.style.width = '';
+        canvasApercu.style.height = '';
+        ctxApercu.drawImage(source, 0, 0);
 
         // Appliquer les filtres CSS via style (GPU)
         canvasApercu.style.filter = construireFiltresCSS(operations);
 
-        // Dessiner les poignees si un outil est actif
+        // Overlay = taille du workspace entier
+        canvasOverlay.width = prepEspaceW;
+        canvasOverlay.height = prepEspaceH;
+
+        // Espace container
+        prepEspace.style.width = prepEspaceW + 'px';
+        prepEspace.style.height = prepEspaceH + 'px';
+
+        prepAppliquerZoom();
+        mettreAJourOverlay();
+    }
+
+    /**
+     * Dessine les poignees sur le canvas overlay (rapide, appele pendant le drag).
+     */
+    function mettreAJourOverlay() {
+        if (!ctxOverlay) return;
+        ctxOverlay.clearRect(0, 0, canvasOverlay.width, canvasOverlay.height);
+        const source = canvasGeometrique || imageTravail;
+        if (!source) return;
+
         if (outilActif === 'crop' && cropRect) {
-            dessinerCrop(ctx, source.width, source.height);
+            dessinerCrop(ctxOverlay, source.width, source.height);
         }
         if (outilActif === 'perspective' && perspectiveCorners) {
-            dessinerPerspective(ctx, source.width, source.height, margeX, margeY);
+            dessinerPerspective(ctxOverlay, source.width, source.height, prepOffsetX, prepOffsetY);
         }
     }
 
@@ -842,56 +937,58 @@
        =============================== */
 
     function dessinerPoignee(ctx, cx, cy, active) {
+        var r = POIGNEE_RAYON / prepZoom;     // rayon constant a l'ecran
         ctx.save();
         ctx.beginPath();
-        ctx.arc(cx, cy, POIGNEE_RAYON, 0, Math.PI * 2);
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
         ctx.fillStyle = active ? 'rgba(220, 235, 255, 0.95)' : 'rgba(255, 255, 255, 0.95)';
         ctx.fill();
-        ctx.lineWidth = 1.5;
+        ctx.lineWidth = 1.5 / prepZoom;       // epaisseur constante a l'ecran
         ctx.strokeStyle = 'rgba(0, 0, 0, 0.45)';
         ctx.stroke();
         ctx.restore();
     }
 
     /**
-     * Dessine le rectangle de crop avec les poignees
+     * Dessine le rectangle de crop avec les poignees (en coordonnees workspace)
      */
     function dessinerCrop(ctx, w, h) {
         if (!cropRect) return;
 
-        const x = cropRect.x * w;
-        const y = cropRect.y * h;
-        const rw = cropRect.width * w;
-        const rh = cropRect.height * h;
+        var x = cropRect.x * w + prepOffsetX;
+        var y = cropRect.y * h + prepOffsetY;
+        var rw = cropRect.width * w;
+        var rh = cropRect.height * h;
 
-        // Zone sombre autour du crop
+        // Zone sombre autour du crop (zone image uniquement)
+        var ix = prepOffsetX, iy = prepOffsetY;
         ctx.fillStyle = 'rgba(0,0,0,0.5)';
-        ctx.fillRect(0, 0, w, y);                          // haut
-        ctx.fillRect(0, y, x, rh);                          // gauche
-        ctx.fillRect(x + rw, y, w - x - rw, rh);            // droite
-        ctx.fillRect(0, y + rh, w, h - y - rh);             // bas
+        ctx.fillRect(ix, iy, w, cropRect.y * h);                                            // haut
+        ctx.fillRect(ix, y, cropRect.x * w, rh);                                            // gauche
+        ctx.fillRect(x + rw, y, w - (cropRect.x + cropRect.width) * w, rh);                  // droite
+        ctx.fillRect(ix, y + rh, w, h - (cropRect.y + cropRect.height) * h);                 // bas
 
         // Bordure du crop
         ctx.strokeStyle = '#fff';
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 2 / prepZoom;
         ctx.strokeRect(x, y, rw, rh);
 
         // Poignees aux 4 coins
-        const coins = [
+        var coins = [
             { px: x, py: y },
             { px: x + rw, py: y },
             { px: x + rw, py: y + rh },
             { px: x, py: y + rh }
         ];
 
-        const coinActif = (cropDragState && cropDragState.mode === 'resize') ? cropDragState.corner : -1;
-        coins.forEach((c, i) => {
+        var coinActif = (cropDragState && cropDragState.mode === 'resize') ? cropDragState.corner : -1;
+        coins.forEach(function(c, i) {
             dessinerPoignee(ctx, c.px, c.py, i === coinActif);
         });
     }
 
     /**
-     * Dessine les poignees de perspective
+     * Dessine les poignees de perspective (en coordonnees workspace)
      */
     function dessinerPerspective(ctx, w, h, offsetX, offsetY) {
         if (!perspectiveCorners) return;
@@ -899,26 +996,28 @@
         offsetY = offsetY || 0;
 
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 1 / prepZoom;
         ctx.strokeRect(offsetX, offsetY, w, h);
 
-        const points = perspectiveCorners.map(p => ({
-            x: p.x * w + offsetX,
-            y: p.y * h + offsetY
-        }));
+        var points = perspectiveCorners.map(function(p) {
+            return {
+                x: p.x * w + offsetX,
+                y: p.y * h + offsetY
+            };
+        });
 
         // Lignes du quadrilatere
         ctx.strokeStyle = 'rgba(0, 150, 255, 0.8)';
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 2 / prepZoom;
         ctx.beginPath();
         ctx.moveTo(points[0].x, points[0].y);
-        for (let i = 1; i < 4; i++) {
+        for (var i = 1; i < 4; i++) {
             ctx.lineTo(points[i].x, points[i].y);
         }
         ctx.closePath();
         ctx.stroke();
 
-        points.forEach((p, i) => {
+        points.forEach(function(p, i) {
             dessinerPoignee(ctx, p.x, p.y, i === poigneeActive);
         });
     }
@@ -928,73 +1027,70 @@
        =============================== */
 
     /**
-     * Configure les Pointer Events sur le canvas d'apercu
+     * Configure les Pointer Events sur le canvas overlay
      */
     function configurerInteractions() {
-        if (!canvasApercu) return;
+        if (!canvasOverlay) return;
 
-        canvasApercu.addEventListener('pointerdown', onPointerDown);
-        canvasApercu.addEventListener('pointermove', onPointerMove);
-        canvasApercu.addEventListener('pointerup', onPointerUp);
-        canvasApercu.addEventListener('pointercancel', onPointerUp);
+        canvasOverlay.addEventListener('pointerdown', onPointerDown);
+        canvasOverlay.addEventListener('pointermove', onPointerMove);
+        canvasOverlay.addEventListener('pointerup', onPointerUp);
+        canvasOverlay.addEventListener('pointercancel', onPointerUp);
     }
 
     function getCanvasPos(e) {
-        const rect = canvasApercu.getBoundingClientRect();
-        const rawX = (e.clientX - rect.left) / rect.width;
-        const rawY = (e.clientY - rect.top) / rect.height;
-
-        // Quand perspective active, convertir de l'espace canvas (avec marge) vers l'espace image
-        if (outilActif === 'perspective') {
-            const total = 1 + perspectiveMarge * 2;
-            return {
-                x: rawX * total - perspectiveMarge,
-                y: rawY * total - perspectiveMarge
-            };
-        }
-
-        return { x: rawX, y: rawY };
+        var rect = prepScrollContainer.getBoundingClientRect();
+        // Position dans le workspace (pixels non-zoomes)
+        var wsX = (e.clientX - rect.left + prepScrollContainer.scrollLeft) / prepZoom;
+        var wsY = (e.clientY - rect.top + prepScrollContainer.scrollTop) / prepZoom;
+        // Normaliser par rapport a l'image (0-1)
+        var source = canvasGeometrique || imageTravail;
+        return {
+            x: (wsX - prepOffsetX) / source.width,
+            y: (wsY - prepOffsetY) / source.height
+        };
     }
 
     function onPointerDown(e) {
-        const pos = getCanvasPos(e);
+        var pos = getCanvasPos(e);
+        var source = canvasGeometrique || imageTravail;
 
         if (outilActif === 'balance') {
-            // Echantillonner le pixel clique
-            const rect = canvasApercu.getBoundingClientRect();
-            const px = Math.round((e.clientX - rect.left) * (canvasApercu.width / rect.width));
-            const py = Math.round((e.clientY - rect.top) * (canvasApercu.height / rect.height));
-            const pixel = ctxApercu.getImageData(px, py, 1, 1).data;
-            const r = pixel[0], g = pixel[1], b = pixel[2];
+            // Echantillonner le pixel clique depuis le canvas apercu
+            var imgX = Math.round(pos.x * source.width);
+            var imgY = Math.round(pos.y * source.height);
+            imgX = Math.max(0, Math.min(source.width - 1, imgX));
+            imgY = Math.max(0, Math.min(source.height - 1, imgY));
+            var pixel = ctxApercu.getImageData(imgX, imgY, 1, 1).data;
+            var r = pixel[0], g = pixel[1], b = pixel[2];
 
             // Eviter division par zero
             if (r < 5 && g < 5 && b < 5) {
                 outilActif = null;
-                canvasApercu.style.cursor = '';
+                canvasOverlay.style.cursor = '';
                 return;
             }
 
             // Calculer les facteurs de correction, limites entre 0.5 et 2.0
-            const rFactor = Math.max(0.5, Math.min(2.0, 255 / Math.max(r, 1)));
-            const gFactor = Math.max(0.5, Math.min(2.0, 255 / Math.max(g, 1)));
-            const bFactor = Math.max(0.5, Math.min(2.0, 255 / Math.max(b, 1)));
+            var rFactor = Math.max(0.5, Math.min(2.0, 255 / Math.max(r, 1)));
+            var gFactor = Math.max(0.5, Math.min(2.0, 255 / Math.max(g, 1)));
+            var bFactor = Math.max(0.5, Math.min(2.0, 255 / Math.max(b, 1)));
 
-            ajouterOperation({ type: 'whiteBalance', rFactor, gFactor, bFactor });
+            ajouterOperation({ type: 'whiteBalance', rFactor: rFactor, gFactor: gFactor, bFactor: bFactor });
             outilActif = null;
-            canvasApercu.style.cursor = '';
+            canvasOverlay.style.cursor = '';
             return;
         }
 
         if (outilActif === 'perspective' && perspectiveCorners) {
-            // Detecter si on touche une poignee (ajuster pour la marge)
-            const echelle = 1 + perspectiveMarge * 2;
-            const seuil = POIGNEE_TAILLE * echelle / (2 * canvasApercu.getBoundingClientRect().width);
-            for (let i = 0; i < 4; i++) {
-                const dx = pos.x - perspectiveCorners[i].x;
-                const dy = pos.y - perspectiveCorners[i].y;
-                if (Math.sqrt(dx * dx + dy * dy) < seuil) {
+            // Seuil hit-test adapte au zoom
+            var seuilPersp = POIGNEE_TAILLE / (prepZoom * 2 * source.width);
+            for (var i = 0; i < 4; i++) {
+                var dx = pos.x - perspectiveCorners[i].x;
+                var dy = pos.y - perspectiveCorners[i].y;
+                if (Math.sqrt(dx * dx + dy * dy) < seuilPersp) {
                     poigneeActive = i;
-                    canvasApercu.setPointerCapture(e.pointerId);
+                    canvasOverlay.setPointerCapture(e.pointerId);
                     return;
                 }
             }
@@ -1006,53 +1102,51 @@
                 cropRect = { x: pos.x, y: pos.y, width: 0, height: 0 };
                 cropDragState = { startX: pos.x, startY: pos.y, mode: 'create' };
             } else {
-                // Detecter coin de resize ou zone de deplacement
-                const sx = canvasApercu.getBoundingClientRect().width;
-                const seuil = POIGNEE_TAILLE / (2 * sx);
+                // Seuil hit-test adapte au zoom
+                var seuilCrop = POIGNEE_TAILLE / (prepZoom * 2 * source.width);
 
-                const coins = [
+                var coins = [
                     { x: cropRect.x, y: cropRect.y },
                     { x: cropRect.x + cropRect.width, y: cropRect.y },
                     { x: cropRect.x + cropRect.width, y: cropRect.y + cropRect.height },
                     { x: cropRect.x, y: cropRect.y + cropRect.height }
                 ];
 
-                let coinTouche = -1;
-                for (let i = 0; i < 4; i++) {
-                    const dx = Math.abs(pos.x - coins[i].x);
-                    const dy = Math.abs(pos.y - coins[i].y);
-                    if (dx < seuil && dy < seuil) {
-                        coinTouche = i;
+                var coinTouche = -1;
+                for (var j = 0; j < 4; j++) {
+                    var cdx = Math.abs(pos.x - coins[j].x);
+                    var cdy = Math.abs(pos.y - coins[j].y);
+                    if (cdx < seuilCrop && cdy < seuilCrop) {
+                        coinTouche = j;
                         break;
                     }
                 }
 
                 if (coinTouche >= 0) {
-                    cropDragState = { mode: 'resize', corner: coinTouche, startX: pos.x, startY: pos.y, original: { ...cropRect } };
+                    cropDragState = { mode: 'resize', corner: coinTouche, startX: pos.x, startY: pos.y, original: { x: cropRect.x, y: cropRect.y, width: cropRect.width, height: cropRect.height } };
                 } else if (pos.x >= cropRect.x && pos.x <= cropRect.x + cropRect.width &&
                            pos.y >= cropRect.y && pos.y <= cropRect.y + cropRect.height) {
-                    cropDragState = { mode: 'move', startX: pos.x, startY: pos.y, original: { ...cropRect } };
+                    cropDragState = { mode: 'move', startX: pos.x, startY: pos.y, original: { x: cropRect.x, y: cropRect.y, width: cropRect.width, height: cropRect.height } };
                 } else {
                     cropRect = { x: pos.x, y: pos.y, width: 0, height: 0 };
                     cropDragState = { startX: pos.x, startY: pos.y, mode: 'create' };
                 }
             }
-            canvasApercu.setPointerCapture(e.pointerId);
+            canvasOverlay.setPointerCapture(e.pointerId);
         }
     }
 
     function onPointerMove(e) {
-        const pos = getCanvasPos(e);
+        var pos = getCanvasPos(e);
 
         if (outilActif === 'perspective' && poigneeActive >= 0) {
-            const limMin = -PERSPECTIVE_MARGE_MAX;
-            const limMax = 1 + PERSPECTIVE_MARGE_MAX;
+            var limMin = -PERSPECTIVE_MARGE_MAX;
+            var limMax = 1 + PERSPECTIVE_MARGE_MAX;
             perspectiveCorners[poigneeActive] = {
                 x: Math.max(limMin, Math.min(limMax, pos.x)),
                 y: Math.max(limMin, Math.min(limMax, pos.y))
             };
-            perspectiveMarge = calculerMargeNecessaire();
-            mettreAJourApercu();
+            mettreAJourOverlay();
             return;
         }
 
@@ -1061,13 +1155,13 @@
                 cropRect.width = Math.max(0, pos.x - cropDragState.startX);
                 cropRect.height = Math.max(0, pos.y - cropDragState.startY);
             } else if (cropDragState.mode === 'move') {
-                const dx = pos.x - cropDragState.startX;
-                const dy = pos.y - cropDragState.startY;
+                var dx = pos.x - cropDragState.startX;
+                var dy = pos.y - cropDragState.startY;
                 cropRect.x = Math.max(0, Math.min(1 - cropDragState.original.width, cropDragState.original.x + dx));
                 cropRect.y = Math.max(0, Math.min(1 - cropDragState.original.height, cropDragState.original.y + dy));
             } else if (cropDragState.mode === 'resize') {
-                const o = cropDragState.original;
-                const corner = cropDragState.corner;
+                var o = cropDragState.original;
+                var corner = cropDragState.corner;
                 if (corner === 0) {
                     cropRect.x = Math.min(pos.x, o.x + o.width);
                     cropRect.y = Math.min(pos.y, o.y + o.height);
@@ -1086,7 +1180,7 @@
                     cropRect.height = Math.max(0, pos.y - o.y);
                 }
             }
-            mettreAJourApercu();
+            mettreAJourOverlay();
         }
     }
 
@@ -1097,6 +1191,101 @@
         if (outilActif === 'crop' && cropDragState) {
             cropDragState = null;
         }
+    }
+
+    /* ===============================
+       EVENEMENTS ZOOM (molette, pinch, boutons)
+       =============================== */
+
+    function configurerZoomEvents() {
+        if (!prepScrollContainer) return;
+
+        // Molette Ctrl+wheel → zoom vers le curseur
+        prepScrollContainer.addEventListener('wheel', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                e.preventDefault();
+                var facteur = e.deltaY < 0 ? PREP_ZOOM_WHEEL_FACTOR : 1 / PREP_ZOOM_WHEEL_FACTOR;
+                prepZoomer(e.clientX, e.clientY, facteur);
+            }
+        }, { passive: false });
+
+        // Pinch macOS (gesturestart/change/end)
+        var gestureBaseZoom = 1;
+        prepScrollContainer.addEventListener('gesturestart', function(e) {
+            e.preventDefault();
+            gestureBaseZoom = prepZoom;
+        });
+        prepScrollContainer.addEventListener('gesturechange', function(e) {
+            e.preventDefault();
+            var oldZoom = prepZoom;
+            prepZoom = Math.max(PREP_ZOOM_MIN, Math.min(PREP_ZOOM_MAX, gestureBaseZoom * e.scale));
+            if (prepZoom !== oldZoom) {
+                prepAppliquerZoom();
+                var rect = prepScrollContainer.getBoundingClientRect();
+                var cx = e.clientX - rect.left, cy = e.clientY - rect.top;
+                var espX = (cx + prepScrollContainer.scrollLeft) / oldZoom;
+                var espY = (cy + prepScrollContainer.scrollTop) / oldZoom;
+                prepScrollContainer.scrollLeft = espX * prepZoom - cx;
+                prepScrollContainer.scrollTop = espY * prepZoom - cy;
+            }
+        });
+        prepScrollContainer.addEventListener('gestureend', function(e) {
+            e.preventDefault();
+        });
+
+        // Pinch tactile (2 doigts)
+        var touchStartDist = 0;
+        var touchStartZoom = 1;
+        var touchStartCenter = { x: 0, y: 0 };
+        prepScrollContainer.addEventListener('touchstart', function(e) {
+            if (e.touches.length === 2) {
+                var dx = e.touches[1].clientX - e.touches[0].clientX;
+                var dy = e.touches[1].clientY - e.touches[0].clientY;
+                touchStartDist = Math.sqrt(dx * dx + dy * dy);
+                touchStartZoom = prepZoom;
+                touchStartCenter = {
+                    x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+                    y: (e.touches[0].clientY + e.touches[1].clientY) / 2
+                };
+            }
+        }, { passive: true });
+        prepScrollContainer.addEventListener('touchmove', function(e) {
+            if (e.touches.length === 2 && touchStartDist > 0) {
+                var dx = e.touches[1].clientX - e.touches[0].clientX;
+                var dy = e.touches[1].clientY - e.touches[0].clientY;
+                var dist = Math.sqrt(dx * dx + dy * dy);
+                var scale = dist / touchStartDist;
+                var oldZoom = prepZoom;
+                prepZoom = Math.max(PREP_ZOOM_MIN, Math.min(PREP_ZOOM_MAX, touchStartZoom * scale));
+                if (prepZoom !== oldZoom) {
+                    prepAppliquerZoom();
+                    var cx = touchStartCenter.x, cy = touchStartCenter.y;
+                    var rect = prepScrollContainer.getBoundingClientRect();
+                    var lx = cx - rect.left, ly = cy - rect.top;
+                    var espX = (lx + prepScrollContainer.scrollLeft) / oldZoom;
+                    var espY = (ly + prepScrollContainer.scrollTop) / oldZoom;
+                    prepScrollContainer.scrollLeft = espX * prepZoom - lx;
+                    prepScrollContainer.scrollTop = espY * prepZoom - ly;
+                }
+            }
+        }, { passive: true });
+        prepScrollContainer.addEventListener('touchend', function() {
+            touchStartDist = 0;
+        }, { passive: true });
+
+        // Boutons preset (Fit / 50% / 100% / 150%)
+        document.querySelectorAll('.prep-btn-zoom').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var val = btn.dataset.zoom;
+                if (val === 'fit') {
+                    prepZoomFit();
+                } else {
+                    prepZoom = parseFloat(val);
+                    prepAppliquerZoom();
+                    prepCentrerSurImage();
+                }
+            });
+        });
     }
 
     /* ===============================
@@ -1152,7 +1341,6 @@
 
     function activerPerspective() {
         outilActif = 'perspective';
-        perspectiveMarge = PERSPECTIVE_MARGE_MIN;
         perspectiveCorners = [
             { x: 0.05, y: 0.05 },  // TL
             { x: 0.95, y: 0.05 },  // TR
@@ -1160,15 +1348,6 @@
             { x: 0.05, y: 0.95 }   // BL
         ];
         mettreAJourApercu();
-    }
-
-    function calculerMargeNecessaire() {
-        if (!perspectiveCorners) return PERSPECTIVE_MARGE_MIN;
-        let needed = 0;
-        perspectiveCorners.forEach(p => {
-            needed = Math.max(needed, -p.x, -p.y, p.x - 1, p.y - 1);
-        });
-        return Math.max(PERSPECTIVE_MARGE_MIN, Math.min(PERSPECTIVE_MARGE_MAX, needed + 0.08));
     }
 
     /* ===============================
@@ -2012,11 +2191,11 @@
         if (outilActif === 'balance') {
             // Desactiver si deja actif
             outilActif = null;
-            if (canvasApercu) canvasApercu.style.cursor = '';
+            if (canvasOverlay) canvasOverlay.style.cursor = '';
             return;
         }
         outilActif = 'balance';
-        if (canvasApercu) canvasApercu.style.cursor = 'crosshair';
+        if (canvasOverlay) canvasOverlay.style.cursor = 'crosshair';
     }
 
     /* ===============================
@@ -2239,7 +2418,12 @@
                 <!-- Zone de travail plein ecran -->
                 <div class="prep-workspace">
                     <div class="prep-canvas-scroll" id="prep-canvas-scroll">
-                        <canvas id="prep-canvas-apercu"></canvas>
+                        <div id="prep-espace-wrapper">
+                            <div id="prep-espace">
+                                <canvas id="prep-canvas-apercu"></canvas>
+                                <canvas id="prep-canvas-overlay"></canvas>
+                            </div>
+                        </div>
                     </div>
                     <button class="prep-btn-canvas" id="prep-btn-appliquer-crop"
                             onclick="travauxPreparation.appliquerCrop()"
@@ -2247,6 +2431,15 @@
                     <button class="prep-btn-canvas" id="prep-btn-appliquer-persp"
                             onclick="travauxPreparation.appliquerPerspective()"
                             style="display:none;">Confirmer perspective</button>
+
+                    <!-- Barre de zoom -->
+                    <div class="prep-zoom-bar" id="prep-zoom-bar">
+                        <button class="prep-btn-zoom" data-zoom="fit">Fit</button>
+                        <button class="prep-btn-zoom" data-zoom="0.5">50%</button>
+                        <button class="prep-btn-zoom" data-zoom="1">100%</button>
+                        <button class="prep-btn-zoom" data-zoom="1.5">150%</button>
+                        <span class="prep-zoom-info" id="prep-zoom-info">100%</span>
+                    </div>
 
                     <!-- Palette Reglages specifiques (flottante, draggable) -->
                     <div class="prep-palette prep-palette-etendu" id="prep-palette-outils" style="top:12px; left:12px;">
@@ -2349,12 +2542,18 @@
 
         document.body.appendChild(modal);
 
-        // Recuperer le canvas
+        // Recuperer les refs DOM du workspace zoomable
         canvasApercu = document.getElementById('prep-canvas-apercu');
         ctxApercu = canvasApercu.getContext('2d');
+        canvasOverlay = document.getElementById('prep-canvas-overlay');
+        ctxOverlay = canvasOverlay.getContext('2d');
+        prepScrollContainer = document.getElementById('prep-canvas-scroll');
+        prepEspaceWrapper = document.getElementById('prep-espace-wrapper');
+        prepEspace = document.getElementById('prep-espace');
 
         // Configurer les interactions
         configurerInteractions();
+        configurerZoomEvents();
         configurerDragPalettes();
 
         // Mettre a jour les boutons d'outils periodiquement
@@ -2582,6 +2781,8 @@
         // Palettes
         togglePalette: togglePalette,
         toggleSection: toggleSection,
+        // Zoom
+        prepZoomFit: prepZoomFit,
         // Batch
         autoBalanceBlancs: autoBalanceBlancs,
         // Etat

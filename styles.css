@@ -14043,20 +14043,88 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     align-items: stretch;
     justify-content: stretch;
 }
+/* Container scroll — fournit les scrollbars */
 .prep-canvas-scroll {
     flex: 1;
     overflow: auto;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    padding: 24px;
+    padding: 0;
     background: var(--surface-page, #0c1a22);
     touch-action: pan-x pan-y;
 }
-.prep-canvas-scroll canvas {
-    display: block;
-    flex-shrink: 0;
+
+/* Wrapper — donne la taille aux scrollbars (dimensions x zoom) */
+#prep-espace-wrapper {
+    position: relative;
+    overflow: hidden;
+}
+
+/* Espace — contient les canvas, zoome par CSS transform */
+#prep-espace {
+    position: absolute;
+    top: 0; left: 0;
+    transform-origin: 0 0;
+}
+
+/* Canvas image — positionne a l'offset, taille = image */
+#prep-canvas-apercu {
+    position: absolute;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Canvas overlay — taille = workspace entier, transparent */
+#prep-canvas-overlay {
+    position: absolute;
+    top: 0; left: 0;
+    touch-action: none;
+}
+
+/* Barre de zoom — flottante en bas a droite */
+.prep-zoom-bar {
+    position: absolute;
+    bottom: 12px; right: 12px;
+    z-index: 80;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    background: var(--surface-carte, #1a3040);
+    border: 1px solid rgba(106, 172, 184, 0.2);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+.prep-btn-zoom {
+    padding: 3px 8px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    cursor: pointer;
+    background: var(--surface-section, #142428);
+    color: var(--texte-principal);
+    transition: all 0.15s;
+}
+.prep-btn-zoom:hover {
+    border-color: rgba(106, 172, 184, 0.3);
+}
+.prep-btn-zoom.actif {
+    background: var(--accent-primaire);
+    color: #fff;
+    border-color: var(--accent-primaire);
+}
+.prep-zoom-info {
+    font-size: 0.7rem;
+    color: var(--texte-muted);
+    min-width: 36px;
+    text-align: center;
+}
+
+/* Mode clair */
+body.mode-clair .prep-zoom-bar {
+    background: #fff;
+    border-color: rgba(3, 46, 92, 0.15);
+}
+body.mode-clair .prep-btn-zoom {
+    background: #f0f4f8;
 }
 
 /* Palette flottante */
