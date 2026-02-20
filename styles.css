@@ -14411,8 +14411,8 @@ body.mode-clair .prep-select {
 /* --- Layout Visionneuse --- */
 .travaux-visionneuse-layout {
     display: flex;
-    height: calc(100vh - 200px);
-    min-height: 500px;
+    height: calc(100vh - 300px);
+    min-height: 400px;
     gap: 0;
 }
 
@@ -18904,6 +18904,12 @@ body.mode-clair .barre-etudiant.tracked-4 {
 
 .travaux-badge-importe:hover {
     background: var(--surface-hover, #1f3a50);
+}
+
+.travaux-badge-importe.actif {
+    background: var(--bleu-pale);
+    border-color: var(--bleu-clair);
+    box-shadow: 0 0 0 2px var(--bleu-clair);
 }
 
 .travaux-badge-icone {

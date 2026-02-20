@@ -268,7 +268,7 @@
             <div class="conteneur">
                 <h2>Annoter et évaluer</h2>
                 <p class="text-muted">Sélectionnez un fichier pour commencer l'annotation</p>
-                ${genererGrilleFichiers(fichiersTravaux)}
+                ${genererGrilleFichiers(fichiersTravaux, 'ouvrirFichier')}
             </div>`;
     }
 
@@ -279,33 +279,15 @@
         const conteneur = document.getElementById('evaluations-contenu-visionneuse');
         if (!conteneur) return;
 
-        const fichiersTravaux = travauxStockage.obtenirFichiersTravaux();
-
         conteneur.innerHTML = `
             <div class="travaux-visionneuse-layout">
-                <!-- Sidebar miniatures -->
-                <div class="travaux-sidebar" id="travaux-sidebar">
-                    <div class="travaux-sidebar-header">
-                        <h4>Fichiers</h4>
-                        <select id="travaux-filtre-etudiant" class="form-select" onchange="travauxUI.filtrerParEtudiant(this.value)">
-                            <option value="">Tous les étudiants</option>
-                            ${genererOptionsEtudiants()}
-                        </select>
-                    </div>
-                    <div class="travaux-miniatures" id="travaux-miniatures">
-                        ${genererMiniatures(fichiersTravaux)}
-                    </div>
-                </div>
-
                 <!-- Zone document + annotation -->
                 <div class="travaux-zone-document" id="travaux-conteneur-document">
-                    <!-- Bouton toggle sidebar (visible quand sidebar repliee) -->
-                    <button class="travaux-btn-toggle-sidebar" id="travaux-btn-toggle-sidebar" onclick="travauxUI.toggleSidebar()" title="Afficher les fichiers">&#x25C0;</button>
 
                     <!-- Toolbar -->
                     <div class="travaux-toolbar">
                         <div class="travaux-toolbar-gauche">
-                            <button class="btn btn-petit" onclick="travauxUI.retourFichiers()" title="Retour à la grille">&#x2190; Retour</button>
+                            <button class="btn btn-petit" onclick="travauxUI.retourFichiers()" title="Fermer la visionneuse">&#x2715; Fermer</button>
                             <span id="travaux-nom-fichier" class="travaux-nom-fichier">Aucun fichier ouvert</span>
                             <span id="travaux-badge-statut" class="u-hide"></span>
                         </div>
@@ -334,7 +316,7 @@
                             <canvas id="travaux-canvas-annotation" class="u-hide" style="pointer-events:none;"></canvas>
                         </div>
                         <div id="travaux-placeholder-visionneuse" class="travaux-placeholder">
-                            <p>Sélectionnez un fichier dans la sidebar pour l'ouvrir</p>
+                            <p>Cliquez sur un fichier ci-dessus pour l'ouvrir</p>
                         </div>
                     </div>
 
@@ -351,18 +333,6 @@
             </div>
         `;
 
-        // Restaurer l'etat de la sidebar depuis la session
-        sidebarManuelReplie = sessionStorage.getItem('travaux-sidebar-replie') === '1';
-        if (sidebarManuelReplie) {
-            const sidebar = document.getElementById('travaux-sidebar');
-            const btnToggle = document.getElementById('travaux-btn-toggle-sidebar');
-            if (sidebar) sidebar.classList.add('replie');
-            if (btnToggle) {
-                btnToggle.classList.add('visible');
-                btnToggle.innerHTML = '&#x25B6;';
-            }
-        }
-
         // Configurer la visionneuse
         const conteneurDoc = document.getElementById('travaux-conteneur-document');
         travauxVisionneuse.setConteneur(conteneurDoc);
@@ -370,9 +340,6 @@
         // Gestes zoom (pinch iPad / trackpad Mac)
         const canvasContainer = document.getElementById('travaux-canvas-container');
         travauxVisionneuse.configurerGestesZoom(canvasContainer);
-
-        // Initialiser le scroll virtuel si necessaire
-        initialiserScrollVirtuel();
 
     }
 
@@ -963,13 +930,14 @@
      * @param {Object} f - Le fichier
      * @returns {string} HTML
      */
-    function genererBadgeFichierImporte(f) {
+    function genererBadgeFichierImporte(f, action) {
+        action = action || 'ouvrirPreviewInline';
         const etudiant = travauxImport.trouverEtudiantParDA(f.etudiantDA);
         const nomEtudiant = etudiant
             ? `${echapperHtml(etudiant.nom)}, ${echapperHtml(etudiant.prenom)}`
             : (f.etudiantDA || 'Non associé');
         const icone = f.typeMIME === 'application/pdf' ? '&#x1F4C4;' : '&#x1F5BC;';
-        return `<div class="travaux-badge-importe" onclick="travauxUI.ouvrirPreviewInline('${f.id}')" title="${echapperHtml(f.nomFichier)}">
+        return `<div class="travaux-badge-importe" data-fichier-id="${f.id}" onclick="travauxUI.${action}('${f.id}')" title="${echapperHtml(f.nomFichier)}">
         <span class="travaux-badge-icone">${icone}</span>
         <span class="travaux-badge-nom">${nomEtudiant}</span>
         <span class="travaux-badge-pill">Importé</span>
@@ -982,7 +950,7 @@
      * @param {Array} fichiers - Les fichiers
      * @returns {string} HTML
      */
-    function genererGrilleFichiers(fichiers) {
+    function genererGrilleFichiers(fichiers, action) {
         if (fichiers.length === 0) return '';
 
         const productions = obtenirDonneesSelonMode(cle('productions'));
@@ -1003,7 +971,7 @@
             if (!g || g.length === 0) return;
             html += `<h5 class="travaux-groupe-production-titre">${echapperHtml(p.titre || p.nom || p.id)} (${g.length})</h5>`;
             html += '<div class="travaux-badges-groupe">';
-            g.forEach(f => { html += genererBadgeFichierImporte(f); });
+            g.forEach(f => { html += genererBadgeFichierImporte(f, action); });
             html += '</div>';
             delete groupes[p.id];
         });
@@ -1013,7 +981,7 @@
         if (sansProduction && sansProduction.length > 0) {
             html += `<h5 class="travaux-groupe-production-titre">Non associés (${sansProduction.length})</h5>`;
             html += '<div class="travaux-badges-groupe">';
-            sansProduction.forEach(f => { html += genererBadgeFichierImporte(f); });
+            sansProduction.forEach(f => { html += genererBadgeFichierImporte(f, action); });
             html += '</div>';
         }
 
@@ -1214,14 +1182,17 @@
             }
         }
 
-        // Toggle interne : masquer grille fichiers, afficher visionneuse
-        const fichiersDiv = document.getElementById('evaluations-contenu-fichiers');
+        // Afficher visionneuse sous les badges
         const visDiv = document.getElementById('evaluations-contenu-visionneuse');
         const evalDiv = document.getElementById('evaluations-contenu-evaluation');
-        if (fichiersDiv) fichiersDiv.classList.add('u-hide');
         if (visDiv) visDiv.classList.remove('u-hide');
         if (evalDiv) evalDiv.classList.add('u-hide');
         afficherVisionneuse();
+
+        // Highlight du badge actif
+        document.querySelectorAll('.travaux-badge-importe').forEach(b => {
+            b.classList.toggle('actif', b.dataset.fichierId === fichierId);
+        });
 
         // Attendre que la visionneuse soit prete
         setTimeout(async () => {
@@ -1273,10 +1244,6 @@
                 }
             }
 
-            // Mettre a jour la miniature active
-            document.querySelectorAll('.travaux-miniature').forEach(m => {
-                m.classList.toggle('actif', m.dataset.fichierId === fichierId);
-            });
 
             // Bulle de decouverte au premier fichier ouvert (aide-contextuelle)
             if (typeof estAideContextuelleActive === 'function' && estAideContextuelleActive()
@@ -2100,13 +2067,12 @@
      * Retour a la grille de fichiers depuis la visionneuse (onglet Annoter)
      */
     function retourFichiers() {
-        const fichiersDiv = document.getElementById('evaluations-contenu-fichiers');
         const visDiv = document.getElementById('evaluations-contenu-visionneuse');
         const evalDiv = document.getElementById('evaluations-contenu-evaluation');
-        if (fichiersDiv) fichiersDiv.classList.remove('u-hide');
         if (visDiv) visDiv.classList.add('u-hide');
         if (evalDiv) evalDiv.classList.add('u-hide');
-        afficherFichiers();
+        // Retirer le highlight actif
+        document.querySelectorAll('.travaux-badge-importe.actif').forEach(b => b.classList.remove('actif'));
     }
 
     /**
