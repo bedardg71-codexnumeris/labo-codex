@@ -2104,6 +2104,9 @@
                     <button class="prep-btn-canvas" id="prep-btn-appliquer-crop"
                             onclick="travauxPreparation.appliquerCrop()"
                             style="display:none;">Confirmer rognage</button>
+                    <button class="prep-btn-canvas" id="prep-btn-appliquer-persp"
+                            onclick="travauxPreparation.appliquerPerspective()"
+                            style="display:none;">Confirmer perspective</button>
 
                     <!-- Palette Reglages specifiques (flottante, draggable) -->
                     <div class="prep-palette prep-palette-etendu" id="prep-palette-outils" style="top:12px; left:12px;">
@@ -2153,9 +2156,10 @@
                                     <span class="prep-chevron">&#x25BE;</span> Decoupe
                                 </div>
                                 <div class="prep-section-body">
-                                    <button class="prep-btn" onclick="travauxPreparation.activerCrop()" style="width:100%;">Recadrage</button>
-                                    <button class="prep-btn" onclick="travauxPreparation.activerPerspective()" style="width:100%;">Perspective</button>
-                                    <button class="prep-btn prep-btn-appliquer" id="prep-btn-appliquer-persp" onclick="travauxPreparation.appliquerPerspective()" style="display:none; width:100%;">Appliquer perspective</button>
+                                    <div class="prep-btn-row">
+                                        <button class="prep-btn" onclick="travauxPreparation.activerCrop()">Recadrage</button>
+                                        <button class="prep-btn" onclick="travauxPreparation.activerPerspective()">Perspective</button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -2180,8 +2184,10 @@
                                         <input type="range" id="prep-exposition" min="${EXPOSITION_MIN}" max="${EXPOSITION_MAX}" value="0" step="1"
                                                oninput="travauxPreparation.changerExposition(this.value)">
                                     </div>
-                                    <button class="prep-btn" id="prep-btn-balance" onclick="travauxPreparation.activerBalanceBlancs()" style="width:100%;">Balance des blancs</button>
-                                    <button class="prep-btn" onclick="travauxPreparation.basculerNiveauxDeGris()" style="width:100%;">Niveaux de gris</button>
+                                    <div class="prep-btn-row">
+                                        <button class="prep-btn" id="prep-btn-balance" onclick="travauxPreparation.activerBalanceBlancs()">Balance des blancs</button>
+                                        <button class="prep-btn" onclick="travauxPreparation.basculerNiveauxDeGris()">Niveaux de gris</button>
+                                    </div>
                                 </div>
                             </div>
 
