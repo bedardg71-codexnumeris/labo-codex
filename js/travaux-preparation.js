@@ -22,6 +22,7 @@
     const TAILLE_APERCU = 1600;       // Copie de travail max px
     const MESH_N = 8;                 // Subdivision perspective apercu
     const POIGNEE_TAILLE = 44;        // px (Apple HIG)
+    const POIGNEE_RAYON  = 10;        // px — rayon visuel des poignees (crop + perspective)
     const LOUPE_TAILLE = 100;         // px
     const LOUPE_ZOOM = 2;
     const ROTATION_FINE_MIN = -15;
@@ -725,6 +726,18 @@
        DESSIN DES OUTILS INTERACTIFS
        =============================== */
 
+    function dessinerPoignee(ctx, cx, cy, active) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, POIGNEE_RAYON, 0, Math.PI * 2);
+        ctx.fillStyle = active ? 'rgba(220, 235, 255, 0.95)' : 'rgba(255, 255, 255, 0.95)';
+        ctx.fill();
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.45)';
+        ctx.stroke();
+        ctx.restore();
+    }
+
     /**
      * Dessine le rectangle de crop avec les poignees
      */
@@ -756,9 +769,9 @@
             { px: x, py: y + rh }
         ];
 
-        ctx.fillStyle = '#fff';
-        coins.forEach(c => {
-            ctx.fillRect(c.px - 6, c.py - 6, 12, 12);
+        const coinActif = (cropDragState && cropDragState.mode === 'resize') ? cropDragState.corner : -1;
+        coins.forEach((c, i) => {
+            dessinerPoignee(ctx, c.px, c.py, i === coinActif);
         });
     }
 
@@ -769,6 +782,10 @@
         if (!perspectiveCorners) return;
         offsetX = offsetX || 0;
         offsetY = offsetY || 0;
+
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(offsetX, offsetY, w, h);
 
         const points = perspectiveCorners.map(p => ({
             x: p.x * w + offsetX,
@@ -786,17 +803,8 @@
         ctx.closePath();
         ctx.stroke();
 
-        // Poignees 44x44px
-        const demiPoignee = POIGNEE_TAILLE / 2;
         points.forEach((p, i) => {
-            ctx.fillStyle = i === poigneeActive ? 'rgba(0, 150, 255, 0.9)' : 'rgba(255, 255, 255, 0.9)';
-            ctx.strokeStyle = 'rgba(0, 100, 200, 1)';
-            ctx.lineWidth = 2;
-
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, demiPoignee / 2, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
+            dessinerPoignee(ctx, p.x, p.y, i === poigneeActive);
         });
     }
 
@@ -885,7 +893,7 @@
             } else {
                 // Detecter coin de resize ou zone de deplacement
                 const sx = canvasApercu.getBoundingClientRect().width;
-                const seuil = 20 / sx;
+                const seuil = POIGNEE_TAILLE / (2 * sx);
 
                 const coins = [
                     { x: cropRect.x, y: cropRect.y },
