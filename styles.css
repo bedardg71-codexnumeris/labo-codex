@@ -14689,6 +14689,36 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     max-width: 400px;
 }
 
+.pipeline-col-controles .pipeline-production-selecteur {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0;
+    background: none;
+    margin: 8px 0;
+    gap: 4px;
+}
+
+/* --- Icone placeholder pipeline --- */
+.pipeline-icone-placeholder { font-size: 1.5rem; }
+
+/* --- Groupe boutons pipeline --- */
+.pipeline-boutons-groupe {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+/* --- Modale doublons pipeline --- */
+.pipeline-doublon-groupe { margin-bottom: 16px; }
+.pipeline-doublon-item label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 4px 0;
+}
+
 /* --- Alerte rotation pipeline --- */
 .pipeline-alerte-rotation {
     background: rgba(230, 126, 34, 0.12);
