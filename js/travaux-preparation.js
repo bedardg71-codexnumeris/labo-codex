@@ -350,6 +350,17 @@
 
         canvasApercu.width = source.width + margeX * 2;
         canvasApercu.height = source.height + margeY * 2;
+
+        // Taille CSS : image tient dans le container, marges debordent → scroll
+        const container = document.getElementById('prep-canvas-scroll');
+        if (container) {
+            const maxW = container.clientWidth - 48;
+            const maxH = container.clientHeight - 48;
+            const scale = Math.min(maxW / source.width, maxH / source.height, 1);
+            canvasApercu.style.width = Math.round(canvasApercu.width * scale) + 'px';
+            canvasApercu.style.height = Math.round(canvasApercu.height * scale) + 'px';
+        }
+
         ctx.clearRect(0, 0, canvasApercu.width, canvasApercu.height);
 
         // Zone de marge sombre
