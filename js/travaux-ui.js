@@ -163,8 +163,6 @@
                     </h3>
                     <div class="pipeline-stats">
                         ${queue.length > 0 ? `${queue.length} fichier(s) en file — ${travauxStockage.formaterTaille(queue.reduce((s, f) => s + f.tailleFichier, 0))}` : ''}
-                        ${stats.nombre > 0 ? ` | ${stats.nombre} en stock (${stats.tailleFormatee})` : ''}
-                        <span class="travaux-mode-stockage">${fsapiActif ? 'Disque local' : 'IndexedDB'}</span>
                     </div>
                 </div>
 
@@ -181,14 +179,14 @@
 
                 <!-- Pipeline -->
                 <div class="pipeline-etapes-groupe" id="pipeline-etapes-groupe">
-                    <div class="pipeline-section-titre">Optimisation</div>
+                    <div class="pipeline-section-titre"></div>
                     <div class="pipeline-etapes-contenu">
 
                     <!-- ETAPE 1 : Zone d'entree -->
                     <div class="pipeline-etape">
                         <div class="pipeline-etape-header">
                             <span class="pipeline-etape-numero">1</span>
-                            <span class="pipeline-etape-titre">Zone d'entrée</span>
+                            <span class="pipeline-etape-titre">Sélection des fichiers</span>
                         </div>
                         <div id="travaux-drop-zone" class="travaux-drop-zone">
                             <div class="travaux-drop-zone-contenu">
@@ -206,7 +204,7 @@
                     <div class="pipeline-etape">
                         <div class="pipeline-etape-header">
                             <span class="pipeline-etape-numero">2</span>
-                            <span class="pipeline-etape-titre">Fichiers déposés</span>
+                            <span class="pipeline-etape-titre">Optimisation</span>
                             <span class="pipeline-etape-compteur">${nbImages} image(s)</span>
                         </div>
                         ${genererEtape2Colonnes(queue, groupes)}
@@ -218,7 +216,7 @@
 
                 <!-- Section fichiers importes (toujours visible) -->
                 <div class="pipeline-section-importes">
-                    <h4>Fichiers importés (${fichiersTravaux.length})</h4>
+                    <h4>Fichiers importés (${fichiersTravaux.length})${stats.nombre > 0 ? ` <span class="texte-muted u-texte-petit">— ${stats.tailleFormatee} · ${fsapiActif ? 'Disque local' : 'IndexedDB'}</span>` : ''}</h4>
                     ${fichiersTravaux.length > 0
                         ? genererGrilleFichiers(fichiersTravaux)
                         : '<p class="texte-muted">Aucun fichier importé pour le moment.</p>'}
@@ -523,7 +521,7 @@
             if (f.thumbnailDataUrl) {
                 conteneur.innerHTML = `<img src="${f.thumbnailDataUrl}" alt="">`;
             } else {
-                conteneur.innerHTML = '<span style="font-size:1.5rem">&#x1F4C4;</span>';
+                conteneur.innerHTML = '<span class="pipeline-icone-placeholder">&#x1F4C4;</span>';
             }
             return;
         }
@@ -531,7 +529,7 @@
         // Utiliser le blob original pour une preview de qualite
         const source = f.fichier || null;
         if (!source && !f.thumbnailDataUrl) {
-            conteneur.innerHTML = '<span style="font-size:1.5rem">&#x1F5BC;</span>';
+            conteneur.innerHTML = '<span class="pipeline-icone-placeholder">&#x1F5BC;</span>';
             return;
         }
 
@@ -605,14 +603,11 @@
 
             const imgResult = document.createElement('img');
             imgResult.src = canvas.toDataURL('image/jpeg', 0.92);
-            imgResult.style.maxWidth = '100%';
-            imgResult.style.maxHeight = '100%';
-            imgResult.style.objectFit = 'contain';
             conteneur.innerHTML = '';
             conteneur.appendChild(imgResult);
         } catch (e) {
             console.warn('[Pipeline] Erreur preview thumbnail:', f.nomFichier, e);
-            conteneur.innerHTML = '<span style="font-size:1.5rem">&#x1F5BC;</span>';
+            conteneur.innerHTML = '<span class="pipeline-icone-placeholder">&#x1F5BC;</span>';
         }
     }
 
@@ -677,7 +672,7 @@
 
             colGauche += `<div class="pipeline-fichier-colonne">
                 <div class="pipeline-fichier-thumb-col">
-                    ${thumb ? `<img src="${thumb}" alt="">` : `<span style="font-size:1.5rem">${icone}</span>`}
+                    ${thumb ? `<img src="${thumb}" alt="">` : `<span class="pipeline-icone-placeholder">${icone}</span>`}
                 </div>
                 <div class="pipeline-fichier-meta-col">
                     <span class="pipeline-meta-nom" title="${echapperHtml(f.nomFichier)}">${echapperHtml(nomCourt)}</span>
@@ -699,23 +694,23 @@
         colCentre += `<li><label><input type="checkbox" id="pipeline-opt-assemblage" checked> Assemblage automatique (par nom / production)</label></li>`;
         colCentre += '</ul>';
 
-        colCentre += `<div style="margin:8px 0">
-            <label style="font-size:0.8rem;color:var(--texte-secondaire)">Production</label>
-            <select class="form-select" id="pipeline-select-production" onchange="travauxUI.associerProductionGlobale(this.value)" style="font-size:0.8rem;margin-top:4px">
+        colCentre += `<div class="pipeline-production-selecteur">
+            <label>Production</label>
+            <select class="form-select" id="pipeline-select-production" onchange="travauxUI.associerProductionGlobale(this.value)">
                 <option value="">-- Choisir une production --</option>
                 ${productions.map(p => `<option value="${p.id}" ${prodActuelle === p.id ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
             </select>
         </div>`;
 
-        colCentre += `<div class="texte-muted" style="margin:8px 0;font-size:0.8rem">${nbImages} image(s)</div>`;
+        colCentre += `<div class="texte-muted u-texte-petit">${nbImages} image(s)</div>`;
 
-        colCentre += `<div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+        colCentre += `<div class="pipeline-boutons-groupe">
             <button class="btn btn-secondaire" onclick="travauxUI.ouvrirPreparation()">Réglages spécifiques</button>
             <button class="btn btn-principal" onclick="travauxUI.appliquerEtImporter()">Appliquer et importer</button>
             <button class="btn btn-secondaire" onclick="travauxImport.viderFileDAttente(); travauxUI.afficherImport();">Annuler tout</button>
         </div>`;
 
-        colCentre += `<div class="pipeline-progression-container" id="pipeline-traitement-progression" style="display:none;margin-top:8px">
+        colCentre += `<div class="pipeline-progression-container u-hide" id="pipeline-traitement-progression">
             <div class="pipeline-progression-barre" id="pipeline-traitement-barre"></div>
         </div>
         <div id="pipeline-traitement-texte" class="texte-muted"></div>`;
@@ -734,7 +729,7 @@
 
             colDroite += `<div class="pipeline-fichier-colonne">
                 <div class="pipeline-fichier-thumb-col" id="pipeline-preview-${index}">
-                    ${f.thumbnailDataUrl ? `<img src="${f.thumbnailDataUrl}" alt="">` : `<span style="font-size:1.5rem">${f.estPDF ? '&#x1F4C4;' : '&#x1F5BC;'}</span>`}
+                    ${f.thumbnailDataUrl ? `<img src="${f.thumbnailDataUrl}" alt="">` : `<span class="pipeline-icone-placeholder">${f.estPDF ? '&#x1F4C4;' : '&#x1F5BC;'}</span>`}
                 </div>
                 <div class="pipeline-fichier-meta-col">
                     <span class="pipeline-meta-resolution" id="pipeline-res-cible-${index}">${resCible}</span>
@@ -784,7 +779,7 @@
         const barre = document.getElementById('pipeline-traitement-barre');
         const texte = document.getElementById('pipeline-traitement-texte');
 
-        if (conteneur) conteneur.style.display = '';
+        if (conteneur) conteneur.classList.remove('u-hide');
         if (barre) barre.style.width = Math.round((fait / total) * 100) + '%';
         if (texte) texte.textContent = `${fait}/${total} fichier(s) traités...`;
     }
@@ -948,7 +943,7 @@
             groupes[pid].push(f);
         });
 
-        let html = '<div class="travaux-grille-fichiers"><h4>Fichiers importés</h4>';
+        let html = '<div class="travaux-grille-fichiers">';
 
         // Afficher chaque production
         productions.forEach(p => {
@@ -1590,10 +1585,10 @@
     function afficherModaleDoublonsEtImporter(queue, doublons) {
         let html = '<div class="modal-section"><p>Cochez les fichiers à supprimer :</p>';
         doublons.forEach(({ cle: cleGroupe, fichiers }) => {
-            html += `<div style="margin-bottom:16px"><strong>${echapperHtml(cleGroupe)}</strong>`;
+            html += `<div class="pipeline-doublon-groupe"><strong>${echapperHtml(cleGroupe)}</strong>`;
             fichiers.forEach((f) => {
                 const idx = queue.indexOf(f);
-                html += `<div style="padding:4px 0"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" class="doublon-check" data-index="${idx}"> ${echapperHtml(f.nomFichier)} (${travauxStockage.formaterTaille(f.tailleFichier)})</label></div>`;
+                html += `<div class="pipeline-doublon-item"><label><input type="checkbox" class="doublon-check" data-index="${idx}"> ${echapperHtml(f.nomFichier)} (${travauxStockage.formaterTaille(f.tailleFichier)})</label></div>`;
             });
             html += '</div>';
         });
