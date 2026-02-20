@@ -207,7 +207,7 @@
                         <div class="pipeline-etape-header">
                             <span class="pipeline-etape-numero">1</span>
                             <span class="pipeline-etape-titre">Zone d'entree</span>
-                            <span class="pipeline-etape-compteur">${queue.length > 0 ? queue.length + ' fichier(s)' : ''}</span>
+                            <span class="pipeline-etape-compteur">${nbAOptimiser > 0 ? nbAOptimiser + ' fichier(s)' : ''}</span>
                         </div>
                         <div id="travaux-drop-zone" class="travaux-drop-zone">
                             <div class="travaux-drop-zone-contenu">
@@ -216,7 +216,10 @@
                                 <p class="texte-muted">PDF, JPEG, PNG, HEIC — ou cliquez pour parcourir</p>
                             </div>
                         </div>
-                        ${queue.length > 0 ? genererPreviewsEntree(queue) : ''}
+                        ${(() => {
+                            const entree = queue.filter(f => f.pipelineStatut === 'a-optimiser');
+                            return entree.length > 0 ? genererPreviewsEntree(entree) : '';
+                        })()}
                     </div>
 
                     ${queue.length > 0 ? `
@@ -853,7 +856,25 @@
     }
 
     /**
-     * Genere la grille de fichiers importes
+     * Genere un badge compact pour un fichier importe
+     * @param {Object} f - Le fichier
+     * @returns {string} HTML
+     */
+    function genererBadgeFichierImporte(f) {
+        const etudiant = travauxImport.trouverEtudiantParDA(f.etudiantDA);
+        const nomEtudiant = etudiant
+            ? `${echapperHtml(etudiant.nom)}, ${echapperHtml(etudiant.prenom)}`
+            : (f.etudiantDA || 'Non associe');
+        const icone = f.typeMIME === 'application/pdf' ? '&#x1F4C4;' : '&#x1F5BC;';
+        return `<div class="travaux-badge-importe" onclick="travauxUI.ouvrirPreviewInline('${f.id}')" title="${echapperHtml(f.nomFichier)}">
+        <span class="travaux-badge-icone">${icone}</span>
+        <span class="travaux-badge-nom">${nomEtudiant}</span>
+        <span class="travaux-badge-pill">Importe</span>
+    </div>`;
+    }
+
+    /**
+     * Genere la grille de fichiers importes, regroupes par production
      * @param {Array} fichiers - Les fichiers
      * @returns {string} HTML
      */
@@ -862,48 +883,37 @@
 
         const productions = obtenirDonneesSelonMode(cle('productions'));
 
-        let html = '<div class="travaux-grille-fichiers"><h4>Fichiers importés</h4><div class="travaux-grille">';
-
+        // Grouper par productionId
+        const groupes = {};
         fichiers.forEach(f => {
-            const thumb = f.thumbnailDataUrl || '';
-            const icone = f.typeMIME === 'application/pdf' ? '&#x1F4C4;' : '&#x1F5BC;';
-            const etudiant = travauxImport.trouverEtudiantParDA(f.etudiantDA);
-            const nomEtudiant = etudiant
-                ? `${echapperHtml(etudiant.nom)}, ${echapperHtml(etudiant.prenom)}`
-                : (f.etudiantDA || 'Non associé');
-
-            // Production associee
-            const prod = productions.find(p => p.id === f.productionId);
-            const prodNom = prod ? echapperHtml(prod.titre || prod.nom || prod.id) : '';
-            const manqueProduction = !f.productionId;
-
-            // Badge cycle de vie
-            let badge = '';
-            if (f.blobStatut === 'facsimile') {
-                badge = '<span class="travaux-badge-facsimile" title="Version allegee">FAC</span>';
-            } else if (f.blobStatut === 'exporte') {
-                badge = '<span class="travaux-badge-exporte" title="Exporte">EXP</span>';
-            }
-
-            html += `
-                <div class="travaux-grille-item" title="${echapperHtml(f.nomFichier)}">
-                    <div class="travaux-grille-thumb" onclick="travauxUI.ouvrirPreviewInline('${f.id}')">
-                        ${thumb ? `<img src="${thumb}" alt="">` : `<span class="travaux-grille-icone">${icone}</span>`}
-                        ${badge}
-                    </div>
-                    <div class="travaux-grille-info">
-                        <div class="travaux-grille-nom">${echapperHtml(f.nomFichier)}</div>
-                        <div class="travaux-grille-etudiant">${nomEtudiant}</div>
-                        <select class="form-select travaux-grille-select-production${manqueProduction ? ' travaux-manque-production' : ''}" onchange="travauxUI.changerProductionFichier('${f.id}', this.value)" title="Production associée">
-                            <option value="">-- Production --</option>
-                            ${productions.map(p => `<option value="${p.id}" ${f.productionId === p.id ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
-                        </select>
-                    </div>
-                    <button class="btn btn-supprimer btn-tres-compact travaux-grille-btn-supprimer" onclick="travauxUI.supprimerFichierImporte('${f.id}')" title="Supprimer ce fichier">✕</button>
-                </div>`;
+            const pid = f.productionId || '__aucune__';
+            if (!groupes[pid]) groupes[pid] = [];
+            groupes[pid].push(f);
         });
 
-        html += '</div></div>';
+        let html = '<div class="travaux-grille-fichiers"><h4>Fichiers importes</h4>';
+
+        // Afficher chaque production
+        productions.forEach(p => {
+            const g = groupes[p.id];
+            if (!g || g.length === 0) return;
+            html += `<h5 class="travaux-groupe-production-titre">${echapperHtml(p.titre || p.nom || p.id)} (${g.length})</h5>`;
+            html += '<div class="travaux-badges-groupe">';
+            g.forEach(f => { html += genererBadgeFichierImporte(f); });
+            html += '</div>';
+            delete groupes[p.id];
+        });
+
+        // Fichiers sans production
+        const sansProduction = groupes['__aucune__'];
+        if (sansProduction && sansProduction.length > 0) {
+            html += `<h5 class="travaux-groupe-production-titre">Non associes (${sansProduction.length})</h5>`;
+            html += '<div class="travaux-badges-groupe">';
+            sansProduction.forEach(f => { html += genererBadgeFichierImporte(f); });
+            html += '</div>';
+        }
+
+        html += '</div>';
         return html;
     }
 
@@ -2048,10 +2058,10 @@
                 state.totalPages = state.pdfDoc.numPages;
             }
 
-            window._previewInlineState = state;
-
-            // Retirer un overlay existant
+            // Retirer un overlay existant (nullifie _previewInlineState)
             fermerPreviewInline();
+
+            window._previewInlineState = state;
 
             const overlay = document.createElement('div');
             overlay.id = 'pipeline-preview-overlay';
@@ -2066,8 +2076,8 @@
                 <div class="preview-quicklook-contenu">
                     <canvas id="pipeline-preview-canvas"></canvas>
                     ${state.totalPages > 1 ? `
-                    <button class="preview-quicklook-fleche preview-quicklook-prec" id="pipeline-prev-btn" onclick="travauxUI.previewPagePrec()">&#x25C0;</button>
-                    <button class="preview-quicklook-fleche preview-quicklook-suiv" id="pipeline-next-btn" onclick="travauxUI.previewPageSuiv()">&#x25B6;</button>
+                    <button class="preview-quicklook-fleche preview-quicklook-prec" id="pipeline-prev-btn" onclick="event.stopPropagation(); travauxUI.previewPagePrec()">&#x25C0;</button>
+                    <button class="preview-quicklook-fleche preview-quicklook-suiv" id="pipeline-next-btn" onclick="event.stopPropagation(); travauxUI.previewPageSuiv()">&#x25B6;</button>
                     <span class="preview-quicklook-page" id="pipeline-preview-page-info">1 / ${state.totalPages}</span>
                     ` : ''}
                 </div>
