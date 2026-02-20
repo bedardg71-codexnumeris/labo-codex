@@ -14411,7 +14411,7 @@ body.mode-clair .prep-select {
 /* --- Layout Visionneuse --- */
 .travaux-visionneuse-layout {
     display: flex;
-    height: calc(100vh - 300px);
+    height: calc(100vh - 180px);
     min-height: 400px;
     gap: 0;
 }
@@ -18887,6 +18887,28 @@ body.mode-clair .barre-etudiant.tracked-4 {
     flex-wrap: wrap;
     gap: 8px;
     margin-bottom: 16px;
+}
+
+/* Mode compact : badges en ligne unique scrollable quand visionneuse ouverte */
+#evaluations-contenu-fichiers.compact .travaux-grille-fichiers {
+    margin-top: 8px;
+}
+#evaluations-contenu-fichiers.compact .travaux-groupe-production-titre {
+    display: none;
+}
+#evaluations-contenu-fichiers.compact .travaux-badges-groupe {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin-bottom: 4px;
+    padding-bottom: 4px;
+}
+#evaluations-contenu-fichiers.compact .travaux-badge-importe {
+    padding: 4px 10px;
+    font-size: 0.8rem;
+}
+#evaluations-contenu-fichiers.compact h2,
+#evaluations-contenu-fichiers.compact .text-muted {
+    display: none;
 }
 
 .travaux-badge-importe {
