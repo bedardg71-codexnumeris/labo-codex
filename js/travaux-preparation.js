@@ -2116,23 +2116,23 @@
                         </div>
                         <div class="prep-palette-contenu">
 
-                            <!-- Section Fichiers (en haut) -->
+                            <!-- Section Fichiers -->
                             <div class="prep-section" id="prep-section-fichiers">
-                                <div class="prep-section-label" onclick="travauxPreparation.toggleSection('fichiers')">
-                                    <span class="prep-chevron">&#x25BE;</span> Fichiers
-                                </div>
+                                <div class="prep-section-label" onclick="travauxPreparation.toggleSection('fichiers')">Fichiers</div>
+                                <div class="prep-section-sous-titre">navigation et assemblage</div>
                                 <div class="prep-section-body">
                                     <div id="prep-miniatures" class="prep-mini-liste"></div>
-                                    <button class="prep-btn" onclick="travauxPreparation.grouperSelection()" id="prep-btn-grouper" style="width:100%; margin-top:4px;">Grouper selection</button>
-                                    <button class="prep-btn" onclick="travauxPreparation.assemblerAuto()" style="width:100%; margin-top:2px;">Assemblage auto</button>
+                                    <div class="prep-btn-row">
+                                        <button class="prep-btn" onclick="travauxPreparation.grouperSelection()" id="prep-btn-grouper">Grouper</button>
+                                        <button class="prep-btn" onclick="travauxPreparation.assemblerAuto()">Assemblage auto</button>
+                                    </div>
                                 </div>
                             </div>
 
                             <!-- Section Rotation -->
                             <div class="prep-section" id="prep-section-rotation">
-                                <div class="prep-section-label" onclick="travauxPreparation.toggleSection('rotation')">
-                                    <span class="prep-chevron">&#x25BE;</span> Rotation
-                                </div>
+                                <div class="prep-section-label" onclick="travauxPreparation.toggleSection('rotation')">Rotation</div>
+                                <div class="prep-section-sous-titre">orientation du document</div>
                                 <div class="prep-section-body">
                                     <div class="prep-btn-row">
                                         <button class="prep-btn" onclick="travauxPreparation.rotation90CCW()" title="90 anti-horaire">&#x21BA; 90°</button>
@@ -2152,9 +2152,8 @@
 
                             <!-- Section Decoupe -->
                             <div class="prep-section" id="prep-section-decoupe">
-                                <div class="prep-section-label" onclick="travauxPreparation.toggleSection('decoupe')">
-                                    <span class="prep-chevron">&#x25BE;</span> Decoupe
-                                </div>
+                                <div class="prep-section-label" onclick="travauxPreparation.toggleSection('decoupe')">Découpe</div>
+                                <div class="prep-section-sous-titre">cadrage et perspective</div>
                                 <div class="prep-section-body">
                                     <div class="prep-btn-row">
                                         <button class="prep-btn" onclick="travauxPreparation.activerCrop()">Recadrage</button>
@@ -2165,9 +2164,8 @@
 
                             <!-- Section Image -->
                             <div class="prep-section" id="prep-section-image">
-                                <div class="prep-section-label" onclick="travauxPreparation.toggleSection('image')">
-                                    <span class="prep-chevron">&#x25BE;</span> Image
-                                </div>
+                                <div class="prep-section-label" onclick="travauxPreparation.toggleSection('image')">Image</div>
+                                <div class="prep-section-sous-titre">ajustements visuels</div>
                                 <div class="prep-section-body">
                                     <div class="prep-slider-groupe">
                                         <label>Luminosite</label>

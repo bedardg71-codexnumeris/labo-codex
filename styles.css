@@ -14064,7 +14064,7 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 .prep-palette-contenu {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 6px;
     padding: 6px;
     overflow-y: auto;
     max-height: calc(100vh - 180px);
@@ -14072,25 +14072,44 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 .prep-palette.replie .prep-palette-contenu { display: none; }
 .prep-palette.replie .prep-palette-footer { display: none; }
 
-/* Sections (dropdowns) */
+/* Sections (catégories colorées, style alignement pédagogique) */
 .prep-section {
     border-radius: 6px;
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
 }
+
+/* Couleurs par section */
+.prep-section[id="prep-section-fichiers"]  { background: rgba(59, 130, 246, 0.06); }
+.prep-section[id="prep-section-rotation"]  { background: rgba(249, 115, 22, 0.06); }
+.prep-section[id="prep-section-decoupe"]   { background: rgba(22, 163, 74, 0.06); }
+.prep-section[id="prep-section-image"]     { background: rgba(106, 172, 184, 0.06); }
 
 .prep-section-label {
     display: flex;
     align-items: center;
-    gap: 4px;
-    padding: 4px 6px;
-    font-size: 0.75rem;
-    font-weight: 600;
+    padding: 1px 4px 0;
+    font-size: 9px;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
-    color: var(--texte-muted);
+    letter-spacing: 0.5px;
     cursor: pointer;
-    border-radius: 4px;
 }
-.prep-section-label:hover { background: rgba(255,255,255,0.05); }
+
+.prep-section[id="prep-section-fichiers"]  .prep-section-label { color: #3b82f6; }
+.prep-section[id="prep-section-rotation"]  .prep-section-label { color: #f97316; }
+.prep-section[id="prep-section-decoupe"]   .prep-section-label { color: #16a34a; }
+.prep-section[id="prep-section-image"]     .prep-section-label { color: #6aacb8; }
+
+.prep-section-sous-titre {
+    padding: 0 4px 1px;
+    font-size: 8px;
+    font-style: italic;
+    color: var(--texte-muted, #5a7a88);
+    line-height: 1.2;
+}
 
 .prep-section-label .prep-chevron {
     font-size: 0.65rem;
@@ -14103,8 +14122,7 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 .prep-section-body {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    padding: 4px 4px 6px;
+    gap: 3px;
 }
 .prep-section.replie .prep-section-body { display: none; }
 
@@ -17929,9 +17947,10 @@ body.mode-clair .prep-btn {
 body.mode-clair .prep-btn:hover {
     border-color: var(--bleu-principal);
 }
-body.mode-clair .prep-section-label:hover {
-    background: rgba(3, 46, 92, 0.04);
-}
+body.mode-clair .prep-section[id="prep-section-fichiers"]  { background: rgba(59, 130, 246, 0.08); }
+body.mode-clair .prep-section[id="prep-section-rotation"]  { background: rgba(249, 115, 22, 0.08); }
+body.mode-clair .prep-section[id="prep-section-decoupe"]   { background: rgba(22, 163, 74, 0.08); }
+body.mode-clair .prep-section[id="prep-section-image"]     { background: rgba(106, 172, 184, 0.08); }
 
 /* Calendrier intégré à la palette */
 body.mode-clair .planif-cal-liens .planif-cal-lien-item {
