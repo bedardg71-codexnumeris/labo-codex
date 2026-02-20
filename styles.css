@@ -14774,6 +14774,8 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     transition: background 0.15s;
+    z-index: 10;
+    pointer-events: auto;
 }
 
 .preview-quicklook-fleche:hover {
@@ -18571,4 +18573,59 @@ body.mode-clair .barre-etudiant.tracked-4 {
     color: var(--gris-moyen, #888);
     border-bottom: 1px solid rgba(106, 172, 184, 0.15);
     margin-bottom: 8px;
+}
+
+/* =============================================================================
+   BADGES COMPACTS — Fichiers importes (regroupes par production)
+   ============================================================================= */
+
+.travaux-badges-groupe {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.travaux-badge-importe {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: var(--surface-carte, #1a3040);
+    border: 1px solid var(--gris-bordure, #2a4a5a);
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background 0.15s;
+}
+
+.travaux-badge-importe:hover {
+    background: var(--surface-hover, #1f3a50);
+}
+
+.travaux-badge-icone {
+    font-size: 1rem;
+}
+
+.travaux-badge-nom {
+    color: var(--texte-principal, #e0e0e0);
+    white-space: nowrap;
+}
+
+.travaux-badge-pill {
+    padding: 2px 8px;
+    background: var(--turquoise-500, #2da89e);
+    color: #fff;
+    border-radius: 10px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.travaux-groupe-production-titre {
+    margin: 12px 0 8px 0;
+    font-size: 0.9rem;
+    color: var(--texte-secondaire, #a0b0c0);
+    font-weight: 600;
 }

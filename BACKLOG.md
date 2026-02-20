@@ -916,6 +916,93 @@
   - Changelog, notes de version, SESSION.md, BACKLOG.md mis a jour
   - **Fichiers** : `index.html`, `version.json`, `styles.css`, `js/changelog-data.js`, `SESSION.md`, `BACKLOG.md`
 
+### Module Travaux — Plan global (18 fevrier 2026)
+
+> Ref : `Plan-global-module-travaux.md` (racine du projet)
+> Objectif : flux complet import → annotation → export pour AQPC (3-5 juin 2026)
+
+**Phase 0 — Auto-perspective (en cours)**
+
+- [ ] **#175** Finaliser l'algo auto-detection des coins dans `test-perspective.html`
+  - Etat actuel : 44% OK, 49% imprecis, 7% echec (41 images, detectSize=600 + fallback 400)
+  - Prochaines etapes : enrichir le corpus (80-100 images), explorer segmentation plus nette
+  - **Fichier** : `test-perspective.html`
+
+- [ ] **#176** Integrer l'auto-detection v5 dans `travaux-preparation.js`
+  - Remplacer `detecterCoinsAuto()` existant par la pipeline v5 du banc de test
+  - Ajouter detection de confiance (si incertain, ne pas toucher l'image)
+  - **Fichier** : `js/travaux-preparation.js`
+
+**Phase 1 — Import intelligent (mars 2026)**
+
+- [ ] **#177** Import par dossier complet Lea (A1)
+  - Lire le dossier telecharge, parser les noms (`Nomdefamille_DA_Travail_Date`)
+  - Associer automatiquement chaque fichier a l'eleve via le DA (7 chiffres)
+  - Gestion des doublons (garder le depot le plus recent)
+  - **Fichiers** : `js/travaux-import.js`
+
+- [ ] **#178** Assemblage multi-images par eleve (A3)
+  - Detecter fichiers multiples d'un meme eleve (meme DA, meme production)
+  - Ordonner par nom/horodatage, assembler en document multi-pages
+  - Le groupement existe deja (`grouperSelection()`) — l'automatiser
+  - **Fichier** : `js/travaux-preparation.js`
+
+**Phase 2 — Annotation complete (mars-avril 2026)**
+
+- [ ] **#179** Panneau retractable en mode annotation (C1)
+  - Le panneau fichiers se replie automatiquement pour maximiser l'espace de travail iPad
+  - **Fichier** : `js/travaux-annotation.js`
+
+- [ ] **#180** Annotation texte (C3)
+  - Outil texte : clic sur le document → zone de saisie clavier
+  - Texte ancre, redimensionnable, couleur configurable (defaut rouge)
+  - **Fichier** : `js/travaux-annotation.js`
+
+- [ ] **#181** Palette d'autocollants (C2)
+  - 12 autocollants retroaction visuelle (qualite + diagnostic)
+  - Phase 1 : PNG existants. Phase 2 : SVG uniformes
+  - **Fichier** : `js/travaux-annotation.js`
+
+- [ ] **#182** Navigation fluide annotation ↔ evaluation (D1)
+  - Bidirectionnel : depuis annotation → evaluation de l'eleve, et vice versa
+  - Split view possible (cote a cote)
+  - **Fichiers** : `js/travaux-annotation.js`, `js/evaluations.js`
+
+**Phase 3 — Export PDF (avril-mai 2026)**
+
+- [ ] **#183** Generation du PDF annote + page synthese (E1)
+  - Pages du travail + annotations aplaties + grille criteres + cartouches + note
+  - Nom du fichier = nom original Lea (pour depot par lots)
+  - Bibliotheque : pdf-lib ou jsPDF (cote client)
+  - **Fichier** : `js/travaux-export-pdf.js`
+
+- [ ] **#184** Insertion de la grille evaluee dans le PDF (B2)
+  - Grille rendue comme image fixe (snapshot) avec resultats remplis
+  - Generee a l'export a partir des donnees du module Evaluations
+  - **Fichiers** : `js/travaux-export-pdf.js`, `js/evaluations.js`
+
+- [ ] **#185** Export par lots avec noms Lea (E3)
+  - Bouton "Exporter tout le groupe", barre de progression
+  - Chaque PDF garde son nom Lea original, ZIP si > 200 Mo
+  - **Fichier** : `js/travaux-export-pdf.js`
+
+**Phase 4 — Integration et polish (mai 2026)**
+
+- [ ] **#186** Conversion DOCX cote client (A2)
+  - Evaluer faisabilite (mammoth.js, docx-preview, ou WASM)
+  - Plan B : message "convertir en PDF avant depot" si fidelite insuffisante
+  - **Risque** : aucune solution WASM fiable connue pour fidelite Word cote client
+
+- [ ] **#187** Detection multi-pages dans une photo (B1 avance)
+  - Detecter N pages dans une meme photo, extraire chaque quad, corriger perspective
+  - L'enseignant peut corriger les coins avant decoupe
+  - **Fichier** : `test-perspective.html` puis `js/travaux-preparation.js`
+
+**Corrections au plan Cowork :**
+- `travaux.js` n'existe pas — la structure reelle est 9 fichiers `travaux-*.js`
+- `auto-perspective.md` n'existe pas — seul `auto-perspective-v5.md` est present
+- Le plan est globalement compatible avec l'etat actuel de l'application
+
 ---
 
 ## Complete (Beta 97.3 - 7 février 2026)
