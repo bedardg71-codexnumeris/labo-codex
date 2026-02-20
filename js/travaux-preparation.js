@@ -34,7 +34,8 @@
     const EXPOSITION_MIN = -20;          // -2.0 EV
     const EXPOSITION_MAX = 20;           // +2.0 EV
     const BATCH_SIZE = 10000;         // Pixels par lot pour le rendu final
-    const PERSPECTIVE_MARGE = 1.0;    // 100% de marge autour de l'image pour perspective (coins hors cadre)
+    const PERSPECTIVE_MARGE_MIN = 0.15;  // marge initiale (15%)
+    const PERSPECTIVE_MARGE_MAX = 0.80;  // marge maximale (80%)
 
     /* ===============================
        ETAT DU MODULE
@@ -58,6 +59,7 @@
     let perspectiveCorners = null;    // [{x,y}, {x,y}, {x,y}, {x,y}] en fractions 0-1
     let poigneeActive = -1;           // Index de la poignee draggee (-1 = aucune)
     let cropDragState = null;         // Etat du drag pour le crop
+    let perspectiveMarge = PERSPECTIVE_MARGE_MIN;  // Marge dynamique perspective
 
     // Assemblage multi-pages
     let selections = new Set();       // Indices des fichiers selectionnes pour grouper
@@ -335,8 +337,8 @@
 
         // Marge autour de l'image quand perspective active (poignees hors cadre)
         const avecMarge = outilActif === 'perspective';
-        const margeX = avecMarge ? Math.round(source.width * PERSPECTIVE_MARGE) : 0;
-        const margeY = avecMarge ? Math.round(source.height * PERSPECTIVE_MARGE) : 0;
+        const margeX = avecMarge ? Math.round(source.width * perspectiveMarge) : 0;
+        const margeY = avecMarge ? Math.round(source.height * perspectiveMarge) : 0;
 
         canvasApercu.width = source.width + margeX * 2;
         canvasApercu.height = source.height + margeY * 2;
@@ -831,10 +833,10 @@
 
         // Quand perspective active, convertir de l'espace canvas (avec marge) vers l'espace image
         if (outilActif === 'perspective') {
-            const total = 1 + PERSPECTIVE_MARGE * 2;
+            const total = 1 + perspectiveMarge * 2;
             return {
-                x: rawX * total - PERSPECTIVE_MARGE,
-                y: rawY * total - PERSPECTIVE_MARGE
+                x: rawX * total - perspectiveMarge,
+                y: rawY * total - perspectiveMarge
             };
         }
 
@@ -872,7 +874,7 @@
 
         if (outilActif === 'perspective' && perspectiveCorners) {
             // Detecter si on touche une poignee (ajuster pour la marge)
-            const echelle = 1 + PERSPECTIVE_MARGE * 2;
+            const echelle = 1 + perspectiveMarge * 2;
             const seuil = POIGNEE_TAILLE * echelle / (2 * canvasApercu.getBoundingClientRect().width);
             for (let i = 0; i < 4; i++) {
                 const dx = pos.x - perspectiveCorners[i].x;
@@ -930,12 +932,13 @@
         const pos = getCanvasPos(e);
 
         if (outilActif === 'perspective' && poigneeActive >= 0) {
-            const limMin = -PERSPECTIVE_MARGE;
-            const limMax = 1 + PERSPECTIVE_MARGE;
+            const limMin = -PERSPECTIVE_MARGE_MAX;
+            const limMax = 1 + PERSPECTIVE_MARGE_MAX;
             perspectiveCorners[poigneeActive] = {
                 x: Math.max(limMin, Math.min(limMax, pos.x)),
                 y: Math.max(limMin, Math.min(limMax, pos.y))
             };
+            perspectiveMarge = calculerMargeNecessaire();
             mettreAJourApercu();
             return;
         }
@@ -1004,6 +1007,17 @@
         ajouterOperation({ type: 'fineRotation', degrees: parseFloat(degrees) });
     }
 
+    function resetRotationFine() {
+        if (operations.length > 0 && operations[operations.length - 1].type === 'fineRotation') {
+            operations.pop();
+        }
+        const slider = document.getElementById('prep-rotation-fine');
+        if (slider) slider.value = 0;
+        fichiers[indexActuel].operations = operations;
+        canvasGeometrique = null;
+        mettreAJourApercu();
+    }
+
     function activerCrop() {
         outilActif = 'crop';
         cropRect = { x: 0.02, y: 0.02, width: 0.96, height: 0.96 };
@@ -1025,6 +1039,7 @@
 
     function activerPerspective() {
         outilActif = 'perspective';
+        perspectiveMarge = PERSPECTIVE_MARGE_MIN;
         perspectiveCorners = [
             { x: 0.05, y: 0.05 },  // TL
             { x: 0.95, y: 0.05 },  // TR
@@ -1032,6 +1047,15 @@
             { x: 0.05, y: 0.95 }   // BL
         ];
         mettreAJourApercu();
+    }
+
+    function calculerMargeNecessaire() {
+        if (!perspectiveCorners) return PERSPECTIVE_MARGE_MIN;
+        let needed = 0;
+        perspectiveCorners.forEach(p => {
+            needed = Math.max(needed, -p.x, -p.y, p.x - 1, p.y - 1);
+        });
+        return Math.max(PERSPECTIVE_MARGE_MIN, Math.min(PERSPECTIVE_MARGE_MAX, needed + 0.08));
     }
 
     /* ===============================
@@ -1198,8 +1222,8 @@
 
                         // Valider les limites
                         const valide = result.every(p =>
-                            p.x >= -PERSPECTIVE_MARGE && p.x <= 1 + PERSPECTIVE_MARGE &&
-                            p.y >= -PERSPECTIVE_MARGE && p.y <= 1 + PERSPECTIVE_MARGE
+                            p.x >= -PERSPECTIVE_MARGE_MAX && p.x <= 1 + PERSPECTIVE_MARGE_MAX &&
+                            p.y >= -PERSPECTIVE_MARGE_MAX && p.y <= 1 + PERSPECTIVE_MARGE_MAX
                         );
                         if (!valide) continue;
 
@@ -2077,6 +2101,9 @@
                 <!-- Zone de travail plein ecran -->
                 <div class="prep-workspace">
                     <canvas id="prep-canvas-apercu" style="max-width:90%; max-height:90%;"></canvas>
+                    <button class="prep-btn-canvas" id="prep-btn-appliquer-crop"
+                            onclick="travauxPreparation.appliquerCrop()"
+                            style="display:none;">Confirmer rognage</button>
 
                     <!-- Palette Reglages specifiques (flottante, draggable) -->
                     <div class="prep-palette prep-palette-etendu" id="prep-palette-outils" style="top:12px; left:12px;">
@@ -2109,7 +2136,11 @@
                                         <button class="prep-btn" onclick="travauxPreparation.rotation90CW()" title="90 horaire">&#x21BB; 90°</button>
                                     </div>
                                     <div class="prep-slider-groupe">
-                                        <label>Fine <span id="prep-rotation-valeur" class="texte-muted">0°</span></label>
+                                        <label>Fine <span id="prep-rotation-valeur" class="texte-muted">0°</span>
+                                            <button class="prep-btn-reset-rotation" id="prep-btn-reset-rotation"
+                                                    onclick="travauxPreparation.resetRotationFine()"
+                                                    title="Remettre a 0°" style="display:none;">&#x21BA; 0°</button>
+                                        </label>
                                         <input type="range" id="prep-rotation-fine" min="${ROTATION_FINE_MIN}" max="${ROTATION_FINE_MAX}" value="0" step="0.5"
                                                oninput="travauxPreparation.rotationFine(this.value)">
                                     </div>
@@ -2123,9 +2154,7 @@
                                 </div>
                                 <div class="prep-section-body">
                                     <button class="prep-btn" onclick="travauxPreparation.activerCrop()" style="width:100%;">Recadrage</button>
-                                    <button class="prep-btn prep-btn-appliquer" id="prep-btn-appliquer-crop" onclick="travauxPreparation.appliquerCrop()" style="display:none; width:100%;">Appliquer crop</button>
                                     <button class="prep-btn" onclick="travauxPreparation.activerPerspective()" style="width:100%;">Perspective</button>
-                                    <button class="prep-btn" onclick="travauxPreparation.detecterCoinsAuto()" style="width:100%;" title="Detecte automatiquement les 4 coins du document">Auto-perspective</button>
                                     <button class="prep-btn prep-btn-appliquer" id="prep-btn-appliquer-persp" onclick="travauxPreparation.appliquerPerspective()" style="display:none; width:100%;">Appliquer perspective</button>
                                 </div>
                             </div>
@@ -2201,6 +2230,10 @@
         const rotVal = document.getElementById('prep-rotation-valeur');
         if (rotSlider && rotVal) {
             rotVal.textContent = rotSlider.value + '°';
+        }
+        const btnReset = document.getElementById('prep-btn-reset-rotation');
+        if (btnReset && rotSlider) {
+            btnReset.style.display = parseFloat(rotSlider.value) !== 0 ? 'inline' : 'none';
         }
     }
 
@@ -2372,11 +2405,11 @@
         rotation90CW: rotation90CW,
         rotation90CCW: rotation90CCW,
         rotationFine: rotationFine,
+        resetRotationFine: resetRotationFine,
         activerCrop: activerCrop,
         appliquerCrop: appliquerCrop,
         activerPerspective: activerPerspective,
         appliquerPerspective: appliquerPerspective,
-        detecterCoinsAuto: detecterCoinsAuto,
         changerLuminosite: changerLuminosite,
         changerContraste: changerContraste,
         changerExposition: changerExposition,

@@ -14066,6 +14066,8 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     flex-direction: column;
     gap: 2px;
     padding: 6px;
+    overflow-y: auto;
+    max-height: calc(100vh - 180px);
 }
 .prep-palette.replie .prep-palette-contenu { display: none; }
 .prep-palette.replie .prep-palette-footer { display: none; }
@@ -14128,12 +14130,12 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 .prep-btn.actif {
-    background: var(--accent-principal);
+    background: var(--accent-primaire);
     color: #fff;
-    border-color: var(--accent-principal);
+    border-color: var(--accent-primaire);
 }
 .prep-btn.prep-btn-appliquer {
-    background: var(--accent-principal);
+    background: var(--accent-primaire);
     color: #fff;
     font-weight: 600;
 }
@@ -14146,6 +14148,39 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     flex: 1;
     justify-content: center;
 }
+
+/* Bouton flottant sur le canevas */
+.prep-btn-canvas {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 8px 20px;
+    border: none;
+    border-radius: 8px;
+    background: var(--accent-primaire);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    z-index: 90;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.prep-btn-canvas:hover {
+    filter: brightness(1.1);
+}
+
+/* Bouton reset rotation fine */
+.prep-btn-reset-rotation {
+    background: none;
+    border: none;
+    color: var(--accent-primaire);
+    cursor: pointer;
+    font-size: 0.7rem;
+    padding: 0 4px;
+    opacity: 0.8;
+}
+.prep-btn-reset-rotation:hover { opacity: 1; }
 
 /* Sliders */
 .prep-slider-groupe {
@@ -14208,7 +14243,7 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 }
 .prep-mini.modifie .prep-mini-nom::after {
     content: ' *';
-    color: var(--accent-principal);
+    color: var(--accent-primaire);
     font-weight: bold;
 }
 .prep-mini-check {
