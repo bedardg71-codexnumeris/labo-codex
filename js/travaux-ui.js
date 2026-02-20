@@ -640,9 +640,61 @@
                 tailleEl.textContent = travauxStockage.formaterTaille(tailleEst);
             }
 
-            // Generer le preview canvas
+            // Generer la thumbnail originale (colonne gauche)
+            genererOriginalThumbnail(f, index);
+            // Generer le preview canvas (colonne droite)
             genererPreviewThumbnail(f, index);
         });
+    }
+
+    /**
+     * Genere la thumbnail originale pour la colonne Originaux
+     * @param {Object} f - Fichier prepare
+     * @param {number} index - Index dans la queue
+     */
+    async function genererOriginalThumbnail(f, index) {
+        const conteneur = document.getElementById('pipeline-original-' + index);
+        if (!conteneur) return;
+
+        const source = f.fichier || null;
+        if (!source) {
+            // Fallback sur thumbnailDataUrl
+            if (f.thumbnailDataUrl) {
+                conteneur.innerHTML = `<img src="${f.thumbnailDataUrl}" alt="">`;
+            }
+            return;
+        }
+
+        try {
+            const url = URL.createObjectURL(source);
+            const img = new Image();
+            await new Promise((resolve, reject) => {
+                img.onload = resolve;
+                img.onerror = reject;
+                img.src = url;
+            });
+            URL.revokeObjectURL(url);
+
+            // Thumbnail a 120px max
+            const scale = Math.min(1, 120 / Math.max(img.width, img.height));
+            const cw = Math.round(img.width * scale);
+            const ch = Math.round(img.height * scale);
+
+            const canvas = document.createElement('canvas');
+            canvas.width = cw;
+            canvas.height = ch;
+            canvas.getContext('2d').drawImage(img, 0, 0, cw, ch);
+
+            const imgResult = document.createElement('img');
+            imgResult.src = canvas.toDataURL('image/jpeg', 0.85);
+            conteneur.innerHTML = '';
+            conteneur.appendChild(imgResult);
+        } catch (e) {
+            // Fallback silencieux
+            if (f.thumbnailDataUrl) {
+                conteneur.innerHTML = `<img src="${f.thumbnailDataUrl}" alt="">`;
+            }
+        }
     }
 
     /**
@@ -661,7 +713,7 @@
         // === Colonne gauche : Originaux ===
         let colGauche = '<div class="pipeline-col-originaux">';
         colGauche += '<div class="pipeline-col-titre">Originaux</div>';
-        queue.forEach((f) => {
+        queue.forEach((f, index) => {
             const thumb = f.thumbnailDataUrl;
             const icone = f.estPDF ? '&#x1F4C4;' : '&#x1F5BC;';
             const nomCourt = (f.parseLea.nom || f.nomFichier).substring(0, 12);
@@ -671,7 +723,7 @@
             const poids = travauxStockage.formaterTaille(f.tailleFichier);
 
             colGauche += `<div class="pipeline-fichier-colonne">
-                <div class="pipeline-fichier-thumb-col">
+                <div class="pipeline-fichier-thumb-col" id="pipeline-original-${index}">
                     ${thumb ? `<img src="${thumb}" alt="">` : `<span class="pipeline-icone-placeholder">${icone}</span>`}
                 </div>
                 <div class="pipeline-fichier-meta-col">
