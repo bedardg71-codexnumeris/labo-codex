@@ -348,6 +348,10 @@
         const typeMIME = fichierPrepare.typeMIME;
         let blob = fichierPrepare.fichier;
 
+        if (!blob) {
+            throw new Error('Le fichier original n\'est plus disponible (session expirée). Veuillez re-déposer le fichier.');
+        }
+
         // Compresser les images si necessaire
         if (fichierPrepare.estImage) {
             blob = await compresserImageSiNecessaire(blob, typeMIME);

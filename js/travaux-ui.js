@@ -130,7 +130,7 @@
         const zeroStateHTML = (fichiersTravaux.length === 0 && queue.length === 0 && aideActive) ? `
             <div class="travaux-zero-state">
                 <div class="zero-state-icone">&#x1F4DD;</div>
-                <h3>Annoter les travaux de tes etudiants</h3>
+                <h3>Annoter les travaux de tes étudiants</h3>
                 <p class="texte-muted">
                     L'annotation te permet de marquer directement sur les copies :
                     surlignage, commentaires, symboles et autocollants de retroaction.
@@ -139,7 +139,7 @@
                     <div class="zero-state-etape">
                         <span class="etape-numero">1</span>
                         <div>
-                            <strong>Deposez vos fichiers</strong>
+                            <strong>Déposez vos fichiers</strong>
                             <small>Glissez des PDF ou images dans la zone ci-dessous</small>
                         </div>
                     </div>
@@ -154,7 +154,7 @@
                         <span class="etape-numero">3</span>
                         <div>
                             <strong>Importez et annotez</strong>
-                            <small>Les fichiers sont stockes et prets a annoter</small>
+                            <small>Les fichiers sont stockés et prêts à annoter</small>
                         </div>
                     </div>
                 </div>
@@ -164,7 +164,7 @@
             <div class="pipeline-page">
 
                 <div class="travaux-import-header">
-                    <h3>Preparer et importer
+                    <h3>Préparer et importer
                         <button class="btn-aide-contextuelle" data-aide="evaluations-annoter" aria-label="Aide contextuelle"></button>
                     </h3>
                     <div class="pipeline-stats">
@@ -185,7 +185,7 @@
 
                 <!-- Selecteur de production global -->
                 <div class="pipeline-production-selecteur">
-                    <label>Production visee</label>
+                    <label>Production visée</label>
                     <select id="pipeline-production-globale" class="form-select" onchange="travauxUI.changerProductionGlobalePipeline(this.value)">
                         <option value="">-- Aucune --</option>
                         ${obtenirDonneesSelonMode(cle('productions')).map(p => `<option value="${p.id}" ${travauxImport.getProductionGlobale() === p.id ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
@@ -206,7 +206,7 @@
                     <div class="pipeline-etape">
                         <div class="pipeline-etape-header">
                             <span class="pipeline-etape-numero">1</span>
-                            <span class="pipeline-etape-titre">Zone d'entree</span>
+                            <span class="pipeline-etape-titre">Zone d'entrée</span>
                             <span class="pipeline-etape-compteur">${nbAOptimiser > 0 ? nbAOptimiser + ' fichier(s)' : ''}</span>
                         </div>
                         <div id="travaux-drop-zone" class="travaux-drop-zone">
@@ -229,7 +229,7 @@
                     <div class="pipeline-etape">
                         <div class="pipeline-etape-header">
                             <span class="pipeline-etape-numero">2</span>
-                            <span class="pipeline-etape-titre">Detection du format</span>
+                            <span class="pipeline-etape-titre">Détection du format</span>
                         </div>
                         ${genererResumeDetection(queue)}
                     </div>
@@ -241,7 +241,7 @@
                         <div class="pipeline-etape-header">
                             <span class="pipeline-etape-numero">3</span>
                             <span class="pipeline-etape-titre">Traitement</span>
-                            <span class="pipeline-etape-compteur">${nbAOptimiser > 0 ? nbAOptimiser + ' image(s) a traiter' : 'Aucune image a traiter'}</span>
+                            <span class="pipeline-etape-compteur">${nbAOptimiser > 0 ? nbAOptimiser + ' image(s) à traiter' : 'Aucune image à traiter'}</span>
                         </div>
                         ${genererSectionTraitement(queue, groupes)}
                     </div>
@@ -253,7 +253,7 @@
                         <div class="pipeline-etape-header">
                             <span class="pipeline-etape-numero">4</span>
                             <span class="pipeline-etape-titre">Identification</span>
-                            <span class="pipeline-etape-compteur">${nbIdentifie}/${queue.length} identifie(s)</span>
+                            <span class="pipeline-etape-compteur">${nbIdentifie}/${queue.length} identifié(s)</span>
                         </div>
                         ${genererSectionIdentification(queue)}
                     </div>
@@ -278,10 +278,10 @@
 
                 <!-- Section fichiers importes (toujours visible) -->
                 <div class="pipeline-section-importes">
-                    <h4>Fichiers importes (${fichiersTravaux.length})</h4>
+                    <h4>Fichiers importés (${fichiersTravaux.length})</h4>
                     ${fichiersTravaux.length > 0
                         ? genererGrilleFichiers(fichiersTravaux)
-                        : '<p class="texte-muted">Aucun fichier importe pour le moment.</p>'}
+                        : '<p class="texte-muted">Aucun fichier importé pour le moment.</p>'}
                 </div>
 
             </div>
@@ -358,7 +358,7 @@
                     <div class="travaux-sidebar-header">
                         <h4>Fichiers</h4>
                         <select id="travaux-filtre-etudiant" class="form-select" onchange="travauxUI.filtrerParEtudiant(this.value)">
-                            <option value="">Tous les etudiants</option>
+                            <option value="">Tous les étudiants</option>
                             ${genererOptionsEtudiants()}
                         </select>
                     </div>
@@ -375,24 +375,24 @@
                     <!-- Toolbar -->
                     <div class="travaux-toolbar">
                         <div class="travaux-toolbar-gauche">
-                            <button class="btn btn-petit" onclick="travauxUI.retourFichiers()" title="Retour a la grille">&#x2190; Retour</button>
+                            <button class="btn btn-petit" onclick="travauxUI.retourFichiers()" title="Retour à la grille">&#x2190; Retour</button>
                             <span id="travaux-nom-fichier" class="travaux-nom-fichier">Aucun fichier ouvert</span>
                             <span id="travaux-badge-statut" class="u-hide"></span>
                         </div>
                         <div class="travaux-toolbar-centre">
-                            <button id="travaux-btn-page-prec" class="btn-icon" onclick="travauxVisionneuse.pagePrecedente()" disabled title="Page precedente">&#x2190;</button>
+                            <button id="travaux-btn-page-prec" class="btn-icon" onclick="travauxVisionneuse.pagePrecedente()" disabled title="Page précédente">&#x2190;</button>
                             <span id="travaux-indicateur-page">-- / --</span>
                             <button id="travaux-btn-page-suiv" class="btn-icon" onclick="travauxVisionneuse.pageSuivante()" disabled title="Page suivante">&#x2192;</button>
                         </div>
                         <div class="travaux-toolbar-droite">
-                            <button class="btn btn-petit" onclick="travauxVisionneuse.zoomPleineLargeur()" title="Ajuster a la largeur du conteneur">Pleine largeur</button>
-                            <button class="btn btn-petit" onclick="travauxVisionneuse.zoomPleineHauteur()" title="Ajuster a la hauteur du conteneur">Pleine hauteur</button>
+                            <button class="btn btn-petit" onclick="travauxVisionneuse.zoomPleineLargeur()" title="Ajuster à la largeur du conteneur">Pleine largeur</button>
+                            <button class="btn btn-petit" onclick="travauxVisionneuse.zoomPleineHauteur()" title="Ajuster à la hauteur du conteneur">Pleine hauteur</button>
                             <span id="travaux-indicateur-zoom">100%</span>
                             <span class="travaux-separateur"></span>
                             <button id="travaux-btn-annoter" class="btn btn-petit" onclick="travauxAnnotation.basculerAnnotation()">Annoter</button>
-                            <button id="travaux-btn-export-pdf" class="btn btn-petit u-hide" onclick="travauxExportPDF.afficherRevisionExport(travauxVisionneuse.getFichierActuel()?.id)" title="Exporter PDF annote">Exporter PDF</button>
-                            <button id="travaux-btn-evaluer" class="btn btn-ajouter btn-petit u-hide" onclick="travauxUI.evaluerDepuisAnnotation()" title="Evaluer cette production">Evaluer</button>
-                            <button id="travaux-btn-alleger" class="btn btn-petit u-hide" onclick="travauxUI.allegerFichier(travauxVisionneuse.getFichierActuel()?.id)" title="Alleger ce fichier">Alleger</button>
+                            <button id="travaux-btn-export-pdf" class="btn btn-petit u-hide" onclick="travauxExportPDF.afficherRevisionExport(travauxVisionneuse.getFichierActuel()?.id)" title="Exporter PDF annoté">Exporter PDF</button>
+                            <button id="travaux-btn-evaluer" class="btn btn-ajouter btn-petit u-hide" onclick="travauxUI.evaluerDepuisAnnotation()" title="Évaluer cette production">Évaluer</button>
+                            <button id="travaux-btn-alleger" class="btn btn-petit u-hide" onclick="travauxUI.allegerFichier(travauxVisionneuse.getFichierActuel()?.id)" title="Alléger ce fichier">Alléger</button>
                             <button id="travaux-btn-reimporter" class="btn btn-petit u-hide" onclick="travauxUI.reimporterFichier(travauxVisionneuse.getFichierActuel()?.id)" title="Re-importer l'original">Re-importer</button>
                         </div>
                     </div>
@@ -404,7 +404,7 @@
                             <canvas id="travaux-canvas-annotation" class="u-hide" style="pointer-events:none;"></canvas>
                         </div>
                         <div id="travaux-placeholder-visionneuse" class="travaux-placeholder">
-                            <p>Selectionnez un fichier dans la sidebar pour l'ouvrir</p>
+                            <p>Sélectionnez un fichier dans la sidebar pour l'ouvrir</p>
                         </div>
                     </div>
 
@@ -414,7 +414,7 @@
                     <!-- Undo/Redo (masques par defaut) -->
                     <div class="travaux-undo-redo u-hide" id="travaux-undo-redo">
                         <button id="travaux-btn-undo" class="btn-icon" onclick="travauxAnnotation.annuler()" disabled title="Annuler (Ctrl+Z)">&#x21A9;</button>
-                        <button id="travaux-btn-redo" class="btn-icon" onclick="travauxAnnotation.retablir()" disabled title="Retablir (Ctrl+Y)">&#x21AA;</button>
+                        <button id="travaux-btn-redo" class="btn-icon" onclick="travauxAnnotation.retablir()" disabled title="Rétablir (Ctrl+Y)">&#x21AA;</button>
                         <button class="btn-icon btn-danger-petit" onclick="travauxAnnotation.effacerPage()" title="Effacer la page">&#x1F5D1;</button>
                     </div>
                 </div>
@@ -505,9 +505,9 @@
 
             <!-- Allegement -->
             <div class="travaux-archivage-carte">
-                <h4>Alleger les travaux exportes</h4>
-                <p class="texte-muted">Convertit les originaux exportes en fac-similes (NdG, 800px). Les annotations et evaluations sont conservees.</p>
-                <button class="btn btn-secondaire" onclick="travauxArchivage.lancerAllegement()">Alleger les travaux exportes</button>
+                <h4>Alléger les travaux exportés</h4>
+                <p class="texte-muted">Convertit les originaux exportés en fac-similés (NdG, 800px). Les annotations et évaluations sont conservées.</p>
+                <button class="btn btn-secondaire" onclick="travauxArchivage.lancerAllegement()">Alléger les travaux exportés</button>
             </div>
 
             <!-- Quota stockage -->
@@ -563,7 +563,7 @@
         if (nbPDF > 0) {
             html += `<div class="pipeline-resume-item">
                 <span class="pipeline-resume-icone">&#x1F4C4;</span>
-                <span>${nbPDF} PDF (prets)</span>
+                <span>${nbPDF} PDF (prêts)</span>
             </div>`;
         }
         if (nbImages > 0) {
@@ -590,14 +590,14 @@
         const imagesPaysage = queue.filter(f => f.estImage && f.largeurOriginale && f.hauteurOriginale && f.largeurOriginale > f.hauteurOriginale * 1.1);
         let alerteRotation = '';
         if (imagesPaysage.length > 0) {
-            alerteRotation = `<div class="pipeline-alerte-rotation">&#x26A0; ${imagesPaysage.length} image(s) potentiellement en paysage — rotation recommandee</div>`;
+            alerteRotation = `<div class="pipeline-alerte-rotation">&#x26A0; ${imagesPaysage.length} image(s) potentiellement en paysage — rotation recommandée</div>`;
         }
 
         let html = '<ul class="pipeline-checklist">';
         html += `<li><label><input type="checkbox" id="pipeline-opt-balance" checked> Balance des blancs auto</label></li>`;
         html += `<li><label><input type="checkbox" id="pipeline-opt-rotation" checked> Rotation (interactif)</label></li>`;
         html += `<li><label><input type="checkbox" id="pipeline-opt-dpi" checked> Uniformisation 200 DPI</label></li>`;
-        html += `<li><label><input type="checkbox" id="pipeline-opt-doublons" checked> Detection doublons (manuel)</label></li>`;
+        html += `<li><label><input type="checkbox" id="pipeline-opt-doublons" checked> Détection doublons (manuel)</label></li>`;
         html += `<li><label><input type="checkbox" id="pipeline-opt-assemblage" checked> Assemblage PDF${nbGroupes > 0 ? ` (${nbGroupes} groupe(s))` : ''}</label></li>`;
         html += '</ul>';
         html += alerteRotation;
@@ -624,7 +624,7 @@
     function genererSectionIdentification(queue) {
         const fichiersCibles = queue.filter(f => f.pipelineStatut === 'pret' || f.pipelineStatut === 'identifie');
         if (fichiersCibles.length === 0 && queue.length > 0) {
-            return '<p class="texte-muted">Les fichiers seront disponibles apres le traitement.</p>';
+            return '<p class="texte-muted">Les fichiers seront disponibles après le traitement.</p>';
         }
         if (queue.length === 0) {
             return '<p class="texte-muted">Aucun fichier en file.</p>';
@@ -653,7 +653,7 @@
             } else {
                 // Dropdown etudiant
                 html += `<select class="form-select" onchange="travauxUI.associerEtudiantPipeline(${index}, this.value)" style="font-size:0.8rem;max-width:180px">
-                    <option value="">-- Etudiant --</option>
+                    <option value="">-- Étudiant --</option>
                     ${[...etudiants].sort((a,b) => (a.nom||'').localeCompare(b.nom||'')).map(e => `<option value="${e.da}" ${f.etudiantDA === e.da ? 'selected' : ''}>${echapperHtml(e.nom + ', ' + e.prenom)}</option>`).join('')}
                 </select>`;
                 // Dropdown production
@@ -680,13 +680,13 @@
     function genererBadgePipeline(fichier) {
         switch (fichier.pipelineStatut) {
             case 'apercu':
-                return '<span class="pipeline-badge pipeline-badge-a-optimiser">Apercu</span>';
+                return '<span class="pipeline-badge pipeline-badge-a-optimiser">Aperçu</span>';
             case 'a-optimiser':
-                return '<span class="pipeline-badge pipeline-badge-a-optimiser"><span class="pipeline-pastille pipeline-pastille-a-optimiser"></span> A optimiser</span>';
+                return '<span class="pipeline-badge pipeline-badge-a-optimiser"><span class="pipeline-pastille pipeline-pastille-a-optimiser"></span> À optimiser</span>';
             case 'pret':
-                return '<span class="pipeline-badge pipeline-badge-pret"><span class="pipeline-pastille pipeline-pastille-pret"></span> Pret</span>';
+                return '<span class="pipeline-badge pipeline-badge-pret"><span class="pipeline-pastille pipeline-pastille-pret"></span> Prêt</span>';
             case 'identifie':
-                return '<span class="pipeline-badge pipeline-badge-identifie">Identifie</span>';
+                return '<span class="pipeline-badge pipeline-badge-identifie">Identifié</span>';
             default:
                 return '<span class="pipeline-badge">' + echapperHtml(fichier.pipelineStatut || '?') + '</span>';
         }
@@ -700,7 +700,7 @@
     function genererBoutonsActionsPipeline(queue) {
         const tousIdentifies = queue.length > 0 && queue.every(f => f.pipelineStatut === 'identifie');
         return `
-            <button class="btn btn-principal" onclick="travauxUI.lancerImportPipeline()" ${!tousIdentifies ? 'disabled title="Tous les fichiers doivent etre identifies"' : ''}>
+            <button class="btn btn-principal" onclick="travauxUI.lancerImportPipeline()" ${!tousIdentifies ? 'disabled title="Tous les fichiers doivent être identifiés"' : ''}>
                 Importer ${queue.length} fichier(s)
             </button>
             <button class="btn btn-secondaire" onclick="travauxImport.viderFileDAttente(); travauxUI.afficherImport();">
@@ -727,7 +727,7 @@
 
         if (conteneur) conteneur.style.display = '';
         if (barre) barre.style.width = Math.round((fait / total) * 100) + '%';
-        if (texte) texte.textContent = `${fait}/${total} fichier(s) traites...`;
+        if (texte) texte.textContent = `${fait}/${total} fichier(s) traités...`;
     }
 
     /**
@@ -864,12 +864,12 @@
         const etudiant = travauxImport.trouverEtudiantParDA(f.etudiantDA);
         const nomEtudiant = etudiant
             ? `${echapperHtml(etudiant.nom)}, ${echapperHtml(etudiant.prenom)}`
-            : (f.etudiantDA || 'Non associe');
+            : (f.etudiantDA || 'Non associé');
         const icone = f.typeMIME === 'application/pdf' ? '&#x1F4C4;' : '&#x1F5BC;';
         return `<div class="travaux-badge-importe" onclick="travauxUI.ouvrirPreviewInline('${f.id}')" title="${echapperHtml(f.nomFichier)}">
         <span class="travaux-badge-icone">${icone}</span>
         <span class="travaux-badge-nom">${nomEtudiant}</span>
-        <span class="travaux-badge-pill">Importe</span>
+        <span class="travaux-badge-pill">Importé</span>
     </div>`;
     }
 
@@ -891,7 +891,7 @@
             groupes[pid].push(f);
         });
 
-        let html = '<div class="travaux-grille-fichiers"><h4>Fichiers importes</h4>';
+        let html = '<div class="travaux-grille-fichiers"><h4>Fichiers importés</h4>';
 
         // Afficher chaque production
         productions.forEach(p => {
@@ -907,7 +907,7 @@
         // Fichiers sans production
         const sansProduction = groupes['__aucune__'];
         if (sansProduction && sansProduction.length > 0) {
-            html += `<h5 class="travaux-groupe-production-titre">Non associes (${sansProduction.length})</h5>`;
+            html += `<h5 class="travaux-groupe-production-titre">Non associés (${sansProduction.length})</h5>`;
             html += '<div class="travaux-badges-groupe">';
             sansProduction.forEach(f => { html += genererBadgeFichierImporte(f); });
             html += '</div>';
@@ -925,7 +925,7 @@
      */
     function genererMiniatures(fichiers) {
         if (fichiers.length === 0) {
-            return '<p class="texte-muted" style="padding: 16px;">Aucun fichier importe</p>';
+            return '<p class="texte-muted" style="padding: 16px;">Aucun fichier importé</p>';
         }
 
         // Scroll virtuel pour grandes listes
@@ -1085,7 +1085,7 @@
             const barre = document.getElementById('travaux-barre-progression');
             if (barre) barre.style.width = pourcent + '%';
             const texte = document.getElementById('travaux-texte-progression');
-            if (texte) texte.textContent = `${i}/${total} fichier(s) importes...`;
+            if (texte) texte.textContent = `${i}/${total} fichier(s) importés...`;
         });
 
         if (progression) progression.classList.add('u-hide');
@@ -1093,7 +1093,7 @@
         // Rafraichir l'affichage
         afficherImport();
 
-        alert(`Import termine : ${resultat.importes} fichier(s) importe(s), ${resultat.erreurs} erreur(s)`);
+        alert(`Import terminé : ${resultat.importes} fichier(s) importé(s), ${resultat.erreurs} erreur(s)`);
     }
 
     /**
@@ -1102,14 +1102,27 @@
     async function lancerImportPipeline() {
         const queue = travauxImport.obtenirFileDAttente();
         if (queue.length === 0) {
-            afficherModalePipeline('Import', '<p>Aucun fichier a importer.</p>',
+            afficherModalePipeline('Import', '<p>Aucun fichier à importer.</p>',
                 [{ label: 'OK', classe: 'btn-principal', action: () => {} }]);
             return;
         }
 
         if (!queue.every(f => f.pipelineStatut === 'identifie')) {
-            afficherModalePipeline('Import', '<p>Tous les fichiers doivent etre identifies avant l\'import.</p>',
+            afficherModalePipeline('Import', '<p>Tous les fichiers doivent être identifiés avant l\'import.</p>',
                 [{ label: 'OK', classe: 'btn-principal', action: () => {} }]);
+            return;
+        }
+
+        // Verifier que les blobs sont disponibles (perdus apres refresh page)
+        const sansBlob = queue.filter(f => !f.fichier);
+        if (sansBlob.length > 0) {
+            afficherModalePipeline('Fichiers expirés',
+                `<p>${sansBlob.length} fichier(s) ne sont plus disponibles en mémoire (la page a été rechargée).</p>
+                <p>Veuillez vider la file et re-déposer vos fichiers.</p>`,
+                [{ label: 'Vider la file', classe: 'btn-principal', action: () => {
+                    travauxImport.viderFileDAttente();
+                    afficherImport();
+                }}]);
             return;
         }
 
@@ -1122,16 +1135,16 @@
             const barre = document.getElementById('travaux-barre-progression');
             if (barre) barre.style.width = pourcent + '%';
             const texte = document.getElementById('travaux-texte-progression');
-            if (texte) texte.textContent = `${i}/${total} fichier(s) importes...`;
+            if (texte) texte.textContent = `${i}/${total} fichier(s) importés...`;
         });
 
         if (progression) progression.classList.add('u-hide');
 
         afficherImport();
 
-        afficherModalePipeline('Import termine',
-            `<p>${resultat.importes} fichier(s) importe(s)${resultat.erreurs > 0 ? `, ${resultat.erreurs} erreur(s)` : ''}.</p>
-            <p class="pipeline-message-succes">Ces documents sont prets pour l'annotation et l'evaluation.</p>`,
+        afficherModalePipeline('Import terminé',
+            `<p>${resultat.importes} fichier(s) importé(s)${resultat.erreurs > 0 ? `, ${resultat.erreurs} erreur(s)` : ''}.</p>
+            <p class="pipeline-message-succes">Ces documents sont prêts pour l'annotation et l'évaluation.</p>`,
             [{ label: 'OK', classe: 'btn-principal', action: () => {} }]);
     }
 
@@ -1413,7 +1426,7 @@
         // Filtrer seulement les images (pas les PDF)
         const images = queue.filter(f => f.estImage);
         if (images.length === 0) {
-            alert('Aucune image a preparer (les PDF ne necessitent pas de preparation)');
+            alert('Aucune image à préparer (les PDF ne nécessitent pas de préparation)');
             return;
         }
 
@@ -1435,8 +1448,21 @@
         const images = queue.filter(f => f.pipelineStatut === 'a-optimiser');
 
         if (images.length === 0) {
-            afficherModalePipeline('Traitement', '<p>Aucune image a traiter.</p>',
+            afficherModalePipeline('Traitement', '<p>Aucune image à traiter.</p>',
                 [{ label: 'OK', classe: 'btn-principal', action: () => {} }]);
+            return;
+        }
+
+        // Verifier que les blobs sont disponibles
+        const sansBlob = images.filter(f => !f.fichier);
+        if (sansBlob.length > 0) {
+            afficherModalePipeline('Fichiers expirés',
+                `<p>${sansBlob.length} image(s) ne sont plus disponibles en mémoire (la page a été rechargée).</p>
+                <p>Veuillez vider la file et re-déposer vos fichiers.</p>`,
+                [{ label: 'Vider la file', classe: 'btn-principal', action: () => {
+                    travauxImport.viderFileDAttente();
+                    afficherImport();
+                }}]);
             return;
         }
 
@@ -1513,8 +1539,8 @@
 
         rafraichirPipelineUI();
 
-        afficherModalePipeline('Traitement termine',
-            `<p>${traites} image(s) traitee(s) avec succes.</p>`,
+        afficherModalePipeline('Traitement terminé',
+            `<p>${traites} image(s) traitée(s) avec succès.</p>`,
             [{ label: 'OK', classe: 'btn-principal', action: () => {} }]);
     }
 
@@ -1641,7 +1667,7 @@
         if (groupesMultiples.length === 0) {
             afficherModalePipeline(
                 'Aucun doublon',
-                '<p>Aucun doublon potentiel detecte.</p>',
+                '<p>Aucun doublon potentiel détecté.</p>',
                 [{ label: 'OK', classe: 'btn-principal', action: () => {
                     document.getElementById('pipeline-opt-doublons').checked = false;
                     lancerTraitementPipeline();
@@ -1650,7 +1676,7 @@
             return;
         }
 
-        let html = '<div class="modal-section"><p>Cochez les fichiers a supprimer :</p>';
+        let html = '<div class="modal-section"><p>Cochez les fichiers à supprimer :</p>';
 
         groupesMultiples.forEach(([cleGroupe, fichiers]) => {
             html += `<div style="margin-bottom:16px"><strong>${echapperHtml(cleGroupe)}</strong>`;
@@ -1744,11 +1770,11 @@
         const ok = await travauxStockage.convertirEnFacsimile(fichierId);
         if (ok) {
             if (typeof afficherNotificationSucces === 'function') {
-                afficherNotificationSucces('Fichier allege en fac-simile');
+                afficherNotificationSucces('Fichier allégé en fac-similé');
             }
             rafraichirUI();
         } else {
-            alert('Erreur lors de l\'allegement');
+            alert('Erreur lors de l\'allègement');
         }
     }
 
