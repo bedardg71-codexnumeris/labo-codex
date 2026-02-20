@@ -14009,6 +14009,32 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 .prep-header-thumb img { width: 100%; height: 100%; object-fit: cover; }
 .prep-header-thumb.actif { border-color: var(--bleu-clair); }
 
+.prep-progress-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 12px;
+    background: var(--surface-section, #142428);
+    border-bottom: 1px solid rgba(106, 172, 184, 0.2);
+    flex-shrink: 0;
+    height: 24px;
+    position: relative;
+}
+.prep-progress-fill {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    background: var(--accent-primaire);
+    opacity: 0.3;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+.prep-progress-text {
+    position: relative;
+    font-size: 0.7rem;
+    color: var(--texte-principal);
+    z-index: 1;
+}
+
 .prep-workspace {
     flex: 1;
     position: relative;
