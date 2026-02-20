@@ -183,77 +183,103 @@
                     }
                 </div>` : ''}
 
+                <!-- Selecteur de production global -->
+                <div class="pipeline-production-selecteur">
+                    <label>Production visee</label>
+                    <select id="pipeline-production-globale" class="form-select" onchange="travauxUI.changerProductionGlobalePipeline(this.value)">
+                        <option value="">-- Aucune --</option>
+                        ${obtenirDonneesSelonMode(cle('productions')).map(p => `<option value="${p.id}" ${travauxImport.getProductionGlobale() === p.id ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
+                    </select>
+                </div>
+
                 ${zeroStateHTML}
 
-                <!-- ETAPE 1 : Zone d'entree -->
-                <div class="pipeline-etape">
-                    <div class="pipeline-etape-header">
-                        <span class="pipeline-etape-numero">1</span>
-                        <span class="pipeline-etape-titre">Zone d'entree</span>
-                        <span class="pipeline-etape-compteur">${queue.length > 0 ? queue.length + ' fichier(s)' : ''}</span>
+                <!-- Pipeline repliable -->
+                <div class="pipeline-etapes-groupe${queue.length === 0 ? ' replie' : ''}" id="pipeline-etapes-groupe">
+                    <div class="pipeline-etapes-toggle" onclick="travauxUI.togglePipelineEtapes()">
+                        <span id="pipeline-toggle-fleche">${queue.length === 0 ? '&#x25B6;' : '&#x25BC;'}</span>
+                        <span>Pipeline d'import${queue.length > 0 ? ` (${queue.length} fichier(s))` : ''}</span>
                     </div>
-                    <div id="travaux-drop-zone" class="travaux-drop-zone">
-                        <div class="travaux-drop-zone-contenu">
-                            <div class="travaux-drop-zone-icone">&#x1F4C1;</div>
-                            <p>Glissez vos fichiers ici</p>
-                            <p class="texte-muted">PDF, JPEG, PNG, HEIC — ou cliquez pour parcourir</p>
+                    <div class="pipeline-etapes-contenu">
+
+                    <!-- ETAPE 1 : Zone d'entree -->
+                    <div class="pipeline-etape">
+                        <div class="pipeline-etape-header">
+                            <span class="pipeline-etape-numero">1</span>
+                            <span class="pipeline-etape-titre">Zone d'entree</span>
+                            <span class="pipeline-etape-compteur">${queue.length > 0 ? queue.length + ' fichier(s)' : ''}</span>
                         </div>
+                        <div id="travaux-drop-zone" class="travaux-drop-zone">
+                            <div class="travaux-drop-zone-contenu">
+                                <div class="travaux-drop-zone-icone">&#x1F4C1;</div>
+                                <p>Glissez vos fichiers ici</p>
+                                <p class="texte-muted">PDF, JPEG, PNG, HEIC — ou cliquez pour parcourir</p>
+                            </div>
+                        </div>
+                        ${queue.length > 0 ? genererPreviewsEntree(queue) : ''}
                     </div>
-                    ${queue.length > 0 ? genererPreviewsEntree(queue) : ''}
-                </div>
 
-                ${queue.length > 0 ? `
-                <div class="pipeline-connecteur"></div>
+                    ${queue.length > 0 ? `
+                    <div class="pipeline-connecteur"></div>
 
-                <!-- ETAPE 2 : Detection du format -->
-                <div class="pipeline-etape">
-                    <div class="pipeline-etape-header">
-                        <span class="pipeline-etape-numero">2</span>
-                        <span class="pipeline-etape-titre">Detection du format</span>
+                    <!-- ETAPE 2 : Detection du format -->
+                    <div class="pipeline-etape">
+                        <div class="pipeline-etape-header">
+                            <span class="pipeline-etape-numero">2</span>
+                            <span class="pipeline-etape-titre">Detection du format</span>
+                        </div>
+                        ${genererResumeDetection(queue)}
                     </div>
-                    ${genererResumeDetection(queue)}
-                </div>
 
-                <div class="pipeline-connecteur"></div>
+                    <div class="pipeline-connecteur"></div>
 
-                <!-- ETAPE 3 : Traitement -->
-                <div class="pipeline-etape ${!aDesImagesAOptimiser ? 'pipeline-etape-inactive' : ''}">
-                    <div class="pipeline-etape-header">
-                        <span class="pipeline-etape-numero">3</span>
-                        <span class="pipeline-etape-titre">Traitement</span>
-                        <span class="pipeline-etape-compteur">${nbAOptimiser > 0 ? nbAOptimiser + ' image(s) a traiter' : 'Aucune image a traiter'}</span>
+                    <!-- ETAPE 3 : Traitement -->
+                    <div class="pipeline-etape ${!aDesImagesAOptimiser ? 'pipeline-etape-inactive' : ''}">
+                        <div class="pipeline-etape-header">
+                            <span class="pipeline-etape-numero">3</span>
+                            <span class="pipeline-etape-titre">Traitement</span>
+                            <span class="pipeline-etape-compteur">${nbAOptimiser > 0 ? nbAOptimiser + ' image(s) a traiter' : 'Aucune image a traiter'}</span>
+                        </div>
+                        ${genererSectionTraitement(queue, groupes)}
                     </div>
-                    ${genererSectionTraitement(queue, groupes)}
-                </div>
 
-                <div class="pipeline-connecteur"></div>
+                    <div class="pipeline-connecteur"></div>
 
-                <!-- ETAPE 4 : Identification -->
-                <div class="pipeline-etape">
-                    <div class="pipeline-etape-header">
-                        <span class="pipeline-etape-numero">4</span>
-                        <span class="pipeline-etape-titre">Identification</span>
-                        <span class="pipeline-etape-compteur">${nbIdentifie}/${queue.length} identifie(s)</span>
+                    <!-- ETAPE 4 : Identification -->
+                    <div class="pipeline-etape">
+                        <div class="pipeline-etape-header">
+                            <span class="pipeline-etape-numero">4</span>
+                            <span class="pipeline-etape-titre">Identification</span>
+                            <span class="pipeline-etape-compteur">${nbIdentifie}/${queue.length} identifie(s)</span>
+                        </div>
+                        ${genererSectionIdentification(queue)}
                     </div>
-                    ${genererSectionIdentification(queue)}
-                </div>
 
-                <div class="pipeline-connecteur"></div>
+                    <div class="pipeline-connecteur"></div>
 
-                <!-- Bouton Importer -->
-                <div class="pipeline-bouton-importer">
-                    ${genererBoutonsActionsPipeline(queue)}
-                </div>
-
-                <div id="travaux-progression-import" class="u-hide">
-                    <div class="pipeline-progression-container">
-                        <div id="travaux-barre-progression" class="pipeline-progression-barre"></div>
+                    <!-- Bouton Importer -->
+                    <div class="pipeline-bouton-importer">
+                        ${genererBoutonsActionsPipeline(queue)}
                     </div>
-                    <div id="travaux-texte-progression" class="texte-muted"></div>
-                </div>
-                ` : ''}
 
-                ${fichiersTravaux.length > 0 ? genererGrilleFichiers(fichiersTravaux) : ''}
+                    <div id="travaux-progression-import" class="u-hide">
+                        <div class="pipeline-progression-container">
+                            <div id="travaux-barre-progression" class="pipeline-progression-barre"></div>
+                        </div>
+                        <div id="travaux-texte-progression" class="texte-muted"></div>
+                    </div>
+                    ` : ''}
+
+                    </div><!-- /pipeline-etapes-contenu -->
+                </div><!-- /pipeline-etapes-groupe -->
+
+                <!-- Section fichiers importes (toujours visible) -->
+                <div class="pipeline-section-importes">
+                    <h4>Fichiers importes (${fichiersTravaux.length})</h4>
+                    ${fichiersTravaux.length > 0
+                        ? genererGrilleFichiers(fichiersTravaux)
+                        : '<p class="texte-muted">Aucun fichier importe pour le moment.</p>'}
+                </div>
 
             </div>
         `;
@@ -261,8 +287,22 @@
         // Initialiser le drag-drop
         const dropZone = document.getElementById('travaux-drop-zone');
         travauxImport.initialiserDropZone(dropZone, (prepares) => {
+            identifierAutoPipeline();
             rafraichirPipelineUI();
         });
+    }
+
+    /**
+     * Toggle la visibilite du groupe d'etapes du pipeline
+     */
+    function togglePipelineEtapes() {
+        const groupe = document.getElementById('pipeline-etapes-groupe');
+        if (!groupe) return;
+        groupe.classList.toggle('replie');
+        const fleche = document.getElementById('pipeline-toggle-fleche');
+        if (fleche) {
+            fleche.innerHTML = groupe.classList.contains('replie') ? '&#x25B6;' : '&#x25BC;';
+        }
     }
 
     /**
@@ -425,7 +465,7 @@
                     <p class="texte-muted">Télécharger tous les travaux d'un étudiant</p>
                     <select id="travaux-archivage-etudiant" class="form-select">
                         <option value="">-- Choisir un étudiant --</option>
-                        ${etudiants.map(e => `<option value="${e.da}">${echapperHtml(e.prenom + ' ' + e.nom)} (${e.da})</option>`).join('')}
+                        ${[...etudiants].sort((a,b) => (a.nom||'').localeCompare(b.nom||'')).map(e => `<option value="${e.da}">${echapperHtml(e.nom + ', ' + e.prenom)} (${e.da})</option>`).join('')}
                     </select>
                     <div class="travaux-archivage-checks">
                         <label><input type="checkbox" id="arch-etudiant-annotes" checked> Inclure annotés</label>
@@ -545,13 +585,21 @@
         const nbImages = queue.filter(f => f.estImage).length;
         const nbGroupes = Array.from(groupes.values()).filter(g => g.length > 1 && g.some(f => f.estImage)).length;
 
+        // Detection images en paysage
+        const imagesPaysage = queue.filter(f => f.estImage && f.largeurOriginale && f.hauteurOriginale && f.largeurOriginale > f.hauteurOriginale * 1.1);
+        let alerteRotation = '';
+        if (imagesPaysage.length > 0) {
+            alerteRotation = `<div class="pipeline-alerte-rotation">&#x26A0; ${imagesPaysage.length} image(s) potentiellement en paysage — rotation recommandee</div>`;
+        }
+
         let html = '<ul class="pipeline-checklist">';
         html += `<li><label><input type="checkbox" id="pipeline-opt-balance" checked> Balance des blancs auto</label></li>`;
-        html += `<li><label><input type="checkbox" id="pipeline-opt-rotation"> Rotation (interactif)</label></li>`;
+        html += `<li><label><input type="checkbox" id="pipeline-opt-rotation" checked> Rotation (interactif)</label></li>`;
         html += `<li><label><input type="checkbox" id="pipeline-opt-dpi" checked> Uniformisation 200 DPI</label></li>`;
-        html += `<li><label><input type="checkbox" id="pipeline-opt-doublons"> Detection doublons (manuel)</label></li>`;
+        html += `<li><label><input type="checkbox" id="pipeline-opt-doublons" checked> Detection doublons (manuel)</label></li>`;
         html += `<li><label><input type="checkbox" id="pipeline-opt-assemblage" checked> Assemblage PDF${nbGroupes > 0 ? ` (${nbGroupes} groupe(s))` : ''}</label></li>`;
         html += '</ul>';
+        html += alerteRotation;
 
         html += `<div style="margin-top:10px">
             <button class="btn btn-principal" onclick="travauxUI.lancerTraitementPipeline()" ${nbImages === 0 ? 'disabled' : ''}>
@@ -589,7 +637,7 @@
         queue.forEach((f, index) => {
             const badge = genererBadgePipeline(f);
             const etudiantNom = f.etudiantAssocie
-                ? `${echapperHtml(f.etudiantAssocie.prenom)} ${echapperHtml(f.etudiantAssocie.nom)}`
+                ? `${echapperHtml(f.etudiantAssocie.nom)}, ${echapperHtml(f.etudiantAssocie.prenom)}`
                 : '';
 
             // Production associee
@@ -605,7 +653,7 @@
                 // Dropdown etudiant
                 html += `<select class="form-select" onchange="travauxUI.associerEtudiantPipeline(${index}, this.value)" style="font-size:0.8rem;max-width:180px">
                     <option value="">-- Etudiant --</option>
-                    ${etudiants.map(e => `<option value="${e.da}" ${f.etudiantDA === e.da ? 'selected' : ''}>${echapperHtml(e.prenom + ' ' + e.nom)}</option>`).join('')}
+                    ${[...etudiants].sort((a,b) => (a.nom||'').localeCompare(b.nom||'')).map(e => `<option value="${e.da}" ${f.etudiantDA === e.da ? 'selected' : ''}>${echapperHtml(e.nom + ', ' + e.prenom)}</option>`).join('')}
                 </select>`;
                 // Dropdown production
                 html += `<select class="form-select" onchange="travauxUI.associerProductionPipeline(${index}, this.value)" style="font-size:0.8rem;max-width:180px">
@@ -619,11 +667,6 @@
         });
 
         html += '</div>';
-
-        // Bouton identification auto
-        html += `<div style="margin-top:8px">
-            <button class="btn btn-secondaire btn-petit" onclick="travauxUI.identifierAutoPipeline()">Identifier automatiquement</button>
-        </div>`;
 
         return html;
     }
@@ -732,6 +775,22 @@
     }
 
     /**
+     * Change la production globale du pipeline et applique aux fichiers sans production
+     * @param {string} productionId - ID de la production
+     */
+    function changerProductionGlobalePipeline(productionId) {
+        travauxImport.setProductionGlobale(productionId);
+        const queue = travauxImport.obtenirFileDAttente();
+        queue.forEach(f => {
+            if (!f.productionId && productionId) {
+                f.productionId = productionId;
+            }
+        });
+        identifierAutoPipeline();
+        rafraichirPipelineUI();
+    }
+
+    /**
      * Tente d'identifier automatiquement les fichiers via parseLea
      */
     function identifierAutoPipeline() {
@@ -770,9 +829,7 @@
 
         rafraichirPipelineUI();
         if (modifies > 0) {
-            afficherModalePipeline('Identification automatique',
-                `<p>${modifies} fichier(s) identifie(s) automatiquement.</p>`,
-                [{ label: 'OK', classe: 'btn-principal', action: () => {} }]);
+            console.log(`[Travaux-UI] Identification automatique: ${modifies} fichier(s) identifie(s)`);
         }
     }
 
@@ -814,7 +871,7 @@
             const icone = f.typeMIME === 'application/pdf' ? '&#x1F4C4;' : '&#x1F5BC;';
             const etudiant = travauxImport.trouverEtudiantParDA(f.etudiantDA);
             const nomEtudiant = etudiant
-                ? `${echapperHtml(etudiant.prenom)} ${echapperHtml(etudiant.nom)}`
+                ? `${echapperHtml(etudiant.nom)}, ${echapperHtml(etudiant.prenom)}`
                 : (f.etudiantDA || 'Non associé');
 
             // Production associee
@@ -832,7 +889,7 @@
 
             html += `
                 <div class="travaux-grille-item" title="${echapperHtml(f.nomFichier)}">
-                    <div class="travaux-grille-thumb" onclick="travauxUI.ouvrirFichier('${f.id}')">
+                    <div class="travaux-grille-thumb" onclick="travauxUI.ouvrirPreviewInline('${f.id}')">
                         ${thumb ? `<img src="${thumb}" alt="">` : `<span class="travaux-grille-icone">${icone}</span>`}
                         ${badge}
                     </div>
@@ -982,8 +1039,8 @@
      */
     function genererOptionsEtudiants() {
         const etudiants = obtenirDonneesSelonMode(cle('groupeEtudiants'));
-        return etudiants.map(e =>
-            `<option value="${e.da}">${echapperHtml(e.prenom + ' ' + e.nom)}</option>`
+        return [...etudiants].sort((a,b) => (a.nom||'').localeCompare(b.nom||'')).map(e =>
+            `<option value="${e.da}">${echapperHtml(e.nom + ', ' + e.prenom)}</option>`
         ).join('');
     }
 
@@ -1065,7 +1122,8 @@
         afficherImport();
 
         afficherModalePipeline('Import termine',
-            `<p>${resultat.importes} fichier(s) importe(s)${resultat.erreurs > 0 ? `, ${resultat.erreurs} erreur(s)` : ''}.</p>`,
+            `<p>${resultat.importes} fichier(s) importe(s)${resultat.erreurs > 0 ? `, ${resultat.erreurs} erreur(s)` : ''}.</p>
+            <p class="pipeline-message-succes">Ces documents sont prets pour l'annotation et l'evaluation.</p>`,
             [{ label: 'OK', classe: 'btn-principal', action: () => {} }]);
     }
 
@@ -1959,6 +2017,158 @@
     window.rafraichirPipelineUI = rafraichirPipelineUI;
 
     /* ===============================
+       PREVIEW INLINE (Apercu dans la page)
+       =============================== */
+
+    /**
+     * Ouvre un apercu inline d'un fichier importe (avant la grille)
+     * @param {string} fichierId - ID du fichier
+     */
+    async function ouvrirPreviewInline(fichierId) {
+        try {
+            const blob = await travauxStockage.recupererBlob(fichierId);
+            if (!blob) {
+                console.warn('[Travaux-UI] Blob introuvable pour preview:', fichierId);
+                return;
+            }
+
+            const fichier = travauxStockage.obtenirFichierParId(fichierId);
+            const estPDF = fichier && fichier.typeMIME === 'application/pdf';
+
+            // Etat du preview
+            const state = {
+                fichierId: fichierId,
+                blob: blob,
+                estPDF: estPDF,
+                pageActuelle: 1,
+                totalPages: 1,
+                pdfDoc: null
+            };
+
+            if (estPDF && typeof pdfjsLib !== 'undefined') {
+                const arrayBuffer = await blob.arrayBuffer();
+                state.pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                state.totalPages = state.pdfDoc.numPages;
+            }
+
+            window._previewInlineState = state;
+
+            // Creer ou reutiliser le conteneur preview
+            let previewDiv = document.getElementById('pipeline-preview-inline');
+            if (!previewDiv) {
+                previewDiv = document.createElement('div');
+                previewDiv.id = 'pipeline-preview-inline';
+                previewDiv.className = 'pipeline-preview-inline';
+                // Inserer avant la section fichiers importes
+                const sectionImportes = document.querySelector('.pipeline-section-importes');
+                if (sectionImportes) {
+                    sectionImportes.parentElement.insertBefore(previewDiv, sectionImportes);
+                } else {
+                    const page = document.querySelector('.pipeline-page');
+                    if (page) page.appendChild(previewDiv);
+                }
+            }
+
+            const nomFichier = fichier ? fichier.nomFichier : fichierId;
+
+            previewDiv.innerHTML = `
+                <div class="pipeline-preview-header">
+                    <strong>${echapperHtml(nomFichier)}</strong>
+                    <div>
+                        <button class="btn btn-petit" onclick="travauxUI.ouvrirFichier('${fichierId}')">Ouvrir dans la visionneuse</button>
+                        <button class="btn btn-petit btn-secondaire" onclick="travauxUI.fermerPreviewInline()">Fermer</button>
+                    </div>
+                </div>
+                <div class="pipeline-preview-canvas-container">
+                    <canvas id="pipeline-preview-canvas"></canvas>
+                </div>
+                ${state.totalPages > 1 ? `
+                <div class="pipeline-preview-nav">
+                    <button class="btn btn-petit" onclick="travauxUI.previewPagePrec()" id="pipeline-prev-btn">&#x2190; Precedente</button>
+                    <span id="pipeline-preview-page-info">Page 1 / ${state.totalPages}</span>
+                    <button class="btn btn-petit" onclick="travauxUI.previewPageSuiv()" id="pipeline-next-btn">Suivante &#x2192;</button>
+                </div>` : ''}
+            `;
+
+            // Rendre la premiere page
+            await rendrePagePreview(state);
+
+        } catch (e) {
+            console.error('[Travaux-UI] Erreur preview inline:', e);
+        }
+    }
+
+    /**
+     * Rend la page courante du preview inline
+     * @param {Object} state - Etat du preview
+     */
+    async function rendrePagePreview(state) {
+        const canvas = document.getElementById('pipeline-preview-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        if (state.estPDF && state.pdfDoc) {
+            const page = await state.pdfDoc.getPage(state.pageActuelle);
+            const viewport = page.getViewport({ scale: 1.2 });
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+        } else {
+            // Image
+            const img = new Image();
+            const url = URL.createObjectURL(state.blob);
+            await new Promise((resolve, reject) => {
+                img.onload = resolve;
+                img.onerror = reject;
+                img.src = url;
+            });
+            canvas.width = Math.min(img.naturalWidth, 800);
+            canvas.height = Math.round(img.naturalHeight * (canvas.width / img.naturalWidth));
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            URL.revokeObjectURL(url);
+        }
+
+        // Mettre a jour l'info de page
+        const pageInfo = document.getElementById('pipeline-preview-page-info');
+        if (pageInfo) pageInfo.textContent = `Page ${state.pageActuelle} / ${state.totalPages}`;
+
+        // Activer/desactiver boutons
+        const prevBtn = document.getElementById('pipeline-prev-btn');
+        const nextBtn = document.getElementById('pipeline-next-btn');
+        if (prevBtn) prevBtn.disabled = state.pageActuelle <= 1;
+        if (nextBtn) nextBtn.disabled = state.pageActuelle >= state.totalPages;
+    }
+
+    /**
+     * Page precedente du preview inline
+     */
+    function previewPagePrec() {
+        const state = window._previewInlineState;
+        if (!state || state.pageActuelle <= 1) return;
+        state.pageActuelle--;
+        rendrePagePreview(state);
+    }
+
+    /**
+     * Page suivante du preview inline
+     */
+    function previewPageSuiv() {
+        const state = window._previewInlineState;
+        if (!state || state.pageActuelle >= state.totalPages) return;
+        state.pageActuelle++;
+        rendrePagePreview(state);
+    }
+
+    /**
+     * Ferme le preview inline
+     */
+    function fermerPreviewInline() {
+        const previewDiv = document.getElementById('pipeline-preview-inline');
+        if (previewDiv) previewDiv.remove();
+        window._previewInlineState = null;
+    }
+
+    /* ===============================
        EXPORTS GLOBAUX
        =============================== */
 
@@ -1983,6 +2193,8 @@
         associerEtudiantPipeline: associerEtudiantPipeline,
         associerProductionPipeline: associerProductionPipeline,
         identifierAutoPipeline: identifierAutoPipeline,
+        changerProductionGlobalePipeline: changerProductionGlobalePipeline,
+        togglePipelineEtapes: togglePipelineEtapes,
         rafraichirPipelineUI: rafraichirPipelineUI,
         // Archivage
         lancerArchivageEtudiant: lancerArchivageEtudiant,
@@ -2004,6 +2216,11 @@
         reimporterFichier: reimporterFichier,
         // Association production
         changerProductionFichier: changerProductionFichier,
+        // Preview inline
+        ouvrirPreviewInline: ouvrirPreviewInline,
+        previewPagePrec: previewPagePrec,
+        previewPageSuiv: previewPageSuiv,
+        fermerPreviewInline: fermerPreviewInline,
         // Rafraichissement
         rafraichirUI: rafraichirUI
     };
