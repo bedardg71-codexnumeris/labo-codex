@@ -14167,6 +14167,32 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     justify-content: center;
 }
 
+/* Selecteur remplissage perspective */
+.prep-option-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 4px;
+}
+.prep-option-label {
+    font-size: 0.7rem;
+    color: var(--texte-muted);
+    white-space: nowrap;
+}
+.prep-select {
+    flex: 1;
+    padding: 2px 4px;
+    border: 1px solid rgba(106, 172, 184, 0.3);
+    border-radius: 4px;
+    background: var(--surface-section, #142428);
+    color: var(--texte-principal);
+    font-size: 0.7rem;
+}
+body.mode-clair .prep-select {
+    background: #ffffff;
+    border-color: rgba(3, 46, 92, 0.15);
+}
+
 /* Bouton flottant sur le canevas */
 .prep-btn-canvas {
     position: absolute;

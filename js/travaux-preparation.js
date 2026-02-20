@@ -60,6 +60,7 @@
     let poigneeActive = -1;           // Index de la poignee draggee (-1 = aucune)
     let cropDragState = null;         // Etat du drag pour le crop
     let perspectiveMarge = PERSPECTIVE_MARGE_MIN;  // Marge dynamique perspective
+    let perspectiveFill = 'white';  // 'none' | 'white' | 'auto'
 
     // Assemblage multi-pages
     let selections = new Set();       // Indices des fichiers selectionnes pour grouper
@@ -456,7 +457,7 @@
             }
 
             case 'perspective': {
-                return appliquerPerspectiveMesh(source, op.corners);
+                return appliquerPerspectiveMesh(source, op.corners, op.fill);
             }
 
             case 'whiteBalance': {
@@ -491,13 +492,20 @@
      * @param {Array} corners - [{x,y}, {x,y}, {x,y}, {x,y}] en fractions 0-1 (TL, TR, BR, BL)
      * @returns {HTMLCanvasElement} Canvas avec perspective corrigee
      */
-    function appliquerPerspectiveMesh(source, corners) {
+    function appliquerPerspectiveMesh(source, corners, fill) {
         const w = source.width;
         const h = source.height;
         const result = document.createElement('canvas');
         result.width = w;
         result.height = h;
         const ctx = result.getContext('2d');
+
+        // Pre-remplissage du fond
+        if (fill && fill !== 'none') {
+            const fillColor = fill === 'auto' ? echantillonnerCouleurPage(source) : fill;
+            ctx.fillStyle = fillColor;
+            ctx.fillRect(0, 0, w, h);
+        }
 
         // Coins source en pixels
         const c = corners.map(p => ({ x: p.x * w, y: p.y * h }));
@@ -608,7 +616,7 @@
         // Appliquer les operations
         for (const op of fichierData.operations) {
             if (op.type === 'perspective') {
-                canvas = await renduPerspectivePixel(canvas, op.corners);
+                canvas = await renduPerspectivePixel(canvas, op.corners, op.fill);
             } else if (op.type === 'whiteBalance') {
                 const imgData = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
                 const d = imgData.data;
@@ -651,7 +659,7 @@
      * @param {Array} corners - 4 coins en fractions 0-1
      * @returns {Promise<HTMLCanvasElement>}
      */
-    function renduPerspectivePixel(source, corners) {
+    function renduPerspectivePixel(source, corners, fill) {
         return new Promise(resolve => {
             const w = source.width;
             const h = source.height;
@@ -663,6 +671,21 @@
             result.height = h;
             const dstData = result.getContext('2d').createImageData(w, h);
             const dstPixels = dstData.data;
+
+            // Pre-remplissage des pixels
+            if (fill && fill !== 'none') {
+                const fillColor = fill === 'auto' ? echantillonnerCouleurPage(source) : fill;
+                const tmp = document.createElement('canvas');
+                tmp.width = 1; tmp.height = 1;
+                const tmpCtx = tmp.getContext('2d');
+                tmpCtx.fillStyle = fillColor;
+                tmpCtx.fillRect(0, 0, 1, 1);
+                const [fr, fg, fb] = tmpCtx.getImageData(0, 0, 1, 1).data;
+                for (let i = 0; i < dstPixels.length; i += 4) {
+                    dstPixels[i] = fr; dstPixels[i+1] = fg;
+                    dstPixels[i+2] = fb; dstPixels[i+3] = 255;
+                }
+            }
 
             const c = corners.map(p => ({ x: p.x * w, y: p.y * h }));
             let pixelIndex = 0;
@@ -1807,10 +1830,31 @@
         if (!perspectiveCorners) return;
         ajouterOperation({
             type: 'perspective',
-            corners: perspectiveCorners.map(p => ({ ...p }))
+            corners: perspectiveCorners.map(p => ({ ...p })),
+            fill: perspectiveFill
         });
         outilActif = null;
         perspectiveCorners = null;
+    }
+
+    function changerRemplissagePerspective(value) {
+        perspectiveFill = value;
+    }
+
+    function echantillonnerCouleurPage(source) {
+        const ctx = source.getContext('2d');
+        const w = source.width, h = source.height;
+        const points = [
+            [2, 2], [w - 3, 2], [2, h - 3], [w - 3, h - 3],
+            [Math.floor(w/2), 2], [2, Math.floor(h/2)]
+        ];
+        let r = 0, g = 0, b = 0, n = 0;
+        for (const [px, py] of points) {
+            const d = ctx.getImageData(px, py, 1, 1).data;
+            if (d[3] > 128) { r += d[0]; g += d[1]; b += d[2]; n++; }
+        }
+        if (n === 0) return '#ffffff';
+        return `rgb(${Math.round(r/n)},${Math.round(g/n)},${Math.round(b/n)})`;
     }
 
     function changerLuminosite(value) {
@@ -2159,6 +2203,15 @@
                                         <button class="prep-btn" onclick="travauxPreparation.activerCrop()">Recadrage</button>
                                         <button class="prep-btn" onclick="travauxPreparation.activerPerspective()">Perspective</button>
                                     </div>
+                                    <div class="prep-option-row" id="prep-persp-fill-row" style="display:none;">
+                                        <label class="prep-option-label">Remplissage</label>
+                                        <select id="prep-persp-fill" class="prep-select"
+                                                onchange="travauxPreparation.changerRemplissagePerspective(this.value)">
+                                            <option value="none">Aucun (transparent)</option>
+                                            <option value="white" selected>Blanc</option>
+                                            <option value="auto">Auto (couleur de page)</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
 
@@ -2222,6 +2275,9 @@
         const btnPersp = document.getElementById('prep-btn-appliquer-persp');
         if (btnCrop) btnCrop.style.display = outilActif === 'crop' ? 'block' : 'none';
         if (btnPersp) btnPersp.style.display = outilActif === 'perspective' ? 'block' : 'none';
+
+        const fillRow = document.getElementById('prep-persp-fill-row');
+        if (fillRow) fillRow.style.display = outilActif === 'perspective' ? 'flex' : 'none';
 
         // Feedback visuel balance des blancs
         const btnBalance = document.getElementById('prep-btn-balance');
@@ -2414,6 +2470,7 @@
         appliquerCrop: appliquerCrop,
         activerPerspective: activerPerspective,
         appliquerPerspective: appliquerPerspective,
+        changerRemplissagePerspective: changerRemplissagePerspective,
         changerLuminosite: changerLuminosite,
         changerContraste: changerContraste,
         changerExposition: changerExposition,
