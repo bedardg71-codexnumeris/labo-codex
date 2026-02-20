@@ -14730,38 +14730,71 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     background: var(--gris-tres-pale);
 }
 
-/* --- Preview inline pipeline --- */
-.pipeline-preview-inline {
-    margin: 12px 0;
-    padding: 16px;
-    border: 1px solid var(--bordure-claire);
-    border-radius: var(--radius-grand);
-    background: var(--gris-tres-pale);
-}
-
-.pipeline-preview-header {
+/* --- Preview Quick Look (overlay style macOS) --- */
+.preview-quicklook-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.75);
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
-}
-
-.pipeline-preview-canvas-container {
-    text-align: center;
-    overflow: auto;
-    max-height: 500px;
-}
-
-.pipeline-preview-canvas-container canvas {
-    max-width: 100%;
-}
-
-.pipeline-preview-nav {
-    display: flex;
     justify-content: center;
+    cursor: pointer;
+}
+
+.preview-quicklook-contenu {
+    position: relative;
+    cursor: default;
+    display: flex;
     align-items: center;
-    gap: 12px;
-    margin-top: 10px;
+    justify-content: center;
+}
+
+.preview-quicklook-contenu canvas {
+    max-width: 85vw;
+    max-height: 85vh;
+    border-radius: var(--radius-grand);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+}
+
+.preview-quicklook-fleche {
+    position: absolute;
+    bottom: 24px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.25);
+    color: #fff;
+    font-size: 1.4rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: background 0.15s;
+}
+
+.preview-quicklook-fleche:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+.preview-quicklook-prec {
+    left: calc(50% - 80px);
+}
+
+.preview-quicklook-suiv {
+    left: calc(50% + 24px);
+}
+
+.preview-quicklook-page {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.8rem;
 }
 
 /* --- Bouton toggle sidebar (visible quand sidebar repliee) --- */

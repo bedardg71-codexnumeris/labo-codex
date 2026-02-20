@@ -539,11 +539,9 @@
             const nomCourt = f.parseLea.nom
                 ? f.parseLea.nom.substring(0, 10)
                 : f.nomFichier.substring(0, 10);
-            const redeposez = f.fichier === null ? '<span class="texte-muted" style="font-size:0.65rem;">(re-deposez)</span>' : '';
             html += `<div class="pipeline-preview-mini" title="${echapperHtml(f.nomFichier)}">
                 ${thumb ? `<img src="${thumb}" alt="">` : `<span style="font-size:1.5rem">${icone}</span>`}
                 <span class="pipeline-mini-nom">${echapperHtml(nomCourt)}</span>
-                ${redeposez}
             </div>`;
         });
         html += '</div>';
@@ -2021,7 +2019,7 @@
        =============================== */
 
     /**
-     * Ouvre un apercu inline d'un fichier importe (avant la grille)
+     * Ouvre un apercu Quick Look (overlay plein ecran, style macOS)
      * @param {string} fichierId - ID du fichier
      */
     async function ouvrirPreviewInline(fichierId) {
@@ -2035,7 +2033,6 @@
             const fichier = travauxStockage.obtenirFichierParId(fichierId);
             const estPDF = fichier && fichier.typeMIME === 'application/pdf';
 
-            // Etat du preview
             const state = {
                 fichierId: fichierId,
                 blob: blob,
@@ -2053,44 +2050,39 @@
 
             window._previewInlineState = state;
 
-            // Creer ou reutiliser le conteneur preview
-            let previewDiv = document.getElementById('pipeline-preview-inline');
-            if (!previewDiv) {
-                previewDiv = document.createElement('div');
-                previewDiv.id = 'pipeline-preview-inline';
-                previewDiv.className = 'pipeline-preview-inline';
-                // Inserer avant la section fichiers importes
-                const sectionImportes = document.querySelector('.pipeline-section-importes');
-                if (sectionImportes) {
-                    sectionImportes.parentElement.insertBefore(previewDiv, sectionImportes);
-                } else {
-                    const page = document.querySelector('.pipeline-page');
-                    if (page) page.appendChild(previewDiv);
-                }
-            }
+            // Retirer un overlay existant
+            fermerPreviewInline();
 
-            const nomFichier = fichier ? fichier.nomFichier : fichierId;
+            const overlay = document.createElement('div');
+            overlay.id = 'pipeline-preview-overlay';
+            overlay.className = 'preview-quicklook-overlay';
 
-            previewDiv.innerHTML = `
-                <div class="pipeline-preview-header">
-                    <strong>${echapperHtml(nomFichier)}</strong>
-                    <div>
-                        <button class="btn btn-petit" onclick="travauxUI.ouvrirFichier('${fichierId}')">Ouvrir dans la visionneuse</button>
-                        <button class="btn btn-petit btn-secondaire" onclick="travauxUI.fermerPreviewInline()">Fermer</button>
-                    </div>
-                </div>
-                <div class="pipeline-preview-canvas-container">
+            // Fermer en cliquant le fond
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) fermerPreviewInline();
+            });
+
+            overlay.innerHTML = `
+                <div class="preview-quicklook-contenu">
                     <canvas id="pipeline-preview-canvas"></canvas>
+                    ${state.totalPages > 1 ? `
+                    <button class="preview-quicklook-fleche preview-quicklook-prec" id="pipeline-prev-btn" onclick="travauxUI.previewPagePrec()">&#x25C0;</button>
+                    <button class="preview-quicklook-fleche preview-quicklook-suiv" id="pipeline-next-btn" onclick="travauxUI.previewPageSuiv()">&#x25B6;</button>
+                    <span class="preview-quicklook-page" id="pipeline-preview-page-info">1 / ${state.totalPages}</span>
+                    ` : ''}
                 </div>
-                ${state.totalPages > 1 ? `
-                <div class="pipeline-preview-nav">
-                    <button class="btn btn-petit" onclick="travauxUI.previewPagePrec()" id="pipeline-prev-btn">&#x2190; Precedente</button>
-                    <span id="pipeline-preview-page-info">Page 1 / ${state.totalPages}</span>
-                    <button class="btn btn-petit" onclick="travauxUI.previewPageSuiv()" id="pipeline-next-btn">Suivante &#x2192;</button>
-                </div>` : ''}
             `;
 
-            // Rendre la premiere page
+            document.body.appendChild(overlay);
+
+            // Fermer avec Echap
+            overlay._onKeyDown = (e) => {
+                if (e.key === 'Escape') fermerPreviewInline();
+                if (e.key === 'ArrowLeft') previewPagePrec();
+                if (e.key === 'ArrowRight') previewPageSuiv();
+            };
+            document.addEventListener('keydown', overlay._onKeyDown);
+
             await rendrePagePreview(state);
 
         } catch (e) {
@@ -2099,8 +2091,7 @@
     }
 
     /**
-     * Rend la page courante du preview inline
-     * @param {Object} state - Etat du preview
+     * Rend la page courante du preview Quick Look
      */
     async function rendrePagePreview(state) {
         const canvas = document.getElementById('pipeline-preview-canvas');
@@ -2109,12 +2100,12 @@
 
         if (state.estPDF && state.pdfDoc) {
             const page = await state.pdfDoc.getPage(state.pageActuelle);
-            const viewport = page.getViewport({ scale: 1.2 });
+            const scale = Math.min(1.5, (window.innerHeight * 0.85) / page.getViewport({ scale: 1 }).height);
+            const viewport = page.getViewport({ scale: scale });
             canvas.width = viewport.width;
             canvas.height = viewport.height;
             await page.render({ canvasContext: ctx, viewport: viewport }).promise;
         } else {
-            // Image
             const img = new Image();
             const url = URL.createObjectURL(state.blob);
             await new Promise((resolve, reject) => {
@@ -2122,25 +2113,26 @@
                 img.onerror = reject;
                 img.src = url;
             });
-            canvas.width = Math.min(img.naturalWidth, 800);
-            canvas.height = Math.round(img.naturalHeight * (canvas.width / img.naturalWidth));
+            const maxH = window.innerHeight * 0.85;
+            const maxW = window.innerWidth * 0.85;
+            const ratio = Math.min(maxW / img.naturalWidth, maxH / img.naturalHeight, 1);
+            canvas.width = Math.round(img.naturalWidth * ratio);
+            canvas.height = Math.round(img.naturalHeight * ratio);
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
             URL.revokeObjectURL(url);
         }
 
-        // Mettre a jour l'info de page
         const pageInfo = document.getElementById('pipeline-preview-page-info');
-        if (pageInfo) pageInfo.textContent = `Page ${state.pageActuelle} / ${state.totalPages}`;
+        if (pageInfo) pageInfo.textContent = `${state.pageActuelle} / ${state.totalPages}`;
 
-        // Activer/desactiver boutons
         const prevBtn = document.getElementById('pipeline-prev-btn');
         const nextBtn = document.getElementById('pipeline-next-btn');
-        if (prevBtn) prevBtn.disabled = state.pageActuelle <= 1;
-        if (nextBtn) nextBtn.disabled = state.pageActuelle >= state.totalPages;
+        if (prevBtn) prevBtn.style.opacity = state.pageActuelle <= 1 ? '0.3' : '';
+        if (nextBtn) nextBtn.style.opacity = state.pageActuelle >= state.totalPages ? '0.3' : '';
     }
 
     /**
-     * Page precedente du preview inline
+     * Page precedente
      */
     function previewPagePrec() {
         const state = window._previewInlineState;
@@ -2150,7 +2142,7 @@
     }
 
     /**
-     * Page suivante du preview inline
+     * Page suivante
      */
     function previewPageSuiv() {
         const state = window._previewInlineState;
@@ -2160,11 +2152,14 @@
     }
 
     /**
-     * Ferme le preview inline
+     * Ferme le preview Quick Look
      */
     function fermerPreviewInline() {
-        const previewDiv = document.getElementById('pipeline-preview-inline');
-        if (previewDiv) previewDiv.remove();
+        const overlay = document.getElementById('pipeline-preview-overlay');
+        if (overlay) {
+            if (overlay._onKeyDown) document.removeEventListener('keydown', overlay._onKeyDown);
+            overlay.remove();
+        }
         window._previewInlineState = null;
     }
 
