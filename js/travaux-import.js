@@ -330,6 +330,7 @@
             }
         }
 
+        persisterFileDAttente();
         return acceptes;
     }
 
@@ -453,6 +454,7 @@
      */
     function viderFileDAttente() {
         fichiersEnAttente = [];
+        persisterFileDAttente();
     }
 
     /**
@@ -461,6 +463,76 @@
      */
     function obtenirFileDAttente() {
         return fichiersEnAttente;
+    }
+
+    /* ===============================
+       PERSISTANCE SESSIONSTORE
+       =============================== */
+
+    /**
+     * Persiste les metadonnees de la file d'attente dans sessionStorage.
+     * Les blobs File ne sont pas serialisables — on ne garde que les metadonnees.
+     */
+    function persisterFileDAttente() {
+        try {
+            const cleSession = 'pipeline_queue_' + (typeof cle === 'function' ? cle('') : 'default');
+            const donnees = fichiersEnAttente.map(f => ({
+                nomFichier: f.nomFichier,
+                typeMIME: f.typeMIME,
+                tailleFichier: f.tailleFichier,
+                daDetecte: f.daDetecte,
+                etudiantDA: f.etudiantDA,
+                estPDF: f.estPDF,
+                estImage: f.estImage,
+                statut: f.statut,
+                parseLea: f.parseLea,
+                pipelineStatut: f.pipelineStatut,
+                groupeDocumentId: f.groupeDocumentId,
+                thumbnailDataUrl: f.thumbnailDataUrl,
+                productionId: f.productionId
+            }));
+            sessionStorage.setItem(cleSession, JSON.stringify(donnees));
+        } catch (e) {
+            console.warn('[Travaux-Import] Erreur persistance sessionStorage:', e);
+        }
+    }
+
+    /**
+     * Restaure les metadonnees de la file d'attente depuis sessionStorage.
+     * Les fichiers restaures ont fichier=null (blob absent) — l'utilisateur
+     * doit re-deposer le fichier pour le traiter/importer.
+     */
+    function restaurerFileDAttente() {
+        try {
+            const cleSession = 'pipeline_queue_' + (typeof cle === 'function' ? cle('') : 'default');
+            const json = sessionStorage.getItem(cleSession);
+            if (!json) return;
+
+            const donnees = JSON.parse(json);
+            if (!Array.isArray(donnees) || donnees.length === 0) return;
+
+            fichiersEnAttente = donnees.map(d => ({
+                fichier: null,
+                nomFichier: d.nomFichier || '',
+                typeMIME: d.typeMIME || '',
+                tailleFichier: d.tailleFichier || 0,
+                daDetecte: d.daDetecte || '',
+                etudiantAssocie: d.etudiantDA ? trouverEtudiantParDA(d.etudiantDA) : null,
+                etudiantDA: d.etudiantDA || '',
+                estPDF: !!d.estPDF,
+                estImage: !!d.estImage,
+                statut: d.statut || 'en-attente',
+                parseLea: d.parseLea || { nom: '', da: '', nomProduction: '', dateRemise: null, raw: '' },
+                pipelineStatut: d.pipelineStatut || 'apercu',
+                groupeDocumentId: d.groupeDocumentId || '',
+                thumbnailDataUrl: d.thumbnailDataUrl || null,
+                productionId: d.productionId || ''
+            }));
+
+            console.log(`[Travaux-Import] File restauree: ${fichiersEnAttente.length} fichier(s) (blobs absents)`);
+        } catch (e) {
+            console.warn('[Travaux-Import] Erreur restauration sessionStorage:', e);
+        }
     }
 
     /* ===============================
@@ -493,6 +565,7 @@
         } else if (fichierPrepare.estImage) {
             fichierPrepare.pipelineStatut = 'a-optimiser';
         }
+        persisterFileDAttente();
     }
 
     /**
@@ -511,6 +584,7 @@
         } catch (e) {
             console.warn('[Travaux-Import] Erreur thumbnail queue:', e);
         }
+        persisterFileDAttente();
         // Rafraichir l'UI pipeline
         if (typeof window.rafraichirPipelineUI === 'function') {
             window.rafraichirPipelineUI();
@@ -723,6 +797,7 @@
     function retirerFichier(index) {
         if (index >= 0 && index < fichiersEnAttente.length) {
             fichiersEnAttente.splice(index, 1);
+            persisterFileDAttente();
             // Rafraichir l'affichage
             if (typeof window.rafraichirImportTravaux === 'function') {
                 window.rafraichirImportTravaux();
@@ -819,6 +894,12 @@
 
         input.click();
     }
+
+    /* ===============================
+       INITIALISATION : RESTAURER LA FILE
+       =============================== */
+
+    restaurerFileDAttente();
 
     /* ===============================
        EXPORTS GLOBAUX

@@ -95,13 +95,6 @@
         moduleInitialise = true;
         console.log('[Travaux-UI] Module Travaux initialise');
 
-        // Renommer l'onglet "Importer et preparer" → "Preparer et importer"
-        document.querySelectorAll('.sous-nav a, .sous-nav button, [data-sous-section]').forEach(el => {
-            if (el.textContent.trim() === 'Importer et préparer') {
-                el.textContent = 'Préparer et importer';
-            }
-        });
-
         rafraichirUI();
     }
 
@@ -293,7 +286,7 @@
             conteneur.innerHTML = `
                 <div class="conteneur">
                     <h2>Annoter et évaluer</h2>
-                    <p class="text-muted">Aucun fichier importé. Importez des travaux depuis l'onglet « Importer et préparer ».</p>
+                    <p class="text-muted">Aucun fichier importé. Importez des travaux depuis l'onglet « Préparer et importer ».</p>
                 </div>`;
             return;
         }
@@ -506,9 +499,11 @@
             const nomCourt = f.parseLea.nom
                 ? f.parseLea.nom.substring(0, 10)
                 : f.nomFichier.substring(0, 10);
+            const redeposez = f.fichier === null ? '<span class="texte-muted" style="font-size:0.65rem;">(re-deposez)</span>' : '';
             html += `<div class="pipeline-preview-mini" title="${echapperHtml(f.nomFichier)}">
                 ${thumb ? `<img src="${thumb}" alt="">` : `<span style="font-size:1.5rem">${icone}</span>`}
                 <span class="pipeline-mini-nom">${echapperHtml(nomCourt)}</span>
+                ${redeposez}
             </div>`;
         });
         html += '</div>';
