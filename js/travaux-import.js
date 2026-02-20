@@ -682,11 +682,16 @@
         });
 
         // Support clic pour ouvrir le selecteur
+        // L'input doit etre dans le DOM pour que Safari declenche le change event
         zone.addEventListener('click', () => {
             const input = document.createElement('input');
             input.type = 'file';
             input.multiple = true;
             input.accept = EXTENSIONS_ACCEPTEES.join(',');
+            input.style.position = 'absolute';
+            input.style.opacity = '0';
+            input.style.pointerEvents = 'none';
+            document.body.appendChild(input);
 
             input.addEventListener('change', () => {
                 if (input.files.length > 0) {
@@ -695,6 +700,7 @@
                         onFichiersAjoutes(prepares);
                     }
                 }
+                input.remove();
             });
 
             input.click();
