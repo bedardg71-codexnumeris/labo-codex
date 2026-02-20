@@ -528,7 +528,9 @@
             return;
         }
 
-        if (!f.thumbnailDataUrl) {
+        // Utiliser le blob original pour une preview de qualite
+        const source = f.fichier || null;
+        if (!source && !f.thumbnailDataUrl) {
             conteneur.innerHTML = '<span style="font-size:1.5rem">&#x1F5BC;</span>';
             return;
         }
@@ -538,10 +540,18 @@
             await new Promise((resolve, reject) => {
                 img.onload = resolve;
                 img.onerror = reject;
-                img.src = f.thumbnailDataUrl;
+                if (source) {
+                    const url = URL.createObjectURL(source);
+                    img._blobUrl = url;
+                    img.src = url;
+                } else {
+                    img.src = f.thumbnailDataUrl;
+                }
             });
+            if (img._blobUrl) URL.revokeObjectURL(img._blobUrl);
 
-            const maxPreviewW = 200;
+            // Preview a 400px max pour une bonne nettete
+            const maxPreviewW = 400;
             const scale = Math.min(1, maxPreviewW / img.width);
             const cw = Math.round(img.width * scale);
             const ch = Math.round(img.height * scale);
@@ -594,7 +604,7 @@
             }
 
             const imgResult = document.createElement('img');
-            imgResult.src = canvas.toDataURL('image/jpeg', 0.8);
+            imgResult.src = canvas.toDataURL('image/jpeg', 0.92);
             imgResult.style.maxWidth = '100%';
             imgResult.style.maxHeight = '100%';
             imgResult.style.objectFit = 'contain';
@@ -648,6 +658,10 @@
      */
     function genererEtape2Colonnes(queue, groupes) {
         const nbImages = queue.filter(f => f.estImage).length;
+        const productions = obtenirDonneesSelonMode(cle('productions'));
+
+        // Production globale actuelle (prendre celle du premier fichier qui en a une)
+        const prodActuelle = queue.find(f => f.productionId)?.productionId || '';
 
         // === Colonne gauche : Originaux ===
         let colGauche = '<div class="pipeline-col-originaux">';
@@ -684,6 +698,14 @@
         colCentre += `<li><label><input type="checkbox" id="pipeline-opt-doublons" checked> Détection doublons (manuel)</label></li>`;
         colCentre += `<li><label><input type="checkbox" id="pipeline-opt-assemblage" checked> Assemblage automatique (par nom / production)</label></li>`;
         colCentre += '</ul>';
+
+        colCentre += `<div style="margin:8px 0">
+            <label style="font-size:0.8rem;color:var(--texte-secondaire)">Production</label>
+            <select class="form-select" id="pipeline-select-production" onchange="travauxUI.associerProductionGlobale(this.value)" style="font-size:0.8rem;margin-top:4px">
+                <option value="">-- Choisir une production --</option>
+                ${productions.map(p => `<option value="${p.id}" ${prodActuelle === p.id ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
+            </select>
+        </div>`;
 
         colCentre += `<div class="texte-muted" style="margin:8px 0;font-size:0.8rem">${nbImages} image(s)</div>`;
 
@@ -809,6 +831,19 @@
             queue[index].pipelineStatut = 'pret';
         }
 
+        rafraichirPipelineUI();
+    }
+
+    /**
+     * Associe une production a tous les fichiers de la queue
+     * @param {string} productionId - ID de la production
+     */
+    function associerProductionGlobale(productionId) {
+        const queue = travauxImport.obtenirFileDAttente();
+        queue.forEach(f => {
+            f.productionId = productionId;
+        });
+        identifierAutoPipeline();
         rafraichirPipelineUI();
     }
 
@@ -2211,6 +2246,7 @@
         mettreAJourPreviewsPipeline: mettreAJourPreviewsPipeline,
         associerEtudiantPipeline: associerEtudiantPipeline,
         associerProductionPipeline: associerProductionPipeline,
+        associerProductionGlobale: associerProductionGlobale,
         identifierAutoPipeline: identifierAutoPipeline,
         rafraichirPipelineUI: rafraichirPipelineUI,
         // Archivage
