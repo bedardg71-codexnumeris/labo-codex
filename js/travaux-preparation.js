@@ -58,9 +58,6 @@
     let poigneeActive = -1;           // Index de la poignee draggee (-1 = aucune)
     let cropDragState = null;         // Etat du drag pour le crop
 
-    // Mode palette (simple / etendu)
-    let paletteMode = 'simple';
-
     // Assemblage multi-pages
     let selections = new Set();       // Indices des fichiers selectionnes pour grouper
     let documentGroups = new Map();   // Map<groupId, [indices]>
@@ -2073,81 +2070,81 @@
                 <div class="prep-workspace">
                     <canvas id="prep-canvas-apercu" style="max-width:90%; max-height:90%;"></canvas>
 
-                    <!-- Palette Outils (flottante, draggable) -->
-                    <div class="prep-palette" id="prep-palette-outils" style="top:12px; left:12px;">
+                    <!-- Palette Reglages specifiques (flottante, draggable) -->
+                    <div class="prep-palette prep-palette-etendu" id="prep-palette-outils" style="top:12px; left:12px;">
                         <div class="prep-palette-barre" data-drag="prep-palette-outils">
-                            <span class="prep-palette-titre">Outils</span>
-                            <button class="prep-palette-toggle" id="prep-mode-toggle" onclick="travauxPreparation.basculerModePalette()">+</button>
+                            <span class="prep-palette-titre">Réglages spécifiques</span>
+                            <button class="prep-palette-toggle" onclick="travauxPreparation.togglePalette('outils')">&#x2212;</button>
                         </div>
                         <div class="prep-palette-contenu">
 
-                            <!-- Mode simple : rotation 90 + balance blancs -->
-                            <div class="prep-mode-simple">
-                                <div class="prep-btn-row">
-                                    <button class="prep-btn" onclick="travauxPreparation.rotation90CCW()" title="90 anti-horaire">&#x21BA; 90°</button>
-                                    <button class="prep-btn" onclick="travauxPreparation.rotation90CW()" title="90 horaire">&#x21BB; 90°</button>
+                            <!-- Section Fichiers (en haut) -->
+                            <div class="prep-section" id="prep-section-fichiers">
+                                <div class="prep-section-label" onclick="travauxPreparation.toggleSection('fichiers')">
+                                    <span class="prep-chevron">&#x25BE;</span> Fichiers
                                 </div>
-                                <button class="prep-btn" id="prep-btn-balance-simple" onclick="travauxPreparation.activerBalanceBlancs()" style="width:100%;">Balance des blancs</button>
+                                <div class="prep-section-body">
+                                    <div id="prep-miniatures" class="prep-mini-liste"></div>
+                                    <button class="prep-btn" onclick="travauxPreparation.grouperSelection()" id="prep-btn-grouper" style="width:100%; margin-top:4px;">Grouper selection</button>
+                                    <button class="prep-btn" onclick="travauxPreparation.assemblerAuto()" style="width:100%; margin-top:2px;">Assemblage auto</button>
+                                </div>
                             </div>
 
-                            <!-- Mode etendu : tous les outils -->
-                            <div class="prep-mode-etendu">
-                                <!-- Section Rotation complete -->
-                                <div class="prep-section" id="prep-section-rotation">
-                                    <div class="prep-section-label" onclick="travauxPreparation.toggleSection('rotation')">
-                                        <span class="prep-chevron">&#x25BE;</span> Rotation
+                            <!-- Section Rotation -->
+                            <div class="prep-section" id="prep-section-rotation">
+                                <div class="prep-section-label" onclick="travauxPreparation.toggleSection('rotation')">
+                                    <span class="prep-chevron">&#x25BE;</span> Rotation
+                                </div>
+                                <div class="prep-section-body">
+                                    <div class="prep-btn-row">
+                                        <button class="prep-btn" onclick="travauxPreparation.rotation90CCW()" title="90 anti-horaire">&#x21BA; 90°</button>
+                                        <button class="prep-btn" onclick="travauxPreparation.rotation90CW()" title="90 horaire">&#x21BB; 90°</button>
                                     </div>
-                                    <div class="prep-section-body">
-                                        <div class="prep-btn-row">
-                                            <button class="prep-btn" onclick="travauxPreparation.rotation90CCW()" title="90 anti-horaire">&#x21BA; 90°</button>
-                                            <button class="prep-btn" onclick="travauxPreparation.rotation90CW()" title="90 horaire">&#x21BB; 90°</button>
-                                        </div>
-                                        <div class="prep-slider-groupe">
-                                            <label>Fine <span id="prep-rotation-valeur" class="texte-muted">0°</span></label>
-                                            <input type="range" id="prep-rotation-fine" min="${ROTATION_FINE_MIN}" max="${ROTATION_FINE_MAX}" value="0" step="0.5"
-                                                   oninput="travauxPreparation.rotationFine(this.value)">
-                                        </div>
+                                    <div class="prep-slider-groupe">
+                                        <label>Fine <span id="prep-rotation-valeur" class="texte-muted">0°</span></label>
+                                        <input type="range" id="prep-rotation-fine" min="${ROTATION_FINE_MIN}" max="${ROTATION_FINE_MAX}" value="0" step="0.5"
+                                               oninput="travauxPreparation.rotationFine(this.value)">
                                     </div>
                                 </div>
+                            </div>
 
-                                <!-- Section Decoupe -->
-                                <div class="prep-section" id="prep-section-decoupe">
-                                    <div class="prep-section-label" onclick="travauxPreparation.toggleSection('decoupe')">
-                                        <span class="prep-chevron">&#x25BE;</span> Decoupe
-                                    </div>
-                                    <div class="prep-section-body">
-                                        <button class="prep-btn" onclick="travauxPreparation.activerCrop()" style="width:100%;">Recadrage</button>
-                                        <button class="prep-btn prep-btn-appliquer" id="prep-btn-appliquer-crop" onclick="travauxPreparation.appliquerCrop()" style="display:none; width:100%;">Appliquer crop</button>
-                                        <button class="prep-btn" onclick="travauxPreparation.activerPerspective()" style="width:100%;">Perspective</button>
-                                        <button class="prep-btn" onclick="travauxPreparation.detecterCoinsAuto()" style="width:100%;" title="Detecte automatiquement les 4 coins du document">Auto-perspective</button>
-                                        <button class="prep-btn prep-btn-appliquer" id="prep-btn-appliquer-persp" onclick="travauxPreparation.appliquerPerspective()" style="display:none; width:100%;">Appliquer perspective</button>
-                                    </div>
+                            <!-- Section Decoupe -->
+                            <div class="prep-section" id="prep-section-decoupe">
+                                <div class="prep-section-label" onclick="travauxPreparation.toggleSection('decoupe')">
+                                    <span class="prep-chevron">&#x25BE;</span> Decoupe
                                 </div>
+                                <div class="prep-section-body">
+                                    <button class="prep-btn" onclick="travauxPreparation.activerCrop()" style="width:100%;">Recadrage</button>
+                                    <button class="prep-btn prep-btn-appliquer" id="prep-btn-appliquer-crop" onclick="travauxPreparation.appliquerCrop()" style="display:none; width:100%;">Appliquer crop</button>
+                                    <button class="prep-btn" onclick="travauxPreparation.activerPerspective()" style="width:100%;">Perspective</button>
+                                    <button class="prep-btn" onclick="travauxPreparation.detecterCoinsAuto()" style="width:100%;" title="Detecte automatiquement les 4 coins du document">Auto-perspective</button>
+                                    <button class="prep-btn prep-btn-appliquer" id="prep-btn-appliquer-persp" onclick="travauxPreparation.appliquerPerspective()" style="display:none; width:100%;">Appliquer perspective</button>
+                                </div>
+                            </div>
 
-                                <!-- Section Image -->
-                                <div class="prep-section" id="prep-section-image">
-                                    <div class="prep-section-label" onclick="travauxPreparation.toggleSection('image')">
-                                        <span class="prep-chevron">&#x25BE;</span> Image
+                            <!-- Section Image -->
+                            <div class="prep-section" id="prep-section-image">
+                                <div class="prep-section-label" onclick="travauxPreparation.toggleSection('image')">
+                                    <span class="prep-chevron">&#x25BE;</span> Image
+                                </div>
+                                <div class="prep-section-body">
+                                    <div class="prep-slider-groupe">
+                                        <label>Luminosite</label>
+                                        <input type="range" id="prep-luminosite" min="${LUMINOSITE_MIN}" max="${LUMINOSITE_MAX}" value="0"
+                                               oninput="travauxPreparation.changerLuminosite(this.value)">
                                     </div>
-                                    <div class="prep-section-body">
-                                        <div class="prep-slider-groupe">
-                                            <label>Luminosite</label>
-                                            <input type="range" id="prep-luminosite" min="${LUMINOSITE_MIN}" max="${LUMINOSITE_MAX}" value="0"
-                                                   oninput="travauxPreparation.changerLuminosite(this.value)">
-                                        </div>
-                                        <div class="prep-slider-groupe">
-                                            <label>Contraste</label>
-                                            <input type="range" id="prep-contraste" min="${CONTRASTE_MIN}" max="${CONTRASTE_MAX}" value="0"
-                                                   oninput="travauxPreparation.changerContraste(this.value)">
-                                        </div>
-                                        <div class="prep-slider-groupe">
-                                            <label>Exposition <span id="prep-exposition-valeur" class="texte-muted">0</span></label>
-                                            <input type="range" id="prep-exposition" min="${EXPOSITION_MIN}" max="${EXPOSITION_MAX}" value="0" step="1"
-                                                   oninput="travauxPreparation.changerExposition(this.value)">
-                                        </div>
-                                        <button class="prep-btn" id="prep-btn-balance" onclick="travauxPreparation.activerBalanceBlancs()" style="width:100%;">Balance des blancs</button>
-                                        <button class="prep-btn" onclick="travauxPreparation.basculerNiveauxDeGris()" style="width:100%;">Niveaux de gris</button>
+                                    <div class="prep-slider-groupe">
+                                        <label>Contraste</label>
+                                        <input type="range" id="prep-contraste" min="${CONTRASTE_MIN}" max="${CONTRASTE_MAX}" value="0"
+                                               oninput="travauxPreparation.changerContraste(this.value)">
                                     </div>
+                                    <div class="prep-slider-groupe">
+                                        <label>Exposition <span id="prep-exposition-valeur" class="texte-muted">0</span></label>
+                                        <input type="range" id="prep-exposition" min="${EXPOSITION_MIN}" max="${EXPOSITION_MAX}" value="0" step="1"
+                                               oninput="travauxPreparation.changerExposition(this.value)">
+                                    </div>
+                                    <button class="prep-btn" id="prep-btn-balance" onclick="travauxPreparation.activerBalanceBlancs()" style="width:100%;">Balance des blancs</button>
+                                    <button class="prep-btn" onclick="travauxPreparation.basculerNiveauxDeGris()" style="width:100%;">Niveaux de gris</button>
                                 </div>
                             </div>
 
@@ -2155,19 +2152,6 @@
                         <div class="prep-palette-footer">
                             <button class="prep-btn" onclick="travauxPreparation.annulerDerniere()">Annuler</button>
                             <button class="prep-btn" onclick="travauxPreparation.reinitialiser()">Reinit.</button>
-                        </div>
-                    </div>
-
-                    <!-- Palette Fichiers (flottante, draggable) -->
-                    <div class="prep-palette" id="prep-palette-fichiers" style="top:12px; right:12px;">
-                        <div class="prep-palette-barre" data-drag="prep-palette-fichiers">
-                            <span class="prep-palette-titre">Fichiers</span>
-                            <button class="prep-palette-toggle" onclick="travauxPreparation.togglePalette('fichiers')">&#x2212;</button>
-                        </div>
-                        <div class="prep-palette-contenu">
-                            <div id="prep-miniatures" class="prep-mini-liste"></div>
-                            <button class="prep-btn" onclick="travauxPreparation.grouperSelection()" id="prep-btn-grouper" style="width:100%; margin-top:4px;">Grouper selection</button>
-                            <button class="prep-btn" onclick="travauxPreparation.assemblerAuto()" style="width:100%; margin-top:2px;">Assemblage auto</button>
                         </div>
                     </div>
                 </div>
@@ -2230,21 +2214,6 @@
         const section = document.getElementById('prep-section-' + id);
         if (!section) return;
         section.classList.toggle('replie');
-    }
-
-    /**
-     * Bascule la palette entre mode simple et etendu
-     */
-    function basculerModePalette() {
-        paletteMode = paletteMode === 'simple' ? 'etendu' : 'simple';
-        const palette = document.getElementById('prep-palette-outils');
-        if (palette) {
-            palette.classList.toggle('prep-palette-etendu', paletteMode === 'etendu');
-        }
-        const btn = document.getElementById('prep-mode-toggle');
-        if (btn) {
-            btn.textContent = paletteMode === 'etendu' ? '\u2212' : '+';
-        }
     }
 
     /**
@@ -2415,7 +2384,6 @@
         // Palettes
         togglePalette: togglePalette,
         toggleSection: toggleSection,
-        basculerModePalette: basculerModePalette,
         // Batch
         autoBalanceBlancs: autoBalanceBlancs,
         // Etat
