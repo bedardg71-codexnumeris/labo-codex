@@ -435,7 +435,11 @@
             dateModification: new Date().toISOString(),
             source: metadonnees.source || 'import-local',
             importePar: metadonnees.importePar || 'single',
-            blobStatut: 'present'  // Cycle de vie: present → exporte → facsimile
+            blobStatut: 'present',  // Cycle de vie: present → exporte → facsimile
+            // Pipeline metadata
+            nomFichierLea: metadonnees.nomFichierLea || '',
+            leaParsed: metadonnees.leaParsed || null,
+            groupeDocumentId: metadonnees.groupeDocumentId || ''
         };
 
         fichiers.push(fichier);
