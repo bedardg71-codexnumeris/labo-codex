@@ -18623,6 +18623,22 @@ body.mode-clair .barre-etudiant.tracked-4 {
     letter-spacing: 0.03em;
 }
 
+.travaux-badge-supprimer {
+    background: none;
+    border: none;
+    color: var(--texte-secondaire, #a0b0c0);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0 2px;
+    line-height: 1;
+    opacity: 0.6;
+    transition: opacity 0.15s;
+}
+.travaux-badge-supprimer:hover {
+    opacity: 1;
+    color: var(--rouge-danger, #e74c3c);
+}
+
 .travaux-groupe-production-titre {
     margin: 12px 0 8px 0;
     font-size: 0.9rem;
