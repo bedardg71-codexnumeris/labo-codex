@@ -14028,7 +14028,7 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     border-radius: 10px;
     box-shadow: 0 4px 16px rgba(0,0,0,0.15);
     min-width: 190px;
-    max-width: 230px;
+    max-width: 260px;
     user-select: none;
 }
 
@@ -14069,11 +14069,6 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 }
 .prep-palette.replie .prep-palette-contenu { display: none; }
 .prep-palette.replie .prep-palette-footer { display: none; }
-
-/* Mode simple / etendu */
-.prep-mode-etendu { display: none; }
-#prep-palette-outils.prep-palette-etendu .prep-mode-simple { display: none; }
-#prep-palette-outils.prep-palette-etendu .prep-mode-etendu { display: flex; flex-direction: column; gap: 2px; }
 
 /* Sections (dropdowns) */
 .prep-section {
