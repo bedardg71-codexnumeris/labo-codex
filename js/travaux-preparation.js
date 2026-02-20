@@ -2151,7 +2151,9 @@
 
                 <!-- Zone de travail plein ecran -->
                 <div class="prep-workspace">
-                    <canvas id="prep-canvas-apercu" style="max-width:90%; max-height:90%;"></canvas>
+                    <div class="prep-canvas-scroll" id="prep-canvas-scroll">
+                        <canvas id="prep-canvas-apercu"></canvas>
+                    </div>
                     <button class="prep-btn-canvas" id="prep-btn-appliquer-crop"
                             onclick="travauxPreparation.appliquerCrop()"
                             style="display:none;">Confirmer rognage</button>
