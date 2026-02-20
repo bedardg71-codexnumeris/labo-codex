@@ -1183,8 +1183,10 @@
         }
 
         // Afficher visionneuse sous les badges
+        const fichiersDiv = document.getElementById('evaluations-contenu-fichiers');
         const visDiv = document.getElementById('evaluations-contenu-visionneuse');
         const evalDiv = document.getElementById('evaluations-contenu-evaluation');
+        if (fichiersDiv) fichiersDiv.classList.add('compact');
         if (visDiv) visDiv.classList.remove('u-hide');
         if (evalDiv) evalDiv.classList.add('u-hide');
         afficherVisionneuse();
@@ -2067,8 +2069,10 @@
      * Retour a la grille de fichiers depuis la visionneuse (onglet Annoter)
      */
     function retourFichiers() {
+        const fichiersDiv = document.getElementById('evaluations-contenu-fichiers');
         const visDiv = document.getElementById('evaluations-contenu-visionneuse');
         const evalDiv = document.getElementById('evaluations-contenu-evaluation');
+        if (fichiersDiv) fichiersDiv.classList.remove('compact');
         if (visDiv) visDiv.classList.add('u-hide');
         if (evalDiv) evalDiv.classList.add('u-hide');
         // Retirer le highlight actif
