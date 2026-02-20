@@ -679,16 +679,16 @@
         colCentre += '<div class="pipeline-col-titre">Traitement</div>';
 
         colCentre += '<ul class="pipeline-checklist">';
-        colCentre += `<li><label><input type="checkbox" id="pipeline-opt-balance" checked onchange="travauxUI.mettreAJourPreviewsPipeline()"> Optimisation automatique</label></li>`;
+        colCentre += `<li><label><input type="checkbox" id="pipeline-opt-balance" checked onchange="travauxUI.mettreAJourPreviewsPipeline()"> Balance des blancs</label></li>`;
         colCentre += `<li><label><input type="checkbox" id="pipeline-opt-dpi" checked onchange="travauxUI.mettreAJourPreviewsPipeline()"> Uniformisation 200 DPI</label></li>`;
         colCentre += `<li><label><input type="checkbox" id="pipeline-opt-doublons" checked> Détection doublons (manuel)</label></li>`;
-        colCentre += `<li><label><input type="checkbox" id="pipeline-opt-assemblage" checked> Assemblage automatique (par noms / production)</label></li>`;
+        colCentre += `<li><label><input type="checkbox" id="pipeline-opt-assemblage" checked> Assemblage automatique (par nom / production)</label></li>`;
         colCentre += '</ul>';
 
         colCentre += `<div class="texte-muted" style="margin:8px 0;font-size:0.8rem">${nbImages} image(s)</div>`;
 
         colCentre += `<div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
-            <button class="btn btn-secondaire" onclick="travauxUI.ouvrirPreparation()">Optimisation spécifique</button>
+            <button class="btn btn-secondaire" onclick="travauxUI.ouvrirPreparation()">Réglages spécifiques</button>
             <button class="btn btn-principal" onclick="travauxUI.appliquerEtImporter()">Appliquer et importer</button>
             <button class="btn btn-secondaire" onclick="travauxImport.viderFileDAttente(); travauxUI.afficherImport();">Annuler tout</button>
         </div>`;
@@ -1439,12 +1439,11 @@
         const optDoublons = document.getElementById('pipeline-opt-doublons')?.checked;
         const optAssemblage = document.getElementById('pipeline-opt-assemblage')?.checked;
 
-        // Si doublons cochee et groupes multiples, afficher la modale puis re-appeler
+        // Si doublons cochee, detecter les vrais doublons et afficher la modale
         if (optDoublons) {
-            const groupes = travauxImport.regrouperParDocument();
-            const groupesMultiples = Array.from(groupes.entries()).filter(([, f]) => f.length > 1);
-            if (groupesMultiples.length > 0) {
-                afficherModaleDoublonsEtImporter(queue);
+            const doublons = detecterDoublons(queue);
+            if (doublons.length > 0) {
+                afficherModaleDoublonsEtImporter(queue, doublons);
                 return;
             }
         }
@@ -1525,16 +1524,40 @@
     }
 
     /**
+     * Detecte les vrais doublons dans la queue
+     * Compare les noms de fichiers en ignorant l'horodatage des secondes et l'extension
+     * Ex: "Nom_DA_Prod_Remis_le_2026-02-18_14h30m12s.jpg" et "...14h30m45s.jpeg" → doublons
+     * @param {Array} queue - File d'attente
+     * @returns {Array} Groupes de doublons [{cle, fichiers}]
+     */
+    function detecterDoublons(queue) {
+        const groupes = new Map();
+
+        queue.forEach(f => {
+            // Retirer l'extension
+            const sansExt = f.nomFichier.replace(/\.[^.]+$/, '');
+            // Neutraliser les secondes dans l'horodatage : HHhMMmSSs → HHhMMm
+            const cle = sansExt.replace(/(\d{2}h\d{2}m)\d{2}s$/, '$1');
+
+            if (!groupes.has(cle)) groupes.set(cle, []);
+            groupes.get(cle).push(f);
+        });
+
+        // Ne garder que les groupes avec >= 2 fichiers (vrais doublons)
+        return Array.from(groupes.entries())
+            .filter(([, fichiers]) => fichiers.length > 1)
+            .map(([cle, fichiers]) => ({ cle, fichiers }));
+    }
+
+    /**
      * Modale doublons adaptee pour appliquerEtImporter
      * Apres resolution des doublons, relance appliquerEtImporter
      * @param {Array} queue - File d'attente
+     * @param {Array} doublons - Groupes de doublons detectes
      */
-    function afficherModaleDoublonsEtImporter(queue) {
-        const groupes = travauxImport.regrouperParDocument();
-        const groupesMultiples = Array.from(groupes.entries()).filter(([, f]) => f.length > 1);
-
+    function afficherModaleDoublonsEtImporter(queue, doublons) {
         let html = '<div class="modal-section"><p>Cochez les fichiers à supprimer :</p>';
-        groupesMultiples.forEach(([cleGroupe, fichiers]) => {
+        doublons.forEach(({ cle: cleGroupe, fichiers }) => {
             html += `<div style="margin-bottom:16px"><strong>${echapperHtml(cleGroupe)}</strong>`;
             fichiers.forEach((f) => {
                 const idx = queue.indexOf(f);
