@@ -774,8 +774,10 @@
         });
 
         rafraichirPipelineUI();
-        if (modifies > 0 && typeof afficherNotificationSucces === 'function') {
-            afficherNotificationSucces(`${modifies} fichier(s) identifie(s) automatiquement`);
+        if (modifies > 0) {
+            afficherModalePipeline('Identification automatique',
+                `<p>${modifies} fichier(s) identifie(s) automatiquement.</p>`,
+                [{ label: 'OK', classe: 'btn-principal', action: () => {} }]);
         }
     }
 
@@ -1040,12 +1042,14 @@
     async function lancerImportPipeline() {
         const queue = travauxImport.obtenirFileDAttente();
         if (queue.length === 0) {
-            alert('Aucun fichier a importer');
+            afficherModalePipeline('Import', '<p>Aucun fichier a importer.</p>',
+                [{ label: 'OK', classe: 'btn-principal', action: () => {} }]);
             return;
         }
 
         if (!queue.every(f => f.pipelineStatut === 'identifie')) {
-            alert('Tous les fichiers doivent etre identifies avant l\'import.');
+            afficherModalePipeline('Import', '<p>Tous les fichiers doivent etre identifies avant l\'import.</p>',
+                [{ label: 'OK', classe: 'btn-principal', action: () => {} }]);
             return;
         }
 
@@ -1065,9 +1069,9 @@
 
         afficherImport();
 
-        if (typeof afficherNotificationSucces === 'function') {
-            afficherNotificationSucces(`Import termine : ${resultat.importes} fichier(s) importe(s)`);
-        }
+        afficherModalePipeline('Import termine',
+            `<p>${resultat.importes} fichier(s) importe(s)${resultat.erreurs > 0 ? `, ${resultat.erreurs} erreur(s)` : ''}.</p>`,
+            [{ label: 'OK', classe: 'btn-principal', action: () => {} }]);
     }
 
     /**
@@ -1370,7 +1374,8 @@
         const images = queue.filter(f => f.pipelineStatut === 'a-optimiser');
 
         if (images.length === 0) {
-            alert('Aucune image a traiter.');
+            afficherModalePipeline('Traitement', '<p>Aucune image a traiter.</p>',
+                [{ label: 'OK', classe: 'btn-principal', action: () => {} }]);
             return;
         }
 
@@ -1447,9 +1452,9 @@
 
         rafraichirPipelineUI();
 
-        if (typeof afficherNotificationSucces === 'function') {
-            afficherNotificationSucces(`Traitement termine : ${traites} image(s) traitee(s)`);
-        }
+        afficherModalePipeline('Traitement termine',
+            `<p>${traites} image(s) traitee(s) avec succes.</p>`,
+            [{ label: 'OK', classe: 'btn-principal', action: () => {} }]);
     }
 
     /**
@@ -1573,52 +1578,97 @@
         const groupesMultiples = Array.from(groupes.entries()).filter(([, f]) => f.length > 1);
 
         if (groupesMultiples.length === 0) {
-            alert('Aucun doublon potentiel detecte.');
-            document.getElementById('pipeline-opt-doublons').checked = false;
-            lancerTraitementPipeline();
+            afficherModalePipeline(
+                'Aucun doublon',
+                '<p>Aucun doublon potentiel detecte.</p>',
+                [{ label: 'OK', classe: 'btn-principal', action: () => {
+                    document.getElementById('pipeline-opt-doublons').checked = false;
+                    lancerTraitementPipeline();
+                }}]
+            );
             return;
         }
 
-        let html = '<div style="max-height:400px;overflow-y:auto">';
-        html += '<p>Cochez les fichiers a supprimer :</p>';
+        let html = '<div class="modal-section"><p>Cochez les fichiers a supprimer :</p>';
 
-        groupesMultiples.forEach(([cle, fichiers]) => {
-            html += `<div style="margin-bottom:12px"><strong>${echapperHtml(cle)}</strong>`;
-            fichiers.forEach((f, i) => {
+        groupesMultiples.forEach(([cleGroupe, fichiers]) => {
+            html += `<div style="margin-bottom:16px"><strong>${echapperHtml(cleGroupe)}</strong>`;
+            fichiers.forEach((f) => {
                 const idx = queue.indexOf(f);
-                html += `<div><label><input type="checkbox" class="doublon-check" data-index="${idx}"> ${echapperHtml(f.nomFichier)} (${travauxStockage.formaterTaille(f.tailleFichier)})</label></div>`;
+                html += `<div style="padding:4px 0"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" class="doublon-check" data-index="${idx}"> ${echapperHtml(f.nomFichier)} (${travauxStockage.formaterTaille(f.tailleFichier)})</label></div>`;
             });
             html += '</div>';
         });
         html += '</div>';
 
-        // Utiliser une modale simple via overlay
+        afficherModalePipeline(
+            'Detection de doublons',
+            html,
+            [
+                { label: 'Supprimer et continuer', classe: 'btn-principal', action: (overlay) => {
+                    const checks = overlay.querySelectorAll('.doublon-check:checked');
+                    const indices = Array.from(checks).map(c => parseInt(c.dataset.index)).sort((a, b) => b - a);
+                    indices.forEach(idx => travauxImport.retirerFichier(idx));
+                    document.getElementById('pipeline-opt-doublons').checked = false;
+                    lancerTraitementPipeline();
+                }},
+                { label: 'Annuler', classe: 'btn-secondaire', action: () => {
+                    document.getElementById('pipeline-opt-doublons').checked = false;
+                    lancerTraitementPipeline();
+                }}
+            ]
+        );
+    }
+
+    /**
+     * Affiche une modale selon le design system (.modal-overlay, .modal-contenu, etc.)
+     * @param {string} titre - Titre de la modale
+     * @param {string} contenuHTML - Contenu HTML du corps
+     * @param {Array} boutons - [{label, classe, action(overlay)}]
+     */
+    function afficherModalePipeline(titre, contenuHTML, boutons) {
+        // Retirer une modale existante si deja presente
+        const existante = document.getElementById('pipeline-modal-overlay');
+        if (existante) existante.remove();
+
         const overlay = document.createElement('div');
-        overlay.className = 'modale-overlay';
-        overlay.innerHTML = `<div class="modale" style="max-width:500px;padding:20px">
-            <h3>Detection de doublons</h3>
-            ${html}
-            <div style="margin-top:12px;display:flex;gap:8px">
-                <button class="btn btn-principal" id="btn-confirmer-doublons">Supprimer et continuer</button>
-                <button class="btn btn-secondaire" id="btn-annuler-doublons">Annuler</button>
-            </div>
-        </div>`;
+        overlay.id = 'pipeline-modal-overlay';
+        overlay.className = 'modal-overlay actif';
+
+        const boutonsHTML = boutons.map((b, i) =>
+            `<button class="btn ${b.classe}" data-btn-index="${i}">${echapperHtml(b.label)}</button>`
+        ).join('');
+
+        overlay.innerHTML = `
+            <div class="modal-contenu modal-compact">
+                <button class="modal-fermer" id="pipeline-modal-fermer">&times;</button>
+                <h3 class="modal-titre">${echapperHtml(titre)}</h3>
+                ${contenuHTML}
+                <div class="modal-actions">
+                    ${boutonsHTML}
+                </div>
+            </div>`;
+
         document.body.appendChild(overlay);
 
-        document.getElementById('btn-annuler-doublons').onclick = () => {
-            overlay.remove();
-            document.getElementById('pipeline-opt-doublons').checked = false;
-            lancerTraitementPipeline();
-        };
+        // Fermer via le X
+        document.getElementById('pipeline-modal-fermer').onclick = () => overlay.remove();
 
-        document.getElementById('btn-confirmer-doublons').onclick = () => {
-            const checks = overlay.querySelectorAll('.doublon-check:checked');
-            const indices = Array.from(checks).map(c => parseInt(c.dataset.index)).sort((a, b) => b - a);
-            indices.forEach(idx => travauxImport.retirerFichier(idx));
-            overlay.remove();
-            document.getElementById('pipeline-opt-doublons').checked = false;
-            lancerTraitementPipeline();
-        };
+        // Fermer en cliquant l'overlay (pas le contenu)
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) overlay.remove();
+        });
+
+        // Brancher les boutons
+        boutons.forEach((b, i) => {
+            const btn = overlay.querySelector(`[data-btn-index="${i}"]`);
+            if (btn) {
+                btn.onclick = () => {
+                    if (b.action) b.action(overlay);
+                    overlay.remove();
+                };
+            }
+        });
     }
 
     /* ===============================
