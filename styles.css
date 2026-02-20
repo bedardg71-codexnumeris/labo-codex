@@ -14332,6 +14332,318 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     position: relative;
 }
 
+/* ===================================================================
+   PIPELINE VERTICAL — Preparer et importer
+   =================================================================== */
+
+/* --- Layout pipeline --- */
+.pipeline-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 16px;
+}
+
+.pipeline-etape {
+    border: 1px solid var(--bordure-claire);
+    border-radius: var(--radius-grand);
+    padding: 16px;
+    background: var(--gris-tres-pale);
+    margin-bottom: 0;
+}
+
+.pipeline-etape-inactive {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.pipeline-etape-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.pipeline-etape-numero {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--bleu-clair);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.pipeline-etape-titre {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--texte-principal);
+}
+
+.pipeline-etape-compteur {
+    margin-left: auto;
+    font-size: 0.8rem;
+    color: var(--texte-secondaire);
+}
+
+.pipeline-connecteur {
+    width: 2px;
+    height: 24px;
+    background: var(--bordure-claire);
+    margin: 0 auto;
+}
+
+/* --- Badges pipeline --- */
+.pipeline-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
+.pipeline-badge-a-optimiser {
+    background: var(--gris-tres-pale);
+    border: 1px solid var(--bordure-claire);
+    color: var(--texte-secondaire);
+}
+
+.pipeline-badge-pret {
+    background: var(--gris-tres-pale);
+    border: 1px solid var(--bordure-claire);
+    color: var(--texte-secondaire);
+}
+
+.pipeline-badge-identifie {
+    background: var(--bleu-clair);
+    color: #fff;
+}
+
+.pipeline-pastille {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.pipeline-pastille-a-optimiser {
+    background: #e67e22;
+}
+
+.pipeline-pastille-pret {
+    background: #34c759;
+}
+
+/* --- Cartes fichier pipeline --- */
+.pipeline-fichier-carte {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid var(--bordure-claire);
+    border-radius: var(--radius-moyen);
+    padding: 8px;
+    background: var(--gris-tres-pale);
+    margin-bottom: 6px;
+}
+
+.pipeline-fichier-carte.identifie {
+    border-color: var(--bleu-clair);
+}
+
+.pipeline-fichier-thumb {
+    width: 48px;
+    height: 64px;
+    overflow: hidden;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gris-tres-pale);
+    border-radius: var(--radius-petit);
+}
+
+.pipeline-fichier-thumb img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.pipeline-fichier-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.pipeline-fichier-nom-lea {
+    font-size: 0.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--texte-principal);
+}
+
+.pipeline-fichier-meta {
+    font-size: 0.75rem;
+    color: var(--texte-secondaire);
+}
+
+.pipeline-fichier-actions {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* --- Grille previews entree --- */
+.pipeline-previews-grille {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.pipeline-preview-mini {
+    width: 56px;
+    height: 72px;
+    border-radius: var(--radius-petit);
+    border: 1px solid var(--bordure-claire);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gris-tres-pale);
+    position: relative;
+    cursor: default;
+}
+
+.pipeline-preview-mini img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.pipeline-preview-mini .pipeline-mini-nom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    font-size: 0.55rem;
+    background: rgba(0,0,0,0.5);
+    color: #fff;
+    padding: 1px 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* --- Checklist traitement --- */
+.pipeline-checklist {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0;
+}
+
+.pipeline-checklist li {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--bordure-claire);
+    font-size: 0.85rem;
+    color: var(--texte-principal);
+}
+
+.pipeline-checklist li:last-child {
+    border-bottom: none;
+}
+
+.pipeline-checklist li label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+/* --- Resume detection --- */
+.pipeline-resume-detection {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.pipeline-resume-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: var(--texte-principal);
+}
+
+.pipeline-resume-icone {
+    font-size: 1.1rem;
+}
+
+/* --- Barre de progression pipeline --- */
+.pipeline-progression-container {
+    width: 100%;
+    height: 6px;
+    background: var(--bordure-claire);
+    border-radius: 3px;
+    margin-top: 10px;
+    overflow: hidden;
+}
+
+.pipeline-progression-barre {
+    height: 100%;
+    background: var(--bleu-clair);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+/* --- Section identification --- */
+.pipeline-identification-liste {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.pipeline-identification-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.pipeline-identification-item select {
+    font-size: 0.8rem;
+    max-width: 200px;
+}
+
+/* --- Stats rapides pipeline --- */
+.pipeline-stats {
+    font-size: 0.8rem;
+    color: var(--texte-secondaire);
+    margin-bottom: 12px;
+}
+
+/* --- Bouton import pipeline --- */
+.pipeline-bouton-importer {
+    margin-top: 8px;
+    text-align: center;
+}
+
 /* --- Bouton toggle sidebar (visible quand sidebar repliee) --- */
 .travaux-btn-toggle-sidebar {
     position: absolute;

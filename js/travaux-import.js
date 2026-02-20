@@ -36,6 +36,58 @@
         /[_\-\s](\d{7})\./,               // _1234567. avant extension
     ];
 
+    /* ===============================
+       PARSER NOM FICHIER LEA
+       =============================== */
+
+    /**
+     * Parse un nom de fichier au format Lea :
+     * NOM_DA_Production_Remis_le_AAAA-MM-JJ_HHhMMmSSs.ext
+     * ou NOM_DA_Production__Remis_le_AAAA-MM-JJ_HHhMMmSSs.ext
+     * @param {string} nomFichier - Le nom complet du fichier
+     * @returns {Object} { nom, da, nomProduction, dateRemise, raw }
+     */
+    function parserNomFichierLea(nomFichier) {
+        const resultat = { nom: '', da: '', nomProduction: '', dateRemise: null, raw: nomFichier };
+
+        // Retirer l'extension
+        const sanExt = nomFichier.replace(/\.[^.]+$/, '');
+
+        // Separer sur _Remis_le_ ou __Remis_le_
+        const separateur = /_?_Remis_le_/;
+        const parties = sanExt.split(separateur);
+
+        if (parties.length < 2) return resultat;
+
+        const partieIdentite = parties[0];
+        const partieDate = parties.slice(1).join('_Remis_le_');
+
+        // Parser la date : AAAA-MM-JJ_HHhMMmSSs
+        const matchDate = partieDate.match(/(\d{4})-(\d{2})-(\d{2})_(\d{2})h(\d{2})m(\d{2})s/);
+        if (matchDate) {
+            resultat.dateRemise = new Date(
+                parseInt(matchDate[1]), parseInt(matchDate[2]) - 1, parseInt(matchDate[3]),
+                parseInt(matchDate[4]), parseInt(matchDate[5]), parseInt(matchDate[6])
+            );
+        }
+
+        // Extraire le DA depuis la partie identite
+        resultat.da = detecterDA(partieIdentite);
+
+        if (resultat.da) {
+            // Trouver la position du DA dans la chaine
+            const indexDA = partieIdentite.indexOf(resultat.da);
+
+            // Nom = tout avant le DA (nettoye des separateurs)
+            resultat.nom = partieIdentite.substring(0, indexDA).replace(/[_\-]+$/, '').replace(/_/g, ' ').trim();
+
+            // Production = tout apres le DA (nettoye des separateurs)
+            resultat.nomProduction = partieIdentite.substring(indexDA + resultat.da.length).replace(/^[_\-]+/, '').replace(/_/g, ' ').trim();
+        }
+
+        return resultat;
+    }
+
     // Compression images iPad (1400px, JPEG 0.80 pour import standard)
     const MAX_IMAGE_DIMENSION = 1400;
     const JPEG_QUALITY_IMPORT = 0.80;
@@ -230,6 +282,12 @@
         const typeMIME = determinerTypeMIME(fichier);
         const daDetecte = detecterDA(fichier.name);
         const etudiant = trouverEtudiantParDA(daDetecte) || trouverEtudiantParNom(fichier.name);
+        const parseLea = parserNomFichierLea(fichier.name);
+
+        // Cle de regroupement pour assemblage multi-pages
+        const groupeDocumentId = parseLea.da && parseLea.nomProduction
+            ? parseLea.da + '_' + parseLea.nomProduction.replace(/\s+/g, '-')
+            : '';
 
         return {
             fichier: fichier,
@@ -241,7 +299,13 @@
             etudiantDA: etudiant ? etudiant.da : daDetecte,
             estPDF: estPDF(typeMIME),
             estImage: estImage(typeMIME),
-            statut: 'en-attente'
+            statut: 'en-attente',
+            // Pipeline
+            parseLea: parseLea,
+            pipelineStatut: 'apercu',
+            groupeDocumentId: groupeDocumentId,
+            thumbnailDataUrl: null,
+            productionId: ''
         };
     }
 
@@ -256,8 +320,11 @@
         for (const fichier of fichiers) {
             if (estTypeAccepte(fichier)) {
                 const prepare = preparerFichier(fichier);
+                detecterFormatEtRouter(prepare);
                 fichiersEnAttente.push(prepare);
                 acceptes.push(prepare);
+                // Generer les thumbnails en fire-and-forget
+                genererThumbnailQueue(prepare);
             } else {
                 console.warn(`[Travaux-Import] Type refuse: ${fichier.name} (${fichier.type})`);
             }
@@ -311,7 +378,11 @@
             nombrePages: nombrePages,
             thumbnailDataUrl: thumbnail,
             source: 'import-local',
-            importePar: 'single'
+            importePar: 'single',
+            // Pipeline metadata
+            nomFichierLea: fichierPrepare.nomFichier,
+            leaParsed: fichierPrepare.parseLea || null,
+            groupeDocumentId: fichierPrepare.groupeDocumentId || ''
         };
 
         // Ajouter les metadonnees
@@ -353,7 +424,9 @@
             if (fichier.statut === 'importe') continue;
 
             try {
-                await importerFichier(fichier, productionId);
+                // En mode pipeline, lire la productionId de chaque fichier
+                const prodId = productionId || fichier.productionId || '';
+                await importerFichier(fichier, prodId);
                 importes++;
             } catch (e) {
                 console.error(`[Travaux-Import] Erreur import ${fichier.nomFichier}:`, e);
@@ -388,6 +461,85 @@
      */
     function obtenirFileDAttente() {
         return fichiersEnAttente;
+    }
+
+    /* ===============================
+       PIPELINE : DETECTION FORMAT ET ROUTAGE
+       =============================== */
+
+    /**
+     * Detecte le format d'un fichier et route vers le bon statut pipeline
+     * PDF → 'pret' (ou 'identifie' si parseLea reussit)
+     * Image → 'a-optimiser'
+     * @param {Object} fichierPrepare - Le fichier prepare
+     */
+    function detecterFormatEtRouter(fichierPrepare) {
+        if (fichierPrepare.estPDF) {
+            // Les PDF sont prets directement
+            fichierPrepare.pipelineStatut = 'pret';
+            // Si parseLea a reussi et on trouve un etudiant, passer en identifie
+            if (fichierPrepare.parseLea.da && fichierPrepare.etudiantAssocie) {
+                const productions = obtenirDonneesSelonMode(cle('productions'));
+                const prodTrouvee = productions.find(p => {
+                    const titre = (p.titre || p.nom || '').toLowerCase();
+                    const nomProd = fichierPrepare.parseLea.nomProduction.toLowerCase();
+                    return nomProd && titre && (titre.includes(nomProd) || nomProd.includes(titre));
+                });
+                if (prodTrouvee) {
+                    fichierPrepare.productionId = prodTrouvee.id;
+                    fichierPrepare.pipelineStatut = 'identifie';
+                }
+            }
+        } else if (fichierPrepare.estImage) {
+            fichierPrepare.pipelineStatut = 'a-optimiser';
+        }
+    }
+
+    /**
+     * Genere la thumbnail d'un fichier en attente (async, fire-and-forget)
+     * @param {Object} fichierPrepare - Le fichier prepare
+     */
+    async function genererThumbnailQueue(fichierPrepare) {
+        try {
+            if (fichierPrepare.estImage) {
+                fichierPrepare.thumbnailDataUrl = await travauxStockage.genererMiniatureImage(fichierPrepare.fichier);
+            } else if (fichierPrepare.estPDF) {
+                const result = await travauxStockage.genererMiniaturePDF(fichierPrepare.fichier);
+                fichierPrepare.thumbnailDataUrl = result.thumbnail;
+                fichierPrepare.nombrePages = result.nombrePages;
+            }
+        } catch (e) {
+            console.warn('[Travaux-Import] Erreur thumbnail queue:', e);
+        }
+        // Rafraichir l'UI pipeline
+        if (typeof window.rafraichirPipelineUI === 'function') {
+            window.rafraichirPipelineUI();
+        }
+    }
+
+    /**
+     * Regroupe les fichiers en attente par groupeDocumentId
+     * @returns {Map<string, Array>} Map de cle de regroupement vers fichiers
+     */
+    function regrouperParDocument() {
+        const groupes = new Map();
+        fichiersEnAttente.forEach(f => {
+            const cle = f.groupeDocumentId || ('_solo_' + f.nomFichier);
+            if (!groupes.has(cle)) groupes.set(cle, []);
+            groupes.get(cle).push(f);
+        });
+        // Trier au sein de chaque groupe par dateRemise
+        groupes.forEach(fichiers => {
+            fichiers.sort((a, b) => {
+                const da = a.parseLea.dateRemise;
+                const db = b.parseLea.dateRemise;
+                if (!da && !db) return 0;
+                if (!da) return 1;
+                if (!db) return -1;
+                return da - db;
+            });
+        });
+        return groupes;
     }
 
     /* ===============================
@@ -446,6 +598,61 @@
 
             input.click();
         });
+    }
+
+    /* ===============================
+       ASSEMBLAGE PDF MULTI-IMAGES
+       =============================== */
+
+    /**
+     * Assemble un groupe d'images en un seul PDF via jsPDF
+     * @param {Array} fichiersDuGroupe - Liste de fichiers prepares (images)
+     * @returns {Promise<Blob>} Le blob PDF assemble
+     */
+    async function assemblerPDFGroupe(fichiersDuGroupe) {
+        const { jsPDF } = window.jspdf;
+        let doc = null;
+
+        for (let i = 0; i < fichiersDuGroupe.length; i++) {
+            const f = fichiersDuGroupe[i];
+            const blob = f.fichier;
+
+            // Charger l'image
+            const imgData = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+
+            // Obtenir les dimensions de l'image
+            const dims = await new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve({ width: img.width, height: img.height });
+                img.onerror = reject;
+                img.src = imgData;
+            });
+
+            // Dimensions en mm (72 DPI par defaut pour PDF)
+            const mmPerPx = 25.4 / 200; // 200 DPI
+            const pageW = dims.width * mmPerPx;
+            const pageH = dims.height * mmPerPx;
+
+            if (i === 0) {
+                doc = new jsPDF({
+                    orientation: pageW > pageH ? 'landscape' : 'portrait',
+                    unit: 'mm',
+                    format: [pageW, pageH]
+                });
+            } else {
+                doc.addPage([pageW, pageH], pageW > pageH ? 'landscape' : 'portrait');
+            }
+
+            doc.addImage(imgData, 'JPEG', 0, 0, pageW, pageH);
+        }
+
+        if (!doc) throw new Error('Aucune image a assembler');
+        return doc.output('blob');
     }
 
     /* ===============================
@@ -621,6 +828,8 @@
         // Detection
         detecterDA: detecterDA,
         trouverEtudiantParDA: trouverEtudiantParDA,
+        // Parser Lea
+        parserNomFichierLea: parserNomFichierLea,
         // Validation
         estTypeAccepte: estTypeAccepte,
         // File d'attente
@@ -629,6 +838,10 @@
         viderFileDAttente: viderFileDAttente,
         changerEtudiant: changerEtudiant,
         retirerFichier: retirerFichier,
+        // Pipeline
+        detecterFormatEtRouter: detecterFormatEtRouter,
+        regrouperParDocument: regrouperParDocument,
+        assemblerPDFGroupe: assemblerPDFGroupe,
         // Import
         importerFichier: importerFichier,
         importerTous: importerTous,

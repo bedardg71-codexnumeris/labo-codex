@@ -2185,6 +2185,96 @@
     }
 
     /* ===============================
+       BALANCE DES BLANCS AUTOMATIQUE (BATCH)
+       =============================== */
+
+    /**
+     * Applique automatiquement la balance des blancs sur un blob image.
+     * Echantillonne la zone la plus claire (top 5% des pixels en luminosite),
+     * calcule les facteurs de correction RGB, et applique la correction.
+     * @param {Blob} blob - Le blob image a traiter
+     * @returns {Promise<Blob>} Le blob corrige
+     */
+    function autoBalanceBlancs(blob) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            const url = URL.createObjectURL(blob);
+
+            img.onload = () => {
+                URL.revokeObjectURL(url);
+
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+
+                const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const d = imgData.data;
+                const totalPixels = d.length / 4;
+
+                // Collecter la luminosite de chaque pixel
+                const luminosites = new Float32Array(totalPixels);
+                for (let i = 0; i < totalPixels; i++) {
+                    const idx = i * 4;
+                    luminosites[i] = 0.299 * d[idx] + 0.587 * d[idx + 1] + 0.114 * d[idx + 2];
+                }
+
+                // Trouver le seuil top 5%
+                const sorted = Float32Array.from(luminosites).sort();
+                const seuil = sorted[Math.floor(totalPixels * 0.95)];
+
+                // Moyenne RGB des pixels les plus clairs
+                let sumR = 0, sumG = 0, sumB = 0, count = 0;
+                for (let i = 0; i < totalPixels; i++) {
+                    if (luminosites[i] >= seuil) {
+                        const idx = i * 4;
+                        sumR += d[idx];
+                        sumG += d[idx + 1];
+                        sumB += d[idx + 2];
+                        count++;
+                    }
+                }
+
+                if (count === 0) {
+                    canvas.toBlob(b => resolve(b), 'image/jpeg', 0.92);
+                    return;
+                }
+
+                const avgR = sumR / count;
+                const avgG = sumG / count;
+                const avgB = sumB / count;
+
+                // Eviter division par zero, limiter les facteurs entre 0.5 et 2.0
+                const rFactor = Math.max(0.5, Math.min(2.0, 255 / Math.max(avgR, 1)));
+                const gFactor = Math.max(0.5, Math.min(2.0, 255 / Math.max(avgG, 1)));
+                const bFactor = Math.max(0.5, Math.min(2.0, 255 / Math.max(avgB, 1)));
+
+                // Appliquer pixel par pixel
+                for (let i = 0; i < d.length; i += 4) {
+                    d[i]     = Math.min(255, Math.round(d[i]     * rFactor));
+                    d[i + 1] = Math.min(255, Math.round(d[i + 1] * gFactor));
+                    d[i + 2] = Math.min(255, Math.round(d[i + 2] * bFactor));
+                }
+
+                ctx.putImageData(imgData, 0, 0);
+                canvas.toBlob(
+                    (blobResult) => resolve(blobResult),
+                    'image/jpeg',
+                    0.92
+                );
+            };
+
+            img.onerror = () => {
+                URL.revokeObjectURL(url);
+                resolve(blob); // fallback: garder l'original
+            };
+
+            img.src = url;
+        });
+    }
+
+    /* ===============================
        EXPORTS GLOBAUX
        =============================== */
 
@@ -2220,6 +2310,8 @@
         // Palettes
         togglePalette: togglePalette,
         toggleSection: toggleSection,
+        // Batch
+        autoBalanceBlancs: autoBalanceBlancs,
         // Etat
         get actif() { return actif; }
     };
