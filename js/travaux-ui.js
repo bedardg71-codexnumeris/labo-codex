@@ -1525,8 +1525,8 @@
 
     /**
      * Detecte les vrais doublons dans la queue
-     * Compare les noms de fichiers en ignorant l'horodatage des secondes et l'extension
-     * Ex: "Nom_DA_Prod_Remis_le_2026-02-18_14h30m12s.jpg" et "...14h30m45s.jpeg" → doublons
+     * Compare les noms de fichiers exacts (seule l'extension est ignoree)
+     * Deux fichiers avec des horodatages differents = deux remises distinctes
      * @param {Array} queue - File d'attente
      * @returns {Array} Groupes de doublons [{cle, fichiers}]
      */
@@ -1534,16 +1534,13 @@
         const groupes = new Map();
 
         queue.forEach(f => {
-            // Retirer l'extension
-            const sansExt = f.nomFichier.replace(/\.[^.]+$/, '');
-            // Neutraliser les secondes dans l'horodatage : HHhMMmSSs → HHhMMm
-            const cle = sansExt.replace(/(\d{2}h\d{2}m)\d{2}s$/, '$1');
+            // Comparer sans extension uniquement (nom exact sinon)
+            const cle = f.nomFichier.replace(/\.[^.]+$/, '');
 
             if (!groupes.has(cle)) groupes.set(cle, []);
             groupes.get(cle).push(f);
         });
 
-        // Ne garder que les groupes avec >= 2 fichiers (vrais doublons)
         return Array.from(groupes.entries())
             .filter(([, fichiers]) => fichiers.length > 1)
             .map(([cle, fichiers]) => ({ cle, fichiers }));
