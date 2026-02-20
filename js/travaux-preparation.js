@@ -126,21 +126,63 @@
             appliquerCrop();
         }
 
-        // Appliquer le rendu final sur chaque fichier modifie
+        // Compter les fichiers a traiter
+        const aTraiter = fichiers.filter(f => f.operations.length > 0);
+        console.log('[Travaux-Preparation] Fichiers avec operations:', aTraiter.length, '/', fichiers.length);
+        aTraiter.forEach((f, idx) => {
+            console.log(`  Fichier ${idx}: ${f.nomFichier}, ops:`, f.operations.map(o => o.type));
+        });
+
+        if (aTraiter.length === 0) {
+            fermer();
+            if (typeof window.rafraichirImportTravaux === 'function') {
+                window.rafraichirImportTravaux();
+            }
+            return;
+        }
+
+        // Afficher la progression
+        const btnConfirmer = document.getElementById('prep-btn-confirmer');
+        const barreContainer = document.getElementById('prep-progress-bar');
+        const barreFill = document.getElementById('prep-progress-fill');
+        const barreText = document.getElementById('prep-progress-text');
+        if (btnConfirmer) {
+            btnConfirmer.disabled = true;
+            btnConfirmer.textContent = 'Traitement...';
+        }
+        if (barreContainer) barreContainer.style.display = 'flex';
+
+        let traites = 0;
+        let reussis = 0;
+        const queue = travauxImport.obtenirFileDAttente();
+
         for (let i = 0; i < fichiers.length; i++) {
             const f = fichiers[i];
-            if (f.operations.length > 0) {
+            if (f.operations.length === 0) continue;
+
+            traites++;
+            const pct = Math.round((traites / aTraiter.length) * 100);
+            if (barreFill) barreFill.style.width = pct + '%';
+            if (barreText) barreText.textContent = `${traites} / ${aTraiter.length}`;
+
+            try {
+                console.log(`[Travaux-Preparation] Rendu fichier ${i}: ${f.nomFichier}, ops:`, f.operations.map(o => o.type));
                 const blobFinal = await renduFinal(f);
-                if (blobFinal && onTerminer) {
-                    // Remplacer le blob dans la file d'attente
-                    const original = travauxImport.obtenirFileDAttente()[i];
-                    if (original) {
-                        original.fichier = blobFinal;
-                        original.tailleFichier = blobFinal.size;
-                    }
+                console.log(`[Travaux-Preparation] Blob final fichier ${i}:`, blobFinal ? `${(blobFinal.size/1024).toFixed(0)}KB` : 'null');
+
+                if (blobFinal && queue[i]) {
+                    queue[i].fichier = blobFinal;
+                    queue[i].tailleFichier = blobFinal.size;
+                    // Regenerer la thumbnail pour que le pipeline affiche l'image corrigee
+                    queue[i].thumbnailDataUrl = null;
+                    reussis++;
                 }
+            } catch (err) {
+                console.error(`[Travaux-Preparation] Erreur rendu fichier ${i} (${f.nomFichier}):`, err);
             }
         }
+
+        console.log(`[Travaux-Preparation] Rendu termine: ${reussis}/${aTraiter.length} reussis`);
 
         fermer();
 
@@ -186,6 +228,13 @@
      */
     async function chargerFichier(index) {
         if (index < 0 || index >= fichiers.length) return;
+
+        // Auto-confirmer l'outil actif du fichier precedent avant de changer
+        if (outilActif === 'perspective' && perspectiveCorners) {
+            appliquerPerspective();
+        } else if (outilActif === 'crop' && cropRect) {
+            appliquerCrop();
+        }
 
         // Liberer l'image precedente
         imageOriginale = null;
@@ -633,6 +682,7 @@
 
         // Appliquer les operations
         for (const op of fichierData.operations) {
+            console.log(`[Travaux-Preparation] renduFinal op: ${op.type}, canvas: ${canvas.width}x${canvas.height}`);
             if (op.type === 'perspective') {
                 canvas = await renduPerspectivePixel(canvas, op.corners, op.fill);
             } else if (op.type === 'whiteBalance') {
@@ -644,7 +694,7 @@
                     d[i + 2] = Math.min(255, Math.round(d[i + 2] * op.bFactor));
                 }
                 canvas.getContext('2d').putImageData(imgData, 0, 0);
-            } else if (op.type === 'brightness' || op.type === 'contrast' || op.type === 'grayscale') {
+            } else if (op.type === 'brightness' || op.type === 'contrast' || op.type === 'exposure' || op.type === 'grayscale') {
                 // Appliquer via CSS filter
                 const temp = document.createElement('canvas');
                 temp.width = canvas.width;
@@ -660,9 +710,13 @@
         }
 
         // Convertir en blob JPEG
-        return new Promise(resolve => {
+        return new Promise((resolve, reject) => {
             canvas.toBlob(blob => {
                 canvas.width = 0;
+                if (!blob) {
+                    reject(new Error('toBlob a retourne null'));
+                    return;
+                }
                 resolve(blob);
             }, 'image/jpeg', 0.92);
         });
@@ -678,90 +732,108 @@
      * @returns {Promise<HTMLCanvasElement>}
      */
     function renduPerspectivePixel(source, corners, fill) {
-        return new Promise(resolve => {
-            const w = source.width;
-            const h = source.height;
-            const srcData = source.getContext('2d').getImageData(0, 0, w, h);
-            const srcPixels = srcData.data;
+        return new Promise((resolve, reject) => {
+            try {
+                const w = source.width;
+                const h = source.height;
+                const srcData = source.getContext('2d').getImageData(0, 0, w, h);
+                const srcPixels = srcData.data;
 
-            const result = document.createElement('canvas');
-            result.width = w;
-            result.height = h;
-            const dstData = result.getContext('2d').createImageData(w, h);
-            const dstPixels = dstData.data;
+                const result = document.createElement('canvas');
+                result.width = w;
+                result.height = h;
+                const dstData = result.getContext('2d').createImageData(w, h);
+                const dstPixels = dstData.data;
 
-            // Pre-remplissage des pixels
-            if (fill && fill !== 'none') {
-                const fillColor = fill === 'auto' ? echantillonnerCouleurPage(source) : fill;
-                const tmp = document.createElement('canvas');
-                tmp.width = 1; tmp.height = 1;
-                const tmpCtx = tmp.getContext('2d');
-                tmpCtx.fillStyle = fillColor;
-                tmpCtx.fillRect(0, 0, 1, 1);
-                const [fr, fg, fb] = tmpCtx.getImageData(0, 0, 1, 1).data;
-                for (let i = 0; i < dstPixels.length; i += 4) {
-                    dstPixels[i] = fr; dstPixels[i+1] = fg;
-                    dstPixels[i+2] = fb; dstPixels[i+3] = 255;
-                }
-            }
-
-            const c = corners.map(p => ({ x: p.x * w, y: p.y * h }));
-            let pixelIndex = 0;
-            const totalPixels = w * h;
-
-            function traiterLot() {
-                const fin = Math.min(pixelIndex + BATCH_SIZE, totalPixels);
-
-                for (; pixelIndex < fin; pixelIndex++) {
-                    const dx = pixelIndex % w;
-                    const dy = Math.floor(pixelIndex / w);
-                    const u = dx / w;
-                    const v = dy / h;
-
-                    // Position source par interpolation bilineaire
-                    const src = interpBilineaire(c, u, v);
-
-                    // Echantillonnage bilineaire (4 pixels voisins)
-                    const sx = src.x;
-                    const sy = src.y;
-                    const x0 = Math.floor(sx);
-                    const y0 = Math.floor(sy);
-                    const x1 = Math.min(x0 + 1, w - 1);
-                    const y1 = Math.min(y0 + 1, h - 1);
-
-                    if (x0 < 0 || x0 >= w || y0 < 0 || y0 >= h) continue;
-
-                    const fx = sx - x0;
-                    const fy = sy - y0;
-                    const fx1 = 1 - fx;
-                    const fy1 = 1 - fy;
-
-                    const i00 = (y0 * w + x0) * 4;
-                    const i10 = (y0 * w + x1) * 4;
-                    const i01 = (y1 * w + x0) * 4;
-                    const i11 = (y1 * w + x1) * 4;
-
-                    const di = pixelIndex * 4;
-
-                    for (let ch = 0; ch < 4; ch++) {
-                        dstPixels[di + ch] = Math.round(
-                            srcPixels[i00 + ch] * fx1 * fy1 +
-                            srcPixels[i10 + ch] * fx * fy1 +
-                            srcPixels[i01 + ch] * fx1 * fy +
-                            srcPixels[i11 + ch] * fx * fy
-                        );
+                // Pre-remplissage des pixels
+                if (fill && fill !== 'none') {
+                    const fillColor = fill === 'auto' ? echantillonnerCouleurPage(source) : fill;
+                    const tmp = document.createElement('canvas');
+                    tmp.width = 1; tmp.height = 1;
+                    const tmpCtx = tmp.getContext('2d');
+                    tmpCtx.fillStyle = fillColor;
+                    tmpCtx.fillRect(0, 0, 1, 1);
+                    const [fr, fg, fb] = tmpCtx.getImageData(0, 0, 1, 1).data;
+                    for (let i = 0; i < dstPixels.length; i += 4) {
+                        dstPixels[i] = fr; dstPixels[i+1] = fg;
+                        dstPixels[i+2] = fb; dstPixels[i+3] = 255;
                     }
                 }
 
-                if (pixelIndex < totalPixels) {
-                    setTimeout(traiterLot, 0);
-                } else {
+                const c = corners.map(p => ({ x: p.x * w, y: p.y * h }));
+                let pixelIndex = 0;
+                const totalPixels = w * h;
+
+                // Timeout de securite : 60 secondes max
+                const timeout = setTimeout(() => {
+                    console.warn('[Travaux-Preparation] renduPerspectivePixel timeout — fallback mesh');
                     result.getContext('2d').putImageData(dstData, 0, 0);
                     resolve(result);
-                }
-            }
+                }, 60000);
 
-            traiterLot();
+                function traiterLot() {
+                    try {
+                        const fin = Math.min(pixelIndex + BATCH_SIZE, totalPixels);
+
+                        for (; pixelIndex < fin; pixelIndex++) {
+                            const dx = pixelIndex % w;
+                            const dy = Math.floor(pixelIndex / w);
+                            const u = dx / w;
+                            const v = dy / h;
+
+                            const src = interpBilineaire(c, u, v);
+
+                            const sx = src.x;
+                            const sy = src.y;
+                            const x0 = Math.floor(sx);
+                            const y0 = Math.floor(sy);
+                            const x1 = Math.min(x0 + 1, w - 1);
+                            const y1 = Math.min(y0 + 1, h - 1);
+
+                            if (x0 < 0 || x0 >= w || y0 < 0 || y0 >= h) continue;
+
+                            const fx = sx - x0;
+                            const fy = sy - y0;
+                            const fx1 = 1 - fx;
+                            const fy1 = 1 - fy;
+
+                            const i00 = (y0 * w + x0) * 4;
+                            const i10 = (y0 * w + x1) * 4;
+                            const i01 = (y1 * w + x0) * 4;
+                            const i11 = (y1 * w + x1) * 4;
+
+                            const di = pixelIndex * 4;
+
+                            for (let ch = 0; ch < 4; ch++) {
+                                dstPixels[di + ch] = Math.round(
+                                    srcPixels[i00 + ch] * fx1 * fy1 +
+                                    srcPixels[i10 + ch] * fx * fy1 +
+                                    srcPixels[i01 + ch] * fx1 * fy +
+                                    srcPixels[i11 + ch] * fx * fy
+                                );
+                            }
+                        }
+
+                        if (pixelIndex < totalPixels) {
+                            setTimeout(traiterLot, 0);
+                        } else {
+                            clearTimeout(timeout);
+                            result.getContext('2d').putImageData(dstData, 0, 0);
+                            resolve(result);
+                        }
+                    } catch (err) {
+                        clearTimeout(timeout);
+                        console.error('[Travaux-Preparation] Erreur dans traiterLot:', err);
+                        result.getContext('2d').putImageData(dstData, 0, 0);
+                        resolve(result);
+                    }
+                }
+
+                traiterLot();
+            } catch (err) {
+                console.error('[Travaux-Preparation] Erreur init renduPerspectivePixel:', err);
+                reject(err);
+            }
         });
     }
 
@@ -2154,10 +2226,14 @@
                         <span id="prep-navigation" style="font-size:0.8rem; margin-left:6px;" class="texte-muted"></span>
                         <span id="prep-nb-ops" class="texte-muted" style="font-size:0.8rem; margin-left:4px;"></span>
                     </div>
-                    <div style="display:flex; gap:6px;">
+                    <div style="display:flex; gap:6px; align-items:center;">
                         <button class="btn btn-secondaire btn-petit" onclick="travauxPreparation.passer()">Passer</button>
-                        <button class="btn btn-principal btn-petit" onclick="travauxPreparation.confirmerTout()">Appliquer et importer</button>
+                        <button class="btn btn-principal btn-petit" id="prep-btn-confirmer" onclick="travauxPreparation.confirmerTout()">Appliquer et importer</button>
                     </div>
+                </div>
+                <div class="prep-progress-bar" id="prep-progress-bar" style="display:none;">
+                    <div class="prep-progress-fill" id="prep-progress-fill"></div>
+                    <span class="prep-progress-text" id="prep-progress-text"></span>
                 </div>
 
                 <!-- Zone de travail plein ecran -->
