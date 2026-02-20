@@ -183,15 +183,6 @@
                     }
                 </div>` : ''}
 
-                <!-- Selecteur de production global -->
-                <div class="pipeline-production-selecteur">
-                    <label>Production visée</label>
-                    <select id="pipeline-production-globale" class="form-select" onchange="travauxUI.changerProductionGlobalePipeline(this.value)">
-                        <option value="">-- Aucune --</option>
-                        ${obtenirDonneesSelonMode(cle('productions')).map(p => `<option value="${p.id}" ${travauxImport.getProductionGlobale() === p.id ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
-                    </select>
-                </div>
-
                 ${zeroStateHTML}
 
                 <!-- Pipeline repliable -->
@@ -207,7 +198,7 @@
                         <div class="pipeline-etape-header">
                             <span class="pipeline-etape-numero">1</span>
                             <span class="pipeline-etape-titre">Zone d'entrée</span>
-                            <span class="pipeline-etape-compteur">${nbAOptimiser > 0 ? nbAOptimiser + ' fichier(s)' : ''}</span>
+                            <span class="pipeline-etape-compteur">${queue.length > 0 ? queue.length + ' fichier(s)' : ''}</span>
                         </div>
                         <div id="travaux-drop-zone" class="travaux-drop-zone">
                             <div class="travaux-drop-zone-contenu">
@@ -216,42 +207,29 @@
                                 <p class="texte-muted">PDF, JPEG, PNG, HEIC — ou cliquez pour parcourir</p>
                             </div>
                         </div>
-                        ${(() => {
-                            const entree = queue.filter(f => f.pipelineStatut === 'a-optimiser');
-                            return entree.length > 0 ? genererPreviewsEntree(entree) : '';
-                        })()}
                     </div>
 
                     ${queue.length > 0 ? `
                     <div class="pipeline-connecteur"></div>
 
-                    <!-- ETAPE 2 : Detection du format -->
+                    <!-- ETAPE 2 : Fichiers deposes -->
                     <div class="pipeline-etape">
                         <div class="pipeline-etape-header">
                             <span class="pipeline-etape-numero">2</span>
-                            <span class="pipeline-etape-titre">Détection du format</span>
+                            <span class="pipeline-etape-titre">Fichiers déposés</span>
+                            <span class="pipeline-etape-compteur">${queue.length} fichier(s)</span>
                         </div>
+                        ${genererPreviewsEntree(queue)}
                         ${genererResumeDetection(queue)}
-                    </div>
-
-                    <div class="pipeline-connecteur"></div>
-
-                    <!-- ETAPE 3 : Traitement -->
-                    <div class="pipeline-etape ${!aDesImagesAOptimiser ? 'pipeline-etape-inactive' : ''}">
-                        <div class="pipeline-etape-header">
-                            <span class="pipeline-etape-numero">3</span>
-                            <span class="pipeline-etape-titre">Traitement</span>
-                            <span class="pipeline-etape-compteur">${nbAOptimiser > 0 ? nbAOptimiser + ' image(s) à traiter' : 'Aucune image à traiter'}</span>
-                        </div>
                         ${genererSectionTraitement(queue, groupes)}
                     </div>
 
                     <div class="pipeline-connecteur"></div>
 
-                    <!-- ETAPE 4 : Identification -->
+                    <!-- ETAPE 3 : Identification -->
                     <div class="pipeline-etape">
                         <div class="pipeline-etape-header">
-                            <span class="pipeline-etape-numero">4</span>
+                            <span class="pipeline-etape-numero">3</span>
                             <span class="pipeline-etape-titre">Identification</span>
                             <span class="pipeline-etape-compteur">${nbIdentifie}/${queue.length} identifié(s)</span>
                         </div>
@@ -870,6 +848,7 @@
         <span class="travaux-badge-icone">${icone}</span>
         <span class="travaux-badge-nom">${nomEtudiant}</span>
         <span class="travaux-badge-pill">Importé</span>
+        <button class="travaux-badge-supprimer" onclick="event.stopPropagation(); travauxUI.supprimerFichierImporte('${f.id}')" title="Supprimer">&times;</button>
     </div>`;
     }
 
