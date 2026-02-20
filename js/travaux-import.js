@@ -321,6 +321,10 @@
             if (estTypeAccepte(fichier)) {
                 const prepare = preparerFichier(fichier);
                 detecterFormatEtRouter(prepare);
+                // Pre-remplir la production si une production globale est selectionnee
+                if (productionSelectionnee && !prepare.productionId) {
+                    prepare.productionId = productionSelectionnee;
+                }
                 fichiersEnAttente.push(prepare);
                 acceptes.push(prepare);
                 // Generer les thumbnails en fire-and-forget
@@ -489,7 +493,9 @@
                 pipelineStatut: f.pipelineStatut,
                 groupeDocumentId: f.groupeDocumentId,
                 thumbnailDataUrl: f.thumbnailDataUrl,
-                productionId: f.productionId
+                productionId: f.productionId,
+                largeurOriginale: f.largeurOriginale || 0,
+                hauteurOriginale: f.hauteurOriginale || 0
             }));
             sessionStorage.setItem(cleSession, JSON.stringify(donnees));
         } catch (e) {
@@ -526,7 +532,9 @@
                 pipelineStatut: d.pipelineStatut || 'apercu',
                 groupeDocumentId: d.groupeDocumentId || '',
                 thumbnailDataUrl: d.thumbnailDataUrl || null,
-                productionId: d.productionId || ''
+                productionId: d.productionId || '',
+                largeurOriginale: d.largeurOriginale || 0,
+                hauteurOriginale: d.hauteurOriginale || 0
             }));
 
             console.log(`[Travaux-Import] File restauree: ${fichiersEnAttente.length} fichier(s) (blobs absents)`);
@@ -576,6 +584,21 @@
         try {
             if (fichierPrepare.estImage) {
                 fichierPrepare.thumbnailDataUrl = await travauxStockage.genererMiniatureImage(fichierPrepare.fichier);
+                // Stocker les dimensions originales pour detection paysage
+                try {
+                    const imgUrl = URL.createObjectURL(fichierPrepare.fichier);
+                    const img = new Image();
+                    await new Promise((resolve, reject) => {
+                        img.onload = resolve;
+                        img.onerror = reject;
+                        img.src = imgUrl;
+                    });
+                    fichierPrepare.largeurOriginale = img.naturalWidth;
+                    fichierPrepare.hauteurOriginale = img.naturalHeight;
+                    URL.revokeObjectURL(imgUrl);
+                } catch (e) {
+                    console.warn('[Travaux-Import] Erreur dimensions image:', e);
+                }
             } else if (fichierPrepare.estPDF) {
                 const result = await travauxStockage.genererMiniaturePDF(fichierPrepare.fichier);
                 fichierPrepare.thumbnailDataUrl = result.thumbnail;
@@ -748,7 +771,7 @@
 
         fichiersEnAttente.forEach((f, index) => {
             const etudiantNom = f.etudiantAssocie
-                ? `${echapperHtml(f.etudiantAssocie.prenom)} ${echapperHtml(f.etudiantAssocie.nom)}`
+                ? `${echapperHtml(f.etudiantAssocie.nom)}, ${echapperHtml(f.etudiantAssocie.prenom)}`
                 : (f.etudiantDA ? `DA: ${echapperHtml(f.etudiantDA)}` : 'Non associe');
 
             const icone = f.estPDF ? '&#x1F4C4;' : '&#x1F5BC;';
@@ -765,7 +788,7 @@
                     <div class="travaux-fichier-etudiant">
                         <select class="form-select travaux-select-etudiant" data-index="${index}" onchange="travauxImport.changerEtudiant(${index}, this.value)">
                             <option value="">-- Associer --</option>
-                            ${etudiants.map(e => `<option value="${e.da}" ${f.etudiantDA === e.da ? 'selected' : ''}>${echapperHtml(e.prenom + ' ' + e.nom)} (${e.da})</option>`).join('')}
+                            ${[...etudiants].sort((a,b) => (a.nom||'').localeCompare(b.nom||'')).map(e => `<option value="${e.da}" ${f.etudiantDA === e.da ? 'selected' : ''}>${echapperHtml(e.nom + ', ' + e.prenom)} (${e.da})</option>`).join('')}
                         </select>
                     </div>
                     <button class="btn-supprimer-fichier" onclick="travauxImport.retirerFichier(${index})" title="Retirer">
@@ -905,6 +928,22 @@
        EXPORTS GLOBAUX
        =============================== */
 
+    /**
+     * Definit la production globale selectionnee
+     * @param {string} id - ID de la production
+     */
+    function setProductionGlobale(id) {
+        productionSelectionnee = id || '';
+    }
+
+    /**
+     * Retourne la production globale selectionnee
+     * @returns {string}
+     */
+    function getProductionGlobale() {
+        return productionSelectionnee;
+    }
+
     window.travauxImport = {
         // Detection
         detecterDA: detecterDA,
@@ -931,6 +970,9 @@
         initialiserDropZone: initialiserDropZone,
         // UI
         genererHTMLFileDAttente: genererHTMLFileDAttente,
+        // Production globale
+        setProductionGlobale: setProductionGlobale,
+        getProductionGlobale: getProductionGlobale,
         // Etat
         get importEnCours() { return importEnCours; }
     };

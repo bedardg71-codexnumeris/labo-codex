@@ -14654,6 +14654,116 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     text-align: center;
 }
 
+/* --- Message succes import pipeline --- */
+.pipeline-message-succes {
+    margin-top: 10px;
+    padding: 10px 14px;
+    background: var(--alerte-fond-succes);
+    border-left: 3px solid var(--alerte-bordure-succes);
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--alerte-texte-succes);
+    border-radius: var(--radius-petit);
+}
+
+/* --- Selecteur production pipeline --- */
+.pipeline-production-selecteur {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--gris-tres-pale);
+    border-radius: var(--radius-grand);
+    margin-bottom: 12px;
+}
+
+.pipeline-production-selecteur label {
+    font-weight: 600;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    color: var(--texte-principal);
+}
+
+.pipeline-production-selecteur select {
+    flex: 1;
+    max-width: 400px;
+}
+
+/* --- Alerte rotation pipeline --- */
+.pipeline-alerte-rotation {
+    background: rgba(230, 126, 34, 0.12);
+    border: 1px solid rgba(230, 126, 34, 0.3);
+    border-radius: var(--radius-moyen);
+    padding: 8px 12px;
+    font-size: 0.82rem;
+    color: var(--alerte-texte-attention);
+    margin-top: 8px;
+}
+
+/* --- Pipeline etapes repliable --- */
+.pipeline-etapes-toggle {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--texte-principal);
+    user-select: none;
+}
+
+.pipeline-etapes-toggle:hover {
+    color: var(--accent-primaire);
+}
+
+.pipeline-etapes-groupe.replie .pipeline-etapes-contenu {
+    display: none;
+}
+
+/* --- Section fichiers importes (toujours visible) --- */
+.pipeline-section-importes {
+    margin-top: 20px;
+    padding: 16px;
+    border: 1px solid var(--bordure-claire);
+    border-radius: var(--radius-grand);
+    background: var(--gris-tres-pale);
+}
+
+/* --- Preview inline pipeline --- */
+.pipeline-preview-inline {
+    margin: 12px 0;
+    padding: 16px;
+    border: 1px solid var(--bordure-claire);
+    border-radius: var(--radius-grand);
+    background: var(--gris-tres-pale);
+}
+
+.pipeline-preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.pipeline-preview-canvas-container {
+    text-align: center;
+    overflow: auto;
+    max-height: 500px;
+}
+
+.pipeline-preview-canvas-container canvas {
+    max-width: 100%;
+}
+
+.pipeline-preview-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;
+}
+
 /* --- Bouton toggle sidebar (visible quand sidebar repliee) --- */
 .travaux-btn-toggle-sidebar {
     position: absolute;

@@ -38,6 +38,12 @@ function chargerApercuEvaluations() {
         // Calculer les statistiques
         calculerStatistiquesEvaluations(etudiantsActifs, evaluations, productions);
 
+        // Compteurs travaux
+        const nbPrep = (typeof travauxImport !== 'undefined') ? travauxImport.obtenirFileDAttente().length : 0;
+        setStatText('ea-travaux-preparation', nbPrep);
+        const nbImportes = (typeof travauxStockage !== 'undefined') ? travauxStockage.statistiquesFichiers().nombre : 0;
+        setStatText('ea-travaux-importes', nbImportes);
+
         console.log('✅ Aperçu des évaluations chargé');
     } catch (error) {
         console.error('❌ Erreur chargement aperçu évaluations:', error);
@@ -121,6 +127,8 @@ function afficherMessageVideEvaluations() {
     setStatText('ea-productions-realisees', '—');
     setStatText('ea-taux-completion', '—');
     setStatText('ea-productions-configurees', '—');
+    setStatText('ea-travaux-preparation', '—');
+    setStatText('ea-travaux-importes', '—');
 }
 
 /**
