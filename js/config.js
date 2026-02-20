@@ -45,7 +45,7 @@ const configurationsOnglets = {
     'evaluations': [
         { id: 'apercu', label: 'Aperçu' },
         { id: 'liste', label: 'Liste des évaluations' },
-        { id: 'importer', label: 'Importer et préparer' },
+        { id: 'importer', label: 'Préparer et importer' },
         { id: 'annoter', label: 'Annoter et évaluer' },
         { id: 'exporter', label: 'Exporter et archiver' }
     ],

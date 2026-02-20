@@ -49,7 +49,7 @@ const GUIDAGE_TEXTES = {
         texte: 'Toutes les \u00e9valuations enregistr\u00e9es, filtrables par production et par groupe. Cliquez sur une \u00e9valuation pour voir le d\u00e9tail crit\u00e9ri\u00e9.'
     },
     'evaluations-importer': {
-        titre: 'Importer et préparer',
+        titre: 'Préparer et importer',
         texte: 'Importer les fichiers des étudiants (PDF, images), les préparer (rotation, assemblage) et les associer à une production.'
     },
     'evaluations-annoter': {
