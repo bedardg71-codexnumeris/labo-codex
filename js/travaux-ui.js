@@ -117,13 +117,7 @@
         const fsapiDispo = travauxStockage.estFSAPIDisponible();
         const fsapiActif = travauxStockage.estFSAPIActif();
 
-        const nbPDF = queue.filter(f => f.estPDF).length;
         const nbImages = queue.filter(f => f.estImage).length;
-        const nbAOptimiser = queue.filter(f => f.pipelineStatut === 'a-optimiser').length;
-        const nbPret = queue.filter(f => f.pipelineStatut === 'pret').length;
-        const nbIdentifie = queue.filter(f => f.pipelineStatut === 'identifie').length;
-        const tousIdentifies = queue.length > 0 && queue.every(f => f.pipelineStatut === 'identifie');
-        const aDesImagesAOptimiser = nbAOptimiser > 0;
 
         // Zero-state pour les novices
         const aideActive = typeof estAideContextuelleActive === 'function' && estAideContextuelleActive();
@@ -185,12 +179,9 @@
 
                 ${zeroStateHTML}
 
-                <!-- Pipeline repliable -->
-                <div class="pipeline-etapes-groupe${queue.length === 0 ? ' replie' : ''}" id="pipeline-etapes-groupe">
-                    <div class="pipeline-etapes-toggle" onclick="travauxUI.togglePipelineEtapes()">
-                        <span id="pipeline-toggle-fleche">${queue.length === 0 ? '&#x25B6;' : '&#x25BC;'}</span>
-                        <span>Pipeline d'import${queue.length > 0 ? ` (${queue.length} fichier(s))` : ''}</span>
-                    </div>
+                <!-- Pipeline -->
+                <div class="pipeline-etapes-groupe" id="pipeline-etapes-groupe">
+                    <div class="pipeline-section-titre">Optimisation</div>
                     <div class="pipeline-etapes-contenu">
 
                     <!-- ETAPE 1 : Zone d'entree -->
@@ -198,7 +189,6 @@
                         <div class="pipeline-etape-header">
                             <span class="pipeline-etape-numero">1</span>
                             <span class="pipeline-etape-titre">Zone d'entrée</span>
-                            <span class="pipeline-etape-compteur">${queue.length > 0 ? queue.length + ' fichier(s)' : ''}</span>
                         </div>
                         <div id="travaux-drop-zone" class="travaux-drop-zone">
                             <div class="travaux-drop-zone-contenu">
@@ -212,42 +202,14 @@
                     ${queue.length > 0 ? `
                     <div class="pipeline-connecteur"></div>
 
-                    <!-- ETAPE 2 : Fichiers deposes -->
+                    <!-- ETAPE 2 : Fichiers deposes (3 colonnes) -->
                     <div class="pipeline-etape">
                         <div class="pipeline-etape-header">
                             <span class="pipeline-etape-numero">2</span>
                             <span class="pipeline-etape-titre">Fichiers déposés</span>
-                            <span class="pipeline-etape-compteur">${queue.length} fichier(s)</span>
+                            <span class="pipeline-etape-compteur">${nbImages} image(s)</span>
                         </div>
-                        ${genererPreviewsEntree(queue)}
-                        ${genererResumeDetection(queue)}
-                        ${genererSectionTraitement(queue, groupes)}
-                    </div>
-
-                    <div class="pipeline-connecteur"></div>
-
-                    <!-- ETAPE 3 : Identification -->
-                    <div class="pipeline-etape">
-                        <div class="pipeline-etape-header">
-                            <span class="pipeline-etape-numero">3</span>
-                            <span class="pipeline-etape-titre">Identification</span>
-                            <span class="pipeline-etape-compteur">${nbIdentifie}/${queue.length} identifié(s)</span>
-                        </div>
-                        ${genererSectionIdentification(queue)}
-                    </div>
-
-                    <div class="pipeline-connecteur"></div>
-
-                    <!-- Bouton Importer -->
-                    <div class="pipeline-bouton-importer">
-                        ${genererBoutonsActionsPipeline(queue)}
-                    </div>
-
-                    <div id="travaux-progression-import" class="u-hide">
-                        <div class="pipeline-progression-container">
-                            <div id="travaux-barre-progression" class="pipeline-progression-barre"></div>
-                        </div>
-                        <div id="travaux-texte-progression" class="texte-muted"></div>
+                        ${genererEtape2Colonnes(queue, groupes)}
                     </div>
                     ` : ''}
 
@@ -271,18 +233,10 @@
             identifierAutoPipeline();
             rafraichirPipelineUI();
         });
-    }
 
-    /**
-     * Toggle la visibilite du groupe d'etapes du pipeline
-     */
-    function togglePipelineEtapes() {
-        const groupe = document.getElementById('pipeline-etapes-groupe');
-        if (!groupe) return;
-        groupe.classList.toggle('replie');
-        const fleche = document.getElementById('pipeline-toggle-fleche');
-        if (fleche) {
-            fleche.innerHTML = groupe.classList.contains('replie') ? '&#x25B6;' : '&#x25BC;';
+        // Lancer les previews apres le rendu si des fichiers sont en queue
+        if (queue.length > 0) {
+            mettreAJourPreviewsPipeline();
         }
     }
 
@@ -508,146 +462,267 @@
        =============================== */
 
     /**
-     * Genere la grille de miniatures de la zone d'entree
-     * @param {Array} queue - File d'attente
-     * @returns {string} HTML
+     * Calcule les dimensions cibles apres uniformisation 200 DPI
+     * Reprend la logique de uniformiser200DPI() sans toucher aux pixels
+     * @param {Object} f - Fichier prepare
+     * @returns {{w: number, h: number}} Dimensions cibles
      */
-    function genererPreviewsEntree(queue) {
-        let html = '<div class="pipeline-previews-grille">';
+    function calculerDimensionsCibles(f) {
+        if (f.estPDF || !f.largeurOriginale || !f.hauteurOriginale) {
+            return { w: 0, h: 0 };
+        }
+
+        const optDPI = document.getElementById('pipeline-opt-dpi')?.checked;
+        if (!optDPI) {
+            return { w: f.largeurOriginale, h: f.hauteurOriginale };
+        }
+
+        let w = f.largeurOriginale;
+        let h = f.hauteurOriginale;
+
+        let maxW, maxH;
+        if (w > 2500 || h > 2500) {
+            maxW = 2200; maxH = 3400;
+        } else {
+            maxW = 1700; maxH = 2200;
+        }
+
+        if (w <= maxW && h <= maxH) {
+            return { w, h };
+        }
+
+        const ratio = Math.min(maxW / w, maxH / h);
+        return { w: Math.round(w * ratio), h: Math.round(h * ratio) };
+    }
+
+    /**
+     * Estime la taille fichier apres traitement
+     * JPEG 0.88 ≈ 0.3 bytes/pixel. PDF : taille inchangee.
+     * @param {number} w - Largeur cible
+     * @param {number} h - Hauteur cible
+     * @param {Object} f - Fichier prepare
+     * @returns {number} Taille estimee en octets
+     */
+    function estimerTailleFichier(w, h, f) {
+        if (f.estPDF || w === 0 || h === 0) {
+            return f.tailleFichier;
+        }
+        return Math.round(w * h * 0.3);
+    }
+
+    /**
+     * Genere un thumbnail de preview avec effets de traitement appliques
+     * @param {Object} f - Fichier prepare
+     * @param {number} index - Index dans la queue
+     */
+    async function genererPreviewThumbnail(f, index) {
+        const conteneur = document.getElementById('pipeline-preview-' + index);
+        if (!conteneur) return;
+
+        if (f.estPDF) {
+            if (f.thumbnailDataUrl) {
+                conteneur.innerHTML = `<img src="${f.thumbnailDataUrl}" alt="">`;
+            } else {
+                conteneur.innerHTML = '<span style="font-size:1.5rem">&#x1F4C4;</span>';
+            }
+            return;
+        }
+
+        if (!f.thumbnailDataUrl) {
+            conteneur.innerHTML = '<span style="font-size:1.5rem">&#x1F5BC;</span>';
+            return;
+        }
+
+        try {
+            const img = new Image();
+            await new Promise((resolve, reject) => {
+                img.onload = resolve;
+                img.onerror = reject;
+                img.src = f.thumbnailDataUrl;
+            });
+
+            const maxPreviewW = 200;
+            const scale = Math.min(1, maxPreviewW / img.width);
+            const cw = Math.round(img.width * scale);
+            const ch = Math.round(img.height * scale);
+
+            const canvas = document.createElement('canvas');
+            canvas.width = cw;
+            canvas.height = ch;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, cw, ch);
+
+            // Appliquer balance des blancs si checkbox cochee
+            const optBalance = document.getElementById('pipeline-opt-balance')?.checked;
+            if (optBalance) {
+                const imgData = ctx.getImageData(0, 0, cw, ch);
+                const d = imgData.data;
+                const totalPixels = d.length / 4;
+
+                const luminosites = new Float32Array(totalPixels);
+                for (let i = 0; i < totalPixels; i++) {
+                    const idx = i * 4;
+                    luminosites[i] = 0.299 * d[idx] + 0.587 * d[idx + 1] + 0.114 * d[idx + 2];
+                }
+
+                const sorted = Float32Array.from(luminosites).sort();
+                const seuil = sorted[Math.floor(totalPixels * 0.95)];
+
+                let sumR = 0, sumG = 0, sumB = 0, count = 0;
+                for (let i = 0; i < totalPixels; i++) {
+                    if (luminosites[i] >= seuil) {
+                        const idx = i * 4;
+                        sumR += d[idx];
+                        sumG += d[idx + 1];
+                        sumB += d[idx + 2];
+                        count++;
+                    }
+                }
+
+                if (count > 0) {
+                    const rFactor = Math.max(0.5, Math.min(2.0, 255 / Math.max(sumR / count, 1)));
+                    const gFactor = Math.max(0.5, Math.min(2.0, 255 / Math.max(sumG / count, 1)));
+                    const bFactor = Math.max(0.5, Math.min(2.0, 255 / Math.max(sumB / count, 1)));
+
+                    for (let i = 0; i < d.length; i += 4) {
+                        d[i]     = Math.min(255, Math.round(d[i]     * rFactor));
+                        d[i + 1] = Math.min(255, Math.round(d[i + 1] * gFactor));
+                        d[i + 2] = Math.min(255, Math.round(d[i + 2] * bFactor));
+                    }
+                    ctx.putImageData(imgData, 0, 0);
+                }
+            }
+
+            const imgResult = document.createElement('img');
+            imgResult.src = canvas.toDataURL('image/jpeg', 0.8);
+            imgResult.style.maxWidth = '100%';
+            imgResult.style.maxHeight = '100%';
+            imgResult.style.objectFit = 'contain';
+            conteneur.innerHTML = '';
+            conteneur.appendChild(imgResult);
+        } catch (e) {
+            console.warn('[Pipeline] Erreur preview thumbnail:', f.nomFichier, e);
+            conteneur.innerHTML = '<span style="font-size:1.5rem">&#x1F5BC;</span>';
+        }
+    }
+
+    /**
+     * Met a jour les previews et les infos de la colonne droite (debounced)
+     */
+    let _previewTimer = null;
+    function mettreAJourPreviewsPipeline() {
+        if (_previewTimer) clearTimeout(_previewTimer);
+        _previewTimer = setTimeout(_mettreAJourPreviewsPipelineImpl, 300);
+    }
+
+    function _mettreAJourPreviewsPipelineImpl() {
+        const queue = travauxImport.obtenirFileDAttente();
+
         queue.forEach((f, index) => {
-            const thumb = f.thumbnailDataUrl;
-            const icone = f.estPDF ? '&#x1F4C4;' : '&#x1F5BC;';
-            const nomCourt = f.parseLea.nom
-                ? f.parseLea.nom.substring(0, 10)
-                : f.nomFichier.substring(0, 10);
-            html += `<div class="pipeline-preview-mini" title="${echapperHtml(f.nomFichier)}">
-                ${thumb ? `<img src="${thumb}" alt="">` : `<span style="font-size:1.5rem">${icone}</span>`}
-                <span class="pipeline-mini-nom">${echapperHtml(nomCourt)}</span>
-            </div>`;
+            // Mettre a jour resolution cible et taille estimee
+            const dims = calculerDimensionsCibles(f);
+            const tailleEst = estimerTailleFichier(dims.w, dims.h, f);
+
+            const resEl = document.getElementById('pipeline-res-cible-' + index);
+            const tailleEl = document.getElementById('pipeline-taille-cible-' + index);
+
+            if (resEl) {
+                resEl.textContent = f.estPDF
+                    ? 'PDF (aucun traitement)'
+                    : `${dims.w} x ${dims.h}`;
+            }
+            if (tailleEl) {
+                tailleEl.textContent = travauxStockage.formaterTaille(tailleEst);
+            }
+
+            // Generer le preview canvas
+            genererPreviewThumbnail(f, index);
         });
-        html += '</div>';
-        return html;
     }
 
     /**
-     * Genere le resume de detection format (PDF vs images)
-     * @param {Array} queue - File d'attente
-     * @returns {string} HTML
-     */
-    function genererResumeDetection(queue) {
-        const nbPDF = queue.filter(f => f.estPDF).length;
-        const nbImages = queue.filter(f => f.estImage).length;
-        let html = '<div class="pipeline-resume-detection">';
-        if (nbPDF > 0) {
-            html += `<div class="pipeline-resume-item">
-                <span class="pipeline-resume-icone">&#x1F4C4;</span>
-                <span>${nbPDF} PDF (prêts)</span>
-            </div>`;
-        }
-        if (nbImages > 0) {
-            html += `<div class="pipeline-resume-item">
-                <span class="pipeline-resume-icone">&#x1F5BC;</span>
-                <span>${nbImages} image(s)</span>
-            </div>`;
-        }
-        html += '</div>';
-        return html;
-    }
-
-    /**
-     * Genere la section traitement (checklist d'optimisation)
+     * Genere l'etape 2 en layout 3 colonnes
      * @param {Array} queue - File d'attente
      * @param {Map} groupes - Groupes de documents
      * @returns {string} HTML
      */
-    function genererSectionTraitement(queue, groupes) {
+    function genererEtape2Colonnes(queue, groupes) {
         const nbImages = queue.filter(f => f.estImage).length;
-        const nbGroupes = Array.from(groupes.values()).filter(g => g.length > 1 && g.some(f => f.estImage)).length;
 
-        // Detection images en paysage
-        const imagesPaysage = queue.filter(f => f.estImage && f.largeurOriginale && f.hauteurOriginale && f.largeurOriginale > f.hauteurOriginale * 1.1);
-        let alerteRotation = '';
-        if (imagesPaysage.length > 0) {
-            alerteRotation = `<div class="pipeline-alerte-rotation">&#x26A0; ${imagesPaysage.length} image(s) potentiellement en paysage — rotation recommandée</div>`;
-        }
+        // === Colonne gauche : Originaux ===
+        let colGauche = '<div class="pipeline-col-originaux">';
+        colGauche += '<div class="pipeline-col-titre">Originaux</div>';
+        queue.forEach((f) => {
+            const thumb = f.thumbnailDataUrl;
+            const icone = f.estPDF ? '&#x1F4C4;' : '&#x1F5BC;';
+            const nomCourt = (f.parseLea.nom || f.nomFichier).substring(0, 12);
+            const resolution = (f.largeurOriginale && f.hauteurOriginale)
+                ? `${f.largeurOriginale} x ${f.hauteurOriginale}`
+                : 'PDF';
+            const poids = travauxStockage.formaterTaille(f.tailleFichier);
 
-        let html = '<ul class="pipeline-checklist">';
-        html += `<li><label><input type="checkbox" id="pipeline-opt-balance" checked> Balance des blancs auto</label></li>`;
-        html += `<li><label><input type="checkbox" id="pipeline-opt-rotation" checked> Rotation (interactif)</label></li>`;
-        html += `<li><label><input type="checkbox" id="pipeline-opt-dpi" checked> Uniformisation 200 DPI</label></li>`;
-        html += `<li><label><input type="checkbox" id="pipeline-opt-doublons" checked> Détection doublons (manuel)</label></li>`;
-        html += `<li><label><input type="checkbox" id="pipeline-opt-assemblage" checked> Assemblage PDF${nbGroupes > 0 ? ` (${nbGroupes} groupe(s))` : ''}</label></li>`;
-        html += '</ul>';
-        html += alerteRotation;
+            colGauche += `<div class="pipeline-fichier-colonne">
+                <div class="pipeline-fichier-thumb-col">
+                    ${thumb ? `<img src="${thumb}" alt="">` : `<span style="font-size:1.5rem">${icone}</span>`}
+                </div>
+                <div class="pipeline-fichier-meta-col">
+                    <span class="pipeline-meta-nom" title="${echapperHtml(f.nomFichier)}">${echapperHtml(nomCourt)}</span>
+                    <span class="pipeline-meta-resolution">${resolution}</span>
+                    <span class="pipeline-meta-taille">${poids}</span>
+                </div>
+            </div>`;
+        });
+        colGauche += '</div>';
 
-        html += `<div style="margin-top:10px">
-            <button class="btn btn-principal" onclick="travauxUI.lancerTraitementPipeline()" ${nbImages === 0 ? 'disabled' : ''}>
-                Lancer le traitement
-            </button>
+        // === Colonne centre : Traitement ===
+        let colCentre = '<div class="pipeline-col-controles">';
+        colCentre += '<div class="pipeline-col-titre">Traitement</div>';
+
+        colCentre += '<ul class="pipeline-checklist">';
+        colCentre += `<li><label><input type="checkbox" id="pipeline-opt-balance" checked onchange="travauxUI.mettreAJourPreviewsPipeline()"> Optimisation automatique</label></li>`;
+        colCentre += `<li><label><input type="checkbox" id="pipeline-opt-dpi" checked onchange="travauxUI.mettreAJourPreviewsPipeline()"> Uniformisation 200 DPI</label></li>`;
+        colCentre += `<li><label><input type="checkbox" id="pipeline-opt-doublons" checked> Détection doublons (manuel)</label></li>`;
+        colCentre += `<li><label><input type="checkbox" id="pipeline-opt-assemblage" checked> Assemblage automatique (par noms / production)</label></li>`;
+        colCentre += '</ul>';
+
+        colCentre += `<div class="texte-muted" style="margin:8px 0;font-size:0.8rem">${nbImages} image(s)</div>`;
+
+        colCentre += `<div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+            <button class="btn btn-secondaire" onclick="travauxUI.ouvrirPreparation()">Optimisation spécifique</button>
+            <button class="btn btn-principal" onclick="travauxUI.appliquerEtImporter()">Appliquer et importer</button>
+            <button class="btn btn-secondaire" onclick="travauxImport.viderFileDAttente(); travauxUI.afficherImport();">Annuler tout</button>
         </div>`;
 
-        html += `<div class="pipeline-progression-container" id="pipeline-traitement-progression" style="display:none">
+        colCentre += `<div class="pipeline-progression-container" id="pipeline-traitement-progression" style="display:none;margin-top:8px">
             <div class="pipeline-progression-barre" id="pipeline-traitement-barre"></div>
         </div>
         <div id="pipeline-traitement-texte" class="texte-muted"></div>`;
 
-        return html;
-    }
+        colCentre += '</div>';
 
-    /**
-     * Genere la section d'identification (badges + dropdowns)
-     * @param {Array} queue - File d'attente
-     * @returns {string} HTML
-     */
-    function genererSectionIdentification(queue) {
-        const fichiersCibles = queue.filter(f => f.pipelineStatut === 'pret' || f.pipelineStatut === 'identifie');
-        if (fichiersCibles.length === 0 && queue.length > 0) {
-            return '<p class="texte-muted">Les fichiers seront disponibles après le traitement.</p>';
-        }
-        if (queue.length === 0) {
-            return '<p class="texte-muted">Aucun fichier en file.</p>';
-        }
-
-        const etudiants = obtenirDonneesSelonMode(cle('groupeEtudiants'));
-        const productions = obtenirDonneesSelonMode(cle('productions'));
-
-        let html = '<div class="pipeline-identification-liste">';
-
+        // === Colonne droite : Apercu ===
+        let colDroite = '<div class="pipeline-col-previews">';
+        colDroite += '<div class="pipeline-col-titre">Aperçu</div>';
         queue.forEach((f, index) => {
-            const badge = genererBadgePipeline(f);
-            const etudiantNom = f.etudiantAssocie
-                ? `${echapperHtml(f.etudiantAssocie.nom)}, ${echapperHtml(f.etudiantAssocie.prenom)}`
-                : '';
+            const dims = calculerDimensionsCibles(f);
+            const tailleEst = estimerTailleFichier(dims.w, dims.h, f);
+            const resCible = f.estPDF
+                ? 'PDF (aucun traitement)'
+                : `${dims.w} x ${dims.h}`;
 
-            // Production associee
-            const prod = productions.find(p => p.id === f.productionId);
-            const prodNom = prod ? echapperHtml(prod.titre || prod.nom || prod.id) : '';
-
-            html += `<div class="pipeline-identification-item">`;
-            html += badge;
-
-            if (f.pipelineStatut === 'identifie') {
-                html += `<span class="pipeline-fichier-nom-lea">${prodNom} — ${etudiantNom}</span>`;
-            } else {
-                // Dropdown etudiant
-                html += `<select class="form-select" onchange="travauxUI.associerEtudiantPipeline(${index}, this.value)" style="font-size:0.8rem;max-width:180px">
-                    <option value="">-- Étudiant --</option>
-                    ${[...etudiants].sort((a,b) => (a.nom||'').localeCompare(b.nom||'')).map(e => `<option value="${e.da}" ${f.etudiantDA === e.da ? 'selected' : ''}>${echapperHtml(e.nom + ', ' + e.prenom)}</option>`).join('')}
-                </select>`;
-                // Dropdown production
-                html += `<select class="form-select" onchange="travauxUI.associerProductionPipeline(${index}, this.value)" style="font-size:0.8rem;max-width:180px">
-                    <option value="">-- Production --</option>
-                    ${productions.map(p => `<option value="${p.id}" ${f.productionId === p.id ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
-                </select>`;
-            }
-
-            html += `<button class="btn-supprimer-fichier" onclick="travauxImport.retirerFichier(${index}); travauxUI.rafraichirPipelineUI();" title="Retirer">&times;</button>`;
-            html += `</div>`;
+            colDroite += `<div class="pipeline-fichier-colonne">
+                <div class="pipeline-fichier-thumb-col" id="pipeline-preview-${index}">
+                    ${f.thumbnailDataUrl ? `<img src="${f.thumbnailDataUrl}" alt="">` : `<span style="font-size:1.5rem">${f.estPDF ? '&#x1F4C4;' : '&#x1F5BC;'}</span>`}
+                </div>
+                <div class="pipeline-fichier-meta-col">
+                    <span class="pipeline-meta-resolution" id="pipeline-res-cible-${index}">${resCible}</span>
+                    <span class="pipeline-meta-taille" id="pipeline-taille-cible-${index}">${travauxStockage.formaterTaille(tailleEst)}</span>
+                </div>
+            </div>`;
         });
+        colDroite += '</div>';
 
-        html += '</div>';
-
-        return html;
+        return `<div class="pipeline-3col-grid">${colGauche}${colCentre}${colDroite}</div>`;
     }
 
     /**
@@ -668,22 +743,6 @@
             default:
                 return '<span class="pipeline-badge">' + echapperHtml(fichier.pipelineStatut || '?') + '</span>';
         }
-    }
-
-    /**
-     * Genere les boutons d'action du pipeline (importer)
-     * @param {Array} queue - File d'attente
-     * @returns {string} HTML
-     */
-    function genererBoutonsActionsPipeline(queue) {
-        const tousIdentifies = queue.length > 0 && queue.every(f => f.pipelineStatut === 'identifie');
-        return `
-            <button class="btn btn-principal" onclick="travauxUI.lancerImportPipeline()" ${!tousIdentifies ? 'disabled title="Tous les fichiers doivent être identifiés"' : ''}>
-                Importer ${queue.length} fichier(s)
-            </button>
-            <button class="btn btn-secondaire" onclick="travauxImport.viderFileDAttente(); travauxUI.afficherImport();">
-                Annuler tout
-            </button>`;
     }
 
     /**
@@ -750,22 +809,6 @@
             queue[index].pipelineStatut = 'pret';
         }
 
-        rafraichirPipelineUI();
-    }
-
-    /**
-     * Change la production globale du pipeline et applique aux fichiers sans production
-     * @param {string} productionId - ID de la production
-     */
-    function changerProductionGlobalePipeline(productionId) {
-        travauxImport.setProductionGlobale(productionId);
-        const queue = travauxImport.obtenirFileDAttente();
-        queue.forEach(f => {
-            if (!f.productionId && productionId) {
-                f.productionId = productionId;
-            }
-        });
-        identifierAutoPipeline();
         rafraichirPipelineUI();
     }
 
@@ -1076,58 +1119,6 @@
     }
 
     /**
-     * Lance l'import pipeline — chaque fichier a deja sa production assignee
-     */
-    async function lancerImportPipeline() {
-        const queue = travauxImport.obtenirFileDAttente();
-        if (queue.length === 0) {
-            afficherModalePipeline('Import', '<p>Aucun fichier à importer.</p>',
-                [{ label: 'OK', classe: 'btn-principal', action: () => {} }]);
-            return;
-        }
-
-        if (!queue.every(f => f.pipelineStatut === 'identifie')) {
-            afficherModalePipeline('Import', '<p>Tous les fichiers doivent être identifiés avant l\'import.</p>',
-                [{ label: 'OK', classe: 'btn-principal', action: () => {} }]);
-            return;
-        }
-
-        // Verifier que les blobs sont disponibles (perdus apres refresh page)
-        const sansBlob = queue.filter(f => !f.fichier);
-        if (sansBlob.length > 0) {
-            afficherModalePipeline('Fichiers expirés',
-                `<p>${sansBlob.length} fichier(s) ne sont plus disponibles en mémoire (la page a été rechargée).</p>
-                <p>Veuillez vider la file et re-déposer vos fichiers.</p>`,
-                [{ label: 'Vider la file', classe: 'btn-principal', action: () => {
-                    travauxImport.viderFileDAttente();
-                    afficherImport();
-                }}]);
-            return;
-        }
-
-        const progression = document.getElementById('travaux-progression-import');
-        if (progression) progression.classList.remove('u-hide');
-
-        // Importer avec la productionId de chaque fichier individuel
-        const resultat = await travauxImport.importerTous(null, (i, total) => {
-            const pourcent = Math.round((i / total) * 100);
-            const barre = document.getElementById('travaux-barre-progression');
-            if (barre) barre.style.width = pourcent + '%';
-            const texte = document.getElementById('travaux-texte-progression');
-            if (texte) texte.textContent = `${i}/${total} fichier(s) importés...`;
-        });
-
-        if (progression) progression.classList.add('u-hide');
-
-        afficherImport();
-
-        afficherModalePipeline('Import terminé',
-            `<p>${resultat.importes} fichier(s) importé(s)${resultat.erreurs > 0 ? `, ${resultat.erreurs} erreur(s)` : ''}.</p>
-            <p class="pipeline-message-succes">Ces documents sont prêts pour l'annotation et l'évaluation.</p>`,
-            [{ label: 'OK', classe: 'btn-principal', action: () => {} }]);
-    }
-
-    /**
      * Ouvre un fichier dans la visionneuse
      * @param {string} fichierId - ID du fichier
      */
@@ -1419,24 +1410,22 @@
        =============================== */
 
     /**
-     * Lance le traitement par lot des images dans le pipeline
-     * Lit les checkboxes, traite par lots de 10, met a jour la progression
+     * Appliquer et importer — fusionne traitement + identification + import
+     * Lit les checkboxes, traite les images, identifie, force pret→identifie, importe
      */
-    async function lancerTraitementPipeline() {
+    async function appliquerEtImporter() {
         const queue = travauxImport.obtenirFileDAttente();
-        const images = queue.filter(f => f.pipelineStatut === 'a-optimiser');
-
-        if (images.length === 0) {
-            afficherModalePipeline('Traitement', '<p>Aucune image à traiter.</p>',
+        if (queue.length === 0) {
+            afficherModalePipeline('Import', '<p>Aucun fichier à importer.</p>',
                 [{ label: 'OK', classe: 'btn-principal', action: () => {} }]);
             return;
         }
 
         // Verifier que les blobs sont disponibles
-        const sansBlob = images.filter(f => !f.fichier);
+        const sansBlob = queue.filter(f => !f.fichier);
         if (sansBlob.length > 0) {
             afficherModalePipeline('Fichiers expirés',
-                `<p>${sansBlob.length} image(s) ne sont plus disponibles en mémoire (la page a été rechargée).</p>
+                `<p>${sansBlob.length} fichier(s) ne sont plus disponibles en mémoire (la page a été rechargée).</p>
                 <p>Veuillez vider la file et re-déposer vos fichiers.</p>`,
                 [{ label: 'Vider la file', classe: 'btn-principal', action: () => {
                     travauxImport.viderFileDAttente();
@@ -1446,81 +1435,132 @@
         }
 
         const optBalance = document.getElementById('pipeline-opt-balance')?.checked;
-        const optRotation = document.getElementById('pipeline-opt-rotation')?.checked;
         const optDPI = document.getElementById('pipeline-opt-dpi')?.checked;
         const optDoublons = document.getElementById('pipeline-opt-doublons')?.checked;
         const optAssemblage = document.getElementById('pipeline-opt-assemblage')?.checked;
 
-        // Si rotation cochee, ouvrir le mode interactif d'abord
-        if (optRotation) {
-            const imagesQueue = queue.filter(f => f.estImage);
-            travauxPreparation.ouvrir(imagesQueue, function() {
-                // Apres rotation, relancer le batch sans rotation
-                document.getElementById('pipeline-opt-rotation').checked = false;
-                lancerTraitementPipeline();
-            });
-            return;
-        }
-
-        // Si doublons cochee, afficher la modale de detection manuelle
+        // Si doublons cochee et groupes multiples, afficher la modale puis re-appeler
         if (optDoublons) {
-            afficherModaleDoublons(queue);
-            return;
+            const groupes = travauxImport.regrouperParDocument();
+            const groupesMultiples = Array.from(groupes.entries()).filter(([, f]) => f.length > 1);
+            if (groupesMultiples.length > 0) {
+                afficherModaleDoublonsEtImporter(queue);
+                return;
+            }
         }
 
+        // === Traitement batch (images a-optimiser) ===
+        const images = queue.filter(f => f.pipelineStatut === 'a-optimiser');
         const BATCH_SIZE = 10;
         let traites = 0;
         const total = images.length;
 
-        for (let i = 0; i < images.length; i += BATCH_SIZE) {
-            const lot = images.slice(i, i + BATCH_SIZE);
+        if (total > 0) {
+            for (let i = 0; i < images.length; i += BATCH_SIZE) {
+                const lot = images.slice(i, i + BATCH_SIZE);
 
-            await Promise.all(lot.map(async (f) => {
-                let blob = f.fichier;
+                await Promise.all(lot.map(async (f) => {
+                    let blob = f.fichier;
 
-                // Balance des blancs auto
-                if (optBalance && typeof travauxPreparation.autoBalanceBlancs === 'function') {
-                    try {
-                        blob = await travauxPreparation.autoBalanceBlancs(blob);
-                    } catch (e) {
-                        console.warn('[Pipeline] Erreur balance blancs:', f.nomFichier, e);
+                    // Balance des blancs auto
+                    if (optBalance && typeof travauxPreparation.autoBalanceBlancs === 'function') {
+                        try {
+                            blob = await travauxPreparation.autoBalanceBlancs(blob);
+                        } catch (e) {
+                            console.warn('[Pipeline] Erreur balance blancs:', f.nomFichier, e);
+                        }
                     }
-                }
 
-                // Uniformisation 200 DPI
-                if (optDPI) {
-                    try {
-                        blob = await uniformiser200DPI(blob);
-                    } catch (e) {
-                        console.warn('[Pipeline] Erreur uniformisation DPI:', f.nomFichier, e);
+                    // Uniformisation 200 DPI
+                    if (optDPI) {
+                        try {
+                            blob = await uniformiser200DPI(blob);
+                        } catch (e) {
+                            console.warn('[Pipeline] Erreur uniformisation DPI:', f.nomFichier, e);
+                        }
                     }
-                }
 
-                f.fichier = blob;
-                f.tailleFichier = blob.size;
-                f.pipelineStatut = 'pret';
-                traites++;
+                    f.fichier = blob;
+                    f.tailleFichier = blob.size;
+                    f.pipelineStatut = 'pret';
+                    traites++;
 
-                afficherProgressionPipeline(traites, total);
-            }));
+                    afficherProgressionPipeline(traites, total);
+                }));
 
-            // Yield au navigateur entre chaque lot
-            await new Promise(r => setTimeout(r, 0));
+                await new Promise(r => setTimeout(r, 0));
+            }
         }
 
-        // Auto-identifier les fichiers dont le parseLea a reussi
-        identifierAutoPipeline();
-
-        // Assemblage PDF des groupes
+        // === Assemblage PDF si coche ===
         if (optAssemblage) {
             await assemblerGroupesPipeline(queue);
         }
 
-        rafraichirPipelineUI();
+        // === Auto-identification ===
+        identifierAutoPipeline();
 
-        afficherModalePipeline('Traitement terminé',
-            `<p>${traites} image(s) traitée(s) avec succès.</p>`,
+        // === Forcer tous les fichiers pret → identifie (import sans blocage) ===
+        queue.forEach(f => {
+            if (f.pipelineStatut === 'pret') {
+                f.pipelineStatut = 'identifie';
+            }
+        });
+
+        // === Import ===
+        const resultat = await travauxImport.importerTous(null, (i, totalImport) => {
+            const pourcent = Math.round((i / totalImport) * 100);
+            const barre = document.getElementById('pipeline-traitement-barre');
+            if (barre) barre.style.width = pourcent + '%';
+            const texte = document.getElementById('pipeline-traitement-texte');
+            if (texte) texte.textContent = `${i}/${totalImport} fichier(s) importés...`;
+        });
+
+        afficherImport();
+
+        afficherModalePipeline('Import terminé',
+            `<p>${resultat.importes} fichier(s) importé(s)${resultat.erreurs > 0 ? `, ${resultat.erreurs} erreur(s)` : ''}.</p>
+            <p class="pipeline-message-succes">Ces documents sont prêts pour l'annotation et l'évaluation.</p>`,
             [{ label: 'OK', classe: 'btn-principal', action: () => {} }]);
+    }
+
+    /**
+     * Modale doublons adaptee pour appliquerEtImporter
+     * Apres resolution des doublons, relance appliquerEtImporter
+     * @param {Array} queue - File d'attente
+     */
+    function afficherModaleDoublonsEtImporter(queue) {
+        const groupes = travauxImport.regrouperParDocument();
+        const groupesMultiples = Array.from(groupes.entries()).filter(([, f]) => f.length > 1);
+
+        let html = '<div class="modal-section"><p>Cochez les fichiers à supprimer :</p>';
+        groupesMultiples.forEach(([cleGroupe, fichiers]) => {
+            html += `<div style="margin-bottom:16px"><strong>${echapperHtml(cleGroupe)}</strong>`;
+            fichiers.forEach((f) => {
+                const idx = queue.indexOf(f);
+                html += `<div style="padding:4px 0"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" class="doublon-check" data-index="${idx}"> ${echapperHtml(f.nomFichier)} (${travauxStockage.formaterTaille(f.tailleFichier)})</label></div>`;
+            });
+            html += '</div>';
+        });
+        html += '</div>';
+
+        afficherModalePipeline(
+            'Detection de doublons',
+            html,
+            [
+                { label: 'Supprimer et continuer', classe: 'btn-principal', action: (overlay) => {
+                    const checks = overlay.querySelectorAll('.doublon-check:checked');
+                    const indices = Array.from(checks).map(c => parseInt(c.dataset.index)).sort((a, b) => b - a);
+                    indices.forEach(idx => travauxImport.retirerFichier(idx));
+                    document.getElementById('pipeline-opt-doublons').checked = false;
+                    appliquerEtImporter();
+                }},
+                { label: 'Annuler', classe: 'btn-secondaire', action: () => {
+                    document.getElementById('pipeline-opt-doublons').checked = false;
+                    appliquerEtImporter();
+                }}
+            ]
+        );
     }
 
     /**
@@ -1633,57 +1673,6 @@
                 console.error(`[Pipeline] Erreur assemblage groupe "${cle}":`, e);
             }
         }
-    }
-
-    /**
-     * Affiche une modale simple de detection manuelle de doublons
-     * @param {Array} queue - File d'attente
-     */
-    function afficherModaleDoublons(queue) {
-        const groupes = travauxImport.regrouperParDocument();
-        const groupesMultiples = Array.from(groupes.entries()).filter(([, f]) => f.length > 1);
-
-        if (groupesMultiples.length === 0) {
-            afficherModalePipeline(
-                'Aucun doublon',
-                '<p>Aucun doublon potentiel détecté.</p>',
-                [{ label: 'OK', classe: 'btn-principal', action: () => {
-                    document.getElementById('pipeline-opt-doublons').checked = false;
-                    lancerTraitementPipeline();
-                }}]
-            );
-            return;
-        }
-
-        let html = '<div class="modal-section"><p>Cochez les fichiers à supprimer :</p>';
-
-        groupesMultiples.forEach(([cleGroupe, fichiers]) => {
-            html += `<div style="margin-bottom:16px"><strong>${echapperHtml(cleGroupe)}</strong>`;
-            fichiers.forEach((f) => {
-                const idx = queue.indexOf(f);
-                html += `<div style="padding:4px 0"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" class="doublon-check" data-index="${idx}"> ${echapperHtml(f.nomFichier)} (${travauxStockage.formaterTaille(f.tailleFichier)})</label></div>`;
-            });
-            html += '</div>';
-        });
-        html += '</div>';
-
-        afficherModalePipeline(
-            'Detection de doublons',
-            html,
-            [
-                { label: 'Supprimer et continuer', classe: 'btn-principal', action: (overlay) => {
-                    const checks = overlay.querySelectorAll('.doublon-check:checked');
-                    const indices = Array.from(checks).map(c => parseInt(c.dataset.index)).sort((a, b) => b - a);
-                    indices.forEach(idx => travauxImport.retirerFichier(idx));
-                    document.getElementById('pipeline-opt-doublons').checked = false;
-                    lancerTraitementPipeline();
-                }},
-                { label: 'Annuler', classe: 'btn-secondaire', action: () => {
-                    document.getElementById('pipeline-opt-doublons').checked = false;
-                    lancerTraitementPipeline();
-                }}
-            ]
-        );
     }
 
     /**
@@ -2198,13 +2187,11 @@
         retourFichiers: retourFichiers,
         retourImport: retourImport,
         // Pipeline
-        lancerTraitementPipeline: lancerTraitementPipeline,
-        lancerImportPipeline: lancerImportPipeline,
+        appliquerEtImporter: appliquerEtImporter,
+        mettreAJourPreviewsPipeline: mettreAJourPreviewsPipeline,
         associerEtudiantPipeline: associerEtudiantPipeline,
         associerProductionPipeline: associerProductionPipeline,
         identifierAutoPipeline: identifierAutoPipeline,
-        changerProductionGlobalePipeline: changerProductionGlobalePipeline,
-        togglePipelineEtapes: togglePipelineEtapes,
         rafraichirPipelineUI: rafraichirPipelineUI,
         // Archivage
         lancerArchivageEtudiant: lancerArchivageEtudiant,
