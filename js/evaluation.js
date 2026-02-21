@@ -6107,6 +6107,7 @@ window.basculerVerrouillageEvaluationCourante = basculerVerrouillageEvaluationCo
 window.nouvelleEvaluation = nouvelleEvaluation;
 window.gererChangementCheckboxJetonDelai = gererChangementCheckboxJetonDelai;
 window.gererChangementCheckboxJetonReprise = gererChangementCheckboxJetonReprise;
+window.niveauSelectionne = niveauSelectionne;
 
 
 })();

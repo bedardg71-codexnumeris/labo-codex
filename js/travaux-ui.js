@@ -58,9 +58,15 @@
      */
     async function initialiserModuleTravaux() {
         if (moduleInitialise) {
+            const etaitEnModeEvaluer = (modeCourant === 'evaluer');
+            // Fermer les palettes eval AVANT rafraichirUI pour sauver les panneaux
+            // (rafraichirUI → afficherFichiers détruit le conteneur document)
+            if (document.getElementById('travaux-palette-eval-gauche')) {
+                fermerModeEvaluation();
+            }
             rafraichirUI();
             // Restaurer le mode Évaluer si c'était le mode actif avant navigation
-            if (modeCourant === 'evaluer') {
+            if (etaitEnModeEvaluer) {
                 const fichier = travauxVisionneuse.getFichierActuel();
                 if (fichier && fichier.etudiantDA && fichier.productionId) {
                     setTimeout(() => {
@@ -1220,6 +1226,11 @@
             }
         }
 
+        // Fermer le mode evaluation si actif (remet les panneaux dans leur conteneur d'origine
+        // avant que afficherFichiers() ne détruise le DOM de la visionneuse)
+        if (document.getElementById('travaux-palette-eval-gauche')) {
+            fermerModeEvaluation();
+        }
         // Masquer la section evaluation si visible (fallback)
         const evalDiv = document.getElementById('evaluations-contenu-evaluation');
         if (evalDiv) evalDiv.classList.add('u-hide');
