@@ -149,6 +149,11 @@
         canvasAnnotation.classList.remove('u-hide');
         canvasAnnotation.style.pointerEvents = 'auto';
 
+        // Si l'outil actif est "position", garder pointer-events none
+        if (travauxOutils.getOutilActif().id === 'position') {
+            canvasAnnotation.style.pointerEvents = 'none';
+        }
+
         // Deplier la palette annotation si elle existe deja, sinon la creer
         const paletteExistante = document.getElementById('travaux-palette-flottante');
         if (paletteExistante) {
@@ -319,6 +324,9 @@
 
         // Pan mode (Space+drag)
         window.addEventListener('travaux-pan-mode', onPanModeChange);
+
+        // Outil change (position vs dessin)
+        window.addEventListener('travaux-outil-change', onOutilChange);
     }
 
     function detacherEvenements() {
@@ -333,6 +341,7 @@
 
         document.removeEventListener('keydown', onKeyDown);
         window.removeEventListener('travaux-pan-mode', onPanModeChange);
+        window.removeEventListener('travaux-outil-change', onOutilChange);
     }
 
     /**
@@ -342,6 +351,7 @@
         const outil = travauxOutils.getOutilActif();
 
         if (modePanActif) return;
+        if (outil.id === 'position') return;
 
         // Mode selection : accepter touch (doigt) en plus de pen/mouse (Apple Pencil exception)
         if (outil.type === 'selection') {
@@ -707,8 +717,22 @@
             if (modePanActif) {
                 canvasAnnotation.style.pointerEvents = 'none';
             } else if (annotationActive) {
-                canvasAnnotation.style.pointerEvents = 'auto';
+                // Restaurer selon l'outil actif
+                if (travauxOutils.getOutilActif().id === 'position') {
+                    canvasAnnotation.style.pointerEvents = 'none';
+                } else {
+                    canvasAnnotation.style.pointerEvents = 'auto';
+                }
             }
+        }
+    }
+
+    function onOutilChange(e) {
+        if (!canvasAnnotation || !annotationActive) return;
+        if (e.detail.outil.id === 'position') {
+            canvasAnnotation.style.pointerEvents = 'none';
+        } else {
+            canvasAnnotation.style.pointerEvents = 'auto';
         }
     }
 

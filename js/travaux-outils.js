@@ -37,6 +37,13 @@
        =============================== */
 
     const OUTILS = {
+        position: {
+            id: 'position',
+            nom: 'Position',
+            icone: '✋',
+            curseur: 'grab',
+            type: 'position'
+        },
         selection: {
             id: 'selection',
             nom: 'S\u00e9lection',
@@ -512,7 +519,7 @@
        ETAT PALETTE
        =============================== */
 
-    let outilActif = 'stylo';
+    let outilActif = 'position';
     let couleurActive = COULEUR_DEFAUT;
     let epaisseurActive = OUTILS.stylo.epaisseurDefaut;
     let taillTexteActive = OUTILS.texte.tailleDefaut;
@@ -655,7 +662,7 @@
         html += '<div class="travaux-palette-label">Outils</div>';
         html += '<div class="travaux-palette-outils">';
 
-        const outilsDessin = ['selection', 'stylo', 'surligneur', 'gomme', 'texte'];
+        const outilsDessin = ['position', 'selection', 'stylo', 'surligneur', 'gomme', 'texte'];
         outilsDessin.forEach(id => {
             const outil = OUTILS[id];
             const actif = outilActif === id ? ' actif' : '';

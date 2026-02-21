@@ -791,6 +791,21 @@
         conteneur.addEventListener('mousedown', function(e) {
             if (e.button === 1) e.preventDefault(); // Empecher auto-scroll molette
         });
+
+        // Curseur grab quand l'outil Position est actif
+        window.addEventListener('travaux-outil-change', function(e) {
+            if (!conteneurGestesZoom) return;
+            if (e.detail.outil.id === 'position') {
+                conteneurGestesZoom.classList.add('travaux-pan-pret');
+            } else {
+                conteneurGestesZoom.classList.remove('travaux-pan-pret');
+            }
+        });
+
+        // Appliquer le curseur initial si l'outil actif est deja position
+        if (typeof travauxOutils !== 'undefined' && travauxOutils.getOutilActif().id === 'position') {
+            conteneur.classList.add('travaux-pan-pret');
+        }
     }
 
     function onPanKeyDown(e) {
@@ -807,7 +822,12 @@
         if (e.key !== ' ') return;
         panState.spaceActif = false;
         if (!panState.actif && conteneurGestesZoom) {
-            conteneurGestesZoom.classList.remove('travaux-pan-pret');
+            // Garder travaux-pan-pret si l'outil Position est actif
+            var estModePosition = typeof travauxOutils !== 'undefined'
+                && travauxOutils.getOutilActif().id === 'position';
+            if (!estModePosition) {
+                conteneurGestesZoom.classList.remove('travaux-pan-pret');
+            }
             conteneurGestesZoom.classList.remove('travaux-pan-actif');
         }
         window.dispatchEvent(new CustomEvent('travaux-pan-mode', { detail: { actif: false } }));
@@ -815,9 +835,12 @@
 
     function onPanPointerDown(e) {
         if (!fichierActuel) return;
+        var estModePosition = typeof travauxOutils !== 'undefined'
+            && travauxOutils.getOutilActif().id === 'position';
         var estSpaceDrag = panState.spaceActif && e.button === 0;
         var estMoletteMilieu = e.button === 1;
-        if (!estSpaceDrag && !estMoletteMilieu) return;
+        var estPositionDrag = estModePosition && e.button === 0;
+        if (!estSpaceDrag && !estMoletteMilieu && !estPositionDrag) return;
         e.preventDefault();
         e.stopPropagation();
         panState.actif = true;
@@ -846,7 +869,9 @@
         panState.actif = false;
         if (conteneurGestesZoom) {
             conteneurGestesZoom.classList.remove('travaux-pan-actif');
-            if (panState.spaceActif) {
+            var estModePosition = typeof travauxOutils !== 'undefined'
+                && travauxOutils.getOutilActif().id === 'position';
+            if (panState.spaceActif || estModePosition) {
                 conteneurGestesZoom.classList.add('travaux-pan-pret');
             } else {
                 conteneurGestesZoom.classList.remove('travaux-pan-pret');
