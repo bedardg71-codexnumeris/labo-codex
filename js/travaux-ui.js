@@ -279,9 +279,6 @@
         const visionDiv = document.createElement('div');
         visionDiv.className = 'travaux-visionneuse-layout';
         visionDiv.innerHTML = `
-                <!-- Panneau gauche (evaluation parametres) — rempli par JS -->
-                <div id="travaux-slot-gauche" class="travaux-slot-panneau u-hide"></div>
-
                 <div class="travaux-zone-document" id="travaux-conteneur-document">
 
                     <!-- Toolbar -->
@@ -318,14 +315,8 @@
                         </div>
                     </div>
 
-                    <!-- Palette flottante d'annotation inseree dynamiquement par activerAnnotation() -->
-
-                    <!-- Slot retroaction (affiche en bas du canvas en mode evaluation) -->
-                    <div id="travaux-slot-retroaction" class="travaux-slot-retroaction u-hide"></div>
+                    <!-- Palettes flottantes (annotation, tampons, evaluation) inserees dynamiquement par JS -->
                 </div>
-
-                <!-- Panneau droite (evaluation criteres) — rempli par JS -->
-                <div id="travaux-slot-droite" class="travaux-slot-panneau u-hide"></div>
         `;
         conteneur.appendChild(visionDiv);
 
@@ -1214,10 +1205,9 @@
             }
         }
 
-        // Fermer le mode evaluation 3 colonnes si actif
-        const layoutVisionneuse = document.querySelector('.travaux-visionneuse-layout');
-        if (layoutVisionneuse && layoutVisionneuse.classList.contains('mode-evaluation')) {
-            evaluerDepuisAnnotation(); // toggle off
+        // Fermer le mode evaluation si actif
+        if (document.getElementById('travaux-palette-eval-gauche')) {
+            fermerModeEvaluation();
         }
         // Masquer la section evaluation si visible (fallback)
         const evalDiv = document.getElementById('evaluations-contenu-evaluation');
@@ -1931,34 +1921,9 @@
             return;
         }
 
-        const layout = document.querySelector('.travaux-visionneuse-layout');
-        const slotGauche = document.getElementById('travaux-slot-gauche');
-        const slotDroite = document.getElementById('travaux-slot-droite');
-        const slotRetro = document.getElementById('travaux-slot-retroaction');
-        const panneauGauche = document.getElementById('travaux-eval-gauche');
-        const panneauDroite = document.getElementById('travaux-eval-droite');
-        const panneauRetro = document.getElementById('travaux-eval-retroaction');
-
-        // Toggle : si deja en mode evaluation, on ferme
-        const estVisible = layout?.classList.contains('mode-evaluation');
-        if (estVisible) {
-            layout.classList.remove('mode-evaluation');
-            if (slotGauche) slotGauche.classList.add('u-hide');
-            if (slotDroite) slotDroite.classList.add('u-hide');
-            if (slotRetro) slotRetro.classList.add('u-hide');
-            // Remettre les panneaux dans le conteneur d'evaluation d'origine
-            const evalDiv = document.getElementById('evaluations-contenu-evaluation');
-            if (evalDiv && panneauGauche) evalDiv.appendChild(panneauGauche);
-            if (evalDiv && panneauDroite) evalDiv.appendChild(panneauDroite);
-            if (evalDiv && panneauRetro) evalDiv.appendChild(panneauRetro);
-            if (panneauGauche) panneauGauche.classList.add('u-hide');
-            if (panneauDroite) panneauDroite.classList.add('u-hide');
-            if (panneauRetro) panneauRetro.classList.add('u-hide');
-            // Reafficher les palettes annotation et tampons
-            const paletteAnnot = document.getElementById('travaux-palette-flottante');
-            if (paletteAnnot) paletteAnnot.classList.remove('u-hide');
-            const paletteTamp = document.getElementById('travaux-palette-tampons');
-            if (paletteTamp) paletteTamp.classList.remove('u-hide');
+        // Toggle : si deja en mode evaluation (palette presente), on ferme
+        if (document.getElementById('travaux-palette-eval-gauche')) {
+            fermerModeEvaluation();
             return;
         }
 
@@ -1971,29 +1936,164 @@
         const paletteTamp = document.getElementById('travaux-palette-tampons');
         if (paletteTamp) paletteTamp.classList.add('u-hide');
 
-        // Deplacer les panneaux eval dans les slots de la visionneuse
-        if (slotGauche && panneauGauche) {
-            slotGauche.appendChild(panneauGauche);
-            panneauGauche.classList.remove('u-hide');
-            slotGauche.classList.remove('u-hide');
-        }
-        if (slotDroite && panneauDroite) {
-            slotDroite.appendChild(panneauDroite);
-            panneauDroite.classList.remove('u-hide');
-            slotDroite.classList.remove('u-hide');
-        }
-        // Retroaction sous le canvas
-        if (slotRetro && panneauRetro) {
-            slotRetro.appendChild(panneauRetro);
-            panneauRetro.classList.remove('u-hide');
-            slotRetro.classList.remove('u-hide');
+        const conteneurDoc = document.getElementById('travaux-conteneur-document');
+        if (!conteneurDoc) return;
+
+        // Creer les 3 palettes flottantes eval
+        const panneauGauche = document.getElementById('travaux-eval-gauche');
+        const panneauDroite = document.getElementById('travaux-eval-droite');
+        const panneauRetro = document.getElementById('travaux-eval-retroaction');
+
+        if (panneauGauche) {
+            const paletteG = creerPaletteEval('travaux-palette-eval-gauche', 'Paramètres', panneauGauche);
+            paletteG.style.top = '56px';
+            paletteG.style.left = '12px';
+            conteneurDoc.appendChild(paletteG);
+            configurerDragPaletteEval('travaux-palette-eval-gauche');
         }
 
-        // Activer le mode evaluation sur le layout
-        if (layout) layout.classList.add('mode-evaluation');
+        if (panneauDroite) {
+            const paletteD = creerPaletteEval('travaux-palette-eval-droite', 'Critères', panneauDroite);
+            paletteD.style.top = '56px';
+            paletteD.style.right = '12px';
+            paletteD.style.left = 'auto';
+            conteneurDoc.appendChild(paletteD);
+            configurerDragPaletteEval('travaux-palette-eval-droite');
+        }
+
+        if (panneauRetro) {
+            const paletteR = creerPaletteEval('travaux-palette-eval-retro', 'Rétroaction', panneauRetro);
+            paletteR.style.bottom = '12px';
+            paletteR.style.left = '50%';
+            paletteR.style.transform = 'translateX(-50%)';
+            conteneurDoc.appendChild(paletteR);
+            configurerDragPaletteEval('travaux-palette-eval-retro');
+        }
 
         // Pre-remplir le formulaire d'evaluation avec retry robuste
         preRemplirEvaluation(da, productionId);
+    }
+
+    /**
+     * Cree une palette flottante eval qui enveloppe un panneau existant
+     * @param {string} id - ID de la palette
+     * @param {string} titre - Titre affiche dans la barre
+     * @param {HTMLElement} panneauContenu - Le panneau existant a deplacer dans la palette
+     * @returns {HTMLElement} La palette creee
+     */
+    function creerPaletteEval(id, titre, panneauContenu) {
+        const palette = document.createElement('div');
+        palette.id = id;
+        palette.className = 'travaux-palette-flottante travaux-palette-eval';
+
+        // Barre de titre (draggable)
+        const barre = document.createElement('div');
+        barre.className = 'travaux-palette-barre';
+        barre.innerHTML = `
+            <span class="travaux-palette-titre">${titre}</span>
+            <button class="travaux-palette-toggle" onclick="travauxUI.togglePaletteEvalReplie('${id}')" title="Replier/Déplier">&#x2212;</button>
+        `;
+        palette.appendChild(barre);
+
+        // Contenu : deplacer le panneau existant
+        const contenu = document.createElement('div');
+        contenu.className = 'travaux-palette-contenu';
+
+        // Cacher le header du panneau (remplace par la barre de palette)
+        const panneauHeader = panneauContenu.querySelector('.travaux-panneau-header');
+        if (panneauHeader) panneauHeader.style.display = 'none';
+
+        panneauContenu.classList.remove('u-hide');
+        contenu.appendChild(panneauContenu);
+        palette.appendChild(contenu);
+
+        return palette;
+    }
+
+    /**
+     * Ferme le mode evaluation : remet les panneaux dans leur conteneur d'origine
+     */
+    function fermerModeEvaluation() {
+        const evalDiv = document.getElementById('evaluations-contenu-evaluation');
+
+        const ids = ['travaux-palette-eval-gauche', 'travaux-palette-eval-droite', 'travaux-palette-eval-retro'];
+        const panneauIds = ['travaux-eval-gauche', 'travaux-eval-droite', 'travaux-eval-retroaction'];
+
+        for (let i = 0; i < ids.length; i++) {
+            const palette = document.getElementById(ids[i]);
+            if (!palette) continue;
+
+            const panneau = document.getElementById(panneauIds[i]);
+            if (panneau) {
+                // Re-afficher le header du panneau
+                const panneauHeader = panneau.querySelector('.travaux-panneau-header');
+                if (panneauHeader) panneauHeader.style.display = '';
+
+                panneau.classList.add('u-hide');
+                if (evalDiv) evalDiv.appendChild(panneau);
+            }
+            palette.remove();
+        }
+
+        // Reafficher les palettes annotation et tampons
+        const paletteAnnot = document.getElementById('travaux-palette-flottante');
+        if (paletteAnnot) paletteAnnot.classList.remove('u-hide');
+        const paletteTamp = document.getElementById('travaux-palette-tampons');
+        if (paletteTamp) paletteTamp.classList.remove('u-hide');
+    }
+
+    /**
+     * Configure le drag d'une palette eval par sa barre de titre
+     * @param {string} paletteId - ID de la palette
+     */
+    function configurerDragPaletteEval(paletteId) {
+        const palette = document.getElementById(paletteId);
+        const barre = palette?.querySelector('.travaux-palette-barre');
+        if (!barre) return;
+
+        barre.addEventListener('mousedown', function(e) {
+            if (e.target.closest('.travaux-palette-toggle')) return;
+            e.preventDefault();
+
+            const startX = e.clientX, startY = e.clientY;
+            const rect = palette.getBoundingClientRect();
+            const container = document.getElementById('travaux-conteneur-document');
+            const cRect = container.getBoundingClientRect();
+            const startLeft = rect.left - cRect.left;
+            const startTop = rect.top - cRect.top;
+
+            // Convertir right/transform en left au premier move
+            palette.style.right = 'auto';
+            palette.style.transform = 'none';
+            palette.style.bottom = 'auto';
+            palette.style.left = startLeft + 'px';
+            palette.style.top = startTop + 'px';
+
+            function onMove(e2) {
+                palette.style.left = Math.max(0, startLeft + e2.clientX - startX) + 'px';
+                palette.style.top = Math.max(0, startTop + e2.clientY - startY) + 'px';
+            }
+            function onUp() {
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup', onUp);
+            }
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onUp);
+        });
+    }
+
+    /**
+     * Replie / deplie une palette eval
+     * @param {string} paletteId - ID de la palette
+     */
+    function togglePaletteEvalReplie(paletteId) {
+        const palette = document.getElementById(paletteId);
+        if (!palette) return;
+        palette.classList.toggle('replie');
+        const btn = palette.querySelector('.travaux-palette-toggle');
+        if (btn) {
+            btn.innerHTML = palette.classList.contains('replie') ? '&#x002B;' : '&#x2212;';
+        }
     }
 
     /**
@@ -2384,6 +2484,8 @@
         lancerArchivageSemestre: lancerArchivageSemestre,
         // Annotation → Evaluation
         evaluerDepuisAnnotation: evaluerDepuisAnnotation,
+        fermerModeEvaluation: fermerModeEvaluation,
+        togglePaletteEvalReplie: togglePaletteEvalReplie,
         // Vue cote-a-cote
         ouvrirVueCoteACote: ouvrirVueCoteACote,
         fermerVueCoteACote: fermerVueCoteACote,

@@ -149,9 +149,8 @@
         canvasAnnotation.style.pointerEvents = 'auto';
 
         // Desactiver le mode evaluation si actif (exclusivite mutuelle)
-        const layout = document.querySelector('.travaux-visionneuse-layout');
-        if (layout && layout.classList.contains('mode-evaluation')) {
-            travauxUI.evaluerDepuisAnnotation(); // toggle off
+        if (document.getElementById('travaux-palette-eval-gauche')) {
+            travauxUI.fermerModeEvaluation();
         }
 
         // Deplier la palette annotation si elle existe deja, sinon la creer
@@ -930,9 +929,10 @@
         const outil = travauxOutils.OUTILS[type];
         const taille = (outil.taille || 30) / canvasAnnotation.width;
 
-        // Couleur fixe pour crochet (vert) et croix (rouge)
+        // Couleur fixe pour crochet (vert), croix (rouge), interrogation (orange)
         const couleurSymbole = type === 'crochet' ? '#2e7d32'
             : type === 'croix' ? '#c62828'
+            : type === 'interrogation' ? '#e65100'
             : travauxOutils.getCouleurActive();
 
         const forme = {
@@ -1552,6 +1552,10 @@
             case 'croix':
                 dessinerCroix(ctxAnnotation, x1, y1, x2, y2, forme.color);
                 break;
+
+            case 'interrogation':
+                dessinerInterrogation(ctxAnnotation, x1, y1, x2, y2, forme.color);
+                break;
         }
 
         ctxAnnotation.restore();
@@ -1618,6 +1622,21 @@
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText('\u2718', mx, my);
+    }
+
+    /**
+     * Dessine un point d'interrogation (caractere ?)
+     */
+    function dessinerInterrogation(ctx, x1, y1, x2, y2, color) {
+        const mx = (x1 + x2) / 2;
+        const my = (y1 + y2) / 2;
+        const size = Math.min(Math.abs(x2 - x1), Math.abs(y2 - y1));
+
+        ctx.fillStyle = color || '#e65100';
+        ctx.font = 'bold ' + size + 'px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('?', mx, my);
     }
 
     /**
@@ -1733,10 +1752,36 @@
             case 'modification-annotation':
                 restaurerAnnotation(donneesPage, action.donnees.type, action.donnees.avant);
                 break;
+            case 'suppression-multiple':
+                // Restaurer tous les elements supprimes
+                for (const item of action.donnees) {
+                    if (item.type === 'stroke') donneesPage.strokes.push(item.data);
+                    else if (item.type === 'shape') donneesPage.shapes.push(item.data);
+                    else if (item.type === 'text') donneesPage.textAnnotations.push(item.data);
+                    else if (item.type === 'sticker') {
+                        if (!donneesPage.stickers) donneesPage.stickers = [];
+                        donneesPage.stickers.push(item.data);
+                    }
+                }
+                break;
+            case 'modification-multiple':
+                // Restaurer les etats avant modification
+                for (const item of action.donnees) {
+                    restaurerAnnotation(donneesPage, item.type, item.avant);
+                }
+                break;
+            case 'effacer-page':
+                // Restaurer tout le contenu de la page
+                donneesPage.strokes = JSON.parse(JSON.stringify(action.donnees.strokes));
+                donneesPage.textAnnotations = JSON.parse(JSON.stringify(action.donnees.textAnnotations));
+                donneesPage.shapes = JSON.parse(JSON.stringify(action.donnees.shapes));
+                donneesPage.stickers = JSON.parse(JSON.stringify(action.donnees.stickers));
+                break;
         }
 
         // Deselectionner apres undo
         annotationSelectionnee = null;
+        selectionsMultiples = [];
         reRendreAnnotations();
         planifierSauvegarde();
         mettreAJourBoutonsUndoRedo();
@@ -1789,10 +1834,33 @@
             case 'modification-annotation':
                 restaurerAnnotation(donneesPage, action.donnees.type, action.donnees.apres);
                 break;
+            case 'suppression-multiple':
+                // Re-supprimer tous les elements
+                for (const item of action.donnees) {
+                    if (item.type === 'stroke') donneesPage.strokes = donneesPage.strokes.filter(s => s.id !== item.data.id);
+                    else if (item.type === 'shape') donneesPage.shapes = donneesPage.shapes.filter(s => s.id !== item.data.id);
+                    else if (item.type === 'text') donneesPage.textAnnotations = donneesPage.textAnnotations.filter(t => t.id !== item.data.id);
+                    else if (item.type === 'sticker' && donneesPage.stickers) donneesPage.stickers = donneesPage.stickers.filter(s => s.id !== item.data.id);
+                }
+                break;
+            case 'modification-multiple':
+                // Restaurer les etats apres modification
+                for (const item of action.donnees) {
+                    restaurerAnnotation(donneesPage, item.type, item.apres);
+                }
+                break;
+            case 'effacer-page':
+                // Re-vider la page
+                donneesPage.strokes = [];
+                donneesPage.textAnnotations = [];
+                donneesPage.shapes = [];
+                donneesPage.stickers = [];
+                break;
         }
 
         // Deselectionner apres redo
         annotationSelectionnee = null;
+        selectionsMultiples = [];
         reRendreAnnotations();
         planifierSauvegarde();
         mettreAJourBoutonsUndoRedo();
@@ -1875,6 +1943,23 @@
         if (!annotationCourante) return;
 
         const page = travauxVisionneuse.getPageActuelle() - 1;
+        const donneesPage = annotationCourante.pages[page];
+        if (!donneesPage) return;
+
+        // Sauvegarder le contenu actuel pour le undo
+        const sauvegarde = {
+            strokes: JSON.parse(JSON.stringify(donneesPage.strokes || [])),
+            textAnnotations: JSON.parse(JSON.stringify(donneesPage.textAnnotations || [])),
+            shapes: JSON.parse(JSON.stringify(donneesPage.shapes || [])),
+            stickers: JSON.parse(JSON.stringify(donneesPage.stickers || []))
+        };
+
+        // Verifier qu'il y a quelque chose a effacer
+        const total = sauvegarde.strokes.length + sauvegarde.textAnnotations.length
+                    + sauvegarde.shapes.length + sauvegarde.stickers.length;
+        if (total === 0) return;
+
+        // Vider la page
         annotationCourante.pages[page] = {
             strokes: [],
             textAnnotations: [],
@@ -1882,9 +1967,10 @@
             stickers: []
         };
 
-        pileUndo = [];
-        pileRedo = [];
+        empilerUndo('effacer-page', sauvegarde);
 
+        annotationSelectionnee = null;
+        selectionsMultiples = [];
         reRendreAnnotations();
         planifierSauvegarde();
         mettreAJourBoutonsUndoRedo();
