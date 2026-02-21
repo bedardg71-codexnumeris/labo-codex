@@ -168,9 +168,11 @@ function afficherAccueilRetour(conteneur) {
 
         ${decouvrirHTML}
 
-        <div class="carte accordeon" id="accueil-parcourir">
+        ${parcoursHTML}
+
+        <div class="carte accordeon" id="accueil-piloter">
             <div class="accordeon-header" onclick="toggleAccordeonV2(this);">
-                <h3 style="margin: 0; font-size: 1.1rem;">Parcourir</h3>
+                <h3 style="margin: 0; font-size: 1.1rem;">Piloter</h3>
                 <span class="accordeon-chevron">\u25BC</span>
             </div>
             <div class="accordeon-contenu" style="display: block;">
@@ -232,16 +234,6 @@ function afficherAccueilRetour(conteneur) {
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <div class="carte accordeon" id="accueil-piloter">
-            <div class="accordeon-header" onclick="toggleAccordeonV2(this);">
-                <h3 style="margin: 0; font-size: 1.1rem;">Piloter</h3>
-                <span class="accordeon-chevron">\u25BC</span>
-            </div>
-            <div class="accordeon-contenu" style="display: block;">
-                ${parcoursHTML}
             </div>
         </div>
 

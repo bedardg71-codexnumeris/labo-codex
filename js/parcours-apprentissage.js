@@ -782,7 +782,7 @@ function genererPanneauParcours() {
     if (progression.autonome) {
         var dateAuto = chargerProgression().dateAutonomie || '';
         html += '<div class="accordeon-header" onclick="toggleAccordeonV2(this);">';
-        html += '<h3 style="margin: 0; font-size: 1.1rem;">🧭 Parcours complété — ' + progression.jalonsFaits + '/' + progression.totalJalons + '</h3>';
+        html += '<h3 style="margin: 0; font-size: 1.1rem;">Parcourir — ' + progression.jalonsFaits + '/' + progression.totalJalons + '</h3>';
         html += '<span class="accordeon-chevron">▼</span>';
         html += '</div>';
         html += '<div class="accordeon-contenu">';
@@ -808,7 +808,7 @@ function genererPanneauParcours() {
     var autreTitre = progression.mode === 'explicite' ? 'Passer en exploration' : 'Passer en explicite';
 
     html += '<div class="accordeon-header" onclick="toggleAccordeonV2(this);">';
-    html += '<h3 style="margin: 0; font-size: 1.1rem;">📍 Ton parcours — ' + progression.jalonsFaits + '/' + progression.totalJalons + '</h3>';
+    html += '<h3 style="margin: 0; font-size: 1.1rem;">Parcourir — ' + progression.jalonsFaits + '/' + progression.totalJalons + '</h3>';
     html += '<button class="parcours-btn-mode" title="' + autreTitre + '" onclick="' +
         'event.stopPropagation(); ' +
         'window.parcours.changerModeParcours(\'' + autreMode + '\'); ' +
