@@ -338,6 +338,30 @@ function chargerEchellePerformance() {
                     source: 'pratique'
                 };
             }
+
+            // Synchroniser les jetons de la pratique vers modalitesEvaluation.configPAN.jetons
+            if (pratiqueData && pratiqueData.jetons) {
+                const j = pratiqueData.jetons;
+                const modalites = db.getSync('modalitesEvaluation', {});
+                modalites.configPAN = modalites.configPAN || {};
+                modalites.configPAN.jetons = {
+                    actif: j.actif !== false,
+                    delai: {
+                        nombre: j.nombre || 2,
+                        dureeJours: j.delaiDuree || 2
+                    },
+                    reprise: {
+                        nombre: j.nombre || 2,
+                        maxParProduction: 1,
+                        archiverOriginale: j.repriseOriginale === 'archiver'
+                    },
+                    repriseCiblee: {
+                        actif: j.cibleeActif || false,
+                        plafondNote: j.cibleePlafond || null
+                    }
+                };
+                db.setSync('modalitesEvaluation', modalites);
+            }
         }
     }
 

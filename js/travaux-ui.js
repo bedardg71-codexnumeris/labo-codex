@@ -1019,15 +1019,15 @@
         // Dropdown filtre de production
         const productionsAvecFichiers = productions.filter(p => groupes[p.id] && groupes[p.id].length > 0);
         let htmlDropdown = '';
-        if (productionsAvecFichiers.length > 1) {
+        if (productionsAvecFichiers.length >= 1) {
             htmlDropdown += '<select id="filtre-production-badges" class="controle-form travaux-filtre-production" onchange="travauxUI.filtrerBadgesParProduction()">';
-            htmlDropdown += '<option value="">Toutes les productions</option>';
+            if (productionsAvecFichiers.length > 1) {
+                htmlDropdown += '<option value="">Toutes les productions</option>';
+            }
             productionsAvecFichiers.forEach(p => {
                 htmlDropdown += `<option value="${p.id}">${echapperHtml(p.titre || p.nom || p.id)} (${groupes[p.id].length})</option>`;
             });
             htmlDropdown += '</select>';
-        } else if (productionsAvecFichiers.length === 1) {
-            htmlDropdown += `<span class="travaux-filtre-production-label">${echapperHtml(productionsAvecFichiers[0].titre || productionsAvecFichiers[0].nom)}</span>`;
         }
 
         let html = '<div class="travaux-grille-fichiers">';
@@ -2137,11 +2137,11 @@
             }
         }
 
-        // 4e palette : Jetons (positionnée sous Paramètres, côté gauche)
+        // 4e palette : Jetons (positionnée en bas à gauche)
         const panneauJetons = document.getElementById('travaux-eval-jetons');
         if (panneauJetons) {
             const paletteJ = creerPaletteEval('travaux-palette-eval-jetons', 'Jetons', panneauJetons);
-            paletteJ.style.top = '55%';
+            paletteJ.style.bottom = '12px';
             paletteJ.style.left = '12px';
             conteneurDoc.appendChild(paletteJ);
             configurerDragPaletteEval('travaux-palette-eval-jetons');
