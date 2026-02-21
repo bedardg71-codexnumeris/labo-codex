@@ -19,6 +19,20 @@
   - L'interface sert pour la projection en classe
   - **Architecture** : Reutiliser au maximum le code du module d'annotation existant (composant partage ou heritage) plutot que de tout dupliquer, pour faciliter la maintenance future
 
+### Priorite haute - Annotation et Evaluation (21 fev 2026)
+
+- [ ] **Evaluations demo** : Produire quelques evaluations de demonstration pour les modules d'annotation et d'evaluation qui ont ete remanies. Permettra de valider le flux complet et de servir d'exemples pour les nouveaux utilisateurs.
+
+- [ ] **Evaluation sans travaux importes** : S'assurer que le module d'evaluation fonctionne meme si aucun travail n'est charge (importe). Contexte : jusqu'a present, l'evaluation se faisait dans GoodNotes ; desormais elle se fera directement dans l'application. Le flux doit supporter l'evaluation manuelle sans fichier PDF/image importe.
+
+- [ ] **Info-bulles et pratique guidee (Annotation/Evaluation)** : Ajouter le systeme d'info-bulles contextuelles et de pratique guidee aux sections Annotation et Evaluation, comme pour les autres modules.
+
+### Priorite haute - Cartes mentales et Calendrier (21 fev 2026)
+
+- [ ] **Terminer le travail sur les cartes mentales** : Finaliser les fonctionnalites en cours du module de planification par carte mentale.
+
+- [ ] **Terminer le travail sur le calendrier** : Finaliser les fonctionnalites en cours du module calendrier.
+
 ### Priorite haute - Module Travaux / Visionneuse (20 fev 2026)
 
 - [x] **Palette annotation : position fixe (pas de scroll)** ✅ CORRIGÉ (20 fév 2026) : La palette `.travaux-palette-flottante` se deplace quand on scroll le travail dans le canvas. Elle doit rester fixe a l'ecran (position fixed ou ancrage au viewport du canvas-container), comme une vraie palette flottante.
