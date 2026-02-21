@@ -14526,6 +14526,63 @@ body.mode-clair .travaux-palette-flottante {
 body.mode-clair .travaux-palette-barre {
     border-bottom-color: rgba(3, 46, 92, 0.08);
 }
+/* Toolbar harmonisée — mode clair */
+body.mode-clair .travaux-toolbar {
+    background: var(--surface-carte, #ffffff);
+    border-bottom-color: rgba(3, 46, 92, 0.1);
+}
+body.mode-clair .travaux-toolbar-gauche {
+    border-right-color: rgba(3, 46, 92, 0.1);
+}
+body.mode-clair .travaux-btn-nav {
+    background: #ffffff;
+    border-color: rgba(3, 46, 92, 0.15);
+    color: var(--texte-secondaire);
+}
+body.mode-clair .travaux-btn-nav:hover:not(:disabled) {
+    border-color: var(--bleu-principal);
+    color: var(--texte-principal);
+}
+body.mode-clair .travaux-btn-zoom {
+    background: #ffffff;
+    border-color: rgba(3, 46, 92, 0.12);
+    color: var(--texte-secondaire);
+}
+body.mode-clair .travaux-btn-zoom:hover {
+    background: rgba(6, 93, 187, 0.08);
+    color: var(--texte-principal);
+}
+body.mode-clair .travaux-btn-action {
+    background: #ffffff;
+    border-color: rgba(3, 46, 92, 0.15);
+    color: var(--texte-secondaire);
+}
+body.mode-clair .travaux-btn-action:hover {
+    border-color: var(--bleu-principal);
+    color: var(--texte-principal);
+}
+body.mode-clair .travaux-btn-action.actif {
+    background: var(--planif-couleur-selection, #6aacb8);
+    color: #fff;
+    border-color: var(--planif-couleur-selection, #6aacb8);
+}
+body.mode-clair .travaux-btn-action-vert {
+    border-color: rgba(40, 167, 69, 0.3);
+    color: var(--vert-succes, #28a745);
+}
+body.mode-clair .travaux-btn-action-vert:hover {
+    background: rgba(40, 167, 69, 0.08);
+}
+body.mode-clair .travaux-canvas-container {
+    background: var(--surface-conteneur, #ffffff);
+}
+body.mode-clair .travaux-nom-fichier {
+    color: var(--texte-principal);
+}
+body.mode-clair .travaux-zoom-info,
+body.mode-clair #travaux-indicateur-page {
+    color: var(--texte-secondaire);
+}
 /* Retroaction dans palette eval */
 .travaux-palette-eval .zone-retroaction {
     margin: 0;
@@ -15350,37 +15407,59 @@ body.mode-clair .travaux-palette-barre {
 
 .travaux-toolbar {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 12px;
-    border-bottom: 1px solid var(--bordure-claire);
-    background: var(--gris-tres-pale);
+    padding: 4px 12px;
+    background: var(--surface-carte, #1a3040);
+    border-bottom: 1px solid var(--planif-couleur-bordure);
     flex-shrink: 0;
-    gap: 12px;
-    flex-wrap: wrap;
+    z-index: 90;
 }
 
-.travaux-toolbar-gauche,
-.travaux-toolbar-centre,
+.travaux-toolbar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+    position: relative;
+}
+
+.travaux-toolbar-gauche {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding-right: 10px;
+    border-right: 1px solid var(--planif-couleur-bordure);
+}
+
+.travaux-toolbar-centre {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+
 .travaux-toolbar-droite {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
+    margin-left: auto;
 }
 
 .travaux-nom-fichier {
-    font-size: 0.85rem;
-    font-weight: 500;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--texte-principal);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 250px;
+    max-width: 350px;
+    pointer-events: auto;
 }
 
 .travaux-separateur {
     width: 1px;
     height: 20px;
-    background: var(--bordure-claire);
+    background: var(--planif-couleur-bordure);
 }
 
 .btn-icon {
@@ -15421,39 +15500,107 @@ body.mode-clair .travaux-palette-barre {
     color: var(--rouge-erreur);
 }
 
-/* --- Boutons colorés toolbar travaux --- */
-.travaux-toolbar .btn-petit {
-    background: var(--bleu-principal);
-    color: white;
-    border: 1px solid var(--bleu-principal);
-    border-radius: var(--radius-moyen);
+/* --- Boutons toolbar travaux (style harmonisé planif) --- */
+
+/* Navigation pages (flèches) — style discret comme planif-btn-carte */
+.travaux-btn-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--planif-couleur-bordure);
+    border-radius: 6px;
+    background: var(--surface-carte, #1a3040);
+    color: var(--texte-secondaire, #8aa4b0);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.travaux-btn-nav:hover:not(:disabled) {
+    background: rgba(106, 172, 184, 0.06);
+    color: var(--texte-principal);
+    border-color: var(--planif-couleur-selection);
+}
+.travaux-btn-nav:disabled {
+    opacity: 0.35;
+    cursor: default;
 }
 
-.travaux-toolbar .btn-petit:hover {
-    background: var(--btn-principal-hover);
-    border-color: var(--btn-principal-hover);
+/* Zoom presets — style comme planif-btn-zoom-preset */
+.travaux-btn-zoom {
+    padding: 2px 8px;
+    border: 1px solid var(--planif-couleur-bordure);
+    border-radius: 4px;
+    background: var(--surface-carte, #1a3040);
+    color: var(--texte-secondaire, #8aa4b0);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+}
+.travaux-btn-zoom:hover {
+    background: rgba(106, 172, 184, 0.1);
+    color: var(--texte-principal);
 }
 
-.travaux-toolbar .btn-petit.actif {
-    background: var(--bleu-clair);
-    border-color: var(--bleu-clair);
+/* Indicateur zoom — style comme planif-zoom-info-header */
+.travaux-zoom-info {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--texte-secondaire, #8aa4b0);
+    min-width: 32px;
+    text-align: right;
 }
 
-.travaux-toolbar .btn-icon {
-    background: var(--bleu-moyen);
-    color: white;
-    border: 1px solid var(--bleu-moyen);
+/* Actions (Annoter, PDF, Alléger, Re-importer) — style planif-btn-carte */
+.travaux-btn-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 28px;
+    border: 1px solid var(--planif-couleur-bordure);
+    border-radius: 6px;
+    background: var(--surface-carte, #1a3040);
+    color: var(--texte-secondaire, #8aa4b0);
+    font-size: 12px;
+    padding: 0 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+.travaux-btn-action:hover {
+    background: rgba(106, 172, 184, 0.06);
+    color: var(--texte-principal);
+    border-color: var(--planif-couleur-selection);
+}
+.travaux-btn-action.actif {
+    background: var(--planif-couleur-selection, #6aacb8);
+    color: #fff;
+    border-color: var(--planif-couleur-selection, #6aacb8);
 }
 
-.travaux-toolbar .btn-icon:hover:not(:disabled) {
-    background: var(--btn-principal-hover);
-    border-color: var(--btn-principal-hover);
+/* Évaluer — accent vert pour le distinguer */
+.travaux-btn-action-vert {
+    border-color: rgba(40, 167, 69, 0.4);
+    color: var(--vert-succes, #28a745);
+}
+.travaux-btn-action-vert:hover {
+    background: rgba(40, 167, 69, 0.1);
+    color: var(--vert-succes, #28a745);
+    border-color: var(--vert-succes, #28a745);
+}
+.travaux-btn-action-vert.actif {
+    background: var(--vert-succes, #28a745);
+    color: #fff;
+    border-color: var(--vert-succes, #28a745);
 }
 
-.travaux-toolbar .btn-icon:disabled {
-    background: var(--bordure-claire);
-    color: var(--gris-clair);
-    border-color: var(--bordure-claire);
+/* Indicateur page */
+#travaux-indicateur-page {
+    font-size: 11px;
+    color: var(--texte-secondaire, #8aa4b0);
+    white-space: nowrap;
 }
 
 /* --- Canvas container --- */
@@ -15465,7 +15612,7 @@ body.mode-clair .travaux-palette-barre {
     align-items: flex-start;
     justify-content: center;
     padding: 16px;
-    background: var(--bordure-claire);
+    background: var(--surface-conteneur, #142428);
     touch-action: pan-x pan-y;
 }
 
@@ -15612,22 +15759,23 @@ body.mode-clair .travaux-palette-barre {
 .travaux-palette-barre:active { cursor: grabbing; }
 
 .travaux-palette-titre {
-    font-size: 0.75rem;
-    font-weight: 600;
+    font-size: 11px;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: var(--texte-secondaire, #aaa);
+    color: var(--texte-secondaire, #8aa4b0);
 }
 
 .travaux-palette-toggle {
+    width: 20px;
+    height: 20px;
+    border: none;
     background: none;
-    border: 1px solid rgba(106, 172, 184, 0.2);
-    border-radius: 4px;
-    color: var(--texte-secondaire, #aaa);
-    font-size: 14px;
-    width: 24px;
-    height: 24px;
+    font-size: 16px;
+    line-height: 1;
     cursor: pointer;
+    color: var(--texte-muted, #5a7a88);
+    border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -15635,6 +15783,7 @@ body.mode-clair .travaux-palette-barre {
 }
 .travaux-palette-toggle:hover {
     background: rgba(106, 172, 184, 0.1);
+    color: var(--texte-principal, #d0e0e4);
 }
 
 .travaux-palette-contenu {
@@ -15947,9 +16096,16 @@ body.mode-clair .travaux-palette-barre {
         min-height: 400px;
     }
 
-    .travaux-toolbar {
+    .travaux-toolbar-inner {
         flex-wrap: wrap;
         gap: 6px;
+    }
+    .travaux-toolbar-centre {
+        position: static;
+        transform: none;
+        order: -1;
+        width: 100%;
+        text-align: center;
     }
 
     .travaux-archivage-options {
@@ -19289,6 +19445,11 @@ body.mode-clair .barre-etudiant.tracked-4 {
 /* Évalué — vert succès */
 .travaux-badge-pill.evalue {
     background: var(--vert-succes, #28a745);
+    color: #fff;
+}
+
+.travaux-badge-pill.en-cours {
+    background: #e65100;
     color: #fff;
 }
 
