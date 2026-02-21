@@ -982,9 +982,13 @@
             statutClasse = 'evalue';
         }
 
+        const verrou = (evaluation && evaluation.verrouillee)
+            ? '<span class="travaux-badge-verrou" title="Évaluation verrouillée">\u{1F512}</span>'
+            : '';
+
         return `<div class="travaux-badge-importe" data-fichier-id="${f.id}" onclick="travauxUI.${action}('${f.id}')" title="${echapperHtml(f.nomFichier)}">
         <span class="travaux-badge-nom">${nomEtudiant}</span>
-        <span class="travaux-badge-pill ${statutClasse}">${statutTexte}</span>
+        <span class="travaux-badge-pill ${statutClasse}">${statutTexte}</span>${verrou}
         <button class="travaux-badge-supprimer" onclick="event.stopPropagation(); travauxUI.supprimerFichierImporte('${f.id}')" title="Supprimer">&times;</button>
     </div>`;
     }
@@ -1249,8 +1253,14 @@
                     pill.dataset.origTexte = pill.textContent;
                     pill.dataset.origClasse = pill.className.replace('travaux-badge-pill', '').trim();
                 }
-                pill.textContent = 'EN COURS';
-                pill.className = 'travaux-badge-pill en-cours';
+                // Si déjà évalué, afficher ÉVALUÉ (vert) au lieu de EN COURS
+                if (pill.dataset.origClasse === 'evalue') {
+                    pill.textContent = 'ÉVALUÉ';
+                    pill.className = 'travaux-badge-pill evalue';
+                } else {
+                    pill.textContent = 'EN COURS';
+                    pill.className = 'travaux-badge-pill en-cours';
+                }
             } else if (pill.dataset.origTexte) {
                 // Restaurer l'etat d'origine
                 pill.textContent = pill.dataset.origTexte;
@@ -1332,8 +1342,14 @@
                 badgeFichier.classList.remove('u-hide');
                 const pillToolbar = badgeFichier.querySelector('.travaux-badge-pill');
                 if (pillToolbar) {
-                    pillToolbar.textContent = 'EN COURS';
-                    pillToolbar.className = 'travaux-badge-pill en-cours';
+                    // Si déjà évalué, afficher ÉVALUÉ (vert) au lieu de EN COURS
+                    if (pillToolbar.classList.contains('evalue')) {
+                        pillToolbar.textContent = 'ÉVALUÉ';
+                        pillToolbar.className = 'travaux-badge-pill evalue';
+                    } else {
+                        pillToolbar.textContent = 'EN COURS';
+                        pillToolbar.className = 'travaux-badge-pill en-cours';
+                    }
                 }
                 // Desactiver le onclick et le bouton supprimer dans cette copie toolbar
                 const badgeCopie = badgeFichier.querySelector('.travaux-badge-importe');
@@ -2010,6 +2026,24 @@
             paletteG.style.left = '12px';
             conteneurDoc.appendChild(paletteG);
             configurerDragPaletteEval('travaux-palette-eval-gauche');
+
+            // Bouton cadenas compact dans la barre de titre
+            const barreParam = paletteG.querySelector('.travaux-palette-barre');
+            if (barreParam) {
+                const btnVerrou = document.createElement('button');
+                btnVerrou.id = 'btnVerrouPalette';
+                btnVerrou.className = 'btn btn-compact';
+                btnVerrou.title = 'Verrouiller/Déverrouiller l\'évaluation';
+                btnVerrou.style.cssText = 'font-size:12px; padding:2px 6px; margin-right:4px; display:none;';
+                btnVerrou.textContent = '\u{1F513}';
+                btnVerrou.addEventListener('click', function() {
+                    if (typeof basculerVerrouillageEvaluationCourante === 'function') {
+                        basculerVerrouillageEvaluationCourante();
+                    }
+                });
+                const btnToggle = barreParam.querySelector('.travaux-palette-toggle');
+                barreParam.insertBefore(btnVerrou, btnToggle);
+            }
         }
 
         if (panneauDroite) {

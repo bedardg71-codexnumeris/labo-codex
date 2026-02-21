@@ -3669,7 +3669,17 @@ function verifierEtChargerEvaluationExistante() {
 
     console.log('📂 Évaluation existante trouvée, chargement des données...', evaluationExistante);
 
-    // Charger la cartouche (si elle existe)
+    // Charger la grille (AVANT la cartouche — nécessaire pour peupler les options cartouche)
+    if (evaluationExistante.grilleId) {
+        const selectGrille = document.getElementById('selectGrille1');
+        if (selectGrille) {
+            selectGrille.value = evaluationExistante.grilleId;
+            // Peupler les cartouches pour cette grille
+            chargerGrilleSelectionnee();
+        }
+    }
+
+    // Charger la cartouche (les options existent maintenant grâce à chargerGrilleSelectionnee)
     if (evaluationExistante.cartoucheId) {
         const selectCartouche = document.getElementById('selectCartoucheEval');
         if (selectCartouche) {
@@ -5587,35 +5597,51 @@ function basculerVerrouillageEvaluationCourante() {
  * Met à jour l'icône de verrouillage (style productions)
  */
 function mettreAJourBoutonVerrouillage(estVerrouillee) {
-    const iconeVerrou = document.getElementById('iconeVerrouEval');
-
-    if (!iconeVerrou) return;
-
-    if (estVerrouillee) {
-        // Verrouillée : cadenas fermé rouge
-        iconeVerrou.textContent = '🔒';
-        iconeVerrou.style.color = 'var(--rouge-erreur)'; // Rouge
-        iconeVerrou.title = 'Évaluation verrouillée - Cliquez pour déverrouiller';
-    } else {
-        // Déverrouillée : cadenas ouvert vert
-        iconeVerrou.textContent = '🔓';
-        iconeVerrou.style.color = 'var(--vert-succes)'; // Vert
-        iconeVerrou.title = 'Évaluation modifiable - Cliquez pour verrouiller';
+    // Bouton cadenas dans la barre de palette Paramètres
+    const btnVerrouPalette = document.getElementById('btnVerrouPalette');
+    if (btnVerrouPalette) {
+        btnVerrouPalette.style.display = '';
+        btnVerrouPalette.textContent = estVerrouillee ? '\u{1F512}' : '\u{1F513}';
+        btnVerrouPalette.title = estVerrouillee
+            ? 'Évaluation verrouillée - Cliquez pour déverrouiller'
+            : 'Évaluation modifiable - Cliquez pour verrouiller';
     }
+
+    // Cadenas sur les badges (sidebar actif + toolbar)
+    const badgesActifs = [
+        document.querySelector('.travaux-badge-importe.actif'),
+        document.querySelector('#travaux-badge-fichier-actif .travaux-badge-importe')
+    ];
+    badgesActifs.forEach(badge => {
+        if (!badge) return;
+        let verrou = badge.querySelector('.travaux-badge-verrou');
+        if (estVerrouillee) {
+            if (!verrou) {
+                verrou = document.createElement('span');
+                verrou.className = 'travaux-badge-verrou';
+                const pill = badge.querySelector('.travaux-badge-pill');
+                if (pill) pill.after(verrou);
+            }
+            verrou.textContent = '\u{1F512}';
+            verrou.title = 'Évaluation verrouillée';
+        } else {
+            if (verrou) verrou.remove();
+        }
+    });
 }
 
 /**
  * Affiche ou masque l'indicateur de verrouillage selon le contexte
  */
 function afficherOuMasquerBoutonVerrouillage(afficher, estVerrouillee = false) {
-    const indicateur = document.getElementById('indicateurVerrouillageEval');
-    if (!indicateur) return;
-
     if (afficher) {
-        indicateur.classList.remove('u-hide');
         mettreAJourBoutonVerrouillage(estVerrouillee);
     } else {
-        indicateur.classList.add('u-hide');
+        // Masquer le bouton cadenas dans la barre de palette
+        const btnVerrouPalette = document.getElementById('btnVerrouPalette');
+        if (btnVerrouPalette) btnVerrouPalette.style.display = 'none';
+        // Retirer le cadenas des badges
+        document.querySelectorAll('.travaux-badge-verrou').forEach(el => el.remove());
     }
 }
 
