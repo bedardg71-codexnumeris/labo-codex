@@ -1351,6 +1351,13 @@
                 break;
             }
 
+            case 'ligne':
+                ctxAnnotation.beginPath();
+                ctxAnnotation.moveTo(x1, y1);
+                ctxAnnotation.lineTo(x2, y2);
+                ctxAnnotation.stroke();
+                break;
+
             case 'fleche':
                 dessinerFleche(ctxAnnotation, x1, y1, x2, y2);
                 break;
@@ -1371,21 +1378,33 @@
      * Dessine une fleche
      */
     function dessinerFleche(ctx, x1, y1, x2, y2) {
-        const headLen = 15;
+        const headLen = Math.max(12, ctx.lineWidth * 5);
+        const headAngle = Math.PI / 8; // angle aigu (~22°)
         const angle = Math.atan2(y2 - y1, x2 - x1);
 
+        // Base de la pointe (ou la tige s'arrete)
+        const baseX = x2 - headLen * Math.cos(angle);
+        const baseY = y2 - headLen * Math.sin(angle);
+
+        // Tige (s'arrete a la base de la pointe)
         ctx.beginPath();
         ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
+        ctx.lineTo(baseX, baseY);
         ctx.stroke();
 
-        // Pointe de fleche
+        // Pointe pleine (triangle ferme)
+        const ax = x2 - headLen * Math.cos(angle - headAngle);
+        const ay = y2 - headLen * Math.sin(angle - headAngle);
+        const bx = x2 - headLen * Math.cos(angle + headAngle);
+        const by = y2 - headLen * Math.sin(angle + headAngle);
+
+        ctx.fillStyle = ctx.strokeStyle;
         ctx.beginPath();
         ctx.moveTo(x2, y2);
-        ctx.lineTo(x2 - headLen * Math.cos(angle - Math.PI / 6), y2 - headLen * Math.sin(angle - Math.PI / 6));
-        ctx.moveTo(x2, y2);
-        ctx.lineTo(x2 - headLen * Math.cos(angle + Math.PI / 6), y2 - headLen * Math.sin(angle + Math.PI / 6));
-        ctx.stroke();
+        ctx.lineTo(ax, ay);
+        ctx.lineTo(bx, by);
+        ctx.closePath();
+        ctx.fill();
     }
 
     /**
