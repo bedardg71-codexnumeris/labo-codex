@@ -2542,6 +2542,52 @@ function centrerVueSurContenu() {
     }
 }
 
+function zoomPleineLargeur() {
+    if (!zoneTravail) return;
+    var viewportWidth = zoneTravail.clientWidth;
+    var contentWidth = ESPACE_W;
+    if (etat.noeuds.size > 0) {
+        var minX = Infinity, maxX = -Infinity;
+        for (var entry of etat.noeuds) {
+            var nd = entry[1];
+            var el = document.getElementById('noeud-' + nd.id);
+            var nodeW = el ? el.offsetWidth : 200;
+            if (nd.x < minX) minX = nd.x;
+            if (nd.x + nodeW > maxX) maxX = nd.x + nodeW;
+        }
+        contentWidth = (maxX - minX) + 200;
+    }
+    etat.zoom = Math.max(0.25, Math.min(3, viewportWidth / contentWidth));
+    appliquerZoom();
+    centrerVueSurContenu();
+    var zoomInfo = document.getElementById('planif-zoom-info');
+    if (zoomInfo) zoomInfo.textContent = Math.round(etat.zoom * 100) + '%';
+    mettreAJourBoutonsZoomPreset();
+}
+
+function zoomPleineHauteur() {
+    if (!zoneTravail) return;
+    var viewportHeight = zoneTravail.clientHeight;
+    var contentHeight = ESPACE_H;
+    if (etat.noeuds.size > 0) {
+        var minY = Infinity, maxY = -Infinity;
+        for (var entry of etat.noeuds) {
+            var nd = entry[1];
+            var el = document.getElementById('noeud-' + nd.id);
+            var nodeH = el ? el.offsetHeight : 100;
+            if (nd.y < minY) minY = nd.y;
+            if (nd.y + nodeH > maxY) maxY = nd.y + nodeH;
+        }
+        contentHeight = (maxY - minY) + 200;
+    }
+    etat.zoom = Math.max(0.25, Math.min(3, viewportHeight / contentHeight));
+    appliquerZoom();
+    centrerVueSurContenu();
+    var zoomInfo = document.getElementById('planif-zoom-info');
+    if (zoomInfo) zoomInfo.textContent = Math.round(etat.zoom * 100) + '%';
+    mettreAJourBoutonsZoomPreset();
+}
+
 // === ATTACHER ÉVÉNEMENTS D'UN NŒUD ===
 function attacherEvenements(el, donnees) {
     var id = donnees.id;
@@ -4680,7 +4726,9 @@ window.planificationCarte = {
     chargerProductions: chargerProductions,
     afficherDetailsProduction: afficherDetailsProduction,
     naviguerVers: naviguerVers,
-    CLE_SEANCES: CLE_SEANCES
+    CLE_SEANCES: CLE_SEANCES,
+    zoomPleineLargeur: zoomPleineLargeur,
+    zoomPleineHauteur: zoomPleineHauteur
 };
 
 })();

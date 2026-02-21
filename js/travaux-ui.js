@@ -1981,7 +1981,7 @@
         }
 
         if (panneauDroite) {
-            const paletteD = creerPaletteEval('travaux-palette-eval-droite', 'Critères', panneauDroite);
+            const paletteD = creerPaletteEval('travaux-palette-eval-droite', 'Évaluation', panneauDroite);
             paletteD.style.top = '56px';
             paletteD.style.right = '12px';
             paletteD.style.left = 'auto';
@@ -2202,6 +2202,13 @@
             document.addEventListener('mousemove', onMove);
             document.addEventListener('mouseup', onUp);
         });
+
+        // Double-clic sur la barre : reset taille
+        barre.addEventListener('dblclick', function(e) {
+            if (e.target.closest('.travaux-palette-toggle')) return;
+            palette.style.width = '';
+            palette.style.height = '';
+        });
     }
 
     /**
@@ -2241,6 +2248,15 @@
             selectEtudiant.value = da;
             if (typeof chargerEvaluationsEtudiant === 'function') {
                 chargerEvaluationsEtudiant();
+            }
+
+            // Defaut "Remis" car le fichier a ete importe (donc remis)
+            var selectRemise = document.getElementById('remiseProduction1');
+            if (selectRemise) {
+                selectRemise.value = 'remis';
+                if (typeof changerStatutRemise === 'function') {
+                    changerStatutRemise(1);
+                }
             }
 
             // Attendre que l'option production apparaisse dans le select
