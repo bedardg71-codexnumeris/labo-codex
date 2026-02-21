@@ -14576,9 +14576,6 @@ body.mode-clair .travaux-btn-action-vert:hover {
 body.mode-clair .travaux-canvas-container {
     background: var(--surface-conteneur, #ffffff);
 }
-body.mode-clair .travaux-nom-fichier {
-    color: var(--texte-principal);
-}
 body.mode-clair .travaux-zoom-info,
 body.mode-clair #travaux-indicateur-page {
     color: var(--texte-secondaire);
@@ -15435,7 +15432,6 @@ body.mode-clair #travaux-indicateur-page {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
-    pointer-events: none;
 }
 
 .travaux-toolbar-droite {
@@ -15443,17 +15439,6 @@ body.mode-clair #travaux-indicateur-page {
     align-items: center;
     gap: 4px;
     margin-left: auto;
-}
-
-.travaux-nom-fichier {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--texte-principal);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 350px;
-    pointer-events: auto;
 }
 
 .travaux-separateur {

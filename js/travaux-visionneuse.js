@@ -406,12 +406,6 @@
         if (btnPrec) btnPrec.disabled = pageActuelle <= 1;
         if (btnSuiv) btnSuiv.disabled = pageActuelle >= nombrePagesTotal;
 
-        // Nom du fichier
-        const nomFichier = document.getElementById('travaux-nom-fichier');
-        if (nomFichier && fichierActuel) {
-            nomFichier.textContent = fichierActuel.nomFichier;
-        }
-
         // Zoom
         const indicateurZoom = document.getElementById('travaux-indicateur-zoom');
         if (indicateurZoom) {
