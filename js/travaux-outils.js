@@ -447,7 +447,7 @@
             const outil = OUTILS[c.id];
             const actif = outilActif === c.id ? ' actif' : '';
             html += `<div class="travaux-errfr-item${actif}" onclick="travauxOutils.setOutilActif('${c.id}')" title="${c.nom}">`;
-            html += `<span class="travaux-errfr-numero" style="background:${outil.couleurBouton}">${outil.icone}</span>`;
+            html += `<span class="travaux-errfr-numero" style="background:${outil.couleurBouton}">${c.code}</span>`;
             html += `<span class="travaux-errfr-nom">${c.nom}</span>`;
             html += '</div>';
         });
@@ -528,7 +528,6 @@
         if (OUTILS[id]) {
             outilActif = id;
             autocollantActif = null; // Desactiver le mode tampon
-            fermerPaletteAutocollants();
             // Restaurer l'epaisseur par defaut de l'outil
             if (OUTILS[id].epaisseurDefaut) {
                 epaisseurActive = OUTILS[id].epaisseurDefaut;
