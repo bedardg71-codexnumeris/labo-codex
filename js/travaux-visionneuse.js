@@ -91,6 +91,7 @@
         }
 
         mettreAJourNavigation();
+        recentrerVue();
         return true;
     }
 
@@ -368,6 +369,7 @@
     async function pageSuivante() {
         if (pageActuelle < nombrePagesTotal) {
             await rendrePage(pageActuelle + 1);
+            recentrerVue();
         }
     }
 
@@ -377,6 +379,7 @@
     async function pagePrecedente() {
         if (pageActuelle > 1) {
             await rendrePage(pageActuelle - 1);
+            recentrerVue();
         }
     }
 
@@ -388,6 +391,7 @@
         num = parseInt(num, 10);
         if (num >= 1 && num <= nombrePagesTotal) {
             await rendrePage(num);
+            recentrerVue();
         }
     }
 
@@ -715,6 +719,7 @@
         const viewY = pinchState.centreY || (conteneurGestesZoom.clientHeight / 2);
         const contentX = conteneurGestesZoom.scrollLeft + viewX;
         const contentY = conteneurGestesZoom.scrollTop + viewY;
+        const margin = getMarginWrapper();
 
         modeZoom = 'manual';
         zoomActuel = zoomCible;
@@ -722,8 +727,9 @@
 
         await reRendrePageActuelle();
 
-        conteneurGestesZoom.scrollLeft = contentX * ratio - viewX;
-        conteneurGestesZoom.scrollTop = contentY * ratio - viewY;
+        // Ajuster pour les marges fixes (seul le canvas scale, pas les marges)
+        conteneurGestesZoom.scrollLeft = (contentX - margin.left) * ratio + margin.left - viewX;
+        conteneurGestesZoom.scrollTop = (contentY - margin.top) * ratio + margin.top - viewY;
 
         pinchState.zoomCible = null;
     }
@@ -765,12 +771,14 @@
             const ratio = zoomActuel / gesteZoomMolette.zoomDepart;
             const contentX = gesteZoomMolette.scrollXDepart + gesteZoomMolette.viewX;
             const contentY = gesteZoomMolette.scrollYDepart + gesteZoomMolette.viewY;
+            const margin = getMarginWrapper();
 
             cachePages.clear();
             await reRendrePageActuelle();
 
-            conteneurGestesZoom.scrollLeft = contentX * ratio - gesteZoomMolette.viewX;
-            conteneurGestesZoom.scrollTop = contentY * ratio - gesteZoomMolette.viewY;
+            // Ajuster pour les marges fixes (seul le canvas scale, pas les marges)
+            conteneurGestesZoom.scrollLeft = (contentX - margin.left) * ratio + margin.left - gesteZoomMolette.viewX;
+            conteneurGestesZoom.scrollTop = (contentY - margin.top) * ratio + margin.top - gesteZoomMolette.viewY;
 
             gesteZoomMolette.actif = false;
         }, 100);
@@ -882,14 +890,20 @@
 
     function recentrerVue() {
         if (!conteneurGestesZoom) return;
-        var wrapper = conteneurGestesZoom.querySelector('.travaux-canvas-wrapper');
-        if (!wrapper) return;
-        var wW = wrapper.offsetWidth;
-        var wH = wrapper.offsetHeight;
-        var cW = conteneurGestesZoom.clientWidth;
-        var cH = conteneurGestesZoom.clientHeight;
-        conteneurGestesZoom.scrollLeft = wW > cW ? (wW - cW) / 2 : 0;
-        conteneurGestesZoom.scrollTop = wH > cH ? (wH - cH) / 2 : 0;
+        conteneurGestesZoom.scrollLeft = (conteneurGestesZoom.scrollWidth - conteneurGestesZoom.clientWidth) / 2;
+        conteneurGestesZoom.scrollTop = (conteneurGestesZoom.scrollHeight - conteneurGestesZoom.clientHeight) / 2;
+    }
+
+    /**
+     * Retourne le margin du wrapper (pour les calculs de zoom centrage)
+     */
+    function getMarginWrapper() {
+        if (!wrapperGestesZoom) return { left: 0, top: 0 };
+        var cs = getComputedStyle(wrapperGestesZoom);
+        return {
+            left: parseInt(cs.marginLeft, 10) || 0,
+            top: parseInt(cs.marginTop, 10) || 0
+        };
     }
 
     function estModePanActif() {

@@ -15619,6 +15619,7 @@ body.mode-clair #travaux-indicateur-page {
 .travaux-canvas-wrapper {
     position: relative;
     display: inline-block;
+    margin: 40vh 40vw; /* Espace de defilement autour du document (comme planif-espace 10000x6000) */
 }
 
 .travaux-canvas-container.travaux-pan-pret {
