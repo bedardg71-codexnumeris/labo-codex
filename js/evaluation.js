@@ -798,9 +798,30 @@ function cartoucheSelectionnee() {
 
     document.getElementById('listeCriteresGrille1').innerHTML = html;
 
-    // Regénérer la rétroaction en temps réel après changement de cartouche
-    calculerNote();
-    genererRetroaction(1);
+    // Restaurer les niveaux précédemment sélectionnés (s'ils existent)
+    // puis recalculer la note et regénérer la rétroaction en temps réel
+    if (evaluationEnCours && evaluationEnCours.criteres) {
+        let niveauxRestaures = 0;
+        for (const [critereId, niveau] of Object.entries(evaluationEnCours.criteres)) {
+            if (!niveau) continue;
+            const selectEl = document.getElementById(`eval_${critereId}`);
+            if (selectEl) {
+                // Vérifier que l'option existe dans le nouveau select
+                const optionExiste = Array.from(selectEl.options).some(o => o.value === niveau);
+                if (optionExiste) {
+                    selectEl.value = niveau;
+                    niveauxRestaures++;
+                    // Mettre à jour le visuel du commentaire et la couleur
+                    niveauSelectionne(critereId);
+                }
+            }
+        }
+        if (niveauxRestaures === 0) {
+            // Aucun niveau restauré, générer quand même la rétroaction (vide de critères)
+            calculerNote();
+            genererRetroaction(1);
+        }
+    }
 }
 
 /**
@@ -1688,7 +1709,7 @@ function genererRetroaction(num) {
                     // Utiliser la rétroaction algorithmique sauvegardée
                     const retroAlgo = evaluationEnCours.donneesAlgorithmiques[critere.id].retroaction;
                     texte += `${critere.nom} (${niveau}) : ${retroAlgo}\n\n`;
-                } else {
+                } else if (cartouche.commentaires) {
                     // Critère standard (holistique/analytique)
                     const cle = `${critere.id}_${niveau}`;
                     const commentaire = cartouche.commentaires[cle];
