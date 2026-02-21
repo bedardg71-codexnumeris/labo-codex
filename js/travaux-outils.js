@@ -453,7 +453,18 @@
      * @returns {string} HTML
      */
     function genererHTMLPalette() {
-        let html = '<div class="travaux-palette">';
+        let html = '<div class="travaux-palette-flottante" id="travaux-palette-flottante" style="top:12px; left:12px;">';
+
+        // Barre de titre draggable
+        html += '<div class="travaux-palette-barre">';
+        html += '<span class="travaux-palette-titre">Annotation</span>';
+        html += '<div>';
+        html += '<button class="travaux-palette-toggle" onclick="travauxOutils.togglePaletteReplie()" title="Replier/Deplier">&#x2212;</button>';
+        html += '</div>';
+        html += '</div>';
+
+        // Contenu (sections verticales)
+        html += '<div class="travaux-palette-contenu">';
 
         // Outils de dessin
         html += '<div class="travaux-palette-section">';
@@ -508,7 +519,16 @@
         html += `<input type="range" class="travaux-slider-epaisseur" min="1" max="20" value="${epaisseurActive}" oninput="travauxOutils.setEpaisseurActive(parseInt(this.value))">`;
         html += '</div>';
 
+        html += '</div>'; // fin .travaux-palette-contenu
+
+        // Pied de palette : Undo / Redo / Effacer
+        html += '<div class="travaux-palette-pied">';
+        html += '<button id="travaux-btn-undo" class="btn-icon" onclick="travauxAnnotation.annuler()" disabled title="Annuler (Ctrl+Z)">&#x21A9;</button>';
+        html += '<button id="travaux-btn-redo" class="btn-icon" onclick="travauxAnnotation.retablir()" disabled title="Retablir (Ctrl+Y)">&#x21AA;</button>';
+        html += '<button class="btn-icon btn-danger-petit" onclick="travauxAnnotation.effacerPage()" title="Effacer la page">&#x1F5D1;</button>';
         html += '</div>';
+
+        html += '</div>'; // fin .travaux-palette-flottante
 
         return html;
     }
@@ -548,6 +568,52 @@
     window.addEventListener('travaux-couleur-change', rafraichirPalette);
 
     /* ===============================
+       PALETTE FLOTTANTE — DRAG & TOGGLE
+       =============================== */
+
+    /**
+     * Configure le drag de la palette flottante par sa barre de titre
+     */
+    function configurerDragPalette() {
+        const palette = document.getElementById('travaux-palette-flottante');
+        const barre = palette?.querySelector('.travaux-palette-barre');
+        if (!barre) return;
+        barre.addEventListener('mousedown', function(e) {
+            if (e.target.closest('.travaux-palette-toggle')) return;
+            e.preventDefault();
+            const startX = e.clientX, startY = e.clientY;
+            const rect = palette.getBoundingClientRect();
+            const container = document.getElementById('travaux-canvas-container');
+            const cRect = container.getBoundingClientRect();
+            const startLeft = rect.left - cRect.left;
+            const startTop = rect.top - cRect.top;
+            function onMove(e2) {
+                palette.style.left = Math.max(0, startLeft + e2.clientX - startX) + 'px';
+                palette.style.top = Math.max(0, startTop + e2.clientY - startY) + 'px';
+            }
+            function onUp() {
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup', onUp);
+            }
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onUp);
+        });
+    }
+
+    /**
+     * Replie / deplie la palette flottante
+     */
+    function togglePaletteReplie() {
+        const palette = document.getElementById('travaux-palette-flottante');
+        if (!palette) return;
+        palette.classList.toggle('replie');
+        const btn = palette.querySelector('.travaux-palette-toggle');
+        if (btn) {
+            btn.innerHTML = palette.classList.contains('replie') ? '&#x002B;' : '&#x2212;';
+        }
+    }
+
+    /* ===============================
        EXPORTS GLOBAUX
        =============================== */
 
@@ -581,7 +647,10 @@
         // UI
         genererHTMLPalette: genererHTMLPalette,
         rafraichirPalette: rafraichirPalette,
-        togglePaletteAutocollants: togglePaletteAutocollants
+        togglePaletteAutocollants: togglePaletteAutocollants,
+        // Palette flottante
+        configurerDragPalette: configurerDragPalette,
+        togglePaletteReplie: togglePaletteReplie
     };
 
 })();

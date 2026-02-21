@@ -1,8 +1,20 @@
-# SESSION ACTIVE - BETA 97.8
+# SESSION ACTIVE - BETA 97.9
 
-**Date** : 19 février 2026
-**Version** : Beta 97.8 (build 0219-1515)
-**Statut** : Module Travaux — Pipeline fonctionnel
+**Date** : 20 février 2026
+**Version** : Beta 97.9 (build 0220-2000)
+**Statut** : Module Travaux — Refonte visionneuse
+
+## SESSION DU 20 FÉVRIER 2026
+
+### Travail accompli — Refonte visionneuse : palette flottante + évaluation 3 colonnes (Beta 97.9, build 0220-2000)
+
+93. **Palette flottante d'annotation** : `genererHTMLPalette()` (travaux-outils.js) génère désormais une palette flottante (`.travaux-palette-flottante`) avec barre de titre draggable, bouton replier/déplier, sections verticales (outils, formes, tampons, couleurs, épaisseur) et pied de palette (Annuler/Rétablir/Effacer). `configurerDragPalette()` et `togglePaletteReplie()` ajoutées au module. `activerAnnotation()` (travaux-annotation.js) insère la palette dans `#travaux-canvas-container` (position absolute). `desactiverAnnotation()` la retire du DOM. L'ancien `#travaux-palette-container` et le div `#travaux-undo-redo` séparé sont supprimés.
+
+94. **Évaluation en 3 colonnes** : `evaluerDepuisAnnotation()` (travaux-ui.js) déplace les panneaux `#travaux-eval-gauche` (paramètres) et `#travaux-eval-droite` (critères) dans des slots latéraux (`#travaux-slot-gauche`, `#travaux-slot-droite`) flanquant le canvas. Classe `.mode-evaluation` sur le layout. Le canvas se comprime entre les panneaux (flex). Quand on quitte, les panneaux retournent dans leur conteneur d'origine. HTML index.html restructuré : la `grille-evaluation-principale` est remplacée par deux panneaux identifiés indépendants.
+
+95. **Exclusivité annotation/évaluation** : Activer l'annotation ferme le mode évaluation (et vice-versa). `activerAnnotation()` vérifie `.mode-evaluation` et appelle `evaluerDepuisAnnotation()` pour toggle off. `evaluerDepuisAnnotation()` appelle `desactiverAnnotation()` si l'annotation est active.
+
+96. **Améliorations toolbar visionneuse** : Badge étudiant actif (`#travaux-badge-fichier-actif`) dans l'entête. Bouton Zoom 100% (`zoom100()` dans travaux-visionneuse.js). Ordre des boutons : Annoter → Évaluer → Exporter PDF. Badge sélectionné avec `--accent-primaire` (box-shadow bleu vif).
 
 ## SESSION DU 19 FÉVRIER 2026
 

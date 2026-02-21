@@ -473,6 +473,16 @@
     }
 
     /**
+     * Zoom 100% : remet le zoom a exactement 1.0
+     */
+    async function zoom100() {
+        modeZoom = 'manual';
+        zoomActuel = 1.0;
+        cachePages.clear();
+        await reRendrePageActuelle();
+    }
+
+    /**
      * Re-rend la page actuelle (apres zoom)
      */
     async function reRendrePageActuelle() {
@@ -833,6 +843,7 @@
         zoomAjuster: zoomAjuster,
         zoomPleineLargeur: zoomPleineLargeur,
         zoomPleineHauteur: zoomPleineHauteur,
+        zoom100: zoom100,
         configurerGestesZoom: configurerGestesZoom,
         // Accesseurs
         getFichierActuel: getFichierActuel,

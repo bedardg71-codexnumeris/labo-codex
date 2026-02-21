@@ -144,11 +144,22 @@
         canvasAnnotation.classList.remove('u-hide');
         canvasAnnotation.style.pointerEvents = 'auto';
 
-        // Afficher la palette
-        const palette = document.getElementById('travaux-palette-container');
-        if (palette) {
-            palette.innerHTML = travauxOutils.genererHTMLPalette();
-            palette.classList.remove('u-hide');
+        // Desactiver le mode evaluation si actif (exclusivite mutuelle)
+        const layout = document.querySelector('.travaux-visionneuse-layout');
+        if (layout && layout.classList.contains('mode-evaluation')) {
+            travauxUI.evaluerDepuisAnnotation(); // toggle off
+        }
+
+        // Inserer la palette flottante dans le canvas-container
+        const canvasContainer = document.getElementById('travaux-canvas-container');
+        if (canvasContainer && !document.getElementById('travaux-palette-flottante')) {
+            const paletteDiv = document.createElement('div');
+            paletteDiv.id = 'travaux-palette-wrapper';
+            paletteDiv.innerHTML = travauxOutils.genererHTMLPalette();
+            // Extraire l'element palette-flottante du wrapper et inserer directement
+            const paletteEl = paletteDiv.firstElementChild;
+            canvasContainer.appendChild(paletteEl);
+            travauxOutils.configurerDragPalette();
         }
 
         window.dispatchEvent(new CustomEvent('travaux-annotation-activee'));
@@ -174,9 +185,10 @@
             // NE PAS cacher le canvas - les annotations doivent rester visibles
         }
 
-        const palette = document.getElementById('travaux-palette-container');
-        if (palette) {
-            palette.classList.add('u-hide');
+        // Retirer la palette flottante du DOM
+        const paletteFlottante = document.getElementById('travaux-palette-flottante');
+        if (paletteFlottante) {
+            paletteFlottante.remove();
         }
 
         pileUndo = [];

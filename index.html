@@ -4596,22 +4596,9 @@
                     <!-- Tous les IDs internes conservés : selectGroupeEval, selectEtudiantEval, etc. -->
                     <div id="evaluations-contenu-evaluation" class="u-hide">
 
-                <h2 class="titre-avec-emoji-toggles">
-                    <span data-tooltip="eval-page">Évaluation des productions et rétroaction différenciée automatique</span>
-                    <span class="titre-emoji-container">
-                        <button class="btn-aide-contextuelle" data-aide="evaluations-proceder" aria-label="Aide contextuelle">📍</button>
-                    </span>
-                </h2>
-                <p class="text-muted">Évaluation détaillée selon les critères et les échelles de performance</p>
-
-                <!-- Conteneur principal en Layout L modifié -->
-                <div class="carte" class="mb-20">
-
-                    <!-- PARTIE HAUTE : 2 colonnes -->
-                    <div class="grille-evaluation-principale" class="mb-20">
-
-                        <!-- COLONNE GAUCHE : PARAMÈTRES DE L'ÉVALUATION -->
-                        <div class="carte-bleu-fonce">
+                <!-- Panneau gauche : parametres (deplace par JS dans le slot gauche de la visionneuse) -->
+                <div id="travaux-eval-gauche" class="travaux-panneau-lateral travaux-panneau-gauche u-hide">
+                    <div class="carte-bleu-fonce">
                             <!-- Boutons de gestion des évaluations -->
                             <div class="groupe-boutons-colonne" class="mb-15">
                                 <!-- Ligne 1: Nouvelle évaluation -->
@@ -4788,10 +4775,12 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                    </div>
+                </div><!-- fin travaux-eval-gauche -->
 
-                        <!-- COLONNE DROITE : CRITÈRES AVEC RÉTROACTIONS -->
-                        <div class="zone-criteres">
+                <!-- Panneau droite : criteres (deplace par JS dans le slot droite de la visionneuse) -->
+                <div id="travaux-eval-droite" class="travaux-panneau-lateral travaux-panneau-droite u-hide">
+                    <div class="zone-criteres">
                             <h4>Évaluation et prévisualisation de la rétroaction</h4>
 
                             <div id="listeCriteresGrille1" class="conteneur-liste">
@@ -4842,10 +4831,8 @@
         font-size: 0.85rem; line-height: 1.5; background: var(--surface-carte, #1a3040);">
 </textarea>
                             </div>
-                        </div>
                     </div>
-
-                </div><!-- fin carte du layout évaluation -->
+                </div><!-- fin travaux-eval-droite -->
 
                     </div><!-- fin evaluations-contenu-evaluation -->
                 </div><!-- fin evaluations-annoter -->
@@ -16337,7 +16324,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97.9';
-        const BUILD_ID = '0220-1055';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0220-2000';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';

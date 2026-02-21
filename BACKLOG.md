@@ -1,11 +1,17 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 16 fevrier 2026 (Beta 97.8, build 0216-0950)
+> **Derniere mise a jour** : 20 fevrier 2026 (Beta 97.9, build 0220-2000)
 
 ---
 
 ## A faire
+
+### Priorite haute - Module Travaux / Visionneuse (20 fev 2026)
+
+- [ ] **Revoir le style de la palette flottante d'annotation** : La palette `.travaux-palette-flottante` (travaux-outils.js, styles.css) necessite un raffinement visuel — espacement, tailles des boutons, coherence avec le design system (consulter `design-system.html`). Verifier l'apparence en mode clair et mode sombre.
+
+- [ ] **Revoir la mise en forme des elements « Evaluer »** : Les panneaux d'evaluation 3 colonnes (`#travaux-eval-gauche`, `#travaux-eval-droite`) deplaces dans les slots lateraux de la visionneuse necessitent un ajustement de style — padding, marges, taille des selects et boutons dans un espace plus etroit (280px). Verifier que le formulaire reste utilisable et lisible.
 
 ### Priorite CRITIQUE - Planification / Carte mentale (Audit 8 fév 2026)
 
