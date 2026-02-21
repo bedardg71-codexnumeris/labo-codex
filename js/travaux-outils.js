@@ -216,13 +216,18 @@
     function setAutocollantActif(id) {
         autocollantActif = id;
         outilActif = 'tampon';
-        fermerPaletteAutocollants();
 
         // Mettre a jour le curseur
         const canvas = document.getElementById('travaux-canvas-annotation');
         if (canvas) canvas.style.cursor = 'copy';
 
-        // Mettre a jour l'etat visuel de la palette
+        // Feedback visuel sur l'item selectionne dans la palette tampons
+        const items = document.querySelectorAll('#travaux-palette-tampons .travaux-autocollant-item');
+        items.forEach(item => item.classList.remove('actif'));
+        const actif = document.querySelector(`#travaux-palette-tampons .travaux-autocollant-item[onclick*="'${id}'"]`);
+        if (actif) actif.classList.add('actif');
+
+        // Mettre a jour l'etat visuel de la palette annotation
         rafraichirPalette();
     }
 
@@ -231,31 +236,34 @@
     }
 
     /**
-     * Bascule la palette d'autocollants (popup fixe au-dessus du bouton)
+     * Bascule la palette flottante d'autocollants (coin sup. droit du canvas)
      */
     function togglePaletteAutocollants() {
-        let popup = document.getElementById('travaux-popup-autocollants');
+        let palette = document.getElementById('travaux-palette-tampons');
 
-        if (popup) {
-            // Fermer
-            popup.remove();
+        if (palette) {
+            palette.remove();
             paletteAutoVisible = false;
             return;
         }
 
-        // Creer le popup
         paletteAutoVisible = true;
-        popup = document.createElement('div');
-        popup.id = 'travaux-popup-autocollants';
-        popup.className = 'travaux-popup-autocollants visible';
+        palette = document.createElement('div');
+        palette.id = 'travaux-palette-tampons';
+        palette.className = 'travaux-palette-flottante travaux-palette-tampons';
 
-        // Texte introductif si aide contextuelle active
-        const aideActive = typeof estAideContextuelleActive === 'function' && estAideContextuelleActive();
-        let html = aideActive
-            ? '<div class="autocollants-aide">📍 Appose un autocollant pour donner une rétroaction visuelle rapide. Les verts soulignent les forces, les oranges signalent des points à travailler.</div>'
-            : '';
+        // Barre de titre
+        let html = '<div class="travaux-palette-barre">';
+        html += '<span class="travaux-palette-titre">Tampons</span>';
+        html += '<div style="display:flex; gap:2px;">';
+        html += '<button class="travaux-palette-toggle" onclick="travauxOutils.togglePaletteTamponsReplie()" title="Replier">−</button>';
+        html += '<button class="travaux-palette-toggle" onclick="travauxOutils.fermerPaletteAutocollants()" title="Fermer">×</button>';
+        html += '</div></div>';
 
-        // Qualite (rang du haut)
+        // Contenu
+        html += '<div class="travaux-palette-contenu" id="travaux-tampons-contenu">';
+
+        // Qualite
         html += '<div class="travaux-autocollants-label">Qualite</div>';
         html += '<div class="travaux-autocollants-grille">';
         AUTOCOLLANTS.filter(a => a.categorie === 'qualite').forEach(a => {
@@ -265,7 +273,7 @@
         });
         html += '</div>';
 
-        // Diagnostic (rang du bas)
+        // Diagnostic
         html += '<div class="travaux-autocollants-label">Diagnostic</div>';
         html += '<div class="travaux-autocollants-grille">';
         AUTOCOLLANTS.filter(a => a.categorie === 'diagnostic').forEach(a => {
@@ -274,50 +282,68 @@
             html += `<span>${a.nom}</span></div>`;
         });
         html += '</div>';
+        html += '</div>';
 
-        popup.innerHTML = html;
-        document.body.appendChild(popup);
+        palette.innerHTML = html;
 
-        // Positionner au-dessus du bouton Tampons
-        const btn = document.getElementById('travaux-btn-tampons');
-        if (btn) {
-            const rect = btn.getBoundingClientRect();
-            popup.style.left = rect.left + 'px';
-            popup.style.bottom = (window.innerHeight - rect.top + 8) + 'px';
-
-            // Ajuster si depasse a droite
-            const popupRect = popup.getBoundingClientRect();
-            if (popupRect.right > window.innerWidth - 8) {
-                popup.style.left = (window.innerWidth - popupRect.width - 8) + 'px';
-            }
-            // Ajuster si depasse en haut
-            if (popupRect.top < 8) {
-                popup.style.bottom = 'auto';
-                popup.style.top = (rect.bottom + 8) + 'px';
-            }
+        // Inserer dans la zone-document (comme la palette annotation)
+        const zoneDocument = document.getElementById('travaux-conteneur-document');
+        if (zoneDocument) {
+            palette.style.top = '56px';
+            palette.style.right = '12px';
+            palette.style.left = 'auto';
+            zoneDocument.appendChild(palette);
+            configurerDragPaletteTampons();
         }
-
-        // Fermer au clic exterieur
-        setTimeout(() => {
-            document.addEventListener('pointerdown', fermerPopupSiExterieur, { once: true });
-        }, 0);
     }
 
-    function fermerPopupSiExterieur(e) {
-        const popup = document.getElementById('travaux-popup-autocollants');
-        if (popup && !popup.contains(e.target) && e.target.id !== 'travaux-btn-tampons') {
-            popup.remove();
-            paletteAutoVisible = false;
-        } else if (popup) {
-            // Re-attacher si clic dans le popup
-            document.addEventListener('pointerdown', fermerPopupSiExterieur, { once: true });
-        }
+    /**
+     * Replier/deplier la palette tampons
+     */
+    function togglePaletteTamponsReplie() {
+        const palette = document.getElementById('travaux-palette-tampons');
+        if (!palette) return;
+        palette.classList.toggle('replie');
+        const btn = palette.querySelector('.travaux-palette-toggle');
+        if (btn) btn.textContent = palette.classList.contains('replie') ? '+' : '−';
+    }
+
+    /**
+     * Drag de la palette tampons
+     */
+    function configurerDragPaletteTampons() {
+        const palette = document.getElementById('travaux-palette-tampons');
+        const barre = palette?.querySelector('.travaux-palette-barre');
+        if (!barre) return;
+        barre.addEventListener('mousedown', function(e) {
+            if (e.target.closest('.travaux-palette-toggle')) return;
+            e.preventDefault();
+            const startX = e.clientX, startY = e.clientY;
+            const rect = palette.getBoundingClientRect();
+            const container = document.getElementById('travaux-conteneur-document');
+            const cRect = container.getBoundingClientRect();
+            const startLeft = rect.left - cRect.left;
+            const startTop = rect.top - cRect.top;
+            // Passer de right a left pour le drag
+            palette.style.right = 'auto';
+            palette.style.left = startLeft + 'px';
+            function onMove(e2) {
+                palette.style.left = Math.max(0, startLeft + e2.clientX - startX) + 'px';
+                palette.style.top = Math.max(0, startTop + e2.clientY - startY) + 'px';
+            }
+            function onUp() {
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup', onUp);
+            }
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onUp);
+        });
     }
 
     function fermerPaletteAutocollants() {
         paletteAutoVisible = false;
-        const popup = document.getElementById('travaux-popup-autocollants');
-        if (popup) popup.remove();
+        const palette = document.getElementById('travaux-palette-tampons');
+        if (palette) palette.remove();
     }
 
     // Precharger au lancement
@@ -453,7 +479,7 @@
      * @returns {string} HTML
      */
     function genererHTMLPalette() {
-        let html = '<div class="travaux-palette-flottante" id="travaux-palette-flottante" style="top:12px; left:12px;">';
+        let html = '<div class="travaux-palette-flottante" id="travaux-palette-flottante" style="top:56px; left:12px;">';
 
         // Barre de titre draggable
         html += '<div class="travaux-palette-barre">';
@@ -493,13 +519,6 @@
         });
 
         html += '</div></div>';
-
-        // Tampons (autocollants)
-        html += '<div class="travaux-palette-section">';
-        html += '<div class="travaux-palette-label">Tampons</div>';
-        const tamponActif = outilActif === 'tampon' ? ' actif' : '';
-        html += `<button class="travaux-btn-outil${tamponActif}" id="travaux-btn-tampons" onclick="travauxOutils.togglePaletteAutocollants()" title="Tampons de retroaction">Tampons</button>`;
-        html += '</div>';
 
         // Couleurs
         html += '<div class="travaux-palette-section">';
@@ -648,6 +667,8 @@
         genererHTMLPalette: genererHTMLPalette,
         rafraichirPalette: rafraichirPalette,
         togglePaletteAutocollants: togglePaletteAutocollants,
+        fermerPaletteAutocollants: fermerPaletteAutocollants,
+        togglePaletteTamponsReplie: togglePaletteTamponsReplie,
         // Palette flottante
         configurerDragPalette: configurerDragPalette,
         togglePaletteReplie: togglePaletteReplie

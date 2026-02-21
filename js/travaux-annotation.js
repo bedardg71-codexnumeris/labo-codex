@@ -160,6 +160,11 @@
             travauxOutils.configurerDragPalette();
         }
 
+        // Ouvrir la palette tampons si pas deja visible
+        if (!document.getElementById('travaux-palette-tampons')) {
+            travauxOutils.togglePaletteAutocollants();
+        }
+
         window.dispatchEvent(new CustomEvent('travaux-annotation-activee'));
     }
 
@@ -183,11 +188,9 @@
             // NE PAS cacher le canvas - les annotations doivent rester visibles
         }
 
-        // Retirer la palette flottante du DOM
+        // Retirer la palette annotation du DOM (la palette tampons reste visible)
         const paletteFlottante = document.getElementById('travaux-palette-flottante');
-        if (paletteFlottante) {
-            paletteFlottante.remove();
-        }
+        if (paletteFlottante) paletteFlottante.remove();
 
         pileUndo = [];
         pileRedo = [];

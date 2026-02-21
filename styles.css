@@ -15634,14 +15634,10 @@ body.mode-clair .travaux-slot-retroaction {
 }
 
 /* --- Popup autocollants --- */
-.travaux-popup-autocollants {
-    position: fixed;
-    background: var(--surface-carte, #1a3040);
-    border: 1px solid var(--bordure-claire);
-    border-radius: var(--radius-grand);
-    box-shadow: var(--shadow-fort);
-    padding: 12px 14px;
-    z-index: 10000;
+/* Palette flottante tampons — herite de .travaux-palette-flottante */
+.travaux-palette-tampons {
+    min-width: 180px;
+    max-width: 220px;
 }
 
 .travaux-autocollants-label {
@@ -15675,6 +15671,11 @@ body.mode-clair .travaux-slot-retroaction {
 
 .travaux-autocollant-item:hover {
     background: var(--bleu-tres-pale);
+}
+.travaux-autocollant-item.actif {
+    background: var(--bleu-pale);
+    box-shadow: 0 0 0 2px var(--accent-primaire, #2196F3);
+    border-radius: var(--radius-moyen);
 }
 
 .travaux-autocollant-item img {
