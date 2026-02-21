@@ -797,6 +797,10 @@ function cartoucheSelectionnee() {
     }).join('');
 
     document.getElementById('listeCriteresGrille1').innerHTML = html;
+
+    // Regénérer la rétroaction en temps réel après changement de cartouche
+    calculerNote();
+    genererRetroaction(1);
 }
 
 /**
@@ -2303,6 +2307,9 @@ function changerEchelleEvaluation(num) {
 
     if (evaluationEnCours) {
         evaluationEnCours.echelleId = echelleId;
+        // Recalculer la note et regénérer la rétroaction avec la nouvelle échelle
+        calculerNote();
+        genererRetroaction(1);
     }
 }
 

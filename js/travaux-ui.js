@@ -59,6 +59,17 @@
     async function initialiserModuleTravaux() {
         if (moduleInitialise) {
             rafraichirUI();
+            // Restaurer le mode Évaluer si c'était le mode actif avant navigation
+            if (modeCourant === 'evaluer') {
+                const fichier = travauxVisionneuse.getFichierActuel();
+                if (fichier && fichier.etudiantDA && fichier.productionId) {
+                    setTimeout(() => {
+                        // Forcer la réouverture car basculerMode vérifie mode === modeCourant
+                        modeCourant = 'annoter';
+                        basculerMode('evaluer');
+                    }, 200);
+                }
+            }
             return;
         }
 
@@ -76,7 +87,13 @@
         if (fichierRestaure) {
             const fichiers = travauxStockage.obtenirFichiersTravaux();
             if (fichiers.some(f => f.id === fichierRestaure)) {
-                setTimeout(() => ouvrirFichier(fichierRestaure), 200);
+                setTimeout(() => {
+                    ouvrirFichier(fichierRestaure);
+                    // Si le mode sauvegardé était "evaluer", le restaurer après ouverture du fichier
+                    if (modeCourant === 'evaluer') {
+                        setTimeout(() => basculerMode('evaluer'), 500);
+                    }
+                }, 200);
             }
         }
 
@@ -1203,10 +1220,6 @@
             }
         }
 
-        // Fermer le mode evaluation si actif
-        if (document.getElementById('travaux-palette-eval-gauche')) {
-            fermerModeEvaluation();
-        }
         // Masquer la section evaluation si visible (fallback)
         const evalDiv = document.getElementById('evaluations-contenu-evaluation');
         if (evalDiv) evalDiv.classList.add('u-hide');
@@ -1999,6 +2012,17 @@
             configurerDragPaletteEval('travaux-palette-eval-retro');
         }
 
+        // 4e palette : Jetons
+        const panneauJetons = document.getElementById('travaux-eval-jetons');
+        if (panneauJetons) {
+            const paletteJ = creerPaletteEval('travaux-palette-eval-jetons', 'Jetons', panneauJetons);
+            paletteJ.style.bottom = '12px';
+            paletteJ.style.right = '12px';
+            paletteJ.style.left = 'auto';
+            conteneurDoc.appendChild(paletteJ);
+            configurerDragPaletteEval('travaux-palette-eval-jetons');
+        }
+
         // Peupler les dropdowns (les fonctions d'evaluation.js remplissent les selects)
         if (typeof chargerListeEtudiantsEval === 'function') chargerListeEtudiantsEval();
         if (typeof chargerGroupesEval === 'function') chargerGroupesEval();
@@ -2011,6 +2035,9 @@
 
         // Pre-remplir le formulaire d'evaluation avec retry robuste
         preRemplirEvaluation(fichier.etudiantDA, fichier.productionId);
+
+        // Peupler la palette jetons
+        peuplementPaletteJetons(fichier);
     }
 
     function masquerPalettesEval() {
@@ -2139,8 +2166,8 @@
     function fermerModeEvaluation() {
         const evalDiv = document.getElementById('evaluations-contenu-evaluation');
 
-        const ids = ['travaux-palette-eval-gauche', 'travaux-palette-eval-droite', 'travaux-palette-eval-retro'];
-        const panneauIds = ['travaux-eval-gauche', 'travaux-eval-droite', 'travaux-eval-retroaction'];
+        const ids = ['travaux-palette-eval-gauche', 'travaux-palette-eval-droite', 'travaux-palette-eval-retro', 'travaux-palette-eval-jetons'];
+        const panneauIds = ['travaux-eval-gauche', 'travaux-eval-droite', 'travaux-eval-retroaction', 'travaux-eval-jetons'];
 
         for (let i = 0; i < ids.length; i++) {
             const palette = document.getElementById(ids[i]);
@@ -2601,6 +2628,109 @@
     }
 
     /* ===============================
+       PALETTE JETONS
+       =============================== */
+
+    /**
+     * Peuple la palette flottante des jetons pour le fichier courant
+     * @param {Object} fichier - Le fichier actuellement ouvert
+     */
+    function peuplementPaletteJetons(fichier) {
+        const conteneur = document.getElementById('travaux-jetons-contenu');
+        if (!conteneur || !fichier?.etudiantDA) return;
+
+        const config = typeof obtenirConfigJetons === 'function' ? obtenirConfigJetons() : null;
+        if (!config || !config.actif) {
+            conteneur.innerHTML = '<p class="texte-aide" style="padding:8px; font-size:0.8rem; color:var(--gris-moyen);">Système de jetons désactivé</p>';
+            return;
+        }
+
+        const statut = typeof obtenirStatutJetonsEtudiant === 'function'
+            ? obtenirStatutJetonsEtudiant(fichier.etudiantDA) : {};
+        const types = typeof obtenirTousTypesJetons === 'function'
+            ? obtenirTousTypesJetons() : [];
+
+        if (types.length === 0) {
+            conteneur.innerHTML = '<p class="texte-aide" style="padding:8px; font-size:0.8rem; color:var(--gris-moyen);">Aucun type de jeton configuré</p>';
+            return;
+        }
+
+        let html = '<div style="display:flex; flex-direction:column; gap:8px; padding:4px;">';
+
+        for (const type of types) {
+            const s = statut[type.id] || { utilises: 0, total: type.nombreTotal || 0, restants: type.nombreTotal || 0 };
+            const couleur = type.id === 'delai' ? 'var(--orange-accent, #e67e22)'
+                          : type.id === 'reprise' ? 'var(--bleu-moyen, #3498db)'
+                          : type.id === 'repriseCiblee' ? 'var(--violet-accent, #9b59b6)'
+                          : 'var(--gris-moyen, #95a5a6)';
+
+            html += `<div style="display:flex; align-items:center; justify-content:space-between; padding:6px 8px; background:var(--surface-conteneur, #162c36); border-radius:6px; border-left:3px solid ${couleur};">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <input type="checkbox" id="travaux-checkbox-jeton-${type.id}"
+                           onchange="travauxUI.gererCheckboxJetonPalette('${type.id}')"
+                           style="accent-color:${couleur};">
+                    <span style="font-size:0.8rem; font-weight:600; color:var(--texte-principal, #e0e0e0);">${echapperHtml(type.nom)}</span>
+                </div>
+                <span style="font-size:0.75rem; color:var(--gris-moyen); white-space:nowrap;">${s.restants} / ${s.total}</span>
+            </div>`;
+        }
+
+        html += '</div>';
+        conteneur.innerHTML = html;
+    }
+
+    /**
+     * Handler pour les checkboxes de la palette jetons flottante
+     * Délègue aux fonctions existantes de evaluation.js
+     * @param {string} typeId - L'identifiant du type de jeton
+     */
+    function gererCheckboxJetonPalette(typeId) {
+        // Synchroniser avec les checkboxes de la palette Paramètres (optionsJetons)
+        const checkboxPalette = document.getElementById(`travaux-checkbox-jeton-${typeId}`);
+        const estCoche = checkboxPalette?.checked || false;
+
+        if (typeId === 'delai') {
+            const checkboxOriginal = document.getElementById('checkboxJetonDelai');
+            if (checkboxOriginal) checkboxOriginal.checked = estCoche;
+            if (typeof gererChangementCheckboxJetonDelai === 'function') {
+                gererChangementCheckboxJetonDelai();
+            }
+        } else if (typeId === 'reprise') {
+            const checkboxOriginal = document.getElementById('checkboxJetonReprise');
+            if (checkboxOriginal) checkboxOriginal.checked = estCoche;
+            if (typeof gererChangementCheckboxJetonReprise === 'function') {
+                gererChangementCheckboxJetonReprise();
+            }
+        } else if (typeId === 'repriseCiblee') {
+            const checkboxOriginal = document.getElementById('checkboxJetonRepriseCiblee');
+            if (checkboxOriginal) checkboxOriginal.checked = estCoche;
+            if (typeof gererChangementCheckboxJetonRepriseCiblee === 'function') {
+                gererChangementCheckboxJetonRepriseCiblee();
+            }
+        } else {
+            // Jeton personnalisé
+            const fichier = travauxVisionneuse.getFichierActuel();
+            if (!fichier?.etudiantDA) return;
+
+            if (estCoche) {
+                if (typeof attribuerJetonPersonnalise === 'function') {
+                    attribuerJetonPersonnalise(fichier.etudiantDA, typeId, 'Appliqué depuis palette jetons');
+                }
+            } else {
+                if (typeof retirerJetonPersonnalise === 'function') {
+                    retirerJetonPersonnalise(fichier.etudiantDA, typeId);
+                }
+            }
+        }
+
+        // Rafraîchir les compteurs de la palette après action
+        const fichier = travauxVisionneuse.getFichierActuel();
+        if (fichier) {
+            setTimeout(() => peuplementPaletteJetons(fichier), 300);
+        }
+    }
+
+    /* ===============================
        EXPORTS GLOBAUX
        =============================== */
 
@@ -2660,6 +2790,9 @@
         fermerPreviewInline: fermerPreviewInline,
         // Rafraichissement
         rafraichirUI: rafraichirUI,
+        // Palette jetons
+        gererCheckboxJetonPalette: gererCheckboxJetonPalette,
+        peuplementPaletteJetons: peuplementPaletteJetons,
         // Utilitaires
         annotationContientDuContenu: annotationContientDuContenu
     };
