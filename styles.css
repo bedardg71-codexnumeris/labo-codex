@@ -14432,7 +14432,9 @@ body.mode-clair .prep-select {
 
 .travaux-palette-eval .travaux-panneau-corps {
     max-height: none;
-    overflow-y: visible;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-width: 0;
 }
 
 /* Contenu compact dans les palettes évaluation (override des inline styles) */
@@ -14442,9 +14444,29 @@ body.mode-clair .prep-select {
 .travaux-palette-eval .zone-criteres > .conteneur-liste > div {
     padding: 8px !important;
     margin-bottom: 8px !important;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+.travaux-palette-eval .zone-criteres,
+.travaux-palette-eval .conteneur-liste {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+.travaux-palette-eval .zone-criteres * {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+.travaux-palette-eval strong,
+.travaux-palette-eval .u-texte-09 {
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
 }
 .travaux-palette-eval .eval-grid-critere {
     font-size: 0.8rem;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
 }
 .travaux-palette-eval .controle-form {
     font-size: 0.78rem !important;
