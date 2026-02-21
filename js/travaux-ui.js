@@ -283,24 +283,33 @@
 
                     <!-- Toolbar -->
                     <div class="travaux-toolbar">
-                        <div class="travaux-toolbar-gauche">
-                            <span id="travaux-badge-statut" class="u-hide"></span>
-                            <span id="travaux-badge-fichier-actif" class="u-hide"></span>
-                            <button id="travaux-btn-page-prec" class="btn-icon" onclick="travauxVisionneuse.pagePrecedente()" disabled title="Page précédente">&#x2190;</button>
-                            <span id="travaux-indicateur-page">-- / --</span>
-                            <button id="travaux-btn-page-suiv" class="btn-icon" onclick="travauxVisionneuse.pageSuivante()" disabled title="Page suivante">&#x2192;</button>
-                        </div>
-                        <div class="travaux-toolbar-droite">
-                            <button class="btn btn-petit" onclick="travauxVisionneuse.zoomPleineLargeur()" title="Ajuster à la largeur du conteneur">Pleine largeur</button>
-                            <button class="btn btn-petit" onclick="travauxVisionneuse.zoomPleineHauteur()" title="Ajuster à la hauteur du conteneur">Pleine hauteur</button>
-                            <button class="btn btn-petit" onclick="travauxVisionneuse.zoom100()" title="Zoom 100%">100%</button>
-                            <span id="travaux-indicateur-zoom">100%</span>
-                            <span class="travaux-separateur"></span>
-                            <button id="travaux-btn-annoter" class="btn btn-petit" onclick="travauxAnnotation.basculerAnnotation()">Annoter</button>
-                            <button id="travaux-btn-evaluer" class="btn btn-ajouter btn-petit u-hide" onclick="travauxUI.evaluerDepuisAnnotation()" title="Évaluer cette production">Évaluer</button>
-                            <button id="travaux-btn-export-pdf" class="btn btn-petit u-hide" onclick="travauxExportPDF.afficherRevisionExport(travauxVisionneuse.getFichierActuel()?.id)" title="Exporter PDF annoté">Exporter PDF</button>
-                            <button id="travaux-btn-alleger" class="btn btn-petit u-hide" onclick="travauxUI.allegerFichier(travauxVisionneuse.getFichierActuel()?.id)" title="Alléger ce fichier">Alléger</button>
-                            <button id="travaux-btn-reimporter" class="btn btn-petit u-hide" onclick="travauxUI.reimporterFichier(travauxVisionneuse.getFichierActuel()?.id)" title="Re-importer l'original">Re-importer</button>
+                        <div class="travaux-toolbar-inner">
+                            <!-- GAUCHE : badge + navigation pages -->
+                            <div class="travaux-toolbar-gauche">
+                                <span id="travaux-badge-fichier-actif" class="u-hide"></span>
+                                <button id="travaux-btn-page-prec" class="travaux-btn-nav" onclick="travauxVisionneuse.pagePrecedente()" disabled title="Page précédente">&#x2190;</button>
+                                <span id="travaux-indicateur-page">-- / --</span>
+                                <button id="travaux-btn-page-suiv" class="travaux-btn-nav" onclick="travauxVisionneuse.pageSuivante()" disabled title="Page suivante">&#x2192;</button>
+                            </div>
+
+                            <!-- CENTRE : nom du fichier -->
+                            <div class="travaux-toolbar-centre">
+                                <span id="travaux-nom-fichier" class="travaux-nom-fichier">—</span>
+                            </div>
+
+                            <!-- DROITE : zoom + séparateur + actions -->
+                            <div class="travaux-toolbar-droite">
+                                <span id="travaux-indicateur-zoom" class="travaux-zoom-info">100%</span>
+                                <button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoomPleineLargeur()" title="Ajuster à la largeur">Largeur</button>
+                                <button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoomPleineHauteur()" title="Ajuster à la hauteur">Hauteur</button>
+                                <button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoom100()" title="Zoom 100%">100%</button>
+                                <span class="travaux-separateur"></span>
+                                <button id="travaux-btn-annoter" class="travaux-btn-action" onclick="travauxAnnotation.basculerAnnotation()">Annoter</button>
+                                <button id="travaux-btn-evaluer" class="travaux-btn-action travaux-btn-action-vert u-hide" onclick="travauxUI.evaluerDepuisAnnotation()" title="Évaluer cette production">Évaluer</button>
+                                <button id="travaux-btn-export-pdf" class="travaux-btn-action u-hide" onclick="travauxExportPDF.afficherRevisionExport(travauxVisionneuse.getFichierActuel()?.id)" title="Exporter PDF annoté">PDF</button>
+                                <button id="travaux-btn-alleger" class="travaux-btn-action u-hide" onclick="travauxUI.allegerFichier(travauxVisionneuse.getFichierActuel()?.id)" title="Alléger ce fichier">Alléger</button>
+                                <button id="travaux-btn-reimporter" class="travaux-btn-action u-hide" onclick="travauxUI.reimporterFichier(travauxVisionneuse.getFichierActuel()?.id)" title="Re-importer l'original">Re-importer</button>
+                            </div>
                         </div>
                     </div>
 
@@ -1213,9 +1222,27 @@
         const evalDiv = document.getElementById('evaluations-contenu-evaluation');
         if (evalDiv) evalDiv.classList.add('u-hide');
 
-        // Highlight du badge actif
+        // Highlight du badge actif : pill → "EN COURS" orange
         document.querySelectorAll('.travaux-badge-importe').forEach(b => {
-            b.classList.toggle('actif', b.dataset.fichierId === fichierId);
+            const estActif = b.dataset.fichierId === fichierId;
+            b.classList.toggle('actif', estActif);
+            const pill = b.querySelector('.travaux-badge-pill');
+            if (!pill) return;
+            if (estActif) {
+                // Sauvegarder le texte/classe d'origine pour restauration
+                if (!pill.dataset.origTexte) {
+                    pill.dataset.origTexte = pill.textContent;
+                    pill.dataset.origClasse = pill.className.replace('travaux-badge-pill', '').trim();
+                }
+                pill.textContent = 'EN COURS';
+                pill.className = 'travaux-badge-pill en-cours';
+            } else if (pill.dataset.origTexte) {
+                // Restaurer l'etat d'origine
+                pill.textContent = pill.dataset.origTexte;
+                pill.className = 'travaux-badge-pill ' + pill.dataset.origClasse;
+                delete pill.dataset.origTexte;
+                delete pill.dataset.origClasse;
+            }
         });
 
         // Attendre que la visionneuse soit prete
@@ -1269,11 +1296,16 @@
             }
 
 
-            // Badge etudiant dans la toolbar
+            // Badge etudiant dans la toolbar — afficher "EN COURS" en orange
             const badgeFichier = document.getElementById('travaux-badge-fichier-actif');
             if (badgeFichier && fichierOuvert) {
                 badgeFichier.innerHTML = genererBadgeFichierImporte(fichierOuvert, 'ouvrirFichier');
                 badgeFichier.classList.remove('u-hide');
+                const pillToolbar = badgeFichier.querySelector('.travaux-badge-pill');
+                if (pillToolbar) {
+                    pillToolbar.textContent = 'EN COURS';
+                    pillToolbar.className = 'travaux-badge-pill en-cours';
+                }
                 // Desactiver le onclick et le bouton supprimer dans cette copie toolbar
                 const badgeCopie = badgeFichier.querySelector('.travaux-badge-importe');
                 if (badgeCopie) { badgeCopie.onclick = null; badgeCopie.style.cursor = 'default'; }
@@ -2385,8 +2417,17 @@
     function retourFichiers() {
         const evalDiv = document.getElementById('evaluations-contenu-evaluation');
         if (evalDiv) evalDiv.classList.add('u-hide');
-        // Retirer le highlight actif
-        document.querySelectorAll('.travaux-badge-importe.actif').forEach(b => b.classList.remove('actif'));
+        // Retirer le highlight actif et restaurer les pills originaux
+        document.querySelectorAll('.travaux-badge-importe.actif').forEach(b => {
+            b.classList.remove('actif');
+            const pill = b.querySelector('.travaux-badge-pill');
+            if (pill && pill.dataset.origTexte) {
+                pill.textContent = pill.dataset.origTexte;
+                pill.className = 'travaux-badge-pill ' + pill.dataset.origClasse;
+                delete pill.dataset.origTexte;
+                delete pill.dataset.origClasse;
+            }
+        });
     }
 
     /**
