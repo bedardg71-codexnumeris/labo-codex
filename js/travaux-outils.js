@@ -148,18 +148,17 @@
             type: 'symbole',
             taille: 30
         },
-        // Erreurs de français (codes 0-10)
-        errfr_0:  { id: 'errfr_0',  nom: 'Aucune erreur',     icone: '0',  couleurBouton: '#888888', curseur: 'crosshair', type: 'symbole', taille: 24 },
-        errfr_1:  { id: 'errfr_1',  nom: 'Syntaxe',           icone: '1',  couleurBouton: '#c62828', curseur: 'crosshair', type: 'symbole', taille: 24 },
-        errfr_2:  { id: 'errfr_2',  nom: 'Subordination',     icone: '2',  couleurBouton: '#c62828', curseur: 'crosshair', type: 'symbole', taille: 24 },
-        errfr_3:  { id: 'errfr_3',  nom: 'Ponctuation',       icone: '3',  couleurBouton: '#e65100', curseur: 'crosshair', type: 'symbole', taille: 24 },
-        errfr_4:  { id: 'errfr_4',  nom: 'Orthographe',       icone: '4',  couleurBouton: '#e65100', curseur: 'crosshair', type: 'symbole', taille: 24 },
-        errfr_5:  { id: 'errfr_5',  nom: 'Homophones',        icone: '5',  couleurBouton: '#e65100', curseur: 'crosshair', type: 'symbole', taille: 24 },
-        errfr_6:  { id: 'errfr_6',  nom: 'Accords GN',        icone: '6',  couleurBouton: '#1565c0', curseur: 'crosshair', type: 'symbole', taille: 24 },
-        errfr_7:  { id: 'errfr_7',  nom: 'Part. passés',      icone: '7',  couleurBouton: '#1565c0', curseur: 'crosshair', type: 'symbole', taille: 24 },
-        errfr_8:  { id: 'errfr_8',  nom: 'Mots inappropriés', icone: '8',  couleurBouton: '#7b1fa2', curseur: 'crosshair', type: 'symbole', taille: 24 },
-        errfr_9:  { id: 'errfr_9',  nom: 'Répétitions',       icone: '9',  couleurBouton: '#7b1fa2', curseur: 'crosshair', type: 'symbole', taille: 24 },
-        errfr_10: { id: 'errfr_10', nom: 'Autres',            icone: '10', couleurBouton: '#888888', curseur: 'crosshair', type: 'symbole', taille: 24 }
+        // Erreurs de français (codes 1-10)
+        errfr_1:  { id: 'errfr_1',  nom: 'Construction syntaxique',  icone: '\u2460', couleurBouton: '#c62828', curseur: 'crosshair', type: 'symbole', taille: 24 },
+        errfr_2:  { id: 'errfr_2',  nom: 'Subordonnée seule',       icone: '\u2461', couleurBouton: '#c62828', curseur: 'crosshair', type: 'symbole', taille: 24 },
+        errfr_3:  { id: 'errfr_3',  nom: 'Ponctuation / guillemets', icone: '\u2462', couleurBouton: '#e65100', curseur: 'crosshair', type: 'symbole', taille: 24 },
+        errfr_4:  { id: 'errfr_4',  nom: 'Accord dans le GN',       icone: '\u2463', couleurBouton: '#1565c0', curseur: 'crosshair', type: 'symbole', taille: 24 },
+        errfr_5:  { id: 'errfr_5',  nom: 'Accord du pronom',        icone: '\u2464', couleurBouton: '#1565c0', curseur: 'crosshair', type: 'symbole', taille: 24 },
+        errfr_6:  { id: 'errfr_6',  nom: 'Accord part. passé',      icone: '\u2465', couleurBouton: '#1565c0', curseur: 'crosshair', type: 'symbole', taille: 24 },
+        errfr_7:  { id: 'errfr_7',  nom: 'Mot invariable',          icone: '\u2466', couleurBouton: '#7b1fa2', curseur: 'crosshair', type: 'symbole', taille: 24 },
+        errfr_8:  { id: 'errfr_8',  nom: 'Déterminant',             icone: '\u2467', couleurBouton: '#7b1fa2', curseur: 'crosshair', type: 'symbole', taille: 24 },
+        errfr_9:  { id: 'errfr_9',  nom: 'Vocabulaire / anglicisme', icone: '\u2468', couleurBouton: '#2e7d32', curseur: 'crosshair', type: 'symbole', taille: 24 },
+        errfr_10: { id: 'errfr_10', nom: 'Orthographe / typo',      icone: '\u2469', couleurBouton: '#2e7d32', curseur: 'crosshair', type: 'symbole', taille: 24 }
     };
 
     /* ===============================
@@ -398,6 +397,117 @@
     prechargerAutocollants();
 
     /* ===============================
+       PALETTE ERREURS DE FRANÇAIS
+       =============================== */
+
+    const CODES_ERREURS_FR = [
+        { id: 'errfr_1',  code: 1,  nom: 'Construction syntaxique / accord du verbe' },
+        { id: 'errfr_2',  code: 2,  nom: 'Subordonnée employée seule' },
+        { id: 'errfr_3',  code: 3,  nom: 'Ponctuation / guillemets' },
+        { id: 'errfr_4',  code: 4,  nom: 'Accord dans le groupe du nom' },
+        { id: 'errfr_5',  code: 5,  nom: 'Accord du pronom / lien avec son antécédent' },
+        { id: 'errfr_6',  code: 6,  nom: 'Accord du participe passé' },
+        { id: 'errfr_7',  code: 7,  nom: 'Mot invariable' },
+        { id: 'errfr_8',  code: 8,  nom: 'Déterminant' },
+        { id: 'errfr_9',  code: 9,  nom: 'Vocabulaire / anglicisme' },
+        { id: 'errfr_10', code: 10, nom: 'Orthographe d\u2019usage / typographie' }
+    ];
+
+    let paletteErrFrVisible = false;
+
+    /**
+     * Bascule la palette flottante des erreurs de français
+     */
+    function togglePaletteErreursFrancais() {
+        let palette = document.getElementById('travaux-palette-erreurs-fr');
+
+        if (palette) {
+            palette.remove();
+            paletteErrFrVisible = false;
+            return;
+        }
+
+        paletteErrFrVisible = true;
+        palette = document.createElement('div');
+        palette.id = 'travaux-palette-erreurs-fr';
+        palette.className = 'travaux-palette-flottante travaux-palette-erreurs-fr';
+
+        // Barre de titre
+        let html = '<div class="travaux-palette-barre">';
+        html += '<span class="travaux-palette-titre">Erreurs de français</span>';
+        html += '<div style="display:flex; gap:2px;">';
+        html += '<button class="travaux-palette-toggle" onclick="travauxOutils.togglePaletteErrFrReplie()" title="Replier">\u2212</button>';
+        html += '<button class="travaux-palette-toggle" onclick="travauxOutils.fermerPaletteErreursFrancais()" title="Fermer">\u00d7</button>';
+        html += '</div></div>';
+
+        // Contenu : liste verticale
+        html += '<div class="travaux-palette-contenu" id="travaux-errfr-contenu">';
+        html += '<div class="travaux-errfr-liste">';
+        CODES_ERREURS_FR.forEach(c => {
+            const outil = OUTILS[c.id];
+            const actif = outilActif === c.id ? ' actif' : '';
+            html += `<div class="travaux-errfr-item${actif}" onclick="travauxOutils.setOutilActif('${c.id}')" title="${c.nom}">`;
+            html += `<span class="travaux-errfr-numero" style="background:${outil.couleurBouton}">${outil.icone}</span>`;
+            html += `<span class="travaux-errfr-nom">${c.nom}</span>`;
+            html += '</div>';
+        });
+        html += '</div></div>';
+
+        palette.innerHTML = html;
+
+        // Inserer dans la zone-document
+        const zoneDocument = document.getElementById('travaux-conteneur-document');
+        if (zoneDocument) {
+            palette.style.top = '56px';
+            palette.style.left = '240px';
+            zoneDocument.appendChild(palette);
+            configurerDragPaletteErrFr();
+        }
+    }
+
+    function fermerPaletteErreursFrancais() {
+        paletteErrFrVisible = false;
+        const palette = document.getElementById('travaux-palette-erreurs-fr');
+        if (palette) palette.remove();
+    }
+
+    function togglePaletteErrFrReplie() {
+        const palette = document.getElementById('travaux-palette-erreurs-fr');
+        if (!palette) return;
+        palette.classList.toggle('replie');
+        const btn = palette.querySelector('.travaux-palette-toggle');
+        if (btn) btn.textContent = palette.classList.contains('replie') ? '+' : '\u2212';
+    }
+
+    function configurerDragPaletteErrFr() {
+        const palette = document.getElementById('travaux-palette-erreurs-fr');
+        const barre = palette?.querySelector('.travaux-palette-barre');
+        if (!barre) return;
+        barre.addEventListener('mousedown', function(e) {
+            if (e.target.closest('.travaux-palette-toggle')) return;
+            e.preventDefault();
+            const startX = e.clientX, startY = e.clientY;
+            const rect = palette.getBoundingClientRect();
+            const container = document.getElementById('travaux-conteneur-document');
+            const cRect = container.getBoundingClientRect();
+            const startLeft = rect.left - cRect.left;
+            const startTop = rect.top - cRect.top;
+            palette.style.right = 'auto';
+            palette.style.left = startLeft + 'px';
+            function onMove(e2) {
+                palette.style.left = Math.max(0, startLeft + e2.clientX - startX) + 'px';
+                palette.style.top = Math.max(0, startTop + e2.clientY - startY) + 'px';
+            }
+            function onUp() {
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup', onUp);
+            }
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onUp);
+        });
+    }
+
+    /* ===============================
        ETAT PALETTE
        =============================== */
 
@@ -619,6 +729,16 @@
             btn.classList.toggle('actif', btn.dataset.couleur === couleurActive);
         });
 
+        // Erreurs de français — selection visuelle
+        const paletteErrFr = document.getElementById('travaux-palette-erreurs-fr');
+        if (paletteErrFr) {
+            paletteErrFr.querySelectorAll('.travaux-errfr-item').forEach(item => {
+                const onclick = item.getAttribute('onclick') || '';
+                const match = onclick.match(/setOutilActif\('(errfr_\d+)'\)/);
+                item.classList.toggle('actif', match && match[1] === outilActif);
+            });
+        }
+
         // Curseur du canvas
         const canvas = document.getElementById('travaux-canvas-annotation');
         if (canvas) {
@@ -718,6 +838,9 @@
         togglePaletteAutocollants: togglePaletteAutocollants,
         fermerPaletteAutocollants: fermerPaletteAutocollants,
         togglePaletteTamponsReplie: togglePaletteTamponsReplie,
+        togglePaletteErreursFrancais: togglePaletteErreursFrancais,
+        fermerPaletteErreursFrancais: fermerPaletteErreursFrancais,
+        togglePaletteErrFrReplie: togglePaletteErrFrReplie,
         // Palette flottante
         configurerDragPalette: configurerDragPalette,
         togglePaletteReplie: togglePaletteReplie
