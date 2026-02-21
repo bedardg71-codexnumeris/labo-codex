@@ -92,6 +92,8 @@
 
         mettreAJourNavigation();
         recentrerVue();
+        // Recentrer après que le layout soit finalisé (PDF/image async)
+        requestAnimationFrame(() => recentrerVue());
         return true;
     }
 
