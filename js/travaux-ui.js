@@ -318,7 +318,10 @@
                         </div>
                     </div>
 
-                    <!-- Palette flottante d'annotation inseree dynamiquement par activerAnnotation() dans #travaux-canvas-container -->
+                    <!-- Palette flottante d'annotation inseree dynamiquement par activerAnnotation() -->
+
+                    <!-- Slot retroaction (affiche en bas du canvas en mode evaluation) -->
+                    <div id="travaux-slot-retroaction" class="travaux-slot-retroaction u-hide"></div>
                 </div>
 
                 <!-- Panneau droite (evaluation criteres) — rempli par JS -->
@@ -1890,8 +1893,10 @@
         const layout = document.querySelector('.travaux-visionneuse-layout');
         const slotGauche = document.getElementById('travaux-slot-gauche');
         const slotDroite = document.getElementById('travaux-slot-droite');
+        const slotRetro = document.getElementById('travaux-slot-retroaction');
         const panneauGauche = document.getElementById('travaux-eval-gauche');
         const panneauDroite = document.getElementById('travaux-eval-droite');
+        const panneauRetro = document.getElementById('travaux-eval-retroaction');
 
         // Toggle : si deja en mode evaluation, on ferme
         const estVisible = layout?.classList.contains('mode-evaluation');
@@ -1899,12 +1904,15 @@
             layout.classList.remove('mode-evaluation');
             if (slotGauche) slotGauche.classList.add('u-hide');
             if (slotDroite) slotDroite.classList.add('u-hide');
+            if (slotRetro) slotRetro.classList.add('u-hide');
             // Remettre les panneaux dans le conteneur d'evaluation d'origine
             const evalDiv = document.getElementById('evaluations-contenu-evaluation');
             if (evalDiv && panneauGauche) evalDiv.appendChild(panneauGauche);
             if (evalDiv && panneauDroite) evalDiv.appendChild(panneauDroite);
+            if (evalDiv && panneauRetro) evalDiv.appendChild(panneauRetro);
             if (panneauGauche) panneauGauche.classList.add('u-hide');
             if (panneauDroite) panneauDroite.classList.add('u-hide');
+            if (panneauRetro) panneauRetro.classList.add('u-hide');
             return;
         }
 
@@ -1921,6 +1929,12 @@
             slotDroite.appendChild(panneauDroite);
             panneauDroite.classList.remove('u-hide');
             slotDroite.classList.remove('u-hide');
+        }
+        // Retroaction sous le canvas
+        if (slotRetro && panneauRetro) {
+            slotRetro.appendChild(panneauRetro);
+            panneauRetro.classList.remove('u-hide');
+            slotRetro.classList.remove('u-hide');
         }
 
         // Activer le mode evaluation sur le layout

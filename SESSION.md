@@ -1,10 +1,24 @@
 # SESSION ACTIVE - BETA 97.9
 
 **Date** : 20 février 2026
-**Version** : Beta 97.9 (build 0220-2000)
+**Version** : Beta 97.9 (build 0220-2030)
 **Statut** : Module Travaux — Refonte visionneuse
 
 ## SESSION DU 20 FÉVRIER 2026
+
+### Travail accompli — Correctifs UX palette et évaluation (Beta 97.9, build 0220-2030)
+
+97. **Palette fixe au scroll** : L'insertion de la palette flottante est déplacée de `#travaux-canvas-container` vers `#travaux-conteneur-document` (`.travaux-zone-document`) dans `activerAnnotation()` (travaux-annotation.js). La palette reste fixe lors du défilement du canvas. Référence drag mise à jour dans `configurerDragPalette()` (travaux-outils.js).
+
+98. **Emojis remplacés par texte** : Toutes les icônes emoji des outils d'annotation (OUTILS dans travaux-outils.js) remplacées par des mots courts : Sél., Stylo, Surl., Gomme, Texte, Cercle, Flèche, Rect., ✓, ✗. Boutons undo/redo/effacer remplacés par « Annuler », « Rétablir », « Effacer » (`.travaux-palette-btn-pied`). Bouton tampons : texte « Tampons ». CSS `.travaux-btn-outil` adapté (11px, padding texte, min-height 28px).
+
+99. **Panneau gauche style palette** : `#travaux-eval-gauche` reçoit un `.travaux-panneau-header` (titre « Paramètres », 0.7rem uppercase) et `.travaux-panneau-corps` wrappant le contenu. CSS `.travaux-slot-panneau` harmonisé avec le design prep-palette (300px, rgba borders, surface-carte background). Styles compacts pour les formulaires internes.
+
+100. **Panneau droit critères uniquement** : `#travaux-eval-droite` ne contient plus que `.travaux-panneau-header` (« Critères ») et `#listeCriteresGrille1`. La zone de rétroaction est extraite dans un élément séparé.
+
+101. **Rétroaction sous le canvas** : Nouvel élément `#travaux-eval-retroaction` contenant textarea, checkboxes et bouton copier. Slot `#travaux-slot-retroaction` ajouté sous le canvas dans `afficherVisionneuse()`. `evaluerDepuisAnnotation()` déplace la rétroaction dans ce slot. CSS `.travaux-slot-retroaction` (border-top, max-height 250px, textarea compact).
+
+102. **Page d'accueil réorganisée** : Trois sections en accordéons dans `afficherAccueilRetour()` (accueil.js) : « Découvrir » (toggles démo/tour/tooltips/aide), « Parcourir » (8 cartes d'action, ouvert par défaut), « Piloter » (panneau parcours, ouvert par défaut). Emoji pin retiré de l'aide contextuelle.
 
 ### Travail accompli — Refonte visionneuse : palette flottante + évaluation 3 colonnes (Beta 97.9, build 0220-2000)
 

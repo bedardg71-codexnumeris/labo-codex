@@ -150,15 +150,13 @@
             travauxUI.evaluerDepuisAnnotation(); // toggle off
         }
 
-        // Inserer la palette flottante dans le canvas-container
-        const canvasContainer = document.getElementById('travaux-canvas-container');
-        if (canvasContainer && !document.getElementById('travaux-palette-flottante')) {
+        // Inserer la palette flottante dans la zone-document (au-dessus du canvas, fixe au scroll)
+        const zoneDocument = document.getElementById('travaux-conteneur-document');
+        if (zoneDocument && !document.getElementById('travaux-palette-flottante')) {
             const paletteDiv = document.createElement('div');
-            paletteDiv.id = 'travaux-palette-wrapper';
             paletteDiv.innerHTML = travauxOutils.genererHTMLPalette();
-            // Extraire l'element palette-flottante du wrapper et inserer directement
             const paletteEl = paletteDiv.firstElementChild;
-            canvasContainer.appendChild(paletteEl);
+            zoneDocument.appendChild(paletteEl);
             travauxOutils.configurerDragPalette();
         }
 

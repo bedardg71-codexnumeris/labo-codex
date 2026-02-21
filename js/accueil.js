@@ -135,7 +135,7 @@ function afficherAccueilRetour(conteneur) {
 
                     <div class="accueil-carte-decouvrir">
                         <label style="display:flex; align-items:center; gap:12px; cursor:pointer;">
-                            <span style="font-size:1.5rem;">\uD83D\uDCCD</span>
+                            <span style="font-size:1.5rem;">&#x2139;&#xFE0F;</span>
                             <input type="checkbox" id="checkbox-aide-contextuelle-accueil" ${aideContextuelleActive ? 'checked' : ''}
                                 onchange="if(typeof definirAideContextuelle==='function') definirAideContextuelle(this.checked);">
                             <div>
@@ -166,66 +166,82 @@ function afficherAccueilRetour(conteneur) {
             <h1>${heroTitre}</h1>
         </div>
 
-        ${parcoursHTML}
-
         ${decouvrirHTML}
 
-        <div class="accueil-cartes accueil-cartes--8">
-            <div class="accueil-carte" onclick="afficherSection('planification'); setTimeout(function(){ afficherSousSection('planification-carte'); }, 100);">
-                <div class="accueil-carte-icone">\uD83E\uDDE9</div>
-                <div class="accueil-carte-titre">Planifier ton cours</div>
-                <div class="accueil-carte-desc">
-                    Organise tes s\u00e9quences, le\u00e7ons et activit\u00e9s pour leur alignement p\u00e9dagogique.
+        <div class="carte accordeon" id="accueil-parcourir">
+            <div class="accordeon-header" onclick="toggleAccordeonV2(this);">
+                <h3 style="margin: 0; font-size: 1.1rem;">Parcourir</h3>
+                <span class="accordeon-chevron">\u25BC</span>
+            </div>
+            <div class="accordeon-contenu" style="display: block;">
+                <div class="accueil-cartes accueil-cartes--8">
+                    <div class="accueil-carte" onclick="afficherSection('planification'); setTimeout(function(){ afficherSousSection('planification-carte'); }, 100);">
+                        <div class="accueil-carte-icone">\uD83E\uDDE9</div>
+                        <div class="accueil-carte-titre">Planifier ton cours</div>
+                        <div class="accueil-carte-desc">
+                            Organise tes s\u00e9quences, le\u00e7ons et activit\u00e9s pour leur alignement p\u00e9dagogique.
+                        </div>
+                    </div>
+                    <div class="accueil-carte" onclick="afficherSection('construction'); setTimeout(function(){ if(typeof ouvrirWizardV2==='function') ouvrirWizardV2(); }, 300);">
+                        <div class="accueil-carte-icone">\uD83C\uDFA8</div>
+                        <div class="accueil-carte-titre">Configurer ta pratique de notation</div>
+                        <div class="accueil-carte-desc">
+                            D\u00e9finis ce que tu mesures et comment tu le fais pour cr\u00e9er ta pratique de notation.
+                        </div>
+                    </div>
+                    <div class="accueil-carte" onclick="afficherSection('presences');">
+                        <div class="accueil-carte-icone">&#x1F4CB;</div>
+                        <div class="accueil-carte-titre">Saisir les pr\u00e9sences</div>
+                        <div class="accueil-carte-desc">
+                            Saisis les pr\u00e9sences du jour pour ton groupe et ajoute des observations.
+                        </div>
+                    </div>
+                    <div class="accueil-carte" onclick="afficherSection('evaluations'); setTimeout(function(){ afficherSousSection('evaluations-annoter'); }, 100);">
+                        <div class="accueil-carte-icone">&#x1F4DD;</div>
+                        <div class="accueil-carte-titre">Annoter et \u00e9valuer</div>
+                        <div class="accueil-carte-desc">
+                            Annote les travaux de tes \u00e9tudiants et \u00e9value-les selon la grille de crit\u00e8res.
+                        </div>
+                    </div>
+                    <div class="accueil-carte" onclick="afficherSection('evaluations'); setTimeout(function(){ afficherSousSection('evaluations-liste'); }, 100);">
+                        <div class="accueil-carte-icone">&#x2696;&#xFE0F;</div>
+                        <div class="accueil-carte-titre">\u00c9valuer une production</div>
+                        <div class="accueil-carte-desc">
+                            Applique une grille de crit\u00e8res et construis une r\u00e9troaction diff\u00e9renci\u00e9e.
+                        </div>
+                    </div>
+                    <div class="accueil-carte" onclick="afficherSection('tableau-bord'); setTimeout(function(){ afficherSousSection('tableau-bord-profil'); }, 100);">
+                        <div class="accueil-carte-icone">\uD83D\uDC64</div>
+                        <div class="accueil-carte-titre">Consulter un profil \u00e9tudiant</div>
+                        <div class="accueil-carte-desc">
+                            Consulte le portrait d\u2019un \u00e9l\u00e8ve\u00a0: pr\u00e9sences, r\u00e9sultats et progression.
+                        </div>
+                    </div>
+                    <div class="accueil-carte" onclick="afficherSection('tableau-bord');">
+                        <div class="accueil-carte-icone">&#x1F4C8;</div>
+                        <div class="accueil-carte-titre">Voir l\u2019\u00e9tat des lieux</div>
+                        <div class="accueil-carte-desc">
+                            Suis la participation, les r\u00e9sultats et la progression de ton groupe.
+                        </div>
+                    </div>
+                    <div class="accueil-carte" onclick="afficherSection('tableau-bord'); setTimeout(function(){ afficherSousSection('tableau-bord-interventions'); }, 100);">
+                        <div class="accueil-carte-icone">\uD83D\uDEDF</div>
+                        <div class="accueil-carte-titre">Pr\u00e9parer des interventions</div>
+                        <div class="accueil-carte-desc">
+                            Identifie les \u00e9l\u00e8ves \u00e0 risque et planifie des interventions diff\u00e9renci\u00e9es selon leurs besoins.
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="accueil-carte" onclick="afficherSection('construction'); setTimeout(function(){ if(typeof ouvrirWizardV2==='function') ouvrirWizardV2(); }, 300);">
-                <div class="accueil-carte-icone">\uD83C\uDFA8</div>
-                <div class="accueil-carte-titre">Configurer ta pratique de notation</div>
-                <div class="accueil-carte-desc">
-                    D\u00e9finis ce que tu mesures et comment tu le fais pour cr\u00e9er ta pratique de notation.
-                </div>
+        </div>
+
+        <div class="carte accordeon" id="accueil-piloter">
+            <div class="accordeon-header" onclick="toggleAccordeonV2(this);">
+                <h3 style="margin: 0; font-size: 1.1rem;">Piloter</h3>
+                <span class="accordeon-chevron">\u25BC</span>
             </div>
-            <div class="accueil-carte" onclick="afficherSection('presences');">
-                <div class="accueil-carte-icone">&#x1F4CB;</div>
-                <div class="accueil-carte-titre">Saisir les pr\u00e9sences</div>
-                <div class="accueil-carte-desc">
-                    Saisis les pr\u00e9sences du jour pour ton groupe et ajoute des observations.
-                </div>
-            </div>
-            <div class="accueil-carte" onclick="afficherSection('evaluations'); setTimeout(function(){ afficherSousSection('evaluations-annoter'); }, 100);">
-                <div class="accueil-carte-icone">&#x1F4DD;</div>
-                <div class="accueil-carte-titre">Annoter et \u00e9valuer</div>
-                <div class="accueil-carte-desc">
-                    Annote les travaux de tes \u00e9tudiants et \u00e9value-les selon la grille de crit\u00e8res.
-                </div>
-            </div>
-            <div class="accueil-carte" onclick="afficherSection('evaluations'); setTimeout(function(){ afficherSousSection('evaluations-liste'); }, 100);">
-                <div class="accueil-carte-icone">&#x2696;&#xFE0F;</div>
-                <div class="accueil-carte-titre">\u00c9valuer une production</div>
-                <div class="accueil-carte-desc">
-                    Applique une grille de crit\u00e8res et construis une r\u00e9troaction diff\u00e9renci\u00e9e.
-                </div>
-            </div>
-            <div class="accueil-carte" onclick="afficherSection('tableau-bord'); setTimeout(function(){ afficherSousSection('tableau-bord-profil'); }, 100);">
-                <div class="accueil-carte-icone">\uD83D\uDC64</div>
-                <div class="accueil-carte-titre">Consulter un profil \u00e9tudiant</div>
-                <div class="accueil-carte-desc">
-                    Consulte le portrait d\u2019un \u00e9l\u00e8ve\u00a0: pr\u00e9sences, r\u00e9sultats et progression.
-                </div>
-            </div>
-            <div class="accueil-carte" onclick="afficherSection('tableau-bord');">
-                <div class="accueil-carte-icone">&#x1F4C8;</div>
-                <div class="accueil-carte-titre">Voir l\u2019\u00e9tat des lieux</div>
-                <div class="accueil-carte-desc">
-                    Suis la participation, les r\u00e9sultats et la progression de ton groupe.
-                </div>
-            </div>
-            <div class="accueil-carte" onclick="afficherSection('tableau-bord'); setTimeout(function(){ afficherSousSection('tableau-bord-interventions'); }, 100);">
-                <div class="accueil-carte-icone">\uD83D\uDEDF</div>
-                <div class="accueil-carte-titre">Pr\u00e9parer des interventions</div>
-                <div class="accueil-carte-desc">
-                    Identifie les \u00e9l\u00e8ves \u00e0 risque et planifie des interventions diff\u00e9renci\u00e9es selon leurs besoins.
-                </div>
+            <div class="accordeon-contenu" style="display: block;">
+                ${parcoursHTML}
             </div>
         </div>
 

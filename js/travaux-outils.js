@@ -39,15 +39,15 @@
     const OUTILS = {
         selection: {
             id: 'selection',
-            nom: 'Selection',
-            icone: '☝️',
+            nom: 'S\u00e9lection',
+            icone: 'S\u00e9l.',
             curseur: 'default',
             type: 'selection'
         },
         stylo: {
             id: 'stylo',
             nom: 'Stylo',
-            icone: '🖊️',
+            icone: 'Stylo',
             curseur: 'crosshair',
             epaisseurDefaut: 2,
             epaisseurMin: 1,
@@ -60,7 +60,7 @@
         surligneur: {
             id: 'surligneur',
             nom: 'Surligneur',
-            icone: '﹏',
+            icone: 'Surl.',
             curseur: 'crosshair',
             epaisseurDefaut: 20,
             epaisseurMin: 10,
@@ -74,14 +74,14 @@
         gomme: {
             id: 'gomme',
             nom: 'Gomme',
-            icone: '🚫',
+            icone: 'Gomme',
             curseur: 'pointer',
             mode: 'effacer-trait' // efface le trait entier au contact
         },
         texte: {
             id: 'texte',
             nom: 'Texte',
-            icone: '💬',
+            icone: 'Texte',
             curseur: 'text',
             tailleDefaut: 14,
             tailleMin: 10,
@@ -90,7 +90,7 @@
         cercle: {
             id: 'cercle',
             nom: 'Cercle',
-            icone: '⭕️',
+            icone: 'Cercle',
             curseur: 'crosshair',
             type: 'forme',
             epaisseurDefaut: 2,
@@ -98,16 +98,16 @@
         },
         fleche: {
             id: 'fleche',
-            nom: 'Fleche',
-            icone: '➔',
+            nom: 'Fl\u00e8che',
+            icone: 'Fl\u00e8che',
             curseur: 'crosshair',
             type: 'forme',
             epaisseurDefaut: 2
         },
         rectangle: {
             id: 'rectangle',
-            nom: 'Rectangle',
-            icone: '🔲',
+            nom: 'Rect.',
+            icone: 'Rect.',
             curseur: 'crosshair',
             type: 'forme',
             epaisseurDefaut: 2,
@@ -116,7 +116,7 @@
         crochet: {
             id: 'crochet',
             nom: 'Crochet',
-            icone: '✅',
+            icone: '\u2713',
             curseur: 'crosshair',
             type: 'symbole',
             taille: 30
@@ -124,7 +124,7 @@
         croix: {
             id: 'croix',
             nom: 'Croix',
-            icone: '❎',
+            icone: '\u2717',
             curseur: 'crosshair',
             type: 'symbole',
             taille: 30
@@ -498,7 +498,7 @@
         html += '<div class="travaux-palette-section">';
         html += '<div class="travaux-palette-label">Tampons</div>';
         const tamponActif = outilActif === 'tampon' ? ' actif' : '';
-        html += `<button class="travaux-btn-outil${tamponActif}" id="travaux-btn-tampons" onclick="travauxOutils.togglePaletteAutocollants()" title="Tampons de retroaction">&#x1F3F7;</button>`;
+        html += `<button class="travaux-btn-outil${tamponActif}" id="travaux-btn-tampons" onclick="travauxOutils.togglePaletteAutocollants()" title="Tampons de retroaction">Tampons</button>`;
         html += '</div>';
 
         // Couleurs
@@ -523,9 +523,9 @@
 
         // Pied de palette : Undo / Redo / Effacer
         html += '<div class="travaux-palette-pied">';
-        html += '<button id="travaux-btn-undo" class="btn-icon" onclick="travauxAnnotation.annuler()" disabled title="Annuler (Ctrl+Z)">&#x21A9;</button>';
-        html += '<button id="travaux-btn-redo" class="btn-icon" onclick="travauxAnnotation.retablir()" disabled title="Retablir (Ctrl+Y)">&#x21AA;</button>';
-        html += '<button class="btn-icon btn-danger-petit" onclick="travauxAnnotation.effacerPage()" title="Effacer la page">&#x1F5D1;</button>';
+        html += '<button id="travaux-btn-undo" class="travaux-palette-btn-pied" onclick="travauxAnnotation.annuler()" disabled title="Annuler (Ctrl+Z)">Annuler</button>';
+        html += '<button id="travaux-btn-redo" class="travaux-palette-btn-pied" onclick="travauxAnnotation.retablir()" disabled title="Retablir (Ctrl+Y)">R\u00e9tablir</button>';
+        html += '<button class="travaux-palette-btn-pied travaux-palette-btn-danger" onclick="travauxAnnotation.effacerPage()" title="Effacer la page">Effacer</button>';
         html += '</div>';
 
         html += '</div>'; // fin .travaux-palette-flottante
@@ -583,7 +583,7 @@
             e.preventDefault();
             const startX = e.clientX, startY = e.clientY;
             const rect = palette.getBoundingClientRect();
-            const container = document.getElementById('travaux-canvas-container');
+            const container = document.getElementById('travaux-conteneur-document');
             const cRect = container.getBoundingClientRect();
             const startLeft = rect.left - cRect.left;
             const startTop = rect.top - cRect.top;
