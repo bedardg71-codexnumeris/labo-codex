@@ -291,6 +291,7 @@
                                 <button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoomPleineLargeur()" title="Ajuster à la largeur">Largeur</button>
                                 <button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoomPleineHauteur()" title="Ajuster à la hauteur">Hauteur</button>
                                 <button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoom100()" title="Zoom 100%">100%</button>
+                                <button class="travaux-btn-zoom" onclick="travauxVisionneuse.recentrerVue()" title="Recentrer la vue">Recentrer</button>
                                 <span class="travaux-separateur"></span>
                                 <button id="travaux-btn-annoter" class="travaux-btn-action actif" onclick="travauxUI.basculerMode('annoter')">Annoter</button>
                                 <button id="travaux-btn-evaluer" class="travaux-btn-action travaux-btn-action-vert u-hide" onclick="travauxUI.basculerMode('evaluer')" title="Évaluer cette production">Évaluer</button>

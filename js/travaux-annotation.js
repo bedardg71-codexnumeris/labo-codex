@@ -51,6 +51,7 @@
     let donneesAvantModif = null;       // snapshot pour undo
     let donneesMultiplesAvantModif = null; // snapshots multi-selection pour undo
     let rectangleSelection = null;      // { x1, y1, x2, y2 } — marquee en cours
+    let modePanActif = false;
 
     /* ===============================
        INITIALISATION
@@ -315,6 +316,9 @@
 
         // Raccourcis clavier
         document.addEventListener('keydown', onKeyDown);
+
+        // Pan mode (Space+drag)
+        window.addEventListener('travaux-pan-mode', onPanModeChange);
     }
 
     function detacherEvenements() {
@@ -328,6 +332,7 @@
         canvasAnnotation.removeEventListener('gesturechange', onGesturePassthrough);
 
         document.removeEventListener('keydown', onKeyDown);
+        window.removeEventListener('travaux-pan-mode', onPanModeChange);
     }
 
     /**
@@ -335,6 +340,8 @@
      */
     function onPointerDown(e) {
         const outil = travauxOutils.getOutilActif();
+
+        if (modePanActif) return;
 
         // Mode selection : accepter touch (doigt) en plus de pen/mouse (Apple Pencil exception)
         if (outil.type === 'selection') {
@@ -694,6 +701,17 @@
         // L'event bulle naturellement vers le conteneur ou le zoom est gere
     }
 
+    function onPanModeChange(e) {
+        modePanActif = e.detail.actif;
+        if (canvasAnnotation) {
+            if (modePanActif) {
+                canvasAnnotation.style.pointerEvents = 'none';
+            } else if (annotationActive) {
+                canvasAnnotation.style.pointerEvents = 'auto';
+            }
+        }
+    }
+
     /**
      * Raccourcis clavier
      */
@@ -702,6 +720,9 @@
 
         // Ne pas intercepter les touches dans les champs de formulaire
         if (e.target.matches('input, select, textarea, [contenteditable]')) return;
+
+        // Laisser Space passer au module visionneuse pour le pan
+        if (e.key === ' ') return;
 
         // Delete/Backspace : supprimer les annotations selectionnees
         if ((e.key === 'Delete' || e.key === 'Backspace') && selectionsMultiples.length > 0) {
