@@ -29,7 +29,7 @@
         { id: 'blanc',      hex: '#ffffff', nom: 'Blanc' }
     ];
 
-    const COULEUR_DEFAUT = '#000000'; // Noir
+    const COULEUR_DEFAUT = '#3b82f6'; // Bleu
     const RESOLUTION_REFERENCE = 1000; // Largeur de reference pour normaliser l'epaisseur
 
     /* ===============================
@@ -570,6 +570,9 @@
         const pxLabel = document.getElementById('travaux-epaisseur-px');
         if (pxLabel) pxLabel.textContent = getEpaisseurReellePixels() + 'px';
         mettreAJourApercuTrait();
+        window.dispatchEvent(new CustomEvent('travaux-epaisseur-change', {
+            detail: { epaisseur: val }
+        }));
     }
 
     function getTailleTexte() {
