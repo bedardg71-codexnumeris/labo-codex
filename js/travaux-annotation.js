@@ -150,18 +150,32 @@
             travauxUI.evaluerDepuisAnnotation(); // toggle off
         }
 
-        // Inserer la palette flottante dans la zone-document (au-dessus du canvas, fixe au scroll)
-        const zoneDocument = document.getElementById('travaux-conteneur-document');
-        if (zoneDocument && !document.getElementById('travaux-palette-flottante')) {
-            const paletteDiv = document.createElement('div');
-            paletteDiv.innerHTML = travauxOutils.genererHTMLPalette();
-            const paletteEl = paletteDiv.firstElementChild;
-            zoneDocument.appendChild(paletteEl);
-            travauxOutils.configurerDragPalette();
+        // Deplier la palette annotation si elle existe deja, sinon la creer
+        const paletteExistante = document.getElementById('travaux-palette-flottante');
+        if (paletteExistante) {
+            if (paletteExistante.classList.contains('replie')) {
+                paletteExistante.classList.remove('replie');
+                const btnR = paletteExistante.querySelector('.travaux-palette-toggle');
+                if (btnR) btnR.textContent = '\u2212';
+            }
+        } else {
+            const zoneDocument = document.getElementById('travaux-conteneur-document');
+            if (zoneDocument) {
+                const paletteDiv = document.createElement('div');
+                paletteDiv.innerHTML = travauxOutils.genererHTMLPalette();
+                const paletteEl = paletteDiv.firstElementChild;
+                zoneDocument.appendChild(paletteEl);
+                travauxOutils.configurerDragPalette();
+            }
         }
 
-        // Ouvrir la palette tampons si pas deja visible
-        if (!document.getElementById('travaux-palette-tampons')) {
+        // Deplier la palette tampons si elle est repliee
+        const paletteTampons = document.getElementById('travaux-palette-tampons');
+        if (paletteTampons && paletteTampons.classList.contains('replie')) {
+            paletteTampons.classList.remove('replie');
+            const btnT = paletteTampons.querySelector('.travaux-palette-toggle');
+            if (btnT) btnT.textContent = '\u2212';
+        } else if (!paletteTampons) {
             travauxOutils.togglePaletteAutocollants();
         }
 
@@ -188,9 +202,13 @@
             // NE PAS cacher le canvas - les annotations doivent rester visibles
         }
 
-        // Retirer la palette annotation du DOM (la palette tampons reste visible)
+        // Replier la palette annotation (elle reste visible)
         const paletteFlottante = document.getElementById('travaux-palette-flottante');
-        if (paletteFlottante) paletteFlottante.remove();
+        if (paletteFlottante && !paletteFlottante.classList.contains('replie')) {
+            paletteFlottante.classList.add('replie');
+            const btnR = paletteFlottante.querySelector('.travaux-palette-toggle');
+            if (btnR) btnR.textContent = '+';
+        }
 
         pileUndo = [];
         pileRedo = [];
@@ -847,10 +865,15 @@
         const outil = travauxOutils.OUTILS[type];
         const taille = (outil.taille || 30) / canvasAnnotation.width;
 
+        // Couleur fixe pour crochet (vert) et croix (rouge)
+        const couleurSymbole = type === 'crochet' ? '#2e7d32'
+            : type === 'croix' ? '#c62828'
+            : travauxOutils.getCouleurActive();
+
         const forme = {
             id: 'SH_' + Date.now(),
             type: type,
-            color: travauxOutils.getCouleurActive(),
+            color: couleurSymbole,
             lineWidth: 3,
             x1: xNorm - taille / 2,
             y1: yNorm - taille / 2,
@@ -1366,36 +1389,33 @@
     }
 
     /**
-     * Dessine un crochet (checkmark)
+     * Dessine un crochet (caractere ✔︎)
      */
     function dessinerCrochet(ctx, x1, y1, x2, y2, color) {
         const mx = (x1 + x2) / 2;
         const my = (y1 + y2) / 2;
-        const size = Math.min(Math.abs(x2 - x1), Math.abs(y2 - y1)) / 2;
-        const ratioResolution = (canvasAnnotation ? canvasAnnotation.width : 1000) / travauxOutils.RESOLUTION_REFERENCE;
+        const size = Math.min(Math.abs(x2 - x1), Math.abs(y2 - y1));
 
-        ctx.strokeStyle = color || '#00AA00';
-        ctx.lineWidth = 3 * ratioResolution;
-        ctx.beginPath();
-        ctx.moveTo(mx - size, my);
-        ctx.lineTo(mx - size * 0.3, my + size * 0.8);
-        ctx.lineTo(mx + size, my - size * 0.6);
-        ctx.stroke();
+        ctx.fillStyle = color || '#2e7d32';
+        ctx.font = size + 'px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('\u2714\uFE0E', mx, my);
     }
 
     /**
-     * Dessine une croix (X)
+     * Dessine une croix (caractere ✘)
      */
     function dessinerCroix(ctx, x1, y1, x2, y2, color) {
-        const ratioResolution = (canvasAnnotation ? canvasAnnotation.width : 1000) / travauxOutils.RESOLUTION_REFERENCE;
-        ctx.strokeStyle = color || '#FF0000';
-        ctx.lineWidth = 3 * ratioResolution;
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.moveTo(x2, y1);
-        ctx.lineTo(x1, y2);
-        ctx.stroke();
+        const mx = (x1 + x2) / 2;
+        const my = (y1 + y2) / 2;
+        const size = Math.min(Math.abs(x2 - x1), Math.abs(y2 - y1));
+
+        ctx.fillStyle = color || '#c62828';
+        ctx.font = size + 'px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('\u2718', mx, my);
     }
 
     /**

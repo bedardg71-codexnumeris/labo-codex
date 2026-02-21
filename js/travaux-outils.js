@@ -116,7 +116,8 @@
         crochet: {
             id: 'crochet',
             nom: 'Crochet',
-            icone: '\u2713',
+            icone: '\u2714\uFE0E',
+            couleurBouton: '#2e7d32',
             curseur: 'crosshair',
             type: 'symbole',
             taille: 30
@@ -124,7 +125,8 @@
         croix: {
             id: 'croix',
             nom: 'Croix',
-            icone: '\u2717',
+            icone: '\u2718',
+            couleurBouton: '#c62828',
             curseur: 'crosshair',
             type: 'symbole',
             taille: 30
@@ -262,6 +264,19 @@
 
         // Contenu
         html += '<div class="travaux-palette-contenu" id="travaux-tampons-contenu">';
+
+        // Symboles (crochet / croix)
+        html += '<div class="travaux-autocollants-label">Symboles</div>';
+        html += '<div class="travaux-autocollants-grille travaux-autocollants-grille--symboles">';
+        const crochetActif = outilActif === 'crochet' ? ' actif' : '';
+        const croixActif = outilActif === 'croix' ? ' actif' : '';
+        html += `<div class="travaux-autocollant-item${crochetActif}" onclick="travauxOutils.setOutilActif('crochet')" title="Crochet">`;
+        html += `<span style="font-size:24px; color:#2e7d32; font-weight:bold;">\u2714\uFE0E</span>`;
+        html += `<span>Vrai</span></div>`;
+        html += `<div class="travaux-autocollant-item${croixActif}" onclick="travauxOutils.setOutilActif('croix')" title="Croix">`;
+        html += `<span style="font-size:24px; color:#c62828; font-weight:bold;">\u2718</span>`;
+        html += `<span>Faux</span></div>`;
+        html += '</div>';
 
         // Qualite
         html += '<div class="travaux-autocollants-label">Qualite</div>';
@@ -511,11 +526,12 @@
         html += '<div class="travaux-palette-label">Formes</div>';
         html += '<div class="travaux-palette-outils">';
 
-        const outilsFormes = ['cercle', 'fleche', 'rectangle', 'crochet', 'croix'];
+        const outilsFormes = ['cercle', 'fleche', 'rectangle'];
         outilsFormes.forEach(id => {
             const outil = OUTILS[id];
             const actif = outilActif === id ? ' actif' : '';
-            html += `<button class="travaux-btn-outil${actif}" data-outil="${id}" onclick="travauxOutils.setOutilActif('${id}')" title="${outil.nom}">${outil.icone}</button>`;
+            const styleCouleur = outil.couleurBouton ? ` style="color:${outil.couleurBouton}; font-weight:bold;"` : '';
+            html += `<button class="travaux-btn-outil${actif}" data-outil="${id}" onclick="travauxOutils.setOutilActif('${id}')" title="${outil.nom}"${styleCouleur}>${outil.icone}</button>`;
         });
 
         html += '</div></div>';
