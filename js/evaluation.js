@@ -6059,5 +6059,26 @@ window.copierCriteresSRPN = copierCriteresSRPN;
 window.copierCriteresSRPNF = copierCriteresSRPNF;
 window.gererChangementCheckboxJetonRepriseCiblee = gererChangementCheckboxJetonRepriseCiblee;
 
+// Exports requis pour le mode evaluation depuis la visionneuse (travaux-ui.js)
+window.chargerListeEtudiantsEval = chargerListeEtudiantsEval;
+window.chargerGroupesEval = chargerGroupesEval;
+window.chargerGrillesDansSelect = chargerGrillesDansSelect;
+window.chargerEchellePerformance = chargerEchellePerformance;
+window.chargerEvaluationsEtudiant = chargerEvaluationsEtudiant;
+window.chargerGrilleSelectionnee = chargerGrilleSelectionnee;
+window.cartoucheSelectionnee = cartoucheSelectionnee;
+window.sauvegarderEvaluation = sauvegarderEvaluation;
+window.chargerProduction = chargerProduction;
+window.filtrerEtudiantsParGroupe = filtrerEtudiantsParGroupe;
+window.changerStatutRemise = changerStatutRemise;
+window.changerEchelleEvaluation = changerEchelleEvaluation;
+window.changerStatutIntegrite = changerStatutIntegrite;
+window.genererRetroaction = genererRetroaction;
+window.copierRetroaction = copierRetroaction;
+window.basculerVerrouillageEvaluationCourante = basculerVerrouillageEvaluationCourante;
+window.nouvelleEvaluation = nouvelleEvaluation;
+window.gererChangementCheckboxJetonDelai = gererChangementCheckboxJetonDelai;
+window.gererChangementCheckboxJetonReprise = gererChangementCheckboxJetonReprise;
+
 
 })();
