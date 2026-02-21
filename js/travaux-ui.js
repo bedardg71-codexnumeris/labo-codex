@@ -57,9 +57,7 @@
         // Ecouter les evenements d'annotation (une seule fois)
         window.addEventListener('travaux-annotation-activee', () => {
             const btnAnnoter = document.getElementById('travaux-btn-annoter');
-            const undoRedo = document.getElementById('travaux-undo-redo');
             if (btnAnnoter) { btnAnnoter.textContent = 'Terminer'; btnAnnoter.classList.add('actif'); }
-            if (undoRedo) undoRedo.classList.remove('u-hide');
             // Replier la sidebar pour maximiser l'espace d'annotation
             const sidebar = document.getElementById('travaux-sidebar');
             if (sidebar) sidebar.classList.add('replie');
@@ -72,9 +70,7 @@
 
         window.addEventListener('travaux-annotation-desactivee', () => {
             const btnAnnoter = document.getElementById('travaux-btn-annoter');
-            const undoRedo = document.getElementById('travaux-undo-redo');
             if (btnAnnoter) { btnAnnoter.textContent = 'Annoter'; btnAnnoter.classList.remove('actif'); }
-            if (undoRedo) undoRedo.classList.add('u-hide');
             // Redeployer la sidebar seulement si pas manuellement repliee
             const sidebar = document.getElementById('travaux-sidebar');
             const btnToggle = document.getElementById('travaux-btn-toggle-sidebar');
@@ -283,12 +279,16 @@
         const visionDiv = document.createElement('div');
         visionDiv.className = 'travaux-visionneuse-layout';
         visionDiv.innerHTML = `
+                <!-- Panneau gauche (evaluation parametres) — rempli par JS -->
+                <div id="travaux-slot-gauche" class="travaux-slot-panneau u-hide"></div>
+
                 <div class="travaux-zone-document" id="travaux-conteneur-document">
 
                     <!-- Toolbar -->
                     <div class="travaux-toolbar">
                         <div class="travaux-toolbar-gauche">
                             <span id="travaux-badge-statut" class="u-hide"></span>
+                            <span id="travaux-badge-fichier-actif" class="u-hide"></span>
                             <button id="travaux-btn-page-prec" class="btn-icon" onclick="travauxVisionneuse.pagePrecedente()" disabled title="Page précédente">&#x2190;</button>
                             <span id="travaux-indicateur-page">-- / --</span>
                             <button id="travaux-btn-page-suiv" class="btn-icon" onclick="travauxVisionneuse.pageSuivante()" disabled title="Page suivante">&#x2192;</button>
@@ -296,11 +296,12 @@
                         <div class="travaux-toolbar-droite">
                             <button class="btn btn-petit" onclick="travauxVisionneuse.zoomPleineLargeur()" title="Ajuster à la largeur du conteneur">Pleine largeur</button>
                             <button class="btn btn-petit" onclick="travauxVisionneuse.zoomPleineHauteur()" title="Ajuster à la hauteur du conteneur">Pleine hauteur</button>
+                            <button class="btn btn-petit" onclick="travauxVisionneuse.zoom100()" title="Zoom 100%">100%</button>
                             <span id="travaux-indicateur-zoom">100%</span>
                             <span class="travaux-separateur"></span>
                             <button id="travaux-btn-annoter" class="btn btn-petit" onclick="travauxAnnotation.basculerAnnotation()">Annoter</button>
-                            <button id="travaux-btn-export-pdf" class="btn btn-petit u-hide" onclick="travauxExportPDF.afficherRevisionExport(travauxVisionneuse.getFichierActuel()?.id)" title="Exporter PDF annoté">Exporter PDF</button>
                             <button id="travaux-btn-evaluer" class="btn btn-ajouter btn-petit u-hide" onclick="travauxUI.evaluerDepuisAnnotation()" title="Évaluer cette production">Évaluer</button>
+                            <button id="travaux-btn-export-pdf" class="btn btn-petit u-hide" onclick="travauxExportPDF.afficherRevisionExport(travauxVisionneuse.getFichierActuel()?.id)" title="Exporter PDF annoté">Exporter PDF</button>
                             <button id="travaux-btn-alleger" class="btn btn-petit u-hide" onclick="travauxUI.allegerFichier(travauxVisionneuse.getFichierActuel()?.id)" title="Alléger ce fichier">Alléger</button>
                             <button id="travaux-btn-reimporter" class="btn btn-petit u-hide" onclick="travauxUI.reimporterFichier(travauxVisionneuse.getFichierActuel()?.id)" title="Re-importer l'original">Re-importer</button>
                         </div>
@@ -317,16 +318,11 @@
                         </div>
                     </div>
 
-                    <!-- Palette d'outils (masquee par defaut) -->
-                    <div id="travaux-palette-container" class="u-hide"></div>
-
-                    <!-- Undo/Redo (masques par defaut) -->
-                    <div class="travaux-undo-redo u-hide" id="travaux-undo-redo">
-                        <button id="travaux-btn-undo" class="btn-icon" onclick="travauxAnnotation.annuler()" disabled title="Annuler (Ctrl+Z)">&#x21A9;</button>
-                        <button id="travaux-btn-redo" class="btn-icon" onclick="travauxAnnotation.retablir()" disabled title="Rétablir (Ctrl+Y)">&#x21AA;</button>
-                        <button class="btn-icon btn-danger-petit" onclick="travauxAnnotation.effacerPage()" title="Effacer la page">&#x1F5D1;</button>
-                    </div>
+                    <!-- Palette flottante d'annotation inseree dynamiquement par activerAnnotation() dans #travaux-canvas-container -->
                 </div>
+
+                <!-- Panneau droite (evaluation criteres) — rempli par JS -->
+                <div id="travaux-slot-droite" class="travaux-slot-panneau u-hide"></div>
         `;
         conteneur.appendChild(visionDiv);
 
@@ -1201,7 +1197,12 @@
             }
         }
 
-        // Masquer la section evaluation si visible
+        // Fermer le mode evaluation 3 colonnes si actif
+        const layoutVisionneuse = document.querySelector('.travaux-visionneuse-layout');
+        if (layoutVisionneuse && layoutVisionneuse.classList.contains('mode-evaluation')) {
+            evaluerDepuisAnnotation(); // toggle off
+        }
+        // Masquer la section evaluation si visible (fallback)
         const evalDiv = document.getElementById('evaluations-contenu-evaluation');
         if (evalDiv) evalDiv.classList.add('u-hide');
 
@@ -1260,6 +1261,18 @@
                 }
             }
 
+
+            // Badge etudiant dans la toolbar
+            const badgeFichier = document.getElementById('travaux-badge-fichier-actif');
+            if (badgeFichier && fichierOuvert) {
+                badgeFichier.innerHTML = genererBadgeFichierImporte(fichierOuvert, 'ouvrirFichier');
+                badgeFichier.classList.remove('u-hide');
+                // Desactiver le onclick et le bouton supprimer dans cette copie toolbar
+                const badgeCopie = badgeFichier.querySelector('.travaux-badge-importe');
+                if (badgeCopie) { badgeCopie.onclick = null; badgeCopie.style.cursor = 'default'; }
+                const btnSupp = badgeFichier.querySelector('.travaux-badge-supprimer');
+                if (btnSupp) btnSupp.remove();
+            }
 
             // Bulle de decouverte au premier fichier ouvert (aide-contextuelle)
             if (typeof estAideContextuelleActive === 'function' && estAideContextuelleActive()
@@ -1874,16 +1887,44 @@
             return;
         }
 
-        // Toggler le panneau d'évaluation dans l'onglet Annoter et évaluer
-        const evalDiv = document.getElementById('evaluations-contenu-evaluation');
-        if (evalDiv) {
-            const estVisible = !evalDiv.classList.contains('u-hide');
-            if (estVisible) {
-                evalDiv.classList.add('u-hide');
-                return;
-            }
-            evalDiv.classList.remove('u-hide');
+        const layout = document.querySelector('.travaux-visionneuse-layout');
+        const slotGauche = document.getElementById('travaux-slot-gauche');
+        const slotDroite = document.getElementById('travaux-slot-droite');
+        const panneauGauche = document.getElementById('travaux-eval-gauche');
+        const panneauDroite = document.getElementById('travaux-eval-droite');
+
+        // Toggle : si deja en mode evaluation, on ferme
+        const estVisible = layout?.classList.contains('mode-evaluation');
+        if (estVisible) {
+            layout.classList.remove('mode-evaluation');
+            if (slotGauche) slotGauche.classList.add('u-hide');
+            if (slotDroite) slotDroite.classList.add('u-hide');
+            // Remettre les panneaux dans le conteneur d'evaluation d'origine
+            const evalDiv = document.getElementById('evaluations-contenu-evaluation');
+            if (evalDiv && panneauGauche) evalDiv.appendChild(panneauGauche);
+            if (evalDiv && panneauDroite) evalDiv.appendChild(panneauDroite);
+            if (panneauGauche) panneauGauche.classList.add('u-hide');
+            if (panneauDroite) panneauDroite.classList.add('u-hide');
+            return;
         }
+
+        // Desactiver annotation si active (exclusivite mutuelle)
+        if (travauxAnnotation.estActif()) travauxAnnotation.desactiverAnnotation();
+
+        // Deplacer les panneaux eval dans les slots de la visionneuse
+        if (slotGauche && panneauGauche) {
+            slotGauche.appendChild(panneauGauche);
+            panneauGauche.classList.remove('u-hide');
+            slotGauche.classList.remove('u-hide');
+        }
+        if (slotDroite && panneauDroite) {
+            slotDroite.appendChild(panneauDroite);
+            panneauDroite.classList.remove('u-hide');
+            slotDroite.classList.remove('u-hide');
+        }
+
+        // Activer le mode evaluation sur le layout
+        if (layout) layout.classList.add('mode-evaluation');
 
         // Pre-remplir le formulaire d'evaluation avec retry robuste
         preRemplirEvaluation(da, productionId);
@@ -1992,7 +2033,7 @@
                         <canvas id="travaux-canvas-annotation" class="u-hide" style="pointer-events:none;"></canvas>
                     </div>
                 </div>
-                <div id="travaux-palette-container" class="u-hide"></div>
+                <!-- Palette flottante inseree dynamiquement par activerAnnotation() -->
             </div>
         `;
 

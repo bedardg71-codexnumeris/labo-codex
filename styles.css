@@ -14416,6 +14416,49 @@ body.mode-clair .prep-select {
     gap: 0;
 }
 
+/* --- Panneaux evaluation (slots gauche/droite) --- */
+.travaux-slot-panneau {
+    width: 280px;
+    min-width: 240px;
+    max-width: 320px;
+    overflow-y: auto;
+    border: 1px solid var(--bordure-claire);
+    background: var(--surface-carte, #1a3040);
+    transition: width 0.3s ease, opacity 0.3s ease;
+}
+
+.travaux-slot-panneau.u-hide {
+    display: none;
+}
+
+/* Panneau gauche — bord droit */
+.travaux-slot-panneau:first-child {
+    border-right: 1px solid var(--bordure-claire);
+    border-left: none;
+}
+
+/* Panneau droite — bord gauche */
+.travaux-slot-panneau:last-child {
+    border-left: 1px solid var(--bordure-claire);
+    border-right: none;
+}
+
+/* Panneaux internes dans les slots */
+.travaux-panneau-lateral {
+    padding: 10px;
+}
+
+.travaux-panneau-lateral .carte-bleu-fonce,
+.travaux-panneau-lateral .zone-criteres {
+    margin: 0;
+}
+
+/* En mode evaluation la zone-document se comprime entre les panneaux */
+.travaux-visionneuse-layout.mode-evaluation .travaux-zone-document {
+    flex: 1;
+    min-width: 0;
+}
+
 .travaux-sidebar {
     width: 200px;
     min-width: 200px;
@@ -15368,6 +15411,87 @@ body.mode-clair .prep-select {
     width: 80px;
 }
 
+/* --- Palette flottante annotation --- */
+.travaux-palette-flottante {
+    position: absolute;
+    z-index: 80;
+    background: var(--surface-carte, #1a3040);
+    border: 1px solid rgba(106, 172, 184, 0.2);
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    min-width: 160px;
+    max-width: 200px;
+    user-select: none;
+}
+
+.travaux-palette-barre {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 10px;
+    cursor: grab;
+    border-bottom: 1px solid rgba(106, 172, 184, 0.2);
+    border-radius: 10px 10px 0 0;
+}
+.travaux-palette-barre:active { cursor: grabbing; }
+
+.travaux-palette-titre {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--texte-secondaire, #aaa);
+}
+
+.travaux-palette-toggle {
+    background: none;
+    border: 1px solid rgba(106, 172, 184, 0.2);
+    border-radius: 4px;
+    color: var(--texte-secondaire, #aaa);
+    font-size: 14px;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+.travaux-palette-toggle:hover {
+    background: rgba(106, 172, 184, 0.1);
+}
+
+.travaux-palette-contenu {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px;
+    overflow-y: auto;
+    max-height: calc(100vh - 250px);
+}
+
+.travaux-palette-contenu .travaux-palette-section {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.travaux-palette-contenu .travaux-palette-outils {
+    flex-wrap: wrap;
+}
+
+.travaux-palette-pied {
+    display: flex;
+    gap: 6px;
+    padding: 6px 8px;
+    border-top: 1px solid rgba(106, 172, 184, 0.2);
+    justify-content: center;
+}
+
+.travaux-palette-flottante.replie .travaux-palette-contenu,
+.travaux-palette-flottante.replie .travaux-palette-pied {
+    display: none;
+}
+
 /* --- Popup autocollants --- */
 .travaux-popup-autocollants {
     position: fixed;
@@ -15613,6 +15737,13 @@ body.mode-clair .prep-select {
 
     .travaux-zone-document {
         min-height: 400px;
+    }
+
+    .travaux-slot-panneau {
+        width: 100%;
+        min-width: 100%;
+        max-width: 100%;
+        max-height: 300px;
     }
 
     .travaux-toolbar {
@@ -18925,8 +19056,8 @@ body.mode-clair .barre-etudiant.tracked-4 {
 
 .travaux-badge-importe.actif {
     background: var(--bleu-pale);
-    border-color: var(--bleu-clair);
-    box-shadow: 0 0 0 2px var(--bleu-clair);
+    border-color: var(--accent-primaire, #2196F3);
+    box-shadow: 0 0 0 2px var(--accent-primaire, #2196F3);
 }
 
 .travaux-badge-nom {
