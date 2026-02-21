@@ -353,6 +353,10 @@
 
         // Double-clic pour mode redimensionnement stickers
         canvasAnnotation.addEventListener('dblclick', onDoubleClick);
+
+        // Changement couleur/epaisseur sur selection
+        window.addEventListener('travaux-couleur-change', onCouleurChange);
+        window.addEventListener('travaux-epaisseur-change', onEpaisseurChange);
     }
 
     function detacherEvenements() {
@@ -370,6 +374,8 @@
         window.removeEventListener('travaux-outil-change', onOutilChange);
         window.removeEventListener('themeChanged', onThemeChanged);
         canvasAnnotation.removeEventListener('dblclick', onDoubleClick);
+        window.removeEventListener('travaux-couleur-change', onCouleurChange);
+        window.removeEventListener('travaux-epaisseur-change', onEpaisseurChange);
     }
 
     /**
@@ -663,8 +669,9 @@
             ctxAnnotation.globalCompositeOperation = outil.composite || 'source-over';
             ctxAnnotation.strokeStyle = travauxOutils.getCouleurActive();
             ctxAnnotation.lineWidth = epaisseur;
-            ctxAnnotation.lineCap = 'round';
-            ctxAnnotation.lineJoin = 'round';
+            const estSurlLive = (outil.id === 'surligneur');
+            ctxAnnotation.lineCap = estSurlLive ? 'butt' : 'round';
+            ctxAnnotation.lineJoin = estSurlLive ? 'bevel' : 'round';
             ctxAnnotation.lineTo(cx, cy);
             ctxAnnotation.stroke();
             ctxAnnotation.beginPath();
@@ -1562,6 +1569,69 @@
     }
 
     /**
+     * Applique une nouvelle couleur aux elements selectionnes
+     */
+    function appliquerCouleurSelection(nouvelleCouleur) {
+        if (selectionsMultiples.length === 0) return;
+
+        const snapshots = selectionsMultiples.map(s => clonerDonneesAnnotation(s));
+
+        for (const sel of selectionsMultiples) {
+            if (sel.data.color !== undefined) {
+                sel.data.color = nouvelleCouleur;
+            }
+        }
+
+        empilerUndo('modification-multiple', selectionsMultiples.map((s, i) => ({
+            type: s.type, index: s.index,
+            avant: snapshots[i],
+            apres: clonerDonneesAnnotation(s)
+        })));
+
+        reRendreAnnotations();
+        planifierSauvegarde();
+    }
+
+    /**
+     * Applique une nouvelle epaisseur aux elements selectionnes
+     */
+    function appliquerEpaisseurSelection(nouvelleEpaisseur) {
+        if (selectionsMultiples.length === 0) return;
+
+        const snapshots = selectionsMultiples.map(s => clonerDonneesAnnotation(s));
+
+        for (const sel of selectionsMultiples) {
+            if (sel.data.lineWidth !== undefined) {
+                sel.data.lineWidth = nouvelleEpaisseur;
+                sel.bbox = calculerBBox(sel.type, sel.data);
+            }
+        }
+
+        empilerUndo('modification-multiple', selectionsMultiples.map((s, i) => ({
+            type: s.type, index: s.index,
+            avant: snapshots[i],
+            apres: clonerDonneesAnnotation(s)
+        })));
+
+        reRendreAnnotations();
+        planifierSauvegarde();
+    }
+
+    function onCouleurChange(e) {
+        if (!annotationActive) return;
+        if (selectionsMultiples.length > 0) {
+            appliquerCouleurSelection(e.detail.couleur);
+        }
+    }
+
+    function onEpaisseurChange(e) {
+        if (!annotationActive) return;
+        if (selectionsMultiples.length > 0) {
+            appliquerEpaisseurSelection(e.detail.epaisseur);
+        }
+    }
+
+    /**
      * Clone les donnees d'une annotation pour undo
      */
     function clonerDonneesAnnotation(sel) {
@@ -1714,8 +1784,9 @@
         ctx.save();
         ctx.globalAlpha = trait.opacity || 1.0;
         ctx.strokeStyle = trait.color;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
+        const estSurl = (trait.tool === 'surligneur');
+        ctx.lineCap = estSurl ? 'butt' : 'round';
+        ctx.lineJoin = estSurl ? 'bevel' : 'round';
 
         ctx.beginPath();
         const p0 = trait.points[0];
@@ -1778,6 +1849,7 @@
                 break;
 
             case 'surligneur':
+                ctx.lineCap = 'butt';
                 ctx.globalAlpha = forme.opacity || 0.5;
                 ctx.beginPath();
                 ctx.moveTo(x1, y1);
