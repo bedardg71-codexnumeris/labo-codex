@@ -42,12 +42,15 @@
     let formeEnCours = null;
     let formeOrigine = null;
 
-    // Mode selection
-    let annotationSelectionnee = null;  // { type, index, data, bbox }
+    // Mode selection (multi-selection)
+    let annotationSelectionnee = null;  // { type, index, data, bbox } — element principal
+    let selectionsMultiples = [];       // [{ type, index, data, bbox }, ...]
     let poigneeActive = null;           // null | 'move' | 'nw' | 'ne' | 'sw' | 'se'
     let deplacementOrigine = null;      // { x, y }
     let dimensionsOriginales = null;    // bbox avant transformation
     let donneesAvantModif = null;       // snapshot pour undo
+    let donneesMultiplesAvantModif = null; // snapshots multi-selection pour undo
+    let rectangleSelection = null;      // { x1, y1, x2, y2 } — marquee en cours
 
     /* ===============================
        INITIALISATION
@@ -61,6 +64,7 @@
         window.addEventListener('travaux-page-rendue', (e) => {
             // Deselectionner au changement de page (evite sélection fantome)
             annotationSelectionnee = null;
+            selectionsMultiples = [];
             poigneeActive = null;
 
             if (annotationActive) {
@@ -194,6 +198,7 @@
 
         // Deselectionner
         annotationSelectionnee = null;
+        selectionsMultiples = [];
         poigneeActive = null;
 
         // Garder le canvas visible en lecture seule (annotations restent affichees)
@@ -351,11 +356,12 @@
 
         // Mode selection
         if (outil.type === 'selection') {
-            // Verifier si on clique sur une poignee de la selection existante
-            if (annotationSelectionnee) {
+            const shiftKey = e.shiftKey;
+
+            // Verifier si on clique sur une poignee de la selection existante (mono-selection seulement)
+            if (annotationSelectionnee && selectionsMultiples.length <= 1) {
                 const poignee = detecterPoignee(xNorm, yNorm, annotationSelectionnee.bbox);
                 if (poignee) {
-                    // Redimensionnement (sauf traits)
                     if (annotationSelectionnee.type !== 'stroke') {
                         poigneeActive = poignee;
                         deplacementOrigine = { x: xNorm, y: yNorm };
@@ -365,14 +371,16 @@
                         return;
                     }
                 }
+            }
 
-                // Verifier si on clique dans la bbox (deplacement)
-                const bbox = annotationSelectionnee.bbox;
-                if (xNorm >= bbox.x1 && xNorm <= bbox.x2 && yNorm >= bbox.y1 && yNorm <= bbox.y2) {
+            // Verifier si on clique dans la bbox combinee (deplacement multi)
+            if (selectionsMultiples.length > 0) {
+                const bboxCombinee = calculerBBoxCombinee(selectionsMultiples);
+                if (xNorm >= bboxCombinee.x1 && xNorm <= bboxCombinee.x2 &&
+                    yNorm >= bboxCombinee.y1 && yNorm <= bboxCombinee.y2 && !shiftKey) {
                     poigneeActive = 'move';
                     deplacementOrigine = { x: xNorm, y: yNorm };
-                    dimensionsOriginales = { ...annotationSelectionnee.bbox };
-                    donneesAvantModif = clonerDonneesAnnotation(annotationSelectionnee);
+                    donneesMultiplesAvantModif = selectionsMultiples.map(s => clonerDonneesAnnotation(s));
                     enDessin = true;
                     return;
                 }
@@ -381,16 +389,39 @@
             // Nouveau hit-test
             const hit = trouverAnnotationAuPoint(xNorm, yNorm);
             if (hit) {
-                annotationSelectionnee = hit;
-                poigneeActive = 'move';
-                deplacementOrigine = { x: xNorm, y: yNorm };
-                dimensionsOriginales = { ...hit.bbox };
-                donneesAvantModif = clonerDonneesAnnotation(hit);
-                enDessin = true;
-                reRendreAnnotations();
+                if (shiftKey) {
+                    // Shift+clic : toggle dans la multi-selection
+                    const dejaIdx = selectionsMultiples.findIndex(s =>
+                        s.type === hit.type && s.index === hit.index);
+                    if (dejaIdx !== -1) {
+                        selectionsMultiples.splice(dejaIdx, 1);
+                    } else {
+                        selectionsMultiples.push(hit);
+                    }
+                    annotationSelectionnee = selectionsMultiples.length > 0
+                        ? selectionsMultiples[selectionsMultiples.length - 1] : null;
+                    reRendreAnnotations();
+                } else {
+                    // Clic simple : selection unique + debut deplacement
+                    selectionsMultiples = [hit];
+                    annotationSelectionnee = hit;
+                    poigneeActive = 'move';
+                    deplacementOrigine = { x: xNorm, y: yNorm };
+                    donneesMultiplesAvantModif = [clonerDonneesAnnotation(hit)];
+                    donneesAvantModif = donneesMultiplesAvantModif[0];
+                    dimensionsOriginales = { ...hit.bbox };
+                    enDessin = true;
+                    reRendreAnnotations();
+                }
             } else {
-                // Clic dans le vide -> deselectionner
-                deselectionner();
+                if (shiftKey) {
+                    // Shift+clic dans le vide : ne rien faire
+                } else {
+                    // Clic dans le vide : demarrer rectangle de selection (marquee)
+                    deselectionner();
+                    rectangleSelection = { x1: xNorm, y1: yNorm, x2: xNorm, y2: yNorm };
+                    enDessin = true;
+                }
             }
             return;
         }
@@ -477,15 +508,27 @@
             if (e.pointerType !== 'pen' && e.pointerType !== 'mouse' && e.pointerType !== 'touch') return;
             e.preventDefault();
 
-            if (!annotationSelectionnee || !deplacementOrigine) return;
+            // Rectangle de selection (marquee)
+            if (rectangleSelection) {
+                rectangleSelection.x2 = xNorm;
+                rectangleSelection.y2 = yNorm;
+                reRendreAnnotations();
+                dessinerMarquee(rectangleSelection);
+                return;
+            }
+
+            if (!deplacementOrigine) return;
 
             const dx = xNorm - deplacementOrigine.x;
             const dy = yNorm - deplacementOrigine.y;
 
             if (poigneeActive === 'move') {
-                appliquerDeplacement(annotationSelectionnee, dx, dy);
+                // Deplacement multi-selection
+                for (const sel of selectionsMultiples) {
+                    appliquerDeplacement(sel, dx, dy);
+                }
                 deplacementOrigine = { x: xNorm, y: yNorm };
-            } else if (poigneeActive) {
+            } else if (poigneeActive && annotationSelectionnee) {
                 appliquerRedimensionnement(annotationSelectionnee, poigneeActive, xNorm, yNorm);
             }
 
@@ -560,18 +603,39 @@
             if (e.pointerType !== 'pen' && e.pointerType !== 'mouse' && e.pointerType !== 'touch') return;
             enDessin = false;
 
-            if (annotationSelectionnee && donneesAvantModif && poigneeActive) {
-                // Verifier si les donnees ont change
-                const apres = clonerDonneesAnnotation(annotationSelectionnee);
-                const avantStr = JSON.stringify(donneesAvantModif);
-                const apresStr = JSON.stringify(apres);
-                if (avantStr !== apresStr) {
-                    empilerUndo('modification-annotation', {
-                        type: annotationSelectionnee.type,
-                        index: annotationSelectionnee.index,
-                        avant: donneesAvantModif,
-                        apres: apres
-                    });
+            // Finaliser le rectangle de selection (marquee)
+            if (rectangleSelection) {
+                const rx1 = Math.min(rectangleSelection.x1, rectangleSelection.x2);
+                const ry1 = Math.min(rectangleSelection.y1, rectangleSelection.y2);
+                const rx2 = Math.max(rectangleSelection.x1, rectangleSelection.x2);
+                const ry2 = Math.max(rectangleSelection.y1, rectangleSelection.y2);
+                // Selectionner uniquement si le rectangle a une taille significative
+                if (Math.abs(rx2 - rx1) > 0.005 && Math.abs(ry2 - ry1) > 0.005) {
+                    selectionsMultiples = trouverAnnotationsDansRect(rx1, ry1, rx2, ry2);
+                    annotationSelectionnee = selectionsMultiples.length > 0
+                        ? selectionsMultiples[0] : null;
+                }
+                rectangleSelection = null;
+                reRendreAnnotations();
+                return;
+            }
+
+            // Undo pour deplacement/redimensionnement multi
+            if (donneesMultiplesAvantModif && poigneeActive) {
+                let aChange = false;
+                const undoItems = [];
+                for (let i = 0; i < selectionsMultiples.length; i++) {
+                    const sel = selectionsMultiples[i];
+                    const avant = donneesMultiplesAvantModif[i];
+                    if (!avant) continue;
+                    const apres = clonerDonneesAnnotation(sel);
+                    if (JSON.stringify(avant) !== JSON.stringify(apres)) {
+                        aChange = true;
+                        undoItems.push({ type: sel.type, index: sel.index, avant: avant, apres: apres });
+                    }
+                }
+                if (aChange) {
+                    empilerUndo('modification-multiple', undoItems);
                     planifierSauvegarde();
                 }
             }
@@ -580,6 +644,7 @@
             deplacementOrigine = null;
             dimensionsOriginales = null;
             donneesAvantModif = null;
+            donneesMultiplesAvantModif = null;
             return;
         }
 
@@ -628,15 +693,15 @@
         // Ne pas intercepter les touches dans les champs de formulaire
         if (e.target.matches('input, select, textarea, [contenteditable]')) return;
 
-        // Delete/Backspace : supprimer l'annotation selectionnee
-        if ((e.key === 'Delete' || e.key === 'Backspace') && annotationSelectionnee) {
+        // Delete/Backspace : supprimer les annotations selectionnees
+        if ((e.key === 'Delete' || e.key === 'Backspace') && selectionsMultiples.length > 0) {
             e.preventDefault();
             supprimerSelection();
             return;
         }
 
         // Escape : deselectionner
-        if (e.key === 'Escape' && annotationSelectionnee) {
+        if (e.key === 'Escape' && selectionsMultiples.length > 0) {
             e.preventDefault();
             deselectionner();
             return;
@@ -1027,47 +1092,150 @@
     }
 
     /**
-     * Dessine le cadre de selection et les poignees
+     * Dessine le cadre de selection et les poignees (multi-selection)
      */
     function dessinerSelection() {
-        if (!annotationSelectionnee || !ctxAnnotation || !canvasAnnotation) return;
+        if (selectionsMultiples.length === 0 || !ctxAnnotation || !canvasAnnotation) return;
 
         const w = canvasAnnotation.width;
         const h = canvasAnnotation.height;
-        const bbox = annotationSelectionnee.bbox;
-
-        const x = bbox.x1 * w;
-        const y = bbox.y1 * h;
-        const bw = (bbox.x2 - bbox.x1) * w;
-        const bh = (bbox.y2 - bbox.y1) * h;
 
         ctxAnnotation.save();
 
-        // Cadre pointille bleu
-        ctxAnnotation.strokeStyle = '#065dbb';
-        ctxAnnotation.lineWidth = 2;
-        ctxAnnotation.setLineDash([6, 4]);
-        ctxAnnotation.strokeRect(x, y, bw, bh);
-        ctxAnnotation.setLineDash([]);
+        // Cadre individuel pour chaque element selectionne
+        for (const sel of selectionsMultiples) {
+            const bbox = sel.bbox;
+            const x = bbox.x1 * w;
+            const y = bbox.y1 * h;
+            const bw = (bbox.x2 - bbox.x1) * w;
+            const bh = (bbox.y2 - bbox.y1) * h;
 
-        // Poignees aux 4 coins (8px, blanc avec bordure bleue)
-        const taille = 8;
-        const coins = [
-            { x: x, y: y },
-            { x: x + bw, y: y },
-            { x: x, y: y + bh },
-            { x: x + bw, y: y + bh }
-        ];
+            ctxAnnotation.strokeStyle = '#065dbb';
+            ctxAnnotation.lineWidth = 1.5;
+            ctxAnnotation.setLineDash([4, 3]);
+            ctxAnnotation.strokeRect(x, y, bw, bh);
+            ctxAnnotation.setLineDash([]);
+        }
 
-        for (const coin of coins) {
-            ctxAnnotation.fillStyle = '#ffffff';
+        // Bbox combinee + poignees
+        const bboxC = calculerBBoxCombinee(selectionsMultiples);
+        const cx = bboxC.x1 * w;
+        const cy = bboxC.y1 * h;
+        const cw = (bboxC.x2 - bboxC.x1) * w;
+        const ch = (bboxC.y2 - bboxC.y1) * h;
+
+        // Cadre exterieur (plus epais si multi)
+        if (selectionsMultiples.length > 1) {
             ctxAnnotation.strokeStyle = '#065dbb';
             ctxAnnotation.lineWidth = 2;
-            ctxAnnotation.fillRect(coin.x - taille / 2, coin.y - taille / 2, taille, taille);
-            ctxAnnotation.strokeRect(coin.x - taille / 2, coin.y - taille / 2, taille, taille);
+            ctxAnnotation.setLineDash([6, 4]);
+            ctxAnnotation.strokeRect(cx, cy, cw, ch);
+            ctxAnnotation.setLineDash([]);
+        }
+
+        // Poignees aux 4 coins (mono-selection seulement)
+        if (selectionsMultiples.length === 1) {
+            const taille = 8;
+            const coins = [
+                { x: cx, y: cy },
+                { x: cx + cw, y: cy },
+                { x: cx, y: cy + ch },
+                { x: cx + cw, y: cy + ch }
+            ];
+            for (const coin of coins) {
+                ctxAnnotation.fillStyle = '#ffffff';
+                ctxAnnotation.strokeStyle = '#065dbb';
+                ctxAnnotation.lineWidth = 2;
+                ctxAnnotation.fillRect(coin.x - taille / 2, coin.y - taille / 2, taille, taille);
+                ctxAnnotation.strokeRect(coin.x - taille / 2, coin.y - taille / 2, taille, taille);
+            }
         }
 
         ctxAnnotation.restore();
+    }
+
+    /**
+     * Calcule la bbox combinee d'un ensemble de selections
+     */
+    function calculerBBoxCombinee(selections) {
+        let x1 = 1, y1 = 1, x2 = 0, y2 = 0;
+        for (const sel of selections) {
+            if (sel.bbox.x1 < x1) x1 = sel.bbox.x1;
+            if (sel.bbox.y1 < y1) y1 = sel.bbox.y1;
+            if (sel.bbox.x2 > x2) x2 = sel.bbox.x2;
+            if (sel.bbox.y2 > y2) y2 = sel.bbox.y2;
+        }
+        return { x1, y1, x2, y2 };
+    }
+
+    /**
+     * Dessine le rectangle de selection (marquee) en cours
+     */
+    function dessinerMarquee(rect) {
+        if (!ctxAnnotation || !canvasAnnotation) return;
+        const w = canvasAnnotation.width;
+        const h = canvasAnnotation.height;
+        const x = Math.min(rect.x1, rect.x2) * w;
+        const y = Math.min(rect.y1, rect.y2) * h;
+        const rw = Math.abs(rect.x2 - rect.x1) * w;
+        const rh = Math.abs(rect.y2 - rect.y1) * h;
+
+        ctxAnnotation.save();
+        ctxAnnotation.fillStyle = 'rgba(6, 93, 187, 0.08)';
+        ctxAnnotation.fillRect(x, y, rw, rh);
+        ctxAnnotation.strokeStyle = '#065dbb';
+        ctxAnnotation.lineWidth = 1;
+        ctxAnnotation.setLineDash([4, 3]);
+        ctxAnnotation.strokeRect(x, y, rw, rh);
+        ctxAnnotation.setLineDash([]);
+        ctxAnnotation.restore();
+    }
+
+    /**
+     * Trouve toutes les annotations dont la bbox est incluse dans le rectangle
+     */
+    function trouverAnnotationsDansRect(rx1, ry1, rx2, ry2) {
+        const donneesPage = obtenirDonneesPage();
+        const resultats = [];
+
+        // Stickers
+        if (donneesPage.stickers) {
+            for (let i = 0; i < donneesPage.stickers.length; i++) {
+                const bbox = calculerBBox('sticker', donneesPage.stickers[i]);
+                if (bboxIntersecte(bbox, rx1, ry1, rx2, ry2)) {
+                    resultats.push({ type: 'sticker', index: i, data: donneesPage.stickers[i], bbox: bbox });
+                }
+            }
+        }
+        // Textes
+        for (let i = 0; i < donneesPage.textAnnotations.length; i++) {
+            const bbox = calculerBBox('text', donneesPage.textAnnotations[i]);
+            if (bboxIntersecte(bbox, rx1, ry1, rx2, ry2)) {
+                resultats.push({ type: 'text', index: i, data: donneesPage.textAnnotations[i], bbox: bbox });
+            }
+        }
+        // Formes
+        for (let i = 0; i < donneesPage.shapes.length; i++) {
+            const bbox = calculerBBox('shape', donneesPage.shapes[i]);
+            if (bboxIntersecte(bbox, rx1, ry1, rx2, ry2)) {
+                resultats.push({ type: 'shape', index: i, data: donneesPage.shapes[i], bbox: bbox });
+            }
+        }
+        // Traits
+        for (let i = 0; i < donneesPage.strokes.length; i++) {
+            const bbox = calculerBBox('stroke', donneesPage.strokes[i]);
+            if (bboxIntersecte(bbox, rx1, ry1, rx2, ry2)) {
+                resultats.push({ type: 'stroke', index: i, data: donneesPage.strokes[i], bbox: bbox });
+            }
+        }
+        return resultats;
+    }
+
+    /**
+     * Verifie si une bbox intersecte un rectangle
+     */
+    function bboxIntersecte(bbox, rx1, ry1, rx2, ry2) {
+        return bbox.x2 >= rx1 && bbox.x1 <= rx2 && bbox.y2 >= ry1 && bbox.y1 <= ry2;
     }
 
     /**
@@ -1075,10 +1243,13 @@
      */
     function deselectionner() {
         annotationSelectionnee = null;
+        selectionsMultiples = [];
         poigneeActive = null;
         deplacementOrigine = null;
         dimensionsOriginales = null;
         donneesAvantModif = null;
+        donneesMultiplesAvantModif = null;
+        rectangleSelection = null;
         reRendreAnnotations();
     }
 
@@ -1181,31 +1352,39 @@
      * Supprime l'annotation selectionnee
      */
     function supprimerSelection() {
-        if (!annotationSelectionnee) return;
+        if (selectionsMultiples.length === 0) return;
 
         const donneesPage = obtenirDonneesPage();
-        const sel = annotationSelectionnee;
 
-        switch (sel.type) {
-            case 'stroke':
-                donneesPage.strokes.splice(sel.index, 1);
-                empilerUndo('suppression-trait', sel.data);
-                break;
-            case 'shape':
-                donneesPage.shapes.splice(sel.index, 1);
-                empilerUndo('suppression-forme', sel.data);
-                break;
-            case 'text':
-                donneesPage.textAnnotations.splice(sel.index, 1);
-                empilerUndo('suppression-texte', sel.data);
-                break;
-            case 'sticker':
-                donneesPage.stickers.splice(sel.index, 1);
-                empilerUndo('suppression-autocollant', sel.data);
-                break;
+        // Trier par index decroissant pour supprimer sans decaler les indices
+        const parType = { stroke: [], shape: [], text: [], sticker: [] };
+        for (const sel of selectionsMultiples) {
+            if (sel.type === 'stroke') parType.stroke.push(sel);
+            else if (sel.type === 'shape') parType.shape.push(sel);
+            else if (sel.type === 'text') parType.text.push(sel);
+            else if (sel.type === 'sticker') parType.sticker.push(sel);
         }
 
+        // Supprimer par index decroissant dans chaque categorie
+        for (const sel of parType.sticker.sort((a, b) => b.index - a.index)) {
+            donneesPage.stickers.splice(sel.index, 1);
+        }
+        for (const sel of parType.text.sort((a, b) => b.index - a.index)) {
+            donneesPage.textAnnotations.splice(sel.index, 1);
+        }
+        for (const sel of parType.shape.sort((a, b) => b.index - a.index)) {
+            donneesPage.shapes.splice(sel.index, 1);
+        }
+        for (const sel of parType.stroke.sort((a, b) => b.index - a.index)) {
+            donneesPage.strokes.splice(sel.index, 1);
+        }
+
+        empilerUndo('suppression-multiple', selectionsMultiples.map(s => ({
+            type: s.type, data: clonerDonneesAnnotation(s)
+        })));
+
         annotationSelectionnee = null;
+        selectionsMultiples = [];
         reRendreAnnotations();
         planifierSauvegarde();
     }
@@ -1216,16 +1395,20 @@
     function mettreAJourCurseurSelection(xNorm, yNorm) {
         if (!canvasAnnotation) return;
 
-        if (annotationSelectionnee) {
+        // Poignees de redimensionnement (mono-selection)
+        if (selectionsMultiples.length === 1 && annotationSelectionnee) {
             const poignee = detecterPoignee(xNorm, yNorm, annotationSelectionnee.bbox);
             if (poignee) {
                 const curseurs = { nw: 'nw-resize', ne: 'ne-resize', sw: 'sw-resize', se: 'se-resize' };
                 canvasAnnotation.style.cursor = curseurs[poignee];
                 return;
             }
-            // Dans la bbox = move
-            const bbox = annotationSelectionnee.bbox;
-            if (xNorm >= bbox.x1 && xNorm <= bbox.x2 && yNorm >= bbox.y1 && yNorm <= bbox.y2) {
+        }
+
+        // Dans la bbox combinee = move
+        if (selectionsMultiples.length > 0) {
+            const bboxC = calculerBBoxCombinee(selectionsMultiples);
+            if (xNorm >= bboxC.x1 && xNorm <= bboxC.x2 && yNorm >= bboxC.y1 && yNorm <= bboxC.y2) {
                 canvasAnnotation.style.cursor = 'move';
                 return;
             }
@@ -1233,7 +1416,7 @@
 
         // Survol d'une annotation = move
         const hit = trouverAnnotationAuPoint(xNorm, yNorm);
-        canvasAnnotation.style.cursor = hit ? 'move' : 'default';
+        canvasAnnotation.style.cursor = hit ? 'move' : 'crosshair';
     }
 
     /* ===============================
