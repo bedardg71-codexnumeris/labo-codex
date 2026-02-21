@@ -788,7 +788,7 @@ function cartoucheSelectionnee() {
         </select>
     `}
 </div>
-            <div id="comm_${critere.id}" style="font-size: 0.85rem; line-height: 1.5; color: var(--gris-moyen); font-style: italic; padding: 8px; background: var(--gris-tres-pale); border-radius: 4px; min-height: 60px;">
+            <div id="comm_${critere.id}" style="display:none;">
                 ${estAlgorithmique ? 'Saisissez les erreurs et le nombre de mots' : 'Sélectionnez un niveau'}
             </div>
         </div>
@@ -934,7 +934,7 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
                     </select>
                 `}
             </div>
-            <div id="comm_${critere.id}" style="font-size: 0.85rem; line-height: 1.5; color: var(--gris-moyen); font-style: italic; padding: 8px; background: var(--gris-tres-pale); border-radius: 4px; min-height: 60px;">
+            <div id="comm_${critere.id}" style="display:none;">
                 ${estAlgorithmique ? 'Saisissez les erreurs et le nombre de mots' : 'Sélectionnez un niveau'}
             </div>
         </div>
