@@ -148,11 +148,6 @@
         canvasAnnotation.classList.remove('u-hide');
         canvasAnnotation.style.pointerEvents = 'auto';
 
-        // Desactiver le mode evaluation si actif (exclusivite mutuelle)
-        if (document.getElementById('travaux-palette-eval-gauche')) {
-            travauxUI.fermerModeEvaluation();
-        }
-
         // Deplier la palette annotation si elle existe deja, sinon la creer
         const paletteExistante = document.getElementById('travaux-palette-flottante');
         if (paletteExistante) {
@@ -352,6 +347,12 @@
         }
 
         e.preventDefault();
+
+        // Auto-basculer en mode Annoter si en mode Evaluer
+        if (typeof travauxUI !== 'undefined' && travauxUI.getModeCourant
+            && travauxUI.getModeCourant() === 'evaluer') {
+            travauxUI.basculerMode('annoter');
+        }
 
         const rect = canvasAnnotation.getBoundingClientRect();
         const x = e.clientX - rect.left;
@@ -2007,6 +2008,7 @@
         }
         timerSauvegarde = setTimeout(() => {
             sauvegarderAnnotation();
+            window.dispatchEvent(new CustomEvent('travaux-annotation-modifiee'));
         }, SAUVEGARDE_DELAI);
     }
 

@@ -22,6 +22,21 @@
     let moduleInitialise = false;
     let vueCoteACote = false;
     let sidebarManuelReplie = false;
+    let modeCourant = 'annoter'; // 'annoter' | 'evaluer'
+
+    function sauvegarderEtatSession() {
+        const fichier = travauxVisionneuse.getFichierActuel();
+        if (fichier) sessionStorage.setItem('travaux-dernier-fichier', fichier.id);
+        sessionStorage.setItem('travaux-mode-courant', modeCourant);
+    }
+
+    function restaurerEtatSession() {
+        const modeSauvegarde = sessionStorage.getItem('travaux-mode-courant');
+        if (modeSauvegarde === 'annoter' || modeSauvegarde === 'evaluer') {
+            modeCourant = modeSauvegarde;
+        }
+        return sessionStorage.getItem('travaux-dernier-fichier');
+    }
 
     /* ===============================
        SCROLL VIRTUEL
@@ -54,42 +69,16 @@
         travauxVisionneuse.initialiser();
         travauxAnnotation.initialiser();
 
-        // Ecouter les evenements d'annotation (une seule fois)
-        window.addEventListener('travaux-annotation-activee', () => {
-            const btnAnnoter = document.getElementById('travaux-btn-annoter');
-            if (btnAnnoter) { btnAnnoter.textContent = 'Terminer'; btnAnnoter.classList.add('actif'); }
-            // Replier la sidebar pour maximiser l'espace d'annotation
-            const sidebar = document.getElementById('travaux-sidebar');
-            if (sidebar) sidebar.classList.add('replie');
-            const btnToggle = document.getElementById('travaux-btn-toggle-sidebar');
-            if (btnToggle) {
-                btnToggle.classList.add('visible');
-                btnToggle.innerHTML = '&#x25B6;';
-            }
-        });
-
-        window.addEventListener('travaux-annotation-desactivee', () => {
-            const btnAnnoter = document.getElementById('travaux-btn-annoter');
-            if (btnAnnoter) { btnAnnoter.textContent = 'Annoter'; btnAnnoter.classList.remove('actif'); }
-            // Redeployer la sidebar seulement si pas manuellement repliee
-            const sidebar = document.getElementById('travaux-sidebar');
-            const btnToggle = document.getElementById('travaux-btn-toggle-sidebar');
-            if (!sidebarManuelReplie) {
-                if (sidebar) sidebar.classList.remove('replie');
-                if (btnToggle) {
-                    btnToggle.classList.remove('visible');
-                    btnToggle.innerHTML = '&#x25C0;';
-                }
-            } else {
-                if (btnToggle) {
-                    btnToggle.classList.add('visible');
-                    btnToggle.innerHTML = '&#x25B6;';
-                }
-            }
-        });
-
         moduleInitialise = true;
         console.log('[Travaux-UI] Module Travaux initialise');
+
+        const fichierRestaure = restaurerEtatSession();
+        if (fichierRestaure) {
+            const fichiers = travauxStockage.obtenirFichiersTravaux();
+            if (fichiers.some(f => f.id === fichierRestaure)) {
+                setTimeout(() => ouvrirFichier(fichierRestaure), 200);
+            }
+        }
 
         rafraichirUI();
     }
@@ -303,9 +292,8 @@
                                 <button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoomPleineHauteur()" title="Ajuster à la hauteur">Hauteur</button>
                                 <button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoom100()" title="Zoom 100%">100%</button>
                                 <span class="travaux-separateur"></span>
-                                <button id="travaux-btn-annoter" class="travaux-btn-action" onclick="travauxAnnotation.basculerAnnotation()">Annoter</button>
-                                <button id="travaux-btn-evaluer" class="travaux-btn-action travaux-btn-action-vert u-hide" onclick="travauxUI.evaluerDepuisAnnotation()" title="Évaluer cette production">Évaluer</button>
-                                <button id="travaux-btn-export-pdf" class="travaux-btn-action u-hide" onclick="travauxExportPDF.afficherRevisionExport(travauxVisionneuse.getFichierActuel()?.id)" title="Exporter PDF annoté">PDF</button>
+                                <button id="travaux-btn-annoter" class="travaux-btn-action actif" onclick="travauxUI.basculerMode('annoter')">Annoter</button>
+                                <button id="travaux-btn-evaluer" class="travaux-btn-action travaux-btn-action-vert u-hide" onclick="travauxUI.basculerMode('evaluer')" title="Évaluer cette production">Évaluer</button>
                                 <button id="travaux-btn-alleger" class="travaux-btn-action u-hide" onclick="travauxUI.allegerFichier(travauxVisionneuse.getFichierActuel()?.id)" title="Alléger ce fichier">Alléger</button>
                                 <button id="travaux-btn-reimporter" class="travaux-btn-action u-hide" onclick="travauxUI.reimporterFichier(travauxVisionneuse.getFichierActuel()?.id)" title="Re-importer l'original">Re-importer</button>
                             </div>
@@ -1251,11 +1239,20 @@
 
             await travauxVisionneuse.ouvrirFichier(fichierId);
 
-            // Afficher les boutons export PDF et evaluer
-            const btnExport = document.getElementById('travaux-btn-export-pdf');
-            if (btnExport) btnExport.classList.remove('u-hide');
+            // Afficher le bouton evaluer
             const btnEvaluer = document.getElementById('travaux-btn-evaluer');
             if (btnEvaluer) btnEvaluer.classList.remove('u-hide');
+
+            // Auto-activer l'annotation
+            travauxAnnotation.activerAnnotation();
+            // Replier la sidebar
+            const sidebar = document.getElementById('travaux-sidebar');
+            if (sidebar) sidebar.classList.add('replie');
+            const btnToggle = document.getElementById('travaux-btn-toggle-sidebar');
+            if (btnToggle) { btnToggle.classList.add('visible'); btnToggle.innerHTML = '&#x25B6;'; }
+            // Highlight Annoter
+            const btnAnnoter = document.getElementById('travaux-btn-annoter');
+            if (btnAnnoter) btnAnnoter.classList.add('actif');
 
             // Boutons et badge cycle de vie
             const fichierOuvert = travauxVisionneuse.getFichierActuel();
@@ -1327,31 +1324,12 @@
                 }, 500);
             }
 
-            // Ouvrir la palette annotation (repliee par defaut)
-            if (!document.getElementById('travaux-palette-flottante')) {
-                const zoneDocument = document.getElementById('travaux-conteneur-document');
-                if (zoneDocument) {
-                    const paletteDiv = document.createElement('div');
-                    paletteDiv.innerHTML = travauxOutils.genererHTMLPalette();
-                    const paletteEl = paletteDiv.firstElementChild;
-                    zoneDocument.appendChild(paletteEl);
-                    travauxOutils.configurerDragPalette();
-                    // Replier immediatement
-                    paletteEl.classList.add('replie');
-                    const btnP = paletteEl.querySelector('.travaux-palette-toggle');
-                    if (btnP) btnP.textContent = '+';
-                }
-            }
-
-            // Ouvrir la palette tampons (repliee par defaut)
-            if (!document.getElementById('travaux-palette-tampons')) {
-                travauxOutils.togglePaletteAutocollants();
-                const paletteTampons = document.getElementById('travaux-palette-tampons');
-                if (paletteTampons && !paletteTampons.classList.contains('replie')) {
-                    paletteTampons.classList.add('replie');
-                    const btn = paletteTampons.querySelector('.travaux-palette-toggle');
-                    if (btn) btn.textContent = '+';
-                }
+            sauvegarderEtatSession();
+            // Si mode sauvegarde etait 'evaluer', basculer
+            if (modeCourant === 'evaluer') {
+                // Forcer la bascule (modeCourant est deja 'evaluer' depuis restaurerEtatSession)
+                modeCourant = 'annoter';
+                basculerMode('evaluer');
             }
         }, 100);
     }
@@ -1938,36 +1916,52 @@
      * depuis la visionneuse d'annotation
      */
     function evaluerDepuisAnnotation() {
-        const fichier = travauxVisionneuse.getFichierActuel();
-        if (!fichier) {
-            alert('Aucun fichier ouvert.');
-            return;
+        basculerMode('evaluer');
+    }
+
+    function basculerMode(mode) {
+        if (mode === modeCourant) return;
+        const btnAnnoter = document.getElementById('travaux-btn-annoter');
+        const btnEvaluer = document.getElementById('travaux-btn-evaluer');
+
+        if (mode === 'evaluer') {
+            const fichier = travauxVisionneuse.getFichierActuel();
+            if (!fichier || !fichier.etudiantDA || !fichier.productionId) {
+                alert('Ce fichier n\'est pas associé à un étudiant ou une production.');
+                return;
+            }
+            modeCourant = 'evaluer';
+            masquerPalettesAnnotation();
+            afficherPalettesEval(fichier);
+            if (btnAnnoter) btnAnnoter.classList.remove('actif');
+            if (btnEvaluer) btnEvaluer.classList.add('actif');
+        } else {
+            modeCourant = 'annoter';
+            masquerPalettesEval();
+            afficherPalettesAnnotation();
+            if (btnAnnoter) btnAnnoter.classList.add('actif');
+            if (btnEvaluer) btnEvaluer.classList.remove('actif');
         }
+        sauvegarderEtatSession();
+    }
 
-        const da = fichier.etudiantDA;
-        const productionId = fichier.productionId;
+    function masquerPalettesAnnotation() {
+        ['travaux-palette-flottante', 'travaux-palette-tampons', 'travaux-palette-erreurs-fr'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('u-hide');
+        });
+    }
 
-        if (!da || !productionId) {
-            alert('Ce fichier n\'est pas associé à un étudiant ou une production.');
-            return;
-        }
+    function afficherPalettesAnnotation() {
+        ['travaux-palette-flottante', 'travaux-palette-tampons', 'travaux-palette-erreurs-fr'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.classList.remove('u-hide');
+        });
+    }
 
-        // Toggle : si deja en mode evaluation (palette presente), on ferme
-        if (document.getElementById('travaux-palette-eval-gauche')) {
-            fermerModeEvaluation();
-            return;
-        }
-
-        // Desactiver annotation si active (exclusivite mutuelle)
-        if (travauxAnnotation.estActif()) travauxAnnotation.desactiverAnnotation();
-
-        // Masquer les palettes annotation, tampons et erreurs en mode evaluation
-        const paletteAnnot = document.getElementById('travaux-palette-flottante');
-        if (paletteAnnot) paletteAnnot.classList.add('u-hide');
-        const paletteTamp = document.getElementById('travaux-palette-tampons');
-        if (paletteTamp) paletteTamp.classList.add('u-hide');
-        const paletteErrFr = document.getElementById('travaux-palette-erreurs-fr');
-        if (paletteErrFr) paletteErrFr.classList.add('u-hide');
+    function afficherPalettesEval(fichier) {
+        // Ne creer que si pas deja presentes
+        if (document.getElementById('travaux-palette-eval-gauche')) return;
 
         const conteneurDoc = document.getElementById('travaux-conteneur-document');
         if (!conteneurDoc) return;
@@ -2014,7 +2008,13 @@
         remplirLabelsIdentite(fichier);
 
         // Pre-remplir le formulaire d'evaluation avec retry robuste
-        preRemplirEvaluation(da, productionId);
+        preRemplirEvaluation(fichier.etudiantDA, fichier.productionId);
+    }
+
+    function masquerPalettesEval() {
+        if (document.getElementById('travaux-palette-eval-gauche')) {
+            fermerModeEvaluation();
+        }
     }
 
     /**
@@ -2161,14 +2161,6 @@
         const sectionCorrection = document.getElementById('travaux-eval-correction');
         if (sectionIdentite) sectionIdentite.classList.remove('u-hide');
         if (sectionCorrection) sectionCorrection.classList.add('u-hide');
-
-        // Reafficher les palettes annotation, tampons et erreurs
-        const paletteAnnot = document.getElementById('travaux-palette-flottante');
-        if (paletteAnnot) paletteAnnot.classList.remove('u-hide');
-        const paletteTamp = document.getElementById('travaux-palette-tampons');
-        if (paletteTamp) paletteTamp.classList.remove('u-hide');
-        const paletteErrFrR = document.getElementById('travaux-palette-erreurs-fr');
-        if (paletteErrFrR) paletteErrFrR.classList.remove('u-hide');
     }
 
     /**
@@ -2622,6 +2614,8 @@
         lancerArchivageSemestre: lancerArchivageSemestre,
         // Annotation → Evaluation
         evaluerDepuisAnnotation: evaluerDepuisAnnotation,
+        basculerMode: basculerMode,
+        getModeCourant: function() { return modeCourant; },
         fermerModeEvaluation: fermerModeEvaluation,
         togglePaletteEvalReplie: togglePaletteEvalReplie,
         toggleCorrectionIdentite: toggleCorrectionIdentite,
