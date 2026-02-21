@@ -351,9 +351,13 @@
         const productions = obtenirDonneesSelonMode(cle('productions'));
         const stats = travauxStockage.statistiquesFichiers();
 
+        const fichiersTravaux = travauxStockage.obtenirFichiersTravaux();
+
         conteneur.innerHTML = `
             <h3>Archivage des travaux</h3>
             <p class="texte-muted">${stats.nombre} fichier(s) en stock (${stats.tailleFormatee})</p>
+
+            ${genererGrilleFichiers(fichiersTravaux, 'ouvrirPreviewInline')}
 
             <div class="travaux-archivage-options">
                 <!-- Export par étudiant -->
@@ -933,11 +937,29 @@
         const nomEtudiant = etudiant
             ? `${echapperHtml(etudiant.nom)}, ${echapperHtml(etudiant.prenom)}`
             : (f.etudiantDA || 'Non associé');
-        const icone = f.typeMIME === 'application/pdf' ? '&#x1F4C4;' : '&#x1F5BC;';
+
+        // Déterminer le statut le plus avancé
+        let statutTexte = 'Importé';
+        let statutClasse = 'importe';
+
+        const annotation = travauxStockage.obtenirAnnotationFichier(f.id);
+        if (annotation) {
+            statutTexte = 'Annoté';
+            statutClasse = 'annote';
+        }
+
+        const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
+        const evaluation = evaluations.find(e =>
+            e.etudiantDA === f.etudiantDA && e.productionId === f.productionId
+        );
+        if (evaluation) {
+            statutTexte = 'Évalué';
+            statutClasse = 'evalue';
+        }
+
         return `<div class="travaux-badge-importe" data-fichier-id="${f.id}" onclick="travauxUI.${action}('${f.id}')" title="${echapperHtml(f.nomFichier)}">
-        <span class="travaux-badge-icone">${icone}</span>
         <span class="travaux-badge-nom">${nomEtudiant}</span>
-        <span class="travaux-badge-pill">Importé</span>
+        <span class="travaux-badge-pill ${statutClasse}">${statutTexte}</span>
         <button class="travaux-badge-supprimer" onclick="event.stopPropagation(); travauxUI.supprimerFichierImporte('${f.id}')" title="Supprimer">&times;</button>
     </div>`;
     }
