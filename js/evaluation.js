@@ -430,7 +430,7 @@ function chargerEvaluationsEtudiant() {
     const grilleActuelle = selectGrille?.value || null;
     const echelleActuelle = selectEchelle?.value || null;
     const cartoucheActuelle = selectCartouche?.value || null;
-    const remiseActuelle = selectRemise?.value || 'non-remis';
+    const remiseActuelle = selectRemise?.value || 'non-recu';
 
     // ✅ Vider IMMÉDIATEMENT les critères AVANT de changer quoi que ce soit
     // (important pour éviter que les valeurs de l'étudiant précédent persistent)
@@ -1003,7 +1003,23 @@ function niveauSelectionne(critereId) {
 
     // Calculer la note et générer la rétroaction en temps réel
     calculerNote();
+
+    // Marquer le critère modifié pour auto-scroll dans la rétroaction
+    if (evaluationEnCours) {
+        evaluationEnCours._dernierCritereModifie = critereId;
+    }
     genererRetroaction(1);
+    if (evaluationEnCours) {
+        evaluationEnCours._dernierCritereModifie = null;
+    }
+
+    // Auto-déplier la palette Rétroaction si elle est repliée
+    const paletteRetro = document.getElementById('travaux-palette-eval-retro');
+    if (paletteRetro && paletteRetro.classList.contains('replie')) {
+        paletteRetro.classList.remove('replie');
+        const btn = paletteRetro.querySelector('.travaux-palette-toggle');
+        if (btn) btn.innerHTML = '&#x2212;';
+    }
 }
 
 /**
@@ -1700,22 +1716,31 @@ function genererRetroaction(num) {
     const grilles = db.getSync('grillesTemplates', []);
     const grille = grilles.find(g => g.id === grilleId);
 
+    // Garder une référence au critère modifié pour auto-scroll
+    const critereActifId = evaluationEnCours._dernierCritereModifie || null;
+    let positionCritereActif = -1;
+
     if (grille) {
-        grille.criteres.forEach(critere => {
+        grille.criteres.forEach((critere, index) => {
             const niveau = evaluationEnCours.criteres[critere.id];
             if (niveau) {
+                // Marquer la position du critère actif avant d'ajouter le texte
+                if (critere.id === critereActifId) {
+                    positionCritereActif = texte.length;
+                }
+
                 // Vérifier si c'est un critère algorithmique
                 if (critere.type === 'algorithmique' && evaluationEnCours.donneesAlgorithmiques?.[critere.id]?.retroaction) {
-                    // Utiliser la rétroaction algorithmique sauvegardée
                     const retroAlgo = evaluationEnCours.donneesAlgorithmiques[critere.id].retroaction;
-                    texte += `${critere.nom} (${niveau}) : ${retroAlgo}\n\n`;
+                    texte += `[Critère ${index + 1} — ${niveau}] ${critere.nom}\n${retroAlgo}\n\n`;
                 } else if (cartouche.commentaires) {
-                    // Critère standard (holistique/analytique)
                     const cle = `${critere.id}_${niveau}`;
                     const commentaire = cartouche.commentaires[cle];
 
                     if (commentaire) {
-                        texte += `${critere.nom} (${niveau}) : ${commentaire}\n\n`;
+                        texte += `[Critère ${index + 1} — ${niveau}] ${critere.nom}\n${commentaire}\n\n`;
+                    } else {
+                        texte += `[Critère ${index + 1} — ${niveau}] ${critere.nom}\n[Non défini]\n\n`;
                     }
                 }
             }
@@ -1724,10 +1749,18 @@ function genererRetroaction(num) {
 
     // Ajouter le niveau global à la fin
     if (evaluationEnCours.niveauFinal && evaluationEnCours.niveauFinal !== '--') {
-        texte += `Le niveau global de cette production est : ${evaluationEnCours.niveauFinal}.`;
+        texte += `---\nNiveau global : ${evaluationEnCours.niveauFinal}`;
     }
 
-    document.getElementById('retroactionFinale1').value = texte.trim();
+    const textarea = document.getElementById('retroactionFinale1');
+    textarea.value = texte.trim();
+
+    // Auto-scroll vers le critère modifié
+    if (positionCritereActif >= 0) {
+        // Estimer la position de scroll basée sur la proportion du texte
+        const ratio = positionCritereActif / Math.max(texte.length, 1);
+        textarea.scrollTop = ratio * textarea.scrollHeight;
+    }
 }
 
 /* ===============================
@@ -1909,6 +1942,10 @@ function sauvegarderEvaluation() {
 
     afficherNotificationSucces(`Évaluation sauvegardée : ${evaluation.etudiantNom} - ${evaluation.productionNom}`);
 
+    // Afficher la checkbox "Remis à l'élève" après sauvegarde
+    const checkboxRemisLabelSave = document.getElementById('checkboxRemisLabel');
+    if (checkboxRemisLabelSave) checkboxRemisLabelSave.style.display = '';
+
     // 🔄 Recalculer les indices C et P après sauvegarde
     if (typeof calculerEtStockerIndicesCP === 'function') {
         calculerEtStockerIndicesCP();
@@ -1934,13 +1971,36 @@ function changerStatutRemise(num) {
         evaluationEnCours.statutRemise = statut;
     }
 
-    // Si non remis, masquer les critères
-    if (statut !== 'remis') {
+    // Mettre à jour la checkbox "Remis à l'élève"
+    const checkboxLabel = document.getElementById('checkboxRemisLabel');
+    const checkbox = document.getElementById('checkboxRemisEleve');
+    if (checkboxLabel && checkbox) {
+        checkbox.checked = (statut === 'remis');
+    }
+
+    // Si non reçu, masquer les critères
+    if (statut === 'non-recu') {
         document.getElementById('listeCriteresGrille1').innerHTML =
-            '<p class="eval-texte-italic-gris">Le travail doit être remis avant évaluation</p>';
+            '<p class="eval-texte-italic-gris">Le travail doit être reçu avant évaluation</p>';
     } else if (evaluationEnCours?.cartoucheId) {
-        // Si remis et cartouche sélectionnée, afficher les critères
         cartoucheSelectionnee();
+    }
+}
+
+/**
+ * Gère le changement de la checkbox "Remis à l'élève"
+ */
+function changerCheckboxRemis() {
+    const checkbox = document.getElementById('checkboxRemisEleve');
+    const select = document.getElementById('remiseProduction1');
+    if (checkbox && select) {
+        if (checkbox.checked) {
+            select.value = 'remis';
+        } else if (select.value === 'remis') {
+            // Revenir au statut calculé précédent (évalué si évaluation existe)
+            select.value = 'evalue';
+        }
+        changerStatutRemise(1);
     }
 }
 
@@ -2361,7 +2421,9 @@ function nouvelleEvaluation() {
     document.getElementById('selectGrille1').value = '';
     document.getElementById('selectEchelle1').value = '';
     document.getElementById('selectCartoucheEval').value = '';
-    document.getElementById('remiseProduction1').value = 'non-remis';
+    document.getElementById('remiseProduction1').value = 'non-recu';
+    const checkboxRemisLabel = document.getElementById('checkboxRemisLabel');
+    if (checkboxRemisLabel) checkboxRemisLabel.style.display = 'none';
     document.getElementById('listeCriteresGrille1').innerHTML = '<p class="eval-texte-placeholder">Sélectionnez une grille et une cartouche</p>';
     document.getElementById('retroactionFinale1').value = '';
     document.getElementById('noteProduction1').textContent = '0.0';
@@ -3691,9 +3753,16 @@ function verifierEtChargerEvaluationExistante() {
     if (evaluationExistante.statutRemise) {
         const selectRemise = document.getElementById('remiseProduction1');
         if (selectRemise) {
-            selectRemise.value = evaluationExistante.statutRemise;
+            // Rétro-compatibilité: mapper les anciens statuts vers les nouveaux
+            const statutMap = { 'non-remis': 'non-recu' };
+            selectRemise.value = statutMap[evaluationExistante.statutRemise] || evaluationExistante.statutRemise;
         }
     }
+    // Afficher la checkbox "Remis à l'élève" pour les évaluations existantes
+    const checkboxRemisLabel = document.getElementById('checkboxRemisLabel');
+    if (checkboxRemisLabel) checkboxRemisLabel.style.display = '';
+    const checkboxRemis = document.getElementById('checkboxRemisEleve');
+    if (checkboxRemis) checkboxRemis.checked = (evaluationExistante.statutRemise === 'remis');
 
     // Charger l'échelle (si elle existe)
     if (evaluationExistante.echelleId) {

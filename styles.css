@@ -10135,21 +10135,21 @@ label:has(+ textarea:disabled) {
 }
 
 .barre-gauss-svg path {
-    fill: rgba(255, 255, 255, 0.4);
-    stroke: rgba(255, 255, 255, 0.8);
+    fill: rgba(3, 46, 92, 0.25);
+    stroke: rgba(3, 46, 92, 0.6);
     stroke-width: 1.5;
 }
 
 /* Ligne verticale pour la moyenne μ */
 .barre-gauss-svg .ligne-mu {
-    stroke: rgba(255, 255, 255, 0.9);
+    stroke: rgba(3, 46, 92, 0.75);
     stroke-width: 2;
     stroke-dasharray: none;
 }
 
 /* Lignes verticales pour ±σ */
 .barre-gauss-svg .ligne-sigma {
-    stroke: rgba(255, 255, 255, 0.6);
+    stroke: rgba(3, 46, 92, 0.45);
     stroke-width: 1;
     stroke-dasharray: 4 3;
 }
@@ -18933,16 +18933,16 @@ body.mode-clair .accueil-carte-decouvrir--action:hover {
    PARITÉ SOMBRE / CLAIR — Corrections visuelles
    =============================== */
 
-/* 1. Courbes de Gauss — traits bleu foncé au lieu de blanc */
+/* 1. Courbes de Gauss — traits blancs en mode clair */
 body.mode-clair .barre-gauss-svg path {
-    fill: rgba(3, 46, 92, 0.25);
-    stroke: rgba(3, 46, 92, 0.6);
+    fill: rgba(255, 255, 255, 0.4);
+    stroke: rgba(255, 255, 255, 0.8);
 }
 body.mode-clair .barre-gauss-svg .ligne-mu {
-    stroke: rgba(3, 46, 92, 0.75);
+    stroke: rgba(255, 255, 255, 0.9);
 }
 body.mode-clair .barre-gauss-svg .ligne-sigma {
-    stroke: rgba(3, 46, 92, 0.45);
+    stroke: rgba(255, 255, 255, 0.6);
 }
 
 /* 2. Overlays des barres — opacité ajustée pour fond clair */
@@ -19590,6 +19590,19 @@ body.mode-clair .barre-etudiant.tracked-4 {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+/* Non reçu — gris neutre */
+.travaux-badge-pill.non-recu {
+    background: var(--gris-moyen, #8aa4b0);
+    color: #fff;
+}
+
+/* Reçu — bleu pâle */
+.travaux-badge-pill.recu {
+    background: var(--bleu-moyen, #244858);
+    color: #fff;
 }
 
 /* Importé — turquoise (neutre) */
@@ -19607,6 +19620,12 @@ body.mode-clair .barre-etudiant.tracked-4 {
 /* Évalué — vert succès */
 .travaux-badge-pill.evalue {
     background: var(--vert-succes, #28a745);
+    color: #fff;
+}
+
+/* Remis — vert foncé */
+.travaux-badge-pill.remis {
+    background: var(--vert-fonce, #1b7a34);
     color: #fff;
 }
 

@@ -31,7 +31,33 @@ function obtenirConfigJetons() {
         reprise: { nombre: 2, maxParProduction: 1, archiverOriginale: true }
     };
 
-    return configPAN.jetons || jetonsDefaut;
+    // Priorité: configPAN.jetons (format canonique), puis fallback vers configurationJetons (format v2 plat)
+    if (configPAN.jetons) {
+        return configPAN.jetons;
+    }
+
+    // Fallback: lire depuis configurationJetons (format plat du module v2) et convertir
+    const configV2 = modalites.configurationJetons;
+    if (configV2) {
+        return {
+            actif: configV2.jetonsActif !== false,
+            delai: {
+                nombre: configV2.nombreParEleve || 2,
+                dureeJours: configV2.dureeDelaiJours || 2
+            },
+            reprise: {
+                nombre: configV2.nombreParEleve || 2,
+                maxParProduction: 1,
+                archiverOriginale: configV2.gestionOriginale === 'archiver'
+            },
+            repriseCiblee: {
+                actif: configV2.repriseCibleeActif || false,
+                plafondNote: configV2.plafondCiblee || null
+            }
+        };
+    }
+
+    return jetonsDefaut;
 }
 
 /**

@@ -963,7 +963,7 @@
             ? `${echapperHtml(etudiant.nom)}, ${echapperHtml(etudiant.prenom)}`
             : (f.etudiantDA || 'Non associé');
 
-        // Déterminer le statut le plus avancé
+        // Déterminer le statut le plus avancé selon le workflow
         let statutTexte = 'Importé';
         let statutClasse = 'importe';
 
@@ -978,8 +978,13 @@
             e.etudiantDA === f.etudiantDA && e.productionId === f.productionId
         );
         if (evaluation) {
-            statutTexte = 'Évalué';
-            statutClasse = 'evalue';
+            if (evaluation.statutRemise === 'remis') {
+                statutTexte = 'Remis';
+                statutClasse = 'remis';
+            } else {
+                statutTexte = 'Évalué';
+                statutClasse = 'evalue';
+            }
         }
 
         const verrou = (evaluation && evaluation.verrouillee)

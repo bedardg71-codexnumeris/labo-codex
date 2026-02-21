@@ -14,6 +14,70 @@ console.log('📦 Chargement du module liste-evaluations.js...');
 // FONCTION UTILITAIRE
 // ============================================
 
+/**
+ * Calcule le statut workflow d'une ligne d'évaluation.
+ * Hiérarchie : non-recu → recu → importe → annote → evalue → remis
+ * @param {Object} ligne - La ligne d'évaluation
+ * @returns {string} Le statut workflow
+ */
+function calculerStatutWorkflow(ligne) {
+    // Si l'évaluation a un statut remise explicite "remis"
+    if (ligne.statutRemise === 'remis') return 'remis';
+
+    // Si évalué (ou remplacée/non-recevable)
+    if (ligne.statut === 'evalue' || ligne.statut === 'remplacee' || ligne.statut === 'non-recevable') return 'evalue';
+
+    // Vérifier si un fichier importé existe et s'il a des annotations
+    if (typeof travauxStockage !== 'undefined' && typeof travauxStockage.obtenirFichiersImportes === 'function') {
+        const fichiers = travauxStockage.obtenirFichiersImportes ? travauxStockage.obtenirFichiersImportes() : [];
+        const fichierExiste = fichiers.some(f => f.etudiantDA === ligne.da && f.productionId === ligne.productionId);
+
+        if (fichierExiste) {
+            // Vérifier annotation
+            const fichier = fichiers.find(f => f.etudiantDA === ligne.da && f.productionId === ligne.productionId);
+            if (fichier) {
+                const annotation = travauxStockage.obtenirAnnotationFichier(fichier.id);
+                if (annotation && typeof annotationContientDuContenu === 'function' && annotationContientDuContenu(annotation)) {
+                    return 'annote';
+                }
+            }
+            return 'importe';
+        }
+    }
+
+    // Statut remise manuelle "recu"
+    if (ligne.statutRemise === 'recu') return 'recu';
+
+    return 'non-recu';
+}
+
+/**
+ * Obtient le libellé français du statut workflow
+ * @param {string} statut - Le statut workflow
+ * @returns {string} Le libellé
+ */
+function obtenirLibelleStatut(statut) {
+    const libelles = {
+        'non-recu': 'Non reçu',
+        'recu': 'Reçu',
+        'importe': 'Importé',
+        'annote': 'Annoté',
+        'evalue': 'Évalué',
+        'remis': 'Remis'
+    };
+    return libelles[statut] || statut;
+}
+
+/**
+ * Obtient l'ordre numérique du statut workflow (pour le tri)
+ * @param {string} statut - Le statut workflow
+ * @returns {number} L'ordre
+ */
+function obtenirOrdreStatut(statut) {
+    const ordres = { 'non-recu': 0, 'recu': 1, 'importe': 2, 'annote': 3, 'evalue': 4, 'remis': 5 };
+    return ordres[statut] ?? 0;
+}
+
 // ============================================
 // VARIABLES GLOBALES DE TRI
 // ============================================
@@ -228,18 +292,6 @@ function chargerDonneesEvaluations() {
  * Génère les options des filtres dynamiquement
  */
 function genererOptionsFiltres(groupes, productions) {
-    // Filtre Groupe
-    const selectGroupe = document.getElementById('filtre-groupe-eval');
-    if (selectGroupe) {
-        selectGroupe.innerHTML = '<option value="">Tous les groupes</option>';
-        groupes.forEach(groupe => {
-            const option = document.createElement('option');
-            option.value = groupe.numero;
-            option.textContent = `Groupe ${groupe.numero}`;
-            selectGroupe.appendChild(option);
-        });
-    }
-
     // Filtre Production
     const selectProduction = document.getElementById('filtre-production-eval');
     if (selectProduction) {
@@ -677,6 +729,11 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
         });
     });
 
+    // Calculer le statut workflow pour chaque ligne
+    lignes.forEach(ligne => {
+        ligne.statutWorkflow = calculerStatutWorkflow(ligne);
+    });
+
     return lignes;
 }
 
@@ -732,35 +789,31 @@ function appliquerFiltresSurLignes(lignes) {
         // Filtre Production
         if (filtreProduction && ligne.productionId !== filtreProduction) return false;
 
-        // Filtre Statut
-        if (filtreStatut === 'remis') {
-            // Afficher seulement les travaux remis (exclut "non-remis" ET "retard")
-            // Les travaux en retard deviennent "remis" quand un jeton de délai est appliqué
-            if (ligne.statutRemise === 'non-remis' || ligne.statutRemise === 'retard') return false;
-        } else if (filtreStatut === 'non-remis') {
-            // Afficher les travaux non remis ET en retard (considérés comme non remis)
-            if (ligne.statutRemise !== 'non-remis' && ligne.statutRemise !== 'retard') return false;
+        // Filtre Statut (workflow + jetons)
+        if (filtreStatut === 'non-recu') {
+            if (ligne.statutWorkflow !== 'non-recu') return false;
+        } else if (filtreStatut === 'recu') {
+            if (ligne.statutWorkflow !== 'recu') return false;
+        } else if (filtreStatut === 'importe') {
+            if (ligne.statutWorkflow !== 'importe') return false;
+        } else if (filtreStatut === 'annote') {
+            if (ligne.statutWorkflow !== 'annote') return false;
+        } else if (filtreStatut === 'evalue') {
+            if (ligne.statutWorkflow !== 'evalue') return false;
+        } else if (filtreStatut === 'remis') {
+            if (ligne.statutWorkflow !== 'remis') return false;
+        } else if (filtreStatut === 'non-evalue') {
+            if (ligne.statut !== 'non-evalue') return false;
         } else if (filtreStatut === 'jeton-delai') {
-            // Afficher seulement les évaluations avec jeton de délai
             if (ligne.badgeType !== 'delai') return false;
         } else if (filtreStatut === 'jeton-reprise') {
-            // Afficher seulement les reprises STANDARD (pas ciblées)
             if (ligne.badgeType !== 'nouvelle-reprise') return false;
         } else if (filtreStatut === 'jeton-reprise-ciblee') {
-            // Afficher seulement les reprises CIBLÉES
             if (ligne.badgeType !== 'reprise-ciblee') return false;
         } else if (filtreStatut === 'tous-jetons') {
-            // Afficher toutes les évaluations avec jetons (délai + reprises standard + reprises ciblées)
             if (!['delai', 'nouvelle-reprise', 'reprise-ciblee'].includes(ligne.badgeType)) return false;
         } else if (filtreStatut === 'remplacees') {
-            // Afficher seulement les évaluations originales remplacées
             if (ligne.statut !== 'remplacee') return false;
-        } else if (filtreStatut === 'evalue') {
-            // Afficher seulement les évaluations RÉELLEMENT évaluées (exclure les "non-remis")
-            if (ligne.statut !== 'evalue' || ligne.statutRemise === 'non-remis') return false;
-        } else if (filtreStatut === 'non-evalue') {
-            // Afficher les non évalués OU les travaux marqués comme non remis
-            if (ligne.statut !== 'non-evalue' && ligne.statutRemise !== 'non-remis') return false;
         } else if (filtreStatut && ligne.statut !== filtreStatut) {
             return false;
         }
@@ -858,18 +911,14 @@ function genererLigneHTML(ligne) {
         badgeJeton = ' <span class="badge-jeton-delai-wrapper"><span class="badge-jeton-titre">Délai</span></span>';
     }
 
-    // Afficher le niveau IDME
+    // Afficher le statut workflow avec badge coloré
+    const statutW = ligne.statutWorkflow || 'non-recu';
+    const libelleStatut = obtenirLibelleStatut(statutW);
     let affichageNiveau;
-    if (ligne.statutRemise === 'non-remis' || ligne.statutRemise === 'retard') {
-        // Non remis ou en retard : afficher le badge "Non remis"
-        affichageNiveau = '<span class="badge-non-remis-wrapper"><span class="badge-jeton-titre">Non remis</span></span>';
-    } else if (ligne.statut === 'non-recevable') {
-        // Non recevable : afficher 0 ou --
+    if (ligne.statut === 'non-recevable') {
         affichageNiveau = '<strong style="color: var(--gris-clair);">0</strong>';
-    } else if ((ligne.statut === 'evalue' || ligne.statut === 'remplacee') && ligne.niveauFinal !== '-') {
-        affichageNiveau = `<strong>${ligne.niveauFinal}</strong>`;
     } else {
-        affichageNiveau = '<span class="badge-non-remis-wrapper"><span class="badge-jeton-titre">Non remis</span></span>';
+        affichageNiveau = `<span class="travaux-badge-pill ${statutW}">${libelleStatut}</span>`;
     }
 
     // Afficher la note chiffrée (%)
@@ -1060,10 +1109,56 @@ function consulterEvaluationDepuisListe(evaluationId) {
 function evaluerProduction(da, productionId) {
     console.log(`📝 Création nouvelle évaluation pour DA: ${da}, Production: ${productionId}`);
 
-    // Naviguer vers la section Évaluations › Annoter et évaluer
+    // Déterminer l'étape du flux selon le statut du travail
+    let etapeNavigation = 'evaluations-annoter'; // défaut: évaluation
+    let ouvrirAnnotation = false;
+
+    // Vérifier s'il y a un fichier importé pour cet étudiant + production
+    let fichierImporte = null;
+    if (typeof travauxStockage !== 'undefined' && typeof travauxStockage.obtenirFichiersImportes === 'function') {
+        const fichiers = travauxStockage.obtenirFichiersImportes() || [];
+        fichierImporte = fichiers.find(f => f.etudiantDA === da && f.productionId === productionId);
+    }
+
+    if (!fichierImporte) {
+        // Pas importé → aller à l'importation
+        etapeNavigation = 'evaluations-importer';
+        console.log('📂 Pas de fichier importé → navigation vers import');
+    } else {
+        // Vérifier annotation
+        const annotation = travauxStockage.obtenirAnnotationFichier(fichierImporte.id);
+        const aAnnotation = annotation && typeof annotationContientDuContenu === 'function' && annotationContientDuContenu(annotation);
+
+        if (!aAnnotation) {
+            // Importé mais pas annoté → ouvrir en mode annotation
+            etapeNavigation = 'evaluations-annoter';
+            ouvrirAnnotation = true;
+            console.log('✏️ Fichier importé sans annotation → navigation vers annotation');
+        } else {
+            // Annoté ou évalué → évaluation (comportement actuel)
+            console.log('📝 Fichier annoté → navigation vers évaluation');
+        }
+    }
+
+    // Naviguer vers la section appropriée
     afficherSection('evaluations');
     if (typeof afficherSousSection === 'function') {
-        afficherSousSection('evaluations-annoter');
+        afficherSousSection(etapeNavigation);
+    }
+
+    // Si on navigue vers l'import, pas besoin de pré-remplir le formulaire d'évaluation
+    if (etapeNavigation === 'evaluations-importer') {
+        return;
+    }
+
+    // Si on doit ouvrir le fichier en mode annotation
+    if (ouvrirAnnotation && fichierImporte) {
+        setTimeout(() => {
+            if (typeof travauxUI !== 'undefined' && typeof travauxUI.ouvrirFichier === 'function') {
+                travauxUI.ouvrirFichier(fichierImporte.id);
+            }
+        }, 200);
+        return;
     }
 
     // Rendre le formulaire d'évaluation visible
@@ -1462,12 +1557,9 @@ function trierLignesParColonne(lignes) {
                 return asc ? jetonA - jetonB : jetonB - jetonA;
 
             case 'niveau':
-                valeurA = a.niveauFinal || '-';
-                valeurB = b.niveauFinal || '-';
-                // Ordre: -, I, D, M, E (ou 0)
-                const ordreNiveau = { '-': 0, '0': 0, 'I': 1, 'D': 2, 'M': 3, 'E': 4 };
-                const numA = ordreNiveau[valeurA] ?? 0;
-                const numB = ordreNiveau[valeurB] ?? 0;
+                // Tri par statut workflow (non-recu → recu → importe → annote → evalue → remis)
+                const numA = obtenirOrdreStatut(a.statutWorkflow);
+                const numB = obtenirOrdreStatut(b.statutWorkflow);
                 return asc ? numA - numB : numB - numA;
 
             case 'note':
