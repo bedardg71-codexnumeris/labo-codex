@@ -502,7 +502,35 @@
             return;
         }
 
-        // Debut d'un trait (stylo ou surligneur)
+        // Surligneur clic-a-clic
+        if (outil.id === 'surligneur') {
+            if (formeEnCours && formeEnCours.type === 'surligneur') {
+                // Second clic : finaliser
+                formeEnCours.x2 = xNorm;
+                formeEnCours.y2 = yNorm;
+                const donneesPage = obtenirDonneesPage();
+                donneesPage.shapes.push(formeEnCours);
+                empilerUndo('ajout-forme', formeEnCours);
+                formeEnCours = null; formeOrigine = null;
+                enDessin = false;
+                reRendreAnnotations(); planifierSauvegarde();
+            } else {
+                // Premier clic : demarrer
+                formeOrigine = { x: xNorm, y: yNorm };
+                formeEnCours = {
+                    id: 'SH_' + Date.now(), type: 'surligneur',
+                    color: travauxOutils.getCouleurActive(),
+                    lineWidth: travauxOutils.getEpaisseurActive(),
+                    opacity: outil.opacite || 0.5,
+                    composite: outil.composite || 'multiply',
+                    x1: xNorm, y1: yNorm, x2: xNorm, y2: yNorm
+                };
+                enDessin = true;
+            }
+            return;
+        }
+
+        // Debut d'un trait (stylo)
         enDessin = true;
         const pression = e.pressure || 0.5;
 
@@ -689,6 +717,12 @@
 
         enDessin = false;
 
+        // Surligneur clic-a-clic : ne pas finaliser au relachement
+        if (formeEnCours && formeEnCours.type === 'surligneur') {
+            enDessin = true; // Garder actif pour l'apercu
+            return;
+        }
+
         // Forme terminee
         if (formeEnCours) {
             const donneesPage = obtenirDonneesPage();
@@ -739,6 +773,13 @@
 
     function onOutilChange(e) {
         if (!canvasAnnotation || !annotationActive) return;
+
+        // Annuler un surligneur en cours si on change d'outil
+        if (formeEnCours && formeEnCours.type === 'surligneur') {
+            formeEnCours = null; formeOrigine = null; enDessin = false;
+            reRendreAnnotations();
+        }
+
         if (e.detail.outil.id === 'position') {
             canvasAnnotation.style.pointerEvents = 'none';
         } else {
@@ -786,6 +827,14 @@
 
         // Laisser Space passer au module visionneuse pour le pan
         if (e.key === ' ') return;
+
+        // Escape : annuler un surligneur en cours
+        if (e.key === 'Escape' && formeEnCours && formeEnCours.type === 'surligneur') {
+            e.preventDefault();
+            formeEnCours = null; formeOrigine = null; enDessin = false;
+            reRendreAnnotations();
+            return;
+        }
 
         // Delete/Backspace : supprimer les annotations selectionnees
         if ((e.key === 'Delete' || e.key === 'Backspace') && selectionsMultiples.length > 0) {
@@ -906,6 +955,11 @@
         const hit = trouverAnnotationAuPoint(xNorm, yNorm);
         if (!hit) return;
 
+        // La gomme n'efface que les annotations du surligneur
+        const estSurligneur = (hit.type === 'stroke' && hit.data.tool === 'surligneur')
+                           || (hit.type === 'shape' && hit.data.type === 'surligneur');
+        if (!estSurligneur) return;
+
         const donneesPage = obtenirDonneesPage();
 
         switch (hit.type) {
@@ -917,16 +971,6 @@
             case 'shape': {
                 const supprime = donneesPage.shapes.splice(hit.index, 1)[0];
                 empilerUndo('suppression-forme', supprime);
-                break;
-            }
-            case 'text': {
-                const supprime = donneesPage.textAnnotations.splice(hit.index, 1)[0];
-                empilerUndo('suppression-texte', supprime);
-                break;
-            }
-            case 'sticker': {
-                const supprime = donneesPage.stickers.splice(hit.index, 1)[0];
-                empilerUndo('suppression-autocollant', supprime);
                 break;
             }
         }
@@ -1161,7 +1205,7 @@
                 return { type: 'shape', index: i, data: forme, bbox: bbox };
             }
             // Pour les symboles (crochet, croix), accepter aussi le centre
-            if ((forme.type === 'crochet' || forme.type === 'croix') && insideX && insideY) {
+            if ((forme.type === 'crochet' || forme.type === 'croix' || forme.type === 'surligneur') && insideX && insideY) {
                 return { type: 'shape', index: i, data: forme, bbox: bbox };
             }
         }
@@ -1693,6 +1737,15 @@
             }
 
             case 'ligne':
+                ctxAnnotation.beginPath();
+                ctxAnnotation.moveTo(x1, y1);
+                ctxAnnotation.lineTo(x2, y2);
+                ctxAnnotation.stroke();
+                break;
+
+            case 'surligneur':
+                ctxAnnotation.globalAlpha = forme.opacity || 0.5;
+                ctxAnnotation.globalCompositeOperation = forme.composite || 'multiply';
                 ctxAnnotation.beginPath();
                 ctxAnnotation.moveTo(x1, y1);
                 ctxAnnotation.lineTo(x2, y2);

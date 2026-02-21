@@ -69,14 +69,12 @@
             nom: 'Surligneur',
             icone: 'Surligneur',
             curseur: 'crosshair',
+            type: 'surligneur',
             epaisseurDefaut: 20,
             epaisseurMin: 10,
             epaisseurMax: 40,
-            opacite: 0.3,
-            composite: 'multiply',
-            sensiblePression: true,
-            facteurPression: 1.5,
-            couleurForce: '#FFFF00' // jaune par defaut
+            opacite: 0.5,
+            composite: 'multiply'
         },
         gomme: {
             id: 'gomme',
