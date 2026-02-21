@@ -15669,6 +15669,9 @@ body.mode-clair .travaux-slot-retroaction {
     min-width: 0;
 }
 
+.travaux-autocollants-grille--symboles {
+    grid-template-columns: repeat(2, 1fr);
+}
 .travaux-autocollant-item:hover {
     background: var(--bleu-tres-pale);
 }

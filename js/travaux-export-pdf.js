@@ -332,25 +332,23 @@
             case 'crochet': {
                 const mx = (x1 + x2) / 2;
                 const my = (y1 + y2) / 2;
-                const size = Math.min(Math.abs(x2 - x1), Math.abs(y2 - y1)) / 2;
-                ctx.strokeStyle = forme.color || '#00AA00';
-                ctx.lineWidth = 3 * ratioResolution;
-                ctx.beginPath();
-                ctx.moveTo(mx - size, my);
-                ctx.lineTo(mx - size * 0.3, my + size * 0.8);
-                ctx.lineTo(mx + size, my - size * 0.6);
-                ctx.stroke();
+                const size = Math.min(Math.abs(x2 - x1), Math.abs(y2 - y1));
+                ctx.fillStyle = forme.color || '#2e7d32';
+                ctx.font = size + 'px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('\u2714\uFE0E', mx, my);
                 break;
             }
             case 'croix': {
-                ctx.strokeStyle = forme.color || '#FF0000';
-                ctx.lineWidth = 3 * ratioResolution;
-                ctx.beginPath();
-                ctx.moveTo(x1, y1);
-                ctx.lineTo(x2, y2);
-                ctx.moveTo(x2, y1);
-                ctx.lineTo(x1, y2);
-                ctx.stroke();
+                const mxC = (x1 + x2) / 2;
+                const myC = (y1 + y2) / 2;
+                const sizeC = Math.min(Math.abs(x2 - x1), Math.abs(y2 - y1));
+                ctx.fillStyle = forme.color || '#c62828';
+                ctx.font = sizeC + 'px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('\u2718', mxC, myC);
                 break;
             }
         }

@@ -1305,6 +1305,33 @@
                     sessionStorage.setItem('travaux_bulle_annoter_vu', 'true');
                 }, 500);
             }
+
+            // Ouvrir la palette annotation (repliee par defaut)
+            if (!document.getElementById('travaux-palette-flottante')) {
+                const zoneDocument = document.getElementById('travaux-conteneur-document');
+                if (zoneDocument) {
+                    const paletteDiv = document.createElement('div');
+                    paletteDiv.innerHTML = travauxOutils.genererHTMLPalette();
+                    const paletteEl = paletteDiv.firstElementChild;
+                    zoneDocument.appendChild(paletteEl);
+                    travauxOutils.configurerDragPalette();
+                    // Replier immediatement
+                    paletteEl.classList.add('replie');
+                    const btnP = paletteEl.querySelector('.travaux-palette-toggle');
+                    if (btnP) btnP.textContent = '+';
+                }
+            }
+
+            // Ouvrir la palette tampons (repliee par defaut)
+            if (!document.getElementById('travaux-palette-tampons')) {
+                travauxOutils.togglePaletteAutocollants();
+                const paletteTampons = document.getElementById('travaux-palette-tampons');
+                if (paletteTampons && !paletteTampons.classList.contains('replie')) {
+                    paletteTampons.classList.add('replie');
+                    const btn = paletteTampons.querySelector('.travaux-palette-toggle');
+                    if (btn) btn.textContent = '+';
+                }
+            }
         }, 100);
     }
 
@@ -1927,11 +1954,22 @@
             if (panneauGauche) panneauGauche.classList.add('u-hide');
             if (panneauDroite) panneauDroite.classList.add('u-hide');
             if (panneauRetro) panneauRetro.classList.add('u-hide');
+            // Reafficher les palettes annotation et tampons
+            const paletteAnnot = document.getElementById('travaux-palette-flottante');
+            if (paletteAnnot) paletteAnnot.classList.remove('u-hide');
+            const paletteTamp = document.getElementById('travaux-palette-tampons');
+            if (paletteTamp) paletteTamp.classList.remove('u-hide');
             return;
         }
 
         // Desactiver annotation si active (exclusivite mutuelle)
         if (travauxAnnotation.estActif()) travauxAnnotation.desactiverAnnotation();
+
+        // Masquer les palettes annotation et tampons en mode evaluation
+        const paletteAnnot = document.getElementById('travaux-palette-flottante');
+        if (paletteAnnot) paletteAnnot.classList.add('u-hide');
+        const paletteTamp = document.getElementById('travaux-palette-tampons');
+        if (paletteTamp) paletteTamp.classList.add('u-hide');
 
         // Deplacer les panneaux eval dans les slots de la visionneuse
         if (slotGauche && panneauGauche) {
