@@ -1763,9 +1763,12 @@ function sauvegarderEvaluation() {
         return;
     }
 
-    const etudiantDA = document.getElementById('selectEtudiantEval').value;
-    const productionId = document.getElementById('selectProduction1').value;
-    const grilleId = document.getElementById('selectGrille1').value;
+    // Lire les selects, avec fallback sur evaluationEnCours (les selects cachés
+    // peuvent être vides si le chaînage setTimeout de preRemplirEvaluation n'a pas terminé)
+    const ec = window.evaluationEnCours;
+    const etudiantDA = document.getElementById('selectEtudiantEval').value || (ec && ec.etudiantDA) || '';
+    const productionId = document.getElementById('selectProduction1').value || (ec && ec.productionId) || '';
+    const grilleId = document.getElementById('selectGrille1').value || (ec && ec.grilleId) || '';
 
     if (!etudiantDA || !productionId || !grilleId) {
         alert('Veuillez sélectionner un étudiant, une production et une grille avant de sauvegarder.');
@@ -4710,9 +4713,10 @@ function sauvegarderEvaluationModifiee() {
     }
 
     // Créer la nouvelle version de l'évaluation (reprendre le code de sauvegarderEvaluation)
-    const etudiantDA = document.getElementById('selectEtudiantEval').value;
-    const productionId = document.getElementById('selectProduction1').value;
-    const grilleId = document.getElementById('selectGrille1').value;
+    const ecMod = window.evaluationEnCours;
+    const etudiantDA = document.getElementById('selectEtudiantEval').value || (ecMod && ecMod.etudiantDA) || '';
+    const productionId = document.getElementById('selectProduction1').value || (ecMod && ecMod.productionId) || '';
+    const grilleId = document.getElementById('selectGrille1').value || (ecMod && ecMod.grilleId) || '';
 
     // ✅ NAMESPACING (Beta 95.5)
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');

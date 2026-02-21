@@ -1230,6 +1230,8 @@
         // avant que afficherFichiers() ne détruise le DOM de la visionneuse)
         if (document.getElementById('travaux-palette-eval-gauche')) {
             fermerModeEvaluation();
+            // Réinitialiser modeCourant pour que basculerMode('evaluer') fonctionne ensuite
+            modeCourant = 'annoter';
         }
         // Masquer la section evaluation si visible (fallback)
         const evalDiv = document.getElementById('evaluations-contenu-evaluation');
@@ -1276,9 +1278,14 @@
             if (sidebar) sidebar.classList.add('replie');
             const btnToggle = document.getElementById('travaux-btn-toggle-sidebar');
             if (btnToggle) { btnToggle.classList.add('visible'); btnToggle.innerHTML = '&#x25B6;'; }
-            // Highlight Annoter
+            // Highlight Annoter (et retirer actif d'Évaluer)
             const btnAnnoter = document.getElementById('travaux-btn-annoter');
             if (btnAnnoter) btnAnnoter.classList.add('actif');
+            const btnEvaluerReset = document.getElementById('travaux-btn-evaluer');
+            if (btnEvaluerReset) btnEvaluerReset.classList.remove('actif');
+
+            // Recentrer après la transition CSS du sidebar (0.3s)
+            setTimeout(() => travauxVisionneuse.recentrerVue(), 350);
 
             // Boutons et badge cycle de vie
             const fichierOuvert = travauxVisionneuse.getFichierActuel();
@@ -2059,19 +2066,6 @@
             configurerDragPaletteEval('travaux-palette-eval-jetons');
         }
 
-        // Sauvegarder les valeurs actuelles des dropdowns (persistent dans le DOM
-        // meme apres fermerModeEvaluation car les panneaux sont deplacés, pas detruits)
-        const ancGrille = document.getElementById('selectGrille1')?.value || '';
-        const ancEchelle = document.getElementById('selectEchelle1')?.value || '';
-        const ancCartouche = document.getElementById('selectCartoucheEval')?.value || '';
-        const ancRemise = document.getElementById('remiseProduction1')?.value || '';
-        // Aussi verifier evaluationEnCours (variable globale qui survit entre sessions)
-        const evalEC = window.evaluationEnCours;
-        const grilleARestaurer = ancGrille || (evalEC && evalEC.grilleId) || '';
-        const echelleARestaurer = ancEchelle || (evalEC && evalEC.echelleId) || '';
-        const cartoucheARestaurer = ancCartouche || (evalEC && evalEC.cartoucheId) || '';
-        const remiseARestaurer = ancRemise || (evalEC && evalEC.statutRemise) || '';
-
         // Peupler les dropdowns (les fonctions d'evaluation.js remplissent les selects)
         if (typeof chargerListeEtudiantsEval === 'function') chargerListeEtudiantsEval();
         if (typeof chargerGroupesEval === 'function') chargerGroupesEval();
@@ -2079,41 +2073,54 @@
         if (typeof chargerGrillesDansSelect === 'function') chargerGrillesDansSelect();
         if (typeof chargerEchellePerformance === 'function') chargerEchellePerformance();
 
-        // Restaurer les valeurs sauvegardées après peuplement
-        if (grilleARestaurer) {
+        // Pré-remplir les selects cachés directement depuis fichier (synchrone, fiable)
+        // Ces selects sont dans travaux-eval-correction (u-hide) et lus par sauvegarderEvaluation()
+        const selEtud = document.getElementById('selectEtudiantEval');
+        if (selEtud && fichier.etudiantDA) {
+            selEtud.value = fichier.etudiantDA;
+        }
+        const selProd = document.getElementById('selectProduction1');
+        if (selProd && fichier.productionId) {
+            selProd.value = fichier.productionId;
+        }
+
+        // Initialiser evaluationEnCours si absent (requis par chargerGrilleSelectionnee)
+        if (!window.evaluationEnCours) {
+            window.evaluationEnCours = {
+                etudiantDA: fichier.etudiantDA || '',
+                productionId: fichier.productionId || '',
+                grilleId: '',
+                echelleId: '',
+                cartoucheId: '',
+                criteres: {},
+                donneesAlgorithmiques: {},
+                statutRemise: 'remis'
+            };
+        }
+
+        // Pré-sélectionner la grille associée à la production (si disponible)
+        const productions = (typeof obtenirDonneesSelonMode === 'function')
+            ? obtenirDonneesSelonMode('productions')
+            : (typeof db !== 'undefined' ? db.getSync(cle('productions'), []) : []);
+        const prod = fichier.productionId ? productions.find(p => p.id === fichier.productionId) : null;
+        if (prod && prod.grilleId) {
             const selG = document.getElementById('selectGrille1');
-            if (selG && Array.from(selG.options).some(o => o.value === grilleARestaurer)) {
-                selG.value = grilleARestaurer;
-                // Peupler les cartouches pour cette grille
+            if (selG && Array.from(selG.options).some(o => o.value === prod.grilleId)) {
+                selG.value = prod.grilleId;
+                window.evaluationEnCours.grilleId = prod.grilleId;
                 if (typeof chargerGrilleSelectionnee === 'function') chargerGrilleSelectionnee();
             }
         }
-        if (echelleARestaurer) {
-            const selE = document.getElementById('selectEchelle1');
-            if (selE && Array.from(selE.options).some(o => o.value === echelleARestaurer)) {
-                selE.value = echelleARestaurer;
-            }
-        }
-        if (remiseARestaurer) {
-            const selR = document.getElementById('remiseProduction1');
-            if (selR) selR.value = remiseARestaurer;
-        }
-        // Restaurer la cartouche après un micro-délai (les options viennent de chargerGrilleSelectionnee)
-        if (cartoucheARestaurer) {
-            setTimeout(() => {
-                const selC = document.getElementById('selectCartoucheEval');
-                if (selC && Array.from(selC.options).some(o => o.value === cartoucheARestaurer)) {
-                    selC.value = cartoucheARestaurer;
-                    // Déclencher l'affichage des critères
-                    if (typeof cartoucheSelectionnee === 'function') cartoucheSelectionnee();
-                }
-            }, 50);
-        }
+
+        // Statut de remise par défaut : remis (fichier importé = travail remis)
+        const selRemise = document.getElementById('remiseProduction1');
+        if (selRemise) selRemise.value = 'remis';
 
         // Afficher les labels d'identite
         remplirLabelsIdentite(fichier);
 
         // Pre-remplir le formulaire d'evaluation avec retry robuste
+        // (gère le chaînage complet : étudiant → productions → grille → évaluation existante)
         preRemplirEvaluation(fichier.etudiantDA, fichier.productionId);
 
         // Peupler la palette jetons
