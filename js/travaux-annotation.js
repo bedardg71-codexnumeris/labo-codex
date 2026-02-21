@@ -25,6 +25,8 @@
 
     let canvasAnnotation = null;
     let ctxAnnotation = null;
+    let canvasSurligneur = null;
+    let ctxSurligneur = null;
     let annotationActive = false; // Mode annotation actif/inactif
     let enDessin = false;
     let traitEnCours = null;
@@ -81,9 +83,12 @@
         // Ecouter la fermeture de fichier
         window.addEventListener('travaux-fichier-ferme', () => {
             desactiverAnnotation();
-            // Cacher le canvas quand le fichier est ferme
+            // Cacher les canvas quand le fichier est ferme
             if (canvasAnnotation) {
                 canvasAnnotation.classList.add('u-hide');
+            }
+            if (canvasSurligneur) {
+                canvasSurligneur.classList.add('u-hide');
             }
         });
 
@@ -100,9 +105,11 @@
 
         const annotation = travauxStockage.obtenirAnnotationFichier(fichierActuel.id);
         if (!annotation) {
-            // Pas d'annotations - cacher le canvas
+            // Pas d'annotations - cacher les canvas
             const canvas = document.getElementById('travaux-canvas-annotation');
             if (canvas) canvas.classList.add('u-hide');
+            const canvasSurl = document.getElementById('travaux-canvas-surligneur');
+            if (canvasSurl) canvasSurl.classList.add('u-hide');
             return;
         }
 
@@ -110,13 +117,17 @@
         canvasAnnotation = document.getElementById('travaux-canvas-annotation');
         if (!canvasAnnotation) return;
 
+        canvasSurligneur = document.getElementById('travaux-canvas-surligneur');
         ctxAnnotation = canvasAnnotation.getContext('2d');
+        if (canvasSurligneur) ctxSurligneur = canvasSurligneur.getContext('2d');
+
         annotationCourante = annotation;
         fichierId = fichierActuel.id;
 
         dimensionnerCanvasAnnotation(width, height);
         canvasAnnotation.classList.remove('u-hide');
         canvasAnnotation.style.pointerEvents = 'none';
+        if (canvasSurligneur) canvasSurligneur.classList.remove('u-hide');
         reRendreAnnotations();
     }
 
@@ -127,7 +138,10 @@
         canvasAnnotation = document.getElementById('travaux-canvas-annotation');
         if (!canvasAnnotation) return;
 
+        canvasSurligneur = document.getElementById('travaux-canvas-surligneur');
         ctxAnnotation = canvasAnnotation.getContext('2d');
+        if (canvasSurligneur) ctxSurligneur = canvasSurligneur.getContext('2d');
+
         annotationActive = true;
         fichierId = travauxVisionneuse.getFichierActuel()?.id;
 
@@ -149,6 +163,7 @@
 
         canvasAnnotation.classList.remove('u-hide');
         canvasAnnotation.style.pointerEvents = 'auto';
+        if (canvasSurligneur) canvasSurligneur.classList.remove('u-hide');
 
         // Si l'outil actif est "position", garder pointer-events none
         if (travauxOutils.getOutilActif().id === 'position') {
@@ -298,6 +313,10 @@
         if (!canvasAnnotation) return;
         canvasAnnotation.width = width;
         canvasAnnotation.height = height;
+        if (canvasSurligneur) {
+            canvasSurligneur.width = width;
+            canvasSurligneur.height = height;
+        }
     }
 
     /* ===============================
@@ -522,7 +541,6 @@
                     color: travauxOutils.getCouleurActive(),
                     lineWidth: travauxOutils.getEpaisseurActive(),
                     opacity: outil.opacite || 0.5,
-                    composite: outil.composite || 'multiply',
                     x1: xNorm, y1: yNorm, x2: xNorm, y2: yNorm
                 };
                 enDessin = true;
@@ -1637,16 +1655,31 @@
         // Effacer le canvas annotation
         ctxAnnotation.clearRect(0, 0, w, h);
 
+        // Effacer le canvas surligneur
+        if (ctxSurligneur && canvasSurligneur) {
+            ctxSurligneur.clearRect(0, 0, w, h);
+        }
+
         const donneesPage = obtenirDonneesPage();
 
         // Dessiner les traits
         for (const trait of donneesPage.strokes) {
-            dessinerTrait(trait);
+            // Anciens traits surligneur → canvas surligneur (mix-blend-mode: multiply)
+            if (trait.tool === 'surligneur' && ctxSurligneur) {
+                dessinerTrait(trait, ctxSurligneur);
+            } else {
+                dessinerTrait(trait, ctxAnnotation);
+            }
         }
 
         // Dessiner les formes
         for (const forme of donneesPage.shapes) {
-            dessinerForme(forme);
+            // Nouvelles formes surligneur → canvas surligneur
+            if (forme.type === 'surligneur' && ctxSurligneur) {
+                dessinerForme(forme, ctxSurligneur);
+            } else {
+                dessinerForme(forme, ctxAnnotation);
+            }
         }
 
         // Dessiner les textes
@@ -1669,60 +1702,61 @@
      * Dessine un trait complet
      * @param {Object} trait - Donnees du trait
      */
-    function dessinerTrait(trait) {
+    function dessinerTrait(trait, ctx) {
         if (!trait.points || trait.points.length < 2) return;
+        ctx = ctx || ctxAnnotation;
 
         const w = canvasAnnotation.width;
         const h = canvasAnnotation.height;
         const outil = travauxOutils.OUTILS[trait.tool] || travauxOutils.OUTILS.stylo;
         const ratioResolution = w / travauxOutils.RESOLUTION_REFERENCE;
 
-        ctxAnnotation.save();
-        ctxAnnotation.globalAlpha = trait.opacity || 1.0;
-        ctxAnnotation.globalCompositeOperation = outil.composite || 'source-over';
-        ctxAnnotation.strokeStyle = trait.color;
-        ctxAnnotation.lineCap = 'round';
-        ctxAnnotation.lineJoin = 'round';
+        ctx.save();
+        ctx.globalAlpha = trait.opacity || 1.0;
+        ctx.strokeStyle = trait.color;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
 
-        ctxAnnotation.beginPath();
+        ctx.beginPath();
         const p0 = trait.points[0];
-        ctxAnnotation.moveTo(p0.x * w, p0.y * h);
+        ctx.moveTo(p0.x * w, p0.y * h);
 
         for (let i = 1; i < trait.points.length; i++) {
             const p = trait.points[i];
             const epaisseurLogique = outil.sensiblePression
                 ? travauxOutils.calculerEpaisseurPression(p.pressure) * (trait.lineWidth / outil.epaisseurDefaut)
                 : trait.lineWidth;
-            ctxAnnotation.lineWidth = epaisseurLogique * ratioResolution;
-            ctxAnnotation.lineTo(p.x * w, p.y * h);
-            ctxAnnotation.stroke();
-            ctxAnnotation.beginPath();
-            ctxAnnotation.moveTo(p.x * w, p.y * h);
+            ctx.lineWidth = epaisseurLogique * ratioResolution;
+            ctx.lineTo(p.x * w, p.y * h);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(p.x * w, p.y * h);
         }
 
-        ctxAnnotation.restore();
+        ctx.restore();
     }
 
     /**
      * Dessine une forme
      * @param {Object} forme - Donnees de la forme
      */
-    function dessinerForme(forme) {
+    function dessinerForme(forme, ctx) {
+        ctx = ctx || ctxAnnotation;
         const w = canvasAnnotation.width;
         const h = canvasAnnotation.height;
         const ratioResolution = w / travauxOutils.RESOLUTION_REFERENCE;
 
-        ctxAnnotation.save();
-        ctxAnnotation.strokeStyle = forme.color;
-        ctxAnnotation.lineWidth = (forme.lineWidth || 2) * ratioResolution;
-        ctxAnnotation.lineCap = 'round';
+        ctx.save();
+        ctx.strokeStyle = forme.color;
+        ctx.lineWidth = (forme.lineWidth || 2) * ratioResolution;
+        ctx.lineCap = 'round';
 
         const x1 = forme.x1 * w, y1 = forme.y1 * h;
         const x2 = forme.x2 * w, y2 = forme.y2 * h;
 
         switch (forme.type) {
             case 'rectangle':
-                ctxAnnotation.strokeRect(x1, y1, x2 - x1, y2 - y1);
+                ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
                 break;
 
             case 'cercle': {
@@ -1730,53 +1764,52 @@
                 const cy = (y1 + y2) / 2;
                 const rx = Math.abs(x2 - x1) / 2;
                 const ry = Math.abs(y2 - y1) / 2;
-                ctxAnnotation.beginPath();
-                ctxAnnotation.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
-                ctxAnnotation.stroke();
+                ctx.beginPath();
+                ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+                ctx.stroke();
                 break;
             }
 
             case 'ligne':
-                ctxAnnotation.beginPath();
-                ctxAnnotation.moveTo(x1, y1);
-                ctxAnnotation.lineTo(x2, y2);
-                ctxAnnotation.stroke();
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
                 break;
 
             case 'surligneur':
-                ctxAnnotation.globalAlpha = forme.opacity || 0.5;
-                ctxAnnotation.globalCompositeOperation = forme.composite || 'multiply';
-                ctxAnnotation.beginPath();
-                ctxAnnotation.moveTo(x1, y1);
-                ctxAnnotation.lineTo(x2, y2);
-                ctxAnnotation.stroke();
+                ctx.globalAlpha = forme.opacity || 0.5;
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
                 break;
 
             case 'fleche':
-                dessinerFleche(ctxAnnotation, x1, y1, x2, y2);
+                dessinerFleche(ctx, x1, y1, x2, y2);
                 break;
 
             case 'crochet':
-                dessinerCrochet(ctxAnnotation, x1, y1, x2, y2, forme.color);
+                dessinerCrochet(ctx, x1, y1, x2, y2, forme.color);
                 break;
 
             case 'croix':
-                dessinerCroix(ctxAnnotation, x1, y1, x2, y2, forme.color);
+                dessinerCroix(ctx, x1, y1, x2, y2, forme.color);
                 break;
 
             case 'interrogation':
-                dessinerInterrogation(ctxAnnotation, x1, y1, x2, y2, forme.color);
+                dessinerInterrogation(ctx, x1, y1, x2, y2, forme.color);
                 break;
 
             default:
                 // Erreurs de français (errfr_1 a errfr_10)
                 if (forme.type.startsWith('errfr_')) {
-                    dessinerErreurFrancais(ctxAnnotation, x1, y1, x2, y2, forme.color, forme.type);
+                    dessinerErreurFrancais(ctx, x1, y1, x2, y2, forme.color, forme.type);
                 }
                 break;
         }
 
-        ctxAnnotation.restore();
+        ctx.restore();
     }
 
     /**
@@ -1910,7 +1943,11 @@
      * @param {Object} forme - Donnees de la forme
      */
     function dessinerFormeTemporaire(forme) {
-        dessinerForme(forme);
+        if (forme.type === 'surligneur' && ctxSurligneur) {
+            dessinerForme(forme, ctxSurligneur);
+        } else {
+            dessinerForme(forme);
+        }
     }
 
     /* ===============================
