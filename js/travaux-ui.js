@@ -1970,6 +1970,23 @@
             configurerDragPaletteEval('travaux-palette-eval-retro');
         }
 
+        // 4e palette : Erreurs de français
+        const paletteErrFr = creerPaletteErreursFrancais();
+        paletteErrFr.style.top = '56px';
+        paletteErrFr.style.left = '240px';
+        conteneurDoc.appendChild(paletteErrFr);
+        configurerDragPaletteEval('travaux-palette-eval-erreurs-fr');
+
+        // Peupler les dropdowns (les fonctions d'evaluation.js remplissent les selects)
+        if (typeof chargerListeEtudiantsEval === 'function') chargerListeEtudiantsEval();
+        if (typeof chargerGroupesEval === 'function') chargerGroupesEval();
+        if (typeof chargerProductionsDansSelect === 'function') chargerProductionsDansSelect();
+        if (typeof chargerGrillesDansSelect === 'function') chargerGrillesDansSelect();
+        if (typeof chargerEchellePerformance === 'function') chargerEchellePerformance();
+
+        // Afficher les labels d'identite
+        remplirLabelsIdentite(fichier);
+
         // Pre-remplir le formulaire d'evaluation avec retry robuste
         preRemplirEvaluation(da, productionId);
     }
@@ -2011,6 +2028,152 @@
     }
 
     /**
+     * Remplit les labels d'identite (etudiant + production) dans la palette Parametres
+     * @param {Object} fichier - Fichier actuel de la visionneuse
+     */
+    function remplirLabelsIdentite(fichier) {
+        const etudiant = travauxImport.trouverEtudiantParDA(fichier.etudiantDA);
+        const productions = obtenirDonneesSelonMode(cle('productions'));
+        const production = productions ? productions.find(p => p.id === fichier.productionId) : null;
+
+        const labelEtud = document.getElementById('travaux-eval-label-etudiant');
+        if (labelEtud) {
+            labelEtud.textContent = etudiant
+                ? `${etudiant.prenom} ${etudiant.nom} (${etudiant.da})`
+                : (fichier.etudiantDA || 'Non associé');
+        }
+        const labelProd = document.getElementById('travaux-eval-label-production');
+        if (labelProd) {
+            labelProd.textContent = production
+                ? (production.titre || production.nom)
+                : 'Non associée';
+        }
+    }
+
+    /**
+     * Bascule la visibilite de la section correction d'identite
+     */
+    function toggleCorrectionIdentite() {
+        const sectionIdentite = document.getElementById('travaux-eval-identite');
+        const sectionCorrection = document.getElementById('travaux-eval-correction');
+        if (!sectionIdentite || !sectionCorrection) return;
+
+        const estCache = sectionCorrection.classList.contains('u-hide');
+        if (estCache) {
+            sectionIdentite.classList.add('u-hide');
+            sectionCorrection.classList.remove('u-hide');
+        } else {
+            sectionCorrection.classList.add('u-hide');
+            sectionIdentite.classList.remove('u-hide');
+        }
+    }
+
+    /**
+     * Applique la correction d'identite (etudiant/production) au fichier importe
+     */
+    function appliquerCorrectionIdentite() {
+        const fichier = travauxVisionneuse.getFichierActuel();
+        if (!fichier) return;
+
+        const selectEtud = document.getElementById('selectEtudiantEval');
+        const selectProd = document.getElementById('selectProduction1');
+        const nouveauDA = selectEtud ? selectEtud.value : '';
+        const nouveauProdId = selectProd ? selectProd.value : '';
+
+        if (!nouveauDA && !nouveauProdId) {
+            alert('Veuillez sélectionner un·e étudiant·e ou une production.');
+            return;
+        }
+
+        // Mettre a jour le fichier importe
+        const modifications = {};
+        if (nouveauDA) modifications.etudiantDA = nouveauDA;
+        if (nouveauProdId) modifications.productionId = nouveauProdId;
+        travauxStockage.mettreAJourFichier(fichier.id, modifications);
+
+        // Mettre a jour l'objet fichier en memoire
+        if (nouveauDA) fichier.etudiantDA = nouveauDA;
+        if (nouveauProdId) fichier.productionId = nouveauProdId;
+
+        // Rafraichir les labels
+        remplirLabelsIdentite(fichier);
+
+        // Refermer la section correction
+        toggleCorrectionIdentite();
+
+        // Re-trigger le pre-remplissage avec les nouvelles valeurs
+        preRemplirEvaluation(fichier.etudiantDA, fichier.productionId);
+    }
+
+    /**
+     * Cree la palette flottante Erreurs de français
+     * @returns {HTMLElement} La palette creee
+     */
+    function creerPaletteErreursFrancais() {
+        const CODES_ERREURS = [
+            { code: 0,  nom: 'Aucune erreur',     couleur: '#888888' },
+            { code: 1,  nom: 'Syntaxe',           couleur: '#c62828' },
+            { code: 2,  nom: 'Subordination',     couleur: '#c62828' },
+            { code: 3,  nom: 'Ponctuation',       couleur: '#e65100' },
+            { code: 4,  nom: 'Orthographe',       couleur: '#e65100' },
+            { code: 5,  nom: 'Homophones',        couleur: '#e65100' },
+            { code: 6,  nom: 'Accords GN',        couleur: '#1565c0' },
+            { code: 7,  nom: 'Part. passés',      couleur: '#1565c0' },
+            { code: 8,  nom: 'Mots inappropriés', couleur: '#7b1fa2' },
+            { code: 9,  nom: 'Répétitions',       couleur: '#7b1fa2' },
+            { code: 10, nom: 'Autres',            couleur: '#888888' }
+        ];
+
+        const palette = document.createElement('div');
+        palette.id = 'travaux-palette-eval-erreurs-fr';
+        palette.className = 'travaux-palette-flottante travaux-palette-eval';
+
+        // Barre de titre
+        let html = '<div class="travaux-palette-barre">';
+        html += '<span class="travaux-palette-titre">Erreurs de français</span>';
+        html += '<button class="travaux-palette-toggle" onclick="travauxUI.togglePaletteEvalReplie(\'travaux-palette-eval-erreurs-fr\')" title="Replier/Déplier">&#x2212;</button>';
+        html += '</div>';
+
+        // Grille de codes
+        html += '<div class="travaux-palette-contenu">';
+        html += '<div class="travaux-errfr-grille">';
+        CODES_ERREURS.forEach(c => {
+            const outilId = 'errfr_' + c.code;
+            const actif = travauxOutils.getOutilActif() === outilId ? ' actif' : '';
+            html += `<div class="travaux-errfr-item${actif}" onclick="travauxUI.activerErreurFrancais('${outilId}')" title="${c.nom}">`;
+            html += `<span class="travaux-errfr-numero" style="background:${c.couleur}">${c.code}</span>`;
+            html += `<span>${c.nom}</span>`;
+            html += '</div>';
+        });
+        html += '</div></div>';
+
+        palette.innerHTML = html;
+        return palette;
+    }
+
+    /**
+     * Active un outil d'erreur de français et met a jour la selection visuelle
+     * @param {string} outilId - ID de l'outil (ex: 'errfr_3')
+     */
+    function activerErreurFrancais(outilId) {
+        // Activer l'annotation si pas deja active
+        if (!travauxAnnotation.estActif()) {
+            travauxAnnotation.activerAnnotation();
+        }
+        travauxOutils.setOutilActif(outilId);
+
+        // Mettre a jour la selection visuelle dans la grille
+        const palette = document.getElementById('travaux-palette-eval-erreurs-fr');
+        if (palette) {
+            palette.querySelectorAll('.travaux-errfr-item').forEach(item => {
+                item.classList.remove('actif');
+            });
+            const actif = palette.querySelector(`[onclick*="'${outilId}'"]`);
+            if (actif) actif.classList.add('actif');
+        }
+    }
+
+    /**
      * Ferme le mode evaluation : remet les panneaux dans leur conteneur d'origine
      */
     function fermerModeEvaluation() {
@@ -2034,6 +2197,16 @@
             }
             palette.remove();
         }
+
+        // Retirer la 4e palette (erreurs de français) — pas de panneau a remettre
+        const paletteErrFr = document.getElementById('travaux-palette-eval-erreurs-fr');
+        if (paletteErrFr) paletteErrFr.remove();
+
+        // Remettre la section identite visible et masquer la correction
+        const sectionIdentite = document.getElementById('travaux-eval-identite');
+        const sectionCorrection = document.getElementById('travaux-eval-correction');
+        if (sectionIdentite) sectionIdentite.classList.remove('u-hide');
+        if (sectionCorrection) sectionCorrection.classList.add('u-hide');
 
         // Reafficher les palettes annotation et tampons
         const paletteAnnot = document.getElementById('travaux-palette-flottante');
@@ -2486,6 +2659,9 @@
         evaluerDepuisAnnotation: evaluerDepuisAnnotation,
         fermerModeEvaluation: fermerModeEvaluation,
         togglePaletteEvalReplie: togglePaletteEvalReplie,
+        toggleCorrectionIdentite: toggleCorrectionIdentite,
+        appliquerCorrectionIdentite: appliquerCorrectionIdentite,
+        activerErreurFrancais: activerErreurFrancais,
         // Vue cote-a-cote
         ouvrirVueCoteACote: ouvrirVueCoteACote,
         fermerVueCoteACote: fermerVueCoteACote,
