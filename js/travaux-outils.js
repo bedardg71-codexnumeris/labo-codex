@@ -47,7 +47,7 @@
         selection: {
             id: 'selection',
             nom: 'S\u00e9lection',
-            icone: 'S\u00e9l.',
+            icone: 'S\u00e9lection',
             curseur: 'default',
             type: 'selection'
         },
@@ -67,7 +67,7 @@
         surligneur: {
             id: 'surligneur',
             nom: 'Surligneur',
-            icone: 'Surl.',
+            icone: 'Surligneur',
             curseur: 'crosshair',
             epaisseurDefaut: 20,
             epaisseurMin: 10,
@@ -544,6 +544,7 @@
             window.dispatchEvent(new CustomEvent('travaux-outil-change', {
                 detail: { outil: OUTILS[id] }
             }));
+            mettreAJourApercuTrait();
         }
     }
 
@@ -558,6 +559,7 @@
         window.dispatchEvent(new CustomEvent('travaux-couleur-change', {
             detail: { couleur: hex }
         }));
+        mettreAJourApercuTrait();
     }
 
     function getEpaisseurActive() {
@@ -569,6 +571,7 @@
         // Mettre a jour l'affichage pixels
         const pxLabel = document.getElementById('travaux-epaisseur-px');
         if (pxLabel) pxLabel.textContent = getEpaisseurReellePixels() + 'px';
+        mettreAJourApercuTrait();
     }
 
     function getTailleTexte() {
@@ -577,6 +580,35 @@
 
     function setTailleTexte(val) {
         taillTexteActive = val;
+    }
+
+    /* ===============================
+       APERCU DU TRAIT EN TEMPS REEL
+       =============================== */
+
+    function mettreAJourApercuTrait() {
+        const apercu = document.getElementById('travaux-apercu-trait');
+        if (!apercu) return;
+        const outil = getOutilActif();
+        const couleur = getCouleurActive();
+        const epaisseur = Math.max(1, Math.min(epaisseurActive, 20));
+        const opacite = outil.opacite || 1.0;
+        apercu.innerHTML = '';
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('width', '100%');
+        svg.setAttribute('height', '100%');
+        svg.setAttribute('viewBox', '0 0 120 24');
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', '10');
+        line.setAttribute('y1', '12');
+        line.setAttribute('x2', '110');
+        line.setAttribute('y2', '12');
+        line.setAttribute('stroke', couleur);
+        line.setAttribute('stroke-width', epaisseur);
+        line.setAttribute('stroke-linecap', 'round');
+        line.setAttribute('opacity', opacite);
+        svg.appendChild(line);
+        apercu.appendChild(svg);
     }
 
     /* ===============================
@@ -702,6 +734,7 @@
         html += '<div class="travaux-palette-section">';
         html += '<div class="travaux-palette-label">Epaisseur <span id="travaux-epaisseur-px" class="travaux-epaisseur-px">' + getEpaisseurReellePixels() + 'px</span></div>';
         html += `<input type="range" class="travaux-slider-epaisseur" min="1" max="20" value="${epaisseurActive}" oninput="travauxOutils.setEpaisseurActive(parseInt(this.value))">`;
+        html += '<div class="travaux-apercu-trait" id="travaux-apercu-trait"></div>';
         html += '</div>';
 
         html += '</div>'; // fin .travaux-palette-contenu
@@ -792,6 +825,13 @@
             }
             document.addEventListener('mousemove', onMove);
             document.addEventListener('mouseup', onUp);
+        });
+
+        // Double-clic sur la barre : reset taille
+        barre.addEventListener('dblclick', function(e) {
+            if (e.target.closest('.travaux-palette-toggle')) return;
+            palette.style.width = '';
+            palette.style.height = '';
         });
     }
 

@@ -52,6 +52,7 @@
     let donneesMultiplesAvantModif = null; // snapshots multi-selection pour undo
     let rectangleSelection = null;      // { x1, y1, x2, y2 } — marquee en cours
     let modePanActif = false;
+    let modeRedimensionnementSticker = false;
 
     /* ===============================
        INITIALISATION
@@ -327,6 +328,12 @@
 
         // Outil change (position vs dessin)
         window.addEventListener('travaux-outil-change', onOutilChange);
+
+        // Re-rendre au changement de theme (inversion autocollants)
+        window.addEventListener('themeChanged', onThemeChanged);
+
+        // Double-clic pour mode redimensionnement stickers
+        canvasAnnotation.addEventListener('dblclick', onDoubleClick);
     }
 
     function detacherEvenements() {
@@ -342,6 +349,8 @@
         document.removeEventListener('keydown', onKeyDown);
         window.removeEventListener('travaux-pan-mode', onPanModeChange);
         window.removeEventListener('travaux-outil-change', onOutilChange);
+        window.removeEventListener('themeChanged', onThemeChanged);
+        canvasAnnotation.removeEventListener('dblclick', onDoubleClick);
     }
 
     /**
@@ -389,7 +398,8 @@
             if (annotationSelectionnee && selectionsMultiples.length <= 1) {
                 const poignee = detecterPoignee(xNorm, yNorm, annotationSelectionnee.bbox);
                 if (poignee) {
-                    if (annotationSelectionnee.type !== 'stroke') {
+                    if (annotationSelectionnee.type !== 'stroke' &&
+                        (annotationSelectionnee.type !== 'sticker' || modeRedimensionnementSticker)) {
                         poigneeActive = poignee;
                         deplacementOrigine = { x: xNorm, y: yNorm };
                         dimensionsOriginales = { ...annotationSelectionnee.bbox };
@@ -736,6 +746,35 @@
         }
     }
 
+    function onThemeChanged() {
+        reRendreAnnotations();
+    }
+
+    function onDoubleClick(e) {
+        const outil = travauxOutils.getOutilActif();
+        if (outil.type !== 'selection') return;
+        const rect = canvasAnnotation.getBoundingClientRect();
+        const xNorm = (e.clientX - rect.left) / canvasAnnotation.width;
+        const yNorm = (e.clientY - rect.top) / canvasAnnotation.height;
+        // Si on double-clique sur un sticker deja selectionne
+        if (annotationSelectionnee && annotationSelectionnee.type === 'sticker') {
+            const bbox = annotationSelectionnee.bbox;
+            if (xNorm >= bbox.x1 && xNorm <= bbox.x2 && yNorm >= bbox.y1 && yNorm <= bbox.y2) {
+                modeRedimensionnementSticker = true;
+                reRendreAnnotations();
+                return;
+            }
+        }
+        // Double-clic sur un sticker non selectionne
+        const hit = trouverAnnotationAuPoint(xNorm, yNorm);
+        if (hit && hit.type === 'sticker') {
+            selectionsMultiples = [hit];
+            annotationSelectionnee = hit;
+            modeRedimensionnementSticker = true;
+            reRendreAnnotations();
+        }
+    }
+
     /**
      * Raccourcis clavier
      */
@@ -755,9 +794,14 @@
             return;
         }
 
-        // Escape : deselectionner
+        // Escape : quitter le mode redimensionnement sticker, ou deselectionner
         if (e.key === 'Escape' && selectionsMultiples.length > 0) {
             e.preventDefault();
+            if (modeRedimensionnementSticker) {
+                modeRedimensionnementSticker = false;
+                reRendreAnnotations();
+                return;
+            }
             deselectionner();
             return;
         }
@@ -837,7 +881,15 @@
         const sw = sticker.width * w;
         const sh = sticker.height * h;
 
-        ctxAnnotation.drawImage(img, sx, sy, sw, sh);
+        const estModeSombre = !document.body.classList.contains('mode-clair');
+        if (estModeSombre) {
+            ctxAnnotation.save();
+            ctxAnnotation.filter = 'invert(1)';
+            ctxAnnotation.drawImage(img, sx, sy, sw, sh);
+            ctxAnnotation.restore();
+        } else {
+            ctxAnnotation.drawImage(img, sx, sy, sw, sh);
+        }
     }
 
     /* ===============================
@@ -1193,19 +1245,23 @@
 
         // Poignees aux 4 coins (mono-selection seulement)
         if (selectionsMultiples.length === 1) {
-            const taille = 8;
-            const coins = [
-                { x: cx, y: cy },
-                { x: cx + cw, y: cy },
-                { x: cx, y: cy + ch },
-                { x: cx + cw, y: cy + ch }
-            ];
-            for (const coin of coins) {
-                ctxAnnotation.fillStyle = '#ffffff';
-                ctxAnnotation.strokeStyle = '#065dbb';
-                ctxAnnotation.lineWidth = 2;
-                ctxAnnotation.fillRect(coin.x - taille / 2, coin.y - taille / 2, taille, taille);
-                ctxAnnotation.strokeRect(coin.x - taille / 2, coin.y - taille / 2, taille, taille);
+            const sel = selectionsMultiples[0];
+            const afficherPoignees = sel.type !== 'sticker' || modeRedimensionnementSticker;
+            if (afficherPoignees) {
+                const taille = 8;
+                const coins = [
+                    { x: cx, y: cy },
+                    { x: cx + cw, y: cy },
+                    { x: cx, y: cy + ch },
+                    { x: cx + cw, y: cy + ch }
+                ];
+                for (const coin of coins) {
+                    ctxAnnotation.fillStyle = '#ffffff';
+                    ctxAnnotation.strokeStyle = '#065dbb';
+                    ctxAnnotation.lineWidth = 2;
+                    ctxAnnotation.fillRect(coin.x - taille / 2, coin.y - taille / 2, taille, taille);
+                    ctxAnnotation.strokeRect(coin.x - taille / 2, coin.y - taille / 2, taille, taille);
+                }
             }
         }
 
@@ -1307,6 +1363,7 @@
         dimensionsOriginales = null;
         donneesAvantModif = null;
         donneesMultiplesAvantModif = null;
+        modeRedimensionnementSticker = false;
         rectangleSelection = null;
         reRendreAnnotations();
     }
