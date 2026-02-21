@@ -15643,6 +15643,15 @@ body.mode-clair #travaux-indicateur-page {
     background: var(--surface-carte, #1a3040);
 }
 
+#travaux-canvas-surligneur {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: transparent;
+    box-shadow: none;
+    mix-blend-mode: multiply;
+}
+
 #travaux-canvas-annotation {
     position: absolute;
     top: 0;

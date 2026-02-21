@@ -305,6 +305,7 @@
                     <div class="travaux-canvas-container" id="travaux-canvas-container">
                         <div class="travaux-canvas-wrapper" id="travaux-canvas-wrapper">
                             <canvas id="travaux-canvas-document"></canvas>
+                            <canvas id="travaux-canvas-surligneur" class="u-hide" style="pointer-events:none;"></canvas>
                             <canvas id="travaux-canvas-annotation" class="u-hide" style="pointer-events:none;"></canvas>
                         </div>
                         <div id="travaux-placeholder-visionneuse" class="travaux-placeholder">
@@ -2334,6 +2335,7 @@
                 <div class="travaux-canvas-container">
                     <div class="travaux-canvas-wrapper">
                         <canvas id="travaux-canvas-document"></canvas>
+                        <canvas id="travaux-canvas-surligneur" class="u-hide" style="pointer-events:none;"></canvas>
                         <canvas id="travaux-canvas-annotation" class="u-hide" style="pointer-events:none;"></canvas>
                     </div>
                 </div>
