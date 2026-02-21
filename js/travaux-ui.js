@@ -270,7 +270,7 @@
         }
 
         conteneur.innerHTML = `
-            <div class="conteneur travaux-fichiers-compact">
+            <div class="travaux-fichiers-compact">
                 ${genererGrilleFichiers(fichiersTravaux, 'ouvrirFichier')}
             </div>`;
 
@@ -1016,14 +1016,29 @@
             groupes[pid].push(f);
         });
 
+        // Dropdown filtre de production
+        const productionsAvecFichiers = productions.filter(p => groupes[p.id] && groupes[p.id].length > 0);
+        let htmlDropdown = '';
+        if (productionsAvecFichiers.length > 1) {
+            htmlDropdown += '<select id="filtre-production-badges" class="controle-form travaux-filtre-production" onchange="travauxUI.filtrerBadgesParProduction()">';
+            htmlDropdown += '<option value="">Toutes les productions</option>';
+            productionsAvecFichiers.forEach(p => {
+                htmlDropdown += `<option value="${p.id}">${echapperHtml(p.titre || p.nom || p.id)} (${groupes[p.id].length})</option>`;
+            });
+            htmlDropdown += '</select>';
+        } else if (productionsAvecFichiers.length === 1) {
+            htmlDropdown += `<span class="travaux-filtre-production-label">${echapperHtml(productionsAvecFichiers[0].titre || productionsAvecFichiers[0].nom)}</span>`;
+        }
+
         let html = '<div class="travaux-grille-fichiers">';
+        html += `<div class="travaux-badges-entete">${htmlDropdown}<div class="travaux-badges-liste">`;
 
         // Afficher chaque production
         productions.forEach(p => {
             const g = groupes[p.id];
             if (!g || g.length === 0) return;
             html += `<h5 class="travaux-groupe-production-titre">${echapperHtml(p.titre || p.nom || p.id)} (${g.length})</h5>`;
-            html += '<div class="travaux-badges-groupe">';
+            html += `<div class="travaux-badges-groupe" data-production-id="${p.id}">`;
             g.forEach(f => { html += genererBadgeFichierImporte(f, action); });
             html += '</div>';
             delete groupes[p.id];
@@ -1033,13 +1048,40 @@
         const sansProduction = groupes['__aucune__'];
         if (sansProduction && sansProduction.length > 0) {
             html += `<h5 class="travaux-groupe-production-titre">Non associés (${sansProduction.length})</h5>`;
-            html += '<div class="travaux-badges-groupe">';
+            html += '<div class="travaux-badges-groupe" data-production-id="__aucune__">';
             sansProduction.forEach(f => { html += genererBadgeFichierImporte(f, action); });
             html += '</div>';
         }
 
-        html += '</div>';
+        html += '</div></div></div>';
         return html;
+    }
+
+    /**
+     * Filtre les badges affichés selon la production sélectionnée dans le dropdown
+     */
+    function filtrerBadgesParProduction() {
+        const select = document.getElementById('filtre-production-badges');
+        const productionId = select ? select.value : '';
+        const groupes = document.querySelectorAll('.travaux-badges-groupe');
+
+        groupes.forEach(groupe => {
+            const pid = groupe.getAttribute('data-production-id');
+            if (!productionId || pid === productionId) {
+                groupe.style.display = '';
+            } else {
+                groupe.style.display = 'none';
+            }
+        });
+
+        // Masquer/afficher aussi les titres de production
+        const titres = document.querySelectorAll('.travaux-groupe-production-titre');
+        titres.forEach(titre => {
+            const nextGroupe = titre.nextElementSibling;
+            if (nextGroupe && nextGroupe.classList.contains('travaux-badges-groupe')) {
+                titre.style.display = nextGroupe.style.display;
+            }
+        });
     }
 
     /**
@@ -2919,6 +2961,8 @@
         // Palette jetons
         gererCheckboxJetonPalette: gererCheckboxJetonPalette,
         peuplementPaletteJetons: peuplementPaletteJetons,
+        // Filtres badges
+        filtrerBadgesParProduction: filtrerBadgesParProduction,
         // Utilitaires
         annotationContientDuContenu: annotationContientDuContenu
     };

@@ -4627,16 +4627,10 @@
 
                             <!-- Indicateur de verrouillage déplacé dans l'en-tête de palette (btnVerrouPalette) -->
 
-                            <!-- Labels d'identité (affichage compact) -->
+                            <!-- Labels d'identité (affichage compact, sans clés) -->
                             <div id="travaux-eval-identite" class="travaux-eval-identite">
-                                <div class="travaux-eval-label-ligne">
-                                    <span class="travaux-eval-label-cle">Étudiant·e</span>
-                                    <span class="travaux-eval-label-val" id="travaux-eval-label-etudiant">--</span>
-                                </div>
-                                <div class="travaux-eval-label-ligne">
-                                    <span class="travaux-eval-label-cle">Production</span>
-                                    <span class="travaux-eval-label-val" id="travaux-eval-label-production">--</span>
-                                </div>
+                                <span class="travaux-eval-label-val" id="travaux-eval-label-etudiant">--</span>
+                                <span class="travaux-eval-label-val travaux-eval-label-production" id="travaux-eval-label-production">--</span>
                                 <button class="btn-lien-discret" id="travaux-eval-btn-corriger" onclick="travauxUI.toggleCorrectionIdentite()" title="Modifier l'attribution">Modifier</button>
                             </div>
 
