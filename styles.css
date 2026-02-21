@@ -14588,28 +14588,27 @@ body.mode-clair .travaux-palette-barre {
     color: var(--accent-primaire);
 }
 
-/* Palette erreurs de français — grille compacte */
-#travaux-palette-eval-erreurs-fr {
-    min-width: 180px;
-    max-width: 220px;
+/* Palette erreurs de français — liste compacte */
+.travaux-palette-erreurs-fr {
+    min-width: 200px;
+    max-width: 260px;
 }
-.travaux-errfr-grille {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 4px;
-    padding: 6px;
+.travaux-errfr-liste {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 4px;
 }
 .travaux-errfr-item {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    gap: 2px;
-    padding: 4px;
-    border-radius: 6px;
+    gap: 6px;
+    padding: 3px 6px;
+    border-radius: 4px;
     cursor: pointer;
     border: 1px solid transparent;
-    font-size: 0.65rem;
-    text-align: center;
+    font-size: 0.7rem;
     color: var(--texte-secondaire);
 }
 .travaux-errfr-item:hover {
@@ -14620,15 +14619,21 @@ body.mode-clair .travaux-palette-barre {
     background: var(--bleu-tres-pale);
 }
 .travaux-errfr-numero {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     color: white;
+    flex-shrink: 0;
+}
+.travaux-errfr-nom {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .travaux-sidebar {

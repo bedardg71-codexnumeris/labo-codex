@@ -182,6 +182,16 @@
             travauxOutils.togglePaletteAutocollants();
         }
 
+        // Deplier la palette erreurs de français si elle est repliee
+        const paletteErrFr = document.getElementById('travaux-palette-erreurs-fr');
+        if (paletteErrFr && paletteErrFr.classList.contains('replie')) {
+            paletteErrFr.classList.remove('replie');
+            const btnE = paletteErrFr.querySelector('.travaux-palette-toggle');
+            if (btnE) btnE.textContent = '\u2212';
+        } else if (!paletteErrFr) {
+            travauxOutils.togglePaletteErreursFrancais();
+        }
+
         window.dispatchEvent(new CustomEvent('travaux-annotation-activee'));
     }
 
@@ -1560,7 +1570,7 @@
                 break;
 
             default:
-                // Erreurs de français (errfr_0 a errfr_10)
+                // Erreurs de français (errfr_1 a errfr_10)
                 if (forme.type.startsWith('errfr_')) {
                     dessinerErreurFrancais(ctxAnnotation, x1, y1, x2, y2, forme.color, forme.type);
                 }

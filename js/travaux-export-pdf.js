@@ -377,7 +377,7 @@
                 break;
             }
             default:
-                // Erreurs de français (errfr_0 a errfr_10)
+                // Erreurs de français (errfr_1 a errfr_10)
                 if (forme.type.startsWith('errfr_')) {
                     const mxE = (x1 + x2) / 2;
                     const myE = (y1 + y2) / 2;
