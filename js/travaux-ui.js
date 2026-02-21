@@ -926,6 +926,20 @@
     }
 
     /**
+     * Verifie qu'une annotation contient du contenu reel (strokes, textes, formes ou stickers)
+     */
+    function annotationContientDuContenu(annotation) {
+        if (!annotation || !annotation.pages) return false;
+        for (const page of Object.values(annotation.pages)) {
+            if (page.strokes && page.strokes.length > 0) return true;
+            if (page.textAnnotations && page.textAnnotations.length > 0) return true;
+            if (page.shapes && page.shapes.length > 0) return true;
+            if (page.stickers && page.stickers.length > 0) return true;
+        }
+        return false;
+    }
+
+    /**
      * Genere un badge compact pour un fichier importe
      * @param {Object} f - Le fichier
      * @returns {string} HTML
@@ -942,7 +956,7 @@
         let statutClasse = 'importe';
 
         const annotation = travauxStockage.obtenirAnnotationFichier(f.id);
-        if (annotation) {
+        if (annotation && annotationContientDuContenu(annotation)) {
             statutTexte = 'Annoté';
             statutClasse = 'annote';
         }
@@ -2352,7 +2366,9 @@
         previewPageSuiv: previewPageSuiv,
         fermerPreviewInline: fermerPreviewInline,
         // Rafraichissement
-        rafraichirUI: rafraichirUI
+        rafraichirUI: rafraichirUI,
+        // Utilitaires
+        annotationContientDuContenu: annotationContientDuContenu
     };
 
     // Alias pour navigation.js
