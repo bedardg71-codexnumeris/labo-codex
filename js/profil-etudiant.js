@@ -8774,7 +8774,7 @@ function genererSectionTravaux(da) {
         const production = productions.find(p => p.id === f.productionId);
         const nomProd = production ? echapperHtml(production.titre || production.nom || '') : '';
         const annotation = travauxStockage.obtenirAnnotationFichier(f.id);
-        const aAnnotations = annotation && Object.keys(annotation.pages || {}).length > 0;
+        const aAnnotations = annotation && travauxUI.annotationContientDuContenu(annotation);
 
         html += `
             <div class="travaux-grille-item" onclick="travauxUI.ouvrirFichier('${f.id}')" title="${echapperHtml(f.nomFichier)}">
