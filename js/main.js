@@ -41,8 +41,10 @@ window.toggleDisplay = function(element, show) {
     if (!element) return;
     if (show) {
         element.classList.remove('u-hide');
+        element.style.display = '';
     } else {
         element.classList.add('u-hide');
+        element.style.display = 'none';
     }
 };
 

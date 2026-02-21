@@ -1,11 +1,23 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 20 fevrier 2026 (Beta 97.9, build 0220-2030)
+> **Derniere mise a jour** : 21 fevrier 2026 (Beta 97.9, build 0221-1535)
 
 ---
 
 ## A faire
+
+### Priorite haute - Boite a outils : Modelisation (21 fev 2026)
+
+- [ ] **Outil "Modelisation" dans la Boite a outils** : Duplicata fonctionnel du module d'annotation existant pour projection en classe, avec les differences suivantes :
+  - Supprimer le bouton "Evaluer" et tout ce qui y est lie (grille d'evaluation, sauvegarde de note, etc.)
+  - Supprimer la navigation par etudiant (conserver les boutons 1/2 ← →)
+  - Supprimer le panneau "ERREURS DE FRANCAIS" (ou le rendre optionnel/masquable)
+  - Conserver integralement : panneau ANNOTATION (Outils, Formes, Couleur, Epaisseur), panneau TAMPONS, et le viewer PDF avec canvas overlay
+  - Ajouter un bouton "Ouvrir un PDF" pour charger n'importe quel fichier local (pas lie a un artefact etudiant)
+  - Les annotations sont sauvegardees dans IndexedDB (l'exercice peut s'etendre sur plusieurs seances ou revenir en exemple plus tard)
+  - L'interface sert pour la projection en classe
+  - **Architecture** : Reutiliser au maximum le code du module d'annotation existant (composant partage ou heritage) plutot que de tout dupliquer, pour faciliter la maintenance future
 
 ### Priorite haute - Module Travaux / Visionneuse (20 fev 2026)
 

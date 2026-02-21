@@ -11,6 +11,19 @@
     var CHANGELOG = [
         {
             version: 'Beta 97.9',
+            date: '21 f\u00e9vrier',
+            couleur: 'bleu',
+            titre: 'Am\u00e9liorations \u00e9valuation, statuts et configuration des pratiques',
+            items: [
+                '<strong>8\u00a0am\u00e9liorations UI</strong> : Badges compacts (nowrap), r\u00e9troaction structur\u00e9e avec auto-d\u00e9pliage, statuts d\u2019\u00e9valuation refondus (Non re\u00e7u \u2192 Re\u00e7u \u2192 Import\u00e9 \u2192 Annot\u00e9 \u2192 \u00c9valu\u00e9 \u2192 Remis), colonne Statut dans la liste, navigation intelligente selon l\u2019\u00e9tape du flux, inversion Gauss clair/sombre.',
+                '<strong>Zone badges et filtre production</strong> : Les badges ont la m\u00eame largeur que le canvas. Un dropdown de production filtre les badges affich\u00e9s. Labels simplifi\u00e9s dans la palette Param\u00e8tres.',
+                '<strong>Configuration des pratiques corrig\u00e9e</strong> : La carte \u00ab\u00a0Structure des \u00e9valuations\u00a0\u00bb s\u2019affiche correctement (correction toggleDisplay inline vs classe). Les cat\u00e9gories S\u00e9lection/Obligatoires et les types de jetons sont d\u00e9sormais visibles.',
+                '<strong>Jetons connect\u00e9s aux pratiques</strong> : La configuration des jetons d\u00e9finie dans une pratique est automatiquement synchronis\u00e9e vers la page d\u2019\u00e9valuation. Palette Jetons repositionn\u00e9e en bas \u00e0 gauche.',
+                '<strong>Canvas centr\u00e9</strong> : Le document s\u2019affiche au centre de la visionneuse apr\u00e8s ouverture (recentrage apr\u00e8s layout finalis\u00e9).'
+            ]
+        },
+        {
+            version: 'Beta 97.9',
             date: '20 f\u00e9vrier',
             couleur: 'vert',
             titre: 'Refonte visionneuse \u2014 Palette flottante et \u00e9valuation 3\u00a0colonnes',

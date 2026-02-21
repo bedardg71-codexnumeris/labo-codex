@@ -1,8 +1,28 @@
 # SESSION ACTIVE - BETA 97.9
 
-**Date** : 20 février 2026
-**Version** : Beta 97.9 (build 0220-2030)
-**Statut** : Module Travaux — Refonte visionneuse
+**Date** : 21 février 2026
+**Version** : Beta 97.9 (build 0221-1535)
+**Statut** : Améliorations évaluation, statuts et configuration des pratiques
+
+## SESSION DU 21 FÉVRIER 2026
+
+### Travail accompli — Améliorations évaluation, statuts et configuration des pratiques (Beta 97.9, build 0221-1535)
+
+103. **8 améliorations UI (Évaluer, Liste, Tableau de bord)** : Badges compacts (`white-space: nowrap`), rétroaction structurée avec auto-dépliage de la palette, suppression du dropdown Groupe redondant, refonte des statuts d'évaluation (Non reçu → Reçu → Importé → Annoté → Évalué → Remis) avec badges colorés, colonne "Statut" remplace "Niveau" dans la liste, navigation intelligente depuis le bouton Évaluer selon l'étape du flux, inversion des couleurs Gauss entre modes clair/sombre, connexion palette Jetons aux réglages.
+
+104. **Zone badges et filtre production** : Les badges ont la même largeur que le canvas (retrait du `.conteneur`). Dropdown de production ajouté à gauche des badges avec filtre `filtrerBadgesParProduction()`. Labels "ÉTUDIANT·E" et "PRODUCTION" retirés de la palette Paramètres.
+
+105. **Structure des évaluations corrigée** : Correction `afficherConfigurationType()` (pratique-notation-v2.js) — les IDs `v2-*` remplacés par `mat-*` et `classList.remove('u-hide')` remplacé par `style.display = ''` pour surcharger le style inline. Badge "6 meilleures" corrigé en "4 meilleures + 2 oblig." dans `genererBadgeCaracteristiques()` (pratiques-materiel.js).
+
+106. **Canvas toujours centré** : Ajout `requestAnimationFrame(() => recentrerVue())` dans `ouvrirFichier()` (travaux-visionneuse.js) pour garantir le centrage après layout finalisé.
+
+107. **Dropdown production toujours visible** : Le `<select>` de production est généré même avec une seule production (remplacement du `<span>` statique).
+
+108. **Bridge jetons pratique → évaluation** : Synchronisation de `configurations[index].jetons` (pratiques-materiel.js) vers `modalitesEvaluation.configPAN.jetons` dans `chargerEchellePerformance()` (evaluation.js). La palette Jetons lit désormais les bons compteurs.
+
+109. **Palette Jetons repositionnée** : Déplacée de `top: 55%, left: 12px` (superposée à Paramètres) vers `bottom: 12px, left: 12px`.
+
+110. **Configuration des pratiques — toggleDisplay global** : Correction de `toggleDisplay()` (main.js) pour gérer `style.display` en plus de `classList`, résolvant l'affichage des catégories Sélection/Obligatoires et du contenu jetons. Correction de `afficherConfigurationTypeMat()` (pratiques-materiel.js) avec même approche.
 
 ## SESSION DU 20 FÉVRIER 2026
 

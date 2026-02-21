@@ -977,11 +977,11 @@ function afficherDescriptionTaxonomiqueMat(type) {
  * Affiche les sections de configuration selon le type
  */
 function afficherConfigurationTypeMat(type) {
-    // Cacher toutes les sections
+    // Cacher toutes les sections (style.display pour surcharger le style inline du HTML)
     const sections = ['mat-config-pan-standards', 'mat-config-sommative', 'mat-config-pan-specifications', 'mat-config-defaut'];
     sections.forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.classList.add('u-hide');
+        if (el) el.style.display = 'none';
     });
 
     // Variante PAN-Standards
@@ -989,19 +989,17 @@ function afficherConfigurationTypeMat(type) {
     toggleDisplay(variantePAN, type === 'pan-standards');
 
     // Afficher la section appropriée
-    if (type === 'pan-standards') {
-        const el = document.getElementById('mat-config-pan-standards');
-        if (el) el.classList.remove('u-hide');
+    let configId = 'mat-config-defaut';
+    if (type === 'pan-standards' || type === 'pan-maitrise') {
+        configId = 'mat-config-pan-standards';
     } else if (type === 'sommative') {
-        const el = document.getElementById('mat-config-sommative');
-        if (el) el.classList.remove('u-hide');
-    } else if (type === 'pan-specifications') {
-        const el = document.getElementById('mat-config-pan-specifications');
-        if (el) el.classList.remove('u-hide');
-    } else {
-        const el = document.getElementById('mat-config-defaut');
-        if (el) el.classList.remove('u-hide');
+        configId = 'mat-config-sommative';
+    } else if (type === 'pan-specifications' || type === 'specifications') {
+        configId = 'mat-config-pan-specifications';
     }
+
+    const config = document.getElementById(configId);
+    if (config) config.style.display = '';
 }
 
 /**
