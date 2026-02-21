@@ -29,7 +29,7 @@
         { id: 'blanc',      hex: '#ffffff', nom: 'Blanc' }
     ];
 
-    const COULEUR_DEFAUT = '#ff8c00'; // Orange
+    const COULEUR_DEFAUT = '#000000'; // Noir
     const RESOLUTION_REFERENCE = 1000; // Largeur de reference pour normaliser l'epaisseur
 
     /* ===============================
@@ -135,6 +135,15 @@
             nom: 'Croix',
             icone: '\u2718',
             couleurBouton: '#c62828',
+            curseur: 'crosshair',
+            type: 'symbole',
+            taille: 30
+        },
+        interrogation: {
+            id: 'interrogation',
+            nom: 'Interrogation',
+            icone: '?',
+            couleurBouton: '#e65100',
             curseur: 'crosshair',
             type: 'symbole',
             taille: 30
@@ -278,12 +287,16 @@
         html += '<div class="travaux-autocollants-grille travaux-autocollants-grille--symboles">';
         const crochetActif = outilActif === 'crochet' ? ' actif' : '';
         const croixActif = outilActif === 'croix' ? ' actif' : '';
+        const interroActif = outilActif === 'interrogation' ? ' actif' : '';
         html += `<div class="travaux-autocollant-item${crochetActif}" onclick="travauxOutils.setOutilActif('crochet')" title="Crochet">`;
         html += `<span style="font-size:24px; color:#2e7d32; font-weight:bold;">\u2714\uFE0E</span>`;
         html += `<span>Vrai</span></div>`;
         html += `<div class="travaux-autocollant-item${croixActif}" onclick="travauxOutils.setOutilActif('croix')" title="Croix">`;
         html += `<span style="font-size:24px; color:#c62828; font-weight:bold;">\u2718</span>`;
         html += `<span>Faux</span></div>`;
+        html += `<div class="travaux-autocollant-item${interroActif}" onclick="travauxOutils.setOutilActif('interrogation')" title="Interrogation">`;
+        html += `<span style="font-size:24px; color:#e65100; font-weight:bold;">?</span>`;
+        html += `<span>???</span></div>`;
         html += '</div>';
 
         // Qualite

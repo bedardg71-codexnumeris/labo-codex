@@ -14416,31 +14416,25 @@ body.mode-clair .prep-select {
     gap: 0;
 }
 
-/* --- Panneaux evaluation (slots gauche/droite) --- */
-.travaux-slot-panneau {
-    width: 300px;
-    min-width: 260px;
-    max-width: 340px;
-    overflow-y: auto;
-    background: var(--surface-carte, #1a3040);
-    border: 1px solid rgba(106, 172, 184, 0.2);
-    transition: width 0.3s ease, opacity 0.3s ease;
+/* --- Palettes flottantes evaluation --- */
+.travaux-palette-eval {
+    min-width: 280px;
+    max-width: 320px;
 }
 
-.travaux-slot-panneau.u-hide {
-    display: none;
+.travaux-palette-eval .travaux-palette-contenu {
+    max-height: calc(100vh - 200px);
+    padding: 0;
 }
 
-/* Panneau gauche — bord droit */
-.travaux-slot-panneau:first-child {
-    border-right: 1px solid rgba(106, 172, 184, 0.2);
-    border-left: none;
+.travaux-palette-eval .travaux-panneau-corps {
+    max-height: none;
+    overflow-y: visible;
 }
 
-/* Panneau droite — bord gauche */
-.travaux-slot-panneau:last-child {
-    border-left: 1px solid rgba(106, 172, 184, 0.2);
-    border-right: none;
+#travaux-palette-eval-retro {
+    min-width: 400px;
+    max-width: 600px;
 }
 
 /* Panneaux internes : style palette (comme prep-palette / planif-palette) */
@@ -14517,7 +14511,7 @@ body.mode-clair .prep-select {
 }
 
 /* Mode clair */
-body.mode-clair .travaux-slot-panneau {
+body.mode-clair .travaux-palette-eval {
     background: #e8f2fd;
     border-color: rgba(3, 46, 92, 0.1);
 }
@@ -14532,44 +14526,22 @@ body.mode-clair .travaux-palette-flottante {
 body.mode-clair .travaux-palette-barre {
     border-bottom-color: rgba(3, 46, 92, 0.08);
 }
-body.mode-clair .travaux-slot-retroaction {
-    background: #e8f2fd;
-    border-top-color: rgba(3, 46, 92, 0.08);
-}
-
-/* En mode evaluation la zone-document se comprime entre les panneaux */
-.travaux-visionneuse-layout.mode-evaluation .travaux-zone-document {
-    flex: 1;
-    min-width: 0;
-}
-
-/* Slot retroaction sous le canvas */
-.travaux-slot-retroaction {
-    border-top: 1px solid rgba(106, 172, 184, 0.2);
-    background: var(--surface-carte, #1a3040);
-    padding: 8px 12px;
-    flex-shrink: 0;
-    max-height: 250px;
-    overflow-y: auto;
-}
-.travaux-slot-retroaction.u-hide {
-    display: none;
-}
-.travaux-slot-retroaction .zone-retroaction {
+/* Retroaction dans palette eval */
+.travaux-palette-eval .zone-retroaction {
     margin: 0;
 }
-.travaux-slot-retroaction .zone-retroaction-header {
+.travaux-palette-eval .zone-retroaction-header {
     margin-bottom: 6px;
 }
-.travaux-slot-retroaction h4 {
+.travaux-palette-eval h4 {
     font-size: 0.85rem;
     margin: 0;
 }
-.travaux-slot-retroaction .grille-checkboxes {
+.travaux-palette-eval .grille-checkboxes {
     font-size: 0.8rem;
     margin-bottom: 6px;
 }
-.travaux-slot-retroaction textarea {
+.travaux-palette-eval textarea {
     height: 100px !important;
 }
 
@@ -15670,7 +15642,7 @@ body.mode-clair .travaux-slot-retroaction {
 }
 
 .travaux-autocollants-grille--symboles {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
 }
 .travaux-autocollant-item:hover {
     background: var(--bleu-tres-pale);
@@ -15882,13 +15854,6 @@ body.mode-clair .travaux-slot-retroaction {
 
     .travaux-zone-document {
         min-height: 400px;
-    }
-
-    .travaux-slot-panneau {
-        width: 100%;
-        min-width: 100%;
-        max-width: 100%;
-        max-height: 300px;
     }
 
     .travaux-toolbar {
@@ -19202,7 +19167,6 @@ body.mode-clair .barre-etudiant.tracked-4 {
 .travaux-badge-importe.actif {
     background: var(--bleu-pale);
     border-color: var(--accent-primaire, #2196F3);
-    box-shadow: 0 0 0 2px var(--accent-primaire, #2196F3);
 }
 
 .travaux-badge-nom {

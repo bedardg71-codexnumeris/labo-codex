@@ -365,6 +365,17 @@
                 ctx.fillText('\u2718', mxC, myC);
                 break;
             }
+            case 'interrogation': {
+                const mxI = (x1 + x2) / 2;
+                const myI = (y1 + y2) / 2;
+                const sizeI = Math.min(Math.abs(x2 - x1), Math.abs(y2 - y1));
+                ctx.fillStyle = forme.color || '#e65100';
+                ctx.font = 'bold ' + sizeI + 'px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('?', mxI, myI);
+                break;
+            }
         }
 
         ctx.restore();
