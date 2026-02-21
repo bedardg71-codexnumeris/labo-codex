@@ -376,6 +376,24 @@
                 ctx.fillText('?', mxI, myI);
                 break;
             }
+            default:
+                // Erreurs de français (errfr_0 a errfr_10)
+                if (forme.type.startsWith('errfr_')) {
+                    const mxE = (x1 + x2) / 2;
+                    const myE = (y1 + y2) / 2;
+                    const rayonE = Math.min(Math.abs(x2 - x1), Math.abs(y2 - y1)) / 2;
+                    const numE = forme.type.replace('errfr_', '');
+                    ctx.fillStyle = forme.color || '#888888';
+                    ctx.beginPath();
+                    ctx.arc(mxE, myE, rayonE, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold ' + Math.round(rayonE * 1.2) + 'px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(numE, mxE, myE);
+                }
+                break;
         }
 
         ctx.restore();

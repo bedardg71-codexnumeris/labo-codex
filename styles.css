@@ -14545,6 +14545,92 @@ body.mode-clair .travaux-palette-barre {
     height: 100px !important;
 }
 
+/* Labels identité dans palette paramètres */
+.travaux-eval-identite {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 4px 0;
+}
+.travaux-eval-label-ligne {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+}
+.travaux-eval-label-cle {
+    font-size: 0.7rem;
+    color: var(--texte-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    flex-shrink: 0;
+}
+.travaux-eval-label-val {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--texte-principal);
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.btn-lien-discret {
+    background: none;
+    border: none;
+    color: var(--texte-muted);
+    font-size: 0.7rem;
+    cursor: pointer;
+    padding: 2px 0;
+    text-decoration: underline;
+    text-align: left;
+}
+.btn-lien-discret:hover {
+    color: var(--accent-primaire);
+}
+
+/* Palette erreurs de français — grille compacte */
+#travaux-palette-eval-erreurs-fr {
+    min-width: 180px;
+    max-width: 220px;
+}
+.travaux-errfr-grille {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    padding: 6px;
+}
+.travaux-errfr-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 4px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    font-size: 0.65rem;
+    text-align: center;
+    color: var(--texte-secondaire);
+}
+.travaux-errfr-item:hover {
+    background: rgba(106, 172, 184, 0.1);
+}
+.travaux-errfr-item.actif {
+    border-color: var(--accent-primaire);
+    background: var(--bleu-tres-pale);
+}
+.travaux-errfr-numero {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.75rem;
+    color: white;
+}
+
 .travaux-sidebar {
     width: 200px;
     min-width: 200px;

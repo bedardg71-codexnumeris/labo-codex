@@ -4604,15 +4604,7 @@
                     <div class="travaux-panneau-corps carte-bleu-fonce">
                             <!-- Boutons de gestion des évaluations -->
                             <div class="groupe-boutons-colonne" class="mb-15">
-                                <!-- Ligne 1: Nouvelle évaluation -->
-                                <div class="groupe-boutons-ligne">
-                                    <button class="btn btn-secondaire btn-tres-compact" onclick="nouvelleEvaluation()" style="width: 100%;"
-                                        title="Commencer une nouvelle évaluation (formulaire vierge)">
-                                        Nouvelle évaluation
-                                    </button>
-                                </div>
-
-                                <!-- Ligne 2: Sauvegarder et Réinitialiser -->
+                                <!-- Sauvegarder et Réinitialiser -->
                                 <div class="groupe-boutons-ligne">
                                     <button class="btn btn-principal btn-tres-compact" onclick="sauvegarderEvaluation()" style="flex: 1;"
                                         title="Sauvegarder l'évaluation">
@@ -4625,7 +4617,7 @@
                                     </button>
                                 </div>
 
-                                <!-- Ligne 3: Supprimer cette évaluation (visible seulement en mode modification) -->
+                                <!-- Supprimer cette évaluation (visible seulement en mode modification) -->
                                 <div class="groupe-boutons-ligne" id="ligneSupprimerEvaluation" style="display: none;">
                                     <button class="btn btn-supprimer btn-tres-compact" onclick="confirmerSuppressionEvaluationSidebar()" style="width: 100%;"
                                         title="Supprimer définitivement cette évaluation">
@@ -4637,8 +4629,6 @@
                             <hr class="separateur-horizontal">
 
                             <div class="indicateur-verrouillage" class="mb-15">
-                                <h4 class="m-0">Paramètres de l'évaluation</h4>
-
                                 <!-- Indicateur de verrouillage -->
                                 <div id="indicateurVerrouillageEval" style="display: none;">
                                     <span id="iconeVerrouEval" onclick="basculerVerrouillageEvaluationCourante()"
@@ -4647,27 +4637,45 @@
                                 </div>
                             </div>
 
-                            <div class="groupe-form" class="mb-12">
-                                <label class="label-formulaire">Groupe :</label>
-                                <select id="selectGroupeEval" class="controle-form"
-                                    onchange="filtrerEtudiantsParGroupe()">
-                                    <option value="">Tous les groupes</option>
-                                </select>
+                            <!-- Labels d'identité (affichage compact) -->
+                            <div id="travaux-eval-identite" class="travaux-eval-identite">
+                                <div class="travaux-eval-label-ligne">
+                                    <span class="travaux-eval-label-cle">Étudiant·e</span>
+                                    <span class="travaux-eval-label-val" id="travaux-eval-label-etudiant">--</span>
+                                </div>
+                                <div class="travaux-eval-label-ligne">
+                                    <span class="travaux-eval-label-cle">Production</span>
+                                    <span class="travaux-eval-label-val" id="travaux-eval-label-production">--</span>
+                                </div>
+                                <button class="btn-lien-discret" id="travaux-eval-btn-corriger" onclick="travauxUI.toggleCorrectionIdentite()" title="Corriger l'attribution">Corriger</button>
                             </div>
 
-                            <div class="groupe-form" class="mb-12">
-                                <label class="label-formulaire">Étudiant·e :</label>
-                                <select id="selectEtudiantEval" class="controle-form"
-                                    onchange="chargerEvaluationsEtudiant()">
-                                    <option value="">-- Choisir un·e étudiant·e --</option>
-                                </select>
-                            </div>
-
-                            <div class="groupe-form" class="mb-12">
-                                <label class="label-formulaire">Production étudiante :</label>
-                                <select id="selectProduction1" class="controle-form" onchange="chargerProduction(1)">
-                                    <option value="">-- Choisir une production --</option>
-                                </select>
+                            <!-- Section correction (cachée par défaut) -->
+                            <div id="travaux-eval-correction" class="u-hide">
+                                <div class="groupe-form">
+                                    <label class="label-formulaire">Groupe :</label>
+                                    <select id="selectGroupeEval" class="controle-form"
+                                        onchange="filtrerEtudiantsParGroupe()">
+                                        <option value="">Tous les groupes</option>
+                                    </select>
+                                </div>
+                                <div class="groupe-form">
+                                    <label class="label-formulaire">Étudiant·e :</label>
+                                    <select id="selectEtudiantEval" class="controle-form"
+                                        onchange="chargerEvaluationsEtudiant()">
+                                        <option value="">-- Choisir un·e étudiant·e --</option>
+                                    </select>
+                                </div>
+                                <div class="groupe-form">
+                                    <label class="label-formulaire">Production :</label>
+                                    <select id="selectProduction1" class="controle-form" onchange="chargerProduction(1)">
+                                        <option value="">-- Choisir une production --</option>
+                                    </select>
+                                </div>
+                                <div class="groupe-boutons-ligne">
+                                    <button class="btn btn-principal btn-tres-compact" onclick="travauxUI.appliquerCorrectionIdentite()">Appliquer</button>
+                                    <button class="btn btn-secondaire btn-tres-compact" onclick="travauxUI.toggleCorrectionIdentite()">Annuler</button>
+                                </div>
                             </div>
 
                             <div class="groupe-form" class="mb-12">
@@ -4710,7 +4718,7 @@
                                     <option value="plagiat">Non recevable - Plagiat</option>
                                     <option value="ia">Non recevable - IA non autorisée</option>
                                 </select>
-                                <p class="text-085-muted-m5-0-0-28">
+                                <p class="text-085-muted-m5-0-0-28" style="font-size: 0.7rem;">
                                     Les travaux non recevables sont exclus des calculs de moyenne.
                                 </p>
                             </div>
@@ -4760,24 +4768,6 @@
                                 </div>
                             </div>
 
-                            <!-- NOTE ET NIVEAU -->
-                            <div id="noteFinale1" class="boite-note-finale" data-tooltip="eval-note-finale">
-                                <!-- Note finale et niveau sur la même ligne -->
-                                <div style="display: flex; align-items: center; justify-content: space-between;">
-                                    <div>
-                                        <div class="label u-texte-gris" style="font-size: 0.8rem; margin-bottom: 5px;">Note finale</div>
-                                        <div class="valeur" style="font-size: 2rem; font-weight: bold; color: var(--accent-primaire);">
-                                            <span id="noteProduction1">0.0</span>
-                                        </div>
-                                    </div>
-                                    <div style="text-align: right;">
-                                        <div class="u-texte-gris" style="font-size: 0.8rem; margin-bottom: 5px;">Niveau</div>
-                                        <div style="font-size: 2rem; font-weight: bold; color: var(--accent-primaire);">
-                                            <span id="niveauProduction1">--</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                     </div><!-- fin travaux-panneau-corps -->
                 </div><!-- fin travaux-eval-gauche -->
 
@@ -4792,6 +4782,24 @@
                                 <p style="color: var(--gris-clair); font-style: italic; font-size: 0.85rem;">
                                     S\u00e9lectionnez une grille et une cartouche
                                 </p>
+                            </div>
+
+                            <!-- Note finale déplacée ici depuis la palette Paramètres -->
+                            <div id="noteFinale1" class="boite-note-finale" data-tooltip="eval-note-finale">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <div>
+                                        <div class="label u-texte-gris" style="font-size: 0.8rem; margin-bottom: 5px;">Note finale</div>
+                                        <div class="valeur" style="font-size: 2rem; font-weight: bold; color: var(--accent-primaire);">
+                                            <span id="noteProduction1">0.0</span>
+                                        </div>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <div class="u-texte-gris" style="font-size: 0.8rem; margin-bottom: 5px;">Niveau</div>
+                                        <div style="font-size: 2rem; font-weight: bold; color: var(--accent-primaire);">
+                                            <span id="niveauProduction1">--</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                     </div>

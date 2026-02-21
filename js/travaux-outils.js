@@ -147,7 +147,19 @@
             curseur: 'crosshair',
             type: 'symbole',
             taille: 30
-        }
+        },
+        // Erreurs de français (codes 0-10)
+        errfr_0:  { id: 'errfr_0',  nom: 'Aucune erreur',     icone: '0',  couleurBouton: '#888888', curseur: 'crosshair', type: 'symbole', taille: 24 },
+        errfr_1:  { id: 'errfr_1',  nom: 'Syntaxe',           icone: '1',  couleurBouton: '#c62828', curseur: 'crosshair', type: 'symbole', taille: 24 },
+        errfr_2:  { id: 'errfr_2',  nom: 'Subordination',     icone: '2',  couleurBouton: '#c62828', curseur: 'crosshair', type: 'symbole', taille: 24 },
+        errfr_3:  { id: 'errfr_3',  nom: 'Ponctuation',       icone: '3',  couleurBouton: '#e65100', curseur: 'crosshair', type: 'symbole', taille: 24 },
+        errfr_4:  { id: 'errfr_4',  nom: 'Orthographe',       icone: '4',  couleurBouton: '#e65100', curseur: 'crosshair', type: 'symbole', taille: 24 },
+        errfr_5:  { id: 'errfr_5',  nom: 'Homophones',        icone: '5',  couleurBouton: '#e65100', curseur: 'crosshair', type: 'symbole', taille: 24 },
+        errfr_6:  { id: 'errfr_6',  nom: 'Accords GN',        icone: '6',  couleurBouton: '#1565c0', curseur: 'crosshair', type: 'symbole', taille: 24 },
+        errfr_7:  { id: 'errfr_7',  nom: 'Part. passés',      icone: '7',  couleurBouton: '#1565c0', curseur: 'crosshair', type: 'symbole', taille: 24 },
+        errfr_8:  { id: 'errfr_8',  nom: 'Mots inappropriés', icone: '8',  couleurBouton: '#7b1fa2', curseur: 'crosshair', type: 'symbole', taille: 24 },
+        errfr_9:  { id: 'errfr_9',  nom: 'Répétitions',       icone: '9',  couleurBouton: '#7b1fa2', curseur: 'crosshair', type: 'symbole', taille: 24 },
+        errfr_10: { id: 'errfr_10', nom: 'Autres',            icone: '10', couleurBouton: '#888888', curseur: 'crosshair', type: 'symbole', taille: 24 }
     };
 
     /* ===============================

@@ -929,11 +929,13 @@
         const outil = travauxOutils.OUTILS[type];
         const taille = (outil.taille || 30) / canvasAnnotation.width;
 
-        // Couleur fixe pour crochet (vert), croix (rouge), interrogation (orange)
-        const couleurSymbole = type === 'crochet' ? '#2e7d32'
-            : type === 'croix' ? '#c62828'
-            : type === 'interrogation' ? '#e65100'
-            : travauxOutils.getCouleurActive();
+        // Couleur fixe selon le type de symbole
+        let couleurSymbole;
+        if (type === 'crochet') couleurSymbole = '#2e7d32';
+        else if (type === 'croix') couleurSymbole = '#c62828';
+        else if (type === 'interrogation') couleurSymbole = '#e65100';
+        else if (type.startsWith('errfr_')) couleurSymbole = outil.couleurBouton || '#888888';
+        else couleurSymbole = travauxOutils.getCouleurActive();
 
         const forme = {
             id: 'SH_' + Date.now(),
@@ -1556,6 +1558,13 @@
             case 'interrogation':
                 dessinerInterrogation(ctxAnnotation, x1, y1, x2, y2, forme.color);
                 break;
+
+            default:
+                // Erreurs de français (errfr_0 a errfr_10)
+                if (forme.type.startsWith('errfr_')) {
+                    dessinerErreurFrancais(ctxAnnotation, x1, y1, x2, y2, forme.color, forme.type);
+                }
+                break;
         }
 
         ctxAnnotation.restore();
@@ -1637,6 +1646,29 @@
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText('?', mx, my);
+    }
+
+    /**
+     * Dessine un cercle numerote pour les erreurs de français
+     */
+    function dessinerErreurFrancais(ctx, x1, y1, x2, y2, color, type) {
+        const mx = (x1 + x2) / 2;
+        const my = (y1 + y2) / 2;
+        const rayon = Math.min(Math.abs(x2 - x1), Math.abs(y2 - y1)) / 2;
+        const numero = type.replace('errfr_', '');
+
+        // Cercle rempli
+        ctx.fillStyle = color || '#888888';
+        ctx.beginPath();
+        ctx.arc(mx, my, rayon, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Numero blanc au centre
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold ' + Math.round(rayon * 1.2) + 'px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(numero, mx, my);
     }
 
     /**
