@@ -15,12 +15,12 @@
             couleur: 'vert',
             titre: 'Refonte visionneuse \u2014 Palette flottante et \u00e9valuation 3\u00a0colonnes',
             items: [
-                '<strong>Palette flottante d\u2019annotation</strong> : Les outils d\u2019annotation s\u2019affichent d\u00e9sormais dans une palette flottante draggable au-dessus du canvas (au lieu d\u2019\u00eatre cach\u00e9s derri\u00e8re un clic). Barre de titre, replier/d\u00e9plier, Annuler/R\u00e9tablir/Effacer int\u00e9gr\u00e9s en pied de palette.',
-                '<strong>\u00c9valuation en 3\u00a0colonnes</strong> : Cliquer \u00ab\u00a0\u00c9valuer\u00a0\u00bb ouvre les param\u00e8tres \u00e0 gauche et les crit\u00e8res \u00e0 droite du canvas, au lieu d\u2019afficher le formulaire en dessous. Le canvas se redimensionne entre les panneaux.',
+                '<strong>Palette flottante fixe</strong> : Les outils d\u2019annotation s\u2019affichent dans une palette flottante draggable qui reste fixe au scroll. Boutons textuels lisibles au lieu d\u2019emojis. Annuler/R\u00e9tablir/Effacer en pied de palette.',
+                '<strong>\u00c9valuation en 3\u00a0colonnes</strong> : Cliquer \u00ab\u00a0\u00c9valuer\u00a0\u00bb ouvre les param\u00e8tres \u00e0 gauche et les crit\u00e8res \u00e0 droite du canvas. Panneaux style palette (comme la carte mentale) avec en-t\u00eates \u00ab\u00a0Param\u00e8tres\u00a0\u00bb et \u00ab\u00a0Crit\u00e8res\u00a0\u00bb.',
+                '<strong>R\u00e9troaction sous le canvas</strong> : La zone de r\u00e9troaction finale s\u2019affiche en bas de la visionneuse (sous le document) au lieu du panneau de droite.',
                 '<strong>Exclusivit\u00e9 annotation/\u00e9valuation</strong> : Les deux modes sont mutuellement exclusifs\u00a0: activer l\u2019un ferme automatiquement l\u2019autre.',
-                '<strong>Badge \u00e9tudiant dans la toolbar</strong> : Le badge de l\u2019\u00e9tudiant actif s\u2019affiche dans l\u2019en-t\u00eate de la visionneuse.',
-                '<strong>Bouton Zoom 100\u00a0%</strong> : Nouveau bouton pour revenir au zoom r\u00e9el (1:1).',
-                '<strong>Ordre des boutons</strong> : Annoter \u2192 \u00c9valuer \u2192 Exporter PDF (ordre logique du flux de travail). Badge s\u00e9lectionn\u00e9 plus visible avec accent bleu vif.'
+                '<strong>Page d\u2019accueil r\u00e9organis\u00e9e</strong> : Trois sections\u00a0: D\u00e9couvrir, Parcourir, Piloter. Les cartes d\u2019action sont regroup\u00e9es sous \u00ab\u00a0Parcourir\u00a0\u00bb, le parcours d\u2019apprentissage sous \u00ab\u00a0Piloter\u00a0\u00bb.',
+                '<strong>Toolbar am\u00e9lior\u00e9e</strong> : Badge \u00e9tudiant actif, bouton Zoom 100\u00a0%, ordre Annoter \u2192 \u00c9valuer \u2192 Exporter PDF, badge s\u00e9lectionn\u00e9 accent bleu vif.'
             ]
         },
         {

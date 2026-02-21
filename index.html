@@ -4598,7 +4598,10 @@
 
                 <!-- Panneau gauche : parametres (deplace par JS dans le slot gauche de la visionneuse) -->
                 <div id="travaux-eval-gauche" class="travaux-panneau-lateral travaux-panneau-gauche u-hide">
-                    <div class="carte-bleu-fonce">
+                    <div class="travaux-panneau-header">
+                        <span class="travaux-panneau-header-titre">Param\u00e8tres</span>
+                    </div>
+                    <div class="travaux-panneau-corps carte-bleu-fonce">
                             <!-- Boutons de gestion des évaluations -->
                             <div class="groupe-boutons-colonne" class="mb-15">
                                 <!-- Ligne 1: Nouvelle évaluation -->
@@ -4775,64 +4778,69 @@
                                     </div>
                                 </div>
                             </div>
-                    </div>
+                    </div><!-- fin travaux-panneau-corps -->
                 </div><!-- fin travaux-eval-gauche -->
 
                 <!-- Panneau droite : criteres (deplace par JS dans le slot droite de la visionneuse) -->
                 <div id="travaux-eval-droite" class="travaux-panneau-lateral travaux-panneau-droite u-hide">
-                    <div class="zone-criteres">
-                            <h4>Évaluation et prévisualisation de la rétroaction</h4>
+                    <div class="travaux-panneau-header">
+                        <span class="travaux-panneau-header-titre">Crit\u00e8res</span>
+                    </div>
+                    <div class="travaux-panneau-corps zone-criteres">
 
                             <div id="listeCriteresGrille1" class="conteneur-liste">
                                 <p style="color: var(--gris-clair); font-style: italic; font-size: 0.85rem;">
-                                    Sélectionnez une grille et une cartouche
+                                    S\u00e9lectionnez une grille et une cartouche
                                 </p>
                             </div>
 
-                            <!-- RÉTROACTION FINALE (déplacée sous la prévisualisation) -->
-                            <div class="zone-retroaction u-mt-20">
-                                <div class="zone-retroaction-header u-flex-between">
-                                    <h4 data-tooltip="eval-retroaction">Rétroaction finale</h4>
-                                    <button class="btn btn-confirmer btn-compact" onclick="copierRetroaction(1)">
-                                        Copier dans le presse-papier
-                                    </button>
-                                </div>
-
-                                <!-- Options à inclure (TOUTES COCHÉES PAR DÉFAUT) -->
-                                <div class="grille-checkboxes" data-tooltip="eval-retroaction-options" class="mb-15">
-                                    <label class="text-sm-pointer">
-                                        <input type="checkbox" id="afficherDescription1" onchange="genererRetroaction(1)"
-                                            checked>
-                                        Description
-                                    </label>
-                                    <label class="text-sm-pointer">
-                                        <input type="checkbox" id="afficherObjectif1" onchange="genererRetroaction(1)" checked>
-                                        Objectif
-                                    </label>
-                                    <label class="text-sm-pointer">
-                                        <input type="checkbox" id="afficherTache1" onchange="genererRetroaction(1)" checked>
-                                        Tâche
-                                    </label>
-                                    <label class="text-sm-pointer">
-                                        <input type="checkbox" id="afficherAdresse1" onchange="genererRetroaction(1)" checked>
-                                        Adresse
-                                    </label>
-                                    <label class="text-sm-pointer">
-                                        <input type="checkbox" id="afficherContexte1" onchange="genererRetroaction(1)" checked>
-                                        Contexte
-                                    </label>
-                                </div>
-
-                                <!-- Zone de texte pour la rétroaction finale -->
-                                <textarea id="retroactionFinale1" class="controle-form" rows="12"
-                                    placeholder="La rétroaction sera générée automatiquement ici selon tes évaluations et les options cochées. Tu peux modifier le texte avant de le copier."
-                                    style="width: 100%; height: 200px; padding: 12px; border-radius: 5px;
-        border: 1px solid var(--bordure-claire); font-family: inherit; resize: vertical;
-        font-size: 0.85rem; line-height: 1.5; background: var(--surface-carte, #1a3040);">
-</textarea>
-                            </div>
                     </div>
                 </div><!-- fin travaux-eval-droite -->
+
+                <!-- Retroaction finale (deplacee par JS sous le canvas en mode evaluation) -->
+                <div id="travaux-eval-retroaction" class="u-hide">
+                    <div class="zone-retroaction">
+                        <div class="zone-retroaction-header u-flex-between">
+                            <h4 data-tooltip="eval-retroaction">R\u00e9troaction finale</h4>
+                            <button class="btn btn-confirmer btn-compact" onclick="copierRetroaction(1)">
+                                Copier dans le presse-papier
+                            </button>
+                        </div>
+
+                        <!-- Options \u00e0 inclure (TOUTES COCH\u00c9ES PAR D\u00c9FAUT) -->
+                        <div class="grille-checkboxes" data-tooltip="eval-retroaction-options">
+                            <label class="text-sm-pointer">
+                                <input type="checkbox" id="afficherDescription1" onchange="genererRetroaction(1)"
+                                    checked>
+                                Description
+                            </label>
+                            <label class="text-sm-pointer">
+                                <input type="checkbox" id="afficherObjectif1" onchange="genererRetroaction(1)" checked>
+                                Objectif
+                            </label>
+                            <label class="text-sm-pointer">
+                                <input type="checkbox" id="afficherTache1" onchange="genererRetroaction(1)" checked>
+                                T\u00e2che
+                            </label>
+                            <label class="text-sm-pointer">
+                                <input type="checkbox" id="afficherAdresse1" onchange="genererRetroaction(1)" checked>
+                                Adresse
+                            </label>
+                            <label class="text-sm-pointer">
+                                <input type="checkbox" id="afficherContexte1" onchange="genererRetroaction(1)" checked>
+                                Contexte
+                            </label>
+                        </div>
+
+                        <!-- Zone de texte pour la r\u00e9troaction finale -->
+                        <textarea id="retroactionFinale1" class="controle-form" rows="6"
+                            placeholder="La r\u00e9troaction sera g\u00e9n\u00e9r\u00e9e automatiquement ici selon tes \u00e9valuations et les options coch\u00e9es."
+                            style="width: 100%; padding: 8px; border-radius: 5px;
+        border: 1px solid var(--bordure-claire); font-family: inherit; resize: vertical;
+        font-size: 0.8rem; line-height: 1.4; background: var(--surface-carte, #1a3040);">
+</textarea>
+                    </div>
+                </div>
 
                     </div><!-- fin evaluations-contenu-evaluation -->
                 </div><!-- fin evaluations-annoter -->
@@ -16324,7 +16332,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97.9';
-        const BUILD_ID = '0220-2000';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0220-2030';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';

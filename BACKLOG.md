@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 20 fevrier 2026 (Beta 97.9, build 0220-2000)
+> **Derniere mise a jour** : 20 fevrier 2026 (Beta 97.9, build 0220-2030)
 
 ---
 
@@ -9,9 +9,19 @@
 
 ### Priorite haute - Module Travaux / Visionneuse (20 fev 2026)
 
-- [ ] **Revoir le style de la palette flottante d'annotation** : La palette `.travaux-palette-flottante` (travaux-outils.js, styles.css) necessite un raffinement visuel — espacement, tailles des boutons, coherence avec le design system (consulter `design-system.html`). Verifier l'apparence en mode clair et mode sombre.
+- [x] **Palette annotation : position fixe (pas de scroll)** ✅ CORRIGÉ (20 fév 2026) : La palette `.travaux-palette-flottante` se deplace quand on scroll le travail dans le canvas. Elle doit rester fixe a l'ecran (position fixed ou ancrage au viewport du canvas-container), comme une vraie palette flottante.
 
-- [ ] **Revoir la mise en forme des elements « Evaluer »** : Les panneaux d'evaluation 3 colonnes (`#travaux-eval-gauche`, `#travaux-eval-droite`) deplaces dans les slots lateraux de la visionneuse necessitent un ajustement de style — padding, marges, taille des selects et boutons dans un espace plus etroit (280px). Verifier que le formulaire reste utilisable et lisible.
+- [x] **Palette annotation : remplacer les emojis par des mots/boutons** ✅ CORRIGÉ (20 fév 2026) : Les icones emoji de la palette (outils, formes, tampons, undo/redo, effacer) sont laids. Les remplacer par des boutons textuels lisibles (mots courts) ou des icones SVG propres. Pas d'emoji.
+
+- [x] **Panneau gauche evaluation : adopter le look « palette »** ✅ CORRIGÉ (20 fév 2026) : Le panneau coulissant gauche (`#travaux-eval-gauche`) doit etre conforme au design des palettes de la carte mentale (`.prep-palette`, `.planif-palette`). Reference : palette de reglages specifiques dans travaux-preparation.js. Barre de titre, style de carte sombre, coherence visuelle.
+
+- [x] **Panneau droit evaluation : criteres + dropdowns echelle uniquement** ✅ CORRIGÉ (20 fév 2026) : Le panneau droit (`#travaux-eval-droite`) doit presenter les criteres d'evaluation et les dropdowns de l'echelle de performance. La retroaction finale et les options de retroaction ne doivent PAS etre dans ce panneau.
+
+- [x] **Previsualisation retroaction : en bas de la visionneuse** ✅ CORRIGÉ (20 fév 2026) : La zone de retroaction finale (textarea + checkboxes + bouton copier) doit s'afficher en bas de la visionneuse (sous le canvas), pas dans le panneau de droite. Deplacer la `.zone-retroaction` hors de `#travaux-eval-droite` vers un emplacement sous le canvas.
+
+### Priorite haute - Page d'accueil (20 fev 2026)
+
+- [x] **Reordonner et renommer les sections de la page d'accueil** ✅ CORRIGÉ (20 fév 2026) : Intervertir les deux premieres sections. Creer une entete pour la 3e section. Les titres des trois sections deviennent : « Decouvrir », « Parcourir », « Piloter ». Retirer l'emoji de pin (📌) des titres.
 
 ### Priorite CRITIQUE - Planification / Carte mentale (Audit 8 fév 2026)
 
