@@ -19615,6 +19615,13 @@ body.mode-clair .barre-etudiant.tracked-4 {
     color: #fff;
 }
 
+.travaux-badge-verrou {
+    font-size: 0.7rem;
+    margin-left: 2px;
+    vertical-align: middle;
+    cursor: default;
+}
+
 .travaux-badge-supprimer {
     background: none;
     border: none;
