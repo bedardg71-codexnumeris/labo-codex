@@ -284,17 +284,16 @@
                     <!-- Toolbar -->
                     <div class="travaux-toolbar">
                         <div class="travaux-toolbar-inner">
-                            <!-- GAUCHE : badge + navigation pages -->
+                            <!-- GAUCHE : navigation pages -->
                             <div class="travaux-toolbar-gauche">
-                                <span id="travaux-badge-fichier-actif" class="u-hide"></span>
                                 <button id="travaux-btn-page-prec" class="travaux-btn-nav" onclick="travauxVisionneuse.pagePrecedente()" disabled title="Page précédente">&#x2190;</button>
                                 <span id="travaux-indicateur-page">-- / --</span>
                                 <button id="travaux-btn-page-suiv" class="travaux-btn-nav" onclick="travauxVisionneuse.pageSuivante()" disabled title="Page suivante">&#x2192;</button>
                             </div>
 
-                            <!-- CENTRE : nom du fichier -->
+                            <!-- CENTRE : badge étudiant -->
                             <div class="travaux-toolbar-centre">
-                                <span id="travaux-nom-fichier" class="travaux-nom-fichier">—</span>
+                                <span id="travaux-badge-fichier-actif" class="u-hide"></span>
                             </div>
 
                             <!-- DROITE : zoom + séparateur + actions -->
