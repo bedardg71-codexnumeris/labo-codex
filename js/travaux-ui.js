@@ -2059,12 +2059,56 @@
             configurerDragPaletteEval('travaux-palette-eval-jetons');
         }
 
+        // Sauvegarder les valeurs actuelles des dropdowns (persistent dans le DOM
+        // meme apres fermerModeEvaluation car les panneaux sont deplacés, pas detruits)
+        const ancGrille = document.getElementById('selectGrille1')?.value || '';
+        const ancEchelle = document.getElementById('selectEchelle1')?.value || '';
+        const ancCartouche = document.getElementById('selectCartoucheEval')?.value || '';
+        const ancRemise = document.getElementById('remiseProduction1')?.value || '';
+        // Aussi verifier evaluationEnCours (variable globale qui survit entre sessions)
+        const evalEC = window.evaluationEnCours;
+        const grilleARestaurer = ancGrille || (evalEC && evalEC.grilleId) || '';
+        const echelleARestaurer = ancEchelle || (evalEC && evalEC.echelleId) || '';
+        const cartoucheARestaurer = ancCartouche || (evalEC && evalEC.cartoucheId) || '';
+        const remiseARestaurer = ancRemise || (evalEC && evalEC.statutRemise) || '';
+
         // Peupler les dropdowns (les fonctions d'evaluation.js remplissent les selects)
         if (typeof chargerListeEtudiantsEval === 'function') chargerListeEtudiantsEval();
         if (typeof chargerGroupesEval === 'function') chargerGroupesEval();
         if (typeof chargerProductionsDansSelect === 'function') chargerProductionsDansSelect();
         if (typeof chargerGrillesDansSelect === 'function') chargerGrillesDansSelect();
         if (typeof chargerEchellePerformance === 'function') chargerEchellePerformance();
+
+        // Restaurer les valeurs sauvegardées après peuplement
+        if (grilleARestaurer) {
+            const selG = document.getElementById('selectGrille1');
+            if (selG && Array.from(selG.options).some(o => o.value === grilleARestaurer)) {
+                selG.value = grilleARestaurer;
+                // Peupler les cartouches pour cette grille
+                if (typeof chargerGrilleSelectionnee === 'function') chargerGrilleSelectionnee();
+            }
+        }
+        if (echelleARestaurer) {
+            const selE = document.getElementById('selectEchelle1');
+            if (selE && Array.from(selE.options).some(o => o.value === echelleARestaurer)) {
+                selE.value = echelleARestaurer;
+            }
+        }
+        if (remiseARestaurer) {
+            const selR = document.getElementById('remiseProduction1');
+            if (selR) selR.value = remiseARestaurer;
+        }
+        // Restaurer la cartouche après un micro-délai (les options viennent de chargerGrilleSelectionnee)
+        if (cartoucheARestaurer) {
+            setTimeout(() => {
+                const selC = document.getElementById('selectCartoucheEval');
+                if (selC && Array.from(selC.options).some(o => o.value === cartoucheARestaurer)) {
+                    selC.value = cartoucheARestaurer;
+                    // Déclencher l'affichage des critères
+                    if (typeof cartoucheSelectionnee === 'function') cartoucheSelectionnee();
+                }
+            }, 50);
+        }
 
         // Afficher les labels d'identite
         remplirLabelsIdentite(fichier);
