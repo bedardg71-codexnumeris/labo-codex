@@ -937,7 +937,7 @@
      */
     function ajouterSymbole(type, xNorm, yNorm) {
         const outil = travauxOutils.OUTILS[type];
-        const taille = (outil.taille || 30) / canvasAnnotation.width;
+        const taille = (outil.taille || 30) / travauxOutils.RESOLUTION_REFERENCE;
 
         // Couleur fixe selon le type de symbole
         let couleurSymbole;
@@ -1304,33 +1304,76 @@
         const bbox = dimensionsOriginales;
 
         if (sel.type === 'shape') {
-            switch (poignee) {
-                case 'nw': sel.data.x1 = xNorm; sel.data.y1 = yNorm; break;
-                case 'ne': sel.data.x2 = xNorm; sel.data.y1 = yNorm; break;
-                case 'sw': sel.data.x1 = xNorm; sel.data.y2 = yNorm; break;
-                case 'se': sel.data.x2 = xNorm; sel.data.y2 = yNorm; break;
+            // Verifier si c'est un symbole (doit garder ses proportions 1:1)
+            const estSymbole = sel.data.type === 'crochet' || sel.data.type === 'croix'
+                || sel.data.type === 'interrogation' || (sel.data.type && sel.data.type.startsWith('errfr_'));
+
+            if (estSymbole) {
+                // Contraindre a un carre : utiliser la plus grande distance comme cote
+                const origW = bbox.x2 - bbox.x1;
+                const origH = bbox.y2 - bbox.y1;
+                let dx, dy, delta;
+                switch (poignee) {
+                    case 'se':
+                        dx = xNorm - bbox.x1; dy = yNorm - bbox.y1;
+                        delta = Math.max(dx, dy);
+                        sel.data.x2 = bbox.x1 + delta; sel.data.y2 = bbox.y1 + delta;
+                        break;
+                    case 'sw':
+                        dx = bbox.x2 - xNorm; dy = yNorm - bbox.y1;
+                        delta = Math.max(dx, dy);
+                        sel.data.x1 = bbox.x2 - delta; sel.data.y2 = bbox.y1 + delta;
+                        break;
+                    case 'ne':
+                        dx = xNorm - bbox.x1; dy = bbox.y2 - yNorm;
+                        delta = Math.max(dx, dy);
+                        sel.data.x2 = bbox.x1 + delta; sel.data.y1 = bbox.y2 - delta;
+                        break;
+                    case 'nw':
+                        dx = bbox.x2 - xNorm; dy = bbox.y2 - yNorm;
+                        delta = Math.max(dx, dy);
+                        sel.data.x1 = bbox.x2 - delta; sel.data.y1 = bbox.y2 - delta;
+                        break;
+                }
+            } else {
+                switch (poignee) {
+                    case 'nw': sel.data.x1 = xNorm; sel.data.y1 = yNorm; break;
+                    case 'ne': sel.data.x2 = xNorm; sel.data.y1 = yNorm; break;
+                    case 'sw': sel.data.x1 = xNorm; sel.data.y2 = yNorm; break;
+                    case 'se': sel.data.x2 = xNorm; sel.data.y2 = yNorm; break;
+                }
             }
         } else if (sel.type === 'sticker') {
+            // Conserver les proportions : ratio original width/height
+            const origW = bbox.x2 - bbox.x1;
+            const origH = bbox.y2 - bbox.y1;
+            const ratio = origW > 0 ? origH / origW : 1;
+
+            let newW;
             switch (poignee) {
                 case 'nw':
-                    sel.data.width = (bbox.x2 - xNorm);
-                    sel.data.height = (bbox.y2 - yNorm);
-                    sel.data.x = xNorm;
-                    sel.data.y = yNorm;
+                    newW = bbox.x2 - xNorm;
+                    sel.data.width = newW;
+                    sel.data.height = newW * ratio;
+                    sel.data.x = bbox.x2 - newW;
+                    sel.data.y = bbox.y2 - newW * ratio;
                     break;
                 case 'ne':
-                    sel.data.width = (xNorm - bbox.x1);
-                    sel.data.height = (bbox.y2 - yNorm);
-                    sel.data.y = yNorm;
+                    newW = xNorm - bbox.x1;
+                    sel.data.width = newW;
+                    sel.data.height = newW * ratio;
+                    sel.data.y = bbox.y2 - newW * ratio;
                     break;
                 case 'sw':
-                    sel.data.width = (bbox.x2 - xNorm);
-                    sel.data.height = (yNorm - bbox.y1);
-                    sel.data.x = xNorm;
+                    newW = bbox.x2 - xNorm;
+                    sel.data.width = newW;
+                    sel.data.height = newW * ratio;
+                    sel.data.x = bbox.x2 - newW;
                     break;
                 case 'se':
-                    sel.data.width = (xNorm - bbox.x1);
-                    sel.data.height = (yNorm - bbox.y1);
+                    newW = xNorm - bbox.x1;
+                    sel.data.width = newW;
+                    sel.data.height = newW * ratio;
                     break;
             }
         } else if (sel.type === 'text') {
