@@ -14689,6 +14689,21 @@ body.mode-clair #travaux-indicateur-page {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+.travaux-errfr-compteur {
+    margin-left: auto;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    background: var(--accent-primaire, #6aacb8);
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    flex-shrink: 0;
+}
 
 .travaux-sidebar {
     width: 200px;

@@ -449,6 +449,7 @@
             html += `<div class="travaux-errfr-item${actif}" onclick="travauxOutils.setOutilActif('${c.id}')" title="${c.nom}">`;
             html += `<span class="travaux-errfr-numero" style="background:${outil.couleurBouton}">${c.code}</span>`;
             html += `<span class="travaux-errfr-nom">${c.nom}</span>`;
+            html += `<span class="travaux-errfr-compteur u-hide" data-erreur="${c.id}"></span>`;
             html += '</div>';
         });
         html += '</div></div>';
@@ -801,6 +802,43 @@
     }
 
     /* ===============================
+       COMPTEURS ERREURS DE FRANÇAIS
+       =============================== */
+
+    function compterErreursFrancais() {
+        const compteurs = {};
+        CODES_ERREURS_FR.forEach(c => { compteurs[c.id] = 0; });
+        const annotation = travauxAnnotation.getAnnotationCourante();
+        if (!annotation || !annotation.pages) return compteurs;
+        for (const pageKey of Object.keys(annotation.pages)) {
+            const page = annotation.pages[pageKey];
+            if (!page.shapes) continue;
+            for (const forme of page.shapes) {
+                if (forme.type && compteurs.hasOwnProperty(forme.type)) {
+                    compteurs[forme.type]++;
+                }
+            }
+        }
+        return compteurs;
+    }
+
+    function mettreAJourCompteursErreurs() {
+        const palette = document.getElementById('travaux-palette-erreurs-fr');
+        if (!palette) return;
+        const compteurs = compterErreursFrancais();
+        CODES_ERREURS_FR.forEach(c => {
+            const badge = palette.querySelector('.travaux-errfr-compteur[data-erreur="' + c.id + '"]');
+            if (badge) {
+                const count = compteurs[c.id] || 0;
+                badge.textContent = count > 0 ? count : '';
+                badge.classList.toggle('u-hide', count === 0);
+            }
+        });
+    }
+
+    window.addEventListener('travaux-annotation-modifiee', mettreAJourCompteursErreurs);
+
+    /* ===============================
        EXPORTS GLOBAUX
        =============================== */
 
@@ -809,6 +847,7 @@
         COULEURS: COULEURS,
         OUTILS: OUTILS,
         AUTOCOLLANTS: AUTOCOLLANTS,
+        CODES_ERREURS_FR: CODES_ERREURS_FR,
         // Getters
         getOutilActif: getOutilActif,
         getCouleurActive: getCouleurActive,
@@ -842,7 +881,10 @@
         togglePaletteErrFrReplie: togglePaletteErrFrReplie,
         // Palette flottante
         configurerDragPalette: configurerDragPalette,
-        togglePaletteReplie: togglePaletteReplie
+        togglePaletteReplie: togglePaletteReplie,
+        // Compteurs erreurs
+        compterErreursFrancais: compterErreursFrancais,
+        mettreAJourCompteursErreurs: mettreAJourCompteursErreurs
     };
 
 })();
