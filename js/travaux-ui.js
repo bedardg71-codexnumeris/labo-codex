@@ -2021,15 +2021,40 @@
             paletteR.style.transform = 'translateX(-50%)';
             conteneurDoc.appendChild(paletteR);
             configurerDragPaletteEval('travaux-palette-eval-retro');
+
+            // Bouton Copier compact dans la barre de titre
+            const barreRetro = paletteR.querySelector('.travaux-palette-barre');
+            if (barreRetro) {
+                const btnCopier = document.createElement('button');
+                btnCopier.className = 'btn btn-compact';
+                btnCopier.textContent = 'Copier';
+                btnCopier.title = 'Copier dans le presse-papier';
+                btnCopier.style.cssText = 'font-size:10px; padding:2px 8px; margin-right:4px;';
+                btnCopier.addEventListener('click', function() { copierRetroaction(1); });
+                const btnToggle = barreRetro.querySelector('.travaux-palette-toggle');
+                barreRetro.insertBefore(btnCopier, btnToggle);
+            }
         }
 
-        // 4e palette : Jetons
+        // Auto-replier Paramètres au clic sur Évaluation
+        if (panneauDroite) {
+            const paletteD = document.getElementById('travaux-palette-eval-droite');
+            if (paletteD) {
+                paletteD.addEventListener('pointerdown', function() {
+                    const paletteG = document.getElementById('travaux-palette-eval-gauche');
+                    if (paletteG && !paletteG.classList.contains('replie')) {
+                        togglePaletteEvalReplie('travaux-palette-eval-gauche');
+                    }
+                });
+            }
+        }
+
+        // 4e palette : Jetons (positionnée sous Paramètres, côté gauche)
         const panneauJetons = document.getElementById('travaux-eval-jetons');
         if (panneauJetons) {
             const paletteJ = creerPaletteEval('travaux-palette-eval-jetons', 'Jetons', panneauJetons);
-            paletteJ.style.bottom = '12px';
-            paletteJ.style.right = '12px';
-            paletteJ.style.left = 'auto';
+            paletteJ.style.top = '55%';
+            paletteJ.style.left = '12px';
             conteneurDoc.appendChild(paletteJ);
             configurerDragPaletteEval('travaux-palette-eval-jetons');
         }

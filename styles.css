@@ -14425,6 +14425,7 @@ body.mode-clair .prep-select {
 .travaux-palette-eval .travaux-palette-contenu {
     max-height: calc(100vh - 200px);
     padding: 0;
+    flex: 1;
 }
 
 .travaux-palette-eval .travaux-panneau-corps {
@@ -14434,7 +14435,7 @@ body.mode-clair .prep-select {
 
 #travaux-palette-eval-retro {
     min-width: 400px;
-    max-width: 600px;
+    max-width: 90vw;
 }
 
 /* Panneaux internes : style palette (comme prep-palette / planif-palette) */
@@ -14583,6 +14584,9 @@ body.mode-clair #travaux-indicateur-page {
 /* Retroaction dans palette eval */
 .travaux-palette-eval .zone-retroaction {
     margin: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 .travaux-palette-eval .zone-retroaction-header {
     margin-bottom: 6px;
@@ -14596,7 +14600,11 @@ body.mode-clair #travaux-indicateur-page {
     margin-bottom: 6px;
 }
 .travaux-palette-eval textarea {
-    height: 100px !important;
+    min-height: 80px;
+    height: auto;
+}
+#retroactionFinale1 {
+    flex: 1;
 }
 
 /* Labels identité dans palette paramètres */
