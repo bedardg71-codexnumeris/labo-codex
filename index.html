@@ -4481,12 +4481,6 @@
                     <div class="carte-grise-mb20">
                         <div class="grid-auto-180">
                             <div class="groupe-form">
-                                <label for="filtre-groupe-eval">Groupe</label>
-                                <select id="filtre-groupe-eval" class="controle-form" onchange="filtrerListeEvaluations()">
-                                    <option value="">Tous les groupes</option>
-                                </select>
-                            </div>
-                            <div class="groupe-form">
                                 <label for="filtre-production-eval">Production</label>
                                 <select id="filtre-production-eval" class="controle-form"
                                     onchange="filtrerListeEvaluations()">
@@ -4497,9 +4491,12 @@
                                 <label for="filtre-statut-eval">Statut</label>
                                 <select id="filtre-statut-eval" class="controle-form" onchange="filtrerListeEvaluations()">
                                     <option value="">Tous</option>
+                                    <option value="non-recu">Non reçu</option>
+                                    <option value="recu">Reçu</option>
+                                    <option value="importe">Importé</option>
+                                    <option value="annote">Annoté</option>
+                                    <option value="evalue">Évalué</option>
                                     <option value="remis">Remis</option>
-                                    <option value="non-remis">Non remis</option>
-                                    <option value="evalue">Évalués seulement</option>
                                     <option value="non-evalue">Non évalués</option>
                                     <option value="jeton-delai">Jeton de délai</option>
                                     <option value="jeton-reprise">Jeton de reprise</option>
@@ -4550,7 +4547,7 @@
                                         Jeton <span id="tri-jetons" style="font-size: 0.8em; color: var(--gris-clair);">↕</span>
                                     </th>
                                     <th class="td-center-clickable" data-tooltip="eval-col-niveau" onclick="trierTableauParColonne('niveau')">
-                                        Niveau <span id="tri-niveau" style="font-size: 0.8em; color: var(--gris-clair);">↕</span>
+                                        Statut <span id="tri-niveau" style="font-size: 0.8em; color: var(--gris-clair);">↕</span>
                                     </th>
                                     <th class="td-center-clickable" onclick="trierTableauParColonne('note')" title="Cliquer pour trier">
                                         Note % <span id="tri-note" style="font-size: 0.8em; color: var(--gris-clair);">↕</span>
@@ -4695,11 +4692,19 @@
                             </div>
 
                             <div class="groupe-form" class="mb-12">
-                                <label class="label-formulaire" data-tooltip="eval-statut-remise">Statut de remise :</label>
+                                <label class="label-formulaire" data-tooltip="eval-statut-remise">Statut :</label>
                                 <select id="remiseProduction1" class="controle-form" onchange="changerStatutRemise(1)">
-                                    <option value="non-remis">Non remis</option>
+                                    <option value="non-recu">Non reçu</option>
+                                    <option value="recu">Reçu</option>
+                                    <option value="importe">Importé</option>
+                                    <option value="annote">Annoté</option>
+                                    <option value="evalue">Évalué</option>
                                     <option value="remis">Remis</option>
                                 </select>
+                                <label class="text-sm-pointer" id="checkboxRemisLabel" style="display:none; margin-top:6px;">
+                                    <input type="checkbox" id="checkboxRemisEleve" onchange="changerCheckboxRemis()">
+                                    Remis à l'élève
+                                </label>
                             </div>
 
                             <!-- STATUT D'INTÉGRITÉ ACADÉMIQUE -->

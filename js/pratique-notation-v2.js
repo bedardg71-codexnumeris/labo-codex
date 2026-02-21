@@ -637,6 +637,25 @@
         modalites.configurationJetons.repriseCibleeActif = document.getElementById('v2-jeton-ciblee-actif')?.checked !== false;
         modalites.configurationJetons.plafondCiblee = document.getElementById('v2-ciblee-plafond')?.value || 'D (Développement)';
 
+        // Synchroniser avec configPAN.jetons (format attendu par evaluation-jetons.js)
+        modalites.configPAN = modalites.configPAN || {};
+        modalites.configPAN.jetons = {
+            actif: modalites.configurationJetons.jetonsActif,
+            delai: {
+                nombre: nombreParEleve,
+                dureeJours: dureeDelaiJours
+            },
+            reprise: {
+                nombre: nombreParEleve,
+                maxParProduction: 1,
+                archiverOriginale: modalites.configurationJetons.gestionOriginale === 'archiver'
+            },
+            repriseCiblee: {
+                actif: modalites.configurationJetons.repriseCibleeActif,
+                plafondNote: modalites.configurationJetons.plafondCiblee
+            }
+        };
+
         db.setSync('modalitesEvaluation', modalites);
         console.log('[DEBUG sauvegarderJetonsV2] Sauvegarde effectuée:', modalites.configurationJetons);
     }
