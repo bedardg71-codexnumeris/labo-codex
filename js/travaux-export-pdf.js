@@ -314,19 +314,33 @@
                 ctx.stroke();
                 break;
             }
-            case 'fleche': {
-                const headLen = 15 * ratioResolution;
-                const angle = Math.atan2(y2 - y1, x2 - x1);
+            case 'ligne':
                 ctx.beginPath();
                 ctx.moveTo(x1, y1);
                 ctx.lineTo(x2, y2);
                 ctx.stroke();
+                break;
+            case 'fleche': {
+                const headLen = Math.max(12 * ratioResolution, ctx.lineWidth * 5);
+                const headAngle = Math.PI / 8;
+                const angle = Math.atan2(y2 - y1, x2 - x1);
+                const baseX = x2 - headLen * Math.cos(angle);
+                const baseY = y2 - headLen * Math.sin(angle);
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(baseX, baseY);
+                ctx.stroke();
+                const ax = x2 - headLen * Math.cos(angle - headAngle);
+                const ay = y2 - headLen * Math.sin(angle - headAngle);
+                const bx = x2 - headLen * Math.cos(angle + headAngle);
+                const by = y2 - headLen * Math.sin(angle + headAngle);
+                ctx.fillStyle = ctx.strokeStyle;
                 ctx.beginPath();
                 ctx.moveTo(x2, y2);
-                ctx.lineTo(x2 - headLen * Math.cos(angle - Math.PI / 6), y2 - headLen * Math.sin(angle - Math.PI / 6));
-                ctx.moveTo(x2, y2);
-                ctx.lineTo(x2 - headLen * Math.cos(angle + Math.PI / 6), y2 - headLen * Math.sin(angle + Math.PI / 6));
-                ctx.stroke();
+                ctx.lineTo(ax, ay);
+                ctx.lineTo(bx, by);
+                ctx.closePath();
+                ctx.fill();
                 break;
             }
             case 'crochet': {
