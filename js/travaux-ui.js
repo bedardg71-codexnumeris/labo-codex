@@ -246,10 +246,7 @@
         const conteneur = document.getElementById('evaluations-contenu-fichiers');
         if (!conteneur) return;
 
-        // S'assurer que la grille est visible et la visionneuse masquée
         conteneur.classList.remove('u-hide');
-        const visDiv = document.getElementById('evaluations-contenu-visionneuse');
-        if (visDiv) visDiv.classList.add('u-hide');
         const evalDiv = document.getElementById('evaluations-contenu-evaluation');
         if (evalDiv) evalDiv.classList.add('u-hide');
 
@@ -265,33 +262,33 @@
         }
 
         conteneur.innerHTML = `
-            <div class="conteneur">
-                <h2>Annoter et évaluer</h2>
-                <p class="text-muted">Sélectionnez un fichier pour commencer l'annotation</p>
+            <div class="conteneur travaux-fichiers-compact">
                 ${genererGrilleFichiers(fichiersTravaux, 'ouvrirFichier')}
             </div>`;
+
+        // Rendre la visionneuse permanente sous les badges
+        afficherVisionneuse();
     }
 
     /**
      * Affiche la sous-section Visionneuse
      */
     function afficherVisionneuse() {
-        const conteneur = document.getElementById('evaluations-contenu-visionneuse');
+        // Eviter de re-creer si deja present
+        if (document.getElementById('travaux-conteneur-document')) return;
+
+        const conteneur = document.getElementById('evaluations-contenu-fichiers');
         if (!conteneur) return;
 
-        conteneur.innerHTML = `
-            <div class="travaux-visionneuse-layout">
-                <!-- Zone document + annotation -->
+        const visionDiv = document.createElement('div');
+        visionDiv.className = 'travaux-visionneuse-layout';
+        visionDiv.innerHTML = `
                 <div class="travaux-zone-document" id="travaux-conteneur-document">
 
                     <!-- Toolbar -->
                     <div class="travaux-toolbar">
                         <div class="travaux-toolbar-gauche">
-                            <button class="btn btn-petit" onclick="travauxUI.retourFichiers()" title="Fermer la visionneuse">&#x2715; Fermer</button>
-                            <span id="travaux-nom-fichier" class="travaux-nom-fichier">Aucun fichier ouvert</span>
                             <span id="travaux-badge-statut" class="u-hide"></span>
-                        </div>
-                        <div class="travaux-toolbar-centre">
                             <button id="travaux-btn-page-prec" class="btn-icon" onclick="travauxVisionneuse.pagePrecedente()" disabled title="Page précédente">&#x2190;</button>
                             <span id="travaux-indicateur-page">-- / --</span>
                             <button id="travaux-btn-page-suiv" class="btn-icon" onclick="travauxVisionneuse.pageSuivante()" disabled title="Page suivante">&#x2192;</button>
@@ -330,8 +327,8 @@
                         <button class="btn-icon btn-danger-petit" onclick="travauxAnnotation.effacerPage()" title="Effacer la page">&#x1F5D1;</button>
                     </div>
                 </div>
-            </div>
         `;
+        conteneur.appendChild(visionDiv);
 
         // Configurer la visionneuse
         const conteneurDoc = document.getElementById('travaux-conteneur-document');
@@ -1182,14 +1179,9 @@
             }
         }
 
-        // Afficher visionneuse sous les badges
-        const fichiersDiv = document.getElementById('evaluations-contenu-fichiers');
-        const visDiv = document.getElementById('evaluations-contenu-visionneuse');
+        // Masquer la section evaluation si visible
         const evalDiv = document.getElementById('evaluations-contenu-evaluation');
-        if (fichiersDiv) fichiersDiv.classList.add('compact');
-        if (visDiv) visDiv.classList.remove('u-hide');
         if (evalDiv) evalDiv.classList.add('u-hide');
-        afficherVisionneuse();
 
         // Highlight du badge actif
         document.querySelectorAll('.travaux-badge-importe').forEach(b => {
@@ -1947,7 +1939,7 @@
         vueCoteACote = true;
 
         // Masquer la visionneuse standard pour eviter les conflits d'IDs canvas
-        const visStandard = document.getElementById('evaluations-contenu-visionneuse');
+        const visStandard = document.getElementById('evaluations-contenu-fichiers');
         if (visStandard) visStandard.classList.add('u-hide');
 
         // Creer la mise en page cote-a-cote
@@ -2028,12 +2020,7 @@
                 afficherImport();
                 break;
             case 'evaluations-annoter':
-                const visDiv = document.getElementById('evaluations-contenu-visionneuse');
-                if (visDiv && !visDiv.classList.contains('u-hide')) {
-                    afficherVisionneuse();
-                } else {
-                    afficherFichiers();
-                }
+                afficherFichiers();
                 break;
             case 'evaluations-exporter':
                 afficherArchivage();
@@ -2069,11 +2056,7 @@
      * Retour a la grille de fichiers depuis la visionneuse (onglet Annoter)
      */
     function retourFichiers() {
-        const fichiersDiv = document.getElementById('evaluations-contenu-fichiers');
-        const visDiv = document.getElementById('evaluations-contenu-visionneuse');
         const evalDiv = document.getElementById('evaluations-contenu-evaluation');
-        if (fichiersDiv) fichiersDiv.classList.remove('compact');
-        if (visDiv) visDiv.classList.add('u-hide');
         if (evalDiv) evalDiv.classList.add('u-hide');
         // Retirer le highlight actif
         document.querySelectorAll('.travaux-badge-importe.actif').forEach(b => b.classList.remove('actif'));
