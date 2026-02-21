@@ -14426,11 +14426,76 @@ body.mode-clair .prep-select {
     max-height: calc(100vh - 200px);
     padding: 0;
     flex: 1;
+    overflow-x: hidden;
+    min-width: 0;
 }
 
 .travaux-palette-eval .travaux-panneau-corps {
     max-height: none;
     overflow-y: visible;
+}
+
+/* Contenu compact dans les palettes évaluation (override des inline styles) */
+.travaux-palette-eval .zone-criteres {
+    padding: 6px !important;
+}
+.travaux-palette-eval .zone-criteres > .conteneur-liste > div {
+    padding: 8px !important;
+    margin-bottom: 8px !important;
+}
+.travaux-palette-eval .eval-grid-critere {
+    font-size: 0.8rem;
+}
+.travaux-palette-eval .controle-form {
+    font-size: 0.78rem !important;
+    padding: 3px 6px !important;
+}
+.travaux-palette-eval select.controle-form {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+}
+.travaux-palette-eval .u-texte-09 {
+    font-size: 0.8rem !important;
+}
+.travaux-palette-eval small {
+    font-size: 0.68rem !important;
+}
+.travaux-palette-eval .groupe-form label {
+    font-size: 0.72rem !important;
+}
+.travaux-palette-eval .groupe-form {
+    margin-bottom: 4px !important;
+}
+.travaux-palette-eval .boite-note-finale {
+    margin-top: 8px !important;
+    padding: 6px !important;
+}
+.travaux-palette-eval .boite-note-finale .valeur,
+.travaux-palette-eval .boite-note-finale div[style*="font-size: 2rem"] {
+    font-size: 1.4rem !important;
+}
+.travaux-palette-eval .boite-note-finale .label,
+.travaux-palette-eval .boite-note-finale div[style*="font-size: 0.8rem"] {
+    font-size: 0.72rem !important;
+}
+/* Grilles internes : s'adapter à la largeur de la palette */
+.travaux-palette-eval div[style*="grid-template-columns"] {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+}
+.travaux-palette-eval input.controle-form {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+}
+/* Paragraphes et textes inline dans la palette */
+.travaux-palette-eval p {
+    font-size: 0.75rem !important;
+}
+.travaux-palette-eval .eval-texte-placeholder,
+.travaux-palette-eval .eval-texte-italic-gris {
+    font-size: 0.78rem !important;
 }
 
 #travaux-palette-eval-retro {
@@ -14441,6 +14506,8 @@ body.mode-clair .prep-select {
 /* Panneaux internes : style palette (comme prep-palette / planif-palette) */
 .travaux-panneau-lateral {
     padding: 0;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .travaux-panneau-lateral .carte-bleu-fonce,
