@@ -14700,30 +14700,21 @@ body.mode-clair #travaux-indicateur-page {
 .travaux-eval-identite {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
     padding: 4px 0;
-}
-.travaux-eval-label-ligne {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 8px;
-}
-.travaux-eval-label-cle {
-    font-size: 0.7rem;
-    color: var(--texte-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    flex-shrink: 0;
 }
 .travaux-eval-label-val {
     font-size: 0.8rem;
     font-weight: 600;
     color: var(--texte-principal);
-    text-align: right;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+.travaux-eval-label-val.travaux-eval-label-production {
+    font-weight: 400;
+    font-size: 0.75rem;
+    color: var(--texte-muted);
 }
 .btn-lien-discret {
     background: none;
@@ -19551,6 +19542,33 @@ body.mode-clair .barre-etudiant.tracked-4 {
     overflow-x: auto;
     margin-bottom: 2px;
     padding-bottom: 4px;
+}
+
+/* Entête badges : dropdown production + badges sur la même ligne */
+.travaux-badges-entete {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+.travaux-filtre-production {
+    flex-shrink: 0;
+    width: auto;
+    max-width: 200px;
+    font-size: 0.75rem;
+    padding: 4px 8px;
+}
+.travaux-filtre-production-label {
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--texte-muted);
+    padding: 4px 0;
+    white-space: nowrap;
+}
+.travaux-badges-liste {
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
 }
 
 .travaux-badge-importe {

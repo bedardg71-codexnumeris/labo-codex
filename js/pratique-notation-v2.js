@@ -488,37 +488,38 @@
      * Taxonomie Beta 95.2 : Sommative, PAN-Standards, PAN-Spécifications, PAN-Dénotation
      */
     function afficherConfigurationType(type) {
-        // Masquer toutes les configurations
-        const configs = ['v2-config-pan-standards', 'v2-config-sommative',
-                        'v2-config-pan-specifications', 'v2-config-defaut'];
+        // Masquer toutes les configurations (IDs mat-* du HTML existant)
+        const configs = ['mat-config-pan-standards', 'mat-config-sommative',
+                        'mat-config-pan-specifications', 'mat-config-defaut'];
 
         configs.forEach(id => {
             const el = document.getElementById(id);
-            if (el) el.classList.add('u-hide');
+            if (el) {
+                el.style.display = 'none';
+            }
         });
 
         // Afficher la configuration correspondante
-        let configId = 'v2-config-defaut';
+        let configId = 'mat-config-defaut';
         switch (type) {
             case 'pan-standards':
             case 'pan-maitrise':  // Rétrocompatibilité
-                configId = 'v2-config-pan-standards';
+                configId = 'mat-config-pan-standards';
                 break;
             case 'sommative':
-                configId = 'v2-config-sommative';
+                configId = 'mat-config-sommative';
                 break;
             case 'pan-specifications':
             case 'specifications':  // Rétrocompatibilité
-                configId = 'v2-config-pan-specifications';
+                configId = 'mat-config-pan-specifications';
                 break;
             case 'pan-denotation':
-                // PAN-Dénotation : pas encore de configuration spécifique
-                configId = 'v2-config-defaut';
+                configId = 'mat-config-defaut';
                 break;
         }
 
         const config = document.getElementById(configId);
-        if (config) config.classList.remove('u-hide');
+        if (config) config.style.display = '';
 
         // Charger les données spécifiques au type de pratique
         if (type === 'pan-specifications' || type === 'specifications') {

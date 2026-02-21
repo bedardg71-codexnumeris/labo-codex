@@ -206,11 +206,30 @@ function genererBadgeCaracteristiques(pratique) {
         caracteristiques.push('par objectifs');
     }
 
-    // 2. Portfolio actif (N meilleures)
+    // 2. Portfolio actif (N meilleures, ou hybride N meilleures + M obligatoires)
     if (pratique.configuration?.portfolio && pratique.configuration.varianteCalcul !== 'par-objectifs') {
-        const n = pratique.configuration.portfolio.nombreARetenir || 0;
-        if (n > 0) {
-            caracteristiques.push(`${n} meilleures`);
+        const config = pratique.configuration;
+        const categoriesActif = config.categories?.actif || config.portfolio?.hybride || false;
+
+        if (categoriesActif && config.categories?.selection) {
+            // Mode hybride : N meilleures + M obligatoires
+            const nMeilleures = config.categories.selection.nombreARetenir || 0;
+            const nTotal = config.portfolio.nombreARetenir || config.portfolio.nbArtefactsRetenus || 0;
+            const nObligatoires = nTotal > nMeilleures ? nTotal - nMeilleures : 0;
+
+            if (nMeilleures > 0) {
+                let texte = `${nMeilleures} meilleure${nMeilleures > 1 ? 's' : ''}`;
+                if (nObligatoires > 0) {
+                    texte += ` + ${nObligatoires} oblig.`;
+                }
+                caracteristiques.push(texte);
+            }
+        } else {
+            // Mode simple : N meilleures
+            const n = config.portfolio.nombreARetenir || config.portfolio.nbArtefactsRetenus || 0;
+            if (n > 0) {
+                caracteristiques.push(`${n} meilleures`);
+            }
         }
     }
 
