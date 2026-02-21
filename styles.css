@@ -15621,6 +15621,21 @@ body.mode-clair #travaux-indicateur-page {
     display: inline-block;
 }
 
+.travaux-canvas-container.travaux-pan-pret {
+    cursor: grab;
+}
+.travaux-canvas-container.travaux-pan-pret .travaux-canvas-wrapper,
+.travaux-canvas-container.travaux-pan-pret canvas {
+    cursor: grab;
+}
+.travaux-canvas-container.travaux-pan-actif {
+    cursor: grabbing;
+}
+.travaux-canvas-container.travaux-pan-actif .travaux-canvas-wrapper,
+.travaux-canvas-container.travaux-pan-actif canvas {
+    cursor: grabbing;
+}
+
 #travaux-canvas-document {
     display: block;
     box-shadow: var(--shadow-prononce);

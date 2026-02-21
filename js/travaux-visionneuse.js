@@ -521,6 +521,16 @@
         distanceInitiale: 0
     };
 
+    // Etat du pan (glisser-deplacer la vue)
+    let panState = {
+        actif: false,
+        spaceActif: false,
+        startX: 0,
+        startY: 0,
+        scrollXDepart: 0,
+        scrollYDepart: 0
+    };
+
     /**
      * Configure les gestes de zoom sur le conteneur du document
      * @param {HTMLElement} conteneur - .travaux-canvas-container
@@ -550,6 +560,8 @@
         // Prevention supplementaire : bloquer le zoom natif sur tout le document
         // quand un pinch est en cours dans notre zone
         document.addEventListener('touchmove', onDocumentTouchMove, { passive: false });
+
+        configurerPan(conteneur);
 
         console.log('[Travaux-Visionneuse] Gestes zoom configures (Safari:', estSafari, ')');
     }
@@ -765,6 +777,101 @@
     }
 
     /* ===============================
+       PAN (glisser-deplacer la vue)
+       =============================== */
+
+    function configurerPan(conteneur) {
+        if (!conteneur) return;
+        document.addEventListener('keydown', onPanKeyDown);
+        document.addEventListener('keyup', onPanKeyUp);
+        conteneur.addEventListener('pointerdown', onPanPointerDown);
+        conteneur.addEventListener('pointermove', onPanPointerMove);
+        conteneur.addEventListener('pointerup', onPanPointerUp);
+        conteneur.addEventListener('pointercancel', onPanPointerUp);
+        conteneur.addEventListener('mousedown', function(e) {
+            if (e.button === 1) e.preventDefault(); // Empecher auto-scroll molette
+        });
+    }
+
+    function onPanKeyDown(e) {
+        if (e.key !== ' ' || e.repeat) return;
+        if (e.target.matches('input, select, textarea, [contenteditable]')) return;
+        if (!fichierActuel) return;
+        e.preventDefault();
+        panState.spaceActif = true;
+        if (conteneurGestesZoom) conteneurGestesZoom.classList.add('travaux-pan-pret');
+        window.dispatchEvent(new CustomEvent('travaux-pan-mode', { detail: { actif: true } }));
+    }
+
+    function onPanKeyUp(e) {
+        if (e.key !== ' ') return;
+        panState.spaceActif = false;
+        if (!panState.actif && conteneurGestesZoom) {
+            conteneurGestesZoom.classList.remove('travaux-pan-pret');
+            conteneurGestesZoom.classList.remove('travaux-pan-actif');
+        }
+        window.dispatchEvent(new CustomEvent('travaux-pan-mode', { detail: { actif: false } }));
+    }
+
+    function onPanPointerDown(e) {
+        if (!fichierActuel) return;
+        var estSpaceDrag = panState.spaceActif && e.button === 0;
+        var estMoletteMilieu = e.button === 1;
+        if (!estSpaceDrag && !estMoletteMilieu) return;
+        e.preventDefault();
+        e.stopPropagation();
+        panState.actif = true;
+        panState.startX = e.clientX;
+        panState.startY = e.clientY;
+        panState.scrollXDepart = conteneurGestesZoom.scrollLeft;
+        panState.scrollYDepart = conteneurGestesZoom.scrollTop;
+        if (conteneurGestesZoom) {
+            conteneurGestesZoom.classList.add('travaux-pan-actif');
+            conteneurGestesZoom.classList.remove('travaux-pan-pret');
+            conteneurGestesZoom.setPointerCapture(e.pointerId);
+        }
+    }
+
+    function onPanPointerMove(e) {
+        if (!panState.actif) return;
+        e.preventDefault();
+        var dx = e.clientX - panState.startX;
+        var dy = e.clientY - panState.startY;
+        conteneurGestesZoom.scrollLeft = panState.scrollXDepart - dx;
+        conteneurGestesZoom.scrollTop = panState.scrollYDepart - dy;
+    }
+
+    function onPanPointerUp(e) {
+        if (!panState.actif) return;
+        panState.actif = false;
+        if (conteneurGestesZoom) {
+            conteneurGestesZoom.classList.remove('travaux-pan-actif');
+            if (panState.spaceActif) {
+                conteneurGestesZoom.classList.add('travaux-pan-pret');
+            } else {
+                conteneurGestesZoom.classList.remove('travaux-pan-pret');
+            }
+            try { conteneurGestesZoom.releasePointerCapture(e.pointerId); } catch(ex) {}
+        }
+    }
+
+    function recentrerVue() {
+        if (!conteneurGestesZoom) return;
+        var wrapper = conteneurGestesZoom.querySelector('.travaux-canvas-wrapper');
+        if (!wrapper) return;
+        var wW = wrapper.offsetWidth;
+        var wH = wrapper.offsetHeight;
+        var cW = conteneurGestesZoom.clientWidth;
+        var cH = conteneurGestesZoom.clientHeight;
+        conteneurGestesZoom.scrollLeft = wW > cW ? (wW - cW) / 2 : 0;
+        conteneurGestesZoom.scrollTop = wH > cH ? (wH - cH) / 2 : 0;
+    }
+
+    function estModePanActif() {
+        return panState.spaceActif || panState.actif;
+    }
+
+    /* ===============================
        FERMETURE
        =============================== */
 
@@ -845,7 +952,9 @@
         getNombrePagesTotal: getNombrePagesTotal,
         getZoomActuel: getZoomActuel,
         getCanvas: getCanvas,
-        getPdfDocument: getPdfDocument
+        getPdfDocument: getPdfDocument,
+        recentrerVue: recentrerVue,
+        estModePanActif: estModePanActif
     };
 
 })();
