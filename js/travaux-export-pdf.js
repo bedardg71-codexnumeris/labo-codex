@@ -441,7 +441,7 @@
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(...cfg.couleurs.texteSecondaire);
         const lignesDroite = [];
-        if (infos.etudiant) lignesDroite.push('Etudiant : ' + infos.etudiant);
+        if (infos.etudiant) lignesDroite.push('Étudiant : ' + infos.etudiant);
         if (infos.production) lignesDroite.push('Production : ' + infos.production);
         if (infos.date) lignesDroite.push('Date : ' + infos.date);
         let yDroite = y - (lignesDroite.length - 1) * mm(4);
@@ -597,7 +597,7 @@
         const dateEval = evaluation.dateEvaluation
             ? new Date(evaluation.dateEvaluation).toLocaleDateString('fr-CA')
             : '';
-        let y = ajouterEnteteRetroaction(doc, 'Synthese de la retroaction', {
+        let y = ajouterEnteteRetroaction(doc, 'Synthèse de la rétroaction', {
             etudiant: evaluation.etudiantNom || fichier.etudiantDA || '',
             production: evaluation.productionNom || '',
             date: dateEval
@@ -612,24 +612,80 @@
             y += mm(6);
         }
 
-        // --- EVALUATION PAR CRITERE (tableau autoTable) ---
+        // --- EN-TETE PERSONNALISE (selon optionsAffichage) ---
+        const opts = evaluation.optionsAffichage || {};
+        let production = null;
+        let etudiant = null;
+        try {
+            const productions = obtenirDonneesSelonMode(cle('productions'));
+            production = productions.find(p => p.id === evaluation.productionId) || null;
+        } catch(e) { /* silencieux */ }
+        try {
+            const etudiants = obtenirDonneesSelonMode(cle('groupeEtudiants'));
+            etudiant = etudiants.find(e => e.da === fichier.etudiantDA) || null;
+        } catch(e) { /* silencieux */ }
+
+        doc.setFontSize(cfg.polices.texteNormal);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(...cfg.couleurs.textePrincipal);
+
+        if (opts.description && production && production.description) {
+            doc.text('Production : ' + production.description, margeG, y);
+            y += mm(5);
+        }
+        if (opts.objectif && production && production.objectif) {
+            doc.text('Objectif : ' + production.objectif, margeG, y);
+            y += mm(5);
+        }
+        if (opts.tache && production && production.tache) {
+            doc.text('Tâche : ' + production.tache, margeG, y);
+            y += mm(5);
+        }
+
+        if (opts.adresse && etudiant && etudiant.prenom) {
+            y += mm(2);
+            doc.text('Bonjour ' + etudiant.prenom + ' !', margeG, y);
+            y += mm(5);
+        }
+
+        doc.text('Voici quelques observations :', margeG, y);
+        y += mm(6);
+
+        // --- ÉVALUATION PAR CRITÈRE (tableau autoTable) ---
         if (evaluation.criteres && evaluation.criteres.length > 0) {
             doc.setFontSize(cfg.polices.titreSection);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(...cfg.couleurs.titreSection);
-            doc.text('EVALUATION PAR CRITERE', margeG, y);
+            doc.text('ÉVALUATION PAR CRITÈRE', margeG, y);
             y += mm(4);
 
-            const donneesCriteres = evaluation.criteres.map(c => [
-                c.critereNom || '',
-                c.niveauSelectionne || '\u2014',
-                c.ponderation ? c.ponderation + '%' : '\u2014',
-                c.retroaction || ''
-            ]);
+            // Chercher la grille pour les descriptions de criteres
+            let grilleDef = null;
+            try {
+                const grilles = db.getSync('grillesTemplates', []);
+                grilleDef = grilles.find(g => g.id === evaluation.grilleId) || null;
+            } catch(e) { /* silencieux */ }
+
+            const donneesCriteres = evaluation.criteres.map(c => {
+                let cellCritere = c.critereNom || '';
+                // Ajouter la description du critere si disponible
+                if (grilleDef && grilleDef.criteres) {
+                    const critDef = grilleDef.criteres.find(gc => gc.nom === c.critereNom || gc.id === c.critereId);
+                    if (critDef && critDef.description) {
+                        cellCritere += '\n' + critDef.description;
+                    }
+                }
+                return [
+                    cellCritere,
+                    c.niveauSelectionne || '\u2014',
+                    c.ponderation ? c.ponderation + '%' : '\u2014',
+                    c.retroaction || ''
+                ];
+            });
 
             doc.autoTable({
                 startY: y,
-                head: [['Critere', 'Niveau', 'Pond.', 'Retroaction']],
+                head: [['Critère', 'Niveau', 'Pond.', 'Rétroaction']],
                 body: donneesCriteres,
                 theme: 'grid',
                 headStyles: {
@@ -682,35 +738,7 @@
             y += mm(8);
         }
 
-        // --- RETROACTION GLOBALE ---
-        if (evaluation.retroactionFinale) {
-            if (y > seuilPage) {
-                doc.addPage([612, 792], 'portrait');
-                y = mm(cfg.marges.haut);
-            }
-
-            doc.setFontSize(cfg.polices.titreSection);
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(...cfg.couleurs.titreSection);
-            doc.text('RETROACTION GLOBALE', margeG, y);
-            y += mm(5);
-
-            doc.setFontSize(cfg.polices.texteNormal);
-            doc.setFont('helvetica', 'normal');
-            doc.setTextColor(...cfg.couleurs.textePrincipal);
-            const lignes = doc.splitTextToSize(evaluation.retroactionFinale, largeurContenu);
-            for (const ligne of lignes) {
-                if (y > seuilPage) {
-                    doc.addPage([612, 792], 'portrait');
-                    y = mm(cfg.marges.haut);
-                }
-                doc.text(ligne, margeG, y);
-                y += mm(4);
-            }
-            y += mm(4);
-        }
-
-        // --- SYNTHESE DES ANNOTATIONS VISUELLES ---
+        // --- SYNTHÈSE DES ANNOTATIONS VISUELLES ---
         const annotation = travauxStockage.obtenirAnnotationFichier(fichier.id);
         const statsVisuelles = compterAnnotationsDetailees(annotation);
 
@@ -720,6 +748,25 @@
 
         // --- PIEDS DE PAGE ---
         finaliserPagesSynthese(doc, premierePageSynthese);
+    }
+
+    /**
+     * Convertit l'image d'un autocollant en dataURL PNG
+     * @param {string} id - ID de l'autocollant
+     * @returns {string|null} dataURL ou null si indisponible
+     */
+    function autocollantToDataURL(id) {
+        const img = travauxOutils.getImageAutocollant(id);
+        if (!img || !img.complete) return null;
+        try {
+            const c = document.createElement('canvas');
+            c.width = img.naturalWidth;
+            c.height = img.naturalHeight;
+            c.getContext('2d').drawImage(img, 0, 0);
+            return c.toDataURL('image/png');
+        } catch(e) {
+            return null;
+        }
     }
 
     /**
@@ -747,7 +794,7 @@
         doc.setFontSize(cfg.polices.titreSection);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(...cfg.couleurs.titreSection);
-        doc.text('SYNTHESE DES ANNOTATIONS VISUELLES', margeG, y);
+        doc.text('SYNTHÈSE DES ANNOTATIONS VISUELLES', margeG, y);
         y += mm(6);
 
         // --- Tableau des tampons ---
@@ -755,30 +802,32 @@
             doc.setFontSize(cfg.polices.texteNormal);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(...cfg.couleurs.textePrincipal);
-            doc.text('Tampons utilises :', margeG, y);
+            doc.text('Tampons utilisés :', margeG, y);
             y += mm(3);
 
             const autocollantsDef = travauxOutils.AUTOCOLLANTS;
             const donnesTampons = [];
+            const tamponsImages = {}; // index ligne → dataURL
 
-            // Trier : qualite d'abord, puis diagnostic
+            // Trier par nom alphabetique
             const ids = Object.keys(stats.tampons);
             const tries = ids.sort((a, b) => {
                 const defA = autocollantsDef.find(x => x.id === a);
                 const defB = autocollantsDef.find(x => x.id === b);
-                const catA = defA?.categorie === 'qualite' ? 0 : 1;
-                const catB = defB?.categorie === 'qualite' ? 0 : 1;
-                if (catA !== catB) return catA - catB;
-                return a.localeCompare(b);
+                return (defA?.nom || a).localeCompare(defB?.nom || b);
             });
 
-            for (const id of tries) {
+            for (let i = 0; i < tries.length; i++) {
+                const id = tries[i];
                 const def = autocollantsDef.find(x => x.id === id);
                 donnesTampons.push([
-                    def?.nom || id,
-                    def?.categorie === 'qualite' ? 'Qualite' : 'Diagnostic',
+                    '      ' + (def?.nom || id),
                     String(stats.tampons[id])
                 ]);
+                const dataUrl = autocollantToDataURL(id);
+                if (dataUrl) {
+                    tamponsImages[i] = dataUrl;
+                }
             }
 
             if (y > seuilPage) {
@@ -786,9 +835,11 @@
                 y = mm(cfg.marges.haut);
             }
 
+            const imgSize = mm(4);
+
             doc.autoTable({
                 startY: y,
-                head: [['Tampon', 'Categorie', 'Nombre']],
+                head: [['Tampon', 'Nombre']],
                 body: donnesTampons,
                 theme: 'grid',
                 headStyles: {
@@ -800,14 +851,23 @@
                 bodyStyles: {
                     fontSize: cfg.polices.textePetit,
                     textColor: cfg.couleurs.textePrincipal,
-                    cellPadding: mm(1.2)
+                    cellPadding: mm(1.2),
+                    minCellHeight: imgSize + mm(1)
                 },
                 columnStyles: {
-                    0: { cellWidth: largeurContenu * 0.40 },
-                    1: { cellWidth: largeurContenu * 0.35 },
-                    2: { cellWidth: largeurContenu * 0.25, halign: 'center' }
+                    0: { cellWidth: largeurContenu * 0.70 },
+                    1: { cellWidth: largeurContenu * 0.30, halign: 'center' }
                 },
-                margin: { left: margeG, right: margeD }
+                margin: { left: margeG, right: margeD },
+                didDrawCell: function(data) {
+                    if (data.section === 'body' && data.column.index === 0) {
+                        const dataUrl = tamponsImages[data.row.index];
+                        if (dataUrl) {
+                            const cellY = data.cell.y + (data.cell.height - imgSize) / 2;
+                            doc.addImage(dataUrl, 'PNG', data.cell.x + mm(1), cellY, imgSize, imgSize);
+                        }
+                    }
+                }
             });
 
             y = doc.lastAutoTable.finalY + mm(6);
@@ -824,7 +884,7 @@
                 y = mm(cfg.marges.haut);
             }
 
-            doc.text('Erreurs de francais :', margeG, y);
+            doc.text('Erreurs de français :', margeG, y);
             y += mm(3);
 
             const codesErreurs = travauxOutils.CODES_ERREURS_FR;
