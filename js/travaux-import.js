@@ -309,7 +309,8 @@
             // Metadata import
             modeImport: parseLea.da ? 'lea' : 'libre',
             nomDocumentLibre: '',
-            dateFichier: new Date(fichier.lastModified)
+            dateFichier: new Date(fichier.lastModified),
+            operations: []
         };
     }
 

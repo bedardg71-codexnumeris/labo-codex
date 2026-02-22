@@ -49,6 +49,7 @@
     let actif = false;
     let fichiers = [];                // Copies locales des fichiers en attente
     let indexActuel = 0;              // Fichier courant
+    let queueOffset = 0;             // Decalage dans la queue pour mode fichier unique
     let imageOriginale = null;        // Image pleine resolution du fichier courant
     let imageTravail = null;          // Canvas copie de travail (1600px)
     let canvasApercu = null;          // Canvas d'apercu visible
@@ -94,9 +95,10 @@
      * @param {Array} fichiersEnAttente - Liste des fichiers prepares par travaux-import
      * @param {Function} callback - Appele avec les blobs traites a la confirmation
      */
-    function ouvrir(fichiersEnAttente, callback) {
+    function ouvrir(fichiersEnAttente, callback, offset) {
         if (!fichiersEnAttente || fichiersEnAttente.length === 0) return;
 
+        queueOffset = offset || 0;
         fichiers = fichiersEnAttente.map(f => ({
             ...f,
             operations: [],
@@ -186,11 +188,13 @@
                 const blobFinal = await renduFinal(f);
                 console.log(`[Travaux-Preparation] Blob final fichier ${i}:`, blobFinal ? `${(blobFinal.size/1024).toFixed(0)}KB` : 'null');
 
-                if (blobFinal && queue[i]) {
-                    queue[i].fichier = blobFinal;
-                    queue[i].tailleFichier = blobFinal.size;
+                if (blobFinal && queue[i + queueOffset]) {
+                    queue[i + queueOffset].fichier = blobFinal;
+                    queue[i + queueOffset].tailleFichier = blobFinal.size;
                     // Regenerer la thumbnail pour que le pipeline affiche l'image corrigee
-                    queue[i].thumbnailDataUrl = null;
+                    queue[i + queueOffset].thumbnailDataUrl = null;
+                    // Ecrire les operations dans la queue pour affichage colonne droite
+                    queue[i + queueOffset].operations = f.operations.slice();
                     reussis++;
                 }
             } catch (err) {
