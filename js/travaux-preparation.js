@@ -2407,7 +2407,7 @@
                     </div>
                     <div style="display:flex; gap:6px; align-items:center;">
                         <button class="btn btn-secondaire btn-petit" onclick="travauxPreparation.passer()">Passer</button>
-                        <button class="btn btn-principal btn-petit" id="prep-btn-confirmer" onclick="travauxPreparation.confirmerTout()">Appliquer et importer</button>
+                        <button class="btn btn-principal btn-petit" id="prep-btn-confirmer" onclick="travauxPreparation.confirmerTout()">Confirmer les r\u00e9glages sp\u00e9cifiques</button>
                     </div>
                 </div>
                 <div class="prep-progress-bar" id="prep-progress-bar" style="display:none;">

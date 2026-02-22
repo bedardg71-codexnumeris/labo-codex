@@ -305,7 +305,11 @@
             pipelineStatut: 'apercu',
             groupeDocumentId: groupeDocumentId,
             thumbnailDataUrl: null,
-            productionId: ''
+            productionId: '',
+            // Metadata import
+            modeImport: parseLea.da ? 'lea' : 'libre',
+            nomDocumentLibre: '',
+            dateFichier: new Date(fichier.lastModified)
         };
     }
 
@@ -391,7 +395,11 @@
             // Pipeline metadata
             nomFichierLea: fichierPrepare.nomFichier,
             leaParsed: fichierPrepare.parseLea || null,
-            groupeDocumentId: fichierPrepare.groupeDocumentId || ''
+            groupeDocumentId: fichierPrepare.groupeDocumentId || '',
+            // Metadata import (LEA / Libre)
+            modeImport: fichierPrepare.modeImport || 'libre',
+            nomDocumentLibre: fichierPrepare.nomDocumentLibre || '',
+            dateFichier: fichierPrepare.dateFichier ? fichierPrepare.dateFichier.toISOString() : null
         };
 
         // Ajouter les metadonnees
