@@ -2548,6 +2548,8 @@
 
         // Peupler la palette jetons
         peuplementPaletteJetons(fichier);
+        // Re-sync après que preRemplirEvaluation ait mis à jour les checkboxes originales
+        setTimeout(() => mettreAJourEtatJetonsPalette(fichier), 2000);
     }
 
     function masquerPalettesEval() {
@@ -3190,6 +3192,32 @@
             return;
         }
 
+        // Determiner l'etat coche depuis les checkboxes originales ou l'evaluation en cours
+        const evaluations = typeof obtenirDonneesSelonMode === 'function'
+            ? obtenirDonneesSelonMode('evaluationsSauvegardees') || [] : [];
+        const evalId = window.evaluationEnCours?.idModification;
+        const evalCourante = evalId ? evaluations.find(e => e.id === evalId) : null;
+
+        function estJetonCoche(typeId) {
+            // Verifier la checkbox originale d'abord
+            const mapOriginal = {
+                'delai': 'checkboxJetonDelai',
+                'reprise': 'checkboxJetonReprise',
+                'repriseCiblee': 'checkboxJetonRepriseCiblee'
+            };
+            if (mapOriginal[typeId]) {
+                const cb = document.getElementById(mapOriginal[typeId]);
+                if (cb) return cb.checked;
+            }
+            // Verifier l'evaluation en cours
+            if (evalCourante) {
+                if (typeId === 'delai') return !!(evalCourante.jetonDelaiApplique || evalCourante.delaiAccorde);
+                if (typeId === 'reprise') return !!(evalCourante.jetonRepriseApplique || evalCourante.repriseDeId);
+                if (typeId === 'repriseCiblee') return !!evalCourante.jetonRepriseCibleeApplique;
+            }
+            return false;
+        }
+
         let html = '<div style="display:flex; flex-direction:column; gap:4px;">';
 
         for (const type of types) {
@@ -3198,11 +3226,12 @@
                           : type.id === 'reprise' ? 'var(--bleu-moyen, #3498db)'
                           : type.id === 'repriseCiblee' ? 'var(--violet-accent, #9b59b6)'
                           : 'var(--gris-moyen, #95a5a6)';
+            const coche = estJetonCoche(type.id) ? ' checked' : '';
 
             html += `<label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:0.8rem; padding:2px 0;">
                     <input type="checkbox" id="travaux-checkbox-jeton-${type.id}"
                            onchange="travauxUI.gererCheckboxJetonPalette('${type.id}')"
-                           style="accent-color:${couleur};">
+                           style="accent-color:${couleur};"${coche}>
                     <span style="font-weight:600;">${echapperHtml(type.nom)}</span>
                     <span style="font-size:0.72rem; color:var(--gris-moyen); margin-left:auto;">${s.restants}/${s.total}</span>
             </label>`;
@@ -3256,10 +3285,57 @@
             }
         }
 
-        // Rafraîchir les compteurs de la palette après action
+        // Rafraîchir compteurs et synchroniser l'état des checkboxes après action
         const fichier = travauxVisionneuse.getFichierActuel();
         if (fichier) {
-            setTimeout(() => peuplementPaletteJetons(fichier), 300);
+            setTimeout(() => mettreAJourEtatJetonsPalette(fichier), 300);
+        }
+    }
+
+    /**
+     * Met à jour l'état des checkboxes et compteurs de la palette jetons
+     * SANS reconstruire le HTML (préserve l'état interactif des checkboxes)
+     * @param {Object} fichier - Le fichier actuellement ouvert
+     */
+    function mettreAJourEtatJetonsPalette(fichier) {
+        if (!fichier?.etudiantDA) return;
+
+        const statut = typeof obtenirStatutJetonsEtudiant === 'function'
+            ? obtenirStatutJetonsEtudiant(fichier.etudiantDA) : {};
+        const types = typeof obtenirTousTypesJetons === 'function'
+            ? obtenirTousTypesJetons() : [];
+
+        // Lire l'état des checkboxes originales et de l'évaluation en cours
+        const evaluations = typeof obtenirDonneesSelonMode === 'function'
+            ? obtenirDonneesSelonMode('evaluationsSauvegardees') || [] : [];
+        const evalId = window.evaluationEnCours?.idModification;
+        const evalCourante = evalId ? evaluations.find(e => e.id === evalId) : null;
+
+        const mapOriginal = {
+            'delai': 'checkboxJetonDelai',
+            'reprise': 'checkboxJetonReprise',
+            'repriseCiblee': 'checkboxJetonRepriseCiblee'
+        };
+
+        for (const type of types) {
+            const s = statut[type.id] || { utilises: 0, total: type.nombreTotal || 0, restants: type.nombreTotal || 0 };
+            const cbPalette = document.getElementById(`travaux-checkbox-jeton-${type.id}`);
+            if (!cbPalette) continue;
+
+            // Synchroniser l'état coché depuis la checkbox originale
+            if (mapOriginal[type.id]) {
+                const cbOriginal = document.getElementById(mapOriginal[type.id]);
+                if (cbOriginal) cbPalette.checked = cbOriginal.checked;
+            } else if (evalCourante) {
+                // Jetons personnalisés : vérifier dans l'évaluation
+            }
+
+            // Mettre à jour le compteur
+            const label = cbPalette.closest('label');
+            if (label) {
+                const compteur = label.querySelector('span:last-child');
+                if (compteur) compteur.textContent = `${s.restants}/${s.total}`;
+            }
         }
     }
 
