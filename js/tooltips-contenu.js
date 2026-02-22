@@ -711,6 +711,72 @@ const TOOLTIPS = {
     'eval-niveau-idme':
         'Niveau calcul\u00e9 automatiquement. Modifier uniquement si n\u00e9cessaire (ex. : reprise cibl\u00e9e).',
 
+    // — Aper\u00e7u — cartes m\u00e9triques —
+    'eval-productions-realisees':
+        'Nombre de productions pour lesquelles au moins une \u00e9valuation a \u00e9t\u00e9 enregistr\u00e9e dans le groupe.',
+    'eval-productions-configurees':
+        'Nombre total de productions d\u00e9finies dans Construction de la note. Inclut portfolios, artefacts et travaux.',
+    'eval-travaux-preparation':
+        'Nombre de fichiers en file d\u2019attente dans le pipeline d\u2019importation, pr\u00eats \u00e0 \u00eatre trait\u00e9s et import\u00e9s.',
+    'eval-travaux-importes':
+        'Nombre de fichiers de travaux stock\u00e9s et pr\u00eats \u00e0 \u00eatre annot\u00e9s ou \u00e9valu\u00e9s.',
+
+    // — R\u00e9troaction — options individuelles —
+    'eval-retro-description':
+        'Inclut un rappel du contexte de la production (titre et description de l\u2019artefact) dans la r\u00e9troaction remise \u00e0 l\u2019\u00e9tudiant.',
+    'eval-retro-objectif':
+        'Inclut l\u2019objectif d\u2019apprentissage vis\u00e9 par la production. Aide l\u2019\u00e9tudiant \u00e0 comprendre ce qu\u2019il devait d\u00e9montrer.',
+    'eval-retro-tache':
+        'Inclut le rappel de la t\u00e2che demand\u00e9e. Situe la r\u00e9troaction par rapport aux consignes initiales.',
+    'eval-retro-adresse':
+        'Ajoute une interpellation personnalis\u00e9e au d\u00e9but de la r\u00e9troaction (ex. : Bonjour [Pr\u00e9nom]). Humanise le commentaire \u00e9crit.',
+    'eval-retro-contexte':
+        'Inclut le texte de contexte d\u2019apprentissage d\u00e9fini dans la cartouche. Situe la r\u00e9troaction dans la progression du cours.',
+
+    // — Formulaire \u00e9valuation — actions et panneaux —
+    'eval-modifier-attribution':
+        'Corriger l\u2019attribution automatique : changer l\u2019\u00e9tudiant ou la production associ\u00e9e \u00e0 ce fichier.',
+    'eval-btn-reinitialiser':
+        'Efface le formulaire d\u2019\u00e9valuation en cours et restaure les valeurs par d\u00e9faut. Les s\u00e9lections de grille et d\u2019\u00e9chelle sont conserv\u00e9es.',
+    'eval-btn-supprimer':
+        'Supprime d\u00e9finitivement cette \u00e9valuation. La production reviendra au statut pr\u00e9c\u00e9dent. Action irr\u00e9versible.',
+    'eval-panneau-criteres':
+        'Liste des crit\u00e8res de la grille s\u00e9lectionn\u00e9e. Attribue un niveau \u00e0 chaque crit\u00e8re pour calculer la note finale.',
+    'eval-filtre-production':
+        'Filtrer les \u00e9valuations par production. Permet de voir les r\u00e9sultats d\u2019un seul artefact \u00e0 la fois.',
+    'eval-filtre-statut':
+        'Filtrer par statut de progression : non re\u00e7u, re\u00e7u, import\u00e9, annot\u00e9, \u00e9valu\u00e9, ou par type de jeton.',
+
+    // — Barre d\u2019outils annotation —
+    'travaux-btn-annoter':
+        'Mode annotation : surligner, \u00e9crire et apposer des tampons directement sur la copie de l\u2019\u00e9tudiant.',
+    'travaux-btn-evaluer':
+        'Mode \u00e9valuation : ouvre les panneaux de crit\u00e8res et de param\u00e8tres pour \u00e9valuer cette production selon la grille.',
+    'travaux-btn-alleger':
+        'Remplace l\u2019original par un fac-simil\u00e9 l\u00e9ger (niveaux de gris, 800px). R\u00e9duit l\u2019espace de stockage. Les annotations sont conserv\u00e9es.',
+    'travaux-btn-reimporter':
+        'Remplace le fichier all\u00e9g\u00e9 par l\u2019original complet. Utile si tu as besoin de revoir les d\u00e9tails de la copie originale.',
+
+    // — Import pipeline —
+    'travaux-fsapi-config':
+        'Stocke les fichiers import\u00e9s directement sur le disque local au lieu d\u2019IndexedDB. Recommand\u00e9 sur Mac pour \u00e9viter les limites de stockage du navigateur.',
+    'travaux-pipeline-optimisation':
+        'Les images sont optimis\u00e9es automatiquement (uniformisation 200 DPI, compression JPEG). Les PDF sont import\u00e9s tels quels.',
+
+    // — Archivage et export —
+    'travaux-archivage-etudiant':
+        'T\u00e9l\u00e9charge un fichier ZIP contenant tous les travaux d\u2019un \u00e9tudiant. Utile pour remettre un dossier complet en fin de session.',
+    'travaux-archivage-production':
+        'T\u00e9l\u00e9charge un fichier ZIP regroupant tous les travaux d\u2019une production. Pratique pour archiver une \u00e9valuation compl\u00e8te.',
+    'travaux-archivage-semestre':
+        'Archive compl\u00e8te de tous les travaux du semestre en un seul fichier ZIP. Recommand\u00e9 en fin de session pour la conservation.',
+    'travaux-archivage-alleger':
+        'Convertit les originaux d\u00e9j\u00e0 export\u00e9s en fac-simil\u00e9s l\u00e9gers (niveaux de gris, 800px). Lib\u00e8re de l\u2019espace sans perdre les annotations.',
+    'travaux-archivage-inclure-annotes':
+        'Ajoute les versions annot\u00e9es (avec surlignage, commentaires et tampons) au fichier ZIP. D\u00e9cocher pour n\u2019exporter que les originaux.',
+    'travaux-archivage-inclure-evals':
+        'Ajoute un fichier de r\u00e9troaction pour chaque \u00e9valuation compl\u00e9t\u00e9e. Pratique pour la remise aux \u00e9tudiants.',
+
     // =================================================================
     // CONSTRUCTION DE LA NOTE — Concepts transversaux
     // =================================================================

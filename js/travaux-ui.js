@@ -172,7 +172,7 @@
                 </div>
 
                 ${fsapiDispo ? `
-                <div class="travaux-fsapi-config">
+                <div class="travaux-fsapi-config" data-tooltip="travaux-fsapi-config">
                     ${fsapiActif
                         ? '<span class="travaux-fsapi-statut actif">Stockage sur disque actif</span>'
                         : `<button class="btn btn-secondaire" onclick="travauxUI.configurerFSAPI()">Configurer le stockage sur disque</button>
@@ -209,7 +209,7 @@
                     <div class="pipeline-etape">
                         <div class="pipeline-etape-header">
                             <span class="pipeline-etape-numero">2</span>
-                            <span class="pipeline-etape-titre">Optimisation</span>
+                            <span class="pipeline-etape-titre" data-tooltip="travaux-pipeline-optimisation">Optimisation</span>
                             <span class="pipeline-etape-compteur">${nbImages} image(s)</span>
                         </div>
                         ${genererEtape2Colonnes(queue, groupes)}
@@ -336,10 +336,10 @@
                                 <button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoom100()" title="Zoom 100%">100%</button>
                                 <button class="travaux-btn-zoom" onclick="travauxVisionneuse.recentrerVue()" title="Recentrer la vue">Recentrer</button>
                                 <span class="travaux-separateur"></span>
-                                <button id="travaux-btn-annoter" class="travaux-btn-action actif" onclick="travauxUI.basculerMode('annoter')">Annoter</button>
-                                <button id="travaux-btn-evaluer" class="travaux-btn-action travaux-btn-action-vert u-hide" onclick="travauxUI.basculerMode('evaluer')" title="Évaluer cette production">Évaluer</button>
-                                <button id="travaux-btn-alleger" class="travaux-btn-action u-hide" onclick="travauxUI.allegerFichier(travauxVisionneuse.getFichierActuel()?.id)" title="Alléger ce fichier">Alléger</button>
-                                <button id="travaux-btn-reimporter" class="travaux-btn-action u-hide" onclick="travauxUI.reimporterFichier(travauxVisionneuse.getFichierActuel()?.id)" title="Re-importer l'original">Re-importer</button>
+                                <button id="travaux-btn-annoter" class="travaux-btn-action actif" onclick="travauxUI.basculerMode('annoter')" data-tooltip="travaux-btn-annoter">Annoter</button>
+                                <button id="travaux-btn-evaluer" class="travaux-btn-action travaux-btn-action-vert u-hide" onclick="travauxUI.basculerMode('evaluer')" title="Évaluer cette production" data-tooltip="travaux-btn-evaluer">Évaluer</button>
+                                <button id="travaux-btn-alleger" class="travaux-btn-action u-hide" onclick="travauxUI.allegerFichier(travauxVisionneuse.getFichierActuel()?.id)" title="Alléger ce fichier" data-tooltip="travaux-btn-alleger">Alléger</button>
+                                <button id="travaux-btn-reimporter" class="travaux-btn-action u-hide" onclick="travauxUI.reimporterFichier(travauxVisionneuse.getFichierActuel()?.id)" title="Re-importer l'original" data-tooltip="travaux-btn-reimporter">Re-importer</button>
                             </div>
                         </div>
                     </div>
@@ -393,41 +393,41 @@
             <div class="travaux-archivage-options">
                 <!-- Export par étudiant -->
                 <div class="travaux-archivage-carte">
-                    <h4>Par étudiant</h4>
+                    <h4 data-tooltip="travaux-archivage-etudiant">Par étudiant</h4>
                     <p class="texte-muted">Télécharger tous les travaux d'un étudiant</p>
                     <select id="travaux-archivage-etudiant" class="form-select">
                         <option value="">-- Choisir un étudiant --</option>
                         ${[...etudiants].sort((a,b) => (a.nom||'').localeCompare(b.nom||'')).map(e => `<option value="${e.da}">${echapperHtml(e.nom + ', ' + e.prenom)} (${e.da})</option>`).join('')}
                     </select>
                     <div class="travaux-archivage-checks">
-                        <label><input type="checkbox" id="arch-etudiant-annotes" checked> Inclure annotés</label>
-                        <label><input type="checkbox" id="arch-etudiant-evals"> Inclure évaluations</label>
+                        <label data-tooltip="travaux-archivage-inclure-annotes"><input type="checkbox" id="arch-etudiant-annotes" checked> Inclure annotés</label>
+                        <label data-tooltip="travaux-archivage-inclure-evals"><input type="checkbox" id="arch-etudiant-evals"> Inclure évaluations</label>
                     </div>
                     <button class="btn btn-principal" onclick="travauxUI.lancerArchivageEtudiant()">Télécharger ZIP</button>
                 </div>
 
                 <!-- Export par production -->
                 <div class="travaux-archivage-carte">
-                    <h4>Par production</h4>
+                    <h4 data-tooltip="travaux-archivage-production">Par production</h4>
                     <p class="texte-muted">Télécharger tous les travaux d'une production</p>
                     <select id="travaux-archivage-production" class="form-select">
                         <option value="">-- Choisir une production --</option>
                         ${productions.map(p => `<option value="${p.id}">${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
                     </select>
                     <div class="travaux-archivage-checks">
-                        <label><input type="checkbox" id="arch-prod-annotes" checked> Inclure annotés</label>
-                        <label><input type="checkbox" id="arch-prod-evals"> Inclure évaluations</label>
+                        <label data-tooltip="travaux-archivage-inclure-annotes"><input type="checkbox" id="arch-prod-annotes" checked> Inclure annotés</label>
+                        <label data-tooltip="travaux-archivage-inclure-evals"><input type="checkbox" id="arch-prod-evals"> Inclure évaluations</label>
                     </div>
                     <button class="btn btn-principal" onclick="travauxUI.lancerArchivageProduction()">Télécharger ZIP</button>
                 </div>
 
                 <!-- Export semestre complet -->
                 <div class="travaux-archivage-carte">
-                    <h4>Semestre complet</h4>
+                    <h4 data-tooltip="travaux-archivage-semestre">Semestre complet</h4>
                     <p class="texte-muted">Archive complète de tous les travaux du semestre</p>
                     <div class="travaux-archivage-checks">
-                        <label><input type="checkbox" id="arch-semestre-annotes" checked> Inclure annotés</label>
-                        <label><input type="checkbox" id="arch-semestre-evals"> Inclure évaluations</label>
+                        <label data-tooltip="travaux-archivage-inclure-annotes"><input type="checkbox" id="arch-semestre-annotes" checked> Inclure annotés</label>
+                        <label data-tooltip="travaux-archivage-inclure-evals"><input type="checkbox" id="arch-semestre-evals"> Inclure évaluations</label>
                     </div>
                     <div id="travaux-texte-progression" class="texte-muted"></div>
                     <div class="travaux-barre-progression-container">
@@ -439,7 +439,7 @@
 
             <!-- Allegement -->
             <div class="travaux-archivage-carte">
-                <h4>Alléger les travaux exportés</h4>
+                <h4 data-tooltip="travaux-archivage-alleger">Alléger les travaux exportés</h4>
                 <p class="texte-muted">Convertit les originaux exportés en fac-similés (NdG, 800px). Les annotations et évaluations sont conservées.</p>
                 <button class="btn btn-secondaire" onclick="travauxArchivage.lancerAllegement()">Alléger les travaux exportés</button>
             </div>
