@@ -238,6 +238,16 @@
                         : '<p class="texte-muted">Aucun fichier importé pour le moment.</p>'}
                 </div>
 
+                ${fichiersTravaux.length > 0 ? `
+                <div id="travaux-drop-zone-edition" class="travaux-drop-zone travaux-drop-zone-edition">
+                    <div class="travaux-drop-zone-contenu">
+                        <div class="travaux-drop-zone-icone">&#x270F;</div>
+                        <p>Éditer un document</p>
+                        <p class="texte-muted">Glissez un badge importé ici pour réordonner, supprimer ou ajouter des pages</p>
+                    </div>
+                </div>
+                ` : ''}
+
             </div>
         `;
 
@@ -247,6 +257,9 @@
             identifierAutoPipeline();
             rafraichirPipelineUI();
         });
+
+        // Initialiser la zone d'edition (drop badge importe)
+        initialiserDropZoneEdition();
 
         // Lancer les previews apres le rendu si des fichiers sont en queue
         if (queue.length > 0) {
@@ -1285,7 +1298,7 @@
             ? '<span class="travaux-badge-verrou" title="Évaluation verrouillée">\u{1F512}</span>'
             : '';
 
-        return `<div class="travaux-badge-importe" data-fichier-id="${f.id}" onclick="travauxUI.${action}('${f.id}')" title="${echapperHtml(f.nomFichier)}">
+        return `<div class="travaux-badge-importe" data-fichier-id="${f.id}" draggable="true" ondragstart="event.dataTransfer.setData('text/fichier-id', '${f.id}')" onclick="travauxUI.${action}('${f.id}')" title="${echapperHtml(f.nomFichier)}">
         <span class="travaux-badge-nom">${nomEtudiant}</span>
         <span class="travaux-badge-pill ${statutClasse}">${statutTexte}</span>${verrou}
         <button class="travaux-badge-supprimer" onclick="event.stopPropagation(); travauxUI.supprimerFichierImporte('${f.id}')" title="Supprimer">&times;</button>
@@ -3286,6 +3299,367 @@
     }
 
     /* ===============================
+       EDITEUR DE PAGES
+       =============================== */
+
+    // Etat local de l'editeur de pages
+    let editionFichierId = null;
+    let editionPages = [];
+    let editionPageSelectionnee = 0;
+
+    /**
+     * Initialise la zone de drop pour l'edition (zone droite)
+     * Ecoute le drag d'un badge importe
+     */
+    function initialiserDropZoneEdition() {
+        const zone = document.getElementById('travaux-drop-zone-edition');
+        if (!zone) return;
+
+        zone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            zone.classList.add('drag-over');
+        });
+
+        zone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            zone.classList.remove('drag-over');
+        });
+
+        zone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            zone.classList.remove('drag-over');
+
+            const fichierId = e.dataTransfer.getData('text/fichier-id');
+            if (fichierId) {
+                ouvrirEditeurPages(fichierId);
+            }
+        });
+    }
+
+    /**
+     * Ouvre l'editeur de pages pour un fichier importe
+     * @param {string} fichierId - ID du fichier
+     */
+    async function ouvrirEditeurPages(fichierId) {
+        const fichier = travauxStockage.obtenirFichierParId(fichierId);
+        if (!fichier) {
+            console.warn('[Editeur Pages] Fichier introuvable:', fichierId);
+            return;
+        }
+
+        // Verifier que c'est un PDF
+        if (fichier.typeMIME !== 'application/pdf') {
+            alert('L\'éditeur de pages est disponible uniquement pour les fichiers PDF.');
+            return;
+        }
+
+        editionFichierId = fichierId;
+        editionPages = [];
+        editionPageSelectionnee = 0;
+
+        // Afficher le conteneur d'edition avec message de chargement
+        const etudiant = travauxImport.trouverEtudiantParDA(fichier.etudiantDA);
+        const nomEtudiant = etudiant
+            ? `${echapperHtml(etudiant.nom)}, ${echapperHtml(etudiant.prenom)}`
+            : (fichier.etudiantDA || 'Document');
+
+        const conteneur = document.getElementById('evaluations-contenu-import');
+        if (!conteneur) return;
+
+        // Injecter l'editeur dans le conteneur principal
+        conteneur.innerHTML = `
+            <div class="editeur-pages-conteneur">
+                <div class="editeur-pages-entete">
+                    <h4>Édition : ${nomEtudiant}</h4>
+                    <button class="btn btn-secondaire" onclick="travauxUI.fermerEditeurPages()">Annuler</button>
+                </div>
+                <div class="editeur-pages-message-chargement" id="editeur-chargement">
+                    Décomposition du PDF en pages...
+                </div>
+            </div>
+        `;
+
+        try {
+            // Decomposer le PDF en pages
+            editionPages = await travauxImport.decomposerPDF(fichierId);
+
+            if (editionPages.length === 0) {
+                document.getElementById('editeur-chargement').textContent = 'Aucune page trouvée dans ce PDF.';
+                return;
+            }
+
+            // Rendre l'editeur complet
+            renderEditeurPages(nomEtudiant);
+        } catch (err) {
+            console.error('[Editeur Pages] Erreur decomposition:', err);
+            const chargement = document.getElementById('editeur-chargement');
+            if (chargement) {
+                chargement.textContent = 'Erreur lors de la décomposition du PDF.';
+            }
+        }
+    }
+
+    /**
+     * Affiche le contenu de l'editeur de pages
+     * @param {string} nomEtudiant - Nom affiche dans l'entete
+     */
+    function renderEditeurPages(nomEtudiant) {
+        const conteneur = document.querySelector('.editeur-pages-conteneur');
+        if (!conteneur) return;
+
+        // Recalculer le nom si pas fourni
+        if (!nomEtudiant && editionFichierId) {
+            const fichier = travauxStockage.obtenirFichierParId(editionFichierId);
+            if (fichier) {
+                const etudiant = travauxImport.trouverEtudiantParDA(fichier.etudiantDA);
+                nomEtudiant = etudiant
+                    ? `${echapperHtml(etudiant.nom)}, ${echapperHtml(etudiant.prenom)}`
+                    : (fichier.etudiantDA || 'Document');
+            }
+        }
+
+        // Generer la liste des pages
+        let htmlListe = '';
+        editionPages.forEach((page, index) => {
+            const sel = index === editionPageSelectionnee ? 'selectionnee' : '';
+            htmlListe += `
+                <div class="editeur-page-item ${sel}" onclick="travauxUI.selectionnerPageEditeur(${index})">
+                    <span class="editeur-page-num">${index + 1}</span>
+                    <img class="editeur-page-thumb" src="${page.dataUrl}" alt="Page ${index + 1}">
+                    <div class="editeur-page-actions">
+                        <button class="editeur-page-btn" onclick="event.stopPropagation(); travauxUI.monterPageEditeur(${index})" ${index === 0 ? 'disabled' : ''} title="Monter">&#x25B2;</button>
+                        <button class="editeur-page-btn" onclick="event.stopPropagation(); travauxUI.descendrePageEditeur(${index})" ${index === editionPages.length - 1 ? 'disabled' : ''} title="Descendre">&#x25BC;</button>
+                        <button class="editeur-page-btn editeur-page-btn-supprimer" onclick="event.stopPropagation(); travauxUI.supprimerPageEditeur(${index})" title="Supprimer" ${editionPages.length <= 1 ? 'disabled' : ''}>&times;</button>
+                    </div>
+                </div>`;
+        });
+
+        // Preview de la page selectionnee
+        const pageActive = editionPages[editionPageSelectionnee];
+        const previewSrc = pageActive ? pageActive.dataUrl : '';
+
+        conteneur.innerHTML = `
+            <div class="editeur-pages-entete">
+                <h4>Édition : ${nomEtudiant || 'Document'} — ${editionPages.length} page(s)</h4>
+                <div style="display:flex;gap:8px;">
+                    <button class="btn btn-secondaire" onclick="travauxUI.fermerEditeurPages()">Annuler</button>
+                </div>
+            </div>
+            <div class="editeur-pages-layout">
+                <div class="editeur-pages-liste">
+                    ${htmlListe}
+                </div>
+                <div class="editeur-pages-preview">
+                    ${previewSrc ? `<img src="${previewSrc}" alt="Preview page ${editionPageSelectionnee + 1}">` : '<p class="texte-muted">Aucune page</p>'}
+                    <div class="editeur-pages-boutons">
+                        <button class="btn btn-secondaire" onclick="travauxUI.ajouterPagesEditeur()">+ Ajouter des pages</button>
+                        <button class="btn btn-principal" onclick="travauxUI.sauvegarderEdition()">Sauvegarder</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * Selectionne une page dans l'editeur
+     */
+    function selectionnerPageEditeur(index) {
+        if (index < 0 || index >= editionPages.length) return;
+        editionPageSelectionnee = index;
+        renderEditeurPages();
+    }
+
+    /**
+     * Monte une page d'un cran
+     */
+    function monterPageEditeur(index) {
+        if (index <= 0 || index >= editionPages.length) return;
+        const temp = editionPages[index];
+        editionPages[index] = editionPages[index - 1];
+        editionPages[index - 1] = temp;
+        // Suivre la page deplacee
+        if (editionPageSelectionnee === index) editionPageSelectionnee = index - 1;
+        else if (editionPageSelectionnee === index - 1) editionPageSelectionnee = index;
+        renderEditeurPages();
+    }
+
+    /**
+     * Descend une page d'un cran
+     */
+    function descendrePageEditeur(index) {
+        if (index < 0 || index >= editionPages.length - 1) return;
+        const temp = editionPages[index];
+        editionPages[index] = editionPages[index + 1];
+        editionPages[index + 1] = temp;
+        // Suivre la page deplacee
+        if (editionPageSelectionnee === index) editionPageSelectionnee = index + 1;
+        else if (editionPageSelectionnee === index + 1) editionPageSelectionnee = index;
+        renderEditeurPages();
+    }
+
+    /**
+     * Supprime une page de l'editeur
+     */
+    function supprimerPageEditeur(index) {
+        if (editionPages.length <= 1) return;
+        editionPages.splice(index, 1);
+        if (editionPageSelectionnee >= editionPages.length) {
+            editionPageSelectionnee = editionPages.length - 1;
+        }
+        renderEditeurPages();
+    }
+
+    /**
+     * Ajoute des pages depuis un selecteur de fichier
+     */
+    function ajouterPagesEditeur() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.multiple = true;
+        input.accept = '.pdf,.jpg,.jpeg,.png';
+        input.style.position = 'absolute';
+        input.style.opacity = '0';
+        input.style.pointerEvents = 'none';
+        document.body.appendChild(input);
+
+        input.addEventListener('change', async () => {
+            if (input.files.length === 0) { input.remove(); return; }
+
+            for (const fichier of input.files) {
+                if (fichier.type === 'application/pdf') {
+                    // Decomposer le PDF en pages
+                    const arrayBuffer = await fichier.arrayBuffer();
+                    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        const pageData = await rendrePagePDF(pdf, i);
+                        editionPages.push(pageData);
+                    }
+                } else if (fichier.type.startsWith('image/')) {
+                    // Ajouter l'image comme page
+                    const dataUrl = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(fichier);
+                    });
+                    const dims = await new Promise((resolve, reject) => {
+                        const img = new Image();
+                        img.onload = () => resolve({ width: img.width, height: img.height });
+                        img.onerror = reject;
+                        img.src = dataUrl;
+                    });
+                    editionPages.push({
+                        pageNum: editionPages.length + 1,
+                        blob: fichier,
+                        dataUrl: dataUrl,
+                        largeur: dims.width,
+                        hauteur: dims.height
+                    });
+                }
+            }
+
+            input.remove();
+            renderEditeurPages();
+        });
+
+        input.click();
+    }
+
+    /**
+     * Rend une page PDF en image (utilitaire pour l'editeur)
+     * @param {PDFDocumentProxy} pdf - Document PDF
+     * @param {number} pageNum - Numero de page (1-based)
+     * @returns {Promise<Object>} {pageNum, blob, dataUrl, largeur, hauteur}
+     */
+    async function rendrePagePDF(pdf, pageNum) {
+        const page = await pdf.getPage(pageNum);
+        const scale = 800 / page.getViewport({ scale: 1 }).width;
+        const viewport = page.getViewport({ scale: scale });
+
+        const canvas = document.createElement('canvas');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        const ctx = canvas.getContext('2d');
+        await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85));
+
+        return {
+            pageNum: pageNum,
+            blob: blob,
+            dataUrl: dataUrl,
+            largeur: viewport.width,
+            hauteur: viewport.height
+        };
+    }
+
+    /**
+     * Sauvegarde les modifications de l'editeur de pages
+     */
+    async function sauvegarderEdition() {
+        if (!editionFichierId || editionPages.length === 0) return;
+
+        const fichier = travauxStockage.obtenirFichierParId(editionFichierId);
+        if (!fichier) return;
+
+        try {
+            // Reassembler le PDF
+            const nouveauBlob = await travauxImport.reassemblerPages(editionPages);
+
+            // Remplacer le blob stocke
+            await travauxStockage.stockerBlob(editionFichierId, nouveauBlob, fichier.etudiantDA, fichier.productionId);
+
+            // Generer une nouvelle miniature a partir de la premiere page
+            let thumbnailDataUrl = '';
+            try {
+                const miniature = await travauxStockage.genererMiniaturePDF(nouveauBlob);
+                thumbnailDataUrl = miniature.thumbnail || '';
+            } catch (e) {
+                console.warn('[Editeur Pages] Miniature non regeneree:', e);
+            }
+
+            // Mettre a jour les metadonnees
+            const modifications = {
+                nombrePages: editionPages.length,
+                tailleFichier: nouveauBlob.size,
+                dateModification: new Date().toISOString()
+            };
+            if (thumbnailDataUrl) {
+                modifications.thumbnailDataUrl = thumbnailDataUrl;
+            }
+            travauxStockage.mettreAJourFichier(editionFichierId, modifications);
+
+            // Fermer l'editeur et rafraichir
+            editionFichierId = null;
+            editionPages = [];
+            editionPageSelectionnee = 0;
+            afficherImport();
+
+            // Notification
+            if (typeof afficherNotificationSucces === 'function') {
+                afficherNotificationSucces('Document mis à jour (' + modifications.nombrePages + ' pages)');
+            }
+        } catch (err) {
+            console.error('[Editeur Pages] Erreur sauvegarde:', err);
+            alert('Erreur lors de la sauvegarde : ' + err.message);
+        }
+    }
+
+    /**
+     * Ferme l'editeur de pages sans sauvegarder
+     */
+    function fermerEditeurPages() {
+        editionFichierId = null;
+        editionPages = [];
+        editionPageSelectionnee = 0;
+        afficherImport();
+    }
+
+    /* ===============================
        EXPORTS GLOBAUX
        =============================== */
 
@@ -3365,7 +3739,16 @@
         ouvrirListeEtudiants: ouvrirListeEtudiants,
         changerDateFichier: changerDateFichier,
         changerNomDocumentLibre: changerNomDocumentLibre,
-        changerProductionPipeline: changerProductionPipeline
+        changerProductionPipeline: changerProductionPipeline,
+        // Editeur de pages
+        ouvrirEditeurPages: ouvrirEditeurPages,
+        fermerEditeurPages: fermerEditeurPages,
+        selectionnerPageEditeur: selectionnerPageEditeur,
+        monterPageEditeur: monterPageEditeur,
+        descendrePageEditeur: descendrePageEditeur,
+        supprimerPageEditeur: supprimerPageEditeur,
+        ajouterPagesEditeur: ajouterPagesEditeur,
+        sauvegarderEdition: sauvegarderEdition
     };
 
     // Alias pour navigation.js
