@@ -401,7 +401,8 @@
             // Metadata import (LEA / Libre)
             modeImport: fichierPrepare.modeImport || 'libre',
             nomDocumentLibre: fichierPrepare.nomDocumentLibre || '',
-            dateFichier: fichierPrepare.dateFichier ? fichierPrepare.dateFichier.toISOString() : null
+            dateFichier: fichierPrepare.dateFichier ? fichierPrepare.dateFichier.toISOString() : null,
+            format11x17: fichierPrepare.format11x17 || false
         };
 
         // Ajouter les metadonnees
