@@ -291,6 +291,7 @@
 
         return {
             fichier: fichier,
+            fichierOriginal: fichier,
             nomFichier: fichier.name,
             typeMIME: typeMIME,
             tailleFichier: fichier.size,
