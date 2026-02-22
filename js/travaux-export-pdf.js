@@ -23,7 +23,7 @@
                         texteSecondaire: [102,102,102], bordure: [204,204,204],
                         fondEntete: [245,245,245] },
             polices: { titrePrincipal: 20, titreSection: 15, sousTitre: 13,
-                       texteNormal: 11, textePetit: 10 }
+                       texteNormal: 12, textePetit: 12 }
         };
     }
     const MM_TO_PX = 612 / 215.9;
@@ -489,10 +489,38 @@
             nomEnseignant = (typeof obtenirNomEnseignantActif === 'function')
                 ? (obtenirNomEnseignantActif() || '')
                 : '';
+            // Fallback vers profilEnseignant si vide
+            if (!nomEnseignant && typeof db !== 'undefined' && db.getSync) {
+                const profil = db.getSync('profilEnseignant', {});
+                if (profil && profil.prenom && profil.nom) {
+                    nomEnseignant = profil.prenom + ' ' + profil.nom;
+                }
+            }
         } catch(e) { /* silencieux */ }
-        if (nomEnseignant) {
+
+        // Cours actif pour le pied de page
+        let codeCoursPied = '';
+        try {
+            if (typeof db !== 'undefined' && db.getSync) {
+                const coursCollection = db.getSync('cours', []);
+                const coursActif = coursCollection.find(c => c.actif);
+                if (coursActif && coursActif.codeCours) {
+                    codeCoursPied = coursActif.codeCours;
+                }
+            }
+        } catch(e) { /* silencieux */ }
+
+        // Construire le texte du pied de page gauche
+        let textePiedGauche = '';
+        if (nomEnseignant && codeCoursPied) {
+            textePiedGauche = nomEnseignant + ' — ' + codeCoursPied;
+        } else {
+            textePiedGauche = nomEnseignant || codeCoursPied;
+        }
+
+        if (textePiedGauche) {
             doc.setFont('helvetica', 'normal');
-            doc.text(nomEnseignant, margeG, yPied);
+            doc.text(textePiedGauche, margeG, yPied);
         }
 
         // Pagination centre
@@ -610,9 +638,13 @@
             production = productions.find(p => p.id === evaluation.productionId) || null;
         } catch(e) { /* silencieux */ }
         try {
+            const coursCollection = db.getSync('cours', []);
             if (production && production.coursId) {
-                const coursCollection = db.getSync('cours', []);
                 cours = coursCollection.find(c => c.id === production.coursId) || null;
+            }
+            // Fallback vers le cours actif
+            if (!cours && coursCollection.length > 0) {
+                cours = coursCollection.find(c => c.actif) || coursCollection[0];
             }
         } catch(e) { /* silencieux */ }
 
@@ -646,17 +678,24 @@
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(...cfg.couleurs.textePrincipal);
 
+        // Helper pour texte long avec wrapping
+        function ajouterTexteWrappe(label, texte) {
+            const lignes = doc.splitTextToSize(label + texte, largeurContenu);
+            for (const ligne of lignes) {
+                doc.text(ligne, margeG, y);
+                y += mm(4.5);
+            }
+            y += mm(1);
+        }
+
         if (opts.description && production && production.description) {
-            doc.text('Production : ' + production.description, margeG, y);
-            y += mm(5);
+            ajouterTexteWrappe('Production : ', production.description);
         }
         if (opts.objectif && production && production.objectif) {
-            doc.text('Objectif : ' + production.objectif, margeG, y);
-            y += mm(5);
+            ajouterTexteWrappe('Objectif : ', production.objectif);
         }
         if (opts.tache && production && production.tache) {
-            doc.text('Tâche : ' + production.tache, margeG, y);
-            y += mm(5);
+            ajouterTexteWrappe('Tâche : ', production.tache);
         }
 
         if (opts.adresse && etudiant && etudiant.prenom) {
@@ -665,8 +704,10 @@
             y += mm(5);
         }
 
-        doc.text('Voici quelques observations :', margeG, y);
-        y += mm(6);
+        if (opts.adresse || opts.description || opts.objectif || opts.tache) {
+            doc.text('Voici quelques observations :', margeG, y);
+            y += mm(6);
+        }
 
         // --- ÉVALUATION PAR CRITÈRE (tableau autoTable) ---
         if (evaluation.criteres && evaluation.criteres.length > 0) {
@@ -728,7 +769,7 @@
                 }
             });
 
-            y = doc.lastAutoTable.finalY + mm(6);
+            y = doc.lastAutoTable.finalY + mm(10);
         }
 
         // --- NOTE FINALE + NIVEAU ---
@@ -737,6 +778,7 @@
             y = mm(cfg.marges.haut);
         }
 
+        const modeNote = opts.affichageNote || 'complet';
         if (evaluation.noteFinale != null || evaluation.niveauFinal) {
             doc.setDrawColor(...cfg.couleurs.bordure);
             doc.setLineWidth(0.5);
@@ -748,11 +790,19 @@
             doc.setTextColor(...cfg.couleurs.textePrincipal);
 
             let texteNote = '';
-            if (evaluation.noteFinale != null) texteNote += 'Note finale : ' + evaluation.noteFinale + '%';
-            if (evaluation.noteFinale != null && evaluation.niveauFinal) texteNote += '    ';
-            if (evaluation.niveauFinal) texteNote += 'Niveau : ' + evaluation.niveauFinal;
-            doc.text(texteNote, margeG, y);
-            y += mm(8);
+            if (modeNote === 'lettre') {
+                // Lettre du niveau de performance seulement
+                if (evaluation.niveauFinal) texteNote = 'Niveau de performance : ' + evaluation.niveauFinal;
+            } else {
+                // Note chiffrée et niveau de maîtrise (par défaut)
+                if (evaluation.noteFinale != null) texteNote += 'Note finale : ' + evaluation.noteFinale + '%';
+                if (evaluation.noteFinale != null && evaluation.niveauFinal) texteNote += '    ';
+                if (evaluation.niveauFinal) texteNote += 'Niveau : ' + evaluation.niveauFinal;
+            }
+            if (texteNote) {
+                doc.text(texteNote, margeG, y);
+                y += mm(8);
+            }
         }
 
         // --- SYNTHÈSE DES ANNOTATIONS VISUELLES ---
@@ -887,7 +937,7 @@
                 }
             });
 
-            y = doc.lastAutoTable.finalY + mm(6);
+            y = doc.lastAutoTable.finalY + mm(10);
         }
 
         // --- Tableau des erreurs de francais ---
@@ -957,7 +1007,7 @@
                 }
             });
 
-            y = doc.lastAutoTable.finalY + mm(4);
+            y = doc.lastAutoTable.finalY + mm(10);
         }
 
         return y;
