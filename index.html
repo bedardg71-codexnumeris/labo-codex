@@ -4425,7 +4425,7 @@
                             <!-- Productions réalisées -->
                             <div class="carte-metrique-bleue">
                                 <div class="carte-metrique-contenu">
-                                    <span class="carte-metrique-label">Productions réalisées</span>
+                                    <span class="carte-metrique-label" data-tooltip="eval-productions-realisees">Productions réalisées</span>
                                     <strong id="ea-productions-realisees" class="carte-metrique-valeur">—</strong>
                                 </div>
                             </div>
@@ -4433,7 +4433,7 @@
                             <!-- Productions configurées -->
                             <div class="carte-metrique-bleue">
                                 <div class="carte-metrique-contenu">
-                                    <span class="carte-metrique-label">Productions configurées</span>
+                                    <span class="carte-metrique-label" data-tooltip="eval-productions-configurees">Productions configurées</span>
                                     <strong id="ea-productions-configurees" class="carte-metrique-valeur">—</strong>
                                 </div>
                             </div>
@@ -4441,7 +4441,7 @@
                             <!-- Travaux en préparation -->
                             <div class="carte-metrique-bleue">
                                 <div class="carte-metrique-contenu">
-                                    <span class="carte-metrique-label">Travaux en préparation</span>
+                                    <span class="carte-metrique-label" data-tooltip="eval-travaux-preparation">Travaux en préparation</span>
                                     <strong id="ea-travaux-preparation" class="carte-metrique-valeur">—</strong>
                                 </div>
                             </div>
@@ -4449,7 +4449,7 @@
                             <!-- Travaux importés -->
                             <div class="carte-metrique-bleue">
                                 <div class="carte-metrique-contenu">
-                                    <span class="carte-metrique-label">Travaux importés</span>
+                                    <span class="carte-metrique-label" data-tooltip="eval-travaux-importes">Travaux importés</span>
                                     <strong id="ea-travaux-importes" class="carte-metrique-valeur">—</strong>
                                 </div>
                             </div>
@@ -4481,14 +4481,14 @@
                     <div class="carte-grise-mb20">
                         <div class="grid-auto-180">
                             <div class="groupe-form">
-                                <label for="filtre-production-eval">Production</label>
+                                <label for="filtre-production-eval" data-tooltip="eval-filtre-production">Production</label>
                                 <select id="filtre-production-eval" class="controle-form"
                                     onchange="filtrerListeEvaluations()">
                                     <option value="">Toutes les productions</option>
                                 </select>
                             </div>
                             <div class="groupe-form">
-                                <label for="filtre-statut-eval">Statut</label>
+                                <label for="filtre-statut-eval" data-tooltip="eval-filtre-statut">Statut</label>
                                 <select id="filtre-statut-eval" class="controle-form" onchange="filtrerListeEvaluations()">
                                     <option value="">Tous</option>
                                     <option value="non-recu">Non reçu</option>
@@ -4608,7 +4608,7 @@
                                     </button>
 
                                     <button class="btn btn-annuler btn-tres-compact" onclick="reinitialiserFormulaire()" style="flex: 1;"
-                                        title="Réinitialiser le formulaire en conservant les sélections">
+                                        title="Réinitialiser le formulaire en conservant les sélections" data-tooltip="eval-btn-reinitialiser">
                                         Réinitialiser
                                     </button>
                                 </div>
@@ -4616,7 +4616,7 @@
                                 <!-- Supprimer cette évaluation (visible seulement en mode modification) -->
                                 <div class="groupe-boutons-ligne" id="ligneSupprimerEvaluation" style="display: none;">
                                     <button class="btn btn-supprimer btn-tres-compact" onclick="confirmerSuppressionEvaluationSidebar()" style="width: 100%;"
-                                        title="Supprimer définitivement cette évaluation">
+                                        title="Supprimer définitivement cette évaluation" data-tooltip="eval-btn-supprimer">
                                         Supprimer cette évaluation
                                     </button>
                                 </div>
@@ -4630,7 +4630,7 @@
                             <div id="travaux-eval-identite" class="travaux-eval-identite">
                                 <span class="travaux-eval-label-val" id="travaux-eval-label-etudiant">--</span>
                                 <span class="travaux-eval-label-val travaux-eval-label-production" id="travaux-eval-label-production">--</span>
-                                <button class="btn-lien-discret" id="travaux-eval-btn-corriger" onclick="travauxUI.toggleCorrectionIdentite()" title="Modifier l'attribution">Modifier</button>
+                                <button class="btn-lien-discret" id="travaux-eval-btn-corriger" onclick="travauxUI.toggleCorrectionIdentite()" title="Modifier l'attribution" data-tooltip="eval-modifier-attribution">Modifier</button>
                             </div>
 
                             <!-- Section correction (cachée par défaut) -->
@@ -4760,7 +4760,7 @@
                 <!-- Panneau droite : criteres (deplace par JS dans le slot droite de la visionneuse) -->
                 <div id="travaux-eval-droite" class="travaux-panneau-lateral travaux-panneau-droite u-hide">
                     <div class="travaux-panneau-header">
-                        <span class="travaux-panneau-header-titre">Critères</span>
+                        <span class="travaux-panneau-header-titre" data-tooltip="eval-panneau-criteres">Critères</span>
                     </div>
                     <div class="travaux-panneau-corps zone-criteres">
 
@@ -4804,11 +4804,11 @@
                         <!-- Options à inclure + mode note -->
                         <div class="eval-options-retroaction" data-tooltip="eval-retroaction-options">
                             <div class="eval-options-checkboxes">
-                                <label><input type="checkbox" id="afficherDescription1" onchange="genererRetroaction(1)" checked> Description</label>
-                                <label><input type="checkbox" id="afficherObjectif1" onchange="genererRetroaction(1)" checked> Objectif</label>
-                                <label><input type="checkbox" id="afficherTache1" onchange="genererRetroaction(1)" checked> Tâche</label>
-                                <label><input type="checkbox" id="afficherAdresse1" onchange="genererRetroaction(1)" checked> Adresse</label>
-                                <label><input type="checkbox" id="afficherContexte1" onchange="genererRetroaction(1)" checked> Contexte</label>
+                                <label data-tooltip="eval-retro-description"><input type="checkbox" id="afficherDescription1" onchange="genererRetroaction(1)" checked> Description</label>
+                                <label data-tooltip="eval-retro-objectif"><input type="checkbox" id="afficherObjectif1" onchange="genererRetroaction(1)" checked> Objectif</label>
+                                <label data-tooltip="eval-retro-tache"><input type="checkbox" id="afficherTache1" onchange="genererRetroaction(1)" checked> Tâche</label>
+                                <label data-tooltip="eval-retro-adresse"><input type="checkbox" id="afficherAdresse1" onchange="genererRetroaction(1)" checked> Adresse</label>
+                                <label data-tooltip="eval-retro-contexte"><input type="checkbox" id="afficherContexte1" onchange="genererRetroaction(1)" checked> Contexte</label>
                             </div>
                             <div class="eval-options-radios">
                                 <label><input type="radio" name="affichageNote1" id="affichageNoteComplet1" value="complet" checked onchange="genererRetroaction(1)"> Note et niveau</label>
