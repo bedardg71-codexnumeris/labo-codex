@@ -416,6 +416,7 @@
                     </select>
                     <div class="travaux-archivage-checks">
                         <label><input type="checkbox" id="arch-prod-annotes" checked> Inclure annotés</label>
+                        <label><input type="checkbox" id="arch-prod-evals"> Inclure évaluations</label>
                     </div>
                     <button class="btn btn-principal" onclick="travauxUI.lancerArchivageProduction()">Télécharger ZIP</button>
                 </div>
@@ -1806,7 +1807,8 @@
         }
 
         const options = {
-            inclureAnnotes: document.getElementById('arch-prod-annotes')?.checked
+            inclureAnnotes: document.getElementById('arch-prod-annotes')?.checked,
+            inclureEvaluations: document.getElementById('arch-prod-evals')?.checked
         };
 
         travauxArchivage.lancerExportProduction(productionId, options);
