@@ -19921,6 +19921,63 @@ body.mode-clair .barre-etudiant.tracked-4 {
     cursor: default;
 }
 
+/* Icône rétroaction sur badge */
+.travaux-badge-retro {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0 2px;
+    font-size: 0.75rem;
+    opacity: 0.7;
+    transition: opacity 0.15s;
+}
+.travaux-badge-retro:hover {
+    opacity: 1;
+}
+
+/* Modal rétroaction — réutilise .modal-overlay/.modal-contenu existants */
+.travaux-retro-entete {
+    font-size: 0.85rem;
+    color: var(--texte-secondaire);
+    margin-bottom: 12px;
+    line-height: 1.5;
+}
+.travaux-retro-criteres {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0;
+}
+.travaux-retro-criteres li {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--bordure-claire);
+    font-size: 0.85rem;
+}
+.travaux-retro-criteres li .niveau {
+    font-weight: 600;
+    min-width: 40px;
+    text-align: center;
+}
+.travaux-retro-criteres li .retro-texte {
+    flex: 1;
+    margin-left: 10px;
+    color: var(--texte-secondaire);
+    font-size: 0.8rem;
+}
+.travaux-retro-textarea {
+    width: 100%;
+    min-height: 150px;
+    resize: vertical;
+    font-family: inherit;
+    font-size: 0.9rem;
+    padding: 10px;
+    border: 1px solid var(--bordure-claire);
+    border-radius: var(--radius-moyen);
+    background: var(--surface-input, var(--surface-carte));
+    color: var(--texte-principal);
+}
+
 .travaux-badge-supprimer {
     background: none;
     border: none;
