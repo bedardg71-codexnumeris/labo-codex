@@ -516,6 +516,30 @@
         return true;
     }
 
+    /**
+     * Met a jour les metadonnees de plusieurs fichiers d'un coup
+     * @param {Object} modifications - Map { fichierId: { champs a modifier } }
+     * @returns {number} Nombre de fichiers mis a jour
+     */
+    function mettreAJourFichiersBatch(modifications) {
+        const fichiers = obtenirFichiersTravaux();
+        let compteur = 0;
+
+        for (const [id, modifs] of Object.entries(modifications)) {
+            const idx = fichiers.findIndex(f => f.id === id);
+            if (idx !== -1) {
+                Object.assign(fichiers[idx], modifs);
+                fichiers[idx].dateModification = new Date().toISOString();
+                compteur++;
+            }
+        }
+
+        if (compteur > 0) {
+            sauvegarderFichiersTravaux(fichiers);
+        }
+        return compteur;
+    }
+
     /* ===============================
        GENERATION MINIATURES
        =============================== */
@@ -977,6 +1001,7 @@
         obtenirFichiersProduction: obtenirFichiersProduction,
         obtenirFichierParId: obtenirFichierParId,
         mettreAJourFichier: mettreAJourFichier,
+        mettreAJourFichiersBatch: mettreAJourFichiersBatch,
         // Miniatures
         genererMiniatureImage: genererMiniatureImage,
         genererMiniaturePDF: genererMiniaturePDF,

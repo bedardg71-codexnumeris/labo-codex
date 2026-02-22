@@ -20044,6 +20044,77 @@ body.mode-clair .barre-etudiant.tracked-4 {
 }
 
 /* ===============================
+   MODALE TRANSFERT FICHIERS
+   =============================== */
+
+.pipeline-section-importes-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.pipeline-section-importes-header h4 {
+    margin: 0;
+}
+
+.transfert-liste-fichiers {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid var(--bordure, #2d3748);
+    border-radius: 8px;
+    margin: 12px 0;
+}
+
+.transfert-fichier-ligne {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--bordure, #2d3748);
+    cursor: pointer;
+    margin: 0;
+}
+
+.transfert-fichier-ligne:last-child {
+    border-bottom: none;
+}
+
+.transfert-fichier-ligne:hover {
+    background: var(--surface-survol, rgba(255,255,255,0.03));
+}
+
+.transfert-fichier-nom {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.85em;
+}
+
+.transfert-tout-selectionner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--surface-sureleve, #1e293b);
+    border-bottom: 2px solid var(--bordure, #2d3748);
+    font-weight: 500;
+    cursor: pointer;
+    margin: 0;
+}
+
+.transfert-avertissement {
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: var(--surface-sureleve, #1e293b);
+    border-left: 3px solid var(--accent-principal, #3b82f6);
+    font-size: 0.85em;
+    color: var(--texte-secondaire, #a0b0c0);
+    margin: 12px 0;
+}
+
+/* ===============================
    EDITEUR DE PAGES (zone scindee)
    =============================== */
 
