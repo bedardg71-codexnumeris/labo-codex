@@ -296,17 +296,16 @@
                     <!-- Toolbar -->
                     <div class="travaux-toolbar">
                         <div class="travaux-toolbar-inner">
-                            <!-- GAUCHE : navigation pages -->
+                            <!-- GAUCHE : navigation pages + badge étudiant -->
                             <div class="travaux-toolbar-gauche">
                                 <button id="travaux-btn-page-prec" class="travaux-btn-nav" onclick="travauxVisionneuse.pagePrecedente()" disabled title="Page précédente">&#x2190;</button>
                                 <span id="travaux-indicateur-page">-- / --</span>
                                 <button id="travaux-btn-page-suiv" class="travaux-btn-nav" onclick="travauxVisionneuse.pageSuivante()" disabled title="Page suivante">&#x2192;</button>
+                                <span id="travaux-badge-fichier-actif" class="u-hide" style="margin-left: 8px;"></span>
                             </div>
 
-                            <!-- CENTRE : badge étudiant -->
-                            <div class="travaux-toolbar-centre">
-                                <span id="travaux-badge-fichier-actif" class="u-hide"></span>
-                            </div>
+                            <!-- CENTRE : vide -->
+                            <div class="travaux-toolbar-centre"></div>
 
                             <!-- DROITE : zoom + séparateur + actions -->
                             <div class="travaux-toolbar-droite">
@@ -677,6 +676,24 @@
     }
 
     /**
+     * Decode une operation de preparation en texte lisible
+     */
+    function decrireOperation(op) {
+        if (!op || !op.type) return '';
+        switch (op.type) {
+            case 'rotation': return 'Rotation ' + (op.angle > 0 ? '+' : '') + op.angle + '\u00b0';
+            case 'perspective': return 'Perspective';
+            case 'crop': return 'Rognage';
+            case 'contraste': return 'Contraste ' + (op.valeur > 0 ? '+' : '') + op.valeur;
+            case 'luminosite': return 'Luminosit\u00e9 ' + (op.valeur > 0 ? '+' : '') + op.valeur;
+            case 'niveaux-gris': return 'Niveaux de gris';
+            case 'inverser': return 'Inversion';
+            case 'balance-blancs': return 'Balance des blancs';
+            default: return op.type;
+        }
+    }
+
+    /**
      * Genere l'etape 2 en layout 3 colonnes
      * @param {Array} queue - File d'attente
      * @param {Map} groupes - Groupes de documents
@@ -701,6 +718,54 @@
                 : 'PDF';
             const poids = travauxStockage.formaterTaille(f.tailleFichier);
 
+            // Mode import : LEA ou Libre
+            const modeLea = f.modeImport === 'lea';
+            const dateVal = f.dateFichier ? new Date(f.dateFichier).toISOString().substring(0, 10) : '';
+            const nomEtudiant = f.etudiantAssocie
+                ? echapperHtml((f.etudiantAssocie.prenom || '') + ' ' + (f.etudiantAssocie.nom || ''))
+                : '';
+
+            let metaChamps = '<div class="pipeline-meta-champs">';
+            // Toggle LEA/Libre
+            metaChamps += `<div class="pipeline-mode-toggle">
+                <button class="pipeline-toggle-btn${modeLea ? ' actif' : ''}" onclick="travauxUI.toggleModeImport(${index},'lea')">LEA</button>
+                <button class="pipeline-toggle-btn${!modeLea ? ' actif' : ''}" onclick="travauxUI.toggleModeImport(${index},'libre')">Libre</button>
+            </div>`;
+
+            if (modeLea) {
+                // Champ autocomplete etudiant
+                metaChamps += `<div class="pipeline-champ">
+                    <label>\u00c9tudiant</label>
+                    <input type="text" class="pipeline-input-etudiant" id="pipeline-etudiant-${index}"
+                        value="${nomEtudiant}" placeholder="Rechercher..."
+                        oninput="travauxUI.rechercherEtudiant(${index}, this.value)"
+                        onfocus="travauxUI.ouvrirListeEtudiants(${index})"
+                        autocomplete="off">
+                    <div class="pipeline-autocomplete-liste u-hide" id="pipeline-autocomplete-${index}"></div>
+                </div>`;
+                // Dropdown production
+                metaChamps += `<div class="pipeline-champ">
+                    <label>Production</label>
+                    <select class="form-select pipeline-select-petit" onchange="travauxUI.changerProductionPipeline(${index}, this.value)">
+                        <option value="">--</option>
+                        ${productions.map(p => `<option value="${p.id}" ${f.productionId === p.id ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
+                    </select>
+                </div>`;
+                // Date picker
+                metaChamps += `<div class="pipeline-champ">
+                    <label>Date</label>
+                    <input type="date" class="pipeline-input-date" value="${dateVal}" onchange="travauxUI.changerDateFichier(${index}, this.value)">
+                </div>`;
+            } else {
+                // Mode Libre : champ nom document
+                metaChamps += `<div class="pipeline-champ">
+                    <label>Nom du document</label>
+                    <input type="text" class="pipeline-input-nom" value="${echapperHtml(f.nomDocumentLibre || '')}"
+                        placeholder="Nom libre..." onchange="travauxUI.changerNomDocumentLibre(${index}, this.value)">
+                </div>`;
+            }
+            metaChamps += '</div>';
+
             colGauche += `<div class="pipeline-fichier-colonne">
                 <div class="pipeline-fichier-thumb-col" id="pipeline-original-${index}">
                     ${thumb ? `<img src="${thumb}" alt="">` : `<span class="pipeline-icone-placeholder">${icone}</span>`}
@@ -709,6 +774,7 @@
                     <span class="pipeline-meta-nom" title="${echapperHtml(f.nomFichier)}">${echapperHtml(nomCourt)}</span>
                     <span class="pipeline-meta-resolution">${resolution}</span>
                     <span class="pipeline-meta-taille">${poids}</span>
+                    ${metaChamps}
                 </div>
             </div>`;
         });
@@ -717,6 +783,7 @@
         // === Colonne centre : Traitement ===
         let colCentre = '<div class="pipeline-col-controles">';
         colCentre += '<div class="pipeline-col-titre">Traitement</div>';
+        colCentre += '<p class="texte-muted u-texte-petit" style="margin:0 0 8px 0;">Ces options s\u2019appliquent par d\u00e9faut \u00e0 tous les fichiers. Pour des r\u00e9glages par fichier, utilisez \u00ab\u00a0R\u00e9glages sp\u00e9cifiques\u00a0\u00bb.</p>';
 
         colCentre += '<ul class="pipeline-checklist">';
         colCentre += `<li><label><input type="checkbox" id="pipeline-opt-balance" checked onchange="travauxUI.mettreAJourPreviewsPipeline()"> Balance des blancs</label></li>`;
@@ -737,7 +804,7 @@
 
         colCentre += `<div class="pipeline-boutons-groupe">
             <button class="btn btn-secondaire" onclick="travauxUI.ouvrirPreparation()">Réglages spécifiques</button>
-            <button class="btn btn-principal" onclick="travauxUI.appliquerEtImporter()">Appliquer et importer</button>
+            <button class="btn btn-principal" onclick="travauxUI.appliquerEtImporter()">Importer</button>
             <button class="btn btn-secondaire" onclick="travauxImport.viderFileDAttente(); travauxUI.afficherImport();">Annuler tout</button>
         </div>`;
 
@@ -758,11 +825,20 @@
                 ? 'PDF (aucun traitement)'
                 : `${dims.w} x ${dims.h}`;
 
+            // Badge reglages specifiques si des operations sont definies
+            let badgeSpecifique = '';
+            if (f.operations && f.operations.length > 0) {
+                const listeOps = f.operations.map(decrireOperation).filter(Boolean).join(', ');
+                badgeSpecifique = `<span class="pipeline-badge pipeline-badge-specifique" title="Remplace les r\u00e9glages par d\u00e9faut">Sp\u00e9cifique</span>`;
+                badgeSpecifique += `<span class="pipeline-meta-ops texte-muted">${echapperHtml(listeOps)}</span>`;
+            }
+
             colDroite += `<div class="pipeline-fichier-colonne">
                 <div class="pipeline-fichier-thumb-col" id="pipeline-preview-${index}">
                     ${f.thumbnailDataUrl ? `<img src="${f.thumbnailDataUrl}" alt="">` : `<span class="pipeline-icone-placeholder">${f.estPDF ? '&#x1F4C4;' : '&#x1F5BC;'}</span>`}
                 </div>
                 <div class="pipeline-fichier-meta-col">
+                    ${badgeSpecifique}
                     <span class="pipeline-meta-resolution" id="pipeline-res-cible-${index}">${resCible}</span>
                     <span class="pipeline-meta-taille" id="pipeline-taille-cible-${index}">${travauxStockage.formaterTaille(tailleEst)}</span>
                 </div>
@@ -2899,6 +2975,104 @@
     }
 
     /* ===============================
+       METADATA PIPELINE (LEA / Libre)
+       =============================== */
+
+    let debounceRechercheTimer = null;
+
+    /**
+     * Bascule le mode import d'un fichier (lea / libre)
+     */
+    function toggleModeImport(index, mode) {
+        const queue = travauxImport.obtenirFileDAttente();
+        if (!queue[index]) return;
+        queue[index].modeImport = mode || (queue[index].modeImport === 'lea' ? 'libre' : 'lea');
+        rafraichirPipelineUI();
+    }
+
+    /**
+     * Recherche un etudiant par query (nom, prenom, DA)
+     */
+    function rechercherEtudiant(index, query) {
+        clearTimeout(debounceRechercheTimer);
+        debounceRechercheTimer = setTimeout(() => {
+            const liste = document.getElementById('pipeline-autocomplete-' + index);
+            if (!liste) return;
+
+            const etudiants = obtenirDonneesSelonMode(cle('groupeEtudiants'));
+            if (!etudiants || !etudiants.length) { liste.classList.add('u-hide'); return; }
+
+            const q = (query || '').toLowerCase().trim();
+            const filtres = q
+                ? etudiants.filter(e => {
+                    const nom = ((e.prenom || '') + ' ' + (e.nom || '') + ' ' + (e.da || '')).toLowerCase();
+                    return nom.includes(q);
+                })
+                : etudiants;
+
+            if (filtres.length === 0) { liste.classList.add('u-hide'); return; }
+
+            liste.innerHTML = filtres.slice(0, 20).map(e =>
+                `<div class="pipeline-autocomplete-item" onmousedown="travauxUI.selectionnerEtudiant(${index},'${echapperHtml(e.da || '')}')">${echapperHtml((e.prenom || '') + ' ' + (e.nom || ''))} <span class="texte-muted">${echapperHtml(e.da || '')}</span></div>`
+            ).join('');
+            liste.classList.remove('u-hide');
+        }, 200);
+    }
+
+    /**
+     * Selectionne un etudiant pour un fichier
+     */
+    function selectionnerEtudiant(index, da) {
+        const queue = travauxImport.obtenirFileDAttente();
+        if (!queue[index]) return;
+        const etudiants = obtenirDonneesSelonMode(cle('groupeEtudiants'));
+        const etudiant = etudiants.find(e => e.da === da);
+        queue[index].etudiantDA = da;
+        queue[index].etudiantAssocie = etudiant || null;
+        // Mettre a jour le champ
+        const input = document.getElementById('pipeline-etudiant-' + index);
+        if (input && etudiant) {
+            input.value = (etudiant.prenom || '') + ' ' + (etudiant.nom || '');
+        }
+        const liste = document.getElementById('pipeline-autocomplete-' + index);
+        if (liste) liste.classList.add('u-hide');
+    }
+
+    /**
+     * Ouvre la liste complete des etudiants au focus
+     */
+    function ouvrirListeEtudiants(index) {
+        rechercherEtudiant(index, '');
+    }
+
+    /**
+     * Change la date d'un fichier
+     */
+    function changerDateFichier(index, dateStr) {
+        const queue = travauxImport.obtenirFileDAttente();
+        if (!queue[index]) return;
+        queue[index].dateFichier = dateStr ? new Date(dateStr) : null;
+    }
+
+    /**
+     * Change le nom de document libre
+     */
+    function changerNomDocumentLibre(index, nom) {
+        const queue = travauxImport.obtenirFileDAttente();
+        if (!queue[index]) return;
+        queue[index].nomDocumentLibre = nom;
+    }
+
+    /**
+     * Change la production d'un fichier dans le pipeline (queue)
+     */
+    function changerProductionPipeline(index, productionId) {
+        const queue = travauxImport.obtenirFileDAttente();
+        if (!queue[index]) return;
+        queue[index].productionId = productionId;
+    }
+
+    /* ===============================
        EXPORTS GLOBAUX
        =============================== */
 
@@ -2964,7 +3138,15 @@
         // Filtres badges
         filtrerBadgesParProduction: filtrerBadgesParProduction,
         // Utilitaires
-        annotationContientDuContenu: annotationContientDuContenu
+        annotationContientDuContenu: annotationContientDuContenu,
+        // Metadata pipeline (LEA / Libre)
+        toggleModeImport: toggleModeImport,
+        rechercherEtudiant: rechercherEtudiant,
+        selectionnerEtudiant: selectionnerEtudiant,
+        ouvrirListeEtudiants: ouvrirListeEtudiants,
+        changerDateFichier: changerDateFichier,
+        changerNomDocumentLibre: changerNomDocumentLibre,
+        changerProductionPipeline: changerProductionPipeline
     };
 
     // Alias pour navigation.js

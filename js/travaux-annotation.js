@@ -527,30 +527,17 @@
             return;
         }
 
-        // Surligneur clic-a-clic
+        // Surligneur click-drag-release (meme pattern que les autres formes)
         if (outil.id === 'surligneur') {
-            if (formeEnCours && formeEnCours.type === 'surligneur') {
-                // Second clic : finaliser
-                formeEnCours.x2 = xNorm;
-                formeEnCours.y2 = yNorm;
-                const donneesPage = obtenirDonneesPage();
-                donneesPage.shapes.push(formeEnCours);
-                empilerUndo('ajout-forme', formeEnCours);
-                formeEnCours = null; formeOrigine = null;
-                enDessin = false;
-                reRendreAnnotations(); planifierSauvegarde();
-            } else {
-                // Premier clic : demarrer
-                formeOrigine = { x: xNorm, y: yNorm };
-                formeEnCours = {
-                    id: 'SH_' + Date.now(), type: 'surligneur',
-                    color: travauxOutils.getCouleurActive(),
-                    lineWidth: travauxOutils.getEpaisseurActive(),
-                    opacity: outil.opacite || 0.5,
-                    x1: xNorm, y1: yNorm, x2: xNorm, y2: yNorm
-                };
-                enDessin = true;
-            }
+            formeOrigine = { x: xNorm, y: yNorm };
+            formeEnCours = {
+                id: 'SH_' + Date.now(), type: 'surligneur',
+                color: travauxOutils.getCouleurActive(),
+                lineWidth: travauxOutils.getEpaisseurActive(),
+                opacity: outil.opacite || 0.5,
+                x1: xNorm, y1: yNorm, x2: xNorm, y2: yNorm
+            };
+            enDessin = true;
             return;
         }
 
@@ -742,14 +729,15 @@
 
         enDessin = false;
 
-        // Surligneur clic-a-clic : ne pas finaliser au relachement
-        if (formeEnCours && formeEnCours.type === 'surligneur') {
-            enDessin = true; // Garder actif pour l'apercu
-            return;
-        }
-
-        // Forme terminee
+        // Forme terminee (y compris surligneur en click-drag-release)
         if (formeEnCours) {
+            // Seuil minimum : ignorer les clics accidentels sans mouvement
+            if (Math.abs(formeEnCours.x2 - formeEnCours.x1) < 0.003 && Math.abs(formeEnCours.y2 - formeEnCours.y1) < 0.003) {
+                formeEnCours = null;
+                formeOrigine = null;
+                reRendreAnnotations();
+                return;
+            }
             const donneesPage = obtenirDonneesPage();
             donneesPage.shapes.push(formeEnCours);
             empilerUndo('ajout-forme', formeEnCours);
@@ -799,8 +787,8 @@
     function onOutilChange(e) {
         if (!canvasAnnotation || !annotationActive) return;
 
-        // Annuler un surligneur en cours si on change d'outil
-        if (formeEnCours && formeEnCours.type === 'surligneur') {
+        // Annuler une forme en cours si on change d'outil
+        if (formeEnCours) {
             formeEnCours = null; formeOrigine = null; enDessin = false;
             reRendreAnnotations();
         }
@@ -853,8 +841,8 @@
         // Laisser Space passer au module visionneuse pour le pan
         if (e.key === ' ') return;
 
-        // Escape : annuler un surligneur en cours
-        if (e.key === 'Escape' && formeEnCours && formeEnCours.type === 'surligneur') {
+        // Escape : annuler une forme en cours de dessin (surligneur, rectangle, etc.)
+        if (e.key === 'Escape' && formeEnCours) {
             e.preventDefault();
             formeEnCours = null; formeOrigine = null; enDessin = false;
             reRendreAnnotations();
@@ -1014,60 +1002,66 @@
      * @param {number} yNorm - Y normalise
      */
     function ajouterTexte(xNorm, yNorm) {
-        // Creer la modale de saisie de texte
-        const overlay = document.createElement('div');
-        overlay.className = 'modal-overlay actif';
-        overlay.id = 'travaux-modal-texte';
+        // Supprimer un textarea inline existant
+        const ancien = document.getElementById('travaux-texte-inline');
+        if (ancien) ancien.remove();
+
+        const conteneur = document.getElementById('travaux-conteneur-document');
+        if (!conteneur || !canvasAnnotation) return;
 
         const tailleCourante = travauxOutils.getTailleTexte();
+        const couleur = travauxOutils.getCouleurActive();
 
-        overlay.innerHTML = `
-            <div class="modal-contenu modal-compact" style="max-width:450px;">
-                <h3>Ajouter un commentaire</h3>
-                <textarea id="travaux-modal-texte-input" rows="4" style="width:100%;resize:vertical;font-size:14px;padding:8px;border-radius:var(--radius-standard);border:1px solid var(--bordure-claire);background:var(--surface-input,#0d1f2d);color:var(--texte-principal,#e0e0e0);font-family:sans-serif;" placeholder="Saisissez votre commentaire..."></textarea>
-                <div style="margin-top:12px;display:flex;align-items:center;gap:12px;">
-                    <label style="white-space:nowrap;">Taille : <span id="travaux-modal-texte-taille-val">${tailleCourante}px</span></label>
-                    <input type="range" id="travaux-modal-texte-taille" min="10" max="32" value="${tailleCourante}" style="flex:1;">
-                </div>
-                <div style="margin-top:16px;display:flex;justify-content:flex-end;gap:8px;">
-                    <button class="btn btn-secondaire" id="travaux-modal-texte-annuler">Annuler</button>
-                    <button class="btn btn-principal" id="travaux-modal-texte-ajouter">Ajouter</button>
-                </div>
-            </div>
+        // Calculer la position pixel a partir des coordonnees normalisees
+        const canvasRect = canvasAnnotation.getBoundingClientRect();
+        const posX = xNorm * canvasRect.width + canvasRect.left - conteneur.getBoundingClientRect().left;
+        const posY = yNorm * canvasRect.height + canvasRect.top - conteneur.getBoundingClientRect().top;
+
+        // Creer le textarea inline
+        const textarea = document.createElement('textarea');
+        textarea.id = 'travaux-texte-inline';
+        textarea.style.cssText = `
+            position: absolute;
+            left: ${posX}px;
+            top: ${posY}px;
+            min-width: 120px;
+            min-height: 32px;
+            max-width: 400px;
+            background: transparent;
+            border: 2px dashed ${couleur};
+            border-radius: 4px;
+            color: ${couleur};
+            font-family: sans-serif;
+            font-size: ${tailleCourante}px;
+            padding: 4px 6px;
+            resize: both;
+            outline: none;
+            z-index: 1000;
+            overflow: hidden;
         `;
+        textarea.placeholder = 'Texte...';
 
-        document.body.appendChild(overlay);
+        conteneur.appendChild(textarea);
 
-        const textarea = document.getElementById('travaux-modal-texte-input');
-        const slider = document.getElementById('travaux-modal-texte-taille');
-        const valLabel = document.getElementById('travaux-modal-texte-taille-val');
-        const btnAnnuler = document.getElementById('travaux-modal-texte-annuler');
-        const btnAjouter = document.getElementById('travaux-modal-texte-ajouter');
+        // Empecher que le clic de creation ne confirme immediatement
+        let pret = false;
+        setTimeout(() => { pret = true; }, 100);
 
         textarea.focus();
 
-        slider.addEventListener('input', () => {
-            valLabel.textContent = slider.value + 'px';
-        });
-
-        function fermerModale() {
-            overlay.remove();
-        }
-
         function confirmerTexte() {
             const texte = textarea.value.trim();
-            if (!texte) { fermerModale(); return; }
+            textarea.remove();
 
-            const taille = parseInt(slider.value, 10) || tailleCourante;
-            travauxOutils.setTailleTexte(taille);
+            if (!texte) return;
 
             const ann = {
                 id: 'TXT_' + Date.now(),
                 x: xNorm,
                 y: yNorm,
                 text: texte,
-                fontSize: taille,
-                color: travauxOutils.getCouleurActive()
+                fontSize: tailleCourante,
+                color: couleur
             };
 
             const donneesPage = obtenirDonneesPage();
@@ -1075,21 +1069,34 @@
             empilerUndo('ajout-texte', ann);
             reRendreAnnotations();
             planifierSauvegarde();
-            fermerModale();
         }
 
-        btnAnnuler.addEventListener('click', fermerModale);
-        btnAjouter.addEventListener('click', confirmerTexte);
+        function annulerTexte() {
+            textarea.remove();
+        }
 
-        // Fermer via Escape
-        overlay.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') { e.stopPropagation(); fermerModale(); }
+        // Enter (sans Shift) : confirmer ; Shift+Enter : saut de ligne
+        textarea.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                e.stopPropagation();
+                confirmerTexte();
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                e.stopPropagation();
+                annulerTexte();
+            }
         });
 
-        // Fermer via clic arriere-plan
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) fermerModale();
-        });
+        // Clic exterieur : confirmer
+        function onClickExterieur(e) {
+            if (!pret) return;
+            if (!textarea.contains(e.target)) {
+                document.removeEventListener('pointerdown', onClickExterieur, true);
+                confirmerTexte();
+            }
+        }
+        document.addEventListener('pointerdown', onClickExterieur, true);
     }
 
     /* ===============================
@@ -1779,7 +1786,10 @@
         const w = canvasAnnotation.width;
         const h = canvasAnnotation.height;
         const outil = travauxOutils.OUTILS[trait.tool] || travauxOutils.OUTILS.stylo;
-        const ratioResolution = w / travauxOutils.RESOLUTION_REFERENCE;
+        const dims = (typeof travauxVisionneuse !== 'undefined' && travauxVisionneuse.getDimensionsOriginales)
+            ? travauxVisionneuse.getDimensionsOriginales() : null;
+        const largeurRef = (dims && dims.w) ? dims.w : travauxOutils.RESOLUTION_REFERENCE;
+        const ratioResolution = largeurRef / travauxOutils.RESOLUTION_REFERENCE;
 
         ctx.save();
         ctx.globalAlpha = trait.opacity || 1.0;
@@ -1815,7 +1825,10 @@
         ctx = ctx || ctxAnnotation;
         const w = canvasAnnotation.width;
         const h = canvasAnnotation.height;
-        const ratioResolution = w / travauxOutils.RESOLUTION_REFERENCE;
+        const dims = (typeof travauxVisionneuse !== 'undefined' && travauxVisionneuse.getDimensionsOriginales)
+            ? travauxVisionneuse.getDimensionsOriginales() : null;
+        const largeurRef = (dims && dims.w) ? dims.w : travauxOutils.RESOLUTION_REFERENCE;
+        const ratioResolution = largeurRef / travauxOutils.RESOLUTION_REFERENCE;
 
         ctx.save();
         ctx.strokeStyle = forme.color;

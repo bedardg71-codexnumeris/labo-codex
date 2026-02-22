@@ -41,6 +41,9 @@
     const cachePages = new Map(); // Map<numPage, {canvas, scale}>
     const MAX_CACHE_PAGES = 5;
 
+    // Dimensions originales du document (avant zoom)
+    let dimensionsOriginales = { w: 0, h: 0 };
+
     /* ===============================
        INITIALISATION PDF.js
        =============================== */
@@ -93,7 +96,8 @@
         mettreAJourNavigation();
         recentrerVue();
         // Recentrer après que le layout soit finalisé (PDF/image async)
-        requestAnimationFrame(() => recentrerVue());
+        // Double requestAnimationFrame pour attendre le rendu complet
+        requestAnimationFrame(() => { requestAnimationFrame(() => recentrerVue()); });
         return true;
     }
 
@@ -159,6 +163,11 @@
 
         try {
             const page = await pdfDocument.getPage(numPage);
+
+            // Stocker les dimensions originales (avant zoom)
+            const viewportOriginal = page.getViewport({ scale: 1 });
+            dimensionsOriginales = { w: viewportOriginal.width, h: viewportOriginal.height };
+
             const zoomEffectif = calculerZoomEffectif(page);
             const viewport = page.getViewport({ scale: zoomEffectif });
 
@@ -251,6 +260,9 @@
      */
     function rendreImage(img) {
         initialiserCanvas();
+
+        // Stocker les dimensions originales (avant zoom)
+        dimensionsOriginales = { w: img.naturalWidth || img.width, h: img.naturalHeight || img.height };
 
         const zoomEffectif = calculerZoomImage(img);
         const w = img.width * zoomEffectif;
@@ -892,8 +904,15 @@
 
     function recentrerVue() {
         if (!conteneurGestesZoom) return;
-        conteneurGestesZoom.scrollLeft = (conteneurGestesZoom.scrollWidth - conteneurGestesZoom.clientWidth) / 2;
-        conteneurGestesZoom.scrollTop = (conteneurGestesZoom.scrollHeight - conteneurGestesZoom.clientHeight) / 2;
+        if (wrapperGestesZoom) {
+            var wrapperCenterX = wrapperGestesZoom.offsetLeft + wrapperGestesZoom.offsetWidth / 2;
+            var wrapperCenterY = wrapperGestesZoom.offsetTop + wrapperGestesZoom.offsetHeight / 2;
+            conteneurGestesZoom.scrollLeft = wrapperCenterX - conteneurGestesZoom.clientWidth / 2;
+            conteneurGestesZoom.scrollTop = wrapperCenterY - conteneurGestesZoom.clientHeight / 2;
+        } else {
+            conteneurGestesZoom.scrollLeft = (conteneurGestesZoom.scrollWidth - conteneurGestesZoom.clientWidth) / 2;
+            conteneurGestesZoom.scrollTop = (conteneurGestesZoom.scrollHeight - conteneurGestesZoom.clientHeight) / 2;
+        }
     }
 
     /**
@@ -947,6 +966,7 @@
     function getZoomActuel() { return zoomActuel; }
     function getCanvas() { return canvasDocument; }
     function getPdfDocument() { return pdfDocument; }
+    function getDimensionsOriginales() { return dimensionsOriginales; }
 
     /**
      * Definit le conteneur de la visionneuse
@@ -995,7 +1015,8 @@
         getCanvas: getCanvas,
         getPdfDocument: getPdfDocument,
         recentrerVue: recentrerVue,
-        estModePanActif: estModePanActif
+        estModePanActif: estModePanActif,
+        getDimensionsOriginales: getDimensionsOriginales
     };
 
 })();

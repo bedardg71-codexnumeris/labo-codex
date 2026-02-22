@@ -655,9 +655,11 @@
      * @returns {number} Epaisseur reelle en pixels canvas
      */
     function calculerEpaisseurReelle(epaisseurLogique) {
-        const canvas = document.getElementById('travaux-canvas-document');
-        const largeurImage = canvas ? canvas.width : RESOLUTION_REFERENCE;
-        return epaisseurLogique * (largeurImage / RESOLUTION_REFERENCE);
+        const dims = (typeof travauxVisionneuse !== 'undefined' && travauxVisionneuse.getDimensionsOriginales)
+            ? travauxVisionneuse.getDimensionsOriginales()
+            : null;
+        const largeurRef = (dims && dims.w) ? dims.w : RESOLUTION_REFERENCE;
+        return epaisseurLogique * (largeurRef / RESOLUTION_REFERENCE);
     }
 
     /**
@@ -745,6 +747,12 @@
         html += '<button id="travaux-btn-undo" class="travaux-palette-btn-pied" onclick="travauxAnnotation.annuler()" disabled title="Annuler (Ctrl+Z)">Annuler</button>';
         html += '<button id="travaux-btn-redo" class="travaux-palette-btn-pied" onclick="travauxAnnotation.retablir()" disabled title="Retablir (Ctrl+Y)">R\u00e9tablir</button>';
         html += '<button class="travaux-palette-btn-pied travaux-palette-btn-danger" onclick="travauxAnnotation.effacerPage()" title="Effacer la page">Effacer</button>';
+        html += '</div>';
+
+        // Boutons toggle palettes secondaires
+        html += '<div class="travaux-palette-pied travaux-palette-toggles">';
+        html += '<button class="travaux-palette-btn-pied" onclick="travauxOutils.togglePaletteErreursFrancais()" title="Codes d\'erreurs">\uD83D\uDCCE</button>';
+        html += '<button class="travaux-palette-btn-pied" onclick="travauxOutils.togglePaletteAutocollants()" title="R\u00e9troactions visuelles">\uD83D\uDD23</button>';
         html += '</div>';
 
         html += '</div>'; // fin .travaux-palette-flottante
