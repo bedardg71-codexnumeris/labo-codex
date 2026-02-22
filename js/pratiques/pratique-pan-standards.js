@@ -514,14 +514,11 @@ class PratiquePANStandards {
             return null;
         }
 
-        // 2. Compter combien CET ÉTUDIANT a remis (certifié avec statutRemise='remis')
-        // ✅ CORRECTIF (16 déc 2025): Compatibilité avec anciennes évaluations sans statutRemise
+        // 2. Compter combien CET ÉTUDIANT a remis (évaluation avec note existante)
         const travauxRemis = travauxAssignes.filter(travail => {
             return evaluations.some(e =>
                 e.etudiantDA === da &&
                 e.productionId === travail.id &&
-                // Considérer comme "remis" si: statutRemise === 'remis' OU (statutRemise undefined ET note existante)
-                (e.statutRemise === 'remis' || (e.statutRemise === undefined && e.noteFinale !== null)) &&
                 e.statutRemise !== 'non-remis' &&
                 !e.remplaceeParId &&
                 e.noteFinale !== null &&

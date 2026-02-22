@@ -4496,7 +4496,6 @@
                                     <option value="importe">Importé</option>
                                     <option value="annote">Annoté</option>
                                     <option value="evalue">Évalué</option>
-                                    <option value="remis">Remis</option>
                                     <option value="non-evalue">Non évalués</option>
                                     <option value="jeton-delai">Jeton de délai</option>
                                     <option value="jeton-reprise">Jeton de reprise</option>
@@ -4693,12 +4692,7 @@
                                     <option value="importe">Importé</option>
                                     <option value="annote">Annoté</option>
                                     <option value="evalue">Évalué</option>
-                                    <option value="remis">Remis</option>
                                 </select>
-                                <label class="text-sm-pointer" id="checkboxRemisLabel" style="display:none; margin-top:6px;">
-                                    <input type="checkbox" id="checkboxRemisEleve" onchange="changerCheckboxRemis()">
-                                    Remis à l'élève
-                                </label>
                             </div>
 
                             <!-- STATUT D'INTÉGRITÉ ACADÉMIQUE -->
@@ -4807,41 +4801,19 @@
                             </button>
                         </div>
 
-                        <!-- Options à inclure (TOUTES COCHÉES PAR DÉFAUT) -->
-                        <div class="grille-checkboxes" data-tooltip="eval-retroaction-options">
-                            <label class="text-sm-pointer">
-                                <input type="checkbox" id="afficherDescription1" onchange="genererRetroaction(1)"
-                                    checked>
-                                Description
-                            </label>
-                            <label class="text-sm-pointer">
-                                <input type="checkbox" id="afficherObjectif1" onchange="genererRetroaction(1)" checked>
-                                Objectif
-                            </label>
-                            <label class="text-sm-pointer">
-                                <input type="checkbox" id="afficherTache1" onchange="genererRetroaction(1)" checked>
-                                Tâche
-                            </label>
-                            <label class="text-sm-pointer">
-                                <input type="checkbox" id="afficherAdresse1" onchange="genererRetroaction(1)" checked>
-                                Adresse
-                            </label>
-                            <label class="text-sm-pointer">
-                                <input type="checkbox" id="afficherContexte1" onchange="genererRetroaction(1)" checked>
-                                Contexte
-                            </label>
-                        </div>
-
-                        <!-- Mode d'affichage de la note -->
-                        <div class="grille-checkboxes" style="margin-top: 6px;" data-tooltip="eval-affichage-note">
-                            <label class="text-sm-pointer">
-                                <input type="radio" name="affichageNote1" id="affichageNoteComplet1" value="complet" checked>
-                                Note et niveau
-                            </label>
-                            <label class="text-sm-pointer">
-                                <input type="radio" name="affichageNote1" id="affichageNoteLettre1" value="lettre">
-                                Lettre seulement
-                            </label>
+                        <!-- Options à inclure + mode note -->
+                        <div class="eval-options-retroaction" data-tooltip="eval-retroaction-options">
+                            <div class="eval-options-checkboxes">
+                                <label><input type="checkbox" id="afficherDescription1" onchange="genererRetroaction(1)" checked> Description</label>
+                                <label><input type="checkbox" id="afficherObjectif1" onchange="genererRetroaction(1)" checked> Objectif</label>
+                                <label><input type="checkbox" id="afficherTache1" onchange="genererRetroaction(1)" checked> Tâche</label>
+                                <label><input type="checkbox" id="afficherAdresse1" onchange="genererRetroaction(1)" checked> Adresse</label>
+                                <label><input type="checkbox" id="afficherContexte1" onchange="genererRetroaction(1)" checked> Contexte</label>
+                            </div>
+                            <div class="eval-options-radios">
+                                <label><input type="radio" name="affichageNote1" id="affichageNoteComplet1" value="complet" checked onchange="genererRetroaction(1)"> Note et niveau</label>
+                                <label><input type="radio" name="affichageNote1" id="affichageNoteLettre1" value="lettre" onchange="genererRetroaction(1)"> Lettre seulement</label>
+                            </div>
                         </div>
 
                         <!-- Zone de texte pour la rétroaction finale -->

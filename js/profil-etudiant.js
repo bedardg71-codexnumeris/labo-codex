@@ -3824,7 +3824,7 @@ function genererSectionProductions(da) {
             }
 
             // Déterminer le statut final basé sur statutRemise (priorité)
-            const statutRemise = evaluation.statutRemise || 'remis';
+            const statutRemise = evaluation.statutRemise || 'evalue';
             const statutIntegrite = evaluation.statutIntegrite || 'recevable';
             const estNonRemis = statutRemise === 'non-remis' || statutRemise === 'retard';
             const estNonRecevable = statutIntegrite === 'plagiat' || statutIntegrite === 'ia';

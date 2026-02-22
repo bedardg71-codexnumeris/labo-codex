@@ -465,7 +465,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759260084761",
       "dateEvaluation": "2025-10-04T21:35:06.869Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -528,7 +528,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759260084761",
       "dateEvaluation": "2025-10-04T21:29:33.573Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -591,7 +591,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759260084761",
       "dateEvaluation": "2025-10-04T22:48:53.781Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -647,7 +647,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759260084761",
       "dateEvaluation": "2025-10-04T22:50:50.999Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -710,7 +710,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759260084761",
       "dateEvaluation": "2025-10-04T22:51:56.582Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -773,7 +773,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759260084761",
       "dateEvaluation": "2025-10-04T22:52:52.460Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -836,7 +836,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759260084761",
       "dateEvaluation": "2025-10-04T22:55:25.776Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -899,7 +899,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759260084761",
       "dateEvaluation": "2025-10-04T22:55:39.496Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -962,7 +962,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759260084761",
       "dateEvaluation": "2025-10-04T22:55:50.660Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -1025,7 +1025,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759260084761",
       "dateEvaluation": "2025-10-04T22:59:01.545Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -1088,7 +1088,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759260084761",
       "dateEvaluation": "2025-10-04T22:59:07.214Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -1151,7 +1151,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759260084761",
       "dateEvaluation": "2025-10-04T22:59:13.497Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -1214,7 +1214,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759260084761",
       "dateEvaluation": "2025-10-04T22:59:19.346Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -1277,7 +1277,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759260084761",
       "dateEvaluation": "2025-10-04T22:59:51.429Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -1340,7 +1340,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759260084761",
       "dateEvaluation": "2025-10-04T22:59:59.346Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -1403,7 +1403,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759260084761",
       "dateEvaluation": "2025-10-04T23:01:01.747Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -1466,7 +1466,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759260084761",
       "dateEvaluation": "2025-10-04T23:03:16.961Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -1529,7 +1529,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759260084761",
       "dateEvaluation": "2025-10-04T23:04:28.494Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -1592,7 +1592,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759260084761",
       "dateEvaluation": "2025-10-04T23:06:37.440Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -1648,7 +1648,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759269075967",
       "dateEvaluation": "2025-10-06T14:19:02.983Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -1704,7 +1704,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759269075967",
       "dateEvaluation": "2025-10-06T14:20:42.549Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -1760,7 +1760,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759269075967",
       "dateEvaluation": "2025-10-06T14:23:01.195Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -1816,7 +1816,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759269075967",
       "dateEvaluation": "2025-10-06T14:23:51.148Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -1872,7 +1872,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759269075967",
       "dateEvaluation": "2025-10-06T14:24:37.415Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -1928,7 +1928,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759269075967",
       "dateEvaluation": "2025-10-06T14:25:19.964Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -1984,7 +1984,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759269075967",
       "dateEvaluation": "2025-10-06T14:26:51.930Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -2040,7 +2040,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759269075967",
       "dateEvaluation": "2025-10-06T14:27:43.096Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -2096,7 +2096,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759269075967",
       "dateEvaluation": "2025-10-06T14:28:19.761Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -2152,7 +2152,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759269075967",
       "dateEvaluation": "2025-10-06T14:29:00.313Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -2208,7 +2208,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759269075967",
       "dateEvaluation": "2025-10-06T14:30:29.445Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -2264,7 +2264,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759269075967",
       "dateEvaluation": "2025-10-06T14:31:18.795Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -2320,7 +2320,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759269075967",
       "dateEvaluation": "2025-10-06T14:32:02.650Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -2376,7 +2376,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759269075967",
       "dateEvaluation": "2025-10-06T14:32:44.598Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -2432,7 +2432,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759269075967",
       "dateEvaluation": "2025-10-06T14:34:02.851Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -2488,7 +2488,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759269075967",
       "dateEvaluation": "2025-10-06T14:35:23.983Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -2544,7 +2544,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759269075967",
       "dateEvaluation": "2025-10-06T14:36:55.949Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -2600,7 +2600,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759269075967",
       "dateEvaluation": "2025-10-06T14:37:35.031Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -2656,7 +2656,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759269075967",
       "dateEvaluation": "2025-10-06T14:38:10.398Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -2712,7 +2712,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759269075967",
       "dateEvaluation": "2025-10-06T14:42:48.564Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -2768,7 +2768,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759620598310",
       "dateEvaluation": "2025-10-06T19:40:21.690Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -2824,7 +2824,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759620598310",
       "dateEvaluation": "2025-10-06T19:49:55.920Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -2880,7 +2880,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759620598310",
       "dateEvaluation": "2025-10-06T19:56:04.493Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -2936,7 +2936,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759620598310",
       "dateEvaluation": "2025-10-06T19:57:52.129Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -2992,7 +2992,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759620598310",
       "dateEvaluation": "2025-10-08T12:48:03.590Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -3048,7 +3048,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759620598310",
       "dateEvaluation": "2025-10-08T12:50:12.024Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -3104,7 +3104,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759620598310",
       "dateEvaluation": "2025-10-08T13:05:29.638Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -3160,7 +3160,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759620598310",
       "dateEvaluation": "2025-10-08T16:55:02.162Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -3216,7 +3216,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759620598310",
       "dateEvaluation": "2025-10-08T17:16:28.302Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -3272,7 +3272,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759620598310",
       "dateEvaluation": "2025-10-08T19:46:14.417Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -3328,7 +3328,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759620598310",
       "dateEvaluation": "2025-10-08T19:47:43.365Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -3384,7 +3384,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759620598310",
       "dateEvaluation": "2025-10-08T19:53:53.729Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -3440,7 +3440,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759620598310",
       "dateEvaluation": "2025-10-08T20:59:44.757Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -3496,7 +3496,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759620598310",
       "dateEvaluation": "2025-10-08T21:09:07.643Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -3552,7 +3552,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759620598310",
       "dateEvaluation": "2025-10-08T21:09:52.560Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -3608,7 +3608,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759620598310",
       "dateEvaluation": "2025-10-09T11:57:23.389Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -3664,7 +3664,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "GAB1759620598310",
       "dateEvaluation": "2025-10-09T12:27:44.660Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -3720,7 +3720,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "CART1760483301927",
       "dateEvaluation": "2025-10-15T12:20:29.644Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -3785,7 +3785,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "CART1760483301927",
       "dateEvaluation": "2025-10-15T13:32:52.298Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -3848,7 +3848,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "CART1760483301927",
       "dateEvaluation": "2025-10-15T14:22:46.173Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -3911,7 +3911,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "CART1760483301927",
       "dateEvaluation": "2025-10-15T15:31:05.387Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -3974,7 +3974,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "CART1760483301927",
       "dateEvaluation": "2025-10-15T15:40:12.732Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -4037,7 +4037,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "CART1760483301927",
       "dateEvaluation": "2025-10-15T16:55:22.521Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -4100,7 +4100,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "CART1760483301927",
       "dateEvaluation": "2025-10-15T18:14:44.406Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -4163,7 +4163,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "CART1760483301927",
       "dateEvaluation": "2025-10-15T18:32:31.384Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -4226,7 +4226,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "CART1760483301927",
       "dateEvaluation": "2025-10-15T18:47:57.233Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -4295,7 +4295,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "CART1760483301927",
       "dateEvaluation": "2025-10-15T22:18:19.437Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -4358,7 +4358,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "CART1760483301927",
       "dateEvaluation": "2025-10-15T22:28:39.395Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -4421,7 +4421,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "CART1760483301927",
       "dateEvaluation": "2025-10-15T23:01:52.136Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -4484,7 +4484,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "CART1760483301927",
       "dateEvaluation": "2025-10-15T23:12:15.371Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -4547,7 +4547,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "CART1760483301927",
       "dateEvaluation": "2025-10-18T14:41:00.834Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -4611,7 +4611,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1760483301927",
       "dateEvaluation": "2025-10-26T17:01:54.040Z",
       "heureEvaluation": "13:01",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -4677,7 +4677,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1760483301927",
       "dateEvaluation": "2025-10-26T17:02:15.577Z",
       "heureEvaluation": "13:01",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -4745,7 +4745,7 @@ const PACK_DEMARRAGE = {
       "echelleId": "ECH1759264511178",
       "cartoucheId": "CART1760483301927",
       "dateEvaluation": "2025-10-27T10:57:25.149Z",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -4818,7 +4818,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1760483301927",
       "dateEvaluation": "2025-12-01T00:19:08.083Z",
       "heureEvaluation": "19:19",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -4893,7 +4893,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1761665398161",
       "dateEvaluation": "2025-10-28T18:13:04.757Z",
       "heureEvaluation": "14:13",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -4957,7 +4957,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1761665398161",
       "dateEvaluation": "2025-10-28T18:34:25.807Z",
       "heureEvaluation": "14:34",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -5025,7 +5025,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1761665398161",
       "dateEvaluation": "2025-10-28T19:05:06.172Z",
       "heureEvaluation": "15:05",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -5089,7 +5089,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1761665398161",
       "dateEvaluation": "2025-10-28T19:11:02.128Z",
       "heureEvaluation": "15:11",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -5153,7 +5153,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1761665398161",
       "dateEvaluation": "2025-10-28T19:14:32.678Z",
       "heureEvaluation": "15:14",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -5217,7 +5217,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1761665398161",
       "dateEvaluation": "2025-10-28T19:18:54.646Z",
       "heureEvaluation": "15:18",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -5281,7 +5281,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1761665398161",
       "dateEvaluation": "2025-10-28T19:43:12.108Z",
       "heureEvaluation": "15:43",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -5345,7 +5345,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1761665398161",
       "dateEvaluation": "2025-10-28T19:51:24.102Z",
       "heureEvaluation": "15:51",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -5409,7 +5409,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1761665398161",
       "dateEvaluation": "2025-10-28T19:55:21.848Z",
       "heureEvaluation": "15:55",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -5473,7 +5473,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1761665398161",
       "dateEvaluation": "2025-10-28T20:02:03.889Z",
       "heureEvaluation": "16:02",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -5537,7 +5537,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1761665398161",
       "dateEvaluation": "2025-10-29T10:52:29.243Z",
       "heureEvaluation": "06:52",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -5603,7 +5603,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1761665398161",
       "dateEvaluation": "2025-10-29T11:06:11.257Z",
       "heureEvaluation": "07:06",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -5667,7 +5667,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1761665398161",
       "dateEvaluation": "2025-10-29T11:17:45.122Z",
       "heureEvaluation": "07:17",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -5731,7 +5731,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1761665398161",
       "dateEvaluation": "2025-10-29T11:28:48.653Z",
       "heureEvaluation": "07:28",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -5795,7 +5795,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1761665398161",
       "dateEvaluation": "2025-10-29T12:07:08.358Z",
       "heureEvaluation": "08:07",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -5863,7 +5863,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1761665398161",
       "dateEvaluation": "2025-10-29T12:26:00.750Z",
       "heureEvaluation": "08:26",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -5927,7 +5927,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1760483301927",
       "dateEvaluation": "2025-11-04T18:47:04.586Z",
       "heureEvaluation": "13:47",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -5996,7 +5996,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1761665398161",
       "dateEvaluation": "2025-11-05T13:39:21.740Z",
       "heureEvaluation": "08:39",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -6064,7 +6064,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1761665398161",
       "dateEvaluation": "2025-11-05T13:41:19.925Z",
       "heureEvaluation": "08:07",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -6133,7 +6133,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1761665398161",
       "dateEvaluation": "2025-11-05T13:41:50.043Z",
       "heureEvaluation": "08:39",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -6202,7 +6202,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1761665398161",
       "dateEvaluation": "2025-11-05T13:42:15.645Z",
       "heureEvaluation": "14:34",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR1759243306842",
@@ -6271,7 +6271,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "GAB1759620598310",
       "dateEvaluation": "2025-11-05T13:59:19.103Z",
       "heureEvaluation": "08:59",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "criteres": [
         {
           "critereId": "CR17592642064900.618466646516426",
@@ -6328,7 +6328,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1761665398161",
       "dateEvaluation": "2025-11-10T00:52:47.764Z",
       "heureEvaluation": "19:52",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -6400,7 +6400,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-11-21T15:15:52.249Z",
       "heureEvaluation": "10:15",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -6493,7 +6493,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-11-21T16:22:05.783Z",
       "heureEvaluation": "11:22",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -6578,7 +6578,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-11-22T13:47:38.661Z",
       "heureEvaluation": "08:47",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -6669,7 +6669,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-11-22T14:06:40.462Z",
       "heureEvaluation": "09:06",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -6755,7 +6755,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-11-22T14:18:29.317Z",
       "heureEvaluation": "09:18",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -6839,7 +6839,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-11-22T14:37:27.765Z",
       "heureEvaluation": "09:37",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -6897,7 +6897,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-11-22T15:04:11.244Z",
       "heureEvaluation": "10:04",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -7004,7 +7004,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-11-22T15:15:02.478Z",
       "heureEvaluation": "10:15",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -7090,7 +7090,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-11-22T15:29:39.770Z",
       "heureEvaluation": "10:29",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -7174,7 +7174,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-11-22T19:47:53.841Z",
       "heureEvaluation": "14:47",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -7265,7 +7265,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-11-23T15:44:17.475Z",
       "heureEvaluation": "10:44",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -7349,7 +7349,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-11-23T15:52:54.909Z",
       "heureEvaluation": "10:52",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -7431,7 +7431,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-11-23T15:54:20.506Z",
       "heureEvaluation": "10:54",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -7517,7 +7517,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-11-23T16:14:00.061Z",
       "heureEvaluation": "11:14",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -7609,7 +7609,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-11-23T17:14:41.539Z",
       "heureEvaluation": "12:14",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -7691,7 +7691,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-11-23T17:40:03.326Z",
       "heureEvaluation": "12:40",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -7784,7 +7784,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-11-23T18:02:17.446Z",
       "heureEvaluation": "13:02",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -7869,7 +7869,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-11-23T18:10:43.816Z",
       "heureEvaluation": "13:10",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -7959,7 +7959,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-11-24T14:06:15.518Z",
       "heureEvaluation": "09:06",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -8044,7 +8044,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-12-01T12:57:42.878Z",
       "heureEvaluation": "10:04",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -8128,7 +8128,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-12-01T12:58:58.375Z",
       "heureEvaluation": "10:52",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -8216,7 +8216,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-12-01T13:08:32.618Z",
       "heureEvaluation": "08:08",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -8304,7 +8304,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-12-02T13:13:21.981Z",
       "heureEvaluation": "11:14",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -8400,7 +8400,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1764706265919",
       "dateEvaluation": "2025-12-02T20:43:03.417Z",
       "heureEvaluation": "15:43",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -8467,7 +8467,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1764706265919",
       "dateEvaluation": "2025-12-02T23:01:54.682Z",
       "heureEvaluation": "18:01",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -8536,7 +8536,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1764706265919",
       "dateEvaluation": "2025-12-03T00:06:16.166Z",
       "heureEvaluation": "19:06",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -8603,7 +8603,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1764706265919",
       "dateEvaluation": "2025-12-03T00:30:16.413Z",
       "heureEvaluation": "19:30",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -8672,7 +8672,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1764706265919",
       "dateEvaluation": "2025-12-03T00:30:25.079Z",
       "heureEvaluation": "19:30",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -8772,7 +8772,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1764706265919",
       "dateEvaluation": "2025-12-03T01:17:55.601Z",
       "heureEvaluation": "20:17",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -8839,7 +8839,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1764706265919",
       "dateEvaluation": "2025-12-03T01:28:39.604Z",
       "heureEvaluation": "20:28",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -8906,7 +8906,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1764706265919",
       "dateEvaluation": "2025-12-03T02:23:42.484Z",
       "heureEvaluation": "21:23",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -8973,7 +8973,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1764706265919",
       "dateEvaluation": "2025-12-03T02:49:43.120Z",
       "heureEvaluation": "21:49",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -9040,7 +9040,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1764706265919",
       "dateEvaluation": "2025-12-03T10:49:55.023Z",
       "heureEvaluation": "05:49",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -9107,7 +9107,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1764706265919",
       "dateEvaluation": "2025-12-03T11:05:37.388Z",
       "heureEvaluation": "06:05",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -9174,7 +9174,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1764706265919",
       "dateEvaluation": "2025-12-03T11:29:02.418Z",
       "heureEvaluation": "06:29",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -9241,7 +9241,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1764706265919",
       "dateEvaluation": "2025-12-03T11:42:09.244Z",
       "heureEvaluation": "06:42",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -9308,7 +9308,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1764706265919",
       "dateEvaluation": "2025-12-03T11:53:32.596Z",
       "heureEvaluation": "06:53",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -9375,7 +9375,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1764706265919",
       "dateEvaluation": "2025-12-03T12:04:07.899Z",
       "heureEvaluation": "07:04",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -9442,7 +9442,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1764706265919",
       "dateEvaluation": "2025-12-03T12:25:57.149Z",
       "heureEvaluation": "07:25",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -9509,7 +9509,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1764706265919",
       "dateEvaluation": "2025-12-03T12:39:05.179Z",
       "heureEvaluation": "07:39",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -9576,7 +9576,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1764706265919",
       "dateEvaluation": "2025-12-03T12:57:26.751Z",
       "heureEvaluation": "07:57",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -9643,7 +9643,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1764706265919",
       "dateEvaluation": "2025-12-03T13:07:29.985Z",
       "heureEvaluation": "08:07",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -9710,7 +9710,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765107186166",
       "dateEvaluation": "2025-12-08T14:56:36.902Z",
       "heureEvaluation": "09:56",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -9770,7 +9770,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765107186166",
       "dateEvaluation": "2025-12-08T14:57:58.502Z",
       "heureEvaluation": "09:57",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -9830,7 +9830,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765107186166",
       "dateEvaluation": "2025-12-08T15:00:16.969Z",
       "heureEvaluation": "10:00",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -9890,7 +9890,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765107186166",
       "dateEvaluation": "2025-12-08T15:01:22.045Z",
       "heureEvaluation": "10:01",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -9950,7 +9950,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765107186166",
       "dateEvaluation": "2025-12-08T15:01:59.393Z",
       "heureEvaluation": "10:01",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -10010,7 +10010,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765107186166",
       "dateEvaluation": "2025-12-08T15:02:58.595Z",
       "heureEvaluation": "10:02",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -10070,7 +10070,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765107186166",
       "dateEvaluation": "2025-12-08T15:04:40.112Z",
       "heureEvaluation": "10:04",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -10130,7 +10130,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765107186166",
       "dateEvaluation": "2025-12-08T15:05:34.194Z",
       "heureEvaluation": "10:05",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -10190,7 +10190,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765107186166",
       "dateEvaluation": "2025-12-08T15:06:18.144Z",
       "heureEvaluation": "10:06",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -10250,7 +10250,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765107186166",
       "dateEvaluation": "2025-12-08T15:06:52.444Z",
       "heureEvaluation": "10:06",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -10310,7 +10310,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765107186166",
       "dateEvaluation": "2025-12-08T15:07:22.397Z",
       "heureEvaluation": "10:07",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -10370,7 +10370,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765107186166",
       "dateEvaluation": "2025-12-08T15:08:20.310Z",
       "heureEvaluation": "10:08",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -10430,7 +10430,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765107186166",
       "dateEvaluation": "2025-12-08T15:08:47.111Z",
       "heureEvaluation": "10:08",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -10490,7 +10490,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765107186166",
       "dateEvaluation": "2025-12-08T15:09:14.893Z",
       "heureEvaluation": "10:09",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -10550,7 +10550,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765107186166",
       "dateEvaluation": "2025-12-08T15:09:47.495Z",
       "heureEvaluation": "10:09",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -10610,7 +10610,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765107186166",
       "dateEvaluation": "2025-12-08T15:10:50.595Z",
       "heureEvaluation": "10:10",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -10670,7 +10670,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765107186166",
       "dateEvaluation": "2025-12-08T15:12:07.595Z",
       "heureEvaluation": "10:12",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -10730,7 +10730,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765107186166",
       "dateEvaluation": "2025-12-08T15:13:15.509Z",
       "heureEvaluation": "10:13",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -10790,7 +10790,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765107186166",
       "dateEvaluation": "2025-12-08T15:13:48.176Z",
       "heureEvaluation": "10:13",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -10850,7 +10850,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765107186166",
       "dateEvaluation": "2025-12-08T15:14:15.126Z",
       "heureEvaluation": "10:14",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -10910,7 +10910,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765292766944",
       "dateEvaluation": "2025-12-09T23:25:42.145Z",
       "heureEvaluation": "18:25",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -10970,7 +10970,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765292766944",
       "dateEvaluation": "2025-12-09T23:26:16.360Z",
       "heureEvaluation": "18:26",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -11030,7 +11030,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765292766944",
       "dateEvaluation": "2025-12-09T23:26:50.672Z",
       "heureEvaluation": "18:26",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -11090,7 +11090,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765292766944",
       "dateEvaluation": "2025-12-09T23:27:24.872Z",
       "heureEvaluation": "18:27",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -11150,7 +11150,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765292766944",
       "dateEvaluation": "2025-12-09T23:28:29.589Z",
       "heureEvaluation": "18:28",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -11210,7 +11210,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765292766944",
       "dateEvaluation": "2025-12-09T23:29:02.838Z",
       "heureEvaluation": "18:29",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -11270,7 +11270,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765292766944",
       "dateEvaluation": "2025-12-09T23:29:40.204Z",
       "heureEvaluation": "18:29",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -11330,7 +11330,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765292766944",
       "dateEvaluation": "2025-12-09T23:30:14.672Z",
       "heureEvaluation": "18:30",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -11390,7 +11390,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765292766944",
       "dateEvaluation": "2025-12-09T23:30:51.022Z",
       "heureEvaluation": "18:30",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -11450,7 +11450,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765292766944",
       "dateEvaluation": "2025-12-09T23:31:23.738Z",
       "heureEvaluation": "18:31",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -11510,7 +11510,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765292766944",
       "dateEvaluation": "2025-12-09T23:32:01.953Z",
       "heureEvaluation": "18:32",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -11570,7 +11570,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765292766944",
       "dateEvaluation": "2025-12-09T23:33:18.519Z",
       "heureEvaluation": "18:33",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -11630,7 +11630,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765292766944",
       "dateEvaluation": "2025-12-09T23:33:51.372Z",
       "heureEvaluation": "18:33",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -11690,7 +11690,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765292766944",
       "dateEvaluation": "2025-12-09T23:36:06.118Z",
       "heureEvaluation": "18:36",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -11750,7 +11750,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765292766944",
       "dateEvaluation": "2025-12-09T23:36:36.719Z",
       "heureEvaluation": "18:36",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -11810,7 +11810,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765292766944",
       "dateEvaluation": "2025-12-09T23:40:05.184Z",
       "heureEvaluation": "18:40",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -11870,7 +11870,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765292766944",
       "dateEvaluation": "2025-12-09T23:41:03.250Z",
       "heureEvaluation": "18:41",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -11930,7 +11930,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765292766944",
       "dateEvaluation": "2025-12-10T15:27:31.785Z",
       "heureEvaluation": "10:27",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "plagiat",
       "notesIntegrite": "",
       "criteres": [],
@@ -11961,7 +11961,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765292766944",
       "dateEvaluation": "2025-12-10T15:28:14.501Z",
       "heureEvaluation": "10:28",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -12021,7 +12021,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1765292766944",
       "dateEvaluation": "2025-12-10T15:29:08.201Z",
       "heureEvaluation": "10:29",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -12081,7 +12081,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-12-15T16:47:14.685Z",
       "heureEvaluation": "11:47",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -12192,7 +12192,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-12-15T16:52:00.732Z",
       "heureEvaluation": "11:52",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -12289,7 +12289,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-12-15T17:03:30.981Z",
       "heureEvaluation": "12:03",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -12372,7 +12372,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-12-15T17:07:18.645Z",
       "heureEvaluation": "12:07",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -12455,7 +12455,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-12-15T17:10:00.407Z",
       "heureEvaluation": "12:10",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -12539,7 +12539,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-12-15T17:10:57.572Z",
       "heureEvaluation": "12:10",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -12625,7 +12625,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-12-15T17:25:29.977Z",
       "heureEvaluation": "12:25",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -12709,7 +12709,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-12-15T17:32:27.873Z",
       "heureEvaluation": "12:32",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -12799,7 +12799,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-12-15T17:35:10.305Z",
       "heureEvaluation": "12:35",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -12878,7 +12878,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-12-15T17:37:04.120Z",
       "heureEvaluation": "12:37",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -12961,7 +12961,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-12-15T17:38:22.505Z",
       "heureEvaluation": "12:38",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -13054,7 +13054,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-12-15T17:42:12.814Z",
       "heureEvaluation": "12:42",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -13138,7 +13138,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-12-15T17:44:47.162Z",
       "heureEvaluation": "12:44",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -13224,7 +13224,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-12-15T17:46:14.778Z",
       "heureEvaluation": "12:46",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -13317,7 +13317,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-12-15T17:48:43.493Z",
       "heureEvaluation": "12:48",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -13396,7 +13396,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-12-15T17:51:55.290Z",
       "heureEvaluation": "12:51",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -13487,7 +13487,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-12-15T17:55:29.686Z",
       "heureEvaluation": "12:55",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -13579,7 +13579,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-12-15T17:56:27.453Z",
       "heureEvaluation": "12:56",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -13660,7 +13660,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-12-15T17:59:53.434Z",
       "heureEvaluation": "12:59",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [
@@ -13744,7 +13744,7 @@ const PACK_DEMARRAGE = {
       "cartoucheId": "CART1763652289229",
       "dateEvaluation": "2025-12-15T18:02:31.083Z",
       "heureEvaluation": "13:02",
-      "statutRemise": "remis",
+      "statutRemise": "evalue",
       "statutIntegrite": "recevable",
       "notesIntegrite": "",
       "criteres": [

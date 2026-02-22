@@ -778,7 +778,9 @@
             y = mm(cfg.marges.haut);
         }
 
-        const modeNote = opts.affichageNote || 'complet';
+        // Lire le radio du DOM en priorité (si page évaluation ouverte), sinon valeur sauvegardée
+        const radioUI = document.querySelector('input[name="affichageNote1"]:checked');
+        const modeNote = (radioUI ? radioUI.value : null) || opts.affichageNote || 'complet';
         if (evaluation.noteFinale != null || evaluation.niveauFinal) {
             doc.setDrawColor(...cfg.couleurs.bordure);
             doc.setLineWidth(0.5);
