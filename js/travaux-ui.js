@@ -1300,7 +1300,7 @@
 
         return `<div class="travaux-badge-importe" data-fichier-id="${f.id}" draggable="true" ondragstart="event.dataTransfer.setData('text/fichier-id', '${f.id}')" onclick="travauxUI.${action}('${f.id}')" title="${echapperHtml(f.nomFichier)}">
         <span class="travaux-badge-nom">${nomEtudiant}</span>
-        <span class="travaux-badge-pill ${statutClasse}">${statutTexte}</span>${verrou}
+        <span class="travaux-badge-pill ${statutClasse}">${statutTexte}</span>${evaluation ? `<button class="travaux-badge-retro" onclick="event.stopPropagation(); travauxUI.afficherRetroaction('${f.id}')" title="Aperçu rétroaction">\u{1F4AC}</button>` : ''}${verrou}
         <button class="travaux-badge-supprimer" onclick="event.stopPropagation(); travauxUI.supprimerFichierImporte('${f.id}')" title="Supprimer">&times;</button>
     </div>`;
     }
@@ -3801,6 +3801,123 @@
     }
 
     /* ===============================
+       MODAL RETROACTION (ARCHIVAGE)
+       =============================== */
+
+    /**
+     * Affiche un modal d'aperçu/édition de la rétroaction globale
+     * pour un fichier évalué depuis la page d'archivage.
+     * @param {string} fichierId - ID du fichier
+     */
+    function afficherRetroaction(fichierId) {
+        const fichier = travauxStockage.obtenirFichierParId(fichierId);
+        if (!fichier) return;
+
+        const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
+        const evaluation = evaluations.find(e =>
+            e.etudiantDA === fichier.etudiantDA && e.productionId === fichier.productionId
+        );
+        if (!evaluation) return;
+
+        const etudiant = travauxImport.trouverEtudiantParDA(fichier.etudiantDA);
+        const nomEtudiant = etudiant
+            ? `${echapperHtml(etudiant.prenom)} ${echapperHtml(etudiant.nom)}`
+            : echapperHtml(evaluation.etudiantNom || fichier.etudiantDA || 'Inconnu');
+
+        // Tableau des critères en lecture seule
+        let criteresHTML = '';
+        if (evaluation.criteres && evaluation.criteres.length > 0) {
+            const lignes = evaluation.criteres.map(c => {
+                const extrait = c.retroaction ? echapperHtml(c.retroaction.substring(0, 120)) : '';
+                return `<li>
+                    <strong>${echapperHtml(c.critereNom || '')}</strong>
+                    <span class="niveau">${echapperHtml(c.niveauSelectionne || '—')}</span>
+                    <span class="retro-texte">${extrait}</span>
+                </li>`;
+            }).join('');
+            criteresHTML = `
+                <h4 style="margin: 12px 0 4px;">Critères</h4>
+                <ul class="travaux-retro-criteres">${lignes}</ul>`;
+        }
+
+        // Construire le modal
+        const html = `
+        <div class="modal-overlay actif" id="travaux-modal-retroaction" onclick="if(event.target===this) travauxUI.fermerModalRetroaction()">
+            <div class="modal-contenu" style="max-width: 620px;">
+                <button class="modal-fermer" onclick="travauxUI.fermerModalRetroaction()">&times;</button>
+                <h3 class="modal-titre">Rétroaction — ${nomEtudiant}</h3>
+
+                <div class="travaux-retro-entete">
+                    <div>Production : <strong>${echapperHtml(evaluation.productionNom || '—')}</strong></div>
+                    <div>Grille : <strong>${echapperHtml(evaluation.grilleNom || '—')}</strong></div>
+                    <div>Note : <strong>${evaluation.noteFinale != null ? evaluation.noteFinale + '%' : '—'}</strong> &nbsp;|&nbsp; Niveau : <strong>${echapperHtml(evaluation.niveauFinal || '—')}</strong></div>
+                </div>
+
+                ${criteresHTML}
+
+                <h4 style="margin: 12px 0 4px;">Rétroaction globale</h4>
+                <textarea id="travaux-modal-retro-texte" class="travaux-retro-textarea">${echapperHtml(evaluation.retroactionFinale || '')}</textarea>
+
+                <div class="modal-actions" style="margin-top: 12px;">
+                    <button class="btn btn-secondaire" onclick="travauxUI.fermerModalRetroaction()">Annuler</button>
+                    <button class="btn btn-principal" onclick="travauxUI.sauvegarderRetroactionDepuisModal('${fichierId}')">Sauvegarder</button>
+                </div>
+            </div>
+        </div>`;
+
+        // Retirer un modal existant
+        const existant = document.getElementById('travaux-modal-retroaction');
+        if (existant) existant.remove();
+
+        document.body.insertAdjacentHTML('beforeend', html);
+    }
+
+    /**
+     * Sauvegarde la rétroaction modifiée depuis le modal.
+     * Ne modifie que retroactionFinale et dateModification.
+     * @param {string} fichierId - ID du fichier
+     */
+    function sauvegarderRetroactionDepuisModal(fichierId) {
+        const textarea = document.getElementById('travaux-modal-retro-texte');
+        if (!textarea) return;
+
+        const fichier = travauxStockage.obtenirFichierParId(fichierId);
+        if (!fichier) return;
+
+        let evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
+        const index = evaluations.findIndex(e =>
+            e.etudiantDA === fichier.etudiantDA &&
+            e.productionId === fichier.productionId
+        );
+
+        if (index === -1) return;
+
+        evaluations[index].retroactionFinale = textarea.value;
+        evaluations[index].dateModification = new Date().toISOString();
+        const resultat = sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
+
+        fermerModalRetroaction();
+
+        if (resultat === true) {
+            if (typeof afficherNotificationSucces === 'function') {
+                afficherNotificationSucces('Rétroaction sauvegardée');
+            }
+        } else if (resultat === 'quota') {
+            if (typeof afficherNotificationErreur === 'function') {
+                afficherNotificationErreur('Espace de stockage insuffisant', 'Impossible de sauvegarder la rétroaction.');
+            }
+        }
+    }
+
+    /**
+     * Ferme le modal de rétroaction.
+     */
+    function fermerModalRetroaction() {
+        const modal = document.getElementById('travaux-modal-retroaction');
+        if (modal) modal.remove();
+    }
+
+    /* ===============================
        EXPORTS GLOBAUX
        =============================== */
 
@@ -3889,7 +4006,11 @@
         descendrePageEditeur: descendrePageEditeur,
         supprimerPageEditeur: supprimerPageEditeur,
         ajouterPagesEditeur: ajouterPagesEditeur,
-        sauvegarderEdition: sauvegarderEdition
+        sauvegarderEdition: sauvegarderEdition,
+        // Rétroaction (archivage)
+        afficherRetroaction: afficherRetroaction,
+        sauvegarderRetroactionDepuisModal: sauvegarderRetroactionDepuisModal,
+        fermerModalRetroaction: fermerModalRetroaction
     };
 
     // Alias pour navigation.js
