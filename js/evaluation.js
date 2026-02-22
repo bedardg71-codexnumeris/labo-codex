@@ -1910,7 +1910,8 @@ function sauvegarderEvaluation() {
             objectif: document.getElementById('afficherObjectif1').checked,
             tache: document.getElementById('afficherTache1').checked,
             adresse: document.getElementById('afficherAdresse1').checked,
-            contexte: document.getElementById('afficherContexte1').checked
+            contexte: document.getElementById('afficherContexte1').checked,
+            affichageNote: document.querySelector('input[name="affichageNote1"]:checked')?.value || 'complet'
         },
         donneesAlgorithmiques: evaluationEnCours.donneesAlgorithmiques || {}, // Sauvegarder données du français écrit algorithmique
         verrouillee: true // Verrouiller par défaut toutes les nouvelles évaluations
@@ -4737,6 +4738,10 @@ function modifierEvaluation(evaluationId) {
                 document.getElementById('afficherTache1').checked = evaluation.optionsAffichage.tache;
                 document.getElementById('afficherAdresse1').checked = evaluation.optionsAffichage.adresse;
                 document.getElementById('afficherContexte1').checked = evaluation.optionsAffichage.contexte;
+                // Restaurer le mode d'affichage de la note
+                const modeNote = evaluation.optionsAffichage.affichageNote || 'complet';
+                const radioNote = document.getElementById(modeNote === 'lettre' ? 'affichageNoteLettre1' : 'affichageNoteComplet1');
+                if (radioNote) radioNote.checked = true;
             }
 
             // ÉTAPE 12: Charger la rétroaction finale
@@ -4914,7 +4919,8 @@ function sauvegarderEvaluationModifiee() {
             objectif: document.getElementById('afficherObjectif1').checked,
             tache: document.getElementById('afficherTache1').checked,
             adresse: document.getElementById('afficherAdresse1').checked,
-            contexte: document.getElementById('afficherContexte1').checked
+            contexte: document.getElementById('afficherContexte1').checked,
+            affichageNote: document.querySelector('input[name="affichageNote1"]:checked')?.value || 'complet'
         },
         donneesAlgorithmiques: evaluationEnCours.donneesAlgorithmiques || {}, // Sauvegarder données du français écrit algorithmique
         ...proprietesJetons, // Préserver toutes les propriétés de jetons
