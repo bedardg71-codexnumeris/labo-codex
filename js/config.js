@@ -62,7 +62,8 @@ const configurationsOnglets = {
     // 🆕 BETA 96.1 : Boîte à outils pédagogiques
     // Outils interactifs pour l'animation en classe
     'boite-outils': [
-        { id: 'tirage', label: 'Tirage au sort' }
+        { id: 'tirage', label: 'Tirage au sort' },
+        { id: 'modelisation', label: 'Modélisation' }
     ],
     'planification': [
         { id: 'carte', label: 'Alignement pédagogique' },
