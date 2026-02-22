@@ -2333,12 +2333,16 @@
             afficherPalettesEval(fichier);
             if (btnAnnoter) btnAnnoter.classList.remove('actif');
             if (btnEvaluer) btnEvaluer.classList.add('actif');
+            // Zoom 165% par defaut en mode evaluation
+            travauxVisionneuse.setZoomManuel(1.65);
         } else {
             modeCourant = 'annoter';
             masquerPalettesEval();
             afficherPalettesAnnotation();
             if (btnAnnoter) btnAnnoter.classList.add('actif');
             if (btnEvaluer) btnEvaluer.classList.remove('actif');
+            // Revenir au zoom ajuste en mode annotation
+            travauxVisionneuse.zoomAjuster();
         }
         sauvegarderEtatSession();
     }
@@ -2364,17 +2368,22 @@
         const conteneurDoc = document.getElementById('travaux-conteneur-document');
         if (!conteneurDoc) return;
 
-        // Creer les 3 palettes flottantes eval
+        // Creer les panneaux
         const panneauGauche = document.getElementById('travaux-eval-gauche');
         const panneauDroite = document.getElementById('travaux-eval-droite');
         const panneauRetro = document.getElementById('travaux-eval-retroaction');
+        const panneauJetons = document.getElementById('travaux-eval-jetons');
 
-        if (panneauGauche) {
-            const paletteG = creerPaletteEval('travaux-palette-eval-gauche', 'Paramètres', panneauGauche);
-            paletteG.style.top = '56px';
-            paletteG.style.left = '12px';
-            conteneurDoc.appendChild(paletteG);
-            configurerDragPaletteEval('travaux-palette-eval-gauche');
+        // Creer le conteneur flex qui remplace les palettes flottantes
+        const evalFlex = document.createElement('div');
+        evalFlex.id = 'eval-layout-flex';
+        evalFlex.className = 'eval-layout-flex';
+
+        // --- Colonne gauche : Parametres ---
+        const paletteG = panneauGauche ? creerPaletteEval('travaux-palette-eval-gauche', 'Paramètres', panneauGauche) : null;
+        if (paletteG) {
+            paletteG.style.position = 'static';
+            paletteG.classList.add('eval-col-params');
 
             // Bouton cadenas compact dans la barre de titre
             const barreParam = paletteG.querySelector('.travaux-palette-barre');
@@ -2393,24 +2402,66 @@
                 const btnToggle = barreParam.querySelector('.travaux-palette-toggle');
                 barreParam.insertBefore(btnVerrou, btnToggle);
             }
+
+            // Integrer les Jetons dans Parametres (avant la barre emoji)
+            const panneauJetons = document.getElementById('travaux-eval-jetons');
+            if (panneauJetons) {
+                const jetonsWrapper = document.createElement('div');
+                jetonsWrapper.id = 'travaux-palette-eval-jetons';
+                jetonsWrapper.className = 'eval-jetons-integre';
+
+                const jetonsHeader = document.createElement('div');
+                jetonsHeader.className = 'eval-jetons-integre-header';
+                jetonsHeader.innerHTML = '<span class="travaux-palette-titre">Jetons</span>';
+                jetonsWrapper.appendChild(jetonsHeader);
+
+                const panneauHeader = panneauJetons.querySelector('.travaux-panneau-header');
+                if (panneauHeader) panneauHeader.style.display = 'none';
+                panneauJetons.classList.remove('u-hide');
+                jetonsWrapper.appendChild(panneauJetons);
+
+                const contenuPalette = paletteG.querySelector('.travaux-palette-contenu');
+                if (contenuPalette) {
+                    contenuPalette.appendChild(jetonsWrapper);
+                } else {
+                    paletteG.appendChild(jetonsWrapper);
+                }
+            }
+
+            // Boutons emoji de navigation en bas
+            const barreNav = document.createElement('div');
+            barreNav.className = 'palette-nav-emojis';
+            barreNav.innerHTML = `
+                <button class="palette-nav-btn" onclick="travauxUI.togglePaletteEvalReplie('travaux-palette-eval-droite')" title="Évaluation">\u{1F4CB}</button>
+                <button class="palette-nav-btn" onclick="travauxUI.togglePaletteEvalReplie('travaux-palette-eval-retro')" title="Rétroaction">\u{1F516}</button>
+            `;
+            paletteG.appendChild(barreNav);
+            evalFlex.appendChild(paletteG);
         }
 
-        if (panneauDroite) {
-            const paletteD = creerPaletteEval('travaux-palette-eval-droite', 'Évaluation', panneauDroite);
-            paletteD.style.top = '56px';
-            paletteD.style.right = '12px';
-            paletteD.style.left = 'auto';
-            conteneurDoc.appendChild(paletteD);
-            configurerDragPaletteEval('travaux-palette-eval-droite');
+        // --- Colonne centre : le canvas (reste en place, on met un wrapper) ---
+        const canvasContainer = document.getElementById('travaux-canvas-container');
+        const centreWrapper = document.createElement('div');
+        centreWrapper.className = 'eval-col-document';
+        centreWrapper.id = 'eval-col-document';
+        if (canvasContainer) {
+            centreWrapper.appendChild(canvasContainer);
+        }
+        evalFlex.appendChild(centreWrapper);
+
+        // --- Colonne evaluation ---
+        const paletteD = panneauDroite ? creerPaletteEval('travaux-palette-eval-droite', 'Évaluation', panneauDroite) : null;
+        if (paletteD) {
+            paletteD.style.position = 'static';
+            paletteD.classList.add('eval-col-evaluation');
+            evalFlex.appendChild(paletteD);
         }
 
-        if (panneauRetro) {
-            const paletteR = creerPaletteEval('travaux-palette-eval-retro', 'Rétroaction', panneauRetro);
-            paletteR.style.bottom = '12px';
-            paletteR.style.left = '50%';
-            paletteR.style.transform = 'translateX(-50%)';
-            conteneurDoc.appendChild(paletteR);
-            configurerDragPaletteEval('travaux-palette-eval-retro');
+        // --- Colonne droite : Retroaction (pleine hauteur) ---
+        const paletteR = panneauRetro ? creerPaletteEval('travaux-palette-eval-retro', 'Rétroaction', panneauRetro) : null;
+        if (paletteR) {
+            paletteR.style.position = 'static';
+            paletteR.classList.add('eval-col-retro');
 
             // Bouton Copier compact dans la barre de titre
             const barreRetro = paletteR.querySelector('.travaux-palette-barre');
@@ -2424,30 +2475,19 @@
                 const btnToggle = barreRetro.querySelector('.travaux-palette-toggle');
                 barreRetro.insertBefore(btnCopier, btnToggle);
             }
+            evalFlex.appendChild(paletteR);
         }
 
-        // Auto-replier Paramètres au clic sur Évaluation
-        if (panneauDroite) {
-            const paletteD = document.getElementById('travaux-palette-eval-droite');
-            if (paletteD) {
-                paletteD.addEventListener('pointerdown', function() {
-                    const paletteG = document.getElementById('travaux-palette-eval-gauche');
-                    if (paletteG && !paletteG.classList.contains('replie')) {
-                        togglePaletteEvalReplie('travaux-palette-eval-gauche');
-                    }
-                });
-            }
+        // Inserer le flex layout sous la toolbar
+        const toolbar = conteneurDoc.querySelector('.travaux-toolbar');
+        if (toolbar) {
+            toolbar.after(evalFlex);
+        } else {
+            conteneurDoc.appendChild(evalFlex);
         }
 
-        // 4e palette : Jetons (positionnée en bas à gauche)
-        const panneauJetons = document.getElementById('travaux-eval-jetons');
-        if (panneauJetons) {
-            const paletteJ = creerPaletteEval('travaux-palette-eval-jetons', 'Jetons', panneauJetons);
-            paletteJ.style.bottom = '12px';
-            paletteJ.style.left = '12px';
-            conteneurDoc.appendChild(paletteJ);
-            configurerDragPaletteEval('travaux-palette-eval-jetons');
-        }
+        // Marquer le conteneur en mode eval (pour CSS)
+        conteneurDoc.classList.add('mode-eval-actif');
 
         // Peupler les dropdowns (les fonctions d'evaluation.js remplissent les selects)
         if (typeof chargerListeEtudiantsEval === 'function') chargerListeEtudiantsEval();
@@ -2635,9 +2675,27 @@
      */
     function fermerModeEvaluation() {
         const evalDiv = document.getElementById('evaluations-contenu-evaluation');
+        const conteneurDoc = document.getElementById('travaux-conteneur-document');
 
-        const ids = ['travaux-palette-eval-gauche', 'travaux-palette-eval-droite', 'travaux-palette-eval-retro', 'travaux-palette-eval-jetons'];
-        const panneauIds = ['travaux-eval-gauche', 'travaux-eval-droite', 'travaux-eval-retroaction', 'travaux-eval-jetons'];
+        // Remettre le canvas container dans le conteneur document (avant suppression du flex)
+        const canvasContainer = document.getElementById('travaux-canvas-container');
+        if (canvasContainer && conteneurDoc) {
+            conteneurDoc.appendChild(canvasContainer);
+        }
+
+        // Restaurer les panneaux Jetons d'abord (integre dans Parametres)
+        const panneauJetons = document.getElementById('travaux-eval-jetons');
+        if (panneauJetons) {
+            const jetonsHeader = panneauJetons.querySelector('.travaux-panneau-header');
+            if (jetonsHeader) jetonsHeader.style.display = '';
+            panneauJetons.classList.add('u-hide');
+            if (evalDiv) evalDiv.appendChild(panneauJetons);
+        }
+        const jetonsWrapper = document.getElementById('travaux-palette-eval-jetons');
+        if (jetonsWrapper) jetonsWrapper.remove();
+
+        const ids = ['travaux-palette-eval-gauche', 'travaux-palette-eval-droite', 'travaux-palette-eval-retro'];
+        const panneauIds = ['travaux-eval-gauche', 'travaux-eval-droite', 'travaux-eval-retroaction'];
 
         for (let i = 0; i < ids.length; i++) {
             const palette = document.getElementById(ids[i]);
@@ -2654,6 +2712,13 @@
             }
             palette.remove();
         }
+
+        // Supprimer le layout flex
+        const evalFlex = document.getElementById('eval-layout-flex');
+        if (evalFlex) evalFlex.remove();
+
+        // Retirer la classe mode eval
+        if (conteneurDoc) conteneurDoc.classList.remove('mode-eval-actif');
 
         // Remettre la section identite visible et masquer la correction
         const sectionIdentite = document.getElementById('travaux-eval-identite');
@@ -3125,7 +3190,7 @@
             return;
         }
 
-        let html = '<div style="display:flex; flex-direction:column; gap:8px; padding:4px;">';
+        let html = '<div style="display:flex; flex-direction:column; gap:4px;">';
 
         for (const type of types) {
             const s = statut[type.id] || { utilises: 0, total: type.nombreTotal || 0, restants: type.nombreTotal || 0 };
@@ -3134,15 +3199,13 @@
                           : type.id === 'repriseCiblee' ? 'var(--violet-accent, #9b59b6)'
                           : 'var(--gris-moyen, #95a5a6)';
 
-            html += `<div style="display:flex; align-items:center; justify-content:space-between; padding:6px 8px; background:var(--surface-conteneur, #162c36); border-radius:6px; border-left:3px solid ${couleur};">
-                <div style="display:flex; align-items:center; gap:8px;">
+            html += `<label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:0.8rem; padding:2px 0;">
                     <input type="checkbox" id="travaux-checkbox-jeton-${type.id}"
                            onchange="travauxUI.gererCheckboxJetonPalette('${type.id}')"
                            style="accent-color:${couleur};">
-                    <span style="font-size:0.8rem; font-weight:600; color:var(--texte-principal, #e0e0e0);">${echapperHtml(type.nom)}</span>
-                </div>
-                <span style="font-size:0.75rem; color:var(--gris-moyen); white-space:nowrap;">${s.restants} / ${s.total}</span>
-            </div>`;
+                    <span style="font-weight:600;">${echapperHtml(type.nom)}</span>
+                    <span style="font-size:0.72rem; color:var(--gris-moyen); margin-left:auto;">${s.restants}/${s.total}</span>
+            </label>`;
         }
 
         html += '</div>';

@@ -495,6 +495,17 @@
     }
 
     /**
+     * Zoom a un niveau specifique (ex: 1.65 pour 165%)
+     * @param {number} niveau - Facteur de zoom
+     */
+    async function setZoomManuel(niveau) {
+        modeZoom = 'manual';
+        zoomActuel = Math.max(ZOOM_MIN, Math.min(niveau, ZOOM_MAX));
+        cachePages.clear();
+        await reRendrePageActuelle();
+    }
+
+    /**
      * Re-rend la page actuelle (apres zoom)
      */
     async function reRendrePageActuelle() {
@@ -1006,6 +1017,7 @@
         zoomPleineLargeur: zoomPleineLargeur,
         zoomPleineHauteur: zoomPleineHauteur,
         zoom100: zoom100,
+        setZoomManuel: setZoomManuel,
         configurerGestesZoom: configurerGestesZoom,
         // Accesseurs
         getFichierActuel: getFichierActuel,
