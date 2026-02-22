@@ -603,6 +603,35 @@
             date: dateEval
         });
 
+        // --- EN-TETE PERSONNALISE (selon optionsAffichage) ---
+        const opts = evaluation.optionsAffichage || {};
+        let production = null;
+        let etudiant = null;
+        let cours = null;
+        try {
+            const productions = obtenirDonneesSelonMode(cle('productions'));
+            production = productions.find(p => p.id === evaluation.productionId) || null;
+        } catch(e) { /* silencieux */ }
+        try {
+            if (production && production.coursId) {
+                const coursCollection = db.getSync('cours', []);
+                cours = coursCollection.find(c => c.id === production.coursId) || null;
+            }
+        } catch(e) { /* silencieux */ }
+
+        // Nom du cours et code
+        if (cours && (cours.codeCours || cours.nomCours)) {
+            doc.setFontSize(cfg.polices.texteNormal);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(...cfg.couleurs.textePrincipal);
+            let texteCours = '';
+            if (cours.codeCours) texteCours += cours.codeCours;
+            if (cours.codeCours && cours.nomCours) texteCours += ' — ';
+            if (cours.nomCours) texteCours += cours.nomCours;
+            doc.text(texteCours, margeG, y);
+            y += mm(5);
+        }
+
         // Nom de la grille (italique, gris)
         if (evaluation.grilleNom) {
             doc.setFontSize(cfg.polices.texteNormal);
@@ -611,15 +640,6 @@
             doc.text('Grille : ' + evaluation.grilleNom, margeG, y);
             y += mm(6);
         }
-
-        // --- EN-TETE PERSONNALISE (selon optionsAffichage) ---
-        const opts = evaluation.optionsAffichage || {};
-        let production = null;
-        let etudiant = null;
-        try {
-            const productions = obtenirDonneesSelonMode(cle('productions'));
-            production = productions.find(p => p.id === evaluation.productionId) || null;
-        } catch(e) { /* silencieux */ }
         try {
             const etudiants = obtenirDonneesSelonMode(cle('groupeEtudiants'));
             etudiant = etudiants.find(e => e.da === fichier.etudiantDA) || null;
