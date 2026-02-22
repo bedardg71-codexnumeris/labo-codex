@@ -16128,8 +16128,8 @@ body.mode-clair .travaux-apercu-trait {
     border: 1px solid rgba(106, 172, 184, 0.2);
     border-radius: 10px;
     box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-    min-width: 160px;
-    max-width: 200px;
+    min-width: 140px;
+    max-width: 180px;
     user-select: none;
     resize: both;
     overflow: hidden;

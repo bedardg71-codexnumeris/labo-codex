@@ -189,31 +189,8 @@
             }
         }
 
-        // Creer la palette tampons (repliee par defaut) si absente
-        const paletteTampons = document.getElementById('travaux-palette-tampons');
-        if (!paletteTampons) {
-            travauxOutils.togglePaletteAutocollants();
-            // Replier immediatement apres creation
-            const ptNew = document.getElementById('travaux-palette-tampons');
-            if (ptNew && !ptNew.classList.contains('replie')) {
-                ptNew.classList.add('replie');
-                const btnT = ptNew.querySelector('.travaux-palette-toggle');
-                if (btnT) btnT.textContent = '+';
-            }
-        }
-
-        // Creer la palette erreurs de francais (repliee par defaut) si absente
-        const paletteErrFr = document.getElementById('travaux-palette-erreurs-fr');
-        if (!paletteErrFr) {
-            travauxOutils.togglePaletteErreursFrancais();
-            // Replier immediatement apres creation
-            const peNew = document.getElementById('travaux-palette-erreurs-fr');
-            if (peNew && !peNew.classList.contains('replie')) {
-                peNew.classList.add('replie');
-                const btnE = peNew.querySelector('.travaux-palette-toggle');
-                if (btnE) btnE.textContent = '+';
-            }
-        }
+        // Les palettes tampons et erreurs ne sont pas creees automatiquement
+        // L'utilisateur les ouvre manuellement via les boutons de la palette d'annotation
 
         window.dispatchEvent(new CustomEvent('travaux-annotation-activee'));
     }

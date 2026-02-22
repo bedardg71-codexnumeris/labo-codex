@@ -1,8 +1,20 @@
 # SESSION ACTIVE - BETA 97.9
 
-**Date** : 21 février 2026
-**Version** : Beta 97.9 (build 0221-1535)
-**Statut** : Améliorations évaluation, statuts et configuration des pratiques
+**Date** : 22 février 2026
+**Version** : Beta 97.9 (build 0222-0949)
+**Statut** : Éditeur de pages, layout évaluation plein canevas, mode annotation redessiné
+
+## SESSION DU 22 FÉVRIER 2026
+
+### Travail accompli — Éditeur de pages, layout évaluation et mode annotation (Beta 97.9, build 0222-0949)
+
+111. **Éditeur de pages pour documents importés** : Nouveau workflow drag-and-drop pour éditer un document déjà importé. Glisser un badge vers la zone « Éditer un document » décompose le PDF en pages individuelles (via PDF.js). Interface avec thumbnails, boutons ↑/↓ pour réordonner, × pour supprimer, « Ajouter des pages » pour insérer. Sauvegarde le PDF réassemblé (jsPDF) dans IndexedDB. Fichiers modifiés : `travaux-ui.js` (ouvrirEditeurPages, renderEditeurPages, sauvegarderEdition), `travaux-import.js` (decomposerPDF, reassemblerPages), `styles.css`.
+
+112. **Layout flex plein canevas en mode Évaluer** : Les palettes d'évaluation occupent tout le canevas en colonnes flex. Paramètres (gauche), Document à 165 % (centre), Évaluation (milieu-droit), Rétroaction pleine hauteur (droite). Jetons intégrés dans la palette Paramètres avec checkboxes compactes. Boutons emojis en bas de Paramètres pour naviguer. Textarea rétroaction occupe toute la hauteur grâce à la propagation flex. `travaux-ui.js` : `afficherPalettesEval()` réécrite, `fermerModeEvaluation()` mise à jour. `travaux-visionneuse.js` : `setZoomManuel()` ajoutée.
+
+113. **Persistance des checkboxes jetons** : Correction du bug où les checkboxes jetons se décochaient immédiatement après clic. Remplacement du `setTimeout(() => peuplementPaletteJetons())` (reconstruction HTML complète) par `mettreAJourEtatJetonsPalette()` qui synchronise les états depuis les checkboxes originales et met à jour les compteurs sans détruire le DOM.
+
+114. **Mode Annoter redessiné** : Le document s'ouvre en pleine largeur (`zoomPleineLargeur()`) avec le haut aligné au viewport (`scrollerEnHaut()`). Les palettes tampons et codes d'erreur ne sont plus créées automatiquement — seule la palette d'annotation est visible par défaut. Palette réduite à max 180px. `travaux-annotation.js` : suppression de la création automatique des palettes tampons/erreurs. `travaux-visionneuse.js` : `scrollerEnHaut()` ajoutée.
 
 ## SESSION DU 21 FÉVRIER 2026
 

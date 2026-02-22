@@ -12129,14 +12129,48 @@
                     <h2>Notes de version</h2>
                     <p class="text-muted">Historique des changements majeurs</p>
 
+                    <!-- Beta 97.9 - Éditeur de pages, layout évaluation, annotation -->
+                    <div class="carte accordeon ouvert" id="accordeon-apropos-beta979-editeur">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Beta 97.9 &mdash; &Eacute;diteur de pages, layout &eacute;valuation et annotation
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu" style="display: block;">
+                        <p class="text-muted">22 f&eacute;vrier 2026</p>
+
+                        <h4 class="titre-bleu-mb8 mt-15">&Eacute;diteur de pages pour documents import&eacute;s</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Zone d'&eacute;dition drag-and-drop</strong> : Glisser un badge import&eacute; vers la zone &laquo;&nbsp;&Eacute;diter un document&nbsp;&raquo; pour d&eacute;composer le PDF en pages individuelles.</li>
+                            <li><strong>R&eacute;ordonnancement</strong> : Boutons &uarr;/&darr; pour d&eacute;placer les pages, bouton &times; pour supprimer, bouton &laquo;&nbsp;Ajouter des pages&nbsp;&raquo; pour ins&eacute;rer de nouveaux fichiers.</li>
+                            <li><strong>R&eacute;assemblage PDF</strong> : Sauvegarde le document r&eacute;assembl&eacute; dans IndexedDB avec mise &agrave; jour des m&eacute;tadonn&eacute;es et de la miniature.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Layout &eacute;valuation plein canevas</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Colonnes flex</strong> : En mode &Eacute;valuer, les palettes occupent tout le canevas&nbsp;: Param&egrave;tres (gauche), Document &agrave; 165&nbsp;% (centre), &Eacute;valuation, R&eacute;troaction pleine hauteur (droite).</li>
+                            <li><strong>Jetons int&eacute;gr&eacute;s</strong> : La palette Jetons est int&eacute;gr&eacute;e dans Param&egrave;tres. Les checkboxes persistent correctement apr&egrave;s clic.</li>
+                            <li><strong>Navigation par emojis</strong> : Boutons en bas de Param&egrave;tres pour naviguer vers Jetons, &Eacute;valuation et R&eacute;troaction.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Mode Annoter redessin&eacute;</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Pleine largeur</strong> : Le document s'ouvre en pleine largeur, align&eacute; en haut du viewport.</li>
+                            <li><strong>Palettes ferm&eacute;es</strong> : Les palettes tampons et codes d'erreur ne sont plus cr&eacute;&eacute;es automatiquement. Seule la palette d'annotation est visible par d&eacute;faut.</li>
+                            <li><strong>Palette plus compacte</strong> : Largeur r&eacute;duite (max 180px) pour maximiser l'espace de travail.</li>
+                        </ul>
+
+                        </div>
+                    </div>
+
                     <!-- Beta 97.8 - Cohérence visuelle + emojis -->
-                    <div class="carte accordeon ouvert" id="accordeon-apropos-beta978-coherence">
+                    <div class="carte accordeon" id="accordeon-apropos-beta978-coherence">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Beta 97.8 &mdash; Coh&eacute;rence visuelle et normalisation
                             </h3>
                         </div>
-                        <div class="accordeon-contenu" style="display: block;">
+                        <div class="accordeon-contenu" style="display: none;">
                         <p class="text-muted">16 f&eacute;vrier 2026</p>
 
                         <h4 class="titre-bleu-mb8 mt-15">Audit modes clair et sombre</h4>
@@ -16344,7 +16378,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97.9';
-        const BUILD_ID = '0221-1535';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0222-0949';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
