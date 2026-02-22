@@ -15,6 +15,20 @@
 
     const EXPORT_SCALE = 2.0; // Rendu a 2x pour qualite d'impression
 
+    // Config PDF reutilisee depuis export-pdf.js
+    function getCfg() {
+        return window.ExportPDF?.config || {
+            marges: { haut: 13, bas: 13, gauche: 13, droite: 13 },
+            couleurs: { titreSection: [3,46,92], textePrincipal: [51,51,51],
+                        texteSecondaire: [102,102,102], bordure: [204,204,204],
+                        fondEntete: [245,245,245] },
+            polices: { titrePrincipal: 18, titreSection: 14, sousTitre: 12,
+                       texteNormal: 10, textePetit: 9 }
+        };
+    }
+    const MM_TO_PX = 612 / 215.9;
+    function mm(v) { return v * MM_TO_PX; }
+
     /* ===============================
        EXPORT PDF PRINCIPAL
        =============================== */
@@ -400,15 +414,166 @@
     }
 
     /* ===============================
+       HELPERS PAGE DE SYNTHESE
+       =============================== */
+
+    /**
+     * Ajoute l'en-tete formate de la page de synthese
+     * @param {Object} doc - Instance jsPDF
+     * @param {string} titre - Titre principal
+     * @param {Object} infos - { etudiant, production, date }
+     * @returns {number} posY apres l'en-tete
+     */
+    function ajouterEnteteRetroaction(doc, titre, infos) {
+        const cfg = getCfg();
+        const pageW = doc.internal.pageSize.getWidth();
+        const margeG = mm(cfg.marges.gauche);
+        const margeD = mm(cfg.marges.droite);
+        let y = mm(cfg.marges.haut);
+
+        // Titre a gauche
+        doc.setFontSize(cfg.polices.titrePrincipal);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(...cfg.couleurs.titreSection);
+        doc.text(titre, margeG, y);
+
+        // Infos a droite
+        doc.setFontSize(cfg.polices.textePetit);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(...cfg.couleurs.texteSecondaire);
+        const lignesDroite = [];
+        if (infos.etudiant) lignesDroite.push('Etudiant : ' + infos.etudiant);
+        if (infos.production) lignesDroite.push('Production : ' + infos.production);
+        if (infos.date) lignesDroite.push('Date : ' + infos.date);
+        let yDroite = y - (lignesDroite.length - 1) * mm(4);
+        for (const ligne of lignesDroite) {
+            doc.text(ligne, pageW - margeD, yDroite, { align: 'right' });
+            yDroite += mm(4);
+        }
+
+        y += mm(6);
+
+        // Ligne separatrice
+        doc.setDrawColor(...cfg.couleurs.bordure);
+        doc.setLineWidth(0.5);
+        doc.line(margeG, y, pageW - margeD, y);
+        y += mm(6);
+
+        return y;
+    }
+
+    /**
+     * Ajoute le pied de page sur une page de synthese
+     * @param {Object} doc - Instance jsPDF
+     * @param {number} page - Numero de page (1-indexed dans les pages de synthese)
+     * @param {number} total - Total de pages de synthese
+     */
+    function ajouterPiedPageSynthese(doc, page, total) {
+        const cfg = getCfg();
+        const pageW = doc.internal.pageSize.getWidth();
+        const pageH = doc.internal.pageSize.getHeight();
+        const margeG = mm(cfg.marges.gauche);
+        const margeD = mm(cfg.marges.droite);
+        const yPied = pageH - mm(cfg.marges.bas);
+
+        // Ligne separatrice
+        doc.setDrawColor(...cfg.couleurs.bordure);
+        doc.setLineWidth(0.5);
+        doc.line(margeG, yPied - mm(3), pageW - margeD, yPied - mm(3));
+
+        doc.setFontSize(cfg.polices.textePetit);
+        doc.setTextColor(...cfg.couleurs.texteSecondaire);
+
+        // Nom enseignant a gauche
+        let nomEnseignant = '';
+        try {
+            if (typeof db !== 'undefined' && db.getSync) {
+                const profil = db.getSync('profilEnseignant', {});
+                if (profil && profil.prenom && profil.nom) {
+                    nomEnseignant = profil.prenom + ' ' + profil.nom;
+                }
+            }
+        } catch(e) { /* silencieux */ }
+        if (nomEnseignant) {
+            doc.setFont('helvetica', 'normal');
+            doc.text(nomEnseignant, margeG, yPied);
+        }
+
+        // Pagination centre
+        if (total > 1) {
+            doc.setFont('helvetica', 'normal');
+            doc.text('Page ' + page + '/' + total, pageW / 2, yPied, { align: 'center' });
+        }
+
+        // Licence a droite
+        doc.setFont('helvetica', 'italic');
+        doc.text('CC BY-NC-SA', pageW - margeD, yPied, { align: 'right' });
+    }
+
+    /**
+     * Finalise les pieds de page sur toutes les pages de synthese
+     * @param {Object} doc - Instance jsPDF
+     * @param {number} premierePageSynthese - Numero de la premiere page de synthese (1-indexed)
+     */
+    function finaliserPagesSynthese(doc, premierePageSynthese) {
+        const totalPages = doc.internal.getNumberOfPages();
+        const totalSynthese = totalPages - premierePageSynthese + 1;
+        for (let i = 0; i < totalSynthese; i++) {
+            doc.setPage(premierePageSynthese + i);
+            ajouterPiedPageSynthese(doc, i + 1, totalSynthese);
+        }
+    }
+
+    /* ===============================
+       COMPTAGE DETAILLE DES ANNOTATIONS
+       =============================== */
+
+    /**
+     * Compte les tampons et erreurs de francais dans les annotations
+     * @param {Object|null} annotation - Donnees d'annotation du fichier
+     * @returns {Object} { tampons: {id: count}, erreursFr: {type: count}, totalTampons, totalErreursFr }
+     */
+    function compterAnnotationsDetailees(annotation) {
+        const stats = { tampons: {}, erreursFr: {}, totalTampons: 0, totalErreursFr: 0 };
+        if (!annotation || !annotation.pages) return stats;
+
+        for (const [_, donneesPage] of Object.entries(annotation.pages)) {
+            // Tampons (autocollants)
+            if (donneesPage.stickers) {
+                for (const stk of donneesPage.stickers) {
+                    const id = stk.autocollantId;
+                    stats.tampons[id] = (stats.tampons[id] || 0) + 1;
+                    stats.totalTampons++;
+                }
+            }
+            // Erreurs de francais (formes type errfr_*)
+            if (donneesPage.shapes) {
+                for (const forme of donneesPage.shapes) {
+                    if (forme.type && forme.type.startsWith('errfr_')) {
+                        stats.erreursFr[forme.type] = (stats.erreursFr[forme.type] || 0) + 1;
+                        stats.totalErreursFr++;
+                    }
+                }
+            }
+        }
+
+        return stats;
+    }
+
+    /* ===============================
        PAGE DE SYNTHESE
        =============================== */
 
     /**
-     * Ajoute une page de synthese avec les cartouches de retroaction
+     * Ajoute une page de synthese formatee avec tableaux et synthese visuelle
      * @param {Object} doc - Instance jsPDF
      * @param {Object} fichier - Metadonnees du fichier
      */
     function ajouterPageSynthese(doc, fichier) {
+        const cfg = getCfg();
+        const margeG = mm(cfg.marges.gauche);
+        const margeD = mm(cfg.marges.droite);
+
         // Chercher l'evaluation correspondante
         const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees'));
         const evaluation = evaluations.find(e =>
@@ -421,120 +586,305 @@
             return;
         }
 
-        // Page lettre en mm
-        doc.addPage([612, 792], 'portrait'); // 8.5x11 pouces en px a 72dpi
+        // Page lettre en px (8.5x11 pouces a 72dpi)
+        doc.addPage([612, 792], 'portrait');
+        const premierePageSynthese = doc.internal.getNumberOfPages();
         const pageW = doc.internal.pageSize.getWidth();
         const pageH = doc.internal.pageSize.getHeight();
-        const marge = 40;
-        let y = marge;
+        const largeurContenu = pageW - margeG - margeD;
+        const seuilPage = pageH - mm(cfg.marges.bas) - mm(8);
 
-        // Titre
-        doc.setFontSize(18);
-        doc.setFont('helvetica', 'bold');
-        doc.text('Synthese de la retroaction', pageW / 2, y, { align: 'center' });
-        y += 30;
+        // En-tete formate
+        const dateEval = evaluation.dateEvaluation
+            ? new Date(evaluation.dateEvaluation).toLocaleDateString('fr-CA')
+            : '';
+        let y = ajouterEnteteRetroaction(doc, 'Synthese de la retroaction', {
+            etudiant: evaluation.etudiantNom || fichier.etudiantDA || '',
+            production: evaluation.productionNom || '',
+            date: dateEval
+        });
 
-        // Informations
-        doc.setFontSize(11);
-        doc.setFont('helvetica', 'normal');
-        doc.text(`Etudiant : ${evaluation.etudiantNom || fichier.etudiantDA}`, marge, y);
-        y += 16;
-        doc.text(`Production : ${evaluation.productionNom || ''}`, marge, y);
-        y += 16;
-        doc.text(`Grille : ${evaluation.grilleNom || ''}`, marge, y);
-        y += 16;
-        doc.text(`Date : ${new Date(evaluation.dateEvaluation).toLocaleDateString('fr-CA')}`, marge, y);
-        y += 24;
+        // Nom de la grille (italique, gris)
+        if (evaluation.grilleNom) {
+            doc.setFontSize(cfg.polices.texteNormal);
+            doc.setFont('helvetica', 'italic');
+            doc.setTextColor(...cfg.couleurs.texteSecondaire);
+            doc.text('Grille : ' + evaluation.grilleNom, margeG, y);
+            y += mm(6);
+        }
 
-        // Separateur
-        doc.setDrawColor(200);
-        doc.line(marge, y, pageW - marge, y);
-        y += 16;
-
-        // Criteres et retroaction
+        // --- EVALUATION PAR CRITERE (tableau autoTable) ---
         if (evaluation.criteres && evaluation.criteres.length > 0) {
-            doc.setFontSize(13);
+            doc.setFontSize(cfg.polices.titreSection);
             doc.setFont('helvetica', 'bold');
-            doc.text('Evaluation par critere', marge, y);
-            y += 20;
+            doc.setTextColor(...cfg.couleurs.titreSection);
+            doc.text('EVALUATION PAR CRITERE', margeG, y);
+            y += mm(4);
 
-            for (const critere of evaluation.criteres) {
-                // Verifier s'il reste de la place
-                if (y > pageH - 80) {
-                    doc.addPage();
-                    y = marge;
+            const donneesCriteres = evaluation.criteres.map(c => [
+                c.critereNom || '',
+                c.niveauSelectionne || '\u2014',
+                c.ponderation ? c.ponderation + '%' : '\u2014',
+                c.retroaction || ''
+            ]);
+
+            doc.autoTable({
+                startY: y,
+                head: [['Critere', 'Niveau', 'Pond.', 'Retroaction']],
+                body: donneesCriteres,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: cfg.couleurs.titreSection,
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold',
+                    fontSize: cfg.polices.textePetit
+                },
+                bodyStyles: {
+                    fontSize: cfg.polices.textePetit,
+                    textColor: cfg.couleurs.textePrincipal,
+                    cellPadding: mm(1.5)
+                },
+                columnStyles: {
+                    0: { cellWidth: largeurContenu * 0.25 },
+                    1: { cellWidth: largeurContenu * 0.10, halign: 'center' },
+                    2: { cellWidth: largeurContenu * 0.10, halign: 'center' },
+                    3: { cellWidth: largeurContenu * 0.55 }
+                },
+                margin: { left: margeG, right: margeD },
+                didDrawPage: function() {
+                    // autoTable gere les sauts de page automatiquement
                 }
+            });
 
-                doc.setFontSize(11);
-                doc.setFont('helvetica', 'bold');
-                doc.text(`${critere.critereNom}`, marge, y);
+            y = doc.lastAutoTable.finalY + mm(6);
+        }
 
-                doc.setFont('helvetica', 'normal');
-                doc.text(`   Niveau : ${critere.niveauSelectionne || '—'}`, marge + 200, y);
-                y += 14;
+        // --- NOTE FINALE + NIVEAU ---
+        if (y > seuilPage) {
+            doc.addPage([612, 792], 'portrait');
+            y = mm(cfg.marges.haut);
+        }
 
-                if (critere.retroaction) {
-                    doc.setFontSize(10);
-                    const lignes = doc.splitTextToSize(critere.retroaction, pageW - marge * 2 - 10);
-                    for (const ligne of lignes) {
-                        if (y > pageH - 40) {
-                            doc.addPage();
-                            y = marge;
-                        }
-                        doc.text(ligne, marge + 10, y);
-                        y += 12;
+        if (evaluation.noteFinale != null || evaluation.niveauFinal) {
+            doc.setDrawColor(...cfg.couleurs.bordure);
+            doc.setLineWidth(0.5);
+            doc.line(margeG, y, pageW - margeD, y);
+            y += mm(5);
+
+            doc.setFontSize(cfg.polices.sousTitre);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(...cfg.couleurs.textePrincipal);
+
+            let texteNote = '';
+            if (evaluation.noteFinale != null) texteNote += 'Note finale : ' + evaluation.noteFinale + '%';
+            if (evaluation.noteFinale != null && evaluation.niveauFinal) texteNote += '    ';
+            if (evaluation.niveauFinal) texteNote += 'Niveau : ' + evaluation.niveauFinal;
+            doc.text(texteNote, margeG, y);
+            y += mm(8);
+        }
+
+        // --- RETROACTION GLOBALE ---
+        if (evaluation.retroactionFinale) {
+            if (y > seuilPage) {
+                doc.addPage([612, 792], 'portrait');
+                y = mm(cfg.marges.haut);
+            }
+
+            doc.setFontSize(cfg.polices.titreSection);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(...cfg.couleurs.titreSection);
+            doc.text('RETROACTION GLOBALE', margeG, y);
+            y += mm(5);
+
+            doc.setFontSize(cfg.polices.texteNormal);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(...cfg.couleurs.textePrincipal);
+            const lignes = doc.splitTextToSize(evaluation.retroactionFinale, largeurContenu);
+            for (const ligne of lignes) {
+                if (y > seuilPage) {
+                    doc.addPage([612, 792], 'portrait');
+                    y = mm(cfg.marges.haut);
+                }
+                doc.text(ligne, margeG, y);
+                y += mm(4);
+            }
+            y += mm(4);
+        }
+
+        // --- SYNTHESE DES ANNOTATIONS VISUELLES ---
+        const annotation = travauxStockage.obtenirAnnotationFichier(fichier.id);
+        const statsVisuelles = compterAnnotationsDetailees(annotation);
+
+        if (statsVisuelles.totalTampons > 0 || statsVisuelles.totalErreursFr > 0) {
+            y = ajouterSyntheseVisuelle(doc, y, statsVisuelles, seuilPage);
+        }
+
+        // --- PIEDS DE PAGE ---
+        finaliserPagesSynthese(doc, premierePageSynthese);
+    }
+
+    /**
+     * Ajoute la section de synthese visuelle (tampons + erreurs de francais)
+     * @param {Object} doc - Instance jsPDF
+     * @param {number} posY - Position Y courante
+     * @param {Object} stats - Resultat de compterAnnotationsDetailees
+     * @param {number} seuilPage - Seuil Y pour saut de page
+     * @returns {number} Nouvelle posY
+     */
+    function ajouterSyntheseVisuelle(doc, posY, stats, seuilPage) {
+        const cfg = getCfg();
+        const margeG = mm(cfg.marges.gauche);
+        const margeD = mm(cfg.marges.droite);
+        const pageW = doc.internal.pageSize.getWidth();
+        const largeurContenu = pageW - margeG - margeD;
+        let y = posY;
+
+        // Titre de section
+        if (y > seuilPage) {
+            doc.addPage([612, 792], 'portrait');
+            y = mm(cfg.marges.haut);
+        }
+
+        doc.setFontSize(cfg.polices.titreSection);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(...cfg.couleurs.titreSection);
+        doc.text('SYNTHESE DES ANNOTATIONS VISUELLES', margeG, y);
+        y += mm(6);
+
+        // --- Tableau des tampons ---
+        if (stats.totalTampons > 0) {
+            doc.setFontSize(cfg.polices.texteNormal);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(...cfg.couleurs.textePrincipal);
+            doc.text('Tampons utilises :', margeG, y);
+            y += mm(3);
+
+            const autocollantsDef = travauxOutils.AUTOCOLLANTS;
+            const donnesTampons = [];
+
+            // Trier : qualite d'abord, puis diagnostic
+            const ids = Object.keys(stats.tampons);
+            const tries = ids.sort((a, b) => {
+                const defA = autocollantsDef.find(x => x.id === a);
+                const defB = autocollantsDef.find(x => x.id === b);
+                const catA = defA?.categorie === 'qualite' ? 0 : 1;
+                const catB = defB?.categorie === 'qualite' ? 0 : 1;
+                if (catA !== catB) return catA - catB;
+                return a.localeCompare(b);
+            });
+
+            for (const id of tries) {
+                const def = autocollantsDef.find(x => x.id === id);
+                donnesTampons.push([
+                    def?.nom || id,
+                    def?.categorie === 'qualite' ? 'Qualite' : 'Diagnostic',
+                    String(stats.tampons[id])
+                ]);
+            }
+
+            if (y > seuilPage) {
+                doc.addPage([612, 792], 'portrait');
+                y = mm(cfg.marges.haut);
+            }
+
+            doc.autoTable({
+                startY: y,
+                head: [['Tampon', 'Categorie', 'Nombre']],
+                body: donnesTampons,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: cfg.couleurs.fondEntete,
+                    textColor: cfg.couleurs.titreSection,
+                    fontStyle: 'bold',
+                    fontSize: cfg.polices.textePetit
+                },
+                bodyStyles: {
+                    fontSize: cfg.polices.textePetit,
+                    textColor: cfg.couleurs.textePrincipal,
+                    cellPadding: mm(1.2)
+                },
+                columnStyles: {
+                    0: { cellWidth: largeurContenu * 0.40 },
+                    1: { cellWidth: largeurContenu * 0.35 },
+                    2: { cellWidth: largeurContenu * 0.25, halign: 'center' }
+                },
+                margin: { left: margeG, right: margeD }
+            });
+
+            y = doc.lastAutoTable.finalY + mm(6);
+        }
+
+        // --- Tableau des erreurs de francais ---
+        if (stats.totalErreursFr > 0) {
+            doc.setFontSize(cfg.polices.texteNormal);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(...cfg.couleurs.textePrincipal);
+
+            if (y > seuilPage) {
+                doc.addPage([612, 792], 'portrait');
+                y = mm(cfg.marges.haut);
+            }
+
+            doc.text('Erreurs de francais :', margeG, y);
+            y += mm(3);
+
+            const codesErreurs = travauxOutils.CODES_ERREURS_FR;
+            const donnesErreurs = [];
+
+            // Trier par numero de code
+            const typesErreurs = Object.keys(stats.erreursFr).sort((a, b) => {
+                const numA = parseInt(a.replace('errfr_', ''), 10);
+                const numB = parseInt(b.replace('errfr_', ''), 10);
+                return numA - numB;
+            });
+
+            for (const type of typesErreurs) {
+                const num = type.replace('errfr_', '');
+                const def = codesErreurs.find(c => c.id === type);
+                donnesErreurs.push([
+                    num,
+                    def?.nom || type,
+                    String(stats.erreursFr[type])
+                ]);
+            }
+
+            // Ligne total en gras
+            donnesErreurs.push(['', 'Total des erreurs', String(stats.totalErreursFr)]);
+
+            doc.autoTable({
+                startY: y,
+                head: [['Code', 'Type d\'erreur', 'Nombre']],
+                body: donnesErreurs,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: cfg.couleurs.fondEntete,
+                    textColor: cfg.couleurs.titreSection,
+                    fontStyle: 'bold',
+                    fontSize: cfg.polices.textePetit
+                },
+                bodyStyles: {
+                    fontSize: cfg.polices.textePetit,
+                    textColor: cfg.couleurs.textePrincipal,
+                    cellPadding: mm(1.2)
+                },
+                columnStyles: {
+                    0: { cellWidth: largeurContenu * 0.12, halign: 'center' },
+                    1: { cellWidth: largeurContenu * 0.63 },
+                    2: { cellWidth: largeurContenu * 0.25, halign: 'center' }
+                },
+                margin: { left: margeG, right: margeD },
+                didParseCell: function(data) {
+                    // Derniere ligne (total) en gras
+                    if (data.section === 'body' && data.row.index === donnesErreurs.length - 1) {
+                        data.cell.styles.fontStyle = 'bold';
                     }
                 }
+            });
 
-                y += 8;
-            }
+            y = doc.lastAutoTable.finalY + mm(4);
         }
 
-        // Note finale
-        if (y > pageH - 60) {
-            doc.addPage();
-            y = marge;
-        }
-
-        doc.setDrawColor(200);
-        doc.line(marge, y, pageW - marge, y);
-        y += 16;
-
-        doc.setFontSize(13);
-        doc.setFont('helvetica', 'bold');
-        if (evaluation.noteFinale != null) {
-            doc.text(`Note finale : ${evaluation.noteFinale}%`, marge, y);
-            y += 16;
-        }
-        if (evaluation.niveauFinal) {
-            doc.text(`Niveau : ${evaluation.niveauFinal}`, marge, y);
-            y += 20;
-        }
-
-        // Retroaction finale
-        if (evaluation.retroactionFinale) {
-            if (y > pageH - 80) {
-                doc.addPage();
-                y = marge;
-            }
-
-            doc.setFontSize(11);
-            doc.setFont('helvetica', 'bold');
-            doc.text('Retroaction globale', marge, y);
-            y += 14;
-
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(10);
-            const lignes = doc.splitTextToSize(evaluation.retroactionFinale, pageW - marge * 2 - 10);
-            for (const ligne of lignes) {
-                if (y > pageH - 40) {
-                    doc.addPage();
-                    y = marge;
-                }
-                doc.text(ligne, marge + 10, y);
-                y += 12;
-            }
-        }
+        return y;
     }
 
     /* ===============================
