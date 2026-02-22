@@ -949,6 +949,30 @@
        =============================== */
 
     /**
+     * Monte un fichier d'un cran dans la file d'attente (index - 1)
+     * @param {number} index - Position actuelle du fichier
+     */
+    function monterFichier(index) {
+        if (index <= 0 || index >= fichiersEnAttente.length) return;
+        const tmp = fichiersEnAttente[index - 1];
+        fichiersEnAttente[index - 1] = fichiersEnAttente[index];
+        fichiersEnAttente[index] = tmp;
+        persisterFileDAttente();
+    }
+
+    /**
+     * Descend un fichier d'un cran dans la file d'attente (index + 1)
+     * @param {number} index - Position actuelle du fichier
+     */
+    function descendreFichier(index) {
+        if (index < 0 || index >= fichiersEnAttente.length - 1) return;
+        const tmp = fichiersEnAttente[index + 1];
+        fichiersEnAttente[index + 1] = fichiersEnAttente[index];
+        fichiersEnAttente[index] = tmp;
+        persisterFileDAttente();
+    }
+
+    /**
      * Definit la production globale selectionnee
      * @param {string} id - ID de la production
      */
@@ -978,6 +1002,8 @@
         viderFileDAttente: viderFileDAttente,
         changerEtudiant: changerEtudiant,
         retirerFichier: retirerFichier,
+        monterFichier: monterFichier,
+        descendreFichier: descendreFichier,
         // Pipeline
         detecterFormatEtRouter: detecterFormatEtRouter,
         regrouperParDocument: regrouperParDocument,

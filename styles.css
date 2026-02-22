@@ -15441,6 +15441,40 @@ body.mode-clair .pipeline-fichier-selectionne {
     color: var(--rouge, #dc3545);
 }
 
+.pipeline-reorder-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    flex-shrink: 0;
+}
+
+.pipeline-btn-reorder {
+    width: 20px;
+    height: 16px;
+    border: none;
+    border-radius: 3px;
+    background: transparent;
+    color: var(--texte-secondaire);
+    font-size: 0.7rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+}
+
+.pipeline-btn-reorder:hover:not(:disabled) {
+    background: rgba(106, 172, 184, 0.2);
+    color: var(--texte-principal);
+}
+
+.pipeline-btn-reorder:disabled {
+    opacity: 0.2;
+    cursor: default;
+}
+
 .pipeline-col-titre {
     font-size: 0.8rem;
     font-weight: 600;
