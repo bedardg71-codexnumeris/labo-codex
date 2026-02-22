@@ -2416,6 +2416,22 @@ function cocherOptionsParDefaut() {
             checkbox.checked = true;
         }
     });
+
+    // Initialiser affichageNote depuis la pratique active
+    try {
+        const configurations = db.getSync('pratiquesConfigurables', []);
+        const modalites = db.getSync('modalitesEvaluation', {});
+        const pratiqueId = modalites.pratiqueActiveId || modalites.configurationSTDAppliquee?.id;
+        const pratiqueActive = pratiqueId ? configurations.find(p => p.id === pratiqueId) : null;
+        if (pratiqueActive?.affichageNote === 'lettre') {
+            document.getElementById('affichageNoteLettre1').checked = true;
+        } else {
+            document.getElementById('affichageNoteComplet1').checked = true;
+        }
+    } catch(e) {
+        const radioComplet = document.getElementById('affichageNoteComplet1');
+        if (radioComplet) radioComplet.checked = true;
+    }
 }
 
 /**

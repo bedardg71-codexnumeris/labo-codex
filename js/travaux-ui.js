@@ -425,6 +425,10 @@
                 <div class="travaux-archivage-carte">
                     <h4>Semestre complet</h4>
                     <p class="texte-muted">Archive complète de tous les travaux du semestre</p>
+                    <div class="travaux-archivage-checks">
+                        <label><input type="checkbox" id="arch-semestre-annotes" checked> Inclure annotés</label>
+                        <label><input type="checkbox" id="arch-semestre-evals"> Inclure évaluations</label>
+                    </div>
                     <div id="travaux-texte-progression" class="texte-muted"></div>
                     <div class="travaux-barre-progression-container">
                         <div id="travaux-barre-progression" class="travaux-barre-progression"></div>
@@ -1813,7 +1817,11 @@
      * Lance l'archivage du semestre
      */
     function lancerArchivageSemestre() {
-        travauxArchivage.lancerExportSemestre();
+        const options = {
+            inclureAnnotes: document.getElementById('arch-semestre-annotes')?.checked,
+            inclureEvaluations: document.getElementById('arch-semestre-evals')?.checked
+        };
+        travauxArchivage.lancerExportSemestre(options);
     }
 
     /**
