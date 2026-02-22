@@ -189,24 +189,30 @@
             }
         }
 
-        // Deplier la palette tampons si elle est repliee
+        // Creer la palette tampons (repliee par defaut) si absente
         const paletteTampons = document.getElementById('travaux-palette-tampons');
-        if (paletteTampons && paletteTampons.classList.contains('replie')) {
-            paletteTampons.classList.remove('replie');
-            const btnT = paletteTampons.querySelector('.travaux-palette-toggle');
-            if (btnT) btnT.textContent = '\u2212';
-        } else if (!paletteTampons) {
+        if (!paletteTampons) {
             travauxOutils.togglePaletteAutocollants();
+            // Replier immediatement apres creation
+            const ptNew = document.getElementById('travaux-palette-tampons');
+            if (ptNew && !ptNew.classList.contains('replie')) {
+                ptNew.classList.add('replie');
+                const btnT = ptNew.querySelector('.travaux-palette-toggle');
+                if (btnT) btnT.textContent = '+';
+            }
         }
 
-        // Deplier la palette erreurs de français si elle est repliee
+        // Creer la palette erreurs de francais (repliee par defaut) si absente
         const paletteErrFr = document.getElementById('travaux-palette-erreurs-fr');
-        if (paletteErrFr && paletteErrFr.classList.contains('replie')) {
-            paletteErrFr.classList.remove('replie');
-            const btnE = paletteErrFr.querySelector('.travaux-palette-toggle');
-            if (btnE) btnE.textContent = '\u2212';
-        } else if (!paletteErrFr) {
+        if (!paletteErrFr) {
             travauxOutils.togglePaletteErreursFrancais();
+            // Replier immediatement apres creation
+            const peNew = document.getElementById('travaux-palette-erreurs-fr');
+            if (peNew && !peNew.classList.contains('replie')) {
+                peNew.classList.add('replie');
+                const btnE = peNew.querySelector('.travaux-palette-toggle');
+                if (btnE) btnE.textContent = '+';
+            }
         }
 
         window.dispatchEvent(new CustomEvent('travaux-annotation-activee'));
