@@ -32,10 +32,8 @@
     }
 
     function restaurerEtatSession() {
-        const modeSauvegarde = sessionStorage.getItem('travaux-mode-courant');
-        if (modeSauvegarde === 'annoter' || modeSauvegarde === 'evaluer') {
-            modeCourant = modeSauvegarde;
-        }
+        // Toujours demarrer en mode "annoter" (l'utilisateur bascule manuellement vers Evaluer)
+        modeCourant = 'annoter';
         return sessionStorage.getItem('travaux-dernier-fichier');
     }
 
@@ -98,10 +96,6 @@
                 setTimeout(() => {
                     if (sousSectionActive !== 'evaluations-annoter') return;
                     ouvrirFichier(fichierRestaure);
-                    // Si le mode sauvegardé était "evaluer", le restaurer après ouverture du fichier
-                    if (modeCourant === 'evaluer') {
-                        setTimeout(() => basculerMode('evaluer'), 500);
-                    }
                 }, 200);
             }
         }
@@ -741,6 +735,10 @@
 
             colGauche += `<div class="pipeline-fichier-ligne${selectionne ? ' pipeline-fichier-selectionne' : ''}" onclick="travauxUI.selectionnerFichierPipeline(${index})">
                 <span class="pipeline-fichier-numero">${index + 1}</span>
+                <div class="pipeline-reorder-btns">
+                    <button class="pipeline-btn-reorder" onclick="event.stopPropagation(); travauxUI.monterFichierPipeline(${index})" ${index === 0 ? 'disabled' : ''} title="Monter">&uarr;</button>
+                    <button class="pipeline-btn-reorder" onclick="event.stopPropagation(); travauxUI.descendreFichierPipeline(${index})" ${index === queue.length - 1 ? 'disabled' : ''} title="Descendre">&darr;</button>
+                </div>
                 <div class="pipeline-fichier-thumb-col" id="pipeline-original-${index}">
                     ${thumb ? `<img src="${thumb}" alt="">` : `<span class="pipeline-icone-placeholder">${icone}</span>`}
                 </div>
@@ -934,6 +932,28 @@
      */
     function deselectionnerFichierPipeline() {
         fichierSelectionneIndex = -1;
+        rafraichirPipelineUI();
+    }
+
+    /**
+     * Monte un fichier d'un cran dans le pipeline et ajuste la selection
+     * @param {number} index - Index du fichier a monter
+     */
+    function monterFichierPipeline(index) {
+        travauxImport.monterFichier(index);
+        if (fichierSelectionneIndex === index) fichierSelectionneIndex = index - 1;
+        else if (fichierSelectionneIndex === index - 1) fichierSelectionneIndex = index;
+        rafraichirPipelineUI();
+    }
+
+    /**
+     * Descend un fichier d'un cran dans le pipeline et ajuste la selection
+     * @param {number} index - Index du fichier a descendre
+     */
+    function descendreFichierPipeline(index) {
+        travauxImport.descendreFichier(index);
+        if (fichierSelectionneIndex === index) fichierSelectionneIndex = index + 1;
+        else if (fichierSelectionneIndex === index + 1) fichierSelectionneIndex = index;
         rafraichirPipelineUI();
     }
 
@@ -1695,12 +1715,6 @@
             }
 
             sauvegarderEtatSession();
-            // Si mode sauvegarde etait 'evaluer', basculer
-            if (modeCourant === 'evaluer') {
-                // Forcer la bascule (modeCourant est deja 'evaluer' depuis restaurerEtatSession)
-                modeCourant = 'annoter';
-                basculerMode('evaluer');
-            }
         }, 100);
     }
 
@@ -3321,6 +3335,8 @@
         selectionnerFichierPipeline: selectionnerFichierPipeline,
         deselectionnerFichierPipeline: deselectionnerFichierPipeline,
         retirerFichierPipeline: retirerFichierPipeline,
+        monterFichierPipeline: monterFichierPipeline,
+        descendreFichierPipeline: descendreFichierPipeline,
         // Suppression
         supprimerFichierImporte: supprimerFichierImporte,
         // Cycle de vie
