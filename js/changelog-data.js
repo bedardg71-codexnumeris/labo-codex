@@ -11,6 +11,18 @@
     var CHANGELOG = [
         {
             version: 'Beta 97.9',
+            date: '22 f\u00e9vrier',
+            couleur: 'vert',
+            titre: '\u00c9diteur de pages, layout \u00e9valuation et affichage annotation',
+            items: [
+                '<strong>\u00c9diteur de pages</strong> : Glisser un badge import\u00e9 vers la zone d\u2019\u00e9dition pour d\u00e9composer le PDF en pages individuelles. R\u00e9ordonner (\u2191/\u2193), supprimer et ajouter des pages, puis sauvegarder le PDF r\u00e9assembl\u00e9.',
+                '<strong>Layout \u00e9valuation plein canevas</strong> : En mode \u00c9valuer, les palettes occupent tout le canevas en colonnes flex (Param\u00e8tres, Document \u00e0 165\u00a0%, \u00c9valuation, R\u00e9troaction pleine hauteur). Jetons int\u00e9gr\u00e9s dans Param\u00e8tres. Checkboxes jetons persistantes.',
+                '<strong>Mode Annoter redessin\u00e9</strong> : Le document s\u2019ouvre en pleine largeur, align\u00e9 en haut du viewport. Seule la palette d\u2019annotation est visible\u00a0; les palettes tampons et erreurs sont ferm\u00e9es par d\u00e9faut (ouverture manuelle). Palette l\u00e9g\u00e8rement plus \u00e9troite.',
+                '<strong>Palettes annot. ferm\u00e9es par d\u00e9faut</strong> : Les palettes tampons et codes d\u2019erreur ne sont plus cr\u00e9\u00e9es automatiquement \u00e0 l\u2019activation de l\u2019annotation.'
+            ]
+        },
+        {
+            version: 'Beta 97.9',
             date: '21 f\u00e9vrier',
             couleur: 'bleu',
             titre: 'Am\u00e9liorations \u00e9valuation, statuts et configuration des pratiques',

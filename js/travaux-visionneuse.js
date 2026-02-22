@@ -927,6 +927,22 @@
     }
 
     /**
+     * Scroll pour aligner le haut du document avec le haut du viewport
+     * Centre horizontalement
+     */
+    function scrollerEnHaut() {
+        if (!conteneurGestesZoom) return;
+        if (wrapperGestesZoom) {
+            var wrapperCenterX = wrapperGestesZoom.offsetLeft + wrapperGestesZoom.offsetWidth / 2;
+            conteneurGestesZoom.scrollLeft = wrapperCenterX - conteneurGestesZoom.clientWidth / 2;
+            conteneurGestesZoom.scrollTop = wrapperGestesZoom.offsetTop;
+        } else {
+            conteneurGestesZoom.scrollLeft = (conteneurGestesZoom.scrollWidth - conteneurGestesZoom.clientWidth) / 2;
+            conteneurGestesZoom.scrollTop = 0;
+        }
+    }
+
+    /**
      * Retourne le margin du wrapper (pour les calculs de zoom centrage)
      */
     function getMarginWrapper() {
@@ -1027,6 +1043,7 @@
         getCanvas: getCanvas,
         getPdfDocument: getPdfDocument,
         recentrerVue: recentrerVue,
+        scrollerEnHaut: scrollerEnHaut,
         estModePanActif: estModePanActif,
         getDimensionsOriginales: getDimensionsOriginales
     };

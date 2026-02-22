@@ -1637,6 +1637,8 @@
 
             // Auto-activer l'annotation
             travauxAnnotation.activerAnnotation();
+            // Pleine largeur par defaut en mode annotation
+            travauxVisionneuse.zoomPleineLargeur();
             // Replier la sidebar
             const sidebar = document.getElementById('travaux-sidebar');
             if (sidebar) sidebar.classList.add('replie');
@@ -1648,8 +1650,8 @@
             const btnEvaluerReset = document.getElementById('travaux-btn-evaluer');
             if (btnEvaluerReset) btnEvaluerReset.classList.remove('actif');
 
-            // Recentrer après la transition CSS du sidebar (0.3s)
-            setTimeout(() => travauxVisionneuse.recentrerVue(), 350);
+            // Aligner le haut du document avec le haut du viewport après la transition CSS du sidebar (0.3s)
+            setTimeout(() => travauxVisionneuse.scrollerEnHaut(), 350);
 
             // Boutons et badge cycle de vie
             const fichierOuvert = travauxVisionneuse.getFichierActuel();
@@ -2341,8 +2343,8 @@
             afficherPalettesAnnotation();
             if (btnAnnoter) btnAnnoter.classList.add('actif');
             if (btnEvaluer) btnEvaluer.classList.remove('actif');
-            // Revenir au zoom ajuste en mode annotation
-            travauxVisionneuse.zoomAjuster();
+            // Pleine largeur par defaut en mode annotation
+            travauxVisionneuse.zoomPleineLargeur();
         }
         sauvegarderEtatSession();
     }
@@ -2355,10 +2357,10 @@
     }
 
     function afficherPalettesAnnotation() {
-        ['travaux-palette-flottante', 'travaux-palette-tampons', 'travaux-palette-erreurs-fr'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.classList.remove('u-hide');
-        });
+        // Seule la palette d'annotation principale est visible par defaut
+        // Les palettes tampons et erreurs restent masquees (l'utilisateur les ouvre manuellement)
+        const paletteAnnot = document.getElementById('travaux-palette-flottante');
+        if (paletteAnnot) paletteAnnot.classList.remove('u-hide');
     }
 
     function afficherPalettesEval(fichier) {
