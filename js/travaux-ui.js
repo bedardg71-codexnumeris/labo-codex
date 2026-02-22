@@ -484,7 +484,8 @@
         }
 
         const optDPI = document.getElementById('pipeline-opt-dpi')?.checked;
-        if (!optDPI) {
+        const opt11x17 = document.getElementById('pipeline-opt-11x17')?.checked;
+        if (!optDPI || opt11x17) {
             return { w: f.largeurOriginale, h: f.hauteurOriginale };
         }
 
@@ -790,6 +791,7 @@
         colCentre += '<ul class="pipeline-checklist">';
         colCentre += `<li><label><input type="checkbox" id="pipeline-opt-balance" checked onchange="travauxUI.mettreAJourPreviewsPipeline()"> Balance des blancs</label></li>`;
         colCentre += `<li><label><input type="checkbox" id="pipeline-opt-dpi" checked onchange="travauxUI.mettreAJourPreviewsPipeline()"> Uniformisation 200 dpi</label></li>`;
+        colCentre += `<li><label><input type="checkbox" id="pipeline-opt-11x17" onchange="travauxUI.mettreAJourPreviewsPipeline()"> Format 11×17 (résolution originale)</label></li>`;
         colCentre += `<li><label><input type="checkbox" id="pipeline-opt-doublons" checked> D\u00e9tection doublons (manuel)</label></li>`;
         colCentre += `<li><label><input type="checkbox" id="pipeline-opt-assemblage" checked> Assemblage automatique (par nom / production)</label></li>`;
         colCentre += '</ul>';
@@ -1975,6 +1977,7 @@
 
         const optBalance = document.getElementById('pipeline-opt-balance')?.checked;
         const optDPI = document.getElementById('pipeline-opt-dpi')?.checked;
+        const opt11x17 = document.getElementById('pipeline-opt-11x17')?.checked;
         const optDoublons = document.getElementById('pipeline-opt-doublons')?.checked;
         const optAssemblage = document.getElementById('pipeline-opt-assemblage')?.checked;
 
@@ -2010,7 +2013,7 @@
                     }
 
                     // Uniformisation 200 dpi
-                    if (optDPI) {
+                    if (optDPI && !opt11x17) {
                         try {
                             blob = await uniformiser200DPI(blob);
                         } catch (e) {
@@ -2037,6 +2040,11 @@
 
         // === Auto-identification ===
         identifierAutoPipeline();
+
+        // === Marquer format 11x17 si coche ===
+        if (opt11x17) {
+            queue.forEach(f => { f.format11x17 = true; });
+        }
 
         // === Forcer tous les fichiers pret → identifie (import sans blocage) ===
         queue.forEach(f => {

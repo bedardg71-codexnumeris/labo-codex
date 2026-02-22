@@ -439,7 +439,8 @@
             // Pipeline metadata
             nomFichierLea: metadonnees.nomFichierLea || '',
             leaParsed: metadonnees.leaParsed || null,
-            groupeDocumentId: metadonnees.groupeDocumentId || ''
+            groupeDocumentId: metadonnees.groupeDocumentId || '',
+            format11x17: metadonnees.format11x17 || false
         };
 
         fichiers.push(fichier);
