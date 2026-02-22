@@ -988,6 +988,98 @@
         return productionSelectionnee;
     }
 
+    /* ===============================
+       DECOMPOSITION / REASSEMBLAGE PDF
+       (Editeur de pages)
+       =============================== */
+
+    /**
+     * Decompose un PDF importe en pages individuelles (images JPEG)
+     * @param {string} fichierId - ID du fichier importe
+     * @returns {Promise<Array>} Tableau de {pageNum, blob, dataUrl, largeur, hauteur}
+     */
+    async function decomposerPDF(fichierId) {
+        const blob = await travauxStockage.recupererBlob(fichierId);
+        if (!blob) throw new Error('Blob introuvable pour ' + fichierId);
+
+        if (typeof pdfjsLib === 'undefined') {
+            throw new Error('PDF.js non disponible');
+        }
+
+        const arrayBuffer = await blob.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        const pages = [];
+
+        for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const scale = 800 / page.getViewport({ scale: 1 }).width;
+            const viewport = page.getViewport({ scale: scale });
+
+            const canvas = document.createElement('canvas');
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            const ctx = canvas.getContext('2d');
+            await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+            const pageBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85));
+
+            pages.push({
+                pageNum: i,
+                blob: pageBlob,
+                dataUrl: dataUrl,
+                largeur: viewport.width,
+                hauteur: viewport.height
+            });
+        }
+
+        console.log(`[Travaux-Import] PDF decompose: ${fichierId} → ${pages.length} pages`);
+        return pages;
+    }
+
+    /**
+     * Reassemble un tableau de pages (blobs images) en un PDF
+     * @param {Array} pages - Tableau de {blob, largeur, hauteur}
+     * @returns {Promise<Blob>} Le blob PDF reassemble
+     */
+    async function reassemblerPages(pages) {
+        const { jsPDF } = window.jspdf;
+        let doc = null;
+
+        for (let i = 0; i < pages.length; i++) {
+            const page = pages[i];
+            const blob = page.blob;
+
+            // Charger en dataURL
+            const imgData = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+
+            // Dimensions en mm (200 DPI)
+            const mmPerPx = 25.4 / 200;
+            const pageW = page.largeur * mmPerPx;
+            const pageH = page.hauteur * mmPerPx;
+
+            if (i === 0) {
+                doc = new jsPDF({
+                    orientation: pageW > pageH ? 'landscape' : 'portrait',
+                    unit: 'mm',
+                    format: [pageW, pageH]
+                });
+            } else {
+                doc.addPage([pageW, pageH], pageW > pageH ? 'landscape' : 'portrait');
+            }
+
+            doc.addImage(imgData, 'JPEG', 0, 0, pageW, pageH);
+        }
+
+        if (!doc) throw new Error('Aucune page a reassembler');
+        return doc.output('blob');
+    }
+
     window.travauxImport = {
         // Detection
         detecterDA: detecterDA,
@@ -1019,6 +1111,9 @@
         // Production globale
         setProductionGlobale: setProductionGlobale,
         getProductionGlobale: getProductionGlobale,
+        // Editeur de pages
+        decomposerPDF: decomposerPDF,
+        reassemblerPages: reassemblerPages,
         // Etat
         get importEnCours() { return importEnCours; }
     };
