@@ -1298,7 +1298,12 @@
             ? '<span class="travaux-badge-verrou" title="Évaluation verrouillée">\u{1F512}</span>'
             : '';
 
-        return `<div class="travaux-badge-importe" data-fichier-id="${f.id}" draggable="true" ondragstart="event.dataTransfer.setData('text/fichier-id', '${f.id}')" onclick="travauxUI.${action}('${f.id}')" title="${echapperHtml(f.nomFichier)}">
+        // Badge evalue/remis sur la page d'archivage → previsualisation PDF complete
+        const actionClic = (evaluation && action === 'ouvrirPreviewInline')
+            ? `travauxExportPDF.previsualiserPDF('${f.id}')`
+            : `travauxUI.${action}('${f.id}')`;
+
+        return `<div class="travaux-badge-importe" data-fichier-id="${f.id}" draggable="true" ondragstart="event.dataTransfer.setData('text/fichier-id', '${f.id}')" onclick="${actionClic}" title="${echapperHtml(f.nomFichier)}">
         <span class="travaux-badge-nom">${nomEtudiant}</span>
         <span class="travaux-badge-pill ${statutClasse}">${statutTexte}</span>${evaluation ? `<button class="travaux-badge-retro" onclick="event.stopPropagation(); travauxUI.afficherRetroaction('${f.id}')" title="Aperçu rétroaction">\u{1F4AC}</button>` : ''}${verrou}
         <button class="travaux-badge-supprimer" onclick="event.stopPropagation(); travauxUI.supprimerFichierImporte('${f.id}')" title="Supprimer">&times;</button>

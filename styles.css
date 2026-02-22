@@ -15729,6 +15729,26 @@ body.mode-clair .pipeline-autocomplete-item:hover {
     font-size: 0.8rem;
 }
 
+/* Bouton telecharger dans overlay preview PDF */
+.preview-pdf-actions {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+}
+.preview-pdf-telecharger {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+/* Indicateur de chargement generation PDF */
+.preview-pdf-chargement {
+    color: #fff;
+    font-size: 1.1rem;
+    text-align: center;
+    padding-top: 40vh;
+}
+
 /* --- Bouton toggle sidebar (visible quand sidebar repliee) --- */
 .travaux-btn-toggle-sidebar {
     position: absolute;

@@ -34,6 +34,33 @@
        =============================== */
 
     /**
+     * Genere un document jsPDF complet (pages annotees + synthese) sans telecharger
+     * @param {string} fichierId - ID du fichier
+     * @returns {Promise<{doc: Object, nomSortie: string, fichierId: string}>}
+     */
+    async function genererDocPDF(fichierId) {
+        const fichier = travauxStockage.obtenirFichierParId(fichierId);
+        if (!fichier) throw new Error('Fichier introuvable');
+
+        const blob = await travauxStockage.recupererBlob(fichierId);
+        if (!blob) throw new Error('Blob introuvable');
+
+        const annotation = travauxStockage.obtenirAnnotationFichier(fichierId);
+
+        let doc;
+        if (fichier.typeMIME === 'application/pdf') {
+            doc = await exporterDepuisPDF(blob, annotation);
+        } else {
+            doc = await exporterDepuisImage(blob, annotation);
+        }
+
+        ajouterPageSynthese(doc, fichier);
+
+        const nomSortie = fichier.nomFichier.replace(/\.[^.]+$/, '') + '_annote.pdf';
+        return { doc, nomSortie, fichierId };
+    }
+
+    /**
      * Exporte le fichier courant en PDF avec annotations et synthese
      * @param {string} fichierId - ID du fichier a exporter
      */
@@ -43,38 +70,10 @@
             return;
         }
 
-        const fichier = travauxStockage.obtenirFichierParId(fichierId);
-        if (!fichier) {
-            alert('Fichier introuvable.');
-            return;
-        }
-
-        const blob = await travauxStockage.recupererBlob(fichierId);
-        if (!blob) {
-            alert('Impossible de recuperer le fichier.');
-            return;
-        }
-
-        const annotation = travauxStockage.obtenirAnnotationFichier(fichierId);
-
         try {
-            let doc;
-            if (fichier.typeMIME === 'application/pdf') {
-                doc = await exporterDepuisPDF(blob, annotation);
-            } else {
-                doc = await exporterDepuisImage(blob, annotation);
-            }
-
-            // Ajouter la page de synthese si une evaluation existe
-            ajouterPageSynthese(doc, fichier);
-
-            // Telecharger
-            const nomSortie = fichier.nomFichier.replace(/\.[^.]+$/, '') + '_annote.pdf';
+            const { doc, nomSortie } = await genererDocPDF(fichierId);
             doc.save(nomSortie);
-
-            // Marquer le fichier comme exporte (cycle de vie)
             travauxStockage.marquerExporte(fichierId);
-
             console.log('[Travaux-Export] PDF exporte:', nomSortie);
         } catch (e) {
             console.error('[Travaux-Export] Erreur export PDF:', e);
@@ -1151,13 +1150,149 @@
         return doc.output('blob');
     }
 
+    /* ===============================
+       PREVISUALISATION PDF (overlay QuickLook)
+       =============================== */
+
+    /**
+     * Ouvre un overlay de previsualisation du PDF complet (annotations + synthese)
+     * @param {string} fichierId - ID du fichier a previsualiser
+     */
+    async function previsualiserPDF(fichierId) {
+        const overlayId = 'preview-pdf-export-overlay';
+        let overlay = document.getElementById(overlayId);
+        if (overlay) overlay.remove();
+
+        overlay = document.createElement('div');
+        overlay.id = overlayId;
+        overlay.className = 'preview-quicklook-overlay';
+        overlay.innerHTML = '<div class="preview-pdf-chargement">Generation du PDF...</div>';
+        document.body.appendChild(overlay);
+
+        try {
+            const { doc, nomSortie, fichierId: fId } = await genererDocPDF(fichierId);
+            const pdfBlob = new Blob([doc.output('arraybuffer')], { type: 'application/pdf' });
+
+            const arrayBuffer = await pdfBlob.arrayBuffer();
+            const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            const totalPages = pdfDoc.numPages;
+
+            window._previewPDFState = {
+                pdfDoc, totalPages, pageActuelle: 1,
+                doc, nomSortie, fichierId: fId
+            };
+
+            overlay.innerHTML = `
+                <div class="preview-quicklook-contenu">
+                    <canvas id="preview-pdf-canvas"></canvas>
+                    ${totalPages > 1 ? `
+                    <button class="preview-quicklook-fleche preview-quicklook-prec" onclick="event.stopPropagation(); travauxExportPDF.previewPDFPagePrec()">&#x25C0;</button>
+                    <button class="preview-quicklook-fleche preview-quicklook-suiv" onclick="event.stopPropagation(); travauxExportPDF.previewPDFPageSuiv()">&#x25B6;</button>
+                    <span class="preview-quicklook-page" id="preview-pdf-page-info">1 / ${totalPages}</span>
+                    ` : ''}
+                    <div class="preview-pdf-actions">
+                        <button class="btn btn-principal preview-pdf-telecharger" onclick="event.stopPropagation(); travauxExportPDF.telechargerDepuisPreview()">Telecharger PDF</button>
+                    </div>
+                </div>
+            `;
+
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) fermerPreviewPDF();
+            });
+
+            overlay._onKeyDown = (e) => {
+                if (e.key === 'Escape') fermerPreviewPDF();
+                if (e.key === 'ArrowLeft') previewPDFPagePrec();
+                if (e.key === 'ArrowRight') previewPDFPageSuiv();
+            };
+            document.addEventListener('keydown', overlay._onKeyDown);
+
+            await rendrePagePreviewPDF(1);
+
+        } catch (e) {
+            console.error('[Travaux-Export] Erreur previsualisation:', e);
+            overlay.innerHTML = '<div class="preview-pdf-chargement">Erreur de generation.</div>';
+            setTimeout(() => overlay.remove(), 2000);
+        }
+    }
+
+    /**
+     * Rend une page du PDF de previsualisation sur le canvas
+     * @param {number} numPage - Numero de page (1-indexed)
+     */
+    async function rendrePagePreviewPDF(numPage) {
+        const state = window._previewPDFState;
+        if (!state) return;
+
+        const canvas = document.getElementById('preview-pdf-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        const page = await state.pdfDoc.getPage(numPage);
+        const scale = Math.min(1.5, (window.innerHeight * 0.85) / page.getViewport({ scale: 1 }).height);
+        const viewport = page.getViewport({ scale: scale });
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+
+        const pageInfo = document.getElementById('preview-pdf-page-info');
+        if (pageInfo) pageInfo.textContent = `${numPage} / ${state.totalPages}`;
+
+        const fleches = document.querySelectorAll('#preview-pdf-export-overlay .preview-quicklook-fleche');
+        if (fleches.length >= 2) {
+            fleches[0].style.opacity = numPage <= 1 ? '0.3' : '';
+            fleches[1].style.opacity = numPage >= state.totalPages ? '0.3' : '';
+        }
+    }
+
+    function previewPDFPagePrec() {
+        const state = window._previewPDFState;
+        if (!state || state.pageActuelle <= 1) return;
+        state.pageActuelle--;
+        rendrePagePreviewPDF(state.pageActuelle);
+    }
+
+    function previewPDFPageSuiv() {
+        const state = window._previewPDFState;
+        if (!state || state.pageActuelle >= state.totalPages) return;
+        state.pageActuelle++;
+        rendrePagePreviewPDF(state.pageActuelle);
+    }
+
+    function fermerPreviewPDF() {
+        const overlay = document.getElementById('preview-pdf-export-overlay');
+        if (overlay) {
+            if (overlay._onKeyDown) document.removeEventListener('keydown', overlay._onKeyDown);
+            overlay.remove();
+        }
+        window._previewPDFState = null;
+    }
+
+    function telechargerDepuisPreview() {
+        const state = window._previewPDFState;
+        if (!state) return;
+        state.doc.save(state.nomSortie);
+        travauxStockage.marquerExporte(state.fichierId);
+        console.log('[Travaux-Export] PDF telecharge depuis preview:', state.nomSortie);
+        fermerPreviewPDF();
+    }
+
+    /* ===============================
+       EXPORTS GLOBAUX
+       =============================== */
+
     window.travauxExportPDF = {
         exporterPDF: exporterPDF,
         exporterDossierComplet: exporterDossierComplet,
         afficherRevisionExport: afficherRevisionExport,
         fermerRevision: fermerRevision,
         rendrePDFAvecAnnotations: rendrePDFAvecAnnotations,
-        dessinerAnnotationsSurCtx: dessinerAnnotationsSurCtx
+        dessinerAnnotationsSurCtx: dessinerAnnotationsSurCtx,
+        previsualiserPDF: previsualiserPDF,
+        telechargerDepuisPreview: telechargerDepuisPreview,
+        fermerPreviewPDF: fermerPreviewPDF,
+        previewPDFPagePrec: previewPDFPagePrec,
+        previewPDFPageSuiv: previewPDFPageSuiv
     };
 
 })();
