@@ -15263,7 +15263,7 @@ body.mode-clair #travaux-indicateur-page {
     max-width: 400px;
 }
 
-.pipeline-col-controles .pipeline-production-selecteur {
+.pipeline-col-centre .pipeline-production-selecteur {
     flex-direction: column;
     align-items: stretch;
     padding: 0;
@@ -15281,6 +15281,14 @@ body.mode-clair #travaux-indicateur-page {
     flex-direction: column;
     gap: 8px;
     margin-top: 8px;
+}
+
+/* --- Zone actions import (entre Optimisation et fichiers importes) --- */
+.pipeline-actions-import {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--bordure-claire);
+    text-align: center;
 }
 
 /* --- Modale doublons pipeline --- */
@@ -15315,27 +15323,107 @@ body.mode-clair #travaux-indicateur-page {
 /* --- Pipeline layout 3 colonnes --- */
 .pipeline-3col-grid {
     display: grid;
-    grid-template-columns: 1fr auto 1fr;
+    grid-template-columns: 250px 1fr 250px;
     gap: 16px;
     margin-top: 12px;
 }
 
 .pipeline-col-originaux,
-.pipeline-col-previews {
+.pipeline-col-confirmes {
     display: flex;
     flex-direction: column;
     gap: 8px;
     min-width: 0;
 }
 
-.pipeline-col-controles {
+.pipeline-col-centre {
     display: flex;
     flex-direction: column;
-    padding: 0 12px;
-    border-left: 1px solid var(--bordure-claire);
-    border-right: 1px solid var(--bordure-claire);
-    min-width: 220px;
-    max-width: 260px;
+}
+
+.pipeline-centre-global {
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--bordure-claire);
+    margin-bottom: 12px;
+}
+
+.pipeline-centre-preview {
+    display: flex;
+    flex-direction: column;
+}
+
+.pipeline-preview-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    border: 2px dashed var(--bordure-claire);
+    border-radius: var(--radius-moyen);
+    padding: 24px;
+    text-align: center;
+}
+
+.pipeline-preview-centre {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gris-tres-pale);
+    border-radius: var(--radius-moyen);
+    min-height: 200px;
+    padding: 8px;
+}
+
+body.mode-clair .pipeline-preview-centre {
+    background: #f5f7fa;
+}
+
+.pipeline-fichier-selectionne {
+    background: rgba(59, 130, 246, 0.12);
+    border: 1px solid rgba(59, 130, 246, 0.5);
+    border-radius: var(--radius-petit);
+}
+
+body.mode-clair .pipeline-fichier-selectionne {
+    background: rgba(59, 130, 246, 0.08);
+    border-color: rgba(59, 130, 246, 0.4);
+}
+
+.pipeline-col-originaux .pipeline-fichier-colonne {
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.pipeline-col-originaux .pipeline-fichier-colonne:hover {
+    background: rgba(106, 172, 184, 0.1);
+}
+
+.pipeline-btn-retirer {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--texte-secondaire);
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.15s, background 0.15s, color 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pipeline-fichier-colonne:hover .pipeline-btn-retirer {
+    opacity: 0.6;
+}
+
+.pipeline-btn-retirer:hover {
+    opacity: 1 !important;
+    background: rgba(220, 53, 69, 0.15);
+    color: var(--rouge, #dc3545);
 }
 
 .pipeline-col-titre {
@@ -15503,13 +15591,11 @@ body.mode-clair .pipeline-autocomplete-item:hover {
     color: var(--texte-secondaire);
 }
 
-@media (max-width: 700px) {
+@media (max-width: 900px) {
     .pipeline-3col-grid {
         grid-template-columns: 1fr;
     }
-    .pipeline-col-controles {
-        border-left: none;
-        border-right: none;
+    .pipeline-col-centre {
         border-top: 1px solid var(--bordure-claire);
         border-bottom: 1px solid var(--bordure-claire);
         padding: 12px 0;
