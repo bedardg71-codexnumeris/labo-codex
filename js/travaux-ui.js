@@ -634,7 +634,7 @@
 
             // Generer la thumbnail originale (colonne gauche)
             genererOriginalThumbnail(f, index);
-            // Generer le preview canvas (colonne droite — fichiers specifiques)
+            // Generer le preview post-traitement (colonne droite)
             genererPreviewThumbnail(f, index);
         });
 
@@ -653,7 +653,8 @@
         const conteneur = document.getElementById('pipeline-original-' + index);
         if (!conteneur) return;
 
-        const source = f.fichier || null;
+        // Toujours utiliser le blob original (pas le blob traite)
+        const source = f.fichierOriginal || f.fichier || null;
         if (!source) {
             // Fallback sur thumbnailDataUrl
             if (f.thumbnailDataUrl) {
@@ -725,28 +726,26 @@
         // Production globale actuelle (prendre celle du premier fichier qui en a une)
         const prodActuelle = queue.find(f => f.productionId)?.productionId || '';
 
-        // === Colonne gauche : Originaux (selectionnables) ===
+        // === Colonne gauche : Originaux (apercu pre-traitement) ===
         let colGauche = '<div class="pipeline-col-originaux">';
         colGauche += '<div class="pipeline-col-titre">Originaux</div>';
         queue.forEach((f, index) => {
             const thumb = f.thumbnailDataUrl;
             const icone = f.estPDF ? '&#x1F4C4;' : '&#x1F5BC;';
-            const nomCourt = (f.parseLea.nom || f.nomFichier).substring(0, 12);
+            const nomCourt = (f.parseLea.nom || f.nomFichier).substring(0, 18);
             const resolution = (f.largeurOriginale && f.hauteurOriginale)
                 ? `${f.largeurOriginale} x ${f.hauteurOriginale}`
                 : 'PDF';
             const poids = travauxStockage.formaterTaille(f.tailleFichier);
             const selectionne = (index === fichierSelectionneIndex);
-            const badgeSpec = (f.operations && f.operations.length > 0)
-                ? ' <span class="pipeline-badge pipeline-badge-specifique" style="font-size:0.6rem;">Sp\u00e9cifique</span>'
-                : '';
 
-            colGauche += `<div class="pipeline-fichier-colonne${selectionne ? ' pipeline-fichier-selectionne' : ''}" onclick="travauxUI.selectionnerFichierPipeline(${index})" style="cursor:pointer;">
+            colGauche += `<div class="pipeline-fichier-ligne${selectionne ? ' pipeline-fichier-selectionne' : ''}" onclick="travauxUI.selectionnerFichierPipeline(${index})">
+                <span class="pipeline-fichier-numero">${index + 1}</span>
                 <div class="pipeline-fichier-thumb-col" id="pipeline-original-${index}">
                     ${thumb ? `<img src="${thumb}" alt="">` : `<span class="pipeline-icone-placeholder">${icone}</span>`}
                 </div>
                 <div class="pipeline-fichier-meta-col">
-                    <span class="pipeline-meta-nom" title="${echapperHtml(f.nomFichier)}">${echapperHtml(nomCourt)}${badgeSpec}</span>
+                    <span class="pipeline-meta-nom" title="${echapperHtml(f.nomFichier)}">${echapperHtml(nomCourt)}</span>
                     <span class="pipeline-meta-resolution">${resolution}</span>
                     <span class="pipeline-meta-taille">${poids}</span>
                 </div>
@@ -765,7 +764,7 @@
 
         colCentre += '<ul class="pipeline-checklist">';
         colCentre += `<li><label><input type="checkbox" id="pipeline-opt-balance" checked onchange="travauxUI.mettreAJourPreviewsPipeline()"> Balance des blancs</label></li>`;
-        colCentre += `<li><label><input type="checkbox" id="pipeline-opt-dpi" checked onchange="travauxUI.mettreAJourPreviewsPipeline()"> Uniformisation 200 DPI</label></li>`;
+        colCentre += `<li><label><input type="checkbox" id="pipeline-opt-dpi" checked onchange="travauxUI.mettreAJourPreviewsPipeline()"> Uniformisation 200 dpi</label></li>`;
         colCentre += `<li><label><input type="checkbox" id="pipeline-opt-doublons" checked> D\u00e9tection doublons (manuel)</label></li>`;
         colCentre += `<li><label><input type="checkbox" id="pipeline-opt-assemblage" checked> Assemblage automatique (par nom / production)</label></li>`;
         colCentre += '</ul>';
@@ -777,7 +776,6 @@
                 ${productions.map(p => `<option value="${p.id}" ${prodActuelle === p.id ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
             </select>
         </div>`;
-
 
         colCentre += '</div>'; // fin pipeline-centre-global
 
@@ -839,10 +837,6 @@
             }
             colCentre += '</div>'; // fin pipeline-meta-champs
 
-            // Dimensions cibles + taille estimee
-            colCentre += `<div class="texte-muted u-texte-petit" style="margin-top:8px;">
-                Cible : <span id="pipeline-res-cible-${idx}">${resCible}</span> &mdash; <span id="pipeline-taille-cible-${idx}">${travauxStockage.formaterTaille(tailleEst)}</span>
-            </div>`;
 
             // Bouton reglages specifiques (seulement pour les images)
             if (f.estImage) {
@@ -861,29 +855,37 @@
         colCentre += '</div>'; // fin pipeline-centre-preview
         colCentre += '</div>'; // fin pipeline-col-centre
 
-        // === Colonne droite : Fichiers avec reglages specifiques confirmes ===
+        // === Colonne droite : Apercu post-traitement ===
         let colDroite = '<div class="pipeline-col-confirmes">';
-        colDroite += '<div class="pipeline-col-titre">R\u00e9glages sp\u00e9cifiques</div>';
-        const fichiersSpecifiques = queue.filter(f => f.operations && f.operations.length > 0);
-        if (fichiersSpecifiques.length === 0) {
-            colDroite += '<p class="texte-muted u-texte-petit">Aucun fichier avec des r\u00e9glages sp\u00e9cifiques.</p>';
-        } else {
-            queue.forEach((f, index) => {
-                if (!f.operations || f.operations.length === 0) return;
+        colDroite += '<div class="pipeline-col-titre">Aper\u00e7u</div>';
+        queue.forEach((f, index) => {
+            const dims = calculerDimensionsCibles(f);
+            const tailleEst = estimerTailleFichier(dims.w, dims.h, f);
+            const resCible = f.estPDF ? 'PDF' : `${dims.w} x ${dims.h}`;
+            const nomEtudiant = f.etudiantAssocie
+                ? echapperHtml(f.etudiantAssocie.nom || '')
+                : '';
+
+            let badgeSpecifique = '';
+            if (f.operations && f.operations.length > 0) {
                 const listeOps = f.operations.map(decrireOperation).filter(Boolean).join(', ');
-                const nomCourt = (f.parseLea.nom || f.nomFichier).substring(0, 12);
-                colDroite += `<div class="pipeline-fichier-colonne">
-                    <div class="pipeline-fichier-thumb-col" id="pipeline-preview-${index}">
-                        ${f.thumbnailDataUrl ? `<img src="${f.thumbnailDataUrl}" alt="">` : `<span class="pipeline-icone-placeholder">${f.estPDF ? '&#x1F4C4;' : '&#x1F5BC;'}</span>`}
-                    </div>
-                    <div class="pipeline-fichier-meta-col">
-                        <span class="pipeline-meta-nom">${echapperHtml(nomCourt)}</span>
-                        <span class="pipeline-badge pipeline-badge-specifique">Sp\u00e9cifique</span>
-                        <span class="pipeline-meta-ops texte-muted">${echapperHtml(listeOps)}</span>
-                    </div>
-                </div>`;
-            });
-        }
+                badgeSpecifique = `<span class="pipeline-badge pipeline-badge-specifique">Sp\u00e9cifique</span>`;
+                badgeSpecifique += `<span class="pipeline-meta-ops texte-muted">${echapperHtml(listeOps)}</span>`;
+            }
+
+            colDroite += `<div class="pipeline-fichier-colonne">
+                <span class="pipeline-fichier-numero">${index + 1}</span>
+                <div class="pipeline-fichier-thumb-col" id="pipeline-preview-${index}">
+                    ${f.thumbnailDataUrl ? `<img src="${f.thumbnailDataUrl}" alt="">` : `<span class="pipeline-icone-placeholder">${f.estPDF ? '&#x1F4C4;' : '&#x1F5BC;'}</span>`}
+                </div>
+                <div class="pipeline-fichier-meta-col">
+                    ${badgeSpecifique}
+                    ${nomEtudiant ? `<span class="pipeline-meta-nom">${nomEtudiant}</span>` : ''}
+                    <span class="pipeline-meta-resolution" id="pipeline-res-cible-${index}">${resCible}</span>
+                    <span class="pipeline-meta-taille" id="pipeline-taille-cible-${index}">${travauxStockage.formaterTaille(tailleEst)}</span>
+                </div>
+            </div>`;
+        });
         colDroite += '</div>';
 
         return `<div class="pipeline-3col-grid">${colGauche}${colCentre}${colDroite}</div>`;
@@ -1959,7 +1961,7 @@
                         }
                     }
 
-                    // Uniformisation 200 DPI
+                    // Uniformisation 200 dpi
                     if (optDPI) {
                         try {
                             blob = await uniformiser200DPI(blob);
@@ -2006,10 +2008,11 @@
 
         afficherImport();
 
-        afficherModalePipeline('Import terminé',
-            `<p>${resultat.importes} fichier(s) importé(s)${resultat.erreurs > 0 ? `, ${resultat.erreurs} erreur(s)` : ''}.</p>
-            <p class="pipeline-message-succes">Ces documents sont prêts pour l'annotation et l'évaluation.</p>`,
-            [{ label: 'OK', classe: 'btn-principal', action: () => {} }]);
+        if (typeof afficherNotificationSucces === 'function') {
+            const msg = `${resultat.importes} fichier(s) import\u00e9(s)`;
+            const det = resultat.erreurs > 0 ? `${resultat.erreurs} erreur(s)` : '';
+            afficherNotificationSucces(msg, det);
+        }
     }
 
     /**
