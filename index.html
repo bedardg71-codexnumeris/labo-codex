@@ -6017,6 +6017,18 @@
                                             </optgroup>
                                         </select>
                                     </div>
+
+                                    <div class="groupe-form u-mt-15">
+                                        <label style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                            Affichage de la note dans la rétroaction
+                                        </label>
+                                        <div style="display: flex; gap: 20px; font-size: 0.9rem;">
+                                            <label><input type="radio" name="mat-affichage-note" id="mat-affichage-note-complet"
+                                                value="complet" checked onchange="sauvegarderConfigPratiqueMat()"> Note et niveau</label>
+                                            <label><input type="radio" name="mat-affichage-note" id="mat-affichage-note-lettre"
+                                                value="lettre" onchange="sauvegarderConfigPratiqueMat()"> Lettre seulement</label>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <!-- Carte : Échelle de performance -->

@@ -778,9 +778,26 @@
             y = mm(cfg.marges.haut);
         }
 
-        // Lire le radio du DOM en priorité (si page évaluation ouverte), sinon valeur sauvegardée
+        // 1. Radio DOM (si page évaluation ouverte)
         const radioUI = document.querySelector('input[name="affichageNote1"]:checked');
-        const modeNote = (radioUI ? radioUI.value : null) || opts.affichageNote || 'complet';
+        let modeNote = radioUI ? radioUI.value : null;
+
+        // 2. Valeur sauvegardée dans l'évaluation
+        if (!modeNote) modeNote = opts.affichageNote;
+
+        // 3. Préférence de la pratique active
+        if (!modeNote) {
+            try {
+                const configurations = db.getSync('pratiquesConfigurables', []);
+                const modalites = db.getSync('modalitesEvaluation', {});
+                const pratiqueId = modalites.pratiqueActiveId || modalites.configurationSTDAppliquee?.id;
+                const pratiqueActive = pratiqueId ? configurations.find(p => p.id === pratiqueId) : null;
+                if (pratiqueActive) modeNote = pratiqueActive.affichageNote;
+            } catch(e) { /* silencieux */ }
+        }
+
+        // 4. Défaut
+        if (!modeNote) modeNote = 'complet';
         if (evaluation.noteFinale != null || evaluation.niveauFinal) {
             doc.setDrawColor(...cfg.couleurs.bordure);
             doc.setLineWidth(0.5);

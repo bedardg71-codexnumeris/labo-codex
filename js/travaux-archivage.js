@@ -167,9 +167,27 @@
                 zip.file(`${nomEtudiant}/${nomProduction}/${fichier.nomFichier}`, blob);
             }
 
+            // Ajouter les annotations aplaties si demande
+            if (options.inclureAnnotes) {
+                const annote = await genererFichierAnnote(fichier);
+                if (annote) {
+                    const ext = fichier.nomFichier.split('.').pop();
+                    const nomAnnote = fichier.nomFichier.replace(`.${ext}`, `_annote.${ext}`);
+                    zip.file(`${nomEtudiant}/${nomProduction}/${nomAnnote}`, annote);
+                }
+            }
+
             traites++;
             if (onProgression) {
                 onProgression(traites, fichiers.length);
+            }
+        }
+
+        // Ajouter les evaluations si demande
+        if (options.inclureEvaluations) {
+            const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees'));
+            if (evaluations.length > 0) {
+                zip.file('_evaluations.json', JSON.stringify(evaluations, null, 2));
             }
         }
 

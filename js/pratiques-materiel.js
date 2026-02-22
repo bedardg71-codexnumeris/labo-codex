@@ -836,6 +836,13 @@ function remplirFormulairePratique(pratique) {
     setValeurChamp('mat-pratique-description', pratique.description || '');
     setValeurChamp('mat-pratique-discipline', pratique.discipline || '');
 
+    // Affichage note
+    const affNote = pratique.affichageNote || pratique.configuration?.affichageNote || 'complet';
+    const radioComplet = document.getElementById('mat-affichage-note-complet');
+    const radioLettre = document.getElementById('mat-affichage-note-lettre');
+    if (affNote === 'lettre' && radioLettre) radioLettre.checked = true;
+    else if (radioComplet) radioComplet.checked = true;
+
     // Afficher la description taxonomique selon le type
     afficherDescriptionTaxonomiqueMat(pratique.type);
 
@@ -1171,6 +1178,10 @@ async function sauvegarderConfigPratiqueMat() {
 
     const type = getValeurChamp('mat-pratique-type');
     configurations[index].type = type;
+
+    // Affichage note
+    configurations[index].affichageNote =
+        document.querySelector('input[name="mat-affichage-note"]:checked')?.value || 'complet';
 
     // Mettre à jour pratiques[]
     configurations[index].pratiques = type === 'pan-standards' ? ['STD'] :
