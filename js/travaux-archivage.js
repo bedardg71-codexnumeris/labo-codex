@@ -115,6 +115,17 @@
             }
         }
 
+        // Ajouter les evaluations si demande
+        if (options.inclureEvaluations) {
+            const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees'));
+            const evalsProd = evaluations.filter(e => e.productionId === productionId);
+
+            if (evalsProd.length > 0) {
+                const evalJson = JSON.stringify(evalsProd, null, 2);
+                dossier.file('evaluations.json', evalJson);
+            }
+        }
+
         return await zip.generateAsync({ type: 'blob' });
     }
 
