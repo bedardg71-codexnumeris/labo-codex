@@ -32,6 +32,9 @@
     const COULEUR_DEFAUT = '#3b82f6'; // Bleu
     const RESOLUTION_REFERENCE = 1000; // Largeur de reference pour normaliser l'epaisseur
 
+    // Flag pour masquer le bouton « Codes d'erreurs » (mode Modelisation)
+    let masquerErreursFrancais = false;
+
     /* ===============================
        OUTILS
        =============================== */
@@ -751,7 +754,9 @@
 
         // Boutons toggle palettes secondaires
         html += '<div class="travaux-palette-pied travaux-palette-toggles">';
-        html += '<button class="travaux-palette-btn-pied" onclick="travauxOutils.togglePaletteErreursFrancais()" title="Codes d\'erreurs">\uD83D\uDCCE</button>';
+        if (!masquerErreursFrancais) {
+            html += '<button class="travaux-palette-btn-pied" onclick="travauxOutils.togglePaletteErreursFrancais()" title="Codes d\'erreurs">\uD83D\uDCCE</button>';
+        }
         html += '<button class="travaux-palette-btn-pied" onclick="travauxOutils.togglePaletteAutocollants()" title="R\u00e9troactions visuelles">\uD83D\uDD23</button>';
         html += '</div>';
 
@@ -898,6 +903,14 @@
        EXPORTS GLOBAUX
        =============================== */
 
+    /**
+     * Active/desactive le masquage du bouton Codes d'erreurs
+     * @param {boolean} val - true pour masquer
+     */
+    function setMasquerErreursFrancais(val) {
+        masquerErreursFrancais = !!val;
+    }
+
     window.travauxOutils = {
         // Constantes
         COULEURS: COULEURS,
@@ -940,7 +953,9 @@
         togglePaletteReplie: togglePaletteReplie,
         // Compteurs erreurs
         compterErreursFrancais: compterErreursFrancais,
-        mettreAJourCompteursErreurs: mettreAJourCompteursErreurs
+        mettreAJourCompteursErreurs: mettreAJourCompteursErreurs,
+        // Contexte Modelisation
+        setMasquerErreursFrancais: setMasquerErreursFrancais
     };
 
 })();

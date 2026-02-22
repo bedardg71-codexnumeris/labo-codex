@@ -37,6 +37,9 @@
     let conteneurVisionneuse = null;
     let enRendu = false;
 
+    // Contexte externe (injection par module Modelisation)
+    let contextExterne = null; // { canvasDocument } — injecte par module externe
+
     // Cache de pre-rendu pour pages adjacentes
     const cachePages = new Map(); // Map<numPage, {canvas, scale}>
     const MAX_CACHE_PAGES = 5;
@@ -349,7 +352,11 @@
      * Toujours rafraichir depuis le DOM (le HTML peut etre regenere)
      */
     function initialiserCanvas() {
-        canvasDocument = document.getElementById('travaux-canvas-document');
+        if (contextExterne && contextExterne.canvasDocument) {
+            canvasDocument = contextExterne.canvasDocument;
+        } else {
+            canvasDocument = document.getElementById('travaux-canvas-document');
+        }
         if (canvasDocument) {
             ctxDocument = canvasDocument.getContext('2d');
         }
@@ -1004,6 +1011,43 @@
     }
 
     /* ===============================
+       CONTEXTE EXTERNE (Modelisation)
+       =============================== */
+
+    /**
+     * Injecte un contexte externe (canvas alternatifs)
+     * Permet de reutiliser la visionneuse dans un autre conteneur
+     * @param {Object|null} ctx - { canvasDocument } ou null pour reset
+     */
+    function setContext(ctx) {
+        contextExterne = ctx || null;
+    }
+
+    /**
+     * Ouvre un fichier depuis un blob et ses metadonnees (sans passer par travauxStockage)
+     * Utilise par le module Modelisation
+     * @param {Blob} blob - Le blob du fichier
+     * @param {Object} metadata - { id, typeMIME, nomFichier, ... }
+     * @returns {Promise<boolean>} true si ouvert avec succes
+     */
+    async function ouvrirDepuisBlob(blob, metadata) {
+        fichierActuel = metadata;
+        pageActuelle = 1;
+        modeZoom = ZOOM_FIT;
+
+        if (metadata.typeMIME === 'application/pdf') {
+            await ouvrirPDF(blob);
+        } else if (metadata.typeMIME.startsWith('image/')) {
+            await ouvrirImage(blob);
+        }
+
+        mettreAJourNavigation();
+        recentrerVue();
+        requestAnimationFrame(() => { requestAnimationFrame(() => recentrerVue()); });
+        return true;
+    }
+
+    /* ===============================
        INITIALISATION
        =============================== */
 
@@ -1019,6 +1063,8 @@
     window.travauxVisionneuse = {
         initialiser: initialiserVisionneuse,
         setConteneur: setConteneur,
+        setContext: setContext,
+        ouvrirDepuisBlob: ouvrirDepuisBlob,
         // Ouverture
         ouvrirFichier: ouvrirFichier,
         fermerFichier: fermerFichier,

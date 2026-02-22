@@ -56,6 +56,9 @@
     let modePanActif = false;
     let modeRedimensionnementSticker = false;
 
+    // Contexte externe (injection par module Modelisation)
+    let contextExterne = null; // { canvasAnnotation, canvasSurligneur, conteneurPalette }
+
     /* ===============================
        INITIALISATION
        =============================== */
@@ -106,18 +109,18 @@
         const annotation = travauxStockage.obtenirAnnotationFichier(fichierActuel.id);
         if (!annotation) {
             // Pas d'annotations - cacher les canvas
-            const canvas = document.getElementById('travaux-canvas-annotation');
+            const canvas = (contextExterne && contextExterne.canvasAnnotation) || document.getElementById('travaux-canvas-annotation');
             if (canvas) canvas.classList.add('u-hide');
-            const canvasSurl = document.getElementById('travaux-canvas-surligneur');
+            const canvasSurl = (contextExterne && contextExterne.canvasSurligneur) || document.getElementById('travaux-canvas-surligneur');
             if (canvasSurl) canvasSurl.classList.add('u-hide');
             return;
         }
 
         // Il y a des annotations - les afficher en lecture seule
-        canvasAnnotation = document.getElementById('travaux-canvas-annotation');
+        canvasAnnotation = (contextExterne && contextExterne.canvasAnnotation) || document.getElementById('travaux-canvas-annotation');
         if (!canvasAnnotation) return;
 
-        canvasSurligneur = document.getElementById('travaux-canvas-surligneur');
+        canvasSurligneur = (contextExterne && contextExterne.canvasSurligneur) || document.getElementById('travaux-canvas-surligneur');
         ctxAnnotation = canvasAnnotation.getContext('2d');
         if (canvasSurligneur) ctxSurligneur = canvasSurligneur.getContext('2d');
 
@@ -135,10 +138,18 @@
      * Active le mode annotation
      */
     function activerAnnotation() {
-        canvasAnnotation = document.getElementById('travaux-canvas-annotation');
+        if (contextExterne && contextExterne.canvasAnnotation) {
+            canvasAnnotation = contextExterne.canvasAnnotation;
+        } else {
+            canvasAnnotation = document.getElementById('travaux-canvas-annotation');
+        }
         if (!canvasAnnotation) return;
 
-        canvasSurligneur = document.getElementById('travaux-canvas-surligneur');
+        if (contextExterne && contextExterne.canvasSurligneur) {
+            canvasSurligneur = contextExterne.canvasSurligneur;
+        } else {
+            canvasSurligneur = document.getElementById('travaux-canvas-surligneur');
+        }
         ctxAnnotation = canvasAnnotation.getContext('2d');
         if (canvasSurligneur) ctxSurligneur = canvasSurligneur.getContext('2d');
 
@@ -179,7 +190,8 @@
                 if (btnR) btnR.textContent = '\u2212';
             }
         } else {
-            const zoneDocument = document.getElementById('travaux-conteneur-document');
+            const zoneDocument = (contextExterne && contextExterne.conteneurPalette)
+                || document.getElementById('travaux-conteneur-document');
             if (zoneDocument) {
                 const paletteDiv = document.createElement('div');
                 paletteDiv.innerHTML = travauxOutils.genererHTMLPalette();
@@ -2334,8 +2346,17 @@
        EXPORTS GLOBAUX
        =============================== */
 
+    /**
+     * Injecte un contexte externe (canvas alternatifs)
+     * @param {Object|null} ctx - { canvasAnnotation, canvasSurligneur, conteneurPalette } ou null
+     */
+    function setContext(ctx) {
+        contextExterne = ctx || null;
+    }
+
     window.travauxAnnotation = {
         initialiser: initialiserAnnotation,
+        setContext: setContext,
         // Mode
         activerAnnotation: activerAnnotation,
         desactiverAnnotation: desactiverAnnotation,

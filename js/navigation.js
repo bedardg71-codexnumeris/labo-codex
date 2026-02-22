@@ -163,6 +163,7 @@ const TOOLTIPS_SOUS_NAV = {
     'construction-retroactions': 'nav-cn-cartouches',
     'construction-pratiques-notation': 'nav-cn-pratiques',
     'boite-outils-tirage': 'nav-bao-tirage',
+    'boite-outils-modelisation': 'nav-bao-modelisation',
     'planification-carte': 'nav-planif-alignement',
     'planification-organisateur': 'nav-planif-organisateur',
     'reglages-trimestre': 'nav-reg-trimestre',
@@ -259,6 +260,17 @@ function afficherSousNavigation(nomOnglet) {
 
 function afficherSousSection(idSousSection) {
     console.log('🔵 afficherSousSection appelée avec:', idSousSection);
+
+    // ============================================
+    // NETTOYAGE DES MODULES EN QUITTANT
+    // ============================================
+
+    // Nettoyer la Modelisation quand on la quitte
+    if (sousSectionActive === 'boite-outils-modelisation' && idSousSection !== 'boite-outils-modelisation') {
+        if (typeof window.modelisation !== 'undefined') {
+            window.modelisation.nettoyer();
+        }
+    }
 
     // Extraire la section parente
     const parties = idSousSection.split('-');
@@ -502,6 +514,13 @@ function afficherSousSection(idSousSection) {
             }
             if (typeof initialiserQuestions === 'function') {
                 setTimeout(initialiserQuestions, 100);
+            }
+            break;
+
+        case 'boite-outils-modelisation':
+            console.log('🔄 Initialisation de la Modelisation...');
+            if (typeof initialiserModelisation === 'function') {
+                setTimeout(initialiserModelisation, 100);
             }
             break;
 
