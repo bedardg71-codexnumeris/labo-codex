@@ -12,6 +12,22 @@
         {
             version: 'Beta 97.9',
             date: '22 f\u00e9vrier',
+            couleur: 'bleu',
+            titre: 'Refonte de la page Synth\u00e8se dans le PDF export\u00e9',
+            items: [
+                '<strong>Accents corrig\u00e9s partout</strong> : Tous les textes visibles du PDF et de l\u2019aper\u00e7u utilisent d\u00e9sormais les caract\u00e8res accentu\u00e9s (\u00c9valuation par crit\u00e8re, Synth\u00e8se, R\u00e9troaction, T\u00e9l\u00e9charger, etc.).',
+                '<strong>En-t\u00eate personnalis\u00e9</strong> : Le PDF affiche le code et nom du cours, la grille, puis les lignes optionnelles (Production, Objectif, T\u00e2che, Bonjour) selon les options d\u2019affichage.',
+                '<strong>Descriptions des crit\u00e8res</strong> : Chaque crit\u00e8re du tableau d\u2019\u00e9valuation inclut sa description sous le nom.',
+                '<strong>Images des tampons</strong> : Le tableau des tampons affiche les ic\u00f4nes PNG \u00e0 c\u00f4t\u00e9 du nom. La colonne Cat\u00e9gorie est retir\u00e9e.',
+                '<strong>Section narrative supprim\u00e9e</strong> : Le bloc \u00ab\u00a0R\u00e9troaction globale\u00a0\u00bb (redondant avec le tableau) est retir\u00e9.',
+                '<strong>Marges et polices</strong> : Marges de 1\u00a0pouce, polices l\u00e9g\u00e8rement plus grandes pour une meilleure lisibilit\u00e9.',
+                '<strong>Aper\u00e7u PDF am\u00e9lior\u00e9</strong> : Les boutons de navigation et T\u00e9l\u00e9charger sont r\u00e9organis\u00e9s en barre horizontale (plus de superposition).',
+                '<strong>Nom enseignant corrig\u00e9</strong> : Le pied de page lit le nom depuis les r\u00e9glages du trimestre actif au lieu de l\u2019ancien profil.'
+            ]
+        },
+        {
+            version: 'Beta 97.9',
+            date: '22 f\u00e9vrier',
             couleur: 'vert',
             titre: '\u00c9diteur de pages, layout \u00e9valuation et affichage annotation',
             items: [
