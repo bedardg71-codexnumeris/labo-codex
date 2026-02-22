@@ -18,12 +18,12 @@
     // Config PDF reutilisee depuis export-pdf.js
     function getCfg() {
         return window.ExportPDF?.config || {
-            marges: { haut: 13, bas: 13, gauche: 13, droite: 13 },
+            marges: { haut: 25.4, bas: 25.4, gauche: 25.4, droite: 25.4 },
             couleurs: { titreSection: [3,46,92], textePrincipal: [51,51,51],
                         texteSecondaire: [102,102,102], bordure: [204,204,204],
                         fondEntete: [245,245,245] },
-            polices: { titrePrincipal: 18, titreSection: 14, sousTitre: 12,
-                       texteNormal: 10, textePetit: 9 }
+            polices: { titrePrincipal: 20, titreSection: 15, sousTitre: 13,
+                       texteNormal: 11, textePetit: 10 }
         };
     }
     const MM_TO_PX = 612 / 215.9;
