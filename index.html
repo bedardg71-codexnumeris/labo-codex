@@ -12129,8 +12129,37 @@
                     <h2>Notes de version</h2>
                     <p class="text-muted">Historique des changements majeurs</p>
 
+                    <!-- Beta 97.9 - Refonte synthèse PDF -->
+                    <div class="carte accordeon ouvert" id="accordeon-apropos-beta979-synthese-pdf">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">&#x25BC;</span> Beta 97.9 &mdash; Refonte de la page Synth&egrave;se dans le PDF export&eacute;
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu" style="display: block;">
+                        <p class="text-muted">22 f&eacute;vrier 2026</p>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Page de synth&egrave;se PDF</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Accents corrig&eacute;s</strong> : Tous les textes visibles du PDF et de l&rsquo;aper&ccedil;u utilisent les caract&egrave;res accentu&eacute;s.</li>
+                            <li><strong>En-t&ecirc;te personnalis&eacute;</strong> : Code et nom du cours, grille, puis lignes optionnelles (Production, Objectif, T&acirc;che, Bonjour) selon les options d&rsquo;affichage.</li>
+                            <li><strong>Descriptions des crit&egrave;res</strong> : Chaque crit&egrave;re du tableau inclut sa description sous le nom.</li>
+                            <li><strong>Images des tampons</strong> : Ic&ocirc;nes PNG affich&eacute;es dans le tableau. Colonne Cat&eacute;gorie retir&eacute;e.</li>
+                            <li><strong>Section narrative supprim&eacute;e</strong> : Le bloc &laquo;&nbsp;R&eacute;troaction globale&nbsp;&raquo; redondant est retir&eacute;.</li>
+                            <li><strong>Marges et polices</strong> : Marges de 1&nbsp;pouce, polices plus grandes.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Aper&ccedil;u et pied de page</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Boutons r&eacute;organis&eacute;s</strong> : Navigation et T&eacute;l&eacute;charger en barre horizontale (plus de superposition).</li>
+                            <li><strong>Nom enseignant</strong> : Lu depuis les r&eacute;glages du trimestre actif.</li>
+                        </ul>
+
+                        </div>
+                    </div>
+
                     <!-- Beta 97.9 - Éditeur de pages, layout évaluation, annotation -->
-                    <div class="carte accordeon ouvert" id="accordeon-apropos-beta979-editeur">
+                    <div class="carte accordeon" id="accordeon-apropos-beta979-editeur">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Beta 97.9 &mdash; &Eacute;diteur de pages, layout &eacute;valuation et annotation
@@ -16378,7 +16407,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '97.9';
-        const BUILD_ID = '0222-0949';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0222-1134';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';

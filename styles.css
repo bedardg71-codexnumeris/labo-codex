@@ -15687,16 +15687,27 @@ body.mode-clair .pipeline-autocomplete-item:hover {
     box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
 }
 
-.preview-quicklook-fleche {
+/* Barre de controles en bas de l'apercu PDF */
+.preview-pdf-barre-bas {
     position: absolute;
-    bottom: 24px;
-    width: 56px;
-    height: 56px;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 10;
+    pointer-events: auto;
+}
+
+.preview-quicklook-fleche {
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     border: none;
     background: rgba(255, 255, 255, 0.25);
     color: #fff;
-    font-size: 1.4rem;
+    font-size: 1.2rem;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -15704,41 +15715,23 @@ body.mode-clair .pipeline-autocomplete-item:hover {
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     transition: background 0.15s;
-    z-index: 10;
-    pointer-events: auto;
+    flex-shrink: 0;
 }
 
 .preview-quicklook-fleche:hover {
     background: rgba(255, 255, 255, 0.4);
 }
 
-.preview-quicklook-prec {
-    left: calc(50% - 80px);
-}
-
-.preview-quicklook-suiv {
-    left: calc(50% + 24px);
-}
-
 .preview-quicklook-page {
-    position: absolute;
-    bottom: 8px;
-    left: 50%;
-    transform: translateX(-50%);
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.85rem;
+    min-width: 3em;
+    text-align: center;
 }
 
-/* Bouton telecharger dans overlay preview PDF */
-.preview-pdf-actions {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 10;
-}
 .preview-pdf-telecharger {
     box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    margin-left: 8px;
 }
 
 /* Indicateur de chargement generation PDF */

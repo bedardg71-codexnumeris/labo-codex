@@ -18,7 +18,7 @@
     // Config PDF reutilisee depuis export-pdf.js
     function getCfg() {
         return window.ExportPDF?.config || {
-            marges: { haut: 25.4, bas: 25.4, gauche: 25.4, droite: 25.4 },
+            marges: { haut: 30, bas: 25.4, gauche: 25.4, droite: 25.4 },
             couleurs: { titreSection: [3,46,92], textePrincipal: [51,51,51],
                         texteSecondaire: [102,102,102], bordure: [204,204,204],
                         fondEntete: [245,245,245] },
@@ -66,7 +66,7 @@
      */
     async function exporterPDF(fichierId) {
         if (!fichierId) {
-            alert('Aucun fichier selectionne.');
+            alert('Aucun fichier sélectionné.');
             return;
         }
 
@@ -486,12 +486,9 @@
         // Nom enseignant a gauche
         let nomEnseignant = '';
         try {
-            if (typeof db !== 'undefined' && db.getSync) {
-                const profil = db.getSync('profilEnseignant', {});
-                if (profil && profil.prenom && profil.nom) {
-                    nomEnseignant = profil.prenom + ' ' + profil.nom;
-                }
-            }
+            nomEnseignant = (typeof obtenirNomEnseignantActif === 'function')
+                ? (obtenirNomEnseignantActif() || '')
+                : '';
         } catch(e) { /* silencieux */ }
         if (nomEnseignant) {
             doc.setFont('helvetica', 'normal');
@@ -979,7 +976,7 @@
      */
     async function exporterDossierComplet(da, productionId) {
         if (!da || !productionId) {
-            alert('Etudiant ou production non specifie.');
+            alert('Étudiant ou production non spécifié.');
             return;
         }
 
@@ -994,7 +991,7 @@
 
         const blob = await travauxStockage.recupererBlob(fichier.id);
         if (!blob) {
-            alert('Impossible de recuperer le fichier.');
+            alert('Impossible de récupérer le fichier.');
             return;
         }
 
@@ -1055,11 +1052,11 @@
         let html = `
             <div class="modal-overlay actif" id="travaux-modal-revision" onclick="if(event.target===this)travauxExportPDF.fermerRevision()">
                 <div class="modal-contenu" style="max-width:600px;max-height:80vh;overflow-y:auto;">
-                    <h3>Revision avant export</h3>
+                    <h3>Révision avant export</h3>
                     <div class="travaux-revision-stats">
                         <p><strong>Fichier :</strong> ${echapperHtml(fichier.nomFichier)}</p>
-                        <p><strong>Etudiant :</strong> ${echapperHtml(evaluation?.etudiantNom || fichier.etudiantDA || 'Non associe')}</p>
-                        <p><strong>Pages annotees :</strong> ${stats.pagesAnnotees} sur ${stats.pagesTotal}</p>
+                        <p><strong>Étudiant :</strong> ${echapperHtml(evaluation?.etudiantNom || fichier.etudiantDA || 'Non associé')}</p>
+                        <p><strong>Pages annotées :</strong> ${stats.pagesAnnotees} sur ${stats.pagesTotal}</p>
                         <p><strong>Traits :</strong> ${stats.traits} | <strong>Formes :</strong> ${stats.formes} | <strong>Textes :</strong> ${stats.textes}</p>`;
 
         if (stats.autocollants > 0) {
@@ -1070,7 +1067,7 @@
 
         if (evaluation) {
             html += '<div class="travaux-revision-evaluation">';
-            html += `<h4>Evaluation : ${echapperHtml(evaluation.grilleNom || '')}</h4>`;
+            html += `<h4>Évaluation : ${echapperHtml(evaluation.grilleNom || '')}</h4>`;
 
             if (evaluation.criteres && evaluation.criteres.length > 0) {
                 html += '<ul class="travaux-revision-criteres">';
@@ -1090,7 +1087,7 @@
 
             html += '</div>';
         } else {
-            html += '<p class="texte-muted">Aucune evaluation trouvee pour ce fichier. La page de synthese ne sera pas incluse.</p>';
+            html += '<p class="texte-muted">Aucune évaluation trouvée pour ce fichier. La page de synthèse ne sera pas incluse.</p>';
         }
 
         html += `
@@ -1246,7 +1243,7 @@
         overlay = document.createElement('div');
         overlay.id = overlayId;
         overlay.className = 'preview-quicklook-overlay';
-        overlay.innerHTML = '<div class="preview-pdf-chargement">Generation du PDF...</div>';
+        overlay.innerHTML = '<div class="preview-pdf-chargement">Génération du PDF...</div>';
         document.body.appendChild(overlay);
 
         try {
@@ -1265,13 +1262,13 @@
             overlay.innerHTML = `
                 <div class="preview-quicklook-contenu">
                     <canvas id="preview-pdf-canvas"></canvas>
-                    ${totalPages > 1 ? `
-                    <button class="preview-quicklook-fleche preview-quicklook-prec" onclick="event.stopPropagation(); travauxExportPDF.previewPDFPagePrec()">&#x25C0;</button>
-                    <button class="preview-quicklook-fleche preview-quicklook-suiv" onclick="event.stopPropagation(); travauxExportPDF.previewPDFPageSuiv()">&#x25B6;</button>
-                    <span class="preview-quicklook-page" id="preview-pdf-page-info">1 / ${totalPages}</span>
-                    ` : ''}
-                    <div class="preview-pdf-actions">
-                        <button class="btn btn-principal preview-pdf-telecharger" onclick="event.stopPropagation(); travauxExportPDF.telechargerDepuisPreview()">Telecharger PDF</button>
+                    <div class="preview-pdf-barre-bas">
+                        ${totalPages > 1 ? `
+                        <button class="preview-quicklook-fleche preview-quicklook-prec" onclick="event.stopPropagation(); travauxExportPDF.previewPDFPagePrec()">&#x25C0;</button>
+                        <span class="preview-quicklook-page" id="preview-pdf-page-info">1 / ${totalPages}</span>
+                        <button class="preview-quicklook-fleche preview-quicklook-suiv" onclick="event.stopPropagation(); travauxExportPDF.previewPDFPageSuiv()">&#x25B6;</button>
+                        ` : ''}
+                        <button class="btn btn-principal preview-pdf-telecharger" onclick="event.stopPropagation(); travauxExportPDF.telechargerDepuisPreview()">Télécharger PDF</button>
                     </div>
                 </div>
             `;
@@ -1291,7 +1288,7 @@
 
         } catch (e) {
             console.error('[Travaux-Export] Erreur previsualisation:', e);
-            overlay.innerHTML = '<div class="preview-pdf-chargement">Erreur de generation.</div>';
+            overlay.innerHTML = '<div class="preview-pdf-chargement">Erreur de génération.</div>';
             setTimeout(() => overlay.remove(), 2000);
         }
     }
