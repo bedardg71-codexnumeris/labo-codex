@@ -232,7 +232,16 @@
 
                 <!-- Section fichiers importes (toujours visible) -->
                 <div class="pipeline-section-importes">
-                    <h4>Fichiers importés (${fichiersTravaux.length})${stats.nombre > 0 ? ` <span class="texte-muted u-texte-petit">— ${stats.tailleFormatee} · ${fsapiActif ? 'Disque local' : 'IndexedDB'}</span>` : ''}</h4>
+                    <div class="pipeline-section-importes-header">
+                        <h4>Fichiers importés (${fichiersTravaux.length})${stats.nombre > 0 ? ` <span class="texte-muted u-texte-petit">— ${stats.tailleFormatee} · ${fsapiActif ? 'Disque local' : 'IndexedDB'}</span>` : ''}</h4>
+                        ${fichiersTravaux.length > 0 ? `
+                            <button class="btn btn-secondaire btn-petit"
+                                    onclick="travauxUI.ouvrirModalTransfert()"
+                                    title="Transférer des fichiers vers un autre groupe">
+                                Transférer
+                            </button>
+                        ` : ''}
+                    </div>
                     ${fichiersTravaux.length > 0
                         ? genererGrilleFichiers(fichiersTravaux)
                         : '<p class="texte-muted">Aucun fichier importé pour le moment.</p>'}
@@ -3928,6 +3937,192 @@
     }
 
     /* ===============================
+       TRANSFERT ENTRE GROUPES-COURS
+       =============================== */
+
+    /**
+     * Ouvre la modale de transfert de fichiers vers un autre groupe-cours
+     */
+    function ouvrirModalTransfert() {
+        // Fichiers du groupe actif
+        const fichiersTravaux = travauxStockage.obtenirFichiersTravaux();
+        if (fichiersTravaux.length === 0) return;
+
+        // Groupes-cours du trimestre
+        const groupesCours = db.getSync(cle('groupesCours'), []);
+        const gcActif = db.getSync('groupeCoursActif', null);
+        const gcActifId = gcActif ? gcActif.id : null;
+
+        // Hydrater les labels (pattern entites-ui.js)
+        const cours = db.getSync('cours', []);
+        const listeCours = db.getSync('listeCours', []);
+        const enseignants = db.getSync('enseignants', []);
+        const horaires = db.getSync(cle('horaires'), []);
+
+        const groupesCibles = groupesCours
+            .filter(gc => gc.id !== gcActifId)
+            .map(gc => {
+                let coursInfo = cours.find(c => c.id === gc.coursId);
+                if (!coursInfo) {
+                    coursInfo = listeCours.find(c => c.id === gc.coursId || c.sigle === gc.coursId);
+                }
+                coursInfo = coursInfo || {};
+                const ens = enseignants.find(e => e.id === gc.enseignantId) || {};
+                const sigle = coursInfo.codeCours || coursInfo.code || coursInfo.sigle || null;
+                const groupe = gc.groupeNum || gc.groupe || '00001';
+                const nomEns = ens.prenom ? `${ens.prenom} ${(ens.nom || '').charAt(0)}.` : '';
+                let label = sigle ? `${sigle} gr.${groupe}` : `Groupe ${groupe}`;
+                if (nomEns) label += ` - ${nomEns}`;
+                return { id: gc.id, coursId: gc.coursId, label: label };
+            });
+
+        if (groupesCibles.length === 0) {
+            alert('Aucun autre groupe-cours disponible pour le transfert.');
+            return;
+        }
+
+        // Determiner le statut de chaque fichier
+        const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
+        const lignesFichiers = fichiersTravaux.map(f => {
+            const etudiant = travauxImport.trouverEtudiantParDA(f.etudiantDA);
+            const nomEtudiant = etudiant
+                ? `${etudiant.nom}, ${etudiant.prenom}`
+                : (f.etudiantDA || 'Non associé');
+
+            let statut = 'importé';
+            const annotation = travauxStockage.obtenirAnnotationFichier(f.id);
+            if (annotation && annotationContientDuContenu(annotation)) {
+                statut = 'annoté';
+            }
+            const evaluation = evaluations.find(e =>
+                e.etudiantDA === f.etudiantDA && e.productionId === f.productionId
+            );
+            if (evaluation) statut = 'évalué';
+
+            return { id: f.id, nom: f.nomFichier, etudiant: nomEtudiant, statut: statut };
+        });
+
+        // Construire la modale
+        const optionsGroupes = groupesCibles.map(g =>
+            `<option value="${g.id}" data-cours-id="${g.coursId}">${echapperHtml(g.label)}</option>`
+        ).join('');
+
+        const lignesHTML = lignesFichiers.map(f => `
+            <label class="transfert-fichier-ligne">
+                <input type="checkbox" value="${f.id}" class="transfert-checkbox-fichier">
+                <span class="transfert-fichier-nom" title="${echapperHtml(f.nom)}">${echapperHtml(f.etudiant)}</span>
+                <span class="travaux-badge-pill ${f.statut === 'annoté' ? 'annote' : f.statut === 'évalué' ? 'evalue' : 'importe'}">${f.statut}</span>
+            </label>
+        `).join('');
+
+        const hasAnnotations = lignesFichiers.some(f => f.statut === 'annoté' || f.statut === 'évalué');
+
+        const overlay = document.createElement('div');
+        overlay.id = 'transfert-modal-overlay';
+        overlay.className = 'modal-overlay actif';
+        overlay.innerHTML = `
+            <div class="modal-contenu modal-compact" style="max-width: 560px;">
+                <button class="modal-fermer" id="transfert-modal-fermer">&times;</button>
+                <h3 class="modal-titre">Transférer des fichiers</h3>
+
+                <label style="font-size: 0.85em; color: var(--texte-secondaire);">Groupe cible :</label>
+                <select id="transfert-groupe-cible" class="controle-form" style="margin: 6px 0 12px 0; width: 100%;">
+                    ${optionsGroupes}
+                </select>
+
+                <div class="transfert-liste-fichiers">
+                    <label class="transfert-tout-selectionner">
+                        <input type="checkbox" id="transfert-tout-selectionner">
+                        Tout sélectionner (${lignesFichiers.length} fichiers)
+                    </label>
+                    ${lignesHTML}
+                </div>
+
+                <div class="transfert-avertissement">
+                    Le lien avec la production sera effacé. Vous pourrez réassigner les fichiers dans le groupe cible.
+                    ${hasAnnotations ? '<br>Les annotations seront conservées.' : ''}
+                </div>
+
+                <div class="modal-actions">
+                    <button class="btn btn-principal" id="transfert-btn-executer" disabled>Transférer 0 fichier(s)</button>
+                    <button class="btn btn-secondaire" id="transfert-btn-annuler">Annuler</button>
+                </div>
+            </div>`;
+
+        document.body.appendChild(overlay);
+
+        // Evenements
+        const fermer = () => overlay.remove();
+        document.getElementById('transfert-modal-fermer').onclick = fermer;
+        document.getElementById('transfert-btn-annuler').onclick = fermer;
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) fermer(); });
+
+        // Tout selectionner
+        const toutSelCheckbox = document.getElementById('transfert-tout-selectionner');
+        const checkboxes = overlay.querySelectorAll('.transfert-checkbox-fichier');
+        const btnExec = document.getElementById('transfert-btn-executer');
+
+        function mettreAJourCompteur() {
+            const selectionnes = overlay.querySelectorAll('.transfert-checkbox-fichier:checked');
+            const n = selectionnes.length;
+            btnExec.textContent = `Transférer ${n} fichier(s)`;
+            btnExec.disabled = (n === 0);
+        }
+
+        toutSelCheckbox.addEventListener('change', () => {
+            checkboxes.forEach(cb => { cb.checked = toutSelCheckbox.checked; });
+            mettreAJourCompteur();
+        });
+
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', () => {
+                toutSelCheckbox.checked = (overlay.querySelectorAll('.transfert-checkbox-fichier:checked').length === checkboxes.length);
+                mettreAJourCompteur();
+            });
+        });
+
+        // Bouton transfert
+        btnExec.onclick = () => {
+            const selectionnes = Array.from(overlay.querySelectorAll('.transfert-checkbox-fichier:checked')).map(cb => cb.value);
+            const selectCible = document.getElementById('transfert-groupe-cible');
+            const cibleId = selectCible.value;
+            const cibleCoursId = selectCible.selectedOptions[0].getAttribute('data-cours-id');
+            if (selectionnes.length === 0 || !cibleId) return;
+            executerTransfert(selectionnes, cibleId, cibleCoursId);
+            fermer();
+        };
+    }
+
+    /**
+     * Execute le transfert de fichiers vers un autre groupe-cours
+     * @param {Array} fichierIds - IDs des fichiers a transferer
+     * @param {string} groupeCoursCibleId - ID du groupe-cours cible
+     * @param {string} coursCibleId - ID du cours cible
+     */
+    function executerTransfert(fichierIds, groupeCoursCibleId, coursCibleId) {
+        const modifications = {};
+        fichierIds.forEach(id => {
+            modifications[id] = {
+                coursId: coursCibleId,
+                groupeCoursId: groupeCoursCibleId,
+                productionId: ''
+            };
+        });
+
+        const nb = travauxStockage.mettreAJourFichiersBatch(modifications);
+
+        // Rafraichir l'affichage
+        afficherImport();
+
+        // Notification
+        if (typeof afficherNotificationSucces === 'function') {
+            afficherNotificationSucces(`${nb} fichier(s) transféré(s) vers le groupe cible`);
+        }
+
+        console.log(`[Travaux-UI] Transfert: ${nb} fichiers vers groupe ${groupeCoursCibleId}`);
+    }
+
+    /* ===============================
        EXPORTS GLOBAUX
        =============================== */
 
@@ -4020,7 +4215,9 @@
         // Rétroaction (archivage)
         afficherRetroaction: afficherRetroaction,
         sauvegarderRetroactionDepuisModal: sauvegarderRetroactionDepuisModal,
-        fermerModalRetroaction: fermerModalRetroaction
+        fermerModalRetroaction: fermerModalRetroaction,
+        // Transfert entre groupes
+        ouvrirModalTransfert: ouvrirModalTransfert
     };
 
     // Alias pour navigation.js
