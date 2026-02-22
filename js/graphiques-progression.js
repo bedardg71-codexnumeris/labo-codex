@@ -2824,11 +2824,9 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                 // Pas d'évaluation → trou dans la trajectoire
                 if (!evaluation) return null;
 
-                // IMPORTANT: Vérifier si le travail a été REMIS
-                // Si statutRemise existe et n'est pas 'remis' → trou (pas de point)
-                // Cela distingue "travail non-remis" de "travail remis avec 0%"
-                if (evaluation.statutRemise && evaluation.statutRemise !== 'remis') {
-                    return null; // Trou pour travail non-remis
+                // Vérifier si le travail a été reçu
+                if (evaluation.statutRemise === 'non-remis' || evaluation.statutRemise === 'retard') {
+                    return null; // Trou pour travail non reçu
                 }
 
                 // Utiliser noteFinale (0-100) converti en 0-1

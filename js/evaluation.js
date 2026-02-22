@@ -649,9 +649,9 @@ function cartoucheSelectionnee() {
     evaluationEnCours.cartoucheId = cartoucheId;
 
     const statut = document.getElementById('remiseProduction1').value;
-    if (statut !== 'remis') {
+    if (statut === 'non-recu') {
         document.getElementById('listeCriteresGrille1').innerHTML =
-            '<p class="eval-texte-italic-gris">Le travail doit être remis avant évaluation</p>';
+            '<p class="eval-texte-italic-gris">Le travail doit être reçu avant évaluation</p>';
         return;
     }
 
@@ -1771,9 +1771,20 @@ function genererRetroaction(num) {
         });
     }
 
-    // Ajouter le niveau global à la fin
-    if (evaluationEnCours.niveauFinal && evaluationEnCours.niveauFinal !== '--') {
-        texte += `---\nNiveau global : ${evaluationEnCours.niveauFinal}`;
+    // Ajouter la note/niveau à la fin selon le mode choisi
+    const modeNote = document.querySelector('input[name="affichageNote1"]:checked')?.value || 'complet';
+    if (modeNote === 'lettre') {
+        if (evaluationEnCours.niveauFinal && evaluationEnCours.niveauFinal !== '--') {
+            texte += `---\nNiveau de performance : ${evaluationEnCours.niveauFinal}`;
+        }
+    } else {
+        const noteAffichee = document.getElementById('noteProduction1')?.textContent;
+        if (noteAffichee && noteAffichee !== '--') {
+            texte += `---\nNote finale : ${noteAffichee}%`;
+        }
+        if (evaluationEnCours.niveauFinal && evaluationEnCours.niveauFinal !== '--') {
+            texte += `  |  Niveau : ${evaluationEnCours.niveauFinal}`;
+        }
     }
 
     const textarea = document.getElementById('retroactionFinale1');
@@ -1967,10 +1978,6 @@ function sauvegarderEvaluation() {
 
     afficherNotificationSucces(`Évaluation sauvegardée : ${evaluation.etudiantNom} - ${evaluation.productionNom}`);
 
-    // Afficher la checkbox "Remis à l'élève" après sauvegarde
-    const checkboxRemisLabelSave = document.getElementById('checkboxRemisLabel');
-    if (checkboxRemisLabelSave) checkboxRemisLabelSave.style.display = '';
-
     // 🔄 Recalculer les indices C et P après sauvegarde
     if (typeof calculerEtStockerIndicesCP === 'function') {
         calculerEtStockerIndicesCP();
@@ -1996,36 +2003,12 @@ function changerStatutRemise(num) {
         evaluationEnCours.statutRemise = statut;
     }
 
-    // Mettre à jour la checkbox "Remis à l'élève"
-    const checkboxLabel = document.getElementById('checkboxRemisLabel');
-    const checkbox = document.getElementById('checkboxRemisEleve');
-    if (checkboxLabel && checkbox) {
-        checkbox.checked = (statut === 'remis');
-    }
-
     // Si non reçu, masquer les critères
     if (statut === 'non-recu') {
         document.getElementById('listeCriteresGrille1').innerHTML =
             '<p class="eval-texte-italic-gris">Le travail doit être reçu avant évaluation</p>';
     } else if (evaluationEnCours?.cartoucheId) {
         cartoucheSelectionnee();
-    }
-}
-
-/**
- * Gère le changement de la checkbox "Remis à l'élève"
- */
-function changerCheckboxRemis() {
-    const checkbox = document.getElementById('checkboxRemisEleve');
-    const select = document.getElementById('remiseProduction1');
-    if (checkbox && select) {
-        if (checkbox.checked) {
-            select.value = 'remis';
-        } else if (select.value === 'remis') {
-            // Revenir au statut calculé précédent (évalué si évaluation existe)
-            select.value = 'evalue';
-        }
-        changerStatutRemise(1);
     }
 }
 
@@ -2447,8 +2430,6 @@ function nouvelleEvaluation() {
     document.getElementById('selectEchelle1').value = '';
     document.getElementById('selectCartoucheEval').value = '';
     document.getElementById('remiseProduction1').value = 'non-recu';
-    const checkboxRemisLabel = document.getElementById('checkboxRemisLabel');
-    if (checkboxRemisLabel) checkboxRemisLabel.style.display = 'none';
     document.getElementById('listeCriteresGrille1').innerHTML = '<p class="eval-texte-placeholder">Sélectionnez une grille et une cartouche</p>';
     document.getElementById('retroactionFinale1').value = '';
     document.getElementById('noteProduction1').textContent = '0.0';
@@ -3579,7 +3560,7 @@ function memoriserSelectionsEvaluation() {
         grille: document.getElementById('selectGrille1')?.value || '',
         echelle: document.getElementById('selectEchelle1')?.value || '',
         cartouche: document.getElementById('selectCartoucheEval')?.value || '',
-        remise: document.getElementById('remiseProduction1')?.value || 'remis',
+        remise: document.getElementById('remiseProduction1')?.value || 'evalue',
         // Options d'affichage
         afficherDescription: document.getElementById('afficherDescription1')?.checked ?? true,
         afficherObjectif: document.getElementById('afficherObjectif1')?.checked ?? true,
@@ -3778,16 +3759,11 @@ function verifierEtChargerEvaluationExistante() {
     if (evaluationExistante.statutRemise) {
         const selectRemise = document.getElementById('remiseProduction1');
         if (selectRemise) {
-            // Rétro-compatibilité: mapper les anciens statuts vers les nouveaux
-            const statutMap = { 'non-remis': 'non-recu' };
+            // Mapper les anciens statuts vers les nouveaux
+            const statutMap = { 'non-remis': 'non-recu', 'remis': 'evalue' };
             selectRemise.value = statutMap[evaluationExistante.statutRemise] || evaluationExistante.statutRemise;
         }
     }
-    // Afficher la checkbox "Remis à l'élève" pour les évaluations existantes
-    const checkboxRemisLabel = document.getElementById('checkboxRemisLabel');
-    if (checkboxRemisLabel) checkboxRemisLabel.style.display = '';
-    const checkboxRemis = document.getElementById('checkboxRemisEleve');
-    if (checkboxRemis) checkboxRemis.checked = (evaluationExistante.statutRemise === 'remis');
 
     // Charger l'échelle (si elle existe)
     if (evaluationExistante.echelleId) {

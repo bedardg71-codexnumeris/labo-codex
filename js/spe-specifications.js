@@ -368,7 +368,7 @@
         const evaluations = await db.get(cle('evaluationsSauvegardees')) || [];
         const evalsEtudiant = evaluations.filter(e =>
             e.etudiantDA === etudiantDA &&
-            e.statutRemise === 'remis'
+            e.statutRemise !== 'non-remis'
         );
 
         // Compter les productions acceptables par type

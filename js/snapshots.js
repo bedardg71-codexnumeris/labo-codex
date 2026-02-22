@@ -233,9 +233,6 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
             return evaluations.some(e =>
                 e.etudiantDA === da &&
                 e.productionId === production.id &&
-                // ✅ CORRECTIF (16 déc 2025): Compatibilité avec anciennes évaluations sans statutRemise
-                // Considérer comme "remis" si: statutRemise === 'remis' OU (statutRemise undefined ET note existante)
-                (e.statutRemise === 'remis' || (e.statutRemise === undefined && e.noteFinale !== null)) &&
                 e.statutRemise !== 'non-remis' &&
                 !e.remplaceeParId &&
                 e.noteFinale !== null &&
@@ -557,7 +554,7 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null, 
         if (dernierTravail) {
             const nbRemis = evaluationsCache.filter(e =>
                 e.productionId === dernierTravail.id &&
-                e.statutRemise === 'remis' &&
+                e.statutRemise !== 'non-remis' &&
                 !e.remplaceeParId &&
                 e.noteFinale !== null &&
                 e.noteFinale !== undefined

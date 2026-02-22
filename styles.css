@@ -14688,6 +14688,35 @@ body.mode-clair #travaux-indicateur-page {
     font-size: 0.8rem;
     margin-bottom: 6px;
 }
+
+/* Options rétroaction compactes (checkboxes + radios) */
+.eval-options-retroaction {
+    background: var(--surface-carte, #1a3040);
+    border-radius: var(--radius-moyen);
+    padding: 6px 10px;
+    font-size: 0.7rem;
+    margin-bottom: 6px;
+}
+.eval-options-checkboxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+}
+.eval-options-checkboxes label,
+.eval-options-radios label {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.eval-options-radios {
+    display: flex;
+    gap: 12px;
+    margin-top: 4px;
+    padding-top: 4px;
+    border-top: 1px solid var(--bordure-claire, rgba(255,255,255,0.1));
+}
 .travaux-palette-eval textarea {
     min-height: 80px;
     height: auto;

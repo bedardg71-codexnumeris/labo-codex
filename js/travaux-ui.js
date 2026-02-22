@@ -1286,13 +1286,8 @@
             e.etudiantDA === f.etudiantDA && e.productionId === f.productionId
         );
         if (evaluation) {
-            if (evaluation.statutRemise === 'remis') {
-                statutTexte = 'Remis';
-                statutClasse = 'remis';
-            } else {
-                statutTexte = 'Évalué';
-                statutClasse = 'evalue';
-            }
+            statutTexte = 'Évalué';
+            statutClasse = 'evalue';
         }
 
         const verrou = (evaluation && evaluation.verrouillee)
@@ -2526,7 +2521,7 @@
                 cartoucheId: '',
                 criteres: {},
                 donneesAlgorithmiques: {},
-                statutRemise: 'remis'
+                statutRemise: 'evalue'
             };
         }
 
@@ -2544,9 +2539,9 @@
             }
         }
 
-        // Statut de remise par défaut : remis (fichier importé = travail remis)
+        // Statut de remise par défaut : importé (fichier importé)
         const selRemise = document.getElementById('remiseProduction1');
-        if (selRemise) selRemise.value = 'remis';
+        if (selRemise) selRemise.value = 'importe';
 
         // Afficher les labels d'identite
         remplirLabelsIdentite(fichier);
@@ -2824,10 +2819,10 @@
                 chargerEvaluationsEtudiant();
             }
 
-            // Defaut "Remis" car le fichier a ete importe (donc remis)
+            // Defaut "Importé" car le fichier a été importé
             var selectRemise = document.getElementById('remiseProduction1');
             if (selectRemise) {
-                selectRemise.value = 'remis';
+                selectRemise.value = 'importe';
                 if (typeof changerStatutRemise === 'function') {
                     changerStatutRemise(1);
                 }

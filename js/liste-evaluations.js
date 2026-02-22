@@ -16,14 +16,11 @@ console.log('📦 Chargement du module liste-evaluations.js...');
 
 /**
  * Calcule le statut workflow d'une ligne d'évaluation.
- * Hiérarchie : non-recu → recu → importe → annote → evalue → remis
+ * Hiérarchie : non-recu → recu → importe → annote → evalue
  * @param {Object} ligne - La ligne d'évaluation
  * @returns {string} Le statut workflow
  */
 function calculerStatutWorkflow(ligne) {
-    // Si l'évaluation a un statut remise explicite "remis"
-    if (ligne.statutRemise === 'remis') return 'remis';
-
     // Si évalué (ou remplacée/non-recevable)
     if (ligne.statut === 'evalue' || ligne.statut === 'remplacee' || ligne.statut === 'non-recevable') return 'evalue';
 
@@ -62,8 +59,7 @@ function obtenirLibelleStatut(statut) {
         'recu': 'Reçu',
         'importe': 'Importé',
         'annote': 'Annoté',
-        'evalue': 'Évalué',
-        'remis': 'Remis'
+        'evalue': 'Évalué'
     };
     return libelles[statut] || statut;
 }
@@ -74,7 +70,7 @@ function obtenirLibelleStatut(statut) {
  * @returns {number} L'ordre
  */
 function obtenirOrdreStatut(statut) {
-    const ordres = { 'non-recu': 0, 'recu': 1, 'importe': 2, 'annote': 3, 'evalue': 4, 'remis': 5 };
+    const ordres = { 'non-recu': 0, 'recu': 1, 'importe': 2, 'annote': 3, 'evalue': 4 };
     return ordres[statut] ?? 0;
 }
 
@@ -562,8 +558,6 @@ function afficherTableauEvaluations(evaluations, productions, etudiants) {
             const filtreStatut = document.getElementById('filtre-statut-eval')?.value;
             if (filtreStatut === 'non-evalue') {
                 compteur.textContent = `${nbTotal} non évalué(s)`;
-            } else if (filtreStatut === 'remis') {
-                compteur.textContent = `${nbTotal} remis`;
             } else if (filtreStatut === 'non-remis') {
                 compteur.textContent = `${nbTotal} non remis`;
             } else if (nbTotal === nbRecevables) {
@@ -800,8 +794,6 @@ function appliquerFiltresSurLignes(lignes) {
             if (ligne.statutWorkflow !== 'annote') return false;
         } else if (filtreStatut === 'evalue') {
             if (ligne.statutWorkflow !== 'evalue') return false;
-        } else if (filtreStatut === 'remis') {
-            if (ligne.statutWorkflow !== 'remis') return false;
         } else if (filtreStatut === 'non-evalue') {
             if (ligne.statut !== 'non-evalue') return false;
         } else if (filtreStatut === 'jeton-delai') {
