@@ -535,6 +535,7 @@ function chargerEvaluationsEtudiant() {
         }
         if (remiseActuelle && selectRemise) {
             selectRemise.value = remiseActuelle;
+            mettreAJourPillStatut(remiseActuelle);
         }
 
         // Vérifier si une évaluation existe déjà pour ce nouvel étudiant
@@ -2036,6 +2037,24 @@ function majBadgesApresEvaluation() {
    =============================== */
 
 /**
+ * Met à jour la pill de statut dans la palette Paramètres
+ */
+function mettreAJourPillStatut(valeur) {
+    const pill = document.getElementById('travaux-eval-statut-pill');
+    if (!pill) return;
+    const map = {
+        'non-recu': { texte: 'Non reçu',  classe: '' },
+        'recu':     { texte: 'Reçu',      classe: 'en-cours' },
+        'importe':  { texte: 'Importé',    classe: 'en-cours' },
+        'annote':   { texte: 'Annoté',     classe: 'en-cours' },
+        'evalue':   { texte: 'Évalué',     classe: 'evalue' }
+    };
+    const info = map[valeur] || map['importe'];
+    pill.textContent = info.texte;
+    pill.className = 'travaux-badge-pill' + (info.classe ? ' ' + info.classe : '');
+}
+
+/**
  * Change le statut de remise
  */
 function changerStatutRemise(num) {
@@ -2044,6 +2063,8 @@ function changerStatutRemise(num) {
     if (evaluationEnCours) {
         evaluationEnCours.statutRemise = statut;
     }
+
+    mettreAJourPillStatut(statut);
 
     // Si non reçu, masquer les critères
     if (statut === 'non-recu') {
@@ -2488,6 +2509,7 @@ function nouvelleEvaluation() {
     document.getElementById('selectEchelle1').value = '';
     document.getElementById('selectCartoucheEval').value = '';
     document.getElementById('remiseProduction1').value = 'non-recu';
+    mettreAJourPillStatut('non-recu');
     document.getElementById('listeCriteresGrille1').innerHTML = '<p class="eval-texte-placeholder">Sélectionnez une grille et une cartouche</p>';
     document.getElementById('retroactionFinale1').value = '';
     document.getElementById('noteProduction1').textContent = '0.0';
@@ -3706,6 +3728,7 @@ function restaurerSelectionsEvaluation() {
                 }
                 if (selectRemise && selections.remise) {
                     selectRemise.value = selections.remise;
+                    mettreAJourPillStatut(selections.remise);
                     selectRemise.dispatchEvent(new Event('change', { bubbles: true }));
                 }
 
@@ -3825,6 +3848,7 @@ function verifierEtChargerEvaluationExistante() {
             // Mapper les anciens statuts vers les nouveaux
             const statutMap = { 'non-remis': 'non-recu', 'remis': 'evalue' };
             selectRemise.value = statutMap[evaluationExistante.statutRemise] || evaluationExistante.statutRemise;
+            mettreAJourPillStatut(selectRemise.value);
         }
     }
 
@@ -4666,6 +4690,7 @@ function modifierEvaluation(evaluationId) {
             const selectRemise = document.getElementById('remiseProduction1');
             if (selectRemise) {
                 selectRemise.value = evaluation.statutRemise;
+                mettreAJourPillStatut(evaluation.statutRemise);
                 selectRemise.dispatchEvent(new Event('change', { bubbles: true }));
             }
 
@@ -6270,6 +6295,7 @@ window.sauvegarderEvaluation = sauvegarderEvaluation;
 window.chargerProduction = chargerProduction;
 window.filtrerEtudiantsParGroupe = filtrerEtudiantsParGroupe;
 window.changerStatutRemise = changerStatutRemise;
+window.mettreAJourPillStatut = mettreAJourPillStatut;
 window.changerEchelleEvaluation = changerEchelleEvaluation;
 window.changerStatutIntegrite = changerStatutIntegrite;
 window.genererRetroaction = genererRetroaction;

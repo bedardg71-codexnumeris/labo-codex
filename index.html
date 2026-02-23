@@ -4630,6 +4630,7 @@
                             <div id="travaux-eval-identite" class="travaux-eval-identite">
                                 <span class="travaux-eval-label-val" id="travaux-eval-label-etudiant">--</span>
                                 <span class="travaux-eval-label-val travaux-eval-label-production" id="travaux-eval-label-production">--</span>
+                                <span id="travaux-eval-statut-pill" class="travaux-badge-pill en-cours" style="align-self: flex-start;">Importé</span>
                                 <button class="btn-lien-discret" id="travaux-eval-btn-corriger" onclick="travauxUI.toggleCorrectionIdentite()" title="Modifier l'attribution" data-tooltip="eval-modifier-attribution">Modifier</button>
                             </div>
 
@@ -4684,7 +4685,7 @@
                                 </select>
                             </div>
 
-                            <div class="groupe-form" class="mb-12">
+                            <div class="groupe-form" class="mb-12" style="display:none">
                                 <label class="label-formulaire" data-tooltip="eval-statut-remise">Statut :</label>
                                 <select id="remiseProduction1" class="controle-form" onchange="changerStatutRemise(1)">
                                     <option value="non-recu">Non reçu</option>
