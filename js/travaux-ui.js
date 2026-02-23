@@ -90,7 +90,7 @@
 
         const fichierRestaure = restaurerEtatSession();
         if (fichierRestaure) {
-            const fichiers = travauxStockage.obtenirFichiersTravaux();
+            const fichiers = travauxStockage.obtenirFichiersGroupeActif();
             if (fichiers.some(f => f.id === fichierRestaure)) {
                 // Ne restaurer que si on est sur l'onglet Annoter (pas Importer)
                 setTimeout(() => {
@@ -114,8 +114,9 @@
         const conteneur = document.getElementById('evaluations-contenu-import');
         if (!conteneur) return;
 
-        const fichiersTravaux = travauxStockage.obtenirFichiersTravaux();
-        const stats = travauxStockage.statistiquesFichiers();
+        const fichiersTravaux = travauxStockage.obtenirFichiersGroupeActif();
+        const tailleGroupe = fichiersTravaux.reduce(function(acc, f) { return acc + (f.tailleFichier || 0); }, 0);
+        const tailleFormatee = travauxStockage.formaterTaille(tailleGroupe);
         const queue = travauxImport.obtenirFileDAttente();
         const groupes = travauxImport.regrouperParDocument();
 
@@ -233,7 +234,7 @@
                 <!-- Section fichiers importes (toujours visible) -->
                 <div class="pipeline-section-importes">
                     <div class="pipeline-section-importes-header">
-                        <h4>Fichiers importés (${fichiersTravaux.length})${stats.nombre > 0 ? ` <span class="texte-muted u-texte-petit">— ${stats.tailleFormatee} · ${fsapiActif ? 'Disque local' : 'IndexedDB'}</span>` : ''}</h4>
+                        <h4>Fichiers importés (${fichiersTravaux.length})${fichiersTravaux.length > 0 ? ` <span class="texte-muted u-texte-petit">— ${tailleFormatee} · ${fsapiActif ? 'Disque local' : 'IndexedDB'}</span>` : ''}</h4>
                         ${fichiersTravaux.length > 0 ? `
                             <button class="btn btn-secondaire btn-petit"
                                     onclick="travauxUI.ouvrirModalTransfert()"
@@ -288,7 +289,7 @@
         const evalDiv = document.getElementById('evaluations-contenu-evaluation');
         if (evalDiv) evalDiv.classList.add('u-hide');
 
-        const fichiersTravaux = travauxStockage.obtenirFichiersTravaux();
+        const fichiersTravaux = travauxStockage.obtenirFichiersGroupeActif();
 
         if (fichiersTravaux.length === 0) {
             conteneur.innerHTML = `
@@ -391,7 +392,7 @@
         const productions = obtenirDonneesSelonMode(cle('productions'));
         const stats = travauxStockage.statistiquesFichiers();
 
-        const fichiersTravaux = travauxStockage.obtenirFichiersTravaux();
+        const fichiersTravaux = travauxStockage.obtenirFichiersGroupeActif();
 
         conteneur.innerHTML = `
             <h3>Archivage des travaux</h3>
@@ -1776,7 +1777,7 @@
      * @param {string} da - DA de l'etudiant (vide = tous)
      */
     function filtrerParEtudiant(da) {
-        let fichiers = travauxStockage.obtenirFichiersTravaux();
+        let fichiers = travauxStockage.obtenirFichiersGroupeActif();
         if (da) {
             fichiers = fichiers.filter(f => f.etudiantDA === da);
         }
@@ -1871,7 +1872,7 @@
      * Propose le nettoyage des anciens fichiers
      */
     async function proposerNettoyage() {
-        const fichiers = travauxStockage.obtenirFichiersTravaux();
+        const fichiers = travauxStockage.obtenirFichiersGroupeActif();
         if (fichiers.length === 0) {
             alert('Aucun fichier a nettoyer.');
             return;
@@ -1911,11 +1912,37 @@
      * @param {string} fichierId - ID du fichier
      */
     async function supprimerFichierImporte(fichierId) {
-        if (!confirm('Supprimer ce fichier importé ?')) return;
+        // 1. Obtenir les infos du fichier AVANT suppression
+        const fichier = travauxStockage.obtenirFichierParId(fichierId);
+        if (!fichier) return;
 
+        // 2. Vérifier s'il existe une évaluation associée
+        const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
+        const evalAssociee = evaluations.find(e =>
+            e.etudiantDA === fichier.etudiantDA &&
+            (!fichier.productionId || e.productionId === fichier.productionId)
+        );
+
+        // 3. Adapter le message de confirmation
+        if (evalAssociee) {
+            const choix = confirm(
+                'Ce fichier a une évaluation associée (' + (evalAssociee.noteFinale || evalAssociee.note || '--') + '%).\n\n' +
+                'Voulez-vous supprimer le fichier ET l\'évaluation ?\n\n' +
+                '(OK = supprimer les deux, Annuler = ne rien supprimer)'
+            );
+            if (!choix) return;
+
+            // Supprimer l'évaluation
+            const evaluationsMaj = evaluations.filter(e => e.id !== evalAssociee.id);
+            sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluationsMaj);
+        } else {
+            if (!confirm('Supprimer ce fichier importé ?')) return;
+        }
+
+        // 4. Supprimer le fichier (blob + métadonnées)
         await travauxStockage.supprimerFichierTravail(fichierId);
 
-        // Rafraichir la vue courante
+        // 5. Rafraichir la vue courante
         const sousSection = sousSectionActive;
         if (sousSection === 'evaluations-importer') {
             afficherImport();
@@ -3953,7 +3980,7 @@
      */
     function ouvrirModalTransfert() {
         // Fichiers du groupe actif
-        const fichiersTravaux = travauxStockage.obtenirFichiersTravaux();
+        const fichiersTravaux = travauxStockage.obtenirFichiersGroupeActif();
         if (fichiersTravaux.length === 0) return;
 
         // Groupes-cours du trimestre

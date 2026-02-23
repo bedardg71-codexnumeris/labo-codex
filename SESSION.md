@@ -1,10 +1,24 @@
-# SESSION ACTIVE - BETA 97.9
+# SESSION ACTIVE - BETA 97.10
 
 **Date** : 22 février 2026
-**Version** : Beta 97.9 (build 0222-0949)
-**Statut** : Éditeur de pages, layout évaluation plein canevas, mode annotation redessiné
+**Version** : Beta 97.10 (build 0222-1750)
+**Statut** : Correction fichiers fantômes, isolation par groupe-cours
 
 ## SESSION DU 22 FÉVRIER 2026
+
+### Travail accompli — Correction fichiers fantômes et isolation par groupe-cours (Beta 97.10, build 0222-1750)
+
+115. **Filtrage fichiers par groupe-cours** : Nouvelle fonction `obtenirFichiersGroupeActif()` dans `travaux-stockage.js` qui filtre les fichiers par `groupeCoursId` du groupe-cours actif. Remplace tous les appels à `obtenirFichiersTravaux()` dans les modules UI (`travaux-ui.js`, `liste-evaluations.js`, `travaux-export-pdf.js`, `travaux-archivage.js`). Les fonctions internes de stockage conservent la liste non filtrée pour les opérations CRUD.
+
+116. **Stampage coursId/groupeCoursId à l'import** : `importerFichier()` (`travaux-import.js`) lit `infoCours` et `groupeCoursActif` depuis db et les injecte dans les métadonnées du fichier. Les fichiers sont désormais correctement taggés à leur groupe d'origine.
+
+117. **Cascade de suppression fichier+évaluation** : `supprimerFichierImporte()` (`travaux-ui.js`) vérifie dans `evaluationsSauvegardees` si une évaluation est associée (même DA + productionId). Si oui, propose de supprimer les deux via `confirm()`. Empêche les évaluations fantômes après suppression de fichiers.
+
+118. **Rollback métadonnées si stockage blob échoue** : `importerFichier()` (`travaux-import.js`) encapsule `stockerBlob()` dans un try/catch. En cas d'échec (quota dépassé), `supprimerFichierTravail()` nettoie les métadonnées orphelines.
+
+119. **Rafraîchissement travaux au changement de groupe** : `changerGroupeCoursActifV2()` (`trimestre-v2.js`) appelle `travauxUI.afficherImport()` et `travauxUI.afficherFichiers()` si les conteneurs sont visibles. Corrige le problème où les fichiers de l'ancien groupe restaient affichés après changement.
+
+120. **Stats fichiers cohérentes par groupe** : Le compteur « Fichiers importés (N) — X Mo » dans `afficherImport()` utilise maintenant la taille calculée depuis la liste filtrée, pas le total global de `statistiquesFichiers()`.
 
 ### Travail accompli — Éditeur de pages, layout évaluation et mode annotation (Beta 97.9, build 0222-0949)
 

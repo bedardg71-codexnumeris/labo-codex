@@ -501,6 +501,21 @@
     }
 
     /**
+     * Obtient les fichiers travaux filtrés par le groupe-cours actif.
+     * Pour l'affichage UI uniquement — exclut les fichiers d'autres groupes-cours.
+     * Filtre strict par groupeCoursId (un même cours peut avoir plusieurs groupes).
+     * Les fichiers sans groupeCoursId (anciens imports pré-Beta 98) sont exclus.
+     * @returns {Array} Fichiers du groupe-cours actif
+     */
+    function obtenirFichiersGroupeActif() {
+        const fichiers = obtenirFichiersTravaux();
+        const gcActif = db.getSync('groupeCoursActif', null);
+        if (!gcActif || !gcActif.id) return fichiers;
+
+        return fichiers.filter(f => f.groupeCoursId === gcActif.id);
+    }
+
+    /**
      * Met a jour les metadonnees d'un fichier travail existant
      * @param {string} id - ID du fichier
      * @param {Object} modifications - Champs a modifier (ex: { productionId: '...', etudiantDA: '...' })
@@ -996,6 +1011,7 @@
         listerBlobsEtudiant: listerBlobsEtudiant,
         // Metadonnees
         obtenirFichiersTravaux: obtenirFichiersTravaux,
+        obtenirFichiersGroupeActif: obtenirFichiersGroupeActif,
         ajouterFichierTravail: ajouterFichierTravail,
         supprimerFichierTravail: supprimerFichierTravail,
         obtenirFichiersEtudiant: obtenirFichiersEtudiant,

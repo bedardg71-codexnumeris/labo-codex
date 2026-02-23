@@ -141,7 +141,7 @@
         }
 
         const zip = new JSZip();
-        const fichiers = travauxStockage.obtenirFichiersTravaux();
+        const fichiers = travauxStockage.obtenirFichiersGroupeActif();
         const etudiants = obtenirDonneesSelonMode(cle('groupeEtudiants'));
         const productions = obtenirDonneesSelonMode(cle('productions'));
 
@@ -406,7 +406,7 @@
      * @returns {Promise<void>}
      */
     async function lancerAllegement() {
-        const fichiers = travauxStockage.obtenirFichiersTravaux();
+        const fichiers = travauxStockage.obtenirFichiersGroupeActif();
         const exportes = fichiers.filter(f => f.blobStatut === 'exporte');
 
         if (exportes.length === 0) {
