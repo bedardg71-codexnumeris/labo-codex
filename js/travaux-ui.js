@@ -1990,9 +1990,21 @@
                         pillToolbar.className = 'travaux-badge-pill en-cours';
                     }
                 }
-                // Desactiver le onclick et le bouton supprimer dans cette copie toolbar
+                // Clic sur le badge toolbar → scroller vers le badge dans la grille
                 const badgeCopie = badgeFichier.querySelector('.travaux-badge-importe');
-                if (badgeCopie) { badgeCopie.onclick = null; badgeCopie.style.cursor = 'default'; }
+                if (badgeCopie) {
+                    badgeCopie.onclick = function(e) {
+                        e.stopPropagation();
+                        const fichierId = badgeCopie.dataset.fichierId;
+                        const cible = document.querySelector(`.travaux-badges-liste .travaux-badge-importe[data-fichier-id="${fichierId}"]`);
+                        if (cible) {
+                            cible.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                            cible.classList.add('travaux-badge-flash');
+                            setTimeout(() => cible.classList.remove('travaux-badge-flash'), 1500);
+                        }
+                    };
+                    badgeCopie.style.cursor = 'pointer';
+                }
                 const btnSupp = badgeFichier.querySelector('.travaux-badge-supprimer');
                 if (btnSupp) btnSupp.remove();
             }
@@ -2906,6 +2918,27 @@
                 selG.value = prod.grilleId;
                 window.evaluationEnCours.grilleId = prod.grilleId;
                 if (typeof chargerGrilleSelectionnee === 'function') chargerGrilleSelectionnee();
+            }
+
+            // 🆕 Pré-sélectionner l'échelle depuis la production
+            if (prod.echelleId) {
+                const selE = document.getElementById('selectEchelle1');
+                if (selE && Array.from(selE.options).some(o => o.value === prod.echelleId)) {
+                    selE.value = prod.echelleId;
+                    window.evaluationEnCours.echelleId = prod.echelleId;
+                }
+            }
+
+            // 🆕 Pré-sélectionner la cartouche (avec délai car les options dépendent de chargerGrilleSelectionnee)
+            if (prod.cartoucheId) {
+                setTimeout(() => {
+                    const selC = document.getElementById('selectCartoucheEval');
+                    if (selC && Array.from(selC.options).some(o => o.value === prod.cartoucheId)) {
+                        selC.value = prod.cartoucheId;
+                        window.evaluationEnCours.cartoucheId = prod.cartoucheId;
+                        selC.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                }, 150);
             }
         }
 
