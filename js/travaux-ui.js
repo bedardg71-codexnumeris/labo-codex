@@ -407,7 +407,7 @@
                     <p class="texte-muted">Télécharger tous les travaux d'un étudiant</p>
                     <select id="travaux-archivage-etudiant" class="form-select">
                         <option value="">-- Choisir un étudiant --</option>
-                        ${[...etudiants].sort((a,b) => (a.nom||'').localeCompare(b.nom||'')).map(e => `<option value="${e.da}">${echapperHtml(e.nom + ', ' + e.prenom)} (${e.da})</option>`).join('')}
+                        ${[...etudiants].sort((a,b) => (a.nom||'').localeCompare(b.nom||'')).map(e => `<option value="${e.da}">${e.nom ? echapperHtml(e.nom + ', ' + e.prenom) : echapperHtml(e.prenom)} (${e.daAffichage || e.da})</option>`).join('')}
                     </select>
                     <div class="travaux-archivage-checks">
                         <label data-tooltip="travaux-archivage-inclure-annotes"><input type="checkbox" id="arch-etudiant-annotes" checked> Inclure annotés</label>
@@ -1284,7 +1284,7 @@
         action = action || 'ouvrirPreviewInline';
         const etudiant = travauxImport.trouverEtudiantParDA(f.etudiantDA);
         const nomEtudiant = etudiant
-            ? `${echapperHtml(etudiant.nom)}, ${echapperHtml(etudiant.prenom)}`
+            ? (etudiant.nom ? `${echapperHtml(etudiant.nom)}, ${echapperHtml(etudiant.prenom)}` : echapperHtml(etudiant.prenom))
             : (f.etudiantDA || 'Non associé');
 
         // Déterminer le statut le plus avancé selon le workflow
@@ -1539,7 +1539,7 @@
     function genererOptionsEtudiants() {
         const etudiants = obtenirDonneesSelonMode(cle('groupeEtudiants'));
         return [...etudiants].sort((a,b) => (a.nom||'').localeCompare(b.nom||'')).map(e =>
-            `<option value="${e.da}">${echapperHtml(e.nom + ', ' + e.prenom)}</option>`
+            `<option value="${e.da}">${e.nom ? echapperHtml(e.nom + ', ' + e.prenom) : echapperHtml(e.prenom)}</option>`
         ).join('');
     }
 
@@ -2662,7 +2662,7 @@
         const labelEtud = document.getElementById('travaux-eval-label-etudiant');
         if (labelEtud) {
             labelEtud.textContent = etudiant
-                ? `${etudiant.prenom} ${etudiant.nom} (${etudiant.da})`
+                ? `${etudiant.prenom} ${etudiant.nom} (${etudiant.daAffichage || etudiant.da})`
                 : (fichier.etudiantDA || 'Non associé');
         }
         const labelProd = document.getElementById('travaux-eval-label-production');
@@ -3426,7 +3426,7 @@
             const q = (query || '').toLowerCase().trim();
             const filtres = q
                 ? etudiants.filter(e => {
-                    const nom = ((e.prenom || '') + ' ' + (e.nom || '') + ' ' + (e.da || '')).toLowerCase();
+                    const nom = ((e.prenom || '') + ' ' + (e.nom || '') + ' ' + (e.daAffichage || e.da || '')).toLowerCase();
                     return nom.includes(q);
                 })
                 : etudiants;
@@ -3434,7 +3434,7 @@
             if (filtres.length === 0) { liste.classList.add('u-hide'); return; }
 
             liste.innerHTML = filtres.slice(0, 20).map(e =>
-                `<div class="pipeline-autocomplete-item" onmousedown="travauxUI.selectionnerEtudiant(${index},'${echapperHtml(e.da || '')}')">${echapperHtml((e.prenom || '') + ' ' + (e.nom || ''))} <span class="texte-muted">${echapperHtml(e.da || '')}</span></div>`
+                `<div class="pipeline-autocomplete-item" onmousedown="travauxUI.selectionnerEtudiant(${index},'${echapperHtml(e.da || '')}')">${echapperHtml((e.prenom || '') + ' ' + (e.nom || ''))} <span class="texte-muted">${echapperHtml(e.daAffichage || e.da || '')}</span></div>`
             ).join('');
             liste.classList.remove('u-hide');
         }, 200);
@@ -3558,7 +3558,7 @@
         // Afficher le conteneur d'edition avec message de chargement
         const etudiant = travauxImport.trouverEtudiantParDA(fichier.etudiantDA);
         const nomEtudiant = etudiant
-            ? `${echapperHtml(etudiant.nom)}, ${echapperHtml(etudiant.prenom)}`
+            ? (etudiant.nom ? `${echapperHtml(etudiant.nom)}, ${echapperHtml(etudiant.prenom)}` : echapperHtml(etudiant.prenom))
             : (fichier.etudiantDA || 'Document');
 
         const conteneur = document.getElementById('evaluations-contenu-import');
@@ -3611,7 +3611,7 @@
             if (fichier) {
                 const etudiant = travauxImport.trouverEtudiantParDA(fichier.etudiantDA);
                 nomEtudiant = etudiant
-                    ? `${echapperHtml(etudiant.nom)}, ${echapperHtml(etudiant.prenom)}`
+                    ? (etudiant.nom ? `${echapperHtml(etudiant.nom)}, ${echapperHtml(etudiant.prenom)}` : echapperHtml(etudiant.prenom))
                     : (fichier.etudiantDA || 'Document');
             }
         }
@@ -3875,7 +3875,7 @@
 
         const etudiant = travauxImport.trouverEtudiantParDA(fichier.etudiantDA);
         const nomEtudiant = etudiant
-            ? `${echapperHtml(etudiant.prenom)} ${echapperHtml(etudiant.nom)}`
+            ? (etudiant.nom ? `${echapperHtml(etudiant.prenom)} ${echapperHtml(etudiant.nom)}` : echapperHtml(etudiant.prenom))
             : echapperHtml(evaluation.etudiantNom || fichier.etudiantDA || 'Inconnu');
 
         // Tableau des critères en lecture seule
@@ -4021,7 +4021,7 @@
         const lignesFichiers = fichiersTravaux.map(f => {
             const etudiant = travauxImport.trouverEtudiantParDA(f.etudiantDA);
             const nomEtudiant = etudiant
-                ? `${etudiant.nom}, ${etudiant.prenom}`
+                ? (etudiant.nom ? `${etudiant.nom}, ${etudiant.prenom}` : etudiant.prenom)
                 : (f.etudiantDA || 'Non associé');
 
             let statut = 'importé';
