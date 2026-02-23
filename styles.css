@@ -14667,7 +14667,8 @@ body.mode-clair .travaux-canvas-container {
     background: var(--surface-conteneur, #ffffff);
 }
 body.mode-clair .travaux-zoom-info,
-body.mode-clair #travaux-indicateur-page {
+body.mode-clair #travaux-indicateur-page,
+body.mode-clair .travaux-compteur-badge {
     color: var(--texte-secondaire);
 }
 /* Retroaction dans palette eval */
@@ -15980,6 +15981,27 @@ body.mode-clair .pipeline-autocomplete-item:hover {
     background: var(--vert-succes, #28a745);
     color: #fff;
     border-color: var(--vert-succes, #28a745);
+}
+
+/* Compteur de badges (navigation fichiers) */
+.travaux-compteur-badge-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.travaux-compteur-badge {
+    font-size: 11px;
+    color: var(--texte-secondaire, #8aa4b0);
+    white-space: nowrap;
+}
+
+/* Séparateur entre compteur badges et navigation pages */
+.travaux-separateur-page {
+    width: 1px;
+    height: 18px;
+    background: var(--planif-couleur-bordure);
+    margin: 0 6px;
+    flex-shrink: 0;
 }
 
 /* Indicateur page */
@@ -19897,6 +19919,14 @@ body.mode-clair .barre-etudiant.tracked-4 {
 .travaux-badge-importe.actif {
     background: var(--bleu-pale);
     border-color: var(--accent-primaire, #2196F3);
+}
+
+.travaux-badge-importe.travaux-badge-flash {
+    animation: badgeFlash 0.5s ease-in-out 3;
+}
+@keyframes badgeFlash {
+    0%, 100% { border-color: var(--gris-bordure, #2a4a5a); }
+    50% { border-color: var(--accent-primaire, #2196F3); box-shadow: 0 0 8px var(--accent-primaire, #2196F3); }
 }
 
 .travaux-badge-nom {
