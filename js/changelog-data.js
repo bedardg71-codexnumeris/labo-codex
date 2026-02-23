@@ -11,6 +11,19 @@
     var CHANGELOG = [
         {
             version: 'Beta 97.11',
+            date: '23 f\u00e9vrier',
+            couleur: 'vert',
+            titre: 'Palette d\u2019annotation ancr\u00e9e et s\u00e9parateurs redimensionnables',
+            items: [
+                '<strong>Palette ancr\u00e9e</strong> : La palette d\u2019annotation est d\u00e9sormais ancr\u00e9e \u00e0 gauche du document (comme les panneaux en mode \u00e9valuation) au lieu de flotter par-dessus.',
+                '<strong>S\u00e9parateurs draggables</strong> : Des poign\u00e9es de redimensionnement entre toutes les colonnes permettent d\u2019ajuster la largeur des panneaux (annotation et \u00e9valuation).',
+                '<strong>Largeurs m\u00e9moris\u00e9es</strong> : Les largeurs personnalis\u00e9es sont persist\u00e9es dans le navigateur. Double-clic sur un s\u00e9parateur pour r\u00e9initialiser.',
+                '<strong>Support iPad</strong> : Les s\u00e9parateurs r\u00e9pondent au toucher. Les colonnes \u00e9valuation et r\u00e9troaction peuvent \u00eatre r\u00e9duites davantage pour les petits \u00e9crans.',
+                '<strong>Tampons pr\u00e9cis\u00e9s</strong> : Les trois symboles d\u2019annotation sont renomm\u00e9s : Exact (\u2714), Erron\u00e9 (\u2718), Incertain (?) avec info-bulles d\u00e9taill\u00e9es.'
+            ]
+        },
+        {
+            version: 'Beta 97.11',
             date: '22 f\u00e9vrier',
             couleur: 'orange',
             titre: 'Correction du mode Anonymisation',
