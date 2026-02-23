@@ -2855,6 +2855,9 @@
         // Marquer le conteneur en mode eval (pour CSS)
         conteneurDoc.classList.add('mode-eval-actif');
 
+        // Bloquer la mémorisation pendant le setup pour ne pas écraser les bonnes valeurs
+        window._bloquerMemorisation = true;
+
         // Capturer les sélections sauvegardées AVANT le setup (qui déclenche des change
         // events via preRemplirEvaluation → memoriserSelectionsEvaluation écrase le DB)
         const savedRaw = (typeof db !== 'undefined') ? db.getSync('dernieresSelectionsEvaluation', null) : null;
@@ -2926,7 +2929,11 @@
         // Utilise selectionsCache (capturé avant le setup) pour éviter les valeurs écrasées
         // Délai suffisant pour que preRemplirEvaluation ait fini son chaînage
         setTimeout(() => {
-            if (!selectionsCache) return;
+            if (!selectionsCache) {
+                // Pas de cache — débloquer la mémorisation quand même
+                window._bloquerMemorisation = false;
+                return;
+            }
             const selG = document.getElementById('selectGrille1');
             const selE = document.getElementById('selectEchelle1');
             const selC = document.getElementById('selectCartoucheEval');
@@ -2947,6 +2954,8 @@
                     selC.value = selectionsCache.cartouche;
                     selC.dispatchEvent(new Event('change', { bubbles: true }));
                 }
+                // Débloquer la mémorisation maintenant que la restauration est terminée
+                window._bloquerMemorisation = false;
             }, 200);
         }, 2500);
 
