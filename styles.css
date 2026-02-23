@@ -20319,16 +20319,17 @@ body.mode-clair .barre-etudiant.tracked-4 {
     flex: 0 0 200px;
     display: flex;
     flex-direction: column;
-    overflow: auto;
+    overflow: hidden;
     border-radius: 0;
     resize: none;
     min-width: 0;
+    min-height: 0;
 }
 .eval-layout-flex .eval-col-evaluation::after { display: none; }
 .eval-layout-flex .eval-col-evaluation .travaux-palette-contenu {
-    max-height: none;
     flex: 1;
     overflow-y: auto;
+    min-height: 0;
 }
 
 /* Colonne Retroaction (pleine hauteur) */
