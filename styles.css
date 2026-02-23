@@ -20309,7 +20309,6 @@ body.mode-clair .barre-etudiant.tracked-4 {
     overflow-y: auto;
     overflow-x: hidden;
     border-radius: 0;
-    border-right: 1px solid rgba(106, 172, 184, 0.15);
     resize: none;
 }
 .eval-layout-flex .eval-col-params::after { display: none; }
@@ -20349,8 +20348,6 @@ body.mode-clair .barre-etudiant.tracked-4 {
     overflow-y: auto;
     overflow-x: hidden;
     border-radius: 0;
-    border-left: 1px solid rgba(106, 172, 184, 0.15);
-    border-right: 1px solid rgba(106, 172, 184, 0.15);
     resize: none;
 }
 .eval-layout-flex .eval-col-evaluation::after { display: none; }
@@ -20368,7 +20365,6 @@ body.mode-clair .barre-etudiant.tracked-4 {
     overflow-y: auto;
     overflow-x: hidden;
     border-radius: 0;
-    border-left: 1px solid rgba(106, 172, 184, 0.15);
     resize: none;
     min-height: 0;
 }
@@ -20419,6 +20415,76 @@ body.mode-clair .barre-etudiant.tracked-4 {
     box-shadow: none;
     border-radius: 0;
 }
+
+/* ===============================
+   SPLITTER HANDLES (séparateurs redimensionnables)
+   =============================== */
+
+.splitter-handle {
+    flex: 0 0 5px;
+    background: rgba(106, 172, 184, 0.1);
+    cursor: col-resize;
+    position: relative;
+    z-index: 10;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.splitter-handle:hover,
+.splitter-handle.splitter-active {
+    background: rgba(106, 172, 184, 0.3);
+}
+.splitter-handle::after {
+    content: '\22EE';
+    color: var(--texte-muted, #5a7a88);
+    font-size: 12px;
+    opacity: 0.5;
+}
+.splitter-handle:hover::after { opacity: 1; }
+body.mode-clair .splitter-handle { background: rgba(3, 46, 92, 0.06); }
+body.mode-clair .splitter-handle:hover,
+body.mode-clair .splitter-handle.splitter-active { background: rgba(3, 46, 92, 0.15); }
+
+/* ===============================
+   LAYOUT ANNOTATION ANCRE
+   =============================== */
+
+.annot-layout-flex {
+    display: flex;
+    flex: 1;
+    gap: 0;
+    overflow: hidden;
+    min-height: 0;
+}
+.annot-layout-flex .annot-col-palette {
+    flex: 0 0 170px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+.annot-layout-flex .travaux-palette-flottante {
+    position: static !important;
+    box-shadow: none;
+    border-radius: 0;
+    min-width: unset;
+    max-width: unset;
+    width: 100%;
+    resize: none;
+}
+.annot-layout-flex .travaux-palette-flottante::after { display: none; }
+.annot-layout-flex .travaux-palette-barre { cursor: default; }
+.annot-layout-flex .travaux-palette-contenu { max-height: none; flex: 1; }
+.annot-col-document {
+    flex: 1;
+    overflow: auto;
+    min-width: 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+.travaux-zone-document.mode-annot-actif > .travaux-canvas-container { display: none; }
 
 /* ===============================
    MODULE: MODELISATION

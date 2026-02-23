@@ -190,14 +190,16 @@
                 if (btnR) btnR.textContent = '\u2212';
             }
         } else {
-            const zoneDocument = (contextExterne && contextExterne.conteneurPalette)
-                || document.getElementById('travaux-conteneur-document');
-            if (zoneDocument) {
+            if (contextExterne && contextExterne.conteneurPalette) {
+                // Vue côte-à-côte : palette flottante (comportement inchangé)
+                const zoneDocument = contextExterne.conteneurPalette;
                 const paletteDiv = document.createElement('div');
                 paletteDiv.innerHTML = travauxOutils.genererHTMLPalette();
-                const paletteEl = paletteDiv.firstElementChild;
-                zoneDocument.appendChild(paletteEl);
+                zoneDocument.appendChild(paletteDiv.firstElementChild);
                 travauxOutils.configurerDragPalette();
+            } else {
+                // Mode normal : layout ancré
+                travauxUI.creerLayoutAnnotation();
             }
         }
 
