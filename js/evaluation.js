@@ -3596,6 +3596,10 @@ function obtenirTendance(evaluations) {
  * Appelée automatiquement lors des changements de select
  */
 function memoriserSelectionsEvaluation() {
+    // Ne pas mémoriser pendant le setup (afficherPalettesEval) pour éviter
+    // d'écraser les bonnes valeurs avec des selects encore vides
+    if (window._bloquerMemorisation) return;
+
     const selections = {
         production: document.getElementById('selectProduction1')?.value || '',
         grille: document.getElementById('selectGrille1')?.value || '',
@@ -4060,8 +4064,9 @@ function attacherEvenementsMemorisation() {
 
     selectsAMemoriser.forEach(id => {
         const select = document.getElementById(id);
-        if (select) {
+        if (select && !select.dataset.memoAttache) {
             select.addEventListener('change', memoriserSelectionsEvaluation);
+            select.dataset.memoAttache = '1';
         }
     });
 
@@ -4076,12 +4081,11 @@ function attacherEvenementsMemorisation() {
 
     checkboxesAMemoriser.forEach(id => {
         const checkbox = document.getElementById(id);
-        if (checkbox) {
+        if (checkbox && !checkbox.dataset.memoAttache) {
             checkbox.addEventListener('change', memoriserSelectionsEvaluation);
+            checkbox.dataset.memoAttache = '1';
         }
     });
-
-    console.log('✅ Événements de mémorisation attachés');
 }
 
 /**
