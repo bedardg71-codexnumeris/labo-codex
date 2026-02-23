@@ -2770,7 +2770,7 @@
             // Splitter 2 : Document | Evaluation
             evalFlex.appendChild(creerSplitter({
                 id: 'eval-splitter-2', storageKey: 'eval-evaluation',
-                side: 'right', minWidth: 140, maxWidth: 500
+                side: 'right', minWidth: 100, maxWidth: 500
             }));
 
             evalFlex.appendChild(paletteD);
@@ -2786,7 +2786,7 @@
             // Splitter 3 : Evaluation | Retroaction
             evalFlex.appendChild(creerSplitter({
                 id: 'eval-splitter-3', storageKey: 'eval-retro',
-                side: 'right', minWidth: 200, maxWidth: 600
+                side: 'right', minWidth: 100, maxWidth: 600
             }));
 
             // Bouton Copier compact dans la barre de titre
