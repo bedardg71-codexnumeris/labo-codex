@@ -38,6 +38,225 @@
     }
 
     /* ===============================
+       SPLITTER (séparateurs redimensionnables)
+       =============================== */
+
+    const STORAGE_KEY_PANNEAUX = 'travaux-panneaux-largeurs';
+
+    function persisterLargeursPanneaux(key, width) {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY_PANNEAUX);
+            const obj = raw ? JSON.parse(raw) : {};
+            obj[key] = width;
+            localStorage.setItem(STORAGE_KEY_PANNEAUX, JSON.stringify(obj));
+        } catch (_) { /* quota ou JSON invalide */ }
+    }
+
+    function obtenirLargeurPanneau(key) {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY_PANNEAUX);
+            if (!raw) return null;
+            const obj = JSON.parse(raw);
+            return obj[key] != null ? obj[key] : null;
+        } catch (_) { return null; }
+    }
+
+    function restaurerLargeurPanneau(panel, storageKey) {
+        const w = obtenirLargeurPanneau(storageKey);
+        if (w != null && panel) {
+            panel.style.flexBasis = w + 'px';
+        }
+    }
+
+    /**
+     * Crée un séparateur draggable entre deux colonnes flex.
+     * @param {Object} opts
+     * @param {string} opts.id - ID du splitter
+     * @param {string} opts.storageKey - Clé de persistence localStorage
+     * @param {'left'|'right'} opts.side - Côté du panneau redimensionné
+     * @param {number} opts.minWidth - Largeur minimale du panneau
+     * @param {number} opts.maxWidth - Largeur maximale du panneau
+     * @returns {HTMLDivElement}
+     */
+    function creerSplitter({ id, storageKey, side, minWidth, maxWidth }) {
+        const handle = document.createElement('div');
+        handle.className = 'splitter-handle';
+        handle.id = id;
+
+        function getPanel() {
+            return side === 'left'
+                ? handle.previousElementSibling
+                : handle.nextElementSibling;
+        }
+
+        function getDefaultWidth(panel) {
+            // Lire la valeur CSS initiale de flex-basis depuis la feuille de style
+            const cs = window.getComputedStyle(panel);
+            const fb = cs.flexBasis;
+            return fb && fb !== 'auto' ? parseFloat(fb) : panel.getBoundingClientRect().width;
+        }
+
+        function startDrag(startX) {
+            const panel = getPanel();
+            if (!panel) return null;
+            const startWidth = panel.getBoundingClientRect().width;
+            handle.classList.add('splitter-active');
+            document.body.style.cursor = 'col-resize';
+            document.body.style.userSelect = 'none';
+            return { panel, startWidth, startX };
+        }
+
+        function onDrag(state, clientX) {
+            if (!state) return;
+            const delta = side === 'left'
+                ? clientX - state.startX
+                : state.startX - clientX;
+            const newW = Math.min(maxWidth, Math.max(minWidth, state.startWidth + delta));
+            state.panel.style.flexBasis = newW + 'px';
+        }
+
+        function endDrag(state) {
+            if (!state) return;
+            handle.classList.remove('splitter-active');
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+            const finalW = state.panel.getBoundingClientRect().width;
+            persisterLargeursPanneaux(storageKey, Math.round(finalW));
+        }
+
+        // Mouse events
+        handle.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            const state = startDrag(e.clientX);
+            if (!state) return;
+            function onMove(e2) { onDrag(state, e2.clientX); }
+            function onUp() {
+                endDrag(state);
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup', onUp);
+            }
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onUp);
+        });
+
+        // Touch events (iPad)
+        handle.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const state = startDrag(touch.clientX);
+            if (!state) return;
+            function onTouchMove(e2) {
+                e2.preventDefault();
+                onDrag(state, e2.touches[0].clientX);
+            }
+            function onTouchEnd() {
+                endDrag(state);
+                document.removeEventListener('touchmove', onTouchMove);
+                document.removeEventListener('touchend', onTouchEnd);
+            }
+            document.addEventListener('touchmove', onTouchMove, { passive: false });
+            document.addEventListener('touchend', onTouchEnd);
+        }, { passive: false });
+
+        // Double-clic → reset à la largeur CSS par défaut
+        handle.addEventListener('dblclick', function() {
+            const panel = getPanel();
+            if (!panel) return;
+            panel.style.flexBasis = '';
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY_PANNEAUX);
+                if (raw) {
+                    const obj = JSON.parse(raw);
+                    delete obj[storageKey];
+                    localStorage.setItem(STORAGE_KEY_PANNEAUX, JSON.stringify(obj));
+                }
+            } catch (_) { /* ignore */ }
+        });
+
+        return handle;
+    }
+
+    /* ===============================
+       LAYOUT ANNOTATION ANCRÉ
+       =============================== */
+
+    function creerLayoutAnnotation() {
+        // Ne pas recréer si déjà présent
+        if (document.getElementById('annot-layout-flex')) return;
+
+        const conteneurDoc = document.getElementById('travaux-conteneur-document');
+        if (!conteneurDoc) return;
+
+        const layoutFlex = document.createElement('div');
+        layoutFlex.id = 'annot-layout-flex';
+        layoutFlex.className = 'annot-layout-flex';
+
+        // --- Colonne palette ---
+        const colPalette = document.createElement('div');
+        colPalette.className = 'annot-col-palette';
+
+        const paletteDiv = document.createElement('div');
+        paletteDiv.innerHTML = travauxOutils.genererHTMLPalette();
+        const paletteEl = paletteDiv.firstElementChild;
+        colPalette.appendChild(paletteEl);
+        layoutFlex.appendChild(colPalette);
+
+        // --- Splitter ---
+        const splitter = creerSplitter({
+            id: 'annot-splitter-1',
+            storageKey: 'annot-palette',
+            side: 'left',
+            minWidth: 120,
+            maxWidth: 400
+        });
+        layoutFlex.appendChild(splitter);
+
+        // --- Colonne document ---
+        const colDoc = document.createElement('div');
+        colDoc.className = 'annot-col-document';
+        colDoc.id = 'annot-col-document';
+        const canvasContainer = document.getElementById('travaux-canvas-container');
+        if (canvasContainer) {
+            colDoc.appendChild(canvasContainer);
+        }
+        layoutFlex.appendChild(colDoc);
+
+        // Insérer après la toolbar
+        const toolbar = conteneurDoc.querySelector('.travaux-toolbar');
+        if (toolbar) {
+            toolbar.after(layoutFlex);
+        } else {
+            conteneurDoc.appendChild(layoutFlex);
+        }
+
+        // Marquer le conteneur
+        conteneurDoc.classList.add('mode-annot-actif');
+
+        // Restaurer la largeur persistée
+        restaurerLargeurPanneau(colPalette, 'annot-palette');
+    }
+
+    function detruireLayoutAnnotation() {
+        const conteneurDoc = document.getElementById('travaux-conteneur-document');
+        const layoutFlex = document.getElementById('annot-layout-flex');
+        if (!layoutFlex) return;
+
+        // Remettre le canvas dans le conteneur principal
+        const canvasContainer = document.getElementById('travaux-canvas-container');
+        if (canvasContainer && conteneurDoc) {
+            conteneurDoc.appendChild(canvasContainer);
+        }
+
+        // Supprimer la palette d'annotation
+        const palette = layoutFlex.querySelector('#travaux-palette-flottante');
+        if (palette) palette.remove();
+
+        layoutFlex.remove();
+
+        if (conteneurDoc) conteneurDoc.classList.remove('mode-annot-actif');
+    }
+
+    /* ===============================
        SCROLL VIRTUEL
        =============================== */
 
@@ -61,6 +280,9 @@
             // Fermer les palettes eval AVANT rafraichirUI pour sauver les panneaux
             // (rafraichirUI → afficherFichiers détruit le conteneur document)
             if (document.getElementById('travaux-palette-eval-gauche')) {
+                if (typeof sauvegarderSelectionsEvaluation === 'function') {
+                    sauvegarderSelectionsEvaluation();
+                }
                 fermerModeEvaluation();
             }
             rafraichirUI();
@@ -1604,6 +1826,10 @@
         // Fermer le mode evaluation si actif (remet les panneaux dans leur conteneur d'origine
         // avant que afficherFichiers() ne détruise le DOM de la visionneuse)
         if (document.getElementById('travaux-palette-eval-gauche')) {
+            // Sauvegarder les sélections (grille, échelle, cartouche) avant destruction
+            if (typeof sauvegarderSelectionsEvaluation === 'function') {
+                sauvegarderSelectionsEvaluation();
+            }
             fermerModeEvaluation();
             // Réinitialiser modeCourant pour que basculerMode('evaluer') fonctionne ensuite
             modeCourant = 'annoter';
@@ -2385,12 +2611,19 @@
                 return;
             }
             modeCourant = 'evaluer';
+            // Extraire le canvas du layout annotation avant de construire le layout eval
+            const annotColDoc = document.getElementById('annot-col-document');
+            const conteneurDoc = document.getElementById('travaux-conteneur-document');
+            const canvasContainer = document.getElementById('travaux-canvas-container');
+            if (annotColDoc && canvasContainer && conteneurDoc) {
+                conteneurDoc.appendChild(canvasContainer);
+            }
             masquerPalettesAnnotation();
             afficherPalettesEval(fichier);
             if (btnAnnoter) btnAnnoter.classList.remove('actif');
             if (btnEvaluer) btnEvaluer.classList.add('actif');
-            // Zoom 165% par defaut en mode evaluation
-            travauxVisionneuse.setZoomManuel(1.65);
+            // Pleine hauteur par défaut en mode évaluation
+            travauxVisionneuse.zoomPleineHauteur();
             // Si productionId manquant, ouvrir le panneau correction d'identité
             if (!fichier.productionId) {
                 setTimeout(() => toggleCorrectionIdentite(), 100);
@@ -2408,15 +2641,27 @@
     }
 
     function masquerPalettesAnnotation() {
-        ['travaux-palette-flottante', 'travaux-palette-tampons', 'travaux-palette-erreurs-fr'].forEach(id => {
+        // Masquer le layout annotation ancré
+        const annotLayout = document.getElementById('annot-layout-flex');
+        if (annotLayout) annotLayout.classList.add('u-hide');
+        // Masquer les palettes secondaires (tampons, erreurs-fr restent flottantes)
+        ['travaux-palette-tampons', 'travaux-palette-erreurs-fr'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.classList.add('u-hide');
         });
+        // Fallback: masquer aussi la palette si elle est hors layout (vue côte-à-côte)
+        const paletteFlottante = document.getElementById('travaux-palette-flottante');
+        if (paletteFlottante && !annotLayout) paletteFlottante.classList.add('u-hide');
     }
 
     function afficherPalettesAnnotation() {
-        // Seule la palette d'annotation principale est visible par defaut
-        // Les palettes tampons et erreurs restent masquees (l'utilisateur les ouvre manuellement)
+        // Afficher le layout annotation ancré s'il existe
+        const annotLayout = document.getElementById('annot-layout-flex');
+        if (annotLayout) {
+            annotLayout.classList.remove('u-hide');
+            return;
+        }
+        // Fallback: palette flottante (vue côte-à-côte)
         const paletteAnnot = document.getElementById('travaux-palette-flottante');
         if (paletteAnnot) paletteAnnot.classList.remove('u-hide');
     }
@@ -2497,6 +2742,13 @@
             `;
             paletteG.appendChild(barreNav);
             evalFlex.appendChild(paletteG);
+            restaurerLargeurPanneau(paletteG, 'eval-params');
+
+            // Splitter 1 : Paramètres | Document
+            evalFlex.appendChild(creerSplitter({
+                id: 'eval-splitter-1', storageKey: 'eval-params',
+                side: 'left', minWidth: 160, maxWidth: 400
+            }));
         }
 
         // --- Colonne centre : le canvas (reste en place, on met un wrapper) ---
@@ -2514,7 +2766,15 @@
         if (paletteD) {
             paletteD.style.position = 'static';
             paletteD.classList.add('eval-col-evaluation');
+
+            // Splitter 2 : Document | Evaluation
+            evalFlex.appendChild(creerSplitter({
+                id: 'eval-splitter-2', storageKey: 'eval-evaluation',
+                side: 'right', minWidth: 140, maxWidth: 500
+            }));
+
             evalFlex.appendChild(paletteD);
+            restaurerLargeurPanneau(paletteD, 'eval-evaluation');
         }
 
         // --- Colonne droite : Retroaction (pleine hauteur) ---
@@ -2522,6 +2782,12 @@
         if (paletteR) {
             paletteR.style.position = 'static';
             paletteR.classList.add('eval-col-retro');
+
+            // Splitter 3 : Evaluation | Retroaction
+            evalFlex.appendChild(creerSplitter({
+                id: 'eval-splitter-3', storageKey: 'eval-retro',
+                side: 'right', minWidth: 200, maxWidth: 600
+            }));
 
             // Bouton Copier compact dans la barre de titre
             const barreRetro = paletteR.querySelector('.travaux-palette-barre');
@@ -2536,6 +2802,7 @@
                 barreRetro.insertBefore(btnCopier, btnToggle);
             }
             evalFlex.appendChild(paletteR);
+            restaurerLargeurPanneau(paletteR, 'eval-retro');
         }
 
         // Inserer le flex layout sous la toolbar
@@ -2605,6 +2872,34 @@
         // Pre-remplir le formulaire d'evaluation avec retry robuste
         // (gère le chaînage complet : étudiant → productions → grille → évaluation existante)
         preRemplirEvaluation(fichier.etudiantDA, fichier.productionId);
+
+        // Attacher les événements de mémorisation pour persister les sélections
+        if (typeof attacherEvenementsMemorisation === 'function') {
+            attacherEvenementsMemorisation();
+        }
+
+        // Restaurer grille/échelle/cartouche si aucune évaluation existante ne les a remplis
+        // Délai suffisant pour que preRemplirEvaluation ait fini son chaînage
+        setTimeout(() => {
+            const selG = document.getElementById('selectGrille1');
+            // Ne restaurer que si la grille est vide (pas d'évaluation existante chargée)
+            if (selG && !selG.value && typeof restaurerSelectionsEvaluation === 'function') {
+                restaurerSelectionsEvaluation();
+            } else if (selG && selG.value) {
+                // Grille déjà remplie, restaurer seulement échelle/cartouche si vides
+                const selE = document.getElementById('selectEchelle1');
+                const selC = document.getElementById('selectCartoucheEval');
+                const saved = db.getSync('dernieresSelectionsEvaluation', null);
+                const s = (typeof saved === 'string') ? JSON.parse(saved) : saved;
+                if (s) {
+                    if (selE && !selE.value && s.echelle) selE.value = s.echelle;
+                    if (selC && !selC.value && s.cartouche) {
+                        selC.value = s.cartouche;
+                        selC.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                }
+            }
+        }, 2500);
 
         // Peupler la palette jetons
         peuplementPaletteJetons(fichier);
@@ -2739,9 +3034,12 @@
         const evalDiv = document.getElementById('evaluations-contenu-evaluation');
         const conteneurDoc = document.getElementById('travaux-conteneur-document');
 
-        // Remettre le canvas container dans le conteneur document (avant suppression du flex)
+        // Remettre le canvas container : dans le layout annotation s'il existe, sinon dans le conteneur document
         const canvasContainer = document.getElementById('travaux-canvas-container');
-        if (canvasContainer && conteneurDoc) {
+        const annotColDoc = document.getElementById('annot-col-document');
+        if (canvasContainer && annotColDoc) {
+            annotColDoc.appendChild(canvasContainer);
+        } else if (canvasContainer && conteneurDoc) {
             conteneurDoc.appendChild(canvasContainer);
         }
 
@@ -4256,7 +4554,10 @@
         sauvegarderRetroactionDepuisModal: sauvegarderRetroactionDepuisModal,
         fermerModalRetroaction: fermerModalRetroaction,
         // Transfert entre groupes
-        ouvrirModalTransfert: ouvrirModalTransfert
+        ouvrirModalTransfert: ouvrirModalTransfert,
+        // Layout annotation ancré
+        creerLayoutAnnotation: creerLayoutAnnotation,
+        detruireLayoutAnnotation: detruireLayoutAnnotation
     };
 
     // Alias pour navigation.js

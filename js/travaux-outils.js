@@ -468,7 +468,10 @@
         const zoneDocument = document.getElementById('travaux-conteneur-document');
         if (zoneDocument) {
             palette.style.top = '56px';
-            palette.style.left = '240px';
+            // Positionner à droite de la palette annotation (largeur réelle ou 170px par défaut)
+            const paletteAnnot = document.getElementById('travaux-palette-flottante');
+            const annotLeft = paletteAnnot ? (paletteAnnot.getBoundingClientRect().width + 10) : 240;
+            palette.style.left = Math.round(annotLeft) + 'px';
             zoneDocument.appendChild(palette);
             configurerDragPaletteErrFr();
         }
@@ -682,7 +685,7 @@
      * @returns {string} HTML
      */
     function genererHTMLPalette() {
-        let html = '<div class="travaux-palette-flottante" id="travaux-palette-flottante" style="top:56px; left:12px;">';
+        let html = '<div class="travaux-palette-flottante" id="travaux-palette-flottante">';
 
         // Barre de titre draggable
         html += '<div class="travaux-palette-barre">';
