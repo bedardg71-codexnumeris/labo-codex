@@ -383,10 +383,16 @@
             }
         }
 
+        // Identifier le cours actif pour taguer le fichier
+        const coursActif = (typeof db !== 'undefined') ? db.getSync('infoCours', null) : null;
+        const gcActif = (typeof db !== 'undefined') ? db.getSync('groupeCoursActif', null) : null;
+
         // Creer les metadonnees
         const metadonnees = {
             etudiantDA: fichierPrepare.etudiantDA,
             productionId: productionId,
+            coursId: coursActif ? coursActif.id : '',
+            groupeCoursId: gcActif ? gcActif.id : '',
             nomFichier: fichierPrepare.nomFichier,
             typeMIME: typeMIME,
             tailleFichier: blob.size,
@@ -408,13 +414,19 @@
         // Ajouter les metadonnees
         const fichierTravail = travauxStockage.ajouterFichierTravail(metadonnees);
 
-        // Stocker le blob
-        await travauxStockage.stockerBlob(
-            fichierTravail.id,
-            blob,
-            fichierPrepare.etudiantDA,
-            productionId
-        );
+        // Stocker le blob (avec rollback des métadonnées si échec)
+        try {
+            await travauxStockage.stockerBlob(
+                fichierTravail.id,
+                blob,
+                fichierPrepare.etudiantDA,
+                productionId
+            );
+        } catch (e) {
+            // Rollback : supprimer les métadonnées orphelines
+            travauxStockage.supprimerFichierTravail(fichierTravail.id);
+            throw e;
+        }
 
         fichierPrepare.statut = 'importe';
         fichierPrepare.id = fichierTravail.id;

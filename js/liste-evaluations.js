@@ -25,18 +25,18 @@ function calculerStatutWorkflow(ligne) {
     if (ligne.statut === 'evalue' || ligne.statut === 'remplacee' || ligne.statut === 'non-recevable') return 'evalue';
 
     // Vérifier si un fichier importé existe et s'il a des annotations
-    if (typeof travauxStockage !== 'undefined' && typeof travauxStockage.obtenirFichiersImportes === 'function') {
-        const fichiers = travauxStockage.obtenirFichiersImportes ? travauxStockage.obtenirFichiersImportes() : [];
-        const fichierExiste = fichiers.some(f => f.etudiantDA === ligne.da && f.productionId === ligne.productionId);
+    if (typeof travauxStockage !== 'undefined' && typeof travauxStockage.obtenirFichiersTravaux === 'function') {
+        const fichiers = travauxStockage.obtenirFichiersGroupeActif() || [];
+        // Match par DA + productionId, ou par DA seul si le fichier n'a pas de productionId
+        const fichier = fichiers.find(f =>
+            f.etudiantDA === ligne.da &&
+            (!f.productionId || f.productionId === ligne.productionId)
+        );
 
-        if (fichierExiste) {
-            // Vérifier annotation
-            const fichier = fichiers.find(f => f.etudiantDA === ligne.da && f.productionId === ligne.productionId);
-            if (fichier) {
-                const annotation = travauxStockage.obtenirAnnotationFichier(fichier.id);
-                if (annotation && typeof annotationContientDuContenu === 'function' && annotationContientDuContenu(annotation)) {
-                    return 'annote';
-                }
+        if (fichier) {
+            const annotation = travauxStockage.obtenirAnnotationFichier(fichier.id);
+            if (annotation && typeof annotationContientDuContenu === 'function' && annotationContientDuContenu(annotation)) {
+                return 'annote';
             }
             return 'importe';
         }
@@ -101,8 +101,10 @@ let triEvaluationsActuel = {
  */
 function calculerEtSauvegarderIndiceCompletion() {
     console.log('Calcul des indices de complétion...');
-    
-    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+
+    const etudiants = (typeof obtenirEtudiantsCoursActif === 'function')
+        ? obtenirEtudiantsCoursActif()
+        : obtenirDonneesSelonMode('groupeEtudiants');
     
     // Structure de sortie
     const indices = {
@@ -259,7 +261,11 @@ function initialiserListeEvaluations() {
 function chargerDonneesEvaluations() {
     // Charger les données selon le mode actif (géré automatiquement par le module 17)
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    const etudiants = obtenirDonneesSelonMode('groupeEtudiants') || [];
+    // ✅ CORRECTION (22 fév 2026): Utiliser obtenirEtudiantsCoursActif() qui filtre par groupe-cours
+    // obtenirDonneesSelonMode('groupeEtudiants') ne filtre que par coursId, pas par groupe
+    const etudiants = (typeof obtenirEtudiantsCoursActif === 'function')
+        ? obtenirEtudiantsCoursActif()
+        : obtenirDonneesSelonMode('groupeEtudiants') || [];
     // ✅ CORRECTION (29 déc 2025): Utiliser obtenirDonneesSelonMode() pour namespace
     const productions = obtenirDonneesSelonMode('productions') || [];
 
@@ -268,7 +274,11 @@ function chargerDonneesEvaluations() {
         ? [...new Set(etudiants.map(e => e.groupe))].sort().map(g => ({ numero: g }))
         : [];
 
-    console.log(`Donnees chargees: ${evaluations.length} evaluations, ${productions.length} productions, ${etudiants.length} etudiants`);
+    const infoCours = db.getSync('infoCours', null);
+    console.log(`📋 [Liste-Eval] Donnees chargees: ${evaluations.length} evaluations, ${productions.length} productions, ${etudiants.length} etudiants`);
+    console.log(`📋 [Liste-Eval] infoCours:`, infoCours ? { id: infoCours.id, groupe: infoCours.groupe, _modeCours: infoCours._modeCours } : 'null');
+    console.log(`📋 [Liste-Eval] Source étudiants: ${typeof obtenirEtudiantsCoursActif === 'function' ? 'obtenirEtudiantsCoursActif()' : 'obtenirDonneesSelonMode()'}`);
+    console.log(`📋 [Liste-Eval] Groupes étudiants:`, [...new Set(etudiants.map(e => e.groupe))]);
 
     // Générer les options des filtres
     genererOptionsFiltres(groupes, productions);
@@ -760,7 +770,9 @@ function obtenirNoteAffichee(evaluation, pratiqueNotation) {
 function appliquerFiltres() {
     // Charger les données selon le mode actif
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
-    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    const etudiants = (typeof obtenirEtudiantsCoursActif === 'function')
+        ? obtenirEtudiantsCoursActif()
+        : obtenirDonneesSelonMode('groupeEtudiants');
     const productions = obtenirDonneesSelonMode('productions');
 
     // Afficher le tableau avec les filtres appliqués
@@ -1107,9 +1119,9 @@ function evaluerProduction(da, productionId) {
 
     // Vérifier s'il y a un fichier importé pour cet étudiant + production
     let fichierImporte = null;
-    if (typeof travauxStockage !== 'undefined' && typeof travauxStockage.obtenirFichiersImportes === 'function') {
-        const fichiers = travauxStockage.obtenirFichiersImportes() || [];
-        fichierImporte = fichiers.find(f => f.etudiantDA === da && f.productionId === productionId);
+    if (typeof travauxStockage !== 'undefined' && typeof travauxStockage.obtenirFichiersTravaux === 'function') {
+        const fichiers = travauxStockage.obtenirFichiersGroupeActif() || [];
+        fichierImporte = fichiers.find(f => f.etudiantDA === da && (!f.productionId || f.productionId === productionId));
     }
 
     if (!fichierImporte) {
@@ -1434,7 +1446,9 @@ function trierLignes(lignes, critere) {
 function trierListeEvaluations() {
     // Charger les données selon le mode actif
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
-    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    const etudiants = (typeof obtenirEtudiantsCoursActif === 'function')
+        ? obtenirEtudiantsCoursActif()
+        : obtenirDonneesSelonMode('groupeEtudiants');
     const productions = obtenirDonneesSelonMode('productions');
 
     // Afficher le tableau avec tri appliqué
@@ -1465,7 +1479,9 @@ function trierTableauParColonne(colonne) {
 
     // Réafficher le tableau avec le nouveau tri
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
-    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    const etudiants = (typeof obtenirEtudiantsCoursActif === 'function')
+        ? obtenirEtudiantsCoursActif()
+        : obtenirDonneesSelonMode('groupeEtudiants');
     const productions = obtenirDonneesSelonMode('productions');
     afficherTableauEvaluations(evaluations, productions, etudiants);
 }

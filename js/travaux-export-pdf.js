@@ -1050,7 +1050,7 @@
         }
 
         // Trouver le fichier associe
-        const fichiers = travauxStockage.obtenirFichiersTravaux();
+        const fichiers = travauxStockage.obtenirFichiersGroupeActif();
         const fichier = fichiers.find(f => f.etudiantDA === da && f.productionId === productionId);
 
         if (!fichier) {

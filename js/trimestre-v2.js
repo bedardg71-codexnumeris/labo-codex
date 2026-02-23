@@ -5797,6 +5797,19 @@ async function changerGroupeCoursActifV2(valeur) {
             }
         }
 
+        // Rafraîchir la liste des évaluations
+        if (typeof initialiserListeEvaluations === 'function') {
+            initialiserListeEvaluations();
+        }
+
+        // Rafraîchir le module travaux si visible
+        if (typeof travauxUI !== 'undefined') {
+            var siC = document.getElementById('evaluations-contenu-import');
+            if (siC && !siC.classList.contains('u-hide') && typeof travauxUI.afficherImport === 'function') travauxUI.afficherImport();
+            var sfC = document.getElementById('evaluations-contenu-fichiers');
+            if (sfC && !sfC.classList.contains('u-hide') && typeof travauxUI.afficherFichiers === 'function') travauxUI.afficherFichiers();
+        }
+
         console.log('[Trimestre V2] Mode COURS activé:', coursId, '(tous groupes)');
         return;
     }
@@ -5921,6 +5934,19 @@ async function changerGroupeCoursActifV2(valeur) {
         if (typeof mettreAJourBoutonsNavigation === 'function') {
             mettreAJourBoutonsNavigation();
         }
+    }
+
+    // Rafraîchir la liste des évaluations
+    if (typeof initialiserListeEvaluations === 'function') {
+        initialiserListeEvaluations();
+    }
+
+    // Rafraîchir le module travaux si visible
+    if (typeof travauxUI !== 'undefined') {
+        var siGC = document.getElementById('evaluations-contenu-import');
+        if (siGC && !siGC.classList.contains('u-hide') && typeof travauxUI.afficherImport === 'function') travauxUI.afficherImport();
+        var sfGC = document.getElementById('evaluations-contenu-fichiers');
+        if (sfGC && !sfGC.classList.contains('u-hide') && typeof travauxUI.afficherFichiers === 'function') travauxUI.afficherFichiers();
     }
 
     console.log('[Trimestre V2] Groupe-cours activé:', gc.id);

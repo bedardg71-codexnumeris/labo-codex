@@ -10,6 +10,20 @@
 
     var CHANGELOG = [
         {
+            version: 'Beta 97.10',
+            date: '22 f\u00e9vrier',
+            couleur: 'orange',
+            titre: 'Correction des fichiers fant\u00f4mes et isolation par groupe-cours',
+            items: [
+                '<strong>Filtrage par groupe-cours</strong> : Les fichiers import\u00e9s sont d\u00e9sormais isol\u00e9s par groupe-cours. Chaque groupe ne voit que ses propres fichiers (import, annotation, \u00e9valuation, archivage, export PDF).',
+                '<strong>Cascade de suppression</strong> : Supprimer un fichier import\u00e9 qui a une \u00e9valuation associ\u00e9e propose de supprimer les deux. Emp\u00eache les \u00e9valuations fant\u00f4mes.',
+                '<strong>Stampage coursId \u00e0 l\u2019import</strong> : Les fichiers import\u00e9s re\u00e7oivent automatiquement le coursId et groupeCoursId du groupe actif.',
+                '<strong>Rollback m\u00e9tadonn\u00e9es</strong> : Si le stockage du blob \u00e9choue (quota), les m\u00e9tadonn\u00e9es orphelines sont nettoy\u00e9es automatiquement.',
+                '<strong>Rafra\u00eechissement au changement de groupe</strong> : Changer de groupe-cours via le dropdown rafra\u00eechit d\u00e9sormais les onglets Pr\u00e9parer/Importer et Annoter/\u00c9valuer.',
+                '<strong>Stats coh\u00e9rentes</strong> : Le compteur \u00ab\u00a0Fichiers import\u00e9s (N) \u2014 X Mo\u00a0\u00bb refl\u00e8te le groupe actif, pas le total global.'
+            ]
+        },
+        {
             version: 'Beta 97.9',
             date: '22 f\u00e9vrier',
             couleur: 'bleu',
