@@ -1833,6 +1833,13 @@
             fermerModeEvaluation();
             // Réinitialiser modeCourant pour que basculerMode('evaluer') fonctionne ensuite
             modeCourant = 'annoter';
+            // Réafficher le layout annotation (masqué par masquerPalettesAnnotation lors du passage en eval)
+            afficherPalettesAnnotation();
+            // Remettre mode-annot-actif si le layout existe
+            const conteneurDocR = document.getElementById('travaux-conteneur-document');
+            if (conteneurDocR && document.getElementById('annot-layout-flex')) {
+                conteneurDocR.classList.add('mode-annot-actif');
+            }
         }
         // Masquer la section evaluation si visible (fallback)
         const evalDiv = document.getElementById('evaluations-contenu-evaluation');
