@@ -1222,7 +1222,7 @@ function afficherMetriquesGlobales(etudiants) {
     const nbSeancesGroupe = datesSeances.length;
 
     // Compter le nombre d'évaluations du groupe (productions distinctes évaluées)
-    let evaluations = obtenirDonneesSelonMode('evaluations') || [];
+    let evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     if (!Array.isArray(evaluations)) evaluations = [];
     const productionsDistinctes = [...new Set(evaluations.map(e => e.productionId || e.artefactId))];
     const nbEvaluationsGroupe = productionsDistinctes.length;
@@ -1905,7 +1905,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
  * @param {boolean} afficherPan - Afficher la couche PAN
  * @returns {string} HTML de la barre
  */
-function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, nbSansDonnees = 0, nbTotal = 0) {
+function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, nbSansDonnees = 0, nbTotal = 0, infoFiabilite = null) {
     // 🆕 BETA 95.6 : Gérer le cas où tous les étudiants sont sans données
     const nbAvecDonnees = (afficherPan ? etudiantsPAN.length : etudiantsSOM.length) || 0;
     const tousEnAttente = nbTotal > 0 && nbAvecDonnees === 0;
@@ -2125,9 +2125,24 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
         }
     }
 
+    // 🆕 Indicateur de fiabilité
+    let messageFiabilite = '';
+    if (infoFiabilite) {
+        const { minArtefacts, maxArtefacts, fenetre } = infoFiabilite;
+        if (maxArtefacts < fenetre) {
+            // Aucun étudiant n'a assez de données
+            const n = maxArtefacts;
+            messageFiabilite = `<div style="color: var(--texte-muted); font-style: italic; font-size: 0.8rem; margin-bottom: 4px;">Analyse préliminaire — basé sur ${n} production${n > 1 ? 's' : ''} sur ${fenetre} configurées</div>`;
+        } else if (minArtefacts < fenetre) {
+            // Données mixtes
+            messageFiabilite = `<div style="color: var(--texte-muted); font-style: italic; font-size: 0.8rem; margin-bottom: 4px;">Certains étudiants ont moins de ${fenetre} productions évaluées</div>`;
+        }
+    }
+
     return `
         <div class="distribution-container u-mb-15">
             <h4 class="tb-titre-metrique" style="margin-bottom: 4px;" data-tooltip="tdb-patterns">Répartition des patterns d'apprentissage</h4>
+            ${messageFiabilite}
             <div class="barre-patterns tb-barre-simple">
                 <div class="barre-patterns-overlay"></div>
                 ${lignesSOM}
@@ -2154,7 +2169,7 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
  * @param {boolean} afficherPan - Afficher la couche PAN
  * @returns {string} HTML de la barre
  */
-function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, nbSansDonnees = 0, nbTotal = 0) {
+function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, nbSansDonnees = 0, nbTotal = 0, infoFiabilite = null) {
     // 🆕 BETA 95.6 : Gérer le cas où tous les étudiants sont sans données
     const nbAvecDonnees = (afficherPan ? etudiantsPAN.length : etudiantsSOM.length) || 0;
     const tousEnAttente = nbTotal > 0 && nbAvecDonnees === 0;
@@ -2351,9 +2366,24 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, n
         }
     }
 
+    // 🆕 Indicateur de fiabilité
+    let messageFiabilite = '';
+    if (infoFiabilite) {
+        const { minArtefacts, maxArtefacts, fenetre } = infoFiabilite;
+        if (maxArtefacts < fenetre) {
+            // Aucun étudiant n'a assez de données
+            const n = maxArtefacts;
+            messageFiabilite = `<div style="color: var(--texte-muted); font-style: italic; font-size: 0.8rem; margin-bottom: 4px;">Analyse préliminaire — basé sur ${n} production${n > 1 ? 's' : ''} sur ${fenetre} configurées</div>`;
+        } else if (minArtefacts < fenetre) {
+            // Données mixtes
+            messageFiabilite = `<div style="color: var(--texte-muted); font-style: italic; font-size: 0.8rem; margin-bottom: 4px;">Certains étudiants ont moins de ${fenetre} productions évaluées</div>`;
+        }
+    }
+
     return `
         <div class="distribution-container u-mb-15">
             <h4 class="tb-titre-metrique" style="margin-bottom: 4px;" data-tooltip="tdb-rai">Modèle de la Réponse à l'intervention (RàI)</h4>
+            ${messageFiabilite}
             <div class="barre-rai tb-barre-simple">
                 <div class="barre-rai-overlay"></div>
                 ${lignesSOM}
@@ -2624,12 +2654,26 @@ function afficherPatternsApprentissage(etudiants) {
         barreExistante.remove();
     }
 
+    // 🆕 Calculer l'indicateur de fiabilité pour le groupe
+    const fenetreAnalyse = typeof obtenirNombreProductionsPourPatterns === 'function' ? obtenirNombreProductionsPourPatterns() : 3;
+    const nbArtefactsParEtudiant = etudiantsAvecDonneesCP.map(e => {
+        try {
+            return calculerIndicesNDerniersArtefacts(e.da, true).nbArtefacts || 0;
+        } catch (err) { return 0; }
+    });
+    let infoFiabilite = null;
+    if (nbArtefactsParEtudiant.length > 0) {
+        const minArtefacts = Math.min(...nbArtefactsParEtudiant);
+        const maxArtefacts = Math.max(...nbArtefactsParEtudiant);
+        infoFiabilite = { minArtefacts, maxArtefacts, fenetre: fenetreAnalyse };
+    }
+
     // Générer la barre de distribution et l'ajouter au conteneur
     // 🆕 FIX (24 jan 2026) : Passer le nombre d'étudiants sans données CP pour affichage approprié
     // Note: Patterns doit être AVANT RàI dans l'ordre d'affichage
     const html = `
         <div class="barre-patterns-container">
-            ${genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, nbSansDonneesCP, nbTotal)}
+            ${genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, nbSansDonneesCP, nbTotal, infoFiabilite)}
         </div>
     `;
 
@@ -2750,11 +2794,25 @@ function afficherNiveauxRaI(etudiants) {
         barreExistante.remove();
     }
 
+    // 🆕 Calculer l'indicateur de fiabilité pour le groupe
+    const fenetreAnalyse = typeof obtenirNombreProductionsPourPatterns === 'function' ? obtenirNombreProductionsPourPatterns() : 3;
+    const nbArtefactsParEtudiant = etudiantsAvecDonneesCP.map(e => {
+        try {
+            return calculerIndicesNDerniersArtefacts(e.da, true).nbArtefacts || 0;
+        } catch (err) { return 0; }
+    });
+    let infoFiabilite = null;
+    if (nbArtefactsParEtudiant.length > 0) {
+        const minArtefacts = Math.min(...nbArtefactsParEtudiant);
+        const maxArtefacts = Math.max(...nbArtefactsParEtudiant);
+        infoFiabilite = { minArtefacts, maxArtefacts, fenetre: fenetreAnalyse };
+    }
+
     // Générer la barre de distribution et l'ajouter au conteneur
     // 🆕 FIX (24 jan 2026) : Passer le nombre d'étudiants sans données CP pour affichage approprié
     const html = `
         <div class="barre-rai-container">
-            ${genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, nbSansDonneesCP, nbTotal)}
+            ${genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, nbSansDonneesCP, nbTotal, infoFiabilite)}
         </div>
     `;
 
