@@ -683,6 +683,22 @@
                     </div>
                     <button class="btn btn-principal" onclick="travauxUI.lancerArchivageSemestre()">Télécharger archive complète</button>
                 </div>
+
+                <!-- Export Lea -->
+                <div class="travaux-archivage-carte">
+                    <h4>Export Lea</h4>
+                    <p class="texte-muted">Exporte les évaluations complétées en PDF (annotations + synthèse) pour téléversement dans Lea</p>
+                    <select id="travaux-archivage-lea-production" class="form-select" onchange="travauxUI.mettreAJourCompteurLea()">
+                        <option value="">-- Choisir une production --</option>
+                        ${productions.map(p => `<option value="${p.id}">${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
+                    </select>
+                    <div id="travaux-lea-compteur" class="texte-muted" style="margin-top: 6px;"></div>
+                    <div id="travaux-texte-progression-lea" class="texte-muted"></div>
+                    <div class="travaux-barre-progression-container">
+                        <div id="travaux-barre-progression-lea" class="travaux-barre-progression"></div>
+                    </div>
+                    <button class="btn btn-principal" style="background: var(--vert-succes, #28a745);" onclick="travauxUI.lancerExportLea()">Exporter pour Lea</button>
+                </div>
             </div>
 
             <!-- Allegement -->
@@ -2098,6 +2114,41 @@
             inclureEvaluations: document.getElementById('arch-semestre-evals')?.checked
         };
         travauxArchivage.lancerExportSemestre(options);
+    }
+
+    /**
+     * Lance l'export Lea depuis l'UI
+     */
+    function lancerExportLea() {
+        const productionId = document.getElementById('travaux-archivage-lea-production')?.value;
+        if (!productionId) {
+            alert('Veuillez sélectionner une production.');
+            return;
+        }
+        travauxArchivage.lancerExportLea(productionId);
+    }
+
+    /**
+     * Met a jour le compteur d'evaluations pour la production Lea selectionnee
+     */
+    function mettreAJourCompteurLea() {
+        const select = document.getElementById('travaux-archivage-lea-production');
+        const compteur = document.getElementById('travaux-lea-compteur');
+        if (!compteur) return;
+
+        const productionId = select?.value;
+        if (!productionId) {
+            compteur.textContent = '';
+            return;
+        }
+
+        const fichiers = travauxStockage.obtenirFichiersProduction(productionId);
+        const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees'));
+        const nbEvalues = fichiers.filter(f =>
+            evaluations.some(e => e.etudiantDA === f.etudiantDA && e.productionId === f.productionId)
+        ).length;
+
+        compteur.textContent = `${nbEvalues} évalué(s) sur ${fichiers.length} fichier(s)`;
     }
 
     /**
@@ -4616,6 +4667,8 @@
         lancerArchivageEtudiant: lancerArchivageEtudiant,
         lancerArchivageProduction: lancerArchivageProduction,
         lancerArchivageSemestre: lancerArchivageSemestre,
+        lancerExportLea: lancerExportLea,
+        mettreAJourCompteurLea: mettreAJourCompteurLea,
         // Annotation → Evaluation
         evaluerDepuisAnnotation: evaluerDepuisAnnotation,
         basculerMode: basculerMode,

@@ -208,6 +208,60 @@
         });
     }
 
+    /**
+     * Genere un ZIP plat de PDFs annotes+synthese pour televersement Lea
+     * Seuls les fichiers ayant une evaluation completee sont inclus
+     * @param {string} productionId - ID de la production
+     * @param {Function} onProgression - Callback(traites, total)
+     * @returns {Promise<Blob>} Le blob ZIP
+     */
+    async function exporterPourLea(productionId, onProgression) {
+        if (typeof JSZip === 'undefined') {
+            throw new Error('JSZip non disponible');
+        }
+
+        const zip = new JSZip();
+        const fichiers = travauxStockage.obtenirFichiersProduction(productionId);
+        const etudiants = obtenirDonneesSelonMode(cle('groupeEtudiants'));
+        const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees'));
+        const productions = obtenirDonneesSelonMode(cle('productions'));
+        const production = productions.find(p => p.id === productionId);
+        const nomProd = (production?.titre || production?.nom || 'production')
+            .replace(/[^a-zA-ZÀ-ÿ0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+
+        let traites = 0;
+        let inclus = 0;
+        const total = fichiers.length;
+
+        for (const fichier of fichiers) {
+            const evaluation = evaluations.find(e =>
+                e.etudiantDA === fichier.etudiantDA &&
+                e.productionId === fichier.productionId
+            );
+            if (!evaluation) {
+                traites++;
+                if (onProgression) onProgression(traites, total);
+                continue;
+            }
+
+            const { doc } = await travauxExportPDF.genererDocPDF(fichier.id);
+            const pdfBlob = doc.output('blob');
+
+            const etudiant = etudiants.find(e => e.da === fichier.etudiantDA);
+            const nom = (etudiant?.nom || 'Inconnu').replace(/[^a-zA-ZÀ-ÿ-]/g, '');
+            const da = etudiant?.da || fichier.etudiantDA || '0000000';
+            const nomFichier = `${nom}_${da}_${nomProd}_Evalue.pdf`;
+
+            zip.file(nomFichier, pdfBlob);
+            inclus++;
+            traites++;
+            if (onProgression) onProgression(traites, total);
+        }
+
+        if (inclus === 0) throw new Error('Aucune évaluation trouvée pour cette production.');
+        return await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
+    }
+
     /* ===============================
        FICHIER ANNOTE (Aplatir annotations)
        =============================== */
@@ -376,6 +430,38 @@
         }
     }
 
+    /**
+     * Lance l'export Lea pour une production et telecharge le ZIP
+     * @param {string} productionId - ID de la production
+     */
+    async function lancerExportLea(productionId) {
+        if (!productionId) {
+            alert('Veuillez sélectionner une production.');
+            return;
+        }
+
+        try {
+            const productions = obtenirDonneesSelonMode(cle('productions'));
+            const production = productions.find(p => p.id === productionId);
+            const nomProd = (production?.titre || production?.nom || 'production')
+                .replace(/[^a-zA-ZÀ-ÿ0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+            const date = new Date().toISOString().split('T')[0];
+
+            const zip = await exporterPourLea(productionId, (traites, total) => {
+                const pourcent = Math.round((traites / total) * 100);
+                const barre = document.getElementById('travaux-barre-progression-lea');
+                if (barre) barre.style.width = pourcent + '%';
+                const texte = document.getElementById('travaux-texte-progression-lea');
+                if (texte) texte.textContent = `${traites}/${total} fichiers traités...`;
+            });
+
+            telechargerBlob(zip, `Lea_${nomProd}_${date}.zip`);
+        } catch (e) {
+            console.error('[Travaux-Archivage] Erreur export Lea:', e);
+            alert('Erreur lors de l\'export Lea: ' + e.message);
+        }
+    }
+
     /* ===============================
        NETTOYAGE POST-ARCHIVAGE
        =============================== */
@@ -444,9 +530,11 @@
         exporterParEtudiant: exporterParEtudiant,
         exporterParProduction: exporterParProduction,
         exporterSemestre: exporterSemestre,
+        exporterPourLea: exporterPourLea,
         lancerExportEtudiant: lancerExportEtudiant,
         lancerExportProduction: lancerExportProduction,
         lancerExportSemestre: lancerExportSemestre,
+        lancerExportLea: lancerExportLea,
         nettoyerProduction: nettoyerProduction,
         telechargerBlob: telechargerBlob,
         lancerAllegement: lancerAllegement
