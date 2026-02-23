@@ -2740,14 +2740,6 @@
                 }
             }
 
-            // Boutons emoji de navigation en bas
-            const barreNav = document.createElement('div');
-            barreNav.className = 'palette-nav-emojis';
-            barreNav.innerHTML = `
-                <button class="palette-nav-btn" onclick="travauxUI.togglePaletteEvalReplie('travaux-palette-eval-droite')" title="Évaluation">\u{1F4CB}</button>
-                <button class="palette-nav-btn" onclick="travauxUI.togglePaletteEvalReplie('travaux-palette-eval-retro')" title="Rétroaction">\u{1F516}</button>
-            `;
-            paletteG.appendChild(barreNav);
             evalFlex.appendChild(paletteG);
             restaurerLargeurPanneau(paletteG, 'eval-params');
 
