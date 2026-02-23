@@ -307,15 +307,15 @@
         const crochetActif = outilActif === 'crochet' ? ' actif' : '';
         const croixActif = outilActif === 'croix' ? ' actif' : '';
         const interroActif = outilActif === 'interrogation' ? ' actif' : '';
-        html += `<div class="travaux-autocollant-item${crochetActif}" onclick="travauxOutils.setOutilActif('crochet')" title="Crochet">`;
+        html += `<div class="travaux-autocollant-item${crochetActif}" onclick="travauxOutils.setOutilActif('crochet')" title="Bien vu, exact, pertinent">`;
         html += `<span style="font-size:24px; color:#2e7d32; font-weight:bold;">\u2714\uFE0E</span>`;
-        html += `<span>Vrai</span></div>`;
-        html += `<div class="travaux-autocollant-item${croixActif}" onclick="travauxOutils.setOutilActif('croix')" title="Croix">`;
+        html += `<span>Exact</span></div>`;
+        html += `<div class="travaux-autocollant-item${croixActif}" onclick="travauxOutils.setOutilActif('croix')" title="Erroné, inexact, +/- pertinent">`;
         html += `<span style="font-size:24px; color:#c62828; font-weight:bold;">\u2718</span>`;
-        html += `<span>Faux</span></div>`;
-        html += `<div class="travaux-autocollant-item${interroActif}" onclick="travauxOutils.setOutilActif('interrogation')" title="Interrogation">`;
+        html += `<span>Erroné</span></div>`;
+        html += `<div class="travaux-autocollant-item${interroActif}" onclick="travauxOutils.setOutilActif('interrogation')" title="Incertain, ambigu, pas clair">`;
         html += `<span style="font-size:24px; color:#e65100; font-weight:bold;">?</span>`;
-        html += `<span>???</span></div>`;
+        html += `<span>Incertain</span></div>`;
         html += '</div>';
 
         // Qualite
