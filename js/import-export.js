@@ -1879,6 +1879,11 @@ async function executerImportLocalStorageBrut(config) {
             nbCles++;
         }
 
+        // Synchroniser le cache localStorage avec IndexedDB
+        if (typeof db.syncToLocalStorageCache === 'function') {
+            await db.syncToLocalStorageCache();
+        }
+
         // 🆕 Restauration des blobs travaux depuis le ZIP
         const nbRestores = await _restaurerBlobsDepuisZip({ ...donnees, _zipTravaux: zipTravaux });
 

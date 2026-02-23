@@ -2380,8 +2380,8 @@
 
         if (mode === 'evaluer') {
             const fichier = travauxVisionneuse.getFichierActuel();
-            if (!fichier || !fichier.etudiantDA || !fichier.productionId) {
-                alert('Ce fichier n\'est pas associé à un étudiant ou une production.');
+            if (!fichier || !fichier.etudiantDA) {
+                alert('Ce fichier n\'est pas associé à un étudiant.');
                 return;
             }
             modeCourant = 'evaluer';
@@ -2391,6 +2391,10 @@
             if (btnEvaluer) btnEvaluer.classList.add('actif');
             // Zoom 165% par defaut en mode evaluation
             travauxVisionneuse.setZoomManuel(1.65);
+            // Si productionId manquant, ouvrir le panneau correction d'identité
+            if (!fichier.productionId) {
+                setTimeout(() => toggleCorrectionIdentite(), 100);
+            }
         } else {
             modeCourant = 'annoter';
             masquerPalettesEval();
