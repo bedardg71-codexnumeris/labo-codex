@@ -461,13 +461,22 @@
                 <div class="pipeline-section-importes">
                     <div class="pipeline-section-importes-header">
                         <h4>Fichiers importés (${fichiersTravaux.length})${fichiersTravaux.length > 0 ? ` <span class="texte-muted u-texte-petit">— ${tailleFormatee} · ${fsapiActif ? 'Disque local' : 'IndexedDB'}</span> <span class="travaux-compteurs-groupe">${resumeGlobal}</span>` : ''}</h4>
-                        ${fichiersTravaux.length > 0 ? `
-                            <button class="btn btn-secondaire btn-petit"
-                                    onclick="travauxUI.ouvrirModalTransfert()"
-                                    title="Transférer des fichiers vers un autre groupe">
-                                Transférer
-                            </button>
-                        ` : ''}
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            ${fichiersTravaux.length > 0 ? `
+                                <div class="travaux-compteur-badge-nav" id="travaux-compteur-badge-header">
+                                    <button id="travaux-btn-badge-prec-header" class="travaux-btn-nav" onclick="travauxUI.badgePrecedent()" disabled title="Fichier précédent">&#x2190;</button>
+                                    <span id="travaux-compteur-badge-txt-header" class="travaux-compteur-badge">-- / ${fichiersTravaux.length}</span>
+                                    <button id="travaux-btn-badge-suiv-header" class="travaux-btn-nav" onclick="travauxUI.badgeSuivant()" disabled title="Fichier suivant">&#x2192;</button>
+                                </div>
+                            ` : ''}
+                            ${fichiersTravaux.length > 0 ? `
+                                <button class="btn btn-secondaire btn-petit"
+                                        onclick="travauxUI.ouvrirModalTransfert()"
+                                        title="Transférer des fichiers vers un autre groupe">
+                                    Transférer
+                                </button>
+                            ` : ''}
+                        </div>
                     </div>
                     ${fichiersTravaux.length > 0
                         ? genererGrilleFichiers(fichiersTravaux)
@@ -553,12 +562,16 @@
                     <!-- Toolbar -->
                     <div class="travaux-toolbar">
                         <div class="travaux-toolbar-inner">
-                            <!-- GAUCHE : navigation pages + badge étudiant -->
+                            <!-- GAUCHE : compteur badges + navigation pages + badge étudiant -->
                             <div class="travaux-toolbar-gauche">
+                                <button id="travaux-btn-badge-prec" class="travaux-btn-nav" onclick="travauxUI.badgePrecedent()" disabled title="Fichier précédent">&#x2190;</button>
+                                <span id="travaux-compteur-badge" class="travaux-compteur-badge">-- / --</span>
+                                <button id="travaux-btn-badge-suiv" class="travaux-btn-nav" onclick="travauxUI.badgeSuivant()" disabled title="Fichier suivant">&#x2192;</button>
+                                <span id="travaux-badge-fichier-actif" class="u-hide" style="margin-left: 8px;"></span>
+                                <span class="travaux-separateur-page"></span>
                                 <button id="travaux-btn-page-prec" class="travaux-btn-nav" onclick="travauxVisionneuse.pagePrecedente()" disabled title="Page précédente">&#x2190;</button>
                                 <span id="travaux-indicateur-page">-- / --</span>
                                 <button id="travaux-btn-page-suiv" class="travaux-btn-nav" onclick="travauxVisionneuse.pageSuivante()" disabled title="Page suivante">&#x2192;</button>
-                                <span id="travaux-badge-fichier-actif" class="u-hide" style="margin-left: 8px;"></span>
                             </div>
 
                             <!-- CENTRE : vide -->
@@ -2008,6 +2021,9 @@
                 const btnSupp = badgeFichier.querySelector('.travaux-badge-supprimer');
                 if (btnSupp) btnSupp.remove();
             }
+
+            // Mettre à jour le compteur de badges (navigation fichiers)
+            mettreAJourCompteurBadge();
 
             // Bulle de decouverte au premier fichier ouvert (aide-contextuelle)
             if (typeof estAideContextuelleActive === 'function' && estAideContextuelleActive()
@@ -4551,6 +4567,52 @@
     }
 
     /* ===============================
+       COMPTEUR DE BADGES (navigation fichiers)
+       =============================== */
+
+    function mettreAJourCompteurBadge() {
+        const fichiers = travauxStockage.obtenirFichiersGroupeActif();
+        const fichierActuel = travauxVisionneuse.getFichierActuel();
+        const index = fichierActuel ? fichiers.findIndex(f => f.id === fichierActuel.id) : -1;
+
+        const texte = index >= 0 ? `${index + 1} / ${fichiers.length}` : `-- / ${fichiers.length || '--'}`;
+        const precDisabled = index <= 0;
+        const suivDisabled = index < 0 || index >= fichiers.length - 1;
+
+        // Mettre à jour le compteur toolbar (annotation)
+        const ind1 = document.getElementById('travaux-compteur-badge');
+        if (ind1) ind1.textContent = texte;
+        const bp1 = document.getElementById('travaux-btn-badge-prec');
+        if (bp1) bp1.disabled = precDisabled;
+        const bs1 = document.getElementById('travaux-btn-badge-suiv');
+        if (bs1) bs1.disabled = suivDisabled;
+
+        // Mettre à jour le compteur header (Fichiers importés)
+        const ind2 = document.getElementById('travaux-compteur-badge-txt-header');
+        if (ind2) ind2.textContent = texte;
+        const bp2 = document.getElementById('travaux-btn-badge-prec-header');
+        if (bp2) bp2.disabled = precDisabled;
+        const bs2 = document.getElementById('travaux-btn-badge-suiv-header');
+        if (bs2) bs2.disabled = suivDisabled;
+    }
+
+    function badgePrecedent() {
+        const fichiers = travauxStockage.obtenirFichiersGroupeActif();
+        const fichierActuel = travauxVisionneuse.getFichierActuel();
+        if (!fichierActuel) return;
+        const index = fichiers.findIndex(f => f.id === fichierActuel.id);
+        if (index > 0) ouvrirFichier(fichiers[index - 1].id);
+    }
+
+    function badgeSuivant() {
+        const fichiers = travauxStockage.obtenirFichiersGroupeActif();
+        const fichierActuel = travauxVisionneuse.getFichierActuel();
+        if (!fichierActuel) return;
+        const index = fichiers.findIndex(f => f.id === fichierActuel.id);
+        if (index >= 0 && index < fichiers.length - 1) ouvrirFichier(fichiers[index + 1].id);
+    }
+
+    /* ===============================
        EXPORTS GLOBAUX
        =============================== */
 
@@ -4565,6 +4627,8 @@
         configurerFSAPI: configurerFSAPI,
         lancerImport: lancerImport,
         ouvrirFichier: ouvrirFichier,
+        badgePrecedent: badgePrecedent,
+        badgeSuivant: badgeSuivant,
         filtrerParEtudiant: filtrerParEtudiant,
         toggleSidebar: toggleSidebar,
         retourFichiers: retourFichiers,

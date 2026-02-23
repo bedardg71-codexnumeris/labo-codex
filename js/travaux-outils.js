@@ -132,7 +132,7 @@
         ondule: {
             id: 'ondule',
             nom: 'Ondulé',
-            icone: '〰',
+            icone: 'vague',
             curseur: 'crosshair',
             type: 'forme',
             epaisseurDefaut: 2
@@ -186,7 +186,7 @@
     const AUTOCOLLANTS = [
         { id: 'bien',           nom: 'Bien',             fichier: 'qualité 1 bien.png',                    categorie: 'qualite' },
         { id: 'tres-bien',      nom: 'Très bien',        fichier: 'qualité 2 très bien.png',               categorie: 'qualite' },
-        { id: 'brillant',       nom: 'Brillant',         fichier: 'qualité 3 brillant.png',                categorie: 'qualite' },
+        { id: 'brillant',       nom: 'Original',         fichier: 'qualité 3 brillant.png',                categorie: 'qualite' },
         { id: 'bon-lien',       nom: 'Bon lien',         fichier: 'bon lien logique.png',                  categorie: 'diagnostic' },
         { id: 'manque-lien',    nom: 'Manque de lien',   fichier: 'manque de lien.png',                    categorie: 'diagnostic' },
         { id: 'confusion',      nom: 'Confusion',        fichier: 'confusion2.png',                        categorie: 'diagnostic' },
@@ -310,7 +310,7 @@
         html += '<div class="travaux-palette-contenu" id="travaux-tampons-contenu">';
 
         // Symboles (crochet / croix)
-        html += '<div class="travaux-autocollants-label">Symboles</div>';
+        html += '<div class="travaux-autocollants-label">Contenu et méthode</div>';
         html += '<div class="travaux-autocollants-grille travaux-autocollants-grille--symboles">';
         const crochetActif = outilActif === 'crochet' ? ' actif' : '';
         const croixActif = outilActif === 'croix' ? ' actif' : '';
@@ -327,7 +327,7 @@
         html += '</div>';
 
         // Qualite
-        html += '<div class="travaux-autocollants-label">Qualite</div>';
+        html += '<div class="travaux-autocollants-label">Inférences / interprétation</div>';
         html += '<div class="travaux-autocollants-grille">';
         AUTOCOLLANTS.filter(a => a.categorie === 'qualite').forEach(a => {
             html += `<div class="travaux-autocollant-item" onclick="travauxOutils.setAutocollantActif('${a.id}')" title="${a.nom}">`;
@@ -337,7 +337,7 @@
         html += '</div>';
 
         // Diagnostic
-        html += '<div class="travaux-autocollants-label">Diagnostic</div>';
+        html += '<div class="travaux-autocollants-label">Observations</div>';
         html += '<div class="travaux-autocollants-grille">';
         AUTOCOLLANTS.filter(a => a.categorie === 'diagnostic').forEach(a => {
             html += `<div class="travaux-autocollant-item" onclick="travauxOutils.setAutocollantActif('${a.id}')" title="${a.nom}">`;
