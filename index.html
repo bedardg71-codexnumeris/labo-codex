@@ -5165,8 +5165,8 @@
                                         </div>
                                         <p id="notePonderation" style="font-size: 0.85rem; color: var(--gris-moyen); margin: 0; padding-top: 28px; line-height: 1.5; display: none;"></p>
                                     </div>
-                                    <!-- Grille de critères + Note explicative -->
-                                    <div id="champGrille" style="display: grid; grid-template-columns: 200px 1fr; gap: 15px; align-items: start;">
+                                    <!-- Grille de critères + Échelle + Cartouche -->
+                                    <div id="champGrille" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; align-items: start;">
                                         <div class="groupe-form" style="margin: 0;">
                                             <label data-tooltip="cn-prod-grille">Grille de critères
                                                 <span class="tooltip-aide" title="Dans une approche par compétences, l'évaluation est généralement individuelle afin de rendre compte du degré d'acquisition de chaque apprenant. Les travaux d'équipe peuvent être évalués, mais la contribution individuelle devrait idéalement être distinguée.">📍</span>
@@ -5175,8 +5175,20 @@
                                                 <option value="">Aucune</option>
                                             </select>
                                         </div>
-                                        <p id="noteGrille" style="font-size: 0.85rem; color: var(--gris-moyen); margin: 0; padding-top: 28px; line-height: 1.5; display: none;"></p>
+                                        <div class="groupe-form" style="margin: 0;">
+                                            <label>Échelle de performance</label>
+                                            <select id="productionEchelle" class="controle-form">
+                                                <option value="">Aucune</option>
+                                            </select>
+                                        </div>
+                                        <div class="groupe-form" style="margin: 0;">
+                                            <label>Cartouche de rétroaction</label>
+                                            <select id="productionCartouche" class="controle-form">
+                                                <option value="">Aucune</option>
+                                            </select>
+                                        </div>
                                     </div>
+                                    <p id="noteGrille" style="font-size: 0.85rem; color: var(--gris-moyen); margin: 0; line-height: 1.5; display: none;"></p>
                                 </div>
 
                                 <!-- ═══════════════════════════════════════════════════════════

@@ -272,6 +272,37 @@ async function afficherFormProduction(id) {
         }
     }
 
+    // 🆕 Peupler le select Échelle de performance
+    const selectEchelle = document.getElementById('productionEchelle');
+    if (selectEchelle) {
+        const echelles = await db.get('echellesTemplates') || [];
+        selectEchelle.innerHTML = '<option value="">Aucune</option>' +
+            echelles.map(e => `<option value="${e.id}">${e.nom}</option>`).join('');
+    }
+
+    // 🆕 Peupler le select Cartouche (dépend de la grille sélectionnée)
+    const selectCartouche = document.getElementById('productionCartouche');
+    const peuplerCartouchesProduction = async (grilleId) => {
+        if (!selectCartouche) return;
+        if (!grilleId) {
+            selectCartouche.innerHTML = '<option value="">Aucune</option>';
+            return;
+        }
+        const cartouches = await db.get(`cartouches_${grilleId}`) || [];
+        selectCartouche.innerHTML = '<option value="">Aucune</option>' +
+            cartouches.map(c => `<option value="${c.id}">${c.nom}</option>`).join('');
+    };
+
+    // Listener : repeupler cartouches quand la grille change
+    if (selectGrille) {
+        selectGrille.addEventListener('change', () => peuplerCartouchesProduction(selectGrille.value));
+    }
+
+    // Peupler cartouches avec la grille initiale (si déjà sélectionnée)
+    if (selectGrille && selectGrille.value) {
+        await peuplerCartouchesProduction(selectGrille.value);
+    }
+
     if (id) {
         // Mode modification
         // 🆕 Beta 95.4 : Utiliser la clé namespacée pour le trimestre actif
@@ -299,6 +330,14 @@ async function afficherFormProduction(id) {
             document.getElementById('productionType').value = prod.type;
             document.getElementById('productionPonderation').value = prod.ponderation;
             if (selectGrille) selectGrille.value = prod.grilleId || '';
+
+            // 🆕 Pré-remplir échelle et cartouche depuis la production
+            if (selectEchelle && prod.echelleId) selectEchelle.value = prod.echelleId;
+            if (prod.grilleId) {
+                await peuplerCartouchesProduction(prod.grilleId);
+                if (selectCartouche && prod.cartoucheId) selectCartouche.value = prod.cartoucheId;
+            }
+
             document.getElementById('productionObjectif').value = prod.objectif || '';
             document.getElementById('productionTache').value = prod.tache || '';
 
@@ -352,6 +391,8 @@ async function afficherFormProduction(id) {
         document.getElementById('productionType').value = '';
         document.getElementById('productionPonderation').value = '';
         if (selectGrille) selectGrille.value = '';
+        if (selectEchelle) selectEchelle.value = '';
+        if (selectCartouche) selectCartouche.innerHTML = '<option value="">Aucune</option>';
         document.getElementById('productionObjectif').value = '';
         document.getElementById('productionTache').value = '';
 
@@ -417,6 +458,12 @@ async function sauvegarderProduction() {
     // Lire la grille depuis le select (même élément pour tous les types)
     const grille = document.getElementById('productionGrille');
     const grilleId = grille ? grille.value : '';
+
+    // 🆕 Lire échelle et cartouche depuis les selects
+    const echelleSelect = document.getElementById('productionEchelle');
+    const echelleId = echelleSelect ? echelleSelect.value : '';
+    const cartoucheSelect = document.getElementById('productionCartouche');
+    const cartoucheId = cartoucheSelect ? cartoucheSelect.value : '';
 
     // ✅ NOUVEAU (Beta 94): Validation incluant dateEcheance obligatoire
     if (!titre || !type || (type !== 'artefact-portfolio' && ponderation === 0)) {
@@ -488,6 +535,8 @@ async function sauvegarderProduction() {
         objectif,
         tache,
         grilleId,
+        echelleId,        // 🆕 Persistance échelle dans le gabarit
+        cartoucheId,      // 🆕 Persistance cartouche dans le gabarit
         dateEcheance,     // ✨ NOUVEAU (Beta 94 - 10 déc 2025)
         pratiquesCompatibles,  // Pratiques de notation compatibles
         verrouille: false,

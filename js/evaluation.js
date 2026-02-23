@@ -579,6 +579,23 @@ function chargerProduction(productionNum) {
                 // Déclencher le chargement de la grille et des cartouches
                 chargerGrilleSelectionnee();
 
+                // 🆕 Pré-sélectionner l'échelle depuis la production
+                if (production.echelleId) {
+                    const selE = document.getElementById('selectEchelle1');
+                    if (selE) selE.value = production.echelleId;
+                }
+
+                // 🆕 Pré-sélectionner la cartouche (après chargement des options par chargerGrilleSelectionnee)
+                if (production.cartoucheId) {
+                    setTimeout(() => {
+                        const selC = document.getElementById('selectCartoucheEval');
+                        if (selC) {
+                            selC.value = production.cartoucheId;
+                            selC.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    }, 150);
+                }
+
                 // Attendre que les cartouches soient chargées, puis vérifier si une évaluation existe
                 setTimeout(() => {
                     verifierEtChargerEvaluationExistante();
