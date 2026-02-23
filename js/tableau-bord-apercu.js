@@ -1334,8 +1334,7 @@ function afficherMetriquesGlobales(etudiants) {
     const etudiantsAvecPresencesSOM = etudiants.filter(e => e.sommatif && e.sommatif.nombreSeances > 0);
     const etudiantsAvecPresencesPAN = etudiants.filter(e => e.alternatif && e.alternatif.nombreSeances > 0);
 
-    // 🆕 BETA 96.1: Pour C et P, exiger des évaluations réelles (pas seulement des présences)
-    // Ceci aligne la logique avec profil-etudiant.js (determinerNiveauRaiPedagogique et determinerAlerteContextuelle)
+    // 🆕 BETA 96.1: Pour P, exiger des évaluations réelles (pas seulement des présences)
     const etudiantsAvecEvalsSOM = etudiants.filter(e =>
         e.sommatif.completion > 0 || e.sommatif.performance > 0
     );
@@ -1343,12 +1342,21 @@ function afficherMetriquesGlobales(etudiants) {
         e.alternatif.completion > 0 || e.alternatif.performance > 0
     );
 
+    // 🔧 FIX (23 fév 2026) : Pour C, inclure TOUS les étudiants dès qu'il y a des productions évaluées
+    // Un étudiant à C=0% (n'a pas remis) est une information utile, pas une absence de données.
+    // Ex: 23 évalués sur 25 → moyenne doit être 92%, pas 100%
+    const ilYaDesEvalsSOM = etudiantsAvecEvalsSOM.length > 0;
+    const ilYaDesEvalsPAN = etudiantsAvecEvalsPAN.length > 0;
+    const etudiantsPourC_SOM = ilYaDesEvalsSOM ? etudiants : [];
+    const etudiantsPourC_PAN = ilYaDesEvalsPAN ? etudiants : [];
+
     // Pour E: nécessite A ET (C ou P) pour être significatif
+    // 🔧 FIX (23 fév 2026) : Inclure aussi les étudiants à C=0 quand des évals existent
     const etudiantsAvecDonneesSOM = etudiants.filter(e =>
-        e.sommatif.nombreSeances > 0 && (e.sommatif.completion > 0 || e.sommatif.performance > 0)
+        e.sommatif.nombreSeances > 0 && (ilYaDesEvalsSOM || e.sommatif.completion > 0 || e.sommatif.performance > 0)
     );
     const etudiantsAvecDonneesPAN = etudiants.filter(e =>
-        e.alternatif.nombreSeances > 0 && (e.alternatif.completion > 0 || e.alternatif.performance > 0)
+        e.alternatif.nombreSeances > 0 && (ilYaDesEvalsPAN || e.alternatif.completion > 0 || e.alternatif.performance > 0)
     );
 
     console.log(`📊 [Données] Étudiants avec présences (nombreSeances>0) SOM: ${etudiantsAvecPresencesSOM.length}, PAN: ${etudiantsAvecPresencesPAN.length}`);
@@ -1373,15 +1381,15 @@ function afficherMetriquesGlobales(etudiants) {
         valeur: e.sommatif.assiduite  // Utiliser sommatif, pas alternatif
     }));
 
-    // 🆕 BETA 96.1: Utiliser etudiantsAvecEvals pour C et P (exige des évaluations réelles)
-    const etudiantsSOM_C = etudiantsAvecEvalsSOM.map(e => ({
+    // 🔧 FIX (23 fév 2026) : Pour C, inclure tous les étudiants (les 0% comptent dans la moyenne)
+    const etudiantsSOM_C = etudiantsPourC_SOM.map(e => ({
         da: e.da,
         nom: e.nom,
         prenom: e.prenom,
         valeur: e.sommatif.completion
     }));
 
-    const etudiantsPAN_C = etudiantsAvecEvalsPAN.map(e => ({
+    const etudiantsPAN_C = etudiantsPourC_PAN.map(e => ({
         da: e.da,
         nom: e.nom,
         prenom: e.prenom,
