@@ -5756,7 +5756,9 @@ function determinerNiveauRaiPedagogique(da) {
             description: 'Aucune production évaluée. L\'interprétation sera disponible après la première évaluation.',
             badgeClasse: 'badge-attente',
             patternBadge: 'badge-attente',
-            donneesSuffisantes: false
+            donneesSuffisantes: false,
+            nbArtefacts: 0,
+            fenetreAnalyse: obtenirNombreProductionsPourPatterns()
         };
     }
 
@@ -5785,7 +5787,9 @@ function determinerNiveauRaiPedagogique(da) {
             defi: diagnostic.principalDefi?.nom || 'Aucun',
             description: 'Difficultés pédagogiques majeures nécessitant un soutien intensif.',
             badgeClasse: 'badge-rai-3',
-            patternBadge: 'badge-pattern-blocage-critique'
+            patternBadge: 'badge-pattern-blocage-critique',
+            nbArtefacts: indices3Derniers.nbArtefacts,
+            fenetreAnalyse: obtenirNombreProductionsPourPatterns()
         };
     }
 
@@ -5814,7 +5818,9 @@ function determinerNiveauRaiPedagogique(da) {
                 ? 'badge-pattern-blocage-emergent'
                 : pattern === 'Défi spécifique'
                     ? 'badge-pattern-defi-specifique'
-                    : 'badge-pattern-stable'
+                    : 'badge-pattern-stable',
+            nbArtefacts: indices3Derniers.nbArtefacts,
+            fenetreAnalyse: obtenirNombreProductionsPourPatterns()
         };
     }
 
@@ -5826,7 +5832,9 @@ function determinerNiveauRaiPedagogique(da) {
         defi: diagnostic.principalDefi?.nom || 'Aucun',
         description: 'Performance stable. Suivi régulier en classe.',
         badgeClasse: 'badge-rai-1',
-        patternBadge: 'badge-pattern-stable'
+        patternBadge: 'badge-pattern-stable',
+        nbArtefacts: indices3Derniers.nbArtefacts,
+        fenetreAnalyse: obtenirNombreProductionsPourPatterns()
     };
 }
 
