@@ -230,22 +230,50 @@ class PratiqueConfigurable {
 
     /**
      * Calcule l'indice de complétion
+     * Ratio : productions remises par l'étudiant / productions évaluées du groupe
+     *
+     * 🔧 FIX (23 fév 2026) : Calcul indépendant à partir des productions et évaluations
+     * au lieu de lire depuis indicesCP (dépendance circulaire avec calculerEtStockerIndicesCP)
+     *
      * @param {string} da - DA de l'étudiant
-     * @returns {number} Indice C (0-1, décimal)
+     * @returns {number|null} Indice C (0-1, décimal), ou null si aucune production évaluée
      */
     calculerCompletion(da) {
-        const indicesCP = db.getSync(cle('indicesCP'), {});
-        const donneesEtudiant = indicesCP[da];
+        if (!da) return null;
 
-        if (!donneesEtudiant || !donneesEtudiant.actuel) {
-            return 0;
+        // Lire les productions et évaluations via le namespace du mode actif
+        const productions = typeof obtenirDonneesSelonMode === 'function'
+            ? obtenirDonneesSelonMode('productions') || []
+            : db.getSync(cle('productions'), []);
+        const evaluations = typeof obtenirDonneesSelonMode === 'function'
+            ? obtenirDonneesSelonMode('evaluationsSauvegardees') || []
+            : db.getSync(cle('evaluationsSauvegardees'), []);
+
+        // Identifier les productions qui ont été évaluées (au moins 1 évaluation existe)
+        const productionsEvaluees = productions.filter(production => {
+            if (production.facultatif) return false;
+            return evaluations.some(e =>
+                e.productionId === production.id &&
+                !e.remplaceeParId &&
+                e.noteFinale !== null
+            );
+        });
+
+        if (productionsEvaluees.length === 0) {
+            return null;
         }
 
-        // La complétion est calculée de la même manière pour toutes les pratiques
-        const C_pct = donneesEtudiant.actuel.SOM?.C || donneesEtudiant.actuel.PAN?.C || 0;
+        // Compter combien cet étudiant a remis parmi les productions évaluées
+        const productionsRemises = productionsEvaluees.filter(production => {
+            return evaluations.some(e =>
+                e.etudiantDA === da &&
+                e.productionId === production.id &&
+                !e.remplaceeParId &&
+                e.noteFinale !== null
+            );
+        });
 
-        // Convertir en décimal 0-1
-        return C_pct / 100;
+        return productionsRemises.length / productionsEvaluees.length;
     }
 
     // ========================================================================
