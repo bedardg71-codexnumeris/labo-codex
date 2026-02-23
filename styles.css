@@ -20319,10 +20319,10 @@ body.mode-clair .barre-etudiant.tracked-4 {
     flex: 0 0 200px;
     display: flex;
     flex-direction: column;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: auto;
     border-radius: 0;
     resize: none;
+    min-width: 0;
 }
 .eval-layout-flex .eval-col-evaluation::after { display: none; }
 .eval-layout-flex .eval-col-evaluation .travaux-palette-contenu {
@@ -20336,8 +20336,7 @@ body.mode-clair .barre-etudiant.tracked-4 {
     flex: 0 0 260px;
     display: flex;
     flex-direction: column;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: auto;
     border-radius: 0;
     resize: none;
     min-height: 0;
