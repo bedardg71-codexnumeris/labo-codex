@@ -1,0 +1,2503 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Perspective — Banc de test auto-detection</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a1628; color: #e0e8f0; min-height: 100vh; }
+h1 { font-size: 1.3em; padding: 12px 20px; background: #0d1f3c; border-bottom: 1px solid #1a3a5c; }
+h2 { font-size: 1em; margin-bottom: 8px; color: #7eb8e0; }
+
+/* Layout */
+.app { display: flex; height: calc(100vh - 48px); }
+.panneau-gauche { width: 280px; min-width: 280px; border-right: 1px solid #1a3a5c; display: flex; flex-direction: column; overflow: hidden; }
+.panneau-central { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.panneau-droit { width: 320px; min-width: 320px; border-left: 1px solid #1a3a5c; overflow-y: auto; padding: 12px; }
+
+/* Panneau gauche — Corpus */
+.section { padding: 12px; border-bottom: 1px solid #1a3a5c; }
+.corpus-liste { flex: 1; overflow-y: auto; padding: 8px; }
+.corpus-item { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; cursor: pointer; margin-bottom: 4px; font-size: 0.85em; }
+.corpus-item:hover { background: #1a3a5c; }
+.corpus-item.actif { background: #1a4a7c; }
+.corpus-item .thumb { width: 40px; height: 40px; object-fit: cover; border-radius: 4px; }
+.corpus-item .info { flex: 1; overflow: hidden; }
+.corpus-item .nom { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.corpus-item .statut { font-size: 0.8em; }
+.statut-ok { color: #4ade80; }
+.statut-imprecis { color: #fbbf24; }
+.statut-echec { color: #f87171; }
+.statut-non-etiquete { color: #64748b; }
+.corpus-item .supprimer { background: none; border: none; color: #f87171; cursor: pointer; font-size: 1.1em; padding: 2px 4px; opacity: 0.5; }
+.corpus-item .supprimer:hover { opacity: 1; }
+
+/* Zone centrale — Image + pipeline */
+.zone-image { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; background: #060e1a; overflow: hidden; }
+.zone-image canvas { max-width: 100%; max-height: 100%; }
+#canvas-principal { cursor: crosshair; }
+.zone-etapes { height: 140px; min-height: 140px; display: flex; gap: 2px; padding: 8px; overflow-x: auto; border-top: 1px solid #1a3a5c; background: #0d1f3c; }
+.etape-visu { display: flex; flex-direction: column; align-items: center; min-width: 130px; }
+.etape-visu canvas { width: 120px; height: 90px; object-fit: contain; border-radius: 4px; border: 1px solid #1a3a5c; background: #000; }
+.etape-visu .etape-label { font-size: 0.7em; margin-top: 4px; color: #7eb8e0; text-align: center; }
+
+/* Panneau droit — Controles */
+.btn { padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85em; font-weight: 500; }
+.btn-primaire { background: #2563eb; color: #fff; }
+.btn-primaire:hover { background: #3b82f6; }
+.btn-secondaire { background: #1e3a5f; color: #c0d8f0; }
+.btn-secondaire:hover { background: #2a4a70; }
+.btn-danger { background: #7f1d1d; color: #fca5a5; }
+.btn-danger:hover { background: #991b1b; }
+.btn-succes { background: #14532d; color: #86efac; }
+.btn-succes:hover { background: #166534; }
+.btn:disabled { opacity: 0.4; cursor: default; }
+.btn-plein { width: 100%; }
+
+input[type="text"], input[type="number"], select {
+    background: #0a1628; border: 1px solid #1a3a5c; color: #e0e8f0;
+    padding: 5px 8px; border-radius: 4px; font-size: 0.85em; width: 100%;
+}
+label { font-size: 0.8em; color: #7eb8e0; display: block; margin-bottom: 3px; margin-top: 8px; }
+
+.tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.tag { font-size: 0.75em; padding: 2px 8px; border-radius: 10px; background: #1e3a5f; color: #7eb8e0; cursor: pointer; }
+.tag.actif { background: #2563eb; color: #fff; }
+
+.groupe-params { margin-top: 12px; padding: 10px; background: #0d1f3c; border-radius: 8px; }
+.param-ligne { display: flex; justify-content: space-between; align-items: center; font-size: 0.8em; padding: 3px 0; }
+.param-ligne .val { color: #fbbf24; font-family: monospace; }
+
+/* Resultats banc de test */
+.resultats-banc { margin-top: 12px; padding: 10px; background: #0d1f3c; border-radius: 8px; }
+.score-global { font-size: 1.8em; font-weight: bold; text-align: center; margin: 8px 0; }
+.score-detail { font-size: 0.8em; display: flex; flex-direction: column; gap: 3px; }
+.score-ligne { display: flex; justify-content: space-between; }
+
+/* Log */
+.zone-log { margin-top: 12px; }
+.log-contenu { background: #000; border-radius: 6px; padding: 8px; font-family: monospace; font-size: 0.72em; max-height: 200px; overflow-y: auto; white-space: pre-wrap; color: #90a8c0; }
+
+/* Drop zone */
+.drop-zone { border: 2px dashed #1a3a5c; border-radius: 8px; padding: 16px; text-align: center; font-size: 0.85em; color: #4a6a8a; cursor: pointer; transition: all 0.2s; }
+.drop-zone:hover, .drop-zone.dragover { border-color: #2563eb; color: #7eb8e0; background: rgba(37,99,235,0.1); }
+.drop-zone input { display: none; }
+
+/* Coins overlay */
+.coin-info { font-size: 0.75em; font-family: monospace; margin-top: 8px; }
+.coin-info .coin-ligne { display: flex; gap: 8px; padding: 2px 0; }
+.coin-detecte { color: #60a5fa; }
+.coin-correct { color: #4ade80; }
+.coin-erreur { color: #fbbf24; }
+</style>
+</head>
+<body>
+
+<h1>Banc de test — Auto-detection perspective <button class="btn btn-secondaire" style="float:right;margin-top:-2px;" onclick="document.getElementById('aide-flottante').style.display='flex'">?&ensp;Aide</button></h1>
+
+<!-- Fenetre flottante aide -->
+<div id="aide-flottante" style="display:flex; position:fixed; inset:0; z-index:9999; align-items:center; justify-content:center; background:rgba(0,0,0,0.6);" onclick="if(event.target===this)this.style.display='none'">
+<div style="background:#0d1f3c; border:1px solid #1a3a5c; border-radius:12px; padding:24px 28px; max-width:560px; width:90%; max-height:85vh; overflow-y:auto; box-shadow:0 8px 32px rgba(0,0,0,0.5);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h2 style="margin:0; font-size:1.1em;">Procedure d'utilisation</h2>
+        <button class="btn btn-secondaire" onclick="document.getElementById('aide-flottante').style.display='none'" style="padding:4px 10px;">Fermer</button>
+    </div>
+    <div style="font-size:0.88em; line-height:1.6; color:#c0d8f0;">
+        <p style="color:#7eb8e0; font-weight:600; margin-bottom:8px;">1. Alimenter le corpus</p>
+        <ul style="margin:0 0 12px 18px;">
+            <li>Glisser-deposer des photos d'eleves dans la zone en haut a gauche</li>
+            <li>Chaque image est sauvegardee dans IndexedDB (persistant)</li>
+            <li>Ajouter des tags de conditions (ombre-laterale, sous-expose, etc.)</li>
+        </ul>
+
+        <p style="color:#7eb8e0; font-weight:600; margin-bottom:8px;">2. Detecter les coins</p>
+        <ul style="margin:0 0 12px 18px;">
+            <li>Selectionner une image dans la liste a gauche</li>
+            <li>Cliquer <strong>Detecter</strong> — les coins bleus apparaissent</li>
+            <li>Les 6 etapes de la pipeline s'affichent en bas (Canny, Hough, etc.)</li>
+            <li>Le log de la pipeline est visible en bas a droite</li>
+        </ul>
+
+        <p style="color:#7eb8e0; font-weight:600; margin-bottom:8px;">3. Etiqueter les coins corrects</p>
+        <ul style="margin:0 0 12px 18px;">
+            <li>Cliquer <strong>Mode etiquette</strong> (le bouton devient vert)</li>
+            <li>Deplacer les poignees <span style="color:#4ade80;">vertes</span> vers les vrais coins du document</li>
+            <li>La zone grise autour de l'image permet de placer des coins hors-cadre</li>
+            <li>Cliquer <strong>Valider coins</strong> pour sauvegarder l'etiquette</li>
+            <li><strong>Reinit coins</strong> recopie les coins detectes (bleus) comme point de depart</li>
+        </ul>
+
+        <p style="color:#7eb8e0; font-weight:600; margin-bottom:8px;">4. Executer le banc de test</p>
+        <ul style="margin:0 0 12px 18px;">
+            <li>Etiqueter au moins quelques images (idealement 10-20+)</li>
+            <li>Cliquer <strong>Executer le banc de test</strong></li>
+            <li>Chaque image etiquetee est re-detectee avec les parametres courants</li>
+            <li>Resultats : score global, erreur moyenne, detail par condition</li>
+        </ul>
+
+        <p style="color:#7eb8e0; font-weight:600; margin-bottom:8px;">5. Iterer sur l'algorithme</p>
+        <ul style="margin:0 0 12px 18px;">
+            <li>Modifier les parametres dans le panneau de droite</li>
+            <li>Re-executer le banc → comparer le score</li>
+            <li>Score monte → garder le changement</li>
+            <li>Score baisse → revenir aux valeurs precedentes</li>
+            <li><strong>Exporter</strong> le corpus pour le sauvegarder en fichier JSON</li>
+        </ul>
+
+        <p style="color:#7eb8e0; font-weight:600; margin-bottom:8px;">Codes couleur</p>
+        <ul style="margin:0 0 4px 18px;">
+            <li><span style="color:#60a5fa;">Bleu</span> = coins detectes par l'algorithme</li>
+            <li><span style="color:#4ade80;">Vert</span> = coins corrects (etiquettes manuelles)</li>
+            <li>Erreur &lt; 0.03 → <span style="color:#4ade80;">OK</span></li>
+            <li>Erreur 0.03–0.08 → <span style="color:#fbbf24;">Imprecis</span></li>
+            <li>Erreur &gt; 0.08 → <span style="color:#f87171;">Echec</span></li>
+        </ul>
+    </div>
+</div>
+</div>
+
+<div class="app">
+    <!-- PANNEAU GAUCHE : Corpus -->
+    <div class="panneau-gauche">
+        <div class="section">
+            <h2>Corpus de test</h2>
+            <div class="drop-zone" id="drop-zone">
+                Glisser des images ici<br>ou cliquer pour charger
+                <input type="file" id="file-input" multiple accept="image/*">
+            </div>
+        </div>
+        <div class="corpus-liste" id="corpus-liste"></div>
+        <div class="section" style="border-top:1px solid #1a3a5c;">
+            <button class="btn btn-primaire btn-plein" onclick="lancerBanc()">Executer le banc de test</button>
+            <div style="margin-top:6px; display:flex; gap:4px;">
+                <button class="btn btn-secondaire" style="flex:1" onclick="exporterCorpus()">Exporter</button>
+                <button class="btn btn-secondaire" style="flex:1" onclick="importerCorpus()">Importer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANNEAU CENTRAL : Image + etapes pipeline -->
+    <div class="panneau-central">
+        <div class="zone-image" id="zone-image">
+            <canvas id="canvas-principal" width="800" height="600"></canvas>
+        </div>
+        <div class="zone-etapes" id="zone-etapes">
+            <div class="etape-visu"><canvas id="cv-gray"></canvas><div class="etape-label">Grayscale</div></div>
+            <div class="etape-visu"><canvas id="cv-canny"></canvas><div class="etape-label">Canny</div></div>
+            <div class="etape-visu"><canvas id="cv-filtre"></canvas><div class="etape-label">Filtre contraste</div></div>
+            <div class="etape-visu"><canvas id="cv-hough"></canvas><div class="etape-label">Hough</div></div>
+            <div class="etape-visu"><canvas id="cv-clusters"></canvas><div class="etape-label">Clusters</div></div>
+            <div class="etape-visu"><canvas id="cv-resultat"></canvas><div class="etape-label">Resultat</div></div>
+        </div>
+    </div>
+
+    <!-- PANNEAU DROIT : Controles + resultats -->
+    <div class="panneau-droit">
+        <h2>Image active</h2>
+        <div id="info-image" style="font-size:0.85em; color:#64748b;">Aucune image chargee</div>
+
+        <label>Conditions</label>
+        <div class="tags" id="tags-conditions">
+            <span class="tag" data-tag="bien-eclaire">bien-eclaire</span>
+            <span class="tag" data-tag="sous-expose">sous-expose</span>
+            <span class="tag" data-tag="surexpose">surexpose</span>
+            <span class="tag" data-tag="ombre-laterale">ombre-laterale</span>
+            <span class="tag" data-tag="angle-fort">angle-fort</span>
+            <span class="tag" data-tag="fond-complexe">fond-complexe</span>
+            <span class="tag" data-tag="2-pages">2-pages</span>
+        </div>
+
+        <div style="margin-top:12px; display:flex; gap:6px;">
+            <button class="btn btn-primaire" style="flex:1" onclick="detecter()">Detecter</button>
+            <button class="btn btn-succes" style="flex:1" onclick="validerCoins()">Valider coins</button>
+        </div>
+
+        <div style="margin-top:6px; display:flex; gap:6px;">
+            <button class="btn btn-secondaire" style="flex:1" id="btn-mode-etiquette" onclick="toggleModeEtiquette()">Mode etiquette</button>
+            <button class="btn btn-danger" style="flex:1" onclick="reinitCoins()">Reinit coins</button>
+        </div>
+
+        <div class="coin-info" id="coin-info"></div>
+
+        <!-- Parametres pipeline -->
+        <div class="groupe-params">
+            <h2>Parametres pipeline</h2>
+            <div class="param-ligne" style="margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid #1a3a5c;">
+                <span style="color:#fbbf24; font-weight:600;">Mode adaptatif</span>
+                <label style="margin:0; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                    <input type="checkbox" id="p-adaptatif" checked> Actif
+                </label>
+            </div>
+            <div class="param-ligne"><span>DETECT_SIZE</span><input type="number" id="p-detect-size" value="600" style="width:60px"></div>
+            <div class="param-ligne" style="color:#64748b;" id="row-canny-low"><span>CANNY_LOW <span id="lbl-canny-low" style="color:#fbbf24;"></span></span><input type="number" id="p-canny-low" value="30" style="width:60px"></div>
+            <div class="param-ligne" style="color:#64748b;" id="row-canny-high"><span>CANNY_HIGH <span id="lbl-canny-high" style="color:#fbbf24;"></span></span><input type="number" id="p-canny-high" value="90" style="width:60px"></div>
+            <div class="param-ligne" style="color:#64748b;" id="row-contraste"><span>Contraste min <span id="lbl-contraste" style="color:#fbbf24;"></span></span><input type="number" id="p-contraste" value="25" style="width:60px"></div>
+            <div class="param-ligne" style="color:#64748b;" id="row-luminosite"><span>Luminosite min <span id="lbl-luminosite" style="color:#fbbf24;"></span></span><input type="number" id="p-luminosite" value="130" style="width:60px"></div>
+            <div class="param-ligne"><span>minSide max</span><input type="number" id="p-minside" value="140" style="width:60px"></div>
+            <div class="param-ligne"><span>Hough seuil (x dim)</span><input type="number" id="p-hough" value="0.09" step="0.01" style="width:60px"></div>
+            <div class="param-ligne"><span>Cluster tolerance</span><input type="number" id="p-cluster-tol" value="8" style="width:60px"></div>
+            <div class="param-ligne"><span>Fusion tolerance</span><input type="number" id="p-fusion-tol" value="18" style="width:60px"></div>
+            <div class="param-ligne"><span>Rayon echant.</span><input type="number" id="p-rayon" value="3" style="width:60px"></div>
+            <div class="param-ligne">
+                <span>Multi-rayon [2,4,7]</span>
+                <label style="margin:0; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                    <input type="checkbox" id="p-multi-rayon"> Actif
+                </label>
+            </div>
+            <div class="param-ligne"><span>Seuil variance boundary</span><input type="number" id="p-seuil-variance" value="150" style="width:60px"></div>
+            <div id="info-adaptatif" style="margin-top:8px; font-size:0.75em; color:#64748b; border-top:1px solid #1a3a5c; padding-top:6px;"></div>
+        </div>
+
+        <!-- Resultats banc -->
+        <div class="resultats-banc" id="resultats-banc" style="display:none;">
+            <h2>Resultats du banc</h2>
+            <div class="score-global" id="score-global">—</div>
+            <div class="score-detail" id="score-detail"></div>
+        </div>
+
+        <!-- Log -->
+        <div class="zone-log">
+            <h2>Log pipeline</h2>
+            <div class="log-contenu" id="log-contenu"></div>
+        </div>
+
+        <!-- Journal d'apprentissage -->
+        <div class="groupe-params" style="margin-top:12px;">
+            <h2>Journal d'apprentissage</h2>
+            <textarea id="notes-journal" rows="3" placeholder="Observations sur ce run..."
+                style="width:100%; background:#0a1628; border:1px solid #1a3a5c; color:#e0e8f0;
+                border-radius:4px; padding:6px; font-size:0.8em; resize:vertical; margin-bottom:6px;"></textarea>
+            <button class="btn btn-secondaire btn-plein" onclick="sauverNote()" id="btn-sauver-note" disabled>Sauver la note</button>
+            <div id="historique-journal" style="margin-top:8px; font-size:0.75em; max-height:250px; overflow-y:auto;"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ============================================================
+//  ETAT GLOBAL
+// ============================================================
+let corpus = [];               // [{id, imageBlob, imageMeta, pages, conditions, nom}]
+let imageActive = null;        // Entry du corpus active
+let imageElement = null;       // HTMLImageElement chargee
+let coinsDetectes = null;      // [{x,y}] resultats de la detection
+let coinsCorrects = null;      // [{x,y}] etiquettes manuelles
+let modeEtiquette = false;     // true = on deplace les coins corrects (vert)
+let poigneeActive = -1;        // Index de la poignee en cours de drag
+let logMessages = [];
+let dernierRunId = null;
+
+const DB_NAME = 'test-perspective-db';
+const DB_VERSION = 2;
+const STORE_NAME = 'corpus';
+const PERSPECTIVE_MARGE = 1.0;
+
+// ============================================================
+//  IndexedDB
+// ============================================================
+let dbInstance = null;
+
+function ouvrirDB() {
+    return new Promise((resolve, reject) => {
+        const req = indexedDB.open(DB_NAME, DB_VERSION);
+        req.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+            }
+            if (!db.objectStoreNames.contains('journal')) {
+                db.createObjectStore('journal', { keyPath: 'id' });
+            }
+        };
+        req.onsuccess = (e) => { dbInstance = e.target.result; resolve(dbInstance); };
+        req.onerror = (e) => reject(e);
+    });
+}
+
+async function sauvegarderItem(item) {
+    const db = dbInstance || await ouvrirDB();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        tx.objectStore(STORE_NAME).put(item);
+        tx.oncomplete = resolve;
+        tx.onerror = reject;
+    });
+}
+
+async function supprimerItem(id) {
+    const db = dbInstance || await ouvrirDB();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        tx.objectStore(STORE_NAME).delete(id);
+        tx.oncomplete = resolve;
+        tx.onerror = reject;
+    });
+}
+
+async function chargerCorpus() {
+    const db = dbInstance || await ouvrirDB();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readonly');
+        const req = tx.objectStore(STORE_NAME).getAll();
+        req.onsuccess = () => { corpus = req.result || []; resolve(corpus); };
+        req.onerror = reject;
+    });
+}
+
+// ============================================================
+//  JOURNAL D'APPRENTISSAGE (IndexedDB)
+// ============================================================
+
+async function sauvegarderJournal(entry) {
+    const db = dbInstance || await ouvrirDB();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction('journal', 'readwrite');
+        tx.objectStore('journal').put(entry);
+        tx.oncomplete = resolve;
+        tx.onerror = reject;
+    });
+}
+
+async function chargerJournal() {
+    const db = dbInstance || await ouvrirDB();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction('journal', 'readonly');
+        const req = tx.objectStore('journal').getAll();
+        req.onsuccess = () => resolve(req.result || []);
+        req.onerror = reject;
+    });
+}
+
+async function sauverNote() {
+    if (!dernierRunId) return;
+    const notes = document.getElementById('notes-journal').value;
+    const entries = await chargerJournal();
+    const entry = entries.find(e => e.id === dernierRunId);
+    if (entry) {
+        entry.notes = notes;
+        await sauvegarderJournal(entry);
+        await afficherJournal();
+    }
+}
+
+async function afficherJournal() {
+    const entries = await chargerJournal();
+    entries.sort((a, b) => new Date(b.date) - new Date(a.date));
+    const el = document.getElementById('historique-journal');
+    const btnNote = document.getElementById('btn-sauver-note');
+    if (!el) return;
+
+    if (entries.length === 0) {
+        el.innerHTML = '<div style="color:#64748b;">Aucun run enregistre</div>';
+        if (btnNote) btnNote.disabled = true;
+        return;
+    }
+
+    if (!dernierRunId) dernierRunId = entries[0].id;
+    const latest = entries.find(e => e.id === dernierRunId);
+    if (latest) document.getElementById('notes-journal').value = latest.notes || '';
+    if (btnNote) btnNote.disabled = false;
+
+    let html = '';
+    for (const e of entries.slice(0, 20)) {
+        const d = new Date(e.date);
+        const ds = d.toLocaleDateString('fr-CA') + ' ' + d.toLocaleTimeString('fr-CA', {hour:'2-digit', minute:'2-digit'});
+        const pct = (e.score * 100).toFixed(0);
+        const col = e.score >= 0.8 ? '#4ade80' : e.score >= 0.5 ? '#fbbf24' : '#f87171';
+        html += '<div style="border:1px solid #1a3a5c; border-radius:4px; padding:6px; margin-bottom:4px;'
+             + (e.id === dernierRunId ? ' background:#1a2a4c;' : '') + '">';
+        html += '<div style="display:flex; justify-content:space-between;">';
+        html += '<span style="color:#7eb8e0;">' + ds + '</span>';
+        html += '<span style="color:' + col + '; font-weight:bold;">' + pct + '% (' + e.ok + '/' + e.total + ')</span>';
+        html += '</div>';
+        html += '<div style="color:#90a8c0;">Imp:' + e.imprecis + ' Ech:' + e.echec + ' | e=' + e.erreurMoyenne.toFixed(4) + '</div>';
+        if (e.notes) html += '<div style="color:#c0d8f0; margin-top:2px; font-style:italic;">'
+            + e.notes.replace(/</g, '&lt;').replace(/\n/g, '<br>') + '</div>';
+        html += '</div>';
+    }
+    el.innerHTML = html;
+}
+
+// ============================================================
+//  LOG (intercept console.log pour [Auto-persp])
+// ============================================================
+let benchMode = false;
+let benchBuffer = [];
+
+function log(msg) {
+    if (benchMode) { benchBuffer.push(msg); return; }
+    logMessages.push(msg);
+    const el = document.getElementById('log-contenu');
+    el.textContent = logMessages.join('\n');
+    el.scrollTop = el.scrollHeight;
+}
+
+function clearLog() {
+    logMessages = [];
+    document.getElementById('log-contenu').textContent = '';
+}
+
+// ============================================================
+//  PIPELINE DE DETECTION (copie de travaux-preparation.js)
+// ============================================================
+
+function getParams() {
+    return {
+        adaptatif: document.getElementById('p-adaptatif').checked,
+        detectSize: +document.getElementById('p-detect-size').value,
+        cannyLow: +document.getElementById('p-canny-low').value,
+        cannyHigh: +document.getElementById('p-canny-high').value,
+        contrasteMin: +document.getElementById('p-contraste').value,
+        luminositeMin: +document.getElementById('p-luminosite').value,
+        minSideMax: +document.getElementById('p-minside').value,
+        houghFactor: +document.getElementById('p-hough').value,
+        clusterTol: +document.getElementById('p-cluster-tol').value,
+        fusionTol: +document.getElementById('p-fusion-tol').value,
+        rayon: +document.getElementById('p-rayon').value,
+        multiRayon: document.getElementById('p-multi-rayon').checked,
+        seuilVariance: +document.getElementById('p-seuil-variance').value
+    };
+}
+
+// ============================================================
+//  SEUILS ADAPTATIFS (Phase 2 du plan v5)
+// ============================================================
+
+/**
+ * 1a. Seuils Canny dynamiques — bases sur la mediane des magnitudes de gradient.
+ * Sur une image sombre, les gradients sont faibles → seuils bas → aretes faibles captees.
+ * Sur une image flash, les gradients sont forts → seuils hauts → bruit filtre.
+ */
+function seuilsCannyAdaptatifs(blurred, w, h) {
+    // Calculer les magnitudes de gradient Sobel
+    const magnitudes = [];
+    for (let y = 1; y < h - 1; y++) {
+        for (let x = 1; x < w - 1; x++) {
+            const gx = -blurred[(y-1)*w+(x-1)] - 2*blurred[y*w+(x-1)] - blurred[(y+1)*w+(x-1)]
+                       + blurred[(y-1)*w+(x+1)] + 2*blurred[y*w+(x+1)] + blurred[(y+1)*w+(x+1)];
+            const gy = -blurred[(y-1)*w+(x-1)] - 2*blurred[(y-1)*w+x] - blurred[(y-1)*w+(x+1)]
+                       + blurred[(y+1)*w+(x-1)] + 2*blurred[(y+1)*w+x] + blurred[(y+1)*w+(x+1)];
+            const mag = Math.sqrt(gx*gx + gy*gy);
+            if (mag > 0.5) magnitudes.push(mag);
+        }
+    }
+    if (magnitudes.length === 0) return { low: 30, high: 90 };
+    magnitudes.sort((a, b) => a - b);
+    const mediane = magnitudes[Math.floor(magnitudes.length / 2)];
+    return {
+        low: Math.max(10, Math.round(mediane * 0.33)),
+        high: Math.max(30, Math.round(mediane * 1.0)),
+        mediane: Math.round(mediane)
+    };
+}
+
+/**
+ * 1b. Seuil de luminosite adaptatif — base sur le pic de l'histogramme.
+ * Trouve la luminosite typique du papier (pic dans le quartile superieur)
+ * et en deduit le seuil : seuil = pic × 0.55.
+ * Sur une photo sous-exposee (papier a 110), seuil = 60 au lieu de 130 fixe.
+ */
+function seuilLuminositeAdaptatif(gray, w, h) {
+    const histo = new Uint32Array(256);
+    const n = w * h;
+    for (let i = 0; i < n; i++) {
+        histo[Math.min(255, Math.max(0, Math.round(gray[i])))]++;
+    }
+    // Chercher le pic dans le quartile superieur (bins 192-255)
+    let picVal = 0, picIdx = 192;
+    for (let i = 192; i < 256; i++) {
+        if (histo[i] > picVal) { picVal = histo[i]; picIdx = i; }
+    }
+    // Fallback : pic global si rien de significatif dans le quartile sup
+    if (picVal < n * 0.02) {
+        picVal = 0;
+        for (let i = 0; i < 256; i++) {
+            if (histo[i] > picVal) { picVal = histo[i]; picIdx = i; }
+        }
+    }
+    return {
+        seuil: Math.round(picIdx * 0.55),
+        picPapier: picIdx
+    };
+}
+
+/**
+ * 1c. Seuil de contraste proportionnel — base sur l'ecart-type de la luminosite.
+ * Une image a faible contraste global a un ecart-type bas → seuil bas.
+ * Une image flash a un ecart-type eleve → seuil plus haut.
+ */
+function seuilContrasteAdaptatif(gray, w, h) {
+    const n = w * h;
+    let sum = 0;
+    for (let i = 0; i < n; i++) sum += gray[i];
+    const mean = sum / n;
+    let sumSq = 0;
+    for (let i = 0; i < n; i++) { const d = gray[i] - mean; sumSq += d * d; }
+    const ecartType = Math.sqrt(sumSq / n);
+    return {
+        seuil: Math.max(12, Math.round(ecartType * 0.4)),
+        ecartType: Math.round(ecartType),
+        moyenne: Math.round(mean)
+    };
+}
+
+function gaussianBlur5x5(src, w, h) {
+    const kernel = [1,4,7,4,1, 4,16,26,16,4, 7,26,41,26,7, 4,16,26,16,4, 1,4,7,4,1];
+    const kSum = 273;
+    const dst = new Float32Array(w * h);
+    for (let y = 2; y < h - 2; y++) {
+        for (let x = 2; x < w - 2; x++) {
+            let sum = 0, ki = 0;
+            for (let ky = -2; ky <= 2; ky++)
+                for (let kx = -2; kx <= 2; kx++)
+                    sum += src[(y + ky) * w + (x + kx)] * kernel[ki++];
+            dst[y * w + x] = sum / kSum;
+        }
+    }
+    return dst;
+}
+
+function cannyEdgeDetection(src, w, h, P) {
+    const gx = new Float32Array(w * h);
+    const gy = new Float32Array(w * h);
+    const mag = new Float32Array(w * h);
+    const dir = new Float32Array(w * h);
+
+    for (let y = 1; y < h - 1; y++) {
+        for (let x = 1; x < w - 1; x++) {
+            const idx = y * w + x;
+            gx[idx] = -src[(y-1)*w+(x-1)] - 2*src[y*w+(x-1)] - src[(y+1)*w+(x-1)]
+                      + src[(y-1)*w+(x+1)] + 2*src[y*w+(x+1)] + src[(y+1)*w+(x+1)];
+            gy[idx] = -src[(y-1)*w+(x-1)] - 2*src[(y-1)*w+x] - src[(y-1)*w+(x+1)]
+                      + src[(y+1)*w+(x-1)] + 2*src[(y+1)*w+x] + src[(y+1)*w+(x+1)];
+            mag[idx] = Math.sqrt(gx[idx]*gx[idx] + gy[idx]*gy[idx]);
+            dir[idx] = Math.atan2(gy[idx], gx[idx]);
+        }
+    }
+
+    // Non-maximum suppression
+    const nms = new Float32Array(w * h);
+    for (let y = 1; y < h - 1; y++) {
+        for (let x = 1; x < w - 1; x++) {
+            const idx = y * w + x;
+            const angle = (dir[idx] * 180 / Math.PI + 180) % 180;
+            let m1 = 0, m2 = 0;
+            if (angle < 22.5 || angle >= 157.5) { m1 = mag[idx-1]; m2 = mag[idx+1]; }
+            else if (angle < 67.5) { m1 = mag[(y-1)*w+(x+1)]; m2 = mag[(y+1)*w+(x-1)]; }
+            else if (angle < 112.5) { m1 = mag[(y-1)*w+x]; m2 = mag[(y+1)*w+x]; }
+            else { m1 = mag[(y-1)*w+(x-1)]; m2 = mag[(y+1)*w+(x+1)]; }
+            nms[idx] = (mag[idx] >= m1 && mag[idx] >= m2) ? mag[idx] : 0;
+        }
+    }
+
+    // Double seuil + hysteresis
+    const edges = new Uint8Array(w * h);
+    for (let i = 0; i < nms.length; i++) {
+        if (nms[i] >= P.cannyHigh) edges[i] = 255;
+        else if (nms[i] >= P.cannyLow) edges[i] = 75;
+    }
+    let changed = true;
+    while (changed) {
+        changed = false;
+        for (let y = 1; y < h - 1; y++) {
+            for (let x = 1; x < w - 1; x++) {
+                const idx = y * w + x;
+                if (edges[idx] !== 75) continue;
+                for (let dy = -1; dy <= 1; dy++)
+                    for (let dx = -1; dx <= 1; dx++)
+                        if (edges[(y+dy)*w+(x+dx)] === 255) { edges[idx] = 255; changed = true; }
+            }
+        }
+    }
+    for (let i = 0; i < edges.length; i++) if (edges[i] !== 255) edges[i] = 0;
+    return edges;
+}
+
+function filtrerAretesDocument(edges, gray, w, h, P) {
+    const filtered = new Uint8Array(w * h);
+    const rayons = P.multiRayon ? [2, 4, 7] : [P.rayon];
+    const Rmax = P.multiRayon ? 7 : P.rayon;
+    for (let y = Rmax; y < h - Rmax; y++) {
+        for (let x = Rmax; x < w - Rmax; x++) {
+            if (!edges[y * w + x]) continue;
+            const gx = gray[y*w+(x+1)] - gray[y*w+(x-1)];
+            const gy = gray[(y+1)*w+x] - gray[(y-1)*w+x];
+            const mag = Math.sqrt(gx*gx + gy*gy);
+            if (mag < 1) continue;
+            const nx = gx / mag, ny = gy / mag;
+            let bestContrast = 0, bestMaxSide = 0, bestMinSide = 255;
+            for (const R of rayons) {
+                let sideA = 0, sideB = 0, count = 0;
+                for (let r = 1; r <= R; r++) {
+                    const ax = Math.round(x + nx*r), ay = Math.round(y + ny*r);
+                    const bx = Math.round(x - nx*r), by = Math.round(y - ny*r);
+                    if (ax >= 0 && ax < w && ay >= 0 && ay < h && bx >= 0 && bx < w && by >= 0 && by < h) {
+                        sideA += gray[ay*w+ax]; sideB += gray[by*w+bx]; count++;
+                    }
+                }
+                if (count === 0) continue;
+                sideA /= count; sideB /= count;
+                const contrast = Math.abs(sideA - sideB);
+                if (contrast > bestContrast) {
+                    bestContrast = contrast;
+                    bestMaxSide = Math.max(sideA, sideB);
+                    bestMinSide = Math.min(sideA, sideB);
+                }
+            }
+            if (bestContrast > P.contrasteMin && bestMaxSide > P.luminositeMin && bestMinSide < P.minSideMax) {
+                filtered[y * w + x] = 255;
+            }
+        }
+    }
+    return filtered;
+}
+
+function houghLines(edges, w, h, seuil) {
+    const maxRho = Math.ceil(Math.sqrt(w*w + h*h));
+    const thetaSteps = 180;
+    const rhoSteps = 2*maxRho + 1;
+    const cosT = new Float32Array(thetaSteps);
+    const sinT = new Float32Array(thetaSteps);
+    for (let t = 0; t < thetaSteps; t++) {
+        const rad = t * Math.PI / 180;
+        cosT[t] = Math.cos(rad); sinT[t] = Math.sin(rad);
+    }
+    const accum = new Uint32Array(thetaSteps * rhoSteps);
+    for (let y = 0; y < h; y++)
+        for (let x = 0; x < w; x++) {
+            if (!edges[y*w+x]) continue;
+            for (let t = 0; t < thetaSteps; t++)
+                accum[t * rhoSteps + Math.round(x*cosT[t] + y*sinT[t]) + maxRho]++;
+        }
+    const lines = [];
+    for (let t = 0; t < thetaSteps; t++) {
+        for (let r = 0; r < rhoSteps; r++) {
+            const votes = accum[t*rhoSteps + r];
+            if (votes < seuil) continue;
+            let estMax = true;
+            for (let dt = -2; dt <= 2 && estMax; dt++)
+                for (let dr = -2; dr <= 2 && estMax; dr++) {
+                    if (dt === 0 && dr === 0) continue;
+                    const nt = t+dt, nr = r+dr;
+                    if (nt >= 0 && nt < thetaSteps && nr >= 0 && nr < rhoSteps)
+                        if (accum[nt*rhoSteps+nr] > votes) estMax = false;
+                }
+            if (estMax) lines.push({ rho: r - maxRho, theta: t, votes });
+        }
+    }
+    lines.sort((a, b) => b.votes - a.votes);
+    return lines;
+}
+
+/**
+ * Raffine les parametres (rho, theta) de chaque ligne Hough en cherchant
+ * le gradient reel sur blurred (plus precis que les boundary du heavy blur).
+ * Donne une precision sub-degre et corrige le biais de ~2px du heavy blur.
+ */
+function raffinerLignesHough(lines, blurred, heavyBlur, dw, dh) {
+    const R = Math.max(4, Math.round(Math.min(dw, dh) * 0.02));
+    const N = 30;
+    const contrastMin = 10;
+    let nbRaffine = 0;
+
+    const result = lines.map(line => {
+        if (line.implicite) return line;
+
+        const thetaRad = line.theta * Math.PI / 180;
+        const cosT = Math.cos(thetaRad), sinT = Math.sin(thetaRad);
+        const dirX = -sinT, dirY = cosT;   // direction le long de la ligne
+        const nx = cosT, ny = sinT;         // normale
+
+        // Point origine sur la ligne (plus proche de l'origine image)
+        const ox = line.rho * cosT, oy = line.rho * sinT;
+
+        // Bornes t : p(t) = (ox + t*dirX, oy + t*dirY) dans l'image
+        let tMin = -Infinity, tMax = Infinity;
+        if (Math.abs(dirX) > 1e-9) {
+            const t1 = (2 - ox) / dirX, t2 = (dw - 3 - ox) / dirX;
+            tMin = Math.max(tMin, Math.min(t1, t2));
+            tMax = Math.min(tMax, Math.max(t1, t2));
+        } else if (ox < 2 || ox >= dw - 2) return line;
+        if (Math.abs(dirY) > 1e-9) {
+            const t1 = (2 - oy) / dirY, t2 = (dh - 3 - oy) / dirY;
+            tMin = Math.max(tMin, Math.min(t1, t2));
+            tMax = Math.min(tMax, Math.max(t1, t2));
+        } else if (oy < 2 || oy >= dh - 2) return line;
+        if (tMax - tMin < 20) return line;
+
+        // Echantillonner le gradient perpendiculaire le long de la ligne
+        const edgePts = [];
+        for (let s = 0; s < N; s++) {
+            const t = tMin + (0.1 + (s / (N - 1)) * 0.8) * (tMax - tMin);
+            const sx = ox + t * dirX, sy = oy + t * dirY;
+
+            let bestScore = 0, bestD = 0;
+            const scores = new Float32Array(2 * R + 1);
+            for (let d = -R; d <= R; d++) {
+                const qx = Math.round(sx + nx * d), qy = Math.round(sy + ny * d);
+                if (qx < 2 || qx >= dw - 2 || qy < 2 || qy >= dh - 2) continue;
+
+                const gx = blurred[qy * dw + (qx + 1)] - blurred[qy * dw + (qx - 1)];
+                const gy = blurred[(qy + 1) * dw + qx] - blurred[(qy - 1) * dw + qx];
+                const mag = Math.sqrt(gx * gx + gy * gy);
+                if (mag < 3) continue;
+
+                const align = Math.abs(gx * nx + gy * ny) / mag;
+                if (align < 0.5) continue;
+
+                const cR = Math.max(3, Math.round(R * 0.4));
+                const ix = Math.round(qx + nx * cR), iy = Math.round(qy + ny * cR);
+                const jx = Math.round(qx - nx * cR), jy = Math.round(qy - ny * cR);
+                if (ix < 0 || ix >= dw || iy < 0 || iy >= dh ||
+                    jx < 0 || jx >= dw || jy < 0 || jy >= dh) continue;
+                if (Math.abs(heavyBlur[iy * dw + ix] - heavyBlur[jy * dw + jx]) < contrastMin) continue;
+
+                const score = mag * align;
+                scores[d + R] = score;
+                if (score > bestScore) { bestScore = score; bestD = d; }
+            }
+            if (bestScore <= 0) continue;
+
+            // Interpolation sub-pixel
+            let subD = bestD;
+            const idx = bestD + R;
+            if (idx > 0 && idx < scores.length - 1) {
+                const sL = scores[idx - 1], sC = scores[idx], sR = scores[idx + 1];
+                if (sL < sC && sR < sC && (sL + sR) > 0) {
+                    const denom = sL - 2 * sC + sR;
+                    if (Math.abs(denom) > 0.001) {
+                        const off = 0.5 * (sL - sR) / denom;
+                        if (Math.abs(off) < 0.5) subD = bestD + off;
+                    }
+                }
+            }
+
+            edgePts.push({ x: sx + nx * subD, y: sy + ny * subD, w: bestScore });
+        }
+
+        if (edgePts.length < 10) return line;
+
+        // IQR outlier rejection
+        const perpDists = edgePts.map(p => (p.x - ox) * nx + (p.y - oy) * ny);
+        const sorted = perpDists.slice().sort((a, b) => a - b);
+        const q1 = sorted[Math.floor(sorted.length * 0.25)];
+        const q3 = sorted[Math.floor(sorted.length * 0.75)];
+        const iqr = q3 - q1;
+        const lo = q1 - 1.5 * iqr, hi = q3 + 1.5 * iqr;
+        const inliers = edgePts.filter((_, j) => perpDists[j] >= lo && perpDists[j] <= hi);
+        if (inliers.length < 8) return line;
+
+        // PCA ponderee
+        let wSum = 0, mx = 0, my = 0;
+        for (const p of inliers) { wSum += p.w; mx += p.x * p.w; my += p.y * p.w; }
+        mx /= wSum; my /= wSum;
+
+        let sxx = 0, syy = 0, sxy = 0;
+        for (const p of inliers) {
+            const cx = p.x - mx, cy = p.y - my;
+            sxx += cx * cx * p.w; syy += cy * cy * p.w; sxy += cx * cy * p.w;
+        }
+
+        const pcaTheta = 0.5 * Math.atan2(2 * sxy, sxx - syy);
+        const pcaDirX = Math.cos(pcaTheta), pcaDirY = Math.sin(pcaTheta);
+
+        // Coherence : direction PCA ~ direction Hough
+        const dot = Math.abs(pcaDirX * dirX + pcaDirY * dirY);
+        if (dot < 0.95) return line;
+
+        // Correction angulaire (signee, petite)
+        const cross = pcaDirX * dirY - pcaDirY * dirX;
+        const deltaDeg = Math.asin(Math.max(-1, Math.min(1, cross))) * 180 / Math.PI;
+        if (Math.abs(deltaDeg) > 3) return line;
+
+        // Nouveau theta (float, proche de l'original) et rho
+        const newTheta = line.theta + deltaDeg;
+        const newThetaRad = newTheta * Math.PI / 180;
+        const newRho = mx * Math.cos(newThetaRad) + my * Math.sin(newThetaRad);
+
+        if (Math.abs(newRho - line.rho) > R * 1.5) return line;
+
+        nbRaffine++;
+        return { rho: newRho, theta: newTheta, votes: line.votes };
+    });
+
+    log('[Auto-persp] Lignes Hough raffinees: ' + nbRaffine + '/' + lines.length);
+    return result;
+}
+
+function diffAngle180(a, b) {
+    let d = Math.abs(a - b) % 180;
+    return Math.min(d, 180 - d);
+}
+
+function clusteriserLignesParAngle(lines, toleranceDeg) {
+    const clusters = [];
+    for (const line of lines) {
+        let placed = false;
+        for (const cluster of clusters) {
+            if (diffAngle180(line.theta, cluster[0].theta) < toleranceDeg) {
+                cluster.push(line); placed = true; break;
+            }
+        }
+        if (!placed) clusters.push([line]);
+    }
+    return clusters.filter(c => c.length >= 1);
+}
+
+/**
+ * Calcule le support d'aretes pour une seule ligne Hough.
+ * Echantillonne N points le long de la ligne et verifie la
+ * presence de pixels boundary dans un rayon de tolerance.
+ * Retourne un ratio 0-1.
+ */
+function calculerSupportLigne(line, edgeMap, dw, dh) {
+    const tol = Math.max(2, Math.round(Math.min(dw, dh) * 0.015));
+    const thetaRad = line.theta * Math.PI / 180;
+    const cosT = Math.cos(thetaRad), sinT = Math.sin(thetaRad);
+    const dirX = -sinT, dirY = cosT;
+    const nx = cosT, ny = sinT;
+    const ox = line.rho * cosT, oy = line.rho * sinT;
+
+    let tMin = -Infinity, tMax = Infinity;
+    if (Math.abs(dirX) > 1e-9) {
+        const t1 = -ox / dirX, t2 = ((dw - 1) - ox) / dirX;
+        tMin = Math.max(tMin, Math.min(t1, t2));
+        tMax = Math.min(tMax, Math.max(t1, t2));
+    } else if (ox < 0 || ox >= dw) return 0;
+    if (Math.abs(dirY) > 1e-9) {
+        const t1 = -oy / dirY, t2 = ((dh - 1) - oy) / dirY;
+        tMin = Math.max(tMin, Math.min(t1, t2));
+        tMax = Math.min(tMax, Math.max(t1, t2));
+    } else if (oy < 0 || oy >= dh) return 0;
+    if (tMax <= tMin) return 0;
+
+    const N = 40;
+    let supported = 0;
+    for (let s = 0; s < N; s++) {
+        const t = tMin + ((s + 0.5) / N) * (tMax - tMin);
+        const sx = ox + t * dirX, sy = oy + t * dirY;
+        let found = false;
+        for (let d = -tol; d <= tol && !found; d++) {
+            const px = Math.round(sx + nx * d), py = Math.round(sy + ny * d);
+            if (px >= 0 && px < dw && py >= 0 && py < dh && edgeMap[py * dw + px]) found = true;
+        }
+        if (found) supported++;
+    }
+    return supported / N;
+}
+
+/**
+ * Filtre les pixels boundary par variance locale sur heavyBlur.
+ * Un vrai bord papier/fond a des regions uniformes des deux cotes (variance faible).
+ * Un bord interne (surlignage, bande coloree) a une variance elevee d'au moins un cote.
+ *
+ * Pour chaque pixel boundary :
+ *  1. Calcule la direction du gradient sur heavyBlur (= normale au bord)
+ *  2. Echantillonne R pixels de chaque cote le long de cette normale
+ *  3. Calcule la variance des valeurs heavyBlur de chaque cote
+ *  4. Garde le pixel seulement si max(varA, varB) < seuilVariance
+ */
+function filtrerBoundaryParVariance(boundary, heavyBlur, dw, dh, seuilVariance) {
+    const R = 5; // rayon d'echantillonnage (pixels)
+    const filtered = new Uint8Array(dw * dh);
+    let kept = 0, total = 0;
+
+    for (let y = R + 1; y < dh - R - 1; y++) {
+        for (let x = R + 1; x < dw - R - 1; x++) {
+            const idx = y * dw + x;
+            if (!boundary[idx]) continue;
+            total++;
+
+            // Gradient sur heavyBlur (Sobel simplifie)
+            const gx = heavyBlur[idx + 1] - heavyBlur[idx - 1];
+            const gy = heavyBlur[idx + dw] - heavyBlur[idx - dw];
+            const mag = Math.sqrt(gx * gx + gy * gy);
+            if (mag < 1) { filtered[idx] = 1; kept++; continue; } // gradient nul = garder par defaut
+
+            // Normale unitaire (direction du gradient)
+            const nx = gx / mag;
+            const ny = gy / mag;
+
+            // Echantillonner cote A (direction du gradient) et cote B (oppose)
+            let sumA = 0, sumA2 = 0, nA = 0;
+            let sumB = 0, sumB2 = 0, nB = 0;
+            for (let k = 1; k <= R; k++) {
+                // Cote A
+                const axf = x + k * nx, ayf = y + k * ny;
+                const ax = Math.round(axf), ay = Math.round(ayf);
+                if (ax >= 0 && ax < dw && ay >= 0 && ay < dh) {
+                    const v = heavyBlur[ay * dw + ax];
+                    sumA += v; sumA2 += v * v; nA++;
+                }
+                // Cote B
+                const bxf = x - k * nx, byf = y - k * ny;
+                const bx = Math.round(bxf), by = Math.round(byf);
+                if (bx >= 0 && bx < dw && by >= 0 && by < dh) {
+                    const v = heavyBlur[by * dw + bx];
+                    sumB += v; sumB2 += v * v; nB++;
+                }
+            }
+
+            // Variance = E[X^2] - E[X]^2
+            const varA = nA > 1 ? (sumA2 / nA - (sumA / nA) * (sumA / nA)) : 0;
+            const varB = nB > 1 ? (sumB2 / nB - (sumB / nB) * (sumB / nB)) : 0;
+
+            if (Math.max(varA, varB) < seuilVariance) {
+                filtered[idx] = 1;
+                kept++;
+            }
+        }
+    }
+
+    log('[Auto-persp] Filtre variance: ' + kept + '/' + total + ' boundary pixels gardes (seuil=' + seuilVariance + ')');
+    return filtered;
+}
+
+/**
+ * Detection par profils de masque : alternative au pipeline Hough.
+ * Pour chaque colonne/rangee, trouve le premier et dernier pixel papier.
+ * Fit 4 droites robustes (Theil-Sen) → intersections = 4 coins.
+ */
+function detecterCoinsParProfils(mask, dw, dh) {
+    const topProfile = [], bottomProfile = [];
+    const leftProfile = [], rightProfile = [];
+
+    for (let x = 0; x < dw; x++) {
+        for (let y = 0; y < dh; y++) {
+            if (mask[y * dw + x]) { topProfile.push({ pos: x, edge: y }); break; }
+        }
+        for (let y = dh - 1; y >= 0; y--) {
+            if (mask[y * dw + x]) { bottomProfile.push({ pos: x, edge: y }); break; }
+        }
+    }
+    for (let y = 0; y < dh; y++) {
+        for (let x = 0; x < dw; x++) {
+            if (mask[y * dw + x]) { leftProfile.push({ pos: y, edge: x }); break; }
+        }
+        for (let x = dw - 1; x >= 0; x--) {
+            if (mask[y * dw + x]) { rightProfile.push({ pos: y, edge: x }); break; }
+        }
+    }
+
+    log('[Auto-persp] Profils: top=' + topProfile.length + ' bottom=' + bottomProfile.length +
+        ' left=' + leftProfile.length + ' right=' + rightProfile.length);
+
+    if (topProfile.length < 10 || bottomProfile.length < 10 ||
+        leftProfile.length < 10 || rightProfile.length < 10) {
+        log('[Auto-persp] Profils insuffisants');
+        return null;
+    }
+
+    // Theil-Sen : regression robuste (mediane des pentes)
+    function theilSen(points) {
+        let pts = points;
+        if (pts.length > 80) {
+            const step = Math.ceil(pts.length / 60);
+            pts = pts.filter((_, i) => i % step === 0);
+        }
+        const slopes = [];
+        for (let i = 0; i < pts.length; i++) {
+            for (let j = i + 1; j < pts.length; j++) {
+                const dx = pts[j].pos - pts[i].pos;
+                if (Math.abs(dx) < 1) continue;
+                slopes.push((pts[j].edge - pts[i].edge) / dx);
+            }
+        }
+        if (slopes.length === 0) return null;
+        slopes.sort((a, b) => a - b);
+        const slope = slopes[Math.floor(slopes.length / 2)];
+        const intercepts = points.map(p => p.edge - slope * p.pos);
+        intercepts.sort((a, b) => a - b);
+        const intercept = intercepts[Math.floor(intercepts.length / 2)];
+        return { slope, intercept };
+    }
+
+    const topLine = theilSen(topProfile);
+    const bottomLine = theilSen(bottomProfile);
+    const leftLine = theilSen(leftProfile);
+    const rightLine = theilSen(rightProfile);
+
+    if (!topLine || !bottomLine || !leftLine || !rightLine) {
+        log('[Auto-persp] Regression echouee');
+        return null;
+    }
+
+    log('[Auto-persp] Profils: top=' + topLine.slope.toFixed(4) + ' bottom=' + bottomLine.slope.toFixed(4) +
+        ' left=' + leftLine.slope.toFixed(4) + ' right=' + rightLine.slope.toFixed(4));
+
+    // Intersection hLine (y = s*x + i) avec vLine (x = s*y + i)
+    function intersectHV(hLine, vLine) {
+        const denom = 1 - vLine.slope * hLine.slope;
+        if (Math.abs(denom) < 1e-10) return null;
+        const x = (vLine.slope * hLine.intercept + vLine.intercept) / denom;
+        const y = hLine.slope * x + hLine.intercept;
+        return { x: x / dw, y: y / dh };
+    }
+
+    const tl = intersectHV(topLine, leftLine);
+    const tr = intersectHV(topLine, rightLine);
+    const br = intersectHV(bottomLine, rightLine);
+    const bl = intersectHV(bottomLine, leftLine);
+
+    if (!tl || !tr || !br || !bl) {
+        log('[Auto-persp] Intersection echouee');
+        return null;
+    }
+
+    const result = [tl, tr, br, bl];
+    log('[Auto-persp] Coins profils: ' + result.map(p => '(' + p.x.toFixed(3) + ',' + p.y.toFixed(3) + ')').join(' '));
+    return result;
+}
+
+function trouverBordsOpposes(cluster, distMin, cx, cy, topN, dw, dh, edgeMap) {
+    topN = topN || 3;
+    if (cluster.length < 1) return [];
+    const withDist = cluster.map(line => {
+        const rad = line.theta * Math.PI / 180;
+        const d = cx * Math.cos(rad) + cy * Math.sin(rad) - line.rho;
+        return { line, d };
+    });
+    withDist.sort((a, b) => a.d - b.d);
+    const paires = [];
+    for (let i = 0; i < withDist.length; i++) {
+        for (let j = i + 1; j < withDist.length; j++) {
+            const dist = Math.abs(withDist[j].d - withDist[i].d);
+            if (dist < distMin) continue;
+            const voteScore = dist * (Math.log(withDist[i].line.votes) + Math.log(withDist[j].line.votes));
+            let supportFactor = 1;
+            if (edgeMap) {
+                const supA = calculerSupportLigne(withDist[i].line, edgeMap, dw, dh);
+                const supB = calculerSupportLigne(withDist[j].line, edgeMap, dw, dh);
+                supportFactor = 0.3 + 0.7 * (supA + supB) / 2;
+            }
+            const score = voteScore * supportFactor;
+            paires.push({ paire: [withDist[i].line, withDist[j].line], score, dist });
+        }
+    }
+    // Fallback bords implicites : si pas de paire, utiliser le bord de l'image
+    if (paires.length === 0 && dw && dh) {
+        const best = cluster.reduce((a, b) => a.votes > b.votes ? a : b);
+        const rad = best.theta * Math.PI / 180;
+        const cos = Math.cos(rad), sin = Math.sin(rad);
+        const dBest = cx * cos + cy * sin - best.rho;
+        // Rho du bord oppose de l'image
+        const rhos = [0, dw * cos, dh * sin, dw * cos + dh * sin];
+        const rhoImplicite = dBest > 0 ? Math.max(...rhos) : Math.min(...rhos);
+        const ligneImplicite = { rho: rhoImplicite, theta: best.theta,
+            votes: Math.max(1, Math.round(best.votes * 0.3)), implicite: true };
+        const distPaire = Math.abs(rhoImplicite - best.rho);
+        if (distPaire >= distMin * 0.5) {
+            const score = distPaire * Math.log(best.votes);
+            paires.push({ paire: [best, ligneImplicite], score, dist: distPaire, implicite: true });
+        }
+    }
+    paires.sort((a, b) => b.score - a.score);
+    return paires.slice(0, topN);
+}
+
+function intersectionLignes(l1, l2) {
+    const t1 = l1.theta * Math.PI / 180, t2 = l2.theta * Math.PI / 180;
+    const cos1 = Math.cos(t1), sin1 = Math.sin(t1);
+    const cos2 = Math.cos(t2), sin2 = Math.sin(t2);
+    const det = cos1 * sin2 - cos2 * sin1;
+    if (Math.abs(det) < 1e-6) return null;
+    return { x: (l1.rho*sin2 - l2.rho*sin1)/det, y: (l2.rho*cos1 - l1.rho*cos2)/det };
+}
+
+function ordonnerCoins(points) {
+    const cx = points.reduce((s,p) => s+p.x, 0) / 4;
+    const cy = points.reduce((s,p) => s+p.y, 0) / 4;
+    const tl = points.filter(p => p.x < cx && p.y < cy)[0];
+    const tr = points.filter(p => p.x >= cx && p.y < cy)[0];
+    const br = points.filter(p => p.x >= cx && p.y >= cy)[0];
+    const bl = points.filter(p => p.x < cx && p.y >= cy)[0];
+    if (!tl || !tr || !br || !bl) {
+        const sorted = points.slice().sort((a,b) => Math.atan2(a.y-cy, a.x-cx) - Math.atan2(b.y-cy, b.x-cx));
+        let minIdx = 0, minSum = Infinity;
+        for (let i = 0; i < sorted.length; i++) { const s = sorted[i].x+sorted[i].y; if (s < minSum) { minSum=s; minIdx=i; }}
+        const ordered = [];
+        for (let i = 0; i < 4; i++) ordered.push(sorted[(minIdx+i)%4]);
+        return ordered;
+    }
+    return [tl, tr, br, bl];
+}
+
+function surfaceQuad(pts) {
+    let area = 0;
+    for (let i = 0; i < 4; i++) { const j = (i+1)%4; area += pts[i].x*pts[j].y; area -= pts[j].x*pts[i].y; }
+    return Math.abs(area) / 2;
+}
+
+/**
+ * Calcule le support d'aretes pour un candidat quad.
+ * Echantillonne des points le long des 4 cotes du quad et verifie
+ * si des pixels d'arete existent a proximite. Un quad correct a ses
+ * cotes alignes avec des aretes papier/fond detectees.
+ * Retourne un ratio 0-1 (fraction de points supportes).
+ */
+function calculerSupportAretes(coins, edgeMap, dw, dh) {
+    const tol = Math.max(2, Math.round(Math.min(dw, dh) * 0.015));
+    let totalPoints = 0;
+    let supportedPoints = 0;
+
+    for (let e = 0; e < 4; e++) {
+        const p1 = coins[e];
+        const p2 = coins[(e + 1) % 4];
+        const x1 = p1.x * dw, y1 = p1.y * dh;
+        const x2 = p2.x * dw, y2 = p2.y * dh;
+        const len = Math.sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
+        if (len < 1) continue;
+        const numSamples = Math.max(10, Math.round(len / 2));
+        // Normale au cote (perpendiculaire)
+        const nx = -(y2-y1)/len, ny = (x2-x1)/len;
+
+        for (let s = 0; s < numSamples; s++) {
+            const t = (s + 0.5) / numSamples;
+            const cx = x1 + t * (x2 - x1);
+            const cy = y1 + t * (y2 - y1);
+            // Ignorer les points hors image
+            if (cx < -tol || cx >= dw + tol || cy < -tol || cy >= dh + tol) continue;
+            totalPoints++;
+
+            // Chercher un pixel d'arete le long de la normale dans la bande de tolerance
+            let found = false;
+            for (let d = -tol; d <= tol && !found; d++) {
+                const px = Math.round(cx + nx * d);
+                const py = Math.round(cy + ny * d);
+                if (px >= 0 && px < dw && py >= 0 && py < dh && edgeMap[py * dw + px]) found = true;
+            }
+            if (found) supportedPoints++;
+        }
+    }
+
+    return totalPoints > 0 ? supportedPoints / totalPoints : 0;
+}
+
+// ============================================================
+//  PIPELINE PRINCIPALE avec visualisation des etapes
+// ============================================================
+
+function detecterCoinsDocument(source, P) {
+    const w = source.width, h = source.height;
+    const scale = Math.min(1, P.detectSize / Math.max(w, h));
+    const dw = Math.round(w * scale), dh = Math.round(h * scale);
+
+    const small = document.createElement('canvas');
+    small.width = dw; small.height = dh;
+    small.getContext('2d').drawImage(source, 0, 0, dw, dh);
+    const pixels = small.getContext('2d').getImageData(0, 0, dw, dh).data;
+
+    // 2. Grayscale
+    const gray = new Float32Array(dw * dh);
+    for (let i = 0; i < gray.length; i++) {
+        const idx = i * 4;
+        gray[i] = 0.299*pixels[idx] + 0.587*pixels[idx+1] + 0.114*pixels[idx+2];
+    }
+    afficherEtape('cv-gray', gray, dw, dh, 'gray');
+
+    // 3. Blur
+    const blurred = gaussianBlur5x5(gray, dw, dh);
+
+    // 3b. Calcul des seuils adaptatifs si le mode est actif
+    if (P.adaptatif) {
+        const cannyAdapt = seuilsCannyAdaptatifs(blurred, dw, dh);
+        P.cannyLow = cannyAdapt.low;
+        P.cannyHigh = cannyAdapt.high;
+
+        const lumAdapt = seuilLuminositeAdaptatif(gray, dw, dh);
+        P.luminositeMin = lumAdapt.seuil;
+
+        const contAdapt = seuilContrasteAdaptatif(gray, dw, dh);
+        P.contrasteMin = contAdapt.seuil;
+
+        log('[Adaptatif] Canny: low=' + P.cannyLow + ' high=' + P.cannyHigh + ' (mediane=' + cannyAdapt.mediane + ')');
+        log('[Adaptatif] Luminosite: seuil=' + P.luminositeMin + ' (pic papier=' + lumAdapt.picPapier + ')');
+        log('[Adaptatif] Contraste: seuil=' + P.contrasteMin + ' (ecart-type=' + contAdapt.ecartType + ', moy=' + contAdapt.moyenne + ')');
+
+        // Mettre a jour l'affichage des valeurs calculees
+        try {
+            document.getElementById('lbl-canny-low').textContent = '→ ' + P.cannyLow;
+            document.getElementById('lbl-canny-high').textContent = '→ ' + P.cannyHigh;
+            document.getElementById('lbl-contraste').textContent = '→ ' + P.contrasteMin;
+            document.getElementById('lbl-luminosite').textContent = '→ ' + P.luminositeMin;
+            document.getElementById('info-adaptatif').textContent =
+                'Mediane grad: ' + cannyAdapt.mediane + ' | Pic papier: ' + lumAdapt.picPapier +
+                ' | Ecart-type: ' + contAdapt.ecartType + ' | Moy: ' + contAdapt.moyenne;
+        } catch(e) {}
+    } else {
+        try {
+            document.getElementById('lbl-canny-low').textContent = '';
+            document.getElementById('lbl-canny-high').textContent = '';
+            document.getElementById('lbl-contraste').textContent = '';
+            document.getElementById('lbl-luminosite').textContent = '';
+            document.getElementById('info-adaptatif').textContent = '';
+        } catch(e) {}
+    }
+
+    // 4. Canny (garde pour fallback et support)
+    const edges = cannyEdgeDetection(blurred, dw, dh, P);
+    afficherEtape('cv-canny', edges, dw, dh, 'binary');
+
+    // 5. Segmentation : flou lourd → masque papier/fond → pixels frontiere
+    // Iterer le blur 5x5 pour obtenir un sigma effectif eleve (~12)
+    let heavyBlur = gray;
+    for (let pass = 0; pass < 6; pass++) heavyBlur = gaussianBlur5x5(heavyBlur, dw, dh);
+
+    // Masque binaire : papier (clair) vs fond (sombre)
+    const mask = new Uint8Array(dw * dh);
+    for (let i = 0; i < dw * dh; i++) mask[i] = heavyBlur[i] > P.luminositeMin ? 1 : 0;
+
+    // Pixels frontiere : papier adjacent a au moins un pixel fond
+    const boundary = new Uint8Array(dw * dh);
+    let nbBoundary = 0;
+    for (let y = 1; y < dh - 1; y++) {
+        for (let x = 1; x < dw - 1; x++) {
+            const idx = y * dw + x;
+            if (mask[idx] === 0) continue;
+            if (mask[idx-1] === 0 || mask[idx+1] === 0 || mask[idx-dw] === 0 || mask[idx+dw] === 0 ||
+                mask[idx-dw-1] === 0 || mask[idx-dw+1] === 0 || mask[idx+dw-1] === 0 || mask[idx+dw+1] === 0) {
+                boundary[idx] = 1;
+                nbBoundary++;
+            }
+        }
+    }
+    log('[Auto-persp] Segmentation: seuil=' + P.luminositeMin + ', frontiere=' + nbBoundary + ' pixels');
+    afficherEtape('cv-filtre', boundary, dw, dh, 'binary');
+
+    // 6. Detection par profils de masque
+    const profilCoins = detecterCoinsParProfils(mask, dw, dh);
+    let edgeMapForSupport = boundary;
+    let meilleur = null;
+
+    if (profilCoins) {
+        const surface = surfaceQuad(profilCoins);
+        const support = calculerSupportAretes(profilCoins, boundary, dw, dh);
+        if (surface >= 0.10) {
+            meilleur = { result: profilCoins, surface, support, bonusAng: 1, implicite: false };
+            log('[Auto-persp] Profils OK: surf=' + surface.toFixed(3) + ' sup=' + support.toFixed(2));
+        } else {
+            log('[Auto-persp] Profils: surface trop petite (' + surface.toFixed(3) + ')');
+        }
+    }
+
+    // 6b. Fallback Hough si profils echouent
+    if (!meilleur) {
+        log('[Auto-persp] Fallback Hough');
+        let seuilHough = Math.max(15, Math.round(Math.min(dw, dh) * 0.06));
+        let lines = houghLines(boundary, dw, dh, seuilHough);
+        log('[Auto-persp] Hough: seuil=' + seuilHough + ', lignes=' + lines.length);
+
+        if (lines.length < 4) {
+            log('[Auto-persp] Fallback Canny classique');
+            const paperEdges = filtrerAretesDocument(edges, blurred, dw, dh, P);
+            seuilHough = Math.max(20, Math.round(Math.min(dw, dh) * P.houghFactor));
+            lines = houghLines(paperEdges, dw, dh, seuilHough);
+            edgeMapForSupport = paperEdges;
+            let nbPaper = 0;
+            for (let i = 0; i < paperEdges.length; i++) if (paperEdges[i]) nbPaper++;
+            log('[Auto-persp] Fallback: aretes=' + nbPaper + ', seuil=' + seuilHough + ', lignes=' + lines.length);
+            if (lines.length < 4) {
+                seuilHough = Math.max(40, Math.round(Math.min(dw, dh) * 0.20));
+                lines = houghLines(edges, dw, dh, seuilHough);
+                edgeMapForSupport = edges;
+                log('[Auto-persp] Fallback brut: seuil=' + seuilHough + ', lignes=' + lines.length);
+            }
+        }
+
+        if (lines.length >= 2) {
+            const clusters = clusteriserLignesParAngle(lines, P.clusterTol);
+            for (let i = 0; i < clusters.length; i++) {
+                for (let j = i + 1; j < clusters.length; j++) {
+                    if (diffAngle180(clusters[i][0].theta, clusters[j][0].theta) <= P.fusionTol) {
+                        clusters[i] = clusters[i].concat(clusters[j]);
+                        clusters.splice(j, 1); j--;
+                    }
+                }
+            }
+            log('[Auto-persp] Clusters: ' + clusters.length);
+
+            if (clusters.length >= 2) {
+                const distMin = Math.min(dw, dh) * 0.1;
+                const cx = dw / 2, cy = dh / 2;
+                const candidats = [];
+                for (let i = 0; i < clusters.length; i++) {
+                    for (let j = i + 1; j < clusters.length; j++) {
+                        const angleDiff = diffAngle180(clusters[i][0].theta, clusters[j][0].theta);
+                        if (angleDiff < 60 || angleDiff > 120) continue;
+                        const pairesA = trouverBordsOpposes(clusters[i], distMin, cx, cy, 3, dw, dh);
+                        const pairesB = trouverBordsOpposes(clusters[j], distMin, cx, cy, 3, dw, dh);
+                        if (pairesA.length === 0 || pairesB.length === 0) continue;
+                        for (const pa of pairesA) {
+                            for (const pb of pairesB) {
+                                const inters = [];
+                                for (const l1 of pa.paire)
+                                    for (const l2 of pb.paire) {
+                                        const pt = intersectionLignes(l1, l2);
+                                        if (pt) inters.push(pt);
+                                    }
+                                if (inters.length !== 4) continue;
+                                const coins = ordonnerCoins(inters);
+                                const result = coins.map(p => ({ x: p.x/dw, y: p.y/dh }));
+                                const valide = result.every(p => p.x >= -PERSPECTIVE_MARGE && p.x <= 1+PERSPECTIVE_MARGE && p.y >= -PERSPECTIVE_MARGE && p.y <= 1+PERSPECTIVE_MARGE);
+                                if (!valide) continue;
+                                const surface = surfaceQuad(result);
+                                if (surface < 0.05) continue;
+                                let penalite = 1;
+                                for (const p of result) {
+                                    const hors = Math.max(0, -p.x, p.x-1, -p.y, p.y-1);
+                                    if (hors > 0.1) penalite *= 1 / (1 + (hors-0.1)*5);
+                                }
+                                const support = calculerSupportAretes(result, edgeMapForSupport, dw, dh);
+                                let nbImpl = 0;
+                                for (const l of [...pa.paire, ...pb.paire]) { if (l.implicite) nbImpl++; }
+                                const penaliteImpl = Math.pow(0.8, nbImpl);
+                                const t1 = clusters[i][0].theta, t2 = clusters[j][0].theta;
+                                const distCard = t => Math.min(Math.min(t, 180 - t), Math.abs(t - 90));
+                                const distMoy = (distCard(t1) + distCard(t2)) / 2;
+                                const bonusAng = Math.max(0.25, 1 - distMoy / 45);
+                                const score = surface * penalite * support * penaliteImpl * bonusAng;
+                                candidats.push({ result, surface, score, support, bonusAng, implicite: nbImpl > 0,
+                                    theta1: Math.round(t1), theta2: Math.round(t2) });
+                            }
+                        }
+                    }
+                }
+                candidats.sort((a, b) => b.score - a.score);
+                if (candidats.length > 0) {
+                    meilleur = candidats[0];
+                    log('[Auto-persp] Hough meilleur: surf=' + meilleur.surface.toFixed(3) + ' sup=' + meilleur.support.toFixed(2));
+                }
+            }
+        }
+    }
+
+    if (!meilleur) { log('[Auto-persp] ECHEC: aucun candidat'); return null; }
+    log('[Auto-persp] Coins: ' + meilleur.result.map(p => '('+p.x.toFixed(3)+','+p.y.toFixed(3)+')').join(' '));
+
+    // Passe 1 : R=2.5%, minShift=0.8px
+    const affine1 = affinerParGradient(meilleur.result, blurred, heavyBlur, dw, dh);
+    const delta1 = erreurMoyennePixels(meilleur.result, affine1, dw, dh);
+    if (delta1 > 0.001 && delta1 < 0.10) {
+        log('[Auto-persp] Raffinement P1: delta=' + delta1.toFixed(4));
+        meilleur.result = affine1;
+    } else if (delta1 >= 0.10) {
+        log('[Auto-persp] Raffinement P1 rejete (delta=' + delta1.toFixed(4) + ')');
+    }
+    // Passe 2 : R=1.5%, minShift=0.4px
+    const affine2 = affinerParGradient(meilleur.result, blurred, heavyBlur, dw, dh,
+        { rayon: 0.015, minShift: 0.4, minInlierRatio: 0.5, minDot: 0.97, centerWeight: true });
+    const delta2 = erreurMoyennePixels(meilleur.result, affine2, dw, dh);
+    if (delta2 > 0.0005 && delta2 < 0.05) {
+        log('[Auto-persp] Raffinement P2: delta=' + delta2.toFixed(4));
+        meilleur.result = affine2;
+    } else if (delta2 >= 0.05) {
+        log('[Auto-persp] Raffinement P2 rejete (delta=' + delta2.toFixed(4) + ')');
+    }
+    // Passe 3 : R=1.0%, minShift=0.15px
+    const affine3 = affinerParGradient(meilleur.result, blurred, heavyBlur, dw, dh,
+        { rayon: 0.010, minShift: 0.15, minInlierRatio: 0.6, minDot: 0.985, centerWeight: true });
+    const delta3 = erreurMoyennePixels(meilleur.result, affine3, dw, dh);
+    if (delta3 > 0.0002 && delta3 < 0.015) {
+        log('[Auto-persp] Raffinement P3: delta=' + delta3.toFixed(4));
+        meilleur.result = affine3;
+    } else if (delta3 >= 0.015) {
+        log('[Auto-persp] Raffinement P3 rejete (delta=' + delta3.toFixed(4) + ')');
+    }
+
+    // Visu resultat
+    afficherResultat('cv-resultat', gray, dw, dh, meilleur.result);
+
+    // Attacher les metriques au resultat pour le fallback
+    meilleur.result._support = meilleur.support;
+    meilleur.result._surface = meilleur.surface;
+
+    return meilleur.result;
+}
+
+// ============================================================
+//  RAFFINEMENT DES COINS (post-Hough)
+// ============================================================
+
+/**
+ * Apres la detection initiale (Hough → intersections → quad), raffine chaque
+ * cote du quad en cherchant le vrai bord papier via le gradient local.
+ *
+ * Pour chaque cote :
+ *  1. Echantillonne des points le long du cote (zone centrale 20-80%)
+ *  2. A chaque point, cherche perpendiculairement le gradient le plus fort
+ *     qui est aligne avec la normale du cote (= transition papier/fond)
+ *  3. Calcule le decalage median → decale le cote
+ * Recompute les 4 coins comme intersections des cotes raffines.
+ */
+function raffinerCoins(coins, gray, dw, dh) {
+    const R = Math.max(8, Math.round(Math.min(dw, dh) * 0.04)); // rayon reduit: 4%
+    const N = 20;
+    const checkDist = Math.max(3, Math.round(R * 0.4)); // distance pour verif contraste
+    const pxCoins = coins.map(c => ({ x: c.x * dw, y: c.y * dh }));
+    const refinedSides = [];
+
+    for (let i = 0; i < 4; i++) {
+        const p1 = pxCoins[i];
+        const p2 = pxCoins[(i + 1) % 4];
+        const dx = p2.x - p1.x, dy = p2.y - p1.y;
+        const len = Math.sqrt(dx * dx + dy * dy);
+        if (len < 2) { refinedSides.push({ p1, p2 }); continue; }
+
+        const nx = -dy / len, ny = dx / len; // normale pointe vers l'interieur
+
+        const offsets = [];
+        for (let s = 0; s < N; s++) {
+            const t = 0.2 + (s / (N - 1)) * 0.6;
+            const sx = p1.x + t * dx, sy = p1.y + t * dy;
+
+            let bestScore = 0, bestD = 0;
+            for (let d = -R; d <= R; d++) {
+                const qx = Math.round(sx + nx * d);
+                const qy = Math.round(sy + ny * d);
+                if (qx < 2 || qx >= dw - 2 || qy < 2 || qy >= dh - 2) continue;
+
+                const gx = gray[qy * dw + (qx + 1)] - gray[qy * dw + (qx - 1)];
+                const gy = gray[(qy + 1) * dw + qx] - gray[(qy - 1) * dw + qx];
+                const mag = Math.sqrt(gx * gx + gy * gy);
+                if (mag < 3) continue;
+
+                const align = Math.abs(gx * nx + gy * ny) / mag;
+                if (align < 0.5) continue;
+
+                // Verif contraste : papier (interieur) vs fond (exterieur)
+                // Rejette les bords de texte (papier des deux cotes → faible contraste)
+                const ix = Math.round(qx + nx * checkDist);
+                const iy = Math.round(qy + ny * checkDist);
+                const ox = Math.round(qx - nx * checkDist);
+                const oy = Math.round(qy - ny * checkDist);
+                if (ix < 0 || ix >= dw || iy < 0 || iy >= dh ||
+                    ox < 0 || ox >= dw || oy < 0 || oy >= dh) continue;
+                const inner = gray[iy * dw + ix];
+                const outer = gray[oy * dw + ox];
+                if (Math.abs(inner - outer) < 15) continue;
+
+                const score = mag * align;
+                if (score > bestScore) { bestScore = score; bestD = d; }
+            }
+            if (bestScore > 0) offsets.push(bestD);
+        }
+
+        if (offsets.length < 5) { refinedSides.push({ p1, p2 }); continue; }
+
+        offsets.sort((a, b) => a - b);
+        const med = offsets[Math.floor(offsets.length / 2)];
+
+        refinedSides.push({
+            p1: { x: p1.x + nx * med, y: p1.y + ny * med },
+            p2: { x: p2.x + nx * med, y: p2.y + ny * med }
+        });
+    }
+
+    // Recomputer les coins comme intersections des cotes raffines adjacents
+    const result = [];
+    for (let i = 0; i < 4; i++) {
+        const sa = refinedSides[(i + 3) % 4]; // cote precedent (finit au coin i)
+        const sb = refinedSides[i];             // cote courant (commence au coin i)
+        const pt = intersectLines2P(sa.p1, sa.p2, sb.p1, sb.p2);
+        result.push(pt ? { x: pt.x / dw, y: pt.y / dh } : coins[i]);
+    }
+
+    // Securite : si le raffinement deplace trop, garder l'original
+    let maxShift = 0;
+    for (let i = 0; i < 4; i++) {
+        const ddx = result[i].x - coins[i].x, ddy = result[i].y - coins[i].y;
+        maxShift = Math.max(maxShift, Math.sqrt(ddx * ddx + ddy * ddy));
+    }
+    if (maxShift > 0.15) return coins;
+
+    return result;
+}
+
+function intersectLines2P(a1, a2, b1, b2) {
+    const d1x = a2.x - a1.x, d1y = a2.y - a1.y;
+    const d2x = b2.x - b1.x, d2y = b2.y - b1.y;
+    const det = d1x * d2y - d1y * d2x;
+    if (Math.abs(det) < 1e-6) return null;
+    const t = ((b1.x - a1.x) * d2y - (b1.y - a1.y) * d2x) / det;
+    return { x: a1.x + t * d1x, y: a1.y + t * d1y };
+}
+
+function erreurMoyennePixels(a, b, dw, dh) {
+    let sum = 0;
+    for (let i = 0; i < 4; i++) {
+        const dx = (a[i].x - b[i].x) * dw, dy = (a[i].y - b[i].y) * dh;
+        sum += Math.sqrt(dx * dx + dy * dy);
+    }
+    return sum / 4 / Math.sqrt(dw * dw + dh * dh);
+}
+
+/**
+ * Raffine chaque cote du quad en trouvant les maxima de gradient (sur blurred)
+ * perpendiculairement au cote, filtres par contraste papier/fond (sur heavyBlur).
+ * Ajuste une droite PCA (total least squares) sur les points edge trouves.
+ * Recalcule les coins comme intersections des droites ajustees.
+ */
+function affinerParGradient(coins, blurred, heavyBlur, dw, dh, opts) {
+    const rayonPct = (opts && opts.rayon) || 0.025;
+    const minShift = (opts && opts.minShift) || 0.8;
+    const minInlierRatio = (opts && opts.minInlierRatio) || 0.4;
+    const minDot = (opts && opts.minDot) || 0.95;
+    const useCenterWeight = (opts && opts.centerWeight) || false;
+    const R = Math.max(5, Math.round(Math.min(dw, dh) * rayonPct));
+    const N = (opts && opts.N) || 30;
+    const contrastMin = 15;
+    const pxCoins = coins.map(c => ({ x: c.x * dw, y: c.y * dh }));
+    const fittedLines = [];
+
+    for (let i = 0; i < 4; i++) {
+        const p1 = pxCoins[i];
+        const p2 = pxCoins[(i + 1) % 4];
+        const sdx = p2.x - p1.x, sdy = p2.y - p1.y;
+        const len = Math.sqrt(sdx * sdx + sdy * sdy);
+        if (len < 2) { fittedLines.push({ p1, p2 }); continue; }
+
+        const nx = -sdy / len, ny = sdx / len;
+        const origDirX = sdx / len, origDirY = sdy / len;
+
+        // Collecter les points edge le long du cote
+        // Zone et poids adaptes selon le mode (P1: large, P2: centre)
+        const margin = useCenterWeight ? 0.15 : 0.10;
+        const span = 1 - 2 * margin;
+        const edgePts = [];
+        for (let s = 0; s < N; s++) {
+            const tNorm = s / (N - 1);  // 0..1 sur la zone d'echantillonnage
+            const t = margin + tNorm * span;
+            const sx = p1.x + t * sdx, sy = p1.y + t * sdy;
+            const centerW = useCenterWeight ? (0.5 + 0.5 * Math.sin(Math.PI * tNorm)) : 1;
+
+            // Passe 1 : trouver le meilleur pixel (entier) et stocker les scores voisins
+            let bestScore = 0, bestD = 0;
+            const scores = new Float32Array(2 * R + 1);  // scores[d+R] = score at offset d
+            for (let d = -R; d <= R; d++) {
+                const qx = Math.round(sx + nx * d);
+                const qy = Math.round(sy + ny * d);
+                if (qx < 2 || qx >= dw - 2 || qy < 2 || qy >= dh - 2) continue;
+
+                const gx = blurred[qy * dw + (qx + 1)] - blurred[qy * dw + (qx - 1)];
+                const gy = blurred[(qy + 1) * dw + qx] - blurred[(qy - 1) * dw + qx];
+                const mag = Math.sqrt(gx * gx + gy * gy);
+                if (mag < 3) continue;
+
+                const align = Math.abs(gx * nx + gy * ny) / mag;
+                if (align < 0.5) continue;
+
+                const checkR = Math.max(3, Math.round(R * 0.4));
+                const ix = Math.round(qx + nx * checkR);
+                const iy = Math.round(qy + ny * checkR);
+                const ox = Math.round(qx - nx * checkR);
+                const oy = Math.round(qy - ny * checkR);
+                if (ix < 0 || ix >= dw || iy < 0 || iy >= dh ||
+                    ox < 0 || ox >= dw || oy < 0 || oy >= dh) continue;
+                const contrast = Math.abs(heavyBlur[iy * dw + ix] - heavyBlur[oy * dw + ox]);
+                if (contrast < contrastMin) continue;
+
+                const score = mag * align;
+                scores[d + R] = score;
+                if (score > bestScore) { bestScore = score; bestD = d; }
+            }
+            if (bestScore <= 0) continue;
+
+            // Passe 2 : interpolation sub-pixel via parabole sur 3 voisins
+            let subD = bestD;
+            const idx = bestD + R;
+            if (idx > 0 && idx < scores.length - 1) {
+                const sL = scores[idx - 1], sC = scores[idx], sR = scores[idx + 1];
+                if (sL < sC && sR < sC && (sL + sR) > 0) {
+                    const denom = sL - 2 * sC + sR;
+                    if (Math.abs(denom) > 0.001) {
+                        const offset = 0.5 * (sL - sR) / denom;
+                        if (Math.abs(offset) < 0.5) subD = bestD + offset;
+                    }
+                }
+            }
+
+            const ex = sx + nx * subD;
+            const ey = sy + ny * subD;
+            edgePts.push({ x: ex, y: ey, w: bestScore * centerW });
+        }
+
+        if (edgePts.length < 8) { fittedLines.push({ p1, p2 }); continue; }
+
+        // Rejection des outliers par IQR sur la distance perpendiculaire
+        const perpDists = edgePts.map(p => (p.x - p1.x) * nx + (p.y - p1.y) * ny);
+        const sorted = perpDists.slice().sort((a, b) => a - b);
+        const q1 = sorted[Math.floor(sorted.length * 0.25)];
+        const q3 = sorted[Math.floor(sorted.length * 0.75)];
+        const iqr = q3 - q1;
+        const lo = q1 - 1.5 * iqr, hi = q3 + 1.5 * iqr;
+        const inliers = edgePts.filter((_, j) => perpDists[j] >= lo && perpDists[j] <= hi);
+
+        if (inliers.length < 6) { fittedLines.push({ p1, p2 }); continue; }
+
+        // PCA ponderee (total least squares) sur les inliers
+        // Les points avec un gradient fort/aligne ont plus d'influence
+        let wSum = 0, mx = 0, my = 0;
+        for (const p of inliers) { wSum += p.w; mx += p.x * p.w; my += p.y * p.w; }
+        mx /= wSum; my /= wSum;
+
+        let sxx = 0, syy = 0, sxy = 0;
+        for (const p of inliers) {
+            const cx = p.x - mx, cy = p.y - my;
+            sxx += cx * cx * p.w; syy += cy * cy * p.w; sxy += cx * cy * p.w;
+        }
+
+        const theta = 0.5 * Math.atan2(2 * sxy, sxx - syy);
+        const dirX = Math.cos(theta), dirY = Math.sin(theta);
+
+        // Coherence : direction PCA doit etre proche de la direction Hough
+        const dot = Math.abs(dirX * origDirX + dirY * origDirY);
+        if (dot < minDot) { fittedLines.push({ p1, p2 }); continue; }
+
+        // Le centre PCA ne doit pas etre trop loin de la ligne originale
+        const centerDist = Math.abs((mx - p1.x) * nx + (my - p1.y) * ny);
+        if (centerDist > R) { fittedLines.push({ p1, p2 }); continue; }
+
+        // Confiance : ne raffiner que si le signal est clair
+        // - Au moins 60% des echantillons ont trouve un point edge
+        const inlierRatio = inliers.length / N;
+        if (inlierRatio < minInlierRatio) { fittedLines.push({ p1, p2 }); continue; }
+        // - Le deplacement doit etre significatif pour eviter les micro-ajustements
+        if (centerDist < minShift) { fittedLines.push({ p1, p2 }); continue; }
+
+        fittedLines.push({
+            p1: { x: mx - dirX * len, y: my - dirY * len },
+            p2: { x: mx + dirX * len, y: my + dirY * len }
+        });
+    }
+
+    // Coins = intersections des cotes ajustes adjacents
+    const result = [];
+    for (let i = 0; i < 4; i++) {
+        const sa = fittedLines[(i + 3) % 4];
+        const sb = fittedLines[i];
+        const pt = intersectLines2P(sa.p1, sa.p2, sb.p1, sb.p2);
+        result.push(pt ? { x: pt.x / dw, y: pt.y / dh } : coins[i]);
+    }
+
+    // Securite : si un coin bouge trop, garder l'original pour CE coin
+    for (let i = 0; i < 4; i++) {
+        const ddx = result[i].x - coins[i].x, ddy = result[i].y - coins[i].y;
+        if (Math.sqrt(ddx * ddx + ddy * ddy) > 0.10) {
+            result[i] = coins[i];
+        }
+    }
+
+    return result;
+}
+
+// ============================================================
+//  AJUSTEMENT DES BORDS PAR MOINDRES CARRES
+// ============================================================
+
+/**
+ * Affine chaque cote du quad en ajustant une droite (moindres carres / PCA)
+ * sur les pixels boundary de la segmentation proches du cote.
+ *
+ * Contrairement a raffinerCoins (gradient sur image brute → attrape le texte),
+ * on utilise les pixels boundary issus du heavy blur → deja filtres,
+ * seule la frontiere papier/fond subsiste.
+ *
+ * Les coins sont recalcules comme intersections des droites ajustees.
+ * Cela deduit les coins meme quand ils sont hors cadre.
+ */
+function affinerBordsParMoindresCarres(coins, boundary, dw, dh) {
+    const tol = Math.max(4, Math.round(Math.min(dw, dh) * 0.02));
+    const pxCoins = coins.map(c => ({ x: c.x * dw, y: c.y * dh }));
+
+    // Collecter les positions boundary une seule fois
+    const bndPts = [];
+    for (let y = 0; y < dh; y++)
+        for (let x = 0; x < dw; x++)
+            if (boundary[y * dw + x]) bndPts.push({ x, y });
+
+    const fittedLines = [];
+
+    for (let i = 0; i < 4; i++) {
+        const p1 = pxCoins[i];
+        const p2 = pxCoins[(i + 1) % 4];
+        const dx = p2.x - p1.x, dy = p2.y - p1.y;
+        const len = Math.sqrt(dx * dx + dy * dy);
+        if (len < 2) { fittedLines.push({ p1, p2 }); continue; }
+
+        const nx = -dy / len, ny = dx / len; // normale au cote
+        // Direction originale normalisee (pour verif coherence)
+        const origDirX = dx / len, origDirY = dy / len;
+
+        // Pixels boundary proches de ce cote (bande serree, extension reduite)
+        const pts = [];
+        for (const bp of bndPts) {
+            const vx = bp.x - p1.x, vy = bp.y - p1.y;
+            const dist = Math.abs(vx * nx + vy * ny);
+            if (dist > tol) continue;
+            const proj = (vx * dx + vy * dy) / (len * len);
+            if (proj < -0.05 || proj > 1.05) continue;
+            pts.push(bp);
+        }
+
+        if (pts.length < 10) { fittedLines.push({ p1, p2 }); continue; }
+
+        // Ajustement par moindres carres (PCA — total least squares)
+        let mx = 0, my = 0;
+        for (const p of pts) { mx += p.x; my += p.y; }
+        mx /= pts.length; my /= pts.length;
+
+        let sxx = 0, syy = 0, sxy = 0;
+        for (const p of pts) {
+            const cx = p.x - mx, cy = p.y - my;
+            sxx += cx * cx; syy += cy * cy; sxy += cx * cy;
+        }
+
+        // Direction principale (eigenvecteur de la plus grande valeur propre)
+        const theta = 0.5 * Math.atan2(2 * sxy, sxx - syy);
+        const dirX = Math.cos(theta), dirY = Math.sin(theta);
+
+        // Verif coherence : la direction PCA doit etre proche de la direction Hough
+        // (produit scalaire > cos(10°) ≈ 0.985)
+        const dot = Math.abs(dirX * origDirX + dirY * origDirY);
+        if (dot < 0.985) { fittedLines.push({ p1, p2 }); continue; }
+
+        // Deux points eloignes sur la droite ajustee (stabilite intersection)
+        fittedLines.push({
+            p1: { x: mx - dirX * len, y: my - dirY * len },
+            p2: { x: mx + dirX * len, y: my + dirY * len }
+        });
+    }
+
+    // Coins = intersections des cotes ajustes adjacents
+    const result = [];
+    for (let i = 0; i < 4; i++) {
+        const sa = fittedLines[(i + 3) % 4]; // cote precedent (finit au coin i)
+        const sb = fittedLines[i];             // cote courant (commence au coin i)
+        const pt = intersectLines2P(sa.p1, sa.p2, sb.p1, sb.p2);
+        result.push(pt ? { x: pt.x / dw, y: pt.y / dh } : coins[i]);
+    }
+
+    // Securite : si un coin bouge trop, garder l'original
+    let maxShift = 0;
+    for (let i = 0; i < 4; i++) {
+        const ddx = result[i].x - coins[i].x, ddy = result[i].y - coins[i].y;
+        maxShift = Math.max(maxShift, Math.sqrt(ddx * ddx + ddy * ddy));
+    }
+    if (maxShift > 0.15) return coins;
+
+    return result;
+}
+
+// ============================================================
+//  VISUALISATION DES ETAPES
+// ============================================================
+
+function afficherEtape(canvasId, data, w, h, mode) {
+    const cv = document.getElementById(canvasId);
+    cv.width = w; cv.height = h;
+    const ctx = cv.getContext('2d');
+    const img = ctx.createImageData(w, h);
+    for (let i = 0; i < w * h; i++) {
+        const v = mode === 'binary' ? (data[i] ? 255 : 0) : Math.round(data[i]);
+        img.data[i*4] = v; img.data[i*4+1] = v; img.data[i*4+2] = v; img.data[i*4+3] = 255;
+    }
+    ctx.putImageData(img, 0, 0);
+}
+
+function afficherHough(canvasId, gray, w, h, lines) {
+    const cv = document.getElementById(canvasId);
+    cv.width = w; cv.height = h;
+    const ctx = cv.getContext('2d');
+    // Fond : image grise attenuee
+    const img = ctx.createImageData(w, h);
+    for (let i = 0; i < w*h; i++) {
+        const v = Math.round(gray[i] * 0.3);
+        img.data[i*4]=v; img.data[i*4+1]=v; img.data[i*4+2]=v; img.data[i*4+3]=255;
+    }
+    ctx.putImageData(img, 0, 0);
+    // Lignes Hough
+    const maxVotes = lines.length > 0 ? lines[0].votes : 1;
+    for (const line of lines.slice(0, 50)) {
+        const rad = line.theta * Math.PI / 180;
+        const cos = Math.cos(rad), sin = Math.sin(rad);
+        const alpha = Math.min(1, line.votes / maxVotes * 2);
+        ctx.strokeStyle = 'rgba(255,100,50,' + alpha.toFixed(2) + ')';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        if (Math.abs(sin) > 0.01) {
+            const x0 = 0, y0 = (line.rho - x0*cos) / sin;
+            const x1 = w, y1 = (line.rho - x1*cos) / sin;
+            ctx.moveTo(x0, y0); ctx.lineTo(x1, y1);
+        } else {
+            const x = line.rho / cos;
+            ctx.moveTo(x, 0); ctx.lineTo(x, h);
+        }
+        ctx.stroke();
+    }
+}
+
+const CLUSTER_COLORS = ['#f87171','#60a5fa','#4ade80','#fbbf24','#c084fc','#f472b6','#22d3ee','#fb923c'];
+
+function afficherClusters(canvasId, gray, w, h, clusters) {
+    const cv = document.getElementById(canvasId);
+    cv.width = w; cv.height = h;
+    const ctx = cv.getContext('2d');
+    const img = ctx.createImageData(w, h);
+    for (let i = 0; i < w*h; i++) {
+        const v = Math.round(gray[i] * 0.2);
+        img.data[i*4]=v; img.data[i*4+1]=v; img.data[i*4+2]=v; img.data[i*4+3]=255;
+    }
+    ctx.putImageData(img, 0, 0);
+    clusters.forEach((cluster, ci) => {
+        const color = CLUSTER_COLORS[ci % CLUSTER_COLORS.length];
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.5;
+        for (const line of cluster.slice(0, 15)) {
+            const rad = line.theta * Math.PI / 180;
+            const cos = Math.cos(rad), sin = Math.sin(rad);
+            ctx.globalAlpha = Math.min(1, line.votes / cluster[0].votes);
+            ctx.beginPath();
+            if (Math.abs(sin) > 0.01) {
+                ctx.moveTo(0, (line.rho) / sin);
+                ctx.lineTo(w, (line.rho - w*cos) / sin);
+            } else {
+                ctx.moveTo(line.rho / cos, 0);
+                ctx.lineTo(line.rho / cos, h);
+            }
+            ctx.stroke();
+        }
+    });
+    ctx.globalAlpha = 1;
+}
+
+function afficherResultat(canvasId, gray, w, h, coins) {
+    const cv = document.getElementById(canvasId);
+    cv.width = w; cv.height = h;
+    const ctx = cv.getContext('2d');
+    const img = ctx.createImageData(w, h);
+    for (let i = 0; i < w*h; i++) {
+        const v = Math.round(gray[i]);
+        img.data[i*4]=v; img.data[i*4+1]=v; img.data[i*4+2]=v; img.data[i*4+3]=255;
+    }
+    ctx.putImageData(img, 0, 0);
+    if (!coins) return;
+    ctx.strokeStyle = '#60a5fa';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(coins[0].x*w, coins[0].y*h);
+    for (let i = 1; i <= 4; i++) ctx.lineTo(coins[i%4].x*w, coins[i%4].y*h);
+    ctx.stroke();
+    coins.forEach((c, i) => {
+        ctx.fillStyle = '#60a5fa';
+        ctx.beginPath();
+        ctx.arc(c.x*w, c.y*h, 4, 0, Math.PI*2);
+        ctx.fill();
+    });
+}
+
+// ============================================================
+//  CANVAS PRINCIPAL — affichage + interaction coins
+// ============================================================
+
+// Marge hors-cadre (fraction de l'image) pour placer des coins hors image
+const MARGE_CANVAS = 0.25;
+
+function dessinerCanvasPrincipal() {
+    const cv = document.getElementById('canvas-principal');
+    const ctx = cv.getContext('2d');
+    if (!imageElement) {
+        cv.width = 800; cv.height = 600;
+        ctx.fillStyle = '#0a1628';
+        ctx.fillRect(0, 0, cv.width, cv.height);
+        ctx.fillStyle = '#4a6a8a';
+        ctx.textAlign = 'center';
+        ctx.font = '14px sans-serif';
+        ctx.fillText('Charger une image pour commencer', cv.width/2, cv.height/2);
+        return;
+    }
+
+    // Fit image dans le canvas avec marge autour
+    const zone = document.getElementById('zone-image');
+    const maxW = zone.clientWidth - 20, maxH = zone.clientHeight - 20;
+    // L'image occupe la zone centrale ; la marge entoure
+    const totalFactor = 1 + 2 * MARGE_CANVAS; // 1.5x pour 25% de marge de chaque cote
+    const scale = Math.min(maxW / (imageElement.width * totalFactor), maxH / (imageElement.height * totalFactor), 1);
+    const imgW = Math.round(imageElement.width * scale);
+    const imgH = Math.round(imageElement.height * scale);
+    const margeX = Math.round(imgW * MARGE_CANVAS);
+    const margeY = Math.round(imgH * MARGE_CANVAS);
+
+    cv.width = imgW + 2 * margeX;
+    cv.height = imgH + 2 * margeY;
+
+    // Fond hors-cadre
+    ctx.fillStyle = '#111827';
+    ctx.fillRect(0, 0, cv.width, cv.height);
+
+    // Bordure de l'image (pour reperer le cadre)
+    ctx.strokeStyle = '#1e3a5c';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    ctx.strokeRect(margeX - 0.5, margeY - 0.5, imgW + 1, imgH + 1);
+    ctx.setLineDash([]);
+
+    // Image
+    ctx.drawImage(imageElement, margeX, margeY, imgW, imgH);
+
+    // Stocker les dimensions pour getCanvasPos
+    cv._imgRect = { x: margeX, y: margeY, w: imgW, h: imgH };
+
+    // Coins detectes (bleu)
+    if (coinsDetectes) {
+        dessinerQuad(ctx, coinsDetectes, imgW, imgH, margeX, margeY, '#60a5fa', 2);
+        dessinerPoignees(ctx, coinsDetectes, imgW, imgH, margeX, margeY, '#60a5fa', !modeEtiquette);
+    }
+    // Coins corrects / etiquettes (vert)
+    if (coinsCorrects) {
+        dessinerQuad(ctx, coinsCorrects, imgW, imgH, margeX, margeY, '#4ade80', 2);
+        dessinerPoignees(ctx, coinsCorrects, imgW, imgH, margeX, margeY, '#4ade80', modeEtiquette);
+    }
+
+    majCoinInfo();
+}
+
+function dessinerQuad(ctx, coins, w, h, ox, oy, color, lineWidth) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineWidth;
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.moveTo(ox + coins[0].x * w, oy + coins[0].y * h);
+    for (let i = 1; i <= 4; i++) ctx.lineTo(ox + coins[i%4].x * w, oy + coins[i%4].y * h);
+    ctx.stroke();
+}
+
+function dessinerPoignees(ctx, coins, w, h, ox, oy, color, actif) {
+    const r = actif ? 8 : 5;
+    const labels = ['TL', 'TR', 'BR', 'BL'];
+    coins.forEach((c, i) => {
+        ctx.fillStyle = actif ? color : color + '60';
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(ox + c.x * w, oy + c.y * h, r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = '#fff';
+        ctx.font = '10px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(labels[i], ox + c.x*w, oy + c.y*h - r - 3);
+    });
+}
+
+function majCoinInfo() {
+    const el = document.getElementById('coin-info');
+    if (!coinsDetectes && !coinsCorrects) { el.innerHTML = ''; return; }
+    const labels = ['TL', 'TR', 'BR', 'BL'];
+    let html = '';
+    labels.forEach((label, i) => {
+        html += '<div class="coin-ligne"><span>' + label + '</span>';
+        if (coinsDetectes) html += '<span class="coin-detecte">D:(' + coinsDetectes[i].x.toFixed(3) + ',' + coinsDetectes[i].y.toFixed(3) + ')</span>';
+        if (coinsCorrects) html += '<span class="coin-correct">C:(' + coinsCorrects[i].x.toFixed(3) + ',' + coinsCorrects[i].y.toFixed(3) + ')</span>';
+        if (coinsDetectes && coinsCorrects) {
+            const dx = coinsDetectes[i].x - coinsCorrects[i].x;
+            const dy = coinsDetectes[i].y - coinsCorrects[i].y;
+            const err = Math.sqrt(dx*dx + dy*dy);
+            html += '<span class="coin-erreur">e=' + err.toFixed(3) + '</span>';
+        }
+        html += '</div>';
+    });
+    if (coinsDetectes && coinsCorrects) {
+        const errMoy = erreurMoyenne(coinsDetectes, coinsCorrects);
+        html += '<div class="coin-ligne" style="margin-top:4px;border-top:1px solid #1a3a5c;padding-top:4px;"><span>Erreur moy.</span><span class="coin-erreur">' + errMoy.toFixed(4) + '</span></div>';
+    }
+    el.innerHTML = html;
+}
+
+function erreurMoyenne(detectes, corrects) {
+    // Essayer les 4 rotations des coins detectes pour trouver la meilleure correspondance.
+    // Le quad peut etre correct mais avec les coins TL/TR/BR/BL assignes differemment.
+    let bestErr = Infinity;
+    for (let rot = 0; rot < 4; rot++) {
+        let sum = 0;
+        for (let i = 0; i < 4; i++) {
+            const di = (i + rot) % 4;
+            const dx = detectes[di].x - corrects[i].x;
+            const dy = detectes[di].y - corrects[i].y;
+            sum += Math.sqrt(dx*dx + dy*dy);
+        }
+        const err = sum / 4;
+        if (err < bestErr) bestErr = err;
+    }
+    return bestErr;
+}
+
+// ============================================================
+//  INTERACTIONS CANVAS
+// ============================================================
+
+function getCanvasPos(e) {
+    const cv = document.getElementById('canvas-principal');
+    const rect = cv.getBoundingClientRect();
+    const ir = cv._imgRect;
+    if (!ir) return { x: 0, y: 0 };
+    // Convertir position pixel ecran → fraction image (0-1 = dans l'image, hors = negatif ou >1)
+    const scaleX = cv.width / rect.width;
+    const scaleY = cv.height / rect.height;
+    const canvasX = (e.clientX - rect.left) * scaleX;
+    const canvasY = (e.clientY - rect.top) * scaleY;
+    return { x: (canvasX - ir.x) / ir.w, y: (canvasY - ir.y) / ir.h };
+}
+
+function trouverPoignee(pos, coins) {
+    if (!coins) return -1;
+    const seuil = 0.04;
+    for (let i = 0; i < 4; i++) {
+        const dx = pos.x - coins[i].x, dy = pos.y - coins[i].y;
+        if (Math.sqrt(dx*dx + dy*dy) < seuil) return i;
+    }
+    return -1;
+}
+
+document.getElementById('canvas-principal').addEventListener('pointerdown', (e) => {
+    const pos = getCanvasPos(e);
+    const coins = modeEtiquette ? coinsCorrects : coinsDetectes;
+    poigneeActive = trouverPoignee(pos, coins);
+    if (poigneeActive >= 0) e.target.setPointerCapture(e.pointerId);
+});
+
+document.getElementById('canvas-principal').addEventListener('pointermove', (e) => {
+    if (poigneeActive < 0) return;
+    const pos = getCanvasPos(e);
+    const coins = modeEtiquette ? coinsCorrects : coinsDetectes;
+    if (coins) {
+        coins[poigneeActive] = { x: Math.max(-1, Math.min(2, pos.x)), y: Math.max(-1, Math.min(2, pos.y)) };
+        dessinerCanvasPrincipal();
+    }
+});
+
+document.getElementById('canvas-principal').addEventListener('pointerup', () => { poigneeActive = -1; });
+
+// ============================================================
+//  ACTIONS PRINCIPALES
+// ============================================================
+
+function detecter() {
+    if (!imageElement) return;
+    clearLog();
+    const P = getParams();
+    const cv = document.createElement('canvas');
+    cv.width = imageElement.width; cv.height = imageElement.height;
+    cv.getContext('2d').drawImage(imageElement, 0, 0);
+    const t0 = performance.now();
+    coinsDetectes = detecterCoinsDocument(cv, P);
+    // Fallback: si echec ou support trop bas, reessayer a 400px
+    if (P.detectSize > 400 && (!coinsDetectes || coinsDetectes._support < 0.6)) {
+        log('[Auto-persp] Fallback a 400px' + (coinsDetectes ? ' (support=' + coinsDetectes._support.toFixed(2) + ')' : ' (aucun resultat)'));
+        const fb = detecterCoinsDocument(cv, {...P, detectSize: 400});
+        if (fb && (!coinsDetectes || fb._support > coinsDetectes._support)) {
+            coinsDetectes = fb;
+        }
+    }
+    const dt = performance.now() - t0;
+    log('[Auto-persp] Temps: ' + dt.toFixed(0) + 'ms');
+    if (!coinsDetectes) {
+        log('[Auto-persp] ECHEC');
+        coinsDetectes = [{ x:0, y:0 }, { x:1, y:0 }, { x:1, y:1 }, { x:0, y:1 }];
+    }
+    // Si pas d'etiquettes, copier les coins detectes comme point de depart
+    if (!coinsCorrects) {
+        coinsCorrects = coinsDetectes.map(c => ({ ...c }));
+    }
+    dessinerCanvasPrincipal();
+}
+
+function validerCoins() {
+    if (!imageActive || !coinsCorrects) return;
+    const errMoy = coinsDetectes ? erreurMoyenne(coinsDetectes, coinsCorrects) : null;
+    let statut = 'non-etiquete';
+    if (errMoy !== null) {
+        if (errMoy < 0.03) statut = 'ok';
+        else if (errMoy < 0.08) statut = 'imprecis';
+        else statut = 'echec';
+    }
+    imageActive.pages = [{
+        coinsCorrects: { tl: coinsCorrects[0], tr: coinsCorrects[1], br: coinsCorrects[2], bl: coinsCorrects[3] },
+        coinsDetectes: coinsDetectes ? { tl: coinsDetectes[0], tr: coinsDetectes[1], br: coinsDetectes[2], bl: coinsDetectes[3] } : null,
+        erreurMoyenne: errMoy,
+        statut: statut
+    }];
+    // Tags
+    const tags = [];
+    document.querySelectorAll('#tags-conditions .tag.actif').forEach(t => tags.push(t.dataset.tag));
+    imageActive.conditions = tags;
+
+    sauvegarderItem(imageActive);
+    majCorpusListe();
+    log('[Banc] Coins valides — statut: ' + statut + (errMoy !== null ? ', erreur: ' + errMoy.toFixed(4) : ''));
+}
+
+function toggleModeEtiquette() {
+    modeEtiquette = !modeEtiquette;
+    const btn = document.getElementById('btn-mode-etiquette');
+    btn.textContent = modeEtiquette ? 'Mode detection' : 'Mode etiquette';
+    btn.className = modeEtiquette ? 'btn btn-succes' : 'btn btn-secondaire';
+    dessinerCanvasPrincipal();
+}
+
+function reinitCoins() {
+    coinsCorrects = coinsDetectes ? coinsDetectes.map(c => ({ ...c })) : [{ x:0, y:0 }, { x:1, y:0 }, { x:1, y:1 }, { x:0, y:1 }];
+    dessinerCanvasPrincipal();
+}
+
+// ============================================================
+//  GESTION DU CORPUS
+// ============================================================
+
+async function ajouterImages(files) {
+    for (const file of files) {
+        const id = 'img-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6);
+        // Stocker comme ArrayBuffer + type MIME (survit aux recharges dans Safari)
+        const arrayBuffer = await file.arrayBuffer();
+        const item = {
+            id,
+            imageData: arrayBuffer,
+            imageType: file.type || 'image/jpeg',
+            imageBlob: null,  // reconstruit a la volee par getImageBlob()
+            imageMeta: { name: file.name, size: file.size },
+            pages: [],
+            conditions: [],
+            nom: file.name
+        };
+        corpus.push(item);
+        await sauvegarderItem(item);
+    }
+    majCorpusListe();
+    // Selectionner la premiere image ajoutee
+    if (corpus.length > 0) selectionnerImage(corpus[corpus.length - files.length]);
+}
+
+// Reconstruit un Blob a partir d'un item (compatible ancien format Blob et nouveau ArrayBuffer)
+function getImageBlob(item) {
+    if (item.imageData) {
+        return new Blob([item.imageData], { type: item.imageType || 'image/jpeg' });
+    }
+    if (item.imageBlob instanceof Blob) {
+        return item.imageBlob;
+    }
+    return null;
+}
+
+function selectionnerImage(item) {
+    imageActive = item;
+    coinsDetectes = null;
+    coinsCorrects = null;
+
+    // Charger coins existants si deja etiquetes
+    if (item.pages && item.pages.length > 0) {
+        const page = item.pages[0];
+        if (page.coinsCorrects) {
+            coinsCorrects = [page.coinsCorrects.tl, page.coinsCorrects.tr, page.coinsCorrects.br, page.coinsCorrects.bl];
+        }
+        if (page.coinsDetectes) {
+            coinsDetectes = [page.coinsDetectes.tl, page.coinsDetectes.tr, page.coinsDetectes.br, page.coinsDetectes.bl];
+        }
+    }
+
+    // Tags
+    document.querySelectorAll('#tags-conditions .tag').forEach(t => {
+        t.classList.toggle('actif', (item.conditions || []).includes(t.dataset.tag));
+    });
+
+    // Charger l'image
+    const blob = getImageBlob(item);
+    if (!blob) { document.getElementById('info-image').textContent = 'Image corrompue'; return; }
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = () => {
+        imageElement = img;
+        document.getElementById('info-image').textContent = item.nom + ' (' + img.width + '×' + img.height + ')';
+        dessinerCanvasPrincipal();
+        URL.revokeObjectURL(url);
+    };
+    img.src = url;
+
+    majCorpusListe();
+}
+
+function supprimerImage(id) {
+    corpus = corpus.filter(c => c.id !== id);
+    supprimerItem(id);
+    if (imageActive && imageActive.id === id) {
+        imageActive = null; imageElement = null; coinsDetectes = null; coinsCorrects = null;
+        dessinerCanvasPrincipal();
+    }
+    majCorpusListe();
+}
+
+function majCorpusListe() {
+    const el = document.getElementById('corpus-liste');
+    el.innerHTML = '';
+    for (const item of corpus) {
+        const div = document.createElement('div');
+        div.className = 'corpus-item' + (imageActive && imageActive.id === item.id ? ' actif' : '');
+        const statut = item.pages && item.pages.length > 0 ? item.pages[0].statut : 'non-etiquete';
+        const statutLabel = { ok: 'OK', imprecis: 'Imprecis', echec: 'Echec', 'non-etiquete': 'Non etiquete' };
+        div.innerHTML = '<div class="info"><div class="nom">' + item.nom + '</div><div class="statut statut-' + statut + '">' + (statutLabel[statut] || statut) +
+            (item.pages && item.pages.length > 0 && item.pages[0].erreurMoyenne !== null ? ' (e=' + item.pages[0].erreurMoyenne.toFixed(3) + ')' : '') + '</div></div>' +
+            '<button class="supprimer" data-id="' + item.id + '">×</button>';
+        div.addEventListener('click', (e) => {
+            if (e.target.classList.contains('supprimer')) { supprimerImage(e.target.dataset.id); return; }
+            selectionnerImage(item);
+        });
+        el.appendChild(div);
+    }
+}
+
+// ============================================================
+//  BANC DE TEST
+// ============================================================
+
+function nomCourt(nom) {
+    const mNom = nom.match(/^(.+?)_\d{6,7}_/);
+    const surname = mNom ? mNom[1] : nom.substring(0, 15);
+    const mTime = nom.match(/(\d{2}h\d{2}m\d{2}s)/);
+    const time = mTime ? ' ' + mTime[1] : '';
+    return (surname + time).substring(0, 25);
+}
+
+async function lancerBanc() {
+    const P = getParams();
+    const etiquetes = corpus.filter(item => item.pages && item.pages.length > 0 && item.pages[0].coinsCorrects);
+    if (etiquetes.length === 0) { alert('Aucune image etiquetee dans le corpus.'); return; }
+
+    clearLog();
+    log('=== BANC DE TEST === ' + etiquetes.length + ' images');
+    log('-'.repeat(55));
+
+    let totalOk = 0, totalImprecis = 0, totalEchec = 0;
+    let sommeErreur = 0;
+    const parCondition = {};
+    const t0 = performance.now();
+
+    for (const item of etiquetes) {
+        // Charger image via createImageBitmap
+        let img;
+        const blob = getImageBlob(item);
+        if (!blob) { log(nomCourt(item.nom).padEnd(26) + '\u2192 ERREUR    (corrompue)'); totalEchec++; sommeErreur += 1.0; continue; }
+        try {
+            img = await createImageBitmap(blob);
+        } catch(e) {
+            log(nomCourt(item.nom).padEnd(26) + '\u2192 ERREUR    (non chargeable)');
+            totalEchec++; sommeErreur += 1.0; continue;
+        }
+
+        const cv = document.createElement('canvas');
+        cv.width = img.width; cv.height = img.height;
+        cv.getContext('2d').drawImage(img, 0, 0);
+
+        benchMode = true; benchBuffer = [];
+        let detectes = detecterCoinsDocument(cv, {...P});
+        let usedFallback = false;
+        // Fallback: si echec ou support trop bas a haute resolution, reessayer a 400px
+        if (P.detectSize > 400 && (!detectes || detectes._support < 0.6)) {
+            const bufOrig = benchBuffer;
+            benchBuffer = [];
+            const detectes2 = detecterCoinsDocument(cv, {...P, detectSize: 400});
+            if (detectes2 && (!detectes || detectes2._support > (detectes ? detectes._support : 0))) {
+                detectes = detectes2;
+                usedFallback = true;
+            } else {
+                benchBuffer = bufOrig;
+            }
+        }
+        benchMode = false;
+        const corrects = [item.pages[0].coinsCorrects.tl, item.pages[0].coinsCorrects.tr, item.pages[0].coinsCorrects.br, item.pages[0].coinsCorrects.bl];
+
+        let err = 1.0;
+        let statut = 'echec';
+        if (detectes) {
+            err = erreurMoyenne(detectes, corrects);
+            if (err < 0.03) statut = 'ok';
+            else if (err < 0.08) statut = 'imprecis';
+            else statut = 'echec';
+        }
+
+        // Mettre a jour l'item
+        item.pages[0].coinsDetectes = detectes ? { tl: detectes[0], tr: detectes[1], br: detectes[2], bl: detectes[3] } : null;
+        item.pages[0].erreurMoyenne = err;
+        item.pages[0].statut = statut;
+        sauvegarderItem(item);
+
+        if (statut === 'ok') totalOk++;
+        else if (statut === 'imprecis') totalImprecis++;
+        else totalEchec++;
+        sommeErreur += err;
+
+        // Par condition
+        for (const cond of (item.conditions || [])) {
+            if (!parCondition[cond]) parCondition[cond] = { ok: 0, total: 0 };
+            parCondition[cond].total++;
+            if (statut === 'ok') parCondition[cond].ok++;
+        }
+
+        const nc = nomCourt(item.nom);
+        let nbCl = '-', nbL = '-', sup = '-', surf = '-';
+        for (const bl of benchBuffer) {
+            let m;
+            if ((m = bl.match(/Clusters: (\d+)/))) nbCl = m[1];
+            if ((m = bl.match(/lignes=(\d+)/))) nbL = m[1];
+            if ((m = bl.match(/sup=([0-9.]+)/))) sup = m[1];
+            if ((m = bl.match(/surf=([0-9.]+)/))) surf = m[1];
+        }
+        const fb = usedFallback ? ' fb' : '';
+        log(nc.padEnd(26) + '→ ' + statut.padEnd(10) + 'e=' + err.toFixed(3) + '  [' + nbCl + 'cl ' + nbL + 'L A=' + surf + ' s=' + sup + fb + ']');
+    }
+
+    const dt = performance.now() - t0;
+    const total = etiquetes.length;
+    const taux = totalOk / total;
+
+    log('-'.repeat(55));
+    log('OK: ' + totalOk + '/' + total + ' (' + (taux*100).toFixed(1) + '%)  |  Imprecis: ' + totalImprecis + '  |  Echec: ' + totalEchec);
+    log('Erreur moy: ' + (sommeErreur/total).toFixed(4) + '  |  Temps: ' + (dt/1000).toFixed(1) + 's');
+
+    // Afficher resultats
+    document.getElementById('resultats-banc').style.display = 'block';
+    document.getElementById('score-global').textContent = (taux*100).toFixed(0) + '%';
+    document.getElementById('score-global').style.color = taux >= 0.8 ? '#4ade80' : taux >= 0.5 ? '#fbbf24' : '#f87171';
+
+    let detailHtml = '<div class="score-ligne"><span>OK</span><span class="statut-ok">' + totalOk + '/' + total + '</span></div>';
+    detailHtml += '<div class="score-ligne"><span>Imprecis</span><span class="statut-imprecis">' + totalImprecis + '</span></div>';
+    detailHtml += '<div class="score-ligne"><span>Echec</span><span class="statut-echec">' + totalEchec + '</span></div>';
+    detailHtml += '<div class="score-ligne"><span>Erreur moy.</span><span>' + (sommeErreur/total).toFixed(4) + '</span></div>';
+    detailHtml += '<div class="score-ligne"><span>Temps</span><span>' + dt.toFixed(0) + 'ms</span></div>';
+    for (const [cond, data] of Object.entries(parCondition)) {
+        detailHtml += '<div class="score-ligne"><span>' + cond + '</span><span>' + data.ok + '/' + data.total + '</span></div>';
+    }
+    document.getElementById('score-detail').innerHTML = detailHtml;
+
+    // Sauvegarder dans le journal
+    const journalEntry = {
+        id: 'run-' + Date.now(),
+        date: new Date().toISOString(),
+        params: {...P},
+        score: taux,
+        ok: totalOk, imprecis: totalImprecis, echec: totalEchec,
+        total: total,
+        erreurMoyenne: sommeErreur / total,
+        temps: dt,
+        parCondition: parCondition,
+        notes: ''
+    };
+    dernierRunId = journalEntry.id;
+    await sauvegarderJournal(journalEntry);
+    await afficherJournal();
+
+    majCorpusListe();
+}
+
+// ============================================================
+//  EXPORT / IMPORT CORPUS
+// ============================================================
+
+async function exporterCorpus() {
+    const data = [];
+    for (const item of corpus) {
+        const blob = getImageBlob(item);
+        if (!blob) { log('[Export] Image corrompue, ignoree: ' + item.nom); continue; }
+        const base64 = await blobToBase64(blob);
+        // Exporter sans imageData (ArrayBuffer) — on utilise le base64
+        const exported = { ...item, imageBlob: base64 };
+        delete exported.imageData;
+        data.push(exported);
+    }
+    const json = JSON.stringify(data);
+    const blob = new Blob([json], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'corpus-perspective-' + new Date().toISOString().slice(0,10) + '.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+}
+
+function importerCorpus() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = async () => {
+        const text = await input.files[0].text();
+        const data = JSON.parse(text);
+        for (const item of data) {
+            // Convertir base64 en ArrayBuffer (nouveau format fiable)
+            const blob = base64ToBlob(item.imageBlob);
+            const arrayBuffer = await blob.arrayBuffer();
+            item.imageData = arrayBuffer;
+            item.imageType = blob.type || 'image/jpeg';
+            item.imageBlob = null;
+            corpus.push(item);
+            await sauvegarderItem(item);
+        }
+        majCorpusListe();
+        log('[Import] ' + data.length + ' images importees');
+    };
+    input.click();
+}
+
+function blobToBase64(blob) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.readAsDataURL(blob);
+    });
+}
+
+function base64ToBlob(dataUrl) {
+    const [header, data] = dataUrl.split(',');
+    const mime = header.match(/:(.*?);/)[1];
+    const binary = atob(data);
+    const arr = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) arr[i] = binary.charCodeAt(i);
+    return new Blob([arr], { type: mime });
+}
+
+// ============================================================
+//  DRAG & DROP + FILE INPUT
+// ============================================================
+
+const dropZone = document.getElementById('drop-zone');
+const fileInput = document.getElementById('file-input');
+
+dropZone.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', async () => { await ajouterImages([...fileInput.files]); fileInput.value = ''; });
+
+dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    const files = [...e.dataTransfer.files].filter(f => f.type.startsWith('image/'));
+    if (files.length > 0) ajouterImages(files);
+});
+
+// Tags toggle
+document.querySelectorAll('#tags-conditions .tag').forEach(tag => {
+    tag.addEventListener('click', () => tag.classList.toggle('actif'));
+});
+
+// ============================================================
+//  INIT
+// ============================================================
+
+window.addEventListener('resize', () => { if (imageElement) dessinerCanvasPrincipal(); });
+
+(async function init() {
+    await ouvrirDB();
+    await chargerCorpus();
+    majCorpusListe();
+    dessinerCanvasPrincipal();
+    await afficherJournal();
+})();
+</script>
+</body>
+</html>

@@ -347,6 +347,10 @@
 
         const nbImages = queue.filter(f => f.estImage).length;
 
+        // Compteurs de statuts pour le header principal
+        const evaluationsHeader = fichiersTravaux.length > 0 ? (obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || []) : [];
+        const resumeGlobal = fichiersTravaux.length > 0 ? genererResumeStatuts(fichiersTravaux, evaluationsHeader) : '';
+
         // Zero-state pour les novices
         const aideActive = typeof estAideContextuelleActive === 'function' && estAideContextuelleActive();
         const zeroStateHTML = (fichiersTravaux.length === 0 && queue.length === 0 && aideActive) ? `
@@ -456,7 +460,7 @@
                 <!-- Section fichiers importes (toujours visible) -->
                 <div class="pipeline-section-importes">
                     <div class="pipeline-section-importes-header">
-                        <h4>Fichiers importés (${fichiersTravaux.length})${fichiersTravaux.length > 0 ? ` <span class="texte-muted u-texte-petit">— ${tailleFormatee} · ${fsapiActif ? 'Disque local' : 'IndexedDB'}</span>` : ''}</h4>
+                        <h4>Fichiers importés (${fichiersTravaux.length})${fichiersTravaux.length > 0 ? ` <span class="texte-muted u-texte-petit">— ${tailleFormatee} · ${fsapiActif ? 'Disque local' : 'IndexedDB'}</span> <span class="travaux-compteurs-groupe">${resumeGlobal}</span>` : ''}</h4>
                         ${fichiersTravaux.length > 0 ? `
                             <button class="btn btn-secondaire btn-petit"
                                     onclick="travauxUI.ouvrirModalTransfert()"
@@ -1545,14 +1549,41 @@
     }
 
     /**
-     * Genere la grille de fichiers importes, regroupes par production
-     * @param {Array} fichiers - Les fichiers
-     * @returns {string} HTML
+     * Determine le statut d'un fichier (importe, annote, evalue)
      */
+    function determinerStatutFichier(f, evaluations) {
+        const evaluation = evaluations.find(e =>
+            e.etudiantDA === f.etudiantDA && e.productionId === f.productionId
+        );
+        if (evaluation) return 'evalue';
+        const annotation = travauxStockage.obtenirAnnotationFichier(f.id);
+        if (annotation && annotationContientDuContenu(annotation)) return 'annote';
+        return 'importe';
+    }
+
+    /**
+     * Genere un resume compact des statuts pour un groupe de fichiers
+     */
+    function genererResumeStatuts(fichiers, evaluations) {
+        let nbEvalue = 0, nbAnnote = 0, nbImporte = 0;
+        fichiers.forEach(f => {
+            const s = determinerStatutFichier(f, evaluations);
+            if (s === 'evalue') nbEvalue++;
+            else if (s === 'annote') nbAnnote++;
+            else nbImporte++;
+        });
+        const parts = [];
+        if (nbEvalue > 0) parts.push(`<span class="travaux-compteur-pill evalue">${nbEvalue} évalué${nbEvalue > 1 ? 's' : ''}</span>`);
+        if (nbAnnote > 0) parts.push(`<span class="travaux-compteur-pill annote">${nbAnnote} annoté${nbAnnote > 1 ? 's' : ''}</span>`);
+        if (nbImporte > 0) parts.push(`<span class="travaux-compteur-pill importe">${nbImporte} importé${nbImporte > 1 ? 's' : ''}</span>`);
+        return parts.join(' ');
+    }
+
     function genererGrilleFichiers(fichiers, action) {
         if (fichiers.length === 0) return '';
 
         const productions = obtenirDonneesSelonMode(cle('productions'));
+        const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
 
         // Grouper par productionId
         const groupes = {};
@@ -1583,7 +1614,8 @@
         productions.forEach(p => {
             const g = groupes[p.id];
             if (!g || g.length === 0) return;
-            html += `<h5 class="travaux-groupe-production-titre">${echapperHtml(p.titre || p.nom || p.id)} (${g.length})</h5>`;
+            const resume = genererResumeStatuts(g, evaluations);
+            html += `<h5 class="travaux-groupe-production-titre">${echapperHtml(p.titre || p.nom || p.id)} (${g.length}) <span class="travaux-compteurs-groupe">${resume}</span></h5>`;
             html += `<div class="travaux-badges-groupe" data-production-id="${p.id}">`;
             g.forEach(f => { html += genererBadgeFichierImporte(f, action); });
             html += '</div>';
@@ -1593,7 +1625,8 @@
         // Fichiers sans production
         const sansProduction = groupes['__aucune__'];
         if (sansProduction && sansProduction.length > 0) {
-            html += `<h5 class="travaux-groupe-production-titre">Non associés (${sansProduction.length})</h5>`;
+            const resume = genererResumeStatuts(sansProduction, evaluations);
+            html += `<h5 class="travaux-groupe-production-titre">Non associés (${sansProduction.length}) <span class="travaux-compteurs-groupe">${resume}</span></h5>`;
             html += '<div class="travaux-badges-groupe" data-production-id="__aucune__">';
             sansProduction.forEach(f => { html += genererBadgeFichierImporte(f, action); });
             html += '</div>';
@@ -2822,6 +2855,11 @@
         // Marquer le conteneur en mode eval (pour CSS)
         conteneurDoc.classList.add('mode-eval-actif');
 
+        // Capturer les sélections sauvegardées AVANT le setup (qui déclenche des change
+        // events via preRemplirEvaluation → memoriserSelectionsEvaluation écrase le DB)
+        const savedRaw = (typeof db !== 'undefined') ? db.getSync('dernieresSelectionsEvaluation', null) : null;
+        const selectionsCache = savedRaw ? ((typeof savedRaw === 'string') ? JSON.parse(savedRaw) : savedRaw) : null;
+
         // Peupler les dropdowns (les fonctions d'evaluation.js remplissent les selects)
         if (typeof chargerListeEtudiantsEval === 'function') chargerListeEtudiantsEval();
         if (typeof chargerGroupesEval === 'function') chargerGroupesEval();
@@ -2885,26 +2923,31 @@
         }
 
         // Restaurer grille/échelle/cartouche si aucune évaluation existante ne les a remplis
+        // Utilise selectionsCache (capturé avant le setup) pour éviter les valeurs écrasées
         // Délai suffisant pour que preRemplirEvaluation ait fini son chaînage
         setTimeout(() => {
+            if (!selectionsCache) return;
             const selG = document.getElementById('selectGrille1');
-            // Ne restaurer que si la grille est vide (pas d'évaluation existante chargée)
-            if (selG && !selG.value && typeof restaurerSelectionsEvaluation === 'function') {
-                restaurerSelectionsEvaluation();
-            } else if (selG && selG.value) {
-                // Grille déjà remplie, restaurer seulement échelle/cartouche si vides
-                const selE = document.getElementById('selectEchelle1');
-                const selC = document.getElementById('selectCartoucheEval');
-                const saved = db.getSync('dernieresSelectionsEvaluation', null);
-                const s = (typeof saved === 'string') ? JSON.parse(saved) : saved;
-                if (s) {
-                    if (selE && !selE.value && s.echelle) selE.value = s.echelle;
-                    if (selC && !selC.value && s.cartouche) {
-                        selC.value = s.cartouche;
-                        selC.dispatchEvent(new Event('change', { bubbles: true }));
-                    }
-                }
+            const selE = document.getElementById('selectEchelle1');
+            const selC = document.getElementById('selectCartoucheEval');
+
+            // Restaurer la grille si vide
+            if (selG && !selG.value && selectionsCache.grille) {
+                selG.value = selectionsCache.grille;
+                selG.dispatchEvent(new Event('change', { bubbles: true }));
             }
+
+            // Restaurer échelle et cartouche si vides (avec délai pour laisser
+            // chargerGrilleSelectionnee() repeupler les options cartouche)
+            setTimeout(() => {
+                if (selE && !selE.value && selectionsCache.echelle) {
+                    selE.value = selectionsCache.echelle;
+                }
+                if (selC && !selC.value && selectionsCache.cartouche) {
+                    selC.value = selectionsCache.cartouche;
+                    selC.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }, 200);
         }, 2500);
 
         // Peupler la palette jetons

@@ -129,6 +129,14 @@
             type: 'forme',
             epaisseurDefaut: 2
         },
+        ondule: {
+            id: 'ondule',
+            nom: 'Ondulé',
+            icone: '〰',
+            curseur: 'crosshair',
+            type: 'forme',
+            epaisseurDefaut: 2
+        },
         crochet: {
             id: 'crochet',
             nom: 'Crochet',
@@ -717,7 +725,7 @@
         html += '<div class="travaux-palette-label">Formes</div>';
         html += '<div class="travaux-palette-outils">';
 
-        const outilsFormes = ['cercle', 'fleche', 'rectangle', 'ligne'];
+        const outilsFormes = ['cercle', 'fleche', 'rectangle', 'ligne', 'ondule'];
         outilsFormes.forEach(id => {
             const outil = OUTILS[id];
             const actif = outilActif === id ? ' actif' : '';

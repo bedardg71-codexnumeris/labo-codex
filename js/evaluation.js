@@ -1978,6 +1978,9 @@ function sauvegarderEvaluation() {
 
     afficherNotificationSucces(`Évaluation sauvegardée : ${evaluation.etudiantNom} - ${evaluation.productionNom}`);
 
+    // Mettre à jour les badges (pills) dans la barre de fichiers
+    majBadgesApresEvaluation();
+
     // 🔄 Recalculer les indices C et P après sauvegarde
     if (typeof calculerEtStockerIndicesCP === 'function') {
         calculerEtStockerIndicesCP();
@@ -1987,6 +1990,28 @@ function sauvegarderEvaluation() {
     if (typeof initialiserListeEvaluations === 'function') {
         setTimeout(() => initialiserListeEvaluations(), 150);
     }
+}
+
+/**
+ * Met à jour les badges (pills) du fichier actif après sauvegarde d'évaluation.
+ * Passe la pill de "IMPORTÉ"/"ANNOTÉ"/"EN COURS" à "ÉVALUÉ" (vert).
+ */
+function majBadgesApresEvaluation() {
+    const fichier = (typeof travauxVisionneuse !== 'undefined' && travauxVisionneuse.getFichierActuel)
+        ? travauxVisionneuse.getFichierActuel() : null;
+    if (!fichier) return;
+
+    document.querySelectorAll(`.travaux-badge-importe[data-fichier-id="${fichier.id}"]`).forEach(badge => {
+        const pill = badge.querySelector('.travaux-badge-pill');
+        if (!pill) return;
+        pill.textContent = 'ÉVALUÉ';
+        pill.className = 'travaux-badge-pill evalue';
+        // Mettre à jour l'état d'origine stocké (pour la restauration lors du changement de fichier)
+        if (pill.dataset.origTexte !== undefined) {
+            pill.dataset.origTexte = 'ÉVALUÉ';
+            pill.dataset.origClasse = 'evalue';
+        }
+    });
 }
 
 /* ===============================
@@ -3622,11 +3647,12 @@ function sauvegarderSelectionsEvaluation() {
  * Appelée lors du passage à un nouvel étudiant
  */
 function restaurerSelectionsEvaluation() {
-    const selectionsJson = db.getSync('dernieresSelectionsEvaluation', null);
-    if (!selectionsJson) return;
+    const selectionsRaw = db.getSync('dernieresSelectionsEvaluation', null);
+    if (!selectionsRaw) return;
 
     try {
-        const selections = JSON.parse(selectionsJson);
+        // Supporter les deux formats : objet (memoriser) et string JSON (sauvegarder)
+        const selections = (typeof selectionsRaw === 'string') ? JSON.parse(selectionsRaw) : selectionsRaw;
 
         // Restaurer les selects
         const selectProduction = document.getElementById('selectProduction1');
@@ -4926,6 +4952,9 @@ function sauvegarderEvaluationModifiee() {
     }
 
     afficherNotificationSucces(`Évaluation modifiée : ${evaluations[indexEval].etudiantNom} - ${evaluations[indexEval].productionNom}`);
+
+    // Mettre à jour les badges (pills) dans la barre de fichiers
+    majBadgesApresEvaluation();
 
     // Réinitialiser le mode modification
     delete window.evaluationEnCours.idModification;

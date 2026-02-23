@@ -25,7 +25,7 @@
 
 - [ ] **Evaluation sans travaux importes** : S'assurer que le module d'evaluation fonctionne meme si aucun travail n'est charge (importe). Contexte : jusqu'a present, l'evaluation se faisait dans GoodNotes ; desormais elle se fera directement dans l'application. Le flux doit supporter l'evaluation manuelle sans fichier PDF/image importe.
 
-- [ ] **Info-bulles et pratique guidee (Annotation/Evaluation)** : Ajouter le systeme d'info-bulles contextuelles et de pratique guidee aux sections Annotation et Evaluation, comme pour les autres modules.
+- [x] **Info-bulles et pratique guidee (Annotation/Evaluation)** ✅ COMPLÉTÉ (22 fév 2026) : 25 info-bulles ajoutées couvrant les cartes métriques, checkboxes rétroaction, boutons d'action, barre d'outils annotation, pipeline d'import et zone d'archivage.
 
 ### Priorite haute - Cartes mentales et Calendrier (21 fev 2026)
 

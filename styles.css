@@ -20042,6 +20042,23 @@ body.mode-clair .barre-etudiant.tracked-4 {
     font-weight: 600;
 }
 
+.travaux-compteurs-groupe {
+    font-weight: 400;
+    margin-left: 4px;
+}
+
+.travaux-compteur-pill {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: var(--radius-moyen);
+    font-size: 0.7rem;
+    font-weight: 600;
+    vertical-align: middle;
+}
+.travaux-compteur-pill.evalue { background: var(--vert-succes, #28a745); color: #fff; }
+.travaux-compteur-pill.annote { background: var(--bleu-clair, #6aacb8); color: #fff; }
+.travaux-compteur-pill.importe { background: var(--turquoise-500, #2da89e); color: #fff; }
+
 /* ===============================
    MODALE TRANSFERT FICHIERS
    =============================== */
@@ -20458,19 +20475,26 @@ body.mode-clair .splitter-handle.splitter-active { background: rgba(3, 46, 92, 0
 }
 .annot-layout-flex .travaux-palette-flottante::after { display: none; }
 .annot-layout-flex .travaux-palette-barre { cursor: default; }
-.annot-layout-flex .travaux-palette-contenu { max-height: none; flex: 1; }
+.annot-layout-flex .travaux-palette-contenu { max-height: none; flex: 1; gap: 4px; padding: 6px; }
 
-/* Boutons outils : grille compacte en icônes seules */
+/* Boutons outils : flex compact avec retour à la ligne */
 .annot-layout-flex .travaux-palette-outils {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(32px, 1fr));
+    display: flex;
+    flex-wrap: wrap;
     gap: 3px;
 }
 .annot-layout-flex .travaux-btn-outil {
-    padding: 4px 2px;
-    font-size: 10px;
-    min-height: 26px;
-    justify-content: center;
+    padding: 3px 6px;
+    font-size: 0.68rem;
+    min-height: 24px;
+}
+/* Sections compactes */
+.annot-layout-flex .travaux-palette-section {
+    margin-bottom: 2px;
+}
+.annot-layout-flex .travaux-palette-label {
+    font-size: 0.6rem;
+    margin-bottom: 1px;
 }
 /* Couleurs : pastilles légèrement réduites */
 .annot-layout-flex .travaux-btn-couleur {
