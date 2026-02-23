@@ -2618,6 +2618,8 @@
             if (annotColDoc && canvasContainer && conteneurDoc) {
                 conteneurDoc.appendChild(canvasContainer);
             }
+            // Retirer mode-annot-actif pendant le mode évaluation
+            if (conteneurDoc) conteneurDoc.classList.remove('mode-annot-actif');
             masquerPalettesAnnotation();
             afficherPalettesEval(fichier);
             if (btnAnnoter) btnAnnoter.classList.remove('actif');
@@ -2632,6 +2634,11 @@
             modeCourant = 'annoter';
             masquerPalettesEval();
             afficherPalettesAnnotation();
+            // Remettre mode-annot-actif si le layout annotation existe
+            const conteneurDocA = document.getElementById('travaux-conteneur-document');
+            if (conteneurDocA && document.getElementById('annot-layout-flex')) {
+                conteneurDocA.classList.add('mode-annot-actif');
+            }
             if (btnAnnoter) btnAnnoter.classList.add('actif');
             if (btnEvaluer) btnEvaluer.classList.remove('actif');
             // Pleine largeur par defaut en mode annotation
