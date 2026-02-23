@@ -14708,7 +14708,6 @@ body.mode-clair #travaux-indicateur-page {
     align-items: center;
     gap: 3px;
     cursor: pointer;
-    white-space: nowrap;
 }
 .eval-options-radios {
     display: flex;
@@ -20350,12 +20349,14 @@ body.mode-clair .barre-etudiant.tracked-4 {
     overflow-y: auto;
     display: flex;
     flex-direction: column;
+    min-width: 0;
 }
 .eval-layout-flex .eval-col-retro #travaux-eval-retroaction {
     flex: 1;
     display: flex;
     flex-direction: column;
     min-height: 0;
+    min-width: 0;
 }
 .eval-layout-flex .eval-col-retro .zone-retroaction {
     flex: 1;
@@ -20363,11 +20364,18 @@ body.mode-clair .barre-etudiant.tracked-4 {
     flex-direction: column;
     height: auto;
     min-height: 0;
+    min-width: 0;
 }
 .eval-layout-flex .eval-col-retro #retroactionFinale1 {
     flex: 1;
     min-height: 120px;
+    min-width: 0;
+    width: 100%;
     resize: none;
+}
+.eval-layout-flex .eval-col-retro .eval-options-retroaction {
+    min-width: 0;
+    overflow: hidden;
 }
 
 /* Jetons integres dans Parametres */
