@@ -350,7 +350,23 @@ function choisirCategorieCulturelle() {
  * @returns {Object} - Mapping DA réel → pseudonyme
  */
 function genererMappingAnonyme() {
-    let mapping = db.getSync('mapping_anonymisation', {});
+    // Utiliser un mapping namespacé par trimestre pour éviter le mélange entre sessions
+    const trId = typeof window.obtenirTrimestreId === 'function' ? window.obtenirTrimestreId() : '';
+    const cleMapping = trId ? `${trId}_mapping_anonymisation` : 'mapping_anonymisation';
+    let mapping = db.getSync(cleMapping, {});
+
+    // Migration : si ancien mapping global existe et pas de mapping namespacé, migrer
+    if (Object.keys(mapping).length === 0 && trId) {
+        const ancienMapping = db.getSync('mapping_anonymisation', {});
+        if (Object.keys(ancienMapping).length > 0) {
+            mapping = ancienMapping;
+        }
+    }
+
+    // Lire les étudiants actuels DIRECTEMENT (éviter récursion avec obtenirDonneesSelonMode)
+    const cleEtudiants = cle('groupeEtudiants');
+    const etudiants = db.getSync(cleEtudiants, []);
+    const etudiantsReels = etudiants.filter(e => e.groupe !== '9999');
 
     // Vérifier si le mapping existe ET utilise le nouveau format
     if (Object.keys(mapping).length > 0) {
@@ -358,33 +374,45 @@ function genererMappingAnonyme() {
         const premierDA = Object.keys(mapping)[0];
         const premierMapping = mapping[premierDA];
 
-        // Ancien format si: nom n'est pas vide OU prenom ne commence pas par "Élève" OU pas de propriété numero/ordreAffichage
         const estAncienFormat = premierMapping.nom ||
                                !premierMapping.prenom?.startsWith('Élève') ||
                                !premierMapping.hasOwnProperty('numero') ||
                                !premierMapping.hasOwnProperty('ordreAffichage');
 
         if (estAncienFormat) {
-            console.log('🔄 Ancien format de mapping détecté, régénération avec format "Élève X"...');
-            // Forcer la régénération
+            doitRegenerer = true;
             mapping = {};
         } else {
-            // Format correct, retourner tel quel
+            // Vérifier que TOUS les étudiants actuels sont couverts
+            const manquants = etudiantsReels.filter(e => !mapping[e.da]);
+            if (manquants.length > 0) {
+                // Étendre le mapping existant avec les étudiants manquants
+                const numerosExistants = Object.values(mapping).map(m => m.numero);
+                let prochainNumero = numerosExistants.length > 0 ? Math.max(...numerosExistants) + 1 : 1;
+                let prochainOrdre = Object.values(mapping).reduce((max, m) => Math.max(max, m.ordreAffichage || 0), 0) + 1;
+
+                manquants.forEach(etudiant => {
+                    mapping[etudiant.da] = {
+                        nom: '',
+                        prenom: `Élève ${prochainNumero}`,
+                        nomComplet: `Élève ${prochainNumero}`,
+                        numero: prochainNumero,
+                        ordreAffichage: prochainOrdre
+                    };
+                    prochainNumero++;
+                    prochainOrdre++;
+                });
+
+                db.setSync(cleMapping, mapping);
+            }
             return mapping;
         }
+    } else {
+        doitRegenerer = true;
     }
 
     // Créer un nouveau mapping avec format "Élève X"
-    // IMPORTANT : Lire DIRECTEMENT depuis storage pour éviter la récursion avec obtenirDonneesSelonMode
-    // ✅ NAMESPACING (Beta 95.5) : Utiliser cle() pour le namespacing par trimestre
-    const cleEtudiants = cle('groupeEtudiants');
-    const etudiants = db.getSync(cleEtudiants, []);
-
-    // Filtrer pour exclure le groupe 9999 (demo)
-    const etudiantsReels = etudiants.filter(e => e.groupe !== '9999');
-
     // Créer un tableau de numéros et le mélanger (Fisher-Yates shuffle)
-    // pour éviter de reconnaître les étudiants en début/fin de liste alphabétique
     const numeros = Array.from({ length: etudiantsReels.length }, (_, i) => i + 1);
     for (let i = numeros.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -399,7 +427,6 @@ function genererMappingAnonyme() {
     }
 
     etudiantsReels.forEach((etudiant, index) => {
-        // Utiliser un numéro aléatoire: "Élève 17", "Élève 3", etc.
         const numero = numeros[index];
 
         mapping[etudiant.da] = {
@@ -407,12 +434,11 @@ function genererMappingAnonyme() {
             prenom: `Élève ${numero}`,
             nomComplet: `Élève ${numero}`,
             numero: numero,
-            ordreAffichage: ordresAffichage[index]  // Pour trier aléatoirement
+            ordreAffichage: ordresAffichage[index]
         };
     });
 
-    db.setSync('mapping_anonymisation', mapping);
-    console.log(`✅ Mapping anonymisation créé avec ${etudiantsReels.length} étudiants (numéros aléatoires)`);
+    db.setSync(cleMapping, mapping);
     return mapping;
 }
 
@@ -505,10 +531,20 @@ function obtenirDonneesSelonMode(cle) {
     // Depuis Beta 92, le mode Assisté utilise les mêmes données réelles que Normal
     // (Primo aide l'utilisateur avec ses vraies données, pas des données simulées)
 
+    // ✅ CORRECTION (Beta 97.11) : Extraire la clé de base (sans namespace trimestre)
+    // Certains appelants passent cle('groupeEtudiants') = 'h2026_groupeEtudiants' (pré-namespacé),
+    // d'autres passent 'groupeEtudiants' (clé de base). Les vérifications logiques (coursId,
+    // anonymisation) doivent toujours comparer avec la clé de base.
+    let cleBase = cle;
+    const trimestreId = typeof window.obtenirTrimestreId === 'function' ? window.obtenirTrimestreId() : null;
+    if (trimestreId && cle.startsWith(trimestreId + '_')) {
+        cleBase = cle.substring(trimestreId.length + 1);
+    }
+
     // Déterminer la valeur par défaut selon le type de clé
     // IMPORTANT: 'presences' est un TABLEAU, pas un objet (utilisé avec .forEach dans profil-etudiant.js)
     const clesSontObjets = ['indicesAssiduiteDetailles', 'indicesCP', 'indicesAssiduite', 'calendrierComplet', 'snapshots'];
-    const valeurParDefaut = clesSontObjets.includes(cle) ? {} : [];
+    const valeurParDefaut = clesSontObjets.includes(cleBase) ? {} : [];
 
     // Utiliser window.cle() pour le namespacing par trimestre (paramètre cle shadowed)
     const cleEffective = typeof window.cle === 'function' ? window.cle(cle) : cle;
@@ -519,7 +555,7 @@ function obtenirDonneesSelonMode(cle) {
     // Ceci corrige le bug de contamination entre cours/trimestres
     // 🆕 BETA 95.3 (10 jan 2026) : Supporte le mode "cours" (tous groupes fusionnés)
     const clesAvecCoursId = ['groupeEtudiants', 'productions', 'presences', 'evaluationsSauvegardees'];
-    if (clesAvecCoursId.includes(cle) && Array.isArray(donnees)) {
+    if (clesAvecCoursId.includes(cleBase) && Array.isArray(donnees)) {
         const coursActif = db.getSync('infoCours', null);
         if (coursActif && coursActif.id) {
             const totalAvant = donnees.length;
@@ -530,7 +566,7 @@ function obtenirDonneesSelonMode(cle) {
                 // Compatibilité : ancien format sans coursId
                 if (!item.coursId) {
                     // Pour étudiants : vérifier groupe (sauf en mode cours)
-                    if (cle === 'groupeEtudiants') {
+                    if (cleBase === 'groupeEtudiants') {
                         // En mode cours, accepter tous les étudiants (pas de filtre groupe)
                         if (estModeCours) {
                             return true;
@@ -552,16 +588,14 @@ function obtenirDonneesSelonMode(cle) {
             });
             if (donnees.length !== totalAvant) {
                 const modeLabel = estModeCours ? 'tous groupes' : `groupe ${coursActif.groupe}`;
-                console.log(`📋 [coursId] Filtré ${cle}: ${donnees.length}/${totalAvant} pour cours ${coursActif.id} (${modeLabel})`);
+                console.log(`📋 [coursId] Filtré ${cleBase}: ${donnees.length}/${totalAvant} pour cours ${coursActif.id} (${modeLabel})`);
             }
         }
     }
 
     // Si mode anonymisation, anonymiser selon le type de données
     if (mode === MODES.ANONYMISATION) {
-        console.log(`🎭 [ANONYMISATION] Mode actif, anonymisation de "${cle}"...`);
-        donnees = anonymiserDonnees(cle, donnees);
-        console.log(`🎭 [ANONYMISATION] ${cle} anonymisé:`, Array.isArray(donnees) ? `${donnees.length} éléments` : 'objet');
+        donnees = anonymiserDonnees(cleBase, donnees);
     }
 
     return donnees;
@@ -635,9 +669,11 @@ function definirOptionAffichageDA(afficherDAReel) {
  * Utile quand la liste d'étudiants change
  */
 function reinitialiserMappingAnonyme() {
+    // Supprimer le mapping namespacé (nouveau format) et le global (ancien format)
+    const trId = typeof window.obtenirTrimestreId === 'function' ? window.obtenirTrimestreId() : '';
+    if (trId) db.removeSync(`${trId}_mapping_anonymisation`);
     db.removeSync('mapping_anonymisation');
-    db.removeSync('mapping_groupes_anonymes'); // 🆕 BETA 96.1: Aussi réinitialiser le mapping des groupes
-    console.log('🔄 Mapping d\'anonymisation réinitialisé');
+    db.removeSync('mapping_groupes_anonymes');
 }
 
 /**
@@ -696,28 +732,25 @@ function anonymiserDonnees(cle, donnees) {
             // Anonymiser et ajouter l'ordre d'affichage
             const etudiantsAnonymes = donnees.map(etudiant => ({
                 ...etudiant,
-                // IMPORTANT: Garder le DA réel pour les calculs, créer daAffichage pour l'interface
-                daReel: etudiant.da, // Toujours garder le vrai DA
-                daAffichage: afficherDAReel ? etudiant.da : 'ANONYME', // Pour affichage seulement
-                nom: mapping[etudiant.da]?.nom || '',
-                prenom: mapping[etudiant.da]?.prenom || etudiant.prenom,
-                groupeReel: etudiant.groupe, // 🆕 Garder le groupe réel pour le filtrage par cours
+                daReel: etudiant.da,
+                daAffichage: afficherDAReel ? etudiant.da : 'ANONYME',
+                nom: mapping[etudiant.da]?.nom ?? '',
+                prenom: mapping[etudiant.da]?.prenom || 'Anonyme',
+                groupeReel: etudiant.groupe,
                 groupe: etudiant.groupe ? anonymiserGroupe(etudiant.groupe) : etudiant.groupe,
-                ordreAffichage: mapping[etudiant.da]?.ordreAffichage ?? 999 // Pour tri aléatoire
+                ordreAffichage: mapping[etudiant.da]?.ordreAffichage ?? 999
             }));
 
-            // Trier selon l'ordre d'affichage aléatoire pour éviter de reconnaître par la position
+            // Trier selon l'ordre d'affichage aléatoire
             const etudiantsTries = etudiantsAnonymes.sort((a, b) => a.ordreAffichage - b.ordreAffichage);
-            console.log(`🎭 [anonymiserDonnees] Étudiants anonymisés:`, etudiantsTries.length, 'étudiants. Exemple:', etudiantsTries[0] ? {da: etudiantsTries[0].daAffichage, nom: etudiantsTries[0].nom, prenom: etudiantsTries[0].prenom} : 'aucun');
             return etudiantsTries;
 
         case 'evaluationsSauvegardees':
             return donnees.map(evaluation => {
-                const nomAnonyme = mapping[evaluation.etudiantDA]?.nomComplet || evaluation.etudiantNom;
+                const nomAnonyme = mapping[evaluation.etudiantDA]?.nomComplet || 'Anonyme';
                 return {
                     ...evaluation,
-                    // IMPORTANT: Garder le DA réel pour les calculs
-                    etudiantDAReel: evaluation.etudiantDA, // Toujours garder le vrai DA
+                    etudiantDAReel: evaluation.etudiantDA,
                     etudiantDAffichage: afficherDAReel ? evaluation.etudiantDA : 'ANONYME',
                     etudiantNom: nomAnonyme,
                     groupe: evaluation.groupe ? anonymiserGroupe(evaluation.groupe) : evaluation.groupe
@@ -725,14 +758,12 @@ function anonymiserDonnees(cle, donnees) {
             });
 
         case 'presences':
-            // Les présences gardent le DA mais on peut anonymiser le nom si présent
             return donnees.map(presence => ({
                 ...presence,
-                // IMPORTANT: Garder le DA réel pour les calculs
-                daReel: presence.da, // Toujours garder le vrai DA
+                daReel: presence.da,
                 daAffichage: afficherDAReel ? presence.da : 'ANONYME',
-                nom: mapping[presence.da]?.nom || '',
-                prenom: mapping[presence.da]?.prenom || presence.prenom
+                nom: mapping[presence.da]?.nom ?? '',
+                prenom: mapping[presence.da]?.prenom || 'Anonyme'
             }));
 
         default:

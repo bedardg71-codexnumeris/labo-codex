@@ -10,6 +10,18 @@
 
     var CHANGELOG = [
         {
+            version: 'Beta 97.11',
+            date: '22 f\u00e9vrier',
+            couleur: 'orange',
+            titre: 'Correction du mode Anonymisation',
+            items: [
+                '<strong>Pr\u00e9noms anonymis\u00e9s</strong> : Les pr\u00e9noms r\u00e9els \u00e9taient visibles en mode anonymisation. Le mapping est maintenant namespace\u0301 par trimestre et auto-extensible quand des \u00e9tudiants sont ajout\u00e9s.',
+                '<strong>Badges anonymis\u00e9s</strong> : Les badges de fichiers import\u00e9s (Importer, Annoter, \u00c9valuer) affichent d\u00e9sormais \u00ab\u00a0\u00c9l\u00e8ve X\u00a0\u00bb au lieu du vrai nom.',
+                '<strong>DA masqu\u00e9 partout</strong> : Les listes d\u00e9roulantes, l\u2019autocomplete et les labels affichent ANONYME au lieu du DA r\u00e9el.',
+                '<strong>Fallback s\u00e9curitaire</strong> : Si un \u00e9tudiant est absent du mapping, \u00ab\u00a0Anonyme\u00a0\u00bb s\u2019affiche au lieu du vrai pr\u00e9nom.'
+            ]
+        },
+        {
             version: 'Beta 97.10',
             date: '22 f\u00e9vrier',
             couleur: 'orange',
