@@ -471,11 +471,7 @@ async function executerExport() {
     }
 
     const json = JSON.stringify(donnees, null, 2);
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    
-    const a = document.createElement('a');
-    a.href = url;
+
     // 🆕 FIX #56 (1er fév 2026) : Horodatage complet pour éviter confusion entre exports
     const now = new Date();
     const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}-${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}-${String(now.getSeconds()).padStart(2,'0')}`;
@@ -487,15 +483,53 @@ async function executerExport() {
     const auteur = (typeof auteurBrut === 'string') ? auteurBrut : '';
     const auteurNettoye = auteur ? auteur.replace(/[^a-z0-9]/gi, '-').toLowerCase() : '';
     const prefixeConfidentiel = contientDonneesPerso ? 'CONFIDENTIEL-' : '';
-    const nomFichier = auteurNettoye
-        ? `sauvegarde-${prefixeConfidentiel}${auteurNettoye}-${dateStr}.json`
-        : `sauvegarde-${prefixeConfidentiel}monitorage-${dateStr}.json`;
-    a.download = nomFichier;
-    a.click();
-    URL.revokeObjectURL(url);
-    
+
+    // 🆕 Export ZIP si fichiersTravaux est sélectionné (inclut les blobs)
+    const cleFT = clesSelectionnees.find(c => c.includes('fichiersTravaux'));
+    if (cleFT && typeof JSZip !== 'undefined' && typeof travauxStockage !== 'undefined') {
+        const zip = new JSZip();
+        zip.file('donnees.json', json);
+
+        const metadonnees = donnees[cleFT] || [];
+        if (Array.isArray(metadonnees)) {
+            const dossier = zip.folder('travaux');
+            let nbBlobs = 0;
+            for (const f of metadonnees) {
+                const blobTravail = await travauxStockage.recupererBlob(f.id);
+                if (blobTravail) {
+                    const ext = (f.nomFichier || 'bin').split('.').pop();
+                    dossier.file(f.id + '.' + ext, blobTravail);
+                    nbBlobs++;
+                }
+            }
+            console.log(`📦 [Export ZIP] ${nbBlobs} blob(s) ajouté(s) au ZIP`);
+        }
+
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        const nomFichier = auteurNettoye
+            ? `sauvegarde-${prefixeConfidentiel}${auteurNettoye}-${dateStr}.zip`
+            : `sauvegarde-${prefixeConfidentiel}monitorage-${dateStr}.zip`;
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(zipBlob);
+        a.download = nomFichier;
+        a.click();
+        URL.revokeObjectURL(a.href);
+    } else {
+        // Export JSON classique (sans fichiersTravaux)
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const nomFichier = auteurNettoye
+            ? `sauvegarde-${prefixeConfidentiel}${auteurNettoye}-${dateStr}.json`
+            : `sauvegarde-${prefixeConfidentiel}monitorage-${dateStr}.json`;
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = nomFichier;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
     fermerModalExport();
-    
+
     if (typeof afficherNotificationSucces === 'function') {
         afficherNotificationSucces(`Export réussi : ${clesSelectionnees.length} clé(s) exportée(s)`);
     } else {
@@ -530,14 +564,62 @@ function previsualiserImport(event) {
     const fichier = event.target.files[0];
     if (!fichier) return;
 
-    // Limite de taille (50 Mo)
-    if (fichier.size > TAILLE_MAX_IMPORT_OCTETS) {
-        alert(`Fichier trop volumineux (${(fichier.size / 1024 / 1024).toFixed(1)} Mo).\n\nLimite : 50 Mo.`);
+    // 🆕 Limite de taille augmentée pour les ZIP (200 Mo)
+    const limiteOctets = (fichier.name.endsWith('.zip') || fichier.type === 'application/zip')
+        ? 200 * 1024 * 1024
+        : TAILLE_MAX_IMPORT_OCTETS;
+
+    if (fichier.size > limiteOctets) {
+        alert(`Fichier trop volumineux (${(fichier.size / 1024 / 1024).toFixed(1)} Mo).\n\nLimite : ${(limiteOctets / 1024 / 1024).toFixed(0)} Mo.`);
         return;
     }
 
     const nomFichier = fichier.name;
 
+    // 🆕 Détection format ZIP (backup avec fichiers travaux)
+    if ((fichier.name.endsWith('.zip') || fichier.type === 'application/zip') && typeof JSZip !== 'undefined') {
+        const lecteurZip = new FileReader();
+        lecteurZip.onload = async function(e) {
+            try {
+                const zip = await JSZip.loadAsync(e.target.result);
+                const jsonEntry = zip.file('donnees.json');
+                if (!jsonEntry) {
+                    alert('ZIP invalide : fichier donnees.json manquant.');
+                    return;
+                }
+                const jsonStr = await jsonEntry.async('string');
+                let donnees;
+                try {
+                    donnees = JSON.parse(jsonStr);
+                } catch (err) {
+                    alert('Fichier donnees.json invalide dans le ZIP.');
+                    console.error('Erreur parsing JSON dans ZIP:', err);
+                    return;
+                }
+
+                // Stocker la référence ZIP pour restauration ultérieure des blobs
+                donnees._zipTravaux = zip;
+
+                fermerModalImport();
+                configCompleteEnAttente = donnees;
+
+                const format = detecterFormatConfig(donnees);
+                if (format === 'configuration-complete') {
+                    afficherModalPreviewConfigComplete(donnees);
+                } else {
+                    configCompleteEnAttente._format = 'localStorage-brut';
+                    afficherModalPreviewLocalStorageBrut(donnees, nomFichier);
+                }
+            } catch (err) {
+                alert('Erreur lors de la lecture du fichier ZIP.\n\nDétails dans la console (F12).');
+                console.error('Erreur lecture ZIP:', err);
+            }
+        };
+        lecteurZip.readAsArrayBuffer(fichier);
+        return;
+    }
+
+    // Import JSON classique
     const lecteur = new FileReader();
     lecteur.onload = function(e) {
         // Étape 1 : Parser le JSON
@@ -587,7 +669,7 @@ async function executerImport() {
     try {
         // ✅ CORRECTION: Utiliser db.set() (async/IndexedDB) au lieu de db.setSync()
         // Pour éviter QuotaExceededError sur localStorage avec gros fichiers
-        const cles = Object.keys(donneesImportEnAttente);
+        const cles = Object.keys(donneesImportEnAttente).filter(c => !c.startsWith('_'));
         let nbCles = 0;
 
         for (const cle of cles) {
@@ -626,12 +708,16 @@ async function executerImport() {
         await db.syncToLocalStorageCache();
         console.log('✅ Cache synchronisé');
 
+        // 🆕 Restauration des blobs travaux depuis le ZIP
+        const nbRestores = await _restaurerBlobsDepuisZip(donneesImportEnAttente);
+
         fermerModalImport();
 
+        const msgBlobs = nbRestores > 0 ? ` + ${nbRestores} fichier(s) travaux` : '';
         if (typeof afficherNotificationSucces === 'function') {
-            afficherNotificationSucces(`Import réussi : ${nbCles} clé(s) importée(s)`);
+            afficherNotificationSucces(`Import réussi : ${nbCles} clé(s) importée(s)${msgBlobs}`);
         } else {
-            console.log(`Import réussi: ${nbCles} clés`);
+            console.log(`Import réussi: ${nbCles} clés${msgBlobs}`);
         }
 
         if (confirm('Import terminé ! Recharger la page pour appliquer les changements ?')) {
@@ -642,6 +728,41 @@ async function executerImport() {
         alert(`Erreur lors de l'import : ${erreur.message}`);
         fermerModalImport();
     }
+}
+
+/**
+ * 🆕 Restaure les blobs travaux depuis un ZIP importé
+ * Utilisé par executerImport() et executerImportLocalStorageBrut()
+ * @param {Object} donnees - Données importées, avec éventuellement _zipTravaux
+ * @returns {Promise<number>} Nombre de blobs restaurés
+ */
+async function _restaurerBlobsDepuisZip(donnees) {
+    if (!donnees._zipTravaux || typeof travauxStockage === 'undefined') return 0;
+
+    const zip = donnees._zipTravaux;
+    const cleFT = Object.keys(donnees).find(c => c.includes('fichiersTravaux'));
+    const metadonnees = cleFT ? donnees[cleFT] : [];
+
+    if (!Array.isArray(metadonnees) || metadonnees.length === 0) return 0;
+
+    let nbRestores = 0;
+    for (const f of metadonnees) {
+        try {
+            const entries = zip.file(new RegExp('^travaux/' + f.id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\.'));
+            if (entries && entries.length > 0) {
+                const blob = await entries[0].async('blob');
+                await travauxStockage.stockerBlob(f.id, blob, f.etudiantDA, f.productionId);
+                nbRestores++;
+            }
+        } catch (e) {
+            console.warn(`[Import ZIP] Erreur restauration blob ${f.id}:`, e);
+        }
+    }
+
+    if (nbRestores > 0) {
+        console.log(`✅ ${nbRestores} fichier(s) travaux restauré(s) depuis le ZIP`);
+    }
+    return nbRestores;
 }
 
 /* ===============================
@@ -1731,9 +1852,11 @@ async function executerImportConfigComplete() {
  * @param {Object} config - Données brutes localStorage
  */
 async function executerImportLocalStorageBrut(config) {
-    // Retirer la propriété interne _format avant import
+    // Retirer les propriétés internes avant import
     const donnees = { ...config };
+    const zipTravaux = donnees._zipTravaux;
     delete donnees._format;
+    delete donnees._zipTravaux;
 
     try {
         const cles = Object.keys(donnees);
@@ -1756,13 +1879,17 @@ async function executerImportLocalStorageBrut(config) {
             nbCles++;
         }
 
+        // 🆕 Restauration des blobs travaux depuis le ZIP
+        const nbRestores = await _restaurerBlobsDepuisZip({ ...donnees, _zipTravaux: zipTravaux });
+
         // Fermer le modal
         fermerModalPreviewConfigComplete();
 
-        console.log(`✅ Import localStorage brut: ${nbCles} clé(s) importée(s)`);
+        const msgBlobs = nbRestores > 0 ? ` + ${nbRestores} fichier(s) travaux` : '';
+        console.log(`✅ Import localStorage brut: ${nbCles} clé(s) importée(s)${msgBlobs}`);
 
         // Notification et rechargement
-        alert(`Import réussi !\n\n${nbCles} clé(s) de données importée(s).`);
+        alert(`Import réussi !\n\n${nbCles} clé(s) de données importée(s)${msgBlobs}.`);
 
         if (confirm('Recharger la page pour appliquer les changements ?')) {
             location.reload();
