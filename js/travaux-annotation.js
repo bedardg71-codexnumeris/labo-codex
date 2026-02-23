@@ -1641,6 +1641,14 @@
     }
 
     /**
+     * Met a jour l'etat enabled/disabled du bouton Supprimer
+     */
+    function mettreAJourBoutonSupprimer() {
+        const btn = document.getElementById('travaux-btn-supprimer');
+        if (btn) btn.disabled = (selectionsMultiples.length === 0);
+    }
+
+    /**
      * Supprime l'annotation selectionnee
      */
     function supprimerSelection() {
@@ -1768,6 +1776,9 @@
 
         // Dessiner la selection si active
         dessinerSelection();
+
+        // Mettre a jour l'etat du bouton Supprimer
+        mettreAJourBoutonSupprimer();
     }
 
     /**
@@ -2366,6 +2377,7 @@
         annuler: annuler,
         retablir: retablir,
         // Actions
+        supprimerSelection: supprimerSelection,
         effacerPage: effacerPage,
         sauvegarderAnnotation: sauvegarderAnnotation,
         // Accesseurs
