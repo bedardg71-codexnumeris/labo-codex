@@ -2782,10 +2782,10 @@
             paletteR.style.position = 'static';
             paletteR.classList.add('eval-col-retro');
 
-            // Splitter 3 : Evaluation | Retroaction (redimensionne Évaluation à gauche)
+            // Splitter 3 : Evaluation | Retroaction (redimensionne Rétroaction à droite)
             evalFlex.appendChild(creerSplitter({
-                id: 'eval-splitter-3', storageKey: 'eval-evaluation',
-                side: 'left', minWidth: 100, maxWidth: 500
+                id: 'eval-splitter-3', storageKey: 'eval-retro',
+                side: 'right', minWidth: 100, maxWidth: 600
             }));
 
             // Bouton Copier compact dans la barre de titre
