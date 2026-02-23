@@ -749,7 +749,8 @@
         html += '<div class="travaux-palette-pied">';
         html += '<button id="travaux-btn-undo" class="travaux-palette-btn-pied" onclick="travauxAnnotation.annuler()" disabled title="Annuler (Ctrl+Z)">Annuler</button>';
         html += '<button id="travaux-btn-redo" class="travaux-palette-btn-pied" onclick="travauxAnnotation.retablir()" disabled title="Retablir (Ctrl+Y)">R\u00e9tablir</button>';
-        html += '<button class="travaux-palette-btn-pied travaux-palette-btn-danger" onclick="travauxAnnotation.effacerPage()" title="Effacer la page">Effacer</button>';
+        html += '<button id="travaux-btn-supprimer" class="travaux-palette-btn-pied" onclick="travauxAnnotation.supprimerSelection()" disabled title="Supprimer la sélection (Delete)">Supprimer</button>';
+        html += '<button class="travaux-palette-btn-pied travaux-palette-btn-danger" onclick="travauxAnnotation.effacerPage()" title="Effacer toute la page">Effacer</button>';
         html += '</div>';
 
         // Boutons toggle palettes secondaires
