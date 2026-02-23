@@ -26,3 +26,13 @@ Retours des testeurs/olivier/
 
 # PDFs volumineux dans docs
 docs/**/*.pdf
+
+# Sauvegardes confidentielles
+sauvegarde-CONFIDENTIEL-*.json
+
+# Captures d'ecran (conservees localement)
+Captures clair/
+
+# Plans de travail Claude (documents de session)
+plans de travail pour Claude Code/
+plans de travail pour Claude Cowork/

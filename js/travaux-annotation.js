@@ -520,6 +520,10 @@
                 x1: xNorm, y1: yNorm,
                 x2: xNorm, y2: yNorm
             };
+            if (outil.id === 'ondule') {
+                formeEnCours.amplitude = 6;
+                formeEnCours.wavelength = 30;
+            }
             enDessin = true;
             return;
         }
@@ -1868,6 +1872,35 @@
                 ctx.lineTo(x2, y2);
                 ctx.stroke();
                 break;
+
+            case 'ondule': {
+                const amplitude = (forme.amplitude || 6) * ratioResolution;
+                const wavelength = (forme.wavelength || 30) * ratioResolution;
+                const dx = x2 - x1;
+                const dy = y2 - y1;
+                const lineLen = Math.sqrt(dx * dx + dy * dy);
+                if (lineLen < 1) break;
+                // Vecteurs unitaires : tangent (along) et normal (perpendicular)
+                const tx = dx / lineLen;
+                const ty = dy / lineLen;
+                const nx = -ty;
+                const ny = tx;
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                const steps = Math.max(Math.ceil(lineLen), 1);
+                for (let i = 1; i <= steps; i++) {
+                    const t = i / steps;
+                    const dist = t * lineLen;
+                    const phase = (dist / wavelength) * Math.PI * 2;
+                    const offset = Math.sin(phase) * amplitude;
+                    ctx.lineTo(
+                        x1 + tx * dist + nx * offset,
+                        y1 + ty * dist + ny * offset
+                    );
+                }
+                ctx.stroke();
+                break;
+            }
 
             case 'surligneur':
                 ctx.lineCap = 'butt';

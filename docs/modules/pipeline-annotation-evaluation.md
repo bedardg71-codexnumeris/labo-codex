@@ -1,0 +1,277 @@
+# Pipeline Import → Annotation → Evaluation → Export
+
+> **Date** : 22 fevrier 2026 (Beta 97.9)
+> **Objectif** : Etat des lieux complet du flux de travail Evaluations, prealable au chantier d'assistance utilisateur (infobulles, aide contextuelle, section Aide).
+
+---
+
+## Vue d'ensemble
+
+La section **Evaluations** est structuree en **5 onglets IPO** (Input-Process-Output) :
+
+| # | Onglet | ID sous-section | Role |
+|---|--------|----------------|------|
+| 1 | Apercu | `evaluations-apercu` | Tableau de bord des statistiques d'evaluation |
+| 2 | Liste des evaluations | `evaluations-liste` | Consulter, filtrer, modifier les evaluations sauvegardees |
+| 3 | Preparer et importer | `evaluations-importer` | Pipeline d'importation et preparation des travaux |
+| 4 | Annoter et evaluer | `evaluations-annoter` | Visionneuse avec annotation et evaluation |
+| 5 | Exporter et archiver | `evaluations-exporter` | Export PDF, ZIP, allegement |
+
+---
+
+## Onglet 1 — Apercu
+
+Tableau de bord des evaluations : taux de completion, distributions, activites recentes.
+
+**Fichiers** : `evaluations-apercu.js`
+
+---
+
+## Onglet 2 — Liste des evaluations
+
+Liste filtree et recherchable de toutes les evaluations sauvegardees. Colonnes : etudiant, production, note, niveau, statut, date. Permet de consulter, modifier ou supprimer.
+
+**Fichiers** : `liste-evaluations.js`
+
+---
+
+## Onglet 3 — Preparer et importer
+
+Pipeline en **2 etapes** avec layout 3 colonnes.
+
+### Etape 1 — Depot des fichiers
+
+- **Zone** : `#travaux-drop-zone` (glisser-deposer ou selecteur de fichiers)
+- **Formats** : PDF, JPEG, PNG, HEIC, HEIF, WebP
+- **Auto-identification** :
+  - DA 7 chiffres dans le nom de fichier (`\b(\d{7})\b`, `DA[_-]?\d{7}`)
+  - Format LEA : `NOM_DA_Production_Remis_le_YYYY-MM-JJ_HHhMMmSSs.ext`
+  - Correspondance Nom/Prenom si DA absent
+  - Association automatique a la production si une seule est selectionnee
+
+### Etape 2 — Optimisation (3 colonnes)
+
+| Colonne | Contenu |
+|---------|---------|
+| **Originaux** (gauche) | Thumbnail, resolution, taille, nom du fichier |
+| **Traitement** (centre) | Options : balance des blancs, uniformisation 200 DPI, detection doublons, assemblage auto. Selecteur de production. Boutons : Reglages specifiques, Appliquer et importer, Annuler |
+| **Apercu** (droite) | Image apres traitement, resolution cible, taille estimee |
+
+### Poste de preparation (optionnel)
+
+Accessible via le bouton « Reglages specifiques ». Workspace zoomable avec outils non-destructifs :
+
+- **Recadrage** : Poignees draggables, coordonnees normalisees (0-1)
+- **Perspective** : Auto-detection (Canny + Hough) ou 4 poignees manuelles, remplissage fond (aucun/blanc/auto)
+- **Rotation** : Fine (-15 a +15 degres)
+- **Ajustements** : Luminosite, contraste, exposition (EV), balance des blancs
+- **Assemblage** : Regroupement multi-pages par similarite
+
+Rendu apercu a 1600px, rendu final en pleine resolution.
+
+### Stockage a l'import
+
+- **Primaire** : File System Access API (Chrome/Edge Mac) ou IndexedDB (fallback)
+- **Compression** : Max 1400px, JPEG qualite 0.80
+- **Metadonnees** : `etudiantDA`, `productionId`, `nomFichier`, `typeMIME`, `dateImport`, `blobStatut: 'initial'`
+
+**Fichiers** : `travaux-import.js`, `travaux-ui.js` (lignes 116-247), `travaux-stockage.js`, `travaux-preparation.js`
+
+---
+
+## Onglet 4 — Annoter et evaluer
+
+Coeur de l'outil. Deux modes exclusifs sur la meme visionneuse.
+
+### Grille de badges
+
+A l'ouverture de l'onglet, l'utilisateur voit une grille de thumbnails par etudiant/production. Chaque badge affiche un statut dynamique :
+
+```
+Importe → Annote → Evalue → Remis
+```
+
+Cliquer sur un badge ouvre le fichier dans la visionneuse.
+
+### Visionneuse
+
+**3 couches de canvas superposees** dans `#travaux-canvas-container` :
+
+1. `#travaux-canvas-document` — Image ou PDF (rendu via PDF.js)
+2. `#travaux-canvas-surligneur` — Surligneur (`mix-blend-mode: multiply`, opacite 50%)
+3. `#travaux-canvas-annotation` — Dessins principaux
+
+**Toolbar** : Navigation de pages (si PDF), controles de zoom (−, +, 100%, largeur, hauteur), bouton Recentrer, boutons de mode (Annoter / Evaluer), badge etudiant actif.
+
+**Navigation** : Fleches gauche/droite pour passer d'un etudiant a l'autre.
+
+### Mode Annoter
+
+**Palette flottante draggable** (`#travaux-palette-flottante`) :
+
+| Categorie | Outils |
+|-----------|--------|
+| **Selection** | Selection (Shift+clic = multi), Position (main/hand pan) |
+| **Dessin** | Stylo (sensible a la pression, epaisseur 1-8px), Surligneur (10-40px, multiply), Gomme (efface le trait entier) |
+| **Texte** | Texte multiligne (modale, taille 10-32px) |
+| **Formes** | Rectangle, Cercle, Ligne, Fleche, Crochet (vert), Croix (rouge), Interrogation (orange) |
+| **Erreurs de francais** | 10 symboles numerotes (construction syntaxique, subordonnee, ponctuation, accord, etc.) |
+| **Couleurs** | 12 couleurs predefinies (bleu par defaut) |
+| **Epaisseur** | Reglable |
+| **Annuler/Retablir** | Pile de 50 etats max |
+
+**Palette Tampons** (`#travaux-palette-tampons`, separee) :
+12 autocollants de retroaction : Bien, Tres bien, Brillant, Bon lien, Manque de lien, Confusion, Repetitif, Preuve absente, Citation, Approfondir, Procedes, Attention.
+
+**Raccourcis** : Space+clic = pan, molette milieu = pan, Ctrl+Z = annuler, Ctrl+Shift+Z = retablir.
+
+**Persistance** : Sauvegarde auto-debounced (2s) dans IndexedDB. Annotations stockees en coordonnees normalisees (0-1) pour adaptation a toute resolution.
+
+### Mode Evaluer
+
+Active des palettes supplementaires autour du canvas :
+
+**Palette Parametres** (gauche, `#travaux-eval-gauche`) :
+- Selecteur etudiant
+- Selecteur production
+- Selecteur grille de criteres
+- Selecteur echelle de performance
+- Selecteur cartouche de retroaction
+- Statut de remise (Non recu → Recu → Importe → Annote → Evalue → Remis)
+
+**Palette Criteres** (droite, `#travaux-eval-droite`) :
+- Affiche chaque critere de la grille selectionnee
+- Boutons de niveau (1-5) par critere
+- Raccourcis clavier : 1-5 pour noter, Tab/Shift+Tab pour naviguer
+- Calcul en temps reel de la note
+
+**Zone Retroaction** (sous le canvas, `#travaux-eval-retroaction`) :
+- Texte auto-genere depuis le cartouche (concatenation des commentaires par critere × niveau selectionne)
+- Textarea editable manuellement
+- Bouton Copier
+- Checkboxes d'options
+
+**Palette Jetons** (optionnelle, bas gauche) :
+- Systeme de jetons bonus/malus pour les pratiques PAN
+- Checkboxes par type de jeton (assiduite, completion, etc.)
+- Modifie la note finale
+
+Les annotations du mode Annoter restent visibles en mode Evaluer.
+
+**Fichiers** : `travaux-annotation.js`, `travaux-outils.js`, `travaux-visionneuse.js`, `travaux-ui.js`, `evaluation.js`
+
+---
+
+## Onglet 5 — Exporter et archiver
+
+### Options d'export
+
+| Mode | Contenu | Format |
+|------|---------|--------|
+| **Par etudiant** | Originaux + PDF annotes + evaluations JSON | ZIP structure par dossiers |
+| **Par production** | Tous les etudiants pour une production | ZIP organise par etudiant |
+| **Semestre complet** | Tous les fichiers du trimestre | ZIP avec barre de progression |
+
+### Structure ZIP (export par etudiant)
+
+```
+Nom_Prenom_DA/
+  originaux/
+    fichier1.pdf
+    fichier2.jpg
+  annotes/
+    fichier1_annote.pdf
+    fichier2_annote.pdf
+  evaluations.json
+```
+
+### PDF genere
+
+Pour chaque fichier :
+1. Rendu de l'original (PDF.js ou image) a 2× pour qualite d'impression
+2. Superposition des annotations (traits, tampons, texte)
+3. Conversion en JPEG (qualite 0.92)
+4. Page de synthese si evaluation existante (nom, production, note, retroaction)
+
+### Allegement
+
+Option « Alleger » : conversion en fac-simile (800px, niveaux de gris) en conservant annotations et evaluations. Reduit l'espace de stockage.
+
+### Cycle de vie des fichiers
+
+```
+initial → annote → exporte → archive → fac-simile
+```
+
+**Fichiers** : `travaux-export-pdf.js`, `travaux-archivage.js`, `travaux-ui.js`
+
+---
+
+## Donnees et stockage
+
+### Cles localStorage (namespacees via `cle()`)
+
+| Cle | Contenu |
+|-----|---------|
+| `evaluationsSauvegardees` | Tableau des evaluations |
+| `productions` | Liste des productions pedagogiques |
+| `grillesTemplates` | Grilles de criteres |
+| `echellesTemplates` | Echelles de performance |
+| `cartouches_*` | Cartouches de retroaction (par grille) |
+| `modalitesEvaluation` | Configuration de la pratique (jetons, etc.) |
+
+### IndexedDB
+
+| Store | Contenu |
+|-------|---------|
+| `fichiers` | Blobs des fichiers importes + metadonnees |
+| `annotations` | Donnees d'annotation par fichierId |
+
+---
+
+## Systeme d'aide existant (etat au 22 fev 2026)
+
+### Tooltips (survol)
+
+- **Mecanisme** : Attribut `data-tooltip="cle"` → bulle au survol (400ms)
+- **Contenu** : `tooltips-contenu.js` (texte simple, tutoiement)
+- **Couverture Annotation/Evaluation** : 3 cles de navigation seulement (`nav-eval-importer`, `nav-eval-annoter`, `nav-eval-exporter`)
+- **Lacune** : Aucun tooltip sur les outils, palettes, formulaires, criteres, jetons
+
+### Aide contextuelle (modale)
+
+- **Mecanisme** : Bouton `btn-aide-contextuelle` + `data-aide="cle"` → modale riche
+- **Contenu** : `aide-contextuelle-contenu.js` (texte, listes, conseils, exemples, alertes, voir aussi)
+- **Couverture** : `evaluations-annoter` (minimal), `evaluations-proceder` (basique)
+- **Lacune** : Aucun bouton d'aide deploye dans l'interface d'annotation/evaluation elle-meme
+
+### Section Aide
+
+- **Lacune** : Pas de contenu dedie a l'annotation et l'evaluation dans la section Aide de l'application
+
+---
+
+## Fichiers source du pipeline
+
+| Fichier | Lignes | Role |
+|---------|--------|------|
+| `travaux-import.js` | ~200+ | Detection fichiers, parsing DA, correspondance etudiants |
+| `travaux-preparation.js` | ~500+ | Poste de preparation (crop, perspective, ajustements) |
+| `travaux-stockage.js` | ~300+ | Abstraction IndexedDB/FSAPI, gestion quota |
+| `travaux-visionneuse.js` | ~400+ | Rendu PDF.js + images, zoom, navigation pages |
+| `travaux-annotation.js` | ~450+ | Moteur de dessin canvas, evenements, modele de donnees |
+| `travaux-outils.js` | ~200+ | Definitions outils, couleurs, autocollants, palette flottante |
+| `travaux-ui.js` | ~2500+ | Coordinateur UI : import, fichiers, visionneuse, modes, archivage |
+| `travaux-export-pdf.js` | ~300+ | Generation PDF avec annotations superposees |
+| `travaux-archivage.js` | ~150+ | Export ZIP, organisation par dossiers, allegement |
+| `evaluation.js` | ~3500+ | Module d'evaluation : chargement, notation, sauvegarde |
+
+---
+
+## Prochaine etape
+
+Chantier d'assistance utilisateur :
+1. Correctifs en suspens (Import + Annoter)
+2. Tooltips sur tous les elements d'interface
+3. Pins d'aide contextuelle (modales riches)
+4. Contenu de la section Aide
