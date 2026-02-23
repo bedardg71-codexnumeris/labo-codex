@@ -74,7 +74,7 @@ const JALONS = {
         titre: 'Créer un groupe-cours',
         description: 'Ajouter les étudiants dans ton groupe.',
         chapitre: 'configurer',
-        navigation: { section: 'reglages', sousSection: 'reglages-groupe' }
+        navigation: { section: 'reglages', sousSection: 'reglages-trimestre' }
     },
     'creer-pratique': {
         numero: '④',
