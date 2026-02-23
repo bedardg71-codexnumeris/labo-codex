@@ -567,7 +567,6 @@
                                 <button id="travaux-btn-badge-prec" class="travaux-btn-nav" onclick="travauxUI.badgePrecedent()" disabled title="Fichier précédent">&#x2190;</button>
                                 <span id="travaux-compteur-badge" class="travaux-compteur-badge">-- / --</span>
                                 <button id="travaux-btn-badge-suiv" class="travaux-btn-nav" onclick="travauxUI.badgeSuivant()" disabled title="Fichier suivant">&#x2192;</button>
-                                <span id="travaux-badge-fichier-actif" class="u-hide" style="margin-left: 8px;"></span>
                                 <span class="travaux-separateur-page"></span>
                                 <button id="travaux-btn-page-prec" class="travaux-btn-nav" onclick="travauxVisionneuse.pagePrecedente()" disabled title="Page précédente">&#x2190;</button>
                                 <span id="travaux-indicateur-page">-- / --</span>
@@ -1987,39 +1986,10 @@
             }
 
 
-            // Badge etudiant dans la toolbar — afficher "EN COURS" en orange
-            const badgeFichier = document.getElementById('travaux-badge-fichier-actif');
-            if (badgeFichier && fichierOuvert) {
-                badgeFichier.innerHTML = genererBadgeFichierImporte(fichierOuvert, 'ouvrirFichier');
-                badgeFichier.classList.remove('u-hide');
-                const pillToolbar = badgeFichier.querySelector('.travaux-badge-pill');
-                if (pillToolbar) {
-                    // Si déjà évalué, afficher ÉVALUÉ (vert) au lieu de EN COURS
-                    if (pillToolbar.classList.contains('evalue')) {
-                        pillToolbar.textContent = 'ÉVALUÉ';
-                        pillToolbar.className = 'travaux-badge-pill evalue';
-                    } else {
-                        pillToolbar.textContent = 'EN COURS';
-                        pillToolbar.className = 'travaux-badge-pill en-cours';
-                    }
-                }
-                // Clic sur le badge toolbar → scroller vers le badge dans la grille
-                const badgeCopie = badgeFichier.querySelector('.travaux-badge-importe');
-                if (badgeCopie) {
-                    badgeCopie.onclick = function(e) {
-                        e.stopPropagation();
-                        const fichierId = badgeCopie.dataset.fichierId;
-                        const cible = document.querySelector(`.travaux-badges-liste .travaux-badge-importe[data-fichier-id="${fichierId}"]`);
-                        if (cible) {
-                            cible.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                            cible.classList.add('travaux-badge-flash');
-                            setTimeout(() => cible.classList.remove('travaux-badge-flash'), 1500);
-                        }
-                    };
-                    badgeCopie.style.cursor = 'pointer';
-                }
-                const btnSupp = badgeFichier.querySelector('.travaux-badge-supprimer');
-                if (btnSupp) btnSupp.remove();
+            // Mettre à jour la pill statut dans la palette Paramètres
+            if (fichierOuvert && typeof mettreAJourPillStatut === 'function') {
+                const selRemise = document.getElementById('remiseProduction1');
+                mettreAJourPillStatut(selRemise ? selRemise.value : 'importe');
             }
 
             // Mettre à jour le compteur de badges (navigation fichiers)
@@ -2961,6 +2931,7 @@
         // Statut de remise par défaut : importé (fichier importé)
         const selRemise = document.getElementById('remiseProduction1');
         if (selRemise) selRemise.value = 'importe';
+        if (typeof mettreAJourPillStatut === 'function') mettreAJourPillStatut('importe');
 
         // Afficher les labels d'identite
         remplirLabelsIdentite(fichier);
