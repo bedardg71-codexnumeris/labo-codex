@@ -20257,32 +20257,6 @@ body.mode-clair .barre-etudiant.tracked-4 {
     color: var(--texte-secondaire, #a0b0c0);
 }
 
-/* Barre de navigation emoji (bas de palette Parametres) */
-.palette-nav-emojis {
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-    padding: 6px 8px;
-    border-top: 1px solid var(--gris-moyen, #3a4a5a);
-}
-.palette-nav-btn {
-    background: none;
-    border: 1px solid transparent;
-    border-radius: var(--radius-petit);
-    cursor: pointer;
-    font-size: 1.1rem;
-    padding: 4px 8px;
-    transition: background 0.15s, border-color 0.15s;
-    line-height: 1;
-}
-.palette-nav-btn:hover {
-    background: rgba(106, 172, 184, 0.15);
-    border-color: var(--bleu-clair);
-}
-/* Masquer la barre emoji quand la palette est repliée */
-.replie .palette-nav-emojis {
-    display: none;
-}
 
 /* ===============================
    LAYOUT FLEX MODE EVALUATION
