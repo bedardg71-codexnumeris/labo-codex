@@ -10,6 +10,17 @@
 
     var CHANGELOG = [
         {
+            version: 'Beta 97.13',
+            date: '24 f\u00e9vrier',
+            couleur: 'vert',
+            titre: 'Couverture Aide compl\u00e8te (100\u00a0%) \u2014 12 nouveaux accord\u00e9ons',
+            items: [
+                '<strong>12 accord\u00e9ons ajout\u00e9s</strong> : Pr\u00e9parer/importer, Annoter/\u00e9valuer, Exporter/archiver, Tirage au sort, Mod\u00e9lisation, Organisateur de le\u00e7on, Aper\u00e7u pr\u00e9sences, Calendrier pr\u00e9sences, Productions, Grilles, \u00c9chelles, Cartouches.',
+                '<strong>Labels MODULE SOURCE retir\u00e9s</strong> : Les titres \u00ab\u00a0Saisir les pr\u00e9sences\u00a0\u00bb et \u00ab\u00a0\u00c9valuer les productions\u00a0\u00bb ne portent plus le suffixe.',
+                '<strong>Couverture 100\u00a0%</strong> : Tous les modules de l\u2019application sont d\u00e9sormais document\u00e9s dans l\u2019onglet Aide.'
+            ]
+        },
+        {
             version: 'Beta 97.11',
             date: '23 f\u00e9vrier',
             couleur: 'vert',
