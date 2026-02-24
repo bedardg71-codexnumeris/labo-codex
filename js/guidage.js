@@ -21,9 +21,9 @@ const ETAPES_CONFIGURATION = [
     {
         id: 'cours',
         section: 'reglages',
-        sousSection: 'reglages-cours',
+        sousSection: 'reglages-trimestre',
         titre: 'Étape 1/5 : Informations du cours',
-        message: 'Configure les informations de base de ton cours : numéro, titre, session, compétence.',
+        message: 'Configure les informations de base de ton cours dans la section Trimestre.',
         suivante: 'trimestre'
     },
     {
@@ -46,9 +46,9 @@ const ETAPES_CONFIGURATION = [
     {
         id: 'groupe',
         section: 'reglages',
-        sousSection: 'reglages-groupe',
+        sousSection: 'reglages-trimestre',
         titre: 'Étape 4/5 : Liste des étudiants',
-        message: 'Ajoute tes étudiants un par un ou importe une liste complète.',
+        message: 'Ajoute tes étudiants dans la section Trimestre (import CSV ou ajout manuel).',
         suivante: 'pratique'
     },
     {

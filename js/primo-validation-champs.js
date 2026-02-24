@@ -35,9 +35,7 @@ const CHAMPS_A_VALIDER = {
     ],
     // NOTE (1er fév 2026) : reglages-horaire supprimé en Beta 95, intégré dans reglages-trimestre
     // Les champs horaire utilisent maintenant les IDs v2-* dans la section Trimestre
-    'reglages-groupe': [
-        // Pas d'ID spécifique, validation sur existence de groupeEtudiants
-    ],
+    // NOTE: reglages-groupe supprimé (Beta 95), validation étudiants intégrée dans reglages-trimestre
     // NOTE: reglages-pratique-notation supprimé (2 jan 2026)
     // Fonctionnalité migrée vers construction-pratiques-notation
     'construction-pratiques-notation': [
@@ -78,7 +76,7 @@ function validerChampsSousSection(sousSectionId) {
     console.log('[Guide] Validation des champs pour:', sousSectionId);
 
     // Cas spécial: groupe d'étudiants
-    if (sousSectionId === 'reglages-groupe') {
+    if (sousSectionId === 'reglages-trimestre') {
         validerGroupeEtudiants();
         return;
     }
@@ -172,14 +170,14 @@ function validerGroupeEtudiants() {
 
     if (etudiants.length === 0) {
         // Aucun étudiant : mettre en évidence le bouton "Ajouter"
-        const btnAjouter = document.querySelector('#reglages-groupe button');
+        const btnAjouter = document.querySelector('#reglages-trimestre .section-import-droite button');
         if (btnAjouter && btnAjouter.textContent.includes('Ajouter')) {
             btnAjouter.classList.add('primo-champ-vide');
             btnAjouter.setAttribute('title', '⚠️ Aucun étudiant - Clique pour ajouter');
         }
     } else {
         // Étudiants présents : retirer le style
-        const btnAjouter = document.querySelector('#reglages-groupe button');
+        const btnAjouter = document.querySelector('#reglages-trimestre .section-import-droite button');
         if (btnAjouter) {
             btnAjouter.classList.remove('primo-champ-vide');
             btnAjouter.removeAttribute('title');

@@ -408,12 +408,7 @@ function afficherSousSection(idSousSection) {
             }
             break;
 
-        case 'reglages-cours-actif':
-            console.log('🔄 Chargement du Cours actif...');
-            if (typeof chargerVueCoursActif === 'function') {
-                setTimeout(chargerVueCoursActif, 100);
-            }
-            break;
+        // NOTE: reglages-cours-actif supprimé (Beta 95), consolidé dans reglages-trimestre
 
         case 'reglages-preferences':
             console.log('🔄 Chargement des Préférences...');
@@ -439,12 +434,7 @@ function afficherSousSection(idSousSection) {
             }
             break;
 
-        case 'reglages-groupe':
-            console.log('🔄 Initialisation du module Groupe...');
-            if (typeof initialiserModuleGroupe === 'function') {
-                setTimeout(initialiserModuleGroupe, 100);
-            }
-            break;
+        // NOTE: reglages-groupe supprimé (Beta 95), consolidé dans reglages-trimestre
 
         // NOTE: reglages-pratique-notation supprimé (2 jan 2026)
         // Fonctionnalité migrée vers Construction > Pratiques de notation
