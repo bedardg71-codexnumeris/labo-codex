@@ -864,6 +864,14 @@ h1, h2, h3, h4 {
     white-space: nowrap;
 }
 
+.titre-section .sous-titre-entete {
+    font-size: 0.95rem;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.75);
+    margin: 0;
+    white-space: nowrap;
+}
+
 .titre-section .meta {
     font-size: 0.75rem;
     color: #9fc5e8;
@@ -1052,6 +1060,10 @@ h1, h2, h3, h4 {
         font-size: 1.2rem;
     }
 
+    .titre-section .sous-titre-entete {
+        font-size: 0.8rem;
+    }
+
     .titre-section .meta {
         font-size: 0.65rem;
     }
@@ -1090,6 +1102,11 @@ h1, h2, h3, h4 {
 
     .titre-section h1 {
         font-size: 1.3rem;
+        white-space: normal;
+    }
+
+    .titre-section .sous-titre-entete {
+        font-size: 0.75rem;
         white-space: normal;
     }
 
