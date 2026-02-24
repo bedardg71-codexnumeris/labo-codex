@@ -285,14 +285,15 @@
                 }
                 fermerModeEvaluation();
             }
+            // Toujours réinitialiser modeCourant à 'annoter' après navigation
+            // (sinon basculerMode('evaluer') retourne immédiatement si modeCourant est resté à 'evaluer')
+            modeCourant = 'annoter';
             rafraichirUI();
             // Restaurer le mode Évaluer si c'était le mode actif avant navigation
             if (etaitEnModeEvaluer) {
                 const fichier = travauxVisionneuse.getFichierActuel();
-                if (fichier && fichier.etudiantDA && fichier.productionId) {
+                if (fichier && fichier.etudiantDA) {
                     setTimeout(() => {
-                        // Forcer la réouverture car basculerMode vérifie mode === modeCourant
-                        modeCourant = 'annoter';
                         basculerMode('evaluer');
                     }, 200);
                 }
