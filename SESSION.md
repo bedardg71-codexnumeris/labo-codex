@@ -1,8 +1,24 @@
-# SESSION ACTIVE - BETA 97.10
+# SESSION ACTIVE - BETA 97.13
 
-**Date** : 22 février 2026
-**Version** : Beta 97.10 (build 0222-1750)
-**Statut** : Correction fichiers fantômes, isolation par groupe-cours
+**Date** : 24 février 2026
+**Version** : Beta 97.13 (build 0224-0505)
+**Statut** : Validation et humanisation de l'onglet Aide
+
+## SESSION DU 24 FÉVRIER 2026
+
+### Travail accompli — Validation et humanisation de l'onglet Aide (Beta 97.13, build 0224-0505)
+
+121. **Disclaimer IA supprimé** : Le bloc d'avertissement « généré par IA » dans l'onglet Aide est retiré.
+
+122. **Tutoiement harmonisé** : 11 instances de vouvoiement (vos/votre/Créez/Utilisez/Glissez/etc.) corrigées en tutoiement cohérent dans la section Aide et les notes de version.
+
+123. **Mentions « à venir » mises à jour** : Import CSV → retiré (fonctionnalité existe). Filtres par niveau de risque et Export automatique hebdomadaire → reformulés « prévu dans une version future ».
+
+124. **10 titres d'accordéons recadrés** : Titres descriptifs convertis en format actionnable (ex: « Qu'est-ce que le suivi ? » → « Comprendre le suivi de l'apprentissage », « Tableau de bord → Aperçu - LECTEUR » → « Consulter le tableau de bord »).
+
+125. **Validation du contenu contre l'app** : Navigation corrigée dans 3 accordéons (Groupe → Trimestre/Groupe d'étudiants, Horaire → Trimestre/Horaire, Pratique → Construction/Pratiques de notation). Labels alignés (Enseignant·e, retrait MODULE SOURCE).
+
+126. **5 nouveaux accordéons** : Gérer la liste des étudiants, Planifier les leçons, Annoter et corriger les travaux, Personnaliser les préférences, Exporter et sauvegarder tes données.
 
 ## SESSION DU 22 FÉVRIER 2026
 

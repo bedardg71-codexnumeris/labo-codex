@@ -1428,6 +1428,7 @@
        =============================== */
 
     window.travauxExportPDF = {
+        genererDocPDF: genererDocPDF,
         exporterPDF: exporterPDF,
         exporterDossierComplet: exporterDossierComplet,
         afficherRevisionExport: afficherRevisionExport,

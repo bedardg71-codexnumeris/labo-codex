@@ -18,7 +18,7 @@ Ce document te guidera vers :
 
 ## Etat actuel
 
-- **Version** : Beta 97.12
+- **Version** : Beta 97.13
 - **Objectif** : Alignement pedagogique (clonage, verbes, evaluations)
 - **Session en cours** : Voir `SESSION.md`
 - **Backlog** : Voir `BACKLOG.md` (taches a faire)

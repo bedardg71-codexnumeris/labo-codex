@@ -614,6 +614,9 @@ class PratiqueSommative {
      * @private
      */
     _lireProductions() {
+        if (typeof obtenirDonneesSelonMode === 'function') {
+            return obtenirDonneesSelonMode('productions') || [];
+        }
         return db.getSync(cle('productions'), []);
     }
 

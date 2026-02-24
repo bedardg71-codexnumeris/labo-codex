@@ -552,6 +552,11 @@
             if (OUTILS[id].epaisseurDefaut) {
                 epaisseurActive = OUTILS[id].epaisseurDefaut;
             }
+            // Feedback visuel sur la palette tampons (symboles crochet/croix/interrogation)
+            const items = document.querySelectorAll('#travaux-palette-tampons .travaux-autocollant-item');
+            items.forEach(item => item.classList.remove('actif'));
+            const actif = document.querySelector(`#travaux-palette-tampons .travaux-autocollant-item[onclick*="'${id}'"]`);
+            if (actif) actif.classList.add('actif');
             // Notifier le changement
             window.dispatchEvent(new CustomEvent('travaux-outil-change', {
                 detail: { outil: OUTILS[id] }
