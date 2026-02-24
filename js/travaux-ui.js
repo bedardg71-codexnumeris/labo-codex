@@ -2968,16 +2968,38 @@
         if (selEtud && fichier.etudiantDA) {
             selEtud.value = fichier.etudiantDA;
         }
+
+        // 🔧 FIX (24 fév 2026) : Si le fichier n'a pas de productionId, chercher dans les évaluations existantes
+        // Depuis ce fix, sauvegarderEvaluation() propage le productionId sur le fichier.
+        // Ce fallback ne sert que pour les fichiers évalués AVANT le fix.
+        // Sécurité : ne sélectionner automatiquement que s'il y a UNE SEULE production évaluée
+        // pour cet étudiant. Sinon, laisser l'utilisateur choisir (ambiguïté avec N productions).
+        let productionIdEffective = fichier.productionId || '';
+        if (!productionIdEffective && fichier.etudiantDA) {
+            const evalsSauvegardees = db.getSync(cle('evaluationsSauvegardees'), []);
+            const evalsEtudiant = evalsSauvegardees.filter(e =>
+                e.etudiantDA === fichier.etudiantDA && e.productionId && !e.remplaceeParId
+            );
+            // Compter les productions distinctes
+            const productionsDistinctes = [...new Set(evalsEtudiant.map(e => e.productionId))];
+            if (productionsDistinctes.length === 1) {
+                productionIdEffective = productionsDistinctes[0];
+                console.log(`[Travaux-UI] Production unique récupérée depuis évaluation: ${productionIdEffective} pour ${fichier.etudiantDA}`);
+            } else if (productionsDistinctes.length > 1) {
+                console.warn(`[Travaux-UI] ${productionsDistinctes.length} productions évaluées pour ${fichier.etudiantDA}, sélection manuelle requise`);
+            }
+        }
+
         const selProd = document.getElementById('selectProduction1');
-        if (selProd && fichier.productionId) {
-            selProd.value = fichier.productionId;
+        if (selProd && productionIdEffective) {
+            selProd.value = productionIdEffective;
         }
 
         // Initialiser evaluationEnCours si absent (requis par chargerGrilleSelectionnee)
         if (!window.evaluationEnCours) {
             window.evaluationEnCours = {
                 etudiantDA: fichier.etudiantDA || '',
-                productionId: fichier.productionId || '',
+                productionId: productionIdEffective || '',
                 grilleId: '',
                 echelleId: '',
                 cartoucheId: '',
@@ -2991,7 +3013,7 @@
         const productions = (typeof obtenirDonneesSelonMode === 'function')
             ? obtenirDonneesSelonMode('productions')
             : (typeof db !== 'undefined' ? db.getSync(cle('productions'), []) : []);
-        const prod = fichier.productionId ? productions.find(p => p.id === fichier.productionId) : null;
+        const prod = productionIdEffective ? productions.find(p => p.id === productionIdEffective) : null;
         if (prod && prod.grilleId) {
             const selG = document.getElementById('selectGrille1');
             if (selG && Array.from(selG.options).some(o => o.value === prod.grilleId)) {
@@ -3027,12 +3049,12 @@
         if (selRemise) selRemise.value = 'importe';
         if (typeof mettreAJourPillStatut === 'function') mettreAJourPillStatut('importe');
 
-        // Afficher les labels d'identite
-        remplirLabelsIdentite(fichier);
+        // Afficher les labels d'identite (avec productionId effective en fallback)
+        remplirLabelsIdentite(fichier, productionIdEffective);
 
         // Pre-remplir le formulaire d'evaluation avec retry robuste
         // (gère le chaînage complet : étudiant → productions → grille → évaluation existante)
-        preRemplirEvaluation(fichier.etudiantDA, fichier.productionId);
+        preRemplirEvaluation(fichier.etudiantDA, productionIdEffective);
 
         // Attacher les événements de mémorisation pour persister les sélections
         if (typeof attacherEvenementsMemorisation === 'function') {
@@ -3125,10 +3147,11 @@
      * Remplit les labels d'identite (etudiant + production) dans la palette Parametres
      * @param {Object} fichier - Fichier actuel de la visionneuse
      */
-    function remplirLabelsIdentite(fichier) {
+    function remplirLabelsIdentite(fichier, productionIdOverride) {
         const etudiant = travauxImport.trouverEtudiantParDA(fichier.etudiantDA);
         const productions = obtenirDonneesSelonMode(cle('productions'));
-        const production = productions ? productions.find(p => p.id === fichier.productionId) : null;
+        const prodId = productionIdOverride || fichier.productionId;
+        const production = (productions && prodId) ? productions.find(p => p.id === prodId) : null;
 
         const labelEtud = document.getElementById('travaux-eval-label-etudiant');
         if (labelEtud) {
