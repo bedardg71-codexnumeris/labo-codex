@@ -38,7 +38,7 @@
      * @param {string} fichierId - ID du fichier
      * @returns {Promise<{doc: Object, nomSortie: string, fichierId: string}>}
      */
-    async function genererDocPDF(fichierId) {
+    async function genererDocPDF(fichierId, productionIdOverride) {
         const fichier = travauxStockage.obtenirFichierParId(fichierId);
         if (!fichier) throw new Error('Fichier introuvable');
 
@@ -54,7 +54,7 @@
             doc = await exporterDepuisImage(blob, annotation);
         }
 
-        ajouterPageSynthese(doc, fichier);
+        ajouterPageSynthese(doc, fichier, productionIdOverride);
 
         const nomSortie = fichier.nomFichier.replace(/\.[^.]+$/, '') + '_annote.pdf';
         return { doc, nomSortie, fichierId };
@@ -593,16 +593,18 @@
      * @param {Object} doc - Instance jsPDF
      * @param {Object} fichier - Metadonnees du fichier
      */
-    function ajouterPageSynthese(doc, fichier) {
+    function ajouterPageSynthese(doc, fichier, productionIdOverride) {
         const cfg = getCfg();
         const margeG = mm(cfg.marges.gauche);
         const margeD = mm(cfg.marges.droite);
 
         // Chercher l'evaluation correspondante
+        // productionIdOverride permet de matcher quand fichier.productionId est vide
+        const prodId = productionIdOverride || fichier.productionId;
         const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees'));
         const evaluation = evaluations.find(e =>
             e.etudiantDA === fichier.etudiantDA &&
-            e.productionId === fichier.productionId
+            e.productionId === prodId
         );
 
         if (!evaluation) {

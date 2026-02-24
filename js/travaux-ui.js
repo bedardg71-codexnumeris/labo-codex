@@ -651,7 +651,7 @@
                     </select>
                     <div class="travaux-archivage-checks">
                         <label data-tooltip="travaux-archivage-inclure-annotes"><input type="checkbox" id="arch-etudiant-annotes" checked> Inclure annotés</label>
-                        <label data-tooltip="travaux-archivage-inclure-evals"><input type="checkbox" id="arch-etudiant-evals"> Inclure évaluations</label>
+                        <label data-tooltip="travaux-archivage-inclure-evals"><input type="checkbox" id="arch-etudiant-evals" checked> Inclure évaluations</label>
                     </div>
                     <button class="btn btn-principal" onclick="travauxUI.lancerArchivageEtudiant()">Télécharger ZIP</button>
                 </div>
@@ -666,7 +666,7 @@
                     </select>
                     <div class="travaux-archivage-checks">
                         <label data-tooltip="travaux-archivage-inclure-annotes"><input type="checkbox" id="arch-prod-annotes" checked> Inclure annotés</label>
-                        <label data-tooltip="travaux-archivage-inclure-evals"><input type="checkbox" id="arch-prod-evals"> Inclure évaluations</label>
+                        <label data-tooltip="travaux-archivage-inclure-evals"><input type="checkbox" id="arch-prod-evals" checked> Inclure évaluations</label>
                     </div>
                     <button class="btn btn-principal" onclick="travauxUI.lancerArchivageProduction()">Télécharger ZIP</button>
                 </div>
@@ -677,7 +677,7 @@
                     <p class="texte-muted">Archive complète de tous les travaux du semestre</p>
                     <div class="travaux-archivage-checks">
                         <label data-tooltip="travaux-archivage-inclure-annotes"><input type="checkbox" id="arch-semestre-annotes" checked> Inclure annotés</label>
-                        <label data-tooltip="travaux-archivage-inclure-evals"><input type="checkbox" id="arch-semestre-evals"> Inclure évaluations</label>
+                        <label data-tooltip="travaux-archivage-inclure-evals"><input type="checkbox" id="arch-semestre-evals" checked> Inclure évaluations</label>
                     </div>
                     <div id="travaux-texte-progression" class="texte-muted"></div>
                     <div class="travaux-barre-progression-container">
