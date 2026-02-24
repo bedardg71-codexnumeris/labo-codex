@@ -1216,7 +1216,7 @@ function dupliquerEvaluation(evaluationId) {
     // TODO: Implémenter la duplication
     console.log(`Duplication de l'évaluation ${evaluationId}`);
 
-    if (!confirm('Voulez-vous dupliquer cette évaluation pour un autre élève ?')) {
+    if (!confirm('Veux-tu dupliquer cette évaluation pour un autre élève ?')) {
         return;
     }
 
@@ -1241,7 +1241,7 @@ function supprimerEvaluation(evaluationId) {
         return;
     }
 
-    if (!confirm('Voulez-vous vraiment supprimer cette évaluation ? Cette action est irréversible.')) {
+    if (!confirm('Veux-tu vraiment supprimer cette évaluation ? Cette action est irréversible.')) {
         return;
     }
 
@@ -1299,7 +1299,7 @@ function toggleVerrouillerEvaluation(evaluationId) {
     const cadenasElement = document.getElementById(`cadenas-liste-${evaluationId}`);
     if (cadenasElement) {
         cadenasElement.textContent = evaluation.verrouillee ? '🔒' : '🔓';
-        cadenasElement.title = evaluation.verrouillee ? 'Verrouillée - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller';
+        cadenasElement.title = evaluation.verrouillee ? 'Verrouillée - Clique pour déverrouiller' : 'Modifiable - Clique pour verrouiller';
     }
 
     // Recharger le tableau

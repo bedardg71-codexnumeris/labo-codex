@@ -157,7 +157,7 @@ function addStudent() {
     console.log('Champ prénom trouvé ?', champPrenom);
 
     if (!champNom || !champPrenom) {
-        afficherNotificationErreur('Erreur technique', 'Les champs du formulaire sont introuvables. Vérifiez les IDs.');
+        afficherNotificationErreur('Erreur technique', 'Les champs du formulaire sont introuvables. Vérifie les IDs.');
         return;
     }
 
@@ -828,7 +828,7 @@ function filtrerParGroupe() {
                     noMsg.innerHTML = `
                         <p style="font-size: 1.1rem; margin-bottom: 10px;">📭 Aucun·e étudiant·e dans le groupe</p>
                         <p style="font-size: 0.9rem;">
-                            Utilisez le formulaire ci-dessus ou l'import pour ajouter des étudiant·es
+                            Utilise le formulaire ci-dessus ou l'import pour ajouter des étudiant·es
                         </p>
                     `;
                 }
@@ -1077,11 +1077,11 @@ function exportStudentsData() {
  * Réinitialise toutes les données
  */
 function resetStudentsData() {
-    if (!confirm('⚠️ ATTENTION !\n\nCette action va supprimer TOUS les étudiants de façon IRRÉVERSIBLE.\n\nVoulez-vous vraiment continuer ?')) {
+    if (!confirm('⚠️ ATTENTION !\n\nCette action va supprimer TOUS les étudiants de façon IRRÉVERSIBLE.\n\nVeux-tu vraiment continuer ?')) {
         return;
     }
 
-    if (!confirm('Dernière confirmation :\nVous allez perdre toutes les données du groupe.\n\nContinuer ?')) {
+    if (!confirm('Dernière confirmation :\nTu vas perdre toutes les données du groupe.\n\nContinuer ?')) {
         return;
     }
 
@@ -1101,7 +1101,7 @@ function resetStudentsData() {
             noMsg.innerHTML = `
                 <p style="font-size: 1.1rem; margin-bottom: 10px;">📭 Aucun·e étudiant·e dans le groupe</p>
                 <p style="font-size: 0.9rem;">
-                    Utilisez le formulaire ci-dessus ou l'import pour ajouter des étudiant·es
+                    Utilise le formulaire ci-dessus ou l'import pour ajouter des étudiant·es
                 </p>
             `;
         }
@@ -1166,7 +1166,7 @@ function supprimerEtudiant(id) {
         return;
     }
 
-    if (confirm(`Êtes-vous sûr de vouloir supprimer ${etudiantASupprimer.nom}, ${etudiantASupprimer.prenom} ?`)) {
+    if (confirm(`Es-tu sûr de vouloir supprimer ${etudiantASupprimer.nom}, ${etudiantASupprimer.prenom} ?`)) {
         try {
             students = students.filter(s => !(s.id == id || s.da == id));
             db.setSync(cleEtudiants, students);

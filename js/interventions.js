@@ -409,7 +409,7 @@ function afficherListeInterventions() {
         html += `
             <div class="message-vide">
                 <p>Aucune intervention planifiée ou complétée.</p>
-                <p class="message-vide-aide">Cliquez sur «Planifier une intervention» pour commencer.</p>
+                <p class="message-vide-aide">Clique sur «Planifier une intervention» pour commencer.</p>
             </div>
         `;
         container.innerHTML = html;
@@ -702,7 +702,7 @@ function afficherFormulaireIntervention() {
                     <div class="carte" style="background: var(--bleu-tres-pale); padding: 15px; margin: 0; height: fit-content;">
                         <h4 style="margin: 0 0 10px 0; color: var(--accent-primaire);" data-tooltip="interv-gestion-absences">Gestion des absences</h4>
                         <p class="text-muted" style="margin: 0 0 15px 0; font-size: 0.9rem;">
-                            Si cette intervention correspond à une séance de cours, vous pouvez marquer comme motivée l'absence des non-participants.
+                            Si cette intervention correspond à une séance de cours, tu peux marquer comme motivée l'absence des non-participants.
                         </p>
 
                         <div class="champ-formulaire" style="margin: 0 0 15px 0;">
@@ -844,7 +844,7 @@ function afficherFormulaireModification(interventionId) {
                     <div class="carte" style="background: var(--bleu-tres-pale); padding: 15px; margin: 0; height: fit-content;">
                         <h4 style="margin: 0 0 10px 0; color: var(--accent-primaire);" data-tooltip="interv-gestion-absences">Gestion des absences</h4>
                         <p class="text-muted" style="margin: 0 0 15px 0; font-size: 0.9rem;">
-                            Si cette intervention correspond à une séance de cours, vous pouvez marquer comme motivée l'absence des non-participants.
+                            Si cette intervention correspond à une séance de cours, tu peux marquer comme motivée l'absence des non-participants.
                         </p>
 
                         <div class="champ-formulaire" style="margin: 0 0 15px 0;">
@@ -1059,7 +1059,7 @@ function ouvrirIntervention(interventionId) {
 
                     <h4 style="margin: 0 0 10px 0; color: var(--accent-primaire);" data-tooltip="interv-gestion-absences">Gestion des absences</h4>
                     <p class="text-muted" style="margin: 0 0 15px 0; font-size: 0.9rem;">
-                        Si cette intervention correspond à une séance de cours, vous pouvez marquer comme motivée l'absence des non-participants.
+                        Si cette intervention correspond à une séance de cours, tu peux marquer comme motivée l'absence des non-participants.
                     </p>
 
                     <div class="champ-formulaire" style="margin: 0 0 15px 0;">
@@ -1086,7 +1086,7 @@ function ouvrirIntervention(interventionId) {
                 <div>
                     <h4 data-tooltip="interv-apercu-sous-groupe">Aperçu du sous-groupe</h4>
                     <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 15px;">
-                        Cette aggrégation des profils des étudiant·e·s vise à éclairer votre préparation.
+                        Cette aggrégation des profils des étudiant·e·s vise à éclairer ta préparation.
                     </p>
                     <div id="analyseTempsReel"></div>
                 </div>
@@ -1095,7 +1095,7 @@ function ouvrirIntervention(interventionId) {
                 <div>
                     <h4 data-tooltip="interv-presences-notes">Marquer les présences et notes individuelles</h4>
                     <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 15px;">
-                        Cochez les étudiant·e·s présent·e·s et documentez vos observations spécifiques.
+                        Coche les étudiant·e·s présent·e·s et documente tes observations spécifiques.
                     </p>
 
                     <div id="listeEtudiantsIntervention" class="liste-etudiants-intervention">
@@ -1108,7 +1108,7 @@ function ouvrirIntervention(interventionId) {
             <div class="carte" style="margin-bottom: 20px;">
                 <h4 class="intervention-mt-0">Observations générales</h4>
                 <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 10px;">
-                    Notez vos observations durant l'intervention (stratégies à nouveau enseignées, réception du groupe...)
+                    Note tes observations durant l'intervention (stratégies à nouveau enseignées, réception du groupe...)
                 </p>
                 <textarea id="observationsIntervention" class="controle-form" rows="6" placeholder="Ex: Stratégie de lecture n°3...">${intervention.observations || ''}</textarea>
             </div>
@@ -1143,7 +1143,7 @@ function afficherAnalyseTempsReel(interventionId) {
     const analyseDiv = document.getElementById('analyseTempsReel');
 
     if (dasSelectionnes.length === 0) {
-        analyseDiv.innerHTML = '<p class="text-muted" style="font-style: italic;">Cochez des étudiant·e·s pour voir l\'analyse du sous-groupe.</p>';
+        analyseDiv.innerHTML = '<p class="text-muted" style="font-style: italic;">Coche des étudiant·e·s pour voir l\'analyse du sous-groupe.</p>';
         return;
     }
 
@@ -1172,7 +1172,7 @@ function afficherNotesIndividuelles(interventionId, dasSelectionnes) {
         <div class="carte" style="margin-top: 20px;">
             <h4 class="intervention-mt-0">Notes individuelles</h4>
             <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 15px;">
-                Documentez vos observations spécifiques pour chaque étudiant·e (participation, compréhension, besoins identifiés...)
+                Documente tes observations spécifiques pour chaque étudiant·e (participation, compréhension, besoins identifiés...)
             </p>
     `;
 
@@ -1359,7 +1359,7 @@ function terminerIntervention(interventionId) {
  * @param {string} interventionId - ID de l'intervention
  */
 function rouvrirIntervention(interventionId) {
-    if (!confirm('Rouvrir cette intervention ? Elle repassera au statut "En cours" et vous pourrez la modifier à nouveau.')) {
+    if (!confirm('Rouvrir cette intervention ? Elle repassera au statut "En cours" et tu pourras la modifier à nouveau.')) {
         return;
     }
 
@@ -1381,7 +1381,7 @@ function rouvrirIntervention(interventionId) {
     ouvrirIntervention(interventionId);
 
     // Notification de succès
-    afficherNotificationSucces('Intervention rouverte - Vous pouvez maintenant la modifier');
+    afficherNotificationSucces('Intervention rouverte - Tu peux maintenant la modifier');
 }
 
 /**

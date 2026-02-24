@@ -689,7 +689,7 @@ async function telechargerCaptureEcran(btn) {
             align-items: center; justify-content: center; z-index: 10002;
             color: white; font-family: system-ui, sans-serif;">
             <div id="decompteNumero" style="font-size: 6rem; font-weight: bold; margin-bottom: 20px;">3</div>
-            <div style="font-size: 1.5rem; margin-bottom: 30px;">Prenez votre capture d'écran maintenant !</div>
+            <div style="font-size: 1.5rem; margin-bottom: 30px;">Prends ta capture d'écran maintenant !</div>
             <div style="font-size: 1rem; opacity: 0.8; text-align: center; max-width: 400px;">
                 <strong>Mac:</strong> Cmd + Shift + 4<br>
                 <strong>Windows:</strong> Win + Shift + S<br>
@@ -794,9 +794,9 @@ function ouvrirModalRapportBug() {
                     ">
                         <strong>Comment signaler un bug :</strong>
                         <ol style="margin: 10px 0 0 0; padding-left: 20px;">
-                            <li>Décrivez le problème ci-dessous</li>
-                            <li>Cliquez sur «Copier le rapport»</li>
-                            <li>Envoyez-le par courriel avec vos captures d'écran</li>
+                            <li>Décris le problème ci-dessous</li>
+                            <li>Clique sur «Copier le rapport»</li>
+                            <li>Envoie-le par courriel avec tes captures d'écran</li>
                         </ol>
                     </div>
 
@@ -808,7 +808,7 @@ function ouvrirModalRapportBug() {
                             margin-bottom: 8px;
                             color: var(--accent-primaire);
                         ">
-                            Votre prénom :
+                            Ton prénom :
                         </label>
                         <input type="text" id="prenomTesteur" placeholder="Ex: Grégoire" style="
                             width: 100%;
@@ -830,7 +830,7 @@ function ouvrirModalRapportBug() {
                             margin-bottom: 8px;
                             color: var(--accent-primaire);
                         ">
-                            Décrivez le problème rencontré :
+                            Décris le problème rencontré :
                         </label>
                         <textarea id="descriptionBug" placeholder="Exemple :
 - J'étais dans la section Réglages > Cours
@@ -969,7 +969,7 @@ async function copierRapportBug(btn) {
             }, 2000);
         }
     } catch (err) {
-        alert('Erreur lors de la copie. Sélectionnez manuellement le texte du rapport.');
+        alert('Erreur lors de la copie. Sélectionne manuellement le texte du rapport.');
     }
 }
 
@@ -1082,7 +1082,7 @@ function envoyerRapportParCourriel(btn) {
     try {
         // Construire le mailto
         const sujet = encodeURIComponent(`[Bug Monitorage ${VERSION_APP}] ${description.substring(0, 50) || 'Rapport de bug'}...`);
-        const corpsNettoye = nettoyerUTF16(rapport + '\n\n--- JOIGNEZ VOS CAPTURES D\'ÉCRAN À CE COURRIEL ---');
+        const corpsNettoye = nettoyerUTF16(rapport + '\n\n--- JOINS TES CAPTURES D\'ÉCRAN À CE COURRIEL ---');
         const corps = encodeURIComponent(corpsNettoye);
 
         // Archiver le rapport localement

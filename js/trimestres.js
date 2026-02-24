@@ -1642,8 +1642,8 @@
 
                     <div class="alerte alerte-attention">
                         <strong>Important</strong><br>
-                        Conservez la table de correspondance (<code>*_PRIVE_*.json</code>) en lieu sûr.
-                        Elle vous permettra de retrouver les correspondances DA si nécessaire.
+                        Conserve la table de correspondance (<code>*_PRIVE_*.json</code>) en lieu sûr.
+                        Elle te permettra de retrouver les correspondances DA si nécessaire.
                     </div>
 
                     <div class="modal-actions">

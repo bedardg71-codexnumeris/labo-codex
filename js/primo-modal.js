@@ -846,7 +846,7 @@ function primoQuestionPrecedente() {
  * Confirme l'annulation de la configuration
  */
 function confirmerAnnulation() {
-    if (confirm('Souhaitez-vous vraiment annuler ? Les réponses non sauvegardées seront perdues.')) {
+    if (confirm('Souhaites-tu vraiment annuler ? Les réponses non sauvegardées seront perdues.')) {
         fermerModalConversationnel();
     }
 }
@@ -1852,7 +1852,7 @@ async function importerMaterielDemarrage() {
         if (typeof afficherNotificationErreur === 'function') {
             afficherNotificationErreur(
                 'Import partiel',
-                'Le matériel de base n\'a pas pu être importé. Vous pourrez l\'ajouter manuellement plus tard.'
+                'Le matériel de base n\'a pas pu être importé. Tu pourras l\'ajouter manuellement plus tard.'
             );
         }
 
@@ -2258,7 +2258,7 @@ function passerEnModeNotification() {
 
     boutonArreter.onclick = function() {
         // Demander confirmation avant d'arrêter
-        if (confirm('Souhaitez-vous vraiment quitter ce parcours ?\n\nVous pourrez le relancer plus tard via le bouton 🗺️.')) {
+        if (confirm('Souhaites-tu vraiment quitter ce parcours ?\n\nTu pourras le relancer plus tard via le bouton 🗺️.')) {
             // Nettoyer le mode notification
             const container = document.getElementById('primo-notification-container');
             const boutonSuivant = document.getElementById('primo-bouton-suivant');

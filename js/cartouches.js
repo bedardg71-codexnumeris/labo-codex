@@ -196,7 +196,7 @@ async function assurerCartoucheGenerique() {
         nom: 'Cartouche générique (exemple)',
         grilleId: 'GRILLE_GENERIQUE',
         echelleId: 'ECHELLE_GENERIQUE',
-        contexte: 'Exemple de cartouche de rétroaction - Modifiez ou dupliquez selon vos besoins',
+        contexte: 'Exemple de cartouche de rétroaction - Modifie ou duplique selon tes besoins',
         criteres: [
             { id: 'CR_COMPREHENSION', nom: 'Compréhension' },
             { id: 'CR_APPLICATION', nom: 'Application' },
@@ -880,7 +880,7 @@ async function importerCommentaires() {
     const texte = document.getElementById('commentairesColles').value.trim();
     
     if (!texte) {
-        alert('Veuillez coller vos commentaires');
+        alert('Colle tes commentaires');
         return;
     }
     
@@ -928,10 +928,10 @@ async function importerCommentaires() {
         });
         
         if (compteur === 0) {
-            alert('Aucun commentaire n\'a pu être importé. Vérifiez le format.');
+            alert('Aucun commentaire n\'a pu être importé. Vérifie le format.');
             return;
         }
-        
+
         // Rafraîchir l'affichage
         await afficherMatriceRetroaction();
         await calculerPourcentageComplete();
@@ -941,7 +941,7 @@ async function importerCommentaires() {
         
     } catch (error) {
         console.error('Erreur d\'import:', error);
-        alert('Erreur lors de l\'import. Vérifiez le format de vos données.');
+        alert('Erreur lors de l\'import. Vérifie le format de tes données.');
     }
 }
 
@@ -1201,7 +1201,7 @@ function afficherListeCartouches(cartouches, grilleId) {
                     <button onclick="basculerVerrouillageCartouche('${cartouche.id}', '${grilleId}')"
                           class="btn btn-tres-compact"
                           class="u-mr-10"
-                          title="${cartouche.verrouille ? 'Verrouillée - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
+                          title="${cartouche.verrouille ? 'Verrouillée - Clique pour déverrouiller' : 'Modifiable - Clique pour verrouiller'}">
                         ${cartouche.verrouille ? 'Verrouillée' : 'Modifiable'}
                     </button>
                     <button class="btn btn-modifier"
@@ -1255,7 +1255,7 @@ async function afficherToutesLesGrillesEtCartouches() {
         container.innerHTML = `
             <div class="cartouche-zone-bleu-pale">
                 <p class="u-texte-bleu-leger">Aucune grille de critères disponible</p>
-                <small>Créez d'abord une grille dans <strong>Réglages → Grilles de critères</strong></small>
+                <small>Crée d'abord une grille dans <strong>Réglages → Grilles de critères</strong></small>
             </div>
         `;
         return;
@@ -1302,7 +1302,7 @@ async function afficherToutesLesGrillesEtCartouches() {
                                                 <button onclick="basculerVerrouillageCartouche('${cartouche.id}', '${grille.id}')"
                                                       class="btn btn-tres-compact"
                                                       class="u-mr-10"
-                                                      title="${cartouche.verrouille ? 'Verrouillée - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
+                                                      title="${cartouche.verrouille ? 'Verrouillée - Clique pour déverrouiller' : 'Modifiable - Clique pour verrouiller'}">
                                                     ${cartouche.verrouille ? 'Verrouillée' : 'Modifiable'}
                                                 </button>
                                                 <button class="btn btn-modifier"
@@ -1593,11 +1593,11 @@ async function supprimerCartoucheConfirm(cartoucheId, grilleId) {
     const cartouche = cartouches.find(c => c.id === cartoucheId);
 
     if (cartouche && cartouche.verrouille) {
-        alert('Déverrouillez ce cartouche (🔓) avant de le supprimer');
+        alert('Déverrouille ce cartouche (🔓) avant de le supprimer');
         return;
     }
 
-    if (confirm(`Êtes-vous sûr de vouloir supprimer la cartouche «${cartouche?.nom}» ?`)) {
+    if (confirm(`Es-tu sûr de vouloir supprimer la cartouche «${cartouche?.nom}» ?`)) {
         const nouveauxCartouches = cartouches.filter(c => c.id !== cartoucheId);
         await db.set(`cartouches_${grilleId}`, nouveauxCartouches);
 
@@ -1792,7 +1792,7 @@ async function importerCartouches(event) {
                 '<div style="margin-bottom: 15px;">' + genererBadgeCC(donnees.metadata) + '</div>' :
                 '';
 
-            message += '<p><strong>Voulez-vous importer ces cartouches ?</strong></p>';
+            message += '<p><strong>Veux-tu importer ces cartouches ?</strong></p>';
 
             // Créer modal avec badge CC
             // z-index: 10001 pour passer au-dessus des modaux de bibliothèque (10000)
@@ -1890,7 +1890,7 @@ window.confirmerImportCartouches = async function(donnees) {
         if (grillesManquantes.length > 0) {
             const nbGrillesManquantes = grillesManquantes.length;
             const message = `⚠️ Attention : ${nbGrillesManquantes} grille(s) de critères manquante(s)\n\n` +
-                `Les cartouches importées sont associées à des grilles qui n'existent pas encore dans votre système.\n\n` +
+                `Les cartouches importées sont associées à des grilles qui n'existent pas encore dans ton système.\n\n` +
                 `Grilles manquantes :\n${grillesManquantes.map(id => `  • ${id}`).join('\n')}\n\n` +
                 `Les cartouches seront importées mais ne seront visibles qu'après avoir importé les grilles manquantes.\n\n` +
                 `Continuer quand même ?`;
@@ -1953,7 +1953,7 @@ window.confirmerImportCartouches = async function(donnees) {
         let message = `✅ Import réussi !\n\n`;
         if (nbAjoutees > 0) message += `${nbAjoutees} nouvelle(s) cartouche(s) ajoutée(s).\n`;
         if (nbMisesAJour > 0) message += `${nbMisesAJour} cartouche(s) mise(s) à jour.\n`;
-        message += `\nConsultez "Cartouches disponibles" pour les ajouter à votre sélection.`;
+        message += `\nConsulte « Cartouches disponibles » pour les ajouter à ta sélection.`;
         afficherNotificationSucces(message);
         console.log('✅ Cartouches importées:', nbAjoutees + nbMisesAJour);
 
@@ -2203,7 +2203,7 @@ function importerCartoucheDepuisTxt(event) {
             sauvegarderCommentaire();
 
             if (compteur === 0) {
-                alert('Aucun commentaire n\'a pu être importé. Vérifiez que :\n- Le fichier est au format Markdown attendu\n- Les noms de critères correspondent à ceux de la grille sélectionnée');
+                alert('Aucun commentaire n\'a pu être importé. Vérifie que :\n- Le fichier est au format Markdown attendu\n- Les noms de critères correspondent à ceux de la grille sélectionnée');
                 return;
             }
 
@@ -2215,7 +2215,7 @@ function importerCartoucheDepuisTxt(event) {
 
         } catch (error) {
             console.error('Erreur d\'import depuis .txt:', error);
-            alert('Erreur lors de l\'import du fichier. Vérifiez le format.');
+            alert('Erreur lors de l\'import du fichier. Vérifie le format.');
         }
     };
 
@@ -2413,7 +2413,7 @@ function importerDansCartoucheActive(event) {
             const confirmation = confirm(
                 messageConfirmation +
                 `⚠️ ATTENTION: Cette action va remplacer la cartouche actuelle.\n\n` +
-                `Voulez-vous continuer ?`
+                `Veux-tu continuer ?`
             );
 
             if (!confirmation) {
@@ -2462,7 +2462,7 @@ function importerDansCartoucheActive(event) {
 
         } catch (error) {
             console.error('Erreur lors de l\'import:', error);
-            alert('Erreur lors de la lecture du fichier JSON. Assurez-vous qu\'il s\'agit d\'un fichier valide.');
+            alert('Erreur lors de la lecture du fichier JSON. Assure-toi qu\'il s\'agit d\'un fichier valide.');
         } finally {
             event.target.value = ''; // Reset input
         }
@@ -2721,7 +2721,7 @@ async function afficherBanqueCartouches(grilleIdFiltre = '') {
     `;
 
     if (cartouchesFiltrees.length === 0) {
-        container.innerHTML = html + '<p class="sidebar-vide">Créez une nouvelle cartouche ou puisez dans la bibliothèque</p>';
+        container.innerHTML = html + '<p class="sidebar-vide">Crée une nouvelle cartouche ou puisez dans la bibliothèque</p>';
         return;
     }
 
@@ -2906,12 +2906,12 @@ async function creerNouvelleCartouche() {
     const echelles = await db.get('echellesTemplates') || [];
 
     if (grilles.length === 0) {
-        alert('Vous devez d\'abord créer au moins une grille de critères dans la section « Grilles de critères »');
+        alert('Tu dois d\'abord créer au moins une grille de critères dans la section « Grilles de critères »');
         return;
     }
 
     if (echelles.length === 0) {
-        alert('Vous devez d\'abord créer au moins une échelle de performance dans la section « Échelles de performance »');
+        alert('Tu dois d\'abord créer au moins une échelle de performance dans la section « Échelles de performance »');
         return;
     }
 
@@ -3106,7 +3106,7 @@ function importerPartiel() {
         textarea.value = '';
         calculerPourcentageComplet();
     } else {
-        alert('Aucun commentaire n\'a pu être importé. Vérifiez les noms de critères.');
+        alert('Aucun commentaire n\'a pu être importé. Vérifie les noms de critères.');
     }
 }
 
@@ -3140,7 +3140,7 @@ function importerCartoucheJSON(event) {
             // Demander quelle grille utiliser
             const grilles = await db.get('grillesTemplates') || [];
             if (grilles.length === 0) {
-                alert('Créez d\'abord une grille de critères');
+                alert('Crée d\'abord une grille de critères');
                 return;
             }
 
@@ -3285,7 +3285,7 @@ async function preparerDonneesBibliothequeCartouches() {
                 classeItem: 'cartouche-disponible-item',
                 dataAttrs: `data-grille="${grilleNom}"`,
                 boutons: [
-                    { label: 'Ajouter à ma sélection', onclick: `ajouterCartoucheIndividuelle('${cartouche.id}', '${cartouche.grilleId}')`, classe: 'btn-confirmer', title: 'Ajouter cette cartouche à votre sélection' },
+                    { label: 'Ajouter à ma sélection', onclick: `ajouterCartoucheIndividuelle('${cartouche.id}', '${cartouche.grilleId}')`, classe: 'btn-confirmer', title: 'Ajouter cette cartouche à ta sélection' },
                     { label: 'Supprimer', onclick: `supprimerCartoucheDeBibliothequePartagee('${cartouche.id}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true }
                 ],
                 groupe: grilleNom
@@ -3413,7 +3413,7 @@ async function ajouterCartoucheIndividuelle(id, grilleId) {
         fermerModalBibliothequeCartouches();
         await afficherBanqueCartouches();
         await afficherBibliothequeCartouches();
-        alert('Cartouche ajoutée à votre sélection avec succès !');
+        alert('Cartouche ajoutée à ta sélection avec succès !');
     } catch (error) {
         console.error('Erreur lors de l\'ajout:', error);
         alert('Erreur lors de l\'ajout de la cartouche');

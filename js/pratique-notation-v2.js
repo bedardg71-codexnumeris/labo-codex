@@ -327,7 +327,7 @@
         },
         'autre': {
             nom: 'Autre méthode',
-            description: 'Décrivez votre méthode de calcul dans le champ « Description » ci-dessous. Nous pourrons discuter de son implémentation.',
+            description: 'Décris ta méthode de calcul dans le champ « Description » ci-dessous. Nous pourrons discuter de son implémentation.',
             exemple: ''
         }
     };
@@ -890,7 +890,7 @@
         if (!objectifs || objectifs.length === 0) {
             conteneur.innerHTML = `
                 <div class="alerte-info" style="padding: 10px; margin: 10px 0;">
-                    Aucun objectif configuré. Utilisez le bouton « + Ajouter un objectif » pour commencer.
+                    Aucun objectif configuré. Utilise le bouton « + Ajouter un objectif » pour commencer.
                 </div>
             `;
             return;
@@ -1126,7 +1126,7 @@
         if (!conteneur) return;
 
         if (!grille || Object.keys(grille).length === 0) {
-            conteneur.innerHTML = '<div class="alerte-info">Ajoutez des objectifs pour voir la grille de conversion.</div>';
+            conteneur.innerHTML = '<div class="alerte-info">Ajoute des objectifs pour voir la grille de conversion.</div>';
             return;
         }
 
@@ -1282,7 +1282,7 @@
         if (!typesTravaux || typesTravaux.length === 0) {
             conteneur.innerHTML = `
                 <div class="alerte-info" style="padding: 10px; margin: 10px 0;">
-                    Aucun type de production configuré. Sélectionnez depuis la bibliothèque ou ajoutez manuellement.
+                    Aucun type de production configuré. Sélectionne depuis la bibliothèque ou ajoute manuellement.
                 </div>
             `;
             return;
@@ -1559,7 +1559,7 @@
         if (!forfaits || forfaits.length === 0) {
             conteneur.innerHTML = `
                 <div class="alerte-info" style="padding: 10px; margin: 10px 0;">
-                    Aucun forfait configuré. Utilisez le bouton ci-dessous pour créer vos forfaits.
+                    Aucun forfait configuré. Utilise le bouton ci-dessous pour créer tes forfaits.
                 </div>
             `;
             return;

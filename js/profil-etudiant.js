@@ -1761,7 +1761,7 @@ function genererSectionAccompagnement(da) {
             <br><br>
             <strong>Contenu :</strong> Niveau d'intervention RàI recommandé (1, 2 ou 3) • Indicateurs de risque, pattern d'apprentissage et progression • Services adaptés (SA, CAF) pour contextualiser l'accompagnement • Échelle visuelle de positionnement du risque • Liste chronologique des interventions documentées
             <br><br>
-            <strong>Utilisation :</strong> Planifier intervention (basez-vous sur le niveau RàI et les indicateurs affichés) • Nouvelle intervention (cliquez sur «Nouvelle intervention») • Consulter historique (cliquez sur «Consulter» pour voir les détails complets) • Notes individuelles (visibles directement sous chaque intervention)
+            <strong>Utilisation :</strong> Planifier intervention (base-toi sur le niveau RàI et les indicateurs affichés) • Nouvelle intervention (clique sur «Nouvelle intervention») • Consulter historique (clique sur «Consulter» pour voir les détails complets) • Notes individuelles (visibles directement sous chaque intervention)
         </div>
 
         <!-- 🆕 NOUVEAU : Trois cartes côte à côte (RàI pédagogique + Contexte + Observation SOLO) -->
@@ -2824,7 +2824,7 @@ function genererCarteCibleIntervention(da) {
             <br><br>
             <strong>Méthodologie :</strong> Le système analyse l'engagement (E = A × C × P), le pattern d'apprentissage actuel (basé sur les ${nbArtefacts} dernier${nbArtefacts > 1 ? 's' : ''} ${obtenirTermeProduction(nbArtefacts > 1 ? 'pluriel' : 'singulier')}), et les défis identifiés sur les critères de la grille de référence. La logique de décision priorise les situations de décrochage, puis les blocages critiques et émergents, avant de recommander des cibles d'enrichissement ou de maintien.
             <br><br>
-            <strong>Utilisation :</strong> Cette section vous guide dans le choix d'interventions appropriées. Les recommandations sont contextualisées selon les besoins spécifiques de l'étudiant. Consultez la section Accompagnement pour planifier et documenter vos interventions.
+            <strong>Utilisation :</strong> Cette section te guide dans le choix d'interventions appropriées. Les recommandations sont contextualisées selon les besoins spécifiques de l'étudiant. Consulte la section Accompagnement pour planifier et documenter tes interventions.
         </div>
 
         <!-- CARTE CIBLE D'INTERVENTION PREMIUM -->
@@ -3769,7 +3769,7 @@ function genererSectionProductions(da) {
         return `
             <div class="profil-zone-grande-bleu">
                 <p class="u-texte-gris" style="font-size: 1.1rem;">Aucune production configurée</p>
-                <p class="u-texte-gris-clair u-mt-10">Créez des productions dans la section Matériel → Productions</p>
+                <p class="u-texte-gris-clair u-mt-10">Crée des productions dans la section Matériel → Productions</p>
             </div>
         `;
     }
@@ -4313,7 +4313,7 @@ function genererSectionProgression(da) {
                     <span style="width: 12px; height: 12px; background: var(--vert-succes); border-radius: 50%;"></span>
                     <span style="color: var(--vert-succes); font-weight: 500;">Performance (P)</span>
                 </span>
-                <span style="color: var(--gris-clair); font-size: 0.85rem; margin-left: auto;">Survolez une courbe pour l'identifier</span>
+                <span style="color: var(--gris-clair); font-size: 0.85rem; margin-left: auto;">Survole une courbe pour l'identifier</span>
             </div>
 
             <!-- Canvas pour le graphique Chart.js -->
@@ -4395,7 +4395,7 @@ function genererSectionPerformance(da) {
                     <div style="background: #162c36; padding: 12px 20px; border-radius: 6px; margin-bottom: 10px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
                         <span style="font-weight: 600; color: var(--gris-fonce);">Critères :</span>
                         ${legendeHTML}
-                        <span style="color: var(--gris-clair); font-size: 0.85rem; margin-left: auto;">Survolez une courbe pour l'identifier</span>
+                        <span style="color: var(--gris-clair); font-size: 0.85rem; margin-left: auto;">Survole une courbe pour l'identifier</span>
                     </div>
 
                     <!-- Canvas pour le graphique Chart.js -->
@@ -6724,8 +6724,8 @@ function genererSectionPerformance(da) {
                     </div>
 
                     <div style="background: #162c36; padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.85rem; color: var(--gris-moyen);">
-                        <strong>Conseil :</strong> Cliquez sur un critère dans la légende pour le masquer ou l'afficher.
-                        Survolez les points pour voir les détails.
+                        <strong>Conseil :</strong> Clique sur un critère dans la légende pour le masquer ou l'afficher.
+                        Survole les points pour voir les détails.
                     </div>
                 </div>
             `;
@@ -7241,7 +7241,7 @@ function genererSectionPerformance(da) {
                                         <div style="flex: 1;">
                                             <strong style="color: var(--alerte-texte-attention); display: block; margin-bottom: 5px;">Configuration requise</strong>
                                             <p style="margin: 0; color: var(--alerte-texte-attention); font-size: 0.9rem; line-height: 1.5;">
-                                                Pour afficher les forces et défis par critère, vous devez configurer une grille de référence dans
+                                                Pour afficher les forces et défis par critère, tu dois configurer une grille de référence dans
                                                 <strong>Réglages → Pratique de notation → Grille de référence pour le dépistage</strong>.
                                             </p>
                                         </div>
@@ -7759,7 +7759,7 @@ function genererSectionRapport(da) {
                 <!-- Conseil Primo: Informations sur le rapport -->
                 <div id="conseil-rapport" class="carte-info-toggle carte-info-conseil" style="display: none;">
                     <strong>À propos du rapport :</strong>
-                    <p>Le rapport est généré à la demande avec les données actuelles et n'est pas sauvegardé automatiquement. Vous pouvez modifier le texte avant de le copier.</p>
+                    <p>Le rapport est généré à la demande avec les données actuelles et n'est pas sauvegardé automatiquement. Tu peux modifier le texte avant de le copier.</p>
                 </div>
 
                 <!-- Grid 2 colonnes : Paramètres + Actions -->
@@ -7810,7 +7810,7 @@ function genererSectionRapport(da) {
             <!-- Zone de texte du rapport (éditable pour ajouter commentaires personnels) -->
             <div class="profil-position-relative-mt15">
                 <textarea id="textarea-rapport-${da}"
-                          placeholder="Le rapport apparaîtra ici. Vous pouvez le modifier et ajouter vos commentaires avant de le copier."
+                          placeholder="Le rapport apparaîtra ici. Tu peux le modifier et ajouter tes commentaires avant de le copier."
                           style="width: 100%; height: 300px; padding: 15px; font-family: 'Courier New', monospace; font-size: 0.9rem; border: 2px solid var(--bleu-pale); border-radius: 6px; resize: vertical; line-height: 1.6; background: #162c36; overflow-y: auto;"></textarea>
             </div>
         </div>
@@ -7936,7 +7936,7 @@ function viderRapport(da) {
     const btnCopier = document.getElementById(`btn-copier-rapport-${da}`);
 
     if (textarea) {
-        textarea.value = 'Cliquez sur "Générer le rapport" pour afficher le contenu...';
+        textarea.value = 'Clique sur "Générer le rapport" pour afficher le contenu...';
     }
 
     if (btnCopier) {
@@ -8351,7 +8351,7 @@ function attribuerJetonPersonnaliseAvecPrompt(da, jetonId, nomJeton) {
  * @param {string} nomJeton - Nom du jeton (pour affichage)
  */
 function retirerJetonPersonnaliseAvecConfirmation(da, jetonId, nomJeton) {
-    if (!confirm(`Êtes-vous sûr de vouloir retirer un jeton "${nomJeton}" à cet·te étudiant·e ?`)) {
+    if (!confirm(`Es-tu sûr de vouloir retirer un jeton "${nomJeton}" à cet·te étudiant·e ?`)) {
         return;
     }
 
@@ -8769,7 +8769,7 @@ function genererSectionTravaux(da) {
         return `
             <div class="profil-zone-grande-bleu">
                 <p style="color: var(--gris-moyen); font-size: 1.1rem;">Aucun travail soumis</p>
-                <p style="color: var(--gris-clair); margin-top: 10px;">Importez des travaux depuis l'onglet Travaux &gt; Import</p>
+                <p style="color: var(--gris-clair); margin-top: 10px;">Importe des travaux depuis l'onglet Travaux &gt; Import</p>
             </div>
         `;
     }

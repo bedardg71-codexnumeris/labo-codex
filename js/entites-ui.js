@@ -59,7 +59,7 @@ async function peuplerDropdownGroupeCoursActif() {
     const trimestreActif = trimestres.find(t => t.actif);
 
     if (!trimestreActif) {
-        selectHeader.innerHTML = '<option value="">-- Sélectionnez un trimestre --</option>';
+        selectHeader.innerHTML = '<option value="">-- Sélectionne un trimestre --</option>';
         return;
     }
 
@@ -166,7 +166,7 @@ function changerEnseignantSelectionneV2(enseignantId) {
 
     if (!enseignantId) {
         if (btnModifier) btnModifier.classList.add('u-hide');
-        if (apercu) apercu.innerHTML = '<p class="text-muted">Sélectionnez un enseignant·e pour voir ses détails.</p>';
+        if (apercu) apercu.innerHTML = '<p class="text-muted">Sélectionne un enseignant·e pour voir ses détails.</p>';
         return;
     }
 
@@ -353,7 +353,7 @@ function changerHoraireSelectionneV2(horaireId) {
 
     if (!horaireId) {
         if (btnModifier) btnModifier.classList.add('u-hide');
-        if (apercu) apercu.innerHTML = '<p class="text-muted">Sélectionnez un horaire pour voir ses détails.</p>';
+        if (apercu) apercu.innerHTML = '<p class="text-muted">Sélectionne un horaire pour voir ses détails.</p>';
         return;
     }
 
@@ -469,7 +469,7 @@ function afficherSeancesV2() {
     if (!container) return;
 
     if (seancesTemp.length === 0) {
-        container.innerHTML = '<p class="text-muted">Sélectionnez le nombre de séances ci-dessus.</p>';
+        container.innerHTML = '<p class="text-muted">Sélectionne le nombre de séances ci-dessus.</p>';
         return;
     }
 
@@ -758,7 +758,7 @@ async function afficherListeGroupeCoursV2() {
 
     const trimestreActif = window.trimestreActif;
     if (!trimestreActif) {
-        container.innerHTML = '<p class="text-muted">Aucun trimestre actif. Sélectionnez un trimestre d\'abord.</p>';
+        container.innerHTML = '<p class="text-muted">Aucun trimestre actif. Sélectionne un trimestre d\'abord.</p>';
         return;
     }
 
@@ -957,7 +957,7 @@ async function activerGroupeCoursV2(groupeCoursId) {
  * Supprime un groupe-cours
  */
 async function supprimerGroupeCoursV2(groupeCoursId) {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce groupe-cours ?')) {
+    if (!confirm('Es-tu sûr de vouloir supprimer ce groupe-cours ?')) {
         return;
     }
 

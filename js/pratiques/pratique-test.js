@@ -158,7 +158,7 @@ class PratiqueTest {
     if (typeof window.enregistrerPratique !== 'function') {
         console.error(
             '[PratiqueTest] Le registre n\'est pas chargé ! ' +
-            'Assurez-vous de charger pratique-registre.js avant pratique-test.js'
+            'Assure-toi de charger pratique-registre.js avant pratique-test.js'
         );
         return;
     }

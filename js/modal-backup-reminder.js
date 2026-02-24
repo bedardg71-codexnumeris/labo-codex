@@ -153,28 +153,28 @@
             <div class="modal-header-warning">
                 <h2>
                     <span>⚠️</span>
-                    Protégez vos données
+                    Protège tes données
                 </h2>
             </div>
 
             <div class="modal-backup-body">
                 <p>
-                    Vos données sont stockées <strong>localement dans votre navigateur</strong>.
+                    Tes données sont stockées <strong>localement dans ton navigateur</strong>.
                     Personne d'autre n'y a accès, mais elles peuvent être <strong>perdues</strong> si :
                 </p>
 
                 <ul>
-                    <li>Vous effacez l'historique de navigation <em>(avec « données de sites »)</em></li>
-                    <li>Vous utilisez la <strong>navigation privée</strong></li>
-                    <li>Vous changez de navigateur <em>(Chrome ≠ Safari ≠ Firefox)</em></li>
-                    <li>Vous réinstallez votre navigateur ou changez d'ordinateur</li>
+                    <li>Tu effaces l'historique de navigation <em>(avec « données de sites »)</em></li>
+                    <li>Tu utilises la <strong>navigation privée</strong></li>
+                    <li>Tu changes de navigateur <em>(Chrome ≠ Safari ≠ Firefox)</em></li>
+                    <li>Tu réinstalles ton navigateur ou changes d'ordinateur</li>
                 </ul>
 
                 <div class="modal-backup-solution">
                     <p>
-                        <strong>Solution :</strong> Exportez régulièrement vos données via
+                        <strong>Solution :</strong> Exporte régulièrement tes données via
                         <strong>Réglages → Données</strong>. Le fichier JSON peut être réimporté
-                        à tout moment pour restaurer vos données.
+                        à tout moment pour restaurer tes données.
                     </p>
                 </div>
 

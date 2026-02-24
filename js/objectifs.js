@@ -265,7 +265,7 @@ function genererFormulaireEnsemble(ensemble) {
                            id="ensembleAuteur"
                            class="controle-form"
                            value="${ensemble.auteur || ''}"
-                           placeholder="Votre nom"
+                           placeholder="Ton nom"
                            oninput="marquerEnsembleModifie()">
                 </div>
                 <div class="groupe-form">
@@ -576,7 +576,7 @@ function sauvegarderEnsembleObjectifs() {
     // Valider le total
     const total = calculerTotalPoidsEnsemble();
     if (total !== 100) {
-        if (!confirm(`Le total des pondérations est de ${total}% au lieu de 100%.\n\nVoulez-vous quand même sauvegarder ?`)) {
+        if (!confirm(`Le total des pondérations est de ${total}% au lieu de 100%.\n\nVeux-tu quand même sauvegarder ?`)) {
             return;
         }
     }
@@ -691,7 +691,7 @@ function dupliquerEnsembleObjectifs(ensembleId) {
     mettreAJourStatsObjectifs();
     afficherEnsembleObjectifs(copie.id);
 
-    alert('✅ Ensemble dupliqué avec succès !\n\nVous pouvez maintenant modifier la copie.');
+    alert('✅ Ensemble dupliqué avec succès !\n\nTu peux maintenant modifier la copie.');
 }
 
 // ============================================================================
@@ -822,7 +822,7 @@ function traiterImportObjectifs(event) {
 👤 Auteur original : ${metadata.auteur_original}
 📅 Date de création : ${metadata.date_creation}
 
-Vous pouvez utiliser, modifier et partager ce matériel selon les conditions de la licence CC BY-NC-SA 4.0.
+Tu peux utiliser, modifier et partager ce matériel selon les conditions de la licence CC BY-NC-SA 4.0.
                 `.trim();
 
                 if (!confirm(infosCC + '\n\nImporter ce matériel ?')) {

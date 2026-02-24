@@ -603,7 +603,7 @@ function afficherModalMigrationLegacy(detailsLegacy) {
                 <div style="text-align: center; margin-bottom: 20px;">
                     <div style="font-size: 3rem; margin-bottom: 10px;">🔄</div>
                     <h2 style="margin: 0; color: var(--texte-secondaire); font-size: 1.4rem;">
-                        Mise à jour de vos données
+                        Mise à jour de tes données
                     </h2>
                 </div>
 
@@ -612,7 +612,7 @@ function afficherModalMigrationLegacy(detailsLegacy) {
                     <p style="margin: 0; font-size: 0.95rem; line-height: 1.6; color: var(--gris-fonce);">
                         L'application Monitorage a beaucoup évolué récemment pour mieux répondre aux
                         besoins des enseignants. Pour profiter de toutes les nouvelles fonctionnalités,
-                        vos données doivent être réorganisées une seule fois.
+                        tes données doivent être réorganisées une seule fois.
                     </p>
                 </div>
 
@@ -635,7 +635,7 @@ function afficherModalMigrationLegacy(detailsLegacy) {
                         <strong>📋 ${nbCles} ensemble(s) de données détecté(s)</strong>
                     </p>
                     <p style="margin: 0; font-size: 0.9rem; color: var(--gris-moyen);">
-                        La migration va créer un trimestre à partir de vos données actuelles.
+                        La migration va créer un trimestre à partir de tes données actuelles.
                         <strong>Aucune donnée ne sera perdue.</strong>
                     </p>
                 </div>
@@ -643,7 +643,7 @@ function afficherModalMigrationLegacy(detailsLegacy) {
                 <!-- Rassurant -->
                 <div style="background: var(--alerte-fond-succes, #d4edda); border-radius: 8px; padding: 12px; margin-bottom: 18px;">
                     <p style="margin: 0; font-size: 0.85rem; color: var(--alerte-texte-succes);">
-                        ✅ <strong>Rassurez-vous :</strong> Cette opération est automatique et ne prendra
+                        ✅ <strong>Rassure-toi :</strong> Cette opération est automatique et ne prendra
                         que quelques secondes. C'est une opération ponctuelle qui ne devrait pas se reproduire.
                     </p>
                 </div>
@@ -651,7 +651,7 @@ function afficherModalMigrationLegacy(detailsLegacy) {
                 <!-- Avertissement export -->
                 <div style="background: var(--alerte-fond-attention); border-radius: 8px; padding: 12px; margin-bottom: 22px;">
                     <p style="margin: 0; font-size: 0.85rem; color: var(--gris-fonce);">
-                        💡 <strong>Conseil :</strong> Si vous préférez, exportez d'abord vos données
+                        💡 <strong>Conseil :</strong> Si tu préfères, exporte d'abord tes données
                         (Réglages → Export localStorage) avant de continuer.
                     </p>
                 </div>
@@ -833,13 +833,13 @@ async function executerMigrationLegacy() {
         fermerModalMigrationLegacy();
 
         // Notification et rechargement
-        alert(`Migration réussie !\n\nVos données ont été organisées pour le trimestre "${nouveauTrimestre.nom}".\n\nL'application va se recharger.`);
+        alert(`Migration réussie !\n\nTes données ont été organisées pour le trimestre "${nouveauTrimestre.nom}".\n\nL'application va se recharger.`);
 
         location.reload();
 
     } catch (erreur) {
         console.error('❌ [Migration Legacy] Erreur:', erreur);
-        alert('Erreur lors de la migration.\n\n' + erreur.message + '\n\nVos données n\'ont pas été modifiées.');
+        alert('Erreur lors de la migration.\n\n' + erreur.message + '\n\nTes données n\'ont pas été modifiées.');
     }
 }
 

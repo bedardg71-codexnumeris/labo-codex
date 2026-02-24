@@ -261,7 +261,7 @@
             titre: 'Point d\u2019entr\u00e9e visible du parcours sur l\u2019accueil',
             items: [
                 '<strong>Panneau CTA sur l\u2019accueil</strong> : Quand le parcours n\u2019est pas initialis\u00e9, un panneau \u00ab\u00a0Commence ton parcours\u00a0\u00bb est affich\u00e9 avec les deux boutons de choix de mode (\uD83D\uDDFA\uFE0F\u00a0\u00c9tape par \u00e9tape / \uD83E\uDDED\u00a0Par exploration).',
-                '<strong>Hero adaptatif</strong> : Le titre de la page d\u2019accueil s\u2019adapte \u00e0 l\u2019\u00e9tat du parcours\u00a0: \u00ab\u00a0Bienvenue\u00a0! Par o\u00f9 commencer\u00a0?\u00a0\u00bb avant le choix, \u00ab\u00a0Que souhaitez-vous faire\u00a0?\u00a0\u00bb apr\u00e8s.',
+                '<strong>Hero adaptatif</strong> : Le titre de la page d\u2019accueil s\u2019adapte \u00e0 l\u2019\u00e9tat du parcours\u00a0: \u00ab\u00a0Bienvenue\u00a0! Par o\u00f9 commencer\u00a0?\u00a0\u00bb avant le choix, \u00ab\u00a0Que souhaites-tu faire\u00a0?\u00a0\u00bb apr\u00e8s.',
                 '<strong>Parcours toujours visible</strong> : Le panneau parcours est d\u00e9sormais affich\u00e9 en permanence sur l\u2019accueil (CTA ou progression), sans condition pr\u00e9alable.'
             ]
         },
@@ -330,8 +330,8 @@
             couleur: 'vert',
             titre: 'Refonte du wizard de configuration des pratiques',
             items: [
-                '<strong>Classification comportementale</strong> : Le wizard ne demande plus de choisir entre Sommative / PAN-Standards / PAN-Sp\u00e9cifications. Il pose des questions concr\u00e8tes sur votre m\u00e9thode de notation et d\u00e9duit automatiquement le type de pratique. Score : 12/12 enseignants correctement classifi\u00e9s (vs 1/12 avant).',
-                '<strong>Questions guid\u00e9es</strong> : Comment calculez-vous la note finale ? Utilisez-vous des r\u00e8gles sp\u00e9ciales ? Combien d\u2019\u00e9valuations pr\u00e9voyez-vous ? Quels sont vos seuils personnels ?',
+                '<strong>Classification comportementale</strong> : Le wizard ne demande plus de choisir entre Sommative / PAN-Standards / PAN-Sp\u00e9cifications. Il pose des questions concr\u00e8tes sur ta m\u00e9thode de notation et d\u00e9duit automatiquement le type de pratique. Score : 12/12 enseignants correctement classifi\u00e9s (vs 1/12 avant).',
+                '<strong>Questions guid\u00e9es</strong> : Comment calcules-tu la note finale ? Utilises-tu des r\u00e8gles sp\u00e9ciales ? Combien d\u2019\u00e9valuations pr\u00e9vois-tu ? Quels sont tes seuils personnels ?',
                 '<strong>Variantes automatiques</strong> : Le moteur d\u00e9tecte les variantes (remplacement progressif, verrou, portfolio, plafonnement, N meilleurs, objectifs pond\u00e9r\u00e9s, comptage, seuils critiques).',
                 '<strong>Calcul par sp\u00e9cifications</strong> : La m\u00e9thode de calcul PAN-Sp\u00e9cifications (fran\u00e7ois) est d\u00e9sormais impl\u00e9ment\u00e9e \u2014 v\u00e9rifie les sp\u00e9cifications satisfaites et retourne la note du forfait le plus \u00e9lev\u00e9.',
                 '<strong>Double verrou</strong> : La m\u00e9thode de plafonnement par verrou (Marie-H\u00e9l\u00e8ne) est impl\u00e9ment\u00e9e \u2014 plafonne la note finale si l\u2019\u00e9valuation verrouill\u00e9e est sous le seuil.',
@@ -478,8 +478,8 @@
                 '<strong>Nouvel onglet Planification</strong> : Carte mentale intégrée pour organiser visuellement compétences, séquences, leçons et activités. Deux zones : Objectifs &amp; Savoirs (gauche) et Organisation &amp; Activités (droite).',
                 '<strong>10 types de nœuds</strong> : Compétence, idée maîtresse, connaissance, préalable, stratégie, séquence, leçon, activité, soutien, révision — chacun avec sa couleur distinctive.',
                 '<strong>Panneau Séances</strong> : Vue calendrier latérale pour planifier la répartition des séquences et leçons sur les semaines du trimestre. Export texte et TSV.',
-                '<strong>Multi-cartes</strong> : Créez plusieurs cartes, renommez-les, importez/exportez en JSON.',
-                '<strong>Glisser-déposer</strong> : Créez des nœuds en glissant depuis la palette, reliez-les par clic, sélectionnez par rectangle, multi-sélection avec ⌘+clic.'
+                '<strong>Multi-cartes</strong> : Crée plusieurs cartes, renomme-les, importe/exporte en JSON.',
+                '<strong>Glisser-déposer</strong> : Crée des nœuds en glissant depuis la palette, relie-les par clic, sélectionne par rectangle, multi-sélection avec ⌘+clic.'
             ]
         },
         {
@@ -503,10 +503,10 @@
             couleur: 'bleu',
             titre: 'Démo et accueil',
             items: [
-                '<strong>Nouveau système de démo</strong> : La démo est désormais une route isolée (et non plus un mode). Entrez et sortez librement via un bouton dédié, vos données réelles sont préservées.',
+                '<strong>Nouveau système de démo</strong> : La démo est désormais une route isolée (et non plus un mode). Entre et sors librement via un bouton dédié, tes données réelles sont préservées.',
                 '<strong>Pack démo 20\u00a0étudiants</strong> : Données réelles A2025 anonymisées — 20\u00a0étudiants, 200\u00a0évaluations, 627\u00a0présences, 11\u00a0productions, 3\u00a0grilles de critères.',
                 '<strong>Page d\u2019accueil permanente</strong> : Nouvel écran d\u2019accueil par défaut avec deux états — premier lancement (créer un cours ou explorer la démo) et retour (4\u00a0cartes par intention). Mode expert dans Réglages pour court-circuiter vers le tableau de bord.',
-                '<strong>Guidage contextuel</strong> : En mode démo, chaque section affiche un encart explicatif décrivant ce que vous voyez (16\u00a0encarts couvrant toutes les sous-sections).',
+                '<strong>Guidage contextuel</strong> : En mode démo, chaque section affiche un encart explicatif décrivant ce que tu vois (16\u00a0encarts couvrant toutes les sous-sections).',
                 '<strong>Bandeau démo</strong> : Barre verte fixe en bas de l\u2019écran en mode démo avec bouton «\u00a0Quitter la démo\u00a0».'
             ]
         },
@@ -533,14 +533,14 @@
             titre: 'Module Travaux',
             items: [
                 '<strong>Nouvel onglet Travaux</strong> : Gestion complète des travaux étudiants directement dans Monitorage (import, annotation, archivage)',
-                '<strong>Import de fichiers</strong> : Glissez vos PDF et images dans la zone de dépôt. Détection automatique du DA étudiant dans le nom du fichier. Association manuelle possible via dropdown.',
-                '<strong>Visionneuse intégrée</strong> : Ouvrez vos PDF et images directement dans l\'application. Navigation entre les pages, zoom avant/arrière, ajustement automatique à la fenêtre.',
-                '<strong>Annotation au stylet</strong> : Annotez directement sur les travaux avec le stylo, le surligneur, la gomme, des formes (cercle, flèche, rectangle) et des symboles (crochet, croix). Support Apple Pencil avec sensibilité à la pression et rejet de la paume.',
-                '<strong>Annuler/Rétablir</strong> : Ctrl+Z / Ctrl+Maj+Z pour annuler ou rétablir vos annotations (jusqu\'à 50 niveaux). Sauvegarde automatique.',
+                '<strong>Import de fichiers</strong> : Glisse tes PDF et images dans la zone de dépôt. Détection automatique du DA étudiant dans le nom du fichier. Association manuelle possible via dropdown.',
+                '<strong>Visionneuse intégrée</strong> : Ouvre tes PDF et images directement dans l\'application. Navigation entre les pages, zoom avant/arrière, ajustement automatique à la fenêtre.',
+                '<strong>Annotation au stylet</strong> : Annote directement sur les travaux avec le stylo, le surligneur, la gomme, des formes (cercle, flèche, rectangle) et des symboles (crochet, croix). Support Apple Pencil avec sensibilité à la pression et rejet de la paume.',
+                '<strong>Annuler/Rétablir</strong> : Ctrl+Z / Ctrl+Maj+Z pour annuler ou rétablir tes annotations (jusqu\'à 50 niveaux). Sauvegarde automatique.',
                 '<strong>Voir le travail depuis Évaluations</strong> : Bouton « Voir le travail » dans la page d\'évaluation pour afficher le document côte à côte avec la grille de critères.',
                 '<strong>Travaux dans le Profil étudiant</strong> : Nouvelle section « Travaux soumis » avec grille de miniatures et export ZIP par étudiant.',
-                '<strong>Archivage ZIP</strong> : Exportez les travaux par étudiant, par production ou pour le semestre complet. Inclut les versions annotées.',
-                '<strong>Stockage sur disque (Mac)</strong> : Option File System Access API pour stocker les fichiers sur votre disque au lieu d\'IndexedDB. Recommandé sur Mac pour les gros volumes.'
+                '<strong>Archivage ZIP</strong> : Exporte les travaux par étudiant, par production ou pour le semestre complet. Inclut les versions annotées.',
+                '<strong>Stockage sur disque (Mac)</strong> : Option File System Access API pour stocker les fichiers sur ton disque au lieu d\'IndexedDB. Recommandé sur Mac pour les gros volumes.'
             ]
         },
         {
@@ -604,7 +604,7 @@
             couleur: 'vert',
             titre: 'Synchronisation multi-appareils',
             items: [
-                '<strong>Import données personnelles corrigé</strong> : L\'import sur un nouvel appareil (iPad, nouveau PC) fonctionne maintenant. Cochez "C\'est ma propre sauvegarde" et les cases Étudiants/Présences/Notes se cochent automatiquement.',
+                '<strong>Import données personnelles corrigé</strong> : L\'import sur un nouvel appareil (iPad, nouveau PC) fonctionne maintenant. Coche "C\'est ma propre sauvegarde" et les cases Étudiants/Présences/Notes se cochent automatiquement.',
                 '<strong>Préservation des IDs</strong> : Les pratiques, grilles, échelles et productions conservent leurs IDs originaux lors de l\'import (plus de références cassées)',
                 '<strong>Import données calendrier</strong> : Les bornes du trimestre, horaires et événements sont maintenant importés correctement',
                 '<strong>Synchronisation MacBook / iPad</strong> : Export sur un appareil, import sur l\'autre - toutes les données sont transférées fidèlement'
@@ -638,7 +638,7 @@
                 '<strong>Anonymisation des groupes</strong> : En mode Anonymisation, les numéros de groupe sont remplacés par des lettres (00001 = Gr. A)',
                 '<strong>Graphique Trajectoire amélioré</strong> : La courbe de l\'élève sélectionné apparaît au premier plan',
                 '<strong>Bouton Supprimer dans les bibliothèques</strong> : Suppression définitive des éléments avec confirmation et vérification des dépendances',
-                '<strong>Bouton Dupliquer dans les bibliothèques</strong> : Créez rapidement une copie d\'un élément existant',
+                '<strong>Bouton Dupliquer dans les bibliothèques</strong> : Crée rapidement une copie d\'un élément existant',
                 '<strong>Isolation des templates archivés</strong> : Supprimer un template en H2026 n\'affecte plus les trimestres archivés'
             ]
         },
@@ -650,10 +650,10 @@
             items: [
                 '<strong>Uniformisation des graphiques</strong> : Tous les graphiques adoptent le même look et comportement cohérent',
                 '<strong>Échelle Y dynamique</strong> : Les graphiques s\'adaptent automatiquement aux données (fini l\'échelle fixe 0-100%)',
-                '<strong>Zones IDME dynamiques</strong> : Les zones colorées (Insuffisant, Développement, Maîtrisé, Étendu) utilisent votre échelle personnalisée partout',
+                '<strong>Zones IDME dynamiques</strong> : Les zones colorées (Insuffisant, Développement, Maîtrisé, Étendu) utilisent ton échelle personnalisée partout',
                 '<strong>Étiquettes de zones centrées</strong> : Les noms des zones s\'affichent au centre du graphique avec des couleurs saturées pour une meilleure lisibilité',
-                '<strong>Survol interactif</strong> : Survolez une courbe pour la mettre en évidence (les autres s\'atténuent), le nom s\'affiche au bout de la courbe',
-                '<strong>Verrouillage au clic</strong> : Cliquez sur une courbe ou son nom pour la verrouiller, cliquez ailleurs pour déverrouiller',
+                '<strong>Survol interactif</strong> : Survole une courbe pour la mettre en évidence (les autres s\'atténuent), le nom s\'affiche au bout de la courbe',
+                '<strong>Verrouillage au clic</strong> : Clique sur une courbe ou son nom pour la verrouiller, clique ailleurs pour déverrouiller',
                 '<strong>Points uniformisés</strong> : Tous les points des graphiques et barres ACEP ont le même style (blanc avec contour bleu pâle, noir au survol)',
                 '<strong>Distribution ACPE</strong> : Nouveau graphique montrant la répartition des indices A, C, P, E avec des courbes de densité (style Gauss)'
             ]
