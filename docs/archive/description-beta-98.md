@@ -4,7 +4,7 @@
 
 ## Ce que l'application te permet de faire
 
-Concrètement, tu bénéficies d'une gestion facile des présences et de la mobilisation en classe, d'un suivi des remises de productions, d'une analyse détaillée des performances et d'un système de gestion de la notation.
+L'application numérise le flux complet de ton travail d'enseignant : **planifier** tes cours et tes leçons, **construire** ton matériel pédagogique (productions, grilles, échelles, cartouches), **enseigner** avec un suivi des présences et de la mobilisation, **évaluer** les travaux de tes étudiants (importer, annoter, noter) et **suivre** leur progression dans le temps. Chaque interaction — une présence cochée, un critère ajusté, une annotation posée — capture une microdonnée qui s'accumule avec les autres pour éclairer ton jugement professionnel.
 
 Grâce à la persistance des critères d'une production à l'autre, l'application :
 
@@ -72,56 +72,42 @@ L'application **déduit automatiquement** ton type de pratique (sommative, PAN-S
 
 ---
 
-## Module Travaux
+## Évaluer les travaux
 
-Gère les travaux étudiants directement dans l'application grâce à l'onglet **Travaux** :
+L'onglet **Évaluations** regroupe trois sous-sections qui couvrent le cycle complet du traitement des copies : préparer les documents, les annoter et les évaluer, puis les archiver. Quand aucun fichier n'est encore importé, un panneau état zéro en 3 étapes te guide pour démarrer. Les travaux soumis apparaissent aussi dans le profil de chaque étudiant.
 
-- **Import de fichiers** : Glisse tes PDF et images dans la zone de dépôt. Détection automatique du DA étudiant dans le nom du fichier. Association manuelle possible via dropdown.
-- **Visionneuse intégrée** : Ouvre tes PDF et images directement dans l'application. Navigation entre les pages, zoom avant/arrière, ajustement automatique à la fenêtre.
-- **Annotation au stylet** : Annote directement sur les travaux avec le stylo, le surligneur, la gomme, des formes (cercle, flèche, rectangle) et des symboles (crochet, croix). Support Apple Pencil avec sensibilité à la pression et rejet de la paume.
-- **Autocollants de rétroaction** : Appose des autocollants visuels pré-configurés sur les copies pour signaler rapidement les points forts, les erreurs récurrentes ou les pistes d'amélioration — avant même d'évaluer.
-- **Annuler/Rétablir** : Ctrl+Z / Ctrl+Maj+Z pour annuler ou rétablir tes annotations (jusqu'à 50 niveaux). Sauvegarde automatique.
-- **Voir le travail depuis Évaluations** : Bouton « Voir le travail » dans la page d'évaluation pour afficher le document côte à côte avec la grille de critères.
-- **Travaux dans le Profil étudiant** : Section « Travaux soumis » avec grille de miniatures et export ZIP par étudiant.
-- **Archivage ZIP** : Exporte les travaux par étudiant, par production ou pour le semestre complet. Inclut les versions annotées.
-- **Stockage sur disque (Mac)** : Option File System Access API pour stocker les fichiers sur ton disque au lieu d'IndexedDB. Recommandé sur Mac pour les gros volumes.
-- **Panneau état zéro** : Quand aucun fichier n'est importé, un guide en 3 étapes explique comment démarrer l'annotation.
+### Préparer et importer
 
-### Préparation des documents
-
-Avant d'annoter, tu peux préparer tes documents numérisés directement dans l'application :
-
-- **Détection automatique des coins** : L'application repère les 4 coins du document (Canny + Hough) et propose une correction de perspective
-- **Poignées extensibles** : Ajuste manuellement les coins si nécessaire
-- **Ajustement d'exposition** : Courbe EV pour éclaircir ou assombrir le document
-- **Balance des blancs** : Corrige les teintes indésirables dues à l'éclairage
-- **Aperçu en temps réel** : Chaque réglage s'affiche instantanément
-- **Format 11×17** : Support du format légal pour les documents grand format
-
-### Pipeline d'import repensé
-
-L'import de fichiers passe de 4 étapes à 2 :
+Glisse tes PDF et images dans la zone de dépôt. Le pipeline d'import fonctionne en 2 étapes :
 
 - **Identification automatique** : En mode LEA, l'application détecte le DA, la production et la date directement dans le nom du fichier
 - **Mode nommage libre** : Pour les fichiers sans convention, tu nommes manuellement
 - **Détection de doublons** : L'application signale les fichiers déjà importés pour éviter les copies en double
 
-### Palettes flottantes
+Avant d'annoter, tu peux préparer tes documents numérisés :
 
-L'interface d'annotation propose des palettes déplaçables et persistantes :
+- **Détection automatique des coins** : L'application repère les 4 coins du document (Canny + Hough) et propose une correction de perspective. Poignées extensibles pour ajuster manuellement
+- **Ajustement d'exposition** : Courbe EV pour éclaircir ou assombrir le document
+- **Balance des blancs** : Corrige les teintes indésirables dues à l'éclairage
+- **Aperçu en temps réel** : Chaque réglage s'affiche instantanément
+- **Format 11×17** : Support du format légal pour les documents grand format
 
-- **Palette d'annotation** : Outils de dessin (stylo, surligneur, gomme, formes) dans une palette que tu positionnes où tu veux
-- **Palette de tampons** : Tampons rapides séparés (✓ ✗ ! →) pour marquer les copies
-- **Palette d'évaluation** : Rétroaction en temps réel pendant l'annotation, avec accès direct à la grille de critères
-- **Largeurs ajustables** : Séparateurs déplaçables entre les panneaux pour adapter l'espace de travail
+### Annoter et évaluer
 
-### Badges de statut
-
-Chaque copie affiche un badge dynamique qui reflète son état dans le flux de travail :
-
-- **Pilules de statut** : Importé → Annoté → Évalué, avec code de couleur
-- **Regroupement par statut** : Filtre et trie les copies selon leur avancement
+- **Visionneuse intégrée** : Ouvre tes PDF et images directement dans l'application. Navigation entre les pages, zoom avant/arrière, ajustement automatique à la fenêtre
+- **Annotation au stylet** : Annote directement sur les copies avec le stylo, le surligneur, la gomme, des formes (cercle, flèche, rectangle) et des symboles (crochet, croix). Support Apple Pencil avec sensibilité à la pression et rejet de la paume
+- **Autocollants de rétroaction** : Appose des autocollants visuels pré-configurés pour signaler rapidement les points forts, les erreurs récurrentes ou les pistes d'amélioration — avant même d'évaluer
+- **Tampons rapides** : ✓ ✗ ! → pour marquer les copies d'un geste
+- **Palettes flottantes déplaçables** : Palette d'annotation (outils de dessin), palette de tampons et palette d'évaluation (rétroaction en temps réel avec accès direct à la grille de critères). Séparateurs déplaçables entre les panneaux pour adapter l'espace de travail
+- **Grille de critères côte à côte** : Affiche le document et la grille d'évaluation simultanément
+- **Annuler/Rétablir** : Ctrl+Z / Ctrl+Maj+Z pour annuler ou rétablir tes annotations (jusqu'à 50 niveaux). Sauvegarde automatique
+- **Badges de statut** : Chaque copie affiche une pilule dynamique — Importé → Annoté → Évalué — avec code de couleur. Filtre et trie les copies selon leur avancement
 - **Verrouillage** : Les copies évaluées sont verrouillées pour éviter les modifications accidentelles
+
+### Exporter et archiver
+
+- **Archivage ZIP** : Exporte les travaux par étudiant, par production ou pour le semestre complet. Inclut les versions annotées
+- **Stockage sur disque** : Option File System Access API pour stocker les fichiers sur ton disque au lieu d'IndexedDB. Recommandé sur Mac pour les gros volumes
 
 ---
 
@@ -232,7 +218,7 @@ Tu peux changer de mode à tout moment dans **Réglages → Préférences**.
 
 ## À propos du projet
 
-Cette application de suivi des apprentissages et de construction de la note est développée par Grégoire Bédard, enseignant en littérature au Cégep de Drummondville.
+Cette application numérise le flux complet du travail enseignant — de la planification au suivi des apprentissages. Elle est développée par Grégoire Bédard, enseignant en littérature au Cégep de Drummondville.
 
 L'application est gratuite, libre et ouverte. Elle est distribuée sous licence Creative Commons BY-NC-SA 4.0 et son code source est disponible en open-source.
 
