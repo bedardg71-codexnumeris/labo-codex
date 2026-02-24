@@ -14,19 +14,19 @@
 const GUIDAGE_TEXTES = {
     'tableau-bord-apercu': {
         titre: 'Tableau de bord \u2014 \u00c9tat des lieux',
-        texte: 'Ce tableau pr\u00e9sente les indicateurs ACPE (Assiduit\u00e9, Compl\u00e9tion, Performance, Engagement) pour vos 20\u00a0\u00e9tudiants fictifs. Les barres gradu\u00e9es montrent la distribution du groupe. Survolez un point pour voir le profil d\u2019un \u00e9tudiant.'
+        texte: 'Ce tableau pr\u00e9sente les indicateurs ACPE (Assiduit\u00e9, Compl\u00e9tion, Performance, Engagement) pour tes 20\u00a0\u00e9tudiants fictifs. Les barres gradu\u00e9es montrent la distribution du groupe. Survole un point pour voir le profil d\u2019un \u00e9tudiant.'
     },
     'tableau-bord-liste': {
         titre: 'Liste des individus',
-        texte: 'Chaque ligne r\u00e9sume un \u00e9tudiant\u00a0: son taux de pr\u00e9sence, sa compl\u00e9tion des travaux et sa performance moyenne. Cliquez sur un nom pour ouvrir son profil d\u00e9taill\u00e9.'
+        texte: 'Chaque ligne r\u00e9sume un \u00e9tudiant\u00a0: son taux de pr\u00e9sence, sa compl\u00e9tion des travaux et sa performance moyenne. Clique sur un nom pour ouvrir son profil d\u00e9taill\u00e9.'
     },
     'tableau-bord-profil': {
         titre: 'Profil \u00e9tudiant',
-        texte: 'Le profil individuel rassemble toutes les donn\u00e9es d\u2019un \u00e9tudiant\u00a0: pr\u00e9sences, \u00e9valuations, progression. C\u2019est ici que vous planifiez une intervention si n\u00e9cessaire.'
+        texte: 'Le profil individuel rassemble toutes les donn\u00e9es d\u2019un \u00e9tudiant\u00a0: pr\u00e9sences, \u00e9valuations, progression. C\u2019est ici que tu planifies une intervention si n\u00e9cessaire.'
     },
     'tableau-bord-interventions': {
         titre: 'Interventions R\u00e0I',
-        texte: 'Le syst\u00e8me R\u00e9ponse \u00e0 l\u2019Intervention (R\u00e0I) classe les \u00e9tudiants en 3\u00a0niveaux selon leurs indicateurs. Les recommandations sont g\u00e9n\u00e9r\u00e9es automatiquement pour guider vos interventions.'
+        texte: 'Le syst\u00e8me R\u00e9ponse \u00e0 l\u2019Intervention (R\u00e0I) classe les \u00e9tudiants en 3\u00a0niveaux selon leurs indicateurs. Les recommandations sont g\u00e9n\u00e9r\u00e9es automatiquement pour guider tes interventions.'
     },
     'presences-apercu': {
         titre: 'Pr\u00e9sences \u2014 Aper\u00e7u',
@@ -34,11 +34,11 @@ const GUIDAGE_TEXTES = {
     },
     'presences-calendrier': {
         titre: 'Vue calendaire',
-        texte: 'Le calendrier affiche chaque s\u00e9ance avec un code couleur par \u00e9tudiant. Rep\u00e9rez les patterns d\u2019absence pour intervenir au bon moment.'
+        texte: 'Le calendrier affiche chaque s\u00e9ance avec un code couleur par \u00e9tudiant. Rep\u00e8re les patterns d\u2019absence pour intervenir au bon moment.'
     },
     'presences-saisie': {
         titre: 'Saisie des pr\u00e9sences',
-        texte: 'C\u2019est ici que vous prenez les pr\u00e9sences au quotidien. S\u00e9lectionnez la date, cochez les pr\u00e9sents, notez les retards. En d\u00e9mo, vous pouvez tester la saisie sans cons\u00e9quence.'
+        texte: 'C\u2019est ici que tu prends les pr\u00e9sences au quotidien. S\u00e9lectionne la date, coche les pr\u00e9sents, note les retards. En d\u00e9mo, tu peux tester la saisie sans cons\u00e9quence.'
     },
     'evaluations-apercu': {
         titre: '\u00c9valuations \u2014 Aper\u00e7u',
@@ -46,7 +46,7 @@ const GUIDAGE_TEXTES = {
     },
     'evaluations-liste': {
         titre: 'Liste des \u00e9valuations',
-        texte: 'Toutes les \u00e9valuations enregistr\u00e9es, filtrables par production et par groupe. Cliquez sur une \u00e9valuation pour voir le d\u00e9tail crit\u00e9ri\u00e9.'
+        texte: 'Toutes les \u00e9valuations enregistr\u00e9es, filtrables par production et par groupe. Clique sur une \u00e9valuation pour voir le d\u00e9tail crit\u00e9ri\u00e9.'
     },
     'evaluations-importer': {
         titre: 'Préparer et importer',
@@ -62,11 +62,11 @@ const GUIDAGE_TEXTES = {
     },
     'construction-apercu': {
         titre: 'Construction de la note \u2014 Aper\u00e7u',
-        texte: 'Ici se construit votre dispositif d\u2019\u00e9valuation\u00a0: productions \u00e9tudiantes, grilles de crit\u00e8res, \u00e9chelles de performance et cartouches de r\u00e9troaction. La d\u00e9mo inclut 11\u00a0productions et 3\u00a0grilles configur\u00e9es.'
+        texte: 'Ici se construit ton dispositif d\u2019\u00e9valuation\u00a0: productions \u00e9tudiantes, grilles de crit\u00e8res, \u00e9chelles de performance et cartouches de r\u00e9troaction. La d\u00e9mo inclut 11\u00a0productions et 3\u00a0grilles configur\u00e9es.'
     },
     'construction-grille-criteres': {
         titre: 'Grilles de crit\u00e8res',
-        texte: 'Les grilles d\u00e9finissent les crit\u00e8res d\u2019\u00e9valuation et leur pond\u00e9ration. La d\u00e9mo inclut 3\u00a0grilles pr\u00eates \u00e0 l\u2019emploi que vous pouvez explorer et dupliquer.'
+        texte: 'Les grilles d\u00e9finissent les crit\u00e8res d\u2019\u00e9valuation et leur pond\u00e9ration. La d\u00e9mo inclut 3\u00a0grilles pr\u00eates \u00e0 l\u2019emploi que tu peux explorer et dupliquer.'
     },
     'construction-echelle-performance': {
         titre: '\u00c9chelles de performance',
@@ -74,15 +74,27 @@ const GUIDAGE_TEXTES = {
     },
     'construction-retroactions': {
         titre: 'Cartouches de r\u00e9troaction',
-        texte: 'Les cartouches sont des banques de commentaires pr\u00e9r\u00e9dig\u00e9s associ\u00e9s aux niveaux de votre grille. Elles acc\u00e9l\u00e8rent la r\u00e9troaction \u00e9crite lors de l\u2019\u00e9valuation.'
+        texte: 'Les cartouches sont des banques de commentaires pr\u00e9r\u00e9dig\u00e9s associ\u00e9s aux niveaux de ta grille. Elles acc\u00e9l\u00e8rent la r\u00e9troaction \u00e9crite lors de l\u2019\u00e9valuation.'
     },
     'construction-productions': {
         titre: 'Productions \u00e9tudiantes',
-        texte: 'Les productions sont les travaux que vos \u00e9tudiants doivent remettre (dissertations, examens, projets). La d\u00e9mo en contient 11, chacune associ\u00e9e \u00e0 une grille de crit\u00e8res.'
+        texte: 'Les productions sont les travaux que tes \u00e9tudiants doivent remettre (dissertations, examens, projets). La d\u00e9mo en contient 11, chacune associ\u00e9e \u00e0 une grille de crit\u00e8res.'
     },
     'boite-outils-tirage': {
         titre: 'Bo\u00eete \u00e0 outils',
         texte: 'Outils interactifs pour l\u2019animation en classe\u00a0: tirage au sort d\u2019\u00e9tudiants pour les mises en situation, les pr\u00e9sentations ou les exercices collaboratifs.'
+    },
+    'planification-carte': {
+        titre: 'Planification \u2014 Carte mentale',
+        texte: 'La carte mentale te permet de visualiser l\u2019alignement p\u00e9dagogique de ton cours. La d\u00e9mo inclut une carte compl\u00e8te \u00ab\u00a0\u00c9criture et litt\u00e9rature\u00a0\u00bb avec 26\u00a0n\u0153uds et 45\u00a0liens. Explore les s\u00e9quences, le\u00e7ons et activit\u00e9s pour voir comment les \u00e9l\u00e9ments se relient.'
+    },
+    'planification-organisateur': {
+        titre: 'Planification \u2014 Plan de le\u00e7on',
+        texte: 'L\u2019organisateur transforme ta carte mentale en plans de le\u00e7on structur\u00e9s. S\u00e9lectionne une carte, une s\u00e9quence et une le\u00e7on pour voir les sections auto-d\u00e9riv\u00e9es (objectif, pr\u00e9requis, productions).'
+    },
+    'boite-outils-modelisation': {
+        titre: 'Bo\u00eete \u00e0 outils \u2014 Mod\u00e9lisation',
+        texte: 'La mod\u00e9lisation te permet d\u2019ouvrir un PDF pour l\u2019annoter en direct lors d\u2019une projection en classe. Ouvre un fichier depuis ton ordinateur pour tester les outils d\u2019annotation.'
     }
 };
 
