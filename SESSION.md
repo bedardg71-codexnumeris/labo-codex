@@ -25,6 +25,16 @@
 
 133. **Diagnostic ajouté** : `console.warn('[Badge]')` dans `genererBadgeFichierImporte()` quand un fichier annoté n'a pas d'évaluation correspondante — aide au débogage en conditions réelles.
 
+> **Rapport** : `Retours des testeurs/gregoire/24 février 2026/ID- grégoire 2026-02-24 14-59-41.txt`
+> **Bug** : #73
+
+134. **Bouton « Évaluer » bloqué après navigation** (#73) : Après navigation vers le Tableau de bord et retour au module Annoter, `modeCourant` restait à `'evaluer'` car les palettes DOM étaient détruites pendant la navigation sans appel à `fermerModeEvaluation()`. `basculerMode('evaluer')` voyait `modeCourant === 'evaluer'` et retournait immédiatement. Corrigé en réinitialisant `modeCourant = 'annoter'` dans `initialiserModuleTravaux()` à chaque entrée dans le module.
+
+> **Rapport** : `Retours des testeurs/gregoire/24 février 2026/ID- gregoire 2026-02-24 15-06-02.txt`
+> **Bug** : #74
+
+135. **Export affiche le mauvais groupe** (#74) : Grégoire évalue 21 copies du groupe 8, mais l'export montre 23 copies du groupe 2. Cause : `peuplerDropdownGroupeCoursActif()` (trimestre-v2.js:5652) validait `groupeCoursActif` contre `groupesCours` (filtrée par `dansSidebar !== false`). Si le groupe actif avait `dansSidebar === false`, il était considéré invalide et remplacé silencieusement par le premier groupe visible. Corrigé : validation contre `tousGroupesCours` (liste non filtrée).
+
 ### Travail accompli — Validation et humanisation de l'onglet Aide (Beta 97.13, build 0224-0505)
 
 121. **Disclaimer IA supprimé** : Le bloc d'avertissement « généré par IA » dans l'onglet Aide est retiré.

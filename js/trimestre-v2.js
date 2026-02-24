@@ -5646,8 +5646,10 @@ async function peuplerDropdownGroupeCoursActif() {
 
     // 🆕 BETA 95.5 : Auto-sélection si aucun groupe-cours actif
     // Vérifie si le groupe-cours actuellement actif appartient au trimestre actif
+    // 🔧 FIX (24 fév 2026) : Valider contre TOUS les groupe-cours, pas seulement ceux visibles dans la sidebar
+    // Sinon un groupe masqué (dansSidebar=false) est considéré invalide et remplacé silencieusement
     const gcActif = db.getSync('groupeCoursActif', null);
-    const gcActifValide = gcActif && groupesCours.some(gc => gc.id === gcActif.id);
+    const gcActifValide = gcActif && tousGroupesCours.some(gc => gc.id === gcActif.id);
 
     console.log('🔄 [GC Dropdown] gcActif:', gcActif?.id, '- trimestreId:', gcActif?.trimestreId);
     console.log('🔄 [GC Dropdown] gcActifValide:', gcActifValide);
