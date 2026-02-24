@@ -5,16 +5,40 @@
 
 ---
 
-## Beta 98 (24 fevrier 2026)
+## Beta 98 (20-24 fevrier 2026)
 
-**Reorganisation de l'entete et deplacement du theme**
+**Visionneuse, annotation, aide 100 % et entete repensee**
 
-- **Entete reorganisee** : Le dropdown Normal/Anonymise est seul a gauche, le bouton « Signaler un bug » est seul a droite, le titre reste centre.
-- **Theme clair/sombre deplace** : Le bouton lune est retire de l'entete. Le choix du theme se fait desormais dans Reglages > Preferences > Experience visuelle.
-- **Preferences reordonnees** : Les cartes « Experience visuelle » et « Navigation » sont desormais en haut de la page Preferences.
-- **Espacement de l'entete** : Plus d'air en haut du titre, separateur visuel entre la ligne Beta/Build et les informations contextuelles (Pratique, Semaine).
-- **Intitule version** : L'entete affiche desormais « Beta XX - Developpement actif » pour indiquer le statut du projet.
-- **Fichiers** : `index.html` (HTML entete + CSS embedded), `styles.css` (layout entete + responsive), `js/modes.js` (nettoyage definirTheme), `js/changelog-data.js`.
+*Visionneuse et annotation*
+- **Palette d'annotation ancree** : Ancree a gauche avec separateurs redimensionnables (drag + double-clic reset). Support tactile iPad.
+- **Evaluation en 3 colonnes** : Parametres a gauche, document au centre, criteres a droite. Retroaction sous le canvas. Exclusivite annotation/evaluation.
+- **Editeur de pages** : Glisser un badge importe pour decomposer, reordonner, supprimer ou ajouter des pages PDF.
+- **Tampons precises** : Renommes Exact, Errone, Incertain avec info-bulles detaillees.
+
+*Export PDF*
+- **Refonte page Synthese** : Accents corriges, en-tete personnalise (cours, grille, options), descriptions des criteres, images des tampons, marges 1 pouce.
+- **Nom enseignant corrige** : Lu depuis les reglages du trimestre actif.
+- **Apercu PDF ameliore** : Boutons reorganises en barre horizontale.
+
+*Evaluation et fichiers*
+- **Statuts d'evaluation** : Flux Non recu > Recu > Importe > Annote > Evalue > Remis. Colonne Statut dans la liste, navigation intelligente.
+- **Fichiers isoles par groupe-cours** : Chaque groupe ne voit que ses propres fichiers. Cascade de suppression, stampage coursId a l'import.
+- **Configuration des pratiques corrigee** : Carte « Structure des evaluations » visible. Jetons connectes aux pratiques.
+
+*Anonymisation*
+- **Mapping namespace par trimestre** : Prenoms, badges et DA masques partout. Fallback securitaire.
+
+*Aide*
+- **Couverture 100 %** : 12 accordeons ajoutes. Tous les modules sont documentes dans l'onglet Aide.
+
+*Entete et preferences*
+- **Entete reorganisee** : Dropdown mode a gauche, Signaler un bug a droite, titre centre. Theme deplace dans Reglages > Preferences > Experience visuelle.
+- **Preferences reordonnees** : Experience visuelle et Navigation en haut de page.
+- **Espacement et separateur** : Plus d'air en haut, separateur entre Beta/Build et infos contextuelles.
+- **Intitule version** : « Beta XX - Developpement actif ».
+
+*Page d'accueil*
+- **Trois sections** : Decouvrir, Parcourir, Piloter.
 
 ---
 
