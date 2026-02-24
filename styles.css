@@ -785,7 +785,7 @@ h1, h2, h3, h4 {
     /* Gradient 4 stops — fidèle à la maquette Ocean & Boussole */
     background: linear-gradient(135deg, #0a1820 0%, #142a38 40%, #1a3848 70%, #0e2028 100%);
     color: white;
-    padding: 15px 30px;
+    padding: 36px 30px 20px;
     position: relative;
     /* Pas de border-radius pour continuité visuelle avec la navigation */
     box-shadow: var(--shadow-prononce);
@@ -796,7 +796,7 @@ h1, h2, h3, h4 {
 .entete-conteneur {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 14px;
 }
 
 /* === LIGNE 1 : Logo + Titre + Version + Boutons === */
@@ -807,6 +807,9 @@ h1, h2, h3, h4 {
     gap: 20px;
     justify-content: space-between;
     position: relative;
+    min-height: 48px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .logo-section {
@@ -930,15 +933,24 @@ h1, h2, h3, h4 {
     }
 }
 
-/* === INFORMATIONS LÉGALES (boutons à droite) === */
+/* === CONTRÔLES HEADER GAUCHE + DROITE === */
 
-.info-legales-section {
+.entete-controles-gauche {
     flex-shrink: 0;
     display: flex;
     flex-direction: row;
-    gap: 8px;
+    gap: 12px;
     align-items: center;
     z-index: 1;
+    padding: 4px 0;
+}
+
+.entete-controles-droite {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    z-index: 1;
+    padding: 4px 0;
 }
 
 /* === LIGNE 2 : Informations contextuelles + Mode === */
@@ -1029,14 +1041,31 @@ h1, h2, h3, h4 {
     padding-right: 20px;
 }
 
-.info-legales-section .meta {
-    font-size: 0.7rem;
-    color: #9fc5e8;
-    margin: 0;
-    padding-top: 3px;
-    padding-right: 20px;
-    text-align: right;
-    line-height: 1.6;
+/* Bouton signaler un bug (droite) */
+.entete-controles-droite .btn-action-header {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-moyen);
+    color: white;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.entete-controles-droite .btn-action-header:hover {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 /* === SÉLECTEUR DE MODE === */
@@ -1118,10 +1147,12 @@ h1, h2, h3, h4 {
         max-width: 100%;
     }
 
-    .info-legales-section {
-        flex-direction: column;
-        align-items: center;
+    .entete-controles-gauche {
+        justify-content: center;
         gap: 6px;
+    }
+    .entete-controles-droite {
+        justify-content: center;
     }
 
     .info-contextuelles-centre {

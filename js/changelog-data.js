@@ -10,6 +10,19 @@
 
     var CHANGELOG = [
         {
+            version: 'Beta 98',
+            date: '24 f\u00e9vrier',
+            couleur: 'bleu',
+            titre: 'R\u00e9organisation de l\u2019ent\u00eate et d\u00e9placement du th\u00e8me',
+            items: [
+                '<strong>Ent\u00eate r\u00e9organis\u00e9e</strong> : Le dropdown Normal/Anonymis\u00e9 est seul \u00e0 gauche, le bouton \u00ab\u00a0Signaler un bug\u00a0\u00bb est seul \u00e0 droite, le titre reste centr\u00e9.',
+                '<strong>Th\u00e8me clair/sombre d\u00e9plac\u00e9</strong> : Le bouton \ud83c\udf15 est retir\u00e9 de l\u2019ent\u00eate. Le choix du th\u00e8me se fait d\u00e9sormais dans R\u00e9glages \u2192 Pr\u00e9f\u00e9rences \u2192 Exp\u00e9rience visuelle.',
+                '<strong>Pr\u00e9f\u00e9rences r\u00e9ordonn\u00e9es</strong> : Les cartes \u00ab\u00a0Exp\u00e9rience visuelle\u00a0\u00bb et \u00ab\u00a0Navigation\u00a0\u00bb sont d\u00e9sormais en haut de la page Pr\u00e9f\u00e9rences.',
+                '<strong>Espacement de l\u2019ent\u00eate</strong> : Plus d\u2019air en haut du titre, s\u00e9parateur visuel entre la ligne Beta/Build et les informations contextuelles.',
+                '<strong>Intitul\u00e9 version</strong> : L\u2019ent\u00eate affiche d\u00e9sormais \u00ab\u00a0Beta XX - D\u00e9veloppement actif\u00a0\u00bb pour indiquer le statut du projet.'
+            ]
+        },
+        {
             version: 'Beta 97.13',
             date: '24 f\u00e9vrier',
             couleur: 'vert',

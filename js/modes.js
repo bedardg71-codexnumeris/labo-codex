@@ -898,9 +898,6 @@ function definirTheme(clair) {
     // Synchroniser les checkboxes
     document.querySelectorAll('#checkbox-mode-clair, #checkbox-mode-clair-accueil')
         .forEach(function(cb) { cb.checked = !!clair; });
-    // Mettre à jour l'icône dans l'en-tête
-    var btnTheme = document.getElementById('btn-toggle-theme');
-    if (btnTheme) btnTheme.textContent = clair ? '🌑' : '🌕';
     // Notifier les modules (graphiques, etc.)
     window.dispatchEvent(new CustomEvent('themeChanged', { detail: { clair: !!clair } }));
     window.dispatchEvent(new Event('modeChanged'));

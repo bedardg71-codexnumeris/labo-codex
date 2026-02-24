@@ -1,7 +1,20 @@
 # Notes de version — Monitorage pedagogique
 
 > Document de gestion locale. Historique complet avec dates.
-> Derniere mise a jour : 15 fevrier 2026
+> Derniere mise a jour : 24 fevrier 2026
+
+---
+
+## Beta 98 (24 fevrier 2026)
+
+**Reorganisation de l'entete et deplacement du theme**
+
+- **Entete reorganisee** : Le dropdown Normal/Anonymise est seul a gauche, le bouton « Signaler un bug » est seul a droite, le titre reste centre.
+- **Theme clair/sombre deplace** : Le bouton lune est retire de l'entete. Le choix du theme se fait desormais dans Reglages > Preferences > Experience visuelle.
+- **Preferences reordonnees** : Les cartes « Experience visuelle » et « Navigation » sont desormais en haut de la page Preferences.
+- **Espacement de l'entete** : Plus d'air en haut du titre, separateur visuel entre la ligne Beta/Build et les informations contextuelles (Pratique, Semaine).
+- **Intitule version** : L'entete affiche desormais « Beta XX - Developpement actif » pour indiquer le statut du projet.
+- **Fichiers** : `index.html` (HTML entete + CSS embedded), `styles.css` (layout entete + responsive), `js/modes.js` (nettoyage definirTheme), `js/changelog-data.js`.
 
 ---
 
