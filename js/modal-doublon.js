@@ -79,7 +79,7 @@
                     </p>
 
                     <p style="margin-bottom: 20px; color: var(--gris-moyen);">
-                        Que souhaitez-vous faire ?
+                        Que souhaites-tu faire ?
                     </p>
                 </div>
 

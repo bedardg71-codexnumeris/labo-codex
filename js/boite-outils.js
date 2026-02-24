@@ -165,7 +165,7 @@ function initialiserTirage() {
 function reinitialiserAffichage() {
     const affichage = document.getElementById('tirage-affichage');
     if (affichage) {
-        affichage.innerHTML = '<span class="tirage-placeholder">Cliquez sur "Tirer !" pour commencer</span>';
+        affichage.innerHTML = '<span class="tirage-placeholder">Clique sur "Tirer !" pour commencer</span>';
     }
 }
 
@@ -816,7 +816,7 @@ function ouvrirModalParamsQuestions() {
                     <div class="form-groupe">
                         <label>Ajouter une question</label>
                         <div class="questions-ajouter-form">
-                            <textarea id="nouvelle-question" placeholder="Tapez votre question..." class="form-textarea" rows="2"></textarea>
+                            <textarea id="nouvelle-question" placeholder="Tape ta question..." class="form-textarea" rows="2"></textarea>
                             <div class="questions-ajouter-actions">
                                 <select id="categorie-nouvelle-question" class="form-select">
                                     <option value="">Sans catégorie</option>
@@ -836,7 +836,7 @@ function ouvrirModalParamsQuestions() {
                         <label>Questions (${disponibles.length}/${total} disponibles)</label>
                         <div class="questions-liste-container">
                             ${etatQuestions.categories.length === 0 && etatQuestions.questions.length === 0 ? `
-                                <p class="questions-vide">Aucune question. Ajoutez-en ci-dessus.</p>
+                                <p class="questions-vide">Aucune question. Ajoute-en ci-dessus.</p>
                             ` : ''}
 
                             ${etatQuestions.categories.map(cat => `
@@ -904,7 +904,7 @@ function genererHTMLQuestionFlash(question) {
 
     return `
         <div class="question-item ${estPosee && !etatQuestions.avecRemise ? 'question-posee' : ''}">
-            <span class="question-item-texte" onclick="window.modifierQuestion('${question.id}')" title="Cliquez pour modifier">${question.texte}</span>
+            <span class="question-item-texte" onclick="window.modifierQuestion('${question.id}')" title="Clique pour modifier">${question.texte}</span>
             <div class="question-item-actions">
                 <select class="question-categorie-select" onchange="window.changerCategorieQuestion('${question.id}', this.value)" title="Changer de catégorie">
                     ${optionsCategorie}
@@ -968,7 +968,7 @@ function rafraichirListeQuestionsModal() {
     let html = '';
 
     if (etatQuestions.categories.length === 0 && etatQuestions.questions.length === 0) {
-        html = '<p class="questions-vide">Aucune question. Ajoutez-en ci-dessus.</p>';
+        html = '<p class="questions-vide">Aucune question. Ajoute-en ci-dessus.</p>';
     } else {
         // Questions par catégorie
         etatQuestions.categories.forEach(cat => {

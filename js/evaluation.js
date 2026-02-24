@@ -470,7 +470,7 @@ function chargerEvaluationsEtudiant() {
         const critereId = select.id.replace('eval_', '');
         const commDiv = document.getElementById(`comm_${critereId}`);
         if (commDiv) {
-            commDiv.textContent = 'Sélectionnez un niveau';
+            commDiv.textContent = 'Sélectionne un niveau';
             commDiv.style.fontStyle = 'italic';
             commDiv.style.color = 'var(--gris-clair)';
         }
@@ -831,7 +831,7 @@ function cartoucheSelectionnee() {
     `}
 </div>
             <div id="comm_${critere.id}" style="display:none;">
-                ${estAlgorithmique ? 'Saisissez les erreurs et le nombre de mots' : 'Sélectionnez un niveau'}
+                ${estAlgorithmique ? 'Saisissez les erreurs et le nombre de mots' : 'Sélectionne un niveau'}
             </div>
         </div>
     </div>
@@ -977,7 +977,7 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
                 `}
             </div>
             <div id="comm_${critere.id}" style="display:none;">
-                ${estAlgorithmique ? 'Saisissez les erreurs et le nombre de mots' : 'Sélectionnez un niveau'}
+                ${estAlgorithmique ? 'Saisissez les erreurs et le nombre de mots' : 'Sélectionne un niveau'}
             </div>
         </div>
     </div>
@@ -1978,17 +1978,17 @@ function sauvegarderEvaluation() {
         if (resultatSauvegarde === 'quota') {
             afficherNotificationErreur(
                 'Espace de stockage insuffisant',
-                'Le quota de stockage du navigateur est dépassé. Exportez vos données (Réglages → Gestion des données) puis supprimez des évaluations anciennes.'
+                'Le quota de stockage du navigateur est dépassé. Exporte tes données (Réglages → Gestion des données) puis supprime des évaluations anciennes.'
             );
         } else if (resultatSauvegarde === false) {
             afficherNotificationErreur(
                 'Modification impossible',
-                'Les modifications sont impossibles en mode Anonymisé. Passez en mode Normal pour sauvegarder.'
+                'Les modifications sont impossibles en mode Anonymisé. Passe en mode Normal pour sauvegarder.'
             );
         } else {
             afficherNotificationErreur(
                 'Erreur de sauvegarde',
-                'Une erreur inattendue s\'est produite. Consultez la console pour plus de détails.'
+                'Une erreur inattendue s\'est produite. Consulte la console pour plus de détails.'
             );
         }
         return;
@@ -2343,7 +2343,7 @@ function gererChangementCheckboxJetonReprise() {
         // Pour le jeton de reprise, demander confirmation car cela crée une nouvelle évaluation
         const confirmer = confirm(
             'Appliquer un jeton de reprise créera une nouvelle évaluation qui remplacera celle-ci.\n\n' +
-            'Voulez-vous continuer ?'
+            'Veux-tu continuer ?'
         );
 
         if (confirmer) {
@@ -2388,8 +2388,8 @@ function gererChangementCheckboxJetonRepriseCiblee() {
         // Pour le jeton de reprise ciblée, demander confirmation
         const confirmer = confirm(
             'Appliquer un jeton de reprise ciblée créera une nouvelle évaluation ciblant UN SEUL critère spécifique.\n\n' +
-            'La correction apportée devra être justifiée et la note sera plafonnée selon votre configuration.\n\n' +
-            'Voulez-vous continuer ?'
+            'La correction apportée devra être justifiée et la note sera plafonnée selon ta configuration.\n\n' +
+            'Veux-tu continuer ?'
         );
 
         if (confirmer) {
@@ -2510,7 +2510,7 @@ function nouvelleEvaluation() {
     document.getElementById('selectCartoucheEval').value = '';
     document.getElementById('remiseProduction1').value = 'non-recu';
     mettreAJourPillStatut('non-recu');
-    document.getElementById('listeCriteresGrille1').innerHTML = '<p class="eval-texte-placeholder">Sélectionnez une grille et une cartouche</p>';
+    document.getElementById('listeCriteresGrille1').innerHTML = '<p class="eval-texte-placeholder">Sélectionne une grille et une cartouche</p>';
     document.getElementById('retroactionFinale1').value = '';
     document.getElementById('noteProduction1').textContent = '0.0';
     document.getElementById('niveauProduction1').textContent = '--';
@@ -2564,7 +2564,7 @@ function nouvelleEvaluation() {
  */
 function reinitialiserFormulaire() {
     // Réinitialiser uniquement les éléments du formulaire de notation
-    document.getElementById('listeCriteresGrille1').innerHTML = '<p class="eval-texte-placeholder">Sélectionnez une grille et une cartouche</p>';
+    document.getElementById('listeCriteresGrille1').innerHTML = '<p class="eval-texte-placeholder">Sélectionne une grille et une cartouche</p>';
     document.getElementById('retroactionFinale1').value = '';
     document.getElementById('noteProduction1').textContent = '0.0';
     document.getElementById('niveauProduction1').textContent = '--';
@@ -2663,7 +2663,7 @@ function copierRetroaction(num) {
         afficherNotificationSucces('Rétroaction copiée dans le presse-papier !');
     }).catch(err => {
         console.error('Erreur de copie:', err);
-        alert('Erreur lors de la copie. Utilisez Cmd+A puis Cmd+C manuellement.');
+        alert('Erreur lors de la copie. Utilise Cmd+A puis Cmd+C manuellement.');
     });
 }
 
@@ -3196,7 +3196,7 @@ function genererDetailsEtudiant(etudiant) {
                                         <span id="cadenas-${item.evaluation.id}"
                                               onclick="basculerVerrouillageEvaluation('${item.evaluation.id}')"
                                               style="font-size: 1.2rem; cursor: pointer; user-select: none;"
-                                              title="${item.evaluation.verrouillee ? 'Verrouillée - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
+                                              title="${item.evaluation.verrouillee ? 'Verrouillée - Clique pour déverrouiller' : 'Modifiable - Clique pour verrouiller'}">
                                             ${item.evaluation.verrouillee ? '🔒' : '🔓'}
                                         </span>
                                     `}
@@ -4380,7 +4380,7 @@ function reparer_evaluations_criteres_manquants() {
               `• ${nbEvaluationsReparees} évaluation(s) réparée(s)\n` +
               `• ${nbEvaluationsIgnorees} évaluation(s) déjà OK\n` +
               `• ${nbEchoues} échec(s)\n\n` +
-              `Consultez la console (F12) pour les détails.`);
+              `Consulte la console (F12) pour les détails.`);
     } else {
         alert(`Aucune évaluation à réparer.\n\n` +
               `• ${nbEvaluationsIgnorees} évaluation(s) ont déjà leurs critères.\n` +
@@ -4830,7 +4830,7 @@ function modifierEvaluation(evaluationId) {
                 desactiverFormulaireEvaluation(true);
                 afficherNotificationSucces('Évaluation chargée en lecture seule (verrouillée)');
             } else {
-                afficherNotificationSucces('Évaluation chargée - Vous pouvez maintenant la modifier');
+                afficherNotificationSucces('Évaluation chargée - Tu peux maintenant la modifier');
             }
 
             // ÉTAPE 15: Afficher la section de gestion des jetons
@@ -5122,7 +5122,7 @@ function afficherIndicateurModeModification(evaluation) {
         <div class="u-flex-1">
             <strong>MODE MODIFICATION</strong><br>
             <span style="font-size: 0.9rem; opacity: 0.95;">
-                Vous modifiez l'évaluation de <strong>${evaluation.etudiantNom}</strong>
+                Tu modifies l'évaluation de <strong>${evaluation.etudiantNom}</strong>
                 pour <strong>${evaluation.productionNom}</strong><br>
                 Évaluation initiale : ${dateEval}
             </span>
@@ -5150,13 +5150,13 @@ function supprimerEvaluation(evaluationId) {
     if (evaluation.verrouillee) {
         afficherNotificationErreur(
             'Suppression impossible',
-            'Cette évaluation est verrouillée. Déverrouillez-la d\'abord pour la supprimer.'
+            'Cette évaluation est verrouillée. Déverrouille-la d\'abord pour la supprimer.'
         );
         return;
     }
 
     // Demander confirmation
-    if (!confirm(`Voulez-vous vraiment supprimer l'évaluation de ${evaluation.etudiantNom} pour ${evaluation.productionNom} ?\n\nCette action est irréversible.`)) {
+    if (!confirm(`Veux-tu vraiment supprimer l'évaluation de ${evaluation.etudiantNom} pour ${evaluation.productionNom} ?\n\nCette action est irréversible.`)) {
         return;
     }
 
@@ -5404,7 +5404,7 @@ function afficherListeBanqueEvaluations(evaluations) {
                         </button>
                         <span onclick="basculerVerrouillageEvaluation('${evaluation.id}')"
                               style="font-size: 1.2rem; cursor: pointer; user-select: none; margin-right: 8px;"
-                              title="${evaluation.verrouillee ? 'Verrouillée - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
+                              title="${evaluation.verrouillee ? 'Verrouillée - Clique pour déverrouiller' : 'Modifiable - Clique pour verrouiller'}">
                             ${evaluation.verrouillee ? '🔒' : '🔓'}
                         </span>
                         <button class="btn btn-supprimer btn-compact" onclick="supprimerEvaluationBanque('${evaluation.id}')">
@@ -5473,7 +5473,7 @@ function appliquerJetonRepriseDepuisBanque(evaluationId) {
 function appliquerJetonDelaiDepuisSidebar() {
     // Vérifier qu'on est en train de modifier une évaluation
     if (!window.evaluationEnCours || !window.evaluationEnCours.idModification) {
-        afficherNotificationErreur('Erreur', 'Vous devez charger une évaluation existante pour appliquer un jeton de délai');
+        afficherNotificationErreur('Erreur', 'Tu dois charger une évaluation existante pour appliquer un jeton de délai');
         return;
     }
 
@@ -5497,7 +5497,7 @@ function appliquerJetonDelaiDepuisSidebar() {
 function appliquerJetonRepriseDepuisSidebar() {
     // Vérifier qu'on est en train de modifier une évaluation
     if (!window.evaluationEnCours || !window.evaluationEnCours.idModification) {
-        afficherNotificationErreur('Erreur', 'Vous devez charger une évaluation existante pour appliquer un jeton de reprise');
+        afficherNotificationErreur('Erreur', 'Tu dois charger une évaluation existante pour appliquer un jeton de reprise');
         return;
     }
 
@@ -5505,7 +5505,7 @@ function appliquerJetonRepriseDepuisSidebar() {
 
     // Demander confirmation
     const confirmation = confirm(
-        'Voulez-vous vraiment appliquer un jeton de reprise ?\n\n' +
+        'Veux-tu vraiment appliquer un jeton de reprise ?\n\n' +
         'Cela va créer une nouvelle évaluation qui remplacera la précédente.\n' +
         'L\'ancienne évaluation sera archivée et ne comptera plus dans les indices.'
     );
@@ -5553,7 +5553,7 @@ function basculerVerrouillageEvaluation(evaluationId) {
     const cadenasElement = document.getElementById(`cadenas-${evaluationId}`);
     if (cadenasElement) {
         cadenasElement.textContent = estVerrouillee ? '🔒' : '🔓';
-        cadenasElement.title = estVerrouillee ? 'Verrouillée - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller';
+        cadenasElement.title = estVerrouillee ? 'Verrouillée - Clique pour déverrouiller' : 'Modifiable - Clique pour verrouiller';
     }
 
     // Rafraîchir la liste de la banque (sans reload de page)
@@ -5575,7 +5575,7 @@ function basculerVerrouillageEvaluation(evaluationId) {
 function retirerJeton(evaluationId, typeJeton) {
     // Demander confirmation
     const typeTexte = typeJeton === 'reprise' ? 'de reprise' : 'de délai';
-    const confirmation = confirm(`Voulez-vous vraiment retirer ce jeton ${typeTexte} ?\n\nCette action est irréversible.`);
+    const confirmation = confirm(`Veux-tu vraiment retirer ce jeton ${typeTexte} ?\n\nCette action est irréversible.`);
 
     if (!confirmation) {
         return; // Annulation
@@ -5625,7 +5625,7 @@ function retirerJeton(evaluationId, typeJeton) {
  * @param {string} evaluationId - ID de l'évaluation
  */
 function supprimerEvaluationBanque(evaluationId) {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cette évaluation ? Cette action est irréversible.')) {
+    if (!confirm('Es-tu sûr de vouloir supprimer cette évaluation ? Cette action est irréversible.')) {
         return;
     }
 
@@ -5675,8 +5675,8 @@ function verrouillerToutesEvaluations(verrouiller) {
     }
 
     const message = verrouiller
-        ? 'Êtes-vous sûr de vouloir verrouiller TOUTES les évaluations ?'
-        : 'Êtes-vous sûr de vouloir déverrouiller TOUTES les évaluations ?';
+        ? 'Es-tu sûr de vouloir verrouiller TOUTES les évaluations ?'
+        : 'Es-tu sûr de vouloir déverrouiller TOUTES les évaluations ?';
 
     if (!confirm(message)) {
         return;
@@ -5769,8 +5769,8 @@ function mettreAJourBoutonVerrouillage(estVerrouillee) {
         btnVerrouPalette.style.display = '';
         btnVerrouPalette.textContent = estVerrouillee ? '\u{1F512}' : '\u{1F513}';
         btnVerrouPalette.title = estVerrouillee
-            ? 'Évaluation verrouillée - Cliquez pour déverrouiller'
-            : 'Évaluation modifiable - Cliquez pour verrouiller';
+            ? 'Évaluation verrouillée - Clique pour déverrouiller'
+            : 'Évaluation modifiable - Clique pour verrouiller';
     }
 
     // Cadenas sur les badges (sidebar actif + toolbar)
@@ -6112,7 +6112,7 @@ function afficherJetonsPersonnalisesEvaluation() {
  */
 function appliquerJetonPersonnalise(jetonId) {
     if (!window.evaluationEnCours?.idModification) {
-        afficherNotificationErreur('Erreur', 'Vous devez charger une évaluation existante pour appliquer un jeton');
+        afficherNotificationErreur('Erreur', 'Tu dois charger une évaluation existante pour appliquer un jeton');
         return;
     }
 
@@ -6126,7 +6126,7 @@ function appliquerJetonPersonnalise(jetonId) {
     }
 
     // Confirmer l'application
-    if (!confirm(`Voulez-vous appliquer le jeton «${jeton.nom}» à cette évaluation ?\n\n${jeton.description}`)) {
+    if (!confirm(`Veux-tu appliquer le jeton «${jeton.nom}» à cette évaluation ?\n\n${jeton.description}`)) {
         return;
     }
 

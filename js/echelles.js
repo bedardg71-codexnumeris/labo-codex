@@ -221,7 +221,7 @@ async function afficherToutesLesEchellesNiveaux() {
         container.innerHTML = `
             <div class="echelle-zone-bleu-pale">
                 <p style="color: var(--bleu-leger);">Aucune échelle définie</p>
-                <small>Créez une échelle en utilisant le formulaire ci-dessous</small>
+                <small>Crée une échelle en utilisant le formulaire ci-dessous</small>
             </div>
         `;
         return;
@@ -466,7 +466,7 @@ async function assurerEchelleGenerique() {
     const echelleGenerique = {
         id: 'ECHELLE_GENERIQUE',
         nom: 'Échelle générique (exemple)',
-        description: 'Échelle 4 niveaux de performance - Modifiez ou dupliquez selon vos besoins',
+        description: 'Échelle 4 niveaux de performance - Modifie ou duplique selon tes besoins',
         niveaux: [
             { code: 'I', nom: 'Incomplet', min: 0, max: 59, valeur: 45, couleur: '#dc3545' },
             { code: 'D', nom: 'en Développement', min: 60, max: 74, valeur: 67, couleur: '#fd7e14' },
@@ -1328,7 +1328,7 @@ function afficherTableauNiveaux(niveaux) {
                             <span id="cadenas-niveau-${index}"
                                   onclick="(async () => { await basculerVerrouillageNiveau(${index}); })()"
                                   style="font-size: 1.2rem; cursor: pointer; user-select: none; margin-left: 8px;"
-                                  title="${niveau.verrouille ? 'Verrouillé - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
+                                  title="${niveau.verrouille ? 'Verrouillé - Clique pour déverrouiller' : 'Modifiable - Clique pour verrouiller'}">
                                 ${niveau.verrouille ? '🔒' : '🔓'}
                             </span>
                         </td>
@@ -1563,7 +1563,7 @@ async function basculerVerrouillageNiveau(index) {
     const cadenasElement = document.getElementById(`cadenas-niveau-${index}`);
     if (cadenasElement) {
         cadenasElement.textContent = estVerrouille ? '🔒' : '🔓';
-        cadenasElement.title = estVerrouille ? 'Verrouillé - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller';
+        cadenasElement.title = estVerrouille ? 'Verrouillé - Clique pour déverrouiller' : 'Modifiable - Clique pour verrouiller';
     }
 
     // Rafraîchir le tableau pour mettre à jour l'état disabled et l'opacité
@@ -1989,9 +1989,9 @@ async function exporterEchelleActive() {
     if (echelle.metadata_cc) {
         // Demander le nom de l'utilisateur s'il modifie le matériel
         const nomUtilisateur = prompt(
-            'Vous allez exporter un matériel créé par ' + echelle.metadata_cc.auteur_original + '.\n\n' +
-            'Entrez votre nom pour être crédité comme contributeur :\n' +
-            '(Laissez vide si vous n\'avez fait aucune modification)'
+            'Tu exportes un matériel créé par ' + echelle.metadata_cc.auteur_original + '.\n\n' +
+            'Entre ton nom pour être crédité comme contributeur :\n' +
+            '(Laisse vide si tu n\'as fait aucune modification)'
         );
 
         if (nomUtilisateur && nomUtilisateur.trim()) {
@@ -2085,7 +2085,7 @@ async function importerDansEchelleActive(event) {
             const confirmation = confirm(
                 messageConfirmation +
                 `⚠️ ATTENTION: Cette action va remplacer l'échelle actuelle.\n\n` +
-                `Voulez-vous continuer ?`
+                `Veux-tu continuer ?`
             );
 
             if (!confirmation) {
@@ -2136,7 +2136,7 @@ async function importerDansEchelleActive(event) {
 
         } catch (error) {
             console.error('Erreur lors de l\'import:', error);
-            alert('Erreur lors de la lecture du fichier JSON. Assurez-vous qu\'il s\'agit d\'un fichier valide.');
+            alert('Erreur lors de la lecture du fichier JSON. Assure-toi qu\'il s\'agit d\'un fichier valide.');
         } finally {
             event.target.value = ''; // Reset input
         }
@@ -2181,7 +2181,7 @@ async function importerEchelles(event) {
                 '<div class="u-mb-15">' + genererBadgeCC(donnees.metadata) + '</div>' :
                 '';
 
-            message += '<p><strong>Voulez-vous importer ces échelles ?</strong></p>';
+            message += '<p><strong>Veux-tu importer ces échelles ?</strong></p>';
 
             // Créer modal avec badge CC
             const modal = document.createElement('div');
@@ -2274,7 +2274,7 @@ window.confirmerImportEchelles = async function(donnees) {
         let message = `✅ Import réussi !\n\n`;
         if (nbAjoutees > 0) message += `${nbAjoutees} nouvelle(s) échelle(s) ajoutée(s).\n`;
         if (nbMisesAJour > 0) message += `${nbMisesAJour} échelle(s) mise(s) à jour.\n`;
-        message += `\nConsultez "Échelles disponibles" pour les ajouter à votre barre latérale.`;
+        message += `\nConsultez "Échelles disponibles" pour les ajouter à ta barre latérale.`;
         alert(message);
         console.log('✅ Échelles importées:', echellesImportees.length);
 
@@ -2349,7 +2349,7 @@ async function afficherListeEchelles() {
     `;
 
     if (echellesDansBibliotheque.length === 0) {
-        html += '<p class="sidebar-vide">Créez une nouvelle échelle ou puisez dans la bibliothèque</p>';
+        html += '<p class="sidebar-vide">Crée une nouvelle échelle ou puisez dans la bibliothèque</p>';
         container.innerHTML = html;
         return;
     }
@@ -2441,7 +2441,7 @@ async function preparerDonneesBibliothequeEchelles() {
                 dataAttrs: `data-discipline="${discipline}" data-pratiques="${pratiques.join(',')}"`,
                 styleExtra: styleGabarit,
                 boutons: [
-                    { label: 'Ajouter à ma sélection', onclick: `ajouterEchelleIndividuelle('${echelle.id}')`, classe: 'btn-confirmer', title: 'Ajouter cette échelle à votre sélection' },
+                    { label: 'Ajouter à ma sélection', onclick: `ajouterEchelleIndividuelle('${echelle.id}')`, classe: 'btn-confirmer', title: 'Ajouter cette échelle à ta sélection' },
                     { label: 'Supprimer', onclick: `supprimerEchelleDeBibliothequePartagee('${echelle.id}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true }
                 ],
                 groupe: discipline
@@ -2589,7 +2589,7 @@ async function ajouterEchelleIndividuelle(id) {
         fermerModalBibliothequeEchelles();
         await afficherListeEchelles();
         await afficherBibliothequeEchelles();
-        alert('Échelle ajoutée à votre sélection avec succès !');
+        alert('Échelle ajoutée à ta sélection avec succès !');
     } catch (error) {
         console.error('Erreur lors de l\'ajout:', error);
         alert('Erreur lors de l\'ajout de l\'échelle');
@@ -2711,7 +2711,7 @@ async function ajouterMesEchellesALaBibliotheque() {
             return;
         }
 
-        if (!confirm(`Voulez-vous ajouter vos ${echelles.length} échelle(s) à la bibliothèque partagée ?\n\nElles seront disponibles dans tous vos trimestres et pourront être partagées avec des collègues.`)) return;
+        if (!confirm(`Veux-tu ajouter tes ${echelles.length} échelle(s) à la bibliothèque partagée ?\n\nElles seront disponibles dans tous tes trimestres et pourront être partagées avec des collègues.`)) return;
 
         const resultat = await importerEchellesDansBibliotheque(echelles);
 
@@ -2722,7 +2722,7 @@ async function ajouterMesEchellesALaBibliotheque() {
             alert(`${resultat.ajoutees} échelle(s) ajoutée(s) à la bibliothèque !` +
                 (resultat.existantes > 0 ? `\n${resultat.existantes} étai(en)t déjà présente(s).` : ''));
         } else {
-            alert('Toutes vos échelles étaient déjà dans la bibliothèque.');
+            alert('Toutes tes échelles étaient déjà dans la bibliothèque.');
         }
     } catch (error) {
         console.error('Erreur lors de l\'ajout à la bibliothèque:', error);
@@ -2964,7 +2964,7 @@ async function importerToutEchellesTrimestreModal() {
     }
 
     const confirmation = confirm(
-        `Voulez-vous importer les ${echelles.length} échelle(s) de ${nomTrimestre} dans la bibliothèque partagée ?`
+        `Veux-tu importer les ${echelles.length} échelle(s) de ${nomTrimestre} dans la bibliothèque partagée ?`
     );
 
     if (!confirmation) return;
@@ -3585,7 +3585,7 @@ async function ajouterNiveauEchelle(echelleId) {
     await afficherListeEchelles();
 
     // Notification de succès
-    alert(`✅ Niveau ajouté avec succès !\n\nL'échelle contient maintenant ${echelleTemplateActuelle.niveaux.length} niveau(x).\nModifiez les propriétés du niveau (code, nom, min, max, etc.) puis continuez votre travail.`);
+    alert(`✅ Niveau ajouté avec succès !\n\nL'échelle contient maintenant ${echelleTemplateActuelle.niveaux.length} niveau(x).\nModifie les propriétés du niveau (code, nom, min, max, etc.) puis continue ton travail.`);
 }
 
 /**
@@ -3800,18 +3800,18 @@ async function supprimerEchelleDepuisSidebar(id) {
             message += 'Options:\n';
             message += '1. Migrer ces évaluations vers une autre échelle\n';
             message += '2. Annuler la suppression\n\n';
-            message += `Voulez-vous migrer les évaluations vers une autre échelle ?`;
+            message += `Veux-tu migrer les évaluations vers une autre échelle ?`;
 
             const choixMigration = confirm(message);
 
             if (choixMigration) {
                 // Afficher un sélecteur d'échelle de remplacement
-                let listeEchelles = 'Sélectionnez l\'échelle de remplacement:\n\n';
+                let listeEchelles = 'Sélectionne l\'échelle de remplacement :\n\n';
                 autresEchelles.forEach((e, idx) => {
                     listeEchelles += `${idx + 1}. ${e.nom} (${e.niveaux?.length || 0} niveaux)\n`;
                 });
 
-                const choixNumero = prompt(listeEchelles + '\nEntrez le numéro de l\'échelle:');
+                const choixNumero = prompt(listeEchelles + '\nEntre le numéro de l\'échelle :');
                 const numeroChoisi = parseInt(choixNumero);
 
                 if (numeroChoisi && numeroChoisi >= 1 && numeroChoisi <= autresEchelles.length) {
@@ -3838,7 +3838,7 @@ async function supprimerEchelleDepuisSidebar(id) {
         } else {
             // Pas d'autres échelles disponibles
             message += '⚠️ Impossible de supprimer : il n\'y a aucune autre échelle vers laquelle migrer les évaluations.\n\n';
-            message += 'Vous devez d\'abord créer une nouvelle échelle ou supprimer les évaluations existantes.';
+            message += 'Tu dois d\'abord créer une nouvelle échelle ou supprimer les évaluations existantes.';
             alert(message);
         }
     } else {

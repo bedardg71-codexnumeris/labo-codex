@@ -2179,7 +2179,7 @@ async function executerImportVersBibliotheques() {
         const total = compteurs.pratiques + compteurs.grilles + compteurs.echelles + compteurs.productions;
 
         if (total === 0) {
-            alert('Aucune nouvelle ressource à ajouter.\n\nToutes les ressources du fichier existent déjà dans vos bibliothèques.');
+            alert('Aucune nouvelle ressource à ajouter.\n\nToutes les ressources du fichier existent déjà dans tes bibliothèques.');
         } else {
             let details = [];
             if (compteurs.pratiques > 0) details.push(`${compteurs.pratiques} pratique(s)`);
@@ -2187,7 +2187,7 @@ async function executerImportVersBibliotheques() {
             if (compteurs.echelles > 0) details.push(`${compteurs.echelles} échelle(s)`);
             if (compteurs.productions > 0) details.push(`${compteurs.productions} production(s)`);
 
-            const message = `Fusion réussie !\n\n${details.join(', ')} ajoutée(s) à vos bibliothèques.\n\nVos données existantes ont été préservées.`;
+            const message = `Fusion réussie !\n\n${details.join(', ')} ajoutée(s) à tes bibliothèques.\n\nTes données existantes ont été préservées.`;
 
             if (typeof afficherNotificationSucces === 'function') {
                 afficherNotificationSucces(message);

@@ -381,7 +381,7 @@ async function afficherListeCoursSidebar() {
     if (coursDansBibliotheque.length === 0) {
         container.innerHTML = `
             <p class="text-muted text-italic" style="font-size: 0.9rem; text-align: center; padding: 20px 10px;">
-                Créez un nouveau cours ou puisez dans la bibliothèque
+                Crée un nouveau cours ou puise dans la bibliothèque
             </p>
         `;
         return;
@@ -1248,17 +1248,17 @@ async function ouvrirModalBibliothequeCours() {
                     ×
                 </button>
                 <h2 style="margin-top: 0; color: var(--accent-primaire);">Bibliothèque de cours</h2>
-                <p class="text-muted">Gérez vos configurations de cours</p>
+                <p class="text-muted">Gère tes configurations de cours</p>
 
                 <!-- SECTION 1 : Ma sélection -->
                 <h3 style="color: var(--bleu-clair); font-size: 1.1rem;">
-                    Cours dans votre sélection (${coursDansBibliotheque.length})
+                    Cours dans ta sélection (${coursDansBibliotheque.length})
                 </h3>
                 <div style="margin-bottom: 30px;">
     `;
 
     if (coursDansBibliotheque.length === 0) {
-        modalHTML += `<p class="text-muted" style="font-style: italic; padding: 20px 0;">Aucun cours dans votre sélection</p>`;
+        modalHTML += `<p class="text-muted" style="font-style: italic; padding: 20px 0;">Aucun cours dans ta sélection</p>`;
     } else {
         coursDansBibliotheque.forEach(cours => {
             const actifBadge = cours.actif ? '<span class="badge-info" style="margin-left: 10px;">Actif</span>' : '';
@@ -1295,7 +1295,7 @@ async function ouvrirModalBibliothequeCours() {
                             </button>
                             <button onclick="retirerCoursDeBibliotheque('${cours.id}')"
                                     class="btn btn-supprimer btn-tres-compact"
-                                    title="Retirer de votre sélection">
+                                    title="Retirer de ta sélection">
                                 Retirer
                             </button>
                         </div>
@@ -1308,7 +1308,7 @@ async function ouvrirModalBibliothequeCours() {
     modalHTML += `
                 </div>
                 <div style="text-align: center; margin-top: 15px;">
-                    <button onclick="partagerTousLesCours()" class="btn btn-secondaire" title="Exporter tous vos cours en un seul fichier JSON">
+                    <button onclick="partagerTousLesCours()" class="btn btn-secondaire" title="Exporter tous tes cours en un seul fichier JSON">
                         Exporter tous mes cours
                     </button>
                 </div>
@@ -1347,7 +1347,7 @@ async function ouvrirModalBibliothequeCours() {
                         <div style="display: flex; gap: 8px;">
                             <button onclick="ajouterCoursIndividuel('${cours.id}')"
                                     class="btn btn-confirmer btn-tres-compact"
-                                    title="Ajouter ce cours à votre sélection">
+                                    title="Ajouter ce cours à ta sélection">
                                 Ajouter à ma sélection
                             </button>
                         </div>
@@ -1402,7 +1402,7 @@ async function retirerCoursDeBibliotheque(id) {
         await db.set('listeCours', cours);
         fermerModalBibliothequeCours();
         await afficherListeCoursSidebar();
-        alert('Cours retiré de votre sélection');
+        alert('Cours retiré de ta sélection');
     }
 }
 
@@ -1421,7 +1421,7 @@ async function ajouterCoursIndividuel(id) {
         await db.set('listeCours', cours);
         fermerModalBibliothequeCours();
         await afficherListeCoursSidebar();
-        alert('Cours ajouté à votre sélection avec succès !');
+        alert('Cours ajouté à ta sélection avec succès !');
     }
 }
 
@@ -1442,7 +1442,7 @@ async function exporterCoursSimple() {
     const coursDansBibliotheque = tousLesCours.filter(c => c.dansBibliotheque === true);
 
     if (coursDansBibliotheque.length === 0) {
-        alert('Aucun cours à exporter dans votre sélection');
+        alert('Aucun cours à exporter dans ta sélection');
         return;
     }
 
@@ -1539,7 +1539,7 @@ async function importerCoursSimple(event) {
 
         } catch (error) {
             console.error('Erreur lors de l\'import :', error);
-            alert('Erreur lors de l\'import du fichier. Vérifiez le format JSON.');
+            alert('Erreur lors de l\'import du fichier. Vérifie le format JSON.');
         }
     };
 
@@ -1615,7 +1615,7 @@ async function partagerTousLesCours() {
     const coursDansBibliotheque = tousLesCours.filter(c => c.dansBibliotheque === true);
 
     if (coursDansBibliotheque.length === 0) {
-        alert('Aucun cours à partager dans votre sélection');
+        alert('Aucun cours à partager dans ta sélection');
         return;
     }
 

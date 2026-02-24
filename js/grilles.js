@@ -503,7 +503,7 @@ async function supprimerCritere(id) {
         return;
     }
 
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce critère ?')) {
+    if (confirm('Es-tu sûr de vouloir supprimer ce critère ?')) {
         if (grilleTemplateActuelle) {
             grilleTemplateActuelle.criteres = grilleTemplateActuelle.criteres.filter(c => c.id !== id);
             await sauvegarderGrilleTemplate();
@@ -798,7 +798,7 @@ async function afficherGrillesCriteres() {
             <div style="padding: 20px; background: var(--bleu-tres-pale); border-radius: 6px; 
                  text-align: center; color: var(--bleu-leger);">
                 <p>Aucune grille de critères disponible</p>
-                <small>Créez d'abord une grille de critères pour pouvoir la réutiliser</small>
+                <small>Crée d'abord une grille de critères pour pouvoir la réutiliser</small>
             </div>
         `;
     } else {
@@ -923,7 +923,7 @@ async function chargerGrilleEnEdition(grilleId) {
  * 4. Rafraîchit le modal
  */
 async function supprimerGrille(grilleId) {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cette grille ?')) {
+    if (!confirm('Es-tu sûr de vouloir supprimer cette grille ?')) {
         return;
     }
 
@@ -1266,7 +1266,7 @@ async function afficherToutesLesGrillesCriteres() {
         container.innerHTML = `
             <div style="padding: 20px; background: var(--bleu-tres-pale); border-radius: 6px; text-align: center;">
                 <p class="grille-texte-bleu-leger">Aucune grille définie</p>
-                <small>Créez une grille en utilisant le formulaire ci-dessous</small>
+                <small>Crée une grille en utilisant le formulaire ci-dessous</small>
             </div>
         `;
         return;
@@ -1527,7 +1527,7 @@ async function assurerGrilleGenerique() {
     const grilleGenerique = {
         id: 'GRILLE_GENERIQUE',
         nom: 'Grille générique (exemple)',
-        description: 'Grille 4 critères - Modifiez ou dupliquez selon vos besoins',
+        description: 'Grille 4 critères - Modifie ou duplique selon tes besoins',
         echelleId: 'ECHELLE_GENERIQUE',
         criteres: [
             { id: 'CR_COMPREHENSION', code: 'comp', nom: 'Compréhension', ponderation: 25, description: 'Capacité à saisir le sens et les enjeux du sujet', type: 'holistique' },
@@ -1759,9 +1759,9 @@ async function exporterGrilleActive() {
     if (grille.metadata_cc) {
         // Demander le nom de l'utilisateur s'il modifie le matériel
         const nomUtilisateur = prompt(
-            'Vous allez exporter un matériel créé par ' + grille.metadata_cc.auteur_original + '.\n\n' +
-            'Entrez votre nom pour être crédité comme contributeur :\n' +
-            '(Laissez vide si vous n\'avez fait aucune modification)'
+            'Tu exportes un matériel créé par ' + grille.metadata_cc.auteur_original + '.\n\n' +
+            'Entre ton nom pour être crédité comme contributeur :\n' +
+            '(Laisse vide si tu n\'as fait aucune modification)'
         );
 
         if (nomUtilisateur && nomUtilisateur.trim()) {
@@ -1855,7 +1855,7 @@ async function importerDansGrilleActive(event) {
             const confirmation = confirm(
                 messageConfirmation +
                 `⚠️ ATTENTION: Cette action va remplacer la grille actuelle.\n\n` +
-                `Voulez-vous continuer ?`
+                `Veux-tu continuer ?`
             );
 
             if (!confirmation) {
@@ -1906,7 +1906,7 @@ async function importerDansGrilleActive(event) {
 
         } catch (error) {
             console.error('Erreur lors de l\'import:', error);
-            alert('Erreur lors de la lecture du fichier JSON. Assurez-vous qu\'il s\'agit d\'un fichier valide.');
+            alert('Erreur lors de la lecture du fichier JSON. Assure-toi qu\'il s\'agit d\'un fichier valide.');
         } finally {
             event.target.value = ''; // Reset input
         }
@@ -1951,7 +1951,7 @@ function importerGrilles(event) {
                 '<div class="u-mb-15">' + genererBadgeCC(donnees.metadata) + '</div>' :
                 '';
 
-            message += '<p><strong>Voulez-vous importer ces grilles ?</strong></p>';
+            message += '<p><strong>Veux-tu importer ces grilles ?</strong></p>';
 
             // Créer modal avec badge CC
             const modal = document.createElement('div');
@@ -2054,7 +2054,7 @@ window.confirmerImportGrilles = async function(donnees) {
         let message = `✅ Import réussi !\n\n`;
         if (nbAjoutees > 0) message += `${nbAjoutees} nouvelle(s) grille(s) ajoutée(s).\n`;
         if (nbMisesAJour > 0) message += `${nbMisesAJour} grille(s) mise(s) à jour.\n`;
-        message += `\nConsultez "Grilles disponibles" pour les ajouter à votre barre latérale.`;
+        message += `\nConsultez "Grilles disponibles" pour les ajouter à ta barre latérale.`;
         alert(message);
         console.log('✅ Grilles importées:', grillesImportees.length);
 
@@ -2140,7 +2140,7 @@ async function afficherListeGrilles() {
     `;
 
     if (grillesDansBibliotheque.length === 0) {
-        html += '<p class="sidebar-vide">Créez une nouvelle grille ou puisez dans la bibliothèque</p>';
+        html += '<p class="sidebar-vide">Crée une nouvelle grille ou puisez dans la bibliothèque</p>';
         container.innerHTML = html;
         return;
     }
@@ -2213,7 +2213,7 @@ async function preparerDonneesBibliothequeGrilles() {
                 classeItem: 'grille-disponible-item',
                 dataAttrs: `data-discipline="${discipline}"`,
                 boutons: [
-                    { label: 'Ajouter à ma sélection', onclick: `ajouterGrilleIndividuelle('${grille.id}')`, classe: 'btn-confirmer', title: 'Ajouter cette grille à votre sélection' },
+                    { label: 'Ajouter à ma sélection', onclick: `ajouterGrilleIndividuelle('${grille.id}')`, classe: 'btn-confirmer', title: 'Ajouter cette grille à ta sélection' },
                     { label: 'Supprimer', onclick: `supprimerGrilleDeBibliothequePartagee('${grille.id}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true }
                 ],
                 groupe: discipline
@@ -2331,7 +2331,7 @@ async function ajouterGrilleIndividuelle(id) {
         await afficherListeGrilles();
         await afficherBibliothequeGrilles();
 
-        alert('Grille ajoutée à votre sélection avec succès !');
+        alert('Grille ajoutée à ta sélection avec succès !');
     } catch (error) {
         console.error('Erreur lors de l\'ajout:', error);
         alert('Erreur lors de l\'ajout de la grille');
@@ -2472,7 +2472,7 @@ async function ajouterMesGrillesALaBibliotheque() {
             return;
         }
 
-        if (!confirm(`Voulez-vous ajouter vos ${grilles.length} grille(s) à la bibliothèque partagée ?\n\nElles seront disponibles dans tous vos trimestres et pourront être partagées avec des collègues.`)) return;
+        if (!confirm(`Veux-tu ajouter tes ${grilles.length} grille(s) à la bibliothèque partagée ?\n\nElles seront disponibles dans tous tes trimestres et pourront être partagées avec des collègues.`)) return;
 
         const resultat = await importerGrillesDansBibliotheque(grilles);
 
@@ -2483,7 +2483,7 @@ async function ajouterMesGrillesALaBibliotheque() {
             alert(`${resultat.ajoutees} grille(s) ajoutée(s) à la bibliothèque !` +
                 (resultat.existantes > 0 ? `\n${resultat.existantes} étai(en)t déjà présente(s).` : ''));
         } else {
-            alert('Toutes vos grilles étaient déjà dans la bibliothèque.');
+            alert('Toutes tes grilles étaient déjà dans la bibliothèque.');
         }
     } catch (error) {
         console.error('Erreur lors de l\'ajout à la bibliothèque:', error);
@@ -3017,7 +3017,7 @@ function afficherCriteresGrille(grille) {
                             <strong>Formule:</strong> Note = Pondération − (Erreurs ÷ Mots × ${critere.facteurNormalisation || 500})
                         </p>
                         <p style="font-size: 0.75rem; color: var(--gris-clair); margin: 4px 0 0 0;">
-                            Lors de l'évaluation, vous saisirez le nombre d'erreurs et le nombre de mots de la rédaction.
+                            Lors de l'évaluation, tu saisiras le nombre d'erreurs et le nombre de mots de la rédaction.
                         </p>
                     </div>
                 </div>
@@ -3094,7 +3094,7 @@ function afficherCriteresGrille(grille) {
                     </div>
                     ` : `
                     <p class="sous-criteres-vide-message">
-                        Aucun sous-critère défini. Utilisez les sous-critères par défaut ou créez les vôtres.
+                        Aucun sous-critère défini. Utilise les sous-critères par défaut ou crée les tiens.
                     </p>
 
                     <!-- Bouton ajouter quand liste vide -->
@@ -3429,7 +3429,7 @@ async function ajouterCritereGrille(grilleId) {
  * @param {number} critereIndex - Index du critère à supprimer
  */
 async function supprimerCritereGrille(grilleId, critereIndex) {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce critère ?')) {
+    if (!confirm('Es-tu sûr de vouloir supprimer ce critère ?')) {
         return;
     }
 
@@ -3543,7 +3543,7 @@ async function supprimerGrilleActive() {
         return;
     }
 
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cette grille ?')) {
+    if (!confirm('Es-tu sûr de vouloir supprimer cette grille ?')) {
         return;
     }
 

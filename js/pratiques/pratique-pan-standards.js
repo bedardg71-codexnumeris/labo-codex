@@ -1602,7 +1602,7 @@ class PratiquePANStandards {
     if (typeof window.enregistrerPratique !== 'function') {
         console.error(
             '[PAN-Standards] Le registre n\'est pas chargé ! ' +
-            'Assurez-vous de charger pratique-registre.js avant pratique-pan-standards.js'
+            'Assure-toi de charger pratique-registre.js avant pratique-pan-standards.js'
         );
         return;
     }

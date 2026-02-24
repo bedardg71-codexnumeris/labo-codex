@@ -305,7 +305,7 @@ function sauvegarderCadreCalendrierV2() {
  * Réinitialise les bornes du trimestre aux valeurs vides
  */
 function reinitialiserBornesTrimestreV2() {
-    if (!confirm('Voulez-vous vraiment réinitialiser les bornes du trimestre ?')) {
+    if (!confirm('Veux-tu vraiment réinitialiser les bornes du trimestre ?')) {
         return;
     }
 
@@ -349,7 +349,7 @@ function reinitialiserBornesTrimestreV2() {
  * Réinitialise les semaines spéciales aux valeurs vides
  */
 function reinitialiserSemainesSpecialesV2() {
-    if (!confirm('Voulez-vous vraiment réinitialiser les semaines spéciales ?')) {
+    if (!confirm('Veux-tu vraiment réinitialiser les semaines spéciales ?')) {
         return;
     }
 
@@ -850,7 +850,7 @@ function annulerFormEvenementImprevuV2() {
  * Supprime un événement
  */
 function supprimerEvenementV2(id, type) {
-    if (!confirm('Voulez-vous vraiment supprimer cet événement ?')) return;
+    if (!confirm('Veux-tu vraiment supprimer cet événement ?')) return;
 
     const typeStorage = type === 'prevu' ? 'evenementsPrevus' : 'evenementsImprevus';
     let evenements = db.getSync(cle(typeStorage), []);
@@ -1210,7 +1210,7 @@ function ouvrirModalNouveauTrimestre() {
         'Quelle session ?\n' +
         '  A = Automne\n' +
         '  H = Hiver\n\n' +
-        'Entrez A ou H :'
+        'Entre A ou H :'
     );
 
     if (!sessionChoix) return; // Annulé
@@ -1226,7 +1226,7 @@ function ouvrirModalNouveauTrimestre() {
     const anneeChoix = prompt(
         `Quelle année ?\n\n` +
         `Exemples : ${anneeActuelle}, ${anneeActuelle + 1}\n\n` +
-        `Entrez l'année (4 chiffres) :`
+        `Entre l'année (4 chiffres) :`
     );
 
     if (!anneeChoix) return; // Annulé
@@ -1248,7 +1248,7 @@ function ouvrirModalNouveauTrimestre() {
     // Demander si on veut l'activer
     const activer = confirm(
         `Créer le trimestre ${session === 'H' ? 'Hiver' : 'Automne'} ${annee} ?\n\n` +
-        `Voulez-vous l'activer immédiatement ?\n` +
+        `Veux-tu l'activer immédiatement ?\n` +
         `(Le trimestre actuel sera désactivé)`
     );
 
@@ -1447,7 +1447,7 @@ function changerCoursSelectionneV2(coursId) {
         // Afficher l'état vide
         if (etatVide) etatVide.classList.remove('u-hide');
         if (formulaire) formulaire.classList.add('u-hide');
-        if (listeGroupes) listeGroupes.innerHTML = '<p class="text-muted">Sélectionnez un cours pour voir ses groupes.</p>';
+        if (listeGroupes) listeGroupes.innerHTML = '<p class="text-muted">Sélectionne un cours pour voir ses groupes.</p>';
         if (btnSupprimer) btnSupprimer.classList.add('u-hide');
         afficherSyntheseCours(null);  // Beta 95.3 : vider la synthèse
         coursEnEditionV2 = null;
@@ -1556,7 +1556,7 @@ function viderAffichageCoursV2() {
     // Vider l'aperçu du cours
     const apercuCours = document.getElementById('v2-apercuCours');
     if (apercuCours) {
-        apercuCours.innerHTML = '<p class="text-muted">Sélectionnez un cours pour voir ses détails.</p>';
+        apercuCours.innerHTML = '<p class="text-muted">Sélectionne un cours pour voir ses détails.</p>';
     }
 
     // Vider les statistiques du groupe
@@ -2303,7 +2303,7 @@ async function chargerListeEtudiantsV2() {
     if (etudiants.length === 0) {
         const message = groupeFiltre
             ? `Aucun étudiant dans le groupe ${groupeFiltre}.`
-            : 'Aucun étudiant. Utilisez l\'import à gauche ou le formulaire ci-dessous.';
+            : 'Aucun étudiant. Utilise l\'import à gauche ou le formulaire ci-dessous.';
         conteneur.innerHTML = `<p class="etat-vide-liste">${message}</p>`;
         toggleDisplay(actionsEtudiants, tousLesEtudiants.length > 0);
         // Masquer le bouton supprimer groupe si pas d'étudiants
@@ -2681,7 +2681,7 @@ function creerNouveauGroupeV2() {
     // Focus sur le premier champ
     document.getElementById('v2-etudiantDA')?.focus();
 
-    afficherNotificationSucces(`Groupe ${groupeFinal} prêt. Ajoutez des étudiants.`);
+    afficherNotificationSucces(`Groupe ${groupeFinal} prêt. Ajoute des étudiants.`);
 }
 
 /**
@@ -2775,7 +2775,7 @@ function traiterDonneesImportV2(contenu) {
     });
 
     if (donneesImportEnAttenteV2.length === 0) {
-        alert('Aucune donnée valide trouvée. Vérifiez le format.');
+        alert('Aucune donnée valide trouvée. Vérifie le format.');
         return;
     }
 
@@ -2935,7 +2935,7 @@ function viderListeEtudiantsV2() {
 async function supprimerGroupeSelectionneV2() {
     const groupeSelectionne = getGroupeSelectionneV2();
     if (!groupeSelectionne) {
-        afficherNotificationErreur('Sélectionnez un groupe spécifique à supprimer.');
+        afficherNotificationErreur('Sélectionne un groupe spécifique à supprimer.');
         return;
     }
 
@@ -2990,7 +2990,7 @@ async function sauvegarderGroupeEtudiantsV2() {
     const etudiants = await db.get(cleEtud) || [];
 
     if (etudiants.length === 0) {
-        alert('Aucun étudiant dans le groupe. Importez d\'abord une liste.');
+        alert('Aucun étudiant dans le groupe. Importe d\'abord une liste.');
         return;
     }
 
@@ -3096,7 +3096,7 @@ function chargerSeancesV2() {
     }
 
     if (horaire.length === 0) {
-        let messageVide = '<p class="text-muted text-italic">Aucune séance configurée. Cliquez sur « + Ajouter une séance » pour commencer.</p>';
+        let messageVide = '<p class="text-muted text-italic">Aucune séance configurée. Clique sur « + Ajouter une séance » pour commencer.</p>';
         if (coursActifInfo) {
             messageVide = `<div class="alerte alerte-info" style="margin-bottom: 10px;">
                 <strong>Cours actif :</strong> ${coursActifInfo}
@@ -3928,15 +3928,15 @@ function ouvrirAideGroupeCours() {
     alert(
         "Comment créer un groupe-cours ?\n\n" +
         "Un groupe-cours associe 4 éléments pour créer une instance d'enseignement :\n\n" +
-        "1. COURS : Le cours que vous enseignez (ex: 601-101-MQ)\n" +
-        "   → Créez-le d'abord dans la section « Cours »\n\n" +
+        "1. COURS : Le cours que tu enseignes (ex: 601-101-MQ)\n" +
+        "   → Crée-le d'abord dans la section « Cours »\n\n" +
         "2. GROUPE D'ÉTUDIANTS : Le numéro de groupe (ex: 00001)\n" +
-        "   → Importez vos étudiants dans la section « Groupe d'étudiants »\n\n" +
+        "   → Importe tes étudiants dans la section « Groupe d'étudiants »\n\n" +
         "3. HORAIRE : Les jours et heures de cours\n" +
-        "   → Créez-le dans la section « Horaire »\n\n" +
+        "   → Crée-le dans la section « Horaire »\n\n" +
         "4. ENSEIGNANT·E : Le responsable du cours\n" +
         "   → Configuré dans la section « Enseignant·e »\n\n" +
-        "Cliquez sur « + Nouveau groupe-cours » puis sélectionnez chaque élément dans les 4 menus déroulants."
+        "Clique sur « + Nouveau groupe-cours » puis sélectionne chaque élément dans les 4 menus déroulants."
     );
 }
 window.ouvrirAideGroupeCours = ouvrirAideGroupeCours;
@@ -4204,7 +4204,7 @@ function mettreAJourNomGroupeCoursV2() {
     } else {
         // Aucun groupe sélectionné
         if (horaireHidden) horaireHidden.value = '';
-        if (horaireNomSpan) horaireNomSpan.textContent = '— Sélectionnez un groupe —';
+        if (horaireNomSpan) horaireNomSpan.textContent = '— Sélectionne un groupe —';
         if (horaireContainer) horaireContainer.classList.remove('sans-horaire');
     }
 
@@ -4364,7 +4364,7 @@ function nouveauGroupeCoursV2() {
     if (selectCours) selectCours.value = '';
     if (selectGroupe) selectGroupe.value = '';
     if (horaireHidden) horaireHidden.value = '';
-    if (horaireNom) horaireNom.textContent = '— Sélectionnez un groupe —';
+    if (horaireNom) horaireNom.textContent = '— Sélectionne un groupe —';
     if (selectPratique) selectPratique.value = '';  // Beta 95.3
 
     // Mettre à jour le titre et bouton
@@ -4749,7 +4749,7 @@ function ouvrirModalBibliothequeGroupeCours() {
         modalHTML += `
             <div style="text-align: center; padding: 40px; color: var(--gris-moyen);">
                 <p style="font-size: 1.1rem;">Aucun groupe-cours configuré</p>
-                <p>Cliquez sur « + Nouveau groupe-cours » dans l'accordéon pour en créer un.</p>
+                <p>Clique sur « + Nouveau groupe-cours » dans l'accordéon pour en créer un.</p>
             </div>
         `;
     } else {
@@ -5503,7 +5503,7 @@ async function supprimerProfilEnseignantV2() {
 
     // Confirmation
     const nomComplet = `${enseignant.prenom || ''} ${enseignant.nom || ''}`.trim();
-    const confirme = confirm(`Voulez-vous vraiment supprimer le profil de ${nomComplet} ?\n\nCette action est irréversible.`);
+    const confirme = confirm(`Veux-tu vraiment supprimer le profil de ${nomComplet} ?\n\nCette action est irréversible.`);
 
     if (!confirme) {
         return;
@@ -5560,7 +5560,7 @@ async function peuplerDropdownGroupeCoursActif() {
     console.log('🔄 [GC Dropdown] Trimestre actif:', trimestreActif?.id, trimestreActif?.nom);
 
     if (!trimestreActif) {
-        selectHeader.innerHTML = '<option value="">-- Sélectionnez un trimestre --</option>';
+        selectHeader.innerHTML = '<option value="">-- Sélectionne un trimestre --</option>';
         return;
     }
 
@@ -5988,7 +5988,7 @@ function changerEnseignantSelectionneV2(enseignantId) {
 
     if (!enseignantId) {
         if (btnModifier) btnModifier.classList.add('u-hide');
-        if (apercu) apercu.innerHTML = '<p class="text-muted">Sélectionnez un enseignant·e pour voir ses détails.</p>';
+        if (apercu) apercu.innerHTML = '<p class="text-muted">Sélectionne un enseignant·e pour voir ses détails.</p>';
         return;
     }
 

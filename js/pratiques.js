@@ -1647,7 +1647,7 @@ function ajouterTypeJetonPersonnalise() {
  * @param {number} index - Index du jeton à supprimer
  */
 function supprimerTypeJetonPersonnalise(index) {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce type de jeton ?')) {
+    if (!confirm('Es-tu sûr de vouloir supprimer ce type de jeton ?')) {
         return;
     }
 
@@ -2618,7 +2618,7 @@ async function dupliquerPratique(id) {
         // Recharger
         await afficherListePratiques();
 
-        alert(`✅ Pratique dupliquée avec succès !\n\n"${nouveauNom}" a été ajoutée à vos pratiques.`);
+        alert(`✅ Pratique dupliquée avec succès !\n\n"${nouveauNom}" a été ajoutée à tes pratiques.`);
     } catch (error) {
         console.error('Erreur lors de la duplication:', error);
         alert(`❌ Erreur : ${error.message}`);
@@ -3507,7 +3507,7 @@ function calculerTotalPoidsObjectifs() {
 
     if (total === 100) {
         totalSpan.classList.add('u-texte-succes');
-        validationP.textContent = 'Total valide ! Vous pouvez continuer.';
+        validationP.textContent = 'Total valide ! Tu peux continuer.';
         validationP.classList.add('u-texte-succes');
     } else if (total > 100) {
         totalSpan.classList.add('u-texte-danger');
@@ -3666,7 +3666,7 @@ function toggleResumeJetonsWizard() {
 
             // Si aucune configuration
             if (!jetons.nombreParEleve && !jetons.delai && !jetons.reprise && (!jetons.typesPersonnalises || jetons.typesPersonnalises.length === 0)) {
-                html = '<p style="color: var(--gris-moyen); margin: 0;">⚠️ Aucun jeton configuré. Configurez les jetons dans Réglages → Pratique de notation.</p>';
+                html = '<p style="color: var(--gris-moyen); margin: 0;">⚠️ Aucun jeton configuré. Configure les jetons dans Réglages → Pratique de notation.</p>';
             }
         }
 
@@ -3831,7 +3831,7 @@ async function creerPratiqueDepuisWizard() {
 
         const message = modeEdition
             ? `✅ Pratique modifiée avec succès !\n\n"${pratiqueConfig.nom}" a été mise à jour.`
-            : `✅ Pratique créée avec succès !\n\n"${pratiqueConfig.nom}" a été ajoutée à vos pratiques configurables.`;
+            : `✅ Pratique créée avec succès !\n\n"${pratiqueConfig.nom}" a été ajoutée à tes pratiques configurables.`;
 
         alert(message);
     } catch (error) {
@@ -4209,7 +4209,7 @@ async function traiterImportPratique(event) {
         // Recharger
         await afficherListePratiques();
 
-        alert(`✅ Pratique importée avec succès !\n\n"${pratiqueJSON.nom}" a été ajoutée à vos pratiques.`);
+        alert(`✅ Pratique importée avec succès !\n\n"${pratiqueJSON.nom}" a été ajoutée à tes pratiques.`);
     } catch (error) {
         console.error('Erreur lors de l\'import:', error);
         alert(`❌ Erreur d'import : ${error.message}`);
@@ -4358,7 +4358,7 @@ async function afficherListePratiquesSidebar() {
     const pratiqueSelectionneeId = sessionStorage.getItem('pratiqueSelectionnee');
 
     if (pratiquesDansBibliotheque.length === 0) {
-        container.innerHTML = '<p class="text-muted text-italic">Créez une nouvelle pratique ou puisez dans la bibliothèque</p>';
+        container.innerHTML = '<p class="text-muted text-italic">Crée une nouvelle pratique ou puisez dans la bibliothèque</p>';
         return;
     }
 
@@ -4449,7 +4449,7 @@ async function ouvrirModalBibliothequePratiques() {
                             Canevas de base (${canevasDeBase.length})
                         </h3>
                         <p style="color: var(--gris-fonce); font-size: 0.9em; margin-bottom: 15px; font-style: italic;">
-                            Structures de référence pour créer vos configurations personnalisées
+                            Structures de référence pour créer tes configurations personnalisées
                         </p>
 
                         <!-- Sélecteur de pratique par défaut -->
@@ -4489,7 +4489,7 @@ async function ouvrirModalBibliothequePratiques() {
 
                         <div id="listePratiquesSelection" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
                             ${pratiquesDansBibliotheque.length === 0 ?
-                                '<p class="text-muted text-italic">Aucune pratique dans votre sélection</p>' :
+                                '<p class="text-muted text-italic">Aucune pratique dans ta sélection</p>' :
                                 pratiquesDansBibliotheque.map(p => {
                                     const nomAffiche = p.nom || p.id;
                                     const auteur = p.auteur ? `Par ${p.auteur}${p.etablissement ? ' (' + p.etablissement + ')' : ''}` : '';
@@ -5265,7 +5265,7 @@ function populerSelecteursNiveaux() {
 
     if (!echelles || echelles.length === 0) {
         console.log('[populerSelecteursNiveaux] Aucune échelle disponible');
-        selectEchelle.innerHTML = '<option value="" disabled selected>Créez d\'abord une échelle</option>';
+        selectEchelle.innerHTML = '<option value="" disabled selected>Crée d\'abord une échelle</option>';
         return;
     }
 
@@ -5296,7 +5296,7 @@ function onEchelleConformiteChange() {
         selecteurs.slice(0, 2).forEach(selecteurId => {
             const select = document.getElementById(selecteurId);
             if (select) {
-                select.innerHTML = '<option value="" disabled selected>Choisissez d\'abord une échelle</option>';
+                select.innerHTML = '<option value="" disabled selected>Choisis d\'abord une échelle</option>';
             }
         });
         return;

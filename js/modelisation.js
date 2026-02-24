@@ -175,7 +175,7 @@
         if (fichiers.length === 0) {
             grille.innerHTML = `
                 <div class="model-placeholder">
-                    <p>Aucun fichier. Cliquez sur « Ouvrir un fichier » pour commencer.</p>
+                    <p>Aucun fichier. Clique sur « Ouvrir un fichier » pour commencer.</p>
                 </div>
             `;
             return;

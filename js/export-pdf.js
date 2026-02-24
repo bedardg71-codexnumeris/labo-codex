@@ -1624,7 +1624,7 @@ async function mettreAJourApercuPDF() {
             if (btnExporter) btnExporter.disabled = false;
         }
     } else {
-        zoneApercu.innerHTML = '<p class="text-muted text-center" style="padding: 40px;">Sélectionnez une grille et une échelle pour voir l\'aperçu</p>';
+        zoneApercu.innerHTML = '<p class="text-muted text-center" style="padding: 40px;">Sélectionne une grille et une échelle pour voir l\'aperçu</p>';
         if (btnExporter) btnExporter.disabled = true;
     }
 }

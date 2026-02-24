@@ -420,7 +420,7 @@ function demarrerEvaluation() {
     const aEtudiants = etudiants.length > 0;
 
     if (!aCours || !aEtudiants) {
-        let message = 'Vous devez d\'abord configurer :\n\n';
+        let message = 'Tu dois d\'abord configurer :\n\n';
         if (!aCours) message += '• Un cours (MODULE 1 : Créer un groupe-cours)\n';
         if (!aEtudiants) message += '• Des étudiants (MODULE 1 : Créer un groupe-cours)\n';
         message += '\nComplétez le Module 1 avant de pouvoir évaluer une production.';

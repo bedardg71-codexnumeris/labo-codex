@@ -46,7 +46,7 @@ const ETAPES_WIZARD = {
     'infos-base': {
         id: 'infos-base',
         titre: 'Informations de base',
-        description: 'Ces informations servent à identifier votre pratique et à générer la licence Creative Commons (CC BY-NC-SA 4.0) pour le partage.',
+        description: 'Ces informations servent à identifier ta pratique et à générer la licence Creative Commons (CC BY-NC-SA 4.0) pour le partage.',
         branche: 'commune',
         ordre: 1,
         champs: [
@@ -57,8 +57,8 @@ const ETAPES_WIZARD = {
             ]},
             { id: 'etablissement', label: 'Établissement', type: 'text', required: true, placeholder: 'Ex: Cégep de Drummondville' },
             { id: 'discipline', label: 'Discipline', type: 'select-disciplines', required: true },
-            { id: 'description', label: 'Description', type: 'textarea', required: false, placeholder: 'Décrivez brièvement votre pratique (optionnel)' },
-            { id: 'infoCC', type: 'info', texte: 'Le partage n\'est pas obligatoire, mais ces informations permettent de protéger votre travail sous licence Creative Commons (CC BY-NC-SA 4.0) et d\'en attribuer la création si vous choisissez de le partager.' }
+            { id: 'description', label: 'Description', type: 'textarea', required: false, placeholder: 'Décris brièvement ta pratique (optionnel)' },
+            { id: 'infoCC', type: 'info', texte: 'Le partage n\'est pas obligatoire, mais ces informations permettent de protéger ton travail sous licence Creative Commons (CC BY-NC-SA 4.0) et d\'en attribuer la création si tu choisis de le partager.' }
         ],
         suivant: () => 'calcul-note-finale',
         precedent: () => null
@@ -71,8 +71,8 @@ const ETAPES_WIZARD = {
 
     'calcul-note-finale': {
         id: 'calcul-note-finale',
-        titre: 'Comment calculez-vous la note finale ?',
-        description: 'Cette question nous aide à identifier le type de pratique qui correspond à votre méthode.',
+        titre: 'Comment calcules-tu la note finale ?',
+        description: 'Cette question nous aide à identifier le type de pratique qui correspond à ta méthode.',
         branche: 'commune',
         ordre: 2,
         champs: [
@@ -89,7 +89,7 @@ const ETAPES_WIZARD = {
                     {
                         value: 'niveaux',
                         label: 'Niveaux de maîtrise (ex: I-D-M-E, A-B-C-D)',
-                        description: 'Vous utilisez une échelle de niveaux pour évaluer la maîtrise des apprentissages, puis convertissez en note.'
+                        description: 'Tu utilises une échelle de niveaux pour évaluer la maîtrise des apprentissages, puis convertis en note.'
                     },
                     {
                         value: 'acceptable',
@@ -99,7 +99,7 @@ const ETAPES_WIZARD = {
                     {
                         value: 'pas-certain',
                         label: 'Je ne suis pas certain(e)',
-                        description: 'Des questions supplémentaires vous aideront à identifier votre méthode.'
+                        description: 'Des questions supplémentaires t\'aideront à identifier ta méthode.'
                     }
                 ]
             }
@@ -116,8 +116,8 @@ const ETAPES_WIZARD = {
 
     'sous-questions-guidees': {
         id: 'sous-questions-guidees',
-        titre: 'Aidons-nous à identifier votre méthode',
-        description: 'Choisissez l\'énoncé qui décrit le mieux votre pratique de notation.',
+        titre: 'Identifions ta méthode',
+        description: 'Choisis l\'énoncé qui décrit le mieux ta pratique de notation.',
         branche: 'commune',
         ordre: 2,
         champs: [
@@ -155,8 +155,8 @@ const ETAPES_WIZARD = {
 
     'regles-sommative': {
         id: 'regles-sommative',
-        titre: 'Utilisez-vous des règles spéciales ?',
-        description: 'Sélectionnez toutes les règles qui s\'appliquent à votre pratique de notation.',
+        titre: 'Utilises-tu des règles spéciales ?',
+        description: 'Sélectionne toutes les règles qui s\'appliquent à ta pratique de notation.',
         branche: 'sommative',
         ordre: 3,
         champs: [
@@ -201,7 +201,7 @@ const ETAPES_WIZARD = {
     'nb-evaluations': {
         id: 'nb-evaluations',
         titre: 'Nombre d\'évaluations',
-        description: 'Combien d\'évaluations prévoyez-vous pour cette session ?',
+        description: 'Combien d\'évaluations prévois-tu pour cette session ?',
         branche: 'commune',
         ordre: 4,
         champs: [
@@ -225,7 +225,7 @@ const ETAPES_WIZARD = {
 
     'seuils-personnels': {
         id: 'seuils-personnels',
-        titre: 'Vos seuils personnels',
+        titre: 'Tes seuils personnels',
         description: 'Ces seuils servent au dépistage automatique des étudiants en difficulté.',
         branche: 'commune',
         ordre: 5,
@@ -285,7 +285,7 @@ const ETAPES_WIZARD = {
     'config-sommative-regles': {
         id: 'config-sommative-regles',
         titre: 'Configuration des règles spéciales',
-        description: 'Précisez les détails de vos règles de notation.',
+        description: 'Précise les détails de tes règles de notation.',
         branche: 'sommative',
         ordre: 6,
         champs: [],
@@ -399,7 +399,7 @@ const ETAPES_WIZARD = {
     'config-objectifs-definition': {
         id: 'config-objectifs-definition',
         titre: 'Définition des objectifs d\'apprentissage',
-        description: 'Ajoutez vos objectifs d\'apprentissage avec leurs pondérations. Les poids doivent totaliser 100%.',
+        description: 'Ajoute tes objectifs d\'apprentissage avec leurs pondérations. Les poids doivent totaliser 100%.',
         branche: 'pan-standards-objectifs',
         ordre: 6,
         champs: [
@@ -430,7 +430,7 @@ const ETAPES_WIZARD = {
     'config-reprises': {
         id: 'config-reprises',
         titre: 'Reprises',
-        description: 'Configurez les reprises pour vos évaluations.',
+        description: 'Configure les reprises pour tes évaluations.',
         branche: 'commune',
         ordre: 7,
         champs: [
@@ -479,7 +479,7 @@ const ETAPES_WIZARD = {
     'mode-configuration': {
         id: 'mode-configuration',
         titre: 'Mode de configuration',
-        description: 'Comment souhaitez-vous configurer votre pratique ?',
+        description: 'Comment souhaites-tu configurer ta pratique ?',
         branche: 'commune',
         ordre: 3,
         condition: (reponses) => reponses.typePratique !== 'sommative',
@@ -545,7 +545,7 @@ const ETAPES_WIZARD = {
     'approche-evaluation': {
         id: 'approche-evaluation',
         titre: 'Approche d\'évaluation',
-        description: 'Comment souhaitez-vous structurer vos évaluations ?',
+        description: 'Comment souhaites-tu structurer tes évaluations ?',
         branche: 'pan-standards',
         ordre: 4,
         champs: [
@@ -856,7 +856,7 @@ const ETAPES_WIZARD = {
     'choix-modele-bundles': {
         id: 'choix-modele-bundles',
         titre: 'Forfaits de spécifications',
-        description: 'Choisissez un modèle prédéfini ou personnalisez',
+        description: 'Choisis un modèle prédéfini ou personnalise',
         branche: 'pan-specifications',
         ordre: 6,
         champs: [], // Champs dynamiques selon modeConfig
@@ -895,7 +895,7 @@ const ETAPES_WIZARD = {
                         {
                             value: 'personnalise',
                             label: 'Personnalisé',
-                            description: 'Créez vos propres forfaits de spécifications.'
+                            description: 'Crée tes propres forfaits de spécifications.'
                         }
                     ]
                 }
@@ -915,7 +915,7 @@ const ETAPES_WIZARD = {
     'echelle-performance': {
         id: 'echelle-performance',
         titre: 'Échelle de performance',
-        description: 'Sélectionnez l\'échelle à utiliser pour les évaluations',
+        description: 'Sélectionne l\'échelle à utiliser pour les évaluations',
         branche: 'finale',
         ordre: 7,
         condition: (reponses) => reponses.typePratique !== 'sommative',
@@ -940,7 +940,7 @@ const ETAPES_WIZARD = {
     'grille-criteres': {
         id: 'grille-criteres',
         titre: 'Grille de critères',
-        description: 'Sélectionnez la grille de critères pour l\'évaluation et le dépistage',
+        description: 'Sélectionne la grille de critères pour l\'évaluation et le dépistage',
         branche: 'finale',
         ordre: 8,
         condition: (reponses) => reponses.typePratique !== 'sommative',
@@ -964,7 +964,7 @@ const ETAPES_WIZARD = {
     'recapitulatif': {
         id: 'recapitulatif',
         titre: 'Récapitulatif',
-        description: 'Vérifiez vos choix avant de créer la pratique',
+        description: 'Vérifie tes choix avant de créer la pratique',
         branche: 'finale',
         ordre: 9,
         champs: [], // Généré dynamiquement
@@ -1509,7 +1509,7 @@ function genererSelectEchelle(champ) {
                 <label>${champ.label}</label>
                 <div class="wizard-v2-alerte">
                     Aucune échelle de performance n'a été créée.
-                    Vous pourrez en créer une dans Matériel → Échelles de performance.
+                    Tu pourras en créer une dans Matériel → Échelles de performance.
                 </div>
             </div>
         `;
@@ -1543,7 +1543,7 @@ function genererSelectGrille(champ) {
             <div class="wizard-v2-champ">
                 <label>${champ.label}</label>
                 <div class="wizard-v2-info-block" style="flex-direction: column; align-items: stretch;">
-                    <p style="margin: 0 0 10px 0;">Aucune grille de critères n'a été créée. Vous pouvez en générer une de base pour commencer.</p>
+                    <p style="margin: 0 0 10px 0;">Aucune grille de critères n'a été créée. Tu peux en générer une de base pour commencer.</p>
                     <button type="button" class="wizard-v2-btn-demo-grille" onclick="wizardV2CreerGrilleDemo()" style="
                         background: var(--bleu-principal, #4A90D9);
                         color: white;
@@ -1554,7 +1554,7 @@ function genererSelectGrille(champ) {
                         font-size: 0.9rem;
                         align-self: flex-start;
                     ">Créer une grille de base (4\u00a0critères)</button>
-                    <p style="margin: 8px 0 0 0; font-size: 0.8rem; color: var(--gris-moyen, #888);">Vous pourrez la modifier plus tard dans Matériel → Critères d'évaluation.</p>
+                    <p style="margin: 8px 0 0 0; font-size: 0.8rem; color: var(--gris-moyen, #888);">Tu pourras la modifier plus tard dans Matériel → Critères d'évaluation.</p>
                 </div>
             </div>
         `;
@@ -1628,8 +1628,8 @@ function genererRecapitulatif() {
 
     // ─── Section 1 : Diagnostic du type de notation (proéminent) ───
     const typeBadges = {
-        'sommative': { code: 'SOM', couleur: '#4A90D9', label: 'Sommative', description: 'Votre note finale est calculée par une moyenne pondérée des évaluations. C\'est la méthode traditionnelle, largement utilisée.' },
-        'pan-standards': { code: 'PAN', couleur: '#E67E22', label: 'PAN \u2013 Standards', description: 'Vous évaluez par niveaux de maîtrise (ex.\u00a0: I-D-M-E). La note est construite à partir de la démonstration de compétences, pas d\'une simple moyenne.' },
+        'sommative': { code: 'SOM', couleur: '#4A90D9', label: 'Sommative', description: 'Ta note finale est calculée par une moyenne pondérée des évaluations. C\'est la méthode traditionnelle, largement utilisée.' },
+        'pan-standards': { code: 'PAN', couleur: '#E67E22', label: 'PAN \u2013 Standards', description: 'Tu évalues par niveaux de maîtrise (ex.\u00a0: I-D-M-E). La note est construite à partir de la démonstration de compétences, pas d\'une simple moyenne.' },
         'pan-specifications': { code: 'SPE', couleur: '#27AE60', label: 'PAN \u2013 Spécifications', description: 'Chaque travail est jugé acceptable ou non. La note finale dépend du nombre de spécifications réussies (forfaits).' }
     };
     const badge = typeBadges[classification.type] || { code: '?', couleur: '#888', label: 'Indéterminé', description: '' };
@@ -1643,7 +1643,7 @@ function genererRecapitulatif() {
             margin-bottom: 20px;
             text-align: center;
         ">
-            <div style="font-size: 0.85rem; color: var(--gris-moyen, #888); margin-bottom: 8px;">Votre pratique de notation a été identifiée comme</div>
+            <div style="font-size: 0.85rem; color: var(--gris-moyen, #888); margin-bottom: 8px;">Ta pratique de notation a été identifiée comme</div>
             <div style="display: inline-flex; align-items: center; gap: 12px; margin-bottom: 10px;">
                 <span style="
                     background: ${badge.couleur};
@@ -1692,7 +1692,7 @@ function genererRecapitulatif() {
     html += `
         <div class="wizard-v2-recap-section" style="margin-bottom: 16px;">
             <h4>Nom de la pratique</h4>
-            <p style="font-size: 0.85rem; color: var(--gris-moyen, #888); margin: 0 0 8px 0;">Maintenant que vous connaissez votre type de notation, vous pouvez ajuster le nom si vous le souhaitez.</p>
+            <p style="font-size: 0.85rem; color: var(--gris-moyen, #888); margin: 0 0 8px 0;">Maintenant que tu connais ton type de notation, tu peux ajuster le nom si tu le souhaites.</p>
             <input type="text" id="wizard-v2-recap-nom" value="${nomActuel.replace(/"/g, '&quot;')}" style="
                 width: 100%;
                 padding: 10px 12px;

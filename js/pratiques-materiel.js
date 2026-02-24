@@ -145,7 +145,7 @@ async function afficherListePratiquesMateriel() {
 
     // Si aucune pratique, afficher message
     if (pratiquesDansBibliotheque.length === 0) {
-        container.innerHTML = '<p class="sidebar-vide">Créez une nouvelle pratique ou puisez dans la bibliothèque</p>';
+        container.innerHTML = '<p class="sidebar-vide">Crée une nouvelle pratique ou puisez dans la bibliothèque</p>';
         return;
     }
 
@@ -367,7 +367,7 @@ async function afficherBibliothequePratiques() {
                     </p>
                 </div>
 
-                <!-- Section 1 : Pratiques dans votre sélection -->
+                <!-- Section 1 : Pratiques dans ta sélection -->
                 <h3 style="color: var(--bleu-clair); font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
                     Pratiques dans la barre latérale
                 </h3>
@@ -507,7 +507,7 @@ async function afficherBibliothequePratiques() {
     const pratiquesAAfficher = pratiquesDisponibles.filter(p => !idsDejaPresents.has(p.id));
 
     if (pratiquesAAfficher.length === 0) {
-        html += '<p style="color: var(--gris-clair); font-style: italic;">Toutes les pratiques sont déjà dans votre sélection</p>';
+        html += '<p style="color: var(--gris-clair); font-style: italic;">Toutes les pratiques sont déjà dans ta sélection</p>';
     } else {
         pratiquesAAfficher.forEach(pratique => {
             const badge = genererBadgeTypePratique(pratique);
@@ -546,7 +546,7 @@ async function afficherBibliothequePratiques() {
                         <button
                             onclick="ajouterPratiqueALaSelection('${pratique.id}')"
                             class="btn btn-principal btn-tres-compact"
-                            title="Ajouter à votre sélection">
+                            title="Ajouter à ta sélection">
                             Ajouter
                         </button>
                     </div>
@@ -628,7 +628,7 @@ async function ajouterPratiqueALaSelection(pratiqueId) {
     if (existante) {
         // La pratique existe - vérifier si elle est dans la sélection
         if (existante.dansBibliotheque !== false) {
-            alert('Cette pratique est déjà dans votre sélection.');
+            alert('Cette pratique est déjà dans ta sélection.');
             return;
         }
 
@@ -1313,9 +1313,9 @@ async function sauvegarderPratiqueMaterielComplet() {
     } catch (erreur) {
         console.error('[pratiques-materiel] ❌ Erreur sauvegarde complète:', erreur);
         if (typeof afficherNotificationErreur === 'function') {
-            afficherNotificationErreur('Erreur lors de la sauvegarde. Vérifiez la console.');
+            afficherNotificationErreur('Erreur lors de la sauvegarde. Vérifie la console.');
         } else {
-            alert('Erreur lors de la sauvegarde. Vérifiez la console.');
+            alert('Erreur lors de la sauvegarde. Vérifie la console.');
         }
     }
 }
@@ -1793,7 +1793,7 @@ async function dupliquerPratiqueMateriel(pratiqueId) {
  * Supprime une pratique
  */
 async function supprimerPratiqueMateriel(pratiqueId) {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cette pratique ?')) {
+    if (!confirm('Es-tu sûr de vouloir supprimer cette pratique ?')) {
         return;
     }
 
@@ -1984,7 +1984,7 @@ async function importerPratiquesUtilisateur(event) {
                 '<div style="margin-bottom: 15px;">' + genererBadgeCC(donnees.metadata) + '</div>' :
                 '';
 
-            message += '<p><strong>Voulez-vous importer ces pratiques de notation ?</strong></p>';
+            message += '<p><strong>Veux-tu importer ces pratiques de notation ?</strong></p>';
 
             // Créer modal avec badge CC
             const modal = document.createElement('div');
@@ -2077,7 +2077,7 @@ window.confirmerImportPratiques = async function(donnees) {
         let message = `✅ Import réussi !\n\n`;
         if (nbAjoutees > 0) message += `${nbAjoutees} nouvelle(s) pratique(s) ajoutée(s).\n`;
         if (nbMisesAJour > 0) message += `${nbMisesAJour} pratique(s) mise(s) à jour.\n`;
-        message += `\nConsultez "Pratiques disponibles" pour les ajouter à votre barre latérale.`;
+        message += `\nConsulte « Pratiques disponibles » pour les ajouter à ta barre latérale.`;
         alert(message);
         console.log('✅ Pratiques importées:', nbAjoutees + nbMisesAJour);
 
@@ -2424,7 +2424,7 @@ function afficherListeObjectifsMat(objectifs) {
     if (!conteneur) return;
 
     if (!objectifs || objectifs.length === 0) {
-        conteneur.innerHTML = '<p style="color: var(--gris-clair); font-style: italic;">Aucun objectif défini. Cliquez sur "+ Ajouter un objectif".</p>';
+        conteneur.innerHTML = '<p style="color: var(--gris-clair); font-style: italic;">Aucun objectif défini. Clique sur "+ Ajouter un objectif".</p>';
         return;
     }
 
@@ -2591,7 +2591,7 @@ function afficherGrilleConversionMat(grille) {
     if (!conteneur) return;
 
     if (!grille || grille.length === 0) {
-        conteneur.innerHTML = '<p style="color: var(--gris-clair); font-style: italic;">Ajoutez des objectifs pour générer la grille de conversion.</p>';
+        conteneur.innerHTML = '<p style="color: var(--gris-clair); font-style: italic;">Ajoute des objectifs pour générer la grille de conversion.</p>';
         return;
     }
 

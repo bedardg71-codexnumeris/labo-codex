@@ -245,7 +245,7 @@ function genererBadgeCC(metadata) {
             ${contributeurs_html}
 
             <div class="cc-badge-conditions">
-                <h4>Vous pouvez :</h4>
+                <h4>Tu peux :</h4>
                 <ul>
                     <li>Partager ce matériel</li>
                     <li>Le modifier et le remixer</li>
@@ -318,16 +318,16 @@ function enregistrerModificationCC(materiel, nomModificateur, descriptionModif) 
  */
 function demanderAttributionModification() {
     const nom = prompt(
-        "Votre nom (pour l'attribution Creative Commons) :",
-        "Votre nom"
+        "Ton nom (pour l'attribution Creative Commons) :",
+        "Ton nom"
     );
 
-    if (!nom || nom === "Votre nom") {
+    if (!nom || nom === "Ton nom") {
         return null; // Annulé
     }
 
     const description = prompt(
-        "Brève description de vos modifications :",
+        "Brève description de tes modifications :",
         "Ajustements personnalisés"
     );
 
@@ -495,9 +495,9 @@ function genererBadgeCCPermanent() {
 
             <div class="cc-badge-conditions">
                 <p>
-                    Vous pouvez librement partager, modifier et réutiliser ce matériel à des fins éducatives,
+                    Tu peux librement partager, modifier et réutiliser ce matériel à des fins éducatives,
                     à condition d'attribuer les auteurs originaux, de ne pas en faire usage commercial,
-                    et de partager vos modifications sous la même licence. Cette licence protège le travail des enseignants
+                    et de partager tes modifications sous la même licence. Cette licence protège le travail des enseignants
                     tout en favorisant le partage et le bien commun en éducation.
                 </p>
             </div>
@@ -609,7 +609,7 @@ function demanderMetadonneesEnrichies(typeContenu, nomContenu) {
                 const intention = document.querySelector('input[name="intentionPartage"]:checked');
 
                 if (!intention) {
-                    alert('Veuillez préciser votre intention de partage.');
+                    alert('Précise ton intention de partage.');
                     return;
                 }
 
@@ -705,7 +705,7 @@ function creerModalMetadonneesEnrichies() {
             </h2>
 
             <p class="u-mb-20" style="color: var(--gris-leger);">
-                Vous exportez : <strong id="metaTypeContenu"></strong><br>
+                Tu exportes : <strong id="metaTypeContenu"></strong><br>
                 <span class="u-texte-09" id="metaNomContenu"></span>
             </p>
 
@@ -738,7 +738,7 @@ function creerModalMetadonneesEnrichies() {
                     Clarification necessaire
                 </p>
                 <p class="u-mb-15 u-texte-09" style="margin-top: 0; color: var(--gris-fonce);">
-                    Pourquoi ne voulez-vous pas partager votre nom ?
+                    Pourquoi ne veux-tu pas partager ton nom ?
                 </p>
                 <label class="cc-modal-radio-label u-mb-10">
                     <input type="radio" name="intentionPartage" value="anonyme" style="margin-right: 10px; margin-top: 3px;">
@@ -871,19 +871,19 @@ function demanderMetadonneesConfigComplete(nbRessources) {
 
             // Validation
             if (!nom) {
-                alert('Le nom de votre pratique est obligatoire');
+                alert('Le nom de ta pratique est obligatoire');
                 return;
             }
             if (!auteur) {
-                alert('Votre nom est obligatoire');
+                alert('Ton nom est obligatoire');
                 return;
             }
             if (!description) {
-                alert('Une description de votre pratique est obligatoire');
+                alert('Une description de ta pratique est obligatoire');
                 return;
             }
             if (!licenceAccept) {
-                alert('Vous devez accepter de partager sous licence CC BY-NC-SA 4.0');
+                alert('Tu dois accepter de partager sous licence CC BY-NC-SA 4.0');
                 return;
             }
 
@@ -932,13 +932,13 @@ function creerModalConfigComplete() {
             </h2>
 
             <p class="u-mb-20" style="color: var(--gris-leger); background: var(--bleu-tres-pale); padding: 15px; border-radius: 4px;">
-                Vous etes sur le point d'exporter <strong id="configNbRessources"></strong> ressource(s) pedagogique(s).<br>
+                Tu es sur le point d'exporter <strong id="configNbRessources"></strong> ressource(s) pedagogique(s).<br>
                 Ces ressources seront partagees avec d'autres enseignant-es.
             </p>
 
             <div class="cc-modal-groupe-form u-mb-20">
                 <label class="cc-modal-form-label">
-                    Nom de votre pratique <span style="color: var(--rouge-erreur);">*</span>
+                    Nom de ta pratique <span style="color: var(--rouge-erreur);">*</span>
                 </label>
                 <input type="text"
                        id="configNom"
@@ -948,7 +948,7 @@ function creerModalConfigComplete() {
 
             <div class="cc-modal-groupe-form u-mb-20">
                 <label class="cc-modal-form-label">
-                    Votre nom <span style="color: var(--rouge-erreur);">*</span>
+                    Ton nom <span style="color: var(--rouge-erreur);">*</span>
                 </label>
                 <input type="text"
                        id="configAuteur"
@@ -980,10 +980,10 @@ function creerModalConfigComplete() {
 
             <div class="cc-modal-groupe-form u-mb-20">
                 <label class="cc-modal-form-label">
-                    Description de votre pratique <span style="color: var(--rouge-erreur);">*</span>
+                    Description de ta pratique <span style="color: var(--rouge-erreur);">*</span>
                 </label>
                 <textarea id="configDescription"
-                          placeholder="Decrivez votre approche pedagogique, vos principes d'evaluation, les objectifs vises..."
+                          placeholder="Decris ton approche pedagogique, tes principes d'evaluation, les objectifs vises..."
                           maxlength="500"
                           class="cc-modal-textarea" style="height: 120px;"></textarea>
                 <small style="color: var(--gris-leger); display: block; margin-top: 5px;">
@@ -993,7 +993,7 @@ function creerModalConfigComplete() {
 
             <div class="cc-modal-groupe-form u-mb-20">
                 <label class="cc-modal-form-label">
-                    Votre courriel <span style="color: var(--gris-leger); font-weight: normal;">(optionnel)</span>
+                    Ton courriel <span style="color: var(--gris-leger); font-weight: normal;">(optionnel)</span>
                 </label>
                 <input type="email"
                        id="configEmail"
@@ -1003,7 +1003,7 @@ function creerModalConfigComplete() {
 
             <div class="cc-modal-groupe-form" style="margin-bottom: 25px;">
                 <label class="cc-modal-form-label">
-                    Votre site web <span style="color: var(--gris-leger); font-weight: normal;">(optionnel)</span>
+                    Ton site web <span style="color: var(--gris-leger); font-weight: normal;">(optionnel)</span>
                 </label>
                 <input type="url"
                        id="configSite"
@@ -1017,8 +1017,8 @@ function creerModalConfigComplete() {
                     <span class="u-texte-09" style="line-height: 1.5;">
                         <strong>J'accepte de partager cette configuration sous licence CC BY-NC-SA 4.0</strong><br>
                         <small style="color: var(--gris-leger);">
-                            Cela signifie que d'autres enseignant-es pourront utiliser, modifier et partager votre travail,
-                            a condition de vous attribuer la paternite, de ne pas en faire usage commercial,
+                            Cela signifie que d'autres enseignant-es pourront utiliser, modifier et partager ton travail,
+                            a condition de t'attribuer la paternite, de ne pas en faire usage commercial,
                             et de partager sous la meme licence.
                         </small>
                     </span>
@@ -1081,10 +1081,10 @@ COMMENT UTILISER CETTE CONFIGURATION
 
 1. Téléchargez le fichier PRATIQUE-COMPLETE-xxx.json
 2. Dans l'application, allez dans Paramètres > Import/Export
-3. Cliquez sur "Importer une configuration complète"
-4. Sélectionnez le fichier téléchargé
+3. Clique sur "Importer une configuration complète"
+4. Sélectionne le fichier téléchargé
 5. L'application importera automatiquement toutes les ressources
-6. Vous pourrez ensuite modifier la configuration selon vos besoins
+6. Tu pourras ensuite modifier la configuration selon tes besoins
 
 -------------------------------------------
 BESOIN D'AIDE ?
@@ -1097,7 +1097,7 @@ Courriel : labo@codexnumeris.org
 ATTRIBUTION
 -------------------------------------------
 
-Si vous utilisez ou adaptez cette pratique, veuillez mentionner :
+Si tu utilises ou adaptes cette pratique, mentionne :
 "Basé sur la pratique de ${metadata.auteur} - ${metadata.nom}"
 
 -------------------------------------------
@@ -1108,16 +1108,16 @@ Cette configuration pédagogique est partagée sous licence
 Creative Commons Attribution - Pas d'utilisation commerciale
 - Partage dans les mêmes conditions 4.0 International.
 
-Vous êtes libre de :
+Tu es libre de :
 - Partager : copier et redistribuer le matériel
 - Adapter : remixer, transformer et créer à partir du matériel
 
 Selon les conditions suivantes :
-- Attribution : Vous devez créditer l'auteur original
-- Pas d'utilisation commerciale : Vous ne pouvez pas utiliser
+- Attribution : tu dois créditer l'auteur original
+- Pas d'utilisation commerciale : tu ne peux pas utiliser
   le matériel à des fins commerciales
-- Partage dans les mêmes conditions : Si vous modifiez ou créez
-  à partir du matériel, vous devez diffuser vos contributions
+- Partage dans les mêmes conditions : si tu modifies ou crées
+  à partir du matériel, tu dois diffuser tes contributions
   sous la même licence
 
 Plus d'informations : https://creativecommons.org/licenses/by-nc-sa/4.0/

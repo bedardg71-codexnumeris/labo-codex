@@ -481,7 +481,7 @@ function initialiserRegistrePratiques() {
     if (nbPratiques === 0) {
         console.warn(
             '⚠️ Aucune pratique enregistrée ! ' +
-            'Assurez-vous que les modules de pratiques sont chargés.'
+            'Assure-toi que les modules de pratiques sont chargés.'
         );
     } else {
         console.log(`✅ ${nbPratiques} pratique(s) disponible(s)`);

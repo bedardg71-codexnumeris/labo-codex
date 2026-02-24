@@ -107,7 +107,7 @@
 
         if (!pratiqueActive) {
             console.warn('⚠️ Aucune pratique configurée');
-            console.log('💡 Allez dans Réglages › Pratique de notation pour configurer');
+            console.log('💡 Va dans Réglages › Pratique de notation pour configurer');
             return;
         }
 
@@ -129,7 +129,7 @@
             console.log('═══════════════════════════════════════════════════════');
             console.log('✅ MIGRATION BETA 90 EFFECTUÉE');
             console.log('═══════════════════════════════════════════════════════');
-            console.log('Votre configuration a été mise à jour automatiquement.');
+            console.log('Ta configuration a été mise à jour automatiquement.');
             console.log('Les nouveaux IDs de pratiques sont maintenant utilisés.');
             console.log('═══════════════════════════════════════════════════════');
         }

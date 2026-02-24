@@ -133,7 +133,7 @@ const QUESTIONS_PRIMO = [
 
             return `Un profil enseignant est déjà configuré :\n\n` +
                    `• Nom : **${nom}**${courriel}\n\n` +
-                   `Souhaitez-vous utiliser ce profil pour ce groupe-cours ?`;
+                   `Souhaites-tu utiliser ce profil pour ce groupe-cours ?`;
         },
         type: 'radio',
         options: [
@@ -161,9 +161,9 @@ const QUESTIONS_PRIMO = [
         texte: function(reponses) {
             // Message d'accueil seulement si pas de profil existant
             if (!reponses['enseignant-config-existante']) {
-                return 'Bienvenue ! Ce guide va vous assister dans la configuration des paramètres de l\'application.\n\nQuel est votre nom ?';
+                return 'Bienvenue ! Ce guide va t\'assister dans la configuration des paramètres de l\'application.\n\nQuel est ton nom ?';
             }
-            return 'Quel est votre nom ?';
+            return 'Quel est ton nom ?';
         },
         type: 'text',
         placeholder: 'Ton prénom',
@@ -1699,7 +1699,7 @@ const QUESTIONS_PRIMO = [
     // M1b — Aucune pratique configurée → message d'orientation
     {
         id: 'materiel-pas-configure',
-        texte: 'Aucune pratique de notation n\'est configurée.\n\nPour créer du matériel pédagogique, configurez d\'abord votre pratique de notation via le **Module 4 : Créer ma pratique de notation** du tour guidé.\n\nVous pouvez fermer cette fenêtre et lancer le Module 4.',
+        texte: 'Aucune pratique de notation n\'est configurée.\n\nPour créer du matériel pédagogique, configure d\'abord ta pratique de notation via le **Module 4 : Créer ma pratique de notation** du tour guidé.\n\nTu peux fermer cette fenêtre et lancer le Module 4.',
         type: 'message',
         champsCibles: [],
         validation: { requis: false },
@@ -1740,7 +1740,7 @@ const QUESTIONS_PRIMO = [
     // M2 — Choix d'échelle de performance (PAN seulement)
     {
         id: 'materiel-echelle-choix',
-        texte: 'Quelle échelle de performance souhaitez-vous utiliser ?',
+        texte: 'Quelle échelle de performance souhaites-tu utiliser ?',
         type: 'radio',
         options: [
             {
@@ -1756,7 +1756,7 @@ const QUESTIONS_PRIMO = [
             {
                 value: 'personnaliser',
                 label: 'Personnaliser',
-                description: 'Créer une échelle sur mesure avec vos propres niveaux.'
+                description: 'Créer une échelle sur mesure avec tes propres niveaux.'
             }
         ],
         champsCibles: [],
@@ -1770,7 +1770,7 @@ const QUESTIONS_PRIMO = [
     // M2a — Nom personnalisé de l'échelle
     {
         id: 'materiel-echelle-nom',
-        texte: 'Comment souhaitez-vous appeler votre échelle ?',
+        texte: 'Comment souhaites-tu appeler ton échelle ?',
         type: 'text',
         placeholder: 'Ex: Mon échelle de performance',
         champsCibles: [],
@@ -1783,7 +1783,7 @@ const QUESTIONS_PRIMO = [
     // M2b — Nombre de niveaux
     {
         id: 'materiel-echelle-niveaux',
-        texte: 'Combien de niveaux comporte votre échelle ?',
+        texte: 'Combien de niveaux comporte ton échelle ?',
         type: 'number',
         placeholder: '4',
         champsCibles: [],
@@ -1826,7 +1826,7 @@ const QUESTIONS_PRIMO = [
         texte: function(reponses) {
             var nom = reponses['materiel-echelle-nom-cree'] || 'Échelle';
             var nb = reponses['materiel-echelle-nb-niveaux-crees'] || '4';
-            return '✅ Échelle **' + nom + '** créée avec ' + nb + ' niveaux.\n\nVous pourrez la modifier dans **Matériel → Échelles de performance**.';
+            return '✅ Échelle **' + nom + '** créée avec ' + nb + ' niveaux.\n\nTu pourras la modifier dans **Matériel → Échelles de performance**.';
         },
         type: 'instruction',
         champsCibles: [],
@@ -1839,7 +1839,7 @@ const QUESTIONS_PRIMO = [
     // M4 — Grille de critères
     {
         id: 'materiel-grille-choix',
-        texte: 'Souhaitez-vous créer une grille de critères d\'évaluation ?',
+        texte: 'Souhaites-tu créer une grille de critères d\'évaluation ?',
         type: 'radio',
         options: [
             {
@@ -1850,7 +1850,7 @@ const QUESTIONS_PRIMO = [
             {
                 value: 'personnaliser',
                 label: 'Personnaliser',
-                description: 'Définir vos propres critères d\'évaluation.'
+                description: 'Définir tes propres critères d\'évaluation.'
             },
             {
                 value: 'passer',
@@ -1868,7 +1868,7 @@ const QUESTIONS_PRIMO = [
     // M4a — Nombre de critères
     {
         id: 'materiel-grille-nb-criteres',
-        texte: 'Combien de critères d\'évaluation souhaitez-vous ?',
+        texte: 'Combien de critères d\'évaluation souhaites-tu ?',
         type: 'number',
         placeholder: '4',
         champsCibles: [],
@@ -1911,7 +1911,7 @@ const QUESTIONS_PRIMO = [
         texte: function(reponses) {
             var nom = reponses['materiel-grille-nom-cree'] || 'Grille';
             var nb = reponses['materiel-grille-nb-criteres-crees'] || '4';
-            return '✅ Grille **' + nom + '** créée avec ' + nb + ' critères.\n\nVous pourrez la modifier dans **Matériel → Grilles de critères**.';
+            return '✅ Grille **' + nom + '** créée avec ' + nb + ' critères.\n\nTu pourras la modifier dans **Matériel → Grilles de critères**.';
         },
         type: 'instruction',
         champsCibles: [],
@@ -1924,7 +1924,7 @@ const QUESTIONS_PRIMO = [
     // M5 — Production : titre
     {
         id: 'materiel-production-titre',
-        texte: 'Comment s\'appelle votre première évaluation ?',
+        texte: 'Comment s\'appelle ta première évaluation ?',
         type: 'text',
         placeholder: 'Ex: Examen mi-session, Analyse littéraire...',
         champsCibles: [],
@@ -1983,7 +1983,7 @@ const QUESTIONS_PRIMO = [
     // M6 — Cartouches de rétroaction (PAN + échelle + grille existent)
     {
         id: 'materiel-cartouches-choix',
-        texte: 'Souhaitez-vous préparer des modèles de rétroaction ?',
+        texte: 'Souhaites-tu préparer des modèles de rétroaction ?',
         type: 'radio',
         options: [
             {
@@ -1994,7 +1994,7 @@ const QUESTIONS_PRIMO = [
             {
                 value: 'non',
                 label: 'Plus tard',
-                description: 'Vous pourrez les créer plus tard dans Matériel → Cartouches.'
+                description: 'Tu pourras les créer plus tard dans Matériel → Cartouches.'
             }
         ],
         champsCibles: [],
@@ -2042,7 +2042,7 @@ const QUESTIONS_PRIMO = [
             if (!reponses['materiel-echelle-nom-cree'] && !reponses['materiel-grille-nom-cree'] && !reponses['materiel-production-titre']) {
                 resume += 'Aucun matériel créé lors de ce parcours.\n';
             }
-            resume += '\nVous pouvez modifier ce matériel dans la section **Matériel** de l\'application.';
+            resume += '\nTu peux modifier ce matériel dans la section **Matériel** de l\'application.';
             return resume;
         },
         type: 'message',

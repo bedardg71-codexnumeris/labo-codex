@@ -411,7 +411,7 @@ function retirerJetonReprise(evaluationId) {
         const noteReprise = evaluationReprise.noteFinale || 0;
 
         const garderReprise = confirm(
-            `Voulez-vous conserver la reprise et archiver l'originale ?\n\n` +
+            `Veux-tu conserver la reprise et archiver l'originale ?\n\n` +
             `• OK : La reprise (${noteReprise}%) devient l'évaluation principale, l'originale (${noteOriginale}%) est archivée\n` +
             `• Annuler : La reprise est supprimée, l'originale (${noteOriginale}%) est restaurée`
         );

@@ -1528,7 +1528,7 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
             ? obtenirEtudiantsCoursActif() : [];
         const dasGroupeActif = new Set(etudiantsGroupeActif.map(e => e.da));
         if (dasGroupeActif.size === 0) {
-            afficherMessageAttente(canvas, 'Aucun groupe actif', 'Sélectionnez un groupe pour voir les données.');
+            afficherMessageAttente(canvas, 'Aucun groupe actif', 'Sélectionne un groupe pour voir les données.');
             return null;
         }
         const etudiants = Array.from(etudiantsMap.values()).filter(e => dasGroupeActif.has(e.da));
@@ -2655,7 +2655,7 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
 
         if (productionsArtefacts.length === 0) {
             console.warn('Aucune production disponible pour le graphique spaghetti');
-            afficherMessageAttente(canvas, 'Aucun artefact défini', 'Créez des productions dans Réglages › Productions');
+            afficherMessageAttente(canvas, 'Aucun artefact défini', 'Crée des productions dans Réglages › Productions');
             return null;
         }
 
@@ -2721,7 +2721,7 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
 
         if (etudiants.length === 0) {
             console.warn('Aucun étudiant disponible');
-            afficherMessageAttente(canvas, 'Aucun étudiant', 'Ajoutez des étudiants dans Réglages › Groupe');
+            afficherMessageAttente(canvas, 'Aucun étudiant', 'Ajoute des étudiants dans Réglages › Groupe');
             return null;
         }
 

@@ -944,7 +944,7 @@ function ajouterFormulaireSeance() {
  */
 function supprimerFormulaireSeance(index) {
     if (seancesEnCours.length <= 1) {
-        alert('Vous devez conserver au moins une séance');
+        alert('Tu dois conserver au moins une séance');
         return;
     }
 
@@ -1323,7 +1323,7 @@ function sauvegarderEditionSeanceEnPlace(index) {
  * @param {number} index - Index de la séance à supprimer
  */
 function supprimerSeance(index) {
-    if (!confirm('Voulez-vous vraiment supprimer cette séance ?')) {
+    if (!confirm('Veux-tu vraiment supprimer cette séance ?')) {
         return;
     }
 
@@ -1557,7 +1557,7 @@ function nettoyerDoublons() {
     const confirmation = confirm(
         `${doublonsTrouves.length} doublon(s) détecté(s):\n` +
         `${doublonsTrouves.join('\n')}\n\n` +
-        `Voulez-vous les supprimer ?`
+        `Veux-tu les supprimer ?`
     );
 
     if (!confirmation) {

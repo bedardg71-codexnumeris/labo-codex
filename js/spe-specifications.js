@@ -121,7 +121,7 @@
         gabaritType: 'SPE',
         pratiques: ['SPE'],
         description: 'Gabarit SPE : Production de type "Prise de position" pour notation par spécifications. L\'étudiant prend position sur un enjeu lié à son domaine.',
-        consignes: 'Prenez position de façon éclairée par rapport à un enjeu scientifique ou technologique qui traverse un métier qui vous intéresse.',
+        consignes: 'Prends position de façon éclairée par rapport à un enjeu scientifique ou technologique qui traverse un métier qui t\'intéresse.',
         ponderation: 0,
         dateCreation: '2026-01-02T00:00:00.000Z',
         auteur: 'François A.-H. (adapté)',
@@ -619,7 +619,7 @@
                     Spécifications à vérifier
                 </h5>
                 <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 15px;">
-                    Cochez chaque spécification respectée. Le travail est <strong>Acceptable</strong>
+                    Coche chaque spécification respectée. Le travail est <strong>Acceptable</strong>
                     uniquement si TOUTES les spécifications sont cochées.
                 </p>
         `;
@@ -934,7 +934,7 @@ La structure est claire (intro, développement, conclusion)"></textarea>
         }
 
         fermerModalGrilleSPE();
-        alert(`Grille "${nom}" créée avec succès !\n\n${specs.length} spécification(s) ajoutée(s).\n\nVous pouvez maintenant l'utiliser pour évaluer vos productions.`);
+        alert(`Grille "${nom}" créée avec succès !\n\n${specs.length} spécification(s) ajoutée(s).\n\nTu peux maintenant l'utiliser pour évaluer tes productions.`);
 
         console.log('[spe-specifications] Grille créée:', nouvelleGrille);
     }

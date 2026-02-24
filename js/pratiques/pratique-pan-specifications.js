@@ -670,7 +670,7 @@ class PratiquePanSpecifications {
     if (typeof window.enregistrerPratique !== 'function') {
         console.error(
             '[SPEC] Impossible d\'enregistrer PratiquePanSpecifications : ' +
-            'Assurez-vous de charger pratique-registre.js avant pratique-pan-specifications.js'
+            'Assure-toi de charger pratique-registre.js avant pratique-pan-specifications.js'
         );
         return;
     }

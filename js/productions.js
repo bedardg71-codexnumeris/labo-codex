@@ -715,7 +715,7 @@ async function modifierProduction(id) {
  * 6. Met à jour les pondérations
  */
 async function supprimerProduction(id) {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cette production ?')) {
+    if (confirm('Es-tu sûr de vouloir supprimer cette production ?')) {
         let evaluations = await db.get(getCleProductions()) || [];
         evaluations = evaluations.filter(e => e.id !== id);
 
@@ -1263,7 +1263,7 @@ async function afficherToutesLesProductionsParType() {
         container.innerHTML = `
             <div class="production-vide">
                 <p>Aucune production définie</p>
-                <small>Ajoutez une production en utilisant les boutons ci-dessous</small>
+                <small>Ajoute une production en utilisant les boutons ci-dessous</small>
             </div>
         `;
         return;
@@ -1596,7 +1596,7 @@ async function preparerDonneesBibliothequeProductions() {
                 classeItem: 'production-disponible-item',
                 dataAttrs: `data-discipline="${prod.discipline || 'Autres'}"`,
                 boutons: [
-                    { label: 'Ajouter à ma sélection', onclick: `ajouterProductionIndividuelle('${prod.id}')`, classe: 'btn-confirmer', title: 'Ajouter cette production à votre sélection' },
+                    { label: 'Ajouter à ma sélection', onclick: `ajouterProductionIndividuelle('${prod.id}')`, classe: 'btn-confirmer', title: 'Ajouter cette production à ta sélection' },
                     { label: 'Supprimer', onclick: `supprimerProductionDeBibliothequePartagee('${prod.id}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true }
                 ],
                 groupe: discipline
@@ -1694,7 +1694,7 @@ async function afficherBibliothequeProductions() {
         sousTitre: 'Gérez les productions affichées dans la barre latérale.',
         onFermer: 'fermerModalBibliothequeProductions',
         doublonsHTML: BibliothequeUI.renderAvertissementDoublons(data.doublonsDetectes),
-        titreSection1: `Productions dans votre sélection (${data.nombreSelection})`,
+        titreSection1: `Productions dans ta sélection (${data.nombreSelection})`,
         contenuSection1: contenuSection1,
         boutonsApresSection1: boutonsApresSection1,
         sectionImportTrimestre: sectionImportTrimestre,
@@ -1750,7 +1750,7 @@ async function ajouterProductionIndividuelle(id) {
         await afficherListeProductions();
         await afficherBibliothequeProductions();
 
-        alert(`✅ "${prod.titre}" ajoutée à votre cours !`);
+        alert(`✅ "${prod.titre}" ajoutée à ton cours !`);
     } catch (error) {
         console.error('Erreur lors de l\'ajout:', error);
         alert('Erreur lors de l\'ajout de la production');
@@ -1767,14 +1767,14 @@ async function ajouterMesProductionsALaBibliotheque() {
         const productions = await db.get(getCleProductions()) || [];
 
         if (productions.length === 0) {
-            alert('Aucune production à ajouter.\n\nCréez d\'abord des productions dans votre cours actuel.');
+            alert('Aucune production à ajouter.\n\nCrée d\'abord des productions dans ton cours actuel.');
             return;
         }
 
         // Confirmer avec l'utilisateur
         const confirmation = confirm(
-            `Voulez-vous ajouter vos ${productions.length} production(s) à la bibliothèque partagée ?\n\n` +
-            `Elles seront disponibles dans tous vos trimestres et pourront être partagées avec des collègues.`
+            `Veux-tu ajouter tes ${productions.length} production(s) à la bibliothèque partagée ?\n\n` +
+            `Elles seront disponibles dans tous tes trimestres et pourront être partagées avec des collègues.`
         );
 
         if (!confirmation) {
@@ -1793,7 +1793,7 @@ async function ajouterMesProductionsALaBibliotheque() {
             alert(`✅ ${resultat.ajoutees} production(s) ajoutée(s) à la bibliothèque !\n\n` +
                   (resultat.existantes > 0 ? `${resultat.existantes} étai(en)t déjà présente(s).` : ''));
         } else {
-            alert(`Toutes vos productions étaient déjà dans la bibliothèque.`);
+            alert(`Toutes tes productions étaient déjà dans la bibliothèque.`);
         }
     } catch (error) {
         console.error('Erreur lors de l\'ajout à la bibliothèque:', error);
@@ -1933,7 +1933,7 @@ async function importerToutTrimestreModal() {
 
     const coursLabel = coursFiltre ? ` du cours sélectionné` : '';
     const confirmation = confirm(
-        `Voulez-vous importer les ${productions.length} production(s)${coursLabel} de ${nomTrimestre} dans la bibliothèque partagée ?`
+        `Veux-tu importer les ${productions.length} production(s)${coursLabel} de ${nomTrimestre} dans la bibliothèque partagée ?`
     );
 
     if (!confirmation) return;
@@ -2016,7 +2016,7 @@ async function partagerProduction(id) {
  * Retire une production de la bibliothèque (soft delete)
  */
 async function retirerProductionDeBibliotheque(id) {
-    if (!confirm('Retirer cette production de votre sélection ?\n\nElle ne sera plus affichée dans la barre latérale mais restera disponible dans le gestionnaire.')) {
+    if (!confirm('Retirer cette production de ta sélection ?\n\nElle ne sera plus affichée dans la barre latérale mais restera disponible dans le gestionnaire.')) {
         return;
     }
 
@@ -2360,9 +2360,9 @@ async function exporterProductionActive() {
     if (production.metadata_cc) {
         // Demander le nom de l'utilisateur s'il modifie le matériel
         const nomUtilisateur = prompt(
-            'Vous allez exporter un matériel créé par ' + production.metadata_cc.auteur_original + '.\n\n' +
-            'Entrez votre nom pour être crédité comme contributeur :\n' +
-            '(Laissez vide si vous n\'avez fait aucune modification)'
+            'Tu vas exporter un matériel créé par ' + production.metadata_cc.auteur_original + '.\n\n' +
+            'Entre ton nom pour être crédité comme contributeur :\n' +
+            '(Laisse vide si tu n\'as fait aucune modification)'
         );
 
         if (nomUtilisateur && nomUtilisateur.trim()) {
@@ -2469,7 +2469,7 @@ async function importerDansProductionActive(event) {
             const confirmation = confirm(
                 messageConfirmation +
                 `⚠️ ATTENTION: Cette action va remplacer la production actuelle.\n\n` +
-                `Voulez-vous continuer ?`
+                `Veux-tu continuer ?`
             );
 
             if (!confirmation) {
@@ -2520,7 +2520,7 @@ async function importerDansProductionActive(event) {
 
         } catch (error) {
             console.error('Erreur lors de l\'import:', error);
-            alert('Erreur lors de la lecture du fichier JSON. Assurez-vous qu\'il s\'agit d\'un fichier valide.');
+            alert('Erreur lors de la lecture du fichier JSON. Assure-toi qu\'il s\'agit d\'un fichier valide.');
         } finally {
             event.target.value = ''; // Reset input
         }
@@ -2562,7 +2562,7 @@ function importerProductions(event) {
                 '<div style="margin-bottom: 15px;">' + genererBadgeCC(donnees.metadata) + '</div>' :
                 '';
 
-            message += '<p><strong>Voulez-vous importer ces productions ?</strong></p>';
+            message += '<p><strong>Veux-tu importer ces productions ?</strong></p>';
 
             // Créer modal avec badge CC
             // z-index: 10001 pour passer au-dessus des modaux de bibliothèque (10000)
@@ -2647,9 +2647,9 @@ window.confirmerImportProductions = async function(donnees) {
         if (grillesManquantes.length > 0) {
             const nbGrillesManquantes = grillesManquantes.length;
             const message = `⚠️ Attention : ${nbGrillesManquantes} grille(s) de critères manquante(s)\n\n` +
-                `Les productions importées font référence à des grilles qui n'existent pas encore dans votre système.\n\n` +
+                `Les productions importées font référence à des grilles qui n'existent pas encore dans ton système.\n\n` +
                 `Grilles manquantes :\n${grillesManquantes.map(id => `  • ${id}`).join('\n')}\n\n` +
-                `Vous pouvez continuer l'import, mais ces productions ne fonctionneront correctement qu'après avoir importé les grilles manquantes.\n\n` +
+                `Tu peux continuer l'import, mais ces productions ne fonctionneront correctement qu'après avoir importé les grilles manquantes.\n\n` +
                 `Continuer quand même ?`;
 
             if (!confirm(message)) {
@@ -2693,7 +2693,7 @@ window.confirmerImportProductions = async function(donnees) {
         let message = `✅ Import réussi !\n\n`;
         if (nbAjoutees > 0) message += `${nbAjoutees} nouvelle(s) production(s) ajoutée(s).\n`;
         if (nbMisesAJour > 0) message += `${nbMisesAJour} production(s) mise(s) à jour.\n`;
-        message += `\nConsultez "Productions disponibles" pour les ajouter à votre barre latérale.`;
+        message += `\nConsulte "Productions disponibles" pour les ajouter à ta barre latérale.`;
         alert(message);
         console.log('✅ Productions importées:', productionsImportees.length);
 
@@ -3052,7 +3052,7 @@ async function afficherListeProductions(filtreType = '') {
     // car il est maintenant dans le HTML (comme pour Cours, Grilles, etc.)
 
     if (productionsFiltrees.length === 0) {
-        container.innerHTML = '<p class="text-muted text-italic" style="font-size: 0.9rem; text-align: center; padding: 20px 10px;">Créez une nouvelle production ou puisez dans la bibliothèque</p>';
+        container.innerHTML = '<p class="text-muted text-italic" style="font-size: 0.9rem; text-align: center; padding: 20px 10px;">Crée une nouvelle production ou puise dans la bibliothèque</p>';
         return;
     }
 
@@ -3399,7 +3399,7 @@ async function supprimerProductionActive() {
         return;
     }
 
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cette production ?')) {
+    if (!confirm('Es-tu sûr de vouloir supprimer cette production ?')) {
         return;
     }
 

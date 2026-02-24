@@ -817,7 +817,7 @@ async function reconstruireSnapshotsHistoriques() {
             return {
                 succes: false,
                 nbSnapshots: 0,
-                message: 'Aucune séance configurée. Configurez d\'abord l\'horaire du groupe dans Réglages → Horaire.'
+                message: 'Aucune séance configurée. Configure d\'abord l\'horaire du groupe dans Réglages → Horaire.'
             };
         }
 
@@ -1048,7 +1048,7 @@ function afficherStatutSnapshots() {
         if (nbHebdo === 0 && nbInterventions === 0) {
             elemStatus.innerHTML = `
                 <p style="color: #ff9800;">
-                    ⚠️ Aucune capture disponible. Utilisez la reconstruction rétroactive pour créer des captures historiques,
+                    ⚠️ Aucune capture disponible. Utilise la reconstruction rétroactive pour créer des captures historiques,
                     ou attendez la prochaine capture hebdomadaire automatique.
                 </p>
             `;
@@ -1069,7 +1069,7 @@ async function capturerSnapshotManuel() {
     try {
         const semaine = obtenirNumeroSemaineActuelle();
         if (!semaine) {
-            alert('Impossible de déterminer la semaine actuelle. Vérifiez la configuration du trimestre.');
+            alert('Impossible de déterminer la semaine actuelle. Vérifie la configuration du trimestre.');
             return;
         }
 
@@ -1120,15 +1120,15 @@ function confirmerNettoyageSnapshots() {
         'Cette action va supprimer TOUTES les captures enregistrées (hebdomadaires et interventions).\n\n' +
         'Les graphiques de progression seront vides après cette opération.\n\n' +
         'Cette action est IRRÉVERSIBLE.\n\n' +
-        'Voulez-vous vraiment continuer?'
+        'Veux-tu vraiment continuer?'
     );
 
     if (!confirmation1) return;
 
     const confirmation2 = confirm(
         'Confirmation finale\n\n' +
-        'Êtes-vous absolument certain de vouloir supprimer toutes les captures?\n\n' +
-        'Cliquez sur OK pour confirmer la suppression.'
+        'Es-tu absolument certain de vouloir supprimer toutes les captures?\n\n' +
+        'Clique sur OK pour confirmer la suppression.'
     );
 
     if (!confirmation2) return;

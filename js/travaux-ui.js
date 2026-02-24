@@ -365,21 +365,21 @@
                     <div class="zero-state-etape">
                         <span class="etape-numero">1</span>
                         <div>
-                            <strong>Déposez vos fichiers</strong>
-                            <small>Glissez des PDF ou images dans la zone ci-dessous</small>
+                            <strong>Dépose tes fichiers</strong>
+                            <small>Glisse des PDF ou images dans la zone ci-dessous</small>
                         </div>
                     </div>
                     <div class="zero-state-etape">
                         <span class="etape-numero">2</span>
                         <div>
-                            <strong>Traitez et identifiez</strong>
+                            <strong>Traite et identifie</strong>
                             <small>Le pipeline optimise et associe automatiquement</small>
                         </div>
                     </div>
                     <div class="zero-state-etape">
                         <span class="etape-numero">3</span>
                         <div>
-                            <strong>Importez et annotez</strong>
+                            <strong>Importe et annote</strong>
                             <small>Les fichiers sont stockés et prêts à annoter</small>
                         </div>
                     </div>
@@ -423,8 +423,8 @@
                         <div id="travaux-drop-zone" class="travaux-drop-zone">
                             <div class="travaux-drop-zone-contenu">
                                 <div class="travaux-drop-zone-icone">&#x1F4C1;</div>
-                                <p>Glissez vos fichiers ici</p>
-                                <p class="texte-muted">PDF, JPEG, PNG, HEIC — ou cliquez pour parcourir</p>
+                                <p>Glisse tes fichiers ici</p>
+                                <p class="texte-muted">PDF, JPEG, PNG, HEIC — ou clique pour parcourir</p>
                             </div>
                         </div>
                     </div>
@@ -488,7 +488,7 @@
                     <div class="travaux-drop-zone-contenu">
                         <div class="travaux-drop-zone-icone">&#x270F;</div>
                         <p>Éditer un document</p>
-                        <p class="texte-muted">Glissez un badge importé ici pour réordonner, supprimer ou ajouter des pages</p>
+                        <p class="texte-muted">Glisse un badge importé ici pour réordonner, supprimer ou ajouter des pages</p>
                     </div>
                 </div>
                 ` : ''}
@@ -530,7 +530,7 @@
             conteneur.innerHTML = `
                 <div class="conteneur">
                     <h2>Annoter et évaluer</h2>
-                    <p class="text-muted">Aucun fichier importé. Importez des travaux depuis l'onglet « Préparer et importer ».</p>
+                    <p class="text-muted">Aucun fichier importé. Importe des travaux depuis l'onglet « Préparer et importer ».</p>
                 </div>`;
             return;
         }
@@ -600,7 +600,7 @@
                             <canvas id="travaux-canvas-annotation" class="u-hide" style="pointer-events:none;"></canvas>
                         </div>
                         <div id="travaux-placeholder-visionneuse" class="travaux-placeholder">
-                            <p>Cliquez sur un fichier ci-dessus pour l'ouvrir</p>
+                            <p>Clique sur un fichier ci-dessus pour l'ouvrir</p>
                         </div>
                     </div>
 
@@ -1131,7 +1131,7 @@
             // Placeholder
             colCentre += `<div class="pipeline-preview-placeholder">
                 <span style="font-size:2rem;opacity:0.3;">&#x1F5BC;</span>
-                <p class="texte-muted">Cliquez sur un fichier \u00e0 gauche pour le pr\u00e9visualiser</p>
+                <p class="texte-muted">Clique sur un fichier \u00e0 gauche pour le pr\u00e9visualiser</p>
             </div>`;
         }
         colCentre += '</div>'; // fin pipeline-centre-preview
@@ -2075,7 +2075,7 @@
     function lancerArchivageEtudiant() {
         const da = document.getElementById('travaux-archivage-etudiant')?.value;
         if (!da) {
-            alert('Sélectionnez un étudiant');
+            alert('Sélectionne un étudiant');
             return;
         }
 
@@ -2205,7 +2205,7 @@
         const confirmation = confirm(
             `Supprimer les ${anciens.length} fichiers les plus anciens ?\n` +
             `Cela liberera environ ${travauxStockage.formaterTaille(tailleLiberee)}.\n\n` +
-            `Assurez-vous d'avoir archive ces fichiers avant de les supprimer.`
+            `Assure-toi d'avoir archivé ces fichiers avant de les supprimer.`
         );
 
         if (!confirmation) return;
@@ -2242,7 +2242,7 @@
         if (evalAssociee) {
             const choix = confirm(
                 'Ce fichier a une évaluation associée (' + (evalAssociee.noteFinale || evalAssociee.note || '--') + '%).\n\n' +
-                'Voulez-vous supprimer le fichier ET l\'évaluation ?\n\n' +
+                'Veux-tu supprimer le fichier ET l\'évaluation ?\n\n' +
                 '(OK = supprimer les deux, Annuler = ne rien supprimer)'
             );
             if (!choix) return;
@@ -2309,7 +2309,7 @@
         if (sansBlob.length > 0) {
             afficherModalePipeline('Fichiers expirés',
                 `<p>${sansBlob.length} fichier(s) ne sont plus disponibles en mémoire (la page a été rechargée).</p>
-                <p>Veuillez vider la file et re-déposer vos fichiers.</p>`,
+                <p>Vide la file et re-dépose tes fichiers.</p>`,
                 [{ label: 'Vider la file', classe: 'btn-principal', action: () => {
                     travauxImport.viderFileDAttente();
                     afficherImport();
@@ -2443,7 +2443,7 @@
      * @param {Array} doublons - Groupes de doublons detectes
      */
     function afficherModaleDoublonsEtImporter(queue, doublons) {
-        let html = '<div class="modal-section"><p>Cochez les fichiers à supprimer :</p>';
+        let html = '<div class="modal-section"><p>Coche les fichiers à supprimer :</p>';
         doublons.forEach(({ cle: cleGroupe, fichiers }) => {
             html += `<div class="pipeline-doublon-groupe"><strong>${echapperHtml(cleGroupe)}</strong>`;
             fichiers.forEach((f) => {
@@ -4505,7 +4505,7 @@
                 </div>
 
                 <div class="transfert-avertissement">
-                    Le lien avec la production sera effacé. Vous pourrez réassigner les fichiers dans le groupe cible.
+                    Le lien avec la production sera effacé. Tu pourras réassigner les fichiers dans le groupe cible.
                     ${hasAnnotations ? '<br>Les annotations seront conservées.' : ''}
                 </div>
 

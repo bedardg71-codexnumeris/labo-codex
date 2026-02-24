@@ -1206,7 +1206,7 @@ function initialiserSaisiePresences() {
     if (!dateInput || !dateInput.value) {
         const tbody = document.getElementById('tbody-saisie-presences');
         if (tbody) {
-            tbody.innerHTML = '<tr><td colspan="8" class="u-text-center">Sélectionnez une date</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="u-text-center">Sélectionne une date</td></tr>';
         }
         return;
     }
@@ -1219,7 +1219,7 @@ function initialiserSaisiePresences() {
         switch (validation.raison) {
             case 'vide':
                 messageTableau = 'Veuillez sélectionner une date';
-                messageCompteur = 'Sélectionnez une date';
+                messageCompteur = 'Sélectionne une date';
                 break;
             case 'pas-cours':
                 messageTableau = ''; // Message affiché uniquement dans la carte de statistiques
@@ -2254,7 +2254,7 @@ function filtrerTableauPresences() {
     const lignes = tbody.getElementsByTagName('tr');
 
     for (let ligne of lignes) {
-        // Ne pas filtrer la ligne de message "Sélectionnez une date"
+        // Ne pas filtrer la ligne de message "Sélectionne une date"
         if (ligne.cells.length < 3) {
             continue;
         }

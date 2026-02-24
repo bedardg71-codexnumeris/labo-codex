@@ -157,7 +157,7 @@
         if (!container) return;
 
         if (!type) {
-            container.innerHTML = '<p class="text-muted text-center" style="padding: 30px;">Sélectionnez un type de ressource ci-dessus pour afficher la liste.</p>';
+            container.innerHTML = '<p class="text-muted text-center" style="padding: 30px;">Sélectionne un type de ressource ci-dessus pour afficher la liste.</p>';
             return;
         }
 
