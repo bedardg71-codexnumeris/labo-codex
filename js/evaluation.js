@@ -4869,8 +4869,8 @@ function sauvegarderEvaluationModifiee() {
         return;
     }
 
-    // CORRECTION: Utiliser obtenirDonneesSelonMode au lieu de localStorage direct
-    let evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
+    // CORRECTION: Lire TOUTES les évaluations (pas seulement celles du cours actif)
+    let evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
     const indexEval = evaluations.findIndex(e => e.id === evaluationId);
 
     if (indexEval === -1) {
@@ -5527,8 +5527,8 @@ function appliquerJetonRepriseDepuisSidebar() {
  * @param {string} evaluationId - ID de l'évaluation
  */
 function basculerVerrouillageEvaluation(evaluationId) {
-    // Utiliser obtenirDonneesSelonMode au lieu de localStorage direct
-    let evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
+    // CORRECTION: Lire TOUTES les évaluations (pas seulement celles du cours actif)
+    let evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
     const index = evaluations.findIndex(e => e.id === evaluationId);
 
     if (index === -1) {

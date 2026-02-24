@@ -533,9 +533,6 @@ function afficherSousSection(idSousSection) {
             if (typeof initialiserModuleTravaux === 'function') {
                 setTimeout(() => {
                     initialiserModuleTravaux();
-                    if (typeof travauxUI !== 'undefined') {
-                        travauxUI.afficherFichiers();
-                    }
                 }, 100);
             }
             break;

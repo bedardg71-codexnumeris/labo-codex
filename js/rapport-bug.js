@@ -467,7 +467,7 @@ function obtenirContexteSection() {
                 break;
 
             case 'evaluations':
-                contexte.nbEvaluations = (db.getSync('evaluationsSauvegardees', []) || []).length;
+                contexte.nbEvaluations = (db.getSync(cle('evaluationsSauvegardees'), []) || []).length;
                 contexte.pratiqueActive = db.getSync('modalitesEvaluation', {})?.pratique || 'non définie';
                 break;
 

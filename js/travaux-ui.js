@@ -567,6 +567,7 @@
                                 <button id="travaux-btn-badge-prec" class="travaux-btn-nav" onclick="travauxUI.badgePrecedent()" disabled title="Fichier précédent">&#x2190;</button>
                                 <span id="travaux-compteur-badge" class="travaux-compteur-badge">-- / --</span>
                                 <button id="travaux-btn-badge-suiv" class="travaux-btn-nav" onclick="travauxUI.badgeSuivant()" disabled title="Fichier suivant">&#x2192;</button>
+                                <span id="travaux-badge-fichier-actif" class="u-hide" style="margin-left: 8px;"></span>
                                 <span class="travaux-separateur-page"></span>
                                 <button id="travaux-btn-page-prec" class="travaux-btn-nav" onclick="travauxVisionneuse.pagePrecedente()" disabled title="Page précédente">&#x2190;</button>
                                 <span id="travaux-indicateur-page">-- / --</span>
@@ -1560,6 +1561,10 @@
             statutClasse = 'evalue';
         }
 
+        if (!evaluation && statutClasse === 'annote') {
+            console.warn(`[Badge] Pas d'évaluation trouvée pour ${f.etudiantDA}/${f.productionId}. Total évaluations lues: ${evaluations.length}`);
+        }
+
         const verrou = (evaluation && evaluation.verrouillee)
             ? '<span class="travaux-badge-verrou" title="Évaluation verrouillée">\u{1F512}</span>'
             : '';
@@ -2001,6 +2006,36 @@
                 }
             }
 
+            // Restaurer le badge étudiant dans la toolbar
+            const badgeFichier = document.getElementById('travaux-badge-fichier-actif');
+            if (badgeFichier && fichierOuvert) {
+                badgeFichier.innerHTML = genererBadgeFichierImporte(fichierOuvert, 'ouvrirFichier');
+                badgeFichier.classList.remove('u-hide');
+                // Adapter la pill : "EN COURS" ou "ÉVALUÉ"
+                const pillToolbar = badgeFichier.querySelector('.travaux-badge-pill');
+                if (pillToolbar) {
+                    if (pillToolbar.classList.contains('evalue')) {
+                        pillToolbar.textContent = 'ÉVALUÉ';
+                        pillToolbar.className = 'travaux-badge-pill evalue';
+                    } else {
+                        pillToolbar.textContent = 'EN COURS';
+                        pillToolbar.className = 'travaux-badge-pill en-cours';
+                    }
+                }
+                // Clic → scroll vers le badge dans la grille
+                const badgeCopie = badgeFichier.querySelector('.travaux-badge-importe');
+                if (badgeCopie) {
+                    badgeCopie.style.cursor = 'pointer';
+                    badgeCopie.onclick = function(e) {
+                        e.stopPropagation();
+                        const original = document.querySelector(`.travaux-badges-liste .travaux-badge-importe[data-fichier-id="${fichierOuvert.id}"]`);
+                        if (original) original.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    };
+                }
+                // Retirer le bouton supprimer du badge toolbar
+                const btnSupp = badgeFichier.querySelector('.travaux-badge-supprimer');
+                if (btnSupp) btnSupp.remove();
+            }
 
             // Mettre à jour la pill statut dans la palette Paramètres
             if (fichierOuvert && typeof mettreAJourPillStatut === 'function') {
