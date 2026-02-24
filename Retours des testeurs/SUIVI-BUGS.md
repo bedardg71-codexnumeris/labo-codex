@@ -1,7 +1,7 @@
 # Suivi des bugs testeurs
 
 > **Objectif** : Tracker les bugs rapportés par les testeurs pour éviter le travail en double.
-> **Dernière mise à jour** : 16 février 2026 (Build 0216-0950)
+> **Dernière mise à jour** : 24 février 2026
 
 ---
 
@@ -9,6 +9,17 @@
 
 | # | Testeur | Date | Description | Priorité | Fichier(s) concerné(s) |
 |---|---------|------|-------------|----------|------------------------|
+
+---
+
+## Corrigés (24 février 2026)
+
+| # | Testeur | Date rapport | Corrigé | Description | Correction |
+|---|---------|--------------|---------|-------------|------------|
+| 69 | Grégoire | 24 fév | 24 fév | Statuts « Évalué » perdus après navigation Tableau de bord → retour | Namespace manquant `cle()` dans rapport-bug.js ; appel redondant `afficherFichiers()` retiré de navigation.js ; diagnostic console.warn ajouté |
+| 70 | Grégoire | 24 fév | 24 fév | Badge étudiant disparu de la toolbar visionneuse | Restauration du `<span#travaux-badge-fichier-actif>` dans la toolbar HTML + peuplement dans `ouvrirFichier()` (travaux-ui.js) |
+| 71 | Grégoire | 24 fév | 24 fév | Perte silencieuse de données inter-cours (modifier/verrouiller/supprimer) | 4 fonctions utilisaient `obtenirDonneesSelonMode` (filtré par cours) avant sauvegarde → écrasait les évaluations des autres cours. Remplacé par `db.getSync(cle(...))` dans evaluation.js et liste-evaluations.js |
+| 72 | Grégoire | 24 fév | 24 fév | Badge « EN COURS » au lieu de « ÉVALUÉ » + cadenas 🔒 manquant | Fichiers importés sans `productionId` ne matchaient pas les évaluations (correspondance exacte `''` vs `'artefact1'`). Recherche assouplie : si fichier sans productionId, accepter toute évaluation pour l'étudiant. Cadenas ajouté sur badges après auto-verrouillage dans `sauvegarderEvaluationModifiee()` |
 
 ---
 
@@ -64,9 +75,8 @@
 
 ### Pour ajouter un bug
 1. Créer une entrée dans la section "Ouverts"
-2. Assigner un numéro séquentiel (prochain : **#69**)
+2. Assigner un numéro séquentiel (prochain : **#73**)
 3. Documenter dans le sous-dossier du testeur si fichiers/screenshots fournis
-4. Prochain numéro : **#68**
 
 ### Pour marquer comme corrigé
 1. Déplacer la ligne vers "Corrigés"

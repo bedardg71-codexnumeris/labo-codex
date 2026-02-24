@@ -552,6 +552,13 @@
             if (OUTILS[id].epaisseurDefaut) {
                 epaisseurActive = OUTILS[id].epaisseurDefaut;
             }
+            // Mettre a jour le slider min/max selon l'outil
+            const slider = document.querySelector('.travaux-slider-epaisseur');
+            if (slider && OUTILS[id].epaisseurMin !== undefined) {
+                slider.min = OUTILS[id].epaisseurMin;
+                slider.max = OUTILS[id].epaisseurMax;
+                slider.value = epaisseurActive;
+            }
             // Feedback visuel sur la palette tampons (symboles crochet/croix/interrogation)
             const items = document.querySelectorAll('#travaux-palette-tampons .travaux-autocollant-item');
             items.forEach(item => item.classList.remove('actif'));
@@ -611,7 +618,7 @@
         if (!apercu) return;
         const outil = getOutilActif();
         const couleur = getCouleurActive();
-        const epaisseur = Math.max(1, Math.min(epaisseurActive, 20));
+        const epaisseur = Math.max(outil.epaisseurMin || 1, Math.min(epaisseurActive, outil.epaisseurMax || 20));
         const opacite = outil.opacite || 1.0;
         apercu.innerHTML = '';
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -753,9 +760,12 @@
         html += '</div></div>';
 
         // Epaisseur (slider + affichage pixels)
+        const outilInit = getOutilActif();
+        const minEp = outilInit.epaisseurMin || 1;
+        const maxEp = outilInit.epaisseurMax || 20;
         html += '<div class="travaux-palette-section">';
         html += '<div class="travaux-palette-label">Epaisseur <span id="travaux-epaisseur-px" class="travaux-epaisseur-px">' + getEpaisseurReellePixels() + 'px</span></div>';
-        html += `<input type="range" class="travaux-slider-epaisseur" min="1" max="20" value="${epaisseurActive}" oninput="travauxOutils.setEpaisseurActive(parseInt(this.value))">`;
+        html += `<input type="range" class="travaux-slider-epaisseur" min="${minEp}" max="${maxEp}" value="${epaisseurActive}" oninput="travauxOutils.setEpaisseurActive(parseInt(this.value))">`;
         html += '<div class="travaux-apercu-trait" id="travaux-apercu-trait"></div>';
         html += '</div>';
 
