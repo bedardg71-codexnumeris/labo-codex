@@ -221,7 +221,9 @@
         }
 
         const zip = new JSZip();
-        const fichiers = travauxStockage.obtenirFichiersProduction(productionId);
+        // 🔧 FIX (24 fév 2026) : Utiliser les fichiers du groupe actif, pas par productionId du fichier
+        // Les fichiers importés sans production ont productionId='', mais l'évaluation a le bon productionId
+        const fichiers = travauxStockage.obtenirFichiersGroupeActif();
         const etudiants = obtenirDonneesSelonMode(cle('groupeEtudiants'));
         const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees'));
         const productions = obtenirDonneesSelonMode(cle('productions'));
@@ -234,9 +236,10 @@
         const total = fichiers.length;
 
         for (const fichier of fichiers) {
+            // Chercher l'évaluation par etudiantDA + productionId sélectionnée (pas celui du fichier)
             const evaluation = evaluations.find(e =>
                 e.etudiantDA === fichier.etudiantDA &&
-                e.productionId === fichier.productionId
+                e.productionId === productionId
             );
             if (!evaluation) {
                 traites++;
