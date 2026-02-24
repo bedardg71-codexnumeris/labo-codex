@@ -12145,8 +12145,48 @@
                     <h2>Notes de version</h2>
                     <p class="text-muted">Historique des changements majeurs</p>
 
+                    <!-- Beta 97.13 - Validation et humanisation de l'onglet Aide -->
+                    <div class="carte accordeon ouvert" id="accordeon-apropos-beta9713-aide">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">&#x25BC;</span> Beta 97.13 &mdash; Validation et humanisation de l'onglet Aide
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu" style="display: block;">
+                        <p class="text-muted">24 f&eacute;vrier 2026</p>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Nettoyage</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Disclaimer IA retir&eacute;</strong> : L'avertissement &laquo;&nbsp;g&eacute;n&eacute;r&eacute; par IA&nbsp;&raquo; est supprim&eacute;.</li>
+                            <li><strong>Tutoiement harmonis&eacute;</strong> : 11 instances de vouvoiement corrig&eacute;es vers le tutoiement coh&eacute;rent.</li>
+                            <li><strong>Mentions &laquo;&nbsp;&agrave; venir&nbsp;&raquo;</strong> : Import CSV mis &agrave; jour (fonctionnalit&eacute; existante), filtres RàI et export auto reformul&eacute;s.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Titres actionnables</h4>
+                        <ul class="modal-liste">
+                            <li><strong>10 accord&eacute;ons renomm&eacute;s</strong> : Titres descriptifs recadr&eacute;s en format actionnable (ex: &laquo;&nbsp;Comprendre le suivi&nbsp;&raquo;, &laquo;&nbsp;Lire les indices A-C-P&nbsp;&raquo;, &laquo;&nbsp;Consulter le tableau de bord&nbsp;&raquo;).</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Validation du contenu</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Navigation corrig&eacute;e</strong> : Accord&eacute;ons Groupe, Horaire et Pratique pointent d&eacute;sormais vers les bons emplacements (Trimestre, Construction).</li>
+                            <li><strong>Labels align&eacute;s</strong> : &laquo;&nbsp;Profil enseignant&nbsp;&raquo; → &laquo;&nbsp;Enseignant&middot;e&nbsp;&raquo;, &laquo;&nbsp;MODULE SOURCE&nbsp;&raquo; retir&eacute; du titre Horaire.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">5 nouveaux accord&eacute;ons</h4>
+                        <ul class="modal-liste">
+                            <li><strong>G&eacute;rer la liste des &eacute;tudiants</strong> : Import CSV/coller, saisie manuelle, marqueur SA, filtrage.</li>
+                            <li><strong>Planifier les le&ccedil;ons</strong> : Carte mentale, 12 types d'&eacute;l&eacute;ments, palette drag-and-drop.</li>
+                            <li><strong>Annoter et corriger les travaux</strong> : Import, visionneuse, outils d'annotation, export PDF.</li>
+                            <li><strong>Personnaliser les pr&eacute;f&eacute;rences</strong> : Th&egrave;me, tooltips, aide contextuelle, parcours.</li>
+                            <li><strong>Exporter et sauvegarder tes donn&eacute;es</strong> : Backup JSON, config p&eacute;dagogique, snapshots.</li>
+                        </ul>
+
+                        </div>
+                    </div>
+
                     <!-- Beta 97.9 - Refonte synthèse PDF -->
-                    <div class="carte accordeon ouvert" id="accordeon-apropos-beta979-synthese-pdf">
+                    <div class="carte accordeon" id="accordeon-apropos-beta979-synthese-pdf">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">&#x25BC;</span> Beta 97.9 &mdash; Refonte de la page Synth&egrave;se dans le PDF export&eacute;
@@ -12361,7 +12401,7 @@
 
                         <h4 class="titre-bleu-mb8 mt-15">Nouvel onglet Planification</h4>
                         <ul class="modal-liste">
-                            <li><strong>Carte mentale</strong> : Organisez visuellement vos comp&eacute;tences, s&eacute;quences, le&ccedil;ons et activit&eacute;s. Deux zones de travail : Objectifs &amp; Savoirs (gauche) et Organisation &amp; Activit&eacute;s (droite).</li>
+                            <li><strong>Carte mentale</strong> : Organise visuellement tes comp&eacute;tences, s&eacute;quences, le&ccedil;ons et activit&eacute;s. Deux zones de travail : Objectifs &amp; Savoirs (gauche) et Organisation &amp; Activit&eacute;s (droite).</li>
                             <li><strong>10 types de n&oelig;uds</strong> : Comp&eacute;tence, id&eacute;e ma&icirc;tresse, connaissance, pr&eacute;alable, strat&eacute;gie, s&eacute;quence, le&ccedil;on, activit&eacute;, soutien, r&eacute;vision &mdash; chacun avec sa couleur distinctive.</li>
                             <li><strong>Liens visuels</strong> : Reliez les n&oelig;uds entre eux par clic pour mat&eacute;rialiser les relations p&eacute;dagogiques (comp&eacute;tence &rarr; s&eacute;quence &rarr; le&ccedil;on &rarr; activit&eacute;).</li>
                         </ul>
@@ -12375,7 +12415,7 @@
                         <h4 class="titre-bleu-mb8 mt-15">Fonctionnalit&eacute;s</h4>
                         <ul class="modal-liste">
                             <li><strong>Multi-cartes</strong> : Cr&eacute;ez plusieurs cartes mentales, renommez-les, passez de l'une &agrave; l'autre.</li>
-                            <li><strong>Import/Export JSON</strong> : Sauvegardez et partagez vos cartes.</li>
+                            <li><strong>Import/Export JSON</strong> : Sauvegarde et partage tes cartes.</li>
                             <li><strong>Glisser-d&eacute;poser</strong> : Cr&eacute;ez des n&oelig;uds en glissant depuis la palette vers la zone de travail.</li>
                             <li><strong>S&eacute;lection avanc&eacute;e</strong> : Rectangle de s&eacute;lection, multi-s&eacute;lection avec &#8984;+clic, zoom avec &#8984;+/&minus;.</li>
                         </ul>
@@ -12444,7 +12484,7 @@
 
                         <h4 class="titre-bleu-mb8 mt-15">Import de fichiers</h4>
                         <ul class="modal-liste">
-                            <li><strong>Drag-and-drop</strong> : Glissez vos PDF et images (JPEG, PNG, HEIC, WebP) dans la zone de dépôt.</li>
+                            <li><strong>Drag-and-drop</strong> : Glisse tes PDF et images (JPEG, PNG, HEIC, WebP) dans la zone de dépôt.</li>
                             <li><strong>Détection automatique du DA</strong> : Le numéro d'admission est extrait du nom de fichier (ex: "Audet_9000175_travail.pdf").</li>
                             <li><strong>Jumelage par nom</strong> : Si le DA n'est pas trouvé, recherche par nom/prénom dans le fichier.</li>
                             <li><strong>Association manuelle</strong> : Dropdown pour corriger ou associer un étudiant avant l'import.</li>
@@ -12488,7 +12528,7 @@
 
                         <h4 class="titre-bleu-mb8 mt-15">Optimisations</h4>
                         <ul class="modal-liste">
-                            <li><strong>File System Access API (Mac)</strong> : Option pour stocker les fichiers sur votre disque au lieu d'IndexedDB. Recommandé pour les gros volumes.</li>
+                            <li><strong>File System Access API (Mac)</strong> : Option pour stocker les fichiers sur ton disque au lieu d'IndexedDB. Recommandé pour les gros volumes.</li>
                             <li><strong>Scroll virtuel</strong> : Les listes de 50+ miniatures utilisent le rendu virtuel pour maintenir la fluidité.</li>
                             <li><strong>Stockage persistant</strong> : Demande automatique de persistance au navigateur pour protéger les données.</li>
                         </ul>
@@ -12708,9 +12748,6 @@
                                 >✕</button>
                             </div>
                         </div>
-                        <div class="alerte alerte-attention" style="margin: 10px 0; padding: 10px; font-size: 0.9rem;">
-                            ⚠️ <strong>Avertissement :</strong> La section Aide a été générée par une intelligence artificielle et peut contenir des inexactitudes.
-                        </div>
                         <div class="label-block-085-muted-center-mb8">
                             Recherche dans : Introduction • Configuration • Formation • Utilisation • Consultation • Référence • Notes de version
                         </div>
@@ -12777,7 +12814,7 @@
                     <div class="carte accordeon" id="accordeon-aide-monitorage">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Qu'est-ce que le suivi de l'apprentissage ?
+                                <span class="accordeon-chevron">▼</span> Comprendre le suivi de l'apprentissage
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
@@ -12794,7 +12831,7 @@
                             <p><strong>Architecture modulaire et flexible :</strong></p>
                             <p>Le système s'adapte à <strong>ta pratique de notation</strong> existante. Tu peux configurer :</p>
                             <ul>
-                                <li><strong>Vos grilles d'évaluation</strong> : Crée tes propres critères selon ta discipline</li>
+                                <li><strong>Tes grilles d'évaluation</strong> : Crée tes propres critères selon ta discipline</li>
                                 <li><strong>Ton échelle de notation</strong> : Échelle qualitative (IDME) ou notes chiffrées (0-100%)</li>
                                 <li><strong>Ta pratique pédagogique</strong> : Évaluation par compétences (PAN) ou sommative traditionnelle</li>
                             </ul>
@@ -12816,7 +12853,7 @@
                     <div class="carte accordeon" id="accordeon-aide-acp">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Les trois indices primaires (A-C-P)
+                                <span class="accordeon-chevron">▼</span> Lire les indices A-C-P de tes étudiants
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
@@ -12853,7 +12890,7 @@
                     <div class="carte accordeon" id="accordeon-aide-srpnf">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Exemple de grille : SRPNF (pratique PAN-Standards)
+                                <span class="accordeon-chevron">▼</span> Utiliser la grille SRPNF (PAN-Standards)
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
@@ -12907,7 +12944,7 @@
                     <div class="carte accordeon" id="accordeon-aide-idme">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Exemple d'échelle : IDME (pratique PAN-Standards)
+                                <span class="accordeon-chevron">▼</span> Appliquer l'échelle IDME
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
@@ -12992,7 +13029,7 @@
                     <div class="carte accordeon" id="accordeon-aide-modes">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Trois modes d'utilisation
+                                <span class="accordeon-chevron">▼</span> Choisir ton mode d'utilisation
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
@@ -13030,7 +13067,7 @@
                     <div class="carte accordeon" id="accordeon-aide-partage">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Partage et communs éducatifs
+                                <span class="accordeon-chevron">▼</span> Partager tes ressources pédagogiques
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
@@ -13046,7 +13083,7 @@
 
                             <div class="alerte alerte-information">
                                 <h4 style="color: var(--accent-primaire); margin-bottom: 10px">Import depuis un trimestre précédent (Beta 95.3)</h4>
-                                <p>Réutilisez votre matériel d'un trimestre à l'autre sans tout recréer :</p>
+                                <p>Réutilise ton matériel d'un trimestre à l'autre sans tout recréer :</p>
                                 <ul class="mt-5">
                                     <li><strong>Échelles</strong> : Section "Importer depuis un autre trimestre" dans la bibliothèque</li>
                                     <li><strong>Grilles</strong> : Dropdown de sélection du trimestre source</li>
@@ -13102,7 +13139,7 @@
                                 <ol class="lh-2">
                                     <li><strong>Trimestre</strong> : Définir les dates (génère le calendrier)</li>
                                     <li><strong>Cours</strong> : Créer ou sélectionner le cours</li>
-                                    <li><strong>Enseignant</strong> : Créer votre profil</li>
+                                    <li><strong>Enseignant·e</strong> : Créer ton profil</li>
                                     <li><strong>Groupe</strong> : Importer la liste d'étudiants (CSV/TXT)</li>
                                     <li><strong>Horaire</strong> : Définir les séances hebdomadaires</li>
                                     <li><strong>Groupe-cours</strong> : Assembler les 5 éléments + pratique de notation</li>
@@ -13243,7 +13280,7 @@
                                 <ol class="lh-2">
                                     <li><strong>Gestion des trimestres</strong> : Dates début/fin, congés, aperçu statistiques</li>
                                     <li><strong>Gestion des cours</strong> : Code, titre, discipline, compétence</li>
-                                    <li><strong>Profil enseignant</strong> : Multi-profils avec dropdown (Beta 95.3)</li>
+                                    <li><strong>Enseignant·e</strong> : Multi-profils avec dropdown (Beta 95.3)</li>
                                     <li><strong>Groupe d'étudiants</strong> : Import CSV/TXT, gestion SA/CAF</li>
                                     <li><strong>Horaire hebdomadaire</strong> : Séances avec jour, heures, local</li>
                                     <li><strong>Assemblage groupe-cours</strong> : Combine les 5 éléments ci-dessus</li>
@@ -13274,7 +13311,7 @@
                             </ol>
 
                             <div class="alerte alerte-succes">
-                                <strong>💡 Astuce :</strong> Une fois le groupe-cours créé, il apparaît dans le dropdown de l'en-tête. Vous pouvez basculer rapidement entre plusieurs groupes-cours.
+                                <strong>💡 Astuce :</strong> Une fois le groupe-cours créé, il apparaît dans le dropdown de l'en-tête. Tu peux basculer rapidement entre plusieurs groupes-cours.
                             </div>
                         </div>
                     </div>
@@ -13328,7 +13365,7 @@
                             <ul>
                                 <li>Décochez la case dans Réglages → Trimestre</li>
                                 <li>Toutes les données du groupe 9999 sont supprimées automatiquement</li>
-                                <li>Vos données personnelles (si présentes) restent intactes</li>
+                                <li>Tes données personnelles (si présentes) restent intactes</li>
                             </ul>
 
                             <div class="alerte alerte-attention">
@@ -13336,7 +13373,7 @@
                             </div>
 
                             <div class="alerte alerte-succes">
-                                <strong>💡 Astuce pédagogique :</strong> Utilisez le groupe demo pour te familiariser avec les fonctionnalités avant de saisir tes vraies données. C'est aussi utile pour expérimenter des configurations (seuils, pratiques de notation) sans risquer d'affecter tes données réelles.
+                                <strong>💡 Astuce pédagogique :</strong> Utilise le groupe demo pour te familiariser avec les fonctionnalités avant de saisir tes vraies données. C'est aussi utile pour expérimenter des configurations (seuils, pratiques de notation) sans risquer d'affecter tes données réelles.
                             </div>
                         </div>
                     </div>
@@ -13374,7 +13411,7 @@
                                 <h4 style="color: var(--accent-primaire); margin-bottom: 10px">Bibliothèque groupe-cours (Beta 95.3)</h4>
                                 <p>Le bouton <strong>📚 Bibliothèque</strong> dans l'accordéon Groupe-cours ouvre une modal avec :</p>
                                 <ul class="mt-5">
-                                    <li>Liste de tous vos groupes-cours du trimestre</li>
+                                    <li>Liste de tous tes groupes-cours du trimestre</li>
                                     <li>Bouton <strong>Activer</strong> pour basculer rapidement</li>
                                     <li>Bouton <strong>Supprimer</strong> avec confirmation</li>
                                     <li>Indicateur visuel du groupe-cours actif</li>
@@ -13383,7 +13420,7 @@
 
                             <div class="alerte alerte-succes">
                                 <strong>💡 Workflow typique :</strong><br>
-                                1. Créez vos composantes dans les accordéons<br>
+                                1. Crée tes composantes dans les accordéons<br>
                                 2. Assemblez dans "Groupe-cours" avec les 5 dropdowns<br>
                                 3. Cliquez "Créer groupe-cours"<br>
                                 4. Le groupe apparaît dans l'en-tête et la bibliothèque
@@ -13399,7 +13436,7 @@
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                            <p><strong>Navigation :</strong> Réglages → Groupe</p>
+                            <p><strong>Navigation :</strong> Réglages → Trimestre → Groupe d'étudiants</p>
 
                             <p><strong>Informations à saisir pour chaque étudiant :</strong></p>
                             <ul>
@@ -13413,7 +13450,7 @@
                             <p><strong>Options d'import :</strong></p>
                             <ul>
                                 <li>Saisie manuelle</li>
-                                <li>Import depuis fichier CSV (à venir)</li>
+                                <li>Import depuis fichier CSV</li>
                             </ul>
                         </div>
                     </div>
@@ -13422,22 +13459,18 @@
                     <div class="carte accordeon" id="accordeon-aide-horaire">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> 4. Établir l'horaire - MODULE SOURCE
+                                <span class="accordeon-chevron">▼</span> 4. Établir l'horaire
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                            <p><strong>Navigation :</strong> Réglages → Horaire</p>
-                            <p class="text-succes-bold">Ce module GÉNÈRE les seancesCompletes (source unique)</p>
-
-                            <div class="alerte alerte-succes">
-                                <strong>✅ Module complété (octobre 2025)</strong> : Génération automatique des séances avec synchronisation au calendrier. Les séances s'adaptent automatiquement aux congés et reprises.
-                            </div>
+                            <p><strong>Navigation :</strong> Réglages → Trimestre → Horaire</p>
 
                             <p><strong>Fonctionnalités :</strong></p>
                             <ul>
                                 <li><strong>Définition des séances hebdomadaires</strong> : Jours et heures de cours</li>
+                                <li><strong>Génération automatique</strong> : Les séances sont générées en synchronisation avec le calendrier du trimestre</li>
                                 <li><strong>Gestion automatique des reprises</strong> : Ex: "Horaire du lundi" se déplace au jeudi si lundi est congé</li>
-                                <li><strong>API</strong> : <code>genererSeancesCompletes()</code> et <code>obtenirSeancesCompletes()</code></li>
+                                <li><strong>Adaptation aux congés</strong> : Les séances s'adaptent automatiquement aux congés et reprises configurés dans le trimestre</li>
                             </ul>
                         </div>
                     </div>
@@ -13450,9 +13483,9 @@
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                            <p><strong>Navigation :</strong> Réglages → Pratique de notation</p>
+                            <p><strong>Navigation :</strong> Construction → Pratiques de notation</p>
 
-                            <p>Le système supporte différentes pratiques pédagogiques. Choisissez celle qui correspond à ton approche :</p>
+                            <p>Le système supporte différentes pratiques pédagogiques. Choisis celle qui correspond à ton approche :</p>
 
                             <div class="alerte alerte-information">
                                 <h4 style="color: var(--accent-primaire); margin-bottom: 10px">📝 PAN-Standards (Évaluation par compétences)</h4>
@@ -13740,6 +13773,43 @@
                                 <li>Clique sur <strong>Archiver</strong> à côté du trimestre souhaité</li>
                                 <li>Confirme l'action dans la fenêtre de dialogue</li>
                             </ol>
+                        </div>
+                    </div>
+
+                    <!-- Carte: Personnaliser les préférences -->
+                    <div class="carte accordeon" id="accordeon-aide-preferences">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Personnaliser les préférences
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Navigation :</strong> Réglages → Préférences</p>
+
+                            <p>Les préférences te permettent d'adapter l'application à ton style de travail. Tout changement est sauvegardé automatiquement.</p>
+
+                            <div class="carte-gradient-bleu">
+                                <p class="titre-11-bold-bleu-mb15">Les 5 cartes de préférences :</p>
+                                <ol class="lh-2">
+                                    <li><strong>Outils à exploiter</strong> : Active ou désactive les micro-données A-C-P et le système RàI</li>
+                                    <li><strong>Affichage des ressources</strong> : Gère la visibilité de l'analyse SOLO, des snapshots, des graphiques d'évolution et des détails techniques</li>
+                                    <li><strong>Expérience visuelle</strong> : Active ou désactive l'animation 3D des points dans le tableau de bord</li>
+                                    <li><strong>Navigation</strong> : Lancement direct au tableau de bord, info-bulles au survol, aide contextuelle (📍), mode clair/sombre</li>
+                                    <li><strong>Parcours d'apprentissage</strong> : Choisis ton mode d'accompagnement (étape par étape, par exploration, autonome)</li>
+                                </ol>
+                            </div>
+
+                            <p><strong>Options de thème :</strong></p>
+                            <ul>
+                                <li><strong>Mode sombre</strong> (par défaut) : Thème foncé, confortable pour un usage prolongé</li>
+                                <li><strong>Mode clair</strong> : Thème lumineux, activable via la case « Mode clair » dans Navigation</li>
+                            </ul>
+
+                            <p><strong>Aide contextuelle :</strong></p>
+                            <ul>
+                                <li><strong>Info-bulles</strong> : Descriptions contextuelles au survol des éléments (désactivables)</li>
+                                <li><strong>Repères 📍</strong> : Marqueurs d'aide disséminés dans l'interface (désactivables)</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -14040,6 +14110,123 @@
                                 <li><strong>Action si nécessaire</strong> : Intervenir si seuils critiques atteints</li>
                             </ol>
                         </div>
+                        </div>
+                    </div>
+
+                    <!-- Carte: Gérer la liste des étudiants -->
+                    <div class="carte accordeon" id="accordeon-aide-etudiants">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Gérer la liste des étudiants
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Navigation :</strong> Réglages → Trimestre → Groupe d'étudiants</p>
+
+                            <p>L'accordéon <strong>Groupe d'étudiants</strong> dans la section Trimestre te permet de constituer et gérer ta liste de classe.</p>
+
+                            <p><strong>Trois façons d'ajouter des étudiants :</strong></p>
+                            <ol class="lh-2">
+                                <li><strong>Coller depuis Excel/Omnivox</strong> : Copie les données depuis ton fichier → colle dans la zone de texte → clique « Prévisualiser » → confirme l'import</li>
+                                <li><strong>Importer un fichier CSV/TSV</strong> : Sélectionne un fichier au format <code>DA, Groupe, Nom, Prénom, Programme, (vide), SA</code></li>
+                                <li><strong>Saisie manuelle</strong> : Remplis le formulaire (DA, nom, prénom, groupe, programme, SA) → clique « Ajouter l'étudiant »</li>
+                            </ol>
+
+                            <p><strong>Informations par étudiant :</strong></p>
+                            <ul>
+                                <li><strong>DA</strong> : Numéro de dossier administratif</li>
+                                <li><strong>Nom et prénom</strong> : Identité complète</li>
+                                <li><strong>Groupe</strong> : Numéro de groupe-cours</li>
+                                <li><strong>Programme</strong> : Programme d'études (avec autocomplétion)</li>
+                                <li><strong>SA</strong> : Marqueur Services adaptés (Oui/Non)</li>
+                            </ul>
+
+                            <p><strong>Actions disponibles :</strong></p>
+                            <ul>
+                                <li><strong>Filtrer par groupe</strong> : Utilise le dropdown pour afficher un groupe spécifique</li>
+                                <li><strong>Exporter en CSV</strong> : Télécharge la liste au format tableur</li>
+                                <li><strong>Statistiques</strong> : Le panneau de gauche affiche le total d'étudiants, le nombre de SA et les top programmes</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Carte: Planifier les leçons -->
+                    <div class="carte accordeon" id="accordeon-aide-lecons">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Planifier les leçons
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Navigation :</strong> Planification → Carte</p>
+
+                            <p>L'onglet Planification offre une <strong>carte mentale visuelle</strong> pour organiser tes séquences, leçons et activités pédagogiques.</p>
+
+                            <p><strong>Créer une carte :</strong></p>
+                            <ol class="lh-2">
+                                <li>Clique sur <strong>Nouvelle carte</strong> dans le menu d'actions</li>
+                                <li>Donne un titre dans le champ éditable en haut</li>
+                                <li>Glisse des éléments depuis la <strong>palette flottante</strong> vers la zone de travail</li>
+                                <li>Relie les éléments entre eux en cliquant pour créer des liens pédagogiques</li>
+                            </ol>
+
+                            <p><strong>12 types d'éléments disponibles :</strong></p>
+                            <ul>
+                                <li><strong>Pourquoi enseigner</strong> : Compétence, Idée maîtresse</li>
+                                <li><strong>Quoi enseigner</strong> : Factuelle, Conceptuelle, Procédurale, Métacognitive</li>
+                                <li><strong>Comment enseigner</strong> : Apprentissage, Soutien, Révision</li>
+                                <li><strong>Vérifier</strong> : Évaluation</li>
+                                <li><strong>Structure</strong> : Séquence, Leçon</li>
+                            </ul>
+
+                            <p><strong>Outils de navigation :</strong></p>
+                            <ul>
+                                <li><strong>Zoom</strong> : Préréglages 25%, 50%, 75%, 100% + recentrer, ajuster largeur/hauteur</li>
+                                <li><strong>Annuler</strong> : Ctrl+Z pour revenir en arrière</li>
+                                <li><strong>Multi-cartes</strong> : Crée plusieurs cartes, duplique-les, passe de l'une à l'autre</li>
+                                <li><strong>Import/Export</strong> : Importe un alignement existant au format JSON</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Carte: Annoter et corriger les travaux -->
+                    <div class="carte accordeon" id="accordeon-aide-travaux">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Annoter et corriger les travaux
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Navigation :</strong> Travaux (onglet dédié)</p>
+
+                            <p>L'onglet Travaux regroupe l'import, l'annotation et l'archivage des productions étudiantes en trois sous-sections.</p>
+
+                            <p><strong>1. Importer des fichiers :</strong></p>
+                            <ul>
+                                <li><strong>Glisse tes PDF et images</strong> (JPEG, PNG, HEIC, WebP) dans la zone de dépôt</li>
+                                <li><strong>Détection automatique du DA</strong> : Le numéro d'admission est extrait du nom de fichier (ex: « Audet_9000175_travail.pdf »)</li>
+                                <li><strong>Jumelage par nom</strong> : Si le DA n'est pas trouvé, le système cherche par nom/prénom</li>
+                                <li><strong>Association manuelle</strong> : Dropdown pour corriger ou associer un étudiant avant l'import</li>
+                            </ul>
+
+                            <p><strong>2. Annoter dans la visionneuse :</strong></p>
+                            <ul>
+                                <li><strong>Outils de dessin</strong> : Surlignage, soulignement, encadrement</li>
+                                <li><strong>Tampons prédéfinis</strong> : Appliquer des marqueurs visuels rapides</li>
+                                <li><strong>Commentaires texte</strong> : Ajouter des annotations textuelles</li>
+                                <li><strong>Navigation multi-pages</strong> : Parcourir les PDF page par page</li>
+                            </ul>
+
+                            <p><strong>3. Archiver et exporter :</strong></p>
+                            <ul>
+                                <li><strong>Export par étudiant</strong> : Télécharger les travaux annotés individuellement</li>
+                                <li><strong>Export semestre complet</strong> : Archive complète organisée par étudiant</li>
+                                <li><strong>Moniteur de stockage</strong> : Barre de progression avec alerte à 80% de capacité</li>
+                            </ul>
+
+                            <div class="alerte alerte-information">
+                                <strong>💡 Astuce :</strong> Les images dépassant 2000px sont automatiquement compressées (JPEG 85%) pour optimiser le stockage. Sur Mac, l'API File System Access permet de stocker les fichiers sur ton disque au lieu d'IndexedDB.
+                            </div>
                         </div>
                     </div>
 
@@ -14848,7 +15035,7 @@
                     <div class="carte accordeon border-left-primary" id="accordeon-aide-tableau-bord">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Tableau de bord → Aperçu - LECTEUR
+                                <span class="accordeon-chevron">▼</span> Consulter le tableau de bord
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
@@ -14860,7 +15047,7 @@
                             <li>Liste complète de tous les étudiants</li>
                             <li>Indices A-C-P en un coup d'œil</li>
                             <li>Codes couleur pour identification rapide des risques</li>
-                            <li>Filtres par niveau de risque (à venir)</li>
+                            <li>Filtres par niveau de risque (prévu dans une version future)</li>
                         </ul>
 
                         <p><strong>Action :</strong> Identifier rapidement qui nécessite une intervention.</p>
@@ -14880,7 +15067,7 @@
                     <div class="carte accordeon border-left-primary" id="accordeon-aide-profil-etudiant">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Profil étudiant (détaillé) - LECTEUR
+                                <span class="accordeon-chevron">▼</span> Interpréter le profil d'un étudiant
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
@@ -14936,7 +15123,7 @@
                     <div class="carte accordeon" id="accordeon-aide-diagnostics">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Interpréter les diagnostics
+                                <span class="accordeon-chevron">▼</span> Comprendre les diagnostics automatiques
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
@@ -15035,7 +15222,7 @@
                     <div class="carte accordeon" id="accordeon-aide-patterns">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Patterns d'apprentissage (optionnel - si activé)
+                                <span class="accordeon-chevron">▼</span> Repérer les patterns de progression
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
@@ -15687,7 +15874,7 @@
                             <h4 style="color: var(--bleu-principal)">Données perdues</h4>
                             <p><strong>Cause :</strong> localStorage effacé (navigation privée, nettoyage navigateur)</p>
                             <p><strong>Solution :</strong> Utiliser Import/Export régulièrement pour backup JSON</p>
-                            <p><strong>Prévention :</strong> Activer Export automatique hebdomadaire (à venir)</p>
+                            <p><strong>Prévention :</strong> Activer Export automatique hebdomadaire (prévu dans une version future)</p>
                         </div>
                         </div>
                     </div>
@@ -15814,9 +16001,9 @@
                                     <div class="alerte alerte-attention" class="mt-10">
                                         <strong>⚠️ Important :</strong> Le localStorage peut être effacé si tu :
                                         <ul class="m-10-0-0-20">
-                                            <li>Utilisez le mode navigation privée</li>
-                                            <li>Nettoyez l'historique/les données du navigateur</li>
-                                            <li>Changez de navigateur ou d'appareil</li>
+                                            <li>Utilises le mode navigation privée</li>
+                                            <li>Nettoies l'historique/les données du navigateur</li>
+                                            <li>Changes de navigateur ou d'appareil</li>
                                         </ul>
                                     </div>
                                     <p class="mt-10"><strong>Recommandation :</strong> Exporte tes données régulièrement via Réglages → Import/Export pour créer des sauvegardes JSON.</p>
@@ -16094,6 +16281,48 @@
                             <strong>📍 Note :</strong> Ce glossaire est une référence rapide. Pour des explications détaillées avec exemples et formules, consultez le Guide complet (PDF) disponible dans les ressources ci-dessous.
                         </div>
                         </div><!-- fin accordeon-contenu glossaire -->
+                    </div>
+
+                    <!-- Carte: Exporter et sauvegarder tes données -->
+                    <div class="carte accordeon" id="accordeon-aide-export-import">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Exporter et sauvegarder tes données
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Navigation :</strong> Réglages → Données</p>
+
+                            <p>La section Données offre trois options de sauvegarde et restauration :</p>
+
+                            <div class="carte-gradient-bleu">
+                                <p class="titre-11-bold-bleu-mb15">Trois options d'export :</p>
+                                <ol class="lh-2">
+                                    <li><strong>Sauvegarde complète</strong> : Toutes tes données (cours, étudiants, présences, évaluations, configurations). Pour restaurer sur cet appareil ou un autre.</li>
+                                    <li><strong>Configuration pédagogique</strong> : Uniquement les outils (grilles, échelles, productions, cartouches). Pour partager avec des collègues sous licence CC BY-NC-SA.</li>
+                                    <li><strong>Importer un fichier</strong> : Restaure une sauvegarde personnelle ou importe la configuration d'un collègue. Le type de fichier est détecté automatiquement.</li>
+                                </ol>
+                            </div>
+
+                            <p><strong>Bonnes pratiques :</strong></p>
+                            <ul>
+                                <li><strong>Exporte régulièrement</strong> : Clique « Exporter mes données » pour créer un backup JSON complet</li>
+                                <li><strong>Avant un changement majeur</strong> : Sauvegarde avant de modifier tes pratiques ou grilles</li>
+                                <li><strong>Partage entre trimestres</strong> : Utilise l'export de configuration pédagogique pour réutiliser tes outils d'un trimestre à l'autre</li>
+                                <li><strong>Transfert d'appareil</strong> : Exporte sur l'ancien appareil, importe sur le nouveau</li>
+                            </ul>
+
+                            <div class="alerte alerte-attention">
+                                <strong>⚠️ Important :</strong> Les données sont stockées dans le navigateur (IndexedDB/localStorage). Si tu nettoies les données du navigateur ou utilises la navigation privée, tes données seront perdues. L'export JSON est ta seule protection.
+                            </div>
+
+                            <p><strong>Captures de progression (Snapshots) :</strong></p>
+                            <ul>
+                                <li>Les captures enregistrent l'état des indices A-C-P à des moments clés</li>
+                                <li>Captures hebdomadaires automatiques + captures lors des interventions</li>
+                                <li>Consulte les statistiques de captures dans Réglages → Données</li>
+                            </ul>
+                        </div>
                     </div>
 
                     <!-- Carte: Ressources -->
@@ -16423,8 +16652,8 @@
          */
 
         // === CONFIGURATION ===
-        const VERSION_MAJEURE = '97.12';
-        const BUILD_ID = '0223-1742';  // Auto-updated by Claude before each commit (Toronto time)
+        const VERSION_MAJEURE = '97.13';
+        const BUILD_ID = '0224-0505';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
