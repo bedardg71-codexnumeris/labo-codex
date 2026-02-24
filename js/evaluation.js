@@ -5002,6 +5002,21 @@ function sauvegarderEvaluationModifiee() {
     // Mettre à jour les badges (pills) dans la barre de fichiers
     majBadgesApresEvaluation();
 
+    // Ajouter le cadenas sur les badges (auto-verrouillage après modification)
+    [   document.querySelector('.travaux-badge-importe.actif'),
+        document.querySelector('#travaux-badge-fichier-actif .travaux-badge-importe')
+    ].forEach(badge => {
+        if (!badge) return;
+        let verrou = badge.querySelector('.travaux-badge-verrou');
+        if (!verrou) {
+            verrou = document.createElement('span');
+            verrou.className = 'travaux-badge-verrou';
+            verrou.title = 'Évaluation verrouillée';
+            verrou.textContent = '\u{1F512}';
+            badge.appendChild(verrou);
+        }
+    });
+
     // Réinitialiser le mode modification
     delete window.evaluationEnCours.idModification;
 

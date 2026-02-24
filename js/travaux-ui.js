@@ -1553,9 +1553,13 @@
         }
 
         const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
-        const evaluation = evaluations.find(e =>
-            e.etudiantDA === f.etudiantDA && e.productionId === f.productionId
-        );
+        const evaluation = evaluations.find(e => {
+            if (e.etudiantDA !== f.etudiantDA) return false;
+            // Si le fichier a un productionId, exiger la correspondance exacte
+            if (f.productionId) return e.productionId === f.productionId;
+            // Si le fichier n'a PAS de productionId, accepter toute évaluation pour cet étudiant
+            return true;
+        });
         if (evaluation) {
             statutTexte = 'Évalué';
             statutClasse = 'evalue';
