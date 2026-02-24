@@ -20,6 +20,8 @@
 | 70 | Grégoire | 24 fév | 24 fév | Badge étudiant disparu de la toolbar visionneuse | Restauration du `<span#travaux-badge-fichier-actif>` dans la toolbar HTML + peuplement dans `ouvrirFichier()` (travaux-ui.js) |
 | 71 | Grégoire | 24 fév | 24 fév | Perte silencieuse de données inter-cours (modifier/verrouiller/supprimer) | 4 fonctions utilisaient `obtenirDonneesSelonMode` (filtré par cours) avant sauvegarde → écrasait les évaluations des autres cours. Remplacé par `db.getSync(cle(...))` dans evaluation.js et liste-evaluations.js |
 | 72 | Grégoire | 24 fév | 24 fév | Badge « EN COURS » au lieu de « ÉVALUÉ » + cadenas 🔒 manquant | Fichiers importés sans `productionId` ne matchaient pas les évaluations (correspondance exacte `''` vs `'artefact1'`). Recherche assouplie : si fichier sans productionId, accepter toute évaluation pour l'étudiant. Cadenas ajouté sur badges après auto-verrouillage dans `sauvegarderEvaluationModifiee()` |
+| 73 | Grégoire | 24 fév | 24 fév | Bouton « Évaluer » ne fonctionne pas après navigation TB → retour | `modeCourant` restait à `'evaluer'` après navigation (palettes DOM détruites sans appel à `fermerModeEvaluation()`). `basculerMode('evaluer')` retournait immédiatement. Corrigé : reset `modeCourant = 'annoter'` dans `initialiserModuleTravaux()` (travaux-ui.js) |
+| 74 | Grégoire | 24 fév | 24 fév | Export affiche le mauvais groupe (gr.2 au lieu de gr.8) | `peuplerDropdownGroupeCoursActif()` validait le groupe actif contre la liste filtrée (`dansSidebar !== false`). Un groupe masqué était considéré invalide → auto-sélection du premier visible. Corrigé : validation contre `tousGroupesCours` (trimestre-v2.js:5652) |
 
 ---
 
@@ -75,7 +77,7 @@
 
 ### Pour ajouter un bug
 1. Créer une entrée dans la section "Ouverts"
-2. Assigner un numéro séquentiel (prochain : **#73**)
+2. Assigner un numéro séquentiel (prochain : **#75**)
 3. Documenter dans le sous-dossier du testeur si fichiers/screenshots fournis
 
 ### Pour marquer comme corrigé
