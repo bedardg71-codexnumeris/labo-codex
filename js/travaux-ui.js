@@ -2182,10 +2182,13 @@
             return;
         }
 
-        const fichiers = travauxStockage.obtenirFichiersProduction(productionId);
+        // 🔧 FIX (24 fév 2026) : Chercher par évaluations, pas par fichier.productionId
+        // Les fichiers importés sans production ont productionId='', mais l'évaluation a le bon productionId
+        const fichiers = travauxStockage.obtenirFichiersGroupeActif();
         const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees'));
+        const evalsProduction = evaluations.filter(e => e.productionId === productionId);
         const nbEvalues = fichiers.filter(f =>
-            evaluations.some(e => e.etudiantDA === f.etudiantDA && e.productionId === f.productionId)
+            evalsProduction.some(e => e.etudiantDA === f.etudiantDA)
         ).length;
 
         compteur.textContent = `${nbEvalues} évalué(s) sur ${fichiers.length} fichier(s)`;
