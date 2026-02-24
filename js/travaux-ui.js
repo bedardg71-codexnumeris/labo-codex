@@ -391,7 +391,7 @@
 
                 <div class="travaux-import-header">
                     <h3>Préparer et importer
-                        <button class="btn-aide-contextuelle" data-aide="evaluations-annoter" aria-label="Aide contextuelle"></button>
+                        <button class="btn-aide-contextuelle" data-aide="evaluations-annoter" aria-label="Aide contextuelle">📍</button>
                     </h3>
                     <div class="pipeline-stats">
                         ${queue.length > 0 ? `${queue.length} fichier(s) en file — ${travauxStockage.formaterTaille(queue.reduce((s, f) => s + f.tailleFichier, 0))}` : ''}
@@ -529,7 +529,7 @@
         if (fichiersTravaux.length === 0) {
             conteneur.innerHTML = `
                 <div class="conteneur">
-                    <h2>Annoter et évaluer</h2>
+                    <h2>Annoter et évaluer <button class="btn-aide-contextuelle" data-aide="evaluations-annoter" aria-label="Aide contextuelle">📍</button></h2>
                     <p class="text-muted">Aucun fichier importé. Importe des travaux depuis l'onglet « Préparer et importer ».</p>
                 </div>`;
             return;
@@ -633,7 +633,7 @@
         const fichiersTravaux = travauxStockage.obtenirFichiersGroupeActif();
 
         conteneur.innerHTML = `
-            <h3>Archivage des travaux</h3>
+            <h3>Archivage des travaux <button class="btn-aide-contextuelle" data-aide="evaluations-annoter" aria-label="Aide contextuelle">📍</button></h3>
             <p class="texte-muted">${stats.nombre} fichier(s) en stock (${stats.tailleFormatee})</p>
 
             ${genererGrilleFichiers(fichiersTravaux, 'ouvrirPreviewInline')}
