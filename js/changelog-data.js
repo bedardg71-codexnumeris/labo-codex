@@ -11,120 +11,20 @@
     var CHANGELOG = [
         {
             version: 'Beta 98',
-            date: '24 f\u00e9vrier',
-            couleur: 'bleu',
-            titre: 'R\u00e9organisation de l\u2019ent\u00eate et d\u00e9placement du th\u00e8me',
-            items: [
-                '<strong>Ent\u00eate r\u00e9organis\u00e9e</strong> : Le dropdown Normal/Anonymis\u00e9 est seul \u00e0 gauche, le bouton \u00ab\u00a0Signaler un bug\u00a0\u00bb est seul \u00e0 droite, le titre reste centr\u00e9.',
-                '<strong>Th\u00e8me clair/sombre d\u00e9plac\u00e9</strong> : Le bouton \ud83c\udf15 est retir\u00e9 de l\u2019ent\u00eate. Le choix du th\u00e8me se fait d\u00e9sormais dans R\u00e9glages \u2192 Pr\u00e9f\u00e9rences \u2192 Exp\u00e9rience visuelle.',
-                '<strong>Pr\u00e9f\u00e9rences r\u00e9ordonn\u00e9es</strong> : Les cartes \u00ab\u00a0Exp\u00e9rience visuelle\u00a0\u00bb et \u00ab\u00a0Navigation\u00a0\u00bb sont d\u00e9sormais en haut de la page Pr\u00e9f\u00e9rences.',
-                '<strong>Espacement de l\u2019ent\u00eate</strong> : Plus d\u2019air en haut du titre, s\u00e9parateur visuel entre la ligne Beta/Build et les informations contextuelles.',
-                '<strong>Intitul\u00e9 version</strong> : L\u2019ent\u00eate affiche d\u00e9sormais \u00ab\u00a0Beta XX - D\u00e9veloppement actif\u00a0\u00bb pour indiquer le statut du projet.'
-            ]
-        },
-        {
-            version: 'Beta 97.13',
-            date: '24 f\u00e9vrier',
+            date: '20-24 f\u00e9vrier',
             couleur: 'vert',
-            titre: 'Couverture Aide compl\u00e8te (100\u00a0%) \u2014 12 nouveaux accord\u00e9ons',
+            titre: 'Visionneuse, annotation, aide 100\u00a0% et ent\u00eate repens\u00e9e',
             items: [
-                '<strong>12 accord\u00e9ons ajout\u00e9s</strong> : Pr\u00e9parer/importer, Annoter/\u00e9valuer, Exporter/archiver, Tirage au sort, Mod\u00e9lisation, Organisateur de le\u00e7on, Aper\u00e7u pr\u00e9sences, Calendrier pr\u00e9sences, Productions, Grilles, \u00c9chelles, Cartouches.',
-                '<strong>Labels MODULE SOURCE retir\u00e9s</strong> : Les titres \u00ab\u00a0Saisir les pr\u00e9sences\u00a0\u00bb et \u00ab\u00a0\u00c9valuer les productions\u00a0\u00bb ne portent plus le suffixe.',
-                '<strong>Couverture 100\u00a0%</strong> : Tous les modules de l\u2019application sont d\u00e9sormais document\u00e9s dans l\u2019onglet Aide.'
-            ]
-        },
-        {
-            version: 'Beta 97.11',
-            date: '23 f\u00e9vrier',
-            couleur: 'vert',
-            titre: 'Palette d\u2019annotation ancr\u00e9e et s\u00e9parateurs redimensionnables',
-            items: [
-                '<strong>Palette ancr\u00e9e</strong> : La palette d\u2019annotation est d\u00e9sormais ancr\u00e9e \u00e0 gauche du document (comme les panneaux en mode \u00e9valuation) au lieu de flotter par-dessus.',
-                '<strong>S\u00e9parateurs draggables</strong> : Des poign\u00e9es de redimensionnement entre toutes les colonnes permettent d\u2019ajuster la largeur des panneaux (annotation et \u00e9valuation).',
-                '<strong>Largeurs m\u00e9moris\u00e9es</strong> : Les largeurs personnalis\u00e9es sont persist\u00e9es dans le navigateur. Double-clic sur un s\u00e9parateur pour r\u00e9initialiser.',
-                '<strong>Support iPad</strong> : Les s\u00e9parateurs r\u00e9pondent au toucher. Les colonnes \u00e9valuation et r\u00e9troaction peuvent \u00eatre r\u00e9duites davantage pour les petits \u00e9crans.',
-                '<strong>Tampons pr\u00e9cis\u00e9s</strong> : Les trois symboles d\u2019annotation sont renomm\u00e9s : Exact (\u2714), Erron\u00e9 (\u2718), Incertain (?) avec info-bulles d\u00e9taill\u00e9es.'
-            ]
-        },
-        {
-            version: 'Beta 97.11',
-            date: '22 f\u00e9vrier',
-            couleur: 'orange',
-            titre: 'Correction du mode Anonymisation',
-            items: [
-                '<strong>Pr\u00e9noms anonymis\u00e9s</strong> : Les pr\u00e9noms r\u00e9els \u00e9taient visibles en mode anonymisation. Le mapping est maintenant namespace\u0301 par trimestre et auto-extensible quand des \u00e9tudiants sont ajout\u00e9s.',
-                '<strong>Badges anonymis\u00e9s</strong> : Les badges de fichiers import\u00e9s (Importer, Annoter, \u00c9valuer) affichent d\u00e9sormais \u00ab\u00a0\u00c9l\u00e8ve X\u00a0\u00bb au lieu du vrai nom.',
-                '<strong>DA masqu\u00e9 partout</strong> : Les listes d\u00e9roulantes, l\u2019autocomplete et les labels affichent ANONYME au lieu du DA r\u00e9el.',
-                '<strong>Fallback s\u00e9curitaire</strong> : Si un \u00e9tudiant est absent du mapping, \u00ab\u00a0Anonyme\u00a0\u00bb s\u2019affiche au lieu du vrai pr\u00e9nom.'
-            ]
-        },
-        {
-            version: 'Beta 97.10',
-            date: '22 f\u00e9vrier',
-            couleur: 'orange',
-            titre: 'Correction des fichiers fant\u00f4mes et isolation par groupe-cours',
-            items: [
-                '<strong>Filtrage par groupe-cours</strong> : Les fichiers import\u00e9s sont d\u00e9sormais isol\u00e9s par groupe-cours. Chaque groupe ne voit que ses propres fichiers (import, annotation, \u00e9valuation, archivage, export PDF).',
-                '<strong>Cascade de suppression</strong> : Supprimer un fichier import\u00e9 qui a une \u00e9valuation associ\u00e9e propose de supprimer les deux. Emp\u00eache les \u00e9valuations fant\u00f4mes.',
-                '<strong>Stampage coursId \u00e0 l\u2019import</strong> : Les fichiers import\u00e9s re\u00e7oivent automatiquement le coursId et groupeCoursId du groupe actif.',
-                '<strong>Rollback m\u00e9tadonn\u00e9es</strong> : Si le stockage du blob \u00e9choue (quota), les m\u00e9tadonn\u00e9es orphelines sont nettoy\u00e9es automatiquement.',
-                '<strong>Rafra\u00eechissement au changement de groupe</strong> : Changer de groupe-cours via le dropdown rafra\u00eechit d\u00e9sormais les onglets Pr\u00e9parer/Importer et Annoter/\u00c9valuer.',
-                '<strong>Stats coh\u00e9rentes</strong> : Le compteur \u00ab\u00a0Fichiers import\u00e9s (N) \u2014 X Mo\u00a0\u00bb refl\u00e8te le groupe actif, pas le total global.'
-            ]
-        },
-        {
-            version: 'Beta 97.9',
-            date: '22 f\u00e9vrier',
-            couleur: 'bleu',
-            titre: 'Refonte de la page Synth\u00e8se dans le PDF export\u00e9',
-            items: [
-                '<strong>Accents corrig\u00e9s partout</strong> : Tous les textes visibles du PDF et de l\u2019aper\u00e7u utilisent d\u00e9sormais les caract\u00e8res accentu\u00e9s (\u00c9valuation par crit\u00e8re, Synth\u00e8se, R\u00e9troaction, T\u00e9l\u00e9charger, etc.).',
-                '<strong>En-t\u00eate personnalis\u00e9</strong> : Le PDF affiche le code et nom du cours, la grille, puis les lignes optionnelles (Production, Objectif, T\u00e2che, Bonjour) selon les options d\u2019affichage.',
-                '<strong>Descriptions des crit\u00e8res</strong> : Chaque crit\u00e8re du tableau d\u2019\u00e9valuation inclut sa description sous le nom.',
-                '<strong>Images des tampons</strong> : Le tableau des tampons affiche les ic\u00f4nes PNG \u00e0 c\u00f4t\u00e9 du nom. La colonne Cat\u00e9gorie est retir\u00e9e.',
-                '<strong>Section narrative supprim\u00e9e</strong> : Le bloc \u00ab\u00a0R\u00e9troaction globale\u00a0\u00bb (redondant avec le tableau) est retir\u00e9.',
-                '<strong>Marges et polices</strong> : Marges de 1\u00a0pouce, polices l\u00e9g\u00e8rement plus grandes pour une meilleure lisibilit\u00e9.',
-                '<strong>Aper\u00e7u PDF am\u00e9lior\u00e9</strong> : Les boutons de navigation et T\u00e9l\u00e9charger sont r\u00e9organis\u00e9s en barre horizontale (plus de superposition).',
-                '<strong>Nom enseignant corrig\u00e9</strong> : Le pied de page lit le nom depuis les r\u00e9glages du trimestre actif au lieu de l\u2019ancien profil.'
-            ]
-        },
-        {
-            version: 'Beta 97.9',
-            date: '22 f\u00e9vrier',
-            couleur: 'vert',
-            titre: '\u00c9diteur de pages, layout \u00e9valuation et affichage annotation',
-            items: [
-                '<strong>\u00c9diteur de pages</strong> : Glisser un badge import\u00e9 vers la zone d\u2019\u00e9dition pour d\u00e9composer le PDF en pages individuelles. R\u00e9ordonner (\u2191/\u2193), supprimer et ajouter des pages, puis sauvegarder le PDF r\u00e9assembl\u00e9.',
-                '<strong>Layout \u00e9valuation plein canevas</strong> : En mode \u00c9valuer, les palettes occupent tout le canevas en colonnes flex (Param\u00e8tres, Document \u00e0 165\u00a0%, \u00c9valuation, R\u00e9troaction pleine hauteur). Jetons int\u00e9gr\u00e9s dans Param\u00e8tres. Checkboxes jetons persistantes.',
-                '<strong>Mode Annoter redessin\u00e9</strong> : Le document s\u2019ouvre en pleine largeur, align\u00e9 en haut du viewport. Seule la palette d\u2019annotation est visible\u00a0; les palettes tampons et erreurs sont ferm\u00e9es par d\u00e9faut (ouverture manuelle). Palette l\u00e9g\u00e8rement plus \u00e9troite.',
-                '<strong>Palettes annot. ferm\u00e9es par d\u00e9faut</strong> : Les palettes tampons et codes d\u2019erreur ne sont plus cr\u00e9\u00e9es automatiquement \u00e0 l\u2019activation de l\u2019annotation.'
-            ]
-        },
-        {
-            version: 'Beta 97.9',
-            date: '21 f\u00e9vrier',
-            couleur: 'bleu',
-            titre: 'Am\u00e9liorations \u00e9valuation, statuts et configuration des pratiques',
-            items: [
-                '<strong>8\u00a0am\u00e9liorations UI</strong> : Badges compacts (nowrap), r\u00e9troaction structur\u00e9e avec auto-d\u00e9pliage, statuts d\u2019\u00e9valuation refondus (Non re\u00e7u \u2192 Re\u00e7u \u2192 Import\u00e9 \u2192 Annot\u00e9 \u2192 \u00c9valu\u00e9 \u2192 Remis), colonne Statut dans la liste, navigation intelligente selon l\u2019\u00e9tape du flux, inversion Gauss clair/sombre.',
-                '<strong>Zone badges et filtre production</strong> : Les badges ont la m\u00eame largeur que le canvas. Un dropdown de production filtre les badges affich\u00e9s. Labels simplifi\u00e9s dans la palette Param\u00e8tres.',
-                '<strong>Configuration des pratiques corrig\u00e9e</strong> : La carte \u00ab\u00a0Structure des \u00e9valuations\u00a0\u00bb s\u2019affiche correctement (correction toggleDisplay inline vs classe). Les cat\u00e9gories S\u00e9lection/Obligatoires et les types de jetons sont d\u00e9sormais visibles.',
-                '<strong>Jetons connect\u00e9s aux pratiques</strong> : La configuration des jetons d\u00e9finie dans une pratique est automatiquement synchronis\u00e9e vers la page d\u2019\u00e9valuation. Palette Jetons repositionn\u00e9e en bas \u00e0 gauche.',
-                '<strong>Canvas centr\u00e9</strong> : Le document s\u2019affiche au centre de la visionneuse apr\u00e8s ouverture (recentrage apr\u00e8s layout finalis\u00e9).'
-            ]
-        },
-        {
-            version: 'Beta 97.9',
-            date: '20 f\u00e9vrier',
-            couleur: 'vert',
-            titre: 'Refonte visionneuse \u2014 Palette flottante et \u00e9valuation 3\u00a0colonnes',
-            items: [
-                '<strong>Palette flottante fixe</strong> : Les outils d\u2019annotation s\u2019affichent dans une palette flottante draggable qui reste fixe au scroll. Boutons textuels lisibles au lieu d\u2019emojis. Annuler/R\u00e9tablir/Effacer en pied de palette.',
-                '<strong>\u00c9valuation en 3\u00a0colonnes</strong> : Cliquer \u00ab\u00a0\u00c9valuer\u00a0\u00bb ouvre les param\u00e8tres \u00e0 gauche et les crit\u00e8res \u00e0 droite du canvas. Panneaux style palette (comme la carte mentale) avec en-t\u00eates \u00ab\u00a0Param\u00e8tres\u00a0\u00bb et \u00ab\u00a0Crit\u00e8res\u00a0\u00bb.',
-                '<strong>R\u00e9troaction sous le canvas</strong> : La zone de r\u00e9troaction finale s\u2019affiche en bas de la visionneuse (sous le document) au lieu du panneau de droite.',
-                '<strong>Exclusivit\u00e9 annotation/\u00e9valuation</strong> : Les deux modes sont mutuellement exclusifs\u00a0: activer l\u2019un ferme automatiquement l\u2019autre.',
-                '<strong>Page d\u2019accueil r\u00e9organis\u00e9e</strong> : Trois sections\u00a0: D\u00e9couvrir, Parcourir, Piloter. Les cartes d\u2019action sont regroup\u00e9es sous \u00ab\u00a0Parcourir\u00a0\u00bb, le parcours d\u2019apprentissage sous \u00ab\u00a0Piloter\u00a0\u00bb.',
-                '<strong>Toolbar am\u00e9lior\u00e9e</strong> : Badge \u00e9tudiant actif, bouton Zoom 100\u00a0%, ordre Annoter \u2192 \u00c9valuer \u2192 Exporter PDF, badge s\u00e9lectionn\u00e9 accent bleu vif.'
+                '<strong>Visionneuse redessin\u00e9e</strong> : Palette d\u2019annotation ancr\u00e9e \u00e0 gauche avec s\u00e9parateurs redimensionnables (drag + double-clic pour r\u00e9initialiser). Support tactile iPad. \u00c9valuation en 3\u00a0colonnes plein canevas. Exclusivit\u00e9 annotation/\u00e9valuation.',
+                '<strong>\u00c9diteur de pages</strong> : Glisser un badge import\u00e9 vers la zone d\u2019\u00e9dition pour d\u00e9composer, r\u00e9ordonner, supprimer ou ajouter des pages PDF.',
+                '<strong>Export PDF refait</strong> : Accents corrig\u00e9s, en-t\u00eate personnalis\u00e9 (cours, grille, options), descriptions des crit\u00e8res, images des tampons, marges 1\u00a0pouce. Nom enseignant lu depuis le trimestre actif.',
+                '<strong>Statuts d\u2019\u00e9valuation</strong> : Flux Non re\u00e7u \u2192 Re\u00e7u \u2192 Import\u00e9 \u2192 Annot\u00e9 \u2192 \u00c9valu\u00e9 \u2192 Remis. Colonne Statut dans la liste, navigation intelligente selon l\u2019\u00e9tape.',
+                '<strong>Fichiers isol\u00e9s par groupe-cours</strong> : Chaque groupe ne voit que ses propres fichiers. Cascade de suppression, stampage coursId \u00e0 l\u2019import, rafra\u00eechissement au changement de groupe.',
+                '<strong>Anonymisation corrig\u00e9e</strong> : Mapping namespac\u00e9 par trimestre, badges et DA masqu\u00e9s partout, fallback s\u00e9curitaire.',
+                '<strong>Aide 100\u00a0%</strong> : 12\u00a0accord\u00e9ons ajout\u00e9s. Tous les modules sont d\u00e9sormais document\u00e9s dans l\u2019onglet Aide.',
+                '<strong>Ent\u00eate r\u00e9organis\u00e9e</strong> : Dropdown mode \u00e0 gauche, Signaler un bug \u00e0 droite, titre centr\u00e9. Th\u00e8me d\u00e9plac\u00e9 dans R\u00e9glages \u2192 Pr\u00e9f\u00e9rences \u2192 Exp\u00e9rience visuelle.',
+                '<strong>Pr\u00e9f\u00e9rences r\u00e9ordonn\u00e9es</strong> : Exp\u00e9rience visuelle et Navigation en haut de page. S\u00e9parateur et espacement dans l\u2019ent\u00eate.',
+                '<strong>Page d\u2019accueil</strong> : Trois sections D\u00e9couvrir, Parcourir, Piloter. Tampons renomm\u00e9s : Exact (\u2714), Erron\u00e9 (\u2718), Incertain (?).'
             ]
         },
         {
