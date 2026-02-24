@@ -3704,6 +3704,7 @@
                 <span class="bandeau-mise-a-jour-arrow">➡︎</span>
                 <span id="bandeau-mise-a-jour-build" class="bandeau-mise-a-jour-build"></span>
             </div>
+            <span class="bandeau-mise-a-jour-texte" style="font-weight: 600; font-size: 0.85rem;">Ce projet est en développement actif.</span>
             <span id="bandeau-mise-a-jour-texte" class="bandeau-mise-a-jour-texte"></span>
             <div class="bandeau-mise-a-jour-footer">
                 <span id="bandeau-mise-a-jour-date" class="bandeau-mise-a-jour-date"></span>
@@ -17303,7 +17304,7 @@
             const heureStr = maintenant.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' });
 
             elBuild.textContent = `BETA ${beta} (BUILD ${build})`;
-            elTexte.textContent = `Une mise à jour a été déployée en arrière-plan pendant que tu travailles. Rafraîchis la page si tu souhaites l\u2019activer.`;
+            elTexte.textContent = `Une mise à jour a été déployée en arrière-plan pendant que tu travailles. Rafraîchis la page pour l\u2019activer. Tes données persistent.`;
             elDate.textContent = `${dateStr} à ${heureStr}`;
 
             bandeau.classList.add('visible');
