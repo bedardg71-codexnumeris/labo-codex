@@ -67,7 +67,7 @@ const JALONS = {
         titre: 'Configurer un cours',
         description: 'Entrer le sigle, le titre et la compétence du cours.',
         chapitre: 'configurer',
-        navigation: { section: 'reglages', sousSection: 'reglages-cours-actif' }
+        navigation: { section: 'reglages', sousSection: 'reglages-trimestre' }
     },
     'creer-groupe': {
         numero: '③',
