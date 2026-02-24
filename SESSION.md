@@ -2,9 +2,28 @@
 
 **Date** : 24 février 2026
 **Version** : Beta 97.13 (build 0224-0505)
-**Statut** : Validation et humanisation de l'onglet Aide
+**Statut** : Correction bugs évaluations (rapport Grégoire 24 fév)
 
 ## SESSION DU 24 FÉVRIER 2026
+
+### Travail accompli — Correction bugs évaluations (rapport Grégoire, 24 février 2026)
+
+> **Rapport** : `Retours des testeurs/gregoire/24 février 2026/ID- grégoire 2026-02-24 13-36-16.txt`
+> **Bugs** : #69, #70, #71, #72
+
+127. **Namespace manquant rapport-bug** (#69) : `rapport-bug.js:470` lisait `'evaluationsSauvegardees'` sans `cle()`, affichant `nbEvaluations: 0` dans les rapports de bug. Corrigé avec `cle('evaluationsSauvegardees')`.
+
+128. **Appel redondant `afficherFichiers()` retiré** (#69) : `navigation.js:531-538` appelait `travauxUI.afficherFichiers()` après `initialiserModuleTravaux()` qui fait déjà `rafraichirUI()` → `afficherFichiers()`. Le double-rendu pouvait écraser les badges mis à jour.
+
+129. **Badge étudiant restauré dans la toolbar** (#70) : Le commit `0dd47d2` (23 fév) avait déplacé le badge vers le panneau Paramètres uniquement. Restauration du `<span#travaux-badge-fichier-actif>` dans `travaux-toolbar-gauche` + peuplement dans `ouvrirFichier()` avec pill statut (EN COURS/ÉVALUÉ), scroll-to-badge au clic, et suppression du bouton supprimer.
+
+130. **Perte données inter-cours corrigée** (#71) : 4 fonctions (`sauvegarderEvaluationModifiee`, `basculerVerrouillageEvaluation`, `supprimerEvaluation`, `toggleVerrouillerEvaluation`) utilisaient `obtenirDonneesSelonMode('evaluationsSauvegardees')` qui filtre par `coursId`. Sauvegarder ce sous-ensemble écrasait les évaluations des autres cours. Remplacé par `db.getSync(cle('evaluationsSauvegardees'), [])` pour lire/écrire le tableau complet.
+
+131. **Badge « EN COURS » au lieu de « ÉVALUÉ »** (#72) : `genererBadgeFichierImporte()` cherchait les évaluations avec correspondance exacte `(etudiantDA, productionId)`. Quand un fichier importé sans production (`productionId = ''`) était évalué avec une production sélectionnée dans le formulaire, la recherche échouait (`'' !== 'artefact1'`). Corrigé : si le fichier n'a pas de `productionId`, accepter toute évaluation pour cet étudiant.
+
+132. **Cadenas 🔒 manquant après modification** (#72) : `sauvegarderEvaluationModifiee()` auto-verrouille l'évaluation (`verrouillee: true`) mais n'ajoutait pas l'icône cadenas sur les badges. Le cadenas est maintenant injecté dans le DOM (badge liste + badge toolbar) immédiatement après sauvegarde.
+
+133. **Diagnostic ajouté** : `console.warn('[Badge]')` dans `genererBadgeFichierImporte()` quand un fichier annoté n'a pas d'évaluation correspondante — aide au débogage en conditions réelles.
 
 ### Travail accompli — Validation et humanisation de l'onglet Aide (Beta 97.13, build 0224-0505)
 
