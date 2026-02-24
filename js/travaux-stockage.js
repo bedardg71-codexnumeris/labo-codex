@@ -488,7 +488,8 @@
      * @returns {Array} Fichiers de la production
      */
     function obtenirFichiersProduction(productionId) {
-        return obtenirFichiersTravaux().filter(f => f.productionId === productionId);
+        // 🔧 FIX (24 fév 2026) : Filtrer par groupe-cours actif pour ne pas mélanger les groupes
+        return obtenirFichiersGroupeActif().filter(f => f.productionId === productionId);
     }
 
     /**
