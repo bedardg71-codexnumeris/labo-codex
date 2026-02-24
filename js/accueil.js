@@ -44,8 +44,8 @@ function afficherAccueilPremierLancement(conteneur) {
             <h1>Bienvenue dans le Monitorage</h1>
             <p class="accueil-sous-titre">Explorer. R\u00e9fl\u00e9chir. Transformer.</p>
             <p class="accueil-description">
-                Un outil de suivi p\u00e9dagogique pour observer la progression de vos \u00e9tudiants
-                et prioriser vos interventions.
+                Un outil de suivi p\u00e9dagogique pour observer la progression de tes \u00e9tudiants
+                et prioriser tes interventions.
             </p>
         </div>
 
@@ -54,7 +54,7 @@ function afficherAccueilPremierLancement(conteneur) {
                 <div class="accueil-carte-icone">&#x1F393;</div>
                 <div class="accueil-carte-titre">Cr\u00e9er mon premier cours</div>
                 <div class="accueil-carte-desc">
-                    Configurez votre cours en quelques \u00e9tapes guid\u00e9es.
+                    Configure ton cours en quelques \u00e9tapes guid\u00e9es.
                 </div>
             </div>
             <div class="accueil-carte" onclick="if(typeof entrerEnDemo==='function') entrerEnDemo();">
