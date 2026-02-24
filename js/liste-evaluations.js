@@ -1227,8 +1227,8 @@ function dupliquerEvaluation(evaluationId) {
  * Supprime une évaluation
  */
 function supprimerEvaluation(evaluationId) {
-    // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
-    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
+    // CORRECTION: Lire TOUTES les évaluations (pas seulement celles du cours actif)
+    const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
     const evaluation = evaluations.find(ev => ev.id === evaluationId);
 
     // Vérifier si l'évaluation est verrouillée
@@ -1272,8 +1272,8 @@ function supprimerEvaluation(evaluationId) {
  * Verrouille/Déverrouille une évaluation
  */
 function toggleVerrouillerEvaluation(evaluationId) {
-    // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
-    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
+    // CORRECTION: Lire TOUTES les évaluations (pas seulement celles du cours actif)
+    const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
     const evaluation = evaluations.find(ev => ev.id === evaluationId);
 
     if (!evaluation) {
