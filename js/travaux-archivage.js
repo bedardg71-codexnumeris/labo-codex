@@ -247,7 +247,7 @@
                 continue;
             }
 
-            const { doc } = await travauxExportPDF.genererDocPDF(fichier.id);
+            const { doc } = await travauxExportPDF.genererDocPDF(fichier.id, productionId);
             const pdfBlob = doc.output('blob');
 
             const etudiant = etudiants.find(e => e.da === fichier.etudiantDA);
