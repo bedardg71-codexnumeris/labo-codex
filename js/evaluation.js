@@ -1996,6 +1996,31 @@ function sauvegarderEvaluation() {
 
     afficherNotificationSucces(`Évaluation sauvegardée : ${evaluation.etudiantNom} - ${evaluation.productionNom}`);
 
+    // 🔧 FIX (24 fév 2026) : Propager les métadonnées manquantes sur le fichier importé
+    // Si le fichier n'a pas de productionId/etudiantDA/groupeCoursId, les écrire
+    // pour que la prochaine ouverture retrouve directement la bonne évaluation
+    const fichierActuel = (typeof travauxVisionneuse !== 'undefined' && travauxVisionneuse.getFichierActuel)
+        ? travauxVisionneuse.getFichierActuel() : null;
+    if (fichierActuel && typeof travauxStockage !== 'undefined' && travauxStockage.mettreAJourFichier) {
+        const modifications = {};
+        if (!fichierActuel.productionId && productionId) {
+            modifications.productionId = productionId;
+            fichierActuel.productionId = productionId;
+        }
+        if (!fichierActuel.etudiantDA && etudiantDA) {
+            modifications.etudiantDA = etudiantDA;
+            fichierActuel.etudiantDA = etudiantDA;
+        }
+        if (!fichierActuel.groupeCoursId && groupeCoursActif?.id) {
+            modifications.groupeCoursId = groupeCoursActif.id;
+            fichierActuel.groupeCoursId = groupeCoursActif.id;
+        }
+        if (Object.keys(modifications).length > 0) {
+            travauxStockage.mettreAJourFichier(fichierActuel.id, modifications);
+            console.log(`[Évaluation] Métadonnées propagées sur le fichier ${fichierActuel.id}:`, Object.keys(modifications).join(', '));
+        }
+    }
+
     // Mettre à jour les badges (pills) dans la barre de fichiers
     majBadgesApresEvaluation();
 
