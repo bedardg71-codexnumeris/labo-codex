@@ -311,6 +311,9 @@
         moduleInitialise = true;
         console.log('[Travaux-UI] Module Travaux initialise');
 
+        // Rétro-propager les métadonnées des évaluations vers les fichiers orphelins
+        retroPropagerMetadonnees();
+
         const fichierRestaure = restaurerEtatSession();
         if (fichierRestaure) {
             const fichiers = travauxStockage.obtenirFichiersGroupeActif();
@@ -1587,12 +1590,64 @@
     }
 
     /**
+     * Rétro-propage les métadonnées (productionId, etudiantDA, groupeCoursId)
+     * des évaluations existantes vers les fichiers qui en manquent.
+     * Corrige les fichiers importés/évalués avant le fix de propagation (9429666).
+     * S'exécute une fois à l'initialisation du module.
+     */
+    function retroPropagerMetadonnees() {
+        const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
+        if (!evaluations.length) return;
+
+        const fichiers = travauxStockage.obtenirFichiersTravaux();
+        const modifications = {};
+
+        fichiers.forEach(f => {
+            if (!f.etudiantDA) return; // pas de DA → pas de matching possible
+            const modifs = {};
+
+            if (!f.productionId) {
+                // Chercher une évaluation pour cet étudiant avec un productionId
+                const evalsEtudiant = evaluations.filter(e =>
+                    e.etudiantDA === f.etudiantDA && e.productionId && !e.remplaceeParId
+                );
+                const productionsDistinctes = [...new Set(evalsEtudiant.map(e => e.productionId))];
+                // Ne propager que s'il y a exactement UNE production (sinon ambiguïté)
+                if (productionsDistinctes.length === 1) {
+                    modifs.productionId = productionsDistinctes[0];
+                }
+            }
+
+            if (!f.groupeCoursId) {
+                const evGc = evaluations.find(e =>
+                    e.etudiantDA === f.etudiantDA && e.groupeCoursId && !e.remplaceeParId
+                );
+                if (evGc) modifs.groupeCoursId = evGc.groupeCoursId;
+            }
+
+            if (Object.keys(modifs).length > 0) {
+                modifications[f.id] = modifs;
+            }
+        });
+
+        const nbMisAJour = Object.keys(modifications).length;
+        if (nbMisAJour > 0) {
+            travauxStockage.mettreAJourFichiersBatch(modifications);
+            console.log(`[Travaux-UI] Rétro-propagation métadonnées : ${nbMisAJour} fichier(s) mis à jour`);
+        }
+    }
+
+    /**
      * Determine le statut d'un fichier (importe, annote, evalue)
      */
     function determinerStatutFichier(f, evaluations) {
-        const evaluation = evaluations.find(e =>
-            e.etudiantDA === f.etudiantDA && e.productionId === f.productionId
-        );
+        const evaluation = evaluations.find(e => {
+            if (e.etudiantDA !== f.etudiantDA) return false;
+            // Si le fichier a un productionId, exiger la correspondance exacte
+            if (f.productionId) return e.productionId === f.productionId;
+            // Si le fichier n'a PAS de productionId, accepter toute évaluation pour cet étudiant
+            return true;
+        });
         if (evaluation) return 'evalue';
         const annotation = travauxStockage.obtenirAnnotationFichier(f.id);
         if (annotation && annotationContientDuContenu(annotation)) return 'annote';
