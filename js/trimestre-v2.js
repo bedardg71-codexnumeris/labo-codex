@@ -5810,6 +5810,8 @@ async function changerGroupeCoursActifV2(valeur) {
             if (siC && !siC.classList.contains('u-hide') && typeof travauxUI.afficherImport === 'function') travauxUI.afficherImport();
             var sfC = document.getElementById('evaluations-contenu-fichiers');
             if (sfC && !sfC.classList.contains('u-hide') && typeof travauxUI.afficherFichiers === 'function') travauxUI.afficherFichiers();
+            var saC = document.getElementById('evaluations-contenu-archivage');
+            if (saC && !saC.classList.contains('u-hide') && typeof travauxUI.afficherArchivage === 'function') travauxUI.afficherArchivage();
         }
 
         console.log('[Trimestre V2] Mode COURS activé:', coursId, '(tous groupes)');
@@ -5949,6 +5951,8 @@ async function changerGroupeCoursActifV2(valeur) {
         if (siGC && !siGC.classList.contains('u-hide') && typeof travauxUI.afficherImport === 'function') travauxUI.afficherImport();
         var sfGC = document.getElementById('evaluations-contenu-fichiers');
         if (sfGC && !sfGC.classList.contains('u-hide') && typeof travauxUI.afficherFichiers === 'function') travauxUI.afficherFichiers();
+        var saGC = document.getElementById('evaluations-contenu-archivage');
+        if (saGC && !saGC.classList.contains('u-hide') && typeof travauxUI.afficherArchivage === 'function') travauxUI.afficherArchivage();
     }
 
     console.log('[Trimestre V2] Groupe-cours activé:', gc.id);
