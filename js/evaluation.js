@@ -5753,8 +5753,8 @@ function basculerVerrouillageEvaluationCourante() {
         return;
     }
 
-    // Utiliser obtenirDonneesSelonMode au lieu de localStorage direct
-    let evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
+    // CORRECTION: Lire TOUTES les évaluations (pas seulement celles du cours actif)
+    let evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
     const index = evaluations.findIndex(e => e.id === evaluationId);
 
     if (index === -1) {
@@ -5791,6 +5791,11 @@ function basculerVerrouillageEvaluationCourante() {
     // Activer/désactiver tous les champs du formulaire (sans reload)
     if (typeof desactiverFormulaireEvaluation === 'function') {
         desactiverFormulaireEvaluation(estVerrouillee);
+    }
+
+    // Rafraîchir les badges pour mettre à jour les cadenas
+    if (typeof travauxUI !== 'undefined' && typeof travauxUI.afficherFichiers === 'function') {
+        travauxUI.afficherFichiers();
     }
 }
 
