@@ -633,13 +633,15 @@
 
         const etudiants = obtenirDonneesSelonMode(cle('groupeEtudiants'));
         const productions = obtenirDonneesSelonMode(cle('productions'));
-        const stats = travauxStockage.statistiquesFichiers();
-
         const fichiersTravaux = travauxStockage.obtenirFichiersGroupeActif();
+        const tailleFiltree = fichiersTravaux.reduce((acc, f) => acc + (f.tailleFichier || 0), 0);
+        const tailleFormatee = tailleFiltree >= 1048576
+            ? (tailleFiltree / 1048576).toFixed(1) + ' Mo'
+            : (tailleFiltree / 1024).toFixed(1) + ' Ko';
 
         conteneur.innerHTML = `
             <h3>Archivage des travaux <button class="btn-aide-contextuelle" data-aide="evaluations-annoter" aria-label="Aide contextuelle">📍</button></h3>
-            <p class="texte-muted">${stats.nombre} fichier(s) en stock (${stats.tailleFormatee})</p>
+            <p class="texte-muted">${fichiersTravaux.length} fichier(s) en stock (${tailleFormatee})</p>
 
             ${genererGrilleFichiers(fichiersTravaux, 'ouvrirPreviewInline')}
 
@@ -1597,32 +1599,46 @@
      */
     function retroPropagerMetadonnees() {
         const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
-        if (!evaluations.length) return;
-
         const fichiers = travauxStockage.obtenirFichiersTravaux();
+        if (!fichiers.length) return;
+
+        // Construire un index DA → groupeCoursId à partir de l'appartenance réelle
+        // des étudiants (groupeEtudiants + groupesCours), PAS des évaluations
+        const tousEtudiants = db.getSync(cle('groupeEtudiants'), []);
+        const tousGC = db.getSync(cle('groupesCours'), []);
+        const normaliserGroupe = (g) => String(g || '').padStart(5, '0');
+        const daVersGcId = {};
+        tousEtudiants.forEach(e => {
+            if (!e.da || !e.groupe) return;
+            const gc = tousGC.find(gc =>
+                gc.coursId === e.coursId &&
+                normaliserGroupe(gc.groupe) === normaliserGroupe(e.groupe)
+            );
+            if (gc) daVersGcId[e.da] = gc.id;
+        });
+
         const modifications = {};
 
         fichiers.forEach(f => {
-            if (!f.etudiantDA) return; // pas de DA → pas de matching possible
+            if (!f.etudiantDA) return;
             const modifs = {};
 
-            if (!f.productionId) {
-                // Chercher une évaluation pour cet étudiant avec un productionId
+            // productionId : depuis les évaluations (IDs uniques, fiable)
+            if (!f.productionId && evaluations.length) {
                 const evalsEtudiant = evaluations.filter(e =>
                     e.etudiantDA === f.etudiantDA && e.productionId && !e.remplaceeParId
                 );
                 const productionsDistinctes = [...new Set(evalsEtudiant.map(e => e.productionId))];
-                // Ne propager que s'il y a exactement UNE production (sinon ambiguïté)
                 if (productionsDistinctes.length === 1) {
                     modifs.productionId = productionsDistinctes[0];
                 }
             }
 
-            if (!f.groupeCoursId) {
-                const evGc = evaluations.find(e =>
-                    e.etudiantDA === f.etudiantDA && e.groupeCoursId && !e.remplaceeParId
-                );
-                if (evGc) modifs.groupeCoursId = evGc.groupeCoursId;
+            // groupeCoursId : depuis l'appartenance réelle de l'étudiant
+            // Corrige aussi les fichiers dont le groupeCoursId est erroné
+            const gcReel = daVersGcId[f.etudiantDA];
+            if (gcReel && f.groupeCoursId !== gcReel) {
+                modifs.groupeCoursId = gcReel;
             }
 
             if (Object.keys(modifs).length > 0) {
