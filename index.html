@@ -5089,16 +5089,6 @@
                                 <p>Sélectionne une production dans la barre latérale ou crée une nouvelle production</p>
                             </div>
 
-                            <!-- Zone d'aperçu PDF (Beta 95.7 - #30) -->
-                            <div id="zoneApercuProductions" class="zone-apercu-pdf">
-                                <div id="contenuApercuProductions"></div>
-                                <div class="zone-apercu-pdf-actions">
-                                    <button onclick="exporterProductionsEnPDF()" class="btn btn-principal">
-                                        📄 Exporter en PDF
-                                    </button>
-                                </div>
-                            </div>
-
                             <!-- Formulaire d'édition -->
                             <div id="formulaireProduction" class="u-hide">
                                 <div class="panneau-formulaire">
@@ -5268,6 +5258,9 @@
                                         </button>
                                         <button id="btnSupprimerProduction" class="btn btn-supprimer u-hide" onclick="supprimerProductionActive()" title="Supprimer cette production">
                                             Supprimer
+                                        </button>
+                                        <button id="btnExporterPDFProduction" class="btn btn-secondaire u-hide" onclick="exporterProductionsEnPDF()" title="Exporter les productions en PDF">
+                                            Exporter en PDF
                                         </button>
                                     </div>
                                     <!-- Boutons droite (actions principales) -->
@@ -6615,16 +6608,6 @@
                                     <p>Sélectionne une cartouche dans la barre latérale ou crée une nouvelle cartouche</p>
                                 </div>
 
-                                <!-- Zone d'aperçu PDF (Beta 95.7 - #30) -->
-                                <div id="zoneApercuCartouche" class="zone-apercu-pdf">
-                                    <div id="contenuApercuCartouche"></div>
-                                    <div class="zone-apercu-pdf-actions">
-                                        <button onclick="exporterCartoucheSelectionneeEnPDF()" class="btn btn-principal">
-                                            📄 Exporter en PDF
-                                        </button>
-                                    </div>
-                                </div>
-
                                 <!-- ANCIEN SYSTÈME (Caché, gardé pour compatibilité interne) -->
                                 <div style="display: none;">
                                     <select id="selectGrilleRetroaction"></select>
@@ -6731,6 +6714,9 @@
                                         </button>
                                         <button id="btnSupprimerCartouche" class="btn btn-supprimer u-hide" onclick="supprimerCartoucheActive()" title="Supprimer cette cartouche">
                                             Supprimer
+                                        </button>
+                                        <button id="btnExporterPDFCartouche" class="btn btn-secondaire u-hide" onclick="exporterCartoucheSelectionneeEnPDF()" title="Exporter cette cartouche en PDF">
+                                            Exporter en PDF
                                         </button>
                                     </div>
                                     <!-- Boutons droite (actions principales) -->
@@ -12132,7 +12118,7 @@
                 <!-- ========================================
                      MODAL : CONFIRMATION SUPPRESSION RESSOURCE
                      ======================================== -->
-                <div id="modal-suppression-ressource" class="modal-overlay" style="display: none;">
+                <div id="modal-suppression-ressource" class="modal-overlay">
                     <div class="modal-contenu" style="max-width: 500px;">
                         <div class="modal-header zone-danger-header">
                             <h3>Supprimer définitivement</h3>
@@ -12144,19 +12130,19 @@
                             </div>
 
                             <!-- Dépendances bloquantes -->
-                            <div id="suppression-dependances-bloquantes" class="alerte alerte-erreur" style="display: none; margin-top: 15px;">
+                            <div id="suppression-dependances-bloquantes" class="alerte alerte-erreur u-hide" style="margin-top: 15px;">
                                 <h4 style="color: #c62828; margin-bottom: 10px;">Suppression impossible</h4>
                                 <ul id="liste-dependances-bloquantes" style="margin: 0 0 0 20px;"></ul>
                             </div>
 
                             <!-- Avertissements -->
-                            <div id="suppression-avertissements" class="alerte alerte-attention" style="display: none; margin-top: 15px;">
+                            <div id="suppression-avertissements" class="alerte alerte-attention u-hide" style="margin-top: 15px;">
                                 <h4 style="color: #e65100; margin-bottom: 10px;">Attention</h4>
                                 <ul id="liste-avertissements" style="margin: 0 0 0 20px;"></ul>
                             </div>
 
                             <!-- Confirmation par nom -->
-                            <div id="suppression-confirmation" style="display: none; margin-top: 20px;">
+                            <div id="suppression-confirmation" class="u-hide" style="margin-top: 20px;">
                                 <label style="display: block; margin-bottom: 10px; font-weight: bold;">
                                     Pour confirmer, tape le nom de la ressource :
                                 </label>
@@ -17176,7 +17162,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '98';
-        const BUILD_ID = '0225-0955';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0225-1357';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';

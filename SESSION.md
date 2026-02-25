@@ -1,12 +1,30 @@
-# SESSION ACTIVE - BETA 98.02
+# SESSION ACTIVE - BETA 98.03
 
 **Date** : 25 février 2026
-**Version** : Beta 98.02 (build 0225-0955)
-**Statut** : Pipeline d'import — réglages par fichier, bouton re-déposer, préférence SIS
+**Version** : Beta 98.03
+**Statut** : Gestion avancée des ressources, panneau évaluation, export PDF, filtre production
 
-## SESSION DU 25 FÉVRIER 2026
+## SESSION DU 25 FÉVRIER 2026 (après-midi)
 
-### Travail accompli — Pipeline d'import et préférences (25 février 2026)
+### Travail accompli — Gestion avancée, évaluation et nettoyage (25 février 2026)
+
+154. **Gestion avancée : fusion bibliothèque + templates** : La Gestion avancée des ressources (Réglages > Données) ne lisait que les clés `bibliothequeGrilles`/`bibliothequeEchelles`, ignorant `grillesTemplates`/`echellesTemplates` utilisées par les dropdowns d'Évaluer. Nouvelle fonction `fusionnerRessources(biblio, templates)` dans `donnees-v2.js` qui combine, déduplique par `id` (priorité bibliothèque) et ajoute un marqueur `_source`. Compteurs, tableaux d'affichage (V1 et V2), lookup de suppression et suppression effective mis à jour pour lire et supprimer des deux côtés. Colonne « Source » ajoutée aux tableaux grilles et échelles avec badges Bibliothèque/Templates.
+
+155. **Panneau évaluation : scrollbar pour tous les critères** : Le 5e critère d'une grille à 5 critères (ex: « Français ») était coupé sans scrollbar. Cause : `.travaux-panneau-lateral` avait `overflow: hidden` et `.travaux-panneau-corps` un `max-height: calc(100vh - 220px)` trop restrictif. Corrigé : `overflow-y: auto` sur le panneau latéral, `max-height` ajusté à `calc(100vh - 120px)`.
+
+156. **Panneau Rétroaction redimensionnable** : Le splitter entre Évaluation et Rétroaction ne permettait pas de rétrécir Rétroaction vers la droite. Deux causes : `#travaux-palette-eval-retro` avait `min-width: 400px` (réduit à 100px), et `.eval-col-retro` avait `flex-shrink: 0` (changé à `flex: 0 1 340px`). La largeur par défaut passe de 260px à 340px pour un meilleur équilibre initial.
+
+157. **Bouton Export PDF déplacé (productions et cartouches)** : Les zones d'aperçu PDF flottantes (`#zoneApercuProductions`, `#zoneApercuCartouche`) supprimées de `index.html`. Remplacées par un bouton « Exporter en PDF » dans la barre de boutons du formulaire d'édition (`btnExporterPDFProduction`, `btnExporterPDFCartouche`), visible uniquement en mode édition.
+
+158. **Export PDF cartouche : source corrigée** : `exporterCartoucheSelectionneeEnPDF()` dans `export-pdf.js` utilisait les anciens selects cachés (`selectGrilleRetroaction`, `selectCartouche`). Corrigé : utilise `window.cartoucheActuel` en priorité (nouvelle interface sidebar), avec fallback sur les anciens selects.
+
+159. **Métadonnées cartouche : backfill systématique** : `sauvegarderCartouche()` dans `cartouches.js` initialise maintenant `metadata_cc` (date_creation, auteur_original, contributeurs) pour toutes les cartouches, pas seulement les nouvelles. Corrige les cartouches anciennes sans métadonnées.
+
+160. **Filtre production persisté** : Le dropdown « Filtrer par production » dans la grille de fichiers est maintenant persisté en `sessionStorage` (`travaux-filtre-production`). Le filtre est restauré automatiquement lors du rafraîchissement de la vue. La sélection de production dans le pipeline est aussi persistée (`travaux-pipeline-production`).
+
+161. **Modal suppression ressource : migration style** : `modal-suppression-ressource` dans `index.html` migré de `style="display:none"` vers la classe `.modal-overlay` standard. Les alertes de dépendances et avertissements migrent de `style="display:none"` vers `u-hide`.
+
+### Travail accompli — Pipeline d'import et préférences (25 février 2026, matin)
 
 148. **Bouton « Re-déposer les fichiers »** : Quand la file d'attente du pipeline est restaurée depuis `sessionStorage`, les blobs `File` sont perdus (non sérialisables). Ajout d'une alerte orange globale indiquant le nombre de fichiers à re-déposer, avec un bouton qui ouvre un sélecteur de fichiers. Correspondance par nom exact (`nomFichier === fichier.name`). Les thumbnails sont régénérées automatiquement. Nouvelle fonction `reattacherBlobs()` dans `travaux-import.js`, fonction `redeposerFichiers()` dans `travaux-ui.js`.
 

@@ -24,6 +24,7 @@
     let sidebarManuelReplie = false;
     let modeCourant = 'annoter'; // 'annoter' | 'evaluer'
     let fichierSelectionneIndex = -1; // -1 = aucune selection dans le pipeline
+    let productionFiltreActive = sessionStorage.getItem('travaux-filtre-production') || '';
 
     function sauvegarderEtatSession() {
         const fichier = travauxVisionneuse.getFichierActuel();
@@ -547,6 +548,11 @@
                 ${genererGrilleFichiers(fichiersTravaux, 'ouvrirFichier')}
             </div>`;
 
+        // Restaurer le filtre de production persisté
+        if (productionFiltreActive) {
+            filtrerBadgesParProduction();
+        }
+
         // Rendre la visionneuse permanente sous les badges
         afficherVisionneuse();
     }
@@ -1009,8 +1015,11 @@
         const nbImages = queue.filter(f => f.estImage).length;
         const productions = obtenirDonneesSelonMode(cle('productions'));
 
-        // Production globale actuelle (prendre celle du premier fichier qui en a une)
-        const prodActuelle = queue.find(f => f.productionId)?.productionId || '';
+        // Production globale actuelle (prendre celle du premier fichier qui en a une, ou la valeur persistée)
+        const prodActuelle = queue.find(f => f.productionId)?.productionId
+            || travauxImport.getProductionGlobale()
+            || sessionStorage.getItem('travaux-pipeline-production')
+            || '';
 
         // === Colonne gauche : Originaux (apercu pre-traitement) ===
         let colGauche = '<div class="pipeline-col-originaux">';
@@ -1558,6 +1567,8 @@
         queue.forEach(f => {
             f.productionId = productionId;
         });
+        travauxImport.setProductionGlobale(productionId);
+        sessionStorage.setItem('travaux-pipeline-production', productionId || '');
         identifierAutoPipeline();
         rafraichirPipelineUI();
     }
@@ -1815,7 +1826,8 @@
                 htmlDropdown += '<option value="">Toutes les productions</option>';
             }
             productionsAvecFichiers.forEach(p => {
-                htmlDropdown += `<option value="${p.id}">${echapperHtml(p.titre || p.nom || p.id)} (${groupes[p.id].length})</option>`;
+                const sel = (productionFiltreActive === p.id) ? ' selected' : '';
+                htmlDropdown += `<option value="${p.id}"${sel}>${echapperHtml(p.titre || p.nom || p.id)} (${groupes[p.id].length})</option>`;
             });
             htmlDropdown += '</select>';
         }
@@ -1855,6 +1867,8 @@
     function filtrerBadgesParProduction() {
         const select = document.getElementById('filtre-production-badges');
         const productionId = select ? select.value : '';
+        productionFiltreActive = productionId;
+        sessionStorage.setItem('travaux-filtre-production', productionId);
         const groupes = document.querySelectorAll('.travaux-badges-groupe');
 
         groupes.forEach(groupe => {

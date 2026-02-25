@@ -1277,29 +1277,31 @@ async function exporterProductionsEnPDF() {
  */
 async function exporterCartoucheSelectionneeEnPDF() {
     try {
-        // Recuperer la cartouche selectionnee via l'interface
-        const grilleId = document.getElementById('selectGrilleRetroaction')?.value;
-        const cartoucheId = document.getElementById('selectCartouche')?.value;
+        // Utiliser la cartouche active en priorite (nouvelle interface sidebar)
+        let cartouche = window.cartoucheActuel || null;
 
-        if (!grilleId || !cartoucheId) {
-            alert('Veuillez d\'abord selectionner une cartouche.');
-            return;
+        // Fallback : anciens selects caches (compatibilite)
+        if (!cartouche) {
+            const grilleId = document.getElementById('selectGrilleRetroaction')?.value;
+            const cartoucheId = document.getElementById('selectCartouche')?.value;
+
+            if (!grilleId || !cartoucheId) {
+                alert('Veuillez d\'abord s\u00e9lectionner une cartouche.');
+                return;
+            }
+
+            let cartouches = await db.get(`cartouches_${grilleId}`) || [];
+            if (!Array.isArray(cartouches)) cartouches = [cartouches];
+            cartouche = cartouches.find(c => c.id === cartoucheId);
         }
 
-        // Charger les cartouches de cette grille
-        let cartouches = await db.get(`cartouches_${grilleId}`) || [];
-        if (!Array.isArray(cartouches)) {
-            cartouches = [cartouches];
-        }
-
-        const cartouche = cartouches.find(c => c.id === cartoucheId);
         if (!cartouche) {
             alert('Cartouche introuvable.');
             return;
         }
 
         await exporterCartouchePDF(cartouche, {
-            nomFichier: `cartouche-${cartouche.nom || cartoucheId}.pdf`
+            nomFichier: `cartouche-${cartouche.nom || cartouche.id}.pdf`
         });
     } catch (err) {
         console.error('[export-pdf] Erreur export cartouche:', err);

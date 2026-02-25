@@ -765,25 +765,29 @@ async function sauvegarderCartouche() {
     cartoucheActuel.nom = nom;
     cartoucheActuel.contexte = document.getElementById('contexteCartouche').value.trim();
     cartoucheActuel.pratiquesCompatibles = pratiquesCompatibles;
-    
+
+    // S'assurer que metadata_cc existe toujours (backfill pour cartouches anciennes)
+    if (!cartoucheActuel.metadata_cc) cartoucheActuel.metadata_cc = {};
+    const enseignantActif = typeof obtenirNomEnseignantActif === 'function' ? obtenirNomEnseignantActif() : null;
+    if (!cartoucheActuel.metadata_cc.date_creation) {
+        cartoucheActuel.metadata_cc.date_creation = new Date().toISOString().split('T')[0];
+    }
+    if (!cartoucheActuel.metadata_cc.auteur_original && enseignantActif) {
+        cartoucheActuel.metadata_cc.auteur_original = enseignantActif;
+    }
+    if (!cartoucheActuel.metadata_cc.contributeurs) {
+        cartoucheActuel.metadata_cc.contributeurs = [];
+    }
+
     // Vérifier si la cartouche existe déjà
     const index = cartouches.findIndex(c => c.id === cartoucheActuel.id);
     if (index >= 0) {
         // Mise à jour
-        // 🆕 Beta 95.4 : Ajouter contributeur si l'utilisateur actif n'est pas l'auteur
         if (typeof ajouterContributeurSiNecessaire === 'function') {
             cartoucheActuel = ajouterContributeurSiNecessaire(cartoucheActuel);
         }
         cartouches[index] = cartoucheActuel;
     } else {
-        // Ajout - 🆕 Beta 95.4 : Définir l'auteur original
-        const enseignantActif = typeof obtenirNomEnseignantActif === 'function' ? obtenirNomEnseignantActif() : null;
-        if (enseignantActif) {
-            if (!cartoucheActuel.metadata_cc) cartoucheActuel.metadata_cc = {};
-            cartoucheActuel.metadata_cc.auteur_original = enseignantActif;
-            cartoucheActuel.metadata_cc.date_creation = new Date().toISOString().split('T')[0];
-            cartoucheActuel.metadata_cc.contributeurs = [];
-        }
         cartouches.push(cartoucheActuel);
     }
     
@@ -1476,12 +1480,13 @@ async function chargerCartouchePourModif(cartoucheId, grilleId) {
         const echelleId = cartouche.echelleId || '';
         await populerDropdownsCartouche(grilleId, echelleId, true);
 
-        // Afficher les boutons Dupliquer, Exporter, Importer et Supprimer (mode édition)
-        // Note: Export/Import se font maintenant via la bibliothèque
+        // Afficher les boutons Dupliquer, Supprimer et Export PDF (mode édition)
         const btnDupliquer = document.getElementById('btnDupliquerCartouche');
         const btnSupprimer = document.getElementById('btnSupprimerCartouche');
+        const btnExportPDFEdit = document.getElementById('btnExporterPDFCartouche');
         if (btnDupliquer) btnDupliquer.classList.remove('u-hide');
         if (btnSupprimer) btnSupprimer.classList.remove('u-hide');
+        if (btnExportPDFEdit) btnExportPDFEdit.classList.remove('u-hide');
 
         // NOUVELLE INTERFACE (Beta 80.5+): Passer les paramètres directement
         await chargerMatriceRetroaction(cartoucheId, grilleId);
@@ -1529,14 +1534,9 @@ async function chargerCartouchePourModif(cartoucheId, grilleId) {
 
         console.log('✅ Cartouche chargée avec succès');
 
-        // Afficher le bouton export PDF (Beta 95.7 - #30)
-        const btnExportPDF = document.getElementById('btnPreparerPDFCartouche');
-        if (btnExportPDF) btnExportPDF.classList.add('visible');
-
-        // Afficher l'apercu PDF (Beta 95.7 - #30)
-        if (typeof window.afficherApercuCartoucheSelectionnee === 'function') {
-            window.afficherApercuCartoucheSelectionnee();
-        }
+        // Afficher le bouton export PDF dans la barre de boutons
+        const btnExportPDF = document.getElementById('btnExporterPDFCartouche');
+        if (btnExportPDF) btnExportPDF.classList.remove('u-hide');
 
         // Si verrouillée, afficher l'alerte de verrouillage
         const alerteVerrouillage = document.getElementById('alerteVerrouillage');
@@ -2247,17 +2247,19 @@ async function ajouterCartoucheAGrille(grilleId) {
         selectGrille.value = grilleId;
     }
 
-    // Masquer les boutons Dupliquer, Exporter, Importer et Supprimer (mode création)
+    // Masquer les boutons Dupliquer, Exporter, Importer, Supprimer et Export PDF (mode création)
     const btnDupliquer = document.getElementById('btnDupliquerCartouche');
     const btnExporter = document.getElementById('btnExporterCartouche');
     const btnImporter = document.getElementById('btnImporterCartouche');
     const btnImporterTxt = document.getElementById('btnImporterCartoucheTxt');
     const btnSupprimer = document.getElementById('btnSupprimerCartouche');
+    const btnExportPDFInit = document.getElementById('btnExporterPDFCartouche');
     if (btnDupliquer) btnDupliquer.classList.add('u-hide');
     if (btnExporter) btnExporter.classList.add('u-hide');
     if (btnImporter) btnImporter.classList.add('u-hide');
     if (btnImporterTxt) btnImporterTxt.classList.add('u-hide');
     if (btnSupprimer) btnSupprimer.classList.add('u-hide');
+    if (btnExportPDFInit) btnExportPDFInit.classList.add('u-hide');
 
     // Initialiser une nouvelle cartouche pour cette grille
     await initialiserNouveauCartouche(grilleId);
@@ -2550,6 +2552,7 @@ window.dupliquerCartouche = dupliquerCartouche;
 window.supprimerCartoucheConfirm = supprimerCartoucheConfirm;
 window.chargerCartouchesRetroaction = chargerCartouchesRetroaction;
 window.sauvegarderCartouche = sauvegarderCartouche;
+window.sauvegarderCommentaire = sauvegarderCommentaire;
 // window.genererApercuRetroaction = genererApercuRetroaction; // FIXME: fonction n'existe pas
 window.importerCommentaires = importerCommentaires;
 window.initialiserModuleCartouches = initialiserModuleCartouches;
@@ -2915,11 +2918,13 @@ async function creerNouvelleCartouche() {
         return;
     }
 
-    // Masquer les boutons Dupliquer et Supprimer (mode création)
+    // Masquer les boutons Dupliquer, Supprimer et Export PDF (mode création)
     const btnDupliquer = document.getElementById('btnDupliquerCartouche');
     const btnSupprimer = document.getElementById('btnSupprimerCartouche');
+    const btnExportPDFCreation = document.getElementById('btnExporterPDFCartouche');
     if (btnDupliquer) btnDupliquer.classList.add('u-hide');
     if (btnSupprimer) btnSupprimer.classList.add('u-hide');
+    if (btnExportPDFCreation) btnExportPDFCreation.classList.add('u-hide');
 
     // Afficher le formulaire
     const messageAccueil = document.getElementById('messageAccueilCartouche');

@@ -1,7 +1,33 @@
 # Notes de version — Monitorage pedagogique
 
 > Document de gestion locale. Historique complet avec dates.
-> Derniere mise a jour : 24 fevrier 2026
+> Derniere mise a jour : 25 fevrier 2026
+
+---
+
+## Beta 98.03 (25 fevrier 2026)
+
+**Gestion avancee des ressources, panneau evaluation et nettoyage UI**
+
+*Gestion avancee des ressources*
+- **Fusion bibliotheque + templates** : La Gestion avancee (Reglages > Donnees) affiche et controle desormais TOUTES les grilles et echelles, qu'elles soient dans `bibliothequeGrilles`/`bibliothequeEchelles` ou `grillesTemplates`/`echellesTemplates`. Deduplication par id, colonne Source avec badges.
+- **Suppression des deux cotes** : Supprimer une grille ou echelle la retire des deux sources (bibliotheque ET templates). Les dropdowns d'Evaluer refletent les suppressions.
+
+*Panneau evaluation*
+- **Scrollbar criteres** : Le 5e critere d'une grille a 5 criteres etait coupe sans scrollbar. Corrige via `overflow-y: auto` et `max-height` ajuste.
+- **Retroaction redimensionnable** : Le panneau Retroaction peut maintenant etre retreci via le splitter (min 100px au lieu de 400px). Largeur par defaut augmentee a 340px pour un meilleur equilibre.
+
+*Export PDF et cartouches*
+- **Bouton Export PDF dans le formulaire** : Les zones d'apercu PDF flottantes sont remplacees par un bouton « Exporter en PDF » dans la barre de boutons d'edition (productions et cartouches).
+- **Export cartouche corrige** : Utilise la cartouche active (`window.cartoucheActuel`) au lieu des anciens selects caches.
+- **Metadonnees cartouche** : Backfill systematique de `metadata_cc` a la sauvegarde (corrige les cartouches anciennes).
+
+*Pipeline et filtres*
+- **Filtre production persiste** : Le dropdown de filtre par production est persiste en sessionStorage et restaure au rechargement.
+- **Production pipeline persistee** : La selection de production dans le pipeline est propagee et persistee.
+
+*Nettoyage*
+- **Modal suppression ressource** : Migration de `style="display:none"` vers classes CSS standard (`modal-overlay`, `u-hide`).
 
 ---
 
