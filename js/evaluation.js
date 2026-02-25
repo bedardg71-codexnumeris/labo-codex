@@ -5793,9 +5793,26 @@ function basculerVerrouillageEvaluationCourante() {
         desactiverFormulaireEvaluation(estVerrouillee);
     }
 
-    // Rafraîchir les badges pour mettre à jour les cadenas
-    if (typeof travauxUI !== 'undefined' && typeof travauxUI.afficherFichiers === 'function') {
-        travauxUI.afficherFichiers();
+    // Mettre à jour le cadenas sur le badge du fichier actuel (sans reconstruire la grille)
+    const fichierActuel = (typeof travauxVisionneuse !== 'undefined' && travauxVisionneuse.getFichierActuel)
+        ? travauxVisionneuse.getFichierActuel() : null;
+    if (fichierActuel) {
+        const badge = document.querySelector(`.travaux-badge-importe[data-fichier-id="${fichierActuel.id}"]`);
+        if (badge) {
+            const verrouExistant = badge.querySelector('.travaux-badge-verrou');
+            if (estVerrouillee && !verrouExistant) {
+                // Ajouter le cadenas avant le bouton supprimer
+                const btnSupp = badge.querySelector('.travaux-badge-supprimer');
+                const span = document.createElement('span');
+                span.className = 'travaux-badge-verrou';
+                span.title = 'Évaluation verrouillée';
+                span.textContent = '\u{1F512}';
+                if (btnSupp) badge.insertBefore(span, btnSupp);
+                else badge.appendChild(span);
+            } else if (!estVerrouillee && verrouExistant) {
+                verrouExistant.remove();
+            }
+        }
     }
 }
 
