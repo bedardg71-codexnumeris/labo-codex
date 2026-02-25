@@ -1,12 +1,354 @@
 {
   "tickets": [
     {
-      "id": 85,
+      "id": 37,
+      "testeur": "inconnu",
+      "resume": "Incohérence indice P vs Note finale",
+      "correction": "calculerEtStockerIndicesCP() utilise calculerDetailsNoteFinale()",
+      "build": "-",
+      "dateCorrection": "2026-01-25",
+      "statut": "vert"
+    },
+    {
+      "id": 48,
+      "testeur": "inconnu",
+      "resume": "Import données personnelles bloqué",
+      "correction": "Checkbox \"C'est ma propre sauvegarde\" + préservation IDs",
+      "build": "0131-1510",
+      "dateCorrection": "2026-01-31",
+      "statut": "vert"
+    },
+    {
+      "id": 49,
+      "testeur": "jordan",
+      "resume": "Import CSV Omnivox (SA + accents)",
+      "correction": "Encodage Windows-1252 + SA flexible col 5/6",
+      "build": "0201-0820",
+      "dateCorrection": "2026-02-01",
+      "statut": "vert"
+    },
+    {
+      "id": 50,
+      "testeur": "bruno",
+      "resume": "Primo config incomplète (jour semaine)",
+      "correction": "creerHoraireDansBanquePrimo lit horaireHebdo namespacé",
+      "build": "0201-0825",
+      "dateCorrection": "2026-02-01",
+      "statut": "vert"
+    },
+    {
+      "id": 50,
+      "testeur": "olivier",
+      "resume": "Primo config incomplète (jour semaine)",
+      "correction": "creerHoraireDansBanquePrimo lit horaireHebdo namespacé",
+      "build": "0201-0825",
+      "dateCorrection": "2026-02-01",
+      "statut": "vert"
+    },
+    {
+      "id": 51,
+      "testeur": "bruno",
+      "resume": "Horaire heures non piles (8h55)",
+      "correction": "Input type=\"time\" remplace dropdown (index.html)",
+      "build": "0201-0815",
+      "dateCorrection": "2026-02-01",
+      "statut": "vert"
+    },
+    {
+      "id": 52,
+      "testeur": "jordan",
+      "resume": "Erreurs null objectifs.js et trimestre-v2.js",
+      "correction": "Vérifications if (!element) ajoutées",
+      "build": "-",
+      "dateCorrection": "",
+      "statut": "vert"
+    },
+    {
+      "id": 53,
+      "testeur": "olivier",
+      "resume": "Menu Format horaire ne se met pas à jour",
+      "correction": "mettreAJourOptionsFormatHoraire() dynamique",
+      "build": "0201-0830",
+      "dateCorrection": "2026-02-01",
+      "statut": "vert"
+    },
+    {
+      "id": 54,
       "testeur": "gregoire",
-      "resume": "Le bouton Evaluer ne fonctionne pas apres navigation",
-      "correction": "modeCourant restait a 'evaluer' apres navigation. Reset dans initialiserModuleTravaux().",
-      "build": "97.14",
-      "dateCorrection": "2026-02-26",
+      "resume": "Message \"Partage impossible\" peu visible",
+      "correction": "Déjà en rouge (fond #f8d7da, bordure #dc3545)",
+      "build": "-",
+      "dateCorrection": "",
+      "statut": "vert"
+    },
+    {
+      "id": 55,
+      "testeur": "inconnu",
+      "resume": "Pratique configurable non trouvée dans registre",
+      "correction": "Nouvelle fonction construireConfigComplete()",
+      "build": "0131-1510",
+      "dateCorrection": "2026-01-31",
+      "statut": "vert"
+    },
+    {
+      "id": 56,
+      "testeur": "gregoire",
+      "resume": "Nommage exports sans horodatage complet",
+      "correction": "Format YYYY-MM-DD-HH-MM-SS (js/import-export.js)",
+      "build": "0201-0808",
+      "dateCorrection": "2026-02-01",
+      "statut": "vert"
+    },
+    {
+      "id": 57,
+      "testeur": "gregoire",
+      "resume": "Suppression grilles impossible",
+      "correction": "Retrait références #optionsImportExportGrilles (js/grilles.js)",
+      "build": "0201-0756",
+      "dateCorrection": "2026-02-01",
+      "statut": "vert"
+    },
+    {
+      "id": 58,
+      "testeur": "gregoire",
+      "resume": "Import productions non détectées",
+      "correction": "Support clés namespacées *_productions (js/import-export.js)",
+      "build": "0201-0756",
+      "dateCorrection": "2026-02-01",
+      "statut": "vert"
+    },
+    {
+      "id": 59,
+      "testeur": "gregoire",
+      "resume": "Horaires non trouvés - aperçu présences vide",
+      "correction": "Utilisation cle('horaires') dans 4 fichiers",
+      "build": "0201-0756",
+      "dateCorrection": "2026-02-01",
+      "statut": "vert"
+    },
+    {
+      "id": 60,
+      "testeur": "gregoire",
+      "resume": "Cours A25 sauvegardé comme H2026",
+      "correction": "Fix reinitialiserFormCoursV2() (js/trimestre-v2.js)",
+      "build": "0201-0756",
+      "dateCorrection": "2026-02-01",
+      "statut": "vert"
+    },
+    {
+      "id": 61,
+      "testeur": "gregoire",
+      "resume": "Section Trimestre tronquée sur iPad",
+      "correction": "Media queries responsive (styles.css)",
+      "build": "0201-0756",
+      "dateCorrection": "2026-02-01",
+      "statut": "vert"
+    },
+    {
+      "id": 62,
+      "testeur": "gregoire",
+      "resume": "Erreur \"reglages-horaire introuvable\"",
+      "correction": "Références mises à jour vers reglages-trimestre",
+      "build": "0201-0756",
+      "dateCorrection": "2026-02-01",
+      "statut": "vert"
+    },
+    {
+      "id": 63,
+      "testeur": "gregoire",
+      "resume": "FR: Supprimer pratiques hors-bibliothèque",
+      "correction": "Nouvelle fonction supprimerPratiqueHorsBibliotheque()",
+      "build": "0201-0756",
+      "dateCorrection": "2026-02-01",
+      "statut": "vert"
+    },
+    {
+      "id": 64,
+      "testeur": "elise",
+      "resume": "Sauvegardes Réglages impossibles (enseignant, horaire, groupe-cours)",
+      "correction": "afficherNotificationSucces/Erreur non exportées vers window — wrappers locaux + exports (trimestre-v2.js, evaluation.js, groupe.js)",
+      "build": "0213-1351",
+      "dateCorrection": "2026-02-13",
+      "statut": "vert"
+    },
+    {
+      "id": 65,
+      "testeur": "elise",
+      "resume": "Erreur console e.target.closest dans tooltips",
+      "correction": "Guard typeof check avant .closest() (tooltips.js:151,159)",
+      "build": "0213-1351",
+      "dateCorrection": "2026-02-13",
+      "statut": "vert"
+    },
+    {
+      "id": 66,
+      "testeur": "elise",
+      "resume": "0 étudiants affichés — filtrage silencieux si champ groupe absent",
+      "correction": "Inclusion étudiants sans groupe dans obtenirDonneesSelonMode et obtenirEtudiantsCoursActif (modes.js)",
+      "build": "0213-1530",
+      "dateCorrection": "2026-02-13",
+      "statut": "vert"
+    },
+    {
+      "id": 67,
+      "testeur": "elise",
+      "resume": "Rapport bug affiche \"Cours actif: undefined\"",
+      "correction": "Lecture infoCours au lieu de listeCours (rapport-bug.js)",
+      "build": "0213-1530",
+      "dateCorrection": "2026-02-13",
+      "statut": "vert"
+    },
+    {
+      "id": 68,
+      "testeur": "gregoire",
+      "resume": "ReferenceError mettreAJourBoutonsNavigation + \"Pas de cours pour ce groupe\"",
+      "correction": "Export window.mettreAJourBoutonsNavigation + fallback horaire cours actif dans validerDateSaisie (saisie-presences.js)",
+      "build": "0216-*",
+      "dateCorrection": "2026-02-16",
+      "statut": "vert"
+    },
+    {
+      "id": 69,
+      "testeur": "gregoire",
+      "resume": "Statuts « Évalué » perdus après navigation Tableau de bord → retour",
+      "correction": "Namespace manquant cle() dans rapport-bug.js ; appel redondant afficherFichiers() retiré de navigation.js ; diagnostic console.warn ajouté",
+      "build": "",
+      "dateCorrection": "2026-02-24",
+      "statut": "jaune"
+    },
+    {
+      "id": 70,
+      "testeur": "gregoire",
+      "resume": "Badge étudiant disparu de la toolbar visionneuse",
+      "correction": "Restauration du <span#travaux-badge-fichier-actif> dans la toolbar HTML + peuplement dans ouvrirFichier() (travaux-ui.js)",
+      "build": "",
+      "dateCorrection": "2026-02-24",
+      "statut": "jaune"
+    },
+    {
+      "id": 71,
+      "testeur": "gregoire",
+      "resume": "Perte silencieuse de données inter-cours (modifier/verrouiller/supprimer)",
+      "correction": "4 fonctions utilisaient obtenirDonneesSelonMode (filtré par cours) avant sauvegarde → écrasait les évaluations des autres cours. Remplacé par db.getSync(cle(...)) dans evaluation.js et liste-evaluations.js",
+      "build": "",
+      "dateCorrection": "2026-02-24",
+      "statut": "jaune"
+    },
+    {
+      "id": 72,
+      "testeur": "gregoire",
+      "resume": "Badge « EN COURS » au lieu de « ÉVALUÉ » + cadenas 🔒 manquant",
+      "correction": "Fichiers importés sans productionId ne matchaient pas les évaluations (correspondance exacte '' vs 'artefact1'). Recherche assouplie : si fichier sans productionId, accepter toute évaluation pour l'étudiant. Cadenas ajouté sur badges après auto-verrouillage dans sauvegarderEvaluationModifiee()",
+      "build": "",
+      "dateCorrection": "2026-02-24",
+      "statut": "jaune"
+    },
+    {
+      "id": 73,
+      "testeur": "gregoire",
+      "resume": "Bouton « Évaluer » ne fonctionne pas après navigation TB → retour",
+      "correction": "modeCourant restait à 'evaluer' après navigation (palettes DOM détruites sans appel à fermerModeEvaluation()). basculerMode('evaluer') retournait immédiatement. Corrigé : reset modeCourant = 'annoter' dans initialiserModuleTravaux() (travaux-ui.js)",
+      "build": "",
+      "dateCorrection": "2026-02-24",
+      "statut": "jaune"
+    },
+    {
+      "id": 74,
+      "testeur": "gregoire",
+      "resume": "Export affiche le mauvais groupe (gr.2 au lieu de gr.8)",
+      "correction": "peuplerDropdownGroupeCoursActif() validait le groupe actif contre la liste filtrée (dansSidebar !== false). Un groupe masqué était considéré invalide → auto-sélection du premier visible. Corrigé : validation contre tousGroupesCours (trimestre-v2.js:5652)",
+      "build": "",
+      "dateCorrection": "2026-02-24",
+      "statut": "jaune"
+    },
+    {
+      "id": 75,
+      "testeur": "gregoire",
+      "resume": "Export Lea : compteur « 23 évalué(s) sur 23 » au lieu de 21 (mauvais groupe)",
+      "correction": "mettreAJourCompteurLea() et exporterPourLea() utilisaient obtenirFichiersProduction() sans filtre groupe. Corrigé : obtenirFichiersGroupeActif() + match par productionId sélectionnée",
+      "build": "",
+      "dateCorrection": "2026-02-24",
+      "statut": "jaune"
+    },
+    {
+      "id": 76,
+      "testeur": "gregoire",
+      "resume": "Production non identifiée au rechargement (select vide, critères vides)",
+      "correction": "fichier.productionId vide malgré évaluation sauvegardée. Corrigé : propagation productionId/etudiantDA/groupeCoursId vers le fichier dans sauvegarderEvaluation() + fallback sécuritaire dans ouvrirFichier() (1 seule production → auto-select)",
+      "build": "",
+      "dateCorrection": "2026-02-24",
+      "statut": "jaune"
+    },
+    {
+      "id": 77,
+      "testeur": "gregoire",
+      "resume": "Synthèse rétroaction absente de l'export PDF",
+      "correction": "ajouterPageSynthese() matchait par fichier.productionId (vide). Corrigé : paramètre productionIdOverride propagé via exporterPourLea() → genererDocPDF() → ajouterPageSynthese()",
+      "build": "",
+      "dateCorrection": "2026-02-24",
+      "statut": "jaune"
+    },
+    {
+      "id": 78,
+      "testeur": "gregoire",
+      "resume": "Note chiffrée affichée malgré « Lettre seulement » dans pratique",
+      "correction": "Cascade de priorité inversée : évaluation sauvegardée primait sur la pratique. Corrigé dans travaux-export-pdf.js et evaluation.js : pratique > évaluation > défaut",
+      "build": "",
+      "dateCorrection": "2026-02-24",
+      "statut": "jaune"
+    },
+    {
+      "id": 79,
+      "testeur": "gregoire",
+      "resume": "Compteur « 21 annotés » alors que tous sont évalués",
+      "correction": "determinerStatutFichier() utilisait un matching strict (productionId === productionId), échouant pour fichiers sans productionId. Corrigé : même matching souple que genererBadgeFichierImporte()",
+      "build": "",
+      "dateCorrection": "2026-02-24",
+      "statut": "jaune"
+    },
+    {
+      "id": 80,
+      "testeur": "gregoire",
+      "resume": "Fichiers « Non associés » malgré évaluations existantes",
+      "correction": "Rétro-propagation des métadonnées (productionId, groupeCoursId) depuis les évaluations vers les fichiers orphelins à l'initialisation du module",
+      "build": "",
+      "dateCorrection": "2026-02-24",
+      "statut": "jaune"
+    },
+    {
+      "id": 81,
+      "testeur": "gregoire",
+      "resume": "Archivage affiche fichiers du mauvais groupe + compteur « 44 fichiers »",
+      "correction": "Rétro-propagation groupeCoursId basée sur l'appartenance réelle de l'étudiant (groupeEtudiants + groupesCours). Compteur filtré par groupe actif",
+      "build": "",
+      "dateCorrection": "2026-02-24",
+      "statut": "jaune"
+    },
+    {
+      "id": 82,
+      "testeur": "gregoire",
+      "resume": "Archivage ne se rafraîchit pas au changement de groupe",
+      "correction": "afficherArchivage() manquant dans les handlers de changement groupe-cours (trimestre-v2.js)",
+      "build": "",
+      "dateCorrection": "2026-02-24",
+      "statut": "jaune"
+    },
+    {
+      "id": 83,
+      "testeur": "gregoire",
+      "resume": "Checkboxes rétroaction décochées au chargement d'évaluation existante",
+      "correction": "verifierEtChargerEvaluationExistante() restaurait les valeurs sauvegardées (souvent false). Remplacé par cocherOptionsParDefaut()",
+      "build": "",
+      "dateCorrection": "2026-02-24",
+      "statut": "jaune"
+    },
+    {
+      "id": 84,
+      "testeur": "gregoire",
+      "resume": "Déverrouiller une évaluation déverrouille TOUTES les autres + cadenas disparus",
+      "correction": "basculerVerrouillageEvaluationCourante() utilisait obtenirDonneesSelonMode (filtré) → écrasait les données. Corrigé : db.getSync(cle(...)) + rafraîchissement badges",
+      "build": "",
+      "dateCorrection": "2026-02-24",
       "statut": "jaune"
     }
   ]

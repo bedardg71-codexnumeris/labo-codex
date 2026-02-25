@@ -88,6 +88,11 @@ update_build_id() {
     sed -i '' "s/\*\*Derniere mise a jour\*\* : .* (Toronto)/**Derniere mise a jour** : $date_fr (Toronto)/" "$SESSION_MD"
     log_success "SESSION.md: Timestamp mis a jour"
 
+    # Regenerer resolutions.json depuis SUIVI-BUGS.md
+    log_info "Regeneration resolutions.json..."
+    node "$PROJECT_ROOT/scripts/generer-resolutions.js"
+    log_success "resolutions.json regenere"
+
     echo ""
     log_success "BUILD_ID mis a jour: $new_build_id"
 }
@@ -215,6 +220,7 @@ show_help() {
     echo "  minor 95.4      Version mineure specifique"
     echo "  major [X]       Version majeure avec archivage"
     echo "  major 96        Version majeure specifique"
+    echo "  resolutions     Regenere resolutions.json depuis SUIVI-BUGS.md"
     echo "  status          Affiche version actuelle"
     echo "  help            Affiche cette aide"
     echo ""
@@ -251,6 +257,11 @@ case "$1" in
         ;;
     major)
         update_major_version "$2"
+        ;;
+    resolutions)
+        log_info "Regeneration resolutions.json depuis SUIVI-BUGS.md..."
+        node "$PROJECT_ROOT/scripts/generer-resolutions.js"
+        log_success "resolutions.json regenere"
         ;;
     status)
         show_status

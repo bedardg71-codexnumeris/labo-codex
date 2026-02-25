@@ -91,6 +91,23 @@
 3. Documenter dans le sous-dossier du testeur si fichiers/screenshots fournis
 
 ### Pour marquer comme corrigé
-1. Déplacer la ligne vers "Corrigés"
-2. Ajouter la date de correction et le build
+1. Déplacer la ligne vers la section "Corrigés" appropriée
+2. Ajouter la date de correction
 3. Résumer brièvement la correction
+4. Optionnel : préfixer la correction par `[VERT]` si testé et confirmé par Grégoire (sinon le statut sera « jaune » = en attente de confirmation testeur)
+
+### resolutions.json — auto-généré
+
+> **Ne jamais éditer `resolutions.json` manuellement.**
+
+Le fichier `resolutions.json` est généré automatiquement par `scripts/generer-resolutions.js` à partir de ce document. Il est regénéré à chaque build.
+
+**Workflow simplifié :**
+1. Éditer ce fichier (`SUIVI-BUGS.md`) — c'est la seule source de vérité
+2. Lancer un build (`./scripts/update-version.sh build`) ou régénérer seul (`./scripts/update-version.sh resolutions`)
+3. Commit + push — les testeurs voient le résultat dans l'app
+
+**Logique des statuts :**
+- Section « Ouverts » → 🔴 rouge
+- 1re section « Corrigés » (la plus récente) → 🟡 jaune (sauf si `[VERT]` en début de correction → 🟢 vert)
+- Sections « Corrigés » plus anciennes → 🟢 vert
