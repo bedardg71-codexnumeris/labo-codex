@@ -780,23 +780,28 @@
             y = mm(cfg.marges.haut);
         }
 
-        // 1. Radio DOM (si page évaluation ouverte)
+        // 🔧 FIX (24 fév 2026) : La préférence de la pratique prime sur l'évaluation individuelle
+        // L'utilisateur configure "Lettre seulement" dans sa pratique → ça doit s'appliquer
+        // même si l'évaluation a été sauvegardée avec "complet" (ancien défaut)
+        let modeNote = null;
+
+        // 1. Radio DOM (si page évaluation ouverte — choix explicite de l'utilisateur)
         const radioUI = document.querySelector('input[name="affichageNote1"]:checked');
-        let modeNote = radioUI ? radioUI.value : null;
+        if (radioUI) modeNote = radioUI.value;
 
-        // 2. Valeur sauvegardée dans l'évaluation
-        if (!modeNote) modeNote = opts.affichageNote;
-
-        // 3. Préférence de la pratique active
+        // 2. Préférence de la pratique active (config globale)
         if (!modeNote) {
             try {
                 const configurations = db.getSync('pratiquesConfigurables', []);
                 const modalites = db.getSync('modalitesEvaluation', {});
                 const pratiqueId = modalites.pratiqueActiveId || modalites.configurationSTDAppliquee?.id;
                 const pratiqueActive = pratiqueId ? configurations.find(p => p.id === pratiqueId) : null;
-                if (pratiqueActive) modeNote = pratiqueActive.affichageNote;
+                if (pratiqueActive && pratiqueActive.affichageNote) modeNote = pratiqueActive.affichageNote;
             } catch(e) { /* silencieux */ }
         }
+
+        // 3. Valeur sauvegardée dans l'évaluation (fallback)
+        if (!modeNote) modeNote = opts.affichageNote;
 
         // 4. Défaut
         if (!modeNote) modeNote = 'complet';
