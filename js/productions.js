@@ -3085,11 +3085,6 @@ async function afficherListeProductions(filtreType = '') {
     }).join('');
 
     container.innerHTML = html;
-
-    // Afficher l'apercu PDF de la liste (Beta 95.7 - #30)
-    if (typeof window.afficherApercuProductionsListe === 'function') {
-        window.afficherApercuProductionsListe();
-    }
 }
 
 /**
@@ -3118,24 +3113,17 @@ async function chargerProductionPourModif(id) {
     const accueil = document.getElementById('accueilProductions');
     if (accueil) accueil.classList.add('u-hide');
 
-    // ✅ AJOUT (28 janvier 2026) : Masquer l'aperçu de la liste des productions
-    // L'aperçu ne doit s'afficher que dans la vue d'accueil, pas quand on édite une production
-    const zoneApercu = document.getElementById('zoneApercuProductions');
-    if (zoneApercu) zoneApercu.classList.remove('visible');
-    const btnExport = document.getElementById('btnExporterProductionsPDF');
-    if (btnExport) btnExport.classList.remove('visible');
-
     // Afficher le formulaire
     const formulaire = document.getElementById('formulaireProduction');
     if (formulaire) formulaire.classList.remove('u-hide');
 
-    // Note: Section optionsImportExportProductions supprimée (Beta 92)
-    // Afficher les boutons Dupliquer et Supprimer (mode édition)
-    // Note: Export/Import se font maintenant via la bibliothèque
+    // Afficher les boutons Dupliquer, Supprimer et Export PDF (mode édition)
     const btnDupliquer = document.getElementById('btnDupliquerProduction');
     const btnSupprimer = document.getElementById('btnSupprimerProduction');
+    const btnExportPDFProd = document.getElementById('btnExporterPDFProduction');
     if (btnDupliquer) btnDupliquer.classList.remove('u-hide');
     if (btnSupprimer) btnSupprimer.classList.remove('u-hide');
+    if (btnExportPDFProd) btnExportPDFProd.classList.remove('u-hide');
 
     // Appeler afficherFormProduction pour charger les données
     await afficherFormProduction(id);
@@ -3174,23 +3162,17 @@ function creerNouvelleProduction() {
     const accueil = document.getElementById('accueilProductions');
     if (accueil) accueil.classList.add('u-hide');
 
-    // ✅ AJOUT (28 janvier 2026) : Masquer l'aperçu de la liste des productions
-    const zoneApercu = document.getElementById('zoneApercuProductions');
-    if (zoneApercu) zoneApercu.classList.remove('visible');
-    const btnExportPDF = document.getElementById('btnExporterProductionsPDF');
-    if (btnExportPDF) btnExportPDF.classList.remove('visible');
-
     // Afficher le formulaire
     const formulaire = document.getElementById('formulaireProduction');
     if (formulaire) formulaire.classList.remove('u-hide');
 
-    // Note: Section optionsImportExportProductions supprimée (Beta 92)
-    // Cacher les boutons Dupliquer et Supprimer (mode création)
-    // Note: Export/Import se font maintenant via la bibliothèque
+    // Cacher les boutons Dupliquer, Supprimer et Export PDF (mode création)
     const btnDupliquer = document.getElementById('btnDupliquerProduction');
     const btnSupprimer = document.getElementById('btnSupprimerProduction');
+    const btnExportPDFNew = document.getElementById('btnExporterPDFProduction');
     if (btnDupliquer) btnDupliquer.classList.add('u-hide');
     if (btnSupprimer) btnSupprimer.classList.add('u-hide');
+    if (btnExportPDFNew) btnExportPDFNew.classList.add('u-hide');
 
     // Réinitialiser le formulaire
     document.getElementById('productionDescription').value = '';
