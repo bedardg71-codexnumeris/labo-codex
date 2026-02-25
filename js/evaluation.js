@@ -4820,29 +4820,13 @@ function modifierEvaluation(evaluationId) {
             }
 
             // ÉTAPE 11: Charger les options d'affichage
+            // 🔧 FIX (24 fév 2026) : Les checkboxes d'affichage sont toujours cochées par défaut
+            // au chargement. L'utilisateur peut les décocher manuellement s'il le veut.
+            // Les valeurs sauvegardées ne reflétaient pas forcément l'intention de l'utilisateur.
             console.log('1️⃣1️⃣ Chargement options d\'affichage');
-            if (evaluation.optionsAffichage) {
-                document.getElementById('afficherDescription1').checked = evaluation.optionsAffichage.description;
-                document.getElementById('afficherObjectif1').checked = evaluation.optionsAffichage.objectif;
-                document.getElementById('afficherTache1').checked = evaluation.optionsAffichage.tache;
-                document.getElementById('afficherAdresse1').checked = evaluation.optionsAffichage.adresse;
-                document.getElementById('afficherContexte1').checked = evaluation.optionsAffichage.contexte;
-                // Restaurer le mode d'affichage de la note
-                // 🔧 FIX (24 fév 2026) : La préférence de la pratique prime sur la valeur sauvegardée
-                // L'utilisateur configure "Lettre seulement" dans sa pratique → ça s'applique
-                // Il peut changer à la pièce via le radio si besoin
-                let modeNote = null;
-                try {
-                    const configurations = db.getSync('pratiquesConfigurables', []);
-                    const modalites = db.getSync('modalitesEvaluation', {});
-                    const pratiqueId = modalites.pratiqueActiveId || modalites.configurationSTDAppliquee?.id;
-                    const pratiqueActive = pratiqueId ? configurations.find(p => p.id === pratiqueId) : null;
-                    if (pratiqueActive && pratiqueActive.affichageNote) modeNote = pratiqueActive.affichageNote;
-                } catch(e) { /* silencieux */ }
-                if (!modeNote) modeNote = evaluation.optionsAffichage.affichageNote || 'complet';
-                const radioNote = document.getElementById(modeNote === 'lettre' ? 'affichageNoteLettre1' : 'affichageNoteComplet1');
-                if (radioNote) radioNote.checked = true;
-            }
+            // cocherOptionsParDefaut() coche toutes les checkboxes ET applique
+            // la préférence de la pratique pour le radio affichageNote
+            cocherOptionsParDefaut();
 
             // ÉTAPE 12: Charger la rétroaction finale
             // ✅ CORRECTION (30 déc 2025): Anonymiser le texte si en mode Anonymisé
