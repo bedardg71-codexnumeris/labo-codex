@@ -14569,7 +14569,7 @@ body.mode-clair .prep-select {
 }
 
 #travaux-palette-eval-retro {
-    min-width: 400px;
+    min-width: 100px;
     max-width: 90vw;
 }
 
@@ -14578,6 +14578,7 @@ body.mode-clair .prep-select {
     padding: 0;
     min-width: 0;
     overflow: hidden;
+    overflow-y: auto;
 }
 
 .travaux-panneau-lateral .carte-bleu-fonce,
@@ -14612,7 +14613,7 @@ body.mode-clair .prep-select {
     flex-direction: column;
     gap: 6px;
     overflow-y: auto;
-    max-height: calc(100vh - 220px);
+    max-height: calc(100vh - 120px);
 }
 
 /* Adaptation des formulaires dans les panneaux etroits */
@@ -20438,9 +20439,9 @@ body.mode-clair .barre-etudiant.tracked-4 {
     min-height: 0;
 }
 
-/* Colonne Retroaction (pleine hauteur) */
+/* Colonne Retroaction (pleine hauteur, redimensionnable via splitter) */
 .eval-layout-flex .eval-col-retro {
-    flex: 0 0 260px;
+    flex: 0 1 340px;
     display: flex;
     flex-direction: column;
     overflow: auto;
