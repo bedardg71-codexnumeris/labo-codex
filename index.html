@@ -4302,17 +4302,18 @@
                         <!-- Filtres et recherche -->
                         <div class="carte-grise-mb20">
                             <div class="grid-auto-180">
-                                <div class="groupe-form">
+                                <div class="groupe-form" style="grid-column: span 2;">
                                     <label for="date-cours" class="label-formulaire">Date du cours</label>
                                     <div class="d-flex-gap8-center">
                                         <button id="btn-cours-precedent" onclick="allerCoursPrecedent()"
-                                            class="btn btn-principal btn-compact">
+                                            class="btn btn-principal btn-compact" style="flex-shrink: 0;">
                                             ← Précédent
                                         </button>
                                         <input type="date" id="date-cours" class="controle-form"
+                                            style="flex: 1; min-width: 0;"
                                             onchange="initialiserSaisiePresences(); mettreAJourBoutonsNavigation();">
                                         <button id="btn-cours-suivant" onclick="allerCoursSuivant()"
-                                            class="btn btn-principal btn-compact">
+                                            class="btn btn-principal btn-compact" style="flex-shrink: 0;">
                                             Suivant →
                                         </button>
                                     </div>
@@ -4350,6 +4351,10 @@
                                 <span>Absents : <span id="nb-absents">0</span></span>
                                 <span>Total : <span id="nb-total">0</span></span>
                                 <span>Assiduité aujourd'hui : <span id="assiduite-aujourdhui">0%</span></span>
+                                <span id="actions-presences-bar" style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
+                                    <button class="btn btn-confirmer btn-compact" onclick="enregistrerPresences()">Enregistrer</button>
+                                    <button class="btn btn-annuler btn-compact" onclick="afficherSousSection('presences-apercu')">Annuler</button>
+                                </span>
                             </div>
                         </div>
 
@@ -4388,15 +4393,6 @@
                             </tbody>
                         </table>
 
-                        <!-- Boutons d'action -->
-                        <div class="btn-groupe" style="margin-top: 20px;">
-                            <button class="btn btn-confirmer" onclick="enregistrerPresences()">
-                                Enregistrer les présences
-                            </button>
-                            <button class="btn btn-annuler" onclick="afficherSousSection('presences-apercu')">
-                                Annuler
-                            </button>
-                        </div>
                     </div>
 
 

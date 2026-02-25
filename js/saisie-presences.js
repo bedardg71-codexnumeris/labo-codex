@@ -1345,7 +1345,10 @@ function mettreAJourEnteteDateSeance(dateStr) {
     }
 
     if (message) {
-        infoSeance.textContent = message;
+        // Préfixer la date formatée (ex: "23 février 2026 — 2ème séance...")
+        const dateObj = new Date(dateStr + 'T12:00:00');
+        const dateFR = dateObj.toLocaleDateString('fr-CA', { day: 'numeric', month: 'long', year: 'numeric' });
+        infoSeance.textContent = `${dateFR} — ${message}`;
         infoSeance.classList.remove('u-hide');
     } else {
         infoSeance.classList.add('u-hide');
@@ -1525,10 +1528,12 @@ function chargerTableauPresences(dateStr, estVerrouille) {
     const btnTousPresents = document.getElementById('btn-tous-presents');
     const btnReinit = document.getElementById('btn-reinit-saisie');
     const btnEnregistrer = document.querySelector('[onclick="enregistrerPresences()"]');
+    const btnAnnuler = document.querySelector('#actions-presences-bar .btn-annuler');
 
     if (btnTousPresents) btnTousPresents.disabled = estVerrouille;
     if (btnReinit) btnReinit.disabled = estVerrouille;
     if (btnEnregistrer) btnEnregistrer.disabled = estVerrouille;
+    if (btnAnnuler) btnAnnuler.disabled = estVerrouille;
     calculerEtSauvegarderIndicesAssiduite();
 
     // Mettre à jour le compteur présents/absents
@@ -2369,14 +2374,18 @@ function restaurerCompteurPresences() {
             <span>Absents : <span id="nb-absents">0</span></span>
             <span>Total : <span id="nb-total">0</span></span>
             <span>Assiduité aujourd'hui : <span id="assiduite-aujourdhui">0%</span></span>
-            <span id="controle-verrouillage-presences" class="u-hide" style="margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 0.85rem;">
-                <input type="checkbox" id="checkbox-verrouillage-presences"
-                       style="width: 16px; height: 16px; accent-color: var(--bleu-principal, #1a73e8); cursor: pointer;"
-                       onchange="basculerVerrouillageDateActive()">
-                <label for="checkbox-verrouillage-presences" style="cursor: pointer; user-select: none; white-space: nowrap;">
-                    <span id="icone-verrouillage-presences">🔓</span>
-                    <span id="texte-verrouillage-presences">Verrouiller</span>
-                </label>
+            <span id="actions-presences-bar" style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
+                <button class="btn btn-confirmer btn-compact" onclick="enregistrerPresences()">Enregistrer</button>
+                <button class="btn btn-annuler btn-compact" onclick="afficherSousSection('presences-apercu')">Annuler</button>
+                <span id="controle-verrouillage-presences" class="u-hide" style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem;">
+                    <input type="checkbox" id="checkbox-verrouillage-presences"
+                           style="width: 16px; height: 16px; accent-color: var(--bleu-principal, #1a73e8); cursor: pointer;"
+                           onchange="basculerVerrouillageDateActive()">
+                    <label for="checkbox-verrouillage-presences" style="cursor: pointer; user-select: none; white-space: nowrap;">
+                        <span id="icone-verrouillage-presences">🔓</span>
+                        <span id="texte-verrouillage-presences">Verrouiller</span>
+                    </label>
+                </span>
             </span>
         </div>
     `;
