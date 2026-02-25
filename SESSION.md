@@ -1,8 +1,26 @@
-# SESSION ACTIVE - BETA 98.01
+# SESSION ACTIVE - BETA 98.02
 
-**Date** : 24 février 2026
-**Version** : Beta 98.01 (build 0224-1945)
-**Statut** : Correction bugs évaluations/export/archivage (rapport Grégoire 24 fév)
+**Date** : 25 février 2026
+**Version** : Beta 98.02 (build 0225-0955)
+**Statut** : Pipeline d'import — réglages par fichier, bouton re-déposer, préférence SIS
+
+## SESSION DU 25 FÉVRIER 2026
+
+### Travail accompli — Pipeline d'import et préférences (25 février 2026)
+
+148. **Bouton « Re-déposer les fichiers »** : Quand la file d'attente du pipeline est restaurée depuis `sessionStorage`, les blobs `File` sont perdus (non sérialisables). Ajout d'une alerte orange globale indiquant le nombre de fichiers à re-déposer, avec un bouton qui ouvre un sélecteur de fichiers. Correspondance par nom exact (`nomFichier === fichier.name`). Les thumbnails sont régénérées automatiquement. Nouvelle fonction `reattacherBlobs()` dans `travaux-import.js`, fonction `redeposerFichiers()` dans `travaux-ui.js`.
+
+149. **Inspecteur pipeline remanié** : La colonne centre du pipeline affiche désormais un « Inspecteur » avec sélecteur de production, réglages par défaut (DPI, balance des blancs, doublons, assemblage), et métadonnées du fichier sélectionné (toggle LEA/Autre, étudiant avec autocomplete, production, date).
+
+150. **Réglages spécifiques par fichier (préparation)** : Nouvelle section « Import » dans la palette de préparation permettant de désactiver la balance des blancs ou de conserver la résolution originale pour un fichier individuel. Flags `skipBalance` et `format11x17` par fichier, respectés lors de `appliquerEtImporter()`.
+
+151. **Scroll synchronisé colonnes pipeline** : Les colonnes gauche (originaux) et droite (confirmés) scrollent en synchronisation. Le scroll est préservé lors de la sélection d'un fichier et du rafraîchissement UI.
+
+152. **Préférence SIS (Système d'information scolaire)** : Nouvelle carte dans les préférences v2 permettant de choisir le SIS du cégep (Omnivox/Léa par défaut, COBA et Col.NET prévus). Persisté dans `preferencesAffichage.sisDefaut`.
+
+153. **Mode import par défaut LEA** : `modeImport` initialisé à `'lea'` au lieu de `'libre'` pour tous les fichiers, peu importe la détection du DA.
+
+---
 
 ## SESSION DU 24 FÉVRIER 2026
 

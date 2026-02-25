@@ -11674,6 +11674,31 @@
                         </div>
                     </div>
 
+                    <!-- Carte : Système d'information scolaire (SIS) -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">Système d'information scolaire</h3>
+                        <p class="text-muted" style="margin-bottom: 15px; font-size: 0.9rem;">
+                            Un SIS (<em>Student Information System</em>) est le système utilisé par ton cégep
+                            pour gérer les dossiers étudiants, les notes et les remises de travaux.
+                            Ce choix détermine le mode par défaut lors de l'import.
+                        </p>
+                        <div class="groupe-form u-mb-15">
+                            <label for="v2-pref-sis" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                SIS utilisé par mon cégep
+                            </label>
+                            <select id="v2-pref-sis" class="controle-form" onchange="sauvegarderPreferencesV2()" style="max-width: 300px;">
+                                <option value="lea">Omnivox / Léa — Skytech</option>
+                                <option value="coba" disabled>COBA — Berger-Levrault (bientôt)</option>
+                                <option value="colnet" disabled>Col.NET — Collège Montmorency (bientôt)</option>
+                                <option value="autre">Autre</option>
+                            </select>
+                            <small style="display: block; color: var(--gris-moyen); margin-top: 5px; font-size: 0.85rem;">
+                                Omnivox (Léa) est le SIS le plus répandu dans les cégeps du Québec.
+                                Le support de COBA et Col.NET est prévu prochainement.
+                            </small>
+                        </div>
+                    </div>
+
                     <!-- Bouton sauvegarder -->
                     <div class="u-mt-20">
                         <button class="btn btn-confirmer" onclick="sauvegarderToutesPreferencesV2()" style="width: 100%;">
@@ -17151,7 +17176,7 @@
 
         // === CONFIGURATION ===
         const VERSION_MAJEURE = '98';
-        const BUILD_ID = '0224-1945';  // Auto-updated by Claude before each commit (Toronto time)
+        const BUILD_ID = '0225-0955';  // Auto-updated by Claude before each commit (Toronto time)
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';

@@ -284,15 +284,21 @@
 
         // Charger l'image
         const blob = f.fichier;
-        if (!blob) return;
+        if (!blob) { console.warn('[Prep] Blob absent — fichier restaure depuis session?'); return; }
 
-        imageOriginale = await chargerImage(blob);
-        imageTravail = creerCopieTravail(imageOriginale);
+        try {
+            imageOriginale = await chargerImage(blob);
+            imageTravail = creerCopieTravail(imageOriginale);
+        } catch (err) {
+            console.error('[Prep] Erreur chargement image:', err);
+            return;
+        }
 
         mettreAJourApercu();
         prepZoomFit();
         mettreAJourMiniatures();
         mettreAJourNavigation();
+        syncOptImport();
     }
 
     /**
@@ -2203,6 +2209,46 @@
     }
 
     /* ===============================
+       OPTIONS IMPORT PAR FICHIER
+       =============================== */
+
+    /**
+     * Met a jour les checkboxes Import selon les flags du fichier courant
+     */
+    function syncOptImport() {
+        const queue = travauxImport.obtenirFileDAttente();
+        const qf = queue[indexActuel + queueOffset];
+        if (!qf) return;
+
+        const cbBalance = document.getElementById('prep-opt-balance');
+        const cbResolution = document.getElementById('prep-opt-resolution');
+        if (cbBalance) cbBalance.checked = !!qf.skipBalance;
+        if (cbResolution) cbResolution.checked = !!qf.format11x17;
+    }
+
+    /**
+     * Change le flag balance des blancs pour le fichier courant
+     * @param {boolean} checked - true = appliquer la balance, false = ignorer
+     */
+    function changerOptBalance(checked) {
+        const queue = travauxImport.obtenirFileDAttente();
+        const qf = queue[indexActuel + queueOffset];
+        if (!qf) return;
+        qf.skipBalance = !checked;
+    }
+
+    /**
+     * Change le flag resolution originale pour le fichier courant
+     * @param {boolean} checked - true = conserver la resolution originale
+     */
+    function changerOptResolution(checked) {
+        const queue = travauxImport.obtenirFileDAttente();
+        const qf = queue[indexActuel + queueOffset];
+        if (!qf) return;
+        qf.format11x17 = checked;
+    }
+
+    /* ===============================
        ASSEMBLAGE MULTI-PAGES
        =============================== */
 
@@ -2535,6 +2581,28 @@
                                 </div>
                             </div>
 
+                            <!-- Section Import (reglages par fichier) -->
+                            <div class="prep-section" id="prep-section-import">
+                                <div class="prep-section-label" onclick="travauxPreparation.toggleSection('import')">Import</div>
+                                <div class="prep-section-sous-titre">r\u00e9glages par fichier</div>
+                                <div class="prep-section-body">
+                                    <div class="prep-option-row">
+                                        <label class="prep-option-label">
+                                            <input type="checkbox" id="prep-opt-balance"
+                                                   onchange="travauxPreparation.changerOptBalance(!this.checked)">
+                                            Ne pas faire de Balance des blancs pour ce document
+                                        </label>
+                                    </div>
+                                    <div class="prep-option-row">
+                                        <label class="prep-option-label">
+                                            <input type="checkbox" id="prep-opt-resolution"
+                                                   onchange="travauxPreparation.changerOptResolution(this.checked)">
+                                            Conserver la r\u00e9solution originale
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
                         <div class="prep-palette-footer">
                             <button class="prep-btn" onclick="travauxPreparation.annulerDerniere()">Annuler</button>
@@ -2775,6 +2843,8 @@
         changerExposition: changerExposition,
         basculerNiveauxDeGris: basculerNiveauxDeGris,
         activerBalanceBlancs: activerBalanceBlancs,
+        changerOptBalance: changerOptBalance,
+        changerOptResolution: changerOptResolution,
         annulerDerniere: annulerDerniere,
         reinitialiser: reinitialiser,
         // Assemblage
