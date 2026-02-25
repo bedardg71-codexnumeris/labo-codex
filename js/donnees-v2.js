@@ -23,6 +23,26 @@
     let ressourceASupprimer = null; // {type, id, nom, dependances, avertissements}
 
     // =========================================================================
+    // UTILITAIRES DE FUSION
+    // =========================================================================
+
+    /**
+     * Fusionne deux tableaux de ressources en dédupliquant par id.
+     * Priorité à la version bibliothèque si même id.
+     * Ajoute un marqueur _source pour l'affichage.
+     */
+    function fusionnerRessources(biblio, templates) {
+        const parId = new Map();
+        (biblio || []).forEach(r => parId.set(r.id, Object.assign({}, r, { _source: 'bibliotheque' })));
+        (templates || []).forEach(r => {
+            if (!parId.has(r.id)) {
+                parId.set(r.id, Object.assign({}, r, { _source: 'templates' }));
+            }
+        });
+        return Array.from(parId.values());
+    }
+
+    // =========================================================================
     // INITIALISATION
     // =========================================================================
 
@@ -125,12 +145,17 @@
         const select = document.getElementById('select-type-ressource');
         if (!select) return;
 
-        // Compter chaque type
+        // Compter chaque type (fusion bibliothèque + templates pour grilles et échelles)
+        const grillesBiblio = typeof obtenirToutesLesGrillesBibliothequeSync === 'function' ? obtenirToutesLesGrillesBibliothequeSync() : [];
+        const grillesTempl = db.getSync('grillesTemplates', []) || [];
+        const echellesBiblio = typeof obtenirToutesLesEchellesBibliothequeSync === 'function' ? obtenirToutesLesEchellesBibliothequeSync() : [];
+        const echellesTempl = db.getSync('echellesTemplates', []) || [];
+
         const counts = {
             pratiques: obtenirToutesPratiquesUtilisateur().length,
-            grilles: (typeof obtenirToutesLesGrillesBibliothequeSync === 'function' ? obtenirToutesLesGrillesBibliothequeSync() : []).length,
+            grilles: fusionnerRessources(grillesBiblio, grillesTempl).length,
             cartouches: (typeof obtenirToutesLesCartouchesBibliothequeSync === 'function' ? obtenirToutesLesCartouchesBibliothequeSync() : []).length,
-            echelles: (typeof obtenirToutesLesEchellesBibliothequeSync === 'function' ? obtenirToutesLesEchellesBibliothequeSync() : []).length,
+            echelles: fusionnerRessources(echellesBiblio, echellesTempl).length,
             productions: (typeof obtenirToutesLesProductionsBibliothequeSync === 'function' ? obtenirToutesLesProductionsBibliothequeSync() : []).length
         };
 
@@ -309,13 +334,15 @@
         const container = document.getElementById('table-ressources-grilles');
         if (!container) return;
 
-        const grilles = typeof obtenirToutesLesGrillesBibliothequeSync === 'function' ?
+        const grillesBiblio = typeof obtenirToutesLesGrillesBibliothequeSync === 'function' ?
             obtenirToutesLesGrillesBibliothequeSync() : [];
+        const grillesTempl = db.getSync('grillesTemplates', []) || [];
+        const grilles = fusionnerRessources(grillesBiblio, grillesTempl);
 
         if (grilles.length === 0) {
             container.innerHTML = `
                 <div class="alerte alerte-information">
-                    <p>Aucune grille de critères dans la bibliothèque.</p>
+                    <p>Aucune grille de critères trouvée.</p>
                 </div>
             `;
             return;
@@ -469,13 +496,15 @@
         const container = document.getElementById('table-ressources-echelles');
         if (!container) return;
 
-        const echelles = typeof obtenirToutesLesEchellesBibliothequeSync === 'function' ?
+        const echellesBiblio = typeof obtenirToutesLesEchellesBibliothequeSync === 'function' ?
             obtenirToutesLesEchellesBibliothequeSync() : [];
+        const echellesTempl = db.getSync('echellesTemplates', []) || [];
+        const echelles = fusionnerRessources(echellesBiblio, echellesTempl);
 
         if (echelles.length === 0) {
             container.innerHTML = `
                 <div class="alerte alerte-information">
-                    <p>Aucune échelle de performance dans la bibliothèque.</p>
+                    <p>Aucune échelle de performance trouvée.</p>
                 </div>
             `;
             return;
@@ -640,22 +669,25 @@
     }
 
     function afficherTableauGrillesV2(container) {
-        const grilles = typeof obtenirToutesLesGrillesBibliothequeSync === 'function' ? obtenirToutesLesGrillesBibliothequeSync() : [];
+        const grillesBiblio = typeof obtenirToutesLesGrillesBibliothequeSync === 'function' ? obtenirToutesLesGrillesBibliothequeSync() : [];
+        const grillesTempl = db.getSync('grillesTemplates', []) || [];
+        const grilles = fusionnerRessources(grillesBiblio, grillesTempl);
 
         if (grilles.length === 0) {
-            container.innerHTML = `<div class="alerte alerte-information"><p>Aucune grille de critères dans la bibliothèque.</p></div>`;
+            container.innerHTML = `<div class="alerte alerte-information"><p>Aucune grille de critères trouvée.</p></div>`;
             return;
         }
 
         const usages = calculerUsagesGrilles(grilles);
-        let html = `<table class="table-ressources"><thead><tr><th>Nom</th><th>Discipline</th><th>Critères</th><th>Statut</th><th>Usage</th><th>Cartouches</th><th>Actions</th></tr></thead><tbody>`;
+        let html = `<table class="table-ressources"><thead><tr><th>Nom</th><th>Source</th><th>Discipline</th><th>Critères</th><th>Statut</th><th>Usage</th><th>Cartouches</th><th>Actions</th></tr></thead><tbody>`;
 
         grilles.forEach(g => {
             const dansSidebar = g.dansBibliotheque !== false;
             const usage = usages[g.id] || { productionsCount: 0, evaluationsCount: 0 };
             const nbCriteres = g.criteres?.length || 0;
             const nbCartouches = compterCartouchesGrille(g.id);
-            html += `<tr><td><strong>${escapeHtml(g.nom)}</strong>${g.auteur ? `<br><small class="text-muted">Par ${escapeHtml(g.auteur)}</small>` : ''}</td><td>${escapeHtml(g.discipline || '—')}</td><td>${nbCriteres} critère${nbCriteres > 1 ? 's' : ''}</td><td>${dansSidebar ? '<span class="badge-actif">Sidebar</span>' : '<span class="badge-archive">Masquée</span>'}</td><td>${usage.productionsCount > 0 || usage.evaluationsCount > 0 ? `<span class="badge-statut evalue">${usage.productionsCount} prod. / ${usage.evaluationsCount} éval.</span>` : '<span class="badge-statut non-evalue">Non utilisée</span>'}</td><td>${nbCartouches > 0 ? `${nbCartouches} cartouche${nbCartouches > 1 ? 's' : ''}` : '—'}</td><td class="actions-cell"><button class="btn btn-compact btn-secondaire" onclick="naviguerVersRessource('grille', '${g.id}')" title="Consulter">Voir</button> <button class="btn btn-compact" onclick="ouvrirModalSuppressionRessource('grille', '${g.id}')" title="Supprimer">Supprimer</button></td></tr>`;
+            const badgeSource = g._source === 'templates' ? '<span class="badge-source badge-source--locale">Templates</span>' : '<span class="badge-source badge-source--bibliotheque">Bibliothèque</span>';
+            html += `<tr><td><strong>${escapeHtml(g.nom)}</strong>${g.auteur ? `<br><small class="text-muted">Par ${escapeHtml(g.auteur)}</small>` : ''}</td><td>${badgeSource}</td><td>${escapeHtml(g.discipline || '—')}</td><td>${nbCriteres} critère${nbCriteres > 1 ? 's' : ''}</td><td>${dansSidebar ? '<span class="badge-actif">Sidebar</span>' : '<span class="badge-archive">Masquée</span>'}</td><td>${usage.productionsCount > 0 || usage.evaluationsCount > 0 ? `<span class="badge-statut evalue">${usage.productionsCount} prod. / ${usage.evaluationsCount} éval.</span>` : '<span class="badge-statut non-evalue">Non utilisée</span>'}</td><td>${nbCartouches > 0 ? `${nbCartouches} cartouche${nbCartouches > 1 ? 's' : ''}` : '—'}</td><td class="actions-cell"><button class="btn btn-compact btn-secondaire" onclick="naviguerVersRessource('grille', '${g.id}')" title="Consulter">Voir</button> <button class="btn btn-compact" onclick="ouvrirModalSuppressionRessource('grille', '${g.id}')" title="Supprimer">Supprimer</button></td></tr>`;
         });
         html += '</tbody></table>';
         container.innerHTML = html;
@@ -684,21 +716,24 @@
     }
 
     function afficherTableauEchellesV2(container) {
-        const echelles = typeof obtenirToutesLesEchellesBibliothequeSync === 'function' ? obtenirToutesLesEchellesBibliothequeSync() : [];
+        const echellesBiblio = typeof obtenirToutesLesEchellesBibliothequeSync === 'function' ? obtenirToutesLesEchellesBibliothequeSync() : [];
+        const echellesTempl = db.getSync('echellesTemplates', []) || [];
+        const echelles = fusionnerRessources(echellesBiblio, echellesTempl);
 
         if (echelles.length === 0) {
-            container.innerHTML = `<div class="alerte alerte-information"><p>Aucune échelle de performance dans la bibliothèque.</p></div>`;
+            container.innerHTML = `<div class="alerte alerte-information"><p>Aucune échelle de performance trouvée.</p></div>`;
             return;
         }
 
         const usages = calculerUsagesEchelles(echelles);
-        let html = `<table class="table-ressources"><thead><tr><th>Nom</th><th>Niveaux</th><th>Statut</th><th>Usage</th><th>Actions</th></tr></thead><tbody>`;
+        let html = `<table class="table-ressources"><thead><tr><th>Nom</th><th>Source</th><th>Niveaux</th><th>Statut</th><th>Usage</th><th>Actions</th></tr></thead><tbody>`;
 
         echelles.forEach(e => {
             const dansSidebar = e.dansBibliotheque !== false;
             const usage = usages[e.id] || { pratiquesCount: 0 };
             const nbNiveaux = e.niveaux?.length || 0;
-            html += `<tr><td><strong>${escapeHtml(e.nom)}</strong>${e.auteur ? `<br><small class="text-muted">Par ${escapeHtml(e.auteur)}</small>` : ''}</td><td>${nbNiveaux} niveau${nbNiveaux > 1 ? 'x' : ''}</td><td>${dansSidebar ? '<span class="badge-actif">Sidebar</span>' : '<span class="badge-archive">Masquée</span>'}</td><td>${usage.pratiquesCount > 0 ? `<span class="badge-statut evalue">${usage.pratiquesCount} pratique(s)</span>` : '<span class="badge-statut non-evalue">Non utilisée</span>'}</td><td class="actions-cell"><button class="btn btn-compact btn-secondaire" onclick="naviguerVersRessource('echelle', '${e.id}')" title="Consulter">Voir</button> <button class="btn btn-compact" onclick="ouvrirModalSuppressionRessource('echelle', '${e.id}')" title="Supprimer">Supprimer</button></td></tr>`;
+            const badgeSource = e._source === 'templates' ? '<span class="badge-source badge-source--locale">Templates</span>' : '<span class="badge-source badge-source--bibliotheque">Bibliothèque</span>';
+            html += `<tr><td><strong>${escapeHtml(e.nom)}</strong>${e.auteur ? `<br><small class="text-muted">Par ${escapeHtml(e.auteur)}</small>` : ''}</td><td>${badgeSource}</td><td>${nbNiveaux} niveau${nbNiveaux > 1 ? 'x' : ''}</td><td>${dansSidebar ? '<span class="badge-actif">Sidebar</span>' : '<span class="badge-archive">Masquée</span>'}</td><td>${usage.pratiquesCount > 0 ? `<span class="badge-statut evalue">${usage.pratiquesCount} pratique(s)</span>` : '<span class="badge-statut non-evalue">Non utilisée</span>'}</td><td class="actions-cell"><button class="btn btn-compact btn-secondaire" onclick="naviguerVersRessource('echelle', '${e.id}')" title="Consulter">Voir</button> <button class="btn btn-compact" onclick="ouvrirModalSuppressionRessource('echelle', '${e.id}')" title="Supprimer">Supprimer</button></td></tr>`;
         });
         html += '</tbody></table>';
         container.innerHTML = html;
@@ -1196,8 +1231,12 @@
             dependances = deps.dependances;
             avertissements = deps.avertissements;
         } else if (type === 'grille') {
-            const grilles = obtenirToutesLesGrillesBibliothequeSync();
-            ressource = grilles.find(g => g.id === id);
+            const grillesBiblio = obtenirToutesLesGrillesBibliothequeSync();
+            ressource = grillesBiblio.find(g => g.id === id);
+            if (!ressource) {
+                const grillesTempl = db.getSync('grillesTemplates', []) || [];
+                ressource = grillesTempl.find(g => g.id === id);
+            }
             const deps = verifierDependancesGrille(id);
             dependances = deps.dependances;
             avertissements = deps.avertissements;
@@ -1208,8 +1247,12 @@
             dependances = deps.dependances;
             avertissements = deps.avertissements;
         } else if (type === 'echelle') {
-            const echelles = obtenirToutesLesEchellesBibliothequeSync();
-            ressource = echelles.find(e => e.id === id);
+            const echellesBiblio = obtenirToutesLesEchellesBibliothequeSync();
+            ressource = echellesBiblio.find(e => e.id === id);
+            if (!ressource) {
+                const echellesTempl = db.getSync('echellesTemplates', []) || [];
+                ressource = echellesTempl.find(e => e.id === id);
+            }
             const deps = verifierDependancesEchelle(id);
             dependances = deps.dependances;
             avertissements = deps.avertissements;
@@ -1238,7 +1281,9 @@
         // Remplir la modal
         const infoDiv = document.getElementById('suppression-ressource-info');
         const typeLabel = type === 'pratique' ? 'pratique de notation' :
-                         type === 'grille' ? 'grille de critères' : 'cartouche de rétroaction';
+                         type === 'grille' ? 'grille de critères' :
+                         type === 'echelle' ? 'échelle de niveaux' :
+                         type === 'production' ? 'production' : 'cartouche de rétroaction';
         infoDiv.innerHTML = `
             <p>Tu es sur le point de supprimer définitivement la ${typeLabel} :</p>
             <p style="font-size: 1.2rem; font-weight: bold; color: var(--accent-primaire); margin: 15px 0;">
@@ -1288,7 +1333,7 @@
         }
 
         // Afficher la modal
-        modal.classList.remove('u-hide');
+        modal.classList.add('actif');
     }
 
     /**
@@ -1297,7 +1342,7 @@
     function fermerModalSuppressionRessource() {
         const modal = document.getElementById('modal-suppression-ressource');
         if (modal) {
-            modal.classList.add('u-hide');
+            modal.classList.remove('actif');
         }
         ressourceASupprimer = null;
     }
@@ -1345,13 +1390,14 @@
                 // Fermer la modal
                 fermerModalSuppressionRessource();
 
-                // Rafraîchir l'affichage
+                // Rafraîchir l'affichage (dropdown V2 + accordéons)
                 chargerCompteursRessources();
-                if (type === 'pratique') afficherTableauPratiques();
-                if (type === 'grille') afficherTableauGrilles();
-                if (type === 'cartouche') afficherTableauCartouches();
-                if (type === 'echelle') afficherTableauEchelles();
-                if (type === 'production') afficherTableauProductions();
+                const typePluriel = type === 'pratique' ? 'pratiques' :
+                                   type === 'grille' ? 'grilles' :
+                                   type === 'cartouche' ? 'cartouches' :
+                                   type === 'echelle' ? 'echelles' :
+                                   type === 'production' ? 'productions' : '';
+                if (typePluriel) afficherTableauRessource(typePluriel);
 
                 // Notification
                 if (typeof afficherNotificationSucces === 'function') {
@@ -1402,12 +1448,25 @@
         try {
             await db.remove(`cartouches_${grilleId}`);
         } catch (e) {
-            console.warn('[donnees-v2] Erreur calcul usages:', e.message);
+            console.warn('[donnees-v2] Erreur suppression cartouches grille:', e.message);
         }
 
         // Retirer de la bibliothèque
         if (typeof retirerGrilleDeLaBibliotheque === 'function') {
             await retirerGrilleDeLaBibliotheque(grilleId);
+        }
+
+        // Retirer aussi de grillesTemplates (dual storage)
+        try {
+            let templates = db.getSync('grillesTemplates', []) || [];
+            const avant = templates.length;
+            templates = templates.filter(g => g.id !== grilleId);
+            if (templates.length !== avant) {
+                await db.set('grillesTemplates', templates);
+                console.log('[donnees-v2] Grille retirée de grillesTemplates:', grilleId);
+            }
+        } catch (e) {
+            console.warn('[donnees-v2] Erreur suppression grille templates:', e.message);
         }
 
         console.log('[donnees-v2] Grille supprimée (avec cartouches):', grilleId);
@@ -1434,16 +1493,19 @@
         // Retirer de la bibliothèque
         if (typeof retirerEchelleDeLaBibliotheque === 'function') {
             await retirerEchelleDeLaBibliotheque(echelleId);
-        } else {
-            // Fallback: suppression directe
-            try {
-                let echelles = db.getSync('echellesTemplates') || [];
-                echelles = echelles.filter(e => e.id !== echelleId);
-                await db.set('echellesTemplates', echelles);
-            } catch (e) {
-                console.error('[donnees-v2] Erreur suppression échelle:', e);
-                return false;
+        }
+
+        // Retirer aussi de echellesTemplates (dual storage)
+        try {
+            let templates = db.getSync('echellesTemplates', []) || [];
+            const avant = templates.length;
+            templates = templates.filter(e => e.id !== echelleId);
+            if (templates.length !== avant) {
+                await db.set('echellesTemplates', templates);
+                console.log('[donnees-v2] Échelle retirée de echellesTemplates:', echelleId);
             }
+        } catch (e) {
+            console.warn('[donnees-v2] Erreur suppression échelle templates:', e.message);
         }
 
         console.log('[donnees-v2] Échelle supprimée:', echelleId);
