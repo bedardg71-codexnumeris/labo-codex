@@ -4828,7 +4828,18 @@ function modifierEvaluation(evaluationId) {
                 document.getElementById('afficherAdresse1').checked = evaluation.optionsAffichage.adresse;
                 document.getElementById('afficherContexte1').checked = evaluation.optionsAffichage.contexte;
                 // Restaurer le mode d'affichage de la note
-                const modeNote = evaluation.optionsAffichage.affichageNote || 'complet';
+                // 🔧 FIX (24 fév 2026) : La préférence de la pratique prime sur la valeur sauvegardée
+                // L'utilisateur configure "Lettre seulement" dans sa pratique → ça s'applique
+                // Il peut changer à la pièce via le radio si besoin
+                let modeNote = null;
+                try {
+                    const configurations = db.getSync('pratiquesConfigurables', []);
+                    const modalites = db.getSync('modalitesEvaluation', {});
+                    const pratiqueId = modalites.pratiqueActiveId || modalites.configurationSTDAppliquee?.id;
+                    const pratiqueActive = pratiqueId ? configurations.find(p => p.id === pratiqueId) : null;
+                    if (pratiqueActive && pratiqueActive.affichageNote) modeNote = pratiqueActive.affichageNote;
+                } catch(e) { /* silencieux */ }
+                if (!modeNote) modeNote = evaluation.optionsAffichage.affichageNote || 'complet';
                 const radioNote = document.getElementById(modeNote === 'lettre' ? 'affichageNoteLettre1' : 'affichageNoteComplet1');
                 if (radioNote) radioNote.checked = true;
             }
