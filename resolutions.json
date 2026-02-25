@@ -1,0 +1,13 @@
+{
+  "tickets": [
+    {
+      "id": 85,
+      "testeur": "gregoire",
+      "resume": "Le bouton Evaluer ne fonctionne pas apres navigation",
+      "correction": "modeCourant restait a 'evaluer' apres navigation. Reset dans initialiserModuleTravaux().",
+      "build": "97.14",
+      "dateCorrection": "2026-02-26",
+      "statut": "jaune"
+    }
+  ]
+}

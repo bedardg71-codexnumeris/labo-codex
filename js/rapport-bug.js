@@ -11,6 +11,12 @@
    - Contexte de données selon la section active
    - Capture d'écran intégrée
    - État stockage pertinent
+
+   ✅ AJOUT (25 fév 2026) :
+   - Système de suivi des tickets (resolutions.json)
+   - Badge de notification pour tickets en attente
+   - Persistance du prénom testeur
+   - Mode commentaire/feedback
    =============================== */
 
 (function() {
@@ -24,7 +30,7 @@
  * Version actuelle de l'application
  * ⚠️ MODIFIER ICI lors de chaque nouvelle release
  */
-const VERSION_APP = 'Beta 97';
+const VERSION_APP = `Beta ${window.VERSION_MAJEURE || '??'}`;
 
 // ===============================
 // ARCHIVAGE LOCAL DES RAPPORTS
@@ -33,10 +39,298 @@ const VERSION_APP = 'Beta 97';
 const CLE_RAPPORTS_ARCHIVES = 'rapportsBugArchives';
 const MAX_RAPPORTS_ARCHIVES = 50;
 
+// ===============================
+// SUIVI DES TICKETS (RÉSOLUTIONS)
+// ===============================
+
+const CLE_PRENOM_TESTEUR = 'prenomTesteurBug';
+const CLE_TICKETS_CONFIRMES = 'bugTicketsConfirmes';
+
+// Résolutions chargées en mémoire
+let resolutionsData = null;
+
+// Mode actif du modal (bug ou commentaire)
+let modeRapport = 'bug';
+
+/**
+ * Normalise un prénom pour comparaison (minuscules, sans accents, sans espaces superflus)
+ */
+function normaliserPrenom(prenom) {
+    return (prenom || '').trim().toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+/**
+ * Charge les résolutions depuis resolutions.json
+ */
+async function chargerResolutions() {
+    try {
+        const reponse = await fetch('resolutions.json?t=' + Date.now(), { cache: 'no-store' });
+        if (!reponse.ok) return;
+        resolutionsData = await reponse.json();
+        console.log('[Rapport Bug] Résolutions chargées:', resolutionsData.tickets?.length || 0, 'tickets');
+    } catch (e) {
+        // Silencieux si hors-ligne ou fichier absent
+        console.log('[Rapport Bug] resolutions.json non disponible');
+    }
+}
+
+/**
+ * Obtient les IDs des tickets confirmés par le testeur
+ */
+function obtenirTicketsConfirmes() {
+    try {
+        const data = localStorage.getItem(CLE_TICKETS_CONFIRMES);
+        return data ? JSON.parse(data) : [];
+    } catch (e) {
+        return [];
+    }
+}
+
+/**
+ * Sauvegarde un ticket comme confirmé
+ */
+function confirmerTicket(id) {
+    const confirmes = obtenirTicketsConfirmes();
+    if (!confirmes.includes(id)) {
+        confirmes.push(id);
+        localStorage.setItem(CLE_TICKETS_CONFIRMES, JSON.stringify(confirmes));
+    }
+    // Rafraîchir la section suivi dans le modal
+    const sectionSuivi = document.getElementById('sectionSuiviBugs');
+    if (sectionSuivi) {
+        sectionSuivi.outerHTML = genererSectionSuivi();
+    }
+    // Mettre à jour le badge
+    mettreAJourBadgeBug();
+}
+
+/**
+ * Action "Pas résolu" — pré-remplit un nouveau rapport
+ */
+function rouvrirTicket(id) {
+    if (!resolutionsData?.tickets) return;
+    const ticket = resolutionsData.tickets.find(t => t.id === id);
+    if (!ticket) return;
+
+    const textarea = document.getElementById('descriptionBug');
+    if (textarea) {
+        textarea.value = `⚠️ RÉOUVERTURE ticket #${ticket.id}\nProblème original : ${ticket.resume}\nCorrection proposée : ${ticket.correction}\n\nLe problème persiste : `;
+        textarea.focus();
+        // Placer le curseur à la fin
+        textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
+        // Mettre à jour le rapport technique
+        mettreAJourRapport();
+        // Scroller vers la description
+        textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    // Si on est en mode commentaire, basculer vers bug
+    if (modeRapport !== 'bug') {
+        modeRapport = 'bug';
+        const sectionFormulaire = document.getElementById('sectionFormulaireBug');
+        if (sectionFormulaire) {
+            mettreAJourModeRapport();
+        }
+    }
+}
+
+/**
+ * Génère le HTML de la section "Suivi de vos bugs"
+ */
+function genererSectionSuivi() {
+    const prenom = normaliserPrenom(localStorage.getItem(CLE_PRENOM_TESTEUR) || '');
+    const confirmes = obtenirTicketsConfirmes();
+    const tickets = resolutionsData?.tickets || [];
+
+    // Filtrer les tickets du testeur (si prénom vide, afficher tous)
+    const ticketsFiltres = prenom
+        ? tickets.filter(t => normaliserPrenom(t.testeur) === prenom)
+        : tickets;
+
+    // Aussi inclure les rapports archivés qui n'ont pas de résolution (rouge)
+    const archives = obtenirRapportsArchives();
+    const archivesSansResolution = [];
+    if (prenom) {
+        archives.forEach(r => {
+            const prenomArchive = normaliserPrenom(r.prenom);
+            if (prenomArchive !== prenom) return;
+            // Vérifier si ce rapport a un ticket correspondant
+            const aTicket = tickets.some(t =>
+                normaliserPrenom(t.testeur) === prenomArchive
+            );
+            // On n'ajoute pas de faux rouges — les rouges sont gérés différemment
+            // Les tickets absents du JSON mais ayant un rapport archivé seront rouges
+        });
+    }
+
+    if (ticketsFiltres.length === 0) {
+        return '<div id="sectionSuiviBugs"></div>';
+    }
+
+    // Compter les tickets jaunes non confirmés
+    const nbEnAttente = ticketsFiltres.filter(t =>
+        t.statut === 'jaune' && !confirmes.includes(t.id)
+    ).length;
+
+    const titreSection = nbEnAttente > 0
+        ? `Suivi de vos bugs (${nbEnAttente} en attente)`
+        : `Suivi de vos bugs`;
+
+    let html = `<div id="sectionSuiviBugs" style="
+        margin-bottom: 20px;
+        padding: 15px;
+        background: var(--gris-tres-pale);
+        border-radius: 8px;
+        border: 1px solid var(--bordure-claire);
+    ">
+        <h3 style="margin: 0 0 12px 0; font-size: 1rem; color: var(--accent-primaire);">
+            📋 ${titreSection}
+        </h3>`;
+
+    ticketsFiltres.forEach(ticket => {
+        const estConfirme = confirmes.includes(ticket.id);
+        let couleur, icone, contenu, actions;
+
+        if (ticket.statut === 'vert' || (ticket.statut === 'jaune' && estConfirme)) {
+            // Vert — confirmé
+            couleur = 'var(--vert-succes)';
+            icone = '🟢';
+            contenu = `<span style="color: var(--gris-moyen); font-style: italic;">Résolu et confirmé ✓</span>`;
+            actions = '';
+        } else if (ticket.statut === 'jaune') {
+            // Jaune — en attente de confirmation
+            couleur = 'var(--orange-accent)';
+            icone = '🟡';
+            const dateFormatee = formaterDateTicket(ticket.dateCorrection);
+            contenu = `
+                <div style="font-size: 0.85rem; color: var(--gris-fonce); margin-bottom: 6px;">
+                    Correction: ${echapperHtmlLocal(ticket.correction)}
+                </div>
+                <div style="font-size: 0.8rem; color: var(--gris-moyen);">
+                    Build ${ticket.build} — ${dateFormatee}
+                </div>`;
+            actions = `
+                <div style="display: flex; gap: 8px; margin-top: 8px;">
+                    <button onclick="confirmerTicket(${ticket.id})" class="btn btn-secondaire" style="
+                        font-size: 0.8rem; padding: 4px 10px; background: var(--vert-succes); color: white; border: none;">
+                        ✅ C'est réglé
+                    </button>
+                    <button onclick="rouvrirTicket(${ticket.id})" class="btn btn-secondaire" style="
+                        font-size: 0.8rem; padding: 4px 10px; color: var(--orange-accent); border-color: var(--orange-accent);">
+                        ⚠️ Pas résolu
+                    </button>
+                </div>`;
+        } else {
+            // Rouge — en investigation (cas par défaut)
+            couleur = 'var(--rouge-erreur)';
+            icone = '🔴';
+            contenu = `<span style="color: var(--gris-moyen); font-style: italic;">En cours d'investigation...</span>`;
+            actions = '';
+        }
+
+        html += `
+            <div style="
+                background: var(--surface-conteneur, #162c36);
+                border-radius: 8px;
+                padding: 10px 12px;
+                margin-bottom: 8px;
+                border-left: 3px solid ${couleur};
+            ">
+                <div style="font-weight: 600; font-size: 0.9rem; margin-bottom: 4px;">
+                    ${icone} #${ticket.id} — ${echapperHtmlLocal(ticket.resume)}
+                </div>
+                ${contenu}
+                ${actions}
+            </div>`;
+    });
+
+    html += '</div>';
+    return html;
+}
+
+/**
+ * Formate une date ISO (YYYY-MM-DD) en format lisible
+ */
+function formaterDateTicket(dateStr) {
+    if (!dateStr) return '';
+    try {
+        const mois = ['jan', 'fév', 'mars', 'avr', 'mai', 'juin',
+                       'juil', 'août', 'sept', 'oct', 'nov', 'déc'];
+        const [annee, moisNum, jour] = dateStr.split('-');
+        return `${parseInt(jour)} ${mois[parseInt(moisNum) - 1]} ${annee}`;
+    } catch (e) {
+        return dateStr;
+    }
+}
+
+/**
+ * Échappement HTML local (pour éviter XSS dans les données de résolution)
+ */
+function echapperHtmlLocal(str) {
+    if (typeof echapperHtml === 'function') return echapperHtml(str);
+    const div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
+}
+
+/**
+ * Met à jour le badge de notification sur le bouton bug dans l'en-tête
+ */
+function mettreAJourBadgeBug() {
+    const prenom = normaliserPrenom(localStorage.getItem(CLE_PRENOM_TESTEUR) || '');
+    const confirmes = obtenirTicketsConfirmes();
+    const tickets = resolutionsData?.tickets || [];
+
+    // Compter les tickets jaunes non confirmés pour ce testeur
+    const ticketsFiltres = prenom
+        ? tickets.filter(t => normaliserPrenom(t.testeur) === prenom)
+        : tickets;
+
+    const nbEnAttente = ticketsFiltres.filter(t =>
+        t.statut === 'jaune' && !confirmes.includes(t.id)
+    ).length;
+
+    // Chercher ou créer le badge
+    const btnBug = document.querySelector('.entete-controles-droite .btn-action-header');
+    if (!btnBug) return;
+
+    let badge = document.getElementById('badgeBugNotification');
+    if (nbEnAttente > 0) {
+        if (!badge) {
+            badge = document.createElement('span');
+            badge.id = 'badgeBugNotification';
+            badge.style.cssText = `
+                position: absolute;
+                top: -6px;
+                right: -6px;
+                background: var(--rouge-erreur);
+                color: white;
+                font-size: 0.7rem;
+                font-weight: 700;
+                min-width: 18px;
+                height: 18px;
+                border-radius: 9px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0 4px;
+                line-height: 1;
+            `;
+            // S'assurer que le parent est en position relative
+            btnBug.style.position = 'relative';
+            btnBug.appendChild(badge);
+        }
+        badge.textContent = nbEnAttente;
+    } else if (badge) {
+        badge.remove();
+    }
+}
+
 /**
  * Archive un rapport de bug localement
  */
-function archiverRapportBug(rapport, description, prenom) {
+function archiverRapportBug(rapport, description, prenom, type) {
     try {
         const archives = db.getSync(CLE_RAPPORTS_ARCHIVES, []);
 
@@ -46,7 +340,8 @@ function archiverRapportBug(rapport, description, prenom) {
             prenom: prenom || 'Anonyme',
             description: description || 'Aucune description',
             rapport: rapport,
-            envoye: true
+            envoye: true,
+            type: type || 'bug'
         };
 
         archives.unshift(nouveauRapport);
@@ -97,6 +392,53 @@ function viderRapportsArchives() {
 }
 
 /**
+ * Détermine la couleur de bordure d'un rapport archivé en fonction des résolutions
+ */
+function obtenirCouleurArchive(rapport) {
+    if (!resolutionsData?.tickets) return 'var(--accent-primaire)';
+
+    const prenomArchive = normaliserPrenom(rapport.prenom);
+    const confirmes = obtenirTicketsConfirmes();
+
+    // Chercher un ticket correspondant (même testeur)
+    const ticketCorrespondant = resolutionsData.tickets.find(t =>
+        normaliserPrenom(t.testeur) === prenomArchive
+    );
+
+    if (!ticketCorrespondant) {
+        // Pas de résolution → rouge (en investigation)
+        return 'var(--rouge-erreur)';
+    }
+
+    if (ticketCorrespondant.statut === 'vert' || confirmes.includes(ticketCorrespondant.id)) {
+        return 'var(--vert-succes)';
+    }
+
+    if (ticketCorrespondant.statut === 'jaune') {
+        return 'var(--orange-accent)';
+    }
+
+    return 'var(--accent-primaire)';
+}
+
+/**
+ * Détermine si un rapport archivé est confirmé (vert) pour l'opacité réduite
+ */
+function estArchiveConfirme(rapport) {
+    if (!resolutionsData?.tickets) return false;
+
+    const prenomArchive = normaliserPrenom(rapport.prenom);
+    const confirmes = obtenirTicketsConfirmes();
+
+    const ticketCorrespondant = resolutionsData.tickets.find(t =>
+        normaliserPrenom(t.testeur) === prenomArchive
+    );
+
+    if (!ticketCorrespondant) return false;
+    return ticketCorrespondant.statut === 'vert' || confirmes.includes(ticketCorrespondant.id);
+}
+
+/**
  * Affiche le modal de gestion des rapports archivés
  */
 function ouvrirModalRapportsArchives() {
@@ -109,11 +451,17 @@ function ouvrirModalRapportsArchives() {
 
     const listeHTML = archives.length === 0
         ? '<p style="text-align: center; color: var(--gris-moyen); padding: 30px;">Aucun rapport archivé</p>'
-        : archives.map(r => `
-            <div style="background: var(--gris-tres-pale); border-radius: 8px; padding: 12px; margin-bottom: 10px; border-left: 3px solid var(--accent-primaire);">
+        : archives.map(r => {
+            const couleurBordure = obtenirCouleurArchive(r);
+            const opacite = estArchiveConfirme(r) ? '0.6' : '1';
+            const typeBadge = r.type === 'commentaire'
+                ? '<span style="font-size: 0.75rem; background: var(--accent-primaire); color: white; padding: 1px 6px; border-radius: 4px; margin-left: 8px;">💬</span>'
+                : '';
+            return `
+            <div style="background: var(--gris-tres-pale); border-radius: 8px; padding: 12px; margin-bottom: 10px; border-left: 3px solid ${couleurBordure}; opacity: ${opacite};">
                 <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
                     <div>
-                        <strong style="color: var(--accent-primaire);">${r.prenom}</strong>
+                        <strong style="color: var(--accent-primaire);">${r.prenom}</strong>${typeBadge}
                         <span style="color: var(--gris-moyen); font-size: 0.85rem; margin-left: 10px;">${formatDate(r.date)}</span>
                     </div>
                     <button onclick="supprimerEtRafraichirArchive(${r.id})" style="
@@ -127,7 +475,7 @@ function ouvrirModalRapportsArchives() {
                     Voir le rapport complet
                 </button>
             </div>
-        `).join('');
+        `}).join('');
 
     const modalHTML = `
         <div id="modalRapportsArchives" style="
@@ -556,10 +904,14 @@ function genererRapportBug(descriptionUtilisateur = '', prenomTesteur = '') {
     const dateId = maintenant.toISOString().slice(0, 10); // 2026-01-30
     const heureId = maintenant.toTimeString().slice(0, 8).replace(/:/g, '-'); // 18-42-23
     const prenomNormalise = prenomTesteur.trim().toLowerCase().replace(/\s+/g, '-') || 'anonyme';
-    const idRapport = `${prenomNormalise} ${dateId} ${heureId}`;
 
-    let rapport = `=== RAPPORT DE BUG ===\n`;
-    rapport += `ID: ${idRapport}\n`;
+    const prefixe = modeRapport === 'commentaire' ? 'FEEDBACK' : 'BUG';
+    const idRapport = `${prefixe}_${prenomNormalise}_${dateId}_${heureId}`;
+
+    let rapport = modeRapport === 'commentaire'
+        ? `=== COMMENTAIRE / FEEDBACK ===\n`
+        : `=== RAPPORT DE BUG ===\n`;
+    rapport += `${idRapport}.txt\n`;
     rapport += `Testeur: ${prenomTesteur.trim() || 'Non spécifié'}\n`;
     rapport += `Date: ${etatApp.dateHeure}\n`;
     rapport += `Version: ${etatApp.version} (Build ${etatApp.build})\n\n`;
@@ -631,11 +983,16 @@ function genererRapportBug(descriptionUtilisateur = '', prenomTesteur = '') {
     }
 
     if (descriptionUtilisateur) {
-        rapport += `--- DESCRIPTION DU PROBLÈME ---\n`;
+        const labelDescription = modeRapport === 'commentaire'
+            ? `--- COMMENTAIRE ---`
+            : `--- DESCRIPTION DU PROBLÈME ---`;
+        rapport += `${labelDescription}\n`;
         rapport += `${descriptionUtilisateur}\n\n`;
     }
 
-    rapport += `=== FIN DU RAPPORT ===`;
+    rapport += modeRapport === 'commentaire'
+        ? `=== FIN DU COMMENTAIRE ===`
+        : `=== FIN DU RAPPORT ===`;
 
     return rapport;
 }
@@ -732,11 +1089,72 @@ async function telechargerCaptureEcran(btn) {
 // ===============================
 
 /**
+ * Met à jour l'affichage du mode (bug vs commentaire)
+ */
+function mettreAJourModeRapport() {
+    const btnBug = document.getElementById('btnModeBug');
+    const btnComment = document.getElementById('btnModeCommentaire');
+    const labelDescription = document.getElementById('labelDescriptionBug');
+    const textarea = document.getElementById('descriptionBug');
+
+    if (btnBug && btnComment) {
+        if (modeRapport === 'bug') {
+            btnBug.style.background = 'var(--accent-primaire)';
+            btnBug.style.color = 'white';
+            btnComment.style.background = 'transparent';
+            btnComment.style.color = 'var(--gris-fonce)';
+        } else {
+            btnComment.style.background = 'var(--accent-primaire)';
+            btnComment.style.color = 'white';
+            btnBug.style.background = 'transparent';
+            btnBug.style.color = 'var(--gris-fonce)';
+        }
+    }
+
+    if (labelDescription) {
+        labelDescription.textContent = modeRapport === 'commentaire'
+            ? 'Ton commentaire ou suggestion :'
+            : 'Décris le problème rencontré :';
+    }
+
+    if (textarea && !textarea.value) {
+        textarea.placeholder = modeRapport === 'commentaire'
+            ? "Dis-nous ce que tu penses de l'app.\n- Ce qui fonctionne bien\n- Ce qui pourrait être amélioré\n- Tes suggestions"
+            : "Exemple :\n- J'étais dans la section Réglages > Cours\n- J'ai cliqué sur le bouton «Ajouter un cours»\n- Rien ne s'est passé (ou message d'erreur...)\n- Je m'attendais à voir le formulaire de création";
+    }
+
+    // Mettre à jour le rapport
+    mettreAJourRapport();
+}
+
+/**
+ * Change le mode du rapport
+ */
+function changerModeRapport(mode) {
+    modeRapport = mode;
+    mettreAJourModeRapport();
+}
+
+/**
  * Ouvre le modal de rapport de bug
  */
 function ouvrirModalRapportBug() {
-    // Générer le rapport initial (sans description)
-    const rapportInitial = genererRapportBug();
+    // Réinitialiser le mode
+    modeRapport = 'bug';
+
+    // Charger les résolutions au passage
+    chargerResolutions().then(() => {
+        const sectionSuivi = document.getElementById('sectionSuiviBugs');
+        if (sectionSuivi) {
+            sectionSuivi.outerHTML = genererSectionSuivi();
+        }
+    });
+
+    // Récupérer le prénom sauvegardé
+    const prenomSauvegarde = localStorage.getItem(CLE_PRENOM_TESTEUR) || '';
+
+    // Générer le rapport initial (sans description, avec prénom sauvegardé)
+    const rapportInitial = genererRapportBug('', prenomSauvegarde);
 
     const modalHTML = `
         <div id="modalRapportBug" style="
@@ -787,6 +1205,25 @@ function ouvrirModalRapportBug() {
 
                 <!-- Contenu -->
                 <div style="padding: 25px;">
+
+                    <!-- Sélecteur de mode -->
+                    <div style="display: flex; gap: 0; margin-bottom: 20px; border: 1px solid var(--bordure-claire); border-radius: 8px; overflow: hidden;">
+                        <button id="btnModeBug" onclick="changerModeRapport('bug')" style="
+                            flex: 1; padding: 10px; border: none; cursor: pointer;
+                            font-family: inherit; font-size: 0.9rem; font-weight: 600;
+                            background: var(--accent-primaire); color: white;
+                            transition: all 0.2s;">
+                            🐛 Signaler un bug
+                        </button>
+                        <button id="btnModeCommentaire" onclick="changerModeRapport('commentaire')" style="
+                            flex: 1; padding: 10px; border: none; cursor: pointer;
+                            font-family: inherit; font-size: 0.9rem; font-weight: 600;
+                            background: transparent; color: var(--gris-fonce);
+                            transition: all 0.2s;">
+                            💬 Partager un commentaire
+                        </button>
+                    </div>
+
                     <!-- Instructions -->
                     <div class="info-box info-box--attention" style="
                         margin-bottom: 20px;
@@ -810,7 +1247,7 @@ function ouvrirModalRapportBug() {
                         ">
                             Ton prénom :
                         </label>
-                        <input type="text" id="prenomTesteur" placeholder="Ex: Grégoire" style="
+                        <input type="text" id="prenomTesteur" placeholder="Ex: Grégoire" value="${echapperHtmlLocal(prenomSauvegarde)}" style="
                             width: 100%;
                             max-width: 250px;
                             padding: 10px 12px;
@@ -819,12 +1256,12 @@ function ouvrirModalRapportBug() {
                             font-family: inherit;
                             font-size: 0.95rem;
                             box-sizing: border-box;
-                        " oninput="mettreAJourRapport()">
+                        " oninput="sauvegarderPrenomEtMettreAJour()">
                     </div>
 
                     <!-- Description du problème -->
-                    <div style="margin-bottom: 20px;">
-                        <label for="descriptionBug" style="
+                    <div id="sectionFormulaireBug" style="margin-bottom: 20px;">
+                        <label id="labelDescriptionBug" for="descriptionBug" style="
                             display: block;
                             font-weight: 600;
                             margin-bottom: 8px;
@@ -901,6 +1338,9 @@ function ouvrirModalRapportBug() {
                         iPad: <code style="background: var(--bordure-claire); padding: 2px 6px; border-radius: 4px;">Power+Vol.haut</code>
                     </div>
 
+                    <!-- Section suivi des tickets -->
+                    ${genererSectionSuivi()}
+
                     <!-- Lien vers archives -->
                     <div style="text-align: center;">
                         <button onclick="ouvrirModalRapportsArchives()" style="
@@ -931,6 +1371,26 @@ function fermerModalRapportBug() {
 }
 
 /**
+ * Sauvegarde le prénom et met à jour le rapport + la section suivi
+ */
+function sauvegarderPrenomEtMettreAJour() {
+    const prenom = document.getElementById('prenomTesteur')?.value || '';
+    localStorage.setItem(CLE_PRENOM_TESTEUR, prenom);
+
+    // Rafraîchir la section suivi avec le nouveau prénom
+    const sectionSuivi = document.getElementById('sectionSuiviBugs');
+    if (sectionSuivi) {
+        sectionSuivi.outerHTML = genererSectionSuivi();
+    }
+
+    // Mettre à jour le badge
+    mettreAJourBadgeBug();
+
+    // Mettre à jour le rapport technique
+    mettreAJourRapport();
+}
+
+/**
  * Met à jour le rapport avec la description de l'utilisateur
  */
 function mettreAJourRapport() {
@@ -955,7 +1415,7 @@ async function copierRapportBug(btn) {
         await navigator.clipboard.writeText(rapport);
 
         // Archiver le rapport localement
-        archiverRapportBug(rapport, description, prenom);
+        archiverRapportBug(rapport, description, prenom, modeRapport === 'commentaire' ? 'commentaire' : 'bug');
 
         // Feedback visuel
         if (btn) {
@@ -985,9 +1445,10 @@ async function telechargerRapportTxt(btn) {
     // Générer le nom du fichier avec date et prénom
     const maintenant = new Date();
     const dateStr = maintenant.toISOString().slice(0, 10); // 2026-02-01
-    const heureStr = maintenant.toTimeString().slice(0, 5).replace(':', 'h'); // 21h45
+    const heureStr = maintenant.toTimeString().slice(0, 8).replace(/:/g, '-'); // 21-45-00
     const prenomNormalise = prenom.trim().toLowerCase().replace(/\s+/g, '-') || 'anonyme';
-    const nomFichier = `rapport-bug-${prenomNormalise}-${dateStr}-${heureStr}.txt`;
+    const prefixe = modeRapport === 'commentaire' ? 'FEEDBACK' : 'BUG';
+    const nomFichier = `${prefixe}_${prenomNormalise}_${dateStr}_${heureStr}.txt`;
 
     let succes = false;
 
@@ -1029,7 +1490,7 @@ async function telechargerRapportTxt(btn) {
     }
 
     // Archiver le rapport localement
-    archiverRapportBug(rapport, description, prenom);
+    archiverRapportBug(rapport, description, prenom, modeRapport === 'commentaire' ? 'commentaire' : 'bug');
 
     // Feedback visuel
     if (btn && succes) {
@@ -1081,12 +1542,13 @@ function envoyerRapportParCourriel(btn) {
 
     try {
         // Construire le mailto
-        const sujet = encodeURIComponent(`[Bug Monitorage ${VERSION_APP}] ${description.substring(0, 50) || 'Rapport de bug'}...`);
+        const typeLabel = modeRapport === 'commentaire' ? 'Feedback' : 'Bug';
+        const sujet = encodeURIComponent(`[${typeLabel} Monitorage ${VERSION_APP}] ${description.substring(0, 50) || 'Rapport de bug'}...`);
         const corpsNettoye = nettoyerUTF16(rapport + '\n\n--- JOINS TES CAPTURES D\'ÉCRAN À CE COURRIEL ---');
         const corps = encodeURIComponent(corpsNettoye);
 
         // Archiver le rapport localement
-        archiverRapportBug(rapport, description, prenom);
+        archiverRapportBug(rapport, description, prenom, modeRapport === 'commentaire' ? 'commentaire' : 'bug');
 
         // Feedback visuel
         if (btn) {
@@ -1108,12 +1570,24 @@ function envoyerRapportParCourriel(btn) {
 }
 
 // ===============================
+// INITIALISATION AU CHARGEMENT
+// ===============================
+
+// Charger les résolutions et mettre à jour le badge au démarrage
+document.addEventListener('DOMContentLoaded', function() {
+    chargerResolutions().then(() => {
+        mettreAJourBadgeBug();
+    });
+});
+
+// ===============================
 // EXPORTS GLOBAUX
 // ===============================
 
 window.ouvrirModalRapportBug = ouvrirModalRapportBug;
 window.fermerModalRapportBug = fermerModalRapportBug;
 window.mettreAJourRapport = mettreAJourRapport;
+window.sauvegarderPrenomEtMettreAJour = sauvegarderPrenomEtMettreAJour;
 window.copierRapportBug = copierRapportBug;
 window.telechargerRapportTxt = telechargerRapportTxt;
 window.envoyerRapportParCourriel = envoyerRapportParCourriel;
@@ -1126,8 +1600,15 @@ window.supprimerEtRafraichirArchive = supprimerEtRafraichirArchive;
 window.rafraichirListeArchives = rafraichirListeArchives;
 window.afficherRapportComplet = afficherRapportComplet;
 window.viderRapportsArchives = viderRapportsArchives;
+// Suivi des tickets
+window.confirmerTicket = confirmerTicket;
+window.rouvrirTicket = rouvrirTicket;
+window.chargerResolutions = chargerResolutions;
+window.mettreAJourBadgeBug = mettreAJourBadgeBug;
+// Mode rapport
+window.changerModeRapport = changerModeRapport;
 
-console.log('Module rapport-bug.js chargé (version améliorée avec archivage)');
+console.log('Module rapport-bug.js chargé (version avec suivi des tickets et feedback)');
 
 
 })();
