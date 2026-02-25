@@ -514,6 +514,9 @@
         if (queue.length > 0) {
             mettreAJourPreviewsPipeline();
         }
+
+        // Synchroniser le scroll entre colonnes gauche et droite
+        requestAnimationFrame(() => initialiserSyncScrollColonnes());
     }
 
     /**
@@ -746,8 +749,7 @@
         }
 
         const optDPI = document.getElementById('pipeline-opt-dpi')?.checked;
-        const opt11x17 = document.getElementById('pipeline-opt-11x17')?.checked;
-        if (!optDPI || opt11x17) {
+        if (!optDPI || f.format11x17) {
             return { w: f.largeurOriginale, h: f.hauteurOriginale };
         }
 
@@ -1047,16 +1049,7 @@
 
         // Zone A : Reglages globaux (toujours visible)
         colCentre += '<div class="pipeline-centre-global">';
-        colCentre += '<div class="pipeline-col-titre">Traitement</div>';
-        colCentre += '<p class="texte-muted u-texte-petit" style="margin:0 0 8px 0;">Ces options s\u2019appliquent par d\u00e9faut \u00e0 tous les fichiers.</p>';
-
-        colCentre += '<ul class="pipeline-checklist">';
-        colCentre += `<li><label><input type="checkbox" id="pipeline-opt-balance" checked onchange="travauxUI.mettreAJourPreviewsPipeline()"> Balance des blancs</label></li>`;
-        colCentre += `<li><label><input type="checkbox" id="pipeline-opt-dpi" checked onchange="travauxUI.mettreAJourPreviewsPipeline()"> Uniformisation 200 dpi</label></li>`;
-        colCentre += `<li><label><input type="checkbox" id="pipeline-opt-11x17" onchange="travauxUI.mettreAJourPreviewsPipeline()"> Format 11×17 (résolution originale)</label></li>`;
-        colCentre += `<li><label><input type="checkbox" id="pipeline-opt-doublons" checked> D\u00e9tection doublons (manuel)</label></li>`;
-        colCentre += `<li><label><input type="checkbox" id="pipeline-opt-assemblage" checked> Assemblage automatique (par nom / production)</label></li>`;
-        colCentre += '</ul>';
+        colCentre += '<div class="pipeline-col-titre">Inspecteur</div>';
 
         colCentre += `<div class="pipeline-production-selecteur">
             <label>Production</label>
@@ -1066,9 +1059,31 @@
             </select>
         </div>`;
 
+        colCentre += '<p class="texte-muted u-texte-petit" style="margin:8px 0 4px 0;">R\u00e9glages par d\u00e9faut\u00a0:</p>';
+
+        colCentre += '<ul class="pipeline-checklist">';
+        colCentre += `<li><label><input type="checkbox" id="pipeline-opt-dpi" checked onchange="travauxUI.mettreAJourPreviewsPipeline()"> Uniformisation 200 dpi</label></li>`;
+        colCentre += `<li><label><input type="checkbox" id="pipeline-opt-balance" checked onchange="travauxUI.mettreAJourPreviewsPipeline()"> Balance des blancs</label></li>`;
+        colCentre += `<li><label><input type="checkbox" id="pipeline-opt-doublons" checked> D\u00e9tection doublons (manuel)</label></li>`;
+        colCentre += `<li><label><input type="checkbox" id="pipeline-opt-assemblage" checked> Assemblage automatique (par nom / production)</label></li>`;
+        colCentre += '</ul>';
+
+        // Alerte globale : blobs manquants après restauration session
+        const nbBlobsManquants = queue.filter(f => !f.fichier).length;
+        if (nbBlobsManquants > 0) {
+            colCentre += `<div class="pipeline-alerte-blobs" style="margin-top:8px; padding:8px 10px; background: var(--orange-pale, rgba(255,152,0,0.1)); border-radius: var(--radius); border-left: 3px solid var(--orange);">
+                <p class="u-texte-petit" style="margin:0 0 6px 0; color: var(--orange);"><strong>${nbBlobsManquants} fichier${nbBlobsManquants > 1 ? 's' : ''}</strong> ${nbBlobsManquants > 1 ? 'doivent' : 'doit'} \u00eatre re-d\u00e9pos\u00e9${nbBlobsManquants > 1 ? 's' : ''} (session restaur\u00e9e).</p>
+                <button class="btn btn-secondaire btn-sm" onclick="travauxUI.redeposerFichiers()">Re-d\u00e9poser les fichiers</button>
+            </div>`;
+        }
+
+        const fSel = queue[fichierSelectionneIndex];
+        const btnReglagesDisabled = fichierSelectionneIndex < 0 || !fSel?.estImage || !fSel?.fichier;
+        colCentre += `<button class="btn btn-secondaire" style="margin-top:8px;" ${btnReglagesDisabled ? 'disabled' : ''} onclick="travauxUI.ouvrirPreparationFichier(${fichierSelectionneIndex})">R\u00e9glages sp\u00e9cifiques</button>`;
+
         colCentre += '</div>'; // fin pipeline-centre-global
 
-        // Zone B : Preview (conditionnelle)
+        // Zone B : Apercu (conditionnelle)
         colCentre += '<div class="pipeline-centre-preview">';
         if (fichierSelectionneIndex >= 0 && fichierSelectionneIndex < queue.length) {
             const f = queue[fichierSelectionneIndex];
@@ -1077,60 +1092,61 @@
             const tailleEst = estimerTailleFichier(dims.w, dims.h, f);
             const resCible = f.estPDF ? 'PDF (aucun traitement)' : `${dims.w} x ${dims.h}`;
 
+            colCentre += '<div class="pipeline-col-titre">Aper\u00e7u</div>';
+
             // Grande preview
             colCentre += `<div class="pipeline-preview-centre" id="pipeline-preview-centre">
                 <span class="pipeline-icone-placeholder">&#x1F5BC;</span>
             </div>`;
 
             // Metadata du fichier
-            const modeLea = f.modeImport === 'lea';
+            colCentre += '<p class="texte-muted u-texte-petit" style="margin:10px 0 4px 0;">M\u00e9tadonn\u00e9es</p>';
+            const modeLea = f.modeImport !== 'autre';
             const dateVal = f.dateFichier ? new Date(f.dateFichier).toISOString().substring(0, 10) : '';
             const nomEtudiant = f.etudiantAssocie
                 ? echapperHtml((f.etudiantAssocie.prenom || '') + ' ' + (f.etudiantAssocie.nom || ''))
                 : '';
 
-            colCentre += '<div class="pipeline-meta-champs" style="margin-top:12px;">';
-            // Toggle LEA/Libre
+            colCentre += '<div class="pipeline-meta-champs" style="margin-top:4px;">';
+            // Toggle LEA/Autre
             colCentre += `<div class="pipeline-mode-toggle">
-                <button class="pipeline-toggle-btn${modeLea ? ' actif' : ''}" onclick="travauxUI.toggleModeImport(${idx},'lea')">LEA</button>
-                <button class="pipeline-toggle-btn${!modeLea ? ' actif' : ''}" onclick="travauxUI.toggleModeImport(${idx},'libre')">Libre</button>
+                <label class="pipeline-radio-label">
+                    <input type="radio" name="pipeline-mode-${idx}" value="lea"
+                        ${modeLea ? 'checked' : ''}
+                        onchange="travauxUI.toggleModeImport(${idx},'lea')">
+                    LEA
+                </label>
+                <label class="pipeline-radio-label">
+                    <input type="radio" name="pipeline-mode-${idx}" value="autre"
+                        ${!modeLea ? 'checked' : ''}
+                        onchange="travauxUI.toggleModeImport(${idx},'autre')">
+                    Autre
+                </label>
             </div>`;
 
-            if (modeLea) {
-                colCentre += `<div class="pipeline-champ">
-                    <label>\u00c9tudiant</label>
-                    <input type="text" class="pipeline-input-etudiant" id="pipeline-etudiant-${idx}"
-                        value="${nomEtudiant}" placeholder="Rechercher..."
-                        oninput="travauxUI.rechercherEtudiant(${idx}, this.value)"
-                        onfocus="travauxUI.ouvrirListeEtudiants(${idx})"
-                        autocomplete="off">
-                    <div class="pipeline-autocomplete-liste u-hide" id="pipeline-autocomplete-${idx}"></div>
-                </div>`;
-                colCentre += `<div class="pipeline-champ">
-                    <label>Production</label>
-                    <select class="form-select pipeline-select-petit" onchange="travauxUI.changerProductionPipeline(${idx}, this.value)">
-                        <option value="">--</option>
-                        ${productions.map(p => `<option value="${p.id}" ${f.productionId === p.id ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
-                    </select>
-                </div>`;
-                colCentre += `<div class="pipeline-champ">
-                    <label>Date</label>
-                    <input type="date" class="pipeline-input-date" value="${dateVal}" onchange="travauxUI.changerDateFichier(${idx}, this.value)">
-                </div>`;
-            } else {
-                colCentre += `<div class="pipeline-champ">
-                    <label>Nom du document</label>
-                    <input type="text" class="pipeline-input-nom" value="${echapperHtml(f.nomDocumentLibre || '')}"
-                        placeholder="Nom libre..." onchange="travauxUI.changerNomDocumentLibre(${idx}, this.value)">
-                </div>`;
-            }
+            // Champs communs LEA et Autre (auto-remplis en LEA, vides/editables en Autre)
+            colCentre += `<div class="pipeline-champ">
+                <label>\u00c9tudiant</label>
+                <input type="text" class="pipeline-input-etudiant" id="pipeline-etudiant-${idx}"
+                    value="${modeLea ? nomEtudiant : echapperHtml(f.etudiantManuel || '')}" placeholder="Rechercher..."
+                    oninput="travauxUI.rechercherEtudiant(${idx}, this.value)"
+                    onfocus="travauxUI.ouvrirListeEtudiants(${idx})"
+                    autocomplete="off">
+                <div class="pipeline-autocomplete-liste u-hide" id="pipeline-autocomplete-${idx}"></div>
+            </div>`;
+            colCentre += `<div class="pipeline-champ">
+                <label>Production</label>
+                <select class="form-select pipeline-select-petit" onchange="travauxUI.changerProductionPipeline(${idx}, this.value)">
+                    <option value="">--</option>
+                    ${productions.map(p => `<option value="${p.id}" ${f.productionId === p.id ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
+                </select>
+            </div>`;
+            colCentre += `<div class="pipeline-champ">
+                <label>Date</label>
+                <input type="date" class="pipeline-input-date" value="${dateVal}" onchange="travauxUI.changerDateFichier(${idx}, this.value)">
+            </div>`;
+
             colCentre += '</div>'; // fin pipeline-meta-champs
-
-
-            // Bouton reglages specifiques (seulement pour les images)
-            if (f.estImage) {
-                colCentre += `<button class="btn btn-secondaire" style="margin-top:8px;" onclick="travauxUI.ouvrirPreparationFichier(${idx})">R\u00e9glages sp\u00e9cifiques</button>`;
-            }
 
             // Lien deselectionner
             colCentre += `<a href="#" class="texte-muted u-texte-petit" style="margin-top:6px;display:inline-block;" onclick="event.preventDefault();travauxUI.deselectionnerFichierPipeline();">D\u00e9s\u00e9lectionner</a>`;
@@ -1202,11 +1218,26 @@
 
     /**
      * Rafraichit l'interface pipeline sans remonter la drop zone
+     * Preserve les positions de scroll des colonnes gauche/droite
      */
     function rafraichirPipelineUI() {
         const queue = travauxImport.obtenirFileDAttente();
         if (fichierSelectionneIndex >= queue.length) fichierSelectionneIndex = -1;
+
+        // Sauvegarder les positions de scroll avant re-rendu
+        const colG = document.querySelector('.pipeline-col-originaux');
+        const scrollGauche = colG ? colG.scrollTop : 0;
+
         afficherImport();
+
+        // Restaurer les positions de scroll apres re-rendu
+        requestAnimationFrame(() => {
+            const newColG = document.querySelector('.pipeline-col-originaux');
+            const newColD = document.querySelector('.pipeline-col-confirmes');
+            if (newColG) newColG.scrollTop = scrollGauche;
+            if (newColD) newColD.scrollTop = scrollGauche;
+            initialiserSyncScrollColonnes();
+        });
     }
 
     /**
@@ -1215,7 +1246,58 @@
      */
     function selectionnerFichierPipeline(index) {
         fichierSelectionneIndex = index;
-        rafraichirPipelineUI();
+
+        // Sauvegarder le scroll avant re-rendu
+        const colG = document.querySelector('.pipeline-col-originaux');
+        const scrollAvant = colG ? colG.scrollTop : 0;
+
+        const queue = travauxImport.obtenirFileDAttente();
+        if (fichierSelectionneIndex >= queue.length) fichierSelectionneIndex = -1;
+        afficherImport();
+
+        // Restaurer le scroll et defiler vers le fichier selectionne
+        requestAnimationFrame(() => {
+            const newColG = document.querySelector('.pipeline-col-originaux');
+            const newColD = document.querySelector('.pipeline-col-confirmes');
+            if (newColG) newColG.scrollTop = scrollAvant;
+            if (newColD) newColD.scrollTop = scrollAvant;
+
+            // Defiler vers le fichier selectionne si hors de la vue
+            const selectionne = newColG?.querySelector('.pipeline-fichier-selectionne');
+            if (selectionne && newColG) {
+                const rect = selectionne.getBoundingClientRect();
+                const contRect = newColG.getBoundingClientRect();
+                if (rect.top < contRect.top || rect.bottom > contRect.bottom) {
+                    selectionne.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+                    if (newColD) newColD.scrollTop = newColG.scrollTop;
+                }
+            }
+            initialiserSyncScrollColonnes();
+        });
+    }
+
+    /**
+     * Synchronise le scroll entre les colonnes gauche et droite du pipeline.
+     * Appelee apres chaque re-rendu pour reattacher les listeners.
+     */
+    function initialiserSyncScrollColonnes() {
+        const colG = document.querySelector('.pipeline-col-originaux');
+        const colD = document.querySelector('.pipeline-col-confirmes');
+        if (!colG || !colD) return;
+
+        let enSync = false;
+        colG.addEventListener('scroll', function() {
+            if (enSync) return;
+            enSync = true;
+            colD.scrollTop = colG.scrollTop;
+            enSync = false;
+        });
+        colD.addEventListener('scroll', function() {
+            if (enSync) return;
+            enSync = true;
+            colG.scrollTop = colD.scrollTop;
+            enSync = false;
+        });
     }
 
     /**
@@ -1260,6 +1342,28 @@
             fichierSelectionneIndex--;
         }
         travauxImport.retirerFichier(index);
+    }
+
+    /**
+     * Ouvre un sélecteur de fichiers pour re-déposer les blobs manquants
+     * après une restauration de session (les File ne sont pas sérialisables).
+     */
+    function redeposerFichiers() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.multiple = true;
+        input.accept = '.pdf,.jpg,.jpeg,.png,.heic,.heif';
+        input.style.cssText = 'position:fixed;top:-9999px;opacity:0;pointer-events:none;';
+        document.body.appendChild(input);
+        input.addEventListener('change', function() {
+            if (input.files && input.files.length > 0) {
+                const rattaches = travauxImport.reattacherBlobs(input.files);
+                console.log(`[Pipeline] ${rattaches} fichier(s) re-attach\u00e9(s)`);
+                rafraichirPipelineUI();
+            }
+            document.body.removeChild(input);
+        });
+        input.click();
     }
 
     /**
@@ -2431,9 +2535,8 @@
             return;
         }
 
-        const optBalance = document.getElementById('pipeline-opt-balance')?.checked;
         const optDPI = document.getElementById('pipeline-opt-dpi')?.checked;
-        const opt11x17 = document.getElementById('pipeline-opt-11x17')?.checked;
+        const optBalance = document.getElementById('pipeline-opt-balance')?.checked;
         const optDoublons = document.getElementById('pipeline-opt-doublons')?.checked;
         const optAssemblage = document.getElementById('pipeline-opt-assemblage')?.checked;
 
@@ -2459,8 +2562,8 @@
                 await Promise.all(lot.map(async (f) => {
                     let blob = f.fichier;
 
-                    // Balance des blancs auto
-                    if (optBalance && typeof travauxPreparation.autoBalanceBlancs === 'function') {
+                    // Balance des blancs auto (globale + par fichier : activee sauf si skipBalance)
+                    if (optBalance && !f.skipBalance && typeof travauxPreparation.autoBalanceBlancs === 'function') {
                         try {
                             blob = await travauxPreparation.autoBalanceBlancs(blob);
                         } catch (e) {
@@ -2468,8 +2571,8 @@
                         }
                     }
 
-                    // Uniformisation 200 dpi
-                    if (optDPI && !opt11x17) {
+                    // Uniformisation 200 dpi (par fichier : sauf si format11x17)
+                    if (optDPI && !f.format11x17) {
                         try {
                             blob = await uniformiser200DPI(blob);
                         } catch (e) {
@@ -2496,11 +2599,6 @@
 
         // === Auto-identification ===
         identifierAutoPipeline();
-
-        // === Marquer format 11x17 si coche ===
-        if (opt11x17) {
-            queue.forEach(f => { f.format11x17 = true; });
-        }
 
         // === Forcer tous les fichiers pret → identifie (import sans blocage) ===
         queue.forEach(f => {
@@ -3964,18 +4062,18 @@
     }
 
     /* ===============================
-       METADATA PIPELINE (LEA / Libre)
+       METADATA PIPELINE (LEA / Autre)
        =============================== */
 
     let debounceRechercheTimer = null;
 
     /**
-     * Bascule le mode import d'un fichier (lea / libre)
+     * Bascule le mode import d'un fichier (lea / autre)
      */
     function toggleModeImport(index, mode) {
         const queue = travauxImport.obtenirFileDAttente();
         if (!queue[index]) return;
-        queue[index].modeImport = mode || (queue[index].modeImport === 'lea' ? 'libre' : 'lea');
+        queue[index].modeImport = mode || (queue[index].modeImport === 'autre' ? 'lea' : 'autre');
         rafraichirPipelineUI();
     }
 
@@ -4825,6 +4923,7 @@
         selectionnerFichierPipeline: selectionnerFichierPipeline,
         deselectionnerFichierPipeline: deselectionnerFichierPipeline,
         retirerFichierPipeline: retirerFichierPipeline,
+        redeposerFichiers: redeposerFichiers,
         monterFichierPipeline: monterFichierPipeline,
         descendreFichierPipeline: descendreFichierPipeline,
         // Suppression
@@ -4848,7 +4947,7 @@
         filtrerBadgesParProduction: filtrerBadgesParProduction,
         // Utilitaires
         annotationContientDuContenu: annotationContientDuContenu,
-        // Metadata pipeline (LEA / Libre)
+        // Metadata pipeline (LEA / Autre)
         toggleModeImport: toggleModeImport,
         rechercherEtudiant: rechercherEtudiant,
         selectionnerEtudiant: selectionnerEtudiant,

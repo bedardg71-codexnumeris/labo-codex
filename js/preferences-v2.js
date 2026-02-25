@@ -150,6 +150,12 @@
             uniteAffichage.value = preferences.uniteAffichageAssiduite || 'periodes';
         }
 
+        // SIS par défaut
+        const sisSelect = document.getElementById('v2-pref-sis');
+        if (sisSelect) {
+            sisSelect.value = preferences.sisDefaut || 'lea';
+        }
+
         // Grille de référence
         const grilleReference = document.getElementById('v2-pref-grille-reference');
         if (grilleReference && modalites.grilleReferenceDepistage) {
@@ -277,6 +283,8 @@
         // 🆕 BETA 96.1 : Animation des points
         preferences.animationPoints = document.getElementById('v2-pref-animation-points')?.checked !== false;
         appliquerAnimationPoints(preferences.animationPoints);
+        // SIS par défaut
+        preferences.sisDefaut = document.getElementById('v2-pref-sis')?.value || 'lea';
 
         db.setSync('preferencesAffichage', preferences);
 

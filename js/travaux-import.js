@@ -308,7 +308,7 @@
             thumbnailDataUrl: null,
             productionId: '',
             // Metadata import
-            modeImport: parseLea.da ? 'lea' : 'libre',
+            modeImport: 'lea',
             nomDocumentLibre: '',
             dateFichier: new Date(fichier.lastModified),
             operations: []
@@ -405,7 +405,7 @@
             leaParsed: fichierPrepare.parseLea || null,
             groupeDocumentId: fichierPrepare.groupeDocumentId || '',
             // Metadata import (LEA / Libre)
-            modeImport: fichierPrepare.modeImport || 'libre',
+            modeImport: fichierPrepare.modeImport || 'lea',
             nomDocumentLibre: fichierPrepare.nomDocumentLibre || '',
             dateFichier: fichierPrepare.dateFichier ? fichierPrepare.dateFichier.toISOString() : null,
             format11x17: fichierPrepare.format11x17 || false
@@ -952,6 +952,32 @@
     }
 
     /* ===============================
+       RE-ATTACHEMENT DES BLOBS (session restaurée)
+       =============================== */
+
+    /**
+     * Re-attache les blobs File aux entrées de la queue restaurée depuis sessionStorage.
+     * Correspondance par nom de fichier exact (nomFichier === fichier.name).
+     * @param {FileList|Array} fichiers - Les fichiers re-déposés par l'utilisateur
+     * @returns {number} Le nombre de fichiers rattachés
+     */
+    function reattacherBlobs(fichiers) {
+        let rattaches = 0;
+        for (const fichier of fichiers) {
+            const index = fichiersEnAttente.findIndex(f => f.nomFichier === fichier.name && !f.fichier);
+            if (index === -1) continue;
+            fichiersEnAttente[index].fichier = fichier;
+            fichiersEnAttente[index].fichierOriginal = fichier;
+            if (!fichiersEnAttente[index].thumbnailDataUrl) {
+                genererThumbnailQueue(fichiersEnAttente[index]);
+            }
+            rattaches++;
+        }
+        if (rattaches > 0) persisterFileDAttente();
+        return rattaches;
+    }
+
+    /* ===============================
        INITIALISATION : RESTAURER LA FILE
        =============================== */
 
@@ -1117,6 +1143,7 @@
         importerFichier: importerFichier,
         importerTous: importerTous,
         reimporterFichier: reimporterFichier,
+        reattacherBlobs: reattacherBlobs,
         // Drag & Drop
         initialiserDropZone: initialiserDropZone,
         // UI

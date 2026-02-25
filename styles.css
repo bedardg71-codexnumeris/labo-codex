@@ -15398,6 +15398,8 @@ body.mode-clair .travaux-compteur-badge {
 }
 
 /* --- Pipeline layout 3 colonnes --- */
+/* Note: position:sticky ne fonctionne pas car .conteneur a overflow:hidden.
+   On utilise plutot des colonnes scrollables independantes. */
 .pipeline-3col-grid {
     display: grid;
     grid-template-columns: 250px 1fr 250px;
@@ -15411,11 +15413,15 @@ body.mode-clair .travaux-compteur-badge {
     flex-direction: column;
     gap: 8px;
     min-width: 0;
+    max-height: calc(100vh - 280px);
+    overflow-y: auto;
 }
 
 .pipeline-col-centre {
     display: flex;
     flex-direction: column;
+    max-height: calc(100vh - 280px);
+    overflow-y: auto;
 }
 
 .pipeline-centre-global {
@@ -15720,6 +15726,12 @@ body.mode-clair .pipeline-autocomplete-item:hover {
 @media (max-width: 900px) {
     .pipeline-3col-grid {
         grid-template-columns: 1fr;
+    }
+    .pipeline-col-originaux,
+    .pipeline-col-confirmes,
+    .pipeline-col-centre {
+        max-height: none;
+        overflow-y: visible;
     }
     .pipeline-col-centre {
         border-top: 1px solid var(--bordure-claire);
