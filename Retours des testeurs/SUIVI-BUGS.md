@@ -22,6 +22,16 @@
 | 72 | Grégoire | 24 fév | 24 fév | Badge « EN COURS » au lieu de « ÉVALUÉ » + cadenas 🔒 manquant | Fichiers importés sans `productionId` ne matchaient pas les évaluations (correspondance exacte `''` vs `'artefact1'`). Recherche assouplie : si fichier sans productionId, accepter toute évaluation pour l'étudiant. Cadenas ajouté sur badges après auto-verrouillage dans `sauvegarderEvaluationModifiee()` |
 | 73 | Grégoire | 24 fév | 24 fév | Bouton « Évaluer » ne fonctionne pas après navigation TB → retour | `modeCourant` restait à `'evaluer'` après navigation (palettes DOM détruites sans appel à `fermerModeEvaluation()`). `basculerMode('evaluer')` retournait immédiatement. Corrigé : reset `modeCourant = 'annoter'` dans `initialiserModuleTravaux()` (travaux-ui.js) |
 | 74 | Grégoire | 24 fév | 24 fév | Export affiche le mauvais groupe (gr.2 au lieu de gr.8) | `peuplerDropdownGroupeCoursActif()` validait le groupe actif contre la liste filtrée (`dansSidebar !== false`). Un groupe masqué était considéré invalide → auto-sélection du premier visible. Corrigé : validation contre `tousGroupesCours` (trimestre-v2.js:5652) |
+| 75 | Grégoire | 24 fév | 24 fév | Export Lea : compteur « 23 évalué(s) sur 23 » au lieu de 21 (mauvais groupe) | `mettreAJourCompteurLea()` et `exporterPourLea()` utilisaient `obtenirFichiersProduction()` sans filtre groupe. Corrigé : `obtenirFichiersGroupeActif()` + match par `productionId` sélectionnée |
+| 76 | Grégoire | 24 fév | 24 fév | Production non identifiée au rechargement (select vide, critères vides) | `fichier.productionId` vide malgré évaluation sauvegardée. Corrigé : propagation productionId/etudiantDA/groupeCoursId vers le fichier dans `sauvegarderEvaluation()` + fallback sécuritaire dans `ouvrirFichier()` (1 seule production → auto-select) |
+| 77 | Grégoire | 24 fév | 24 fév | Synthèse rétroaction absente de l'export PDF | `ajouterPageSynthese()` matchait par `fichier.productionId` (vide). Corrigé : paramètre `productionIdOverride` propagé via `exporterPourLea()` → `genererDocPDF()` → `ajouterPageSynthese()` |
+| 78 | Grégoire | 24 fév | 24 fév | Note chiffrée affichée malgré « Lettre seulement » dans pratique | Cascade de priorité inversée : évaluation sauvegardée primait sur la pratique. Corrigé dans `travaux-export-pdf.js` et `evaluation.js` : pratique > évaluation > défaut |
+| 79 | Grégoire | 24 fév | 24 fév | Compteur « 21 annotés » alors que tous sont évalués | `determinerStatutFichier()` utilisait un matching strict (`productionId === productionId`), échouant pour fichiers sans productionId. Corrigé : même matching souple que `genererBadgeFichierImporte()` |
+| 80 | Grégoire | 24 fév | 24 fév | Fichiers « Non associés » malgré évaluations existantes | Rétro-propagation des métadonnées (productionId, groupeCoursId) depuis les évaluations vers les fichiers orphelins à l'initialisation du module |
+| 81 | Grégoire | 24 fév | 24 fév | Archivage affiche fichiers du mauvais groupe + compteur « 44 fichiers » | Rétro-propagation `groupeCoursId` basée sur l'appartenance réelle de l'étudiant (groupeEtudiants + groupesCours). Compteur filtré par groupe actif |
+| 82 | Grégoire | 24 fév | 24 fév | Archivage ne se rafraîchit pas au changement de groupe | `afficherArchivage()` manquant dans les handlers de changement groupe-cours (trimestre-v2.js) |
+| 83 | Grégoire | 24 fév | 24 fév | Checkboxes rétroaction décochées au chargement d'évaluation existante | `verifierEtChargerEvaluationExistante()` restaurait les valeurs sauvegardées (souvent `false`). Remplacé par `cocherOptionsParDefaut()` |
+| 84 | Grégoire | 24 fév | 24 fév | Déverrouiller une évaluation déverrouille TOUTES les autres + cadenas disparus | `basculerVerrouillageEvaluationCourante()` utilisait `obtenirDonneesSelonMode` (filtré) → écrasait les données. Corrigé : `db.getSync(cle(...))` + rafraîchissement badges |
 
 ---
 
@@ -77,7 +87,7 @@
 
 ### Pour ajouter un bug
 1. Créer une entrée dans la section "Ouverts"
-2. Assigner un numéro séquentiel (prochain : **#75**)
+2. Assigner un numéro séquentiel (prochain : **#85**)
 3. Documenter dans le sous-dossier du testeur si fichiers/screenshots fournis
 
 ### Pour marquer comme corrigé

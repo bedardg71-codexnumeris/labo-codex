@@ -1,8 +1,8 @@
-# SESSION ACTIVE - BETA 97.13
+# SESSION ACTIVE - BETA 98.01
 
 **Date** : 24 février 2026
-**Version** : Beta 97.13 (build 0224-0505)
-**Statut** : Correction bugs évaluations (rapport Grégoire 24 fév)
+**Version** : Beta 98.01 (build 0224-1945)
+**Statut** : Correction bugs évaluations/export/archivage (rapport Grégoire 24 fév)
 
 ## SESSION DU 24 FÉVRIER 2026
 
@@ -34,6 +34,28 @@
 > **Bug** : #74
 
 135. **Export affiche le mauvais groupe** (#74) : Grégoire évalue 21 copies du groupe 8, mais l'export montre 23 copies du groupe 2. Cause : `peuplerDropdownGroupeCoursActif()` (trimestre-v2.js:5652) validait `groupeCoursActif` contre `groupesCours` (filtrée par `dansSidebar !== false`). Si le groupe actif avait `dansSidebar === false`, il était considéré invalide et remplacé silencieusement par le premier groupe visible. Corrigé : validation contre `tousGroupesCours` (liste non filtrée).
+
+> **Bugs** : #75-#84
+
+136. **Export Lea : compteur et fichiers du mauvais groupe** (#75) : `mettreAJourCompteurLea()` et `exporterPourLea()` utilisaient les fichiers sans filtre groupe. Corrigé avec `obtenirFichiersGroupeActif()` et matching évaluations par `productionId` sélectionnée.
+
+137. **Production non identifiée au rechargement** (#76) : `fichier.productionId` vide malgré évaluation sauvegardée. Triple correction : (a) `sauvegarderEvaluation()` propage productionId/etudiantDA/groupeCoursId vers le fichier, (b) fallback sécuritaire dans `ouvrirFichier()` (1 seule production → auto-select, multiples → sélection manuelle).
+
+138. **Synthèse rétroaction absente de l'export PDF** (#77) : `ajouterPageSynthese()` matchait par `fichier.productionId` (vide). Paramètre `productionIdOverride` propagé via toute la chaîne d'export. Checkboxes « Inclure évaluations » cochées par défaut.
+
+139. **Note chiffrée malgré « Lettre seulement »** (#78) : Cascade de priorité inversée dans `travaux-export-pdf.js` et `evaluation.js`. Réordonnée : pratique active > évaluation sauvegardée > défaut. `cocherOptionsParDefaut()` appliqué aussi au chargement d'évaluation existante.
+
+140. **Compteur « 21 annotés » vs badges « ÉVALUÉ »** (#79) : `determinerStatutFichier()` utilisait un matching strict sur `productionId`. Aligné avec le matching souple de `genererBadgeFichierImporte()`.
+
+141. **Rétro-propagation métadonnées fichiers orphelins** (#80) : Fonction `retroPropagerMetadonnees()` à l'initialisation : propage `productionId` depuis les évaluations et `groupeCoursId` depuis l'appartenance réelle de l'étudiant (groupeEtudiants + groupesCours).
+
+142. **Archivage affichait fichiers du mauvais groupe** (#81) : Rétro-propagation `groupeCoursId` corrigée pour utiliser l'index `DA → groupeCoursId` plutôt que les évaluations (qui avaient le mauvais groupe). Compteur filtré par groupe actif.
+
+143. **Archivage ne se rafraîchissait pas au changement de groupe** (#82) : Ajout de `travauxUI.afficherArchivage()` dans les handlers de changement groupe-cours (modes COURS et GROUPE-COURS) dans trimestre-v2.js.
+
+144. **Checkboxes rétroaction décochées au chargement** (#83) : `verifierEtChargerEvaluationExistante()` restaurait les valeurs sauvegardées (souvent `false`). Remplacé par `cocherOptionsParDefaut()` qui coche tout et applique la préférence pratique pour le radio.
+
+145. **Déverrouiller une éval déverrouille toutes les autres** (#84) : `basculerVerrouillageEvaluationCourante()` utilisait `obtenirDonneesSelonMode` (filtré par coursId) → sauvegardait un sous-ensemble → écrasait les données. Corrigé avec `db.getSync(cle(...))` + rafraîchissement badges après basculement.
 
 ### Travail accompli — Validation et humanisation de l'onglet Aide (Beta 97.13, build 0224-0505)
 
