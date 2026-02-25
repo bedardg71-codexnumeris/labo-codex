@@ -20793,3 +20793,78 @@ body.mode-clair .model-fichier-carte {
 body.mode-clair .model-fichier-apercu {
     background: var(--surface-conteneur, #f1f5f9);
 }
+
+/* ===============================
+   MODAL EDITION RETROACTIONS (tampons + erreurs FR)
+   =============================== */
+
+.travaux-retro-modal {
+    max-width: 700px;
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+.travaux-retro-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+
+.travaux-retro-item img {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.travaux-retro-numero {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: white;
+    flex-shrink: 0;
+    margin-top: 4px;
+}
+
+.travaux-retro-nom {
+    font-weight: 600;
+    min-width: 140px;
+    flex-shrink: 0;
+    padding-top: 6px;
+    font-size: 0.85rem;
+}
+
+.travaux-retro-modal .travaux-retro-textarea {
+    flex: 1;
+    min-height: 60px;
+    resize: vertical;
+    font-family: inherit;
+    font-size: 0.82rem;
+    padding: 8px;
+    border: 1px solid var(--bordure-claire);
+    border-radius: var(--radius-moyen);
+    background: var(--surface-input, var(--surface-carte));
+    color: var(--texte-principal);
+    line-height: 1.4;
+}
+
+.travaux-retro-modal .travaux-retro-textarea:focus {
+    outline: none;
+    border-color: var(--primary-500, #3b82f6);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+.travaux-retro-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    padding: 16px 0 0;
+    border-top: 1px solid var(--bordure-claire);
+    margin-top: 8px;
+}

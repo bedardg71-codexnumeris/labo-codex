@@ -1789,6 +1789,47 @@ function genererRetroaction(num) {
         });
     }
 
+    // Rétroactions des annotations visuelles (tampons diagnostiques + erreurs de français)
+    const fichierActuel = (typeof travauxVisionneuse !== 'undefined' && travauxVisionneuse.getFichierActuel)
+        ? travauxVisionneuse.getFichierActuel() : null;
+    if (fichierActuel) {
+        const annotationFichier = (typeof travauxStockage !== 'undefined')
+            ? travauxStockage.obtenirAnnotationFichier(fichierActuel.id) : null;
+        if (annotationFichier) {
+            const statsAnnot = (typeof travauxExportPdf !== 'undefined' && travauxExportPdf.compterAnnotationsDetailees)
+                ? travauxExportPdf.compterAnnotationsDetailees(annotationFichier) : null;
+            if (statsAnnot) {
+                // Observations (tampons diagnostiques)
+                const retroObs = travauxOutils.obtenirRetroactionsObservations();
+                const DIAG_IDS = ['bon-lien','manque-lien','confusion','repetitif','preuve-absente','citation','approfondir','procedes','attention'];
+                const tamponsObs = Object.entries(statsAnnot.tampons).filter(([id]) => DIAG_IDS.includes(id));
+                if (tamponsObs.length > 0) {
+                    texte += '--- Observations ---\n\n';
+                    for (const [id, count] of tamponsObs) {
+                        const def = travauxOutils.AUTOCOLLANTS.find(a => a.id === id);
+                        const txt = retroObs[id];
+                        if (txt) texte += `${def?.nom || id} (\u00d7${count}) :\n${txt}\n\n`;
+                    }
+                }
+                // Erreurs de français
+                const retroFr = travauxOutils.obtenirRetroactionsErreursFr();
+                if (statsAnnot.totalErreursFr > 0) {
+                    texte += '--- Langue ---\n\n';
+                    const typesTriés = Object.entries(statsAnnot.erreursFr).sort((a, b) => {
+                        const numA = parseInt(a[0].replace('errfr_', ''), 10);
+                        const numB = parseInt(b[0].replace('errfr_', ''), 10);
+                        return numA - numB;
+                    });
+                    for (const [type, count] of typesTriés) {
+                        const def = travauxOutils.CODES_ERREURS_FR.find(c => c.id === type);
+                        const txt = retroFr[type];
+                        if (txt) texte += `Code ${def?.code} \u2013 ${def?.nom} (\u00d7${count}) :\n${txt}\n\n`;
+                    }
+                }
+            }
+        }
+    }
+
     // Ajouter la note/niveau à la fin selon le mode choisi
     const modeNote = document.querySelector('input[name="affichageNote1"]:checked')?.value || 'complet';
     if (modeNote === 'lettre') {

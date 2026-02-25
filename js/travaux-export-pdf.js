@@ -901,6 +901,8 @@
             const autocollantsDef = travauxOutils.AUTOCOLLANTS;
             const donnesTampons = [];
             const tamponsImages = {}; // index ligne → dataURL
+            const DIAG_IDS = ['bon-lien','manque-lien','confusion','repetitif','preuve-absente','citation','approfondir','procedes','attention'];
+            const retroObs = travauxOutils.obtenirRetroactionsObservations();
 
             // Trier par nom alphabetique
             const ids = Object.keys(stats.tampons);
@@ -910,12 +912,16 @@
                 return (defA?.nom || a).localeCompare(defB?.nom || b);
             });
 
+            const isDiag = {};
             for (let i = 0; i < tries.length; i++) {
                 const id = tries[i];
                 const def = autocollantsDef.find(x => x.id === id);
+                isDiag[i] = DIAG_IDS.includes(id);
+                const retroTexte = isDiag[i] ? (retroObs[id] || '') : '';
                 donnesTampons.push([
                     '      ' + (def?.nom || id),
-                    String(stats.tampons[id])
+                    String(stats.tampons[id]),
+                    retroTexte
                 ]);
                 const dataUrl = autocollantToDataURL(id);
                 if (dataUrl) {
@@ -932,7 +938,7 @@
 
             doc.autoTable({
                 startY: y,
-                head: [['Tampon', 'Nombre']],
+                head: [['Tampon', 'Nb', 'Rétroaction']],
                 body: donnesTampons,
                 theme: 'grid',
                 headStyles: {
@@ -948,8 +954,9 @@
                     minCellHeight: imgSize + mm(1)
                 },
                 columnStyles: {
-                    0: { cellWidth: largeurContenu * 0.70 },
-                    1: { cellWidth: largeurContenu * 0.30, halign: 'center' }
+                    0: { cellWidth: largeurContenu * 0.40 },
+                    1: { cellWidth: largeurContenu * 0.10, halign: 'center' },
+                    2: { cellWidth: largeurContenu * 0.50, fontSize: cfg.polices.textePetit - 1 }
                 },
                 margin: { left: margeG, right: margeD },
                 didDrawCell: function(data) {
@@ -982,6 +989,7 @@
 
             const codesErreurs = travauxOutils.CODES_ERREURS_FR;
             const donnesErreurs = [];
+            const retroFr = travauxOutils.obtenirRetroactionsErreursFr();
 
             // Trier par numero de code
             const typesErreurs = Object.keys(stats.erreursFr).sort((a, b) => {
@@ -996,16 +1004,17 @@
                 donnesErreurs.push([
                     num,
                     def?.nom || type,
-                    String(stats.erreursFr[type])
+                    String(stats.erreursFr[type]),
+                    retroFr[type] || ''
                 ]);
             }
 
             // Ligne total en gras
-            donnesErreurs.push(['', 'Total des erreurs', String(stats.totalErreursFr)]);
+            donnesErreurs.push(['', 'Total des erreurs', String(stats.totalErreursFr), '']);
 
             doc.autoTable({
                 startY: y,
-                head: [['Code', 'Type d\'erreur', 'Nombre']],
+                head: [['Code', 'Type', 'Nb', 'Rétroaction']],
                 body: donnesErreurs,
                 theme: 'grid',
                 headStyles: {
@@ -1020,9 +1029,10 @@
                     cellPadding: mm(1.2)
                 },
                 columnStyles: {
-                    0: { cellWidth: largeurContenu * 0.12, halign: 'center' },
-                    1: { cellWidth: largeurContenu * 0.63 },
-                    2: { cellWidth: largeurContenu * 0.25, halign: 'center' }
+                    0: { cellWidth: largeurContenu * 0.08, halign: 'center' },
+                    1: { cellWidth: largeurContenu * 0.25 },
+                    2: { cellWidth: largeurContenu * 0.07, halign: 'center' },
+                    3: { cellWidth: largeurContenu * 0.60, fontSize: cfg.polices.textePetit - 1 }
                 },
                 margin: { left: margeG, right: margeD },
                 didParseCell: function(data) {
