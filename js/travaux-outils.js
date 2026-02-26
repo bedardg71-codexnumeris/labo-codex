@@ -35,8 +35,8 @@
     // Flag pour masquer le bouton « Codes d'erreurs » (mode Modelisation)
     let masquerErreursFrancais = false;
 
-    // Fleche double (pointes aux deux bouts)
-    let flecheDouble = false;
+    // Mode pointes de fleche : 'fin' | 'debut' | 'double' | 'aucune'
+    let flechePointes = 'fin';
 
     /* ===============================
        OUTILS
@@ -124,14 +124,8 @@
             epaisseurDefaut: 2,
             remplir: false
         },
-        ligne: {
-            id: 'ligne',
-            nom: 'Ligne',
-            icone: 'Ligne',
-            curseur: 'crosshair',
-            type: 'forme',
-            epaisseurDefaut: 2
-        },
+        // ligne retiré de la palette — rétrocompatibilité assurée au rendu
+        // (les données existantes type:'ligne' sont rendues via normaliserPointes)
         ondule: {
             id: 'ondule',
             nom: 'Ondulé',
@@ -1000,7 +994,7 @@
         html += '<div class="travaux-palette-label">Formes</div>';
         html += '<div class="travaux-palette-outils">';
 
-        const outilsFormes = ['cercle', 'fleche', 'rectangle', 'ligne', 'ondule'];
+        const outilsFormes = ['cercle', 'fleche', 'rectangle', 'ondule'];
         outilsFormes.forEach(id => {
             const outil = OUTILS[id];
             const actif = outilActif === id ? ' actif' : '';
@@ -1010,12 +1004,20 @@
 
         html += '</div></div>';
 
-        // Options fleche (visible quand outil fleche actif)
+        // Options fleche : 4 modes de pointes (visible quand outil fleche actif)
         html += '<div class="travaux-palette-section travaux-options-fleche" id="travaux-options-fleche"' + (outilActif === 'fleche' ? '' : ' style="display:none"') + '>';
-        html += '<div class="travaux-palette-label">Options fl\u00e8che</div>';
+        html += '<div class="travaux-palette-label">Extr\u00e9mit\u00e9s</div>';
         html += '<div class="travaux-palette-outils">';
-        const dblActif = flecheDouble ? ' actif' : '';
-        html += `<button class="travaux-btn-outil${dblActif}" id="travaux-btn-fleche-double" onclick="travauxOutils.toggleFlecheDouble()" title="Fl\u00e8che double (\u2194)">\u2194</button>`;
+        const modes = [
+            { val: 'debut', label: '\u2190', titre: 'Pointe au d\u00e9but (\u2190)' },
+            { val: 'double', label: '\u2194', titre: 'Double pointe (\u2194)' },
+            { val: 'fin', label: '\u2192', titre: 'Pointe \u00e0 la fin (\u2192)' },
+            { val: 'aucune', label: '\u2014', titre: 'Aucune pointe (\u2014)' }
+        ];
+        modes.forEach(m => {
+            const act = flechePointes === m.val ? ' actif' : '';
+            html += `<button class="travaux-btn-outil${act}" data-pointes="${m.val}" onclick="travauxOutils.setFlechePointes('${m.val}')" title="${m.titre}">${m.label}</button>`;
+        });
         html += '</div></div>';
 
         // Couleurs
@@ -1095,14 +1097,13 @@
             });
         }
 
-        // Options fleche : afficher/masquer selon outil actif
+        // Options fleche : afficher/masquer selon outil actif + maj boutons pointes
         const sectionFleche = document.getElementById('travaux-options-fleche');
         if (sectionFleche) {
             sectionFleche.style.display = outilActif === 'fleche' ? '' : 'none';
-        }
-        const btnDbl = document.getElementById('travaux-btn-fleche-double');
-        if (btnDbl) {
-            btnDbl.classList.toggle('actif', flecheDouble);
+            sectionFleche.querySelectorAll('[data-pointes]').forEach(btn => {
+                btn.classList.toggle('actif', btn.dataset.pointes === flechePointes);
+            });
         }
 
         // Curseur du canvas (personnalise pour tampons et codes d'erreur)
@@ -1122,7 +1123,7 @@
     // Rafraichir la palette quand l'outil ou la couleur change
     window.addEventListener('travaux-outil-change', rafraichirPalette);
     window.addEventListener('travaux-couleur-change', rafraichirPalette);
-    window.addEventListener('travaux-fleche-double-change', rafraichirPalette);
+    window.addEventListener('travaux-fleche-pointes-change', rafraichirPalette);
     // Invalider les curseurs personnalises au changement de theme
     window.addEventListener('themeChanged', function() { invaliderCacheCurseurs(); rafraichirPalette(); });
 
@@ -1614,18 +1615,15 @@
     }
 
     /* ===============================
-       FLECHE DOUBLE
+       FLECHE POINTES (4 modes)
        =============================== */
 
-    function getFlecheDouble() { return flecheDouble; }
+    function getFlechePointes() { return flechePointes; }
 
-    function setFlecheDouble(val) {
-        flecheDouble = !!val;
-        window.dispatchEvent(new CustomEvent('travaux-fleche-double-change', { detail: { double: flecheDouble } }));
-    }
-
-    function toggleFlecheDouble() {
-        setFlecheDouble(!flecheDouble);
+    function setFlechePointes(val) {
+        if (['fin', 'debut', 'double', 'aucune'].indexOf(val) === -1) val = 'fin';
+        flechePointes = val;
+        window.dispatchEvent(new CustomEvent('travaux-fleche-pointes-change', { detail: { pointes: flechePointes } }));
     }
 
     /* ===============================
@@ -1697,10 +1695,9 @@
         // Epaisseur increments
         incrementerEpaisseur: incrementerEpaisseur,
         decrementerEpaisseur: decrementerEpaisseur,
-        // Fleche double
-        getFlecheDouble: getFlecheDouble,
-        setFlecheDouble: setFlecheDouble,
-        toggleFlecheDouble: toggleFlecheDouble,
+        // Fleche pointes (4 modes)
+        getFlechePointes: getFlechePointes,
+        setFlechePointes: setFlechePointes,
         // Contexte Modelisation
         setMasquerErreursFrancais: setMasquerErreursFrancais
     };
