@@ -985,6 +985,10 @@
             const outil = OUTILS[id];
             const actif = outilActif === id ? ' actif' : '';
             html += `<button class="travaux-btn-outil${actif}" data-outil="${id}" onclick="travauxOutils.setOutilActif('${id}')" title="${outil.nom}">${outil.icone}</button>`;
+            // Bouton Dupliquer juste apres Selection
+            if (id === 'selection') {
+                html += '<button class="travaux-btn-outil" id="travaux-btn-dupliquer" onclick="travauxAnnotation.dupliquerSelection()" title="Dupliquer la s\u00e9lection">Dupliquer</button>';
+            }
         });
 
         html += '</div></div>';
