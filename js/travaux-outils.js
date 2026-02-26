@@ -869,7 +869,8 @@
         if (_curseurCache[outilId]) return _curseurCache[outilId];
         const outil = OUTILS[outilId];
         if (!outil) return 'crosshair';
-        const code = outilId.replace('errfr_', '');
+        const ordre = obtenirOrdreErreursFr();
+        const code = ordre.indexOf(outilId) + 1 || outilId.replace('errfr_', '');
         const couleur = outil.couleurBouton || '#888';
         const taille = 32;
         const c = document.createElement('canvas');
