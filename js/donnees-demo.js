@@ -867,6 +867,7 @@ window.dechargerDonneesDemo = dechargerDonneesDemo;
 window.sontDonnesDemoChargees = sontDonnesDemoChargees;
 window.afficherBandeauDemo = afficherBandeauDemo;
 window.initialiserModuleDonneesDemo = initialiserModuleDonneesDemo;
+window.CARTE_DEMO_ALIGNEMENT = CARTE_DEMO_ALIGNEMENT;
 
 
 })();
