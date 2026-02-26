@@ -16224,8 +16224,40 @@ body.mode-clair .pipeline-autocomplete-item:hover {
     box-shadow: 0 0 0 1px white, 0 0 0 2px var(--gris-fonce);
 }
 
+.travaux-epaisseur-controles {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
 .travaux-slider-epaisseur {
     width: 80px;
+    flex: 1;
+}
+.travaux-btn-epaisseur-inc {
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: 1px solid rgba(106, 172, 184, 0.3);
+    border-radius: var(--radius-petit, 4px);
+    background: var(--fond-surface, #1e2a3a);
+    color: var(--texte-principal, #e2e8f0);
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.travaux-btn-epaisseur-inc:hover {
+    background: var(--fond-survol, #2a3a4e);
+}
+body.mode-clair .travaux-btn-epaisseur-inc {
+    background: var(--fond-surface-clair, #fff);
+    color: var(--texte-principal-clair, #1e293b);
+    border-color: var(--bordure-claire, #d0d8e0);
+}
+body.mode-clair .travaux-btn-epaisseur-inc:hover {
+    background: var(--fond-survol-clair, #f1f5f9);
 }
 
 .travaux-apercu-trait {
