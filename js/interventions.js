@@ -126,6 +126,7 @@ function sauvegarderInterventions(interventions) {
  */
 function creerIntervention(data) {
     const interventions = obtenirInterventions();
+    const now = new Date().toISOString();
     const nouvelleIntervention = {
         id: genererIdUnique('intervention-'),
         date: data.date || '',
