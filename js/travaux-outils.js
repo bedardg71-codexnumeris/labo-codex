@@ -198,6 +198,9 @@
         { id: 'attention',      nom: 'Attention',        fichier: 'attention.png',                         categorie: 'diagnostic' }
     ];
 
+    // Sauvegarder les valeurs par defaut des autocollants avant toute personnalisation
+    const _defautsAutocollants = AUTOCOLLANTS.map(a => ({ ...a }));
+
     let imagesAutocollants = {};   // Cache { id: HTMLImageElement }
     let promessesAutocollants = {}; // Cache { id: Promise<HTMLImageElement> }
     let autocollantActif = null;   // ID de l'autocollant selectionne (ou null)
@@ -331,8 +334,9 @@
         html += '<div class="travaux-autocollants-label">Inférences / interprétation</div>';
         html += '<div class="travaux-autocollants-grille">';
         AUTOCOLLANTS.filter(a => a.categorie === 'qualite').forEach(a => {
+            const imgSrc = imagesAutocollants[a.id] ? imagesAutocollants[a.id].src : DOSSIER_AUTOCOLLANTS + a.fichier;
             html += `<div class="travaux-autocollant-item" onclick="travauxOutils.setAutocollantActif('${a.id}')" title="${a.nom}">`;
-            html += `<img src="${DOSSIER_AUTOCOLLANTS}${a.fichier}" alt="${a.nom}">`;
+            html += `<img src="${imgSrc}" alt="${a.nom}">`;
             html += `<span>${a.nom}</span></div>`;
         });
         html += '</div>';
@@ -341,8 +345,9 @@
         html += '<div class="travaux-autocollants-label">Observations</div>';
         html += '<div class="travaux-autocollants-grille">';
         AUTOCOLLANTS.filter(a => a.categorie === 'diagnostic').forEach(a => {
+            const imgSrc = imagesAutocollants[a.id] ? imagesAutocollants[a.id].src : DOSSIER_AUTOCOLLANTS + a.fichier;
             html += `<div class="travaux-autocollant-item" onclick="travauxOutils.setAutocollantActif('${a.id}')" title="${a.nom}">`;
-            html += `<img src="${DOSSIER_AUTOCOLLANTS}${a.fichier}" alt="${a.nom}">`;
+            html += `<img src="${imgSrc}" alt="${a.nom}">`;
             html += `<span>${a.nom}</span></div>`;
         });
         html += '</div>';
@@ -430,6 +435,14 @@
         { id: 'errfr_10', code: 10, nom: 'Orthographe d\u2019usage / typographie' }
     ];
 
+    // Sauvegarder les valeurs par defaut des erreurs FR avant toute personnalisation
+    const _defautsNomsErrFr = {};
+    const _defautsCouleursErrFr = {};
+    CODES_ERREURS_FR.forEach(c => {
+        _defautsNomsErrFr[c.id] = c.nom;
+        _defautsCouleursErrFr[c.id] = OUTILS[c.id].couleurBouton;
+    });
+
     /* ===============================
        RETROACTIONS PAR DEFAUT (Observations + Erreurs FR)
        =============================== */
@@ -479,6 +492,75 @@
     function sauvegarderRetroactionsErreursFr(obj) {
         db.setSync('retroactionsErreursFr', obj);
     }
+
+    /* ===============================
+       PERSONNALISATIONS (noms, icones, couleurs)
+       Stockage NON-namespacé — indépendant du semestre
+       =============================== */
+
+    function obtenirPersonnalisationObservations() {
+        return db.getSync('personnalisationObservations', null) || {};
+    }
+
+    function sauvegarderPersonnalisationObservations(obj) {
+        db.setSync('personnalisationObservations', obj);
+    }
+
+    function obtenirPersonnalisationErreursFr() {
+        return db.getSync('personnalisationErreursFr', null) || {};
+    }
+
+    function sauvegarderPersonnalisationErreursFr(obj) {
+        db.setSync('personnalisationErreursFr', obj);
+    }
+
+    /**
+     * Applique les personnalisations (noms, images, couleurs) directement
+     * sur les objets AUTOCOLLANTS, CODES_ERREURS_FR et OUTILS.
+     * Appelée au démarrage et après chaque sauvegarde.
+     */
+    function appliquerPersonnalisations() {
+        // --- Observations (autocollants) ---
+        const persObs = obtenirPersonnalisationObservations();
+        AUTOCOLLANTS.forEach((a, i) => {
+            const defaut = _defautsAutocollants[i];
+            const pers = persObs[a.id];
+            // Restaurer le nom par défaut puis appliquer la personnalisation
+            a.nom = (pers && pers.nom) ? pers.nom : defaut.nom;
+            // Image personnalisée en base64
+            if (pers && pers.imageBase64) {
+                const img = new Image();
+                const promesse = new Promise((resolve, reject) => {
+                    img.onload = () => resolve(img);
+                    img.onerror = () => reject(new Error('Echec chargement image personnalisée: ' + a.id));
+                });
+                img.src = pers.imageBase64;
+                imagesAutocollants[a.id] = img;
+                promessesAutocollants[a.id] = promesse;
+            } else {
+                // Restaurer l'image par défaut depuis le fichier
+                const img = new Image();
+                const promesse = new Promise((resolve, reject) => {
+                    img.onload = () => resolve(img);
+                    img.onerror = () => reject(new Error('Echec chargement: ' + defaut.fichier));
+                });
+                img.src = DOSSIER_AUTOCOLLANTS + defaut.fichier;
+                imagesAutocollants[a.id] = img;
+                promessesAutocollants[a.id] = promesse;
+            }
+        });
+
+        // --- Erreurs de français ---
+        const persErr = obtenirPersonnalisationErreursFr();
+        CODES_ERREURS_FR.forEach(c => {
+            const pers = persErr[c.id];
+            c.nom = (pers && pers.nom) ? pers.nom : _defautsNomsErrFr[c.id];
+            OUTILS[c.id].couleurBouton = (pers && pers.couleur) ? pers.couleur : _defautsCouleursErrFr[c.id];
+        });
+    }
+
+    // Appliquer les personnalisations au démarrage (après prechargerAutocollants)
+    appliquerPersonnalisations();
 
     let paletteErrFrVisible = false;
 
@@ -990,19 +1072,26 @@
         if (existant) existant.remove();
 
         const retroActuelles = obtenirRetroactionsObservations();
+        const persObs = obtenirPersonnalisationObservations();
         const overlay = document.createElement('div');
         overlay.id = 'modal-retro-observations';
         overlay.className = 'modal-overlay actif';
 
         let html = '<div class="modal-contenu travaux-retro-modal">';
         html += '<h2 style="margin-top:0">Rétroactions — Observations</h2>';
-        html += '<p style="color:var(--texte-secondaire);font-size:0.85rem;margin-bottom:16px;">Ces textes apparaîtront dans la rétroaction générée pour l\'élève lorsque le tampon correspondant est utilisé.</p>';
+        html += '<p style="color:var(--texte-secondaire);font-size:0.85rem;margin-bottom:16px;">Ces textes apparaîtront dans la rétroaction générée pour l\'élève lorsque le tampon correspondant est utilisé. Cliquez sur l\'image pour la remplacer.</p>';
 
         AUTOCOLLANTS.filter(a => a.categorie === 'diagnostic').forEach(a => {
             const texte = retroActuelles[a.id] || '';
-            html += '<div class="travaux-retro-item">';
-            html += `<img src="${DOSSIER_AUTOCOLLANTS}${a.fichier}" alt="${a.nom}">`;
-            html += `<span class="travaux-retro-nom">${a.nom}</span>`;
+            const imgSrc = (persObs[a.id] && persObs[a.id].imageBase64) ? persObs[a.id].imageBase64 : DOSSIER_AUTOCOLLANTS + a.fichier;
+            html += '<div class="travaux-retro-row" data-obs-id="' + a.id + '">';
+            html += '<div class="travaux-retro-row-haut">';
+            html += `<div class="travaux-retro-img-upload" data-obs-id="${a.id}" title="Cliquer pour changer l'image">`;
+            html += `<img src="${imgSrc}" alt="${a.nom}" data-img-id="${a.id}">`;
+            html += `<input type="file" accept="image/*" data-file-id="${a.id}" hidden>`;
+            html += '</div>';
+            html += `<input type="text" class="travaux-retro-nom-input" data-nom-id="${a.id}" value="${a.nom}">`;
+            html += '</div>';
             html += `<textarea class="travaux-retro-textarea" data-retro-id="${a.id}" rows="3">${texte}</textarea>`;
             html += '</div>';
         });
@@ -1019,25 +1108,78 @@
             if (e.target === overlay) overlay.remove();
         });
         document.body.appendChild(overlay);
+
+        // Wiring: clic sur l'image → ouvre le file input
+        overlay.querySelectorAll('.travaux-retro-img-upload').forEach(wrap => {
+            const imgEl = wrap.querySelector('img');
+            const fileInput = wrap.querySelector('input[type="file"]');
+            wrap.addEventListener('click', function(e) {
+                if (e.target !== fileInput) fileInput.click();
+            });
+            fileInput.addEventListener('change', function() {
+                const file = fileInput.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    imgEl.src = ev.target.result;
+                    imgEl.dataset.base64 = ev.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        });
     }
 
     function enregistrerRetroObservations() {
         const modal = document.getElementById('modal-retro-observations');
         if (!modal) return;
-        const obj = {};
+        // Textes de rétroaction
+        const retroObj = {};
         modal.querySelectorAll('textarea[data-retro-id]').forEach(ta => {
-            obj[ta.dataset.retroId] = ta.value;
+            retroObj[ta.dataset.retroId] = ta.value;
         });
-        sauvegarderRetroactionsObservations(obj);
+        sauvegarderRetroactionsObservations(retroObj);
+        // Personnalisations (noms + images)
+        const persObj = obtenirPersonnalisationObservations();
+        modal.querySelectorAll('input[data-nom-id]').forEach(inp => {
+            const id = inp.dataset.nomId;
+            if (!persObj[id]) persObj[id] = {};
+            persObj[id].nom = inp.value;
+        });
+        modal.querySelectorAll('img[data-img-id]').forEach(img => {
+            const id = img.dataset.imgId;
+            if (!persObj[id]) persObj[id] = {};
+            if (img.dataset.base64) {
+                persObj[id].imageBase64 = img.dataset.base64;
+            }
+        });
+        sauvegarderPersonnalisationObservations(persObj);
+        appliquerPersonnalisations();
+        rafraichirPalettesApresPersonnalisation();
         modal.remove();
     }
 
     function reinitialiserRetroObservations() {
         db.setSync('retroactionsObservations', null);
+        db.setSync('personnalisationObservations', null);
+        appliquerPersonnalisations();
         const modal = document.getElementById('modal-retro-observations');
         if (modal) {
+            // Restaurer textes
             modal.querySelectorAll('textarea[data-retro-id]').forEach(ta => {
                 ta.value = RETROACTIONS_OBSERVATIONS_DEFAUT[ta.dataset.retroId] || '';
+            });
+            // Restaurer noms
+            modal.querySelectorAll('input[data-nom-id]').forEach(inp => {
+                const defaut = _defautsAutocollants.find(a => a.id === inp.dataset.nomId);
+                if (defaut) inp.value = defaut.nom;
+            });
+            // Restaurer images
+            modal.querySelectorAll('img[data-img-id]').forEach(img => {
+                const defaut = _defautsAutocollants.find(a => a.id === img.dataset.imgId);
+                if (defaut) {
+                    img.src = DOSSIER_AUTOCOLLANTS + defaut.fichier;
+                    delete img.dataset.base64;
+                }
             });
         }
     }
@@ -1053,14 +1195,19 @@
 
         let html = '<div class="modal-contenu travaux-retro-modal">';
         html += '<h2 style="margin-top:0">Rétroactions — Erreurs de français</h2>';
-        html += '<p style="color:var(--texte-secondaire);font-size:0.85rem;margin-bottom:16px;">Ces textes apparaîtront dans la rétroaction générée pour l\'élève lorsque le code d\'erreur correspondant est utilisé.</p>';
+        html += '<p style="color:var(--texte-secondaire);font-size:0.85rem;margin-bottom:16px;">Ces textes apparaîtront dans la rétroaction générée pour l\'élève lorsque le code d\'erreur correspondant est utilisé. Cliquez sur la pastille pour changer sa couleur.</p>';
 
         CODES_ERREURS_FR.forEach(c => {
             const outil = OUTILS[c.id];
             const texte = retroActuelles[c.id] || '';
-            html += '<div class="travaux-retro-item">';
-            html += `<span class="travaux-retro-numero" style="background:${outil.couleurBouton}">${c.code}</span>`;
-            html += `<span class="travaux-retro-nom">${c.nom}</span>`;
+            html += '<div class="travaux-retro-row" data-err-id="' + c.id + '">';
+            html += '<div class="travaux-retro-row-haut">';
+            html += `<div class="travaux-retro-couleur-wrap">`;
+            html += `<span class="travaux-retro-numero" style="background:${outil.couleurBouton}" data-pastille-id="${c.id}">${c.code}</span>`;
+            html += `<input type="color" value="${outil.couleurBouton}" data-color-id="${c.id}" title="Changer la couleur">`;
+            html += '</div>';
+            html += `<input type="text" class="travaux-retro-nom-input" data-nom-id="${c.id}" value="${c.nom}">`;
+            html += '</div>';
             html += `<textarea class="travaux-retro-textarea" data-retro-id="${c.id}" rows="3">${texte}</textarea>`;
             html += '</div>';
         });
@@ -1077,26 +1224,85 @@
             if (e.target === overlay) overlay.remove();
         });
         document.body.appendChild(overlay);
+
+        // Wiring: changement couleur → met à jour la pastille en live
+        overlay.querySelectorAll('input[data-color-id]').forEach(colorInput => {
+            const pastille = overlay.querySelector('span[data-pastille-id="' + colorInput.dataset.colorId + '"]');
+            colorInput.addEventListener('input', function() {
+                if (pastille) pastille.style.background = colorInput.value;
+            });
+        });
     }
 
     function enregistrerRetroErreursFr() {
         const modal = document.getElementById('modal-retro-erreurs-fr');
         if (!modal) return;
-        const obj = {};
+        // Textes de rétroaction
+        const retroObj = {};
         modal.querySelectorAll('textarea[data-retro-id]').forEach(ta => {
-            obj[ta.dataset.retroId] = ta.value;
+            retroObj[ta.dataset.retroId] = ta.value;
         });
-        sauvegarderRetroactionsErreursFr(obj);
+        sauvegarderRetroactionsErreursFr(retroObj);
+        // Personnalisations (noms + couleurs)
+        const persObj = obtenirPersonnalisationErreursFr();
+        modal.querySelectorAll('input[data-nom-id]').forEach(inp => {
+            const id = inp.dataset.nomId;
+            if (!persObj[id]) persObj[id] = {};
+            persObj[id].nom = inp.value;
+        });
+        modal.querySelectorAll('input[data-color-id]').forEach(inp => {
+            const id = inp.dataset.colorId;
+            if (!persObj[id]) persObj[id] = {};
+            persObj[id].couleur = inp.value;
+        });
+        sauvegarderPersonnalisationErreursFr(persObj);
+        appliquerPersonnalisations();
+        rafraichirPalettesApresPersonnalisation();
         modal.remove();
     }
 
     function reinitialiserRetroErreursFr() {
         db.setSync('retroactionsErreursFr', null);
+        db.setSync('personnalisationErreursFr', null);
+        appliquerPersonnalisations();
         const modal = document.getElementById('modal-retro-erreurs-fr');
         if (modal) {
+            // Restaurer textes
             modal.querySelectorAll('textarea[data-retro-id]').forEach(ta => {
                 ta.value = RETROACTIONS_ERREURS_FR_DEFAUT[ta.dataset.retroId] || '';
             });
+            // Restaurer noms
+            modal.querySelectorAll('input[data-nom-id]').forEach(inp => {
+                const defaut = _defautsNomsErrFr[inp.dataset.nomId];
+                if (defaut) inp.value = defaut;
+            });
+            // Restaurer couleurs
+            modal.querySelectorAll('input[data-color-id]').forEach(inp => {
+                const defaut = _defautsCouleursErrFr[inp.dataset.colorId];
+                if (defaut) {
+                    inp.value = defaut;
+                    const pastille = modal.querySelector('span[data-pastille-id="' + inp.dataset.colorId + '"]');
+                    if (pastille) pastille.style.background = defaut;
+                }
+            });
+        }
+    }
+
+    /* ===============================
+       RAFRAICHIR PALETTES APRES PERSONNALISATION
+       =============================== */
+
+    /**
+     * Ferme et rouvre les palettes visibles pour refléter les personnalisations.
+     */
+    function rafraichirPalettesApresPersonnalisation() {
+        if (document.getElementById('travaux-palette-tampons')) {
+            fermerPaletteAutocollants();
+            togglePaletteAutocollants();
+        }
+        if (document.getElementById('travaux-palette-erreurs-fr')) {
+            fermerPaletteErreursFrancais();
+            togglePaletteErreursFrancais();
         }
     }
 
@@ -1164,6 +1370,8 @@
         enregistrerRetroErreursFr: enregistrerRetroErreursFr,
         reinitialiserRetroObservations: reinitialiserRetroObservations,
         reinitialiserRetroErreursFr: reinitialiserRetroErreursFr,
+        // Personnalisations (noms, icônes, couleurs)
+        appliquerPersonnalisations: appliquerPersonnalisations,
         // Contexte Modelisation
         setMasquerErreursFrancais: setMasquerErreursFrancais
     };
