@@ -1,8 +1,26 @@
-# SESSION ACTIVE - BETA 98.03
+# SESSION ACTIVE - BETA 98.1
 
-**Date** : 25 février 2026
-**Version** : Beta 98.03
-**Statut** : Gestion avancée des ressources, panneau évaluation, export PDF, filtre production
+**Date** : 26 février 2026
+**Version** : Beta 98.1
+**Statut** : Outils d'annotation unifiés, duplication, curseur codes d'erreur
+
+## SESSION DU 26 FÉVRIER 2026
+
+### Travail accompli — Outils d'annotation unifiés et duplication (26 février 2026)
+
+162. **Fusion Ligne/Flèche** : Les outils `ligne` et `fleche` sont fusionnés en un seul outil `fleche` (affiché « Ligne ») avec 4 modes d'extrémités via la propriété `pointes` : `'fin'` (→), `'debut'` (←), `'double'` (↔), `'aucune'` (—). Helper `normaliserPointes(forme)` assure la rétrocompatibilité : `type:'ligne'` → `'aucune'`, `double:true` → `'double'`. Fichiers : `travaux-outils.js`, `travaux-annotation.js`, `travaux-export-pdf.js`.
+
+163. **Extrémités pour Vague** : L'outil ondulé dispose des mêmes 4 modes d'extrémités. Les pointes de flèche se dessinent aux extrémités de la courbe sur le canvas et dans l'export PDF.
+
+164. **Grille 2×2 Formes** : Les boutons Formes sont disposés en grille 2×2 avec la classe CSS `travaux-palette-outils--grille2x2`. Ordre : Cercle, Rectangle, Ligne, Vague.
+
+165. **Bouton Dupliquer** : Nouveau bouton « Dupliquer » à côté de « Sélection ». Fonction `dupliquerSelection()` dans `travaux-annotation.js` clone les annotations sélectionnées avec offset 2%, IDs uniques, support annuler/rétablir (`duplication-multiple`).
+
+166. **Curseur codes d'erreur corrigé** : `genererCurseurErrFr()` utilise `obtenirOrdreErreursFr()` pour afficher le rang personnalisé au lieu de l'ID fixe.
+
+167. **Effacer tout** : Le bouton « Effacer » renommé en « Effacer tout ».
+
+---
 
 ## SESSION DU 25 FÉVRIER 2026 (après-midi)
 
