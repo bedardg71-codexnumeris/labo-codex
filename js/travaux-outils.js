@@ -117,8 +117,8 @@
         },
         rectangle: {
             id: 'rectangle',
-            nom: 'Rect.',
-            icone: 'Rect.',
+            nom: 'Rectangle',
+            icone: 'Rectangle',
             curseur: 'crosshair',
             type: 'forme',
             epaisseurDefaut: 2,
@@ -994,7 +994,7 @@
         html += '<div class="travaux-palette-label">Formes</div>';
         html += '<div class="travaux-palette-outils travaux-palette-outils--grille2x2">';
 
-        const outilsFormes = ['cercle', 'fleche', 'rectangle', 'ondule'];
+        const outilsFormes = ['cercle', 'rectangle', 'fleche', 'ondule'];
         outilsFormes.forEach(id => {
             const outil = OUTILS[id];
             const actif = outilActif === id ? ' actif' : '';
