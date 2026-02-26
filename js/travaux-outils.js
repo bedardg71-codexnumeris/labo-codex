@@ -728,14 +728,28 @@
     }
 
     function setEpaisseurActive(val) {
-        epaisseurActive = val;
+        const outil = getOutilActif();
+        const minEp = outil.epaisseurMin || 1;
+        const maxEp = outil.epaisseurMax || 20;
+        epaisseurActive = Math.max(minEp, Math.min(maxEp, val));
         // Mettre a jour l'affichage pixels
         const pxLabel = document.getElementById('travaux-epaisseur-px');
         if (pxLabel) pxLabel.textContent = getEpaisseurReellePixels() + 'px';
+        // Synchroniser le slider
+        const slider = document.getElementById('travaux-slider-epaisseur');
+        if (slider) slider.value = epaisseurActive;
         mettreAJourApercuTrait();
         window.dispatchEvent(new CustomEvent('travaux-epaisseur-change', {
-            detail: { epaisseur: val }
+            detail: { epaisseur: epaisseurActive }
         }));
+    }
+
+    function incrementerEpaisseur() {
+        setEpaisseurActive(epaisseurActive + 1);
+    }
+
+    function decrementerEpaisseur() {
+        setEpaisseurActive(epaisseurActive - 1);
     }
 
     function getTailleTexte() {
@@ -757,16 +771,20 @@
         const couleur = getCouleurActive();
         const epaisseur = Math.max(outil.epaisseurMin || 1, Math.min(epaisseurActive, outil.epaisseurMax || 20));
         const opacite = outil.opacite || 1.0;
+        // Hauteur du viewBox adaptee a l'epaisseur pour ne pas tronquer
+        const vbH = Math.max(24, epaisseur + 8);
+        const midY = vbH / 2;
         apercu.innerHTML = '';
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         svg.setAttribute('width', '100%');
         svg.setAttribute('height', '100%');
-        svg.setAttribute('viewBox', '0 0 120 24');
+        svg.setAttribute('viewBox', '0 0 120 ' + vbH);
+        svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         line.setAttribute('x1', '10');
-        line.setAttribute('y1', '12');
+        line.setAttribute('y1', String(midY));
         line.setAttribute('x2', '110');
-        line.setAttribute('y2', '12');
+        line.setAttribute('y2', String(midY));
         line.setAttribute('stroke', couleur);
         line.setAttribute('stroke-width', epaisseur);
         line.setAttribute('stroke-linecap', 'round');
@@ -910,7 +928,11 @@
         const maxEp = outilInit.epaisseurMax || 20;
         html += '<div class="travaux-palette-section">';
         html += '<div class="travaux-palette-label">Epaisseur <span id="travaux-epaisseur-px" class="travaux-epaisseur-px">' + getEpaisseurReellePixels() + 'px</span></div>';
-        html += `<input type="range" class="travaux-slider-epaisseur" min="${minEp}" max="${maxEp}" value="${epaisseurActive}" oninput="travauxOutils.setEpaisseurActive(parseInt(this.value))">`;
+        html += '<div class="travaux-epaisseur-controles">';
+        html += `<button class="travaux-btn-epaisseur-inc" onclick="travauxOutils.decrementerEpaisseur()" title="Moins fin">\u2190</button>`;
+        html += `<input type="range" class="travaux-slider-epaisseur" id="travaux-slider-epaisseur" min="${minEp}" max="${maxEp}" value="${epaisseurActive}" oninput="travauxOutils.setEpaisseurActive(parseInt(this.value))">`;
+        html += `<button class="travaux-btn-epaisseur-inc" onclick="travauxOutils.incrementerEpaisseur()" title="Plus \u00e9pais">\u2192</button>`;
+        html += '</div>';
         html += '<div class="travaux-apercu-trait" id="travaux-apercu-trait"></div>';
         html += '</div>';
 
@@ -1409,6 +1431,9 @@
         reinitialiserRetroErreursFr: reinitialiserRetroErreursFr,
         // Personnalisations (noms, icônes, couleurs)
         appliquerPersonnalisations: appliquerPersonnalisations,
+        // Epaisseur increments
+        incrementerEpaisseur: incrementerEpaisseur,
+        decrementerEpaisseur: decrementerEpaisseur,
         // Fleche double
         getFlecheDouble: getFlecheDouble,
         setFlecheDouble: setFlecheDouble,
