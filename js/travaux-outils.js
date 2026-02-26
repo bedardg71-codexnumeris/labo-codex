@@ -269,9 +269,9 @@
         autocollantActif = id;
         outilActif = 'tampon';
 
-        // Mettre a jour le curseur
+        // Mettre a jour le curseur avec l'image du tampon
         const canvas = document.getElementById('travaux-canvas-annotation');
-        if (canvas) canvas.style.cursor = 'copy';
+        if (canvas) canvas.style.cursor = genererCurseurTampon(id);
 
         // Feedback visuel sur l'item selectionne dans la palette tampons
         const items = document.querySelectorAll('#travaux-palette-tampons .travaux-autocollant-item');
@@ -577,6 +577,9 @@
             c.nom = (pers && pers.nom) ? pers.nom : _defautsNomsErrFr[c.id];
             OUTILS[c.id].couleurBouton = (pers && pers.couleur) ? pers.couleur : _defautsCouleursErrFr[c.id];
         });
+
+        // Invalider le cache de curseurs (couleurs/images ont pu changer)
+        invaliderCacheCurseurs();
     }
 
     // Appliquer les personnalisations au démarrage (après prechargerAutocollants)
@@ -811,6 +814,59 @@
     }
 
     /* ===============================
+       CURSEUR PERSONNALISE (tampons + codes d'erreur)
+       =============================== */
+
+    let _curseurCache = {}; // { id: 'url(data:...) 16 16, crosshair' }
+
+    function genererCurseurTampon(autocollantId) {
+        if (_curseurCache['tampon_' + autocollantId]) return _curseurCache['tampon_' + autocollantId];
+        const img = imagesAutocollants[autocollantId];
+        if (!img || !img.complete || !img.naturalWidth) return 'copy';
+        const taille = 32;
+        const c = document.createElement('canvas');
+        c.width = taille; c.height = taille;
+        const ctx = c.getContext('2d');
+        // Mode sombre : inverser
+        const estModeSombre = !document.body.classList.contains('mode-clair');
+        if (estModeSombre) ctx.filter = 'invert(1)';
+        ctx.drawImage(img, 0, 0, taille, taille);
+        const url = 'url(' + c.toDataURL() + ') 16 16, copy';
+        _curseurCache['tampon_' + autocollantId] = url;
+        return url;
+    }
+
+    function genererCurseurErrFr(outilId) {
+        if (_curseurCache[outilId]) return _curseurCache[outilId];
+        const outil = OUTILS[outilId];
+        if (!outil) return 'crosshair';
+        const code = outilId.replace('errfr_', '');
+        const couleur = outil.couleurBouton || '#888';
+        const taille = 32;
+        const c = document.createElement('canvas');
+        c.width = taille; c.height = taille;
+        const ctx = c.getContext('2d');
+        // Cercle colore
+        ctx.fillStyle = couleur;
+        ctx.beginPath();
+        ctx.arc(taille / 2, taille / 2, taille / 2 - 1, 0, Math.PI * 2);
+        ctx.fill();
+        // Numero blanc
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold ' + Math.round(taille * 0.55) + 'px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(code, taille / 2, taille / 2 + 1);
+        const url = 'url(' + c.toDataURL() + ') 16 16, crosshair';
+        _curseurCache[outilId] = url;
+        return url;
+    }
+
+    function invaliderCacheCurseurs() {
+        _curseurCache = {};
+    }
+
+    /* ===============================
        COURBE DE PRESSION
        =============================== */
 
@@ -1014,11 +1070,13 @@
             btnDbl.classList.toggle('actif', flecheDouble);
         }
 
-        // Curseur du canvas
+        // Curseur du canvas (personnalise pour tampons et codes d'erreur)
         const canvas = document.getElementById('travaux-canvas-annotation');
         if (canvas) {
-            if (outilActif === 'tampon') {
-                canvas.style.cursor = 'copy';
+            if (outilActif === 'tampon' && autocollantActif) {
+                canvas.style.cursor = genererCurseurTampon(autocollantActif);
+            } else if (outilActif.startsWith('errfr_')) {
+                canvas.style.cursor = genererCurseurErrFr(outilActif);
             } else {
                 const outil = getOutilActif();
                 canvas.style.cursor = outil.curseur || 'crosshair';
@@ -1030,6 +1088,8 @@
     window.addEventListener('travaux-outil-change', rafraichirPalette);
     window.addEventListener('travaux-couleur-change', rafraichirPalette);
     window.addEventListener('travaux-fleche-double-change', rafraichirPalette);
+    // Invalider les curseurs personnalises au changement de theme
+    window.addEventListener('themeChanged', function() { invaliderCacheCurseurs(); rafraichirPalette(); });
 
     /* ===============================
        PALETTE FLOTTANTE — DRAG & TOGGLE
