@@ -354,6 +354,9 @@
         // Changement couleur/epaisseur sur selection
         window.addEventListener('travaux-couleur-change', onCouleurChange);
         window.addEventListener('travaux-epaisseur-change', onEpaisseurChange);
+
+        // Fleche double toggle sur selection
+        window.addEventListener('travaux-fleche-double-change', onFlecheDoubleChange);
     }
 
     function detacherEvenements() {
@@ -373,6 +376,7 @@
         canvasAnnotation.removeEventListener('dblclick', onDoubleClick);
         window.removeEventListener('travaux-couleur-change', onCouleurChange);
         window.removeEventListener('travaux-epaisseur-change', onEpaisseurChange);
+        window.removeEventListener('travaux-fleche-double-change', onFlecheDoubleChange);
     }
 
     /**
@@ -418,10 +422,10 @@
 
             // Verifier si on clique sur une poignee de la selection existante (mono-selection seulement)
             if (annotationSelectionnee && selectionsMultiples.length <= 1) {
-                const poignee = detecterPoignee(xNorm, yNorm, annotationSelectionnee.bbox);
+                const poignee = detecterPoignee(xNorm, yNorm, annotationSelectionnee.bbox, annotationSelectionnee);
                 if (poignee) {
-                    if (annotationSelectionnee.type !== 'stroke' &&
-                        (annotationSelectionnee.type !== 'sticker' || modeRedimensionnementSticker)) {
+                    if (poignee === 'cp' || (annotationSelectionnee.type !== 'stroke' &&
+                        (annotationSelectionnee.type !== 'sticker' || modeRedimensionnementSticker))) {
                         poigneeActive = poignee;
                         deplacementOrigine = { x: xNorm, y: yNorm };
                         dimensionsOriginales = { ...annotationSelectionnee.bbox };
@@ -524,6 +528,9 @@
                 formeEnCours.amplitude = 6;
                 formeEnCours.wavelength = 30;
             }
+            if (outil.id === 'fleche' && travauxOutils.getFlecheDouble()) {
+                formeEnCours.double = true;
+            }
             enDessin = true;
             return;
         }
@@ -605,6 +612,11 @@
                     appliquerDeplacement(sel, dx, dy);
                 }
                 deplacementOrigine = { x: xNorm, y: yNorm };
+            } else if (poigneeActive === 'cp' && annotationSelectionnee) {
+                // Drag du point de controle Bezier
+                annotationSelectionnee.data.cx = xNorm;
+                annotationSelectionnee.data.cy = yNorm;
+                annotationSelectionnee.bbox = calculerBBox(annotationSelectionnee.type, annotationSelectionnee.data);
             } else if (poigneeActive && annotationSelectionnee) {
                 appliquerRedimensionnement(annotationSelectionnee, poigneeActive, xNorm, yNorm);
             }
@@ -1163,13 +1175,20 @@
                 }
                 return { x1: minX - pad, y1: minY - pad, x2: maxX + pad, y2: maxY + pad };
             }
-            case 'shape':
-                return {
-                    x1: Math.min(data.x1, data.x2),
-                    y1: Math.min(data.y1, data.y2),
-                    x2: Math.max(data.x1, data.x2),
-                    y2: Math.max(data.y1, data.y2)
-                };
+            case 'shape': {
+                let sx1 = Math.min(data.x1, data.x2);
+                let sy1 = Math.min(data.y1, data.y2);
+                let sx2 = Math.max(data.x1, data.x2);
+                let sy2 = Math.max(data.y1, data.y2);
+                // Inclure le point de controle Bezier dans la bbox
+                if (data.type === 'fleche' && data.cx != null && data.cy != null) {
+                    if (data.cx < sx1) sx1 = data.cx;
+                    if (data.cy < sy1) sy1 = data.cy;
+                    if (data.cx > sx2) sx2 = data.cx;
+                    if (data.cy > sy2) sy2 = data.cy;
+                }
+                return { x1: sx1, y1: sy1, x2: sx2, y2: sy2 };
+            }
             case 'text': {
                 const fontSize = data.fontSize || 14;
                 const w = canvasAnnotation?.width || 1000;
@@ -1193,6 +1212,44 @@
             default:
                 return { x1: 0, y1: 0, x2: 0, y2: 0 };
         }
+    }
+
+    /**
+     * Distance d'un point a un segment
+     */
+    function distancePointSegment(px, py, ax, ay, bx, by) {
+        const dx = bx - ax, dy = by - ay;
+        const lenSq = dx * dx + dy * dy;
+        if (lenSq === 0) return Math.sqrt((px - ax) * (px - ax) + (py - ay) * (py - ay));
+        let t = ((px - ax) * dx + (py - ay) * dy) / lenSq;
+        t = Math.max(0, Math.min(1, t));
+        const projX = ax + t * dx, projY = ay + t * dy;
+        return Math.sqrt((px - projX) * (px - projX) + (py - projY) * (py - projY));
+    }
+
+    /**
+     * Teste la proximite d'un point a une fleche (droite ou courbe Bezier)
+     */
+    function testProximiteFleche(forme, px, py, seuil) {
+        if (forme.cx != null && forme.cy != null) {
+            // Courbe quadratique : echantillonner ~20 points
+            const steps = 20;
+            const x0 = forme.x1, y0 = forme.y1;
+            const cx = forme.cx, cy = forme.cy;
+            const x1 = forme.x2, y1 = forme.y2;
+            let prevX = x0, prevY = y0;
+            for (let i = 1; i <= steps; i++) {
+                const t = i / steps;
+                const inv = 1 - t;
+                const qx = inv * inv * x0 + 2 * inv * t * cx + t * t * x1;
+                const qy = inv * inv * y0 + 2 * inv * t * cy + t * t * y1;
+                if (distancePointSegment(px, py, prevX, prevY, qx, qy) < seuil) return true;
+                prevX = qx; prevY = qy;
+            }
+            return false;
+        }
+        // Fleche droite
+        return distancePointSegment(px, py, forme.x1, forme.y1, forme.x2, forme.y2) < seuil;
     }
 
     /**
@@ -1229,6 +1286,15 @@
         for (let i = donneesPage.shapes.length - 1; i >= 0; i--) {
             const forme = donneesPage.shapes[i];
             const bbox = calculerBBox('shape', forme);
+
+            // Fleches : hit-testing specifique (droite ou courbe)
+            if (forme.type === 'fleche') {
+                if (testProximiteFleche(forme, xNorm, yNorm, seuil)) {
+                    return { type: 'shape', index: i, data: forme, bbox: bbox };
+                }
+                continue;
+            }
+
             // Proximite des bords (pas de l'interieur)
             const nearX = Math.min(Math.abs(xNorm - bbox.x1), Math.abs(xNorm - bbox.x2));
             const nearY = Math.min(Math.abs(yNorm - bbox.y1), Math.abs(yNorm - bbox.y2));
@@ -1261,8 +1327,19 @@
      * Detecte si le point est sur une poignee de la selection
      * @returns {string|null} 'nw' | 'ne' | 'sw' | 'se' | null
      */
-    function detecterPoignee(xNorm, yNorm, bbox) {
+    function detecterPoignee(xNorm, yNorm, bbox, sel) {
         const taille = 12 / (canvasAnnotation?.width || 1000); // 12px en normalise
+
+        // Point de controle Bezier (prioritaire, teste en premier)
+        if (sel && sel.type === 'shape' && sel.data.type === 'fleche') {
+            const data = sel.data;
+            const cpX = data.cx != null ? data.cx : (data.x1 + data.x2) / 2;
+            const cpY = data.cy != null ? data.cy : (data.y1 + data.y2) / 2;
+            if (Math.abs(xNorm - cpX) < taille && Math.abs(yNorm - cpY) < taille) {
+                return 'cp';
+            }
+        }
+
         const coins = {
             nw: { x: bbox.x1, y: bbox.y1 },
             ne: { x: bbox.x2, y: bbox.y1 },
@@ -1339,6 +1416,38 @@
                     ctxAnnotation.fillRect(coin.x - taille / 2, coin.y - taille / 2, taille, taille);
                     ctxAnnotation.strokeRect(coin.x - taille / 2, coin.y - taille / 2, taille, taille);
                 }
+            }
+
+            // Handle de point de controle Bezier pour les fleches
+            if (sel.type === 'shape' && sel.data.type === 'fleche') {
+                const data = sel.data;
+                // Position du handle : cx/cy si defini, sinon milieu de la fleche
+                const cpNormX = data.cx != null ? data.cx : (data.x1 + data.x2) / 2;
+                const cpNormY = data.cy != null ? data.cy : (data.y1 + data.y2) / 2;
+                const cpPxX = cpNormX * w;
+                const cpPxY = cpNormY * h;
+
+                // Ligne pointillee du milieu de la fleche au handle
+                const midX = ((data.x1 + data.x2) / 2) * w;
+                const midY = ((data.y1 + data.y2) / 2) * h;
+                ctxAnnotation.strokeStyle = '#065dbb';
+                ctxAnnotation.lineWidth = 1;
+                ctxAnnotation.setLineDash([3, 3]);
+                ctxAnnotation.beginPath();
+                ctxAnnotation.moveTo(midX, midY);
+                ctxAnnotation.lineTo(cpPxX, cpPxY);
+                ctxAnnotation.stroke();
+                ctxAnnotation.setLineDash([]);
+
+                // Handle circulaire
+                const rayon = 6;
+                ctxAnnotation.fillStyle = '#ffffff';
+                ctxAnnotation.strokeStyle = '#065dbb';
+                ctxAnnotation.lineWidth = 2;
+                ctxAnnotation.beginPath();
+                ctxAnnotation.arc(cpPxX, cpPxY, rayon, 0, Math.PI * 2);
+                ctxAnnotation.fill();
+                ctxAnnotation.stroke();
             }
         }
 
@@ -1461,6 +1570,8 @@
                 sel.data.y1 += dy;
                 sel.data.x2 += dx;
                 sel.data.y2 += dy;
+                // Deplacer le point de controle Bezier
+                if (sel.data.cx != null) { sel.data.cx += dx; sel.data.cy += dy; }
                 break;
             case 'text':
                 sel.data.x += dx;
@@ -1516,11 +1627,25 @@
                         break;
                 }
             } else {
+                // Sauvegarder l'ancienne bbox pour scaler le point de controle
+                const oldX1 = sel.data.x1, oldY1 = sel.data.y1;
+                const oldX2 = sel.data.x2, oldY2 = sel.data.y2;
                 switch (poignee) {
                     case 'nw': sel.data.x1 = xNorm; sel.data.y1 = yNorm; break;
                     case 'ne': sel.data.x2 = xNorm; sel.data.y1 = yNorm; break;
                     case 'sw': sel.data.x1 = xNorm; sel.data.y2 = yNorm; break;
                     case 'se': sel.data.x2 = xNorm; sel.data.y2 = yNorm; break;
+                }
+                // Scaler le point de controle Bezier proportionnellement
+                if (sel.data.cx != null && sel.data.type === 'fleche') {
+                    const oldW = oldX2 - oldX1;
+                    const oldH = oldY2 - oldY1;
+                    const newW = sel.data.x2 - sel.data.x1;
+                    const newH = sel.data.y2 - sel.data.y1;
+                    if (Math.abs(oldW) > 0.001 && Math.abs(oldH) > 0.001) {
+                        sel.data.cx = sel.data.x1 + (sel.data.cx - oldX1) * (newW / oldW);
+                        sel.data.cy = sel.data.y1 + (sel.data.cy - oldY1) * (newH / oldH);
+                    }
                 }
             }
         } else if (sel.type === 'sticker') {
@@ -1639,6 +1764,29 @@
         }
     }
 
+    function onFlecheDoubleChange(e) {
+        if (!annotationActive) return;
+        if (selectionsMultiples.length === 0) return;
+        const val = e.detail.double;
+        const snapshots = selectionsMultiples.map(s => clonerDonneesAnnotation(s));
+        let modifie = false;
+        for (const sel of selectionsMultiples) {
+            if (sel.type === 'shape' && sel.data.type === 'fleche') {
+                if (val) { sel.data.double = true; } else { delete sel.data.double; }
+                modifie = true;
+            }
+        }
+        if (modifie) {
+            empilerUndo('modification-multiple', selectionsMultiples.map((s, i) => ({
+                type: s.type, index: s.index,
+                avant: snapshots[i],
+                apres: clonerDonneesAnnotation(s)
+            })));
+            reRendreAnnotations();
+            planifierSauvegarde();
+        }
+    }
+
     /**
      * Clone les donnees d'une annotation pour undo
      */
@@ -1703,10 +1851,10 @@
 
         // Poignees de redimensionnement (mono-selection)
         if (selectionsMultiples.length === 1 && annotationSelectionnee) {
-            const poignee = detecterPoignee(xNorm, yNorm, annotationSelectionnee.bbox);
+            const poignee = detecterPoignee(xNorm, yNorm, annotationSelectionnee.bbox, annotationSelectionnee);
             if (poignee) {
-                const curseurs = { nw: 'nw-resize', ne: 'ne-resize', sw: 'sw-resize', se: 'se-resize' };
-                canvasAnnotation.style.cursor = curseurs[poignee];
+                const curseurs = { nw: 'nw-resize', ne: 'ne-resize', sw: 'sw-resize', se: 'se-resize', cp: 'grab' };
+                canvasAnnotation.style.cursor = curseurs[poignee] || 'grab';
                 return;
             }
         }
@@ -1912,7 +2060,7 @@
                 break;
 
             case 'fleche':
-                dessinerFleche(ctx, x1, y1, x2, y2);
+                dessinerFleche(ctx, x1, y1, x2, y2, forme);
                 break;
 
             case 'crochet':
@@ -1939,36 +2087,107 @@
     }
 
     /**
-     * Dessine une fleche
+     * Dessine une pointe de fleche (triangle plein)
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {number} tipX - X de la pointe
+     * @param {number} tipY - Y de la pointe
+     * @param {number} angle - Angle de la direction (radians)
+     * @param {number} headLen - Longueur de la pointe
+     * @param {number} headAngle - Demi-ouverture du triangle
      */
-    function dessinerFleche(ctx, x1, y1, x2, y2) {
-        const headLen = Math.max(12, ctx.lineWidth * 5);
-        const headAngle = Math.PI / 8; // angle aigu (~22°)
-        const angle = Math.atan2(y2 - y1, x2 - x1);
-
-        // Base de la pointe (ou la tige s'arrete)
-        const baseX = x2 - headLen * Math.cos(angle);
-        const baseY = y2 - headLen * Math.sin(angle);
-
-        // Tige (s'arrete a la base de la pointe)
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(baseX, baseY);
-        ctx.stroke();
-
-        // Pointe pleine (triangle ferme)
-        const ax = x2 - headLen * Math.cos(angle - headAngle);
-        const ay = y2 - headLen * Math.sin(angle - headAngle);
-        const bx = x2 - headLen * Math.cos(angle + headAngle);
-        const by = y2 - headLen * Math.sin(angle + headAngle);
+    function dessinerPointeFleche(ctx, tipX, tipY, angle, headLen, headAngle) {
+        const ax = tipX - headLen * Math.cos(angle - headAngle);
+        const ay = tipY - headLen * Math.sin(angle - headAngle);
+        const bx = tipX - headLen * Math.cos(angle + headAngle);
+        const by = tipY - headLen * Math.sin(angle + headAngle);
 
         ctx.fillStyle = ctx.strokeStyle;
         ctx.beginPath();
-        ctx.moveTo(x2, y2);
+        ctx.moveTo(tipX, tipY);
         ctx.lineTo(ax, ay);
         ctx.lineTo(bx, by);
         ctx.closePath();
         ctx.fill();
+    }
+
+    /**
+     * Dessine une fleche (droite ou courbe, simple ou double)
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {number} x1 - Debut X pixel
+     * @param {number} y1 - Debut Y pixel
+     * @param {number} x2 - Fin X pixel
+     * @param {number} y2 - Fin Y pixel
+     * @param {Object} [forme] - Donnees de la forme (cx, cy, double)
+     */
+    function dessinerFleche(ctx, x1, y1, x2, y2, forme) {
+        const headLen = Math.max(12, ctx.lineWidth * 5);
+        const headAngle = Math.PI / 8;
+        const w = canvasAnnotation ? canvasAnnotation.width : 1;
+        const h = canvasAnnotation ? canvasAnnotation.height : 1;
+        const estDouble = forme && forme.double;
+        const aCourbe = forme && forme.cx != null && forme.cy != null;
+
+        if (aCourbe) {
+            // Point de controle en pixels
+            const cpx = forme.cx * w;
+            const cpy = forme.cy * h;
+
+            // Tangentes aux extremites d'une courbe quadratique B(t) = (1-t)²P0 + 2(1-t)tC + t²P1
+            // B'(0) = 2(C - P0), B'(1) = 2(P1 - C)
+            const angleEnd = Math.atan2(y2 - cpy, x2 - cpx);
+            const angleStartOut = Math.atan2(cpy - y1, cpx - x1); // tangente sortante au start
+
+            // Raccourcir la tige aux extremites pour la pointe
+            const endBaseX = x2 - headLen * Math.cos(angleEnd);
+            const endBaseY = y2 - headLen * Math.sin(angleEnd);
+
+            let startX = x1, startY = y1;
+            if (estDouble) {
+                startX = x1 + headLen * Math.cos(angleStartOut);
+                startY = y1 + headLen * Math.sin(angleStartOut);
+            }
+
+            // Tige courbe (quadraticCurveTo)
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.quadraticCurveTo(cpx, cpy, endBaseX, endBaseY);
+            ctx.stroke();
+
+            // Pointe a la fin
+            dessinerPointeFleche(ctx, x2, y2, angleEnd, headLen, headAngle);
+
+            // Pointe au debut (si double)
+            if (estDouble) {
+                dessinerPointeFleche(ctx, x1, y1, angleStartOut + Math.PI, headLen, headAngle);
+            }
+        } else {
+            // Fleche droite (legacy)
+            const angle = Math.atan2(y2 - y1, x2 - x1);
+
+            let startX = x1, startY = y1;
+            if (estDouble) {
+                startX = x1 + headLen * Math.cos(angle);
+                startY = y1 + headLen * Math.sin(angle);
+            }
+
+            // Base de la pointe end (ou la tige s'arrete)
+            const baseX = x2 - headLen * Math.cos(angle);
+            const baseY = y2 - headLen * Math.sin(angle);
+
+            // Tige
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(baseX, baseY);
+            ctx.stroke();
+
+            // Pointe end
+            dessinerPointeFleche(ctx, x2, y2, angle, headLen, headAngle);
+
+            // Pointe start (si double)
+            if (estDouble) {
+                dessinerPointeFleche(ctx, x1, y1, angle + Math.PI, headLen, headAngle);
+            }
+        }
     }
 
     /**
