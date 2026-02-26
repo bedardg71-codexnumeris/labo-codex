@@ -68,7 +68,7 @@ function afficherAccueilPremierLancement(conteneur) {
 
         <div class="accueil-pied">
             <a href="https://codexnumeris.org" target="_blank" rel="noopener noreferrer" class="accueil-pied-logo-link">
-                <img src="img/logo-codex-numeris.png" alt="Logo Codex Numeris" class="accueil-pied-logo">
+                <img src="img/logo-codex-numeris.png" alt="Logo Labo Codex" class="accueil-pied-logo">
             </a>
             <a href="https://codexnumeris.org" target="_blank" rel="noopener noreferrer" style="font-size: 0.8rem; color: var(--gris-moyen); text-decoration: none;">codexnumeris.org</a>
             <span style="font-size: 0.75rem; color: var(--gris-clair); font-style: italic;">R\u00e9fl\u00e9chir, exp\u00e9rimenter, partager.</span>
@@ -252,7 +252,7 @@ function afficherAccueilRetour(conteneur) {
 
         <div class="accueil-pied">
             <a href="https://codexnumeris.org" target="_blank" rel="noopener noreferrer" class="accueil-pied-logo-link">
-                <img src="img/logo-codex-numeris.png" alt="Logo Codex Numeris" class="accueil-pied-logo">
+                <img src="img/logo-codex-numeris.png" alt="Logo Labo Codex" class="accueil-pied-logo">
             </a>
             <a href="https://codexnumeris.org" target="_blank" rel="noopener noreferrer" style="font-size: 0.8rem; color: var(--gris-moyen); text-decoration: none;">codexnumeris.org</a>
             <span style="font-size: 0.75rem; color: var(--gris-clair); font-style: italic;">R\u00e9fl\u00e9chir, exp\u00e9rimenter, partager.</span>
