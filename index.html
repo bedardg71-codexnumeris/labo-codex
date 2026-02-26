@@ -17161,8 +17161,10 @@
          */
 
         // === CONFIGURATION ===
-        const VERSION_MAJEURE = '98';
-        const BUILD_ID = '0226-0845';  // Auto-updated by Claude before each commit (Toronto time)
+        // VERSION_MAJEURE et BUILD_ID sont lus depuis version.json au chargement (source unique)
+        // Les valeurs ici servent de fallback si version.json n'est pas disponible
+        let VERSION_MAJEURE = '98.1';
+        let BUILD_ID = '0226-0845';
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
@@ -17282,6 +17284,25 @@
             }
         }
 
+        /**
+         * Charge version.json pour synchroniser VERSION_MAJEURE et BUILD_ID
+         * puis rafraîchit l'en-tête. Source unique de vérité.
+         */
+        async function chargerVersionJSON() {
+            try {
+                const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
+                if (!r.ok) return;
+                const data = await r.json();
+                if (data.beta) VERSION_MAJEURE = data.beta;
+                if (data.build) BUILD_ID = data.build;
+                window.VERSION_MAJEURE = VERSION_MAJEURE;
+                window.BUILD_ID = BUILD_ID;
+                afficherBuildNumero();
+            } catch (e) {
+                // Hors-ligne : on garde les valeurs fallback
+            }
+        }
+
         // Initialisation au chargement
         document.addEventListener('DOMContentLoaded', function() {
             // Fermer le modal News si on clique sur l'overlay
@@ -17300,8 +17321,11 @@
                 conteneur.innerHTML = genererChangelogHTML();
             }
 
-            // Afficher le numéro de build dans l'entête
+            // Afficher le numéro de build dans l'entête (fallback immédiat)
             afficherBuildNumero();
+
+            // Puis synchroniser depuis version.json (source de vérité)
+            chargerVersionJSON();
 
             // Mettre à jour l'affichage de la pastille (no-op si accueil pas encore rendu)
             mettreAJourPastille();
