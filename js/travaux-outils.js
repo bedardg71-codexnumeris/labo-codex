@@ -517,6 +517,23 @@
         db.setSync('personnalisationErreursFr', obj);
     }
 
+    function obtenirOrdreErreursFr() {
+        const ordre = db.getSync('ordreErreursFr', null);
+        if (ordre && Array.isArray(ordre) && ordre.length === CODES_ERREURS_FR.length) return ordre;
+        return CODES_ERREURS_FR.map(c => c.id);
+    }
+
+    function sauvegarderOrdreErreursFr(arr) {
+        db.setSync('ordreErreursFr', arr);
+    }
+
+    function obtenirCodesOrdonnes() {
+        const ordre = obtenirOrdreErreursFr();
+        const map = {};
+        CODES_ERREURS_FR.forEach(c => { map[c.id] = c; });
+        return ordre.map(id => map[id]).filter(Boolean);
+    }
+
     /**
      * Applique les personnalisations (noms, images, couleurs) directement
      * sur les objets AUTOCOLLANTS, CODES_ERREURS_FR et OUTILS.
@@ -596,11 +613,11 @@
         // Contenu : liste verticale
         html += '<div class="travaux-palette-contenu" id="travaux-errfr-contenu">';
         html += '<div class="travaux-errfr-liste">';
-        CODES_ERREURS_FR.forEach(c => {
+        obtenirCodesOrdonnes().forEach((c, idx) => {
             const outil = OUTILS[c.id];
             const actif = outilActif === c.id ? ' actif' : '';
             html += `<div class="travaux-errfr-item${actif}" onclick="travauxOutils.setOutilActif('${c.id}')" title="${c.nom}">`;
-            html += `<span class="travaux-errfr-numero" style="background:${outil.couleurBouton}">${c.code}</span>`;
+            html += `<span class="travaux-errfr-numero" style="background:${outil.couleurBouton}">${idx + 1}</span>`;
             html += `<span class="travaux-errfr-nom">${c.nom}</span>`;
             html += `<span class="travaux-errfr-compteur u-hide" data-erreur="${c.id}"></span>`;
             html += '</div>';
@@ -1233,31 +1250,35 @@
         if (existant) existant.remove();
 
         const retroActuelles = obtenirRetroactionsErreursFr();
+        const codesOrdonnes = obtenirCodesOrdonnes();
         const overlay = document.createElement('div');
         overlay.id = 'modal-retro-erreurs-fr';
         overlay.className = 'modal-overlay actif';
 
         let html = '<div class="modal-contenu travaux-retro-modal">';
-        html += '<h2 style="margin-top:0">Rétroactions — Erreurs de français</h2>';
-        html += '<p style="color:var(--texte-secondaire);font-size:0.85rem;margin-bottom:16px;">Ces textes apparaîtront dans la rétroaction générée pour l\'élève lorsque le code d\'erreur correspondant est utilisé. Cliquez sur la pastille pour changer sa couleur.</p>';
+        html += '<h2 style="margin-top:0">R\u00e9troactions \u2014 Erreurs de fran\u00e7ais</h2>';
+        html += '<p style="color:var(--texte-secondaire);font-size:0.85rem;margin-bottom:16px;">Ces textes appara\u00eetront dans la r\u00e9troaction g\u00e9n\u00e9r\u00e9e pour l\'\u00e9l\u00e8ve lorsque le code d\'erreur correspondant est utilis\u00e9. Cliquez sur la pastille pour changer sa couleur. Glissez \u2630 pour r\u00e9ordonner.</p>';
 
-        CODES_ERREURS_FR.forEach(c => {
+        html += '<div id="travaux-retro-errfr-liste">';
+        codesOrdonnes.forEach((c, idx) => {
             const outil = OUTILS[c.id];
             const texte = retroActuelles[c.id] || '';
-            html += '<div class="travaux-retro-row" data-err-id="' + c.id + '">';
+            html += '<div class="travaux-retro-row travaux-retro-draggable" data-err-id="' + c.id + '" draggable="true">';
             html += '<div class="travaux-retro-row-haut">';
-            html += `<div class="travaux-retro-couleur-wrap">`;
-            html += `<span class="travaux-retro-numero" style="background:${outil.couleurBouton}" data-pastille-id="${c.id}">${c.code}</span>`;
-            html += `<input type="color" value="${outil.couleurBouton}" data-color-id="${c.id}" title="Changer la couleur">`;
+            html += '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner">\u2630</span>';
+            html += '<div class="travaux-retro-couleur-wrap">';
+            html += '<span class="travaux-retro-numero" style="background:' + outil.couleurBouton + '" data-pastille-id="' + c.id + '">' + (idx + 1) + '</span>';
+            html += '<input type="color" value="' + outil.couleurBouton + '" data-color-id="' + c.id + '" title="Changer la couleur">';
             html += '</div>';
-            html += `<input type="text" class="travaux-retro-nom-input" data-nom-id="${c.id}" value="${c.nom}">`;
+            html += '<input type="text" class="travaux-retro-nom-input" data-nom-id="' + c.id + '" value="' + c.nom + '">';
             html += '</div>';
-            html += `<textarea class="travaux-retro-textarea" data-retro-id="${c.id}" rows="3">${texte}</textarea>`;
+            html += '<textarea class="travaux-retro-textarea" data-retro-id="' + c.id + '" rows="3">' + texte + '</textarea>';
             html += '</div>';
         });
+        html += '</div>';
 
         html += '<div class="travaux-retro-actions">';
-        html += '<button class="btn-secondaire" onclick="travauxOutils.reinitialiserRetroErreursFr()">Réinitialiser</button>';
+        html += '<button class="btn-secondaire" onclick="travauxOutils.reinitialiserRetroErreursFr()">R\u00e9initialiser</button>';
         html += '<button class="btn-secondaire" onclick="document.getElementById(\'modal-retro-erreurs-fr\').remove()">Annuler</button>';
         html += '<button class="btn-principal" onclick="travauxOutils.enregistrerRetroErreursFr()">Enregistrer</button>';
         html += '</div>';
@@ -1275,6 +1296,69 @@
             colorInput.addEventListener('input', function() {
                 if (pastille) pastille.style.background = colorInput.value;
             });
+        });
+
+        // Wiring: drag-and-drop pour réordonner
+        configurerDragRetroErrFr(overlay.querySelector('#travaux-retro-errfr-liste'));
+    }
+
+    function configurerDragRetroErrFr(conteneur) {
+        if (!conteneur) return;
+        let draggedRow = null;
+
+        conteneur.addEventListener('dragstart', function(e) {
+            const row = e.target.closest('.travaux-retro-draggable');
+            if (!row) return;
+            draggedRow = row;
+            row.classList.add('travaux-retro-dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', '');
+        });
+
+        conteneur.addEventListener('dragend', function() {
+            if (draggedRow) draggedRow.classList.remove('travaux-retro-dragging');
+            draggedRow = null;
+            conteneur.querySelectorAll('.travaux-retro-drag-over').forEach(el => el.classList.remove('travaux-retro-drag-over'));
+        });
+
+        conteneur.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            const cible = e.target.closest('.travaux-retro-draggable');
+            if (!cible || cible === draggedRow) return;
+            conteneur.querySelectorAll('.travaux-retro-drag-over').forEach(el => el.classList.remove('travaux-retro-drag-over'));
+            cible.classList.add('travaux-retro-drag-over');
+        });
+
+        conteneur.addEventListener('dragleave', function(e) {
+            const cible = e.target.closest('.travaux-retro-draggable');
+            if (cible) cible.classList.remove('travaux-retro-drag-over');
+        });
+
+        conteneur.addEventListener('drop', function(e) {
+            e.preventDefault();
+            const cible = e.target.closest('.travaux-retro-draggable');
+            if (!cible || !draggedRow || cible === draggedRow) return;
+            cible.classList.remove('travaux-retro-drag-over');
+            // Inserer avant ou après selon la position relative
+            const rows = Array.from(conteneur.querySelectorAll('.travaux-retro-draggable'));
+            const idxDrag = rows.indexOf(draggedRow);
+            const idxCible = rows.indexOf(cible);
+            if (idxDrag < idxCible) {
+                conteneur.insertBefore(draggedRow, cible.nextSibling);
+            } else {
+                conteneur.insertBefore(draggedRow, cible);
+            }
+            // Renuméroter
+            renumeroterRetroErrFr(conteneur);
+        });
+    }
+
+    function renumeroterRetroErrFr(conteneur) {
+        const rows = conteneur.querySelectorAll('.travaux-retro-draggable');
+        rows.forEach((row, idx) => {
+            const pastille = row.querySelector('.travaux-retro-numero');
+            if (pastille) pastille.textContent = idx + 1;
         });
     }
 
@@ -1300,6 +1384,13 @@
             persObj[id].couleur = inp.value;
         });
         sauvegarderPersonnalisationErreursFr(persObj);
+        // Ordre personnalisé
+        const liste = modal.querySelector('#travaux-retro-errfr-liste');
+        if (liste) {
+            const ordre = Array.from(liste.querySelectorAll('.travaux-retro-draggable'))
+                .map(row => row.dataset.errId);
+            sauvegarderOrdreErreursFr(ordre);
+        }
         appliquerPersonnalisations();
         rafraichirPalettesApresPersonnalisation();
         modal.remove();
@@ -1308,28 +1399,10 @@
     function reinitialiserRetroErreursFr() {
         db.setSync('retroactionsErreursFr', null);
         db.setSync('personnalisationErreursFr', null);
+        db.setSync('ordreErreursFr', null);
         appliquerPersonnalisations();
-        const modal = document.getElementById('modal-retro-erreurs-fr');
-        if (modal) {
-            // Restaurer textes
-            modal.querySelectorAll('textarea[data-retro-id]').forEach(ta => {
-                ta.value = RETROACTIONS_ERREURS_FR_DEFAUT[ta.dataset.retroId] || '';
-            });
-            // Restaurer noms
-            modal.querySelectorAll('input[data-nom-id]').forEach(inp => {
-                const defaut = _defautsNomsErrFr[inp.dataset.nomId];
-                if (defaut) inp.value = defaut;
-            });
-            // Restaurer couleurs
-            modal.querySelectorAll('input[data-color-id]').forEach(inp => {
-                const defaut = _defautsCouleursErrFr[inp.dataset.colorId];
-                if (defaut) {
-                    inp.value = defaut;
-                    const pastille = modal.querySelector('span[data-pastille-id="' + inp.dataset.colorId + '"]');
-                    if (pastille) pastille.style.background = defaut;
-                }
-            });
-        }
+        // Rouvrir le modal pour refleter l'ordre et les valeurs par defaut
+        ouvrirEditionRetroErreursFr();
     }
 
     /* ===============================

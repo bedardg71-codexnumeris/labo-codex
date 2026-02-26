@@ -20909,6 +20909,28 @@ body.mode-clair .model-fichier-apercu {
     gap: 6px;
     margin-bottom: 16px;
 }
+.travaux-retro-draggable {
+    transition: opacity 0.15s, box-shadow 0.15s;
+    border-radius: var(--radius-moyen, 8px);
+    padding: 4px;
+}
+.travaux-retro-dragging {
+    opacity: 0.35;
+}
+.travaux-retro-drag-over {
+    box-shadow: 0 -3px 0 0 var(--primary-500, #3b82f6);
+}
+.travaux-retro-drag-handle {
+    cursor: grab;
+    font-size: 1.1rem;
+    color: var(--texte-secondaire, #94a3b8);
+    user-select: none;
+    padding: 0 2px;
+    flex-shrink: 0;
+}
+.travaux-retro-drag-handle:active {
+    cursor: grabbing;
+}
 
 .travaux-retro-row-haut {
     display: flex;
