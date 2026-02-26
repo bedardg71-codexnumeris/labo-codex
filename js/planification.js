@@ -33,8 +33,11 @@ function initialiserModulePlanification() {
         dejaInitialise = true;
         console.log('   ✅ Module Planification initialisé');
     } else {
-        // Retour vers la section : recentrer la vue
-        if (window.planificationCarte) {
+        // Retour vers la section : recharger les données du trimestre actif et recentrer
+        if (window.planificationCarte && window.planificationDonnees) {
+            var index = window.planificationDonnees.initialiserSiNecessaire();
+            window.planificationCarte.mettreAJourListeCartes();
+            window.planificationCarte.chargerCarte(index.active);
             requestAnimationFrame(function() {
                 window.planificationCarte.centrerVueSurContenu();
             });
