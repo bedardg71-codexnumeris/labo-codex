@@ -315,43 +315,44 @@
 
         // Contenu
         html += '<div class="travaux-palette-contenu" id="travaux-tampons-contenu">';
+        const nomsCat = obtenirNomsCategories();
 
         // Symboles (crochet / croix)
-        html += '<div class="travaux-autocollants-label">Contenu et méthode</div>';
+        html += '<div class="travaux-autocollants-label">' + (nomsCat.symboles || 'Contenu et m\u00e9thode') + '</div>';
         html += '<div class="travaux-autocollants-grille travaux-autocollants-grille--symboles">';
         const crochetActif = outilActif === 'crochet' ? ' actif' : '';
         const croixActif = outilActif === 'croix' ? ' actif' : '';
         const interroActif = outilActif === 'interrogation' ? ' actif' : '';
-        html += `<div class="travaux-autocollant-item${crochetActif}" onclick="travauxOutils.setOutilActif('crochet')" title="Bien vu, exact, pertinent">`;
-        html += `<span style="font-size:24px; color:#2e7d32; font-weight:bold;">\u2714\uFE0E</span>`;
-        html += `<span>Exact</span></div>`;
-        html += `<div class="travaux-autocollant-item${croixActif}" onclick="travauxOutils.setOutilActif('croix')" title="Erroné, inexact, +/- pertinent">`;
-        html += `<span style="font-size:24px; color:#c62828; font-weight:bold;">\u2718</span>`;
-        html += `<span>Erroné</span></div>`;
-        html += `<div class="travaux-autocollant-item${interroActif}" onclick="travauxOutils.setOutilActif('interrogation')" title="Incertain, ambigu, pas clair">`;
-        html += `<span style="font-size:24px; color:#e65100; font-weight:bold;">?</span>`;
-        html += `<span>Incertain</span></div>`;
+        html += '<div class="travaux-autocollant-item' + crochetActif + '" onclick="travauxOutils.setOutilActif(\'crochet\')" title="Bien vu, exact, pertinent">';
+        html += '<span style="font-size:24px; color:#2e7d32; font-weight:bold;">\u2714\uFE0E</span>';
+        html += '<span>Exact</span></div>';
+        html += '<div class="travaux-autocollant-item' + croixActif + '" onclick="travauxOutils.setOutilActif(\'croix\')" title="Erron\u00e9, inexact, +/- pertinent">';
+        html += '<span style="font-size:24px; color:#c62828; font-weight:bold;">\u2718</span>';
+        html += '<span>Erron\u00e9</span></div>';
+        html += '<div class="travaux-autocollant-item' + interroActif + '" onclick="travauxOutils.setOutilActif(\'interrogation\')" title="Incertain, ambigu, pas clair">';
+        html += '<span style="font-size:24px; color:#e65100; font-weight:bold;">?</span>';
+        html += '<span>Incertain</span></div>';
         html += '</div>';
 
-        // Qualite
-        html += '<div class="travaux-autocollants-label">Inférences / interprétation</div>';
+        // Qualite (ordre personnalise)
+        html += '<div class="travaux-autocollants-label">' + (nomsCat.qualite || 'Qualit\u00e9') + '</div>';
         html += '<div class="travaux-autocollants-grille">';
-        AUTOCOLLANTS.filter(a => a.categorie === 'qualite').forEach(a => {
-            const imgSrc = imagesAutocollants[a.id] ? imagesAutocollants[a.id].src : DOSSIER_AUTOCOLLANTS + a.fichier;
-            html += `<div class="travaux-autocollant-item" onclick="travauxOutils.setAutocollantActif('${a.id}')" title="${a.nom}">`;
-            html += `<img src="${imgSrc}" alt="${a.nom}">`;
-            html += `<span>${a.nom}</span></div>`;
+        obtenirAutocollantsOrdonnes('qualite').forEach(function(a) {
+            var imgSrc = imagesAutocollants[a.id] ? imagesAutocollants[a.id].src : DOSSIER_AUTOCOLLANTS + a.fichier;
+            html += '<div class="travaux-autocollant-item" onclick="travauxOutils.setAutocollantActif(\'' + a.id + '\')" title="' + a.nom + '">';
+            html += '<img src="' + imgSrc + '" alt="' + a.nom + '">';
+            html += '<span>' + a.nom + '</span></div>';
         });
         html += '</div>';
 
-        // Diagnostic
-        html += '<div class="travaux-autocollants-label">Observations</div>';
+        // Diagnostic (ordre personnalise)
+        html += '<div class="travaux-autocollants-label">' + (nomsCat.diagnostic || 'Observations') + '</div>';
         html += '<div class="travaux-autocollants-grille">';
-        AUTOCOLLANTS.filter(a => a.categorie === 'diagnostic').forEach(a => {
-            const imgSrc = imagesAutocollants[a.id] ? imagesAutocollants[a.id].src : DOSSIER_AUTOCOLLANTS + a.fichier;
-            html += `<div class="travaux-autocollant-item" onclick="travauxOutils.setAutocollantActif('${a.id}')" title="${a.nom}">`;
-            html += `<img src="${imgSrc}" alt="${a.nom}">`;
-            html += `<span>${a.nom}</span></div>`;
+        obtenirAutocollantsOrdonnes('diagnostic').forEach(function(a) {
+            var imgSrc = imagesAutocollants[a.id] ? imagesAutocollants[a.id].src : DOSSIER_AUTOCOLLANTS + a.fichier;
+            html += '<div class="travaux-autocollant-item" onclick="travauxOutils.setAutocollantActif(\'' + a.id + '\')" title="' + a.nom + '">';
+            html += '<img src="' + imgSrc + '" alt="' + a.nom + '">';
+            html += '<span>' + a.nom + '</span></div>';
         });
         html += '</div>';
         html += '</div>';
@@ -1228,31 +1229,73 @@
 
         const retroActuelles = obtenirRetroactionsObservations();
         const persObs = obtenirPersonnalisationObservations();
+        const nomsCat = obtenirNomsCategories();
         const overlay = document.createElement('div');
         overlay.id = 'modal-retro-observations';
         overlay.className = 'modal-overlay actif';
 
         let html = '<div class="modal-contenu travaux-retro-modal">';
-        html += '<h2 style="margin-top:0">Rétroactions — Observations</h2>';
-        html += '<p style="color:var(--texte-secondaire);font-size:0.85rem;margin-bottom:16px;">Ces textes apparaîtront dans la rétroaction générée pour l\'élève lorsque le tampon correspondant est utilisé. Cliquez sur l\'image pour la remplacer.</p>';
+        html += '<h2 style="margin-top:0">R\u00e9troactions \u2014 Observations</h2>';
+        html += '<p style="color:var(--texte-secondaire);font-size:0.85rem;margin-bottom:16px;">Ces textes appara\u00eetront dans la r\u00e9troaction g\u00e9n\u00e9r\u00e9e pour l\'\u00e9l\u00e8ve lorsque le tampon correspondant est utilis\u00e9. Cliquez sur l\'image pour la remplacer. Glissez \u2630 pour r\u00e9ordonner.</p>';
 
-        AUTOCOLLANTS.filter(a => a.categorie === 'diagnostic').forEach(a => {
-            const texte = retroActuelles[a.id] || '';
-            const imgSrc = (persObs[a.id] && persObs[a.id].imageBase64) ? persObs[a.id].imageBase64 : DOSSIER_AUTOCOLLANTS + a.fichier;
-            html += '<div class="travaux-retro-row" data-obs-id="' + a.id + '">';
+        // Noms des categories editables
+        html += '<div style="margin-bottom:16px; display:flex; flex-direction:column; gap:6px;">';
+        html += '<div class="travaux-retro-row-haut" style="gap:8px; align-items:center;">';
+        html += '<span style="font-size:0.8rem; color:var(--texte-secondaire); min-width:120px;">\u2714 \u2718 ? :</span>';
+        html += '<input type="text" class="travaux-retro-nom-input" data-cat-id="symboles" value="' + (nomsCat.symboles || '') + '">';
+        html += '</div>';
+        html += '<div class="travaux-retro-row-haut" style="gap:8px; align-items:center;">';
+        html += '<span style="font-size:0.8rem; color:var(--texte-secondaire); min-width:120px;">Tampons 1-3 :</span>';
+        html += '<input type="text" class="travaux-retro-nom-input" data-cat-id="qualite" value="' + (nomsCat.qualite || '') + '">';
+        html += '</div>';
+        html += '<div class="travaux-retro-row-haut" style="gap:8px; align-items:center;">';
+        html += '<span style="font-size:0.8rem; color:var(--texte-secondaire); min-width:120px;">Tampons 4+ :</span>';
+        html += '<input type="text" class="travaux-retro-nom-input" data-cat-id="diagnostic" value="' + (nomsCat.diagnostic || '') + '">';
+        html += '</div>';
+        html += '</div>';
+
+        // Categorie qualite
+        html += '<div class="travaux-retro-cat-label" style="font-weight:600; margin:12px 0 6px; color:var(--texte-principal);">' + (nomsCat.qualite || 'Qualit\u00e9') + '</div>';
+        html += '<div id="travaux-retro-obs-liste-qualite">';
+        obtenirAutocollantsOrdonnes('qualite').forEach(function(a) {
+            var texte = retroActuelles[a.id] || '';
+            var imgSrc = (persObs[a.id] && persObs[a.id].imageBase64) ? persObs[a.id].imageBase64 : DOSSIER_AUTOCOLLANTS + a.fichier;
+            html += '<div class="travaux-retro-row travaux-retro-draggable" data-obs-id="' + a.id + '" draggable="true">';
             html += '<div class="travaux-retro-row-haut">';
-            html += `<div class="travaux-retro-img-upload" data-obs-id="${a.id}" title="Cliquer pour changer l'image">`;
-            html += `<img src="${imgSrc}" alt="${a.nom}" data-img-id="${a.id}">`;
-            html += `<input type="file" accept="image/*" data-file-id="${a.id}" hidden>`;
+            html += '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner">\u2630</span>';
+            html += '<div class="travaux-retro-img-upload" data-obs-id="' + a.id + '" title="Cliquer pour changer l\'image">';
+            html += '<img src="' + imgSrc + '" alt="' + a.nom + '" data-img-id="' + a.id + '">';
+            html += '<input type="file" accept="image/*" data-file-id="' + a.id + '" hidden>';
             html += '</div>';
-            html += `<input type="text" class="travaux-retro-nom-input" data-nom-id="${a.id}" value="${a.nom}">`;
+            html += '<input type="text" class="travaux-retro-nom-input" data-nom-id="' + a.id + '" value="' + a.nom + '">';
             html += '</div>';
-            html += `<textarea class="travaux-retro-textarea" data-retro-id="${a.id}" rows="3">${texte}</textarea>`;
+            html += '<textarea class="travaux-retro-textarea" data-retro-id="' + a.id + '" rows="3">' + texte + '</textarea>';
             html += '</div>';
         });
+        html += '</div>';
+
+        // Categorie diagnostic
+        html += '<div class="travaux-retro-cat-label" style="font-weight:600; margin:12px 0 6px; color:var(--texte-principal);">' + (nomsCat.diagnostic || 'Observations') + '</div>';
+        html += '<div id="travaux-retro-obs-liste-diagnostic">';
+        obtenirAutocollantsOrdonnes('diagnostic').forEach(function(a) {
+            var texte = retroActuelles[a.id] || '';
+            var imgSrc = (persObs[a.id] && persObs[a.id].imageBase64) ? persObs[a.id].imageBase64 : DOSSIER_AUTOCOLLANTS + a.fichier;
+            html += '<div class="travaux-retro-row travaux-retro-draggable" data-obs-id="' + a.id + '" draggable="true">';
+            html += '<div class="travaux-retro-row-haut">';
+            html += '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner">\u2630</span>';
+            html += '<div class="travaux-retro-img-upload" data-obs-id="' + a.id + '" title="Cliquer pour changer l\'image">';
+            html += '<img src="' + imgSrc + '" alt="' + a.nom + '" data-img-id="' + a.id + '">';
+            html += '<input type="file" accept="image/*" data-file-id="' + a.id + '" hidden>';
+            html += '</div>';
+            html += '<input type="text" class="travaux-retro-nom-input" data-nom-id="' + a.id + '" value="' + a.nom + '">';
+            html += '</div>';
+            html += '<textarea class="travaux-retro-textarea" data-retro-id="' + a.id + '" rows="3">' + texte + '</textarea>';
+            html += '</div>';
+        });
+        html += '</div>';
 
         html += '<div class="travaux-retro-actions">';
-        html += '<button class="btn-secondaire" onclick="travauxOutils.reinitialiserRetroObservations()">Réinitialiser</button>';
+        html += '<button class="btn-secondaire" onclick="travauxOutils.reinitialiserRetroObservations()">R\u00e9initialiser</button>';
         html += '<button class="btn-secondaire" onclick="document.getElementById(\'modal-retro-observations\').remove()">Annuler</button>';
         html += '<button class="btn-principal" onclick="travauxOutils.enregistrerRetroObservations()">Enregistrer</button>';
         html += '</div>';
@@ -1265,16 +1308,16 @@
         document.body.appendChild(overlay);
 
         // Wiring: clic sur l'image → ouvre le file input
-        overlay.querySelectorAll('.travaux-retro-img-upload').forEach(wrap => {
-            const imgEl = wrap.querySelector('img');
-            const fileInput = wrap.querySelector('input[type="file"]');
+        overlay.querySelectorAll('.travaux-retro-img-upload').forEach(function(wrap) {
+            var imgEl = wrap.querySelector('img');
+            var fileInput = wrap.querySelector('input[type="file"]');
             wrap.addEventListener('click', function(e) {
                 if (e.target !== fileInput) fileInput.click();
             });
             fileInput.addEventListener('change', function() {
-                const file = fileInput.files[0];
+                var file = fileInput.files[0];
                 if (!file) return;
-                const reader = new FileReader();
+                var reader = new FileReader();
                 reader.onload = function(ev) {
                     imgEl.src = ev.target.result;
                     imgEl.dataset.base64 = ev.target.result;
@@ -1282,25 +1325,78 @@
                 reader.readAsDataURL(file);
             });
         });
+
+        // Wiring: drag-and-drop pour chaque categorie
+        configurerDragRetroObs(overlay.querySelector('#travaux-retro-obs-liste-qualite'));
+        configurerDragRetroObs(overlay.querySelector('#travaux-retro-obs-liste-diagnostic'));
+    }
+
+    function configurerDragRetroObs(conteneur) {
+        if (!conteneur) return;
+        var draggedRow = null;
+
+        conteneur.addEventListener('dragstart', function(e) {
+            var row = e.target.closest('.travaux-retro-draggable');
+            if (!row) return;
+            draggedRow = row;
+            row.classList.add('travaux-retro-dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', '');
+        });
+
+        conteneur.addEventListener('dragend', function() {
+            if (draggedRow) draggedRow.classList.remove('travaux-retro-dragging');
+            draggedRow = null;
+            conteneur.querySelectorAll('.travaux-retro-drag-over').forEach(function(el) { el.classList.remove('travaux-retro-drag-over'); });
+        });
+
+        conteneur.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            var cible = e.target.closest('.travaux-retro-draggable');
+            if (!cible || cible === draggedRow) return;
+            conteneur.querySelectorAll('.travaux-retro-drag-over').forEach(function(el) { el.classList.remove('travaux-retro-drag-over'); });
+            cible.classList.add('travaux-retro-drag-over');
+        });
+
+        conteneur.addEventListener('dragleave', function(e) {
+            var cible = e.target.closest('.travaux-retro-draggable');
+            if (cible) cible.classList.remove('travaux-retro-drag-over');
+        });
+
+        conteneur.addEventListener('drop', function(e) {
+            e.preventDefault();
+            var cible = e.target.closest('.travaux-retro-draggable');
+            if (!cible || !draggedRow || cible === draggedRow) return;
+            cible.classList.remove('travaux-retro-drag-over');
+            var rows = Array.from(conteneur.querySelectorAll('.travaux-retro-draggable'));
+            var idxDrag = rows.indexOf(draggedRow);
+            var idxCible = rows.indexOf(cible);
+            if (idxDrag < idxCible) {
+                conteneur.insertBefore(draggedRow, cible.nextSibling);
+            } else {
+                conteneur.insertBefore(draggedRow, cible);
+            }
+        });
     }
 
     function enregistrerRetroObservations() {
         const modal = document.getElementById('modal-retro-observations');
         if (!modal) return;
-        // Textes de rétroaction
+        // Textes de retroaction
         const retroObj = {};
-        modal.querySelectorAll('textarea[data-retro-id]').forEach(ta => {
+        modal.querySelectorAll('textarea[data-retro-id]').forEach(function(ta) {
             retroObj[ta.dataset.retroId] = ta.value;
         });
         sauvegarderRetroactionsObservations(retroObj);
         // Personnalisations (noms + images)
         const persObj = obtenirPersonnalisationObservations();
-        modal.querySelectorAll('input[data-nom-id]').forEach(inp => {
+        modal.querySelectorAll('input[data-nom-id]').forEach(function(inp) {
             const id = inp.dataset.nomId;
             if (!persObj[id]) persObj[id] = {};
             persObj[id].nom = inp.value;
         });
-        modal.querySelectorAll('img[data-img-id]').forEach(img => {
+        modal.querySelectorAll('img[data-img-id]').forEach(function(img) {
             const id = img.dataset.imgId;
             if (!persObj[id]) persObj[id] = {};
             if (img.dataset.base64) {
@@ -1308,6 +1404,21 @@
             }
         });
         sauvegarderPersonnalisationObservations(persObj);
+        // Noms des categories
+        const nomsCat = obtenirNomsCategories();
+        modal.querySelectorAll('input[data-cat-id]').forEach(function(inp) {
+            nomsCat[inp.dataset.catId] = inp.value;
+        });
+        sauvegarderNomsCategories(nomsCat);
+        // Ordre personnalise par categorie
+        ['qualite', 'diagnostic'].forEach(function(cat) {
+            const liste = modal.querySelector('#travaux-retro-obs-liste-' + cat);
+            if (liste) {
+                const ordre = Array.from(liste.querySelectorAll('.travaux-retro-draggable'))
+                    .map(function(row) { return row.dataset.obsId; });
+                sauvegarderOrdreAutocollants(cat, ordre);
+            }
+        });
         appliquerPersonnalisations();
         rafraichirPalettesApresPersonnalisation();
         modal.remove();
@@ -1316,27 +1427,12 @@
     function reinitialiserRetroObservations() {
         db.setSync('retroactionsObservations', null);
         db.setSync('personnalisationObservations', null);
+        db.setSync('nomsCategoriesTampons', null);
+        db.setSync('ordreAutocollants_qualite', null);
+        db.setSync('ordreAutocollants_diagnostic', null);
         appliquerPersonnalisations();
-        const modal = document.getElementById('modal-retro-observations');
-        if (modal) {
-            // Restaurer textes
-            modal.querySelectorAll('textarea[data-retro-id]').forEach(ta => {
-                ta.value = RETROACTIONS_OBSERVATIONS_DEFAUT[ta.dataset.retroId] || '';
-            });
-            // Restaurer noms
-            modal.querySelectorAll('input[data-nom-id]').forEach(inp => {
-                const defaut = _defautsAutocollants.find(a => a.id === inp.dataset.nomId);
-                if (defaut) inp.value = defaut.nom;
-            });
-            // Restaurer images
-            modal.querySelectorAll('img[data-img-id]').forEach(img => {
-                const defaut = _defautsAutocollants.find(a => a.id === img.dataset.imgId);
-                if (defaut) {
-                    img.src = DOSSIER_AUTOCOLLANTS + defaut.fichier;
-                    delete img.dataset.base64;
-                }
-            });
-        }
+        // Rouvrir le modal pour refleter l'ordre et les valeurs par defaut
+        ouvrirEditionRetroObservations();
     }
 
     function ouvrirEditionRetroErreursFr() {
