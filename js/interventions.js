@@ -629,8 +629,9 @@ function genererAffichageNotesIndividuelles(notesIndividuelles) {
 
 /**
  * Afficher le formulaire de création d'intervention
+ * @param {string} [daPreselectionne] - DA de l'étudiant à pré-cocher (depuis profil)
  */
-function afficherFormulaireIntervention() {
+function afficherFormulaireIntervention(daPreselectionne) {
     const container = document.getElementById('conteneurPrincipal');
 
     if (!container) return;
@@ -638,11 +639,27 @@ function afficherFormulaireIntervention() {
     // Date d'aujourd'hui par défaut
     const aujourdhui = new Date().toISOString().split('T')[0];
 
+    // Indicateur visuel si étudiant pré-sélectionné
+    let bandeauPreselection = '';
+    if (daPreselectionne) {
+        const etudiants = typeof filtrerEtudiantsParMode === 'function'
+            ? filtrerEtudiantsParMode(obtenirDonneesSelonMode('groupeEtudiants'))
+            : obtenirDonneesSelonMode('groupeEtudiants');
+        const etudiant = etudiants.find(e => e.da === daPreselectionne);
+        if (etudiant) {
+            bandeauPreselection = `
+                <div class="info-box info-box--info" style="margin-bottom: 15px;">
+                    Intervention pour <strong>${etudiant.prenom} ${etudiant.nom}</strong> — l'élève sera pré-coché à la prochaine étape.
+                </div>`;
+        }
+    }
+
     container.innerHTML = `
         <div class="carte">
             <h3 class="intervention-mt-0">Planifier une intervention</h3>
-
+            ${bandeauPreselection}
             <form onsubmit="sauvegarderNouvelleIntervention(event); return false;">
+                <input type="hidden" id="interventionDaPreselectionne" value="${daPreselectionne || ''}">
                 <!-- Layout 2 colonnes : formulaire | gestion absences -->
                 <div class="intervention-grid-1-09">
                     <!-- Colonne gauche : Champs du formulaire (50%) -->
@@ -757,11 +774,17 @@ function sauvegarderNouvelleIntervention(event) {
 
     const interventionId = creerIntervention(data);
 
-    // Retourner à la liste
-    afficherListeInterventions();
-
-    // Notification de succès
-    afficherNotificationSucces('Intervention planifiée avec succès');
+    // Si un étudiant est pré-sélectionné, l'ajouter puis ouvrir l'intervention directement
+    const daPreselectionne = document.getElementById('interventionDaPreselectionne');
+    if (daPreselectionne && daPreselectionne.value) {
+        marquerPresences(interventionId, [daPreselectionne.value]);
+        ouvrirIntervention(interventionId);
+        afficherNotificationSucces('Intervention créée — étudiant pré-sélectionné');
+    } else {
+        // Retourner à la liste
+        afficherListeInterventions();
+        afficherNotificationSucces('Intervention planifiée avec succès');
+    }
 }
 
 /**
@@ -931,8 +954,11 @@ function ouvrirIntervention(interventionId) {
     const container = document.getElementById('conteneurPrincipal');
     if (!container) return;
 
-    // Obtenir la liste des étudiants
-    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    // Obtenir la liste des étudiants (filtrée par groupe-cours actif)
+    const etudiantsBruts = obtenirDonneesSelonMode('groupeEtudiants');
+    const etudiants = typeof filtrerEtudiantsParMode === 'function'
+        ? filtrerEtudiantsParMode(etudiantsBruts)
+        : etudiantsBruts;
 
     console.log('🔍 ouvrirIntervention() - RENDU CHECKBOXES');
     console.log('   interventionId:', interventionId);
@@ -1413,8 +1439,11 @@ function transfererPresencesVersModule(interventionId) {
     console.log('   Date:', intervention.date);
     console.log('   Étudiants présents:', intervention.etudiants.length);
 
-    // Obtenir tous les étudiants du groupe
-    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    // Obtenir tous les étudiants du groupe (filtrés par groupe-cours actif)
+    const etudiantsBruts2 = obtenirDonneesSelonMode('groupeEtudiants');
+    const etudiants = typeof filtrerEtudiantsParMode === 'function'
+        ? filtrerEtudiantsParMode(etudiantsBruts2)
+        : etudiantsBruts2;
     console.log('   Total étudiants du groupe:', etudiants.length);
 
     // Obtenir les présences existantes
@@ -1558,8 +1587,11 @@ function obtenirAbsencesMotiveesParDate(date) {
         return [];
     }
 
-    // Récupérer tous les étudiants du groupe
-    const tousLesEtudiants = obtenirDonneesSelonMode('groupeEtudiants') || [];
+    // Récupérer tous les étudiants du groupe (filtrés par groupe-cours actif)
+    const tousLesBruts = obtenirDonneesSelonMode('groupeEtudiants') || [];
+    const tousLesEtudiants = typeof filtrerEtudiantsParMode === 'function'
+        ? filtrerEtudiantsParMode(tousLesBruts)
+        : tousLesBruts;
     const tousLesDas = tousLesEtudiants.map(e => e.da);
 
     // Pour chaque intervention concernée
