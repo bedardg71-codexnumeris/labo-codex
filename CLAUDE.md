@@ -88,16 +88,18 @@ Gregoire a la memoire contextuelle reelle du projet.
 ## Avant chaque commit
 
 1. **Demander le numero de beta** a Gregoire. Ne jamais renumeroter automatiquement.
-2. **Mettre a jour le BUILD_ID** dans `index.html` (ligne ~15986) :
-```javascript
-const BUILD_ID = 'MMJJ-HHMM';  // Format: mois-jour-heure-minute (Toronto)
-```
-Exemple : `'0201-0840'` = 1er fevrier, 08h40
-3. **Mettre a jour `version.json`** a la racine du projet (OBLIGATOIRE, sinon la notification de mise a jour affiche l'ancienne version) :
+2. **Mettre a jour `version.json`** a la racine du projet — c'est la **source unique de verite** :
 ```json
 {"build":"MMJJ-HHMM","beta":"XX.X"}
 ```
-Les deux fichiers doivent avoir les memes valeurs. `version.json` est lu par le polling de mise a jour distante.
+Format BUILD : mois-jour-heure-minute (Toronto). Exemple : `"0201-0840"` = 1er fevrier, 08h40.
+L'en-tete de l'app charge `version.json` au demarrage et synchronise `VERSION_MAJEURE` et `BUILD_ID` automatiquement. Les valeurs dans `index.html` ne sont que des fallback hors-ligne.
+3. **Mettre a jour les fallback** dans `index.html` (ligne ~17166) :
+```javascript
+let VERSION_MAJEURE = 'XX.X';
+let BUILD_ID = 'MMJJ-HHMM';
+```
+Les deux endroits doivent avoir les memes valeurs que `version.json`.
 
 ---
 
