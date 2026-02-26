@@ -10,6 +10,20 @@
 
     var CHANGELOG = [
         {
+            version: 'Beta 98.1',
+            date: '26 f\u00e9vrier',
+            couleur: 'vert',
+            titre: 'Outils d\u2019annotation unifi\u00e9s et duplication',
+            items: [
+                '<strong>Ligne unifi\u00e9e</strong> : Les outils Ligne et Fl\u00e8che sont fusionn\u00e9s en un seul outil \u00ab\u00a0Ligne\u00a0\u00bb avec 4\u00a0modes d\u2019extr\u00e9mit\u00e9s\u00a0: \u2192 (pointe \u00e0 la fin), \u2190 (pointe au d\u00e9but), \u2194 (double pointe) et \u2014 (aucune pointe). R\u00e9trocompatibilit\u00e9 totale avec les donn\u00e9es existantes.',
+                '<strong>Vague avec pointes</strong> : L\u2019outil Vague (ondul\u00e9) dispose d\u00e9sormais des m\u00eames 4\u00a0modes d\u2019extr\u00e9mit\u00e9s que la Ligne. Les pointes de fl\u00e8che s\u2019affichent correctement aux extr\u00e9mit\u00e9s de la courbe.',
+                '<strong>Grille 2\u00d72</strong> : Les boutons Formes sont dispos\u00e9s en grille 2\u00d72 (Cercle, Rectangle, Ligne, Vague) pour un acc\u00e8s plus rapide.',
+                '<strong>Duplication</strong> : Nouveau bouton \u00ab\u00a0Dupliquer\u00a0\u00bb \u00e0 c\u00f4t\u00e9 de S\u00e9lection. Duplique les annotations s\u00e9lectionn\u00e9es avec un d\u00e9calage de 2\u00a0%, support complet annuler/r\u00e9tablir.',
+                '<strong>Curseur codes d\u2019erreur</strong> : Le num\u00e9ro affich\u00e9 sur le curseur respecte d\u00e9sormais l\u2019ordre personnalis\u00e9 des codes d\u2019erreur, et non plus l\u2019identifiant interne.',
+                '<strong>Export PDF</strong> : Les 4\u00a0modes d\u2019extr\u00e9mit\u00e9s (Ligne et Vague) sont correctement rendus dans l\u2019export PDF.'
+            ]
+        },
+        {
             version: 'Beta 98.03',
             date: '25 f\u00e9vrier',
             couleur: 'vert',
