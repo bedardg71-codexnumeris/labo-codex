@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 26 fevrier 2026 (Beta 98.1, build 0226-0845)
+> **Derniere mise a jour** : 26 fevrier 2026 (Beta 98.1, build 0226-1525)
 
 ---
 
@@ -1046,6 +1046,50 @@
 - `travaux.js` n'existe pas — la structure reelle est 9 fichiers `travaux-*.js`
 - `auto-perspective.md` n'existe pas — seul `auto-perspective-v5.md` est present
 - Le plan est globalement compatible avec l'etat actuel de l'application
+
+---
+
+## Complete (Beta 98.1 - 26 février 2026)
+
+- [x] **#188** Bibliothèque d'alignements pédagogiques (cartes mentales partagées) ✅ FAIT (26 fév 2026)
+  - CRUD bibliothèque partagée (non namespacée) avec seed démo idempotent (Écriture et littérature)
+  - Modale via `BibliothequeUI`, import/export JSON avec métadonnées CC BY-NC-SA 4.0
+  - Bouton 📚 dans la palette d'éléments + option Gestion avancée
+  - **Fichiers** : `js/planification-bibliotheque.js` (nouveau), `js/planification-donnees.js`, `js/planification-carte.js`, `js/donnees-demo.js`, `js/donnees-v2.js`, `index.html`
+
+- [x] **#189** Fix planification : recharger données au retour dans la section ✅ FAIT (26 fév 2026)
+  - La carte démo n'apparaissait pas en mode démo car `initialiser()` ne rechargeait pas les données au retour
+  - **Fichier** : `js/planification.js`
+
+- [x] **#190** Renommer l'application « Codex Numeris » → « Labo Codex » ✅ FAIT (26 fév 2026)
+  - Titre, h1 et alt des logos modifiés
+  - **Fichiers** : `index.html`, `js/accueil.js`
+
+- [x] **#191** Fix calcul présences : Total périodes basé sur le calendrier des séances ✅ FAIT (26 fév 2026)
+  - « Total pér. » comptait seulement les séances avec enregistrements sauvegardés
+  - Nouvelle fonction `calculerTotalPeriodesAvecCalendrier()` itère `seancesCompletes`
+  - **Fichier** : `js/saisie-presences.js`
+
+- [x] **#192** Fix interventions : variable `now` non déclarée empêchait la sauvegarde ✅ FAIT (26 fév 2026)
+  - `ReferenceError: Can't find variable: now` dans `creerIntervention()`
+  - **Fichier** : `js/interventions.js`
+
+- [x] **#193** Interventions UX : pré-cocher l'étudiant depuis son profil ✅ FAIT (26 fév 2026)
+  - Bouton « + Nouvelle intervention » du profil transmet le DA
+  - Bandeau info + champ hidden → étudiant pré-coché à la sauvegarde → ouverture directe
+  - **Fichiers** : `js/interventions.js`, `js/profil-etudiant.js`
+
+- [x] **#194** Interventions : contexte explicite niveau 2 (rattrapage vs en-classe) ✅ FAIT (26 fév 2026)
+  - Nouveau champ `contexte` : rattrapage (congé motivé) ou en-classe (petit groupe)
+  - Tableau explicatif des niveaux dans le formulaire de création
+  - Panneau absences visible seulement si rattrapage, checkbox redondante supprimée
+  - Option MIO retirée (pas un réenseignement)
+  - Rétrocompatible : migration automatique des interventions existantes
+  - **Fichier** : `js/interventions.js`
+
+- [x] **#195** Fix interventions : filtrer étudiants par groupe-cours actif ✅ FAIT (26 fév 2026)
+  - `obtenirDonneesSelonMode` ne filtrait pas par groupe-cours. Remplacé par `obtenirEtudiantsCoursActif()`
+  - **Fichier** : `js/interventions.js`
 
 ---
 
