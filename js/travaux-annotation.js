@@ -22,6 +22,17 @@
     // Reference locale aux modules externes (resolue au premier acces)
     function _outils() { return window.travauxOutils; }
 
+    /**
+     * Normalise la propriete pointes d'une forme fleche/ligne
+     * Retrocompatibilite : ligne → 'aucune', fleche sans pointes → 'fin', double:true → 'double'
+     */
+    function normaliserPointes(forme) {
+        if (forme.pointes) return forme.pointes;
+        if (forme.double) return 'double';
+        if (forme.type === 'ligne') return 'aucune';
+        return 'fin';
+    }
+
     /* ===============================
        ETAT DU MODULE
        =============================== */
@@ -358,8 +369,8 @@
         window.addEventListener('travaux-couleur-change', onCouleurChange);
         window.addEventListener('travaux-epaisseur-change', onEpaisseurChange);
 
-        // Fleche double toggle sur selection
-        window.addEventListener('travaux-fleche-double-change', onFlecheDoubleChange);
+        // Fleche pointes change sur selection
+        window.addEventListener('travaux-fleche-pointes-change', onFlechePointesChange);
     }
 
     function detacherEvenements() {
@@ -379,7 +390,7 @@
         canvasAnnotation.removeEventListener('dblclick', onDoubleClick);
         window.removeEventListener('travaux-couleur-change', onCouleurChange);
         window.removeEventListener('travaux-epaisseur-change', onEpaisseurChange);
-        window.removeEventListener('travaux-fleche-double-change', onFlecheDoubleChange);
+        window.removeEventListener('travaux-fleche-pointes-change', onFlechePointesChange);
     }
 
     /**
@@ -531,8 +542,8 @@
                 formeEnCours.amplitude = 6;
                 formeEnCours.wavelength = 30;
             }
-            if (outil.id === 'fleche' && _outils().getFlecheDouble()) {
-                formeEnCours.double = true;
+            if (outil.id === 'fleche') {
+                formeEnCours.pointes = _outils().getFlechePointes();
             }
             enDessin = true;
             return;
@@ -1291,8 +1302,8 @@
             const forme = donneesPage.shapes[i];
             const bbox = calculerBBox('shape', forme);
 
-            // Fleches : hit-testing specifique (droite ou courbe)
-            if (forme.type === 'fleche') {
+            // Fleches et lignes : hit-testing specifique (droite ou courbe)
+            if (forme.type === 'fleche' || forme.type === 'ligne') {
                 if (testProximiteFleche(forme, xNorm, yNorm, seuil)) {
                     return { type: 'shape', index: i, data: forme, bbox: bbox };
                 }
@@ -1334,8 +1345,8 @@
     function detecterPoignee(xNorm, yNorm, bbox, sel) {
         const taille = 12 / (canvasAnnotation?.width || 1000); // 12px en normalise
 
-        // Fleche : poignees directes sur les extremites + point de controle
-        if (sel && sel.type === 'shape' && sel.data.type === 'fleche') {
+        // Fleche/ligne : poignees directes sur les extremites + point de controle
+        if (sel && sel.type === 'shape' && (sel.data.type === 'fleche' || sel.data.type === 'ligne')) {
             const data = sel.data;
             // Point de controle Bezier (prioritaire)
             const cpX = data.cx != null ? data.cx : (data.x1 + data.x2) / 2;
@@ -1382,12 +1393,12 @@
         ctxAnnotation.save();
 
         // Cadre individuel pour chaque element selectionne
-        // (sauf fleche en mono-selection : controlée par ses extremites)
+        // (sauf fleche/ligne en mono-selection : controlée par ses extremites)
         const skipBboxFleche = selectionsMultiples.length === 1
             && selectionsMultiples[0].type === 'shape'
-            && selectionsMultiples[0].data.type === 'fleche';
+            && (selectionsMultiples[0].data.type === 'fleche' || selectionsMultiples[0].data.type === 'ligne');
         for (const sel of selectionsMultiples) {
-            if (skipBboxFleche && sel.type === 'shape' && sel.data.type === 'fleche') continue;
+            if (skipBboxFleche && sel.type === 'shape' && (sel.data.type === 'fleche' || sel.data.type === 'ligne')) continue;
             const bbox = sel.bbox;
             const x = bbox.x1 * w;
             const y = bbox.y1 * h;
@@ -1420,7 +1431,7 @@
         // Poignees (mono-selection seulement)
         if (selectionsMultiples.length === 1) {
             const sel = selectionsMultiples[0];
-            const estFleche = sel.type === 'shape' && sel.data.type === 'fleche';
+            const estFleche = sel.type === 'shape' && (sel.data.type === 'fleche' || sel.data.type === 'ligne');
 
             if (estFleche) {
                 // Fleche : poignees aux extremites (pas de rectangle englobant)
@@ -1628,8 +1639,8 @@
     function appliquerRedimensionnement(sel, poignee, xNorm, yNorm) {
         if (sel.type === 'stroke') return; // Pas de resize pour les traits en V1
 
-        // Fleche : deplacement direct des extremites
-        if (sel.type === 'shape' && sel.data.type === 'fleche' && (poignee === 'p1' || poignee === 'p2')) {
+        // Fleche/ligne : deplacement direct des extremites
+        if (sel.type === 'shape' && (sel.data.type === 'fleche' || sel.data.type === 'ligne') && (poignee === 'p1' || poignee === 'p2')) {
             if (poignee === 'p1') {
                 sel.data.x1 = xNorm;
                 sel.data.y1 = yNorm;
@@ -1686,7 +1697,7 @@
                     case 'se': sel.data.x2 = xNorm; sel.data.y2 = yNorm; break;
                 }
                 // Scaler le point de controle Bezier proportionnellement
-                if (sel.data.cx != null && sel.data.type === 'fleche') {
+                if (sel.data.cx != null && (sel.data.type === 'fleche' || sel.data.type === 'ligne')) {
                     const oldW = oldX2 - oldX1;
                     const oldH = oldY2 - oldY1;
                     const newW = sel.data.x2 - sel.data.x1;
@@ -1813,15 +1824,16 @@
         }
     }
 
-    function onFlecheDoubleChange(e) {
+    function onFlechePointesChange(e) {
         if (!annotationActive) return;
         if (selectionsMultiples.length === 0) return;
-        const val = e.detail.double;
+        const val = e.detail.pointes;
         const snapshots = selectionsMultiples.map(s => clonerDonneesAnnotation(s));
         let modifie = false;
         for (const sel of selectionsMultiples) {
-            if (sel.type === 'shape' && sel.data.type === 'fleche') {
-                if (val) { sel.data.double = true; } else { delete sel.data.double; }
+            if (sel.type === 'shape' && (sel.data.type === 'fleche' || sel.data.type === 'ligne')) {
+                sel.data.pointes = val;
+                delete sel.data.double; // nettoyage legacy
                 modifie = true;
             }
         }
@@ -2067,13 +2079,6 @@
                 break;
             }
 
-            case 'ligne':
-                ctx.beginPath();
-                ctx.moveTo(x1, y1);
-                ctx.lineTo(x2, y2);
-                ctx.stroke();
-                break;
-
             case 'ondule': {
                 const amplitude = (forme.amplitude || 6) * ratioResolution;
                 const wavelength = (forme.wavelength || 30) * ratioResolution;
@@ -2112,6 +2117,7 @@
                 ctx.stroke();
                 break;
 
+            case 'ligne': // fallthrough — rendu via dessinerFleche avec pointes='aucune'
             case 'fleche':
                 dessinerFleche(ctx, x1, y1, x2, y2, forme);
                 break;
@@ -2177,7 +2183,9 @@
         const headAngle = Math.PI / 8;
         const w = canvasAnnotation ? canvasAnnotation.width : 1;
         const h = canvasAnnotation ? canvasAnnotation.height : 1;
-        const estDouble = forme && forme.double;
+        const pointes = normaliserPointes(forme || {});
+        const pointeDebut = pointes === 'debut' || pointes === 'double';
+        const pointeFin = pointes === 'fin' || pointes === 'double';
         const aCourbe = forme && forme.cx != null && forme.cy != null;
 
         if (aCourbe) {
@@ -2190,12 +2198,15 @@
             const angleEnd = Math.atan2(y2 - cpy, x2 - cpx);
             const angleStartOut = Math.atan2(cpy - y1, cpx - x1); // tangente sortante au start
 
-            // Raccourcir la tige aux extremites pour la pointe
-            const endBaseX = x2 - headLen * Math.cos(angleEnd);
-            const endBaseY = y2 - headLen * Math.sin(angleEnd);
+            // Raccourcir la tige aux extremites pour les pointes
+            let endX = x2, endY = y2;
+            if (pointeFin) {
+                endX = x2 - headLen * Math.cos(angleEnd);
+                endY = y2 - headLen * Math.sin(angleEnd);
+            }
 
             let startX = x1, startY = y1;
-            if (estDouble) {
+            if (pointeDebut) {
                 startX = x1 + headLen * Math.cos(angleStartOut);
                 startY = y1 + headLen * Math.sin(angleStartOut);
             }
@@ -2203,41 +2214,48 @@
             // Tige courbe (quadraticCurveTo)
             ctx.beginPath();
             ctx.moveTo(startX, startY);
-            ctx.quadraticCurveTo(cpx, cpy, endBaseX, endBaseY);
+            ctx.quadraticCurveTo(cpx, cpy, endX, endY);
             ctx.stroke();
 
             // Pointe a la fin
-            dessinerPointeFleche(ctx, x2, y2, angleEnd, headLen, headAngle);
+            if (pointeFin) {
+                dessinerPointeFleche(ctx, x2, y2, angleEnd, headLen, headAngle);
+            }
 
-            // Pointe au debut (si double)
-            if (estDouble) {
+            // Pointe au debut
+            if (pointeDebut) {
                 dessinerPointeFleche(ctx, x1, y1, angleStartOut + Math.PI, headLen, headAngle);
             }
         } else {
-            // Fleche droite (legacy)
+            // Fleche droite
             const angle = Math.atan2(y2 - y1, x2 - x1);
 
             let startX = x1, startY = y1;
-            if (estDouble) {
+            if (pointeDebut) {
                 startX = x1 + headLen * Math.cos(angle);
                 startY = y1 + headLen * Math.sin(angle);
             }
 
             // Base de la pointe end (ou la tige s'arrete)
-            const baseX = x2 - headLen * Math.cos(angle);
-            const baseY = y2 - headLen * Math.sin(angle);
+            let endX = x2, endY = y2;
+            if (pointeFin) {
+                endX = x2 - headLen * Math.cos(angle);
+                endY = y2 - headLen * Math.sin(angle);
+            }
 
             // Tige
             ctx.beginPath();
             ctx.moveTo(startX, startY);
-            ctx.lineTo(baseX, baseY);
+            ctx.lineTo(endX, endY);
             ctx.stroke();
 
             // Pointe end
-            dessinerPointeFleche(ctx, x2, y2, angle, headLen, headAngle);
+            if (pointeFin) {
+                dessinerPointeFleche(ctx, x2, y2, angle, headLen, headAngle);
+            }
 
-            // Pointe start (si double)
-            if (estDouble) {
+            // Pointe start
+            if (pointeDebut) {
                 dessinerPointeFleche(ctx, x1, y1, angle + Math.PI, headLen, headAngle);
             }
         }
