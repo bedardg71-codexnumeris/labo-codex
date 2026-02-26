@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 25 fevrier 2026 (Beta 98.02, build 0225-0955)
+> **Derniere mise a jour** : 25 fevrier 2026 (Beta 98.03, build 0225-1357)
 
 ---
 
@@ -20,6 +20,8 @@
   - **Architecture** : Reutiliser au maximum le code du module d'annotation existant (composant partage ou heritage) plutot que de tout dupliquer, pour faciliter la maintenance future
 
 ### Priorite haute - Annotation et Evaluation (21 fev 2026)
+
+- [ ] **Retroactions visuelles enrichies dans la synthese** : Les retroactions remises a l'eleve (synthese PDF et zone de retroaction) ne contiennent actuellement que les courts descriptifs des niveaux de la palette (quelques mots par critere). Ce n'est pas suffisant pour une retroaction pedagogique significative. Il faudrait developper des retroactions plus etoffees : phrases completes par critere/niveau, pistes d'amelioration, forces observees, liens avec les objectifs. Explorer les options : commentaires editables par critere dans la cartouche, champs de retroaction detaillee par niveau, ou generation assistee a partir du contexte de la production.
 
 - [ ] **Evaluations demo** : Produire quelques evaluations de demonstration pour les modules d'annotation et d'evaluation qui ont ete remanies. Permettra de valider le flux complet et de servir d'exemples pour les nouveaux utilisateurs.
 

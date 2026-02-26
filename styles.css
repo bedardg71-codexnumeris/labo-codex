@@ -20868,3 +20868,94 @@ body.mode-clair .model-fichier-apercu {
     border-top: 1px solid var(--bordure-claire);
     margin-top: 8px;
 }
+
+/* --- Personnalisation : lignes enrichies --- */
+
+.travaux-retro-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 16px;
+}
+
+.travaux-retro-row-haut {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.travaux-retro-nom-input {
+    flex: 1;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 4px 8px;
+    border: 1px solid var(--bordure-claire);
+    border-radius: var(--radius-moyen);
+    background: var(--surface-input, var(--surface-carte));
+    color: var(--texte-principal);
+    font-family: inherit;
+}
+
+.travaux-retro-nom-input:focus {
+    outline: none;
+    border-color: var(--primary-500, #3b82f6);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+/* Upload image (observations) */
+.travaux-retro-img-upload {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    cursor: pointer;
+    border-radius: var(--radius-moyen);
+    overflow: hidden;
+}
+
+.travaux-retro-img-upload img {
+    width: 36px;
+    height: 36px;
+    display: block;
+}
+
+.travaux-retro-img-upload::after {
+    content: '✎';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    font-size: 0.75rem;
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+
+.travaux-retro-img-upload:hover::after {
+    opacity: 1;
+}
+
+/* Color picker (erreurs FR) */
+.travaux-retro-couleur-wrap {
+    position: relative;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+}
+
+.travaux-retro-couleur-wrap input[type="color"] {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    border: none;
+    padding: 0;
+}
+
+.travaux-retro-couleur-wrap .travaux-retro-numero {
+    margin-top: 0;
+}
