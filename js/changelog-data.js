@@ -10,6 +10,20 @@
 
     var CHANGELOG = [
         {
+            version: 'Beta 98.03',
+            date: '25 f\u00e9vrier',
+            couleur: 'vert',
+            titre: 'R\u00e9troactions personnalisables et \u00e9ditables',
+            items: [
+                '<strong>R\u00e9troactions enrichies</strong> : Textes de r\u00e9troaction personnalisables par l\u2019enseignant pour les 9\u00a0tampons d\u2019observation et les 10\u00a0codes d\u2019erreur de fran\u00e7ais. Bouton \u2699 sur chaque palette pour \u00e9diter, avec persistance ind\u00e9pendante du semestre.',
+                '<strong>Noms \u00e9ditables</strong> : Les noms affich\u00e9s des observations et des erreurs de fran\u00e7ais sont d\u00e9sormais modifiables dans la modale de r\u00e9troaction. Les changements se refl\u00e8tent partout\u00a0: palette, canvas, PDF, \u00e9valuation.',
+                '<strong>Ic\u00f4nes personnalis\u00e9es</strong> : Cliquer sur l\u2019image d\u2019un tampon d\u2019observation dans la modale permet d\u2019uploader un PNG personnalis\u00e9 qui remplace l\u2019ic\u00f4ne par d\u00e9faut.',
+                '<strong>Couleurs des pastilles</strong> : Les pastilles num\u00e9rot\u00e9es des codes d\u2019erreur de fran\u00e7ais disposent d\u2019un s\u00e9lecteur de couleur int\u00e9gr\u00e9. La nouvelle couleur s\u2019applique aux annotations futures.',
+                '<strong>R\u00e9initialisation</strong> : Bouton \u00ab\u00a0R\u00e9initialiser\u00a0\u00bb pour restaurer tous les noms, images, couleurs et textes \u00e0 leurs valeurs par d\u00e9faut.',
+                '<strong>Int\u00e9gration PDF et \u00e9valuation</strong> : Les noms et images personnalis\u00e9s apparaissent dans la g\u00e9n\u00e9ration de r\u00e9troaction et l\u2019export PDF sans modification de code suppl\u00e9mentaire (mutation directe des objets source).'
+            ]
+        },
+        {
             version: 'Beta 98',
             date: '20-24 f\u00e9vrier',
             couleur: 'vert',
