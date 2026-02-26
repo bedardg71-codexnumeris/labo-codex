@@ -156,7 +156,8 @@
             grilles: fusionnerRessources(grillesBiblio, grillesTempl).length,
             cartouches: (typeof obtenirToutesLesCartouchesBibliothequeSync === 'function' ? obtenirToutesLesCartouchesBibliothequeSync() : []).length,
             echelles: fusionnerRessources(echellesBiblio, echellesTempl).length,
-            productions: (typeof obtenirToutesLesProductionsBibliothequeSync === 'function' ? obtenirToutesLesProductionsBibliothequeSync() : []).length
+            productions: (typeof obtenirToutesLesProductionsBibliothequeSync === 'function' ? obtenirToutesLesProductionsBibliothequeSync() : []).length,
+            alignements: (typeof getNombreAlignementsBibliotheque === 'function' ? getNombreAlignementsBibliotheque() : 0)
         };
 
         // Mettre à jour les options du select
@@ -167,7 +168,8 @@
                     grilles: 'Grilles de critères',
                     cartouches: 'Cartouches de rétroaction',
                     echelles: 'Échelles de performance',
-                    productions: 'Productions'
+                    productions: 'Productions',
+                    alignements: 'Alignements pédagogiques'
                 };
                 option.textContent = `${labels[option.value]} (${counts[option.value]})`;
             }
@@ -206,6 +208,9 @@
                     break;
                 case 'productions':
                     afficherTableauProductionsV2(container);
+                    break;
+                case 'alignements':
+                    afficherTableauAlignementsV2(container);
                     break;
                 default:
                     container.innerHTML = '<p class="text-muted text-center" style="padding: 30px;">Type de ressource non reconnu.</p>';
@@ -755,6 +760,28 @@
             const usage = usages[p.id] || { evaluationsCount: 0 };
             const typeProduction = p.type || p.categorie || '—';
             html += `<tr><td><strong>${escapeHtml(p.nom)}</strong>${p.description ? `<br><small class="text-muted">${escapeHtml(p.description.substring(0, 50))}${p.description.length > 50 ? '...' : ''}</small>` : ''}</td><td>${escapeHtml(typeProduction)}</td><td>${dansSidebar ? '<span class="badge-actif">Sidebar</span>' : '<span class="badge-archive">Masquée</span>'}</td><td>${usage.evaluationsCount > 0 ? `<span class="badge-statut evalue">${usage.evaluationsCount} éval.</span>` : '<span class="badge-statut non-evalue">Non utilisée</span>'}</td><td class="actions-cell"><button class="btn btn-compact btn-secondaire" onclick="naviguerVersRessource('production', '${p.id}')" title="Consulter">Voir</button> <button class="btn btn-compact" onclick="ouvrirModalSuppressionRessource('production', '${p.id}')" title="Supprimer">Supprimer</button></td></tr>`;
+        });
+        html += '</tbody></table>';
+        container.innerHTML = html;
+    }
+
+    function afficherTableauAlignementsV2(container) {
+        const alignements = typeof obtenirTousLesAlignementsBibliothequeSync === 'function' ? obtenirTousLesAlignementsBibliothequeSync() : [];
+
+        if (alignements.length === 0) {
+            container.innerHTML = `<div class="alerte alerte-information"><p>Aucun alignement dans la bibliothèque partagée.</p></div>`;
+            return;
+        }
+
+        let html = `<table class="table-ressources"><thead><tr><th>Nom</th><th>Auteur</th><th>Noeuds</th><th>Liens</th><th>Date</th><th>Actions</th></tr></thead><tbody>`;
+
+        alignements.forEach(a => {
+            const nbNoeuds = a.donnees ? (a.donnees.noeuds || []).length : 0;
+            const nbLiens = a.donnees ? (a.donnees.liens || []).length : 0;
+            const auteur = a.auteur || (a.metadata_cc && a.metadata_cc.auteur_original) || '—';
+            const date = a.dateAjoutBiblio ? new Date(a.dateAjoutBiblio).toLocaleDateString('fr-CA') : '—';
+            const licence = (a.metadata_cc && a.metadata_cc.licence) || '';
+            html += `<tr><td><strong>${escapeHtml(a.nom || 'Sans titre')}</strong>${licence ? `<br><small class="text-muted">${escapeHtml(licence)}</small>` : ''}</td><td>${escapeHtml(auteur)}</td><td>${nbNoeuds}</td><td>${nbLiens}</td><td>${date}</td><td class="actions-cell"><button class="btn btn-compact" onclick="supprimerAlignementDeBibliotheque('${a.id}')" title="Supprimer de la bibliothèque">Supprimer</button></td></tr>`;
         });
         html += '</tbody></table>';
         container.innerHTML = html;
@@ -1586,6 +1613,7 @@
     window.afficherTableauEchelles = afficherTableauEchelles;
     window.afficherTableauProductions = afficherTableauProductions;
     window.afficherTableauRessource = afficherTableauRessource;
+    window.afficherTableauAlignementsV2 = afficherTableauAlignementsV2;
     window.ouvrirModalSuppressionRessource = ouvrirModalSuppressionRessource;
     window.fermerModalSuppressionRessource = fermerModalSuppressionRessource;
     window.verifierConfirmationSuppression = verifierConfirmationSuppression;

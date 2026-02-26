@@ -6857,6 +6857,7 @@
                                             <button class="planif-action-item" id="planif-btn-nouvelle-carte">Nouvelle carte</button>
                                             <button class="planif-action-item" id="planif-btn-dupliquer-carte">Dupliquer cette carte</button>
                                             <button class="planif-action-item" id="planif-btn-importer-carte">Importer un alignement</button>
+                                            <button class="planif-action-item" id="planif-btn-exporter-carte">Exporter cet alignement</button>
                                             <hr class="planif-action-sep">
                                             <button class="planif-action-item planif-danger" id="planif-btn-supprimer-carte">Supprimer cette carte</button>
                                         </div>
@@ -6957,6 +6958,7 @@
                                     <button id="planif-palette-inspecteur-btn" class="planif-palette-aide-btn" title="Inspecteur">🔎</button>
                                     <button id="planif-palette-raccourcis-btn" class="planif-palette-aide-btn" title="Raccourcis clavier">🛎️</button>
                                     <button id="planif-palette-aide-btn" class="planif-palette-aide-btn" data-tooltip="planif-aide">📔</button>
+                                    <button id="planif-palette-bibliotheque-btn" class="planif-palette-aide-btn" title="Bibliothèque d'alignements">📚</button>
                                 </div>
                             </div>
                             <!-- Panneau raccourcis flottant -->
@@ -12102,6 +12104,7 @@
                                         <option value="cartouches">Cartouches de rétroaction (<span id="count-cartouches">0</span>)</option>
                                         <option value="echelles">Échelles de performance (<span id="count-echelles">0</span>)</option>
                                         <option value="productions">Productions (<span id="count-productions">0</span>)</option>
+                                        <option value="alignements">Alignements pédagogiques (<span id="count-alignements">0</span>)</option>
                                     </select>
                                 </div>
 
@@ -17066,6 +17069,7 @@
 
     <!-- Module Planification (Carte mentale) -->
     <script src="js/planification-donnees.js?v=2026020701"></script>
+    <script src="js/planification-bibliotheque.js?v=2026022601"></script>
     <script src="js/planification-carte.js?v=2026021401"></script>
     <script src="js/organisateur.js?v=2026021401"></script>
     <script src="js/planification.js?v=2026020701"></script>

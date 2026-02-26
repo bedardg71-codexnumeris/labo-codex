@@ -195,6 +195,80 @@ function migrerDonneesProto() {
     return false;
 }
 
+/**
+ * Importe un alignement depuis la bibliothèque partagée dans le trimestre actif.
+ * Deep-clone les données pour éviter les références croisées.
+ * @param {Object} alignementBiblio - Item de la bibliothèque { nom, donnees: { compteur, compteurLiens, noeuds, liens } }
+ * @returns {string|null} ID de la nouvelle carte créée, ou null si échec
+ */
+function importerDepuisBibliotheque(alignementBiblio) {
+    if (!alignementBiblio || !alignementBiblio.donnees) return null;
+
+    var donnees = getDonnees();
+    if (!donnees || !donnees.index) {
+        // Initialiser si nécessaire
+        initialiserSiNecessaire();
+        donnees = getDonnees();
+        if (!donnees) return null;
+    }
+
+    var index = donnees.index;
+    index.compteurCartes = (index.compteurCartes || 0) + 1;
+    var nouvelId = 'carte_' + index.compteurCartes;
+
+    // Ajouter à l'index
+    index.cartes.push({
+        id: nouvelId,
+        nom: alignementBiblio.nom || 'Alignement importé',
+        dateCreation: new Date().toISOString()
+    });
+
+    // Deep-clone les données de la carte
+    var contenuClone = JSON.parse(JSON.stringify(alignementBiblio.donnees));
+
+    // Sauvegarder
+    if (!donnees.cartes) donnees.cartes = {};
+    donnees.cartes[nouvelId] = contenuClone;
+    index.active = nouvelId;
+    donnees.index = index;
+    setDonnees(donnees);
+
+    return nouvelId;
+}
+
+/**
+ * Exporte une carte du trimestre actif pour la bibliothèque.
+ * @param {string} carteId - ID de la carte à exporter (ex: 'carte_1')
+ * @returns {Object|null} { nom, dateCreation, donnees: { compteur, compteurLiens, noeuds, liens } }
+ */
+function exporterCartePourBibliotheque(carteId) {
+    var donnees = getDonnees();
+    if (!donnees || !donnees.cartes || !donnees.cartes[carteId]) return null;
+
+    var index = donnees.index;
+    var infosCarte = null;
+    if (index && index.cartes) {
+        for (var i = 0; i < index.cartes.length; i++) {
+            if (index.cartes[i].id === carteId) {
+                infosCarte = index.cartes[i];
+                break;
+            }
+        }
+    }
+
+    var contenu = donnees.cartes[carteId];
+    return {
+        nom: infosCarte ? infosCarte.nom : 'Sans titre',
+        dateCreation: infosCarte ? infosCarte.dateCreation : new Date().toISOString(),
+        donnees: JSON.parse(JSON.stringify({
+            compteur: contenu.compteur || 0,
+            compteurLiens: contenu.compteurLiens || 0,
+            noeuds: contenu.noeuds || [],
+            liens: contenu.liens || []
+        }))
+    };
+}
+
 // === EXPORT ===
 window.planificationDonnees = {
     getIndex: getIndex,
@@ -203,7 +277,9 @@ window.planificationDonnees = {
     chargerCarte: chargerCarte,
     supprimerCarte: supprimerCarte,
     initialiserSiNecessaire: initialiserSiNecessaire,
-    migrerDonneesProto: migrerDonneesProto
+    migrerDonneesProto: migrerDonneesProto,
+    importerDepuisBibliotheque: importerDepuisBibliotheque,
+    exporterCartePourBibliotheque: exporterCartePourBibliotheque
 };
 
 })();

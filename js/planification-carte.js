@@ -4490,6 +4490,27 @@ function initialiser() {
         });
     }
 
+    // Bouton exporter carte (menu Actions)
+    var btnExporterCarte = document.getElementById('planif-btn-exporter-carte');
+    if (btnExporterCarte) {
+        btnExporterCarte.addEventListener('click', function() {
+            var idx = window.planificationDonnees.getIndex();
+            if (idx && idx.active && typeof exporterAlignementJSON === 'function') {
+                exporterAlignementJSON(idx.active);
+            }
+        });
+    }
+
+    // Bouton bibliothèque (palette d'éléments)
+    var btnBibliotheque = document.getElementById('planif-palette-bibliotheque-btn');
+    if (btnBibliotheque) {
+        btnBibliotheque.addEventListener('click', function() {
+            if (typeof afficherBibliothequeAlignements === 'function') {
+                afficherBibliothequeAlignements();
+            }
+        });
+    }
+
     // Titre carte éditable
     var titreCarte = document.getElementById('planif-titre-carte');
     if (titreCarte) {
