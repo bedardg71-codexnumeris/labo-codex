@@ -109,8 +109,8 @@
         },
         fleche: {
             id: 'fleche',
-            nom: 'Fl\u00e8che',
-            icone: 'Fl\u00e8che',
+            nom: 'Ligne',
+            icone: 'Ligne',
             curseur: 'crosshair',
             type: 'forme',
             epaisseurDefaut: 2
@@ -128,8 +128,8 @@
         // (les données existantes type:'ligne' sont rendues via normaliserPointes)
         ondule: {
             id: 'ondule',
-            nom: 'Ondulé',
-            icone: 'vague',
+            nom: 'Vague',
+            icone: 'Vague',
             curseur: 'crosshair',
             type: 'forme',
             epaisseurDefaut: 2
@@ -989,10 +989,10 @@
 
         html += '</div></div>';
 
-        // Formes et symboles
+        // Formes (grille 2x2 : Cercle+Ligne / Rect.+Vague)
         html += '<div class="travaux-palette-section">';
         html += '<div class="travaux-palette-label">Formes</div>';
-        html += '<div class="travaux-palette-outils">';
+        html += '<div class="travaux-palette-outils travaux-palette-outils--grille2x2">';
 
         const outilsFormes = ['cercle', 'fleche', 'rectangle', 'ondule'];
         outilsFormes.forEach(id => {
@@ -1004,8 +1004,9 @@
 
         html += '</div></div>';
 
-        // Options fleche : 4 modes de pointes (visible quand outil fleche actif)
-        html += '<div class="travaux-palette-section travaux-options-fleche" id="travaux-options-fleche"' + (outilActif === 'fleche' ? '' : ' style="display:none"') + '>';
+        // Options extrémités : 4 modes de pointes (visible quand outil fleche ou ondule actif)
+        const montrerExtremites = outilActif === 'fleche' || outilActif === 'ondule';
+        html += '<div class="travaux-palette-section travaux-options-fleche" id="travaux-options-fleche"' + (montrerExtremites ? '' : ' style="display:none"') + '>';
         html += '<div class="travaux-palette-label">Extr\u00e9mit\u00e9s</div>';
         html += '<div class="travaux-palette-outils">';
         const modes = [
@@ -1097,10 +1098,10 @@
             });
         }
 
-        // Options fleche : afficher/masquer selon outil actif + maj boutons pointes
+        // Options extrémités : afficher/masquer selon outil actif + maj boutons pointes
         const sectionFleche = document.getElementById('travaux-options-fleche');
         if (sectionFleche) {
-            sectionFleche.style.display = outilActif === 'fleche' ? '' : 'none';
+            sectionFleche.style.display = (outilActif === 'fleche' || outilActif === 'ondule') ? '' : 'none';
             sectionFleche.querySelectorAll('[data-pointes]').forEach(btn => {
                 btn.classList.toggle('actif', btn.dataset.pointes === flechePointes);
             });

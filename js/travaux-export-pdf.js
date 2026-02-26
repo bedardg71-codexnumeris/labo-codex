@@ -305,7 +305,7 @@
     function normaliserPointes(forme) {
         if (forme.pointes) return forme.pointes;
         if (forme.double) return 'double';
-        if (forme.type === 'ligne') return 'aucune';
+        if (forme.type === 'ligne' || forme.type === 'ondule') return 'aucune';
         return 'fin';
     }
 
@@ -352,6 +352,41 @@
                 ctx.beginPath();
                 ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
                 ctx.stroke();
+                break;
+            }
+            case 'ondule': {
+                const ampOnd = (forme.amplitude || 6) * ratioResolution;
+                const wlOnd = (forme.wavelength || 30) * ratioResolution;
+                const dxOnd = x2 - x1;
+                const dyOnd = y2 - y1;
+                const lineLenOnd = Math.sqrt(dxOnd * dxOnd + dyOnd * dyOnd);
+                if (lineLenOnd < 1) break;
+                const headLenOnd = Math.max(12 * ratioResolution, ctx.lineWidth * 5);
+                const headAngleOnd = Math.PI / 8;
+                const pointesOnd = normaliserPointes(forme);
+                const pdOnd = pointesOnd === 'debut' || pointesOnd === 'double';
+                const pfOnd = pointesOnd === 'fin' || pointesOnd === 'double';
+                const txO = dxOnd / lineLenOnd;
+                const tyO = dyOnd / lineLenOnd;
+                const nxO = -tyO;
+                const nyO = txO;
+                const startDistOnd = pdOnd ? headLenOnd : 0;
+                const endDistOnd = pfOnd ? lineLenOnd - headLenOnd : lineLenOnd;
+                ctx.beginPath();
+                ctx.moveTo(x1 + txO * startDistOnd, y1 + tyO * startDistOnd);
+                const stepsOnd = Math.max(Math.ceil(lineLenOnd), 1);
+                for (let i = 1; i <= stepsOnd; i++) {
+                    const t = i / stepsOnd;
+                    const dist = t * lineLenOnd;
+                    if (dist < startDistOnd || dist > endDistOnd) continue;
+                    const phase = (dist / wlOnd) * Math.PI * 2;
+                    const offset = Math.sin(phase) * ampOnd;
+                    ctx.lineTo(x1 + txO * dist + nxO * offset, y1 + tyO * dist + nyO * offset);
+                }
+                ctx.stroke();
+                const angleOnd = Math.atan2(dyOnd, dxOnd);
+                if (pfOnd) drawArrowhead(ctx, x2, y2, angleOnd, headLenOnd, headAngleOnd);
+                if (pdOnd) drawArrowhead(ctx, x1, y1, angleOnd + Math.PI, headLenOnd, headAngleOnd);
                 break;
             }
             case 'ligne': // fallthrough — rendu via fleche avec pointes='aucune'

@@ -29,7 +29,7 @@
     function normaliserPointes(forme) {
         if (forme.pointes) return forme.pointes;
         if (forme.double) return 'double';
-        if (forme.type === 'ligne') return 'aucune';
+        if (forme.type === 'ligne' || forme.type === 'ondule') return 'aucune';
         return 'fin';
     }
 
@@ -542,7 +542,7 @@
                 formeEnCours.amplitude = 6;
                 formeEnCours.wavelength = 30;
             }
-            if (outil.id === 'fleche') {
+            if (outil.id === 'fleche' || outil.id === 'ondule') {
                 formeEnCours.pointes = _outils().getFlechePointes();
             }
             enDessin = true;
@@ -1303,7 +1303,7 @@
             const bbox = calculerBBox('shape', forme);
 
             // Fleches et lignes : hit-testing specifique (droite ou courbe)
-            if (forme.type === 'fleche' || forme.type === 'ligne') {
+            if (forme.type === 'fleche' || forme.type === 'ligne' || forme.type === 'ondule') {
                 if (testProximiteFleche(forme, xNorm, yNorm, seuil)) {
                     return { type: 'shape', index: i, data: forme, bbox: bbox };
                 }
@@ -1346,7 +1346,7 @@
         const taille = 12 / (canvasAnnotation?.width || 1000); // 12px en normalise
 
         // Fleche/ligne : poignees directes sur les extremites + point de controle
-        if (sel && sel.type === 'shape' && (sel.data.type === 'fleche' || sel.data.type === 'ligne')) {
+        if (sel && sel.type === 'shape' && (sel.data.type === 'fleche' || sel.data.type === 'ligne' || sel.data.type === 'ondule')) {
             const data = sel.data;
             // Point de controle Bezier (prioritaire)
             const cpX = data.cx != null ? data.cx : (data.x1 + data.x2) / 2;
@@ -1398,7 +1398,7 @@
             && selectionsMultiples[0].type === 'shape'
             && (selectionsMultiples[0].data.type === 'fleche' || selectionsMultiples[0].data.type === 'ligne');
         for (const sel of selectionsMultiples) {
-            if (skipBboxFleche && sel.type === 'shape' && (sel.data.type === 'fleche' || sel.data.type === 'ligne')) continue;
+            if (skipBboxFleche && sel.type === 'shape' && (sel.data.type === 'fleche' || sel.data.type === 'ligne' || sel.data.type === 'ondule')) continue;
             const bbox = sel.bbox;
             const x = bbox.x1 * w;
             const y = bbox.y1 * h;
@@ -1431,7 +1431,7 @@
         // Poignees (mono-selection seulement)
         if (selectionsMultiples.length === 1) {
             const sel = selectionsMultiples[0];
-            const estFleche = sel.type === 'shape' && (sel.data.type === 'fleche' || sel.data.type === 'ligne');
+            const estFleche = sel.type === 'shape' && (sel.data.type === 'fleche' || sel.data.type === 'ligne' || sel.data.type === 'ondule');
 
             if (estFleche) {
                 // Fleche : poignees aux extremites (pas de rectangle englobant)
@@ -1640,7 +1640,7 @@
         if (sel.type === 'stroke') return; // Pas de resize pour les traits en V1
 
         // Fleche/ligne : deplacement direct des extremites
-        if (sel.type === 'shape' && (sel.data.type === 'fleche' || sel.data.type === 'ligne') && (poignee === 'p1' || poignee === 'p2')) {
+        if (sel.type === 'shape' && (sel.data.type === 'fleche' || sel.data.type === 'ligne' || sel.data.type === 'ondule') && (poignee === 'p1' || poignee === 'p2')) {
             if (poignee === 'p1') {
                 sel.data.x1 = xNorm;
                 sel.data.y1 = yNorm;
@@ -1697,7 +1697,7 @@
                     case 'se': sel.data.x2 = xNorm; sel.data.y2 = yNorm; break;
                 }
                 // Scaler le point de controle Bezier proportionnellement
-                if (sel.data.cx != null && (sel.data.type === 'fleche' || sel.data.type === 'ligne')) {
+                if (sel.data.cx != null && (sel.data.type === 'fleche' || sel.data.type === 'ligne' || sel.data.type === 'ondule')) {
                     const oldW = oldX2 - oldX1;
                     const oldH = oldY2 - oldY1;
                     const newW = sel.data.x2 - sel.data.x1;
@@ -1831,7 +1831,7 @@
         const snapshots = selectionsMultiples.map(s => clonerDonneesAnnotation(s));
         let modifie = false;
         for (const sel of selectionsMultiples) {
-            if (sel.type === 'shape' && (sel.data.type === 'fleche' || sel.data.type === 'ligne')) {
+            if (sel.type === 'shape' && (sel.data.type === 'fleche' || sel.data.type === 'ligne' || sel.data.type === 'ondule')) {
                 sel.data.pointes = val;
                 delete sel.data.double; // nettoyage legacy
                 modifie = true;
@@ -2086,17 +2086,26 @@
                 const dy = y2 - y1;
                 const lineLen = Math.sqrt(dx * dx + dy * dy);
                 if (lineLen < 1) break;
+                const headLen = Math.max(12, ctx.lineWidth * 5);
+                const headAngle = Math.PI / 8;
+                const pointes = normaliserPointes(forme);
+                const pointeDebut = pointes === 'debut' || pointes === 'double';
+                const pointeFin = pointes === 'fin' || pointes === 'double';
                 // Vecteurs unitaires : tangent (along) et normal (perpendicular)
                 const tx = dx / lineLen;
                 const ty = dy / lineLen;
                 const nx = -ty;
                 const ny = tx;
+                // Raccourcir la vague aux extremites pour laisser place aux pointes
+                const startDist = pointeDebut ? headLen : 0;
+                const endDist = pointeFin ? lineLen - headLen : lineLen;
                 ctx.beginPath();
-                ctx.moveTo(x1, y1);
+                ctx.moveTo(x1 + tx * startDist, y1 + ty * startDist);
                 const steps = Math.max(Math.ceil(lineLen), 1);
                 for (let i = 1; i <= steps; i++) {
                     const t = i / steps;
                     const dist = t * lineLen;
+                    if (dist < startDist || dist > endDist) continue;
                     const phase = (dist / wavelength) * Math.PI * 2;
                     const offset = Math.sin(phase) * amplitude;
                     ctx.lineTo(
@@ -2105,6 +2114,14 @@
                     );
                 }
                 ctx.stroke();
+                // Pointes
+                const angle = Math.atan2(dy, dx);
+                if (pointeFin) {
+                    dessinerPointeFleche(ctx, x2, y2, angle, headLen, headAngle);
+                }
+                if (pointeDebut) {
+                    dessinerPointeFleche(ctx, x1, y1, angle + Math.PI, headLen, headAngle);
+                }
                 break;
             }
 

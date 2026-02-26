@@ -16168,6 +16168,12 @@ body.mode-clair .pipeline-autocomplete-item:hover {
     gap: 4px;
 }
 
+.travaux-palette-outils--grille2x2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+}
+
 .travaux-btn-outil {
     border: 1px solid transparent;
     border-radius: 6px;
@@ -20604,6 +20610,11 @@ body.mode-clair .splitter-handle.splitter-active { background: rgba(3, 46, 92, 0
 .annot-layout-flex .travaux-palette-outils {
     display: flex;
     flex-wrap: wrap;
+    gap: 3px;
+}
+.annot-layout-flex .travaux-palette-outils--grille2x2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 3px;
 }
 .annot-layout-flex .travaux-btn-outil {
