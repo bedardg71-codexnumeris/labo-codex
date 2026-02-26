@@ -1330,16 +1330,27 @@
     function detecterPoignee(xNorm, yNorm, bbox, sel) {
         const taille = 12 / (canvasAnnotation?.width || 1000); // 12px en normalise
 
-        // Point de controle Bezier (prioritaire, teste en premier)
+        // Fleche : poignees directes sur les extremites + point de controle
         if (sel && sel.type === 'shape' && sel.data.type === 'fleche') {
             const data = sel.data;
+            // Point de controle Bezier (prioritaire)
             const cpX = data.cx != null ? data.cx : (data.x1 + data.x2) / 2;
             const cpY = data.cy != null ? data.cy : (data.y1 + data.y2) / 2;
             if (Math.abs(xNorm - cpX) < taille && Math.abs(yNorm - cpY) < taille) {
                 return 'cp';
             }
+            // Extremite p1 (debut)
+            if (Math.abs(xNorm - data.x1) < taille && Math.abs(yNorm - data.y1) < taille) {
+                return 'p1';
+            }
+            // Extremite p2 (fin / pointe)
+            if (Math.abs(xNorm - data.x2) < taille && Math.abs(yNorm - data.y2) < taille) {
+                return 'p2';
+            }
+            return null;
         }
 
+        // Autres formes : coins du bbox
         const coins = {
             nw: { x: bbox.x1, y: bbox.y1 },
             ne: { x: bbox.x2, y: bbox.y1 },
@@ -1367,7 +1378,12 @@
         ctxAnnotation.save();
 
         // Cadre individuel pour chaque element selectionne
+        // (sauf fleche en mono-selection : controlée par ses extremites)
+        const skipBboxFleche = selectionsMultiples.length === 1
+            && selectionsMultiples[0].type === 'shape'
+            && selectionsMultiples[0].data.type === 'fleche';
         for (const sel of selectionsMultiples) {
+            if (skipBboxFleche && sel.type === 'shape' && sel.data.type === 'fleche') continue;
             const bbox = sel.bbox;
             const x = bbox.x1 * w;
             const y = bbox.y1 * h;
@@ -1397,31 +1413,29 @@
             ctxAnnotation.setLineDash([]);
         }
 
-        // Poignees aux 4 coins (mono-selection seulement)
+        // Poignees (mono-selection seulement)
         if (selectionsMultiples.length === 1) {
             const sel = selectionsMultiples[0];
-            const afficherPoignees = sel.type !== 'sticker' || modeRedimensionnementSticker;
-            if (afficherPoignees) {
+            const estFleche = sel.type === 'shape' && sel.data.type === 'fleche';
+
+            if (estFleche) {
+                // Fleche : poignees aux extremites (pas de rectangle englobant)
+                const data = sel.data;
+                const p1x = data.x1 * w, p1y = data.y1 * h;
+                const p2x = data.x2 * w, p2y = data.y2 * h;
                 const taille = 8;
-                const coins = [
-                    { x: cx, y: cy },
-                    { x: cx + cw, y: cy },
-                    { x: cx, y: cy + ch },
-                    { x: cx + cw, y: cy + ch }
-                ];
-                for (const coin of coins) {
+
+                // Poignees carrees aux extremites p1 et p2
+                const endpoints = [{ x: p1x, y: p1y }, { x: p2x, y: p2y }];
+                for (const ep of endpoints) {
                     ctxAnnotation.fillStyle = '#ffffff';
                     ctxAnnotation.strokeStyle = '#065dbb';
                     ctxAnnotation.lineWidth = 2;
-                    ctxAnnotation.fillRect(coin.x - taille / 2, coin.y - taille / 2, taille, taille);
-                    ctxAnnotation.strokeRect(coin.x - taille / 2, coin.y - taille / 2, taille, taille);
+                    ctxAnnotation.fillRect(ep.x - taille / 2, ep.y - taille / 2, taille, taille);
+                    ctxAnnotation.strokeRect(ep.x - taille / 2, ep.y - taille / 2, taille, taille);
                 }
-            }
 
-            // Handle de point de controle Bezier pour les fleches
-            if (sel.type === 'shape' && sel.data.type === 'fleche') {
-                const data = sel.data;
-                // Position du handle : cx/cy si defini, sinon milieu de la fleche
+                // Handle circulaire du point de controle Bezier
                 const cpNormX = data.cx != null ? data.cx : (data.x1 + data.x2) / 2;
                 const cpNormY = data.cy != null ? data.cy : (data.y1 + data.y2) / 2;
                 const cpPxX = cpNormX * w;
@@ -1439,7 +1453,6 @@
                 ctxAnnotation.stroke();
                 ctxAnnotation.setLineDash([]);
 
-                // Handle circulaire
                 const rayon = 6;
                 ctxAnnotation.fillStyle = '#ffffff';
                 ctxAnnotation.strokeStyle = '#065dbb';
@@ -1448,6 +1461,25 @@
                 ctxAnnotation.arc(cpPxX, cpPxY, rayon, 0, Math.PI * 2);
                 ctxAnnotation.fill();
                 ctxAnnotation.stroke();
+            } else {
+                // Autres formes : poignees aux 4 coins du bbox
+                const afficherPoignees = sel.type !== 'sticker' || modeRedimensionnementSticker;
+                if (afficherPoignees) {
+                    const taille = 8;
+                    const coins = [
+                        { x: cx, y: cy },
+                        { x: cx + cw, y: cy },
+                        { x: cx, y: cy + ch },
+                        { x: cx + cw, y: cy + ch }
+                    ];
+                    for (const coin of coins) {
+                        ctxAnnotation.fillStyle = '#ffffff';
+                        ctxAnnotation.strokeStyle = '#065dbb';
+                        ctxAnnotation.lineWidth = 2;
+                        ctxAnnotation.fillRect(coin.x - taille / 2, coin.y - taille / 2, taille, taille);
+                        ctxAnnotation.strokeRect(coin.x - taille / 2, coin.y - taille / 2, taille, taille);
+                    }
+                }
             }
         }
 
@@ -1591,6 +1623,19 @@
      */
     function appliquerRedimensionnement(sel, poignee, xNorm, yNorm) {
         if (sel.type === 'stroke') return; // Pas de resize pour les traits en V1
+
+        // Fleche : deplacement direct des extremites
+        if (sel.type === 'shape' && sel.data.type === 'fleche' && (poignee === 'p1' || poignee === 'p2')) {
+            if (poignee === 'p1') {
+                sel.data.x1 = xNorm;
+                sel.data.y1 = yNorm;
+            } else {
+                sel.data.x2 = xNorm;
+                sel.data.y2 = yNorm;
+            }
+            sel.bbox = calculerBBox(sel.type, sel.data);
+            return;
+        }
 
         const bbox = dimensionsOriginales;
 
@@ -1853,8 +1898,8 @@
         if (selectionsMultiples.length === 1 && annotationSelectionnee) {
             const poignee = detecterPoignee(xNorm, yNorm, annotationSelectionnee.bbox, annotationSelectionnee);
             if (poignee) {
-                const curseurs = { nw: 'nw-resize', ne: 'ne-resize', sw: 'sw-resize', se: 'se-resize', cp: 'grab' };
-                canvasAnnotation.style.cursor = curseurs[poignee] || 'grab';
+                const curseurs = { nw: 'nw-resize', ne: 'ne-resize', sw: 'sw-resize', se: 'se-resize', cp: 'grab', p1: 'grab', p2: 'grab' };
+                canvasAnnotation.style.cursor = curseurs[poignee] || 'move';
                 return;
             }
         }
