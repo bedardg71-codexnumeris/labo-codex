@@ -300,6 +300,23 @@
     }
 
     /**
+     * Dessine une pointe de fleche (triangle plein) pour l'export PDF
+     */
+    function drawArrowhead(ctx, tipX, tipY, angle, headLen, headAngle) {
+        const ax = tipX - headLen * Math.cos(angle - headAngle);
+        const ay = tipY - headLen * Math.sin(angle - headAngle);
+        const bx = tipX - headLen * Math.cos(angle + headAngle);
+        const by = tipY - headLen * Math.sin(angle + headAngle);
+        ctx.fillStyle = ctx.strokeStyle;
+        ctx.beginPath();
+        ctx.moveTo(tipX, tipY);
+        ctx.lineTo(ax, ay);
+        ctx.lineTo(bx, by);
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    /**
      * Dessine une forme
      */
     function dessinerForme(ctx, w, h, forme, scale) {
@@ -336,24 +353,55 @@
             case 'fleche': {
                 const headLen = Math.max(12 * ratioResolution, ctx.lineWidth * 5);
                 const headAngle = Math.PI / 8;
-                const angle = Math.atan2(y2 - y1, x2 - x1);
-                const baseX = x2 - headLen * Math.cos(angle);
-                const baseY = y2 - headLen * Math.sin(angle);
-                ctx.beginPath();
-                ctx.moveTo(x1, y1);
-                ctx.lineTo(baseX, baseY);
-                ctx.stroke();
-                const ax = x2 - headLen * Math.cos(angle - headAngle);
-                const ay = y2 - headLen * Math.sin(angle - headAngle);
-                const bx = x2 - headLen * Math.cos(angle + headAngle);
-                const by = y2 - headLen * Math.sin(angle + headAngle);
-                ctx.fillStyle = ctx.strokeStyle;
-                ctx.beginPath();
-                ctx.moveTo(x2, y2);
-                ctx.lineTo(ax, ay);
-                ctx.lineTo(bx, by);
-                ctx.closePath();
-                ctx.fill();
+                const estDouble = forme.double;
+                const aCourbe = forme.cx != null && forme.cy != null;
+
+                if (aCourbe) {
+                    const cpx = forme.cx * w;
+                    const cpy = forme.cy * h;
+                    const angleEnd = Math.atan2(y2 - cpy, x2 - cpx);
+                    const angleStartCorr = Math.atan2(cpy - y1, cpx - x1);
+
+                    const endBaseX = x2 - headLen * Math.cos(angleEnd);
+                    const endBaseY = y2 - headLen * Math.sin(angleEnd);
+
+                    let sx = x1, sy = y1;
+                    if (estDouble) {
+                        sx = x1 + headLen * Math.cos(angleStartCorr);
+                        sy = y1 + headLen * Math.sin(angleStartCorr);
+                    }
+
+                    ctx.beginPath();
+                    ctx.moveTo(sx, sy);
+                    ctx.quadraticCurveTo(cpx, cpy, endBaseX, endBaseY);
+                    ctx.stroke();
+
+                    // Pointe end
+                    drawArrowhead(ctx, x2, y2, angleEnd, headLen, headAngle);
+
+                    if (estDouble) {
+                        drawArrowhead(ctx, x1, y1, angleStartCorr + Math.PI, headLen, headAngle);
+                    }
+                } else {
+                    const angle = Math.atan2(y2 - y1, x2 - x1);
+                    let sx = x1, sy = y1;
+                    if (estDouble) {
+                        sx = x1 + headLen * Math.cos(angle);
+                        sy = y1 + headLen * Math.sin(angle);
+                    }
+                    const baseX = x2 - headLen * Math.cos(angle);
+                    const baseY = y2 - headLen * Math.sin(angle);
+                    ctx.beginPath();
+                    ctx.moveTo(sx, sy);
+                    ctx.lineTo(baseX, baseY);
+                    ctx.stroke();
+
+                    drawArrowhead(ctx, x2, y2, angle, headLen, headAngle);
+
+                    if (estDouble) {
+                        drawArrowhead(ctx, x1, y1, angle + Math.PI, headLen, headAngle);
+                    }
+                }
                 break;
             }
             case 'crochet': {

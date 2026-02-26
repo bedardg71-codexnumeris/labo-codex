@@ -35,6 +35,9 @@
     // Flag pour masquer le bouton « Codes d'erreurs » (mode Modelisation)
     let masquerErreursFrancais = false;
 
+    // Fleche double (pointes aux deux bouts)
+    let flecheDouble = false;
+
     /* ===============================
        OUTILS
        =============================== */
@@ -881,6 +884,14 @@
 
         html += '</div></div>';
 
+        // Options fleche (visible quand outil fleche actif)
+        html += '<div class="travaux-palette-section travaux-options-fleche" id="travaux-options-fleche"' + (outilActif === 'fleche' ? '' : ' style="display:none"') + '>';
+        html += '<div class="travaux-palette-label">Options fl\u00e8che</div>';
+        html += '<div class="travaux-palette-outils">';
+        const dblActif = flecheDouble ? ' actif' : '';
+        html += `<button class="travaux-btn-outil${dblActif}" id="travaux-btn-fleche-double" onclick="travauxOutils.toggleFlecheDouble()" title="Fl\u00e8che double (\u2194)">\u2194</button>`;
+        html += '</div></div>';
+
         // Couleurs
         html += '<div class="travaux-palette-section">';
         html += '<div class="travaux-palette-label">Couleur</div>';
@@ -954,6 +965,16 @@
             });
         }
 
+        // Options fleche : afficher/masquer selon outil actif
+        const sectionFleche = document.getElementById('travaux-options-fleche');
+        if (sectionFleche) {
+            sectionFleche.style.display = outilActif === 'fleche' ? '' : 'none';
+        }
+        const btnDbl = document.getElementById('travaux-btn-fleche-double');
+        if (btnDbl) {
+            btnDbl.classList.toggle('actif', flecheDouble);
+        }
+
         // Curseur du canvas
         const canvas = document.getElementById('travaux-canvas-annotation');
         if (canvas) {
@@ -969,6 +990,7 @@
     // Rafraichir la palette quand l'outil ou la couleur change
     window.addEventListener('travaux-outil-change', rafraichirPalette);
     window.addEventListener('travaux-couleur-change', rafraichirPalette);
+    window.addEventListener('travaux-fleche-double-change', rafraichirPalette);
 
     /* ===============================
        PALETTE FLOTTANTE — DRAG & TOGGLE
@@ -1307,6 +1329,21 @@
     }
 
     /* ===============================
+       FLECHE DOUBLE
+       =============================== */
+
+    function getFlecheDouble() { return flecheDouble; }
+
+    function setFlecheDouble(val) {
+        flecheDouble = !!val;
+        window.dispatchEvent(new CustomEvent('travaux-fleche-double-change', { detail: { double: flecheDouble } }));
+    }
+
+    function toggleFlecheDouble() {
+        setFlecheDouble(!flecheDouble);
+    }
+
+    /* ===============================
        EXPORTS GLOBAUX
        =============================== */
 
@@ -1372,6 +1409,10 @@
         reinitialiserRetroErreursFr: reinitialiserRetroErreursFr,
         // Personnalisations (noms, icônes, couleurs)
         appliquerPersonnalisations: appliquerPersonnalisations,
+        // Fleche double
+        getFlecheDouble: getFlecheDouble,
+        setFlecheDouble: setFlecheDouble,
+        toggleFlecheDouble: toggleFlecheDouble,
         // Contexte Modelisation
         setMasquerErreursFrancais: setMasquerErreursFrancais
     };
