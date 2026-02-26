@@ -1995,7 +1995,7 @@ function genererSectionAccompagnement(da) {
                 <h4 style="color: var(--accent-primaire); font-size: 0.95rem; margin: 0; font-weight: 600;" data-tooltip="profil-historique">
                     HISTORIQUE ${interventions && interventions.length > 0 ? `(${interventions.length} intervention${interventions.length > 1 ? 's' : ''})` : ''}
                 </h4>
-                <button class="btn btn-principal" onclick="naviguerVersNouvelleIntervention();">+ Nouvelle intervention</button>
+                <button class="btn btn-principal" onclick="naviguerVersNouvelleIntervention('${da}');">+ Nouvelle intervention</button>
             </div>
         </div>
     `;
@@ -7473,8 +7473,9 @@ function toggleSection(sectionId) {
 
 /**
  * Naviguer vers une nouvelle intervention depuis le profil étudiant
+ * @param {string} [daPreselectionne] - DA de l'étudiant à pré-cocher
  */
-function naviguerVersNouvelleIntervention() {
+function naviguerVersNouvelleIntervention(daPreselectionne) {
     // Naviguer vers la section
     afficherSection('tableau-bord');
     afficherSousSection('tableau-bord-interventions');
@@ -7484,7 +7485,7 @@ function naviguerVersNouvelleIntervention() {
         const conteneur = document.getElementById('conteneurPrincipal');
         if (conteneur && conteneur.innerHTML.trim() !== '') {
             clearInterval(checkConteneur);
-            afficherFormulaireIntervention();
+            afficherFormulaireIntervention(daPreselectionne);
         }
     }, 50); // Vérifier toutes les 50ms
 
