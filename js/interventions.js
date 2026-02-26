@@ -686,8 +686,8 @@ function afficherFormulaireIntervention(daPreselectionne) {
     // Indicateur visuel si étudiant pré-sélectionné
     let bandeauPreselection = '';
     if (daPreselectionne) {
-        const etudiants = typeof filtrerEtudiantsParMode === 'function'
-            ? filtrerEtudiantsParMode(obtenirDonneesSelonMode('groupeEtudiants'))
+        const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
+            ? obtenirEtudiantsCoursActif()
             : obtenirDonneesSelonMode('groupeEtudiants');
         const etudiant = etudiants.find(e => e.da === daPreselectionne);
         if (etudiant) {
@@ -1059,10 +1059,9 @@ function ouvrirIntervention(interventionId) {
     if (!container) return;
 
     // Obtenir la liste des étudiants (filtrée par groupe-cours actif)
-    const etudiantsBruts = obtenirDonneesSelonMode('groupeEtudiants');
-    const etudiants = typeof filtrerEtudiantsParMode === 'function'
-        ? filtrerEtudiantsParMode(etudiantsBruts)
-        : etudiantsBruts;
+    const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
+        ? obtenirEtudiantsCoursActif()
+        : obtenirDonneesSelonMode('groupeEtudiants');
 
     console.log('🔍 ouvrirIntervention() - RENDU CHECKBOXES');
     console.log('   interventionId:', interventionId);
@@ -1584,10 +1583,9 @@ function transfererPresencesVersModule(interventionId) {
     console.log('   Étudiants présents:', intervention.etudiants.length);
 
     // Obtenir tous les étudiants du groupe (filtrés par groupe-cours actif)
-    const etudiantsBruts2 = obtenirDonneesSelonMode('groupeEtudiants');
-    const etudiants = typeof filtrerEtudiantsParMode === 'function'
-        ? filtrerEtudiantsParMode(etudiantsBruts2)
-        : etudiantsBruts2;
+    const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
+        ? obtenirEtudiantsCoursActif()
+        : obtenirDonneesSelonMode('groupeEtudiants');
     console.log('   Total étudiants du groupe:', etudiants.length);
 
     // Obtenir les présences existantes
@@ -1732,10 +1730,9 @@ function obtenirAbsencesMotiveesParDate(date) {
     }
 
     // Récupérer tous les étudiants du groupe (filtrés par groupe-cours actif)
-    const tousLesBruts = obtenirDonneesSelonMode('groupeEtudiants') || [];
-    const tousLesEtudiants = typeof filtrerEtudiantsParMode === 'function'
-        ? filtrerEtudiantsParMode(tousLesBruts)
-        : tousLesBruts;
+    const tousLesEtudiants = typeof obtenirEtudiantsCoursActif === 'function'
+        ? obtenirEtudiantsCoursActif()
+        : (obtenirDonneesSelonMode('groupeEtudiants') || []);
     const tousLesDas = tousLesEtudiants.map(e => e.da);
 
     // Pour chaque intervention concernée
