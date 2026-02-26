@@ -509,6 +509,40 @@
         db.setSync('personnalisationObservations', obj);
     }
 
+    // Noms des categories de tampons
+    const NOMS_CATEGORIES_DEFAUT = {
+        symboles: 'Contenu et m\u00e9thode',
+        qualite: 'Inf\u00e9rences / interpr\u00e9tation',
+        diagnostic: 'Observations'
+    };
+
+    function obtenirNomsCategories() {
+        return db.getSync('nomsCategoriesTampons', null) || { ...NOMS_CATEGORIES_DEFAUT };
+    }
+
+    function sauvegarderNomsCategories(obj) {
+        db.setSync('nomsCategoriesTampons', obj);
+    }
+
+    function obtenirOrdreAutocollants(categorie) {
+        const key = 'ordreAutocollants_' + categorie;
+        const ordre = db.getSync(key, null);
+        const ids = AUTOCOLLANTS.filter(a => a.categorie === categorie).map(a => a.id);
+        if (ordre && Array.isArray(ordre) && ordre.length === ids.length) return ordre;
+        return ids;
+    }
+
+    function sauvegarderOrdreAutocollants(categorie, arr) {
+        db.setSync('ordreAutocollants_' + categorie, arr);
+    }
+
+    function obtenirAutocollantsOrdonnes(categorie) {
+        const ordre = obtenirOrdreAutocollants(categorie);
+        const map = {};
+        AUTOCOLLANTS.forEach(a => { map[a.id] = a; });
+        return ordre.map(id => map[id]).filter(Boolean);
+    }
+
     function obtenirPersonnalisationErreursFr() {
         return db.getSync('personnalisationErreursFr', null) || {};
     }
@@ -583,7 +617,7 @@
     }
 
     // Appliquer les personnalisations au démarrage (après prechargerAutocollants)
-    appliquerPersonnalisations();
+    try { appliquerPersonnalisations(); } catch (e) { console.error('[Travaux-Outils] Erreur appliquerPersonnalisations:', e); }
 
     let paletteErrFrVisible = false;
 

@@ -19,6 +19,9 @@
     const MAX_UNDO = 50;
     const SAUVEGARDE_DELAI = 2000; // ms, debounce auto-save
 
+    // Reference locale aux modules externes (resolue au premier acces)
+    function _outils() { return window.travauxOutils; }
+
     /* ===============================
        ETAT DU MODULE
        =============================== */
@@ -177,7 +180,7 @@
         if (canvasSurligneur) canvasSurligneur.classList.remove('u-hide');
 
         // Si l'outil actif est "position", garder pointer-events none
-        if (travauxOutils.getOutilActif().id === 'position') {
+        if (_outils().getOutilActif().id === 'position') {
             canvasAnnotation.style.pointerEvents = 'none';
         }
 
@@ -194,9 +197,9 @@
                 // Vue côte-à-côte : palette flottante (comportement inchangé)
                 const zoneDocument = contextExterne.conteneurPalette;
                 const paletteDiv = document.createElement('div');
-                paletteDiv.innerHTML = travauxOutils.genererHTMLPalette();
+                paletteDiv.innerHTML = _outils().genererHTMLPalette();
                 zoneDocument.appendChild(paletteDiv.firstElementChild);
-                travauxOutils.configurerDragPalette();
+                _outils().configurerDragPalette();
             } else {
                 // Mode normal : layout ancré
                 travauxUI.creerLayoutAnnotation();
@@ -383,7 +386,7 @@
      * Debut du trait / interaction
      */
     function onPointerDown(e) {
-        const outil = travauxOutils.getOutilActif();
+        const outil = _outils().getOutilActif();
 
         if (modePanActif) return;
         if (outil.id === 'position') return;
@@ -490,8 +493,8 @@
         }
 
         // Mode tampon : poser un autocollant
-        if (outilActifId === 'tampon' || travauxOutils.getAutocollantActif()) {
-            const autoId = travauxOutils.getAutocollantActif();
+        if (outilActifId === 'tampon' || _outils().getAutocollantActif()) {
+            const autoId = _outils().getAutocollantActif();
             if (autoId) {
                 poserAutocollant(autoId, xNorm, yNorm);
             }
@@ -519,8 +522,8 @@
             formeEnCours = {
                 id: 'SH_' + Date.now(),
                 type: outil.id,
-                color: travauxOutils.getCouleurActive(),
-                lineWidth: travauxOutils.getEpaisseurActive(),
+                color: _outils().getCouleurActive(),
+                lineWidth: _outils().getEpaisseurActive(),
                 x1: xNorm, y1: yNorm,
                 x2: xNorm, y2: yNorm
             };
@@ -528,7 +531,7 @@
                 formeEnCours.amplitude = 6;
                 formeEnCours.wavelength = 30;
             }
-            if (outil.id === 'fleche' && travauxOutils.getFlecheDouble()) {
+            if (outil.id === 'fleche' && _outils().getFlecheDouble()) {
                 formeEnCours.double = true;
             }
             enDessin = true;
@@ -540,8 +543,8 @@
             formeOrigine = { x: xNorm, y: yNorm };
             formeEnCours = {
                 id: 'SH_' + Date.now(), type: 'surligneur',
-                color: travauxOutils.getCouleurActive(),
-                lineWidth: travauxOutils.getEpaisseurActive(),
+                color: _outils().getCouleurActive(),
+                lineWidth: _outils().getEpaisseurActive(),
                 opacity: outil.opacite || 0.5,
                 x1: xNorm, y1: yNorm, x2: xNorm, y2: yNorm
             };
@@ -556,8 +559,8 @@
         traitEnCours = {
             id: 'S_' + Date.now(),
             tool: outil.id,
-            color: travauxOutils.getCouleurActive(),
-            lineWidth: travauxOutils.getEpaisseurActive(),
+            color: _outils().getCouleurActive(),
+            lineWidth: _outils().getEpaisseurActive(),
             opacity: outil.opacite || 1.0,
             points: [{ x: xNorm, y: yNorm, pressure: pression }]
         };
@@ -571,7 +574,7 @@
      * Mouvement du stylet
      */
     function onPointerMove(e) {
-        const outil = travauxOutils.getOutilActif();
+        const outil = _outils().getOutilActif();
 
         const rect = canvasAnnotation.getBoundingClientRect();
         const x = e.clientX - rect.left;
@@ -661,13 +664,13 @@
             traitEnCours.points.push({ x: cxNorm, y: cyNorm, pressure: pression });
 
             // Dessiner le segment (epaisseur ajustee a la resolution)
-            const epaisseurPression = travauxOutils.calculerEpaisseurPression(pression);
-            const epaisseur = travauxOutils.calculerEpaisseurReelle(epaisseurPression);
+            const epaisseurPression = _outils().calculerEpaisseurPression(pression);
+            const epaisseur = _outils().calculerEpaisseurReelle(epaisseurPression);
 
             ctxAnnotation.save();
             ctxAnnotation.globalAlpha = outil.opacite || 1.0;
             ctxAnnotation.globalCompositeOperation = outil.composite || 'source-over';
-            ctxAnnotation.strokeStyle = travauxOutils.getCouleurActive();
+            ctxAnnotation.strokeStyle = _outils().getCouleurActive();
             ctxAnnotation.lineWidth = epaisseur;
             const estSurlLive = (outil.id === 'surligneur');
             ctxAnnotation.lineCap = estSurlLive ? 'butt' : 'round';
@@ -686,7 +689,7 @@
     function onPointerUp(e) {
         if (!enDessin) return;
 
-        const outil = travauxOutils.getOutilActif();
+        const outil = _outils().getOutilActif();
 
         // Mode selection : finaliser le drag
         if (outil.type === 'selection') {
@@ -788,7 +791,7 @@
                 canvasAnnotation.style.pointerEvents = 'none';
             } else if (annotationActive) {
                 // Restaurer selon l'outil actif
-                if (travauxOutils.getOutilActif().id === 'position') {
+                if (_outils().getOutilActif().id === 'position') {
                     canvasAnnotation.style.pointerEvents = 'none';
                 } else {
                     canvasAnnotation.style.pointerEvents = 'auto';
@@ -818,7 +821,7 @@
     }
 
     function onDoubleClick(e) {
-        const outil = travauxOutils.getOutilActif();
+        const outil = _outils().getOutilActif();
         if (outil.type !== 'selection') return;
         const rect = canvasAnnotation.getBoundingClientRect();
         const xNorm = (e.clientX - rect.left) / canvasAnnotation.width;
@@ -906,7 +909,7 @@
      */
     function poserAutocollant(autocollantId, xNorm, yNorm) {
         const tailleBase = 0.06; // 6% de la largeur du document
-        const img = travauxOutils.getImageAutocollant(autocollantId);
+        const img = _outils().getImageAutocollant(autocollantId);
         const ratio = (img && img.naturalWidth && img.naturalHeight)
             ? img.naturalHeight / img.naturalWidth
             : 1;
@@ -936,7 +939,8 @@
      * @param {Object} sticker - Donnees du sticker
      */
     function dessinerAutocollant(sticker) {
-        const img = travauxOutils.getImageAutocollant(sticker.autocollantId);
+        if (!_outils()) return;
+        const img = _outils().getImageAutocollant(sticker.autocollantId);
         if (!img) return;
 
         if (!img.complete) {
@@ -1022,8 +1026,8 @@
         const conteneur = document.getElementById('travaux-conteneur-document');
         if (!conteneur || !canvasAnnotation) return;
 
-        const tailleCourante = travauxOutils.getTailleTexte();
-        const couleur = travauxOutils.getCouleurActive();
+        const tailleCourante = _outils().getTailleTexte();
+        const couleur = _outils().getCouleurActive();
 
         // Calculer la position pixel a partir des coordonnees normalisees
         const canvasRect = canvasAnnotation.getBoundingClientRect();
@@ -1123,8 +1127,8 @@
      * @param {number} yNorm - Y normalise
      */
     function ajouterSymbole(type, xNorm, yNorm) {
-        const outil = travauxOutils.OUTILS[type];
-        const taille = (outil.taille || 30) / travauxOutils.RESOLUTION_REFERENCE;
+        const outil = _outils().OUTILS[type];
+        const taille = (outil.taille || 30) / _outils().RESOLUTION_REFERENCE;
 
         // Couleur fixe selon le type de symbole
         let couleurSymbole;
@@ -1132,7 +1136,7 @@
         else if (type === 'croix') couleurSymbole = '#c62828';
         else if (type === 'interrogation') couleurSymbole = '#e65100';
         else if (type.startsWith('errfr_')) couleurSymbole = outil.couleurBouton || '#888888';
-        else couleurSymbole = travauxOutils.getCouleurActive();
+        else couleurSymbole = _outils().getCouleurActive();
 
         const forme = {
             id: 'SH_' + Date.now(),
@@ -1986,15 +1990,17 @@
      */
     function dessinerTrait(trait, ctx) {
         if (!trait.points || trait.points.length < 2) return;
+        if (!_outils()) return; // Module pas encore charge
         ctx = ctx || ctxAnnotation;
 
         const w = canvasAnnotation.width;
         const h = canvasAnnotation.height;
-        const outil = travauxOutils.OUTILS[trait.tool] || travauxOutils.OUTILS.stylo;
+        const outils = _outils();
+        const outil = outils.OUTILS[trait.tool] || outils.OUTILS.stylo;
         const dims = (typeof travauxVisionneuse !== 'undefined' && travauxVisionneuse.getDimensionsOriginales)
             ? travauxVisionneuse.getDimensionsOriginales() : null;
-        const largeurRef = (dims && dims.w) ? dims.w : travauxOutils.RESOLUTION_REFERENCE;
-        const ratioResolution = largeurRef / travauxOutils.RESOLUTION_REFERENCE;
+        const largeurRef = (dims && dims.w) ? dims.w : outils.RESOLUTION_REFERENCE;
+        const ratioResolution = largeurRef / outils.RESOLUTION_REFERENCE;
 
         ctx.save();
         ctx.globalAlpha = trait.opacity || 1.0;
@@ -2010,7 +2016,7 @@
         for (let i = 1; i < trait.points.length; i++) {
             const p = trait.points[i];
             const epaisseurLogique = outil.sensiblePression
-                ? travauxOutils.calculerEpaisseurPression(p.pressure) * (trait.lineWidth / outil.epaisseurDefaut)
+                ? outils.calculerEpaisseurPression(p.pressure) * (trait.lineWidth / outil.epaisseurDefaut)
                 : trait.lineWidth;
             ctx.lineWidth = epaisseurLogique * ratioResolution;
             ctx.lineTo(p.x * w, p.y * h);
@@ -2027,13 +2033,15 @@
      * @param {Object} forme - Donnees de la forme
      */
     function dessinerForme(forme, ctx) {
+        if (!_outils()) return; // Module pas encore charge
         ctx = ctx || ctxAnnotation;
         const w = canvasAnnotation.width;
         const h = canvasAnnotation.height;
+        const outils = _outils();
         const dims = (typeof travauxVisionneuse !== 'undefined' && travauxVisionneuse.getDimensionsOriginales)
             ? travauxVisionneuse.getDimensionsOriginales() : null;
-        const largeurRef = (dims && dims.w) ? dims.w : travauxOutils.RESOLUTION_REFERENCE;
-        const ratioResolution = largeurRef / travauxOutils.RESOLUTION_REFERENCE;
+        const largeurRef = (dims && dims.w) ? dims.w : outils.RESOLUTION_REFERENCE;
+        const ratioResolution = largeurRef / outils.RESOLUTION_REFERENCE;
 
         ctx.save();
         ctx.strokeStyle = forme.color;
