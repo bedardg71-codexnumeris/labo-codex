@@ -4821,16 +4821,13 @@
                 <ul class="travaux-retro-criteres">${lignes}</ul>`;
         }
 
-        // Lire le réglage affichageNote de la pratique active
+        // Lire le réglage affichageNote de la pratique active du groupe-cours
         let modeNote = 'complet';
         try {
+            const pratiqueId = typeof obtenirPratiqueActiveGroupeCours === 'function'
+                ? obtenirPratiqueActiveGroupeCours() : null;
             const configurations = db.getSync('pratiquesConfigurables', []);
-            const modalites = db.getSync('modalitesEvaluation', {});
-            const idUnique = modalites.pratiqueId || modalites.configurationSTDAppliquee?.id;
-            const typeP = modalites.pratique;
-            const pratiqueActive = idUnique
-                ? configurations.find(p => p.id === idUnique)
-                : (typeP ? configurations.find(p => p.type === typeP) : null);
+            const pratiqueActive = pratiqueId ? configurations.find(p => p.id === pratiqueId) : null;
             if (pratiqueActive?.affichageNote === 'lettre') modeNote = 'lettre';
         } catch(e) { /* fallback complet */ }
 

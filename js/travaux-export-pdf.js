@@ -1008,16 +1008,13 @@
             if (radioUI) modeNote = radioUI.value;
         }
 
-        // 3. Préférence de la pratique active (défaut initial)
+        // 3. Préférence de la pratique active du groupe-cours (défaut initial)
         if (!modeNote) {
             try {
+                const pratiqueId = typeof obtenirPratiqueActiveGroupeCours === 'function'
+                    ? obtenirPratiqueActiveGroupeCours() : null;
                 const configurations = db.getSync('pratiquesConfigurables', []);
-                const modalites = db.getSync('modalitesEvaluation', {});
-                const idUnique = modalites.pratiqueId || modalites.configurationSTDAppliquee?.id;
-                const typeP = modalites.pratique;
-                const pratiqueActive = idUnique
-                    ? configurations.find(p => p.id === idUnique)
-                    : (typeP ? configurations.find(p => p.type === typeP) : null);
+                const pratiqueActive = pratiqueId ? configurations.find(p => p.id === pratiqueId) : null;
                 if (pratiqueActive && pratiqueActive.affichageNote) modeNote = pratiqueActive.affichageNote;
             } catch(e) { /* silencieux */ }
         }
