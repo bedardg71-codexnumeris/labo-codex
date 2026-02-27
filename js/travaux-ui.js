@@ -3260,6 +3260,10 @@
         // Afficher les labels d'identite (avec productionId effective en fallback)
         remplirLabelsIdentite(fichier, productionIdEffective);
 
+        // Initialiser affichageNote depuis la pratique active (avant preRemplirEvaluation
+        // qui peut prendre du temps — l'utilisateur voit le bon radio immédiatement)
+        if (typeof cocherOptionsParDefaut === 'function') cocherOptionsParDefaut();
+
         // Pre-remplir le formulaire d'evaluation avec retry robuste
         // (gère le chaînage complet : étudiant → productions → grille → évaluation existante)
         preRemplirEvaluation(fichier.etudiantDA, productionIdEffective);

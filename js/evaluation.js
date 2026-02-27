@@ -3716,7 +3716,8 @@ function memoriserSelectionsEvaluation() {
         afficherObjectif: document.getElementById('afficherObjectif1')?.checked ?? true,
         afficherTache: document.getElementById('afficherTache1')?.checked ?? true,
         afficherAdresse: document.getElementById('afficherAdresse1')?.checked ?? true,
-        afficherContexte: document.getElementById('afficherContexte1')?.checked ?? true
+        afficherContexte: document.getElementById('afficherContexte1')?.checked ?? true,
+        affichageNote: document.querySelector('input[name="affichageNote1"]:checked')?.value || 'complet'
     };
 
     db.setSync('dernieresSelectionsEvaluation', selections);
@@ -3744,7 +3745,8 @@ function sauvegarderSelectionsEvaluation() {
         afficherObjectif: document.getElementById('afficherObjectif1')?.checked ?? true,
         afficherTache: document.getElementById('afficherTache1')?.checked ?? true,
         afficherAdresse: document.getElementById('afficherAdresse1')?.checked ?? true,
-        afficherContexte: document.getElementById('afficherContexte1')?.checked ?? true
+        afficherContexte: document.getElementById('afficherContexte1')?.checked ?? true,
+        affichageNote: document.querySelector('input[name="affichageNote1"]:checked')?.value || 'complet'
     };
 
     db.setSync('dernieresSelectionsEvaluation', JSON.stringify(selections));
@@ -3811,6 +3813,15 @@ function restaurerSelectionsEvaluation() {
                     const checkbox = document.getElementById(id);
                     if (checkbox) checkbox.checked = value ?? true;
                 });
+
+                // Restaurer le radio affichageNote
+                if (selections.affichageNote === 'lettre') {
+                    const radioLettre = document.getElementById('affichageNoteLettre1');
+                    if (radioLettre) radioLettre.checked = true;
+                } else {
+                    const radioComplet = document.getElementById('affichageNoteComplet1');
+                    if (radioComplet) radioComplet.checked = true;
+                }
 
                 console.log('✅ Sélections restaurées');
 
@@ -4191,6 +4202,15 @@ function attacherEvenementsMemorisation() {
         if (checkbox && !checkbox.dataset.memoAttache) {
             checkbox.addEventListener('change', memoriserSelectionsEvaluation);
             checkbox.dataset.memoAttache = '1';
+        }
+    });
+
+    // Mémoriser aussi les radios affichageNote
+    ['affichageNoteComplet1', 'affichageNoteLettre1'].forEach(id => {
+        const radio = document.getElementById(id);
+        if (radio && !radio.dataset.memoAttache) {
+            radio.addEventListener('change', memoriserSelectionsEvaluation);
+            radio.dataset.memoAttache = '1';
         }
     });
 }
