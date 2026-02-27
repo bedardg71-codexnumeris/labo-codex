@@ -21,6 +21,7 @@
     const ZOOM_FIT = 'fit'; // Ajuster a la fenetre
     const ZOOM_FIT_WIDTH = 'fit-width';   // Pleine largeur
     const ZOOM_FIT_HEIGHT = 'fit-height'; // Pleine hauteur
+    const PDF_RENDER_SCALE = 2.0; // Rendu PDF à 144 DPI (2× le 72 DPI natif) pour netteté comparable aux photos
 
     /* ===============================
        ETAT DU MODULE
@@ -167,8 +168,8 @@
         try {
             const page = await pdfDocument.getPage(numPage);
 
-            // Stocker les dimensions originales (avant zoom)
-            const viewportOriginal = page.getViewport({ scale: 1 });
+            // Stocker les dimensions originales à la résolution de rendu (PDF_RENDER_SCALE × 72 DPI)
+            const viewportOriginal = page.getViewport({ scale: PDF_RENDER_SCALE });
             dimensionsOriginales = { w: viewportOriginal.width, h: viewportOriginal.height };
 
             const zoomEffectif = calculerZoomEffectif(page);
@@ -300,9 +301,9 @@
             return zoomActuel;
         }
 
-        const viewport = page.getViewport({ scale: 1.0 });
+        const viewport = page.getViewport({ scale: PDF_RENDER_SCALE });
         const conteneur = conteneurVisionneuse || document.getElementById('travaux-conteneur-document');
-        if (!conteneur) return 1.0;
+        if (!conteneur) return PDF_RENDER_SCALE;
 
         const largeurDispo = conteneur.clientWidth - 40; // marge
         const hauteurDispo = conteneur.clientHeight - 40;
