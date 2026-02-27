@@ -769,12 +769,9 @@
                     <!-- Toolbar -->
                     <div class="travaux-toolbar">
                         <div class="travaux-toolbar-inner">
-                            <!-- GAUCHE : compteur badges + navigation pages + badge étudiant -->
+                            <!-- GAUCHE : badge étudiant + navigation pages -->
                             <div class="travaux-toolbar-gauche">
-                                <button id="travaux-btn-badge-prec" class="travaux-btn-nav" onclick="travauxUI.badgePrecedent()" disabled title="Fichier précédent">&#x2190;</button>
-                                <span id="travaux-compteur-badge" class="travaux-compteur-badge">-- / --</span>
-                                <button id="travaux-btn-badge-suiv" class="travaux-btn-nav" onclick="travauxUI.badgeSuivant()" disabled title="Fichier suivant">&#x2192;</button>
-                                <span id="travaux-badge-fichier-actif" class="u-hide" style="margin-left: 8px;"></span>
+                                <span id="travaux-badge-fichier-actif" class="u-hide"></span>
                                 <span class="travaux-separateur-page"></span>
                                 <button id="travaux-btn-page-prec" class="travaux-btn-nav" onclick="travauxVisionneuse.pagePrecedente()" disabled title="Page précédente">&#x2190;</button>
                                 <span id="travaux-indicateur-page">-- / --</span>
@@ -784,13 +781,17 @@
                             <!-- CENTRE : vide -->
                             <div class="travaux-toolbar-centre"></div>
 
-                            <!-- DROITE : zoom + séparateur + actions -->
+                            <!-- DROITE : zoom + navigation fichiers + séparateur + actions -->
                             <div class="travaux-toolbar-droite">
                                 <span id="travaux-indicateur-zoom" class="travaux-zoom-info">100%</span>
                                 <button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoomPleineLargeur()" title="Ajuster à la largeur">Largeur</button>
                                 <button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoomPleineHauteur()" title="Ajuster à la hauteur">Hauteur</button>
                                 <button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoom100()" title="Zoom 100%">100%</button>
                                 <button class="travaux-btn-zoom" onclick="travauxVisionneuse.recentrerVue()" title="Recentrer la vue">Recentrer</button>
+                                <span class="travaux-separateur"></span>
+                                <button id="travaux-btn-badge-prec" class="travaux-btn-nav" onclick="travauxUI.badgePrecedent()" disabled title="Fichier précédent">&#x2190;</button>
+                                <span id="travaux-compteur-badge" class="travaux-compteur-badge">-- / --</span>
+                                <button id="travaux-btn-badge-suiv" class="travaux-btn-nav" onclick="travauxUI.badgeSuivant()" disabled title="Fichier suivant">&#x2192;</button>
                                 <span class="travaux-separateur"></span>
                                 <button id="travaux-btn-annoter" class="travaux-btn-action actif" onclick="travauxUI.basculerMode('annoter')" data-tooltip="travaux-btn-annoter">Annoter</button>
                                 <button id="travaux-btn-evaluer" class="travaux-btn-action travaux-btn-action-vert u-hide" onclick="travauxUI.basculerMode('evaluer')" title="Évaluer cette production" data-tooltip="travaux-btn-evaluer">Évaluer</button>
@@ -2373,20 +2374,27 @@
             const btnEvaluer = document.getElementById('travaux-btn-evaluer');
             if (btnEvaluer) btnEvaluer.classList.remove('u-hide');
 
-            // Auto-activer l'annotation
-            travauxAnnotation.activerAnnotation();
-            // Pleine largeur par defaut en mode annotation
-            travauxVisionneuse.zoomPleineLargeur();
             // Replier la sidebar
             const sidebar = document.getElementById('travaux-sidebar');
             if (sidebar) sidebar.classList.add('replie');
             const btnToggle = document.getElementById('travaux-btn-toggle-sidebar');
             if (btnToggle) { btnToggle.classList.add('visible'); btnToggle.innerHTML = '&#x25B6;'; }
-            // Highlight Annoter (et retirer actif d'Évaluer)
-            const btnAnnoter = document.getElementById('travaux-btn-annoter');
-            if (btnAnnoter) btnAnnoter.classList.add('actif');
-            const btnEvaluerReset = document.getElementById('travaux-btn-evaluer');
-            if (btnEvaluerReset) btnEvaluerReset.classList.remove('actif');
+
+            // Restaurer le mode courant (Annoter ou Évaluer) sans flash
+            if (modeAvantNavigation === 'evaluer') {
+                const fichierNav = travauxVisionneuse.getFichierActuel();
+                if (fichierNav && fichierNav.etudiantDA) {
+                    basculerMode('evaluer');
+                }
+            } else {
+                // Mode annotation par défaut
+                travauxAnnotation.activerAnnotation();
+                travauxVisionneuse.zoomPleineLargeur();
+                const btnAnnoter = document.getElementById('travaux-btn-annoter');
+                if (btnAnnoter) btnAnnoter.classList.add('actif');
+                const btnEvaluerReset = document.getElementById('travaux-btn-evaluer');
+                if (btnEvaluerReset) btnEvaluerReset.classList.remove('actif');
+            }
 
             // Aligner le haut du document avec le haut du viewport après la transition CSS du sidebar (0.3s)
             setTimeout(() => travauxVisionneuse.scrollerEnHaut(), 350);
@@ -2484,14 +2492,6 @@
             }
 
             sauvegarderEtatSession();
-
-            // Restaurer le mode Évaluer si c'était le mode actif avant navigation
-            if (modeAvantNavigation === 'evaluer') {
-                const fichierNav = travauxVisionneuse.getFichierActuel();
-                if (fichierNav && fichierNav.etudiantDA) {
-                    setTimeout(() => basculerMode('evaluer'), 200);
-                }
-            }
         }, 100);
     }
 
