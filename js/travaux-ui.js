@@ -4826,10 +4826,11 @@
         try {
             const configurations = db.getSync('pratiquesConfigurables', []);
             const modalites = db.getSync('modalitesEvaluation', {});
-            const pratiqueId = modalites.pratique;
-            const pratiqueActive = pratiqueId
-                ? (configurations.find(p => p.id === pratiqueId) || configurations.find(p => p.type === pratiqueId))
-                : null;
+            const idUnique = modalites.pratiqueId || modalites.configurationSTDAppliquee?.id;
+            const typeP = modalites.pratique;
+            const pratiqueActive = idUnique
+                ? configurations.find(p => p.id === idUnique)
+                : (typeP ? configurations.find(p => p.type === typeP) : null);
             if (pratiqueActive?.affichageNote === 'lettre') modeNote = 'lettre';
         } catch(e) { /* fallback complet */ }
 

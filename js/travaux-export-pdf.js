@@ -580,7 +580,7 @@
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(...cfg.couleurs.texteSecondaire);
         const lignesDroite = [];
-        if (infos.etudiant) lignesDroite.push('\u00c9tudiant : ' + infos.etudiant);
+        if (infos.etudiant) lignesDroite.push('\u00c9tudiant\u00b7e : ' + infos.etudiant);
         if (infos.date) lignesDroite.push('Date de l\'\u00e9valuation : ' + infos.date);
         let yDroite = y - (lignesDroite.length - 1) * mm(4);
         for (const ligne of lignesDroite) {
@@ -1013,10 +1013,11 @@
             try {
                 const configurations = db.getSync('pratiquesConfigurables', []);
                 const modalites = db.getSync('modalitesEvaluation', {});
-                const pratiqueId = modalites.pratique;
-                const pratiqueActive = pratiqueId
-                    ? (configurations.find(p => p.id === pratiqueId) || configurations.find(p => p.type === pratiqueId))
-                    : null;
+                const idUnique = modalites.pratiqueId || modalites.configurationSTDAppliquee?.id;
+                const typeP = modalites.pratique;
+                const pratiqueActive = idUnique
+                    ? configurations.find(p => p.id === idUnique)
+                    : (typeP ? configurations.find(p => p.type === typeP) : null);
                 if (pratiqueActive && pratiqueActive.affichageNote) modeNote = pratiqueActive.affichageNote;
             } catch(e) { /* silencieux */ }
         }
