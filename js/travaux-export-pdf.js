@@ -762,9 +762,9 @@
         // En-tete formate
         const dateObj = evaluation.dateEvaluation ? new Date(evaluation.dateEvaluation) : null;
         const dateEval = dateObj
-            ? dateObj.toLocaleDateString('fr-CA') + ' \u00e0 ' + dateObj.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' })
+            ? dateObj.toLocaleDateString('fr-CA', { timeZone: 'America/Toronto' }) + ' \u00e0 ' + dateObj.toLocaleTimeString('fr-CA', { timeZone: 'America/Toronto', hour: '2-digit', minute: '2-digit' })
             : '';
-        let y = ajouterEnteteRetroaction(doc, '\u00c9valuation', {
+        let y = ajouterEnteteRetroaction(doc, '\u00c9VALUATION', {
             etudiant: evaluation.etudiantNom || fichier.etudiantDA || '',
             production: evaluation.productionNom || '',
             date: dateEval
@@ -856,7 +856,7 @@
             doc.setFontSize(cfg.polices.titreSection);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(...cfg.couleurs.titreSection);
-            doc.text('R\u00c9TROACTION G\u00c9N\u00c9RALE PAR CRIT\u00c8RE', margeG, y);
+            doc.text('R\u00e9troaction g\u00e9n\u00e9rale par crit\u00e8re et niveau de performance', margeG, y);
             y += mm(3);
 
             doc.setFont('helvetica', 'italic');
@@ -895,7 +895,7 @@
 
             doc.autoTable({
                 startY: y,
-                head: [['Critère', 'Niveau', 'Pond.', 'Rétroaction']],
+                head: [['Crit\u00e8re', 'Niv.', 'Pond.', 'R\u00e9troaction']],
                 body: donneesCriteres,
                 theme: 'grid',
                 headStyles: {
@@ -916,6 +916,44 @@
                     3: { cellWidth: largeurContenu * 0.77 }
                 },
                 margin: { left: margeG, right: margeD },
+                didParseCell: function(data) {
+                    // Colonne Critère : nom en gras, description en italique
+                    if (data.section === 'body' && data.column.index === 0) {
+                        const texte = data.cell.text.join('\n');
+                        const parties = texte.split('\n');
+                        if (parties.length > 1) {
+                            // Forcer le style normal, le rendu custom est dans didDrawCell
+                            data.cell.styles.fontStyle = 'normal';
+                        } else {
+                            data.cell.styles.fontStyle = 'bold';
+                        }
+                    }
+                },
+                didDrawCell: function(data) {
+                    // Colonne Critère : dessiner nom en gras + description en italique
+                    if (data.section === 'body' && data.column.index === 0) {
+                        const raw = data.cell.raw || '';
+                        const parties = raw.split('\n');
+                        if (parties.length > 1) {
+                            const x = data.cell.x + data.cell.padding('left');
+                            let yCell = data.cell.y + data.cell.padding('top') + data.cell.styles.fontSize * 0.352;
+                            const lineH = data.cell.styles.fontSize * 0.352 * 1.15;
+                            const maxW = data.cell.width - data.cell.padding('left') - data.cell.padding('right');
+                            // Nom en gras
+                            doc.setFont('helvetica', 'bold');
+                            doc.setFontSize(data.cell.styles.fontSize);
+                            doc.setTextColor(...data.cell.styles.textColor);
+                            const lignesNom = doc.splitTextToSize(parties[0], maxW);
+                            doc.text(lignesNom, x, yCell);
+                            yCell += lignesNom.length * lineH + lineH * 0.3;
+                            // Description en italique
+                            doc.setFont('helvetica', 'italic');
+                            const lignesDesc = doc.splitTextToSize(parties.slice(1).join('\n'), maxW);
+                            doc.text(lignesDesc, x, yCell);
+                            doc.setFont('helvetica', 'normal');
+                        }
+                    }
+                },
                 didDrawPage: function() {
                     // autoTable gere les sauts de page automatiquement
                 }
@@ -959,32 +997,30 @@
         // 4. Défaut
         if (!modeNote) modeNote = 'complet';
         if (evaluation.noteFinale != null || evaluation.niveauFinal) {
-            doc.setDrawColor(...cfg.couleurs.bordure);
-            doc.setLineWidth(0.5);
-            doc.line(margeG, y, pageW - margeD, y);
-            y += mm(5);
-
             doc.setFontSize(cfg.polices.sousTitre);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(...cfg.couleurs.textePrincipal);
 
             let texteNote = '';
             if (modeNote === 'lettre') {
-                // Lettre du niveau de performance seulement
                 if (evaluation.niveauFinal) texteNote = 'Niveau de performance : ' + evaluation.niveauFinal;
             } else {
-                // Note chiffrée et niveau de maîtrise (par défaut)
                 if (evaluation.noteFinale != null) texteNote += 'Note finale : ' + evaluation.noteFinale + '%';
                 if (evaluation.noteFinale != null && evaluation.niveauFinal) texteNote += '    ';
                 if (evaluation.niveauFinal) texteNote += 'Niveau : ' + evaluation.niveauFinal;
             }
             if (texteNote) {
                 doc.text(texteNote, margeG, y);
-                y += mm(8);
+                y += mm(5);
             }
+
+            doc.setDrawColor(...cfg.couleurs.bordure);
+            doc.setLineWidth(0.5);
+            doc.line(margeG, y, pageW - margeD, y);
+            y += mm(8);
         }
 
-        // --- RÉTROACTION VISUELLE SPÉCIFIQUE ---
+        // --- Rétroactions visuelles spécifiques ---
         const annotation = travauxStockage.obtenirAnnotationFichier(fichier.id);
         const statsVisuelles = compterAnnotationsDetailees(annotation);
 
@@ -1040,7 +1076,7 @@
         doc.setFontSize(cfg.polices.titreSection);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(...cfg.couleurs.titreSection);
-        doc.text('R\u00c9TROACTION VISUELLE SP\u00c9CIFIQUE', margeG, y);
+        doc.text('R\u00e9troactions visuelles sp\u00e9cifiques', margeG, y);
         y += mm(6);
 
         // --- Tableau des tampons ---
