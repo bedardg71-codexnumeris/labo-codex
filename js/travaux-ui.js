@@ -2618,7 +2618,7 @@
             evalsProduction.some(e => e.etudiantDA === f.etudiantDA)
         ).length;
 
-        compteur.textContent = `${nbEvalues} fichiers traités sur ${fichiersProduction.length}`;
+        compteur.textContent = `${nbEvalues} évaluation(s) sur ${fichiersProduction.length}`;
     }
 
     /**
