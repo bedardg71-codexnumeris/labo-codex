@@ -937,7 +937,7 @@
             }
         }
 
-        // --- SYNTHÈSE DES ANNOTATIONS VISUELLES ---
+        // --- SYNTHÈSE DES RÉTROACTIONS VISUELLES ---
         const annotation = travauxStockage.obtenirAnnotationFichier(fichier.id);
         const statsVisuelles = compterAnnotationsDetailees(annotation);
 
@@ -993,7 +993,7 @@
         doc.setFontSize(cfg.polices.titreSection);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(...cfg.couleurs.titreSection);
-        doc.text('SYNTHÈSE DES ANNOTATIONS VISUELLES', margeG, y);
+        doc.text('SYNTH\u00c8SE DES R\u00c9TROACTIONS VISUELLES', margeG, y);
         y += mm(6);
 
         // --- Tableau des tampons ---
@@ -1060,9 +1060,9 @@
                     minCellHeight: imgSize + mm(1)
                 },
                 columnStyles: {
-                    0: { cellWidth: largeurContenu * 0.40 },
-                    1: { cellWidth: largeurContenu * 0.10, halign: 'center' },
-                    2: { cellWidth: largeurContenu * 0.50, fontSize: cfg.polices.textePetit - 1 }
+                    0: { cellWidth: largeurContenu * 0.22 },
+                    1: { cellWidth: largeurContenu * 0.08, halign: 'center' },
+                    2: { cellWidth: largeurContenu * 0.70, fontSize: cfg.polices.textePetit - 1 }
                 },
                 margin: { left: margeG, right: margeD },
                 didDrawCell: function(data) {
@@ -1158,10 +1158,10 @@
                     cellPadding: mm(1.2)
                 },
                 columnStyles: {
-                    0: { cellWidth: largeurContenu * 0.08, halign: 'center' },
-                    1: { cellWidth: largeurContenu * 0.25 },
-                    2: { cellWidth: largeurContenu * 0.07, halign: 'center' },
-                    3: { cellWidth: largeurContenu * 0.60, fontSize: cfg.polices.textePetit - 1 }
+                    0: { cellWidth: largeurContenu * 0.06, halign: 'center' },
+                    1: { cellWidth: largeurContenu * 0.17 },
+                    2: { cellWidth: largeurContenu * 0.05, halign: 'center' },
+                    3: { cellWidth: largeurContenu * 0.72, fontSize: cfg.polices.textePetit - 1 }
                 },
                 margin: { left: margeG, right: margeD },
                 didParseCell: function(data) {
