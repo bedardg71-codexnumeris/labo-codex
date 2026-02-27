@@ -760,10 +760,11 @@
         const seuilPage = pageH - mm(cfg.marges.bas) - mm(8);
 
         // En-tete formate
-        const dateEval = evaluation.dateEvaluation
-            ? new Date(evaluation.dateEvaluation).toLocaleDateString('fr-CA')
+        const dateObj = evaluation.dateEvaluation ? new Date(evaluation.dateEvaluation) : null;
+        const dateEval = dateObj
+            ? dateObj.toLocaleDateString('fr-CA') + ' \u00e0 ' + dateObj.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' })
             : '';
-        let y = ajouterEnteteRetroaction(doc, 'Synthèse de la rétroaction', {
+        let y = ajouterEnteteRetroaction(doc, '\u00c9valuation', {
             etudiant: evaluation.etudiantNom || fichier.etudiantDA || '',
             production: evaluation.productionNom || '',
             date: dateEval
@@ -850,13 +851,23 @@
             y += mm(6);
         }
 
-        // --- ÉVALUATION PAR CRITÈRE (tableau autoTable) ---
+        // --- RÉTROACTION GÉNÉRALE PAR CRITÈRE (tableau autoTable) ---
         if (evaluation.criteres && evaluation.criteres.length > 0) {
             doc.setFontSize(cfg.polices.titreSection);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(...cfg.couleurs.titreSection);
-            doc.text('ÉVALUATION PAR CRITÈRE', margeG, y);
-            y += mm(4);
+            doc.text('R\u00c9TROACTION G\u00c9N\u00c9RALE PAR CRIT\u00c8RE', margeG, y);
+            y += mm(3);
+
+            doc.setFont('helvetica', 'italic');
+            doc.setFontSize(cfg.polices.textePetit);
+            doc.setTextColor(...cfg.couleurs.texteSecondaire);
+            const noteGenerale = 'Le commentaire associ\u00e9 \u00e0 ton \u00e9valuation est g\u00e9n\u00e9ral. Il faut le contextualiser en fonction de ta production personnelle. S\u2019il y a des impr\u00e9cisions ou des ambigu\u00eft\u00e9s, viens me voir.';
+            const lignesNoteGen = doc.splitTextToSize(noteGenerale, largeurContenu);
+            doc.text(lignesNoteGen, margeG, y);
+            y += lignesNoteGen.length * mm(3.5) + mm(2);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(...cfg.couleurs.textePrincipal);
 
             // Chercher la grille pour les descriptions de criteres
             let grilleDef = null;
@@ -899,10 +910,10 @@
                     cellPadding: mm(1.5)
                 },
                 columnStyles: {
-                    0: { cellWidth: largeurContenu * 0.25 },
-                    1: { cellWidth: largeurContenu * 0.10, halign: 'center' },
-                    2: { cellWidth: largeurContenu * 0.10, halign: 'center' },
-                    3: { cellWidth: largeurContenu * 0.55 }
+                    0: { cellWidth: largeurContenu * 0.13 },
+                    1: { cellWidth: largeurContenu * 0.05, halign: 'center' },
+                    2: { cellWidth: largeurContenu * 0.05, halign: 'center' },
+                    3: { cellWidth: largeurContenu * 0.77 }
                 },
                 margin: { left: margeG, right: margeD },
                 didDrawPage: function() {
@@ -971,7 +982,7 @@
             }
         }
 
-        // --- SYNTHÈSE DES RÉTROACTIONS VISUELLES ---
+        // --- RÉTROACTION VISUELLE SPÉCIFIQUE ---
         const annotation = travauxStockage.obtenirAnnotationFichier(fichier.id);
         const statsVisuelles = compterAnnotationsDetailees(annotation);
 
@@ -1027,7 +1038,7 @@
         doc.setFontSize(cfg.polices.titreSection);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(...cfg.couleurs.titreSection);
-        doc.text('SYNTH\u00c8SE DES R\u00c9TROACTIONS VISUELLES', margeG, y);
+        doc.text('R\u00c9TROACTION VISUELLE SP\u00c9CIFIQUE', margeG, y);
         y += mm(6);
 
         // --- Tableau des tampons ---
@@ -1094,9 +1105,9 @@
                     minCellHeight: imgSize + mm(1)
                 },
                 columnStyles: {
-                    0: { cellWidth: largeurContenu * 0.22 },
-                    1: { cellWidth: largeurContenu * 0.08, halign: 'center' },
-                    2: { cellWidth: largeurContenu * 0.70, fontSize: cfg.polices.textePetit - 1 }
+                    0: { cellWidth: largeurContenu * 0.15 },
+                    1: { cellWidth: largeurContenu * 0.07, halign: 'center' },
+                    2: { cellWidth: largeurContenu * 0.78, fontSize: cfg.polices.textePetit - 1 }
                 },
                 margin: { left: margeG, right: margeD },
                 didDrawCell: function(data) {
