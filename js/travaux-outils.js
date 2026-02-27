@@ -310,48 +310,9 @@
         html += '<button class="travaux-palette-toggle" onclick="travauxOutils.fermerPaletteAutocollants()" title="Fermer">×</button>';
         html += '</div></div>';
 
-        // Contenu
+        // Contenu (réutilise la fonction partagée)
         html += '<div class="travaux-palette-contenu" id="travaux-tampons-contenu">';
-        const nomsCat = obtenirNomsCategories();
-
-        // Symboles (crochet / croix)
-        html += '<div class="travaux-autocollants-label">' + (nomsCat.symboles || 'Contenu et m\u00e9thode') + '</div>';
-        html += '<div class="travaux-autocollants-grille travaux-autocollants-grille--symboles">';
-        const crochetActif = outilActif === 'crochet' ? ' actif' : '';
-        const croixActif = outilActif === 'croix' ? ' actif' : '';
-        const interroActif = outilActif === 'interrogation' ? ' actif' : '';
-        html += '<div class="travaux-autocollant-item' + crochetActif + '" onclick="travauxOutils.setOutilActif(\'crochet\')" title="Bien vu, exact, pertinent">';
-        html += '<span style="font-size:24px; color:#2e7d32; font-weight:bold;">\u2714\uFE0E</span>';
-        html += '<span>Exact</span></div>';
-        html += '<div class="travaux-autocollant-item' + croixActif + '" onclick="travauxOutils.setOutilActif(\'croix\')" title="Erron\u00e9, inexact, +/- pertinent">';
-        html += '<span style="font-size:24px; color:#c62828; font-weight:bold;">\u2718</span>';
-        html += '<span>Erron\u00e9</span></div>';
-        html += '<div class="travaux-autocollant-item' + interroActif + '" onclick="travauxOutils.setOutilActif(\'interrogation\')" title="Incertain, ambigu, pas clair">';
-        html += '<span style="font-size:24px; color:#e65100; font-weight:bold;">?</span>';
-        html += '<span>Incertain</span></div>';
-        html += '</div>';
-
-        // Qualite (ordre personnalise)
-        html += '<div class="travaux-autocollants-label">' + (nomsCat.qualite || 'Qualit\u00e9') + '</div>';
-        html += '<div class="travaux-autocollants-grille">';
-        obtenirAutocollantsOrdonnes('qualite').forEach(function(a) {
-            var imgSrc = imagesAutocollants[a.id] ? imagesAutocollants[a.id].src : DOSSIER_AUTOCOLLANTS + a.fichier;
-            html += '<div class="travaux-autocollant-item" onclick="travauxOutils.setAutocollantActif(\'' + a.id + '\')" title="' + a.nom + '">';
-            html += '<img src="' + imgSrc + '" alt="' + a.nom + '">';
-            html += '<span>' + a.nom + '</span></div>';
-        });
-        html += '</div>';
-
-        // Diagnostic (ordre personnalise)
-        html += '<div class="travaux-autocollants-label">' + (nomsCat.diagnostic || 'Observations') + '</div>';
-        html += '<div class="travaux-autocollants-grille">';
-        obtenirAutocollantsOrdonnes('diagnostic').forEach(function(a) {
-            var imgSrc = imagesAutocollants[a.id] ? imagesAutocollants[a.id].src : DOSSIER_AUTOCOLLANTS + a.fichier;
-            html += '<div class="travaux-autocollant-item" onclick="travauxOutils.setAutocollantActif(\'' + a.id + '\')" title="' + a.nom + '">';
-            html += '<img src="' + imgSrc + '" alt="' + a.nom + '">';
-            html += '<span>' + a.nom + '</span></div>';
-        });
-        html += '</div>';
+        html += genererContenuTampons();
         html += '</div>';
 
         palette.innerHTML = html;
@@ -617,6 +578,82 @@
     // Appliquer les personnalisations au démarrage (après prechargerAutocollants)
     try { appliquerPersonnalisations(); } catch (e) { console.error('[Travaux-Outils] Erreur appliquerPersonnalisations:', e); }
 
+    /* ===============================
+       CONTENU RÉUTILISABLE DES PALETTES
+       (pour ancrage colonne droite ET flottant)
+       =============================== */
+
+    /**
+     * Génère le HTML interne de la liste des erreurs de français.
+     * Utilisé par la colonne droite ancrée ET la palette flottante.
+     * @returns {string} HTML de la .travaux-errfr-liste
+     */
+    function genererContenuErreursFr() {
+        let html = '<div class="travaux-errfr-liste">';
+        obtenirCodesOrdonnes().forEach((c, idx) => {
+            const outil = OUTILS[c.id];
+            const actif = outilActif === c.id ? ' actif' : '';
+            html += `<div class="travaux-errfr-item${actif}" onclick="travauxOutils.setOutilActif('${c.id}')" title="${c.nom}">`;
+            html += `<span class="travaux-errfr-numero" style="background:${outil.couleurBouton}">${idx + 1}</span>`;
+            html += `<span class="travaux-errfr-nom">${c.nom}</span>`;
+            html += `<span class="travaux-errfr-compteur u-hide" data-erreur="${c.id}"></span>`;
+            html += '</div>';
+        });
+        html += '</div>';
+        return html;
+    }
+
+    /**
+     * Génère le HTML interne des tampons (symboles + qualité + diagnostic).
+     * Utilisé par la colonne droite ancrée ET la palette flottante.
+     * @returns {string} HTML des 3 grilles d'autocollants
+     */
+    function genererContenuTampons() {
+        let html = '';
+        const nomsCat = obtenirNomsCategories();
+
+        // Symboles (crochet / croix / interrogation)
+        html += '<div class="travaux-autocollants-label">' + (nomsCat.symboles || 'Contenu et méthode') + '</div>';
+        html += '<div class="travaux-autocollants-grille travaux-autocollants-grille--symboles">';
+        const crochetActif = outilActif === 'crochet' ? ' actif' : '';
+        const croixActif = outilActif === 'croix' ? ' actif' : '';
+        const interroActif = outilActif === 'interrogation' ? ' actif' : '';
+        html += '<div class="travaux-autocollant-item' + crochetActif + '" onclick="travauxOutils.setOutilActif(\'crochet\')" title="Bien vu, exact, pertinent">';
+        html += '<span style="font-size:24px; color:#2e7d32; font-weight:bold;">\u2714\uFE0E</span>';
+        html += '<span>Exact</span></div>';
+        html += '<div class="travaux-autocollant-item' + croixActif + '" onclick="travauxOutils.setOutilActif(\'croix\')" title="Erroné, inexact, +/- pertinent">';
+        html += '<span style="font-size:24px; color:#c62828; font-weight:bold;">\u2718</span>';
+        html += '<span>Erroné</span></div>';
+        html += '<div class="travaux-autocollant-item' + interroActif + '" onclick="travauxOutils.setOutilActif(\'interrogation\')" title="Incertain, ambigu, pas clair">';
+        html += '<span style="font-size:24px; color:#e65100; font-weight:bold;">?</span>';
+        html += '<span>Incertain</span></div>';
+        html += '</div>';
+
+        // Qualité (ordre personnalisé)
+        html += '<div class="travaux-autocollants-label">' + (nomsCat.qualite || 'Qualité') + '</div>';
+        html += '<div class="travaux-autocollants-grille">';
+        obtenirAutocollantsOrdonnes('qualite').forEach(function(a) {
+            var imgSrc = imagesAutocollants[a.id] ? imagesAutocollants[a.id].src : DOSSIER_AUTOCOLLANTS + a.fichier;
+            html += '<div class="travaux-autocollant-item" onclick="travauxOutils.setAutocollantActif(\'' + a.id + '\')" title="' + a.nom + '">';
+            html += '<img src="' + imgSrc + '" alt="' + a.nom + '">';
+            html += '<span>' + a.nom + '</span></div>';
+        });
+        html += '</div>';
+
+        // Diagnostic (ordre personnalisé)
+        html += '<div class="travaux-autocollants-label">' + (nomsCat.diagnostic || 'Observations') + '</div>';
+        html += '<div class="travaux-autocollants-grille">';
+        obtenirAutocollantsOrdonnes('diagnostic').forEach(function(a) {
+            var imgSrc = imagesAutocollants[a.id] ? imagesAutocollants[a.id].src : DOSSIER_AUTOCOLLANTS + a.fichier;
+            html += '<div class="travaux-autocollant-item" onclick="travauxOutils.setAutocollantActif(\'' + a.id + '\')" title="' + a.nom + '">';
+            html += '<img src="' + imgSrc + '" alt="' + a.nom + '">';
+            html += '<span>' + a.nom + '</span></div>';
+        });
+        html += '</div>';
+
+        return html;
+    }
+
     let paletteErrFrVisible = false;
 
     /**
@@ -645,19 +682,10 @@
         html += '<button class="travaux-palette-toggle" onclick="travauxOutils.fermerPaletteErreursFrancais()" title="Fermer">\u00d7</button>';
         html += '</div></div>';
 
-        // Contenu : liste verticale
+        // Contenu : liste verticale (réutilise la fonction partagée)
         html += '<div class="travaux-palette-contenu" id="travaux-errfr-contenu">';
-        html += '<div class="travaux-errfr-liste">';
-        obtenirCodesOrdonnes().forEach((c, idx) => {
-            const outil = OUTILS[c.id];
-            const actif = outilActif === c.id ? ' actif' : '';
-            html += `<div class="travaux-errfr-item${actif}" onclick="travauxOutils.setOutilActif('${c.id}')" title="${c.nom}">`;
-            html += `<span class="travaux-errfr-numero" style="background:${outil.couleurBouton}">${idx + 1}</span>`;
-            html += `<span class="travaux-errfr-nom">${c.nom}</span>`;
-            html += `<span class="travaux-errfr-compteur u-hide" data-erreur="${c.id}"></span>`;
-            html += '</div>';
-        });
-        html += '</div></div>';
+        html += genererContenuErreursFr();
+        html += '</div>';
 
         palette.innerHTML = html;
 
@@ -1061,14 +1089,6 @@
         html += '<button id="travaux-btn-redo" class="travaux-palette-btn-pied" onclick="travauxAnnotation.retablir()" disabled title="Retablir (Ctrl+Y)">R\u00e9tablir</button>';
         html += '<button id="travaux-btn-supprimer" class="travaux-palette-btn-pied" onclick="travauxAnnotation.supprimerSelection()" disabled title="Supprimer la sélection (Delete)">Supprimer</button>';
         html += '<button class="travaux-palette-btn-pied travaux-palette-btn-danger" onclick="travauxAnnotation.effacerPage()" title="Effacer toute la page">Effacer tout</button>';
-        html += '</div>';
-
-        // Boutons toggle palettes secondaires
-        html += '<div class="travaux-palette-pied travaux-palette-toggles">';
-        if (!masquerErreursFrancais) {
-            html += '<button class="travaux-palette-btn-pied" onclick="travauxOutils.togglePaletteErreursFrancais()" title="Codes d\'erreurs">\uD83D\uDCCE</button>';
-        }
-        html += '<button class="travaux-palette-btn-pied" onclick="travauxOutils.togglePaletteAutocollants()" title="R\u00e9troactions visuelles">\uD83D\uDD23</button>';
         html += '</div>';
 
         html += '</div>'; // fin .travaux-palette-flottante
@@ -1609,15 +1629,27 @@
 
     /**
      * Ferme et rouvre les palettes visibles pour refléter les personnalisations.
+     * Détecte si les palettes sont ancrées (colonne droite) ou flottantes.
      */
     function rafraichirPalettesApresPersonnalisation() {
-        if (document.getElementById('travaux-palette-tampons')) {
-            fermerPaletteAutocollants();
-            togglePaletteAutocollants();
+        // Palettes ancrées dans la colonne droite — re-rendre le contenu in-place
+        const ancreErrFr = document.getElementById('annot-errfr-contenu');
+        if (ancreErrFr) {
+            ancreErrFr.innerHTML = genererContenuErreursFr();
         }
-        if (document.getElementById('travaux-palette-erreurs-fr')) {
+        const ancreTampons = document.getElementById('annot-tampons-contenu');
+        if (ancreTampons) {
+            ancreTampons.innerHTML = genererContenuTampons();
+        }
+
+        // Fallback flottant (vue côte-à-côte)
+        if (!ancreErrFr && document.getElementById('travaux-palette-erreurs-fr')) {
             fermerPaletteErreursFrancais();
             togglePaletteErreursFrancais();
+        }
+        if (!ancreTampons && document.getElementById('travaux-palette-tampons')) {
+            fermerPaletteAutocollants();
+            togglePaletteAutocollants();
         }
     }
 
@@ -1685,6 +1717,9 @@
         // Palette flottante
         configurerDragPalette: configurerDragPalette,
         togglePaletteReplie: togglePaletteReplie,
+        // Contenu réutilisable (colonne droite + flottant)
+        genererContenuErreursFr: genererContenuErreursFr,
+        genererContenuTampons: genererContenuTampons,
         // Compteurs erreurs
         compterErreursFrancais: compterErreursFrancais,
         mettreAJourCompteursErreurs: mettreAJourCompteursErreurs,

@@ -69,6 +69,24 @@
         }
     }
 
+    // Migration one-time : supprimer les anciennes largeurs eval persistées
+    // pour que les nouveaux défauts (plus étroits) prennent effet.
+    (function migrerLargeursEval() {
+        const MIGRATION_KEY = 'travaux-migration-eval-widths-v1';
+        if (localStorage.getItem(MIGRATION_KEY)) return;
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY_PANNEAUX);
+            if (raw) {
+                const obj = JSON.parse(raw);
+                delete obj['eval-params'];
+                delete obj['eval-evaluation'];
+                delete obj['eval-retro'];
+                localStorage.setItem(STORAGE_KEY_PANNEAUX, JSON.stringify(obj));
+            }
+        } catch (_) { /* ignore */ }
+        localStorage.setItem(MIGRATION_KEY, '1');
+    })();
+
     /**
      * Crée un séparateur draggable entre deux colonnes flex.
      * @param {Object} opts
@@ -192,7 +210,7 @@
         layoutFlex.id = 'annot-layout-flex';
         layoutFlex.className = 'annot-layout-flex';
 
-        // --- Colonne palette ---
+        // --- Colonne palette (gauche) ---
         const colPalette = document.createElement('div');
         colPalette.className = 'annot-col-palette';
 
@@ -202,17 +220,16 @@
         colPalette.appendChild(paletteEl);
         layoutFlex.appendChild(colPalette);
 
-        // --- Splitter ---
-        const splitter = creerSplitter({
+        // --- Splitter 1 : Palette | Canvas ---
+        layoutFlex.appendChild(creerSplitter({
             id: 'annot-splitter-1',
             storageKey: 'annot-palette',
             side: 'left',
             minWidth: 120,
             maxWidth: 400
-        });
-        layoutFlex.appendChild(splitter);
+        }));
 
-        // --- Colonne document ---
+        // --- Colonne document (centre) ---
         const colDoc = document.createElement('div');
         colDoc.className = 'annot-col-document';
         colDoc.id = 'annot-col-document';
@@ -221,6 +238,66 @@
             colDoc.appendChild(canvasContainer);
         }
         layoutFlex.appendChild(colDoc);
+
+        // --- Splitter 2 : Canvas | Colonne droite ---
+        layoutFlex.appendChild(creerSplitter({
+            id: 'annot-splitter-2',
+            storageKey: 'annot-droite',
+            side: 'right',
+            minWidth: 160,
+            maxWidth: 400
+        }));
+
+        // --- Colonne droite : Erreurs FR + Tampons ---
+        const colDroite = document.createElement('div');
+        colDroite.className = 'annot-col-droite';
+        colDroite.id = 'annot-col-droite';
+
+        // Section Erreurs de français
+        const sectionErrFr = document.createElement('div');
+        sectionErrFr.className = 'annot-section-palette';
+        sectionErrFr.id = 'travaux-palette-erreurs-fr';
+        sectionErrFr.innerHTML =
+            '<div class="annot-section-barre" data-section="errfr">' +
+                '<span class="annot-section-titre">Erreurs de français</span>' +
+                '<div style="display:flex; gap:2px;">' +
+                    '<button class="travaux-palette-toggle" onclick="travauxOutils.ouvrirEditionRetroErreursFr()" title="Personnaliser">\u2699</button>' +
+                    '<button class="travaux-palette-toggle annot-section-toggle" data-section="errfr" title="Replier">\u2212</button>' +
+                '</div>' +
+            '</div>' +
+            '<div class="annot-section-contenu" id="annot-errfr-contenu">' +
+                travauxOutils.genererContenuErreursFr() +
+            '</div>';
+        colDroite.appendChild(sectionErrFr);
+
+        // Section Tampons
+        const sectionTampons = document.createElement('div');
+        sectionTampons.className = 'annot-section-palette';
+        sectionTampons.id = 'travaux-palette-tampons';
+        sectionTampons.innerHTML =
+            '<div class="annot-section-barre" data-section="tampons">' +
+                '<span class="annot-section-titre">Tampons</span>' +
+                '<div style="display:flex; gap:2px;">' +
+                    '<button class="travaux-palette-toggle" onclick="travauxOutils.ouvrirEditionRetroObservations()" title="Personnaliser">\u2699</button>' +
+                    '<button class="travaux-palette-toggle annot-section-toggle" data-section="tampons" title="Replier">\u2212</button>' +
+                '</div>' +
+            '</div>' +
+            '<div class="annot-section-contenu" id="annot-tampons-contenu">' +
+                travauxOutils.genererContenuTampons() +
+            '</div>';
+        colDroite.appendChild(sectionTampons);
+
+        // Listener délégué pour collapse/expand des sections
+        colDroite.addEventListener('click', function(e) {
+            const btn = e.target.closest('.annot-section-toggle');
+            if (!btn) return;
+            const section = btn.closest('.annot-section-palette');
+            if (!section) return;
+            section.classList.toggle('replie');
+            btn.textContent = section.classList.contains('replie') ? '+' : '\u2212';
+        });
+
+        layoutFlex.appendChild(colDroite);
 
         // Insérer après la toolbar
         const toolbar = conteneurDoc.querySelector('.travaux-toolbar');
@@ -233,8 +310,9 @@
         // Marquer le conteneur
         conteneurDoc.classList.add('mode-annot-actif');
 
-        // Restaurer la largeur persistée
+        // Restaurer les largeurs persistées
         restaurerLargeurPanneau(colPalette, 'annot-palette');
+        restaurerLargeurPanneau(colDroite, 'annot-droite');
     }
 
     function detruireLayoutAnnotation() {
@@ -3006,6 +3084,11 @@
         const annotLayout = document.getElementById('annot-layout-flex');
         if (annotLayout) {
             annotLayout.classList.remove('u-hide');
+            // Défense en profondeur : s'assurer que les sections ancrées sont visibles
+            ['travaux-palette-erreurs-fr', 'travaux-palette-tampons'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.remove('u-hide');
+            });
             return;
         }
         // Fallback: palette flottante (vue côte-à-côte)
