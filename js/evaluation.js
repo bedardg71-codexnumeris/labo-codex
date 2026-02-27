@@ -3902,6 +3902,8 @@ function verifierEtChargerEvaluationExistante() {
         const section = document.getElementById('gestionJetonsEvaluation');
         if (section) section.classList.add('u-hide');
 
+        // Régénérer la rétroaction avec les options d'affichage actuelles
+        genererRetroaction(1);
         return;
     }
 
@@ -4082,6 +4084,9 @@ function verifierEtChargerEvaluationExistante() {
                 calculerNote();
                 console.log('✅ Note finale recalculée après restauration critères et données algorithmiques');
             }
+            // Régénérer la rétroaction avec les options d'affichage ACTUELLES
+            // (la rétroaction sauvegardée peut être obsolète si les checkboxes/radios ont changé)
+            genererRetroaction(1);
         }, 350);
     }, 300);
 }
