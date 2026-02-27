@@ -13807,6 +13807,19 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 }
 
 /* ===============================
+   LAYOUT PLEINE LARGEUR — Annoter et évaluer
+   Supprime les paddings parents pour maximiser l'espace de travail
+   (même approche que la planification)
+   =============================== */
+.contenu:has(#evaluations-annoter.sous-section.active) {
+    padding: 0;
+}
+#section-evaluations.section.active:has(#evaluations-annoter.sous-section.active) {
+    padding: 4px 0 0;
+    border-radius: 0;
+}
+
+/* ===============================
    MODULE TRAVAUX - STYLES
    Beta 96.3 : Import, annotation, archivage
    =============================== */
