@@ -4539,13 +4539,13 @@ function modifierEvaluation(evaluationId) {
 
     const estVerrouillee = evaluation.verrouillee || false;
 
+    // Flag pour empêcher afficherFichiers() de masquer le formulaire d'évaluation
+    // (afficherSousSection déclenche initialiserModuleTravaux → rafraichirUI → afficherFichiers
+    // qui masquerait le formulaire avant qu'on ait le temps de le rendre visible)
+    window._modifierEvaluationEnCours = true;
+
     // Naviguer vers la section d'évaluation (onglet Annoter et évaluer)
     afficherSousSection('evaluations-annoter');
-
-    // NOTE: Le masquage DOM (montrer formulaire / masquer visionneuse) est fait
-    // dans le setTimeout 300ms ci-dessous, APRÈS que initialiserModuleTravaux()
-    // (déclenché par afficherSousSection, délai 100ms) ait fini son rafraichirUI().
-    // Sinon rafraichirUI() → afficherFichiers() écrase le masquage.
 
     // ========== FONCTIONS HELPER ==========
 
@@ -4961,29 +4961,6 @@ function modifierEvaluation(evaluationId) {
                 ligneSupprimer.classList.remove('u-hide');
             }
 
-            // ÉTAPE 17: Synchroniser la visionneuse avec le fichier de l'étudiant
-            // (pour que le canevas affiche la bonne copie si l'utilisateur bascule en mode annotation)
-            if (typeof travauxStockage !== 'undefined' && typeof travauxUI !== 'undefined') {
-                try {
-                    let fichiers = travauxStockage.obtenirFichiersEtudiant(evaluation.etudiantDA);
-                    if (evaluation.productionId) {
-                        fichiers = fichiers.filter(f => f.productionId === evaluation.productionId);
-                    }
-                    if (fichiers.length > 0) {
-                        console.log('1️⃣7️⃣ Synchronisation visionneuse avec fichier:', fichiers[0].id);
-                        await travauxUI.ouvrirFichier(fichiers[0].id);
-                        // Re-masquer la visionneuse et re-montrer le formulaire
-                        // (ouvrirFichier remet la visionneuse en avant)
-                        const evalDivFin = document.getElementById('evaluations-contenu-evaluation');
-                        const fichiersDivFin = document.getElementById('evaluations-contenu-fichiers');
-                        if (evalDivFin) evalDivFin.classList.remove('u-hide');
-                        if (fichiersDivFin) fichiersDivFin.classList.add('u-hide');
-                    }
-                } catch (e) {
-                    console.warn('⚠️ Synchronisation visionneuse ignorée:', e.message);
-                }
-            }
-
             console.log('✅ Évaluation chargée avec succès');
 
         } catch (erreur) {
@@ -4992,8 +4969,10 @@ function modifierEvaluation(evaluationId) {
                 'Erreur de chargement',
                 `Impossible de charger l'évaluation: ${erreur.message}`
             );
+        } finally {
+            window._modifierEvaluationEnCours = false;
         }
-    }, 300);
+    }, 200);
 }
 
 /**

@@ -719,6 +719,10 @@
      * État initial : sélection de fichier pour annotation
      */
     function afficherFichiers() {
+        // Ne pas écraser le formulaire d'évaluation si modifierEvaluation() est en cours
+        // (sinon rafraichirUI masque le formulaire avant qu'il ne soit rendu visible)
+        if (window._modifierEvaluationEnCours) return;
+
         const conteneur = document.getElementById('evaluations-contenu-fichiers');
         if (!conteneur) return;
 
