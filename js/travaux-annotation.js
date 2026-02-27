@@ -1086,6 +1086,9 @@
 
         function confirmerTexte() {
             const texte = textarea.value.trim();
+            // Capturer la largeur du textarea avant de le supprimer
+            const canvasRect2 = canvasAnnotation.getBoundingClientRect();
+            const largeurNorm = textarea.offsetWidth / canvasRect2.width;
             textarea.remove();
 
             if (!texte) return;
@@ -1096,7 +1099,8 @@
                 y: yNorm,
                 text: texte,
                 fontSize: tailleCourante,
-                color: couleur
+                color: couleur,
+                width: largeurNorm
             };
 
             const donneesPage = obtenirDonneesPage();
@@ -1217,17 +1221,31 @@
                 const h = canvasAnnotation?.height || 1000;
                 const ctx = ctxAnnotation || document.createElement('canvas').getContext('2d');
                 ctx.font = `${fontSize}px sans-serif`;
-                // Support multiligne
-                const lignes = (data.text || '').split('\n');
-                let maxTextW = 0;
-                for (const ligne of lignes) {
-                    const lw = ctx.measureText(ligne).width / w;
-                    if (lw > maxTextW) maxTextW = lw;
-                }
+                const lignesBrutes = (data.text || '').split('\n');
                 const interligne = fontSize * 1.3;
                 const textH = fontSize / h;
-                const totalH = (lignes.length * interligne) / h;
-                return { x1: data.x, y1: data.y - textH, x2: data.x + maxTextW, y2: data.y + totalH };
+
+                let bboxW, nbLignes;
+                if (data.width && data.width > 0) {
+                    // Largeur fixe + word-wrap
+                    bboxW = data.width;
+                    const maxWidthPx = data.width * w;
+                    nbLignes = 0;
+                    for (const ligne of lignesBrutes) {
+                        nbLignes += wrapLigne(ctx, ligne, maxWidthPx).length;
+                    }
+                } else {
+                    // Ancien mode : largeur automatique
+                    let maxTextW = 0;
+                    for (const ligne of lignesBrutes) {
+                        const lw = ctx.measureText(ligne).width / w;
+                        if (lw > maxTextW) maxTextW = lw;
+                    }
+                    bboxW = maxTextW;
+                    nbLignes = lignesBrutes.length;
+                }
+                const totalH = (nbLignes * interligne) / h;
+                return { x1: data.x, y1: data.y - textH, x2: data.x + bboxW, y2: data.y + totalH };
             }
             case 'sticker':
                 return { x1: data.x, y1: data.y, x2: data.x + data.width, y2: data.y + data.height };
@@ -1749,19 +1767,15 @@
                     break;
             }
         } else if (sel.type === 'text') {
-            // Ajuster fontSize proportionnellement
-            const origW = bbox.x2 - bbox.x1;
+            // Ajuster la largeur du bloc texte (le texte se redistribue)
             let newW;
             switch (poignee) {
                 case 'ne': case 'se': newW = xNorm - bbox.x1; break;
                 case 'nw': case 'sw': newW = bbox.x2 - xNorm; sel.data.x = xNorm; break;
-                default: newW = origW;
+                default: newW = bbox.x2 - bbox.x1;
             }
-            if (origW > 0 && newW > 0) {
-                const ratio = newW / origW;
-                // Utiliser la fontSize originale (avant drag) pour eviter la croissance exponentielle
-                const fontSizeOriginal = (donneesAvantModif && donneesAvantModif.fontSize) || sel.data.fontSize || 14;
-                sel.data.fontSize = Math.max(8, Math.round(fontSizeOriginal * ratio));
+            if (newW > 0.02) {
+                sel.data.width = newW;
             }
         }
 
@@ -2416,9 +2430,26 @@
     }
 
     /**
-     * Dessine un texte
-     * @param {Object} texte - Donnees texte
+     * Découpe une ligne de texte en sous-lignes tenant dans maxWidthPx.
      */
+    function wrapLigne(ctx, ligne, maxWidthPx) {
+        if (!ligne) return [''];
+        const mots = ligne.split(' ');
+        const result = [];
+        let courante = '';
+        for (const mot of mots) {
+            const test = courante ? courante + ' ' + mot : mot;
+            if (ctx.measureText(test).width > maxWidthPx && courante) {
+                result.push(courante);
+                courante = mot;
+            } else {
+                courante = test;
+            }
+        }
+        if (courante) result.push(courante);
+        return result.length ? result : [''];
+    }
+
     function dessinerTexte(texte) {
         const w = canvasAnnotation.width;
         const h = canvasAnnotation.height;
@@ -2428,13 +2459,26 @@
         ctxAnnotation.font = `${fontSize}px sans-serif`;
         ctxAnnotation.fillStyle = texte.color || '#FF0000';
 
-        const lignes = (texte.text || '').split('\n');
         const interligne = fontSize * 1.3;
         const xPx = texte.x * w;
         const yPx = texte.y * h;
 
-        for (let i = 0; i < lignes.length; i++) {
-            ctxAnnotation.fillText(lignes[i], xPx, yPx + i * interligne);
+        // Word-wrap si une largeur est définie
+        const maxWidthPx = texte.width ? texte.width * w : 0;
+        const lignesBrutes = (texte.text || '').split('\n');
+        let lignesFinales;
+
+        if (maxWidthPx > 0) {
+            lignesFinales = [];
+            for (const ligne of lignesBrutes) {
+                lignesFinales.push(...wrapLigne(ctxAnnotation, ligne, maxWidthPx));
+            }
+        } else {
+            lignesFinales = lignesBrutes;
+        }
+
+        for (let i = 0; i < lignesFinales.length; i++) {
+            ctxAnnotation.fillText(lignesFinales[i], xPx, yPx + i * interligne);
         }
 
         ctxAnnotation.restore();
