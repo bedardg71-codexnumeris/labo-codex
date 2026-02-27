@@ -109,6 +109,13 @@
             }
         });
 
+        // Sauvegarder les annotations avant rechargement/fermeture de page
+        window.addEventListener('beforeunload', () => {
+            if (annotationActive && annotationCourante) {
+                sauvegarderAnnotation();
+            }
+        });
+
         console.log('[Travaux-Annotation] Module initialise');
     }
 

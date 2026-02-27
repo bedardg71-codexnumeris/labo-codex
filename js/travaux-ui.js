@@ -278,6 +278,11 @@
     async function initialiserModuleTravaux() {
         if (moduleInitialise) {
             const etaitEnModeEvaluer = (modeCourant === 'evaluer');
+            // Forcer la sauvegarde des annotations AVANT de reconstruire le DOM
+            // (sinon les annotations non sauvegardées sont perdues lors de la navigation)
+            if (typeof travauxAnnotation !== 'undefined' && travauxAnnotation.desactiverAnnotation) {
+                travauxAnnotation.desactiverAnnotation();
+            }
             // Fermer les palettes eval AVANT rafraichirUI pour sauver les panneaux
             // (rafraichirUI → afficherFichiers détruit le conteneur document)
             if (document.getElementById('travaux-palette-eval-gauche')) {
@@ -1821,7 +1826,7 @@
         const productionsAvecFichiers = productions.filter(p => groupes[p.id] && groupes[p.id].length > 0);
         let htmlDropdown = '';
         if (productionsAvecFichiers.length >= 1) {
-            htmlDropdown += '<select id="filtre-production-badges" class="controle-form travaux-filtre-production" onchange="travauxUI.filtrerBadgesParProduction()">';
+            htmlDropdown += '<select class="controle-form travaux-filtre-production" onchange="travauxUI.filtrerBadgesParProduction(this)">';
             if (productionsAvecFichiers.length > 1) {
                 htmlDropdown += '<option value="">Toutes les productions</option>';
             }
@@ -1864,12 +1869,18 @@
     /**
      * Filtre les badges affichés selon la production sélectionnée dans le dropdown
      */
-    function filtrerBadgesParProduction() {
-        const select = document.getElementById('filtre-production-badges');
+    function filtrerBadgesParProduction(selectElement) {
+        // Trouver le select : soit passé en argument (onchange), soit chercher dans le conteneur annoter
+        const select = selectElement || document.querySelector('#evaluations-contenu-fichiers .travaux-filtre-production');
         const productionId = select ? select.value : '';
         productionFiltreActive = productionId;
         sessionStorage.setItem('travaux-filtre-production', productionId);
-        const groupes = document.querySelectorAll('.travaux-badges-groupe');
+
+        // Scoper au conteneur parent du select pour éviter d'affecter les autres onglets
+        const conteneur = select ? select.closest('.travaux-grille-fichiers') : null;
+        const groupes = conteneur
+            ? conteneur.querySelectorAll('.travaux-badges-groupe')
+            : document.querySelectorAll('.travaux-badges-groupe');
 
         groupes.forEach(groupe => {
             const pid = groupe.getAttribute('data-production-id');
@@ -1881,13 +1892,27 @@
         });
 
         // Masquer/afficher aussi les titres de production
-        const titres = document.querySelectorAll('.travaux-groupe-production-titre');
+        const titres = conteneur
+            ? conteneur.querySelectorAll('.travaux-groupe-production-titre')
+            : document.querySelectorAll('.travaux-groupe-production-titre');
         titres.forEach(titre => {
             const nextGroupe = titre.nextElementSibling;
             if (nextGroupe && nextGroupe.classList.contains('travaux-badges-groupe')) {
                 titre.style.display = nextGroupe.style.display;
             }
         });
+
+        // Auto-naviguer vers le premier fichier visible si le fichier actuel est masqué
+        if (selectElement && conteneur) {
+            const fichierActuel = travauxVisionneuse.getFichierActuel();
+            const fichierMasque = fichierActuel && productionId && fichierActuel.productionId !== productionId;
+            if (!fichierActuel || fichierMasque) {
+                const premierBadge = conteneur.querySelector('.travaux-badges-groupe[style=""] .travaux-badge-importe, .travaux-badges-groupe:not([style*="none"]) .travaux-badge-importe');
+                if (premierBadge && premierBadge.dataset.fichierId) {
+                    ouvrirFichier(premierBadge.dataset.fichierId);
+                }
+            }
+        }
     }
 
     /**
@@ -4574,6 +4599,23 @@
                 <ul class="travaux-retro-criteres">${lignes}</ul>`;
         }
 
+        // Lire le réglage affichageNote de la pratique active
+        let modeNote = 'complet';
+        try {
+            const configurations = db.getSync('pratiquesConfigurables', []);
+            const modalites = db.getSync('modalitesEvaluation', {});
+            const pratiqueId = modalites.pratiqueActiveId || modalites.configurationSTDAppliquee?.id;
+            const pratiqueActive = pratiqueId ? configurations.find(p => p.id === pratiqueId) : null;
+            if (pratiqueActive?.affichageNote === 'lettre') modeNote = 'lettre';
+        } catch(e) { /* fallback complet */ }
+
+        let noteHTML;
+        if (modeNote === 'lettre') {
+            noteHTML = `Niveau : <strong>${echapperHtml(evaluation.niveauFinal || '—')}</strong>`;
+        } else {
+            noteHTML = `Note : <strong>${evaluation.noteFinale != null ? evaluation.noteFinale + '%' : '—'}</strong> &nbsp;|&nbsp; Niveau : <strong>${echapperHtml(evaluation.niveauFinal || '—')}</strong>`;
+        }
+
         // Construire le modal
         const html = `
         <div class="modal-overlay actif" id="travaux-modal-retroaction" onclick="if(event.target===this) travauxUI.fermerModalRetroaction()">
@@ -4584,7 +4626,7 @@
                 <div class="travaux-retro-entete">
                     <div>Production : <strong>${echapperHtml(evaluation.productionNom || '—')}</strong></div>
                     <div>Grille : <strong>${echapperHtml(evaluation.grilleNom || '—')}</strong></div>
-                    <div>Note : <strong>${evaluation.noteFinale != null ? evaluation.noteFinale + '%' : '—'}</strong> &nbsp;|&nbsp; Niveau : <strong>${echapperHtml(evaluation.niveauFinal || '—')}</strong></div>
+                    <div>${noteHTML}</div>
                 </div>
 
                 ${criteresHTML}

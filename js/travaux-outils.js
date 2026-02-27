@@ -38,6 +38,9 @@
     // Mode pointes de fleche : 'fin' | 'debut' | 'double' | 'aucune'
     let flechePointes = 'fin';
 
+    // Cache des curseurs personnalisés (tampons + codes d'erreur)
+    let _curseurCache = {};
+
     /* ===============================
        OUTILS
        =============================== */
@@ -845,8 +848,6 @@
     /* ===============================
        CURSEUR PERSONNALISE (tampons + codes d'erreur)
        =============================== */
-
-    let _curseurCache = {}; // { id: 'url(data:...) 16 16, crosshair' }
 
     function genererCurseurTampon(autocollantId) {
         if (_curseurCache['tampon_' + autocollantId]) return _curseurCache['tampon_' + autocollantId];
