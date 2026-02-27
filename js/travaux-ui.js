@@ -2098,7 +2098,9 @@
         });
 
         // Auto-naviguer vers le premier fichier visible si le fichier actuel est masqué
-        if (selectElement && conteneur) {
+        // Uniquement dans le contexte annotation (pas archivage)
+        const dansArchivage = select && select.closest('#evaluations-contenu-archivage');
+        if (selectElement && conteneur && !dansArchivage) {
             const fichierActuel = travauxVisionneuse.getFichierActuel();
             const fichierMasque = fichierActuel && productionId && fichierActuel.productionId !== productionId;
             if (!fichierActuel || fichierMasque) {
