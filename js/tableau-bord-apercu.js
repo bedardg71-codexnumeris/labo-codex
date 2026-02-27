@@ -880,6 +880,16 @@ function chargerTableauBordApercu() {
         // Appliquer les couleurs des étudiants suivis après génération du HTML
         appliquerCouleursEtudiantsSuivis();
 
+        // Horodatage discret en bas du tableau de bord
+        const horodatage = document.getElementById('tdb-horodatage');
+        if (horodatage) {
+            const now = new Date();
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            const s = String(now.getSeconds()).padStart(2, '0');
+            horodatage.textContent = `Indices calculés à ${h}:${m}:${s}`;
+        }
+
     } catch (error) {
         console.error('❌ Erreur chargement tableau de bord:', error);
     }
