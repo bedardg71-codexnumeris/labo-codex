@@ -2380,6 +2380,9 @@
             const btnToggle = document.getElementById('travaux-btn-toggle-sidebar');
             if (btnToggle) { btnToggle.classList.add('visible'); btnToggle.innerHTML = '&#x25B6;'; }
 
+            // Charger les annotations du nouveau fichier (nécessaire dans les deux modes)
+            travauxAnnotation.activerAnnotation();
+
             // Restaurer le mode courant (Annoter ou Évaluer) sans flash
             if (modeAvantNavigation === 'evaluer') {
                 const fichierNav = travauxVisionneuse.getFichierActuel();
@@ -2388,7 +2391,6 @@
                 }
             } else {
                 // Mode annotation par défaut
-                travauxAnnotation.activerAnnotation();
                 travauxVisionneuse.zoomPleineHauteur();
                 const btnAnnoter = document.getElementById('travaux-btn-annoter');
                 if (btnAnnoter) btnAnnoter.classList.add('actif');
