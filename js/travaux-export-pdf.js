@@ -623,16 +623,21 @@
         doc.setTextColor(...cfg.couleurs.texteSecondaire);
 
         // Nom enseignant a gauche
+        // Priorité : 1) obtenirNomEnseignantActif (via groupeCours), 2) select enseignant du trimestre, 3) premier de la liste enseignants
         let nomEnseignant = '';
         try {
             nomEnseignant = (typeof obtenirNomEnseignantActif === 'function')
                 ? (obtenirNomEnseignantActif() || '')
                 : '';
-            // Fallback vers profilEnseignant si vide
+            // Fallback vers la liste enseignants (profil sélectionné ou premier)
             if (!nomEnseignant && typeof db !== 'undefined' && db.getSync) {
-                const profil = db.getSync('profilEnseignant', {});
-                if (profil && profil.prenom && profil.nom) {
-                    nomEnseignant = profil.prenom + ' ' + profil.nom;
+                const enseignants = db.getSync('enseignants', []);
+                // Essayer le select du trimestre
+                const selectEns = document.getElementById('v2-selectEnseignant');
+                const ensId = selectEns?.value;
+                const ens = ensId ? enseignants.find(e => e.id === ensId) : (enseignants[0] || null);
+                if (ens && ens.prenom && ens.nom) {
+                    nomEnseignant = ens.prenom + ' ' + ens.nom;
                 }
             }
         } catch(e) { /* silencieux */ }
@@ -856,7 +861,7 @@
             doc.setFontSize(cfg.polices.titreSection);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(...cfg.couleurs.titreSection);
-            doc.text('R\u00e9troaction g\u00e9n\u00e9rale par crit\u00e8re et niveau de performance', margeG, y);
+            doc.text('R\u00e9troactions g\u00e9n\u00e9rales par crit\u00e8res et niveaux de performance', margeG, y);
             y += mm(3);
 
             doc.setFont('helvetica', 'italic');
@@ -916,15 +921,21 @@
                     3: { cellWidth: largeurContenu * 0.77 }
                 },
                 margin: { left: margeG, right: margeD },
+                willDrawCell: function(data) {
+                    // Colonne Critère multi-lignes : masquer le texte normal
+                    // (le rendu custom gras+italique est dans didDrawCell)
+                    if (data.section === 'body' && data.column.index === 0) {
+                        const raw = data.cell.raw || '';
+                        if (raw.includes('\n')) {
+                            data.cell.text = [''];
+                        }
+                    }
+                },
                 didParseCell: function(data) {
-                    // Colonne Critère : nom en gras, description en italique
+                    // Colonne Critère : si une seule ligne, juste mettre en gras
                     if (data.section === 'body' && data.column.index === 0) {
                         const texte = data.cell.text.join('\n');
-                        const parties = texte.split('\n');
-                        if (parties.length > 1) {
-                            // Forcer le style normal, le rendu custom est dans didDrawCell
-                            data.cell.styles.fontStyle = 'normal';
-                        } else {
+                        if (!texte.includes('\n')) {
                             data.cell.styles.fontStyle = 'bold';
                         }
                     }
@@ -936,21 +947,26 @@
                         const parties = raw.split('\n');
                         if (parties.length > 1) {
                             const x = data.cell.x + data.cell.padding('left');
-                            let yCell = data.cell.y + data.cell.padding('top') + data.cell.styles.fontSize * 0.352;
-                            const lineH = data.cell.styles.fontSize * 0.352 * 1.15;
+                            const fontSize = data.cell.styles.fontSize;
+                            const lineH = fontSize * 0.352 * 1.15;
+                            let yCell = data.cell.y + data.cell.padding('top') + fontSize * 0.352;
                             const maxW = data.cell.width - data.cell.padding('left') - data.cell.padding('right');
                             // Nom en gras
                             doc.setFont('helvetica', 'bold');
-                            doc.setFontSize(data.cell.styles.fontSize);
+                            doc.setFontSize(fontSize);
                             doc.setTextColor(...data.cell.styles.textColor);
                             const lignesNom = doc.splitTextToSize(parties[0], maxW);
                             doc.text(lignesNom, x, yCell);
-                            yCell += lignesNom.length * lineH + lineH * 0.3;
-                            // Description en italique
+                            yCell += lignesNom.length * lineH + lineH * 0.5;
+                            // Description en italique (taille réduite)
+                            const descFontSize = fontSize - 1;
                             doc.setFont('helvetica', 'italic');
+                            doc.setFontSize(descFontSize);
+                            const descLineH = descFontSize * 0.352 * 1.15;
                             const lignesDesc = doc.splitTextToSize(parties.slice(1).join('\n'), maxW);
-                            doc.text(lignesDesc, x, yCell);
+                            doc.text(lignesDesc, x, yCell, { lineHeightFactor: 1.15 });
                             doc.setFont('helvetica', 'normal');
+                            doc.setFontSize(fontSize);
                         }
                     }
                 },
@@ -1212,21 +1228,19 @@
             for (const type of typesErreurs) {
                 const idxNum = ordreRecap.indexOf(type);
                 const num = idxNum !== -1 ? idxNum + 1 : type.replace('errfr_', '');
-                const def = codesErreurs.find(c => c.id === type);
                 donnesErreurs.push([
                     num,
-                    def?.nom || type,
                     String(stats.erreursFr[type]),
                     retroFr[type] || ''
                 ]);
             }
 
             // Ligne total en gras
-            donnesErreurs.push(['', 'Total des erreurs', String(stats.totalErreursFr), '']);
+            donnesErreurs.push(['', String(stats.totalErreursFr), '']);
 
             doc.autoTable({
                 startY: y,
-                head: [['Code', 'Type', 'Nb', 'Rétroaction']],
+                head: [['Code', 'Nb', 'Rétroaction']],
                 body: donnesErreurs,
                 theme: 'grid',
                 headStyles: {
@@ -1242,9 +1256,8 @@
                 },
                 columnStyles: {
                     0: { cellWidth: largeurContenu * 0.06, halign: 'center' },
-                    1: { cellWidth: largeurContenu * 0.17 },
-                    2: { cellWidth: largeurContenu * 0.05, halign: 'center' },
-                    3: { cellWidth: largeurContenu * 0.72, fontSize: cfg.polices.textePetit - 1 }
+                    1: { cellWidth: largeurContenu * 0.05, halign: 'center' },
+                    2: { cellWidth: largeurContenu * 0.89, fontSize: cfg.polices.textePetit - 1 }
                 },
                 margin: { left: margeG, right: margeD },
                 didParseCell: function(data) {
