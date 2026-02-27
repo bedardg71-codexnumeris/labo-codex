@@ -301,6 +301,16 @@
             fichiersAvecEval = fichiersAvecEval.filter(f => f.etudiantDA === da);
         }
 
+        // 1 PDF par étudiant : privilégier le fichier de cette production
+        const parEtudiant = new Map();
+        for (const f of fichiersAvecEval) {
+            const existant = parEtudiant.get(f.etudiantDA);
+            if (!existant || (f.productionId === productionId && existant.productionId !== productionId)) {
+                parEtudiant.set(f.etudiantDA, f);
+            }
+        }
+        fichiersAvecEval = [...parEtudiant.values()];
+
         if (fichiersAvecEval.length === 0) {
             throw new Error('Aucune évaluation trouvée pour ces critères.');
         }
