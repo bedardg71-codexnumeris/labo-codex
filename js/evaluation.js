@@ -4545,7 +4545,10 @@ function modifierEvaluation(evaluationId) {
     window._modifierEvaluationEnCours = true;
 
     // Naviguer vers la section d'évaluation (onglet Annoter et évaluer)
-    afficherSousSection('evaluations-annoter');
+    // Ne pas re-naviguer si on y est déjà (sinon ça réinitialise le module et écrase le mode évaluer)
+    if (typeof sousSectionActive === 'undefined' || sousSectionActive !== 'evaluations-annoter') {
+        afficherSousSection('evaluations-annoter');
+    }
 
     // ========== FONCTIONS HELPER ==========
 
@@ -4646,22 +4649,25 @@ function modifierEvaluation(evaluationId) {
 
     setTimeout(async () => {
         try {
-            // Masquer la visionneuse et montrer le formulaire d'évaluation
-            // (doit être ici, APRÈS initialiserModuleTravaux/rafraichirUI qui s'exécute à ~100ms)
-            const evalDiv = document.getElementById('evaluations-contenu-evaluation');
-            const fichiersDiv = document.getElementById('evaluations-contenu-fichiers');
-            const visDiv3 = document.getElementById('evaluations-contenu-visionneuse');
-            if (evalDiv) evalDiv.classList.remove('u-hide');
-            if (fichiersDiv) fichiersDiv.classList.add('u-hide');
-            if (visDiv3) visDiv3.classList.add('u-hide');
+            // Si on est en mode évaluer (visionneuse avec fichier ouvert),
+            // les panneaux sont déjà visibles via afficherPalettesEval — ne pas toucher au DOM.
+            // Sinon (standalone, sans fichier), afficher le formulaire directement.
+            const enModeEvaluer = !!document.getElementById('eval-layout-flex');
+            if (!enModeEvaluer) {
+                const evalDiv = document.getElementById('evaluations-contenu-evaluation');
+                const fichiersDiv = document.getElementById('evaluations-contenu-fichiers');
+                const visDiv3 = document.getElementById('evaluations-contenu-visionneuse');
+                if (evalDiv) evalDiv.classList.remove('u-hide');
+                if (fichiersDiv) fichiersDiv.classList.add('u-hide');
+                if (visDiv3) visDiv3.classList.add('u-hide');
 
-            // Rendre visibles les panneaux enfants du formulaire
-            // (ils sont u-hide par défaut car normalement déplacés par afficherPalettesEval
-            // dans le mode évaluation de la visionneuse — ici on les affiche en standalone)
-            ['travaux-eval-gauche', 'travaux-eval-droite', 'travaux-eval-retroaction'].forEach(id => {
-                const panneau = document.getElementById(id);
-                if (panneau) panneau.classList.remove('u-hide');
-            });
+                // Rendre visibles les panneaux enfants du formulaire
+                // (ils sont u-hide par défaut car normalement déplacés par afficherPalettesEval)
+                ['travaux-eval-gauche', 'travaux-eval-droite', 'travaux-eval-retroaction'].forEach(id => {
+                    const panneau = document.getElementById(id);
+                    if (panneau) panneau.classList.remove('u-hide');
+                });
+            }
 
             // ÉTAPE 0: Charger les selects de base (groupes, grilles, échelles)
             console.log('0️⃣ Initialisation des selects de base');
@@ -4970,7 +4976,8 @@ function modifierEvaluation(evaluationId) {
             }
 
             // ÉTAPE 17: Ouvrir le travail de l'étudiant en vue côte à côte (si disponible)
-            if (typeof travauxStockage !== 'undefined' && typeof travauxUI !== 'undefined') {
+            // Seulement en standalone (pas quand le fichier est déjà dans la visionneuse en mode évaluer)
+            if (!enModeEvaluer && typeof travauxStockage !== 'undefined' && typeof travauxUI !== 'undefined') {
                 try {
                     let fichiers = travauxStockage.obtenirFichiersEtudiant(evaluation.etudiantDA);
                     if (evaluation.productionId) {
