@@ -20435,7 +20435,7 @@ body.mode-clair .barre-etudiant.tracked-4 {
 
 /* Colonne Parametres */
 .eval-layout-flex .eval-col-params {
-    flex: 0 0 240px;
+    flex: 0 0 200px;
     display: flex;
     flex-direction: column;
     overflow-y: auto;
@@ -20474,7 +20474,7 @@ body.mode-clair .barre-etudiant.tracked-4 {
 
 /* Colonne Evaluation */
 .eval-layout-flex .eval-col-evaluation {
-    flex: 0 0 200px;
+    flex: 0 0 160px;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -20492,7 +20492,7 @@ body.mode-clair .barre-etudiant.tracked-4 {
 
 /* Colonne Retroaction (pleine hauteur, redimensionnable via splitter) */
 .eval-layout-flex .eval-col-retro {
-    flex: 0 1 340px;
+    flex: 0 1 280px;
     display: flex;
     flex-direction: column;
     overflow: auto;
@@ -20676,6 +20676,82 @@ body.mode-clair .splitter-handle.splitter-active { background: rgba(3, 46, 92, 0
     flex-direction: column;
 }
 /* Le canvas est déplacé dans .annot-col-document par JS — pas de masquage CSS nécessaire */
+
+/* --- Colonne droite annotation (Erreurs FR + Tampons) --- */
+.annot-col-droite {
+    flex: 0 0 220px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+    background: var(--surface-1);
+    border-left: 1px solid var(--bordure);
+}
+.annot-section-palette {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 50%;
+    min-height: 80px;
+    overflow: hidden;
+}
+.annot-section-palette.replie {
+    flex: 0 0 auto;
+    min-height: 0;
+}
+.annot-section-palette.replie .annot-section-contenu {
+    display: none;
+}
+.annot-section-palette + .annot-section-palette {
+    border-top: 1px solid var(--bordure);
+}
+.annot-section-barre {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 8px;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--bordure);
+    flex-shrink: 0;
+}
+.annot-section-titre {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--texte-principal);
+}
+.annot-section-contenu {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px;
+}
+/* Grilles tampons dans la colonne droite : 3 colonnes */
+.annot-col-droite .travaux-autocollants-grille {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3px;
+}
+.annot-col-droite .travaux-autocollants-label {
+    font-size: 0.65rem;
+    padding: 3px 4px 1px;
+    color: var(--texte-secondaire);
+}
+.annot-col-droite .travaux-autocollant-item {
+    padding: 3px 2px;
+    font-size: 0.6rem;
+}
+.annot-col-droite .travaux-autocollant-item img {
+    width: 28px;
+    height: 28px;
+}
+/* Erreurs FR compactes dans la colonne droite */
+.annot-col-droite .travaux-errfr-item {
+    padding: 3px 6px;
+    font-size: 0.72rem;
+}
+.annot-col-droite .travaux-errfr-numero {
+    width: 18px;
+    height: 18px;
+    font-size: 0.6rem;
+    line-height: 18px;
+}
 
 /* ===============================
    MODULE: MODELISATION
