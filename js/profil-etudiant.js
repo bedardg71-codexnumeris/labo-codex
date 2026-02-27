@@ -7988,7 +7988,7 @@ function restaurerPreferencesRapport(da) {
 // ============================================
 
 /**
- * Consulte une évaluation existante (ouvre le formulaire d'évaluation en lecture)
+ * Consulte une évaluation existante (ouvre le fichier dans la visionneuse en mode évaluer)
  */
 function consulterEvaluation(da, productionId) {
     // Trouver l'évaluation
@@ -8000,18 +8000,52 @@ function consulterEvaluation(da, productionId) {
         return;
     }
 
-    // Naviguer d'abord vers la section Évaluations
+    // Trouver le fichier importé pour cet étudiant/production
+    let fichierId = null;
+    if (typeof travauxStockage !== 'undefined' && typeof travauxStockage.obtenirFichiersEtudiant === 'function') {
+        let fichiers = travauxStockage.obtenirFichiersEtudiant(da);
+        if (productionId) {
+            fichiers = fichiers.filter(f => f.productionId === productionId);
+        }
+        if (fichiers.length > 0) {
+            fichierId = fichiers[0].id;
+        }
+    }
+
+    // Naviguer vers la section Évaluations d'abord (on vient du profil étudiant)
     afficherSection('evaluations');
 
-    // Attendre que la section soit chargée, puis ouvrir l'évaluation
-    setTimeout(() => {
-        if (typeof window.modifierEvaluationParId === 'function') {
-            window.modifierEvaluationParId(evaluation.id);
-        } else {
-            console.error('❌ Fonction modifierEvaluationParId non disponible');
-            alert('Erreur: Module d\'évaluation non chargé correctement');
-        }
-    }, 200);
+    if (fichierId && typeof travauxUI !== 'undefined' && typeof travauxUI.ouvrirFichier === 'function') {
+        // Workflow visionneuse : naviguer vers Annoter, attendre l'init du module,
+        // puis ouvrir le fichier. Le callback _apresOuvertureFichier est appelé
+        // par ouvrirFichier APRÈS que le fichier soit complètement chargé dans le canvas.
+        window._apresOuvertureFichier = function() {
+            // Basculer en mode évaluer (crée le layout eval-layout-flex avec canvas + panneaux)
+            if (typeof travauxUI.basculerMode === 'function') {
+                travauxUI.basculerMode('evaluer');
+            }
+            // Charger l'évaluation sauvegardée dans le formulaire
+            setTimeout(function() {
+                if (typeof window.modifierEvaluationParId === 'function') {
+                    window.modifierEvaluationParId(evaluation.id);
+                }
+            }, 200);
+        };
+        // Naviguer vers evaluations-annoter (déclenche initialiserModuleTravaux à +100ms)
+        afficherSousSection('evaluations-annoter');
+        // Attendre que initialiserModuleTravaux soit terminé (+300ms de marge),
+        // puis ouvrir le fichier dans la visionneuse
+        setTimeout(function() {
+            travauxUI.ouvrirFichier(fichierId);
+        }, 500);
+    } else {
+        // Fallback : pas de fichier importé, ouvrir le formulaire en standalone
+        setTimeout(function() {
+            if (typeof window.modifierEvaluationParId === 'function') {
+                window.modifierEvaluationParId(evaluation.id);
+            }
+        }, 300);
+    }
 }
 
 /**

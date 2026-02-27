@@ -2518,6 +2518,14 @@
             }
 
             sauvegarderEtatSession();
+
+            // Callback post-ouverture (utilisé par consulterEvaluation pour enchaîner
+            // basculerMode('evaluer') + chargement évaluation APRÈS que le fichier soit prêt)
+            if (typeof window._apresOuvertureFichier === 'function') {
+                const cb = window._apresOuvertureFichier;
+                window._apresOuvertureFichier = null;
+                cb();
+            }
         }, 100);
     }
 
