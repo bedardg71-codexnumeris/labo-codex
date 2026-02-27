@@ -494,7 +494,13 @@
                     const mxE = (x1 + x2) / 2;
                     const myE = (y1 + y2) / 2;
                     const rayonE = Math.min(Math.abs(x2 - x1), Math.abs(y2 - y1)) / 2;
-                    const numE = forme.type.replace('errfr_', '');
+                    // Utiliser la position dans l'ordre personnalisé
+                    let numE = forme.type.replace('errfr_', '');
+                    if (typeof travauxOutils !== 'undefined' && travauxOutils.obtenirOrdreErreursFr) {
+                        const ordreE = travauxOutils.obtenirOrdreErreursFr();
+                        const idxE = ordreE.indexOf(forme.type);
+                        if (idxE !== -1) numE = idxE + 1;
+                    }
                     ctx.fillStyle = forme.color || '#888888';
                     ctx.beginPath();
                     ctx.arc(mxE, myE, rayonE, 0, Math.PI * 2);
@@ -1090,15 +1096,19 @@
             const donnesErreurs = [];
             const retroFr = travauxOutils.obtenirRetroactionsErreursFr();
 
-            // Trier par numero de code
+            // Trier par position dans l'ordre personnalisé de la palette
+            const ordreRecap = (typeof travauxOutils !== 'undefined' && travauxOutils.obtenirOrdreErreursFr)
+                ? travauxOutils.obtenirOrdreErreursFr() : [];
             const typesErreurs = Object.keys(stats.erreursFr).sort((a, b) => {
-                const numA = parseInt(a.replace('errfr_', ''), 10);
-                const numB = parseInt(b.replace('errfr_', ''), 10);
-                return numA - numB;
+                const idxA = ordreRecap.indexOf(a);
+                const idxB = ordreRecap.indexOf(b);
+                if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                return parseInt(a.replace('errfr_', ''), 10) - parseInt(b.replace('errfr_', ''), 10);
             });
 
             for (const type of typesErreurs) {
-                const num = type.replace('errfr_', '');
+                const idxNum = ordreRecap.indexOf(type);
+                const num = idxNum !== -1 ? idxNum + 1 : type.replace('errfr_', '');
                 const def = codesErreurs.find(c => c.id === type);
                 donnesErreurs.push([
                     num,

@@ -2393,7 +2393,13 @@
         const mx = (x1 + x2) / 2;
         const my = (y1 + y2) / 2;
         const rayon = Math.min(Math.abs(x2 - x1), Math.abs(y2 - y1)) / 2;
-        const numero = type.replace('errfr_', '');
+        // Utiliser la position dans l'ordre personnalisé (palette) plutôt que le numéro du ID
+        let numero = type.replace('errfr_', '');
+        if (typeof travauxOutils !== 'undefined' && travauxOutils.obtenirOrdreErreursFr) {
+            const ordre = travauxOutils.obtenirOrdreErreursFr();
+            const idx = ordre.indexOf(type);
+            if (idx !== -1) numero = idx + 1;
+        }
 
         // Cercle rempli
         ctx.fillStyle = color || '#888888';

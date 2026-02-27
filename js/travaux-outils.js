@@ -1706,7 +1706,9 @@
         getFlechePointes: getFlechePointes,
         setFlechePointes: setFlechePointes,
         // Contexte Modelisation
-        setMasquerErreursFrancais: setMasquerErreursFrancais
+        setMasquerErreursFrancais: setMasquerErreursFrancais,
+        // Ordre personnalisé des erreurs FR
+        obtenirOrdreErreursFr: obtenirOrdreErreursFr
     };
 
 })();
