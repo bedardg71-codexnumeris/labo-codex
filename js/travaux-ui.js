@@ -2389,7 +2389,7 @@
             } else {
                 // Mode annotation par défaut
                 travauxAnnotation.activerAnnotation();
-                travauxVisionneuse.zoomPleineLargeur();
+                travauxVisionneuse.zoomPleineHauteur();
                 const btnAnnoter = document.getElementById('travaux-btn-annoter');
                 if (btnAnnoter) btnAnnoter.classList.add('actif');
                 const btnEvaluerReset = document.getElementById('travaux-btn-evaluer');
@@ -3192,8 +3192,8 @@
             }
             if (btnAnnoter) btnAnnoter.classList.add('actif');
             if (btnEvaluer) btnEvaluer.classList.remove('actif');
-            // Pleine largeur par defaut en mode annotation
-            travauxVisionneuse.zoomPleineLargeur();
+            // Pleine hauteur par defaut en mode annotation
+            travauxVisionneuse.zoomPleineHauteur();
         }
         sauvegarderEtatSession();
     }
