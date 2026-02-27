@@ -1100,12 +1100,19 @@
             // Trier par position dans l'ordre personnalisé de la palette
             const ordreRecap = (typeof travauxOutils !== 'undefined' && travauxOutils.obtenirOrdreErreursFr)
                 ? travauxOutils.obtenirOrdreErreursFr() : [];
-            const typesErreurs = Object.keys(stats.erreursFr).sort((a, b) => {
+            let typesErreurs = Object.keys(stats.erreursFr).sort((a, b) => {
                 const idxA = ordreRecap.indexOf(a);
                 const idxB = ordreRecap.indexOf(b);
                 if (idxA !== -1 && idxB !== -1) return idxA - idxB;
                 return parseInt(a.replace('errfr_', ''), 10) - parseInt(b.replace('errfr_', ''), 10);
             });
+
+            const modeSynthese = travauxOutils.obtenirModeSyntheseErrFr();
+            if (modeSynthese === 'principale' && typesErreurs.length > 1) {
+                const typeMax = typesErreurs.reduce((max, t) =>
+                    stats.erreursFr[t] > (stats.erreursFr[max] || 0) ? t : max, typesErreurs[0]);
+                typesErreurs = [typeMax];
+            }
 
             for (const type of typesErreurs) {
                 const idxNum = ordreRecap.indexOf(type);

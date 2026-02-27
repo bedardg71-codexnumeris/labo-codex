@@ -1477,6 +1477,13 @@
         html += '<h2 style="margin-top:0">R\u00e9troactions \u2014 Erreurs de fran\u00e7ais</h2>';
         html += '<p style="color:var(--texte-secondaire);font-size:0.85rem;margin-bottom:16px;">Ces textes appara\u00eetront dans la r\u00e9troaction g\u00e9n\u00e9r\u00e9e pour l\'\u00e9l\u00e8ve lorsque le code d\'erreur correspondant est utilis\u00e9. Cliquez sur la pastille pour changer sa couleur. Glissez \u2630 pour r\u00e9ordonner.</p>';
 
+        const modeSynthese = obtenirModeSyntheseErrFr();
+        html += '<div class="travaux-errfr-reglage">';
+        html += '<span class="travaux-errfr-reglage-label">Synth\u00e8se PDF\u00a0:</span>';
+        html += '<label><input type="radio" name="errfr-synthese" value="principale"' + (modeSynthese === 'principale' ? ' checked' : '') + ' onchange="travauxOutils.changerModeSyntheseErrFr(\'principale\')"> Erreur principale</label>';
+        html += '<label><input type="radio" name="errfr-synthese" value="toutes"' + (modeSynthese === 'toutes' ? ' checked' : '') + ' onchange="travauxOutils.changerModeSyntheseErrFr(\'toutes\')"> Toutes les erreurs</label>';
+        html += '</div>';
+
         html += '<div id="travaux-retro-errfr-liste">';
         codesOrdonnes.forEach((c, idx) => {
             const outil = OUTILS[c.id];
@@ -1677,6 +1684,14 @@
         masquerErreursFrancais = !!val;
     }
 
+    function changerModeSyntheseErrFr(mode) {
+        db.setSync('errfrModeSynthese', mode);
+    }
+
+    function obtenirModeSyntheseErrFr() {
+        return db.getSync('errfrModeSynthese', 'principale');
+    }
+
     window.travauxOutils = {
         // Constantes
         COULEURS: COULEURS,
@@ -1743,7 +1758,10 @@
         // Contexte Modelisation
         setMasquerErreursFrancais: setMasquerErreursFrancais,
         // Ordre personnalisé des erreurs FR
-        obtenirOrdreErreursFr: obtenirOrdreErreursFr
+        obtenirOrdreErreursFr: obtenirOrdreErreursFr,
+        // Mode synthèse erreurs FR (principale / toutes)
+        changerModeSyntheseErrFr: changerModeSyntheseErrFr,
+        obtenirModeSyntheseErrFr: obtenirModeSyntheseErrFr
     };
 
 })();
