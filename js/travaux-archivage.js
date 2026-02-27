@@ -131,12 +131,12 @@
 
     /**
      * Genere un ZIP filtre par etudiant, production, ou les deux
+     * Inclut toujours : productions en PDF + evaluations en JSON
      * @param {string|null} da - DA de l'etudiant (null = tous)
      * @param {string|null} productionId - ID de la production (null = toutes)
-     * @param {Object} options - Options d'export
      * @returns {Promise<Blob>} Le blob ZIP
      */
-    async function exporterTravaux(da, productionId, options = {}) {
+    async function exporterTravaux(da, productionId) {
         if (typeof JSZip === 'undefined') {
             throw new Error('JSZip non disponible');
         }
@@ -168,25 +168,23 @@
 
             zip.file(`${sousDossier}/${fichier.nomFichier}`, blob);
 
-            if (options.inclureAnnotes) {
-                const annote = await genererFichierAnnote(fichier);
-                if (annote) {
-                    const ext = fichier.nomFichier.split('.').pop();
-                    const nomAnnote = fichier.nomFichier.replace(`.${ext}`, `_annote.${ext}`);
-                    zip.file(`${sousDossier}/${nomAnnote}`, annote);
-                }
+            // Toujours inclure les annotations aplaties
+            const annote = await genererFichierAnnote(fichier);
+            if (annote) {
+                const ext = fichier.nomFichier.split('.').pop();
+                const nomAnnote = fichier.nomFichier.replace(`.${ext}`, `_annote.${ext}`);
+                zip.file(`${sousDossier}/${nomAnnote}`, annote);
             }
         }
 
-        if (options.inclureEvaluations) {
-            const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees'));
-            let evalsFiltre = evaluations;
-            if (da) evalsFiltre = evalsFiltre.filter(e => e.etudiantDA === da);
-            if (productionId) evalsFiltre = evalsFiltre.filter(e => e.productionId === productionId);
+        // Toujours inclure les evaluations
+        const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees'));
+        let evalsFiltre = evaluations;
+        if (da) evalsFiltre = evalsFiltre.filter(e => e.etudiantDA === da);
+        if (productionId) evalsFiltre = evalsFiltre.filter(e => e.productionId === productionId);
 
-            if (evalsFiltre.length > 0) {
-                zip.file('evaluations.json', JSON.stringify(evalsFiltre, null, 2));
-            }
+        if (evalsFiltre.length > 0) {
+            zip.file('evaluations.json', JSON.stringify(evalsFiltre, null, 2));
         }
 
         return await zip.generateAsync({ type: 'blob' });
@@ -204,15 +202,24 @@
         }
 
         const zip = new JSZip();
-        const fichiers = travauxStockage.obtenirFichiersGroupeActif();
+        let fichiers = travauxStockage.obtenirFichiersGroupeActif();
         const etudiants = obtenirDonneesSelonMode(cle('groupeEtudiants'));
         const productions = obtenirDonneesSelonMode(cle('productions'));
+
+        // Filtres optionnels
+        if (options.da) {
+            fichiers = fichiers.filter(f => f.etudiantDA === options.da);
+        }
+        if (options.productionId) {
+            fichiers = fichiers.filter(f => f.productionId === options.productionId);
+        }
 
         const trimestreActif = obtenirTrimestreActif();
         const nomArchive = trimestreActif ? trimestreActif.nom.replace(/\s/g, '_') : 'semestre';
 
         let traites = 0;
 
+        // Structure: eleve/production/fichier
         for (const fichier of fichiers) {
             const etudiant = etudiants.find(e => e.da === fichier.etudiantDA);
             const production = productions.find(p => p.id === fichier.productionId);
@@ -230,14 +237,12 @@
                 zip.file(`${nomEtudiant}/${nomProduction}/${fichier.nomFichier}`, blob);
             }
 
-            // Ajouter les annotations aplaties si demande
-            if (options.inclureAnnotes) {
-                const annote = await genererFichierAnnote(fichier);
-                if (annote) {
-                    const ext = fichier.nomFichier.split('.').pop();
-                    const nomAnnote = fichier.nomFichier.replace(`.${ext}`, `_annote.${ext}`);
-                    zip.file(`${nomEtudiant}/${nomProduction}/${nomAnnote}`, annote);
-                }
+            // Toujours inclure les annotations aplaties
+            const annote = await genererFichierAnnote(fichier);
+            if (annote) {
+                const ext = fichier.nomFichier.split('.').pop();
+                const nomAnnote = fichier.nomFichier.replace(`.${ext}`, `_annote.${ext}`);
+                zip.file(`${nomEtudiant}/${nomProduction}/${nomAnnote}`, annote);
             }
 
             traites++;
@@ -246,12 +251,12 @@
             }
         }
 
-        // Ajouter les evaluations si demande
-        if (options.inclureEvaluations) {
-            const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees'));
-            if (evaluations.length > 0) {
-                zip.file('_evaluations.json', JSON.stringify(evaluations, null, 2));
-            }
+        // Toujours inclure les evaluations
+        let evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees'));
+        if (options.da) evaluations = evaluations.filter(e => e.etudiantDA === options.da);
+        if (options.productionId) evaluations = evaluations.filter(e => e.productionId === options.productionId);
+        if (evaluations.length > 0) {
+            zip.file('_evaluations.json', JSON.stringify(evaluations, null, 2));
         }
 
         // Ajouter un fichier resume
@@ -272,20 +277,14 @@
     }
 
     /**
-     * Genere un ZIP plat de PDFs annotes+synthese pour televersement Lea
+     * Genere des PDFs annotes+synthese pour televersement Lea
      * Seuls les fichiers ayant une evaluation completee sont inclus
      * @param {string} productionId - ID de la production
+     * @param {string|null} da - DA d'un etudiant specifique (null = tous)
      * @param {Function} onProgression - Callback(traites, total)
-     * @returns {Promise<Blob>} Le blob ZIP
+     * @returns {Promise<{blobs: Array<{blob: Blob, nom: string}>}>} Les PDFs generes
      */
-    async function exporterPourLea(productionId, onProgression) {
-        if (typeof JSZip === 'undefined') {
-            throw new Error('JSZip non disponible');
-        }
-
-        const zip = new JSZip();
-        // 🔧 FIX (24 fév 2026) : Utiliser les fichiers du groupe actif, pas par productionId du fichier
-        // Les fichiers importés sans production ont productionId='', mais l'évaluation a le bon productionId
+    async function exporterPourLea(productionId, da, onProgression) {
         const fichiers = travauxStockage.obtenirFichiersGroupeActif();
         const etudiants = obtenirDonneesSelonMode(cle('groupeEtudiants'));
         const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees'));
@@ -295,12 +294,20 @@
             .replace(/[^a-zA-ZÀ-ÿ0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
 
         // Filtrer les fichiers qui ont une évaluation pour cette production
-        const fichiersAvecEval = fichiers.filter(f =>
+        let fichiersAvecEval = fichiers.filter(f =>
             evaluations.some(e => e.etudiantDA === f.etudiantDA && e.productionId === productionId)
         );
+        if (da) {
+            fichiersAvecEval = fichiersAvecEval.filter(f => f.etudiantDA === da);
+        }
+
+        if (fichiersAvecEval.length === 0) {
+            throw new Error('Aucune évaluation trouvée pour ces critères.');
+        }
 
         let traites = 0;
         const total = fichiersAvecEval.length;
+        const blobs = [];
 
         for (const fichier of fichiersAvecEval) {
             const { doc } = await travauxExportPDF.genererDocPDF(fichier.id, productionId);
@@ -308,16 +315,15 @@
 
             const etudiant = etudiants.find(e => e.da === fichier.etudiantDA);
             const nom = (etudiant?.nom || 'Inconnu').replace(/[^a-zA-ZÀ-ÿ-]/g, '');
-            const da = etudiant?.da || fichier.etudiantDA || '0000000';
-            const nomFichier = `${nom}_${da}_${nomProd}_Evalue.pdf`;
+            const daEtud = etudiant?.da || fichier.etudiantDA || '0000000';
+            const nomFichier = `${nom}_${daEtud}_${nomProd}_Evalue.pdf`;
 
-            zip.file(nomFichier, pdfBlob);
+            blobs.push({ blob: pdfBlob, nom: nomFichier });
             traites++;
             if (onProgression) onProgression(traites, total);
         }
 
-        if (total === 0) throw new Error('Aucune évaluation trouvée pour cette production.');
-        return await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
+        return { blobs, nomProd };
     }
 
     /* ===============================
@@ -468,11 +474,10 @@
      * Lance l'export unifie (etudiant, production, ou les deux) et telecharge
      * @param {string|null} da - DA de l'etudiant (null = tous)
      * @param {string|null} productionId - ID de la production (null = toutes)
-     * @param {Object} options - Options
      */
-    async function lancerExport(da, productionId, options = {}) {
+    async function lancerExport(da, productionId) {
         try {
-            const zip = await exporterTravaux(da, productionId, options);
+            const zip = await exporterTravaux(da, productionId);
 
             // Nom du fichier selon le filtre
             let nomZip = 'travaux';
@@ -525,23 +530,21 @@
     }
 
     /**
-     * Lance l'export Lea pour une production et telecharge le ZIP
+     * Lance l'export Lea pour une production et telecharge
+     * 1 fichier → PDF direct, 2+ fichiers → ZIP
      * @param {string} productionId - ID de la production
+     * @param {string|null} da - DA d'un etudiant specifique (null = tous)
      */
-    async function lancerExportLea(productionId) {
+    async function lancerExportLea(productionId, da) {
         if (!productionId) {
             alert('Veuillez sélectionner une production.');
             return;
         }
 
         try {
-            const productions = obtenirDonneesSelonMode(cle('productions'));
-            const production = productions.find(p => p.id === productionId);
-            const nomProd = (production?.titre || production?.nom || 'production')
-                .replace(/[^a-zA-ZÀ-ÿ0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
             const date = new Date().toISOString().split('T')[0];
 
-            const zip = await exporterPourLea(productionId, (traites, total) => {
+            const { blobs, nomProd } = await exporterPourLea(productionId, da, (traites, total) => {
                 const pourcent = Math.round((traites / total) * 100);
                 const barre = document.getElementById('travaux-barre-progression-lea');
                 if (barre) barre.style.width = pourcent + '%';
@@ -549,7 +552,19 @@
                 if (texte) texte.textContent = `${traites}/${total} fichiers traités...`;
             });
 
-            telechargerBlob(zip, `Lea_${nomProd}_${date}.zip`);
+            if (blobs.length === 1) {
+                // Un seul fichier → PDF direct
+                telechargerBlob(blobs[0].blob, blobs[0].nom);
+            } else {
+                // Plusieurs fichiers → ZIP
+                if (typeof JSZip === 'undefined') throw new Error('JSZip non disponible');
+                const zip = new JSZip();
+                for (const { blob, nom } of blobs) {
+                    zip.file(nom, blob);
+                }
+                const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
+                telechargerBlob(zipBlob, `Lea_${nomProd}_${date}.zip`);
+            }
         } catch (e) {
             console.error('[Travaux-Archivage] Erreur export Lea:', e);
             alert('Erreur lors de l\'export Lea: ' + e.message);

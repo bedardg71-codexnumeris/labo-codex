@@ -835,9 +835,11 @@
         const conteneur = document.getElementById('evaluations-contenu-archivage');
         if (!conteneur) return;
 
-        const etudiants = obtenirDonneesSelonMode(cle('groupeEtudiants'));
+        const tousEtudiants = obtenirDonneesSelonMode(cle('groupeEtudiants'));
         const productions = obtenirDonneesSelonMode(cle('productions'));
         const fichiersTravaux = travauxStockage.obtenirFichiersGroupeActif();
+        const dasActifs = new Set(fichiersTravaux.map(f => f.etudiantDA).filter(Boolean));
+        const etudiants = tousEtudiants.filter(e => dasActifs.has(e.da));
         const tailleFiltree = fichiersTravaux.reduce((acc, f) => acc + (f.tailleFichier || 0), 0);
         const tailleFormatee = tailleFiltree >= 1048576
             ? (tailleFiltree / 1048576).toFixed(1) + ' Mo'
@@ -850,18 +852,11 @@
             ${genererGrilleFichiers(fichiersTravaux, 'ouvrirPreviewInline')}
 
             <div class="travaux-archivage-options">
-                <!-- Export par étudiant / production (fusionné) -->
+                <!-- Exporter des travaux -->
                 <div class="travaux-archivage-carte">
                     <h4>Exporter des travaux</h4>
-                    <p class="texte-muted">Filtrer par étudiant, production, ou les deux</p>
+                    <p class="texte-muted">Évaluations en JSON + productions en PDF</p>
                     <div class="travaux-archivage-filtres">
-                        <div class="groupe-form">
-                            <label>Étudiant·e</label>
-                            <select id="travaux-archivage-etudiant" class="form-select">
-                                <option value="">— Tous —</option>
-                                ${[...etudiants].sort((a,b) => (a.nom||'').localeCompare(b.nom||'')).map(e => `<option value="${e.da}">${e.nom ? echapperHtml(e.nom + ', ' + e.prenom) : echapperHtml(e.prenom)} (${e.daAffichage || e.da})</option>`).join('')}
-                            </select>
-                        </div>
                         <div class="groupe-form">
                             <label>Production</label>
                             <select id="travaux-archivage-production" class="form-select">
@@ -869,38 +864,65 @@
                                 ${productions.map(p => `<option value="${p.id}">${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
                             </select>
                         </div>
+                        <div class="groupe-form">
+                            <label>Étudiant·e</label>
+                            <select id="travaux-archivage-etudiant" class="form-select">
+                                <option value="">— Tous —</option>
+                                ${[...etudiants].sort((a,b) => (a.nom||'').localeCompare(b.nom||'')).map(e => `<option value="${e.da}">${e.nom ? echapperHtml(e.nom + ', ' + e.prenom) : echapperHtml(e.prenom)} (${e.daAffichage || e.da})</option>`).join('')}
+                            </select>
+                        </div>
                     </div>
-                    <div class="travaux-archivage-checks">
-                        <label data-tooltip="travaux-archivage-inclure-annotes"><input type="checkbox" id="arch-inclure-annotes" checked> Inclure annotés</label>
-                        <label data-tooltip="travaux-archivage-inclure-evals"><input type="checkbox" id="arch-inclure-evals" checked> Inclure évaluations</label>
-                    </div>
-                    <button class="btn btn-principal" onclick="travauxUI.lancerArchivage()">Télécharger ZIP</button>
+                    <button class="btn btn-principal" onclick="travauxUI.lancerArchivage()">Télécharger</button>
                 </div>
 
-                <!-- Export semestre complet -->
+                <!-- Semestre complet -->
                 <div class="travaux-archivage-carte">
-                    <h4 data-tooltip="travaux-archivage-semestre">Semestre complet</h4>
-                    <p class="texte-muted">Archive complète de tous les travaux du semestre</p>
-                    <div class="travaux-archivage-checks">
-                        <label data-tooltip="travaux-archivage-inclure-annotes"><input type="checkbox" id="arch-semestre-annotes" checked> Inclure annotés</label>
-                        <label data-tooltip="travaux-archivage-inclure-evals"><input type="checkbox" id="arch-semestre-evals" checked> Inclure évaluations</label>
+                    <h4>Semestre complet</h4>
+                    <p class="texte-muted">Toutes les productions en PDF classées par élève + évaluations en JSON</p>
+                    <div class="travaux-archivage-filtres">
+                        <div class="groupe-form">
+                            <label>Production</label>
+                            <select id="travaux-archivage-semestre-production" class="form-select">
+                                <option value="">— Toutes —</option>
+                                ${productions.map(p => `<option value="${p.id}">${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="groupe-form">
+                            <label>Étudiant·e</label>
+                            <select id="travaux-archivage-semestre-etudiant" class="form-select">
+                                <option value="">— Tous —</option>
+                                ${[...etudiants].sort((a,b) => (a.nom||'').localeCompare(b.nom||'')).map(e => `<option value="${e.da}">${e.nom ? echapperHtml(e.nom + ', ' + e.prenom) : echapperHtml(e.prenom)} (${e.daAffichage || e.da})</option>`).join('')}
+                            </select>
+                        </div>
                     </div>
                     <div id="travaux-texte-progression" class="texte-muted"></div>
                     <div class="travaux-barre-progression-container">
                         <div id="travaux-barre-progression" class="travaux-barre-progression"></div>
                     </div>
-                    <button class="btn btn-principal" onclick="travauxUI.lancerArchivageSemestre()">Télécharger archive complète</button>
+                    <button class="btn btn-principal" onclick="travauxUI.lancerArchivageSemestre()">Télécharger archive</button>
                 </div>
 
                 <!-- Export Lea -->
                 <div class="travaux-archivage-carte">
                     <h4>Export Lea</h4>
-                    <p class="texte-muted">Exporte les évaluations complétées en PDF (annotations + synthèse) pour téléversement dans Lea</p>
-                    <select id="travaux-archivage-lea-production" class="form-select" onchange="travauxUI.mettreAJourCompteurLea()">
-                        <option value="">-- Choisir une production --</option>
-                        ${productions.map(p => `<option value="${p.id}">${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
-                    </select>
-                    <div id="travaux-lea-compteur" class="texte-muted" style="margin-top: 6px;"></div>
+                    <p class="texte-muted">Production annotée + évaluation (note et rétroaction) en PDF pour téléversement dans Lea</p>
+                    <div class="travaux-archivage-filtres">
+                        <div class="groupe-form">
+                            <label>Production</label>
+                            <select id="travaux-archivage-lea-production" class="form-select" onchange="travauxUI.mettreAJourCompteurLea()">
+                                <option value="">— Choisir —</option>
+                                ${productions.map(p => `<option value="${p.id}">${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="groupe-form">
+                            <label>Étudiant·e</label>
+                            <select id="travaux-archivage-lea-etudiant" class="form-select" onchange="travauxUI.mettreAJourCompteurLea()">
+                                <option value="">— Tous —</option>
+                                ${[...etudiants].sort((a,b) => (a.nom||'').localeCompare(b.nom||'')).map(e => `<option value="${e.da}">${e.nom ? echapperHtml(e.nom + ', ' + e.prenom) : echapperHtml(e.prenom)} (${e.daAffichage || e.da})</option>`).join('')}
+                            </select>
+                        </div>
+                    </div>
+                    <div id="travaux-lea-compteur" class="texte-muted"></div>
                     <div id="travaux-texte-progression-lea" class="texte-muted"></div>
                     <div class="travaux-barre-progression-container">
                         <div id="travaux-barre-progression-lea" class="travaux-barre-progression"></div>
@@ -2545,12 +2567,7 @@
             return;
         }
 
-        const options = {
-            inclureAnnotes: document.getElementById('arch-inclure-annotes')?.checked,
-            inclureEvaluations: document.getElementById('arch-inclure-evals')?.checked
-        };
-
-        travauxArchivage.lancerExport(da, productionId, options);
+        travauxArchivage.lancerExport(da, productionId);
     }
 
     // Rétrocompatibilité
@@ -2558,14 +2575,12 @@
     function lancerArchivageProduction() { lancerArchivage(); }
 
     /**
-     * Lance l'archivage du semestre
+     * Lance l'archivage du semestre (structure dossiers élève/production)
      */
     function lancerArchivageSemestre() {
-        const options = {
-            inclureAnnotes: document.getElementById('arch-semestre-annotes')?.checked,
-            inclureEvaluations: document.getElementById('arch-semestre-evals')?.checked
-        };
-        travauxArchivage.lancerExportSemestre(options);
+        const da = document.getElementById('travaux-archivage-semestre-etudiant')?.value || null;
+        const productionId = document.getElementById('travaux-archivage-semestre-production')?.value || null;
+        travauxArchivage.lancerExportSemestre({ da, productionId });
     }
 
     /**
@@ -2577,33 +2592,41 @@
             alert('Veuillez sélectionner une production.');
             return;
         }
-        travauxArchivage.lancerExportLea(productionId);
+        const da = document.getElementById('travaux-archivage-lea-etudiant')?.value || null;
+        travauxArchivage.lancerExportLea(productionId, da);
     }
 
     /**
-     * Met a jour le compteur d'evaluations pour la production Lea selectionnee
+     * Met a jour le compteur d'evaluations pour la selection Lea
      */
     function mettreAJourCompteurLea() {
-        const select = document.getElementById('travaux-archivage-lea-production');
         const compteur = document.getElementById('travaux-lea-compteur');
         if (!compteur) return;
 
-        const productionId = select?.value;
+        const productionId = document.getElementById('travaux-archivage-lea-production')?.value;
+        const da = document.getElementById('travaux-archivage-lea-etudiant')?.value || null;
+
         if (!productionId) {
             compteur.textContent = '';
             return;
         }
 
-        // Filtrer les fichiers par production sélectionnée
         const fichiers = travauxStockage.obtenirFichiersGroupeActif();
-        const fichiersProduction = fichiers.filter(f => f.productionId === productionId);
         const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
         const evalsProduction = evaluations.filter(e => e.productionId === productionId);
-        const nbEvalues = fichiersProduction.filter(f =>
-            evalsProduction.some(e => e.etudiantDA === f.etudiantDA)
-        ).length;
 
-        compteur.textContent = `${nbEvalues} évaluation(s) sur ${fichiersProduction.length}`;
+        let fichiersAvecEval = fichiers.filter(f =>
+            evalsProduction.some(e => e.etudiantDA === f.etudiantDA)
+        );
+        if (da) {
+            fichiersAvecEval = fichiersAvecEval.filter(f => f.etudiantDA === da);
+        }
+
+        const total = da
+            ? fichiers.filter(f => f.etudiantDA === da).length
+            : fichiers.filter(f => f.productionId === productionId).length;
+
+        compteur.textContent = `${fichiersAvecEval.length} évaluation(s)` + (total > 0 ? ` sur ${total} fichier(s)` : '');
     }
 
     /**
