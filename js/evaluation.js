@@ -4655,6 +4655,14 @@ function modifierEvaluation(evaluationId) {
             if (fichiersDiv) fichiersDiv.classList.add('u-hide');
             if (visDiv3) visDiv3.classList.add('u-hide');
 
+            // Rendre visibles les panneaux enfants du formulaire
+            // (ils sont u-hide par défaut car normalement déplacés par afficherPalettesEval
+            // dans le mode évaluation de la visionneuse — ici on les affiche en standalone)
+            ['travaux-eval-gauche', 'travaux-eval-droite', 'travaux-eval-retroaction'].forEach(id => {
+                const panneau = document.getElementById(id);
+                if (panneau) panneau.classList.remove('u-hide');
+            });
+
             // ÉTAPE 0: Charger les selects de base (groupes, grilles, échelles)
             console.log('0️⃣ Initialisation des selects de base');
             if (typeof chargerGroupesEval === 'function') {
