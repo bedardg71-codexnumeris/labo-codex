@@ -2299,6 +2299,9 @@
      * @param {string} fichierId - ID du fichier
      */
     async function ouvrirFichier(fichierId) {
+        // Mémoriser le mode courant AVANT fermeture (pour le restaurer après chargement)
+        const modeAvantNavigation = modeCourant;
+
         // Naviguer vers l'onglet Annoter et évaluer si pas déjà dessus
         if (typeof afficherSousSection === 'function') {
             const sousSectionActive = document.querySelector('#evaluations-annoter.sous-section.active') ||
@@ -2481,6 +2484,14 @@
             }
 
             sauvegarderEtatSession();
+
+            // Restaurer le mode Évaluer si c'était le mode actif avant navigation
+            if (modeAvantNavigation === 'evaluer') {
+                const fichierNav = travauxVisionneuse.getFichierActuel();
+                if (fichierNav && fichierNav.etudiantDA) {
+                    setTimeout(() => basculerMode('evaluer'), 200);
+                }
+            }
         }, 100);
     }
 
