@@ -1815,15 +1815,20 @@ function genererRetroaction(num) {
                 const retroFr = travauxOutils.obtenirRetroactionsErreursFr();
                 if (statsAnnot.totalErreursFr > 0) {
                     texte += '--- Langue ---\n\n';
+                    const ordreRetro = (typeof travauxOutils !== 'undefined' && travauxOutils.obtenirOrdreErreursFr)
+                        ? travauxOutils.obtenirOrdreErreursFr() : [];
                     const typesTriés = Object.entries(statsAnnot.erreursFr).sort((a, b) => {
-                        const numA = parseInt(a[0].replace('errfr_', ''), 10);
-                        const numB = parseInt(b[0].replace('errfr_', ''), 10);
-                        return numA - numB;
+                        const idxA = ordreRetro.indexOf(a[0]);
+                        const idxB = ordreRetro.indexOf(b[0]);
+                        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                        return parseInt(a[0].replace('errfr_', ''), 10) - parseInt(b[0].replace('errfr_', ''), 10);
                     });
                     for (const [type, count] of typesTriés) {
                         const def = travauxOutils.CODES_ERREURS_FR.find(c => c.id === type);
+                        const idxRetro = ordreRetro.indexOf(type);
+                        const numRetro = idxRetro !== -1 ? idxRetro + 1 : def?.code;
                         const txt = retroFr[type];
-                        if (txt) texte += `Code ${def?.code} \u2013 ${def?.nom} (\u00d7${count}) :\n${txt}\n\n`;
+                        if (txt) texte += `Code ${numRetro} \u2013 ${def?.nom} (\u00d7${count}) :\n${txt}\n\n`;
                     }
                 }
             }
