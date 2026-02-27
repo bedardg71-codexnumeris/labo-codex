@@ -850,34 +850,31 @@
             ${genererGrilleFichiers(fichiersTravaux, 'ouvrirPreviewInline')}
 
             <div class="travaux-archivage-options">
-                <!-- Export par étudiant -->
+                <!-- Export par étudiant / production (fusionné) -->
                 <div class="travaux-archivage-carte">
-                    <h4 data-tooltip="travaux-archivage-etudiant">Par étudiant</h4>
-                    <p class="texte-muted">Télécharger tous les travaux d'un étudiant</p>
-                    <select id="travaux-archivage-etudiant" class="form-select">
-                        <option value="">-- Choisir un étudiant --</option>
-                        ${[...etudiants].sort((a,b) => (a.nom||'').localeCompare(b.nom||'')).map(e => `<option value="${e.da}">${e.nom ? echapperHtml(e.nom + ', ' + e.prenom) : echapperHtml(e.prenom)} (${e.daAffichage || e.da})</option>`).join('')}
-                    </select>
-                    <div class="travaux-archivage-checks">
-                        <label data-tooltip="travaux-archivage-inclure-annotes"><input type="checkbox" id="arch-etudiant-annotes" checked> Inclure annotés</label>
-                        <label data-tooltip="travaux-archivage-inclure-evals"><input type="checkbox" id="arch-etudiant-evals" checked> Inclure évaluations</label>
+                    <h4>Exporter des travaux</h4>
+                    <p class="texte-muted">Filtrer par étudiant, production, ou les deux</p>
+                    <div class="travaux-archivage-filtres">
+                        <div class="groupe-form">
+                            <label>Étudiant·e</label>
+                            <select id="travaux-archivage-etudiant" class="form-select">
+                                <option value="">— Tous —</option>
+                                ${[...etudiants].sort((a,b) => (a.nom||'').localeCompare(b.nom||'')).map(e => `<option value="${e.da}">${e.nom ? echapperHtml(e.nom + ', ' + e.prenom) : echapperHtml(e.prenom)} (${e.daAffichage || e.da})</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="groupe-form">
+                            <label>Production</label>
+                            <select id="travaux-archivage-production" class="form-select">
+                                <option value="">— Toutes —</option>
+                                ${productions.map(p => `<option value="${p.id}">${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
+                            </select>
+                        </div>
                     </div>
-                    <button class="btn btn-principal" onclick="travauxUI.lancerArchivageEtudiant()">Télécharger ZIP</button>
-                </div>
-
-                <!-- Export par production -->
-                <div class="travaux-archivage-carte">
-                    <h4 data-tooltip="travaux-archivage-production">Par production</h4>
-                    <p class="texte-muted">Télécharger tous les travaux d'une production</p>
-                    <select id="travaux-archivage-production" class="form-select">
-                        <option value="">-- Choisir une production --</option>
-                        ${productions.map(p => `<option value="${p.id}">${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
-                    </select>
                     <div class="travaux-archivage-checks">
-                        <label data-tooltip="travaux-archivage-inclure-annotes"><input type="checkbox" id="arch-prod-annotes" checked> Inclure annotés</label>
-                        <label data-tooltip="travaux-archivage-inclure-evals"><input type="checkbox" id="arch-prod-evals" checked> Inclure évaluations</label>
+                        <label data-tooltip="travaux-archivage-inclure-annotes"><input type="checkbox" id="arch-inclure-annotes" checked> Inclure annotés</label>
+                        <label data-tooltip="travaux-archivage-inclure-evals"><input type="checkbox" id="arch-inclure-evals" checked> Inclure évaluations</label>
                     </div>
-                    <button class="btn btn-principal" onclick="travauxUI.lancerArchivageProduction()">Télécharger ZIP</button>
+                    <button class="btn btn-principal" onclick="travauxUI.lancerArchivage()">Télécharger ZIP</button>
                 </div>
 
                 <!-- Export semestre complet -->
@@ -2537,40 +2534,28 @@
     }
 
     /**
-     * Lance l'archivage par etudiant
+     * Lance l'archivage unifié (étudiant, production, ou les deux)
      */
-    function lancerArchivageEtudiant() {
-        const da = document.getElementById('travaux-archivage-etudiant')?.value;
-        if (!da) {
-            alert('Sélectionne un étudiant');
+    function lancerArchivage() {
+        const da = document.getElementById('travaux-archivage-etudiant')?.value || null;
+        const productionId = document.getElementById('travaux-archivage-production')?.value || null;
+
+        if (!da && !productionId) {
+            alert('Sélectionne au moins un étudiant ou une production');
             return;
         }
 
         const options = {
-            inclureAnnotes: document.getElementById('arch-etudiant-annotes')?.checked,
-            inclureEvaluations: document.getElementById('arch-etudiant-evals')?.checked
+            inclureAnnotes: document.getElementById('arch-inclure-annotes')?.checked,
+            inclureEvaluations: document.getElementById('arch-inclure-evals')?.checked
         };
 
-        travauxArchivage.lancerExportEtudiant(da, options);
+        travauxArchivage.lancerExport(da, productionId, options);
     }
 
-    /**
-     * Lance l'archivage par production
-     */
-    function lancerArchivageProduction() {
-        const productionId = document.getElementById('travaux-archivage-production')?.value;
-        if (!productionId) {
-            alert('Selectionnez une production');
-            return;
-        }
-
-        const options = {
-            inclureAnnotes: document.getElementById('arch-prod-annotes')?.checked,
-            inclureEvaluations: document.getElementById('arch-prod-evals')?.checked
-        };
-
-        travauxArchivage.lancerExportProduction(productionId, options);
-    }
+    // Rétrocompatibilité
+    function lancerArchivageEtudiant() { lancerArchivage(); }
+    function lancerArchivageProduction() { lancerArchivage(); }
 
     /**
      * Lance l'archivage du semestre
@@ -5186,6 +5171,7 @@
         identifierAutoPipeline: identifierAutoPipeline,
         rafraichirPipelineUI: rafraichirPipelineUI,
         // Archivage
+        lancerArchivage: lancerArchivage,
         lancerArchivageEtudiant: lancerArchivageEtudiant,
         lancerArchivageProduction: lancerArchivageProduction,
         lancerArchivageSemestre: lancerArchivageSemestre,
