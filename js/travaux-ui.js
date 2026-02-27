@@ -927,6 +927,12 @@
 
         // Charger les infos quota
         chargerQuota();
+
+        // Appliquer le filtre de production si actif (dropdown sélectionné au rendu)
+        if (productionFiltreActive) {
+            const selectArchivage = conteneur.querySelector('.travaux-filtre-production');
+            if (selectArchivage) filtrerBadgesParProduction(selectArchivage);
+        }
     }
 
     /* ===============================
@@ -2588,16 +2594,16 @@
             return;
         }
 
-        // 🔧 FIX (24 fév 2026) : Chercher par évaluations, pas par fichier.productionId
-        // Les fichiers importés sans production ont productionId='', mais l'évaluation a le bon productionId
+        // Filtrer les fichiers par production sélectionnée
         const fichiers = travauxStockage.obtenirFichiersGroupeActif();
-        const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees'));
+        const fichiersProduction = fichiers.filter(f => f.productionId === productionId);
+        const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
         const evalsProduction = evaluations.filter(e => e.productionId === productionId);
-        const nbEvalues = fichiers.filter(f =>
+        const nbEvalues = fichiersProduction.filter(f =>
             evalsProduction.some(e => e.etudiantDA === f.etudiantDA)
         ).length;
 
-        compteur.textContent = `${nbEvalues} évalué(s) sur ${fichiers.length} fichier(s)`;
+        compteur.textContent = `${nbEvalues} fichiers traités sur ${fichiersProduction.length}`;
     }
 
     /**
