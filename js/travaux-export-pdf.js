@@ -207,6 +207,27 @@
        =============================== */
 
     /**
+     * Découpe une ligne de texte en sous-lignes tenant dans maxWidthPx (identique à wrapLigne du canvas).
+     */
+    function wrapLignePdf(ctx, ligne, maxWidthPx) {
+        if (!ligne) return [''];
+        const mots = ligne.split(' ');
+        const result = [];
+        let courante = '';
+        for (const mot of mots) {
+            const test = courante ? courante + ' ' + mot : mot;
+            if (ctx.measureText(test).width > maxWidthPx && courante) {
+                result.push(courante);
+                courante = mot;
+            } else {
+                courante = test;
+            }
+        }
+        if (courante) result.push(courante);
+        return result.length ? result : [''];
+    }
+
+    /**
      * Dessine toutes les annotations d'une page sur un contexte canvas
      * @param {CanvasRenderingContext2D} ctx
      * @param {number} w - Largeur du canvas
@@ -232,7 +253,7 @@
             }
         }
 
-        // Textes (avec support multiligne)
+        // Textes (avec support multiligne et word-wrap)
         if (donneesPage.textAnnotations) {
             const ratioResolutionTexte = w / travauxOutils.RESOLUTION_REFERENCE;
             for (const texte of donneesPage.textAnnotations) {
@@ -241,13 +262,26 @@
                 ctx.font = `${fontSize}px sans-serif`;
                 ctx.fillStyle = texte.color || '#FF0000';
 
-                const lignes = (texte.text || '').split('\n');
                 const interligne = fontSize * 1.3;
                 const xPx = texte.x * w;
                 const yPx = texte.y * h;
 
-                for (let i = 0; i < lignes.length; i++) {
-                    ctx.fillText(lignes[i], xPx, yPx + i * interligne);
+                // Word-wrap si une largeur est définie (identique au canvas d'annotation)
+                const maxWidthPx = texte.width ? texte.width * w : 0;
+                const lignesBrutes = (texte.text || '').split('\n');
+                let lignesFinales;
+
+                if (maxWidthPx > 0) {
+                    lignesFinales = [];
+                    for (const ligne of lignesBrutes) {
+                        lignesFinales.push(...wrapLignePdf(ctx, ligne, maxWidthPx));
+                    }
+                } else {
+                    lignesFinales = lignesBrutes;
+                }
+
+                for (let i = 0; i < lignesFinales.length; i++) {
+                    ctx.fillText(lignesFinales[i], xPx, yPx + i * interligne);
                 }
 
                 ctx.restore();
