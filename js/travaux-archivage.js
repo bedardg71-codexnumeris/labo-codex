@@ -231,22 +231,15 @@
         const nomProd = (production?.titre || production?.nom || 'production')
             .replace(/[^a-zA-ZÀ-ÿ0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
 
+        // Filtrer les fichiers qui ont une évaluation pour cette production
+        const fichiersAvecEval = fichiers.filter(f =>
+            evaluations.some(e => e.etudiantDA === f.etudiantDA && e.productionId === productionId)
+        );
+
         let traites = 0;
-        let inclus = 0;
-        const total = fichiers.length;
+        const total = fichiersAvecEval.length;
 
-        for (const fichier of fichiers) {
-            // Chercher l'évaluation par etudiantDA + productionId sélectionnée (pas celui du fichier)
-            const evaluation = evaluations.find(e =>
-                e.etudiantDA === fichier.etudiantDA &&
-                e.productionId === productionId
-            );
-            if (!evaluation) {
-                traites++;
-                if (onProgression) onProgression(traites, total);
-                continue;
-            }
-
+        for (const fichier of fichiersAvecEval) {
             const { doc } = await travauxExportPDF.genererDocPDF(fichier.id, productionId);
             const pdfBlob = doc.output('blob');
 
@@ -256,12 +249,11 @@
             const nomFichier = `${nom}_${da}_${nomProd}_Evalue.pdf`;
 
             zip.file(nomFichier, pdfBlob);
-            inclus++;
             traites++;
             if (onProgression) onProgression(traites, total);
         }
 
-        if (inclus === 0) throw new Error('Aucune évaluation trouvée pour cette production.');
+        if (total === 0) throw new Error('Aucune évaluation trouvée pour cette production.');
         return await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
     }
 
