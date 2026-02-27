@@ -2354,8 +2354,9 @@
             }
         }
         // Masquer la section evaluation si visible (fallback)
+        // Ne pas masquer si modifierEvaluation() est en cours de chargement
         const evalDiv = document.getElementById('evaluations-contenu-evaluation');
-        if (evalDiv) evalDiv.classList.add('u-hide');
+        if (evalDiv && !window._modifierEvaluationEnCours) evalDiv.classList.add('u-hide');
 
         // Highlight du badge actif : pill → "EN COURS" orange
         document.querySelectorAll('.travaux-badge-importe').forEach(b => {
