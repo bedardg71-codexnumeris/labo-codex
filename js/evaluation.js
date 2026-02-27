@@ -2552,19 +2552,23 @@ function cocherOptionsParDefaut() {
     });
 
     // Initialiser affichageNote depuis la pratique active
+    // modalites.pratiqueId = ID unique (ex: 'PRAT_123'), modalites.pratique = type (ex: 'pan-standards')
     try {
         const configurations = db.getSync('pratiquesConfigurables', []);
         const modalites = db.getSync('modalitesEvaluation', {});
-        const pratiqueId = modalites.pratique;
-        const pratiqueActive = pratiqueId
-            ? (configurations.find(p => p.id === pratiqueId) || configurations.find(p => p.type === pratiqueId))
-            : null;
+        const idUnique = modalites.pratiqueId || modalites.configurationSTDAppliquee?.id;
+        const typeP = modalites.pratique;
+        const pratiqueActive = idUnique
+            ? configurations.find(p => p.id === idUnique)
+            : (typeP ? configurations.find(p => p.type === typeP) : null);
+        console.log('[cocherOptionsParDefaut] pratiqueId:', idUnique, 'type:', typeP, 'affichageNote:', pratiqueActive?.affichageNote);
         if (pratiqueActive?.affichageNote === 'lettre') {
             document.getElementById('affichageNoteLettre1').checked = true;
         } else {
             document.getElementById('affichageNoteComplet1').checked = true;
         }
     } catch(e) {
+        console.warn('[cocherOptionsParDefaut] Erreur:', e);
         const radioComplet = document.getElementById('affichageNoteComplet1');
         if (radioComplet) radioComplet.checked = true;
     }
