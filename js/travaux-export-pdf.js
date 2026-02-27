@@ -580,9 +580,8 @@
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(...cfg.couleurs.texteSecondaire);
         const lignesDroite = [];
-        if (infos.etudiant) lignesDroite.push('Étudiant : ' + infos.etudiant);
-        if (infos.production) lignesDroite.push('Production : ' + infos.production);
-        if (infos.date) lignesDroite.push('Date : ' + infos.date);
+        if (infos.etudiant) lignesDroite.push('\u00c9tudiant : ' + infos.etudiant);
+        if (infos.date) lignesDroite.push('Date de l\'\u00e9valuation : ' + infos.date);
         let yDroite = y - (lignesDroite.length - 1) * mm(4);
         for (const ligne of lignesDroite) {
             doc.text(ligne, pageW - margeD, yDroite, { align: 'right' });
@@ -642,14 +641,24 @@
             }
         } catch(e) { /* silencieux */ }
 
-        // Cours actif pour le pied de page
+        // Cours actif pour le pied de page (via groupe-cours du trimestre)
         let codeCoursPied = '';
         try {
             if (typeof db !== 'undefined' && db.getSync) {
-                const coursCollection = db.getSync('cours', []);
-                const coursActif = coursCollection.find(c => c.actif);
-                if (coursActif && coursActif.codeCours) {
-                    codeCoursPied = coursActif.codeCours;
+                const trimId = window.trimestreActif || db.getSync('trimestreActif', '');
+                if (trimId) {
+                    const groupesCours = db.getSync(trimId + '_groupesCours', []);
+                    const gcActif = groupesCours.find(gc => gc.actif);
+                    if (gcActif && gcActif.coursId) {
+                        const cours = db.getSync('cours', []);
+                        const listeCours = db.getSync('listeCours', []);
+                        const coursInfo = cours.find(c => c.id === gcActif.coursId) || listeCours.find(c => c.id === gcActif.coursId);
+                        if (coursInfo) {
+                            const sigle = coursInfo.codeCours || coursInfo.sigle || coursInfo.code || '';
+                            const titre = coursInfo.nomCours || coursInfo.titre || coursInfo.nom || '';
+                            codeCoursPied = [sigle, titre].filter(Boolean).join(' — ');
+                        }
+                    }
                 }
             }
         } catch(e) { /* silencieux */ }
@@ -769,9 +778,11 @@
         const dateEval = dateObj
             ? dateObj.toLocaleDateString('fr-CA', { timeZone: 'America/Toronto' }) + ' \u00e0 ' + dateObj.toLocaleTimeString('fr-CA', { timeZone: 'America/Toronto', hour: '2-digit', minute: '2-digit' })
             : '';
-        let y = ajouterEnteteRetroaction(doc, '\u00c9VALUATION', {
-            etudiant: evaluation.etudiantNom || fichier.etudiantDA || '',
-            production: evaluation.productionNom || '',
+        const titreProduction = evaluation.productionNom || '';
+        const titrePdf = titreProduction ? '\u00c9VALUATION \u2014 ' + titreProduction : '\u00c9VALUATION';
+        const nomEtudiantEntete = (evaluation.etudiantNom || '') + (fichier.etudiantDA ? ' (' + fichier.etudiantDA + ')' : '');
+        let y = ajouterEnteteRetroaction(doc, titrePdf, {
+            etudiant: nomEtudiantEntete,
             date: dateEval
         });
 
