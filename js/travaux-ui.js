@@ -2611,22 +2611,23 @@
             return;
         }
 
-        const fichiers = travauxStockage.obtenirFichiersGroupeActif();
-        const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
-        const evalsProduction = evaluations.filter(e => e.productionId === productionId);
-
-        let fichiersAvecEval = fichiers.filter(f =>
-            evalsProduction.some(e => e.etudiantDA === f.etudiantDA)
+        // Compter les étudiants évalués (1 PDF par étudiant)
+        const dasGroupeActif = new Set(
+            travauxStockage.obtenirFichiersGroupeActif().map(f => f.etudiantDA).filter(Boolean)
         );
+        const dasEvalues = new Set(
+            (obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [])
+                .filter(e => e.productionId === productionId && dasGroupeActif.has(e.etudiantDA))
+                .map(e => e.etudiantDA)
+        );
+
         if (da) {
-            fichiersAvecEval = fichiersAvecEval.filter(f => f.etudiantDA === da);
+            compteur.textContent = dasEvalues.has(da) ? '1 évaluation prête' : 'Aucune évaluation';
+        } else {
+            compteur.textContent = dasEvalues.size > 0
+                ? `${dasEvalues.size} évaluation(s) pour ${dasEvalues.size} étudiant(s)`
+                : 'Aucune évaluation trouvée';
         }
-
-        const total = da
-            ? fichiers.filter(f => f.etudiantDA === da).length
-            : fichiers.filter(f => f.productionId === productionId).length;
-
-        compteur.textContent = `${fichiersAvecEval.length} évaluation(s)` + (total > 0 ? ` sur ${total} fichier(s)` : '');
     }
 
     /**
