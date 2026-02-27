@@ -8005,10 +8005,11 @@ function consulterEvaluation(da, productionId) {
 
     // Attendre que la section soit chargée, puis ouvrir l'évaluation
     setTimeout(() => {
-        if (typeof modifierEvaluation === 'function') {
-            modifierEvaluation(evaluation.id);
+        if (typeof window.modifierEvaluationParId === 'function') {
+            window.modifierEvaluationParId(evaluation.id);
         } else {
-            alert('Module d\'évaluation non chargé');
+            console.error('❌ Fonction modifierEvaluationParId non disponible');
+            alert('Erreur: Module d\'évaluation non chargé correctement');
         }
     }, 200);
 }
