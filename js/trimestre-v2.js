@@ -5463,6 +5463,9 @@ async function sauvegarderEnseignantV2() {
 
     db.setSync('enseignants', enseignants);
 
+    // Synchroniser profilEnseignant (utilisé en fallback par d'autres modules)
+    db.setSync('profilEnseignant', profil);
+
     // Rafraîchir les dropdowns
     populerDropdownEnseignantsV2();
     populerDropdownsAssemblageV2();

@@ -182,22 +182,18 @@ function obtenirNomEnseignantPDF() {
             }
         }
 
-        // 4. FALLBACK: Toujours essayer profilEnseignant si rien trouvé
-        const profil = db.getSync('profilEnseignant', {});
-        if (profil.prenom && profil.nom) {
-            return `${profil.prenom} ${profil.nom}`;
+        // 4. FALLBACK: Chercher dans la liste enseignants (select actif ou premier)
+        const enseignants = db.getSync('enseignants', []);
+        const selectEns = document.getElementById('v2-selectEnseignant');
+        const ensId = selectEns?.value;
+        const ens = ensId ? enseignants.find(e => e.id === ensId) : (enseignants[0] || null);
+        if (ens && ens.prenom && ens.nom) {
+            return `${ens.prenom} ${ens.nom}`;
         }
 
         return '';
     } catch (err) {
         console.warn('[export-pdf] Erreur obtention nom enseignant:', err);
-        // Dernier recours: essayer profilEnseignant
-        try {
-            const profil = db.getSync('profilEnseignant', {});
-            if (profil.prenom && profil.nom) {
-                return `${profil.prenom} ${profil.nom}`;
-            }
-        } catch (e) { /* ignore */ }
         return '';
     }
 }

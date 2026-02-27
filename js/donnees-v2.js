@@ -212,6 +212,9 @@
                 case 'alignements':
                     afficherTableauAlignementsV2(container);
                     break;
+                case 'parametres':
+                    afficherTableauParametresV2(container);
+                    break;
                 default:
                     container.innerHTML = '<p class="text-muted text-center" style="padding: 30px;">Type de ressource non reconnu.</p>';
             }
@@ -785,6 +788,91 @@
         });
         html += '</tbody></table>';
         container.innerHTML = html;
+    }
+
+    /**
+     * Affiche le tableau des paramètres de configuration stockés
+     */
+    function afficherTableauParametresV2(container) {
+        const trimestreActif = window.trimestreActif || db.getSync('trimestreActif', null);
+
+        // Liste des paramètres à auditer (clé, label, namespacé)
+        const parametres = [
+            { cle: 'profilEnseignant', label: 'Profil enseignant (legacy)', ns: false },
+            { cle: 'enseignants', label: 'Liste des enseignants', ns: false },
+            { cle: 'modalitesEvaluation', label: 'Modalités d\'évaluation', ns: true },
+            { cle: 'trimestreActif', label: 'Trimestre actif', ns: false },
+            { cle: 'modeApplication', label: 'Mode de l\'application', ns: false },
+            { cle: 'preferencesAffichage', label: 'Préférences d\'affichage', ns: false },
+            { cle: 'seuilsInterpretation', label: 'Seuils d\'interprétation', ns: true },
+            { cle: 'errfrModeSynthese', label: 'Mode synthèse erreurs FR', ns: false },
+            { cle: 'pratiqueParDefaut', label: 'Pratique par défaut', ns: true },
+            { cle: 'demo-actif', label: 'Mode démo actif', ns: false },
+            { cle: 'indicesCP', label: 'Indices C/P', ns: true },
+            { cle: 'formatHoraire', label: 'Format horaire', ns: true },
+            { cle: 'datesVerrouillees', label: 'Dates verrouillées', ns: true },
+            { cle: 'migrationLegacyEffectuee', label: 'Migration legacy effectuée', ns: false },
+            { cle: 'migrationLegacyDate', label: 'Date migration legacy', ns: false }
+        ];
+
+        let html = '<table class="table-ressources"><thead><tr><th>Paramètre</th><th>Clé</th><th>Valeur</th><th>Actions</th></tr></thead><tbody>';
+
+        parametres.forEach(p => {
+            const cleFinale = p.ns && trimestreActif ? trimestreActif + '_' + p.cle : p.cle;
+            let valeur = null;
+            try {
+                valeur = db.getSync(cleFinale, null);
+            } catch(e) { /* silencieux */ }
+
+            let apercu = '—';
+            let typeBadge = '<span class="badge-statut non-evalue">Vide</span>';
+
+            if (valeur !== null && valeur !== undefined) {
+                typeBadge = '<span class="badge-actif">Défini</span>';
+                if (typeof valeur === 'string') {
+                    apercu = escapeHtml(valeur.length > 80 ? valeur.substring(0, 80) + '…' : valeur);
+                } else if (Array.isArray(valeur)) {
+                    apercu = valeur.length + ' élément' + (valeur.length > 1 ? 's' : '');
+                } else if (typeof valeur === 'object') {
+                    const keys = Object.keys(valeur);
+                    apercu = keys.length + ' propriété' + (keys.length > 1 ? 's' : '') + ' : ' + escapeHtml(keys.slice(0, 4).join(', ')) + (keys.length > 4 ? '…' : '');
+                } else {
+                    apercu = escapeHtml(String(valeur));
+                }
+            }
+
+            html += '<tr>'
+                + '<td><strong>' + escapeHtml(p.label) + '</strong>' + (p.ns ? '<br><small class="text-muted">Namespacé par trimestre</small>' : '') + '</td>'
+                + '<td><code>' + escapeHtml(cleFinale) + '</code></td>'
+                + '<td>' + typeBadge + '<br><small>' + apercu + '</small></td>'
+                + '<td class="actions-cell">'
+                + (valeur !== null ? '<button class="btn btn-compact" onclick="supprimerParametreConfig(\'' + escapeHtml(cleFinale) + '\', \'' + escapeHtml(p.label) + '\')" title="Supprimer">Supprimer</button>' : '')
+                + '</td></tr>';
+        });
+
+        html += '</tbody></table>';
+        container.innerHTML = html;
+    }
+
+    /**
+     * Supprime un paramètre de configuration après confirmation
+     */
+    function supprimerParametreConfig(cle, label) {
+        if (!confirm('Supprimer le paramètre « ' + label + ' » (' + cle + ') ?\n\nCette action est irréversible.')) {
+            return;
+        }
+        try {
+            db.setSync(cle, null);
+            if (typeof afficherNotificationSucces === 'function') {
+                afficherNotificationSucces('Paramètre « ' + label + ' » supprimé');
+            }
+            afficherTableauParametresV2(document.getElementById('table-ressources-container'));
+        } catch(e) {
+            console.error('[donnees-v2] Erreur suppression paramètre:', e);
+            if (typeof afficherNotificationErreur === 'function') {
+                afficherNotificationErreur('Erreur lors de la suppression');
+            }
+        }
     }
 
     // =========================================================================
@@ -1619,6 +1707,7 @@
     window.verifierConfirmationSuppression = verifierConfirmationSuppression;
     window.confirmerSuppressionRessource = confirmerSuppressionRessource;
     window.naviguerVersRessource = naviguerVersRessource;
+    window.supprimerParametreConfig = supprimerParametreConfig;
 
     // =========================================================================
     // INITIALISATION AU CHARGEMENT

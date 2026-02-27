@@ -528,12 +528,17 @@ function demanderMetadonneesEnrichies(typeContenu, nomContenu) {
             document.body.appendChild(modal);
         }
 
-        // 🆕 BETA 95.2: Priorité au profilEnseignant (section Trimestre)
-        // Fallback vers infoCours et listeCours pour rétrocompatibilité
-        // Note: db.getSync lit depuis localStorage (cache) qui est synchronisé avec IndexedDB
-        const profilEnseignant = (typeof db !== 'undefined' && db.getSync)
-            ? db.getSync('profilEnseignant', null)
-            : db.getSync('profilEnseignant', null);
+        // Priorité : enseignants[] (sélectionné ou premier) > profilEnseignant (legacy)
+        let profilEnseignant = null;
+        if (typeof db !== 'undefined' && db.getSync) {
+            const enseignants = db.getSync('enseignants', []);
+            const selectEns = document.getElementById('v2-selectEnseignant');
+            const ensId = selectEns?.value;
+            profilEnseignant = ensId ? enseignants.find(e => e.id === ensId) : (enseignants[0] || null);
+            if (!profilEnseignant) {
+                profilEnseignant = db.getSync('profilEnseignant', null);
+            }
+        }
         const infoCours = db.getSync('infoCours', {});
         const listeCours = db.getSync('listeCours', []);
         const coursActif = listeCours.find(c => c.actif) || listeCours[0] || {};
