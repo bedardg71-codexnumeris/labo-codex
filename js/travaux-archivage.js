@@ -130,6 +130,69 @@
     }
 
     /**
+     * Genere un ZIP filtre par etudiant, production, ou les deux
+     * @param {string|null} da - DA de l'etudiant (null = tous)
+     * @param {string|null} productionId - ID de la production (null = toutes)
+     * @param {Object} options - Options d'export
+     * @returns {Promise<Blob>} Le blob ZIP
+     */
+    async function exporterTravaux(da, productionId, options = {}) {
+        if (typeof JSZip === 'undefined') {
+            throw new Error('JSZip non disponible');
+        }
+
+        const zip = new JSZip();
+        let fichiers = travauxStockage.obtenirFichiersGroupeActif();
+
+        if (da) {
+            fichiers = fichiers.filter(f => f.etudiantDA === da);
+        }
+        if (productionId) {
+            fichiers = fichiers.filter(f => f.productionId === productionId);
+        }
+
+        if (fichiers.length === 0) {
+            throw new Error('Aucun fichier trouvé pour ces critères.');
+        }
+
+        const etudiants = obtenirDonneesSelonMode(cle('groupeEtudiants'));
+
+        for (const fichier of fichiers) {
+            const blob = await travauxStockage.recupererBlob(fichier.id);
+            if (!blob) continue;
+
+            const etudiant = etudiants.find(e => e.da === fichier.etudiantDA);
+            const sousDossier = etudiant
+                ? `${etudiant.nom}_${etudiant.prenom}_${fichier.etudiantDA}`
+                : (fichier.etudiantDA || 'non-associe');
+
+            zip.file(`${sousDossier}/${fichier.nomFichier}`, blob);
+
+            if (options.inclureAnnotes) {
+                const annote = await genererFichierAnnote(fichier);
+                if (annote) {
+                    const ext = fichier.nomFichier.split('.').pop();
+                    const nomAnnote = fichier.nomFichier.replace(`.${ext}`, `_annote.${ext}`);
+                    zip.file(`${sousDossier}/${nomAnnote}`, annote);
+                }
+            }
+        }
+
+        if (options.inclureEvaluations) {
+            const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees'));
+            let evalsFiltre = evaluations;
+            if (da) evalsFiltre = evalsFiltre.filter(e => e.etudiantDA === da);
+            if (productionId) evalsFiltre = evalsFiltre.filter(e => e.productionId === productionId);
+
+            if (evalsFiltre.length > 0) {
+                zip.file('evaluations.json', JSON.stringify(evalsFiltre, null, 2));
+            }
+        }
+
+        return await zip.generateAsync({ type: 'blob' });
+    }
+
+    /**
      * Genere un ZIP complet du semestre
      * @param {Object} options - Options d'export
      * @param {Function} onProgression - Callback de progression
@@ -402,6 +465,42 @@
     }
 
     /**
+     * Lance l'export unifie (etudiant, production, ou les deux) et telecharge
+     * @param {string|null} da - DA de l'etudiant (null = tous)
+     * @param {string|null} productionId - ID de la production (null = toutes)
+     * @param {Object} options - Options
+     */
+    async function lancerExport(da, productionId, options = {}) {
+        try {
+            const zip = await exporterTravaux(da, productionId, options);
+
+            // Nom du fichier selon le filtre
+            let nomZip = 'travaux';
+            if (da) {
+                const etudiants = obtenirDonneesSelonMode(cle('groupeEtudiants'));
+                const etudiant = etudiants.find(e => e.da === da);
+                nomZip += '_' + (etudiant ? etudiant.nom + '_' + etudiant.prenom : da);
+            }
+            if (productionId) {
+                const productions = obtenirDonneesSelonMode(cle('productions'));
+                const prod = productions.find(p => p.id === productionId);
+                const titreProd = (prod?.titre || prod?.nom || productionId).replace(/[^a-zA-Z0-9]/g, '_');
+                nomZip += '_' + titreProd;
+            }
+            telechargerBlob(zip, nomZip + '.zip');
+
+            // Marquer les fichiers comme exportes
+            let fichiers = travauxStockage.obtenirFichiersGroupeActif();
+            if (da) fichiers = fichiers.filter(f => f.etudiantDA === da);
+            if (productionId) fichiers = fichiers.filter(f => f.productionId === productionId);
+            fichiers.forEach(f => travauxStockage.marquerExporte(f.id));
+        } catch (e) {
+            console.error('[Travaux-Archivage] Erreur export:', e);
+            alert('Erreur lors de l\'export: ' + e.message);
+        }
+    }
+
+    /**
      * Lance l'export du semestre complet et telecharge
      * @param {Object} options - Options
      */
@@ -524,8 +623,10 @@
     window.travauxArchivage = {
         exporterParEtudiant: exporterParEtudiant,
         exporterParProduction: exporterParProduction,
+        exporterTravaux: exporterTravaux,
         exporterSemestre: exporterSemestre,
         exporterPourLea: exporterPourLea,
+        lancerExport: lancerExport,
         lancerExportEtudiant: lancerExportEtudiant,
         lancerExportProduction: lancerExportProduction,
         lancerExportSemestre: lancerExportSemestre,

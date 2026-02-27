@@ -16569,6 +16569,19 @@ body.mode-clair .travaux-autocollant-item img {
     margin: 0 0 8px 0;
 }
 
+.travaux-archivage-filtres {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 12px 0;
+}
+
+.travaux-archivage-filtres .groupe-form label {
+    display: block;
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+}
+
 .travaux-archivage-checks {
     display: flex;
     flex-direction: column;
