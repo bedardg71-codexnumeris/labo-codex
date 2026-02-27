@@ -789,12 +789,12 @@
                                 <button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoom100()" title="Zoom 100%">100%</button>
                                 <button class="travaux-btn-zoom" onclick="travauxVisionneuse.recentrerVue()" title="Recentrer la vue">Recentrer</button>
                                 <span class="travaux-separateur"></span>
+                                <button id="travaux-btn-annoter" class="travaux-btn-action actif" onclick="travauxUI.basculerMode('annoter')" data-tooltip="travaux-btn-annoter">Annoter</button>
+                                <button id="travaux-btn-evaluer" class="travaux-btn-action travaux-btn-action-vert u-hide" onclick="travauxUI.basculerMode('evaluer')" title="Évaluer cette production" data-tooltip="travaux-btn-evaluer">Évaluer</button>
+                                <span class="travaux-separateur"></span>
                                 <button id="travaux-btn-badge-prec" class="travaux-btn-nav" onclick="travauxUI.badgePrecedent()" disabled title="Fichier précédent">&#x2190;</button>
                                 <span id="travaux-compteur-badge" class="travaux-compteur-badge">-- / --</span>
                                 <button id="travaux-btn-badge-suiv" class="travaux-btn-nav" onclick="travauxUI.badgeSuivant()" disabled title="Fichier suivant">&#x2192;</button>
-                                <span class="travaux-separateur"></span>
-                                <button id="travaux-btn-annoter" class="travaux-btn-action actif" onclick="travauxUI.basculerMode('annoter')" data-tooltip="travaux-btn-annoter">Annoter</button>
-                                <button id="travaux-btn-evaluer" class="travaux-btn-action travaux-btn-action-vert u-hide" onclick="travauxUI.basculerMode('evaluer')" title="Évaluer cette production" data-tooltip="travaux-btn-evaluer">Évaluer</button>
                                 <button id="travaux-btn-alleger" class="travaux-btn-action u-hide" onclick="travauxUI.allegerFichier(travauxVisionneuse.getFichierActuel()?.id)" title="Alléger ce fichier" data-tooltip="travaux-btn-alleger">Alléger</button>
                                 <button id="travaux-btn-reimporter" class="travaux-btn-action u-hide" onclick="travauxUI.reimporterFichier(travauxVisionneuse.getFichierActuel()?.id)" title="Re-importer l'original" data-tooltip="travaux-btn-reimporter">Re-importer</button>
                             </div>
