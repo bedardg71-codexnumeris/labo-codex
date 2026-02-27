@@ -195,6 +195,108 @@
         return handle;
     }
 
+    /**
+     * Crée un séparateur horizontal draggable entre deux sections flex (colonne).
+     * Redimensionne le panneau du dessus (flexBasis en hauteur).
+     */
+    function creerSplitterH({ id, storageKey, minHeight, maxHeight }) {
+        const handle = document.createElement('div');
+        handle.className = 'splitter-handle splitter-handle-h';
+        handle.id = id;
+
+        function getPanel() {
+            return handle.previousElementSibling;
+        }
+
+        function startDrag(startY) {
+            const panel = getPanel();
+            if (!panel) return null;
+            const startHeight = panel.getBoundingClientRect().height;
+            handle.classList.add('splitter-active');
+            document.body.style.cursor = 'row-resize';
+            document.body.style.userSelect = 'none';
+            return { panel, startHeight, startY };
+        }
+
+        function onDrag(state, clientY) {
+            if (!state) return;
+            const delta = clientY - state.startY;
+            const newH = Math.min(maxHeight, Math.max(minHeight, state.startHeight + delta));
+            state.panel.style.flexBasis = newH + 'px';
+            state.panel.style.flexGrow = '0';
+        }
+
+        function endDrag(state) {
+            if (!state) return;
+            handle.classList.remove('splitter-active');
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+            const finalH = state.panel.getBoundingClientRect().height;
+            persisterLargeursPanneaux(storageKey, Math.round(finalH));
+        }
+
+        handle.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            const state = startDrag(e.clientY);
+            if (!state) return;
+            function onMove(e2) { onDrag(state, e2.clientY); }
+            function onUp() {
+                endDrag(state);
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup', onUp);
+            }
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onUp);
+        });
+
+        handle.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const state = startDrag(touch.clientY);
+            if (!state) return;
+            function onTouchMove(e2) {
+                e2.preventDefault();
+                onDrag(state, e2.touches[0].clientY);
+            }
+            function onTouchEnd() {
+                endDrag(state);
+                document.removeEventListener('touchmove', onTouchMove);
+                document.removeEventListener('touchend', onTouchEnd);
+            }
+            document.addEventListener('touchmove', onTouchMove, { passive: false });
+            document.addEventListener('touchend', onTouchEnd);
+        }, { passive: false });
+
+        // Double-clic → reset
+        handle.addEventListener('dblclick', function() {
+            const panel = getPanel();
+            if (!panel) return;
+            panel.style.flexBasis = '';
+            panel.style.flexGrow = '';
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY_PANNEAUX);
+                if (raw) {
+                    const obj = JSON.parse(raw);
+                    delete obj[storageKey];
+                    localStorage.setItem(STORAGE_KEY_PANNEAUX, JSON.stringify(obj));
+                }
+            } catch (_) { /* ignore */ }
+        });
+
+        return handle;
+    }
+
+    /**
+     * Restaure la hauteur persistée d'un panneau (pour splitters horizontaux).
+     */
+    function restaurerHauteurPanneau(panel, storageKey) {
+        const h = obtenirLargeurPanneau(storageKey);
+        if (h != null && panel) {
+            panel.style.flexBasis = h + 'px';
+            panel.style.flexGrow = '0';
+        }
+    }
+
     /* ===============================
        LAYOUT ANNOTATION ANCRÉ
        =============================== */
@@ -270,6 +372,14 @@
             '</div>';
         colDroite.appendChild(sectionErrFr);
 
+        // Splitter horizontal entre Erreurs FR et Tampons
+        colDroite.appendChild(creerSplitterH({
+            id: 'annot-splitter-h',
+            storageKey: 'annot-errfr-h',
+            minHeight: 60,
+            maxHeight: 600
+        }));
+
         // Section Tampons
         const sectionTampons = document.createElement('div');
         sectionTampons.className = 'annot-section-palette';
@@ -310,9 +420,10 @@
         // Marquer le conteneur
         conteneurDoc.classList.add('mode-annot-actif');
 
-        // Restaurer les largeurs persistées
+        // Restaurer les dimensions persistées
         restaurerLargeurPanneau(colPalette, 'annot-palette');
         restaurerLargeurPanneau(colDroite, 'annot-droite');
+        restaurerHauteurPanneau(sectionErrFr, 'annot-errfr-h');
     }
 
     function detruireLayoutAnnotation() {
@@ -1991,6 +2102,9 @@
                 }
             }
         }
+
+        // Rafraîchir le compteur pour refléter le filtre
+        mettreAJourCompteurBadge();
     }
 
     /**
@@ -4970,8 +5084,17 @@
        COMPTEUR DE BADGES (navigation fichiers)
        =============================== */
 
-    function mettreAJourCompteurBadge() {
+    /**
+     * Retourne la liste de fichiers filtrée par la production active (si applicable).
+     */
+    function obtenirFichiersNavigables() {
         const fichiers = travauxStockage.obtenirFichiersGroupeActif();
+        if (!productionFiltreActive) return fichiers;
+        return fichiers.filter(f => f.productionId === productionFiltreActive);
+    }
+
+    function mettreAJourCompteurBadge() {
+        const fichiers = obtenirFichiersNavigables();
         const fichierActuel = travauxVisionneuse.getFichierActuel();
         const index = fichierActuel ? fichiers.findIndex(f => f.id === fichierActuel.id) : -1;
 
@@ -4997,7 +5120,7 @@
     }
 
     function badgePrecedent() {
-        const fichiers = travauxStockage.obtenirFichiersGroupeActif();
+        const fichiers = obtenirFichiersNavigables();
         const fichierActuel = travauxVisionneuse.getFichierActuel();
         if (!fichierActuel) return;
         const index = fichiers.findIndex(f => f.id === fichierActuel.id);
@@ -5005,7 +5128,7 @@
     }
 
     function badgeSuivant() {
-        const fichiers = travauxStockage.obtenirFichiersGroupeActif();
+        const fichiers = obtenirFichiersNavigables();
         const fichierActuel = travauxVisionneuse.getFichierActuel();
         if (!fichierActuel) return;
         const index = fichiers.findIndex(f => f.id === fichierActuel.id);

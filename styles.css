@@ -20587,6 +20587,15 @@ body.mode-clair .barre-etudiant.tracked-4 {
 body.mode-clair .splitter-handle { background: rgba(3, 46, 92, 0.06); }
 body.mode-clair .splitter-handle:hover,
 body.mode-clair .splitter-handle.splitter-active { background: rgba(3, 46, 92, 0.15); }
+/* Splitter horizontal (row-resize) */
+.splitter-handle-h {
+    flex: 0 0 5px;
+    cursor: row-resize;
+    min-height: 5px;
+}
+.splitter-handle-h::after {
+    content: '\22EF';
+}
 
 /* ===============================
    LAYOUT ANNOTATION ANCRE
@@ -20701,8 +20710,8 @@ body.mode-clair .splitter-handle.splitter-active { background: rgba(3, 46, 92, 0
 .annot-section-palette.replie .annot-section-contenu {
     display: none;
 }
-.annot-section-palette + .annot-section-palette {
-    border-top: 1px solid var(--bordure);
+.annot-section-palette + .splitter-handle-h + .annot-section-palette {
+    /* Le splitter horizontal sert de séparateur visuel */
 }
 .annot-section-barre {
     display: flex;
