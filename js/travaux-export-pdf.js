@@ -1093,6 +1093,19 @@
             doc.text('Erreurs de français :', margeG, y);
             y += mm(3);
 
+            const modeSyntheseErrFr = travauxOutils.obtenirModeSyntheseErrFr();
+            if (modeSyntheseErrFr === 'principale') {
+                doc.setFont('helvetica', 'italic');
+                doc.setFontSize(cfg.polices.textePetit);
+                doc.setTextColor(...cfg.couleurs.texteSecondaire);
+                const noteExplicative = 'Seule l\u2019erreur la plus fr\u00e9quente est pr\u00e9sent\u00e9e ici. Concentre tes efforts sur ce type d\u2019erreur dans tes prochaines productions.';
+                const lignesNote = doc.splitTextToSize(noteExplicative, largeurContenu);
+                doc.text(lignesNote, margeG, y);
+                y += lignesNote.length * mm(3.5) + mm(2);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(...cfg.couleurs.textePrincipal);
+            }
+
             const codesErreurs = travauxOutils.CODES_ERREURS_FR;
             const donnesErreurs = [];
             const retroFr = travauxOutils.obtenirRetroactionsErreursFr();
@@ -1107,8 +1120,7 @@
                 return parseInt(a.replace('errfr_', ''), 10) - parseInt(b.replace('errfr_', ''), 10);
             });
 
-            const modeSynthese = travauxOutils.obtenirModeSyntheseErrFr();
-            if (modeSynthese === 'principale' && typesErreurs.length > 1) {
+            if (modeSyntheseErrFr === 'principale' && typesErreurs.length > 1) {
                 const typeMax = typesErreurs.reduce((max, t) =>
                     stats.erreursFr[t] > (stats.erreursFr[max] || 0) ? t : max, typesErreurs[0]);
                 typesErreurs = [typeMax];
