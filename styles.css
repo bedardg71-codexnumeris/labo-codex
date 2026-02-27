@@ -20751,6 +20751,28 @@ body.mode-clair .splitter-handle.splitter-active { background: rgba(3, 46, 92, 0
     height: 28px;
 }
 /* Erreurs FR compactes dans la colonne droite */
+.travaux-errfr-reglage {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    margin-bottom: 12px;
+    font-size: 0.85rem;
+    background: var(--fond-surface);
+    border: 1px solid var(--bordure);
+    border-radius: 6px;
+}
+.travaux-errfr-reglage-label {
+    color: var(--texte-secondaire);
+    font-weight: 600;
+    margin-right: 4px;
+}
+.travaux-errfr-reglage label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+}
 .annot-col-droite .travaux-errfr-item {
     padding: 3px 6px;
     font-size: 0.72rem;
