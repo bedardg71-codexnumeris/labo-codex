@@ -4969,6 +4969,25 @@ function modifierEvaluation(evaluationId) {
                 ligneSupprimer.classList.remove('u-hide');
             }
 
+            // ÉTAPE 17: Ouvrir le travail de l'étudiant en vue côte à côte (si disponible)
+            if (typeof travauxStockage !== 'undefined' && typeof travauxUI !== 'undefined') {
+                try {
+                    let fichiers = travauxStockage.obtenirFichiersEtudiant(evaluation.etudiantDA);
+                    if (evaluation.productionId) {
+                        fichiers = fichiers.filter(f => f.productionId === evaluation.productionId);
+                    }
+                    if (fichiers.length > 0) {
+                        const conteneurGrille = document.getElementById('listeCriteresGrille1')?.closest('.form-group') || document.getElementById('listeCriteresGrille1');
+                        if (conteneurGrille) {
+                            console.log('1️⃣7️⃣ Ouverture du travail en vue côte à côte:', fichiers[0].id);
+                            await travauxUI.ouvrirVueCoteACote(fichiers[0].id, conteneurGrille);
+                        }
+                    }
+                } catch (e) {
+                    console.warn('⚠️ Ouverture du travail ignorée:', e.message);
+                }
+            }
+
             console.log('✅ Évaluation chargée avec succès');
 
         } catch (erreur) {
