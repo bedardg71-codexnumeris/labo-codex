@@ -885,26 +885,25 @@
             y = mm(cfg.marges.haut);
         }
 
-        // 🔧 FIX (24 fév 2026) : La préférence de la pratique prime sur l'évaluation individuelle
-        // L'utilisateur configure "Lettre seulement" dans sa pratique → ça doit s'appliquer
-        // même si l'évaluation a été sauvegardée avec "complet" (ancien défaut)
+        // Résoudre le mode d'affichage de la note (lettre vs complet)
+        // Priorité : 1) pratique active, 2) radio DOM, 3) évaluation, 4) défaut
         let modeNote = null;
 
-        // 1. Radio DOM (si page évaluation ouverte — choix explicite de l'utilisateur)
-        const radioUI = document.querySelector('input[name="affichageNote1"]:checked');
-        if (radioUI) modeNote = radioUI.value;
+        // 1. Préférence de la pratique active (source de vérité)
+        try {
+            const configurations = db.getSync('pratiquesConfigurables', []);
+            const modalites = db.getSync('modalitesEvaluation', {});
+            const pratiqueId = modalites.pratique;
+            const pratiqueActive = pratiqueId
+                ? (configurations.find(p => p.id === pratiqueId) || configurations.find(p => p.type === pratiqueId))
+                : null;
+            if (pratiqueActive && pratiqueActive.affichageNote) modeNote = pratiqueActive.affichageNote;
+        } catch(e) { /* silencieux */ }
 
-        // 2. Préférence de la pratique active (config globale)
+        // 2. Radio DOM (si page évaluation ouverte et pas de config pratique)
         if (!modeNote) {
-            try {
-                const configurations = db.getSync('pratiquesConfigurables', []);
-                const modalites = db.getSync('modalitesEvaluation', {});
-                const pratiqueId = modalites.pratique;
-                const pratiqueActive = pratiqueId
-                    ? (configurations.find(p => p.id === pratiqueId) || configurations.find(p => p.type === pratiqueId))
-                    : null;
-                if (pratiqueActive && pratiqueActive.affichageNote) modeNote = pratiqueActive.affichageNote;
-            } catch(e) { /* silencieux */ }
+            const radioUI = document.querySelector('input[name="affichageNote1"]:checked');
+            if (radioUI) modeNote = radioUI.value;
         }
 
         // 3. Valeur sauvegardée dans l'évaluation (fallback)
@@ -1275,11 +1274,27 @@
                 html += '</ul>';
             }
 
-            if (evaluation.noteFinale != null) {
-                html += `<p><strong>Note :</strong> ${evaluation.noteFinale}%</p>`;
-            }
-            if (evaluation.niveauFinal) {
-                html += `<p><strong>Niveau :</strong> ${echapperHtml(evaluation.niveauFinal)}</p>`;
+            // Respecter le mode d'affichage de la note (lettre vs complet)
+            let modeNotePreview = 'complet';
+            try {
+                const cfgs = db.getSync('pratiquesConfigurables', []);
+                const mods = db.getSync('modalitesEvaluation', {});
+                const pId = mods.pratique;
+                const pActive = pId ? (cfgs.find(p => p.id === pId) || cfgs.find(p => p.type === pId)) : null;
+                if (pActive?.affichageNote === 'lettre') modeNotePreview = 'lettre';
+            } catch(e) { /* fallback complet */ }
+
+            if (modeNotePreview === 'lettre') {
+                if (evaluation.niveauFinal) {
+                    html += `<p><strong>Niveau de performance :</strong> ${echapperHtml(evaluation.niveauFinal)}</p>`;
+                }
+            } else {
+                if (evaluation.noteFinale != null) {
+                    html += `<p><strong>Note :</strong> ${evaluation.noteFinale}%</p>`;
+                }
+                if (evaluation.niveauFinal) {
+                    html += `<p><strong>Niveau :</strong> ${echapperHtml(evaluation.niveauFinal)}</p>`;
+                }
             }
 
             html += '</div>';
