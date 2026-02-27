@@ -4084,8 +4084,29 @@ function verifierEtChargerEvaluationExistante() {
                 calculerNote();
                 console.log('✅ Note finale recalculée après restauration critères et données algorithmiques');
             }
-            // Régénérer la rétroaction avec les options d'affichage ACTUELLES
-            // (la rétroaction sauvegardée peut être obsolète si les checkboxes/radios ont changé)
+            // Restaurer les options d'affichage sauvegardées dans l'évaluation
+            if (evaluationExistante.optionsAffichage) {
+                const opts = evaluationExistante.optionsAffichage;
+                const checkboxMap = {
+                    'afficherDescription1': opts.description,
+                    'afficherObjectif1': opts.objectif,
+                    'afficherTache1': opts.tache,
+                    'afficherAdresse1': opts.adresse,
+                    'afficherContexte1': opts.contexte
+                };
+                Object.entries(checkboxMap).forEach(([id, val]) => {
+                    const cb = document.getElementById(id);
+                    if (cb) cb.checked = val ?? true;
+                });
+                if (opts.affichageNote === 'lettre') {
+                    const r = document.getElementById('affichageNoteLettre1');
+                    if (r) r.checked = true;
+                } else {
+                    const r = document.getElementById('affichageNoteComplet1');
+                    if (r) r.checked = true;
+                }
+            }
+            // Régénérer la rétroaction avec les options d'affichage restaurées
             genererRetroaction(1);
         }, 350);
     }, 300);
