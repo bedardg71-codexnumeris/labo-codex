@@ -24,6 +24,7 @@
     let moduleInitialise = false;
     const CLE_FICHIERS = 'fichiersModelisation';  // Cle localStorage distincte
     const PREFIXE_ID = 'FM_';      // Prefixe pour distinguer des fichiers travaux (FT_)
+    const SESSION_KEY_FICHIER = 'model-dernier-fichier';
 
     /* ===============================
        INITIALISATION
@@ -33,6 +34,11 @@
         if (moduleInitialise) {
             chargerFichiers();
             afficherCarrousel();
+            // Restaurer le fichier ouvert si on revient d'une autre section
+            var dernierFichier = sessionStorage.getItem(SESSION_KEY_FICHIER);
+            if (dernierFichier && !fichierOuvertId && fichiers.some(function(f) { return f.id === dernierFichier; })) {
+                ouvrirFichierModelisation(dernierFichier);
+            }
             return;
         }
 
@@ -350,6 +356,7 @@
 
         // Ouvrir le fichier
         fichierOuvertId = id;
+        sessionStorage.setItem(SESSION_KEY_FICHIER, id);
         mettreAJourPlaceholder();
         await travauxVisionneuse.ouvrirDepuisBlob(blob, metadata);
 
@@ -391,6 +398,7 @@
 
         travauxVisionneuse.fermerFichier();
         fichierOuvertId = null;
+        sessionStorage.removeItem(SESSION_KEY_FICHIER);
 
         var palette = document.getElementById('travaux-palette-flottante');
         if (palette && palette.closest('#model-conteneur-document')) {
