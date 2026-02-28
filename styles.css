@@ -14472,7 +14472,7 @@ body.mode-clair .prep-select {
 /* --- Layout Visionneuse --- */
 .travaux-visionneuse-layout {
     display: flex;
-    height: calc(100vh - 160px);
+    height: calc(100vh - 120px);
     min-height: 400px;
     gap: 0;
 }
@@ -19994,6 +19994,45 @@ body.mode-clair .barre-etudiant.tracked-4 {
     padding-bottom: 4px;
 }
 
+/* Badges dans toolbar fusionnée — aplatir la grille en une seule ligne */
+.annot-toolbar-fichiers.travaux-fichiers-compact {
+    padding-right: 8px;
+}
+.annot-toolbar-fichiers .travaux-grille-fichiers {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 0;
+}
+.annot-toolbar-fichiers .travaux-badges-entete {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
+}
+.annot-toolbar-fichiers .travaux-badges-liste {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+}
+.annot-toolbar-fichiers .travaux-badges-groupe {
+    display: inline-flex;
+    gap: 6px;
+    flex-wrap: nowrap;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+.annot-toolbar-fichiers .travaux-filtre-production {
+    flex-shrink: 0;
+    max-width: 180px;
+    font-size: 0.75rem;
+    padding: 2px 6px;
+}
+
 /* Entête badges : dropdown production + badges sur la même ligne */
 .travaux-badges-entete {
     display: flex;
@@ -20019,6 +20058,56 @@ body.mode-clair .barre-etudiant.tracked-4 {
     flex: 1;
     min-width: 0;
     overflow-x: auto;
+}
+
+/* --- Toolbar unique fusionnée (badges + outils sur 1 rangée) --- */
+.annot-toolbar {
+    display: flex;
+    align-items: center;
+    padding: 4px 8px;
+    background: var(--surface-carte, #1a3040);
+    border-bottom: 1px solid var(--bordure-claire, #334155);
+    flex-shrink: 0;
+    z-index: 90;
+    gap: 0;
+}
+
+.annot-toolbar-fichiers {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    padding-right: 8px;
+}
+
+.annot-toolbar-separateur {
+    width: 1px;
+    height: 24px;
+    background: var(--bordure-claire, #334155);
+    flex-shrink: 0;
+    margin: 0 4px;
+}
+
+.annot-toolbar-outils {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.annot-toolbar-badges-zone {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    flex: 1;
+    min-width: 0;
+}
+
+body.mode-clair .annot-toolbar {
+    background: var(--surface-carte, #ffffff);
+    border-bottom-color: rgba(3, 46, 92, 0.1);
 }
 
 /* --- Badges unifies annotation (Annoter/Evaluer + Modelisation) --- */
@@ -20813,18 +20902,8 @@ body.mode-clair .splitter-handle.splitter-active { background: rgba(3, 46, 92, 0
 
 /* --- Modelisation : carrousel + zone document pleine largeur --- */
 .model-zone-document {
-    height: calc(100vh - 210px);
+    height: calc(100vh - 170px);
     min-height: 400px;
-}
-
-.model-carrousel {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
-    border-bottom: 1px solid var(--bordure-claire, #334155);
-    overflow-x: auto;
-    white-space: nowrap;
 }
 
 .model-btn-ouvrir-compact {
@@ -20845,25 +20924,6 @@ body.mode-clair .splitter-handle.splitter-active { background: rgba(3, 46, 92, 0
     background: var(--accent-survol, #2563eb);
 }
 
-.model-carrousel-badges {
-    display: flex;
-    gap: 6px;
-    overflow-x: auto;
-    flex: 1;
-    min-width: 0;
-}
-
-.model-toolbar-nom-fichier {
-    margin-left: 12px;
-    opacity: 0.7;
-    font-size: 0.85em;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 200px;
-    display: inline-block;
-    vertical-align: middle;
-}
 
 .model-compteur-fichiers {
     font-size: 0.85em;
