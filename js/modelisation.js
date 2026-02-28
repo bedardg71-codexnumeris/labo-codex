@@ -146,13 +146,13 @@
 
         var html = '';
         fichiers.forEach(function(f) {
-            var actif = f.id === fichierOuvertId ? ' model-badge-actif' : '';
+            var actif = f.id === fichierOuvertId ? ' actif' : '';
             var statut = determinerStatutModelisation(f);
             html +=
-                '<div class="model-badge' + actif + '" data-id="' + f.id + '" onclick="window.modelisation.ouvrirFichier(\'' + f.id + '\')" title="' + f.nomFichier + '">' +
-                    '<span class="model-badge-nom">' + tronquerNom(f.nomFichier, 22) + '</span>' +
+                '<div class="annot-badge' + actif + '" data-id="' + f.id + '" onclick="window.modelisation.ouvrirFichier(\'' + f.id + '\')" title="' + f.nomFichier + '">' +
+                    '<span class="annot-badge-nom">' + tronquerNom(f.nomFichier, 22) + '</span>' +
                     '<span class="travaux-badge-pill ' + statut.classe + '">' + statut.texte + '</span>' +
-                    '<button class="model-badge-supprimer" onclick="event.stopPropagation(); window.modelisation.supprimerFichier(\'' + f.id + '\')" title="Supprimer">&times;</button>' +
+                    '<button class="annot-badge-supprimer" onclick="event.stopPropagation(); window.modelisation.supprimerFichier(\'' + f.id + '\')" title="Supprimer">&times;</button>' +
                 '</div>';
         });
         zone.innerHTML = html;

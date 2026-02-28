@@ -20021,42 +20021,48 @@ body.mode-clair .barre-etudiant.tracked-4 {
     overflow-x: auto;
 }
 
-.travaux-badge-importe {
+/* --- Badges unifies annotation (Annoter/Evaluer + Modelisation) --- */
+.annot-badge {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     padding: var(--padding-compact);
-    border: 2px solid var(--gris-bordure, #2a4a5a);
+    border: 1px solid var(--bordure-claire, #334155);
     border-radius: var(--radius-petit);
+    background: var(--surface-carte, #1e293b);
     cursor: pointer;
     font-size: var(--font-compact);
     line-height: 1.2;
-    transition: all 0.2s ease;
-    opacity: 0.9;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: border-color 0.15s, background 0.15s, transform 0.15s, box-shadow 0.15s;
 }
 
-.travaux-badge-importe:hover {
-    opacity: 1;
+.annot-badge:hover {
     transform: translateY(-1px);
     box-shadow: var(--shadow-normal);
+    border-color: var(--accent-principal, #3b82f6);
 }
 
-.travaux-badge-importe.actif {
+.annot-badge.actif {
     background: var(--bleu-pale);
     border-color: var(--accent-primaire, #2196F3);
 }
 
-.travaux-badge-importe.travaux-badge-flash {
+.annot-badge.annot-badge-flash {
     animation: badgeFlash 0.5s ease-in-out 3;
 }
 @keyframes badgeFlash {
-    0%, 100% { border-color: var(--gris-bordure, #2a4a5a); }
+    0%, 100% { border-color: var(--bordure-claire, #334155); }
     50% { border-color: var(--accent-primaire, #2196F3); box-shadow: 0 0 8px var(--accent-primaire, #2196F3); }
 }
 
-.travaux-badge-nom {
-    color: var(--texte-principal, #e0e0e0);
+.annot-badge-nom {
+    color: var(--texte-principal, #e0e8f0);
     white-space: nowrap;
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .travaux-badge-pill {
@@ -20174,7 +20180,7 @@ body.mode-clair .barre-etudiant.tracked-4 {
     color: var(--texte-principal);
 }
 
-.travaux-badge-supprimer {
+.annot-badge-supprimer {
     background: none;
     border: none;
     color: var(--texte-secondaire, #a0b0c0);
@@ -20182,10 +20188,10 @@ body.mode-clair .barre-etudiant.tracked-4 {
     font-size: 1rem;
     padding: 0 2px;
     line-height: 1;
-    opacity: 0.6;
-    transition: opacity 0.15s;
+    opacity: 0.5;
+    transition: opacity 0.15s, color 0.15s;
 }
-.travaux-badge-supprimer:hover {
+.annot-badge-supprimer:hover {
     opacity: 1;
     color: var(--rouge-danger, #e74c3c);
 }
@@ -20302,10 +20308,10 @@ body.mode-clair .barre-etudiant.tracked-4 {
 }
 
 /* Badges draggable */
-.travaux-badge-importe[draggable="true"] {
+.annot-badge[draggable="true"] {
     cursor: grab;
 }
-.travaux-badge-importe[draggable="true"]:active {
+.annot-badge[draggable="true"]:active {
     cursor: grabbing;
 }
 
@@ -20805,171 +20811,6 @@ body.mode-clair .splitter-handle.splitter-active { background: rgba(3, 46, 92, 0
     padding: 16px;
 }
 
-.model-entete {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.model-entete-gauche {
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
-}
-
-.model-titre {
-    font-size: 1.25em;
-    font-weight: 600;
-    margin: 0;
-    color: var(--texte-principal, #e0e8f0);
-}
-
-.model-sous-titre {
-    font-size: 0.85em;
-    color: var(--texte-secondaire, #a0b0c0);
-}
-
-.model-entete-droite {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.model-btn-ouvrir {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 8px;
-    background: var(--accent-principal, #3b82f6);
-    color: #fff;
-    font-size: 0.9em;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.15s;
-}
-
-.model-btn-ouvrir:hover {
-    background: var(--accent-survol, #2563eb);
-}
-
-.model-compteur {
-    font-size: 0.85em;
-    color: var(--texte-secondaire, #a0b0c0);
-}
-
-/* Grille de fichiers */
-.model-grille-fichiers {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 16px;
-}
-
-.model-placeholder {
-    width: 100%;
-    text-align: center;
-    padding: 32px;
-    color: var(--texte-secondaire, #a0b0c0);
-    font-size: 0.9em;
-}
-
-.model-fichier-carte {
-    position: relative;
-    width: 120px;
-    border-radius: 8px;
-    background: var(--surface-carte, #1e293b);
-    border: 2px solid transparent;
-    cursor: pointer;
-    overflow: hidden;
-    transition: border-color 0.15s, box-shadow 0.15s;
-}
-
-.model-fichier-carte:hover {
-    border-color: var(--accent-principal, #3b82f6);
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
-}
-
-.model-fichier-carte.model-fichier-actif {
-    border-color: var(--accent-principal, #3b82f6);
-}
-
-.model-fichier-apercu {
-    width: 100%;
-    height: 140px;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--surface-conteneur, #0f172a);
-}
-
-.model-fichier-thumb {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.model-fichier-thumb-placeholder {
-    font-size: 1.2em;
-    font-weight: 600;
-    color: var(--texte-secondaire, #a0b0c0);
-}
-
-.model-fichier-info {
-    padding: 6px 8px;
-}
-
-.model-fichier-nom {
-    font-size: 0.75em;
-    color: var(--texte-principal, #e0e8f0);
-    display: block;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.model-fichier-supprimer {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    width: 22px;
-    height: 22px;
-    border: none;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.6);
-    color: #fff;
-    font-size: 14px;
-    line-height: 22px;
-    text-align: center;
-    cursor: pointer;
-    opacity: 0;
-    transition: opacity 0.15s;
-    padding: 0;
-}
-
-.model-fichier-carte:hover .model-fichier-supprimer {
-    opacity: 1;
-}
-
-.model-fichier-supprimer:hover {
-    background: rgba(239, 68, 68, 0.8);
-}
-
-/* Mode clair */
-body.mode-clair .model-titre {
-    color: var(--texte-principal, #1e293b);
-}
-
-body.mode-clair .model-fichier-carte {
-    background: var(--surface-carte, #ffffff);
-}
-
-body.mode-clair .model-fichier-apercu {
-    background: var(--surface-conteneur, #f1f5f9);
-}
-
 /* --- Modelisation : carrousel + zone document pleine largeur --- */
 .model-zone-document {
     height: calc(100vh - 210px);
@@ -21012,60 +20853,6 @@ body.mode-clair .model-fichier-apercu {
     min-width: 0;
 }
 
-.model-badge {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 5px 10px;
-    border: 1px solid var(--bordure-claire, #334155);
-    border-radius: 6px;
-    background: var(--surface-carte, #1e293b);
-    cursor: pointer;
-    white-space: nowrap;
-    flex-shrink: 0;
-    transition: border-color 0.15s, background 0.15s;
-    position: relative;
-}
-
-.model-badge:hover {
-    border-color: var(--accent-principal, #3b82f6);
-}
-
-.model-badge.model-badge-actif {
-    border-color: var(--accent-principal, #3b82f6);
-    background: var(--bleu-pale, rgba(59, 130, 246, 0.15));
-}
-
-.model-badge-nom {
-    font-size: 0.8em;
-    color: var(--texte-principal, #e0e8f0);
-    max-width: 160px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.model-badge .travaux-badge-pill {
-    font-size: 0.65em;
-    padding: 1px 5px;
-}
-
-.model-badge-supprimer {
-    border: none;
-    background: none;
-    color: var(--texte-secondaire, #a0b0c0);
-    cursor: pointer;
-    font-size: 14px;
-    line-height: 1;
-    padding: 0 2px;
-    opacity: 0.4;
-    transition: opacity 0.15s, color 0.15s;
-}
-
-.model-badge-supprimer:hover {
-    opacity: 1;
-    color: var(--rouge-clair, #ef4444);
-}
-
 .model-toolbar-nom-fichier {
     margin-left: 12px;
     opacity: 0.7;
@@ -21091,12 +20878,13 @@ body.mode-clair .model-fichier-apercu {
     font-size: 0.9em;
 }
 
-/* Mode clair */
-body.mode-clair .model-badge {
+/* Mode clair — badges unifies */
+body.mode-clair .annot-badge {
     background: var(--surface-carte, #ffffff);
+    border-color: var(--gris-bordure, #d1d5db);
 }
 
-body.mode-clair .model-badge.model-badge-actif {
+body.mode-clair .annot-badge.actif {
     background: var(--bleu-pale, rgba(59, 130, 246, 0.1));
 }
 
