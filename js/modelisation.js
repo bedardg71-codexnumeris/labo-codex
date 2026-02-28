@@ -156,9 +156,9 @@
     function determinerStatutModelisation(f) {
         var annotation = travauxStockage.obtenirAnnotationFichier(f.id);
         if (annotation && typeof travauxUI !== 'undefined' && travauxUI.annotationContientDuContenu(annotation)) {
-            return { texte: 'Annote', classe: 'annote' };
+            return { texte: 'Annot\u00e9', classe: 'annote' };
         }
-        return { texte: 'Importe', classe: 'importe' };
+        return { texte: 'Import\u00e9', classe: 'importe' };
     }
 
     function mettreAJourPlaceholder() {
@@ -363,7 +363,7 @@
 
         // Ajuster le zoom a la largeur disponible
         setTimeout(function() {
-            travauxVisionneuse.zoomPleineLargeur();
+            travauxVisionneuse.zoomPleineHauteur();
         }, 100);
 
         afficherCarrousel();
