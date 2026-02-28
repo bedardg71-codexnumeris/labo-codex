@@ -1,8 +1,34 @@
-# SESSION ACTIVE - BETA 98.1
+# SESSION ACTIVE - BETA 98.2
 
-**Date** : 26 février 2026
-**Version** : Beta 98.1
-**Statut** : Outils d'annotation unifiés, duplication, curseur codes d'erreur
+**Date** : 28 février 2026
+**Version** : Beta 98.2
+**Statut** : Toolbar unifiée 1 rangée (Modélisation et Annoter/Évaluer)
+
+## SESSION DU 28 FÉVRIER 2026
+
+### Travail accompli — Toolbar unifiée 1 rangée (28 février 2026)
+
+168. **Toolbar 1 rangée — Modélisation** : Réécriture de `construireUI()` dans `modelisation.js`. Les 2 rangées (carrousel badges + toolbar outils) sont fusionnées en une seule `<div class="annot-toolbar">` avec zone badges scrollable à gauche (`annot-toolbar-fichiers`) et outils de navigation/zoom à droite (`annot-toolbar-outils`), séparées par `annot-toolbar-separateur`. Suppression de `model-carrousel` et `model-nom-fichier`. La toolbar reste toujours visible (même sans fichier ouvert).
+
+169. **Toolbar 1 rangée — Annoter/Évaluer** : Réécriture de `afficherVisionneuse()` dans `travaux-ui.js`. Le dropdown artefact + badges sont intégrés dans la toolbar (`.annot-toolbar-fichiers.travaux-fichiers-compact`) au lieu d'avoir une rangée séparée. Suppression du badge actif dans la toolbar (`travaux-badge-fichier-actif`), remplacé par scroll-to-badge actif dans le strip.
+
+170. **CSS unifié `.annot-toolbar`** : Nouvelles classes `.annot-toolbar`, `.annot-toolbar-fichiers`, `.annot-toolbar-separateur`, `.annot-toolbar-outils`, `.annot-toolbar-badges-zone` dans `styles.css`. Suppression de `.model-carrousel`, `.model-carrousel-badges`, `.model-toolbar-nom-fichier`. Ajustement des hauteurs (`calc(100vh - 120px)`).
+
+171. **Padding optimisé Modélisation** : Ajout de surcharges `:has()` dans `styles.css` pour supprimer le padding des conteneurs imbriqués quand Modélisation est active (`.contenu:has(#boite-outils-modelisation...)`, `#section-boite-outils...`). `.model-layout` passe à `padding: 0`.
+
+172. **Zoom pleine hauteur par défaut** : `ouvrirFichierModelisation()` appelle désormais `zoomPleineHauteur()` au lieu de `zoomPleineLargeur()` pour un affichage optimal du document.
+
+173. **Accents badges Modélisation** : `determinerStatutModelisation()` retourne maintenant `'Importé'` et `'Annoté'` (avec accents) au lieu de `'Importe'`/`'Annote'`.
+
+174. **Fix layout annotation Modélisation** : `creerLayoutAnnotation()` cherche maintenant `.annot-toolbar` en priorité (puis `.travaux-toolbar` en fallback) pour insérer le layout flex au bon endroit.
+
+175. **Fix document invisible Modélisation** : Le zoom après ouverture utilise double `requestAnimationFrame` (attend le reflow complet du layout flex) suivi de `scrollerEnHaut()` avec délai 150ms. Corrige le canvas invisible causé par le déplacement DOM du canvas container dans le layout flex.
+
+176. **Fix visionneuse non chargée** : `afficherFichiers()` dans `travaux-ui.js` remet `conteneur.innerHTML = ''` avant `afficherVisionneuse()` pour forcer la reconfiguration de `setConteneur()` après navigation entre modules.
+
+177. **Fix décalage document Annoter/Évaluer** : `basculerMode()` utilise `requestAnimationFrame` + `scrollerEnHaut()` pour les transitions Annoter↔Évaluer, évitant le décalage causé par un zoom calculé avant le reflow.
+
+---
 
 ## SESSION DU 26 FÉVRIER 2026
 
