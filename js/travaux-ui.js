@@ -433,8 +433,8 @@
             layoutFlex.appendChild(colDroite);
         }
 
-        // Insérer après la toolbar
-        const toolbar = conteneurDoc.querySelector('.travaux-toolbar');
+        // Insérer après la toolbar (.annot-toolbar ou .travaux-toolbar)
+        const toolbar = conteneurDoc.querySelector('.annot-toolbar') || conteneurDoc.querySelector('.travaux-toolbar');
         if (toolbar) {
             toolbar.after(layoutFlex);
         } else {
