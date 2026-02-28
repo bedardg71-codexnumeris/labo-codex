@@ -22,7 +22,6 @@
     let fichiers = [];              // Liste des fichiers modelisation
     let fichierOuvertId = null;     // ID du fichier actuellement ouvert
     let moduleInitialise = false;
-    let sidebarReplie = false;
     const CLE_FICHIERS = 'fichiersModelisation';  // Cle localStorage distincte
     const PREFIXE_ID = 'FM_';      // Prefixe pour distinguer des fichiers travaux (FT_)
 
@@ -32,35 +31,26 @@
 
     function initialiserModelisation() {
         if (moduleInitialise) {
-            // Deja initialise, juste rafraichir la liste
             chargerFichiers();
-            afficherSidebar();
+            afficherCarrousel();
             return;
         }
 
         console.log('[Modelisation] Initialisation du module...');
 
-        // Initialiser le stockage (attendre si necessaire)
         if (typeof travauxStockage !== 'undefined') {
             travauxStockage.initialiser();
         }
-
-        // Initialiser la visionneuse (idempotent — configure PDF.js)
         if (typeof travauxVisionneuse !== 'undefined') {
             travauxVisionneuse.initialiser();
         }
-
-        // Initialiser le moteur d'annotation (idempotent)
         if (typeof travauxAnnotation !== 'undefined') {
             travauxAnnotation.initialiser();
         }
 
-        // Construire l'UI
         construireUI();
-
-        // Charger la liste des fichiers
         chargerFichiers();
-        afficherSidebar();
+        afficherCarrousel();
 
         moduleInitialise = true;
         console.log('[Modelisation] Module initialise');
@@ -71,128 +61,95 @@
        =============================== */
 
     function construireUI() {
-        const conteneur = document.getElementById('model-conteneur-principal');
+        var conteneur = document.getElementById('model-conteneur-principal');
         if (!conteneur) return;
-
-        // Eviter de re-creer si deja present
         if (document.getElementById('model-conteneur-document')) return;
 
         conteneur.innerHTML =
             '<div class="model-layout">' +
 
-                '<!-- Layout flex : sidebar toujours visible + zone document -->' +
-                '<div class="model-visionneuse-flex" id="model-visionneuse-flex">' +
-
-                    '<!-- Sidebar -->' +
-                    '<div class="travaux-sidebar" id="model-sidebar">' +
-                        '<div class="travaux-sidebar-header">' +
-                            '<button class="model-btn-ouvrir" onclick="window.modelisation.ouvrirFichierLocal()" style="width:100%">' +
-                                '+ Ouvrir un fichier' +
-                            '</button>' +
-                        '</div>' +
-                        '<div class="travaux-miniatures" id="model-liste-miniatures">' +
-                            '<!-- Rempli dynamiquement -->' +
-                        '</div>' +
-                    '</div>' +
-
-                    '<!-- Bouton replier sidebar (visible quand replie) -->' +
-                    '<button class="model-btn-toggle-sidebar" id="model-btn-toggle-sidebar" onclick="window.modelisation.toggleSidebar()" title="Afficher/masquer la liste">' +
-                        '\u25B6' +
-                    '</button>' +
-
-                    '<!-- Zone document -->' +
-                    '<div class="travaux-zone-document" id="model-conteneur-document" style="flex:1; min-width:0;">' +
-
-                        '<!-- Toolbar (masquee tant qu aucun fichier ouvert) -->' +
-                        '<div class="travaux-toolbar" id="model-toolbar" style="display:none;">' +
-                            '<div class="travaux-toolbar-inner">' +
-                                '<!-- GAUCHE : navigation pages -->' +
-                                '<div class="travaux-toolbar-gauche">' +
-                                    '<button id="model-btn-page-prec" class="travaux-btn-nav" onclick="travauxVisionneuse.pagePrecedente()" disabled title="Page precedente">&#x2190;</button>' +
-                                    '<span id="model-indicateur-page">-- / --</span>' +
-                                    '<button id="model-btn-page-suiv" class="travaux-btn-nav" onclick="travauxVisionneuse.pageSuivante()" disabled title="Page suivante">&#x2192;</button>' +
-                                    '<span id="model-nom-fichier" class="model-toolbar-nom-fichier"></span>' +
-                                '</div>' +
-
-                                '<!-- CENTRE : navigation inter-documents -->' +
-                                '<div class="travaux-toolbar-centre">' +
-                                    '<button id="model-btn-fichier-prec" class="travaux-btn-nav" onclick="window.modelisation.fichierPrecedent()" disabled title="Fichier precedent">&#x276E;</button>' +
-                                    '<span id="model-compteur-fichiers" class="model-compteur-fichiers"></span>' +
-                                    '<button id="model-btn-fichier-suiv" class="travaux-btn-nav" onclick="window.modelisation.fichierSuivant()" disabled title="Fichier suivant">&#x276F;</button>' +
-                                '</div>' +
-
-                                '<!-- DROITE : zoom + fermer -->' +
-                                '<div class="travaux-toolbar-droite">' +
-                                    '<span id="model-indicateur-zoom" class="travaux-zoom-info">100%</span>' +
-                                    '<button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoomPleineLargeur()" title="Ajuster a la largeur">Largeur</button>' +
-                                    '<button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoomPleineHauteur()" title="Ajuster a la hauteur">Hauteur</button>' +
-                                    '<button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoom100()" title="Zoom 100%">100%</button>' +
-                                    '<button class="travaux-btn-zoom" onclick="travauxVisionneuse.recentrerVue()" title="Recentrer la vue">Recentrer</button>' +
-                                    '<span class="travaux-separateur"></span>' +
-                                    '<button class="travaux-btn-action" onclick="window.modelisation.fermerVisionneuse()" title="Fermer le fichier">Fermer</button>' +
-                                '</div>' +
-                            '</div>' +
-                        '</div>' +
-
-                        '<!-- Canvas container (masque tant qu aucun fichier ouvert) -->' +
-                        '<div class="travaux-canvas-container" id="model-canvas-container" style="display:none;">' +
-                            '<div class="travaux-canvas-wrapper" id="model-canvas-wrapper">' +
-                                '<canvas id="model-canvas-document"></canvas>' +
-                                '<canvas id="model-canvas-surligneur" class="u-hide" style="pointer-events:none;"></canvas>' +
-                                '<canvas id="model-canvas-annotation" class="u-hide" style="pointer-events:none;"></canvas>' +
-                            '</div>' +
-                        '</div>' +
-
-                        '<!-- Placeholder dans la zone document -->' +
-                        '<div class="model-placeholder" id="model-placeholder-vide">' +
-                            '<p>Cliquer sur « + Ouvrir un fichier » pour commencer.</p>' +
-                        '</div>' +
-
-                    '</div>' +
+                '<!-- Carrousel horizontal de fichiers -->' +
+                '<div class="model-carrousel" id="model-carrousel">' +
+                    '<button class="model-btn-ouvrir-compact" onclick="window.modelisation.ouvrirFichierLocal()" title="Ouvrir un fichier">+ Ouvrir</button>' +
+                    '<div class="model-carrousel-badges" id="model-carrousel-badges"></div>' +
                 '</div>' +
 
+                '<!-- Zone document (pleine largeur) -->' +
+                '<div class="travaux-zone-document model-zone-document" id="model-conteneur-document">' +
+
+                    '<!-- Toolbar -->' +
+                    '<div class="travaux-toolbar" id="model-toolbar" style="display:none;">' +
+                        '<div class="travaux-toolbar-inner">' +
+                            '<div class="travaux-toolbar-gauche">' +
+                                '<button id="model-btn-page-prec" class="travaux-btn-nav" onclick="travauxVisionneuse.pagePrecedente()" disabled title="Page precedente">&#x2190;</button>' +
+                                '<span id="model-indicateur-page">-- / --</span>' +
+                                '<button id="model-btn-page-suiv" class="travaux-btn-nav" onclick="travauxVisionneuse.pageSuivante()" disabled title="Page suivante">&#x2192;</button>' +
+                                '<span id="model-nom-fichier" class="model-toolbar-nom-fichier"></span>' +
+                            '</div>' +
+                            '<div class="travaux-toolbar-centre">' +
+                                '<button id="model-btn-fichier-prec" class="travaux-btn-nav" onclick="window.modelisation.fichierPrecedent()" disabled title="Fichier precedent">&#x276E;</button>' +
+                                '<span id="model-compteur-fichiers" class="model-compteur-fichiers"></span>' +
+                                '<button id="model-btn-fichier-suiv" class="travaux-btn-nav" onclick="window.modelisation.fichierSuivant()" disabled title="Fichier suivant">&#x276F;</button>' +
+                            '</div>' +
+                            '<div class="travaux-toolbar-droite">' +
+                                '<span id="model-indicateur-zoom" class="travaux-zoom-info">100%</span>' +
+                                '<button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoomPleineLargeur()" title="Ajuster a la largeur">Largeur</button>' +
+                                '<button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoomPleineHauteur()" title="Ajuster a la hauteur">Hauteur</button>' +
+                                '<button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoom100()" title="Zoom 100%">100%</button>' +
+                                '<button class="travaux-btn-zoom" onclick="travauxVisionneuse.recentrerVue()" title="Recentrer la vue">Recentrer</button>' +
+                                '<span class="travaux-separateur"></span>' +
+                                '<button class="travaux-btn-action" onclick="window.modelisation.fermerVisionneuse()" title="Fermer le fichier">Fermer</button>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+
+                    '<!-- Canvas container -->' +
+                    '<div class="travaux-canvas-container" id="model-canvas-container" style="display:none;">' +
+                        '<div class="travaux-canvas-wrapper" id="model-canvas-wrapper">' +
+                            '<canvas id="model-canvas-document"></canvas>' +
+                            '<canvas id="model-canvas-surligneur" class="u-hide" style="pointer-events:none;"></canvas>' +
+                            '<canvas id="model-canvas-annotation" class="u-hide" style="pointer-events:none;"></canvas>' +
+                        '</div>' +
+                    '</div>' +
+
+                    '<!-- Placeholder -->' +
+                    '<div class="model-placeholder" id="model-placeholder-vide">' +
+                        '<p>Cliquer sur « + Ouvrir » pour importer un fichier.</p>' +
+                    '</div>' +
+
+                '</div>' +
             '</div>';
 
-        // Ecouter l'evenement travaux-page-rendue pour mettre a jour les indicateurs modelisation
         window.addEventListener('travaux-page-rendue', onPageRendue);
     }
 
     /* ===============================
-       SIDEBAR — LISTE DES FICHIERS
+       CARROUSEL HORIZONTAL DE BADGES
        =============================== */
 
-    function afficherSidebar() {
-        const liste = document.getElementById('model-liste-miniatures');
-        if (!liste) return;
+    function afficherCarrousel() {
+        var zone = document.getElementById('model-carrousel-badges');
+        if (!zone) return;
 
         if (fichiers.length === 0) {
-            liste.innerHTML = '<div class="model-sidebar-vide">Aucun fichier.</div>';
+            zone.innerHTML = '';
             mettreAJourPlaceholder();
             mettreAJourCompteurFichiers();
             return;
         }
 
-        let html = '';
+        var html = '';
         fichiers.forEach(function(f) {
-            const actif = f.id === fichierOuvertId ? ' actif' : '';
-            const statut = determinerStatutModelisation(f);
-            const thumbnail = f.thumbnailDataUrl
-                ? '<img src="' + f.thumbnailDataUrl + '" alt="">'
-                : '<span>' + (f.typeMIME === 'application/pdf' ? 'PDF' : 'IMG') + '</span>';
-
+            var actif = f.id === fichierOuvertId ? ' model-badge-actif' : '';
+            var statut = determinerStatutModelisation(f);
             html +=
-                '<div class="travaux-miniature' + actif + '" data-id="' + f.id + '" onclick="window.modelisation.ouvrirFichier(\'' + f.id + '\')">' +
-                    '<div class="travaux-miniature-thumb">' +
-                        thumbnail +
-                    '</div>' +
-                    '<div class="model-miniature-info">' +
-                        '<span class="travaux-miniature-nom" title="' + f.nomFichier + '">' + tronquerNom(f.nomFichier, 18) + '</span>' +
-                        '<span class="travaux-badge-pill ' + statut.classe + '">' + statut.texte + '</span>' +
-                    '</div>' +
-                    '<button class="model-miniature-supprimer" onclick="event.stopPropagation(); window.modelisation.supprimerFichier(\'' + f.id + '\')" title="Supprimer">&times;</button>' +
+                '<div class="model-badge' + actif + '" data-id="' + f.id + '" onclick="window.modelisation.ouvrirFichier(\'' + f.id + '\')" title="' + f.nomFichier + '">' +
+                    '<span class="model-badge-nom">' + tronquerNom(f.nomFichier, 22) + '</span>' +
+                    '<span class="travaux-badge-pill ' + statut.classe + '">' + statut.texte + '</span>' +
+                    '<button class="model-badge-supprimer" onclick="event.stopPropagation(); window.modelisation.supprimerFichier(\'' + f.id + '\')" title="Supprimer">&times;</button>' +
                 '</div>';
         });
-        liste.innerHTML = html;
+        zone.innerHTML = html;
 
         mettreAJourPlaceholder();
         mettreAJourCompteurFichiers();
@@ -273,22 +230,6 @@
     }
 
     /* ===============================
-       TOGGLE SIDEBAR
-       =============================== */
-
-    function toggleSidebar() {
-        var sidebar = document.getElementById('model-sidebar');
-        var btn = document.getElementById('model-btn-toggle-sidebar');
-        if (!sidebar) return;
-        sidebar.classList.toggle('replie');
-        sidebarReplie = sidebar.classList.contains('replie');
-        if (btn) {
-            btn.classList.toggle('visible', sidebarReplie);
-            btn.innerHTML = sidebarReplie ? '&#x25B6;' : '&#x25C0;';
-        }
-    }
-
-    /* ===============================
        GESTION DES FICHIERS
        =============================== */
 
@@ -322,7 +263,6 @@
                 var blob = new Blob([await file.arrayBuffer()], { type: file.type });
                 var id = PREFIXE_ID + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
 
-                // Generer la miniature
                 var thumbnailDataUrl = '';
                 try {
                     if (file.type === 'application/pdf') {
@@ -335,7 +275,6 @@
                     console.warn('[Modelisation] Erreur generation miniature:', err);
                 }
 
-                // Creer les metadonnees
                 var metadata = {
                     id: id,
                     nomFichier: file.name,
@@ -346,24 +285,17 @@
                     dateImport: new Date().toISOString()
                 };
 
-                // Stocker le blob dans IndexedDB
                 await travauxStockage.stockerBlob(id, blob, '', '');
-
-                // Sauvegarder les metadonnees
                 fichiers.push(metadata);
                 sauvegarderFichiers();
-                afficherSidebar();
-
-                // Ouvrir le fichier dans la visionneuse
+                afficherCarrousel();
                 await ouvrirFichierModelisation(id);
-
                 console.log('[Modelisation] Fichier importe:', file.name);
             } catch (err) {
                 console.error('[Modelisation] Erreur import fichier:', err);
                 alert('Erreur lors de l\u2019importation du fichier.');
             }
 
-            // Nettoyer l'input
             input.remove();
         });
 
@@ -403,15 +335,12 @@
             conteneurPalette: document.getElementById('model-conteneur-document')
         });
 
-        // Configurer le conteneur de la visionneuse
         var conteneurDoc = document.getElementById('model-conteneur-document');
         travauxVisionneuse.setConteneur(conteneurDoc);
 
-        // Configurer les gestes zoom sur le canvas container
         var canvasContainer = document.getElementById('model-canvas-container');
         travauxVisionneuse.configurerGestesZoom(canvasContainer);
 
-        // Recuperer le blob
         var blob = await travauxStockage.recupererBlob(id);
         if (!blob) {
             console.error('[Modelisation] Blob introuvable pour:', id);
@@ -424,11 +353,10 @@
         mettreAJourPlaceholder();
         await travauxVisionneuse.ouvrirDepuisBlob(blob, metadata);
 
-        // Afficher le nom du fichier dans la toolbar
         var nomEl = document.getElementById('model-nom-fichier');
         if (nomEl) nomEl.textContent = metadata.nomFichier;
 
-        // Activer l'annotation automatiquement
+        // Activer l'annotation
         travauxAnnotation.activerAnnotation();
 
         // Creer le layout annotation partage (palette outils + tampons, sans codes)
@@ -440,8 +368,12 @@
             });
         }
 
-        // Rafraichir la sidebar pour marquer le fichier actif
-        afficherSidebar();
+        // Ajuster le zoom a la largeur disponible
+        setTimeout(function() {
+            travauxVisionneuse.zoomPleineLargeur();
+        }, 100);
+
+        afficherCarrousel();
     }
 
     /* ===============================
@@ -449,12 +381,10 @@
        =============================== */
 
     function fermerVisionneuse() {
-        // Sauvegarder les annotations avant de fermer
         if (travauxAnnotation.estActif()) {
             travauxAnnotation.desactiverAnnotation();
         }
 
-        // Detruire le layout annotation partage
         if (typeof travauxUI !== 'undefined' && travauxUI.detruireLayoutAnnotation) {
             travauxUI.detruireLayoutAnnotation('model-conteneur-document');
         }
@@ -462,19 +392,16 @@
         travauxVisionneuse.fermerFichier();
         fichierOuvertId = null;
 
-        // Supprimer la palette flottante si elle existe dans notre conteneur
         var palette = document.getElementById('travaux-palette-flottante');
         if (palette && palette.closest('#model-conteneur-document')) {
             palette.remove();
         }
 
-        // Nettoyer le contexte
         travauxVisionneuse.setContext(null);
         travauxAnnotation.setContext(null);
 
-        // Rafraichir la sidebar et afficher le placeholder
         mettreAJourPlaceholder();
-        afficherSidebar();
+        afficherCarrousel();
     }
 
     /* ===============================
@@ -484,19 +411,16 @@
     async function supprimerFichierModelisation(id) {
         if (!confirm('Supprimer ce fichier et ses annotations ?')) return;
 
-        // Fermer si c'est le fichier ouvert
         if (id === fichierOuvertId) {
             fermerVisionneuse();
         }
 
-        // Supprimer le blob
         try {
             await travauxStockage.supprimerBlob(id);
         } catch (e) {
             console.warn('[Modelisation] Erreur suppression blob:', e);
         }
 
-        // Supprimer les annotations liees
         try {
             var annotations = travauxStockage.obtenirAnnotations();
             var annotationsFiltrees = annotations.filter(function(a) { return a.fichierId !== id; });
@@ -507,10 +431,9 @@
             console.warn('[Modelisation] Erreur suppression annotations:', e);
         }
 
-        // Supprimer des metadonnees
         fichiers = fichiers.filter(function(f) { return f.id !== id; });
         sauvegarderFichiers();
-        afficherSidebar();
+        afficherCarrousel();
 
         console.log('[Modelisation] Fichier supprime:', id);
     }
@@ -520,12 +443,10 @@
        =============================== */
 
     function onPageRendue(e) {
-        // Ne reagir que si on est dans le contexte modelisation
         if (!fichierOuvertId) return;
         var modelCanvas = document.getElementById('model-canvas-document');
         if (!modelCanvas) return;
 
-        // Mettre a jour les indicateurs modelisation
         var indicateur = document.getElementById('model-indicateur-page');
         if (indicateur) {
             var totalPages = travauxVisionneuse.getNombrePagesTotal();
@@ -540,7 +461,6 @@
         if (btnPrec) btnPrec.disabled = page <= 1;
         if (btnSuiv) btnSuiv.disabled = page >= total;
 
-        // Zoom
         var indicateurZoom = document.getElementById('model-indicateur-zoom');
         if (indicateurZoom) {
             indicateurZoom.textContent = Math.round(travauxVisionneuse.getZoomActuel() * 100) + '%';
@@ -554,29 +474,24 @@
     function nettoyerModelisation() {
         console.log('[Modelisation] Nettoyage...');
 
-        // Sauvegarder et desactiver l'annotation
         if (typeof travauxAnnotation !== 'undefined' && travauxAnnotation.estActif()) {
             travauxAnnotation.desactiverAnnotation();
         }
 
-        // Detruire le layout annotation partage
         if (typeof travauxUI !== 'undefined' && travauxUI.detruireLayoutAnnotation) {
             travauxUI.detruireLayoutAnnotation('model-conteneur-document');
         }
 
-        // Fermer le fichier dans la visionneuse
         if (fichierOuvertId && typeof travauxVisionneuse !== 'undefined') {
             travauxVisionneuse.fermerFichier();
             fichierOuvertId = null;
         }
 
-        // Supprimer la palette flottante si elle existe dans notre conteneur
         var palette = document.getElementById('travaux-palette-flottante');
         if (palette && palette.closest('#model-conteneur-document')) {
             palette.remove();
         }
 
-        // Remettre les contextes a null
         if (typeof travauxVisionneuse !== 'undefined') {
             travauxVisionneuse.setContext(null);
         }
@@ -597,8 +512,7 @@
         fermerVisionneuse: fermerVisionneuse,
         nettoyer: nettoyerModelisation,
         fichierPrecedent: fichierPrecedent,
-        fichierSuivant: fichierSuivant,
-        toggleSidebar: toggleSidebar
+        fichierSuivant: fichierSuivant
     };
 
     console.log('[Modelisation] Module charge');
