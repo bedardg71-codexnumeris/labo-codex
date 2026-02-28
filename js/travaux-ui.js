@@ -775,6 +775,10 @@
         // Stocker le HTML badges pour injection dans la toolbar (Phase A — 1 rangée)
         _htmlBadgesGrille = genererGrilleFichiers(fichiersTravaux, 'ouvrirFichier');
 
+        // Nettoyer le conteneur (détruit l'ancienne visionneuse pour la recréer
+        // avec les badges à jour et reconfigurer setConteneur/gestesZoom)
+        conteneur.innerHTML = '';
+
         // Rendre la visionneuse (toolbar unique intègre les badges)
         afficherVisionneuse();
 
