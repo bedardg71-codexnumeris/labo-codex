@@ -20970,6 +20970,125 @@ body.mode-clair .model-fichier-apercu {
     background: var(--surface-conteneur, #f1f5f9);
 }
 
+/* --- Modelisation : layout flex sidebar + document --- */
+.model-visionneuse-flex {
+    display: flex;
+    height: calc(100vh - 160px);
+    min-height: 400px;
+    gap: 0;
+    position: relative;
+}
+
+.model-visionneuse-flex .travaux-sidebar {
+    width: 180px;
+    min-width: 180px;
+}
+
+.model-toolbar-nom-fichier {
+    margin-left: 12px;
+    opacity: 0.7;
+    font-size: 0.85em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 200px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.model-compteur-fichiers {
+    font-size: 0.85em;
+    color: var(--texte-secondaire, #a0b0c0);
+    white-space: nowrap;
+}
+
+.model-miniature-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.model-miniature-supprimer {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 18px;
+    height: 18px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    font-size: 12px;
+    line-height: 18px;
+    text-align: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.15s;
+    padding: 0;
+}
+
+.travaux-miniature:hover .model-miniature-supprimer {
+    opacity: 1;
+}
+
+.model-miniature-supprimer:hover {
+    background: rgba(239, 68, 68, 0.8);
+}
+
+.travaux-miniature {
+    position: relative;
+}
+
+.model-btn-toggle-sidebar {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 5;
+    width: 20px;
+    height: 40px;
+    border: 1px solid var(--bordure-claire);
+    border-left: none;
+    border-radius: 0 6px 6px 0;
+    background: var(--surface-carte, #1e293b);
+    color: var(--texte-secondaire, #a0b0c0);
+    cursor: pointer;
+    font-size: 10px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: background 0.15s;
+}
+
+.model-btn-toggle-sidebar.visible {
+    display: flex;
+}
+
+.model-btn-toggle-sidebar:hover {
+    background: var(--surface-hover, #334155);
+}
+
+.model-sidebar-vide {
+    text-align: center;
+    padding: 16px 8px;
+    color: var(--texte-secondaire, #a0b0c0);
+    font-size: 0.8em;
+}
+
+.model-placeholder {
+    text-align: center;
+    padding: 48px 16px;
+    color: var(--texte-secondaire, #a0b0c0);
+    font-size: 0.9em;
+}
+
+body.mode-clair .model-btn-toggle-sidebar {
+    background: var(--surface-carte, #ffffff);
+}
+
 /* ===============================
    MODAL EDITION RETROACTIONS (tampons + erreurs FR)
    =============================== */

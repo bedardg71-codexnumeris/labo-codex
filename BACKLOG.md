@@ -9,15 +9,7 @@
 
 ### Priorite haute - Boite a outils : Modelisation (21 fev 2026)
 
-- [ ] **Outil "Modelisation" dans la Boite a outils** : Duplicata fonctionnel du module d'annotation existant pour projection en classe, avec les differences suivantes :
-  - Supprimer le bouton "Evaluer" et tout ce qui y est lie (grille d'evaluation, sauvegarde de note, etc.)
-  - Supprimer la navigation par etudiant (conserver les boutons 1/2 ← →)
-  - Supprimer le panneau "ERREURS DE FRANCAIS" (ou le rendre optionnel/masquable)
-  - Conserver integralement : panneau ANNOTATION (Outils, Formes, Couleur, Epaisseur), panneau TAMPONS, et le viewer PDF avec canvas overlay
-  - Ajouter un bouton "Ouvrir un PDF" pour charger n'importe quel fichier local (pas lie a un artefact etudiant)
-  - Les annotations sont sauvegardees dans IndexedDB (l'exercice peut s'etendre sur plusieurs seances ou revenir en exemple plus tard)
-  - L'interface sert pour la projection en classe
-  - **Architecture** : Reutiliser au maximum le code du module d'annotation existant (composant partage ou heritage) plutot que de tout dupliquer, pour faciliter la maintenance future
+- [x] **Outil "Modelisation" dans la Boite a outils** ✅ COMPLÉTÉ (28 fév 2026) : Module entierement reecrit avec layout flex sidebar + document, toolbar enrichie (pages, navigation inter-documents, zoom), badges de statut (Importé/Annoté), sidebar retractable avec miniatures. Palette d'annotation partagee via `travauxUI.creerLayoutAnnotation()` parametrable (`afficherCodes`, `afficherTampons`, `conteneurDocId`). Titre du panneau de codes rendu dynamique (`db.getSync('titrePanneauCodes')`). Suppression de `setMasquerErreursFrancais` au profit du parametre generique `afficherCodes: false`. Fichiers modifies : `js/modelisation.js` (reecrit), `js/travaux-ui.js` (parametrise), `styles.css` (+105 lignes).
 
 ### Priorite haute - Annotation et Evaluation (21 fev 2026)
 
