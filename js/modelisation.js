@@ -80,7 +80,7 @@
         conteneur.innerHTML =
             '<div class="model-layout">' +
 
-                '<!-- Visionneuse flex : sidebar + document -->' +
+                '<!-- Layout flex : sidebar toujours visible + zone document -->' +
                 '<div class="model-visionneuse-flex" id="model-visionneuse-flex">' +
 
                     '<!-- Sidebar -->' +
@@ -103,8 +103,8 @@
                     '<!-- Zone document -->' +
                     '<div class="travaux-zone-document" id="model-conteneur-document" style="flex:1; min-width:0;">' +
 
-                        '<!-- Toolbar -->' +
-                        '<div class="travaux-toolbar">' +
+                        '<!-- Toolbar (masquee tant qu aucun fichier ouvert) -->' +
+                        '<div class="travaux-toolbar" id="model-toolbar" style="display:none;">' +
                             '<div class="travaux-toolbar-inner">' +
                                 '<!-- GAUCHE : navigation pages -->' +
                                 '<div class="travaux-toolbar-gauche">' +
@@ -134,8 +134,8 @@
                             '</div>' +
                         '</div>' +
 
-                        '<!-- Canvas container -->' +
-                        '<div class="travaux-canvas-container" id="model-canvas-container">' +
+                        '<!-- Canvas container (masque tant qu aucun fichier ouvert) -->' +
+                        '<div class="travaux-canvas-container" id="model-canvas-container" style="display:none;">' +
                             '<div class="travaux-canvas-wrapper" id="model-canvas-wrapper">' +
                                 '<canvas id="model-canvas-document"></canvas>' +
                                 '<canvas id="model-canvas-surligneur" class="u-hide" style="pointer-events:none;"></canvas>' +
@@ -143,12 +143,12 @@
                             '</div>' +
                         '</div>' +
 
-                    '</div>' +
-                '</div>' +
+                        '<!-- Placeholder dans la zone document -->' +
+                        '<div class="model-placeholder" id="model-placeholder-vide">' +
+                            '<p>Cliquer sur « + Ouvrir un fichier » pour commencer.</p>' +
+                        '</div>' +
 
-                '<!-- Placeholder quand aucun fichier ouvert -->' +
-                '<div class="model-placeholder" id="model-placeholder-vide">' +
-                    '<p>Ouvrir un fichier dans la barre laterale pour commencer.</p>' +
+                    '</div>' +
                 '</div>' +
 
             '</div>';
@@ -208,15 +208,17 @@
 
     function mettreAJourPlaceholder() {
         var placeholder = document.getElementById('model-placeholder-vide');
-        var flex = document.getElementById('model-visionneuse-flex');
-        if (!placeholder || !flex) return;
+        var toolbar = document.getElementById('model-toolbar');
+        var canvas = document.getElementById('model-canvas-container');
 
         if (fichierOuvertId) {
-            placeholder.style.display = 'none';
-            flex.style.display = '';
+            if (placeholder) placeholder.style.display = 'none';
+            if (toolbar) toolbar.style.display = '';
+            if (canvas) canvas.style.display = '';
         } else {
-            placeholder.style.display = '';
-            flex.style.display = 'none';
+            if (placeholder) placeholder.style.display = '';
+            if (toolbar) toolbar.style.display = 'none';
+            if (canvas) canvas.style.display = 'none';
         }
     }
 
