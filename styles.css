@@ -20897,12 +20897,21 @@ body.mode-clair .splitter-handle.splitter-active { background: rgba(3, 46, 92, 0
    =============================== */
 
 .model-layout {
-    padding: 16px;
+    padding: 0;
 }
 
-/* --- Modelisation : carrousel + zone document pleine largeur --- */
+/* Supprimer le padding des conteneurs parents quand Modélisation est active */
+.contenu:has(#boite-outils-modelisation.sous-section.active) {
+    padding: 0;
+}
+#section-boite-outils.section.active:has(#boite-outils-modelisation.sous-section.active) {
+    padding: 4px 0 0;
+    border-radius: 0;
+}
+
+/* --- Modelisation : zone document pleine largeur --- */
 .model-zone-document {
-    height: calc(100vh - 170px);
+    height: calc(100vh - 120px);
     min-height: 400px;
 }
 
