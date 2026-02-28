@@ -3198,7 +3198,11 @@
             if (btnAnnoter) btnAnnoter.classList.remove('actif');
             if (btnEvaluer) btnEvaluer.classList.add('actif');
             // Pleine hauteur par défaut en mode évaluation
-            travauxVisionneuse.zoomPleineHauteur();
+            // Différer pour que le reflow (ajout panneaux eval) soit terminé
+            requestAnimationFrame(() => {
+                travauxVisionneuse.zoomPleineHauteur();
+                setTimeout(() => travauxVisionneuse.scrollerEnHaut(), 100);
+            });
             // Si productionId manquant, ouvrir le panneau correction d'identité
             if (!fichier.productionId) {
                 setTimeout(() => toggleCorrectionIdentite(), 100);
@@ -3214,8 +3218,12 @@
             }
             if (btnAnnoter) btnAnnoter.classList.add('actif');
             if (btnEvaluer) btnEvaluer.classList.remove('actif');
-            // Pleine hauteur par defaut en mode annotation
-            travauxVisionneuse.zoomPleineHauteur();
+            // Pleine hauteur par défaut en mode annotation
+            // Différer pour que le reflow (suppression panneaux eval) soit terminé
+            requestAnimationFrame(() => {
+                travauxVisionneuse.zoomPleineHauteur();
+                setTimeout(() => travauxVisionneuse.scrollerEnHaut(), 100);
+            });
         }
         sauvegarderEtatSession();
     }
