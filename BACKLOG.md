@@ -7,6 +7,79 @@
 
 ## A faire
 
+### Qualite du code — Audit fevrier 2026
+
+> **Rapport complet** : `docs/AUDIT-QUALITE.md` (134 constats : 24 critiques, 63 moderes, 47 mineurs)
+
+#### Priorite CRITIQUE — Integrite des donnees
+
+- [ ] **#196** Harmoniser les appels evaluation.js : remplacer les 16 appels `db.getSync()` directs par `obtenirDonneesSelonMode()` (root cause bug #71)
+  - **Fichier** : `js/evaluation.js`
+  - **Ref audit** : EVL-01
+
+- [ ] **#197** Ajouter 6 cles manquantes dans CLES_NAMESPACEES ou documenter dans CLES_GLOBALES : `listeCours`, `cours`, `infoCours`, `groupeCoursActif`, `horaireSelectionne`, `pratiqueParDefaut`
+  - **Fichiers** : `js/trimestres.js`, `js/trimestre-v2.js`
+  - **Ref audit** : TRM-01
+
+- [ ] **#198** Chainer le recalcul d'indices : apres modification presences, appeler `calculerEtStockerIndicesCP()` pour que E = (A*C*P)^(1/3) reflète la bonne valeur de A
+  - **Fichier** : `js/saisie-presences.js:72`
+  - **Ref audit** : SUI-03
+
+- [ ] **#199** Fixer evaluation-jetons.js : utiliser `sauvegarderDonneesSelonMode()` au lieu de `db.setSync()` direct (6 emplacements — les jetons bypassent le mode assiste/simulation)
+  - **Fichier** : `js/evaluation-jetons.js:171, 226, 362, 466, 758, 797`
+  - **Ref audit** : EVL-04
+
+- [ ] **#200** Unifier la source de verite "cours" : garder `listeCours` OU `cours` (pas les deux), nettoyer la migration Beta 95.2
+  - **Fichier** : `js/trimestre-v2.js:1290-1291`
+  - **Ref audit** : TRM-02
+
+- [ ] **#201** Reinitialiser `infoCours` lors du changement de trimestre et de la suppression de cours (singleton global qui pointe vers un cours fantome)
+  - **Fichier** : `js/trimestre-v2.js:1300, 1523`
+  - **Ref audit** : TRM-03
+
+#### Priorite CRITIQUE — Robustesse
+
+- [ ] **#202** Fixer division par zero dans `calculerPerformancePAN()` : ajouter guard `if (meilleuresNotes.length === 0) return 0;`
+  - **Fichier** : `js/profil-etudiant.js:2601`
+  - **Ref audit** : SUI-02
+
+- [ ] **#203** Ajouter validation taille blobs avant stockage IndexedDB (pas de limite actuellement, crash si quota depasse)
+  - **Fichier** : `js/travaux-stockage.js:259-293`
+  - **Ref audit** : TRV-03
+
+- [ ] **#204** Fixer deadlock UI : `enRendu` jamais reset si `preRendreAdjacentes()` throw — wrapper dans try/catch ou utiliser `finally`
+  - **Fichier** : `js/travaux-visionneuse.js:160-215`
+  - **Ref audit** : TRV-01
+
+- [ ] **#205** Nettoyer variable `configCompleteEnAttente` apres import (fuite de donnees si importations multiples dans meme session)
+  - **Fichier** : `js/import-export.js:604-641`
+  - **Ref audit** : AUT-01
+
+#### Priorite haute — Architecture
+
+- [ ] **#206** Creer module `indices.js` centralise : regrouper les 7 fonctions de calcul d'indices A-C-P-E dupliquees entre profil-etudiant.js, portfolio.js, tableau-bord-apercu.js et saisie-presences.js
+  - **Ref audit** : SUI-01, voir tableau de centralisation dans AUDIT-QUALITE.md
+
+- [ ] **#207** Integrer travaux-stockage.js dans db.js : creer une API blob dans db.js au lieu d'ouvrir une base IndexedDB parallele (`MonitorageFichiers`)
+  - **Fichier** : `js/travaux-stockage.js:51`
+  - **Ref audit** : ARC-01
+
+#### Priorite haute — Performance et hygiene
+
+- [ ] **#208** Throttle drag multi-selection carte mentale via `requestAnimationFrame` (recalcul N² liens a chaque mousemove = UI janky)
+  - **Fichier** : `js/planification-carte.js:2631-2649`
+  - **Ref audit** : PLN-03
+
+- [ ] **#209** Supprimer ~20 console.log debug dans `calculerNote()` (spam 300+ logs par session)
+  - **Fichier** : `js/evaluation.js:1551-1623`
+  - **Ref audit** : EVL-06
+
+- [ ] **#210** Consolider styles inline index.html : 1 119 → ~300 en exploitant les classes utilitaires existantes (`.u-flex`, `.u-texte-gras`, `.u-ml-*`, etc.)
+  - **Ref audit** : CSS-01
+
+- [ ] **#211** Nettoyer code legacy prototype dans planification-carte.js (variables organisateur lignes 4553-4581, fonctions inexistantes)
+  - **Ref audit** : PLN-01
+
 ### Priorite haute - Boite a outils : Modelisation (21 fev 2026)
 
 - [x] **Outil "Modelisation" dans la Boite a outils** ✅ COMPLÉTÉ (28 fév 2026) : Module entierement reecrit avec layout flex sidebar + document, toolbar enrichie (pages, navigation inter-documents, zoom), badges de statut (Importé/Annoté), sidebar retractable avec miniatures. Palette d'annotation partagee via `travauxUI.creerLayoutAnnotation()` parametrable (`afficherCodes`, `afficherTampons`, `conteneurDocId`). Titre du panneau de codes rendu dynamique (`db.getSync('titrePanneauCodes')`). Suppression de `setMasquerErreursFrancais` au profit du parametre generique `afficherCodes: false`. Fichiers modifies : `js/modelisation.js` (reecrit), `js/travaux-ui.js` (parametrise), `styles.css` (+105 lignes).
