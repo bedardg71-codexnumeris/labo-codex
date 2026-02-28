@@ -74,38 +74,30 @@
         conteneur.innerHTML =
             '<div class="model-layout">' +
 
-                '<!-- Carrousel horizontal de fichiers -->' +
-                '<div class="model-carrousel" id="model-carrousel">' +
-                    '<button class="model-btn-ouvrir-compact" onclick="window.modelisation.ouvrirFichierLocal()" title="Ouvrir un fichier">+ Ouvrir</button>' +
-                    '<div class="model-carrousel-badges" id="model-carrousel-badges"></div>' +
-                '</div>' +
-
                 '<!-- Zone document (pleine largeur) -->' +
                 '<div class="travaux-zone-document model-zone-document" id="model-conteneur-document">' +
 
-                    '<!-- Toolbar -->' +
-                    '<div class="travaux-toolbar" id="model-toolbar" style="display:none;">' +
-                        '<div class="travaux-toolbar-inner">' +
-                            '<div class="travaux-toolbar-gauche">' +
-                                '<button id="model-btn-page-prec" class="travaux-btn-nav" onclick="travauxVisionneuse.pagePrecedente()" disabled title="Page precedente">&#x2190;</button>' +
-                                '<span id="model-indicateur-page">-- / --</span>' +
-                                '<button id="model-btn-page-suiv" class="travaux-btn-nav" onclick="travauxVisionneuse.pageSuivante()" disabled title="Page suivante">&#x2192;</button>' +
-                                '<span id="model-nom-fichier" class="model-toolbar-nom-fichier"></span>' +
-                            '</div>' +
-                            '<div class="travaux-toolbar-centre">' +
-                                '<button id="model-btn-fichier-prec" class="travaux-btn-nav" onclick="window.modelisation.fichierPrecedent()" disabled title="Fichier precedent">&#x276E;</button>' +
-                                '<span id="model-compteur-fichiers" class="model-compteur-fichiers"></span>' +
-                                '<button id="model-btn-fichier-suiv" class="travaux-btn-nav" onclick="window.modelisation.fichierSuivant()" disabled title="Fichier suivant">&#x276F;</button>' +
-                            '</div>' +
-                            '<div class="travaux-toolbar-droite">' +
-                                '<span id="model-indicateur-zoom" class="travaux-zoom-info">100%</span>' +
-                                '<button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoomPleineLargeur()" title="Ajuster a la largeur">Largeur</button>' +
-                                '<button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoomPleineHauteur()" title="Ajuster a la hauteur">Hauteur</button>' +
-                                '<button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoom100()" title="Zoom 100%">100%</button>' +
-                                '<button class="travaux-btn-zoom" onclick="travauxVisionneuse.recentrerVue()" title="Recentrer la vue">Recentrer</button>' +
-                                '<span class="travaux-separateur"></span>' +
-                                '<button class="travaux-btn-action" onclick="window.modelisation.fermerVisionneuse()" title="Fermer le fichier">Fermer</button>' +
-                            '</div>' +
+                    '<!-- Toolbar unique (badges + outils) -->' +
+                    '<div class="annot-toolbar" id="model-toolbar">' +
+                        '<div class="annot-toolbar-fichiers">' +
+                            '<button class="model-btn-ouvrir-compact" onclick="window.modelisation.ouvrirFichierLocal()" title="Ouvrir un fichier">+ Ouvrir</button>' +
+                            '<div id="model-carrousel-badges" class="annot-toolbar-badges-zone"></div>' +
+                        '</div>' +
+                        '<div class="annot-toolbar-separateur"></div>' +
+                        '<div class="annot-toolbar-outils">' +
+                            '<button id="model-btn-page-prec" class="travaux-btn-nav" onclick="travauxVisionneuse.pagePrecedente()" disabled title="Page precedente">&#x2190;</button>' +
+                            '<span id="model-indicateur-page">-- / --</span>' +
+                            '<button id="model-btn-page-suiv" class="travaux-btn-nav" onclick="travauxVisionneuse.pageSuivante()" disabled title="Page suivante">&#x2192;</button>' +
+                            '<span class="travaux-separateur"></span>' +
+                            '<button id="model-btn-fichier-prec" class="travaux-btn-nav" onclick="window.modelisation.fichierPrecedent()" disabled title="Fichier precedent">&#x276E;</button>' +
+                            '<span id="model-compteur-fichiers" class="model-compteur-fichiers"></span>' +
+                            '<button id="model-btn-fichier-suiv" class="travaux-btn-nav" onclick="window.modelisation.fichierSuivant()" disabled title="Fichier suivant">&#x276F;</button>' +
+                            '<span class="travaux-separateur"></span>' +
+                            '<button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoomPleineLargeur()" title="Ajuster a la largeur">Largeur</button>' +
+                            '<button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoomPleineHauteur()" title="Ajuster a la hauteur">Hauteur</button>' +
+                            '<button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoom100()" title="Zoom 100%">100%</button>' +
+                            '<span class="travaux-separateur"></span>' +
+                            '<button class="travaux-btn-action" onclick="window.modelisation.fermerVisionneuse()" title="Fermer le fichier">Fermer</button>' +
                         '</div>' +
                     '</div>' +
 
@@ -171,16 +163,13 @@
 
     function mettreAJourPlaceholder() {
         var placeholder = document.getElementById('model-placeholder-vide');
-        var toolbar = document.getElementById('model-toolbar');
         var canvas = document.getElementById('model-canvas-container');
 
         if (fichierOuvertId) {
             if (placeholder) placeholder.style.display = 'none';
-            if (toolbar) toolbar.style.display = '';
             if (canvas) canvas.style.display = '';
         } else {
             if (placeholder) placeholder.style.display = '';
-            if (toolbar) toolbar.style.display = 'none';
             if (canvas) canvas.style.display = 'none';
         }
     }
@@ -359,9 +348,6 @@
         sessionStorage.setItem(SESSION_KEY_FICHIER, id);
         mettreAJourPlaceholder();
         await travauxVisionneuse.ouvrirDepuisBlob(blob, metadata);
-
-        var nomEl = document.getElementById('model-nom-fichier');
-        if (nomEl) nomEl.textContent = metadata.nomFichier;
 
         // Activer l'annotation
         travauxAnnotation.activerAnnotation();

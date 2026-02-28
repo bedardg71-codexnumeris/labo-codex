@@ -25,6 +25,7 @@
     let modeCourant = 'annoter'; // 'annoter' | 'evaluer'
     let fichierSelectionneIndex = -1; // -1 = aucune selection dans le pipeline
     let productionFiltreActive = sessionStorage.getItem('travaux-filtre-production') || '';
+    let _htmlBadgesGrille = ''; // HTML badges pré-généré pour injection dans toolbar unique
 
     function sauvegarderEtatSession() {
         const fichier = travauxVisionneuse.getFichierActuel();
@@ -771,18 +772,16 @@
             return;
         }
 
-        conteneur.innerHTML = `
-            <div class="travaux-fichiers-compact">
-                ${genererGrilleFichiers(fichiersTravaux, 'ouvrirFichier')}
-            </div>`;
+        // Stocker le HTML badges pour injection dans la toolbar (Phase A — 1 rangée)
+        _htmlBadgesGrille = genererGrilleFichiers(fichiersTravaux, 'ouvrirFichier');
+
+        // Rendre la visionneuse (toolbar unique intègre les badges)
+        afficherVisionneuse();
 
         // Restaurer le filtre de production persisté
         if (productionFiltreActive) {
             filtrerBadgesParProduction();
         }
-
-        // Rendre la visionneuse permanente sous les badges
-        afficherVisionneuse();
     }
 
     /**
@@ -800,38 +799,30 @@
         visionDiv.innerHTML = `
                 <div class="travaux-zone-document" id="travaux-conteneur-document">
 
-                    <!-- Toolbar -->
-                    <div class="travaux-toolbar">
-                        <div class="travaux-toolbar-inner">
-                            <!-- GAUCHE : badge étudiant + navigation pages -->
-                            <div class="travaux-toolbar-gauche">
-                                <span id="travaux-badge-fichier-actif" class="u-hide"></span>
-                                <span class="travaux-separateur-page"></span>
-                                <button id="travaux-btn-page-prec" class="travaux-btn-nav" onclick="travauxVisionneuse.pagePrecedente()" disabled title="Page précédente">&#x2190;</button>
-                                <span id="travaux-indicateur-page">-- / --</span>
-                                <button id="travaux-btn-page-suiv" class="travaux-btn-nav" onclick="travauxVisionneuse.pageSuivante()" disabled title="Page suivante">&#x2192;</button>
-                            </div>
-
-                            <!-- CENTRE : vide -->
-                            <div class="travaux-toolbar-centre"></div>
-
-                            <!-- DROITE : zoom + navigation fichiers + séparateur + actions -->
-                            <div class="travaux-toolbar-droite">
-                                <span id="travaux-indicateur-zoom" class="travaux-zoom-info">100%</span>
-                                <button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoomPleineLargeur()" title="Ajuster à la largeur">Largeur</button>
-                                <button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoomPleineHauteur()" title="Ajuster à la hauteur">Hauteur</button>
-                                <button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoom100()" title="Zoom 100%">100%</button>
-                                <button class="travaux-btn-zoom" onclick="travauxVisionneuse.recentrerVue()" title="Recentrer la vue">Recentrer</button>
-                                <span class="travaux-separateur"></span>
-                                <button id="travaux-btn-annoter" class="travaux-btn-action actif" onclick="travauxUI.basculerMode('annoter')" data-tooltip="travaux-btn-annoter">Annoter</button>
-                                <button id="travaux-btn-evaluer" class="travaux-btn-action travaux-btn-action-vert u-hide" onclick="travauxUI.basculerMode('evaluer')" title="Évaluer cette production" data-tooltip="travaux-btn-evaluer">Évaluer</button>
-                                <span class="travaux-separateur"></span>
-                                <button id="travaux-btn-badge-prec" class="travaux-btn-nav" onclick="travauxUI.badgePrecedent()" disabled title="Fichier précédent">&#x2190;</button>
-                                <span id="travaux-compteur-badge" class="travaux-compteur-badge">-- / --</span>
-                                <button id="travaux-btn-badge-suiv" class="travaux-btn-nav" onclick="travauxUI.badgeSuivant()" disabled title="Fichier suivant">&#x2192;</button>
-                                <button id="travaux-btn-alleger" class="travaux-btn-action u-hide" onclick="travauxUI.allegerFichier(travauxVisionneuse.getFichierActuel()?.id)" title="Alléger ce fichier" data-tooltip="travaux-btn-alleger">Alléger</button>
-                                <button id="travaux-btn-reimporter" class="travaux-btn-action u-hide" onclick="travauxUI.reimporterFichier(travauxVisionneuse.getFichierActuel()?.id)" title="Re-importer l'original" data-tooltip="travaux-btn-reimporter">Re-importer</button>
-                            </div>
+                    <!-- Toolbar unique (badges + outils — Phase A) -->
+                    <div class="annot-toolbar">
+                        <div class="annot-toolbar-fichiers travaux-fichiers-compact">
+                            ${_htmlBadgesGrille}
+                        </div>
+                        <div class="annot-toolbar-separateur"></div>
+                        <div class="annot-toolbar-outils">
+                            <button id="travaux-btn-page-prec" class="travaux-btn-nav" onclick="travauxVisionneuse.pagePrecedente()" disabled title="Page précédente">&#x2190;</button>
+                            <span id="travaux-indicateur-page">-- / --</span>
+                            <button id="travaux-btn-page-suiv" class="travaux-btn-nav" onclick="travauxVisionneuse.pageSuivante()" disabled title="Page suivante">&#x2192;</button>
+                            <span class="travaux-separateur"></span>
+                            <button id="travaux-btn-badge-prec" class="travaux-btn-nav" onclick="travauxUI.badgePrecedent()" disabled title="Fichier précédent">&#x2190;</button>
+                            <span id="travaux-compteur-badge" class="travaux-compteur-badge">-- / --</span>
+                            <button id="travaux-btn-badge-suiv" class="travaux-btn-nav" onclick="travauxUI.badgeSuivant()" disabled title="Fichier suivant">&#x2192;</button>
+                            <span class="travaux-separateur"></span>
+                            <span id="travaux-indicateur-zoom" class="travaux-zoom-info">100%</span>
+                            <button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoomPleineLargeur()" title="Ajuster à la largeur">Largeur</button>
+                            <button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoomPleineHauteur()" title="Ajuster à la hauteur">Hauteur</button>
+                            <button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoom100()" title="Zoom 100%">100%</button>
+                            <span class="travaux-separateur"></span>
+                            <button id="travaux-btn-annoter" class="travaux-btn-action actif" onclick="travauxUI.basculerMode('annoter')" data-tooltip="travaux-btn-annoter">Annoter</button>
+                            <button id="travaux-btn-evaluer" class="travaux-btn-action travaux-btn-action-vert u-hide" onclick="travauxUI.basculerMode('evaluer')" title="Évaluer cette production" data-tooltip="travaux-btn-evaluer">Évaluer</button>
+                            <button id="travaux-btn-alleger" class="travaux-btn-action u-hide" onclick="travauxUI.allegerFichier(travauxVisionneuse.getFichierActuel()?.id)" title="Alléger ce fichier" data-tooltip="travaux-btn-alleger">Alléger</button>
+                            <button id="travaux-btn-reimporter" class="travaux-btn-action u-hide" onclick="travauxUI.reimporterFichier(travauxVisionneuse.getFichierActuel()?.id)" title="Re-importer l'original" data-tooltip="travaux-btn-reimporter">Re-importer</button>
                         </div>
                     </div>
 
@@ -2492,36 +2483,9 @@
                 }
             }
 
-            // Restaurer le badge étudiant dans la toolbar
-            const badgeFichier = document.getElementById('travaux-badge-fichier-actif');
-            if (badgeFichier && fichierOuvert) {
-                badgeFichier.innerHTML = genererBadgeFichierImporte(fichierOuvert, 'ouvrirFichier');
-                badgeFichier.classList.remove('u-hide');
-                // Adapter la pill : "EN COURS" ou "ÉVALUÉ"
-                const pillToolbar = badgeFichier.querySelector('.travaux-badge-pill');
-                if (pillToolbar) {
-                    if (pillToolbar.classList.contains('evalue')) {
-                        pillToolbar.textContent = 'ÉVALUÉ';
-                        pillToolbar.className = 'travaux-badge-pill evalue';
-                    } else {
-                        pillToolbar.textContent = 'EN COURS';
-                        pillToolbar.className = 'travaux-badge-pill en-cours';
-                    }
-                }
-                // Clic → scroll vers le badge dans la grille
-                const badgeCopie = badgeFichier.querySelector('.annot-badge');
-                if (badgeCopie) {
-                    badgeCopie.style.cursor = 'pointer';
-                    badgeCopie.onclick = function(e) {
-                        e.stopPropagation();
-                        const original = document.querySelector(`.travaux-badges-liste .annot-badge[data-fichier-id="${fichierOuvert.id}"]`);
-                        if (original) original.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    };
-                }
-                // Retirer le bouton supprimer du badge toolbar
-                const btnSupp = badgeFichier.querySelector('.annot-badge-supprimer');
-                if (btnSupp) btnSupp.remove();
-            }
+            // Scroll le badge actif dans le strip toolbar pour qu'il soit visible
+            const badgeActifEl = document.querySelector('.annot-toolbar-fichiers .annot-badge.actif');
+            if (badgeActifEl) badgeActifEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
 
             // Mettre à jour la pill statut dans la palette Paramètres
             if (fichierOuvert && typeof mettreAJourPillStatut === 'function') {
