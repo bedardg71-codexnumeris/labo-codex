@@ -1953,10 +1953,10 @@
             ? `travauxExportPDF.previsualiserPDF('${f.id}')`
             : `travauxUI.${action}('${f.id}')`;
 
-        return `<div class="travaux-badge-importe" data-fichier-id="${f.id}" draggable="true" ondragstart="event.dataTransfer.setData('text/fichier-id', '${f.id}')" onclick="${actionClic}" title="${echapperHtml(f.nomFichier)}">
-        <span class="travaux-badge-nom">${nomEtudiant}</span>
+        return `<div class="annot-badge" data-fichier-id="${f.id}" draggable="true" ondragstart="event.dataTransfer.setData('text/fichier-id', '${f.id}')" onclick="${actionClic}" title="${echapperHtml(f.nomFichier)}">
+        <span class="annot-badge-nom">${nomEtudiant}</span>
         <span class="travaux-badge-pill ${statutClasse}">${statutTexte}</span>${evaluation ? `<button class="travaux-badge-retro" onclick="event.stopPropagation(); travauxUI.afficherRetroaction('${f.id}')" title="Aperçu rétroaction">\u{1F4AC}</button>` : ''}${verrou}
-        <button class="travaux-badge-supprimer" onclick="event.stopPropagation(); travauxUI.supprimerFichierImporte('${f.id}')" title="Supprimer">&times;</button>
+        <button class="annot-badge-supprimer" onclick="event.stopPropagation(); travauxUI.supprimerFichierImporte('${f.id}')" title="Supprimer">&times;</button>
     </div>`;
     }
 
@@ -2158,7 +2158,7 @@
             const fichierActuel = travauxVisionneuse.getFichierActuel();
             const fichierMasque = fichierActuel && productionId && fichierActuel.productionId !== productionId;
             if (!fichierActuel || fichierMasque) {
-                const premierBadge = conteneur.querySelector('.travaux-badges-groupe[style=""] .travaux-badge-importe, .travaux-badges-groupe:not([style*="none"]) .travaux-badge-importe');
+                const premierBadge = conteneur.querySelector('.travaux-badges-groupe[style=""] .annot-badge, .travaux-badges-groupe:not([style*="none"]) .annot-badge');
                 if (premierBadge && premierBadge.dataset.fichierId) {
                     ouvrirFichier(premierBadge.dataset.fichierId);
                 }
@@ -2389,7 +2389,7 @@
         if (evalDiv && !window._modifierEvaluationEnCours) evalDiv.classList.add('u-hide');
 
         // Highlight du badge actif : pill → "EN COURS" orange
-        document.querySelectorAll('.travaux-badge-importe').forEach(b => {
+        document.querySelectorAll('.annot-badge').forEach(b => {
             const estActif = b.dataset.fichierId === fichierId;
             b.classList.toggle('actif', estActif);
             const pill = b.querySelector('.travaux-badge-pill');
@@ -2509,17 +2509,17 @@
                     }
                 }
                 // Clic → scroll vers le badge dans la grille
-                const badgeCopie = badgeFichier.querySelector('.travaux-badge-importe');
+                const badgeCopie = badgeFichier.querySelector('.annot-badge');
                 if (badgeCopie) {
                     badgeCopie.style.cursor = 'pointer';
                     badgeCopie.onclick = function(e) {
                         e.stopPropagation();
-                        const original = document.querySelector(`.travaux-badges-liste .travaux-badge-importe[data-fichier-id="${fichierOuvert.id}"]`);
+                        const original = document.querySelector(`.travaux-badges-liste .annot-badge[data-fichier-id="${fichierOuvert.id}"]`);
                         if (original) original.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     };
                 }
                 // Retirer le bouton supprimer du badge toolbar
-                const btnSupp = badgeFichier.querySelector('.travaux-badge-supprimer');
+                const btnSupp = badgeFichier.querySelector('.annot-badge-supprimer');
                 if (btnSupp) btnSupp.remove();
             }
 
@@ -4027,7 +4027,7 @@
         const evalDiv = document.getElementById('evaluations-contenu-evaluation');
         if (evalDiv) evalDiv.classList.add('u-hide');
         // Retirer le highlight actif et restaurer les pills originaux
-        document.querySelectorAll('.travaux-badge-importe.actif').forEach(b => {
+        document.querySelectorAll('.annot-badge.actif').forEach(b => {
             b.classList.remove('actif');
             const pill = b.querySelector('.travaux-badge-pill');
             if (pill && pill.dataset.origTexte) {

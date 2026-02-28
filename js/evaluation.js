@@ -2090,7 +2090,7 @@ function majBadgesApresEvaluation() {
         ? travauxVisionneuse.getFichierActuel() : null;
     if (!fichier) return;
 
-    document.querySelectorAll(`.travaux-badge-importe[data-fichier-id="${fichier.id}"]`).forEach(badge => {
+    document.querySelectorAll(`.annot-badge[data-fichier-id="${fichier.id}"]`).forEach(badge => {
         const pill = badge.querySelector('.travaux-badge-pill');
         if (!pill) return;
         pill.textContent = 'ÉVALUÉ';
@@ -5156,8 +5156,8 @@ function sauvegarderEvaluationModifiee() {
     majBadgesApresEvaluation();
 
     // Ajouter le cadenas sur les badges (auto-verrouillage après modification)
-    [   document.querySelector('.travaux-badge-importe.actif'),
-        document.querySelector('#travaux-badge-fichier-actif .travaux-badge-importe')
+    [   document.querySelector('.annot-badge.actif'),
+        document.querySelector('#travaux-badge-fichier-actif .annot-badge')
     ].forEach(badge => {
         if (!badge) return;
         let verrou = badge.querySelector('.travaux-badge-verrou');
@@ -5930,12 +5930,12 @@ function basculerVerrouillageEvaluationCourante() {
     const fichierActuel = (typeof travauxVisionneuse !== 'undefined' && travauxVisionneuse.getFichierActuel)
         ? travauxVisionneuse.getFichierActuel() : null;
     if (fichierActuel) {
-        const badge = document.querySelector(`.travaux-badge-importe[data-fichier-id="${fichierActuel.id}"]`);
+        const badge = document.querySelector(`.annot-badge[data-fichier-id="${fichierActuel.id}"]`);
         if (badge) {
             const verrouExistant = badge.querySelector('.travaux-badge-verrou');
             if (estVerrouillee && !verrouExistant) {
                 // Ajouter le cadenas avant le bouton supprimer
-                const btnSupp = badge.querySelector('.travaux-badge-supprimer');
+                const btnSupp = badge.querySelector('.annot-badge-supprimer');
                 const span = document.createElement('span');
                 span.className = 'travaux-badge-verrou';
                 span.title = 'Évaluation verrouillée';
@@ -5965,8 +5965,8 @@ function mettreAJourBoutonVerrouillage(estVerrouillee) {
 
     // Cadenas sur les badges (sidebar actif + toolbar)
     const badgesActifs = [
-        document.querySelector('.travaux-badge-importe.actif'),
-        document.querySelector('#travaux-badge-fichier-actif .travaux-badge-importe')
+        document.querySelector('.annot-badge.actif'),
+        document.querySelector('#travaux-badge-fichier-actif .annot-badge')
     ];
     badgesActifs.forEach(badge => {
         if (!badge) return;
