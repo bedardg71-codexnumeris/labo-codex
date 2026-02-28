@@ -301,11 +301,17 @@
        LAYOUT ANNOTATION ANCRÉ
        =============================== */
 
-    function creerLayoutAnnotation() {
+    function creerLayoutAnnotation(options) {
+        options = options || {};
+        const conteneurDocId = options.conteneurDocId || 'travaux-conteneur-document';
+        const canvasContainerId = options.canvasContainerId || 'travaux-canvas-container';
+        const afficherCodes = options.afficherCodes !== undefined ? options.afficherCodes : true;
+        const afficherTampons = options.afficherTampons !== undefined ? options.afficherTampons : true;
+
         // Ne pas recréer si déjà présent
         if (document.getElementById('annot-layout-flex')) return;
 
-        const conteneurDoc = document.getElementById('travaux-conteneur-document');
+        const conteneurDoc = document.getElementById(conteneurDocId);
         if (!conteneurDoc) return;
 
         const layoutFlex = document.createElement('div');
@@ -335,79 +341,93 @@
         const colDoc = document.createElement('div');
         colDoc.className = 'annot-col-document';
         colDoc.id = 'annot-col-document';
-        const canvasContainer = document.getElementById('travaux-canvas-container');
+        const canvasContainer = document.getElementById(canvasContainerId);
         if (canvasContainer) {
             colDoc.appendChild(canvasContainer);
         }
         layoutFlex.appendChild(colDoc);
 
-        // --- Splitter 2 : Canvas | Colonne droite ---
-        layoutFlex.appendChild(creerSplitter({
-            id: 'annot-splitter-2',
-            storageKey: 'annot-droite',
-            side: 'right',
-            minWidth: 160,
-            maxWidth: 400
-        }));
+        // Colonne droite uniquement si au moins un panneau est affiché
+        const afficherColDroite = afficherCodes || afficherTampons;
+        let colDroite = null;
+        let sectionErrFr = null;
 
-        // --- Colonne droite : Erreurs FR + Tampons ---
-        const colDroite = document.createElement('div');
-        colDroite.className = 'annot-col-droite';
-        colDroite.id = 'annot-col-droite';
+        if (afficherColDroite) {
+            // --- Splitter 2 : Canvas | Colonne droite ---
+            layoutFlex.appendChild(creerSplitter({
+                id: 'annot-splitter-2',
+                storageKey: 'annot-droite',
+                side: 'right',
+                minWidth: 160,
+                maxWidth: 400
+            }));
 
-        // Section Erreurs de français
-        const sectionErrFr = document.createElement('div');
-        sectionErrFr.className = 'annot-section-palette';
-        sectionErrFr.id = 'travaux-palette-erreurs-fr';
-        sectionErrFr.innerHTML =
-            '<div class="annot-section-barre" data-section="errfr">' +
-                '<span class="annot-section-titre">Erreurs de français</span>' +
-                '<div style="display:flex; gap:2px;">' +
-                    '<button class="travaux-palette-toggle" onclick="travauxOutils.ouvrirEditionRetroErreursFr()" title="Personnaliser">\u2699</button>' +
-                    '<button class="travaux-palette-toggle annot-section-toggle" data-section="errfr" title="Replier">\u2212</button>' +
-                '</div>' +
-            '</div>' +
-            '<div class="annot-section-contenu" id="annot-errfr-contenu">' +
-                travauxOutils.genererContenuErreursFr() +
-            '</div>';
-        colDroite.appendChild(sectionErrFr);
+            colDroite = document.createElement('div');
+            colDroite.className = 'annot-col-droite';
+            colDroite.id = 'annot-col-droite';
 
-        // Splitter horizontal entre Erreurs FR et Tampons
-        colDroite.appendChild(creerSplitterH({
-            id: 'annot-splitter-h',
-            storageKey: 'annot-errfr-h',
-            minHeight: 60,
-            maxHeight: 600
-        }));
+            if (afficherCodes) {
+                // Titre personnalisable — stocké dans db, avec fallback
+                const titreCodes = db.getSync('titrePanneauCodes', 'Erreurs de français');
 
-        // Section Tampons
-        const sectionTampons = document.createElement('div');
-        sectionTampons.className = 'annot-section-palette';
-        sectionTampons.id = 'travaux-palette-tampons';
-        sectionTampons.innerHTML =
-            '<div class="annot-section-barre" data-section="tampons">' +
-                '<span class="annot-section-titre">Tampons</span>' +
-                '<div style="display:flex; gap:2px;">' +
-                    '<button class="travaux-palette-toggle" onclick="travauxOutils.ouvrirEditionRetroObservations()" title="Personnaliser">\u2699</button>' +
-                    '<button class="travaux-palette-toggle annot-section-toggle" data-section="tampons" title="Replier">\u2212</button>' +
-                '</div>' +
-            '</div>' +
-            '<div class="annot-section-contenu" id="annot-tampons-contenu">' +
-                travauxOutils.genererContenuTampons() +
-            '</div>';
-        colDroite.appendChild(sectionTampons);
+                sectionErrFr = document.createElement('div');
+                sectionErrFr.className = 'annot-section-palette';
+                sectionErrFr.id = 'travaux-palette-erreurs-fr';
+                sectionErrFr.innerHTML =
+                    '<div class="annot-section-barre" data-section="errfr">' +
+                        '<span class="annot-section-titre">' + titreCodes + '</span>' +
+                        '<div style="display:flex; gap:2px;">' +
+                            '<button class="travaux-palette-toggle" onclick="travauxOutils.ouvrirEditionRetroErreursFr()" title="Personnaliser">\u2699</button>' +
+                            '<button class="travaux-palette-toggle annot-section-toggle" data-section="errfr" title="Replier">\u2212</button>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="annot-section-contenu" id="annot-errfr-contenu">' +
+                        travauxOutils.genererContenuErreursFr() +
+                    '</div>';
+                colDroite.appendChild(sectionErrFr);
+            }
 
-        // Listener délégué pour collapse/expand des sections
-        colDroite.addEventListener('click', function(e) {
-            const btn = e.target.closest('.annot-section-toggle');
-            if (!btn) return;
-            const section = btn.closest('.annot-section-palette');
-            if (!section) return;
-            section.classList.toggle('replie');
-            btn.textContent = section.classList.contains('replie') ? '+' : '\u2212';
-        });
+            if (afficherCodes && afficherTampons) {
+                // Splitter horizontal entre Codes et Tampons
+                colDroite.appendChild(creerSplitterH({
+                    id: 'annot-splitter-h',
+                    storageKey: 'annot-errfr-h',
+                    minHeight: 60,
+                    maxHeight: 600
+                }));
+            }
 
-        layoutFlex.appendChild(colDroite);
+            if (afficherTampons) {
+                // Section Tampons
+                const sectionTampons = document.createElement('div');
+                sectionTampons.className = 'annot-section-palette';
+                sectionTampons.id = 'travaux-palette-tampons';
+                sectionTampons.innerHTML =
+                    '<div class="annot-section-barre" data-section="tampons">' +
+                        '<span class="annot-section-titre">Tampons</span>' +
+                        '<div style="display:flex; gap:2px;">' +
+                            '<button class="travaux-palette-toggle" onclick="travauxOutils.ouvrirEditionRetroObservations()" title="Personnaliser">\u2699</button>' +
+                            '<button class="travaux-palette-toggle annot-section-toggle" data-section="tampons" title="Replier">\u2212</button>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="annot-section-contenu" id="annot-tampons-contenu">' +
+                        travauxOutils.genererContenuTampons() +
+                    '</div>';
+                colDroite.appendChild(sectionTampons);
+            }
+
+            // Listener délégué pour collapse/expand des sections
+            colDroite.addEventListener('click', function(e) {
+                const btn = e.target.closest('.annot-section-toggle');
+                if (!btn) return;
+                const section = btn.closest('.annot-section-palette');
+                if (!section) return;
+                section.classList.toggle('replie');
+                btn.textContent = section.classList.contains('replie') ? '+' : '\u2212';
+            });
+
+            layoutFlex.appendChild(colDroite);
+        }
 
         // Insérer après la toolbar
         const toolbar = conteneurDoc.querySelector('.travaux-toolbar');
@@ -422,17 +442,21 @@
 
         // Restaurer les dimensions persistées
         restaurerLargeurPanneau(colPalette, 'annot-palette');
-        restaurerLargeurPanneau(colDroite, 'annot-droite');
-        restaurerHauteurPanneau(sectionErrFr, 'annot-errfr-h');
+        if (colDroite) restaurerLargeurPanneau(colDroite, 'annot-droite');
+        if (sectionErrFr) restaurerHauteurPanneau(sectionErrFr, 'annot-errfr-h');
     }
 
-    function detruireLayoutAnnotation() {
-        const conteneurDoc = document.getElementById('travaux-conteneur-document');
+    function detruireLayoutAnnotation(conteneurDocId) {
+        conteneurDocId = conteneurDocId || 'travaux-conteneur-document';
+        const conteneurDoc = document.getElementById(conteneurDocId);
         const layoutFlex = document.getElementById('annot-layout-flex');
         if (!layoutFlex) return;
 
         // Remettre le canvas dans le conteneur principal
-        const canvasContainer = document.getElementById('travaux-canvas-container');
+        const canvasContainerId = conteneurDocId === 'travaux-conteneur-document'
+            ? 'travaux-canvas-container'
+            : 'model-canvas-container';
+        const canvasContainer = document.getElementById(canvasContainerId);
         if (canvasContainer && conteneurDoc) {
             conteneurDoc.appendChild(canvasContainer);
         }
