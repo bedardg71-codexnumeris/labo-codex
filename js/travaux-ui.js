@@ -308,15 +308,18 @@
         const afficherCodes = options.afficherCodes !== undefined ? options.afficherCodes : true;
         const afficherTampons = options.afficherTampons !== undefined ? options.afficherTampons : true;
 
-        // Ne pas recréer si déjà présent
-        if (document.getElementById('annot-layout-flex')) return;
-
         const conteneurDoc = document.getElementById(conteneurDocId);
         if (!conteneurDoc) return;
 
+        // Ne pas recréer si déjà présent dans CE conteneur
+        if (conteneurDoc.querySelector('.annot-layout-flex')) return;
+
         const layoutFlex = document.createElement('div');
-        layoutFlex.id = 'annot-layout-flex';
         layoutFlex.className = 'annot-layout-flex';
+        // Garder l'id pour le contexte travaux (compatibilité masquerPalettesAnnotation, etc.)
+        if (conteneurDocId === 'travaux-conteneur-document') {
+            layoutFlex.id = 'annot-layout-flex';
+        }
 
         // --- Colonne palette (gauche) ---
         const colPalette = document.createElement('div');
@@ -449,7 +452,10 @@
     function detruireLayoutAnnotation(conteneurDocId) {
         conteneurDocId = conteneurDocId || 'travaux-conteneur-document';
         const conteneurDoc = document.getElementById(conteneurDocId);
-        const layoutFlex = document.getElementById('annot-layout-flex');
+        if (!conteneurDoc) return;
+
+        // Trouver le layout dans CE conteneur (pas globalement)
+        const layoutFlex = conteneurDoc.querySelector('.annot-layout-flex');
         if (!layoutFlex) return;
 
         // Remettre le canvas dans le conteneur principal
@@ -457,7 +463,7 @@
             ? 'travaux-canvas-container'
             : 'model-canvas-container';
         const canvasContainer = document.getElementById(canvasContainerId);
-        if (canvasContainer && conteneurDoc) {
+        if (canvasContainer) {
             conteneurDoc.appendChild(canvasContainer);
         }
 
@@ -467,7 +473,7 @@
 
         layoutFlex.remove();
 
-        if (conteneurDoc) conteneurDoc.classList.remove('mode-annot-actif');
+        conteneurDoc.classList.remove('mode-annot-actif');
     }
 
     /* ===============================

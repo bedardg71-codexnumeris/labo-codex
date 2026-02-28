@@ -20970,18 +20970,100 @@ body.mode-clair .model-fichier-apercu {
     background: var(--surface-conteneur, #f1f5f9);
 }
 
-/* --- Modelisation : layout flex sidebar + document --- */
-.model-visionneuse-flex {
-    display: flex;
-    height: calc(100vh - 160px);
+/* --- Modelisation : carrousel + zone document pleine largeur --- */
+.model-zone-document {
+    height: calc(100vh - 210px);
     min-height: 400px;
-    gap: 0;
+}
+
+.model-carrousel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--bordure-claire, #334155);
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+.model-btn-ouvrir-compact {
+    padding: 6px 14px;
+    border: none;
+    border-radius: 6px;
+    background: var(--accent-principal, #3b82f6);
+    color: #fff;
+    font-size: 0.82em;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background 0.15s;
+}
+
+.model-btn-ouvrir-compact:hover {
+    background: var(--accent-survol, #2563eb);
+}
+
+.model-carrousel-badges {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    flex: 1;
+    min-width: 0;
+}
+
+.model-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border: 1px solid var(--bordure-claire, #334155);
+    border-radius: 6px;
+    background: var(--surface-carte, #1e293b);
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: border-color 0.15s, background 0.15s;
     position: relative;
 }
 
-.model-visionneuse-flex .travaux-sidebar {
-    width: 180px;
-    min-width: 180px;
+.model-badge:hover {
+    border-color: var(--accent-principal, #3b82f6);
+}
+
+.model-badge.model-badge-actif {
+    border-color: var(--accent-principal, #3b82f6);
+    background: var(--bleu-pale, rgba(59, 130, 246, 0.15));
+}
+
+.model-badge-nom {
+    font-size: 0.8em;
+    color: var(--texte-principal, #e0e8f0);
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.model-badge .travaux-badge-pill {
+    font-size: 0.65em;
+    padding: 1px 5px;
+}
+
+.model-badge-supprimer {
+    border: none;
+    background: none;
+    color: var(--texte-secondaire, #a0b0c0);
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    padding: 0 2px;
+    opacity: 0.4;
+    transition: opacity 0.15s, color 0.15s;
+}
+
+.model-badge-supprimer:hover {
+    opacity: 1;
+    color: var(--rouge-clair, #ef4444);
 }
 
 .model-toolbar-nom-fichier {
@@ -21002,82 +21084,6 @@ body.mode-clair .model-fichier-apercu {
     white-space: nowrap;
 }
 
-.model-miniature-info {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.model-miniature-supprimer {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    width: 18px;
-    height: 18px;
-    border: none;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.5);
-    color: #fff;
-    font-size: 12px;
-    line-height: 18px;
-    text-align: center;
-    cursor: pointer;
-    opacity: 0;
-    transition: opacity 0.15s;
-    padding: 0;
-}
-
-.travaux-miniature:hover .model-miniature-supprimer {
-    opacity: 1;
-}
-
-.model-miniature-supprimer:hover {
-    background: rgba(239, 68, 68, 0.8);
-}
-
-.travaux-miniature {
-    position: relative;
-}
-
-.model-btn-toggle-sidebar {
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 5;
-    width: 20px;
-    height: 40px;
-    border: 1px solid var(--bordure-claire);
-    border-left: none;
-    border-radius: 0 6px 6px 0;
-    background: var(--surface-carte, #1e293b);
-    color: var(--texte-secondaire, #a0b0c0);
-    cursor: pointer;
-    font-size: 10px;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    transition: background 0.15s;
-}
-
-.model-btn-toggle-sidebar.visible {
-    display: flex;
-}
-
-.model-btn-toggle-sidebar:hover {
-    background: var(--surface-hover, #334155);
-}
-
-.model-sidebar-vide {
-    text-align: center;
-    padding: 16px 8px;
-    color: var(--texte-secondaire, #a0b0c0);
-    font-size: 0.8em;
-}
-
 .model-placeholder {
     text-align: center;
     padding: 48px 16px;
@@ -21085,8 +21091,13 @@ body.mode-clair .model-fichier-apercu {
     font-size: 0.9em;
 }
 
-body.mode-clair .model-btn-toggle-sidebar {
+/* Mode clair */
+body.mode-clair .model-badge {
     background: var(--surface-carte, #ffffff);
+}
+
+body.mode-clair .model-badge.model-badge-actif {
+    background: var(--bleu-pale, rgba(59, 130, 246, 0.1));
 }
 
 /* ===============================
