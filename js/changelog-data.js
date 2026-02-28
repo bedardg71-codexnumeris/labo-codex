@@ -10,6 +10,20 @@
 
     var CHANGELOG = [
         {
+            version: 'Beta 98.2',
+            date: '28 f\u00e9vrier',
+            couleur: 'bleu',
+            titre: 'Toolbar unifi\u00e9e 1\u00a0rang\u00e9e (Mod\u00e9lisation et Annoter/\u00c9valuer)',
+            items: [
+                '<strong>Toolbar 1\u00a0rang\u00e9e</strong> : Les deux rang\u00e9es (badges + outils) sont fusionn\u00e9es en une seule barre compacte <code>.annot-toolbar</code> pour les modules Mod\u00e9lisation et Annoter/\u00c9valuer. Gain de ~50\u00a0px de hauteur pour le document.',
+                '<strong>Badges int\u00e9gr\u00e9s</strong> : Les badges de fichiers sont d\u00e9sormais dans la toolbar (zone scrollable \u00e0 gauche), avec un s\u00e9parateur visuel entre badges et outils de navigation.',
+                '<strong>Padding optimis\u00e9</strong> : Conteneurs imbriqu\u00e9s de Mod\u00e9lisation nettoy\u00e9s (padding 0, `:has()` overrides) pour maximiser la surface du document.',
+                '<strong>Zoom pleine hauteur par d\u00e9faut</strong> : Le document s\u2019ouvre d\u00e9sormais en mode \u00ab\u00a0pleine hauteur\u00a0\u00bb dans Mod\u00e9lisation (au lieu de pleine largeur).',
+                '<strong>Accents badges</strong> : Les statuts Mod\u00e9lisation affichent correctement \u00ab\u00a0Import\u00e9\u00a0\u00bb et \u00ab\u00a0Annot\u00e9\u00a0\u00bb (avec accents).',
+                '<strong>Corrections layout</strong> : Positionnement du layout annotation apr\u00e8s la toolbar corrig\u00e9, timing du zoom avec double <code>requestAnimationFrame</code> et <code>scrollerEnHaut()</code> pour un affichage fiable.'
+            ]
+        },
+        {
             version: 'Beta 98.1',
             date: '26 f\u00e9vrier',
             couleur: 'vert',

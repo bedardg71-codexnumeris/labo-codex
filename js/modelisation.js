@@ -361,10 +361,14 @@
             });
         }
 
-        // Ajuster le zoom a la largeur disponible
-        setTimeout(function() {
-            travauxVisionneuse.zoomPleineHauteur();
-        }, 100);
+        // Ajuster le zoom apres que le layout flex ait ses dimensions
+        // Double rAF pour attendre le reflow complet du layout flex
+        requestAnimationFrame(function() {
+            requestAnimationFrame(function() {
+                travauxVisionneuse.zoomPleineHauteur();
+                setTimeout(function() { travauxVisionneuse.scrollerEnHaut(); }, 150);
+            });
+        });
 
         afficherCarrousel();
     }
