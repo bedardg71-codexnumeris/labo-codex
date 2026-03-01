@@ -12171,6 +12171,32 @@
                     <h2>Notes de version</h2>
                     <p class="text-muted">Historique des changements majeurs</p>
 
+                    <!-- Beta 98.4 - Consolidation styles + fix accueil -->
+                    <div class="carte accordeon ouvert" id="accordeon-apropos-beta984">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">&#x25BC;</span> Beta 98.4 &mdash; Consolidation CSS et correction page d&rsquo;accueil
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu" style="display: block;">
+                        <p class="text-muted">1 mars 2026</p>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Consolidation des styles inline (#210)</h4>
+                        <ul class="modal-liste">
+                            <li><strong>276 attributs style &eacute;limin&eacute;s</strong> : 1&nbsp;137 &rarr; 861 attributs <code>style=&quot;...&quot;</code> dans index.html, remplac&eacute;s par les classes utilitaires <code>.u-*</code> existantes.</li>
+                            <li><strong>~1&nbsp;150 propri&eacute;t&eacute;s extraites</strong> : margins, font-size, font-weight, text-align, display, flex, padding, width, color.</li>
+                            <li><strong>Aucune nouvelle classe CSS</strong> : Toutes les substitutions utilisent les ~92 classes <code>.u-*</code> d&eacute;j&agrave; d&eacute;finies dans styles.css.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Correction page d&rsquo;accueil</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Fix lecture cl&eacute; cours</strong> : <code>accueil.js</code> lit d&eacute;sormais <code>cours</code> (cl&eacute; canonique apr&egrave;s migration) au lieu de <code>listeCours</code> (vid&eacute;e par la migration).</li>
+                            <li><strong>Page d&rsquo;accueil unifi&eacute;e</strong> : Suppression de l&rsquo;&eacute;cran &laquo;&nbsp;Bienvenue dans le Monitorage&nbsp;&raquo; (premier lancement). Tous les utilisateurs voient la m&ecirc;me page avec les 3 accord&eacute;ons D&eacute;couvrir, Parcourir et Piloter.</li>
+                        </ul>
+
+                        </div>
+                    </div>
+
                     <!-- Beta 97.13 - Couverture Aide 100% -->
                     <div class="carte accordeon ouvert" id="accordeon-apropos-beta9713-aide">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
@@ -17167,8 +17193,8 @@
         // === CONFIGURATION ===
         // VERSION_MAJEURE et BUILD_ID sont lus depuis version.json au chargement (source unique)
         // Les valeurs ici servent de fallback si version.json n'est pas disponible
-        let VERSION_MAJEURE = '98.3';
-        let BUILD_ID = '0228-2100';
+        let VERSION_MAJEURE = '98.4';
+        let BUILD_ID = '0301-1655';
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
