@@ -809,8 +809,10 @@ function chargerTableauBordApercu() {
         mettreAJourContextesSections(nbEtudiants);
 
         // Ajouter les indices (structure : {sommatif: {...}, alternatif: {...}})
+        const _cacheIndicesA = obtenirDonneesSelonMode('indicesAssiduite') || {};
+        const _cacheIndicesCP = obtenirDonneesSelonMode('indicesCP') || {};
         const etudiantsAvecIndices = etudiantsActifs.map(etudiant => {
-            const indices = calculerIndicesEtudiant(etudiant.da);
+            const indices = calculerIndicesEtudiant(etudiant.da, _cacheIndicesA, _cacheIndicesCP);
             return {
                 ...etudiant,
                 ...indices  // Ajoute sommatif et alternatif
@@ -1083,16 +1085,17 @@ function genererIndicateurPratiqueOuCheckboxes() {
  * @param {string} da - DA de l'étudiant
  * @returns {Object} Indices complets { sommatif: {...}, alternatif: {...} }
  */
-function calculerIndicesEtudiant(da) {
+function calculerIndicesEtudiant(da, _cacheIndicesA, _cacheIndicesCP) {
     // Récupérer les indices A depuis saisie-presences.js
     // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
-    const indicesA = obtenirDonneesSelonMode('indicesAssiduite') || {};
+    const indicesA = _cacheIndicesA || obtenirDonneesSelonMode('indicesAssiduite') || {};
 
     // 🆕 BETA 95.5 : Utiliser obtenirIndicesCP() pour rétrocompatibilité
     // Gère automatiquement ancien format (SOM/PAN) et nouveau format (pratique unique)
-    const indicesCPEtudiant = typeof obtenirIndicesCP === 'function'
-        ? obtenirIndicesCP(da)
-        : null;
+    // Si le cache est fourni, extraire directement ; sinon fallback sur obtenirIndicesCP()
+    const indicesCPEtudiant = _cacheIndicesCP
+        ? (_cacheIndicesCP[da]?.actuel || null)
+        : (typeof obtenirIndicesCP === 'function' ? obtenirIndicesCP(da) : null);
 
     // 🆕 BETA 95.5 : Détecter le format des données
     // Ancien format : { SOM: {C, P, E}, PAN: {C, P, E} }
