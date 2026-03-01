@@ -94,4 +94,10 @@ Infrastructure
 
 Historique
 
-—
+Période              Étape
+Août-nov. 2025       Passage d'un tableur Numbers à une app web (Claude Sonnet 4.5)
+Nov. 2025            Pivot : Claude Code, pratiques modulaires, namespacing (Beta 95)
+Déc. 2025            Stabilisation, données A2025 = legacy pré-namespacing
+Janv.-fév. 2026      Refonte majeure travaux/annotation/évaluation, 98 betas
+Fév. 2026            Audit qualité (134 constats), centralisation indices, Beta 98.3
+Juin 2026 (objectif) Version 1.0, présentation AQPC, open-source AGPL v3
