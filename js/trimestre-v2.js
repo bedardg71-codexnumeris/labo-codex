@@ -1286,21 +1286,21 @@ function chargerDropdownCoursV2() {
     if (!select) return;
 
     // Récupérer les cours depuis le stockage
-    // 🆕 FIX (4 fév 2026) : Fusionner listeCours ET cours pour compatibilité Primo
-    const listeCours = db.getSync('listeCours', []);
-    const coursCollection = db.getSync('cours', []);
-    // Fusionner les deux sources en évitant les doublons (par id)
-    const coursMap = new Map();
-    [...listeCours, ...coursCollection].forEach(c => {
-        if (c.id && !coursMap.has(c.id)) {
-            coursMap.set(c.id, c);
-        }
-    });
-    const tousCours = Array.from(coursMap.values());
+    // Migration one-shot : fusionner listeCours → cours (clé canonique)
+    const anciensListeCours = db.getSync('listeCours', []);
+    if (anciensListeCours.length > 0) {
+        const coursExistants = db.getSync('cours', []);
+        const coursMap = new Map(coursExistants.map(c => [c.id, c]));
+        anciensListeCours.forEach(c => { if (c.id && !coursMap.has(c.id)) coursMap.set(c.id, c); });
+        db.setSync('cours', Array.from(coursMap.values()));
+        db.setSync('listeCours', []);
+        console.log('[Trimestre V2] Migration listeCours → cours effectuée');
+    }
+    const tousCours = db.getSync('cours', []);
     const coursActif = db.getSync('infoCours', null);
 
     console.log('[Trimestre V2] Chargement dropdown cours...');
-    console.log('[Trimestre V2] listeCours:', listeCours.length, '+ cours:', coursCollection.length, '= total:', tousCours.length, 'cours');
+    console.log('[Trimestre V2] cours:', tousCours.length, 'cours');
     console.log('[Trimestre V2] infoCours:', coursActif);
 
     // Obtenir le trimestre actif
@@ -1363,7 +1363,7 @@ function chargerDropdownCoursV2() {
     if (coursActif && infoCoursDansTrimestre) {
         // infoCours est dans le bon trimestre
         if (!coursAfficher.find(c => c.id === coursActif.id)) {
-            // Pas dans listeCours, l'ajouter
+            // Pas dans la liste, l'ajouter
             coursAfficher.unshift(coursActif);
             console.log('[Trimestre V2] Cours actif (infoCours) ajouté:', obtenirTexteCours(coursActif));
         }
@@ -1455,14 +1455,8 @@ function changerCoursSelectionneV2(coursId) {
     }
 
     // Charger les détails du cours
-    const cours = db.getSync('cours', []);  // 🆕 BETA 95.2 : nouvelle clé
+    const cours = db.getSync('cours', []);
     let coursSelectionne = cours.find(c => c.id === coursId);
-
-    // Fallback sur l'ancienne clé si non trouvé
-    if (!coursSelectionne) {
-        const listeCours = db.getSync('listeCours', []);
-        coursSelectionne = listeCours.find(c => c.id === coursId);
-    }
 
     if (coursSelectionne) {
         // Afficher le formulaire en mode édition
@@ -1494,16 +1488,9 @@ function supprimerCoursV2() {
         return;
     }
 
-    // Chercher le cours dans les deux clés possibles
+    // Chercher le cours dans la clé canonique
     let cours = db.getSync('cours', []);
     let coursObj = cours.find(c => c.id === coursEnEditionV2);
-    let cleCours = 'cours';
-
-    if (!coursObj) {
-        cours = db.getSync('listeCours', []);
-        coursObj = cours.find(c => c.id === coursEnEditionV2);
-        cleCours = 'listeCours';
-    }
 
     if (!coursObj) {
         console.warn('[Trimestre V2] Cours non trouvé:', coursEnEditionV2);
@@ -1520,7 +1507,13 @@ function supprimerCoursV2() {
 
     // Supprimer de la liste
     const coursFiltres = cours.filter(c => c.id !== coursEnEditionV2);
-    db.setSync(cleCours, coursFiltres);
+    db.setSync('cours', coursFiltres);
+
+    // Nettoyer infoCours si le cours supprimé était le cours actif
+    const coursActif = db.getSync('infoCours', null);
+    if (coursActif && coursActif.id === coursEnEditionV2) {
+        db.setSync('infoCours', null);
+    }
 
     console.log('[Trimestre V2] Cours supprimé:', coursEnEditionV2);
 
@@ -1696,7 +1689,7 @@ async function modifierCoursSelectionneV2() {
     }
 
     // Trouver le cours
-    const cours = db.getSync('listeCours', []);
+    const cours = db.getSync('cours', []);
     const coursSelectionne = cours.find(c => c.id === coursId) || db.getSync('infoCours', null);
 
     if (!coursSelectionne) {
@@ -1745,7 +1738,7 @@ function dupliquerCoursSelectionneV2() {
     }
 
     // Trouver le cours
-    const cours = db.getSync('listeCours', []);
+    const cours = db.getSync('cours', []);
     const coursSelectionne = cours.find(c => c.id === coursId) || db.getSync('infoCours', null);
 
     if (!coursSelectionne) {
@@ -1985,15 +1978,13 @@ function afficherSyntheseGroupeCours(gc) {
 
     // Récupérer les entités liées
     const cours = db.getSync('cours', []);
-    const listeCours = db.getSync('listeCours', []);
     const enseignants = db.getSync('enseignants', []);
     // 🆕 FIX (1er fév 2026) : Utiliser cle() pour namespacing (horaires est dans CLES_NAMESPACEES)
     const cleHoraires = cle('horaires');
     const horaires = db.getSync(cleHoraires, []);
     const pratiques = db.getSync('pratiquesConfigurables', []);
 
-    let coursInfo = cours.find(c => c.id === gc.coursId);
-    if (!coursInfo) coursInfo = listeCours.find(c => c.id === gc.coursId);
+    const coursInfo = cours.find(c => c.id === gc.coursId);
     const ens = enseignants.find(e => e.id === gc.enseignantId);
     const hor = horaires.find(h => h.id === gc.horaireId);
     const prat = pratiques.find(p => p.id === gc.pratiqueId);
@@ -2166,8 +2157,8 @@ function sauvegarderCoursV2() {
     // Récupérer le groupe depuis le cours existant ou utiliser la valeur par défaut
     let groupe = '00001';
     if (coursEnEditionV2) {
-        const listeCours = db.getSync('listeCours', []);
-        const coursExistant = listeCours.find(c => c.id === coursEnEditionV2);
+        const coursListe = db.getSync('cours', []);
+        const coursExistant = coursListe.find(c => c.id === coursEnEditionV2);
         if (coursExistant?.groupe) {
             groupe = String(coursExistant.groupe).padStart(5, '0');
         }
@@ -2205,26 +2196,26 @@ function sauvegarderCoursV2() {
         pratiqueId: document.getElementById('v2-pratiqueIdCours')?.value || 'pan-standards'
     };
 
-    // Sauvegarder dans la liste des cours
-    let listeCours = db.getSync('listeCours', []);
+    // Sauvegarder dans la liste des cours (clé canonique 'cours')
+    let tousLesCours = db.getSync('cours', []);
 
     if (coursEnEditionV2) {
         // Modification
-        const index = listeCours.findIndex(c => c.id === coursEnEditionV2);
+        const index = tousLesCours.findIndex(c => c.id === coursEnEditionV2);
         if (index >= 0) {
-            listeCours[index] = { ...listeCours[index], ...cours };
+            tousLesCours[index] = { ...tousLesCours[index], ...cours };
         } else {
-            listeCours.push(cours);
+            tousLesCours.push(cours);
         }
     } else {
         // Création
-        listeCours.push(cours);
+        tousLesCours.push(cours);
     }
 
-    db.setSync('listeCours', listeCours);
+    db.setSync('cours', tousLesCours);
 
     // Si c'est le seul cours ou le cours actif, mettre à jour infoCours aussi
-    if (listeCours.length === 1 || cours.actif) {
+    if (tousLesCours.length === 1 || cours.actif) {
         db.setSync('infoCours', cours);
     }
 
@@ -3987,19 +3978,9 @@ function populerDropdownsAssemblageV2() {
     }
 
     // Dropdown Cours
-    // 🆕 FIX (4 fév 2026) : Fusionner listeCours ET cours pour compatibilité Primo
     const selectCours = document.getElementById('v2-gc-cours');
     if (selectCours) {
-        const listeCours = db.getSync('listeCours', []);
-        const coursCollection = db.getSync('cours', []);
-        // Fusionner les deux sources en évitant les doublons (par id)
-        const coursMap = new Map();
-        [...listeCours, ...coursCollection].forEach(c => {
-            if (c.id && !coursMap.has(c.id)) {
-                coursMap.set(c.id, c);
-            }
-        });
-        const cours = Array.from(coursMap.values());
+        const cours = db.getSync('cours', []);
 
         let html = '<option value="">— Choisir un cours —</option>';
         cours.forEach(c => {
@@ -4112,14 +4093,10 @@ function genererNomGroupeCoursV2() {
     }
 
     // Cours sélectionné
-    // 🆕 FIX (4 fév 2026) : Fusionner listeCours ET cours, priorité codeCours
     const coursId = document.getElementById('v2-gc-cours')?.value;
     let codeCours = '';
     if (coursId) {
-        const listeCours = db.getSync('listeCours', []);
-        const coursCollection = db.getSync('cours', []);
-        const cours = [...listeCours, ...coursCollection];
-        // Beta 95.2: Chercher par id, sigle, codeCours OU code (Primo utilise 'code')
+        const cours = db.getSync('cours', []);
         const coursObj = cours.find(c => c.id === coursId || c.sigle === coursId || c.codeCours === coursId || c.code === coursId);
         codeCours = coursObj?.codeCours || coursObj?.sigle || coursObj?.code || '';
     }
@@ -4253,11 +4230,7 @@ function mettreAJourCarteResumeGroupeCoursV2(gc) {
     }
 
     // Récupérer les infos liées
-    // 🆕 FIX (4 fév 2026) : Fusionner listeCours ET cours, priorité codeCours
-    const listeCours = db.getSync('listeCours', []);
-    const coursCollection = db.getSync('cours', []);
-    const cours = [...listeCours, ...coursCollection];
-    // Beta 95.2: Chercher par id, sigle, codeCours OU code (Primo utilise 'code')
+    const cours = db.getSync('cours', []);
     const coursObj = cours.find(c => c.id === gc.coursId || c.sigle === gc.coursId || c.codeCours === gc.coursId || c.code === gc.coursId);
     const coursNom = coursObj ? (coursObj.codeCours || coursObj.sigle || coursObj.code || '') + ' - ' + (coursObj.nomCours || coursObj.nom || coursObj.titre || '') : '—';
 
@@ -4614,7 +4587,6 @@ function ouvrirModalBibliothequeGroupeCours() {
 
     // Récupérer les entités liées pour l'affichage
     const cours = db.getSync('cours', []);
-    const listeCours = db.getSync('listeCours', []);
     const enseignants = db.getSync('enseignants', []);
     const cleHoraires = cle('horaires');
     const horaires = db.getSync(cleHoraires, []);
@@ -4625,8 +4597,7 @@ function ouvrirModalBibliothequeGroupeCours() {
 
     // Helper pour générer une carte groupe-cours
     function genererCarteGC(gc, estMasque) {
-        let coursInfo = cours.find(c => c.id === gc.coursId);
-        if (!coursInfo) coursInfo = listeCours.find(c => c.id === gc.coursId);
+        const coursInfo = cours.find(c => c.id === gc.coursId);
         const ens = enseignants.find(e => e.id === gc.enseignantId);
         const hor = horaires.find(h => h.id === gc.horaireId);
 
@@ -5580,7 +5551,6 @@ async function peuplerDropdownGroupeCoursActif() {
 
     if (groupesCours.length > 0) {
         const cours = db.getSync('cours', []);
-        const listeCours = db.getSync('listeCours', []);
         const enseignants = db.getSync('enseignants', []);
         const cleHoraires = cle('horaires');
         const horaires = db.getSync(cleHoraires, []);
@@ -5600,11 +5570,7 @@ async function peuplerDropdownGroupeCoursActif() {
         // Section Groupe-cours
         options += '<optgroup label="Groupe-cours">';
         groupesCours.forEach(gc => {
-            // Chercher dans cours (nouveau) ou listeCours (legacy)
-            let coursInfo = cours.find(c => c.id === gc.coursId);
-            if (!coursInfo) {
-                coursInfo = listeCours.find(c => c.id === gc.coursId || c.sigle === gc.coursId);
-            }
+            const coursInfo = cours.find(c => c.id === gc.coursId);
             const ens = enseignants.find(e => e.id === gc.enseignantId) || {};
             const hor = horaires.find(h => h.id === gc.horaireId) || {};
 
@@ -5630,10 +5596,7 @@ async function peuplerDropdownGroupeCoursActif() {
         if (coursMap.size > 0 && !estDemo) {
             options += '<optgroup label="Cours (tous groupes)">';
             coursMap.forEach((gcs, coursId) => {
-                let coursInfo = cours.find(c => c.id === coursId);
-                if (!coursInfo) {
-                    coursInfo = listeCours.find(c => c.id === coursId || c.sigle === coursId);
-                }
+                const coursInfo = cours.find(c => c.id === coursId);
                 const sigle = coursInfo?.codeCours || coursInfo?.code || coursInfo?.sigle || coursId;
                 const nbGroupes = gcs.length;
                 const label = nbGroupes > 1 ? `${sigle} (${nbGroupes} groupes)` : sigle;
@@ -5687,7 +5650,7 @@ async function changerGroupeCoursActifV2(valeur) {
 
     if (!valeur) {
         db.setSync('groupeCoursActif', null);
-        await db.set('infoCours', null);
+        db.setSync('infoCours', null);
         console.log('[Trimestre V2] Groupe-cours désélectionné');
         return;
     }
@@ -5703,12 +5666,8 @@ async function changerGroupeCoursActifV2(valeur) {
         // Mode COURS : tous les groupes fusionnés
         const coursId = valeur.replace('cours:', '');
         const cours = db.getSync('cours', []);
-        const listeCours = db.getSync('listeCours', []);
 
-        let coursInfo = cours.find(c => c.id === coursId);
-        if (!coursInfo) {
-            coursInfo = listeCours.find(c => c.id === coursId || c.sigle === coursId);
-        }
+        const coursInfo = cours.find(c => c.id === coursId);
 
         const sigle = coursInfo?.codeCours || coursInfo?.code || coursInfo?.sigle || coursId;
 
@@ -5850,11 +5809,7 @@ async function changerGroupeCoursActifV2(valeur) {
 
     // ✅ CORRIGÉ (11 jan 2026) : Mettre à jour infoCours directement (évite problèmes timing IndexedDB)
     const cours = db.getSync('cours', []);
-    const listeCours = db.getSync('listeCours', []);
-    let coursInfo = cours.find(c => c.id === gc.coursId);
-    if (!coursInfo) {
-        coursInfo = listeCours.find(c => c.id === gc.coursId || c.sigle === gc.coursId);
-    }
+    const coursInfo = cours.find(c => c.id === gc.coursId);
     const sigleGC = coursInfo?.codeCours || coursInfo?.code || coursInfo?.sigle || '';
 
     // ✅ Utiliser setSync car infoCours doit être lu de manière synchrone par obtenirEtudiantsCoursActif
@@ -6235,10 +6190,6 @@ async function mettreAJourApercuGroupeCours() {
     let cours = null;
     if (typeof CoursEntite !== 'undefined') {
         cours = await CoursEntite.obtenirParId(coursId);
-    }
-    if (!cours) {
-        const listeCours = db.getSync('listeCours', []);
-        cours = listeCours.find(c => c.id === coursId || c.sigle === coursId || c.code === coursId);
     }
     if (!cours) {
         const coursCollection = db.getSync('cours', []);

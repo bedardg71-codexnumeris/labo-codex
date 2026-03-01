@@ -167,8 +167,8 @@ function appliquerJetonDelai(evaluationId) {
     evaluation.delaiAccorde = true;
     evaluation.dureeDelaiJours = dureeDelai; // Stocker la durée appliquée
 
-    // Sauvegarder directement dans localStorage
-    db.setSync(cle('evaluationsSauvegardees'), evaluations);
+    // Sauvegarder via sauvegarderDonneesSelonMode (bloque en mode anonymisation)
+    sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
     console.log('✅ Évaluations sauvegardées avec jeton de délai');
 
     console.log('✅ Jeton de délai appliqué');
@@ -222,8 +222,8 @@ function retirerJetonDelai(evaluationId) {
     delete evaluation.delaiAccorde;
     delete evaluation.dureeDelaiJours;
 
-    // Sauvegarder directement dans localStorage
-    db.setSync(cle('evaluationsSauvegardees'), evaluations);
+    // Sauvegarder via sauvegarderDonneesSelonMode (bloque en mode anonymisation)
+    sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
     console.log('✅ Évaluations sauvegardées après retrait jeton de délai');
 
     console.log('✅ Jeton de délai retiré');
@@ -358,8 +358,8 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale = null) 
     // Ajouter la nouvelle évaluation
     evaluations.push(nouvelleEvaluation);
 
-    // Sauvegarder directement dans localStorage
-    db.setSync(cle('evaluationsSauvegardees'), evaluations);
+    // Sauvegarder via sauvegarderDonneesSelonMode (bloque en mode anonymisation)
+    sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
     console.log('✅ Évaluations sauvegardées avec jeton de reprise');
     console.log('✅ Jeton de reprise appliqué, nouvelle évaluation:', nouvelleEvaluation.id);
 
@@ -462,8 +462,8 @@ function retirerJetonReprise(evaluationId) {
         afficherNotificationSucces('Jeton de reprise retiré');
     }
 
-    // Sauvegarder directement dans localStorage
-    db.setSync(cle('evaluationsSauvegardees'), evaluations);
+    // Sauvegarder via sauvegarderDonneesSelonMode (bloque en mode anonymisation)
+    sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
     console.log('✅ Évaluations sauvegardées après retrait jeton de reprise');
 
     // Recalculer les indices
@@ -754,8 +754,8 @@ function appliquerJetonRepriseCiblee(evaluationOriginaleId, critereId = null, ar
     // Ajouter la nouvelle évaluation
     evaluations.push(nouvelleEvaluation);
 
-    // Sauvegarder directement dans localStorage
-    db.setSync(cle('evaluationsSauvegardees'), evaluations);
+    // Sauvegarder via sauvegarderDonneesSelonMode (bloque en mode anonymisation)
+    sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
     console.log('✅ Évaluations sauvegardées avec jeton de reprise ciblée');
     console.log('✅ Jeton de reprise ciblée appliqué, nouvelle évaluation:', nouvelleEvaluation.id);
 
@@ -794,7 +794,7 @@ function nettoyerEvaluationsRepriseCiblee() {
     });
 
     if (nbNettoyees > 0) {
-        db.setSync(cle('evaluationsSauvegardees'), evaluations);
+        sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
         console.log(`✅ ${nbNettoyees} évaluation(s) de reprise ciblée nettoyée(s)`);
 
         // Rafraîchir la liste

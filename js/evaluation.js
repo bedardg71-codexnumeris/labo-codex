@@ -16,6 +16,11 @@
    - Navigation vers la liste des évaluations
    =============================== */
 
+// PATTERN LECTURE ÉVALUATIONS :
+// - obtenirDonneesSelonMode() → lectures read-only (affichage, stats) — filtré par coursId
+// - db.getSync(cle()) → lectures read-modify-write (modification, suppression) — toutes les évals
+// - sauvegarderDonneesSelonMode() → toutes les écritures
+
 (function() {
 'use strict';
 
@@ -3573,7 +3578,7 @@ function mettreAJourStatistiquesEvaluations() {
     const etudiantsEvalues = etudiants.filter(e => e.evaluations.length > 0).length;
 
     // 🎯 Calculer le total d'artefacts DONNÉS (même logique que portfolio.js)
-    const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const productions = db.getSync(cle('productions'), []);
 
     // Identifier les artefacts-portfolio
@@ -3856,7 +3861,7 @@ function verifierEtChargerEvaluationExistante() {
     }
 
     // Chercher une évaluation existante
-    const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const evaluationExistante = evaluations.find(e =>
         e.etudiantDA === etudiantDA &&
         e.productionId === productionId &&
@@ -4178,7 +4183,7 @@ function mettreAJourIndicateurProgression() {
     const totalEtudiants = etudiantsActifs.length;
 
     // Compter les évaluations déjà réalisées pour cette production
-    const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const evaluationsProduction = evaluations.filter(e => e.productionId === productionId);
 
     // Compter les étudiants uniques évalués (au cas où il y aurait plusieurs évaluations par étudiant)
@@ -5440,7 +5445,7 @@ function chargerFiltresBanqueEvaluations() {
  * Filtre et affiche les évaluations selon les critères sélectionnés
  */
 function filtrerBanqueEvaluations() {
-    const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
 
     // Récupérer les filtres dropdown
     const filtreGroupe = document.getElementById('filtreBanqueGroupe')?.value || '';
@@ -6373,7 +6378,7 @@ function confirmerSuppressionEvaluationSidebar() {
 
     // Si la suppression réussit, réinitialiser le formulaire
     setTimeout(() => {
-        const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
+        const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
         const evalExiste = evaluations.find(e => e.id === evaluationId);
 
         if (!evalExiste) {

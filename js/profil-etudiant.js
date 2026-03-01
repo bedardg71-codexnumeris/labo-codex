@@ -2599,6 +2599,8 @@ function calculerPerformancePAN(da) {
         .sort((a, b) => b - a)
         .slice(0, 3);
 
+    if (meilleuresNotes.length === 0) return 0;
+
     const moyenne = meilleuresNotes.reduce((sum, note) => sum + note, 0) / meilleuresNotes.length;
     console.log(`Indice P calculé depuis les ${meilleuresNotes.length} meilleure(s) note(s): ${moyenne.toFixed(1)}%`);
     return moyenne / 100; // Retourner en proportion 0-1

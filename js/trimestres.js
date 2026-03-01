@@ -64,7 +64,9 @@
         'pratiquesConfigurables',
         'modalitesEvaluation',
         'modeApplication',
-        'etatsAccordeonsV2'
+        'etatsAccordeonsV2',
+        'cours',       // Bibliothèque de cours partagée (clé canonique, remplace listeCours)
+        'listeCours'   // Legacy — migré vers 'cours' au chargement, conservé pour rétrocompatibilité
     ];
 
     // ✅ AJOUT (28 janvier 2026) : Templates à copier lors de l'archivage
@@ -325,6 +327,10 @@
         // Corrige le bug où les données A2025/Démo n'étaient pas accessibles
         // car les modules lisaient l'ancienne valeur de window.trimestreActif
         window.trimestreActif = id;
+
+        // Réinitialiser le cours actif — chargerDropdownCoursV2() re-sélectionnera le premier cours
+        db.setSync('infoCours', null);
+        db.setSync('groupeCoursActif', null);
 
         console.log(`[Trimestres] Trimestre actif changé: ${trimestre.nom} (${id})`);
 
