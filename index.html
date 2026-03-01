@@ -12171,27 +12171,27 @@
                     <h2>Notes de version</h2>
                     <p class="text-muted">Historique des changements majeurs</p>
 
-                    <!-- Beta 98.4 - Consolidation styles + fix accueil -->
-                    <div class="carte accordeon ouvert" id="accordeon-apropos-beta984">
+                    <!-- Beta 98.2 - Toolbar compacte + accueil unifié + nettoyage CSS -->
+                    <div class="carte accordeon ouvert" id="accordeon-apropos-beta982">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
                             <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">&#x25BC;</span> Beta 98.4 &mdash; Consolidation CSS et correction page d&rsquo;accueil
+                                <span class="accordeon-chevron">&#x25BC;</span> Beta 98.2 &mdash; Barre d&rsquo;outils compacte et page d&rsquo;accueil unifi&eacute;e
                             </h3>
                         </div>
                         <div class="accordeon-contenu" style="display: block;">
                         <p class="text-muted">1 mars 2026</p>
 
-                        <h4 class="titre-bleu-mb8 mt-15">Consolidation des styles inline (#210)</h4>
+                        <h4 class="titre-bleu-mb8 mt-15">Barre d&rsquo;outils compacte</h4>
                         <ul class="modal-liste">
-                            <li><strong>276 attributs style &eacute;limin&eacute;s</strong> : 1&nbsp;137 &rarr; 861 attributs <code>style=&quot;...&quot;</code> dans index.html, remplac&eacute;s par les classes utilitaires <code>.u-*</code> existantes.</li>
-                            <li><strong>~1&nbsp;150 propri&eacute;t&eacute;s extraites</strong> : margins, font-size, font-weight, text-align, display, flex, padding, width, color.</li>
-                            <li><strong>Aucune nouvelle classe CSS</strong> : Toutes les substitutions utilisent les ~92 classes <code>.u-*</code> d&eacute;j&agrave; d&eacute;finies dans styles.css.</li>
+                            <li><strong>Une seule rang&eacute;e</strong> : Badges de fichiers et outils regroup&eacute;s, lib&eacute;rant ~50&nbsp;px de hauteur pour le document.</li>
+                            <li><strong>Pleine hauteur par d&eacute;faut</strong> : Le document s&rsquo;ouvre en mode pleine hauteur dans Mod&eacute;lisation.</li>
+                            <li><strong>Corrections d&rsquo;affichage</strong> : Statuts &laquo;&nbsp;Import&eacute;&nbsp;&raquo; et &laquo;&nbsp;Annot&eacute;&nbsp;&raquo; corrig&eacute;s.</li>
                         </ul>
 
-                        <h4 class="titre-bleu-mb8 mt-15">Correction page d&rsquo;accueil</h4>
+                        <h4 class="titre-bleu-mb8 mt-15">Page d&rsquo;accueil unifi&eacute;e</h4>
                         <ul class="modal-liste">
-                            <li><strong>Fix lecture cl&eacute; cours</strong> : <code>accueil.js</code> lit d&eacute;sormais <code>cours</code> (cl&eacute; canonique apr&egrave;s migration) au lieu de <code>listeCours</code> (vid&eacute;e par la migration).</li>
-                            <li><strong>Page d&rsquo;accueil unifi&eacute;e</strong> : Suppression de l&rsquo;&eacute;cran &laquo;&nbsp;Bienvenue dans le Monitorage&nbsp;&raquo; (premier lancement). Tous les utilisateurs voient la m&ecirc;me page avec les 3 accord&eacute;ons D&eacute;couvrir, Parcourir et Piloter.</li>
+                            <li><strong>Page unique</strong> : Tous les utilisateurs voient la m&ecirc;me page avec les 3 accord&eacute;ons D&eacute;couvrir, Parcourir et Piloter, d&egrave;s la premi&egrave;re ouverture.</li>
+                            <li><strong>Nettoyage CSS</strong> : Plus de 275 styles en ligne remplac&eacute;s par des classes utilitaires existantes.</li>
                         </ul>
 
                         </div>
@@ -17193,8 +17193,8 @@
         // === CONFIGURATION ===
         // VERSION_MAJEURE et BUILD_ID sont lus depuis version.json au chargement (source unique)
         // Les valeurs ici servent de fallback si version.json n'est pas disponible
-        let VERSION_MAJEURE = '98.4';
-        let BUILD_ID = '0301-1655';
+        let VERSION_MAJEURE = '98.2';
+        let BUILD_ID = '0301-1705';
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
